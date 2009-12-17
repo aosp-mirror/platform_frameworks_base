@@ -1334,8 +1334,26 @@ public class Contacts {
         }
 
         /**
+         * TODO find a place to put the canonical version of these.
+         */
+        interface ProviderNames {
+            //
+            //NOTE: update Contacts.java with new providers when they're added.
+            //
+            String YAHOO = "Yahoo";
+            String GTALK = "GTalk";
+            String MSN = "MSN";
+            String ICQ = "ICQ";
+            String AIM = "AIM";
+            String XMPP = "XMPP";
+            String JABBER = "JABBER";
+            String SKYPE = "SKYPE";
+            String QQ = "QQ";
+        }
+
+        /**
          * This looks up the provider name defined in
-         * {@link android.provider.Im.ProviderNames} from the predefined IM protocol id.
+         * from the predefined IM protocol id.
          * This is used for interacting with the IM application.
          *
          * @param protocol the protocol ID
@@ -1348,21 +1366,21 @@ public class Contacts {
         public static String lookupProviderNameFromId(int protocol) {
             switch (protocol) {
                 case PROTOCOL_GOOGLE_TALK:
-                    return Im.ProviderNames.GTALK;
+                    return ProviderNames.GTALK;
                 case PROTOCOL_AIM:
-                    return Im.ProviderNames.AIM;
+                    return ProviderNames.AIM;
                 case PROTOCOL_MSN:
-                    return Im.ProviderNames.MSN;
+                    return ProviderNames.MSN;
                 case PROTOCOL_YAHOO:
-                    return Im.ProviderNames.YAHOO;
+                    return ProviderNames.YAHOO;
                 case PROTOCOL_ICQ:
-                    return Im.ProviderNames.ICQ;
+                    return ProviderNames.ICQ;
                 case PROTOCOL_JABBER:
-                    return Im.ProviderNames.JABBER;
+                    return ProviderNames.JABBER;
                 case PROTOCOL_SKYPE:
-                    return Im.ProviderNames.SKYPE;
+                    return ProviderNames.SKYPE;
                 case PROTOCOL_QQ:
-                    return Im.ProviderNames.QQ;
+                    return ProviderNames.QQ;
             }
             return null;
         }
@@ -1532,7 +1550,35 @@ public class Contacts {
      * @deprecated see {@link android.provider.ContactsContract}
      */
     @Deprecated
-    public interface PresenceColumns extends Im.CommonPresenceColumns {
+    public interface PresenceColumns {
+        /**
+         * The priority, an integer, used by XMPP presence
+         * <P>Type: INTEGER</P>
+         */
+        String PRIORITY = "priority";
+
+        /**
+         * The server defined status.
+         * <P>Type: INTEGER (one of the values below)</P>
+         */
+        String PRESENCE_STATUS = ContactsContract.StatusUpdates.PRESENCE;
+
+        /**
+         * Presence Status definition
+         */
+        int OFFLINE = ContactsContract.StatusUpdates.OFFLINE;
+        int INVISIBLE = ContactsContract.StatusUpdates.INVISIBLE;
+        int AWAY = ContactsContract.StatusUpdates.AWAY;
+        int IDLE = ContactsContract.StatusUpdates.IDLE;
+        int DO_NOT_DISTURB = ContactsContract.StatusUpdates.DO_NOT_DISTURB;
+        int AVAILABLE = ContactsContract.StatusUpdates.AVAILABLE;
+
+        /**
+         * The user defined status line.
+         * <P>Type: TEXT</P>
+         */
+        String PRESENCE_CUSTOM_STATUS = ContactsContract.StatusUpdates.STATUS;
+
         /**
          * The IM service the presence is coming from. Formatted using either
          * {@link Contacts.ContactMethods#encodePredefinedImProtocol} or

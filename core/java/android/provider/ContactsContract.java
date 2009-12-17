@@ -1601,18 +1601,39 @@ public final class ContactsContract {
      * @see StatusUpdates
      * @see ContactsContract.Data
      */
-    protected interface StatusColumns extends Im.CommonPresenceColumns {
+    protected interface StatusColumns {
         /**
          * Contact's latest presence level.
          * <P>Type: INTEGER (one of the values below)</P>
          */
-        public static final String PRESENCE = PRESENCE_STATUS;
+        public static final String PRESENCE = "mode";
+
+        /**
+         * @deprecated use {@link #PRESENCE}
+         */
+        @Deprecated
+        public static final String PRESENCE_STATUS = PRESENCE;
+
+        /*
+         * Presence Status definition
+         */
+        int OFFLINE = 0;
+        int INVISIBLE = 1;
+        int AWAY = 2;
+        int IDLE = 3;
+        int DO_NOT_DISTURB = 4;
+        int AVAILABLE = 5;
 
         /**
          * Contact latest status update.
          * <p>Type: TEXT</p>
          */
-        public static final String STATUS = PRESENCE_CUSTOM_STATUS;
+        public static final String STATUS = "status";
+
+        /**
+         * @deprecated use {@link #STATUS}
+         */
+        public static final String PRESENCE_CUSTOM_STATUS = STATUS;
 
         /**
          * The absolute time in milliseconds when the latest status was inserted/updated.
