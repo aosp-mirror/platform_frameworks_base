@@ -1,8 +1,9 @@
 page.title=Wireless Controls
 @jd:body
 
+Go away.
 
-
+<!--
 <h2>Wi-Fi</h2>
 <p>The Wi-Fi APIs provide a means by which application can communicate with the lower-level
 wireless stack that provides Wi-Fi network access. Almost all information from the device supplicant
@@ -12,8 +13,11 @@ interactions include the ability to scan, add, dave, terminate and initiate conn
 
 
 <h2>Bluetooth</h2>
-<p>The Bluetooth APIs allow applications to scan, connect and pair with other Bluetooth devices.
-THESE APIS ARE NOT YET AVAILABLE.</p>
-
+<p>The Android platform includes support for the Bluetooth network stack, which allows a device to
+wirelessly exchange data with other Bluetooth devices. The application framework provides access to
+the Bluetooth functionality through the Android Bluetooth APIs. These APIs let applications
+wirelessly connect to other Bluetooth devices, enabling point-to-point and multipoint wireless
+features.</p>
+-->
 
 
