@@ -41,7 +41,6 @@ import android.view.KeyEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
-import android.webkit.plugin.FullScreenDrawingModel;
 import android.webkit.plugin.SurfaceDrawingModel;
 import android.webkit.plugin.WebkitPlugin;
 
@@ -737,6 +736,15 @@ final class WebViewCore {
         boolean mRemember;
     }
 
+    static class PluginFullScreenData {
+        View mView;
+        int mNpp;
+        int mDocX;
+        int mDocY;
+        int mDocWidth;
+        int mDocHeight;
+    }
+
         static final String[] HandlerDebugString = {
             "UPDATE_FRAME_CACHE_IF_LOADING", // = 98
             "SCROLL_TEXT_INPUT", // = 99
@@ -869,6 +877,8 @@ final class WebViewCore {
         static final int GEOLOCATION_PERMISSIONS_PROVIDE = 180;
 
         static final int POPULATE_VISITED_LINKS = 181;
+
+        static final int HIDE_FULLSCREEN = 182;
 
         // private message ids
         private static final int DESTROY =     200;
@@ -1313,6 +1323,10 @@ final class WebViewCore {
                                     message);
                             break;
                         }
+
+                        case HIDE_FULLSCREEN:
+                            nativeFullScreenPluginHidden(msg.arg1);
+                            break;
                     }
                 }
             };
@@ -2236,35 +2250,53 @@ final class WebViewCore {
 
     // called by JNI. PluginWidget function to launch a full-screen view using a
     // View object provided by the plugin class.
-    private void showFullScreenPlugin(WebkitPlugin webkitPlugin, final int npp) {
+    private void showFullScreenPlugin(WebkitPlugin webkitPlugin, final int npp,
+            int x, int y, int width, int height) {
         if (mWebView == null) {
             return;
         }
 
-        final FullScreenDrawingModel surface = webkitPlugin.getFullScreenSurface();
+        final SurfaceDrawingModel surface = webkitPlugin.getFullScreenSurface();
         if(surface == null) {
-            Log.e(LOGTAG, "Attempted to create an full-screen surface with a null drawing model");
+            Log.e(LOGTAG, "Attempted to create an full-screen surface with a " +
+                    "null drawing model");
             return;
         }
 
-        WebChromeClient.CustomViewCallback callback = new WebChromeClient.CustomViewCallback() {
-            public void onCustomViewHidden() {
-                if (surface != null) {
-                    surface.onSurfaceRemoved();
-                    nativeFullScreenPluginHidden(npp);
-                }
-            }
-        };
-
-        mCallbackProxy.showCustomView(surface.getSurface(), callback);
+        PluginFullScreenData data = new PluginFullScreenData();
+        data.mView = surface.getSurface();
+        data.mNpp = npp;
+        data.mDocX = x;
+        data.mDocY = y;
+        data.mDocWidth = width;
+        data.mDocHeight = height;
+        mWebView.mPrivateHandler.obtainMessage(WebView.SHOW_FULLSCREEN, data)
+                .sendToTarget();
     }
 
+    // called by JNI
     private void hideFullScreenPlugin() {
         if (mWebView == null) {
             return;
         }
+        mWebView.mPrivateHandler.obtainMessage(WebView.HIDE_FULLSCREEN)
+                .sendToTarget();
+    }
 
-        mCallbackProxy.hideCustomView();
+    // called by JNI
+    private void updateFullScreenPlugin(int x, int y, int width, int height) {
+        if (mWebView == null) {
+            return;
+        }
+
+        PluginFullScreenData data = new PluginFullScreenData();
+        data.mDocX = x;
+        data.mDocY = y;
+        data.mDocWidth = width;
+        data.mDocHeight = height;
+        // null mView and mNpp to indicate it is an update
+        mWebView.mPrivateHandler.obtainMessage(WebView.SHOW_FULLSCREEN, data)
+                .sendToTarget();
     }
 
     // called by JNI.  PluginWidget functions for creating an embedded View for
