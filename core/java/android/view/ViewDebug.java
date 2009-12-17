@@ -910,7 +910,7 @@ public class ViewDebug {
     private static void dump(View root, OutputStream clientStream) throws IOException {
         BufferedWriter out = null;
         try {
-            out = new BufferedWriter(new OutputStreamWriter(clientStream), 32 * 1024);
+            out = new BufferedWriter(new OutputStreamWriter(clientStream, "utf-8"), 32 * 1024);
             View view = root.getRootView();
             if (view instanceof ViewGroup) {
                 ViewGroup group = (ViewGroup) view;
