@@ -79,5 +79,5 @@ abstract class Learner {
         instances.removeAll(toDelete);
     }
 
-    abstract ArrayList<Prediction> classify(int gestureType, float[] vector);
+    abstract ArrayList<Prediction> classify(int sequenceType, int orientationType, float[] vector);
 }

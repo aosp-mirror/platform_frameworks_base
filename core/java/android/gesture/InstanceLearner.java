@@ -41,7 +41,7 @@ class InstanceLearner extends Learner {
     };
 
     @Override
-    ArrayList<Prediction> classify(int sequenceType, float[] vector) {
+    ArrayList<Prediction> classify(int sequenceType, int orientationType, float[] vector) {
         ArrayList<Prediction> predictions = new ArrayList<Prediction>();
         ArrayList<Instance> instances = getInstances();
         int count = instances.size();
@@ -53,7 +53,7 @@ class InstanceLearner extends Learner {
             }
             double distance;
             if (sequenceType == GestureStore.SEQUENCE_SENSITIVE) {
-                distance = GestureUtilities.cosineDistance(sample.vector, vector);
+                distance = GestureUtilities.minimumCosineDistance(sample.vector, vector, orientationType);
             } else {
                 distance = GestureUtilities.squaredEuclideanDistance(sample.vector, vector);
             }
