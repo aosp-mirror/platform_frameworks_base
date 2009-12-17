@@ -1447,7 +1447,6 @@ public final class Settings {
          */
         public static final String[] SETTINGS_TO_BACKUP = {
             STAY_ON_WHILE_PLUGGED_IN,
-            END_BUTTON_BEHAVIOR,
             WIFI_SLEEP_POLICY,
             WIFI_USE_STATIC_IP,
             WIFI_STATIC_IP,
