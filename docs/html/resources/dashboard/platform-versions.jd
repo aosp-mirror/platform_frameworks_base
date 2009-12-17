@@ -35,7 +35,7 @@ div.dashboard-panel th {
 <p>This page provides data about the relative number of active devices
 running a given version of the Android platform. This can help you
 understand the landscape of device distribution and decide how to prioritize
-the development of your application features for the devices currently in the
+the development of your application features for the devices currently in
 the hands of users.</p>
 
 <p class="note"><strong>Note:</strong> This data is based on the number

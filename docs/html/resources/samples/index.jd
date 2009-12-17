@@ -1,13 +1,11 @@
-guide=true
 page.title=Sample Code
 @jd:body
 
 
-<p>Sometimes, the best way to learn how things are done is to look at some code.
-Here, you can browse the source of some sample Android applications that are included
-in the Android SDK.</p>
+<p>Sometimes, the best way to learn how things are done is to look at some code.</p>
 
-<p>Each version of the Android platform available for the SDK includes a full set of sample
+<p>Here, you can browse the source of some sample Android applications. Also, each version of the
+Android platform available for the SDK includes a set of sample
 applications (which may vary between different versions of the platform).
 You can find the samples in your SDK at:</p>
 
@@ -53,7 +51,7 @@ platforms) and allow you to view the source files in your browser. </p>
   <dd>A home screen replacement application.</dd>
   
  <dt><a href="JetBoy/index.html">JetBoy</a></dt>
-  <dd>JetBoy is a game that demonstrates the SONiVOX JET interactive music technology,
+  <dd>A game that demonstrates the SONiVOX JET interactive music technology,
   with {@link android.media.JetPlayer}.</dd>
     
  <dt><a href="LunarLander/index.html">Lunar Lander</a></dt>
@@ -77,7 +75,7 @@ platforms) and allow you to view the source files in your browser. </p>
  <dt><a href="SoftKeyboard/index.html">Soft Keyboard</a></dt>
   <dd>An example of writing an input method for a software keyboard.</dd>
 
- <dt><a href=Wiktionary/index.html">Wiktionary</a></dt>
+ <dt><a href="Wiktionary/index.html">Wiktionary</a></dt>
   <dd>An example of creating interactive widgets for display on the Android
   home screen.</dd>
 
