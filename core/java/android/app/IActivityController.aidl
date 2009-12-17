@@ -44,7 +44,7 @@ interface IActivityController
      * it immediately.
      */
     boolean appCrashed(String processName, int pid,
-            String tag, String shortMsg, String longMsg,
+            String shortMsg, String longMsg,
             long timeMillis, String stackTrace);
     
     /**

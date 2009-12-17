@@ -81,6 +81,13 @@ public final class Log {
      */
     public static final int ASSERT = 7;
 
+    /**
+     * Exception class used to capture a stack trace in {@link #wtf()}.
+     */
+    private static class TerribleFailure extends Exception {
+        TerribleFailure(String msg, Throwable cause) { super(msg, cause); }
+    }
+
     private Log() {
     }
 
@@ -170,24 +177,24 @@ public final class Log {
 
     /**
      * Checks to see whether or not a log for the specified tag is loggable at the specified level.
-     * 
+     *
      *  The default level of any tag is set to INFO. This means that any level above and including
      *  INFO will be logged. Before you make any calls to a logging method you should check to see
      *  if your tag should be logged. You can change the default level by setting a system property:
      *      'setprop log.tag.&lt;YOUR_LOG_TAG> &lt;LEVEL>'
-     *  Where level is either VERBOSE, DEBUG, INFO, WARN, ERROR, ASSERT, or SUPPRESS. SUPRESS will 
+     *  Where level is either VERBOSE, DEBUG, INFO, WARN, ERROR, ASSERT, or SUPPRESS. SUPPRESS will
      *  turn off all logging for your tag. You can also create a local.prop file that with the
      *  following in it:
      *      'log.tag.&lt;YOUR_LOG_TAG>=&lt;LEVEL>'
      *  and place that in /data/local.prop.
-     *  
+     *
      * @param tag The tag to check.
      * @param level The level to check.
      * @return Whether or not that this is allowed to be logged.
      * @throws IllegalArgumentException is thrown if the tag.length() > 23.
      */
     public static native boolean isLoggable(String tag, int level);
-        
+
     /*
      * Send a {@link #WARN} log message and log the exception.
      * @param tag Used to identify the source of a log message.  It usually identifies
@@ -217,6 +224,46 @@ public final class Log {
      */
     public static int e(String tag, String msg, Throwable tr) {
         return println(ERROR, tag, msg + '\n' + getStackTraceString(tr));
+    }
+
+    /**
+     * What a Terrible Failure: Report a condition that should never happen.
+     * The error will always be logged at level ASSERT with the call stack.
+     * Depending on system configuration, a report may be added to the
+     * {@link android.os.DropBoxManager} and/or the process may be terminated
+     * immediately with an error dialog.
+     * @param tag Used to identify the source of a log message.
+     * @param msg The message you would like logged.
+     * @pending
+     */
+    public static int wtf(String tag, String msg) {
+        return wtf(tag, msg, null);
+    }
+
+    /**
+     * What a Terrible Failure: Report an exception that should never happen.
+     * Similar to {@link #wtf(String, String)}, with an exception to log.
+     * @param tag Used to identify the source of a log message.
+     * @param tr An exception to log.
+     * @pending
+     */
+    public static int wtf(String tag, Throwable tr) {
+        return wtf(tag, tr.getMessage(), tr);
+    }
+
+    /**
+     * What a Terrible Failure: Report an exception that should never happen.
+     * Similar to {@link #wtf(String, Throwable)}, with a message as well.
+     * @param tag Used to identify the source of a log message.
+     * @param msg The message you would like logged.
+     * @param tr An exception to log.  May be null.
+     * @pending
+     */
+    public static int wtf(String tag, String msg, Throwable tr) {
+        tr = new TerribleFailure(msg, tr);
+        int bytes = println(ASSERT, tag, getStackTraceString(tr));
+        RuntimeInit.wtf(tag, tr);
+        return bytes;
     }
 
     /**
