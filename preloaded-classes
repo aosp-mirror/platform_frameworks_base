@@ -585,12 +585,6 @@ android.provider.ContactsContract$Presence
 android.provider.ContactsContract$RawContacts
 android.provider.Downloads
 android.provider.DrmStore$Audio
-android.provider.Im$Account
-android.provider.Im$Avatars
-android.provider.Im$Chats
-android.provider.Im$Contacts
-android.provider.Im$Messages
-android.provider.Im$Provider
 android.provider.MediaStore
 android.provider.MediaStore$Audio$Albums
 android.provider.MediaStore$Audio$Artists
