@@ -105,6 +105,17 @@ static sp<MediaMetadataRetrieverBase> createRetriever(player_type playerType)
 {
     sp<MediaMetadataRetrieverBase> p;
     switch (playerType) {
+#if BUILD_WITH_FULL_STAGEFRIGHT
+        case STAGEFRIGHT_PLAYER:
+            // For now we are going to keep using PV for meta-data support
+            // until stagefright is up to par.
+
+            // LOGV("create StagefrightMetadataRetriever");
+            // p = new StagefrightMetadataRetriever;
+            // break;
+
+            // fall through to PV_PLAYER
+#endif
 #ifndef NO_OPENCORE
         case PV_PLAYER:
             LOGV("create pv metadata retriever");
@@ -119,12 +130,6 @@ static sp<MediaMetadataRetrieverBase> createRetriever(player_type playerType)
             LOGV("create midi metadata retriever");
             p = new MidiMetadataRetriever();
             break;
-#if BUILD_WITH_FULL_STAGEFRIGHT
-        case STAGEFRIGHT_PLAYER:
-            LOGV("create StagefrightMetadataRetriever");
-            p = new StagefrightMetadataRetriever;
-            break;
-#endif
         default:
             // TODO:
             // support for TEST_PLAYER
