@@ -59,6 +59,7 @@ LOCAL_STATIC_LIBRARIES := \
         libstagefright_amrnbenc \
         libstagefright_amrwbdec \
         libstagefright_avcdec \
+        libstagefright_m4vh263dec \
         libstagefright_mp3dec
 
 LOCAL_SHARED_LIBRARIES += \
