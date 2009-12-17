@@ -17,6 +17,9 @@
 package com.android.providers.settings;
 
 import java.io.FileNotFoundException;
+import java.util.Random;
+import java.security.SecureRandom;
+import java.security.NoSuchAlgorithmException;
 
 import android.backup.BackupManager;
 import android.content.ContentProvider;
@@ -26,6 +29,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
+import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.media.Ringtone;
@@ -189,7 +193,39 @@ public class SettingsProvider extends ContentProvider {
     public boolean onCreate() {
         mOpenHelper = new DatabaseHelper(getContext());
         mBackupManager = new BackupManager(getContext());
+
+        if (!ensureAndroidIdIsSet()) {
+            return false;
+        }
+
         return true;
+    }
+
+    private boolean ensureAndroidIdIsSet() {
+        final Cursor c = query(Settings.Secure.CONTENT_URI,
+                new String[] { Settings.NameValueTable.VALUE },
+                Settings.NameValueTable.NAME + "=?",
+                new String[]{Settings.Secure.ANDROID_ID}, null);
+        try {
+            final String value = c.moveToNext() ? c.getString(0) : null;
+            if (value == null) {
+                final SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
+                final String newAndroidIdValue = Long.toHexString(random.nextLong());
+                Log.d(TAG, "Generated and saved new ANDROID_ID");
+                final ContentValues values = new ContentValues();
+                values.put(Settings.NameValueTable.NAME, Settings.Secure.ANDROID_ID);
+                values.put(Settings.NameValueTable.VALUE, newAndroidIdValue);
+                final Uri uri = insert(Settings.Secure.CONTENT_URI, values);
+                if (uri == null) {
+                    return false;
+                }
+            }
+            return true;
+        } catch (NoSuchAlgorithmException e) {
+            return false;
+        } finally {
+            c.close();
+        }
     }
 
     @Override
