@@ -47,3 +47,6 @@ LOCAL_PRELINK_MODULE:= false
 LOCAL_MODULE:= libstagefright_omx
 
 include $(BUILD_SHARED_LIBRARY)
+
+include $(call all-makefiles-under,$(LOCAL_PATH))
+

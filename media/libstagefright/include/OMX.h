@@ -31,7 +31,7 @@ class OMX : public BnOMX,
 public:
     OMX();
 
-    virtual status_t listNodes(List<String8> *list);
+    virtual status_t listNodes(List<ComponentInfo> *list);
 
     virtual status_t allocateNode(
             const char *name, const sp<IOMXObserver> &observer, node_id *node);
