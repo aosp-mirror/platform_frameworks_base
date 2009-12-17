@@ -18,6 +18,8 @@ package android.os;
 
 import java.io.File;
 
+import android.os.IMountService;
+
 /**
  * Provides access to environment variables.
  */
@@ -27,6 +29,8 @@ public class Environment {
             = getDirectory("ANDROID_ROOT", "/system");
 
     private static final String SYSTEM_PROPERTY_EFS_ENABLED = "persist.security.efs.enabled";
+
+    private static IMountService mMntSvc = null;
 
     /**
      * Gets the Android root directory.
@@ -167,9 +171,19 @@ public class Environment {
 
     /**
      * Gets the current state of the external storage device.
+     * Note: This call should be deprecated as it doesn't support
+     * multiple volumes.
      */
     public static String getExternalStorageState() {
-        return SystemProperties.get("EXTERNAL_STORAGE_STATE", MEDIA_REMOVED);
+        try {
+            if (mMntSvc == null) {
+                mMntSvc = IMountService.Stub.asInterface(ServiceManager
+                                                         .getService("mount"));
+            }
+            return mMntSvc.getVolumeState(getExternalStorageDirectory().toString());
+        } catch (android.os.RemoteException rex) {
+            return Environment.MEDIA_REMOVED;
+        }
     }
 
     static File getDirectory(String variableName, String defaultPath) {

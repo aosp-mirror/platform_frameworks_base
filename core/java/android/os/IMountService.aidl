@@ -75,4 +75,9 @@ interface IMountService
      * when a UMS host is detected.
      */
     void setAutoStartUms(boolean value);
+
+    /**
+     * Gets the state of an volume via it's mountpoint.
+     */
+    String getVolumeState(String mountPoint);
 }
