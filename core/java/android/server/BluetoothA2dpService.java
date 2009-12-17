@@ -305,7 +305,11 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
             return false;
 
         // State is DISCONNECTED
+        handleSinkStateChange(device, state, BluetoothA2dp.STATE_CONNECTING);
+
         if (!connectSinkNative(path)) {
+            // Restore previous state
+            handleSinkStateChange(device, mAudioDevices.get(device), state);
             return false;
         }
         return true;
@@ -321,7 +325,8 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
             return false;
         }
 
-        switch (getSinkState(device)) {
+        int state = getSinkState(device);
+        switch (state) {
         case BluetoothA2dp.STATE_DISCONNECTED:
             return false;
         case BluetoothA2dp.STATE_DISCONNECTING:
@@ -329,11 +334,13 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
         }
 
         // State is CONNECTING or CONNECTED or PLAYING
+        handleSinkStateChange(device, state, BluetoothA2dp.STATE_DISCONNECTING);
         if (!disconnectSinkNative(path)) {
+            // Restore previous state
+            handleSinkStateChange(device, mAudioDevices.get(device), state);
             return false;
-        } else {
-            return true;
         }
+        return true;
     }
 
     public synchronized boolean suspendSink(BluetoothDevice device) {
@@ -510,6 +517,19 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
             }
         }
         return result;
+    }
+
+    private void onConnectSinkResult(String deviceObjectPath, boolean result) {
+        // If the call was a success, ignore we will update the state
+        // when we a Sink Property Change
+        if (!result) {
+            if (deviceObjectPath != null) {
+                String address = mBluetoothService.getAddressFromObjectPath(deviceObjectPath);
+                BluetoothDevice device = mAdapter.getRemoteDevice(address);
+                int state = getSinkState(device);
+                handleSinkStateChange(device, state, BluetoothA2dp.STATE_DISCONNECTED);
+            }
+        }
     }
 
     @Override
