@@ -78,7 +78,8 @@ OMXNodeInstance::OMXNodeInstance(
     : mOwner(owner),
       mNodeID(NULL),
       mHandle(NULL),
-      mObserver(observer) {
+      mObserver(observer),
+      mDying(false) {
 }
 
 OMXNodeInstance::~OMXNodeInstance() {
@@ -113,6 +114,11 @@ status_t OMXNodeInstance::freeNode(OMXMaster *master) {
     // This ensures that all active buffers are properly freed even
     // for components that don't do this themselves on a call to
     // "FreeHandle".
+
+    // The code below may trigger some more events to be dispatched
+    // by the OMX component - we want to ignore them as our client
+    // does not expect them.
+    mDying = true;
 
     OMX_STATETYPE state;
     CHECK_EQ(OMX_GetState(mHandle, &state), OMX_ErrorNone);
@@ -406,6 +412,9 @@ OMX_ERRORTYPE OMXNodeInstance::OnEvent(
         OMX_IN OMX_U32 nData2,
         OMX_IN OMX_PTR pEventData) {
     OMXNodeInstance *instance = static_cast<OMXNodeInstance *>(pAppData);
+    if (instance->mDying) {
+        return OMX_ErrorNone;
+    }
     return instance->owner()->OnEvent(
             instance->nodeID(), eEvent, nData1, nData2, pEventData);
 }
@@ -416,6 +425,9 @@ OMX_ERRORTYPE OMXNodeInstance::OnEmptyBufferDone(
         OMX_IN OMX_PTR pAppData,
         OMX_IN OMX_BUFFERHEADERTYPE* pBuffer) {
     OMXNodeInstance *instance = static_cast<OMXNodeInstance *>(pAppData);
+    if (instance->mDying) {
+        return OMX_ErrorNone;
+    }
     return instance->owner()->OnEmptyBufferDone(instance->nodeID(), pBuffer);
 }
 
@@ -425,6 +437,9 @@ OMX_ERRORTYPE OMXNodeInstance::OnFillBufferDone(
         OMX_IN OMX_PTR pAppData,
         OMX_IN OMX_BUFFERHEADERTYPE* pBuffer) {
     OMXNodeInstance *instance = static_cast<OMXNodeInstance *>(pAppData);
+    if (instance->mDying) {
+        return OMX_ErrorNone;
+    }
     return instance->owner()->OnFillBufferDone(instance->nodeID(), pBuffer);
 }
 

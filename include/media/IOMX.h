@@ -42,7 +42,11 @@ public:
     typedef void *buffer_id;
     typedef void *node_id;
 
-    virtual status_t listNodes(List<String8> *list) = 0;
+    struct ComponentInfo {
+        String8 mName;
+        List<String8> mRoles;
+    };
+    virtual status_t listNodes(List<ComponentInfo> *list) = 0;
 
     virtual status_t allocateNode(
             const char *name, const sp<IOMXObserver> &observer,

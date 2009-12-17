@@ -425,14 +425,9 @@ sp<MediaSource> OMXCodec::Create(
         esds.getCodecSpecificInfo(
                 &codec_specific_data, &codec_specific_data_size);
 
-        printf("found codec-specific data of size %d\n",
-               codec_specific_data_size);
-
         codec->addCodecSpecificData(
                 codec_specific_data, codec_specific_data_size);
     } else if (meta->findData(kKeyAVCC, &type, &data, &size)) {
-        printf("found avcc of size %d\n", size);
-
         // Parse the AVCDecoderConfigurationRecord
 
         const uint8_t *ptr = (const uint8_t *)data;
@@ -1223,7 +1218,7 @@ status_t OMXCodec::allocateBuffersOnPort(OMX_U32 portIndex) {
              portIndex == kPortIndexInput ? "input" : "output");
     }
 
-    dumpPortStatus(portIndex);
+    // dumpPortStatus(portIndex);
 
     return OK;
 }
@@ -1273,7 +1268,6 @@ void OMXCodec::on_message(const omx_message &msg) {
                 CHECK_EQ(mPortStatus[kPortIndexInput], ENABLED);
                 drainInputBuffer(&buffers->editItemAt(i));
             }
-
             break;
         }
 
@@ -1282,12 +1276,10 @@ void OMXCodec::on_message(const omx_message &msg) {
             IOMX::buffer_id buffer = msg.u.extended_buffer_data.buffer;
             OMX_U32 flags = msg.u.extended_buffer_data.flags;
 
-            CODEC_LOGV("FILL_BUFFER_DONE(buffer: %p, size: %ld, flags: 0x%08lx)",
+            CODEC_LOGV("FILL_BUFFER_DONE(buffer: %p, size: %ld, flags: 0x%08lx, timestamp: %lld us (%.2f secs))",
                  buffer,
                  msg.u.extended_buffer_data.range_length,
-                 flags);
-
-            CODEC_LOGV("FILL_BUFFER_DONE(timestamp: %lld us (%.2f secs))",
+                 flags,
                  msg.u.extended_buffer_data.timestamp,
                  msg.u.extended_buffer_data.timestamp / 1E6);
 
@@ -1315,11 +1307,13 @@ void OMXCodec::on_message(const omx_message &msg) {
                 CHECK_EQ(err, OK);
 
                 buffers->removeAt(i);
+#if 0
             } else if (mPortStatus[kPortIndexOutput] == ENABLED
                        && (flags & OMX_BUFFERFLAG_EOS)) {
                 CODEC_LOGV("No more output data.");
                 mNoMoreOutputData = true;
                 mBufferFilled.signal();
+#endif
             } else if (mPortStatus[kPortIndexOutput] != SHUTTING_DOWN) {
                 CHECK_EQ(mPortStatus[kPortIndexOutput], ENABLED);
 
@@ -1351,6 +1345,11 @@ void OMXCodec::on_message(const omx_message &msg) {
 
                 mFilledBuffers.push_back(i);
                 mBufferFilled.signal();
+
+                if (msg.u.extended_buffer_data.flags & OMX_BUFFERFLAG_EOS) {
+                    CODEC_LOGV("No more output data.");
+                    mNoMoreOutputData = true;
+                }
             }
 
             break;
@@ -1374,7 +1373,7 @@ void OMXCodec::onEvent(OMX_EVENTTYPE event, OMX_U32 data1, OMX_U32 data2) {
 
         case OMX_EventError:
         {
-            LOGE("ERROR(%ld, %ld)", data1, data2);
+            LOGE("ERROR(0x%08lx, %ld)", data1, data2);
 
             setState(ERROR);
             break;
@@ -1386,6 +1385,7 @@ void OMXCodec::onEvent(OMX_EVENTTYPE event, OMX_U32 data1, OMX_U32 data2) {
             break;
         }
 
+#if 0
         case OMX_EventBufferFlag:
         {
             CODEC_LOGV("EVENT_BUFFER_FLAG(%ld)", data1);
@@ -1395,6 +1395,7 @@ void OMXCodec::onEvent(OMX_EVENTTYPE event, OMX_U32 data1, OMX_U32 data2) {
             }
             break;
         }
+#endif
 
         default:
         {
@@ -1564,13 +1565,6 @@ void OMXCodec::onCmdComplete(OMX_COMMANDTYPE cmd, OMX_U32 data) {
                     && mPortStatus[kPortIndexOutput] == ENABLED) {
                     CODEC_LOGV("Finished flushing both ports, now continuing from"
                          " seek-time.");
-
-                    // Clear this flag in case the decoder sent us either
-                    // the EVENT_BUFFER_FLAG(1) or an output buffer with
-                    // the EOS flag set _while_ flushing. Since we're going
-                    // to submit "fresh" input data now, this flag no longer
-                    // applies to our future.
-                    mNoMoreOutputData = false;
 
                     drainInputBuffers();
                     fillOutputBuffers();
@@ -1832,6 +1826,8 @@ void OMXCodec::drainInputBuffer(BufferInfo *info) {
             memcpy(info->mMem->pointer(), specific->mData, specific->mSize);
         }
 
+        mNoMoreOutputData = false;
+
         status_t err = mOMX->emptyBuffer(
                 mNode, info->mBuffer, 0, size,
                 OMX_BUFFERFLAG_ENDOFFRAME | OMX_BUFFERFLAG_CODECCONFIG,
@@ -1849,7 +1845,9 @@ void OMXCodec::drainInputBuffer(BufferInfo *info) {
     if (mSeekTimeUs >= 0) {
         MediaSource::ReadOptions options;
         options.setSeekTo(mSeekTimeUs);
+
         mSeekTimeUs = -1;
+        mBufferFilled.signal();
 
         err = mSource->read(&srcBuffer, &options);
     } else {
@@ -1866,6 +1864,8 @@ void OMXCodec::drainInputBuffer(BufferInfo *info) {
 
         mSignalledEOS = true;
     } else {
+        mNoMoreOutputData = false;
+
         srcLength = srcBuffer->range_length();
 
         if (info->mMem->size() < srcLength) {
@@ -1878,10 +1878,10 @@ void OMXCodec::drainInputBuffer(BufferInfo *info) {
                srcLength);
 
         if (srcBuffer->meta_data()->findInt64(kKeyTime, &timestampUs)) {
-            CODEC_LOGV("Calling emptyBuffer on buffer %p (length %d)",
-                 info->mBuffer, srcLength);
-            CODEC_LOGV("Calling emptyBuffer with timestamp %lld us (%.2f secs)",
-                 timestampUs, timestampUs / 1E6);
+            CODEC_LOGV("Calling emptyBuffer on buffer %p (length %d), "
+                       "timestamp %lld us (%.2f secs)",
+                       info->mBuffer, srcLength,
+                       timestampUs, timestampUs / 1E6);
         }
     }
 
@@ -2298,7 +2298,6 @@ status_t OMXCodec::read(
         CODEC_LOGV("seeking to %lld us (%.2f secs)", seekTimeUs, seekTimeUs / 1E6);
 
         mSignalledEOS = false;
-        mNoMoreOutputData = false;
 
         CHECK(seekTimeUs >= 0);
         mSeekTimeUs = seekTimeUs;
@@ -2316,6 +2315,10 @@ status_t OMXCodec::read(
 
         if (emulateOutputFlushCompletion) {
             onCmdComplete(OMX_CommandFlush, kPortIndexOutput);
+        }
+
+        while (mSeekTimeUs >= 0) {
+            mBufferFilled.wait(mLock);
         }
     }
 

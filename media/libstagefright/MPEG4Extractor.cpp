@@ -534,8 +534,8 @@ status_t MPEG4Extractor::parseChunk(off_t *offset, int depth) {
             uint16_t sample_size = U16_AT(&buffer[18]);
             uint32_t sample_rate = U32_AT(&buffer[24]) >> 16;
 
-            printf("*** coding='%s' %d channels, size %d, rate %d\n",
-                   chunk, num_channels, sample_size, sample_rate);
+            // printf("*** coding='%s' %d channels, size %d, rate %d\n",
+            //        chunk, num_channels, sample_size, sample_rate);
 
             mLastTrack->meta->setCString(kKeyMIMEType, FourCC2MIME(chunk_type));
             mLastTrack->meta->setInt32(kKeyChannelCount, num_channels);
@@ -576,8 +576,8 @@ status_t MPEG4Extractor::parseChunk(off_t *offset, int depth) {
             uint16_t width = U16_AT(&buffer[6 + 18]);
             uint16_t height = U16_AT(&buffer[6 + 20]);
 
-            printf("*** coding='%s' width=%d height=%d\n",
-                   chunk, width, height);
+            // printf("*** coding='%s' width=%d height=%d\n",
+            //        chunk, width, height);
 
             mLastTrack->meta->setCString(kKeyMIMEType, FourCC2MIME(chunk_type));
             mLastTrack->meta->setInt32(kKeyWidth, width);

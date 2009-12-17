@@ -75,7 +75,7 @@ public:
         : BpInterface<IOMX>(impl) {
     }
 
-    virtual status_t listNodes(List<String8> *list) {
+    virtual status_t listNodes(List<ComponentInfo> *list) {
         list->clear();
 
         Parcel data, reply;
@@ -84,9 +84,14 @@ public:
 
         int32_t n = reply.readInt32();
         for (int32_t i = 0; i < n; ++i) {
-            String8 s = reply.readString8();
+            list->push_back(ComponentInfo());
+            ComponentInfo &info = *--list->end();
 
-            list->push_back(s);
+            info.mName = reply.readString8();
+            int32_t numRoles = reply.readInt32();
+            for (int32_t j = 0; j < numRoles; ++j) {
+                info.mRoles.push_back(reply.readString8());
+            }
         }
 
         return OK;
@@ -368,13 +373,20 @@ status_t BnOMX::onTransact(
         {
             CHECK_INTERFACE(IOMX, data, reply);
 
-            List<String8> list;
+            List<ComponentInfo> list;
             listNodes(&list);
 
             reply->writeInt32(list.size());
-            for (List<String8>::iterator it = list.begin();
+            for (List<ComponentInfo>::iterator it = list.begin();
                  it != list.end(); ++it) {
-                reply->writeString8(*it);
+                ComponentInfo &cur = *it;
+
+                reply->writeString8(cur.mName);
+                reply->writeInt32(cur.mRoles.size());
+                for (List<String8>::iterator role_it = cur.mRoles.begin();
+                     role_it != cur.mRoles.end(); ++role_it) {
+                    reply->writeString8(*role_it);
+                }
             }
 
             return NO_ERROR;
