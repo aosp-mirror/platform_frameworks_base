@@ -22,6 +22,8 @@ This file contains declarations of internal functions for common encoder/decoder
 #ifndef AVCCOMMON_LIB_H_INCLUDED
 #define AVCCOMMON_LIB_H_INCLUDED
 
+#include <stdlib.h>
+
 #ifndef AVCINT_COMMON_H_INCLUDED
 #include "avcint_common.h"
 #endif
