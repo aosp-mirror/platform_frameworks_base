@@ -315,7 +315,7 @@ public final class ServerSession extends ObexSession implements Runnable {
                 if (!((flags & 1) == 0)) {
                     backup = true;
                 }
-                if ((flags & 2) == 0) {
+                if (!((flags & 2) == 0)) {
                     create = false;
                 }
 
