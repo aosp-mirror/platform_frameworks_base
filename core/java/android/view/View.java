@@ -1494,6 +1494,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @hide
      */
     static final int OPAQUE_MASK                    = 0x01800000;
+    
+    /**
+     * Indicates a prepressed state;
+     * the short time between ACTION_DOWN and recognizing
+     * a 'real' press. Prepressed is used to recognize quick taps
+     * even when they are shorter than ViewConfiguration.getTapTimeout().
+     * 
+     * @hide
+     */
+    private static final int PREPRESSED             = 0x02000000;
 
     /**
      * The parent this view is attached to.
@@ -1722,6 +1732,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     private int mNextFocusDownId = View.NO_ID;
 
     private CheckForLongPress mPendingCheckForLongPress;
+    private CheckForTap mPendingCheckForTap = null;
+    
     private UnsetPressedState mUnsetPressedState;
 
     /**
@@ -1762,6 +1774,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * Special tree observer used when mAttachInfo is null.
      */
     private ViewTreeObserver mFloatingTreeObserver;
+    
+    /**
+     * Cache the touch slop from the context that created the view.
+     */
+    private int mTouchSlop;
 
     // Used for debug only
     static long sInstanceCount = 0;
@@ -1777,6 +1794,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         mResources = context != null ? context.getResources() : null;
         mViewFlags = SOUND_EFFECTS_ENABLED | HAPTIC_FEEDBACK_ENABLED;
         ++sInstanceCount;
+        mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
     }
 
     /**
@@ -3951,7 +3969,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                         (event.getRepeatCount() == 0)) {
                     setPressed(true);
                     if ((mViewFlags & LONG_CLICKABLE) == LONG_CLICKABLE) {
-                        postCheckForLongClick();
+                        postCheckForLongClick(0);
                     }
                     return true;
                 }
@@ -4174,7 +4192,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 (viewFlags & LONG_CLICKABLE) == LONG_CLICKABLE)) {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_UP:
-                    if ((mPrivateFlags & PRESSED) != 0) {
+                    boolean prepressed = (mPrivateFlags & PREPRESSED) != 0;
+                    if ((mPrivateFlags & PRESSED) != 0 || prepressed) {
                         // take focus if we don't have it already and we should in
                         // touch mode.
                         boolean focusTaken = false;
@@ -4196,24 +4215,31 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                             mUnsetPressedState = new UnsetPressedState();
                         }
 
-                        if (!post(mUnsetPressedState)) {
+                        if (prepressed) {
+                            mPrivateFlags |= PRESSED;
+                            refreshDrawableState();
+                            postDelayed(mUnsetPressedState,
+                                    ViewConfiguration.getPressedStateDuration());
+                        } else if (!post(mUnsetPressedState)) {
                             // If the post failed, unpress right now
                             mUnsetPressedState.run();
                         }
+                        removeTapCallback();
                     }
                     break;
 
                 case MotionEvent.ACTION_DOWN:
-                    mPrivateFlags |= PRESSED;
-                    refreshDrawableState();
-                    if ((mViewFlags & LONG_CLICKABLE) == LONG_CLICKABLE) {
-                        postCheckForLongClick();
+                    if (mPendingCheckForTap == null) {
+                        mPendingCheckForTap = new CheckForTap();
                     }
+                    mPrivateFlags |= PREPRESSED;
+                    postDelayed(mPendingCheckForTap, ViewConfiguration.getTapTimeout());
                     break;
 
                 case MotionEvent.ACTION_CANCEL:
                     mPrivateFlags &= ~PRESSED;
                     refreshDrawableState();
+                    removeTapCallback();
                     break;
 
                 case MotionEvent.ACTION_MOVE:
@@ -4221,23 +4247,17 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                     final int y = (int) event.getY();
 
                     // Be lenient about moving outside of buttons
-                    int slop = ViewConfiguration.get(mContext).getScaledTouchSlop();
+                    int slop = mTouchSlop;
                     if ((x < 0 - slop) || (x >= getWidth() + slop) ||
                             (y < 0 - slop) || (y >= getHeight() + slop)) {
                         // Outside button
+                        removeTapCallback();
                         if ((mPrivateFlags & PRESSED) != 0) {
-                            // Remove any future long press checks
+                            // Remove any future long press/tap checks
                             removeLongPressCallback();
 
                             // Need to switch from pressed to not pressed
                             mPrivateFlags &= ~PRESSED;
-                            refreshDrawableState();
-                        }
-                    } else {
-                        // Inside button
-                        if ((mPrivateFlags & PRESSED) == 0) {
-                            // Need to switch from not pressed to pressed
-                            mPrivateFlags |= PRESSED;
                             refreshDrawableState();
                         }
                     }
@@ -4255,6 +4275,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     private void removeLongPressCallback() {
         if (mPendingCheckForLongPress != null) {
           removeCallbacks(mPendingCheckForLongPress);
+        }
+    }
+    
+    /**
+     * Remove the tap detection timer.
+     */
+    private void removeTapCallback() {
+        if (mPendingCheckForTap != null) {
+            mPrivateFlags &= ~PREPRESSED;
+            removeCallbacks(mPendingCheckForTap);
         }
     }
 
@@ -8427,14 +8457,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         }
     }
 
-    private void postCheckForLongClick() {
+    private void postCheckForLongClick(int delayOffset) {
         mHasPerformedLongPress = false;
 
         if (mPendingCheckForLongPress == null) {
             mPendingCheckForLongPress = new CheckForLongPress();
         }
         mPendingCheckForLongPress.rememberWindowAttachCount();
-        postDelayed(mPendingCheckForLongPress, ViewConfiguration.getLongPressTimeout());
+        postDelayed(mPendingCheckForLongPress,
+                ViewConfiguration.getLongPressTimeout() - delayOffset);
     }
 
     private static int[] stateSetUnion(final int[] stateSet1,
@@ -8609,6 +8640,17 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
 
         public void rememberWindowAttachCount() {
             mOriginalWindowAttachCount = mWindowAttachCount;
+        }
+    }
+    
+    private final class CheckForTap implements Runnable {
+        public void run() {
+            mPrivateFlags &= ~PREPRESSED;
+            mPrivateFlags |= PRESSED;
+            refreshDrawableState();
+            if ((mViewFlags & LONG_CLICKABLE) == LONG_CLICKABLE) {
+                postCheckForLongClick(ViewConfiguration.getTapTimeout());
+            }
         }
     }
 

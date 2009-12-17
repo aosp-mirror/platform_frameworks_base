@@ -49,7 +49,7 @@ public class ViewConfiguration {
      * Defines the duration in milliseconds of the pressed state in child
      * components.
      */
-    private static final int PRESSED_STATE_DURATION = 85;
+    private static final int PRESSED_STATE_DURATION = 125;
     
     /**
      * Defines the duration in milliseconds before a press turns into
@@ -69,7 +69,7 @@ public class ViewConfiguration {
      * is a tap or a scroll. If the user does not move within this interval, it is
      * considered to be a tap. 
      */
-    private static final int TAP_TIMEOUT = 100;
+    private static final int TAP_TIMEOUT = 115;
     
     /**
      * Defines the duration in milliseconds we will wait to see if a touch event 
