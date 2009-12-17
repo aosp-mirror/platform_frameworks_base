@@ -38,6 +38,7 @@ namespace android {
 
 #ifdef HAVE_BLUETOOTH
 static jmethodID method_onSinkPropertyChanged;
+static jmethodID method_onConnectSinkResult;
 
 typedef struct {
     JavaVM *vm;
@@ -47,6 +48,7 @@ typedef struct {
 } native_data_t;
 
 static native_data_t *nat = NULL;  // global native data
+static void onConnectSinkResult(DBusMessage *msg, void *user, void *n);
 
 static Properties sink_properties[] = {
         {"State", DBUS_TYPE_STRING},
@@ -133,9 +135,12 @@ static jboolean connectSinkNative(JNIEnv *env, jobject object, jstring path) {
     LOGV(__FUNCTION__);
     if (nat) {
         const char *c_path = env->GetStringUTFChars(path, NULL);
+        int len = env->GetStringLength(path) + 1;
+        char *context_path = (char *)calloc(len, sizeof(char));
+        strlcpy(context_path, c_path, len);  // for callback
 
-        bool ret = dbus_func_args_async(env, nat->conn, -1, NULL, NULL, nat,
-                                    c_path, "org.bluez.AudioSink", "Connect",
+        bool ret = dbus_func_args_async(env, nat->conn, -1, onConnectSinkResult, context_path,
+                                    nat, c_path, "org.bluez.AudioSink", "Connect",
                                     DBUS_TYPE_INVALID);
 
         env->ReleaseStringUTFChars(path, c_path);
@@ -237,6 +242,31 @@ DBusHandlerResult a2dp_event_filter(DBusMessage *msg, JNIEnv *env) {
 
     return result;
 }
+
+void onConnectSinkResult(DBusMessage *msg, void *user, void *n) {
+    LOGV(__FUNCTION__);
+
+    native_data_t *nat = (native_data_t *)n;
+    const char *path = (const char *)user;
+    DBusError err;
+    dbus_error_init(&err);
+    JNIEnv *env;
+    nat->vm->GetEnv((void**)&env, nat->envVer);
+
+
+    bool result = JNI_TRUE;
+    if (dbus_set_error_from_message(&err, msg)) {
+        LOG_AND_FREE_DBUS_ERROR(&err);
+        result = JNI_FALSE;
+    }
+    LOGV("... Device Path = %s, result = %d", path, result);
+    env->CallVoidMethod(nat->me,
+                        method_onConnectSinkResult,
+                        env->NewStringUTF(path),
+                        result);
+    free(user);
+}
+
 #endif
 
 
@@ -244,7 +274,7 @@ static JNINativeMethod sMethods[] = {
     {"initNative", "()Z", (void *)initNative},
     {"cleanupNative", "()V", (void *)cleanupNative},
 
-    /* Bluez audio 4.40 API */
+    /* Bluez audio 4.47 API */
     {"connectSinkNative", "(Ljava/lang/String;)Z", (void *)connectSinkNative},
     {"disconnectSinkNative", "(Ljava/lang/String;)Z", (void *)disconnectSinkNative},
     {"suspendSinkNative", "(Ljava/lang/String;)Z", (void*)suspendSinkNative},
@@ -263,6 +293,8 @@ int register_android_server_BluetoothA2dpService(JNIEnv *env) {
 #ifdef HAVE_BLUETOOTH
     method_onSinkPropertyChanged = env->GetMethodID(clazz, "onSinkPropertyChanged",
                                           "(Ljava/lang/String;[Ljava/lang/String;)V");
+    method_onConnectSinkResult = env->GetMethodID(clazz, "onConnectSinkResult",
+                                                         "(Ljava/lang/String;Z)V");
 #endif
 
     return AndroidRuntime::registerNativeMethods(env,
