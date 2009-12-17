@@ -78,6 +78,10 @@ static void dumpstate(int full) {
         PRINT("");
         PRINT("Routes:");
         DUMP("/proc/net/route");
+#ifdef FWDUMP_bcm4329
+        PRINT("Dump wlan FW log");
+        EXEC_XBIN6("su", "root","dhdutil","-i","eth0","upload","/data/local/tmp/wlan_crash.dump");
+#endif
         PRINT("------ SYSTEM PROPERTIES ------");
         print_properties();
         PRINT("------ KERNEL LOG ------");
