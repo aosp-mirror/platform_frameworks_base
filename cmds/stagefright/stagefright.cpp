@@ -345,12 +345,12 @@ int main(int argc, char **argv) {
         sp<IOMX> omx = service->getOMX();
         CHECK(omx.get() != NULL);
 
-        List<String8> list;
+        List<IOMX::ComponentInfo> list;
         omx->listNodes(&list);
 
-        for (List<String8>::iterator it = list.begin();
+        for (List<IOMX::ComponentInfo>::iterator it = list.begin();
              it != list.end(); ++it) {
-            printf("%s\n", (*it).string());
+            printf("%s\n", (*it).mName.string());
         }
     }
 
