@@ -20,6 +20,7 @@
 
 #include <stdint.h>
 #include <sys/types.h>
+#include <limits.h>
 
 #include <media/IAudioFlinger.h>
 #include <media/IAudioFlingerClient.h>
@@ -208,6 +209,7 @@ private:
     class PlaybackThread;
     class MixerThread;
     class DirectOutputThread;
+    class DuplicatingThread;
     class Track;
     class RecordTrack;
 
@@ -324,6 +326,7 @@ private:
                     void        sendConfigEvent_l(int event, int param = 0);
                     void        processConfigEvents();
                     int         id() const { return mId;}
+                    bool        standby() { return mStandby; }
 
         mutable     Mutex                   mLock;
 
@@ -452,6 +455,7 @@ private:
             };
 
                                 OutputTrack(  const wp<ThreadBase>& thread,
+                                        DuplicatingThread *sourceThread,
                                         uint32_t sampleRate,
                                         int format,
                                         int channelCount,
@@ -471,13 +475,12 @@ private:
             void                clearBufferQueue();
 
             // Maximum number of pending buffers allocated by OutputTrack::write()
-            static const uint8_t kMaxOverFlowBuffers = 3;
+            static const uint8_t kMaxOverFlowBuffers = 10;
 
             Vector < Buffer* >          mBufferQueue;
             AudioBufferProvider::Buffer mOutBuffer;
-            uint32_t                    mWaitTimeMs;
             bool                        mActive;
-
+            DuplicatingThread*          mSourceThread;
         };  // end of OutputTrack
 
         PlaybackThread (const sp<AudioFlinger>& audioFlinger, AudioStreamOut* output, int id);
@@ -520,6 +523,7 @@ private:
         virtual     int         type() const { return mType; }
                     void        suspend() { mSuspended++; }
                     void        restore() { if (mSuspended) mSuspended--; }
+                    bool        isSuspended() { return (mSuspended != 0); }
         virtual     String8     getParameters(const String8& keys);
         virtual     void        audioConfigChanged(int event, int param = 0);
 
@@ -635,9 +639,16 @@ private:
         virtual     bool        threadLoop();
                     void        addOutputTrack(MixerThread* thread);
                     void        removeOutputTrack(MixerThread* thread);
+                    uint32_t    waitTimeMs() { return mWaitTimeMs; }
+    protected:
+        virtual     uint32_t    activeSleepTimeUs();
 
     private:
+                    bool        outputsReady(SortedVector< sp<OutputTrack> > &outputTracks);
+                    void        updateWaitTime();
+
         SortedVector < sp<OutputTrack> >  mOutputTracks;
+                    uint32_t    mWaitTimeMs;
     };
 
               PlaybackThread *checkPlaybackThread_l(int output) const;
