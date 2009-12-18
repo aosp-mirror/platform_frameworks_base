@@ -24,6 +24,7 @@
 #include "include/AMRNBEncoder.h"
 #include "include/AMRWBDecoder.h"
 #include "include/AVCDecoder.h"
+#include "include/M4vH263Decoder.h"
 #include "include/MP3Decoder.h"
 #endif
 
@@ -70,6 +71,7 @@ FACTORY_CREATE(AMRNBDecoder)
 FACTORY_CREATE(AMRWBDecoder)
 FACTORY_CREATE(AACDecoder)
 FACTORY_CREATE(AVCDecoder)
+FACTORY_CREATE(M4vH263Decoder)
 FACTORY_CREATE(AMRNBEncoder)
 
 static sp<MediaSource> InstantiateSoftwareCodec(
@@ -85,6 +87,7 @@ static sp<MediaSource> InstantiateSoftwareCodec(
         FACTORY_REF(AMRWBDecoder)
         FACTORY_REF(AACDecoder)
         FACTORY_REF(AVCDecoder)
+        FACTORY_REF(M4vH263Decoder)
         FACTORY_REF(AMRNBEncoder)
     };
     for (size_t i = 0;
@@ -120,9 +123,11 @@ static const CodecInfo kDecoderInfo[] = {
     { MEDIA_MIMETYPE_AUDIO_AAC, "OMX.PV.aacdec" },
     { MEDIA_MIMETYPE_VIDEO_MPEG4, "OMX.qcom.video.decoder.mpeg4" },
     { MEDIA_MIMETYPE_VIDEO_MPEG4, "OMX.TI.Video.Decoder" },
+    OPTIONAL(MEDIA_MIMETYPE_VIDEO_MPEG4, "M4vH264Decoder")
     { MEDIA_MIMETYPE_VIDEO_MPEG4, "OMX.PV.mpeg4dec" },
     { MEDIA_MIMETYPE_VIDEO_H263, "OMX.qcom.video.decoder.h263" },
     { MEDIA_MIMETYPE_VIDEO_H263, "OMX.TI.Video.Decoder" },
+    OPTIONAL(MEDIA_MIMETYPE_VIDEO_H263, "M4vH264Decoder")
     { MEDIA_MIMETYPE_VIDEO_H263, "OMX.PV.h263dec" },
     { MEDIA_MIMETYPE_VIDEO_AVC, "OMX.qcom.video.decoder.avc" },
     { MEDIA_MIMETYPE_VIDEO_AVC, "OMX.TI.Video.Decoder" },
