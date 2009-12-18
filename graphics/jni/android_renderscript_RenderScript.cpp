@@ -1063,56 +1063,36 @@ nProgramBindConstants(JNIEnv *_env, jobject _this, jint vpv, jint slot, jint a)
     rsProgramBindConstants(con, (RsProgram)vpv, slot, (RsAllocation)a);
 }
 
+static void
+nProgramBindTexture(JNIEnv *_env, jobject _this, jint vpf, jint slot, jint a)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nProgramBindTexture, con(%p), vpf(%p), slot(%i), a(%p)", con, (RsProgramFragment)vpf, slot, (RsAllocation)a);
+    rsProgramBindTexture(con, (RsProgramFragment)vpf, slot, (RsAllocation)a);
+}
+
+static void
+nProgramBindSampler(JNIEnv *_env, jobject _this, jint vpf, jint slot, jint a)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nProgramBindSampler, con(%p), vpf(%p), slot(%i), a(%p)", con, (RsProgramFragment)vpf, slot, (RsSampler)a);
+    rsProgramBindSampler(con, (RsProgramFragment)vpf, slot, (RsSampler)a);
+}
+
 // ---------------------------------------------------------------------------
 
-static void
-nProgramFragmentSetShader(JNIEnv *_env, jobject _this, jstring name)
-{
-    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    const char* n = _env->GetStringUTFChars(name, NULL);
-    LOG_API("nProgramFragmentSetShader, con(%p)", con);
-    rsProgramFragmentSetShader(con, n, _env->GetStringUTFLength(name));
-    _env->ReleaseStringUTFChars(name, n);
-}
-
-static void
-nProgramFragmentBegin(JNIEnv *_env, jobject _this, jint in, jint out, jboolean pointSpriteEnable)
-{
-    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nProgramFragmentBegin, con(%p), in(%p), out(%p) PointSprite(%i)", con, (RsElement)in, (RsElement)out, pointSpriteEnable);
-    rsProgramFragmentBegin(con, (RsElement)in, (RsElement)out, pointSpriteEnable);
-}
-
-static void
-nProgramFragmentBindTexture(JNIEnv *_env, jobject _this, jint vpf, jint slot, jint a)
-{
-    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nProgramFragmentBindTexture, con(%p), vpf(%p), slot(%i), a(%p)", con, (RsProgramFragment)vpf, slot, (RsAllocation)a);
-    rsProgramFragmentBindTexture(con, (RsProgramFragment)vpf, slot, (RsAllocation)a);
-}
-
-static void
-nProgramFragmentBindSampler(JNIEnv *_env, jobject _this, jint vpf, jint slot, jint a)
-{
-    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nProgramFragmentBindSampler, con(%p), vpf(%p), slot(%i), a(%p)", con, (RsProgramFragment)vpf, slot, (RsSampler)a);
-    rsProgramFragmentBindSampler(con, (RsProgramFragment)vpf, slot, (RsSampler)a);
-}
-
-static void
-nProgramFragmentSetSlot(JNIEnv *_env, jobject _this, jint slot, jboolean enable, jint env, jint vt)
-{
-    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nProgramFragmentSetType, con(%p), slot(%i), enable(%i), env(%i), vt(%p)", con, slot, enable, env, (RsType)vt);
-    rsProgramFragmentSetSlot(con, slot, enable, (RsTexEnvMode)env, (RsType)vt);
-}
-
 static jint
-nProgramFragmentCreate(JNIEnv *_env, jobject _this, jint slot, jboolean enable)
+nProgramFragmentCreate(JNIEnv *_env, jobject _this, jintArray params)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nProgramFragmentCreate, con(%p)", con);
-    return (jint)rsProgramFragmentCreate(con);
+    jint *paramPtr = _env->GetIntArrayElements(params, NULL);
+    jint paramLen = _env->GetArrayLength(params);
+
+    LOG_API("nProgramFragmentCreate, con(%p), paramLen(%i)", con, shaderLen, paramLen);
+
+    jint ret = (jint)rsProgramFragmentCreate(con, (uint32_t *)paramPtr, paramLen);
+    _env->ReleaseIntArrayElements(params, paramPtr, JNI_ABORT);
+    return ret;
 }
 
 static jint
@@ -1455,13 +1435,10 @@ static JNINativeMethod methods[] = {
 {"nProgramFragmentStoreCreate",    "()I",                                  (void*)nProgramFragmentStoreCreate },
 
 {"nProgramBindConstants",          "(III)V",                               (void*)nProgramBindConstants },
+{"nProgramBindTexture",            "(III)V",                               (void*)nProgramBindTexture },
+{"nProgramBindSampler",            "(III)V",                               (void*)nProgramBindSampler },
 
-{"nProgramFragmentBegin",          "(IIZ)V",                               (void*)nProgramFragmentBegin },
-{"nProgramFragmentBindTexture",    "(III)V",                               (void*)nProgramFragmentBindTexture },
-{"nProgramFragmentBindSampler",    "(III)V",                               (void*)nProgramFragmentBindSampler },
-{"nProgramFragmentSetSlot",        "(IZII)V",                              (void*)nProgramFragmentSetSlot },
-{"nProgramFragmentSetShader",      "(Ljava/lang/String;)V",                (void*)nProgramFragmentSetShader },
-{"nProgramFragmentCreate",         "()I",                                  (void*)nProgramFragmentCreate },
+{"nProgramFragmentCreate",         "([I)I",                                (void*)nProgramFragmentCreate },
 {"nProgramFragmentCreate2",        "(Ljava/lang/String;[I)I",              (void*)nProgramFragmentCreate2 },
 
 {"nProgramRasterCreate",           "(IIZZZ)I",                             (void*)nProgramRasterCreate },

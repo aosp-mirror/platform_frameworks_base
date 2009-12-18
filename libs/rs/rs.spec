@@ -372,37 +372,22 @@ ProgramBindConstants {
 	param RsAllocation constants
 	}
 
-ProgramFragmentBegin {
-	param RsElement in
-	param RsElement out
-	param bool pointSpriteEnable
-	}
 
-ProgramFragmentSetShader {
-	param const char * text
-	param uint32_t length
-	}
-
-ProgramFragmentBindTexture {
+ProgramBindTexture {
 	param RsProgramFragment pf
 	param uint32_t slot
 	param RsAllocation a
 	}
 
-ProgramFragmentBindSampler {
+ProgramBindSampler {
 	param RsProgramFragment pf
 	param uint32_t slot
 	param RsSampler s
 	}
 
-ProgramFragmentSetSlot {
-	param uint32_t slot
-	param bool enable
-	param RsTexEnvMode env
-	param RsType t
-	}
-
 ProgramFragmentCreate {
+	param const uint32_t * params
+	param uint32_t paramLength
 	ret RsProgramFragment
 	}
 

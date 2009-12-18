@@ -46,6 +46,27 @@ public class Program extends BaseObj {
         mRS.nProgramBindConstants(mID, slot, a.mID);
     }
 
+    public void bindTexture(Allocation va, int slot)
+        throws IllegalArgumentException {
+        mRS.validate();
+        if((slot < 0) || (slot >= mTextureCount)) {
+            throw new IllegalArgumentException("Slot ID out of range.");
+        }
+
+        mRS.nProgramBindTexture(mID, slot, va.mID);
+    }
+
+    public void bindSampler(Sampler vs, int slot)
+        throws IllegalArgumentException {
+        mRS.validate();
+        if((slot < 0) || (slot >= mTextureCount)) {
+            throw new IllegalArgumentException("Slot ID out of range.");
+        }
+
+        mRS.nProgramBindSampler(mID, slot, vs.mID);
+    }
+
+
     public static class BaseProgramBuilder {
         RenderScript mRS;
         Element mInputs[];

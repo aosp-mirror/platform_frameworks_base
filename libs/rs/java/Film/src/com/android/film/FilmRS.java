@@ -121,13 +121,13 @@ public class FilmRS {
         bs.setWrapT(Sampler.Value.WRAP);
         mSampler = bs.create();
 
-        ProgramFragment.Builder b = new ProgramFragment.Builder(mRS, null, null);
-
+        ProgramFragment.Builder b = new ProgramFragment.Builder(mRS);
         mPFBackground = b.create();
         mPFBackground.setName("PFBackground");
 
-        b.setTexEnable(true, 0);
-        b.setTexEnvMode(ProgramFragment.EnvMode.REPLACE, 0);
+        b = new ProgramFragment.Builder(mRS);
+        b.setTexture(ProgramFragment.Builder.EnvMode.REPLACE,
+                     ProgramFragment.Builder.Format.RGBA, 0);
         mPFImages = b.create();
         mPFImages.bindSampler(mSampler, 0);
         mPFImages.setName("PFImages");
