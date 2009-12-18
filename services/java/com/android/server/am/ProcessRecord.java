@@ -28,6 +28,7 @@ import android.content.pm.ApplicationInfo;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.util.PrintWriterPrinter;
 
 import java.io.PrintWriter;
@@ -50,6 +51,8 @@ class ProcessRecord implements Watchdog.PssRequestor {
                                 // are in the process of launching the app)
     int pid;                    // The process of this application; 0 if none
     boolean starting;           // True if the process is being started
+    long lastActivityTime;      // For managing the LRU list
+    long lruWeight;             // Weight for ordering in LRU list
     int maxAdj;                 // Maximum OOM adjustment for this process
     int hiddenAdj;              // If hidden, this is the adjustment to use
     int curRawAdj;              // Current OOM unlimited adjustment for this process
@@ -73,6 +76,8 @@ class ProcessRecord implements Watchdog.PssRequestor {
     long lastRequestedGc;       // When we last asked the app to do a gc
     long lastLowMemory;         // When we last told the app that memory is low
     boolean reportLowMemory;    // Set to true when waiting to report low mem
+    boolean empty;              // Is this an empty background process?
+    boolean hidden;             // Is this a hidden process?
     int lastPss;                // Last pss size reported by app.
     String adjType;             // Debugging: primary thing impacting oom_adj.
     int adjTypeCode;            // Debugging: adj code to report to app.
@@ -108,6 +113,7 @@ class ProcessRecord implements Watchdog.PssRequestor {
     boolean waitedForDebugger;  // has process show wait for debugger dialog?
     Dialog waitDialog;          // current wait for debugger dialog
     
+    String shortStringName;     // caching of toShortString() result.
     String stringName;          // caching of toString() result.
     
     // These reports are generated & stored when an app gets into an error condition.
@@ -120,6 +126,7 @@ class ProcessRecord implements Watchdog.PssRequestor {
     ComponentName errorReportReceiver;
 
     void dump(PrintWriter pw, String prefix) {
+        long now = SystemClock.uptimeMillis();
         if (info.className != null) {
             pw.print(prefix); pw.print("class="); pw.println(info.className);
         }
@@ -149,6 +156,10 @@ class ProcessRecord implements Watchdog.PssRequestor {
                 pw.print(" curReceiver="); pw.println(curReceiver);
         pw.print(prefix); pw.print("pid="); pw.print(pid); pw.print(" starting=");
                 pw.print(starting); pw.print(" lastPss="); pw.println(lastPss);
+        pw.print(prefix); pw.print("lastActivityTime="); pw.print(lastActivityTime);
+                pw.print(" lruWeight="); pw.println(lruWeight);
+                pw.print(" hidden="); pw.print(hidden);
+                pw.print(" empty="); pw.println(empty);
         pw.print(prefix); pw.print("oom: max="); pw.print(maxAdj);
                 pw.print(" hidden="); pw.print(hiddenAdj);
                 pw.print(" curRaw="); pw.print(curRawAdj);
@@ -220,6 +231,7 @@ class ProcessRecord implements Watchdog.PssRequestor {
 
     public void setPid(int _pid) {
         pid = _pid;
+        shortStringName = null;
         stringName = null;
     }
     
@@ -256,12 +268,16 @@ class ProcessRecord implements Watchdog.PssRequestor {
         }
     }
     
-    public String toString() {
-        if (stringName != null) {
-            return stringName;
+    public String toShortString() {
+        if (shortStringName != null) {
+            return shortStringName;
         }
         StringBuilder sb = new StringBuilder(128);
-        sb.append("ProcessRecord{");
+        toShortString(sb);
+        return shortStringName = sb.toString();
+    }
+    
+    void toShortString(StringBuilder sb) {
         sb.append(Integer.toHexString(System.identityHashCode(this)));
         sb.append(' ');
         sb.append(pid);
@@ -269,6 +285,15 @@ class ProcessRecord implements Watchdog.PssRequestor {
         sb.append(processName);
         sb.append('/');
         sb.append(info.uid);
+    }
+    
+    public String toString() {
+        if (stringName != null) {
+            return stringName;
+        }
+        StringBuilder sb = new StringBuilder(128);
+        sb.append("ProcessRecord{");
+        toShortString(sb);
         sb.append('}');
         return stringName = sb.toString();
     }
