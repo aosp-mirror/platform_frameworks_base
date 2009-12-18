@@ -42,6 +42,8 @@ private:
     off_t mFirstFramePos;
     sp<MetaData> mMeta;
     uint32_t mFixedHeader;
+    int32_t mByteNumber; // total number of bytes in this MP3
+    char mTableOfContents[99]; // TOC entries in XING header
 
     MP3Extractor(const MP3Extractor &);
     MP3Extractor &operator=(const MP3Extractor &);
