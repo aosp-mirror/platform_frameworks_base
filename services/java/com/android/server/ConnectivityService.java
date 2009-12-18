@@ -667,8 +667,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             }
             if (usedNetworkType != networkType) {
                 Integer currentPid = new Integer(pid);
-                reassessPidDns(pid, true);
                 mNetRequestersPids[usedNetworkType].remove(currentPid);
+                reassessPidDns(pid, true);
                 if (mNetRequestersPids[usedNetworkType].size() != 0) {
                     if (DBG) Log.d(TAG, "not tearing down special network - " +
                            "others still using it");
