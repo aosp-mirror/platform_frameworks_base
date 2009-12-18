@@ -294,7 +294,7 @@ public final class ContactsContract {
          * The display name for the contact.
          * <P>Type: TEXT</P>
          */
-        public static final String DISPLAY_NAME = "display_name";
+        public static final String DISPLAY_NAME = ContactNameColumns.DISPLAY_NAME_PRIMARY;
 
         /**
          * Reference to the row in the RawContacts table holding the contact name.
@@ -456,13 +456,13 @@ public final class ContactsContract {
          * The default text shown as the contact's display name.  It is based on
          * available data, see {@link #DISPLAY_NAME_SOURCE}.
          */
-        public static final String DISPLAY_NAME = "display_name";
+        public static final String DISPLAY_NAME_PRIMARY = "display_name";
 
         /**
          * Alternative representation of the display name.  If display name is
          * based on the structured name and the structured name follows
          * the Western full name style, then this field contains the "family name first"
-         * version of the full name.  Otherwise, it is the same as {@link #DISPLAY_NAME}.
+         * version of the full name.  Otherwise, it is the same as DISPLAY_NAME_PRIMARY.
          */
         public static final String DISPLAY_NAME_ALTERNATIVE = "display_name_alt";
 
@@ -483,7 +483,7 @@ public final class ContactsContract {
          * the sort key is the name's Pinyin spelling; for Japanese names
          * it is the Hiragana version of the phonetic name.
          */
-        public static final String SORT_KEY = "sort_key";
+        public static final String SORT_KEY_PRIMARY = "sort_key";
 
         /**
          * Sort key based on the alternative representation of the full name,
@@ -562,7 +562,7 @@ public final class ContactsContract {
      * </tr>
      * <tr>
      * <td>String</td>
-     * <td>{@link #DISPLAY_NAME}</td>
+     * <td>DISPLAY_NAME_PRIMARY</td>
      * <td>read-only</td>
      * <td>The display name for the contact. It is the display name
      * contributed by the raw contact referred to by the NAME_RAW_CONTACT_ID
@@ -692,7 +692,7 @@ public final class ContactsContract {
      * </table>
      */
     public static class Contacts implements BaseColumns, ContactsColumns,
-            ContactOptionsColumns, ContactStatusColumns {
+            ContactOptionsColumns, ContactNameColumns, ContactStatusColumns {
         /**
          * This utility class cannot be instantiated
          */
@@ -1519,6 +1519,7 @@ public final class ContactsContract {
                 super(cursor);
             }
 
+            @Override
             public android.content.Entity getEntityAndIncrementCursor(Cursor cursor)
                     throws RemoteException {
                 final int columnRawContactId = cursor.getColumnIndexOrThrow(RawContacts._ID);
@@ -1757,8 +1758,8 @@ public final class ContactsContract {
      * @see ContactsContract.Data
      */
     protected interface DataColumnsWithJoins extends BaseColumns, DataColumns, StatusColumns,
-        RawContactsColumns, ContactsColumns, ContactOptionsColumns, ContactStatusColumns {
-
+            RawContactsColumns, ContactsColumns, ContactNameColumns, ContactOptionsColumns,
+            ContactStatusColumns {
     }
 
     /**
@@ -3039,7 +3040,7 @@ public final class ContactsContract {
 
             /**
              * The alphabet used for capturing the phonetic name.
-             * See {@link ContactsContract.PhoneticNameStyle}.
+             * See ContactsContract.PhoneticNameStyle.
              * @hide
              */
             public static final String PHONETIC_NAME_STYLE = DATA11;
@@ -3922,6 +3923,12 @@ public final class ContactsContract {
          * <td>{@link #DATA9}</td>
          * <td></td>
          * </tr>
+         * <tr>
+         * <td>String</td>
+         * <td>PHONETIC_NAME_STYLE</td>
+         * <td>{@link #DATA10}</td>
+         * <td></td>
+         * </tr>
          * </table>
          */
         public static final class Organization implements DataColumnsWithJoins, CommonColumns {
@@ -3977,6 +3984,13 @@ public final class ContactsContract {
              * <P>Type: TEXT</P>
              */
             public static final String OFFICE_LOCATION = DATA9;
+
+            /**
+             * The alphabet used for capturing the phonetic name.
+             * See {@link ContactsContract.PhoneticNameStyle}.
+             * @hide
+             */
+            public static final String PHONETIC_NAME_STYLE = DATA10;
 
             /**
              * Return the string resource that best describes the given
@@ -4599,6 +4613,7 @@ public final class ContactsContract {
                 super(cursor);
             }
 
+            @Override
             public Entity getEntityAndIncrementCursor(Cursor cursor) throws RemoteException {
                 // we expect the cursor is already at the row we need to read from
                 final ContentValues values = new ContentValues();
