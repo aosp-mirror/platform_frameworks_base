@@ -158,6 +158,7 @@ enum RsBlendDstFunc {
 };
 
 enum RsTexEnvMode {
+    RS_TEX_ENV_MODE_NONE,
     RS_TEX_ENV_MODE_REPLACE,
     RS_TEX_ENV_MODE_MODULATE,
     RS_TEX_ENV_MODE_DECAL

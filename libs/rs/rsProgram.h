@@ -32,6 +32,7 @@ class Program : public ObjectBase
 public:
     const static uint32_t MAX_ATTRIBS = 8;
     const static uint32_t MAX_UNIFORMS = 16;
+    const static uint32_t MAX_TEXTURE = 2;
 
     Program(Context *);
     Program(Context *, const char * shaderText, uint32_t shaderLength,
@@ -40,6 +41,9 @@ public:
 
     void bindAllocation(Allocation *);
     virtual void createShader();
+
+    void bindTexture(uint32_t slot, Allocation *);
+    void bindSampler(uint32_t slot, Sampler *);
 
     uint32_t getShaderID() const {return mShaderID;}
     void setShader(const char *, uint32_t len);
@@ -71,6 +75,15 @@ protected:
     uint32_t mUniformCount;
     String8 mAttribNames[MAX_ATTRIBS];
     String8 mUniformNames[MAX_UNIFORMS];
+
+    // The difference between Textures and Constants is how they are accessed
+    // Texture lookups go though a sampler which in effect converts normalized
+    // coordinates into type specific.  Multiple samples may also be taken
+    // and filtered.
+    //
+    // Constants are strictly accessed by programetic loads.
+    ObjectBaseRef<Allocation> mTextures[MAX_TEXTURE];
+    ObjectBaseRef<Sampler> mSamplers[MAX_TEXTURE];
 
     bool loadShader(Context *, uint32_t type);
 

@@ -619,20 +619,20 @@ static void SC_vec2Rand(float *vec, float maxLen)
 static void SC_bindTexture(RsProgramFragment vpf, uint32_t slot, RsAllocation va)
 {
     GET_TLS();
-    rsi_ProgramFragmentBindTexture(rsc,
-                                   static_cast<ProgramFragment *>(vpf),
-                                   slot,
-                                   static_cast<Allocation *>(va));
+    rsi_ProgramBindTexture(rsc,
+                           static_cast<ProgramFragment *>(vpf),
+                           slot,
+                           static_cast<Allocation *>(va));
 
 }
 
 static void SC_bindSampler(RsProgramFragment vpf, uint32_t slot, RsSampler vs)
 {
     GET_TLS();
-    rsi_ProgramFragmentBindSampler(rsc,
-                                   static_cast<ProgramFragment *>(vpf),
-                                   slot,
-                                   static_cast<Sampler *>(vs));
+    rsi_ProgramBindSampler(rsc,
+                           static_cast<ProgramFragment *>(vpf),
+                           slot,
+                           static_cast<Sampler *>(vs));
 
 }
 
@@ -846,9 +846,7 @@ static void SC_color(float r, float g, float b, float a)
     rsc->mStateVertex.color[1] = g;
     rsc->mStateVertex.color[2] = b;
     rsc->mStateVertex.color[3] = a;
-    if (rsc->checkVersion2_0()) {
-        glVertexAttrib4f(1, r, g, b, a);
-    } else {
+    if (!rsc->checkVersion2_0()) {
         glColor4f(r, g, b, a);
     }
 }

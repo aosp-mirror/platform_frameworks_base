@@ -168,13 +168,10 @@ public class RenderScript {
     native void nProgramRasterSetPointSize(int pr, float v);
 
     native void nProgramBindConstants(int pv, int slot, int mID);
+    native void nProgramBindTexture(int vpf, int slot, int a);
+    native void nProgramBindSampler(int vpf, int slot, int s);
 
-    native void nProgramFragmentBegin(int in, int out, boolean pointSpriteEnable);
-    native void nProgramFragmentBindTexture(int vpf, int slot, int a);
-    native void nProgramFragmentBindSampler(int vpf, int slot, int s);
-    native void nProgramFragmentSetSlot(int slot, boolean enable, int env, int vt);
-    native void nProgramFragmentSetShader(String txt);
-    native int  nProgramFragmentCreate();
+    native int  nProgramFragmentCreate(int[] params);
     native int  nProgramFragmentCreate2(String shader, int[] params);
 
     native int  nProgramVertexCreate(boolean texMat);

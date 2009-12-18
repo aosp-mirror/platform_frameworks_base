@@ -121,6 +121,30 @@ void Program::bindAllocation(Allocation *alloc)
     mDirty = true;
 }
 
+void Program::bindTexture(uint32_t slot, Allocation *a)
+{
+    if (slot >= MAX_TEXTURE) {
+        LOGE("Attempt to bind a texture to a slot > MAX_TEXTURE");
+        return;
+    }
+
+    //LOGE("bindtex %i %p", slot, a);
+    mTextures[slot].set(a);
+    mDirty = true;
+}
+
+void Program::bindSampler(uint32_t slot, Sampler *s)
+{
+    if (slot >= MAX_TEXTURE) {
+        LOGE("Attempt to bind a Sampler to a slot > MAX_TEXTURE");
+        return;
+    }
+
+    mSamplers[slot].set(s);
+    mDirty = true;
+}
+
+
 void Program::createShader()
 {
 }
@@ -182,6 +206,17 @@ void rsi_ProgramBindConstants(Context *rsc, RsProgram vp, uint32_t slot, RsAlloc
     p->bindAllocation(static_cast<Allocation *>(constants));
 }
 
+void rsi_ProgramBindTexture(Context *rsc, RsProgram vpf, uint32_t slot, RsAllocation a)
+{
+    Program *p = static_cast<Program *>(vpf);
+    p->bindTexture(slot, static_cast<Allocation *>(a));
+}
+
+void rsi_ProgramBindSampler(Context *rsc, RsProgram vpf, uint32_t slot, RsSampler s)
+{
+    Program *p = static_cast<Program *>(vpf);
+    p->bindSampler(slot, static_cast<Sampler *>(s));
+}
 
 }
 }

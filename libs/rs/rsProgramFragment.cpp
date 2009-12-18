@@ -26,18 +26,28 @@ using namespace android;
 using namespace android::renderscript;
 
 
-ProgramFragment::ProgramFragment(Context *rsc, Element *in, Element *out, bool pointSpriteEnable) :
+ProgramFragment::ProgramFragment(Context *rsc, const uint32_t * params,
+                                 uint32_t paramLength) :
     Program(rsc)
 {
     mAllocFile = __FILE__;
     mAllocLine = __LINE__;
-    for (uint32_t ct=0; ct < MAX_TEXTURE; ct++) {
-        mEnvModes[ct] = RS_TEX_ENV_MODE_REPLACE;
-        mTextureDimensions[ct] = 2;
-    }
+    rsAssert(paramLength = 5);
+
+    mEnvModes[0] = (RsTexEnvMode)params[0];
+    mTextureFormats[0] = params[1];
+    mEnvModes[1] = (RsTexEnvMode)params[2];
+    mTextureFormats[1] = params[3];
+    mPointSpriteEnable = params[4] != 0;
+
     mTextureEnableMask = 0;
-    mPointSpriteEnable = pointSpriteEnable;
-    mEnvModes[1] = RS_TEX_ENV_MODE_DECAL;
+    if (mEnvModes[0]) {
+        mTextureEnableMask |= 1;
+    }
+    if (mEnvModes[1]) {
+        mTextureEnableMask |= 2;
+    }
+    init(rsc);
 }
 
 ProgramFragment::ProgramFragment(Context *rsc, const char * shaderText,
@@ -84,6 +94,9 @@ void ProgramFragment::setupGL(const Context *rsc, ProgramFragmentState *state)
         glBindTexture(GL_TEXTURE_2D, mTextures[ct]->getTextureID());
 
         switch(mEnvModes[ct]) {
+        case RS_TEX_ENV_MODE_NONE:
+            rsAssert(0);
+            break;
         case RS_TEX_ENV_MODE_REPLACE:
             glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
             break;
@@ -211,6 +224,9 @@ void ProgramFragment::createShader()
         while (mask) {
             if (mask & 1) {
                 switch(mEnvModes[texNum]) {
+                case RS_TEX_ENV_MODE_NONE:
+                    rsAssert(0);
+                    break;
                 case RS_TEX_ENV_MODE_REPLACE:
                     mShader.append("  col = texture2D(uni_Tex0, tex0);\n");
                     break;
@@ -232,69 +248,6 @@ void ProgramFragment::createShader()
 
         mShader.append("  gl_FragColor = col;\n");
         mShader.append("}\n");
-    }
-}
-
-void ProgramFragment::bindTexture(uint32_t slot, Allocation *a)
-{
-    if (slot >= MAX_TEXTURE) {
-        LOGE("Attempt to bind a texture to a slot > MAX_TEXTURE");
-        return;
-    }
-
-    //LOGE("bindtex %i %p", slot, a);
-    mTextures[slot].set(a);
-    mDirty = true;
-}
-
-void ProgramFragment::bindSampler(uint32_t slot, Sampler *s)
-{
-    if (slot >= MAX_TEXTURE) {
-        LOGE("Attempt to bind a Sampler to a slot > MAX_TEXTURE");
-        return;
-    }
-
-    mSamplers[slot].set(s);
-    mDirty = true;
-}
-
-void ProgramFragment::setType(uint32_t slot, const Element *e, uint32_t dim)
-{
-    if (slot >= MAX_TEXTURE) {
-        LOGE("Attempt to setType to a slot > MAX_TEXTURE");
-        return;
-    }
-
-    if (dim >= 4) {
-        LOGE("Attempt to setType to a dimension > 3");
-        return;
-    }
-
-    mTextureFormats[slot].set(e);
-    mTextureDimensions[slot] = dim;
-}
-
-void ProgramFragment::setEnvMode(uint32_t slot, RsTexEnvMode env)
-{
-    if (slot >= MAX_TEXTURE) {
-        LOGE("Attempt to setEnvMode to a slot > MAX_TEXTURE");
-        return;
-    }
-
-    mEnvModes[slot] = env;
-}
-
-void ProgramFragment::setTexEnable(uint32_t slot, bool enable)
-{
-    if (slot >= MAX_TEXTURE) {
-        LOGE("Attempt to setEnvMode to a slot > MAX_TEXTURE");
-        return;
-    }
-
-    uint32_t bit = 1 << slot;
-    mTextureEnableMask &= ~bit;
-    if (enable) {
-        mTextureEnableMask |= bit;
     }
 }
 
@@ -320,7 +273,12 @@ ProgramFragmentState::~ProgramFragmentState()
 
 void ProgramFragmentState::init(Context *rsc, int32_t w, int32_t h)
 {
-    ProgramFragment *pf = new ProgramFragment(rsc, NULL, NULL, false);
+    uint32_t tmp[5] = {
+        RS_TEX_ENV_MODE_NONE, 0,
+        RS_TEX_ENV_MODE_NONE, 0,
+        0
+    };
+    ProgramFragment *pf = new ProgramFragment(rsc, tmp, 5);
     mDefault.set(pf);
     pf->init(rsc);
 }
@@ -335,52 +293,12 @@ void ProgramFragmentState::deinit(Context *rsc)
 namespace android {
 namespace renderscript {
 
-void rsi_ProgramFragmentBegin(Context * rsc, RsElement in, RsElement out, bool pointSpriteEnable)
+RsProgramFragment rsi_ProgramFragmentCreate(Context *rsc,
+                                            const uint32_t * params,
+                                            uint32_t paramLength)
 {
-    delete rsc->mStateFragment.mPF;
-    rsc->mStateFragment.mPF = new ProgramFragment(rsc, (Element *)in, (Element *)out, pointSpriteEnable);
-}
-
-void rsi_ProgramFragmentBindTexture(Context *rsc, RsProgramFragment vpf, uint32_t slot, RsAllocation a)
-{
-    ProgramFragment *pf = static_cast<ProgramFragment *>(vpf);
-    pf->bindTexture(slot, static_cast<Allocation *>(a));
-}
-
-void rsi_ProgramFragmentBindSampler(Context *rsc, RsProgramFragment vpf, uint32_t slot, RsSampler s)
-{
-    ProgramFragment *pf = static_cast<ProgramFragment *>(vpf);
-    pf->bindSampler(slot, static_cast<Sampler *>(s));
-}
-
-void rsi_ProgramFragmentSetSlot(Context *rsc, uint32_t slot, bool enable, RsTexEnvMode env, RsType vt)
-{
-    const Type *t = static_cast<const Type *>(vt);
-    if (t) {
-        uint32_t dim = 1;
-        if (t->getDimY()) {
-            dim ++;
-            if (t->getDimZ()) {
-                dim ++;
-            }
-        }
-        rsc->mStateFragment.mPF->setType(slot, t->getElement(), dim);
-    }
-    rsc->mStateFragment.mPF->setEnvMode(slot, env);
-    rsc->mStateFragment.mPF->setTexEnable(slot, enable);
-}
-
-void rsi_ProgramFragmentSetShader(Context *rsc, const char *txt, uint32_t len)
-{
-    rsc->mStateFragment.mPF->setShader(txt, len);
-}
-
-RsProgramFragment rsi_ProgramFragmentCreate(Context *rsc)
-{
-    ProgramFragment *pf = rsc->mStateFragment.mPF;
+    ProgramFragment *pf = new ProgramFragment(rsc, params, paramLength);
     pf->incUserRef();
-    pf->init(rsc);
-    rsc->mStateFragment.mPF = 0;
     return pf;
 }
 
