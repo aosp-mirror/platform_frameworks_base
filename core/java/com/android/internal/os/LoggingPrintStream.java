@@ -16,11 +16,17 @@
 
 package com.android.internal.os;
 
-import java.io.PrintStream;
-import java.io.OutputStream;
 import java.io.IOException;
-import java.util.Locale;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.CoderResult;
+import java.nio.charset.CodingErrorAction;
 import java.util.Formatter;
+import java.util.Locale;
 
 /**
  * A print stream which logs output line by line.
@@ -30,6 +36,27 @@ import java.util.Formatter;
 abstract class LoggingPrintStream extends PrintStream {
 
     private final StringBuilder builder = new StringBuilder();
+
+    /**
+     * A buffer that is initialized when raw bytes are first written to this
+     * stream. It may contain the leading bytes of multi-byte characters.
+     * Between writes this buffer is always ready to receive data; ie. the
+     * position is at the first unassigned byte and the limit is the capacity.
+     */
+    private ByteBuffer encodedBytes;
+
+    /**
+     * A buffer that is initialized when raw bytes are first written to this
+     * stream. Between writes this buffer is always clear; ie. the position is
+     * zero and the limit is the capacity.
+     */
+    private CharBuffer decodedChars;
+
+    /**
+     * Decodes bytes to characters using the system default charset. Initialized
+     * when raw bytes are first written to this stream.
+     */
+    private CharsetDecoder decoder;
 
     protected LoggingPrintStream() {
         super(new OutputStream() {
@@ -80,20 +107,48 @@ abstract class LoggingPrintStream extends PrintStream {
         }
     }
 
-    /*
-     * We have no idea of how these bytes are encoded, so just ignore them.
-     */
+    public void write(int oneByte) {
+        write(new byte[] { (byte) oneByte }, 0, 1);
+    }
 
-    /** Ignored. */
-    public void write(int oneByte) {}
-
-    /** Ignored. */
     @Override
-    public void write(byte buffer[]) {}
+    public void write(byte[] buffer) {
+        write(buffer, 0, buffer.length);
+    }
 
-    /** Ignored. */
     @Override
-    public void write(byte bytes[], int start, int count) {}
+    public synchronized void write(byte bytes[], int start, int count) {
+        if (decoder == null) {
+            encodedBytes = ByteBuffer.allocate(80);
+            decodedChars = CharBuffer.allocate(80);
+            decoder = Charset.defaultCharset().newDecoder()
+                    .onMalformedInput(CodingErrorAction.REPLACE)
+                    .onUnmappableCharacter(CodingErrorAction.REPLACE);
+        }
+
+        int end = start + count;
+        while (start < end) {
+            // copy some bytes from the array to the long-lived buffer. This
+            // way, if we end with a partial character we don't lose it.
+            int numBytes = Math.min(encodedBytes.remaining(), end - start);
+            encodedBytes.put(bytes, start, numBytes);
+            start += numBytes;
+
+            encodedBytes.flip();
+            CoderResult coderResult;
+            do {
+                // decode bytes from the byte buffer into the char buffer
+                coderResult = decoder.decode(encodedBytes, decodedChars, false);
+
+                // copy chars from the char buffer into our string builder
+                decodedChars.flip();
+                builder.append(decodedChars);
+                decodedChars.clear();
+            } while (coderResult.isOverflow());
+            encodedBytes.compact();
+        }
+        flush(false);
+    }
 
     /** Always returns false. */
     @Override
