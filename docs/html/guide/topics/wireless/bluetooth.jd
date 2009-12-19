@@ -34,6 +34,12 @@ page.title=Bluetooth
     <li><a href="#ManagingAConnection">Managing a Connection</a></li>
   </ol>
 
+  <h2>See also</h2>
+  <ol>
+    <li><a href="{@docRoot}resources/samples/BluetoothChat/index.html">Bluetooth Chat sample
+      app</a></li>
+  </ol>
+
 </div>
 </div>
 
@@ -826,4 +832,7 @@ terminated at any time by closing the {@link android.bluetooth.BluetoothSocket}.
 This should always be called when you're done using the Bluetooth
 connection.</p>
 
-
+<div class="special">
+<p>For a complete demonstration using the Bluetooth APIs, see the <a
+href="{@docRoot}resources/samples/BluetoothChat/index.html">Bluetooth Chat sample app</a>.</p>
+</div>

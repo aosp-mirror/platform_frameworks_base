@@ -12,96 +12,16 @@ devices, connecting with devices, and managing data transfer between devices.
   <li>Transfer data to and from other devices</li>
 </ul>
 
-<p class="note"><strong>Note:</strong>
+<p>
 To perform Bluetooth communication using these APIs, an application must
 declare the {@link android.Manifest.permission#BLUETOOTH} permission. Some
-additional functionality, such as requesting device discovery and
-pairing also requires the {@link android.Manifest.permission#BLUETOOTH_ADMIN}
+additional functionality, such as requesting device discovery,
+also requires the {@link android.Manifest.permission#BLUETOOTH_ADMIN}
 permission.
 </p>
 
-<h3>Overview</h3>
-
-<p>Here's a basic introduction to the Bluetooth classes:</p>
-<dl>
-  <dt>{@link android.bluetooth.BluetoothAdapter}</dt>
-  <dd>This represents the local Bluetooth adapter, which is essentially the
-  entry-point to performing any interaction with Bluetooth. With it, you can
-  discover other Bluetooth devices, query a list of bonded (paired) devices,
-  initialize a {@link android.bluetooth.BluetoothDevice} using a known MAC
-  address, and create a {@link android.bluetooth.BluetoothServerSocket} to
-  listen for communications from other devices.</dd>
-
-  <dt>{@link android.bluetooth.BluetoothDevice}</dt>
-  <dd>This represents a remote Bluetooth device. Use this to request a
-  connection with a remote device through a
-  {@link android.bluetooth.BluetoothSocket}
-  or query information about the device such as its name, address, class, and
-  bonding state.</dd>
-
-  <dt>{@link android.bluetooth.BluetoothSocket}</dt>
-  <dd>This represents the interface for a Bluetooth socket
-  (similar to a TCP client-side {@link java.net.Socket}). This is the
-  connection point that allows an app to transfer data with another Bluetooth
-  device via {@link java.io.InputStream} and {@link java.io.OutputStream}.</dd>
-  <dt>{@link android.bluetooth.BluetoothServerSocket}</dt>
-
-  <dd>This represents an open server socket that listens for incoming requests
-  (similar to a TCP server-side {@link java.net.ServerSocket}).
-  When attempting to connect two Android devices, one device will need to open
-  a server socket with this class. When a connection is accepted, a new
-  {@link android.bluetooth.BluetoothSocket} will be returned,
-  which can be used to manage the connection and transfer data.</dd>
-
-  <dt>{@link android.bluetooth.BluetoothClass}</dt>
-  <dd>This represents the Bluetooth class for a device which describes general
-  characteristics and capabilities of a device. This class and its subclasses
-  don't provide any actual functionality. The sub-classes are entirely composed
-  of constants for the device and service class definitions.</dd>
-</dl>
-
-
-<h3>Example Procedure</h3>
-
-<p>For example, here's an pseudo-code procedure for discovering and
-connecting a remote device, and transfering data:</p>
-
-<ol>
-  <li>Register a {@link android.content.BroadcastReceiver} that accepts the
-  {@link android.bluetooth.BluetoothDevice#ACTION_FOUND} Intent.</li>
-  <li>Call {@link android.bluetooth.BluetoothAdapter#getDefaultAdapter} to
-  retrieve the Android system's local
-  {@link android.bluetooth.BluetoothAdapter}.</li>
-  <li>Call {@link android.bluetooth.BluetoothAdapter#startDiscovery()
-  BluetoothAdapter.startDiscovery()} to scan for local devices. This is where
-  the BroadcastReceiver comes in; Android now scans for devices and will
-  broadcast the {@link android.bluetooth.BluetoothDevice#ACTION_FOUND} Intent
-  for each remote device discovered. The
-  {@link android.content.BroadcastReceiver}
-  you created will receive each Intent.</li>
-  <li>The {@link android.bluetooth.BluetoothDevice#ACTION_FOUND} Intent
-  includes the {@link android.bluetooth.BluetoothDevice#EXTRA_DEVICE}
-  Parcelable extra, which is a {@link android.bluetooth.BluetoothDevice}
-  object. Extract this from the Intent and call
-  {@link android.bluetooth.BluetoothDevice#createRfcommSocketToServiceRecord(java.util.UUID)
-  BluetoothDevice.createRfcommSocketToServiceRecord()}
-  to open a {@link android.bluetooth.BluetoothSocket} with a chosen
-  remote device.</li>
-  <li>Call {@link android.bluetooth.BluetoothSocket#connect()
-  BluetoothSocket.connect()} to connect with the remote device.</li>
-  <li>When successfully connected, call
-  {@link android.bluetooth.BluetoothSocket#getInputStream()
-  BluetoothSocket.getInputStream()} and/or
-  {@link android.bluetooth.BluetoothSocket#getOutputStream()
-  BluetoothSocket.getOutputStream()} to retreive an
-  {@link java.io.InputStream} and {@link java.io.OutputStream}, respectively,
-  which are hooked into the socket.</li>
-  <li>Use {@link java.io.InputStream#read(byte[]) InputStream.read()} and
-  {@link java.io.OutputStream#write(byte[]) OutputStream.write()} to transfer
-  data.</li>
-</ol>
-
-
+<p>For a detailed guide to using the Bluetooth APIs, see the <a
+href="{@docRoot}guide/topics/wireless/bluetooth.html">Bluetooth Dev Guide topic</a>.</p>
 
 <p class="note"><strong>Note:</strong>
 Not all Android devices are guaranteed to have Bluetooth functionality.</p>
