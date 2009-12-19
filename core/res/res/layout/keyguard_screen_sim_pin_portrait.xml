@@ -16,59 +16,55 @@
 ** limitations under the License.
 */
 -->
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
+    android:orientation="vertical"
     android:background="@android:color/background_dark"
-        >
+    android:gravity="center_horizontal">
 
     <LinearLayout android:id="@+id/topDisplayGroup"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:orientation="vertical"
-            >
+        android:orientation="vertical">
 
         <!-- header text ('Enter Pin Code') -->
         <TextView android:id="@+id/headerText"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="9dip"
             android:gravity="center"
             android:lines="2"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            />
+            android:textAppearance="?android:attr/textAppearanceLarge"/>
 
-        <RelativeLayout
+        <!-- password entry -->
+        <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="18dip"
+            android:orientation="horizontal"
             android:layout_marginRight="6dip"
             android:layout_marginLeft="6dip"
-            android:background="@android:drawable/edit_text"
-            >
+            android:gravity="center_vertical"
+            android:background="@android:drawable/edit_text">
 
             <!-- displays dots as user enters pin -->
             <TextView android:id="@+id/pinDisplay"
-                android:layout_width="wrap_content"
-                android:layout_height="64dip"
-                android:layout_centerInParent="true"
+                android:layout_width="0dip"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:maxLines="1"
                 android:textAppearance="?android:attr/textAppearanceLargeInverse"
                 android:textStyle="bold"
                 android:inputType="textPassword"
-                />
+            />
 
             <ImageButton android:id="@+id/backspace"
                 android:src="@android:drawable/ic_input_delete"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
-                android:layout_centerVertical="true"
-                android:layout_marginRight="1dip"
-                    />
-        </RelativeLayout>
-
+                android:layout_marginRight="-3dip"
+                android:layout_marginBottom="-3dip"
+            />
+        </LinearLayout>
 
     </LinearLayout>
 
@@ -78,16 +74,14 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/topDisplayGroup"
         android:layout_marginTop="10dip"
-        android:orientation="vertical"
-        >
+        android:orientation="vertical">
 
         <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="64dip"
             android:layout_marginLeft="2dip"
             android:layout_marginRight="2dip"
-            android:orientation="horizontal"
-        >
+            android:orientation="horizontal">
 
             <Button android:id="@+id/one"
                 android:layout_width="0sp"
@@ -125,8 +119,7 @@
             android:layout_height="64dip"
             android:layout_marginLeft="2dip"
             android:layout_marginRight="2dip"
-            android:orientation="horizontal"
-        >
+            android:orientation="horizontal">
 
             <Button android:id="@+id/four"
                 android:layout_width="0sp"
@@ -164,8 +157,7 @@
             android:layout_height="64dip"
             android:layout_marginLeft="2dip"
             android:layout_marginRight="2dip"
-            android:orientation="horizontal"
-        >
+            android:orientation="horizontal">
 
             <Button android:id="@+id/seven"
                 android:layout_width="0sp"
@@ -203,8 +195,7 @@
             android:layout_height="64dip"
             android:layout_marginLeft="2dip"
             android:layout_marginRight="2dip"
-            android:orientation="horizontal"
-        >
+            android:orientation="horizontal">
 
             <Button android:id="@+id/ok"
                 android:layout_width="0sp"
@@ -242,27 +233,33 @@
     <!-- end keypad -->
     </LinearLayout>
 
-
-    <!-- emergency call button -->
-    <Button
-        android:id="@+id/emergencyCall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_alignParentBottom="true"
-        android:drawableLeft="@android:drawable/ic_emergency"
-        android:drawablePadding="8dip"
-        android:text="@android:string/lockscreen_emergency_call"
-        />
-
     <!-- spacer below keypad -->
     <View
         android:id="@+id/spacerBottom"
         android:layout_width="fill_parent"
         android:layout_height="1dip"
-        android:layout_marginBottom="6dip"
+        android:layout_marginTop="6dip"
         android:layout_above="@id/emergencyCall"
-        android:background="@android:drawable/divider_horizontal_dark"/>
+        android:background="@android:drawable/divider_horizontal_dark"
+    />
 
+    <!-- The emergency button should take the rest of the space and be centered vertically -->
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="0dip"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:orientation="vertical">
 
-</RelativeLayout>
+        <!-- emergency call button -->
+        <Button
+            android:id="@+id/emergencyCall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:drawableLeft="@android:drawable/ic_emergency"
+            android:drawablePadding="8dip"
+            android:text="@android:string/lockscreen_emergency_call"
+        />
+    </LinearLayout>
+
+</LinearLayout>
