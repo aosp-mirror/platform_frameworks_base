@@ -123,11 +123,11 @@ static const CodecInfo kDecoderInfo[] = {
     { MEDIA_MIMETYPE_AUDIO_AAC, "OMX.PV.aacdec" },
     { MEDIA_MIMETYPE_VIDEO_MPEG4, "OMX.qcom.video.decoder.mpeg4" },
     { MEDIA_MIMETYPE_VIDEO_MPEG4, "OMX.TI.Video.Decoder" },
-    OPTIONAL(MEDIA_MIMETYPE_VIDEO_MPEG4, "M4vH264Decoder")
+    OPTIONAL(MEDIA_MIMETYPE_VIDEO_MPEG4, "M4vH263Decoder")
     { MEDIA_MIMETYPE_VIDEO_MPEG4, "OMX.PV.mpeg4dec" },
     { MEDIA_MIMETYPE_VIDEO_H263, "OMX.qcom.video.decoder.h263" },
     { MEDIA_MIMETYPE_VIDEO_H263, "OMX.TI.Video.Decoder" },
-    OPTIONAL(MEDIA_MIMETYPE_VIDEO_H263, "M4vH264Decoder")
+    OPTIONAL(MEDIA_MIMETYPE_VIDEO_H263, "M4vH263Decoder")
     { MEDIA_MIMETYPE_VIDEO_H263, "OMX.PV.h263dec" },
     { MEDIA_MIMETYPE_VIDEO_AVC, "OMX.qcom.video.decoder.avc" },
     { MEDIA_MIMETYPE_VIDEO_AVC, "OMX.TI.Video.Decoder" },

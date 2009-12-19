@@ -45,7 +45,6 @@ protected:
 private:
     sp<MediaSource> mSource;
     bool mStarted;
-    bool mInitialized;
     int32_t mWidth, mHeight;
 
     sp<MetaData> mFormat;

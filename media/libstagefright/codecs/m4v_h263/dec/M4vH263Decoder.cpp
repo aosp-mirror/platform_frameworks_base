@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#define LOG_NDEBUG 0
+//#define LOG_NDEBUG 0
 #define LOG_TAG "M4vH263Decoder"
+#include <utils/Log.h>
 
 #include "ESDS.h"
 #include "M4vH263Decoder.h"
@@ -37,8 +38,9 @@ M4vH263Decoder::M4vH263Decoder(const sp<MediaSource> &source)
       mHandle(new tagvideoDecControls),
       mInputBuffer(NULL),
       mNumSamplesOutput(0) {
-    memset(mHandle, 0, sizeof(tagvideoDecControls));
 
+    LOGV("M4vH263Decoder");
+    memset(mHandle, 0, sizeof(tagvideoDecControls));
     mFormat = new MetaData;
     mFormat->setCString(kKeyMIMEType, MEDIA_MIMETYPE_VIDEO_RAW);
     CHECK(mSource->getFormat()->findInt32(kKeyWidth, &mWidth));
@@ -47,7 +49,6 @@ M4vH263Decoder::M4vH263Decoder(const sp<MediaSource> &source)
     mFormat->setInt32(kKeyHeight, mHeight);
     mFormat->setInt32(kKeyColorFormat, OMX_COLOR_FormatYUV420Planar);
     mFormat->setCString(kKeyDecoderComponent, "M4vH263Decoder");
-
 }
 
 M4vH263Decoder::~M4vH263Decoder() {
@@ -76,7 +77,7 @@ status_t M4vH263Decoder::start(MetaData *) {
     uint32_t type;
     const void *data = NULL;
     size_t size = 0;
-    uint8_t *vol_data = NULL;
+    uint8_t *vol_data[1] = {0};
     int32_t vol_size = 0;
     if (mSource->getFormat()->findData(kKeyESDS, &type, &data, &size)) {
         ESDS esds((const uint8_t *)data, size);
@@ -86,14 +87,17 @@ status_t M4vH263Decoder::start(MetaData *) {
         size_t codec_specific_data_size;
         esds.getCodecSpecificInfo(&codec_specific_data, &codec_specific_data_size);
 
-        vol_data = (uint8_t *) codec_specific_data;
+        vol_data[0] = (uint8_t *) malloc(codec_specific_data_size);
+        memcpy(vol_data[0], codec_specific_data, codec_specific_data_size);
         vol_size = codec_specific_data_size;
     } else {
-        vol_data = NULL;
+        vol_data[0] = NULL;
         vol_size = 0;
+
     }
     CHECK_EQ(PV_TRUE, PVInitVideoDecoder(
-            mHandle, &vol_data, &vol_size, 1, mWidth, mHeight, mode));
+            mHandle, vol_data, &vol_size, 1, mWidth, mHeight, mode));
+    if (vol_data[0]) free(vol_data[0]);
     MP4DecodingMode actualMode = PVGetDecBitstreamMode(mHandle);
     CHECK_EQ(mode, actualMode);
 
