@@ -662,6 +662,14 @@ public interface WindowManagerPolicy {
     public boolean finishAnimationLw();
 
     /**
+     * Return true if it is okay to perform animations for an app transition
+     * that is about to occur.  You may return false for this if, for example,
+     * the lock screen is currently displayed so the switch should happen
+     * immediately.
+     */
+    public boolean allowAppAnimationsLw();
+    
+    /**
      * Called after the screen turns off.
      *
      * @param why {@link #OFF_BECAUSE_OF_USER} or
@@ -674,6 +682,11 @@ public interface WindowManagerPolicy {
      */
     public void screenTurnedOn();
 
+    /**
+     * Return whether the screen is currently on.
+     */
+    public boolean isScreenOn();
+    
     /**
      * Perform any initial processing of a low-level input event before the
      * window manager handles special keys and generates a high-level event
