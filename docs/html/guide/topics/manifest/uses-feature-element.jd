@@ -50,12 +50,12 @@ camera, then you should include the following in your {@code AndroidManifest.xml
 &lt;uses-feature android:name="android.hardware.camera" />
 </pre>
 
-<p>If you declare {@code android.hardware.camera}, then your application is considered
+<p>If you declare {@code android.hardware.camera} this way, then your application is considered
 compatible with all devices that include a camera. If your application also uses auto-focus
 features, then you also need to include a
 {@code &lt;uses-feature>} element that declares the {@code android.hardware.camera.autofocus}
 feature. Also note that you must still request the {@link android.Manifest.permission#CAMERA
-CAMERA} permission. Requesting permission grants your application access to the
+CAMERA} permission. Requesting the permission grants your application access to the
 appropriate hardware and software, while declaring the features used by
 your application ensures proper device compatibility.</p>
 
@@ -81,8 +81,8 @@ instance of this element.</p>
   <dt><a name="glEsVersion"></a>{@code android:glEsVersion}</dt>
   <dd>The GLES version needed by the application.
      The higher 16 bits represent the major number and the lower 16 bits
-     represent the minor number. For example, for GL 1.2 referring to
-     0x00000102, the actual value should be set as 0x00010002.
+     represent the minor number. For example, for GL 1.2,
+     the value should be set as {@code 0x00010002}.
   </dd>
 
   <dt><a name="name"></a>{@code android:name}</dt>
@@ -96,7 +96,7 @@ instance of this element.</p>
        <th>Description</th> 
     </tr><tr>
        <td rowspan="2">Camera</td>
-       <td>"{@code android.hardware.camera}"</td> 
+       <td>{@code android.hardware.camera}</td>
        <td>The application requires a camera.</td> 
     </tr><tr>
        <td colspan="2">
@@ -106,17 +106,60 @@ instance of this element.</p>
          to use all camera features (auto-focus and flash). Thus, the application will not
          be compatible with devices that do not support all camera features. Please use
          {@code &lt;uses-feature>} to declare only the camera features that your
-         application does need. For instance, if you requests the
-         {@link android.Manifest.permission#CAMERA} permission, but does not need auto-focus or
-          flash, then declare only the {@code android.hardware.camera} feature&mdash;the camera
-          features that you do not request will no longer be assumed as required.
+         application does need. For instance, if you request the
+         {@link android.Manifest.permission#CAMERA} permission, but you do not need auto-focus or
+          flash, then declare only the {@code android.hardware.camera} feature&mdash;the other
+          camera features that you do not request will no longer be assumed as required.
        </td>
     </tr><tr>
       <td>Camera auto-focus</td>
-      <td>"{@code android.hardware.camera.autofocus}"</td>
+      <td>{@code android.hardware.camera.autofocus}</td>
       <td>The application requires a camera with auto-focus capability.
-       As a prerequisite, "{@code android.hardware.camera}" must also be declared
+       As a prerequisite, {@code android.hardware.camera} must also be declared
        with a separate {@code &lt;uses-feature>} element.
+      </td>
+    </tr><tr>
+      <td>Camera flash</td>
+      <td>{@code android.hardware.camera.flash}</td>
+      <td>The application requires a camera with a flash.
+        As a prerequisite, both {@code android.hardware.camera} and {@code
+        android.hardware.camera.autofocus} must also be declared
+        with separate {@code &lt;uses-feature>} elements.
+      </td>
+    </tr><tr>
+      <td>Light sensor</td>
+      <td>{@code android.hardware.sensor.light}</td>
+      <td>The application requires a device with a light sensor.
+      </td>
+    </tr><tr>
+      <td>Proximity sensor</td>
+      <td>{@code android.hardware.sensor.proximity}</td>
+      <td>The application requires a device with a proximity sensor.
+      </td>
+    </tr><tr>
+      <td>Multitouch screen</td>
+      <td>{@code android.hardware.touchscreen.multitouch}</td>
+      <td>The application requires a device that supports multitouch.
+      </td>
+    </tr><tr>
+      <td>Telephony</td>
+      <td>{@code android.hardware.telephony}</td>
+      <td>The application requires a device that includes a telephony radio with data
+         communication services.
+      </td>
+    </tr><tr>
+      <td>CDMA telephony</td>
+      <td>{@code android.hardware.telephony.cdma}</td>
+      <td>The application requires a device that includes a CDMA telephony radio. As a
+        prerequisite, {@code android.hardware.telephony} must also be declared
+        with a separate {@code &lt;uses-feature>} element.
+      </td>
+    </tr><tr>
+      <td>GSM telephony</td>
+      <td>{@code android.hardware.telephony.gsm}</td>
+      <td>The application requires a device that includes a GSM telephony radio. As a
+        prerequisite, {@code android.hardware.telephony} must also be declared
+        with a separate {@code &lt;uses-feature>} element.
       </td>
     </tr>
   </table>
@@ -124,19 +167,20 @@ instance of this element.</p>
 
   <dt><a name="required"></a>{@code android:required}</dt>  <!-- added in api level 5 -->
   <dd>Indicates whether the feature is required by the application. This is
-    "true" by default. <strong>You should not use this attribute for most cases.</strong>
+    {@code true} by default. <strong>You should not use this attribute for most cases.</strong>
     </p>
 
-    <p>The only situation in which you should set this attribute "false" is when your application
-    requests the {@link android.Manifest.permission#CAMERA} permission, but will degrade gracefully
-    and perform without failure if the device does not have a camera. In this situation, you must
-    declare the "{@code android.hardware.camera}" feature and set the {@code required} attribute
-    "false". This is necessary because the {@link android.Manifest.permission#CAMERA} permission
-    will automatically turn on the requirement for all camera features. So if your application uses
-    this permission but is still compatible with devices without a camera, then you must set this
-    attribute "false" for "{@code android.hardware.camera}" or else it will not install on devices
-    without a camera. Note that, while the permission will enable the requirement for <em>all</em>
-    camera features, you only need to off the requirement for the basic camera feature.</p>
+    <p>The only situation in which you should set this attribute {@code false} is when your
+    application requests the {@link android.Manifest.permission#CAMERA} permission, but will degrade
+    gracefully and perform without failure if the device does not have a camera. In this situation,
+    you must declare the {@code android.hardware.camera} feature and set the {@code required}
+    attribute {@code false}. This is necessary because the {@link
+    android.Manifest.permission#CAMERA} permission will automatically turn on the requirement for
+    all camera features. So if your application uses this permission but is still compatible with
+    devices without a camera, then you must set the {@code required} attribute {@code false} for
+    {@code android.hardware.camera} or else it will not install on devices without a camera. Note
+    that, while the permission will enable the requirement for <em>all</em> camera features, you
+    only need to off the requirement for the basic camera feature.</p>
 
   </dd>
 
