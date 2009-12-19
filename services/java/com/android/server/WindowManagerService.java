@@ -2378,6 +2378,18 @@ public class WindowManagerService extends IWindowManager.Stub
                     mInputMethodWindow = win;
                     imMayMove = true;
                 }
+                if (win.mAttrs.type == TYPE_BASE_APPLICATION
+                        && win.mAppToken != null
+                        && win.mAppToken.startingWindow != null) {
+                    // Special handling of starting window over the base
+                    // window of the app: propagate lock screen flags to it,
+                    // to provide the correct semantics while starting.
+                    final int mask =
+                        WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
+                        | WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD;
+                    WindowManager.LayoutParams sa = win.mAppToken.startingWindow.mAttrs;
+                    sa.flags = (sa.flags&~mask) | (win.mAttrs.flags&mask);
+                }
             } else {
                 win.mEnterAnimationPending = false;
                 if (win.mSurface != null) {
