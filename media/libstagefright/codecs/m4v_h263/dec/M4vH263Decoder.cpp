@@ -16,7 +16,7 @@
 //#define LOG_NDEBUG 0
 #define LOG_TAG "M4vH263Decoder"
 #include <utils/Log.h>
-
+#include <stdlib.h> // for free
 #include "ESDS.h"
 #include "M4vH263Decoder.h"
 

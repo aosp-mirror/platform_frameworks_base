@@ -21,6 +21,7 @@
 
 #include <stdint.h>
 #include <string.h>
+#include <stdlib.h> // for free, malloc, etc
 
 // Redefine the int types
 typedef uint8_t uint8;
