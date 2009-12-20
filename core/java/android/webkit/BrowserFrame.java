@@ -339,6 +339,7 @@ class BrowserFrame extends Handler {
         // loadType is not used yet
         if (isMainFrame) {
             mCommitted = true;
+            mWebViewCore.getWebView().mViewManager.postResetStateAll();
         }
     }
 
