@@ -16,7 +16,6 @@
 
 package android.webkit;
 
-import android.content.Context;
 import android.view.View;
 import android.widget.AbsoluteLayout;
 
@@ -26,6 +25,7 @@ class ViewManager {
     private final WebView mWebView;
     private final ArrayList<ChildView> mChildren = new ArrayList<ChildView>();
     private boolean mHidden;
+    private boolean mReadyToDraw;
 
     class ChildView {
         int x;
@@ -70,6 +70,9 @@ class ViewManager {
         void attachViewOnUIThread(AbsoluteLayout.LayoutParams lp) {
             mWebView.addView(mView, lp);
             mChildren.add(this);
+            if (!mReadyToDraw) {
+                mView.setVisibility(View.GONE);
+            }
         }
 
         void removeView() {
@@ -153,5 +156,24 @@ class ViewManager {
             v.mView.setVisibility(View.VISIBLE);
         }
         mHidden = false;
+    }
+
+    void postResetStateAll() {
+        mWebView.mPrivateHandler.post(new Runnable() {
+            public void run() {
+                mReadyToDraw = false;
+            }
+        });
+    }
+
+    void postReadyToDrawAll() {
+        mWebView.mPrivateHandler.post(new Runnable() {
+            public void run() {
+                mReadyToDraw = true;
+                for (ChildView v : mChildren) {
+                    v.mView.setVisibility(View.VISIBLE);
+                }
+            }
+        });
     }
 }
