@@ -773,11 +773,10 @@ public class WebView extends AbsoluteLayout
         init();
 
         mCallbackProxy = new CallbackProxy(context, this);
+        mViewManager = new ViewManager(this);
         mWebViewCore = new WebViewCore(context, this, mCallbackProxy, javascriptInterfaces);
         mDatabase = WebViewDatabase.getInstance(context);
         mScroller = new Scroller(context);
-
-        mViewManager = new ViewManager(this);
 
         mZoomButtonsController = new ZoomButtonsController(this);
         mZoomButtonsController.setOnZoomListener(mZoomListener);
@@ -5410,7 +5409,8 @@ public class WebView extends AbsoluteLayout
                     final Point viewSize = draw.mViewPoint;
                     boolean useWideViewport = settings.getUseWideViewPort();
                     WebViewCore.RestoreState restoreState = draw.mRestoreState;
-                    if (restoreState != null) {
+                    boolean hasRestoreState = restoreState != null;
+                    if (hasRestoreState) {
                         mInZoomOverview = false;
                         mLastScale = mInitialScaleInPercent > 0
                                 ? mInitialScaleInPercent / 100.0f
@@ -5499,6 +5499,9 @@ public class WebView extends AbsoluteLayout
                     }
                     if (draw.mFocusSizeChanged && inEditingMode()) {
                         mFocusSizeChanged = true;
+                    }
+                    if (hasRestoreState) {
+                        mViewManager.postReadyToDrawAll();
                     }
                     break;
                 }

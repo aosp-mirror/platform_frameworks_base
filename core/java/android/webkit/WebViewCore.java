@@ -1924,7 +1924,14 @@ final class WebViewCore {
 
         if (mWebView == null) return;
 
-        setupViewport(standardLoad || mRestoredScale > 0);
+        boolean updateRestoreState = standardLoad || mRestoredScale > 0;
+        setupViewport(updateRestoreState);
+        // if updateRestoreState is true, ViewManager.postReadyToDrawAll() will
+        // be called after the WebView restore the state. If updateRestoreState
+        // is false, start to draw now as it is ready.
+        if (!updateRestoreState) {
+            mWebView.mViewManager.postReadyToDrawAll();
+        }
 
         // reset the scroll position, the restored offset and scales
         mWebkitScrollX = mWebkitScrollY = mRestoredX = mRestoredY
