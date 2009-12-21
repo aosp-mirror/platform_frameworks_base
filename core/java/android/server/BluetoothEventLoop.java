@@ -21,14 +21,15 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothUuid;
-import android.os.ParcelUuid;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.Message;
+import android.os.ParcelUuid;
 import android.util.Log;
 
 import java.util.HashMap;
+import java.util.Set;
 
 /**
  * TODO: Move this to
@@ -553,7 +554,7 @@ class BluetoothEventLoop {
         if (mBluetoothService.isEnabled() &&
                 (BluetoothUuid.isAudioSource(uuid) || BluetoothUuid.isAvrcpTarget(uuid)
                         || BluetoothUuid.isAdvAudioDist(uuid)) &&
-                        (a2dp.getNonDisconnectedSinks().size() == 0)) {
+                        !isOtherSinkInNonDisconnectingState(address)) {
             BluetoothDevice device = mAdapter.getRemoteDevice(address);
             authorized = a2dp.getSinkPriority(device) > BluetoothA2dp.PRIORITY_OFF;
             if (authorized) {
@@ -566,6 +567,16 @@ class BluetoothEventLoop {
         }
         log("onAgentAuthorize(" + objectPath + ", " + deviceUuid + ") = " + authorized);
         return authorized;
+    }
+
+    boolean isOtherSinkInNonDisconnectingState(String address) {
+        BluetoothA2dp a2dp = new BluetoothA2dp(mContext);
+        Set<BluetoothDevice> devices = a2dp.getNonDisconnectedSinks();
+        if (devices.size() == 0) return false;
+        for(BluetoothDevice dev: devices) {
+            if (!dev.getAddress().equals(address)) return true;
+        }
+        return false;
     }
 
     private void onAgentCancel() {
