@@ -382,7 +382,7 @@ static bool check_char(JNIEnv* env, const jchar *s, int spos, jchar expected)
     jchar c = s[spos];
     if (c != expected) {
         char msg[100];
-	sprintf(msg, "Unexpected %c at pos=%d.  Expected %c.", c, spos,
+	sprintf(msg, "Unexpected character 0x%02x at pos=%d.  Expected %c.", c, spos,
 		expected);
 	jniThrowException(env, "android/util/TimeFormatException", msg);
 	return false;
@@ -483,6 +483,12 @@ static jboolean android_text_format_Time_parse3339(JNIEnv* env,
     int n;
     jboolean inUtc = false;
 
+    if (len < 10) {
+        jniThrowException(env, "android/util/TimeFormatException",
+                "Time input is too short; must be at least 10 characters");
+        return false;
+    }
+
     // year
     n = get_char(env, s, 0, 1000, &thrown);    
     n += get_char(env, s, 1, 100, &thrown);
@@ -510,7 +516,7 @@ static jboolean android_text_format_Time_parse3339(JNIEnv* env,
     if (thrown) return false;
     env->SetIntField(This, g_mdayField, n);
 
-    if (len >= 17) {
+    if (len >= 19) {
         // T
         if (!check_char(env, s, 10, 'T')) return false;
 
@@ -541,10 +547,19 @@ static jboolean android_text_format_Time_parse3339(JNIEnv* env,
         if (thrown) return false;
         env->SetIntField(This, g_secField, n);
 
-	// skip the '.XYZ' -- we don't care about subsecond precision.
+        // skip the '.XYZ' -- we don't care about subsecond precision.
+        int tz_index = 19;
+        if (tz_index < len && s[tz_index] == '.') {
+            do {
+                tz_index++;
+            } while (tz_index < len
+                && s[tz_index] >= '0'
+                && s[tz_index] <= '9');
+        }
+
         int offset = 0;
-	if (len >= 23) {
-	    char c = s[23];
+        if (len > tz_index) {
+            char c = s[tz_index];
 
 	    // NOTE: the offset is meant to be subtracted to get from local time
 	    // to UTC.  we therefore use 1 for '-' and -1 for '+'.
@@ -561,27 +576,34 @@ static jboolean android_text_format_Time_parse3339(JNIEnv* env,
 	        break;
 	    default:
 	        char msg[100];
-	        sprintf(msg, "Unexpected %c at position 19.  Expected + or -",
-			c);
+	        sprintf(msg, "Unexpected character 0x%02x at position %d.  Expected + or -",
+			c, tz_index);
 	        jniThrowException(env, "android/util/TimeFormatException", msg);
 	        return false;
 	    }
             inUtc = true;
 
 	    if (offset != 0) {
+	        if (len < tz_index + 5) {
+	            char msg[100];
+	            sprintf(msg, "Unexpected length; should be %d characters", tz_index + 5);
+	            jniThrowException(env, "android/util/TimeFormatException", msg);
+	            return false;
+	        }
+
 	        // hour
-	        n = get_char(env, s, 24, 10, &thrown);
-		n += get_char(env, s, 25, 1, &thrown);
+	        n = get_char(env, s, tz_index + 1, 10, &thrown);
+		n += get_char(env, s, tz_index + 2, 1, &thrown);
 		if (thrown) return false;
 		n *= offset;
 		hour += n;
 
 		// :
-		if (!check_char(env, s, 26, ':')) return false;
+		if (!check_char(env, s, tz_index + 3, ':')) return false;
 	    
 		// minute
-		n = get_char(env, s, 27, 10, &thrown);
-		n += get_char(env, s, 28, 1, &thrown);
+		n = get_char(env, s, tz_index + 4, 10, &thrown);
+		n += get_char(env, s, tz_index + 5, 1, &thrown);
 		if (thrown) return false;
 		n *= offset;
 		minute += n;

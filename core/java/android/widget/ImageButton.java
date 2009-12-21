@@ -44,11 +44,11 @@ import java.util.Map;
  * <pre>
  * &lt;?xml version="1.0" encoding="utf-8"?&gt;
  * &lt;selector xmlns:android="http://schemas.android.com/apk/res/android"&gt;
- *     &lt;item android:drawable="@drawable/button_normal" /&gt; &lt;!-- default --&gt;
  *     &lt;item android:state_pressed="true"
  *           android:drawable="@drawable/button_pressed" /&gt; &lt;!-- pressed --&gt;
  *     &lt;item android:state_focused="true"
  *           android:drawable="@drawable/button_focused" /&gt; &lt;!-- focused --&gt;
+ *     &lt;item android:drawable="@drawable/button_normal" /&gt; &lt;!-- default --&gt;
  * &lt;/selector&gt;</pre>
  *
  * <p>Save the XML file in your project {@code res/drawable/} folder and then 
