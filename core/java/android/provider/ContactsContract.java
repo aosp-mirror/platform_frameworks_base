@@ -4990,7 +4990,8 @@ public final class ContactsContract {
          *            centered around this {@link Rect}. If you are running at a
          *            non-native density, you need to manually adjust using
          *            {@link DisplayMetrics#density} before calling.
-         * @param lookupUri A {@link Contacts#CONTENT_LOOKUP_URI} style
+         * @param lookupUri A
+         *            {@link ContactsContract.Contacts#CONTENT_LOOKUP_URI} style
          *            {@link Uri} that describes a specific contact to feature
          *            in this dialog.
          * @param mode Any of {@link #MODE_SMALL}, {@link #MODE_MEDIUM}, or
