@@ -1405,14 +1405,10 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
         }
 
         /*
-<<<<<<< HEAD
-         * Tries to acquire the right to use an EGL
-         * surface. Does not block.
-=======
          * Tries once to acquire the right to use an EGL
          * surface. Does not block. Requires that we are already
          * in the sGLThreadManager monitor when this is called.
->>>>>>> dc49acb0
+         *
          * @return true if the right to use an EGL surface was acquired.
          */
         public boolean tryAcquireEglSurfaceLocked(GLThread thread) {
