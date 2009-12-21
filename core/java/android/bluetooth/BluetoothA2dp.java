@@ -83,6 +83,8 @@ public final class BluetoothA2dp {
     /** Default priority for a2dp devices that should not allow incoming
      * connections */
     public static final int PRIORITY_OFF = 0;
+    /** Default priority when not set or when the device is unpaired */
+    public static final int PRIORITY_UNDEFINED = -1;
 
     private final IBluetoothA2dp mService;
     private final Context mContext;
