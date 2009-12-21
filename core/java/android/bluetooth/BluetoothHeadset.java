@@ -109,6 +109,8 @@ public final class BluetoothHeadset {
     /** Default priority for headsets that should not be auto-connected
      * and not allow incoming connections. */
     public static final int PRIORITY_OFF = 0;
+    /** Default priority when not set or when the device is unpaired */
+    public static final int PRIORITY_UNDEFINED = -1;
 
     /** The voice dialer 'works' but the user experience is poor. The voice
      *  recognizer has trouble dealing with the 8kHz SCO signal, and it still
