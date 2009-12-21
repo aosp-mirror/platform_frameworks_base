@@ -34,7 +34,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.util.Log;
-import com.android.internal.util.XmlUtils;
+import com.android.common.XmlUtils;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -1130,7 +1130,7 @@ public class Intent implements Parcelable {
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_POWER_USAGE_SUMMARY = "android.intent.action.POWER_USAGE_SUMMARY";
-    
+
     /**
      * Activity Action: Setup wizard to launch after a platform update.  This
      * activity should have a string meta-data field associated with it,
@@ -1144,7 +1144,7 @@ public class Intent implements Parcelable {
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_UPGRADE_SETUP = "android.intent.action.UPGRADE_SETUP";
-    
+
     /**
      * A string associated with a {@link #ACTION_UPGRADE_SETUP} activity
      * describing the last run version of the platform that was setup.
@@ -1158,7 +1158,7 @@ public class Intent implements Parcelable {
 
     /**
      * Broadcast Action: Sent after the screen turns off.
-     * 
+     *
      * <p class="note">This is a protected intent that can only be sent
      * by the system.
      */
@@ -1166,7 +1166,7 @@ public class Intent implements Parcelable {
     public static final String ACTION_SCREEN_OFF = "android.intent.action.SCREEN_OFF";
     /**
      * Broadcast Action: Sent after the screen turns on.
-     * 
+     *
      * <p class="note">This is a protected intent that can only be sent
      * by the system.
      */
@@ -1176,7 +1176,7 @@ public class Intent implements Parcelable {
     /**
      * Broadcast Action: Sent when the user is present after device wakes up (e.g when the
      * keyguard is gone).
-     * 
+     *
      * <p class="note">This is a protected intent that can only be sent
      * by the system.
      */
@@ -1189,7 +1189,7 @@ public class Intent implements Parcelable {
      * in manifests, only by exlicitly registering for it with
      * {@link Context#registerReceiver(BroadcastReceiver, IntentFilter)
      * Context.registerReceiver()}.
-     * 
+     *
      * <p class="note">This is a protected intent that can only be sent
      * by the system.
      */
@@ -1210,7 +1210,7 @@ public class Intent implements Parcelable {
      * <ul>
      *   <li><em>time-zone</em> - The java.util.TimeZone.getID() value identifying the new time zone.</li>
      * </ul>
-     * 
+     *
      * <p class="note">This is a protected intent that can only be sent
      * by the system.
      */
@@ -1238,7 +1238,7 @@ public class Intent implements Parcelable {
      * such as installing alarms.  You must hold the
      * {@link android.Manifest.permission#RECEIVE_BOOT_COMPLETED} permission
      * in order to receive this broadcast.
-     * 
+     *
      * <p class="note">This is a protected intent that can only be sent
      * by the system.
      */
@@ -1254,7 +1254,7 @@ public class Intent implements Parcelable {
      * Broadcast Action: Trigger the download and eventual installation
      * of a package.
      * <p>Input: {@link #getData} is the URI of the package file to download.
-     * 
+     *
      * <p class="note">This is a protected intent that can only be sent
      * by the system.
      */
@@ -1270,7 +1270,7 @@ public class Intent implements Parcelable {
      * <li> {@link #EXTRA_REPLACING} is set to true if this is following
      * an {@link #ACTION_PACKAGE_REMOVED} broadcast for the same package.
      * </ul>
-     * 
+     *
      * <p class="note">This is a protected intent that can only be sent
      * by the system.
      */
@@ -1284,7 +1284,7 @@ public class Intent implements Parcelable {
      * <ul>
      * <li> {@link #EXTRA_UID} containing the integer uid assigned to the new package.
      * </ul>
-     * 
+     *
      * <p class="note">This is a protected intent that can only be sent
      * by the system.
      */
@@ -1302,7 +1302,7 @@ public class Intent implements Parcelable {
      * <li> {@link #EXTRA_REPLACING} is set to true if this will be followed
      * by an {@link #ACTION_PACKAGE_ADDED} broadcast for the same package.
      * </ul>
-     * 
+     *
      * <p class="note">This is a protected intent that can only be sent
      * by the system.
      */
@@ -1319,7 +1319,7 @@ public class Intent implements Parcelable {
      * <li> {@link #EXTRA_DONT_KILL_APP} containing boolean field to override the
      * default action of restarting the application.
      * </ul>
-     * 
+     *
      * <p class="note">This is a protected intent that can only be sent
      * by the system.
      */
@@ -1335,7 +1335,7 @@ public class Intent implements Parcelable {
      * <ul>
      * <li> {@link #EXTRA_UID} containing the integer uid assigned to the package.
      * </ul>
-     * 
+     *
      * <p class="note">This is a protected intent that can only be sent
      * by the system.
      */
@@ -1350,7 +1350,7 @@ public class Intent implements Parcelable {
      * <ul>
      * <li> {@link #EXTRA_UID} containing the integer uid assigned to the package.
      * </ul>
-     * 
+     *
      * <p class="note">This is a protected intent that can only be sent
      * by the system.
      */
@@ -1359,7 +1359,7 @@ public class Intent implements Parcelable {
     /**
      * Broadcast Action: A user ID has been removed from the system.  The user
      * ID number is stored in the extra data under {@link #EXTRA_UID}.
-     * 
+     *
      * <p class="note">This is a protected intent that can only be sent
      * by the system.
      */
@@ -1380,13 +1380,13 @@ public class Intent implements Parcelable {
      * application to make sure it sees the new changes.  Some system code that
      * can not be restarted will need to watch for this action and handle it
      * appropriately.
-     * 
+     *
      * <p class="note">
      * You can <em>not</em> receive this through components declared
      * in manifests, only by explicitly registering for it with
      * {@link Context#registerReceiver(BroadcastReceiver, IntentFilter)
      * Context.registerReceiver()}.
-     * 
+     *
      * <p class="note">This is a protected intent that can only be sent
      * by the system.
      *
@@ -1396,7 +1396,7 @@ public class Intent implements Parcelable {
     public static final String ACTION_CONFIGURATION_CHANGED = "android.intent.action.CONFIGURATION_CHANGED";
     /**
      * Broadcast Action: The current device's locale has changed.
-     * 
+     *
      * <p class="note">This is a protected intent that can only be sent
      * by the system.
      */
@@ -1417,7 +1417,7 @@ public class Intent implements Parcelable {
      * and {@link #ACTION_POWER_DISCONNECTED} for distinct battery-related
      * broadcasts that are sent and can be received through manifest
      * receivers.
-     * 
+     *
      * <p class="note">This is a protected intent that can only be sent
      * by the system.
      */
@@ -1426,7 +1426,7 @@ public class Intent implements Parcelable {
     /**
      * Broadcast Action:  Indicates low battery condition on the device.
      * This broadcast corresponds to the "Low battery warning" system dialog.
-     * 
+     *
      * <p class="note">This is a protected intent that can only be sent
      * by the system.
      */
@@ -1436,7 +1436,7 @@ public class Intent implements Parcelable {
      * Broadcast Action:  Indicates the battery is now okay after being low.
      * This will be sent after {@link #ACTION_BATTERY_LOW} once the battery has
      * gone back up to an okay state.
-     * 
+     *
      * <p class="note">This is a protected intent that can only be sent
      * by the system.
      */
@@ -1448,7 +1448,7 @@ public class Intent implements Parcelable {
      * Unlike ACTION_BATTERY_CHANGED, applications will be woken for this and so do not have to
      * stay active to receive this notification.  This action can be used to implement actions
      * that wait until power is available to trigger.
-     * 
+     *
      * <p class="note">This is a protected intent that can only be sent
      * by the system.
      */
@@ -1460,7 +1460,7 @@ public class Intent implements Parcelable {
      * Unlike ACTION_BATTERY_CHANGED, applications will be woken for this and so do not have to
      * stay active to receive this notification.  This action can be used to implement actions
      * that wait until power is available to trigger.
-     * 
+     *
      * <p class="note">This is a protected intent that can only be sent
      * by the system.
      */
@@ -1473,7 +1473,7 @@ public class Intent implements Parcelable {
      * off, not sleeping).  Once the broadcast is complete, the final shutdown
      * will proceed and all unsaved data lost.  Apps will not normally need
      * to handle this, since the foreground activity will be paused as well.
-     * 
+     *
      * <p class="note">This is a protected intent that can only be sent
      * by the system.
      */
@@ -1493,7 +1493,7 @@ public class Intent implements Parcelable {
     /**
      * Broadcast Action:  A sticky broadcast that indicates low memory
      * condition on the device
-     * 
+     *
      * <p class="note">This is a protected intent that can only be sent
      * by the system.
      */
@@ -1501,7 +1501,7 @@ public class Intent implements Parcelable {
     public static final String ACTION_DEVICE_STORAGE_LOW = "android.intent.action.DEVICE_STORAGE_LOW";
     /**
      * Broadcast Action:  Indicates low memory condition on the device no longer exists
-     * 
+     *
      * <p class="note">This is a protected intent that can only be sent
      * by the system.
      */
@@ -1668,7 +1668,7 @@ public class Intent implements Parcelable {
      *   then cell radio and possibly other radios such as bluetooth or WiFi may have also been
      *   turned off</li>
      * </ul>
-     * 
+     *
      * <p class="note">This is a protected intent that can only be sent
      * by the system.
      */
@@ -1750,7 +1750,7 @@ public class Intent implements Parcelable {
      * <p>You must hold the
      * {@link android.Manifest.permission#PROCESS_OUTGOING_CALLS}
      * permission to receive this Intent.</p>
-     * 
+     *
      * <p class="note">This is a protected intent that can only be sent
      * by the system.
      */
@@ -1761,7 +1761,7 @@ public class Intent implements Parcelable {
     /**
      * Broadcast Action: Have the device reboot.  This is only for use by
      * system code.
-     * 
+     *
      * <p class="note">This is a protected intent that can only be sent
      * by the system.
      */
@@ -2112,7 +2112,7 @@ public class Intent implements Parcelable {
      * indicate that the dock should take over the home key when it is active.
      */
     public static final String METADATA_DOCK_HOME = "android.dock_home";
-    
+
     /**
      * Used as a parcelable extra field in {@link #ACTION_APP_ERROR}, containing
      * the bug report.
@@ -2406,7 +2406,7 @@ public class Intent implements Parcelable {
      * the new broadcast (and receivers associated with it) will replace the
      * existing one in the pending broadcast list, remaining at the same
      * position in the list.
-     * 
+     *
      * <p>This flag is most typically used with sticky broadcasts, which
      * only care about delivering the most recent values of the broadcast
      * to their receivers.
@@ -2440,7 +2440,7 @@ public class Intent implements Parcelable {
     public static final int IMMUTABLE_FLAGS =
             FLAG_GRANT_READ_URI_PERMISSION
             | FLAG_GRANT_WRITE_URI_PERMISSION;
-    
+
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
     // toUri() and parseUri() options.
@@ -2454,7 +2454,7 @@ public class Intent implements Parcelable {
      * VIEW action for that raw URI.
      */
     public static final int URI_INTENT_SCHEME = 1<<0;
-    
+
     // ---------------------------------------------------------------------
 
     private String mAction;
@@ -2613,7 +2613,7 @@ public class Intent implements Parcelable {
     public static Intent getIntent(String uri) throws URISyntaxException {
         return parseUri(uri, 0);
     }
-    
+
     /**
      * Create an intent from a URI.  This URI may encode the action,
      * category, and other intent fields, if it was returned by
@@ -2632,7 +2632,7 @@ public class Intent implements Parcelable {
      * @throws URISyntaxException Throws URISyntaxError if the basic URI syntax
      * it bad (as parsed by the Uri class) or the Intent data within the
      * URI is invalid.
-     * 
+     *
      * @see #toUri
      */
     public static Intent parseUri(String uri, int flags) throws URISyntaxException {
@@ -2650,7 +2650,7 @@ public class Intent implements Parcelable {
                     return intent;
                 }
             }
-            
+
             // simple case
             i = uri.lastIndexOf("#");
             if (i == -1) return new Intent(ACTION_VIEW, Uri.parse(uri));
@@ -2742,7 +2742,7 @@ public class Intent implements Parcelable {
                         data = scheme + ':' + data;
                     }
                 }
-                
+
                 if (data.length() > 0) {
                     try {
                         intent.mData = Uri.parse(data);
@@ -2751,7 +2751,7 @@ public class Intent implements Parcelable {
                     }
                 }
             }
-            
+
             return intent;
 
         } catch (IndexOutOfBoundsException e) {
@@ -2902,7 +2902,7 @@ public class Intent implements Parcelable {
             } else {
                 intent.mData = Uri.parse(uri);
             }
-            
+
             if (intent.mAction == null) {
                 // By default, if no action is specified, then use VIEW.
                 intent.mAction = ACTION_VIEW;
@@ -5127,13 +5127,13 @@ public class Intent implements Parcelable {
      * used with {@link Uri#parse Uri.parse(String)}.  The URI contains the
      * Intent's data as the base URI, with an additional fragment describing
      * the action, categories, type, flags, package, component, and extras.
-     * 
+     *
      * <p>You can convert the returned string back to an Intent with
      * {@link #getIntent}.
-     * 
+     *
      * @param flags Additional operating flags.  Either 0 or
      * {@link #URI_INTENT_SCHEME}.
-     * 
+     *
      * @return Returns a URI encoding URI string describing the entire contents
      * of the Intent.
      */
@@ -5157,13 +5157,13 @@ public class Intent implements Parcelable {
                         data = data.substring(i+1);
                         break;
                     }
-                    
+
                     // No scheme.
                     break;
                 }
             }
             uri.append(data);
-            
+
         } else if ((flags&URI_INTENT_SCHEME) != 0) {
             uri.append("intent:");
         }

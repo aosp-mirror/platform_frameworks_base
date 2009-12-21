@@ -24,7 +24,7 @@ import android.util.Xml;
 import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.PhoneBase;
 
-import com.android.internal.util.XmlUtils;
+import com.android.common.XmlUtils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;

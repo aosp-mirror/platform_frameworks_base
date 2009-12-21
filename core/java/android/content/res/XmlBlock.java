@@ -17,7 +17,7 @@
 package android.content.res;
 
 import android.util.TypedValue;
-import com.android.internal.util.XmlUtils;
+import com.android.common.XmlUtils;
 
 import org.xmlpull.v1.XmlPullParserException;
 

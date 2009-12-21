@@ -17,7 +17,7 @@
 package android.app;
 
 import com.android.internal.policy.PolicyManager;
-import com.android.internal.util.XmlUtils;
+import com.android.common.XmlUtils;
 import com.google.android.collect.Maps;
 
 import org.xmlpull.v1.XmlPullParserException;

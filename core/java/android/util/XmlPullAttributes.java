@@ -19,7 +19,7 @@ package android.util;
 import org.xmlpull.v1.XmlPullParser;
 
 import android.util.AttributeSet;
-import com.android.internal.util.XmlUtils;
+import com.android.common.XmlUtils;
 
 /**
  * Provides an implementation of AttributeSet on top of an XmlPullParser.

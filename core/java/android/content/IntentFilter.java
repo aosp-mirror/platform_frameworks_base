@@ -34,7 +34,7 @@ import android.util.AndroidException;
 import android.util.Config;
 import android.util.Log;
 import android.util.Printer;
-import com.android.internal.util.XmlUtils;
+import com.android.common.XmlUtils;
 
 /**
  * Structured description of Intent values to be matched.  An IntentFilter can
