@@ -32,7 +32,7 @@ import android.view.RawInputEvent;
 import android.view.Surface;
 import android.view.WindowManagerPolicy;
 
-import com.android.internal.util.XmlUtils;
+import com.android.common.XmlUtils;
 
 import org.xmlpull.v1.XmlPullParser;
 

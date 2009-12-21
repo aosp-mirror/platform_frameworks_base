@@ -13,7 +13,7 @@ import android.os.Environment;
 import android.util.Log;
 import android.util.Xml;
 
-import com.android.internal.util.XmlUtils;
+import com.android.common.XmlUtils;
 
 public class SpnOverride {
     private HashMap<String, String> CarrierSpnMap;

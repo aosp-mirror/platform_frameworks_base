@@ -418,8 +418,6 @@ android.net.LocalSocketAddress$Namespace
 android.net.LocalSocketImpl
 android.net.LocalSocketImpl$SocketInputStream
 android.net.LocalSocketImpl$SocketOutputStream
-android.net.NetworkConnectivityListener
-android.net.NetworkConnectivityListener$State
 android.net.NetworkInfo
 android.net.NetworkInfo$DetailedState
 android.net.NetworkInfo$State
@@ -959,6 +957,11 @@ android.widget.ZoomButtonsController$3
 android.widget.ZoomButtonsController$5
 android.widget.ZoomButtonsController$Container
 android.widget.ZoomControls
+com.android.common.ArrayListCursor
+com.android.common.FastXmlSerializer
+com.android.common.NetworkConnectivityListener
+com.android.common.NetworkConnectivityListener$State
+com.android.common.XmlUtils
 com.android.internal.R$styleable
 com.android.internal.app.AlertActivity
 com.android.internal.app.AlertController
@@ -973,7 +976,6 @@ com.android.internal.appwidget.IAppWidgetHost$Stub
 com.android.internal.appwidget.IAppWidgetService$Stub
 com.android.internal.appwidget.IAppWidgetService$Stub$Proxy
 com.android.internal.content.SyncStateContentProviderHelper
-com.android.internal.database.ArrayListCursor
 com.android.internal.database.SortCursor
 com.android.internal.graphics.NativeUtils
 com.android.internal.location.DummyLocationProvider
@@ -1025,8 +1027,6 @@ com.android.internal.telephony.gsm.GsmSmsAddress
 com.android.internal.telephony.gsm.SmsMessage
 com.android.internal.telephony.gsm.SmsMessage$PduParser
 com.android.internal.util.ArrayUtils
-com.android.internal.util.FastXmlSerializer
-com.android.internal.util.XmlUtils
 com.android.internal.view.BaseIWindow
 com.android.internal.view.IInputConnectionWrapper
 com.android.internal.view.IInputContext$Stub

@@ -66,7 +66,7 @@ import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
 import com.android.internal.service.wallpaper.ImageWallpaper;
-import com.android.internal.util.FastXmlSerializer;
+import com.android.common.FastXmlSerializer;
 
 class WallpaperManagerService extends IWallpaperManager.Stub {
     static final String TAG = "WallpaperService";

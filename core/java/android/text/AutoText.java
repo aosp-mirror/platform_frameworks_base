@@ -18,7 +18,7 @@ package android.text;
 
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
-import com.android.internal.util.XmlUtils;
+import com.android.common.XmlUtils;
 import android.view.View;
 
 import org.xmlpull.v1.XmlPullParser;
