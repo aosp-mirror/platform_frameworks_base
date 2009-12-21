@@ -1066,6 +1066,8 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                 GL10 gl = null;
                 boolean createEglSurface = false;
                 boolean sizeChanged = false;
+                boolean wantRenderNotification = false;
+                boolean doRenderNotification = false;
                 int w = 0;
                 int h = 0;
                 Runnable event = null;
@@ -1111,6 +1113,13 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                                 sGLThreadManager.notifyAll();
                             }
 
+                            if (doRenderNotification) {
+                                wantRenderNotification = false;
+                                doRenderNotification = false;
+                                mRenderComplete = true;
+                                sGLThreadManager.notifyAll();
+                            }
+
                             // Ready to draw?
                             if ((!mPaused) && mHasSurface
                                 && (mWidth > 0) && (mHeight > 0)
@@ -1130,6 +1139,8 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                                         sizeChanged = true;
                                         w = mWidth;
                                         h = mHeight;
+                                        wantRenderNotification = true;
+
                                         if (DRAW_TWICE_AFTER_SIZE_CHANGED) {
                                             // We keep mRequestRender true so that we draw twice after the size changes.
                                             // (Once because of mSizeChanged, the second time because of mRequestRender.)
@@ -1186,6 +1197,10 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                         if (LOG_SURFACE) {
                             Log.i("GLThread", "egl surface lost tid=" + getId());
                         }
+                    }
+
+                    if (wantRenderNotification) {
+                        doRenderNotification = true;
                     }
                 }
             } finally {
@@ -1269,7 +1284,20 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                 mHeight = h;
                 mSizeChanged = true;
                 mRequestRender = true;
+                mRenderComplete = false;
                 sGLThreadManager.notifyAll();
+
+                // Wait for thread to react to resize and render a frame
+                while (! mExited && !mPaused && !mRenderComplete ) {
+                    if (LOG_SURFACE) {
+                        Log.i("Main thread", "onWindowResize waiting for render complete.");
+                    }
+                    try {
+                        sGLThreadManager.wait();
+                    } catch (InterruptedException ex) {
+                        Thread.currentThread().interrupt();
+                    }
+                }
             }
         }
 
@@ -1315,6 +1343,7 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
         private int mHeight;
         private int mRenderMode;
         private boolean mRequestRender;
+        private boolean mRenderComplete;
         private ArrayList<Runnable> mEventQueue = new ArrayList<Runnable>();
         // End of member variables protected by the sGLThreadManager monitor.
 
