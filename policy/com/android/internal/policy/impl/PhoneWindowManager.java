@@ -100,6 +100,8 @@ import android.view.animation.AnimationUtils;
 import android.media.IAudioService;
 import android.media.AudioManager;
 
+import java.util.ArrayList;
+
 /**
  * WindowManagerPolicy implementation for the Android phone UI.  This
  * introduces a new method suffix, Lp, for an internal lock of the
@@ -181,6 +183,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     
     boolean mSafeMode;
     WindowState mStatusBar = null;
+    final ArrayList<WindowState> mStatusBarPanels = new ArrayList<WindowState>();
     WindowState mKeyguard = null;
     KeyguardViewMediator mKeyguardMediator;
     GlobalActions mGlobalActions;
@@ -881,6 +884,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
                 mStatusBar = win;
                 break;
+            case TYPE_STATUS_BAR_PANEL:
+                mStatusBarPanels.add(win);
+                break;
             case TYPE_KEYGUARD:
                 if (mKeyguard != null) {
                     return WindowManagerImpl.ADD_MULTIPLE_SINGLETON;
@@ -898,6 +904,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
         else if (mKeyguard == win) {
             mKeyguard = null;
+        } else {
+            mStatusBarPanels.remove(win);
         }
     }
 
@@ -1436,7 +1444,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (mKeyguard != null) {
             if (localLOGV) Log.v(TAG, "finishLayoutLw::mHideKeyguard="+mHideLockScreen);
             if (mDismissKeyguard && !mKeyguardMediator.isSecure()) {
-                if (mKeyguard.hideLw(false)) {
+                if (mKeyguard.hideLw(true)) {
                     changes |= FINISH_LAYOUT_REDO_LAYOUT
                             | FINISH_LAYOUT_REDO_CONFIG
                             | FINISH_LAYOUT_REDO_WALLPAPER;
@@ -1449,14 +1457,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     });
                 }
             } else if (mHideLockScreen) {
-                if (mKeyguard.hideLw(false)) {
+                if (mKeyguard.hideLw(true)) {
                     mKeyguardMediator.setHidden(true);
                     changes |= FINISH_LAYOUT_REDO_LAYOUT
                             | FINISH_LAYOUT_REDO_CONFIG
                             | FINISH_LAYOUT_REDO_WALLPAPER;
                 }
             } else {
-                if (mKeyguard.showLw(false)) {
+                if (mKeyguard.showLw(true)) {
                     mKeyguardMediator.setHidden(false);
                     changes |= FINISH_LAYOUT_REDO_LAYOUT
                             | FINISH_LAYOUT_REDO_CONFIG
@@ -1491,6 +1499,33 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     /** {@inheritDoc} */
     public boolean finishAnimationLw() {
         return false;
+    }
+
+    public boolean allowAppAnimationsLw() {
+        if (mKeyguard != null && mKeyguard.isVisibleLw()) {
+            // If keyguard is currently visible, no reason to animate
+            // behind it.
+            return false;
+        }
+        if (mStatusBar != null && mStatusBar.isVisibleLw()) {
+            Rect rect = new Rect(mStatusBar.getShownFrameLw());
+            for (int i=mStatusBarPanels.size()-1; i>=0; i--) {
+                WindowState w = mStatusBarPanels.get(i);
+                if (w.isVisibleLw()) {
+                    rect.union(w.getShownFrameLw());
+                }
+            }
+            final int insetw = mW/10;
+            final int inseth = mH/10;
+            if (rect.contains(insetw, inseth, mW-insetw, mH-inseth)) {
+                // All of the status bar windows put together cover the
+                // screen, so the app can't be seen.  (Note this test doesn't
+                // work if the rects of these windows are at off offsets or
+                // sizes, causing gaps in the rect union we have computed.)
+                return false;
+            }
+        }
+        return true;
     }
 
     /** {@inheritDoc} */
@@ -1924,6 +1959,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
+    /** {@inheritDoc} */
+    public boolean isScreenOn() {
+        return mScreenOn;
+    }
+    
     /** {@inheritDoc} */
     public void enableKeyguard(boolean enabled) {
         mKeyguardMediator.setKeyguardEnabled(enabled);
