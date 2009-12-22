@@ -1210,10 +1210,6 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             if (MONITOR_CPU_USAGE) {
                 ServiceManager.addService("cpuinfo", new CpuBinder(m));
             }
-            ServiceManager.addService("activity.broadcasts", new BroadcastsBinder(m));
-            ServiceManager.addService("activity.services", new ServicesBinder(m));
-            ServiceManager.addService("activity.senders", new SendersBinder(m));
-            ServiceManager.addService("activity.providers", new ProvidersBinder(m));
             ServiceManager.addService("permission", new PermissionController(m));
 
             ApplicationInfo info =
@@ -1318,54 +1314,6 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             }
 
             Looper.loop();
-        }
-    }
-
-    static class BroadcastsBinder extends Binder {
-        ActivityManagerService mActivityManagerService;
-        BroadcastsBinder(ActivityManagerService activityManagerService) {
-            mActivityManagerService = activityManagerService;
-        }
-
-        @Override
-        protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-            mActivityManagerService.dumpBroadcasts(pw);
-        }
-    }
-
-    static class ServicesBinder extends Binder {
-        ActivityManagerService mActivityManagerService;
-        ServicesBinder(ActivityManagerService activityManagerService) {
-            mActivityManagerService = activityManagerService;
-        }
-
-        @Override
-        protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-            mActivityManagerService.dumpServices(pw);
-        }
-    }
-
-    static class SendersBinder extends Binder {
-        ActivityManagerService mActivityManagerService;
-        SendersBinder(ActivityManagerService activityManagerService) {
-            mActivityManagerService = activityManagerService;
-        }
-
-        @Override
-        protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-            mActivityManagerService.dumpSenders(pw);
-        }
-    }
-
-    static class ProvidersBinder extends Binder {
-        ActivityManagerService mActivityManagerService;
-        ProvidersBinder(ActivityManagerService activityManagerService) {
-            mActivityManagerService = activityManagerService;
-        }
-
-        @Override
-        protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-            mActivityManagerService.dumpProviders(pw);
         }
     }
 
@@ -9151,69 +9099,190 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        synchronized (this) {
-            if (checkCallingPermission(android.Manifest.permission.DUMP)
-                    != PackageManager.PERMISSION_GRANTED) {
-                pw.println("Permission Denial: can't dump ActivityManager from from pid="
-                        + Binder.getCallingPid()
-                        + ", uid=" + Binder.getCallingUid()
-                        + " without permission "
-                        + android.Manifest.permission.DUMP);
+        if (checkCallingPermission(android.Manifest.permission.DUMP)
+                != PackageManager.PERMISSION_GRANTED) {
+            pw.println("Permission Denial: can't dump ActivityManager from from pid="
+                    + Binder.getCallingPid()
+                    + ", uid=" + Binder.getCallingUid()
+                    + " without permission "
+                    + android.Manifest.permission.DUMP);
+            return;
+        }
+        
+        boolean dumpAll = false;
+        
+        int opti = 0;
+        while (opti < args.length) {
+            String opt = args[opti];
+            if (opt == null || opt.length() <= 0 || opt.charAt(0) != '-') {
+                break;
+            }
+            opti++;
+            if ("-a".equals(opt)) {
+                dumpAll = true;
+            } else if ("-h".equals(opt)) {
+                pw.println("Activity manager dump options:");
+                pw.println("  [-a] [h- [cmd] ...");
+                pw.println("  cmd may be one of:");
+                pw.println("    activities: activity stack state");
+                pw.println("    broadcasts: broadcast state");
+                pw.println("    intents: pending intent state");
+                pw.println("    processes: process state");
+                pw.println("    providers: content provider state");
+                pw.println("    services: service state");
+                pw.println("    service [name]: service client-side state");
                 return;
+            } else {
+                pw.println("Unknown argument: " + opt + "; use -h for help");
             }
-            if (args.length != 0 && "service".equals(args[0])) {
-                dumpService(fd, pw, args);
-                return;
-            }
-            pw.println("Activities in Current Activity Manager State:");
-            dumpHistoryList(pw, mHistory, "  ", "Hist", true);
-            pw.println(" ");
-            pw.println("  Running activities (most recent first):");
-            dumpHistoryList(pw, mLRUActivities, "  ", "Run", false);
-            if (mWaitingVisibleActivities.size() > 0) {
-                pw.println(" ");
-                pw.println("  Activities waiting for another to become visible:");
-                dumpHistoryList(pw, mWaitingVisibleActivities, "  ", "Wait", false);
-            }
-            if (mStoppingActivities.size() > 0) {
-                pw.println(" ");
-                pw.println("  Activities waiting to stop:");
-                dumpHistoryList(pw, mStoppingActivities, "  ", "Stop", false);
-            }
-            if (mFinishingActivities.size() > 0) {
-                pw.println(" ");
-                pw.println("  Activities waiting to finish:");
-                dumpHistoryList(pw, mFinishingActivities, "  ", "Fin", false);
-            }
-
-            pw.println(" ");
-            pw.println("  mPausingActivity: " + mPausingActivity);
-            pw.println("  mResumedActivity: " + mResumedActivity);
-            pw.println("  mFocusedActivity: " + mFocusedActivity);
-            pw.println("  mLastPausedActivity: " + mLastPausedActivity);
-
-            if (mRecentTasks.size() > 0) {
-                pw.println(" ");
-                pw.println("Recent tasks in Current Activity Manager State:");
-
-                final int N = mRecentTasks.size();
-                for (int i=0; i<N; i++) {
-                    TaskRecord tr = mRecentTasks.get(i);
-                    pw.print("  * Recent #"); pw.print(i); pw.print(": ");
-                            pw.println(tr);
-                    mRecentTasks.get(i).dump(pw, "    ");
+        }
+        
+        // Is the caller requesting to dump a particular piece of data?
+        if (opti < args.length) {
+            String cmd = args[opti];
+            opti++;
+            if ("activities".equals(cmd) || "a".equals(cmd)) {
+                synchronized (this) {
+                    dumpActivitiesLocked(fd, pw, args, opti, true, true);
                 }
+                return;
+            } else if ("broadcasts".equals(cmd) || "b".equals(cmd)) {
+                synchronized (this) {
+                    dumpBroadcastsLocked(fd, pw, args, opti, true);
+                }
+                return;
+            } else if ("intents".equals(cmd) || "i".equals(cmd)) {
+                synchronized (this) {
+                    dumpPendingIntentsLocked(fd, pw, args, opti, true);
+                }
+                return;
+            } else if ("processes".equals(cmd) || "p".equals(cmd)) {
+                synchronized (this) {
+                    dumpProcessesLocked(fd, pw, args, opti, true);
+                }
+                return;
+            } else if ("providers".equals(cmd) || "prov".equals(cmd)) {
+                synchronized (this) {
+                    dumpProvidersLocked(fd, pw, args, opti, true);
+                }
+                return;
+            } else if ("service".equals(cmd)) {
+                dumpService(fd, pw, args, opti, true);
+                return;
+            } else if ("services".equals(cmd) || "s".equals(cmd)) {
+                synchronized (this) {
+                    dumpServicesLocked(fd, pw, args, opti, true);
+                }
+                return;
             }
-            
+        }
+        
+        // No piece of data specified, dump everything.
+        synchronized (this) {
+            boolean needSep;
+            if (dumpAll) {
+                pw.println("Providers in Current Activity Manager State:");
+            }
+            needSep = dumpProvidersLocked(fd, pw, args, opti, dumpAll);
+            if (needSep) {
+                pw.println(" ");
+            }
+            if (dumpAll) {
+                pw.println("-------------------------------------------------------------------------------");
+                pw.println("Broadcasts in Current Activity Manager State:");
+            }
+            needSep = dumpBroadcastsLocked(fd, pw, args, opti, dumpAll);
+            if (needSep) {
+                pw.println(" ");
+            }
+            if (dumpAll) {
+                pw.println("-------------------------------------------------------------------------------");
+                pw.println("Services in Current Activity Manager State:");
+            }
+            needSep = dumpServicesLocked(fd, pw, args, opti, dumpAll);
+            if (needSep) {
+                pw.println(" ");
+            }
+            if (dumpAll) {
+                pw.println("-------------------------------------------------------------------------------");
+                pw.println("PendingIntents in Current Activity Manager State:");
+            }
+            needSep = dumpPendingIntentsLocked(fd, pw, args, opti, dumpAll);
+            if (needSep) {
+                pw.println(" ");
+            }
+            if (dumpAll) {
+                pw.println("-------------------------------------------------------------------------------");
+                pw.println("Activities in Current Activity Manager State:");
+            }
+            needSep = dumpActivitiesLocked(fd, pw, args, opti, dumpAll, !dumpAll);
+            if (needSep) {
+                pw.println(" ");
+            }
+            if (dumpAll) {
+                pw.println("-------------------------------------------------------------------------------");
+                pw.println("Processes in Current Activity Manager State:");
+            }
+            dumpProcessesLocked(fd, pw, args, opti, dumpAll);
+        }
+    }
+    
+    boolean dumpActivitiesLocked(FileDescriptor fd, PrintWriter pw, String[] args,
+            int opti, boolean dumpAll, boolean needHeader) {
+        if (needHeader) {
+            pw.println("  Activity stack:");
+        }
+        dumpHistoryList(pw, mHistory, "  ", "Hist", true);
+        pw.println(" ");
+        pw.println("  Running activities (most recent first):");
+        dumpHistoryList(pw, mLRUActivities, "  ", "Run", false);
+        if (mWaitingVisibleActivities.size() > 0) {
             pw.println(" ");
-            pw.println("  mCurTask: " + mCurTask);
-            
+            pw.println("  Activities waiting for another to become visible:");
+            dumpHistoryList(pw, mWaitingVisibleActivities, "  ", "Wait", false);
+        }
+        if (mStoppingActivities.size() > 0) {
             pw.println(" ");
-            pw.println("Processes in Current Activity Manager State:");
+            pw.println("  Activities waiting to stop:");
+            dumpHistoryList(pw, mStoppingActivities, "  ", "Stop", false);
+        }
+        if (mFinishingActivities.size() > 0) {
+            pw.println(" ");
+            pw.println("  Activities waiting to finish:");
+            dumpHistoryList(pw, mFinishingActivities, "  ", "Fin", false);
+        }
 
-            boolean needSep = false;
-            int numPers = 0;
+        pw.println(" ");
+        pw.println("  mPausingActivity: " + mPausingActivity);
+        pw.println("  mResumedActivity: " + mResumedActivity);
+        pw.println("  mFocusedActivity: " + mFocusedActivity);
+        pw.println("  mLastPausedActivity: " + mLastPausedActivity);
 
+        if (dumpAll && mRecentTasks.size() > 0) {
+            pw.println(" ");
+            pw.println("Recent tasks in Current Activity Manager State:");
+
+            final int N = mRecentTasks.size();
+            for (int i=0; i<N; i++) {
+                TaskRecord tr = mRecentTasks.get(i);
+                pw.print("  * Recent #"); pw.print(i); pw.print(": ");
+                        pw.println(tr);
+                mRecentTasks.get(i).dump(pw, "    ");
+            }
+        }
+        
+        pw.println(" ");
+        pw.println("  mCurTask: " + mCurTask);
+        
+        return true;
+    }
+        
+    boolean dumpProcessesLocked(FileDescriptor fd, PrintWriter pw, String[] args,
+            int opti, boolean dumpAll) {
+        boolean needSep = false;
+        int numPers = 0;
+
+        if (dumpAll) {
             for (SparseArray<ProcessRecord> procs : mProcessNames.getMap().values()) {
                 final int NA = procs.size();
                 for (int ia=0; ia<NA; ia++) {
@@ -9231,142 +9300,151 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     }
                 }
             }
-            
-            if (mLruProcesses.size() > 0) {
+        }
+        
+        if (mLruProcesses.size() > 0) {
+            if (needSep) pw.println(" ");
+            needSep = true;
+            pw.println("  Running processes (most recent first):");
+            dumpProcessList(pw, this, mLruProcesses, "    ",
+                    "App ", "PERS", true);
+            needSep = true;
+        }
+
+        synchronized (mPidsSelfLocked) {
+            if (mPidsSelfLocked.size() > 0) {
                 if (needSep) pw.println(" ");
                 needSep = true;
-                pw.println("  Running processes (most recent first):");
-                dumpProcessList(pw, this, mLruProcesses, "    ",
-                        "App ", "PERS", true);
-                needSep = true;
-            }
-
-            synchronized (mPidsSelfLocked) {
-                if (mPidsSelfLocked.size() > 0) {
-                    if (needSep) pw.println(" ");
-                    needSep = true;
-                    pw.println("  PID mappings:");
-                    for (int i=0; i<mPidsSelfLocked.size(); i++) {
-                        pw.print("    PID #"); pw.print(mPidsSelfLocked.keyAt(i));
-                            pw.print(": "); pw.println(mPidsSelfLocked.valueAt(i));
-                    }
+                pw.println("  PID mappings:");
+                for (int i=0; i<mPidsSelfLocked.size(); i++) {
+                    pw.print("    PID #"); pw.print(mPidsSelfLocked.keyAt(i));
+                        pw.print(": "); pw.println(mPidsSelfLocked.valueAt(i));
                 }
             }
-            
-            if (mForegroundProcesses.size() > 0) {
-                if (needSep) pw.println(" ");
-                needSep = true;
-                pw.println("  Foreground Processes:");
-                for (int i=0; i<mForegroundProcesses.size(); i++) {
-                    pw.print("    PID #"); pw.print(mForegroundProcesses.keyAt(i));
-                            pw.print(": "); pw.println(mForegroundProcesses.valueAt(i));
-                }
+        }
+        
+        if (mForegroundProcesses.size() > 0) {
+            if (needSep) pw.println(" ");
+            needSep = true;
+            pw.println("  Foreground Processes:");
+            for (int i=0; i<mForegroundProcesses.size(); i++) {
+                pw.print("    PID #"); pw.print(mForegroundProcesses.keyAt(i));
+                        pw.print(": "); pw.println(mForegroundProcesses.valueAt(i));
             }
-            
-            if (mPersistentStartingProcesses.size() > 0) {
-                if (needSep) pw.println(" ");
-                needSep = true;
-                pw.println("  Persisent processes that are starting:");
-                dumpProcessList(pw, this, mPersistentStartingProcesses, "    ",
-                        "Starting Norm", "Restarting PERS", false);
-            }
+        }
+        
+        if (mPersistentStartingProcesses.size() > 0) {
+            if (needSep) pw.println(" ");
+            needSep = true;
+            pw.println("  Persisent processes that are starting:");
+            dumpProcessList(pw, this, mPersistentStartingProcesses, "    ",
+                    "Starting Norm", "Restarting PERS", false);
+        }
 
-            if (mStartingProcesses.size() > 0) {
-                if (needSep) pw.println(" ");
-                needSep = true;
-                pw.println("  Processes that are starting:");
-                dumpProcessList(pw, this, mStartingProcesses, "    ",
-                        "Starting Norm", "Starting PERS", false);
-            }
+        if (mStartingProcesses.size() > 0) {
+            if (needSep) pw.println(" ");
+            needSep = true;
+            pw.println("  Processes that are starting:");
+            dumpProcessList(pw, this, mStartingProcesses, "    ",
+                    "Starting Norm", "Starting PERS", false);
+        }
 
-            if (mRemovedProcesses.size() > 0) {
-                if (needSep) pw.println(" ");
-                needSep = true;
-                pw.println("  Processes that are being removed:");
-                dumpProcessList(pw, this, mRemovedProcesses, "    ",
-                        "Removed Norm", "Removed PERS", false);
-            }
-            
-            if (mProcessesOnHold.size() > 0) {
-                if (needSep) pw.println(" ");
-                needSep = true;
-                pw.println("  Processes that are on old until the system is ready:");
-                dumpProcessList(pw, this, mProcessesOnHold, "    ",
-                        "OnHold Norm", "OnHold PERS", false);
-            }
+        if (mRemovedProcesses.size() > 0) {
+            if (needSep) pw.println(" ");
+            needSep = true;
+            pw.println("  Processes that are being removed:");
+            dumpProcessList(pw, this, mRemovedProcesses, "    ",
+                    "Removed Norm", "Removed PERS", false);
+        }
+        
+        if (mProcessesOnHold.size() > 0) {
+            if (needSep) pw.println(" ");
+            needSep = true;
+            pw.println("  Processes that are on old until the system is ready:");
+            dumpProcessList(pw, this, mProcessesOnHold, "    ",
+                    "OnHold Norm", "OnHold PERS", false);
+        }
 
-            if (mProcessesToGc.size() > 0) {
-                if (needSep) pw.println(" ");
-                needSep = true;
-                pw.println("  Processes that are waiting to GC:");
-                long now = SystemClock.uptimeMillis();
-                for (int i=0; i<mProcessesToGc.size(); i++) {
-                    ProcessRecord proc = mProcessesToGc.get(i);
-                    pw.print("    Process "); pw.println(proc);
-                    pw.print("      lowMem="); pw.print(proc.reportLowMemory);
-                            pw.print(", last gced=");
-                            pw.print(now-proc.lastRequestedGc);
-                            pw.print(" ms ago, last lowMem=");
-                            pw.print(now-proc.lastLowMemory);
+        if (mProcessesToGc.size() > 0) {
+            if (needSep) pw.println(" ");
+            needSep = true;
+            pw.println("  Processes that are waiting to GC:");
+            long now = SystemClock.uptimeMillis();
+            for (int i=0; i<mProcessesToGc.size(); i++) {
+                ProcessRecord proc = mProcessesToGc.get(i);
+                pw.print("    Process "); pw.println(proc);
+                pw.print("      lowMem="); pw.print(proc.reportLowMemory);
+                        pw.print(", last gced=");
+                        pw.print(now-proc.lastRequestedGc);
+                        pw.print(" ms ago, last lowMem=");
+                        pw.print(now-proc.lastLowMemory);
+                        pw.println(" ms ago");
+                
+            }
+        }
+        
+        if (mProcessCrashTimes.getMap().size() > 0) {
+            if (needSep) pw.println(" ");
+            needSep = true;
+            pw.println("  Time since processes crashed:");
+            long now = SystemClock.uptimeMillis();
+            for (Map.Entry<String, SparseArray<Long>> procs
+                    : mProcessCrashTimes.getMap().entrySet()) {
+                SparseArray<Long> uids = procs.getValue();
+                final int N = uids.size();
+                for (int i=0; i<N; i++) {
+                    pw.print("    Process "); pw.print(procs.getKey());
+                            pw.print(" uid "); pw.print(uids.keyAt(i));
+                            pw.print(": last crashed ");
+                            pw.print((now-uids.valueAt(i)));
                             pw.println(" ms ago");
-                    
                 }
             }
-            
-            if (mProcessCrashTimes.getMap().size() > 0) {
-                if (needSep) pw.println(" ");
-                needSep = true;
-                pw.println("  Time since processes crashed:");
-                long now = SystemClock.uptimeMillis();
-                for (Map.Entry<String, SparseArray<Long>> procs
-                        : mProcessCrashTimes.getMap().entrySet()) {
-                    SparseArray<Long> uids = procs.getValue();
-                    final int N = uids.size();
-                    for (int i=0; i<N; i++) {
-                        pw.print("    Process "); pw.print(procs.getKey());
-                                pw.print(" uid "); pw.print(uids.keyAt(i));
-                                pw.print(": last crashed ");
-                                pw.print((now-uids.valueAt(i)));
-                                pw.println(" ms ago");
-                    }
-                }
-            }
+        }
 
-            if (mBadProcesses.getMap().size() > 0) {
-                if (needSep) pw.println(" ");
-                needSep = true;
-                pw.println("  Bad processes:");
-                for (Map.Entry<String, SparseArray<Long>> procs
-                        : mBadProcesses.getMap().entrySet()) {
-                    SparseArray<Long> uids = procs.getValue();
-                    final int N = uids.size();
-                    for (int i=0; i<N; i++) {
-                        pw.print("    Bad process "); pw.print(procs.getKey());
-                                pw.print(" uid "); pw.print(uids.keyAt(i));
-                                pw.print(": crashed at time ");
-                                pw.println(uids.valueAt(i));
-                    }
+        if (mBadProcesses.getMap().size() > 0) {
+            if (needSep) pw.println(" ");
+            needSep = true;
+            pw.println("  Bad processes:");
+            for (Map.Entry<String, SparseArray<Long>> procs
+                    : mBadProcesses.getMap().entrySet()) {
+                SparseArray<Long> uids = procs.getValue();
+                final int N = uids.size();
+                for (int i=0; i<N; i++) {
+                    pw.print("    Bad process "); pw.print(procs.getKey());
+                            pw.print(" uid "); pw.print(uids.keyAt(i));
+                            pw.print(": crashed at time ");
+                            pw.println(uids.valueAt(i));
                 }
             }
+        }
 
-            pw.println(" ");
+        pw.println(" ");
+        pw.println("  mHomeProcess: " + mHomeProcess);
+        pw.println("  mConfiguration: " + mConfiguration);
+        pw.println("  mSleeping=" + mSleeping + " mShuttingDown=" + mShuttingDown);
+        if (mDebugApp != null || mOrigDebugApp != null || mDebugTransient
+                || mOrigWaitForDebugger) {
+            pw.println("  mDebugApp=" + mDebugApp + "/orig=" + mOrigDebugApp
+                    + " mDebugTransient=" + mDebugTransient
+                    + " mOrigWaitForDebugger=" + mOrigWaitForDebugger);
+        }
+        if (mAlwaysFinishActivities || mController != null) {
+            pw.println("  mAlwaysFinishActivities=" + mAlwaysFinishActivities
+                    + " mController=" + mController);
+        }
+        if (dumpAll) {
             pw.println("  Total persistent processes: " + numPers);
-            pw.println("  mHomeProcess: " + mHomeProcess);
-            pw.println("  mConfiguration: " + mConfiguration);
             pw.println("  mStartRunning=" + mStartRunning
                     + " mSystemReady=" + mSystemReady
                     + " mBooting=" + mBooting
                     + " mBooted=" + mBooted
                     + " mFactoryTest=" + mFactoryTest);
-            pw.println("  mSleeping=" + mSleeping + " mShuttingDown=" + mShuttingDown);
             pw.println("  mGoingToSleep=" + mGoingToSleep);
             pw.println("  mLaunchingActivity=" + mLaunchingActivity);
-            pw.println("  mDebugApp=" + mDebugApp + "/orig=" + mOrigDebugApp
-                    + " mDebugTransient=" + mDebugTransient
-                    + " mOrigWaitForDebugger=" + mOrigWaitForDebugger);
-            pw.println("  mAlwaysFinishActivities=" + mAlwaysFinishActivities
-                    + " mController=" + mController);
         }
+        
+        return true;
     }
 
     /**
@@ -9377,20 +9455,22 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
      *  - the first arg isn't the flattened component name of an existing service:
      *    dump all services whose component contains the first arg as a substring
      */
-    protected void dumpService(FileDescriptor fd, PrintWriter pw, String[] args) {
+    protected void dumpService(FileDescriptor fd, PrintWriter pw, String[] args,
+            int opti, boolean dumpAll) {
         String[] newArgs;
         String componentNameString;
         ServiceRecord r;
-        if (args.length == 1) {
+        if (opti <= args.length) {
             componentNameString = null;
             newArgs = EMPTY_STRING_ARRAY;
             r = null;
         } else {
-            componentNameString = args[1];
+            componentNameString = args[opti];
+            opti++;
             ComponentName componentName = ComponentName.unflattenFromString(componentNameString);
             r = componentName != null ? mServices.get(componentName) : null;
-            newArgs = new String[args.length - 2];
-            if (args.length > 2) System.arraycopy(args, 2, newArgs, 0, args.length - 2);
+            newArgs = new String[args.length - opti];
+            if (args.length > 2) System.arraycopy(args, opti, newArgs, 0, args.length - opti);
         }
 
         if (r != null) {
@@ -9424,19 +9504,11 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
     }
 
-    void dumpBroadcasts(PrintWriter pw) {
-        synchronized (this) {
-            if (checkCallingPermission(android.Manifest.permission.DUMP)
-                    != PackageManager.PERMISSION_GRANTED) {
-                pw.println("Permission Denial: can't dump ActivityManager from from pid="
-                        + Binder.getCallingPid()
-                        + ", uid=" + Binder.getCallingUid()
-                        + " without permission "
-                        + android.Manifest.permission.DUMP);
-                return;
-            }
-            pw.println("Broadcasts in Current Activity Manager State:");
-
+    boolean dumpBroadcastsLocked(FileDescriptor fd, PrintWriter pw, String[] args,
+            int opti, boolean dumpAll) {
+        boolean needSep = false;
+        
+        if (dumpAll) {
             if (mRegisteredReceivers.size() > 0) {
                 pw.println(" ");
                 pw.println("  Registered Receivers:");
@@ -9447,38 +9519,42 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     r.dump(pw, "    ");
                 }
             }
-
+    
             pw.println(" ");
             pw.println("Receiver Resolver Table:");
             mReceiverResolver.dump(pw, "  ");
-            
-            if (mParallelBroadcasts.size() > 0 || mOrderedBroadcasts.size() > 0
-                    || mPendingBroadcast != null) {
-                if (mParallelBroadcasts.size() > 0) {
-                    pw.println(" ");
-                    pw.println("  Active broadcasts:");
-                }
-                for (int i=mParallelBroadcasts.size()-1; i>=0; i--) {
-                    pw.println("  Broadcast #" + i + ":");
-                    mParallelBroadcasts.get(i).dump(pw, "    ");
-                }
-                if (mOrderedBroadcasts.size() > 0) {
-                    pw.println(" ");
-                    pw.println("  Active serialized broadcasts:");
-                }
-                for (int i=mOrderedBroadcasts.size()-1; i>=0; i--) {
-                    pw.println("  Serialized Broadcast #" + i + ":");
-                    mOrderedBroadcasts.get(i).dump(pw, "    ");
-                }
+            needSep = true;
+        }
+        
+        if (mParallelBroadcasts.size() > 0 || mOrderedBroadcasts.size() > 0
+                || mPendingBroadcast != null) {
+            if (mParallelBroadcasts.size() > 0) {
                 pw.println(" ");
-                pw.println("  Pending broadcast:");
-                if (mPendingBroadcast != null) {
-                    mPendingBroadcast.dump(pw, "    ");
-                } else {
-                    pw.println("    (null)");
-                }
+                pw.println("  Active broadcasts:");
             }
+            for (int i=mParallelBroadcasts.size()-1; i>=0; i--) {
+                pw.println("  Broadcast #" + i + ":");
+                mParallelBroadcasts.get(i).dump(pw, "    ");
+            }
+            if (mOrderedBroadcasts.size() > 0) {
+                pw.println(" ");
+                pw.println("  Active serialized broadcasts:");
+            }
+            for (int i=mOrderedBroadcasts.size()-1; i>=0; i--) {
+                pw.println("  Serialized Broadcast #" + i + ":");
+                mOrderedBroadcasts.get(i).dump(pw, "    ");
+            }
+            pw.println(" ");
+            pw.println("  Pending broadcast:");
+            if (mPendingBroadcast != null) {
+                mPendingBroadcast.dump(pw, "    ");
+            } else {
+                pw.println("    (null)");
+            }
+            needSep = true;
+        }
 
+        if (dumpAll) {
             pw.println(" ");
             pw.println("  Historical broadcasts:");
             for (int i=0; i<MAX_BROADCAST_HISTORY; i++) {
@@ -9489,54 +9565,50 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 pw.println("  Historical Broadcast #" + i + ":");
                 r.dump(pw, "    ");
             }
-            
+            needSep = true;
+        }
+        
+        if (mStickyBroadcasts != null) {
             pw.println(" ");
-            pw.println("  mBroadcastsScheduled=" + mBroadcastsScheduled);
-            if (mStickyBroadcasts != null) {
-                pw.println(" ");
-                pw.println("  Sticky broadcasts:");
-                StringBuilder sb = new StringBuilder(128);
-                for (Map.Entry<String, ArrayList<Intent>> ent
-                        : mStickyBroadcasts.entrySet()) {
-                    pw.print("  * Sticky action "); pw.print(ent.getKey());
-                            pw.println(":");
-                    ArrayList<Intent> intents = ent.getValue();
-                    final int N = intents.size();
-                    for (int i=0; i<N; i++) {
-                        sb.setLength(0);
-                        sb.append("    Intent: ");
-                        intents.get(i).toShortString(sb, true, false);
-                        pw.println(sb.toString());
-                        Bundle bundle = intents.get(i).getExtras();
-                        if (bundle != null) {
-                            pw.print("      ");
-                            pw.println(bundle.toString());
-                        }
+            pw.println("  Sticky broadcasts:");
+            StringBuilder sb = new StringBuilder(128);
+            for (Map.Entry<String, ArrayList<Intent>> ent
+                    : mStickyBroadcasts.entrySet()) {
+                pw.print("  * Sticky action "); pw.print(ent.getKey());
+                        pw.println(":");
+                ArrayList<Intent> intents = ent.getValue();
+                final int N = intents.size();
+                for (int i=0; i<N; i++) {
+                    sb.setLength(0);
+                    sb.append("    Intent: ");
+                    intents.get(i).toShortString(sb, true, false);
+                    pw.println(sb.toString());
+                    Bundle bundle = intents.get(i).getExtras();
+                    if (bundle != null) {
+                        pw.print("      ");
+                        pw.println(bundle.toString());
                     }
                 }
             }
-            
+            needSep = true;
+        }
+        
+        if (dumpAll) {
             pw.println(" ");
+            pw.println("  mBroadcastsScheduled=" + mBroadcastsScheduled);
             pw.println("  mHandler:");
             mHandler.dump(new PrintWriterPrinter(pw), "    ");
+            needSep = true;
         }
+        
+        return needSep;
     }
 
-    void dumpServices(PrintWriter pw) {
-        synchronized (this) {
-            if (checkCallingPermission(android.Manifest.permission.DUMP)
-                    != PackageManager.PERMISSION_GRANTED) {
-                pw.println("Permission Denial: can't dump ActivityManager from from pid="
-                        + Binder.getCallingPid()
-                        + ", uid=" + Binder.getCallingUid()
-                        + " without permission "
-                        + android.Manifest.permission.DUMP);
-                return;
-            }
-            pw.println("Services in Current Activity Manager State:");
+    boolean dumpServicesLocked(FileDescriptor fd, PrintWriter pw, String[] args,
+            int opti, boolean dumpAll) {
+        boolean needSep = false;
 
-            boolean needSep = false;
-
+        if (dumpAll) {
             if (mServices.size() > 0) {
                 pw.println("  Active services:");
                 Iterator<ServiceRecord> it = mServices.values().iterator();
@@ -9547,40 +9619,42 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 }
                 needSep = true;
             }
+        }
 
-            if (mPendingServices.size() > 0) {
-                if (needSep) pw.println(" ");
-                pw.println("  Pending services:");
-                for (int i=0; i<mPendingServices.size(); i++) {
-                    ServiceRecord r = mPendingServices.get(i);
-                    pw.print("  * Pending "); pw.println(r);
-                    r.dump(pw, "    ");
-                }
-                needSep = true;
+        if (mPendingServices.size() > 0) {
+            if (needSep) pw.println(" ");
+            pw.println("  Pending services:");
+            for (int i=0; i<mPendingServices.size(); i++) {
+                ServiceRecord r = mPendingServices.get(i);
+                pw.print("  * Pending "); pw.println(r);
+                r.dump(pw, "    ");
             }
+            needSep = true;
+        }
 
-            if (mRestartingServices.size() > 0) {
-                if (needSep) pw.println(" ");
-                pw.println("  Restarting services:");
-                for (int i=0; i<mRestartingServices.size(); i++) {
-                    ServiceRecord r = mRestartingServices.get(i);
-                    pw.print("  * Restarting "); pw.println(r);
-                    r.dump(pw, "    ");
-                }
-                needSep = true;
+        if (mRestartingServices.size() > 0) {
+            if (needSep) pw.println(" ");
+            pw.println("  Restarting services:");
+            for (int i=0; i<mRestartingServices.size(); i++) {
+                ServiceRecord r = mRestartingServices.get(i);
+                pw.print("  * Restarting "); pw.println(r);
+                r.dump(pw, "    ");
             }
+            needSep = true;
+        }
 
-            if (mStoppingServices.size() > 0) {
-                if (needSep) pw.println(" ");
-                pw.println("  Stopping services:");
-                for (int i=0; i<mStoppingServices.size(); i++) {
-                    ServiceRecord r = mStoppingServices.get(i);
-                    pw.print("  * Stopping "); pw.println(r);
-                    r.dump(pw, "    ");
-                }
-                needSep = true;
+        if (mStoppingServices.size() > 0) {
+            if (needSep) pw.println(" ");
+            pw.println("  Stopping services:");
+            for (int i=0; i<mStoppingServices.size(); i++) {
+                ServiceRecord r = mStoppingServices.get(i);
+                pw.print("  * Stopping "); pw.println(r);
+                r.dump(pw, "    ");
             }
+            needSep = true;
+        }
 
+        if (dumpAll) {
             if (mServiceConnections.size() > 0) {
                 if (needSep) pw.println(" ");
                 pw.println("  Connection bindings to services:");
@@ -9591,26 +9665,18 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     pw.print("  * "); pw.println(r);
                     r.dump(pw, "    ");
                 }
+                needSep = true;
             }
         }
+        
+        return needSep;
     }
 
-    void dumpProviders(PrintWriter pw) {
-        synchronized (this) {
-            if (checkCallingPermission(android.Manifest.permission.DUMP)
-                    != PackageManager.PERMISSION_GRANTED) {
-                pw.println("Permission Denial: can't dump ActivityManager from from pid="
-                        + Binder.getCallingPid()
-                        + ", uid=" + Binder.getCallingUid()
-                        + " without permission "
-                        + android.Manifest.permission.DUMP);
-                return;
-            }
+    boolean dumpProvidersLocked(FileDescriptor fd, PrintWriter pw, String[] args,
+            int opti, boolean dumpAll) {
+        boolean needSep = false;
 
-            pw.println("Content Providers in Current Activity Manager State:");
-
-            boolean needSep = false;
-
+        if (dumpAll) {
             if (mProvidersByClass.size() > 0) {
                 if (needSep) pw.println(" ");
                 pw.println("  Published content providers (by class):");
@@ -9623,7 +9689,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 }
                 needSep = true;
             }
-
+    
             if (mProvidersByName.size() > 0) {
                 pw.println(" ");
                 pw.println("  Authority to provider mappings:");
@@ -9636,55 +9702,50 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 }
                 needSep = true;
             }
-
-            if (mLaunchingProviders.size() > 0) {
-                if (needSep) pw.println(" ");
-                pw.println("  Launching content providers:");
-                for (int i=mLaunchingProviders.size()-1; i>=0; i--) {
-                    pw.print("  Launching #"); pw.print(i); pw.print(": ");
-                            pw.println(mLaunchingProviders.get(i));
-                }
-                needSep = true;
-            }
-
-            if (mGrantedUriPermissions.size() > 0) {
-                pw.println();
-                pw.println("Granted Uri Permissions:");
-                for (int i=0; i<mGrantedUriPermissions.size(); i++) {
-                    int uid = mGrantedUriPermissions.keyAt(i);
-                    HashMap<Uri, UriPermission> perms
-                            = mGrantedUriPermissions.valueAt(i);
-                    pw.print("  * UID "); pw.print(uid);
-                            pw.println(" holds:");
-                    for (UriPermission perm : perms.values()) {
-                        pw.print("    "); pw.println(perm);
-                        perm.dump(pw, "      ");
-                    }
-                }
-            }
         }
+
+        if (mLaunchingProviders.size() > 0) {
+            if (needSep) pw.println(" ");
+            pw.println("  Launching content providers:");
+            for (int i=mLaunchingProviders.size()-1; i>=0; i--) {
+                pw.print("  Launching #"); pw.print(i); pw.print(": ");
+                        pw.println(mLaunchingProviders.get(i));
+            }
+            needSep = true;
+        }
+
+        if (mGrantedUriPermissions.size() > 0) {
+            pw.println();
+            pw.println("Granted Uri Permissions:");
+            for (int i=0; i<mGrantedUriPermissions.size(); i++) {
+                int uid = mGrantedUriPermissions.keyAt(i);
+                HashMap<Uri, UriPermission> perms
+                        = mGrantedUriPermissions.valueAt(i);
+                pw.print("  * UID "); pw.print(uid);
+                        pw.println(" holds:");
+                for (UriPermission perm : perms.values()) {
+                    pw.print("    "); pw.println(perm);
+                    perm.dump(pw, "      ");
+                }
+            }
+            needSep = true;
+        }
+        
+        return needSep;
     }
 
-    void dumpSenders(PrintWriter pw) {
-        synchronized (this) {
-            if (checkCallingPermission(android.Manifest.permission.DUMP)
-                    != PackageManager.PERMISSION_GRANTED) {
-                pw.println("Permission Denial: can't dump ActivityManager from from pid="
-                        + Binder.getCallingPid()
-                        + ", uid=" + Binder.getCallingUid()
-                        + " without permission "
-                        + android.Manifest.permission.DUMP);
-                return;
-            }
-
-            pw.println("Pending Intents in Current Activity Manager State:");
-
+    boolean dumpPendingIntentsLocked(FileDescriptor fd, PrintWriter pw, String[] args,
+            int opti, boolean dumpAll) {
+        boolean needSep = false;
+        
+        if (dumpAll) {
             if (this.mIntentSenderRecords.size() > 0) {
                 Iterator<WeakReference<PendingIntentRecord>> it
                         = mIntentSenderRecords.values().iterator();
                 while (it.hasNext()) {
                     WeakReference<PendingIntentRecord> ref = it.next();
                     PendingIntentRecord rec = ref != null ? ref.get(): null;
+                    needSep = true;
                     if (rec != null) {
                         pw.print("  * "); pw.println(rec);
                         rec.dump(pw, "    ");
@@ -9694,6 +9755,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 }
             }
         }
+        
+        return needSep;
     }
 
     private static final void dumpHistoryList(PrintWriter pw, List list,
