@@ -467,8 +467,7 @@ public class StkService extends Handler implements AppInterface {
             sInstance = new StkService(ci, sr, context, fh, sc);
             StkLog.d(sInstance, "NEW sInstance");
         } else if ((sr != null) && (mSimRecords != sr)) {
-            StkLog.d(sInstance, String.format(
-                    "Reinitialize the Service with SIMRecords sr=0x%x.", sr));
+            StkLog.d(sInstance, "Reinitialize the Service with SIMRecords");
             mSimRecords = sr;
 
             // re-Register for SIM ready event.
