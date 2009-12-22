@@ -34,7 +34,7 @@ import android.util.Log;
 import com.android.internal.telephony.cdma.CDMAPhone;
 import com.android.internal.telephony.gsm.GSMPhone;
 import com.android.internal.telephony.gsm.NetworkInfo;
-import com.android.internal.telephony.gsm.PdpConnection;
+import com.android.internal.telephony.gsm.GsmDataConnection;
 import com.android.internal.telephony.test.SimulatedRadioControl;
 
 import java.util.List;
@@ -564,22 +564,8 @@ public class PhoneProxy extends Handler implements Phone {
         mActivePhone.invokeOemRilRequestStrings(strings, response);
     }
 
-    /**
-     * @deprecated
-     */
-    public void getPdpContextList(Message response) {
-        mActivePhone.getPdpContextList(response);
-    }
-
     public void getDataCallList(Message response) {
         mActivePhone.getDataCallList(response);
-    }
-
-    /**
-     * @deprecated
-     */
-    public List<PdpConnection> getCurrentPdpList() {
-        return mActivePhone.getCurrentPdpList();
     }
 
     public List<DataConnection> getCurrentDataConnectionList() {

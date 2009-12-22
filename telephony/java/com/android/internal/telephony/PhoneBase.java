@@ -35,7 +35,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.internal.R;
-import com.android.internal.telephony.gsm.PdpConnection;
+import com.android.internal.telephony.gsm.GsmDataConnection;
 import com.android.internal.telephony.test.SimulatedRadioControl;
 
 import java.util.List;
@@ -690,16 +690,6 @@ public abstract class PhoneBase extends Handler implements Phone {
     public void queryTTYMode(Message onComplete) {
         // This function should be overridden by the class CDMAPhone. Not implemented in GSMPhone.
         Log.e(LOG_TAG, "Error! This function should never be executed, inactive CDMAPhone.");
-    }
-
-    /**
-     * This should only be called in GSM mode.
-     * Only here for some backward compatibility
-     * issues concerning the GSMPhone class.
-     * @deprecated Always returns null.
-     */
-    public List<PdpConnection> getCurrentPdpList() {
-        return null;
     }
 
     public void enableEnhancedVoicePrivacy(boolean enable, Message onComplete) {

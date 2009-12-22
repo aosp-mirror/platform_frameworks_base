@@ -1050,31 +1050,8 @@ public class GSMPhone extends PhoneBase {
         return mCT.getMute();
     }
 
-    /**
-     * @deprecated Do not use.
-     */
-    @Deprecated
-    public void getPdpContextList(Message response) {
-        getDataCallList(response);
-    }
-
     public void getDataCallList(Message response) {
         mCM.getDataCallList(response);
-    }
-
-    /**
-     * @deprecated Do not use.
-     */
-    @Deprecated
-    public List<PdpConnection> getCurrentPdpList() {
-        ArrayList<DataConnection> connections = new ArrayList<DataConnection>();
-        ArrayList<PdpConnection> pdp_list = new ArrayList<PdpConnection>();
-
-        for(int n = 0; n < connections.size(); n++) {
-            pdp_list.add((PdpConnection) connections.get(n));
-        }
-
-        return pdp_list;
     }
 
     public List<DataConnection> getCurrentDataConnectionList () {

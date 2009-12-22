@@ -657,13 +657,6 @@ public class CDMAPhone extends PhoneBase {
         mSST.disableLocationUpdates();
     }
 
-    /**
-     * @deprecated
-     */
-    public void getPdpContextList(Message response) {
-        getDataCallList(response);
-    }
-
     public void getDataCallList(Message response) {
         mCM.getDataCallList(response);
     }
