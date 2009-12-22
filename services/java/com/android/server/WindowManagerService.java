@@ -2020,7 +2020,7 @@ public class WindowManagerService extends IWindowManager.Stub
         // to hold off on removing the window until the animation is done.
         // If the display is frozen, just remove immediately, since the
         // animation wouldn't be seen.
-        if (win.mSurface != null && !mDisplayFrozen) {
+        if (win.mSurface != null && !mDisplayFrozen && mPolicy.isScreenOn()) {
             // If we are not currently running the exit animation, we
             // need to see about starting one.
             if (wasVisible=win.isWinVisibleLw()) {
@@ -2336,7 +2336,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     win.mEnterAnimationPending = true;
                 }
                 if (displayed && win.mSurface != null && !win.mDrawPending
-                        && !win.mCommitDrawPending && !mDisplayFrozen) {
+                        && !win.mCommitDrawPending && !mDisplayFrozen
+                        && mPolicy.isScreenOn()) {
                     applyEnterAnimationLocked(win);
                 }
                 if (displayed && (win.mAttrs.flags
@@ -2588,7 +2589,7 @@ public class WindowManagerService extends IWindowManager.Stub
         // frozen, there is no reason to animate and it can cause strange
         // artifacts when we unfreeze the display if some different animation
         // is running.
-        if (!mDisplayFrozen) {
+        if (!mDisplayFrozen && mPolicy.isScreenOn()) {
             int anim = mPolicy.selectAnimationLw(win, transit);
             int attr = -1;
             Animation a = null;
@@ -2671,7 +2672,7 @@ public class WindowManagerService extends IWindowManager.Stub
         // frozen, there is no reason to animate and it can cause strange
         // artifacts when we unfreeze the display if some different animation
         // is running.
-        if (!mDisplayFrozen) {
+        if (!mDisplayFrozen && mPolicy.isScreenOn()) {
             Animation a;
             if (lp != null && (lp.flags & FLAG_COMPATIBLE_WINDOW) != 0) {
                 a = new FadeInOutAnimation(enter);
@@ -3262,7 +3263,7 @@ public class WindowManagerService extends IWindowManager.Stub
             // If the display is frozen, we won't do anything until the
             // actual window is displayed so there is no reason to put in
             // the starting window.
-            if (mDisplayFrozen) {
+            if (mDisplayFrozen || !mPolicy.isScreenOn()) {
                 return;
             }
 
@@ -7491,7 +7492,7 @@ public class WindowManagerService extends IWindowManager.Stub
         // This must be called while inside a transaction.  Returns true if
         // there is more animation to run.
         boolean stepAnimationLocked(long currentTime, int dw, int dh) {
-            if (!mDisplayFrozen) {
+            if (!mDisplayFrozen && mPolicy.isScreenOn()) {
                 // We will run animations as long as the display isn't frozen.
 
                 if (!mDrawPending && !mCommitDrawPending && mAnimation != null) {
@@ -8421,7 +8422,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         // This must be called while inside a transaction.
         boolean stepAnimationLocked(long currentTime, int dw, int dh) {
-            if (!mDisplayFrozen) {
+            if (!mDisplayFrozen && mPolicy.isScreenOn()) {
                 // We will run animations as long as the display isn't frozen.
 
                 if (animation == sDummyAnimation) {
@@ -9391,6 +9392,7 @@ public class WindowManagerService extends IWindowManager.Stub
         try {
             boolean restart;
             boolean forceHiding = false;
+            boolean wallpaperForceHidingChanged = false;
 
             do {
                 final int transactionSequence = ++mTransactionSequence;
@@ -9411,13 +9413,16 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                 }
 
+                if (DEBUG_APP_TRANSITIONS) Log.v(TAG, "*** ANIM STEP: seq="
+                        + transactionSequence + " tokensAnimating="
+                        + tokensAnimating);
+                        
                 animating = tokensAnimating;
                 restart = false;
 
                 boolean tokenMayBeDrawn = false;
                 boolean wallpaperMayChange = false;
                 boolean focusMayChange = false;
-                boolean wallpaperForceHidingChanged = false;
 
                 mPolicy.beginAnimationLw(dw, dh);
 
@@ -9730,6 +9735,14 @@ public class WindowManagerService extends IWindowManager.Stub
                             mLastEnterAnimParams = null;
                         }
 
+                        // If all closing windows are obscured, then there is
+                        // no need to do an animation.  This is the case, for
+                        // example, when this transition is being done behind
+                        // the lock screen.
+                        if (!mPolicy.allowAppAnimationsLw()) {
+                            animLp = null;
+                        }
+                        
                         NN = mOpeningApps.size();
                         for (i=0; i<NN; i++) {
                             AppWindowToken wtoken = mOpeningApps.get(i);
@@ -9802,7 +9815,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
                 int adjResult = 0;
 
-                if (wallpaperForceHidingChanged) {
+                if (wallpaperForceHidingChanged && !restart && !mAppTransitionReady) {
                     // At this point, there was a window with a wallpaper that
                     // was force hiding other windows behind it, but now it
                     // is going away.  This may be simple -- just animate
@@ -9810,10 +9823,28 @@ public class WindowManagerService extends IWindowManager.Stub
                     // hard -- the wallpaper now needs to be shown behind
                     // something that was hidden.
                     WindowState oldWallpaper = mWallpaperTarget;
+                    if (mLowerWallpaperTarget != null
+                            && mLowerWallpaperTarget.mAppToken != null) {
+                        if (DEBUG_WALLPAPER) Log.v(TAG,
+                                "wallpaperForceHiding changed with lower="
+                                + mLowerWallpaperTarget);
+                        if (DEBUG_WALLPAPER) Log.v(TAG,
+                                "hidden=" + mLowerWallpaperTarget.mAppToken.hidden +
+                                " hiddenRequested=" + mLowerWallpaperTarget.mAppToken.hiddenRequested);
+                        if (mLowerWallpaperTarget.mAppToken.hidden) {
+                            // The lower target has become hidden before we
+                            // actually started the animation...  let's completely
+                            // re-evaluate everything.
+                            mLowerWallpaperTarget = mUpperWallpaperTarget = null;
+                            restart = true;
+                        }
+                    }
                     adjResult = adjustWallpaperWindowsLocked();
                     wallpaperMayChange = false;
-                    if (false) Log.v(TAG, "****** OLD: " + oldWallpaper
-                            + " NEW: " + mWallpaperTarget);
+                    wallpaperForceHidingChanged = false;
+                    if (DEBUG_WALLPAPER) Log.v(TAG, "****** OLD: " + oldWallpaper
+                            + " NEW: " + mWallpaperTarget
+                            + " LOWER: " + mLowerWallpaperTarget);
                     if (mLowerWallpaperTarget == null) {
                         // Whoops, we don't need a special wallpaper animation.
                         // Clear them out.
@@ -9868,6 +9899,9 @@ public class WindowManagerService extends IWindowManager.Stub
                     performLayoutLockedInner();
                 }
 
+                if (DEBUG_APP_TRANSITIONS) Log.v(TAG, "*** ANIM STEP: restart="
+                        + restart);
+                
             } while (restart);
 
             // THIRD LOOP: Update the surfaces of all windows.
@@ -10257,7 +10291,8 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             if (mDimAnimator != null && mDimAnimator.mDimShown) {
-                animating |= mDimAnimator.updateSurface(dimming, currentTime, mDisplayFrozen);
+                animating |= mDimAnimator.updateSurface(dimming, currentTime,
+                        mDisplayFrozen || !mPolicy.isScreenOn());
             }
 
             if (!blurring && mBlurShown) {
