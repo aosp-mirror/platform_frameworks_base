@@ -18,12 +18,12 @@ package com.android.internal.os;
 
 import junit.framework.TestCase;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.io.StringWriter;
 import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 public class LoggingPrintStreamTest extends TestCase {
 
@@ -121,6 +121,58 @@ public class LoggingPrintStreamTest extends TestCase {
         assertEquals(Arrays.asList("Foo", "4", "a"), out.lines);
     }
 
+    public void testMultiByteCharactersSpanningBuffers() throws Exception {
+        // assume 3*1000 bytes won't fit in LoggingPrintStream's internal buffer
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < 1000; i++) {
+            builder.append("\u20AC"); // a Euro character; 3 bytes in UTF-8
+        }
+        String expected = builder.toString();
+
+        out.write(expected.getBytes("UTF-8"));
+        out.flush();
+        assertEquals(Arrays.asList(expected), out.lines);
+    }
+
+    public void testWriteOneByteAtATimeMultibyteCharacters() throws Exception {
+        String expected = " \u20AC  \u20AC   \u20AC    \u20AC     ";
+        for (byte b : expected.getBytes()) {
+            out.write(b);
+        }
+        out.flush();
+        assertEquals(Arrays.asList(expected), out.lines);
+    }
+
+    public void testWriteByteArrayAtATimeMultibyteCharacters() throws Exception {
+        String expected = " \u20AC  \u20AC   \u20AC    \u20AC     ";
+        out.write(expected.getBytes());
+        out.flush();
+        assertEquals(Arrays.asList(expected), out.lines);
+    }
+
+    public void testWriteWithOffsetsMultibyteCharacters() throws Exception {
+        String expected = " \u20AC  \u20AC   \u20AC    \u20AC     ";
+        byte[] bytes = expected.getBytes();
+        int i = 0;
+        while (i < bytes.length - 5) {
+            out.write(bytes, i, 5);
+            i += 5;
+        }
+        out.write(bytes, i, bytes.length - i);
+        out.flush();
+        assertEquals(Arrays.asList(expected), out.lines);
+    }
+
+    public void testWriteFlushesOnNewlines() throws Exception {
+        String a = " \u20AC  \u20AC ";
+        String b = "  \u20AC    \u20AC  ";
+        String c = "   ";
+        String toWrite = a + "\n" + b + "\n" + c;
+        out.write(toWrite.getBytes());
+        out.flush();
+        assertEquals(Arrays.asList(a, b, c), out.lines);
+    }
+
     static class TestPrintStream extends LoggingPrintStream {
 
         final List<String> lines = new ArrayList<String>();
@@ -129,5 +181,4 @@ public class LoggingPrintStreamTest extends TestCase {
             lines.add(line);
         }
     }
-
 }
