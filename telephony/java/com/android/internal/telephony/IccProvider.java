@@ -19,7 +19,7 @@ package com.android.internal.telephony;
 import android.content.ContentProvider;
 import android.content.UriMatcher;
 import android.content.ContentValues;
-import com.android.internal.database.ArrayListCursor;
+import com.android.common.ArrayListCursor;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.SystemProperties;

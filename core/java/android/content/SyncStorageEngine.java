@@ -16,6 +16,10 @@
 
 package android.content;
 
+import com.android.internal.os.AtomicFile;
+import com.android.internal.util.ArrayUtils;
+import com.android.common.FastXmlSerializer;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
@@ -36,10 +40,6 @@ import android.os.SystemProperties;
 import android.util.Log;
 import android.util.SparseArray;
 import android.util.Xml;
-
-import com.android.internal.os.AtomicFile;
-import com.android.internal.util.ArrayUtils;
-import com.android.internal.util.FastXmlSerializer;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -512,7 +512,7 @@ public class SyncStorageEngine extends Handler {
 
             SyncStatusInfo status = getOrCreateSyncStatusLocked(authority.ident);
             status.pending = true;
-            status.initialize = op.extras != null && 
+            status.initialize = op.extras != null &&
                  op.extras.containsKey(ContentResolver.SYNC_EXTRAS_INITIALIZE) &&
                  op.extras.getBoolean(ContentResolver.SYNC_EXTRAS_INITIALIZE);
         }

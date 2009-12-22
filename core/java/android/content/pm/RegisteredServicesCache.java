@@ -43,7 +43,7 @@ import java.io.IOException;
 import java.io.FileInputStream;
 
 import com.android.internal.os.AtomicFile;
-import com.android.internal.util.FastXmlSerializer;
+import com.android.common.FastXmlSerializer;
 
 import com.google.android.collect.Maps;
 import com.google.android.collect.Lists;

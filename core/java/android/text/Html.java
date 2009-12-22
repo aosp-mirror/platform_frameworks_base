@@ -46,7 +46,7 @@ import android.text.style.TypefaceSpan;
 import android.text.style.URLSpan;
 import android.text.style.UnderlineSpan;
 import android.util.Log;
-import com.android.internal.util.XmlUtils;
+import com.android.common.XmlUtils;
 
 import java.io.IOException;
 import java.io.StringReader;

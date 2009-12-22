@@ -17,8 +17,8 @@
 package com.android.server;
 
 import com.android.internal.app.ResolverActivity;
-import com.android.internal.util.FastXmlSerializer;
-import com.android.internal.util.XmlUtils;
+import com.android.common.FastXmlSerializer;
+import com.android.common.XmlUtils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;

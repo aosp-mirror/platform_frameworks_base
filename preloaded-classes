@@ -209,7 +209,6 @@ android.net.LocalSocketAddress$Namespace
 android.net.LocalSocketImpl
 android.net.LocalSocketImpl$SocketInputStream
 android.net.LocalSocketImpl$SocketOutputStream
-android.net.NetworkConnectivityListener$State
 android.net.NetworkInfo
 android.net.NetworkInfo$DetailedState
 android.net.SSLCertificateSocketFactory
@@ -576,7 +575,11 @@ android.widget.ViewAnimator
 android.widget.ViewSwitcher
 android.widget.ZoomButton
 android.widget.ZoomControls
-com.android.internal.database.ArrayListCursor
+com.android.common.ArrayListCursor
+com.android.common.FastXmlSerializer
+com.android.common.NetworkConnectivityListener
+com.android.common.NetworkConnectivityListener$State
+com.android.common.XmlUtils
 com.android.internal.database.SortCursor
 com.android.internal.appwidget.IAppWidgetService$Stub
 com.android.internal.http.multipart.FilePart
@@ -633,7 +636,6 @@ com.android.internal.telephony.ServiceStateTracker
 
 com.android.internal.telephony.gsm.stk.ComprehensionTlvTag
 com.android.internal.telephony.gsm.stk.ResultCode
-com.android.internal.util.FastXmlSerializer
 com.android.internal.view.IInputConnectionWrapper
 com.android.internal.view.IInputConnectionWrapper$MyHandler
 com.android.internal.view.IInputConnectionWrapper$SomeArgs

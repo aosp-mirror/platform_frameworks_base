@@ -5,7 +5,7 @@ import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
-import com.android.internal.util.XmlUtils;
+import com.android.common.XmlUtils;
 
 import java.util.Arrays;
 
