@@ -3710,6 +3710,11 @@ public final class Settings {
                 "dropbox:";
 
         /**
+         * Nonzero causes Log.wtf() to crash.
+         */
+        public static final String WTF_IS_FATAL = "wtf_is_fatal";
+
+        /**
          * The length of time in milli-seconds that automatic small adjustments to
          * SystemClock are ignored if NITZ_UPDATE_DIFF is not exceeded.
          */

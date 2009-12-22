@@ -2137,6 +2137,24 @@ class PowerManagerService extends IPowerManager.Stub
         }
     }
 
+    /**
+     * Crash the runtime (causing a complete restart of the Android framework).
+     * Requires REBOOT permission.  Mostly for testing.  Should not return.
+     */
+    public void crash(final String message)
+    {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.REBOOT, null);
+        Thread t = new Thread("PowerManagerService.crash()") {
+            public void run() { throw new RuntimeException(message); }
+        };
+        try {
+            t.start();
+            t.join();
+        } catch (InterruptedException e) {
+            Log.wtf(TAG, e);
+        }
+    }
+
     private void goToSleepLocked(long time, int reason) {
 
         if (mLastEventTime <= time) {

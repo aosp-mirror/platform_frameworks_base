@@ -242,8 +242,9 @@ public interface IActivityManager extends IInterface {
     // Special low-level communication with activity manager.
     public void startRunning(String pkg, String cls, String action,
             String data) throws RemoteException;
-
-    public void handleApplicationError(IBinder app, String tag,
+    public void handleApplicationCrash(IBinder app,
+            ApplicationErrorReport.CrashInfo crashInfo) throws RemoteException;
+    public boolean handleApplicationWtf(IBinder app, String tag,
             ApplicationErrorReport.CrashInfo crashInfo) throws RemoteException;
     
     /*
@@ -349,7 +350,7 @@ public interface IActivityManager extends IInterface {
     // Please keep these transaction codes the same -- they are also
     // sent by C++ code.
     int START_RUNNING_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION;
-    int HANDLE_APPLICATION_ERROR_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+1;
+    int HANDLE_APPLICATION_CRASH_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+1;
     int START_ACTIVITY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+2;
     int UNHANDLED_BACK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+3;
     int OPEN_CONTENT_URI_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+4;
@@ -446,4 +447,5 @@ public interface IActivityManager extends IInterface {
     int KILL_APPLICATION_PROCESS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+98;
     int START_ACTIVITY_INTENT_SENDER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+99;
     int OVERRIDE_PENDING_TRANSITION_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+100;
+    int HANDLE_APPLICATION_WTF_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+101;
 }

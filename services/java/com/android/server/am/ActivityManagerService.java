@@ -71,7 +71,9 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.Build;
 import android.os.Debug;
+import android.os.DropBoxManager;
 import android.os.Environment;
 import android.os.FileUtils;
 import android.os.Handler;
@@ -8580,11 +8582,10 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     }
 
     private boolean makeAppCrashingLocked(ProcessRecord app,
-            String tag, String shortMsg, String longMsg, String stackTrace) {
+            String shortMsg, String longMsg, String stackTrace) {
         app.crashing = true;
         app.crashingReport = generateProcessError(app,
-                ActivityManager.ProcessErrorStateInfo.CRASHED, tag, shortMsg, longMsg,
-                stackTrace);
+                ActivityManager.ProcessErrorStateInfo.CRASHED, null, shortMsg, longMsg, stackTrace);
         startAppProblemLocked(app);
         app.stopFreezingAllLocked();
         return handleAppCrashLocked(app);
@@ -8658,10 +8659,11 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     }
 
     private void makeAppNotRespondingLocked(ProcessRecord app,
-            String tag, String shortMsg, String longMsg) {
+            String activity, String shortMsg, String longMsg) {
         app.notResponding = true;
         app.notRespondingReport = generateProcessError(app,
-                ActivityManager.ProcessErrorStateInfo.NOT_RESPONDING, tag, shortMsg, longMsg, null);
+                ActivityManager.ProcessErrorStateInfo.NOT_RESPONDING,
+                activity, shortMsg, longMsg, null);
         startAppProblemLocked(app);
         app.stopFreezingAllLocked();
     }
@@ -8672,7 +8674,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
      * @param app The ProcessRecord in which the error occurred.
      * @param condition Crashing, Application Not Responding, etc.  Values are defined in 
      *                      ActivityManager.AppErrorStateInfo
-     * @param tag The tag that was passed into handleApplicationError().  Typically the classname.
+     * @param activity The activity associated with the crash, if known.
      * @param shortMsg Short message describing the crash.
      * @param longMsg Long message describing the crash.
      * @param stackTrace Full crash stack trace, may be null.
@@ -8680,14 +8682,14 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
      * @return Returns a fully-formed AppErrorStateInfo record.
      */
     private ActivityManager.ProcessErrorStateInfo generateProcessError(ProcessRecord app, 
-            int condition, String tag, String shortMsg, String longMsg, String stackTrace) {
+            int condition, String activity, String shortMsg, String longMsg, String stackTrace) {
         ActivityManager.ProcessErrorStateInfo report = new ActivityManager.ProcessErrorStateInfo();
 
         report.condition = condition;
         report.processName = app.processName;
         report.pid = app.pid;
         report.uid = app.info.uid;
-        report.tag = tag;
+        report.tag = activity;
         report.shortMsg = shortMsg;
         report.longMsg = longMsg;
         report.stackTrace = stackTrace;
@@ -8804,10 +8806,126 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
     }
 
-    public void handleApplicationError(IBinder app, String tag,
+    /**
+     * Used by {@link com.android.internal.os.RuntimeInit} to report when an application crashes.
+     * The application process will exit immediately after this call returns.
+     * @param app object of the crashing app, null for the system server
+     * @param crashInfo describing the exception
+     */
+    public void handleApplicationCrash(IBinder app, ApplicationErrorReport.CrashInfo crashInfo) {
+        ProcessRecord r = findAppProcess(app);
+
+        EventLog.writeEvent(EventLogTags.AM_CRASH, Binder.getCallingPid(),
+                app == null ? "system" : (r == null ? "unknown" : r.processName),
+                crashInfo.exceptionClassName,
+                crashInfo.exceptionMessage,
+                crashInfo.throwFileName,
+                crashInfo.throwLineNumber);
+
+        addExceptionToDropBox("crash", r, null, crashInfo);
+
+        crashApplication(r, crashInfo);
+    }
+
+    /**
+     * Used by {@link Log} via {@link com.android.internal.os.RuntimeInit} to report serious errors.
+     * @param app object of the crashing app, null for the system server
+     * @param tag reported by the caller
+     * @param crashInfo describing the context of the error
+     * @return true if the process should exit immediately (WTF is fatal)
+     */
+    public boolean handleApplicationWtf(IBinder app, String tag,
             ApplicationErrorReport.CrashInfo crashInfo) {
-        AppErrorResult result = new AppErrorResult();
-        ProcessRecord r = null;
+        ProcessRecord r = findAppProcess(app);
+
+        EventLog.writeEvent(EventLogTags.AM_WTF, Binder.getCallingPid(),
+                app == null ? "system" : (r == null ? "unknown" : r.processName),
+                tag, crashInfo.exceptionMessage);
+
+        addExceptionToDropBox("wtf", r, tag, crashInfo);
+
+        if (Settings.Gservices.getInt(mContext.getContentResolver(),
+                Settings.Gservices.WTF_IS_FATAL, 0) != 0) {
+            crashApplication(r, crashInfo);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * @param app object of some object (as stored in {@link com.android.internal.os.RuntimeInit})
+     * @return the corresponding {@link ProcessRecord} object, or null if none could be found
+     */
+    private ProcessRecord findAppProcess(IBinder app) {
+        if (app == null) {
+            return null;
+        }
+
+        synchronized (this) {
+            for (SparseArray<ProcessRecord> apps : mProcessNames.getMap().values()) {
+                final int NA = apps.size();
+                for (int ia=0; ia<NA; ia++) {
+                    ProcessRecord p = apps.valueAt(ia);
+                    if (p.thread != null && p.thread.asBinder() == app) {
+                        return p;
+                    }
+                }
+            }
+
+            Log.w(TAG, "Can't find mystery application: " + app);
+            return null;
+        }
+    }
+
+    /**
+     * Write a description of an exception (from a crash or WTF report) to the drop box.
+     * @param eventType to include in the drop box tag ("crash", "wtf", etc.)
+     * @param r the process which crashed, null for the system server
+     * @param tag supplied by the application (in the case of WTF), or null
+     * @param crashInfo describing the exception
+     */
+    private void addExceptionToDropBox(String eventType, ProcessRecord r, String tag,
+            ApplicationErrorReport.CrashInfo crashInfo) {
+        String dropboxTag, processName;
+        if (r == null) {
+            dropboxTag = "system_server_" + eventType;
+        } else if ((r.info.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
+            dropboxTag = "system_app_" + eventType;
+        } else {
+            dropboxTag = "data_app_" + eventType;
+        }
+
+        DropBoxManager dbox = (DropBoxManager) mContext.getSystemService(Context.DROPBOX_SERVICE);
+        if (dbox != null && dbox.isTagEnabled(dropboxTag)) {
+            StringBuilder sb = new StringBuilder(1024);
+            sb.append("Build: ").append(Build.FINGERPRINT).append("\n");
+            if (r == null) {
+                sb.append("Process: system_server\n");
+            } else {
+                sb.append("Package: ").append(r.info.packageName).append("\n");
+                if (!r.processName.equals(r.info.packageName)) {
+                    sb.append("Process: ").append(r.processName).append("\n");
+                }
+            }
+            if (tag != null) {
+                sb.append("Tag: ").append(tag).append("\n");
+            }
+            if (crashInfo != null && crashInfo.stackTrace != null) {
+                sb.append("\n").append(crashInfo.stackTrace);
+            }
+            dbox.addText(dropboxTag, sb.toString());
+        }
+    }
+
+    /**
+     * Bring up the "unexpected error" dialog box for a crashing app.
+     * Deal with edge cases (intercepts from instrumented applications,
+     * ActivityController, error intent receivers, that sort of thing).
+     * @param r the application crashing
+     * @param crashInfo describing the failure
+     */
+    private void crashApplication(ProcessRecord r, ApplicationErrorReport.CrashInfo crashInfo) {
         long timeMillis = System.currentTimeMillis();
         String shortMsg = crashInfo.exceptionClassName;
         String longMsg = crashInfo.exceptionMessage;
@@ -8818,20 +8936,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             longMsg = shortMsg;
         }
 
+        AppErrorResult result = new AppErrorResult();
         synchronized (this) {
-            if (app != null) {
-                for (SparseArray<ProcessRecord> apps : mProcessNames.getMap().values()) {
-                    final int NA = apps.size();
-                    for (int ia=0; ia<NA; ia++) {
-                        ProcessRecord p = apps.valueAt(ia);
-                        if (p.thread != null && p.thread.asBinder() == app) {
-                            r = p;
-                            break;
-                        }
-                    }
-                }
-            }
-
             if (r != null) {
                 // The application has crashed. Send the SIGQUIT to the process so
                 // that it can dump its state.
@@ -8844,7 +8950,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 try {
                     String name = r != null ? r.processName : null;
                     int pid = r != null ? r.pid : Binder.getCallingPid();
-                    if (!mController.appCrashed(name, pid, tag,
+                    if (!mController.appCrashed(name, pid,
                             shortMsg, longMsg, timeMillis, crashInfo.stackTrace)) {
                         Log.w(TAG, "Force-killing crashed app " + name
                                 + " at watcher's request");
@@ -8872,15 +8978,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 return;
             }
 
-            if (r != null) {
-                if (!makeAppCrashingLocked(r, tag, shortMsg, longMsg, stackTrace)) {
-                    return;
-                }
-            } else {
-                Log.w(TAG, "Some application object " + app + " tag " + tag
-                        + " has crashed, but I don't know who it is.");
-                Log.w(TAG, "ShortMsg:" + shortMsg);
-                Log.w(TAG, "LongMsg:" + longMsg);
+            // If we can't identify the process or it's already exceeded its crash quota,
+            // quit right away without showing a crash dialog.
+            if (r == null || !makeAppCrashingLocked(r, shortMsg, longMsg, stackTrace)) {
                 Binder.restoreCallingIdentity(origId);
                 return;
             }

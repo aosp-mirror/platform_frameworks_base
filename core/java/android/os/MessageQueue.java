@@ -115,9 +115,7 @@ public class MessageQueue {
                         didIdle = true;
                         keep = ((IdleHandler)idler).queueIdle();
                     } catch (Throwable t) {
-                        Log.e("MessageQueue",
-                              "IdleHandler threw exception", t);
-                        RuntimeInit.crash("MessageQueue", t);
+                        Log.wtf("MessageQueue", "IdleHandler threw exception", t);
                     }
 
                     if (!keep) {

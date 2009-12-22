@@ -326,12 +326,11 @@ public class PowerManager
         {
             synchronized (mToken) {
                 if (mHeld) {
+                    Log.wtf(TAG, "WakeLock finalized while still held: " + mTag);
                     try {
                         mService.releaseWakeLock(mToken, 0);
                     } catch (RemoteException e) {
                     }
-                    RuntimeInit.crash(TAG, new Exception(
-                                "WakeLock finalized while still held: "+mTag));
                 }
             }
         }

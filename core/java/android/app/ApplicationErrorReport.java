@@ -195,6 +195,7 @@ public class ApplicationErrorReport implements Parcelable {
             StringWriter sw = new StringWriter();
             tr.printStackTrace(new PrintWriter(sw));
             stackTrace = sw.toString();
+            exceptionMessage = tr.getMessage();
 
             // Populate fields with the "root cause" exception
             while (tr.getCause() != null) {

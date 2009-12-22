@@ -31,6 +31,7 @@ interface IPowerManager
     void preventScreenOn(boolean prevent);
     boolean isScreenOn();
     void reboot(String reason);
+    void crash(String message);
 
     // sets the brightness of the backlights (screen, keyboard, button) 0-255
     void setBacklightBrightness(int brightness);

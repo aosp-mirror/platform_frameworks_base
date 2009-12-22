@@ -79,4 +79,7 @@ option java_package com.android.server.am
 # The activity manager gave up on a new process taking too long to start
 30037 am_process_start_timeout (PID|1|5),(UID|1|5),(Process Name|3)
 
-
+# Unhandled exception
+30039 am_crash (PID|1|5),(Process Name|3),(Exception|3),(Message|3),(File|3),(Line|1|5)
+# Log.wtf() called
+30040 am_wtf (PID|1|5),(Process Name|3),(Tag|3),(Message|3)

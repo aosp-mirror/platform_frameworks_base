@@ -979,13 +979,23 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
-        case HANDLE_APPLICATION_ERROR_TRANSACTION: {
+        case HANDLE_APPLICATION_CRASH_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            IBinder app = data.readStrongBinder();
+            ApplicationErrorReport.CrashInfo ci = new ApplicationErrorReport.CrashInfo(data);
+            handleApplicationCrash(app, ci);
+            reply.writeNoException();
+            return true;
+        }
+
+        case HANDLE_APPLICATION_WTF_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             IBinder app = data.readStrongBinder();
             String tag = data.readString();
             ApplicationErrorReport.CrashInfo ci = new ApplicationErrorReport.CrashInfo(data);
-            handleApplicationError(app, tag, ci);
+            boolean res = handleApplicationWtf(app, tag, ci);
             reply.writeNoException();
+            reply.writeInt(res ? 1 : 0);
             return true;
         }
 
@@ -2337,7 +2347,20 @@ class ActivityManagerProxy implements IActivityManager
         /* this base class version is never called */
         return true;
     }
-    public void handleApplicationError(IBinder app, String tag,
+    public void handleApplicationCrash(IBinder app,
+            ApplicationErrorReport.CrashInfo crashInfo) throws RemoteException
+    {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeStrongBinder(app);
+        crashInfo.writeToParcel(data, 0);
+        mRemote.transact(HANDLE_APPLICATION_CRASH_TRANSACTION, data, reply, 0);
+        reply.readException();
+        reply.recycle();
+        data.recycle();
+    }
+    public boolean handleApplicationWtf(IBinder app, String tag,
             ApplicationErrorReport.CrashInfo crashInfo) throws RemoteException
     {
         Parcel data = Parcel.obtain();
@@ -2346,10 +2369,12 @@ class ActivityManagerProxy implements IActivityManager
         data.writeStrongBinder(app);
         data.writeString(tag);
         crashInfo.writeToParcel(data, 0);
-        mRemote.transact(HANDLE_APPLICATION_ERROR_TRANSACTION, data, reply, 0);
+        mRemote.transact(HANDLE_APPLICATION_WTF_TRANSACTION, data, reply, 0);
         reply.readException();
+        boolean res = reply.readInt() != 0;
         reply.recycle();
         data.recycle();
+        return res;
     }
 
     public void signalPersistentProcesses(int sig) throws RemoteException {

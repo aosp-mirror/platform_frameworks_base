@@ -606,7 +606,7 @@ public class ActivityManager {
         public int uid;
         
         /**
-         * The tag that was provided when the process crashed.
+         * The activity name associated with the error, if known.  May be null.
          */
         public String tag;
 
