@@ -575,7 +575,7 @@ import java.util.Set;
  * {@link #setFlags} and {@link #addFlags}.  See {@link #setFlags} for a list
  * of all possible flags.
  */
-public class Intent implements Parcelable {
+public class Intent implements Parcelable, Cloneable {
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
     // Standard intent activity actions (see action variable).
