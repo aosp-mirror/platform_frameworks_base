@@ -5684,12 +5684,49 @@ public class WebView extends AbsoluteLayout
                         mFullScreenHolder.setContentView(data.mView);
                         mFullScreenHolder.setCancelable(false);
                         mFullScreenHolder.setCanceledOnTouchOutside(false);
+                        mFullScreenHolder.show();
                     }
+                    // move the matching embedded view fully into the view so
+                    // that touch will be valid instead of rejected due to out
+                    // of the visible bounds
+                    // TODO: do we need to preserve the original position and
+                    // scale so that we can revert it when leaving the full
+                    // screen mode?
+                    int x = contentToViewX(data.mDocX);
+                    int y = contentToViewY(data.mDocY);
+                    int width = contentToViewDimension(data.mDocWidth);
+                    int height = contentToViewDimension(data.mDocHeight);
+                    int viewWidth = getViewWidth();
+                    int viewHeight = getViewHeight();
+                    int newX = mScrollX;
+                    int newY = mScrollY;
+                    if (x < mScrollX) {
+                        newX = x + (width > viewWidth
+                                ? (width - viewWidth) / 2 : 0);
+                    } else if (x + width > mScrollX + viewWidth) {
+                        newX = x + width - viewWidth - (width > viewWidth
+                                ? (width - viewWidth) / 2 : 0);
+                    }
+                    if (y < mScrollY) {
+                        newY = y + (height > viewHeight
+                                ? (height - viewHeight) / 2 : 0);
+                    } else if (y + height > mScrollY + viewHeight) {
+                        newY = y + height - viewHeight - (height > viewHeight
+                                ? (height - viewHeight) / 2 : 0);
+                    }
+                    scrollTo(newX, newY);
+                    if (width > viewWidth || height > viewHeight) {
+                        mZoomCenterX = viewWidth * .5f;
+                        mZoomCenterY = viewHeight * .5f;
+                        setNewZoomScale(mActualScale
+                                / Math.max((float) width / viewWidth,
+                                        (float) height / viewHeight), false);
+                    }
+                    // Now update the bound
                     mFullScreenHolder.updateBound(contentToViewX(data.mDocX)
                             - mScrollX, contentToViewY(data.mDocY) - mScrollY,
                             contentToViewDimension(data.mDocWidth),
                             contentToViewDimension(data.mDocHeight));
-                    mFullScreenHolder.show();
                     break;
 
                 case HIDE_FULLSCREEN:
