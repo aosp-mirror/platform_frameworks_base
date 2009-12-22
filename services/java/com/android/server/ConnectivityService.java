@@ -454,6 +454,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         IBinder mBinder;
         int mPid;
         int mUid;
+        long mCreateTime;
 
         FeatureUser(int type, String feature, IBinder binder) {
             super();
@@ -462,6 +463,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             mBinder = binder;
             mPid = getCallingPid();
             mUid = getCallingUid();
+            mCreateTime = System.currentTimeMillis();
 
             try {
                 mBinder.linkToDeath(this, 0);
@@ -476,14 +478,21 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
         public void binderDied() {
             Log.d(TAG, "ConnectivityService FeatureUser binderDied(" +
-                    mNetworkType + ", " + mFeature + ", " + mBinder);
+                    mNetworkType + ", " + mFeature + ", " + mBinder + "), created " +
+                    (System.currentTimeMillis() - mCreateTime) + " mSec ago");
             stopUsingNetworkFeature(this, false);
         }
 
         public void expire() {
             Log.d(TAG, "ConnectivityService FeatureUser expire(" +
-                    mNetworkType + ", " + mFeature + ", " + mBinder);
+                    mNetworkType + ", " + mFeature + ", " + mBinder +"), created " +
+                    (System.currentTimeMillis() - mCreateTime) + " mSec ago");
             stopUsingNetworkFeature(this, false);
+        }
+
+        public String toString() {
+            return "FeatureUser("+mNetworkType+","+mFeature+","+mPid+","+mUid+"), created " +
+                    (System.currentTimeMillis() - mCreateTime) + " mSec ago";
         }
     }
 
@@ -599,6 +608,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             return stopUsingNetworkFeature(u, true);
         } else {
             // none found!
+            if (DBG) Log.d(TAG, "ignoring stopUsingNetworkFeature - not a live request");
             return 1;
         }
     }
@@ -643,6 +653,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     if (x.mUid == u.mUid && x.mPid == u.mPid &&
                             x.mNetworkType == u.mNetworkType &&
                             TextUtils.equals(x.mFeature, u.mFeature)) {
+                        if (DBG) Log.d(TAG, "ignoring stopUsingNetworkFeature as dup is found");
                         return 1;
                     }
                 }
@@ -1199,14 +1210,32 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
         pw.println();
         for (NetworkStateTracker nst : mNetTrackers) {
-            if (nst != null && nst.getNetworkInfo().isConnected()) {
-                pw.println("Active network: " + nst.getNetworkInfo().
-                        getTypeName());
+            if (nst != null) {
+                if (nst.getNetworkInfo().isConnected()) {
+                    pw.println("Active network: " + nst.getNetworkInfo().
+                            getTypeName());
+                }
+                pw.println(nst.getNetworkInfo());
+                pw.println(nst);
+                pw.println();
             }
-            pw.println(nst.getNetworkInfo());
-            pw.println(nst);
-            pw.println();
         }
+
+        pw.println("Network Requester Pids:");
+        for (int net : mPriorityList) {
+            String pidString = net + ": ";
+            for (Object pid : mNetRequestersPids[net]) {
+                pidString = pidString + pid.toString() + ", ";
+            }
+            pw.println(pidString);
+        }
+        pw.println();
+
+        pw.println("FeatureUsers:");
+        for (Object requester : mFeatureUsers) {
+            pw.println(requester.toString());
+        }
+        pw.println();
     }
 
     // must be stateless - things change under us.
