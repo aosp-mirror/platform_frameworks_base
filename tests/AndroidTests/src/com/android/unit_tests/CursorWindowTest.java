@@ -18,7 +18,7 @@ package com.android.unit_tests;
 
 import android.database.AbstractCursor;
 import android.test.suitebuilder.annotation.SmallTest;
-import com.android.internal.database.ArrayListCursor;
+import com.android.common.ArrayListCursor;
 import android.database.CursorWindow;
 import android.test.PerformanceTestCase;
 

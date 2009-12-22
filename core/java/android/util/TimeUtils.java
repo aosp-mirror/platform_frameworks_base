@@ -27,7 +27,7 @@ import java.io.IOException;
 import java.util.TimeZone;
 import java.util.Date;
 
-import com.android.internal.util.XmlUtils;
+import com.android.common.XmlUtils;
 
 /**
  * A class containing utility methods related to time zones.

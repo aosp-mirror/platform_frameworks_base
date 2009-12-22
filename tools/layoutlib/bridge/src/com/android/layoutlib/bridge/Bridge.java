@@ -16,7 +16,7 @@
 
 package com.android.layoutlib.bridge;
 
-import com.android.internal.util.XmlUtils;
+import com.android.common.XmlUtils;
 import com.android.layoutlib.api.ILayoutBridge;
 import com.android.layoutlib.api.ILayoutLog;
 import com.android.layoutlib.api.ILayoutResult;

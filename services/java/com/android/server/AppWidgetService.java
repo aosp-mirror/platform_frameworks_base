@@ -57,7 +57,7 @@ import java.util.HashSet;
 
 import com.android.internal.appwidget.IAppWidgetService;
 import com.android.internal.appwidget.IAppWidgetHost;
-import com.android.internal.util.FastXmlSerializer;
+import com.android.common.FastXmlSerializer;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
