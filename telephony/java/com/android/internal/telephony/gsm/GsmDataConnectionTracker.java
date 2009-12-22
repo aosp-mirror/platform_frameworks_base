@@ -126,8 +126,8 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
      */
     private ArrayList<DataConnection> pdpList;
 
-    /** Currently active PdpConnection */
-    private PdpConnection mActivePdp;
+    /** Currently active DataConnection */
+    private GsmDataConnection mActivePdp;
 
     /** Is packet service restricted by network */
     private boolean mIsPsRestricted = false;
@@ -137,7 +137,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
     // TODO: Increase this to match the max number of simultaneous
     // PDP contexts we plan to support.
     /**
-     * Pool size of PdpConnection objects.
+     * Pool size of DataConnection objects.
      */
     private static final int PDP_CONNECTION_POOL_SIZE = 1;
 
@@ -382,7 +382,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
     }
 
     /**
-     * Formerly this method was ArrayList<PdpConnection> getAllPdps()
+     * Formerly this method was ArrayList<GsmDataConnection> getAllPdps()
      */
     public ArrayList<DataConnection> getAllDataConnections() {
         ArrayList<DataConnection> pdps = (ArrayList<DataConnection>)pdpList.clone();
@@ -452,7 +452,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                 waitingApns = buildWaitingApns();
                 if (waitingApns.isEmpty()) {
                     if (DBG) log("No APN found");
-                    notifyNoData(PdpConnection.FailCause.MISSING_UKNOWN_APN);
+                    notifyNoData(GsmDataConnection.FailCause.MISSING_UKNOWN_APN);
                     return false;
                 } else {
                     log ("Create from allApns : " + apnListToString(allApns));
@@ -487,7 +487,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
      * there is no mechanism for abandoning an INITING/CONNECTING session,
      * but would likely involve cancelling pending async requests or
      * setting a flag or new state to ignore them when they came in
-     * @param tearDown true if the underlying PdpConnection should be
+     * @param tearDown true if the underlying GsmDataConnection should be
      * disconnected.
      * @param reason reason for the clean up.
      */
@@ -505,12 +505,11 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         setState(State.DISCONNECTING);
 
         for (DataConnection conn : pdpList) {
-            PdpConnection pdp = (PdpConnection) conn;
             if (tearDown) {
                 Message msg = obtainMessage(EVENT_DISCONNECT_DONE, reason);
-                pdp.disconnect(msg);
+                conn.disconnect(msg);
             } else {
-                pdp.clearSettings();
+                conn.reset();
             }
         }
         stopNetStatPoll();
@@ -564,10 +563,10 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         return result;
     }
 
-    private PdpConnection findFreePdp() {
+    private GsmDataConnection findFreePdp() {
         for (DataConnection conn : pdpList) {
-            PdpConnection pdp = (PdpConnection) conn;
-            if (pdp.getState() == DataConnection.State.INACTIVE) {
+            GsmDataConnection pdp = (GsmDataConnection) conn;
+            if (pdp.isInactive()) {
                 return pdp;
             }
         }
@@ -576,13 +575,13 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
 
     private boolean setupData(String reason) {
         ApnSetting apn;
-        PdpConnection pdp;
+        GsmDataConnection pdp;
 
         apn = getNextApn();
         if (apn == null) return false;
         pdp = findFreePdp();
         if (pdp == null) {
-            if (DBG) log("setupData: No free PdpConnection found!");
+            if (DBG) log("setupData: No free GsmDataConnection found!");
             return false;
         }
         mActiveApn = apn;
@@ -591,7 +590,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         Message msg = obtainMessage();
         msg.what = EVENT_DATA_SETUP_COMPLETE;
         msg.obj = reason;
-        pdp.connect(apn, msg);
+        pdp.connect(msg, apn);
 
         setState(State.INITING);
         phone.notifyDataConnection(reason);
@@ -974,13 +973,8 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
      * seems like it deserves an error notification.
      * Transient errors are ignored
      */
-    private boolean shouldPostNotification(PdpConnection.FailCause  cause) {
-        boolean shouldPost = true;
-        // TODO CHECK
-        // if (dataLink != null) {
-        //    shouldPost = dataLink.getLastLinkExitCode() != DataLink.EXIT_OPEN_FAILED;
-        //}
-        return (shouldPost && cause != PdpConnection.FailCause.UNKNOWN);
+    private boolean shouldPostNotification(GsmDataConnection.FailCause  cause) {
+        return (cause != GsmDataConnection.FailCause.UNKNOWN);
     }
 
     /**
@@ -1046,7 +1040,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         }
     }
 
-    private void notifyNoData(PdpConnection.FailCause lastFailCauseCode) {
+    private void notifyNoData(GsmDataConnection.FailCause lastFailCauseCode) {
         setState(State.FAILED);
     }
 
@@ -1069,7 +1063,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         mRetryMgr.resetRetryCount();
 
         // TODO:  To support simultaneous PDP contexts, this should really only call
-        // cleanUpConnection if it needs to free up a PdpConnection.
+        // cleanUpConnection if it needs to free up a GsmDataConnection.
         cleanUpConnection(true, Phone.REASON_APN_SWITCHED);
     }
 
@@ -1149,8 +1143,8 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             // that the existing connection may service that type, in which
             // case we should try the next type, etc.
         } else {
-            PdpConnection.FailCause cause;
-            cause = (PdpConnection.FailCause) (ar.result);
+            GsmDataConnection.FailCause cause;
+            cause = (GsmDataConnection.FailCause) (ar.result);
             if(DBG) log("PDP setup failed " + cause);
                     // Log this failure to the Event Logs.
             if (cause.isEventLoggable()) {
@@ -1259,9 +1253,9 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                 if (cursor.getCount() > 0) {
                     allApns = createApnList(cursor);
                     // TODO: Figure out where this fits in.  This basically just
-                    // writes the pap-secrets file.  No longer tied to PdpConnection
+                    // writes the pap-secrets file.  No longer tied to GsmDataConnection
                     // object.  Not used on current platform (no ppp).
-                    //PdpConnection pdp = pdpList.get(pdp_name);
+                    //GsmDataConnection pdp = pdpList.get(pdp_name);
                     //if (pdp != null && pdp.dataLink != null) {
                     //    pdp.dataLink.setPasswordInfo(cursor);
                     //}
@@ -1273,7 +1267,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         if (allApns.isEmpty()) {
             if (DBG) log("No APN found for carrier: " + operator);
             preferredApn = null;
-            notifyNoData(PdpConnection.FailCause.MISSING_UKNOWN_APN);
+            notifyNoData(GsmDataConnection.FailCause.MISSING_UKNOWN_APN);
         } else {
             preferredApn = getPreferredApn();
             Log.d(LOG_TAG, "Get PreferredAPN");
@@ -1289,14 +1283,14 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         DataConnection pdp;
 
         for (int i = 0; i < PDP_CONNECTION_POOL_SIZE; i++) {
-            pdp = new PdpConnection(mGsmPhone);
+            pdp = GsmDataConnection.makeDataConnection(mGsmPhone);
             pdpList.add(pdp);
          }
     }
 
     private void destroyAllPdpList() {
         if(pdpList != null) {
-            PdpConnection pdp;
+            GsmDataConnection pdp;
             pdpList.removeAll(pdpList);
         }
     }
@@ -1361,7 +1355,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         return result.toString();
     }
 
-    private void startDelayedRetry(PdpConnection.FailCause cause, String reason) {
+    private void startDelayedRetry(GsmDataConnection.FailCause cause, String reason) {
         notifyNoData(cause);
         reconnectAfterFail(cause, reason);
     }

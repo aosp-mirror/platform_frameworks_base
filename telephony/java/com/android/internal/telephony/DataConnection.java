@@ -16,43 +16,137 @@
 
 package com.android.internal.telephony;
 
+import com.android.internal.telephony.gsm.ApnSetting;
+
+import com.android.internal.util.HierarchicalState;
+import com.android.internal.util.HierarchicalStateMachine;
+
 import android.os.AsyncResult;
-import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
+import android.os.SystemProperties;
+import android.util.EventLog;
 
 /**
  * {@hide}
+ *
+ * DataConnection HierarchicalStateMachine.
+ *
+ * This is an abstract base class for representing a single data connection.
+ * Instances of this class such as <code>CdmaDataConnection</code> and
+ * <code>GsmDataConnection</code>, * represent a connection via the cellular network.
+ * There may be multiple data connections and all of them are managed by the
+ * <code>DataConnectionTracker</code>.
+ *
+ * Instances are asynchronous state machines and have two primary entry points
+ * <code>connect()</code> and <code>disconnect</code>. The message a parameter will be returned
+ * hen the operation completes. The <code>msg.obj</code> will contain an AsyncResult
+ * object and <code>AsyncResult.userObj</code> is the original <code>msg.obj</code>. if successful
+ * with the <code>AsyncResult.result == null</code> and <code>AsyncResult.exception == null</code>.
+ * If an error <code>AsyncResult.result = FailCause</code> and
+ * <code>AsyncResult.exception = new Exception()</code>.
+ *
+ * The other public methods are provided for debugging.
+ *
+ * Below is the state machine description for this class.
+ *
+ * DataConnection {
+ *   + mDefaultState {
+ *        EVENT_RESET { clearSettings, >mInactiveState }.
+ *        EVENT_CONNECT {  notifyConnectCompleted(FailCause.UNKNOWN) }.
+ *        EVENT_DISCONNECT { notifyDisconnectCompleted }.
+ *
+ *        // Ignored messages
+ *        EVENT_SETUP_DATA_CONNECTION_DONE,
+ *        EVENT_GET_LAST_FAIL_DONE,
+ *        EVENT_DEACTIVATE_DONE.
+ *     }
+ *   ++ # mInactiveState {
+ *            EVENT_RESET.
+ *            EVENT_CONNECT {startConnecting, >mActivatingState }.
+ *        }
+ *   ++   mActivatingState {
+ *            EVENT_DISCONNECT { %EVENT_DISCONNECT }.
+ *            EVENT_SETUP_DATA_CONNECTION_DONE {
+ *                  if (SUCCESS) { notifyConnectCompleted(FailCause.NONE), >mActiveState }.
+ *                  if (ERR_BadCommand) {
+ *                         notifyConnectCompleted(FailCause.UNKNOWN), >mInactiveState }.
+ *                  if (ERR_BadDns) { tearDownData($DEACTIVATE_DONE), >mDisconnectingBadDnsState }.
+ *                  if (ERR_Other) { getLastDataCallFailCause($EVENT_GET_LAST_FAIL_DONE) }.
+ *                  if (ERR_Stale) {}.
+ *            }
+ *            EVENT_GET_LAST_FAIL_DONE { notifyConnectCompleted(result), >mInactive }.
+ *        }
+ *   ++   mActiveState {
+ *            EVENT_DISCONNECT { tearDownData($EVENT_DEACTIVATE_DONE), >mDisconnecting }.
+ *        }
+ *   ++   mDisconnectingState {
+ *            EVENT_DEACTIVATE_DONE { notifyDisconnectCompleted, >mInactiveState }.
+ *        }
+ *   ++   mDisconnectingBadDnsState {
+ *            EVENT_DEACTIVATE_DONE { notifyConnectComplete(FailCause.UNKNOWN), >mInactiveState }.
+ *        }
+ *  }
  */
-public abstract class DataConnection extends Handler {
+public abstract class DataConnection extends HierarchicalStateMachine {
+    protected static final boolean DBG = true;
 
-    // the inherited class
+    protected static Object mCountLock = new Object();
+    protected static int mCount;
 
-    public enum State {
-        ACTIVE, /* has active data connection */
-        ACTIVATING, /* during connecting process */
-        INACTIVE; /* has empty data connection */
+    /**
+     * Class returned by onSetupConnectionCompleted.
+     */
+    protected enum SetupResult {
+        ERR_BadCommand,
+        ERR_BadDns,
+        ERR_Other,
+        ERR_Stale,
+        SUCCESS;
 
+        public FailCause mFailCause;
+
+        @Override
         public String toString() {
             switch (this) {
-            case ACTIVE:
-                return "active";
-            case ACTIVATING:
-                return "setting up";
-            default:
-                return "inactive";
+                case ERR_BadCommand: return "Bad Command";
+                case ERR_BadDns: return "Bad DNS";
+                case ERR_Other: return "Other error";
+                case ERR_Stale: return "Stale command";
+                case SUCCESS: return "SUCCESS";
+                default: return "unknown";
             }
-        }
-
-        public boolean isActive() {
-            return this == ACTIVE;
-        }
-
-        public boolean isInactive() {
-            return this == INACTIVE;
         }
     }
 
+    /**
+     * Used internally for saving connecting parameters.
+     */
+    protected static class ConnectionParams {
+        public ConnectionParams(ApnSetting apn, Message onCompletedMsg) {
+            this.apn = apn;
+            this.onCompletedMsg = onCompletedMsg;
+        }
+
+        public int tag;
+        public ApnSetting apn;
+        public Message onCompletedMsg;
+    }
+
+    /**
+     * Used internally for saving disconnecting parameters.
+     */
+    protected static class DisconnectParams {
+        public DisconnectParams(Message onCompletedMsg) {
+            this.onCompletedMsg = onCompletedMsg;
+        }
+
+        public int tag;
+        public Message onCompletedMsg;
+    }
+
+    /**
+     * Returned as the reason for a connection failure.
+     */
     public enum FailCause {
         NONE,
         OPERATOR_BARRED,
@@ -71,8 +165,7 @@ public abstract class DataConnection extends Handler {
         GPRS_REGISTRATION_FAIL,
         UNKNOWN,
 
-        RADIO_NOT_AVAILABLE,
-        RADIO_ERROR_RETRY;
+        RADIO_NOT_AVAILABLE;
 
         public boolean isPermanentFail() {
             return (this == OPERATOR_BARRED) || (this == MISSING_UKNOWN_APN) ||
@@ -128,117 +221,139 @@ public abstract class DataConnection extends Handler {
                 return "Data Network Registration Failure";
             case RADIO_NOT_AVAILABLE:
                 return "Radio Not Available";
-            case RADIO_ERROR_RETRY:
-                return "Transient Radio Rrror";
             default:
                 return "Unknown Data Error";
             }
         }
     }
 
-    // ***** Event codes
-    protected static final int EVENT_SETUP_DATA_CONNECTION_DONE = 1;
-    protected static final int EVENT_GET_LAST_FAIL_DONE = 2;
-    protected static final int EVENT_LINK_STATE_CHANGED = 3;
-    protected static final int EVENT_DEACTIVATE_DONE = 4;
-    protected static final int EVENT_FORCE_RETRY = 5;
+    // ***** Event codes for driving the state machine
+    protected static final int EVENT_RESET = 1;
+    protected static final int EVENT_CONNECT = 2;
+    protected static final int EVENT_SETUP_DATA_CONNECTION_DONE = 3;
+    protected static final int EVENT_GET_LAST_FAIL_DONE = 4;
+    protected static final int EVENT_DEACTIVATE_DONE = 5;
+    protected static final int EVENT_DISCONNECT = 6;
 
     //***** Tag IDs for EventLog
     protected static final int EVENT_LOG_BAD_DNS_ADDRESS = 50100;
 
-
     //***** Member Variables
+    protected int mTag;
     protected PhoneBase phone;
-    protected Message onConnectCompleted;
-    protected Message onDisconnect;
     protected int cid;
     protected String interfaceName;
     protected String ipAddress;
     protected String gatewayAddress;
     protected String[] dnsServers;
-    protected State state;
     protected long createTime;
     protected long lastFailTime;
     protected FailCause lastFailCause;
     protected static final String NULL_IP = "0.0.0.0";
     Object userData;
 
-    // receivedDisconnectReq is set when disconnect during activation
-    protected boolean receivedDisconnectReq;
+    //***** Abstract methods
+    public abstract String toString();
 
-    /* Instance Methods */
-    protected abstract void onSetupConnectionCompleted(AsyncResult ar);
-
-    protected abstract void onDeactivated(AsyncResult ar);
-
-    protected abstract void disconnect(Message msg);
-
-    protected abstract void notifyFail(FailCause cause, Message onCompleted);
-
-    protected abstract void notifyDisconnect(Message msg);
-
-    protected abstract void onLinkStateChanged(DataLink.LinkState linkState);
+    protected abstract void onConnect(ConnectionParams cp);
 
     protected abstract FailCause getFailCauseFromRequest(int rilCause);
 
-    public abstract String toString();
+    protected abstract boolean isDnsOk(String[] domainNameServers);
 
     protected abstract void log(String s);
 
 
    //***** Constructor
-    protected DataConnection(PhoneBase phone) {
-        super();
+    protected DataConnection(PhoneBase phone, String name) {
+        super(name);
+        if (DBG) log("DataConnection constructor E");
         this.phone = phone;
-        onConnectCompleted = null;
-        onDisconnect = null;
         this.cid = -1;
-        receivedDisconnectReq = false;
         this.dnsServers = new String[2];
+
+        clearSettings();
+
+        setDbg(true);
+        addState(mDefaultState);
+            addState(mInactiveState, mDefaultState);
+            addState(mActivatingState, mDefaultState);
+            addState(mActiveState, mDefaultState);
+            addState(mDisconnectingState, mDefaultState);
+            addState(mDisconnectingBadDnsState, mDefaultState);
+        setInitialState(mInactiveState);
+        if (DBG) log("DataConnection constructor X");
+    }
+
+    /**
+     * TearDown the data connection.
+     *
+     * @param o will be returned in AsyncResult.userObj
+     *          and is either a DisconnectParams or ConnectionParams.
+     */
+    private void tearDownData(Object o) {
+        if (phone.mCM.getRadioState().isOn()) {
+            if (DBG) log("tearDownData radio is on, call deactivateDataCall");
+            phone.mCM.deactivateDataCall(cid, obtainMessage(EVENT_DEACTIVATE_DONE, o));
+        } else {
+            if (DBG) log("tearDownData radio is off sendMessage EVENT_DEACTIVATE_DONE immediately");
+            sendMessage(obtainMessage(EVENT_DEACTIVATE_DONE, o));
+        }
+    }
+
+    /**
+     * Send the connectionCompletedMsg.
+     *
+     * @param cp is the ConnectionParams
+     * @param cause
+     */
+    private void notifyConnectCompleted(ConnectionParams cp, FailCause cause) {
+        Message connectionCompletedMsg = cp.onCompletedMsg;
+        if (connectionCompletedMsg == null) {
+            return;
+        }
+
+        long timeStamp = System.currentTimeMillis();
+        connectionCompletedMsg.arg1 = cid;
+
+        if (cause == FailCause.NONE) {
+            createTime = timeStamp;
+            AsyncResult.forMessage(connectionCompletedMsg);
+        } else {
+            lastFailCause = cause;
+            lastFailTime = timeStamp;
+            AsyncResult.forMessage(connectionCompletedMsg, cause, new Exception());
+        }
+        if (DBG) log("notifyConnection at " + timeStamp + " cause=" + cause);
+
+        connectionCompletedMsg.sendToTarget();
+    }
+
+    /**
+     * Send ar.userObj if its a message, which is should be back to originator.
+     *
+     * @param dp is the DisconnectParams.
+     */
+    private void notifyDisconnectCompleted(DisconnectParams dp) {
+        if (DBG) log("NotifyDisconnectCompleted");
+
+        Message msg = dp.onCompletedMsg;
+        AsyncResult.forMessage(msg);
+        msg.sendToTarget();
 
         clearSettings();
     }
 
-    protected void setHttpProxy(String httpProxy, String httpPort) {
-        if (httpProxy == null || httpProxy.length() == 0) {
-            phone.setSystemProperty("net.gprs.http-proxy", null);
-            return;
-        }
+    /**
+     * Clear all settings called when entering mInactiveState.
+     */
+    protected void clearSettings() {
+        if (DBG) log("clearSettings");
 
-        if (httpPort == null || httpPort.length() == 0) {
-            httpPort = "8080";     // Default to port 8080
-        }
-
-        phone.setSystemProperty("net.gprs.http-proxy",
-                "http://" + httpProxy + ":" + httpPort + "/");
-    }
-
-    public String getInterface() {
-        return interfaceName;
-    }
-
-    public String getIpAddress() {
-        return ipAddress;
-    }
-
-    public String getGatewayAddress() {
-        return gatewayAddress;
-    }
-
-    public String[] getDnsServers() {
-        return dnsServers;
-    }
-
-    public void clearSettings() {
-        log("DataConnection.clearSettings()");
-
-        this.state = State.INACTIVE;
         this.createTime = -1;
         this.lastFailTime = -1;
         this.lastFailCause = FailCause.NONE;
 
-        receivedDisconnectReq = false;
-        onConnectCompleted = null;
         interfaceName = null;
         ipAddress = null;
         gatewayAddress = null;
@@ -246,80 +361,433 @@ public abstract class DataConnection extends Handler {
         dnsServers[1] = null;
     }
 
-    protected void onGetLastFailCompleted(AsyncResult ar) {
-        if (receivedDisconnectReq) {
-            // Don't bother reporting the error if there's already a
-            // pending disconnect request, since DataConnectionTracker
-            // has already updated its state.
-            notifyDisconnect(onDisconnect);
-        } else {
-            FailCause cause = FailCause.UNKNOWN;
+    /**
+     * Process setup completion.
+     *
+     * @param ar is the result
+     * @return SetupResult.
+     */
+    private SetupResult onSetupConnectionCompleted(AsyncResult ar) {
+        SetupResult result;
+        String[] response = ((String[]) ar.result);
+        ConnectionParams cp = (ConnectionParams) ar.userObj;
 
-            if (ar.exception == null) {
-                int rilFailCause = ((int[]) (ar.result))[0];
-                cause = getFailCauseFromRequest(rilFailCause);
+        if (ar.exception != null) {
+            if (DBG) log("DataConnection Init failed " + ar.exception);
+
+            if (ar.exception instanceof CommandException
+                    && ((CommandException) (ar.exception)).getCommandError()
+                    == CommandException.Error.RADIO_NOT_AVAILABLE) {
+                result = SetupResult.ERR_BadCommand;
+                result.mFailCause = FailCause.RADIO_NOT_AVAILABLE;
+            } else {
+                result = SetupResult.ERR_Other;
             }
-            notifyFail(cause, onConnectCompleted);
-        }
-    }
-
-    protected void onForceRetry() {
-        if (receivedDisconnectReq) {
-            notifyDisconnect(onDisconnect);
+        } else if (cp.tag != mTag) {
+            if (DBG) {
+                log("BUG: onSetupConnectionCompleted is stale cp.tag=" + cp.tag + ", mtag=" + mTag);
+            }
+            result = SetupResult.ERR_Stale;
         } else {
-            notifyFail(FailCause.RADIO_ERROR_RETRY, onConnectCompleted);
+            cid = Integer.parseInt(response[0]);
+            if (response.length > 2) {
+                interfaceName = response[1];
+                ipAddress = response[2];
+                String prefix = "net." + interfaceName + ".";
+                gatewayAddress = SystemProperties.get(prefix + "gw");
+                dnsServers[0] = SystemProperties.get(prefix + "dns1");
+                dnsServers[1] = SystemProperties.get(prefix + "dns2");
+                if (DBG) {
+                    log("interface=" + interfaceName + " ipAddress=" + ipAddress
+                        + " gateway=" + gatewayAddress + " DNS1=" + dnsServers[0]
+                        + " DNS2=" + dnsServers[1]);
+                }
+
+                if (isDnsOk(dnsServers)) {
+                    result = SetupResult.SUCCESS;
+                } else {
+                    result = SetupResult.ERR_BadDns;
+                }
+            } else {
+                result = SetupResult.ERR_Other;
+            }
+        }
+
+        if (DBG) log("DataConnection setup result=" + result + " on cid = " + cid);
+        return result;
+    }
+
+    /**
+     * The parent state for all other states.
+     */
+    private class DcDefaultState extends HierarchicalState {
+        @Override
+        protected boolean processMessage(Message msg) {
+            AsyncResult ar;
+
+            switch (msg.what) {
+                case EVENT_RESET:
+                    if (DBG) log("DcDefaultState: msg.what=EVENT_RESET");
+                    clearSettings();
+                    transitionTo(mInactiveState);
+                    break;
+
+                case EVENT_CONNECT:
+                    if (DBG) log("DcDefaultState: msg.what=EVENT_CONNECT, fail not expected");
+                    ConnectionParams cp = (ConnectionParams) msg.obj;
+                    notifyConnectCompleted(cp, FailCause.UNKNOWN);
+                    break;
+
+                case EVENT_DISCONNECT:
+                    if (DBG) log("DcDefaultState: msg.what=EVENT_DISCONNECT");
+                    notifyDisconnectCompleted((DisconnectParams) msg.obj);
+                    break;
+
+                default:
+                    if (DBG) {
+                        log("DcDefaultState: shouldn't happen but ignore msg.what=" + msg.what);
+                    }
+                    break;
+            }
+
+            return true;
         }
     }
+    private DcDefaultState mDefaultState = new DcDefaultState();
 
-    @Override
-    public void handleMessage(Message msg) {
-        AsyncResult ar;
+    /**
+     * The state machine is inactive and expects a EVENT_CONNECT.
+     */
+    private class DcInactiveState extends HierarchicalState {
+        @Override protected void enter() {
+            mTag += 1;
+        }
+        @Override protected boolean processMessage(Message msg) {
+            boolean retVal;
 
-        log("DataConnection.handleMessage()");
+            switch (msg.what) {
+                case EVENT_RESET:
+                    if (DBG) {
+                        log("DcInactiveState: msg.what=EVENT_RESET, ignore we're already reset");
+                    }
+                    retVal = true;
+                    break;
 
-        switch (msg.what) {
+                case EVENT_CONNECT:
+                    if (DBG) log("DcInactiveState msg.what=EVENT_CONNECT");
+                    ConnectionParams cp = (ConnectionParams) msg.obj;
+                    cp.tag = mTag;
+                    onConnect(cp);
+                    transitionTo(mActivatingState);
+                    retVal = true;
+                    break;
 
-        case EVENT_SETUP_DATA_CONNECTION_DONE:
-            onSetupConnectionCompleted((AsyncResult) msg.obj);
-            break;
-
-        case EVENT_FORCE_RETRY:
-            onForceRetry();
-            break;
-
-        case EVENT_GET_LAST_FAIL_DONE:
-            onGetLastFailCompleted((AsyncResult) msg.obj);
-            break;
-
-        case EVENT_LINK_STATE_CHANGED:
-            ar = (AsyncResult) msg.obj;
-            DataLink.LinkState ls  = (DataLink.LinkState) ar.result;
-            onLinkStateChanged(ls);
-            break;
-
-        case EVENT_DEACTIVATE_DONE:
-            onDeactivated((AsyncResult) msg.obj);
-            break;
+                default:
+                    if (DBG) log("DcInactiveState nothandled msg.what=" + msg.what);
+                    retVal = false;
+                    break;
+            }
+            return retVal;
         }
     }
+    private DcInactiveState mInactiveState = new DcInactiveState();
 
-    public State getState() {
-        log("DataConnection.getState()");
-        return state;
+    /**
+     * The state machine is activating a connection.
+     */
+    private class DcActivatingState extends HierarchicalState {
+        @Override protected boolean processMessage(Message msg) {
+            boolean retVal;
+            AsyncResult ar;
+            ConnectionParams cp;
+
+            switch (msg.what) {
+                case EVENT_DISCONNECT:
+                    if (DBG) log("DcActivatingState deferring msg.what=EVENT_DISCONNECT");
+                    deferMessage(msg);
+                    retVal = true;
+                    break;
+
+                case EVENT_SETUP_DATA_CONNECTION_DONE:
+                    if (DBG) log("DcActivatingState msg.what=EVENT_SETUP_DATA_CONNECTION_DONE");
+
+                    ar = (AsyncResult) msg.obj;
+                    cp = (ConnectionParams) ar.userObj;
+
+                    SetupResult result = onSetupConnectionCompleted(ar);
+                    switch (result) {
+                        case SUCCESS:
+                            // All is well
+                            notifyConnectCompleted(cp, FailCause.NONE);
+                            transitionTo(mActiveState);
+                            break;
+                        case ERR_BadCommand:
+                            // Vendor ril rejected the command and didn't connect.
+                            notifyConnectCompleted(cp, result.mFailCause);
+                            transitionTo(mInactiveState);
+                            break;
+                        case ERR_BadDns:
+                            // Connection succeeded but DNS info is bad so disconnect
+                            EventLog.writeEvent(TelephonyEventLog.EVENT_LOG_BAD_DNS_ADDRESS,
+                                    dnsServers[0]);
+                            tearDownData(cp);
+                            transitionTo(mDisconnectingBadDnsState);
+                            break;
+                        case ERR_Other:
+                            // Request the failure cause and process in this state
+                            phone.mCM.getLastDataCallFailCause(
+                                    obtainMessage(EVENT_GET_LAST_FAIL_DONE, cp));
+                            break;
+                        case ERR_Stale:
+                            // Request is stale, ignore.
+                            break;
+                        default:
+                            throw new RuntimeException("Unkown SetupResult, should not happen");
+                    }
+                    retVal = true;
+                    break;
+
+                case EVENT_GET_LAST_FAIL_DONE:
+                    ar = (AsyncResult) msg.obj;
+                    cp = (ConnectionParams) ar.userObj;
+                    FailCause cause = FailCause.UNKNOWN;
+
+                    if (cp.tag == mTag) {
+                        if (DBG) log("DcActivatingState msg.what=EVENT_GET_LAST_FAIL_DONE");
+                        if (ar.exception == null) {
+                            int rilFailCause = ((int[]) (ar.result))[0];
+                            cause = getFailCauseFromRequest(rilFailCause);
+                        }
+                         notifyConnectCompleted(cp, cause);
+                         transitionTo(mInactiveState);
+                    } else {
+                        if (DBG) {
+                            log("DcActivatingState EVENT_GET_LAST_FAIL_DONE is stale cp.tag="
+                                + cp.tag + ", mTag=" + mTag);
+                        }
+                    }
+
+                    retVal = true;
+                    break;
+
+                default:
+                    if (DBG) log("DcActivatingState not handled msg.what=" + msg.what);
+                    retVal = false;
+                    break;
+            }
+            return retVal;
+        }
+    }
+    private DcActivatingState mActivatingState = new DcActivatingState();
+
+    /**
+     * The state machine is connected, expecting an EVENT_DISCONNECT.
+     */
+    private class DcActiveState extends HierarchicalState {
+        @Override protected boolean processMessage(Message msg) {
+            boolean retVal;
+
+            switch (msg.what) {
+                case EVENT_DISCONNECT:
+                    if (DBG) log("DcActiveState msg.what=EVENT_DISCONNECT");
+                    DisconnectParams dp = (DisconnectParams) msg.obj;
+                    dp.tag = mTag;
+                    tearDownData(dp);
+                    transitionTo(mDisconnectingState);
+                    retVal = true;
+                    break;
+
+                default:
+                    if (DBG) log("DcActiveState nothandled msg.what=" + msg.what);
+                    retVal = false;
+                    break;
+            }
+            return retVal;
+        }
+    }
+    private DcActiveState mActiveState = new DcActiveState();
+
+    /**
+     * The state machine is disconnecting.
+     */
+    private class DcDisconnectingState extends HierarchicalState {
+        @Override protected boolean processMessage(Message msg) {
+            boolean retVal;
+
+            switch (msg.what) {
+                case EVENT_DEACTIVATE_DONE:
+                    if (DBG) log("DcDisconnectingState msg.what=EVENT_DEACTIVATE_DONE");
+                    AsyncResult ar = (AsyncResult) msg.obj;
+                    DisconnectParams dp = (DisconnectParams) ar.userObj;
+                    if (dp.tag == mTag) {
+                        notifyDisconnectCompleted((DisconnectParams) ar.userObj);
+                        transitionTo(mInactiveState);
+                    } else {
+                        if (DBG) log("DcDisconnectState EVENT_DEACTIVATE_DONE stale dp.tag="
+                                + dp.tag + " mTag=" + mTag);
+                    }
+                    retVal = true;
+                    break;
+
+                default:
+                    if (DBG) log("DcDisconnectingState not handled msg.what=" + msg.what);
+                    retVal = false;
+                    break;
+            }
+            return retVal;
+        }
+    }
+    private DcDisconnectingState mDisconnectingState = new DcDisconnectingState();
+
+    /**
+     * The state machine is disconnecting after a bad dns setup
+     * was found in mInactivatingState.
+     */
+    private class DcDisconnectingBadDnsState extends HierarchicalState {
+        @Override protected boolean processMessage(Message msg) {
+            boolean retVal;
+
+            switch (msg.what) {
+                case EVENT_DEACTIVATE_DONE:
+                    AsyncResult ar = (AsyncResult) msg.obj;
+                    ConnectionParams cp = (ConnectionParams) ar.userObj;
+                    if (cp.tag == mTag) {
+                        if (DBG) log("DcDisconnectingBadDnsState msg.what=EVENT_DEACTIVATE_DONE");
+                        notifyConnectCompleted(cp, FailCause.UNKNOWN);
+                        transitionTo(mInactiveState);
+                    } else {
+                        if (DBG) log("DcDisconnectingBadDnsState EVENT_DEACTIVE_DONE stale dp.tag="
+                                + cp.tag + ", mTag=" + mTag);
+                    }
+                    retVal = true;
+                    break;
+
+                default:
+                    if (DBG) log("DcDisconnectingBadDnsState not handled msg.what=" + msg.what);
+                    retVal = false;
+                    break;
+            }
+            return retVal;
+        }
+    }
+    private DcDisconnectingBadDnsState mDisconnectingBadDnsState = new DcDisconnectingBadDnsState();
+
+    // ******* public interface
+
+    /**
+     * Disconnect from the network.
+     */
+    public void reset() {
+        sendMessage(obtainMessage(EVENT_RESET));
     }
 
+    /**
+     * Connect to the apn and return an AsyncResult in onCompletedMsg.
+     * Used for cellular networks that use Acess Point Names (APN) such
+     * as GSM networks.
+     *
+     * @param onCompletedMsg is sent with its msg.obj as an AsyncResult object.
+     *        With AsyncResult.userObj set to the original msg.obj,
+     *        AsyncResult.result = FailCause and AsyncResult.exception = Exception().
+     * @param apn is the Acces Point Name to connect to
+     */
+    public void connect(Message onCompletedMsg, ApnSetting apn) {
+        sendMessage(obtainMessage(EVENT_CONNECT, new ConnectionParams(apn, onCompletedMsg)));
+    }
+
+    /**
+     * Connect to the apn and return an AsyncResult in onCompletedMsg.
+     *
+     * @param onCompletedMsg is sent with its msg.obj as an AsyncResult object.
+     *        With AsyncResult.userObj set to the original msg.obj,
+     *        AsyncResult.result = FailCause and AsyncResult.exception = Exception().
+     */
+    public void connect(Message onCompletedMsg) {
+        sendMessage(obtainMessage(EVENT_CONNECT, new ConnectionParams(null, onCompletedMsg)));
+    }
+
+    /**
+     * Disconnect from the network.
+     *
+     * @param onCompletedMsg is sent with its msg.obj as an AsyncResult object.
+     *        With AsyncResult.userObj set to the original msg.obj.
+     */
+    public void disconnect(Message onCompletedMsg) {
+        sendMessage(obtainMessage(EVENT_DISCONNECT, new DisconnectParams(onCompletedMsg)));
+    }
+
+    // ****** The following are used for debugging.
+
+    /**
+     * @return true if the state machine is in the inactive state.
+     */
+    public boolean isInactive() {
+        boolean retVal = getCurrentState() == mInactiveState;
+        return retVal;
+    }
+
+    /**
+     * @return true if the state machine is in the inactive state.
+     */
+    public boolean isActive() {
+        boolean retVal = getCurrentState() == mActiveState;
+        return retVal;
+    }
+
+    /**
+     * @return the interface name as a string.
+     */
+    public String getInterface() {
+        return interfaceName;
+    }
+
+    /**
+     * @return the ip address as a string.
+     */
+    public String getIpAddress() {
+        return ipAddress;
+    }
+
+    /**
+     * @return the gateway address as a string.
+     */
+    public String getGatewayAddress() {
+        return gatewayAddress;
+    }
+
+    /**
+     * @return an array of associated DNS addresses.
+     */
+    public String[] getDnsServers() {
+        return dnsServers;
+    }
+
+    /**
+     * @return the current state as a string.
+     */
+    public String getStateAsString() {
+        String retVal = getCurrentState().getName();
+        return retVal;
+    }
+
+    /**
+     * @return the time of when this connection was created.
+     */
     public long getConnectionTime() {
-        log("DataConnection.getConnectionTime()");
         return createTime;
     }
 
+    /**
+     * @return the time of the last failure.
+     */
     public long getLastFailTime() {
-        log("DataConnection.getLastFailTime()");
         return lastFailTime;
     }
 
+    /**
+     * @return the last cause of failure.
+     */
     public FailCause getLastFailCause() {
-        log("DataConnection.getLastFailCause()");
         return lastFailCause;
     }
 }

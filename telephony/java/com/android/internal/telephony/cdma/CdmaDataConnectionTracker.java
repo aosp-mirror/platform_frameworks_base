@@ -386,7 +386,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
                     Message msg = obtainMessage(EVENT_DISCONNECT_DONE, reason);
                     conn.disconnect(msg);
                 } else {
-                    conn.clearSettings();
+                    conn.reset();
                 }
             }
         }
@@ -403,7 +403,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
     private CdmaDataConnection findFreeDataConnection() {
         for (DataConnection connBase : dataConnectionList) {
             CdmaDataConnection conn = (CdmaDataConnection) connBase;
-            if (conn.getState() == DataConnection.State.INACTIVE) {
+            if (conn.isInactive()) {
                 return conn;
             }
         }
@@ -801,7 +801,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
         CdmaDataConnection dataConn;
 
        for (int i = 0; i < DATA_CONNECTION_POOL_SIZE; i++) {
-            dataConn = new CdmaDataConnection(mCdmaPhone);
+            dataConn = CdmaDataConnection.makeDataConnection(mCdmaPhone);
             dataConnectionList.add(dataConn);
        }
     }
