@@ -167,7 +167,8 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
         // not yet been handled and also do not correspond to the two
         // kinds that are processed below.
         if ((SmsEnvelope.TELESERVICE_WMT != teleService) &&
-                (SmsEnvelope.TELESERVICE_WEMT != teleService)) {
+                (SmsEnvelope.TELESERVICE_WEMT != teleService) &&
+                (SmsEnvelope.MESSAGE_TYPE_BROADCAST != sms.getMessageType())) {
             return Intents.RESULT_SMS_UNSUPPORTED;
         }
 

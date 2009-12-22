@@ -458,8 +458,19 @@ public class SmsMessage extends SmsMessageBase {
      *  {@link com.android.internal.telephony.cdma.sms.SmsEnvelope#TELESERVICE_VMN},
      *  {@link com.android.internal.telephony.cdma.sms.SmsEnvelope#TELESERVICE_WAP}
     */
-    public int getTeleService() {
+    /* package */ int getTeleService() {
         return mEnvelope.teleService;
+    }
+
+    /**
+     * Returns the message type of the message.
+     * @return the message type:
+     *  {@link com.android.internal.telephony.cdma.sms.SmsEnvelope#MESSAGE_TYPE_POINT_TO_POINT},
+     *  {@link com.android.internal.telephony.cdma.sms.SmsEnvelope#MESSAGE_TYPE_BROADCAST},
+     *  {@link com.android.internal.telephony.cdma.sms.SmsEnvelope#MESSAGE_TYPE_ACKNOWLEDGE},
+    */
+    /* package */ int getMessageType() {
+        return mEnvelope.messageType;
     }
 
     /**
