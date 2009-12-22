@@ -8,7 +8,7 @@ LOCAL_SRC_FILES:=       \
 	stagefright.cpp
 
 LOCAL_SHARED_LIBRARIES := \
-	libstagefright
+	libstagefright libmedia libutils libbinder
 
 LOCAL_C_INCLUDES:= \
 	$(JNI_H_INCLUDE) \
@@ -30,7 +30,7 @@ LOCAL_SRC_FILES:=         \
         record.cpp
 
 LOCAL_SHARED_LIBRARIES := \
-	libstagefright
+	libstagefright liblog libutils libbinder
 
 LOCAL_C_INCLUDES:= \
 	$(JNI_H_INCLUDE) \
@@ -52,7 +52,7 @@ LOCAL_SRC_FILES:=         \
         audioloop.cpp
 
 LOCAL_SHARED_LIBRARIES := \
-	libstagefright
+	libstagefright liblog libutils libbinder
 
 LOCAL_C_INCLUDES:= \
 	$(JNI_H_INCLUDE) \
