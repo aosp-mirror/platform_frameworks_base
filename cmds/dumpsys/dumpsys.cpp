@@ -51,22 +51,26 @@ int main(int argc, char* const argv[])
 
     const size_t N = services.size();
 
-    // first print a list of the current services
-    aout << "Currently running services:" << endl;
-
-    for (size_t i=0; i<N; i++) {
-        sp<IBinder> service = sm->checkService(services[i]);
-        if (service != NULL) {
-            aout << "  " << services[i] << endl;
+    if (N > 1) {
+        // first print a list of the current services
+        aout << "Currently running services:" << endl;
+    
+        for (size_t i=0; i<N; i++) {
+            sp<IBinder> service = sm->checkService(services[i]);
+            if (service != NULL) {
+                aout << "  " << services[i] << endl;
+            }
         }
     }
 
     for (size_t i=0; i<N; i++) {
         sp<IBinder> service = sm->checkService(services[i]);
         if (service != NULL) {
-            aout << "------------------------------------------------------------"
-                    "-------------------" << endl;
-            aout << "DUMP OF SERVICE " << services[i] << ":" << endl;
+            if (N > 1) {
+                aout << "------------------------------------------------------------"
+                        "-------------------" << endl;
+                aout << "DUMP OF SERVICE " << services[i] << ":" << endl;
+            }
             int err = service->dump(STDOUT_FILENO, args);
             if (err != 0) {
                 aerr << "Error dumping service info: (" << strerror(err)
