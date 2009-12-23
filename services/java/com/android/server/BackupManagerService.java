@@ -497,11 +497,21 @@ class BackupManagerService extends IBackupManager.Stub {
         }
     }
 
-    // Add a transport to our set of available backends
+    // Add a transport to our set of available backends.  If 'transport' is null, this
+    // is an unregistration, and the transport's entry is removed from our bookkeeping.
     private void registerTransport(String name, IBackupTransport transport) {
         synchronized (mTransports) {
             if (DEBUG) Log.v(TAG, "Registering transport " + name + " = " + transport);
-            mTransports.put(name, transport);
+            if (transport != null) {
+                mTransports.put(name, transport);
+            } else {
+                mTransports.remove(name);
+                if (mCurrentTransport.equals(name)) {
+                    mCurrentTransport = null;
+                }
+                // Nothing further to do in the unregistration case
+                return;
+            }
         }
 
         // If the init sentinel file exists, we need to be sure to perform the init
