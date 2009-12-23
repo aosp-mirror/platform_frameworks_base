@@ -340,8 +340,6 @@ public class SimpleMesh extends BaseObj {
             }
             mElement = b.create();
 
-            android.util.Log.e("rs", "sm create  size=" + (mVtxCount / floatCount) + ", count=" + mVtxCount);
-
             Builder smb = new Builder(mRS);
             smb.addVertexType(mElement, mVtxCount / floatCount);
             smb.setIndexType(Element.createIndex(mRS), mIndexCount);

@@ -108,7 +108,6 @@ Element * Element::create(Context *rsc, size_t count, const Element **ein,
     for (size_t ct=0; ct < count; ct++) {
         e->mFields[ct].e.set(ein[ct]);
         e->mFields[ct].name.setTo(nin[ct], lengths[ct]);
-        LOGE("element %p %s", ein[ct], e->mFields[ct].name.string());
     }
 
     return e;

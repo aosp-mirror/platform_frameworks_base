@@ -269,12 +269,10 @@ public class Element extends BaseObj {
 
     /////////////////////////////////////////
     public static Element createUser(RenderScript rs, DataType dt) {
-        //android.util.Log.e("rs", "createUser " + dt.mID);
         return new Element(rs, dt, DataKind.USER, false, 1);
     }
 
     public static Element createVector(RenderScript rs, DataType dt, int size) {
-        //android.util.Log.e("rs", "createVector " + dt.mID + ", " + size);
         if (size < 2 || size > 4) {
             throw new IllegalArgumentException("Bad size");
         }
@@ -282,12 +280,10 @@ public class Element extends BaseObj {
     }
 
     public static Element createIndex(RenderScript rs) {
-        android.util.Log.e("rs", "createIndex ");
         return new Element(rs, DataType.UNSIGNED_16, DataKind.INDEX, false, 1);
     }
 
     public static Element createAttrib(RenderScript rs, DataType dt, DataKind dk, int size) {
-        android.util.Log.e("rs", "createAttrib " + dt.mID + ", " + dk.mID + ", " + size);
         if (!(dt == DataType.FLOAT_32 ||
               dt == DataType.UNSIGNED_8 ||
               dt == DataType.UNSIGNED_16 ||
@@ -336,7 +332,6 @@ public class Element extends BaseObj {
     }
 
     public static Element createPixel(RenderScript rs, DataType dt, DataKind dk) {
-        android.util.Log.e("rs", "createPixel " + dt.mID + ", " + dk.mID);
         if (!(dk == DataKind.PIXEL_L ||
               dk == DataKind.PIXEL_A ||
               dk == DataKind.PIXEL_LA ||
