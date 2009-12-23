@@ -50,12 +50,7 @@ public class LockPatternKeyguardViewProperties implements KeyguardViewProperties
     }
 
     public boolean isSecure() {
-        return isLockPatternSecure() || isSimPinSecure();
-    }
-
-    private boolean isLockPatternSecure() {
-        return mLockPatternUtils.isLockPatternEnabled() && mLockPatternUtils
-                .savedPatternExists();
+        return mLockPatternUtils.isSecure() || isSimPinSecure();
     }
 
     private boolean isSimPinSecure() {

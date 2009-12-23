@@ -111,7 +111,12 @@ public class LockPatternKeyguardView extends KeyguardViewBase
         /**
          * Unlock by entering an account's login and password.
          */
-        Account
+        Account,
+
+        /**
+         * Unlock by entering a password or PIN
+         */
+        Password
     }
 
     /**
@@ -268,7 +273,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase
             public void reportFailedPatternAttempt() {
                 mUpdateMonitor.reportFailedAttempt();
                 final int failedAttempts = mUpdateMonitor.getFailedAttempts();
-                if (DEBUG) Log.d(TAG, 
+                if (DEBUG) Log.d(TAG,
                     "reportFailedPatternAttempt: #" + failedAttempts +
                     " (enableFallback=" + mEnableFallback + ")");
                 if (mEnableFallback && failedAttempts ==
@@ -309,7 +314,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase
         mLockScreen = createLockScreen();
         addView(mLockScreen);
         final UnlockMode unlockMode = getUnlockMode();
-        if (DEBUG) Log.d(TAG, 
+        if (DEBUG) Log.d(TAG,
             "LockPatternKeyguardView ctor: about to createUnlockScreenFor; mEnableFallback="
             + mEnableFallback);
         mUnlockScreen = createUnlockScreenFor(unlockMode);
@@ -434,16 +439,25 @@ public class LockPatternKeyguardView extends KeyguardViewBase
 
     private boolean isSecure() {
         UnlockMode unlockMode = getUnlockMode();
-        if (unlockMode == UnlockMode.Pattern) {
-            return mLockPatternUtils.isLockPatternEnabled();
-        } else if (unlockMode == UnlockMode.SimPin) {
-            return mUpdateMonitor.getSimState() == IccCard.State.PIN_REQUIRED
-                        || mUpdateMonitor.getSimState() == IccCard.State.PUK_REQUIRED;
-        } else if (unlockMode == UnlockMode.Account) {
-            return true;
-        } else {
-            throw new IllegalStateException("unknown unlock mode " + unlockMode);
+        boolean secure = false;
+        switch (unlockMode) {
+            case Pattern:
+                secure = mLockPatternUtils.isLockPatternEnabled();
+                break;
+            case SimPin:
+                secure = mUpdateMonitor.getSimState() == IccCard.State.PIN_REQUIRED
+                            || mUpdateMonitor.getSimState() == IccCard.State.PUK_REQUIRED;
+                break;
+            case Account:
+                secure = true;
+                break;
+            case Password:
+                secure = mLockPatternUtils.isLockPasswordEnabled();
+                break;
+            default:
+                throw new IllegalStateException("unknown unlock mode " + unlockMode);
         }
+        return secure;
     }
 
     private void updateScreen(final Mode mode) {
@@ -524,6 +538,12 @@ public class LockPatternKeyguardView extends KeyguardViewBase
                 // "permanently locked" state.)
                 return createUnlockScreenFor(UnlockMode.Pattern);
             }
+        } else if (unlockMode == UnlockMode.Password) {
+            return new PasswordUnlockScreen(
+                    mContext,
+                    mLockPatternUtils,
+                    mUpdateMonitor,
+                    mKeyguardScreenCallback);
         } else {
             throw new IllegalArgumentException("unknown unlock mode " + unlockMode);
         }
@@ -575,13 +595,29 @@ public class LockPatternKeyguardView extends KeyguardViewBase
      */
     private UnlockMode getUnlockMode() {
         final IccCard.State simState = mUpdateMonitor.getSimState();
+        UnlockMode currentMode;
         if (simState == IccCard.State.PIN_REQUIRED || simState == IccCard.State.PUK_REQUIRED) {
-            return UnlockMode.SimPin;
+            currentMode = UnlockMode.SimPin;
         } else {
-            return (mForgotPattern || mLockPatternUtils.isPermanentlyLocked()) ?
-                    UnlockMode.Account:
-                    UnlockMode.Pattern;
+            final int mode = mLockPatternUtils.getPasswordMode();
+            switch (mode) {
+                case LockPatternUtils.MODE_PIN:
+                case LockPatternUtils.MODE_PASSWORD:
+                    currentMode = UnlockMode.Password;
+                    break;
+                case LockPatternUtils.MODE_PATTERN:
+                    // "forgot pattern" button is only available in the pattern mode...
+                    if (mForgotPattern && mLockPatternUtils.isPermanentlyLocked()) {
+                        currentMode = UnlockMode.Account;
+                    } else {
+                        currentMode = UnlockMode.Pattern;
+                    }
+                    break;
+                default:
+                   throw new IllegalStateException("Unknown unlock mode:" + mode);
+            }
         }
+        return currentMode;
     }
 
     private void showTimeoutDialog() {

@@ -27,7 +27,6 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.android.internal.R;
@@ -167,6 +166,7 @@ public class SimUnlockScreen extends LinearLayout implements KeyguardScreen, Vie
             }
             mCallback.pokeWakelock();
         } else if (v == mEmergencyCallButton) {
+            mCallback.pokeWakelock();
             mCallback.takeEmergencyCallAction();
         } else if (v == mOkButton) {
             checkPin();
@@ -219,8 +219,8 @@ public class SimUnlockScreen extends LinearLayout implements KeyguardScreen, Vie
                     mHeaderText.setText(R.string.keyguard_password_wrong_pin_code);
                     mPinText.setText("");
                     mEnteredDigits = 0;
-                    mCallback.pokeWakelock();
                 }
+                mCallback.pokeWakelock();
             }
         }.start();
     }

@@ -197,6 +197,7 @@ class UnlockScreen extends LinearLayoutWithDefaultTouchRecepient
         // emergency call buttons
         final OnClickListener emergencyClick = new OnClickListener() {
             public void onClick(View v) {
+                mCallback.pokeWakelock();
                 mCallback.takeEmergencyCallAction();
             }
         };
