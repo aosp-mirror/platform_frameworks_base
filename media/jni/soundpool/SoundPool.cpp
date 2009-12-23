@@ -61,6 +61,9 @@ SoundPool::SoundPool(int maxChannels, int streamType, int srcQuality)
     mNextSampleID = 0;
     mNextChannelID = 0;
 
+    mCallback = 0;
+    mUserData = 0;
+
     mChannelPool = new SoundChannel[mMaxChannels];
     for (int i = 0; i < mMaxChannels; ++i) {
         mChannelPool[i].init(this);
@@ -141,7 +144,7 @@ void SoundPool::quit()
 
 bool SoundPool::startThreads()
 {
-    createThread(beginThread, this);
+    createThreadEtc(beginThread, this, "SoundPoolThread");
     if (mDecodeThread == NULL)
         mDecodeThread = new SoundPoolThread(this);
     return mDecodeThread != NULL;
@@ -372,6 +375,21 @@ void SoundPool::done(SoundChannel* channel)
     }
 }
 
+void SoundPool::setCallback(SoundPoolCallback* callback, void* user)
+{
+    Mutex::Autolock lock(&mCallbackLock);
+    mCallback = callback;
+    mUserData = user;
+}
+
+void SoundPool::notify(SoundPoolEvent event)
+{
+    Mutex::Autolock lock(&mCallbackLock);
+    if (mCallback != NULL) {
+        mCallback(event, this, mUserData);
+    }
+}
+
 void SoundPool::dump()
 {
     for (int i = 0; i < mMaxChannels; ++i) {
@@ -422,7 +440,7 @@ Sample::~Sample()
     delete mUrl;
 }
 
-void Sample::doLoad()
+status_t Sample::doLoad()
 {
     uint32_t sampleRate;
     int numChannels;
@@ -439,19 +457,19 @@ void Sample::doLoad()
     }
     if (p == 0) {
         LOGE("Unable to load sample: %s", mUrl);
-        return;
+        return -1;
     }
     LOGV("pointer = %p, size = %u, sampleRate = %u, numChannels = %d",
             p->pointer(), p->size(), sampleRate, numChannels);
 
     if (sampleRate > kMaxSampleRate) {
        LOGE("Sample rate (%u) out of range", sampleRate);
-       return;
+       return - 1;
     }
 
     if ((numChannels < 1) || (numChannels > 2)) {
         LOGE("Sample channel count (%d) out of range", numChannels);
-        return;
+        return - 1;
     }
 
     //_dumpBuffer(p->pointer(), p->size());
@@ -464,6 +482,7 @@ void Sample::doLoad()
     mNumChannels = numChannels;
     mFormat = format;
     mState = READY;
+    return 0;
 }
 
 

@@ -27,7 +27,7 @@ namespace android {
 
 class SoundPoolMsg {
 public:
-    enum MessageType { INVALID, KILL, LOAD_SAMPLE, PLAY_SAMPLE, SAMPLE_DONE };
+    enum MessageType { INVALID, KILL, LOAD_SAMPLE };
     SoundPoolMsg() : mMessageType(INVALID), mData(0) {}
     SoundPoolMsg(MessageType MessageType, int data) :
         mMessageType(MessageType), mData(data) {}
@@ -45,29 +45,22 @@ public:
     SoundPoolThread(SoundPool* SoundPool);
     ~SoundPoolThread();
     void loadSample(int sampleID);
-    void quit() { mMessages.quit(); }
+    void quit();
+    void write(SoundPoolMsg msg);
 
 private:
     static const size_t maxMessages = 5;
 
-    class MessageQueue {
-    public:
-        void write(SoundPoolMsg msg);
-        const SoundPoolMsg read();
-        void setCapacity(size_t size) { mQueue.setCapacity(size); }
-        void quit();
-    private:
-        Vector<SoundPoolMsg>    mQueue;
-        Mutex                   mLock;
-        Condition               mCondition;
-    };
-
     static int beginThread(void* arg);
     int run();
     void doLoadSample(int sampleID);
+    const SoundPoolMsg read();
 
-    SoundPool*                  mSoundPool;
-    MessageQueue                mMessages;
+    Mutex                   mLock;
+    Condition               mCondition;
+    Vector<SoundPoolMsg>    mMsgQueue;
+    SoundPool*              mSoundPool;
+    bool                    mRunning;
 };
 
 } // end namespace android

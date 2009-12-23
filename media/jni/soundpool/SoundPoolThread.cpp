@@ -22,50 +22,54 @@
 
 namespace android {
 
-void SoundPoolThread::MessageQueue::write(SoundPoolMsg msg) {
-    LOGV("MessageQueue::write - acquiring lock\n");
+void SoundPoolThread::write(SoundPoolMsg msg) {
     Mutex::Autolock lock(&mLock);
-    while (mQueue.size() >= maxMessages) {
-        LOGV("MessageQueue::write - wait\n");
+    while (mMsgQueue.size() >= maxMessages) {
         mCondition.wait(mLock);
     }
-    LOGV("MessageQueue::write - push message\n");
-    mQueue.push(msg);
-    mCondition.signal();
+
+    // if thread is quitting, don't add to queue
+    if (mRunning) {
+        mMsgQueue.push(msg);
+        mCondition.signal();
+    }
 }
 
-const SoundPoolMsg SoundPoolThread::MessageQueue::read() {
-    LOGV("MessageQueue::read - acquiring lock\n");
+const SoundPoolMsg SoundPoolThread::read() {
     Mutex::Autolock lock(&mLock);
-    while (mQueue.size() == 0) {
-        LOGV("MessageQueue::read - wait\n");
+    while (mMsgQueue.size() == 0) {
         mCondition.wait(mLock);
     }
-    SoundPoolMsg msg = mQueue[0];
-    LOGV("MessageQueue::read - retrieve message\n");
-    mQueue.removeAt(0);
+    SoundPoolMsg msg = mMsgQueue[0];
+    mMsgQueue.removeAt(0);
     mCondition.signal();
     return msg;
 }
 
-void SoundPoolThread::MessageQueue::quit() {
+void SoundPoolThread::quit() {
     Mutex::Autolock lock(&mLock);
-    mQueue.clear();
-    mQueue.push(SoundPoolMsg(SoundPoolMsg::KILL, 0));
-    mCondition.signal();
-    mCondition.wait(mLock);
+    if (mRunning) {
+        mRunning = false;
+        mMsgQueue.clear();
+        mMsgQueue.push(SoundPoolMsg(SoundPoolMsg::KILL, 0));
+        mCondition.signal();
+        mCondition.wait(mLock);
+    }
     LOGV("return from quit");
 }
 
 SoundPoolThread::SoundPoolThread(SoundPool* soundPool) :
     mSoundPool(soundPool)
 {
-    mMessages.setCapacity(maxMessages);
-    createThread(beginThread, this);
+    mMsgQueue.setCapacity(maxMessages);
+    if (createThread(beginThread, this)) {
+        mRunning = true;
+    }
 }
 
 SoundPoolThread::~SoundPoolThread()
 {
+    quit();
 }
 
 int SoundPoolThread::beginThread(void* arg) {
@@ -77,7 +81,7 @@ int SoundPoolThread::beginThread(void* arg) {
 int SoundPoolThread::run() {
     LOGV("run");
     for (;;) {
-        SoundPoolMsg msg = mMessages.read();
+        SoundPoolMsg msg = read();
         LOGV("Got message m=%d, mData=%d", msg.mMessageType, msg.mData);
         switch (msg.mMessageType) {
         case SoundPoolMsg::KILL:
@@ -95,14 +99,16 @@ int SoundPoolThread::run() {
 }
 
 void SoundPoolThread::loadSample(int sampleID) {
-    mMessages.write(SoundPoolMsg(SoundPoolMsg::LOAD_SAMPLE, sampleID));
+    write(SoundPoolMsg(SoundPoolMsg::LOAD_SAMPLE, sampleID));
 }
 
 void SoundPoolThread::doLoadSample(int sampleID) {
     sp <Sample> sample = mSoundPool->findSample(sampleID);
+    status_t status = -1;
     if (sample != 0) {
-        sample->doLoad();
+        status = sample->doLoad();
     }
+    mSoundPool->notify(SoundPoolEvent(SoundPoolEvent::SAMPLE_LOADED, sampleID, status));
 }
 
 } // end namespace android
