@@ -64,8 +64,8 @@ public:
     void setPointSize(uint32_t type, uint32_t stride, uint32_t offset);
     void setTexture(uint32_t size, uint32_t type, uint32_t stride, uint32_t offset, uint32_t num);
 
-    void setupGL(class VertexArrayState *) const;
-    void setupGL2(class VertexArrayState *, ShaderCache *) const;
+    void setupGL(const Context *rsc, class VertexArrayState *) const;
+    void setupGL2(const Context *rsc, class VertexArrayState *, ShaderCache *) const;
     void logAttrib(uint32_t idx) const;
 
 protected:

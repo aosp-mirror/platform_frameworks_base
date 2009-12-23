@@ -89,9 +89,9 @@ public class RenderScript {
     native void nObjDestroyOOB(int id);
     native int  nFileOpen(byte[] name);
 
-    native void nElementBegin();
-    native void nElementAdd(int kind, int type, boolean norm, int bits, String s);
-    native int  nElementCreate();
+
+    native int  nElementCreate(int type, int kind, boolean norm, int vecSize);
+    native int  nElementCreate2(int[] elements, String[] names);
 
     native void nTypeBegin(int elementID);
     native void nTypeAdd(int dim, int val);
@@ -198,14 +198,13 @@ public class RenderScript {
     private Surface mSurface;
     private MessageThread mMessageThread;
 
-
     Element mElement_USER_U8;
     Element mElement_USER_I8;
     Element mElement_USER_U16;
     Element mElement_USER_I16;
     Element mElement_USER_U32;
     Element mElement_USER_I32;
-    Element mElement_USER_FLOAT;
+    Element mElement_USER_F32;
 
     Element mElement_A_8;
     Element mElement_RGB_565;
@@ -215,9 +214,12 @@ public class RenderScript {
     Element mElement_RGBA_8888;
 
     Element mElement_INDEX_16;
-    Element mElement_XY_F32;
-    Element mElement_XYZ_F32;
-
+    Element mElement_POSITION_2;
+    Element mElement_POSITION_3;
+    Element mElement_TEXTURE_2;
+    Element mElement_NORMAL_3;
+    Element mElement_COLOR_U8_4;
+    Element mElement_COLOR_F32_4;
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -303,9 +305,9 @@ public class RenderScript {
             nDeviceSetConfig(mDev, 0, 1);
         }
         mContext = nContextCreate(mDev, 0, useDepth);
-        Element.initPredefined(this);
         mMessageThread = new MessageThread(this);
         mMessageThread.start();
+        Element.initPredefined(this);
     }
 
     public void contextSetSurface(int w, int h, Surface sur) {

@@ -142,6 +142,13 @@ uint32_t Context::runScript(Script *s, uint32_t launchID)
     return ret;
 }
 
+void Context::checkError(const char *msg) const
+{
+    GLenum err = glGetError();
+    if (err != GL_NO_ERROR) {
+        LOGE("GL Error, 0x%x, from %s", err, msg);
+    }
+}
 
 uint32_t Context::runRootScript()
 {
@@ -169,11 +176,7 @@ uint32_t Context::runRootScript()
     mStateFragmentStore.mLast.clear();
     uint32_t ret = runScript(mRootScript.get(), 0);
 
-    GLenum err = glGetError();
-    if (err != GL_NO_ERROR) {
-        LOGE("Pending GL Error, 0x%x", err);
-    }
-
+    checkError("runRootScript");
     return ret;
 }
 
@@ -339,10 +342,6 @@ void * Context::threadProc(void *vrsc)
 
      rsc->mObjDestroy.mNeedToEmpty = true;
      rsc->objDestroyOOBRun();
-
-     glClearColor(0,0,0,0);
-     glClear(GL_COLOR_BUFFER_BIT);
-     eglSwapBuffers(rsc->mEGL.mDisplay, rsc->mEGL.mSurface);
 
      pthread_mutex_lock(&gInitMutex);
      rsc->deinitEGL();

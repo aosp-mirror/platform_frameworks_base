@@ -96,15 +96,16 @@ void VertexArray::setTexture(uint32_t size, uint32_t type, uint32_t stride, uint
 }
 
 void VertexArray::logAttrib(uint32_t idx) const {
-    LOGE("va %i: buf=%i  size=%i  type=0x%x  stride=0x%x  offset=0x%x", idx,
+    LOGE("va %i: buf=%i  size=%i  type=0x%x  stride=0x%x  norm=%i  offset=0x%x", idx,
          mAttribs[idx].buffer,
          mAttribs[idx].size,
          mAttribs[idx].type,
          mAttribs[idx].stride,
+         mAttribs[idx].normalized,
          mAttribs[idx].offset);
 }
 
-void VertexArray::setupGL(class VertexArrayState *state) const
+void VertexArray::setupGL(const Context *rsc, class VertexArrayState *state) const
 {
     if (mAttribs[POSITION].size) {
         //logAttrib(POSITION);
@@ -168,9 +169,10 @@ void VertexArray::setupGL(class VertexArrayState *state) const
     } else {
         glDisableClientState(GL_POINT_SIZE_ARRAY_OES);
     }
+    rsc->checkError("VertexArray::setupGL");
 }
 
-void VertexArray::setupGL2(class VertexArrayState *state, ShaderCache *sc) const
+void VertexArray::setupGL2(const Context *rsc, class VertexArrayState *state, ShaderCache *sc) const
 {
     for (int ct=1; ct < _LAST; ct++) {
         glDisableVertexAttribArray(ct);
@@ -194,6 +196,7 @@ void VertexArray::setupGL2(class VertexArrayState *state, ShaderCache *sc) const
             rsAssert(ct);
         }
     }
+    rsc->checkError("VertexArray::setupGL2");
 }
 ////////////////////////////////////////////
 

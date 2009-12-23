@@ -79,10 +79,9 @@ public class FountainRS {
         mIntAlloc.data(mSD);
 
         Element.Builder eb = new Element.Builder(mRS);
-        eb.addFloat(Element.DataKind.USER, "dx");
-        eb.addFloat(Element.DataKind.USER, "dy");
-        eb.addFloatXY("");
-        eb.addUNorm8RGBA("");
+        eb.add(Element.createVector(mRS, Element.DataType.FLOAT_32, 2), "delta");
+        eb.add(Element.createAttrib(mRS, Element.DataType.FLOAT_32, Element.DataKind.POSITION, 2), "position");
+        eb.add(Element.createAttrib(mRS, Element.DataType.UNSIGNED_8, Element.DataKind.COLOR, 4), "color");
         Element primElement = eb.create();
 
 

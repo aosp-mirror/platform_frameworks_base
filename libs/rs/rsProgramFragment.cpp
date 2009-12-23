@@ -213,9 +213,9 @@ void ProgramFragment::createShader()
 
         if (mTextureEnableMask) {
             if (mPointSpriteEnable) {
-                mShader.append("  vec2 tex0 = gl_PointCoord;\n");
+                mShader.append("  vec2 t0 = gl_PointCoord;\n");
             } else {
-                mShader.append("  vec2 tex0 = varTex0.xy;\n");
+                mShader.append("  vec2 t0 = varTex0.xy;\n");
             }
         }
 
@@ -228,13 +228,39 @@ void ProgramFragment::createShader()
                     rsAssert(0);
                     break;
                 case RS_TEX_ENV_MODE_REPLACE:
-                    mShader.append("  col = texture2D(uni_Tex0, tex0);\n");
+                    switch(mTextureFormats[texNum]) {
+                    case 1:
+                        mShader.append("  col.a = texture2D(uni_Tex0, t0).a;\n");
+                        break;
+                    case 2:
+                        mShader.append("  col.rgba = texture2D(uni_Tex0, t0).rgba;\n");
+                        break;
+                    case 3:
+                        mShader.append("  col.rgb = texture2D(uni_Tex0, t0).rgb;\n");
+                        break;
+                    case 4:
+                        mShader.append("  col.rgba = texture2D(uni_Tex0, t0).rgba;\n");
+                        break;
+                    }
                     break;
                 case RS_TEX_ENV_MODE_MODULATE:
-                    mShader.append("  col *= texture2D(uni_Tex0, tex0);\n");
+                    switch(mTextureFormats[texNum]) {
+                    case 1:
+                        mShader.append("  col.a *= texture2D(uni_Tex0, t0).a;\n");
+                        break;
+                    case 2:
+                        mShader.append("  col.rgba *= texture2D(uni_Tex0, t0).rgba;\n");
+                        break;
+                    case 3:
+                        mShader.append("  col.rgb *= texture2D(uni_Tex0, t0).rgb;\n");
+                        break;
+                    case 4:
+                        mShader.append("  col.rgba *= texture2D(uni_Tex0, t0).rgba;\n");
+                        break;
+                    }
                     break;
                 case RS_TEX_ENV_MODE_DECAL:
-                    mShader.append("  col = texture2D(uni_Tex0, tex0);\n");
+                    mShader.append("  col = texture2D(uni_Tex0, t0);\n");
                     break;
                 }
 

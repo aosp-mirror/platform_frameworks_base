@@ -171,9 +171,10 @@ public class Allocation extends BaseObj {
     public Adapter1D createAdapter1D() {
         mRS.validate();
         int id = mRS.nAdapter1DCreate();
-        if (id != 0) {
-            mRS.nAdapter1DBindAllocation(id, mID);
+        if(id == 0) {
+            throw new IllegalStateException("allocation failed.");
         }
+        mRS.nAdapter1DBindAllocation(id, mID);
         return new Adapter1D(id, mRS);
     }
 
@@ -213,9 +214,10 @@ public class Allocation extends BaseObj {
     public Adapter2D createAdapter2D() {
         mRS.validate();
         int id = mRS.nAdapter2DCreate();
-        if (id != 0) {
-            mRS.nAdapter2DBindAllocation(id, mID);
+        if(id == 0) {
+            throw new IllegalStateException("allocation failed.");
         }
+        mRS.nAdapter2DBindAllocation(id, mID);
         return new Adapter2D(id, mRS);
     }
 
@@ -258,6 +260,9 @@ public class Allocation extends BaseObj {
 
         rs.validate();
         int id = rs.nAllocationCreateFromBitmap(dstFmt.mID, genMips, b);
+        if(id == 0) {
+            throw new IllegalStateException("Load failed.");
+        }
         return new Allocation(id, rs, null);
     }
 
@@ -266,6 +271,9 @@ public class Allocation extends BaseObj {
 
         rs.validate();
         int id = rs.nAllocationCreateFromBitmapBoxed(dstFmt.mID, genMips, b);
+        if(id == 0) {
+            throw new IllegalStateException("Load failed.");
+        }
         return new Allocation(id, rs, null);
     }
 
@@ -282,6 +290,9 @@ public class Allocation extends BaseObj {
             int allocationId = rs.nAllocationCreateFromAssetStream(dstFmt.mID, genMips,
                     asset);
 
+            if(allocationId == 0) {
+                throw new IllegalStateException("Load failed.");
+            }
             return new Allocation(allocationId, rs, null);
         } catch (Exception e) {
             // Ignore

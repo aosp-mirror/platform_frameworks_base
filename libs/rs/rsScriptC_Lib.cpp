@@ -689,9 +689,9 @@ static void SC_drawLine(float x1, float y1, float z1,
     VertexArray va;
     va.setPosition(2, GL_FLOAT, 12, (uint32_t)&vtx);
     if (rsc->checkVersion2_0()) {
-        va.setupGL2(&rsc->mStateVertexArray, &rsc->mShaderCache);
+        va.setupGL2(rsc, &rsc->mStateVertexArray, &rsc->mShaderCache);
     } else {
-        va.setupGL(&rsc->mStateVertexArray);
+        va.setupGL(rsc, &rsc->mStateVertexArray);
     }
 
     glDrawArrays(GL_LINES, 0, 2);
@@ -707,9 +707,9 @@ static void SC_drawPoint(float x, float y, float z)
     VertexArray va;
     va.setPosition(1, GL_FLOAT, 12, (uint32_t)&vtx);
     if (rsc->checkVersion2_0()) {
-        va.setupGL2(&rsc->mStateVertexArray, &rsc->mShaderCache);
+        va.setupGL2(rsc, &rsc->mStateVertexArray, &rsc->mShaderCache);
     } else {
-        va.setupGL(&rsc->mStateVertexArray);
+        va.setupGL(rsc, &rsc->mStateVertexArray);
     }
 
     glDrawArrays(GL_POINTS, 0, 1);
@@ -742,9 +742,9 @@ static void SC_drawQuadTexCoords(float x1, float y1, float z1,
     //va.setTexture(2, GL_FLOAT, 8, (uint32_t)&tex, 1);
     //
     if (rsc->checkVersion2_0()) {
-        va.setupGL2(&rsc->mStateVertexArray, &rsc->mShaderCache);
+        va.setupGL2(rsc, &rsc->mStateVertexArray, &rsc->mShaderCache);
     } else {
-        va.setupGL(&rsc->mStateVertexArray);
+        va.setupGL(rsc, &rsc->mStateVertexArray);
     }
 
 
@@ -1223,33 +1223,33 @@ ScriptCState::SymbolTable_t ScriptCState::gSyms[] = {
 
     // vec3
     { "vec3Norm", (void *)&SC_vec3Norm,
-        "void", "(struct vec3_s *)" },
+        "void", "(struct vecF32_3_s *)" },
     { "vec3Length", (void *)&SC_vec3Length,
-        "float", "(struct vec3_s *)" },
+        "float", "(struct vecF32_3_s *)" },
     { "vec3Add", (void *)&SC_vec3Add,
-        "void", "(struct vec3_s *dest, struct vec3_s *lhs, struct vec3_s *rhs)" },
+        "void", "(struct vecF32_3_s *dest, struct vecF32_3_s *lhs, struct vecF32_3_s *rhs)" },
     { "vec3Sub", (void *)&SC_vec3Sub,
-        "void", "(struct vec3_s *dest, struct vec3_s *lhs, struct vec3_s *rhs)" },
+        "void", "(struct vecF32_3_s *dest, struct vecF32_3_s *lhs, struct vecF32_3_s *rhs)" },
     { "vec3Cross", (void *)&SC_vec3Cross,
-        "void", "(struct vec3_s *dest, struct vec3_s *lhs, struct vec3_s *rhs)" },
+        "void", "(struct vecF32_3_s *dest, struct vecF32_3_s *lhs, struct vecF32_3_s *rhs)" },
     { "vec3Dot", (void *)&SC_vec3Dot,
-        "float", "(struct vec3_s *lhs, struct vec3_s *rhs)" },
+        "float", "(struct vecF32_3_s *lhs, struct vecF32_3_s *rhs)" },
     { "vec3Scale", (void *)&SC_vec3Scale,
-        "void", "(struct vec3_s *lhs, float scale)" },
+        "void", "(struct vecF32_3_s *lhs, float scale)" },
 
     // vec4
     { "vec4Norm", (void *)&SC_vec4Norm,
-        "void", "(struct vec4_s *)" },
+        "void", "(struct vecF32_4_s *)" },
     { "vec4Length", (void *)&SC_vec4Length,
-        "float", "(struct vec4_s *)" },
+        "float", "(struct vecF32_4_s *)" },
     { "vec4Add", (void *)&SC_vec4Add,
-        "void", "(struct vec4_s *dest, struct vec4_s *lhs, struct vec4_s *rhs)" },
+        "void", "(struct vecF32_4_s *dest, struct vecF32_4_s *lhs, struct vecF32_4_s *rhs)" },
     { "vec4Sub", (void *)&SC_vec4Sub,
-        "void", "(struct vec4_s *dest, struct vec4_s *lhs, struct vec4_s *rhs)" },
+        "void", "(struct vecF32_4_s *dest, struct vecF32_4_s *lhs, struct vecF32_4_s *rhs)" },
     { "vec4Dot", (void *)&SC_vec4Dot,
-        "float", "(struct vec4_s *lhs, struct vec4_s *rhs)" },
+        "float", "(struct vecF32_4_s *lhs, struct vecF32_4_s *rhs)" },
     { "vec4Scale", (void *)&SC_vec4Scale,
-        "void", "(struct vec4_s *lhs, float scale)" },
+        "void", "(struct vecF32_4_s *lhs, float scale)" },
 
     // context
     { "bindProgramFragment", (void *)&SC_bindProgramFragment,

@@ -17,7 +17,7 @@
 #ifndef ANDROID_STRUCTURED_ELEMENT_H
 #define ANDROID_STRUCTURED_ELEMENT_H
 
-//#include "rsComponent.h"
+#include "rsComponent.h"
 #include "rsUtils.h"
 #include "rsObjectBase.h"
 
@@ -53,20 +53,22 @@ public:
     const Element * getField(uint32_t idx) const {return mFields[idx].e.get();}
     const char * getFieldName(uint32_t idx) const {return mFields[idx].name.string();}
 
-    RsDataType getType() const {return mType;}
-    bool getIsNormalized() const {return mIsNormalized;}
-    RsDataKind getKind() const {return mKind;}
+    const Component & getComponent() const {return mComponent;}
+    RsDataType getType() const {return mComponent.getType();}
+    //bool getIsNormalized() const {return mIsNormalized;}
+    RsDataKind getKind() const {return mComponent.getKind();}
     uint32_t getBits() const {return mBits;}
     //uint32_t getGLType() const;
-    const char * getCType() const;
+
+    String8 getCType(uint32_t indent=0) const;
+    String8 getCStructBody(uint32_t indent=0) const;
 
     void dumpLOGV(const char *prefix) const;
 
-
-    static Element * create(Context *rsc, RsDataKind dk, RsDataType dt,
-                            bool isNorm, size_t bits);
-    static Element * create(Context *rsc, Element **, const char **,
-                            const size_t * lengths, size_t count);
+    static Element * create(Context *rsc, RsDataType dt, RsDataKind dk,
+                            bool isNorm, uint32_t vecSize);
+    static Element * create(Context *rsc, size_t count, const Element **,
+                            const char **, const size_t * lengths);
 
 protected:
     // deallocate any components that are part of this element.
@@ -74,7 +76,7 @@ protected:
 
     typedef struct {
         String8 name;
-        ObjectBaseRef<Element> e;
+        ObjectBaseRef<const Element> e;
     } ElementField_t;
     ElementField_t *mFields;
     size_t mFieldCount;
@@ -82,12 +84,8 @@ protected:
 
     Element(Context *);
 
-
-    RsDataType mType;
-    bool mIsNormalized;
-    RsDataKind mKind;
+    Component mComponent;
     uint32_t mBits;
-    //String8 mName;
 };
 
 

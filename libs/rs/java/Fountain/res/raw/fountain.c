@@ -14,19 +14,17 @@ int main(int launchID) {
         float rMax = ((float)rate) * 0.005f;
         int x = Control->x;
         int y = Control->y;
-        char r = Control->r * 255.f;
-        char g = Control->g * 255.f;
-        char b = Control->b * 255.f;
+        int color = ((int)(Control->r * 255.f)) |
+                    ((int)(Control->g * 255.f)) << 8 |
+                    ((int)(Control->b * 255.f)) << 16 |
+                    (0xf0 << 24);
         struct point_s * np = &p[newPart];
 
         while (rate--) {
-            vec2Rand((float *)np, rMax);
-            np->x = x;
-            np->y = y;
-            np->r = r;
-            np->g = g;
-            np->b = b;
-            np->a = 0xf0;
+            vec2Rand((float *)&np->delta.x, rMax);
+            np->position.x = x;
+            np->position.y = y;
+            np->color = color;
             newPart++;
             np++;
             if (newPart >= count) {
@@ -37,14 +35,14 @@ int main(int launchID) {
     }
 
     for (ct=0; ct < count; ct++) {
-        float dy = p->dy + 0.15f;
-        float posy = p->y + dy;
+        float dy = p->delta.y + 0.15f;
+        float posy = p->position.y + dy;
         if ((posy > height) && (dy > 0)) {
             dy *= -0.3f;
         }
-        p->dy = dy;
-        p->x += p->dx;
-        p->y = posy;
+        p->delta.y = dy;
+        p->position.x += p->delta.x;
+        p->position.y = posy;
         p++;
     }
 

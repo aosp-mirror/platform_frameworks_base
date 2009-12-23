@@ -168,6 +168,7 @@ public:
     } props;
 
     void dumpDebug() const;
+    void checkError(const char *) const;
 
     mutable const ObjectBase * mObjHead;
 

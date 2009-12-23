@@ -62,9 +62,9 @@ void SimpleMesh::renderRange(Context *rsc, uint32_t start, uint32_t len) const
         mVertexTypes[ct]->enableGLVertexBuffer(&va);
     }
     if (rsc->checkVersion2_0()) {
-        va.setupGL2(0, &rsc->mShaderCache);
+        va.setupGL2(rsc, 0, &rsc->mShaderCache);
     } else {
-        va.setupGL(0);
+        va.setupGL(rsc, 0);
     }
 
     if (mIndexType.get()) {
@@ -74,6 +74,8 @@ void SimpleMesh::renderRange(Context *rsc, uint32_t start, uint32_t len) const
     } else {
         glDrawArrays(mGLPrimitive, start, len);
     }
+
+    rsc->checkError("SimpleMesh::renderRange");
 }
 
 void SimpleMesh::uploadAll(Context *rsc)
@@ -89,6 +91,7 @@ void SimpleMesh::uploadAll(Context *rsc)
     if (mPrimitiveBuffer.get()) {
         mPrimitiveBuffer->deferedUploadToBufferObject(rsc);
     }
+    rsc->checkError("SimpleMesh::uploadAll");
 }
 
 
