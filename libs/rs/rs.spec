@@ -60,18 +60,19 @@ ObjDestroy {
 	param void *obj
 	}
 
-ElementBegin {
-}
-
-ElementAdd {
-	param RsDataKind dataKind
-	param RsDataType dataType
-	param bool isNormalized
-	param size_t bits
-	param const char * name
+ElementCreate {
+	param RsDataType mType
+	param RsDataKind mKind
+	param bool mNormalized
+	param uint32_t mVectorSize
+	ret RsElement
 	}
 
-ElementCreate {
+ElementCreate2 {
+	param size_t count
+	param const RsElement * elements
+	param const char ** names
+	param const size_t * nameLengths
 	ret RsElement
 	}
 

@@ -152,10 +152,13 @@ public class FilmRS {
         mBufferIDs = new int[13];
         mImages = new Allocation[13];
         mAllocIDs = Allocation.createSized(mRS,
-            Element.USER_F32(mRS), mBufferIDs.length);
+            Element.createUser(mRS, Element.DataType.FLOAT_32),
+            mBufferIDs.length);
 
-        Element ie = Element.RGB_565(mRS);
+        Element ie = Element.createPixel(mRS, Element.DataType.UNSIGNED_5_6_5, Element.DataKind.PIXEL_RGB);
+        android.util.Log.e("rs", "load 1");
         mImages[0] = Allocation.createFromBitmapResourceBoxed(mRS, mRes, R.drawable.p01, ie, true);
+        android.util.Log.e("rs", "load 2");
         mImages[1] = Allocation.createFromBitmapResourceBoxed(mRS, mRes, R.drawable.p02, ie, true);
         mImages[2] = Allocation.createFromBitmapResourceBoxed(mRS, mRes, R.drawable.p03, ie, true);
         mImages[3] = Allocation.createFromBitmapResourceBoxed(mRS, mRes, R.drawable.p04, ie, true);
@@ -195,7 +198,8 @@ public class FilmRS {
     {
         mBufferState = new int[10];
         mAllocState = Allocation.createSized(mRS,
-            Element.USER_F32(mRS), mBufferState.length);
+            Element.createUser(mRS, Element.DataType.FLOAT_32),
+            mBufferState.length);
         mBufferState[STATE_LAST_FOCUS] = -1;
         mAllocState.data(mBufferState);
     }
@@ -238,12 +242,12 @@ public class FilmRS {
 
 
         mAllocOffsets = Allocation.createSized(mRS,
-            Element.USER_I32(mRS), mFSM.mTriangleOffsets.length);
+            Element.createUser(mRS, Element.DataType.SIGNED_32), mFSM.mTriangleOffsets.length);
         mAllocOffsets.data(mFSM.mTriangleOffsets);
         mScriptStrip.bindAllocation(mAllocOffsets, 4);
 
         mAllocOffsetsTex = Allocation.createSized(mRS,
-            Element.USER_F32(mRS), mFSM.mTriangleOffsetsTex.length);
+            Element.createUser(mRS, Element.DataType.FLOAT_32), mFSM.mTriangleOffsetsTex.length);
         mAllocOffsetsTex.data(mFSM.mTriangleOffsetsTex);
         mScriptStrip.bindAllocation(mAllocOffsetsTex, 5);
 

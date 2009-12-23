@@ -62,7 +62,7 @@ public class ImageProcessingActivity extends Activity implements SurfaceHolder.C
 
         public float threshold;
     }
-    
+
     static class Pixel {
         public byte a;
         public byte r;
@@ -78,7 +78,7 @@ public class ImageProcessingActivity extends Activity implements SurfaceHolder.C
                         mParams.outWidth, mParams.outHeight);
                 mDisplayView.invalidate();
             }
-        };        
+        };
 
         @Override
         public void run() {
@@ -131,7 +131,7 @@ public class ImageProcessingActivity extends Activity implements SurfaceHolder.C
 
     public void surfaceDestroyed(SurfaceHolder holder) {
     }
-        
+
     private Script.Invokable createScript() {
         mRS = new RenderScript(false, false);
         mRS.mMessageCallback = new FilterCallback();
@@ -143,9 +143,11 @@ public class ImageProcessingActivity extends Activity implements SurfaceHolder.C
         final int pixelCount = mParams.inWidth * mParams.inHeight;
 
         mPixelType = Type.createFromClass(mRS, Pixel.class, 1, "Pixel");
-        mInPixelsAllocation = Allocation.createSized(mRS, Element.USER_I32(mRS),
+        mInPixelsAllocation = Allocation.createSized(mRS,
+                Element.createUser(mRS, Element.DataType.SIGNED_32),
                 pixelCount);
-        mOutPixelsAllocation = Allocation.createSized(mRS, Element.USER_I32(mRS),
+        mOutPixelsAllocation = Allocation.createSized(mRS,
+                Element.createUser(mRS, Element.DataType.SIGNED_32),
                 pixelCount);
 
         final int[] data = new int[pixelCount];
@@ -154,7 +156,7 @@ public class ImageProcessingActivity extends Activity implements SurfaceHolder.C
 
         mOutData = new int[pixelCount];
         mOutPixelsAllocation.data(mOutData);
-        
+
         ScriptC.Builder sb = new ScriptC.Builder(mRS);
         sb.setType(mParamsType, "Params", 0);
         sb.setType(mPixelType, "InPixel", 1);

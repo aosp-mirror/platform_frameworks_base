@@ -93,7 +93,10 @@ bool ShaderCache::lookup(Context *rsc, ProgramVertex *vtx, ProgramFragment *frag
 
         glBindAttribLocation(pgm, VertexArray::POSITION, "attrib_Position");
         glBindAttribLocation(pgm, VertexArray::COLOR, "attrib_Color");
-
+        //glBindAttribLocation(pgm, VertexArray::NORMAL, "attrib_Normal");
+        //glBindAttribLocation(pgm, VertexArray::POINT_SIZE, "attrib_PointSize");
+        //glBindAttribLocation(pgm, VertexArray::TEXTURE_0, "attrib_T0");
+        //glBindAttribLocation(pgm, VertexArray::TEXTURE_1, "attrib_T1");
 
         //LOGE("e2 %x", glGetError());
         glLinkProgram(pgm);

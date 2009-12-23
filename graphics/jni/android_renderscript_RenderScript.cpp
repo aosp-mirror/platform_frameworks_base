@@ -247,36 +247,39 @@ static void nContextDeinitToClient(JNIEnv *_env, jobject _this)
 }
 
 
-static void
-nElementBegin(JNIEnv *_env, jobject _this)
+static jint
+nElementCreate(JNIEnv *_env, jobject _this, jint type, jint kind, jboolean norm, jint size)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nElementBegin, con(%p)", con);
-    rsElementBegin(con);
-}
-
-
-static void
-nElementAdd(JNIEnv *_env, jobject _this, jint kind, jint type, jboolean norm, jint bits, jstring name)
-{
-    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    const char* n = NULL;
-    if (name) {
-        n = _env->GetStringUTFChars(name, NULL);
-    }
-    LOG_API("nElementAdd, con(%p), kind(%i), type(%i), norm(%i), bits(%i)", con, kind, type, norm, bits);
-    rsElementAdd(con, (RsDataKind)kind, (RsDataType)type, norm != 0, (size_t)bits, n);
-    if (n) {
-        _env->ReleaseStringUTFChars(name, n);
-    }
+    LOG_API("nElementCreate, con(%p), type(%i), kind(%i), norm(%i), size(%i)", con, type, kind, norm, size);
+    return (jint)rsElementCreate(con, (RsDataType)type, (RsDataKind)kind, norm, size);
 }
 
 static jint
-nElementCreate(JNIEnv *_env, jobject _this)
+nElementCreate2(JNIEnv *_env, jobject _this, jintArray _ids, jobjectArray _names)
 {
+    int fieldCount = _env->GetArrayLength(_ids);
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nElementCreate, con(%p)", con);
-    return (jint)rsElementCreate(con);
+    LOG_API("nElementCreate, con(%p), type(%i), kind(%i), norm(%i), size(%i)", con, type, kind, norm, size);
+
+    jint *ids = _env->GetIntArrayElements(_ids, NULL);
+    const char ** nameArray = (const char **)calloc(fieldCount, sizeof(char *));
+    size_t* sizeArray = (size_t*)calloc(fieldCount, sizeof(size_t));
+
+    for (int ct=0; ct < fieldCount; ct++) {
+        jstring s = (jstring)_env->GetObjectArrayElement(_names, ct);
+        nameArray[ct] = _env->GetStringUTFChars(s, NULL);
+        sizeArray[ct] = _env->GetStringUTFLength(s);
+    }
+    jint id = (jint)rsElementCreate2(con, fieldCount, (RsElement *)ids, nameArray, sizeArray);
+    for (int ct=0; ct < fieldCount; ct++) {
+        jstring s = (jstring)_env->GetObjectArrayElement(_names, ct);
+        _env->ReleaseStringUTFChars(s, nameArray[ct]);
+    }
+    _env->ReleaseIntArrayElements(_ids, ids, JNI_ABORT);
+    free(nameArray);
+    free(sizeArray);
+    return (jint)id;
 }
 
 // -----------------------------------
@@ -395,26 +398,24 @@ nTypeSetupFields(JNIEnv *_env, jobject _this, jobject _type, jintArray _types, j
         tfc[ct].bits = fBits[ct];
 
         switch(fType[ct]) {
-        case RS_TYPE_FLOAT:
+        case RS_TYPE_FLOAT_32:
             tfc[ct].ptr = SF_LoadFloat;
             tfc[ct].readPtr = SF_SaveFloat;
             break;
-        case RS_TYPE_UNSIGNED:
-        case RS_TYPE_SIGNED:
-            switch(tfc[ct].bits) {
-            case 32:
-                tfc[ct].ptr = SF_LoadInt;
-                tfc[ct].readPtr = SF_SaveInt;
-                break;
-            case 16:
-                tfc[ct].ptr = SF_LoadShort;
-                tfc[ct].readPtr = SF_SaveShort;
-                break;
-            case 8:
-                tfc[ct].ptr = SF_LoadByte;
-                tfc[ct].readPtr = SF_SaveByte;
-                break;
-            }
+        case RS_TYPE_UNSIGNED_32:
+        case RS_TYPE_SIGNED_32:
+            tfc[ct].ptr = SF_LoadInt;
+            tfc[ct].readPtr = SF_SaveInt;
+            break;
+        case RS_TYPE_UNSIGNED_16:
+        case RS_TYPE_SIGNED_16:
+            tfc[ct].ptr = SF_LoadShort;
+            tfc[ct].readPtr = SF_SaveShort;
+            break;
+        case RS_TYPE_UNSIGNED_8:
+        case RS_TYPE_SIGNED_8:
+            tfc[ct].ptr = SF_LoadByte;
+            tfc[ct].readPtr = SF_SaveByte;
             break;
         }
         tc->size += 4;
@@ -1367,9 +1368,8 @@ static JNINativeMethod methods[] = {
 
 {"nFileOpen",                      "([B)I",                                (void*)nFileOpen },
 
-{"nElementBegin",                  "()V",                                  (void*)nElementBegin },
-{"nElementAdd",                    "(IIZILjava/lang/String;)V",            (void*)nElementAdd },
-{"nElementCreate",                 "()I",                                  (void*)nElementCreate },
+{"nElementCreate",                 "(IIZI)I",                              (void*)nElementCreate },
+{"nElementCreate2",                "([I[Ljava/lang/String;)I",             (void*)nElementCreate2 },
 
 {"nTypeBegin",                     "(I)V",                                 (void*)nTypeBegin },
 {"nTypeAdd",                       "(II)V",                                (void*)nTypeAdd },

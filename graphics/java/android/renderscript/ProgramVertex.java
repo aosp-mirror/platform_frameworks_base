@@ -107,7 +107,7 @@ public class ProgramVertex extends Program {
             mProjection = new Matrix();
             mTexture = new Matrix();
 
-            mAlloc = Allocation.createSized(rs, Element.USER_F32(rs), 48);
+            mAlloc = Allocation.createSized(rs, Element.createUser(rs, Element.DataType.FLOAT_32), 48);
             mAlloc.subData1D(MODELVIEW_OFFSET, 16, mModel.mMat);
             mAlloc.subData1D(PROJECTION_OFFSET, 16, mProjection.mMat);
             mAlloc.subData1D(TEXTURE_OFFSET, 16, mTexture.mMat);

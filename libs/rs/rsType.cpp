@@ -137,106 +137,44 @@ void Type::makeGLComponents()
     memset(&mGL, 0, sizeof(mGL));
 
     for (uint32_t ct=0; ct < getElement()->getFieldCount(); ct++) {
-        const Element *c = getElement()->getField(ct);
+        const Component &c = getElement()->getField(ct)->getComponent();
 
-        switch(c->getKind()) {
-        case RS_KIND_X:
+        switch(c.getKind()) {
+        case RS_KIND_POSITION:
             rsAssert(mGL.mVtx.size == 0);
-            mGL.mVtx.size = 1;
+            mGL.mVtx.size = c.getVectorSize();
             mGL.mVtx.offset = mElement->getFieldOffsetBytes(ct);
-            mGL.mVtx.type = c->getGLType();
+            mGL.mVtx.type = c.getGLType();
             break;
-        case RS_KIND_Y:
-            rsAssert(mGL.mVtx.size == 1);
-            rsAssert(mGL.mVtx.type == c->getGLType());
-            mGL.mVtx.size = 2;
-            break;
-        case RS_KIND_Z:
-            rsAssert(mGL.mVtx.size == 2);
-            rsAssert(mGL.mVtx.type == c->getGLType());
-            mGL.mVtx.size = 3;
-            break;
-        case RS_KIND_W:
-            rsAssert(mGL.mVtx.size == 4);
-            rsAssert(mGL.mVtx.type == c->getGLType());
-            mGL.mVtx.size = 4;
-        break;
 
-        case RS_KIND_RED:
+        case RS_KIND_COLOR:
             rsAssert(mGL.mColor.size == 0);
-            mGL.mColor.size = 1;
+            mGL.mColor.size = c.getVectorSize();
             mGL.mColor.offset = mElement->getFieldOffsetBytes(ct);
-            mGL.mColor.type = c->getGLType();
+            mGL.mColor.type = c.getGLType();
             break;
-        case RS_KIND_GREEN:
-            rsAssert(mGL.mColor.size == 1);
-            rsAssert(mGL.mColor.type == c->getGLType());
-            mGL.mColor.size = 2;
-            break;
-        case RS_KIND_BLUE:
-            rsAssert(mGL.mColor.size == 2);
-            rsAssert(mGL.mColor.type == c->getGLType());
-            mGL.mColor.size = 3;
-            break;
-        case RS_KIND_ALPHA:
-            // Can be RGBA or A at this point
-            if (mGL.mColor.size > 0) {
-                rsAssert(mGL.mColor.size == 3);
-                rsAssert(mGL.mColor.type == c->getGLType());
-                mGL.mColor.size = 4;
-            } else {
-                mGL.mColor.size = 1;
-                mGL.mColor.offset = mElement->getFieldOffsetBytes(ct);
-                mGL.mColor.type = c->getGLType();
-            }
-        break;
 
-        case RS_KIND_NX:
+        case RS_KIND_NORMAL:
             rsAssert(mGL.mNorm.size == 0);
-            mGL.mNorm.size = 1;
+            mGL.mNorm.size = c.getVectorSize();
             mGL.mNorm.offset = mElement->getFieldOffsetBytes(ct);
-            mGL.mNorm.type = c->getGLType();
-        break;
-        case RS_KIND_NY:
-            rsAssert(mGL.mNorm.size == 1);
-            rsAssert(mGL.mNorm.type == c->getGLType());
-            mGL.mNorm.size = 2;
-        break;
-        case RS_KIND_NZ:
-            rsAssert(mGL.mNorm.size == 2);
-            rsAssert(mGL.mNorm.type == c->getGLType());
-            mGL.mNorm.size = 3;
-        break;
+            mGL.mNorm.type = c.getGLType();
+            break;
 
-        case RS_KIND_S:
+        case RS_KIND_TEXTURE:
             if (mGL.mTex[texNum].size) {
                 texNum++;
             }
-            mGL.mTex[texNum].size = 1;
+            mGL.mTex[texNum].size = c.getVectorSize();
             mGL.mTex[texNum].offset = mElement->getFieldOffsetBytes(ct);
-            mGL.mTex[texNum].type = c->getGLType();
-        break;
-        case RS_KIND_T:
-            rsAssert(mGL.mTex[texNum].size == 1);
-            rsAssert(mGL.mTex[texNum].type == c->getGLType());
-            mGL.mTex[texNum].size = 2;
-        break;
-        case RS_KIND_R:
-            rsAssert(mGL.mTex[texNum].size == 2);
-            rsAssert(mGL.mTex[texNum].type == c->getGLType());
-            mGL.mTex[texNum].size = 3;
-        break;
-        case RS_KIND_Q:
-            rsAssert(mGL.mTex[texNum].size == 3);
-            rsAssert(mGL.mTex[texNum].type == c->getGLType());
-            mGL.mTex[texNum].size = 4;
-        break;
+            mGL.mTex[texNum].type = c.getGLType();
+            break;
 
         case RS_KIND_POINT_SIZE:
             rsAssert(!mGL.mPointSize.size);
-            mGL.mPointSize.size = 1;
+            mGL.mPointSize.size = c.getVectorSize();
             mGL.mPointSize.offset = mElement->getFieldOffsetBytes(ct);
-            mGL.mPointSize.type = c->getGLType();
+            mGL.mPointSize.type = c.getGLType();
         break;
 
         default:

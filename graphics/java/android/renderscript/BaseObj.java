@@ -25,6 +25,7 @@ import android.util.Log;
 class BaseObj {
 
     BaseObj(RenderScript rs) {
+        rs.validate();
         mRS = rs;
         mID = 0;
         mDestroyed = false;

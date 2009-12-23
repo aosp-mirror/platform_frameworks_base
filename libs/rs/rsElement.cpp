@@ -24,9 +24,6 @@ using namespace android::renderscript;
 
 Element::Element(Context *rsc) : ObjectBase(rsc)
 {
-    mType = RS_TYPE_FLOAT;
-    mIsNormalized = false;
-    mKind = RS_KIND_USER;
     mBits = 0;
     mAllocFile = __FILE__;
     mAllocLine = __LINE__;
@@ -80,161 +77,6 @@ size_t Element::getFieldOffsetBits(uint32_t componentNumber) const
     return offset;
 }
 
-uint32_t Element::getGLType() const
-{
-    int bits[4];
-
-    if (!mFieldCount) {
-        switch (mType) {
-        case RS_TYPE_FLOAT:
-            if (mBits == 32) {
-                return GL_FLOAT;
-            }
-            return 0;
-        case RS_TYPE_SIGNED:
-            switch (mBits) {
-            case 8:
-                return GL_BYTE;
-            case 16:
-                return GL_SHORT;
-            //case 32:
-                //return GL_INT;
-            }
-            return 0;
-        case RS_TYPE_UNSIGNED:
-            switch (mBits) {
-            case 8:
-                return GL_UNSIGNED_BYTE;
-            case 16:
-                return GL_UNSIGNED_SHORT;
-            //case 32:
-                //return GL_UNSIGNED_INT;
-            }
-            return 0;
-        }
-    }
-
-    if (mFieldCount > 4) {
-        return 0;
-    }
-
-    for (uint32_t ct=0; ct < mFieldCount; ct++) {
-        bits[ct] = mFields[ct].e->mBits;
-        if (mFields[ct].e->mFieldCount) {
-            return 0;
-        }
-        if (mFields[ct].e->mType != RS_TYPE_UNSIGNED) {
-            return 0;
-        }
-        if (!mFields[ct].e->mIsNormalized) {
-            return 0;
-        }
-    }
-
-    switch(mFieldCount) {
-    case 1:
-        if (bits[0] == 8) {
-            return GL_UNSIGNED_BYTE;
-        }
-        return 0;
-    case 2:
-        if ((bits[0] == 8) &&
-            (bits[1] == 8)) {
-            return GL_UNSIGNED_BYTE;
-        }
-        return 0;
-    case 3:
-        if ((bits[0] == 8) &&
-            (bits[1] == 8) &&
-            (bits[2] == 8)) {
-            return GL_UNSIGNED_BYTE;
-        }
-        if ((bits[0] == 5) &&
-            (bits[1] == 6) &&
-            (bits[2] == 5)) {
-            return GL_UNSIGNED_SHORT_5_6_5;
-        }
-        return 0;
-    case 4:
-        if ((bits[0] == 8) &&
-            (bits[1] == 8) &&
-            (bits[2] == 8) &&
-            (bits[3] == 8)) {
-            return GL_UNSIGNED_BYTE;
-        }
-        if ((bits[0] == 4) &&
-            (bits[1] == 4) &&
-            (bits[2] == 4) &&
-            (bits[3] == 4)) {
-            return GL_UNSIGNED_SHORT_4_4_4_4;
-        }
-        if ((bits[0] == 5) &&
-            (bits[1] == 5) &&
-            (bits[2] == 5) &&
-            (bits[3] == 1)) {
-            return GL_UNSIGNED_SHORT_5_5_5_1;
-        }
-    }
-    return 0;
-}
-
-uint32_t Element::getGLFormat() const
-{
-    if (!mFieldCount) {
-        if (mKind == RS_KIND_ALPHA) {
-            return GL_ALPHA;
-        }
-        if (mKind == RS_KIND_LUMINANCE) {
-            return GL_LUMINANCE;
-        }
-    }
-
-    switch(mFieldCount) {
-    case 2:
-        if ((mFields[0].e->mKind == RS_KIND_LUMINANCE) &&
-            (mFields[1].e->mKind == RS_KIND_ALPHA)) {
-            return GL_LUMINANCE_ALPHA;
-        }
-        break;
-    case 3:
-        if ((mFields[0].e->mKind == RS_KIND_RED) &&
-            (mFields[1].e->mKind == RS_KIND_GREEN) &&
-            (mFields[2].e->mKind == RS_KIND_BLUE)) {
-            return GL_RGB;
-        }
-        break;
-    case 4:
-        if ((mFields[0].e->mKind == RS_KIND_RED) &&
-            (mFields[1].e->mKind == RS_KIND_GREEN) &&
-            (mFields[2].e->mKind == RS_KIND_BLUE) &&
-            (mFields[3].e->mKind == RS_KIND_ALPHA)) {
-            return GL_RGBA;
-        }
-        break;
-    }
-    return 0;
-}
-
-const char * Element::getCType() const
-{
-    switch(mType) {
-    case RS_TYPE_FLOAT:
-        return "float";
-    case RS_TYPE_SIGNED:
-    case RS_TYPE_UNSIGNED:
-        switch(mBits) {
-        case 32:
-            return "int";
-        case 16:
-            return "short";
-        case 8:
-            return "char";
-        }
-        break;
-    }
-    return NULL;
-}
-
 void Element::dumpLOGV(const char *prefix) const
 {
     ObjectBase::dumpLOGV(prefix);
@@ -246,19 +88,18 @@ void Element::dumpLOGV(const char *prefix) const
     }
 }
 
-Element * Element::create(Context *rsc, RsDataKind dk, RsDataType dt,
-                          bool isNorm, size_t bits)
+
+Element * Element::create(Context *rsc, RsDataType dt, RsDataKind dk,
+                            bool isNorm, uint32_t vecSize)
 {
     Element *e = new Element(rsc);
-    e->mKind = dk;
-    e->mType = dt;
-    e->mIsNormalized = isNorm;
-    e->mBits = bits;
+    e->mComponent.set(dt, dk, isNorm, vecSize);
+    e->mBits = e->mComponent.getBits();
     return e;
 }
 
-Element * Element::create(Context *rsc, Element **ein, const char **nin,
-                          const size_t * lengths, size_t count)
+Element * Element::create(Context *rsc, size_t count, const Element **ein,
+                            const char **nin, const size_t * lengths)
 {
     Element *e = new Element(rsc);
     e->mFields = new ElementField_t [count];
@@ -267,10 +108,52 @@ Element * Element::create(Context *rsc, Element **ein, const char **nin,
     for (size_t ct=0; ct < count; ct++) {
         e->mFields[ct].e.set(ein[ct]);
         e->mFields[ct].name.setTo(nin[ct], lengths[ct]);
+        LOGE("element %p %s", ein[ct], e->mFields[ct].name.string());
     }
 
     return e;
 }
+
+String8 Element::getCStructBody(uint32_t indent) const
+{
+    String8 si;
+    for (uint32_t ct=0; ct < indent; ct++) {
+        si.append(" ");
+    }
+
+    String8 s(si);
+    s.append("{\n");
+    for (uint32_t ct = 0; ct < mFieldCount; ct++) {
+        s.append(si);
+        s.append(mFields[ct].e->getCType(indent+4));
+        s.append(" ");
+        s.append(mFields[ct].name);
+        s.append(";\n");
+    }
+    s.append(si);
+    s.append("}");
+    return s;
+}
+
+String8 Element::getCType(uint32_t indent) const
+{
+    String8 s;
+    for (uint32_t ct=0; ct < indent; ct++) {
+        s.append(" ");
+    }
+
+    if (!mFieldCount) {
+        // Basic component.
+        s.append(mComponent.getCType());
+    } else {
+        s.append("struct ");
+        s.append(getCStructBody(indent));
+    }
+
+    return s;
+}
+
+
 
 
 ElementState::ElementState()
@@ -288,14 +171,31 @@ ElementState::~ElementState()
 namespace android {
 namespace renderscript {
 
-void rsi_ElementBegin(Context *rsc)
+RsElement rsi_ElementCreate(Context *rsc,
+                            RsDataType dt,
+                            RsDataKind dk,
+                            bool norm,
+                            uint32_t vecSize)
 {
-    ElementState * sec = &rsc->mStateElement;
-
-    sec->mBuildList.clear();
-    sec->mNames.clear();
+    //LOGE("rsi_ElementCreate %i %i %i %i", dt, dk, norm, vecSize);
+    Element *e = Element::create(rsc, dt, dk, norm, vecSize);
+    e->incUserRef();
+    return e;
 }
 
+RsElement rsi_ElementCreate2(Context *rsc,
+                             size_t count,
+                             const RsElement * ein,
+                             const char ** names,
+                             const size_t * nameLengths)
+{
+    //LOGE("rsi_ElementCreate2 %i", count);
+    Element *e = Element::create(rsc, count, (const Element **)ein, names, nameLengths);
+    e->incUserRef();
+    return e;
+}
+
+/*
 void rsi_ElementAdd(Context *rsc, RsDataKind dk, RsDataType dt, bool isNormalized, size_t bits, const char *name)
 {
     ElementState * sec = &rsc->mStateElement;
@@ -345,6 +245,7 @@ RsElement rsi_ElementCreate(Context *rsc)
     free(tmpLengths);
     return se;
 }
+*/
 
 
 }

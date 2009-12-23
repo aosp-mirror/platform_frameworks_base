@@ -106,8 +106,8 @@ void Allocation::uploadToTexture(const Context *rsc)
         return;
     }
 
-    GLenum type = mType->getElement()->getGLType();
-    GLenum format = mType->getElement()->getGLFormat();
+    GLenum type = mType->getElement()->getComponent().getGLType();
+    GLenum format = mType->getElement()->getComponent().getGLFormat();
 
     if (!type || !format) {
         return;
@@ -422,10 +422,10 @@ static void elementConverter_8888_to_565(void *dst, const void *src, uint32_t co
 
 static ElementConverter_t pickConverter(const Element *dst, const Element *src)
 {
-    GLenum srcGLType = src->getGLType();
-    GLenum srcGLFmt = src->getGLFormat();
-    GLenum dstGLType = dst->getGLType();
-    GLenum dstGLFmt = dst->getGLFormat();
+    GLenum srcGLType = src->getComponent().getGLType();
+    GLenum srcGLFmt = src->getComponent().getGLFormat();
+    GLenum dstGLType = dst->getComponent().getGLType();
+    GLenum dstGLFmt = dst->getComponent().getGLFormat();
 
     if (srcGLFmt == dstGLFmt && srcGLType == dstGLType) {
         switch(dst->getSizeBytes()) {
