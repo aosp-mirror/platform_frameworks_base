@@ -1325,9 +1325,13 @@
     <!-- Attbution of a contact status update, when the time of update is known -->
     <string name="contact_status_update_attribution_with_date"><xliff:g id="date" example="3 hours ago">%1$s</xliff:g> via <xliff:g id="source" example="Google Talk">%2$s</xliff:g></string>
 
-    <!-- Instructions telling the user to enter their pin to unlock the keyguard.
+    <!-- Instructions telling the user to enter their SIM PIN to unlock the keyguard.
          Displayed in one line in a large font.  -->
     <string name="keyguard_password_enter_pin_code">Enter PIN code</string>
+
+    <!-- Instructions telling the user to enter their PIN password to unlock the keyguard.
+         Displayed in one line in a large font.  -->
+    <string name="keyguard_password_enter_password_code">Enter password to unlock</string>
 
     <!-- Instructions telling the user that they entered the wrong pin while trying
          to unlock the keyguard.  Displayed in one line in a large font.  -->

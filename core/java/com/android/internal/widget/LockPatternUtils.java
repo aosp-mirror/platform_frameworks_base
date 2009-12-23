@@ -38,8 +38,9 @@ import java.util.List;
 public class LockPatternUtils {
 
     private static final String TAG = "LockPatternUtils";
-    
+
     private static final String LOCK_PATTERN_FILE = "/system/gesture.key";
+    private static final String LOCK_PASSWORD_FILE = "/system/password.key";
 
     /**
      * The maximum number of incorrect attempts before the user is prevented
@@ -70,20 +71,32 @@ public class LockPatternUtils {
     public static final int MIN_LOCK_PATTERN_SIZE = 4;
 
     /**
+     * Type of password being stored.
+     * pattern = pattern screen
+     * pin = digit-only password
+     * password = alphanumeric password
+     */
+    public static final int MODE_PATTERN = 0;
+    public static final int MODE_PIN = 1;
+    public static final int MODE_PASSWORD = 2;
+
+    /**
      * The minimum number of dots the user must include in a wrong pattern
      * attempt for it to be counted against the counts that affect
      * {@link #FAILED_ATTEMPTS_BEFORE_TIMEOUT} and {@link #FAILED_ATTEMPTS_BEFORE_RESET}
      */
-    public static final int MIN_PATTERN_REGISTER_FAIL = 3;    
+    public static final int MIN_PATTERN_REGISTER_FAIL = 3;
 
     private final static String LOCKOUT_PERMANENT_KEY = "lockscreen.lockedoutpermanently";
     private final static String LOCKOUT_ATTEMPT_DEADLINE = "lockscreen.lockoutattemptdeadline";
-    private final static String PATTERN_EVER_CHOSEN = "lockscreen.patterneverchosen";
+    private final static String PATTERN_EVER_CHOSEN_KEY = "lockscreen.patterneverchosen";
+    public final static String PASSWORD_TYPE_KEY = "lockscreen.password_type";
 
     private final ContentResolver mContentResolver;
 
     private static String sLockPatternFilename;
-    
+    private static String sLockPasswordFilename;
+
     /**
      * @param contentResolver Used to look up and save settings.
      */
@@ -91,16 +104,19 @@ public class LockPatternUtils {
         mContentResolver = contentResolver;
         // Initialize the location of gesture lock file
         if (sLockPatternFilename == null) {
-            sLockPatternFilename = android.os.Environment.getDataDirectory() 
+            sLockPatternFilename = android.os.Environment.getDataDirectory()
                     .getAbsolutePath() + LOCK_PATTERN_FILE;
+            sLockPasswordFilename = android.os.Environment.getDataDirectory()
+                    .getAbsolutePath() + LOCK_PASSWORD_FILE;
         }
+
     }
 
     /**
      * Check to see if a pattern matches the saved pattern.  If no pattern exists,
      * always returns true.
      * @param pattern The pattern to check.
-     * @return Whether the pattern matchees the stored one.
+     * @return Whether the pattern matches the stored one.
      */
     public boolean checkPattern(List<LockPatternView.Cell> pattern) {
         try {
@@ -122,13 +138,40 @@ public class LockPatternUtils {
     }
 
     /**
-     * Check to see if the user has stored a lock pattern.
-     * @return Whether a saved pattern exists.
+     * Check to see if a password matches the saved password.  If no password exists,
+     * always returns true.
+     * @param password The password to check.
+     * @return Whether the password matches the stored one.
      */
-    public boolean savedPatternExists() {
+    public boolean checkPassword(String password) {
+        try {
+            // Read all the bytes from the file
+            RandomAccessFile raf = new RandomAccessFile(sLockPasswordFilename, "r");
+            final byte[] stored = new byte[(int) raf.length()];
+            int got = raf.read(stored, 0, stored.length);
+            raf.close();
+            if (got <= 0) {
+                return true;
+            }
+            // Compare the hash from the file with the entered password's hash
+            return Arrays.equals(stored, LockPatternUtils.passwordToHash(password));
+        } catch (FileNotFoundException fnfe) {
+            return true;
+        } catch (IOException ioe) {
+            return true;
+        }
+    }
+
+    /**
+     * Checks to see if the given file exists and contains any data. Returns true if it does,
+     * false otherwise.
+     * @param filename
+     * @return true if file exists and is non-empty.
+     */
+    private boolean nonEmptyFileExists(String filename) {
         try {
             // Check if we can read a byte from the file
-            RandomAccessFile raf = new RandomAccessFile(sLockPatternFilename, "r");
+            RandomAccessFile raf = new RandomAccessFile(filename, "r");
             byte first = raf.readByte();
             raf.close();
             return true;
@@ -140,13 +183,29 @@ public class LockPatternUtils {
     }
 
     /**
+     * Check to see if the user has stored a lock pattern.
+     * @return Whether a saved pattern exists.
+     */
+    public boolean savedPatternExists() {
+        return nonEmptyFileExists(sLockPatternFilename);
+    }
+
+    /**
+     * Check to see if the user has stored a lock pattern.
+     * @return Whether a saved pattern exists.
+     */
+    public boolean savedPasswordExists() {
+        return nonEmptyFileExists(sLockPasswordFilename);
+    }
+
+    /**
      * Return true if the user has ever chosen a pattern.  This is true even if the pattern is
      * currently cleared.
      *
      * @return True if the user has ever chosen a pattern.
      */
     public boolean isPatternEverChosen() {
-        return getBoolean(PATTERN_EVER_CHOSEN);
+        return getBoolean(PATTERN_EVER_CHOSEN_KEY);
     }
 
     /**
@@ -166,7 +225,8 @@ public class LockPatternUtils {
                 raf.write(hash, 0, hash.length);
             }
             raf.close();
-            setBoolean(PATTERN_EVER_CHOSEN, true);
+            setBoolean(PATTERN_EVER_CHOSEN_KEY, true);
+            setLong(PASSWORD_TYPE_KEY, MODE_PATTERN);
         } catch (FileNotFoundException fnfe) {
             // Cant do much, unless we want to fail over to using the settings provider
             Log.e(TAG, "Unable to save lock pattern to " + sLockPatternFilename);
@@ -174,6 +234,38 @@ public class LockPatternUtils {
             // Cant do much
             Log.e(TAG, "Unable to save lock pattern to " + sLockPatternFilename);
         }
+    }
+
+    /**
+     * Save a lock password.
+     * @param password The password to save
+     */
+    public void saveLockPassword(String password) {
+        // Compute the hash
+        boolean numericHint = password != null ? TextUtils.isDigitsOnly(password) : false;
+        final byte[] hash  = LockPatternUtils.passwordToHash(password);
+        try {
+            // Write the hash to file
+            RandomAccessFile raf = new RandomAccessFile(sLockPasswordFilename, "rw");
+            // Truncate the file if pattern is null, to clear the lock
+            if (password == null) {
+                raf.setLength(0);
+            } else {
+                raf.write(hash, 0, hash.length);
+            }
+            raf.close();
+            setLong(PASSWORD_TYPE_KEY, numericHint ? MODE_PIN : MODE_PASSWORD);
+        } catch (FileNotFoundException fnfe) {
+            // Cant do much, unless we want to fail over to using the settings provider
+            Log.e(TAG, "Unable to save lock pattern to " + sLockPasswordFilename);
+        } catch (IOException ioe) {
+            // Cant do much
+            Log.e(TAG, "Unable to save lock pattern to " + sLockPasswordFilename);
+        }
+    }
+
+    public int getPasswordMode() {
+        return (int) getLong(PASSWORD_TYPE_KEY, MODE_PATTERN);
     }
 
     /**
@@ -210,7 +302,7 @@ public class LockPatternUtils {
         }
         return new String(res);
     }
-    
+
     /*
      * Generate an SHA-1 hash for the pattern. Not the most secure, but it is
      * at least a second level of protection. First level is that the file
@@ -218,11 +310,11 @@ public class LockPatternUtils {
      * @param pattern the gesture pattern.
      * @return the hash of the pattern in a byte array.
      */
-    static byte[] patternToHash(List<LockPatternView.Cell> pattern) {
+    private static byte[] patternToHash(List<LockPatternView.Cell> pattern) {
         if (pattern == null) {
             return null;
         }
-        
+
         final int patternSize = pattern.size();
         byte[] res = new byte[patternSize];
         for (int i = 0; i < patternSize; i++) {
@@ -238,11 +330,55 @@ public class LockPatternUtils {
         }
     }
 
+    /*
+     * Generate a hash for the given password. To avoid brute force attacks, we use a salted hash.
+     * Not the most secure, but it is at least a second level of protection. First level is that
+     * the file is in a location only readable by the system process.
+     * @param password the gesture pattern.
+     * @return the hash of the pattern in a byte array.
+     */
+     public static byte[] passwordToHash(String password) {
+        if (password == null) {
+            return null;
+        }
+        String algo = null;
+        byte[] hashed = null;
+        try {
+            long salt = 0x2374868151054924L; // TODO: make this unique to device
+            byte[] saltedPassword = (password + Long.toString(salt)).getBytes();
+            byte[] sha1 = MessageDigest.getInstance(algo = "SHA-1").digest(saltedPassword);
+            byte[] md5 = MessageDigest.getInstance(algo = "MD5").digest(saltedPassword);
+            hashed = (toHex(sha1) + toHex(md5)).getBytes();
+        } catch (NoSuchAlgorithmException e) {
+            Log.w(TAG, "Failed to encode string because of missing algorithm: " + algo);
+        }
+        return hashed;
+    }
+
+    private static String toHex(byte[] ary) {
+        final String hex = "0123456789ABCDEF";
+        String ret = "";
+        for (int i = 0; i < ary.length; i++) {
+            ret += hex.charAt((ary[i] >> 4) & 0xf);
+            ret += hex.charAt(ary[i] & 0xf);
+        }
+        return ret;
+    }
+
+    /**
+     * @return Whether the lock password is enabled.
+     */
+    public boolean isLockPasswordEnabled() {
+        long mode = getLong(PASSWORD_TYPE_KEY, 0);
+        return savedPasswordExists() && (mode == MODE_PASSWORD || mode == MODE_PIN);
+    }
+
     /**
      * @return Whether the lock pattern is enabled.
      */
     public boolean isLockPatternEnabled() {
-        return getBoolean(Settings.System.LOCK_PATTERN_ENABLED);
+        return getBoolean(Settings.System.LOCK_PATTERN_ENABLED)
+                && getLong(PASSWORD_TYPE_KEY, MODE_PATTERN) == MODE_PATTERN;
     }
 
     /**
@@ -361,5 +497,10 @@ public class LockPatternUtils {
         android.provider.Settings.System.putLong(mContentResolver, systemSettingKey, value);
     }
 
-
+    public boolean isSecure() {
+        long mode = getPasswordMode();
+        boolean secure = mode == MODE_PATTERN && isLockPatternEnabled() && savedPatternExists()
+            || (mode == MODE_PIN || mode == MODE_PASSWORD) && savedPasswordExists();
+        return secure;
+    }
 }
