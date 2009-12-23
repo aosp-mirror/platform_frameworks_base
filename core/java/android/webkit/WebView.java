@@ -486,7 +486,7 @@ public class WebView extends AbsoluteLayout
     static final int MOVE_OUT_OF_PLUGIN                 = 19;
     static final int CLEAR_TEXT_ENTRY                   = 20;
     static final int UPDATE_TEXT_SELECTION_MSG_ID       = 21;
-    static final int UPDATE_CLIPBOARD                   = 22;
+
     static final int LONG_PRESS_CENTER                  = 23;
     static final int PREVENT_TOUCH_ID                   = 24;
     static final int WEBCORE_NEED_TOUCH_EVENTS          = 25;
@@ -522,7 +522,7 @@ public class WebView extends AbsoluteLayout
         "MOVE_OUT_OF_PLUGIN", //             = 19;
         "CLEAR_TEXT_ENTRY", //               = 20;
         "UPDATE_TEXT_SELECTION_MSG_ID", //   = 21;
-        "UPDATE_CLIPBOARD", //               = 22;
+        "22", //                             = 22;
         "LONG_PRESS_CENTER", //              = 23;
         "PREVENT_TOUCH_ID", //               = 24;
         "WEBCORE_NEED_TOUCH_EVENTS", //      = 25;
@@ -3661,14 +3661,22 @@ public class WebView extends AbsoluteLayout
     private boolean commitCopy() {
         boolean copiedSomething = false;
         if (mExtendSelection) {
-            // copy region so core operates on copy without touching orig.
-            Region selection = new Region(nativeGetSelection());
-            if (selection.isEmpty() == false) {
+            String selection = nativeGetSelection();
+            if (selection != "") {
+                if (DebugFlags.WEB_VIEW) {
+                    Log.v(LOGTAG, "commitCopy \"" + selection + "\"");
+                }
                 Toast.makeText(mContext
                         , com.android.internal.R.string.text_copied
                         , Toast.LENGTH_SHORT).show();
-                mWebViewCore.sendMessage(EventHub.GET_SELECTION, selection);
                 copiedSomething = true;
+                try {
+                    IClipboard clip = IClipboard.Stub.asInterface(
+                            ServiceManager.getService("clipboard"));
+                            clip.setClipboardText(selection);
+                } catch (android.os.RemoteException e) {
+                    Log.e(LOGTAG, "Clipboard failed", e);
+                }
             }
             mExtendSelection = false;
         }
@@ -5655,19 +5663,6 @@ public class WebView extends AbsoluteLayout
                         mWebTextView.setAdapterCustom(adapter);
                     }
                     break;
-                case UPDATE_CLIPBOARD:
-                    String str = (String) msg.obj;
-                    if (DebugFlags.WEB_VIEW) {
-                        Log.v(LOGTAG, "UPDATE_CLIPBOARD " + str);
-                    }
-                    try {
-                        IClipboard clip = IClipboard.Stub.asInterface(
-                                ServiceManager.getService("clipboard"));
-                                clip.setClipboardText(str);
-                    } catch (android.os.RemoteException e) {
-                        Log.e(LOGTAG, "Clipboard failed", e);
-                    }
-                    break;
                 case RESUME_WEBCORE_UPDATE:
                     WebViewCore.resumeUpdate(mWebViewCore);
                     break;
@@ -6369,7 +6364,7 @@ public class WebView extends AbsoluteLayout
     private native boolean  nativeFocusIsPlugin();
     /* package */ native int nativeFocusNodePointer();
     private native Rect     nativeGetCursorRingBounds();
-    private native Region   nativeGetSelection();
+    private native String   nativeGetSelection();
     private native boolean  nativeHasCursorNode();
     private native boolean  nativeHasFocusNode();
     private native void     nativeHideCursor();

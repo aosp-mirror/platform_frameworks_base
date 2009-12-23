@@ -547,8 +547,6 @@ final class WebViewCore {
      */
     private native void nativeSetSelection(int start, int end);
 
-    private native String nativeGetSelection(Region sel);
-
     // Register a scheme to be treated as local scheme so that it can access
     // local asset files for resources
     private native void nativeRegisterURLSchemeAsLocal(String scheme);
@@ -777,7 +775,7 @@ final class WebViewCore {
             "SET_BACKGROUND_COLOR", // = 126;
             "SET_MOVE_FOCUS", // = 127
             "SAVE_DOCUMENT_STATE", // = 128;
-            "GET_SELECTION", // = 129;
+            "129", // = 129;
             "WEBKIT_DRAW", // = 130;
             "SYNC_SCROLL", // = 131;
             "POST_URL", // = 132;
@@ -829,7 +827,7 @@ final class WebViewCore {
         static final int SET_BACKGROUND_COLOR = 126;
         static final int SET_MOVE_FOCUS = 127;
         static final int SAVE_DOCUMENT_STATE = 128;
-        static final int GET_SELECTION = 129;
+
         static final int WEBKIT_DRAW = 130;
         static final int SYNC_SCROLL = 131;
         static final int POST_URL = 132;
@@ -1251,13 +1249,6 @@ final class WebViewCore {
 
                         case SET_BACKGROUND_COLOR:
                             nativeSetBackgroundColor(msg.arg1);
-                            break;
-
-                        case GET_SELECTION:
-                            String str = nativeGetSelection((Region) msg.obj);
-                            Message.obtain(mWebView.mPrivateHandler
-                                    , WebView.UPDATE_CLIPBOARD, str)
-                                    .sendToTarget();
                             break;
 
                         case DUMP_DOMTREE:
