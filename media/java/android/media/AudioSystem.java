@@ -271,7 +271,8 @@ public class AudioSystem
     public static final int FORCE_BT_SCO = 3;
     public static final int FORCE_BT_A2DP = 4;
     public static final int FORCE_WIRED_ACCESSORY = 5;
-    public static final int FORCE_BT_DOCK = 6;
+    public static final int FORCE_BT_CAR_DOCK = 6;
+    public static final int FORCE_BT_DESK_DOCK = 7;
     public static final int FORCE_DEFAULT = FORCE_NONE;
 
     // usage for serForceUse
