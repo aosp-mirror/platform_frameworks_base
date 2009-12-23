@@ -31,7 +31,9 @@ LOCAL_SRC_FILES += \
 LOCAL_SHARED_LIBRARIES := \
     libcutils \
     libskia \
-    libstagefright
+    libstagefright \
+    libbinder \
+    libutils
 
 LOCAL_C_INCLUDES := \
     $(JNI_H_INCLUDE) \
