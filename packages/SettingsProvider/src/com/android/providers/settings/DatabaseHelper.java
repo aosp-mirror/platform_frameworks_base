@@ -71,7 +71,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // database gets upgraded properly. At a minimum, please confirm that 'upgradeVersion'
     // is properly propagated through your change.  Not doing so will result in a loss of user
     // settings.
-    private static final int DATABASE_VERSION = 43;
+    private static final int DATABASE_VERSION = 44;
 
     private Context mContext;
 
@@ -539,6 +539,24 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             upgradeVersion = 43;
         }
 
+        if (upgradeVersion == 43) {
+            /*
+             * This upgrade stores bluetooth volume separately from voice volume
+             */
+            db.beginTransaction();
+            try {
+                SQLiteStatement stmt = db.compileStatement("INSERT OR IGNORE INTO system(name,value)"
+                        + " VALUES(?,?);");
+                loadSetting(stmt, Settings.System.VOLUME_BLUETOOTH_SCO,
+                        AudioManager.DEFAULT_STREAM_VOLUME[AudioManager.STREAM_BLUETOOTH_SCO]);
+                stmt.close();
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+            }
+            upgradeVersion = 44;
+        }
+
         if (upgradeVersion != currentVersion) {
             Log.w(TAG, "Got stuck trying to upgrade from version " + upgradeVersion
                     + ", must wipe the settings provider");
@@ -691,6 +709,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 stmt,
                 Settings.System.VOLUME_NOTIFICATION,
                 AudioManager.DEFAULT_STREAM_VOLUME[AudioManager.STREAM_NOTIFICATION]);
+        loadSetting(
+                stmt,
+                Settings.System.VOLUME_BLUETOOTH_SCO,
+                AudioManager.DEFAULT_STREAM_VOLUME[AudioManager.STREAM_BLUETOOTH_SCO]);
+
         loadSetting(stmt, Settings.System.MODE_RINGER,
                 AudioManager.RINGER_MODE_NORMAL);
 
