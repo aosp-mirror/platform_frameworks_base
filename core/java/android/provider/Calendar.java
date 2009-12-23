@@ -1059,11 +1059,23 @@ public final class Calendar {
          * <P>Type: INTEGER</P>
          */
         public static final String MAX_BUSYBITS = "maxBusyBits";
+
+        /**
+         * The minimum Julian day in the EventDays table.
+         * <P>Type: INTEGER</P>
+         */
+        public static final String MIN_EVENTDAYS = "minEventDays";
+
+        /**
+         * The maximum Julian day in the EventDays table.
+         * <P>Type: INTEGER</P>
+         */
+        public static final String MAX_EVENTDAYS = "maxEventDays";
     }
 
     public static final class CalendarMetaData implements CalendarMetaDataColumns {
     }
-
+    /*busybits*/
     public interface BusyBitsColumns {
         /**
          * The Julian day number.
@@ -1088,6 +1100,7 @@ public final class Calendar {
         public static final String ALL_DAY_COUNT = "allDayCount";
     }
 
+    /*busybits*/
     public static final class BusyBits implements BusyBitsColumns {
         public static final Uri CONTENT_URI = Uri.parse("content://calendar/busybits/when");
 
@@ -1101,6 +1114,47 @@ public final class Calendar {
 
         /**
          * Retrieves the busy bits for the Julian days starting at "startDay"
+         * for "numDays".
+         * This is being phased out so has been changed to an empty method so
+         * that it doesn't reference anything that needs to be cleaned up else-
+         * where.
+         *
+         * @param cr the ContentResolver
+         * @param startDay the first Julian day in the range
+         * @param numDays the number of days to load (must be at least 1)
+         * @return a database cursor
+         */
+        public static final Cursor query(ContentResolver cr, int startDay, int numDays) {
+//            if (numDays < 1) {
+//                return null;
+//            }
+//            int endDay = startDay + numDays - 1;
+//            Uri.Builder builder = CONTENT_URI.buildUpon();
+//            ContentUris.appendId(builder, startDay);
+//            ContentUris.appendId(builder, endDay);
+//            return cr.query(builder.build(), PROJECTION, null /* selection */,
+//                    null /* selection args */, DAY);
+          return null;
+        }
+    }
+
+    public interface EventDaysColumns {
+        /**
+         * The Julian starting day number.
+         * <P>Type: INTEGER (int)</P>
+         */
+        public static final String STARTDAY = "startDay";
+
+    }
+
+    public static final class EventDays implements EventDaysColumns {
+        public static final Uri CONTENT_URI = Uri.parse("content://calendar/instances/groupbyday");
+
+        public static final String[] PROJECTION = { STARTDAY };
+        public static final String SELECTION = "selected==1";
+
+        /**
+         * Retrieves the days with events for the Julian days starting at "startDay"
          * for "numDays".
          *
          * @param cr the ContentResolver
@@ -1116,8 +1170,8 @@ public final class Calendar {
             Uri.Builder builder = CONTENT_URI.buildUpon();
             ContentUris.appendId(builder, startDay);
             ContentUris.appendId(builder, endDay);
-            return cr.query(builder.build(), PROJECTION, null /* selection */,
-                    null /* selection args */, DAY);
+            return cr.query(builder.build(), PROJECTION, SELECTION,
+                    null /* selection args */, STARTDAY);
         }
     }
 
