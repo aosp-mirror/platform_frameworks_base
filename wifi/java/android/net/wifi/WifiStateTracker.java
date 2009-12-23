@@ -616,7 +616,7 @@ public class WifiStateTracker extends NetworkStateTracker {
      * @return {@code true} if the operation succeeds, {@code false} otherwise, e.g.,
      * the number of channels is invalid.
      */
-    public boolean setNumAllowedChannels() {
+    public synchronized boolean setNumAllowedChannels() {
         try {
             return setNumAllowedChannels(
                     Settings.Secure.getInt(mContext.getContentResolver(),
@@ -859,7 +859,9 @@ public class WifiStateTracker extends NetworkStateTracker {
                 // Only do this if we haven't gotten a new supplicant status since the timer
                 // started
                 if (mNumSupplicantStateChanges == msg.arg1) {
-                    WifiNative.scanCommand(false); // do a passive scan
+                    synchronized (this) {
+                        WifiNative.scanCommand(false); // do a passive scan
+                    }
                 }
                 break;
 
@@ -1154,7 +1156,6 @@ public class WifiStateTracker extends NetworkStateTracker {
                     // [31- 1] Reserved for future use
                     // [ 0- 0] Interface configuration succeeded (1) or failed (0)
                     EventLog.writeEvent(EVENTLOG_INTERFACE_CONFIGURATION_STATE_CHANGED, 0);
-                
                     mHaveIpAddress = false;
                     mWifiInfo.setIpAddress(0);
                     mObtainingIpAddress = false;
