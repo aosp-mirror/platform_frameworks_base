@@ -1,6 +1,7 @@
 // Simple OpenGL ES 1.x application showing how to initialize and draw something.
 
 #include <EGL/egl.h>
+
 #include <GLES/gl.h>
 #include <GLES/glext.h>
 
@@ -8,6 +9,7 @@
 #include <ui/EGLUtils.h>
 
 #include <stdio.h>
+
 #include <stdlib.h>
 #include <math.h>
 
@@ -27,6 +29,11 @@ void init_scene(void);
 void render();
 void create_texture(void);
 int readTimer(void);
+
+static void printGLString(const char *name, GLenum s) {
+    const char *v = (const char *) glGetString(s);
+    fprintf(stderr, "GL %s = %s\n", name, v);
+}
 
 static void gluLookAt(float eyeX, float eyeY, float eyeZ,
         float centerX, float centerY, float centerZ, float upX, float upY,
@@ -86,7 +93,6 @@ static void gluLookAt(float eyeX, float eyeY, float eyeZ,
     glMultMatrixf(m);
     glTranslatef(-eyeX, -eyeY, -eyeZ);
 }
-
 
 void printEGLConfiguration(EGLDisplay dpy, EGLConfig config) {
 
@@ -188,27 +194,19 @@ int main(int argc, char **argv)
 {
     int q;
     int start, end;
-
     printf("Initializing EGL...\n");
-
     if(!init_gl_surface())
     {
         printf("GL initialisation failed - exiting\n");
         return 0;
     }
-
     init_scene();
-
     create_texture();
-
     printf("Running...\n");
-
     while(true) {
         render();
     }
-
     free_gl_surface();
-
     return 0;
 }
 
@@ -227,7 +225,7 @@ int init_gl_surface(void)
         printf("eglGetDisplay failed\n");
         return 0;
     }
-
+    
     if ( eglInitialize(eglDisplay, NULL, NULL) != EGL_TRUE )
     {
         printf("eglInitialize failed\n");
@@ -238,6 +236,7 @@ int init_gl_surface(void)
         printf("printEGLConfigurations failed.\n");
         return 0;
     }
+
     EGLNativeWindowType window = android_createDisplaySurface();
     EGLUtils::selectConfigForNativeWindow(eglDisplay, attrib, window, &myConfig);
 
@@ -259,6 +258,21 @@ int init_gl_surface(void)
         printf("eglMakeCurrent failed\n");
         return 0;
     }
+    
+    int w, h;
+
+    eglQuerySurface(eglDisplay, eglSurface, EGL_WIDTH, &w);
+    checkEglError("eglQuerySurface");
+    eglQuerySurface(eglDisplay, eglSurface, EGL_HEIGHT, &h);
+    checkEglError("eglQuerySurface");
+    GLint dim = w < h ? w : h;
+    
+    fprintf(stderr, "Window dimensions: %d x %d\n", w, h);
+
+    printGLString("Version", GL_VERSION);
+    printGLString("Vendor", GL_VENDOR);
+    printGLString("Renderer", GL_RENDERER);
+    printGLString("Extensions", GL_EXTENSIONS);
 
     return 1;
 }
@@ -280,21 +294,17 @@ void init_scene(void)
 {
     glDisable(GL_DITHER);
     glEnable(GL_CULL_FACE);
-
     float ratio = 320.0f / 480.0f;
     glViewport(0, 0, 320, 480);
-
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     glFrustumf(-ratio, ratio, -1, 1, 1, 10);
-
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     gluLookAt(
             0, 0, 3,  // eye
             0, 0, 0,  // center
             0, 1, 0); // up
-
     glEnable(GL_TEXTURE_2D);
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
@@ -315,6 +325,7 @@ void create_texture(void)
             on, off, on, off, on, off, on, off,
             off, on, off, on, off, on, off, on,
     };
+
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 8, 8, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
@@ -346,12 +357,9 @@ void render()
 
     glVertexPointer(3, GL_FLOAT, 0, vertices);
     glTexCoordPointer(2, GL_FIXED, 0, texCoords);
-
     glClearColor(1.0, 1.0, 1.0, 1.0);
-
     int nelem = sizeof(indices)/sizeof(indices[0]);
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
     glDrawElements(GL_TRIANGLES, nelem, GL_UNSIGNED_SHORT, indices);
     eglSwapBuffers(eglDisplay, eglSurface);
 }
-
