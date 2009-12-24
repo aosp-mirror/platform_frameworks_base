@@ -23,8 +23,6 @@ public class DatabaseTests {
         TestSuite suite = new TestSuite(DatabaseTests.class.getName());
 
         suite.addTestSuite(DatabaseGeneralTest.class);
-        suite.addTestSuite(DatabaseCursorTest.class);
-        suite.addTestSuite(DatabaseStatementTest.class);
         suite.addTestSuite(DatabaseLocaleTest.class);
         suite.addTestSuite(CursorWindowTest.class);
         suite.addTestSuite(DatabaseLockTest.class);
