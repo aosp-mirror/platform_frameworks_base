@@ -800,6 +800,7 @@ public final class RIL extends BaseCommands implements CommandsInterface {
 
         rr.mp.writeString(address);
         rr.mp.writeInt(clirMode);
+        rr.mp.writeInt(0); // UUS information is absent
 
         if (RILJ_LOGD) riljLog(rr.serialString() + "> " + requestToString(rr.mRequest));
 
@@ -2824,6 +2825,13 @@ public final class RIL extends BaseCommands implements CommandsInterface {
             dc.numberPresentation = DriverCall.presentationFromCLIP(np);
             dc.name = p.readString();
             dc.namePresentation = p.readInt();
+            int uusInfoPresent = p.readInt();
+            if (uusInfoPresent == 1) {
+                // TODO: Copy the data to dc to forward to the apps.
+                p.readInt();
+                p.readInt();
+                p.createByteArray();
+            }
 
             // Make sure there's a leading + on addresses with a TOA of 145
             dc.number = PhoneNumberUtils.stringFromStringAndTOA(dc.number, dc.TOA);
