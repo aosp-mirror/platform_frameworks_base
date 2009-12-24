@@ -283,8 +283,12 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved)
                                                "(Ljava/lang/Object;IIILjava/lang/Object;)V");
     if (fields.mPostEvent == NULL) {
         LOGE("Can't find android/media/SoundPool.postEventFromNative");
-        return -1;
+        goto bail;
     }
+
+    // create a reference to class. Technically, we're leaking this reference
+    // since it's a static object.
+    fields.mSoundPoolClass = (jclass) env->NewGlobalRef(clazz);
 
     if (AndroidRuntime::registerNativeMethods(env, kClassPathName, gMethods, NELEM(gMethods)) < 0)
         goto bail;
