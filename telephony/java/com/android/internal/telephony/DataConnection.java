@@ -274,7 +274,7 @@ public abstract class DataConnection extends HierarchicalStateMachine {
 
         clearSettings();
 
-        setDbg(true);
+        setDbg(false);
         addState(mDefaultState);
             addState(mInactiveState, mDefaultState);
             addState(mActivatingState, mDefaultState);
