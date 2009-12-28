@@ -120,3 +120,33 @@ ifeq ($(ARCH_ARM_HAVE_TLS_REGISTER),true)
 endif
 
 include $(BUILD_SHARED_LIBRARY)
+
+###############################################################################
+# Build the ETC1 host static library
+#
+
+include $(CLEAR_VARS)
+
+LOCAL_SRC_FILES:= 		\
+	ETC1/etc1.cpp 	\
+#
+
+LOCAL_LDLIBS := -lpthread -ldl
+LOCAL_MODULE:= libETC1
+
+include $(BUILD_HOST_STATIC_LIBRARY)
+
+###############################################################################
+# Build the ETC1 device library
+#
+
+include $(CLEAR_VARS)
+
+LOCAL_SRC_FILES:= 		\
+	ETC1/etc1.cpp 	\
+#
+
+LOCAL_LDLIBS := -lpthread -ldl
+LOCAL_MODULE:= libETC1
+
+include $(BUILD_SHARED_LIBRARY)

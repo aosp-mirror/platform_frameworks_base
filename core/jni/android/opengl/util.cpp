@@ -23,6 +23,7 @@
 #include <dlfcn.h>
 
 #include <GLES/gl.h>
+#include <ETC1/etc1.h>
 
 #include <core/SkBitmap.h>
 
@@ -39,6 +40,7 @@ namespace android {
 
 static jclass gIAEClass;
 static jclass gUOEClass;
+static jclass gAIOOBEClass;
 
 static inline
 void mx4transform(float x, float y, float z, float w, const float* pM, float* pDest) {
@@ -712,6 +714,297 @@ static jint util_texSubImage2D(JNIEnv *env, jclass clazz,
 }
 
 /*
+ * ETC1 methods.
+ */
+
+static jclass nioAccessClass;
+static jclass bufferClass;
+static jmethodID getBasePointerID;
+static jmethodID getBaseArrayID;
+static jmethodID getBaseArrayOffsetID;
+static jfieldID positionID;
+static jfieldID limitID;
+static jfieldID elementSizeShiftID;
+
+/* Cache method IDs each time the class is loaded. */
+
+static void
+nativeClassInitBuffer(JNIEnv *_env)
+{
+    jclass nioAccessClassLocal = _env->FindClass("java/nio/NIOAccess");
+    nioAccessClass = (jclass) _env->NewGlobalRef(nioAccessClassLocal);
+
+    jclass bufferClassLocal = _env->FindClass("java/nio/Buffer");
+    bufferClass = (jclass) _env->NewGlobalRef(bufferClassLocal);
+
+    getBasePointerID = _env->GetStaticMethodID(nioAccessClass,
+            "getBasePointer", "(Ljava/nio/Buffer;)J");
+    getBaseArrayID = _env->GetStaticMethodID(nioAccessClass,
+            "getBaseArray", "(Ljava/nio/Buffer;)Ljava/lang/Object;");
+    getBaseArrayOffsetID = _env->GetStaticMethodID(nioAccessClass,
+            "getBaseArrayOffset", "(Ljava/nio/Buffer;)I");
+    positionID = _env->GetFieldID(bufferClass, "position", "I");
+    limitID = _env->GetFieldID(bufferClass, "limit", "I");
+    elementSizeShiftID =
+        _env->GetFieldID(bufferClass, "_elementSizeShift", "I");
+}
+
+static void *
+getPointer(JNIEnv *_env, jobject buffer, jint *remaining)
+{
+    jint position;
+    jint limit;
+    jint elementSizeShift;
+    jlong pointer;
+    jint offset;
+    void *data;
+
+    position = _env->GetIntField(buffer, positionID);
+    limit = _env->GetIntField(buffer, limitID);
+    elementSizeShift = _env->GetIntField(buffer, elementSizeShiftID);
+    *remaining = (limit - position) << elementSizeShift;
+    pointer = _env->CallStaticLongMethod(nioAccessClass,
+            getBasePointerID, buffer);
+    if (pointer != 0L) {
+        return (void *) (jint) pointer;
+    }
+    return NULL;
+}
+
+class BufferHelper {
+public:
+    BufferHelper(JNIEnv *env, jobject buffer) {
+        mEnv = env;
+        mBuffer = buffer;
+        mData = NULL;
+        mRemaining = 0;
+    }
+
+    bool checkPointer(const char* errorMessage) {
+        if (mBuffer) {
+            mData = getPointer(mEnv, mBuffer, &mRemaining);
+            if (mData == NULL) {
+                mEnv->ThrowNew(gIAEClass, errorMessage);
+            }
+            return mData != NULL;
+        } else {
+            mEnv->ThrowNew(gIAEClass, errorMessage);
+            return false;
+        }
+    }
+
+    inline void* getData() {
+        return mData;
+    }
+
+    inline jint remaining() {
+        return mRemaining;
+    }
+
+private:
+    JNIEnv* mEnv;
+    jobject mBuffer;
+    void* mData;
+    jint mRemaining;
+};
+
+/**
+ * Encode a block of pixels.
+ *
+ * @param in a pointer to a ETC1_DECODED_BLOCK_SIZE array of bytes that represent a
+ * 4 x 4 square of 3-byte pixels in form R, G, B. Byte (3 * (x + 4 * y) is the R
+ * value of pixel (x, y).
+ *
+ * @param validPixelMask is a 16-bit mask where bit (1 << (x + y * 4)) indicates whether
+ * the corresponding (x,y) pixel is valid. Invalid pixel color values are ignored when compressing.
+ *
+ * @param out an ETC1 compressed version of the data.
+ *
+ */
+static void etc1_encodeBlock(JNIEnv *env, jclass clazz,
+        jobject in, jint validPixelMask, jobject out) {
+    if (validPixelMask < 0 || validPixelMask > 15) {
+        env->ThrowNew(gIAEClass, "validPixelMask");
+        return;
+    }
+    BufferHelper inB(env, in);
+    BufferHelper outB(env, out);
+    if (inB.checkPointer("in") && outB.checkPointer("out")) {
+        if (inB.remaining() < ETC1_DECODED_BLOCK_SIZE) {
+            env->ThrowNew(gIAEClass, "in's remaining data < DECODED_BLOCK_SIZE");
+        } else if (outB.remaining() < ETC1_ENCODED_BLOCK_SIZE) {
+            env->ThrowNew(gIAEClass, "out's remaining data < ENCODED_BLOCK_SIZE");
+        } else {
+            etc1_encode_block((etc1_byte*) inB.getData(), validPixelMask,
+                    (etc1_byte*) outB.getData());
+        }
+    }
+}
+
+/**
+ * Decode a block of pixels.
+ *
+ * @param in an ETC1 compressed version of the data.
+ *
+ * @param out a pointer to a ETC_DECODED_BLOCK_SIZE array of bytes that represent a
+ * 4 x 4 square of 3-byte pixels in form R, G, B. Byte (3 * (x + 4 * y) is the R
+ * value of pixel (x, y).
+ */
+static void etc1_decodeBlock(JNIEnv *env, jclass clazz,
+        jobject in, jobject out){
+    BufferHelper inB(env, in);
+    BufferHelper outB(env, out);
+    if (inB.checkPointer("in") && outB.checkPointer("out")) {
+        if (inB.remaining() < ETC1_ENCODED_BLOCK_SIZE) {
+            env->ThrowNew(gIAEClass, "in's remaining data < ENCODED_BLOCK_SIZE");
+        } else if (outB.remaining() < ETC1_DECODED_BLOCK_SIZE) {
+            env->ThrowNew(gIAEClass, "out's remaining data < DECODED_BLOCK_SIZE");
+        } else {
+            etc1_decode_block((etc1_byte*) inB.getData(),
+                    (etc1_byte*) outB.getData());
+        }
+    }
+}
+
+/**
+ * Return the size of the encoded image data (does not include size of PKM header).
+ */
+static jint etc1_getEncodedDataSize(JNIEnv *env, jclass clazz,
+        jint width, jint height) {
+    return etc1_get_encoded_data_size(width, height);
+}
+
+/**
+ * Encode an entire image.
+ * @param in pointer to the image data. Formatted such that
+ *           pixel (x,y) is at pIn + pixelSize * x + stride * y + redOffset;
+ * @param out pointer to encoded data. Must be large enough to store entire encoded image.
+ */
+static void etc1_encodeImage(JNIEnv *env, jclass clazz,
+        jobject in, jint width, jint height,
+        jint pixelSize, jint stride, jobject out) {
+    if (pixelSize < 2 || pixelSize > 3) {
+        env->ThrowNew(gIAEClass, "pixelSize must be 2 or 3");
+        return;
+    }
+    BufferHelper inB(env, in);
+    BufferHelper outB(env, out);
+    if (inB.checkPointer("in") && outB.checkPointer("out")) {
+        jint imageSize = stride * height;
+        jint encodedImageSize = etc1_get_encoded_data_size(width, height);
+        if (inB.remaining() < imageSize) {
+            env->ThrowNew(gIAEClass, "in's remaining data < image size");
+        } else if (outB.remaining() < encodedImageSize) {
+            env->ThrowNew(gIAEClass, "out's remaining data < encoded image size");
+        } else {
+            int result = etc1_encode_image((etc1_byte*) inB.getData(),
+                    width, height, pixelSize,
+                    stride,
+                    (etc1_byte*) outB.getData());
+        }
+    }
+}
+
+/**
+ * Decode an entire image.
+ * @param in the encoded data.
+ * @param out pointer to the image data. Will be written such that
+ *            pixel (x,y) is at pIn + pixelSize * x + stride * y. Must be
+ *            large enough to store entire image.
+ */
+static void etc1_decodeImage(JNIEnv *env, jclass clazz,
+        jobject  in, jobject out,
+        jint width, jint height,
+        jint pixelSize, jint stride) {
+    if (pixelSize < 2 || pixelSize > 3) {
+        env->ThrowNew(gIAEClass, "pixelSize must be 2 or 3");
+        return;
+    }
+    BufferHelper inB(env, in);
+    BufferHelper outB(env, out);
+    if (inB.checkPointer("in") && outB.checkPointer("out")) {
+        jint imageSize = stride * height;
+        jint encodedImageSize = etc1_get_encoded_data_size(width, height);
+        if (inB.remaining() < encodedImageSize) {
+            env->ThrowNew(gIAEClass, "in's remaining data < encoded image size");
+        } else if (outB.remaining() < imageSize) {
+            env->ThrowNew(gIAEClass, "out's remaining data < image size");
+        } else {
+            int result = etc1_decode_image((etc1_byte*) inB.getData(),
+                    (etc1_byte*) outB.getData(),
+                    width, height, pixelSize,
+                    stride);
+        }
+    }
+}
+
+/**
+ * Format a PKM header
+ */
+static void etc1_formatHeader(JNIEnv *env, jclass clazz,
+        jobject header, jint width, jint height) {
+    BufferHelper headerB(env, header);
+    if (headerB.checkPointer("header") ){
+        if (headerB.remaining() < ETC_PKM_HEADER_SIZE) {
+            env->ThrowNew(gIAEClass, "header's remaining data < ETC_PKM_HEADER_SIZE");
+        } else {
+            etc1_pkm_format_header((etc1_byte*) headerB.getData(), width, height);
+        }
+    }
+}
+
+/**
+ * Check if a PKM header is correctly formatted.
+ */
+static jboolean etc1_isValid(JNIEnv *env, jclass clazz,
+        jobject header) {
+    jboolean result = false;
+    BufferHelper headerB(env, header);
+    if (headerB.checkPointer("header") ){
+        if (headerB.remaining() < ETC_PKM_HEADER_SIZE) {
+            env->ThrowNew(gIAEClass, "header's remaining data < ETC_PKM_HEADER_SIZE");
+        } else {
+            result = etc1_pkm_is_valid((etc1_byte*) headerB.getData());
+        }
+    }
+    return result;
+}
+
+/**
+ * Read the image width from a PKM header
+ */
+static jint etc1_getWidth(JNIEnv *env, jclass clazz,
+        jobject header) {
+    jint result = 0;
+    BufferHelper headerB(env, header);
+    if (headerB.checkPointer("header") ){
+        if (headerB.remaining() < ETC_PKM_HEADER_SIZE) {
+            env->ThrowNew(gIAEClass, "header's remaining data < ETC_PKM_HEADER_SIZE");
+        } else {
+            result = etc1_pkm_get_width((etc1_byte*) headerB.getData());
+        }
+    }
+    return result;
+}
+
+/**
+ * Read the image height from a PKM header
+ */
+static int etc1_getHeight(JNIEnv *env, jclass clazz,
+        jobject header) {
+    jint result = 0;
+    BufferHelper headerB(env, header);
+    if (headerB.checkPointer("header") ){
+        if (headerB.remaining() < ETC_PKM_HEADER_SIZE) {
+            env->ThrowNew(gIAEClass, "header's remaining data < ETC_PKM_HEADER_SIZE");
+        } else {
+            result = etc1_pkm_get_height((etc1_byte*) headerB.getData());
+        }
+    }
+    return result;
+}
+
+/*
  * JNI registration
  */
 
@@ -721,6 +1014,8 @@ lookupClasses(JNIEnv* env) {
             env->FindClass("java/lang/IllegalArgumentException"));
     gUOEClass = (jclass) env->NewGlobalRef(
             env->FindClass("java/lang/UnsupportedOperationException"));
+    gAIOOBEClass = (jclass) env->NewGlobalRef(
+            env->FindClass("java/lang/ArrayIndexOutOfBoundsException"));
 }
 
 static JNINativeMethod gMatrixMethods[] = {
@@ -742,6 +1037,18 @@ static JNINativeMethod gUtilsMethods[] = {
     { "native_texSubImage2D", "(IIIILandroid/graphics/Bitmap;II)I", (void*)util_texSubImage2D },
 };
 
+static JNINativeMethod gEtc1Methods[] = {
+    { "encodeBlock", "(Ljava/nio/Buffer;ILjava/nio/Buffer;)V", (void*) etc1_encodeBlock },
+    { "decodeBlock", "(Ljava/nio/Buffer;Ljava/nio/Buffer;)V", (void*) etc1_decodeBlock },
+    { "getEncodedDataSize", "(II)I", (void*) etc1_getEncodedDataSize },
+    { "encodeImage", "(Ljava/nio/Buffer;IIIILjava/nio/Buffer;)V", (void*) etc1_encodeImage },
+    { "decodeImage", "(Ljava/nio/Buffer;Ljava/nio/Buffer;IIII)V", (void*) etc1_decodeImage },
+    { "formatHeader", "(Ljava/nio/Buffer;II)V", (void*) etc1_formatHeader },
+    { "isValid", "(Ljava/nio/Buffer;)Z", (void*) etc1_isValid },
+    { "getWidth", "(Ljava/nio/Buffer;)I", (void*) etc1_getWidth },
+    { "getHeight", "(Ljava/nio/Buffer;)I", (void*) etc1_getHeight },
+};
+
 typedef struct _ClassRegistrationInfo {
     const char* classPath;
     JNINativeMethod* methods;
@@ -752,11 +1059,13 @@ static ClassRegistrationInfo gClasses[] = {
         {"android/opengl/Matrix", gMatrixMethods, NELEM(gMatrixMethods)},
         {"android/opengl/Visibility", gVisiblityMethods, NELEM(gVisiblityMethods)},
         {"android/opengl/GLUtils", gUtilsMethods, NELEM(gUtilsMethods)},
+        {"android/opengl/ETC1", gEtc1Methods, NELEM(gEtc1Methods)},
 };
 
 int register_android_opengl_classes(JNIEnv* env)
 {
     lookupClasses(env);
+    nativeClassInitBuffer(env);
     int result = 0;
     for (int i = 0; i < NELEM(gClasses); i++) {
         ClassRegistrationInfo* cri = &gClasses[i];
