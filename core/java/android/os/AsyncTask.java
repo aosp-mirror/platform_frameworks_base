@@ -82,7 +82,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  *     <li><code>Result</code>, the type of the result of the background
  *     computation.</li>
  * </ol>
- * <p>Not all types are always used by am asynchronous task. To mark a type as unused,
+ * <p>Not all types are always used by an asynchronous task. To mark a type as unused,
  * simply use the type {@link Void}:</p>
  * <pre>
  * private class MyTask extends AsyncTask&lt;Void, Void, Void&gt; { ... }
