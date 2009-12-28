@@ -1194,6 +1194,12 @@ public final class Settings {
         public static final String VOLUME_NOTIFICATION = "volume_notification";
 
         /**
+         * Bluetooth Headset volume. This is used internally, changing this value will
+         * not change the volume. See AudioManager.
+         */
+        public static final String VOLUME_BLUETOOTH_SCO = "volume_bluetooth_sco";
+
+        /**
          * Whether the notifications should use the ring volume (value of 1) or
          * a separate notification volume (value of 0). In most cases, users
          * will have this enabled so the notification and ringer volumes will be
@@ -1214,7 +1220,7 @@ public final class Settings {
          */
         public static final String[] VOLUME_SETTINGS = {
             VOLUME_VOICE, VOLUME_SYSTEM, VOLUME_RING, VOLUME_MUSIC,
-            VOLUME_ALARM, VOLUME_NOTIFICATION
+            VOLUME_ALARM, VOLUME_NOTIFICATION, VOLUME_BLUETOOTH_SCO
         };
 
         /**
@@ -1471,12 +1477,14 @@ public final class Settings {
             VOLUME_MUSIC,
             VOLUME_ALARM,
             VOLUME_NOTIFICATION,
+            VOLUME_BLUETOOTH_SCO,
             VOLUME_VOICE + APPEND_FOR_LAST_AUDIBLE,
             VOLUME_SYSTEM + APPEND_FOR_LAST_AUDIBLE,
             VOLUME_RING + APPEND_FOR_LAST_AUDIBLE,
             VOLUME_MUSIC + APPEND_FOR_LAST_AUDIBLE,
             VOLUME_ALARM + APPEND_FOR_LAST_AUDIBLE,
             VOLUME_NOTIFICATION + APPEND_FOR_LAST_AUDIBLE,
+            VOLUME_BLUETOOTH_SCO + APPEND_FOR_LAST_AUDIBLE,
             TEXT_AUTO_REPLACE,
             TEXT_AUTO_CAPS,
             TEXT_AUTO_PUNCTUATE,
