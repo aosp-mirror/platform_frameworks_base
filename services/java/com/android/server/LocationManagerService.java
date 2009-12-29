@@ -552,10 +552,8 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         }
         // Use system settings
         ContentResolver resolver = mContext.getContentResolver();
-        String allowedProviders = Settings.Secure.getString(resolver,
-           Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
 
-        return ((allowedProviders != null) && (allowedProviders.contains(provider)));
+        return Settings.Secure.isLocationProviderEnabled(resolver, provider);
     }
 
     private void checkPermissionsSafe(String provider) {
