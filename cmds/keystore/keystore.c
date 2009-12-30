@@ -170,16 +170,12 @@ static int8_t encrypt_blob(char *name, AES_KEY *aes_key)
         return SYSTEM_ERROR;
     }
 
-    length = (blob.length + blob.value - blob.encrypted) % AES_BLOCK_SIZE;
-    if (length) {
-        length = AES_BLOCK_SIZE - length;
-    }
+    length = blob.length + blob.value - blob.encrypted;
+    length = (length + AES_BLOCK_SIZE - 1) / AES_BLOCK_SIZE * AES_BLOCK_SIZE;
 
-    length += blob.length + blob.value - blob.digested;
     blob.length = htonl(blob.length);
-    MD5(blob.digested, length, blob.digest);
+    MD5(blob.digested, length - (blob.digested - blob.encrypted), blob.digest);
 
-    length += blob.digested - blob.encrypted;
     memcpy(vector, blob.vector, AES_BLOCK_SIZE);
     AES_cbc_encrypt(blob.encrypted, blob.encrypted, length, aes_key, vector,
                     AES_ENCRYPT);
