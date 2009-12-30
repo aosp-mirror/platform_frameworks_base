@@ -662,19 +662,24 @@ public class TtsService extends Service implements OnCompletionListener {
     }
 
     public void onCompletion(MediaPlayer arg0) {
-        String callingApp = mCurrentSpeechItem.mCallingApp;
-        ArrayList<String> params = mCurrentSpeechItem.mParams;
-        String utteranceId = "";
-        if (params != null){
-            for (int i = 0; i < params.size() - 1; i = i + 2){
-            String param = params.get(i);
-                if (param.equals(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID)){
-                    utteranceId = params.get(i+1);
+        // mCurrentSpeechItem may become null if it is stopped at the same
+        // time it completes.
+        SpeechItem currentSpeechItemCopy = mCurrentSpeechItem;
+        if (currentSpeechItemCopy != null) {
+            String callingApp = currentSpeechItemCopy.mCallingApp;
+            ArrayList<String> params = currentSpeechItemCopy.mParams;
+            String utteranceId = "";
+            if (params != null) {
+                for (int i = 0; i < params.size() - 1; i = i + 2) {
+                    String param = params.get(i);
+                    if (param.equals(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID)) {
+                        utteranceId = params.get(i + 1);
+                    }
                 }
             }
-        }
-        if (utteranceId.length() > 0){
-            dispatchUtteranceCompletedCallback(utteranceId, callingApp);
+            if (utteranceId.length() > 0) {
+                dispatchUtteranceCompletedCallback(utteranceId, callingApp);
+            }
         }
         processSpeechQueue();
     }
