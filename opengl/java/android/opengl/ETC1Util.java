@@ -92,7 +92,7 @@ public class ETC1Util {
 
     /**
      * Check if ETC1 texture compression is supported by the active OpenGL ES context.
-     * @returns true if the active OpenGL ES context supports ETC1 texture compression.
+     * @return true if the active OpenGL ES context supports ETC1 texture compression.
      */
     public static boolean isETC1Supported() {
         int[] results = new int[20];

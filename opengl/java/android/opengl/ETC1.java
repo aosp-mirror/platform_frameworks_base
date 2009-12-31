@@ -27,7 +27,7 @@ import java.nio.Buffer;
  * The PKM file format is of a 16-byte header that describes the image bounds
  * followed by the encoded ETC1 texture data.
  * <p>
- * @see(ETC1Util)
+ * @see ETC1Util
  */
 public class ETC1 {
 
