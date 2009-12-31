@@ -1314,7 +1314,7 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService} to retrieve a
-     * {@blink android.appwidget.AppWidgetManager} for accessing AppWidgets.
+     * {@link android.appwidget.AppWidgetManager} for accessing AppWidgets.
      *
      * @hide
      * @see #getSystemService
@@ -1323,7 +1323,7 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService} to retrieve an
-     * {@blink android.backup.IBackupManager IBackupManager} for communicating
+     * {@link android.backup.IBackupManager IBackupManager} for communicating
      * with the backup mechanism.
      * @hide
      * 
@@ -1333,7 +1333,7 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService} to retrieve a
-     * {@blink android.os.DropBox DropBox} instance for recording
+     * {@link android.os.DropBox DropBox} instance for recording
      * diagnostic logs.
      * @see #getSystemService
      */
