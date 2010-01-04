@@ -25,7 +25,6 @@ import android.net.Uri;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.WeakHashMap;
 
 /**
  * An easy adapter to map static data to views defined in an XML file. You can specify the data
@@ -58,7 +57,6 @@ public class SimpleAdapter extends BaseAdapter implements Filterable {
     private int mResource;
     private int mDropDownResource;
     private LayoutInflater mInflater;
-    private final WeakHashMap<View, View[]> mHolders = new WeakHashMap<View, View[]>();
 
     private SimpleFilter mFilter;
     private ArrayList<Map<String, ?>> mUnfilteredData;
@@ -121,16 +119,6 @@ public class SimpleAdapter extends BaseAdapter implements Filterable {
         View v;
         if (convertView == null) {
             v = mInflater.inflate(resource, parent, false);
-
-            final int[] to = mTo;
-            final int count = to.length;
-            final View[] holder = new View[count];
-
-            for (int i = 0; i < count; i++) {
-                holder[i] = v.findViewById(to[i]);
-            }
-
-            mHolders.put(v, holder);
         } else {
             v = convertView;
         }
@@ -162,13 +150,12 @@ public class SimpleAdapter extends BaseAdapter implements Filterable {
         }
 
         final ViewBinder binder = mViewBinder;
-        final View[] holder = mHolders.get(view);
         final String[] from = mFrom;
         final int[] to = mTo;
         final int count = to.length;
 
         for (int i = 0; i < count; i++) {
-            final View v = holder[i];
+            final View v = view.findViewById(to[i]);
             if (v != null) {
                 final Object data = dataSet.get(from[i]);
                 String text = data == null ? "" : data.toString();
@@ -187,7 +174,8 @@ public class SimpleAdapter extends BaseAdapter implements Filterable {
                             ((Checkable) v).setChecked((Boolean) data);
                         } else {
                             throw new IllegalStateException(v.getClass().getName() +
-                                    " should be bound to a Boolean, not a " + data.getClass());
+                                    " should be bound to a Boolean, not a " +
+                                    (data == null ? "<unknown type>" : data.getClass()));
                         }
                     } else if (v instanceof TextView) {
                         // Note: keep the instanceof TextView check at the bottom of these
