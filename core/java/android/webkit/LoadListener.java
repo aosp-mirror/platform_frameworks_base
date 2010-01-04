@@ -936,8 +936,11 @@ class LoadListener extends Handler implements EventHandler {
     void downloadFile() {
         // Setting the Cache Result to null ensures that this
         // content is not added to the cache
-        mCacheResult = null;
-        
+        if (mCacheResult != null) {
+            CacheManager.cleanupCacheFile(mCacheResult);
+            mCacheResult = null;
+        }
+
         // Inform the client that they should download a file
         mBrowserFrame.getCallbackProxy().onDownloadStart(url(), 
                 mBrowserFrame.getUserAgentString(),
@@ -1096,10 +1099,18 @@ class LoadListener extends Handler implements EventHandler {
 
             if (c.mLength != 0) {
                 if (mCacheResult != null) {
-                    try {
-                        mCacheResult.outStream.write(c.mArray, 0, c.mLength);
-                    } catch (IOException e) {
+                    mCacheResult.contentLength += c.mLength;
+                    if (mCacheResult.contentLength > CacheManager.CACHE_MAX_SIZE) {
+                        CacheManager.cleanupCacheFile(mCacheResult);
                         mCacheResult = null;
+                    } else {
+                        try {
+                            mCacheResult.outStream
+                                    .write(c.mArray, 0, c.mLength);
+                        } catch (IOException e) {
+                            CacheManager.cleanupCacheFile(mCacheResult);
+                            mCacheResult = null;
+                        }
                     }
                 }
                 nativeAddData(c.mArray, c.mLength);
@@ -1117,6 +1128,8 @@ class LoadListener extends Handler implements EventHandler {
         if (mCacheResult != null) {
             if (getErrorID() == OK) {
                 CacheManager.saveCacheFile(mUrl, mPostIdentifier, mCacheResult);
+            } else {
+                CacheManager.cleanupCacheFile(mCacheResult);
             }
 
             // we need to reset mCacheResult to be null
@@ -1181,7 +1194,10 @@ class LoadListener extends Handler implements EventHandler {
             mRequestHandle = null;
         }
 
-        mCacheResult = null;
+        if (mCacheResult != null) {
+            CacheManager.cleanupCacheFile(mCacheResult);
+            mCacheResult = null;
+        }
         mCancelled = true;
 
         clearNativeLoader();
@@ -1246,6 +1262,8 @@ class LoadListener extends Handler implements EventHandler {
                 if (getErrorID() == OK) {
                     CacheManager.saveCacheFile(mUrl, mPostIdentifier,
                             mCacheResult);
+                } else {
+                    CacheManager.cleanupCacheFile(mCacheResult);
                 }
                 mCacheResult = null;
             }
