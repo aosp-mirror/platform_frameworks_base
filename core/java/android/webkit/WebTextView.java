@@ -84,12 +84,6 @@ import java.util.ArrayList;
     // True if the most recent drag event has caused either the TextView to
     // scroll or the web page to scroll.  Gets reset after a touch down.
     private boolean         mScrolled;
-    // Gets set to true any time the WebTextView has focus, but the navigation
-    // cache does not yet know that the focus has been changed.  This happens
-    // if the user presses "Next", if the user moves the cursor to a textfield
-    // and starts typing or clicks the trackball/center key, and when the user
-    // touches a textfield.
-    boolean                 mOkayForFocusNotToMatch;
     // Whether or not a selection change was generated from webkit.  If it was,
     // we do not need to pass the selection back to webkit.
     private boolean         mFromWebKit;
@@ -151,22 +145,6 @@ import java.util.ArrayList;
                 break;
         }
 
-        if (down) {
-            if (mOkayForFocusNotToMatch) {
-                if (mWebView.nativeFocusNodePointer() == mNodePointer) {
-                    mOkayForFocusNotToMatch = false;
-                }
-            } else if (mWebView.nativeFocusNodePointer() != mNodePointer
-                    && !isArrowKey) {
-                mWebView.nativeClearCursor();
-                // Do not call remove() here, which hides the soft keyboard.  If
-                // the soft keyboard is being displayed, the user will still want
-                // it there.
-                mWebView.removeView(this);
-                mWebView.requestFocus();
-                return mWebView.dispatchKeyEvent(event);
-            }
-        }
         Spannable text = (Spannable) getText();
         int oldLength = text.length();
         // Normally the delete key's dom events are sent via onTextChanged.
@@ -324,7 +302,6 @@ import java.util.ArrayList;
             // focus, set the focus controller back to inactive
             mWebView.setFocusControllerInactive();
             mWebView.nativeMoveCursorToNextTextInput();
-            mOkayForFocusNotToMatch = true;
             // Preemptively rebuild the WebTextView, so that the action will
             // be set properly.
             mWebView.rebuildWebTextView();
