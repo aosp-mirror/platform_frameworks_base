@@ -427,7 +427,7 @@ void CameraService::Client::disconnect()
 // pass the buffered ISurface to the camera service
 status_t CameraService::Client::setPreviewDisplay(const sp<ISurface>& surface)
 {
-    LOGD("setPreviewDisplay(%p) (pid %d)",
+    LOGV("setPreviewDisplay(%p) (pid %d)",
          ((surface == NULL) ? NULL : surface.get()), getCallingPid());
     Mutex::Autolock lock(mLock);
     status_t result = checkPid();
@@ -438,7 +438,7 @@ status_t CameraService::Client::setPreviewDisplay(const sp<ISurface>& surface)
     // asBinder() is safe on NULL (returns NULL)
     if (surface->asBinder() != mSurface->asBinder()) {
         if (mSurface != 0) {
-            LOGD("clearing old preview surface %p", mSurface.get());
+            LOGV("clearing old preview surface %p", mSurface.get());
             if ( !mUseOverlay)
             {
                 mSurface->unregisterBuffers();
@@ -487,7 +487,7 @@ status_t CameraService::Client::startCameraMode(camera_mode mode)
 {
     int callingPid = getCallingPid();
 
-    LOGD("startCameraMode(%d) (pid %d)", mode, callingPid);
+    LOGV("startCameraMode(%d) (pid %d)", mode, callingPid);
 
     /* we cannot call into mHardware with mLock held because
      * mHardware has callbacks onto us which acquire this lock
@@ -512,7 +512,7 @@ status_t CameraService::Client::startCameraMode(camera_mode mode)
 
     default: // CAMERA_PREVIEW_MODE
         if (mSurface == 0) {
-            LOGD("mSurface is not set yet.");
+            LOGV("mSurface is not set yet.");
         }
         return startPreviewMode();
     }
@@ -520,7 +520,7 @@ status_t CameraService::Client::startCameraMode(camera_mode mode)
 
 status_t CameraService::Client::startRecordingMode()
 {
-    LOGD("startRecordingMode (pid %d)", getCallingPid());
+    LOGV("startRecordingMode (pid %d)", getCallingPid());
 
     status_t ret = UNKNOWN_ERROR;
 
@@ -547,7 +547,7 @@ status_t CameraService::Client::startRecordingMode()
 
 status_t CameraService::Client::setOverlay()
 {
-    LOGD("setOverlay");
+    LOGV("setOverlay");
     int w, h;
     CameraParameters params(mHardware->getParameters());
     params.getPreviewSize(&w, &h);
@@ -573,7 +573,7 @@ status_t CameraService::Client::setOverlay()
             for (int retry = 0; retry < 50; ++retry) {
                 mOverlayRef = mSurface->createOverlay(w, h, OVERLAY_FORMAT_DEFAULT);
                 if (mOverlayRef != NULL) break;
-                LOGD("Overlay create failed - retrying");
+                LOGW("Overlay create failed - retrying");
                 usleep(20000);
             }
             if ( mOverlayRef.get() == NULL )
@@ -623,7 +623,7 @@ status_t CameraService::Client::registerPreviewBuffers()
 
 status_t CameraService::Client::startPreviewMode()
 {
-    LOGD("startPreviewMode (pid %d)", getCallingPid());
+    LOGV("startPreviewMode (pid %d)", getCallingPid());
 
     // if preview has been enabled, nothing needs to be done
     if (mHardware->previewEnabled()) {
@@ -659,14 +659,14 @@ status_t CameraService::Client::startPreviewMode()
 
 status_t CameraService::Client::startPreview()
 {
-    LOGD("startPreview (pid %d)", getCallingPid());
+    LOGV("startPreview (pid %d)", getCallingPid());
 
     return startCameraMode(CAMERA_PREVIEW_MODE);
 }
 
 status_t CameraService::Client::startRecording()
 {
-    LOGD("startRecording (pid %d)", getCallingPid());
+    LOGV("startRecording (pid %d)", getCallingPid());
 
     if (mMediaPlayerBeep.get() != NULL) {
         // do not play record jingle if stream volume is 0
@@ -687,7 +687,7 @@ status_t CameraService::Client::startRecording()
 // stop preview mode
 void CameraService::Client::stopPreview()
 {
-    LOGD("stopPreview (pid %d)", getCallingPid());
+    LOGV("stopPreview (pid %d)", getCallingPid());
 
     // hold main lock during state transition
     {
@@ -701,7 +701,7 @@ void CameraService::Client::stopPreview()
 
         mHardware->stopPreview();
         mHardware->disableMsgType(CAMERA_MSG_PREVIEW_FRAME);
-        LOGD("stopPreview(), hardware stopped OK");
+        LOGV("stopPreview(), hardware stopped OK");
 
         if (mSurface != 0 && !mUseOverlay) {
             mSurface->unregisterBuffers();
@@ -718,7 +718,7 @@ void CameraService::Client::stopPreview()
 // stop recording mode
 void CameraService::Client::stopRecording()
 {
-    LOGD("stopRecording (pid %d)", getCallingPid());
+    LOGV("stopRecording (pid %d)", getCallingPid());
 
     // hold main lock during state transition
     {
@@ -737,7 +737,7 @@ void CameraService::Client::stopRecording()
 
         mHardware->stopRecording();
         mHardware->disableMsgType(CAMERA_MSG_VIDEO_FRAME);
-        LOGD("stopRecording(), hardware stopped OK");
+        LOGV("stopRecording(), hardware stopped OK");
     }
 
     // hold preview buffer lock
@@ -833,7 +833,7 @@ static void dump_to_file(const char *fname,
 
 status_t CameraService::Client::autoFocus()
 {
-    LOGD("autoFocus (pid %d)", getCallingPid());
+    LOGV("autoFocus (pid %d)", getCallingPid());
 
     Mutex::Autolock lock(mLock);
     status_t result = checkPid();
@@ -849,7 +849,7 @@ status_t CameraService::Client::autoFocus()
 
 status_t CameraService::Client::cancelAutoFocus()
 {
-    LOGD("cancelAutoFocus (pid %d)", getCallingPid());
+    LOGV("cancelAutoFocus (pid %d)", getCallingPid());
 
     Mutex::Autolock lock(mLock);
     status_t result = checkPid();
@@ -866,7 +866,7 @@ status_t CameraService::Client::cancelAutoFocus()
 // take a picture - image is returned in callback
 status_t CameraService::Client::takePicture()
 {
-    LOGD("takePicture (pid %d)", getCallingPid());
+    LOGV("takePicture (pid %d)", getCallingPid());
 
     Mutex::Autolock lock(mLock);
     status_t result = checkPid();
@@ -933,7 +933,7 @@ void CameraService::Client::handleShutter(
             h = size->height;
             w &= ~1;
             h &= ~1;
-            LOGD("Snapshot image width=%d, height=%d", w, h);
+            LOGV("Snapshot image width=%d, height=%d", w, h);
         }
         ISurface::BufferHeap buffers(w, h, w, h,
             PIXEL_FORMAT_YCbCr_420_SP, transform, 0, mHardware->getRawHeap());
@@ -952,7 +952,7 @@ void CameraService::Client::handlePreviewData(const sp<IMemory>& mem)
 #if DEBUG_HEAP_LEAKS && 0 // debugging
     if (gWeakHeap == NULL) {
         if (gWeakHeap != heap) {
-            LOGD("SETTING PREVIEW HEAP");
+            LOGV("SETTING PREVIEW HEAP");
             heap->trackMe(true, true);
             gWeakHeap = heap;
         }
@@ -1221,7 +1221,7 @@ String8 CameraService::Client::getParameters() const
 
 status_t CameraService::Client::sendCommand(int32_t cmd, int32_t arg1, int32_t arg2)
 {
-    LOGD("sendCommand (pid %d)", getCallingPid());
+    LOGV("sendCommand (pid %d)", getCallingPid());
     Mutex::Autolock lock(mLock);
     status_t result = checkPid();
     if (result != NO_ERROR) return result;

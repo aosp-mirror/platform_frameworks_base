@@ -220,7 +220,7 @@ void JNICameraContext::postData(int32_t msgType, const sp<IMemory>& dataPtr)
         break;
     default:
         // TODO: Change to LOGV
-        LOGD("dataCallback(%d, %p)", msgType, dataPtr.get());
+        LOGV("dataCallback(%d, %p)", msgType, dataPtr.get());
         copyAndPost(env, dataPtr, msgType);
         break;
     }
