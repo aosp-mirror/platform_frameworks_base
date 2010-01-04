@@ -55,6 +55,7 @@ private:
 
     int64_t mNumSamplesOutput;
 
+    void allocateFrames(int32_t width, int32_t height);
     void releaseFrames();
 
     M4vH263Decoder(const M4vH263Decoder &);

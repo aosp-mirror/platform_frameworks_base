@@ -2969,7 +2969,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             break;
         case KeyEvent.KEYCODE_SPACE:
             // Only send spaces once we are filtered
-            okToSend = mFiltered = true;
+            okToSend = mFiltered;
             break;
         }
 

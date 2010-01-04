@@ -27,6 +27,7 @@
 
 #include <string.h>
 #include <cutils/atomic.h>
+#include <cutils/properties.h>
 #include <binder/MemoryDealer.h>
 #include <android_runtime/ActivityManager.h>
 #include <binder/IPCThreadState.h>
@@ -107,14 +108,17 @@ static sp<MediaMetadataRetrieverBase> createRetriever(player_type playerType)
     switch (playerType) {
 #if BUILD_WITH_FULL_STAGEFRIGHT
         case STAGEFRIGHT_PLAYER:
-            // For now we are going to keep using PV for meta-data support
-            // until stagefright is up to par.
+        {
+            char value[PROPERTY_VALUE_MAX];
+            if (property_get("media.stagefright.enable-meta", value, NULL)
+                && (!strcmp(value, "1") || !strcasecmp(value, "true"))) {
+                LOGV("create StagefrightMetadataRetriever");
+                p = new StagefrightMetadataRetriever;
+                break;
+            }
 
-            // LOGV("create StagefrightMetadataRetriever");
-            // p = new StagefrightMetadataRetriever;
-            // break;
-
-            // fall through to PV_PLAYER
+            // fall through
+        }
 #endif
 #ifndef NO_OPENCORE
         case PV_PLAYER:

@@ -155,7 +155,7 @@ public class AccountManagerService
             new AtomicReference<AccountManagerService>();
 
     private static final boolean isDebuggableMonkeyBuild =
-            SystemProperties.getBoolean("ro.monkey", false)
+            SystemProperties.getBoolean("monkey.running", false)
                     && SystemProperties.getBoolean("ro.debuggable", false);
     private static final Account[] EMPTY_ACCOUNT_ARRAY = new Account[]{};
 

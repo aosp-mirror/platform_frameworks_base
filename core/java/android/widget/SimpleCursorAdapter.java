@@ -20,9 +20,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.view.View;
-import android.view.ViewGroup;
-
-import java.util.WeakHashMap;
 
 /**
  * An easy adapter to map columns from a cursor to TextViews or ImageViews
@@ -66,7 +63,6 @@ public class SimpleCursorAdapter extends ResourceCursorAdapter {
     private CursorToStringConverter mCursorToStringConverter;
     private ViewBinder mViewBinder;
     private String[] mOriginalFrom;
-    private final WeakHashMap<View, View[]> mHolders = new WeakHashMap<View, View[]>();
 
     /**
      * Constructor.
@@ -89,29 +85,6 @@ public class SimpleCursorAdapter extends ResourceCursorAdapter {
         mTo = to;
         mOriginalFrom = from;
         findColumns(from);
-    }
-
-    @Override
-    public View newView(Context context, Cursor cursor, ViewGroup parent) {
-        return generateViewHolder(super.newView(context, cursor, parent));
-    }
-
-    @Override
-    public View newDropDownView(Context context, Cursor cursor, ViewGroup parent) {
-        return generateViewHolder(super.newDropDownView(context, cursor, parent));
-    }
-
-    private View generateViewHolder(View v) {
-        final int[] to = mTo;
-        final int count = to.length;
-        final View[] holder = new View[count];
-
-        for (int i = 0; i < count; i++) {
-            holder[i] = v.findViewById(to[i]);
-        }
-        mHolders.put(v, holder);
-
-        return v;
     }
 
     /**
@@ -140,13 +113,13 @@ public class SimpleCursorAdapter extends ResourceCursorAdapter {
      */
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
-        final View[] holder = mHolders.get(view);
         final ViewBinder binder = mViewBinder;
         final int count = mTo.length;
         final int[] from = mFrom;
+        final int[] to = mTo;
 
         for (int i = 0; i < count; i++) {
-            final View v = holder[i];
+            final View v = view.findViewById(to[i]);
             if (v != null) {
                 boolean bound = false;
                 if (binder != null) {
