@@ -155,8 +155,6 @@ public class MediaFile {
         sFileExtensions = builder.toString();
     }
     
-    public static final String UNKNOWN_STRING = "<unknown>";
-    
     public static boolean isAudioFileType(int fileType) {
         return ((fileType >= FIRST_AUDIO_FILE_TYPE &&
                 fileType <= LAST_AUDIO_FILE_TYPE) ||
