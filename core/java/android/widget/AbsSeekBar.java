@@ -26,7 +26,6 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 
 public abstract class AbsSeekBar extends ProgressBar {
-
     private Drawable mThumb;
     private int mThumbOffset;
     
@@ -66,8 +65,9 @@ public abstract class AbsSeekBar extends ProgressBar {
         Drawable thumb = a.getDrawable(com.android.internal.R.styleable.SeekBar_thumb);
         setThumb(thumb); // will guess mThumbOffset if thumb != null...
         // ...but allow layout to override this
-        int thumbOffset =
-                a.getDimensionPixelOffset(com.android.internal.R.styleable.SeekBar_thumbOffset, getThumbOffset());
+        int thumbOffset = a.getDimensionPixelOffset(
+                com.android.internal.R.styleable.SeekBar_thumbOffset, getThumbOffset());
+        setThumbOffset(thumbOffset);
         a.recycle();
 
         a = context.obtainStyledAttributes(attrs,
@@ -91,7 +91,7 @@ public abstract class AbsSeekBar extends ProgressBar {
             // Assuming the thumb drawable is symmetric, set the thumb offset
             // such that the thumb will hang halfway off either edge of the
             // progress bar.
-            mThumbOffset = (int)thumb.getIntrinsicWidth() / 2;
+            mThumbOffset = thumb.getIntrinsicWidth() / 2;
         }
         mThumb = thumb;
         invalidate();
@@ -368,20 +368,21 @@ public abstract class AbsSeekBar extends ProgressBar {
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        int progress = getProgress();
-        
-        switch (keyCode) {
-            case KeyEvent.KEYCODE_DPAD_LEFT:
-                if (progress <= 0) break;
-                setProgress(progress - mKeyProgressIncrement, true);
-                onKeyChange();
-                return true;
-        
-            case KeyEvent.KEYCODE_DPAD_RIGHT:
-                if (progress >= getMax()) break;
-                setProgress(progress + mKeyProgressIncrement, true);
-                onKeyChange();
-                return true;
+        if (isEnabled()) {
+            int progress = getProgress();
+            switch (keyCode) {
+                case KeyEvent.KEYCODE_DPAD_LEFT:
+                    if (progress <= 0) break;
+                    setProgress(progress - mKeyProgressIncrement, true);
+                    onKeyChange();
+                    return true;
+            
+                case KeyEvent.KEYCODE_DPAD_RIGHT:
+                    if (progress >= getMax()) break;
+                    setProgress(progress + mKeyProgressIncrement, true);
+                    onKeyChange();
+                    return true;
+            }
         }
 
         return super.onKeyDown(keyCode, event);
