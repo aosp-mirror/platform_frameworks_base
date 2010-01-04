@@ -633,6 +633,10 @@ public class GpsLocationProvider implements LocationProviderInterface {
         }
     }
 
+    public String getInternalState() {
+        return native_get_internal_state();
+    }
+
     private final class Listener implements IBinder.DeathRecipient {
         final IGpsStatusListener mListener;
         
@@ -1391,12 +1395,15 @@ public class GpsLocationProvider implements LocationProviderInterface {
     private native int native_read_nmea(int index, byte[] buffer, int bufferSize);
     private native void native_inject_location(double latitude, double longitude, float accuracy);
 
-    // XTRA Support    
+    // XTRA Support
     private native void native_inject_time(long time, long timeReference, int uncertainty);
     private native boolean native_supports_xtra();
     private native void native_inject_xtra_data(byte[] data, int length);
 
-    // AGPS Support    
+    // DEBUG Support
+    private native String native_get_internal_state();
+
+    // AGPS Support
     private native void native_agps_data_conn_open(String apn);
     private native void native_agps_data_conn_closed();
     private native void native_agps_data_conn_failed();

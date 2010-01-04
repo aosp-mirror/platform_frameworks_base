@@ -168,6 +168,10 @@ public class MockProvider implements LocationProviderInterface {
         mStatusUpdateTime = 0;
     }
 
+    public String getInternalState() {
+        return null;
+    }
+
     public void enableLocationTracking(boolean enable) {
     }
 

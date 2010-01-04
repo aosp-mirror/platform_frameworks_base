@@ -42,6 +42,7 @@ static const GpsInterface* sGpsInterface = NULL;
 static const GpsXtraInterface* sGpsXtraInterface = NULL;
 static const AGpsInterface* sAGpsInterface = NULL;
 static const GpsNiInterface* sGpsNiInterface = NULL;
+static const GpsDebugInterface* sGpsDebugInterface = NULL;
 
 // data written to by GPS callbacks
 static GpsLocation  sGpsLocation;
@@ -57,7 +58,7 @@ struct NmeaSentence {
     GpsUtcTime  timestamp;
     char        nmea[NMEA_SENTENCE_LENGTH];
 };
-static NmeaSentence sNmeaBuffer[NMEA_SENTENCE_LENGTH];
+static NmeaSentence sNmeaBuffer[NMEA_SENTENCE_COUNT];
 static int mNmeaSentenceCount = 0;
 
 // a copy of the data shared by android_location_GpsLocationProvider_wait_for_event
@@ -66,7 +67,7 @@ static GpsLocation  sGpsLocationCopy;
 static GpsStatus    sGpsStatusCopy;
 static GpsSvStatus  sGpsSvStatusCopy;
 static AGpsStatus   sAGpsStatusCopy;
-static NmeaSentence sNmeaBufferCopy[NMEA_SENTENCE_LENGTH];
+static NmeaSentence sNmeaBufferCopy[NMEA_SENTENCE_COUNT];
 static GpsNiNotification  sGpsNiNotificationCopy;
 
 enum CallbackType {
@@ -225,6 +226,9 @@ static jboolean android_location_GpsLocationProvider_init(JNIEnv* env, jobject o
        sGpsNiInterface = (const GpsNiInterface*)sGpsInterface->get_extension(GPS_NI_INTERFACE);
     if (sGpsNiInterface)
        sGpsNiInterface->init(&sGpsNiCallbacks);
+
+    if (!sGpsDebugInterface)
+       sGpsDebugInterface = (const GpsDebugInterface*)sGpsInterface->get_extension(GPS_DEBUG_INTERFACE);
 
     return true;
 }
@@ -472,11 +476,26 @@ static void android_location_GpsLocationProvider_set_agps_server(JNIEnv* env, jo
 static void android_location_GpsLocationProvider_send_ni_response(JNIEnv* env, jobject obj,
       jint notifId, jint response)
 {
-   if (!sGpsNiInterface)
-      sGpsNiInterface = (const GpsNiInterface*)sGpsInterface->get_extension(GPS_NI_INTERFACE);
-   if (sGpsNiInterface) {
-      sGpsNiInterface->respond(notifId, response);
-   }
+    if (!sGpsNiInterface) {
+        sGpsNiInterface = (const GpsNiInterface*)sGpsInterface->get_extension(GPS_NI_INTERFACE);
+    }
+    if (sGpsNiInterface) {
+        sGpsNiInterface->respond(notifId, response);
+    }
+}
+
+static jstring android_location_GpsLocationProvider_get_internal_state(JNIEnv* env, jobject obj)
+{
+    jstring result = NULL;
+    if (sGpsDebugInterface) {
+        const size_t maxLength = 2047;
+        char buffer[maxLength+1];
+        size_t length = sGpsDebugInterface->get_internal_state(buffer, maxLength);
+        if (length > maxLength) length = maxLength;
+        buffer[length] = 0;
+        result = env->NewStringUTF(buffer);
+    }
+    return result;
 }
 
 static JNINativeMethod sMethods[] = {
@@ -501,6 +520,7 @@ static JNINativeMethod sMethods[] = {
     {"native_agps_data_conn_failed", "()V", (void*)android_location_GpsLocationProvider_agps_data_conn_failed},
     {"native_set_agps_server", "(ILjava/lang/String;I)V", (void*)android_location_GpsLocationProvider_set_agps_server},
     {"native_send_ni_response", "(II)V", (void*)android_location_GpsLocationProvider_send_ni_response},
+    {"native_get_internal_state", "()Ljava/lang/String;", (void*)android_location_GpsLocationProvider_get_internal_state},
 };
 
 int register_android_location_GpsLocationProvider(JNIEnv* env)
