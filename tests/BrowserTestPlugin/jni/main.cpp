@@ -168,7 +168,10 @@ NPError NPP_New(NPMIMEType pluginType, NPP instance, uint16 mode, int16 argc,
 NPError NPP_Destroy(NPP instance, NPSavedData** save)
 {
     PluginObject *obj = (PluginObject*) instance->pdata;
-    delete obj->subPlugin;
+    if (obj) {
+        delete obj->subPlugin;
+        browser->releaseobject(&obj->header);
+    }
 
     return NPERR_NO_ERROR;
 }
