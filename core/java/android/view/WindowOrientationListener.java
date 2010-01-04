@@ -32,14 +32,13 @@ import android.util.Log;
  */
 public abstract class WindowOrientationListener {
     private static final String TAG = "WindowOrientationListener";
-    private static final boolean DEBUG = false;
-    private static final boolean localLOGV = DEBUG ? Config.LOGD : Config.LOGV;
+    private static final boolean DEBUG = true;
+    private static final boolean localLOGV = DEBUG || Config.DEBUG;
     private SensorManager mSensorManager;
     private boolean mEnabled = false;
     private int mRate;
     private Sensor mSensor;
-    private SensorEventListener mSensorEventListener;
-    private int mSensorRotation = -1;
+    private SensorEventListenerImpl mSensorEventListener;
 
     /**
      * Creates a new WindowOrientationListener.
@@ -80,7 +79,6 @@ public abstract class WindowOrientationListener {
         }
         if (mEnabled == false) {
             if (localLOGV) Log.d(TAG, "WindowOrientationListener enabled");
-            mSensorRotation = -1;
             mSensorManager.registerListener(mSensorEventListener, mSensor, mRate);
             mEnabled = true;
         }
@@ -96,23 +94,22 @@ public abstract class WindowOrientationListener {
         }
         if (mEnabled == true) {
             if (localLOGV) Log.d(TAG, "WindowOrientationListener disabled");
-            mSensorRotation = -1;
             mSensorManager.unregisterListener(mSensorEventListener);
             mEnabled = false;
         }
     }
 
     public int getCurrentRotation() {
-        return mSensorRotation;
+        if (mEnabled) {
+            return mSensorEventListener.getCurrentRotation();
+        }
+        return -1;
     }
     
     class SensorEventListenerImpl implements SensorEventListener {
         private static final int _DATA_X = 0;
         private static final int _DATA_Y = 1;
         private static final int _DATA_Z = 2;
-        // Angle around x-axis thats considered almost perfect vertical to hold
-        // the device
-        private static final int PIVOT = 20;
         // Angle around x-asis that's considered almost too vertical. Beyond
         // this angle will not result in any orientation changes. f phone faces uses,
         // the device is leaning backward.
@@ -121,30 +118,61 @@ public abstract class WindowOrientationListener {
         // angle will not result in any orientation changes. If phone faces uses,
         // the device is leaning forward.
         private static final int PIVOT_LOWER = -10;
-        // Upper threshold limit for switching from portrait to landscape
-        private static final int PL_UPPER = 295;
-        // Lower threshold limit for switching from landscape to portrait
-        private static final int LP_LOWER = 320;
-        // Lower threshold limt for switching from portrait to landscape
-        private static final int PL_LOWER = 270;
-        // Upper threshold limit for switching from landscape to portrait
-        private static final int LP_UPPER = 359;
-        // Minimum angle which is considered landscape
-        private static final int LANDSCAPE_LOWER = 235;
-        // Minimum angle which is considered portrait
-        private static final int PORTRAIT_LOWER = 60;
+        static final int ROTATION_0 = 0;
+        static final int ROTATION_90 = 1;
+        static final int ROTATION_180 = 2;
+        static final int ROTATION_270 = 3;
+        int mRotation = ROTATION_0;
+
+        // Threshold values defined for device rotation positions
+        // follow order ROTATION_0 .. ROTATION_270
+        final int THRESHOLDS[][][] = new int[][][] {
+            {{60, 135}, {135, 225}, {225, 300}},
+                {{0, 45}, {45, 135}, {135, 210}, {330, 360}},
+                {{0, 45}, {45, 120}, {240, 315}, {315, 360}},
+                {{0, 30}, {150, 225}, {225, 315}, {315, 360}}
+        };
+
+        // Transform rotation ranges based on THRESHOLDS. This
+        // has to be in step with THESHOLDS
+        final int ROTATE_TO[][] = new int[][] {
+            {ROTATION_270, ROTATION_180, ROTATION_90},
+            {ROTATION_0, ROTATION_270, ROTATION_180, ROTATION_0},
+            {ROTATION_0, ROTATION_270, ROTATION_90, ROTATION_0},
+            {ROTATION_0, ROTATION_180, ROTATION_90, ROTATION_0}
+        };
+
+        // Mapping into actual Surface rotation values
+        final int TRANSFORM_ROTATIONS[] = new int[]{Surface.ROTATION_0,
+                Surface.ROTATION_90, Surface.ROTATION_180, Surface.ROTATION_270};
+
+        int getCurrentRotation() {
+            return TRANSFORM_ROTATIONS[mRotation];
+        }
         
-        // Internal value used for calculating linear variant
-        private static final float PL_LF_UPPER =
-            ((float)(PL_UPPER-PL_LOWER))/((float)(PIVOT_UPPER-PIVOT));
-        private static final float PL_LF_LOWER =
-            ((float)(PL_UPPER-PL_LOWER))/((float)(PIVOT-PIVOT_LOWER));
-        //  Internal value used for calculating linear variant
-        private static final float LP_LF_UPPER =
-            ((float)(LP_UPPER - LP_LOWER))/((float)(PIVOT_UPPER-PIVOT));
-        private static final float LP_LF_LOWER =
-            ((float)(LP_UPPER - LP_LOWER))/((float)(PIVOT-PIVOT_LOWER)); 
-        
+        private void calculateNewRotation(int orientation, int zyangle) {
+            if (localLOGV) Log.i(TAG, orientation + ", " + zyangle + ", " + mRotation);
+            int rangeArr[][] = THRESHOLDS[mRotation];
+            int row = -1;
+            for (int i = 0; i < rangeArr.length; i++) {
+                if ((orientation >= rangeArr[i][0]) && (orientation < rangeArr[i][1])) {
+                    row = i;
+                    break;
+                }
+            }
+            if (row != -1) {
+                // Find new rotation based on current rotation value.
+                // This also takes care of irregular rotations as well.
+                int rotation = ROTATE_TO[mRotation][row];
+                if (localLOGV) Log.i(TAG, " new rotation = " + rotation);
+                if (rotation != mRotation) {
+                    mRotation = rotation;
+                    // Trigger orientation change
+                    onOrientationChanged(TRANSFORM_ROTATIONS[rotation]);
+                }
+            }
+        }
+
         public void onSensorChanged(SensorEvent event) {
             float[] values = event.values;
             float X = values[_DATA_X];
@@ -153,53 +181,19 @@ public abstract class WindowOrientationListener {
             float OneEightyOverPi = 57.29577957855f;
             float gravity = (float) Math.sqrt(X*X+Y*Y+Z*Z);
             float zyangle = (float)Math.asin(Z/gravity)*OneEightyOverPi;
-            int rotation = -1;
             if ((zyangle <= PIVOT_UPPER) && (zyangle >= PIVOT_LOWER)) {
                 // Check orientation only if the phone is flat enough
                 // Don't trust the angle if the magnitude is small compared to the y value
                 float angle = (float)Math.atan2(Y, -X) * OneEightyOverPi;
-                int orientation = 90 - (int)Math.round(angle);
+                int orientation = 90 - Math.round(angle);
                 // normalize to 0 - 359 range
                 while (orientation >= 360) {
                     orientation -= 360;
-                } 
+                }
                 while (orientation < 0) {
                     orientation += 360;
                 }
-                // Orientation values between  LANDSCAPE_LOWER and PL_LOWER
-                // are considered landscape.
-                // Ignore orientation values between 0 and LANDSCAPE_LOWER
-                // For orientation values between LP_UPPER and PL_LOWER,
-                // the threshold gets set linearly around PIVOT.
-                if ((orientation >= PL_LOWER) && (orientation <= LP_UPPER)) {
-                    float threshold;
-                    float delta = zyangle - PIVOT;
-                    if (mSensorRotation == Surface.ROTATION_90) {
-                        if (delta < 0) {
-                            // Delta is negative
-                            threshold = LP_LOWER - (LP_LF_LOWER * delta);
-                        } else {
-                            threshold = LP_LOWER + (LP_LF_UPPER * delta);
-                        }
-                        rotation = (orientation >= threshold) ? Surface.ROTATION_0 : Surface.ROTATION_90;
-                    } else {
-                        if (delta < 0) {
-                            // Delta is negative
-                            threshold = PL_UPPER+(PL_LF_LOWER * delta);
-                        } else {
-                            threshold = PL_UPPER-(PL_LF_UPPER * delta);
-                        }
-                        rotation = (orientation <= threshold) ? Surface.ROTATION_90: Surface.ROTATION_0;
-                    }
-                } else if ((orientation >= LANDSCAPE_LOWER) && (orientation < LP_LOWER)) {
-                    rotation = Surface.ROTATION_90;
-                } else if ((orientation >= PL_UPPER) || (orientation <= PORTRAIT_LOWER)) {
-                    rotation = Surface.ROTATION_0;
-                }
-                if ((rotation != -1) && (rotation != mSensorRotation)) {
-                    mSensorRotation = rotation;
-                    onOrientationChanged(mSensorRotation);
-                }
+                calculateNewRotation(orientation, Math.round(zyangle));
             }
         }
 
