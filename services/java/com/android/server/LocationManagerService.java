@@ -37,6 +37,7 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.location.Address;
+import android.location.GeocoderParams;
 import android.location.IGeocodeProvider;
 import android.location.IGpsStatusListener;
 import android.location.IGpsStatusProvider;
@@ -1655,11 +1656,11 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
     // Geocoder
 
     public String getFromLocation(double latitude, double longitude, int maxResults,
-            String language, String country, String variant, String appName, List<Address> addrs) {
+            GeocoderParams params, List<Address> addrs) {
         if (mGeocodeProvider != null) {
             try {
-                return mGeocodeProvider.getFromLocation(latitude, longitude, maxResults, language, country,
-                        variant, appName,  addrs);
+                return mGeocodeProvider.getFromLocation(latitude, longitude, maxResults,
+                        params, addrs);
             } catch (RemoteException e) {
                 Log.e(TAG, "getFromLocation failed", e);
                 mGeocodeProvider = null;
@@ -1672,13 +1673,13 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
     public String getFromLocationName(String locationName,
             double lowerLeftLatitude, double lowerLeftLongitude,
             double upperRightLatitude, double upperRightLongitude, int maxResults,
-            String language, String country, String variant, String appName, List<Address> addrs) {
+            GeocoderParams params, List<Address> addrs) {
 
         if (mGeocodeProvider != null) {
             try {
                 return mGeocodeProvider.getFromLocationName(locationName, lowerLeftLatitude,
                         lowerLeftLongitude, upperRightLatitude, upperRightLongitude,
-                        maxResults, language, country, variant, appName, addrs);
+                        maxResults, params, addrs);
             } catch (RemoteException e) {
                 Log.e(TAG, "getFromLocationName failed", e);
                 mGeocodeProvider = null;

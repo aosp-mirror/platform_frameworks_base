@@ -105,6 +105,48 @@ public class LocationManager {
      */
     public static final String KEY_LOCATION_CHANGED = "location";
 
+    public interface GeocodeProvider {
+        String getFromLocation(double latitude, double longitude, int maxResults,
+            GeocoderParams params, List<Address> addrs);
+
+        String getFromLocationName(String locationName,
+            double lowerLeftLatitude, double lowerLeftLongitude,
+            double upperRightLatitude, double upperRightLongitude, int maxResults,
+            GeocoderParams params, List<Address> addrs);
+    }
+
+    private static final class GeocodeProviderProxy extends IGeocodeProvider.Stub {
+        private GeocodeProvider mProvider;
+
+        GeocodeProviderProxy(GeocodeProvider provider) {
+            mProvider = provider;
+        }
+
+        /**
+         * This method is overridden to implement the
+         * {@link Geocoder#getFromLocation(double, double, int)} method.
+         * Classes implementing this method should not hold a reference to the params parameter.
+         */
+        public String getFromLocation(double latitude, double longitude, int maxResults,
+                GeocoderParams params, List<Address> addrs) {
+            return mProvider.getFromLocation(latitude, longitude, maxResults, params, addrs);
+        }
+
+        /**
+         * This method is overridden to implement the
+         * {@link Geocoder#getFromLocationName(String, int, double, double, double, double)} method.
+         * Classes implementing this method should not hold a reference to the params parameter.
+         */
+        public String getFromLocationName(String locationName,
+                double lowerLeftLatitude, double lowerLeftLongitude,
+                double upperRightLatitude, double upperRightLongitude, int maxResults,
+                GeocoderParams params, List<Address> addrs) {
+            return mProvider.getFromLocationName(locationName, lowerLeftLatitude,
+                    lowerLeftLongitude, upperRightLatitude, upperRightLongitude,
+                    maxResults, params, addrs);
+        }
+    }
+
     // Map from LocationListeners to their associated ListenerTransport objects
     private HashMap<LocationListener,ListenerTransport> mListeners =
         new HashMap<LocationListener,ListenerTransport>();
@@ -1388,9 +1430,9 @@ public class LocationManager {
      *
      * {@hide}
      */
-    public boolean installGeocodeProvider(IGeocodeProvider provider) {
+    public boolean installGeocodeProvider(GeocodeProvider provider) {
         try {
-            mService.installGeocodeProvider(provider);
+            mService.installGeocodeProvider(new GeocodeProviderProxy(provider));
             return true;
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException in setGeocodeProvider: ", e);
