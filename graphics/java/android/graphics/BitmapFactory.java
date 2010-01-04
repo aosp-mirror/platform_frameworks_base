@@ -532,7 +532,7 @@ public class BitmapFactory {
     public static Bitmap decodeFileDescriptor(FileDescriptor fd, Rect outPadding, Options opts) {
         try {
             if (MemoryFile.isMemoryFile(fd)) {
-                int mappedlength = MemoryFile.getMappedSize(fd);
+                int mappedlength = MemoryFile.getSize(fd);
                 MemoryFile file = new MemoryFile(fd, mappedlength, "r");
                 InputStream is = file.getInputStream();
                 Bitmap bm = decodeStream(is, outPadding, opts);
