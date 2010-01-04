@@ -1908,6 +1908,33 @@ final class WebViewCore {
         }
     }
 
+    private static boolean mRepaintScheduled = false;
+
+    /*
+     * Called by the WebView thread
+     */
+    /* package */ void signalRepaintDone() {
+        mRepaintScheduled = false;
+    }
+
+    // called by JNI
+    private void sendImmediateRepaint() {
+        if (mWebView != null && !mRepaintScheduled) {
+            mRepaintScheduled = true;
+            Message.obtain(mWebView.mPrivateHandler,
+                           WebView.IMMEDIATE_REPAINT_MSG_ID).sendToTarget();
+        }
+    }
+
+    // called by JNI
+    private void setRootLayer(int layer) {
+        if (mWebView != null) {
+            Message.obtain(mWebView.mPrivateHandler,
+                           WebView.SET_ROOT_LAYER_MSG_ID,
+                           layer, 0).sendToTarget();
+        }
+    }
+
     /* package */ WebView getWebView() {
         return mWebView;
     }
