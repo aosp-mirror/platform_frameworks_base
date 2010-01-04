@@ -44,7 +44,7 @@ import java.util.Arrays;
  * &lt;selector xmlns:android="http://schemas.android.com/apk/res/android"&gt;
  *   &lt;item android:state_focused="true" android:color="@color/testcolor1"/&gt;
  *   &lt;item android:state_pressed="true" android:state_enabled="false" android:color="@color/testcolor2" /&gt;
- *   &lt;item android:state_enabled="false" android:colore="@color/testcolor3" /&gt;
+ *   &lt;item android:state_enabled="false" android:color="@color/testcolor3" /&gt;
  *   &lt;item android:state_active="true" android:color="@color/testcolor4" /&gt;
  *   &lt;item android:color="@color/testcolor5"/&gt;
  * &lt;/selector&gt;
