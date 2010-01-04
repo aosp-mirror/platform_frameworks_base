@@ -262,6 +262,8 @@ status_t AVCDecoder::read(
                 &nalType, &nalRefIdc);
 
     if (res != AVCDEC_SUCCESS) {
+        LOGE("cannot determine nal type");
+
         mInputBuffer->release();
         mInputBuffer = NULL;
 
@@ -375,18 +377,19 @@ status_t AVCDecoder::read(
             mInputBuffer->release();
             mInputBuffer = NULL;
 
-            if (res == AVCDEC_PICTURE_READY) {
+            if (res == AVCDEC_PICTURE_READY || res == AVCDEC_SUCCESS) {
                 *out = new MediaBuffer(0);
 
                 return OK;
             } else {
+                LOGE("failed to decode frame (res = %d)", res);
                 return UNKNOWN_ERROR;
             }
         }
 
         case AVC_NALTYPE_SEI:
         {
-            res = PVAVCDecodeSlice(
+            res = PVAVCDecSEI(
                     mHandle, const_cast<uint8_t *>(inPtr),
                     mInputBuffer->range_length());
 
@@ -404,6 +407,9 @@ status_t AVCDecoder::read(
 
         case AVC_NALTYPE_AUD:
         {
+            mInputBuffer->release();
+            mInputBuffer = NULL;
+
             *out = new MediaBuffer(0);
 
             return OK;
