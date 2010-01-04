@@ -179,6 +179,14 @@ public final class MediaStore {
     public final static String EXTRA_OUTPUT = "output";
 
     /**
+      * The string that is used when a media attribute is not known. For example,
+      * if an audio file does not have any meta data, the artist and album columns
+      * will be set to this value.
+      * @hide
+      */
+    public static final String UNKNOWN_STRING = "<unknown>";
+
+    /**
      * Common fields for most MediaProvider tables
      */
 
