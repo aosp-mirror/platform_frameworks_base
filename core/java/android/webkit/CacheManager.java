@@ -56,6 +56,9 @@ public final class CacheManager {
     private static long CACHE_THRESHOLD = 6 * 1024 * 1024;
     private static long CACHE_TRIM_AMOUNT = 2 * 1024 * 1024;
 
+    // Limit the maximum cache file size to half of the normal capacity
+    static long CACHE_MAX_SIZE = (CACHE_THRESHOLD - CACHE_TRIM_AMOUNT) / 2;
+
     private static boolean mDisabled;
 
     // Reference count the enable/disable transaction
@@ -448,7 +451,6 @@ public final class CacheManager {
             return;
         }
 
-        cacheRet.contentLength = cacheRet.outFile.length();
         boolean redirect = checkCacheRedirect(cacheRet.httpStatusCode);
         if (redirect) {
             // location is in database, no need to keep the file
@@ -468,6 +470,15 @@ public final class CacheManager {
         if (DebugFlags.CACHE_MANAGER) {
             Log.v(LOGTAG, "saveCacheFile for url " + url);
         }
+    }
+
+    static boolean cleanupCacheFile(CacheResult cacheRet) {
+        try {
+            cacheRet.outStream.close();
+        } catch (IOException e) {
+            return false;
+        }
+        return cacheRet.outFile.delete();
     }
 
     /**
@@ -644,6 +655,9 @@ public final class CacheManager {
 
     private static CacheResult parseHeaders(int statusCode, Headers headers,
             String mimeType) {
+        // if the contentLength is already larger than CACHE_MAX_SIZE, skip it
+        if (headers.getContentLength() > CACHE_MAX_SIZE) return null;
+
         // TODO: if authenticated or secure, return null
         CacheResult ret = new CacheResult();
         ret.httpStatusCode = statusCode;
