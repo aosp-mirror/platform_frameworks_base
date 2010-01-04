@@ -1333,7 +1333,7 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService} to retrieve a
-     * {@link android.os.DropBox DropBox} instance for recording
+     * {@link android.os.DropBoxManager} instance for recording
      * diagnostic logs.
      * @see #getSystemService
      */
