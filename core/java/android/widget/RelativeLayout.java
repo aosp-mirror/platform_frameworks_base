@@ -45,8 +45,7 @@ import java.util.ArrayList;
 
 /**
  * A Layout where the positions of the children can be described in relation to each other or to the
- * parent. For the sake of efficiency, the relations between views are evaluated in one pass, so if
- * view Y is dependent on the position of view X, make sure the view X comes first in the layout.
+ * parent.
  *
  * <p>
  * Note that you cannot have a circular dependency between the size of the RelativeLayout and the
