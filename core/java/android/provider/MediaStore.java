@@ -972,7 +972,7 @@ public final class MediaStore {
         public static String keyFor(String name) {
             if (name != null)  {
                 boolean sortfirst = false;
-                if (name.equals(android.media.MediaFile.UNKNOWN_STRING)) {
+                if (name.equals(UNKNOWN_STRING)) {
                     return "\001";
                 }
                 // Check if the first character is \001. We use this to

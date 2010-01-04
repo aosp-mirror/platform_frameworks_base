@@ -637,8 +637,8 @@ public class MediaScanner
             map.put(MediaStore.MediaColumns.MIME_TYPE, mMimeType);
 
             if (MediaFile.isVideoFileType(mFileType)) {
-                map.put(Video.Media.ARTIST, (mArtist != null && mArtist.length() > 0 ? mArtist : MediaFile.UNKNOWN_STRING));
-                map.put(Video.Media.ALBUM, (mAlbum != null && mAlbum.length() > 0 ? mAlbum : MediaFile.UNKNOWN_STRING));
+                map.put(Video.Media.ARTIST, (mArtist != null && mArtist.length() > 0 ? mArtist : MediaStore.UNKNOWN_STRING));
+                map.put(Video.Media.ALBUM, (mAlbum != null && mAlbum.length() > 0 ? mAlbum : MediaStore.UNKNOWN_STRING));
                 map.put(Video.Media.DURATION, mDuration);
                 map.put(Video.Media.DATE_TAKEN, mLastModified * 1000);
                 // FIXME - add RESOLUTION
@@ -648,8 +648,8 @@ public class MediaScanner
                 // contains date time information.
                 map.put(Images.Media.DATE_TAKEN, mLastModified * 1000);
             } else if (MediaFile.isAudioFileType(mFileType)) {
-                map.put(Audio.Media.ARTIST, (mArtist != null && mArtist.length() > 0 ? mArtist : MediaFile.UNKNOWN_STRING));
-                map.put(Audio.Media.ALBUM, (mAlbum != null && mAlbum.length() > 0 ? mAlbum : MediaFile.UNKNOWN_STRING));
+                map.put(Audio.Media.ARTIST, (mArtist != null && mArtist.length() > 0 ? mArtist : MediaStore.UNKNOWN_STRING));
+                map.put(Audio.Media.ALBUM, (mAlbum != null && mAlbum.length() > 0 ? mAlbum : MediaStore.UNKNOWN_STRING));
                 map.put(Audio.Media.COMPOSER, mComposer);
                 if (mYear != 0) {
                     map.put(Audio.Media.YEAR, mYear);
@@ -705,7 +705,7 @@ public class MediaScanner
                 values.put(MediaStore.MediaColumns.TITLE, title);
             }
             String album = values.getAsString(Audio.Media.ALBUM);
-            if (MediaFile.UNKNOWN_STRING.equals(album)) {
+            if (MediaStore.UNKNOWN_STRING.equals(album)) {
                 album = values.getAsString(MediaStore.MediaColumns.DATA);
                 // extract last path segment before file name
                 int lastSlash = album.lastIndexOf('/');
