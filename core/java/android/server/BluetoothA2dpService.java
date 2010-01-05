@@ -96,11 +96,13 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
                                                    BluetoothDevice.ERROR);
                 switch(bondState) {
                 case BluetoothDevice.BOND_BONDED:
-                    setSinkPriority(device, BluetoothA2dp.PRIORITY_ON);
+                    if (getSinkPriority(device) == BluetoothA2dp.PRIORITY_UNDEFINED) {
+                        setSinkPriority(device, BluetoothA2dp.PRIORITY_ON);
+                    }
                     break;
                 case BluetoothDevice.BOND_BONDING:
                 case BluetoothDevice.BOND_NONE:
-                    setSinkPriority(device, BluetoothA2dp.PRIORITY_OFF);
+                    setSinkPriority(device, BluetoothA2dp.PRIORITY_UNDEFINED);
                     break;
                 }
             } else if (action.equals(BluetoothDevice.ACTION_ACL_CONNECTED)) {

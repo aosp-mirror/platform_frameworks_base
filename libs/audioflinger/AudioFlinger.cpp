@@ -932,6 +932,8 @@ status_t AudioFlinger::PlaybackThread::dumpInternals(int fd, const Vector<String
     result.append(buffer);
     snprintf(buffer, SIZE, "blocked in write: %d\n", mInWrite);
     result.append(buffer);
+    snprintf(buffer, SIZE, "suspend count: %d\n", mSuspended);
+    result.append(buffer);
     write(fd, result.string(), result.size());
 
     dumpBase(fd, args);
@@ -1344,7 +1346,7 @@ uint32_t AudioFlinger::MixerThread::prepareTracks_l(const SortedVector< wp<Track
         if (cblk->framesReady() && (track->isReady() || track->isStopped()) &&
                 !track->isPaused())
         {
-            //LOGV("track %d u=%08x, s=%08x [OK]", track->name(), cblk->user, cblk->server);
+            //LOGV("track %d u=%08x, s=%08x [OK] on thread %p", track->name(), cblk->user, cblk->server, this);
 
             // compute volume for this track
             int16_t left, right;
@@ -1400,7 +1402,7 @@ uint32_t AudioFlinger::MixerThread::prepareTracks_l(const SortedVector< wp<Track
             track->mRetryCount = kMaxTrackRetries;
             mixerStatus = MIXER_TRACKS_READY;
         } else {
-            //LOGV("track %d u=%08x, s=%08x [NOT READY]", track->name(), cblk->user, cblk->server);
+            //LOGV("track %d u=%08x, s=%08x [NOT READY] on thread %p", track->name(), cblk->user, cblk->server, this);
             if (track->isStopped()) {
                 track->reset();
             }
@@ -1914,7 +1916,7 @@ uint32_t AudioFlinger::DirectOutputThread::idleSleepTimeUs()
 // ----------------------------------------------------------------------------
 
 AudioFlinger::DuplicatingThread::DuplicatingThread(const sp<AudioFlinger>& audioFlinger, AudioFlinger::MixerThread* mainThread, int id)
-    :   MixerThread(audioFlinger, mainThread->getOutput(), id)
+    :   MixerThread(audioFlinger, mainThread->getOutput(), id), mWaitTimeMs(UINT_MAX)
 {
     mType = PlaybackThread::DUPLICATING;
     addOutputTrack(mainThread);
@@ -1952,6 +1954,7 @@ bool AudioFlinger::DuplicatingThread::threadLoop()
 
             if (checkForNewParameters_l()) {
                 mixBufferSize = mFrameCount*mFrameSize;
+                updateWaitTime();
                 activeSleepTime = activeSleepTimeUs();
                 idleSleepTime = idleSleepTimeUs();
             }
@@ -2003,7 +2006,11 @@ bool AudioFlinger::DuplicatingThread::threadLoop()
 
         if (LIKELY(mixerStatus == MIXER_TRACKS_READY)) {
             // mix buffers...
-            mAudioMixer->process(curBuf);
+            if (outputsReady(outputTracks)) {
+                mAudioMixer->process(curBuf);
+            } else {
+                memset(curBuf, 0, mixBufferSize);
+            }
             sleepTime = 0;
             writeFrames = mFrameCount;
         } else {
@@ -2054,6 +2061,7 @@ void AudioFlinger::DuplicatingThread::addOutputTrack(MixerThread *thread)
 {
     int frameCount = (3 * mFrameCount * mSampleRate) / thread->sampleRate();
     OutputTrack *outputTrack = new OutputTrack((ThreadBase *)thread,
+                                            this,
                                             mSampleRate,
                                             mFormat,
                                             mChannelCount,
@@ -2062,6 +2070,7 @@ void AudioFlinger::DuplicatingThread::addOutputTrack(MixerThread *thread)
         thread->setStreamVolume(AudioSystem::NUM_STREAM_TYPES, 1.0f);
         mOutputTracks.add(outputTrack);
         LOGV("addOutputTrack() track %p, on thread %p", outputTrack, thread);
+        updateWaitTime();
     }
 }
 
@@ -2072,10 +2081,48 @@ void AudioFlinger::DuplicatingThread::removeOutputTrack(MixerThread *thread)
         if (mOutputTracks[i]->thread() == (ThreadBase *)thread) {
             mOutputTracks[i]->destroy();
             mOutputTracks.removeAt(i);
+            updateWaitTime();
             return;
         }
     }
     LOGV("removeOutputTrack(): unkonwn thread: %p", thread);
+}
+
+void AudioFlinger::DuplicatingThread::updateWaitTime()
+{
+    mWaitTimeMs = UINT_MAX;
+    for (size_t i = 0; i < mOutputTracks.size(); i++) {
+        sp<ThreadBase> strong = mOutputTracks[i]->thread().promote();
+        if (strong != NULL) {
+            uint32_t waitTimeMs = (strong->frameCount() * 2 * 1000) / strong->sampleRate();
+            if (waitTimeMs < mWaitTimeMs) {
+                mWaitTimeMs = waitTimeMs;
+            }
+        }
+    }
+}
+
+
+bool AudioFlinger::DuplicatingThread::outputsReady(SortedVector< sp<OutputTrack> > &outputTracks)
+{
+    for (size_t i = 0; i < outputTracks.size(); i++) {
+        sp <ThreadBase> thread = outputTracks[i]->thread().promote();
+        if (thread == 0) {
+            LOGW("DuplicatingThread::outputsReady() could not promote thread on output track %p", outputTracks[i].get());
+            return false;
+        }
+        PlaybackThread *playbackThread = (PlaybackThread *)thread.get();
+        if (playbackThread->standby() && !playbackThread->isSuspended()) {
+            LOGV("DuplicatingThread output track %p on thread %p Not Ready", outputTracks[i].get(), thread.get());
+            return false;
+        }
+    }
+    return true;
+}
+
+uint32_t AudioFlinger::DuplicatingThread::activeSleepTimeUs()
+{
+    return (mWaitTimeMs * 1000) / 2;
 }
 
 // ----------------------------------------------------------------------------
@@ -2616,12 +2663,13 @@ void AudioFlinger::RecordThread::RecordTrack::dump(char* buffer, size_t size)
 
 AudioFlinger::PlaybackThread::OutputTrack::OutputTrack(
             const wp<ThreadBase>& thread,
+            DuplicatingThread *sourceThread,
             uint32_t sampleRate,
             int format,
             int channelCount,
             int frameCount)
     :   Track(thread, NULL, AudioSystem::NUM_STREAM_TYPES, sampleRate, format, channelCount, frameCount, NULL),
-    mActive(false)
+    mActive(false), mSourceThread(sourceThread)
 {
 
     PlaybackThread *playbackThread = (PlaybackThread *)thread.unsafe_get();
@@ -2630,10 +2678,9 @@ AudioFlinger::PlaybackThread::OutputTrack::OutputTrack(
         mCblk->buffers = (char*)mCblk + sizeof(audio_track_cblk_t);
         mCblk->volume[0] = mCblk->volume[1] = 0x1000;
         mOutBuffer.frameCount = 0;
-        mWaitTimeMs = (playbackThread->frameCount() * 2 * 1000) / playbackThread->sampleRate();
         playbackThread->mTracks.add(this);
-        LOGV("OutputTrack constructor mCblk %p, mBuffer %p, mCblk->buffers %p, mCblk->frameCount %d, mCblk->sampleRate %d, mCblk->channels %d mBufferEnd %p mWaitTimeMs %d",
-                mCblk, mBuffer, mCblk->buffers, mCblk->frameCount, mCblk->sampleRate, mCblk->channels, mBufferEnd, mWaitTimeMs);
+        LOGV("OutputTrack constructor mCblk %p, mBuffer %p, mCblk->buffers %p, mCblk->frameCount %d, mCblk->sampleRate %d, mCblk->channels %d mBufferEnd %p",
+                mCblk, mBuffer, mCblk->buffers, mCblk->frameCount, mCblk->sampleRate, mCblk->channels, mBufferEnd);
     } else {
         LOGW("Error creating output track on thread %p", playbackThread);
     }
@@ -2673,7 +2720,7 @@ bool AudioFlinger::PlaybackThread::OutputTrack::write(int16_t* data, uint32_t fr
     inBuffer.frameCount = frames;
     inBuffer.i16 = data;
 
-    uint32_t waitTimeLeftMs = mWaitTimeMs;
+    uint32_t waitTimeLeftMs = mSourceThread->waitTimeMs();
 
     if (!mActive && frames != 0) {
         start();
@@ -2712,12 +2759,11 @@ bool AudioFlinger::PlaybackThread::OutputTrack::write(int16_t* data, uint32_t fr
             mOutBuffer.frameCount = pInBuffer->frameCount;
             nsecs_t startTime = systemTime();
             if (obtainBuffer(&mOutBuffer, waitTimeLeftMs) == (status_t)AudioTrack::NO_MORE_BUFFERS) {
-                LOGV ("OutputTrack::write() %p no more output buffers", this);
+                LOGV ("OutputTrack::write() %p thread %p no more output buffers", this, mThread.unsafe_get());
                 outputBufferFull = true;
                 break;
             }
             uint32_t waitTimeMs = (uint32_t)ns2ms(systemTime() - startTime);
-            LOGV("OutputTrack::write() to thread %p waitTimeMs %d waitTimeLeftMs %d", mThread.unsafe_get(), waitTimeMs, waitTimeLeftMs);
             if (waitTimeLeftMs >= waitTimeMs) {
                 waitTimeLeftMs -= waitTimeMs;
             } else {
@@ -2738,7 +2784,7 @@ bool AudioFlinger::PlaybackThread::OutputTrack::write(int16_t* data, uint32_t fr
                 mBufferQueue.removeAt(0);
                 delete [] pInBuffer->mBuffer;
                 delete pInBuffer;
-                LOGV("OutputTrack::write() %p released overflow buffer %d", this, mBufferQueue.size());
+                LOGV("OutputTrack::write() %p thread %p released overflow buffer %d", this, mThread.unsafe_get(), mBufferQueue.size());
             } else {
                 break;
             }
@@ -2747,16 +2793,19 @@ bool AudioFlinger::PlaybackThread::OutputTrack::write(int16_t* data, uint32_t fr
 
     // If we could not write all frames, allocate a buffer and queue it for next time.
     if (inBuffer.frameCount) {
-        if (mBufferQueue.size() < kMaxOverFlowBuffers) {
-            pInBuffer = new Buffer;
-            pInBuffer->mBuffer = new int16_t[inBuffer.frameCount * channels];
-            pInBuffer->frameCount = inBuffer.frameCount;
-            pInBuffer->i16 = pInBuffer->mBuffer;
-            memcpy(pInBuffer->raw, inBuffer.raw, inBuffer.frameCount * channels * sizeof(int16_t));
-            mBufferQueue.add(pInBuffer);
-            LOGV("OutputTrack::write() %p adding overflow buffer %d", this, mBufferQueue.size());
-        } else {
-            LOGW("OutputTrack::write() %p no more overflow buffers", this);
+        sp<ThreadBase> thread = mThread.promote();
+        if (thread != 0 && !thread->standby()) {
+            if (mBufferQueue.size() < kMaxOverFlowBuffers) {
+                pInBuffer = new Buffer;
+                pInBuffer->mBuffer = new int16_t[inBuffer.frameCount * channels];
+                pInBuffer->frameCount = inBuffer.frameCount;
+                pInBuffer->i16 = pInBuffer->mBuffer;
+                memcpy(pInBuffer->raw, inBuffer.raw, inBuffer.frameCount * channels * sizeof(int16_t));
+                mBufferQueue.add(pInBuffer);
+                LOGV("OutputTrack::write() %p thread %p adding overflow buffer %d", this, mThread.unsafe_get(), mBufferQueue.size());
+            } else {
+                LOGW("OutputTrack::write() %p thread %p no more overflow buffers", mThread.unsafe_get(), this);
+            }
         }
     }
 

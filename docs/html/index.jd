@@ -20,7 +20,8 @@ home=true
                                 </div> <!-- end annoucement -->
                             </div> <!-- end annoucement-block -->  
                         </div><!-- end topAnnouncement -->
-                        <div id="carouselMain" style="height:215px"> <!-- this height can be adjusted based on the content height -->
+                        <div id="carouselMain" style="height:200px"> <!-- this height can be
+                                                            adjusted based on the content height -->
                         </div>
                             <div class="clearer"></div>
                         <div id="carouselWheel">
@@ -126,18 +127,17 @@ href="{@docRoot}resources/dashboard/platform-versions.html">Learn more &raquo;</
     'sdk': {
       'layout':"imgLeft",
       'icon':"sdk-small.png",
-      'name':"Android 2.0.1",
-      'img':"eclair-android.png",
-      'title':"Android 2.0.1",
-      'desc': "<p>Android 2.0.1 is a minor platform update to Android 2.0. "
-               + "For information about what's included in the new platform, read "
-               + "the <a href='{@docRoot}sdk/android-2.0.1.html'>Android 2.0.1 "
+      'name':"Android 2.1",
+      'img':"sdk-large.png",
+      'title':"Android 2.1 is now available",
+      'desc': "<p>Android 2.1 is a small feature release that includes new developer APIs "
+               + "and documentation. For information about what's included in the platform, "
+               + "read the <a href='{@docRoot}sdk/android-2.1.html'>Android 2.1 "
                + "version notes</a>.</p>"
-               + "<p>You can update your existing environment "
-               + "by installing the Android 2.0.1 platform and updated tools as"
-               + " <a href='{@docRoot}sdk/adding-components.html'>SDK "
-               + "components</a>. Otherwise, "
-               + "<a href='{@docRoot}sdk/index.html'>download a new Android SDK</a>.</p>"
+               + "<p>You can update your existing development environment "
+               + "by installing the Android 2.1 platform as an "
+               + "<a href='{@docRoot}sdk/adding-components.html'>SDK "
+               + "component</a>."
     },
 
     'devphone': {
