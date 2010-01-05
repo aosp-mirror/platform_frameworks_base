@@ -24,6 +24,69 @@
 
 namespace android {
 
+// Given a connected HTTPStream, determine if the given path redirects
+// somewhere else, if so, disconnect the stream, update host path and port
+// accordingly and return true, otherwise return false and leave the stream
+// connected.
+static bool PerformRedirectIfNecessary(
+        HTTPStream *http, string *host, string *path, int *port) {
+    String8 request;
+    request.append("HEAD ");
+    request.append(path->c_str());
+    request.append(" HTTP/1.1\r\n");
+    request.append("Host: ");
+    request.append(host->c_str());
+    request.append("\r\n\r\n");
+
+    status_t err = http->send(request.string());
+
+    int http_status;
+    if (err == OK) {
+        err = http->receive_header(&http_status);
+    }
+
+    if (err != OK) {
+        return false;
+    }
+
+    if (http_status != 301 && http_status != 302) {
+        return false;
+    }
+
+    string location;
+    CHECK(http->find_header_value("Location", &location));
+
+    CHECK(string(location, 0, 7) == "http://");
+    location.erase(0, 7);
+    string::size_type slashPos = location.find('/');
+    if (slashPos == string::npos) {
+        slashPos = location.size();
+        location += '/';
+    }
+
+    http->disconnect();
+
+    LOGI("Redirecting to %s\n", location.c_str());
+
+    *host = string(location, 0, slashPos);
+
+    string::size_type colonPos = host->find(':');
+    if (colonPos != string::npos) {
+        const char *start = host->c_str() + colonPos + 1;
+        char *end;
+        long tmp = strtol(start, &end, 10);
+        CHECK(end > start && (*end == '\0'));
+
+        *port = (tmp >= 0 && tmp < 65536) ? (int)tmp : 80;
+    } else {
+        *port = 80;
+    }
+
+    *path = string(location, slashPos);
+
+    return true;
+}
+
 HTTPDataSource::HTTPDataSource(const char *uri)
     : mHttp(new HTTPStream),
       mHost(NULL),
@@ -63,22 +126,44 @@ HTTPDataSource::HTTPDataSource(const char *uri)
     LOGI("Connecting to host '%s', port %d, path '%s'",
          host.c_str(), port, path.c_str());
 
+    do {
+        mInitCheck = mHttp->connect(host.c_str(), port);
+
+        if (mInitCheck != OK) {
+            return;
+        }
+    } while (PerformRedirectIfNecessary(mHttp, &host, &path, &port));
+
     mHost = strdup(host.c_str());
     mPort = port;
     mPath = strdup(path.c_str());
-
-    mInitCheck = mHttp->connect(mHost, mPort);
 }
 
-HTTPDataSource::HTTPDataSource(const char *host, int port, const char *path)
+HTTPDataSource::HTTPDataSource(const char *_host, int port, const char *_path)
     : mHttp(new HTTPStream),
-      mHost(strdup(host)),
-      mPort(port),
-      mPath(strdup(path)),
+      mHost(NULL),
+      mPort(0),
+      mPath(NULL),
       mBuffer(malloc(kBufferSize)),
       mBufferLength(0),
       mBufferOffset(0) {
-    mInitCheck = mHttp->connect(mHost, mPort);
+    string host = _host;
+    string path = _path;
+
+    LOGI("Connecting to host '%s', port %d, path '%s'",
+         host.c_str(), port, path.c_str());
+
+    do {
+        mInitCheck = mHttp->connect(host.c_str(), port);
+
+        if (mInitCheck != OK) {
+            return;
+        }
+    } while (PerformRedirectIfNecessary(mHttp, &host, &path, &port));
+
+    mHost = strdup(host.c_str());
+    mPort = port;
+    mPath = strdup(path.c_str());
 }
 
 status_t HTTPDataSource::initCheck() const {
@@ -91,8 +176,15 @@ HTTPDataSource::~HTTPDataSource() {
     free(mBuffer);
     mBuffer = NULL;
 
-    free(mPath);
-    mPath = NULL;
+    if (mPath) {
+        free(mPath);
+        mPath = NULL;
+    }
+
+    if (mHost) {
+        free(mHost);
+        mHost = NULL;
+    }
 
     delete mHttp;
     mHttp = NULL;
