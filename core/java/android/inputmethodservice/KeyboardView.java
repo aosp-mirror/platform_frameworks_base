@@ -1118,6 +1118,11 @@ public class KeyboardView extends View implements View.OnClickListener {
         if (action == MotionEvent.ACTION_DOWN) mSwipeTracker.clear();
         mSwipeTracker.addMovement(me);
 
+        // Ignore all motion events until a DOWN.
+        if (mAbortKey && action != MotionEvent.ACTION_DOWN) {
+            return true;
+        }
+
         if (mGestureDetector.onTouchEvent(me)) {
             showPreview(NOT_A_KEY);
             mHandler.removeMessages(MSG_REPEAT);
@@ -1150,9 +1155,14 @@ public class KeyboardView extends View implements View.OnClickListener {
                         mKeys[keyIndex].codes[0] : 0);
                 if (mCurrentKey >= 0 && mKeys[mCurrentKey].repeatable) {
                     mRepeatKeyIndex = mCurrentKey;
-                    repeatKey();
                     Message msg = mHandler.obtainMessage(MSG_REPEAT);
                     mHandler.sendMessageDelayed(msg, REPEAT_START_DELAY);
+                    repeatKey();
+                    // Delivering the key could have caused an abort
+                    if (mAbortKey) {
+                        mRepeatKeyIndex = NOT_A_KEY;
+                        break;
+                    }
                 }
                 if (mCurrentKey != NOT_A_KEY) {
                     Message msg = mHandler.obtainMessage(MSG_LONGPRESS, me);
