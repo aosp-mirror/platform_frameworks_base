@@ -891,6 +891,38 @@ public class ActivityManager {
     }
     
     /**
+     * @deprecated This is now just a wrapper for
+     * {@link #killBackgroundProcesses(String)}; the previous behavior here
+     * is no longer available to applications because it allows them to
+     * break other applications by removing their alarms, stopping their
+     * services, etc.
+     */
+    @Deprecated
+    public void restartPackage(String packageName) {
+        killBackgroundProcesses(packageName);
+    }
+    
+    /**
+     * Have the system immediately kill all background processes associated
+     * with the given package.  This is the same as the kernel killing those
+     * processes to reclaim memory; the system will take care of restarting
+     * these processes in the future as needed.
+     * 
+     * <p>You must hold the permission
+     * {@link android.Manifest.permission#KILL_BACKGROUND_PROCESSES} to be able to
+     * call this method.
+     * 
+     * @param packageName The name of the package whose processes are to
+     * be killed.
+     */
+    public void killBackgroundProcesses(String packageName) {
+        try {
+            ActivityManagerNative.getDefault().killBackgroundProcesses(packageName);
+        } catch (RemoteException e) {
+        }
+    }
+    
+    /**
      * Have the system perform a force stop of everything associated with
      * the given application package.  All processes that share its uid
      * will be killed, all services it has running stopped, all activities
@@ -899,14 +931,18 @@ public class ActivityManager {
      * be stopped, notifications removed, etc.
      * 
      * <p>You must hold the permission
-     * {@link android.Manifest.permission#RESTART_PACKAGES} to be able to
+     * {@link android.Manifest.permission#FORCE_STOP_PACKAGES} to be able to
      * call this method.
      * 
      * @param packageName The name of the package to be stopped.
+     * 
+     * @hide This is not available to third party applications due to
+     * it allowing them to break other applications by stopping their
+     * services, removing their alarms, etc.
      */
-    public void restartPackage(String packageName) {
+    public void forceStopPackage(String packageName) {
         try {
-            ActivityManagerNative.getDefault().restartPackage(packageName);
+            ActivityManagerNative.getDefault().forceStopPackage(packageName);
         } catch (RemoteException e) {
         }
     }

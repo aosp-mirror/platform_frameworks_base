@@ -216,7 +216,8 @@ public interface IActivityManager extends IInterface {
     
     public void getMemoryInfo(ActivityManager.MemoryInfo outInfo) throws RemoteException;
     
-    public void restartPackage(final String packageName) throws RemoteException;
+    public void killBackgroundProcesses(final String packageName) throws RemoteException;
+    public void forceStopPackage(final String packageName) throws RemoteException;
     
     // Note: probably don't want to allow applications access to these.
     public void goingToSleep() throws RemoteException;
@@ -424,7 +425,7 @@ public interface IActivityManager extends IInterface {
     int GET_MEMORY_INFO_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+75;
     int GET_PROCESSES_IN_ERROR_STATE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+76;
     int CLEAR_APP_DATA_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+77;
-    int RESTART_PACKAGE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+78;
+    int FORCE_STOP_PACKAGE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+78;
     int KILL_PIDS_FOR_MEMORY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+79;
     int GET_SERVICES_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+80;
     int REPORT_PSS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+81;
@@ -448,4 +449,5 @@ public interface IActivityManager extends IInterface {
     int START_ACTIVITY_INTENT_SENDER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+99;
     int OVERRIDE_PENDING_TRANSITION_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+100;
     int HANDLE_APPLICATION_WTF_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+101;
+    int KILL_BACKGROUND_PROCESSES_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+102;
 }

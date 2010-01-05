@@ -462,10 +462,17 @@
         size.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_restartPackages">restart other applications</string>
+    <string name="permlab_killBackgroundProcesses">kill background processes</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_restartPackages">Allows an application to
-        forcibly restart other applications.</string>
+    <string name="permdesc_killBackgroundProcesses">Allows an application to
+        kill background processes of other applications, even if memory
+        isn\'t low.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_forceStopPackages">force stop other applications</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_forceStopPackages">Allows an application to
+        forcibly stop other applications.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_forceBack">force application to close</string>

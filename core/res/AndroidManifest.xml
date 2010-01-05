@@ -556,12 +556,30 @@
         android:label="@string/permlab_changeConfiguration"
         android:description="@string/permdesc_changeConfiguration" />
 
-    <!-- Allows an application to restart other applications. -->
+    <!-- @deprecated The {@link android.app.ActivityManager#restartPackage}
+        API is no longer supported. -->
     <permission android:name="android.permission.RESTART_PACKAGES"
         android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
-        android:protectionLevel="dangerous"
-        android:label="@string/permlab_restartPackages"
-        android:description="@string/permdesc_restartPackages" />
+        android:protectionLevel="normal"
+        android:label="@string/permlab_killBackgroundProcesses"
+        android:description="@string/permdesc_killBackgroundProcesses" />
+
+    <!-- Allows an application to call
+        {@link android.app.ActivityManager#killBackgroundProcesses}. -->
+    <permission android:name="android.permission.KILL_BACKGROUND_PROCESSES"
+        android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
+        android:protectionLevel="normal"
+        android:label="@string/permlab_killBackgroundProcesses"
+        android:description="@string/permdesc_killBackgroundProcesses" />
+
+    <!-- Allows an application to call
+        {@link android.app.ActivityManager#forceStopPackage}.
+        @hide -->
+    <permission android:name="android.permission.FORCE_STOP_PACKAGES"
+        android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
+        android:protectionLevel="signature"
+        android:label="@string/permlab_forceStopPackages"
+        android:description="@string/permdesc_forceStopPackages" />
 
     <!-- Allows an application to retrieve state dump information from system
          services. -->

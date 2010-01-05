@@ -1194,7 +1194,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     int uid = msg.arg1;
                     boolean restart = (msg.arg2 == 1);
                     String pkg = (String) msg.obj;
-                    uninstallPackageLocked(pkg, uid, restart);
+                    forceStopPackageLocked(pkg, uid, restart);
                 }
             } break;
             }
@@ -2734,8 +2734,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 // Whoops, need to restart this activity!
                 next.state = lastState;
                 mResumedActivity = lastResumedActivity;
-                if (Config.LOGD) Log.d(TAG,
-                        "Restarting because process died: " + next);
+                Log.i(TAG, "Restarting because process died: " + next);
                 if (!next.hasBeenLaunched) {
                     next.hasBeenLaunched = true;
                 } else {
@@ -4293,7 +4292,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         
         cleanUpActivityLocked(r, false);
 
-        if (r.app != null) {
+        final boolean hadApp = r.app != null;
+        
+        if (hadApp) {
             if (removeFromApp) {
                 int idx = r.app.activities.indexOf(r);
                 if (idx >= 0) {
@@ -4350,16 +4351,14 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
         r.configChangeFlags = 0;
         
-        if (!mLRUActivities.remove(r)) {
+        if (!mLRUActivities.remove(r) && hadApp) {
             Log.w(TAG, "Activity " + r + " being finished, but not in LRU list");
         }
         
         return removedFromHistory;
     }
 
-    private static void removeHistoryRecordsForAppLocked(ArrayList list,
-                                                         ProcessRecord app)
-    {
+    private static void removeHistoryRecordsForAppLocked(ArrayList list, ProcessRecord app) {
         int i = list.size();
         if (localLOGV) Log.v(
             TAG, "Removing app " + app + " from list " + list
@@ -4550,7 +4549,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     scheduleAppGcsLocked();
                 }
             }
-        } else if (Config.LOGD) {
+        } else if (DEBUG_PROCESSES) {
             Log.d(TAG, "Received spurious death notification for thread "
                     + thread.asBinder());
         }
@@ -4852,7 +4851,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                         android.Manifest.permission.CLEAR_APP_USER_DATA,
                         pid, uid, -1)
                         == PackageManager.PERMISSION_GRANTED) {
-                    restartPackageLocked(packageName, pkgUid);
+                    forceStopPackageLocked(packageName, pkgUid);
                 } else {
                     throw new SecurityException(pid+" does not have permission:"+
                             android.Manifest.permission.CLEAR_APP_USER_DATA+" to clear data" +
@@ -4877,13 +4876,15 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         return true;
     }
 
-    public void restartPackage(final String packageName) {
-        if (checkCallingPermission(android.Manifest.permission.RESTART_PACKAGES)
-                != PackageManager.PERMISSION_GRANTED) {
-            String msg = "Permission Denial: restartPackage() from pid="
+    public void killBackgroundProcesses(final String packageName) {
+        if (checkCallingPermission(android.Manifest.permission.KILL_BACKGROUND_PROCESSES)
+                != PackageManager.PERMISSION_GRANTED &&
+                checkCallingPermission(android.Manifest.permission.RESTART_PACKAGES)
+                        != PackageManager.PERMISSION_GRANTED) {
+            String msg = "Permission Denial: killBackgroundProcesses() from pid="
                     + Binder.getCallingPid()
                     + ", uid=" + Binder.getCallingUid()
-                    + " requires " + android.Manifest.permission.RESTART_PACKAGES;
+                    + " requires " + android.Manifest.permission.KILL_BACKGROUND_PROCESSES;
             Log.w(TAG, msg);
             throw new SecurityException(msg);
         }
@@ -4901,7 +4902,39 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     Log.w(TAG, "Invalid packageName: " + packageName);
                     return;
                 }
-                restartPackageLocked(packageName, pkgUid);
+                killPackageProcessesLocked(packageName, pkgUid,
+                        SECONDARY_SERVER_ADJ, false);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(callingId);
+        }
+    }
+
+    public void forceStopPackage(final String packageName) {
+        if (checkCallingPermission(android.Manifest.permission.FORCE_STOP_PACKAGES)
+                != PackageManager.PERMISSION_GRANTED) {
+            String msg = "Permission Denial: forceStopPackage() from pid="
+                    + Binder.getCallingPid()
+                    + ", uid=" + Binder.getCallingUid()
+                    + " requires " + android.Manifest.permission.FORCE_STOP_PACKAGES;
+            Log.w(TAG, msg);
+            throw new SecurityException(msg);
+        }
+        
+        long callingId = Binder.clearCallingIdentity();
+        try {
+            IPackageManager pm = ActivityThread.getPackageManager();
+            int pkgUid = -1;
+            synchronized(this) {
+                try {
+                    pkgUid = pm.getPackageUid(packageName);
+                } catch (RemoteException e) {
+                }
+                if (pkgUid == -1) {
+                    Log.w(TAG, "Invalid packageName: " + packageName);
+                    return;
+                }
+                forceStopPackageLocked(packageName, pkgUid);
             }
         } finally {
             Binder.restoreCallingIdentity(callingId);
@@ -5011,8 +5044,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
     }
 
-    private void restartPackageLocked(final String packageName, int uid) {
-        uninstallPackageLocked(packageName, uid, false);
+    private void forceStopPackageLocked(final String packageName, int uid) {
+        forceStopPackageLocked(packageName, uid, false);
         Intent intent = new Intent(Intent.ACTION_PACKAGE_RESTARTED,
                 Uri.fromParts("package", packageName, null));
         intent.putExtra(Intent.EXTRA_UID, uid);
@@ -5021,19 +5054,49 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 false, false, MY_PID, Process.SYSTEM_UID);
     }
     
-    private final void uninstallPackageLocked(String name, int uid,
-            boolean callerWillRestart) {
-        if (Config.LOGD) Log.d(TAG, "Uninstalling process " + name);
+    private final void killPackageProcessesLocked(String packageName, int uid,
+            int minOomAdj, boolean callerWillRestart) {
+        ArrayList<ProcessRecord> procs = new ArrayList<ProcessRecord>();
 
+        // Remove all processes this package may have touched: all with the
+        // same UID (except for the system or root user), and all whose name
+        // matches the package name.
+        final String procNamePrefix = packageName + ":";
+        for (SparseArray<ProcessRecord> apps : mProcessNames.getMap().values()) {
+            final int NA = apps.size();
+            for (int ia=0; ia<NA; ia++) {
+                ProcessRecord app = apps.valueAt(ia);
+                if (app.removed) {
+                    procs.add(app);
+                } else if ((uid > 0 && uid != Process.SYSTEM_UID && app.info.uid == uid)
+                        || app.processName.equals(packageName)
+                        || app.processName.startsWith(procNamePrefix)) {
+                    if (app.setAdj >= minOomAdj) {
+                        app.removed = true;
+                        procs.add(app);
+                    }
+                }
+            }
+        }
+        
+        int N = procs.size();
+        for (int i=0; i<N; i++) {
+            removeProcessLocked(procs.get(i), callerWillRestart);
+        }
+    }
+    
+    private final void forceStopPackageLocked(String name, int uid,
+            boolean callerWillRestart) {
         int i, N;
 
-        final String procNamePrefix = name + ":";
         if (uid < 0) {
             try {
                 uid = ActivityThread.getPackageManager().getPackageUid(name);
             } catch (RemoteException e) {
             }
         }
+
+        Log.i(TAG, "Force stopping package " + name + " uid=" + uid);
 
         Iterator<SparseArray<Long>> badApps = mProcessCrashTimes.getMap().values().iterator();
         while (badApps.hasNext()) {
@@ -5043,37 +5106,12 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             }
         }
 
-        ArrayList<ProcessRecord> procs = new ArrayList<ProcessRecord>();
-
-        // Remove all processes this package may have touched: all with the
-        // same UID (except for the system or root user), and all whose name
-        // matches the package name.
-        for (SparseArray<ProcessRecord> apps : mProcessNames.getMap().values()) {
-            final int NA = apps.size();
-            for (int ia=0; ia<NA; ia++) {
-                ProcessRecord app = apps.valueAt(ia);
-                if (app.removed) {
-                    procs.add(app);
-                } else if ((uid > 0 && uid != Process.SYSTEM_UID && app.info.uid == uid)
-                        || app.processName.equals(name)
-                        || app.processName.startsWith(procNamePrefix)) {
-                    app.removed = true;
-                    procs.add(app);
-                }
-            }
-        }
-
-        N = procs.size();
-        for (i=0; i<N; i++) {
-            removeProcessLocked(procs.get(i), callerWillRestart);
-        }
+        killPackageProcessesLocked(name, uid, -100, callerWillRestart);
         
         for (i=mHistory.size()-1; i>=0; i--) {
             HistoryRecord r = (HistoryRecord)mHistory.get(i);
             if (r.packageName.equals(name)) {
-                if (Config.LOGD) Log.d(
-                    TAG, "  Force finishing activity "
-                    + r.intent.getComponent().flattenToShortString());
+                Log.i(TAG, "  Force finishing activity " + r);
                 if (r.app != null) {
                     r.app.removed = true;
                 }
@@ -5085,6 +5123,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         ArrayList<ServiceRecord> services = new ArrayList<ServiceRecord>();
         for (ServiceRecord service : mServices.values()) {
             if (service.packageName.equals(name)) {
+                Log.i(TAG, "  Force stopping service " + service);
                 if (service.app != null) {
                     service.app.removed = true;
                 }
@@ -5104,7 +5143,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     private final boolean removeProcessLocked(ProcessRecord app, boolean callerWillRestart) {
         final String name = app.processName;
         final int uid = app.info.uid;
-        if (Config.LOGD) Log.d(
+        if (DEBUG_PROCESSES) Log.d(
             TAG, "Force removing process " + app + " (" + name
             + "/" + uid + ")");
 
@@ -7861,7 +7900,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
         synchronized(this) {
             int count = mHistory.size();
-            if (Config.LOGD) Log.d(
+            if (DEBUG_SWITCH) Log.d(
                 TAG, "Performing unhandledBack(): stack size = " + count);
             if (count > 1) {
                 final long origId = Binder.clearCallingIdentity();
@@ -8062,7 +8101,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             mDebugTransient = !persistent;
             if (packageName != null) {
                 final long origId = Binder.clearCallingIdentity();
-                uninstallPackageLocked(packageName, -1, false);
+                forceStopPackageLocked(packageName, -1, false);
                 Binder.restoreCallingIdentity(origId);
             }
         }
@@ -8686,8 +8725,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             for (int i=mHistory.size()-1; i>=0; i--) {
                 HistoryRecord r = (HistoryRecord)mHistory.get(i);
                 if (r.app == app) {
-                    if (Config.LOGD) Log.d(
-                        TAG, "  Force finishing activity "
+                    Log.w(TAG, "  Force finishing activity "
                         + r.intent.getComponent().flattenToShortString());
                     finishActivityLocked(r, i, Activity.RESULT_CANCELED, null, "crashed");
                 }
@@ -11922,7 +11960,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     String ssp;
                     if (data != null && (ssp=data.getSchemeSpecificPart()) != null) {
                         if (!intent.getBooleanExtra(Intent.EXTRA_DONT_KILL_APP, false)) {
-                            uninstallPackageLocked(ssp,
+                            forceStopPackageLocked(ssp,
                                     intent.getIntExtra(Intent.EXTRA_UID, -1), false);
                             AttributeCache ac = AttributeCache.instance();
                             if (ac != null) {
@@ -12890,7 +12928,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             }
 
             final long origId = Binder.clearCallingIdentity();
-            uninstallPackageLocked(ii.targetPackage, -1, true);
+            forceStopPackageLocked(ii.targetPackage, -1, true);
             ProcessRecord app = addAppLocked(ai);
             app.instrumentationClass = className;
             app.instrumentationInfo = ai;
@@ -12945,7 +12983,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         app.instrumentationProfileFile = null;
         app.instrumentationArguments = null;
 
-        uninstallPackageLocked(app.processName, -1, false);
+        forceStopPackageLocked(app.processName, -1, false);
     }
 
     public void finishInstrumentation(IApplicationThread target,
