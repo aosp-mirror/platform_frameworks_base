@@ -1608,7 +1608,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 code == KeyEvent.KEYCODE_MEDIA_STOP || 
                 code == KeyEvent.KEYCODE_MEDIA_NEXT ||
                 code == KeyEvent.KEYCODE_MEDIA_PREVIOUS || 
-                code == KeyEvent.KEYCODE_MEDIA_PREVIOUS ||
+                code == KeyEvent.KEYCODE_MEDIA_REWIND ||
                 code == KeyEvent.KEYCODE_MEDIA_FAST_FORWARD) {
             return true;
         }
