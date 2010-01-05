@@ -721,9 +721,13 @@ player_type getPlayerType(const char* url)
     }
 
     if (!strncasecmp(url, "http://", 7)) {
-        // For now, we're going to use PV for http-based playback,
-        // until we can clear up a few more issues.
-        return PV_PLAYER;
+        char value[PROPERTY_VALUE_MAX];
+        if (!property_get("media.stagefright.enable-http", value, NULL)
+            || (strcmp(value, "1") && strcasecmp(value, "true"))) {
+            // For now, we're going to use PV for http-based playback
+            // by default until we can clear up a few more issues.
+            return PV_PLAYER;
+        }
     }
 
     return getDefaultPlayerType();
