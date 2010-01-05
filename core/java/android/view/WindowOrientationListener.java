@@ -32,7 +32,7 @@ import android.util.Log;
  */
 public abstract class WindowOrientationListener {
     private static final String TAG = "WindowOrientationListener";
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
     private static final boolean localLOGV = DEBUG || Config.DEBUG;
     private SensorManager mSensorManager;
     private boolean mEnabled = false;
