@@ -139,6 +139,8 @@ public class LockPatternKeyguardView extends KeyguardViewBase
      */
     private final LockPatternUtils mLockPatternUtils;
 
+    private int mNumAccounts;
+
     /**
      * @return Whether we are stuck on the lock screen because the sim is
      *   missing.
@@ -149,22 +151,22 @@ public class LockPatternKeyguardView extends KeyguardViewBase
                 && (mUpdateMonitor.getSimState() == IccCard.State.ABSENT);
     }
 
+    // Called by AccountManager.getAccountByTypeAndFeatures() below...
     public void run(AccountManagerFuture<Account[]> future) {
-        // We err on the side of caution.
-        // In case of error we assume we have a SAML account.
-        boolean hasSAMLAccount = true;
+        int samlAccounts = 0;
         try {
-            hasSAMLAccount = future.getResult().length > 0;
+            samlAccounts = future.getResult().length;
         } catch (OperationCanceledException e) {
         } catch (IOException e) {
         } catch (AuthenticatorException e) {
         }
-        mEnableFallback = !hasSAMLAccount;
+        // At least one of the accounts must be non-SAML to enable the fallback.
+        mEnableFallback = samlAccounts < mNumAccounts;
 
         if (mUnlockScreen == null) {
             Log.w(TAG, "no unlock screen when receiving AccountManager information");
         } else if (mUnlockScreen instanceof UnlockScreen) {
-            ((UnlockScreen)mUnlockScreen).setEnableFallback(true);
+            ((UnlockScreen)mUnlockScreen).setEnableFallback(mEnableFallback);
         }
     }
 
@@ -313,12 +315,19 @@ public class LockPatternKeyguardView extends KeyguardViewBase
         mUnlockScreen = createUnlockScreenFor(unlockMode);
         mUnlockScreenMode = unlockMode;
 
+        maybeEnableFallback(context);
+
+        addView(mUnlockScreen);
+        updateScreen(mMode);
+    }
+
+    private void maybeEnableFallback(Context context) {
         // Ask the account manager if we have an account that can be used as a
         // fallback in case the user forgets his pattern. The response comes
         // back in run() below; don't bother asking until you've called
         // createUnlockScreenFor(), else the information will go unused.
-        final boolean hasAccount = AccountManager.get(context).getAccounts().length > 0;
-        if (hasAccount) {
+        mNumAccounts = AccountManager.get(context).getAccounts().length;
+        if (mNumAccounts > 0) {
             /* If we have a SAML account which requires web login we can not use the
              fallback screen UI to ask the user for credentials.
              For now we will disable fallback screen in this case.
@@ -328,11 +337,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase
             AccountManager.get(context).getAccountsByTypeAndFeatures(
                     "com.google", features, this, null);
         }
-
-        addView(mUnlockScreen);
-        updateScreen(mMode);
     }
-
 
     @Override
     public void reset() {
