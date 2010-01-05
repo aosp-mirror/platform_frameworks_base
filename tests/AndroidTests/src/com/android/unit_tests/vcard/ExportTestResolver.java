@@ -110,8 +110,41 @@ import java.util.List;
         return contactEntry;
     }
 
+    /**
+     * <p>
+     * An old method which had existed but was removed from ContentResolver.
+     * </p>
+     * <p>
+     * We still keep using this method since we don't have a propeer way to know
+     * which value in the ContentValue corresponds to the entry in Contacts database.
+     * </p>
+     * <p>
+     * Detail:
+     * There's an easy way to know which index "family name" corresponds to, via
+     * {@link android.provider.ContactsContract}.
+     * FAMILY_NAME equals DATA3, so the corresponding index
+     * for "family name" should be 2 (note that index is 0-origin).
+     * However, we cannot know what the index 2 corresponds to; it may be "family name",
+     * "label" for now, but may be the other some column in the future. We don't have
+     * convenient way to know the original data structure.
+     * </p>
+     */
+    public EntityIterator queryEntities(Uri uri,
+            String selection, String[] selectionArgs, String sortOrder) {
+        mTestCase.assertTrue(uri != null);
+        mTestCase.assertTrue(ContentResolver.SCHEME_CONTENT.equals(uri.getScheme()));
+        final String authority = uri.getAuthority();
+        mTestCase.assertTrue(RawContacts.CONTENT_URI.getAuthority().equals(authority));
+        mTestCase.assertTrue((Data.CONTACT_ID + "=?").equals(selection));
+        mTestCase.assertEquals(1, selectionArgs.length);
+        final int id = Integer.parseInt(selectionArgs[0]);
+        mTestCase.assertTrue(id >= 0 && id < mContactEntryList.size());
+
+        return new MockEntityIterator(mContactEntryList.get(id).getList());
+    }
+
     @Override
-    public Cursor query(Uri uri, String[] projection,
+    public Cursor query(Uri uri,String[] projection,
             String selection, String[] selectionArgs, String sortOrder) {
         mTestCase.assertTrue(VCardComposer.CONTACTS_TEST_CONTENT_URI.equals(uri));
         // In this test, following arguments are not supported.

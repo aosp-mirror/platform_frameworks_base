@@ -54,6 +54,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+import java.lang.reflect.Method;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -197,7 +198,7 @@ public class VCardComposer {
             if (mIsDoCoMo) {
                 try {
                     // Create one empty entry.
-                    mWriter.write(createOneEntryInternal("-1"));
+                    mWriter.write(createOneEntryInternal("-1", null));
                 } catch (IOException e) {
                     Log.e(LOG_TAG,
                             "IOException occurred during exportOneContactData: "
@@ -428,6 +429,14 @@ public class VCardComposer {
     }
 
     public boolean createOneEntry() {
+        return createOneEntry(null);
+    }
+
+    /**
+     * @param getEntityIteratorMethod For Dependency Injection.
+     * @hide just for testing.
+     */
+    public boolean createOneEntry(Method getEntityIteratorMethod) {
         if (mCursor == null || mCursor.isAfterLast()) {
             mErrorReason = FAILURE_REASON_NOT_INITIALIZED;
             return false;
@@ -439,7 +448,8 @@ public class VCardComposer {
                 vcard = createOneCallLogEntryInternal();
             } else {
                 if (mIdColumn >= 0) {
-                    vcard = createOneEntryInternal(mCursor.getString(mIdColumn));
+                    vcard = createOneEntryInternal(mCursor.getString(mIdColumn),
+                            getEntityIteratorMethod);
                 } else {
                     Log.e(LOG_TAG, "Incorrect mIdColumn: " + mIdColumn);
                     return true;
@@ -475,7 +485,8 @@ public class VCardComposer {
         return true;
     }
 
-    private String createOneEntryInternal(final String contactId) {
+    private String createOneEntryInternal(final String contactId,
+            Method getEntityIteratorMethod) {
         final Map<String, List<ContentValues>> contentValuesListMap =
                 new HashMap<String, List<ContentValues>>();
         // The resolver may return the entity iterator with no data. It is possiible.
@@ -484,13 +495,34 @@ public class VCardComposer {
         boolean dataExists = false;
         EntityIterator entityIterator = null;
         try {
-            final Uri uri = RawContacts.CONTENT_URI.buildUpon()
-                    .appendEncodedPath(contactId)
-                    .appendEncodedPath(RawContacts.Entity.CONTENT_DIRECTORY)
-                    .appendQueryParameter(Data.FOR_EXPORT_ONLY, "1")
-                    .build();
-            entityIterator = RawContacts.newEntityIterator(mContentResolver.query(
-                    uri, null, null, null, null));
+
+            if (getEntityIteratorMethod != null) {
+                try {
+                    final Uri uri = RawContacts.CONTENT_URI.buildUpon()
+                            .appendQueryParameter(Data.FOR_EXPORT_ONLY, "1")
+                            .build();
+                    final String selection = Data.CONTACT_ID + "=?";
+                    final String[] selectionArgs = new String[] {contactId};
+                    entityIterator = (EntityIterator)getEntityIteratorMethod.invoke(null,
+                            mContentResolver, uri, selection, selectionArgs, null);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            } else {
+                final Uri uri = RawContacts.CONTENT_URI.buildUpon()
+                        .appendEncodedPath(contactId)
+                        .appendEncodedPath(RawContacts.Entity.CONTENT_DIRECTORY)
+                        .appendQueryParameter(Data.FOR_EXPORT_ONLY, "1")
+                        .build();
+                entityIterator = RawContacts.newEntityIterator(mContentResolver.query(
+                        uri, null, null, null, null));
+            }
+
+            if (entityIterator == null) {
+                Log.e(LOG_TAG, "EntityIterator is null");
+                return "";
+            }
+
             dataExists = entityIterator.hasNext();
             while (entityIterator.hasNext()) {
                 Entity entity = entityIterator.next();
