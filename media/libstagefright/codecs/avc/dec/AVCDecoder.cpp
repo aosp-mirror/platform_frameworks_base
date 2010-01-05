@@ -90,7 +90,8 @@ status_t AVCDecoder::start(MetaData *) {
     uint32_t type;
     const void *data;
     size_t size;
-    if (mSource->getFormat()->findData(kKeyAVCC, &type, &data, &size)) {
+    sp<MetaData> meta = mSource->getFormat();
+    if (meta->findData(kKeyAVCC, &type, &data, &size)) {
         // Parse the AVCDecoderConfigurationRecord
 
         const uint8_t *ptr = (const uint8_t *)data;

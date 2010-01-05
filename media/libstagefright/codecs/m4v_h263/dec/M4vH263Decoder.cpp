@@ -87,7 +87,8 @@ status_t M4vH263Decoder::start(MetaData *) {
     CHECK(!mStarted);
 
     const char *mime = NULL;
-    CHECK(mSource->getFormat()->findCString(kKeyMIMEType, &mime));
+    sp<MetaData> meta = mSource->getFormat();
+    CHECK(meta->findCString(kKeyMIMEType, &mime));
 
     MP4DecodingMode mode;
     if (!strcasecmp(MEDIA_MIMETYPE_VIDEO_MPEG4, mime)) {
@@ -102,7 +103,7 @@ status_t M4vH263Decoder::start(MetaData *) {
     size_t size = 0;
     uint8_t *vol_data[1] = {0};
     int32_t vol_size = 0;
-    if (mSource->getFormat()->findData(kKeyESDS, &type, &data, &size)) {
+    if (meta->findData(kKeyESDS, &type, &data, &size)) {
         ESDS esds((const uint8_t *)data, size);
         CHECK_EQ(esds.InitCheck(), OK);
 
