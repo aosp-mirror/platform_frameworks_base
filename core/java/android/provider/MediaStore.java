@@ -182,7 +182,6 @@ public final class MediaStore {
       * The string that is used when a media attribute is not known. For example,
       * if an audio file does not have any meta data, the artist and album columns
       * will be set to this value.
-      * @hide
       */
     public static final String UNKNOWN_STRING = "<unknown>";
 
@@ -852,7 +851,6 @@ public final class MediaStore {
              * The position, in ms, playback was at when playback for this file
              * was last stopped.
              * <P>Type: INTEGER (long)</P>
-             * @hide
              */
             public static final String BOOKMARK = "bookmark";
 
@@ -931,7 +929,6 @@ public final class MediaStore {
             /**
              * Non-zero if the audio file is a podcast
              * <P>Type: INTEGER (boolean)</P>
-             * @hide
              */
             public static final String IS_PODCAST = "is_podcast";
 
@@ -1266,7 +1263,6 @@ public final class MediaStore {
                  * @param from The position of the item to move
                  * @param to The position to move the item to
                  * @return true on success
-                 * @hide
                  */
                 public static final boolean moveItem(ContentResolver res,
                         long playlistId, int from, int to) {
