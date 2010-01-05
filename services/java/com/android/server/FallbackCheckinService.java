@@ -21,11 +21,11 @@ import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.ICheckinService;
 import android.os.IParentalControlCallback;
+import android.os.RecoverySystem;
 import android.util.Log;
 
 import java.io.IOException;
 
-import com.android.internal.os.RecoverySystem;
 import com.google.android.net.ParentalControlState;
 
 /**
@@ -50,7 +50,7 @@ public final class FallbackCheckinService extends ICheckinService.Stub {
 
         // Save the android ID so the new system can get it erased.
         try {
-            RecoverySystem.rebootAndWipe();
+            RecoverySystem.rebootWipeUserData(mContext);
         } catch (IOException e) {
             Log.e(TAG, "Reboot for masterClear() failed", e);
         }
@@ -67,7 +67,7 @@ public final class FallbackCheckinService extends ICheckinService.Stub {
 
         // Save the android ID so the new system can get it erased.
         try {
-            RecoverySystem.rebootAndToggleEFS(efsEnabled);
+            RecoverySystem.rebootToggleEFS(mContext, efsEnabled);
         } catch (IOException e) {
             Log.e(TAG, "Reboot for toggle EFS failed", e);
         }

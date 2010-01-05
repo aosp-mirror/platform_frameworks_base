@@ -23,11 +23,10 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.DropBoxManager;
 import android.os.FileUtils;
+import android.os.RecoverySystem;
 import android.os.SystemProperties;
 import android.provider.Settings;
 import android.util.Log;
-
-import com.android.internal.os.RecoverySystem;
 
 import java.io.File;
 import java.io.IOException;
