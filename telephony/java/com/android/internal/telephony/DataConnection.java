@@ -389,31 +389,39 @@ public abstract class DataConnection extends HierarchicalStateMachine {
             }
             result = SetupResult.ERR_Stale;
         } else {
-            cid = Integer.parseInt(response[0]);
-            if (response.length > 2) {
+//            log("onSetupConnectionCompleted received " + response.length + " response strings:");
+//            for (int i = 0; i < response.length; i++) {
+//                log("  response[" + i + "]='" + response[i] + "'");
+//            }
+            if (response.length >= 2) {
+                cid = Integer.parseInt(response[0]);
                 interfaceName = response[1];
-                ipAddress = response[2];
-                String prefix = "net." + interfaceName + ".";
-                gatewayAddress = SystemProperties.get(prefix + "gw");
-                dnsServers[0] = SystemProperties.get(prefix + "dns1");
-                dnsServers[1] = SystemProperties.get(prefix + "dns2");
-                if (DBG) {
-                    log("interface=" + interfaceName + " ipAddress=" + ipAddress
-                        + " gateway=" + gatewayAddress + " DNS1=" + dnsServers[0]
-                        + " DNS2=" + dnsServers[1]);
-                }
+                if (response.length > 2) {
+                    ipAddress = response[2];
+                    String prefix = "net." + interfaceName + ".";
+                    gatewayAddress = SystemProperties.get(prefix + "gw");
+                    dnsServers[0] = SystemProperties.get(prefix + "dns1");
+                    dnsServers[1] = SystemProperties.get(prefix + "dns2");
+                    if (DBG) {
+                        log("interface=" + interfaceName + " ipAddress=" + ipAddress
+                            + " gateway=" + gatewayAddress + " DNS1=" + dnsServers[0]
+                            + " DNS2=" + dnsServers[1]);
+                    }
 
-                if (isDnsOk(dnsServers)) {
-                    result = SetupResult.SUCCESS;
+                    if (isDnsOk(dnsServers)) {
+                        result = SetupResult.SUCCESS;
+                    } else {
+                        result = SetupResult.ERR_BadDns;
+                    }
                 } else {
-                    result = SetupResult.ERR_BadDns;
+                    result = SetupResult.SUCCESS;
                 }
             } else {
                 result = SetupResult.ERR_Other;
             }
         }
 
-        if (DBG) log("DataConnection setup result=" + result + " on cid = " + cid);
+        if (DBG) log("DataConnection setup result='" + result + "' on cid=" + cid);
         return result;
     }
 
