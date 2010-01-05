@@ -15,8 +15,11 @@
  */
 package com.android.unit_tests.vcard;
 
+import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.EntityIterator;
+import android.net.Uri;
 import android.pim.vcard.VCardComposer;
 import android.pim.vcard.VCardConfig;
 import android.pim.vcard.VCardEntryConstructor;
@@ -32,6 +35,7 @@ import android.test.mock.MockContext;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 
 /* package */ class CustomMockContext extends MockContext {
@@ -259,8 +263,24 @@ import java.util.Arrays;
         }
     }
 
+    public static EntityIterator mockGetEntityIteratorMethod(
+            final ContentResolver resolver,
+            final Uri uri, final String selection,
+            final String[] selectionArgs, final String sortOrder) {
+        final ContentProvider provider =
+            resolver.acquireContentProviderClient(uri).getLocalContentProvider();
+        return ((ExportTestProvider)provider).queryEntities(
+                uri, selection, selectionArgs, sortOrder);
+    }
+
+    private Method getMockGetEntityIteratorMethod()
+            throws SecurityException, NoSuchMethodException {
+        return this.getClass().getMethod("mockGetEntityIteratorMethod",
+                ContentResolver.class, Uri.class, String.class, String[].class, String.class);
+    }
+
     private void verifyForExportTest() {
-        VCardComposer composer =
+       final VCardComposer composer =
             new VCardComposer(new CustomMockContext(mExportTestResolver), mVCardType);
         composer.addHandler(mLineVerifier);
         composer.addHandler(mVCardVerifierInternal);
@@ -270,7 +290,14 @@ import java.util.Arrays;
         mTestCase.assertFalse(composer.isAfterLast());
         try {
             while (!composer.isAfterLast()) {
-                mTestCase.assertTrue(composer.createOneEntry());
+                try {
+                    final Method mockGetEntityIteratorMethod = getMockGetEntityIteratorMethod();
+                    mTestCase.assertTrue(
+                            composer.createOneEntry(getMockGetEntityIteratorMethod()));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    mTestCase.fail();
+                }
             }
         } finally {
             composer.terminate();
