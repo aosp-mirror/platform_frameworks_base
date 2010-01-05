@@ -16,6 +16,8 @@
 
 #include "include/stagefright_string.h"
 
+#include <media/stagefright/MediaDebug.h>
+
 namespace android {
 
 // static
@@ -28,8 +30,15 @@ string::string(const char *s, size_t length)
     : mString(s, length) {
 }
 
-string::string(const string &from, size_type start, size_type length)
-    : mString(from.c_str() + start, length) {
+string::string(const string &from, size_type start, size_type length) {
+    CHECK(start <= from.size());
+    if (length == npos) {
+        length = from.size() - start;
+    } else {
+        CHECK(start + length <= from.size());
+    }
+
+    mString.setTo(from.c_str() + start, length);
 }
 
 string::string(const char *s)
