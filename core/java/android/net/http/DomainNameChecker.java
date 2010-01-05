@@ -231,7 +231,7 @@ public class DomainNameChecker {
                     rval = thisDomainTokens[i].equals(thatDomainTokens[i]);
                     if (!rval) {
                         // (c) OR we have a special *-match:
-                        // Z.Y.X matches *.Y.X but does not match *.X
+                        // *.Y.X matches Z.Y.X but *.X doesn't match Z.Y.X
                         rval = (i == 0 && thisDomainTokensNum == thatDomainTokensNum);
                         if (rval) {
                             rval = thatDomainTokens[0].equals("*");
@@ -242,10 +242,13 @@ public class DomainNameChecker {
                                     thisDomainTokens[0], thatDomainTokens[0]);
                             }
                         }
-
                         break;
                     }
                 }
+            } else {
+              // (e) OR thatHost has a '*.'-prefix of thisHost:
+              // *.Y.X matches Y.X
+              rval = thatDomain.equals("*." + thisDomain);
             }
         }
 
