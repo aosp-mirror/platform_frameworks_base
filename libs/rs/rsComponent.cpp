@@ -264,6 +264,27 @@ String8 Component::getCType() const
     return s;
 }
 
+String8 Component::getGLSLType() const
+{
+    if (mType == RS_TYPE_SIGNED_32) {
+        switch(mVectorSize) {
+        case 1: return String8("int");
+        case 2: return String8("ivec2");
+        case 3: return String8("ivec3");
+        case 4: return String8("ivec4");
+        }
+    }
+    if (mType == RS_TYPE_FLOAT_32) {
+        switch(mVectorSize) {
+        case 1: return String8("float");
+        case 2: return String8("vec2");
+        case 3: return String8("vec3");
+        case 4: return String8("vec4");
+        }
+    }
+    return String8();
+}
+
 static const char * gTypeStrings[] = {
     "NONE",
     "F16",

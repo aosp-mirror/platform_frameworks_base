@@ -43,17 +43,6 @@ void Element::clear()
     mFields = NULL;
     mFieldCount = 0;
 }
-/*
-void Element::setComponent(uint32_t idx, Component *c)
-{
-    rsAssert(!mComponents[idx].get());
-    rsAssert(idx < mComponentCount);
-    mComponents[idx].set(c);
-
-// Fixme: This should probably not be here
-    c->incUserRef();
-}
-*/
 
 size_t Element::getSizeBits() const
 {
@@ -152,6 +141,24 @@ String8 Element::getCType(uint32_t indent) const
     return s;
 }
 
+String8 Element::getGLSLType(uint32_t indent) const
+{
+    String8 s;
+    for (uint32_t ct=0; ct < indent; ct++) {
+        s.append(" ");
+    }
+
+    if (!mFieldCount) {
+        // Basic component.
+        s.append(mComponent.getGLSLType());
+    } else {
+        rsAssert(0);
+        //s.append("struct ");
+        //s.append(getCStructBody(indent));
+    }
+
+    return s;
+}
 
 
 
@@ -193,58 +200,6 @@ RsElement rsi_ElementCreate2(Context *rsc,
     e->incUserRef();
     return e;
 }
-
-/*
-void rsi_ElementAdd(Context *rsc, RsDataKind dk, RsDataType dt, bool isNormalized, size_t bits, const char *name)
-{
-    ElementState * sec = &rsc->mStateElement;
-
-    rsAssert(bits > 0);
-
-    Element *c = Element::create(rsc, dk, dt, isNormalized, bits);
-    sec->mBuildList.add(c);
-    if (name)
-        sec->mNames.add(String8(name));
-    else
-        sec->mNames.add(String8(""));
-}
-
-RsElement rsi_ElementCreate(Context *rsc)
-{
-    ElementState * sec = &rsc->mStateElement;
-
-    size_t count = sec->mBuildList.size();
-    rsAssert(count > 0);
-
-    if (count == 1) {
-        Element *se = sec->mBuildList[0];
-        se->incUserRef();
-        sec->mBuildList.clear();
-        sec->mNames.clear();
-        return se;
-    }
-
-    Element ** tmpElements = (Element **)calloc(count, sizeof(Element *));
-    const char ** tmpNames = (const char **)calloc(count, sizeof(char *));
-    size_t * tmpLengths = (size_t *)calloc(count, sizeof(size_t));
-
-
-    for (size_t ct = 0; ct < count; ct++) {
-        tmpElements[ct] = sec->mBuildList[ct];
-        tmpNames[ct] = sec->mNames[ct].string();
-        tmpLengths[ct] = sec->mNames[ct].length();
-    }
-    Element *se = Element::create(rsc, tmpElements, tmpNames, tmpLengths, count);
-
-    sec->mBuildList.clear();
-    sec->mNames.clear();
-    se->incUserRef();
-    free(tmpElements);
-    free(tmpNames);
-    free(tmpLengths);
-    return se;
-}
-*/
 
 
 }

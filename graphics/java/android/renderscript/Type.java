@@ -34,6 +34,9 @@ public class Type extends BaseObj {
     private int mNativeCache;
     Class mJavaClass;
 
+    public Element getElement() {
+        return mElement;
+    }
 
     public int getX() {
         return mDimX;

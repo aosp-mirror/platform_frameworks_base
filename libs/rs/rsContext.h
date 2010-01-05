@@ -105,7 +105,6 @@ public:
     void removeName(ObjectBase *obj);
     ObjectBase * lookupName(const char *name) const;
     void appendNameDefines(String8 *str) const;
-    void appendVarDefines(String8 *str) const;
 
     uint32_t getMessageToClient(void *data, size_t *receiveLen, size_t bufferLen, bool wait);
     bool sendMessageToClient(void *data, uint32_t cmdID, size_t len, bool waitForSpace);
@@ -125,14 +124,6 @@ public:
     }
     ProgramRaster * getDefaultProgramRaster() const {
         return mStateRaster.mDefault.get();
-    }
-
-    void addInt32Define(const char* name, int32_t value) {
-        mInt32Defines.add(String8(name), value);
-    }
-
-    void addFloatDefine(const char* name, float value) {
-        mFloatDefines.add(String8(name), value);
     }
 
     uint32_t getWidth() const {return mEGL.mWidth;}
@@ -249,8 +240,6 @@ private:
     Surface *mWndSurface;
 
     Vector<ObjectBase *> mNames;
-    KeyedVector<String8,int> mInt32Defines;
-    KeyedVector<String8,float> mFloatDefines;
 
     uint64_t mTimers[_RS_TIMER_TOTAL];
     Timers mTimerActive;

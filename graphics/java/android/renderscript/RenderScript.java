@@ -76,8 +76,6 @@ public class RenderScript {
     native void nContextBindProgramFragment(int pf);
     native void nContextBindProgramVertex(int pf);
     native void nContextBindProgramRaster(int pr);
-    native void nContextAddDefineI32(String name, int value);
-    native void nContextAddDefineF(String name, float value);
     native void nContextPause();
     native void nContextResume();
     native int nContextGetMessage(int[] data, boolean wait);

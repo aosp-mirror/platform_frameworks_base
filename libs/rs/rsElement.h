@@ -32,12 +32,8 @@ class Element : public ObjectBase
 public:
     ~Element();
 
-
-    //void setComponent(uint32_t idx, Component *c);
-
     uint32_t getGLType() const;
     uint32_t getGLFormat() const;
-
 
     size_t getSizeBits() const;
     size_t getSizeBytes() const {
@@ -55,13 +51,12 @@ public:
 
     const Component & getComponent() const {return mComponent;}
     RsDataType getType() const {return mComponent.getType();}
-    //bool getIsNormalized() const {return mIsNormalized;}
     RsDataKind getKind() const {return mComponent.getKind();}
     uint32_t getBits() const {return mBits;}
-    //uint32_t getGLType() const;
 
     String8 getCType(uint32_t indent=0) const;
     String8 getCStructBody(uint32_t indent=0) const;
+    String8 getGLSLType(uint32_t indent=0) const;
 
     void dumpLOGV(const char *prefix) const;
 
@@ -94,8 +89,6 @@ public:
     ElementState();
     ~ElementState();
 
-    Vector<Element *> mBuildList;
-    Vector<String8> mNames;
 };
 
 
