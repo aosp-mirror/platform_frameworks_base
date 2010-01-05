@@ -1636,6 +1636,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             if (mDataChanged) return;
 
             if (mAdapter != null && mItemCount > 0 &&
+                    mClickMotionPosition != INVALID_POSITION &&
                     mClickMotionPosition < mAdapter.getCount() && sameWindow()) {
                 performItemClick(mChild, mClickMotionPosition, getAdapter().getItemId(
                         mClickMotionPosition));
