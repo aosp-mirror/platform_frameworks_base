@@ -26,11 +26,13 @@
 #include <media/stagefright/DataSource.h>
 #include <media/stagefright/FileSource.h>
 #include <media/stagefright/MediaBuffer.h>
+#include <media/stagefright/MediaDefs.h>
 #include <media/stagefright/MediaExtractor.h>
 #include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/MediaSource.h>
 #include <media/stagefright/MetaData.h>
 #include <media/stagefright/OMXCodec.h>
+
 namespace android {
 
 struct AwesomeEvent : public TimedEventQueue::Event {
@@ -516,10 +518,19 @@ status_t AwesomePlayer::setAudioSource(const sp<MediaSource> &source) {
         return UNKNOWN_ERROR;
     }
 
-    mAudioSource = OMXCodec::Create(
-            mClient.interface(), source->getFormat(),
-            false, // createEncoder
-            source);
+    sp<MetaData> meta = source->getFormat();
+
+    const char *mime;
+    CHECK(meta->findCString(kKeyMIMEType, &mime));
+
+    if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_RAW)) {
+        mAudioSource = source;
+    } else {
+        mAudioSource = OMXCodec::Create(
+                mClient.interface(), source->getFormat(),
+                false, // createEncoder
+                source);
+    }
 
     if (mAudioSource != NULL) {
         int64_t durationUs;
