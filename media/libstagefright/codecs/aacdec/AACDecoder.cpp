@@ -70,7 +70,8 @@ status_t AACDecoder::start(MetaData *params) {
     uint32_t type;
     const void *data;
     size_t size;
-    if (mSource->getFormat()->findData(kKeyESDS, &type, &data, &size)) {
+    sp<MetaData> meta = mSource->getFormat();
+    if (meta->findData(kKeyESDS, &type, &data, &size)) {
         ESDS esds((const char *)data, size);
         CHECK_EQ(esds.InitCheck(), OK);
 
