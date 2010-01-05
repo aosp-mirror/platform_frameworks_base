@@ -137,7 +137,6 @@ void ScriptCState::runCompiler(Context *rsc, ScriptC *s)
 
     rsc->appendNameDefines(&tmp);
     appendDecls(&tmp);
-    rsc->appendVarDefines(&tmp);
     appendVarDefines(rsc, &tmp);
     appendTypes(rsc, &tmp);
     tmp.append("#line 1\n");

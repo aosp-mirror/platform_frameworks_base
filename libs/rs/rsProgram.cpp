@@ -144,6 +144,42 @@ void Program::bindSampler(uint32_t slot, Sampler *s)
     mDirty = true;
 }
 
+String8 Program::getGLSLInputString() const
+{
+    String8 s;
+    for (uint32_t ct=0; ct < mInputCount; ct++) {
+        const Element *e = mInputElements[ct].get();
+        for (uint32_t field=0; field < e->getFieldCount(); field++) {
+            const Element *f = e->getField(field);
+
+            // Cannot be complex
+            rsAssert(!f->getFieldCount());
+            switch(f->getComponent().getVectorSize()) {
+            case 1: s.append("attribute float ATTRIB_"); break;
+            case 2: s.append("attribute vec2 ATTRIB_"); break;
+            case 3: s.append("attribute vec3 ATTRIB_"); break;
+            case 4: s.append("attribute vec4 ATTRIB_"); break;
+            default:
+                rsAssert(0);
+            }
+
+            s.append(e->getFieldName(field));
+            s.append(";\n");
+        }
+    }
+    return s;
+}
+
+String8 Program::getGLSLOutputString() const
+{
+    return String8();
+}
+
+String8 Program::getGLSLConstantString() const
+{
+    return String8();
+}
+
 
 void Program::createShader()
 {

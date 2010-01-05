@@ -53,6 +53,10 @@ public:
     const String8 & getAttribName(uint32_t i) const {return mAttribNames[i];}
     const String8 & getUniformName(uint32_t i) const {return mUniformNames[i];}
 
+    String8 getGLSLInputString() const;
+    String8 getGLSLOutputString() const;
+    String8 getGLSLConstantString() const;
+
 protected:
     // Components not listed in "in" will be passed though
     // unless overwritten by components in out.

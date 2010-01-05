@@ -116,12 +116,6 @@ void ProgramVertex::createShader()
 {
     mShader.setTo("");
 
-    for (uint32_t ct=0; ct < mAttribCount; ct++) {
-        mShader.append("attribute vec4 ");
-        mShader.append(mAttribNames[ct]);
-        mShader.append(";\n");
-    }
-
     for (uint32_t ct=0; ct < mUniformCount; ct++) {
         mShader.append("uniform mat4 ");
         mShader.append(mUniformNames[ct]);
@@ -132,8 +126,34 @@ void ProgramVertex::createShader()
     mShader.append("varying vec4 varTex0;\n");
 
     if (mUserShader.length() > 1) {
+        for (uint32_t ct=0; ct < mInputCount; ct++) {
+            const Element *e = mInputElements[ct].get();
+            for (uint32_t field=0; field < e->getFieldCount(); field++) {
+                const Element *f = e->getField(field);
+
+                // Cannot be complex
+                rsAssert(!f->getFieldCount());
+                switch(f->getComponent().getVectorSize()) {
+                case 1: mShader.append("attribute float ATTRIB_"); break;
+                case 2: mShader.append("attribute vec2 ATTRIB_"); break;
+                case 3: mShader.append("attribute vec3 ATTRIB_"); break;
+                case 4: mShader.append("attribute vec4 ATTRIB_"); break;
+                default:
+                    rsAssert(0);
+                }
+
+                mShader.append(e->getFieldName(field));
+                mShader.append(";\n");
+            }
+        }
         mShader.append(mUserShader);
     } else {
+        for (uint32_t ct=0; ct < mAttribCount; ct++) {
+            mShader.append("attribute vec4 ");
+            mShader.append(mAttribNames[ct]);
+            mShader.append(";\n");
+        }
+
         mShader.append("void main() {\n");
         mShader.append("  gl_Position = uni_MVP * attrib_Position;\n");
         mShader.append("  gl_PointSize = attrib_PointSize.x;\n");

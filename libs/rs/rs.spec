@@ -20,16 +20,6 @@ ContextBindProgramRaster {
 	param RsProgramRaster pgm
 	}
 
-ContextSetDefineF {
-    param const char* name
-    param float value
-    }
-
-ContextSetDefineI32 {
-    param const char* name
-    param int32_t value
-    }
-
 ContextPause {
 	}
 
