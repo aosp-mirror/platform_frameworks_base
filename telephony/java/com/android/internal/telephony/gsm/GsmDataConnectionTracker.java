@@ -710,12 +710,10 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                 Log.i(LOG_TAG, "PDP connection has dropped. Reconnecting");
 
                 // Add an event log when the network drops PDP
-                int cid = -1;
                 GsmCellLocation loc = ((GsmCellLocation)phone.getCellLocation());
-                if (loc != null) cid = loc.getCid();
-                EventLog.List val = new EventLog.List(cid,
+                EventLog.writeEvent(TelephonyEventLog.EVENT_LOG_PDP_NETWORK_DROP,
+                        loc != null ? loc.getCid() : -1,
                         TelephonyManager.getDefault().getNetworkType());
-                EventLog.writeEvent(TelephonyEventLog.EVENT_LOG_PDP_NETWORK_DROP, val);
 
                 cleanUpConnection(true, null);
                 return;
@@ -733,12 +731,10 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                                     + " Reconnecting");
 
                     // Log the network drop on the event log.
-                    int cid = -1;
                     GsmCellLocation loc = ((GsmCellLocation)phone.getCellLocation());
-                    if (loc != null) cid = loc.getCid();
-                    EventLog.List val = new EventLog.List(cid,
+                    EventLog.writeEvent(TelephonyEventLog.EVENT_LOG_PDP_NETWORK_DROP,
+                            loc != null ? loc.getCid() : -1,
                             TelephonyManager.getDefault().getNetworkType());
-                    EventLog.writeEvent(TelephonyEventLog.EVENT_LOG_PDP_NETWORK_DROP, val);
 
                     cleanUpConnection(true, null);
                 }
@@ -1148,14 +1144,10 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             if(DBG) log("PDP setup failed " + cause);
                     // Log this failure to the Event Logs.
             if (cause.isEventLoggable()) {
-                int cid = -1;
                 GsmCellLocation loc = ((GsmCellLocation)phone.getCellLocation());
-                if (loc != null) cid = loc.getCid();
-
-                EventLog.List val = new EventLog.List(
-                        cause.ordinal(), cid,
+                EventLog.writeEvent(TelephonyEventLog.EVENT_LOG_RADIO_PDP_SETUP_FAIL,
+                        cause.ordinal(), loc != null ? loc.getCid() : -1,
                         TelephonyManager.getDefault().getNetworkType());
-                EventLog.writeEvent(TelephonyEventLog.EVENT_LOG_RADIO_PDP_SETUP_FAIL, val);
             }
 
             // No try for permanent failure

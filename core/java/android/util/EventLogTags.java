@@ -25,16 +25,14 @@ import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/** Parsed representation of /etc/event-log-tags. */
+/**
+ * to-bo-deprecated: This class is no longer functional.
+ * Use {@link android.util.EventLog} instead.
+ */
 public class EventLogTags {
-    private final static String TAG = "EventLogTags";
-
-    private final static String TAGS_FILE = "/etc/event-log-tags";
-
     public static class Description {
         public final int mTag;
         public final String mName;
-        // TODO: Parse parameter descriptions when anyone has a use for them.
 
         Description(int tag, String name) {
             mTag = tag;
@@ -42,49 +40,11 @@ public class EventLogTags {
         }
     }
 
-    private final static Pattern COMMENT_PATTERN = Pattern.compile(
-            "^\\s*(#.*)?$");
+    public EventLogTags() throws IOException {}
 
-    private final static Pattern TAG_PATTERN = Pattern.compile(
-            "^\\s*(\\d+)\\s+(\\w+)\\s*(\\(.*\\))?\\s*$");
+    public EventLogTags(BufferedReader input) throws IOException {}
 
-    private final HashMap<String, Description> mNameMap =
-            new HashMap<String, Description>();
+    public Description get(String name) { return null; }
 
-    private final HashMap<Integer, Description> mTagMap =
-            new HashMap<Integer, Description>();
-
-    public EventLogTags() throws IOException {
-        this(new BufferedReader(new FileReader(TAGS_FILE), 256));
-    }
-
-    public EventLogTags(BufferedReader input) throws IOException {
-        String line;
-        while ((line = input.readLine()) != null) {
-            Matcher m = COMMENT_PATTERN.matcher(line);
-            if (m.matches()) continue;
-
-            m = TAG_PATTERN.matcher(line);
-            if (m.matches()) {
-                try {
-                    int tag = Integer.parseInt(m.group(1));
-                    Description d = new Description(tag, m.group(2));
-                    mNameMap.put(d.mName, d);
-                    mTagMap.put(d.mTag, d);
-                } catch (NumberFormatException e) {
-                    Log.e(TAG, "Error in event log tags entry: " + line, e);
-                }
-            } else {
-                Log.e(TAG, "Can't parse event log tags entry: " + line);
-            }
-        }
-    }
-
-    public Description get(String name) {
-        return mNameMap.get(name);
-    }
-
-    public Description get(int tag) {
-        return mTagMap.get(tag);
-    }
+    public Description get(int tag) { return null; }
 }

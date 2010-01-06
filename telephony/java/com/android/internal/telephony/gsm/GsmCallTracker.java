@@ -868,13 +868,10 @@ public final class GsmCallTracker extends CallTracker {
                     causeCode == CallFailCause.QOS_NOT_AVAIL ||
                     causeCode == CallFailCause.BEARER_NOT_AVAIL ||
                     causeCode == CallFailCause.ERROR_UNSPECIFIED) {
-                    int cid = -1;
                     GsmCellLocation loc = ((GsmCellLocation)phone.getCellLocation());
-                    if (loc != null) cid = loc.getCid();
-
-                    EventLog.List val = new EventLog.List(causeCode, cid,
-                        TelephonyManager.getDefault().getNetworkType());
-                    EventLog.writeEvent(TelephonyEventLog.EVENT_LOG_CALL_DROP, val);
+                    EventLog.writeEvent(TelephonyEventLog.EVENT_LOG_CALL_DROP,
+                            causeCode, loc != null ? loc.getCid() : -1,
+                            TelephonyManager.getDefault().getNetworkType());
                 }
 
                 for (int i = 0, s =  droppedDuringPoll.size()

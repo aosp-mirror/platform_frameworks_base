@@ -822,11 +822,9 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
                 mRetryMgr.resetRetryCount();
 
                 CdmaCellLocation loc = (CdmaCellLocation)(phone.getCellLocation());
-                int bsid = (loc != null) ? loc.getBaseStationId() : -1;
-
-                EventLog.List val = new EventLog.List(bsid,
+                EventLog.writeEvent(TelephonyEventLog.EVENT_LOG_CDMA_DATA_SETUP_FAILED,
+                        loc != null ? loc.getBaseStationId() : -1,
                         TelephonyManager.getDefault().getNetworkType());
-                EventLog.writeEvent(TelephonyEventLog.EVENT_LOG_CDMA_DATA_SETUP_FAILED, val);
             }
             trySetupData(Phone.REASON_CDMA_DATA_DETACHED);
         }
@@ -865,10 +863,9 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
 
     private void writeEventLogCdmaDataDrop() {
         CdmaCellLocation loc = (CdmaCellLocation)(phone.getCellLocation());
-        int bsid = (loc != null) ? loc.getBaseStationId() : -1;
-        EventLog.List val = new EventLog.List(bsid,
+        EventLog.writeEvent(TelephonyEventLog.EVENT_LOG_CDMA_DATA_DROP,
+                loc != null ? loc.getBaseStationId() : -1,
                 TelephonyManager.getDefault().getNetworkType());
-        EventLog.writeEvent(TelephonyEventLog.EVENT_LOG_CDMA_DATA_DROP, val);
     }
 
     protected void onDataStateChanged(AsyncResult ar) {

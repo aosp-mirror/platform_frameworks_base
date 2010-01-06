@@ -482,12 +482,9 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
                     // Can't register data sevice while voice service is ok
                     // i.e. CREG is ok while CGREG is not
                     // possible a network or baseband side error
-                    int cid = -1;
                     GsmCellLocation loc = ((GsmCellLocation)phone.getCellLocation());
-                    if (loc != null) cid = loc.getCid();
-
-                    EventLog.List val = new EventLog.List(ss.getOperatorNumeric(), cid);
-                    EventLog.writeEvent(TelephonyEventLog.EVENT_LOG_CGREG_FAIL, val);
+                    EventLog.writeEvent(TelephonyEventLog.EVENT_LOG_CGREG_FAIL,
+                            ss.getOperatorNumeric(), loc != null ? loc.getCid() : -1);
                     mReportedGprsNoReg = true;
                 }
                 mStartedGprsRegCheck = false;
@@ -518,11 +515,8 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
         } else if (!mDesiredPowerState && cm.getRadioState().isOn()) {
             DataConnectionTracker dcTracker = phone.mDataConnection;
             if (! dcTracker.isDataConnectionAsDesired()) {
-
-                EventLog.List val = new EventLog.List(
-                        dcTracker.getStateInString(),
-                        (dcTracker.getAnyDataEnabled() ? 1 : 0) );
-                EventLog.writeEvent(TelephonyEventLog.EVENT_LOG_DATA_STATE_RADIO_OFF, val);
+                EventLog.writeEvent(TelephonyEventLog.EVENT_LOG_DATA_STATE_RADIO_OFF,
+                        dcTracker.getStateInString(), dcTracker.getAnyDataEnabled() ? 1 : 0);
             }
             Message msg = dcTracker.obtainMessage(DataConnectionTracker.EVENT_CLEAN_UP_CONNECTION);
             msg.arg1 = 1; // tearDown is true
