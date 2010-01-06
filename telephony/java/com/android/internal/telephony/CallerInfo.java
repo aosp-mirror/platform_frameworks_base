@@ -22,6 +22,7 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.provider.ContactsContract.PhoneLookup;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
+import static android.provider.ContactsContract.RawContacts;
 import android.text.TextUtils;
 import android.telephony.TelephonyManager;
 import android.telephony.PhoneNumberUtils;
@@ -118,7 +119,6 @@ public class CallerInfo {
      * number. The returned CallerInfo is null if no number is supplied.
      */
     public static CallerInfo getCallerInfo(Context context, Uri contactRef, Cursor cursor) {
-
         CallerInfo info = new CallerInfo();
         info.photoResource = 0;
         info.phoneLabel = null;
@@ -132,6 +132,9 @@ public class CallerInfo {
 
         if (cursor != null) {
             if (cursor.moveToFirst()) {
+                // TODO: photo_id is always available but not taken
+                // care of here. Maybe we should store it in the
+                // CallerInfo object as well.
 
                 int columnIndex;
 
@@ -160,10 +163,34 @@ public class CallerInfo {
                     }
                 }
 
-                // Look for the person ID
-                columnIndex = cursor.getColumnIndex(PhoneLookup._ID);
+                // Look for the person ID.
+
+                // TODO: This is pretty ugly now, see bug 2269240 for
+                // more details. With tel: URI the contact id is in
+                // col "_id" while when we use a
+                // content://contacts/data/phones URI, the contact id
+                // is col "contact_id". As a work around we use the
+                // type of the contact url to figure out which column
+                // we should look at to get the contact_id.
+
+                final String mimeType = context.getContentResolver().getType(contactRef);
+
+                columnIndex = -1;
+                if (Phone.CONTENT_ITEM_TYPE.equals(mimeType)) {
+                    // content://com.android.contacts/data/phones URL
+                    columnIndex = cursor.getColumnIndex(RawContacts.CONTACT_ID);
+                } else {
+                    // content://com.android.contacts/phone_lookup URL
+                    // TODO: mime type is null here so we cannot test
+                    // if we have the right url type. phone_lookup URL
+                    // should resolve to a mime type.
+                    columnIndex = cursor.getColumnIndex(PhoneLookup._ID);
+                }
+
                 if (columnIndex != -1) {
                     info.person_id = cursor.getLong(columnIndex);
+                } else {
+                    Log.e(TAG, "Column missing for " + contactRef);
                 }
 
                 // look for the custom ringtone, create from the string stored
