@@ -26,8 +26,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * to-bo-deprecated: This class is no longer functional.
- * Use {@link android.util.EventLog} instead.
+ * to-be-deprecated: This class is no longer functional.
+ * Use {to-be-link android.util.EventLog} instead.
  */
 public class EventLogTags {
     public static class Description {
