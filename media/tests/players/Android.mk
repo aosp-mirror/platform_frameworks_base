@@ -23,7 +23,7 @@ LOCAL_SHARED_LIBRARIES:= \
     libutils
 
 LOCAL_MODULE:= invoke_mock_media_player
-LOCAL_MODULE_TAGS := test eng
+LOCAL_MODULE_TAGS := tests eng
 LOCAL_PRELINK_MODULE:= false
 
 include $(BUILD_SHARED_LIBRARY)
