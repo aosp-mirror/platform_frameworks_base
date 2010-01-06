@@ -45,10 +45,7 @@ import java.util.List;
 public final class Geocoder {
     private static final String TAG = "Geocoder";
 
-    private String mLanguage;
-    private String mCountry;
-    private String mVariant;
-    private String mAppName;
+    private GeocoderParams mParams;
     private ILocationManager mService;
 
     /**
@@ -64,11 +61,7 @@ public final class Geocoder {
         if (locale == null) {
             throw new NullPointerException("locale == null");
         }
-        mLanguage = locale.getLanguage();
-        mCountry = locale.getCountry();
-        mVariant = locale.getVariant();
-        mAppName = context.getPackageName();
-
+        mParams = new GeocoderParams(context, locale);
         IBinder b = ServiceManager.getService(Context.LOCATION_SERVICE);
         mService = ILocationManager.Stub.asInterface(b);
     }
@@ -119,7 +112,7 @@ public final class Geocoder {
         try {
             List<Address> results = new ArrayList<Address>();
             String ex =  mService.getFromLocation(latitude, longitude, maxResults,
-                mLanguage, mCountry, mVariant, mAppName, results);
+                mParams, results);
             if (ex != null) {
                 throw new IOException(ex);
             } else {
@@ -161,7 +154,7 @@ public final class Geocoder {
         try {
             List<Address> results = new ArrayList<Address>();
             String ex = mService.getFromLocationName(locationName,
-                0, 0, 0, 0, maxResults, mLanguage, mCountry, mVariant, mAppName, results);
+                0, 0, 0, 0, maxResults, mParams, results);
             if (ex != null) {
                 throw new IOException(ex);
             } else {
@@ -234,7 +227,7 @@ public final class Geocoder {
             ArrayList<Address> result = new ArrayList<Address>();
             String ex =  mService.getFromLocationName(locationName,
                 lowerLeftLatitude, lowerLeftLongitude, upperRightLatitude, upperRightLongitude,
-                maxResults, mLanguage, mCountry, mVariant, mAppName, result);
+                maxResults, mParams, result);
             if (ex != null) {
                 throw new IOException(ex);
             } else {

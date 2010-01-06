@@ -17,6 +17,7 @@
 package android.location;
 
 import android.location.Address;
+import android.location.GeocoderParams;
 
 /**
  * An interface for location providers implementing the Geocoder services.
@@ -26,10 +27,10 @@ import android.location.Address;
 interface IGeocodeProvider {
 
     String getFromLocation(double latitude, double longitude, int maxResults,
-        String language, String country, String variant, String appName, out List<Address> addrs);
+        in GeocoderParams params, out List<Address> addrs);
 
     String getFromLocationName(String locationName,
         double lowerLeftLatitude, double lowerLeftLongitude,
         double upperRightLatitude, double upperRightLongitude, int maxResults,
-        String language, String country, String variant, String appName, out List<Address> addrs);
+        in GeocoderParams params, out List<Address> addrs);
 }

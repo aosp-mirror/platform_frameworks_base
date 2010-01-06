@@ -18,6 +18,7 @@ package android.location;
 
 import android.app.PendingIntent;
 import android.location.Address;
+import android.location.GeocoderParams;
 import android.location.IGeocodeProvider;
 import android.location.IGpsStatusListener;
 import android.location.ILocationListener;
@@ -63,11 +64,11 @@ interface ILocationManager
     void reportLocation(in Location location);
 
     String getFromLocation(double latitude, double longitude, int maxResults,
-        String language, String country, String variant, String appName, out List<Address> addrs);
+        in GeocoderParams params, out List<Address> addrs);
     String getFromLocationName(String locationName,
         double lowerLeftLatitude, double lowerLeftLongitude,
         double upperRightLatitude, double upperRightLongitude, int maxResults,
-        String language, String country, String variant, String appName, out List<Address> addrs);
+        in GeocoderParams params, out List<Address> addrs);
 
     void addTestProvider(String name, boolean requiresNetwork, boolean requiresSatellite,
         boolean requiresCell, boolean hasMonetaryCost, boolean supportsAltitude,
