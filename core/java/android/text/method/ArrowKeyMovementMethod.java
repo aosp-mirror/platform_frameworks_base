@@ -247,10 +247,11 @@ implements MovementMethod
                               KeyEvent.META_SHIFT_ON) == 1) ||
                             (MetaKeyKeyListener.getMetaState(buffer,
                               MetaKeyKeyListener.META_SELECTING) != 0);
+              int x = (int) event.getX();
+              int y = (int) event.getY();
+              int offset = getOffset(x, y, widget);
+
               if (cap) {
-                  int x = (int) event.getX();
-                  int y = (int) event.getY();
-                  int offset = getOffset(x, y, widget);
 
                   buffer.setSpan(LAST_TAP_DOWN, offset, offset,
                                  Spannable.SPAN_POINT_POINT);
@@ -260,6 +261,30 @@ implements MovementMethod
                   // without this, users would get booted out of select
                   // mode once the view detected it needed to scroll.
                   widget.getParent().requestDisallowInterceptTouchEvent(true);
+              } else {
+                  OnePointFiveTapState[] tap = buffer.getSpans(0, buffer.length(),
+                      OnePointFiveTapState.class);
+
+                  if (tap.length > 0) {
+                      if (event.getEventTime() - tap[0].mWhen <=
+                          ViewConfiguration.getDoubleTapTimeout() &&
+                          sameWord(buffer, offset, Selection.getSelectionEnd(buffer))) {
+
+                          tap[0].active = true;
+                          MetaKeyKeyListener.startSelecting(widget, buffer);
+                          widget.getParent().requestDisallowInterceptTouchEvent(true);
+                          buffer.setSpan(LAST_TAP_DOWN, offset, offset,
+                              Spannable.SPAN_POINT_POINT);
+                      }
+
+                      tap[0].mWhen = event.getEventTime();
+                  } else {
+                      OnePointFiveTapState newtap = new OnePointFiveTapState();
+                      newtap.mWhen = event.getEventTime();
+                      newtap.active = false;
+                      buffer.setSpan(newtap, 0, buffer.length(),
+                          Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+                  }
               }
             } else if (event.getAction() == MotionEvent.ACTION_MOVE ) {
                 boolean cap = (MetaKeyKeyListener.getMetaState(buffer,
@@ -287,7 +312,7 @@ implements MovementMethod
                     // user started the selection)
                     int lastDownOffset = buffer.getSpanStart(LAST_TAP_DOWN);
 
-                    // Compute the selection boundries
+                    // Compute the selection boundaries
                     int spanstart;
                     int spanend;
                     if (offset >= lastDownOffset) {
@@ -324,6 +349,19 @@ implements MovementMethod
 
                 // XXX should do the same adjust for x as we do for the line.
 
+                OnePointFiveTapState[] onepointfivetap = buffer.getSpans(0, buffer.length(),
+                    OnePointFiveTapState.class);
+                if (onepointfivetap.length > 0 && onepointfivetap[0].active &&
+                    Selection.getSelectionStart(buffer) == Selection.getSelectionEnd(buffer)) {
+                    // If we've set select mode, because there was a onepointfivetap,
+                    // but there was no ensuing swipe gesture, undo the select mode
+                    // and remove reference to the last onepointfivetap.
+                    MetaKeyKeyListener.stopSelecting(widget, buffer);
+                    for (int i=0; i < onepointfivetap.length; i++) {
+                        buffer.removeSpan(onepointfivetap[i]);
+                    }
+                    buffer.removeSpan(LAST_TAP_DOWN);
+                }
                 boolean cap = (MetaKeyKeyListener.getMetaState(buffer,
                                 KeyEvent.META_SHIFT_ON) == 1) ||
                               (MetaKeyKeyListener.getMetaState(buffer,
@@ -335,10 +373,10 @@ implements MovementMethod
 
                 if (tap.length > 0) {
                     if (event.getEventTime() - tap[0].mWhen <=
-                        ViewConfiguration.getDoubleTapTimeout()) {
-                        if (sameWord(buffer, off, Selection.getSelectionEnd(buffer))) {
-                            doubletap = true;
-                        }
+                        ViewConfiguration.getDoubleTapTimeout() &&
+                        sameWord(buffer, off, Selection.getSelectionEnd(buffer))) {
+
+                        doubletap = true;
                     }
 
                     tap[0].mWhen = event.getEventTime();
@@ -351,6 +389,11 @@ implements MovementMethod
 
                 if (cap) {
                     buffer.removeSpan(LAST_TAP_DOWN);
+                    if (onepointfivetap.length > 0 && onepointfivetap[0].active) {
+                        // If we selecting something with the onepointfivetap-and
+                        // swipe gesture, stop it on finger up.
+                        MetaKeyKeyListener.stopSelecting(widget, buffer);
+                    }
                 } else if (doubletap) {
                     Selection.setSelection(buffer,
                                            findWordStart(buffer, off),
@@ -371,6 +414,19 @@ implements MovementMethod
 
     private static class DoubleTapState implements NoCopySpan {
         long mWhen;
+    }
+
+    /* We check for a onepointfive tap. This is similar to
+    *  doubletap gesture (where a finger goes down, up, down, up, in a short
+    *  time period), except in the onepointfive tap, a users finger only needs
+    *  to go down, up, down in a short time period. We detect this type of tap
+    *  to implement the onepointfivetap-and-swipe selection gesture.
+    *  This gesture allows users to select a segment of text without going
+    *  through the "select text" option in the context menu.
+    */
+    private static class OnePointFiveTapState implements NoCopySpan {
+        long mWhen;
+        boolean active;
     }
 
     private static boolean sameWord(CharSequence text, int one, int two) {
