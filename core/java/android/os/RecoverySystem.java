@@ -50,8 +50,6 @@ import org.apache.harmony.security.provider.cert.X509CertImpl;
  * RecoverySystem contains methods for interacting with the Android
  * recovery system (the separate partition that can be used to install
  * system updates, wipe user data, etc.)
- *
- * @pending
  */
 public class RecoverySystem {
     private static final String TAG = "RecoverySystem";
