@@ -1420,6 +1420,19 @@ public class LocationManager {
     }
 
     /**
+     * Installs a location provider.
+     *
+     * @param provider implementation of the location provider
+     *
+     * @return true if the command succeeds.
+     *
+     * Requires the android.permission.INSTALL_LOCATION_PROVIDER permission.
+     */
+    public boolean installLocationProvider(LocationProviderImpl provider) {
+        return installLocationProvider(provider.getName(), provider.getInterface());
+    }
+
+    /**
      * Installs a geocoder server.
      *
      * @param provider Binder interface for the geocoder provider
