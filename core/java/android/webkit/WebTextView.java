@@ -814,6 +814,7 @@ import java.util.ArrayList;
                         | EditorInfo.TYPE_TEXT_FLAG_CAP_SENTENCES
                         | EditorInfo.TYPE_TEXT_FLAG_AUTO_CORRECT;
                 setImeOptions(EditorInfo.IME_ACTION_NONE);
+                setHint(null);
                 break;
             case 2: // PASSWORD
                 inPassword = true;
@@ -844,6 +845,7 @@ import java.util.ArrayList;
         }
         if (single) {
             maxLength = mWebView.nativeFocusCandidateMaxLength();
+            setHint(mWebView.nativeFocusCandidateLabel());
             if (type != 2 /* PASSWORD */) {
                 String name = mWebView.nativeFocusCandidateName();
                 if (name != null && name.length() > 0) {
