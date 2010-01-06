@@ -1150,6 +1150,12 @@
         android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
         android:protectionLevel="signatureOrSystem" />
 
+    <!-- Allow an application to read and write the cache partition. -->
+    <permission android:name="android.permission.ACCESS_CACHE_FILESYSTEM"
+        android:label="@string/permlab_cache_filesystem"
+        android:description="@string/permdesc_cache_filesystem"
+        android:protectionLevel="signatureOrSystem" />
+
     <application android:process="system"
                  android:persistent="true"
                  android:hasCode="false"
