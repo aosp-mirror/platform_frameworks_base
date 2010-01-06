@@ -21,7 +21,6 @@ import android.net.LocalSocket;
 import android.os.Environment;
 import android.os.SystemClock;
 import android.os.SystemProperties;
-import android.os.RemoteException;
 import android.util.Config;
 import android.util.Log;
 
@@ -29,6 +28,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.lang.IllegalStateException;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -49,7 +49,13 @@ final class MountListener implements Runnable {
     private OutputStream          mOutputStream;
 
     class ResponseCode {
+        public static final int ActionInitiated                = 100;
+        public static final int VolumeListResult               = 110;
+        public static final int AsecListResult                 = 111;
+
+        public static final int CommandOkay                    = 200;
         public static final int ShareAvailabilityResult        = 210;
+        public static final int AsecPathResult                 = 211;
 
         public static final int UnsolicitedInformational       = 600;
         public static final int VolumeStateChange              = 605;
@@ -163,7 +169,8 @@ final class MountListener implements Runnable {
         SystemClock.sleep(5000);
     }
 
-    private void handleUnsolicitedEvent(int code, String raw, String[] cooked) throws RemoteException {
+    private void handleUnsolicitedEvent(int code, String raw,
+                                        String[] cooked) throws IllegalStateException {
 //        Log.d(TAG, "unsolicited {" + raw + "}");
         if (code == ResponseCode.VolumeStateChange) {
             // FMT: NNN Volume <label> <mountpoint> state changed from <old_#> (<old_str>) to <new_#> (<new_str>)
@@ -232,7 +239,7 @@ final class MountListener implements Runnable {
         }
     }
 
-    private synchronized ArrayList<String> doCommand(String cmd) throws RemoteException {
+    private synchronized ArrayList<String> doCommand(String cmd) throws IllegalStateException {
         sendCommand(cmd);
 
         ArrayList<String> response = new ArrayList<String>();
@@ -255,13 +262,14 @@ final class MountListener implements Runnable {
         }
 
         if (code >= 400 && code < 600) {
-            Log.w(TAG, "Vold cmd {" + cmd + "} err code " + code);
-            throw new RemoteException();
+            throw new IllegalStateException(String.format(
+                                               "Command %s failed with code %d",
+                                                cmd, code));
         }
         return response;
     }
 
-    boolean getShareAvailable(String method) throws RemoteException {
+    boolean getShareAvailable(String method) throws IllegalStateException  {
         ArrayList<String> rsp = doCommand("share_available " + method);
 
         for (String line : rsp) {
@@ -272,10 +280,10 @@ final class MountListener implements Runnable {
                     return true;
                 return false;
             } else {
-                throw new RemoteException();
+                throw new IllegalStateException(String.format("Unexpected response code %d", code));
             }
         }
-        throw new RemoteException();
+        throw new IllegalStateException("Got an empty response");
     }
 
     /**
@@ -283,28 +291,87 @@ final class MountListener implements Runnable {
      * 
      * @param enable  true to enable USB mass storage support
      */
-    void setShareMethodEnabled(String mountPoint, String method, boolean enable) throws RemoteException {
+    void setShareMethodEnabled(String mountPoint, String method,
+                               boolean enable) throws IllegalStateException {
         doCommand((enable ? "" : "un") + "share " + mountPoint + " " + method);
     }
 
     /**
      * Mount media at given mount point.
      */
-    public void mountVolume(String label) throws RemoteException {
+    public void mountVolume(String label) throws IllegalStateException {
         doCommand("mount " + label);
     }
 
     /**
      * Unmount media at given mount point.
      */
-    public void unmountVolume(String label) throws RemoteException {
+    public void unmountVolume(String label) throws IllegalStateException {
         doCommand("unmount " + label);
     }
 
     /**
      * Format media at given mount point.
      */
-    public void formatVolume(String label) throws RemoteException {
+    public void formatVolume(String label) throws IllegalStateException {
         doCommand("format " + label);
+    }
+
+    public String createAsec(String id, int sizeMb, String fstype, String key,
+                           int ownerUid) throws IllegalStateException {
+        String cmd = String.format("create_asec %s %d %s %s %d",
+                                   id, sizeMb, fstype, key, ownerUid);
+        doCommand(cmd);
+        return getAsecPath(id);
+    }
+
+    public void finalizeAsec(String id) throws IllegalStateException {
+        doCommand("finalize_asec " + id);
+    }
+
+    public void destroyAsec(String id) throws IllegalStateException {
+        doCommand("destroy_asec " + id);
+    }
+
+    public String mountAsec(String id, String key, int ownerUid) throws IllegalStateException {
+        String cmd = String.format("mount_asec %s %s %d",
+                                   id, key, ownerUid);
+        doCommand(cmd);
+        return getAsecPath(id);
+    }
+
+    public String getAsecPath(String id) throws IllegalStateException {
+        ArrayList<String> rsp = doCommand("asec_path " + id);
+
+        for (String line : rsp) {
+            String []tok = line.split(" ");
+            int code = Integer.parseInt(tok[0]);
+            if (code == ResponseCode.AsecPathResult) {
+                return tok[1];
+            } else {
+                throw new IllegalStateException(String.format("Unexpected response code %d", code));
+            }
+        }
+        throw new IllegalStateException("Got an empty response");
+    }
+
+    public String[] listAsec() throws IllegalStateException {
+        ArrayList<String> rsp = doCommand("list_asec");
+
+        String[] rdata = new String[rsp.size()];
+        int idx = 0;
+
+        for (String line : rsp) {
+            String []tok = line.split(" ");
+            int code = Integer.parseInt(tok[0]);
+            if (code == ResponseCode.AsecPathResult) {
+                rdata[idx++] = tok[1];
+            } else if (code == ResponseCode.CommandOkay) {
+                return rdata;
+            } else {
+                throw new IllegalStateException(String.format("Unexpected response code %d", code));
+            }
+        }
+        throw new IllegalStateException("Got an empty response");
     }
 }

@@ -80,4 +80,39 @@ interface IMountService
      * Gets the state of an volume via it's mountpoint.
      */
     String getVolumeState(String mountPoint);
+
+    /*
+     * Creates a secure cache with the specified parameters.
+     * On success, the filesystem cache-path is returned.
+     */
+    String createSecureCache(String id, int sizeMb, String fstype, String key, int ownerUid);
+
+    /*
+     * Finalize a cache which has just been created and populated.
+     * After finalization, the cache is immutable.
+     */
+    void finalizeSecureCache(String id);
+
+    /*
+     * Destroy a secure cache, and free up all resources associated with it.
+     * NOTE: Ensure all references are released prior to deleting.
+     */
+    void destroySecureCache(String id);
+
+    /*
+     * Mount a secure cache with the specified key and owner UID.
+     * On success, the filesystem cache-path is returned.
+     */
+    String mountSecureCache(String id, String key, int ownerUid);
+
+    /*
+     * Returns the filesystem path of a mounted secure cache.
+     */
+    String getSecureCachePath(String id);
+
+    /**
+     * Gets an Array of currently known secure cache IDs
+     */
+    String[] getSecureCacheList();
+
 }

@@ -99,6 +99,42 @@ static int mount(const char* path) {
     return -1;
 }
 
+static int asec_create(const char *id, int sizeMb, const char *fstype,
+                       const char *key, int ownerUid) {
+    String16 sId(id);
+    String16 sFstype(fstype);
+    String16 sKey(key);
+
+    String16 r = gMountService->createSecureCache(sId, sizeMb, sFstype,
+                                                  sKey, ownerUid);
+    return 0;
+}
+
+static int asec_finalize(const char *id) {
+    String16 sId(id);
+    gMountService->finalizeSecureCache(sId);
+    return 0;
+}
+
+static int asec_destroy(const char *id) {
+    String16 sId(id);
+    gMountService->destroySecureCache(sId);
+    return 0;
+}
+
+static int asec_mount(const char *id, const char *key, int ownerUid) {
+    String16 sId(id);
+    String16 sKey(key);
+    gMountService->mountSecureCache(sId, sKey, ownerUid);
+    return 0;
+}
+
+static int asec_path(const char *id) {
+    String16 sId(id);
+    gMountService->getSecureCachePath(sId);
+    return 0;
+}
+
 static int unmount(const char* path) {
     String16 string(path);
     gMountService->unmountMedia(string);
@@ -153,14 +189,42 @@ int main(int argc, char **argv)
             android::init();
             return android::umsEnable(false);
         }
+    } else if (!strcmp(command, "asec")) {
+        const char* id = (argc > 3 ? argv[3] : NULL);
+
+        if (!id)
+            goto usage;
+
+        android::init();
+        if (!strcmp(argument, "create")) {
+
+            if (argc != 8)
+                goto usage;
+            return android::asec_create(id, atoi(argv[4]), argv[5], argv[6],
+                                        atoi(argv[7]));
+        } else if (!strcmp(argument, "finalize")) {
+            return android::asec_finalize(id);
+        } else if (!strcmp(argument, "destroy")) {
+            return android::asec_destroy(id);
+        } else if (!strcmp(argument, "mount")) {
+            return android::asec_mount(id, argv[4], atoi(argv[5]));
+        } else if (!strcmp(argument, "path")) {
+            return android::asec_path(id);
+        }
     }
     
+usage:
     fprintf(stderr, "usage:\n"
                     "    sdutil mount <mount path>          - mounts the SD card at the given mount point\n"
                     "    sdutil unmount <mount path>        - unmounts the SD card at the given mount point\n"
                     "    sdutil format <mount path>         - formats the SD card at the given mount point\n"
                     "    sdutil ums enable                  - enables USB mass storage\n"
-                    "    sdutil ums disable                 - disnables USB mass storage\n"
+                    "    sdutil ums disable                 - disables USB mass storage\n"
+                    "    sdutil asec create <id> <sizeMb> <fstype> <key> <ownerUid>\n"
+                    "    sdutil asec finalize <id>\n"
+                    "    sdutil asec destroy <id>\n"
+                    "    sdutil asec mount <id> <key> <ownerUid>\n"
+                    "    sdutil asec path <id>\n"
                     );
     return -1;
 }
