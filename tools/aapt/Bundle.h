@@ -38,7 +38,7 @@ public:
           mUpdate(false), mExtending(false),
           mRequireLocalization(false), mPseudolocalize(false),
           mUTF8(false), mEncodingSpecified(false), mValues(false),
-          mCompressionMethod(0), mOutputAPKFile(NULL),
+          mCompressionMethod(0), mOutputAPKFile(NULL), mManifestPackageNameOverride(NULL),
           mAssetSourceDir(NULL), mProguardFile(NULL),
           mAndroidManifestFile(NULL), mPublicOutputFile(NULL),
           mRClassDir(NULL), mResourceIntermediatesDir(NULL),
@@ -88,6 +88,8 @@ public:
     void setJunkPath(bool val) { mJunkPath = val; }
     const char* getOutputAPKFile() const { return mOutputAPKFile; }
     void setOutputAPKFile(const char* val) { mOutputAPKFile = val; }
+    const char* getManifestPackageNameOverride() const { return mManifestPackageNameOverride; }
+    void setManifestPackageNameOverride(const char * val) { mManifestPackageNameOverride = val; }
 
     /*
      * Input options.
@@ -178,6 +180,7 @@ private:
     int         mCompressionMethod;
     bool        mJunkPath;
     const char* mOutputAPKFile;
+    const char* mManifestPackageNameOverride;
     const char* mAssetSourceDir;
     const char* mProguardFile;
     const char* mAndroidManifestFile;

@@ -95,6 +95,8 @@ public:
 
     const attribute_entry* getAttribute(const String16& ns, const String16& name) const;
     
+    attribute_entry* editAttribute(const String16& ns, const String16& name);
+
     const String16& getCData() const;
 
     const String16& getComment() const;

@@ -489,11 +489,11 @@ static bool applyFileOverlay(Bundle *bundle,
                         DefaultKeyedVector<AaptGroupEntry, sp<AaptFile> > baseFiles =
                                 baseGroup->getFiles();
                         for (size_t i=0; i < baseFiles.size(); i++) {
-                            printf("baseFile %d has flavor %s\n", i,
+                            printf("baseFile %ld has flavor %s\n", i,
                                     baseFiles.keyAt(i).toString().string());
                         }
                         for (size_t i=0; i < overlayFiles.size(); i++) {
-                            printf("overlayFile %d has flavor %s\n", i,
+                            printf("overlayFile %ld has flavor %s\n", i,
                                     overlayFiles.keyAt(i).toString().string());
                         }
                     }
@@ -507,7 +507,7 @@ static bool applyFileOverlay(Bundle *bundle,
                                 keyAt(overlayGroupIndex));
                         if(baseFileIndex < UNKNOWN_ERROR) {
                             if (bundle->getVerbose()) {
-                                printf("found a match (%d) for overlay file %s, for flavor %s\n",
+                                printf("found a match (%ld) for overlay file %s, for flavor %s\n",
                                         baseFileIndex,
                                         overlayGroup->getLeaf().string(),
                                         overlayFiles.keyAt(overlayGroupIndex).toString().string());
@@ -562,6 +562,33 @@ void addTagAttribute(const sp<XMLNode>& node, const char* ns8,
     node->addAttribute(ns, attr, String16(value));
 }
 
+static void fullyQualifyClassName(String8& package, sp<XMLNode> node) {
+    XMLNode::attribute_entry* attr = node->editAttribute(
+            String16("http://schemas.android.com/apk/res/android"), String16("name"));
+    if (attr != NULL) {
+        String8 name(attr->string);
+
+        // asdf     --> package.asdf
+        // .asdf  .a.b  --> package.asdf package.a.b
+        // asdf.adsf --> asdf.asdf
+        String8 className;
+        const char* p = name.string();
+        const char* q = strchr(p, '.');
+        if (p == q) {
+            className += package;
+            className += name;
+        } else if (q == NULL) {
+            className += package;
+            className += ".";
+            className += name;
+        } else {
+            className += name;
+        }
+        NOISY(printf("Qualifying class '%s' to '%s'", name.string(), className.string()));
+        attr->string.setTo(String16(className));
+    }
+}
+
 status_t massageManifest(Bundle* bundle, sp<XMLNode> root)
 {
     root = root->searchElement(String16(), String16("manifest"));
@@ -591,7 +618,36 @@ status_t massageManifest(Bundle* bundle, sp<XMLNode> root)
         addTagAttribute(vers, RESOURCES_ANDROID_NAMESPACE, "maxSdkVersion",
                 bundle->getMaxSdkVersion());
     }
-    
+
+    // Deal with manifest package name overrides
+    const char* manifestPackageNameOverride = bundle->getManifestPackageNameOverride();
+    if (manifestPackageNameOverride != NULL) {
+        // Update the actual package name
+        XMLNode::attribute_entry* attr = root->editAttribute(String16(), String16("package"));
+        if (attr == NULL) {
+            fprintf(stderr, "package name is required with --rename-manifest-package.\n");
+            return UNKNOWN_ERROR;
+        }
+        String8 origPackage(attr->string);
+        attr->string.setTo(String16(manifestPackageNameOverride));
+        NOISY(printf("Overriding package '%s' to be '%s'\n", origPackage.string(), manifestPackageNameOverride));
+
+        // Make class names fully qualified
+        sp<XMLNode> application = root->getChildElement(String16(), String16("application"));
+        if (application != NULL) {
+            fullyQualifyClassName(origPackage, application);
+
+            Vector<sp<XMLNode> >& children = const_cast<Vector<sp<XMLNode> >&>(application->getChildren());
+            for (size_t i = 0; i < children.size(); i++) {
+                sp<XMLNode> child = children.editItemAt(i);
+                String8 tag(child->getElementName());
+                if (tag == "activity" || tag == "service" || tag == "receiver" || tag == "provider") {
+                    fullyQualifyClassName(origPackage, child);
+                }
+            }
+        }
+    }
+
     return NO_ERROR;
 }
 
@@ -1173,14 +1229,14 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets)
             table.writePublicDefinitions(String16(assets->getPackage()), fp);
             fclose(fp);
         }
-
+#if 0
         NOISY(
               ResTable rt;
               rt.add(resFile->getData(), resFile->getSize(), NULL);
               printf("Generated resources:\n");
               rt.print();
         )
-
+#endif
         // These resources are now considered to be a part of the included
         // resources, for others to reference.
         err = assets->addIncludedResources(resFile);
