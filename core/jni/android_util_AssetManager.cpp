@@ -524,7 +524,6 @@ static jobjectArray android_content_AssetManager_getLocales(JNIEnv* env, jobject
     }
 
     for (int i=0; i<N; i++) {
-        LOGD("locale %2d: '%s'", i, locales[i].string());
         env->SetObjectArrayElement(result, i, env->NewStringUTF(locales[i].string()));
     }
 
