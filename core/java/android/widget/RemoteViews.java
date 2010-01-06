@@ -26,6 +26,7 @@ import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -37,7 +38,6 @@ import android.view.ViewGroup;
 import android.view.LayoutInflater.Filter;
 import android.view.View.OnClickListener;
 
-import java.lang.Class;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -283,6 +283,7 @@ public class RemoteViews implements Parcelable, Filter {
         static final int CHAR_SEQUENCE = 10;
         static final int URI = 11;
         static final int BITMAP = 12;
+        static final int BUNDLE = 13;
 
         int viewId;
         String methodName;
@@ -342,6 +343,9 @@ public class RemoteViews implements Parcelable, Filter {
                 case BITMAP:
                     this.value = Bitmap.CREATOR.createFromParcel(in);
                     break;
+                case BUNDLE:
+                    this.value = in.readBundle();
+                    break;
                 default:
                     break;
             }
@@ -394,6 +398,9 @@ public class RemoteViews implements Parcelable, Filter {
                 case BITMAP:
                     ((Bitmap)this.value).writeToParcel(out, flags);
                     break;
+                case BUNDLE:
+                    out.writeBundle((Bundle) this.value);
+                    break;
                 default:
                     break;
             }
@@ -425,6 +432,8 @@ public class RemoteViews implements Parcelable, Filter {
                     return Uri.class;
                 case BITMAP:
                     return Bitmap.class;
+                case BUNDLE:
+                    return Bundle.class;
                 default:
                     return null;
             }
@@ -883,6 +892,17 @@ public class RemoteViews implements Parcelable, Filter {
      */
     public void setBitmap(int viewId, String methodName, Bitmap value) {
         addAction(new ReflectionAction(viewId, methodName, ReflectionAction.BITMAP, value));
+    }
+
+    /**
+     * Call a method taking one Bundle on a view in the layout for this RemoteViews.
+     *
+     * @param viewId The id of the view whose text should change
+     * @param methodName The name of the method to call.
+     * @param value The value to pass to the method.
+     */
+    public void setBundle(int viewId, String methodName, Bundle value) {
+        addAction(new ReflectionAction(viewId, methodName, ReflectionAction.BUNDLE, value));
     }
 
     /**
