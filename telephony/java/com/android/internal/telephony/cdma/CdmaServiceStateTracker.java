@@ -537,11 +537,9 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
         } else if (!mDesiredPowerState && cm.getRadioState().isOn()) {
             DataConnectionTracker dcTracker = phone.mDataConnection;
             if (! dcTracker.isDataConnectionAsDesired()) {
-
-                EventLog.List val = new EventLog.List(
+                EventLog.writeEvent(TelephonyEventLog.EVENT_LOG_DATA_STATE_RADIO_OFF,
                         dcTracker.getStateInString(),
-                        (dcTracker.getAnyDataEnabled() ? 1 : 0) );
-                EventLog.writeEvent(TelephonyEventLog.EVENT_LOG_DATA_STATE_RADIO_OFF, val);
+                        dcTracker.getAnyDataEnabled() ? 1 : 0);
             }
             Message msg = dcTracker.obtainMessage(DataConnectionTracker.EVENT_CLEAN_UP_CONNECTION);
             msg.arg1 = 1; // tearDown is true

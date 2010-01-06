@@ -59,22 +59,13 @@ public class EventLogFunctionalTest extends TestCase {
      }
 
     public void testLogOfListWithOneInt() throws Exception {
-        final EventLog.List list = new EventLog.List(1234);
-        final int numBytes =  EventLog.writeEvent(TEST_TAG, list);
+        final int numBytes =  EventLog.writeEvent(TEST_TAG, new Object[] {1234});
         Assert.assertEquals(STARTING_POS_OF_PAYLOAD + 1 + 1 + 4 + 1, numBytes);
     }
 
     public void testLogOfListWithMultipleInts() throws Exception {
-       final EventLog.List list = new EventLog.List(1234, 2345, 3456);
-        final int numBytes =  EventLog.writeEvent(TEST_TAG, list);
+        final int numBytes =  EventLog.writeEvent(TEST_TAG, new Object[] {1234, 2345, 3456});
         Assert.assertEquals(STARTING_POS_OF_PAYLOAD + 1 + 1 + 4 + 1 + 4 + 1 + 4 + 1, numBytes);
-    }
-
-    public void testLogOfListWithEmbeddedList() throws Exception {
-        final EventLog.List list = new EventLog.List(
-                new EventLog.List(1234, 2345, 3456));
-        final int numBytes =  EventLog.writeEvent(TEST_TAG, list);
-        Assert.assertEquals(STARTING_POS_OF_PAYLOAD + 2 + 1 + 1 + 4 + 1 + 4 + 1 + 4 + 1, numBytes);
     }
 
     public void testEventLargerThanInitialBufferCapacity() throws Exception {
@@ -82,8 +73,7 @@ public class EventLogFunctionalTest extends TestCase {
         for (int i = 0; i < array.length; i++) {
             array[i] = i;
         }
-        final EventLog.List list = new EventLog.List((Object[]) array);
-        final int numBytes =  EventLog.writeEvent(TEST_TAG, list);
+        final int numBytes =  EventLog.writeEvent(TEST_TAG, (Object[]) array);
         Assert.assertEquals(STARTING_POS_OF_PAYLOAD + 1 + (5 * array.length) + 1, numBytes);
     }
 
@@ -117,8 +107,7 @@ public class EventLogFunctionalTest extends TestCase {
     // This test is obsolete. See http://b/issue?id=1262082
     public void disableTestReadCompoundEntry() throws Exception {
         long when = System.currentTimeMillis();
-        EventLog.writeEvent(2719,
-                new EventLog.List(1l, new EventLog.List("2", "three", "4"), 5));
+        EventLog.writeEvent(2719, 1l, "2", 3);
         Log.i(TAG, "Wrote compound event at T=" + when);
 
         ArrayList<EventLog.Event> list = new ArrayList<EventLog.Event>();
@@ -129,18 +118,11 @@ public class EventLogFunctionalTest extends TestCase {
             long eventTime = event.getTimeNanos() / 1000000;
             Log.i(TAG, "  Found event T=" + eventTime);
             if (eventTime > when - 100 && eventTime < when + 1000) {
-                EventLog.List data = (EventLog.List) event.getData();
-                assertEquals(data.getNumItems(), 3);
-
-                EventLog.List nested = (EventLog.List) data.getItem(1);
-                assertEquals(nested.getNumItems(), 3);
-
-                assertEquals(data.getItem(0), 1l);
-                assertEquals(nested.getItem(0), "2");
-                assertEquals(nested.getItem(1), "three");
-                assertEquals(nested.getItem(2), "4");
-                assertEquals(data.getItem(2), 5);
-
+                Object[] data = (Object[]) event.getData();
+                assertEquals(data.length, 3);
+                assertEquals(data[0], 1l);
+                assertEquals(data[1], "2");
+                assertEquals(data[2], 3);
                 assertFalse(found);
                 found = true;
             }

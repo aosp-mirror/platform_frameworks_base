@@ -33,13 +33,13 @@ public class EventLogTest extends TestCase {
 
     public void testIllegalListTypesThrowException() throws Exception {
         try {
-            EventLog.writeEvent(TEST_TAG, new EventLog.List(new Object()));
+            EventLog.writeEvent(TEST_TAG, new Object[]{new Object()});
             fail("Can't create List with any old Object");
         } catch (IllegalArgumentException e) {
             // expected
         }
         try {
-            EventLog.writeEvent(TEST_TAG, new EventLog.List((byte) 1));
+            EventLog.writeEvent(TEST_TAG, new Object[]{(byte) 1});
             fail("Can't create List with any old byte");
         } catch (IllegalArgumentException e) {
             // expected
