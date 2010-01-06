@@ -25,8 +25,8 @@ using namespace android::renderscript;
 
 VertexArray::VertexArray()
 {
-    memset(mAttribs, 0, sizeof(mAttribs));
     mActiveBuffer = 0;
+    mUserCount = 0;
 }
 
 VertexArray::~VertexArray()
@@ -36,13 +36,43 @@ VertexArray::~VertexArray()
 
 void VertexArray::clearAll()
 {
-    memset(mAttribs, 0, sizeof(mAttribs));
+    for (uint32_t ct=0; ct < RS_MAX_ATTRIBS; ct++) {
+        mAttribs[ct].clear();
+    }
     mActiveBuffer = 0;
+    mUserCount = 0;
+}
+
+VertexArray::Attrib::Attrib()
+{
+    clear();
+}
+
+void VertexArray::Attrib::set(const Attrib &a)
+{
+    buffer = a.buffer;
+    offset = a.offset;
+    type = a.type;
+    size = a.size;
+    stride = a.stride;
+    normalized = a.normalized;
+    name.setTo(a.name);
+}
+
+void VertexArray::Attrib::clear()
+{
+    buffer = 0;
+    offset = 0;
+    type = 0;
+    size = 0;
+    stride = 0;
+    normalized = false;
+    name.setTo("");
 }
 
 void VertexArray::clear(AttribName n)
 {
-    mAttribs[n].size = 0;
+    mAttribs[n].clear();
 }
 
 void VertexArray::setPosition(uint32_t size, uint32_t type, uint32_t stride, uint32_t offset)
@@ -85,18 +115,27 @@ void VertexArray::setPointSize(uint32_t type, uint32_t stride, uint32_t offset)
     mAttribs[POINT_SIZE].normalized = false;
 }
 
-void VertexArray::setTexture(uint32_t size, uint32_t type, uint32_t stride, uint32_t offset, uint32_t num)
+void VertexArray::setTexture(uint32_t size, uint32_t type, uint32_t stride, uint32_t offset)
 {
-    mAttribs[TEXTURE_0 + num].buffer = mActiveBuffer;
-    mAttribs[TEXTURE_0 + num].type = type;
-    mAttribs[TEXTURE_0 + num].size = size;
-    mAttribs[TEXTURE_0 + num].offset = offset;
-    mAttribs[TEXTURE_0 + num].stride = stride;
-    mAttribs[TEXTURE_0 + num].normalized = false;
+    mAttribs[TEXTURE].buffer = mActiveBuffer;
+    mAttribs[TEXTURE].type = type;
+    mAttribs[TEXTURE].size = size;
+    mAttribs[TEXTURE].offset = offset;
+    mAttribs[TEXTURE].stride = stride;
+    mAttribs[TEXTURE].normalized = false;
 }
 
-void VertexArray::logAttrib(uint32_t idx) const {
-    LOGE("va %i: buf=%i  size=%i  type=0x%x  stride=0x%x  norm=%i  offset=0x%x", idx,
+void VertexArray::setUser(const Attrib &a, uint32_t stride)
+{
+    mAttribs[mUserCount].set(a);
+    mAttribs[mUserCount].buffer = mActiveBuffer;
+    mAttribs[mUserCount].stride = stride;
+    mUserCount ++;
+}
+
+void VertexArray::logAttrib(uint32_t idx, uint32_t slot) const {
+    LOGE("va %i: slot=%i name=%s buf=%i  size=%i  type=0x%x  stride=0x%x  norm=%i  offset=0x%x", idx, slot,
+         mAttribs[idx].name.string(),
          mAttribs[idx].buffer,
          mAttribs[idx].size,
          mAttribs[idx].type,
@@ -143,21 +182,18 @@ void VertexArray::setupGL(const Context *rsc, class VertexArrayState *state) con
         glDisableClientState(GL_COLOR_ARRAY);
     }
 
-    for (uint32_t ct=0; ct < RS_MAX_TEXTURE; ct++) {
-        glClientActiveTexture(GL_TEXTURE0 + ct);
-        if (mAttribs[TEXTURE_0 + ct].size) {
-            //logAttrib(TEXTURE_0 + ct);
-            glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-            glBindBuffer(GL_ARRAY_BUFFER, mAttribs[TEXTURE_0 + ct].buffer);
-            glTexCoordPointer(mAttribs[TEXTURE_0 + ct].size,
-                              mAttribs[TEXTURE_0 + ct].type,
-                              mAttribs[TEXTURE_0 + ct].stride,
-                              (void *)mAttribs[TEXTURE_0 + ct].offset);
-        } else {
-            glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-        }
-    }
     glClientActiveTexture(GL_TEXTURE0);
+    if (mAttribs[TEXTURE].size) {
+        //logAttrib(TEXTURE);
+        glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+        glBindBuffer(GL_ARRAY_BUFFER, mAttribs[TEXTURE].buffer);
+        glTexCoordPointer(mAttribs[TEXTURE].size,
+                          mAttribs[TEXTURE].type,
+                          mAttribs[TEXTURE].stride,
+                          (void *)mAttribs[TEXTURE].offset);
+    } else {
+        glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+    }
 
     if (mAttribs[POINT_SIZE].size) {
         //logAttrib(POINT_SIZE);
@@ -178,12 +214,12 @@ void VertexArray::setupGL2(const Context *rsc, class VertexArrayState *state, Sh
         glDisableVertexAttribArray(ct);
     }
 
-    for (int ct=0; ct < _LAST; ct++) {
+    for (uint32_t ct=0; ct < RS_MAX_ATTRIBS; ct++) {
         if (mAttribs[ct].size) {
-            //logAttrib(ct);
+            //logAttrib(ct, sc->vtxAttribSlot(ct));
+            rsAssert(sc->vtxAttribSlot(ct) >= 0);
             glEnableVertexAttribArray(sc->vtxAttribSlot(ct));
             glBindBuffer(GL_ARRAY_BUFFER, mAttribs[ct].buffer);
-            //LOGV("attp %i %i", ct, sc->vtxAttribSlot(ct));
 
             glVertexAttribPointer(sc->vtxAttribSlot(ct),
                                   mAttribs[ct].size,
@@ -191,9 +227,6 @@ void VertexArray::setupGL2(const Context *rsc, class VertexArrayState *state, Sh
                                   mAttribs[ct].normalized,
                                   mAttribs[ct].stride,
                                   (void *)mAttribs[ct].offset);
-        } else {
-            //glDisableVertexAttribArray(ct);
-            rsAssert(ct);
         }
     }
     rsc->checkError("VertexArray::setupGL2");
@@ -201,6 +234,5 @@ void VertexArray::setupGL2(const Context *rsc, class VertexArrayState *state, Sh
 ////////////////////////////////////////////
 
 void VertexArrayState::init(Context *) {
-    memset(this, 0, sizeof(this));
 }
 

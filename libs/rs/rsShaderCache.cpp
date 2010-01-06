@@ -59,6 +59,7 @@ bool ShaderCache::lookup(Context *rsc, ProgramVertex *vtx, ProgramFragment *frag
             glUseProgram(mEntries[ct].program);
             mCurrent = &mEntries[ct];
             //LOGV("ShaderCache hit, using %i", ct);
+            rsc->checkError("ShaderCache::lookup (hit)");
             return true;
         }
     }
@@ -91,12 +92,15 @@ bool ShaderCache::lookup(Context *rsc, ProgramVertex *vtx, ProgramFragment *frag
         //LOGE("e1 %x", glGetError());
         glAttachShader(pgm, frag->getShaderID());
 
-        glBindAttribLocation(pgm, VertexArray::POSITION, "attrib_Position");
-        glBindAttribLocation(pgm, VertexArray::COLOR, "attrib_Color");
-        //glBindAttribLocation(pgm, VertexArray::NORMAL, "attrib_Normal");
-        //glBindAttribLocation(pgm, VertexArray::POINT_SIZE, "attrib_PointSize");
-        //glBindAttribLocation(pgm, VertexArray::TEXTURE_0, "attrib_T0");
-        //glBindAttribLocation(pgm, VertexArray::TEXTURE_1, "attrib_T1");
+        if (!vtx->isUserProgram()) {
+            glBindAttribLocation(pgm, VertexArray::POSITION, "ATTRIB_Position");
+            glBindAttribLocation(pgm, VertexArray::COLOR, "ATTRIB_Color");
+            glBindAttribLocation(pgm, VertexArray::NORMAL, "ATTRIB_Normal");
+            glBindAttribLocation(pgm, VertexArray::POINT_SIZE, "ATTRIB_PointSize");
+            glBindAttribLocation(pgm, VertexArray::TEXTURE, "ATTRIB_T0");
+        } else {
+
+        }
 
         //LOGE("e2 %x", glGetError());
         glLinkProgram(pgm);
@@ -119,7 +123,7 @@ bool ShaderCache::lookup(Context *rsc, ProgramVertex *vtx, ProgramFragment *frag
         for (uint32_t ct=0; ct < vtx->getAttribCount(); ct++) {
             e->mVtxAttribSlots[ct] = glGetAttribLocation(pgm, vtx->getAttribName(ct));
             if (rsc->props.mLogShaders) {
-                LOGV("vtx A, %s = %d\n", vtx->getAttribName(ct).string(), e->mVtxAttribSlots[ct]);
+                LOGV("vtx A %i, %s = %d\n", ct, vtx->getAttribName(ct).string(), e->mVtxAttribSlots[ct]);
             }
         }
         for (uint32_t ct=0; ct < vtx->getUniformCount(); ct++) {
@@ -139,6 +143,7 @@ bool ShaderCache::lookup(Context *rsc, ProgramVertex *vtx, ProgramFragment *frag
     //LOGV("SC made program %i", e->program);
     glUseProgram(e->program);
     mEntryCount++;
+    rsc->checkError("ShaderCache::lookup (miss)");
     return true;
 }
 

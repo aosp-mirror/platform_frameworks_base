@@ -42,6 +42,8 @@ public:
     void bindAllocation(Allocation *);
     virtual void createShader();
 
+    bool isUserProgram() const {return mUserShader.size() > 0;}
+
     void bindTexture(uint32_t slot, Allocation *);
     void bindSampler(uint32_t slot, Sampler *);
 

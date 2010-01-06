@@ -298,7 +298,8 @@ public class Element extends BaseObj {
               dk == DataKind.POSITION ||
               dk == DataKind.TEXTURE ||
               dk == DataKind.NORMAL ||
-              dk == DataKind.POINT_SIZE)) {
+              dk == DataKind.POINT_SIZE ||
+              dk == DataKind.USER)) {
             throw new IllegalArgumentException("Unsupported DataKind");
         }
 

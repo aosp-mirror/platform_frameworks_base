@@ -738,9 +738,7 @@ static void SC_drawQuadTexCoords(float x1, float y1, float z1,
 
     VertexArray va;
     va.setPosition(3, GL_FLOAT, 12, (uint32_t)&vtx);
-    va.setTexture(2, GL_FLOAT, 8, (uint32_t)&tex, 0);
-    //va.setTexture(2, GL_FLOAT, 8, (uint32_t)&tex, 1);
-    //
+    va.setTexture(2, GL_FLOAT, 8, (uint32_t)&tex);
     if (rsc->checkVersion2_0()) {
         va.setupGL2(rsc, &rsc->mStateVertexArray, &rsc->mShaderCache);
     } else {

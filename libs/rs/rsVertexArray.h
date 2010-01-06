@@ -38,19 +38,24 @@ public:
         COLOR,
         NORMAL,
         POINT_SIZE,
-        TEXTURE_0,
-        TEXTURE_1,
+        TEXTURE,
         _LAST
     };
 
-    typedef struct {
+    class Attrib {
+    public:
         uint32_t buffer;
         uint32_t offset;
         uint32_t type;
         uint32_t size;
         uint32_t stride;
         bool normalized;
-    } Attrib;
+        String8 name;
+
+        Attrib();
+        void set(const Attrib &);
+        void clear();
+    };
 
 
     void clearAll();
@@ -58,19 +63,21 @@ public:
 
     void setActiveBuffer(uint32_t id) {mActiveBuffer = id;}
 
+    void setUser(const Attrib &, uint32_t stride);
     void setPosition(uint32_t size, uint32_t type, uint32_t stride, uint32_t offset);
     void setColor(uint32_t size, uint32_t type, uint32_t stride, uint32_t offset);
     void setNormal(uint32_t type, uint32_t stride, uint32_t offset);
     void setPointSize(uint32_t type, uint32_t stride, uint32_t offset);
-    void setTexture(uint32_t size, uint32_t type, uint32_t stride, uint32_t offset, uint32_t num);
+    void setTexture(uint32_t size, uint32_t type, uint32_t stride, uint32_t offset);
 
     void setupGL(const Context *rsc, class VertexArrayState *) const;
     void setupGL2(const Context *rsc, class VertexArrayState *, ShaderCache *) const;
-    void logAttrib(uint32_t idx) const;
+    void logAttrib(uint32_t idx, uint32_t slot) const;
 
 protected:
     uint32_t mActiveBuffer;
-    Attrib mAttribs[_LAST];
+    uint32_t mUserCount;
+    Attrib mAttribs[RS_MAX_ATTRIBS];
 };
 
 
@@ -78,7 +85,7 @@ class VertexArrayState {
 public:
     void init(Context *);
 
-    VertexArray::Attrib mAttribs[VertexArray::_LAST];
+    //VertexArray::Attrib mAttribs[VertexArray::_LAST];
 };
 
 

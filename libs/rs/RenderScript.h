@@ -64,6 +64,7 @@ void rsContextInitToClient(RsContext);
 void rsContextDeinitToClient(RsContext);
 
 #define RS_MAX_TEXTURE 2
+#define RS_MAX_ATTRIBS 16
 
 enum RsDataType {
     RS_TYPE_NONE,

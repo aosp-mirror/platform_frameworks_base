@@ -59,6 +59,9 @@ protected:
 
     // Hacks to create a program for now
     bool mTextureMatrixEnable;
+
+private:
+    void initAddUserAttrib(const Element *e);
 };
 
 

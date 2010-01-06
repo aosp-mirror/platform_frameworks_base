@@ -136,6 +136,7 @@ void ProgramFragment::setupGL(const Context *rsc, ProgramFragmentState *state)
     }
     glActiveTexture(GL_TEXTURE0);
     mDirty = false;
+    rsc->checkError("ProgramFragment::setupGL");
 }
 
 void ProgramFragment::setupGL2(const Context *rsc, ProgramFragmentState *state, ShaderCache *sc)
@@ -170,8 +171,7 @@ void ProgramFragment::setupGL2(const Context *rsc, ProgramFragmentState *state, 
 
     glActiveTexture(GL_TEXTURE0);
     mDirty = false;
-
-    //LOGE("sgl2 frag2 %x", glGetError());
+    rsc->checkError("ProgramFragment::setupGL2");
 }
 
 void ProgramFragment::loadShader(Context *rsc) {

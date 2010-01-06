@@ -274,8 +274,8 @@ void * Context::threadProc(void *vrsc)
 
      rsc->props.mLogTimes = getProp("debug.rs.profile");
      rsc->props.mLogScripts = getProp("debug.rs.script");
-     rsc->props.mLogObjects = getProp("debug.rs.objects");
-     rsc->props.mLogShaders = getProp("debug.rs.shaders");
+     rsc->props.mLogObjects = getProp("debug.rs.object");
+     rsc->props.mLogShaders = getProp("debug.rs.shader");
 
      ScriptTLSStruct *tlsStruct = new ScriptTLSStruct;
      if (!tlsStruct) {

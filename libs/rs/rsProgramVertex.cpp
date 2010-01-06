@@ -148,21 +148,21 @@ void ProgramVertex::createShader()
         }
         mShader.append(mUserShader);
     } else {
-        for (uint32_t ct=0; ct < mAttribCount; ct++) {
+        for (uint32_t ct=VertexArray::POSITION; ct < mAttribCount; ct++) {
             mShader.append("attribute vec4 ");
             mShader.append(mAttribNames[ct]);
             mShader.append(";\n");
         }
 
         mShader.append("void main() {\n");
-        mShader.append("  gl_Position = uni_MVP * attrib_Position;\n");
-        mShader.append("  gl_PointSize = attrib_PointSize.x;\n");
+        mShader.append("  gl_Position = uni_MVP * ATTRIB_Position;\n");
+        mShader.append("  gl_PointSize = ATTRIB_PointSize.x;\n");
 
-        mShader.append("  varColor = attrib_Color;\n");
+        mShader.append("  varColor = ATTRIB_Color;\n");
         if (mTextureMatrixEnable) {
-            mShader.append("  varTex0 = uni_TexMatrix * attrib_T0;\n");
+            mShader.append("  varTex0 = uni_TexMatrix * ATTRIB_Texture;\n");
         } else {
-            mShader.append("  varTex0 = attrib_T0;\n");
+            mShader.append("  varTex0 = ATTRIB_Texture;\n");
         }
         //mShader.append("  pos.x = pos.x / 480.0;\n");
         //mShader.append("  pos.y = pos.y / 800.0;\n");
@@ -195,7 +195,7 @@ void ProgramVertex::setupGL2(const Context *rsc, ProgramVertexState *state, Shad
     }
 
     state->mLast.set(this);
-    //LOGE("sgl2 vtx2 %x", glGetError());
+    rsc->checkError("ProgramVertex::setupGL2");
 }
 
 void ProgramVertex::addLight(const Light *l)
@@ -236,15 +236,37 @@ void ProgramVertex::transformToScreen(const Context *rsc, float *v4out, const fl
     mvp.vectorMultiply(v4out, v3in);
 }
 
+void ProgramVertex::initAddUserAttrib(const Element *e)
+{
+    rsAssert(e->getFieldCount());
+    for (uint32_t ct=0; ct < e->getFieldCount(); ct++) {
+        const Element *ce = e->getField(ct);
+        if (ce->getFieldCount()) {
+            initAddUserAttrib(ce);
+        } else {
+            String8 tmp("ATTRIB_");
+            tmp.append(e->getFieldName(ct));
+            mAttribNames[mAttribCount].setTo(tmp.string());
+            mAttribCount++;
+        }
+    }
+}
+
 void ProgramVertex::init(Context *rsc)
 {
-    mAttribCount = 6;
-    mAttribNames[VertexArray::POSITION].setTo("attrib_Position");
-    mAttribNames[VertexArray::COLOR].setTo("attrib_Color");
-    mAttribNames[VertexArray::NORMAL].setTo("attrib_Normal");
-    mAttribNames[VertexArray::POINT_SIZE].setTo("attrib_PointSize");
-    mAttribNames[VertexArray::TEXTURE_0].setTo("attrib_T0");
-    mAttribNames[VertexArray::TEXTURE_1].setTo("attrib_T1");
+    if (mUserShader.size() > 0) {
+        mAttribCount = 0;
+        for (uint32_t ct=0; ct < mInputCount; ct++) {
+            initAddUserAttrib(mInputElements[ct].get());
+        }
+    } else {
+        mAttribCount = 5;
+        mAttribNames[0].setTo("ATTRIB_Position");
+        mAttribNames[1].setTo("ATTRIB_Color");
+        mAttribNames[2].setTo("ATTRIB_Normal");
+        mAttribNames[3].setTo("ATTRIB_PointSize");
+        mAttribNames[4].setTo("ATTRIB_Texture");
+    }
 
     mUniformCount = 2;
     mUniformNames[0].setTo("uni_MVP");
