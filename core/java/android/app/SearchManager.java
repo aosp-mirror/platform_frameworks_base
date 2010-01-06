@@ -1346,6 +1346,7 @@ public class SearchManager
      * @hide Pending API council approval
      */
     public final static String SELECT_INITIAL_QUERY = "select_initial_query";
+
     /**
      * Defines the constants used in the communication between {@link android.app.SearchDialog} and
      * the global search provider via {@link Cursor#respond(android.os.Bundle)}.
@@ -1610,6 +1611,15 @@ public class SearchManager
      * This limit is only advisory and suggestion providers may chose to ignore it.
      */
     public final static String SUGGEST_PARAMETER_LIMIT = "limit";
+
+    /**
+     * Intent action for opening the search source selection activity.
+     * The intent may include these extra values:
+     * {@link #QUERY},
+     * {@link #APP_DATA}.
+     */
+    public static final String INTENT_ACTION_SELECT_SEARCH_SOURCE
+            = "android.intent.action.SELECT_SEARCH_SOURCE";
 
     /**
      * If a suggestion has this value in {@link #SUGGEST_COLUMN_INTENT_ACTION},
