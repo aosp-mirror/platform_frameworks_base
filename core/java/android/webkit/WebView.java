@@ -499,6 +499,7 @@ public class WebView extends AbsoluteLayout
     static final int DOM_FOCUS_CHANGED                  = 31;
     static final int IMMEDIATE_REPAINT_MSG_ID           = 32;
     static final int SET_ROOT_LAYER_MSG_ID              = 33;
+    static final int RETURN_LABEL                       = 34;
 
     static final String[] HandlerDebugString = {
         "REMEMBER_PASSWORD", //              = 1;
@@ -533,7 +534,8 @@ public class WebView extends AbsoluteLayout
         "HIDE_FULLSCREEN", //                = 30;
         "DOM_FOCUS_CHANGED", //              = 31;
         "IMMEDIATE_REPAINT_MSG_ID", //       = 32;
-        "SET_ROOT_LAYER_MSG_ID" //           = 33;
+        "SET_ROOT_LAYER_MSG_ID", //          = 33;
+        "RETURN_LABEL" //                    = 34;
     };
 
     // If the site doesn't use the viewport meta tag to specify the viewport,
@@ -3308,6 +3310,17 @@ public class WebView extends AbsoluteLayout
         }
     }
 
+    /**
+     * Pass a message to find out the <label> associated with the <input>
+     * identified by nodePointer
+     * @param framePointer Pointer to the frame containing the <input> node
+     * @param nodePointer Pointer to the node for which a <label> is desired.
+     */
+    /* package */ void requestLabel(int framePointer, int nodePointer) {
+        mWebViewCore.sendMessage(EventHub.REQUEST_LABEL, framePointer,
+                nodePointer);
+    }
+
     /*
      * This class runs the layers animations in their own thread,
      * so that we do not slow down the UI.
@@ -5361,7 +5374,7 @@ public class WebView extends AbsoluteLayout
             // exclude INVAL_RECT_MSG_ID since it is frequently output
             if (DebugFlags.WEB_VIEW && msg.what != INVAL_RECT_MSG_ID) {
                 Log.v(LOGTAG, msg.what < REMEMBER_PASSWORD || msg.what
-                        > SET_ROOT_LAYER_MSG_ID ? Integer.toString(msg.what)
+                        > RETURN_LABEL ? Integer.toString(msg.what)
                         : HandlerDebugString[msg.what - REMEMBER_PASSWORD]);
             }
             if (mWebViewCore == null) {
@@ -5590,6 +5603,20 @@ public class WebView extends AbsoluteLayout
                                 = (WebViewCore.TextSelectionData) msg.obj;
                         mWebTextView.setSelectionFromWebKit(tData.mStart,
                                 tData.mEnd);
+                    }
+                    break;
+                case RETURN_LABEL:
+                    if (inEditingMode()
+                            && mWebTextView.isSameTextField(msg.arg1)) {
+                        mWebTextView.setHint((String) msg.obj);
+                        InputMethodManager imm
+                                = InputMethodManager.peekInstance();
+                        // The hint is propagated to the IME in
+                        // onCreateInputConnection.  If the IME is already
+                        // active, restart it so that its hint text is updated.
+                        if (imm != null && imm.isActive(mWebTextView)) {
+                            imm.restartInput(mWebTextView);
+                        }
                     }
                     break;
                 case MOVE_OUT_OF_PLUGIN:
@@ -6350,12 +6377,11 @@ public class WebView extends AbsoluteLayout
     private native void     nativeDumpDisplayTree(String urlOrNull);
     private native int      nativeFindAll(String findLower, String findUpper);
     private native void     nativeFindNext(boolean forward);
-    private native int      nativeFocusCandidateFramePointer();
+    /* package */ native int      nativeFocusCandidateFramePointer();
     private native boolean  nativeFocusCandidateIsPassword();
     private native boolean  nativeFocusCandidateIsPlugin();
     private native boolean  nativeFocusCandidateIsRtlText();
     private native boolean  nativeFocusCandidateIsTextInput();
-    /* package */ native String   nativeFocusCandidateLabel();
     /* package */ native int      nativeFocusCandidateMaxLength();
     /* package */ native String   nativeFocusCandidateName();
     private native Rect     nativeFocusCandidateNodeBounds();
