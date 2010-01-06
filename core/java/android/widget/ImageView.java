@@ -491,8 +491,16 @@ public class ImageView extends View {
             }
         } else if (mUri != null) {
             String scheme = mUri.getScheme();
-            if (ContentResolver.SCHEME_CONTENT.equals(scheme)
-                    || ContentResolver.SCHEME_ANDROID_RESOURCE.equals(scheme)
+            if (ContentResolver.SCHEME_ANDROID_RESOURCE.equals(scheme)) {
+                try {
+                    // Load drawable through Resources, to get the source density information
+                    ContentResolver.OpenResourceIdResult r =
+                            mContext.getContentResolver().getResourceId(mUri);
+                    d = r.r.getDrawable(r.id);
+                } catch (Exception e) {
+                    Log.w("ImageView", "Unable to open content: " + mUri, e);
+                }
+            } else if (ContentResolver.SCHEME_CONTENT.equals(scheme)
                     || ContentResolver.SCHEME_FILE.equals(scheme)) {
                 try {
                     d = Drawable.createFromStream(
