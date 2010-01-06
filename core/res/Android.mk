@@ -24,7 +24,7 @@ LOCAL_CERTIFICATE := platform
 # since these resources will be used by many apps.
 LOCAL_AAPT_FLAGS := -x
 
-LOCAL_MODULE_TAGS := user
+LOCAL_MODULE_TAGS := optional
 
 # Install this alongside the libraries.
 LOCAL_MODULE_PATH := $(TARGET_OUT_JAVA_LIBRARIES)
