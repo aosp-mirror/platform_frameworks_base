@@ -447,8 +447,8 @@ final class WebViewCore {
         should this be called nativeSetViewPortSize?
     */
     private native void nativeSetSize(int width, int height, int screenWidth,
-            float scale, int realScreenWidth, int screenHeight,
-            boolean ignoreHeight);
+            float scale, int realScreenWidth, int screenHeight, int anchorX,
+            int anchorY, boolean ignoreHeight);
 
     private native int nativeGetContentMinPrefWidth();
 
@@ -961,6 +961,7 @@ final class WebViewCore {
                                     (WebView.ViewSizeData) msg.obj;
                             viewSizeChanged(data.mWidth, data.mHeight,
                                     data.mTextWrapWidth, data.mScale,
+                                    data.mAnchorX, data.mAnchorY,
                                     data.mIgnoreHeight);
                             break;
                         }
@@ -1483,7 +1484,7 @@ final class WebViewCore {
 
     // notify webkit that our virtual view size changed size (after inv-zoom)
     private void viewSizeChanged(int w, int h, int textwrapWidth, float scale,
-            boolean ignoreHeight) {
+            int anchorX, int anchorY, boolean ignoreHeight) {
         if (DebugFlags.WEB_VIEW_CORE) {
             Log.v(LOGTAG, "viewSizeChanged w=" + w + "; h=" + h
                     + "; textwrapWidth=" + textwrapWidth + "; scale=" + scale);
@@ -1514,12 +1515,14 @@ final class WebViewCore {
                     width = Math.max(w, Math.max(DEFAULT_VIEWPORT_WIDTH,
                             nativeGetContentMinPrefWidth()));
                 }
-            } else {
+            } else if (mViewportWidth > 0) {
                 width = Math.max(w, mViewportWidth);
+            } else {
+                width = Math.max(w, nativeGetContentMinPrefWidth());
             }
         }
         nativeSetSize(width, width == w ? h : Math.round((float) width * h / w),
-                textwrapWidth, scale, w, h, ignoreHeight);
+                textwrapWidth, scale, w, h, anchorX, anchorY, ignoreHeight);
         // Remember the current width and height
         boolean needInvalidate = (mCurrentViewWidth == 0);
         mCurrentViewWidth = w;
@@ -1953,14 +1956,12 @@ final class WebViewCore {
         mRestoreState.mScrollY = mRestoredY;
         mRestoreState.mMobileSite = (0 == mViewportWidth);
         if (mRestoredScale > 0) {
+            mRestoreState.mViewScale = mRestoredScale / 100.0f;
             if (mRestoredScreenWidthScale > 0) {
                 mRestoreState.mTextWrapScale =
                         mRestoredScreenWidthScale / 100.0f;
-                // 0 will trigger WebView to turn on zoom overview mode
-                mRestoreState.mViewScale = 0;
             } else {
-                mRestoreState.mViewScale = mRestoreState.mTextWrapScale =
-                        mRestoredScale / 100.0f;
+                mRestoreState.mTextWrapScale = mRestoreState.mViewScale;
             }
         } else {
             if (mViewportInitialScale > 0) {
@@ -1993,6 +1994,7 @@ final class WebViewCore {
             data.mTextWrapWidth = data.mWidth;
             data.mScale = -1.0f;
             data.mIgnoreHeight = false;
+            data.mAnchorX = data.mAnchorY = 0;
             // send VIEW_SIZE_CHANGED to the front of the queue so that we can
             // avoid pushing the wrong picture to the WebView side. If there is
             // a VIEW_SIZE_CHANGED in the queue, probably from WebView side,
@@ -2021,6 +2023,7 @@ final class WebViewCore {
                 data.mTextWrapWidth = Math.round(webViewWidth
                         / mRestoreState.mTextWrapScale);
                 data.mIgnoreHeight = false;
+                data.mAnchorX = data.mAnchorY = 0;
                 // send VIEW_SIZE_CHANGED to the front of the queue so that we
                 // can avoid pushing the wrong picture to the WebView side.
                 mEventHub.removeMessages(EventHub.VIEW_SIZE_CHANGED);
@@ -2175,6 +2178,40 @@ final class WebViewCore {
     
     private void destroySurface(ViewManager.ChildView childView) {
         childView.removeView();
+    }
+
+    // called by JNI
+    static class ShowRectData {
+        int mLeft;
+        int mTop;
+        int mWidth;
+        int mHeight;
+        int mContentWidth;
+        int mContentHeight;
+        float mXPercentInDoc;
+        float mXPercentInView;
+        float mYPercentInDoc;
+        float mYPercentInView;
+    }
+
+    private void showRect(int left, int top, int width, int height,
+            int contentWidth, int contentHeight, float xPercentInDoc,
+            float xPercentInView, float yPercentInDoc, float yPercentInView) {
+        if (mWebView != null) {
+            ShowRectData data = new ShowRectData();
+            data.mLeft = left;
+            data.mTop = top;
+            data.mWidth = width;
+            data.mHeight = height;
+            data.mContentWidth = contentWidth;
+            data.mContentHeight = contentHeight;
+            data.mXPercentInDoc = xPercentInDoc;
+            data.mXPercentInView = xPercentInView;
+            data.mYPercentInDoc = yPercentInDoc;
+            data.mYPercentInView = yPercentInView;
+            Message.obtain(mWebView.mPrivateHandler, WebView.SHOW_RECT_MSG_ID,
+                    data).sendToTarget();
+        }
     }
 
     private native void nativePause();
