@@ -3663,9 +3663,6 @@ public class WebView extends AbsoluteLayout
         nativeHideCursor();
     }
 
-    /**
-     * @hide
-     */
     public void emulateShiftHeld() {
         if (0 == mNativeClass) return; // client isn't initialized
         setUpSelectXY();
