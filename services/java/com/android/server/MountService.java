@@ -28,7 +28,6 @@ import android.content.res.Resources;
 import android.net.Uri;
 import android.os.IMountService;
 import android.os.Environment;
-import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.UEventObserver;
 import android.text.TextUtils;
@@ -36,6 +35,7 @@ import android.util.Log;
 
 import java.io.File;
 import java.io.FileReader;
+import java.lang.IllegalStateException;
 
 /**
  * MountService implements an to the mount service daemon
@@ -136,7 +136,7 @@ class MountService extends IMountService.Stub {
     /**
      * @return true if USB mass storage support is enabled.
      */
-    public boolean getMassStorageEnabled() throws RemoteException {
+    public boolean getMassStorageEnabled() {
         return mUmsEnabled;
     }
 
@@ -145,7 +145,7 @@ class MountService extends IMountService.Stub {
      * 
      * @param enable  true to enable USB mass storage support
      */
-    public void setMassStorageEnabled(boolean enable) throws RemoteException {
+    public void setMassStorageEnabled(boolean enable) throws IllegalStateException {
         try {
             String vp = Environment.getExternalStorageDirectory().getPath();
             String vs = getVolumeState(vp);
@@ -164,7 +164,7 @@ class MountService extends IMountService.Stub {
                 Log.d(TAG, "Mounting media after UMS disable");
                 mountMedia(vp);
             }
-        } catch (RemoteException rex) {
+        } catch (IllegalStateException rex) {
             Log.e(TAG, "Failed to set ums enable {" + enable + "}");
             return;
         }
@@ -173,14 +173,14 @@ class MountService extends IMountService.Stub {
     /**
      * @return true if USB mass storage is connected.
      */
-    public boolean getMassStorageConnected() throws RemoteException {
+    public boolean getMassStorageConnected() {
         return mUmsConnected;
     }
 
     /**
      * @return state of the volume at the specified mount point
      */
-    public String getVolumeState(String mountPoint) throws RemoteException {
+    public String getVolumeState(String mountPoint) throws IllegalStateException {
         /*
          * XXX: Until we have multiple volume discovery, just hardwire
          * this to /sdcard
@@ -197,7 +197,7 @@ class MountService extends IMountService.Stub {
     /**
      * Attempt to mount external media
      */
-    public void mountMedia(String mountPath) throws RemoteException {
+    public void mountMedia(String mountPath) throws IllegalStateException {
         if (mContext.checkCallingOrSelfPermission(
                 android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS) 
                 != PackageManager.PERMISSION_GRANTED) {
@@ -209,7 +209,7 @@ class MountService extends IMountService.Stub {
     /**
      * Attempt to unmount external media to prepare for eject
      */
-    public void unmountMedia(String mountPath) throws RemoteException {
+    public void unmountMedia(String mountPath) throws IllegalStateException {
         if (mContext.checkCallingOrSelfPermission(
                 android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS) 
                 != PackageManager.PERMISSION_GRANTED) {
@@ -227,7 +227,7 @@ class MountService extends IMountService.Stub {
     /**
      * Attempt to format external media
      */
-    public void formatMedia(String formatPath) throws RemoteException {
+    public void formatMedia(String formatPath) throws IllegalStateException {
         if (mContext.checkCallingOrSelfPermission(
                 android.Manifest.permission.MOUNT_FORMAT_FILESYSTEMS) 
                 != PackageManager.PERMISSION_GRANTED) {
@@ -306,7 +306,7 @@ class MountService extends IMountService.Stub {
             } else {
                 setUsbStorageNotification(0, 0, 0, false, false, null);
             }
-        } catch (RemoteException e) {
+        } catch (IllegalStateException e) {
             // Nothing to do
         }
     }
@@ -335,7 +335,7 @@ class MountService extends IMountService.Stub {
                     } else {
                         Log.d(TAG, "Skipping connection-mount; already mounted");
                     }
-                } catch (RemoteException rex) {
+                } catch (IllegalStateException rex) {
                     Log.e(TAG, "Exception while handling connection mount " + rex);
                 }
 
@@ -350,7 +350,7 @@ class MountService extends IMountService.Stub {
     }
 
     void notifyVolumeStateChange(String label, String mountPoint, int oldState,
-                                 int newState) throws RemoteException {
+                                 int newState) throws IllegalStateException {
         String vs = getVolumeState(mountPoint);
 
         if (newState == VolumeState.Init) {
@@ -395,7 +395,7 @@ class MountService extends IMountService.Stub {
             if (mAutoStartUms) {
                 try {
                     setMassStorageEnabled(true);
-                } catch (RemoteException e) {
+                } catch (IllegalStateException e) {
                 }
             } else {
                 updateUsbMassStorageNotification(false, true);
@@ -429,7 +429,7 @@ class MountService extends IMountService.Stub {
         mContext.sendBroadcast(intent);
     }
 
-    void notifyMediaInserted(final String path) throws RemoteException {
+    void notifyMediaInserted(final String path) throws IllegalStateException {
         new Thread() {
             public void run() {
                 try {
@@ -445,7 +445,7 @@ class MountService extends IMountService.Stub {
     /**
      * Broadcasts the media removed event to all clients.
      */
-    void notifyMediaRemoved(String path) throws RemoteException {
+    void notifyMediaRemoved(String path) throws IllegalStateException {
 
         // Suppress this on bad removal
         if (getVolumeState(path).equals(Environment.MEDIA_BAD_REMOVAL)) {
@@ -755,5 +755,31 @@ class MountService extends IMountService.Stub {
             notificationManager.cancel(notificationId);
         }
     }
+
+    public String[] getSecureCacheList() throws IllegalStateException {
+        return mListener.listAsec();
+    }
+
+    public String createSecureCache(String id, int sizeMb, String fstype,
+                                    String key, int ownerUid) throws IllegalStateException {
+        return mListener.createAsec(id, sizeMb, fstype, key, ownerUid);
+    }
+
+    public void finalizeSecureCache(String id) throws IllegalStateException {
+        mListener.finalizeAsec(id);
+    }
+
+    public void destroySecureCache(String id) throws IllegalStateException {
+        mListener.destroyAsec(id);
+    }
+   
+    public String mountSecureCache(String id, String key, int ownerUid) throws IllegalStateException {
+        return mListener.mountAsec(id, key, ownerUid);
+    }
+
+    public String getSecureCachePath(String id) throws IllegalStateException {
+        return mListener.getAsecPath(id);
+    }
+
 }
 
