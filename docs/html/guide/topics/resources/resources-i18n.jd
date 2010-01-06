@@ -643,14 +643,14 @@ resource qualifiers in the table above.</p>
 <p>Android will pick which of the various underlying resource files should be
 used at runtime, depending on the current configuration of the device.
 The example used here assumes the following device configuration:</p>
-<blockquote>
-  <p>Locale = <code>en-GB</code><br>
+
+  <p style="margin-left:2em">Locale = <code>en-GB</code><br>
   Screen orientation = <code>port</code><br>
   Screen pixel density = <code>mdpi</code><br>
     Touchscreen type = <code>notouch</code><br>
     Primary text input method = <code>12key</code><br>
   </p>
-</blockquote>
+
 <p>Here is how  Android  makes the selection: </p>
 <ol>
     <li>
