@@ -81,7 +81,7 @@ public class NinePatchDrawable extends Drawable {
      */
     @Deprecated
     public NinePatchDrawable(NinePatch patch) {
-        this(new NinePatchState(patch, null), null);
+        this(new NinePatchState(patch, new Rect()), null);
     }
 
     /**
@@ -89,7 +89,7 @@ public class NinePatchDrawable extends Drawable {
      * based on the display metrics of the resources.
      */
     public NinePatchDrawable(Resources res, NinePatch patch) {
-        this(new NinePatchState(patch, null), res);
+        this(new NinePatchState(patch, new Rect()), res);
         mNinePatchState.mTargetDensity = mTargetDensity;
     }
 
