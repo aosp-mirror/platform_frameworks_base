@@ -82,6 +82,11 @@ public class ApplicationErrorReport implements Parcelable {
     public long time;
 
     /**
+     * Set if the app is on the system image.
+     */
+    public boolean systemApp;
+
+    /**
      * If this report is of type {@link #TYPE_CRASH}, contains an instance
      * of CrashInfo describing the crash; otherwise null.
      */
@@ -113,6 +118,7 @@ public class ApplicationErrorReport implements Parcelable {
         dest.writeString(installerPackageName);
         dest.writeString(processName);
         dest.writeLong(time);
+        dest.writeInt(systemApp ? 1 : 0);
 
         switch (type) {
             case TYPE_CRASH:
@@ -130,6 +136,7 @@ public class ApplicationErrorReport implements Parcelable {
         installerPackageName = in.readString();
         processName = in.readString();
         time = in.readLong();
+        systemApp = in.readInt() == 1;
 
         switch (type) {
             case TYPE_CRASH:
@@ -331,6 +338,7 @@ public class ApplicationErrorReport implements Parcelable {
         pw.println(prefix + "installerPackageName: " + installerPackageName);
         pw.println(prefix + "processName: " + processName);
         pw.println(prefix + "time: " + time);
+        pw.println(prefix + "systemApp: " + systemApp);
 
         switch (type) {
             case TYPE_CRASH:
