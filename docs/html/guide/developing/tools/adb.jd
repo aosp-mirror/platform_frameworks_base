@@ -83,12 +83,12 @@ page.title=Android Debug Bridge
 
 <p>The server then sets up connections to all running emulator/device instances. It locates emulator/device instances by scanning odd-numbered ports in the range 5555 to 5585, the range used by emulators/devices. Where the server finds an adb daemon, it sets up a connection to that port. Note that each emulator/device instance acquires a pair of sequential ports &mdash; an even-numbered port for console connections and an odd-numbered port for adb connections. For example: </p>
 
-<blockquote>
+<p style="margin-left:2em">
 Emulator 1, console: 5554<br/>
 Emulator 1, adb: 5555<br>
 Emulator 2, console: 5556<br>
 Emulator 2, adb: 5557 ...
-</blockquote>
+</p>
 
 <p>As shown, the emulator instance connected to adb on port 5555 is the same as the instance whose console listens on port 5554. </p>
 
