@@ -582,21 +582,23 @@ public class SQLiteCursor extends AbstractWindowedCursor {
     @Override
     protected void finalize() {
         try {
+            // if the cursor hasn't been closed yet, close it first
             if (mWindow != null) {
                 close();
-                String message = "Finalizing cursor " + this + " on " + mEditTable
-                        + " that has not been deactivated or closed";
+                Log.e(TAG, "Finalizing cursor that has not been deactivated or closed." 
+                    + " database = " + mDatabase.getPath() + ", table = " + mEditTable
+                    + ", query = " + mQuery.mSql);
                 if (SQLiteDebug.DEBUG_ACTIVE_CURSOR_FINALIZATION) {
-                    Log.d(TAG, message + "\nThis cursor was created in:");
+                    Log.d(TAG, "This cursor was created in:");
                     for (StackTraceElement ste : mStackTraceElements) {
                         Log.d(TAG, "      " + ste);
                     }
                 }
                 SQLiteDebug.notifyActiveCursorFinalized();
-                throw new IllegalStateException(message);
             } else {
                 if (Config.LOGV) {
-                    Log.v(TAG, "Finalizing cursor " + this + " on " + mEditTable);
+                    Log.v(TAG, "Finalizing cursor on database = " + mDatabase.getPath() +
+                            ", table = " + mEditTable + ", query = " + mQuery.mSql);
                 }
             }
         } finally {
