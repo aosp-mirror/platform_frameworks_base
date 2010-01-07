@@ -111,8 +111,7 @@
     <string name="httpErrorFile" msgid="8250549644091165175">"Det gick inte att komma åt filen."</string>
     <string name="httpErrorFileNotFound" msgid="5588380756326017105">"Den begärda filen hittades inte."</string>
     <string name="httpErrorTooManyRequests" msgid="1235396927087188253">"För många begäranden bearbetas. Försök igen senare."</string>
-    <!-- no translation found for notification_title (1259940370369187045) -->
-    <skip />
+    <string name="notification_title" msgid="1259940370369187045">"Inloggningsfel för <xliff:g id="ACCOUNT">%1$s</xliff:g>"</string>
     <string name="contentServiceSync" msgid="8353523060269335667">"Synkronisera"</string>
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"Synkronisera"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"För många <xliff:g id="CONTENT_TYPE">%s</xliff:g>-borttagningar."</string>
@@ -148,10 +147,8 @@
     <string name="permgroupdesc_location" msgid="2430258821648348660">"Övervaka din fysiska plats"</string>
     <string name="permgrouplab_network" msgid="5808983377727109831">"Nätverkskommunikation"</string>
     <string name="permgroupdesc_network" msgid="5035763698958415998">"Tillåt att program kommer åt olika nätverksfunktioner."</string>
-    <!-- no translation found for permgrouplab_accounts (3359646291125325519) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_accounts (4948732641827091312) -->
-    <skip />
+    <string name="permgrouplab_accounts" msgid="3359646291125325519">"Dina konton"</string>
+    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Få åtkomst till tillgängliga konton."</string>
     <string name="permgrouplab_hardwareControls" msgid="7998214968791599326">"Kontroller för maskinvara"</string>
     <string name="permgroupdesc_hardwareControls" msgid="4357057861225462702">"Direkt åtkomst till maskinvara på handenheten."</string>
     <string name="permgrouplab_phoneCalls" msgid="9067173988325865923">"Telefonsamtal"</string>
@@ -188,8 +185,14 @@
     <string name="permdesc_setDebugApp" msgid="5584310661711990702">"Tillåter att ett program aktiverar felsökning för ett annat program. Skadliga program kan använda detta för att avsluta andra program."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"ändra dina gränssnittsinställningar"</string>
     <string name="permdesc_changeConfiguration" msgid="3465121501528064399">"Tillåter att ett program ändrar den aktuella konfigurationen, till exempel språk eller övergripande teckenformat."</string>
-    <string name="permlab_restartPackages" msgid="2386396847203622628">"starta om andra program"</string>
-    <string name="permdesc_restartPackages" msgid="1076364837492936814">"Tillåter att ett program framtvingar omstart av andra program."</string>
+    <!-- no translation found for permlab_killBackgroundProcesses (8373714752793061963) -->
+    <skip />
+    <!-- no translation found for permdesc_killBackgroundProcesses (2908829602869383753) -->
+    <skip />
+    <!-- no translation found for permlab_forceStopPackages (1447830113260156236) -->
+    <skip />
+    <!-- no translation found for permdesc_forceStopPackages (7263036616161367402) -->
+    <skip />
     <string name="permlab_forceBack" msgid="1804196839880393631">"tvinga program att avsluta"</string>
     <string name="permdesc_forceBack" msgid="6534109744159919013">"Tillåter att ett program tvingar en aktivitet som finns i förgrunden att avsluta och gå tillbaka. Behövs inte för vanliga program."</string>
     <string name="permlab_dump" msgid="1681799862438954752">"hämta systemets interna status"</string>
@@ -319,7 +322,7 @@
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"ringa telefonnummer direkt"</string>
     <string name="permdesc_callPrivileged" msgid="244405067160028452">"Tillåter att programmet ringer ett telefonnummer, inklusive nödnummer, utan att du behöver göra något. Skadliga program kan ringa onödiga och olagliga samtal till räddningtjänsten."</string>
     <string name="permlab_performCdmaProvisioning" msgid="5604848095315421425">"starta CDMA-telefoninställningar direkt"</string>
-    <string name="permdesc_performCdmaProvisioning" msgid="6457447676108355905">"Tillåter att programmet startar CDMA-anslutning. Skadliga program kan skada CDMA-anslutningar i onödan."</string>
+    <string name="permdesc_performCdmaProvisioning" msgid="6457447676108355905">"Tillåter att programmet startar CDMA-anslutning. Skadliga program kan starta CDMA-anslutningar i onödan."</string>
     <string name="permlab_locationUpdates" msgid="7785408253364335740">"styra meddelanden för platsuppdatering"</string>
     <string name="permdesc_locationUpdates" msgid="2300018303720930256">"Tillåter aktivering och inaktivering av avisering om platsuppdatering i radion. Används inte av vanliga program."</string>
     <string name="permlab_checkinProperties" msgid="7855259461268734914">"få åtkomst till incheckningsegenskaper"</string>
@@ -392,6 +395,10 @@
     <string name="permdesc_writeDictionary" msgid="2241256206524082880">"Tillåter att ett program skriver in nya ord i användarordlistan."</string>
     <string name="permlab_sdcardWrite" msgid="8079403759001777291">"ändra/ta bort innehåll på SD-kortet"</string>
     <string name="permdesc_sdcardWrite" msgid="6643963204976471878">"Tillåter att ett program skriver till SD-kortet."</string>
+    <!-- no translation found for permlab_cache_filesystem (5656487264819669824) -->
+    <skip />
+    <!-- no translation found for permdesc_cache_filesystem (1624734528435659906) -->
+    <skip />
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Hem"</item>
     <item msgid="869923650527136615">"Mobil"</item>
@@ -435,126 +442,73 @@
     <item msgid="2506857312718630823">"ICQ"</item>
     <item msgid="1648797903785279353">"Jabber"</item>
   </string-array>
-    <!-- no translation found for phoneTypeCustom (1644738059053355820) -->
-    <skip />
-    <!-- no translation found for phoneTypeHome (2570923463033985887) -->
-    <skip />
-    <!-- no translation found for phoneTypeMobile (6501463557754751037) -->
-    <skip />
-    <!-- no translation found for phoneTypeWork (8863939667059911633) -->
-    <skip />
-    <!-- no translation found for phoneTypeFaxWork (3517792160008890912) -->
-    <skip />
-    <!-- no translation found for phoneTypeFaxHome (2067265972322971467) -->
-    <skip />
-    <!-- no translation found for phoneTypePager (7582359955394921732) -->
-    <skip />
-    <!-- no translation found for phoneTypeOther (1544425847868765990) -->
-    <skip />
-    <!-- no translation found for phoneTypeCallback (2712175203065678206) -->
-    <skip />
-    <!-- no translation found for phoneTypeCar (8738360689616716982) -->
-    <skip />
-    <!-- no translation found for phoneTypeCompanyMain (540434356461478916) -->
-    <skip />
-    <!-- no translation found for phoneTypeIsdn (8022453193171370337) -->
-    <skip />
-    <!-- no translation found for phoneTypeMain (6766137010628326916) -->
-    <skip />
-    <!-- no translation found for phoneTypeOtherFax (8587657145072446565) -->
-    <skip />
-    <!-- no translation found for phoneTypeRadio (4093738079908667513) -->
-    <skip />
-    <!-- no translation found for phoneTypeTelex (3367879952476250512) -->
-    <skip />
-    <!-- no translation found for phoneTypeTtyTdd (8606514378585000044) -->
-    <skip />
-    <!-- no translation found for phoneTypeWorkMobile (1311426989184065709) -->
-    <skip />
-    <!-- no translation found for phoneTypeWorkPager (649938731231157056) -->
-    <skip />
-    <!-- no translation found for phoneTypeAssistant (5596772636128562884) -->
-    <skip />
-    <!-- no translation found for phoneTypeMms (7254492275502768992) -->
-    <skip />
-    <!-- no translation found for eventTypeBirthday (2813379844211390740) -->
-    <skip />
-    <!-- no translation found for eventTypeAnniversary (3876779744518284000) -->
-    <skip />
-    <!-- no translation found for eventTypeOther (5834288791948564594) -->
-    <skip />
-    <!-- no translation found for emailTypeCustom (8525960257804213846) -->
-    <skip />
-    <!-- no translation found for emailTypeHome (449227236140433919) -->
-    <skip />
-    <!-- no translation found for emailTypeWork (3548058059601149973) -->
-    <skip />
-    <!-- no translation found for emailTypeOther (2923008695272639549) -->
-    <skip />
-    <!-- no translation found for emailTypeMobile (119919005321166205) -->
-    <skip />
-    <!-- no translation found for postalTypeCustom (8903206903060479902) -->
-    <skip />
-    <!-- no translation found for postalTypeHome (8165756977184483097) -->
-    <skip />
-    <!-- no translation found for postalTypeWork (5268172772387694495) -->
-    <skip />
-    <!-- no translation found for postalTypeOther (2726111966623584341) -->
-    <skip />
-    <!-- no translation found for imTypeCustom (2074028755527826046) -->
-    <skip />
-    <!-- no translation found for imTypeHome (6241181032954263892) -->
-    <skip />
-    <!-- no translation found for imTypeWork (1371489290242433090) -->
-    <skip />
-    <!-- no translation found for imTypeOther (5377007495735915478) -->
-    <skip />
-    <!-- no translation found for imProtocolCustom (6919453836618749992) -->
-    <skip />
-    <!-- no translation found for imProtocolAim (7050360612368383417) -->
-    <skip />
-    <!-- no translation found for imProtocolMsn (144556545420769442) -->
-    <skip />
-    <!-- no translation found for imProtocolYahoo (8271439408469021273) -->
-    <skip />
-    <!-- no translation found for imProtocolSkype (9019296744622832951) -->
-    <skip />
-    <!-- no translation found for imProtocolQq (8887484379494111884) -->
-    <skip />
-    <!-- no translation found for imProtocolGoogleTalk (3808393979157698766) -->
-    <skip />
-    <!-- no translation found for imProtocolIcq (1574870433606517315) -->
-    <skip />
-    <!-- no translation found for imProtocolJabber (2279917630875771722) -->
-    <skip />
-    <!-- no translation found for imProtocolNetMeeting (8287625655986827971) -->
-    <skip />
-    <!-- no translation found for orgTypeWork (29268870505363872) -->
-    <skip />
-    <!-- no translation found for orgTypeOther (3951781131570124082) -->
-    <skip />
-    <!-- no translation found for orgTypeCustom (225523415372088322) -->
-    <skip />
-    <!-- no translation found for contact_status_update_attribution (5112589886094402795) -->
-    <skip />
-    <!-- no translation found for contact_status_update_attribution_with_date (5945386376369979909) -->
-    <skip />
+    <string name="phoneTypeCustom" msgid="1644738059053355820">"Anpassad"</string>
+    <string name="phoneTypeHome" msgid="2570923463033985887">"Hem"</string>
+    <string name="phoneTypeMobile" msgid="6501463557754751037">"Mobil"</string>
+    <string name="phoneTypeWork" msgid="8863939667059911633">"Arbete"</string>
+    <string name="phoneTypeFaxWork" msgid="3517792160008890912">"Arbetsfax"</string>
+    <string name="phoneTypeFaxHome" msgid="2067265972322971467">"Hemfax"</string>
+    <string name="phoneTypePager" msgid="7582359955394921732">"Personsökare"</string>
+    <string name="phoneTypeOther" msgid="1544425847868765990">"Övrigt"</string>
+    <string name="phoneTypeCallback" msgid="2712175203065678206">"Återuppringning"</string>
+    <string name="phoneTypeCar" msgid="8738360689616716982">"Bil"</string>
+    <string name="phoneTypeCompanyMain" msgid="540434356461478916">"Nummer till företag"</string>
+    <string name="phoneTypeIsdn" msgid="8022453193171370337">"ISDN"</string>
+    <string name="phoneTypeMain" msgid="6766137010628326916">"Telefonnummer"</string>
+    <string name="phoneTypeOtherFax" msgid="8587657145072446565">"Annat faxnummer"</string>
+    <string name="phoneTypeRadio" msgid="4093738079908667513">"Radio"</string>
+    <string name="phoneTypeTelex" msgid="3367879952476250512">"Telex"</string>
+    <string name="phoneTypeTtyTdd" msgid="8606514378585000044">"TTY TDD"</string>
+    <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"Mobiltelefon, arbetet"</string>
+    <string name="phoneTypeWorkPager" msgid="649938731231157056">"Personsökare, arbetet"</string>
+    <string name="phoneTypeAssistant" msgid="5596772636128562884">"Assistent"</string>
+    <string name="phoneTypeMms" msgid="7254492275502768992">"MMS"</string>
+    <string name="eventTypeBirthday" msgid="2813379844211390740">"Födelsedag"</string>
+    <string name="eventTypeAnniversary" msgid="3876779744518284000">"Högtidsdag"</string>
+    <string name="eventTypeOther" msgid="5834288791948564594">"Händelse"</string>
+    <string name="emailTypeCustom" msgid="8525960257804213846">"Anpassad"</string>
+    <string name="emailTypeHome" msgid="449227236140433919">"Hem"</string>
+    <string name="emailTypeWork" msgid="3548058059601149973">"Arbete"</string>
+    <string name="emailTypeOther" msgid="2923008695272639549">"Övrigt"</string>
+    <string name="emailTypeMobile" msgid="119919005321166205">"Mobil"</string>
+    <string name="postalTypeCustom" msgid="8903206903060479902">"Anpassad"</string>
+    <string name="postalTypeHome" msgid="8165756977184483097">"Hem"</string>
+    <string name="postalTypeWork" msgid="5268172772387694495">"Arbete"</string>
+    <string name="postalTypeOther" msgid="2726111966623584341">"Övrigt"</string>
+    <string name="imTypeCustom" msgid="2074028755527826046">"Anpassad"</string>
+    <string name="imTypeHome" msgid="6241181032954263892">"Hem"</string>
+    <string name="imTypeWork" msgid="1371489290242433090">"Arbete"</string>
+    <string name="imTypeOther" msgid="5377007495735915478">"Övrigt"</string>
+    <string name="imProtocolCustom" msgid="6919453836618749992">"Anpassad"</string>
+    <string name="imProtocolAim" msgid="7050360612368383417">"AIM"</string>
+    <string name="imProtocolMsn" msgid="144556545420769442">"Windows Live"</string>
+    <string name="imProtocolYahoo" msgid="8271439408469021273">"Yahoo"</string>
+    <string name="imProtocolSkype" msgid="9019296744622832951">"Skype"</string>
+    <string name="imProtocolQq" msgid="8887484379494111884">"QQ"</string>
+    <string name="imProtocolGoogleTalk" msgid="3808393979157698766">"Google Talk"</string>
+    <string name="imProtocolIcq" msgid="1574870433606517315">"ICQ"</string>
+    <string name="imProtocolJabber" msgid="2279917630875771722">"Jabber"</string>
+    <string name="imProtocolNetMeeting" msgid="8287625655986827971">"NetMeeting"</string>
+    <string name="orgTypeWork" msgid="29268870505363872">"Arbete"</string>
+    <string name="orgTypeOther" msgid="3951781131570124082">"Övrigt"</string>
+    <string name="orgTypeCustom" msgid="225523415372088322">"Anpassad"</string>
+    <string name="contact_status_update_attribution" msgid="5112589886094402795">"via <xliff:g id="SOURCE">%1$s</xliff:g>"</string>
+    <string name="contact_status_update_attribution_with_date" msgid="5945386376369979909">"<xliff:g id="DATE">%1$s</xliff:g> via <xliff:g id="SOURCE">%2$s</xliff:g>"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"Ange PIN-kod"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"Fel PIN-kod!"</string>
-    <string name="keyguard_label_text" msgid="861796461028298424">"Tryck på Meny och sedan på 0 om du vill låsa upp."</string>
+    <string name="keyguard_label_text" msgid="861796461028298424">"Tryck på Menu och sedan på 0 om du vill låsa upp."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"Nödsamtalsnummer"</string>
     <string name="lockscreen_carrier_default" msgid="8812714795156374435">"(Ingen tjänst)"</string>
     <string name="lockscreen_screen_locked" msgid="7288443074806832904">"Skärmen har låsts."</string>
-    <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Tryck på Meny om du vill låsa upp eller ringa nödsamtal."</string>
-    <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"Tryck på Meny om du vill låsa upp."</string>
+    <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Tryck på Menu om du vill låsa upp eller ringa nödsamtal."</string>
+    <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"Tryck på Menu om du vill låsa upp."</string>
     <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"Rita grafiskt lösenord för att låsa upp"</string>
     <string name="lockscreen_emergency_call" msgid="5347633784401285225">"Nödsamtal"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Korrekt!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4817583279053112312">"Försök igen"</string>
     <string name="lockscreen_plugged_in" msgid="613343852842944435">"Laddar (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
     <string name="lockscreen_charged" msgid="4938930459620989972">"Laddad."</string>
-    <!-- no translation found for lockscreen_battery_short (3617549178603354656) -->
-    <skip />
+    <string name="lockscreen_battery_short" msgid="3617549178603354656">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Anslut din laddare."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="7381499217732227295">"Inget SIM-kort."</string>
     <string name="lockscreen_missing_sim_message" msgid="2186920585695169078">"Inget SIM-kort i telefonen."</string>
@@ -576,6 +530,9 @@
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Logga in"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Ogiltigt användarnamn eller lösenord."</string>
     <string name="lockscreen_glogin_checking_password" msgid="6758890536332363322">"Kontrollerar ..."</string>
+    <string name="lockscreen_unlock_label" msgid="737440483220667054">"Lås upp"</string>
+    <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Ljud på"</string>
+    <string name="lockscreen_sound_off_label" msgid="996822825154319026">"Ljud av"</string>
     <string name="hour_ampm" msgid="4329881288269772723">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_cap_ampm" msgid="1829009197680861107">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Ta bort"</string>
@@ -586,8 +543,7 @@
     <string name="battery_status_charging" msgid="756617993998772213">"Laddar…"</string>
     <string name="battery_low_title" msgid="7923774589611311406">"Anslut laddaren"</string>
     <string name="battery_low_subtitle" msgid="7388781709819722764">"Batteriet håller på att ta slut:"</string>
-    <!-- no translation found for battery_low_percent_format (696154104579022959) -->
-    <skip />
+    <string name="battery_low_percent_format" msgid="696154104579022959">"<xliff:g id="NUMBER">%d%%</xliff:g> eller mindre kvar."</string>
     <string name="battery_low_why" msgid="7279169609518386372">"Batteriförbrukning"</string>
     <string name="factorytest_failed" msgid="5410270329114212041">"Det gick fel vid fabrikstestet"</string>
     <string name="factorytest_not_system" msgid="4435201656767276723">"Åtgärden FACTORY_TEST stöds endast för paket som har installerats i /system/app."</string>
@@ -597,8 +553,7 @@
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
     <string name="js_dialog_before_unload" msgid="1901675448179653089">"Vill du lämna den här den här sidan?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Tryck på OK om du vill fortsätta eller på Avbryt om du vill vara kvar på den aktuella sidan."</string>
     <string name="save_password_label" msgid="6860261758665825069">"Bekräfta"</string>
-    <!-- no translation found for double_tap_toast (1068216937244567247) -->
-    <skip />
+    <string name="double_tap_toast" msgid="1068216937244567247">"Tips! Dubbelklicka om du vill zooma in eller ut."</string>
     <string name="permlab_readHistoryBookmarks" msgid="1284843728203412135">"läsa webbläsarhistorik och bokmärken"</string>
     <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"Tillåter att program läser alla webbadresser som webbläsaren har öppnat och alla webbläsarens bokmärken."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"skriva webbläsarhistorik och bokmärken"</string>
@@ -610,7 +565,7 @@
     <string name="open_permission_deny" msgid="5661861460947222274">"Du har inte behörighet att öppna den här sidan."</string>
     <string name="text_copied" msgid="4985729524670131385">"Text har kopierats till urklipp."</string>
     <string name="more_item_label" msgid="4650918923083320495">"Mer"</string>
-    <string name="prepend_shortcut_label" msgid="2572214461676015642">"Meny+"</string>
+    <string name="prepend_shortcut_label" msgid="2572214461676015642">"Menu+"</string>
     <string name="menu_space_shortcut_label" msgid="2410328639272162537">"utrymme"</string>
     <string name="menu_enter_shortcut_label" msgid="2743362785111309668">"retur"</string>
     <string name="menu_delete_shortcut_label" msgid="3658178007202748164">"ta bort"</string>
@@ -749,7 +704,6 @@
     <string name="force_close" msgid="3653416315450806396">"Tvinga fram en stängning"</string>
     <string name="report" msgid="4060218260984795706">"Rapportera"</string>
     <string name="wait" msgid="7147118217226317732">"Vänta"</string>
-    <string name="debug" msgid="9103374629678531849">"Felsökning"</string>
     <string name="sendText" msgid="5132506121645618310">"Välj en åtgärd för text"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Ringvolym"</string>
     <string name="volume_music" msgid="5421651157138628171">"Mediavolym"</string>
@@ -803,10 +757,8 @@
     <string name="extmedia_format_message" msgid="3621369962433523619">"Vill du formatera SD-kortet? Alla data på ditt kort kommer att gå förlorade."</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Format"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB-felsökning ansluten"</string>
-    <!-- no translation found for adb_active_notification_message (8470296818270110396) -->
-    <skip />
-    <!-- no translation found for select_input_method (6865512749462072765) -->
-    <skip />
+    <string name="adb_active_notification_message" msgid="8470296818270110396">"Välj att inaktivera USB-felsökning."</string>
+    <string name="select_input_method" msgid="6865512749462072765">"Välj indatametod"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"kandidater"</u></string>
@@ -837,22 +789,29 @@
     <string name="create_contact_using" msgid="4947405226788104538">"Skapa kontakt"\n"med <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="accessibility_compound_button_selected" msgid="5612776946036285686">"markerad"</string>
     <string name="accessibility_compound_button_unselected" msgid="8864512895673924091">"inte markerad"</string>
+    <!-- no translation found for grant_credentials_permission_message_header (6824538733852821001) -->
+    <skip />
+    <!-- no translation found for grant_credentials_permission_message_footer (3125211343379376561) -->
+    <skip />
+    <!-- no translation found for grant_permissions_header_text (2722567482180797717) -->
+    <skip />
     <string name="allow" msgid="7225948811296386551">"Tillåt"</string>
     <string name="deny" msgid="2081879885755434506">"Neka"</string>
     <string name="permission_request_notification_title" msgid="5390555465778213840">"Begärd behörighet"</string>
-    <!-- no translation found for permission_request_notification_with_subtitle (4325409589686688000) -->
-    <skip />
+    <string name="permission_request_notification_with_subtitle" msgid="4325409589686688000">"Behörighet krävs"\n"för kontot <xliff:g id="ACCOUNT">%s</xliff:g>"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Indatametod"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"Synkronisera"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Tillgänglighet"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Bakgrund"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Ändra bakgrund"</string>
-    <!-- no translation found for pptp_vpn_description (2688045385181439401) -->
+    <string name="pptp_vpn_description" msgid="2688045385181439401">"Point-to-Point Tunneling Protocol"</string>
+    <string name="l2tp_vpn_description" msgid="3750692169378923304">"Layer 2 Tunneling Protocol"</string>
+    <string name="l2tp_ipsec_psk_vpn_description" msgid="3945043564008303239">"I förväg delad L2TP/IPSec VPN-nyckel"</string>
+    <string name="l2tp_ipsec_crt_vpn_description" msgid="5382714073103653577">"Certifikatsbaserad L2TP/IPSec VPN"</string>
+    <!-- no translation found for upload_file (2897957172366730416) -->
     <skip />
-    <!-- no translation found for l2tp_vpn_description (3750692169378923304) -->
+    <!-- no translation found for reset (2448168080964209908) -->
     <skip />
-    <!-- no translation found for l2tp_ipsec_psk_vpn_description (3945043564008303239) -->
-    <skip />
-    <!-- no translation found for l2tp_ipsec_crt_vpn_description (5382714073103653577) -->
+    <!-- no translation found for submit (1602335572089911941) -->
     <skip />
 </resources>

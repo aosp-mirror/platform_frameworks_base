@@ -111,8 +111,7 @@
     <string name="httpErrorFile" msgid="8250549644091165175">"Dosyaya erişilemedi."</string>
     <string name="httpErrorFileNotFound" msgid="5588380756326017105">"İstenen dosya bulunamadı."</string>
     <string name="httpErrorTooManyRequests" msgid="1235396927087188253">"Çok fazla sayıda istek işleniyor. Daha sonra yeniden deneyin."</string>
-    <!-- no translation found for notification_title (1259940370369187045) -->
-    <skip />
+    <string name="notification_title" msgid="1259940370369187045">"<xliff:g id="ACCOUNT">%1$s</xliff:g> hesabı için oturum açma hatası"</string>
     <string name="contentServiceSync" msgid="8353523060269335667">"Senk."</string>
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"Senk."</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Çok fazla <xliff:g id="CONTENT_TYPE">%s</xliff:g> silme var."</string>
@@ -148,10 +147,8 @@
     <string name="permgroupdesc_location" msgid="2430258821648348660">"Fiziksel konumunuzu izleyin"</string>
     <string name="permgrouplab_network" msgid="5808983377727109831">"Ağ iletişimi"</string>
     <string name="permgroupdesc_network" msgid="5035763698958415998">"Uygulamaların çeşitli ağ özelliklerine erişmesine izin verir."</string>
-    <!-- no translation found for permgrouplab_accounts (3359646291125325519) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_accounts (4948732641827091312) -->
-    <skip />
+    <string name="permgrouplab_accounts" msgid="3359646291125325519">"Hesaplarınız"</string>
+    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Kullanılabilir hesaplara erişin."</string>
     <string name="permgrouplab_hardwareControls" msgid="7998214968791599326">"Donanım denetimleri"</string>
     <string name="permgroupdesc_hardwareControls" msgid="4357057861225462702">"Telefon donanımına doğrudan erişim."</string>
     <string name="permgrouplab_phoneCalls" msgid="9067173988325865923">"Telefon çağrıları"</string>
@@ -188,8 +185,14 @@
     <string name="permdesc_setDebugApp" msgid="5584310661711990702">"Bir uygulamanın başka bir uygulama için hata ayıklamayı çalıştırmasına izin verir. Kötü amaçlı uygulamalar bu işlevi başka uygulamaları kapatmak için kullanabilir."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"kullanıcı arayüzü ayarlarınızı değiştirin"</string>
     <string name="permdesc_changeConfiguration" msgid="3465121501528064399">"Uygulamaların güncel yapılandırmayı; örneğin yerel ayarı veya genel yazı tipi boyutunu değiştirmesine izin verir."</string>
-    <string name="permlab_restartPackages" msgid="2386396847203622628">"diğer uygulamaları yeniden başlat"</string>
-    <string name="permdesc_restartPackages" msgid="1076364837492936814">"Uygulamaların başka uygulamaları zorla yeniden başlatmasına izin verir."</string>
+    <!-- no translation found for permlab_killBackgroundProcesses (8373714752793061963) -->
+    <skip />
+    <!-- no translation found for permdesc_killBackgroundProcesses (2908829602869383753) -->
+    <skip />
+    <!-- no translation found for permlab_forceStopPackages (1447830113260156236) -->
+    <skip />
+    <!-- no translation found for permdesc_forceStopPackages (7263036616161367402) -->
+    <skip />
     <string name="permlab_forceBack" msgid="1804196839880393631">"uygulamayı kapanmaya zorla"</string>
     <string name="permdesc_forceBack" msgid="6534109744159919013">"Uygulamaların, ön plandaki herhangi bir etkinliği kapanmaya ve arka plana geçmeye zorlamasına izin verir. Normal uygulamalarda hiçbir zaman gerekmemelidir."</string>
     <string name="permlab_dump" msgid="1681799862438954752">"sistemin dahili durumunu al"</string>
@@ -314,9 +317,9 @@
     <string name="permdesc_flashlight" msgid="6433045942283802309">"Uygulamaların flaş ışığını denetlemesine izin verir."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"donanımı test et"</string>
     <string name="permdesc_hardware_test" msgid="3668894686500081699">"Uygulamanın donanım testi için çeşitli çevre birimlerini denetlemesine izin verir."</string>
-    <string name="permlab_callPhone" msgid="3925836347681847954">"telefon numaralarını doğrudan ara"</string>
-    <string name="permdesc_callPhone" msgid="3369867353692722456">"Uygulamanın müdahaleniz olmadan telefon numaralarını aramasına izin verir. Kötü amaçlı uygulamalar, telefon faturanızda beklenmedik görüşmeler çıkmasına neden olabilir. Bu işlev, uygulamanın acil numara aramasına izin vermez."</string>
-    <string name="permlab_callPrivileged" msgid="4198349211108497879">"herhangi bir telefon numarasını doğrudan ara"</string>
+    <string name="permlab_callPhone" msgid="3925836347681847954">"telefon numaralarına doğrudan çağrı yap"</string>
+    <string name="permdesc_callPhone" msgid="3369867353692722456">"Uygulamanın müdahaleniz olmadan telefon numaralarına çağrı yapmasına izin verir. Kötü amaçlı uygulamalar, telefon faturanızda beklenmedik görüşmeler çıkmasına neden olabilir. Bu işlev, uygulamanın acil numaralara çağrı yapmasına izin vermez."</string>
+    <string name="permlab_callPrivileged" msgid="4198349211108497879">"herhangi bir telefon numarasına doğrudan çağrı yap"</string>
     <string name="permdesc_callPrivileged" msgid="244405067160028452">"Uygulamanın, siz müdahale etmeden acil numaralar dahil herhangi bir numarayı aramasına izin verir. Kötü amaçlı uygulamalar acil servisleri gereksiz yere ve yasal olmayan şekilde arayabilir."</string>
     <string name="permlab_performCdmaProvisioning" msgid="5604848095315421425">"CDMA telefon kurulumunu doğrudan başlat"</string>
     <string name="permdesc_performCdmaProvisioning" msgid="6457447676108355905">"Uygulamaya CDMA hazırlığını başlatma izni verir. Kötü niyetli uygulamalar CDMA hazırlığını gereksiz yere başlatabilir"</string>
@@ -392,6 +395,10 @@
     <string name="permdesc_writeDictionary" msgid="2241256206524082880">"Uygulamaların kullanıcı sözlüğüne yeni kelimeler yazmasına izin verir."</string>
     <string name="permlab_sdcardWrite" msgid="8079403759001777291">"SD kart içeriklerini değiştir/sil"</string>
     <string name="permdesc_sdcardWrite" msgid="6643963204976471878">"Bir uygulamaya SD karta yazma izni verir."</string>
+    <!-- no translation found for permlab_cache_filesystem (5656487264819669824) -->
+    <skip />
+    <!-- no translation found for permdesc_cache_filesystem (1624734528435659906) -->
+    <skip />
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Ev"</item>
     <item msgid="869923650527136615">"Mobil"</item>
@@ -435,110 +442,58 @@
     <item msgid="2506857312718630823">"ICQ"</item>
     <item msgid="1648797903785279353">"Jabber"</item>
   </string-array>
-    <!-- no translation found for phoneTypeCustom (1644738059053355820) -->
-    <skip />
-    <!-- no translation found for phoneTypeHome (2570923463033985887) -->
-    <skip />
-    <!-- no translation found for phoneTypeMobile (6501463557754751037) -->
-    <skip />
-    <!-- no translation found for phoneTypeWork (8863939667059911633) -->
-    <skip />
-    <!-- no translation found for phoneTypeFaxWork (3517792160008890912) -->
-    <skip />
-    <!-- no translation found for phoneTypeFaxHome (2067265972322971467) -->
-    <skip />
-    <!-- no translation found for phoneTypePager (7582359955394921732) -->
-    <skip />
-    <!-- no translation found for phoneTypeOther (1544425847868765990) -->
-    <skip />
-    <!-- no translation found for phoneTypeCallback (2712175203065678206) -->
-    <skip />
-    <!-- no translation found for phoneTypeCar (8738360689616716982) -->
-    <skip />
-    <!-- no translation found for phoneTypeCompanyMain (540434356461478916) -->
-    <skip />
-    <!-- no translation found for phoneTypeIsdn (8022453193171370337) -->
-    <skip />
-    <!-- no translation found for phoneTypeMain (6766137010628326916) -->
-    <skip />
-    <!-- no translation found for phoneTypeOtherFax (8587657145072446565) -->
-    <skip />
-    <!-- no translation found for phoneTypeRadio (4093738079908667513) -->
-    <skip />
-    <!-- no translation found for phoneTypeTelex (3367879952476250512) -->
-    <skip />
-    <!-- no translation found for phoneTypeTtyTdd (8606514378585000044) -->
-    <skip />
-    <!-- no translation found for phoneTypeWorkMobile (1311426989184065709) -->
-    <skip />
-    <!-- no translation found for phoneTypeWorkPager (649938731231157056) -->
-    <skip />
-    <!-- no translation found for phoneTypeAssistant (5596772636128562884) -->
-    <skip />
-    <!-- no translation found for phoneTypeMms (7254492275502768992) -->
-    <skip />
-    <!-- no translation found for eventTypeBirthday (2813379844211390740) -->
-    <skip />
-    <!-- no translation found for eventTypeAnniversary (3876779744518284000) -->
-    <skip />
-    <!-- no translation found for eventTypeOther (5834288791948564594) -->
-    <skip />
-    <!-- no translation found for emailTypeCustom (8525960257804213846) -->
-    <skip />
-    <!-- no translation found for emailTypeHome (449227236140433919) -->
-    <skip />
-    <!-- no translation found for emailTypeWork (3548058059601149973) -->
-    <skip />
-    <!-- no translation found for emailTypeOther (2923008695272639549) -->
-    <skip />
-    <!-- no translation found for emailTypeMobile (119919005321166205) -->
-    <skip />
-    <!-- no translation found for postalTypeCustom (8903206903060479902) -->
-    <skip />
-    <!-- no translation found for postalTypeHome (8165756977184483097) -->
-    <skip />
-    <!-- no translation found for postalTypeWork (5268172772387694495) -->
-    <skip />
-    <!-- no translation found for postalTypeOther (2726111966623584341) -->
-    <skip />
-    <!-- no translation found for imTypeCustom (2074028755527826046) -->
-    <skip />
-    <!-- no translation found for imTypeHome (6241181032954263892) -->
-    <skip />
-    <!-- no translation found for imTypeWork (1371489290242433090) -->
-    <skip />
-    <!-- no translation found for imTypeOther (5377007495735915478) -->
-    <skip />
-    <!-- no translation found for imProtocolCustom (6919453836618749992) -->
-    <skip />
-    <!-- no translation found for imProtocolAim (7050360612368383417) -->
-    <skip />
-    <!-- no translation found for imProtocolMsn (144556545420769442) -->
-    <skip />
-    <!-- no translation found for imProtocolYahoo (8271439408469021273) -->
-    <skip />
-    <!-- no translation found for imProtocolSkype (9019296744622832951) -->
-    <skip />
-    <!-- no translation found for imProtocolQq (8887484379494111884) -->
-    <skip />
-    <!-- no translation found for imProtocolGoogleTalk (3808393979157698766) -->
-    <skip />
-    <!-- no translation found for imProtocolIcq (1574870433606517315) -->
-    <skip />
-    <!-- no translation found for imProtocolJabber (2279917630875771722) -->
-    <skip />
-    <!-- no translation found for imProtocolNetMeeting (8287625655986827971) -->
-    <skip />
-    <!-- no translation found for orgTypeWork (29268870505363872) -->
-    <skip />
-    <!-- no translation found for orgTypeOther (3951781131570124082) -->
-    <skip />
-    <!-- no translation found for orgTypeCustom (225523415372088322) -->
-    <skip />
-    <!-- no translation found for contact_status_update_attribution (5112589886094402795) -->
-    <skip />
-    <!-- no translation found for contact_status_update_attribution_with_date (5945386376369979909) -->
-    <skip />
+    <string name="phoneTypeCustom" msgid="1644738059053355820">"Özel"</string>
+    <string name="phoneTypeHome" msgid="2570923463033985887">"Ev"</string>
+    <string name="phoneTypeMobile" msgid="6501463557754751037">"Mobil"</string>
+    <string name="phoneTypeWork" msgid="8863939667059911633">"İş"</string>
+    <string name="phoneTypeFaxWork" msgid="3517792160008890912">"İş Faksı"</string>
+    <string name="phoneTypeFaxHome" msgid="2067265972322971467">"Ev Faksı"</string>
+    <string name="phoneTypePager" msgid="7582359955394921732">"Çağrı cihazı"</string>
+    <string name="phoneTypeOther" msgid="1544425847868765990">"Diğer"</string>
+    <string name="phoneTypeCallback" msgid="2712175203065678206">"Geri Arama"</string>
+    <string name="phoneTypeCar" msgid="8738360689616716982">"Araç"</string>
+    <string name="phoneTypeCompanyMain" msgid="540434356461478916">"Şirket Merkezi"</string>
+    <string name="phoneTypeIsdn" msgid="8022453193171370337">"ISDN"</string>
+    <string name="phoneTypeMain" msgid="6766137010628326916">"Ana"</string>
+    <string name="phoneTypeOtherFax" msgid="8587657145072446565">"Diğer Faks"</string>
+    <string name="phoneTypeRadio" msgid="4093738079908667513">"Telsiz"</string>
+    <string name="phoneTypeTelex" msgid="3367879952476250512">"Teleks"</string>
+    <string name="phoneTypeTtyTdd" msgid="8606514378585000044">"TTY TDD"</string>
+    <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"İş Yeri Cep Telefonu"</string>
+    <string name="phoneTypeWorkPager" msgid="649938731231157056">"İş Yeri Çağrı Cihazı"</string>
+    <string name="phoneTypeAssistant" msgid="5596772636128562884">"Yardımcı"</string>
+    <string name="phoneTypeMms" msgid="7254492275502768992">"MMS"</string>
+    <string name="eventTypeBirthday" msgid="2813379844211390740">"Doğum günü"</string>
+    <string name="eventTypeAnniversary" msgid="3876779744518284000">"Yıldönümü"</string>
+    <string name="eventTypeOther" msgid="5834288791948564594">"Etkinlik"</string>
+    <string name="emailTypeCustom" msgid="8525960257804213846">"Özel"</string>
+    <string name="emailTypeHome" msgid="449227236140433919">"Ev"</string>
+    <string name="emailTypeWork" msgid="3548058059601149973">"İş"</string>
+    <string name="emailTypeOther" msgid="2923008695272639549">"Diğer"</string>
+    <string name="emailTypeMobile" msgid="119919005321166205">"Mobil"</string>
+    <string name="postalTypeCustom" msgid="8903206903060479902">"Özel"</string>
+    <string name="postalTypeHome" msgid="8165756977184483097">"Ev"</string>
+    <string name="postalTypeWork" msgid="5268172772387694495">"İş"</string>
+    <string name="postalTypeOther" msgid="2726111966623584341">"Diğer"</string>
+    <string name="imTypeCustom" msgid="2074028755527826046">"Özel"</string>
+    <string name="imTypeHome" msgid="6241181032954263892">"Ev"</string>
+    <string name="imTypeWork" msgid="1371489290242433090">"İş"</string>
+    <string name="imTypeOther" msgid="5377007495735915478">"Diğer"</string>
+    <string name="imProtocolCustom" msgid="6919453836618749992">"Özel"</string>
+    <string name="imProtocolAim" msgid="7050360612368383417">"AIM"</string>
+    <string name="imProtocolMsn" msgid="144556545420769442">"Windows Live"</string>
+    <string name="imProtocolYahoo" msgid="8271439408469021273">"Yahoo"</string>
+    <string name="imProtocolSkype" msgid="9019296744622832951">"Skype"</string>
+    <string name="imProtocolQq" msgid="8887484379494111884">"QQ"</string>
+    <string name="imProtocolGoogleTalk" msgid="3808393979157698766">"Google Talk"</string>
+    <string name="imProtocolIcq" msgid="1574870433606517315">"ICQ"</string>
+    <string name="imProtocolJabber" msgid="2279917630875771722">"Jabber"</string>
+    <string name="imProtocolNetMeeting" msgid="8287625655986827971">"NetMeeting"</string>
+    <string name="orgTypeWork" msgid="29268870505363872">"İş"</string>
+    <string name="orgTypeOther" msgid="3951781131570124082">"Diğer"</string>
+    <string name="orgTypeCustom" msgid="225523415372088322">"Özel"</string>
+    <string name="contact_status_update_attribution" msgid="5112589886094402795">"<xliff:g id="SOURCE">%1$s</xliff:g> aracılığıyla"</string>
+    <string name="contact_status_update_attribution_with_date" msgid="5945386376369979909">"<xliff:g id="SOURCE">%2$s</xliff:g> ile <xliff:g id="DATE">%1$s</xliff:g> tarihinde"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"PIN kodunu gir"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"Yanlış PIN kodu!"</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"Kilidi açmak için önce Menü\'ye, sonra 0\'a basın."</string>
@@ -553,8 +508,7 @@
     <string name="lockscreen_pattern_wrong" msgid="4817583279053112312">"Üzgünüz, lütfen yeniden deneyin"</string>
     <string name="lockscreen_plugged_in" msgid="613343852842944435">"Şarj oluyor (<xliff:g id="PERCENT">%%</xliff:g><xliff:g id="NUMBER">%d</xliff:g>)"</string>
     <string name="lockscreen_charged" msgid="4938930459620989972">"Şarj oldu."</string>
-    <!-- no translation found for lockscreen_battery_short (3617549178603354656) -->
-    <skip />
+    <string name="lockscreen_battery_short" msgid="3617549178603354656">"<xliff:g id="NUMBER">%d</xliff:g> <xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Şarj cihazınızı bağlayın."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="7381499217732227295">"SIM kart yok."</string>
     <string name="lockscreen_missing_sim_message" msgid="2186920585695169078">"Telefonda SIM kart yok."</string>
@@ -576,6 +530,9 @@
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Oturum aç"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Geçersiz kullanıcı adı veya şifre."</string>
     <string name="lockscreen_glogin_checking_password" msgid="6758890536332363322">"Kontrol ediliyor..."</string>
+    <string name="lockscreen_unlock_label" msgid="737440483220667054">"Kilit Aç"</string>
+    <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Sesi aç"</string>
+    <string name="lockscreen_sound_off_label" msgid="996822825154319026">"Sesi kapat"</string>
     <string name="hour_ampm" msgid="4329881288269772723">"<xliff:g id="HOUR">%-l</xliff:g> <xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_cap_ampm" msgid="1829009197680861107">"<xliff:g id="HOUR">%-l</xliff:g> <xliff:g id="AMPM">%p</xliff:g>"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Temizle"</string>
@@ -586,8 +543,7 @@
     <string name="battery_status_charging" msgid="756617993998772213">"Şarj oluyor…"</string>
     <string name="battery_low_title" msgid="7923774589611311406">"Lütfen şarj cihazını takın"</string>
     <string name="battery_low_subtitle" msgid="7388781709819722764">"Pil tükeniyor:"</string>
-    <!-- no translation found for battery_low_percent_format (696154104579022959) -->
-    <skip />
+    <string name="battery_low_percent_format" msgid="696154104579022959">"<xliff:g id="NUMBER">%d%%</xliff:g> veya daha az kaldı."</string>
     <string name="battery_low_why" msgid="7279169609518386372">"Pil kullanımı"</string>
     <string name="factorytest_failed" msgid="5410270329114212041">"Fabrika testi yapılamadı"</string>
     <string name="factorytest_not_system" msgid="4435201656767276723">"FACTORY_TEST işlemi yalnızca /system/app dizinine yüklenmiş paketler için desteklenir."</string>
@@ -597,8 +553,7 @@
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
     <string name="js_dialog_before_unload" msgid="1901675448179653089">"Bu sayfadan ayrılıyor musunuz?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Devam etmek için Tamam\'ı, sayfada kalmak için İptal\'i tıklatın."</string>
     <string name="save_password_label" msgid="6860261758665825069">"Onayla"</string>
-    <!-- no translation found for double_tap_toast (1068216937244567247) -->
-    <skip />
+    <string name="double_tap_toast" msgid="1068216937244567247">"İpucu: Yakınlaştırmak ve uzaklaştırmak için iki kez hafifçe vurun."</string>
     <string name="permlab_readHistoryBookmarks" msgid="1284843728203412135">"Tarayıcı geçmişini ve favorileri oku"</string>
     <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"Uygulamaya Tarayıcının ziyaret etmiş olduğu tüm URL\'leri ve Tarayıcının tüm favorilerini okuma izni verir."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"Tarayıcı geçmişini ve favorileri yaz"</string>
@@ -713,7 +668,7 @@
     <string name="elapsed_time_short_format_mm_ss" msgid="4431555943828711473">"<xliff:g id="MINUTES">%1$02d</xliff:g>:<xliff:g id="SECONDS">%2$02d</xliff:g>"</string>
     <string name="elapsed_time_short_format_h_mm_ss" msgid="1846071997616654124">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
     <string name="selectAll" msgid="6876518925844129331">"Tümünü seç"</string>
-    <string name="selectText" msgid="3889149123626888637">"Metni seç"</string>
+    <string name="selectText" msgid="3889149123626888637">"Metin seç"</string>
     <string name="stopSelectingText" msgid="4157931463872320996">"Metin seçmeyi durdur"</string>
     <string name="cut" msgid="3092569408438626261">"Kes"</string>
     <string name="cutAll" msgid="2436383270024931639">"Tümünü kes"</string>
@@ -749,7 +704,6 @@
     <string name="force_close" msgid="3653416315450806396">"Kapanmaya zorla"</string>
     <string name="report" msgid="4060218260984795706">"Rapor"</string>
     <string name="wait" msgid="7147118217226317732">"Bekle"</string>
-    <string name="debug" msgid="9103374629678531849">"Hata ayıkla"</string>
     <string name="sendText" msgid="5132506121645618310">"Metin için bir işlem seçin"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Zil sesi düzeyi"</string>
     <string name="volume_music" msgid="5421651157138628171">"Medya ses düzeyi"</string>
@@ -803,10 +757,8 @@
     <string name="extmedia_format_message" msgid="3621369962433523619">"SD kartı biçimlendirmek istediğinizden emin misiniz? Kartınızdaki tüm veriler yok olacak."</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Biçimlendir"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB hata ayıklaması bağlandı"</string>
-    <!-- no translation found for adb_active_notification_message (8470296818270110396) -->
-    <skip />
-    <!-- no translation found for select_input_method (6865512749462072765) -->
-    <skip />
+    <string name="adb_active_notification_message" msgid="8470296818270110396">"USB hata ayıklamasını devre dışı bırakmak için tıklayın."</string>
+    <string name="select_input_method" msgid="6865512749462072765">"Giriş yöntemini seç"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"adaylar"</u></string>
@@ -837,22 +789,29 @@
     <string name="create_contact_using" msgid="4947405226788104538">"<xliff:g id="NUMBER">%s</xliff:g>"\n" ile kişi oluştur"</string>
     <string name="accessibility_compound_button_selected" msgid="5612776946036285686">"seçildi"</string>
     <string name="accessibility_compound_button_unselected" msgid="8864512895673924091">"seçilmedi"</string>
+    <!-- no translation found for grant_credentials_permission_message_header (6824538733852821001) -->
+    <skip />
+    <!-- no translation found for grant_credentials_permission_message_footer (3125211343379376561) -->
+    <skip />
+    <!-- no translation found for grant_permissions_header_text (2722567482180797717) -->
+    <skip />
     <string name="allow" msgid="7225948811296386551">"İzin Ver"</string>
     <string name="deny" msgid="2081879885755434506">"Reddet"</string>
     <string name="permission_request_notification_title" msgid="5390555465778213840">"İzin İstendi"</string>
-    <!-- no translation found for permission_request_notification_with_subtitle (4325409589686688000) -->
-    <skip />
+    <string name="permission_request_notification_with_subtitle" msgid="4325409589686688000">"<xliff:g id="ACCOUNT">%s</xliff:g> hesabı için"\n"İzin İstendi"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Giriş yöntemi"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"Senkronizasyon"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Erişebilirlik"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Duvar Kağıdı"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Duvar kağıdını değiştir"</string>
-    <!-- no translation found for pptp_vpn_description (2688045385181439401) -->
+    <string name="pptp_vpn_description" msgid="2688045385181439401">"Noktadan Noktaya Tünel Protokolü Kuralları"</string>
+    <string name="l2tp_vpn_description" msgid="3750692169378923304">"Katman 2 Tünel Protokolü"</string>
+    <string name="l2tp_ipsec_psk_vpn_description" msgid="3945043564008303239">"L2TP/IPSec VPN temelli önceden paylaşılmış anahtar"</string>
+    <string name="l2tp_ipsec_crt_vpn_description" msgid="5382714073103653577">"L2TP/IPSec VPN temelli sertifika"</string>
+    <!-- no translation found for upload_file (2897957172366730416) -->
     <skip />
-    <!-- no translation found for l2tp_vpn_description (3750692169378923304) -->
+    <!-- no translation found for reset (2448168080964209908) -->
     <skip />
-    <!-- no translation found for l2tp_ipsec_psk_vpn_description (3945043564008303239) -->
-    <skip />
-    <!-- no translation found for l2tp_ipsec_crt_vpn_description (5382714073103653577) -->
+    <!-- no translation found for submit (1602335572089911941) -->
     <skip />
 </resources>
