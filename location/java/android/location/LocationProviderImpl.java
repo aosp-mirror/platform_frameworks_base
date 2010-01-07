@@ -158,8 +158,8 @@ public abstract class LocationProviderImpl extends LocationProvider {
 
     /**
      * Returns the time at which the status was last updated. It is the
-     * responsibility of the provider to appropriately set this value
-     * using {@link android.os.SystemClock.elapsedRealtime()} each time
+     * responsibility of the provider to appropriately set this value using
+     * {@link android.os.SystemClock#elapsedRealtime SystemClock.elapsedRealtime()}.
      * there is a status update that it wishes to broadcast to all its
      * listeners. The provider should be careful not to broadcast
      * the same status again.
