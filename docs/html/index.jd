@@ -47,7 +47,7 @@ home=true
                                       <td class="imageCell"><a href="{@docRoot}sdk/index.html"><img src="{@docRoot}assets/images/icon_download.jpg" style="padding:0" /></a></td>
                                       <td>
                                               <h2 class="green">Download</h2>
-                                              <p>The Android SDK  the tools, sample code, and docs you need to create great apps.</p>
+                                              <p>The Android SDK has the tools, sample code, and docs you need to create great apps.</p>
                                               <p><a href="{@docRoot}sdk/index.html">Learn more &raquo;</a></p>
                                       </td>
                               </tr>

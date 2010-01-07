@@ -5,11 +5,9 @@ page.title=&lt;uses-feature&gt;
 
 <dt>syntax:</dt>
 <dd>
-<pre class="stx">
-&lt;uses-feature android:<a href="#glEsVersion">glEsVersion</a>="<em>integer</em>"
+<pre class="stx">&lt;uses-feature android:<a href="#glEsVersion">glEsVersion</a>="<em>integer</em>"
               android:<a href="#name">name</a>="<em>string</em>"
-              android:<a href="#required">required</a>=["true" | "false"] /&gt;
-</pre>
+              android:<a href="#required">required</a>=["true" | "false"] /&gt;</pre>
 </dd>
 
 <dt>contained in:</dt>
