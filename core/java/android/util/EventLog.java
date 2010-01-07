@@ -138,6 +138,7 @@ public class EventLog {
 
             case LIST_TYPE:
                 int length = mBuffer.get();
+                if (length < 0) length += 256;  // treat as signed byte
                 Object[] array = new Object[length];
                 for (int i = 0; i < length; ++i) array[i] = decodeObject();
                 return array;

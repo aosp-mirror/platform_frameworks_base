@@ -1,8 +1,6 @@
 package android.test;
 
 import com.android.internal.os.LoggingPrintStreamTest;
-import android.util.EventLogFunctionalTest;
-import android.util.EventLogTest;
 import junit.framework.TestSuite;
 import com.android.internal.http.multipart.MultipartTest;
 import com.android.internal.policy.impl.LockPatternKeyguardViewTest;
@@ -18,8 +16,6 @@ public class FrameworkTests {
         TestSuite suite = new TestSuite(FrameworkTests.class.getName());
 
         suite.addTestSuite(MultipartTest.class);
-        suite.addTestSuite(EventLogTest.class);
-        suite.addTestSuite(EventLogFunctionalTest.class);
         suite.addTestSuite(LoggingPrintStreamTest.class);
         suite.addTestSuite(LockPatternKeyguardViewTest.class);
 

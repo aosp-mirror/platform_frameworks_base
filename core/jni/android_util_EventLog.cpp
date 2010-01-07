@@ -21,6 +21,9 @@
 #include "jni.h"
 #include "cutils/logger.h"
 
+// The size of the tag number comes out of the payload size.
+#define MAX_EVENT_PAYLOAD (LOGGER_ENTRY_MAX_PAYLOAD - sizeof(int32_t))
+
 namespace android {
 
 static jclass gCollectionClass;
@@ -66,7 +69,7 @@ static jint android_util_EventLog_writeEvent_Long(JNIEnv* env, jobject clazz,
  */
 static jint android_util_EventLog_writeEvent_String(JNIEnv* env, jobject clazz,
                                                     jint tag, jstring value) {
-    uint8_t buf[LOGGER_ENTRY_MAX_PAYLOAD];
+    uint8_t buf[MAX_EVENT_PAYLOAD];
 
     // Don't throw NPE -- I feel like it's sort of mean for a logging function
     // to be all crashy if you pass in NULL -- but make the NULL value explicit.
@@ -94,12 +97,12 @@ static jint android_util_EventLog_writeEvent_Array(JNIEnv* env, jobject clazz,
         return android_util_EventLog_writeEvent_String(env, clazz, tag, NULL);
     }
 
-    uint8_t buf[LOGGER_ENTRY_MAX_PAYLOAD];
+    uint8_t buf[MAX_EVENT_PAYLOAD];
     const size_t max = sizeof(buf) - 1;  // leave room for final newline
     size_t pos = 2;  // Save room for type tag & array count
 
     jsize copied = 0, num = env->GetArrayLength(value);
-    for (; copied < num && copied < 256; ++copied) {
+    for (; copied < num && copied < 255; ++copied) {
         jobject item = env->GetObjectArrayElement(value, copied);
         if (item == NULL || env->IsInstanceOf(item, gStringClass)) {
             if (pos + 1 + sizeof(jint) > max) break;
