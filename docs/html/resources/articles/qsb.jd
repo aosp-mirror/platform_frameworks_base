@@ -23,8 +23,8 @@ example, from the home screen.</p>
 
 <p class="note"><strong>Note:</strong> The code fragments in this document are
 related to a sample app called <a
-href="http://developer.android.com/guide/samples/SearchableDictionary/index.
-html" title="Searchable Dictionary">Searchable Dictionary</a>. The app is
+href="{@docRoot}resources/samples/SearchableDictionary/index.html"
+title="Searchable Dictionary">Searchable Dictionary</a>. The app is
 available for Android 1.6 and later platforms.</p>
 
 <h3>The story before now: searching within your app</h3>
