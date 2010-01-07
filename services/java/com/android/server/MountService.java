@@ -115,8 +115,6 @@ class MountService extends IMountService.Stub {
         // start processing events before we ought-to
         mContext.registerReceiver(mBroadcastReceiver,
                 new IntentFilter(Intent.ACTION_BOOT_COMPLETED), null, null);
-        mContext.registerReceiver(mBroadcastReceiver,
-                new IntentFilter(Intent.ACTION_SHUTDOWN), null, null);
 
         mListener =  new MountListener(this);       
         mShowSafeUnmountNotificationWhenUnmounted = false;
@@ -133,8 +131,6 @@ class MountService extends IMountService.Stub {
             if (action.equals(Intent.ACTION_BOOT_COMPLETED)) {
                 Thread thread = new Thread(mListener, MountListener.class.getName());
                 thread.start();
-            } else if (action.equals(Intent.ACTION_SHUTDOWN)) {
-                shutdown();
             }
         }
     };
