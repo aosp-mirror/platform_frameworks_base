@@ -26,7 +26,6 @@ using namespace android::renderscript;
 VertexArray::VertexArray()
 {
     mActiveBuffer = 0;
-    mUserCount = 0;
 }
 
 VertexArray::~VertexArray()
@@ -40,7 +39,6 @@ void VertexArray::clearAll()
         mAttribs[ct].clear();
     }
     mActiveBuffer = 0;
-    mUserCount = 0;
 }
 
 VertexArray::Attrib::Attrib()
@@ -127,10 +125,13 @@ void VertexArray::setTexture(uint32_t size, uint32_t type, uint32_t stride, uint
 
 void VertexArray::setUser(const Attrib &a, uint32_t stride)
 {
-    mAttribs[mUserCount].set(a);
-    mAttribs[mUserCount].buffer = mActiveBuffer;
-    mAttribs[mUserCount].stride = stride;
-    mUserCount ++;
+    // Find empty slot, some may be taken by legacy 1.1 slots.
+    uint32_t slot = 0;
+    while (mAttribs[slot].size) slot++;
+    rsAssert(slot < RS_MAX_ATTRIBS);
+    mAttribs[slot].set(a);
+    mAttribs[slot].buffer = mActiveBuffer;
+    mAttribs[slot].stride = stride;
 }
 
 void VertexArray::logAttrib(uint32_t idx, uint32_t slot) const {
@@ -215,9 +216,8 @@ void VertexArray::setupGL2(const Context *rsc, class VertexArrayState *state, Sh
     }
 
     for (uint32_t ct=0; ct < RS_MAX_ATTRIBS; ct++) {
-        if (mAttribs[ct].size) {
+        if (mAttribs[ct].size && (sc->vtxAttribSlot(ct) >= 0)) {
             //logAttrib(ct, sc->vtxAttribSlot(ct));
-            rsAssert(sc->vtxAttribSlot(ct) >= 0);
             glEnableVertexAttribArray(sc->vtxAttribSlot(ct));
             glBindBuffer(GL_ARRAY_BUFFER, mAttribs[ct].buffer);
 

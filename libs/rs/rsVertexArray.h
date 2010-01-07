@@ -76,7 +76,6 @@ public:
 
 protected:
     uint32_t mActiveBuffer;
-    uint32_t mUserCount;
     Attrib mAttribs[RS_MAX_ATTRIBS];
 };
 
