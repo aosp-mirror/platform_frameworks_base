@@ -2452,6 +2452,133 @@ public final class Settings {
         public static final String LAST_SETUP_SHOWN = "last_setup_shown";
 
         /**
+         * How frequently (in seconds) to check the memory status of the
+         * device.
+         * @hide
+         */
+        public static final String MEMCHECK_INTERVAL = "memcheck_interval";
+
+        /**
+         * Max frequency (in seconds) to log memory check stats, in realtime
+         * seconds.  This allows for throttling of logs when the device is
+         * running for large amounts of time.
+         * @hide
+         */
+        public static final String MEMCHECK_LOG_REALTIME_INTERVAL =
+                "memcheck_log_realtime_interval";
+
+        /**
+         * Boolean indicating whether rebooting due to system memory checks
+         * is enabled.
+         * @hide
+         */
+        public static final String MEMCHECK_SYSTEM_ENABLED = "memcheck_system_enabled";
+
+        /**
+         * How many bytes the system process must be below to avoid scheduling
+         * a soft reboot.  This reboot will happen when it is next determined
+         * to be a good time.
+         * @hide
+         */
+        public static final String MEMCHECK_SYSTEM_SOFT_THRESHOLD = "memcheck_system_soft";
+
+        /**
+         * How many bytes the system process must be below to avoid scheduling
+         * a hard reboot.  This reboot will happen immediately.
+         * @hide
+         */
+        public static final String MEMCHECK_SYSTEM_HARD_THRESHOLD = "memcheck_system_hard";
+
+        /**
+         * How many bytes the phone process must be below to avoid scheduling
+         * a soft restart.  This restart will happen when it is next determined
+         * to be a good time.
+         * @hide
+         */
+        public static final String MEMCHECK_PHONE_SOFT_THRESHOLD = "memcheck_phone_soft";
+
+        /**
+         * How many bytes the phone process must be below to avoid scheduling
+         * a hard restart.  This restart will happen immediately.
+         * @hide
+         */
+        public static final String MEMCHECK_PHONE_HARD_THRESHOLD = "memcheck_phone_hard";
+
+        /**
+         * Boolean indicating whether restarting the phone process due to
+         * memory checks is enabled.
+         * @hide
+         */
+        public static final String MEMCHECK_PHONE_ENABLED = "memcheck_phone_enabled";
+
+        /**
+         * First time during the day it is okay to kill processes
+         * or reboot the device due to low memory situations.  This number is
+         * in seconds since midnight.
+         * @hide
+         */
+        public static final String MEMCHECK_EXEC_START_TIME = "memcheck_exec_start_time";
+
+        /**
+         * Last time during the day it is okay to kill processes
+         * or reboot the device due to low memory situations.  This number is
+         * in seconds since midnight.
+         * @hide
+         */
+        public static final String MEMCHECK_EXEC_END_TIME = "memcheck_exec_end_time";
+
+        /**
+         * How long the screen must have been off in order to kill processes
+         * or reboot.  This number is in seconds.  A value of -1 means to
+         * entirely disregard whether the screen is on.
+         * @hide
+         */
+        public static final String MEMCHECK_MIN_SCREEN_OFF = "memcheck_min_screen_off";
+
+        /**
+         * How much time there must be until the next alarm in order to kill processes
+         * or reboot.  This number is in seconds.  Note: this value must be
+         * smaller than {@link #MEMCHECK_RECHECK_INTERVAL} or else it will
+         * always see an alarm scheduled within its time.
+         * @hide
+         */
+        public static final String MEMCHECK_MIN_ALARM = "memcheck_min_alarm";
+
+        /**
+         * How frequently to check whether it is a good time to restart things,
+         * if the device is in a bad state.  This number is in seconds.  Note:
+         * this value must be larger than {@link #MEMCHECK_MIN_ALARM} or else
+         * the alarm to schedule the recheck will always appear within the
+         * minimum "do not execute now" time.
+         * @hide
+         */
+        public static final String MEMCHECK_RECHECK_INTERVAL = "memcheck_recheck_interval";
+
+        /**
+         * How frequently (in DAYS) to reboot the device.  If 0, no reboots
+         * will occur.
+         * @hide
+         */
+        public static final String REBOOT_INTERVAL = "reboot_interval";
+
+        /**
+         * First time during the day it is okay to force a reboot of the
+         * device (if REBOOT_INTERVAL is set).  This number is
+         * in seconds since midnight.
+         * @hide
+         */
+        public static final String REBOOT_START_TIME = "reboot_start_time";
+
+        /**
+         * The window of time (in seconds) after each REBOOT_INTERVAL in which
+         * a reboot can be executed.  If 0, a reboot will always be executed at
+         * exactly the given time.  Otherwise, it will only be executed if
+         * the device is idle within the window.
+         * @hide
+         */
+        public static final String REBOOT_WINDOW = "reboot_window";
+
+        /**
          * @hide
          */
         public static final String[] SETTINGS_TO_BACKUP = {
@@ -2676,117 +2803,6 @@ public final class Settings {
          * install/uninstall. Any non-0 value is considered true.
          */
         public static final String MARKET_FORCE_CHECKIN = "market_force_checkin";
-
-        /**
-         * How frequently (in seconds) to check the memory status of the
-         * device.
-         */
-        public static final String MEMCHECK_INTERVAL = "memcheck_interval";
-
-        /**
-         * Max frequency (in seconds) to log memory check stats, in realtime
-         * seconds.  This allows for throttling of logs when the device is
-         * running for large amounts of time.
-         */
-        public static final String MEMCHECK_LOG_REALTIME_INTERVAL =
-                "memcheck_log_realtime_interval";
-
-        /**
-         * Boolean indicating whether rebooting due to system memory checks
-         * is enabled.
-         */
-        public static final String MEMCHECK_SYSTEM_ENABLED = "memcheck_system_enabled";
-
-        /**
-         * How many bytes the system process must be below to avoid scheduling
-         * a soft reboot.  This reboot will happen when it is next determined
-         * to be a good time.
-         */
-        public static final String MEMCHECK_SYSTEM_SOFT_THRESHOLD = "memcheck_system_soft";
-
-        /**
-         * How many bytes the system process must be below to avoid scheduling
-         * a hard reboot.  This reboot will happen immediately.
-         */
-        public static final String MEMCHECK_SYSTEM_HARD_THRESHOLD = "memcheck_system_hard";
-
-        /**
-         * How many bytes the phone process must be below to avoid scheduling
-         * a soft restart.  This restart will happen when it is next determined
-         * to be a good time.
-         */
-        public static final String MEMCHECK_PHONE_SOFT_THRESHOLD = "memcheck_phone_soft";
-
-        /**
-         * How many bytes the phone process must be below to avoid scheduling
-         * a hard restart.  This restart will happen immediately.
-         */
-        public static final String MEMCHECK_PHONE_HARD_THRESHOLD = "memcheck_phone_hard";
-
-        /**
-         * Boolean indicating whether restarting the phone process due to
-         * memory checks is enabled.
-         */
-        public static final String MEMCHECK_PHONE_ENABLED = "memcheck_phone_enabled";
-
-        /**
-         * First time during the day it is okay to kill processes
-         * or reboot the device due to low memory situations.  This number is
-         * in seconds since midnight.
-         */
-        public static final String MEMCHECK_EXEC_START_TIME = "memcheck_exec_start_time";
-
-        /**
-         * Last time during the day it is okay to kill processes
-         * or reboot the device due to low memory situations.  This number is
-         * in seconds since midnight.
-         */
-        public static final String MEMCHECK_EXEC_END_TIME = "memcheck_exec_end_time";
-
-        /**
-         * How long the screen must have been off in order to kill processes
-         * or reboot.  This number is in seconds.  A value of -1 means to
-         * entirely disregard whether the screen is on.
-         */
-        public static final String MEMCHECK_MIN_SCREEN_OFF = "memcheck_min_screen_off";
-
-        /**
-         * How much time there must be until the next alarm in order to kill processes
-         * or reboot.  This number is in seconds.  Note: this value must be
-         * smaller than {@link #MEMCHECK_RECHECK_INTERVAL} or else it will
-         * always see an alarm scheduled within its time.
-         */
-        public static final String MEMCHECK_MIN_ALARM = "memcheck_min_alarm";
-
-        /**
-         * How frequently to check whether it is a good time to restart things,
-         * if the device is in a bad state.  This number is in seconds.  Note:
-         * this value must be larger than {@link #MEMCHECK_MIN_ALARM} or else
-         * the alarm to schedule the recheck will always appear within the
-         * minimum "do not execute now" time.
-         */
-        public static final String MEMCHECK_RECHECK_INTERVAL = "memcheck_recheck_interval";
-
-        /**
-         * How frequently (in DAYS) to reboot the device.  If 0, no reboots
-         * will occur.
-         */
-        public static final String REBOOT_INTERVAL = "reboot_interval";
-
-        /**
-         * First time during the day it is okay to force a reboot of the
-         * device (if REBOOT_INTERVAL is set).  This number is
-         * in seconds since midnight.
-         */
-        public static final String REBOOT_START_TIME = "reboot_start_time";
-
-        /**
-         * The window of time (in seconds) after each REBOOT_INTERVAL in which
-         * a reboot can be executed.  If 0, a reboot will always be executed at
-         * exactly the given time.  Otherwise, it will only be executed if
-         * the device is idle within the window.
-         */
-        public static final String REBOOT_WINDOW = "reboot_window";
 
         /**
          * The minimum version of the server that is required in order for the device to accept

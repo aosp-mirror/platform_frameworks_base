@@ -97,16 +97,16 @@ public class Watchdog extends Thread {
     long mLastMemCheckRealtime = -(MEMCHECK_DEFAULT_LOG_REALTIME_INTERVAL*1000);
     boolean mHaveGlobalPss;
     final MemMonitor mSystemMemMonitor = new MemMonitor("system",
-            Settings.Gservices.MEMCHECK_SYSTEM_ENABLED,
-            Settings.Gservices.MEMCHECK_SYSTEM_SOFT_THRESHOLD,
+            Settings.Secure.MEMCHECK_SYSTEM_ENABLED,
+            Settings.Secure.MEMCHECK_SYSTEM_SOFT_THRESHOLD,
             MEMCHECK_DEFAULT_SYSTEM_SOFT_THRESHOLD,
-            Settings.Gservices.MEMCHECK_SYSTEM_HARD_THRESHOLD,
+            Settings.Secure.MEMCHECK_SYSTEM_HARD_THRESHOLD,
             MEMCHECK_DEFAULT_SYSTEM_HARD_THRESHOLD);
     final MemMonitor mPhoneMemMonitor = new MemMonitor("com.android.phone",
-            Settings.Gservices.MEMCHECK_PHONE_ENABLED,
-            Settings.Gservices.MEMCHECK_PHONE_SOFT_THRESHOLD,
+            Settings.Secure.MEMCHECK_PHONE_ENABLED,
+            Settings.Secure.MEMCHECK_PHONE_SOFT_THRESHOLD,
             MEMCHECK_DEFAULT_PHONE_SOFT_THRESHOLD,
-            Settings.Gservices.MEMCHECK_PHONE_HARD_THRESHOLD,
+            Settings.Secure.MEMCHECK_PHONE_HARD_THRESHOLD,
             MEMCHECK_DEFAULT_PHONE_HARD_THRESHOLD);
 
     final Calendar mCalendar = Calendar.getInstance();
@@ -161,11 +161,11 @@ public class Watchdog extends Thread {
         }
 
         void retrieveSettings(ContentResolver resolver) {
-            mSoftThreshold = Settings.Gservices.getInt(
+            mSoftThreshold = Settings.Secure.getInt(
                     resolver, mSoftSetting, mSoftThreshold);
-            mHardThreshold = Settings.Gservices.getInt(
+            mHardThreshold = Settings.Secure.getInt(
                     resolver, mHardSetting, mHardThreshold);
-            mEnabled = Settings.Gservices.getInt(
+            mEnabled = Settings.Secure.getInt(
                     resolver, mEnabledSetting, 0) != 0;
         }
 
@@ -255,8 +255,8 @@ public class Watchdog extends Thread {
 
                     // See if we should force a reboot.
                     int rebootInterval = mReqRebootInterval >= 0
-                            ? mReqRebootInterval : Settings.Gservices.getInt(
-                            mResolver, Settings.Gservices.REBOOT_INTERVAL,
+                            ? mReqRebootInterval : Settings.Secure.getInt(
+                            mResolver, Settings.Secure.REBOOT_INTERVAL,
                             REBOOT_DEFAULT_INTERVAL);
                     if (mRebootInterval != rebootInterval) {
                         mRebootInterval = rebootInterval;
@@ -266,8 +266,8 @@ public class Watchdog extends Thread {
                     }
 
                     // See if we should check memory conditions.
-                    long memCheckInterval = Settings.Gservices.getLong(
-                            mResolver, Settings.Gservices.MEMCHECK_INTERVAL,
+                    long memCheckInterval = Settings.Secure.getLong(
+                            mResolver, Settings.Secure.MEMCHECK_INTERVAL,
                             MEMCHECK_DEFAULT_INTERVAL) * 1000;
                     if ((mLastMemCheckTime+memCheckInterval) < now) {
                         // It is now time to collect pss information.  This
@@ -279,8 +279,8 @@ public class Watchdog extends Thread {
                         collectMemory();
                         mHavePss = true;
 
-                        long memCheckRealtimeInterval = Settings.Gservices.getLong(
-                                mResolver, Settings.Gservices.MEMCHECK_LOG_REALTIME_INTERVAL,
+                        long memCheckRealtimeInterval = Settings.Secure.getLong(
+                                mResolver, Settings.Secure.MEMCHECK_LOG_REALTIME_INTERVAL,
                                 MEMCHECK_DEFAULT_LOG_REALTIME_INTERVAL) * 1000;
                         long realtimeNow = SystemClock.elapsedRealtime();
                         if ((mLastMemCheckRealtime+memCheckRealtimeInterval) < realtimeNow) {
@@ -468,8 +468,8 @@ public class Watchdog extends Thread {
         long curTime;
         long nextTime = 0;
 
-        long recheckInterval = Settings.Gservices.getLong(
-                mResolver, Settings.Gservices.MEMCHECK_RECHECK_INTERVAL,
+        long recheckInterval = Settings.Secure.getLong(
+                mResolver, Settings.Secure.MEMCHECK_RECHECK_INTERVAL,
                 MEMCHECK_DEFAULT_RECHECK_INTERVAL) * 1000;
 
         mSystemMemMonitor.retrieveSettings(mResolver);
@@ -586,8 +586,8 @@ public class Watchdog extends Thread {
 
     void checkReboot(boolean fromAlarm) {
         int rebootInterval = mReqRebootInterval >= 0 ? mReqRebootInterval
-                : Settings.Gservices.getInt(
-                mResolver, Settings.Gservices.REBOOT_INTERVAL,
+                : Settings.Secure.getInt(
+                mResolver, Settings.Secure.REBOOT_INTERVAL,
                 REBOOT_DEFAULT_INTERVAL);
         mRebootInterval = rebootInterval;
         if (rebootInterval <= 0) {
@@ -598,16 +598,16 @@ public class Watchdog extends Thread {
         }
 
         long rebootStartTime = mReqRebootStartTime >= 0 ? mReqRebootStartTime
-                : Settings.Gservices.getLong(
-                mResolver, Settings.Gservices.REBOOT_START_TIME,
+                : Settings.Secure.getLong(
+                mResolver, Settings.Secure.REBOOT_START_TIME,
                 REBOOT_DEFAULT_START_TIME);
         long rebootWindowMillis = (mReqRebootWindow >= 0 ? mReqRebootWindow
-                : Settings.Gservices.getLong(
-                mResolver, Settings.Gservices.REBOOT_WINDOW,
+                : Settings.Secure.getLong(
+                mResolver, Settings.Secure.REBOOT_WINDOW,
                 REBOOT_DEFAULT_WINDOW)) * 1000;
         long recheckInterval = (mReqRecheckInterval >= 0 ? mReqRecheckInterval
-                : Settings.Gservices.getLong(
-                mResolver, Settings.Gservices.MEMCHECK_RECHECK_INTERVAL,
+                : Settings.Secure.getLong(
+                mResolver, Settings.Secure.MEMCHECK_RECHECK_INTERVAL,
                 MEMCHECK_DEFAULT_RECHECK_INTERVAL)) * 1000;
 
         retrieveBrutalityAmount();
@@ -688,12 +688,12 @@ public class Watchdog extends Thread {
      */
     void retrieveBrutalityAmount() {
         mMinScreenOff = (mReqMinScreenOff >= 0 ? mReqMinScreenOff
-                : Settings.Gservices.getInt(
-                mResolver, Settings.Gservices.MEMCHECK_MIN_SCREEN_OFF,
+                : Settings.Secure.getInt(
+                mResolver, Settings.Secure.MEMCHECK_MIN_SCREEN_OFF,
                 MEMCHECK_DEFAULT_MIN_SCREEN_OFF)) * 1000;
         mMinAlarm = (mReqMinNextAlarm >= 0 ? mReqMinNextAlarm
-                : Settings.Gservices.getInt(
-                mResolver, Settings.Gservices.MEMCHECK_MIN_ALARM,
+                : Settings.Secure.getInt(
+                mResolver, Settings.Secure.MEMCHECK_MIN_ALARM,
                 MEMCHECK_DEFAULT_MIN_ALARM)) * 1000;
     }
 
@@ -737,11 +737,11 @@ public class Watchdog extends Thread {
 
         mMemcheckLastTime = curTime;
 
-        long memcheckExecStartTime = Settings.Gservices.getLong(
-                mResolver, Settings.Gservices.MEMCHECK_EXEC_START_TIME,
+        long memcheckExecStartTime = Settings.Secure.getLong(
+                mResolver, Settings.Secure.MEMCHECK_EXEC_START_TIME,
                 MEMCHECK_DEFAULT_EXEC_START_TIME);
-        long memcheckExecEndTime = Settings.Gservices.getLong(
-                mResolver, Settings.Gservices.MEMCHECK_EXEC_END_TIME,
+        long memcheckExecEndTime = Settings.Secure.getLong(
+                mResolver, Settings.Secure.MEMCHECK_EXEC_END_TIME,
                 MEMCHECK_DEFAULT_EXEC_END_TIME);
 
         mMemcheckExecEndTime = computeCalendarTime(mCalendar, curTime,
