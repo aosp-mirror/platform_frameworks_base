@@ -773,8 +773,8 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
 
     private void doRecovery() {
         if (state == State.CONNECTED) {
-            int maxPdpReset = Settings.Gservices.getInt(mResolver,
-                    Settings.Gservices.PDP_WATCHDOG_MAX_PDP_RESET_FAIL_COUNT,
+            int maxPdpReset = Settings.Secure.getInt(mResolver,
+                    Settings.Secure.PDP_WATCHDOG_MAX_PDP_RESET_FAIL_COUNT,
                     DEFAULT_MAX_PDP_RESET_FAIL);
             if (mPdpResetCount < maxPdpReset) {
                 mPdpResetCount++;
@@ -875,8 +875,8 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                 }
             }
 
-            int watchdogTrigger = Settings.Gservices.getInt(mResolver,
-                    Settings.Gservices.PDP_WATCHDOG_TRIGGER_PACKET_COUNT,
+            int watchdogTrigger = Settings.Secure.getInt(mResolver,
+                    Settings.Secure.PDP_WATCHDOG_TRIGGER_PACKET_COUNT,
                     NUMBER_SENT_PACKETS_OF_HANG);
 
             if (sentSinceLastRecv >= watchdogTrigger) {
@@ -886,8 +886,8 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                             sentSinceLastRecv);
                 }
 
-                int noRecvPollLimit = Settings.Gservices.getInt(mResolver,
-                        Settings.Gservices.PDP_WATCHDOG_ERROR_POLL_COUNT, NO_RECV_POLL_LIMIT);
+                int noRecvPollLimit = Settings.Secure.getInt(mResolver,
+                        Settings.Secure.PDP_WATCHDOG_ERROR_POLL_COUNT, NO_RECV_POLL_LIMIT);
 
                 if (mNoRecvPollCount < noRecvPollLimit) {
                     // It's possible the PDP context went down and we weren't notified.
@@ -898,8 +898,8 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                     mNoRecvPollCount++;
 
                     // Slow down the poll interval to let things happen
-                    netStatPollPeriod = Settings.Gservices.getInt(mResolver,
-                            Settings.Gservices.PDP_WATCHDOG_ERROR_POLL_INTERVAL_MS,
+                    netStatPollPeriod = Settings.Secure.getInt(mResolver,
+                            Settings.Secure.PDP_WATCHDOG_ERROR_POLL_INTERVAL_MS,
                             POLL_NETSTAT_SLOW_MILLIS);
                 } else {
                     if (DBG) log("Sent " + String.valueOf(sentSinceLastRecv) +
@@ -918,11 +918,11 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             } else {
                 mNoRecvPollCount = 0;
                 if (mIsScreenOn) {
-                    netStatPollPeriod = Settings.Gservices.getInt(mResolver,
-                            Settings.Gservices.PDP_WATCHDOG_POLL_INTERVAL_MS, POLL_NETSTAT_MILLIS);
+                    netStatPollPeriod = Settings.Secure.getInt(mResolver,
+                            Settings.Secure.PDP_WATCHDOG_POLL_INTERVAL_MS, POLL_NETSTAT_MILLIS);
                 } else {
-                    netStatPollPeriod = Settings.Gservices.getInt(mResolver,
-                            Settings.Gservices.PDP_WATCHDOG_LONG_POLL_INTERVAL_MS,
+                    netStatPollPeriod = Settings.Secure.getInt(mResolver,
+                            Settings.Secure.PDP_WATCHDOG_LONG_POLL_INTERVAL_MS,
                             POLL_NETSTAT_SCREEN_OFF_MILLIS);
                 }
             }
@@ -936,10 +936,10 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
     private void runPingTest () {
         int status = -1;
         try {
-            String address = Settings.Gservices.getString(mResolver,
-                    Settings.Gservices.PDP_WATCHDOG_PING_ADDRESS);
-            int deadline = Settings.Gservices.getInt(mResolver,
-                        Settings.Gservices.PDP_WATCHDOG_PING_DEADLINE, DEFAULT_PING_DEADLINE);
+            String address = Settings.Secure.getString(mResolver,
+                    Settings.Secure.PDP_WATCHDOG_PING_ADDRESS);
+            int deadline = Settings.Secure.getInt(mResolver,
+                        Settings.Secure.PDP_WATCHDOG_PING_DEADLINE, DEFAULT_PING_DEADLINE);
             if (DBG) log("pinging " + address + " for " + deadline + "s");
             if (address != null && !NULL_IP.equals(address)) {
                 Process p = Runtime.getRuntime()

@@ -31,16 +31,16 @@ public class SettingsProviderTest extends AndroidTestCase {
     @MediumTest
     public void testNameValueCache() {
         ContentResolver r = getContext().getContentResolver();
-        Settings.Gservices.putString(r, "test_service", "Value");
-        assertEquals("Value", Settings.Gservices.getString(r, "test_service"));
+        Settings.Secure.putString(r, "test_service", "Value");
+        assertEquals("Value", Settings.Secure.getString(r, "test_service"));
 
         // Make sure the value can be overwritten.
-        Settings.Gservices.putString(r, "test_service", "New");
-        assertEquals("New", Settings.Gservices.getString(r, "test_service"));
+        Settings.Secure.putString(r, "test_service", "New");
+        assertEquals("New", Settings.Secure.getString(r, "test_service"));
 
         // Also that delete works.
-        assertEquals(1, r.delete(Settings.Gservices.getUriFor("test_service"), null, null));
-        assertEquals(null, Settings.Gservices.getString(r, "test_service"));
+        assertEquals(1, r.delete(Settings.Secure.getUriFor("test_service"), null, null));
+        assertEquals(null, Settings.Secure.getString(r, "test_service"));
 
         // Try all the same things in the System table
         Settings.System.putString(r, "test_setting", "Value");
@@ -60,10 +60,10 @@ public class SettingsProviderTest extends AndroidTestCase {
         assertEquals("content://settings/system/test_setting",
                 Settings.System.getUriFor("test_setting").toString());
         assertEquals("content://settings/gservices/test_service",
-                Settings.Gservices.getUriFor("test_service").toString());
+                Settings.Secure.getUriFor("test_service").toString());
 
         // These tables use the row name (not ID) as their content URI.
-        Uri tables[] = { Settings.System.CONTENT_URI, Settings.Gservices.CONTENT_URI };
+        Uri tables[] = { Settings.System.CONTENT_URI, Settings.Secure.CONTENT_URI };
         for (Uri table : tables) {
             ContentValues v = new ContentValues();
             v.put(Settings.System.NAME, "test_key");
@@ -119,7 +119,7 @@ public class SettingsProviderTest extends AndroidTestCase {
         }
 
         assertEquals(null, Settings.System.getString(r, "test_key"));
-        assertEquals(null, Settings.Gservices.getString(r, "test_key"));
+        assertEquals(null, Settings.Secure.getString(r, "test_key"));
     }
 
     @MediumTest

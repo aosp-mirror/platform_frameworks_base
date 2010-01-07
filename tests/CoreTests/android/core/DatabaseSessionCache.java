@@ -136,8 +136,8 @@ public class DatabaseSessionCache implements SSLClientSessionCache {
     }
 
 //    public static boolean enabled(Context androidContext) {
-//        String sslCache = Settings.Gservices.getString(androidContext.getContentResolver(),
-//                Settings.Gservices.SSL_SESSION_CACHE);
+//        String sslCache = Settings.Secure.getString(androidContext.getContentResolver(),
+//                Settings.Secure.SSL_SESSION_CACHE);
 //
 //        if (Log.isLoggable(TAG, Log.DEBUG)) {
 //            Log.d(TAG, "enabled " + sslCache + " " + androidContext.getPackageName());

@@ -1463,10 +1463,10 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
                      */
                     long gained = c.getTimeInMillis() - System.currentTimeMillis();
                     long timeSinceLastUpdate = SystemClock.elapsedRealtime() - mSavedAtTime;
-                    int nitzUpdateSpacing = Settings.Gservices.getInt(cr,
-                            Settings.Gservices.NITZ_UPDATE_SPACING, mNitzUpdateSpacing);
-                    int nitzUpdateDiff = Settings.Gservices.getInt(cr,
-                            Settings.Gservices.NITZ_UPDATE_DIFF, mNitzUpdateDiff);
+                    int nitzUpdateSpacing = Settings.Secure.getInt(cr,
+                            Settings.Secure.NITZ_UPDATE_SPACING, mNitzUpdateSpacing);
+                    int nitzUpdateDiff = Settings.Secure.getInt(cr,
+                            Settings.Secure.NITZ_UPDATE_DIFF, mNitzUpdateDiff);
 
                     if ((mSavedAtTime == 0) || (timeSinceLastUpdate > nitzUpdateSpacing)
                             || (Math.abs(gained) > nitzUpdateDiff)) {

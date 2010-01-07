@@ -859,8 +859,8 @@ class SyncManager implements OnAccountsUpdateListener {
         }
 
         // Cap the delay
-        long maxSyncRetryTimeInSeconds = Settings.Gservices.getLong(mContext.getContentResolver(),
-                Settings.Gservices.SYNC_MAX_RETRY_DELAY_IN_SECONDS,
+        long maxSyncRetryTimeInSeconds = Settings.Secure.getLong(mContext.getContentResolver(),
+                Settings.Secure.SYNC_MAX_RETRY_DELAY_IN_SECONDS,
                 DEFAULT_MAX_SYNC_RETRY_TIME_IN_SECONDS);
         if (newDelayInMs > maxSyncRetryTimeInSeconds * 1000) {
             newDelayInMs = maxSyncRetryTimeInSeconds * 1000;

@@ -139,8 +139,6 @@ public class SettingsProvider extends ContentProvider {
         } else if (table.equals("secure")) {
             property = Settings.Secure.SYS_PROP_SETTING_VERSION;
             backedUpDataChanged = true;
-        } else if (table.equals("gservices")) {
-            property = Settings.Gservices.SYS_PROP_SETTING_VERSION;
         }
 
         if (property != null) {

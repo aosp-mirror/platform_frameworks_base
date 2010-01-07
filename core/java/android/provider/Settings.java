@@ -2681,6 +2681,139 @@ public final class Settings {
         public static final String WIFI_IDLE_MS = "wifi_idle_ms";
 
         /**
+         * The interval in milliseconds at which to check packet counts on the
+         * mobile data interface when screen is on, to detect possible data
+         * connection problems.
+         * @hide
+         */
+        public static final String PDP_WATCHDOG_POLL_INTERVAL_MS =
+                "pdp_watchdog_poll_interval_ms";
+
+        /**
+         * The interval in milliseconds at which to check packet counts on the
+         * mobile data interface when screen is off, to detect possible data
+         * connection problems.
+         * @hide
+         */
+        public static final String PDP_WATCHDOG_LONG_POLL_INTERVAL_MS =
+                "pdp_watchdog_long_poll_interval_ms";
+
+        /**
+         * The interval in milliseconds at which to check packet counts on the
+         * mobile data interface after {@link #PDP_WATCHDOG_TRIGGER_PACKET_COUNT}
+         * outgoing packets has been reached without incoming packets.
+         * @hide
+         */
+        public static final String PDP_WATCHDOG_ERROR_POLL_INTERVAL_MS =
+                "pdp_watchdog_error_poll_interval_ms";
+
+        /**
+         * The number of outgoing packets sent without seeing an incoming packet
+         * that triggers a countdown (of {@link #PDP_WATCHDOG_ERROR_POLL_COUNT}
+         * device is logged to the event log
+         * @hide
+         */
+        public static final String PDP_WATCHDOG_TRIGGER_PACKET_COUNT =
+                "pdp_watchdog_trigger_packet_count";
+
+        /**
+         * The number of polls to perform (at {@link #PDP_WATCHDOG_ERROR_POLL_INTERVAL_MS})
+         * after hitting {@link #PDP_WATCHDOG_TRIGGER_PACKET_COUNT} before
+         * attempting data connection recovery.
+         * @hide
+         */
+        public static final String PDP_WATCHDOG_ERROR_POLL_COUNT =
+                "pdp_watchdog_error_poll_count";
+
+        /**
+         * The number of failed PDP reset attempts before moving to something more
+         * drastic: re-registering to the network.
+         * @hide
+         */
+        public static final String PDP_WATCHDOG_MAX_PDP_RESET_FAIL_COUNT =
+                "pdp_watchdog_max_pdp_reset_fail_count";
+
+        /**
+         * Address to ping as a last sanity check before attempting any recovery.
+         * Unset or set to "0.0.0.0" to skip this check.
+         * @hide
+         */
+        public static final String PDP_WATCHDOG_PING_ADDRESS = "pdp_watchdog_ping_address";
+
+        /**
+         * The "-w deadline" parameter for the ping, ie, the max time in
+         * seconds to spend pinging.
+         * @hide
+         */
+        public static final String PDP_WATCHDOG_PING_DEADLINE = "pdp_watchdog_ping_deadline";
+
+        /**
+         * The interval in milliseconds at which to check gprs registration
+         * after the first registration mismatch of gprs and voice service,
+         * to detect possible data network registration problems.
+         *
+         * @hide
+         */
+        public static final String GPRS_REGISTER_CHECK_PERIOD_MS =
+                "gprs_register_check_period_ms";
+
+        /**
+         * The length of time in milli-seconds that automatic small adjustments to
+         * SystemClock are ignored if NITZ_UPDATE_DIFF is not exceeded.
+         * @hide
+         */
+        public static final String NITZ_UPDATE_SPACING = "nitz_update_spacing";
+
+        /**
+         * If the NITZ_UPDATE_DIFF time is exceeded then an automatic adjustment
+         * to SystemClock will be allowed even if NITZ_UPDATE_SPACING has not been
+         * exceeded.
+         * @hide
+         */
+        public static final String NITZ_UPDATE_DIFF = "nitz_update_diff";
+
+        /**
+         * The maximum reconnect delay for short network outages or when the network is suspended
+         * due to phone use.
+         * @hide
+         */
+        public static final String SYNC_MAX_RETRY_DELAY_IN_SECONDS =
+                "sync_max_retry_delay_in_seconds";
+
+        /**
+         * The interval in milliseconds at which to check the number of SMS sent
+         * out without asking for use permit, to limit the un-authorized SMS
+         * usage.
+         * @hide
+         */
+        public static final String SMS_OUTGOING_CHECK_INTERVAL_MS =
+                "sms_outgoing_check_interval_ms";
+
+        /**
+         * The number of outgoing SMS sent without asking for user permit
+         * (of {@link #SMS_OUTGOING_CHECK_INTERVAL_MS}
+         * @hide
+         */
+        public static final String SMS_OUTGOING_CHECK_MAX_COUNT =
+                "sms_outgoing_check_max_count";
+
+        /**
+         * Enable use of ssl session caching.
+         * 'db' - save each session in a (per process) database
+         * 'file' - save each session in a (per process) file
+         * not set or any other value - normal java in-memory caching
+         * @hide
+         */
+        public static final String SSL_SESSION_CACHE = "ssl_session_cache";
+
+        /**
+         * How many bytes long a message has to be, in order to be gzipped.
+         * @hide
+         */
+        public static final String SYNC_MIN_GZIP_BYTES =
+                "sync_min_gzip_bytes";
+
+        /**
          * @hide
          */
         public static final String[] SETTINGS_TO_BACKUP = {
@@ -3255,20 +3388,6 @@ public final class Settings {
         public static final String GSYNC_USE_RMQ2_ROUTING_INFO = "gsync_use_rmq2_routing_info";
 
         /**
-         * Enable use of ssl session caching.
-         * 'db' - save each session in a (per process) database
-         * 'file' - save each session in a (per process) file
-         * not set or any other value - normal java in-memory caching
-         */
-        public static final String SSL_SESSION_CACHE = "ssl_session_cache";
-
-        /**
-         * How many bytes long a message has to be, in order to be gzipped.
-         */
-        public static final String SYNC_MIN_GZIP_BYTES =
-                "sync_min_gzip_bytes";
-
-        /**
          * The hash value of the current provisioning settings
          */
         public static final String PROVISIONING_DIGEST = "digest";
@@ -3540,96 +3659,6 @@ public final class Settings {
                 = "google_services:";
 
         /**
-         * The maximum reconnect delay for short network outages or when the network is suspended
-         * due to phone use.
-         */
-        public static final String SYNC_MAX_RETRY_DELAY_IN_SECONDS =
-                "sync_max_retry_delay_in_seconds";
-
-        /**
-         * The interval in milliseconds at which to check the number of SMS sent
-         * out without asking for use permit, to limit the un-authorized SMS
-         * usage.
-         */
-        public static final String SMS_OUTGOING_CHECK_INTERVAL_MS =
-                "sms_outgoing_check_interval_ms";
-
-        /**
-         * The number of outgoing SMS sent without asking for user permit
-         * (of {@link #SMS_OUTGOING_CHECK_INTERVAL_MS}
-         */
-        public static final String SMS_OUTGOING_CEHCK_MAX_COUNT =
-                "sms_outgoing_check_max_count";
-
-        /**
-         * The interval in milliseconds at which to check packet counts on the
-         * mobile data interface when screen is on, to detect possible data
-         * connection problems.
-         */
-        public static final String PDP_WATCHDOG_POLL_INTERVAL_MS =
-                "pdp_watchdog_poll_interval_ms";
-
-        /**
-         * The interval in milliseconds at which to check packet counts on the
-         * mobile data interface when screen is off, to detect possible data
-         * connection problems.
-         */
-        public static final String PDP_WATCHDOG_LONG_POLL_INTERVAL_MS =
-                "pdp_watchdog_long_poll_interval_ms";
-
-        /**
-         * The interval in milliseconds at which to check packet counts on the
-         * mobile data interface after {@link #PDP_WATCHDOG_TRIGGER_PACKET_COUNT}
-         * outgoing packets has been reached without incoming packets.
-         */
-        public static final String PDP_WATCHDOG_ERROR_POLL_INTERVAL_MS =
-                "pdp_watchdog_error_poll_interval_ms";
-
-        /**
-         * The number of outgoing packets sent without seeing an incoming packet
-         * that triggers a countdown (of {@link #PDP_WATCHDOG_ERROR_POLL_COUNT}
-         * device is logged to the event log
-         */
-        public static final String PDP_WATCHDOG_TRIGGER_PACKET_COUNT =
-                "pdp_watchdog_trigger_packet_count";
-
-        /**
-         * The number of polls to perform (at {@link #PDP_WATCHDOG_ERROR_POLL_INTERVAL_MS})
-         * after hitting {@link #PDP_WATCHDOG_TRIGGER_PACKET_COUNT} before
-         * attempting data connection recovery.
-         */
-        public static final String PDP_WATCHDOG_ERROR_POLL_COUNT =
-                "pdp_watchdog_error_poll_count";
-
-        /**
-         * The number of failed PDP reset attempts before moving to something more
-         * drastic: re-registering to the network.
-         */
-        public static final String PDP_WATCHDOG_MAX_PDP_RESET_FAIL_COUNT =
-                "pdp_watchdog_max_pdp_reset_fail_count";
-
-        /**
-         * Address to ping as a last sanity check before attempting any recovery.
-         * Unset or set to "0.0.0.0" to skip this check.
-         */
-        public static final String PDP_WATCHDOG_PING_ADDRESS = "pdp_watchdog_ping_address";
-
-        /**
-         * The "-w deadline" parameter for the ping, ie, the max time in
-         * seconds to spend pinging.
-         */
-        public static final String PDP_WATCHDOG_PING_DEADLINE = "pdp_watchdog_ping_deadline";
-
-        /**
-         * The interval in milliseconds at which to check gprs registration
-         * after the first registration mismatch of gprs and voice service,
-         * to detect possible data network registration problems.
-         *
-         */
-        public static final String GPRS_REGISTER_CHECK_PERIOD_MS =
-                "gprs_register_check_period_ms";
-
-        /**
          * List of test suites (local disk filename) for the automatic instrumentation test runner.
          * The file format is similar to automated_suites.xml, see AutoTesterService.
          * If this setting is missing or empty, the automatic test runner will not start.
@@ -3754,19 +3783,6 @@ public final class Settings {
          * Maximum size of /proc/last_kmsg content to upload after reboot.
          */
         public static final String LAST_KMSG_KB = "last_kmsg_kb";
-
-        /**
-         * The length of time in milli-seconds that automatic small adjustments to
-         * SystemClock are ignored if NITZ_UPDATE_DIFF is not exceeded.
-         */
-        public static final String NITZ_UPDATE_SPACING = "nitz_update_spacing";
-
-        /**
-         * If the NITZ_UPDATE_DIFF time is exceeded then an automatic adjustment
-         * to SystemClock will be allowed even if NITZ_UPDATE_SPACING has not been
-         * exceeded.
-         */
-        public static final String NITZ_UPDATE_DIFF = "nitz_update_diff";
 
         /**
          * @deprecated

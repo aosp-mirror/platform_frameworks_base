@@ -339,19 +339,9 @@ public final class AndroidHttpClient implements HttpClient {
      * Shorter data will not be compressed.
      */
     public static long getMinGzipSize(ContentResolver resolver) {
-        String sMinGzipBytes = Settings.Gservices.getString(resolver,
-                Settings.Gservices.SYNC_MIN_GZIP_BYTES);
-
-        if (!TextUtils.isEmpty(sMinGzipBytes)) {
-            try {
-                return Long.parseLong(sMinGzipBytes);
-            } catch (NumberFormatException nfe) {
-                Log.w(TAG, "Unable to parse " +
-                        Settings.Gservices.SYNC_MIN_GZIP_BYTES + " " +
-                        sMinGzipBytes, nfe);
-            }
-        }
-        return DEFAULT_SYNC_MIN_GZIP_BYTES;
+        return Settings.Secure.getLong(resolver,
+                                       Settings.Secure.SYNC_MIN_GZIP_BYTES,
+                                       DEFAULT_SYNC_MIN_GZIP_BYTES);
     }
 
     /* cURL logging support. */
