@@ -1144,13 +1144,14 @@ public final class Calendar {
          * <P>Type: INTEGER (int)</P>
          */
         public static final String STARTDAY = "startDay";
+        public static final String ENDDAY = "endDay";
 
     }
 
     public static final class EventDays implements EventDaysColumns {
         public static final Uri CONTENT_URI = Uri.parse("content://calendar/instances/groupbyday");
 
-        public static final String[] PROJECTION = { STARTDAY };
+        public static final String[] PROJECTION = { STARTDAY, ENDDAY };
         public static final String SELECTION = "selected==1";
 
         /**
