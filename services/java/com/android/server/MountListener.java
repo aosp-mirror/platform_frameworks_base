@@ -123,8 +123,8 @@ final class MountListener implements Runnable {
                                 try {
                                     handleUnsolicitedEvent(code, event, tokens);
                                 } catch (Exception ex) {
-                                    Log.e(TAG, "Error handling unsolicited event '" + event + "'");
-                                    Log.e(TAG, ex.toString());
+                                    Log.e(TAG, String.format(
+                                            "Error handling '%s'", event), ex);
                                 }
                             } else {
                                 try {
