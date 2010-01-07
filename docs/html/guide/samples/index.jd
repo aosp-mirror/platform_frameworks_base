@@ -77,7 +77,7 @@ platforms) and allow you to view the source files in your browser. </p>
  <dt><a href="{@docRoot}resources/samples/SoftKeyboard/index.html">Soft Keyboard</a></dt>
   <dd>An example of writing an input method for a software keyboard.</dd>
 
- <dt><a href={@docRoot}resources/samples/Wiktionary/index.html">Wiktionary</a></dt>
+ <dt><a href=""{@docRoot}resources/samples/Wiktionary/index.html">Wiktionary</a></dt>
   <dd>An example of creating interactive widgets for display on the Android
   home screen.</dd>
 
