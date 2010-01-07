@@ -115,4 +115,10 @@ interface IMountService
      */
     String[] getSecureCacheList();
 
+    /**
+     * Shuts down the MountService and gracefully unmounts
+     * all external media.
+     */
+    void shutdown();
+
 }
