@@ -45,6 +45,9 @@ import android.os.Power;
 import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.ServiceManager;
+import android.os.Environment;
+import android.os.IMountService;
 import android.os.SystemClock;
 import android.provider.Settings.SettingNotFoundException;
 import android.provider.Settings;
@@ -2123,6 +2126,60 @@ class PowerManagerService extends IPowerManager.Stub
         }
     }
 
+    private void unmountExternalStorage() {
+        String state = Environment.getExternalStorageState();
+
+        IMountService mSvc;
+
+        mSvc = IMountService.Stub.asInterface(
+                ServiceManager.getService("mount"));
+        if (mSvc == null) {
+            Log.e(TAG, "MountService unavailable");
+            return;
+        }
+
+        if (state.equals(Environment.MEDIA_SHARED)) {
+            /*
+             * If the media is currently shared, unshare it.
+             * XXX: This is still dangerous!. We should not
+             * be rebooting at *all* if UMS is enabled, since
+             * the UMS host could have dirty FAT cache entries
+             * yet to flush.
+             */
+            try {
+               mSvc.setMassStorageEnabled(false);
+            } catch (Exception e) {
+                Log.e(TAG, "ums disable failed", e);
+            }
+        } else if (state.equals(Environment.MEDIA_CHECKING)) {
+            /*
+             * If the media is being checked, then we need to wait for
+             * it to complete before being able to proceed.
+             */
+            while (state.equals(Environment.MEDIA_CHECKING)) {
+                state = Environment.getExternalStorageState();
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException iex) {
+                    Log.e(TAG, "Interrupted while waiting for media", iex);
+                    break;
+                }
+            }
+        }
+
+        if (state.equals(Environment.MEDIA_MOUNTED)) {
+            /*
+             * If the media is mounted, then gracefully unmount it.
+             */
+            try {
+                String m = Environment.getExternalStorageDirectory().toString();
+                mSvc.unmountMedia(m);
+            } catch (Exception e) {
+                Log.e(TAG, "external storage unmount failed", e);
+            }
+        }
+    }
+
     /**
      * Reboot the device immediately, passing 'reason' (may be null)
      * to the underlying __reboot system call.  Should not return.
@@ -2130,6 +2187,9 @@ class PowerManagerService extends IPowerManager.Stub
     public void reboot(String reason)
     {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.REBOOT, null);
+
+        unmountExternalStorage();
+
         try {
             Power.reboot(reason);
         } catch (IOException e) {
