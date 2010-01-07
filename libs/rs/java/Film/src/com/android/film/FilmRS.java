@@ -156,9 +156,7 @@ public class FilmRS {
             mBufferIDs.length);
 
         Element ie = Element.createPixel(mRS, Element.DataType.UNSIGNED_5_6_5, Element.DataKind.PIXEL_RGB);
-        android.util.Log.e("rs", "load 1");
         mImages[0] = Allocation.createFromBitmapResourceBoxed(mRS, mRes, R.drawable.p01, ie, true);
-        android.util.Log.e("rs", "load 2");
         mImages[1] = Allocation.createFromBitmapResourceBoxed(mRS, mRes, R.drawable.p02, ie, true);
         mImages[2] = Allocation.createFromBitmapResourceBoxed(mRS, mRes, R.drawable.p03, ie, true);
         mImages[3] = Allocation.createFromBitmapResourceBoxed(mRS, mRes, R.drawable.p04, ie, true);

@@ -266,7 +266,7 @@ public class Allocation extends BaseObj {
         return new Allocation(id, rs, null);
     }
 
-    static public Allocation createFromBitmapBoxed(RenderScript rs, Bitmap b, Element dstFmt, boolean genMips)
+    static Allocation createFromBitmapBoxed(RenderScript rs, Bitmap b, Element dstFmt, boolean genMips)
         throws IllegalArgumentException {
 
         rs.validate();
