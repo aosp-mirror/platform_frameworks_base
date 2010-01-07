@@ -93,10 +93,10 @@ page.title=Menu Design Guidelines
 
 <h2 id="tour_of_the_menus">Tour of the Menus</h2>
 
-<blockquote>
-  <b>NOTE</b> - Your menus and screens might not look like those shown in this document;
-  they may vary from one version of Android or device to another.
-</blockquote>
+<p class="note"><strong>Note:</strong> Your menus and screens might not look 
+like those shown in this document; they may vary from one version of Android 
+or device to another.
+</p>
 
 <h3 id="options_menu">Options Menu</h3>
 

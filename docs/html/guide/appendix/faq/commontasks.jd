@@ -160,11 +160,9 @@ It is not necessary to put external JARs in the assets folder.
     <li>Create an {@link android.app.AlertDialog app.AlertDialog} class </li>
     <li>Set the {@link android.R.style#Theme_Dialog} <em>theme</em> attribute to <code>&#064;android:style/Theme.Dialog</code>
         in your AndroidManifest.xml file. For example:    
-</ul>
-<blockquote>
     <pre>&lt;activity class=&quot;AddRssItem&quot; android:label=&quot;Add an item&quot; android:theme=&quot;&#064;android:style/Theme.Dialog&quot;/&gt;
-</pre>
-</blockquote>
+</pre></li>
+</ul>
 <p>Calling startActivity() or startActivityForResult() will open a new screen in whatever
     way it defines itself (if it uses a floating theme it will be floating,
     otherwise it will be full screen). </p>
