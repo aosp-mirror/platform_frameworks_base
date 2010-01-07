@@ -987,4 +987,18 @@ public class DatabaseGeneralTest extends TestCase implements PerformanceTestCase
         ih.close();
     }
 
+    @MediumTest
+    public void testDbCloseReleasingAllCachedSql() {
+        mDatabase.execSQL("CREATE TABLE test (_id INTEGER PRIMARY KEY, text1 TEXT, text2 TEXT, " +
+                "num1 INTEGER, num2 INTEGER, image BLOB);");
+        final String statement = "DELETE FROM test WHERE _id=?;";
+        SQLiteStatement statementDoNotClose = mDatabase.compileStatement(statement);
+        assertTrue(statementDoNotClose.getUniqueId() > 0);
+        int nStatement = statementDoNotClose.getUniqueId();
+        assertTrue(statementDoNotClose.getUniqueId() == nStatement);
+        /* do not close statementDoNotClose object. 
+         * That should leave it in SQLiteDatabase.mPrograms.
+         * mDatabase.close() in tearDown() should release it.
+         */
+    }
 }
