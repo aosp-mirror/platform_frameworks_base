@@ -16,7 +16,7 @@
 
 package com.android.unit_tests;
 
-import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.DropBoxManager;
@@ -37,11 +37,10 @@ import java.util.zip.GZIPOutputStream;
 /** Test {@link DropBoxManager} functionality. */
 public class DropBoxTest extends AndroidTestCase {
     public void tearDown() throws Exception {
-        Intent override = new Intent(Settings.Gservices.OVERRIDE_ACTION);
-        override.putExtra(Settings.Gservices.DROPBOX_AGE_SECONDS, "");
-        override.putExtra(Settings.Gservices.DROPBOX_QUOTA_KB, "");
-        override.putExtra(Settings.Gservices.DROPBOX_TAG_PREFIX + "DropBoxTest", "");
-        waitForBroadcast(override);
+        ContentResolver cr = getContext().getContentResolver();
+        Settings.Secure.putString(cr, Settings.Secure.DROPBOX_AGE_SECONDS, "");
+        Settings.Secure.putString(cr, Settings.Secure.DROPBOX_QUOTA_KB, "");
+        Settings.Secure.putString(cr, Settings.Secure.DROPBOX_TAG_PREFIX + "DropBoxTest", "");
     }
 
     public void testAddText() throws Exception {
@@ -246,16 +245,15 @@ public class DropBoxTest extends AndroidTestCase {
         dropbox.addText("DropBoxTest", "TEST-ENABLED");
         assertTrue(dropbox.isTagEnabled("DropBoxTest"));
 
-        Intent override = new Intent(Settings.Gservices.OVERRIDE_ACTION);
-        override.putExtra(Settings.Gservices.DROPBOX_TAG_PREFIX + "DropBoxTest", "disabled");
-        waitForBroadcast(override);
+        ContentResolver cr = getContext().getContentResolver();
+        Settings.Secure.putString(cr, Settings.Secure.DROPBOX_TAG_PREFIX + "DropBoxTest",
+                                  "disabled");
 
         dropbox.addText("DropBoxTest", "TEST-DISABLED");
         assertFalse(dropbox.isTagEnabled("DropBoxTest"));
 
-        override = new Intent(Settings.Gservices.OVERRIDE_ACTION);
-        override.putExtra(Settings.Gservices.DROPBOX_TAG_PREFIX + "DropBoxTest", "");
-        waitForBroadcast(override);
+        Settings.Secure.putString(cr, Settings.Secure.DROPBOX_TAG_PREFIX + "DropBoxTest",
+                                  "");
 
         dropbox.addText("DropBoxTest", "TEST-ENABLED-AGAIN");
         assertTrue(dropbox.isTagEnabled("DropBoxTest"));
@@ -323,9 +321,8 @@ public class DropBoxTest extends AndroidTestCase {
 
         // Limit storage to 10 blocks
         int kb = blockSize * 10 / 1024;
-        Intent override = new Intent(Settings.Gservices.OVERRIDE_ACTION);
-        override.putExtra(Settings.Gservices.DROPBOX_QUOTA_KB, Integer.toString(kb));
-        waitForBroadcast(override);
+        ContentResolver cr = getContext().getContentResolver();
+        Settings.Secure.putString(cr, Settings.Secure.DROPBOX_QUOTA_KB, Integer.toString(kb));
 
         // Three tags using a total of 12 blocks:
         // DropBoxTest0 [ ][ ]
@@ -426,10 +423,9 @@ public class DropBoxTest extends AndroidTestCase {
 
         // Limit storage to 10 blocks with an expiration of 1 second
         int kb = blockSize * 10 / 1024;
-        Intent override = new Intent(Settings.Gservices.OVERRIDE_ACTION);
-        override.putExtra(Settings.Gservices.DROPBOX_AGE_SECONDS, "1");
-        override.putExtra(Settings.Gservices.DROPBOX_QUOTA_KB, Integer.toString(kb));
-        waitForBroadcast(override);
+        ContentResolver cr = getContext().getContentResolver();
+        Settings.Secure.putString(cr, Settings.Secure.DROPBOX_AGE_SECONDS, "1");
+        Settings.Secure.putString(cr, Settings.Secure.DROPBOX_QUOTA_KB, Integer.toString(kb));
 
         // Write one normal entry and another so big that it is instantly tombstoned
         long before = System.currentTimeMillis();
@@ -503,15 +499,6 @@ public class DropBoxTest extends AndroidTestCase {
         int length = 0;
         while (is.read() != -1) length++;
         return length;
-    }
-
-    private void waitForBroadcast(Intent intent) throws InterruptedException {
-        BroadcastReceiver receiver = new BroadcastReceiver() {
-            public synchronized void onReceive(Context context, Intent intent) { notify(); }
-        };
-
-        getContext().sendOrderedBroadcast(intent, null, receiver, null, 0, null, null);
-        synchronized (receiver) { receiver.wait(); }
     }
 
     private void recursiveDelete(File file) {

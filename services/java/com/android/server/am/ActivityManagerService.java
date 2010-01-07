@@ -8579,9 +8579,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     }
 
     private ComponentName getErrorReportReceiver(ProcessRecord app) {
-        // check if error reporting is enabled in Gservices
-        int enabled = Settings.Gservices.getInt(mContext.getContentResolver(),
-                Settings.Gservices.SEND_ACTION_APP_ERROR, 0);
+        // check if error reporting is enabled in secure settings
+        int enabled = Settings.Secure.getInt(mContext.getContentResolver(),
+                Settings.Secure.SEND_ACTION_APP_ERROR, 0);
         if (enabled == 0) {
             return null;
         }
@@ -8830,8 +8830,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
         addExceptionToDropBox("wtf", r, tag, crashInfo);
 
-        if (Settings.Gservices.getInt(mContext.getContentResolver(),
-                Settings.Gservices.WTF_IS_FATAL, 0) != 0) {
+        if (Settings.Secure.getInt(mContext.getContentResolver(),
+                Settings.Secure.WTF_IS_FATAL, 0) != 0) {
             crashApplication(r, crashInfo);
             return true;
         } else {

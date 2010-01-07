@@ -2579,6 +2579,108 @@ public final class Settings {
         public static final String REBOOT_WINDOW = "reboot_window";
 
         /**
+         * Threshold values for the duration and level of a discharge cycle, under
+         * which we log discharge cycle info.
+         * @hide
+         */
+        public static final String BATTERY_DISCHARGE_DURATION_THRESHOLD =
+                "battery_discharge_duration_threshold";
+        /** @hide */
+        public static final String BATTERY_DISCHARGE_THRESHOLD = "battery_discharge_threshold";
+
+        /**
+         * Flag for allowing ActivityManagerService to send ACTION_APP_ERROR intents
+         * on application crashes and ANRs. If this is disabled, the crash/ANR dialog
+         * will never display the "Report" button.
+         * Type: int ( 0 = disallow, 1 = allow )
+         * @hide
+         */
+        public static final String SEND_ACTION_APP_ERROR = "send_action_app_error";
+
+        /**
+         * Nonzero causes Log.wtf() to crash.
+         * @hide
+         */
+        public static final String WTF_IS_FATAL = "wtf_is_fatal";
+
+        /**
+         * Maximum age of entries kept by {@link android.os.IDropBox}.
+         * @hide
+         */
+        public static final String DROPBOX_AGE_SECONDS =
+                "dropbox_age_seconds";
+        /**
+         * Maximum amount of disk space used by {@link android.os.IDropBox} no matter what.
+         * @hide
+         */
+        public static final String DROPBOX_QUOTA_KB =
+                "dropbox_quota_kb";
+        /**
+         * Percent of free disk (excluding reserve) which {@link android.os.IDropBox} will use.
+         * @hide
+         */
+        public static final String DROPBOX_QUOTA_PERCENT =
+                "dropbox_quota_percent";
+        /**
+         * Percent of total disk which {@link android.os.IDropBox} will never dip into.
+         * @hide
+         */
+        public static final String DROPBOX_RESERVE_PERCENT =
+                "dropbox_reserve_percent";
+        /**
+         * Prefix for per-tag dropbox disable/enable settings.
+         * @hide
+         */
+        public static final String DROPBOX_TAG_PREFIX =
+                "dropbox:";
+
+
+        /**
+         * Screen timeout in milliseconds corresponding to the
+         * PowerManager's POKE_LOCK_SHORT_TIMEOUT flag (i.e. the fastest
+         * possible screen timeout behavior.)
+         * @hide
+         */
+        public static final String SHORT_KEYLIGHT_DELAY_MS =
+                "short_keylight_delay_ms";
+
+        /**
+         * The interval in minutes after which the amount of free storage left on the
+         * device is logged to the event log
+         * @hide
+         */
+        public static final String SYS_FREE_STORAGE_LOG_INTERVAL =
+                "sys_free_storage_log_interval";
+
+        /**
+         * Threshold for the amount of change in disk free space required to report the amount of
+         * free space. Used to prevent spamming the logs when the disk free space isn't changing
+         * frequently.
+         * @hide
+         */
+        public static final String DISK_FREE_CHANGE_REPORTING_THRESHOLD =
+                "disk_free_change_reporting_threshold";
+
+
+        /**
+         * Minimum percentage of free storage on the device that is used to determine if
+         * the device is running low on storage.
+         * Say this value is set to 10, the device is considered running low on storage
+         * if 90% or more of the device storage is filled up.
+         * @hide
+         */
+        public static final String SYS_STORAGE_THRESHOLD_PERCENTAGE =
+                "sys_storage_threshold_percentage";
+
+        /**
+         * The interval in milliseconds after which Wi-Fi is considered idle.
+         * When idle, it is possible for the device to be switched from Wi-Fi to
+         * the mobile data network.
+         * @hide
+         */
+        public static final String WIFI_IDLE_MS = "wifi_idle_ms";
+
+        /**
          * @hide
          */
         public static final String[] SETTINGS_TO_BACKUP = {
@@ -3431,14 +3533,6 @@ public final class Settings {
                 "parental_control_redirect_regex";
 
         /**
-         * Threshold for the amount of change in disk free space required to report the amount of
-         * free space. Used to prevent spamming the logs when the disk free space isn't changing
-         * frequently.
-         */
-        public static final String DISK_FREE_CHANGE_REPORTING_THRESHOLD =
-                "disk_free_change_reporting_threshold";
-
-        /**
          * Prefix for new Google services published by the checkin
          * server.
          */
@@ -3451,22 +3545,6 @@ public final class Settings {
          */
         public static final String SYNC_MAX_RETRY_DELAY_IN_SECONDS =
                 "sync_max_retry_delay_in_seconds";
-
-        /**
-         * Minimum percentage of free storage on the device that is used to determine if
-         * the device is running low on storage.
-         * Say this value is set to 10, the device is considered running low on storage
-         * if 90% or more of the device storage is filled up.
-         */
-        public static final String SYS_STORAGE_THRESHOLD_PERCENTAGE =
-                "sys_storage_threshold_percentage";
-
-        /**
-         * The interval in minutes after which the amount of free storage left on the
-         * device is logged to the event log
-         */
-        public static final String SYS_FREE_STORAGE_LOG_INTERVAL =
-                "sys_free_storage_log_interval";
 
         /**
          * The interval in milliseconds at which to check the number of SMS sent
@@ -3552,21 +3630,6 @@ public final class Settings {
                 "gprs_register_check_period_ms";
 
         /**
-         * The interval in milliseconds after which Wi-Fi is considered idle.
-         * When idle, it is possible for the device to be switched from Wi-Fi to
-         * the mobile data network.
-         */
-        public static final String WIFI_IDLE_MS = "wifi_idle_ms";
-
-        /**
-         * Screen timeout in milliseconds corresponding to the
-         * PowerManager's POKE_LOCK_SHORT_TIMEOUT flag (i.e. the fastest
-         * possible screen timeout behavior.)
-         */
-        public static final String SHORT_KEYLIGHT_DELAY_MS =
-                "short_keylight_delay_ms";
-
-        /**
          * List of test suites (local disk filename) for the automatic instrumentation test runner.
          * The file format is similar to automated_suites.xml, see AutoTesterService.
          * If this setting is missing or empty, the automatic test runner will not start.
@@ -3586,14 +3649,6 @@ public final class Settings {
          */
         public static final String AUTOTEST_REBOOT_SECONDS = "autotest_reboot_seconds";
 
-
-        /**
-         * Threshold values for the duration and level of a discharge cycle, under
-         * which we log discharge cycle info.
-         */
-        public static final String BATTERY_DISCHARGE_DURATION_THRESHOLD =
-                "battery_discharge_duration_threshold";
-        public static final String BATTERY_DISCHARGE_THRESHOLD = "battery_discharge_threshold";
 
         /**
          * An email address that anr bugreports should be sent to.
@@ -3694,49 +3749,11 @@ public final class Settings {
          */
         public static final String SEARCH_PER_SOURCE_CONCURRENT_QUERY_LIMIT =
                 "search_per_source_concurrent_query_limit";
-        /**
-         * Flag for allowing ActivityManagerService to send ACTION_APP_ERROR intents
-         * on application crashes and ANRs. If this is disabled, the crash/ANR dialog
-         * will never display the "Report" button.
-         * Type: int ( 0 = disallow, 1 = allow )
-         */
-        public static final String SEND_ACTION_APP_ERROR = "send_action_app_error";
 
         /**
          * Maximum size of /proc/last_kmsg content to upload after reboot.
          */
         public static final String LAST_KMSG_KB = "last_kmsg_kb";
-
-        /**
-         * Maximum age of entries kept by {@link android.os.IDropBox}.
-         */
-        public static final String DROPBOX_AGE_SECONDS =
-                "dropbox_age_seconds";
-        /**
-         * Maximum amount of disk space used by {@link android.os.IDropBox} no matter what.
-         */
-        public static final String DROPBOX_QUOTA_KB =
-                "dropbox_quota_kb";
-        /**
-         * Percent of free disk (excluding reserve) which {@link android.os.IDropBox} will use.
-         */
-        public static final String DROPBOX_QUOTA_PERCENT =
-                "dropbox_quota_percent";
-        /**
-         * Percent of total disk which {@link android.os.IDropBox} will never dip into.
-         */
-        public static final String DROPBOX_RESERVE_PERCENT =
-                "dropbox_reserve_percent";
-        /**
-         * Prefix for per-tag dropbox disable/enable settings.
-         */
-        public static final String DROPBOX_TAG_PREFIX =
-                "dropbox:";
-
-        /**
-         * Nonzero causes Log.wtf() to crash.
-         */
-        public static final String WTF_IS_FATAL = "wtf_is_fatal";
 
         /**
          * The length of time in milli-seconds that automatic small adjustments to

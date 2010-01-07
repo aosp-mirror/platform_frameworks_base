@@ -29,6 +29,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.database.ContentObserver;
 import android.database.Cursor;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -36,9 +37,11 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.BatteryStats;
 import android.os.Binder;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
+import android.os.IMountService;
 import android.os.IPowerManager;
 import android.os.LocalPowerManager;
 import android.os.Power;
@@ -46,8 +49,6 @@ import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.os.Environment;
-import android.os.IMountService;
 import android.os.SystemClock;
 import android.provider.Settings.SettingNotFoundException;
 import android.provider.Settings;
@@ -88,7 +89,7 @@ class PowerManagerService extends IPowerManager.Stub
                                         | PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK;
 
     //                       time since last state:               time since last event:
-    // The short keylight delay comes from Gservices; this is the default.
+    // The short keylight delay comes from secure settings; this is the default.
     private static final int SHORT_KEYLIGHT_DELAY_DEFAULT = 6000; // t+6 sec
     private static final int MEDIUM_KEYLIGHT_DELAY = 15000;       // t+15 sec
     private static final int LONG_KEYLIGHT_DELAY = 6000;        // t+6 sec
@@ -103,7 +104,7 @@ class PowerManagerService extends IPowerManager.Stub
     // trigger proximity if distance is less than 5 cm
     private static final float PROXIMITY_THRESHOLD = 5.0f;
 
-    // Cached Gservices settings; see updateGservicesValues()
+    // Cached secure settings; see updateSettingsValues()
     private int mShortKeylightDelay = SHORT_KEYLIGHT_DELAY_DEFAULT;
 
     // flags for setPowerState
@@ -516,12 +517,15 @@ class PowerManagerService extends IPowerManager.Stub
         filter.addAction(Intent.ACTION_BOOT_COMPLETED);
         mContext.registerReceiver(new BootCompletedReceiver(), filter);
 
-        // Listen for Gservices changes
-        IntentFilter gservicesChangedFilter =
-                new IntentFilter(Settings.Gservices.CHANGED_ACTION);
-        mContext.registerReceiver(new GservicesChangedReceiver(), gservicesChangedFilter);
-        // And explicitly do the initial update of our cached settings
-        updateGservicesValues();
+        // Listen for secure settings changes
+        mContext.getContentResolver().registerContentObserver(
+            Settings.Secure.CONTENT_URI, true,
+            new ContentObserver(new Handler()) {
+                public void onChange(boolean selfChange) {
+                    updateSettingsValues();
+                }
+            });
+        updateSettingsValues();
 
         if (mUseSoftwareAutoBrightness) {
             // turn the screen on
@@ -2273,7 +2277,7 @@ class PowerManagerService extends IPowerManager.Stub
      * */
     private void setScreenOffTimeoutsLocked() {
         if ((mPokey & POKE_LOCK_SHORT_TIMEOUT) != 0) {
-            mKeylightDelay = mShortKeylightDelay;  // Configurable via Gservices
+            mKeylightDelay = mShortKeylightDelay;  // Configurable via secure settings
             mDimDelay = -1;
             mScreenOffDelay = 0;
         } else if ((mPokey & POKE_LOCK_MEDIUM_TIMEOUT) != 0) {
@@ -2308,28 +2312,15 @@ class PowerManagerService extends IPowerManager.Stub
     }
 
     /**
-     * Refreshes cached Gservices settings.  Called once on startup, and
-     * on subsequent Settings.Gservices.CHANGED_ACTION broadcasts (see
-     * GservicesChangedReceiver).
+     * Refreshes cached secure settings.  Called once on startup, and
+     * on subsequent changes to secure settings.
      */
-    private void updateGservicesValues() {
-        mShortKeylightDelay = Settings.Gservices.getInt(
+    private void updateSettingsValues() {
+        mShortKeylightDelay = Settings.Secure.getInt(
                 mContext.getContentResolver(),
-                Settings.Gservices.SHORT_KEYLIGHT_DELAY_MS,
+                Settings.Secure.SHORT_KEYLIGHT_DELAY_MS,
                 SHORT_KEYLIGHT_DELAY_DEFAULT);
-        // Log.i(TAG, "updateGservicesValues(): mShortKeylightDelay now " + mShortKeylightDelay);
-    }
-
-    /**
-     * Receiver for the Gservices.CHANGED_ACTION broadcast intent,
-     * which tells us we need to refresh our cached Gservices settings.
-     */
-    private class GservicesChangedReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            // Log.i(TAG, "GservicesChangedReceiver.onReceive(): " + intent);
-            updateGservicesValues();
-        }
+        // Log.i(TAG, "updateSettingsValues(): mShortKeylightDelay now " + mShortKeylightDelay);
     }
 
     private class LockList extends ArrayList<WakeLock>

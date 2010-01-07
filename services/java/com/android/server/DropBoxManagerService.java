@@ -22,9 +22,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Debug;
 import android.os.DropBoxManager;
+import android.os.Handler;
 import android.os.ParcelFileDescriptor;
 import android.os.StatFs;
 import android.os.SystemClock;
@@ -113,14 +115,21 @@ public final class DropBoxManagerService extends IDropBoxManagerService.Stub {
      * @param context to use for receiving free space & gservices intents
      * @param path to store drop box entries in
      */
-    public DropBoxManagerService(Context context, File path) {
+    public DropBoxManagerService(final Context context, File path) {
         mDropBoxDir = path;
 
         // Set up intent receivers
         mContext = context;
         mContentResolver = context.getContentResolver();
         context.registerReceiver(mReceiver, new IntentFilter(Intent.ACTION_DEVICE_STORAGE_LOW));
-        context.registerReceiver(mReceiver, new IntentFilter(Settings.Gservices.CHANGED_ACTION));
+
+        mContentResolver.registerContentObserver(
+            Settings.Secure.CONTENT_URI, true,
+            new ContentObserver(new Handler()) {
+                public void onChange(boolean selfChange) {
+                    mReceiver.onReceive(context, (Intent) null);
+                }
+            });
 
         // The real work gets done lazily in init() -- that way service creation always
         // succeeds, and things like disk problems cause individual method failures.
@@ -205,8 +214,8 @@ public final class DropBoxManagerService extends IDropBoxManagerService.Stub {
     }
 
     public boolean isTagEnabled(String tag) {
-        return !"disabled".equals(Settings.Gservices.getString(
-                mContentResolver, Settings.Gservices.DROPBOX_TAG_PREFIX + tag));
+        return !"disabled".equals(Settings.Secure.getString(
+                mContentResolver, Settings.Secure.DROPBOX_TAG_PREFIX + tag));
     }
 
     public synchronized DropBoxManager.Entry getNextEntry(String tag, long millis) {
@@ -611,8 +620,8 @@ public final class DropBoxManagerService extends IDropBoxManagerService.Stub {
     private synchronized long trimToFit() {
         // Expunge aged items (including tombstones marking deleted data).
 
-        int ageSeconds = Settings.Gservices.getInt(mContentResolver,
-                Settings.Gservices.DROPBOX_AGE_SECONDS, DEFAULT_AGE_SECONDS);
+        int ageSeconds = Settings.Secure.getInt(mContentResolver,
+                Settings.Secure.DROPBOX_AGE_SECONDS, DEFAULT_AGE_SECONDS);
         long cutoffMillis = System.currentTimeMillis() - ageSeconds * 1000;
         while (!mAllFiles.contents.isEmpty()) {
             EntryFile entry = mAllFiles.contents.first();
@@ -631,12 +640,12 @@ public final class DropBoxManagerService extends IDropBoxManagerService.Stub {
 
         long uptimeMillis = SystemClock.uptimeMillis();
         if (uptimeMillis > mCachedQuotaUptimeMillis + QUOTA_RESCAN_MILLIS) {
-            int quotaPercent = Settings.Gservices.getInt(mContentResolver,
-                    Settings.Gservices.DROPBOX_QUOTA_PERCENT, DEFAULT_QUOTA_PERCENT);
-            int reservePercent = Settings.Gservices.getInt(mContentResolver,
-                    Settings.Gservices.DROPBOX_RESERVE_PERCENT, DEFAULT_RESERVE_PERCENT);
-            int quotaKb = Settings.Gservices.getInt(mContentResolver,
-                    Settings.Gservices.DROPBOX_QUOTA_KB, DEFAULT_QUOTA_KB);
+            int quotaPercent = Settings.Secure.getInt(mContentResolver,
+                    Settings.Secure.DROPBOX_QUOTA_PERCENT, DEFAULT_QUOTA_PERCENT);
+            int reservePercent = Settings.Secure.getInt(mContentResolver,
+                    Settings.Secure.DROPBOX_RESERVE_PERCENT, DEFAULT_RESERVE_PERCENT);
+            int quotaKb = Settings.Secure.getInt(mContentResolver,
+                    Settings.Secure.DROPBOX_QUOTA_KB, DEFAULT_QUOTA_KB);
 
             mStatFs.restat(mDropBoxDir.getPath());
             int available = mStatFs.getAvailableBlocks();

@@ -113,8 +113,8 @@ public class WifiService extends IWifiManager.Stub {
     private final IBatteryStats mBatteryStats;
 
     /**
-     * See {@link Settings.Gservices#WIFI_IDLE_MS}. This is the default value if a
-     * Settings.Gservices value is not present. This timeout value is chosen as
+     * See {@link Settings.Secure#WIFI_IDLE_MS}. This is the default value if a
+     * Settings.Secure value is not present. This timeout value is chosen as
      * the approximate point at which the battery drain caused by Wi-Fi
      * being enabled but not active exceeds the battery drain caused by
      * re-establishing a connection to the mobile data network.
@@ -1317,11 +1317,12 @@ public class WifiService extends IWifiManager.Stub {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
 
-            long idleMillis = Settings.Gservices.getLong(mContext.getContentResolver(),
-                                                  Settings.Gservices.WIFI_IDLE_MS, DEFAULT_IDLE_MILLIS);
+            long idleMillis =
+                Settings.Secure.getLong(mContext.getContentResolver(),
+                                        Settings.Secure.WIFI_IDLE_MS, DEFAULT_IDLE_MILLIS);
             int stayAwakeConditions =
-                    Settings.System.getInt(mContext.getContentResolver(),
-                                           Settings.System.STAY_ON_WHILE_PLUGGED_IN, 0);
+                Settings.System.getInt(mContext.getContentResolver(),
+                                       Settings.System.STAY_ON_WHILE_PLUGGED_IN, 0);
             if (action.equals(Intent.ACTION_SCREEN_ON)) {
                 Log.d(TAG, "ACTION_SCREEN_ON");
                 mAlarmManager.cancel(mIdleIntent);

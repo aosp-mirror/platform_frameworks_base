@@ -34,25 +34,29 @@ import android.os.ServiceManager;
 import android.os.StatFs;
 import android.os.SystemClock;
 import android.os.SystemProperties;
-import android.provider.Settings.Gservices;
+import android.provider.Settings;
 import android.util.Config;
 import android.util.EventLog;
 import android.util.Log;
 import android.provider.Settings;
 
 /**
- * This class implements a service to monitor the amount of disk storage space
- * on the device. If the free storage on device is less than a tunable threshold value
- * (default is 10%. this value is a gservices parameter) a low memory notification is
- * displayed to alert the user. If the user clicks on the low memory notification the
- * Application Manager application gets launched to let the user free storage space.
- * Event log events:
- * A low memory event with the free storage on device in bytes  is logged to the event log
- * when the device goes low on storage space.
- * The amount of free storage on the device is periodically logged to the event log. The log
- * interval is a gservices parameter with a default value of 12 hours
- * When the free storage differential goes below a threshold(again a gservices parameter with
- * a default value of 2MB), the free memory is logged to the event log
+ * This class implements a service to monitor the amount of disk
+ * storage space on the device.  If the free storage on device is less
+ * than a tunable threshold value (a secure settings parameter;
+ * default 10%) a low memory notification is displayed to alert the
+ * user. If the user clicks on the low memory notification the
+ * Application Manager application gets launched to let the user free
+ * storage space.
+ *
+ * Event log events: A low memory event with the free storage on
+ * device in bytes is logged to the event log when the device goes low
+ * on storage space.  The amount of free storage on the device is
+ * periodically logged to the event log. The log interval is a secure
+ * settings parameter with a default value of 12 hours.  When the free
+ * storage differential goes below a threshold (again a secure
+ * settings parameter with a default value of 2MB), the free memory is
+ * logged to the event log.
  */
 class DeviceStorageMonitorService extends Binder {
     private static final String TAG = "DeviceStorageMonitorService";
@@ -131,9 +135,9 @@ class DeviceStorageMonitorService extends Binder {
         if (!"".equals(debugFreeMem)) {
             mFreeMem = Long.parseLong(debugFreeMem);
         }
-        // Read the log interval from Gservices
-        long freeMemLogInterval = Gservices.getLong(mContentResolver,
-                Gservices.SYS_FREE_STORAGE_LOG_INTERVAL,
+        // Read the log interval from secure settings
+        long freeMemLogInterval = Settings.Secure.getLong(mContentResolver,
+                Settings.Secure.SYS_FREE_STORAGE_LOG_INTERVAL,
                 DEFAULT_FREE_STORAGE_LOG_INTERVAL_IN_MINUTES)*60*1000;
         //log the amount of free memory in event log
         long currTime = SystemClock.elapsedRealtime();
@@ -159,9 +163,9 @@ class DeviceStorageMonitorService extends Binder {
             EventLog.writeEvent(EventLogTags.FREE_STORAGE_LEFT,
                                 mFreeMem, mFreeSystem, mFreeCache);
         }
-        // Read the reporting threshold from Gservices
-        long threshold = Gservices.getLong(mContentResolver,
-                Gservices.DISK_FREE_CHANGE_REPORTING_THRESHOLD,
+        // Read the reporting threshold from secure settings
+        long threshold = Settings.Secure.getLong(mContentResolver,
+                Settings.Secure.DISK_FREE_CHANGE_REPORTING_THRESHOLD,
                 DEFAULT_DISK_FREE_CHANGE_REPORTING_THRESHOLD);
         // If mFree changed significantly log the new value
         long delta = mFreeMem - mLastReportedFreeMem;
@@ -247,13 +251,13 @@ class DeviceStorageMonitorService extends Binder {
 
     /*
      * just query settings to retrieve the memory threshold.
-     * Preferred this over using a ContentObserver since Settings.Gservices caches the value
+     * Preferred this over using a ContentObserver since Settings.Secure caches the value
      * any way
      */
     private long getMemThreshold() {
-        int value = Settings.Gservices.getInt(
+        int value = Settings.Secure.getInt(
                               mContentResolver,
-                              Settings.Gservices.SYS_STORAGE_THRESHOLD_PERCENTAGE,
+                              Settings.Secure.SYS_STORAGE_THRESHOLD_PERCENTAGE,
                               DEFAULT_THRESHOLD_PERCENTAGE);
         if(localLOGV) Log.v(TAG, "Threshold Percentage="+value);
         //evaluate threshold value

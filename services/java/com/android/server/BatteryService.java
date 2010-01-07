@@ -413,10 +413,10 @@ class BatteryService extends Binder {
 
     private final void logOutlier(long duration) {
         ContentResolver cr = mContext.getContentResolver();
-        String dischargeThresholdString = Settings.Gservices.getString(cr,
-                Settings.Gservices.BATTERY_DISCHARGE_THRESHOLD);
-        String durationThresholdString = Settings.Gservices.getString(cr,
-                Settings.Gservices.BATTERY_DISCHARGE_DURATION_THRESHOLD);
+        String dischargeThresholdString = Settings.Secure.getString(cr,
+                Settings.Secure.BATTERY_DISCHARGE_THRESHOLD);
+        String durationThresholdString = Settings.Secure.getString(cr,
+                Settings.Secure.BATTERY_DISCHARGE_DURATION_THRESHOLD);
 
         if (dischargeThresholdString != null && durationThresholdString != null) {
             try {
