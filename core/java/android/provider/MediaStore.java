@@ -96,14 +96,12 @@ public final class MediaStore {
     /**
      * The name of an Intent-extra used to control the UI of a ViewImage.
      * This is a boolean property that overrides the activity's default fullscreen state.
-     * @hide
      */
     public static final String EXTRA_FULL_SCREEN = "android.intent.extra.fullScreen";
 
     /**
      * The name of an Intent-extra used to control the UI of a ViewImage.
      * This is a boolean property that specifies whether or not to show action icons.
-     * @hide
      */
     public static final String EXTRA_SHOW_ACTION_ICONS = "android.intent.extra.showActionIcons";
 
@@ -162,13 +160,11 @@ public final class MediaStore {
 
     /**
      * Specify the maximum allowed size.
-     * @hide
      */
     public final static String EXTRA_SIZE_LIMIT = "android.intent.extra.sizeLimit";
 
     /**
      * Specify the maximum allowed recording duration in seconds.
-     * @hide
      */
     public final static String EXTRA_DURATION_LIMIT = "android.intent.extra.durationLimit";
 
