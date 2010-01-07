@@ -234,7 +234,6 @@ public final class Log {
      * immediately with an error dialog.
      * @param tag Used to identify the source of a log message.
      * @param msg The message you would like logged.
-     * @pending
      */
     public static int wtf(String tag, String msg) {
         return wtf(tag, msg, null);
@@ -245,7 +244,6 @@ public final class Log {
      * Similar to {@link #wtf(String, String)}, with an exception to log.
      * @param tag Used to identify the source of a log message.
      * @param tr An exception to log.
-     * @pending
      */
     public static int wtf(String tag, Throwable tr) {
         return wtf(tag, tr.getMessage(), tr);
@@ -257,7 +255,6 @@ public final class Log {
      * @param tag Used to identify the source of a log message.
      * @param msg The message you would like logged.
      * @param tr An exception to log.  May be null.
-     * @pending
      */
     public static int wtf(String tag, String msg, Throwable tr) {
         tr = new TerribleFailure(msg, tr);

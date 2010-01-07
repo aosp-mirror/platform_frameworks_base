@@ -40,8 +40,6 @@ import java.util.regex.Pattern;
  * <p>Events use integer tag codes corresponding to /system/etc/event-log-tags.
  * They carry a payload of one or more int, long, or String values.  The
  * event-log-tags file defines the payload contents for each type code.
- *
- * @pending
  */
 public class EventLog {
     private static final String TAG = "EventLog";
