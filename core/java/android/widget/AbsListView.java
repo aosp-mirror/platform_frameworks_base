@@ -127,11 +127,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     static final int TOUCH_MODE_FLING = 4;
 
     /**
-     * Indicates that the user is currently dragging the fast scroll thumb
-     */
-    static final int TOUCH_MODE_FAST_SCROLL = 5;
-
-    /**
      * Regular layout - usually an unsolicited layout from the view system
      */
     static final int LAYOUT_NORMAL = 0;
@@ -440,6 +435,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     private Runnable mClearScrollingCache;
     private int mMinimumVelocity;
     private int mMaximumVelocity;
+    
+    final boolean[] mIsScrap = new boolean[1];
 
     /**
      * Interface definition for a callback to be invoked when the list or grid
@@ -1239,9 +1236,13 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * converting an old view or making a new one.
      *
      * @param position The position to display
+     * @param isScrap Array of at least 1 boolean, the first entry will become true if
+     *                the returned view was taken from the scrap heap, false if otherwise.
+     * 
      * @return A view displaying the data associated with the specified position
      */
-    View obtainView(int position) {
+    View obtainView(int position, boolean[] isScrap) {
+        isScrap[0] = false;
         View scrapView;
 
         scrapView = mRecycler.getScrapView(position);
@@ -1269,6 +1270,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     ViewDebug.trace(scrapView, ViewDebug.RecyclerTraceType.MOVE_TO_SCRAP_HEAP,
                             position, -1);
                 }
+            } else {
+                isScrap[0] = true;                
             }
         } else {
             child = mAdapter.getView(position, null, this);
@@ -1542,6 +1545,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
         // Dismiss the popup in case onSaveInstanceState() was not invoked
         dismissPopup();
+
+        // Detach any view left in the scrap heap
+        mRecycler.clear();
 
         final ViewTreeObserver treeObserver = getViewTreeObserver();
         if (treeObserver != null) {
@@ -3595,12 +3601,12 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             for (int i = 0; i < count; ++i) {
                 final View victim = activeViews[i];
                 if (victim != null) {
-                    int whichScrap = ((AbsListView.LayoutParams)
-                            victim.getLayoutParams()).viewType;
+                    int whichScrap = ((AbsListView.LayoutParams) victim.getLayoutParams()).viewType;
 
                     activeViews[i] = null;
 
                     if (whichScrap == AdapterView.ITEM_VIEW_TYPE_IGNORE) {
+                        removeDetachedView(victim, false);
                         // Do not move views that should be ignored
                         continue;
                     }
