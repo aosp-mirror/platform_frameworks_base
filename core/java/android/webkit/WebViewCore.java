@@ -744,6 +744,7 @@ final class WebViewCore {
     }
 
         static final String[] HandlerDebugString = {
+            "REQUEST_LABEL", // 97
             "UPDATE_FRAME_CACHE_IF_LOADING", // = 98
             "SCROLL_TEXT_INPUT", // = 99
             "LOAD_URL", // = 100;
@@ -797,6 +798,7 @@ final class WebViewCore {
 
     class EventHub {
         // Message Ids
+        static final int REQUEST_LABEL = 97;
         static final int UPDATE_FRAME_CACHE_IF_LOADING = 98;
         static final int SCROLL_TEXT_INPUT = 99;
         static final int LOAD_URL = 100;
@@ -909,11 +911,11 @@ final class WebViewCore {
                 @Override
                 public void handleMessage(Message msg) {
                     if (DebugFlags.WEB_VIEW_CORE) {
-                        Log.v(LOGTAG, (msg.what < UPDATE_FRAME_CACHE_IF_LOADING
+                        Log.v(LOGTAG, (msg.what < REQUEST_LABEL
                                 || msg.what
                                 > VALID_NODE_BOUNDS ? Integer.toString(msg.what)
                                 : HandlerDebugString[msg.what
-                                        - UPDATE_FRAME_CACHE_IF_LOADING])
+                                        - REQUEST_LABEL])
                                 + " arg1=" + msg.arg1 + " arg2=" + msg.arg2
                                 + " obj=" + msg.obj);
                     }
@@ -931,6 +933,19 @@ final class WebViewCore {
                                 mSettings.onDestroyed();
                                 mNativeClass = 0;
                                 mWebView = null;
+                            }
+                            break;
+
+                        case REQUEST_LABEL:
+                            if (mWebView != null) {
+                                int nodePointer = msg.arg2;
+                                String label = nativeRequestLabel(msg.arg1,
+                                        nodePointer);
+                                if (label != null && label.length() > 0) {
+                                    Message.obtain(mWebView.mPrivateHandler,
+                                            WebView.RETURN_LABEL, nodePointer,
+                                            0, label).sendToTarget();
+                                }
                             }
                             break;
 
@@ -2192,7 +2207,7 @@ final class WebViewCore {
     }
 
     private native void nativeUpdateFrameCacheIfLoading();
-
+    private native String nativeRequestLabel(int framePtr, int nodePtr);
     /**
      * Scroll the focused textfield to (xPercent, y) in document space
      */
