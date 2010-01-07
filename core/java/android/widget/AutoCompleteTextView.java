@@ -1485,8 +1485,8 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
          * @return the view for the specified item
          */
         @Override
-        protected View obtainView(int position) {
-            View view = super.obtainView(position);
+        View obtainView(int position, boolean[] isScrap) {
+            View view = super.obtainView(position, isScrap);
 
             if (view instanceof TextView) {
                 ((TextView) view).setHorizontallyScrolling(true);

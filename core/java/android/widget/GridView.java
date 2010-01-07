@@ -931,7 +931,7 @@ public class GridView extends AbsListView {
         mItemCount = mAdapter == null ? 0 : mAdapter.getCount();
         final int count = mItemCount;
         if (count > 0) {
-            final View child = obtainView(0);
+            final View child = obtainView(0, mIsScrap);
 
             AbsListView.LayoutParams p = (AbsListView.LayoutParams)child.getLayoutParams();
             if (p == null) {
@@ -1203,7 +1203,7 @@ public class GridView extends AbsListView {
         View child;
 
         if (!mDataChanged) {
-            // Try to use an exsiting view for this position
+            // Try to use an existing view for this position
             child = mRecycler.getActiveView(position);
             if (child != null) {
                 // Found it -- we're using an existing child
@@ -1215,10 +1215,10 @@ public class GridView extends AbsListView {
 
         // Make a new view for this position, or convert an unused view if
         // possible
-        child = obtainView(position);
+        child = obtainView(position, mIsScrap);
 
         // This needs to be positioned and measured
-        setupChild(child, position, y, flow, childrenLeft, selected, false, where);
+        setupChild(child, position, y, flow, childrenLeft, selected, mIsScrap[0], where);
 
         return child;
     }

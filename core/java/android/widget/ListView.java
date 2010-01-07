@@ -1033,7 +1033,7 @@ public class ListView extends AbsListView {
         mItemCount = mAdapter == null ? 0 : mAdapter.getCount();
         if (mItemCount > 0 && (widthMode == MeasureSpec.UNSPECIFIED ||
                 heightMode == MeasureSpec.UNSPECIFIED)) {
-            final View child = obtainView(0);
+            final View child = obtainView(0, mIsScrap);
 
             measureScrapChild(child, 0, widthMeasureSpec);
 
@@ -1142,9 +1142,10 @@ public class ListView extends AbsListView {
         endPosition = (endPosition == NO_POSITION) ? adapter.getCount() - 1 : endPosition;
         final AbsListView.RecycleBin recycleBin = mRecycler;
         final boolean recyle = recycleOnMeasure();
+        final boolean[] isScrap = mIsScrap;
 
         for (i = startPosition; i <= endPosition; ++i) {
-            child = obtainView(i);
+            child = obtainView(i, isScrap);
 
             measureScrapChild(child, i, widthMeasureSpec);
 
@@ -1665,10 +1666,10 @@ public class ListView extends AbsListView {
         }
 
         // Make a new view for this position, or convert an unused view if possible
-        child = obtainView(position);
+        child = obtainView(position, mIsScrap);
 
         // This needs to be positioned and measured
-        setupChild(child, position, y, flow, childrenLeft, selected, false);
+        setupChild(child, position, y, flow, childrenLeft, selected, mIsScrap[0]);
 
         return child;
     }
@@ -2823,17 +2824,19 @@ public class ListView extends AbsListView {
 
     private View addViewAbove(View theView, int position) {
         int abovePosition = position - 1;
-        View view = obtainView(abovePosition);
+        View view = obtainView(abovePosition, mIsScrap);
         int edgeOfNewChild = theView.getTop() - mDividerHeight;
-        setupChild(view, abovePosition, edgeOfNewChild, false, mListPadding.left, false, false);
+        setupChild(view, abovePosition, edgeOfNewChild, false, mListPadding.left,
+                false, mIsScrap[0]);
         return view;
     }
 
     private View addViewBelow(View theView, int position) {
         int belowPosition = position + 1;
-        View view = obtainView(belowPosition);
+        View view = obtainView(belowPosition, mIsScrap);
         int edgeOfNewChild = theView.getBottom() + mDividerHeight;
-        setupChild(view, belowPosition, edgeOfNewChild, true, mListPadding.left, false, false);
+        setupChild(view, belowPosition, edgeOfNewChild, true, mListPadding.left,
+                false, mIsScrap[0]);
         return view;
     }
 
