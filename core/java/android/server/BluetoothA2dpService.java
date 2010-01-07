@@ -470,7 +470,8 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
                 mAudioManager.setParameters("A2dpSuspended=false");
             }
 
-            if (state == BluetoothA2dp.STATE_CONNECTING ||
+            if (getSinkPriority(device) > BluetoothA2dp.PRIORITY_OFF &&
+                    state == BluetoothA2dp.STATE_CONNECTING ||
                     state == BluetoothA2dp.STATE_CONNECTED) {
                 // We have connected or attempting to connect.
                 // Bump priority
