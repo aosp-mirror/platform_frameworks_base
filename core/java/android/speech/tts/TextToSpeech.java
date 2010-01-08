@@ -286,6 +286,10 @@ public class TextToSpeech {
          */
         public static final String KEY_PARAM_VARIANT = "variant";
         /**
+         * {@hide}
+         */
+        public static final String KEY_PARAM_ENGINE = "engine";
+        /**
          * Parameter key to specify the audio stream type to be used when speaking text
          * or playing back a file.
          * @see TextToSpeech#speak(String, int, HashMap)
@@ -327,10 +331,16 @@ public class TextToSpeech {
          * {@hide}
          */
         protected static final int PARAM_POSITION_UTTERANCE_ID = 10;
+
         /**
          * {@hide}
          */
-        protected static final int NB_CACHED_PARAMS = 6;
+        protected static final int PARAM_POSITION_ENGINE = 12;
+
+        /**
+         * {@hide}
+         */
+        protected static final int NB_CACHED_PARAMS = 7;
     }
 
     /**
@@ -373,6 +383,7 @@ public class TextToSpeech {
         mCachedParams[Engine.PARAM_POSITION_VARIANT] = Engine.KEY_PARAM_VARIANT;
         mCachedParams[Engine.PARAM_POSITION_STREAM] = Engine.KEY_PARAM_STREAM;
         mCachedParams[Engine.PARAM_POSITION_UTTERANCE_ID] = Engine.KEY_PARAM_UTTERANCE_ID;
+        mCachedParams[Engine.PARAM_POSITION_ENGINE] = Engine.KEY_PARAM_ENGINE;
 
         mCachedParams[Engine.PARAM_POSITION_RATE + 1] =
                 String.valueOf(Engine.DEFAULT_RATE);
@@ -381,10 +392,10 @@ public class TextToSpeech {
         mCachedParams[Engine.PARAM_POSITION_LANGUAGE + 1] = defaultLoc.getISO3Language();
         mCachedParams[Engine.PARAM_POSITION_COUNTRY + 1] = defaultLoc.getISO3Country();
         mCachedParams[Engine.PARAM_POSITION_VARIANT + 1] = defaultLoc.getVariant();
-
         mCachedParams[Engine.PARAM_POSITION_STREAM + 1] =
                 String.valueOf(Engine.DEFAULT_STREAM);
         mCachedParams[Engine.PARAM_POSITION_UTTERANCE_ID + 1] = "";
+        mCachedParams[Engine.PARAM_POSITION_ENGINE + 1] = Engine.DEFAULT_SYNTH;
 
         initTts();
     }
@@ -684,6 +695,10 @@ public class TextToSpeech {
                     if (extra != null) {
                         mCachedParams[Engine.PARAM_POSITION_UTTERANCE_ID + 1] = extra;
                     }
+                    extra = params.get(Engine.KEY_PARAM_ENGINE);
+                    if (extra != null) {
+                        mCachedParams[Engine.PARAM_POSITION_ENGINE + 1] = extra;
+                    }
                 }
                 result = mITts.speak(mPackageName, text, queueMode, mCachedParams);
             } catch (RemoteException e) {
@@ -819,7 +834,7 @@ public class TextToSpeech {
                 mStarted = false;
                 initTts();
             } finally {
-              return result;
+                return result;
             }
         }
     }
@@ -894,7 +909,7 @@ public class TextToSpeech {
                 mStarted = false;
                 initTts();
             } finally {
-              return result;
+                return result;
             }
         }
     }
@@ -943,7 +958,7 @@ public class TextToSpeech {
                 mStarted = false;
                 initTts();
             } finally {
-              return result;
+                return result;
             }
         }
     }
@@ -990,7 +1005,7 @@ public class TextToSpeech {
                 mStarted = false;
                 initTts();
             } finally {
-              return result;
+                return result;
             }
         }
     }
@@ -1046,7 +1061,7 @@ public class TextToSpeech {
                 mStarted = false;
                 initTts();
             } finally {
-              return result;
+                return result;
             }
         }
     }
@@ -1064,7 +1079,7 @@ public class TextToSpeech {
                 return null;
             }
             try {
-                String[] locStrings =  mITts.getLanguage();
+                String[] locStrings = mITts.getLanguage();
                 if ((locStrings != null) && (locStrings.length == 3)) {
                     return new Locale(locStrings[0], locStrings[1], locStrings[2]);
                 } else {
@@ -1131,7 +1146,7 @@ public class TextToSpeech {
                 mStarted = false;
                 initTts();
             } finally {
-              return result;
+                return result;
             }
         }
     }
@@ -1165,6 +1180,10 @@ public class TextToSpeech {
                     String extra = params.get(Engine.KEY_PARAM_UTTERANCE_ID);
                     if (extra != null) {
                         mCachedParams[Engine.PARAM_POSITION_UTTERANCE_ID + 1] = extra;
+                    }
+                    extra = params.get(Engine.KEY_PARAM_ENGINE);
+                    if (extra != null) {
+                        mCachedParams[Engine.PARAM_POSITION_ENGINE + 1] = extra;
                     }
                 }
                 if (mITts.synthesizeToFile(mPackageName, text, mCachedParams, filename)){
@@ -1270,6 +1289,9 @@ public class TextToSpeech {
             }
             try {
                 result = mITts.setEngineByPackageName(enginePackageName);
+                if (result == TextToSpeech.SUCCESS){
+                    mCachedParams[Engine.PARAM_POSITION_ENGINE + 1] = enginePackageName;
+                }
             } catch (RemoteException e) {
                 // TTS died; restart it.
                 Log.e("TextToSpeech.java - setEngineByPackageName", "RemoteException");

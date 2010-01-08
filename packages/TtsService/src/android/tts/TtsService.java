@@ -744,6 +744,7 @@ public class TtsService extends Service implements OnCompletionListener {
                     String country = "";
                     String variant = "";
                     String speechRate = "";
+                    String engine = "";
                     if (speechItem.mParams != null){
                         for (int i = 0; i < speechItem.mParams.size() - 1; i = i + 2){
                             String param = speechItem.mParams.get(i);
@@ -765,12 +766,17 @@ public class TtsService extends Service implements OnCompletionListener {
                                     } catch (NumberFormatException e) {
                                         streamType = DEFAULT_STREAM_TYPE;
                                     }
+                                } else if (param.equals(TextToSpeech.Engine.KEY_PARAM_ENGINE)) {
+                                    engine = speechItem.mParams.get(i + 1);
                                 }
                             }
                         }
                     }
                     // Only do the synthesis if it has not been killed by a subsequent utterance.
                     if (mKillList.get(speechItem) == null) {
+                        if (engine.length() > 0) {
+                            setEngine(engine);
+                        }
                         if (language.length() > 0){
                             setLanguage("", language, country, variant);
                         }
@@ -825,6 +831,7 @@ public class TtsService extends Service implements OnCompletionListener {
                     String country = "";
                     String variant = "";
                     String speechRate = "";
+                    String engine = "";
                     if (speechItem.mParams != null){
                         for (int i = 0; i < speechItem.mParams.size() - 1; i = i + 2){
                             String param = speechItem.mParams.get(i);
@@ -839,12 +846,17 @@ public class TtsService extends Service implements OnCompletionListener {
                                     variant = speechItem.mParams.get(i+1);
                                 } else if (param.equals(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID)){
                                     utteranceId = speechItem.mParams.get(i+1);
+                                } else if (param.equals(TextToSpeech.Engine.KEY_PARAM_ENGINE)) {
+                                    engine = speechItem.mParams.get(i + 1);
                                 }
                             }
                         }
                     }
                     // Only do the synthesis if it has not been killed by a subsequent utterance.
                     if (mKillList.get(speechItem) == null){
+                        if (engine.length() > 0) {
+                            setEngine(engine);
+                        }
                         if (language.length() > 0){
                             setLanguage("", language, country, variant);
                         }
