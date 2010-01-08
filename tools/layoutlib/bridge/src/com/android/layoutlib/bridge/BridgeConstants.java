@@ -61,6 +61,6 @@ public class BridgeConstants {
     public final static String REFERENCE_NULL = "@null";
 
     public final static String MATCH_PARENT = "match_parent";
-    public final static String FILL_PARENT = "match_parent";
+    public final static String FILL_PARENT = "fill_parent";
     public final static String WRAP_CONTENT = "wrap_content";
 }
