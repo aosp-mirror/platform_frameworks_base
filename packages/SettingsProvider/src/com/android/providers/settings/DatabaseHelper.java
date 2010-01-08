@@ -71,7 +71,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // database gets upgraded properly. At a minimum, please confirm that 'upgradeVersion'
     // is properly propagated through your change.  Not doing so will result in a loss of user
     // settings.
-    private static final int DATABASE_VERSION = 45;
+    private static final int DATABASE_VERSION = 46;
 
     private Context mContext;
 
@@ -558,8 +558,29 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             db.execSQL("DROP INDEX IF EXISTS gservicesIndex1");
             upgradeVersion = 45;
         }
-            
-        
+
+        if (upgradeVersion == 45) {
+             /*
+              * New settings for MountService
+              */
+            db.beginTransaction();
+            try {
+                db.execSQL("INSERT INTO secure(name,value) values('" +
+                        Settings.Secure.MOUNT_PLAY_NOTIFICATION_SND + "','1');");
+                db.execSQL("INSERT INTO secure(name,value) values('" +
+                        Settings.Secure.MOUNT_UMS_AUTOSTART + "','0');");
+                db.execSQL("INSERT INTO secure(name,value) values('" +
+                        Settings.Secure.MOUNT_UMS_PROMPT + "','1');");
+                db.execSQL("INSERT INTO secure(name,value) values('" +
+                        Settings.Secure.MOUNT_UMS_NOTIFY_ENABLED + "','1');");
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+            }
+            upgradeVersion = 46;
+        }
+
+ 
         if (upgradeVersion != currentVersion) {
             Log.w(TAG, "Got stuck trying to upgrade from version " + upgradeVersion
                     + ", must wipe the settings provider");
@@ -888,7 +909,19 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 "1".equals(SystemProperties.get("ro.allow.mock.location")) ? 1 : 0);
 
         loadSecure35Settings(stmt);
-        
+
+        loadBooleanSetting(stmt, Settings.Secure.MOUNT_PLAY_NOTIFICATION_SND,
+                R.bool.def_mount_play_notification_snd);
+
+        loadBooleanSetting(stmt, Settings.Secure.MOUNT_UMS_AUTOSTART,
+                R.bool.def_mount_ums_autostart);
+
+        loadBooleanSetting(stmt, Settings.Secure.MOUNT_UMS_PROMPT,
+                R.bool.def_mount_ums_prompt);
+
+        loadBooleanSetting(stmt, Settings.Secure.MOUNT_UMS_NOTIFY_ENABLED,
+                R.bool.def_mount_ums_notify_enabled);
+
         stmt.close();
     }
 

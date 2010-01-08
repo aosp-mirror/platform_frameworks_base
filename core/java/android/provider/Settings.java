@@ -2918,6 +2918,29 @@ public final class Settings {
         public static final String SEARCH_PER_SOURCE_CONCURRENT_QUERY_LIMIT =
                 "search_per_source_concurrent_query_limit";
 
+        /**
+         * Whether or not alert sounds are played on MountService events. (0 = false, 1 = true)
+         * @hide
+         */
+        public static final String MOUNT_PLAY_NOTIFICATION_SND = "mount_play_not_snd";
+
+        /**
+         * Whether or not UMS auto-starts on UMS host detection. (0 = false, 1 = true)
+         * @hide
+         */
+        public static final String MOUNT_UMS_AUTOSTART = "mount_ums_autostart";
+
+        /**
+         * Whether or not a notification is displayed on UMS host detection. (0 = false, 1 = true)
+         * @hide
+         */
+        public static final String MOUNT_UMS_PROMPT = "mount_ums_prompt";
+
+        /**
+         * Whether or not a notification is displayed while UMS is enabled. (0 = false, 1 = true)
+         * @hide
+         */
+        public static final String MOUNT_UMS_NOTIFY_ENABLED = "mount_ums_notify_enabled";
 
         
         /**
@@ -2941,6 +2964,10 @@ public final class Settings {
             WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY,
             WIFI_NUM_ALLOWED_CHANNELS,
             WIFI_NUM_OPEN_NETWORKS_KEPT,
+            MOUNT_PLAY_NOTIFICATION_SND,
+            MOUNT_UMS_AUTOSTART,
+            MOUNT_UMS_PROMPT,
+            MOUNT_UMS_NOTIFY_ENABLED
         };
 
         /**
