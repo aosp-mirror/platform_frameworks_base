@@ -24,6 +24,7 @@
 #include <limits.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <cutils/properties.h>
 #include <utils/threads.h>
 
 #include "jni.h"
@@ -32,8 +33,10 @@
 
 #ifndef NO_OPENCORE
 #include "pvmediascanner.h"
-#else
-#include "StagefrightMediaScanner.h"
+#endif
+
+#if BUILD_WITH_FULL_STAGEFRIGHT
+#include <media/stagefright/StagefrightMediaScanner.h>
 #endif
 
 // ----------------------------------------------------------------------------
@@ -283,14 +286,25 @@ android_media_MediaScanner_native_init(JNIEnv *env)
     }
 }
 
+static MediaScanner *createMediaScanner() {
+#if BUILD_WITH_FULL_STAGEFRIGHT
+    char value[PROPERTY_VALUE_MAX];
+    if (property_get("media.stagefright.enable-scan", value, NULL)
+        && (!strcmp(value, "1") || !strcasecmp(value, "true"))) {
+        return new StagefrightMediaScanner;
+    }
+#endif
+#ifndef NO_OPENCORE
+    return new PVMediaScanner();
+#endif
+
+    return NULL;
+}
+
 static void
 android_media_MediaScanner_native_setup(JNIEnv *env, jobject thiz)
 {
-#ifndef NO_OPENCORE
-    MediaScanner *mp = new PVMediaScanner();
-#else
-    MediaScanner *mp = new StagefrightMediaScanner();
-#endif
+    MediaScanner *mp = createMediaScanner();
 
     if (mp == NULL) {
         jniThrowException(env, "java/lang/RuntimeException", "Out of memory");

@@ -15,7 +15,8 @@ LOCAL_SHARED_LIBRARIES := \
     libbinder \
     libmedia \
     libskia \
-    libui
+    libui \
+    libcutils
 
 ifneq ($(BUILD_WITHOUT_PV),true)
 LOCAL_SRC_FILES += \
@@ -26,6 +27,15 @@ LOCAL_SHARED_LIBRARIES += \
     libomx_amrenc_sharedlibrary
 else
     LOCAL_CFLAGS += -DNO_OPENCORE
+endif
+
+ifeq ($(BUILD_WITH_FULL_STAGEFRIGHT),true)
+
+LOCAL_CFLAGS += -DBUILD_WITH_FULL_STAGEFRIGHT=1
+
+LOCAL_SHARED_LIBRARIES += \
+    libstagefright
+
 endif
 
 LOCAL_STATIC_LIBRARIES :=

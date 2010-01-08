@@ -26,11 +26,6 @@ LOCAL_SRC_FILES:= \
     MediaScannerClient.cpp \
     autodetect.cpp
 
-ifneq ($(BUILD_WITHOUT_PV),true)
-else
-LOCAL_SRC_FILES += StagefrightMediaScanner.cpp
-endif
-
 LOCAL_SHARED_LIBRARIES := \
 	libui libcutils libutils libbinder libsonivox libicuuc
 

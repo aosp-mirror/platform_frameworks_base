@@ -19,7 +19,7 @@
 #define LOG_TAG "StagefrightMetadataRetriever"
 #include <utils/Log.h>
 
-#include "StagefrightMetadataRetriever.h"
+#include "include/StagefrightMetadataRetriever.h"
 
 #include <media/stagefright/CachingDataSource.h>
 #include <media/stagefright/ColorConverter.h>
