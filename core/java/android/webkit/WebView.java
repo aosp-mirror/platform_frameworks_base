@@ -5739,11 +5739,6 @@ public class WebView extends AbsoluteLayout
                         hideSoftKeyboard();
                     } else {
                         displaySoftKeyboard(false);
-                        if (DebugFlags.WEB_VIEW) {
-                            Log.v(LOGTAG, "REQUEST_KEYBOARD"
-                                    + " focusCandidateIsPlugin="
-                                    + nativeFocusCandidateIsPlugin());
-                        }
                     }
                     break;
 
@@ -6342,7 +6337,7 @@ public class WebView extends AbsoluteLayout
     private native void     nativeCreate(int ptr);
     private native int      nativeCursorFramePointer();
     private native Rect     nativeCursorNodeBounds();
-    /* package */ native int nativeCursorNodePointer();
+    private native int nativeCursorNodePointer();
     /* package */ native boolean nativeCursorMatchesFocus();
     private native boolean  nativeCursorIntersects(Rect visibleRect);
     private native boolean  nativeCursorIsAnchor();
@@ -6374,13 +6369,12 @@ public class WebView extends AbsoluteLayout
     private native void     nativeFindNext(boolean forward);
     /* package */ native int      nativeFocusCandidateFramePointer();
     private native boolean  nativeFocusCandidateIsPassword();
-    private native boolean  nativeFocusCandidateIsPlugin();
     private native boolean  nativeFocusCandidateIsRtlText();
     private native boolean  nativeFocusCandidateIsTextInput();
     /* package */ native int      nativeFocusCandidateMaxLength();
     /* package */ native String   nativeFocusCandidateName();
     private native Rect     nativeFocusCandidateNodeBounds();
-    /* package */ native int nativeFocusCandidatePointer();
+    private native int      nativeFocusCandidatePointer();
     private native String   nativeFocusCandidateText();
     private native int      nativeFocusCandidateTextSize();
     /**
