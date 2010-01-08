@@ -1049,18 +1049,6 @@ public final class Calendar {
         public static final String MAX_INSTANCE = "maxInstance";
 
         /**
-         * The minimum Julian day in the BusyBits table.
-         * <P>Type: INTEGER</P>
-         */
-        public static final String MIN_BUSYBITS = "minBusyBits";
-
-        /**
-         * The maximum Julian day in the BusyBits table.
-         * <P>Type: INTEGER</P>
-         */
-        public static final String MAX_BUSYBITS = "maxBusyBits";
-
-        /**
          * The minimum Julian day in the EventDays table.
          * <P>Type: INTEGER</P>
          */
@@ -1074,68 +1062,6 @@ public final class Calendar {
     }
 
     public static final class CalendarMetaData implements CalendarMetaDataColumns {
-    }
-    /*busybits*/
-    public interface BusyBitsColumns {
-        /**
-         * The Julian day number.
-         * <P>Type: INTEGER (int)</P>
-         */
-        public static final String DAY = "day";
-
-        /**
-         * The 24 bits representing the 24 1-hour time slots in a day.
-         * If an event in the Instances table overlaps part of a 1-hour
-         * time slot then the corresponding bit is set.  The first time slot
-         * (12am to 1am) is bit 0.  The last time slot (11pm to midnight)
-         * is bit 23.
-         * <P>Type: INTEGER (int)</P>
-         */
-        public static final String BUSYBITS = "busyBits";
-
-        /**
-         * The number of all-day events that occur on this day.
-         * <P>Type: INTEGER (int)</P>
-         */
-        public static final String ALL_DAY_COUNT = "allDayCount";
-    }
-
-    /*busybits*/
-    public static final class BusyBits implements BusyBitsColumns {
-        public static final Uri CONTENT_URI = Uri.parse("content://calendar/busybits/when");
-
-        public static final String[] PROJECTION = { DAY, BUSYBITS, ALL_DAY_COUNT };
-
-        // The number of minutes represented by one busy bit
-        public static final int MINUTES_PER_BUSY_INTERVAL = 60;
-
-        // The number of intervals in a day
-        public static final int INTERVALS_PER_DAY = 24 * 60 / MINUTES_PER_BUSY_INTERVAL;
-
-        /**
-         * Retrieves the busy bits for the Julian days starting at "startDay"
-         * for "numDays".
-         * This is being phased out so has been changed to an empty method so
-         * that it doesn't reference anything that needs to be cleaned up else-
-         * where.
-         *
-         * @param cr the ContentResolver
-         * @param startDay the first Julian day in the range
-         * @param numDays the number of days to load (must be at least 1)
-         * @return a database cursor
-         */
-        public static final Cursor query(ContentResolver cr, int startDay, int numDays) {
-//            if (numDays < 1) {
-//                return null;
-//            }
-//            int endDay = startDay + numDays - 1;
-//            Uri.Builder builder = CONTENT_URI.buildUpon();
-//            ContentUris.appendId(builder, startDay);
-//            ContentUris.appendId(builder, endDay);
-//            return cr.query(builder.build(), PROJECTION, null /* selection */,
-//                    null /* selection args */, DAY);
-          return null;
-        }
     }
 
     public interface EventDaysColumns {
