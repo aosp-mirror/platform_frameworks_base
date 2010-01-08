@@ -92,9 +92,9 @@ void Type::compute()
         mLODs[lod].mZ = tz;
         mLODs[lod].mOffset = offset;
         offset += tx * rsMax(ty, 1u) * rsMax(tz, 1u) * mElement->getSizeBytes();
-        tx = (tx + 1) >> 1;
-        ty = (ty + 1) >> 1;
-        tz = (tz + 1) >> 1;
+        if (tx > 1) tx >>= 1;
+        if (ty > 1) ty >>= 1;
+        if (tz > 1) tz >>= 1;
     }
 
     // At this point the offset is the size of a mipmap chain;
