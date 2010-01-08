@@ -68,8 +68,8 @@ public class VerticalFocusSearch extends Activity {
         mLayout.setOrientation(LinearLayout.VERTICAL);
         mLayout.setHorizontalGravity(Gravity.LEFT);
         mLayout.setLayoutParams(new ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.FILL_PARENT,
-                ViewGroup.LayoutParams.FILL_PARENT));
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT));
 
         mTopWide = makeWide("top wide");
         mLayout.addView(mTopWide);
@@ -102,7 +102,7 @@ public class VerticalFocusSearch extends Activity {
         Button button = new MyButton(this);
         button.setText(label);
         button.setLayoutParams(new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.FILL_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT));
         return button;
     }
@@ -133,7 +133,7 @@ public class VerticalFocusSearch extends Activity {
         LinearLayout ll = new LinearLayout(this);
         ll.setOrientation(LinearLayout.HORIZONTAL);
         ll.setLayoutParams(new LinearLayout.LayoutParams(
-            ViewGroup.LayoutParams.FILL_PARENT,
+            ViewGroup.LayoutParams.MATCH_PARENT,
             ViewGroup.LayoutParams.WRAP_CONTENT));
 
         if (atRight) {

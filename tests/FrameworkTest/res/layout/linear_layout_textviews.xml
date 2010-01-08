@@ -21,7 +21,7 @@
     android:id="@+id/layout"
     android:background="#FFFF0000"
     android:orientation="horizontal"
-    android:layout_width="fill_parent"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
     <EditText

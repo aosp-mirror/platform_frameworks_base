@@ -25,7 +25,7 @@
     >
 
     <TextView android:id="@+id/subtitle"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textSize="18dp"
         android:paddingLeft="19dp"
@@ -35,7 +35,7 @@
         />
     
     <TextView android:id="@+id/level_percent"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textSize="18dp"
         android:textColor="#ffffffff"

@@ -16,7 +16,7 @@
 
 package android.inputmethodservice;
 
-import static android.view.ViewGroup.LayoutParams.FILL_PARENT;
+import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
 import android.app.Dialog;
@@ -556,7 +556,7 @@ public class InputMethodService extends AbstractInputMethodService {
                 Context.LAYOUT_INFLATER_SERVICE);
         mWindow = new SoftInputWindow(this, mTheme, mDispatcherState);
         initViews();
-        mWindow.getWindow().setLayout(FILL_PARENT, WRAP_CONTENT);
+        mWindow.getWindow().setLayout(MATCH_PARENT, WRAP_CONTENT);
     }
     
     /**
@@ -803,8 +803,8 @@ public class InputMethodService extends AbstractInputMethodService {
      * candidates only mode changes.
      * 
      * <p>The default implementation makes the layout for the window
-     * FILL_PARENT x FILL_PARENT when in fullscreen mode, and
-     * FILL_PARENT x WRAP_CONTENT when in non-fullscreen mode.
+     * MATCH_PARENT x MATCH_PARENT when in fullscreen mode, and
+     * MATCH_PARENT x WRAP_CONTENT when in non-fullscreen mode.
      * 
      * @param win The input method's window.
      * @param isFullscreen If true, the window is running in fullscreen mode
@@ -816,9 +816,9 @@ public class InputMethodService extends AbstractInputMethodService {
     public void onConfigureWindow(Window win, boolean isFullscreen,
             boolean isCandidatesOnly) {
         if (isFullscreen) {
-            mWindow.getWindow().setLayout(FILL_PARENT, FILL_PARENT);
+            mWindow.getWindow().setLayout(MATCH_PARENT, MATCH_PARENT);
         } else {
-            mWindow.getWindow().setLayout(FILL_PARENT, WRAP_CONTENT);
+            mWindow.getWindow().setLayout(MATCH_PARENT, WRAP_CONTENT);
         }
     }
     
@@ -1049,8 +1049,8 @@ public class InputMethodService extends AbstractInputMethodService {
     public void setExtractView(View view) {
         mExtractFrame.removeAllViews();
         mExtractFrame.addView(view, new FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.FILL_PARENT,
-                ViewGroup.LayoutParams.FILL_PARENT));
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT));
         mExtractView = view;
         if (view != null) {
             mExtractEditText = (ExtractEditText)view.findViewById(
@@ -1079,7 +1079,7 @@ public class InputMethodService extends AbstractInputMethodService {
     public void setCandidatesView(View view) {
         mCandidatesFrame.removeAllViews();
         mCandidatesFrame.addView(view, new FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.FILL_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT));
     }
     
@@ -1092,7 +1092,7 @@ public class InputMethodService extends AbstractInputMethodService {
     public void setInputView(View view) {
         mInputFrame.removeAllViews();
         mInputFrame.addView(view, new FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.FILL_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT));
         mInputView = view;
     }

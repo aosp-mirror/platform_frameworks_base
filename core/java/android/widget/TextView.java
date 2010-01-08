@@ -4992,7 +4992,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 final int height = mLayoutParams.height;
                 // If the size of the view does not depend on the size of the text, try to
                 // start the marquee immediately
-                if (height != LayoutParams.WRAP_CONTENT && height != LayoutParams.FILL_PARENT) {
+                if (height != LayoutParams.WRAP_CONTENT && height != LayoutParams.MATCH_PARENT) {
                     startMarquee();
                 } else {
                     // Defer the start of the marquee until we know our width (see setFrame())
@@ -5307,7 +5307,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 if (desiredHeight != this.getHeight()) {
                     sizeChanged = true;
                 }
-            } else if (mLayoutParams.height == LayoutParams.FILL_PARENT) {
+            } else if (mLayoutParams.height == LayoutParams.MATCH_PARENT) {
                 if (mDesiredHeightAtMeasure >= 0) {
                     int desiredHeight = getDesiredHeight();
 
@@ -5354,7 +5354,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (mEllipsize != TextUtils.TruncateAt.MARQUEE) {
                 // In a fixed-height view, so use our new text layout.
                 if (mLayoutParams.height != LayoutParams.WRAP_CONTENT &&
-                    mLayoutParams.height != LayoutParams.FILL_PARENT) {
+                    mLayoutParams.height != LayoutParams.MATCH_PARENT) {
                     invalidate();
                     return;
                 }

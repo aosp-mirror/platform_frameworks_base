@@ -22,55 +22,55 @@
 
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/scrollView"
-    android:layout_width="fill_parent"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:scrollbars="none">
 
     <LinearLayout
         android:id="@+id/layout"
         android:orientation="vertical"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
 
         <Button android:id="@+id/scrollToRectFromTop"
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/scroll_top_button"/>
 
         <Button android:id="@+id/scrollToRectFromTop2"
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingBottom="10dip"
             android:text="@string/scroll_top_button2"/>
 
         <TextView android:id="@+id/topBlob"
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dip"
             android:layout_marginBottom="5dip"/>
 
         <TextView android:id="@+id/childToMakeVisible"
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dip"
             android:layout_marginBottom="5dip"
             android:text="@string/scroll_to_me"/>
 
         <TextView android:id="@+id/bottomBlob"
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dip"
             android:layout_marginBottom="5dip"/>
 
         <Button android:id="@+id/scrollToRectFromBottom2"
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingTop="10dip"
             android:text="@string/scroll_bottom_button2"/>
 
         <Button android:id="@+id/scrollToRectFromBottom"
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/scroll_bottom_button"/>
 

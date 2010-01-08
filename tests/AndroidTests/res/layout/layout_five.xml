@@ -17,6 +17,6 @@
 ** limitations under the License.
 */
 -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/content" android:orientation="vertical" android:layout_width="fill_parent" android:layout_height="fill_parent">
-	<TextView android:id="@+id/text" android:text="@string/layout_five_text_text" android:layout_width="fill_parent" android:layout_height="wrap_content" />
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/content" android:orientation="vertical" android:layout_width="match_parent" android:layout_height="match_parent">
+	<TextView android:id="@+id/text" android:text="@string/layout_five_text_text" android:layout_width="match_parent" android:layout_height="wrap_content" />
 </LinearLayout>

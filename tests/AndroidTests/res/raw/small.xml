@@ -17,4 +17,4 @@
 ** limitations under the License.
 */
 -->
-<view class="com.android.tests.InflateTest$ViewOne" id="@+id/viewOne" android:layout_width="fill_parent" android:layout_height="fill_parent"/>
+<view class="com.android.tests.InflateTest$ViewOne" id="@+id/viewOne" android:layout_width="match_parent" android:layout_height="match_parent"/>

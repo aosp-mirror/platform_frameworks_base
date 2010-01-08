@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 
@@ -26,14 +25,14 @@ public class BigEditTextActivityScrollableResize extends Activity {
         mRootView = new ScrollView(this);
         ((ScrollView) mRootView).setFillViewport(true);
         mRootView.setLayoutParams(new ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.FILL_PARENT,
-                ViewGroup.LayoutParams.FILL_PARENT));
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT));
         
         mLayout = new LinearLayout(this);
         mLayout.setOrientation(LinearLayout.VERTICAL);
         mLayout.setLayoutParams(new ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.FILL_PARENT,
-                ViewGroup.LayoutParams.FILL_PARENT));
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT));
         
         View view = getLayoutInflater().inflate(
                 R.layout.full_screen_edit_text, ((ScrollView) mRootView), false);

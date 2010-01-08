@@ -16,8 +16,6 @@
 
 package android.widget;
 
-import com.android.internal.R;
-
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -26,7 +24,6 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.View.OnFocusChangeListener;
@@ -313,7 +310,7 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
         if (child.getLayoutParams() == null) {
             final LinearLayout.LayoutParams lp = new LayoutParams(
                     0,
-                    ViewGroup.LayoutParams.FILL_PARENT, 1.0f);
+                    ViewGroup.LayoutParams.MATCH_PARENT, 1.0f);
             lp.setMargins(0, 0, 0, 0);
             child.setLayoutParams(lp);
         }
@@ -328,7 +325,7 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
             ImageView divider = new ImageView(mContext);
             final LinearLayout.LayoutParams lp = new LayoutParams(
                     mDividerDrawable.getIntrinsicWidth(),
-                    LayoutParams.FILL_PARENT);
+                    LayoutParams.MATCH_PARENT);
             lp.setMargins(0, 0, 0, 0);
             divider.setLayoutParams(lp);
             divider.setBackgroundDrawable(mDividerDrawable);

@@ -327,8 +327,8 @@ mTabHost.addTab(TAB_TAG_1, "Hello, world!", "Tab 1");
                     .addView(
                             mCurrentView,
                             new ViewGroup.LayoutParams(
-                                    ViewGroup.LayoutParams.FILL_PARENT,
-                                    ViewGroup.LayoutParams.FILL_PARENT));
+                                    ViewGroup.LayoutParams.MATCH_PARENT,
+                                    ViewGroup.LayoutParams.MATCH_PARENT));
         }
 
         if (!mTabWidget.hasFocus()) {

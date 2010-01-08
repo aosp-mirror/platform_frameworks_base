@@ -247,7 +247,7 @@ public class ZoomButtonsController implements View.OnTouchListener {
                 LayoutParams.FLAG_LAYOUT_NO_LIMITS |
                 LayoutParams.FLAG_ALT_FOCUSABLE_IM;
         lp.height = LayoutParams.WRAP_CONTENT;
-        lp.width = LayoutParams.FILL_PARENT;
+        lp.width = LayoutParams.MATCH_PARENT;
         lp.type = LayoutParams.TYPE_APPLICATION_PANEL;
         lp.format = PixelFormat.TRANSLUCENT;
         lp.windowAnimations = com.android.internal.R.style.Animation_ZoomButtons;

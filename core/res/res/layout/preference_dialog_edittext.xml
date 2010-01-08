@@ -24,7 +24,7 @@
     
     <TextView android:id="@+android:id/message"
         style="?android:attr/textAppearanceSmall"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textColor="?android:attr/textColorSecondary" />
         

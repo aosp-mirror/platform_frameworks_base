@@ -23,8 +23,6 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import android.os.Handler;
-import android.os.Message;
 import android.os.Vibrator;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -34,7 +32,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
-import android.view.animation.AnimationSet;
 import android.view.animation.LinearInterpolator;
 import android.view.animation.TranslateAnimation;
 import android.view.animation.Animation.AnimationListener;
@@ -214,7 +211,7 @@ public class SlidingTab extends ViewGroup {
             // Create hint TextView
             text = new TextView(parent.getContext());
             text.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT,
-                    LayoutParams.FILL_PARENT));
+                    LayoutParams.MATCH_PARENT));
             text.setBackgroundResource(barId);
             text.setTextAppearance(parent.getContext(), R.style.TextAppearance_SlidingTabNormal);
             // hint.setSingleLine();  // Hmm.. this causes the text to disappear off-screen

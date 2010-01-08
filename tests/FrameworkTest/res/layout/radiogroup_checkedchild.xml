@@ -21,23 +21,23 @@
 
       <RadioButton
           android:id="@+id/value_one"
-          android:layout_width="fill_parent"
-          android:layout_height="fill_parent"
+          android:layout_width="match_parent"
+          android:layout_height="match_parent"
           android:textColor="#555555"
           android:checked="true"
           android:text="@string/visibility_1_view_1" />
 
       <RadioButton
           android:id="@+id/value_two"
-          android:layout_width="fill_parent"
-          android:layout_height="fill_parent"
+          android:layout_width="match_parent"
+          android:layout_height="match_parent"
           android:textColor="#555555"
           android:text="@string/visibility_1_view_2" />
 
       <RadioButton
           android:id="@+id/value_three"
-          android:layout_width="fill_parent"
-          android:layout_height="fill_parent"
+          android:layout_width="match_parent"
+          android:layout_height="match_parent"
           android:textColor="#555555"
           android:text="@string/visibility_1_view_3" />
 

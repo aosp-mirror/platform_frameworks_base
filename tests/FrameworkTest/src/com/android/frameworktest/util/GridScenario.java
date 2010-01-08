@@ -242,8 +242,8 @@ public abstract class GridScenario extends Activity {
 
         mGridView = new GridView(this);
         mGridView.setLayoutParams(new ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.FILL_PARENT,
-                ViewGroup.LayoutParams.FILL_PARENT));
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT));
         mGridView.setDrawSelectorOnTop(false);
         if (mNumColumns >= GridView.AUTO_FIT) {
             mGridView.setNumColumns(mNumColumns);
@@ -330,7 +330,7 @@ public abstract class GridScenario extends Activity {
         result.setHeight(desiredHeight);
         result.setText(getValueAtPosition(position));
         final ViewGroup.LayoutParams lp = new AbsListView.LayoutParams(
-                ViewGroup.LayoutParams.FILL_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT);
         result.setLayoutParams(lp);
         result.setId(position);

@@ -15,7 +15,7 @@
 -->
 
 <com.android.internal.view.menu.ListMenuItemView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
+    android:layout_width="match_parent"
     android:layout_height="?android:attr/listPreferredItemHeight">
     
     <!-- Icon will be inserted here. -->
@@ -32,7 +32,7 @@
         
         <TextView 
             android:id="@+id/title"
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
             android:layout_alignParentLeft="true"

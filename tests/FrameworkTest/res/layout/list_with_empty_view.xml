@@ -16,17 +16,17 @@
 
  
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent" >
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
 
     <ListView android:id="@android:id/list"
         android:drawSelectorOnTop="false"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"/>
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
 
     <TextView android:id="@+id/empty"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:gravity="center"
         android:textSize="36sp"
         android:textColor="#999"

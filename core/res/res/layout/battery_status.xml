@@ -32,13 +32,13 @@
 
         <LinearLayout
             android:id="@+id/meter"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:orientation="vertical"
             >
 
             <ImageView
-                android:layout_width="fill_parent"
+                android:layout_width="match_parent"
                 android:layout_height="15dip"
                 />
             <ImageView
@@ -55,8 +55,8 @@
         </LinearLayout>
 
         <TextView android:id="@+id/level_percent"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:textStyle="bold"
             android:textSize="48dp"
             android:textColor="#ffffffff"

@@ -25,7 +25,7 @@
     android:descendantFocusability="afterDescendants">
 
     <LinearLayout
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:paddingTop="3dp"
@@ -77,26 +77,26 @@
     </LinearLayout>
 
     <FrameLayout
-        android:layout_width="fill_parent" 
+        android:layout_width="match_parent" 
         android:layout_height="wrap_content"
         >
         <ScrollView
             android:id="@+id/scroll"
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:fadingEdge="none"
             >
             <com.android.server.status.NotificationLinearLayout
                 android:id="@+id/notificationLinearLayout"
-                android:layout_width="fill_parent"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:orientation="vertical"
                 >
                 
                 <TextView android:id="@+id/noNotificationsTitle"
-                    android:layout_width="fill_parent"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="@drawable/title_bar_portrait"
                     android:paddingLeft="5dp"
@@ -105,7 +105,7 @@
                     />
 
                 <TextView android:id="@+id/ongoingTitle"
-                    android:layout_width="fill_parent"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="@drawable/title_bar_portrait"
                     android:paddingLeft="5dp"
@@ -113,13 +113,13 @@
                     android:text="@string/status_bar_ongoing_events_title"
                     />
                 <LinearLayout android:id="@+id/ongoingItems"
-                    android:layout_width="fill_parent"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     />
 
                 <TextView android:id="@+id/latestTitle"
-                    android:layout_width="fill_parent"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="@drawable/title_bar_portrait"
                     android:paddingLeft="5dp"
@@ -127,7 +127,7 @@
                     android:text="@string/status_bar_latest_events_title"
                     />
                 <LinearLayout android:id="@+id/latestItems"
-                    android:layout_width="fill_parent"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     />
@@ -135,7 +135,7 @@
         </ScrollView>
 
         <ImageView
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:src="@drawable/title_bar_shadow"
             android:scaleType="fitXY"

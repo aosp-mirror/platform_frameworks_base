@@ -668,8 +668,8 @@ public class Dialog implements DialogInterface, Window.Callback,
         event.setPackageName(mContext.getPackageName());
 
         LayoutParams params = getWindow().getAttributes();
-        boolean isFullScreen = (params.width == LayoutParams.FILL_PARENT) &&
-            (params.height == LayoutParams.FILL_PARENT);
+        boolean isFullScreen = (params.width == LayoutParams.MATCH_PARENT) &&
+            (params.height == LayoutParams.MATCH_PARENT);
         event.setFullScreen(isFullScreen);
 
         return false;

@@ -35,7 +35,7 @@ import android.view.ViewDebug;
  * <p>The children of a TableRow do not need to specify the
  * <code>layout_width</code> and <code>layout_height</code> attributes in the
  * XML file. TableRow always enforces those values to be respectively
- * {@link android.widget.TableLayout.LayoutParams#FILL_PARENT} and
+ * {@link android.widget.TableLayout.LayoutParams#MATCH_PARENT} and
  * {@link android.widget.TableLayout.LayoutParams#WRAP_CONTENT}.</p>
  *
  * <p>
@@ -299,7 +299,7 @@ public class TableRow extends LinearLayout {
                         case LayoutParams.WRAP_CONTENT:
                             spec = getChildMeasureSpec(widthMeasureSpec, 0, LayoutParams.WRAP_CONTENT);
                             break;
-                        case LayoutParams.FILL_PARENT:
+                        case LayoutParams.MATCH_PARENT:
                             spec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
                             break;
                         default:
@@ -351,7 +351,7 @@ public class TableRow extends LinearLayout {
 
     /**
      * Returns a set of layout parameters with a width of
-     * {@link android.view.ViewGroup.LayoutParams#FILL_PARENT},
+     * {@link android.view.ViewGroup.LayoutParams#MATCH_PARENT},
      * a height of {@link android.view.ViewGroup.LayoutParams#WRAP_CONTENT} and no spanning.
      */
     @Override
@@ -451,7 +451,7 @@ public class TableRow extends LinearLayout {
          * {@link android.view.ViewGroup.LayoutParams#WRAP_CONTENT}.</p>
          */
         public LayoutParams() {
-            super(FILL_PARENT, WRAP_CONTENT);
+            super(MATCH_PARENT, WRAP_CONTENT);
             column = -1;
             span = 1;
         }
@@ -459,7 +459,7 @@ public class TableRow extends LinearLayout {
         /**
          * <p>Puts the view in the specified column.</p>
          *
-         * <p>Sets the child width to {@link android.view.ViewGroup.LayoutParams#FILL_PARENT}
+         * <p>Sets the child width to {@link android.view.ViewGroup.LayoutParams#MATCH_PARENT}
          * and the child height to
          * {@link android.view.ViewGroup.LayoutParams#WRAP_CONTENT}.</p>
          *
@@ -490,7 +490,7 @@ public class TableRow extends LinearLayout {
             if (a.hasValue(widthAttr)) {
                 width = a.getLayoutDimension(widthAttr, "layout_width");
             } else {
-                width = FILL_PARENT;
+                width = MATCH_PARENT;
             }
 
             // We don't want to force users to specify a layout_height

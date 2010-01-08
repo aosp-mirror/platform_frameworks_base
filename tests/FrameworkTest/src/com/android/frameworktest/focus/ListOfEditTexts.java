@@ -45,14 +45,14 @@ public class ListOfEditTexts extends Activity {
         mLinearLayout = new LinearLayout(this);
         mLinearLayout.setOrientation(LinearLayout.VERTICAL);
         mLinearLayout.setLayoutParams(new ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.FILL_PARENT,
-                ViewGroup.LayoutParams.FILL_PARENT));
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT));
 
         // add a button above
         Button buttonAbove = new Button(this);
         buttonAbove.setLayoutParams(
                 new LinearLayout.LayoutParams(
-                        ViewGroup.LayoutParams.FILL_PARENT,
+                        ViewGroup.LayoutParams.MATCH_PARENT,
                         ViewGroup.LayoutParams.WRAP_CONTENT));
         buttonAbove.setText("button above list");
         mLinearLayout.addView(buttonAbove);
@@ -60,12 +60,12 @@ public class ListOfEditTexts extends Activity {
         // add a list view to it
         mListView = new ListView(this);
         mListView.setLayoutParams(new ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.FILL_PARENT,
-                ViewGroup.LayoutParams.FILL_PARENT));
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT));
         mListView.setDrawSelectorOnTop(false);
         mListView.setItemsCanFocus(true);
         mListView.setLayoutParams((new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.FILL_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT,
                 0,
                 1f)));
 
@@ -82,7 +82,7 @@ public class ListOfEditTexts extends Activity {
         Button buttonBelow = new Button(this);
         buttonBelow.setLayoutParams(
                 new LinearLayout.LayoutParams(
-                        ViewGroup.LayoutParams.FILL_PARENT,
+                        ViewGroup.LayoutParams.MATCH_PARENT,
                         ViewGroup.LayoutParams.WRAP_CONTENT));
         buttonBelow.setText("button below list");
         mLinearLayout.addView(buttonBelow);

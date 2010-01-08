@@ -311,8 +311,8 @@ public class AppWidgetHostView extends FrameLayout {
         // Take requested dimensions from child, but apply default gravity.
         FrameLayout.LayoutParams requested = (FrameLayout.LayoutParams)view.getLayoutParams();
         if (requested == null) {
-            requested = new FrameLayout.LayoutParams(LayoutParams.FILL_PARENT,
-                    LayoutParams.FILL_PARENT);
+            requested = new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT,
+                    LayoutParams.MATCH_PARENT);
         }
 
         requested.gravity = Gravity.CENTER;

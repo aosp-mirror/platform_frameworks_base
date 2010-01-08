@@ -80,7 +80,7 @@ public class ViewSwitcher extends ViewAnimator {
         View child = mFactory.makeView();
         LayoutParams lp = (LayoutParams) child.getLayoutParams();
         if (lp == null) {
-            lp = new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT);
+            lp = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
         }
         addView(child, lp);
         return child;

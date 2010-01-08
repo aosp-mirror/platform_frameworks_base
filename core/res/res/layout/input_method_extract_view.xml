@@ -25,7 +25,7 @@
     <android.inputmethodservice.ExtractEditText
             android:id="@+id/inputExtractEditText"
             android:layout_width="0px"
-            android:layout_height="fill_parent"
+            android:layout_height="match_parent"
             android:layout_weight="1"
             android:scrollbars="vertical"
             android:gravity="top"
@@ -38,7 +38,7 @@
     <FrameLayout
             android:id="@+id/inputExtractAccessories"
             android:layout_width="wrap_content"
-            android:layout_height="fill_parent"
+            android:layout_height="match_parent"
             android:paddingLeft="10dip"
             android:paddingRight="10dip"
             android:background="@android:drawable/keyboard_accessory_bg_landscape"

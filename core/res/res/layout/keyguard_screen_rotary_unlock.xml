@@ -22,14 +22,14 @@
   depending on the state of the device.  It is the same for landscape
   and portrait.-->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             android:layout_width="fill_parent"
-             android:layout_height="fill_parent"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent"
              android:id="@+id/root"
                  >
 
 <RelativeLayout
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:background="#70000000"
         >
 
@@ -67,7 +67,7 @@
 
     <View
         android:id="@+id/divider"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="1dip"
         android:layout_marginTop="10dip"
         android:layout_below="@id/date"
@@ -114,7 +114,7 @@
          robust for different screen sizes.  On hvga, the widget should be flush with the bottom.-->
     <com.android.internal.widget.RotarySelector
         android:id="@+id/rotary"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:layout_alignParentTop="true"

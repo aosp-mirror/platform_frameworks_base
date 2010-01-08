@@ -22,24 +22,24 @@
 
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/scrollView"
-    android:layout_width="fill_parent"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:scrollbars="none">
 
     <LinearLayout
         android:id="@+id/layout"
         android:orientation="vertical"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
 
         <Button android:id="@+id/scrollToBlob"
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/scroll_top_button"/>
 
         <TextView android:id="@+id/blob"
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="80dip"
             android:layout_marginTop="500dip"
             android:layout_marginBottom="5dip"/>

@@ -254,7 +254,7 @@ public final class IconMenuItemView extends TextView implements MenuView.ItemVie
         if (lp == null) {
             // Default layout parameters
             lp = new IconMenuView.LayoutParams(
-                    IconMenuView.LayoutParams.FILL_PARENT, IconMenuView.LayoutParams.FILL_PARENT);
+                    IconMenuView.LayoutParams.MATCH_PARENT, IconMenuView.LayoutParams.MATCH_PARENT);
         }
 
         // Set the desired width of item

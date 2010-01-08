@@ -17,7 +17,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" 
     android:id="@+id/content"
     android:orientation="vertical"
-    android:layout_width="fill_parent" 
+    android:layout_width="match_parent" 
     android:layout_height="wrap_content"
     android:background="@android:drawable/edit_text"
     android:divider="@android:drawable/divider_horizontal_textfield"
@@ -25,14 +25,14 @@
 
     <LinearLayout android:id="@+id/container"
         android:orientation="vertical"
-        android:layout_width="fill_parent" 
+        android:layout_width="match_parent" 
         android:layout_height="wrap_content"
         android:paddingRight="0dip"
     />
 
     <AutoCompleteTextView android:id="@+id/edit"
         android:completionThreshold="1"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:singleLine="true"
         android:layout_gravity="center_vertical"

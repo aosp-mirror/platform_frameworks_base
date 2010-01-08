@@ -7,9 +7,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
 
 public class BigEditTextActivityNonScrollablePanScan extends Activity {
     
@@ -25,8 +23,8 @@ public class BigEditTextActivityNonScrollablePanScan extends Activity {
         mRootView = new LinearLayout(this);
         ((LinearLayout) mRootView).setOrientation(LinearLayout.VERTICAL);
         mRootView.setLayoutParams(new ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.FILL_PARENT,
-                ViewGroup.LayoutParams.FILL_PARENT));
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT));
         
         View view = getLayoutInflater().inflate(
                 R.layout.full_screen_edit_text, ((LinearLayout) mRootView), false);

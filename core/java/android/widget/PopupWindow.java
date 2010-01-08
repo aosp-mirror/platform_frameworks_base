@@ -569,7 +569,7 @@ public class PopupWindow {
      * the current width or height is requested as an explicit size from
      * the window manager.  You can supply
      * {@link ViewGroup.LayoutParams#WRAP_CONTENT} or 
-     * {@link ViewGroup.LayoutParams#FILL_PARENT} to have that measure
+     * {@link ViewGroup.LayoutParams#MATCH_PARENT} to have that measure
      * spec supplied instead, replacing the absolute width and height that
      * has been set in the popup.</p>
      *
@@ -578,11 +578,11 @@ public class PopupWindow {
      *
      * @param widthSpec an explicit width measure spec mode, either
      * {@link ViewGroup.LayoutParams#WRAP_CONTENT},
-     * {@link ViewGroup.LayoutParams#FILL_PARENT}, or 0 to use the absolute
+     * {@link ViewGroup.LayoutParams#MATCH_PARENT}, or 0 to use the absolute
      * width.
      * @param heightSpec an explicit height measure spec mode, either
      * {@link ViewGroup.LayoutParams#WRAP_CONTENT},
-     * {@link ViewGroup.LayoutParams#FILL_PARENT}, or 0 to use the absolute
+     * {@link ViewGroup.LayoutParams#MATCH_PARENT}, or 0 to use the absolute
      * height.
      */
     public void setWindowLayoutMode(int widthSpec, int heightSpec) {
@@ -785,7 +785,7 @@ public class PopupWindow {
 
         if (mBackground != null) {
             final ViewGroup.LayoutParams layoutParams = mContentView.getLayoutParams();
-            int height = ViewGroup.LayoutParams.FILL_PARENT;
+            int height = ViewGroup.LayoutParams.MATCH_PARENT;
             if (layoutParams != null &&
                     layoutParams.height == ViewGroup.LayoutParams.WRAP_CONTENT) {
                 height = ViewGroup.LayoutParams.WRAP_CONTENT;
@@ -795,7 +795,7 @@ public class PopupWindow {
             // within another view that owns the background drawable
             PopupViewContainer popupViewContainer = new PopupViewContainer(mContext);
             PopupViewContainer.LayoutParams listParams = new PopupViewContainer.LayoutParams(
-                    ViewGroup.LayoutParams.FILL_PARENT, height
+                    ViewGroup.LayoutParams.MATCH_PARENT, height
             );
             popupViewContainer.setBackgroundDrawable(mBackground);
             popupViewContainer.addView(mContentView, listParams);

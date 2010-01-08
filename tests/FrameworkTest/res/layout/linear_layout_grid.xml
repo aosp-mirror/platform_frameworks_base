@@ -20,80 +20,80 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/layout"
     android:orientation="vertical"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
     <LinearLayout android:id="@+id/column1"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="0sp"
         android:layout_weight="1"
         android:orientation="horizontal">
 
         <Button
             android:layout_width="0sp"
-            android:layout_height="fill_parent"
+            android:layout_height="match_parent"
             android:layout_weight="1"
             android:text="@string/keypad_one"/>
 
         <Button
             android:layout_width="0sp"
-            android:layout_height="fill_parent"
+            android:layout_height="match_parent"
             android:layout_weight="1"
             android:text="@string/keypad_two"/>
 
         <Button
             android:layout_width="0sp"
-            android:layout_height="fill_parent"
+            android:layout_height="match_parent"
             android:layout_weight="1"
             android:text="@string/keypad_three"/>
     </LinearLayout>
 
     <LinearLayout android:id="@+id/column2"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="0sp"
         android:layout_weight="1"
         android:orientation="horizontal">
 
         <Button
             android:layout_width="0sp"
-            android:layout_height="fill_parent"
+            android:layout_height="match_parent"
             android:layout_weight="1"
             android:text="@string/keypad_four"/>
 
         <Button
             android:layout_width="0sp"
-            android:layout_height="fill_parent"
+            android:layout_height="match_parent"
             android:layout_weight="1"
             android:text="@string/keypad_five"/>
 
         <Button
             android:layout_width="0sp"
-            android:layout_height="fill_parent"
+            android:layout_height="match_parent"
             android:layout_weight="1"
             android:text="@string/keypad_six"/>
     </LinearLayout>
 
     <LinearLayout android:id="@+id/column3"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="0sp"
         android:layout_weight="1"
         android:orientation="horizontal">
 
         <Button
             android:layout_width="0sp"
-            android:layout_height="fill_parent"
+            android:layout_height="match_parent"
             android:layout_weight="1"
             android:text="@string/keypad_seven"/>
 
         <Button
             android:layout_width="0sp"
-            android:layout_height="fill_parent"
+            android:layout_height="match_parent"
             android:layout_weight="1"
             android:text="@string/keypad_eight"/>
 
         <Button
             android:layout_width="0sp"
-            android:layout_height="fill_parent"
+            android:layout_height="match_parent"
             android:layout_weight="1"
             android:text="@string/keypad_nine"/>
     </LinearLayout>

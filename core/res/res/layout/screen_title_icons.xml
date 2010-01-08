@@ -21,11 +21,11 @@ This is the basic layout for a screen, with all of its features enabled.
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:fitsSystemWindows="true"
     android:orientation="vertical"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
     <RelativeLayout android:id="@android:id/title_container"
         style="?android:attr/windowTitleBackgroundStyle"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="?android:attr/windowTitleSize">
         <!-- The title background has 9px left padding. -->
         <ImageView android:id="@android:id/left_icon"
@@ -51,7 +51,7 @@ This is the basic layout for a screen, with all of its features enabled.
              the left of the title text left edge. -->
         <ProgressBar android:id="@+id/progress_horizontal"
             style="?android:attr/progressBarStyleHorizontal"
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="-3dip"
             android:layout_toLeftOf="@android:id/progress_circular"
@@ -60,8 +60,8 @@ This is the basic layout for a screen, with all of its features enabled.
             android:visibility="gone"
             android:max="10000" />
         <LinearLayout
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:orientation="horizontal"
             android:layout_toLeftOf="@id/progress_circular"
             android:layout_toRightOf="@android:id/left_icon"
@@ -69,7 +69,7 @@ This is the basic layout for a screen, with all of its features enabled.
             <TextView android:id="@android:id/title"
                 style="?android:attr/windowTitleStyle"
                 android:layout_width="0dip"
-                android:layout_height="fill_parent"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:background="@null"
                 android:fadingEdge="horizontal"
@@ -89,7 +89,7 @@ This is the basic layout for a screen, with all of its features enabled.
             </LinearLayout>
     </RelativeLayout>
     <FrameLayout android:id="@android:id/content"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="0dip"
         android:layout_weight="1"
         android:foregroundGravity="fill_horizontal|top"

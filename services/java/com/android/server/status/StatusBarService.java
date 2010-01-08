@@ -329,7 +329,7 @@ public class StatusBarService extends IStatusBar.Stub
     public void systemReady() {
         final StatusBarView view = mStatusBarView;
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
-                ViewGroup.LayoutParams.FILL_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT,
                 view.getContext().getResources().getDimensionPixelSize(
                         com.android.internal.R.dimen.status_bar_height),
                 WindowManager.LayoutParams.TYPE_STATUS_BAR,
@@ -1486,8 +1486,8 @@ public class StatusBarService extends IStatusBar.Stub
         }
 
         lp = new WindowManager.LayoutParams(
-                ViewGroup.LayoutParams.FILL_PARENT,
-                ViewGroup.LayoutParams.FILL_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT,
                 WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL,
                 WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
                 | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
@@ -1520,7 +1520,7 @@ public class StatusBarService extends IStatusBar.Stub
 
         final int disph = mDisplay.getHeight();
         lp = mExpandedDialog.getWindow().getAttributes();
-        lp.width = ViewGroup.LayoutParams.FILL_PARENT;
+        lp.width = ViewGroup.LayoutParams.MATCH_PARENT;
         lp.height = ViewGroup.LayoutParams.WRAP_CONTENT;
         lp.x = 0;
         mTrackingPosition = lp.y = -disph; // sufficiently large negative
@@ -1539,7 +1539,7 @@ public class StatusBarService extends IStatusBar.Stub
 
         mExpandedDialog.getWindow().requestFeature(Window.FEATURE_NO_TITLE);
         mExpandedDialog.setContentView(mExpandedView,
-                new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT,
+                new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                                            ViewGroup.LayoutParams.WRAP_CONTENT));
         mExpandedDialog.show();
         FrameLayout hack = (FrameLayout)mExpandedView.getParent();

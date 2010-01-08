@@ -20,19 +20,19 @@
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
         >
 
     <LinearLayout
         android:id="@+id/beforeDescendants"
         android:orientation="vertical"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:descendantFocusability="beforeDescendants"
             >
         <Button
-          android:layout_width="fill_parent"
+          android:layout_width="match_parent"
           android:layout_height="wrap_content"
                 />
     </LinearLayout>
@@ -40,12 +40,12 @@
     <LinearLayout
         android:id="@+id/afterDescendants"
         android:orientation="vertical"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:descendantFocusability="afterDescendants"
             >
         <Button
-          android:layout_width="fill_parent"
+          android:layout_width="match_parent"
           android:layout_height="wrap_content"
                 />
     </LinearLayout>
@@ -53,12 +53,12 @@
     <LinearLayout
         android:id="@+id/blocksDescendants"
         android:orientation="vertical"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:descendantFocusability="blocksDescendants"
             >
         <Button
-          android:layout_width="fill_parent"
+          android:layout_width="match_parent"
           android:layout_height="wrap_content"
                 />
     </LinearLayout>

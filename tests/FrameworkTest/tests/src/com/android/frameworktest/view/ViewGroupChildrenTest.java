@@ -260,7 +260,7 @@ public class ViewGroupChildrenTest extends ActivityInstrumentationTestCase<ViewG
         TextView view = new TextView(getActivity());
         view.setText(text);
         view.setLayoutParams(new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.FILL_PARENT,
+                LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
         ));
         return view;

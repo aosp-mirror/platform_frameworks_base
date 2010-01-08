@@ -22,14 +22,14 @@
   depending on the state of the device.-->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
              xmlns:rotaryunlock="http://schemas.android.com/apk/res/com.android.rotaryunlock"
-             android:layout_width="fill_parent"
-             android:layout_height="fill_parent"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent"
              android:id="@+id/root"
                  >
 <LinearLayout
         android:orientation="horizontal"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:background="#70000000"
         >
 
@@ -37,7 +37,7 @@
     <RelativeLayout
             android:orientation="vertical"
             android:layout_width="0dip"
-            android:layout_height="fill_parent"
+            android:layout_height="match_parent"
             android:layout_weight="1.0"
             android:gravity="center_horizontal"
             >
@@ -76,7 +76,7 @@
 
         <View
             android:id="@+id/divider"
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="1dip"
             android:layout_marginTop="10dip"
             android:layout_below="@id/date"
@@ -136,7 +136,7 @@
     <com.android.internal.widget.RotarySelector
         android:id="@+id/rotary"
         android:layout_width="wrap_content"
-        android:layout_height="fill_parent"
+        android:layout_height="match_parent"
         android:orientation="vertical"
         />
 

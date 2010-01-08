@@ -23,14 +23,14 @@
 <com.android.internal.widget.LinearLayoutWithDefaultTouchRecepient
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:gravity="center_horizontal"
     android:background="#70000000"
     >
 
     <RelativeLayout
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         >
         <TextView
@@ -70,7 +70,7 @@
 
             <TextView android:id="@+id/am_pm"
                 android:layout_width="wrap_content"
-                android:layout_height="fill_parent"
+                android:layout_height="match_parent"
                 android:gravity="bottom"
                 android:singleLine="true"
                 android:ellipsize="none"
@@ -98,7 +98,7 @@
 
     <View
         android:id="@+id/divider"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="1dip"
         android:layout_marginTop="8dip"
         android:layout_marginBottom="8dip"
@@ -109,7 +109,7 @@
          status.  -->
     <LinearLayout
         android:orientation="horizontal"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="0dip"
         android:layout_marginLeft="12dip"
@@ -145,7 +145,7 @@
 
     <com.android.internal.widget.LockPatternView
         android:id="@+id/lockPattern"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="0dip"
         android:layout_weight="1"
         android:layout_marginTop="2dip"
@@ -153,14 +153,14 @@
 
     <!-- footer -->
     <FrameLayout
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         >
 
         <!-- option 1: a single emergency call button -->
         <RelativeLayout android:id="@+id/footerNormal"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             >
             <Button android:id="@+id/emergencyCallAlone"
                 android:layout_width="wrap_content"
@@ -177,13 +177,13 @@
         <!-- option 2: an emergency call button, and a 'forgot pattern?' button -->
         <LinearLayout android:id="@+id/footerForgotPattern"
             android:orientation="horizontal"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:gravity="center"
             >
             <Button android:id="@+id/emergencyCallTogether"
                 android:layout_width="0dip"
-                android:layout_height="fill_parent"
+                android:layout_height="match_parent"
                 android:layout_weight="1.0"
                 android:layout_marginTop="4dip"
                 android:layout_marginBottom="4dip"
@@ -196,7 +196,7 @@
                 />
             <Button android:id="@+id/forgotPattern"
                 android:layout_width="0dip"
-                android:layout_height="fill_parent"
+                android:layout_height="match_parent"
                 android:layout_weight="1.0"
                 android:layout_marginTop="4dip"
                 android:layout_marginBottom="4dip"

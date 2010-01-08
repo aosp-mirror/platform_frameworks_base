@@ -20,19 +20,19 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/layout"
     android:orientation="vertical"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
     
     <!-- Outer linear layout providing vertical layout -->
     <LinearLayout
         android:orientation="vertical"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content" >
         
         <!-- The control buttons -->
         <LinearLayout
             android:orientation="horizontal"
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content" >
             
             <Button
@@ -58,7 +58,7 @@
         <ListView 
             android:id="@+id/inner_list"
             android:layout_width="200dip"
-            android:layout_height="fill_parent"
+            android:layout_height="match_parent"
             android:background="@android:drawable/spinner_dropdown_background"
             android:divider="@android:drawable/divider_horizontal_bright" />
  

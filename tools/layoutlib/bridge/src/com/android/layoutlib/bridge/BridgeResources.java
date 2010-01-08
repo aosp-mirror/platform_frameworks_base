@@ -239,8 +239,9 @@ public final class BridgeResources extends Resources {
             String v = value.getValue();
 
             if (v != null) {
-                if (v.equals(BridgeConstants.FILL_PARENT)) {
-                    return LayoutParams.FILL_PARENT;
+                if (v.equals(BridgeConstants.MATCH_PARENT) ||
+                        v.equals(BridgeConstants.FILL_PARENT)) {
+                    return LayoutParams.MATCH_PARENT;
                 } else if (v.equals(BridgeConstants.WRAP_CONTENT)) {
                     return LayoutParams.WRAP_CONTENT;
                 }

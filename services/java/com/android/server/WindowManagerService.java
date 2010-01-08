@@ -7095,8 +7095,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 w = mAttrs.width < 0 ? pw : mAttrs.width;
                 h = mAttrs.height< 0 ? ph : mAttrs.height;
             } else {
-                w = mAttrs.width == mAttrs.FILL_PARENT ? pw : mRequestedWidth;
-                h = mAttrs.height== mAttrs.FILL_PARENT ? ph : mRequestedHeight;
+                w = mAttrs.width == mAttrs.MATCH_PARENT ? pw : mRequestedWidth;
+                h = mAttrs.height== mAttrs.MATCH_PARENT ? ph : mRequestedHeight;
             }
 
             final Rect content = mContentFrame;
@@ -10136,8 +10136,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
                     if (displayed) {
                         if (!covered) {
-                            if (attrs.width == LayoutParams.FILL_PARENT
-                                    && attrs.height == LayoutParams.FILL_PARENT) {
+                            if (attrs.width == LayoutParams.MATCH_PARENT
+                                    && attrs.height == LayoutParams.MATCH_PARENT) {
                                 covered = true;
                             }
                         }

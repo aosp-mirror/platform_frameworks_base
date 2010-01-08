@@ -21,6 +21,6 @@
     android:id="@android:id/text1"
 	style="?android:attr/spinnerItemStyle"
     android:singleLine="true"
-    android:layout_width="fill_parent"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:ellipsize="marquee" />

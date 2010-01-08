@@ -434,9 +434,9 @@ public abstract class WallpaperService extends Service {
             }
             
             int myWidth = mSurfaceHolder.getRequestedWidth();
-            if (myWidth <= 0) myWidth = ViewGroup.LayoutParams.FILL_PARENT;
+            if (myWidth <= 0) myWidth = ViewGroup.LayoutParams.MATCH_PARENT;
             int myHeight = mSurfaceHolder.getRequestedHeight();
-            if (myHeight <= 0) myHeight = ViewGroup.LayoutParams.FILL_PARENT;
+            if (myHeight <= 0) myHeight = ViewGroup.LayoutParams.MATCH_PARENT;
             
             final boolean creating = !mCreated;
             final boolean formatChanged = mFormat != mSurfaceHolder.getRequestedFormat();

@@ -43,7 +43,7 @@ import android.view.accessibility.AccessibilityEvent;
  * SlidingDrawer should be used as an overlay inside layouts. This means SlidingDrawer
  * should only be used inside of a FrameLayout or a RelativeLayout for instance. The
  * size of the SlidingDrawer defines how much space the content will occupy once slid
- * out so SlidingDrawer should usually use fill_parent for both its dimensions.
+ * out so SlidingDrawer should usually use match_parent for both its dimensions.
  *
  * Inside an XML layout, SlidingDrawer must define the id of the handle and of the
  * content:
@@ -51,8 +51,8 @@ import android.view.accessibility.AccessibilityEvent;
  * <pre class="prettyprint">
  * &lt;SlidingDrawer
  *     android:id="@+id/drawer"
- *     android:layout_width="fill_parent"
- *     android:layout_height="fill_parent"
+ *     android:layout_width="match_parent"
+ *     android:layout_height="match_parent"
  *
  *     android:handle="@+id/handle"
  *     android:content="@+id/content"&gt;
@@ -64,8 +64,8 @@ import android.view.accessibility.AccessibilityEvent;
  *
  *     &lt;GridView
  *         android:id="@id/content"
- *         android:layout_width="fill_parent"
- *         android:layout_height="fill_parent" /&gt;
+ *         android:layout_width="match_parent"
+ *         android:layout_height="match_parent" /&gt;
  *
  * &lt;/SlidingDrawer&gt;
  * </pre>

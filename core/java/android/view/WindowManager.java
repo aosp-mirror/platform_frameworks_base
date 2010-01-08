@@ -771,26 +771,26 @@ public interface WindowManager extends ViewManager {
         
         
         public LayoutParams() {
-            super(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT);
+            super(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
             type = TYPE_APPLICATION;
             format = PixelFormat.OPAQUE;
         }
         
         public LayoutParams(int _type) {
-            super(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT);
+            super(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
             type = _type;
             format = PixelFormat.OPAQUE;
         }
     
         public LayoutParams(int _type, int _flags) {
-            super(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT);
+            super(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
             type = _type;
             flags = _flags;
             format = PixelFormat.OPAQUE;
         }
     
         public LayoutParams(int _type, int _flags, int _format) {
-            super(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT);
+            super(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
             type = _type;
             flags = _flags;
             format = _format;
@@ -1036,9 +1036,9 @@ public interface WindowManager extends ViewManager {
             sb.append(',');
             sb.append(y);
             sb.append(")(");
-            sb.append((width==FILL_PARENT?"fill":(width==WRAP_CONTENT?"wrap":width)));
+            sb.append((width== MATCH_PARENT ?"fill":(width==WRAP_CONTENT?"wrap":width)));
             sb.append('x');
-            sb.append((height==FILL_PARENT?"fill":(height==WRAP_CONTENT?"wrap":height)));
+            sb.append((height== MATCH_PARENT ?"fill":(height==WRAP_CONTENT?"wrap":height)));
             sb.append(")");
             if (softInputMode != 0) {
                 sb.append(" sim=#");

@@ -24,8 +24,8 @@
 <com.android.internal.widget.LinearLayoutWithDefaultTouchRecepient
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:background="#70000000"
         >
 
@@ -33,7 +33,7 @@
     <LinearLayout
             android:orientation="vertical"
             android:layout_width="0dip"
-            android:layout_height="fill_parent"
+            android:layout_height="match_parent"
             android:layout_weight="1.0"
             android:layout_marginLeft="24dip"
             android:gravity="left"
@@ -81,7 +81,7 @@
 
             <TextView android:id="@+id/am_pm"
                 android:layout_width="wrap_content"
-                android:layout_height="fill_parent"
+                android:layout_height="match_parent"
                 android:gravity="bottom"
                 android:singleLine="true"
                 android:ellipsize="none"
@@ -136,20 +136,20 @@
         <!-- fill space between header and button below -->
         <View
             android:layout_weight="1.0"
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="0dip"
             />
 
         <!-- footer -->
         <FrameLayout
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dip"
             >
 
             <!-- option 1: a single emergency call button -->
             <RelativeLayout android:id="@+id/footerNormal"
-                android:layout_width="fill_parent"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="left"
                 >
@@ -166,18 +166,18 @@
             <!-- option 2: an emergency call button, and a 'forgot pattern?' button -->
             <LinearLayout android:id="@+id/footerForgotPattern"
                 android:orientation="vertical"
-                android:layout_width="fill_parent"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="left"
                 >
                 <Button android:id="@+id/forgotPattern"
-                    android:layout_width="fill_parent"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     style="@style/Widget.Button.Transparent"
                     android:visibility="invisible"
                     />
                 <Button android:id="@+id/emergencyCallTogether"
-                    android:layout_width="fill_parent"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/lockscreen_emergency_call"
                     style="@style/Widget.Button.Transparent"

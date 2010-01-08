@@ -28,7 +28,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 
 /**
  * A {@link Preference} that allows for string
@@ -128,7 +127,7 @@ public class EditTextPreference extends DialogPreference {
         ViewGroup container = (ViewGroup) dialogView
                 .findViewById(com.android.internal.R.id.edittext_container);
         if (container != null) {
-            container.addView(editText, ViewGroup.LayoutParams.FILL_PARENT,
+            container.addView(editText, ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT);
         }
     }

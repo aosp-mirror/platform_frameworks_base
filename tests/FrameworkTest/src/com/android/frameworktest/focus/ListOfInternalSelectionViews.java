@@ -119,8 +119,8 @@ public class ListOfInternalSelectionViews extends Activity {
 
         mListView = new ListView(this);
         mListView.setLayoutParams(new ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.FILL_PARENT,
-                ViewGroup.LayoutParams.FILL_PARENT));
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT));
         mListView.setDrawSelectorOnTop(false);
         mListView.setAdapter(new MyAdapter());
         mListView.setItemsCanFocus(true);

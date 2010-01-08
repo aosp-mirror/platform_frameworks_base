@@ -161,9 +161,9 @@ public class AbsoluteLayout extends ViewGroup {
          * Creates a new set of layout parameters with the specified width,
          * height and location.
          *
-         * @param width the width, either {@link #FILL_PARENT},
+         * @param width the width, either {@link #MATCH_PARENT},
                   {@link #WRAP_CONTENT} or a fixed size in pixels
-         * @param height the height, either {@link #FILL_PARENT},
+         * @param height the height, either {@link #MATCH_PARENT},
                   {@link #WRAP_CONTENT} or a fixed size in pixels
          * @param x the X location of the child
          * @param y the Y location of the child

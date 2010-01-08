@@ -22,12 +22,12 @@ This is an custom layout for a screen.
     android:orientation="vertical"
     android:fitsSystemWindows="true">
     <FrameLayout android:id="@android:id/title_container" 
-        android:layout_width="fill_parent" 
+        android:layout_width="match_parent" 
         android:layout_height="?android:attr/windowTitleSize"
         style="?android:attr/windowTitleBackgroundStyle">
     </FrameLayout>
     <FrameLayout android:id="@android:id/content"
-        android:layout_width="fill_parent" 
+        android:layout_width="match_parent" 
         android:layout_height="0dip"
         android:layout_weight="1"
         android:foregroundGravity="fill_horizontal|top"

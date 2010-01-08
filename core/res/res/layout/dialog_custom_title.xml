@@ -22,19 +22,19 @@ This is an custom layout for a dialog.
     android:orientation="vertical" 
     android:fitsSystemWindows="true">
     <FrameLayout android:id="@android:id/title_container" 
-        android:layout_width="fill_parent" 
+        android:layout_width="match_parent" 
         android:layout_height="24dip"
         android:layout_weight="0"
         style="?android:attr/windowTitleBackgroundStyle">
     </FrameLayout>
     <FrameLayout
-        android:layout_width="fill_parent" android:layout_height="wrap_content"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
         android:layout_weight="1"
         android:orientation="vertical"
         android:foreground="?android:attr/windowContentOverlay">
         <FrameLayout android:id="@android:id/content"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:paddingTop="6dip"
             android:paddingBottom="10dip"
             android:paddingLeft="10dip"

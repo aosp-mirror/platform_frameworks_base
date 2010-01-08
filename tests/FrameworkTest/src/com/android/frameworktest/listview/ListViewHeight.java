@@ -70,14 +70,14 @@ public class ListViewHeight extends Activity {
             }
         });
 
-        // Clicking this button will show the list view and set it fill_parent height
+        // Clicking this button will show the list view and set it match_parent height
         // If you then hide the views, there is an NPE when calculating the ListView height.
         mButton2.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 // set listview to fill screen
                 ViewGroup.MarginLayoutParams lp;
                 lp = (ViewGroup.MarginLayoutParams) mInnerList.getLayoutParams();
-                lp.height = lp.FILL_PARENT;
+                lp.height = lp.MATCH_PARENT;
                 mInnerList.setLayoutParams(lp);
                 // enable list adapter
                 mInnerList.setAdapter(mAdapter);

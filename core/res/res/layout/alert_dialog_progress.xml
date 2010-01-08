@@ -15,10 +15,10 @@
 -->
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content" android:layout_height="fill_parent">
+    android:layout_width="wrap_content" android:layout_height="match_parent">
         <ProgressBar android:id="@+id/progress"
             style="?android:attr/progressBarStyleHorizontal"
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dip"
             android:layout_marginBottom="1dip"
