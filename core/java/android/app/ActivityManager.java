@@ -622,7 +622,6 @@ public class ActivityManager {
 
         /**
          * The stack trace where the error originated.  May be null.
-         * @pending
          */
         public String stackTrace;
 
