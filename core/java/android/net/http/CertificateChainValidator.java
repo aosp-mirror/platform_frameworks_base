@@ -16,6 +16,8 @@
 
 package android.net.http;
 
+import com.android.common.DomainNameValidator;
+
 import org.apache.harmony.xnet.provider.jsse.SSLParameters;
 
 import java.io.IOException;
@@ -112,7 +114,7 @@ class CertificateChainValidator {
             closeSocketThrowException(
                 sslSocket, "certificate for this site is null");
         } else {
-            if (!DomainNameChecker.match(currCertificate, domain)) {
+            if (!DomainNameValidator.match(currCertificate, domain)) {
                 String errorMessage = "certificate not for this host: " + domain;
 
                 if (HttpLog.LOGV) {

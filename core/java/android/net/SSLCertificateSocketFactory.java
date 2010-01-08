@@ -16,10 +16,11 @@
 
 package android.net;
 
-import android.net.http.DomainNameChecker;
 import android.os.SystemProperties;
 import android.util.Config;
 import android.util.Log;
+
+import com.android.common.DomainNameValidator;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -200,7 +201,7 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
 
         X509Certificate lastChainCert = (X509Certificate) certs[0];
 
-        if (!DomainNameChecker.match(lastChainCert, destHost)) {
+        if (!DomainNameValidator.match(lastChainCert, destHost)) {
             if (Config.LOGD) {
                 Log.d(LOG_TAG,"validateSocket(): domain name check failed");
             }

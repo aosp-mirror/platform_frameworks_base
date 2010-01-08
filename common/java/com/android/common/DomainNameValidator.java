@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008 The Android Open Source Project
+ * Copyright (C) 2010 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,29 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.android.common;
 
-package android.net.http;
-
-import org.bouncycastle.asn1.x509.X509Name;
+import android.util.Config;
+import android.util.Log;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.security.cert.X509Certificate;
 import java.security.cert.CertificateParsingException;
+import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
-import java.util.Vector;
 
-/**
- * Implements basic domain-name validation as specified by RFC2818.
- * 
- * {@hide}
- */
-public class DomainNameChecker {
+import javax.security.auth.x500.X500Principal;
+
+public class DomainNameValidator {
+    private final static String TAG = "DomainNameValidator";
+
+    private static final boolean DEBUG = false;
+    private static final boolean LOG_ENABLED = DEBUG ? Config.LOGD : Config.LOGV;
+
     private static Pattern QUICK_IP_PATTERN;
     static {
         try {
@@ -84,8 +84,8 @@ public class DomainNameChecker {
                   errorMessage = "unknown host exception";
                 }
 
-                if (HttpLog.LOGV) {
-                    HttpLog.v("DomainNameChecker.isIpAddress(): " + errorMessage);
+                if (LOG_ENABLED) {
+                    Log.v(TAG, "DomainNameValidator.isIpAddress(): " + errorMessage);
                 }
 
                 rval = false;
@@ -102,8 +102,8 @@ public class DomainNameChecker {
      * @return True iff if there is a domain match as specified by RFC2818
      */
     private static boolean matchIpAddress(X509Certificate certificate, String thisDomain) {
-        if (HttpLog.LOGV) {
-            HttpLog.v("DomainNameChecker.matchIpAddress(): this domain: " + thisDomain);
+        if (LOG_ENABLED) {
+            Log.v(TAG, "DomainNameValidator.matchIpAddress(): this domain: " + thisDomain);
         }
 
         try {
@@ -118,8 +118,8 @@ public class DomainNameChecker {
                             if (altNameType.intValue() == ALT_IPA_NAME) {
                                 String altName = (String)(altNameEntry.get(1));
                                 if (altName != null) {
-                                    if (HttpLog.LOGV) {
-                                        HttpLog.v("alternative IP: " + altName);
+                                    if (LOG_ENABLED) {
+                                        Log.v(TAG, "alternative IP: " + altName);
                                     }
                                     if (thisDomain.equalsIgnoreCase(altName)) {
                                         return true;
@@ -171,26 +171,26 @@ public class DomainNameChecker {
             // spec (a valid DNS name must start with a letter); there is no
             // good way around this, and in order to be compatible we proceed
             // to check the common name (ie, ignore alternative names)
-            if (HttpLog.LOGV) {
+            if (LOG_ENABLED) {
                 String errorMessage = e.getMessage();
                 if (errorMessage == null) {
                     errorMessage = "failed to parse certificate";
                 }
 
-                if (HttpLog.LOGV) {
-                    HttpLog.v("DomainNameChecker.matchDns(): " + errorMessage);
-                }
+                Log.v(TAG, "DomainNameValidator.matchDns(): " + errorMessage);
             }
         }
 
         if (!hasDns) {
-            X509Name xName = new X509Name(certificate.getSubjectDN().getName());
-            Vector val = xName.getValues();
-            Vector oid = xName.getOIDs();
-            for (int i = 0; i < oid.size(); i++) {
-                if (oid.elementAt(i).equals(X509Name.CN)) {
-                    return matchDns(thisDomain, (String)(val.elementAt(i)));
-                }
+            final String cn = new DNParser(certificate.getSubjectX500Principal())
+                    .find("cn");
+            if (LOG_ENABLED) {
+                Log.v(TAG, "Validating subject: DN:"
+                        + certificate.getSubjectX500Principal().getName(X500Principal.CANONICAL)
+                        + "  CN:" + cn);
+            }
+            if (cn != null) {
+                return matchDns(thisDomain, cn);
             }
         }
 
@@ -202,9 +202,10 @@ public class DomainNameChecker {
      * @param thatDomain The domain name from the certificate
      * @return True iff thisDomain matches thatDomain as specified by RFC2818
      */
-    private static boolean matchDns(String thisDomain, String thatDomain) {
-        if (HttpLog.LOGV) {
-            HttpLog.v("DomainNameChecker.matchDns():" +
+    // not private for testing
+    public static boolean matchDns(String thisDomain, String thatDomain) {
+        if (LOG_ENABLED) {
+            Log.v(TAG, "DomainNameValidator.matchDns():" +
                       " this domain: " + thisDomain +
                       " that domain: " + thatDomain);
         }

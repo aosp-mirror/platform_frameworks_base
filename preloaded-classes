@@ -225,7 +225,6 @@ android.net.Uri$PathPart
 android.net.Uri$PathSegments
 android.net.Uri$StringUri
 android.net.WebAddress
-android.net.http.DomainNameChecker
 android.net.http.CertificateChainValidator
 android.net.http.EventHandler
 android.net.http.HttpsConnection
