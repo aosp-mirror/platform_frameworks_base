@@ -389,8 +389,8 @@ public final class WebStorage {
         mOrigins = new HashMap<String, Origin>();
         for (String origin : tmp) {
             Origin website = new Origin(origin,
-                                 nativeGetUsageForOrigin(origin),
-                                 nativeGetQuotaForOrigin(origin));
+                                 nativeGetQuotaForOrigin(origin),
+                                 nativeGetUsageForOrigin(origin));
             mOrigins.put(origin, website);
         }
     }
