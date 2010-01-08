@@ -179,6 +179,9 @@
           <li><a href="<?cs var:toroot ?>resources/samples/BluetoothChat/index.html">
                 <span class="en">Bluetooth Chat</span>
               </a> <span class="new">new!</span></li>
+          <li><a href="<?cs var:toroot ?>resources/samples/BusinessCard/index.html">
+                <span class="en">Business Card</span>
+              </a> <span class="new">new!</span></li>
           <li><a href="<?cs var:toroot ?>resources/samples/ContactManager/index.html">
                 <span class="en">Contact Manager</span>
               </a> <span class="new">new!</span></li>
