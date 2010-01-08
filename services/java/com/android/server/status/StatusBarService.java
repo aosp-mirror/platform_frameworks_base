@@ -1672,7 +1672,10 @@ public class StatusBarService extends IStatusBar.Stub
         // act accordingly
         if ((diff & StatusBarManager.DISABLE_EXPAND) != 0) {
             if ((net & StatusBarManager.DISABLE_EXPAND) != 0) {
-                animateCollapse();
+                Log.d(TAG, "DISABLE_EXPAND: yes");
+                mAnimating = false;
+                updateExpandedViewPos(0);
+                performCollapse();
             }
         }
         if ((diff & StatusBarManager.DISABLE_NOTIFICATION_ICONS) != 0) {
