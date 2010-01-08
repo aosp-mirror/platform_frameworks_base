@@ -22,13 +22,13 @@ This is the basic layout for a screen, with all of its features enabled.
 <LinearLayout  xmlns:android="http://schemas.android.com/apk/res/android"
     android:fitsSystemWindows="true"
     android:orientation="vertical"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
 >
     <!-- Title bar -->
     <RelativeLayout android:id="@android:id/title_container"
         style="?android:attr/windowTitleBackgroundStyle"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="?android:attr/windowTitleSize"
     >
         <ImageView android:id="@android:id/left_icon"
@@ -66,7 +66,7 @@ This is the basic layout for a screen, with all of its features enabled.
         </LinearLayout>
         <ProgressBar android:id="@+id/progress_horizontal"
             style="?android:attr/progressBarStyleHorizontal"
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="2dip"
             android:layout_toLeftOf="@android:id/right_container"
@@ -77,8 +77,8 @@ This is the basic layout for a screen, with all of its features enabled.
         />
         <TextView android:id="@android:id/title"
             style="?android:attr/windowTitleStyle"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:background="@null"
             android:fadingEdge="horizontal"
             android:scrollHorizontally="true"
@@ -90,7 +90,7 @@ This is the basic layout for a screen, with all of its features enabled.
 
     <!-- Content -->
     <FrameLayout android:id="@android:id/content"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="0dip"
         android:layout_weight="1"
         android:foregroundGravity="fill_horizontal|top"

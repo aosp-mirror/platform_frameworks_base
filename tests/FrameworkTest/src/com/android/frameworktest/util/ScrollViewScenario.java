@@ -174,7 +174,7 @@ public abstract class ScrollViewScenario extends Activity {
                     // fill width, equally weighted on height
                     final LinearLayout.LayoutParams lp =
                             new LinearLayout.LayoutParams(
-                                    ViewGroup.LayoutParams.FILL_PARENT, 0, 1f);
+                                    ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f);
                     for (int i = 0; i < numButtons; i++) {
                         final Button button = new Button(context);
                         button.setText(prefix + i);
@@ -240,15 +240,15 @@ public abstract class ScrollViewScenario extends Activity {
         // create views specified by params
         for (ViewFactory viewFactory : params.mViewFactories) {
             final LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-                    ViewGroup.LayoutParams.FILL_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT,
                     (int) (viewFactory.getHeightRatio() * screenHeight));
             mLinearLayout.addView(viewFactory.create(this), lp);
         }
 
         mScrollView = createScrollView();
         mScrollView.addView(mLinearLayout, new ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.FILL_PARENT,
-                ViewGroup.LayoutParams.FILL_PARENT));
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT));
 
         // no animation to speed up tests
         mScrollView.setSmoothScrollingEnabled(false);

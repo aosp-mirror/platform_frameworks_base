@@ -17,8 +17,8 @@
 -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
 	android:orientation="vertical"
 >
 	<Button
@@ -31,8 +31,8 @@
 	    </Button>
 	<View
 		android:id="@+id/surface"
-	    android:layout_width="fill_parent"
-	    android:layout_height="fill_parent"
+	    android:layout_width="match_parent"
+	    android:layout_height="match_parent"
 	    android:layout_weight="2"
 	    />
 	<TextView
@@ -40,7 +40,7 @@
 	    android:paddingLeft="2dip"
 	    android:layout_weight="0"
 	    android:background="@drawable/black"
-	    android:layout_width="fill_parent"
+	    android:layout_width="match_parent"
 	    android:layout_height="wrap_content"
 	    android:lines="1"
 	    android:gravity="center_vertical|center_horizontal"

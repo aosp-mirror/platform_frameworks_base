@@ -22,8 +22,8 @@
   depending on the state of the device.-->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tabunlock="http://schemas.android.com/apk/res/com.android.tabunlock"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:orientation="horizontal"
     android:background="#70000000"
     android:id="@+id/root">
@@ -31,7 +31,7 @@
     <!-- left side -->
     <RelativeLayout
             android:layout_width="0dip"
-            android:layout_height="fill_parent"
+            android:layout_height="match_parent"
             android:layout_weight="1.0"
             android:layout_marginLeft="24dip"
             android:gravity="left">
@@ -82,7 +82,7 @@
 
             <TextView android:id="@+id/am_pm"
                 android:layout_width="wrap_content"
-                android:layout_height="fill_parent"
+                android:layout_height="match_parent"
                 android:gravity="bottom"
                 android:singleLine="true"
                 android:ellipsize="none"
@@ -144,7 +144,7 @@
         android:id="@+id/tab_selector"
         android:orientation="vertical"
         android:layout_width="wrap_content"
-        android:layout_height="fill_parent"
+        android:layout_height="match_parent"
         android:layout_marginRight="80dip"
         />
 

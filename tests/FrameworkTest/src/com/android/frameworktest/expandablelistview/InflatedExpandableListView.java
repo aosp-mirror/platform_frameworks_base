@@ -65,7 +65,7 @@ public class InflatedExpandableListView extends Activity {
         public TextView getGenericView() {
             // Layout parameters for the ExpandableListView
             AbsListView.LayoutParams lp = new AbsListView.LayoutParams(
-                    ViewGroup.LayoutParams.FILL_PARENT, 64);
+                    ViewGroup.LayoutParams.MATCH_PARENT, 64);
 
             TextView textView = new TextView(InflatedExpandableListView.this);
             textView.setLayoutParams(lp);

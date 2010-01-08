@@ -2,17 +2,13 @@ package com.android.imftest.samples;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.EditText;
 import android.widget.Button;
 import android.view.LayoutInflater;
 import android.app.Dialog;
-
-import com.android.internal.R;
 
 public class DialogActivity extends Activity {
 
@@ -34,8 +30,8 @@ public class DialogActivity extends Activity {
         mLayout = new LinearLayout(this);
         mLayout.setOrientation(LinearLayout.VERTICAL);
         mLayout.setLayoutParams(new ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.FILL_PARENT,
-                ViewGroup.LayoutParams.FILL_PARENT));
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT));
 
         mButton1 = new Button(this);
         mButton1.setText("Dialog WITHOUT EditText");//(R.string.open_dialog_scrollable);

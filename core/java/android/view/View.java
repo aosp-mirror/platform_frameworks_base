@@ -379,7 +379,7 @@ import java.util.WeakHashMap;
  * dimension, it can specify one of:
  * <ul>
  * <li> an exact number
- * <li>FILL_PARENT, which means the view wants to be as big as its parent
+ * <li>MATCH_PARENT, which means the view wants to be as big as its parent
  * (minus padding)
  * <li> WRAP_CONTENT, which means that the view wants to be just big enough to
  * enclose its content (plus padding).

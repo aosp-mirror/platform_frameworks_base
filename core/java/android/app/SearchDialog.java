@@ -182,11 +182,11 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         Window theWindow = getWindow();
         WindowManager.LayoutParams lp = theWindow.getAttributes();
         lp.type = WindowManager.LayoutParams.TYPE_SEARCH_BAR;
-        lp.width = ViewGroup.LayoutParams.FILL_PARENT;
+        lp.width = ViewGroup.LayoutParams.MATCH_PARENT;
         // taking up the whole window (even when transparent) is less than ideal,
         // but necessary to show the popup window until the window manager supports
         // having windows anchored by their parent but not clipped by them.
-        lp.height = ViewGroup.LayoutParams.FILL_PARENT;
+        lp.height = ViewGroup.LayoutParams.MATCH_PARENT;
         lp.gravity = Gravity.TOP | Gravity.FILL_HORIZONTAL;
         lp.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
         theWindow.setAttributes(lp);

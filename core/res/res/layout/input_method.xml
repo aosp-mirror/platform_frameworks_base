@@ -20,27 +20,27 @@
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/parentPanel"
-    android:layout_width="fill_parent"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
     >
 
     <LinearLayout
         android:id="@+id/fullscreenArea"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         >
 
         <FrameLayout android:id="@android:id/extractArea"
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="0px"
             android:layout_weight="1"
             android:visibility="gone">
         </FrameLayout>
         
         <FrameLayout android:id="@android:id/candidatesArea"
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:visibility="invisible">
         </FrameLayout>
@@ -48,7 +48,7 @@
     </LinearLayout>
             
     <FrameLayout android:id="@android:id/inputArea"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:visibility="gone">
     </FrameLayout>

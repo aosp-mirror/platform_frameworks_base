@@ -21,7 +21,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     class="android.app.SearchDialog$SearchBar"
     android:id="@+id/search_bar"
-    android:layout_width="fill_parent"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:focusable="true"
@@ -30,7 +30,7 @@
     <!-- Outer layout defines the entire search bar at the top of the screen -->
     <LinearLayout
         android:id="@+id/search_plate"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:paddingLeft="12dip"
@@ -52,7 +52,7 @@
         <!-- Inner layout contains the app icon, button(s) and EditText -->
         <LinearLayout
             android:id="@+id/search_edit_frame"
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
             
@@ -76,8 +76,8 @@
                 android:singleLine="true"
                 android:ellipsize="end"
                 android:inputType="text|textAutoComplete"
-                android:dropDownWidth="fill_parent"
-                android:dropDownHeight="fill_parent"
+                android:dropDownWidth="match_parent"
+                android:dropDownHeight="match_parent"
                 android:dropDownAnchor="@id/search_plate"
                 android:dropDownVerticalOffset="-9dip"
                 android:popupBackground="@android:drawable/search_dropdown_background"
@@ -88,13 +88,13 @@
                 android:id="@+id/search_go_btn"
                 android:background="@drawable/btn_search_dialog"
                 android:layout_width="wrap_content"
-                android:layout_height="fill_parent"
+                android:layout_height="match_parent"
             />
 
             <ImageButton
                 android:id="@+id/search_voice_btn"
                 android:layout_width="wrap_content"
-                android:layout_height="fill_parent"
+                android:layout_height="match_parent"
                 android:layout_marginLeft="8dip"
                 android:background="@drawable/btn_search_dialog_voice"
                 android:src="@android:drawable/ic_btn_speak_now"

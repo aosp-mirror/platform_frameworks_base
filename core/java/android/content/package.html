@@ -421,7 +421,7 @@ can supply them explicitly in the XML file:</p>
 &lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;root&gt;
     &lt;EditText id="text"
-        android:layout_width="fill_parent" android:layout_height="fill_parent"
+        android:layout_width="match_parent" android:layout_height="match_parent"
         <b>android:textSize="18" android:textColor="#008"</b>
         android:text="Hello, World!" /&gt;
 &lt;/root&gt;
@@ -447,7 +447,7 @@ one of those resources:</p>
 &lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;root&gt;
     &lt;EditText id="text"
-        android:layout_width="fill_parent" android:layout_height="fill_parent"
+        android:layout_width="match_parent" android:layout_height="match_parent"
         <b>android:textColor="@color/opaque_red"</b>
         android:text="Hello, World!" /&gt;
 &lt;/root&gt;
@@ -463,7 +463,7 @@ reference a system resource, you would need to write:</p>
 &lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;root&gt;
     &lt;EditText id="text"
-        android:layout_width="fill_parent" android:layout_height="fill_parent"
+        android:layout_width="match_parent" android:layout_height="match_parent"
         android:textColor="@<b>android:</b>color/opaque_red"
         android:text="Hello, World!" /&gt;
 &lt;/root&gt;
@@ -476,7 +476,7 @@ strings in a layout file so that they can be localized:</p>
 &lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;root&gt;
     &lt;EditText id="text"
-        android:layout_width="fill_parent" android:layout_height="fill_parent"
+        android:layout_width="match_parent" android:layout_height="match_parent"
         android:textColor="@android:color/opaque_red"
         android:text="@string/hello_world" /&gt;
 &lt;/root&gt;
@@ -509,7 +509,7 @@ one of the standard colors defined in the base system theme:</p>
 &lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;root&gt;
     &lt;EditText id="text"
-        android:layout_width="fill_parent" android:layout_height="fill_parent"
+        android:layout_width="match_parent" android:layout_height="match_parent"
         <b>android:textColor="?android:textDisabledColor"</b>
         android:text="@string/hello_world" /&gt;
 &lt;/root&gt;
@@ -637,10 +637,10 @@ new style resource with the desired values:</p>
 &lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;root&gt;
     &lt;EditText id="text1" <b>style="@style/SpecialText"</b>
-        android:layout_width="fill_parent" android:layout_height="wrap_content"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
         android:text="Hello, World!" /&gt;
     &lt;EditText id="text2" <b>style="@style/SpecialText"</b>
-        android:layout_width="fill_parent" android:layout_height="wrap_content"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
         android:text="I love you all." /&gt;
 &lt;/root&gt;</pre>
 <h4>&nbsp;</h4>

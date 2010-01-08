@@ -70,7 +70,7 @@ public class ScrollViewButtonsAndLabels extends Activity {
         mLinearLayout = (LinearLayout) findViewById(R.id.layout);
 
         LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.FILL_PARENT,
+                LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
         );
 

@@ -58,15 +58,15 @@ public class GoneParentFocusedChild extends Activity {
         mLayout = new LinearLayout(this);
         mLayout.setOrientation(LinearLayout.HORIZONTAL);
         mLayout.setLayoutParams(new ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.FILL_PARENT,
-                ViewGroup.LayoutParams.FILL_PARENT));
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT));
 
 
         mGoneGroup = new LinearLayout(this);
         mGoneGroup.setOrientation(LinearLayout.HORIZONTAL);
         mGoneGroup.setLayoutParams(new ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.FILL_PARENT,
-                ViewGroup.LayoutParams.FILL_PARENT));
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT));
 
         mButton = new Button(this);
         mButton.setLayoutParams(new LinearLayout.LayoutParams(

@@ -23,8 +23,8 @@
   and portrait.-->
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tabunlock="http://schemas.android.com/apk/res/com.android.tabunlock"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:background="#70000000"
     android:gravity="center_horizontal"
     android:id="@+id/root">
@@ -81,7 +81,7 @@
 
         <TextView android:id="@+id/am_pm"
             android:layout_width="wrap_content"
-            android:layout_height="fill_parent"
+            android:layout_height="match_parent"
             android:gravity="bottom"
             android:singleLine="true"
             android:ellipsize="none"
@@ -141,7 +141,7 @@
     <com.android.internal.widget.SlidingTab
         android:id="@+id/tab_selector"
         android:orientation="horizontal"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_marginBottom="80dip" 

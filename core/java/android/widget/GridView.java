@@ -935,7 +935,7 @@ public class GridView extends AbsListView {
 
             AbsListView.LayoutParams p = (AbsListView.LayoutParams)child.getLayoutParams();
             if (p == null) {
-                p = new AbsListView.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT,
+                p = new AbsListView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                         ViewGroup.LayoutParams.WRAP_CONTENT, 0);
                 child.setLayoutParams(p);
             }
@@ -1254,7 +1254,7 @@ public class GridView extends AbsListView {
         // some up...
         AbsListView.LayoutParams p = (AbsListView.LayoutParams)child.getLayoutParams();
         if (p == null) {
-            p = new AbsListView.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT,
+            p = new AbsListView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT, 0);
         }
         p.viewType = mAdapter.getItemViewType(position);

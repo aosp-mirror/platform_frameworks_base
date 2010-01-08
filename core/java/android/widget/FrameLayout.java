@@ -164,12 +164,12 @@ public class FrameLayout extends ViewGroup {
 
     /**
      * Returns a set of layout parameters with a width of
-     * {@link android.view.ViewGroup.LayoutParams#FILL_PARENT},
-     * and a height of {@link android.view.ViewGroup.LayoutParams#FILL_PARENT}.
+     * {@link android.view.ViewGroup.LayoutParams#MATCH_PARENT},
+     * and a height of {@link android.view.ViewGroup.LayoutParams#MATCH_PARENT}.
      */
     @Override
     protected LayoutParams generateDefaultLayoutParams() {
-        return new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT);
+        return new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
     }
 
     /**
@@ -467,9 +467,9 @@ public class FrameLayout extends ViewGroup {
          * Creates a new set of layout parameters with the specified width, height
          * and weight.
          *
-         * @param width the width, either {@link #FILL_PARENT},
+         * @param width the width, either {@link #MATCH_PARENT},
          *        {@link #WRAP_CONTENT} or a fixed size in pixels
-         * @param height the height, either {@link #FILL_PARENT},
+         * @param height the height, either {@link #MATCH_PARENT},
          *        {@link #WRAP_CONTENT} or a fixed size in pixels
          * @param gravity the gravity
          *

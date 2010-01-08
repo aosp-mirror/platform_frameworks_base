@@ -1394,8 +1394,10 @@
              be a dimension (such as "12dip") for a constant width or one of
              the special constants. -->
         <attr name="layout_width" format="dimension">
-            <!-- The view should be as big as its parent (minus padding). -->
+            <!-- {@deprecated Use match_parent instead.} -->
             <enum name="fill_parent" value="-1" />
+            <!-- The view should be as big as its parent (minus padding). -->
+            <enum name="match_parent" value="-1" />
             <!-- The view should be only big enough to enclose its content (plus padding). -->
             <enum name="wrap_content" value="-2" />
         </attr>
@@ -1405,8 +1407,10 @@
              be a dimension (such as "12dip") for a constant height or one of
              the special constants. -->
         <attr name="layout_height" format="dimension">
-            <!-- The view should be as big as its parent (minus padding). -->
+            <!-- {@deprecated Use match_parent instead.} -->
             <enum name="fill_parent" value="-1" />
+            <!-- The view should be as big as its parent (minus padding). -->
+            <enum name="match_parent" value="-1" />
             <!-- The view should be only big enough to enclose its content (plus padding). -->
             <enum name="wrap_content" value="-2" />
         </attr>
@@ -2110,22 +2114,26 @@
              is used. -->
         <attr name="dropDownAnchor" format="reference" />
         <!-- Specifies the basic width of the dropdown. Its value may
-             be a dimension (such as "12dip") for a constant width, fill_parent
-             to fill the width of the screen, or wrap_content to match the width
+             be a dimension (such as "12dip") for a constant width, match_parent
+             to match the width of the screen, or wrap_content to match the width
              of the anchored view. -->
         <attr name="dropDownWidth" format="dimension">
-            <!-- The dropdown should fill the width of the screen. -->
+            <!-- {@deprecated Use match_parent instead.} -->
             <enum name="fill_parent" value="-1" />
+            <!-- The dropdown should fit the width of the screen. -->
+            <enum name="match_parent" value="-1" />
             <!-- The dropdown should fit the width of its anchor. -->
             <enum name="wrap_content" value="-2" />
         </attr>
         <!-- Specifies the basic width of the dropdown. Its value may
-             be a dimension (such as "12dip") for a constant width, fill_parent
+             be a dimension (such as "12dip") for a constant width, match_parent
              to fill the width of the screen, or wrap_content to match the height of
              the content of the drop down. -->
         <attr name="dropDownHeight" format="dimension">
-            <!-- The dropdown should fill the width of the screen. -->
+            <!-- {@deprecated Use match_parent instead.} -->
             <enum name="fill_parent" value="-1" />
+            <!-- The dropdown should fill the width of the screen. -->
+            <enum name="match_parent" value="-1" />
             <!-- The dropdown should fit the width of its anchor. -->
             <enum name="wrap_content" value="-2" />
         </attr>

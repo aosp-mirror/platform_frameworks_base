@@ -39,7 +39,7 @@ public class BigCache extends Activity {
         final LinearLayout testBed = new LinearLayout(this);
         testBed.setOrientation(LinearLayout.VERTICAL);
         testBed.setLayoutParams(new ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
         final int cacheSize = ViewConfiguration.getMaximumDrawingCacheSize();
         final Display display = getWindowManager().getDefaultDisplay();
@@ -60,7 +60,7 @@ public class BigCache extends Activity {
 
         final ScrollView scroller = new ScrollView(this);
         scroller.setLayoutParams(new ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT));
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 
         testBed.addView(tiny);
         testBed.addView(large);

@@ -21,7 +21,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android" 
     android:paddingLeft="4dip"
     android:paddingRight="2dip"
-    android:layout_width="fill_parent"
+    android:layout_width="match_parent"
     android:layout_height="?android:attr/searchResultListItemHeight" >
 
     <!-- Icons come first in the layout, since their placement doesn't depend on
@@ -50,7 +50,7 @@
         style="?android:attr/dropDownItemStyle"
         android:textAppearance="?android:attr/textAppearanceSearchResultSubtitle"
         android:singleLine="true"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="29dip" 
         android:paddingBottom="4dip"
         android:gravity="top"
@@ -66,7 +66,7 @@
         style="?android:attr/dropDownItemStyle"
         android:textAppearance="?android:attr/textAppearanceSearchResultTitle"
         android:singleLine="true"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:layout_toRightOf="@android:id/icon1"

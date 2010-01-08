@@ -21,17 +21,13 @@ import com.android.imftest.R;
 import android.app.Activity;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.Button;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewParent;
-import android.view.ViewRoot;
 import android.view.inputmethod.EditorInfo;
-import android.content.Context;
 
 public class InputTypeActivity extends Activity {
 
@@ -49,8 +45,8 @@ public class InputTypeActivity extends Activity {
         mLayout = new LinearLayout(this);
         mLayout.setOrientation(LinearLayout.VERTICAL);
         mLayout.setLayoutParams(new ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.FILL_PARENT,
-                ViewGroup.LayoutParams.FILL_PARENT));
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT));
 
         mInflater = getLayoutInflater();
         mParent = mLayout;

@@ -18,7 +18,6 @@ package com.android.frameworktest.util;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 import android.view.Gravity;
 import android.view.View;
@@ -256,7 +255,7 @@ public abstract class ExpandableListScenario extends ListScenario {
         result.setHeight(desiredHeight);
         result.setText(getValueAtPosition(packedPosition));
         final ViewGroup.LayoutParams lp = new AbsListView.LayoutParams(
-                ViewGroup.LayoutParams.FILL_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT);
         result.setLayoutParams(lp);
         result.setGravity(Gravity.CENTER_VERTICAL);

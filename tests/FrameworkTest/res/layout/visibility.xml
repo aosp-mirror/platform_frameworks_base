@@ -22,30 +22,30 @@
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
     <LinearLayout
       android:orientation="vertical"
       android:background="@drawable/box"
-      android:layout_width="fill_parent"
+      android:layout_width="match_parent"
       android:layout_height="wrap_content">
 
       <TextView android:id="@+id/refUp"
           android:background="@drawable/red"
-          android:layout_width="fill_parent"
+          android:layout_width="match_parent"
           android:layout_height="wrap_content"
           android:text="@string/visibility_1_view_1"/>
 
       <TextView android:id="@+id/victim"
           android:background="@drawable/green"
-          android:layout_width="fill_parent"
+          android:layout_width="match_parent"
           android:layout_height="wrap_content"
           android:text="@string/visibility_1_view_2"/>
 
       <TextView android:id="@+id/refDown"
           android:background="@drawable/blue"
-          android:layout_width="fill_parent"
+          android:layout_width="match_parent"
           android:layout_height="wrap_content"
           android:text="@string/visibility_1_view_3"/>
 

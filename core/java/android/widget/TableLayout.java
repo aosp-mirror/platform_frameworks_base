@@ -52,7 +52,7 @@ import java.util.regex.Pattern;
  * {@link #setColumnCollapsed(int,boolean) setColumnCollapsed()}.</p>
  *
  * <p>The children of a TableLayout cannot specify the <code>layout_width</code>
- * attribute. Width is always <code>FILL_PARENT</code>. However, the
+ * attribute. Width is always <code>MATCH_PARENT</code>. However, the
  * <code>layout_height</code> attribute can be defined by a child; default value
  * is {@link android.widget.TableLayout.LayoutParams#WRAP_CONTENT}. If the child
  * is a {@link android.widget.TableRow}, then the height is always
@@ -621,7 +621,7 @@ public class TableLayout extends LinearLayout {
 
     /**
      * Returns a set of layout parameters with a width of
-     * {@link android.view.ViewGroup.LayoutParams#FILL_PARENT},
+     * {@link android.view.ViewGroup.LayoutParams#MATCH_PARENT},
      * and a height of {@link android.view.ViewGroup.LayoutParams#WRAP_CONTENT}.
      */
     @Override
@@ -647,7 +647,7 @@ public class TableLayout extends LinearLayout {
 
     /**
      * <p>This set of layout parameters enforces the width of each child to be
-     * {@link #FILL_PARENT} and the height of each child to be
+     * {@link #MATCH_PARENT} and the height of each child to be
      * {@link #WRAP_CONTENT}, but only if the height is not specified.</p>
      */
     @SuppressWarnings({"UnusedDeclaration"})
@@ -663,14 +663,14 @@ public class TableLayout extends LinearLayout {
          * {@inheritDoc}
          */
         public LayoutParams(int w, int h) {
-            super(FILL_PARENT, h);
+            super(MATCH_PARENT, h);
         }
 
         /**
          * {@inheritDoc}
          */
         public LayoutParams(int w, int h, float initWeight) {
-            super(FILL_PARENT, h, initWeight);
+            super(MATCH_PARENT, h, initWeight);
         }
 
         /**
@@ -679,7 +679,7 @@ public class TableLayout extends LinearLayout {
          * {@link android.view.ViewGroup.LayoutParams#WRAP_CONTENT}.</p>
          */
         public LayoutParams() {
-            super(FILL_PARENT, WRAP_CONTENT);
+            super(MATCH_PARENT, WRAP_CONTENT);
         }
 
         /**
@@ -698,7 +698,7 @@ public class TableLayout extends LinearLayout {
 
         /**
          * <p>Fixes the row's width to
-         * {@link android.view.ViewGroup.LayoutParams#FILL_PARENT}; the row's
+         * {@link android.view.ViewGroup.LayoutParams#MATCH_PARENT}; the row's
          * height is fixed to
          * {@link android.view.ViewGroup.LayoutParams#WRAP_CONTENT} if no layout
          * height is specified.</p>
@@ -710,7 +710,7 @@ public class TableLayout extends LinearLayout {
         @Override
         protected void setBaseAttributes(TypedArray a,
                 int widthAttr, int heightAttr) {
-            this.width = FILL_PARENT;
+            this.width = MATCH_PARENT;
             if (a.hasValue(heightAttr)) {
                 this.height = a.getLayoutDimension(heightAttr, "layout_height");
             } else {

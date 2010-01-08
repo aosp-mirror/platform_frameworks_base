@@ -61,8 +61,8 @@ public class HorizontalFocusSearch extends Activity {
         mLayout = new LinearLayout(this);
         mLayout.setOrientation(LinearLayout.HORIZONTAL);
         mLayout.setLayoutParams(new ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.FILL_PARENT,
-                ViewGroup.LayoutParams.FILL_PARENT));
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT));
 
         mLeftTall = makeTall("left tall");
         mLayout.addView(mLeftTall);
@@ -95,7 +95,7 @@ public class HorizontalFocusSearch extends Activity {
         button.setText(label);
         button.setLayoutParams(new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.FILL_PARENT));
+                ViewGroup.LayoutParams.MATCH_PARENT));
         return button;
     }
 
@@ -118,7 +118,7 @@ public class HorizontalFocusSearch extends Activity {
         ll.setOrientation(LinearLayout.VERTICAL);
         ll.setLayoutParams(new LinearLayout.LayoutParams(
             ViewGroup.LayoutParams.WRAP_CONTENT,
-            ViewGroup.LayoutParams.FILL_PARENT));
+            ViewGroup.LayoutParams.MATCH_PARENT));
 
         if (atBottom) {
             ll.addView(filler);

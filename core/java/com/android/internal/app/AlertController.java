@@ -16,7 +16,7 @@
 
 package com.android.internal.app;
 
-import static android.view.ViewGroup.LayoutParams.FILL_PARENT;
+import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -361,7 +361,7 @@ public class AlertController {
         if (mView != null) {
             customPanel = (FrameLayout) mWindow.findViewById(R.id.customPanel);
             FrameLayout custom = (FrameLayout) mWindow.findViewById(R.id.custom);
-            custom.addView(mView, new LayoutParams(FILL_PARENT, FILL_PARENT));
+            custom.addView(mView, new LayoutParams(MATCH_PARENT, MATCH_PARENT));
             if (mViewSpacingSpecified) {
                 custom.setPadding(mViewSpacingLeft, mViewSpacingTop, mViewSpacingRight,
                         mViewSpacingBottom);
@@ -391,7 +391,7 @@ public class AlertController {
         if (mCustomTitleView != null) {
             // Add the custom title view directly to the topPanel layout
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.FILL_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                    LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             
             topPanel.addView(mCustomTitleView, lp);
             
@@ -460,8 +460,8 @@ public class AlertController {
             if (mListView != null) {
                 contentPanel.removeView(mWindow.findViewById(R.id.scrollView));
                 contentPanel.addView(mListView,
-                        new LinearLayout.LayoutParams(FILL_PARENT, FILL_PARENT));
-                contentPanel.setLayoutParams(new LinearLayout.LayoutParams(FILL_PARENT, 0, 1.0f));
+                        new LinearLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT));
+                contentPanel.setLayoutParams(new LinearLayout.LayoutParams(MATCH_PARENT, 0, 1.0f));
             } else {
                 contentPanel.setVisibility(View.GONE);
             }
@@ -657,8 +657,8 @@ public class AlertController {
             ViewGroup parent = (ViewGroup) mWindow.findViewById(R.id.parentPanel);
             parent.removeView(buttonPanel);
             AbsListView.LayoutParams params = new AbsListView.LayoutParams(
-                    AbsListView.LayoutParams.FILL_PARENT, 
-                    AbsListView.LayoutParams.FILL_PARENT);
+                    AbsListView.LayoutParams.MATCH_PARENT, 
+                    AbsListView.LayoutParams.MATCH_PARENT);
             buttonPanel.setLayoutParams(params);
             mListView.addFooterView(buttonPanel);
             */

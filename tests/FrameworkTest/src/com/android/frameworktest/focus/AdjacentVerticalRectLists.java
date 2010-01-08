@@ -66,11 +66,11 @@ public class AdjacentVerticalRectLists extends Activity {
         mLayout = new LinearLayout(this);
         mLayout.setOrientation(LinearLayout.HORIZONTAL);
         mLayout.setLayoutParams(new ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.FILL_PARENT,
-                ViewGroup.LayoutParams.FILL_PARENT));
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT));
 
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(0,
-                ViewGroup.LayoutParams.FILL_PARENT, 1);
+                ViewGroup.LayoutParams.MATCH_PARENT, 1);
 
         mLeftColumn = new InternalSelectionView(this, 5, "left column");
         mLeftColumn.setLayoutParams(params);

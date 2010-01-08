@@ -3070,7 +3070,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             if (childDimension >= 0) {
                 resultSize = childDimension;
                 resultMode = MeasureSpec.EXACTLY;
-            } else if (childDimension == LayoutParams.FILL_PARENT) {
+            } else if (childDimension == LayoutParams.MATCH_PARENT) {
                 // Child wants to be our size. So be it.
                 resultSize = size;
                 resultMode = MeasureSpec.EXACTLY;
@@ -3088,7 +3088,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 // Child wants a specific size... so be it
                 resultSize = childDimension;
                 resultMode = MeasureSpec.EXACTLY;
-            } else if (childDimension == LayoutParams.FILL_PARENT) {
+            } else if (childDimension == LayoutParams.MATCH_PARENT) {
                 // Child wants to be our size, but our size is not fixed.
                 // Constrain child to not be bigger than us.
                 resultSize = size;
@@ -3107,7 +3107,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 // Child wants a specific size... let him have it
                 resultSize = childDimension;
                 resultMode = MeasureSpec.EXACTLY;
-            } else if (childDimension == LayoutParams.FILL_PARENT) {
+            } else if (childDimension == LayoutParams.MATCH_PARENT) {
                 // Child wants to be our size... find out how big it should
                 // be
                 resultSize = 0;
@@ -3362,7 +3362,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * for both width and height. For each dimension, it can specify one of:
      * <ul>
      * <li> an exact number
-     * <li>FILL_PARENT, which means the view wants to be as big as its parent
+     * <li>MATCH_PARENT, which means the view wants to be as big as its parent
      * (minus padding)
      * <li> WRAP_CONTENT, which means that the view wants to be just big enough
      * to enclose its content (plus padding)
@@ -3376,11 +3376,19 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      */
     public static class LayoutParams {
         /**
-         * Special value for the height or width requested by a View.
-         * FILL_PARENT means that the view wants to fill the available space
-         * within the parent, taking the parent's padding into account.
+         * This value has the same meaning as {@link #MATCH_PARENT} but has
+         * been deprecated.
          */
+        @SuppressWarnings({"UnusedDeclaration"})
+        @Deprecated
         public static final int FILL_PARENT = -1;
+
+        /**
+         * Special value for the height or width requested by a View.
+         * MATCH_PARENT means that the view wants to be as bigas its parent,
+         * minus the parent's padding, if any.
+         */
+        public static final int MATCH_PARENT = -1;
 
         /**
          * Special value for the height or width requested by a View.
@@ -3391,20 +3399,20 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
         /**
          * Information about how wide the view wants to be. Can be an exact
-         * size, or one of the constants FILL_PARENT or WRAP_CONTENT.
+         * size, or one of the constants MATCH_PARENT or WRAP_CONTENT.
          */
         @ViewDebug.ExportedProperty(mapping = {
-            @ViewDebug.IntToString(from = FILL_PARENT, to = "FILL_PARENT"),
+            @ViewDebug.IntToString(from = MATCH_PARENT, to = "MATCH_PARENT"),
             @ViewDebug.IntToString(from = WRAP_CONTENT, to = "WRAP_CONTENT")
         })
         public int width;
 
         /**
          * Information about how tall the view wants to be. Can be an exact
-         * size, or one of the constants FILL_PARENT or WRAP_CONTENT.
+         * size, or one of the constants MATCH_PARENT or WRAP_CONTENT.
          */
         @ViewDebug.ExportedProperty(mapping = {
-            @ViewDebug.IntToString(from = FILL_PARENT, to = "FILL_PARENT"),
+            @ViewDebug.IntToString(from = MATCH_PARENT, to = "MATCH_PARENT"),
             @ViewDebug.IntToString(from = WRAP_CONTENT, to = "WRAP_CONTENT")
         })
         public int height;
@@ -3421,9 +3429,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
          *
          * <ul>
          *   <li><code>layout_width</code>: the width, either an exact value,
-         *   {@link #WRAP_CONTENT} or {@link #FILL_PARENT}</li>
+         *   {@link #WRAP_CONTENT} or {@link #MATCH_PARENT}</li>
          *   <li><code>layout_height</code>: the height, either an exact value,
-         *   {@link #WRAP_CONTENT} or {@link #FILL_PARENT}</li>
+         *   {@link #WRAP_CONTENT} or {@link #MATCH_PARENT}</li>
          * </ul>
          *
          * @param c the application environment
@@ -3442,9 +3450,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
          * Creates a new set of layout parameters with the specified width
          * and height.
          *
-         * @param width the width, either {@link #FILL_PARENT},
+         * @param width the width, either {@link #MATCH_PARENT},
          *        {@link #WRAP_CONTENT} or a fixed size in pixels
-         * @param height the height, either {@link #FILL_PARENT},
+         * @param height the height, either {@link #MATCH_PARENT},
          *        {@link #WRAP_CONTENT} or a fixed size in pixels
          */
         public LayoutParams(int width, int height) {
@@ -3507,8 +3515,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             if (size == WRAP_CONTENT) {
                 return "wrap-content";
             }
-            if (size == FILL_PARENT) {
-                return "fill-parent";
+            if (size == MATCH_PARENT) {
+                return "match-parent";
             }
             return String.valueOf(size);
         }

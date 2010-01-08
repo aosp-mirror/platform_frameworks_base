@@ -378,7 +378,7 @@ public class LinearLayout extends ViewGroup {
             }
 
             boolean matchWidthLocally = false;
-            if (widthMode != MeasureSpec.EXACTLY && lp.width == LayoutParams.FILL_PARENT) {
+            if (widthMode != MeasureSpec.EXACTLY && lp.width == LayoutParams.MATCH_PARENT) {
                 // The width of the linear layout will scale, and at least one
                 // child said it wanted to match our width. Set a flag
                 // indicating that we need to remeasure at least that view when
@@ -391,7 +391,7 @@ public class LinearLayout extends ViewGroup {
             final int measuredWidth = child.getMeasuredWidth() + margin;
             maxWidth = Math.max(maxWidth, measuredWidth);
 
-            allFillParent = allFillParent && lp.width == LayoutParams.FILL_PARENT;
+            allFillParent = allFillParent && lp.width == LayoutParams.MATCH_PARENT;
             if (lp.weight > 0) {
                 /*
                  * Widths of weighted Views are bogus if we end up
@@ -472,12 +472,12 @@ public class LinearLayout extends ViewGroup {
                 maxWidth = Math.max(maxWidth, measuredWidth);
 
                 boolean matchWidthLocally = widthMode != MeasureSpec.EXACTLY &&
-                        lp.width == LayoutParams.FILL_PARENT;
+                        lp.width == LayoutParams.MATCH_PARENT;
 
                 alternativeMaxWidth = Math.max(alternativeMaxWidth,
                         matchWidthLocally ? margin : measuredWidth);
 
-                allFillParent = allFillParent && lp.width == LayoutParams.FILL_PARENT;
+                allFillParent = allFillParent && lp.width == LayoutParams.MATCH_PARENT;
 
                 mTotalLength += child.getMeasuredHeight() + lp.topMargin +
                         lp.bottomMargin + getNextLocationOffset(child);
@@ -515,7 +515,7 @@ public class LinearLayout extends ViewGroup {
            if (child.getVisibility() != GONE) { 
                LinearLayout.LayoutParams lp = ((LinearLayout.LayoutParams)child.getLayoutParams());
                
-               if (lp.width == LayoutParams.FILL_PARENT) {
+               if (lp.width == LayoutParams.MATCH_PARENT) {
                    // Temporarily force children to reuse their old measured height
                    // FIXME: this may not be right for something like wrapping text?
                    int oldHeight = lp.height;
@@ -629,7 +629,7 @@ public class LinearLayout extends ViewGroup {
             }
 
             boolean matchHeightLocally = false;
-            if (heightMode != MeasureSpec.EXACTLY && lp.height == LayoutParams.FILL_PARENT) {
+            if (heightMode != MeasureSpec.EXACTLY && lp.height == LayoutParams.MATCH_PARENT) {
                 // The height of the linear layout will scale, and at least one
                 // child said it wanted to match our height. Set a flag indicating that
                 // we need to remeasure at least that view when we know our height.
@@ -657,7 +657,7 @@ public class LinearLayout extends ViewGroup {
 
             maxHeight = Math.max(maxHeight, childHeight);
 
-            allFillParent = allFillParent && lp.height == LayoutParams.FILL_PARENT;
+            allFillParent = allFillParent && lp.height == LayoutParams.MATCH_PARENT;
             if (lp.weight > 0) {
                 /*
                  * Heights of weighted Views are bogus if we end up
@@ -758,7 +758,7 @@ public class LinearLayout extends ViewGroup {
                         lp.rightMargin + getNextLocationOffset(child);
 
                 boolean matchHeightLocally = heightMode != MeasureSpec.EXACTLY &&
-                        lp.height == LayoutParams.FILL_PARENT;
+                        lp.height == LayoutParams.MATCH_PARENT;
 
                 final int margin = lp.topMargin + lp .bottomMargin;
                 int childHeight = child.getMeasuredHeight() + margin;
@@ -766,7 +766,7 @@ public class LinearLayout extends ViewGroup {
                 alternativeMaxHeight = Math.max(alternativeMaxHeight,
                         matchHeightLocally ? margin : childHeight);
 
-                allFillParent = allFillParent && lp.height == LayoutParams.FILL_PARENT;
+                allFillParent = allFillParent && lp.height == LayoutParams.MATCH_PARENT;
 
                 if (baselineAligned) {
                     final int childBaseline = child.getBaseline();
@@ -832,7 +832,7 @@ public class LinearLayout extends ViewGroup {
            if (child.getVisibility() != GONE) { 
                LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) child.getLayoutParams();
                
-               if (lp.height == LayoutParams.FILL_PARENT) {
+               if (lp.height == LayoutParams.MATCH_PARENT) {
                    // Temporarily force children to reuse their old measured width
                    // FIXME: this may not be right for something like wrapping text?
                    int oldWidth = lp.width;
@@ -1065,7 +1065,7 @@ public class LinearLayout extends ViewGroup {
                 final LinearLayout.LayoutParams lp =
                         (LinearLayout.LayoutParams) child.getLayoutParams();
 
-                if (baselineAligned && lp.height != LayoutParams.FILL_PARENT) {
+                if (baselineAligned && lp.height != LayoutParams.MATCH_PARENT) {
                     childBaseline = child.getBaseline();
                 }
                 
@@ -1199,7 +1199,7 @@ public class LinearLayout extends ViewGroup {
 
     /**
      * Returns a set of layout parameters with a width of
-     * {@link android.view.ViewGroup.LayoutParams#FILL_PARENT}
+     * {@link android.view.ViewGroup.LayoutParams#MATCH_PARENT}
      * and a height of {@link android.view.ViewGroup.LayoutParams#WRAP_CONTENT}
      * when the layout's orientation is {@link #VERTICAL}. When the orientation is
      * {@link #HORIZONTAL}, the width is set to {@link LayoutParams#WRAP_CONTENT}
@@ -1210,7 +1210,7 @@ public class LinearLayout extends ViewGroup {
         if (mOrientation == HORIZONTAL) {
             return new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
         } else if (mOrientation == VERTICAL) {
-            return new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT);
+            return new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
         }
         return null;
     }
@@ -1290,9 +1290,9 @@ public class LinearLayout extends ViewGroup {
          * Creates a new set of layout parameters with the specified width, height
          * and weight.
          *
-         * @param width the width, either {@link #FILL_PARENT},
+         * @param width the width, either {@link #MATCH_PARENT},
          *        {@link #WRAP_CONTENT} or a fixed size in pixels
-         * @param height the height, either {@link #FILL_PARENT},
+         * @param height the height, either {@link #MATCH_PARENT},
          *        {@link #WRAP_CONTENT} or a fixed size in pixels
          * @param weight the weight
          */

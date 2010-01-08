@@ -19,7 +19,7 @@
 -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" 
-    android:layout_width="fill_parent"
+    android:layout_width="match_parent"
     android:layout_height="?android:attr/listPreferredItemHeight"
     android:orientation="horizontal"
     android:gravity="center_vertical"
@@ -39,7 +39,7 @@
             style="?android:attr/dropDownItemStyle"
             android:textAppearance="?android:attr/textAppearanceLargeInverse"
             android:singleLine="true"
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content" />
     
         <TextView
@@ -48,7 +48,7 @@
             android:textAppearance="?android:attr/textAppearanceSmallInverse"
             android:textColor="#323232"
             android:singleLine="true"
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@android:id/text1"
             android:layout_alignLeft="@android:id/text1" />

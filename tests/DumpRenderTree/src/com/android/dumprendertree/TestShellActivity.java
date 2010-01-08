@@ -126,7 +126,7 @@ public class TestShellActivity extends Activity implements LayoutTestController 
         mWebView.addJavascriptInterface(mCallbackProxy, "eventSender");
         setupWebViewForLayoutTests(mWebView, mCallbackProxy);
 
-        contentView.addView(mWebView, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT, 0.0f));
+        contentView.addView(mWebView, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, 0.0f));
 
         mWebView.getSettings().setLayoutAlgorithm(WebSettings.LayoutAlgorithm.NORMAL);
 

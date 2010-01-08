@@ -85,8 +85,8 @@ public class ReliabilityTestActivity extends Activity {
         webView.setWebChromeClient(chromeClient);
 
         contentView.addView(webView, new LayoutParams(
-                ViewGroup.LayoutParams.FILL_PARENT,
-                ViewGroup.LayoutParams.FILL_PARENT, 0.0f));
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT, 0.0f));
 
         handler = new Handler() {
             @Override

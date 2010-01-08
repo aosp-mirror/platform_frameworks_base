@@ -22,7 +22,7 @@
     android:orientation="horizontal"
     android:minHeight="?android:attr/listPreferredItemHeight"
     android:layout_height="wrap_content"
-    android:layout_width="fill_parent"
+    android:layout_width="match_parent"
     android:paddingLeft="10dip"
     android:paddingRight="15dip">
 

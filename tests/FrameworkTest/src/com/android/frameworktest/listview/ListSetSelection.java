@@ -51,7 +51,7 @@ public class ListSetSelection extends ListScenario {
         });
 
         getListViewContainer().addView(mButton, new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.FILL_PARENT,
+                LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
         ));
     }

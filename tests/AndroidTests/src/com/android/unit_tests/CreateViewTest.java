@@ -21,7 +21,7 @@ import android.test.AndroidTestCase;
 import android.test.PerformanceTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.view.View;
-import static android.view.ViewGroup.LayoutParams.FILL_PARENT;
+import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -45,7 +45,7 @@ public class CreateViewTest extends AndroidTestCase implements PerformanceTestCa
     public void testLayout2() throws Exception {
         LinearLayout vert = new LinearLayout(mContext);
         vert.addView(new CreateViewTest.ViewOne(mContext),
-                new LinearLayout.LayoutParams(FILL_PARENT, FILL_PARENT, 0));
+                new LinearLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT, 0));
     }
 
     @SmallTest
@@ -53,22 +53,22 @@ public class CreateViewTest extends AndroidTestCase implements PerformanceTestCa
         LinearLayout vert = new LinearLayout(mContext);
 
         ViewOne one = new ViewOne(mContext);
-        vert.addView(one, new LinearLayout.LayoutParams(FILL_PARENT, FILL_PARENT, 0));
+        vert.addView(one, new LinearLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT, 0));
 
         ViewOne two = new ViewOne(mContext);
-        vert.addView(two, new LinearLayout.LayoutParams(FILL_PARENT, FILL_PARENT, 0));
+        vert.addView(two, new LinearLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT, 0));
 
         ViewOne three = new ViewOne(mContext);
-        vert.addView(three, new LinearLayout.LayoutParams(FILL_PARENT, FILL_PARENT, 0));
+        vert.addView(three, new LinearLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT, 0));
 
         ViewOne four = new ViewOne(mContext);
-        vert.addView(four, new LinearLayout.LayoutParams(FILL_PARENT, FILL_PARENT, 0));
+        vert.addView(four, new LinearLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT, 0));
 
         ViewOne five = new ViewOne(mContext);
-        vert.addView(five, new LinearLayout.LayoutParams(FILL_PARENT, FILL_PARENT, 0));
+        vert.addView(five, new LinearLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT, 0));
 
         ViewOne six = new ViewOne(mContext);
-        vert.addView(six, new LinearLayout.LayoutParams(FILL_PARENT, FILL_PARENT, 0));
+        vert.addView(six, new LinearLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT, 0));
     }
 
     @SmallTest
@@ -83,7 +83,7 @@ public class CreateViewTest extends AndroidTestCase implements PerformanceTestCa
         text.setText("S");
 
         LinearLayout vert = new LinearLayout(mContext);
-        vert.addView(text, new LinearLayout.LayoutParams(FILL_PARENT, WRAP_CONTENT, 0));
+        vert.addView(text, new LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT, 0));
     }
 
     @SmallTest
@@ -92,27 +92,27 @@ public class CreateViewTest extends AndroidTestCase implements PerformanceTestCa
 
         TextView one = new TextView(mContext);
         one.setText("S");
-        vert.addView(one, new LinearLayout.LayoutParams(FILL_PARENT, WRAP_CONTENT, 0));
+        vert.addView(one, new LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT, 0));
 
         TextView two = new TextView(mContext);
         two.setText("M");
-        vert.addView(two, new LinearLayout.LayoutParams(FILL_PARENT, WRAP_CONTENT, 0));
+        vert.addView(two, new LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT, 0));
 
         TextView three = new TextView(mContext);
         three.setText("T");
-        vert.addView(three, new LinearLayout.LayoutParams(FILL_PARENT, WRAP_CONTENT, 0));
+        vert.addView(three, new LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT, 0));
 
         TextView four = new TextView(mContext);
         four.setText("W");
-        vert.addView(four, new LinearLayout.LayoutParams(FILL_PARENT, WRAP_CONTENT, 0));
+        vert.addView(four, new LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT, 0));
 
         TextView five = new TextView(mContext);
         five.setText("H");
-        vert.addView(five, new LinearLayout.LayoutParams(FILL_PARENT, WRAP_CONTENT, 0));
+        vert.addView(five, new LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT, 0));
 
         TextView six = new TextView(mContext);
         six.setText("F");
-        vert.addView(six, new LinearLayout.LayoutParams(FILL_PARENT, WRAP_CONTENT, 0));
+        vert.addView(six, new LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT, 0));
     }
 
     public static class ViewOne extends View {

@@ -27,14 +27,14 @@
     >
 
     <LinearLayout android:id="@+id/icons"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:orientation="horizontal">
             
         <com.android.server.status.IconMerger android:id="@+id/notificationIcons"
             android:layout_width="0dip"
             android:layout_weight="1"
-            android:layout_height="fill_parent"
+            android:layout_height="match_parent"
             android:layout_alignParentLeft="true"
             android:paddingLeft="6dip"
             android:gravity="center_vertical"
@@ -42,7 +42,7 @@
             
         <LinearLayout android:id="@+id/statusIcons"
             android:layout_width="wrap_content"
-            android:layout_height="fill_parent"
+            android:layout_height="match_parent"
             android:layout_alignParentRight="true"
             android:paddingRight="6dip"
             android:gravity="center_vertical"
@@ -50,14 +50,14 @@
     </LinearLayout>
         
     <LinearLayout android:id="@+id/ticker"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:paddingLeft="6dip"
         android:animationCache="false"
         android:orientation="horizontal" >
         <ImageSwitcher android:id="@+id/tickerIcon"
             android:layout_width="wrap_content"
-            android:layout_height="fill_parent"
+            android:layout_height="match_parent"
             android:layout_marginRight="8dip"
             >
             <com.android.server.status.AnimatedImageView
@@ -76,12 +76,12 @@
             android:paddingTop="2dip"
             android:paddingRight="10dip">
             <TextView
-                android:layout_width="fill_parent"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:singleLine="true"
                 android:textColor="#ff000000" />
             <TextView
-                android:layout_width="fill_parent"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:singleLine="true"
                 android:textColor="#ff000000" />
@@ -90,7 +90,7 @@
 
     <com.android.server.status.DateView android:id="@+id/date"
         android:layout_width="wrap_content"
-        android:layout_height="fill_parent"
+        android:layout_height="match_parent"
         android:singleLine="true"
         android:textSize="16sp"
         android:textStyle="bold"

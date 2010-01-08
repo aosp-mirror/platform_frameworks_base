@@ -560,7 +560,7 @@ public class RelativeLayout extends ViewGroup {
                 mPaddingLeft, mPaddingRight,
                 myWidth);
         int childHeightMeasureSpec;
-        if (params.width == LayoutParams.FILL_PARENT) {
+        if (params.width == LayoutParams.MATCH_PARENT) {
             childHeightMeasureSpec = MeasureSpec.makeMeasureSpec(myHeight, MeasureSpec.EXACTLY);
         } else {
             childHeightMeasureSpec = MeasureSpec.makeMeasureSpec(myHeight, MeasureSpec.AT_MOST);
@@ -622,7 +622,7 @@ public class RelativeLayout extends ViewGroup {
                     // We can grow in this dimension.
                     childSpecSize = childSize;
                 }
-            } else if (childSize == LayoutParams.FILL_PARENT) {
+            } else if (childSize == LayoutParams.MATCH_PARENT) {
                 // Child wanted to be as big as possible. Give all availble
                 // space
                 childSpecMode = MeasureSpec.EXACTLY;

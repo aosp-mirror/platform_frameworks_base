@@ -16,12 +16,12 @@
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:orientation="vertical"
-	android:layout_width="fill_parent" 
-    android:layout_height="fill_parent">
+	android:layout_width="match_parent" 
+    android:layout_height="match_parent">
 	
 	<GridView android:id="@+id/grid"
-	    android:layout_width="fill_parent" 
-		android:layout_height="fill_parent"
+	    android:layout_width="match_parent" 
+		android:layout_height="match_parent"
 	    android:padding="10dip"
 	    android:verticalSpacing="10dp"    
 	    android:horizontalSpacing="10dp"
@@ -31,7 +31,7 @@
 	    android:gravity="center"/>
 	    
     <TextView android:id="@+id/text"
-    	android:layout_width="fill_parent" 
+    	android:layout_width="match_parent" 
     	android:layout_height="wrap_content"
     	android:gravity="center_horizontal"/>
     	

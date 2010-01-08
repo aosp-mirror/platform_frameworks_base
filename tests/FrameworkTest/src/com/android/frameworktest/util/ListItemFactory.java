@@ -50,7 +50,7 @@ public class ListItemFactory {
 
         final LinearLayout.LayoutParams buttonLp =
                 new LinearLayout.LayoutParams(
-                        ViewGroup.LayoutParams.FILL_PARENT,
+                        ViewGroup.LayoutParams.MATCH_PARENT,
                         50);
 
         final Button topButton = new Button(context);
@@ -61,7 +61,7 @@ public class ListItemFactory {
 
         final TextView middleFiller = new TextView(context);
         middleFiller.setLayoutParams(new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.FILL_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT,
                 desiredHeight - 100));
         middleFiller.setText("filler");
         ll.addView(middleFiller);
@@ -157,7 +157,7 @@ public class ListItemFactory {
         result.setHeight(desiredHeight);
         result.setText(text);
         final ViewGroup.LayoutParams lp = new AbsListView.LayoutParams(
-                ViewGroup.LayoutParams.FILL_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT);
         result.setLayoutParams(lp);
         result.setId(position);
@@ -197,7 +197,7 @@ public class ListItemFactory {
         result.setHeight(desiredHeight);
         result.setText(text);
         final ViewGroup.LayoutParams lp = new AbsListView.LayoutParams(
-                ViewGroup.LayoutParams.FILL_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT);
         result.setLayoutParams(lp);
         result.setId(position);
@@ -239,7 +239,7 @@ public class ListItemFactory {
 
         final AbsListView.LayoutParams lp =
                 new AbsListView.LayoutParams(
-                        ViewGroup.LayoutParams.FILL_PARENT,
+                        ViewGroup.LayoutParams.MATCH_PARENT,
                         desiredHeight);
         ll.setLayoutParams(lp);
         ll.setId(position);

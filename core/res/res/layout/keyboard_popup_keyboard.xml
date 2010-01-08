@@ -19,7 +19,7 @@
 -->
 <LinearLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:background="@android:drawable/keyboard_popup_panel_background"
@@ -29,7 +29,7 @@
             android:id="@android:id/keyboardView"
             android:background="@android:color/transparent"
             android:layout_alignParentBottom="true"
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:keyPreviewLayout="@layout/keyboard_key_preview"
             android:popupLayout="@layout/keyboard_popup_keyboard"

@@ -1067,7 +1067,7 @@ public class ListView extends AbsListView {
     private void measureScrapChild(View child, int position, int widthMeasureSpec) {
         LayoutParams p = (LayoutParams) child.getLayoutParams();
         if (p == null) {
-            p = new LayoutParams(ViewGroup.LayoutParams.FILL_PARENT,
+            p = new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT, 0);
             child.setLayoutParams(p);
         }
@@ -1702,7 +1702,7 @@ public class ListView extends AbsListView {
         // noinspection unchecked
         AbsListView.LayoutParams p = (AbsListView.LayoutParams) child.getLayoutParams();
         if (p == null) {
-            p = new AbsListView.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT,
+            p = new AbsListView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT, 0);
         }
         p.viewType = mAdapter.getItemViewType(position);
@@ -2388,7 +2388,7 @@ public class ListView extends AbsListView {
         ViewGroup.LayoutParams p = child.getLayoutParams();
         if (p == null) {
             p = new ViewGroup.LayoutParams(
-                    ViewGroup.LayoutParams.FILL_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT);
         }
 

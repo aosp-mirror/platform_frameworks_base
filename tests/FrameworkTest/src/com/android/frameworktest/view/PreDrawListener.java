@@ -60,7 +60,7 @@ public class PreDrawListener extends Activity implements OnClickListener {
             if (mCancelNextDraw) {
                 Button b = new Button(this.getContext());
                 b.setText("Hello");
-                addView(b, new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT,
+                addView(b, new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT,
                         LayoutParams.WRAP_CONTENT));
                 mCancelNextDraw = false;
                 return false;

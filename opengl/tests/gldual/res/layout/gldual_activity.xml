@@ -17,14 +17,14 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/text"
 
     android:orientation="vertical"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
   <android.opengl.GLSurfaceView android:id="@+id/gl1"
-	android:layout_width="fill_parent"
+	android:layout_width="match_parent"
 	    android:layout_height="0dip"
 	    android:layout_weight="1" />
   <com.android.gldual.GLDualGL2View android:id="@+id/gl2"
-	android:layout_width="fill_parent"
+	android:layout_width="match_parent"
             android:layout_height="0dip"
             android:layout_weight="1" />
 </LinearLayout>

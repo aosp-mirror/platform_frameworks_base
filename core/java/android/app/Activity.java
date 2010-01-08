@@ -2087,8 +2087,8 @@ public class Activity extends ContextThemeWrapper
         event.setPackageName(getPackageName());
 
         LayoutParams params = getWindow().getAttributes();
-        boolean isFullScreen = (params.width == LayoutParams.FILL_PARENT) &&
-            (params.height == LayoutParams.FILL_PARENT);
+        boolean isFullScreen = (params.width == LayoutParams.MATCH_PARENT) &&
+            (params.height == LayoutParams.MATCH_PARENT);
         event.setFullScreen(isFullScreen);
 
         CharSequence title = getTitle();

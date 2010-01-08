@@ -44,7 +44,7 @@ public class ListItemsExpandOnSelection extends ListScenario {
         result.setFocusable(mItemsFocusable);
         result.setText(getValueAtPosition(position));
         final AbsListView.LayoutParams lp = new AbsListView.LayoutParams(
-                ViewGroup.LayoutParams.FILL_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT);
         result.setLayoutParams(lp);
         return result;

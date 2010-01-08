@@ -129,7 +129,7 @@ public class AppWidgetHostActivity extends Activity
 
         // Add it to the list
         LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.FILL_PARENT,
+                LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT);
         mAppWidgetContainer.addView(view, layoutParams);
 

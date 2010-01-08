@@ -1167,7 +1167,7 @@ public final class ViewRoot extends Handler implements ViewParent,
         int measureSpec;
         switch (rootDimension) {
 
-        case ViewGroup.LayoutParams.FILL_PARENT:
+        case ViewGroup.LayoutParams.MATCH_PARENT:
             // Window can't resize. Force root view to be windowSize.
             measureSpec = MeasureSpec.makeMeasureSpec(windowSize, MeasureSpec.EXACTLY);
             break;

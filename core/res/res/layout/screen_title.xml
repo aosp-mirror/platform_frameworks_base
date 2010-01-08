@@ -23,7 +23,7 @@ enabled.
     android:orientation="vertical"
     android:fitsSystemWindows="true">
     <FrameLayout
-        android:layout_width="fill_parent" 
+        android:layout_width="match_parent" 
         android:layout_height="?android:attr/windowTitleSize"
         style="?android:attr/windowTitleBackgroundStyle">
         <TextView android:id="@android:id/title" 
@@ -31,11 +31,11 @@ enabled.
             android:background="@null"
             android:fadingEdge="horizontal"
             android:gravity="center_vertical"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent" />
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
     </FrameLayout>
     <FrameLayout android:id="@android:id/content"
-        android:layout_width="fill_parent" 
+        android:layout_width="match_parent" 
         android:layout_height="0dip"
         android:layout_weight="1"
         android:foregroundGravity="fill_horizontal|top"

@@ -16,8 +16,8 @@
 
 <com.android.internal.view.menu.IconMenuItemView xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/title"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:paddingBottom="1dip"
     android:paddingLeft="3dip"
     android:paddingRight="3dip"

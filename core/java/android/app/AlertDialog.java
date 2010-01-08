@@ -40,7 +40,7 @@ import com.android.internal.app.AlertController;
  *
  * <pre>
  * FrameLayout fl = (FrameLayout) findViewById(R.id.body);
- * fl.add(myView, new LayoutParams(FILL_PARENT, WRAP_CONTENT));
+ * fl.add(myView, new LayoutParams(MATCH_PARENT, WRAP_CONTENT));
  * </pre>
  * 
  * <p>The AlertDialog class takes care of automatically setting

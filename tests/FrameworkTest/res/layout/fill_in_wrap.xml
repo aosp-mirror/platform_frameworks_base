@@ -15,7 +15,7 @@
 -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
+    android:layout_width="match_parent"
     android:layout_height="?android:attr/listPreferredItemHeight"
     android:orientation="horizontal"
     android:baselineAligned="false"
@@ -28,7 +28,7 @@
     />
 
     <LinearLayout android:id="@+id/layout"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingLeft="0dip"
         android:paddingRight="0dip"
@@ -43,7 +43,7 @@
         <EditText android:id="@+id/data"
             android:layout_width="0dip"
             android:layout_weight="1"
-            android:layout_height="fill_parent"
+            android:layout_height="match_parent"
             android:layout_marginLeft="8dip"
             android:paddingBottom="4dip"
             android:layout_gravity="center_vertical"

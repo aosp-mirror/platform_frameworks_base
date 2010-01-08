@@ -19,6 +19,6 @@
     android:textAppearance="?android:attr/textAppearanceSmall"
     android:paddingTop="2dip"
     android:paddingBottom="3dip"
-    android:layout_width="fill_parent"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
 />

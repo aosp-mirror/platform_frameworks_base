@@ -24,13 +24,13 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:gravity="bottom"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
         >
 
     <LinearLayout
         android:orientation="vertical"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginBottom="15dip"
@@ -43,25 +43,25 @@
 
         <!-- when sim is present -->
         <TextView android:id="@+id/headerSimOk1"
-                  android:layout_width="fill_parent"
+                  android:layout_width="match_parent"
                   android:layout_height="wrap_content"
                   android:gravity="center"
                   android:textSize="34sp"/>
         <TextView android:id="@+id/headerSimOk2"
-                  android:layout_width="fill_parent"
+                  android:layout_width="match_parent"
                   android:layout_height="wrap_content"
                   android:gravity="center"
                   android:textSize="34sp"/>
 
         <!-- when sim is missing / locked -->
         <TextView android:id="@+id/headerSimBad1"
-                  android:layout_width="fill_parent"
+                  android:layout_width="match_parent"
                   android:layout_height="wrap_content"
                   android:gravity="center"
                   android:text="@android:string/lockscreen_missing_sim_message"
                   android:textAppearance="?android:attr/textAppearanceLarge"/>
         <TextView android:id="@+id/headerSimBad2"
-                  android:layout_width="fill_parent"
+                  android:layout_width="match_parent"
                   android:layout_height="wrap_content"
                   android:layout_marginTop="7dip"
                   android:layout_marginBottom="7dip"
@@ -71,27 +71,27 @@
 
         <!-- spacer after carrier info / sim messages -->
         <View
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="1dip"
             android:layout_marginTop="8dip"
             android:background="@android:drawable/divider_horizontal_dark"/>
 
         <!-- time and date -->
         <TextView android:id="@+id/time"
-                  android:layout_width="fill_parent"
+                  android:layout_width="match_parent"
                   android:layout_height="wrap_content"
                   android:gravity="center"
                   android:textSize="34sp"/>
 
         <TextView android:id="@+id/date"
-                  android:layout_width="fill_parent"
+                  android:layout_width="match_parent"
                   android:layout_height="wrap_content"
                   android:gravity="center"
                   android:textSize="18sp"/>
 
         <!-- spacer after time and date -->
         <View
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="1dip"
             android:layout_marginBottom="8dip"
             android:background="@android:drawable/divider_horizontal_dark"
@@ -100,7 +100,7 @@
         <!-- battery info -->
         <LinearLayout android:id="@+id/batteryInfo"
                 android:orientation="horizontal"
-                android:layout_width="fill_parent"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
               >
@@ -124,7 +124,7 @@
 
         <!-- spacer after battery info -->
         <View android:id="@+id/batteryInfoSpacer"
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="1dip"
             android:layout_marginTop="8dip"
             android:layout_marginBottom="8dip"
@@ -135,7 +135,7 @@
 
         <LinearLayout android:id="@+id/nextAlarmInfo"
                 android:orientation="horizontal"
-                android:layout_width="fill_parent"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
               >
@@ -159,7 +159,7 @@
 
         <!-- spacer after alarm info -->
         <View android:id="@+id/nextAlarmSpacer"
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="1dip"
             android:layout_marginTop="8dip"
             android:layout_marginBottom="8dip"
@@ -169,7 +169,7 @@
              (shown when SIM card is present) -->
         <LinearLayout android:id="@+id/screenLockedInfo"
             android:orientation="horizontal"
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
             >
@@ -195,7 +195,7 @@
         <!-- message about how to unlock
              (shown when SIM card is present) -->
         <TextView android:id="@+id/lockInstructions"
-                  android:layout_width="fill_parent"
+                  android:layout_width="match_parent"
                   android:layout_height="wrap_content"
                   android:layout_marginBottom="5dip"
                   android:gravity="center"
