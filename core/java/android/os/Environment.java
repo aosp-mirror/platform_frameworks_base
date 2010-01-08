@@ -181,7 +181,7 @@ public class Environment {
                                                          .getService("mount"));
             }
             return mMntSvc.getVolumeState(getExternalStorageDirectory().toString());
-        } catch (android.os.RemoteException rex) {
+        } catch (Exception rex) {
             return Environment.MEDIA_REMOVED;
         }
     }
