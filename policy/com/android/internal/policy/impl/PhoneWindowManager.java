@@ -805,8 +805,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE|
             WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
 
-        win.setLayout(WindowManager.LayoutParams.FILL_PARENT,
-                            WindowManager.LayoutParams.FILL_PARENT);
+        win.setLayout(WindowManager.LayoutParams.MATCH_PARENT,
+                            WindowManager.LayoutParams.MATCH_PARENT);
 
         final WindowManager.LayoutParams params = win.getAttributes();
         params.token = appToken;

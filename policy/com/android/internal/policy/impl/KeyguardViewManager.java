@@ -99,7 +99,7 @@ public class KeyguardViewManager implements KeyguardWindowController {
 
             mKeyguardHost = new KeyguardViewHost(mContext, mCallback);
 
-            final int stretch = ViewGroup.LayoutParams.FILL_PARENT;
+            final int stretch = ViewGroup.LayoutParams.MATCH_PARENT;
             int flags = WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN
                     | WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER
                     | WindowManager.LayoutParams.FLAG_KEEP_SURFACE_WHILE_ANIMATING
@@ -127,8 +127,8 @@ public class KeyguardViewManager implements KeyguardWindowController {
             mKeyguardView.setCallback(mCallback);
 
             final ViewGroup.LayoutParams lp = new FrameLayout.LayoutParams(
-                    ViewGroup.LayoutParams.FILL_PARENT,
-                    ViewGroup.LayoutParams.FILL_PARENT);
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT);
 
             mKeyguardHost.addView(mKeyguardView, lp);
 

@@ -15,7 +15,7 @@
 
 package com.android.internal.policy.impl;
 
-import static android.view.ViewGroup.LayoutParams.FILL_PARENT;
+import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import static android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
@@ -41,8 +41,6 @@ import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
@@ -61,7 +59,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.ViewManager;
 import android.view.VolumePanel;
@@ -204,7 +201,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     @Override
     public void setContentView(View view) {
-        setContentView(view, new ViewGroup.LayoutParams(FILL_PARENT, FILL_PARENT));
+        setContentView(view, new ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT));
     }
 
     @Override
@@ -424,7 +421,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             }
 
             int backgroundResId;
-            if (lp.width == ViewGroup.LayoutParams.FILL_PARENT) {
+            if (lp.width == ViewGroup.LayoutParams.MATCH_PARENT) {
                 // If the contents is fill parent for the width, set the
                 // corresponding background
                 backgroundResId = st.fullBackground;
@@ -1811,7 +1808,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 if (SWEEP_OPEN_MENU) {
                     if (mMenuBackground == null && mFeatureId < 0
                             && getAttributes().height
-                            == WindowManager.LayoutParams.FILL_PARENT) {
+                            == WindowManager.LayoutParams.MATCH_PARENT) {
                         mMenuBackground = getContext().getResources().getDrawable(
                                 com.android.internal.R.drawable.menu_background);
                     }
@@ -2151,7 +2148,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         mDecor.startChanging();
 
         View in = mLayoutInflater.inflate(layoutResource, null);
-        decor.addView(in, new ViewGroup.LayoutParams(FILL_PARENT, FILL_PARENT));
+        decor.addView(in, new ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT));
 
         ViewGroup contentParent = (ViewGroup)findViewById(ID_ANDROID_CONTENT);
         if (contentParent == null) {
