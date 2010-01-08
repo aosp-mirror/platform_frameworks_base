@@ -329,6 +329,17 @@ public class WifiService extends IWifiManager.Stub {
             return false;
         }
 
+        /**
+         * Multiple calls to unregisterReceiver() cause exception and a system crash.
+         * This can happen if a supplicant is lost (or firmware crash occurs) and user indicates
+         * disable wifi at the same time.
+         * Avoid doing a disable when the current Wifi state is UNKNOWN
+         * TODO: Handle driver load fail and supplicant lost as seperate states
+         */
+        if (mWifiState == WIFI_STATE_UNKNOWN && !enable) {
+            return false;
+        }
+
         setWifiEnabledState(enable ? WIFI_STATE_ENABLING : WIFI_STATE_DISABLING, uid);
 
         if (enable) {
