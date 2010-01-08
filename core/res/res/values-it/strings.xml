@@ -111,8 +111,7 @@
     <string name="httpErrorFile" msgid="8250549644091165175">"Impossibile accedere al file."</string>
     <string name="httpErrorFileNotFound" msgid="5588380756326017105">"Impossibile trovare il file richiesto."</string>
     <string name="httpErrorTooManyRequests" msgid="1235396927087188253">"Troppe richieste in fase di elaborazione. Riprova più tardi."</string>
-    <!-- no translation found for notification_title (1259940370369187045) -->
-    <skip />
+    <string name="notification_title" msgid="1259940370369187045">"Errore di accesso per <xliff:g id="ACCOUNT">%1$s</xliff:g>"</string>
     <string name="contentServiceSync" msgid="8353523060269335667">"Sinc"</string>
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"Sincronizzazione"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Troppe eliminazioni di <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>
@@ -134,8 +133,8 @@
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Audio non attivo"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"Audio attivo"</string>
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Modalità aereo"</string>
-    <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Modalità aereo attiva"</string>
-    <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Modalità aereo non attiva"</string>
+    <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Disattiva modalità aereo"</string>
+    <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Disattiva modalità aeereo"</string>
     <string name="safeMode" msgid="2788228061547930246">"Modalità provvisoria"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Sistema Android"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Servizi che prevedono un costo"</string>
@@ -148,10 +147,8 @@
     <string name="permgroupdesc_location" msgid="2430258821648348660">"Monitorare la posizione fisica dell\'utente"</string>
     <string name="permgrouplab_network" msgid="5808983377727109831">"Comunicazione di rete"</string>
     <string name="permgroupdesc_network" msgid="5035763698958415998">"Consentono l\'accesso delle applicazioni a varie funzionalità di rete."</string>
-    <!-- no translation found for permgrouplab_accounts (3359646291125325519) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_accounts (4948732641827091312) -->
-    <skip />
+    <string name="permgrouplab_accounts" msgid="3359646291125325519">"I tuoi account"</string>
+    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Accedere agli account disponibili."</string>
     <string name="permgrouplab_hardwareControls" msgid="7998214968791599326">"Controlli hardware"</string>
     <string name="permgroupdesc_hardwareControls" msgid="4357057861225462702">"Accedere direttamente all\'hardware del ricevitore."</string>
     <string name="permgrouplab_phoneCalls" msgid="9067173988325865923">"Telefonate"</string>
@@ -188,8 +185,14 @@
     <string name="permdesc_setDebugApp" msgid="5584310661711990702">"Consente a un\'applicazione di attivare il debug per un\'altra applicazione. Le applicazioni dannose possono sfruttare questa possibilità per interrompere altre applicazioni."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"modifica impostazioni UI"</string>
     <string name="permdesc_changeConfiguration" msgid="3465121501528064399">"Consente a un\'applicazione di modificare la configurazione corrente, come le dimensioni dei caratteri locali o complessive."</string>
-    <string name="permlab_restartPackages" msgid="2386396847203622628">"riavvio altre applicazioni"</string>
-    <string name="permdesc_restartPackages" msgid="1076364837492936814">"Consente a un\'applicazione di riavviare forzatamente altre applicazioni."</string>
+    <!-- no translation found for permlab_killBackgroundProcesses (8373714752793061963) -->
+    <skip />
+    <!-- no translation found for permdesc_killBackgroundProcesses (2908829602869383753) -->
+    <skip />
+    <!-- no translation found for permlab_forceStopPackages (1447830113260156236) -->
+    <skip />
+    <!-- no translation found for permdesc_forceStopPackages (7263036616161367402) -->
+    <skip />
     <string name="permlab_forceBack" msgid="1804196839880393631">"chiusura forzata dell\'applicazione"</string>
     <string name="permdesc_forceBack" msgid="6534109744159919013">"Consente a un\'applicazione di forzare la chiusura di attività in primo piano. Non dovrebbe essere mai necessario per le normali applicazioni."</string>
     <string name="permlab_dump" msgid="1681799862438954752">"recupero stato interno del sistema"</string>
@@ -319,7 +322,7 @@
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"chiamata diretta di tutti i n. telefono"</string>
     <string name="permdesc_callPrivileged" msgid="244405067160028452">"Consente all\'applicazione di chiamare qualsiasi numero, compresi quelli di emergenza, automaticamente. Le applicazioni dannose potrebbero effettuare chiamate non necessarie e illegali a servizi di emergenza."</string>
     <string name="permlab_performCdmaProvisioning" msgid="5604848095315421425">"avviare direttamente la configurazione del telefono CDMA"</string>
-    <string name="permdesc_performCdmaProvisioning" msgid="6457447676108355905">"Consente all\'applicazione di avviare il servizio di CDMA provisioning. Le applicazioni dannose potrebbero avviare il servizio di CDMA provisioning quando non è necessario"</string>
+    <string name="permdesc_performCdmaProvisioning" msgid="6457447676108355905">"Consente all\'applicazione di avviare il servizio di provisioning CDMA. Le applicazioni dannose potrebbero avviare il servizio di provisioning CDMA quando non è necessario"</string>
     <string name="permlab_locationUpdates" msgid="7785408253364335740">"controllo notifiche aggiornamento posizione"</string>
     <string name="permdesc_locationUpdates" msgid="2300018303720930256">"Consente l\'attivazione/disattivazione delle notifiche di aggiornamento della posizione dal segnale cellulare. Da non usare per normali applicazioni."</string>
     <string name="permlab_checkinProperties" msgid="7855259461268734914">"accesso a proprietà di archiviazione"</string>
@@ -392,6 +395,10 @@
     <string name="permdesc_writeDictionary" msgid="2241256206524082880">"Consente a un\'applicazione di scrivere nuove parole nel dizionario utente."</string>
     <string name="permlab_sdcardWrite" msgid="8079403759001777291">"modificare/eliminare i contenuti della scheda SD"</string>
     <string name="permdesc_sdcardWrite" msgid="6643963204976471878">"Consente a un\'applicazione di scrivere sulla scheda SD."</string>
+    <!-- no translation found for permlab_cache_filesystem (5656487264819669824) -->
+    <skip />
+    <!-- no translation found for permdesc_cache_filesystem (1624734528435659906) -->
+    <skip />
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Casa"</item>
     <item msgid="869923650527136615">"Cellulare"</item>
@@ -435,110 +442,58 @@
     <item msgid="2506857312718630823">"ICQ"</item>
     <item msgid="1648797903785279353">"Jabber"</item>
   </string-array>
-    <!-- no translation found for phoneTypeCustom (1644738059053355820) -->
-    <skip />
-    <!-- no translation found for phoneTypeHome (2570923463033985887) -->
-    <skip />
-    <!-- no translation found for phoneTypeMobile (6501463557754751037) -->
-    <skip />
-    <!-- no translation found for phoneTypeWork (8863939667059911633) -->
-    <skip />
-    <!-- no translation found for phoneTypeFaxWork (3517792160008890912) -->
-    <skip />
-    <!-- no translation found for phoneTypeFaxHome (2067265972322971467) -->
-    <skip />
-    <!-- no translation found for phoneTypePager (7582359955394921732) -->
-    <skip />
-    <!-- no translation found for phoneTypeOther (1544425847868765990) -->
-    <skip />
-    <!-- no translation found for phoneTypeCallback (2712175203065678206) -->
-    <skip />
-    <!-- no translation found for phoneTypeCar (8738360689616716982) -->
-    <skip />
-    <!-- no translation found for phoneTypeCompanyMain (540434356461478916) -->
-    <skip />
-    <!-- no translation found for phoneTypeIsdn (8022453193171370337) -->
-    <skip />
-    <!-- no translation found for phoneTypeMain (6766137010628326916) -->
-    <skip />
-    <!-- no translation found for phoneTypeOtherFax (8587657145072446565) -->
-    <skip />
-    <!-- no translation found for phoneTypeRadio (4093738079908667513) -->
-    <skip />
-    <!-- no translation found for phoneTypeTelex (3367879952476250512) -->
-    <skip />
-    <!-- no translation found for phoneTypeTtyTdd (8606514378585000044) -->
-    <skip />
-    <!-- no translation found for phoneTypeWorkMobile (1311426989184065709) -->
-    <skip />
-    <!-- no translation found for phoneTypeWorkPager (649938731231157056) -->
-    <skip />
-    <!-- no translation found for phoneTypeAssistant (5596772636128562884) -->
-    <skip />
-    <!-- no translation found for phoneTypeMms (7254492275502768992) -->
-    <skip />
-    <!-- no translation found for eventTypeBirthday (2813379844211390740) -->
-    <skip />
-    <!-- no translation found for eventTypeAnniversary (3876779744518284000) -->
-    <skip />
-    <!-- no translation found for eventTypeOther (5834288791948564594) -->
-    <skip />
-    <!-- no translation found for emailTypeCustom (8525960257804213846) -->
-    <skip />
-    <!-- no translation found for emailTypeHome (449227236140433919) -->
-    <skip />
-    <!-- no translation found for emailTypeWork (3548058059601149973) -->
-    <skip />
-    <!-- no translation found for emailTypeOther (2923008695272639549) -->
-    <skip />
-    <!-- no translation found for emailTypeMobile (119919005321166205) -->
-    <skip />
-    <!-- no translation found for postalTypeCustom (8903206903060479902) -->
-    <skip />
-    <!-- no translation found for postalTypeHome (8165756977184483097) -->
-    <skip />
-    <!-- no translation found for postalTypeWork (5268172772387694495) -->
-    <skip />
-    <!-- no translation found for postalTypeOther (2726111966623584341) -->
-    <skip />
-    <!-- no translation found for imTypeCustom (2074028755527826046) -->
-    <skip />
-    <!-- no translation found for imTypeHome (6241181032954263892) -->
-    <skip />
-    <!-- no translation found for imTypeWork (1371489290242433090) -->
-    <skip />
-    <!-- no translation found for imTypeOther (5377007495735915478) -->
-    <skip />
-    <!-- no translation found for imProtocolCustom (6919453836618749992) -->
-    <skip />
-    <!-- no translation found for imProtocolAim (7050360612368383417) -->
-    <skip />
-    <!-- no translation found for imProtocolMsn (144556545420769442) -->
-    <skip />
-    <!-- no translation found for imProtocolYahoo (8271439408469021273) -->
-    <skip />
-    <!-- no translation found for imProtocolSkype (9019296744622832951) -->
-    <skip />
-    <!-- no translation found for imProtocolQq (8887484379494111884) -->
-    <skip />
-    <!-- no translation found for imProtocolGoogleTalk (3808393979157698766) -->
-    <skip />
-    <!-- no translation found for imProtocolIcq (1574870433606517315) -->
-    <skip />
-    <!-- no translation found for imProtocolJabber (2279917630875771722) -->
-    <skip />
-    <!-- no translation found for imProtocolNetMeeting (8287625655986827971) -->
-    <skip />
-    <!-- no translation found for orgTypeWork (29268870505363872) -->
-    <skip />
-    <!-- no translation found for orgTypeOther (3951781131570124082) -->
-    <skip />
-    <!-- no translation found for orgTypeCustom (225523415372088322) -->
-    <skip />
-    <!-- no translation found for contact_status_update_attribution (5112589886094402795) -->
-    <skip />
-    <!-- no translation found for contact_status_update_attribution_with_date (5945386376369979909) -->
-    <skip />
+    <string name="phoneTypeCustom" msgid="1644738059053355820">"Personalizzato"</string>
+    <string name="phoneTypeHome" msgid="2570923463033985887">"Casa"</string>
+    <string name="phoneTypeMobile" msgid="6501463557754751037">"Cellulare"</string>
+    <string name="phoneTypeWork" msgid="8863939667059911633">"Ufficio"</string>
+    <string name="phoneTypeFaxWork" msgid="3517792160008890912">"Fax ufficio"</string>
+    <string name="phoneTypeFaxHome" msgid="2067265972322971467">"Fax casa"</string>
+    <string name="phoneTypePager" msgid="7582359955394921732">"Cercapersone"</string>
+    <string name="phoneTypeOther" msgid="1544425847868765990">"Altro"</string>
+    <string name="phoneTypeCallback" msgid="2712175203065678206">"Callback"</string>
+    <string name="phoneTypeCar" msgid="8738360689616716982">"Automobile"</string>
+    <string name="phoneTypeCompanyMain" msgid="540434356461478916">"Azienda, principale"</string>
+    <string name="phoneTypeIsdn" msgid="8022453193171370337">"ISDN"</string>
+    <string name="phoneTypeMain" msgid="6766137010628326916">"Principale"</string>
+    <string name="phoneTypeOtherFax" msgid="8587657145072446565">"Altro fax"</string>
+    <string name="phoneTypeRadio" msgid="4093738079908667513">"Segnale radio"</string>
+    <string name="phoneTypeTelex" msgid="3367879952476250512">"Telex"</string>
+    <string name="phoneTypeTtyTdd" msgid="8606514378585000044">"TTY TDD"</string>
+    <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"Cellulare lavoro"</string>
+    <string name="phoneTypeWorkPager" msgid="649938731231157056">"Cercapersone ufficio"</string>
+    <string name="phoneTypeAssistant" msgid="5596772636128562884">"Assistente"</string>
+    <string name="phoneTypeMms" msgid="7254492275502768992">"MMS"</string>
+    <string name="eventTypeBirthday" msgid="2813379844211390740">"Compleanno"</string>
+    <string name="eventTypeAnniversary" msgid="3876779744518284000">"Anniversario"</string>
+    <string name="eventTypeOther" msgid="5834288791948564594">"Evento"</string>
+    <string name="emailTypeCustom" msgid="8525960257804213846">"Personalizzato"</string>
+    <string name="emailTypeHome" msgid="449227236140433919">"Casa"</string>
+    <string name="emailTypeWork" msgid="3548058059601149973">"Ufficio"</string>
+    <string name="emailTypeOther" msgid="2923008695272639549">"Altro"</string>
+    <string name="emailTypeMobile" msgid="119919005321166205">"Cellulare"</string>
+    <string name="postalTypeCustom" msgid="8903206903060479902">"Personalizzato"</string>
+    <string name="postalTypeHome" msgid="8165756977184483097">"Casa"</string>
+    <string name="postalTypeWork" msgid="5268172772387694495">"Ufficio"</string>
+    <string name="postalTypeOther" msgid="2726111966623584341">"Altro"</string>
+    <string name="imTypeCustom" msgid="2074028755527826046">"Personalizzato"</string>
+    <string name="imTypeHome" msgid="6241181032954263892">"Casa"</string>
+    <string name="imTypeWork" msgid="1371489290242433090">"Ufficio"</string>
+    <string name="imTypeOther" msgid="5377007495735915478">"Altro"</string>
+    <string name="imProtocolCustom" msgid="6919453836618749992">"Personalizzato"</string>
+    <string name="imProtocolAim" msgid="7050360612368383417">"AIM"</string>
+    <string name="imProtocolMsn" msgid="144556545420769442">"Windows Live"</string>
+    <string name="imProtocolYahoo" msgid="8271439408469021273">"Yahoo"</string>
+    <string name="imProtocolSkype" msgid="9019296744622832951">"Skype"</string>
+    <string name="imProtocolQq" msgid="8887484379494111884">"QQ"</string>
+    <string name="imProtocolGoogleTalk" msgid="3808393979157698766">"Google Talk"</string>
+    <string name="imProtocolIcq" msgid="1574870433606517315">"ICQ"</string>
+    <string name="imProtocolJabber" msgid="2279917630875771722">"Jabber"</string>
+    <string name="imProtocolNetMeeting" msgid="8287625655986827971">"NetMeeting"</string>
+    <string name="orgTypeWork" msgid="29268870505363872">"Ufficio"</string>
+    <string name="orgTypeOther" msgid="3951781131570124082">"Altro"</string>
+    <string name="orgTypeCustom" msgid="225523415372088322">"Personalizzato"</string>
+    <string name="contact_status_update_attribution" msgid="5112589886094402795">"tramite <xliff:g id="SOURCE">%1$s</xliff:g>"</string>
+    <string name="contact_status_update_attribution_with_date" msgid="5945386376369979909">"<xliff:g id="DATE">%1$s</xliff:g> tramite <xliff:g id="SOURCE">%2$s</xliff:g>"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"Inserisci il PIN"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"Codice PIN errato."</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"Per sbloccare, premi Menu, poi 0."</string>
@@ -553,8 +508,7 @@
     <string name="lockscreen_pattern_wrong" msgid="4817583279053112312">"Riprova"</string>
     <string name="lockscreen_plugged_in" msgid="613343852842944435">"In carica (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
     <string name="lockscreen_charged" msgid="4938930459620989972">"Carico."</string>
-    <!-- no translation found for lockscreen_battery_short (3617549178603354656) -->
-    <skip />
+    <string name="lockscreen_battery_short" msgid="3617549178603354656">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Collegare il caricabatterie."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="7381499217732227295">"Nessuna SIM presente."</string>
     <string name="lockscreen_missing_sim_message" msgid="2186920585695169078">"Nessuna SIM presente nel telefono."</string>
@@ -576,6 +530,9 @@
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Accedi"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Password o nome utente non valido."</string>
     <string name="lockscreen_glogin_checking_password" msgid="6758890536332363322">"Controllo in corso..."</string>
+    <string name="lockscreen_unlock_label" msgid="737440483220667054">"Sblocca"</string>
+    <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Audio attivato"</string>
+    <string name="lockscreen_sound_off_label" msgid="996822825154319026">"Audio disattivato"</string>
     <string name="hour_ampm" msgid="4329881288269772723">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_cap_ampm" msgid="1829009197680861107">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Cancella"</string>
@@ -586,8 +543,7 @@
     <string name="battery_status_charging" msgid="756617993998772213">"In carica..."</string>
     <string name="battery_low_title" msgid="7923774589611311406">"Collegare il caricabatterie"</string>
     <string name="battery_low_subtitle" msgid="7388781709819722764">"Batteria quasi scarica:"</string>
-    <!-- no translation found for battery_low_percent_format (696154104579022959) -->
-    <skip />
+    <string name="battery_low_percent_format" msgid="696154104579022959">"<xliff:g id="NUMBER">%d%%</xliff:g> rimanente o meno."</string>
     <string name="battery_low_why" msgid="7279169609518386372">"Utilizzo batteria"</string>
     <string name="factorytest_failed" msgid="5410270329114212041">"Test di fabbrica non riuscito"</string>
     <string name="factorytest_not_system" msgid="4435201656767276723">"L\'azione FACTORY_TEST è supportata soltanto per i pacchetti installati in /system/app."</string>
@@ -597,8 +553,7 @@
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
     <string name="js_dialog_before_unload" msgid="1901675448179653089">"Uscire da questa pagina?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Seleziona OK per continuare o Annulla per rimanere nella pagina corrente."</string>
     <string name="save_password_label" msgid="6860261758665825069">"Conferma"</string>
-    <!-- no translation found for double_tap_toast (1068216937244567247) -->
-    <skip />
+    <string name="double_tap_toast" msgid="1068216937244567247">"Suggerimento. Tocca due volte per aumentare/ridurre lo zoom."</string>
     <string name="permlab_readHistoryBookmarks" msgid="1284843728203412135">"lettura cronologia e segnalibri del browser"</string>
     <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"Consente all\'applicazione di leggere tutti gli URL visitati e tutti i segnalibri del browser."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"creazione cronologia e segnalibri del browser"</string>
@@ -749,7 +704,6 @@
     <string name="force_close" msgid="3653416315450806396">"Termina"</string>
     <string name="report" msgid="4060218260984795706">"Segnala"</string>
     <string name="wait" msgid="7147118217226317732">"Attendi"</string>
-    <string name="debug" msgid="9103374629678531849">"Debug"</string>
     <string name="sendText" msgid="5132506121645618310">"Selezione un\'opzione di invio"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Volume suoneria"</string>
     <string name="volume_music" msgid="5421651157138628171">"Volume app. multimediali"</string>
@@ -803,10 +757,8 @@
     <string name="extmedia_format_message" msgid="3621369962433523619">"Formattare la scheda SD? Tutti i dati sulla scheda verranno persi."</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Formatta"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Debug USB collegato"</string>
-    <!-- no translation found for adb_active_notification_message (8470296818270110396) -->
-    <skip />
-    <!-- no translation found for select_input_method (6865512749462072765) -->
-    <skip />
+    <string name="adb_active_notification_message" msgid="8470296818270110396">"Seleziona per disattivare il debug USB."</string>
+    <string name="select_input_method" msgid="6865512749462072765">"Seleziona metodo di inserimento"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"candidati"</u></string>
@@ -837,22 +789,29 @@
     <string name="create_contact_using" msgid="4947405226788104538">"Crea contatto"\n"utilizzando <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="accessibility_compound_button_selected" msgid="5612776946036285686">"selezionato"</string>
     <string name="accessibility_compound_button_unselected" msgid="8864512895673924091">"non selezionato"</string>
+    <!-- no translation found for grant_credentials_permission_message_header (6824538733852821001) -->
+    <skip />
+    <!-- no translation found for grant_credentials_permission_message_footer (3125211343379376561) -->
+    <skip />
+    <!-- no translation found for grant_permissions_header_text (2722567482180797717) -->
+    <skip />
     <string name="allow" msgid="7225948811296386551">"Consenti"</string>
     <string name="deny" msgid="2081879885755434506">"Nega"</string>
     <string name="permission_request_notification_title" msgid="5390555465778213840">"Autorizzazione richiesta"</string>
-    <!-- no translation found for permission_request_notification_with_subtitle (4325409589686688000) -->
-    <skip />
+    <string name="permission_request_notification_with_subtitle" msgid="4325409589686688000">"Autorizzazione richiesta"\n"per l\'account <xliff:g id="ACCOUNT">%s</xliff:g>"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Metodo inserimento"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"Sinc"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Accesso facilitato"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Sfondo"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Cambia sfondo"</string>
-    <!-- no translation found for pptp_vpn_description (2688045385181439401) -->
+    <string name="pptp_vpn_description" msgid="2688045385181439401">"Protocollo di tunneling Point-to-Point"</string>
+    <string name="l2tp_vpn_description" msgid="3750692169378923304">"Protocollo di tunneling livello 2"</string>
+    <string name="l2tp_ipsec_psk_vpn_description" msgid="3945043564008303239">"VPN L2TP/IPSec basata su chiave precondivisa"</string>
+    <string name="l2tp_ipsec_crt_vpn_description" msgid="5382714073103653577">"VPN L2TP/IPSec basata su certificato"</string>
+    <!-- no translation found for upload_file (2897957172366730416) -->
     <skip />
-    <!-- no translation found for l2tp_vpn_description (3750692169378923304) -->
+    <!-- no translation found for reset (2448168080964209908) -->
     <skip />
-    <!-- no translation found for l2tp_ipsec_psk_vpn_description (3945043564008303239) -->
-    <skip />
-    <!-- no translation found for l2tp_ipsec_crt_vpn_description (5382714073103653577) -->
+    <!-- no translation found for submit (1602335572089911941) -->
     <skip />
 </resources>
