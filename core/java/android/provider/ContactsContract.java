@@ -23,10 +23,10 @@ import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.Intent;
 import android.content.CursorEntityIterator;
-import android.content.EntityIterator;
 import android.content.Entity;
+import android.content.EntityIterator;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
@@ -62,7 +62,8 @@ import java.io.InputStream;
  * </li>
  * <li>
  * A row in the {@link RawContacts} table represents a set of Data describing a
- * person and associated with a single account.
+ * person and associated with a single account (for example, a single Gmail
+ * account).
  * </li>
  * <li>
  * A row in the {@link Contacts} table represents an aggregate of one or more
@@ -245,6 +246,9 @@ public final class ContactsContract {
     }
 
     /**
+     * Columns of {@link ContactsContract.Contacts} that track the user's
+     * preferences for, or interactions with, the contact.
+     *
      * @see Contacts
      * @see RawContacts
      * @see ContactsContract.Data
@@ -271,20 +275,25 @@ public final class ContactsContract {
         public static final String STARRED = "starred";
 
         /**
-         * A custom ringtone associated with a contact. Not always present.
+         * URI for a custom ringtone associated with the contact. If null or missing,
+         * the default ringtone is used.
          * <P>Type: TEXT (URI to the ringtone)</P>
          */
         public static final String CUSTOM_RINGTONE = "custom_ringtone";
 
         /**
-         * Whether the contact should always be sent to voicemail. Not always
-         * present.
+         * Whether the contact should always be sent to voicemail. If missing,
+         * defaults to false.
          * <P>Type: INTEGER (0 for false, 1 for true)</P>
          */
         public static final String SEND_TO_VOICEMAIL = "send_to_voicemail";
     }
 
     /**
+     * Columns of {@link ContactsContract.Contacts} that refer to intrinsic
+     * properties of the contact, as opposed to the user-specified options
+     * found in {@link ContactOptionsColumns}.
+     *
      * @see Contacts
      * @see ContactsContract.Data
      * @see PhoneLookup
@@ -441,6 +450,8 @@ public final class ContactsContract {
     }
 
     /**
+     * Contact name and contact name metadata columns in the RawContacts table.
+     *
      * @see Contacts
      * @see RawContacts
      * @hide
@@ -1616,14 +1627,34 @@ public final class ContactsContract {
         @Deprecated
         public static final String PRESENCE_STATUS = PRESENCE;
 
-        /*
-         * Presence Status definition
+        /**
+         * An allowed value of {@link #PRESENCE}.
          */
         int OFFLINE = 0;
+
+        /**
+         * An allowed value of {@link #PRESENCE}.
+         */
         int INVISIBLE = 1;
+
+        /**
+         * An allowed value of {@link #PRESENCE}.
+         */
         int AWAY = 2;
+
+        /**
+         * An allowed value of {@link #PRESENCE}.
+         */
         int IDLE = 3;
+
+        /**
+         * An allowed value of {@link #PRESENCE}.
+         */
         int DO_NOT_DISTURB = 4;
+
+        /**
+         * An allowed value of {@link #PRESENCE}.
+         */
         int AVAILABLE = 5;
 
         /**
@@ -1635,6 +1666,7 @@ public final class ContactsContract {
         /**
          * @deprecated use {@link #STATUS}
          */
+        @Deprecated
         public static final String PRESENCE_CUSTOM_STATUS = STATUS;
 
         /**
@@ -1691,7 +1723,7 @@ public final class ContactsContract {
         public static final String RAW_CONTACT_ID = "raw_contact_id";
 
         /**
-         * Whether this is the primary entry of its kind for the raw contact it belongs to
+         * Whether this is the primary entry of its kind for the raw contact it belongs to.
          * <P>Type: INTEGER (if set, non-0 means true)</P>
          */
         public static final String IS_PRIMARY = "is_primary";
@@ -1740,7 +1772,10 @@ public final class ContactsContract {
         public static final String DATA13 = "data13";
         /** Generic data column, the meaning is {@link #MIMETYPE} specific */
         public static final String DATA14 = "data14";
-        /** Generic data column, the meaning is {@link #MIMETYPE} specific */
+        /**
+         * Generic data column, the meaning is {@link #MIMETYPE} specific. By convention,
+         * this field is used to store BLOBs (binary data).
+         */
         public static final String DATA15 = "data15";
 
         /** Generic column for use by sync adapters. */
@@ -1766,23 +1801,28 @@ public final class ContactsContract {
     /**
      * <p>
      * Constants for the data table, which contains data points tied to a raw
-     * contact. For example, a phone number or email address.
+     * contact.  Each row of the data table is typically used to store a single
+     * piece of contact
+     * information (such as a phone number) and its
+     * associated metadata (such as whether it is a work or home number).
      * </p>
      * <h3>Data kinds</h3>
      * <p>
-     * Data is a generic table that can hold all kinds of data. Sync adapters
-     * and applications can introduce their own data kinds. The kind of data
-     * stored in a particular row is determined by the mime type in the row.
-     * Fields from {@link #DATA1} through {@link #DATA15} are generic columns
-     * whose specific use is determined by the kind of data stored in the row.
+     * Data is a generic table that can hold any kind of contact data.
+     * The kind of data stored in a given row is specified by the row's
+     * {@link #MIMETYPE} value, which determines the meaning of the
+     * generic columns {@link #DATA1} through
+     * {@link #DATA15}.
      * For example, if the data kind is
-     * {@link CommonDataKinds.Phone Phone.CONTENT_ITEM_TYPE}, then DATA1 stores the
+     * {@link CommonDataKinds.Phone Phone.CONTENT_ITEM_TYPE}, then the column
+     * {@link #DATA1} stores the
      * phone number, but if the data kind is
-     * {@link CommonDataKinds.Email Email.CONTENT_ITEM_TYPE}, then DATA1 stores the
-     * email address.
+     * {@link CommonDataKinds.Email Email.CONTENT_ITEM_TYPE}, then {@link #DATA1}
+     * stores the email address.
+     * Sync adapters and applications can introduce their own data kinds.
      * </p>
      * <p>
-     * ContactsContract defines a small number of common data kinds, e.g.
+     * ContactsContract defines a small number of pre-defined data kinds, e.g.
      * {@link CommonDataKinds.Phone}, {@link CommonDataKinds.Email} etc. As a
      * convenience, these classes define data kind specific aliases for DATA1 etc.
      * For example, {@link CommonDataKinds.Phone Phone.NUMBER} is the same as
@@ -1799,8 +1839,8 @@ public final class ContactsContract {
      * By convention, {@link #DATA15} is used for storing BLOBs (binary data).
      * </p>
      * <p>
-     * Typically you should refrain from introducing new kinds of data for 3rd
-     * party account types. For example, if you add a data row for
+     * Typically you should refrain from introducing new kinds of data for an other
+     * party's account types. For example, if you add a data row for
      * "favorite song" to a raw contact owned by a Google account, it will not
      * get synced to the server, because the Google sync adapter does not know
      * how to handle this data kind. Thus new data kinds are typically
@@ -1937,6 +1977,10 @@ public final class ContactsContract {
      * </dd>
      * </dl>
      * <h2>Columns</h2>
+     * <p>
+     * Many columns are available via a {@link Data#CONTENT_URI} query.  For best performance you
+     * should explicitly specify a projection to only those columns that you need.
+     * </p>
      * <table class="jd-sumtable">
      * <tr>
      * <th colspan='4'>Data</th>
@@ -1946,7 +1990,7 @@ public final class ContactsContract {
      * <td style="width: 20em;">{@link #_ID}</td>
      * <td style="width: 5em;">read-only</td>
      * <td>Row ID. Sync adapter should try to preserve row IDs during updates. In other words,
-     * it would be a bad idea to delete and reinsert a data rows. A sync adapter should
+     * it would be a bad idea to delete and reinsert a data row. A sync adapter should
      * always do an update instead.</td>
      * </tr>
      * <tr>
@@ -1978,21 +2022,15 @@ public final class ContactsContract {
      * <td>long</td>
      * <td>{@link #RAW_CONTACT_ID}</td>
      * <td>read/write-once</td>
-     * <td>A reference to the {@link RawContacts#_ID} that this data belongs to.</td>
-     * </tr>
-     * <tr>
-     * <td>long</td>
-     * <td>{@link #CONTACT_ID}</td>
-     * <td>read-only</td>
-     * <td>A reference to the {@link ContactsContract.Contacts#_ID} that this data row belongs
-     * to. It is obtained through a join with RawContacts.</td>
+     * <td>The id of the row in the {@link RawContacts} table that this data belongs to.</td>
      * </tr>
      * <tr>
      * <td>int</td>
      * <td>{@link #IS_PRIMARY}</td>
      * <td>read/write</td>
      * <td>Whether this is the primary entry of its kind for the raw contact it belongs to.
-     * "1" if true, "0" if false.</td>
+     * "1" if true, "0" if false.
+     * </td>
      * </tr>
      * <tr>
      * <td>int</td>
@@ -2000,7 +2038,9 @@ public final class ContactsContract {
      * <td>read/write</td>
      * <td>Whether this is the primary entry of its kind for the aggregate
      * contact it belongs to. Any data record that is "super primary" must
-     * also be "primary".</td>
+     * also be "primary".  For example, the super-primary entry may be
+     * interpreted as the default contact value of its kind (for example,
+     * the default phone number to use for the contact).</td>
      * </tr>
      * <tr>
      * <td>int</td>
@@ -2029,7 +2069,19 @@ public final class ContactsContract {
      * {@link #DATA15}
      * </td>
      * <td>read/write</td>
-     * <td>Generic data columns, the meaning is {@link #MIMETYPE} specific.</td>
+     * <td>
+     * <p>
+     * Generic data columns.  The meaning of each column is determined by the
+     * {@link #MIMETYPE}.  By convention, {@link #DATA15} is used for storing
+     * BLOBs (binary data).
+     * </p>
+     * <p>
+     * Data columns whose meaning is not explicitly defined for a given MIMETYPE
+     * should not be used.  There is no guarantee that any sync adapter will
+     * preserve them.  Sync adapters themselves should not use such columns either,
+     * but should instead use {@link #SYNC1}-{@link #SYNC4}.
+     * </p>
+     * </td>
      * </tr>
      * <tr>
      * <td>Any type</td>
@@ -2046,6 +2098,10 @@ public final class ContactsContract {
      * </tr>
      * </table>
      *
+     * <p>
+     * Some columns from the most recent associated status update are also available
+     * through an implicit join.
+     * </p>
      * <table class="jd-sumtable">
      * <tr>
      * <th colspan='4'>Join with {@link StatusUpdates}</th>
@@ -2098,18 +2154,26 @@ public final class ContactsContract {
      * </table>
      *
      * <p>
-     * Columns from the associated raw contact are also available through an
-     * implicit join.
+     * Some columns from the associated raw contact are also available through an
+     * implicit join.  The other columns are excluded as uninteresting in this
+     * context.
      * </p>
      *
      * <table class="jd-sumtable">
      * <tr>
-     * <th colspan='4'>Join with {@link RawContacts}</th>
+     * <th colspan='4'>Join with {@link ContactsContract.RawContacts}</th>
      * </tr>
      * <tr>
-     * <td style="width: 7em;">int</td>
-     * <td style="width: 20em;">{@link #AGGREGATION_MODE}</td>
+     * <td style="width: 7em;">long</td>
+     * <td style="width: 20em;">{@link #CONTACT_ID}</td>
      * <td style="width: 5em;">read-only</td>
+     * <td>The id of the row in the {@link Contacts} table that this data belongs
+     * to.</td>
+     * </tr>
+     * <tr>
+     * <td>int</td>
+     * <td>{@link #AGGREGATION_MODE}</td>
+     * <td>read-only</td>
      * <td>See {@link RawContacts}.</td>
      * </tr>
      * <tr>
@@ -2121,13 +2185,18 @@ public final class ContactsContract {
      * </table>
      *
      * <p>
-     * Columns from the associated aggregated contact are also available through an
-     * implicit join.
+     * The ID column for the associated aggregated contact table
+     * {@link ContactsContract.Contacts} is available
+     * via the implicit join to the {@link RawContacts} table, see above.
+     * The remaining columns from this table are also
+     * available, through an implicit join.  This
+     * facilitates lookup by
+     * the value of a single data element, such as the email address.
      * </p>
      *
      * <table class="jd-sumtable">
      * <tr>
-     * <th colspan='4'>Join with {@link Contacts}</th>
+     * <th colspan='4'>Join with {@link ContactsContract.Contacts}</th>
      * </tr>
      * <tr>
      * <td style="width: 7em;">String</td>
@@ -2234,24 +2303,30 @@ public final class ContactsContract {
         private Data() {}
 
         /**
-         * The content:// style URI for this table
+         * The content:// style URI for this table, which requests a directory
+         * of data rows matching the selection criteria.
          */
         public static final Uri CONTENT_URI = Uri.withAppendedPath(AUTHORITY_URI, "data");
 
         /**
-         * The MIME type of {@link #CONTENT_URI} providing a directory of data.
+         * The MIME type of the results from {@link #CONTENT_URI}.
          */
         public static final String CONTENT_TYPE = "vnd.android.cursor.dir/data";
 
         /**
+         * <p>
          * If {@link #FOR_EXPORT_ONLY} is explicitly set to "1", returned Cursor toward
          * Data.CONTENT_URI contains only exportable data.
-         *
+         * </p>
+         * <p>
          * This flag is useful (currently) only for vCard exporter in Contacts app, which
          * needs to exclude "un-exportable" data from available data to export, while
          * Contacts app itself has priviledge to access all data including "un-exportable"
          * ones and providers return all of them regardless of the callers' intention.
-         * <P>Type: INTEGER</p>
+         * </p>
+         * <p>
+         * Type: INTEGER
+         * </p>
          *
          * @hide Maybe available only in Eclair and not really ready for public use.
          * TODO: remove, or implement this feature completely. As of now (Eclair),
@@ -2260,9 +2335,17 @@ public final class ContactsContract {
         public static final String FOR_EXPORT_ONLY = "for_export_only";
 
         /**
+         * <p>
          * Build a {@link android.provider.ContactsContract.Contacts#CONTENT_LOOKUP_URI}
          * style {@link Uri} for the parent {@link android.provider.ContactsContract.Contacts}
          * entry of the given {@link ContactsContract.Data} entry.
+         * </p>
+         * <p>
+         * Returns the Uri for the contact in the first entry returned by
+         * {@link ContentResolver#query(Uri, String[], String, String[], String)}
+         * for the provided {@code dataUri}.  If the query returns null or empty
+         * results, silently returns null.
+         * </p>
          */
         public static Uri getContactLookupUri(ContentResolver resolver, Uri dataUri) {
             final Cursor cursor = resolver.query(dataUri, new String[] {
@@ -2285,7 +2368,7 @@ public final class ContactsContract {
 
     /**
      * <p>
-     * Constants for the raw contacts entities table, which can be though of as
+     * Constants for the raw contacts entities table, which can be thought of as
      * an outer join of the raw_contacts table with the data table.  It is a strictly
      * read-only table.
      * </p>
