@@ -3193,14 +3193,17 @@ public class WebView extends AbsoluteLayout
         mWebViewCore.sendMessage(EventHub.SET_SELECTION, start, end);
     }
 
-    // Called by JNI when a touch event puts a textfield into focus.
+    /**
+     * Called in response to a message from webkit telling us that the soft
+     * keyboard should be launched.
+     */
     private void displaySoftKeyboard(boolean isTextView) {
         InputMethodManager imm = (InputMethodManager)
                 getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
 
         if (isTextView) {
-            if (mWebTextView == null) return;
-
+            rebuildWebTextView();
+            if (!inEditingMode()) return;
             imm.showSoftInput(mWebTextView, 0);
             if (mInZoomOverview) {
                 // if in zoom overview mode, call doDoubleTap() to bring it back
@@ -5099,10 +5102,6 @@ public class WebView extends AbsoluteLayout
     /*package*/ void centerKeyPressOnTextField() {
         mWebViewCore.sendMessage(EventHub.CLICK, nativeCursorFramePointer(),
                     nativeCursorNodePointer());
-        // Need to show the soft keyboard if it's not readonly.
-        if (!nativeCursorIsReadOnly()) {
-            displaySoftKeyboard(true);
-        }
     }
 
     private void doShortPress() {
@@ -5743,7 +5742,7 @@ public class WebView extends AbsoluteLayout
                     if (msg.arg1 == 0) {
                         hideSoftKeyboard();
                     } else {
-                        displaySoftKeyboard(false);
+                        displaySoftKeyboard(1 == msg.arg2);
                     }
                     break;
 
@@ -6346,7 +6345,6 @@ public class WebView extends AbsoluteLayout
     /* package */ native boolean nativeCursorMatchesFocus();
     private native boolean  nativeCursorIntersects(Rect visibleRect);
     private native boolean  nativeCursorIsAnchor();
-    private native boolean  nativeCursorIsReadOnly();
     private native boolean  nativeCursorIsTextInput();
     private native Point    nativeCursorPosition();
     private native String   nativeCursorText();
