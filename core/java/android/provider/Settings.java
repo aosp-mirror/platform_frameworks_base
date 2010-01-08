@@ -2814,6 +2814,113 @@ public final class Settings {
                 "sync_min_gzip_bytes";
 
         /**
+         * The number of promoted sources in GlobalSearch.
+         * @hide
+         */
+        public static final String SEARCH_NUM_PROMOTED_SOURCES = "search_num_promoted_sources";
+        /**
+         * The maximum number of suggestions returned by GlobalSearch.
+         * @hide
+         */
+        public static final String SEARCH_MAX_RESULTS_TO_DISPLAY = "search_max_results_to_display";
+        /**
+         * The number of suggestions GlobalSearch will ask each non-web search source for.
+         * @hide
+         */
+        public static final String SEARCH_MAX_RESULTS_PER_SOURCE = "search_max_results_per_source";
+        /**
+         * The number of suggestions the GlobalSearch will ask the web search source for.
+         * @hide
+         */
+        public static final String SEARCH_WEB_RESULTS_OVERRIDE_LIMIT =
+                "search_web_results_override_limit";
+        /**
+         * The number of milliseconds that GlobalSearch will wait for suggestions from
+         * promoted sources before continuing with all other sources.
+         * @hide
+         */
+        public static final String SEARCH_PROMOTED_SOURCE_DEADLINE_MILLIS =
+                "search_promoted_source_deadline_millis";
+        /**
+         * The number of milliseconds before GlobalSearch aborts search suggesiton queries.
+         * @hide
+         */
+        public static final String SEARCH_SOURCE_TIMEOUT_MILLIS = "search_source_timeout_millis";
+        /**
+         * The maximum number of milliseconds that GlobalSearch shows the previous results
+         * after receiving a new query.
+         * @hide
+         */
+        public static final String SEARCH_PREFILL_MILLIS = "search_prefill_millis";
+        /**
+         * The maximum age of log data used for shortcuts in GlobalSearch.
+         * @hide
+         */
+        public static final String SEARCH_MAX_STAT_AGE_MILLIS = "search_max_stat_age_millis";
+        /**
+         * The maximum age of log data used for source ranking in GlobalSearch.
+         * @hide
+         */
+        public static final String SEARCH_MAX_SOURCE_EVENT_AGE_MILLIS =
+                "search_max_source_event_age_millis";
+        /**
+         * The minimum number of impressions needed to rank a source in GlobalSearch.
+         * @hide
+         */
+        public static final String SEARCH_MIN_IMPRESSIONS_FOR_SOURCE_RANKING =
+                "search_min_impressions_for_source_ranking";
+        /**
+         * The minimum number of clicks needed to rank a source in GlobalSearch.
+         * @hide
+         */
+        public static final String SEARCH_MIN_CLICKS_FOR_SOURCE_RANKING =
+                "search_min_clicks_for_source_ranking";
+        /**
+         * The maximum number of shortcuts shown by GlobalSearch.
+         * @hide
+         */
+        public static final String SEARCH_MAX_SHORTCUTS_RETURNED = "search_max_shortcuts_returned";
+        /**
+         * The size of the core thread pool for suggestion queries in GlobalSearch.
+         * @hide
+         */
+        public static final String SEARCH_QUERY_THREAD_CORE_POOL_SIZE =
+                "search_query_thread_core_pool_size";
+        /**
+         * The maximum size of the thread pool for suggestion queries in GlobalSearch.
+         * @hide
+         */
+        public static final String SEARCH_QUERY_THREAD_MAX_POOL_SIZE =
+                "search_query_thread_max_pool_size";
+        /**
+         * The size of the core thread pool for shortcut refreshing in GlobalSearch.
+         * @hide
+         */
+        public static final String SEARCH_SHORTCUT_REFRESH_CORE_POOL_SIZE =
+                "search_shortcut_refresh_core_pool_size";
+        /**
+         * The maximum size of the thread pool for shortcut refreshing in GlobalSearch.
+         * @hide
+         */
+        public static final String SEARCH_SHORTCUT_REFRESH_MAX_POOL_SIZE =
+                "search_shortcut_refresh_max_pool_size";
+        /**
+         * The maximun time that excess threads in the GlobalSeach thread pools will
+         * wait before terminating.
+         * @hide
+         */
+        public static final String SEARCH_THREAD_KEEPALIVE_SECONDS =
+                "search_thread_keepalive_seconds";
+        /**
+         * The maximum number of concurrent suggestion queries to each source.
+         * @hide
+         */
+        public static final String SEARCH_PER_SOURCE_CONCURRENT_QUERY_LIMIT =
+                "search_per_source_concurrent_query_limit";
+
+
+        
+        /**
          * @hide
          */
         public static final String[] SETTINGS_TO_BACKUP = {
@@ -2875,941 +2982,6 @@ public final class Settings {
             }
             putString(cr, Settings.Secure.LOCATION_PROVIDERS_ALLOWED, provider);
         }
-    }
-
-    /**
-     * Gservices settings, containing the network names for Google's
-     * various services. This table holds simple name/addr pairs.
-     * Addresses can be accessed through the getString() method.
-     *
-     * TODO: This should move to partner/google/... somewhere.
-     *
-     * @hide
-     */
-    public static final class Gservices extends NameValueTable {
-        public static final String SYS_PROP_SETTING_VERSION = "sys.settings_gservices_version";
-
-        /**
-         * Intent action broadcast when the Gservices table is updated by the server.
-         * This is broadcast once after settings change (so many values may have been updated).
-         */
-        @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-        public static final String CHANGED_ACTION =
-            "com.google.gservices.intent.action.GSERVICES_CHANGED";
-
-        /**
-         * Intent action to override Gservices for testing.  (Requires WRITE_GSERVICES permission.)
-         */
-        @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-        public static final String OVERRIDE_ACTION =
-            "com.google.gservices.intent.action.GSERVICES_OVERRIDE";
-
-        /**
-         * Intent action to set Gservices with new values.  (Requires WRITE_GSERVICES permission.)
-         */
-        @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-        public static final String UPDATE_ACTION =
-            "com.google.gservices.intent.action.GSERVICES_UPDATE";
-
-        private static volatile NameValueCache mNameValueCache = null;
-        private static final Object mNameValueCacheLock = new Object();
-
-        /**
-         * Look up a name in the database.
-         * @param resolver to access the database with
-         * @param name to look up in the table
-         * @return the corresponding value, or null if not present
-         */
-        public static String getString(ContentResolver resolver, String name) {
-            synchronized (mNameValueCacheLock) {
-                if (mNameValueCache == null) {
-                    mNameValueCache = new NameValueCache(SYS_PROP_SETTING_VERSION, CONTENT_URI);
-                }
-                return mNameValueCache.getString(resolver, name);
-            }
-        }
-
-        /**
-         * Store a name/value pair into the database.
-         * @param resolver to access the database with
-         * @param name to store
-         * @param value to associate with the name
-         * @return true if the value was set, false on database errors
-         */
-        public static boolean putString(ContentResolver resolver,
-                String name, String value) {
-            return putString(resolver, CONTENT_URI, name, value);
-        }
-
-        /**
-         * Look up the value for name in the database, convert it to an int using Integer.parseInt
-         * and return it. If it is null or if a NumberFormatException is caught during the
-         * conversion then return defValue.
-         */
-        public static int getInt(ContentResolver resolver, String name, int defValue) {
-            String valString = getString(resolver, name);
-            int value;
-            try {
-                value = valString != null ? Integer.parseInt(valString) : defValue;
-            } catch (NumberFormatException e) {
-                value = defValue;
-            }
-            return value;
-        }
-
-        /**
-         * Look up the value for name in the database, convert it to a long using Long.parseLong
-         * and return it. If it is null or if a NumberFormatException is caught during the
-         * conversion then return defValue.
-         */
-        public static long getLong(ContentResolver resolver, String name, long defValue) {
-            String valString = getString(resolver, name);
-            long value;
-            try {
-                value = valString != null ? Long.parseLong(valString) : defValue;
-            } catch (NumberFormatException e) {
-                value = defValue;
-            }
-            return value;
-        }
-
-        /**
-         * Construct the content URI for a particular name/value pair,
-         * useful for monitoring changes with a ContentObserver.
-         * @param name to look up in the table
-         * @return the corresponding content URI, or null if not present
-         */
-        public static Uri getUriFor(String name) {
-            return getUriFor(CONTENT_URI, name);
-        }
-
-        /**
-         * The content:// style URL for this table
-         */
-        public static final Uri CONTENT_URI =
-                Uri.parse("content://" + AUTHORITY + "/gservices");
-
-        /**
-         * MMS - URL to use for HTTP "x-wap-profile" header
-         */
-        public static final String MMS_X_WAP_PROFILE_URL
-                = "mms_x_wap_profile_url";
-
-        /**
-         * YouTube - the flag to indicate whether to use proxy
-         */
-        public static final String YOUTUBE_USE_PROXY
-                = "youtube_use_proxy";
-
-        /**
-         * MMS - maximum message size in bytes for a MMS message.
-         */
-        public static final String MMS_MAXIMUM_MESSAGE_SIZE
-                = "mms_maximum_message_size";
-
-        /**
-         * Event tags from the kernel event log to upload during checkin.
-         */
-        public static final String CHECKIN_EVENTS = "checkin_events";
-
-        /**
-         * Comma-separated list of service names to dump and upload during checkin.
-         */
-        public static final String CHECKIN_DUMPSYS_LIST = "checkin_dumpsys_list";
-
-        /**
-         * Comma-separated list of packages to specify for each service that is
-         * dumped (currently only meaningful for user activity).
-         */
-        public static final String CHECKIN_PACKAGE_LIST = "checkin_package_list";
-
-        /**
-         * The interval (in seconds) between periodic checkin attempts.
-         */
-        public static final String CHECKIN_INTERVAL = "checkin_interval";
-
-        /**
-         * The interval (in seconds) between event log aggregation runs.
-         */
-        public static final String AGGREGATION_INTERVAL_SECONDS = "aggregation_interval_seconds";
-
-        /**
-         * Boolean indicating if the market app should force market only checkins on
-         * install/uninstall. Any non-0 value is considered true.
-         */
-        public static final String MARKET_FORCE_CHECKIN = "market_force_checkin";
-
-        /**
-         * The minimum version of the server that is required in order for the device to accept
-         * the server's recommendations about the initial sync settings to use. When this is unset,
-         * blank or can't be interpreted as an integer then we will not ask the server for a
-         * recommendation.
-         */
-        public static final String GMAIL_CONFIG_INFO_MIN_SERVER_VERSION =
-                "gmail_config_info_min_server_version";
-
-        /**
-         * Controls whether Gmail offers a preview button for images.
-         */
-        public static final String GMAIL_DISALLOW_IMAGE_PREVIEWS = "gmail_disallow_image_previews";
-
-        /**
-         * The maximal size in bytes allowed for attachments when composing messages in Gmail
-         */
-        public static final String GMAIL_MAX_ATTACHMENT_SIZE = "gmail_max_attachment_size_bytes";
-
-        /**
-         * The timeout in milliseconds that Gmail uses when opening a connection and reading
-         * from it. A missing value or a value of -1 instructs Gmail to use the defaults provided
-         * by GoogleHttpClient.
-         */
-        public static final String GMAIL_TIMEOUT_MS = "gmail_timeout_ms";
-
-        /**
-         * Controls whether Gmail will request an expedited sync when a message is sent. Value must
-         * be an integer where non-zero means true. Defaults to 1.
-         */
-        public static final String GMAIL_SEND_IMMEDIATELY = "gmail_send_immediately";
-
-        /**
-         * Controls whether gmail buffers server responses.  Possible values are "memory", for a
-         * memory-based buffer, or "file", for a temp-file-based buffer.  All other values
-         * (including not set) disable buffering.
-         */
-        public static final String GMAIL_BUFFER_SERVER_RESPONSE = "gmail_buffer_server_response";
-
-        /**
-         * The maximum size in bytes allowed for the provider to gzip a protocol buffer uploaded to
-         * the server.
-         */
-        public static final String GMAIL_MAX_GZIP_SIZE = "gmail_max_gzip_size_bytes";
-
-        /**
-         * Controls whether Gmail will discard uphill operations that repeatedly fail. Value must be
-         * an integer where non-zero means true. Defaults to 1. This flag controls Donut devices.
-         */
-        public static final String GMAIL_DISCARD_ERROR_UPHILL_OP = "gmail_discard_error_uphill_op";
-
-        /**
-         * Controls whether Gmail will discard uphill operations that repeatedly fail. Value must be
-         * an integer where non-zero means true. Defaults to 1. This flag controls Eclair and
-         * future devices.
-         */
-        public static final String GMAIL_DISCARD_ERROR_UPHILL_OP_NEW =
-            "gmail_discard_error_uphill_op_new";
-
-        /**
-         * Controls how many attempts Gmail will try to upload an uphill operations before it
-         * abandons the operation. Defaults to 20.
-         */
-        public static final String GMAIL_NUM_RETRY_UPHILL_OP = "gmail_num_retry_uphill_op";
-
-        /**
-         * How much time in seconds Gmail will try to upload an uphill operations before it
-         * abandons the operation. Defaults to 36400 (one day).
-         */
-        public static final String GMAIL_WAIT_TIME_RETRY_UPHILL_OP =
-                "gmail_wait_time_retry_uphill_op";
-
-        /**
-         * Controls if Gmail should delay sending operations that have previously failed.
-         */
-        public static final String GMAIL_DELAY_BAD_OP = "gmail_delay_bad_op";
-
-        /**
-         * Controls if the protocol buffer version of the protocol will use a multipart request for
-         * attachment uploads. Value must be an integer where non-zero means true. Defaults to 0.
-         */
-        public static final String GMAIL_USE_MULTIPART_PROTOBUF = "gmail_use_multipart_protobuf";
-
-        /**
-         * the transcoder URL for mobile devices.
-         */
-        public static final String TRANSCODER_URL = "mobile_transcoder_url";
-
-        /**
-         * URL that points to the privacy terms of the Google Talk service.
-         */
-        public static final String GTALK_TERMS_OF_SERVICE_URL = "gtalk_terms_of_service_url";
-
-        /**
-         * Hostname of the GTalk server.
-         */
-        public static final String GTALK_SERVICE_HOSTNAME = "gtalk_hostname";
-
-        /**
-         * Secure port of the GTalk server.
-         */
-        public static final String GTALK_SERVICE_SECURE_PORT = "gtalk_secure_port";
-
-        /**
-         * The server configurable RMQ acking interval
-         */
-        public static final String GTALK_SERVICE_RMQ_ACK_INTERVAL = "gtalk_rmq_ack_interval";
-
-        /**
-         * The minimum reconnect delay for short network outages or when the network is suspended
-         * due to phone use.
-         */
-        public static final String GTALK_SERVICE_MIN_RECONNECT_DELAY_SHORT =
-                "gtalk_min_reconnect_delay_short";
-
-        /**
-         * The reconnect variant range for short network outages or when the network is suspended
-         * due to phone use. A random number between 0 and this constant is computed and
-         * added to {@link #GTALK_SERVICE_MIN_RECONNECT_DELAY_SHORT} to form the initial reconnect
-         * delay.
-         */
-        public static final String GTALK_SERVICE_RECONNECT_VARIANT_SHORT =
-                "gtalk_reconnect_variant_short";
-
-        /**
-         * The minimum reconnect delay for long network outages
-         */
-        public static final String GTALK_SERVICE_MIN_RECONNECT_DELAY_LONG =
-                "gtalk_min_reconnect_delay_long";
-
-        /**
-         * The reconnect variant range for long network outages.  A random number between 0 and this
-         * constant is computed and added to {@link #GTALK_SERVICE_MIN_RECONNECT_DELAY_LONG} to
-         * form the initial reconnect delay.
-         */
-        public static final String GTALK_SERVICE_RECONNECT_VARIANT_LONG =
-                "gtalk_reconnect_variant_long";
-
-        /**
-         * The maximum reconnect delay time, in milliseconds.
-         */
-        public static final String GTALK_SERVICE_MAX_RECONNECT_DELAY =
-                "gtalk_max_reconnect_delay";
-
-        /**
-         * The network downtime that is considered "short" for the above calculations,
-         * in milliseconds.
-         */
-        public static final String GTALK_SERVICE_SHORT_NETWORK_DOWNTIME =
-                "gtalk_short_network_downtime";
-
-        /**
-         * How frequently we send heartbeat pings to the GTalk server. Receiving a server packet
-         * will reset the heartbeat timer. The away heartbeat should be used when the user is
-         * logged into the GTalk app, but not actively using it.
-         */
-        public static final String GTALK_SERVICE_AWAY_HEARTBEAT_INTERVAL_MS =
-                "gtalk_heartbeat_ping_interval_ms";  // keep the string backward compatible
-
-        /**
-         * How frequently we send heartbeat pings to the GTalk server. Receiving a server packet
-         * will reset the heartbeat timer. The active heartbeat should be used when the user is
-         * actively using the GTalk app.
-         */
-        public static final String GTALK_SERVICE_ACTIVE_HEARTBEAT_INTERVAL_MS =
-                "gtalk_active_heartbeat_ping_interval_ms";
-
-        /**
-         * How frequently we send heartbeat pings to the GTalk server. Receiving a server packet
-         * will reset the heartbeat timer. The sync heartbeat should be used when the user isn't
-         * logged into the GTalk app, but auto-sync is enabled.
-         */
-        public static final String GTALK_SERVICE_SYNC_HEARTBEAT_INTERVAL_MS =
-                "gtalk_sync_heartbeat_ping_interval_ms";
-
-        /**
-         * How frequently we send heartbeat pings to the GTalk server. Receiving a server packet
-         * will reset the heartbeat timer. The no sync heartbeat should be used when the user isn't
-         * logged into the GTalk app, and auto-sync is not enabled.
-         */
-        public static final String GTALK_SERVICE_NOSYNC_HEARTBEAT_INTERVAL_MS =
-                "gtalk_nosync_heartbeat_ping_interval_ms";
-
-        /**
-         * The maximum heartbeat interval used while on the WIFI network.
-         */
-        public static final String GTALK_SERVICE_WIFI_MAX_HEARTBEAT_INTERVAL_MS =
-                "gtalk_wifi_max_heartbeat_ping_interval_ms";
-
-        /**
-         * How long we wait to receive a heartbeat ping acknowledgement (or another packet)
-         * from the GTalk server, before deeming the connection dead.
-         */
-        public static final String GTALK_SERVICE_HEARTBEAT_ACK_TIMEOUT_MS =
-                "gtalk_heartbeat_ack_timeout_ms";
-
-        /**
-         * How long after screen is turned off before we consider the user to be idle.
-         */
-        public static final String GTALK_SERVICE_IDLE_TIMEOUT_MS =
-                "gtalk_idle_timeout_ms";
-
-        /**
-         * By default, GTalkService will always connect to the server regardless of the auto-sync
-         * setting. However, if this parameter is true, then GTalkService will only connect
-         * if auto-sync is enabled. Using the GTalk app will trigger the connection too.
-         */
-        public static final String GTALK_SERVICE_CONNECT_ON_AUTO_SYNC =
-                "gtalk_connect_on_auto_sync";
-
-        /**
-         * GTalkService holds a wakelock while broadcasting the intent for data message received.
-         * It then automatically release the wakelock after a timeout. This setting controls what
-         * the timeout should be.
-         */
-        public static final String GTALK_DATA_MESSAGE_WAKELOCK_MS =
-                "gtalk_data_message_wakelock_ms";
-
-        /**
-         * The socket read timeout used to control how long ssl handshake wait for reads before
-         * timing out. This is needed so the ssl handshake doesn't hang for a long time in some
-         * circumstances.
-         */
-        public static final String GTALK_SSL_HANDSHAKE_TIMEOUT_MS =
-                "gtalk_ssl_handshake_timeout_ms";
-
-        /**
-         * Compress the gtalk stream.
-         */
-        public static final String GTALK_COMPRESS = "gtalk_compress";
-
-        /**
-         * This is the timeout for which Google Talk will send the message using bareJID. In a
-         * established chat between two XMPP endpoints, Google Talk uses fullJID in the format
-         * of user@domain/resource in order to send the message to the specific client. However,
-         * if Google Talk hasn't received a message from that client after some time, it would
-         * fall back to use the bareJID, which would broadcast the message to all clients for
-         * the other user.
-         */
-        public static final String GTALK_USE_BARE_JID_TIMEOUT_MS = "gtalk_use_barejid_timeout_ms";
-
-        /**
-         * This is the threshold of retry number when there is an authentication expired failure
-         * for Google Talk. In some situation, e.g. when a Google Apps account is disabled chat
-         * service, the connection keeps failing. This threshold controls when we should stop
-         * the retrying.
-         */
-        public static final String GTALK_MAX_RETRIES_FOR_AUTH_EXPIRED =
-                "gtalk_max_retries_for_auth_expired";
-
-        /**
-         * a boolean setting indicating whether the GTalkService should use RMQ2 protocol or not.
-         */
-        public static final String GTALK_USE_RMQ2_PROTOCOL =
-                "gtalk_use_rmq2";
-
-        /**
-         * a boolean setting indicating whether the GTalkService should support both RMQ and
-         * RMQ2 protocols. This setting is true for the transitional period when we need to
-         * support both protocols.
-         */
-        public static final String GTALK_SUPPORT_RMQ_AND_RMQ2_PROTOCOLS =
-                "gtalk_support_rmq_and_rmq2";
-
-        /**
-         * a boolean setting controlling whether the rmq2 protocol will include stream ids in
-         * the protobufs. This is used for debugging.
-         */
-        public static final String GTALK_RMQ2_INCLUDE_STREAM_ID =
-                "gtalk_rmq2_include_stream_id";
-
-        /**
-         * when receiving a chat message from the server, the message could be an older message
-         * whose "time sent" is x seconds from now. If x is significant enough, we want to flag
-         * it so the UI can give it some special treatment when displaying the "time sent" for
-         * it. This setting is to control what x is.
-         */
-        public static final String GTALK_OLD_CHAT_MESSAGE_THRESHOLD_IN_SEC =
-                "gtalk_old_chat_msg_threshold_in_sec";
-
-        /**
-         * a setting to control the max connection history record GTalkService stores.
-         */
-        public static final String GTALK_MAX_CONNECTION_HISTORY_RECORDS =
-                "gtalk_max_conn_history_records";
-
-        /**
-         * This is gdata url to lookup album and picture info from picasa web. It also controls
-         * whether url scraping for picasa is enabled (NULL to disable).
-         */
-        public static final String GTALK_PICASA_ALBUM_URL =
-                "gtalk_picasa_album_url";
-
-        /**
-         * This is the url to lookup picture info from flickr. It also controls
-         * whether url scraping for flickr is enabled (NULL to disable).
-         */
-        public static final String GTALK_FLICKR_PHOTO_INFO_URL =
-                "gtalk_flickr_photo_info_url";
-
-        /**
-         * This is the url to lookup an actual picture from flickr.
-         */
-        public static final String GTALK_FLICKR_PHOTO_URL =
-                "gtalk_flickr_photo_url";
-
-        /**
-         * This is the gdata url to lookup info on a youtube video. It also controls
-         * whether url scraping for youtube is enabled (NULL to disable).
-         */
-        public static final String GTALK_YOUTUBE_VIDEO_URL =
-                "gtalk_youtube_video_url";
-
-        /**
-         * Enable/disable GTalk URL scraping for JPG images ("true" to enable).
-         */
-        public static final String GTALK_URL_SCRAPING_FOR_JPG =
-                "gtalk_url_scraping_for_jpg";
-
-        /**
-         * Chat message lifetime (for pruning old chat messages).
-         */
-        public static final String GTALK_CHAT_MESSAGE_LIFETIME =
-                "gtalk_chat_message_lifetime";
-
-        /**
-         * OTR message lifetime (for pruning old otr messages).
-         */
-        public static final String GTALK_OTR_MESSAGE_LIFETIME =
-                "gtalk_otr_message_lifetime";
-
-        /**
-         * Chat expiration time, i.e., time since last message in the chat (for pruning old chats).
-         */
-        public static final String GTALK_CHAT_EXPIRATION_TIME =
-                "gtalk_chat_expiration_time";
-
-        /**
-         * This is the url for getting the app token for server-to-device push messaging.
-         */
-        public static final String PUSH_MESSAGING_REGISTRATION_URL =
-                "push_messaging_registration_url";
-
-        /**
-         * Use android://&lt;it&gt; routing infos for Google Sync Server subcriptions.
-         */
-        public static final String GSYNC_USE_RMQ2_ROUTING_INFO = "gsync_use_rmq2_routing_info";
-
-        /**
-         * The hash value of the current provisioning settings
-         */
-        public static final String PROVISIONING_DIGEST = "digest";
-
-        /**
-         * Provisioning keys to block from server update
-         */
-        public static final String PROVISIONING_OVERRIDE = "override";
-
-        /**
-         * "Generic" service name for  authentication requests.
-         */
-        public static final String GOOGLE_LOGIN_GENERIC_AUTH_SERVICE
-                = "google_login_generic_auth_service";
-
-        /**
-         * Duration in milliseconds after setup at which market does not reconcile applications
-         * which are installed during restore.
-         */
-        public static final String VENDING_RESTORE_WINDOW_MS = "vending_restore_window_ms";
-
-
-        /**
-         * Frequency in milliseconds at which we should sync the locally installed Vending Machine
-         * content with the server.
-         */
-        public static final String VENDING_SYNC_FREQUENCY_MS = "vending_sync_frequency_ms";
-
-        /**
-         * Support URL that is opened in a browser when user clicks on 'Help and Info' in Vending
-         * Machine.
-         */
-        public static final String VENDING_SUPPORT_URL = "vending_support_url";
-
-        /**
-         * Indicates if Vending Machine requires a SIM to be in the phone to allow a purchase.
-         *
-         * true = SIM is required
-         * false = SIM is not required
-         */
-        public static final String VENDING_REQUIRE_SIM_FOR_PURCHASE =
-                "vending_require_sim_for_purchase";
-
-        /**
-         * Indicates the Vending Machine backup state. It is set if the
-         * Vending application has been backed up at least once.
-         */
-        public static final String VENDING_BACKUP_STATE = "vending_backup_state";
-
-        /**
-         * The current version id of the Vending Machine terms of service.
-         */
-        public static final String VENDING_TOS_VERSION = "vending_tos_version";
-
-        /**
-         * URL that points to the terms of service for Vending Machine.
-         */
-        public static final String VENDING_TOS_URL = "vending_tos_url";
-
-        /**
-         * URL to navigate to in browser (not Market) when the terms of service
-         * for Vending Machine could not be accessed due to bad network
-         * connection.
-         */
-        public static final String VENDING_TOS_MISSING_URL = "vending_tos_missing_url";
-
-        /**
-         * Whether to use sierraqa instead of sierra tokens for the purchase flow in
-         * Vending Machine.
-         *
-         * true = use sierraqa
-         * false = use sierra (default)
-         */
-        public static final String VENDING_USE_CHECKOUT_QA_SERVICE =
-                "vending_use_checkout_qa_service";
-
-        /**
-         * Default value to use for all/free/priced filter in Market.
-         * Valid values: ALL, FREE, PAID (case insensitive)
-         */
-        public static final String VENDING_DEFAULT_FILTER = "vending_default_filter";
-        /**
-         * Ranking type value to use for the first category tab (currently popular)
-         */
-        public static final String VENDING_TAB_1_RANKING_TYPE = "vending_tab_1_ranking_type";
-
-        /**
-         * Title string to use for first category tab.
-         */
-        public static final String VENDING_TAB_1_TITLE = "vending_tab_1_title";
-
-        /**
-         * Ranking type value to use for the second category tab (currently newest)
-         */
-        public static final String VENDING_TAB_2_RANKING_TYPE = "vending_tab_2_ranking_type";
-
-        /**
-         * Title string to use for second category tab.
-         */
-        public static final String VENDING_TAB_2_TITLE = "vending_tab_2_title";
-
-        /**
-         * Frequency in milliseconds at which we should request MCS heartbeats
-         * from the Vending Machine client.
-         */
-        public static final String VENDING_HEARTBEAT_FREQUENCY_MS =
-                "vending_heartbeat_frequency_ms";
-
-        /**
-         * Frequency in milliseconds at which we should resend pending download
-         * requests to the API Server from the Vending Machine client.
-         */
-        public static final String VENDING_PENDING_DOWNLOAD_RESEND_FREQUENCY_MS =
-                "vending_pd_resend_frequency_ms";
-
-        /**
-         * Time before an asset in the 'DOWNLOADING' state is considered ready
-         * for an install kick on the client.
-         */
-        public static final String VENDING_DOWNLOADING_KICK_TIMEOUT_MS =
-                "vending_downloading_kick_ms";
-
-        /**
-         * Size of buffer in bytes for Vending to use when reading cache files.
-         */
-        public static final String VENDING_DISK_INPUT_BUFFER_BYTES =
-                "vending_disk_input_buffer_bytes";
-
-        /**
-         * Size of buffer in bytes for Vending to use when writing cache files.
-         */
-        public static final String VENDING_DISK_OUTPUT_BUFFER_BYTES =
-                "vending_disk_output_buffer_bytes";
-
-        /**
-         * Frequency in milliseconds at which we should cycle through the promoted applications
-         * on the home screen or the categories page.
-         */
-        public static final String VENDING_PROMO_REFRESH_FREQUENCY_MS =
-                "vending_promo_refresh_freq_ms";
-
-        /**
-         * Frequency in milliseconds when we should refresh the provisioning information from
-         * the carrier backend.
-         */
-        public static final String VENDING_CARRIER_PROVISIONING_REFRESH_FREQUENCY_MS =
-                "vending_carrier_ref_freq_ms";
-
-        /**
-         * Interval in milliseconds after which a failed provisioning request should be retried.
-         */
-        public static final String VENDING_CARRIER_PROVISIONING_RETRY_MS =
-            "vending_carrier_prov_retry_ms";
-
-        /**
-         * Buffer in milliseconds for carrier credentials to be considered valid.
-         */
-        public static final String VENDING_CARRIER_CREDENTIALS_BUFFER_MS =
-            "vending_carrier_cred_buf_ms";
-
-        /**
-         * Whether to turn on performance logging in the Market client.
-         */
-        public static final String VENDING_LOG_PERFORMANCE =
-            "vending_log_perf";
-
-        /**
-         * URL that points to the legal terms of service to display in Settings.
-         * <p>
-         * This should be a https URL. For a pretty user-friendly URL, use
-         * {@link #SETTINGS_TOS_PRETTY_URL}.
-         */
-        public static final String SETTINGS_TOS_URL = "settings_tos_url";
-
-        /**
-         * URL that points to the legal terms of service to display in Settings.
-         * <p>
-         * This should be a pretty http URL. For the URL the device will access
-         * via Settings, use {@link #SETTINGS_TOS_URL}.
-         */
-        public static final String SETTINGS_TOS_PRETTY_URL = "settings_tos_pretty_url";
-
-        /**
-         * URL that points to the contributors to display in Settings.
-         * <p>
-         * This should be a https URL. For a pretty user-friendly URL, use
-         * {@link #SETTINGS_CONTRIBUTORS_PRETTY_URL}.
-         */
-        public static final String SETTINGS_CONTRIBUTORS_URL = "settings_contributors_url";
-
-        /**
-         * URL that points to the contributors to display in Settings.
-         * <p>
-         * This should be a pretty http URL. For the URL the device will access
-         * via Settings, use {@link #SETTINGS_CONTRIBUTORS_URL}.
-         */
-        public static final String SETTINGS_CONTRIBUTORS_PRETTY_URL =
-                "settings_contributors_pretty_url";
-
-        /**
-         * URL that points to the Terms Of Service for the device.
-         * <p>
-         * This should be a pretty http URL.
-         */
-        public static final String SETUP_GOOGLE_TOS_URL = "setup_google_tos_url";
-
-        /**
-         * URL that points to the Android privacy policy for the device.
-         * <p>
-         * This should be a pretty http URL.
-         */
-        public static final String SETUP_ANDROID_PRIVACY_URL = "setup_android_privacy_url";
-
-        /**
-         * URL that points to the Google privacy policy for the device.
-         * <p>
-         * This should be a pretty http URL.
-         */
-        public static final String SETUP_GOOGLE_PRIVACY_URL = "setup_google_privacy_url";
-
-        /**
-         * Request an MSISDN token for various Google services.
-         */
-        public static final String USE_MSISDN_TOKEN = "use_msisdn_token";
-
-        /**
-         * RSA public key used to encrypt passwords stored in the database.
-         */
-        public static final String GLS_PUBLIC_KEY = "google_login_public_key";
-
-        /**
-         * Only check parental control status if this is set to "true".
-         */
-        public static final String PARENTAL_CONTROL_CHECK_ENABLED =
-                "parental_control_check_enabled";
-
-        /**
-         * The list of applications we need to block if parental control is
-         * enabled.
-         */
-        public static final String PARENTAL_CONTROL_APPS_LIST =
-                "parental_control_apps_list";
-
-        /**
-         * Duration in which parental control status is valid.
-         */
-        public static final String PARENTAL_CONTROL_TIMEOUT_IN_MS =
-                "parental_control_timeout_in_ms";
-
-        /**
-         * When parental control is off, we expect to get this string from the
-         * litmus url.
-         */
-        public static final String PARENTAL_CONTROL_EXPECTED_RESPONSE =
-                "parental_control_expected_response";
-
-        /**
-         * When the litmus url returns a 302, declare parental control to be on
-         * only if the redirect url matches this regular expression.
-         */
-        public static final String PARENTAL_CONTROL_REDIRECT_REGEX =
-                "parental_control_redirect_regex";
-
-        /**
-         * Prefix for new Google services published by the checkin
-         * server.
-         */
-        public static final String GOOGLE_SERVICES_PREFIX
-                = "google_services:";
-
-        /**
-         * List of test suites (local disk filename) for the automatic instrumentation test runner.
-         * The file format is similar to automated_suites.xml, see AutoTesterService.
-         * If this setting is missing or empty, the automatic test runner will not start.
-         */
-        public static final String AUTOTEST_SUITES_FILE = "autotest_suites_file";
-
-        /**
-         * Interval between synchronous checkins forced by the automatic test runner.
-         * If you set this to a value smaller than CHECKIN_INTERVAL, then the test runner's
-         * frequent checkins will prevent asynchronous background checkins from interfering
-         * with any performance measurements.
-         */
-        public static final String AUTOTEST_CHECKIN_SECONDS = "autotest_checkin_seconds";
-
-        /**
-         * Interval between reboots forced by the automatic test runner.
-         */
-        public static final String AUTOTEST_REBOOT_SECONDS = "autotest_reboot_seconds";
-
-
-        /**
-         * An email address that anr bugreports should be sent to.
-         */
-        public static final String ANR_BUGREPORT_RECIPIENT = "anr_bugreport_recipient";
-
-        /**
-         * Flag for allowing service provider to use location information to improve products and
-         * services.
-         * Type: int ( 0 = disallow, 1 = allow )
-         * @deprecated
-         */
-        public static final String USE_LOCATION_FOR_SERVICES = "use_location";
-
-        /**
-         * The number of promoted sources in GlobalSearch.
-         */
-        public static final String SEARCH_NUM_PROMOTED_SOURCES = "search_num_promoted_sources";
-        /**
-         * The maximum number of suggestions returned by GlobalSearch.
-         */
-        public static final String SEARCH_MAX_RESULTS_TO_DISPLAY = "search_max_results_to_display";
-        /**
-         * The number of suggestions GlobalSearch will ask each non-web search source for.
-         */
-        public static final String SEARCH_MAX_RESULTS_PER_SOURCE = "search_max_results_per_source";
-        /**
-         * The number of suggestions the GlobalSearch will ask the web search source for.
-         */
-        public static final String SEARCH_WEB_RESULTS_OVERRIDE_LIMIT =
-                "search_web_results_override_limit";
-        /**
-         * The number of milliseconds that GlobalSearch will wait for suggestions from
-         * promoted sources before continuing with all other sources.
-         */
-        public static final String SEARCH_PROMOTED_SOURCE_DEADLINE_MILLIS =
-                "search_promoted_source_deadline_millis";
-        /**
-         * The number of milliseconds before GlobalSearch aborts search suggesiton queries.
-         */
-        public static final String SEARCH_SOURCE_TIMEOUT_MILLIS = "search_source_timeout_millis";
-        /**
-         * The maximum number of milliseconds that GlobalSearch shows the previous results
-         * after receiving a new query.
-         */
-        public static final String SEARCH_PREFILL_MILLIS = "search_prefill_millis";
-        /**
-         * The maximum age of log data used for shortcuts in GlobalSearch.
-         */
-        public static final String SEARCH_MAX_STAT_AGE_MILLIS = "search_max_stat_age_millis";
-        /**
-         * The maximum age of log data used for source ranking in GlobalSearch.
-         */
-        public static final String SEARCH_MAX_SOURCE_EVENT_AGE_MILLIS =
-                "search_max_source_event_age_millis";
-        /**
-         * The minimum number of impressions needed to rank a source in GlobalSearch.
-         */
-        public static final String SEARCH_MIN_IMPRESSIONS_FOR_SOURCE_RANKING =
-                "search_min_impressions_for_source_ranking";
-        /**
-         * The minimum number of clicks needed to rank a source in GlobalSearch.
-         */
-        public static final String SEARCH_MIN_CLICKS_FOR_SOURCE_RANKING =
-                "search_min_clicks_for_source_ranking";
-        /**
-         * The maximum number of shortcuts shown by GlobalSearch.
-         */
-        public static final String SEARCH_MAX_SHORTCUTS_RETURNED = "search_max_shortcuts_returned";
-        /**
-         * The size of the core thread pool for suggestion queries in GlobalSearch.
-         */
-        public static final String SEARCH_QUERY_THREAD_CORE_POOL_SIZE =
-                "search_query_thread_core_pool_size";
-        /**
-         * The maximum size of the thread pool for suggestion queries in GlobalSearch.
-         */
-        public static final String SEARCH_QUERY_THREAD_MAX_POOL_SIZE =
-                "search_query_thread_max_pool_size";
-        /**
-         * The size of the core thread pool for shortcut refreshing in GlobalSearch.
-         */
-        public static final String SEARCH_SHORTCUT_REFRESH_CORE_POOL_SIZE =
-                "search_shortcut_refresh_core_pool_size";
-        /**
-         * The maximum size of the thread pool for shortcut refreshing in GlobalSearch.
-         */
-        public static final String SEARCH_SHORTCUT_REFRESH_MAX_POOL_SIZE =
-                "search_shortcut_refresh_max_pool_size";
-        /**
-         * The maximun time that excess threads in the GlobalSeach thread pools will
-         * wait before terminating.
-         */
-        public static final String SEARCH_THREAD_KEEPALIVE_SECONDS =
-                "search_thread_keepalive_seconds";
-        /**
-         * The maximum number of concurrent suggestion queries to each source.
-         */
-        public static final String SEARCH_PER_SOURCE_CONCURRENT_QUERY_LIMIT =
-                "search_per_source_concurrent_query_limit";
-
-        /**
-         * Maximum size of /proc/last_kmsg content to upload after reboot.
-         */
-        public static final String LAST_KMSG_KB = "last_kmsg_kb";
-
-        /**
-         * @deprecated
-         * @hide
-         */
-        @Deprecated  // Obviated by NameValueCache: just fetch the value directly.
-        public static class QueryMap extends ContentQueryMap {
-
-            public QueryMap(ContentResolver contentResolver, Cursor cursor, boolean keepUpdated,
-                    Handler handlerForUpdateNotifications) {
-                super(cursor, NAME, keepUpdated, handlerForUpdateNotifications);
-            }
-
-            public QueryMap(ContentResolver contentResolver, boolean keepUpdated,
-                    Handler handlerForUpdateNotifications) {
-                this(contentResolver,
-                        contentResolver.query(CONTENT_URI, null, null, null, null),
-                        keepUpdated, handlerForUpdateNotifications);
-            }
-
-            public String getString(String name) {
-                ContentValues cv = getValues(name);
-                if (cv == null) return null;
-                return cv.getAsString(VALUE);
-            }
-        }
-
     }
 
     /**
