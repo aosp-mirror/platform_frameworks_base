@@ -203,6 +203,8 @@ public class WebView extends AbsoluteLayout
         implements ViewTreeObserver.OnGlobalFocusChangeListener,
         ViewGroup.OnHierarchyChangeListener {
 
+    // enable debug output for drag trackers
+    private static final boolean DEBUG_DRAG_TRACKER;
     // if AUTO_REDRAW_HACK is true, then the CALL key will toggle redrawing
     // the screen all-the-time. Good for profiling our drawing code
     static private final boolean AUTO_REDRAW_HACK = false;
@@ -3967,7 +3969,7 @@ public class WebView extends AbsoluteLayout
             mMinDY = -viewTop;
             mMaxDY = docBottom - viewBottom;
 
-            if (DebugFlags.DRAG_TRACKER) {
+            if (DebugFlags.DRAG_TRACKER || DEBUG_DRAG_TRACKER) {
                 Log.d(DebugFlags.DRAG_TRACKER_LOGTAG, " dragtracker y= " + y +
                       " up/down= " + mMinDY + " " + mMaxDY);
             }
@@ -4004,7 +4006,7 @@ public class WebView extends AbsoluteLayout
             if (mCurrStretchX != sx || mCurrStretchY != sy) {
                 mCurrStretchX = sx;
                 mCurrStretchY = sy;
-                if (DebugFlags.DRAG_TRACKER) {
+                if (DebugFlags.DRAG_TRACKER || DEBUG_DRAG_TRACKER) {
                     Log.d(DebugFlags.DRAG_TRACKER_LOGTAG, "---- stretch " + sx +
                           " " + sy);
                 }
@@ -4015,7 +4017,7 @@ public class WebView extends AbsoluteLayout
         }
 
         public void stopDrag() {
-            if (DebugFlags.DRAG_TRACKER) {
+            if (DebugFlags.DRAG_TRACKER || DEBUG_DRAG_TRACKER) {
                 Log.d(DebugFlags.DRAG_TRACKER_LOGTAG, "----- stopDrag");
             }
             mProxy.onStopDrag();
@@ -4052,7 +4054,7 @@ public class WebView extends AbsoluteLayout
                 canvas.restoreToCount(count);
                 return true;
             }
-            if (DebugFlags.DRAG_TRACKER) {
+            if (DebugFlags.DRAG_TRACKER || DEBUG_DRAG_TRACKER) {
                 Log.d(DebugFlags.DRAG_TRACKER_LOGTAG, " -- draw false " +
                       mCurrStretchX + " " + mCurrStretchY);
             }
@@ -4067,7 +4069,7 @@ public class WebView extends AbsoluteLayout
             canvas.translate(-sx, -sy);
             drawContent(canvas);
 
-            if (DebugFlags.DRAG_TRACKER) {
+            if (DebugFlags.DRAG_TRACKER || DEBUG_DRAG_TRACKER) {
                 Log.d(DebugFlags.DRAG_TRACKER_LOGTAG, "--- buildBitmap " + sx +
                       " " + sy + " " + w + " " + h);
             }
