@@ -230,9 +230,8 @@ class SynthProxyJniStorage {
               mAudioOut = NULL;
             } else {
               //LOGI("AudioTrack OK");
-              mAudioOut->setVolume(2.0f, 2.0f);
-              mAudioOut->start();
-              LOGV("AudioTrack started");
+              mAudioOut->setVolume(1.0f, 1.0f);
+              LOGV("AudioTrack ready");
             }
         }
 };
