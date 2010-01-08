@@ -459,10 +459,6 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
             checkSinkSuspendState(state);
             mTargetA2dpState = -1;
 
-            if (state == BluetoothA2dp.STATE_CONNECTING) {
-                mAudioManager.setParameters("A2dpSuspended=false");
-            }
-
             if (getSinkPriority(device) > BluetoothA2dp.PRIORITY_OFF &&
                     state == BluetoothA2dp.STATE_CONNECTING ||
                     state == BluetoothA2dp.STATE_CONNECTED) {
