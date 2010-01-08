@@ -65,18 +65,6 @@ interface IMountService
     void setPlayNotificationSounds(boolean value);
 
     /**
-     * Returns true if USB Mass Storage is automatically started
-     * when a UMS host is detected.
-     */
-    boolean getAutoStartUms();
-
-    /**
-     * Sets whether or not USB Mass Storage is automatically started
-     * when a UMS host is detected.
-     */
-    void setAutoStartUms(boolean value);
-
-    /**
      * Gets the state of an volume via it's mountpoint.
      */
     String getVolumeState(String mountPoint);
@@ -120,5 +108,4 @@ interface IMountService
      * all external media.
      */
     void shutdown();
-
 }
