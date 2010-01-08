@@ -52,12 +52,17 @@ import android.util.Log;
 import com.android.internal.app.IBatteryStats;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.DataInputStream;
+import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -65,7 +70,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Random;
 
 public class BluetoothService extends IBluetooth.Stub {
     private static final String TAG = "BluetoothService";
@@ -528,6 +532,7 @@ public class BluetoothService extends IBluetooth.Stub {
                     persistBluetoothOnSetting(true);
                 }
                 mIsDiscovering = false;
+                mBondState.readAutoPairingData();
                 mBondState.loadBondState();
                 mHandler.sendMessageDelayed(
                         mHandler.obtainMessage(MESSAGE_REGISTER_SDP_RECORDS, 1, -1), 3000);
@@ -580,34 +585,17 @@ public class BluetoothService extends IBluetooth.Stub {
     public class BondState {
         private final HashMap<String, Integer> mState = new HashMap<String, Integer>();
         private final HashMap<String, Integer> mPinAttempt = new HashMap<String, Integer>();
-        private final ArrayList<String> mAutoPairingFailures = new ArrayList<String>();
-        // List of all the vendor_id prefix of Bluetooth addresses for
-        // which auto pairing is not attempted.
-        // The following companies are included in the list below:
-        // ALPS (lexus), Murata (Prius 2007, Nokia 616), TEMIC SDS (Porsche, Audi),
-        // Parrot, Zhongshan General K-mate Electronics, Great Well
-        // Electronics, Flaircomm Electronics, Jatty Electronics, Delphi,
-        // Clarion, Novero, Denso (Lexus, Toyota), Johnson Controls (Acura),
-        // Continental Automotive, Harman/Becker, Panasonic/Kyushu Ten,
-        // BMW (Motorola PCS)
-        private final ArrayList<String>  mAutoPairingAddressBlacklist =
-                new ArrayList<String>(Arrays.asList(
-                        "00:02:C7", "00:16:FE", "00:19:C1", "00:1B:FB", "00:1E:3D", "00:21:4F",
-                        "00:23:06", "00:24:33", "00:A0:79", "00:0E:6D", "00:13:E0", "00:21:E8",
-                        "00:60:57", "00:0E:9F", "00:12:1C", "00:18:91", "00:18:96", "00:13:04",
-                        "00:16:FD", "00:22:A0", "00:0B:4C", "00:60:6F", "00:23:3D", "00:C0:59",
-                        "00:0A:30", "00:1E:AE", "00:1C:D7", "00:80:F0", "00:12:8A"
-                        ));
 
-        // List of names of Bluetooth devices for which auto pairing should be
-        // disabled.
-        private final ArrayList<String> mAutoPairingExactNameBlacklist =
-                new ArrayList<String>(Arrays.asList(
-                        "Motorola IHF1000", "i.TechBlueBAND", "X5 Stereo v1.3"));
+        private static final String AUTO_PAIRING_BLACKLIST =
+            "/etc/bluetooth/auto_pairing.conf";
+        private static final String DYNAMIC_AUTO_PAIRING_BLACKLIST =
+            "/data/misc/bluetooth/dynamic_auto_pairing.conf";
+        private ArrayList<String>  mAutoPairingAddressBlacklist;
+        private ArrayList<String> mAutoPairingExactNameBlacklist;
+        private ArrayList<String> mAutoPairingPartialNameBlacklist;
+        // Addresses added to blacklist dynamically based on usage.
+        private ArrayList<String> mAutoPairingDynamicAddressBlacklist;
 
-        private final ArrayList<String> mAutoPairingPartialNameBlacklist =
-                new ArrayList<String>(Arrays.asList(
-                        "BMW", "Audi"));
 
         // If this is an outgoing connection, store the address.
         // There can be only 1 pending outgoing connection at a time,
@@ -682,18 +670,29 @@ public class BluetoothService extends IBluetooth.Stub {
         }
 
         public boolean isAutoPairingBlacklisted(String address) {
-            for (String blacklistAddress : mAutoPairingAddressBlacklist) {
-                if (address.startsWith(blacklistAddress)) return true;
+            if (mAutoPairingAddressBlacklist != null) {
+                for (String blacklistAddress : mAutoPairingAddressBlacklist) {
+                    if (address.startsWith(blacklistAddress)) return true;
+                }
             }
 
+            if (mAutoPairingDynamicAddressBlacklist != null) {
+                for (String blacklistAddress: mAutoPairingDynamicAddressBlacklist) {
+                    if (address.equals(blacklistAddress)) return true;
+                }
+            }
             String name = getRemoteName(address);
             if (name != null) {
-                for (String blacklistName : mAutoPairingExactNameBlacklist) {
-                    if (name.equals(blacklistName)) return true;
+                if (mAutoPairingExactNameBlacklist != null) {
+                    for (String blacklistName : mAutoPairingExactNameBlacklist) {
+                        if (name.equals(blacklistName)) return true;
+                    }
                 }
 
-                for (String blacklistName : mAutoPairingPartialNameBlacklist) {
-                    if (name.startsWith(blacklistName)) return true;
+                if (mAutoPairingPartialNameBlacklist != null) {
+                    for (String blacklistName : mAutoPairingPartialNameBlacklist) {
+                        if (name.startsWith(blacklistName)) return true;
+                    }
                 }
             }
             return false;
@@ -718,9 +717,12 @@ public class BluetoothService extends IBluetooth.Stub {
         }
 
         public synchronized void addAutoPairingFailure(String address) {
-            if (!mAutoPairingFailures.contains(address)) {
-                mAutoPairingFailures.add(address);
+            if (mAutoPairingDynamicAddressBlacklist == null) {
+                mAutoPairingDynamicAddressBlacklist = new ArrayList<String>();
             }
+
+            updateAutoPairingData(address);
+            mAutoPairingDynamicAddressBlacklist.add(address);
         }
 
         public synchronized boolean isAutoPairingAttemptsInProgress(String address) {
@@ -732,7 +734,9 @@ public class BluetoothService extends IBluetooth.Stub {
         }
 
         public synchronized boolean hasAutoPairingFailed(String address) {
-            return mAutoPairingFailures.contains(address);
+            if (mAutoPairingDynamicAddressBlacklist == null) return false;
+
+            return mAutoPairingDynamicAddressBlacklist.contains(address);
         }
 
         public synchronized int getAttempt(String address) {
@@ -754,6 +758,108 @@ public class BluetoothService extends IBluetooth.Stub {
             mPinAttempt.put(address, new Integer(newAttempt));
         }
 
+        private void copyAutoPairingData() {
+            File file = null;
+            FileInputStream in = null;
+            FileOutputStream out = null;
+            try {
+                file = new File(DYNAMIC_AUTO_PAIRING_BLACKLIST);
+                if (file.exists()) return;
+
+                in = new FileInputStream(AUTO_PAIRING_BLACKLIST);
+                out= new FileOutputStream(DYNAMIC_AUTO_PAIRING_BLACKLIST);
+
+                byte[] buf = new byte[1024];
+                int len;
+                while ((len = in.read(buf)) > 0) {
+                    out.write(buf, 0, len);
+                }
+            } catch (FileNotFoundException e) {
+                log("FileNotFoundException: in copyAutoPairingData");
+            } catch (IOException e) {
+                log("IOException: in copyAutoPairingData");
+            } finally {
+                 try {
+                     if (in != null) in.close();
+                     if (out != null) out.close();
+                 } catch (IOException e) {}
+            }
+        }
+
+        public void readAutoPairingData() {
+            if (mAutoPairingAddressBlacklist != null) return;
+            copyAutoPairingData();
+            FileInputStream fstream = null;
+            try {
+                fstream = new FileInputStream(DYNAMIC_AUTO_PAIRING_BLACKLIST);
+                DataInputStream in = new DataInputStream(fstream);
+                BufferedReader file = new BufferedReader(new InputStreamReader(in));
+                String line;
+                while((line = file.readLine()) != null) {
+                    line = line.trim();
+                    if (line.length() == 0 || line.startsWith("//")) continue;
+                    String[] value = line.split("=");
+                    if (value != null && value.length == 2) {
+                        String[] val = value[1].split(",");
+                        if (value[0].equalsIgnoreCase("AddressBlacklist")) {
+                            mAutoPairingAddressBlacklist =
+                                new ArrayList<String>(Arrays.asList(val));
+                        } else if (value[0].equalsIgnoreCase("ExactNameBlacklist")) {
+                            mAutoPairingExactNameBlacklist =
+                                new ArrayList<String>(Arrays.asList(val));
+                        } else if (value[0].equalsIgnoreCase("PartialNameBlacklist")) {
+                            mAutoPairingPartialNameBlacklist =
+                                new ArrayList<String>(Arrays.asList(val));
+                        } else if (value[0].equalsIgnoreCase("DynamicAddressBlacklist")) {
+                            mAutoPairingDynamicAddressBlacklist =
+                                new ArrayList<String>(Arrays.asList(val));
+                        } else {
+                            Log.e(TAG, "Error parsing Auto pairing blacklist file");
+                        }
+                    }
+                }
+            } catch (FileNotFoundException e) {
+                log("FileNotFoundException: readAutoPairingData" + e.toString());
+            } catch (IOException e) {
+                log("IOException: readAutoPairingData" + e.toString());
+            } finally {
+                if (fstream != null) {
+                    try {
+                        fstream.close();
+                    } catch (IOException e) {
+                        // Ignore
+                    }
+                }
+            }
+        }
+
+        // This function adds a bluetooth address to the auto pairing blacklis
+        // file. These addresses are added to DynamicAddressBlacklistSection
+        private void updateAutoPairingData(String address) {
+            BufferedWriter out = null;
+            try {
+                out = new BufferedWriter(new FileWriter(DYNAMIC_AUTO_PAIRING_BLACKLIST, true));
+                StringBuilder str = new StringBuilder();
+                if (mAutoPairingDynamicAddressBlacklist.size() == 0) {
+                    str.append("DynamicAddressBlacklist=");
+                }
+                str.append(address);
+                str.append(",");
+                out.write(str.toString());
+            } catch (FileNotFoundException e) {
+                log("FileNotFoundException: updateAutoPairingData" + e.toString());
+            } catch (IOException e) {
+                log("IOException: updateAutoPairingData" + e.toString());
+            } finally {
+                if (out != null) {
+                    try {
+                        out.close();
+                    } catch (IOException e) {
+                        // Ignore
+                    }
+                }
+            }
+        }
     }
 
     private static String toBondStateString(int bondState) {
