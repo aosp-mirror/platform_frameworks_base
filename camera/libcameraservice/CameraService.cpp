@@ -16,7 +16,6 @@
 ** limitations under the License.
 */
 
-//#define LOG_NDEBUG 0
 #define LOG_TAG "CameraService"
 #include <utils/Log.h>
 
@@ -95,7 +94,7 @@ CameraService::~CameraService()
 sp<ICamera> CameraService::connect(const sp<ICameraClient>& cameraClient)
 {
     int callingPid = getCallingPid();
-    LOGD("CameraService::connect E (pid %d, client %p)", callingPid,
+    LOGV("CameraService::connect E (pid %d, client %p)", callingPid,
             cameraClient->asBinder().get());
 
     Mutex::Autolock lock(mServiceLock);
@@ -106,30 +105,30 @@ sp<ICamera> CameraService::connect(const sp<ICameraClient>& cameraClient)
             sp<ICameraClient> currentCameraClient(currentClient->getCameraClient());
             if (cameraClient->asBinder() == currentCameraClient->asBinder()) {
                 // This is the same client reconnecting...
-                LOGD("CameraService::connect X (pid %d, same client %p) is reconnecting...",
+                LOGV("CameraService::connect X (pid %d, same client %p) is reconnecting...",
                     callingPid, cameraClient->asBinder().get());
                 return currentClient;
             } else {
                 // It's another client... reject it
-                LOGD("CameraService::connect X (pid %d, new client %p) rejected. "
+                LOGV("CameraService::connect X (pid %d, new client %p) rejected. "
                     "(old pid %d, old client %p)",
                     callingPid, cameraClient->asBinder().get(),
                     currentClient->mClientPid, currentCameraClient->asBinder().get());
                 if (kill(currentClient->mClientPid, 0) == -1 && errno == ESRCH) {
-                    LOGD("The old client is dead!");
+                    LOGV("The old client is dead!");
                 }
                 return client;
             }
         } else {
             // can't promote, the previous client has died...
-            LOGD("New client (pid %d) connecting, old reference was dangling...",
+            LOGV("New client (pid %d) connecting, old reference was dangling...",
                     callingPid);
             mClient.clear();
         }
     }
 
     if (mUsers > 0) {
-        LOGD("Still have client, rejected");
+        LOGV("Still have client, rejected");
         return client;
     }
 
@@ -141,7 +140,7 @@ sp<ICamera> CameraService::connect(const sp<ICameraClient>& cameraClient)
     // the refcount.
     client->trackMe(true, true);
 #endif
-    LOGD("CameraService::connect X");
+    LOGV("CameraService::connect X");
     return client;
 }
 
@@ -157,7 +156,7 @@ void CameraService::removeClient(const sp<ICameraClient>& cameraClient)
 
     if (mClient == 0) {
         // This happens when we have already disconnected.
-        LOGD("removeClient (pid %d): already disconnected", callingPid);
+        LOGV("removeClient (pid %d): already disconnected", callingPid);
         return;
     }
 
@@ -165,7 +164,7 @@ void CameraService::removeClient(const sp<ICameraClient>& cameraClient)
     // Client::~Client() -> disconnect() -> removeClient().
     client = mClient.promote();
     if (client == 0) {
-        LOGD("removeClient (pid %d): no more strong reference", callingPid);
+        LOGV("removeClient (pid %d): no more strong reference", callingPid);
         mClient.clear();
         return;
     }
@@ -178,7 +177,7 @@ void CameraService::removeClient(const sp<ICameraClient>& cameraClient)
         mClient.clear();
     }
 
-    LOGD("removeClient (pid %d) done", callingPid);
+    LOGV("removeClient (pid %d) done", callingPid);
 }
 
 // The reason we need this count is a new CameraService::connect() request may
@@ -212,7 +211,7 @@ CameraService::Client::Client(const sp<CameraService>& cameraService,
         const sp<ICameraClient>& cameraClient, pid_t clientPid)
 {
     int callingPid = getCallingPid();
-    LOGD("Client::Client E (pid %d)", callingPid);
+    LOGV("Client::Client E (pid %d)", callingPid);
     mCameraService = cameraService;
     mCameraClient = cameraClient;
     mClientPid = clientPid;
@@ -237,7 +236,7 @@ CameraService::Client::Client(const sp<CameraService>& cameraService,
     // Callback is disabled by default
     mPreviewCallbackFlag = FRAME_CALLBACK_FLAG_NOOP;
     cameraService->incUsers();
-    LOGD("Client::Client X (pid %d)", callingPid);
+    LOGV("Client::Client X (pid %d)", callingPid);
 }
 
 status_t CameraService::Client::checkPid()
@@ -253,7 +252,7 @@ status_t CameraService::Client::checkPid()
 status_t CameraService::Client::lock()
 {
     int callingPid = getCallingPid();
-    LOGD("lock from pid %d (mClientPid %d)", callingPid, mClientPid);
+    LOGV("lock from pid %d (mClientPid %d)", callingPid, mClientPid);
     Mutex::Autolock _l(mLock);
     // lock camera to this client if the the camera is unlocked
     if (mClientPid == 0) {
@@ -267,13 +266,13 @@ status_t CameraService::Client::lock()
 status_t CameraService::Client::unlock()
 {
     int callingPid = getCallingPid();
-    LOGD("unlock from pid %d (mClientPid %d)", callingPid, mClientPid);
+    LOGV("unlock from pid %d (mClientPid %d)", callingPid, mClientPid);
     Mutex::Autolock _l(mLock);
     // allow anyone to use camera
     status_t result = checkPid();
     if (result == NO_ERROR) {
         mClientPid = 0;
-        LOGD("clear mCameraClient (pid %d)", callingPid);
+        LOGV("clear mCameraClient (pid %d)", callingPid);
         // we need to remove the reference so that when app goes
         // away, the reference count goes to 0.
         mCameraClient.clear();
@@ -286,7 +285,7 @@ status_t CameraService::Client::connect(const sp<ICameraClient>& client)
     int callingPid = getCallingPid();
 
     // connect a new process to the camera
-    LOGD("Client::connect E (pid %d, client %p)", callingPid, client->asBinder().get());
+    LOGV("Client::connect E (pid %d, client %p)", callingPid, client->asBinder().get());
 
     // I hate this hack, but things get really ugly when the media recorder
     // service is handing back the camera to the app. The ICameraClient
@@ -310,14 +309,14 @@ status_t CameraService::Client::connect(const sp<ICameraClient>& client)
 
             // did the client actually change?
             if ((mCameraClient != NULL) && (client->asBinder() == mCameraClient->asBinder())) {
-                LOGD("Connect to the same client");
+                LOGV("Connect to the same client");
                 return NO_ERROR;
             }
 
             mCameraClient = client;
             mClientPid = -1;
             mPreviewCallbackFlag = FRAME_CALLBACK_FLAG_NOOP;
-            LOGD("Connect to the new client (pid %d, client %p)",
+            LOGV("Connect to the new client (pid %d, client %p)",
                 callingPid, mCameraClient->asBinder().get());
         }
 
@@ -344,7 +343,7 @@ CameraService::Client::~Client()
     int callingPid = getCallingPid();
 
     // tear down client
-    LOGD("Client::~Client E (pid %d, client %p)",
+    LOGV("Client::~Client E (pid %d, client %p)",
             callingPid, getCameraClient()->asBinder().get());
     if (mSurface != 0 && !mUseOverlay) {
 #if HAVE_ANDROID_OS
@@ -373,23 +372,23 @@ CameraService::Client::~Client()
     // make sure we tear down the hardware
     mClientPid = callingPid;
     disconnect();
-    LOGD("Client::~Client X (pid %d)", mClientPid);
+    LOGV("Client::~Client X (pid %d)", mClientPid);
 }
 
 void CameraService::Client::disconnect()
 {
     int callingPid = getCallingPid();
 
-    LOGD("Client::disconnect() E (pid %d client %p)",
+    LOGV("Client::disconnect() E (pid %d client %p)",
             callingPid, getCameraClient()->asBinder().get());
 
     Mutex::Autolock lock(mLock);
     if (mClientPid <= 0) {
-        LOGD("camera is unlocked (mClientPid = %d), don't tear down hardware", mClientPid);
+        LOGV("camera is unlocked (mClientPid = %d), don't tear down hardware", mClientPid);
         return;
     }
     if (checkPid() != NO_ERROR) {
-        LOGD("Different client - don't disconnect");
+        LOGV("Different client - don't disconnect");
         return;
     }
 
@@ -397,7 +396,7 @@ void CameraService::Client::disconnect()
     // from the user directly, or called by the destructor.
     if (mHardware == 0) return;
 
-    LOGD("hardware teardown");
+    LOGV("hardware teardown");
     // Before destroying mHardware, we must make sure it's in the
     // idle state.
     mHardware->stopPreview();
@@ -421,7 +420,7 @@ void CameraService::Client::disconnect()
     mCameraService->removeClient(mCameraClient);
     mCameraService->decUsers();
 
-    LOGD("Client::disconnect() X (pid %d)", callingPid);
+    LOGV("Client::disconnect() X (pid %d)", callingPid);
 }
 
 // pass the buffered ISurface to the camera service
@@ -805,14 +804,14 @@ static void dump_to_file(const char *fname,
     int nw, cnt = 0;
     uint32_t written = 0;
 
-    LOGD("opening file [%s]\n", fname);
+    LOGV("opening file [%s]\n", fname);
     int fd = open(fname, O_RDWR | O_CREAT);
     if (fd < 0) {
         LOGE("failed to create file [%s]: %s", fname, strerror(errno));
         return;
     }
 
-    LOGD("writing %d bytes to file [%s]\n", size, fname);
+    LOGV("writing %d bytes to file [%s]\n", size, fname);
     while (written < size) {
         nw = ::write(fd,
                      buf + written,
@@ -825,7 +824,7 @@ static void dump_to_file(const char *fname,
         written += nw;
         cnt++;
     }
-    LOGD("done writing %d bytes to file [%s] in %d passes\n",
+    LOGV("done writing %d bytes to file [%s] in %d passes\n",
          size, fname, cnt);
     ::close(fd);
 }
@@ -1189,7 +1188,7 @@ void CameraService::Client::dataCallbackTimestamp(nsecs_t timestamp, int32_t msg
 // set preview/capture parameters - key/value pairs
 status_t CameraService::Client::setParameters(const String8& params)
 {
-    LOGD("setParameters(%s)", params.string());
+    LOGV("setParameters(%s)", params.string());
 
     Mutex::Autolock lock(mLock);
     status_t result = checkPid();
@@ -1215,7 +1214,7 @@ String8 CameraService::Client::getParameters() const
     }
 
     String8 params(mHardware->getParameters().flatten());
-    LOGD("getParameters(%s)", params.string());
+    LOGV("getParameters(%s)", params.string());
     return params;
 }
 
@@ -1327,7 +1326,7 @@ status_t CameraService::onTransact(
     status_t err = BnCameraService::onTransact(code, data, reply, flags);
 
 #if DEBUG_HEAP_LEAKS
-    LOGD("+++ onTransact err %d code %d", err, code);
+    LOGV("+++ onTransact err %d code %d", err, code);
 
     if (err == UNKNOWN_TRANSACTION || err == PERMISSION_DENIED) {
         // the 'service' command interrogates this binder for its name, and then supplies it
@@ -1335,7 +1334,7 @@ status_t CameraService::onTransact(
         // ISurfaceComposer (since we delegated the INTERFACE_TRANSACTION handling to
         // BnSurfaceComposer before falling through to this code).
 
-        LOGD("+++ onTransact code %d", code);
+        LOGV("+++ onTransact code %d", code);
 
         CHECK_INTERFACE(ICameraService, data, reply);
 
@@ -1345,13 +1344,13 @@ status_t CameraService::onTransact(
             if (gWeakHeap != 0) {
                 sp<IMemoryHeap> h = gWeakHeap.promote();
                 IMemoryHeap *p = gWeakHeap.unsafe_get();
-                LOGD("CHECKING WEAK REFERENCE %p (%p)", h.get(), p);
+                LOGV("CHECKING WEAK REFERENCE %p (%p)", h.get(), p);
                 if (h != 0)
                     h->printRefs();
                 bool attempt_to_delete = data.readInt32() == 1;
                 if (attempt_to_delete) {
                     // NOT SAFE!
-                    LOGD("DELETING WEAK REFERENCE %p (%p)", h.get(), p);
+                    LOGV("DELETING WEAK REFERENCE %p (%p)", h.get(), p);
                     if (p) delete p;
                 }
                 return NO_ERROR;

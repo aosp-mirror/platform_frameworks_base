@@ -328,7 +328,7 @@ static void android_hardware_Camera_native_setup(JNIEnv *env, jobject thiz, jobj
 static void android_hardware_Camera_release(JNIEnv *env, jobject thiz)
 {
     // TODO: Change to LOGV
-    LOGD("release camera");
+    LOGV("release camera");
     JNICameraContext* context = NULL;
     sp<Camera> camera;
     {
@@ -526,7 +526,7 @@ static void android_hardware_Camera_unlock(JNIEnv *env, jobject thiz)
 
 static void android_hardware_Camera_startSmoothZoom(JNIEnv *env, jobject thiz, jint value)
 {
-    LOGD("startSmoothZoom");
+    LOGV("startSmoothZoom");
     sp<Camera> camera = get_native_camera(env, thiz, NULL);
     if (camera == 0) return;
 
@@ -537,7 +537,7 @@ static void android_hardware_Camera_startSmoothZoom(JNIEnv *env, jobject thiz, j
 
 static void android_hardware_Camera_stopSmoothZoom(JNIEnv *env, jobject thiz)
 {
-    LOGD("stopSmoothZoom");
+    LOGV("stopSmoothZoom");
     sp<Camera> camera = get_native_camera(env, thiz, NULL);
     if (camera == 0) return;
 

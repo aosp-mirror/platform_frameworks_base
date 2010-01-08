@@ -23,7 +23,6 @@ import android.os.Looper;
 import android.os.RemoteException;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Config;
 import android.util.Log;
 
 import com.android.internal.location.DummyLocationProvider;
@@ -248,7 +247,7 @@ public class LocationManager {
      * factory Context.getSystemService.
      */
     public LocationManager(ILocationManager service) {
-        if (Config.LOGD) {
+        if (false) {
             Log.d(TAG, "Constructor: service = " + service);
         }
         mService = service;
@@ -277,7 +276,7 @@ public class LocationManager {
      * @return list of Strings containing names of the providers
      */
     public List<String> getAllProviders() {
-        if (Config.LOGD) {
+        if (false) {
             Log.d(TAG, "getAllProviders");
         }
         try {
@@ -829,7 +828,7 @@ public class LocationManager {
         if (listener == null) {
             throw new IllegalArgumentException("listener==null");
         }
-        if (Config.LOGD) {
+        if (false) {
             Log.d(TAG, "removeUpdates: listener = " + listener);
         }
         try {
@@ -854,7 +853,7 @@ public class LocationManager {
         if (intent == null) {
             throw new IllegalArgumentException("intent==null");
         }
-        if (Config.LOGD) {
+        if (false) {
             Log.d(TAG, "removeUpdates: intent = " + intent);
         }
         try {
@@ -909,7 +908,7 @@ public class LocationManager {
      */
     public void addProximityAlert(double latitude, double longitude,
         float radius, long expiration, PendingIntent intent) {
-        if (Config.LOGD) {
+        if (false) {
             Log.d(TAG, "addProximityAlert: latitude = " + latitude +
                 ", longitude = " + longitude + ", radius = " + radius +
                 ", expiration = " + expiration +
@@ -930,7 +929,7 @@ public class LocationManager {
      * proximity alerts
      */
     public void removeProximityAlert(PendingIntent intent) {
-        if (Config.LOGD) {
+        if (false) {
             Log.d(TAG, "removeProximityAlert: intent = " + intent);
         }
         try {

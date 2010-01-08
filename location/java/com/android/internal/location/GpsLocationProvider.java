@@ -41,7 +41,6 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.provider.Settings;
-import android.util.Config;
 import android.util.Log;
 import android.util.SparseIntArray;
 
@@ -69,7 +68,7 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
 
     private static final String TAG = "GpsLocationProvider";
 
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
     private static final boolean VERBOSE = false;
     
     /**
@@ -377,7 +376,7 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
     public void updateNetworkState(int state, NetworkInfo info) {
         mNetworkAvailable = (state == LocationProvider.AVAILABLE);
 
-        if (Config.LOGD) {
+        if (DEBUG) {
             Log.d(TAG, "updateNetworkState " + (mNetworkAvailable ? "available" : "unavailable")
                 + " info: " + info);
         }
@@ -498,7 +497,7 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
      * when the provider is enabled.
      */
     public synchronized void enable() {
-        if (Config.LOGD) Log.d(TAG, "enable");
+        if (DEBUG) Log.d(TAG, "enable");
         if (mEnabled) return;
         mEnabled = native_init();
 
@@ -534,7 +533,7 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
      * down while the provider is disabled.
      */
     public synchronized void disable() {
-        if (Config.LOGD) Log.d(TAG, "disable");
+        if (DEBUG) Log.d(TAG, "disable");
         if (!mEnabled) return;
 
         mEnabled = false;
@@ -602,7 +601,7 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
     }
 
     public void setMinTime(long minTime) {
-        if (Config.LOGD) Log.d(TAG, "setMinTime " + minTime);
+        if (DEBUG) Log.d(TAG, "setMinTime " + minTime);
         
         if (minTime >= 0) {
             int interval = (int)(minTime/1000);
@@ -623,7 +622,7 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
         }
         
         public void binderDied() {
-            if (Config.LOGD) Log.d(TAG, "GPS status listener died");
+            if (DEBUG) Log.d(TAG, "GPS status listener died");
 
             synchronized(mListeners) {
                 mListeners.remove(this);
@@ -721,7 +720,7 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
     }
 
     private boolean forceTimeInjection() {
-        if (Config.LOGD) Log.d(TAG, "forceTimeInjection");
+        if (DEBUG) Log.d(TAG, "forceTimeInjection");
         if (mNetworkThread != null) {
             mNetworkThread.timeInjectRequest();
             return true;
@@ -797,7 +796,7 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
         // report time to first fix
         if (mTTFF == 0 && (flags & LOCATION_HAS_LAT_LONG) == LOCATION_HAS_LAT_LONG) {
             mTTFF = (int)(mLastFixTime - mFixRequestTime);
-            if (Config.LOGD) Log.d(TAG, "TTFF: " + mTTFF);
+            if (DEBUG) Log.d(TAG, "TTFF: " + mTTFF);
 
             // notify status listeners
             synchronized(mListeners) {
@@ -1046,7 +1045,7 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
     }
 
     private void xtraDownloadRequest() {
-        if (Config.LOGD) Log.d(TAG, "xtraDownloadRequest");
+        if (DEBUG) Log.d(TAG, "xtraDownloadRequest");
         if (mNetworkThread != null) {
             mNetworkThread.xtraDownloadRequest();
         }
@@ -1063,7 +1062,7 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
     		
     		StringBuilder extrasBuf = new StringBuilder();
 
-    		if (Config.LOGD) Log.d(TAG, "sendNiResponse, notifId: " + notificationId +
+    		if (DEBUG) Log.d(TAG, "sendNiResponse, notifId: " + notificationId +
     				", response: " + userResponse);
     		
     		native_send_ni_response(notificationId, userResponse);
@@ -1149,14 +1148,14 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
         }
 
         public void run() {
-            if (Config.LOGD) Log.d(TAG, "GpsEventThread starting");
+            if (DEBUG) Log.d(TAG, "GpsEventThread starting");
             // Exit as soon as disable() is called instead of waiting for the GPS to stop.
             while (mEnabled) {
                 // this will wait for an event from the GPS,
                 // which will be reported via reportLocation or reportStatus
                 native_wait_for_event();
             }
-            if (Config.LOGD) Log.d(TAG, "GpsEventThread exiting");
+            if (DEBUG) Log.d(TAG, "GpsEventThread exiting");
         }
     }
 
@@ -1181,7 +1180,7 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
         }
 
         public void runLocked() {
-            if (Config.LOGD) Log.d(TAG, "NetworkThread starting");
+            if (DEBUG) Log.d(TAG, "NetworkThread starting");
             
             SntpClient client = new SntpClient();
             GpsXtraDownloader xtraDownloader = null;
@@ -1197,18 +1196,17 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
                     synchronized (this) {
                         try {
                             if (!mNetworkAvailable) {
-                                if (Config.LOGD) Log.d(TAG, 
-                                        "NetworkThread wait for network");
+                                if (DEBUG) Log.d(TAG, "NetworkThread wait for network");
                                 wait();
                             } else if (waitTime > 0) {
-                                if (Config.LOGD) {
+                                if (DEBUG) {
                                     Log.d(TAG, "NetworkThread wait for " +
                                             waitTime + "ms");
                                 }
                                 wait(waitTime);
                             }
                         } catch (InterruptedException e) {
-                            if (Config.LOGD) {
+                            if (DEBUG) {
                                 Log.d(TAG, "InterruptedException in GpsNetworkThread");
                             }
                         }
@@ -1217,12 +1215,11 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
                 } while (!mDone && ((!mXtraDownloadRequested &&
                         !mTimeInjectRequested && waitTime > 0)
                         || !mNetworkAvailable));
-                if (Config.LOGD) Log.d(TAG, "NetworkThread out of wake loop");
-                
+                if (DEBUG) Log.d(TAG, "NetworkThread out of wake loop"); 
                 if (!mDone) {
                     if (mNtpServer != null && 
                             (mTimeInjectRequested || mNextNtpTime <= System.currentTimeMillis())) {
-                        if (Config.LOGD) {
+                        if (DEBUG) {
                             Log.d(TAG, "Requesting time from NTP server " + mNtpServer);
                         }
                         mTimeInjectRequested = false;
@@ -1231,14 +1228,14 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
                             long timeReference = client.getNtpTimeReference();
                             int certainty = (int)(client.getRoundTripTime()/2);
         
-                            if (Config.LOGD) Log.d(TAG, "calling native_inject_time: " + 
+                            if (DEBUG) Log.d(TAG, "calling native_inject_time: " + 
                                     time + " reference: " + timeReference 
                                     + " certainty: " + certainty);
         
                             native_inject_time(time, timeReference, certainty);
                             mNextNtpTime = System.currentTimeMillis() + NTP_INTERVAL;
                         } else {
-                            if (Config.LOGD) Log.d(TAG, "requestTime failed");
+                            if (DEBUG) Log.d(TAG, "requestTime failed");
                             mNextNtpTime = System.currentTimeMillis() + RETRY_INTERVAL;
                         }
                     }
@@ -1249,7 +1246,7 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
                         mXtraDownloadRequested = false;
                         byte[] data = xtraDownloader.downloadXtraData();
                         if (data != null) {
-                            if (Config.LOGD) {
+                            if (DEBUG) {
                                 Log.d(TAG, "calling native_inject_xtra_data");
                             }
                             native_inject_xtra_data(data, data.length);
@@ -1260,7 +1257,7 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
                     }
                 }
             }
-            if (Config.LOGD) Log.d(TAG, "NetworkThread exiting");
+            if (DEBUG) Log.d(TAG, "NetworkThread exiting");
         }
         
         synchronized void xtraDownloadRequest() {
@@ -1278,7 +1275,7 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
         }
 
         synchronized void setDone() {
-            if (Config.LOGD) Log.d(TAG, "stopping NetworkThread");
+            if (DEBUG) Log.d(TAG, "stopping NetworkThread");
             mDone = true;
             notify();
         }

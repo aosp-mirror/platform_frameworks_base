@@ -16,7 +16,6 @@
 
 #define LOG_TAG "SensorService"
 
-#define LOG_NDEBUG 0
 #include "utils/Log.h"
 
 #include <hardware/sensors.h>

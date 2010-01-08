@@ -545,8 +545,8 @@ public class SensorManager
                     i = sensors_module_get_next_sensor(sensor, i);
 
                     if (i>=0) {
-                        Log.d(TAG, "found sensor: " + sensor.getName() +
-                                ", handle=" + sensor.getHandle());
+                        //Log.d(TAG, "found sensor: " + sensor.getName() +
+                        //        ", handle=" + sensor.getHandle());
                         sensor.setLegacyType(getLegacySensorType(sensor.getType()));
                         fullList.add(sensor);
                         sHandleToSensor.append(sensor.getHandle(), sensor);

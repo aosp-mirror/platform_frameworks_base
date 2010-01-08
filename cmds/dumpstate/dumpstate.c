@@ -28,7 +28,7 @@
 #include <cutils/sockets.h>
 #include "private/android_filesystem_config.h"
 
-#define LOG_NDEBUG 0
+
 #define LOG_TAG "dumpstate"
 #include <utils/Log.h>
 
