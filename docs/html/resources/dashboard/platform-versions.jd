@@ -45,9 +45,11 @@ ending on the data collection date noted below.</p>
 <div class="dashboard-panel">
 
 <img alt="" width="400" height="250"
-src="http://chart.apis.google.com/chart?cht=p&chs=400x250&chd=t:0.3,27.7,54.2,2.9,14.8&chl=Android%201.1|Android%201.5|Android%201.6|Android%202.0|Android%202.0.1&chco=c4df9b,6fad0c" />
+src="http://chart.apis.google.com/chart?cht=p&chs=400x250&chd=t:0.3,31.0,47.6,0.7,20.4&chl=Android%201.1|Android%201.5|Android%201.6|Android%202.0|Android%202.0.1&chco=c4df9b,6fad0c" />
 
-<!-- f6faf2,a3c539 -->
+<!-- HISTORY
+12/14/09 http://chart.apis.google.com/chart?cht=p&chs=400x250&chd=t:0.3,27.7,54.2,2.9,14.8&chl=Android%201.1|Android%201.5|Android%201.6|Android%202.0|Android%202.0.1&chco=c4df9b,6fad0c
+-->
 
 <table>
 <tr>
@@ -60,20 +62,20 @@ src="http://chart.apis.google.com/chart?cht=p&chs=400x250&chd=t:0.3,27.7,54.2,2.
 </tr>
 <tr>
   <td>Android 1.5</td>
-  <td>27.7%</td>
+  <td>31.0%</td>
 </tr>
 <tr>
   <td>Android 1.6</td>
-  <td>54.2%</td></tr>
+  <td>47.6%</td></tr>
 <tr>
   <td>Android 2.0</td>
-  <td>2.9%</td>
+  <td>0.7%</td>
 </tr>
 <tr>
   <td>Android 2.0.1</td>
-  <td>14.8%</td>
+  <td>20.4%</td>
 </tr>
 </table>
 </div>
 
-<p><em>Data collected during two weeks ending on 12/14/2009</em></p>
+<p><em>Data collected during two weeks ending on 1/4/2010</em></p>

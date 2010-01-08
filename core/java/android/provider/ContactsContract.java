@@ -48,49 +48,49 @@ import java.io.InputStream;
  * ContactsContract defines an extensible database of contact-related
  * information. Contact information is stored in a three-tier data model:
  * </p>
- * <blockquote>
- * <p>
+ * <ul>
+ * <li>
  * The {@link Data} table contains all kinds of personal data: phone numbers,
  * email addresses etc. The list of data kinds that can be stored in this table
  * is open-ended. There is a predefined set of common kinds, but any application
  * can add its own data kinds.
- * </p>
- * <p>
+ * </li>
+ * <li>
  * A row in the {@link RawContacts} table represents a set of Data describing a
  * person and associated with a single account.
- * </p>
- * <p>
+ * </li>
+ * <li>
  * A row in the {@link Contacts} table represents an aggregate of one or more
  * RawContacts presumably describing the same person.
- * </p>
- * </blockquote>
+ * </li>
+ * </ul>
  * <p>
  * Other tables include:
  * </p>
- * <blockquote>
- * <p>
+ * <ul>
+ * <li>
  * {@link Groups}, which contains information about raw contact groups - the
  * current API does not support the notion of groups spanning multiple accounts.
- * </p>
- * <p>
+ * </li>
+ * <li>
  * {@link StatusUpdates}, which contains social status updates including IM
  * availability.
- * </p>
- * <p>
+ * </li>
+ * <li>
  * {@link AggregationExceptions}, which is used for manual aggregation and
  * disaggregation of raw contacts
- * </p>
- * <p>
+ * </li>
+ * <li>
  * {@link Settings}, which contains visibility and sync settings for accounts
  * and groups.
- * </p>
- * <p>
+ * </li>
+ * <li>
  * {@link SyncState}, which contains free-form data maintained on behalf of sync
  * adapters
- * </p>
- * <p>
- * {@link PhoneLookup}, which is used for quick caller-ID lookup</id>
- * </blockquote>
+ * </li>
+ * <li>
+ * {@link PhoneLookup}, which is used for quick caller-ID lookup</li>
+ * </ul>
  */
 @SuppressWarnings("unused")
 public final class ContactsContract {
