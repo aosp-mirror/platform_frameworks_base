@@ -204,7 +204,7 @@ public class WebView extends AbsoluteLayout
         ViewGroup.OnHierarchyChangeListener {
 
     // enable debug output for drag trackers
-    private static final boolean DEBUG_DRAG_TRACKER;
+    private static final boolean DEBUG_DRAG_TRACKER = false;
     // if AUTO_REDRAW_HACK is true, then the CALL key will toggle redrawing
     // the screen all-the-time. Good for profiling our drawing code
     static private final boolean AUTO_REDRAW_HACK = false;
