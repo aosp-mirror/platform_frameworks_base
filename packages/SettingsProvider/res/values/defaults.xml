@@ -51,4 +51,10 @@
     <!-- Default value for whether or not to pulse the notification LED when there is a 
          pending notification -->
     <bool name="def_notification_pulse">true</bool>
+
+    <bool name="def_mount_play_notification_snd">true</bool>
+    <bool name="def_mount_ums_autostart">false</bool>
+    <bool name="def_mount_ums_prompt">true</bool>
+    <bool name="def_mount_ums_notify_enabled">true</bool>
+
 </resources>
