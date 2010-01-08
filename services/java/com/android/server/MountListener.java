@@ -364,7 +364,7 @@ final class MountListener implements Runnable {
         for (String line : rsp) {
             String []tok = line.split(" ");
             int code = Integer.parseInt(tok[0]);
-            if (code == ResponseCode.AsecPathResult) {
+            if (code == ResponseCode.AsecListResult) {
                 rdata[idx++] = tok[1];
             } else if (code == ResponseCode.CommandOkay) {
                 return rdata;
