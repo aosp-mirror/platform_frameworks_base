@@ -86,6 +86,8 @@ public class WebViewClient {
      * @param view The WebView that is initiating the callback.
      * @param cancelMsg The message to send if the host wants to cancel
      * @param continueMsg The message to send if the host wants to continue
+     * @deprecated This method is no longer called. When the WebView encounters
+     *             a redirect loop, it will cancel the load.
      */
     public void onTooManyRedirects(WebView view, Message cancelMsg,
             Message continueMsg) {

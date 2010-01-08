@@ -90,7 +90,6 @@ class CallbackProxy extends Handler {
     private static final int JS_PROMPT                           = 114;
     private static final int JS_UNLOAD                           = 115;
     private static final int ASYNC_KEYEVENTS                     = 116;
-    private static final int TOO_MANY_REDIRECTS                  = 117;
     private static final int DOWNLOAD_FILE                       = 118;
     private static final int REPORT_ERROR                        = 119;
     private static final int RESEND_POST_DATA                    = 120;
@@ -273,19 +272,6 @@ class CallbackProxy extends Handler {
                 if (mWebChromeClient != null) {
                     mWebChromeClient.onReceivedTitle(mWebView,
                             (String) msg.obj);
-                }
-                break;
-
-            case TOO_MANY_REDIRECTS:
-                Message cancelMsg =
-                        (Message) msg.getData().getParcelable("cancelMsg");
-                Message continueMsg =
-                        (Message) msg.getData().getParcelable("continueMsg");
-                if (mWebViewClient != null) {
-                    mWebViewClient.onTooManyRedirects(mWebView, cancelMsg,
-                            continueMsg);
-                } else {
-                    cancelMsg.sendToTarget();
                 }
                 break;
 
@@ -790,19 +776,10 @@ class CallbackProxy extends Handler {
         sendMessage(msg);
     }
 
+    // Because this method is public and because CallbackProxy is mistakenly
+    // party of the public classes, we cannot remove this method.
     public void onTooManyRedirects(Message cancelMsg, Message continueMsg) {
-        // Do an unsynchronized quick check to avoid posting if no callback has
-        // been set.
-        if (mWebViewClient == null) {
-            cancelMsg.sendToTarget();
-            return;
-        }
-
-        Message msg = obtainMessage(TOO_MANY_REDIRECTS);
-        Bundle bundle = msg.getData();
-        bundle.putParcelable("cancelMsg", cancelMsg);
-        bundle.putParcelable("continueMsg", continueMsg);
-        sendMessage(msg);
+        // deprecated.
     }
 
     public void onReceivedError(int errorCode, String description,
