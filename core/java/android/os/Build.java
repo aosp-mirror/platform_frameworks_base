@@ -21,7 +21,7 @@ package android.os;
  */
 public class Build {
     /** Value used for when a build property is unknown. */
-    private static final String UNKNOWN = "unknown";
+    public static final String UNKNOWN = "unknown";
 
     /** Either a changelist number, or a label like "M4-rc20". */
     public static final String ID = getString("ro.build.id");
