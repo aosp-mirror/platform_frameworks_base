@@ -88,11 +88,11 @@ public abstract class ContentResolver {
      * <code>content://com.company.provider.imap/inbox/1</code> for a particular
      * message in the inbox, whose MIME type would be reported as
      * <code>CURSOR_ITEM_BASE_TYPE + "/vnd.company.imap-msg"</code>
-     * 
+     *
      * <p>Compare with {@link #CURSOR_DIR_BASE_TYPE}.
      */
     public static final String CURSOR_ITEM_BASE_TYPE = "vnd.android.cursor.item";
-    
+
     /**
      * This is the Android platform's base MIME type for a content: URI
      * containing a Cursor of zero or more items.  Applications should use this
@@ -102,7 +102,7 @@ public abstract class ContentResolver {
      * <code>content://com.company.provider.imap/inbox</code> for all of the
      * messages in its inbox, whose MIME type would be reported as
      * <code>CURSOR_DIR_BASE_TYPE + "/vnd.company.imap-msg"</code>
-     * 
+     *
      * <p>Note how the base MIME type varies between this and
      * {@link #CURSOR_ITEM_BASE_TYPE} depending on whether there is
      * one single item or multiple items in the data set, while the sub-type
@@ -173,13 +173,25 @@ public abstract class ContentResolver {
     }
 
     /**
+     * <p>
      * Query the given URI, returning a {@link Cursor} over the result set.
+     * </p>
+     * <p>
+     * For best performance, the caller should follow these guidelines:
+     * <ul>
+     * <li>Provide an explicit projection, to prevent
+     * reading data from storage that aren't going to be used.</li>
+     * <li>Use question mark parameter markers such as 'phone=?' instead of
+     * explicit values in the {@code selection} parameter, so that queries
+     * that differ only by those values will be recognized as the same
+     * for caching purposes.</li>
+     * </ul>
+     * </p>
      *
      * @param uri The URI, using the content:// scheme, for the content to
      *         retrieve.
      * @param projection A list of which columns to return. Passing null will
-     *         return all columns, which is discouraged to prevent reading data
-     *         from storage that isn't going to be used.
+     *         return all columns, which is inefficient.
      * @param selection A filter declaring which rows to return, formatted as an
      *         SQL WHERE clause (excluding the WHERE itself). Passing null will
      *         return all rows for the given URI.
@@ -225,10 +237,10 @@ public abstract class ContentResolver {
      * <li>android.resource ({@link #SCHEME_ANDROID_RESOURCE})</li>
      * <li>file ({@link #SCHEME_FILE})</li>
      * </ul>
-     * 
+     *
      * <p>See {@link #openAssetFileDescriptor(Uri, String)} for more information
      * on these schemes.
-     * 
+     *
      * @param uri The desired URI.
      * @return InputStream
      * @throws FileNotFoundException if the provided URI could not be opened.
@@ -283,7 +295,7 @@ public abstract class ContentResolver {
      *
      * <p>See {@link #openAssetFileDescriptor(Uri, String)} for more information
      * on these schemes.
-     * 
+     *
      * @param uri The desired URI.
      * @param mode May be "w", "wa", "rw", or "rwt".
      * @return OutputStream
@@ -318,7 +330,7 @@ public abstract class ContentResolver {
      *
      * <p>See {@link #openAssetFileDescriptor(Uri, String)} for more information
      * on these schemes.
-     * 
+     *
      * @param uri The desired URI to open.
      * @param mode The file mode to use, as per {@link ContentProvider#openFile
      * ContentProvider.openFile}.
@@ -334,19 +346,19 @@ public abstract class ContentResolver {
         if (afd == null) {
             return null;
         }
-        
+
         if (afd.getDeclaredLength() < 0) {
             // This is a full file!
             return afd.getParcelFileDescriptor();
         }
-        
+
         // Client can't handle a sub-section of a file, so close what
         // we got and bail with an exception.
         try {
             afd.close();
         } catch (IOException e) {
         }
-        
+
         throw new FileNotFoundException("Not a whole file");
     }
 
@@ -491,7 +503,7 @@ public abstract class ContentResolver {
         res.id = id;
         return res;
     }
-    
+
     /** @hide */
     static public int modeToMode(Uri uri, String mode) throws FileNotFoundException {
         int modeBits;
@@ -518,7 +530,7 @@ public abstract class ContentResolver {
         }
         return modeBits;
     }
-    
+
     /**
      * Inserts a row into a table at the given URL.
      *
@@ -1146,7 +1158,7 @@ public abstract class ContentResolver {
 
     /** @hide */
     public static final String CONTENT_SERVICE_NAME = "content";
-    
+
     /** @hide */
     public static IContentService getContentService() {
         if (sContentService != null) {
@@ -1158,7 +1170,7 @@ public abstract class ContentResolver {
         if (Config.LOGV) Log.v("ContentService", "default service = " + sContentService);
         return sContentService;
     }
-    
+
     private static IContentService sContentService;
     private final Context mContext;
     private static final String TAG = "ContentResolver";
