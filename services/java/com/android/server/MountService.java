@@ -30,8 +30,13 @@ import android.os.IMountService;
 import android.os.Environment;
 import android.os.SystemProperties;
 import android.os.UEventObserver;
+import android.os.Handler;
 import android.text.TextUtils;
 import android.util.Log;
+
+import android.provider.Settings;
+import android.content.ContentResolver;
+import android.database.ContentObserver;
 
 import java.io.File;
 import java.io.FileReader;
@@ -95,7 +100,10 @@ class MountService extends IMountService.Stub {
 
     private boolean mMounted;
 
+    private SettingsWatcher mSettingsWatcher;
     private boolean mAutoStartUms;
+    private boolean mPromptUms;
+    private boolean mUmsActiveNotify;
 
     private boolean mUmsConnected = false;
     private boolean mUmsEnabled = false;
@@ -121,7 +129,76 @@ class MountService extends IMountService.Stub {
 
         mPlaySounds = SystemProperties.get("persist.service.mount.playsnd", "1").equals("1");
 
-        mAutoStartUms = SystemProperties.get("persist.service.mount.umsauto", "0").equals("1");
+        ContentResolver cr = mContext.getContentResolver();
+        mAutoStartUms = (Settings.Secure.getInt(
+                cr, Settings.Secure.MOUNT_UMS_AUTOSTART, 0) == 1);
+        mPromptUms = (Settings.Secure.getInt(
+                cr, Settings.Secure.MOUNT_UMS_PROMPT, 1) == 1);
+        mUmsActiveNotify = (Settings.Secure.getInt(
+                cr, Settings.Secure.MOUNT_UMS_NOTIFY_ENABLED, 1) == 1);
+
+        mSettingsWatcher = new SettingsWatcher(new Handler());
+    }
+  
+    private class SettingsWatcher extends ContentObserver {
+        public SettingsWatcher(Handler handler) {
+            super(handler);
+            ContentResolver cr = mContext.getContentResolver();
+            cr.registerContentObserver(Settings.System.getUriFor(
+                    Settings.Secure.MOUNT_PLAY_NOTIFICATION_SND), false, this);
+            cr.registerContentObserver(Settings.Secure.getUriFor(
+                    Settings.Secure.MOUNT_UMS_AUTOSTART), false, this);
+            cr.registerContentObserver(Settings.Secure.getUriFor(
+                    Settings.Secure.MOUNT_UMS_PROMPT), false, this);
+            cr.registerContentObserver(Settings.Secure.getUriFor(
+                    Settings.Secure.MOUNT_UMS_NOTIFY_ENABLED), false, this);
+        }
+
+        public void onChange(boolean selfChange) {
+            super.onChange(selfChange);
+            ContentResolver cr = mContext.getContentResolver();
+
+            boolean newPlayNotificationSounds = (Settings.Secure.getInt(
+                    cr, Settings.Secure.MOUNT_PLAY_NOTIFICATION_SND, 1) == 1);
+
+            boolean newUmsAutostart = (Settings.Secure.getInt(
+                    cr, Settings.Secure.MOUNT_UMS_AUTOSTART, 0) == 1);
+
+            if (newUmsAutostart != mAutoStartUms) {
+                Log.d(TAG, "Changing UMS autostart to " + newUmsAutostart);
+                mAutoStartUms = newUmsAutostart;
+            }
+
+            boolean newUmsPrompt = (Settings.Secure.getInt(
+                    cr, Settings.Secure.MOUNT_UMS_PROMPT, 1) == 1);
+
+            if (newUmsPrompt != mPromptUms) {
+                Log.d(TAG, "Changing UMS prompt to " + newUmsPrompt);
+                mPromptUms = newUmsAutostart;
+            }
+
+            boolean newUmsNotifyEnabled = (Settings.Secure.getInt(
+                    cr, Settings.Secure.MOUNT_UMS_NOTIFY_ENABLED, 1) == 1);
+
+            Log.d(TAG, "new notify enabled = " + newUmsNotifyEnabled);
+            if (mUmsEnabled) {
+                if (newUmsNotifyEnabled) {
+                    Intent intent = new Intent();
+                    intent.setClass(mContext, com.android.internal.app.UsbStorageStopActivity.class);
+                    PendingIntent pi = PendingIntent.getActivity(mContext, 0, intent, 0);
+                    setUsbStorageNotification(com.android.internal.R.string.usb_storage_stop_notification_title,
+                            com.android.internal.R.string.usb_storage_stop_notification_message,
+                            com.android.internal.R.drawable.stat_sys_warning,
+                            false, true, pi);
+                } else {
+                    setUsbStorageNotification(0, 0, 0, false, false, null);
+                }
+            }
+            if (newUmsNotifyEnabled != mUmsActiveNotify) {
+                Log.d(TAG, "Changing UMS active notification to " + newUmsNotifyEnabled);
+                mUmsActiveNotify = newUmsNotifyEnabled;
+            }
+        }
     }
 
     BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
@@ -205,13 +282,18 @@ class MountService extends IMountService.Stub {
      * @param enable  true to enable USB mass storage support
      */
     public void setMassStorageEnabled(boolean enable) throws IllegalStateException {
+        if (mContext.checkCallingOrSelfPermission(
+                android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Requires MOUNT_UNMOUNT_FILESYSTEMS permission");
+        }
         try {
             String vp = Environment.getExternalStorageDirectory().getPath();
             String vs = getVolumeState(vp);
 
             if (enable && vs.equals(Environment.MEDIA_MOUNTED)) {
-                Log.d(TAG, "Unmounting media before UMS enable");
-                unmountMedia(vp);
+                mListener.unmountVolume(vp);
+                updateUsbMassStorageNotification(true, false);
             }
 
             mListener.setShareMethodEnabled(Environment
@@ -220,8 +302,12 @@ class MountService extends IMountService.Stub {
                                             "ums", enable);
             mUmsEnabled = enable;
             if (!enable) {
-                Log.d(TAG, "Mounting media after UMS disable");
                 mountMedia(vp);
+                if (mPromptUms) {
+                    updateUsbMassStorageNotification(false, false);
+                } else {
+                    updateUsbMassStorageNotification(true, false);
+                }
             }
         } catch (IllegalStateException rex) {
             Log.e(TAG, "Failed to set ums enable {" + enable + "}");
@@ -316,26 +402,6 @@ class MountService extends IMountService.Stub {
         SystemProperties.set("persist.service.mount.playsnd", (enabled ? "1" : "0"));
     }
 
-    /**
-     * Returns true if we auto-start UMS on cable insertion.
-     */
-    public boolean getAutoStartUms() {
-        return mAutoStartUms;
-    }
-
-    /**
-     * Set whether or not we're playing media notification sounds.
-     */
-    public void setAutoStartUms(boolean enabled) {
-        if (mContext.checkCallingOrSelfPermission(
-                android.Manifest.permission.WRITE_SETTINGS) 
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Requires WRITE_SETTINGS permission");
-        }
-        mAutoStartUms = enabled;
-        SystemProperties.set("persist.service.mount.umsauto", (enabled ? "1" : "0"));
-    }
-
     void updatePublicVolumeState(String mountPoint, String state) {
         if (!mountPoint.equals(Environment.getExternalStorageDirectory().getPath())) {
             Log.w(TAG, "Multiple volumes not currently supported");
@@ -395,7 +461,7 @@ class MountService extends IMountService.Stub {
                         Log.d(TAG, "Skipping connection-mount; already mounted");
                     }
                 } catch (IllegalStateException rex) {
-                    Log.e(TAG, "Exception while handling connection mount " + rex);
+                    Log.e(TAG, "Exception while handling connection mount ", rex);
                 }
 
                 try {
@@ -456,7 +522,7 @@ class MountService extends IMountService.Stub {
                     setMassStorageEnabled(true);
                 } catch (IllegalStateException e) {
                 }
-            } else {
+            } else if (mPromptUms) {
                 updateUsbMassStorageNotification(false, true);
             }
         }
@@ -465,17 +531,29 @@ class MountService extends IMountService.Stub {
         mContext.sendBroadcast(intent);
     }
 
-    void notifyShareAvailabilityChange(String method, boolean avail) {
-        Log.d(TAG, "Share method {" + method + "} availability now " + avail);
+    void notifyShareAvailabilityChange(String method, final boolean avail) {
         if (!method.equals("ums")) {
            Log.w(TAG, "Ignoring unsupported share method {" + method + "}");
            return;
         }
-        if (avail) {
-            notifyUmsConnected();
-        } else {
-            notifyUmsDisconnected();
-        }
+
+        /*
+         * Notification needs to run in a different thread as
+         * it may need to call back into vold
+         */
+        new Thread() {
+            public void run() {
+                try {
+                    if (avail) {
+                        notifyUmsConnected();
+                    } else {
+                        notifyUmsDisconnected();
+                    }
+                } catch (Exception ex) {
+                    Log.w(TAG, "Failed to mount media on insertion");
+                }
+            }
+        }.start();
     }
 
     /**
@@ -483,6 +561,14 @@ class MountService extends IMountService.Stub {
      */
     void notifyUmsDisconnected() {
         mUmsConnected = false;
+        if (mUmsEnabled) {
+            try {
+                Log.w(TAG, "UMS disconnected while enabled!");
+                setMassStorageEnabled(false);
+            } catch (Exception ex) {
+                Log.e(TAG, "Error disabling UMS on unsafe UMS disconnect", ex);
+            }
+        }
         updateUsbMassStorageNotification(false, false);
         Intent intent = new Intent(Intent.ACTION_UMS_DISCONNECTED);
         mContext.sendBroadcast(intent);
@@ -495,7 +581,7 @@ class MountService extends IMountService.Stub {
                     Log.d(TAG, "Mounting media after insertion");
                     mountMedia(path);
                 } catch (Exception ex) {
-                    Log.w(TAG, "Failed to mount media on insertion");
+                    Log.w(TAG, "Failed to mount media on insertion", ex);
                 }
             }
         }.start();
@@ -522,7 +608,6 @@ class MountService extends IMountService.Stub {
             true, false, null);
         handlePossibleExplicitUnmountBroadcast(path);
 
-        // Log.d(TAG, "Sending ACTION_MEDIA_REMOVED");
         Intent intent = new Intent(Intent.ACTION_MEDIA_REMOVED, 
                 Uri.parse("file://" + path));
         mContext.sendBroadcast(intent);
@@ -547,7 +632,6 @@ class MountService extends IMountService.Stub {
         }
         updateUsbMassStorageNotification(false, false);
 
-        // Log.d(TAG, "Sending ACTION_MEDIA_UNMOUNTED");
         Intent intent = new Intent(Intent.ACTION_MEDIA_UNMOUNTED, 
                 Uri.parse("file://" + path));
         mContext.sendBroadcast(intent);
@@ -566,7 +650,6 @@ class MountService extends IMountService.Stub {
                 true, false, null);
 
         updateUsbMassStorageNotification(true, false);
-        // Log.d(TAG, "Sending ACTION_MEDIA_CHECKING");
         Intent intent = new Intent(Intent.ACTION_MEDIA_CHECKING, 
                 Uri.parse("file://" + path));
         mContext.sendBroadcast(intent);
@@ -587,7 +670,6 @@ class MountService extends IMountService.Stub {
                                     com.android.internal.R.drawable.stat_notify_sdcard_usb,
                                     true, false, pi);
         updateUsbMassStorageNotification(false, false);
-        // Log.d(TAG, "Sending ACTION_MEDIA_NOFS");
         intent = new Intent(Intent.ACTION_MEDIA_NOFS, 
                 Uri.parse("file://" + path));
         mContext.sendBroadcast(intent);
@@ -601,7 +683,6 @@ class MountService extends IMountService.Stub {
 
         setMediaStorageNotification(0, 0, 0, false, false, null);
         updateUsbMassStorageNotification(false, false);
-        // Log.d(TAG, "Sending ACTION_MEDIA_MOUNTED");
         Intent intent = new Intent(Intent.ACTION_MEDIA_MOUNTED, 
                 Uri.parse("file://" + path));
         intent.putExtra("read-only", readOnly);
@@ -620,16 +701,17 @@ class MountService extends IMountService.Stub {
 
         updatePublicVolumeState(path, Environment.MEDIA_SHARED);
 
-        Intent intent = new Intent();
-        intent.setClass(mContext, com.android.internal.app.UsbStorageStopActivity.class);
-        PendingIntent pi = PendingIntent.getActivity(mContext, 0, intent, 0);
-        setUsbStorageNotification(com.android.internal.R.string.usb_storage_stop_notification_title,
-                                  com.android.internal.R.string.usb_storage_stop_notification_message,
-                                  com.android.internal.R.drawable.stat_sys_warning,
-                                  false, true, pi);
+        if (mUmsActiveNotify) {
+            Intent intent = new Intent();
+            intent.setClass(mContext, com.android.internal.app.UsbStorageStopActivity.class);
+            PendingIntent pi = PendingIntent.getActivity(mContext, 0, intent, 0);
+            setUsbStorageNotification(com.android.internal.R.string.usb_storage_stop_notification_title,
+                    com.android.internal.R.string.usb_storage_stop_notification_message,
+                    com.android.internal.R.drawable.stat_sys_warning,
+                    false, true, pi);
+        }
         handlePossibleExplicitUnmountBroadcast(path);
-        // Log.d(TAG, "Sending ACTION_MEDIA_SHARED");
-        intent = new Intent(Intent.ACTION_MEDIA_SHARED, 
+        Intent intent = new Intent(Intent.ACTION_MEDIA_SHARED,
                 Uri.parse("file://" + path));
         mContext.sendBroadcast(intent);
     }
@@ -647,7 +729,6 @@ class MountService extends IMountService.Stub {
                                     true, true, null);
 
         handlePossibleExplicitUnmountBroadcast(path);
-        // Log.d(TAG, "Sending ACTION_MEDIA_BAD_REMOVAL");
         Intent intent = new Intent(Intent.ACTION_MEDIA_BAD_REMOVAL, 
                 Uri.parse("file://" + path));
         mContext.sendBroadcast(intent);
@@ -671,7 +752,6 @@ class MountService extends IMountService.Stub {
 
         handlePossibleExplicitUnmountBroadcast(path);
 
-        // Log.d(TAG, "Sending ACTION_MEDIA_UNMOUNTABLE");
         intent = new Intent(Intent.ACTION_MEDIA_UNMOUNTABLE, 
                 Uri.parse("file://" + path));
         mContext.sendBroadcast(intent);
@@ -681,7 +761,6 @@ class MountService extends IMountService.Stub {
      * Broadcasts the media eject event to all clients.
      */
     void notifyMediaUnmounting(String path) {
-        // Log.d(TAG, "Sending ACTION_MEDIA_EJECT");
         Intent intent = new Intent(Intent.ACTION_MEDIA_EJECT, 
                 Uri.parse("file://" + path));
         mContext.sendBroadcast(intent);
