@@ -31,6 +31,8 @@ LOCAL_SRC_FILES +=                \
         MediaExtractor.cpp        \
         SampleTable.cpp           \
         ShoutcastSource.cpp       \
+        StagefrightMediaScanner.cpp \
+        StagefrightMetadataRetriever.cpp \
         TimeSource.cpp            \
         TimedEventQueue.cpp       \
         WAVExtractor.cpp          \

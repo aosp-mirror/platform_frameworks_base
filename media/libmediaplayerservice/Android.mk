@@ -19,7 +19,6 @@ LOCAL_SRC_FILES:=               \
 ifeq ($(BUILD_WITH_FULL_STAGEFRIGHT),true)
 
 LOCAL_SRC_FILES +=                      \
-    StagefrightMetadataRetriever.cpp    \
     StagefrightPlayer.cpp               \
     StagefrightRecorder.cpp
 

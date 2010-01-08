@@ -22,6 +22,8 @@
 
 namespace android {
 
+struct StagefrightMetadataRetriever;
+
 struct StagefrightMediaScanner : public MediaScanner {
     StagefrightMediaScanner();
     virtual ~StagefrightMediaScanner();
@@ -33,6 +35,8 @@ struct StagefrightMediaScanner : public MediaScanner {
     virtual char *extractAlbumArt(int fd);
 
 private:
+    sp<StagefrightMetadataRetriever> mRetriever;
+
     StagefrightMediaScanner(const StagefrightMediaScanner &);
     StagefrightMediaScanner &operator=(const StagefrightMediaScanner &);
 };
