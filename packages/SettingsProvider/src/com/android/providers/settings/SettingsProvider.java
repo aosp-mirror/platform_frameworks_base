@@ -75,8 +75,7 @@ public class SettingsProvider extends ContentProvider {
                 throw new UnsupportedOperationException("WHERE clause not supported: " + url);
             } else {
                 this.table = url.getPathSegments().get(0);
-                if ("gservices".equals(this.table) || "system".equals(this.table)
-                        || "secure".equals(this.table)) {
+                if ("system".equals(this.table) || "secure".equals(this.table)) {
                     this.where = Settings.NameValueTable.NAME + "=?";
                     this.args = new String[] { url.getPathSegments().get(1) };
                 } else {
@@ -110,8 +109,7 @@ public class SettingsProvider extends ContentProvider {
             throw new IllegalArgumentException("Invalid URI: " + tableUri);
         }
         String table = tableUri.getPathSegments().get(0);
-        if ("gservices".equals(table) || "system".equals(table)
-                || "secure".equals(table)) {
+        if ("system".equals(table) || "secure".equals(table)) {
             String name = values.getAsString(Settings.NameValueTable.NAME);
             return Uri.withAppendedPath(tableUri, name);
         } else {
@@ -169,21 +167,12 @@ public class SettingsProvider extends ContentProvider {
      */
     private void checkWritePermissions(SqlArguments args) {
         if ("secure".equals(args.table) &&
-                getContext().checkCallingOrSelfPermission(
-                        android.Manifest.permission.WRITE_SECURE_SETTINGS) !=
-                    PackageManager.PERMISSION_GRANTED) {
-                throw new SecurityException(
-                        String.format("Permission denial: writing to secure settings requires %1$s",
-                                android.Manifest.permission.WRITE_SECURE_SETTINGS));
-
-        // TODO: Move gservices into its own provider so we don't need this nonsense.
-        } else if ("gservices".equals(args.table) &&
             getContext().checkCallingOrSelfPermission(
-                    android.Manifest.permission.WRITE_GSERVICES) !=
-                PackageManager.PERMISSION_GRANTED) {
+                    android.Manifest.permission.WRITE_SECURE_SETTINGS) !=
+            PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException(
-                    String.format("Permission denial: writing to gservices settings requires %1$s",
-                            android.Manifest.permission.WRITE_GSERVICES));
+                    String.format("Permission denial: writing to secure settings requires %1$s",
+                                  android.Manifest.permission.WRITE_SECURE_SETTINGS));
         }
     }
 

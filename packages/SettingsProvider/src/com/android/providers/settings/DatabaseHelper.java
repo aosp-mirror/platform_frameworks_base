@@ -71,7 +71,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // database gets upgraded properly. At a minimum, please confirm that 'upgradeVersion'
     // is properly propagated through your change.  Not doing so will result in a loss of user
     // settings.
-    private static final int DATABASE_VERSION = 44;
+    private static final int DATABASE_VERSION = 45;
 
     private Context mContext;
 
@@ -99,13 +99,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL("CREATE INDEX systemIndex1 ON system (name);");
 
         createSecureTable(db);
-
-        db.execSQL("CREATE TABLE gservices (" +
-                   "_id INTEGER PRIMARY KEY AUTOINCREMENT," +
-                   "name TEXT UNIQUE ON CONFLICT REPLACE," +
-                   "value TEXT" +
-                   ");");
-        db.execSQL("CREATE INDEX gservicesIndex1 ON gservices (name);");
 
         db.execSQL("CREATE TABLE bluetooth_devices (" +
                     "_id INTEGER PRIMARY KEY," +
@@ -557,6 +550,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             upgradeVersion = 44;
         }
 
+        if (upgradeVersion == 44) {
+            /*
+             * Gservices was moved into vendor/google.
+             */
+            db.execSQL("DROP TABLE IF EXISTS gservices");
+            db.execSQL("DROP INDEX IF EXISTS gservicesIndex1");
+            upgradeVersion = 45;
+        }
+            
+        
         if (upgradeVersion != currentVersion) {
             Log.w(TAG, "Got stuck trying to upgrade from version " + upgradeVersion
                     + ", must wipe the settings provider");
