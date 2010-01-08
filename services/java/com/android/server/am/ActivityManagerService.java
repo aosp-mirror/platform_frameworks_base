@@ -70,11 +70,12 @@ import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Binder;
-import android.os.Bundle;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Debug;
 import android.os.DropBoxManager;
 import android.os.Environment;
+import android.os.FileObserver;
 import android.os.FileUtils;
 import android.os.Handler;
 import android.os.IBinder;
@@ -355,7 +356,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             Integer.valueOf(SystemProperties.get("ro.EMPTY_APP_MEM"))*PAGE_SIZE;
     }
     
-    final int MY_PID;
+    static final int MY_PID = Process.myPid();
     
     static final String[] EMPTY_STRING_ARRAY = new String[0];
 
@@ -1222,7 +1223,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                         mSystemThread.getApplicationThread(), info,
                         info.processName);
                 app.persistent = true;
-                app.pid = Process.myPid();
+                app.pid = MY_PID;
                 app.maxAdj = SYSTEM_ADJ;
                 mSelf.mProcessNames.put(app.processName, app.info.uid, app);
                 synchronized (mSelf.mPidsSelfLocked) {
@@ -1382,8 +1383,6 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
 
         Log.i(TAG, "Memory class: " + ActivityManager.staticGetMemoryClass());
-        
-        MY_PID = Process.myPid();
         
         File dataDir = Environment.getDataDirectory();
         File systemDir = new File(dataDir, "system");
@@ -4555,142 +4554,141 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
     }
 
-    final String readFile(String filename) {
-        try {
-            FileInputStream fs = new FileInputStream(filename);
-            byte[] inp = new byte[8192];
-            int size = fs.read(inp);
-            fs.close();
-            return new String(inp, 0, 0, size);
-        } catch (java.io.IOException e) {
+    /**
+     * If a stack trace dump file is configured, dump process stack traces.
+     * @param pids of dalvik VM processes to dump stack traces for
+     * @return file containing stack traces, or null if no dump file is configured
+     */
+    private static File dumpStackTraces(ArrayList<Integer> pids) {
+        String tracesPath = SystemProperties.get("dalvik.vm.stack-trace-file", null);
+        if (tracesPath == null || tracesPath.length() == 0) {
+            return null;
         }
-        return "";
+
+        File tracesFile = new File(tracesPath);
+        try {
+            File tracesDir = tracesFile.getParentFile();
+            if (!tracesDir.exists()) tracesFile.mkdirs();
+            FileUtils.setPermissions(tracesDir.getPath(), 0775, -1, -1);  // drwxrwxr-x
+
+            if (tracesFile.exists()) tracesFile.delete();
+            tracesFile.createNewFile();
+            FileUtils.setPermissions(tracesFile.getPath(), 0666, -1, -1); // -rw-rw-rw-
+        } catch (IOException e) {
+            Log.w(TAG, "Unable to prepare ANR traces file: " + tracesPath, e);
+            return null;
+        }
+
+        // Use a FileObserver to detect when traces finish writing.
+        // The order of traces is considered important to maintain for legibility.
+        FileObserver observer = new FileObserver(tracesPath, FileObserver.CLOSE_WRITE) {
+            public synchronized void onEvent(int event, String path) { notify(); }
+        };
+
+        try {
+            observer.startWatching();
+            int num = pids.size();
+            for (int i = 0; i < num; i++) {
+                synchronized (observer) {
+                    Process.sendSignal(pids.get(i), Process.SIGNAL_QUIT);
+                    observer.wait(200);  // Wait for write-close, give up after 200msec
+                }
+            }
+        } catch (InterruptedException e) {
+            Log.wtf(TAG, e);
+        } finally {
+            observer.stopWatching();
+        }
+
+        return tracesFile;
     }
 
-    final void appNotRespondingLocked(ProcessRecord app, HistoryRecord activity, 
-            HistoryRecord reportedActivity, final String annotation) {
+    final void appNotRespondingLocked(ProcessRecord app, HistoryRecord activity,
+            HistoryRecord parent, final String annotation) {
         if (app.notResponding || app.crashing) {
             return;
         }
-        
+
         // Log the ANR to the event log.
         EventLog.writeEvent(EventLogTags.ANR, app.pid, app.processName, annotation);
-        
-        // If we are on a secure build and the application is not interesting to the user (it is
-        // not visible or in the background), just kill it instead of displaying a dialog.
-        boolean isSecure = "1".equals(SystemProperties.get(SYSTEM_SECURE, "0"));
-        if (isSecure && !app.isInterestingToUserLocked() && Process.myPid() != app.pid) {
-            Process.killProcess(app.pid);
-            return;
-        }
-        
-        // DeviceMonitor.start();
 
-        String processInfo = null;
-        if (MONITOR_CPU_USAGE) {
-            updateCpuStatsNow();
-            synchronized (mProcessStatsThread) {
-                processInfo = mProcessStats.printCurrentState();
+        // Dump thread traces as quickly as we can, starting with "interesting" processes.
+        ArrayList<Integer> pids = new ArrayList<Integer>(20);
+        pids.add(app.pid);
+
+        int parentPid = app.pid;
+        if (parent != null && parent.app != null && parent.app.pid > 0) parentPid = parent.app.pid;
+        if (parentPid != app.pid) pids.add(parentPid);
+
+        if (MY_PID != app.pid && MY_PID != parentPid) pids.add(MY_PID);
+
+        for (int i = mLruProcesses.size() - 1; i >= 0; i--) {
+            ProcessRecord r = mLruProcesses.get(i);
+            if (r != null && r.thread != null) {
+                int pid = r.pid;
+                if (pid > 0 && pid != app.pid && pid != parentPid && pid != MY_PID) pids.add(pid);
             }
         }
 
+        File tracesFile = dumpStackTraces(pids);
+
+        // Log the ANR to the main log.
         StringBuilder info = mStringBuilder;
         info.setLength(0);
-        info.append("ANR in process: ");
-        info.append(app.processName);
-        if (reportedActivity != null && reportedActivity.app != null) {
-            info.append(" (last in ");
-            info.append(reportedActivity.app.processName);
-            info.append(")");
+        info.append("ANR in ").append(app.processName);
+        if (activity != null && activity.shortComponentName != null) {
+            info.append(" (").append(activity.shortComponentName).append(")");
         }
         if (annotation != null) {
-            info.append("\nAnnotation: ");
-            info.append(annotation);
+            info.append("\nReason: ").append(annotation).append("\n");
         }
-        if (MONITOR_CPU_USAGE) {
-            info.append("\nCPU usage:\n");
-            info.append(processInfo);
+        if (parent != null && parent != activity) {
+            info.append("\nParent: ").append(parent.shortComponentName);
         }
-        Log.i(TAG, info.toString());
 
-        // The application is not responding. Dump as many thread traces as we can.
-        boolean fileDump = prepareTraceFile(true);
-        if (!fileDump) {
-            // Dumping traces to the log, just dump the process that isn't responding so
-            // we don't overflow the log
-            Process.sendSignal(app.pid, Process.SIGNAL_QUIT);
-        } else {
-            // Dumping traces to a file so dump all active processes we know about
-            synchronized (this) {
-                // First, these are the most important processes.
-                final int[] imppids = new int[3];
-                int i=0;
-                imppids[0] = app.pid;
-                i++;
-                if (reportedActivity != null && reportedActivity.app != null
-                        && reportedActivity.app.thread != null
-                        && reportedActivity.app.pid != app.pid) {
-                    imppids[i] = reportedActivity.app.pid;
-                    i++;
-                }
-                imppids[i] = Process.myPid();
-                for (i=0; i<imppids.length && imppids[i] != 0; i++) {
-                    Process.sendSignal(imppids[i], Process.SIGNAL_QUIT);
-                    synchronized (this) {
-                        try {
-                            wait(200);
-                        } catch (InterruptedException e) {
-                        }
-                    }
-                }
-                for (i = mLruProcesses.size() - 1 ; i >= 0 ; i--) {
-                    ProcessRecord r = mLruProcesses.get(i);
-                    boolean done = false;
-                    for (int j=0; j<imppids.length && imppids[j] != 0; j++) {
-                        if (imppids[j] == r.pid) {
-                            done = true;
-                            break;
-                        }
-                    }
-                    if (!done && r.thread != null) {
-                        Process.sendSignal(r.pid, Process.SIGNAL_QUIT);
-                        synchronized (this) {
-                            try {
-                                wait(200);
-                            } catch (InterruptedException e) {
-                            }
-                        }
-                    }
-                }
-            }
+        String cpuInfo = null;
+        if (MONITOR_CPU_USAGE) {
+            updateCpuStatsNow();
+            synchronized (mProcessStatsThread) { cpuInfo = mProcessStats.printCurrentState(); }
+            info.append(cpuInfo);
         }
+
+        Log.e(TAG, info.toString());
+        if (tracesFile == null) {
+            // There is no trace file, so dump (only) the alleged culprit's threads to the log
+            Process.sendSignal(app.pid, Process.SIGNAL_QUIT);
+        }
+
+        addErrorToDropBox("anr", app, activity, parent, annotation, cpuInfo, tracesFile, null);
 
         if (mController != null) {
             try {
-                int res = mController.appNotResponding(app.processName,
-                        app.pid, info.toString());
+                // 0 == show dialog, 1 = keep waiting, -1 = kill process immediately
+                int res = mController.appNotResponding(app.processName, app.pid, info.toString());
                 if (res != 0) {
-                    if (res < 0) {
-                        // wait until the SIGQUIT has had a chance to process before killing the
-                        // process.
-                        try {
-                            wait(2000);
-                        } catch (InterruptedException e) {
-                        }
-
-                        Process.killProcess(app.pid);
-                        return;
-                    }
+                    if (res < 0 && app.pid != MY_PID) Process.killProcess(app.pid);
+                    return;
                 }
             } catch (RemoteException e) {
                 mController = null;
             }
         }
 
+        // Unless configured otherwise, swallow ANRs in background processes & kill the process.
+        boolean showBackground = Settings.Secure.getInt(mContext.getContentResolver(),
+                Settings.Secure.ANR_SHOW_BACKGROUND, 0) != 0;
+        if (!showBackground && !app.isInterestingToUserLocked() && app.pid != MY_PID) {
+            Process.killProcess(app.pid);
+            return;
+        }
+
+        // Set the app's notResponding state, and look up the errorReportReceiver
         makeAppNotRespondingLocked(app,
                 activity != null ? activity.shortComponentName : null,
                 annotation != null ? "ANR " + annotation : "ANR",
                 info.toString());
+
+        // Bring up the infamous App Not Responding dialog
         Message msg = Message.obtain();
         HashMap map = new HashMap();
         msg.what = SHOW_NOT_RESPONDING_MSG;
@@ -4703,53 +4701,6 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         mHandler.sendMessage(msg);
         return;
     }
-
-    /**
-     * If a stack trace file has been configured, prepare the filesystem
-     * by creating the directory if it doesn't exist and optionally
-     * removing the old trace file.
-     *
-     * @param removeExisting If set, the existing trace file will be removed.
-     * @return Returns true if the trace file preparations succeeded
-     */
-    public static boolean prepareTraceFile(boolean removeExisting) {
-        String tracesPath = SystemProperties.get("dalvik.vm.stack-trace-file", null);
-        boolean fileReady = false;
-        if (!TextUtils.isEmpty(tracesPath)) {
-            File f = new File(tracesPath);
-            if (!f.exists()) {
-                // Ensure the enclosing directory exists
-                File dir = f.getParentFile();
-                if (!dir.exists()) {
-                    fileReady = dir.mkdirs();
-                    FileUtils.setPermissions(dir.getAbsolutePath(),
-                            FileUtils.S_IRWXU | FileUtils.S_IRWXG | FileUtils.S_IXOTH, -1, -1);
-                } else if (dir.isDirectory()) {
-                    fileReady = true;
-                }
-            } else if (removeExisting) {
-                // Remove the previous traces file, so we don't fill the disk.
-                // The VM will recreate it
-                Log.i(TAG, "Removing old ANR trace file from " + tracesPath);
-                fileReady = f.delete();
-            }
-            
-            if (removeExisting) {
-                try {
-                    f.createNewFile();
-                    FileUtils.setPermissions(f.getAbsolutePath(),
-                            FileUtils.S_IRWXU | FileUtils.S_IRWXG
-                            | FileUtils.S_IWOTH | FileUtils.S_IROTH, -1, -1);
-                    fileReady = true;
-                } catch (IOException e) {
-                    Log.w(TAG, "Unable to make ANR traces file", e);
-                }
-            }
-        }
-
-        return fileReady;
-    }
-
 
     private final void decPersistentCountLocked(ProcessRecord app)
     {
@@ -8684,8 +8635,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         return report;
     }
 
-    void killAppAtUsersRequest(ProcessRecord app, Dialog fromDialog,
-            boolean crashed) {
+    void killAppAtUsersRequest(ProcessRecord app, Dialog fromDialog) {
         synchronized (this) {
             app.crashing = false;
             app.crashingReport = null;
@@ -8698,18 +8648,15 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 app.waitDialog = null;
             }
             if (app.pid > 0 && app.pid != MY_PID) {
-                if (crashed) {
-                    handleAppCrashLocked(app);
-                }
+                handleAppCrashLocked(app);
                 Log.i(ActivityManagerService.TAG, "Killing process "
                         + app.processName
                         + " (pid=" + app.pid + ") at user's request");
                 Process.killProcess(app.pid);
             }
-            
         }
     }
-    
+
     private boolean handleAppCrashLocked(ProcessRecord app) {
         long now = SystemClock.uptimeMillis();
 
@@ -8808,7 +8755,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 crashInfo.throwFileName,
                 crashInfo.throwLineNumber);
 
-        addExceptionToDropBox("crash", r, null, crashInfo);
+        addErrorToDropBox("crash", r, null, null, null, null, null, crashInfo);
 
         crashApplication(r, crashInfo);
     }
@@ -8828,7 +8775,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 app == null ? "system" : (r == null ? "unknown" : r.processName),
                 tag, crashInfo.exceptionMessage);
 
-        addExceptionToDropBox("wtf", r, tag, crashInfo);
+        addErrorToDropBox("wtf", r, null, null, tag, null, null, crashInfo);
 
         if (Settings.Secure.getInt(mContext.getContentResolver(),
                 Settings.Secure.WTF_IS_FATAL, 0) != 0) {
@@ -8865,18 +8812,24 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     }
 
     /**
-     * Write a description of an exception (from a crash or WTF report) to the drop box.
+     * Write a description of an error (crash, WTF, ANR) to the drop box.
      * @param eventType to include in the drop box tag ("crash", "wtf", etc.)
-     * @param r the process which crashed, null for the system server
-     * @param tag supplied by the application (in the case of WTF), or null
-     * @param crashInfo describing the exception
+     * @param process which caused the error, null means the system server
+     * @param activity which triggered the error, null if unknown
+     * @param parent activity related to the error, null if unknown
+     * @param subject line related to the error, null if absent
+     * @param report in long form describing the error, null if absent
+     * @param logFile to include in the report, null if none
+     * @param crashInfo giving an application stack trace, null if absent
      */
-    private void addExceptionToDropBox(String eventType, ProcessRecord r, String tag,
+    private void addErrorToDropBox(String eventType,
+            ProcessRecord process, HistoryRecord activity, HistoryRecord parent,
+            String subject, String report, File logFile,
             ApplicationErrorReport.CrashInfo crashInfo) {
-        String dropboxTag, processName;
-        if (r == null) {
+        String dropboxTag;
+        if (process == null || process.pid == MY_PID) {
             dropboxTag = "system_server_" + eventType;
-        } else if ((r.info.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
+        } else if ((process.info.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
             dropboxTag = "system_app_" + eventType;
         } else {
             dropboxTag = "data_app_" + eventType;
@@ -8885,20 +8838,37 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         DropBoxManager dbox = (DropBoxManager) mContext.getSystemService(Context.DROPBOX_SERVICE);
         if (dbox != null && dbox.isTagEnabled(dropboxTag)) {
             StringBuilder sb = new StringBuilder(1024);
-            sb.append("Build: ").append(Build.FINGERPRINT).append("\n");
-            if (r == null) {
+            if (process == null || process.pid == MY_PID) {
                 sb.append("Process: system_server\n");
             } else {
-                sb.append("Package: ").append(r.info.packageName).append("\n");
-                if (!r.processName.equals(r.info.packageName)) {
-                    sb.append("Process: ").append(r.processName).append("\n");
+                sb.append("Process: ").append(process.processName).append("\n");
+            }
+            if (activity != null) {
+                sb.append("Activity: ").append(activity.shortComponentName).append("\n");
+            }
+            if (parent != null && parent.app != null && parent.app.pid != process.pid) {
+                sb.append("Parent-Process: ").append(parent.app.processName).append("\n");
+            }
+            if (parent != null && parent != activity) {
+                sb.append("Parent-Activity: ").append(parent.shortComponentName).append("\n");
+            }
+            if (subject != null) {
+                sb.append("Subject: ").append(subject).append("\n");
+            }
+            sb.append("Build: ").append(Build.FINGERPRINT).append("\n");
+            sb.append("\n");
+            if (report != null) {
+                sb.append(report);
+            }
+            if (logFile != null) {
+                try {
+                    sb.append(FileUtils.readTextFile(logFile, 128 * 1024, "\n\n[[TRUNCATED]]"));
+                } catch (IOException e) {
+                    Log.e(TAG, "Error reading " + logFile, e);
                 }
             }
-            if (tag != null) {
-                sb.append("Tag: ").append(tag).append("\n");
-            }
             if (crashInfo != null && crashInfo.stackTrace != null) {
-                sb.append("\n").append(crashInfo.stackTrace);
+                sb.append(crashInfo.stackTrace);
             }
             dbox.addText(dropboxTag, sb.toString());
         }
@@ -8924,14 +8894,6 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
         AppErrorResult result = new AppErrorResult();
         synchronized (this) {
-            if (r != null) {
-                // The application has crashed. Send the SIGQUIT to the process so
-                // that it can dump its state.
-                Process.sendSignal(r.pid, Process.SIGNAL_QUIT);
-                //Log.i(TAG, "Current system threads:");
-                //Process.sendSignal(MY_PID, Process.SIGNAL_QUIT);
-            }
-
             if (mController != null) {
                 try {
                     String name = r != null ? r.processName : null;
@@ -10320,7 +10282,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         if (r.startRequested) {
             info.flags |= ActivityManager.RunningServiceInfo.FLAG_STARTED;
         }
-        if (r.app != null && r.app.pid == Process.myPid()) {
+        if (r.app != null && r.app.pid == MY_PID) {
             info.flags |= ActivityManager.RunningServiceInfo.FLAG_SYSTEM_PROCESS;
         }
         if (r.app != null && r.app.persistent) {
@@ -11623,7 +11585,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             }
             if (timeout != null && mLruProcesses.contains(proc)) {
                 Log.w(TAG, "Timeout executing service: " + timeout);
-                appNotRespondingLocked(proc, null, null, "Executing service " + timeout.name);
+                appNotRespondingLocked(proc, null, null, "Executing service " + timeout.shortName);
             } else {
                 Message msg = mHandler.obtainMessage(SERVICE_TIMEOUT_MSG);
                 msg.obj = proc;

@@ -38,6 +38,10 @@ import java.io.IOException;
 public class BootReceiver extends BroadcastReceiver {
     private static final String TAG = "BootReceiver";
 
+    // Negative meaning capture the *last* 64K of the file
+    // (passed to FileUtils.readTextFile)
+    private static final int LOG_SIZE = -65536;
+
     @Override
     public void onReceive(Context context, Intent intent) {
         try {
@@ -67,16 +71,20 @@ public class BootReceiver extends BroadcastReceiver {
     private void logBootEvents(Context context) throws IOException {
         DropBoxManager db = (DropBoxManager) context.getSystemService(Context.DROPBOX_SERVICE);
 
-        String build =
-                "Build: " + Build.FINGERPRINT + "\nKernel: " +
-                FileUtils.readTextFile(new File("/proc/version"), 1024, "...\n");
+        StringBuilder props = new StringBuilder();
+        props.append("Build: ").append(Build.FINGERPRINT).append("\n");
+        props.append("Hardware: ").append(Build.BOARD).append("\n");
+        props.append("Bootloader: ").append(Build.BOOTLOADER).append("\n");
+        props.append("Radio: ").append(Build.RADIO).append("\n");
+        props.append("Kernel: ");
+        props.append(FileUtils.readTextFile(new File("/proc/version"), 1024, "...\n"));
 
         if (SystemProperties.getLong("ro.runtime.firstboot", 0) == 0) {
             String now = Long.toString(System.currentTimeMillis());
             SystemProperties.set("ro.runtime.firstboot", now);
-            if (db != null) db.addText("SYSTEM_BOOT", build);
+            if (db != null) db.addText("SYSTEM_BOOT", props.toString());
         } else {
-            if (db != null) db.addText("SYSTEM_RESTART", build);
+            if (db != null) db.addText("SYSTEM_RESTART", props.toString());
             return;  // Subsequent boot, don't log kernel boot log
         }
 
@@ -98,6 +106,13 @@ public class BootReceiver extends BroadcastReceiver {
         String setting = "logfile:" + filename;
         long lastTime = Settings.Secure.getLong(cr, setting, 0);
         if (lastTime == fileTime) return;  // Already logged this particular file
-        db.addFile(tag, file, DropBoxManager.IS_TEXT);
+        Settings.Secure.putLong(cr, setting, fileTime);
+
+        StringBuilder report = new StringBuilder();
+        report.append("Build: ").append(Build.FINGERPRINT).append("\n");
+        report.append("Kernel: ");
+        report.append(FileUtils.readTextFile(new File("/proc/version"), 1024, "...\n"));
+        report.append(FileUtils.readTextFile(new File(filename), LOG_SIZE, "[[TRUNCATED]]\n"));
+        db.addText(tag, report.toString());
     }
 }

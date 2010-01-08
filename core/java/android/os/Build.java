@@ -53,6 +53,15 @@ public class Build {
     /** The end-user-visible name for the end product. */
     public static final String MODEL = getString("ro.product.model");
 
+    /** @pending The system bootloader version number. */
+    public static final String BOOTLOADER = getString("ro.bootloader");
+
+    /** @pending The radio firmware version number. */
+    public static final String RADIO = getString("gsm.version.baseband");
+
+    /** @pending The device serial number. */
+    public static final String SERIAL = getString("ro.serialno");
+
     /** Various version strings. */
     public static class VERSION {
         /**

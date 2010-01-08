@@ -153,14 +153,16 @@ public class FileUtils
     public static String readTextFile(File file, int max, String ellipsis) throws IOException {
         InputStream input = new FileInputStream(file);
         try {
-            if (max > 0) {  // "head" mode: read the first N bytes
+            long size = file.length();
+            if (max > 0 || (size > 0 && max == 0)) {  // "head" mode: read the first N bytes
+                if (size > 0 && (max == 0 || size < max)) max = (int) size;
                 byte[] data = new byte[max + 1];
                 int length = input.read(data);
                 if (length <= 0) return "";
                 if (length <= max) return new String(data, 0, length);
                 if (ellipsis == null) return new String(data, 0, max);
                 return new String(data, 0, max) + ellipsis;
-            } else if (max < 0) {  // "tail" mode: read it all, keep the last N
+            } else if (max < 0) {  // "tail" mode: keep the last N
                 int len;
                 boolean rolled = false;
                 byte[] last = null, data = null;
@@ -180,7 +182,7 @@ public class FileUtils
                 }
                 if (ellipsis == null || !rolled) return new String(last);
                 return ellipsis + new String(last);
-            } else {  // "cat" mode: read it all
+            } else {  // "cat" mode: size unknown, read it all in streaming fashion
                 ByteArrayOutputStream contents = new ByteArrayOutputStream();
                 int len;
                 byte[] data = new byte[1024];

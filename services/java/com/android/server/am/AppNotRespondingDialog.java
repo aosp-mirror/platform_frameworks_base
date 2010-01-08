@@ -104,8 +104,7 @@ class AppNotRespondingDialog extends BaseErrorDialog {
             switch (msg.what) {
                 case FORCE_CLOSE:
                     // Kill the application.
-                    mService.killAppAtUsersRequest(mProc,
-                            AppNotRespondingDialog.this, true);
+                    mService.killAppAtUsersRequest(mProc, AppNotRespondingDialog.this);
                     break;
                 case WAIT_AND_REPORT:
                 case WAIT:
