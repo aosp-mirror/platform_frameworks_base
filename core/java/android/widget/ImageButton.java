@@ -57,6 +57,11 @@ import java.util.Map;
  * based on the state of the button and the corresponding images
  * defined in the XML.</p>
  *
+ * <p>The order of the {@code &lt;item>} elements is important because they are
+ * evaluated in order. This is why the "normal" button image comes last, because
+ * it will only be applied after {@code android:state_pressed} and {@code
+ * android:state_focused} have both evaluated false.</p>
+ *
  * <p><strong>XML attributes</strong></p>
  * <p>
  * See {@link android.R.styleable#ImageView Button Attributes},
