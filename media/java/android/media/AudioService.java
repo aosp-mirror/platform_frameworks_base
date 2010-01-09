@@ -1438,6 +1438,8 @@ public class AudioService extends IAudioService.Stub {
                     AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
                                                          AudioSystem.DEVICE_STATE_AVAILABLE,
                                                          address);
+                    // Reset A2DP suspend state each time a new sink is connected
+                    AudioSystem.setParameters("A2dpSuspended=false");
                     mConnectedDevices.put( new Integer(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP),
                             address);
                 }
