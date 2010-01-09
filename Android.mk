@@ -165,7 +165,6 @@ LOCAL_SRC_FILES += \
 	telephony/java/com/android/internal/telephony/IExtendedNetworkService.aidl \
 	vpn/java/android/net/vpn/IVpnService.aidl \
 
-LOCAL_SRC_FILES += core/java/android/content/EventLogTags.logtags
 
 # FRAMEWORKS_BASE_JAVA_SRC_DIRS comes from build/core/pathmap.mk
 LOCAL_AIDL_INCLUDES += $(FRAMEWORKS_BASE_JAVA_SRC_DIRS)
