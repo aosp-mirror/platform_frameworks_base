@@ -42,6 +42,12 @@ platforms) and allow you to view the source files in your browser. </p>
  <dt><a href="BluetoothChat/index.html">Bluetooth Chat</a></dt>
   <dd>An application for two-way text messaging over Bluetooth.</dd>
 
+  <dt><a href="BusinessCard/index.html">BusinessCard</a></dt>
+   <dd>An application that demonstrates how to launch the built-in contact
+   picker from within an activity. This sample also uses reflection to ensure
+   that the correct version of the contacts API is used, depending on which
+   API level the application is running under.</dd>
+
  <dt><a href="ContactManager/index.html">Contact Manager</a></dt>
   <dd>An application that demonstrates how to query the system contacts provider 
   using the <code>ContactsContract</code> API, as
