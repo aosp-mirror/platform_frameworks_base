@@ -41,8 +41,6 @@ import android.view.KeyEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
-import android.webkit.plugin.SurfaceDrawingModel;
-import android.webkit.plugin.WebkitPlugin;
 
 import java.util.ArrayList;
 import java.util.Collection;
