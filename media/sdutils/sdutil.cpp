@@ -105,33 +105,33 @@ static int asec_create(const char *id, int sizeMb, const char *fstype,
     String16 sFstype(fstype);
     String16 sKey(key);
 
-    String16 r = gMountService->createSecureCache(sId, sizeMb, sFstype,
-                                                  sKey, ownerUid);
+    String16 r = gMountService->createSecureContainer(sId, sizeMb, sFstype,
+                                                      sKey, ownerUid);
     return 0;
 }
 
 static int asec_finalize(const char *id) {
     String16 sId(id);
-    gMountService->finalizeSecureCache(sId);
+    gMountService->finalizeSecureContainer(sId);
     return 0;
 }
 
 static int asec_destroy(const char *id) {
     String16 sId(id);
-    gMountService->destroySecureCache(sId);
+    gMountService->destroySecureContainer(sId);
     return 0;
 }
 
 static int asec_mount(const char *id, const char *key, int ownerUid) {
     String16 sId(id);
     String16 sKey(key);
-    gMountService->mountSecureCache(sId, sKey, ownerUid);
+    gMountService->mountSecureContainer(sId, sKey, ownerUid);
     return 0;
 }
 
 static int asec_path(const char *id) {
     String16 sId(id);
-    gMountService->getSecureCachePath(sId);
+    gMountService->getSecureContainerPath(sId);
     return 0;
 }
 

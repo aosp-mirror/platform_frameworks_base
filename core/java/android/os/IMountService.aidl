@@ -70,38 +70,38 @@ interface IMountService
     String getVolumeState(String mountPoint);
 
     /*
-     * Creates a secure cache with the specified parameters.
-     * On success, the filesystem cache-path is returned.
+     * Creates a secure container with the specified parameters.
+     * On success, the filesystem container-path is returned.
      */
-    String createSecureCache(String id, int sizeMb, String fstype, String key, int ownerUid);
+    String createSecureContainer(String id, int sizeMb, String fstype, String key, int ownerUid);
 
     /*
-     * Finalize a cache which has just been created and populated.
-     * After finalization, the cache is immutable.
+     * Finalize a container which has just been created and populated.
+     * After finalization, the container is immutable.
      */
-    void finalizeSecureCache(String id);
+    void finalizeSecureContainer(String id);
 
     /*
-     * Destroy a secure cache, and free up all resources associated with it.
+     * Destroy a secure container, and free up all resources associated with it.
      * NOTE: Ensure all references are released prior to deleting.
      */
-    void destroySecureCache(String id);
+    void destroySecureContainer(String id);
 
     /*
-     * Mount a secure cache with the specified key and owner UID.
-     * On success, the filesystem cache-path is returned.
+     * Mount a secure container with the specified key and owner UID.
+     * On success, the filesystem container-path is returned.
      */
-    String mountSecureCache(String id, String key, int ownerUid);
+    String mountSecureContainer(String id, String key, int ownerUid);
 
     /*
-     * Returns the filesystem path of a mounted secure cache.
+     * Returns the filesystem path of a mounted secure container.
      */
-    String getSecureCachePath(String id);
+    String getSecureContainerPath(String id);
 
     /**
-     * Gets an Array of currently known secure cache IDs
+     * Gets an Array of currently known secure container IDs
      */
-    String[] getSecureCacheList();
+    String[] getSecureContainerList();
 
     /**
      * Shuts down the MountService and gracefully unmounts

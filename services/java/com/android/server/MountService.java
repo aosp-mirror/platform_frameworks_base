@@ -888,28 +888,28 @@ class MountService extends IMountService.Stub {
         }
     }
 
-    public String[] getSecureCacheList() throws IllegalStateException {
+    public String[] getSecureContainerList() throws IllegalStateException {
         return mListener.listAsec();
     }
 
-    public String createSecureCache(String id, int sizeMb, String fstype,
+    public String createSecureContainer(String id, int sizeMb, String fstype,
                                     String key, int ownerUid) throws IllegalStateException {
         return mListener.createAsec(id, sizeMb, fstype, key, ownerUid);
     }
 
-    public void finalizeSecureCache(String id) throws IllegalStateException {
+    public void finalizeSecureContainer(String id) throws IllegalStateException {
         mListener.finalizeAsec(id);
     }
 
-    public void destroySecureCache(String id) throws IllegalStateException {
+    public void destroySecureContainer(String id) throws IllegalStateException {
         mListener.destroyAsec(id);
     }
    
-    public String mountSecureCache(String id, String key, int ownerUid) throws IllegalStateException {
+    public String mountSecureContainer(String id, String key, int ownerUid) throws IllegalStateException {
         return mListener.mountAsec(id, key, ownerUid);
     }
 
-    public String getSecureCachePath(String id) throws IllegalStateException {
+    public String getSecureContainerPath(String id) throws IllegalStateException {
         return mListener.getAsecPath(id);
     }
 
