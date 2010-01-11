@@ -14,9 +14,20 @@
  * limitations under the License.
  */
 
+//#define LOG_NDEBUG 0
+#define LOG_TAG "StagefrightMediaScanner"
+#include <utils/Log.h>
+
 #include <media/stagefright/StagefrightMediaScanner.h>
 
 #include "include/StagefrightMetadataRetriever.h"
+
+// Sonivox includes
+#include <libsonivox/eas.h>
+
+// Ogg Vorbis includes
+#include "ivorbiscodec.h"
+#include "ivorbisfile.h"
 
 namespace android {
 
@@ -26,11 +37,144 @@ StagefrightMediaScanner::StagefrightMediaScanner()
 
 StagefrightMediaScanner::~StagefrightMediaScanner() {}
 
+static bool FileHasAcceptableExtension(const char *extension) {
+    static const char *kValidExtensions[] = {
+        ".mp3", ".mp4", ".m4a", ".3gp", ".3gpp", ".3g2", ".3gpp2",
+        ".mpeg", ".ogg", ".mid", ".smf", ".imy", ".wma", ".aac",
+        ".wav", ".amr", ".midi", ".xmf", ".rtttl", ".rtx", ".ota"
+    };
+    static const size_t kNumValidExtensions =
+        sizeof(kValidExtensions) / sizeof(kValidExtensions[0]);
+
+    for (size_t i = 0; i < kNumValidExtensions; ++i) {
+        if (!strcasecmp(extension, kValidExtensions[i])) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+static status_t HandleMIDI(
+        const char *filename, MediaScannerClient *client) {
+    // get the library configuration and do sanity check
+    const S_EAS_LIB_CONFIG* pLibConfig = EAS_Config();
+    if ((pLibConfig == NULL) || (LIB_VERSION != pLibConfig->libVersion)) {
+        LOGE("EAS library/header mismatch\n");
+        return UNKNOWN_ERROR;
+    }
+    EAS_I32 temp;
+
+    // spin up a new EAS engine
+    EAS_DATA_HANDLE easData = NULL;
+    EAS_HANDLE easHandle = NULL;
+    EAS_RESULT result = EAS_Init(&easData);
+    if (result == EAS_SUCCESS) {
+        EAS_FILE file;
+        file.path = filename;
+        file.fd = 0;
+        file.offset = 0;
+        file.length = 0;
+        result = EAS_OpenFile(easData, &file, &easHandle);
+    }
+    if (result == EAS_SUCCESS) {
+        result = EAS_Prepare(easData, easHandle);
+    }
+    if (result == EAS_SUCCESS) {
+        result = EAS_ParseMetaData(easData, easHandle, &temp);
+    }
+    if (easHandle) {
+        EAS_CloseFile(easData, easHandle);
+    }
+    if (easData) {
+        EAS_Shutdown(easData);
+    }
+
+    if (result != EAS_SUCCESS) {
+        return UNKNOWN_ERROR;
+    }
+
+    char buffer[20];
+    sprintf(buffer, "%ld", temp);
+    if (!client->addStringTag("duration", buffer)) return UNKNOWN_ERROR;
+
+    return OK;
+}
+
+static status_t HandleOGG(
+        const char *filename, MediaScannerClient *client) {
+    int duration;
+
+    FILE *file = fopen(filename,"r");
+    if (!file)
+        return UNKNOWN_ERROR;
+
+    OggVorbis_File vf;
+    if (ov_open(file, &vf, NULL, 0) < 0) {
+        return UNKNOWN_ERROR;
+    }
+
+    char **ptr=ov_comment(&vf,-1)->user_comments;
+    while(*ptr){
+        char *val = strstr(*ptr, "=");
+        if (val) {
+            int keylen = val++ - *ptr;
+            char key[keylen + 1];
+            strncpy(key, *ptr, keylen);
+            key[keylen] = 0;
+            if (!client->addStringTag(key, val)) goto failure;
+        }
+        ++ptr;
+    }
+
+    // Duration
+    duration = ov_time_total(&vf, -1);
+    if (duration > 0) {
+        char buffer[20];
+        sprintf(buffer, "%d", duration);
+        if (!client->addStringTag("duration", buffer)) goto failure;
+    }
+
+    ov_clear(&vf); // this also closes the FILE
+    return OK;
+
+failure:
+    ov_clear(&vf); // this also closes the FILE
+    return UNKNOWN_ERROR;
+}
+
 status_t StagefrightMediaScanner::processFile(
         const char *path, const char *mimeType,
         MediaScannerClient &client) {
     client.setLocale(locale());
     client.beginFile();
+
+    const char *extension = strrchr(path, '.');
+
+    if (!extension) {
+        return UNKNOWN_ERROR;
+    }
+
+    if (!FileHasAcceptableExtension(extension)) {
+        client.endFile();
+
+        return UNKNOWN_ERROR;
+    }
+
+    if (!strcasecmp(extension, ".mid")
+            || !strcasecmp(extension, ".smf")
+            || !strcasecmp(extension, ".imy")
+            || !strcasecmp(extension, ".midi")
+            || !strcasecmp(extension, ".xmf")
+            || !strcasecmp(extension, ".rtttl")
+            || !strcasecmp(extension, ".rtx")
+            || !strcasecmp(extension, ".ota")) {
+        return HandleMIDI(path, &client);
+    }
+
+    if (!strcasecmp(extension, ".ogg")) {
+        return HandleOGG(path, &client);
+    }
 
     if (mRetriever->setDataSource(path) == OK
             && mRetriever->setMode(
@@ -66,12 +210,27 @@ status_t StagefrightMediaScanner::processFile(
 }
 
 char *StagefrightMediaScanner::extractAlbumArt(int fd) {
-    if (mRetriever->setDataSource(fd, 0, 0) == OK
+    off_t size = lseek(fd, 0, SEEK_END);
+    if (size < 0) {
+        return NULL;
+    }
+    lseek(fd, 0, SEEK_SET);
+
+    if (mRetriever->setDataSource(fd, 0, size) == OK
             && mRetriever->setMode(
                 METADATA_MODE_FRAME_CAPTURE_ONLY) == OK) {
         MediaAlbumArt *art = mRetriever->extractAlbumArt();
 
-        // TODO: figure out what format the result should be in.
+        if (art != NULL) {
+            char *data = (char *)malloc(art->mSize + 4);
+            *(int32_t *)data = art->mSize;
+            memcpy(&data[4], art->mData, art->mSize);
+
+            delete art;
+            art = NULL;
+
+            return data;
+        }
     }
 
     return NULL;

@@ -20,6 +20,8 @@
 
 #include "include/MP3Extractor.h"
 
+#include "include/ID3.h"
+
 #include <media/stagefright/DataSource.h>
 #include <media/stagefright/MediaBuffer.h>
 #include <media/stagefright/MediaBufferGroup.h>
@@ -667,7 +669,7 @@ status_t MP3Source::read(
         }
 
         // Lost sync.
-        LOGW("lost sync!\n");
+        LOGV("lost sync!\n");
 
         off_t pos = mCurrentPos;
         if (!Resync(mDataSource, mFixedHeader, &pos, NULL)) {
@@ -704,6 +706,63 @@ status_t MP3Source::read(
     *out = buffer;
 
     return OK;
+}
+
+sp<MetaData> MP3Extractor::getMetaData() {
+    sp<MetaData> meta = new MetaData;
+
+    meta->setCString(kKeyMIMEType, "audio/mpeg");
+
+    ID3 id3(mDataSource);
+
+    if (!id3.isValid()) {
+        return meta;
+    }
+
+    struct Map {
+        int key;
+        const char *tag1;
+        const char *tag2;
+    };
+    static const Map kMap[] = {
+        { kKeyAlbum, "TALB", "TAL" },
+        { kKeyArtist, "TPE1", "TP1" },
+        { kKeyComposer, "TCOM", "TCM" },
+        { kKeyGenre, "TCON", "TCO" },
+        { kKeyTitle, "TALB", "TAL" },
+        { kKeyYear, "TYE", "TYER" },
+    };
+    static const size_t kNumMapEntries = sizeof(kMap) / sizeof(kMap[0]);
+
+    for (size_t i = 0; i < kNumMapEntries; ++i) {
+        ID3::Iterator *it = new ID3::Iterator(id3, kMap[i].tag1);
+        if (it->done()) {
+            delete it;
+            it = new ID3::Iterator(id3, kMap[i].tag2);
+        }
+
+        if (it->done()) {
+            delete it;
+            continue;
+        }
+
+        String8 s;
+        it->getString(&s);
+        delete it;
+
+        meta->setCString(kMap[i].key, s);
+    }
+
+    size_t dataSize;
+    String8 mime;
+    const void *data = id3.getAlbumArt(&dataSize, &mime);
+
+    if (data) {
+        meta->setData(kKeyAlbumArt, MetaData::TYPE_NONE, data, dataSize);
+        meta->setCString(kKeyAlbumArtMIME, mime.string());
+    }
+
+    return meta;
 }
 
 bool SniffMP3(

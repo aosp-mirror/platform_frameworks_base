@@ -383,7 +383,7 @@ status_t AVCDecoder::read(
 
                 return OK;
             } else {
-                LOGE("failed to decode frame (res = %d)", res);
+                LOGV("failed to decode frame (res = %d)", res);
                 return UNKNOWN_ERROR;
             }
         }

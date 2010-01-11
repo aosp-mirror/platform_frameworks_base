@@ -31,6 +31,8 @@ class String8;
 
 class DataSource : public RefBase {
 public:
+    static sp<DataSource> CreateFromURI(const char *uri);
+
     DataSource() {}
 
     virtual status_t initCheck() const = 0;

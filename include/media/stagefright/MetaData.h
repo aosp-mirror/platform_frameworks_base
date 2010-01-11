@@ -48,6 +48,15 @@ enum {
     kKeyBufferID          = 'bfID',
     kKeyMaxInputSize      = 'inpS',
     kKeyThumbnailTime     = 'thbT',  // int64_t (usecs)
+
+    kKeyAlbum             = 'albu',  // cstring
+    kKeyArtist            = 'arti',  // cstring
+    kKeyComposer          = 'comp',  // cstring
+    kKeyGenre             = 'genr',  // cstring
+    kKeyTitle             = 'titl',  // cstring
+    kKeyYear              = 'year',  // cstring
+    kKeyAlbumArt          = 'albA',  // compressed image data
+    kKeyAlbumArtMIME      = 'alAM',  // cstring
 };
 
 enum {

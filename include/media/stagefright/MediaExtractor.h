@@ -43,6 +43,10 @@ public:
     virtual sp<MetaData> getTrackMetaData(
             size_t index, uint32_t flags = 0) = 0;
 
+    // Return container specific meta-data. The default implementation
+    // returns an empty metadata object.
+    virtual sp<MetaData> getMetaData();
+
 protected:
     MediaExtractor() {}
     virtual ~MediaExtractor() {}

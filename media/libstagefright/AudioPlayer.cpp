@@ -133,13 +133,14 @@ void AudioPlayer::stop() {
 
     if (mAudioSink.get() != NULL) {
         mAudioSink->stop();
+        mAudioSink->close();
     } else {
         mAudioTrack->stop();
 
         delete mAudioTrack;
         mAudioTrack = NULL;
     }
-    
+
     // Make sure to release any buffer we hold onto so that the
     // source is able to stop().
     if (mInputBuffer != NULL) {
@@ -150,7 +151,7 @@ void AudioPlayer::stop() {
     }
 
     mSource->stop();
-    
+
     mNumFramesPlayed = 0;
     mPositionTimeMediaUs = -1;
     mPositionTimeRealUs = -1;
@@ -259,7 +260,7 @@ void AudioPlayer::fillBuffer(void *data, size_t size) {
 
         mInputBuffer->set_range(mInputBuffer->range_offset() + copy,
                                 mInputBuffer->range_length() - copy);
-                    
+
         size_done += copy;
         size_remaining -= copy;
     }

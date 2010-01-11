@@ -1,0 +1,465 @@
+/*
+ * Copyright (C) 2010 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+//#define LOG_NDEBUG 0
+#define LOG_TAG "ID3"
+#include <utils/Log.h>
+
+#include "../include/ID3.h"
+
+#include <media/stagefright/DataSource.h>
+#include <media/stagefright/MediaDebug.h>
+#include <media/stagefright/Utils.h>
+#include <utils/String8.h>
+
+namespace android {
+
+ID3::ID3(const sp<DataSource> &source)
+    : mIsValid(false),
+      mData(NULL),
+      mSize(0),
+      mFirstFrameOffset(0),
+      mVersion(ID3_UNKNOWN) {
+    mIsValid = parse(source);
+}
+
+ID3::~ID3() {
+    if (mData) {
+        free(mData);
+        mData = NULL;
+    }
+}
+
+bool ID3::isValid() const {
+    return mIsValid;
+}
+
+ID3::Version ID3::version() const {
+    return mVersion;
+}
+
+bool ID3::parse(const sp<DataSource> &source) {
+    struct id3_header {
+        char id[3];
+        uint8_t version_major;
+        uint8_t version_minor;
+        uint8_t flags;
+        uint8_t enc_size[4];
+    };
+
+    id3_header header;
+    if (source->readAt(
+                0, &header, sizeof(header)) != (ssize_t)sizeof(header)) {
+        return false;
+    }
+
+    if (memcmp(header.id, "ID3", 3)) {
+        return false;
+    }
+
+    if (header.version_major == 0xff || header.version_minor == 0xff) {
+        return false;
+    }
+
+    if (header.version_major == 2) {
+        if (header.flags & 0x3f) {
+            // We only support the 2 high bits, if any of the lower bits are
+            // set, we cannot guarantee to understand the tag format.
+            return false;
+        }
+
+        if (header.flags & 0x40) {
+            // No compression scheme has been decided yet, ignore the
+            // tag if compression is indicated.
+
+            return false;
+        }
+    } else if (header.version_major == 3) {
+        if (header.flags & 0x1f) {
+            // We only support the 3 high bits, if any of the lower bits are
+            // set, we cannot guarantee to understand the tag format.
+            return false;
+        }
+    } else {
+        return false;
+    }
+
+    size_t size = 0;
+    for (int32_t i = 0; i < 4; ++i) {
+        if (header.enc_size[i] & 0x80) {
+            return false;
+        }
+
+        size = (size << 7) | header.enc_size[i];
+    }
+
+    mData = (uint8_t *)malloc(size);
+
+    if (mData == NULL) {
+        return false;
+    }
+
+    mSize = size;
+
+    if (source->readAt(sizeof(header), mData, mSize) != (ssize_t)mSize) {
+        return false;
+    }
+
+    if (header.flags & 0x80) {
+        LOGI("removing unsynchronization");
+        removeUnsynchronization();
+    }
+
+    mFirstFrameOffset = 0;
+    if (header.version_major == 3 && (header.flags & 0x40)) {
+        // Version 2.3 has an optional extended header.
+
+        if (mSize < 4) {
+            return false;
+        }
+
+        size_t extendedHeaderSize = U32_AT(&mData[0]) + 4;
+
+        if (extendedHeaderSize > mSize) {
+            return false;
+        }
+
+        mFirstFrameOffset = extendedHeaderSize;
+
+        uint16_t extendedFlags = 0;
+        if (extendedHeaderSize >= 6) {
+            extendedFlags = U16_AT(&mData[4]);
+
+            if (extendedHeaderSize >= 10) {
+                size_t paddingSize = U32_AT(&mData[6]);
+
+                if (mFirstFrameOffset + paddingSize > mSize) {
+                    return false;
+                }
+
+                mSize -= paddingSize;
+            }
+
+            if (extendedFlags & 0x8000) {
+                LOGI("have crc");
+            }
+        }
+    }
+
+    if (header.version_major == 2) {
+        mVersion = ID3_V2_2;
+    } else {
+        CHECK_EQ(header.version_major, 3);
+        mVersion = ID3_V2_3;
+    }
+
+    return true;
+}
+
+void ID3::removeUnsynchronization() {
+    for (size_t i = 0; i + 1 < mSize; ++i) {
+        if (mData[i] == 0xff && mData[i + 1] == 0x00) {
+            memmove(&mData[i + 1], &mData[i + 2], mSize - i - 2);
+            --mSize;
+        }
+    }
+}
+
+ID3::Iterator::Iterator(const ID3 &parent, const char *id)
+    : mParent(parent),
+      mID(NULL),
+      mOffset(mParent.mFirstFrameOffset),
+      mFrameData(NULL),
+      mFrameSize(0) {
+    if (id) {
+        mID = strdup(id);
+    }
+
+    findFrame();
+}
+
+ID3::Iterator::~Iterator() {
+    if (mID) {
+        free(mID);
+        mID = NULL;
+    }
+}
+
+bool ID3::Iterator::done() const {
+    return mFrameData == NULL;
+}
+
+void ID3::Iterator::next() {
+    if (mFrameData == NULL) {
+        return;
+    }
+
+    mOffset += mFrameSize;
+
+    findFrame();
+}
+
+void ID3::Iterator::getID(String8 *id) const {
+    id->setTo("");
+
+    if (mFrameData == NULL) {
+        return;
+    }
+
+    if (mParent.mVersion == ID3_V2_2) {
+        id->setTo((const char *)&mParent.mData[mOffset], 3);
+    } else {
+        CHECK_EQ(mParent.mVersion, ID3_V2_3);
+        id->setTo((const char *)&mParent.mData[mOffset], 4);
+    }
+}
+
+static void convertISO8859ToString8(
+        const uint8_t *data, size_t size,
+        String8 *s) {
+    size_t utf8len = 0;
+    for (size_t i = 0; i < size; ++i) {
+        if (data[i] < 0x80) {
+            ++utf8len;
+        } else {
+            utf8len += 2;
+        }
+    }
+
+    if (utf8len == size) {
+        // Only ASCII characters present.
+
+        s->setTo((const char *)data, size);
+        return;
+    }
+
+    char *tmp = new char[utf8len];
+    char *ptr = tmp;
+    for (size_t i = 0; i < size; ++i) {
+        if (data[i] < 0x80) {
+            *ptr++ = data[i];
+        } else if (data[i] < 0xc0) {
+            *ptr++ = 0xc2;
+            *ptr++ = data[i];
+        } else {
+            *ptr++ = 0xc3;
+            *ptr++ = data[i] - 64;
+        }
+    }
+
+    s->setTo(tmp, utf8len);
+
+    delete[] tmp;
+    tmp = NULL;
+}
+
+void ID3::Iterator::getString(String8 *id) const {
+    id->setTo("");
+
+    if (mFrameData == NULL) {
+        return;
+    }
+
+    size_t n = mFrameSize - getHeaderLength() - 1;
+
+    if (*mFrameData == 0x00) {
+        // ISO 8859-1
+        convertISO8859ToString8(mFrameData + 1, n, id);
+    } else {
+        // UCS-2
+        id->setTo((const char16_t *)(mFrameData + 1), n);
+    }
+}
+
+const uint8_t *ID3::Iterator::getData(size_t *length) const {
+    *length = 0;
+
+    if (mFrameData == NULL) {
+        return NULL;
+    }
+
+    *length = mFrameSize - getHeaderLength();
+
+    return mFrameData;
+}
+
+size_t ID3::Iterator::getHeaderLength() const {
+    if (mParent.mVersion == ID3_V2_2) {
+        return 6;
+    } else {
+        CHECK_EQ(mParent.mVersion, ID3_V2_3);
+        return 10;
+    }
+}
+
+void ID3::Iterator::findFrame() {
+    for (;;) {
+        mFrameData = NULL;
+        mFrameSize = 0;
+
+        if (mParent.mVersion == ID3_V2_2) {
+            if (mOffset + 6 > mParent.mSize) {
+                return;
+            }
+
+            if (!memcmp(&mParent.mData[mOffset], "\0\0\0", 3)) {
+                return;
+            }
+
+            mFrameSize =
+                (mParent.mData[mOffset + 3] << 16)
+                | (mParent.mData[mOffset + 4] << 8)
+                | mParent.mData[mOffset + 5];
+
+            mFrameSize += 6;
+
+            if (mOffset + mFrameSize > mParent.mSize) {
+                LOGV("partial frame at offset %d (size = %d, bytes-remaining = %d)",
+                     mOffset, mFrameSize, mParent.mSize - mOffset - 6);
+                return;
+            }
+
+            mFrameData = &mParent.mData[mOffset + 6];
+
+            if (!mID) {
+                break;
+            }
+
+            char id[4];
+            memcpy(id, &mParent.mData[mOffset], 3);
+            id[3] = '\0';
+
+            if (!strcmp(id, mID)) {
+                break;
+            }
+        } else {
+            CHECK_EQ(mParent.mVersion, ID3_V2_3);
+
+            if (mOffset + 10 > mParent.mSize) {
+                return;
+            }
+
+            if (!memcmp(&mParent.mData[mOffset], "\0\0\0\0", 4)) {
+                return;
+            }
+
+            mFrameSize = 10 + U32_AT(&mParent.mData[mOffset + 4]);
+
+            if (mOffset + mFrameSize > mParent.mSize) {
+                LOGV("partial frame at offset %d (size = %d, bytes-remaining = %d)",
+                     mOffset, mFrameSize, mParent.mSize - mOffset - 10);
+                return;
+            }
+
+            mFrameData = &mParent.mData[mOffset + 10];
+
+            if (!mID) {
+                break;
+            }
+
+            char id[5];
+            memcpy(id, &mParent.mData[mOffset], 4);
+            id[4] = '\0';
+
+            if (!strcmp(id, mID)) {
+                break;
+            }
+        }
+
+        mOffset += mFrameSize;
+    }
+}
+
+static size_t StringSize(const uint8_t *start, uint8_t encoding) {
+    if (encoding== 0x00) {
+        // ISO 8859-1
+        return strlen((const char *)start) + 1;
+    }
+
+    // UCS-2
+    size_t n = 0;
+    while (start[n] != '\0' || start[n + 1] != '\0') {
+        n += 2;
+    }
+
+    return n;
+}
+
+const void *
+ID3::getAlbumArt(size_t *length, String8 *mime) const {
+    *length = 0;
+    mime->setTo("");
+
+    Iterator it(*this, mVersion == ID3_V2_3 ? "APIC" : "PIC");
+
+    while (!it.done()) {
+        size_t size;
+        const uint8_t *data = it.getData(&size);
+
+        if (mVersion == ID3_V2_3) {
+            uint8_t encoding = data[0];
+            mime->setTo((const char *)&data[1]);
+            size_t mimeLen = strlen((const char *)&data[1]) + 1;
+
+            uint8_t picType = data[1 + mimeLen];
+#if 0
+            if (picType != 0x03) {
+                // Front Cover Art
+                it.next();
+                continue;
+            }
+#endif
+
+            size_t descLen = StringSize(&data[2 + mimeLen], encoding);
+
+            *length = size - 2 - mimeLen - descLen;
+
+            return &data[2 + mimeLen + descLen];
+        } else {
+            uint8_t encoding = data[0];
+
+            if (!memcmp(&data[1], "PNG", 3)) {
+                mime->setTo("image/png");
+            } else if (!memcmp(&data[1], "JPG", 3)) {
+                mime->setTo("image/jpeg");
+            } else if (!memcmp(&data[1], "-->", 3)) {
+                mime->setTo("text/plain");
+            } else {
+                return NULL;
+            }
+
+#if 0
+            uint8_t picType = data[4];
+            if (picType != 0x03) {
+                // Front Cover Art
+                it.next();
+                continue;
+            }
+#endif
+
+            size_t descLen = StringSize(&data[5], encoding);
+
+            *length = size - 5 - descLen;
+
+            return &data[5 + descLen];
+        }
+    }
+
+    return NULL;
+}
+
+
+}  // namespace android

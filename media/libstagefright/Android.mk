@@ -44,14 +44,17 @@ endif
 LOCAL_C_INCLUDES:= \
 	$(JNI_H_INCLUDE) \
         $(TOP)/external/opencore/extern_libs_v2/khronos/openmax/include \
-        $(TOP)/external/opencore/android
+        $(TOP)/external/opencore/android \
+        $(TOP)/external/tremor/Tremor
 
 LOCAL_SHARED_LIBRARIES := \
         libbinder         \
         libmedia          \
         libutils          \
         libcutils         \
-        libui
+        libui             \
+        libsonivox        \
+        libvorbisidec
 
 ifeq ($(BUILD_WITH_FULL_STAGEFRIGHT),true)
 
@@ -62,7 +65,8 @@ LOCAL_STATIC_LIBRARIES := \
         libstagefright_amrwbdec \
         libstagefright_avcdec \
         libstagefright_m4vh263dec \
-        libstagefright_mp3dec
+        libstagefright_mp3dec \
+        libstagefright_id3
 
 LOCAL_SHARED_LIBRARIES += \
         libstagefright_amrnb_common \

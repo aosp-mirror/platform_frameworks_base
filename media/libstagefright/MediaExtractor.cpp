@@ -23,15 +23,17 @@
 #include "include/MPEG4Extractor.h"
 #include "include/WAVExtractor.h"
 
-#include <media/stagefright/CachingDataSource.h>
 #include <media/stagefright/DataSource.h>
-#include <media/stagefright/FileSource.h>
-#include <media/stagefright/HTTPDataSource.h>
 #include <media/stagefright/MediaDefs.h>
 #include <media/stagefright/MediaExtractor.h>
+#include <media/stagefright/MetaData.h>
 #include <utils/String8.h>
 
 namespace android {
+
+sp<MetaData> MediaExtractor::getMetaData() {
+    return new MetaData;
+}
 
 // static
 sp<MediaExtractor> MediaExtractor::Create(
@@ -40,7 +42,7 @@ sp<MediaExtractor> MediaExtractor::Create(
     if (mime == NULL) {
         float confidence;
         if (!source->sniff(&tmp, &confidence)) {
-            LOGE("FAILED to autodetect media content.");
+            LOGV("FAILED to autodetect media content.");
 
             return NULL;
         }
@@ -68,16 +70,7 @@ sp<MediaExtractor> MediaExtractor::Create(
 // static
 sp<MediaExtractor> MediaExtractor::CreateFromURI(
         const char *uri, const char *mime) {
-    sp<DataSource> source;
-    if (!strncasecmp("file://", uri, 7)) {
-        source = new FileSource(uri + 7);
-    } else if (!strncasecmp("http://", uri, 7)) {
-        source = new HTTPDataSource(uri);
-        source = new CachingDataSource(source, 64 * 1024, 10);
-    } else {
-        // Assume it's a filename.
-        source = new FileSource(uri);
-    }
+    sp<DataSource> source = DataSource::CreateFromURI(uri);
 
     if (source == NULL || source->initCheck() != OK) {
         return NULL;

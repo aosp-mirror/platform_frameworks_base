@@ -1,19 +1,18 @@
 /*
-**
-** Copyright 2009, The Android Open Source Project
-**
-** Licensed under the Apache License, Version 2.0 (the "License");
-** you may not use this file except in compliance with the License.
-** You may obtain a copy of the License at
-**
-**     http://www.apache.org/licenses/LICENSE-2.0
-**
-** Unless required by applicable law or agreed to in writing, software
-** distributed under the License is distributed on an "AS IS" BASIS,
-** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-** See the License for the specific language governing permissions and
-** limitations under the License.
-*/
+ * Copyright (C) 2009 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 //#define LOG_NDEBUG 0
 #define LOG_TAG "StagefrightMetadataRetriever"
@@ -33,7 +32,9 @@
 
 namespace android {
 
-StagefrightMetadataRetriever::StagefrightMetadataRetriever() {
+StagefrightMetadataRetriever::StagefrightMetadataRetriever()
+    : mParsedMetaData(false),
+      mAlbumArt(NULL) {
     LOGV("StagefrightMetadataRetriever()");
 
     DataSource::RegisterDefaultSniffers();
@@ -42,23 +43,66 @@ StagefrightMetadataRetriever::StagefrightMetadataRetriever() {
 
 StagefrightMetadataRetriever::~StagefrightMetadataRetriever() {
     LOGV("~StagefrightMetadataRetriever()");
+
+    delete mAlbumArt;
+    mAlbumArt = NULL;
+
     mClient.disconnect();
 }
 
 status_t StagefrightMetadataRetriever::setDataSource(const char *uri) {
     LOGV("setDataSource(%s)", uri);
 
-    mExtractor = MediaExtractor::CreateFromURI(uri);
+    mParsedMetaData = false;
+    mMetaData.clear();
+    delete mAlbumArt;
+    mAlbumArt = NULL;
 
-    return mExtractor.get() != NULL ? OK : UNKNOWN_ERROR;
+    mSource = DataSource::CreateFromURI(uri);
+
+    if (mSource == NULL) {
+        return UNKNOWN_ERROR;
+    }
+
+    mExtractor = MediaExtractor::Create(mSource);
+
+    if (mExtractor == NULL) {
+        mSource.clear();
+
+        return UNKNOWN_ERROR;
+    }
+
+    return OK;
 }
 
+// Warning caller retains ownership of the filedescriptor! Dup it if necessary.
 status_t StagefrightMetadataRetriever::setDataSource(
         int fd, int64_t offset, int64_t length) {
+    fd = dup(fd);
+
     LOGV("setDataSource(%d, %lld, %lld)", fd, offset, length);
 
-    mExtractor = MediaExtractor::Create(
-            new FileSource(fd, offset, length));
+    mParsedMetaData = false;
+    mMetaData.clear();
+    delete mAlbumArt;
+    mAlbumArt = NULL;
+
+    mSource = new FileSource(fd, offset, length);
+
+    status_t err;
+    if ((err = mSource->initCheck()) != OK) {
+        mSource.clear();
+
+        return err;
+    }
+
+    mExtractor = MediaExtractor::Create(mSource);
+
+    if (mExtractor == NULL) {
+        mSource.clear();
+
+        return UNKNOWN_ERROR;
+    }
 
     return OK;
 }
@@ -184,14 +228,98 @@ VideoFrame *StagefrightMetadataRetriever::captureFrame() {
 MediaAlbumArt *StagefrightMetadataRetriever::extractAlbumArt() {
     LOGV("extractAlbumArt (extractor: %s)", mExtractor.get() != NULL ? "YES" : "NO");
 
+    if (mExtractor == NULL) {
+        return NULL;
+    }
+
+    if (!mParsedMetaData) {
+        parseMetaData();
+
+        mParsedMetaData = true;
+    }
+
+    if (mAlbumArt) {
+        return new MediaAlbumArt(*mAlbumArt);
+    }
+
     return NULL;
 }
 
 const char *StagefrightMetadataRetriever::extractMetadata(int keyCode) {
-    LOGV("extractMetadata %d (extractor: %s)",
-         keyCode, mExtractor.get() != NULL ? "YES" : "NO");
+    LOGV("extractMetadata %d", keyCode);
 
-    return NULL;
+    if (mExtractor == NULL) {
+        return NULL;
+    }
+
+    if (!mParsedMetaData) {
+        parseMetaData();
+
+        mParsedMetaData = true;
+    }
+
+    ssize_t index = mMetaData.indexOfKey(keyCode);
+
+    if (index < 0) {
+        return NULL;
+    }
+
+    return strdup(mMetaData.valueAt(index).string());
 }
+
+void StagefrightMetadataRetriever::parseMetaData() {
+    sp<MetaData> meta = mExtractor->getMetaData();
+
+    struct Map {
+        int from;
+        int to;
+    };
+    static const Map kMap[] = {
+        { kKeyAlbum, METADATA_KEY_ALBUM },
+        { kKeyArtist, METADATA_KEY_ARTIST },
+        { kKeyComposer, METADATA_KEY_COMPOSER },
+        { kKeyGenre, METADATA_KEY_GENRE },
+        { kKeyTitle, METADATA_KEY_TITLE },
+        { kKeyYear, METADATA_KEY_YEAR },
+    };
+    static const size_t kNumMapEntries = sizeof(kMap) / sizeof(kMap[0]);
+
+    for (size_t i = 0; i < kNumMapEntries; ++i) {
+        const char *value;
+        if (meta->findCString(kMap[i].from, &value)) {
+            mMetaData.add(kMap[i].to, String8(value));
+        }
+    }
+
+    const void *data;
+    uint32_t type;
+    size_t dataSize;
+    if (meta->findData(kKeyAlbumArt, &type, &data, &dataSize)) {
+        mAlbumArt = new MediaAlbumArt;
+        mAlbumArt->mSize = dataSize;
+        mAlbumArt->mData = new uint8_t[dataSize];
+        memcpy(mAlbumArt->mData, data, dataSize);
+    }
+
+    // The overall duration is the duration of the longest track.
+    int64_t maxDurationUs = 0;
+    for (size_t i = 0; i < mExtractor->countTracks(); ++i) {
+        sp<MetaData> trackMeta = mExtractor->getTrackMetaData(i);
+
+        int64_t durationUs;
+        if (trackMeta->findInt64(kKeyDuration, &durationUs)) {
+            if (durationUs > maxDurationUs) {
+                maxDurationUs = durationUs;
+            }
+        }
+    }
+
+    // The duration value is a string representing the duration in ms.
+    char tmp[32];
+    sprintf(tmp, "%lld", (maxDurationUs + 500) / 1000);
+
+    mMetaData.add(METADATA_KEY_DURATION, String8(tmp));
+}
+
 
 }  // namespace android

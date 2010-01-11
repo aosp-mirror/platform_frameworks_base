@@ -34,6 +34,8 @@ public:
     virtual sp<MediaSource> getTrack(size_t index);
     virtual sp<MetaData> getTrackMetaData(size_t index, uint32_t flags);
 
+    virtual sp<MetaData> getMetaData();
+
 protected:
     virtual ~MP3Extractor();
 

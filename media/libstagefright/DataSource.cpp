@@ -19,7 +19,10 @@
 #include "include/MPEG4Extractor.h"
 #include "include/WAVExtractor.h"
 
+#include <media/stagefright/CachingDataSource.h>
 #include <media/stagefright/DataSource.h>
+#include <media/stagefright/FileSource.h>
+#include <media/stagefright/HTTPDataSource.h>
 #include <media/stagefright/MediaErrors.h>
 #include <utils/String8.h>
 
@@ -89,6 +92,26 @@ void DataSource::RegisterDefaultSniffers() {
     RegisterSniffer(SniffMPEG4);
     RegisterSniffer(SniffAMR);
     RegisterSniffer(SniffWAV);
+}
+
+// static
+sp<DataSource> DataSource::CreateFromURI(const char *uri) {
+    sp<DataSource> source;
+    if (!strncasecmp("file://", uri, 7)) {
+        source = new FileSource(uri + 7);
+    } else if (!strncasecmp("http://", uri, 7)) {
+        source = new HTTPDataSource(uri);
+        source = new CachingDataSource(source, 64 * 1024, 10);
+    } else {
+        // Assume it's a filename.
+        source = new FileSource(uri);
+    }
+
+    if (source == NULL || source->initCheck() != OK) {
+        return NULL;
+    }
+
+    return source;
 }
 
 }  // namespace android
