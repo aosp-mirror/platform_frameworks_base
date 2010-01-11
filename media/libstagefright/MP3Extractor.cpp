@@ -557,7 +557,7 @@ MP3Source::MP3Source(
       mStarted(false),
       mByteNumber(byte_number),
       mGroup(NULL) {
-    memcpy (mTableOfContents, table_of_contents, strlen(table_of_contents));
+    memcpy (mTableOfContents, table_of_contents, sizeof(mTableOfContents));
 }
 
 MP3Source::~MP3Source() {
