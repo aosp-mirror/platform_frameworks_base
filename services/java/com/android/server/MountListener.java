@@ -203,7 +203,7 @@ final class MountListener implements Runnable {
             // FMT: NNN Volume <label> <mountpoint> bad removal (<major>:<minor>)
             mService.notifyMediaBadRemoval(cooked[3]);
         } else {
-            Log.d(TAG, "Unhandled event {" + raw + "}");
+            Log.w(TAG, "Unhandled event {" + raw + "}");
         }
     }
     
@@ -220,7 +220,7 @@ final class MountListener implements Runnable {
      */
     private void sendCommand(String command, String argument) {
         synchronized (this) {
-            Log.d(TAG, "sendCommand {" + command + "} {" + argument + "}");
+            // Log.d(TAG, "sendCommand {" + command + "} {" + argument + "}");
             if (mOutputStream == null) {
                 Log.e(TAG, "No connection to Vold", new IllegalStateException());
             } else {

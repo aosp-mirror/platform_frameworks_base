@@ -165,7 +165,6 @@ class MountService extends IMountService.Stub {
                     cr, Settings.Secure.MOUNT_UMS_AUTOSTART, 0) == 1);
 
             if (newUmsAutostart != mAutoStartUms) {
-                Log.d(TAG, "Changing UMS autostart to " + newUmsAutostart);
                 mAutoStartUms = newUmsAutostart;
             }
 
@@ -173,14 +172,12 @@ class MountService extends IMountService.Stub {
                     cr, Settings.Secure.MOUNT_UMS_PROMPT, 1) == 1);
 
             if (newUmsPrompt != mPromptUms) {
-                Log.d(TAG, "Changing UMS prompt to " + newUmsPrompt);
                 mPromptUms = newUmsAutostart;
             }
 
             boolean newUmsNotifyEnabled = (Settings.Secure.getInt(
                     cr, Settings.Secure.MOUNT_UMS_NOTIFY_ENABLED, 1) == 1);
 
-            Log.d(TAG, "new notify enabled = " + newUmsNotifyEnabled);
             if (mUmsEnabled) {
                 if (newUmsNotifyEnabled) {
                     Intent intent = new Intent();
@@ -195,7 +192,6 @@ class MountService extends IMountService.Stub {
                 }
             }
             if (newUmsNotifyEnabled != mUmsActiveNotify) {
-                Log.d(TAG, "Changing UMS active notification to " + newUmsNotifyEnabled);
                 mUmsActiveNotify = newUmsNotifyEnabled;
             }
         }
@@ -219,7 +215,7 @@ class MountService extends IMountService.Stub {
             throw new SecurityException("Requires SHUTDOWN permission");
         }
 
-        Log.d(TAG, "Shutting down");
+        Log.i(TAG, "Shutting down");
         String state = Environment.getExternalStorageState();
 
         if (state.equals(Environment.MEDIA_SHARED)) {
@@ -453,7 +449,6 @@ class MountService extends IMountService.Stub {
                                  .equals(Environment.MEDIA_MOUNTED)) {
                         try {
                             mountMedia(Environment.getExternalStorageDirectory().getPath());
-                            Log.d(TAG, "Connection-mount suceeded");
                         } catch (Exception ex) {
                             Log.w(TAG, "Connection-mount failed");
                         }
@@ -578,7 +573,6 @@ class MountService extends IMountService.Stub {
         new Thread() {
             public void run() {
                 try {
-                    Log.d(TAG, "Mounting media after insertion");
                     mountMedia(path);
                 } catch (Exception ex) {
                     Log.w(TAG, "Failed to mount media on insertion", ex);
