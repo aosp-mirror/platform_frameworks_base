@@ -2998,8 +2998,11 @@ public class WebView extends AbsoluteLayout
 
     private void drawLayers(Canvas canvas) {
         if (mRootLayer != 0) {
-            float scrollY = Math.max(mScrollY - getTitleHeight(), 0);
+            int scrollY = computeVerticalScrollOffset();
+            int viewHeight = getHeight() - getVisibleTitleHeight();
+
             nativeDrawLayers(mRootLayer, mScrollX, scrollY,
+                             getWidth(), viewHeight,
                              mActualScale, canvas);
         }
     }
@@ -6361,7 +6364,8 @@ public class WebView extends AbsoluteLayout
     private native boolean  nativeLayersHaveAnimations(int layer);
     private native void     nativeUpdateLayers(int layer, int updates);
     private native void     nativeDrawLayers(int layer,
-                                             float scrollX, float scrollY,
+                                             int scrollX, int scrollY,
+                                             int width, int height,
                                              float scale, Canvas canvas);
     private native void     nativeDrawMatches(Canvas canvas);
     private native void     nativeDrawSelectionPointer(Canvas content,
