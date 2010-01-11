@@ -286,6 +286,7 @@ public class SQLiteDatabase extends SQLiteClosable {
             close();
         } finally {
             Log.e(TAG, "Removing corrupt database: " + mPath);
+            EventLog.writeEvent(EVENT_DB_CORRUPT, mPath);
             // Delete the corrupt file.  Don't re-create it now -- that would just confuse people
             // -- but the next time someone tries to open it, they can set it up from scratch.
             new File(mPath).delete();

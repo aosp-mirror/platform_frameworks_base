@@ -289,11 +289,11 @@ Alternate Resources</a>.
 compatibility features that together manage the rendering of application
 resources in an appropriate way for the current device screen. The platform
 handles most of the work of rendering your application, but also gives you two
-key ways to control the way your application is displayed, if you need or want
+key ways to control how your application is displayed, if you need or want
 to use them:</p>
 
 <ul>
-  <li>The platform provides a set of resource qualifiers that let you provide
+  <li>The platform supports a set of resource qualifiers that let you provide
 size- and density-specific resources, if needed. The qualifiers for 
 size-specific resources are <code>large</code>, <code>normal</code>, and
 <code>small</code>, and those for density-specific resources are
@@ -303,7 +303,7 @@ size-specific resources are <code>large</code>, <code>normal</code>, and
   <li>The platform also provides a 
 <a href="{@docRoot}guide/topics/manifest/supports-screens-element.html">
 <code>&lt;supports-screens&gt;</code></a>
-element, whose attributes
+manifest element, whose attributes
 <code>android:largeScreens</code>, <code>android:normalScreens</code>, and
 <code>android:smallScreens</code> let you specify what generalized screen sizes
 your application supports. A fourth attribute, <code>android:anyDensity</code>,
