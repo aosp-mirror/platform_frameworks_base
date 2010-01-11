@@ -68,7 +68,8 @@ see <a href="{@docRoot}sdk/adding-components.html">Adding SDK Components</a>.
 the latest documentation package. The documentation covers all versions of the
 API and lets you filter out those versions that your application won't support.
 Once installed, the documentation is also available to you directly from the
-Eclipse IDE. </p>
+Eclipse IDE. When you are online, you can always access the latest documentation
+at the Android Developers site.</p>
 
 <p><strong>5. Download other SDK components</strong></p>
 
