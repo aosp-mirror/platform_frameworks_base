@@ -21,6 +21,7 @@ import java.util.List;
 
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
@@ -31,8 +32,6 @@ import android.content.pm.Signature;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.SystemProperties;
 import android.util.Log;
-import android.webkit.plugin.NativePlugin;
-import android.webkit.plugin.WebkitPlugin;
 
 /**
  * Class for managing the relationship between the {@link WebView} and installed
@@ -42,12 +41,6 @@ import android.webkit.plugin.WebkitPlugin;
  * @hide pending API solidification
  */
 public class PluginManager {
-
-    private class PluginInfo {
-        public PackageInfo packageInfo;
-        public boolean isNative;
-        public Class<? extends WebkitPlugin> pluginClass;
-    }
 
     /**
      * Service Action: A plugin wishes to be loaded in the WebView must provide
@@ -75,7 +68,7 @@ public class PluginManager {
 
     private final Context mContext;
 
-    private ArrayList<PluginInfo> mPluginInfoCache;
+    private ArrayList<PackageInfo> mPackageInfoCache;
 
     // Only plugin matches one of the signatures in the list can be loaded
     // inside the WebView process
@@ -87,7 +80,7 @@ public class PluginManager {
 
     private PluginManager(Context context) {
         mContext = context;
-        mPluginInfoCache = new ArrayList<PluginInfo>();
+        mPackageInfoCache = new ArrayList<PackageInfo>();
     }
 
     public static synchronized PluginManager getInstance(Context context) {
@@ -122,10 +115,10 @@ public class PluginManager {
                 PLUGIN_ACTION), PackageManager.GET_SERVICES
                 | PackageManager.GET_META_DATA);
 
-        synchronized(mPluginInfoCache) {
+        synchronized(mPackageInfoCache) {
 
             // clear the list of existing packageInfo objects
-            mPluginInfoCache.clear();
+            mPackageInfoCache.clear();
 
             for (ResolveInfo info : plugins) {
 
@@ -192,9 +185,6 @@ public class PluginManager {
                     }
                 }
 
-                PluginInfo pluginInfo = new PluginInfo();
-                pluginInfo.packageInfo = pkgInfo;
-
                 // determine the type of plugin from the manifest
                 if (serviceInfo.metaData == null) {
                     Log.e(LOGTAG, "The plugin '" + serviceInfo.name + "' has no type defined");
@@ -202,9 +192,7 @@ public class PluginManager {
                 }
 
                 String pluginType = serviceInfo.metaData.getString(PLUGIN_TYPE);
-                if (TYPE_NATIVE.equals(pluginType)) {
-                    pluginInfo.isNative = true;
-                } else {
+                if (!TYPE_NATIVE.equals(pluginType)) {
                     Log.e(LOGTAG, "Unrecognized plugin type: " + pluginType);
                     continue;
                 }
@@ -212,17 +200,11 @@ public class PluginManager {
                 try {
                     Class<?> cls = getPluginClass(serviceInfo.packageName, serviceInfo.name);
 
-                    boolean classFound = false;
-                    for(Class<?> implemented : cls.getInterfaces()) {
-                        if (pluginInfo.isNative && implemented.equals(NativePlugin.class)) {
-                            pluginInfo.pluginClass = cls.asSubclass(WebkitPlugin.class);
-                            classFound = true;
-                            break;
-                        }
-                    }
+                    //TODO implement any requirements of the plugin class here!
+                    boolean classFound = true;
 
                     if (!classFound) {
-                        Log.e(LOGTAG, "The plugin's class'" + serviceInfo.name + "' does not extend the appropriate interface.");
+                        Log.e(LOGTAG, "The plugin's class' " + serviceInfo.name + "' does not extend the appropriate class.");
                         continue;
                     }
 
@@ -235,7 +217,7 @@ public class PluginManager {
                 }
 
                 // if all checks have passed then make the plugin available
-                mPluginInfoCache.add(pluginInfo);
+                mPackageInfoCache.add(pkgInfo);
                 directories.add(directory);
             }
         }
@@ -252,9 +234,8 @@ public class PluginManager {
         }
 
         // must be synchronized to ensure the consistency of the cache
-        synchronized(mPluginInfoCache) {
-            for (PluginInfo pluginInfo : mPluginInfoCache) {
-                PackageInfo pkgInfo = pluginInfo.packageInfo;
+        synchronized(mPackageInfoCache) {
+            for (PackageInfo pkgInfo : mPackageInfoCache) {
                 if (pluginLib.startsWith(pkgInfo.applicationInfo.dataDir)) {
                     return pkgInfo.packageName;
                 }
@@ -267,39 +248,6 @@ public class PluginManager {
 
     String getPluginSharedDataDirectory() {
         return mContext.getDir("plugins", 0).getPath();
-    }
-
-    /* package */
-    WebkitPlugin getPluginInstance(String pkgName, int npp) {
-
-        // must be synchronized to ensure the consistency of the cache
-        synchronized(mPluginInfoCache) {
-
-            // lookup plugin based on pkgName and instantiate if possible.
-            for (PluginInfo pluginInfo : mPluginInfoCache) {
-
-                if (pluginInfo.packageInfo.packageName.equals(pkgName)) {
-
-                    try {
-                        WebkitPlugin webkitPlugin = pluginInfo.pluginClass.newInstance();
-
-                        if (pluginInfo.isNative) {
-                            NativePlugin nativePlugin = (NativePlugin) webkitPlugin;
-                            nativePlugin.initializePlugin(npp, mContext);
-                        }
-
-                        return webkitPlugin;
-                    } catch (Exception e) {
-                        // Any number of things could have happened. Log the exception and
-                        // return null. Careful not to use Log.e(LOGTAG, "String", e)
-                        // because that reports the exception to the checkin service.
-                        Log.e(LOGTAG, Log.getStackTraceString(e));
-                    }
-                    break;
-                }
-            }
-        }
-        return null;
     }
 
     /* package */
