@@ -118,11 +118,19 @@ class HTML5VideoViewProxy extends Handler
 
         public static void play(String url, int time, HTML5VideoViewProxy proxy,
                 WebChromeClient client) {
+            if (mCurrentProxy == proxy) {
+                if (!mVideoView.isPlaying()) {
+                    mVideoView.start();
+                }
+                return;
+            }
+
             if (mCurrentProxy != null) {
                 // Some other video is already playing. Notify the caller that its playback ended.
                 proxy.playbackEnded();
                 return;
             }
+
             mCurrentProxy = proxy;
             // Create a FrameLayout that will contain the VideoView and the
             // progress view (if any).
