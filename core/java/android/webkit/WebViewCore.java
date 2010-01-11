@@ -2236,10 +2236,11 @@ final class WebViewCore {
     }
 
     // called by JNI
-    private void requestKeyboard(boolean showKeyboard) {
+    private void requestKeyboard(boolean showKeyboard, boolean isTextView) {
         if (mWebView != null) {
             Message.obtain(mWebView.mPrivateHandler,
-                    WebView.REQUEST_KEYBOARD, showKeyboard ? 1 : 0, 0)
+                    WebView.REQUEST_KEYBOARD, showKeyboard ? 1 : 0,
+                    isTextView ? 1 : 0)
                     .sendToTarget();
         }
     }
