@@ -1316,13 +1316,14 @@ final class WebViewCore {
 
                         case VALID_NODE_BOUNDS: {
                             MotionUpData motionUpData = (MotionUpData) msg.obj;
-                            boolean result = nativeValidNodeAndBounds(
+                            if (!nativeValidNodeAndBounds(
                                     motionUpData.mFrame, motionUpData.mNode,
-                                    motionUpData.mBounds);
+                                    motionUpData.mBounds)) {
+                                nativeUpdateFrameCache();
+                            }
                             Message message = mWebView.mPrivateHandler
                                     .obtainMessage(WebView.DO_MOTION_UP,
-                                    motionUpData.mX, motionUpData.mY,
-                                    new Boolean(result));
+                                    motionUpData.mX, motionUpData.mY);
                             mWebView.mPrivateHandler.sendMessageAtFrontOfQueue(
                                     message);
                             break;

@@ -5129,12 +5129,12 @@ public class WebView extends AbsoluteLayout
             mWebViewCore.sendMessageAtFrontOfQueue(EventHub.VALID_NODE_BOUNDS,
                     motionUpData);
         } else {
-            doMotionUp(contentX, contentY, false);
+            doMotionUp(contentX, contentY);
         }
     }
 
-    private void doMotionUp(int contentX, int contentY, boolean useNavCache) {
-        if (nativeMotionUp(contentX, contentY, useNavCache ? mNavSlop : 0)) {
+    private void doMotionUp(int contentX, int contentY) {
+        if (nativeMotionUp(contentX, contentY, mNavSlop)) {
             if (mLogEvent) {
                 Checkin.updateStats(mContext.getContentResolver(),
                         Checkin.Stats.Tag.BROWSER_SNAP_CENTER, 1, 0.0);
@@ -5763,7 +5763,7 @@ public class WebView extends AbsoluteLayout
                     break;
 
                 case DO_MOTION_UP:
-                    doMotionUp(msg.arg1, msg.arg2, (Boolean) msg.obj);
+                    doMotionUp(msg.arg1, msg.arg2);
                     break;
 
                 case SHOW_FULLSCREEN:
