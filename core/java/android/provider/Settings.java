@@ -2942,7 +2942,13 @@ public final class Settings {
          */
         public static final String MOUNT_UMS_NOTIFY_ENABLED = "mount_ums_notify_enabled";
 
-        
+        /**
+         * If nonzero, ANRs in invisible background processes bring up a dialog.
+         * Otherwise, the process will be silently killed.
+         * @hide
+         */
+        public static final String ANR_SHOW_BACKGROUND = "anr_show_background";
+
         /**
          * @hide
          */

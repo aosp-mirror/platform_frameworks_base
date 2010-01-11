@@ -62,8 +62,7 @@ class AppWaitingForDebuggerDialog extends BaseErrorDialog {
             switch (msg.what) {
                 case 1:
                     // Kill the application.
-                    mService.killAppAtUsersRequest(mProc,
-                            AppWaitingForDebuggerDialog.this, true);
+                    mService.killAppAtUsersRequest(mProc, AppWaitingForDebuggerDialog.this);
                     break;
             }
         }

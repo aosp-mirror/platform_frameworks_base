@@ -305,6 +305,7 @@ public final class DropBoxManagerService extends IDropBoxManagerService.Stub {
             if (!match) continue;
 
             numFound++;
+            if (doPrint) out.append("========================================\n");
             out.append(date).append(" ").append(entry.tag == null ? "(no tag)" : entry.tag);
             if (entry.file == null) {
                 out.append(" (no file)\n");
@@ -339,6 +340,12 @@ public final class DropBoxManagerService extends IDropBoxManagerService.Stub {
                             if (n <= 0) break;
                             out.append(buf, 0, n);
                             newline = (buf[n - 1] == '\n');
+
+                            // Flush periodically when printing to avoid out-of-memory.
+                            if (out.length() > 65536) {
+                                pw.write(out.toString());
+                                out.setLength(0);
+                            }
                         }
                         if (!newline) out.append("\n");
                     } else {

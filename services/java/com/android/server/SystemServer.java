@@ -74,8 +74,6 @@ class ServerThread extends Thread {
         EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_SYSTEM_RUN,
             SystemClock.uptimeMillis());
 
-        ActivityManagerService.prepareTraceFile(false);     // create dir
-
         Looper.prepare();
 
         android.os.Process.setThreadPriority(
