@@ -41,8 +41,6 @@
 #define FILTER_TRANSITION_FREQ 1100.0f     // in Hz
 #define FILTER_SHELF_SLOPE 1.0f            // Q
 #define FILTER_GAIN 5.5f // linear gain
-// such a huge gain is justified by how much energy in the low frequencies is "wasted" at the output
-// of the synthesis. The low shelving filter removes it, leaving room for amplification.
 
 #define USAGEMODE_PLAY_IMMEDIATELY 0
 #define USAGEMODE_WRITE_TO_FILE    1
@@ -80,13 +78,19 @@ double out0;// y[n]
 double out1;// y[n-1]
 double out2;// y[n-2]
 
+static float fFilterLowshelfAttenuation = FILTER_LOWSHELF_ATTENUATION;
+static float fFilterTransitionFreq = FILTER_TRANSITION_FREQ;
+static float fFilterShelfSlope = FILTER_SHELF_SLOPE;
+static float fFilterGain = FILTER_GAIN;
+static bool  bUseFilter = false;
+
 void initializeEQ() {
 
-    amp = float(pow(10.0, FILTER_LOWSHELF_ATTENUATION / 40.0));
-    w = 2.0 * M_PI * (FILTER_TRANSITION_FREQ / DEFAULT_TTS_RATE);
+    amp = float(pow(10.0, fFilterLowshelfAttenuation / 40.0));
+    w = 2.0 * M_PI * (fFilterTransitionFreq / DEFAULT_TTS_RATE);
     sinw = float(sin(w));
     cosw = float(cos(w));
-    beta = float(sqrt(amp)/FILTER_SHELF_SLOPE);
+    beta = float(sqrt(amp)/fFilterShelfSlope);
 
     // initialize low-shelf parameters
     b0 = amp * ((amp+1.0F) - ((amp-1.0F)*cosw) + (beta*sinw));
@@ -96,9 +100,9 @@ void initializeEQ() {
     a1 = 2.0F * ((amp-1.0F) + ((amp+1.0F)*cosw));
     a2 = -((amp+1.0F) + ((amp-1.0F)*cosw) - (beta*sinw));
 
-    m_fa = FILTER_GAIN * b0/a0;
-    m_fb = FILTER_GAIN * b1/a0;
-    m_fc = FILTER_GAIN * b2/a0;
+    m_fa = fFilterGain * b0/a0;
+    m_fb = fFilterGain * b1/a0;
+    m_fc = fFilterGain * b2/a0;
     m_fd = a1/a0;
     m_fe = a2/a0;
 }
@@ -284,7 +288,9 @@ static tts_callback_status ttsSynthDoneCB(void *& userdata, uint32_t rate,
         if (bufferSize > 0) {
             prepAudioTrack(pJniData, pForAfter->streamType, rate, (AudioSystem::audio_format)format, channel);
             if (pJniData->mAudioOut) {
-                applyFilter((int16_t*)wav, bufferSize/2);
+                if (bUseFilter) {
+                    applyFilter((int16_t*)wav, bufferSize/2);
+                }
                 pJniData->mAudioOut->write(wav, bufferSize);
                 memset(wav, 0, bufferSize);
                 //LOGV("AudioTrack wrote: %d bytes", bufferSize);
@@ -300,7 +306,9 @@ static tts_callback_status ttsSynthDoneCB(void *& userdata, uint32_t rate,
             return TTS_CALLBACK_HALT;
         }
         if (bufferSize > 0){
-            applyFilter((int16_t*)wav, bufferSize/2);
+            if (bUseFilter) {
+                applyFilter((int16_t*)wav, bufferSize/2);
+            }
             fwrite(wav, 1, bufferSize, pForAfter->outputFile);
             memset(wav, 0, bufferSize);
         }
@@ -334,23 +342,50 @@ static tts_callback_status ttsSynthDoneCB(void *& userdata, uint32_t rate,
 
 
 // ----------------------------------------------------------------------------
-static void
+static int
+android_tts_SynthProxy_setLowShelf(JNIEnv *env, jobject thiz, jboolean applyFilter,
+        jfloat filterGain, jfloat attenuationInDb, jfloat freqInHz, jfloat slope)
+{
+    int result = TTS_SUCCESS;
+
+    bUseFilter = applyFilter;
+    if (applyFilter) {
+        fFilterLowshelfAttenuation = attenuationInDb;
+        fFilterTransitionFreq = freqInHz;
+        fFilterShelfSlope = slope;
+        fFilterGain = filterGain;
+
+        if (fFilterShelfSlope != 0.0f) {
+            initializeEQ();
+        } else {
+            LOGE("Invalid slope, can't be null");
+            result = TTS_FAILURE;
+        }
+    }
+
+    return result;
+}
+
+// ----------------------------------------------------------------------------
+static int
 android_tts_SynthProxy_native_setup(JNIEnv *env, jobject thiz,
         jobject weak_this, jstring nativeSoLib)
 {
+    int result = TTS_FAILURE;
+
+    bUseFilter = false;
+
     SynthProxyJniStorage* pJniStorage = new SynthProxyJniStorage();
 
     prepAudioTrack(pJniStorage,
             DEFAULT_TTS_STREAM_TYPE, DEFAULT_TTS_RATE, DEFAULT_TTS_FORMAT, DEFAULT_TTS_NB_CHANNELS);
 
-    const char *nativeSoLibNativeString =
-            env->GetStringUTFChars(nativeSoLib, 0);
+    const char *nativeSoLibNativeString =  env->GetStringUTFChars(nativeSoLib, 0);
 
     void *engine_lib_handle = dlopen(nativeSoLibNativeString,
             RTLD_NOW | RTLD_LOCAL);
     if (engine_lib_handle == NULL) {
        LOGE("android_tts_SynthProxy_native_setup(): engine_lib_handle == NULL");
-       // TODO report error so the TTS can't be used
     } else {
         TtsEngine *(*get_TtsEngine)() =
             reinterpret_cast<TtsEngine* (*)()>(dlsym(engine_lib_handle, "getTtsEngine"));
@@ -362,18 +397,19 @@ android_tts_SynthProxy_native_setup(JNIEnv *env, jobject thiz,
             Mutex::Autolock l(engineMutex);
             pJniStorage->mNativeSynthInterface->init(ttsSynthDoneCB);
         }
+
+        result = TTS_SUCCESS;
     }
 
     // we use a weak reference so the SynthProxy object can be garbage collected.
     pJniStorage->tts_ref = env->NewGlobalRef(weak_this);
 
     // save the JNI resources so we can use them (and free them) later
-    env->SetIntField(thiz, javaTTSFields.synthProxyFieldJniData,
-            (int)pJniStorage);
-
-    initializeEQ();
+    env->SetIntField(thiz, javaTTSFields.synthProxyFieldJniData, (int)pJniStorage);
 
     env->ReleaseStringUTFChars(nativeSoLib, nativeSoLibNativeString);
+
+    return result;
 }
 
 
@@ -842,8 +878,12 @@ static JNINativeMethod gMethods[] = {
         (void*)android_tts_SynthProxy_shutdown
     },
     {   "native_setup",
-        "(Ljava/lang/Object;Ljava/lang/String;)V",
+        "(Ljava/lang/Object;Ljava/lang/String;)I",
         (void*)android_tts_SynthProxy_native_setup
+    },
+    {   "native_setLowShelf",
+        "(ZFFFF)I",
+        (void*)android_tts_SynthProxy_setLowShelf
     },
     {   "native_finalize",
         "(I)V",
