@@ -30,6 +30,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 
 class PluginFullScreenHolder extends Dialog {
 
@@ -37,6 +38,7 @@ class PluginFullScreenHolder extends Dialog {
 
     private final WebView mWebView;
     private final int mNpp;
+    private View mContentView;
     private int mX;
     private int mY;
     private int mWidth;
@@ -61,6 +63,12 @@ class PluginFullScreenHolder extends Dialog {
         mY = y;
         mWidth = width;
         mHeight = height;
+    }
+
+    @Override
+    public void setContentView(View contentView) {
+        super.setContentView(contentView);
+        mContentView = contentView;
     }
 
     @Override
@@ -113,6 +121,11 @@ class PluginFullScreenHolder extends Dialog {
     @Override
     protected void onStop() {
         super.onStop();
+        // manually remove the contentView's parent since the dialog does not
+        if (mContentView != null && mContentView.getParent() != null) {
+            ViewGroup vg = (ViewGroup) mContentView.getParent();
+            vg.removeView(mContentView);
+        }
         mWebView.getWebViewCore().sendMessage(
                 WebViewCore.EventHub.HIDE_FULLSCREEN, mNpp, 0);
     }
