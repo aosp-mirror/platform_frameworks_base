@@ -1439,8 +1439,6 @@ public class LocationManager {
      * @return true if the command succeeds.
      *
      * Requires the android.permission.INSTALL_LOCATION_PROVIDER permission.
-     *
-     * {@hide}
      */
     public boolean installGeocodeProvider(GeocodeProvider provider) {
         try {
@@ -1458,8 +1456,6 @@ public class LocationManager {
      * @param location new Location to report
      *
      * Requires the android.permission.INSTALL_LOCATION_PROVIDER permission.
-     *
-     * {@hide}
      */
     public void reportLocation(Location location) {
         try {
