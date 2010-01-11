@@ -2255,6 +2255,11 @@ final class WebViewCore {
     }
 
     // called by JNI
+    private Context getContext() {
+        return mContext;
+    }
+
+    // called by JNI
     private Class<?> getPluginClass(String libName, String clsName) {
         
         if (mWebView == null) {
@@ -2281,40 +2286,17 @@ final class WebViewCore {
         return null;
     }
 
-    private WebkitPlugin createPluginJavaInstance(String libName, int npp) {
-        
-        if (mWebView == null) {
-            return null;
-        }
-
-        PluginManager pluginManager = PluginManager.getInstance(null);
-
-        String pkgName = pluginManager.getPluginsAPKName(libName);
-        if (pkgName == null) {
-            Log.w(LOGTAG, "Unable to resolve " + libName + " to a plugin APK");
-            return null;
-        }
-
-        return pluginManager.getPluginInstance(pkgName, npp);
-    }
-
     // called by JNI. PluginWidget function to launch a full-screen view using a
     // View object provided by the plugin class.
-    private void showFullScreenPlugin(WebkitPlugin webkitPlugin, final int npp,
-            int x, int y, int width, int height) {
-        if (mWebView == null) {
-            return;
-        }
+    private void showFullScreenPlugin(ViewManager.ChildView childView,
+            final int npp, int x, int y, int width, int height) {
 
-        final SurfaceDrawingModel surface = webkitPlugin.getFullScreenSurface();
-        if(surface == null) {
-            Log.e(LOGTAG, "Attempted to create an full-screen surface with a " +
-                    "null drawing model");
+        if (mWebView == null) {
             return;
         }
 
         PluginFullScreenData data = new PluginFullScreenData();
-        data.mView = surface.getSurface();
+        data.mView = childView.mView;
         data.mNpp = npp;
         data.mDocX = x;
         data.mDocY = y;
@@ -2351,20 +2333,18 @@ final class WebViewCore {
 
     // called by JNI.  PluginWidget functions for creating an embedded View for
     // the surface drawing model.
-    private ViewManager.ChildView createSurface(WebkitPlugin webkitPlugin,
-            int x, int y, int width, int height) {
-        
+    private ViewManager.ChildView addSurface(View pluginView, int x, int y,
+                                             int width, int height) {
         if (mWebView == null) {
             return null;
         }
 
-        SurfaceDrawingModel embeddedSurface = webkitPlugin.getEmbeddedSurface();
-        if(embeddedSurface == null) {
-            Log.e(LOGTAG, "Attempted to create an embedded surface with a null drawing model");
+        if (pluginView == null) {
+            Log.e(LOGTAG, "Attempted to add an empty plugin view to the view hierarchy");
             return null;
         }
 
-        View pluginView = embeddedSurface.getSurface();
+        // ensures the view system knows the view can redraw itself
         pluginView.setWillNotDraw(false);
 
         ViewManager.ChildView view = mWebView.mViewManager.createView();
