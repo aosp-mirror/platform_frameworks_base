@@ -119,12 +119,12 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
         int CONTACT_STATUS_RES_PACKAGE = 8;
         int CONTACT_STATUS_LABEL = 9;
     }
-    
+
     private interface PhotoQuery {
         String[] COLUMNS = new String[] {
             Photo.PHOTO
         };
-        
+
         int PHOTO = 0;
     }
 
@@ -241,13 +241,13 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
                     case TOKEN_PHOTO_QUERY: {
                         //Set the photo
                         Bitmap photoBitmap = null;
-                        if (cursor != null && cursor.moveToFirst() 
+                        if (cursor != null && cursor.moveToFirst()
                                 && !cursor.isNull(PhotoQuery.PHOTO)) {
                             byte[] photoData = cursor.getBlob(PhotoQuery.PHOTO);
                             photoBitmap = BitmapFactory.decodeByteArray(photoData, 0,
                                     photoData.length, null);
                         }
-                            
+
                         if (photoBitmap == null) {
                             photoBitmap = loadPlaceholderPhoto(null);
                         }
@@ -261,7 +261,7 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
                     case TOKEN_CONTACT_INFO: {
                         if (cursor != null && cursor.moveToFirst()) {
                             bindContactInfo(cursor);
-                            Uri lookupUri = Contacts.getLookupUri(cursor.getLong(ContactQuery._ID), 
+                            Uri lookupUri = Contacts.getLookupUri(cursor.getLong(ContactQuery._ID),
                                     cursor.getString(ContactQuery.LOOKUP_KEY));
                             startPhotoQuery(cursor.getLong(ContactQuery.PHOTO_ID), lookupUri);
                             invalidate();
@@ -277,6 +277,7 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
                         } else {
                             String phoneNumber = (String) cookie;
                             setDisplayName(phoneNumber, null);
+                            setSocialSnippet(null);
                             mPhotoView.assignContactFromPhone(phoneNumber, true);
                         }
                         break;
@@ -290,6 +291,7 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
                         } else {
                             String emailAddress = (String) cookie;
                             setDisplayName(emailAddress, null);
+                            setSocialSnippet(null);
                             mPhotoView.assignContactFromEmail(emailAddress, true);
                         }
                         break;
@@ -374,6 +376,7 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
     public void setSocialSnippet(CharSequence snippet) {
         if (snippet == null) {
             mStatusView.setVisibility(View.GONE);
+            mStatusAttributionView.setVisibility(View.GONE);
         } else {
             mStatusView.setText(snippet);
             mStatusView.setVisibility(View.VISIBLE);
@@ -446,7 +449,9 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
      *
      */
     public void wipeClean() {
+        setDisplayName(null, null);
         setPhoto(null);
+        setSocialSnippet(null);
         mContactUri = null;
         mExcludeMimes = null;
     }
@@ -457,11 +462,11 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
     }
 
     protected void startPhotoQuery(long photoId, Uri lookupKey) {
-        mQueryHandler.startQuery(TOKEN_PHOTO_QUERY, lookupKey, 
+        mQueryHandler.startQuery(TOKEN_PHOTO_QUERY, lookupKey,
                 ContentUris.withAppendedId(Data.CONTENT_URI, photoId), PhotoQuery.COLUMNS,
                 null, null, null);
     }
-    
+
     /**
      * Bind the contact details provided by the given {@link Cursor}.
      */
