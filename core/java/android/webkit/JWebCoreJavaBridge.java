@@ -247,4 +247,5 @@ final class JWebCoreJavaBridge extends Handler {
     private native void nativeUpdatePluginDirectories(String[] directories,
             boolean reload);
     public native void setNetworkOnLine(boolean online);
+    public native void setNetworkType(String type, String subtype);
 }

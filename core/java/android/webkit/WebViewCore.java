@@ -878,6 +878,8 @@ final class WebViewCore {
 
         static final int HIDE_FULLSCREEN = 182;
 
+        static final int SET_NETWORK_TYPE = 183;
+
         // private message ids
         private static final int DESTROY =     200;
 
@@ -1108,6 +1110,16 @@ final class WebViewCore {
                             }
                             BrowserFrame.sJavaBridge
                                     .setNetworkOnLine(msg.arg1 == 1);
+                            break;
+
+                        case SET_NETWORK_TYPE:
+                            if (BrowserFrame.sJavaBridge == null) {
+                                throw new IllegalStateException("No WebView " +
+                                        "has been created in this process!");
+                            }
+                            Map<String, String> map = (Map<String, String>) msg.obj;
+                            BrowserFrame.sJavaBridge
+                                    .setNetworkType(map.get("type"), map.get("subtype"));
                             break;
 
                         case CLEAR_CACHE:
