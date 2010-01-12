@@ -17,6 +17,8 @@
 package android.os;
 
 import java.io.IOException;
+import android.os.ServiceManager;
+import android.os.IMountService;
 
 /**
  * Class that provides access to some of the power management functions.
@@ -97,5 +99,19 @@ public class Power
      * @throws IOException if reboot fails for some reason (eg, lack of
      *         permission)
      */
-    public static native void reboot(String reason) throws IOException;
+    public static void reboot(String reason) throws IOException
+    {
+        IMountService mSvc = IMountService.Stub.asInterface(
+                ServiceManager.getService("mount"));
+
+        if (mSvc != null) {
+            try {
+                mSvc.shutdown();
+            } catch (Exception e) {
+            }
+        }
+        rebootNative(reason);
+    }
+
+    private static native void rebootNative(String reason) throws IOException ;
 }
