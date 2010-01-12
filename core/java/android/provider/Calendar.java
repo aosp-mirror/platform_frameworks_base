@@ -583,14 +583,14 @@ public final class Calendar {
          * {@link #ACCOUNT_TYPE} identifies a specific account.
          * <P>Type: TEXT</P>
          */
-        public static final String ACCOUNT_NAME = "account_name";
+        public static final String ACCOUNT_NAME = "_sync_account";
 
         /**
          * The type of account to which this row belongs, which when paired with
          * {@link #ACCOUNT_NAME} identifies a specific account.
          * <P>Type: TEXT</P>
          */
-        public static final String ACCOUNT_TYPE = "account_type";
+        public static final String ACCOUNT_TYPE = "_sync_account_type";
 
         public static EntityIterator newEntityIterator(Cursor cursor, ContentResolver resolver) {
             return new EntityIteratorImpl(cursor, resolver);
