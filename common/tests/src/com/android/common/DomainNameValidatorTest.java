@@ -15,6 +15,11 @@
  */
 package com.android.common;
 
+import com.android.common.tests.R;
+
+import android.test.AndroidTestCase;
+
+import java.io.InputStream;
 import java.math.BigInteger;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -25,6 +30,7 @@ import java.security.SignatureException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateExpiredException;
+import java.security.cert.CertificateFactory;
 import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.CertificateParsingException;
 import java.security.cert.X509Certificate;
@@ -37,22 +43,16 @@ import java.util.Set;
 
 import javax.security.auth.x500.X500Principal;
 
-import junit.framework.TestCase;
-
-public class DomainNameValidatorTest extends TestCase {
+public class DomainNameValidatorTest extends AndroidTestCase {
     private static final int ALT_UNKNOWN = 0;
     private static final int ALT_DNS_NAME = 2;
     private static final int ALT_IPA_NAME = 7;
 
     /**
-     * Tests {@link DomainNameValidator#match}
+     * Tests {@link DomainNameValidator#match}, using a simple {@link X509Certificate}
+     * implementation.
      */
     public void testMatch() {
-        // TODO Use actual X509Certificate objects, instead of StubX509Certificate.
-        // Comment in DomainNameValidator suggests X509Certificate fails to parse a certificate
-        // if subject alternative names contain a domain name that begins with '*'.
-        // This test won't cover this kind of errors.
-
         checkMatch("11", new StubX509Certificate("cn=imap.g.com"), "imap.g.com", true);
         checkMatch("12", new StubX509Certificate("cn=imap2.g.com"), "imap.g.com", false);
         checkMatch("13", new StubX509Certificate("cn=sub.imap.g.com"), "imap.g.com", false);
@@ -73,7 +73,6 @@ public class DomainNameValidatorTest extends TestCase {
         checkMatch("24", new StubX509Certificate("")
                 .addSubjectAlternativeName(ALT_DNS_NAME, "*.g.com")
                 , "imap.g.com", true);
-
 
         // host name is ip address
         checkMatch("31", new StubX509Certificate("")
@@ -167,6 +166,70 @@ public class DomainNameValidatorTest extends TestCase {
             boolean expected) {
         boolean actual = DomainNameValidator.matchDns(thisDomain, thatDomain);
         assertEquals(message, expected, actual);
+    }
+
+    /**
+     * Test {@link DomainNameValidator#match} with actual certificates.
+     */
+    public void testWithActualCert() throws Exception {
+        // subject_only
+        //
+        // subject: C=JP, CN=www.example.com
+        // subject alt names: n/a
+        checkWithActualCert("11", R.raw.subject_only, "www.example.com", true);
+        checkWithActualCert("12", R.raw.subject_only, "www2.example.com", false);
+
+        // subject_alt_only
+        //
+        // subject: C=JP (no CN)
+        // subject alt names: DNS:www.example.com
+        checkWithActualCert("21", R.raw.subject_alt_only, "www.example.com", true);
+        checkWithActualCert("22", R.raw.subject_alt_only, "www2.example.com", false);
+
+        // subject_with_alt_names
+        //
+        // subject: C=JP, CN=www.example.com
+        // subject alt names: DNS:www2.example.com, DNS:www3.example.com
+        // * Subject should be ignored, because it has subject alt names.
+        checkWithActualCert("31", R.raw.subject_with_alt_names, "www.example.com", false);
+        checkWithActualCert("32", R.raw.subject_with_alt_names, "www2.example.com", true);
+        checkWithActualCert("33", R.raw.subject_with_alt_names, "www3.example.com", true);
+        checkWithActualCert("34", R.raw.subject_with_alt_names, "www4.example.com", false);
+
+        // subject_with_wild_alt_name
+        //
+        // subject: C=JP, CN=www.example.com
+        // subject alt names: DNS:*.example2.com
+        // * Subject should be ignored, because it has subject alt names.
+        checkWithActualCert("41", R.raw.subject_with_wild_alt_name, "www.example.com", false);
+        checkWithActualCert("42", R.raw.subject_with_wild_alt_name, "www2.example.com", false);
+        checkWithActualCert("43", R.raw.subject_with_wild_alt_name, "www.example2.com", true);
+        checkWithActualCert("44", R.raw.subject_with_wild_alt_name, "abc.example2.com", true);
+        checkWithActualCert("45", R.raw.subject_with_wild_alt_name, "www.example3.com", false);
+
+        // wild_alt_name_only
+        //
+        // subject: C=JP
+        // subject alt names: DNS:*.example.com
+        checkWithActualCert("51", R.raw.wild_alt_name_only, "www.example.com", true);
+        checkWithActualCert("52", R.raw.wild_alt_name_only, "www2.example.com", true);
+        checkWithActualCert("53", R.raw.wild_alt_name_only, "www.example2.com", false);
+
+        // wild_alt_name_only
+        //
+        // subject: C=JP
+        // subject alt names: IP Address:192.168.10.1
+        checkWithActualCert("61", R.raw.alt_ip_only, "192.168.10.1", true);
+        checkWithActualCert("61", R.raw.alt_ip_only, "192.168.10.2", false);
+    }
+
+    private void checkWithActualCert(String message, int resId, String domain,
+            boolean expected) throws Exception {
+        CertificateFactory factory = CertificateFactory.getInstance("X509");
+        InputStream certStream = getContext().getResources().openRawResource(resId);
+        X509Certificate certificate = (X509Certificate) factory.generateCertificate(certStream);
+
+        checkMatch(message, certificate, domain, expected);
     }
 
     /**

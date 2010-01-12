@@ -166,6 +166,9 @@ public class DomainNameValidator {
                 }
             }
         } catch (CertificateParsingException e) {
+            // TODO figure out if this comment is still true
+            //      i.e. In what condition do we this exception with a valid certificate?
+
             // one way we can get here is if an alternative name starts with
             // '*' character, which is contrary to one interpretation of the
             // spec (a valid DNS name must start with a letter); there is no
