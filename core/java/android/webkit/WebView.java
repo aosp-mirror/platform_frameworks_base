@@ -3892,7 +3892,9 @@ public class WebView extends AbsoluteLayout
             public void run() {
                 // we always force, in case our height changed, in which case we
                 // still want to send the notification over to webkit
-                setNewZoomScale(mActualScale, true);
+                if (mWebViewCore != null) {
+                    setNewZoomScale(mActualScale, true);
+                }
             }
         });
     }
