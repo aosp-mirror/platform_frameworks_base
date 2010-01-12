@@ -291,6 +291,8 @@ public class RelativeLayout extends ViewGroup {
         }        
     }
 
+    // TODO: we need to find another way to implement RelativeLayout
+    // This implementation cannot handle every case
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         if (mDirtyHierarchy) {
@@ -438,6 +440,10 @@ public class RelativeLayout extends ViewGroup {
                         final int[] rules = params.getRules();
                         if (rules[CENTER_IN_PARENT] != 0 || rules[CENTER_HORIZONTAL] != 0) {
                             centerHorizontal(child, params, width);
+                        } else if (rules[ALIGN_PARENT_RIGHT] != 0) {
+                            final int childWidth = child.getMeasuredWidth();
+                            params.mLeft = width - mPaddingRight - childWidth;
+                            params.mRight = params.mLeft + childWidth;
                         }
                     }
                 }
@@ -464,6 +470,10 @@ public class RelativeLayout extends ViewGroup {
                         final int[] rules = params.getRules();
                         if (rules[CENTER_IN_PARENT] != 0 || rules[CENTER_VERTICAL] != 0) {
                             centerVertical(child, params, height);
+                        } else if (rules[ALIGN_PARENT_BOTTOM] != 0) {
+                            final int childHeight = child.getMeasuredHeight();
+                            params.mTop = height - mPaddingBottom - childHeight;
+                            params.mBottom = params.mTop + childHeight;
                         }
                     }
                 }
@@ -673,7 +683,7 @@ public class RelativeLayout extends ViewGroup {
                 params.mRight = params.mLeft + child.getMeasuredWidth();
             }
         }
-        return false;
+        return rules[ALIGN_PARENT_RIGHT] != 0;
     }
 
     private boolean positionChildVertical(View child, LayoutParams params, int myHeight,
@@ -702,7 +712,7 @@ public class RelativeLayout extends ViewGroup {
                 params.mBottom = params.mTop + child.getMeasuredHeight();
             }
         }
-        return false;
+        return rules[ALIGN_PARENT_BOTTOM] != 0;
     }
 
     private void applyHorizontalSizeRules(LayoutParams childParams, int myWidth) {
