@@ -55,12 +55,12 @@ public final class VelocityTracker implements Poolable<VelocityTracker> {
                 }
             }, 2));
 
-    final float mPastX[] = new float[NUM_PAST];
-    final float mPastY[] = new float[NUM_PAST];
-    final long mPastTime[] = new long[NUM_PAST];
+    final float mPastX[][] = new float[MotionEvent.BASE_AVAIL_POINTERS][NUM_PAST];
+    final float mPastY[][] = new float[MotionEvent.BASE_AVAIL_POINTERS][NUM_PAST];
+    final long mPastTime[][] = new long[MotionEvent.BASE_AVAIL_POINTERS][NUM_PAST];
 
-    float mYVelocity;
-    float mXVelocity;
+    float mYVelocity[] = new float[MotionEvent.BASE_AVAIL_POINTERS];
+    float mXVelocity[] = new float[MotionEvent.BASE_AVAIL_POINTERS];
 
     private VelocityTracker mNext;
 
@@ -105,7 +105,9 @@ public final class VelocityTracker implements Poolable<VelocityTracker> {
      * Reset the velocity tracker back to its initial state.
      */
     public void clear() {
-        mPastTime[0] = 0;
+        for (int i = 0; i < MotionEvent.BASE_AVAIL_POINTERS; i++) {
+            mPastTime[i][0] = 0;
+        }
     }
     
     /**
@@ -120,18 +122,21 @@ public final class VelocityTracker implements Poolable<VelocityTracker> {
     public void addMovement(MotionEvent ev) {
         long time = ev.getEventTime();
         final int N = ev.getHistorySize();
-        for (int i=0; i<N; i++) {
-            addPoint(ev.getHistoricalX(i), ev.getHistoricalY(i),
-                    ev.getHistoricalEventTime(i));
+        final int pointerCount = ev.getPointerCount();
+        for (int p = 0; p < pointerCount; p++) {
+            for (int i=0; i<N; i++) {
+                addPoint(p, ev.getHistoricalX(p, i), ev.getHistoricalY(p, i),
+                        ev.getHistoricalEventTime(i));
+            }
+            addPoint(p, ev.getX(p), ev.getY(p), time);
         }
-        addPoint(ev.getX(), ev.getY(), time);
     }
 
-    private void addPoint(float x, float y, long time) {
+    private void addPoint(int pos, float x, float y, long time) {
         int drop = -1;
         int i;
         if (localLOGV) Log.v(TAG, "Adding past y=" + y + " time=" + time);
-        final long[] pastTime = mPastTime;
+        final long[] pastTime = mPastTime[pos];
         for (i=0; i<NUM_PAST; i++) {
             if (pastTime[i] == 0) {
                 break;
@@ -146,8 +151,8 @@ public final class VelocityTracker implements Poolable<VelocityTracker> {
             drop = 0;
         }
         if (drop == i) drop--;
-        final float[] pastX = mPastX;
-        final float[] pastY = mPastY;
+        final float[] pastX = mPastX[pos];
+        final float[] pastY = mPastY[pos];
         if (drop >= 0) {
             if (localLOGV) Log.v(TAG, "Dropping up to #" + drop);
             final int start = drop+1;
@@ -190,44 +195,48 @@ public final class VelocityTracker implements Poolable<VelocityTracker> {
      * must be positive.
      */
     public void computeCurrentVelocity(int units, float maxVelocity) {
-        final float[] pastX = mPastX;
-        final float[] pastY = mPastY;
-        final long[] pastTime = mPastTime;
-        
-        // Kind-of stupid.
-        final float oldestX = pastX[0];
-        final float oldestY = pastY[0];
-        final long oldestTime = pastTime[0];
-        float accumX = 0;
-        float accumY = 0;
-        int N=0;
-        while (N < NUM_PAST) {
-            if (pastTime[N] == 0) {
-                break;
+        for (int pos = 0; pos < MotionEvent.BASE_AVAIL_POINTERS; pos++) {
+            final float[] pastX = mPastX[pos];
+            final float[] pastY = mPastY[pos];
+            final long[] pastTime = mPastTime[pos];
+
+            // Kind-of stupid.
+            final float oldestX = pastX[0];
+            final float oldestY = pastY[0];
+            final long oldestTime = pastTime[0];
+            float accumX = 0;
+            float accumY = 0;
+            int N=0;
+            while (N < NUM_PAST) {
+                if (pastTime[N] == 0) {
+                    break;
+                }
+                N++;
             }
-            N++;
+            // Skip the last received event, since it is probably pretty noisy.
+            if (N > 3) N--;
+
+            for (int i=1; i < N; i++) {
+                final int dur = (int)(pastTime[i] - oldestTime);
+                if (dur == 0) continue;
+                float dist = pastX[i] - oldestX;
+                float vel = (dist/dur) * units;   // pixels/frame.
+                if (accumX == 0) accumX = vel;
+                else accumX = (accumX + vel) * .5f;
+
+                dist = pastY[i] - oldestY;
+                vel = (dist/dur) * units;   // pixels/frame.
+                if (accumY == 0) accumY = vel;
+                else accumY = (accumY + vel) * .5f;
+            }
+            mXVelocity[pos] = accumX < 0.0f ? Math.max(accumX, -maxVelocity)
+                    : Math.min(accumX, maxVelocity);
+            mYVelocity[pos] = accumY < 0.0f ? Math.max(accumY, -maxVelocity)
+                    : Math.min(accumY, maxVelocity);
+
+            if (localLOGV) Log.v(TAG, "Y velocity=" + mYVelocity +" X velocity="
+                    + mXVelocity + " N=" + N);
         }
-        // Skip the last received event, since it is probably pretty noisy.
-        if (N > 3) N--;
-        
-        for (int i=1; i < N; i++) {
-            final int dur = (int)(pastTime[i] - oldestTime);
-            if (dur == 0) continue;
-            float dist = pastX[i] - oldestX;
-            float vel = (dist/dur) * units;   // pixels/frame.
-            if (accumX == 0) accumX = vel;
-            else accumX = (accumX + vel) * .5f;
-            
-            dist = pastY[i] - oldestY;
-            vel = (dist/dur) * units;   // pixels/frame.
-            if (accumY == 0) accumY = vel;
-            else accumY = (accumY + vel) * .5f;
-        }
-        mXVelocity = accumX < 0.0f ? Math.max(accumX, -maxVelocity) : Math.min(accumX, maxVelocity);
-        mYVelocity = accumY < 0.0f ? Math.max(accumY, -maxVelocity) : Math.min(accumY, maxVelocity);
-        
-        if (localLOGV) Log.v(TAG, "Y velocity=" + mYVelocity +" X velocity="
-                + mXVelocity + " N=" + N);
     }
     
     /**
@@ -237,7 +246,7 @@ public final class VelocityTracker implements Poolable<VelocityTracker> {
      * @return The previously computed X velocity.
      */
     public float getXVelocity() {
-        return mXVelocity;
+        return mXVelocity[0];
     }
     
     /**
@@ -247,6 +256,32 @@ public final class VelocityTracker implements Poolable<VelocityTracker> {
      * @return The previously computed Y velocity.
      */
     public float getYVelocity() {
-        return mYVelocity;
+        return mYVelocity[0];
+    }
+    
+    /**
+     * Retrieve the last computed X velocity.  You must first call
+     * {@link #computeCurrentVelocity(int)} before calling this function.
+     * 
+     * @param pos Which pointer's velocity to return.
+     * @return The previously computed X velocity.
+     * 
+     * @hide Pending API approval
+     */
+    public float getXVelocity(int pos) {
+        return mXVelocity[pos];
+    }
+    
+    /**
+     * Retrieve the last computed Y velocity.  You must first call
+     * {@link #computeCurrentVelocity(int)} before calling this function.
+     * 
+     * @param pos Which pointer's velocity to return.
+     * @return The previously computed Y velocity.
+     * 
+     * @hide Pending API approval
+     */
+    public float getYVelocity(int pos) {
+        return mYVelocity[pos];
     }
 }
