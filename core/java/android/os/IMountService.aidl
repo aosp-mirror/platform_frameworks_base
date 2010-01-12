@@ -104,8 +104,7 @@ interface IMountService
     String[] getSecureContainerList();
 
     /**
-     * Shuts down the MountService and gracefully unmounts
-     * all external media.
+     * Shuts down the MountService and gracefully unmounts all external media.
      */
     void shutdown();
 }

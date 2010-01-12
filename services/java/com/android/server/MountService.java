@@ -215,7 +215,7 @@ class MountService extends IMountService.Stub {
             throw new SecurityException("Requires SHUTDOWN permission");
         }
 
-        Log.i(TAG, "Shutting down");
+        Log.d(TAG, "Shutting down");
         String state = Environment.getExternalStorageState();
 
         if (state.equals(Environment.MEDIA_SHARED)) {
@@ -259,6 +259,20 @@ class MountService extends IMountService.Stub {
             try {
                 String m = Environment.getExternalStorageDirectory().toString();
                 unmountMedia(m);
+
+                int retries = 12;
+                while (!state.equals(Environment.MEDIA_UNMOUNTED) && (retries-- >=0)) {
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException iex) {
+                        Log.e(TAG, "Interrupted while waiting for media", iex);
+                        break;
+                    }
+                    state = Environment.getExternalStorageState();
+                }
+                if (retries == 0) {
+                    Log.e(TAG, "Timed out waiting for media to unmount");
+                }
             } catch (Exception e) {
                 Log.e(TAG, "external storage unmount failed", e);
             }
