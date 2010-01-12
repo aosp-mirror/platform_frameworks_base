@@ -160,7 +160,10 @@ public class LockPatternKeyguardView extends KeyguardViewBase
         } catch (AuthenticatorException e) {
         }
         mEnableFallback = !hasSAMLAccount;
-        if (mUnlockScreen instanceof UnlockScreen) {
+
+        if (mUnlockScreen == null) {
+            Log.w(TAG, "no unlock screen when receiving AccountManager information");
+        } else if (mUnlockScreen instanceof UnlockScreen) {
             ((UnlockScreen)mUnlockScreen).setEnableFallback(true);
         }
     }
@@ -179,18 +182,6 @@ public class LockPatternKeyguardView extends KeyguardViewBase
             KeyguardWindowController controller) {
         super(context);
 
-        final boolean hasAccount = AccountManager.get(context).getAccounts().length > 0;
-        if (hasAccount) {
-            /* If we have a SAML account which requires web login we can not use the
-             fallback screen UI to ask the user for credentials.
-             For now we will disable fallback screen in this case.
-             Ultimately we could consider bringing up a web login from GLS
-             but need to make sure that it will work in the "locked screen" mode. */
-            String[] features = new String[] {"saml"};
-            AccountManager.get(context).getAccountsByTypeAndFeatures(
-                    "com.google", features, this, null);
-        }
-        
         mEnableFallback = false;
 
         mRequiresSim =
@@ -275,6 +266,9 @@ public class LockPatternKeyguardView extends KeyguardViewBase
             public void reportFailedPatternAttempt() {
                 mUpdateMonitor.reportFailedAttempt();
                 final int failedAttempts = mUpdateMonitor.getFailedAttempts();
+                if (DEBUG) Log.d(TAG, 
+                    "reportFailedPatternAttempt: #" + failedAttempts +
+                    " (enableFallback=" + mEnableFallback + ")");
                 if (mEnableFallback && failedAttempts ==
                         (LockPatternUtils.FAILED_ATTEMPTS_BEFORE_RESET
                                 - LockPatternUtils.FAILED_ATTEMPTS_BEFORE_TIMEOUT)) {
@@ -313,8 +307,28 @@ public class LockPatternKeyguardView extends KeyguardViewBase
         mLockScreen = createLockScreen();
         addView(mLockScreen);
         final UnlockMode unlockMode = getUnlockMode();
+        if (DEBUG) Log.d(TAG, 
+            "LockPatternKeyguardView ctor: about to createUnlockScreenFor; mEnableFallback="
+            + mEnableFallback);
         mUnlockScreen = createUnlockScreenFor(unlockMode);
         mUnlockScreenMode = unlockMode;
+
+        // Ask the account manager if we have an account that can be used as a
+        // fallback in case the user forgets his pattern. The response comes
+        // back in run() below; don't bother asking until you've called
+        // createUnlockScreenFor(), else the information will go unused.
+        final boolean hasAccount = AccountManager.get(context).getAccounts().length > 0;
+        if (hasAccount) {
+            /* If we have a SAML account which requires web login we can not use the
+             fallback screen UI to ask the user for credentials.
+             For now we will disable fallback screen in this case.
+             Ultimately we could consider bringing up a web login from GLS
+             but need to make sure that it will work in the "locked screen" mode. */
+            String[] features = new String[] {"saml"};
+            AccountManager.get(context).getAccountsByTypeAndFeatures(
+                    "com.google", features, this, null);
+        }
+
         addView(mUnlockScreen);
         updateScreen(mMode);
     }
@@ -475,6 +489,8 @@ public class LockPatternKeyguardView extends KeyguardViewBase
                     mUpdateMonitor,
                     mKeyguardScreenCallback,
                     mUpdateMonitor.getFailedAttempts());
+            if (DEBUG) Log.d(TAG,
+                "createUnlockScreenFor(" + unlockMode + "): mEnableFallback=" + mEnableFallback);
             view.setEnableFallback(mEnableFallback);
             return view;
         } else if (unlockMode == UnlockMode.SimPin) {

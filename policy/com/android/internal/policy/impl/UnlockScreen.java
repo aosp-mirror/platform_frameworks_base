@@ -27,6 +27,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.text.format.DateFormat;
 import android.text.TextUtils;
+import android.util.Log;
 import com.android.internal.R;
 import com.android.internal.telephony.IccCard;
 import com.android.internal.widget.LinearLayoutWithDefaultTouchRecepient;
@@ -45,6 +46,7 @@ class UnlockScreen extends LinearLayoutWithDefaultTouchRecepient
         implements KeyguardScreen, KeyguardUpdateMonitor.ConfigurationChangeCallback,
         KeyguardUpdateMonitor.InfoCallback, KeyguardUpdateMonitor.SimStateCallback {
 
+    private static final boolean DEBUG = false;
     private static final String TAG = "UnlockScreen";
 
     // how long before we clear the wrong pattern
@@ -71,10 +73,10 @@ class UnlockScreen extends LinearLayoutWithDefaultTouchRecepient
 
     private boolean mCreatedInPortrait;
 
+    private String mDateFormatString;
+
     private TextView mCarrier;
-    private TextView mCenterDot;
     private TextView mDate;
-    private TextView mTime;
 
     // are we showing battery information?
     private boolean mShowingBatteryInfo = false;
@@ -102,7 +104,7 @@ class UnlockScreen extends LinearLayoutWithDefaultTouchRecepient
      * Keeps track of the last time we poked the wake lock during dispatching
      * of the touch event, initalized to something gauranteed to make us
      * poke it when the user starts drawing the pattern.
-     * @see #dispatchTouchEvent(android.view.MotionEvent) 
+     * @see #dispatchTouchEvent(android.view.MotionEvent)
      */
     private long mLastPokeTime = -UNLOCK_PATTERN_WAKE_INTERVAL_MS;
 
@@ -162,6 +164,12 @@ class UnlockScreen extends LinearLayoutWithDefaultTouchRecepient
         mTotalFailedPatternAttempts = totalFailedAttempts;
         mFailedPatternAttemptsSinceLastTimeout = totalFailedAttempts % LockPatternUtils.FAILED_ATTEMPTS_BEFORE_TIMEOUT;
 
+        if (DEBUG) Log.d(TAG,
+            "UnlockScreen() ctor: totalFailedAttempts="
+                 + totalFailedAttempts + ", mFailedPat...="
+                 + mFailedPatternAttemptsSinceLastTimeout
+                 );
+
         if (mUpdateMonitor.isInPortrait()) {
             LayoutInflater.from(context).inflate(R.layout.keyguard_screen_unlock_portrait, this, true);
         } else {
@@ -169,11 +177,9 @@ class UnlockScreen extends LinearLayoutWithDefaultTouchRecepient
         }
 
         mCarrier = (TextView) findViewById(R.id.carrier);
-        mCenterDot = (TextView) findViewById(R.id.centerDot);
         mDate = (TextView) findViewById(R.id.date);
-        mTime = (TextView) findViewById(R.id.time);
 
-        mCenterDot.setText("|");
+        mDateFormatString = getContext().getString(R.string.full_wday_month_day_no_year);
         refreshTimeAndDateDisplay();
 
         mStatus1 = (TextView) findViewById(R.id.status1);
@@ -241,9 +247,10 @@ class UnlockScreen extends LinearLayoutWithDefaultTouchRecepient
     }
 
     public void setEnableFallback(boolean state) {
+        if (DEBUG) Log.d(TAG, "setEnableFallback(" + state + ")");
         mEnableFallback = state;
     }
-    
+
     private void resetStatusInfo() {
         mInstructions = null;
         mShowingBatteryInfo = mUpdateMonitor.shouldShowBatteryInfo();
@@ -322,9 +329,7 @@ class UnlockScreen extends LinearLayoutWithDefaultTouchRecepient
 
 
     private void refreshTimeAndDateDisplay() {
-        Date now = new Date();
-        mTime.setText(DateFormat.getTimeFormat(getContext()).format(now));
-        mDate.setText(DateFormat.getMediumDateFormat(getContext()).format(now));
+        mDate.setText(DateFormat.format(mDateFormatString, new Date()));
     }
 
 
@@ -363,6 +368,11 @@ class UnlockScreen extends LinearLayoutWithDefaultTouchRecepient
         mCarrier.setText(LockScreen.getCarrierString(plmn, spn));
     }
 
+    /** {@inheritDoc} */
+    public void onRingerModeChanged(int state) {
+        // not currently used
+    }
+
     // ---------- SimStateCallback
 
     /** {@inheritDoc} */
@@ -386,7 +396,7 @@ class UnlockScreen extends LinearLayoutWithDefaultTouchRecepient
     public boolean needsInput() {
         return false;
     }
-    
+
     /** {@inheritDoc} */
     public void onPause() {
         if (mCountdownTimer != null) {
@@ -404,9 +414,9 @@ class UnlockScreen extends LinearLayoutWithDefaultTouchRecepient
         mLockPatternView.enableInput();
         mLockPatternView.setEnabled(true);
         mLockPatternView.clearPattern();
-        
+
         // show "forgot pattern?" button if we have an alternate authentication method
-        mForgotPatternButton.setVisibility(mCallback.doesFallbackUnlockScreenExist() 
+        mForgotPatternButton.setVisibility(mCallback.doesFallbackUnlockScreenExist()
                 ? View.VISIBLE : View.INVISIBLE);
 
         // if the user is currently locked out, enforce it.
@@ -452,7 +462,7 @@ class UnlockScreen extends LinearLayoutWithDefaultTouchRecepient
 
         public void onPatternCellAdded(List<Cell> pattern) {
             // To guard against accidental poking of the wakelock, look for
-            // the user actually trying to draw a pattern of some minimal length. 
+            // the user actually trying to draw a pattern of some minimal length.
             if (pattern.size() > MIN_PATTERN_BEFORE_POKE_WAKELOCK) {
                 mCallback.pokeWakelock(UNLOCK_PATTERN_WAKE_INTERVAL_MS);
             }

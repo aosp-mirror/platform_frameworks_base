@@ -85,6 +85,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_PRIORITY_PHONE;
 import static android.view.WindowManager.LayoutParams.TYPE_SEARCH_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL;
+import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ERROR;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
@@ -94,7 +95,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import android.view.WindowManagerImpl;
 import android.view.WindowManagerPolicy;
-import android.view.WindowManagerPolicy.WindowState;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.media.IAudioService;
@@ -121,25 +121,26 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final int PHONE_LAYER = 3;
     static final int SEARCH_BAR_LAYER = 4;
     static final int STATUS_BAR_PANEL_LAYER = 5;
+    static final int SYSTEM_DIALOG_LAYER = 6;
     // toasts and the plugged-in battery thing
-    static final int TOAST_LAYER = 6;
-    static final int STATUS_BAR_LAYER = 7;
+    static final int TOAST_LAYER = 7;
+    static final int STATUS_BAR_LAYER = 8;
     // SIM errors and unlock.  Not sure if this really should be in a high layer.
-    static final int PRIORITY_PHONE_LAYER = 8;
+    static final int PRIORITY_PHONE_LAYER = 9;
     // like the ANR / app crashed dialogs
-    static final int SYSTEM_ALERT_LAYER = 9;
+    static final int SYSTEM_ALERT_LAYER = 10;
     // system-level error dialogs
-    static final int SYSTEM_ERROR_LAYER = 10;
+    static final int SYSTEM_ERROR_LAYER = 11;
     // on-screen keyboards and other such input method user interfaces go here.
-    static final int INPUT_METHOD_LAYER = 11;
+    static final int INPUT_METHOD_LAYER = 12;
     // on-screen keyboards and other such input method user interfaces go here.
-    static final int INPUT_METHOD_DIALOG_LAYER = 12;
+    static final int INPUT_METHOD_DIALOG_LAYER = 13;
     // the keyguard; nothing on top of these can take focus, since they are
     // responsible for power management when displayed.
-    static final int KEYGUARD_LAYER = 13;
-    static final int KEYGUARD_DIALOG_LAYER = 14;
+    static final int KEYGUARD_LAYER = 14;
+    static final int KEYGUARD_DIALOG_LAYER = 15;
     // things in here CAN NOT take focus, but are shown on top of everything else.
-    static final int SYSTEM_OVERLAY_LAYER = 15;
+    static final int SYSTEM_OVERLAY_LAYER = 16;
 
     static final int APPLICATION_MEDIA_SUBLAYER = -2;
     static final int APPLICATION_MEDIA_OVERLAY_SUBLAYER = -1;
@@ -154,6 +155,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static public final String SYSTEM_DIALOG_REASON_KEY = "reason";
     static public final String SYSTEM_DIALOG_REASON_GLOBAL_ACTIONS = "globalactions";
     static public final String SYSTEM_DIALOG_REASON_RECENT_APPS = "recentapps";
+    static public final String SYSTEM_DIALOG_REASON_HOME_KEY = "homekey";
 
     final Object mLock = new Object();
     
@@ -441,7 +443,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (mGlobalActions == null) {
             mGlobalActions = new GlobalActions(mContext);
         }
-        final boolean keyguardShowing = mKeyguardMediator.isShowing();
+        final boolean keyguardShowing = mKeyguardMediator.isShowingAndNotHidden();
         mGlobalActions.showDialog(keyguardShowing, isDeviceProvisioned());
         if (keyguardShowing) {
             // since it took two seconds of long press to bring this up,
@@ -686,6 +688,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return STATUS_BAR_LAYER;
         case TYPE_STATUS_BAR_PANEL:
             return STATUS_BAR_PANEL_LAYER;
+        case TYPE_SYSTEM_DIALOG:
+            return SYSTEM_DIALOG_LAYER;
         case TYPE_SEARCH_BAR:
             return SEARCH_BAR_LAYER;
         case TYPE_PHONE:
@@ -1108,7 +1112,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
      * given the situation with the keyguard.
      */
     void launchHomeFromHotKey() {
-        if (!mHideLockScreen && mKeyguardMediator.isShowing()) {
+        if (mKeyguardMediator.isShowingAndNotHidden()) {
             // don't launch home if keyguard showing
         } else if (!mHideLockScreen && mKeyguardMediator.isInputRestricted()) {
             // when in keyguard restricted mode, must first verify unlock
@@ -1120,7 +1124,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             ActivityManagerNative.getDefault().stopAppSwitches();
                         } catch (RemoteException e) {
                         }
-                        sendCloseSystemWindows();
+                        sendCloseSystemWindows(SYSTEM_DIALOG_REASON_HOME_KEY);
                         startDockOrHome();
                     }
                 }
@@ -1131,7 +1135,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 ActivityManagerNative.getDefault().stopAppSwitches();
             } catch (RemoteException e) {
             }
-            sendCloseSystemWindows();
+            sendCloseSystemWindows(SYSTEM_DIALOG_REASON_HOME_KEY);
             startDockOrHome();
         }
     }
@@ -1619,14 +1623,20 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     public int interceptKeyTq(RawInputEvent event, boolean screenIsOn) {
         int result = ACTION_PASS_TO_USER;
         final boolean isWakeKey = isWakeKeyTq(event);
-        final boolean keyguardShowing = keyguardIsShowingTq();
+        // If screen is off then we treat the case where the keyguard is open but hidden
+        // the same as if it were open and in front.
+        // This will prevent any keys other than the power button from waking the screen
+        // when the keyguard is hidden by another activity.
+        final boolean keyguardActive = (screenIsOn ?
+                                        mKeyguardMediator.isShowingAndNotHidden() :
+                                        mKeyguardMediator.isShowing());
 
         if (false) {
             Log.d(TAG, "interceptKeyTq event=" + event + " keycode=" + event.keycode
-                  + " screenIsOn=" + screenIsOn + " keyguardShowing=" + keyguardShowing);
+                  + " screenIsOn=" + screenIsOn + " keyguardActive=" + keyguardActive);
         }
 
-        if (keyguardShowing) {
+        if (keyguardActive) {
             if (screenIsOn) {
                 // when the screen is on, always give the event to the keyguard
                 result |= ACTION_PASS_TO_USER;
@@ -1644,14 +1654,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     if (!mKeyguardMediator.onWakeKeyWhenKeyguardShowingTq(event.keycode)
                             && (event.keycode == KeyEvent.KEYCODE_VOLUME_DOWN
                                 || event.keycode == KeyEvent.KEYCODE_VOLUME_UP)) {
+                        // when keyguard is showing and screen off, we need
+                        // to handle the volume key for calls and  music here
                         if (isInCall()) {
-                            // if the keyguard didn't wake the device, we are in call, and
-                            // it is a volume key, turn on the screen so that the user
-                            // can more easily adjust the in call volume.
-                            mKeyguardMediator.pokeWakelock();
+                            handleVolumeKey(AudioManager.STREAM_VOICE_CALL, event.keycode);
                         } else if (isMusicActive()) {
-                            // when keyguard is showing and screen off, we need
-                            // to handle the volume key for music here
                             handleVolumeKey(AudioManager.STREAM_MUSIC, event.keycode);
                         }
                     }
@@ -1720,7 +1727,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         mShouldTurnOffOnKeyUp = false;
                         boolean gohome = (mEndcallBehavior & ENDCALL_HOME) != 0;
                         boolean sleeps = (mEndcallBehavior & ENDCALL_SLEEPS) != 0;
-                        if (keyguardShowing
+                        if (keyguardActive
                                 || (sleeps && !gohome)
                                 || (gohome && !goHome() && sleeps)) {
                             // they must already be on the keyguad or home screen,
@@ -1923,7 +1930,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     /** {@inheritDoc} */
     public boolean keyguardIsShowingTq() {
-        return mKeyguardMediator.isShowing();
+        return mKeyguardMediator.isShowingAndNotHidden();
     }
 
     /** {@inheritDoc} */
@@ -1997,8 +2004,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         try {
             int menuState = mWindowManager.getKeycodeState(KeyEvent.KEYCODE_MENU);
             int sState = mWindowManager.getKeycodeState(KeyEvent.KEYCODE_S);
-            int dpadState = mWindowManager.getKeycodeState(KeyEvent.KEYCODE_DPAD_CENTER);
-            int trackballState = mWindowManager.getScancodeState(RawInputEvent.BTN_MOUSE);
+            int dpadState = mWindowManager.getDPadKeycodeState(KeyEvent.KEYCODE_DPAD_CENTER);
+            int trackballState = mWindowManager.getTrackballScancodeState(RawInputEvent.BTN_MOUSE);
             mSafeMode = menuState > 0 || sState > 0 || dpadState > 0 || trackballState > 0;
             performHapticFeedbackLw(null, mSafeMode
                     ? HapticFeedbackConstants.SAFE_MODE_ENABLED
@@ -2193,7 +2200,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     public boolean performHapticFeedbackLw(WindowState win, int effectId, boolean always) {
         final boolean hapticsDisabled = Settings.System.getInt(mContext.getContentResolver(),
                 Settings.System.HAPTIC_FEEDBACK_ENABLED, 0) == 0;
-        if (!always && (hapticsDisabled || mKeyguardMediator.isShowing())) {
+        if (!always && (hapticsDisabled || mKeyguardMediator.isShowingAndNotHidden())) {
             return false;
         }
         switch (effectId) {
@@ -2221,7 +2228,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
     
     public void screenOnStoppedLw() {
-        if (!mKeyguardMediator.isShowing()) {
+        if (!mKeyguardMediator.isShowingAndNotHidden() && mPowerManager.isScreenOn()) {
             long curTime = SystemClock.uptimeMillis();
             mPowerManager.userActivity(curTime, false, LocalPowerManager.OTHER_EVENT);
         }

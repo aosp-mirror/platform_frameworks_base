@@ -92,7 +92,7 @@ public class KeyguardViewManager implements KeyguardWindowController {
      * lazily.
      */
     public synchronized void show() {
-        if (DEBUG) Log.d(TAG, "show()");
+        if (DEBUG) Log.d(TAG, "show(); mKeyguardView==" + mKeyguardView);
 
         if (mKeyguardHost == null) {
             if (DEBUG) Log.d(TAG, "keyguard host is null, creating it...");

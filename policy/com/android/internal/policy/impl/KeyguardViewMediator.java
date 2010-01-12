@@ -105,6 +105,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
     private static final int KEYGUARD_DONE = 9;
     private static final int KEYGUARD_DONE_DRAWING = 10;
     private static final int KEYGUARD_DONE_AUTHENTICATING = 11;
+    private static final int SET_HIDDEN = 12;
     
     /**
      * The default amount of time we stay awake (used for all key input)
@@ -279,8 +280,9 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
 
     /**
      * Called to let us know the screen was turned off.
-     * @param why either {@link WindowManagerPolicy#OFF_BECAUSE_OF_USER} or
-     *   {@link WindowManagerPolicy#OFF_BECAUSE_OF_TIMEOUT}.
+     * @param why either {@link WindowManagerPolicy#OFF_BECAUSE_OF_USER},
+     *   {@link WindowManagerPolicy#OFF_BECAUSE_OF_TIMEOUT} or
+     *   {@link WindowManagerPolicy#OFF_BECAUSE_OF_PROX_SENSOR}.
      */
     public void onScreenTurnedOff(int why) {
         synchronized (this) {
@@ -311,6 +313,8 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
                         sender);
                 if (DEBUG) Log.d(TAG, "setting alarm to turn off keyguard, seq = " 
                                  + mDelayedShowingSequence);
+            } else if (why == WindowManagerPolicy.OFF_BECAUSE_OF_PROX_SENSOR) {
+                // Do not enable the keyguard if the prox sensor forced the screen off.
             } else {
                 doKeyguard();
             }
@@ -421,13 +425,31 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
     }
 
     /**
+     * Is the keyguard currently showing and not being force hidden?
+     */
+    public boolean isShowingAndNotHidden() {
+        return mShowing && !mHidden;
+    }
+
+    /**
      * Notify us when the keyguard is hidden by another window
      */
     public void setHidden(boolean isHidden) {
         if (DEBUG) Log.d(TAG, "setHidden " + isHidden);
+        mHandler.removeMessages(SET_HIDDEN);
+        Message msg = mHandler.obtainMessage(SET_HIDDEN, (isHidden ? 1 : 0), 0);
+        mHandler.sendMessage(msg);
+    }
+
+    /**
+     * Handles SET_HIDDEN message sent by setHidden()
+     */
+    private void handleSetHidden(boolean isHidden) {
         synchronized (KeyguardViewMediator.this) {
-            mHidden = isHidden;
-            adjustUserActivityLocked();
+            if (mHidden != isHidden) {
+                mHidden = isHidden;
+                adjustUserActivityLocked();
+            }
         }
     }
 
@@ -812,6 +834,9 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
                 case KEYGUARD_DONE_AUTHENTICATING:
                     keyguardDone(true);
                     return;
+                case SET_HIDDEN:
+                    handleSetHidden(msg.arg1 != 0);
+                    break;
             }
         }
     };
