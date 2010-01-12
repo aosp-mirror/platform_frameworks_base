@@ -42,17 +42,17 @@ interface IMountService
     /**
      * Mount external storage at given mount point.
      */
-    void mountMedia(String mountPoint);
+    void mountVolume(String mountPoint);
 
     /**
      * Safely unmount external storage at given mount point.
      */
-    void unmountMedia(String mountPoint);
+    void unmountVolume(String mountPoint);
 
     /**
      * Format external storage given a mount point.
      */
-    void formatMedia(String mountPoint);
+    void formatVolume(String mountPoint);
 
     /**
      * Returns true if media notification sounds are enabled.
