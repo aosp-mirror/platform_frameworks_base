@@ -252,6 +252,13 @@ public abstract class PackageManager {
     public static final int INSTALL_ALLOW_TEST = 0x00000004;
 
     /**
+     * Flag parameter for {@link #installPackage} to indicate that this
+     * package has to be installed on the sdcard.
+     * @hide
+     */
+    public static final int INSTALL_ON_SDCARD = 0x00000008;
+
+    /**
      * Flag parameter for
      * {@link #setComponentEnabledSetting(android.content.ComponentName, int, int)} to indicate
      * that you don't want to kill the app containing the component.  Be careful when you set this
@@ -410,6 +417,15 @@ public abstract class PackageManager {
      * @hide
      */
     public static final int INSTALL_FAILED_MISSING_FEATURE = -17;
+
+    // ------ Errors related to sdcard
+    /**
+     * Installation return code: this is passed to the {@link IPackageInstallObserver} by
+     * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)} if
+     * a secure container mount point couldn't be accessed on external media.
+     * @hide
+     */
+    public static final int INSTALL_FAILED_CONTAINER_ERROR = -18;
 
     /**
      * Installation parse return code: this is passed to the {@link IPackageInstallObserver} by

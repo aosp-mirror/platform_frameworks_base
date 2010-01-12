@@ -594,6 +594,8 @@ public final class Pm {
                 }
             } else if (opt.equals("-t")) {
                 installFlags |= PackageManager.INSTALL_ALLOW_TEST;
+            } else if (opt.equals("-s")) {
+                installFlags |= PackageManager.INSTALL_ON_SDCARD;
             } else {
                 System.err.println("Error: Unknown option: " + opt);
                 showUsage();
@@ -822,7 +824,7 @@ public final class Pm {
         System.err.println("       pm list instrumentation [-f] [TARGET-PACKAGE]");
         System.err.println("       pm list features");
         System.err.println("       pm path PACKAGE");
-        System.err.println("       pm install [-l] [-r] [-t] [-i INSTALLER_PACKAGE_NAME] PATH");
+        System.err.println("       pm install [-l] [-r] [-t] [-i INSTALLER_PACKAGE_NAME] [-s] PATH");
         System.err.println("       pm uninstall [-k] PACKAGE");
         System.err.println("       pm enable PACKAGE_OR_COMPONENT");
         System.err.println("       pm disable PACKAGE_OR_COMPONENT");
@@ -854,6 +856,7 @@ public final class Pm {
         System.err.println("  -r: reinstall an exisiting app, keeping its data.");
         System.err.println("  -t: allow test .apks to be installed.");
         System.err.println("  -i: specify the installer package name.");
+        System.err.println("  -s: install package on sdcard.");
         System.err.println("");
         System.err.println("The uninstall command removes a package from the system. Options:");
         System.err.println("  -k: keep the data and cache directories around.");

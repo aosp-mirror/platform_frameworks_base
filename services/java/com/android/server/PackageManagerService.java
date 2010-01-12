@@ -135,8 +135,8 @@ class PackageManagerService extends IPackageManager.Stub {
     static final int SCAN_NO_DEX = 1<<1;
     static final int SCAN_FORCE_DEX = 1<<2;
     static final int SCAN_UPDATE_SIGNATURE = 1<<3;
-    static final int SCAN_FORWARD_LOCKED = 1<<4;
-    static final int SCAN_NEW_INSTALL = 1<<5;
+    static final int SCAN_NEW_INSTALL = 1<<4;
+    static final int SCAN_NO_PATHS = 1<<5;
 
     final HandlerThread mHandlerThread = new HandlerThread("PackageManager",
             Process.THREAD_PRIORITY_BACKGROUND);
@@ -281,8 +281,10 @@ class PackageManagerService extends IPackageManager.Stub {
     final HashMap<String, ArrayList<String>> mPendingBroadcasts
             = new HashMap<String, ArrayList<String>>();
     static final int SEND_PENDING_BROADCAST = 1;
+    static final int DESTROY_SD_CONTAINER = 2;
     // Delay time in millisecs
     static final int BROADCAST_DELAY = 10 * 1000;
+    static final int DESTROY_SD_CONTAINER_DELAY = 30 * 1000;
 
     class PackageHandler extends Handler {
         PackageHandler(Looper looper) {
@@ -290,6 +292,15 @@ class PackageManagerService extends IPackageManager.Stub {
         }
         public void handleMessage(Message msg) {
             switch (msg.what) {
+                case DESTROY_SD_CONTAINER:
+                    String pkgName = (String) msg.obj;
+                    if (pkgName != null) {
+                        // Too bad we cannot handle the errors from destroying the containers.
+                        if (!destroySdDir(pkgName)) {
+                            Log.e(TAG, "Failed to destroy container for pkg : " + pkgName);
+                        }
+                    }
+                    break;
                 case SEND_PENDING_BROADCAST : {
                     String packages[];
                     ArrayList components[];
@@ -562,12 +573,12 @@ class PackageManagerService extends IPackageManager.Stub {
                 mFrameworkDir.getPath(), OBSERVER_EVENTS, true);
             mFrameworkInstallObserver.startWatching();
             scanDirLI(mFrameworkDir, PackageParser.PARSE_IS_SYSTEM,
-                    scanMode | SCAN_NO_DEX);
+                    scanMode | SCAN_NO_DEX | SCAN_NO_PATHS);
             mSystemAppDir = new File(Environment.getRootDirectory(), "app");
             mSystemInstallObserver = new AppDirObserver(
                 mSystemAppDir.getPath(), OBSERVER_EVENTS, true);
             mSystemInstallObserver.startWatching();
-            scanDirLI(mSystemAppDir, PackageParser.PARSE_IS_SYSTEM, scanMode);
+            scanDirLI(mSystemAppDir, PackageParser.PARSE_IS_SYSTEM, scanMode | SCAN_NO_PATHS);
             mAppInstallDir = new File(dataDir, "app");
             if (mInstaller == null) {
                 // Make sure these dirs exist, when we are running in
@@ -594,7 +605,7 @@ class PackageManagerService extends IPackageManager.Stub {
             mDrmAppInstallObserver = new AppDirObserver(
                 mDrmAppPrivateInstallDir.getPath(), OBSERVER_EVENTS, false);
             mDrmAppInstallObserver.startWatching();
-            scanDirLI(mDrmAppPrivateInstallDir, 0, scanMode | SCAN_FORWARD_LOCKED);
+            scanDirLI(mDrmAppPrivateInstallDir, PackageParser.PARSE_FORWARD_LOCK, scanMode);
 
             EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_PMS_SCAN_END,
                     SystemClock.uptimeMillis());
@@ -1961,12 +1972,7 @@ class PackageManagerService extends IPackageManager.Stub {
         int i;
         for (i=0; i<files.length; i++) {
             File file = new File(dir, files[i]);
-            File resFile = file;
-            // Pick up the resource path from settings for fwd locked apps
-            if ((scanMode & SCAN_FORWARD_LOCKED) != 0) {
-                resFile = null;
-            }
-            PackageParser.Package pkg = scanPackageLI(file, file, resFile,
+            PackageParser.Package pkg = scanPackageLI(file,
                     flags|PackageParser.PARSE_MUST_BE_APK, scanMode);
         }
     }
@@ -2009,14 +2015,15 @@ class PackageManagerService extends IPackageManager.Stub {
      *  Returns null in case of errors and the error code is stored in mLastScanError
      */
     private PackageParser.Package scanPackageLI(File scanFile,
-            File destCodeFile, File destResourceFile, int parseFlags,
+            int parseFlags,
             int scanMode) {
         mLastScanError = PackageManager.INSTALL_SUCCEEDED;
         parseFlags |= mDefParseFlags;
         PackageParser pp = new PackageParser(scanFile.getPath());
         pp.setSeparateProcesses(mSeparateProcesses);
         final PackageParser.Package pkg = pp.parsePackage(scanFile,
-                destCodeFile.getAbsolutePath(), mMetrics, parseFlags);
+                scanFile.getPath(),
+                mMetrics, parseFlags);
         if (pkg == null) {
             mLastScanError = pp.getParseError();
             return null;
@@ -2062,16 +2069,12 @@ class PackageManagerService extends IPackageManager.Stub {
         }
         // The apk is forward locked (not public) if its code and resources
         // are kept in different files.
+        // TODO grab this value from PackageSettings
         if (ps != null && !ps.codePath.equals(ps.resourcePath)) {
-            scanMode |= SCAN_FORWARD_LOCKED;
-        }
-        File resFile = destResourceFile;
-        if (ps != null && ((scanMode & SCAN_FORWARD_LOCKED) != 0)) {
-            resFile = getFwdLockedResource(ps.name);
+            parseFlags |= PackageParser.PARSE_FORWARD_LOCK;
         }
         // Note that we invoke the following method only if we are about to unpack an application
-        return scanPackageLI(scanFile, destCodeFile, resFile,
-                pkg, parseFlags, scanMode | SCAN_UPDATE_SIGNATURE);
+        return scanPackageLI(pkg, parseFlags, scanMode | SCAN_UPDATE_SIGNATURE);
     }
 
     private static String fixProcessName(String defProcessName,
@@ -2138,7 +2141,7 @@ class PackageManagerService extends IPackageManager.Stub {
             try {
                 if (forceDex || dalvik.system.DexFile.isDexOptNeeded(path)) {
                     ret = mInstaller.dexopt(path, pkg.applicationInfo.uid,
-                            !pkg.mForwardLocked);
+                            !isForwardLocked(pkg));
                     pkg.mDidDexOpt = true;
                     performed = true;
                 }
@@ -2164,9 +2167,8 @@ class PackageManagerService extends IPackageManager.Stub {
     }
     
     private PackageParser.Package scanPackageLI(
-        File scanFile, File destCodeFile, File destResourceFile,
         PackageParser.Package pkg, int parseFlags, int scanMode) {
-
+        File scanFile = new File(pkg.mScanPath);
         mScanningPath = scanFile;
         if (pkg == null) {
             mLastScanError = PackageManager.INSTALL_PARSE_FAILED_BAD_PACKAGE_NAME;
@@ -2222,6 +2224,43 @@ class PackageManagerService extends IPackageManager.Stub {
             mLastScanError = PackageManager.INSTALL_FAILED_DUPLICATE_PACKAGE;
             return null;
         }
+
+        // Initialize package source and resource directories
+        File destResourceFile = null;
+        File destCodeFile = null;
+        if ((scanMode & SCAN_NO_PATHS) == 0) {
+            boolean fwdLocked = (parseFlags & PackageParser.PARSE_FORWARD_LOCK) != 0;
+            final String pkgFileName = pkgName + ".apk";
+            File destDir = null;
+
+            if (fwdLocked) {
+                destDir = mDrmAppPrivateInstallDir;
+                destResourceFile = new File(mAppInstallDir, pkgName + ".zip");
+            } else {
+                boolean onSd = (parseFlags & PackageParser.PARSE_ON_SDCARD) != 0;
+                if (!onSd) {
+                    destDir = mAppInstallDir;
+                } else {
+                    String cachePath = getSdDir(pkgName);
+                    if (cachePath == null) {
+                        Log.e(TAG, "Secure container path for pkg: " + pkgName + " at location: " + cachePath +
+                                " not found");
+                        mLastScanError = PackageManager.INSTALL_FAILED_CONTAINER_ERROR;
+                        return null;
+                    }
+                    destDir = new File(cachePath);
+                }
+                destResourceFile = new File(destDir, pkgFileName);
+            }
+            destCodeFile = new File(destDir, pkgFileName);
+            pkg.mPath = destCodeFile.getAbsolutePath();
+        } else {
+            pkg.mPath = pkg.mScanPath;
+            destCodeFile = new File(pkg.mScanPath);
+            destResourceFile = new File(pkg.mScanPath);
+        }
+        pkg.applicationInfo.sourceDir = destCodeFile.getAbsolutePath();
+        pkg.applicationInfo.publicSourceDir = destResourceFile.getAbsolutePath();
 
         SharedUserSetting suid = null;
         PackageSetting pkgSetting = null;
@@ -2394,7 +2433,6 @@ class PackageManagerService extends IPackageManager.Stub {
                 pkg.applicationInfo.packageName,
                 pkg.applicationInfo.processName,
                 pkg.applicationInfo.uid);
-        pkg.applicationInfo.publicSourceDir = destResourceFile.toString();
 
         File dataPath;
         if (mPlatformPackage == pkg) {
@@ -2509,8 +2547,6 @@ class PackageManagerService extends IPackageManager.Stub {
                     return null;
                 }
             }
-
-            pkg.mForwardLocked = (scanMode&SCAN_FORWARD_LOCKED) != 0;
             pkg.mScanPath = path;
 
             if ((scanMode&SCAN_NO_DEX) == 0) {
@@ -2545,7 +2581,7 @@ class PackageManagerService extends IPackageManager.Stub {
         }
         synchronized (mPackages) {
             // Add the new setting to mSettings
-            mSettings.insertPackageSettingLP(pkgSetting, pkg, destCodeFile, destResourceFile);
+            mSettings.insertPackageSettingLP(pkgSetting, pkg);
             // Add the new setting to mPackages
             mPackages.put(pkg.applicationInfo.packageName, pkg);
             int N = pkg.providers.size();
@@ -3714,7 +3750,7 @@ class PackageManagerService extends IPackageManager.Stub {
                 if ((event&ADD_EVENTS) != 0) {
                     PackageParser.Package p = mAppDirs.get(fullPathStr);
                     if (p == null) {
-                        p = scanPackageLI(fullPath, fullPath, fullPath,
+                        p = scanPackageLI(fullPath,
                                 (mIsRom ? PackageParser.PARSE_IS_SYSTEM : 0) |
                                 PackageParser.PARSE_CHATTY |
                                 PackageParser.PARSE_MUST_BE_APK,
@@ -3823,13 +3859,14 @@ class PackageManagerService extends IPackageManager.Stub {
     /*
      * Install a non-existing package.
      */
-    private void installNewPackageLI(String pkgName,
-            File tmpPackageFile,
-            String destFilePath, File destPackageFile, File destResourceFile,
-            PackageParser.Package pkg, boolean forwardLocked, boolean newInstall,
+    private void installNewPackageLI(PackageParser.Package pkg,
+            int parseFlags,
+            int scanMode,
             String installerPackageName, PackageInstalledInfo res) {
         // Remember this for later, in case we need to rollback this install
         boolean dataDirExists;
+        String pkgName = pkg.packageName;
+        boolean onSd = (parseFlags & PackageParser.PARSE_ON_SDCARD) != 0;
 
         if (useEncryptedFilesystemForPackage(pkg)) {
             dataDirExists = (new File(mSecureAppDataDir, pkgName)).exists();
@@ -3838,7 +3875,7 @@ class PackageManagerService extends IPackageManager.Stub {
         }
         res.name = pkgName;
         synchronized(mPackages) {
-            if (mPackages.containsKey(pkgName) || mAppDirs.containsKey(destFilePath)) {
+            if (mPackages.containsKey(pkgName) || mAppDirs.containsKey(pkg.mPath)) {
                 // Don't allow installation over an existing package with the same name.
                 Log.w(TAG, "Attempt to re-install " + pkgName
                         + " without first uninstalling.");
@@ -3846,32 +3883,37 @@ class PackageManagerService extends IPackageManager.Stub {
                 return;
             }
         }
-        if (destPackageFile.exists()) {
-            // It's safe to do this because we know (from the above check) that the file
-            // isn't currently used for an installed package.
-            destPackageFile.delete();
-        }
         mLastScanError = PackageManager.INSTALL_SUCCEEDED;
-        PackageParser.Package newPackage = scanPackageLI(tmpPackageFile, destPackageFile,
-                destResourceFile, pkg, 0,
-                SCAN_MONITOR | SCAN_FORCE_DEX
-                | SCAN_UPDATE_SIGNATURE
-                | (forwardLocked ? SCAN_FORWARD_LOCKED : 0)
-                | (newInstall ? SCAN_NEW_INSTALL : 0));
+        if (onSd) {
+            // Create secure container mount point for package
+            String cPath = createSdDir(new File(pkg.mScanPath), pkgName);
+            if (cPath == null) {
+                mLastScanError = res.returnCode = PackageManager.INSTALL_FAILED_CONTAINER_ERROR;
+                return;
+            }
+        }
+        PackageParser.Package newPackage = scanPackageLI(pkg, parseFlags, scanMode);
         if (newPackage == null) {
-            Log.w(TAG, "Package couldn't be installed in " + destPackageFile);
+            Log.w(TAG, "Package couldn't be installed in " + pkg.mPath);
             if ((res.returnCode=mLastScanError) == PackageManager.INSTALL_SUCCEEDED) {
                 res.returnCode = PackageManager.INSTALL_FAILED_INVALID_APK;
             }
         } else {
-            updateSettingsLI(pkgName, tmpPackageFile,
-                    destFilePath, destPackageFile,
-                    destResourceFile, pkg,
-                    newPackage,
-                    true,
-                    forwardLocked,
+            File destPackageFile = new File(pkg.mPath);
+            if (destPackageFile.exists()) {
+                // It's safe to do this because we know (from the above check) that the file
+                // isn't currently used for an installed package.
+                destPackageFile.delete();
+            }
+            updateSettingsLI(newPackage,
                     installerPackageName,
                     res);
+            if (res.returnCode == PackageManager.INSTALL_SUCCEEDED) {
+                // Check if container can be finalized
+                if(onSd && !finalizeSdDir(pkgName)) {
+                    res.returnCode = PackageManager.INSTALL_FAILED_CONTAINER_ERROR;
+                }
+            }
             // delete the partially installed application. the data directory will have to be
             // restored if it was already existing
             if (res.returnCode != PackageManager.INSTALL_SUCCEEDED) {
@@ -3885,15 +3927,19 @@ class PackageManagerService extends IPackageManager.Stub {
                                 res.removedInfo);
             }
         }
+        if (onSd && res.returnCode != PackageManager.INSTALL_SUCCEEDED) {
+            // Destroy cache
+            destroySdDir(pkgName);
+        }
     }
 
-    private void replacePackageLI(String pkgName,
-            File tmpPackageFile,
-            String destFilePath, File destPackageFile, File destResourceFile,
-            PackageParser.Package pkg, boolean forwardLocked, boolean newInstall,
+    private void replacePackageLI(PackageParser.Package pkg,
+            int parseFlags,
+            int scanMode,
             String installerPackageName, PackageInstalledInfo res) {
 
         PackageParser.Package oldPackage;
+        String pkgName = pkg.packageName;
         // First find the old package info and check signatures
         synchronized(mPackages) {
             oldPackage = mPackages.get(pkgName);
@@ -3905,21 +3951,15 @@ class PackageManagerService extends IPackageManager.Stub {
         }
         boolean sysPkg = ((oldPackage.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0);
         if(sysPkg) {
-            replaceSystemPackageLI(oldPackage,
-                    tmpPackageFile, destFilePath,
-                    destPackageFile, destResourceFile, pkg, forwardLocked,
-                    newInstall, installerPackageName, res);
+            replaceSystemPackageLI(oldPackage, pkg, parseFlags, scanMode, installerPackageName, res);
         } else {
-            replaceNonSystemPackageLI(oldPackage, tmpPackageFile, destFilePath,
-                    destPackageFile, destResourceFile, pkg, forwardLocked,
-                    newInstall, installerPackageName, res);
+            replaceNonSystemPackageLI(oldPackage, pkg, parseFlags, scanMode, installerPackageName, res);
         }
     }
 
     private void replaceNonSystemPackageLI(PackageParser.Package deletedPackage,
-            File tmpPackageFile,
-            String destFilePath, File destPackageFile, File destResourceFile,
-            PackageParser.Package pkg, boolean forwardLocked, boolean newInstall,
+            PackageParser.Package pkg,
+            int parseFlags, int scanMode,
             String installerPackageName, PackageInstalledInfo res) {
         PackageParser.Package newPackage = null;
         String pkgName = deletedPackage.packageName;
@@ -3931,7 +3971,7 @@ class PackageManagerService extends IPackageManager.Stub {
             oldInstallerPackageName = mSettings.getInstallerPackageName(pkgName);
         }
 
-        int parseFlags = PackageManager.INSTALL_REPLACE_EXISTING;
+        parseFlags |= PackageManager.INSTALL_REPLACE_EXISTING;
         // First delete the existing package while retaining the data directory
         if (!deletePackageLI(pkgName, false, PackageManager.DONT_DELETE_DATA,
                 res.removedInfo)) {
@@ -3941,24 +3981,13 @@ class PackageManagerService extends IPackageManager.Stub {
         } else {
             // Successfully deleted the old package. Now proceed with re-installation
             mLastScanError = PackageManager.INSTALL_SUCCEEDED;
-            newPackage = scanPackageLI(tmpPackageFile, destPackageFile,
-                    destResourceFile, pkg, parseFlags,
-                    SCAN_MONITOR | SCAN_FORCE_DEX
-                    | SCAN_UPDATE_SIGNATURE
-                    | (forwardLocked ? SCAN_FORWARD_LOCKED : 0)
-                    | (newInstall ? SCAN_NEW_INSTALL : 0));
+            newPackage = scanPackageLI(pkg, parseFlags, scanMode);
             if (newPackage == null) {
-                    Log.w(TAG, "Package couldn't be installed in " + destPackageFile);
+                Log.w(TAG, "Package couldn't be installed in " + pkg.mPath);
                 if ((res.returnCode=mLastScanError) == PackageManager.INSTALL_SUCCEEDED) {
                     res.returnCode = PackageManager.INSTALL_FAILED_INVALID_APK;
-                }
-            } else {
-                updateSettingsLI(pkgName, tmpPackageFile,
-                        destFilePath, destPackageFile,
-                        destResourceFile, pkg,
-                        newPackage,
-                        true,
-                        forwardLocked,
+                }      
+                updateSettingsLI(newPackage,
                         installerPackageName,
                         res);
                 updatedSettings = true;
@@ -4028,13 +4057,12 @@ class PackageManagerService extends IPackageManager.Stub {
     }
 
     private void replaceSystemPackageLI(PackageParser.Package deletedPackage,
-            File tmpPackageFile,
-            String destFilePath, File destPackageFile, File destResourceFile,
-            PackageParser.Package pkg, boolean forwardLocked, boolean newInstall,
+            PackageParser.Package pkg,
+            int parseFlags, int scanMode,
             String installerPackageName, PackageInstalledInfo res) {
         PackageParser.Package newPackage = null;
         boolean updatedSettings = false;
-        int parseFlags = PackageManager.INSTALL_REPLACE_EXISTING |
+        parseFlags |= PackageManager.INSTALL_REPLACE_EXISTING |
                 PackageParser.PARSE_IS_SYSTEM;
         String packageName = deletedPackage.packageName;
         res.returnCode = PackageManager.INSTALL_FAILED_REPLACE_COULDNT_DELETE;
@@ -4064,26 +4092,14 @@ class PackageManagerService extends IPackageManager.Stub {
         // Successfully disabled the old package. Now proceed with re-installation
         mLastScanError = PackageManager.INSTALL_SUCCEEDED;
         pkg.applicationInfo.flags |= ApplicationInfo.FLAG_UPDATED_SYSTEM_APP;
-        newPackage = scanPackageLI(tmpPackageFile, destPackageFile,
-                destResourceFile, pkg, parseFlags,
-                SCAN_MONITOR | SCAN_FORCE_DEX
-                | SCAN_UPDATE_SIGNATURE
-                | (forwardLocked ? SCAN_FORWARD_LOCKED : 0)
-                | (newInstall ? SCAN_NEW_INSTALL : 0));
+        newPackage = scanPackageLI(pkg, parseFlags, scanMode);
         if (newPackage == null) {
-            Log.w(TAG, "Package couldn't be installed in " + destPackageFile);
+            Log.w(TAG, "Package couldn't be installed in " + pkg.mPath);
             if ((res.returnCode=mLastScanError) == PackageManager.INSTALL_SUCCEEDED) {
                 res.returnCode = PackageManager.INSTALL_FAILED_INVALID_APK;
             }
         } else {
-            updateSettingsLI(packageName, tmpPackageFile,
-                    destFilePath, destPackageFile,
-                    destResourceFile, pkg,
-                    newPackage,
-                    true,
-                    forwardLocked,
-                    installerPackageName,
-                    res);
+            updateSettingsLI(newPackage, installerPackageName, res);
             updatedSettings = true;
         }
 
@@ -4102,9 +4118,7 @@ class PackageManagerService extends IPackageManager.Stub {
                 removePackageLI(newPackage, true);
             }
             // Add back the old system package
-            scanPackageLI(oldPkgSetting.codePath, oldPkgSetting.codePath,
-                    oldPkgSetting.resourcePath,
-                    oldPkg, parseFlags,
+            scanPackageLI(oldPkg, parseFlags,
                     SCAN_MONITOR
                     | SCAN_UPDATE_SIGNATURE);
             // Restore the old system information in Settings
@@ -4119,14 +4133,9 @@ class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-    private void updateSettingsLI(String pkgName, File tmpPackageFile,
-            String destFilePath, File destPackageFile,
-            File destResourceFile,
-            PackageParser.Package pkg,
-            PackageParser.Package newPackage,
-            boolean replacingExistingPackage,
-            boolean forwardLocked,
+    private void updateSettingsLI(PackageParser.Package newPackage,
             String installerPackageName, PackageInstalledInfo res) {
+        String pkgName = newPackage.packageName;
         synchronized (mPackages) {
             //write settings. the installStatus will be incomplete at this stage.
             //note that the new package setting would have already been
@@ -4136,11 +4145,10 @@ class PackageManagerService extends IPackageManager.Stub {
         }
 
         int retCode = 0;
-        if ((pkg.applicationInfo.flags&ApplicationInfo.FLAG_HAS_CODE) != 0) {
-            retCode = mInstaller.movedex(tmpPackageFile.toString(),
-                    destPackageFile.toString());
+        if ((newPackage.applicationInfo.flags&ApplicationInfo.FLAG_HAS_CODE) != 0) {
+            retCode = mInstaller.movedex(newPackage.mScanPath, newPackage.mPath);
             if (retCode != 0) {
-                Log.e(TAG, "Couldn't rename dex file: " + destPackageFile);
+                Log.e(TAG, "Couldn't rename dex file: " + newPackage.mPath);
                 res.returnCode =  PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
                 return;
             }
@@ -4148,22 +4156,25 @@ class PackageManagerService extends IPackageManager.Stub {
         // XXX There are probably some big issues here: upon doing
         // the rename, we have reached the point of no return (the
         // original .apk is gone!), so we can't fail.  Yet... we can.
-        if (!tmpPackageFile.renameTo(destPackageFile)) {
-            Log.e(TAG, "Couldn't move package file to: " + destPackageFile);
-            res.returnCode =  PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
+        File scanFile = new File(newPackage.mScanPath);
+        if (!scanFile.renameTo(new File(newPackage.mPath))) {
+            Log.e(TAG, "Couldn't move package file: " + newPackage.mScanPath + " to: " + newPackage.mPath);
+            // TODO rename should work. Workaround
+            if (!FileUtils.copyFile(scanFile, new File(newPackage.mPath))) {
+                Log.e(TAG, "Couldn't move package file to: " + newPackage.mPath);
+                res.returnCode =  PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
+            }
         } else {
-            res.returnCode = setPermissionsLI(pkgName, newPackage, destFilePath,
-                    destResourceFile,
-                    forwardLocked);
+            res.returnCode = setPermissionsLI(newPackage);
             if(res.returnCode != PackageManager.INSTALL_SUCCEEDED) {
                 return;
             } else {
-                Log.d(TAG, "New package installed in " + destPackageFile);
+                Log.d(TAG, "New package installed in " + newPackage.mPath);
             }
         }
         if(res.returnCode != PackageManager.INSTALL_SUCCEEDED) {
             if (mInstaller != null) {
-                mInstaller.rmdex(tmpPackageFile.getPath());
+                mInstaller.rmdex(newPackage.mScanPath);
             }
         }
 
@@ -4178,11 +4189,6 @@ class PackageManagerService extends IPackageManager.Stub {
             //to update install status
             mSettings.writeLP();
         }
-    }
-
-    private File getFwdLockedResource(String pkgName) {
-        final String publicZipFileName = pkgName + ".zip";
-        return new File(mAppInstallDir, publicZipFileName);
     }
 
     private File copyTempInstallFile(Uri pPackageURI,
@@ -4246,46 +4252,29 @@ class PackageManagerService extends IPackageManager.Stub {
     private void installPackageLI(Uri pPackageURI,
             int pFlags, boolean newInstall, String installerPackageName,
             File tmpPackageFile, PackageInstalledInfo res) {
-        String pkgName = null;
-        boolean forwardLocked = false;
+        boolean forwardLocked = ((pFlags & PackageManager.INSTALL_FORWARD_LOCK) != 0);
+        boolean onSd = ((pFlags & PackageManager.INSTALL_ON_SDCARD) != 0);
         boolean replacingExistingPackage = false;
+        int scanMode = SCAN_MONITOR | SCAN_FORCE_DEX | SCAN_UPDATE_SIGNATURE
+                | (newInstall ? SCAN_NEW_INSTALL : 0);
         // Result object to be returned
         res.returnCode = PackageManager.INSTALL_SUCCEEDED;
 
         main_flow: try {
-            pkgName = PackageParser.parsePackageName(
-                    tmpPackageFile.getAbsolutePath(), 0);
-            if (pkgName == null) {
-                Log.e(TAG, "Couldn't find a package name in : " + tmpPackageFile);
-                res.returnCode = PackageManager.INSTALL_FAILED_INVALID_APK;
-                break main_flow;
-            }
-            res.name = pkgName;
-            //initialize some variables before installing pkg
-            final String pkgFileName = pkgName + ".apk";
-            final File destDir = ((pFlags&PackageManager.INSTALL_FORWARD_LOCK) != 0)
-                                 ?  mDrmAppPrivateInstallDir
-                                 : mAppInstallDir;
-            final File destPackageFile = new File(destDir, pkgFileName);
-            final String destFilePath = destPackageFile.getAbsolutePath();
-            File destResourceFile;
-            if ((pFlags&PackageManager.INSTALL_FORWARD_LOCK) != 0) {
-                destResourceFile = getFwdLockedResource(pkgName);
-                forwardLocked = true;
-            } else {
-                destResourceFile = destPackageFile;
-            }
             // Retrieve PackageSettings and parse package
-            int parseFlags = PackageParser.PARSE_CHATTY;
+            int parseFlags = PackageParser.PARSE_CHATTY |
+                    (forwardLocked ? PackageParser.PARSE_FORWARD_LOCK : 0) |
+                    (onSd ? PackageParser.PARSE_ON_SDCARD : 0);
             parseFlags |= mDefParseFlags;
             PackageParser pp = new PackageParser(tmpPackageFile.getPath());
             pp.setSeparateProcesses(mSeparateProcesses);
             final PackageParser.Package pkg = pp.parsePackage(tmpPackageFile,
-                    destPackageFile.getAbsolutePath(), mMetrics, parseFlags);
+                    null, mMetrics, parseFlags);
             if (pkg == null) {
                 res.returnCode = pp.getParseError();
                 break main_flow;
             }
+            String pkgName = res.name = pkg.packageName;
             if ((pkg.applicationInfo.flags&ApplicationInfo.FLAG_TEST_ONLY) != 0) {
                 if ((pFlags&PackageManager.INSTALL_ALLOW_TEST) == 0) {
                     res.returnCode = PackageManager.INSTALL_FAILED_TEST_ONLY;
@@ -4306,17 +4295,11 @@ class PackageManagerService extends IPackageManager.Stub {
             }
 
             if(replacingExistingPackage) {
-                replacePackageLI(pkgName,
-                        tmpPackageFile,
-                        destFilePath, destPackageFile, destResourceFile,
-                        pkg, forwardLocked, newInstall, installerPackageName,
-                        res);
+                replacePackageLI(pkg, parseFlags, scanMode,
+                        installerPackageName, res);
             } else {
-                installNewPackageLI(pkgName,
-                        tmpPackageFile,
-                        destFilePath, destPackageFile, destResourceFile,
-                        pkg, forwardLocked, newInstall, installerPackageName,
-                        res);
+                installNewPackageLI(pkg, parseFlags, scanMode,
+                        installerPackageName,res);
             }
         } finally {
             if (tmpPackageFile != null && tmpPackageFile.exists()) {
@@ -4325,13 +4308,12 @@ class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-    private int setPermissionsLI(String pkgName,
-            PackageParser.Package newPackage,
-            String destFilePath,
-            File destResourceFile,
-            boolean forwardLocked) {
+    private int setPermissionsLI(PackageParser.Package newPackage) {
+        String pkgName = newPackage.packageName;
         int retCode;
-        if (forwardLocked) {
+        if ((newPackage.applicationInfo.flags
+                & ApplicationInfo.FLAG_FORWARD_LOCK) != 0) {
+            File destResourceFile = new File(newPackage.applicationInfo.publicSourceDir);
             try {
                 extractPublicFiles(newPackage, destResourceFile);
             } catch (IOException e) {
@@ -4347,25 +4329,25 @@ class PackageManagerService extends IPackageManager.Stub {
             } else {
                 final int filePermissions =
                         FileUtils.S_IRUSR|FileUtils.S_IWUSR|FileUtils.S_IRGRP;
-                retCode = FileUtils.setPermissions(destFilePath, filePermissions, -1,
+                retCode = FileUtils.setPermissions(newPackage.mPath, filePermissions, -1,
                                                    newPackage.applicationInfo.uid);
             }
         } else {
             final int filePermissions =
                     FileUtils.S_IRUSR|FileUtils.S_IWUSR|FileUtils.S_IRGRP
                     |FileUtils.S_IROTH;
-            retCode = FileUtils.setPermissions(destFilePath, filePermissions, -1, -1);
+            retCode = FileUtils.setPermissions(newPackage.mPath, filePermissions, -1, -1);
         }
         if (retCode != 0) {
-            Log.e(TAG, "Couldn't set new package file permissions for " + destFilePath
+            Log.e(TAG, "Couldn't set new package file permissions for " +
+                    newPackage.mPath
                        + ". The return code was: " + retCode);
         }
         return PackageManager.INSTALL_SUCCEEDED;
     }
 
-    private boolean isForwardLocked(PackageParser.Package deletedPackage) {
-        final ApplicationInfo applicationInfo = deletedPackage.applicationInfo;
-        return applicationInfo.sourceDir.startsWith(mDrmAppPrivateInstallDir.getAbsolutePath());
+    private boolean isForwardLocked(PackageParser.Package pkg) {
+        return  ((pkg.applicationInfo.flags & ApplicationInfo.FLAG_FORWARD_LOCK) != 0);
     }
 
     private void extractPublicFiles(PackageParser.Package newPackage,
@@ -4643,9 +4625,9 @@ class PackageManagerService extends IPackageManager.Stub {
             mSettings.enableSystemPackageLP(p.packageName);
         }
         // Install the system package
-        PackageParser.Package newPkg = scanPackageLI(ps.codePath, ps.codePath, ps.resourcePath,
+        PackageParser.Package newPkg = scanPackageLI(ps.codePath,
                 PackageParser.PARSE_MUST_BE_APK | PackageParser.PARSE_IS_SYSTEM,
-                SCAN_MONITOR);
+                SCAN_MONITOR | SCAN_NO_PATHS);
 
         if (newPkg == null) {
             Log.w(TAG, "Failed to restore system package:"+p.packageName+" with error:" + mLastScanError);
@@ -4749,14 +4731,32 @@ class PackageManagerService extends IPackageManager.Stub {
             Log.w(TAG, "Package " + p.packageName + " has no applicationInfo.");
             return false;
         }
+        boolean onSd = (p.applicationInfo.flags & ApplicationInfo.FLAG_ON_SDCARD) != 0;
+        // Mount sd container if needed
+        if (onSd) {
+            // TODO Better error handling from MountService api later
+            mountSdDir(p.packageName, Process.SYSTEM_UID) ;
+        }
+        boolean ret = false;
         if ( (p.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
             Log.i(TAG, "Removing system package:"+p.packageName);
             // When an updated system application is deleted we delete the existing resources as well and
             // fall back to existing code in system partition
-            return deleteSystemPackageLI(p, flags, outInfo);
+            ret = deleteSystemPackageLI(p, flags, outInfo);
+        } else {
+            Log.i(TAG, "Removing non-system package:"+p.packageName);
+            ret = deleteInstalledPackageLI (p, deleteCodeAndResources, flags, outInfo);
         }
-        Log.i(TAG, "Removing non-system package:"+p.packageName);
-        return deleteInstalledPackageLI (p, deleteCodeAndResources, flags, outInfo);
+        if (ret && onSd) {
+            // Post a delayed destroy on the container since there might
+            // be active processes holding open file handles to package
+            // resources which will get killed by the process killer when
+            // destroying the container. This might even kill the current
+            // process and crash the system. Delay the destroy a bit so
+            // that the active processes get to handle the uninstall broadcasts.
+            sendDelayedDestroySdDir(packageName);
+        }
+        return ret;
     }
 
     public void clearApplicationUserData(final String packageName,
@@ -6343,22 +6343,23 @@ class PackageManagerService extends IPackageManager.Stub {
             return p;
         }
 
-        private void insertPackageSettingLP(PackageSetting p, PackageParser.Package pkg,
-                File codePath, File resourcePath) {
+        private void insertPackageSettingLP(PackageSetting p, PackageParser.Package pkg) {
             p.pkg = pkg;
+            String codePath = pkg.applicationInfo.sourceDir;
+            String resourcePath = pkg.applicationInfo.publicSourceDir;
             // Update code path if needed
-            if (!codePath.toString().equalsIgnoreCase(p.codePathString)) {
+            if (!codePath.equalsIgnoreCase(p.codePathString)) {
                 Log.w(TAG, "Code path for pkg : " + p.pkg.packageName +
                         " changing from " + p.codePathString + " to " + codePath);
-                p.codePath = codePath;
-                p.codePathString = codePath.toString();
+                p.codePath = new File(codePath);
+                p.codePathString = codePath;
             }
             //Update resource path if needed
-            if (!resourcePath.toString().equalsIgnoreCase(p.resourcePathString)) {
+            if (!resourcePath.equalsIgnoreCase(p.resourcePathString)) {
                 Log.w(TAG, "Resource path for pkg : " + p.pkg.packageName +
                         " changing from " + p.resourcePathString + " to " + resourcePath);
-                p.resourcePath = resourcePath;
-                p.resourcePathString = resourcePath.toString();
+                p.resourcePath = new File(resourcePath);
+                p.resourcePathString = resourcePath;
             }
             // Update version code if needed
              if (pkg.mVersionCode != p.versionCode) {
@@ -7432,4 +7433,110 @@ class PackageManagerService extends IPackageManager.Stub {
                        || packageSettings.enabledComponents.contains(componentInfo.name));
         }
     }
+
+    // ------- apps on sdcard specific code -------
+    static final boolean DEBUG_SD_INSTALL = false;
+    final private String mSdEncryptKey = "none";
+
+    private MountService getMountService() {
+        return (MountService) ServiceManager.getService("mount");
+    }
+
+   private String createSdDir(File tmpPackageFile, String pkgName) {
+        // Create mount point via MountService
+        MountService mountService = getMountService();
+        long len = tmpPackageFile.length();
+        int mbLen = (int) (len/(1024*1024));
+        if ((len - (mbLen * 1024 * 1024)) > 0) {
+            mbLen++;
+        }
+        if (DEBUG_SD_INSTALL) Log.i(TAG, "mbLen="+mbLen);
+        String cachePath = null;
+        // Remove any pending destroy messages
+        mHandler.removeMessages(DESTROY_SD_CONTAINER, pkgName);
+        try {
+            cachePath = mountService.createSecureContainer(pkgName,
+                mbLen,
+                "vfat", mSdEncryptKey, Process.SYSTEM_UID);
+            if (DEBUG_SD_INSTALL) Log.i(TAG, "Trying to install " + pkgName + ", cachePath =" + cachePath);
+            return cachePath;
+        } catch(IllegalStateException e) {
+            Log.e(TAG, "Failed to create storage on sdcard with exception: " + e);
+        }
+        // TODO just fail here and let the user delete later on.
+        try {
+            mountService.destroySecureContainer(pkgName);
+            if (DEBUG_SD_INSTALL) Log.i(TAG, "Destroying cache for " + pkgName + ", cachePath =" + cachePath);
+        } catch(IllegalStateException e) {
+            Log.e(TAG, "Failed to destroy existing cache: " + e);
+            return null;
+        } 
+       try {
+            cachePath = mountService.createSecureContainer(pkgName,
+                mbLen,
+                "vfat", mSdEncryptKey, Process.SYSTEM_UID);
+            if (DEBUG_SD_INSTALL) Log.i(TAG, "Trying to install again " + pkgName + ", cachePath =" + cachePath);
+            return cachePath;
+        } catch(IllegalStateException e) {
+            Log.e(TAG, "Failed to create storage on sdcard with exception: " + e);
+            return null;
+        }
+    }
+
+   private String mountSdDir(String pkgName, int ownerUid) {
+       try {
+           return getMountService().mountSecureContainer(pkgName, mSdEncryptKey, ownerUid);
+       } catch (IllegalStateException e) {
+           Log.i(TAG, "Failed to mount container for pkg : " + pkgName + " exception : " + e);
+       }
+       return null;
+   }
+
+   private String getSdDir(String pkgName) {
+       String cachePath = null;
+       try {
+           cachePath = getMountService().getSecureContainerPath(pkgName);
+       } catch (IllegalStateException e) {
+           Log.e(TAG, "Failed to retrieve secure container path for pkg : " + pkgName + " with exception " + e);
+       }
+       return cachePath;
+   }
+
+   private boolean finalizeSdDir(String pkgName) {
+       try {
+           getMountService().finalizeSecureContainer(pkgName);
+           return true;
+       } catch (IllegalStateException e) {
+           Log.i(TAG, "Failed to destroy container for pkg : " + pkgName);
+           return false;
+       }
+   }
+
+   private boolean destroySdDir(String pkgName) {
+       try {
+           if (mHandler.hasMessages(DESTROY_SD_CONTAINER, pkgName)) {
+               // Don't have to send message again
+               mHandler.removeMessages(DESTROY_SD_CONTAINER, pkgName);
+           }
+           // We need to destroy right away
+           getMountService().destroySecureContainer(pkgName);
+           return true;
+       } catch (IllegalStateException e) {
+           Log.i(TAG, "Failed to destroy container for pkg : " + pkgName);
+           return false;
+       }
+   }
+
+   private void sendDelayedDestroySdDir(String pkgName) {
+       if (mHandler.hasMessages(DESTROY_SD_CONTAINER, pkgName)) {
+           // Don't have to send message again
+           return;
+       }
+       Message msg = mHandler.obtainMessage(DESTROY_SD_CONTAINER, pkgName);
+       mHandler.sendMessageDelayed(msg, DESTROY_SD_CONTAINER_DELAY);
+   }
+
+   public void updateExternalMediaStatus(boolean mediaStatus) {
+       // TODO
+   }
 }
