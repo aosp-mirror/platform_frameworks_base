@@ -2030,8 +2030,23 @@ public class SearchManager
     }
 
     /**
-     * Gets information about a searchable activity. This method is static so that it can
-     * be used from non-Activity contexts.
+     * Gets information about a searchable activity.
+     *
+     * @param componentName The activity to get searchable information for.
+     * @return Searchable information, or <code>null</code> if the activity does not
+     *         exist, or is not searchable.
+     */
+    public SearchableInfo getSearchableInfo(ComponentName componentName) {
+        try {
+            return mService.getSearchableInfo(componentName, false);
+        } catch (RemoteException ex) {
+            Log.e(TAG, "getSearchableInfo() failed: " + ex);
+            return null;
+        }
+    }
+
+    /**
+     * Gets information about a searchable activity.
      *
      * @param componentName The activity to get searchable information for.
      * @param globalSearch If <code>false</code>, return information about the given activity.
