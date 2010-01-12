@@ -1496,6 +1496,7 @@ public class StatusBarService extends IStatusBar.Stub
 //        lp.token = mStatusBarView.getWindowToken();
         lp.gravity = Gravity.TOP | Gravity.FILL_HORIZONTAL;
         lp.setTitle("TrackingView");
+        lp.y = mTrackingPosition;
         mTrackingParams = lp;
 
         WindowManagerImpl.getDefault().addView(mTrackingView, lp);
@@ -1575,8 +1576,11 @@ public class StatusBarService extends IStatusBar.Stub
         // Maybe the view was resized.
         if (!mExpandedVisible) {
             if (mTrackingView != null) {
-                mTrackingPosition = mTrackingParams.y = -disph;
-                WindowManagerImpl.getDefault().updateViewLayout(mTrackingView, mTrackingParams);
+                mTrackingPosition = -disph;
+                if (mTrackingParams != null) {
+                    mTrackingParams.y = mTrackingPosition;
+                    WindowManagerImpl.getDefault().updateViewLayout(mTrackingView, mTrackingParams);
+                }
             }
             if (mExpandedParams != null) {
                 mExpandedParams.y = -disph;
