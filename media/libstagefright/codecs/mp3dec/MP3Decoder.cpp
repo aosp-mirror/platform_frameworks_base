@@ -161,6 +161,9 @@ status_t MP3Decoder::read(
     mConfig->pOutputBuffer = static_cast<int16_t *>(buffer->data());
 
     if (pvmp3_framedecoder(mConfig, mDecoderBuf) != NO_DECODING_ERROR) {
+        buffer->release();
+        buffer = NULL;
+
         mInputBuffer->release();
         mInputBuffer = NULL;
 
