@@ -61,7 +61,7 @@ protected:
     bool mTextureMatrixEnable;
 
 private:
-    void initAddUserAttrib(const Element *e);
+    void initAddUserElement(const Element *e, String8 *names, uint32_t *count, const char *prefix);
 };
 
 

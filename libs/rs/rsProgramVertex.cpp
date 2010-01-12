@@ -69,7 +69,7 @@ void ProgramVertex::setupGL(const Context *rsc, ProgramVertexState *state)
     }
     state->mLast.set(this);
 
-    const float *f = static_cast<const float *>(mConstants->getPtr());
+    const float *f = static_cast<const float *>(mConstants[0]->getPtr());
 
     glMatrixMode(GL_TEXTURE);
     if (mTextureMatrixEnable) {
@@ -116,16 +116,37 @@ void ProgramVertex::createShader()
 {
     mShader.setTo("");
 
-    for (uint32_t ct=0; ct < mUniformCount; ct++) {
-        mShader.append("uniform mat4 ");
-        mShader.append(mUniformNames[ct]);
-        mShader.append(";\n");
-    }
-
     mShader.append("varying vec4 varColor;\n");
     mShader.append("varying vec4 varTex0;\n");
 
     if (mUserShader.length() > 1) {
+        mShader.append("uniform mat4 ");
+        mShader.append(mUniformNames[0]);
+        mShader.append(";\n");
+
+        LOGE("constant %i ", mConstantCount);
+        for (uint32_t ct=0; ct < mConstantCount; ct++) {
+            const Element *e = mConstantTypes[ct]->getElement();
+            for (uint32_t field=0; field < e->getFieldCount(); field++) {
+                const Element *f = e->getField(field);
+
+                // Cannot be complex
+                rsAssert(!f->getFieldCount());
+                switch(f->getComponent().getVectorSize()) {
+                case 1: mShader.append("uniform float UNI_"); break;
+                case 2: mShader.append("uniform vec2 UNI_"); break;
+                case 3: mShader.append("uniform vec3 UNI_"); break;
+                case 4: mShader.append("uniform vec4 UNI_"); break;
+                default:
+                    rsAssert(0);
+                }
+
+                mShader.append(e->getFieldName(field));
+                mShader.append(";\n");
+            }
+        }
+
+
         for (uint32_t ct=0; ct < mInputCount; ct++) {
             const Element *e = mInputElements[ct].get();
             for (uint32_t field=0; field < e->getFieldCount(); field++) {
@@ -148,6 +169,12 @@ void ProgramVertex::createShader()
         }
         mShader.append(mUserShader);
     } else {
+        for (uint32_t ct=0; ct < mUniformCount; ct++) {
+            mShader.append("uniform mat4 ");
+            mShader.append(mUniformNames[ct]);
+            mShader.append(";\n");
+        }
+
         for (uint32_t ct=VertexArray::POSITION; ct < mAttribCount; ct++) {
             mShader.append("attribute vec4 ");
             mShader.append(mAttribNames[ct]);
@@ -155,12 +182,12 @@ void ProgramVertex::createShader()
         }
 
         mShader.append("void main() {\n");
-        mShader.append("  gl_Position = uni_MVP * ATTRIB_Position;\n");
+        mShader.append("  gl_Position = UNI_MVP * ATTRIB_Position;\n");
         mShader.append("  gl_PointSize = ATTRIB_PointSize.x;\n");
 
         mShader.append("  varColor = ATTRIB_Color;\n");
         if (mTextureMatrixEnable) {
-            mShader.append("  varTex0 = uni_TexMatrix * ATTRIB_Texture;\n");
+            mShader.append("  varTex0 = UNI_TexMatrix * ATTRIB_Texture;\n");
         } else {
             mShader.append("  varTex0 = ATTRIB_Texture;\n");
         }
@@ -180,7 +207,7 @@ void ProgramVertex::setupGL2(const Context *rsc, ProgramVertexState *state, Shad
 
     glVertexAttrib4f(1, state->color[0], state->color[1], state->color[2], state->color[3]);
 
-    const float *f = static_cast<const float *>(mConstants->getPtr());
+    const float *f = static_cast<const float *>(mConstants[0]->getPtr());
 
     Matrix mvp;
     mvp.load(&f[RS_PROGRAM_VERTEX_PROJECTION_OFFSET]);
@@ -192,6 +219,54 @@ void ProgramVertex::setupGL2(const Context *rsc, ProgramVertexState *state, Shad
     if (mTextureMatrixEnable) {
         glUniformMatrix4fv(sc->vtxUniformSlot(1), 1, GL_FALSE,
                            &f[RS_PROGRAM_VERTEX_TEXTURE_OFFSET]);
+    }
+
+    uint32_t uidx = 1;
+    for (uint32_t ct=0; ct < mConstantCount; ct++) {
+        Allocation *alloc = mConstants[ct+1].get();
+        if (!alloc) {
+            continue;
+        }
+
+        const uint8_t *data = static_cast<const uint8_t *>(alloc->getPtr());
+        const Element *e = mConstantTypes[ct]->getElement();
+        for (uint32_t field=0; field < e->getFieldCount(); field++) {
+            const Element *f = e->getField(field);
+            uint32_t offset = e->getFieldOffsetBytes(field);
+            int32_t slot = sc->vtxUniformSlot(uidx);
+
+            const float *fd = reinterpret_cast<const float *>(&data[offset]);
+
+            //LOGE("Uniform  slot=%i, offset=%i, constant=%i, field=%i, uidx=%i", slot, offset, ct, field, uidx);
+            if (slot >= 0) {
+                switch(f->getComponent().getVectorSize()) {
+                case 1:
+                    //LOGE("Uniform 1 = %f", fd[0]);
+                    glUniform1fv(slot, 1, fd);
+                    break;
+                case 2:
+                    //LOGE("Uniform 2 = %f %f", fd[0], fd[1]);
+                    glUniform2fv(slot, 1, fd);
+                    break;
+                case 3:
+                    //LOGE("Uniform 3 = %f %f %f", fd[0], fd[1], fd[2]);
+                    glUniform3fv(slot, 1, fd);
+                    break;
+                case 4:
+                    //LOGE("Uniform 4 = %f %f %f %f", fd[0], fd[1], fd[2], fd[3]);
+                    glUniform4fv(slot, 1, fd);
+                    break;
+                default:
+                    rsAssert(0);
+                }
+            }
+            uidx ++;
+        }
+    }
+
+    for (uint32_t ct=0; ct < mConstantCount; ct++) {
+        uint32_t glSlot = sc->vtxUniformSlot(ct + 1);
+
     }
 
     state->mLast.set(this);
@@ -208,46 +283,46 @@ void ProgramVertex::addLight(const Light *l)
 
 void ProgramVertex::setProjectionMatrix(const rsc_Matrix *m) const
 {
-    float *f = static_cast<float *>(mConstants->getPtr());
+    float *f = static_cast<float *>(mConstants[0]->getPtr());
     memcpy(&f[RS_PROGRAM_VERTEX_PROJECTION_OFFSET], m, sizeof(rsc_Matrix));
     mDirty = true;
 }
 
 void ProgramVertex::setModelviewMatrix(const rsc_Matrix *m) const
 {
-    float *f = static_cast<float *>(mConstants->getPtr());
+    float *f = static_cast<float *>(mConstants[0]->getPtr());
     memcpy(&f[RS_PROGRAM_VERTEX_MODELVIEW_OFFSET], m, sizeof(rsc_Matrix));
     mDirty = true;
 }
 
 void ProgramVertex::setTextureMatrix(const rsc_Matrix *m) const
 {
-    float *f = static_cast<float *>(mConstants->getPtr());
+    float *f = static_cast<float *>(mConstants[0]->getPtr());
     memcpy(&f[RS_PROGRAM_VERTEX_TEXTURE_OFFSET], m, sizeof(rsc_Matrix));
     mDirty = true;
 }
 
 void ProgramVertex::transformToScreen(const Context *rsc, float *v4out, const float *v3in) const
 {
-    float *f = static_cast<float *>(mConstants->getPtr());
+    float *f = static_cast<float *>(mConstants[0]->getPtr());
     Matrix mvp;
     mvp.loadMultiply((Matrix *)&f[RS_PROGRAM_VERTEX_MODELVIEW_OFFSET],
                      (Matrix *)&f[RS_PROGRAM_VERTEX_PROJECTION_OFFSET]);
     mvp.vectorMultiply(v4out, v3in);
 }
 
-void ProgramVertex::initAddUserAttrib(const Element *e)
+void ProgramVertex::initAddUserElement(const Element *e, String8 *names, uint32_t *count, const char *prefix)
 {
     rsAssert(e->getFieldCount());
     for (uint32_t ct=0; ct < e->getFieldCount(); ct++) {
         const Element *ce = e->getField(ct);
         if (ce->getFieldCount()) {
-            initAddUserAttrib(ce);
+            initAddUserElement(ce, names, count, prefix);
         } else {
-            String8 tmp("ATTRIB_");
+            String8 tmp(prefix);
             tmp.append(e->getFieldName(ct));
-            mAttribNames[mAttribCount].setTo(tmp.string());
-            mAttribCount++;
+            names[*count].setTo(tmp.string());
+            (*count)++;
         }
     }
 }
@@ -257,7 +332,13 @@ void ProgramVertex::init(Context *rsc)
     if (mUserShader.size() > 0) {
         mAttribCount = 0;
         for (uint32_t ct=0; ct < mInputCount; ct++) {
-            initAddUserAttrib(mInputElements[ct].get());
+            initAddUserElement(mInputElements[ct].get(), mAttribNames, &mAttribCount, "ATTRIB_");
+        }
+
+        mUniformCount = 1;
+        mUniformNames[0].setTo("UNI_MVP");
+        for (uint32_t ct=0; ct < mInputCount; ct++) {
+            initAddUserElement(mConstantTypes[ct]->getElement(), mUniformNames, &mUniformCount, "UNI_");
         }
     } else {
         mAttribCount = 5;
@@ -266,11 +347,11 @@ void ProgramVertex::init(Context *rsc)
         mAttribNames[2].setTo("ATTRIB_Normal");
         mAttribNames[3].setTo("ATTRIB_PointSize");
         mAttribNames[4].setTo("ATTRIB_Texture");
-    }
 
-    mUniformCount = 2;
-    mUniformNames[0].setTo("uni_MVP");
-    mUniformNames[1].setTo("uni_TexMatrix");
+        mUniformCount = 2;
+        mUniformNames[0].setTo("UNI_MVP");
+        mUniformNames[1].setTo("UNI_TexMatrix");
+    }
 
     createShader();
 }
@@ -299,7 +380,7 @@ void ProgramVertexState::init(Context *rsc, int32_t w, int32_t h)
     mDefaultAlloc.set(alloc);
     mDefault.set(pv);
     pv->init(rsc);
-    pv->bindAllocation(alloc);
+    pv->bindAllocation(alloc, 0);
 
     color[0] = 1.f;
     color[1] = 1.f;

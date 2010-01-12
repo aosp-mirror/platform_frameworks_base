@@ -39,6 +39,10 @@ public class Allocation extends BaseObj {
         mType = t;
     }
 
+    public Type getType() {
+        return mType;
+    }
+
     public void uploadToTexture(int baseMipLevel) {
         mRS.validate();
         mRS.validateSurface();

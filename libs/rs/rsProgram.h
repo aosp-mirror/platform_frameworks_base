@@ -39,7 +39,7 @@ public:
                        const uint32_t * params, uint32_t paramLength);
     virtual ~Program();
 
-    void bindAllocation(Allocation *);
+    void bindAllocation(Allocation *, uint32_t slot);
     virtual void createShader();
 
     bool isUserProgram() const {return mUserShader.size() > 0;}
@@ -69,7 +69,7 @@ protected:
     uint32_t mOutputCount;
     uint32_t mConstantCount;
 
-    ObjectBaseRef<Allocation> mConstants;
+    ObjectBaseRef<Allocation> mConstants[MAX_UNIFORMS];
 
     mutable bool mDirty;
     String8 mShader;

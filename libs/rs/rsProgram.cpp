@@ -95,7 +95,9 @@ Program::Program(Context *rsc, const char * shaderText, uint32_t shaderLength,
 
 Program::~Program()
 {
-    bindAllocation(NULL);
+    for (uint32_t ct=0; ct < MAX_UNIFORMS; ct++) {
+        bindAllocation(NULL, ct);
+    }
 
     delete[] mInputElements;
     delete[] mOutputElements;
@@ -106,15 +108,16 @@ Program::~Program()
 }
 
 
-void Program::bindAllocation(Allocation *alloc)
+void Program::bindAllocation(Allocation *alloc, uint32_t slot)
 {
-    if (mConstants.get() == alloc) {
+    LOGE("bind alloc %p %i", alloc, slot);
+    if (mConstants[slot].get() == alloc) {
         return;
     }
-    if (mConstants.get()) {
-        mConstants.get()->removeProgramToDirty(this);
+    if (mConstants[slot].get()) {
+        mConstants[slot].get()->removeProgramToDirty(this);
     }
-    mConstants.set(alloc);
+    mConstants[slot].set(alloc);
     if (alloc) {
         alloc->addProgramToDirty(this);
     }
@@ -239,7 +242,7 @@ namespace renderscript {
 void rsi_ProgramBindConstants(Context *rsc, RsProgram vp, uint32_t slot, RsAllocation constants)
 {
     Program *p = static_cast<Program *>(vp);
-    p->bindAllocation(static_cast<Allocation *>(constants));
+    p->bindAllocation(static_cast<Allocation *>(constants), slot);
 }
 
 void rsi_ProgramBindTexture(Context *rsc, RsProgram vpf, uint32_t slot, RsAllocation a)

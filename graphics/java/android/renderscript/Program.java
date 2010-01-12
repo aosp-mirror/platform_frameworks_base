@@ -111,12 +111,13 @@ public class Program extends BaseObj {
             mOutputs[mOutputCount++] = e;
         }
 
-        public void addConstant(Type t) throws IllegalStateException {
+        public int addConstant(Type t) throws IllegalStateException {
             // Should check for consistant and non-conflicting names...
             if(mConstantCount >= MAX_CONSTANT) {
                 throw new IllegalArgumentException("Max input count exceeded.");
             }
-            mConstants[mConstantCount++] = t;
+            mConstants[mConstantCount] = t;
+            return mConstantCount++;
         }
 
         public void setTextureCount(int count) throws IllegalArgumentException {
