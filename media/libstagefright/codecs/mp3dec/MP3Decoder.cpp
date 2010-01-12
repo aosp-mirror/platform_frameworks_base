@@ -160,7 +160,12 @@ status_t MP3Decoder::read(
     mConfig->outputFrameSize = buffer->size() / sizeof(int16_t);
     mConfig->pOutputBuffer = static_cast<int16_t *>(buffer->data());
 
-    CHECK_EQ(pvmp3_framedecoder(mConfig, mDecoderBuf), NO_DECODING_ERROR);
+    if (pvmp3_framedecoder(mConfig, mDecoderBuf) != NO_DECODING_ERROR) {
+        mInputBuffer->release();
+        mInputBuffer = NULL;
+
+        return UNKNOWN_ERROR;
+    }
 
     buffer->set_range(
             0, mConfig->outputFrameSize * sizeof(int16_t));
