@@ -2098,6 +2098,7 @@ public class WebView extends AbsoluteLayout
             mWebViewCore.sendMessage(EventHub.VIEW_SIZE_CHANGED, data);
             mLastWidthSent = newWidth;
             mLastHeightSent = newHeight;
+            mAnchorX = mAnchorY = 0;
             return true;
         }
         return false;
@@ -3702,8 +3703,12 @@ public class WebView extends AbsoluteLayout
     private static boolean mSupportMultiTouch;
 
     private double mPinchDistance;
+    private float mLastPressure;
     private int mAnchorX;
     private int mAnchorY;
+
+    private static float SCALE_INCREMENT = 0.01f;
+    private static float PRESSURE_THRESHOLD = 0.67f;
 
     private boolean doMultiTouch(MotionEvent ev) {
         int action = ev.getAction();
@@ -3719,28 +3724,25 @@ public class WebView extends AbsoluteLayout
                 mWebTextView.setInPassword(false);
             }
             // start multi (2-pointer) touch
-            mPreviewZoomOnly = true;
             float x0 = ev.getX(0);
             float y0 = ev.getY(0);
             float x1 = ev.getX(1);
             float y1 = ev.getY(1);
-            mLastTouchTime = ev.getEventTime();
             mPinchDistance = Math.sqrt((x0 - x1) * (x0 - x1) + (y0 - y1)
                     * (y0 - y1));
-            mZoomCenterX = mZoomCenterY = 0;
         } else if ((action & 0xff) == MotionEvent.ACTION_POINTER_UP) {
-            mPreviewZoomOnly = false;
-            // for testing only, default don't reflow now
-            boolean reflowNow = !getSettings().getPluginsEnabled();
-            // force zoom after mPreviewZoomOnly is set to false so that the new
-            // view size will be passed to the WebKit
-            if (reflowNow && (mZoomCenterX != 0) && (mZoomCenterY != 0)) {
+            if (mPreviewZoomOnly) {
+                mPreviewZoomOnly = false;
                 mAnchorX = viewToContentX((int) mZoomCenterX + mScrollX);
                 mAnchorY = viewToContentY((int) mZoomCenterY + mScrollY);
+                // for testing only, default don't reflow now
+                boolean reflowNow = !getSettings().getPluginsEnabled();
+                // force zoom after mPreviewZoomOnly is set to false so that the
+                // new view size will be passed to the WebKit
+                setNewZoomScale(mActualScale, reflowNow, true);
+                // call invalidate() to draw without zoom filter
+                invalidate();
             }
-            setNewZoomScale(mActualScale, reflowNow, true);
-            // call invalidate() to draw without zoom filter
-            invalidate();
             // adjust the edit text view if needed
             if (inEditingMode()) {
                 adjustTextView(true);
@@ -3763,12 +3765,11 @@ public class WebView extends AbsoluteLayout
                     * (y0 - y1));
             float scale = (float) (Math.round(distance / mPinchDistance
                     * mActualScale * 100) / 100.0);
-            long time = ev.getEventTime();
-            // add distance/time checking to avoid the minor shift right before
-            // lifting the fingers after a pause
-            if (Math.abs(scale - mActualScale) >= 0.01f
-                    && ((time - mLastTouchTime) < 300 || Math.abs(distance
-                            - mPinchDistance) > (10 * mDefaultScale))) {
+            float pressure = ev.getPressure(0) + ev.getPressure(1);
+            if (Math.abs(scale - mActualScale) >= SCALE_INCREMENT
+                    && (!mPreviewZoomOnly
+                    || (pressure / mLastPressure) > PRESSURE_THRESHOLD)) {
+                mPreviewZoomOnly = true;
                 // limit the scale change per step
                 if (scale > mActualScale) {
                     scale = Math.min(scale, mActualScale * 1.25f);
@@ -3780,7 +3781,7 @@ public class WebView extends AbsoluteLayout
                 setNewZoomScale(scale, false, false);
                 invalidate();
                 mPinchDistance = distance;
-                mLastTouchTime = time;
+                mLastPressure = pressure;
             }
         } else {
             Log.w(LOGTAG, action + " should not happen during doMultiTouch");
@@ -3801,7 +3802,7 @@ public class WebView extends AbsoluteLayout
         }
 
         if (mSupportMultiTouch && getSettings().supportZoom()
-                && ev.getPointerCount() > 1) {
+                && mMinZoomScale < mMaxZoomScale && ev.getPointerCount() > 1) {
             return doMultiTouch(ev);
         }
 
