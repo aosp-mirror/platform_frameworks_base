@@ -256,7 +256,7 @@ public class FocusFinderTest extends AndroidTestCase {
     }
 
     /**
-     * Grabbed from {@link com.android.frameworktest.focus.VerticalFocusSearchTest#testSearchFromMidLeft()}
+     * Grabbed from {@link android.widget.focus.VerticalFocusSearchTest#testSearchFromMidLeft()}
      */
     @SmallTest
     public void testVerticalFocusSearchScenario() {
@@ -350,7 +350,7 @@ public class FocusFinderTest extends AndroidTestCase {
 
     /**
      * A dial pad with 9 squares arranged in a grid.  no padding, so
-     * the edges are equal.  see {@link com.android.frameworktest.focus.LinearLayoutGrid}
+     * the edges are equal.  see {@link android.widget.focus.LinearLayoutGrid}
      */
     @SmallTest
     public void testGridWithTouchingEdges() {
