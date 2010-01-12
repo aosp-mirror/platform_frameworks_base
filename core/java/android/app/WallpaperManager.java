@@ -63,6 +63,21 @@ public class WallpaperManager {
     public static final String ACTION_LIVE_WALLPAPER_CHOOSER
             = "android.service.wallpaper.LIVE_WALLPAPER_CHOOSER";
     
+    /**
+     * Command for {@link #sendWallpaperCommand}: reported by the wallpaper
+     * host when the user taps on an empty area (not performing an action
+     * in the host).  The x and y arguments are the location of the tap in
+     * screen coordinates.
+     */
+    public static final String COMMAND_TAP = "android.wallpaper.tap";
+    
+    /**
+     * Command for {@link #sendWallpaperCommand}: reported by the wallpaper
+     * host when the user drops an object into an area of the host.  The x
+     * and y arguments are the location of the drop.
+     */
+    public static final String COMMAND_DROP = "android.home.drop";
+    
     private final Context mContext;
     
     /**
@@ -195,7 +210,12 @@ public class WallpaperManager {
                 if (mDefaultWallpaper != null) {
                     return mDefaultWallpaper;
                 }
-                mWallpaper = getCurrentWallpaperLocked(context);
+                mWallpaper = null;
+                try {
+                    mWallpaper = getCurrentWallpaperLocked(context);
+                } catch (OutOfMemoryError e) {
+                    Log.w(TAG, "No memory load current wallpaper", e);
+                }
                 if (mWallpaper == null && returnDefault) {
                     mDefaultWallpaper = getDefaultWallpaperLocked(context);
                     return mDefaultWallpaper;
@@ -279,7 +299,12 @@ public class WallpaperManager {
                     } catch (IOException e) {
                     }
                     
-                    return generateBitmap(context, bm, width, height);
+                    try {
+                        return generateBitmap(context, bm, width, height);
+                    } catch (OutOfMemoryError e) {
+                        Log.w(TAG, "Can't generate default bitmap", e);
+                        return bm;
+                    }
                 }
             } catch (RemoteException e) {
             }
@@ -594,7 +619,7 @@ public class WallpaperManager {
     /**
      * For applications that use multiple virtual screens showing a wallpaper,
      * specify the step size between virtual screens. For example, if the
-     * launcher has 5 virtual screens, it would specify an xStep of 0.5,
+     * launcher has 3 virtual screens, it would specify an xStep of 0.5,
      * since the X offset for those screens are 0.0, 0.5 and 1.0
      * @param xStep The X offset delta from one screen to the next one 
      * @param yStep The Y offset delta from one screen to the next one

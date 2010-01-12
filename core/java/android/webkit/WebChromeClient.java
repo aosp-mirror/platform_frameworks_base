@@ -256,29 +256,34 @@ public class WebChromeClient {
     }
 
     /**
-     * Add a JavaScript error message to the console. Clients should override
-     * this to process the log message as they see fit.
+     * Report a JavaScript error message to the host application. The ChromeClient
+     * should override this to process the log message as they see fit.
      * @param message The error message to report.
      * @param lineNumber The line number of the error.
      * @param sourceID The name of the source file that caused the error.
      */
-    public void addMessageToConsole(String message, int lineNumber, String sourceID) {}
+    public void onConsoleMessage(String message, int lineNumber, String sourceID) {}
 
     /**
-     * Ask the host application for an icon to represent a <video> element.
-     * This icon will be used if the Web page did not specify a poster attribute.
+     * When not playing, video elements are represented by a 'poster' image. The
+     * image to use can be specified by the poster attribute of the video tag in
+     * HTML. If the attribute is absent, then a default poster will be used. This
+     * method allows the ChromeClient to provide that default image.
      *
-     * @return Bitmap The icon or null if no such icon is available.
+     * @return Bitmap The image to use as a default poster, or null if no such image is
+     * available.
      */
     public Bitmap getDefaultVideoPoster() {
         return null;
     }
 
     /**
-     * Ask the host application for a custom progress view to show while
-     * a <video> is loading.
+     * When the user starts to playback a video element, it may take time for enough
+     * data to be buffered before the first frames can be rendered. While this buffering
+     * is taking place, the ChromeClient can use this function to provide a View to be
+     * displayed. For example, the ChromeClient could show a spinner animation.
      *
-     * @return View The progress view.
+     * @return View The View to be displayed whilst the video is loading.
      */
     public View getVideoLoadingProgressView() {
         return null;

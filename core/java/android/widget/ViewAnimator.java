@@ -43,7 +43,7 @@ public class ViewAnimator extends FrameLayout {
 
     public ViewAnimator(Context context) {
         super(context);
-        initViewAnimator();
+        initViewAnimator(context, null);
     }
 
     public ViewAnimator(Context context, AttributeSet attrs) {
@@ -61,11 +61,28 @@ public class ViewAnimator extends FrameLayout {
         }
         a.recycle();
 
-        initViewAnimator();
+        initViewAnimator(context, attrs);
     }
 
-    private void initViewAnimator() {
-        mMeasureAllChildren = true;
+    /**
+     * Initialize this {@link ViewAnimator}, possibly setting
+     * {@link #setMeasureAllChildren(boolean)} based on {@link FrameLayout} flags.
+     */
+    private void initViewAnimator(Context context, AttributeSet attrs) {
+        if (attrs == null) {
+            // For compatibility, always measure children when undefined.
+            mMeasureAllChildren = true;
+            return;
+        }
+
+        // For compatibility, default to measure children, but allow XML
+        // attribute to override.
+        final TypedArray a = context.obtainStyledAttributes(attrs,
+                com.android.internal.R.styleable.FrameLayout);
+        final boolean measureAllChildren = a.getBoolean(
+                com.android.internal.R.styleable.FrameLayout_measureAllChildren, true);
+        setMeasureAllChildren(measureAllChildren);
+        a.recycle();
     }
     
     /**

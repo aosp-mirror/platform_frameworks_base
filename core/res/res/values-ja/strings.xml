@@ -520,6 +520,9 @@
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"ログイン"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"ユーザー名またはパスワードが正しくありません。"</string>
     <string name="lockscreen_glogin_checking_password" msgid="6758890536332363322">"確認中..."</string>
+    <string name="lockscreen_unlock_label" msgid="737440483220667054">"ロック解除"</string>
+    <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"サウンドON"</string>
+    <string name="lockscreen_sound_off_label" msgid="996822825154319026">"サウンドOFF"</string>
     <string name="hour_ampm" msgid="4329881288269772723">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_cap_ampm" msgid="1829009197680861107">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"通知を消去"</string>
@@ -723,7 +726,7 @@
     <string name="sms_control_no" msgid="1715320703137199869">"キャンセル"</string>
     <string name="date_time_set" msgid="5777075614321087758">"設定"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"端末既定"</string>
-    <string name="no_permissions" msgid="7283357728219338112">"権限付与の必要はありません"</string>
+    <string name="no_permissions" msgid="7283357728219338112">"権限の許可は必要ありません"</string>
     <string name="perms_hide" msgid="7283915391320676226"><b>"隠す"</b></string>
     <string name="perms_show_all" msgid="2671791163933091180"><b>"すべて表示"</b></string>
     <string name="googlewebcontenthelper_loading" msgid="4722128368651947186">"読み込み中..."</string>

@@ -237,6 +237,12 @@
         <item name="android:background">@android:drawable/button_inset</item>
     </style>
 
+    <style name="Widget.Button.Transparent">
+        <item name="android:background">@android:drawable/btn_default_transparent</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+
     <style name="Widget.CompoundButton">
         <item name="android:focusable">true</item>
         <item name="android:clickable">true</item>
@@ -676,6 +682,25 @@
     <style name="TextAppearance.Widget.TextView.SpinnerItem">
         <item name="android:textColor">@android:color/primary_text_light_disable_only</item>
     </style>
+    
+    <!-- @hide -->
+    <style name="TextAppearance.SlidingTabNormal" 
+        parent="@android:attr/textAppearanceMedium">
+        <item name="android:textColor">?android:attr/textColorTertiary</item>
+        <item name="android:textSize">28sp</item>
+        <item name="android:shadowColor">@android:color/sliding_tab_text_color_shadow</item>
+        <item name="android:shadowDx">0.0</item>
+        <item name="android:shadowDy">1.0</item>
+        <item name="android:shadowRadius">5.0</item>
+    </style>
+
+    <!-- @hide -->
+    <style name="TextAppearance.SlidingTabActive" 
+        parent="@android:attr/textAppearanceMedium">
+        <item name="android:textColor">@android:color/sliding_tab_text_color_active</item>
+        <item name="android:textSize">28sp</item>
+    </style>
+    
 
     <!-- @hide -->	
      <style name="TextAppearance.SearchResult">	

@@ -118,8 +118,6 @@ FramebufferNativeWindow::FramebufferNativeWindow()
         LOGE_IF(err, "fb buffer 1 allocation failed w=%d, h=%d, err=%s",
                 fbDev->width, fbDev->height, strerror(-err));
 
-        LOGE("xDpi %d", fbDev->xdpi);
-        LOGE("yDpi %d", fbDev->ydpi);
         const_cast<uint32_t&>(android_native_window_t::flags) = fbDev->flags; 
         const_cast<float&>(android_native_window_t::xdpi) = fbDev->xdpi;
         const_cast<float&>(android_native_window_t::ydpi) = fbDev->ydpi;

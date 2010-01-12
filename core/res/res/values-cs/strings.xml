@@ -353,7 +353,7 @@
     <string name="permdesc_useCredentials" msgid="7416570544619546974">"Umožňuje aplikaci požadovat ověřovací tokeny."</string>
     <string name="permlab_accessNetworkState" msgid="6865575199464405769">"zobrazení stavu sítě"</string>
     <string name="permdesc_accessNetworkState" msgid="558721128707712766">"Umožňuje aplikaci zobrazit stav všech sítí."</string>
-    <string name="permlab_createNetworkSockets" msgid="9121633680349549585">"plný přístup k Internetu"</string>
+    <string name="permlab_createNetworkSockets" msgid="9121633680349549585">"plný přístup k internetu"</string>
     <string name="permdesc_createNetworkSockets" msgid="4593339106921772192">"Umožňuje aplikaci vytvořit síťové sokety."</string>
     <string name="permlab_writeApnSettings" msgid="7823599210086622545">"zápis nastavení názvu přístupového bodu (APN)"</string>
     <string name="permdesc_writeApnSettings" msgid="7443433457842966680">"Umožňuje aplikaci změnit nastavení APN, jako je například proxy či port APN."</string>
@@ -387,7 +387,7 @@
     <string name="permdesc_readDictionary" msgid="1082972603576360690">"Umožní aplikaci číst soukromá slova, jména a fráze, která uživatel mohl uložit do svého slovníku."</string>
     <string name="permlab_writeDictionary" msgid="6703109511836343341">"zápis do slovníku definovaného uživatelem"</string>
     <string name="permdesc_writeDictionary" msgid="2241256206524082880">"Umožní aplikaci zapisovat nová slova do uživatelského slovníku."</string>
-    <string name="permlab_sdcardWrite" msgid="8079403759001777291">"změna/smazání obsah karty SD"</string>
+    <string name="permlab_sdcardWrite" msgid="8079403759001777291">"změna/smazání obsahu karty SD"</string>
     <string name="permdesc_sdcardWrite" msgid="6643963204976471878">"Umožní aplikaci zápis na kartu SD."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Domů"</item>
@@ -402,7 +402,7 @@
   <string-array name="emailAddressTypes">
     <item msgid="8073994352956129127">"Domů"</item>
     <item msgid="7084237356602625604">"Práce"</item>
-    <item msgid="1112044410659011023">"Ostatní"</item>
+    <item msgid="1112044410659011023">"(další)"</item>
     <item msgid="2374913952870110618">"Vlastní"</item>
   </string-array>
   <string-array name="postalAddressTypes">
@@ -520,6 +520,9 @@
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Přihlásit se"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Neplatné uživatelské jméno nebo heslo."</string>
     <string name="lockscreen_glogin_checking_password" msgid="6758890536332363322">"Probíhá kontrola..."</string>
+    <string name="lockscreen_unlock_label" msgid="737440483220667054">"Odemknout"</string>
+    <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Zapnout zvuk"</string>
+    <string name="lockscreen_sound_off_label" msgid="996822825154319026">"Vypnout zvuk"</string>
     <string name="hour_ampm" msgid="4329881288269772723">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_cap_ampm" msgid="1829009197680861107">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Vymazat"</string>

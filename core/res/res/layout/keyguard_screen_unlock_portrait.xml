@@ -27,79 +27,98 @@
     android:layout_height="fill_parent"
     android:gravity="center_horizontal"
     android:background="#70000000"
-        >
+    >
 
-    <LinearLayout
-        android:id="@+id/carrierAndDate"
-        android:orientation="horizontal"
-        android:layout_width="wrap_content"
+    <RelativeLayout
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="13dip"
         >
         <TextView
             android:id="@+id/carrier"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_marginTop="6dip"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="8dip"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="?android:attr/textColorSecondary"
-            android:textSize="17sp"
             />
-        <TextView
-            android:id="@+id/centerDot"
+
+        <com.android.internal.widget.DigitalClock android:id="@+id/time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="5dip"
-            android:layout_marginRight="5dip"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="?android:attr/textColorSecondary"
-            android:textSize="17sp"
-            />
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginTop="15dip"
+            android:layout_marginBottom="6dip"
+            android:layout_marginLeft="20dip"
+            >
+
+            <TextView android:id="@+id/timeDisplay"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="bottom"
+                android:textSize="56sp"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:shadowColor="#C0000000"
+                android:shadowDx="0"
+                android:shadowDy="0"
+                android:shadowRadius="3.0"
+                />
+
+            <TextView android:id="@+id/am_pm"
+                android:layout_width="wrap_content"
+                android:layout_height="fill_parent"
+                android:gravity="bottom"
+                android:textSize="18sp"
+                android:singleLine="true"
+                android:layout_marginLeft="4dip"
+                android:layout_marginBottom="-6dip"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:shadowColor="#C0000000"
+                android:shadowDx="0"
+                android:shadowDy="0"
+                android:shadowRadius="3.0"
+                />
+
+        </com.android.internal.widget.DigitalClock>
+
         <TextView
             android:id="@+id/date"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
+            android:layout_below="@id/time"
+            android:layout_marginLeft="24dip"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="?android:attr/textColorSecondary"
-            android:textSize="17sp"
             />
-    </LinearLayout>
-
-    <TextView
-        android:id="@+id/time"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="-9dip"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textSize="48sp"
-        />
+    
+    </RelativeLayout>
 
     <View
         android:id="@+id/divider"
         android:layout_width="fill_parent"
         android:layout_height="1dip"
-        android:layout_marginTop="-4dip"
-        android:layout_centerHorizontal="true"
+        android:layout_marginTop="8dip"
+        android:layout_marginBottom="8dip"
         android:background="@android:drawable/divider_horizontal_dark"
-            />
+        />
 
     <!-- used for instructions such as "draw pattern to unlock", the next alarm, and charging
          status.  -->
     <LinearLayout
         android:orientation="horizontal"
-        android:layout_width="wrap_content"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="3dip"
-        android:gravity="center"
+        android:layout_marginTop="0dip"
+        android:layout_marginLeft="12dip"
+        android:gravity="left"
         >
         <TextView
             android:id="@+id/status1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="?android:attr/textColorSecondary"
-            android:textSize="17sp"
+            android:textSize="18sp"
             android:drawablePadding="4dip"
             />
         <TextView
@@ -109,8 +128,7 @@
             android:layout_marginLeft="5dip"
             android:layout_marginRight="5dip"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="?android:attr/textColorSecondary"
-            android:textSize="17sp"
+            android:textSize="18sp"
             />
         <TextView
             android:id="@+id/status2"
@@ -118,8 +136,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="?android:attr/textColorSecondary"
-            android:textSize="17sp"
+            android:textSize="18sp"
             android:drawablePadding="4dip"
             />
     </LinearLayout>
@@ -148,9 +165,7 @@
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
                 android:text="@string/lockscreen_emergency_call"
-                android:background="@drawable/btn_lock_normal"
-                android:textAppearance="?android:attr/textAppearanceSmall"
-                android:textColor="?android:attr/textColorPrimary"
+                style="@style/Widget.Button.Transparent"
                 android:drawableLeft="@drawable/ic_emergency"
                 android:drawablePadding="8dip"
                 />
@@ -173,9 +188,7 @@
                 android:layout_marginLeft="4dip"
                 android:layout_marginRight="2dip"
                 android:text="@string/lockscreen_emergency_call"
-                android:background="@drawable/btn_lock_normal"
-                android:textAppearance="?android:attr/textAppearanceSmall"
-                android:textColor="?android:attr/textColorPrimary"
+                style="@style/Widget.Button.Transparent"
                 android:drawableLeft="@drawable/ic_emergency"
                 android:drawablePadding="8dip"
                 />
@@ -187,9 +200,7 @@
                 android:layout_marginBottom="4dip"
                 android:layout_marginLeft="2dip"
                 android:layout_marginRight="4dip"
-                android:background="@drawable/btn_lock_normal"
-                android:textAppearance="?android:attr/textAppearanceSmall"
-                android:textColor="?android:attr/textColorPrimary"
+                style="@style/Widget.Button.Transparent"
                 android:visibility="invisible"
                 />
         </LinearLayout>

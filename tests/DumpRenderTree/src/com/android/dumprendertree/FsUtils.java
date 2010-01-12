@@ -26,6 +26,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.regex.Pattern;
 
 public class FsUtils {
 
@@ -119,6 +120,40 @@ public class FsUtils {
             }
         }
         return url;
+    }
+
+    public static boolean diffIgnoreSpaces(String file1, String file2)  throws IOException {
+        BufferedReader br1 = new BufferedReader(new FileReader(file1));
+        BufferedReader br2 = new BufferedReader(new FileReader(file2));
+        boolean same = true;
+        Pattern trailingSpace = Pattern.compile("\\s+$");
+
+        while(true) {
+            String line1 = br1.readLine();
+            String line2 = br2.readLine();
+
+            if (line1 == null && line2 == null)
+                break;
+            if (line1 != null) {
+                line1 = trailingSpace.matcher(line1).replaceAll("");
+            } else {
+                line1 = "";
+            }
+            if (line2 != null) {
+                line2 = trailingSpace.matcher(line2).replaceAll("");
+            } else {
+                line2 = "";
+            }
+            if(!line1.equals(line2)) {
+                same = false;
+                break;
+            }
+        }
+
+        br1.close();
+        br2.close();
+
+        return same;
     }
 
 }

@@ -122,13 +122,13 @@
     <string name="turn_on_radio" msgid="3912793092339962371">"무선 사용"</string>
     <string name="turn_off_radio" msgid="8198784949987062346">"무선 끄기"</string>
     <string name="screen_lock" msgid="799094655496098153">"화면 잠금"</string>
-    <string name="power_off" msgid="4266614107412865048">"끄기"</string>
+    <string name="power_off" msgid="4266614107412865048">"종료"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"종료 중..."</string>
     <string name="shutdown_confirm" msgid="649792175242821353">"휴대전화가 종료됩니다."</string>
     <string name="no_recent_tasks" msgid="279702952298056674">"최신 응용프로그램이 아닙니다."</string>
     <string name="global_actions" msgid="2406416831541615258">"휴대전화 옵션"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"화면 잠금"</string>
-    <string name="global_action_power_off" msgid="4471879440839879722">"끄기"</string>
+    <string name="global_action_power_off" msgid="4471879440839879722">"종료"</string>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"무음 모드"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"소리 꺼짐"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"소리 켜짐"</string>
@@ -520,6 +520,9 @@
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"로그인"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"사용자 이름 또는 비밀번호가 잘못되었습니다."</string>
     <string name="lockscreen_glogin_checking_password" msgid="6758890536332363322">"확인 중..."</string>
+    <string name="lockscreen_unlock_label" msgid="737440483220667054">"잠금해제"</string>
+    <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"사운드 켜기"</string>
+    <string name="lockscreen_sound_off_label" msgid="996822825154319026">"사운드 끄기"</string>
     <string name="hour_ampm" msgid="4329881288269772723">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_cap_ampm" msgid="1829009197680861107">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"지우기"</string>

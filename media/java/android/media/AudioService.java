@@ -111,6 +111,9 @@ public class AudioService extends IAudioService.Stub {
     private Object mSettingsLock = new Object();
     private boolean mMediaServerOk;
 
+    /** cached value of the BT dock address to recognize undocking events */
+    private static String sBtDockAddress;
+
     private SoundPool mSoundPool;
     private Object mSoundEffectsLock = new Object();
     private static final int NUM_SOUNDPOOL_CHANNELS = 4;
@@ -222,15 +225,6 @@ public class AudioService extends IAudioService.Stub {
     // Broadcast receiver for device connections intent broadcasts
     private final BroadcastReceiver mReceiver = new AudioServiceBroadcastReceiver();
 
-    //TODO: use common definitions with HeadsetObserver
-    private static final int BIT_HEADSET = (1 << 0);
-    private static final int BIT_HEADSET_NO_MIC = (1 << 1);
-    private static final int BIT_TTY = (1 << 2);
-    private static final int BIT_FM_HEADSET = (1 << 3);
-    private static final int BIT_FM_SPEAKER = (1 << 4);
-
-    private int mHeadsetState;
-
     // Devices currently connected
     private HashMap <Integer, String> mConnectedDevices = new HashMap <Integer, String>();
 
@@ -254,7 +248,6 @@ public class AudioService extends IAudioService.Stub {
         mVolumePanel = new VolumePanel(context, this);
         mSettingsObserver = new SettingsObserver();
         mMode = AudioSystem.MODE_NORMAL;
-        mHeadsetState = 0;
         mForcedUseForComm = AudioSystem.FORCE_NONE;
         createAudioSystemThread();
         readPersistedSettings();
@@ -1409,6 +1402,10 @@ public class AudioService extends IAudioService.Stub {
 
                 if (isConnected &&
                     state != BluetoothA2dp.STATE_CONNECTED && state != BluetoothA2dp.STATE_PLAYING) {
+                    if (address.equals(sBtDockAddress)) {
+                        Log.v(TAG, "Recognized undocking from BT dock");
+                        AudioSystem.setForceUse(AudioSystem.FOR_DOCK, AudioSystem.FORCE_NONE);
+                    }
                     AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
                             AudioSystem.DEVICE_STATE_UNAVAILABLE,
                             address);
@@ -1416,6 +1413,11 @@ public class AudioService extends IAudioService.Stub {
                 } else if (!isConnected &&
                              (state == BluetoothA2dp.STATE_CONNECTED ||
                               state == BluetoothA2dp.STATE_PLAYING)) {
+                    if (btDevice.isBluetoothDock()) {
+                        Log.v(TAG, "Recognized docking to BT dock");
+                        sBtDockAddress = address;
+                        AudioSystem.setForceUse(AudioSystem.FOR_DOCK, AudioSystem.FORCE_BT_DOCK);
+                    }
                     AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
                                                          AudioSystem.DEVICE_STATE_AVAILABLE,
                                                          address);
@@ -1460,72 +1462,35 @@ public class AudioService extends IAudioService.Stub {
                 }
             } else if (action.equals(Intent.ACTION_HEADSET_PLUG)) {
                 int state = intent.getIntExtra("state", 0);
-                if ((state & BIT_HEADSET) == 0 &&
-                    (mHeadsetState & BIT_HEADSET) != 0) {
-                    AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_WIRED_HEADSET,
-                            AudioSystem.DEVICE_STATE_UNAVAILABLE,
-                            "");
-                    mConnectedDevices.remove(AudioSystem.DEVICE_OUT_WIRED_HEADSET);
-                } else if ((state & BIT_HEADSET) != 0 &&
-                    (mHeadsetState & BIT_HEADSET) == 0)  {
-                    AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_WIRED_HEADSET,
-                            AudioSystem.DEVICE_STATE_AVAILABLE,
-                            "");
-                    mConnectedDevices.put( new Integer(AudioSystem.DEVICE_OUT_WIRED_HEADSET), "");
+                int microphone = intent.getIntExtra("microphone", 0);
+
+                if (microphone != 0) {
+                    boolean isConnected = mConnectedDevices.containsKey(AudioSystem.DEVICE_OUT_WIRED_HEADSET);
+                    if (state == 0 && isConnected) {
+                        AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_WIRED_HEADSET,
+                                AudioSystem.DEVICE_STATE_UNAVAILABLE,
+                                "");
+                        mConnectedDevices.remove(AudioSystem.DEVICE_OUT_WIRED_HEADSET);
+                    } else if (state == 1 && !isConnected)  {
+                        AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_WIRED_HEADSET,
+                                AudioSystem.DEVICE_STATE_AVAILABLE,
+                                "");
+                        mConnectedDevices.put( new Integer(AudioSystem.DEVICE_OUT_WIRED_HEADSET), "");
+                    }
+                } else {
+                    boolean isConnected = mConnectedDevices.containsKey(AudioSystem.DEVICE_OUT_WIRED_HEADPHONE);
+                    if (state == 0 && isConnected) {
+                        AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_WIRED_HEADPHONE,
+                                AudioSystem.DEVICE_STATE_UNAVAILABLE,
+                                "");
+                        mConnectedDevices.remove(AudioSystem.DEVICE_OUT_WIRED_HEADPHONE);
+                    } else if (state == 1 && !isConnected)  {
+                        AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_WIRED_HEADPHONE,
+                                AudioSystem.DEVICE_STATE_AVAILABLE,
+                                "");
+                        mConnectedDevices.put( new Integer(AudioSystem.DEVICE_OUT_WIRED_HEADPHONE), "");
+                    }
                 }
-                if ((state & BIT_HEADSET_NO_MIC) == 0 &&
-                    (mHeadsetState & BIT_HEADSET_NO_MIC) != 0) {
-                    AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_WIRED_HEADPHONE,
-                            AudioSystem.DEVICE_STATE_UNAVAILABLE,
-                            "");
-                    mConnectedDevices.remove(AudioSystem.DEVICE_OUT_WIRED_HEADPHONE);
-                } else if ((state & BIT_HEADSET_NO_MIC) != 0 &&
-                    (mHeadsetState & BIT_HEADSET_NO_MIC) == 0)  {
-                    AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_WIRED_HEADPHONE,
-                            AudioSystem.DEVICE_STATE_AVAILABLE,
-                            "");
-                    mConnectedDevices.put( new Integer(AudioSystem.DEVICE_OUT_WIRED_HEADPHONE), "");
-                }
-                if ((state & BIT_TTY) == 0 &&
-                    (mHeadsetState & BIT_TTY) != 0) {
-                    AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_TTY,
-                            AudioSystem.DEVICE_STATE_UNAVAILABLE,
-                            "");
-                    mConnectedDevices.remove(AudioSystem.DEVICE_OUT_TTY);
-                } else if ((state & BIT_TTY) != 0 &&
-                    (mHeadsetState & BIT_TTY) == 0)  {
-                    AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_TTY,
-                            AudioSystem.DEVICE_STATE_AVAILABLE,
-                            "");
-                    mConnectedDevices.put( new Integer(AudioSystem.DEVICE_OUT_TTY), "");
-                }
-                if ((state & BIT_FM_HEADSET) == 0 &&
-                    (mHeadsetState & BIT_FM_HEADSET) != 0) {
-                    AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_FM_HEADPHONE,
-                            AudioSystem.DEVICE_STATE_UNAVAILABLE,
-                            "");
-                    mConnectedDevices.remove(AudioSystem.DEVICE_OUT_FM_HEADPHONE);
-                } else if ((state & BIT_FM_HEADSET) != 0 &&
-                    (mHeadsetState & BIT_FM_HEADSET) == 0)  {
-                    AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_FM_HEADPHONE,
-                            AudioSystem.DEVICE_STATE_AVAILABLE,
-                            "");
-                    mConnectedDevices.put( new Integer(AudioSystem.DEVICE_OUT_FM_HEADPHONE), "");
-                }
-                if ((state & BIT_FM_SPEAKER) == 0 &&
-                    (mHeadsetState & BIT_FM_SPEAKER) != 0) {
-                    AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_FM_SPEAKER,
-                            AudioSystem.DEVICE_STATE_UNAVAILABLE,
-                            "");
-                    mConnectedDevices.remove(AudioSystem.DEVICE_OUT_FM_SPEAKER);
-                } else if ((state & BIT_FM_SPEAKER) != 0 &&
-                    (mHeadsetState & BIT_FM_SPEAKER) == 0)  {
-                    AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_FM_SPEAKER,
-                            AudioSystem.DEVICE_STATE_AVAILABLE,
-                            "");
-                    mConnectedDevices.put( new Integer(AudioSystem.DEVICE_OUT_FM_SPEAKER), "");
-                }
-                mHeadsetState = state;
             }
         }
     }

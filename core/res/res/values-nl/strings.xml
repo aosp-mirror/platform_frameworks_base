@@ -147,10 +147,8 @@
     <string name="permgroupdesc_location" msgid="2430258821648348660">"Uw fysieke locatie bijhouden"</string>
     <string name="permgrouplab_network" msgid="5808983377727109831">"Netwerkcommunicatie"</string>
     <string name="permgroupdesc_network" msgid="5035763698958415998">"Toepassingen toestaan verschillende netwerkfuncties te openen."</string>
-    <!-- no translation found for permgrouplab_accounts (3359646291125325519) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_accounts (4948732641827091312) -->
-    <skip />
+    <string name="permgrouplab_accounts" msgid="3359646291125325519">"Uw accounts"</string>
+    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Toegang tot de beschikbare accounts."</string>
     <string name="permgrouplab_hardwareControls" msgid="7998214968791599326">"Bedieningselementen hardware"</string>
     <string name="permgroupdesc_hardwareControls" msgid="4357057861225462702">"Rechtstreekse toegang tot hardware op de handset."</string>
     <string name="permgrouplab_phoneCalls" msgid="9067173988325865923">"Telefoonoproepen"</string>
@@ -455,12 +453,9 @@
     <string name="phoneTypeWorkPager" msgid="649938731231157056">"Pager werk"</string>
     <string name="phoneTypeAssistant" msgid="5596772636128562884">"Assistent"</string>
     <string name="phoneTypeMms" msgid="7254492275502768992">"MMS"</string>
-    <!-- no translation found for eventTypeBirthday (2813379844211390740) -->
-    <skip />
-    <!-- no translation found for eventTypeAnniversary (3876779744518284000) -->
-    <skip />
-    <!-- no translation found for eventTypeOther (5834288791948564594) -->
-    <skip />
+    <string name="eventTypeBirthday" msgid="2813379844211390740">"Verjaardag"</string>
+    <string name="eventTypeAnniversary" msgid="3876779744518284000">"Jubileum"</string>
+    <string name="eventTypeOther" msgid="5834288791948564594">"Afspraak"</string>
     <string name="emailTypeCustom" msgid="8525960257804213846">"Aangepast"</string>
     <string name="emailTypeHome" msgid="449227236140433919">"Thuis"</string>
     <string name="emailTypeWork" msgid="3548058059601149973">"Werk"</string>
@@ -525,6 +520,9 @@
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Aanmelden"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Gebruikersnaam of wachtwoord ongeldig."</string>
     <string name="lockscreen_glogin_checking_password" msgid="6758890536332363322">"Controleren..."</string>
+    <string name="lockscreen_unlock_label" msgid="737440483220667054">"Ontgrendelen"</string>
+    <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Geluid aan"</string>
+    <string name="lockscreen_sound_off_label" msgid="996822825154319026">"Geluid uit"</string>
     <string name="hour_ampm" msgid="4329881288269772723">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_cap_ampm" msgid="1829009197680861107">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Wissen"</string>
@@ -793,12 +791,8 @@
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Toegankelijkheid"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Achtergrond"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Achtergrond wijzigen"</string>
-    <!-- no translation found for pptp_vpn_description (2688045385181439401) -->
-    <skip />
-    <!-- no translation found for l2tp_vpn_description (3750692169378923304) -->
-    <skip />
-    <!-- no translation found for l2tp_ipsec_psk_vpn_description (3945043564008303239) -->
-    <skip />
-    <!-- no translation found for l2tp_ipsec_crt_vpn_description (5382714073103653577) -->
-    <skip />
+    <string name="pptp_vpn_description" msgid="2688045385181439401">"Point-to-Point Tunneling Protocol (PPTP)"</string>
+    <string name="l2tp_vpn_description" msgid="3750692169378923304">"Layer 2 Tunneling Protocol (L2TP)"</string>
+    <string name="l2tp_ipsec_psk_vpn_description" msgid="3945043564008303239">"Vooraf gedeelde sleutel op basis van L2TP/IPSec VPN"</string>
+    <string name="l2tp_ipsec_crt_vpn_description" msgid="5382714073103653577">"Certificaat op basis van L2TP/IPSec VPN"</string>
 </resources>

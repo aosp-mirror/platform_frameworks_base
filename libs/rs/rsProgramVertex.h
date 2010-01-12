@@ -63,6 +63,7 @@ public:
 
     void init(Context *rsc, int32_t w, int32_t h);
     void deinit(Context *rsc);
+    void updateSize(Context *rsc, int32_t w, int32_t h);
 
     ObjectBaseRef<ProgramVertex> mDefault;
     ObjectBaseRef<ProgramVertex> mLast;

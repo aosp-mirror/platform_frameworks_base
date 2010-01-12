@@ -177,7 +177,7 @@
     <string name="permdesc_writeSms" msgid="6299398896177548095">"Ermöglicht einer Anwendung, auf Ihrem Telefon oder Ihrer SIM-Karte gespeicherte Kurznachrichten zu bearbeiten. Schädliche Anwendungen löschen möglicherweise Ihre Nachrichten."</string>
     <string name="permlab_receiveWapPush" msgid="8258226427716551388">"WAP-Nachrichten empfangen"</string>
     <string name="permdesc_receiveWapPush" msgid="5979623826128082171">"Ermöglicht der Anwendung, WAP-Mitteilungen zu empfangen und zu verarbeiten. Schädliche Anwendungen können Ihre Nachrichten möglicherweise überwachen oder löschen, bevor sie angezeigt werden."</string>
-    <string name="permlab_getTasks" msgid="5005277531132573353">"Laufende Anwendungen abrufen"</string>
+    <string name="permlab_getTasks" msgid="5005277531132573353">"laufende Anwendungen abrufen"</string>
     <string name="permdesc_getTasks" msgid="7048711358713443341">"Ermöglicht der Anwendung, Informationen zu aktuellen und kürzlich ausführten Aufgaben abzurufen. Schädliche Anwendungen können so eventuell geheime Informationen zu anderen Anwendungen entdecken."</string>
     <string name="permlab_reorderTasks" msgid="5669588525059921549">"Laufende Anwendungen neu ordnen"</string>
     <string name="permdesc_reorderTasks" msgid="126252774270522835">"Ermöglicht einer Anwendung, Aufgaben in den Vorder- und Hintergrund zu verschieben. Schädliche Anwendungen können so ohne Ihr Zutun eine Anzeige im Vordergrund erzwingen."</string>
@@ -253,9 +253,9 @@
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"Ermöglicht einer Anwendung, alle Elemente in der Diagnosegruppe zu lesen und zu bearbeiten, etwa Dateien in \"/dev\". Dies könnte eine potenzielle Gefährdung für die Stabilität und Sicherheit des Systems darstellen und sollte NUR für Hardware-spezifische Diagnosen des Herstellers oder Netzbetreibers verwendet werden."</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"Anwendungskomponenten aktivieren oder deaktivieren"</string>
     <string name="permdesc_changeComponentState" msgid="4569107043246700630">"Ermöglicht einer Anwendung, die Komponente einer anderen Anwendung nach Belieben zu aktivieren oder zu deaktivieren. Schädliche Anwendungen können so wichtige Funktionen des Telefons deaktivieren. Bei der Erteilung von Berechtigungen ist daher Vorsicht geboten, da die Anwendungskomponenten unbrauchbar, inkonsistent und unstabil werden können."</string>
-    <string name="permlab_setPreferredApplications" msgid="3393305202145172005">"Bevorzugte Einstellungen festlegen"</string>
+    <string name="permlab_setPreferredApplications" msgid="3393305202145172005">"bevorzugte Einstellungen festlegen"</string>
     <string name="permdesc_setPreferredApplications" msgid="760008293501937546">"Ermöglicht einer Anwendung, Ihre bevorzugten Einstellungen zu ändern. Schädliche Anwendungen können so laufende Anwendungen ohne Ihr Wissen ändern, damit die vorhandenen Anwendungen private Daten von Ihnen sammeln."</string>
-    <string name="permlab_writeSettings" msgid="1365523497395143704">"Allgemeine Systemeinstellungen ändern"</string>
+    <string name="permlab_writeSettings" msgid="1365523497395143704">"allgemeine Systemeinstellungen ändern"</string>
     <string name="permdesc_writeSettings" msgid="838789419871034696">"Ermöglicht einer Anwendung, die Einstellungsdaten des Systems zu ändern. Schädliche Anwendungen können so die Systemkonfiguration beschädigen."</string>
     <string name="permlab_writeSecureSettings" msgid="204676251876718288">"Sicherheitseinstellungen für das System ändern"</string>
     <string name="permdesc_writeSecureSettings" msgid="5497873143539034724">"Der Anwendung wird das Ändern der Sicherheitseinstellungsdaten des Systems ermöglicht. Nicht für normale Anwendungen vorgesehen."</string>
@@ -353,7 +353,7 @@
     <string name="permdesc_useCredentials" msgid="7416570544619546974">"Ermöglicht einer Anwendung, Authentifizierungs-Token anzufordern."</string>
     <string name="permlab_accessNetworkState" msgid="6865575199464405769">"Netzwerkstatus anzeigen"</string>
     <string name="permdesc_accessNetworkState" msgid="558721128707712766">"Ermöglicht einer Anwendung, den Status aller Netzwerke anzuzeigen."</string>
-    <string name="permlab_createNetworkSockets" msgid="9121633680349549585">"Uneingeschränkter Internetzugriff"</string>
+    <string name="permlab_createNetworkSockets" msgid="9121633680349549585">"uneingeschränkter Internetzugriff"</string>
     <string name="permdesc_createNetworkSockets" msgid="4593339106921772192">"Ermöglicht einer Anwendung, Netzwerk-Sockets einzurichten."</string>
     <string name="permlab_writeApnSettings" msgid="7823599210086622545">"Einstellungen für Zugriffspunktname schreiben"</string>
     <string name="permdesc_writeApnSettings" msgid="7443433457842966680">"Ermöglicht einer Anwendung, die APN-Einstellungen wie Proxy und Port eines Zugriffspunkts zu ändern."</string>
@@ -379,11 +379,11 @@
     <string name="permdesc_writeSyncSettings" msgid="2498201614431360044">"Ermöglicht einer Anwendung, die Synchronisierungseinstellungen zu ändern, etwa ob die Synchronisierung für Kontakte aktiviert ist oder nicht."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"Synchronisierungsstatistiken lesen"</string>
     <string name="permdesc_readSyncStats" msgid="7511448343374465000">"Ermöglicht einer Anwendung, die Synchronisierungsstatistiken zu lesen, etwa den Verlauf der bereits durchgeführten Synchronisierungen."</string>
-    <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"Abonnierte Feeds lesen"</string>
+    <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"abonnierte Feeds lesen"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="3622200625634207660">"Ermöglicht einer Anwendung, Details zu den zurzeit synchronisierten Feeds abzurufen."</string>
-    <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"Abonnierte Feeds schreiben"</string>
+    <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"abonnierte Feeds schreiben"</string>
     <string name="permdesc_subscribedFeedsWrite" msgid="8121607099326533878">"Ermöglicht einer Anwendung, Änderungen an den kürzlich synchronisierten Feeds vorzunehmen. Schädliche Anwendungen könnten so Ihre synchronisierten Feeds ändern."</string>
-    <string name="permlab_readDictionary" msgid="432535716804748781">"Nutzerdefiniertes Wörterbuch lesen"</string>
+    <string name="permlab_readDictionary" msgid="432535716804748781">"nutzerdefiniertes Wörterbuch lesen"</string>
     <string name="permdesc_readDictionary" msgid="1082972603576360690">"Erlaubt einer Anwendung, alle privaten Wörter, Namen und Ausdrücke zu lesen, die ein Nutzer in seinem Wörterbuch gespeichert hat."</string>
     <string name="permlab_writeDictionary" msgid="6703109511836343341">"in nutzerdefiniertes Wörterbuch schreiben"</string>
     <string name="permdesc_writeDictionary" msgid="2241256206524082880">"Erlaubt einer Anwendung, neue Wörter in das Wörterbuch des Nutzers zu schreiben."</string>
@@ -520,6 +520,9 @@
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Anmelden"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Ungültiger  Nutzername oder ungültiges Passwort."</string>
     <string name="lockscreen_glogin_checking_password" msgid="6758890536332363322">"Überprüfung..."</string>
+    <string name="lockscreen_unlock_label" msgid="737440483220667054">"Entsperren"</string>
+    <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Ton ein"</string>
+    <string name="lockscreen_sound_off_label" msgid="996822825154319026">"Ton aus"</string>
     <string name="hour_ampm" msgid="4329881288269772723">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_cap_ampm" msgid="1829009197680861107">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Löschen"</string>

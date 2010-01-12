@@ -249,28 +249,11 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
         File expected = new File(expectedResultFile);
         if (actual.exists() && expected.exists()) {
             try {
-                boolean passing = true;
-                BufferedReader fr = new BufferedReader(new FileReader(actual));
-                BufferedReader fe = new BufferedReader(new FileReader(expected));
-                while (true) {
-                    String s1 = fr.readLine();
-                    String s2 = fe.readLine();
-                    if (s1 == null && s2 == null)
-                        break; // both files are the same
-                    if (s1 == null || s2 == null || !s1.equals(s2)) {
-                        passing = false;
-                        break;
-                    }
-                }
-
-                if (passing) {
+                if (FsUtils.diffIgnoreSpaces(actualResultFile, expectedResultFile)) {
                     passedCase(testFile);
                 } else {
                     failedCase(testFile);
                 }
-
-                fe.close();
-                fr.close();
             } catch (FileNotFoundException ex) {
                 Log.e(LOGTAG, "File not found : " + ex.getMessage());
             } catch (IOException ex) {

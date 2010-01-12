@@ -292,9 +292,9 @@ class BluetoothEventLoop {
             mBluetoothService.setProperty(name, propValues[1]);
         } else if (name.equals("Pairable") || name.equals("Discoverable")) {
             String pairable = name.equals("Pairable") ? propValues[1] :
-                mBluetoothService.getProperty("Pairable");
+                mBluetoothService.getPropertyInternal("Pairable");
             String discoverable = name.equals("Discoverable") ? propValues[1] :
-                mBluetoothService.getProperty("Discoverable");
+                mBluetoothService.getPropertyInternal("Discoverable");
 
             // This shouldn't happen, unless Adapter Properties are null.
             if (pairable == null || discoverable == null)
@@ -492,6 +492,14 @@ class BluetoothEventLoop {
                 mBluetoothService.getBondState().getPendingOutgoingBonding();
         if (address.equals(pendingOutgoingAddress)) {
             // we initiated the bonding
+
+            // Check if its a dock
+            if (mBluetoothService.isBluetoothDock(address)) {
+                String pin = mBluetoothService.getDockPin();
+                mBluetoothService.setPin(address, BluetoothDevice.convertPinToBytes(pin));
+                return;
+            }
+
             BluetoothClass btClass = new BluetoothClass(mBluetoothService.getRemoteClass(address));
 
             // try 0000 once if the device looks dumb
@@ -538,12 +546,14 @@ class BluetoothEventLoop {
 
         boolean authorized = false;
         ParcelUuid uuid = ParcelUuid.fromString(deviceUuid);
+        BluetoothA2dp a2dp = new BluetoothA2dp(mContext);
+
         // Bluez sends the UUID of the local service being accessed, _not_ the
         // remote service
         if (mBluetoothService.isEnabled() &&
                 (BluetoothUuid.isAudioSource(uuid) || BluetoothUuid.isAvrcpTarget(uuid)
-                        || BluetoothUuid.isAdvAudioDist(uuid))) {
-            BluetoothA2dp a2dp = new BluetoothA2dp(mContext);
+                        || BluetoothUuid.isAdvAudioDist(uuid)) &&
+                        (a2dp.getNonDisconnectedSinks().size() == 0)) {
             BluetoothDevice device = mAdapter.getRemoteDevice(address);
             authorized = a2dp.getSinkPriority(device) > BluetoothA2dp.PRIORITY_OFF;
             if (authorized) {

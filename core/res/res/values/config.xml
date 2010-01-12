@@ -207,4 +207,15 @@
 
     <!-- Enables swipe versus poly-finger touch disambiguation in the KeyboardView -->
     <bool name="config_swipeDisambiguation">true</bool>
+
+    <!-- Enables special filtering code in the framework for raw touch events
+         from the touch driver.  This code exists for one particular device,
+         and should not be enabled for any others.  Hopefully in the future
+         it will be removed when the lower-level touch driver generates better
+         data. -->
+    <bool name="config_filterTouchEvents">false</bool>
+    
+    <!-- Component name of the default wallpaper. This will be ImageWallpaper if not 
+         specified -->
+    <string name="default_wallpaper_component">@null</string>
 </resources>

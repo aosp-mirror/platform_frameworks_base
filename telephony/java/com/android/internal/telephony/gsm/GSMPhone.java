@@ -879,16 +879,7 @@ public class GSMPhone extends PhoneBase {
     }
 
     public String getLine1AlphaTag() {
-        String ret;
-
-        ret = mSIMRecords.getMsisdnAlphaTag();
-
-        if (ret == null || ret.length() == 0) {
-            return mContext.getText(
-                    com.android.internal.R.string.defaultMsisdnAlphaTag).toString();
-        }
-
-        return ret;
+        return mSIMRecords.getMsisdnAlphaTag();
     }
 
     public void setLine1Number(String alphaTag, String number, Message onComplete) {

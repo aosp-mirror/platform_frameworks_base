@@ -130,13 +130,15 @@ private:
         virtual bool transformed() const;
         virtual void destroy() { }
     private:
+        status_t initTempBuffer() const;
         mutable Mutex                   mBufferSourceLock;
         sp<Buffer>                      mBuffer;
         status_t                        mStatus;
         ISurface::BufferHeap            mBufferHeap;
         size_t                          mBufferSize;
-        mutable sp<GraphicBuffer>       mTempBitmap;
         mutable LayerBase::Texture      mTexture;
+        mutable NativeBuffer            mTempBuffer;
+        mutable sp<GraphicBuffer>       mTempGraphicBuffer;
     };
     
     class OverlaySource : public Source {
@@ -205,6 +207,7 @@ private:
     sp<Surface>     mSurface;
     bool            mInvalidate;
     bool            mNeedsBlending;
+    copybit_device_t* mBlitEngine;
 };
 
 // ---------------------------------------------------------------------------

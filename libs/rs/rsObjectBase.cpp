@@ -182,11 +182,17 @@ void ObjectBase::zeroAllUserRef(Context *rsc)
 
     if (rsc->props.mLogObjects) {
         LOGV("Objects remaining.");
-        o = rsc->mObjHead;
-        while (o) {
-            o->dumpLOGV("  ");
-            o = o->mNext;
-        }
+        dumpAll(rsc);
+    }
+}
+
+void ObjectBase::dumpAll(Context *rsc)
+{
+    LOGV("Dumping all objects");
+    const ObjectBase * o = rsc->mObjHead;
+    while (o) {
+        o->dumpLOGV("  ");
+        o = o->mNext;
     }
 }
 

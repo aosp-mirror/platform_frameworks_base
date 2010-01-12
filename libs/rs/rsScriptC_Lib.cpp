@@ -28,7 +28,6 @@
 #include <GLES/glext.h>
 
 #include <time.h>
-#include <cutils/tztime.h>
 
 using namespace android;
 using namespace android::renderscript;
@@ -444,15 +443,9 @@ static int32_t SC_second()
     time_t rawtime;
     time(&rawtime);
 
-    if (sc->mEnviroment.mTimeZone) {
-        struct tm timeinfo;
-        localtime_tz(&rawtime, &timeinfo, sc->mEnviroment.mTimeZone);
-        return timeinfo.tm_sec;
-    } else {
-        struct tm *timeinfo;
-        timeinfo = localtime(&rawtime);
-        return timeinfo->tm_sec;
-    }
+    struct tm *timeinfo;
+    timeinfo = localtime(&rawtime);
+    return timeinfo->tm_sec;
 }
 
 static int32_t SC_minute()
@@ -462,15 +455,9 @@ static int32_t SC_minute()
     time_t rawtime;
     time(&rawtime);
 
-    if (sc->mEnviroment.mTimeZone) {
-        struct tm timeinfo;
-        localtime_tz(&rawtime, &timeinfo, sc->mEnviroment.mTimeZone);
-        return timeinfo.tm_min;
-    } else {
-        struct tm *timeinfo;
-        timeinfo = localtime(&rawtime);
-        return timeinfo->tm_min;
-    }
+    struct tm *timeinfo;
+    timeinfo = localtime(&rawtime);
+    return timeinfo->tm_min;
 }
 
 static int32_t SC_hour()
@@ -480,15 +467,9 @@ static int32_t SC_hour()
     time_t rawtime;
     time(&rawtime);
 
-    if (sc->mEnviroment.mTimeZone) {
-        struct tm timeinfo;
-        localtime_tz(&rawtime, &timeinfo, sc->mEnviroment.mTimeZone);
-        return timeinfo.tm_hour;
-    } else {
-        struct tm *timeinfo;
-        timeinfo = localtime(&rawtime);
-        return timeinfo->tm_hour;
-    }
+    struct tm *timeinfo;
+    timeinfo = localtime(&rawtime);
+    return timeinfo->tm_hour;
 }
 
 static int32_t SC_day()
@@ -498,15 +479,9 @@ static int32_t SC_day()
     time_t rawtime;
     time(&rawtime);
 
-    if (sc->mEnviroment.mTimeZone) {
-        struct tm timeinfo;
-        localtime_tz(&rawtime, &timeinfo, sc->mEnviroment.mTimeZone);
-        return timeinfo.tm_mday;
-    } else {
-        struct tm *timeinfo;
-        timeinfo = localtime(&rawtime);
-        return timeinfo->tm_mday;
-    }
+    struct tm *timeinfo;
+    timeinfo = localtime(&rawtime);
+    return timeinfo->tm_mday;
 }
 
 static int32_t SC_month()
@@ -516,15 +491,9 @@ static int32_t SC_month()
     time_t rawtime;
     time(&rawtime);
 
-    if (sc->mEnviroment.mTimeZone) {
-        struct tm timeinfo;
-        localtime_tz(&rawtime, &timeinfo, sc->mEnviroment.mTimeZone);
-        return timeinfo.tm_mon;
-    } else {
-        struct tm *timeinfo;
-        timeinfo = localtime(&rawtime);
-        return timeinfo->tm_mon;
-    }
+    struct tm *timeinfo;
+    timeinfo = localtime(&rawtime);
+    return timeinfo->tm_mon;
 }
 
 static int32_t SC_year()
@@ -534,15 +503,9 @@ static int32_t SC_year()
     time_t rawtime;
     time(&rawtime);
 
-    if (sc->mEnviroment.mTimeZone) {
-        struct tm timeinfo;
-        localtime_tz(&rawtime, &timeinfo, sc->mEnviroment.mTimeZone);
-        return timeinfo.tm_year;
-    } else {
-        struct tm *timeinfo;
-        timeinfo = localtime(&rawtime);
-        return timeinfo->tm_year;
-    }
+    struct tm *timeinfo;
+    timeinfo = localtime(&rawtime);
+    return timeinfo->tm_year;
 }
 
 static int32_t SC_uptimeMillis()

@@ -80,10 +80,10 @@ public class RSSurfaceView extends SurfaceView implements SurfaceHolder.Callback
      */
     public void surfaceDestroyed(SurfaceHolder holder) {
         // Surface will be destroyed when we return
+        Log.v(RenderScript.LOG_TAG, "surfaceDestroyed");
         if (mRS != null) {
-            mRS.contextSetSurface(null);
+            mRS.contextSetSurface(0, 0, null);
         }
-        //Log.v(RenderScript.LOG_TAG, "surfaceDestroyed");
     }
 
     /**
@@ -91,10 +91,10 @@ public class RSSurfaceView extends SurfaceView implements SurfaceHolder.Callback
      * not normally called or subclassed by clients of RSSurfaceView.
      */
     public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
+        Log.v(RenderScript.LOG_TAG, "surfaceChanged");
         if (mRS != null) {
-            mRS.contextSetSurface(holder.getSurface());
+            mRS.contextSetSurface(w, h, holder.getSurface());
         }
-        //Log.v(RenderScript.LOG_TAG, "surfaceChanged");
     }
 
     /**
@@ -147,11 +147,8 @@ public class RSSurfaceView extends SurfaceView implements SurfaceHolder.Callback
     // ----------------------------------------------------------------------
 
     public RenderScript createRenderScript(boolean useDepth, boolean forceSW) {
-        Surface sur = null;
-        while ((sur == null) || (mSurfaceHolder == null)) {
-            sur = getHolder().getSurface();
-        }
-        mRS = new RenderScript(sur, useDepth, forceSW);
+        Log.v(RenderScript.LOG_TAG, "createRenderScript");
+        mRS = new RenderScript(useDepth, forceSW);
         return mRS;
     }
 
@@ -160,6 +157,7 @@ public class RSSurfaceView extends SurfaceView implements SurfaceHolder.Callback
     }
 
     public void destroyRenderScript() {
+        Log.v(RenderScript.LOG_TAG, "destroyRenderScript");
         mRS.destroy();
         mRS = null;
     }

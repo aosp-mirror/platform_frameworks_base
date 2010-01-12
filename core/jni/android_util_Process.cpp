@@ -266,6 +266,7 @@ void android_os_Process_setProcessGroup(JNIEnv* env, jobject clazz, int pid, jin
         if (set_sched_policy(t_pid, (grp == ANDROID_TGROUP_BG_NONINTERACT) ?
                                             SP_BACKGROUND : SP_FOREGROUND)) {
             signalExceptionForGroupError(env, clazz, errno);
+            break;
         }
     }
     closedir(d);
@@ -284,6 +285,7 @@ void android_os_Process_setThreadPriority(JNIEnv* env, jobject clazz,
 
     if (rc) {
         signalExceptionForGroupError(env, clazz, errno);
+        return;
     }
 
     if (setpriority(PRIO_PROCESS, pid, pri) < 0) {

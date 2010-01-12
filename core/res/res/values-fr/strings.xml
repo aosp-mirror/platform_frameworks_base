@@ -277,16 +277,16 @@
     <string name="permdesc_readCalendar" msgid="5533029139652095734">"Permet à une application de lire tous les événements de l\'agenda enregistrés sur votre téléphone. Des applications malveillantes peuvent utiliser cette fonctionnalité pour envoyer les événements de votre agenda à d\'autres personnes."</string>
     <string name="permlab_writeCalendar" msgid="377926474603567214">"Écriture des données de l\'agenda"</string>
     <string name="permdesc_writeCalendar" msgid="8674240662630003173">"Permet à une application de modifier les événements de l\'agenda enregistrés sur votre téléphone. Des applications malveillantes peuvent utiliser cette fonctionnalité pour effacer ou modifier les données de votre agenda."</string>
-    <string name="permlab_accessMockLocation" msgid="8688334974036823330">"Création de sources de positionnement fictives à des fins de test"</string>
-    <string name="permdesc_accessMockLocation" msgid="7648286063459727252">"Permet de créer des sources de positionnement fictives à des fins de test. Des applications malveillantes peuvent utiliser cette fonctionnalité pour remplacer la position géographique et/ou l\'état fournis par des sources réelles comme le GPS ou les fournisseurs d\'accès."</string>
+    <string name="permlab_accessMockLocation" msgid="8688334974036823330">"Création de sources de localisation fictives à des fins de test"</string>
+    <string name="permdesc_accessMockLocation" msgid="7648286063459727252">"Permet de créer des sources de localisation fictives à des fins de test. Des applications malveillantes peuvent utiliser cette fonctionnalité pour remplacer la position géographique et/ou l\'état fournis par des sources réelles comme le GPS ou les fournisseurs d\'accès."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"Accès aux commandes de fournisseur de position géographique supplémentaires"</string>
-    <string name="permdesc_accessLocationExtraCommands" msgid="1948144701382451721">"Permet d\'accéder à des commandes de fournisseur de position géographique supplémentaires. Des applications malveillantes peuvent utiliser cette fonctionnalité pour interférer avec l\'utilisation du GPS ou d\'autres sources de positionnement géographique."</string>
+    <string name="permdesc_accessLocationExtraCommands" msgid="1948144701382451721">"Permet d\'accéder à des commandes de fournisseur de position géographique supplémentaires. Des applications malveillantes peuvent utiliser cette fonctionnalité pour interférer avec l\'utilisation du GPS ou d\'autres sources de localisation géographique."</string>
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"autoriser l\'installation d\'un fournisseur de services de localisation"</string>
     <string name="permdesc_installLocationProvider" msgid="5449175116732002106">"Créer des sources de données de localisation factices à des fins de test. Les applications malveillantes peuvent exploiter cette fonction pour remplacer la position géographique et/ou l\'état renvoyé par les sources de données de localisation réelles, telles que le GPS ou les fournisseurs réseau, ou pour surveiller et transmettre votre position géographique à une source externe."</string>
     <string name="permlab_accessFineLocation" msgid="8116127007541369477">"Localisation OK (GPS)"</string>
-    <string name="permdesc_accessFineLocation" msgid="7411213317434337331">"Permet d\'accéder à des sources de positionnement précises comme le Global Positioning System (GPS) sur le téléphone, lorsque ces services sont disponibles. Des applications malveillantes peuvent utiliser cette fonctionnalité pour déterminer l\'endroit où vous vous trouvez et augmenter la consommation de la batterie de votre téléphone."</string>
+    <string name="permdesc_accessFineLocation" msgid="7411213317434337331">"Permet d\'accéder à des sources de localisation précises comme le Global Positioning System (GPS) sur le téléphone, lorsque ces services sont disponibles. Des applications malveillantes peuvent utiliser cette fonctionnalité pour déterminer l\'endroit où vous vous trouvez et augmenter la consommation de la batterie de votre téléphone."</string>
     <string name="permlab_accessCoarseLocation" msgid="4642255009181975828">"Position géo. approximative (selon le réseau)"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="8235655958070862293">"Accès à des sources de positionnement approximatif (par ex. des bases de données de réseaux mobiles) pour déterminer la position géographique du téléphone, lorsque cette option est disponible. Des applications malveillantes peuvent utiliser cette fonctionnalité pour déterminer approximativement l\'endroit où vous vous trouvez."</string>
+    <string name="permdesc_accessCoarseLocation" msgid="8235655958070862293">"Accès à des sources de localisation approximative (par ex. des bases de données de réseaux mobiles) pour déterminer la position géographique du téléphone, lorsque cette option est disponible. Des applications malveillantes peuvent utiliser cette fonctionnalité pour déterminer approximativement l\'endroit où vous vous trouvez."</string>
     <string name="permlab_accessSurfaceFlinger" msgid="2363969641792388947">"Accès à SurfaceFlinger"</string>
     <string name="permdesc_accessSurfaceFlinger" msgid="6805241830020733025">"Permet à certaines applications d\'utiliser les fonctionnalités SurfaceFlinger de bas niveau."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"Lecture de la mémoire tampon graphique"</string>
@@ -495,7 +495,7 @@
     <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"Dessinez un schéma pour déverrouiller le téléphone"</string>
     <string name="lockscreen_emergency_call" msgid="5347633784401285225">"Appel d\'urgence"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Combinaison correcte !"</string>
-    <string name="lockscreen_pattern_wrong" msgid="4817583279053112312">"Désolé. Merci de réessayer."</string>
+    <string name="lockscreen_pattern_wrong" msgid="4817583279053112312">"Incorrect. Merci de réessayer."</string>
     <string name="lockscreen_plugged_in" msgid="613343852842944435">"Chargement (<xliff:g id="NUMBER">%d</xliff:g> <xliff:g id="PERCENT">%%</xliff:g>)"</string>
     <string name="lockscreen_charged" msgid="4938930459620989972">"Chargé"</string>
     <string name="lockscreen_battery_short" msgid="3617549178603354656">"<xliff:g id="NUMBER">%d</xliff:g> <xliff:g id="PERCENT">%%</xliff:g>"</string>
@@ -520,6 +520,9 @@
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Se connecter"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Nom d\'utilisateur ou mot de passe incorrect."</string>
     <string name="lockscreen_glogin_checking_password" msgid="6758890536332363322">"Vérification..."</string>
+    <string name="lockscreen_unlock_label" msgid="737440483220667054">"Débloquer"</string>
+    <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Son activé"</string>
+    <string name="lockscreen_sound_off_label" msgid="996822825154319026">"Son désactivé"</string>
     <string name="hour_ampm" msgid="4329881288269772723">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_cap_ampm" msgid="1829009197680861107">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Effacer"</string>

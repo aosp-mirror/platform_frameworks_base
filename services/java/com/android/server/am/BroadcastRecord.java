@@ -41,11 +41,13 @@ class BroadcastRecord extends Binder {
     final int callingUid;   // the uid of who sent this
     final boolean ordered;  // serialize the send to receivers?
     final boolean sticky;   // originated from existing sticky data?
+    final boolean initialSticky; // initial broadcast from register to sticky?
     final String requiredPermission; // a permission the caller has required
     final List receivers;   // contains BroadcastFilter and ResolveInfo
     final IIntentReceiver resultTo; // who receives final result if non-null
     long dispatchTime;      // when dispatch started on this set of receivers
-    long startTime;         // when current receiver started for timeouts.
+    long receiverTime;      // when current receiver started for timeouts.
+    long finishTime;        // when we finished the broadcast.
     int resultCode;         // current result code value.
     String resultData;      // current result data value.
     Bundle resultExtras;    // current result extra data values.
@@ -73,28 +75,55 @@ class BroadcastRecord extends Binder {
     void dump(PrintWriter pw, String prefix) {
         pw.println(prefix + this);
         pw.println(prefix + intent);
+        if (sticky) {
+            Bundle bundle = intent.getExtras();
+            if (bundle != null) {
+                pw.println(prefix + "extras: " + bundle.toString());
+            }
+        }
         pw.println(prefix + "proc=" + callerApp);
         pw.println(prefix + "caller=" + callerPackage
                 + " callingPid=" + callingPid
                 + " callingUid=" + callingUid);
-        pw.println(prefix + "requiredPermission=" + requiredPermission);
+        if (requiredPermission != null) {
+            pw.println(prefix + "requiredPermission=" + requiredPermission);
+        }
         pw.println(prefix + "dispatchTime=" + dispatchTime + " ("
-                + (SystemClock.uptimeMillis()-dispatchTime) + " since now)");
-        pw.println(prefix + "startTime=" + startTime + " ("
-                + (SystemClock.uptimeMillis()-startTime) + " since now)");
-        pw.println(prefix + "anrCount=" + anrCount);
-        pw.println(prefix + "resultTo=" + resultTo
-              + " resultCode=" + resultCode + " resultData=" + resultData);
-        pw.println(prefix + "resultExtras=" + resultExtras);
-        pw.println(prefix + "resultAbort=" + resultAbort
-                + " ordered=" + ordered + " sticky=" + sticky);
-        pw.println(prefix + "nextReceiver=" + nextReceiver
-              + " receiver=" + receiver);
-        pw.println(prefix + "curFilter=" + curFilter);
-        pw.println(prefix + "curReceiver="
-                + ((curReceiver != null) ? curReceiver : "(null)"));
-        pw.println(prefix + "curApp=" + curApp);
+                + (SystemClock.uptimeMillis()-dispatchTime) + "ms since now)");
+        if (finishTime != 0) {
+            pw.println(prefix + "finishTime=" + finishTime + " ("
+                    + (SystemClock.uptimeMillis()-finishTime) + "ms since now)");
+        } else {
+            pw.println(prefix + "receiverTime=" + receiverTime + " ("
+                    + (SystemClock.uptimeMillis()-receiverTime) + "ms since now)");
+        }
+        if (anrCount != 0) {
+            pw.println(prefix + "anrCount=" + anrCount);
+        }
+        if (resultTo != null || resultCode != -1 || resultData != null) {
+            pw.println(prefix + "resultTo=" + resultTo
+                  + " resultCode=" + resultCode + " resultData=" + resultData);
+        }
+        if (resultExtras != null) {
+            pw.println(prefix + "resultExtras=" + resultExtras);
+        }
+        if (resultAbort || ordered || sticky || initialSticky) {
+            pw.println(prefix + "resultAbort=" + resultAbort
+                    + " ordered=" + ordered + " sticky=" + sticky
+                    + " initialSticky=" + initialSticky);
+        }
+        if (nextReceiver != 0 || receiver != null) {
+            pw.println(prefix + "nextReceiver=" + nextReceiver
+                  + " receiver=" + receiver);
+        }
+        if (curFilter != null) {
+            pw.println(prefix + "curFilter=" + curFilter);
+        }
+        if (curReceiver != null) {
+            pw.println(prefix + "curReceiver=" + curReceiver);
+        }
         if (curApp != null) {
+            pw.println(prefix + "curApp=" + curApp);
             pw.println(prefix + "curComponent="
                     + (curComponent != null ? curComponent.toShortString() : "--"));
             pw.println(prefix + "curSourceDir=" + curReceiver.applicationInfo.sourceDir);
@@ -114,7 +143,7 @@ class BroadcastRecord extends Binder {
             Object o = receivers.get(i);
             pw.println(prefix + "Receiver #" + i + ": " + o);
             if (o instanceof BroadcastFilter)
-                ((BroadcastFilter)o).dump(pw, p2);
+                ((BroadcastFilter)o).dumpBrief(pw, p2);
             else if (o instanceof ResolveInfo)
                 ((ResolveInfo)o).dump(printer, p2);
         }
@@ -124,7 +153,7 @@ class BroadcastRecord extends Binder {
             int _callingPid, int _callingUid, String _requiredPermission,
             List _receivers, IIntentReceiver _resultTo, int _resultCode,
             String _resultData, Bundle _resultExtras, boolean _serialized,
-            boolean _sticky) {
+            boolean _sticky, boolean _initialSticky) {
         intent = _intent;
         callerApp = _callerApp;
         callerPackage = _callerPackage;
@@ -138,6 +167,7 @@ class BroadcastRecord extends Binder {
         resultExtras = _resultExtras;
         ordered = _serialized;
         sticky = _sticky;
+        initialSticky = _initialSticky;
         nextReceiver = 0;
         state = IDLE;
     }

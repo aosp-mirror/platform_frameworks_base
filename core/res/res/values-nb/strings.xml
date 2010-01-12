@@ -520,6 +520,9 @@
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Logg på"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Ugyldig brukernavn eller passord."</string>
     <string name="lockscreen_glogin_checking_password" msgid="6758890536332363322">"Kontrollerer ..."</string>
+    <string name="lockscreen_unlock_label" msgid="737440483220667054">"Lås opp"</string>
+    <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Lyd på"</string>
+    <string name="lockscreen_sound_off_label" msgid="996822825154319026">"Lyd av"</string>
     <string name="hour_ampm" msgid="4329881288269772723">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_cap_ampm" msgid="1829009197680861107">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Fjern"</string>

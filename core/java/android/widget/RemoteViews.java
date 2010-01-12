@@ -23,6 +23,7 @@ import android.content.IntentSender;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.Bitmap;
 import android.graphics.PorterDuff;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Parcel;
@@ -136,10 +137,15 @@ public class RemoteViews implements Parcelable, Filter {
             if (target != null && pendingIntent != null) {
                 OnClickListener listener = new OnClickListener() {
                     public void onClick(View v) {
+                        int[] pos = new int[2];
+                        v.getLocationOnScreen(pos);
+                        Intent intent = new Intent();
+                        intent.setSourceBounds(new Rect(pos[0], pos[1],
+                                    pos[0]+v.getWidth(), pos[1]+v.getHeight()));
                         try {
                             // TODO: Unregister this handler if PendingIntent.FLAG_ONE_SHOT?
                             v.getContext().startIntentSender(
-                                    pendingIntent.getIntentSender(), null,
+                                    pendingIntent.getIntentSender(), intent,
                                     Intent.FLAG_ACTIVITY_NEW_TASK,
                                     Intent.FLAG_ACTIVITY_NEW_TASK, 0);
                         } catch (IntentSender.SendIntentException e) {
@@ -457,6 +463,46 @@ public class RemoteViews implements Parcelable, Filter {
         }
     }
 
+    /**
+     * Equivalent to calling {@link ViewGroup#addView(View)} after inflating the
+     * given {@link RemoteViews}, or calling {@link ViewGroup#removeAllViews()}
+     * when null. This allows users to build "nested" {@link RemoteViews}.
+     */
+    private class ViewGroupAction extends Action {
+        public ViewGroupAction(int viewId, RemoteViews nestedViews) {
+            this.viewId = viewId;
+            this.nestedViews = nestedViews;
+        }
+
+        public ViewGroupAction(Parcel parcel) {
+            viewId = parcel.readInt();
+            nestedViews = parcel.readParcelable(null);
+        }
+
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(TAG);
+            dest.writeInt(viewId);
+            dest.writeParcelable(nestedViews, 0 /* no flags */);
+        }
+
+        @Override
+        public void apply(View root) {
+            final Context context = root.getContext();
+            final ViewGroup target = (ViewGroup) root.findViewById(viewId);
+            if (nestedViews != null) {
+                // Inflate nested views and add as children
+                target.addView(nestedViews.apply(context, target));
+            } else if (target != null) {
+                // Clear all children when nested views omitted
+                target.removeAllViews();
+            }
+        }
+
+        int viewId;
+        RemoteViews nestedViews;
+
+        public final static int TAG = 4;
+    }
 
     /**
      * Create a new RemoteViews object that will display the views contained
@@ -493,6 +539,9 @@ public class RemoteViews implements Parcelable, Filter {
                 case ReflectionAction.TAG:
                     mActions.add(new ReflectionAction(parcel));
                     break;
+                case ViewGroupAction.TAG:
+                    mActions.add(new ViewGroupAction(parcel));
+                    break;
                 default:
                     throw new ActionException("Tag " + tag + " not found");
                 }
@@ -519,7 +568,31 @@ public class RemoteViews implements Parcelable, Filter {
         }
         mActions.add(a);
     }
-    
+
+    /**
+     * Equivalent to calling {@link ViewGroup#addView(View)} after inflating the
+     * given {@link RemoteViews}. This allows users to build "nested"
+     * {@link RemoteViews}. In cases where consumers of {@link RemoteViews} may
+     * recycle layouts, use {@link #removeAllViews(int)} to clear any existing
+     * children.
+     *
+     * @param viewId The id of the parent {@link ViewGroup} to add child into.
+     * @param nestedView {@link RemoteViews} that describes the child.
+     */
+    public void addView(int viewId, RemoteViews nestedView) {
+        addAction(new ViewGroupAction(viewId, nestedView));
+    }
+
+    /**
+     * Equivalent to calling {@link ViewGroup#removeAllViews()}.
+     *
+     * @param viewId The id of the parent {@link ViewGroup} to remove all
+     *            children from.
+     */
+    public void removeAllViews(int viewId) {
+        addAction(new ViewGroupAction(viewId, null));
+    }
+
     /**
      * Equivalent to calling View.setVisibility
      * 

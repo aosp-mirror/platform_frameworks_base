@@ -32,16 +32,17 @@ import android.bluetooth.BluetoothSocket;
 import android.bluetooth.BluetoothUuid;
 import android.bluetooth.IBluetooth;
 import android.bluetooth.IBluetoothCallback;
-import android.os.ParcelUuid;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.Binder;
-import android.os.IBinder;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Message;
+import android.os.ParcelUuid;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemService;
@@ -50,7 +51,13 @@ import android.util.Log;
 
 import com.android.internal.app.IBatteryStats;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedWriter;
 import java.io.FileDescriptor;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -58,6 +65,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Random;
 
 public class BluetoothService extends IBluetooth.Stub {
     private static final String TAG = "BluetoothService";
@@ -65,7 +73,6 @@ public class BluetoothService extends IBluetooth.Stub {
 
     private int mNativeData;
     private BluetoothEventLoop mEventLoop;
-    private IntentFilter mIntentFilter;
     private boolean mIsAirplaneSensitive;
     private int mBluetoothState;
     private boolean mRestart = false;  // need to call enable() after disable()
@@ -78,6 +85,12 @@ public class BluetoothService extends IBluetooth.Stub {
 
     private static final String BLUETOOTH_ADMIN_PERM = android.Manifest.permission.BLUETOOTH_ADMIN;
     private static final String BLUETOOTH_PERM = android.Manifest.permission.BLUETOOTH;
+
+    private static final String DOCK_ADDRESS_PATH = "/sys/class/switch/dock/bt_addr";
+    private static final String DOCK_PIN_PATH = "/sys/class/switch/dock/bt_pin";
+
+    private static final String SHARED_PREFERENCE_DOCK_ADDRESS = "dock_bluetooth_address";
+    private static final String SHARED_PREFERENCES_NAME = "bluetooth_service_settings";
 
     private static final int MESSAGE_REGISTER_SDP_RECORDS = 1;
     private static final int MESSAGE_FINISH_DISABLE = 2;
@@ -103,6 +116,9 @@ public class BluetoothService extends IBluetooth.Stub {
     private final HashMap<RemoteService, IBluetoothCallback> mUuidCallbackTracker;
 
     private final HashMap<Integer, Integer> mServiceRecordToPid;
+
+    private static String mDockAddress;
+    private String mDockPin;
 
     private static class RemoteService {
         public String address;
@@ -150,7 +166,79 @@ public class BluetoothService extends IBluetooth.Stub {
         mUuidIntentTracker = new ArrayList<String>();
         mUuidCallbackTracker = new HashMap<RemoteService, IBluetoothCallback>();
         mServiceRecordToPid = new HashMap<Integer, Integer>();
-        registerForAirplaneMode();
+
+        IntentFilter filter = new IntentFilter();
+        registerForAirplaneMode(filter);
+
+        filter.addAction(Intent.ACTION_DOCK_EVENT);
+        mContext.registerReceiver(mReceiver, filter);
+    }
+
+     public static synchronized String readDockBluetoothAddress() {
+        if (mDockAddress != null) return mDockAddress;
+
+        BufferedInputStream file = null;
+        String dockAddress;
+        try {
+            file = new BufferedInputStream(new FileInputStream(DOCK_ADDRESS_PATH));
+            byte[] address = new byte[17];
+            file.read(address);
+            dockAddress = new String(address);
+            dockAddress = dockAddress.toUpperCase();
+            if (BluetoothAdapter.checkBluetoothAddress(dockAddress)) {
+                mDockAddress = dockAddress;
+                return mDockAddress;
+            } else {
+                log("CheckBluetoothAddress failed for car dock address:" + dockAddress);
+            }
+        } catch (FileNotFoundException e) {
+            log("FileNotFoundException while trying to read dock address");
+        } catch (IOException e) {
+            log("IOException while trying to read dock address");
+        } finally {
+            if (file != null) {
+                try {
+                    file.close();
+                } catch (IOException e) {
+                    // Ignore
+                }
+            }
+        }
+        mDockAddress = null;
+        return null;
+    }
+
+    private synchronized boolean writeDockPin() {
+        BufferedWriter out = null;
+        try {
+            out = new BufferedWriter(new FileWriter(DOCK_PIN_PATH));
+
+            // Generate a random 4 digit pin between 0000 and 9999
+            // This is not truly random but good enough for our purposes.
+            int pin = (int) Math.floor(Math.random() * 10000);
+
+            mDockPin = String.format("%04d", pin);
+            out.write(mDockPin);
+            return true;
+        } catch (FileNotFoundException e) {
+            log("FileNotFoundException while trying to write dock pairing pin");
+        } catch (IOException e) {
+            log("IOException while while trying to write dock pairing pin");
+        } finally {
+            if (out != null) {
+                try {
+                    out.close();
+                } catch (IOException e) {
+                    // Ignore
+                }
+            }
+        }
+        mDockPin = null;
+        return false;
+    }
+
+    /*package*/ synchronized String getDockPin() {
+        return mDockPin;
     }
 
     public synchronized void initAfterRegistration() {
@@ -160,9 +248,7 @@ public class BluetoothService extends IBluetooth.Stub {
 
     @Override
     protected void finalize() throws Throwable {
-        if (mIsAirplaneSensitive) {
-            mContext.unregisterReceiver(mReceiver);
-        }
+        mContext.unregisterReceiver(mReceiver);
         try {
             cleanupNativeDataNative();
         } finally {
@@ -172,6 +258,10 @@ public class BluetoothService extends IBluetooth.Stub {
 
     public boolean isEnabled() {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
+        return isEnabledInternal();
+    }
+
+    private boolean isEnabledInternal() {
         return mBluetoothState == BluetoothAdapter.STATE_ON;
     }
 
@@ -328,7 +418,7 @@ public class BluetoothService extends IBluetooth.Stub {
         public void handleMessage(Message msg) {
             switch (msg.what) {
             case MESSAGE_REGISTER_SDP_RECORDS:
-                if (!isEnabled()) {
+                if (!isEnabledInternal()) {
                     return;
                 }
                 // SystemService.start() forks sdptool to register service
@@ -340,14 +430,14 @@ public class BluetoothService extends IBluetooth.Stub {
                 // records, use a DBUS call instead.
                 switch (msg.arg1) {
                 case 1:
-                    Log.d(TAG, "Registering hsag record");
-                    SystemService.start("hsag");
+                    Log.d(TAG, "Registering hfag record");
+                    SystemService.start("hfag");
                     mHandler.sendMessageDelayed(
                             mHandler.obtainMessage(MESSAGE_REGISTER_SDP_RECORDS, 2, -1), 500);
                     break;
                 case 2:
-                    Log.d(TAG, "Registering hfag record");
-                    SystemService.start("hfag");
+                    Log.d(TAG, "Registering hsag record");
+                    SystemService.start("hsag");
                     mHandler.sendMessageDelayed(
                             mHandler.obtainMessage(MESSAGE_REGISTER_SDP_RECORDS, 3, -1), 500);
                     break;
@@ -375,7 +465,7 @@ public class BluetoothService extends IBluetooth.Stub {
                 break;
             case MESSAGE_DISCOVERABLE_TIMEOUT:
                 int mode = msg.arg1;
-                if (isEnabled()) {
+                if (isEnabledInternal()) {
                     // TODO: Switch back to the previous scan mode
                     // This is ok for now, because we only use
                     // CONNECTABLE and CONNECTABLE_DISCOVERABLE
@@ -502,9 +592,13 @@ public class BluetoothService extends IBluetooth.Stub {
 
         // List of names of Bluetooth devices for which auto pairing should be
         // disabled.
-        private final ArrayList<String> mAutoPairingNameBlacklist =
+        private final ArrayList<String> mAutoPairingExactNameBlacklist =
                 new ArrayList<String>(Arrays.asList(
                         "Motorola IHF1000", "i.TechBlueBAND", "X5 Stereo v1.3"));
+
+        private final ArrayList<String> mAutoPairingPartialNameBlacklist =
+                new ArrayList<String>(Arrays.asList(
+                        "BMW", "Audi"));
 
         // If this is an outgoing connection, store the address.
         // There can be only 1 pending outgoing connection at a time,
@@ -523,7 +617,7 @@ public class BluetoothService extends IBluetooth.Stub {
                 return;
             }
             String []bonds = null;
-            String val = getProperty("Devices");
+            String val = getPropertyInternal("Devices");
             if (val != null) {
                 bonds = val.split(",");
             }
@@ -585,8 +679,12 @@ public class BluetoothService extends IBluetooth.Stub {
 
             String name = getRemoteName(address);
             if (name != null) {
-                for (String blacklistName : mAutoPairingNameBlacklist) {
+                for (String blacklistName : mAutoPairingExactNameBlacklist) {
                     if (name.equals(blacklistName)) return true;
+                }
+
+                for (String blacklistName : mAutoPairingPartialNameBlacklist) {
+                    if (name.startsWith(blacklistName)) return true;
                 }
             }
             return false;
@@ -667,6 +765,7 @@ public class BluetoothService extends IBluetooth.Stub {
     }
 
     /*package*/synchronized void getAllProperties() {
+
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
         mAdapterProperties.clear();
 
@@ -726,16 +825,19 @@ public class BluetoothService extends IBluetooth.Stub {
     // The following looks dirty.
     private boolean setPropertyString(String key, String value) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
+        if (!isEnabledInternal()) return false;
         return setAdapterPropertyStringNative(key, value);
     }
 
     private boolean setPropertyInteger(String key, int value) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
+        if (!isEnabledInternal()) return false;
         return setAdapterPropertyIntegerNative(key, value);
     }
 
     private boolean setPropertyBoolean(String key, boolean value) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
+        if (!isEnabledInternal()) return false;
         return setAdapterPropertyBooleanNative(key, value ? 1 : 0);
     }
 
@@ -789,7 +891,12 @@ public class BluetoothService extends IBluetooth.Stub {
         return true;
     }
 
-    /*package*/ synchronized String getProperty (String name) {
+    /*package*/ synchronized String getProperty(String name) {
+        if (!isEnabledInternal()) return null;
+        return getPropertyInternal(name);
+    }
+
+    /*package*/ synchronized String getPropertyInternal(String name) {
         if (!mAdapterProperties.isEmpty())
             return mAdapterProperties.get(name);
         getAllProperties();
@@ -844,7 +951,7 @@ public class BluetoothService extends IBluetooth.Stub {
 
     public synchronized int getScanMode() {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
-        if (!isEnabled())
+        if (!isEnabledInternal())
             return BluetoothAdapter.SCAN_MODE_NONE;
 
         boolean pairable = getProperty("Pairable").equals("true");
@@ -855,15 +962,16 @@ public class BluetoothService extends IBluetooth.Stub {
     public synchronized boolean startDiscovery() {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
                                                 "Need BLUETOOTH_ADMIN permission");
-        if (!isEnabled()) {
-            return false;
-        }
+        if (!isEnabledInternal()) return false;
+
         return startDiscoveryNative();
     }
 
     public synchronized boolean cancelDiscovery() {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
                                                 "Need BLUETOOTH_ADMIN permission");
+        if (!isEnabledInternal()) return false;
+
         return stopDiscoveryNative();
     }
 
@@ -879,6 +987,8 @@ public class BluetoothService extends IBluetooth.Stub {
     public synchronized boolean createBond(String address) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
                                                 "Need BLUETOOTH_ADMIN permission");
+        if (!isEnabledInternal()) return false;
+
         if (!BluetoothAdapter.checkBluetoothAddress(address)) {
             return false;
         }
@@ -898,6 +1008,13 @@ public class BluetoothService extends IBluetooth.Stub {
             return false;
         }
 
+        if (address.equals(mDockAddress)) {
+            if (!writeDockPin()) {
+                log("Error while writing Pin for the dock");
+                return false;
+            }
+        }
+
         if (!createPairedDeviceNative(address, 60000 /* 1 minute */)) {
             return false;
         }
@@ -911,6 +1028,8 @@ public class BluetoothService extends IBluetooth.Stub {
     public synchronized boolean cancelBondProcess(String address) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
                                                 "Need BLUETOOTH_ADMIN permission");
+        if (!isEnabledInternal()) return false;
+
         if (!BluetoothAdapter.checkBluetoothAddress(address)) {
             return false;
         }
@@ -928,6 +1047,8 @@ public class BluetoothService extends IBluetooth.Stub {
     public synchronized boolean removeBond(String address) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
                                                 "Need BLUETOOTH_ADMIN permission");
+        if (!isEnabledInternal()) return false;
+
         if (!BluetoothAdapter.checkBluetoothAddress(address)) {
             return false;
         }
@@ -947,11 +1068,20 @@ public class BluetoothService extends IBluetooth.Stub {
         return mBondState.getBondState(address.toUpperCase());
     }
 
+    public synchronized boolean isBluetoothDock(String address) {
+        SharedPreferences sp = mContext.getSharedPreferences(SHARED_PREFERENCES_NAME,
+                mContext.MODE_PRIVATE);
+
+        return sp.contains(SHARED_PREFERENCE_DOCK_ADDRESS + address);
+    }
+
     /*package*/ boolean isRemoteDeviceInCache(String address) {
         return (mDeviceProperties.get(address) != null);
     }
 
     /*package*/ String[] getRemoteDeviceProperties(String address) {
+        if (!isEnabledInternal()) return null;
+
         String objectPath = getObjectPathFromAddress(address);
         return (String [])getDevicePropertiesNative(objectPath);
     }
@@ -1047,6 +1177,8 @@ public class BluetoothService extends IBluetooth.Stub {
             return false;
         }
 
+        if (!isEnabledInternal()) return false;
+
         return setDevicePropertyBooleanNative(getObjectPathFromAddress(address), "Trusted",
                 value ? 1 : 0);
     }
@@ -1136,6 +1268,8 @@ public class BluetoothService extends IBluetooth.Stub {
     public synchronized boolean fetchRemoteUuids(String address, ParcelUuid uuid,
             IBluetoothCallback callback) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
+        if (!isEnabledInternal()) return false;
+
         if (!BluetoothAdapter.checkBluetoothAddress(address)) {
             return false;
         }
@@ -1190,6 +1324,8 @@ public class BluetoothService extends IBluetooth.Stub {
      */
     public int getRemoteServiceChannel(String address, ParcelUuid uuid) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
+        if (!isEnabledInternal()) return -1;
+
         if (!BluetoothAdapter.checkBluetoothAddress(address)) {
             return BluetoothDevice.ERROR;
         }
@@ -1208,6 +1344,8 @@ public class BluetoothService extends IBluetooth.Stub {
     public synchronized boolean setPin(String address, byte[] pin) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
                                                 "Need BLUETOOTH_ADMIN permission");
+        if (!isEnabledInternal()) return false;
+
         if (pin == null || pin.length <= 0 || pin.length > 16 ||
             !BluetoothAdapter.checkBluetoothAddress(address)) {
             return false;
@@ -1234,6 +1372,8 @@ public class BluetoothService extends IBluetooth.Stub {
     public synchronized boolean setPasskey(String address, int passkey) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
                                                 "Need BLUETOOTH_ADMIN permission");
+        if (!isEnabledInternal()) return false;
+
         if (passkey < 0 || passkey > 999999 || !BluetoothAdapter.checkBluetoothAddress(address)) {
             return false;
         }
@@ -1251,6 +1391,8 @@ public class BluetoothService extends IBluetooth.Stub {
     public synchronized boolean setPairingConfirmation(String address, boolean confirm) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
                                                 "Need BLUETOOTH_ADMIN permission");
+        if (!isEnabledInternal()) return false;
+
         address = address.toUpperCase();
         Integer data = mEventLoop.getPasskeyAgentRequestData().remove(address);
         if (data == null) {
@@ -1265,6 +1407,8 @@ public class BluetoothService extends IBluetooth.Stub {
     public synchronized boolean cancelPairingUserInput(String address) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
                                                 "Need BLUETOOTH_ADMIN permission");
+        if (!isEnabledInternal()) return false;
+
         if (!BluetoothAdapter.checkBluetoothAddress(address)) {
             return false;
         }
@@ -1281,7 +1425,7 @@ public class BluetoothService extends IBluetooth.Stub {
         return cancelPairingUserInputNative(address, data.intValue());
     }
 
-    public void updateDeviceServiceChannelCache(String address) {
+    /*package*/ void updateDeviceServiceChannelCache(String address) {
         ParcelUuid[] deviceUuids = getRemoteUuids(address);
         // We are storing the rfcomm channel numbers only for the uuids
         // we are interested in.
@@ -1356,8 +1500,9 @@ public class BluetoothService extends IBluetooth.Stub {
      */
     public synchronized int addRfcommServiceRecord(String serviceName, ParcelUuid uuid,
             int channel, IBinder b) {
-        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM,
-                                                "Need BLUETOOTH permission");
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
+        if (!isEnabledInternal()) return -1;
+
         if (serviceName == null || uuid == null || channel < 1 ||
                 channel > BluetoothSocket.MAX_RFCOMM_CHANNEL) {
             return -1;
@@ -1417,6 +1562,8 @@ public class BluetoothService extends IBluetooth.Stub {
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            if (intent == null) return;
+
             String action = intent.getAction();
             if (action.equals(Intent.ACTION_AIRPLANE_MODE_CHANGED)) {
                 ContentResolver resolver = context.getContentResolver();
@@ -1431,18 +1578,31 @@ public class BluetoothService extends IBluetooth.Stub {
                         disable(false);
                     }
                 }
+            } else if (Intent.ACTION_DOCK_EVENT.equals(action)) {
+                int state = intent.getIntExtra(Intent.EXTRA_DOCK_STATE,
+                        Intent.EXTRA_DOCK_STATE_UNDOCKED);
+                if (DBG) Log.v(TAG, "Received ACTION_DOCK_EVENT with State:" + state);
+                if (state == Intent.EXTRA_DOCK_STATE_UNDOCKED) {
+                    mDockAddress = null;
+                    mDockPin = null;
+                } else {
+                    SharedPreferences.Editor editor =
+                        mContext.getSharedPreferences(SHARED_PREFERENCES_NAME,
+                                mContext.MODE_PRIVATE).edit();
+                    editor.putBoolean(SHARED_PREFERENCE_DOCK_ADDRESS + mDockAddress, true);
+                    editor.commit();
+                }
             }
         }
     };
 
-    private void registerForAirplaneMode() {
+    private void registerForAirplaneMode(IntentFilter filter) {
         String airplaneModeRadios = Settings.System.getString(mContext.getContentResolver(),
                 Settings.System.AIRPLANE_MODE_RADIOS);
         mIsAirplaneSensitive = airplaneModeRadios == null
                 ? true : airplaneModeRadios.contains(Settings.System.RADIO_BLUETOOTH);
         if (mIsAirplaneSensitive) {
-            mIntentFilter = new IntentFilter(Intent.ACTION_AIRPLANE_MODE_CHANGED);
-            mContext.registerReceiver(mReceiver, mIntentFilter);
+            filter.addAction(Intent.ACTION_AIRPLANE_MODE_CHANGED);
         }
     }
 
@@ -1598,7 +1758,7 @@ public class BluetoothService extends IBluetooth.Stub {
     }
 
     /*package*/ String getAddressFromObjectPath(String objectPath) {
-        String adapterObjectPath = getProperty("ObjectPath");
+        String adapterObjectPath = getPropertyInternal("ObjectPath");
         if (adapterObjectPath == null || objectPath == null) {
             Log.e(TAG, "getAddressFromObjectPath: AdpaterObjectPath:" + adapterObjectPath +
                     "  or deviceObjectPath:" + objectPath + " is null");
@@ -1618,7 +1778,7 @@ public class BluetoothService extends IBluetooth.Stub {
     }
 
     /*package*/ String getObjectPathFromAddress(String address) {
-        String path = getProperty("ObjectPath");
+        String path = getPropertyInternal("ObjectPath");
         if (path == null) {
             Log.e(TAG, "Error: Object Path is null");
             return null;

@@ -1,0 +1,159 @@
+page.title=Hello, TimePicker
+parent.title=Hello, Views
+parent.link=index.html
+@jd:body
+
+<p>A {@link android.widget.TimePicker} is a widget that allows the 
+user to select the time by hour, minute and AM or PM.</p>
+
+
+<ol>
+  <li>Start a new project/Activity called HelloTimePicker.</li>
+  <li>Open the layout file and make it like so:
+    <pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    &lt;TextView android:id="@+id/timeDisplay"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text=""/>
+
+    &lt;Button android:id="@+id/pickTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Change the time"/>
+
+&lt;/LinearLayout>
+</pre>
+	<p>For the layout, we're using a vertical LinearLayout, with a {@link android.widget.TextView} that
+	will display the time and a {@link android.widget.Button} that will initiate the 
+        {@link android.widget.TimePicker} dialog.
+	With this layout, the TextView will sit above the Button.
+	The text value in the TextView is set empty, as it will be filled by our Activity
+	with the current time.</p>
+    </li> 
+
+  <li>Open HelloTimePicker.java. Insert the following to the HelloTimePicker class:
+<pre>
+private TextView mTimeDisplay;
+private Button mPickTime;
+
+private int mHour;
+private int mMinute;
+
+static final int TIME_DIALOG_ID = 0;
+
+&#64;Override
+protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.main);
+    
+    // capture our View elements
+    mTimeDisplay = (TextView) findViewById(R.id.timeDisplay);
+    mPickTime = (Button) findViewById(R.id.pickTime);
+
+    // add a click listener to the button
+    mPickTime.setOnClickListener(new View.OnClickListener() {
+        public void onClick(View v) {
+            showDialog(TIME_DIALOG_ID);
+        }
+    });
+
+    // get the current time
+    final Calendar c = Calendar.getInstance();
+    mHour = c.get(Calendar.HOUR_OF_DAY);
+    mMinute = c.get(Calendar.MINUTE);
+
+    // display the current date
+    updateDisplay();
+}
+</pre>
+<p class="note"><strong>Tip:</strong> Press Ctrl(or Cmd) + Shift + O to import all needed packages.</p>
+        <p>We start by instantiating variables for our View elements and time fields.
+	The <code>TIME_DIALOG_ID</code> is a static integer that uniquely identifies the dialog. In the
+	<code>onCreate()</code> method, we get prepared by setting the layout and capturing the View elements. 
+	We then set an on-click listener for the Button, so that when it is clicked, it will
+	show our TimePicker dialog. The <code>showDialog()</code> method will perform a callback
+	to our Activity. (We'll define this callback in the next section.) We then create an
+	instance of {@link java.util.Calendar} and get the current hour and minute. Finally, we call 
+	<code>updateDisplay()</code>&mdash;our own method that will fill the TextView with the time.</p>
+</li>
+
+<li>After the <code>onCreate()</code> method, add the <code>onCreateDialog()</code> callback method:
+<pre>
+&#64;Override
+protected Dialog onCreateDialog(int id) {
+    switch (id) {
+    case TIME_DIALOG_ID:
+        return new TimePickerDialog(this,
+                mTimeSetListener, mHour, mMinute, false);
+    }
+    return null;
+}
+</pre>
+	<p>This is passed the identifier we gave <code>showDialog()</code> and initializes
+	the TimePicker to the time we retrieved from our Calendar instance. It will be called by 
+        <code>showDialog()</code>.</p>
+</li>
+
+<li>Now add our <code>updateDisplay()</code> method:
+<pre>
+// updates the time we display in the TextView
+private void updateDisplay() {
+    mTimeDisplay.setText(
+        new StringBuilder()
+                .append(pad(mHour)).append(":")
+                .append(pad(mMinute)));
+}
+</pre>
+	<p>This simply takes our member fields for the time and inserts them in 
+	the <code>mTimeDisplay</code> TextView. Note that we call a new method, <code>pad()</code>,
+	on the hour and minute. (We'll create this method in the last step.)</p>
+</li>
+
+<li>Next, add a listener to be called when the time is reset:
+<pre>
+// the callback received when the user "sets" the time in the dialog
+private TimePickerDialog.OnTimeSetListener mTimeSetListener =
+    new TimePickerDialog.OnTimeSetListener() {
+        public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+            mHour = hourOfDay;
+            mMinute = minute;
+            updateDisplay();
+        }
+    };
+</pre>
+	<p>Now when the user is done setting the time (clicks the "Set" button), we update our member fields with
+	the new time and update our TextView.</p>
+</li>
+<li>Finally, add the <code>pad()</code> method that we called from the <code>updateDisplay()</code>:
+<pre>
+private static String pad(int c) {
+    if (c >= 10)
+        return String.valueOf(c);
+    else
+        return "0" + String.valueOf(c);
+}
+</pre>
+	<p>This method returns the appropriate String representation of the hour or minute.
+	It will prefix a zero to the number if it's a single digit.
+  	</p>
+</li>
+
+<li>Now run it.</li>
+</ol>
+<p>When you press the "Change the time" button, you should see the following:</p>
+<img src="images/hello-timepicker.png" width="150px" />
+
+<h3>References</h3>
+<ol>
+  <li>{@link android.widget.TimePicker}</li>
+  <li>{@link android.widget.Button}</li>
+  <li>{@link android.widget.TextView}</li>
+  <li>{@link java.util.Calendar}</li>
+</ol>
+

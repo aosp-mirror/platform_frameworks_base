@@ -84,6 +84,8 @@ static void dumpstate(int full) {
         EXEC("dmesg");
         PRINT("------ KERNEL WAKELOCKS ------");
         DUMP("/proc/wakelocks");
+        PRINT("------ KERNEL CPUFREQ ------");
+        DUMP("/sys/devices/system/cpu/cpu0/cpufreq/stats/time_in_state");
         PRINT("");
         PRINT("------ PROCESSES ------");
         EXEC1("ps", "-P");
@@ -112,7 +114,11 @@ static void dumpstate(int full) {
         PRINT("------ PACKAGE UID ERRORS ------");
         DUMP("/data/system/uiderrors.txt");
 
-        dump_kernel_log("/data/dontpanic/last_kmsg", "LAST KMSG");
+        dump_kernel_log("/proc/last_kmsg", "LAST KMSG");
+
+        PRINT("------ LAST RADIO LOG ------");
+        EXEC1("parse_radio_log", "/proc/last_radio_log");
+
         dump_kernel_log("/data/dontpanic/apanic_console",
                         "PANIC CONSOLE");
         dump_kernel_log("/data/dontpanic/apanic_threads",

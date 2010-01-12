@@ -180,6 +180,15 @@ public final class BluetoothSocket implements Closeable {
      * <p>This method will block until a connection is made or the connection
      * fails. If this method returns without an exception then this socket
      * is now connected.
+     * <p>Creating new connections to
+     * remote Bluetooth devices should not be attempted while device discovery
+     * is in progress. Device discovery is a heavyweight procedure on the
+     * Bluetooth adapter and will significantly slow a device connection.
+     * Use {@link BluetoothAdapter#cancelDiscovery()} to cancel an ongoing
+     * discovery. Discovery is not managed by the Activity,
+     * but is run as a system service, so an application should always call
+     * {@link BluetoothAdapter#cancelDiscovery()} even if it
+     * did not directly request a discovery, just to be sure.
      * <p>{@link #close} can be used to abort this call from another thread.
      * @throws IOException on error, for example connection failure
      */

@@ -57,7 +57,7 @@ bool LocklessCommandFifo::init(uint32_t sizeInBytes)
     mPut = mBuffer;
     mGet = mBuffer;
     mEnd = mBuffer + (sizeInBytes) - 1;
-    dumpState("init");
+    //dumpState("init");
     return true;
 }
 

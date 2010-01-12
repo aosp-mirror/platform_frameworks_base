@@ -1573,12 +1573,14 @@ status_t MediaPlayerService::AudioCache::open(
         uint32_t sampleRate, int channelCount, int format, int bufferCount,
         AudioCallback cb, void *cookie)
 {
+    LOGV("open(%u, %d, %d, %d)", sampleRate, channelCount, format, bufferCount);
     if (cb != NULL) {
         return UNKNOWN_ERROR;  // TODO: implement this.
     }
+    if (mHeap->getHeapID() < 0) {
+        return NO_INIT;
+    }
 
-    LOGV("open(%u, %d, %d, %d)", sampleRate, channelCount, format, bufferCount);
-    if (mHeap->getHeapID() < 0) return NO_INIT;
     mSampleRate = sampleRate;
     mChannelCount = (uint16_t)channelCount;
     mFormat = (uint16_t)format;
@@ -1627,16 +1629,24 @@ void MediaPlayerService::AudioCache::notify(void* cookie, int msg, int ext1, int
     AudioCache* p = static_cast<AudioCache*>(cookie);
 
     // ignore buffering messages
-    if (msg == MEDIA_BUFFERING_UPDATE) return;
-
-    // set error condition
-    if (msg == MEDIA_ERROR) {
+    switch (msg)
+    {
+    case MEDIA_ERROR:
         LOGE("Error %d, %d occurred", ext1, ext2);
         p->mError = ext1;
+        break;
+    case MEDIA_PREPARED:
+        LOGV("prepared");
+        break;
+    case MEDIA_PLAYBACK_COMPLETE:
+        LOGV("playback complete");
+        break;
+    default:
+        LOGV("ignored");
+        return;
     }
 
     // wake up thread
-    LOGV("wakeup thread");
     p->mCommandComplete = true;
     p->mSignal.signal();
 }

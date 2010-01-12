@@ -102,6 +102,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
@@ -277,7 +278,8 @@ class PackageManagerService extends IPackageManager.Stub {
     PackageParser.Package mPlatformPackage;
 
     // Set of pending broadcasts for aggregating enable/disable of components.
-    final HashMap<String, String> mPendingBroadcasts = new HashMap<String, String>();
+    final HashMap<String, ArrayList<String>> mPendingBroadcasts
+            = new HashMap<String, ArrayList<String>>();
     static final int SEND_PENDING_BROADCAST = 1;
     // Delay time in millisecs
     static final int BROADCAST_DELAY = 10 * 1000;
@@ -289,30 +291,40 @@ class PackageManagerService extends IPackageManager.Stub {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case SEND_PENDING_BROADCAST : {
+                    String packages[];
+                    ArrayList components[];
                     int size = 0;
-                    String broadcastList[];
-                    HashMap<String, String> tmpMap;
                     int uids[];
                     synchronized (mPackages) {
+                        if (mPendingBroadcasts == null) {
+                            return;
+                        }
                         size = mPendingBroadcasts.size();
                         if (size <= 0) {
                             // Nothing to be done. Just return
                             return;
                         }
-                        broadcastList = new String[size];
-                        mPendingBroadcasts.keySet().toArray(broadcastList);
-                        tmpMap = new HashMap<String, String>(mPendingBroadcasts);
+                        packages = new String[size];
+                        components = new ArrayList[size];
                         uids = new int[size];
-                        for (int i = 0; i < size; i++) {
-                            PackageSetting ps = mSettings.mPackages.get(mPendingBroadcasts.get(broadcastList[i]));
+                        Iterator<HashMap.Entry<String, ArrayList<String>>>
+                                it = mPendingBroadcasts.entrySet().iterator();
+                        int i = 0;
+                        while (it.hasNext() && i < size) {
+                            HashMap.Entry<String, ArrayList<String>> ent = it.next();
+                            packages[i] = ent.getKey();
+                            components[i] = ent.getValue();
+                            PackageSetting ps = mSettings.mPackages.get(ent.getKey());
                             uids[i] = (ps != null) ? ps.userId : -1;
+                            i++;
                         }
+                        size = i;
                         mPendingBroadcasts.clear();
                     }
                     // Send broadcasts
                     for (int i = 0; i < size; i++) {
-                        String className = broadcastList[i];
-                        sendPackageChangedBroadcast(className, true, tmpMap.get(className), uids[i]);
+                        sendPackageChangedBroadcast(packages[i], true,
+                                (ArrayList<String>)components[i], uids[i]);
                     }
                     break;
                 }
@@ -2770,72 +2782,156 @@ class PackageManagerService extends IPackageManager.Stub {
         return pkg;
     }
 
-    private int cachePackageSharedLibsLI(PackageParser.Package pkg,
-            File dataPath, File scanFile) {
-        File sharedLibraryDir = new File(dataPath.getPath() + "/lib");
-        final String sharedLibraryABI = Build.CPU_ABI;
-        final String apkLibraryDirectory = "lib/" + sharedLibraryABI + "/";
-        final String apkSharedLibraryPrefix = apkLibraryDirectory + "lib";
-        final String sharedLibrarySuffix = ".so";
-        boolean hasNativeCode = false;
-        boolean installedNativeCode = false;
-        try {
-            ZipFile zipFile = new ZipFile(scanFile);
-            Enumeration<ZipEntry> entries =
-                (Enumeration<ZipEntry>) zipFile.entries();
+    // The following constants are returned by cachePackageSharedLibsForAbiLI
+    // to indicate if native shared libraries were found in the package.
+    // Values are:
+    //    PACKAGE_INSTALL_NATIVE_FOUND_LIBRARIES => native libraries found and installed
+    //    PACKAGE_INSTALL_NATIVE_NO_LIBRARIES     => no native libraries in package
+    //    PACKAGE_INSTALL_NATIVE_ABI_MISMATCH     => native libraries for another ABI found
+    //                                        in package (and not installed)
+    //
+    private static final int PACKAGE_INSTALL_NATIVE_FOUND_LIBRARIES = 0;
+    private static final int PACKAGE_INSTALL_NATIVE_NO_LIBRARIES = 1;
+    private static final int PACKAGE_INSTALL_NATIVE_ABI_MISMATCH = 2;
 
-            while (entries.hasMoreElements()) {
-                ZipEntry entry = entries.nextElement();
-                if (entry.isDirectory()) {
-                    if (!hasNativeCode && entry.getName().startsWith("lib")) {
-                        hasNativeCode = true;
-                    }
-                    continue;
+    // Find all files of the form lib/<cpuAbi>/lib<name>.so in the .apk
+    // and automatically copy them to /data/data/<appname>/lib if present.
+    //
+    // NOTE: this method may throw an IOException if the library cannot
+    // be copied to its final destination, e.g. if there isn't enough
+    // room left on the data partition, or a ZipException if the package
+    // file is malformed.
+    //
+    private int cachePackageSharedLibsForAbiLI( PackageParser.Package  pkg,
+        File dataPath, File scanFile, String cpuAbi)
+    throws IOException, ZipException {
+        File sharedLibraryDir = new File(dataPath.getPath() + "/lib");
+        final String apkLib = "lib/";
+        final int apkLibLen = apkLib.length();
+        final int cpuAbiLen = cpuAbi.length();
+        final String libPrefix = "lib";
+        final int libPrefixLen = libPrefix.length();
+        final String libSuffix = ".so";
+        final int libSuffixLen = libSuffix.length();
+        boolean hasNativeLibraries = false;
+        boolean installedNativeLibraries = false;
+
+        // the minimum length of a valid native shared library of the form
+        // lib/<something>/lib<name>.so.
+        final int minEntryLen  = apkLibLen + 2 + libPrefixLen + 1 + libSuffixLen;
+
+        ZipFile zipFile = new ZipFile(scanFile);
+        Enumeration<ZipEntry> entries =
+            (Enumeration<ZipEntry>) zipFile.entries();
+
+        while (entries.hasMoreElements()) {
+            ZipEntry entry = entries.nextElement();
+            // skip directories
+            if (entry.isDirectory()) {
+                continue;
+            }
+            String entryName = entry.getName();
+
+            // check that the entry looks like lib/<something>/lib<name>.so
+            // here, but don't check the ABI just yet.
+            //
+            // - must be sufficiently long
+            // - must end with libSuffix, i.e. ".so"
+            // - must start with apkLib, i.e. "lib/"
+            if (entryName.length() < minEntryLen ||
+                !entryName.endsWith(libSuffix) ||
+                !entryName.startsWith(apkLib) ) {
+                continue;
+            }
+
+            // file name must start with libPrefix, i.e. "lib"
+            int lastSlash = entryName.lastIndexOf('/');
+
+            if (lastSlash < 0 || 
+                !entryName.regionMatches(lastSlash+1, libPrefix, 0, libPrefixLen) ) {
+                continue;
+            }
+
+            hasNativeLibraries = true;
+
+            // check the cpuAbi now, between lib/ and /lib<name>.so
+            //
+            if (lastSlash != apkLibLen + cpuAbiLen ||
+                !entryName.regionMatches(apkLibLen, cpuAbi, 0, cpuAbiLen) )
+                continue;
+
+            // extract the library file name, ensure it doesn't contain
+            // weird characters. we're guaranteed here that it doesn't contain
+            // a directory separator though.
+            String libFileName = entryName.substring(lastSlash+1);
+            if (!FileUtils.isFilenameSafe(new File(libFileName))) {
+                continue;
+            }
+
+            installedNativeLibraries = true;
+
+            String sharedLibraryFilePath = sharedLibraryDir.getPath() +
+                File.separator + libFileName;
+            File sharedLibraryFile = new File(sharedLibraryFilePath);
+            if (! sharedLibraryFile.exists() ||
+                sharedLibraryFile.length() != entry.getSize() ||
+                sharedLibraryFile.lastModified() != entry.getTime()) {
+                if (Config.LOGD) {
+                    Log.d(TAG, "Caching shared lib " + entry.getName());
                 }
-                String entryName = entry.getName();
-                if (entryName.startsWith("lib/")) {
-                    hasNativeCode = true;
+                if (mInstaller == null) {
+                    sharedLibraryDir.mkdir();
                 }
-                if (! (entryName.startsWith(apkSharedLibraryPrefix)
-                        && entryName.endsWith(sharedLibrarySuffix))) {
-                    continue;
+                cacheSharedLibLI(pkg, zipFile, entry, sharedLibraryDir,
+                        sharedLibraryFile);
+            }
+        }
+        if (!hasNativeLibraries)
+            return PACKAGE_INSTALL_NATIVE_NO_LIBRARIES;
+
+        if (!installedNativeLibraries)
+            return PACKAGE_INSTALL_NATIVE_ABI_MISMATCH;
+
+        return PACKAGE_INSTALL_NATIVE_FOUND_LIBRARIES;
+    }
+
+    // extract shared libraries stored in the APK as lib/<cpuAbi>/lib<name>.so
+    // and copy them to /data/data/<appname>/lib.
+    //
+    // This function will first try the main CPU ABI defined by Build.CPU_ABI
+    // (which corresponds to ro.product.cpu.abi), and also try an alternate
+    // one if ro.product.cpu.abi2 is defined.
+    //
+    private int cachePackageSharedLibsLI(PackageParser.Package  pkg,
+        File dataPath, File scanFile) {
+        final String cpuAbi = Build.CPU_ABI;
+        try {
+            int result = cachePackageSharedLibsForAbiLI(pkg, dataPath, scanFile, cpuAbi);
+
+            // some architectures are capable of supporting several CPU ABIs
+            // for example, 'armeabi-v7a' also supports 'armeabi' native code
+            // this is indicated by the definition of the ro.product.cpu.abi2
+            // system property.
+            //
+            // only scan the package twice in case of ABI mismatch
+            if (result == PACKAGE_INSTALL_NATIVE_ABI_MISMATCH) {
+                String  cpuAbi2 = SystemProperties.get("ro.product.cpu.abi2",null);
+                if (cpuAbi2 != null) {
+                    result = cachePackageSharedLibsForAbiLI(pkg, dataPath, scanFile, cpuAbi2);
                 }
-                String libFileName = entryName.substring(
-                        apkLibraryDirectory.length());
-                if (libFileName.contains("/")
-                        || (!FileUtils.isFilenameSafe(new File(libFileName)))) {
-                    continue;
-                }
-                
-                installedNativeCode = true;
-                
-                String sharedLibraryFilePath = sharedLibraryDir.getPath() +
-                    File.separator + libFileName;
-                File sharedLibraryFile = new File(sharedLibraryFilePath);
-                if (! sharedLibraryFile.exists() ||
-                    sharedLibraryFile.length() != entry.getSize() ||
-                    sharedLibraryFile.lastModified() != entry.getTime()) {
-                    if (Config.LOGD) {
-                        Log.d(TAG, "Caching shared lib " + entry.getName());
-                    }
-                    if (mInstaller == null) {
-                        sharedLibraryDir.mkdir();
-                    }
-                    cacheSharedLibLI(pkg, zipFile, entry, sharedLibraryDir,
-                            sharedLibraryFile);
+
+                if (result == PACKAGE_INSTALL_NATIVE_ABI_MISMATCH) {
+                    Log.w(TAG,"Native ABI mismatch from package file");
+                    return PackageManager.INSTALL_FAILED_INVALID_APK;
                 }
             }
+        } catch (ZipException e) {
+            Log.w(TAG, "Failed to extract data from package file", e);
+            return PackageManager.INSTALL_FAILED_INVALID_APK;
         } catch (IOException e) {
             Log.w(TAG, "Failed to cache package shared libs", e);
             return PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
         }
-        
-        if (hasNativeCode && !installedNativeCode) {
-            Log.w(TAG, "Install failed: .apk has native code but none for arch "
-                    + Build.CPU_ABI);
-            return PackageManager.INSTALL_FAILED_CPU_ABI_INCOMPATIBLE;
-        }
-        
         return PackageManager.INSTALL_SUCCEEDED;
     }
 
@@ -2870,12 +2966,6 @@ class PackageManagerService extends IPackageManager.Stub {
             TAG, "Removing package " + pkg.applicationInfo.packageName );
 
         synchronized (mPackages) {
-            if (pkg.mPreferredOrder > 0) {
-                mSettings.mPreferredPackages.remove(pkg);
-                pkg.mPreferredOrder = 0;
-                updatePreferredIndicesLP();
-            }
-    
             clearPackagePreferredActivitiesLP(pkg.packageName);
     
             mPackages.remove(pkg.applicationInfo.packageName);
@@ -4842,62 +4932,17 @@ class PackageManagerService extends IPackageManager.Stub {
     public void addPackageToPreferred(String packageName) {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.SET_PREFERRED_APPLICATIONS, null);
-
-        synchronized (mPackages) {
-            PackageParser.Package p = mPackages.get(packageName);
-            if (p == null) {
-                return;
-            }
-            PackageSetting ps = (PackageSetting)p.mExtras;
-            if (ps != null) {
-                mSettings.mPreferredPackages.remove(ps);
-                mSettings.mPreferredPackages.add(0, ps);
-                updatePreferredIndicesLP();
-                mSettings.writeLP();
-            }
-        }
+        Log.w(TAG, "addPackageToPreferred: no longer implemented");
     }
 
     public void removePackageFromPreferred(String packageName) {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.SET_PREFERRED_APPLICATIONS, null);
-
-        synchronized (mPackages) {
-            PackageParser.Package p = mPackages.get(packageName);
-            if (p == null) {
-                return;
-            }
-            if (p.mPreferredOrder > 0) {
-                PackageSetting ps = (PackageSetting)p.mExtras;
-                if (ps != null) {
-                    mSettings.mPreferredPackages.remove(ps);
-                    p.mPreferredOrder = 0;
-                    updatePreferredIndicesLP();
-                    mSettings.writeLP();
-                }
-            }
-        }
-    }
-
-    private void updatePreferredIndicesLP() {
-        final ArrayList<PackageSetting> pkgs
-                = mSettings.mPreferredPackages;
-        final int N = pkgs.size();
-        for (int i=0; i<N; i++) {
-            pkgs.get(i).pkg.mPreferredOrder = N - i;
-        }
+        Log.w(TAG, "removePackageFromPreferred: no longer implemented");
     }
 
     public List<PackageInfo> getPreferredPackages(int flags) {
-        synchronized (mPackages) {
-            final ArrayList<PackageInfo> res = new ArrayList<PackageInfo>();
-            final ArrayList<PackageSetting> pref = mSettings.mPreferredPackages;
-            final int N = pref.size();
-            for (int i=0; i<N; i++) {
-                res.add(generatePackageInfo(pref.get(i).pkg, flags));
-            }
-            return res;
-        }
+        return new ArrayList<PackageInfo>();
     }
 
     public void addPreferredActivity(IntentFilter filter, int match,
@@ -5023,8 +5068,9 @@ class PackageManagerService extends IPackageManager.Stub {
         final boolean allowedByPermission = (permission == PackageManager.PERMISSION_GRANTED);
         boolean sendNow = false;
         boolean isApp = (className == null);
-        String key = isApp ? packageName : className;
+        String componentName = isApp ? packageName : className;
         int packageUid = -1;
+        ArrayList<String> components;
         synchronized (mPackages) {
             pkgSetting = mSettings.mPackages.get(packageName);
             if (pkgSetting == null) {
@@ -5064,17 +5110,22 @@ class PackageManagerService extends IPackageManager.Stub {
             }
             mSettings.writeLP();
             packageUid = pkgSetting.userId;
+            components = mPendingBroadcasts.get(packageName);
+            boolean newPackage = components == null;
+            if (newPackage) {
+                components = new ArrayList<String>();
+            }
+            if (!components.contains(componentName)) {
+                components.add(componentName);
+            }
             if ((flags&PackageManager.DONT_KILL_APP) == 0) {
                 sendNow = true;
                 // Purge entry from pending broadcast list if another one exists already
                 // since we are sending one right away.
-                if (mPendingBroadcasts.get(key) != null) {
-                    mPendingBroadcasts.remove(key);
-                    // Can ignore empty list since its handled in the handler anyway
-                }
+                mPendingBroadcasts.remove(packageName);
             } else {
-                if (mPendingBroadcasts.get(key) == null) {
-                    mPendingBroadcasts.put(key, packageName);
+                if (newPackage) {
+                    mPendingBroadcasts.put(packageName, components);
                 }
                 if (!mHandler.hasMessages(SEND_PENDING_BROADCAST)) {
                     // Schedule a message
@@ -5087,7 +5138,7 @@ class PackageManagerService extends IPackageManager.Stub {
         try {
             if (sendNow) {
                 sendPackageChangedBroadcast(packageName,
-                        (flags&PackageManager.DONT_KILL_APP) != 0, key, packageUid);
+                        (flags&PackageManager.DONT_KILL_APP) != 0, components, packageUid);
             }
         } finally {
             Binder.restoreCallingIdentity(callingId);
@@ -5095,9 +5146,14 @@ class PackageManagerService extends IPackageManager.Stub {
     }
 
     private void sendPackageChangedBroadcast(String packageName,
-            boolean killFlag, String componentName, int packageUid) {
-        Bundle extras = new Bundle(2);
-        extras.putString(Intent.EXTRA_CHANGED_COMPONENT_NAME, componentName);
+            boolean killFlag, ArrayList<String> componentNames, int packageUid) {
+        if (false) Log.v(TAG, "Sending package changed: package=" + packageName
+                + " components=" + componentNames);
+        Bundle extras = new Bundle(4);
+        extras.putString(Intent.EXTRA_CHANGED_COMPONENT_NAME, componentNames.get(0));
+        String nameList[] = new String[componentNames.size()];
+        componentNames.toArray(nameList);
+        extras.putStringArray(Intent.EXTRA_CHANGED_COMPONENT_NAME_LIST, nameList);
         extras.putBoolean(Intent.EXTRA_DONT_KILL_APP, killFlag);
         extras.putInt(Intent.EXTRA_UID, packageUid);
         sendPackageBroadcast(Intent.ACTION_PACKAGE_CHANGED,  packageName, extras);   
@@ -5199,13 +5255,6 @@ class PackageManagerService extends IPackageManager.Stub {
             pw.println(" ");
             pw.println("Preferred Activities:");
             mSettings.mPreferredActivities.dump(pw, "  ");
-            pw.println(" ");
-            pw.println("Preferred Packages:");
-            {
-                for (PackageSetting ps : mSettings.mPreferredPackages) {
-                    pw.print("  "); pw.println(ps.name);
-                }
-            }
             pw.println(" ");
             pw.println("Permissions:");
             {
@@ -5957,10 +6006,6 @@ class PackageManagerService extends IPackageManager.Stub {
         private final File mBackupSettingsFilename;
         private final HashMap<String, PackageSetting> mPackages =
                 new HashMap<String, PackageSetting>();
-        // The user's preferred packages/applications, in order of preference.
-        // First is the most preferred.
-        private final ArrayList<PackageSetting> mPreferredPackages =
-                new ArrayList<PackageSetting>();
         // List of replaced system applications
         final HashMap<String, PackageSetting> mDisabledSysPackages =
             new HashMap<String, PackageSetting>();
@@ -6004,9 +6049,6 @@ class PackageManagerService extends IPackageManager.Stub {
         // Mapping from permission tree names to info about them.
         final HashMap<String, BasePermission> mPermissionTrees =
                 new HashMap<String, BasePermission>();
-
-        private final ArrayList<String> mPendingPreferredPackages
-                = new ArrayList<String>();
 
         private final StringBuilder mReadMessages = new StringBuilder();
 
@@ -6491,16 +6533,6 @@ class PackageManagerService extends IPackageManager.Stub {
                     writeDisabledSysPackage(serializer, pkg);
                 }
 
-                serializer.startTag(null, "preferred-packages");
-                int N = mPreferredPackages.size();
-                for (int i=0; i<N; i++) {
-                    PackageSetting pkg = mPreferredPackages.get(i);
-                    serializer.startTag(null, "item");
-                    serializer.attribute(null, "name", pkg.name);
-                    serializer.endTag(null, "item");
-                }
-                serializer.endTag(null, "preferred-packages");
-
                 serializer.startTag(null, "preferred-activities");
                 for (PreferredActivity pa : mPreferredActivities.filterSet()) {
                     serializer.startTag(null, "item");
@@ -6778,7 +6810,7 @@ class PackageManagerService extends IPackageManager.Stub {
                     } else if (tagName.equals("shared-user")) {
                         readSharedUserLP(parser);
                     } else if (tagName.equals("preferred-packages")) {
-                        readPreferredPackagesLP(parser);
+                        // no longer used.
                     } else if (tagName.equals("preferred-activities")) {
                         readPreferredActivitiesLP(parser);
                     } else if(tagName.equals("updated-package")) {
@@ -6831,19 +6863,6 @@ class PackageManagerService extends IPackageManager.Stub {
                 }
             }
             mPendingPackages.clear();
-
-            N = mPendingPreferredPackages.size();
-            mPreferredPackages.clear();
-            for (int i=0; i<N; i++) {
-                final String name = mPendingPreferredPackages.get(i);
-                final PackageSetting p = mPackages.get(name);
-                if (p != null) {
-                    mPreferredPackages.add(p);
-                } else {
-                    Log.w(TAG, "Unknown preferred package: " + name);
-                }
-            }
-            mPendingPreferredPackages.clear();
 
             mReadMessages.append("Read completed successfully: "
                     + mPackages.size() + " packages, "
@@ -7297,37 +7316,6 @@ class PackageManagerService extends IPackageManager.Stub {
                 } else {
                     reportSettingsProblem(Log.WARN,
                             "Unknown element under <perms>: "
-                            + parser.getName());
-                }
-                XmlUtils.skipCurrentTag(parser);
-            }
-        }
-
-        private void readPreferredPackagesLP(XmlPullParser parser)
-                throws XmlPullParserException, IOException {
-            int outerDepth = parser.getDepth();
-            int type;
-            while ((type=parser.next()) != XmlPullParser.END_DOCUMENT
-                   && (type != XmlPullParser.END_TAG
-                           || parser.getDepth() > outerDepth)) {
-                if (type == XmlPullParser.END_TAG
-                        || type == XmlPullParser.TEXT) {
-                    continue;
-                }
-
-                String tagName = parser.getName();
-                if (tagName.equals("item")) {
-                    String name = parser.getAttributeValue(null, "name");
-                    if (name != null) {
-                        mPendingPreferredPackages.add(name);
-                    } else {
-                        reportSettingsProblem(Log.WARN,
-                                "Error in package manager settings: <preferred-package> has no name at "
-                                + parser.getPositionDescription());
-                    }
-                } else {
-                    reportSettingsProblem(Log.WARN,
-                            "Unknown element under <preferred-packages>: "
                             + parser.getName());
                 }
                 XmlUtils.skipCurrentTag(parser);

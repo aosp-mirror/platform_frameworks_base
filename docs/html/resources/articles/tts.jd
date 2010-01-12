@@ -1,0 +1,241 @@
+page.title=Using Text-to-Speech
+@jd:body
+
+<p>Starting with Android 1.6 (API Level 4), the Android platform includes a new
+Text-to-Speech (TTS) capability. Also known as "speech synthesis", TTS enables
+your Android device to "speak" text of different languages.</p>
+
+<p>Before we explain how to use the TTS API itself, let's first review a few
+aspects of the engine that will be important to your TTS-enabled application. We
+will then show how to make your Android application talk and how to configure
+the way it speaks.</p>
+
+<h3>Languages and resources</h3>
+
+<p>The TTS engine that ships with the Android platform supports a number of
+languages: English, French, German, Italian and Spanish. Also, depending on
+which side of the Atlantic you are on, American and British accents for English
+are both supported.</p>
+
+<p>The TTS engine needs to know which language to speak, as a word like "Paris",
+for example, is pronounced differently in French and English. So the voice and
+dictionary are language-specific resources that need to be loaded before the
+engine can start to speak.</p>
+
+<p>Although all Android-powered devices that support the TTS functionality ship
+with the engine, some devices have limited storage and may lack the
+language-specific resource files. If a user wants to install those resources,
+the TTS API enables an application to query the platform for the availability of
+language files and can initiate their download and installation. So upon
+creating your activity, a good first step is to check for the presence of the
+TTS resources with the corresponding intent:</p>
+
+<pre>Intent checkIntent = new Intent();
+checkIntent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
+startActivityForResult(checkIntent, MY_DATA_CHECK_CODE);</pre>
+
+<p>A successful check will be marked by a <code>CHECK_VOICE_DATA_PASS</code>
+result code, indicating this device is ready to speak, after the creation of
+our 
+{@link android.speech.tts.TextToSpeech} object. If not, we need to let the user
+know to install the data that's required for the device to become a
+multi-lingual talking machine! Downloading and installing the data is
+accomplished by firing off the ACTION_INSTALL_TTS_DATA intent, which will take
+the user to Android Market, and will let her/him initiate the download.
+Installation of the data will happen automatically once the download completes.
+Here is an example of what your implementation of
+<code>onActivityResult()</code> would look like:</p>
+
+<pre>private TextToSpeech mTts;
+protected void onActivityResult(
+        int requestCode, int resultCode, Intent data) {
+    if (requestCode == MY_DATA_CHECK_CODE) {
+        if (resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS) {
+            // success, create the TTS instance
+            mTts = new TextToSpeech(this, this);
+        } else {
+            // missing data, install it
+            Intent installIntent = new Intent();
+            installIntent.setAction(
+                TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA);
+            startActivity(installIntent);
+        }
+    }
+}</pre>
+
+<p>In the constructor of the <code>TextToSpeech</code> instance we pass a
+reference to the <code>Context</code> to be used (here the current Activity),
+and to an <code>OnInitListener</code> (here our Activity as well). This listener
+enables our application to be notified when the Text-To-Speech engine is fully
+loaded, so we can start configuring it and using it.</p>
+
+<h4>Languages and Locale</h4>
+
+<p>At Google I/O 2009, we showed an <a title="Google I/O 2009, TTS
+demonstration" href="http://www.youtube.com/watch?v=uX9nt8Cpdqg#t=6m17s"
+id="rnfd">example of TTS</a> where it was used to speak the result of a
+translation from and to one of the 5 languages the Android TTS engine currently
+supports. Loading a language is as simple as calling for instance:</p>
+
+<pre>mTts.setLanguage(Locale.US);</pre><p>to load and set the language to
+English, as spoken in the country "US". A locale is the preferred way to specify
+a language because it accounts for the fact that the same language can vary from
+one country to another. To query whether a specific Locale is supported, you can
+use <code>isLanguageAvailable()</code>, which returns the level of support for
+the given Locale. For instance the calls:</p>
+
+<pre>mTts.isLanguageAvailable(Locale.UK))
+mTts.isLanguageAvailable(Locale.FRANCE))
+mTts.isLanguageAvailable(new Locale("spa", "ESP")))</pre>
+
+<p>will return TextToSpeech.LANG_COUNTRY_AVAILABLE to indicate that the language
+AND country as described by the Locale parameter are supported (and the data is
+correctly installed). But the calls:</p>
+
+<pre>mTts.isLanguageAvailable(Locale.CANADA_FRENCH))
+mTts.isLanguageAvailable(new Locale("spa"))</pre>
+
+<p>will return <code>TextToSpeech.LANG_AVAILABLE</code>. In the first example,
+French is supported, but not the given country. And in the second, only the
+language was specified for the Locale, so that's what the match was made on.</p>
+
+<p>Also note that besides the <code>ACTION_CHECK_TTS_DATA</code> intent to check
+the availability of the TTS data, you can also use
+<code>isLanguageAvailable()</code> once you have created your
+<code>TextToSpeech</code> instance, which will return
+<code>TextToSpeech.LANG_MISSING_DATA</code> if the required resources are not
+installed for the queried language.</p>
+
+<p>Making the engine speak an Italian string while the engine is set to the
+French language will produce some pretty <i>interesting </i>results, but it will
+not exactly be something your user would understand  So try to match the
+language of your application's content and the language that you loaded in your
+<code>TextToSpeech</code> instance. Also if you are using
+<code>Locale.getDefault()</code> to query the current Locale, make sure that at
+least the default language is supported.</p>
+
+<h3>Making your application speak</h3>
+
+<p>Now that our <code>TextToSpeech</code> instance is properly initialized and
+configured, we can start to make your application speak. The simplest way to do
+so is to use the <code>speak()</code> method. Let's iterate on the following
+example to make a talking alarm clock:</p>
+
+<pre>String myText1 = "Did you sleep well?";
+String myText2 = "I hope so, because it's time to wake up.";
+mTts.speak(myText1, TextToSpeech.QUEUE_FLUSH, null);
+mTts.speak(myText2, TextToSpeech.QUEUE_ADD, null);</pre>
+
+<p>The TTS engine manages a global queue of all the entries to synthesize, which
+are also known as "utterances". Each <code>TextToSpeech</code> instance can
+manage its own queue in order to control which utterance will interrupt the
+current one and which one is simply queued. Here the first <code>speak()</code>
+request would interrupt whatever was currently being synthesized: the queue is
+flushed and the new utterance is queued, which places it at the head of the
+queue. The second utterance is queued and will be played after
+<code>myText1</code> has completed.</p>
+
+<h4>Using optional parameters to change the playback stream type</h4>
+
+<p>On Android, each audio stream that is played is associated with one stream
+type, as defined in 
+{@link android.media.AudioManager android.media.AudioManager}. For a talking 
+alarm clock, we would like our text to be played on the
+<code>AudioManager.STREAM_ALARM</code> stream type so that it respects the alarm
+settings the user has chosen on the device. The last parameter of the speak()
+method allows you to pass to the TTS engine optional parameters, specified as
+key/value pairs in a HashMap. Let's use that mechanism to change the stream type
+of our utterances:</p>
+
+<pre>HashMap&lt;String, String&gt; myHashAlarm = new HashMap();
+myHashAlarm.put(TextToSpeech.Engine.KEY_PARAM_STREAM,
+        String.valueOf(AudioManager.STREAM_ALARM));
+mTts.speak(myText1, TextToSpeech.QUEUE_FLUSH, myHashAlarm);
+mTts.speak(myText2, TextToSpeech.QUEUE_ADD, myHashAlarm);</pre>
+
+<h4>Using optional parameters for playback completion callbacks</h4>
+
+<p>Note that <code>speak()</code> calls are asynchronous, so they will return
+well before the text is done being synthesized and played by Android, regardless
+of the use of <code>QUEUE_FLUSH</code> or <code>QUEUE_ADD</code>. But you might
+need to know when a particular utterance is done playing. For instance you might
+want to start playing an annoying music after <code>myText2</code> has finished
+synthesizing (remember, we're trying to wake up the user). We will again use an
+optional parameter, this time to tag our utterance as one we want to identify.
+We also need to make sure our activity implements the
+<code>TextToSpeech.OnUtteranceCompletedListener</code> interface:</p>
+
+<pre>mTts.setOnUtteranceCompletedListener(this);
+myHashAlarm.put(TextToSpeech.Engine.KEY_PARAM_STREAM,
+        String.valueOf(AudioManager.STREAM_ALARM));
+mTts.speak(myText1, TextToSpeech.QUEUE_FLUSH, myHashAlarm);
+myHashAlarm.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID,
+        "end of wakeup message ID");
+// myHashAlarm now contains two optional parameters
+mTts.speak(myText2, TextToSpeech.QUEUE_ADD, myHashAlarm);</pre>
+
+<p>And the Activity gets notified of the completion in the implementation 
+of the listener:</p>
+
+<pre>public void onUtteranceCompleted(String uttId) {
+    if (uttId == "end of wakeup message ID") {
+        playAnnoyingMusic();
+    } 
+}</pre>
+
+<h4>File rendering and playback</h4>
+
+<p>While the <code>speak()</code> method is used to make Android speak the text
+right away, there are cases where you would want the result of the synthesis to
+be recorded in an audio file instead. This would be the case if, for instance,
+there is text your application will speak often; you could avoid the synthesis
+CPU-overhead by rendering only once to a file, and then playing back that audio
+file whenever needed. Just like for <code>speak()</code>, you can use an
+optional utterance identifier to be notified on the completion of the synthesis
+to the file:</p>
+
+<pre>HashMap&lt;String, String&gt; myHashRender = new HashMap();
+String wakeUpText = "Are you up yet?";
+String destFileName = "/sdcard/myAppCache/wakeUp.wav";
+myHashRender.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, wakeUpText);
+mTts.synthesizeToFile(wakuUpText, myHashRender, destFileName);</pre>
+
+<p>Once you are notified of the synthesis completion, you can play the output
+file just like any other audio resource with 
+{@link android.media.MediaPlayer android.media.MediaPlayer}.</p>
+
+<p>But the <code>TextToSpeech</code> class offers other ways of associating
+audio resources with speech. So at this point we have a WAV file that contains
+the result of the synthesis of "Wake up" in the previously selected language. We
+can tell our TTS instance to associate the contents of the string "Wake up" with
+an audio resource, which can be accessed through its path, or through the
+package it's in, and its resource ID, using one of the two
+<code>addSpeech()</code> methods:</p>
+
+<pre>mTts.addSpeech(wakeUpText, destFileName);</pre>
+
+<p>This way any call to speak() for the same string content as
+<code>wakeUpText</code> will result in the playback of
+<code>destFileName</code>. If the file is missing, then speak will behave as if
+the audio file wasn't there, and will synthesize and play the given string. But
+you can also take advantage of that feature to provide an option to the user to
+customize how "Wake up" sounds, by recording their own version if they choose
+to. Regardless of where that audio file comes from, you can still use the same
+line in your Activity code to ask repeatedly "Are you up yet?":</p>
+
+<pre>mTts.speak(wakeUpText, TextToSpeech.QUEUE_ADD, myHashAlarm);</pre>
+
+<h4>When not in use...</h4><p>The text-to-speech functionality relies on a
+dedicated service shared across all applications that use that feature. When you
+are done using TTS, be a good citizen and tell it "you won't be needing its
+services anymore" by calling <code>mTts.shutdown()</code>, in your Activity
+<code>onDestroy()</code> method for instance.</p>
+
+<h3>Conclusion</h3>
+
+<p>Android now talks, and so can your apps. Remember that in order for
+synthesized speech to be intelligible, you need to match the language you select
+to that of the text to synthesize. Text-to-speech can help you push your app in
+new directions. Whether you use TTS to help users with disabilities, to enable
+the  use of your application while looking away from the screen, or simply to
+make it cool, we hope you'll enjoy this new feature.</p>

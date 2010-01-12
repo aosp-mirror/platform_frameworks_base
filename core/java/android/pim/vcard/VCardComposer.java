@@ -414,8 +414,10 @@ public class VCardComposer {
         appendVCardLine(builder, VCARD_PROPERTY_FULL_NAME, phoneName, needCharset, false);
         appendVCardLine(builder, VCARD_PROPERTY_NAME, phoneName, needCharset, false);
 
-        String label = Integer.toString(phonetype);
-        appendVCardTelephoneLine(builder, phonetype, label, phoneNumber);
+        if (!TextUtils.isEmpty(phoneNumber)) {
+            String label = Integer.toString(phonetype);
+            appendVCardTelephoneLine(builder, phonetype, label, phoneNumber);
+        }
 
         appendVCardLine(builder, VCARD_PROPERTY_END, VCARD_DATA_VCARD);
 

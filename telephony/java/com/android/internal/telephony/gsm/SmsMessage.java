@@ -225,6 +225,25 @@ public class SmsMessage extends SmsMessageBase{
     public static SubmitPdu getSubmitPdu(String scAddress,
             String destinationAddress, String message,
             boolean statusReportRequested, byte[] header) {
+        return getSubmitPdu(scAddress, destinationAddress, message, statusReportRequested, header,
+                ENCODING_UNKNOWN);
+    }
+
+
+    /**
+     * Get an SMS-SUBMIT PDU for a destination address and a message using the
+     * specified encoding.
+     *
+     * @param scAddress Service Centre address.  Null means use default.
+     * @param encoding Encoding defined by constants in android.telephony.SmsMessage.ENCODING_*
+     * @return a <code>SubmitPdu</code> containing the encoded SC
+     *         address, if applicable, and the encoded message.
+     *         Returns null on encode error.
+     * @hide
+     */
+    public static SubmitPdu getSubmitPdu(String scAddress,
+            String destinationAddress, String message,
+            boolean statusReportRequested, byte[] header, int encoding) {
 
         // Perform null parameter checks.
         if (message == null || destinationAddress == null) {
@@ -237,18 +256,44 @@ public class SmsMessage extends SmsMessageBase{
         ByteArrayOutputStream bo = getSubmitPduHead(
                 scAddress, destinationAddress, mtiByte,
                 statusReportRequested, ret);
-
-        try {
+        // User Data (and length)
+        byte[] userData;
+        if (encoding == ENCODING_UNKNOWN) {
             // First, try encoding it with the GSM alphabet
+            encoding = ENCODING_7BIT;
+        }
+        try {
+            if (encoding == ENCODING_7BIT) {
+                userData = GsmAlphabet.stringToGsm7BitPackedWithHeader(message, header);
+            } else { //assume UCS-2
+                try {
+                    userData = encodeUCS2(message, header);
+                } catch(UnsupportedEncodingException uex) {
+                    Log.e(LOG_TAG,
+                            "Implausible UnsupportedEncodingException ",
+                            uex);
+                    return null;
+                }
+            }
+        } catch (EncodeException ex) {
+            // Encoding to the 7-bit alphabet failed. Let's see if we can
+            // send it as a UCS-2 encoded message
+            try {
+                userData = encodeUCS2(message, header);
+                encoding = ENCODING_16BIT;
+            } catch(UnsupportedEncodingException uex) {
+                Log.e(LOG_TAG,
+                        "Implausible UnsupportedEncodingException ",
+                        uex);
+                return null;
+            }
+        }
 
-            // User Data (and length)
-            byte[] userData = GsmAlphabet.stringToGsm7BitPackedWithHeader(message, header);
-
+        if (encoding == ENCODING_7BIT) {
             if ((0xff & userData[0]) > MAX_USER_DATA_SEPTETS) {
                 // Message too long
                 return null;
             }
-
             // TP-Data-Coding-Scheme
             // Default encoding, uncompressed
             // To test writing messages to the SIM card, change this value 0x00
@@ -258,54 +303,47 @@ public class SmsMessage extends SmsMessageBase{
             // the receiver's SIM card. You can then send messages to yourself
             // (on a phone with this change) and they'll end up on the SIM card.
             bo.write(0x00);
-
-            // (no TP-Validity-Period)
-
-            bo.write(userData, 0, userData.length);
-        } catch (EncodeException ex) {
-            byte[] userData, textPart;
-            // Encoding to the 7-bit alphabet failed. Let's see if we can
-            // send it as a UCS-2 encoded message
-
-            try {
-                textPart = message.getBytes("utf-16be");
-            } catch (UnsupportedEncodingException uex) {
-                Log.e(LOG_TAG,
-                      "Implausible UnsupportedEncodingException ",
-                      uex);
-                return null;
-            }
-
-            if (header != null) {
-                // Need 1 byte for UDHL
-                userData = new byte[header.length + textPart.length + 1];
-
-                userData[0] = (byte)header.length;
-                System.arraycopy(header, 0, userData, 1, header.length);
-                System.arraycopy(textPart, 0, userData, header.length + 1, textPart.length);
-            }
-            else {
-                userData = textPart;
-            }
-
-            if (userData.length > MAX_USER_DATA_BYTES) {
+        } else { //assume UCS-2
+            if ((0xff & userData[0]) > MAX_USER_DATA_BYTES) {
                 // Message too long
                 return null;
             }
-
             // TP-Data-Coding-Scheme
             // Class 3, UCS-2 encoding, uncompressed
             bo.write(0x0b);
-
-            // (no TP-Validity-Period)
-
-            // TP-UDL
-            bo.write(userData.length);
-
-            bo.write(userData, 0, userData.length);
         }
 
+        // (no TP-Validity-Period)
+        bo.write(userData, 0, userData.length);
         ret.encodedMessage = bo.toByteArray();
+        return ret;
+    }
+
+    /**
+     * Packs header and UCS-2 encoded message. Includes TP-UDL & TP-UDHL if necessary
+     *
+     * @return
+     * @throws UnsupportedEncodingException
+     */
+    private static byte[] encodeUCS2(String message, byte[] header)
+        throws UnsupportedEncodingException {
+        byte[] userData, textPart;
+        textPart = message.getBytes("utf-16be");
+
+        if (header != null) {
+            // Need 1 byte for UDHL
+            userData = new byte[header.length + textPart.length + 1];
+
+            userData[0] = (byte)header.length;
+            System.arraycopy(header, 0, userData, 1, header.length);
+            System.arraycopy(textPart, 0, userData, header.length + 1, textPart.length);
+        }
+        else {
+            userData = textPart;
+        }
+        byte[] ret = new byte[userData.length+1];
+        ret[0] = (byte) (userData.length & 0xff );
+        System.arraycopy(userData, 0, ret, 1, userData.length);
         return ret;
     }
 

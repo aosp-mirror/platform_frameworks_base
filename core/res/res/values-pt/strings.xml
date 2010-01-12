@@ -390,7 +390,7 @@
     <string name="permlab_sdcardWrite" msgid="8079403759001777291">"modificar/excluir conteúdo do cartão SD"</string>
     <string name="permdesc_sdcardWrite" msgid="6643963204976471878">"Permite que um aplicativo grave no cartão SD."</string>
   <string-array name="phoneTypes">
-    <item msgid="8901098336658710359">"Página inicial"</item>
+    <item msgid="8901098336658710359">"Residencial"</item>
     <item msgid="869923650527136615">"Celular"</item>
     <item msgid="7897544654242874543">"Trabalho"</item>
     <item msgid="1103601433382158155">"Fax do trabalho"</item>
@@ -400,19 +400,19 @@
     <item msgid="9192514806975898961">"Personalizado"</item>
   </string-array>
   <string-array name="emailAddressTypes">
-    <item msgid="8073994352956129127">"Página inicial"</item>
+    <item msgid="8073994352956129127">"Residencial"</item>
     <item msgid="7084237356602625604">"Trabalho"</item>
     <item msgid="1112044410659011023">"Outros"</item>
     <item msgid="2374913952870110618">"Personalizado"</item>
   </string-array>
   <string-array name="postalAddressTypes">
-    <item msgid="6880257626740047286">"Página inicial"</item>
+    <item msgid="6880257626740047286">"Residencial"</item>
     <item msgid="5629153956045109251">"Trabalho"</item>
     <item msgid="4966604264500343469">"Outros"</item>
     <item msgid="4932682847595299369">"Personalizado"</item>
   </string-array>
   <string-array name="imAddressTypes">
-    <item msgid="1738585194601476694">"Página inicial"</item>
+    <item msgid="1738585194601476694">"Residencial"</item>
     <item msgid="1359644565647383708">"Trabalho"</item>
     <item msgid="7868549401053615677">"Outros"</item>
     <item msgid="3145118944639869809">"Personalizado"</item>
@@ -433,7 +433,7 @@
     <item msgid="1648797903785279353">"Jabber"</item>
   </string-array>
     <string name="phoneTypeCustom" msgid="1644738059053355820">"Personalizado"</string>
-    <string name="phoneTypeHome" msgid="2570923463033985887">"Página inicial"</string>
+    <string name="phoneTypeHome" msgid="2570923463033985887">"Residencial"</string>
     <string name="phoneTypeMobile" msgid="6501463557754751037">"Celular"</string>
     <string name="phoneTypeWork" msgid="8863939667059911633">"Comercial"</string>
     <string name="phoneTypeFaxWork" msgid="3517792160008890912">"Fax comercial"</string>
@@ -457,16 +457,16 @@
     <string name="eventTypeAnniversary" msgid="3876779744518284000">"Data comemorativa"</string>
     <string name="eventTypeOther" msgid="5834288791948564594">"Evento"</string>
     <string name="emailTypeCustom" msgid="8525960257804213846">"Personalizado"</string>
-    <string name="emailTypeHome" msgid="449227236140433919">"Página inicial"</string>
+    <string name="emailTypeHome" msgid="449227236140433919">"Residencial"</string>
     <string name="emailTypeWork" msgid="3548058059601149973">"Comercial"</string>
     <string name="emailTypeOther" msgid="2923008695272639549">"Outros"</string>
     <string name="emailTypeMobile" msgid="119919005321166205">"Celular"</string>
     <string name="postalTypeCustom" msgid="8903206903060479902">"Personalizado"</string>
-    <string name="postalTypeHome" msgid="8165756977184483097">"Página inicial"</string>
+    <string name="postalTypeHome" msgid="8165756977184483097">"Residencial"</string>
     <string name="postalTypeWork" msgid="5268172772387694495">"Comercial"</string>
     <string name="postalTypeOther" msgid="2726111966623584341">"Outros"</string>
     <string name="imTypeCustom" msgid="2074028755527826046">"Personalizado"</string>
-    <string name="imTypeHome" msgid="6241181032954263892">"Página inicial"</string>
+    <string name="imTypeHome" msgid="6241181032954263892">"Residencial"</string>
     <string name="imTypeWork" msgid="1371489290242433090">"Comercial"</string>
     <string name="imTypeOther" msgid="5377007495735915478">"Outros"</string>
     <string name="imProtocolCustom" msgid="6919453836618749992">"Personalizado"</string>
@@ -520,6 +520,9 @@
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Fazer login"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Nome de usuário ou senha inválida."</string>
     <string name="lockscreen_glogin_checking_password" msgid="6758890536332363322">"Verificando..."</string>
+    <string name="lockscreen_unlock_label" msgid="737440483220667054">"Desbloquear"</string>
+    <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Som ativado"</string>
+    <string name="lockscreen_sound_off_label" msgid="996822825154319026">"Som desativado"</string>
     <string name="hour_ampm" msgid="4329881288269772723">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_cap_ampm" msgid="1829009197680861107">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Limpar"</string>

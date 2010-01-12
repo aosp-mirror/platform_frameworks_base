@@ -702,8 +702,8 @@ declared in its manifest file.  (If you're working offline in the SDK, you
 can find all the source files for this sample application, including its 
 manifest file, at {@code &lt;sdk&gt;/samples/NotePad/index.html}.  
 If you're viewing the documentation online, the source files are in the 
-<a href="{@docRoot}guide/samples/index.html">Tutorials and Sample Code</a> 
-section <a href="{@docRoot}guide/samples/NotePad/index.html">here</a>.)
+<a href="{@docRoot}resources/samples/index.html">Tutorials and Sample Code</a> 
+section <a href="{@docRoot}resources/samples/NotePad/index.html">here</a>.)
 </p>
 
 <p>
@@ -968,7 +968,7 @@ NoteEditor activity:
 <dd>Asks the activity to display the content of the note identified 
 by {@code <var>ID</var>}. (For details on how {@code content:} URIs
 specify individual members of a group, see 
-<a href="{@docRoot}guide/topics/provider/content-providers.html">Content Providers</a>.)
+<a href="{@docRoot}guide/topics/providers/content-providers.html">Content Providers</a>.)
 
 <dt>action: <code>android.intent.action.EDIT</code>
 <br/>data: <code>content://com.google.provider.NotePad/notes/<var>ID</var></code></dt>

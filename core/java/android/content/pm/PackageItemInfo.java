@@ -141,11 +141,15 @@ public class PackageItemInfo {
     }
     
     protected void dumpFront(Printer pw, String prefix) {
-        pw.println(prefix + "name=" + name);
+        if (name != null) {
+            pw.println(prefix + "name=" + name);
+        }
         pw.println(prefix + "packageName=" + packageName);
-        pw.println(prefix + "labelRes=0x" + Integer.toHexString(labelRes)
-                + " nonLocalizedLabel=" + nonLocalizedLabel
-                + " icon=0x" + Integer.toHexString(icon));
+        if (labelRes != 0 || nonLocalizedLabel != null || icon != 0) {
+            pw.println(prefix + "labelRes=0x" + Integer.toHexString(labelRes)
+                    + " nonLocalizedLabel=" + nonLocalizedLabel
+                    + " icon=0x" + Integer.toHexString(icon));
+        }
     }
     
     protected void dumpBack(Printer pw, String prefix) {

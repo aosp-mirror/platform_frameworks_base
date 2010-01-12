@@ -22,6 +22,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TimeZone;
 
 /**
  * This is a class for reading and writing Exif tags in a JPEG file.
@@ -56,9 +57,13 @@ public class ExifInterface {
     // Constants used for white balance
     public static final int WHITEBALANCE_AUTO = 0;
     public static final int WHITEBALANCE_MANUAL = 1;
+    private static SimpleDateFormat sFormatter;
 
     static {
         System.loadLibrary("exif");
+        sFormatter = new SimpleDateFormat("yyyy:MM:dd HH:mm:ss");
+        //TODO: uncomment this when our EXIF datetime is encoded as UTC
+        //sFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
 
     private String mFilename;
@@ -241,9 +246,6 @@ public class ExifInterface {
             return false;
         }
     }
-
-    private static SimpleDateFormat sFormatter =
-            new SimpleDateFormat("yyyy:MM:dd HH:mm:ss");
 
     /**
      * Returns number of milliseconds since Jan. 1, 1970, midnight GMT.

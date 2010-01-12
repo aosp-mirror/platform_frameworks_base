@@ -46,7 +46,7 @@ public:
     void * getPtr() const {return mPtr;}
     const Type * getType() const {return mType.get();}
 
-    void uploadToTexture(uint32_t lodOffset = 0);
+    void uploadToTexture(Context *rsc, uint32_t lodOffset = 0);
     uint32_t getTextureID() const {return mTextureID;}
 
     void uploadToBufferObject();
@@ -64,6 +64,8 @@ public:
 
     void enableGLVertexBuffers() const;
     void setupGLIndexBuffers() const;
+
+    virtual void dumpLOGV(const char *prefix) const;
 
 
 protected:

@@ -309,15 +309,22 @@ public class ActivityInfo extends ComponentInfo
 
     public void dump(Printer pw, String prefix) {
         super.dumpFront(pw, prefix);
-        pw.println(prefix + "permission=" + permission);
+        if (permission != null) {
+            pw.println(prefix + "permission=" + permission);
+        }
         pw.println(prefix + "taskAffinity=" + taskAffinity
                 + " targetActivity=" + targetActivity);
-        pw.println(prefix + "launchMode=" + launchMode
-                + " flags=0x" + Integer.toHexString(flags)
-                + " theme=0x" + Integer.toHexString(theme));
-        pw.println(prefix + "screenOrientation=" + screenOrientation
-                + " configChanges=0x" + Integer.toHexString(configChanges)
-                + " softInputMode=0x" + Integer.toHexString(softInputMode));
+        if (launchMode != 0 || flags != 0 || theme != 0) {
+            pw.println(prefix + "launchMode=" + launchMode
+                    + " flags=0x" + Integer.toHexString(flags)
+                    + " theme=0x" + Integer.toHexString(theme));
+        }
+        if (screenOrientation != SCREEN_ORIENTATION_UNSPECIFIED
+                || configChanges != 0 || softInputMode != 0) {
+            pw.println(prefix + "screenOrientation=" + screenOrientation
+                    + " configChanges=0x" + Integer.toHexString(configChanges)
+                    + " softInputMode=0x" + Integer.toHexString(softInputMode));
+        }
         super.dumpBack(pw, prefix);
     }
     

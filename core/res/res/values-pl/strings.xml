@@ -434,7 +434,7 @@
   </string-array>
     <string name="phoneTypeCustom" msgid="1644738059053355820">"Niestandardowy"</string>
     <string name="phoneTypeHome" msgid="2570923463033985887">"Domowy"</string>
-    <string name="phoneTypeMobile" msgid="6501463557754751037">"Komórkowy"</string>
+    <string name="phoneTypeMobile" msgid="6501463557754751037">"Komórka"</string>
     <string name="phoneTypeWork" msgid="8863939667059911633">"Służbowy"</string>
     <string name="phoneTypeFaxWork" msgid="3517792160008890912">"Faks służbowy"</string>
     <string name="phoneTypeFaxHome" msgid="2067265972322971467">"Faks domowy"</string>
@@ -449,7 +449,7 @@
     <string name="phoneTypeRadio" msgid="4093738079908667513">"Radio"</string>
     <string name="phoneTypeTelex" msgid="3367879952476250512">"Teleks"</string>
     <string name="phoneTypeTtyTdd" msgid="8606514378585000044">"TTY TDD"</string>
-    <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"Służbowy komórkowy"</string>
+    <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"Służbowa komórka"</string>
     <string name="phoneTypeWorkPager" msgid="649938731231157056">"Pager służbowy"</string>
     <string name="phoneTypeAssistant" msgid="5596772636128562884">"Asystent"</string>
     <string name="phoneTypeMms" msgid="7254492275502768992">"Wiadomość MMS"</string>
@@ -460,7 +460,7 @@
     <string name="emailTypeHome" msgid="449227236140433919">"Domowy"</string>
     <string name="emailTypeWork" msgid="3548058059601149973">"Służbowy"</string>
     <string name="emailTypeOther" msgid="2923008695272639549">"Inny"</string>
-    <string name="emailTypeMobile" msgid="119919005321166205">"Komórkowy"</string>
+    <string name="emailTypeMobile" msgid="119919005321166205">"Komórka"</string>
     <string name="postalTypeCustom" msgid="8903206903060479902">"Niestandardowy"</string>
     <string name="postalTypeHome" msgid="8165756977184483097">"Domowy"</string>
     <string name="postalTypeWork" msgid="5268172772387694495">"Służbowy"</string>
@@ -517,9 +517,12 @@
     <string name="lockscreen_glogin_instructions" msgid="1816635201812207709">"Aby odblokować, zaloguj się za pomocą konta Google"</string>
     <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"Nazwa użytkownika (e-mail)"</string>
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Hasło"</string>
-    <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Zaloguj"</string>
+    <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Zaloguj się"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Błędna nazwa użytkownika lub hasło."</string>
     <string name="lockscreen_glogin_checking_password" msgid="6758890536332363322">"Trwa sprawdzanie..."</string>
+    <string name="lockscreen_unlock_label" msgid="737440483220667054">"Odblokuj"</string>
+    <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Włącz dźwięk"</string>
+    <string name="lockscreen_sound_off_label" msgid="996822825154319026">"Wyłącz dźwięk"</string>
     <string name="hour_ampm" msgid="4329881288269772723">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_cap_ampm" msgid="1829009197680861107">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Wyczyść"</string>
@@ -593,7 +596,7 @@
   </plurals>
   <plurals name="abbrev_num_seconds_ago">
     <item quantity="one" msgid="1849036840200069118">"sekundę temu"</item>
-    <item quantity="other" msgid="3699169366650930415">"<xliff:g id="COUNT">%d</xliff:g> sek. temu"</item>
+    <item quantity="other" msgid="3699169366650930415">"<xliff:g id="COUNT">%d</xliff:g> s temu"</item>
   </plurals>
   <plurals name="abbrev_num_minutes_ago">
     <item quantity="one" msgid="6361490147113871545">"minutę temu"</item>
@@ -609,7 +612,7 @@
   </plurals>
   <plurals name="abbrev_in_num_seconds">
     <item quantity="one" msgid="5842225370795066299">"za sekundę"</item>
-    <item quantity="other" msgid="5495880108825805108">"za <xliff:g id="COUNT">%d</xliff:g> sek."</item>
+    <item quantity="other" msgid="5495880108825805108">"za <xliff:g id="COUNT">%d</xliff:g> s"</item>
   </plurals>
   <plurals name="abbrev_in_num_minutes">
     <item quantity="one" msgid="562786149928284878">"za minutę"</item>

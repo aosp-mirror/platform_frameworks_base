@@ -28,16 +28,16 @@ keep your development environment up-to-date. </li>
 
 <p>Note that if you are currently using the Android 1.6 SDK, you do not
 necessarily need to install the new SDK, since your existing SDK already
-includes the Android SDK and AVD Manager tool. To develop against Android 2.0,
-for example, you could just download the Android 2.0 platform into your existing
+includes the Android SDK and AVD Manager tool. To develop against Android 2.0.1,
+for example, you could just download the Android 2.0.1 platform into your existing
 SDK. </p>
 
 <p>Release notes for Android platforms and other SDK components are
 now available from the "SDK" tab, under "Downloadable SDK Components."</p>
 
 <ul>
-<li>Notes for the Android 2.0 platform are in the <a
-href="{@docRoot}sdk/android-2.0.html">Android 2.0, Release 1</a> document. </li>
+<li>Notes for the Android 2.0.1 platform are in the <a
+href="{@docRoot}sdk/android-2.0.1.html">Android 2.0.1, Release 1</a> document. </li>
 <li>You can find information about tools changes in the <a
 href="{@docRoot}sdk/tools-notes.html">SDK Tools Notes</a> and <a
 href="{@docRoot}sdk/adt-notes.html">ADT Plugin Notes</a>.</li>
@@ -76,11 +76,8 @@ value the application declares in its manifest. For more information, see
   </ul>
 
 <p>For details about the Android platforms included in the SDK &mdash; including
-bug fixes, features, and API changes &mdash; please read the Version Notes
-documents available at left. For a list of Android platforms included in this
-release, see the <a href="{@docRoot}sdk/1.6_r1/index.html">Download
-page</a>. Note that you can use the Android SDK and AVD Manager to download 
-additional platforms.</p>
+bug fixes, features, and API changes &mdash; please read the <a
+href="android-1.6.html">Android 1.6 version notes</a>.</p>
 
 <h3>Installation and Upgrade Notes</h3>
 
@@ -95,10 +92,6 @@ running the latest version of the Android platform, you are strongly encouraged
 to migrate the application to the new SDK, compile it using the platform
 matching the application's original API Level, and run it against the most
 current platform. </p>
-
-<p>If you're installing the Android SDK for the first time, please see
-the instructions in <a
-href="{@docRoot}sdk/1.6_r1/installing.html">Installing the SDK</a>.
 
 <h3>ADT Plugin for Eclipse</h3>
 
@@ -115,8 +108,8 @@ Plugin (0.9.3 or higher). </p>
 
 <p>The new version of ADT is downloadable from the usual remote update site or
 is separately downloadable as a .zip archive. For instructions on how to
-download the plugin, please see <a href="{@docRoot}sdk/1.6_r1/upgrading.html#UpdateAdt">Upgrading
-Your Eclipse Plugin</a>. </p>
+download the plugin, please see <a
+href="{@docRoot}sdk/eclipse-adt.html">Installing and Updating ADT</a>. </p>
 
 <h3>Android SDK and AVD Manager</h3>
 
@@ -208,11 +201,9 @@ properly, you do not need to upgrade to the new driver. However, we recommend
 upgrading if you have had any problems with the older driver or simply want
 to upgrade to the latest version.</p>
 
-<p>The USB driver files are located in the
-<code>&lt;SDK&gt;/usb_driver</code> directory. For driver installation or
+<p>For driver installation or
 upgrade instructions, see  <a
-href="{@docRoot}guide/developing/device.html#WinUsbDriver">Installing the WinUSB
-Driver</a>.</p>
+href="{@docRoot}sdk/win-usb.html">USB Driver for Windows</a>.</p>
 </p>
 
 <h3>Emulator Skins, Android 1.6 Platform</h3>
@@ -360,10 +351,8 @@ Android project.</li>
   </ul>
 
 <p>For details about the Android platforms included in the SDK &mdash; including
-bug fixes, features, and API changes &mdash; please read the Version Notes
-documents available at left. For a list of Android platforms included in this
-release, see the <a href="{@docRoot}sdk/1.5_r1/index.html">Download
-page</a>.</p>
+bug fixes, features, and API changes &mdash; please read the <a
+href="{@docRoot}sdk/android-1.5.html">Android 1.5 version notes</a>.</p>
 
 <h3>Installation and Upgrade Notes</h3>
 
@@ -378,10 +367,6 @@ running the latest version of the Android platform, you are strongly encouraged
 to migrate the application to the new SDK, compile it using the platform
 matching the application's original API Level, and run it against the most
 current platform. </p>
-
-<p>If you're installing the Android SDK for the first time, please see
-the instructions in <a
-href="{@docRoot}sdk/1.5_r1/installing.html">Installing the SDK</a>.
 
 <h3>SDK Add-Ons</h3>
 
@@ -457,11 +442,9 @@ these USB drivers that you can install, to let you develop on the device:</p>
 <li>USB driver for 64-bit Vista only</li>
 </ul>
 
-<p>The USB driver files are located in the
-<code>&lt;SDK&gt;/usb_driver</code> directory. For details and
-installation instructions, see <a
-href="{@docRoot}guide/developing/device.html#setting-up">Setting Up a
-Device for Development</a>.</p>
+<p>For driver installation or
+upgrade instructions, see  <a
+href="{@docRoot}sdk/win-usb.html">USB Driver for Windows</a>.</p>
 </p>
 
 <h3>Resolved Issues, Changes</h3>
@@ -508,7 +491,7 @@ as well as a few minor API changes from the 1.0 version. </p>
 
 <p>For details about the Android 1.1 system image included in the SDK &mdash;
 including bug fixes, features, and API changes &mdash; please read the <a
-href="{@docRoot}sdk/android-1.1.html">Android 1.1 Version Notes</a>.</p>
+href="{@docRoot}sdk/android-1.1.html">Android 1.1 version notes</a>.</p>
 
 <h3>App Versioning for Android 1.1</h3>
 
@@ -562,8 +545,7 @@ testing.</p>
 Plugin for Eclipse is <strong>0.8.0</strong>. If you are using a
 previous version of ADT, you should update to the latest version for use
 with this SDK. For information about how to update your ADT plugin, see
-<a href="{@docRoot}sdk/1.1_r1/upgrading.html#update-plugin">Upgrading
-the SDK</a>.</p>
+<a href="{@docRoot}sdk/eclipse-adt.html">Installing and Updating ADT</a>.</p>
 
 <h3>Installation and Upgrade Notes</h3>
 
@@ -571,10 +553,6 @@ the SDK</a>.</p>
 changes to your application are needed. You may want to wipe application
 user data (emulator option <code>-wipe-data</code>) when running your
 application on the Android 1.1 emulator for the first time.</p>
-
-<p>If you're installing the Android SDK for the first time, please see
-the instructions in <a
-href="{@docRoot}sdk/1.5_r1/installing.html">Installing the SDK</a>.
 
 <h3>Other Notes</h3>
 
@@ -626,7 +604,7 @@ Device for Development</a>.</p>
 classes, you can do so. However, you need to set up a custom JUnit configuration
 before your tests will run properly. For detailed information about how to set
 up the JUnit configuration, see the troubleshooting topic <a
-href="{@docRoot}guide/appendix/faq/troubleshooting.html#addjunit">Running a Junit test class
+href="{@docRoot}resources/faq/troubleshooting.html#addjunit">Running a Junit test class
 in Eclipse</a>.</li>
 </ul>
 
@@ -673,13 +651,7 @@ added.</p>
 Development Tools (ADT) Plugin for Eclipse is <strong>0.8.0</strong>. If you are
 using a previous version of ADT, you should update to the latest version for use
 with this SDK. For information about how to update your ADT plugin, see <a
-href="{@docRoot}sdk/1.0_r2/upgrading.html">Upgrading the SDK</a>.</p>
-
-<h3>Installation and Upgrade Notes</h3>
-
-<p>If you're installing the Android SDK for the first time, please see the
-instructions in <a href="{@docRoot}sdk/1.0_r2/installing.html">Installing the
-SDK</a>.
+href="{@docRoot}sdk/eclipse-adt.html">Installing and Updating ADT</a>.</p>
 
 <h3>Other Notes</h3>
 
@@ -764,8 +736,6 @@ to this release.</p>
 <h3>Installation and Upgrade Notes</h3>
 
 <p>If you've been developing an application using a previous SDK version and you want the application to run on Android-powered mobile devices, you must port the application to the Android 1.0 SDK. Please see <a href="{@docRoot}sdk/1.0_r1/upgrading.html">Upgrading the SDK</a> for detailed instructions on how to make the transition to this release.  Be sure to wipe application user data (emulator option <code>-wipe-data</code>) when running your application on the Android 1.0 SDK emulator.</p>
-
-<p>If you're installing the Android SDK for the first time, please see the instructions in <a href="{@docRoot}sdk/1.0_r1/installing.html">Installing the SDK</a>.
 
 <h3>Other Notes</h3>
 

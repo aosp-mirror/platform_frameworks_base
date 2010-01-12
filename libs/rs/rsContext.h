@@ -49,7 +49,7 @@ namespace renderscript {
 class Context
 {
 public:
-    Context(Device *, Surface *, bool useDepth);
+    Context(Device *, bool useDepth);
     ~Context();
 
     static pthread_key_t gThreadTLSKey;
@@ -94,7 +94,8 @@ public:
 
     void pause();
     void resume();
-    void setSurface(Surface *sur);
+    void setSurface(uint32_t w, uint32_t h, Surface *sur);
+    void setPriority(int32_t p);
 
     void assignName(ObjectBase *obj, const char *name, uint32_t len);
     void removeName(ObjectBase *obj);
@@ -104,7 +105,7 @@ public:
 
     uint32_t getMessageToClient(void *data, size_t *receiveLen, size_t bufferLen, bool wait);
     bool sendMessageToClient(void *data, uint32_t cmdID, size_t len, bool waitForSpace);
-    bool runScript(Script *s, uint32_t launchID);
+    uint32_t runScript(Script *s, uint32_t launchID);
 
     void initToClient();
     void deinitToClient();
@@ -161,6 +162,8 @@ public:
         bool mLogObjects;
     } props;
 
+    void dumpDebug() const;
+
     mutable const ObjectBase * mObjHead;
 
 protected:
@@ -189,12 +192,17 @@ protected:
 
     } mGL;
 
+    uint32_t mWidth;
+    uint32_t mHeight;
+    int32_t mThreadPriority;
+
     bool mRunning;
     bool mExit;
     bool mUseDepth;
     bool mPaused;
 
     pthread_t mThreadId;
+    pid_t mNativeThreadId;
 
     ObjectBaseRef<Script> mRootScript;
     ObjectBaseRef<ProgramFragment> mFragment;
@@ -219,7 +227,7 @@ private:
     void initEGL();
     void deinitEGL();
 
-    bool runRootScript();
+    uint32_t runRootScript();
 
     static void * threadProc(void *);
 
@@ -234,6 +242,9 @@ private:
     uint64_t mTimeLast;
     uint64_t mTimeFrame;
     uint64_t mTimeLastFrame;
+    uint32_t mTimeMSLastFrame;
+    uint32_t mTimeMSLastScript;
+    uint32_t mTimeMSLastSwap;
 };
 
 }

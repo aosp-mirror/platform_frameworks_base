@@ -35,7 +35,7 @@ import java.io.FileNotFoundException;
  */
 class HeadsetObserver extends UEventObserver {
     private static final String TAG = HeadsetObserver.class.getSimpleName();
-    private static final boolean LOG = false;
+    private static final boolean LOG = true;
 
     private static final String HEADSET_UEVENT_MATCH = "DEVPATH=/devices/virtual/switch/h2w";
     private static final String HEADSET_STATE_PATH = "/sys/class/switch/h2w/state";
@@ -43,14 +43,12 @@ class HeadsetObserver extends UEventObserver {
 
     private static final int BIT_HEADSET = (1 << 0);
     private static final int BIT_HEADSET_NO_MIC = (1 << 1);
-    private static final int BIT_TTY = (1 << 2);
-    private static final int BIT_FM_HEADSET = (1 << 3);
-    private static final int BIT_FM_SPEAKER = (1 << 4);
+    private static final int SUPPORTED_HEADSETS = (BIT_HEADSET|BIT_HEADSET_NO_MIC);
+    private static final int HEADSETS_WITH_MIC = BIT_HEADSET;
 
     private int mHeadsetState;
     private int mPrevHeadsetState;
     private String mHeadsetName;
-    private boolean mPendingIntent;
 
     private final Context mContext;
     private final WakeLock mWakeLock;  // held while there is a pending route change
@@ -102,56 +100,79 @@ class HeadsetObserver extends UEventObserver {
     }
 
     private synchronized final void update(String newName, int newState) {
-        if (newName != mHeadsetName || newState != mHeadsetState) {
-            boolean isUnplug = false;
-            if ( (mHeadsetState & BIT_HEADSET) > 0 || (mHeadsetState & BIT_HEADSET_NO_MIC) > 0) {
-                if ((newState & BIT_HEADSET) == 0 && (newState & BIT_HEADSET_NO_MIC) == 0)
-                    isUnplug = true;
-            }
-            mHeadsetName = newName;
-            mPrevHeadsetState = mHeadsetState;
-            mHeadsetState = newState;
-            mPendingIntent = true;
+        // Retain only relevant bits
+        int headsetState = newState & SUPPORTED_HEADSETS;
+        int newOrOld = headsetState | mHeadsetState;
+        // reject all suspect transitions: only accept state changes from:
+        // - a: 0 heaset to 1 headset
+        // - b: 1 headset to 0 headset
+        if (mHeadsetState == headsetState || ((newOrOld & (newOrOld - 1)) != 0)) {
+            return;
+        }
 
-            if (isUnplug) {
-                Intent intent = new Intent(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
-                mContext.sendBroadcast(intent);
+        mHeadsetName = newName;
+        mPrevHeadsetState = mHeadsetState;
+        mHeadsetState = headsetState;
 
-                // It can take hundreds of ms flush the audio pipeline after
-                // apps pause audio playback, but audio route changes are
-                // immediate, so delay the route change by 1000ms.
-                // This could be improved once the audio sub-system provides an
-                // interface to clear the audio pipeline.
-                mWakeLock.acquire();
-                mHandler.sendEmptyMessageDelayed(0, 1000);
-            } else {
-                sendIntent();
-                mPendingIntent = false;
+        if (headsetState == 0) {
+            Intent intent = new Intent(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
+            mContext.sendBroadcast(intent);
+
+            // It can take hundreds of ms flush the audio pipeline after
+            // apps pause audio playback, but audio route changes are
+            // immediate, so delay the route change by 1000ms.
+            // This could be improved once the audio sub-system provides an
+            // interface to clear the audio pipeline.
+            mWakeLock.acquire();
+            mHandler.sendMessageDelayed(mHandler.obtainMessage(0,
+                                                               mHeadsetState,
+                                                               mPrevHeadsetState,
+                                                               mHeadsetName),
+                                        1000);
+        } else {
+            sendIntents(mHeadsetState, mPrevHeadsetState, mHeadsetName);
+        }
+    }
+
+    private synchronized final void sendIntents(int headsetState, int prevHeadsetState, String headsetName) {
+        int allHeadsets = SUPPORTED_HEADSETS;
+        for (int curHeadset = 1; allHeadsets != 0; curHeadset <<= 1) {
+            if ((curHeadset & allHeadsets) != 0) {
+                sendIntent(curHeadset, headsetState, prevHeadsetState, headsetName);
+                allHeadsets &= ~curHeadset;
             }
         }
     }
 
-    private synchronized final void sendIntent() {
-        //  Pack up the values and broadcast them to everyone
-        Intent intent = new Intent(Intent.ACTION_HEADSET_PLUG);
-        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+    private final void sendIntent(int headset, int headsetState, int prevHeadsetState, String headsetName) {
+        if ((headsetState & headset) != (prevHeadsetState & headset)) {
+            //  Pack up the values and broadcast them to everyone
+            Intent intent = new Intent(Intent.ACTION_HEADSET_PLUG);
+            intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+            int state = 0;
+            int microphone = 0;
 
-        intent.putExtra("state", mHeadsetState);
-        intent.putExtra("name", mHeadsetName);
+            if ((headset & HEADSETS_WITH_MIC) != 0) {
+                microphone = 1;
+            }
+            if ((headsetState & headset) != 0) {
+                state = 1;
+            }
+            intent.putExtra("state", state);
+            intent.putExtra("name", headsetName);
+            intent.putExtra("microphone", microphone);
 
-        // TODO: Should we require a permission?
-        ActivityManagerNative.broadcastStickyIntent(intent, null);
+            if (LOG) Log.v(TAG, "Intent.ACTION_HEADSET_PLUG: state: "+state+" name: "+headsetName+" mic: "+microphone);
+            // TODO: Should we require a permission?
+            ActivityManagerNative.broadcastStickyIntent(intent, null);
+        }
     }
 
     private final Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
-            if (mPendingIntent) {
-                sendIntent();
-                mPendingIntent = false;
-            }
+            sendIntents(msg.arg1, msg.arg2, (String)msg.obj);
             mWakeLock.release();
         }
     };
-
 }

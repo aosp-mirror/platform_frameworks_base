@@ -133,8 +133,8 @@
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Audio non attivo"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"Audio attivo"</string>
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Modalità aereo"</string>
-    <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Modalità aereo attiva"</string>
-    <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Modalità aereo non attiva"</string>
+    <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Disattiva modalità aereo"</string>
+    <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Disattiva modalità aeereo"</string>
     <string name="safeMode" msgid="2788228061547930246">"Modalità provvisoria"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Sistema Android"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Servizi che prevedono un costo"</string>
@@ -446,10 +446,10 @@
     <string name="phoneTypeIsdn" msgid="8022453193171370337">"ISDN"</string>
     <string name="phoneTypeMain" msgid="6766137010628326916">"Principale"</string>
     <string name="phoneTypeOtherFax" msgid="8587657145072446565">"Altro fax"</string>
-    <string name="phoneTypeRadio" msgid="4093738079908667513">"Segnale cellulare"</string>
+    <string name="phoneTypeRadio" msgid="4093738079908667513">"Segnale radio"</string>
     <string name="phoneTypeTelex" msgid="3367879952476250512">"Telex"</string>
     <string name="phoneTypeTtyTdd" msgid="8606514378585000044">"TTY TDD"</string>
-    <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"Cellulare ufficio"</string>
+    <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"Cellulare lavoro"</string>
     <string name="phoneTypeWorkPager" msgid="649938731231157056">"Cercapersone ufficio"</string>
     <string name="phoneTypeAssistant" msgid="5596772636128562884">"Assistente"</string>
     <string name="phoneTypeMms" msgid="7254492275502768992">"MMS"</string>
@@ -520,6 +520,9 @@
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Accedi"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Password o nome utente non valido."</string>
     <string name="lockscreen_glogin_checking_password" msgid="6758890536332363322">"Controllo in corso..."</string>
+    <string name="lockscreen_unlock_label" msgid="737440483220667054">"Sblocca"</string>
+    <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Audio attivato"</string>
+    <string name="lockscreen_sound_off_label" msgid="996822825154319026">"Audio disattivato"</string>
     <string name="hour_ampm" msgid="4329881288269772723">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_cap_ampm" msgid="1829009197680861107">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Cancella"</string>

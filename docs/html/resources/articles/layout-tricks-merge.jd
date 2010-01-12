@@ -1,0 +1,198 @@
+page.title=Layout Tricks: Merging Layouts
+@jd:body
+
+<p>The <a href=""></a> articles showed you how to use the <code>&lt;include /&gt;</code> tag in XML layouts, to reuse and share your layout code. This article explains the <code>&lt;merge /&gt;</code> tag and how it complements the  <code>&lt;include /&gt;</code> tag.</p>
+
+<p>The <code>&lt;merge /&gt;</code> tag was created for the purpose of
+optimizing Android layouts by reducing the number of levels in view trees. It's
+easier to understand the problem this tag solves by looking at an example. The
+following XML layout declares a layout that shows an image with its title on top
+of it. The structure is fairly simple; a {@link android.widget.FrameLayout} is
+used to stack a {@link android.widget.TextView} on top of an 
+{@link android.widget.ImageView}:</p>
+
+<pre class="prettyprint">&lt;FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"&gt;
+
+    &lt;ImageView  
+        android:layout_width="fill_parent" 
+        android:layout_height="fill_parent" 
+    
+        android:scaleType="center"
+        android:src="&#64;drawable/golden_gate" /&gt;
+    
+    &lt;TextView
+        android:layout_width="wrap_content" 
+        android:layout_height="wrap_content" 
+        android:layout_marginBottom="20dip"
+        android:layout_gravity="center_horizontal|bottom"
+
+        android:padding="12dip"
+        
+        android:background="#AA000000"
+        android:textColor="#ffffffff"
+        
+        android:text="Golden Gate" /&gt;
+
+&lt;/FrameLayout&gt;</pre>
+
+<p>This layout renders nicely and nothing seems wrong with it:</p>
+
+<div style="text-align: center;"><img src="images/merge1.jpg" alt="A FrameLayout is used to overlay a title on top of an image"></div>
+
+<p>Things get more interesting when you inspect the result with <a
+href="{@docRoot}guide/developing/tools/hierarchy-viewer.html">HierarchyViewer</a>. 
+If you look closely at the resulting tree, you will notice that the
+<code>FrameLayout</code> defined in our XML file (highlighted in blue below) is
+the sole child of another <code>FrameLayout</code>:</p>
+
+<div style="text-align: center;"><img src="images/merge2.png" alt="A layout with only one child of same dimensions can be removed"></div>
+
+<p>Since our <code>FrameLayout</code> has the same dimension as its parent, by
+the virtue of using the <code>fill_parent</code> constraints, and does not
+define any background, extra padding or a gravity, it is <em>totally
+useless</em>. We only made the UI more complex for no good reason. But how could
+we get rid of this <code>FrameLayout</code>? After all, XML documents require a
+root tag and tags in XML layouts always represent view instances.</p>
+
+<p>That's where the <code>&lt;merge /&gt;</code> tag comes in handy. When the
+{@link android.view.LayoutInflater} encounters this tag, it skips it and adds
+the <code>&lt;merge /&gt;</code> children to the <code>&lt;merge /&gt;</code>
+parent. Confused? Let's rewrite our previous XML layout by replacing the
+<code>FrameLayout</code> with <code>&lt;merge /&gt;</code>:</p>
+
+<pre class="prettyprint">&lt;merge xmlns:android="http://schemas.android.com/apk/res/android"&gt;
+
+    &lt;ImageView  
+        android:layout_width="fill_parent" 
+        android:layout_height="fill_parent" 
+    
+        android:scaleType="center"
+        android:src="&#64;drawable/golden_gate" /&gt;
+    
+    &lt;TextView
+        android:layout_width="wrap_content" 
+        android:layout_height="wrap_content" 
+        android:layout_marginBottom="20dip"
+        android:layout_gravity="center_horizontal|bottom"
+
+        android:padding="12dip"
+        
+        android:background="#AA000000"
+        android:textColor="#ffffffff"
+        
+        android:text="Golden Gate" /&gt;
+
+&lt;/merge&gt;</pre>
+
+<p>With this new version, both the <code>TextView</code> and the
+<code>ImageView</code> will be added directly to the top-level
+<code>FrameLayout</code>. The result will be visually the same but the view
+hierarchy is simpler:</p>
+
+<div style="text-align: center;"><img src="images/merge3.png" alt="Optimized view hierarchy using the merge tag"></div>
+
+<p>Obviously, using <code>&lt;merge /&gt;</code> works in this case because the
+parent of an activity's content view is always a <code>FrameLayout</code>. You
+could not apply this trick if your layout was using a <code>LinearLayout</code>
+as its root tag for instance. The <code>&lt;merge /&gt;</code> can be useful in
+other situations though. For instance, it works perfectly when combined with the
+<code>&lt;include /&gt;</code> tag. You can also use <code>&lt;merge
+/&gt;</code> when you create a custom composite view. Let's see how we can use
+this tag to create a new view called <code>OkCancelBar</code> which simply shows
+two buttons with customizable labels. You can also <a
+href="http://progx.org/users/Gfx/android/MergeLayout.zip">download the complete
+source code of this example</a>. Here is the XML used to display this custom
+view on top of an image:</p>
+
+<pre class="prettyprint">&lt;merge
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:okCancelBar="http://schemas.android.com/apk/res/com.example.android.merge"&gt;
+
+    &lt;ImageView  
+        android:layout_width="fill_parent" 
+        android:layout_height="fill_parent" 
+    
+        android:scaleType="center"
+        android:src="&#64;drawable/golden_gate" /&gt;
+    
+    &lt;com.example.android.merge.OkCancelBar
+        android:layout_width="fill_parent" 
+        android:layout_height="wrap_content" 
+        android:layout_gravity="bottom"
+
+        android:paddingTop="8dip"
+        android:gravity="center_horizontal"
+        
+        android:background="#AA000000"
+        
+        okCancelBar:okLabel="Save"
+        okCancelBar:cancelLabel="Don't save" /&gt;
+
+&lt;/merge&gt;</pre>
+
+<p>This new layout produces the following result on a device:</p>
+
+<div style="text-align: center;"><img src="images/merge4.jpg" alt="Creating a custom view with the merge tag"></div>
+
+<p>The source code of <code>OkCancelBar</code> is very simple because the two
+buttons are defined in an external XML file, loaded using a
+<code>LayoutInflate</code>. As you can see in the following snippet, the XML
+layout <code>R.layout.okcancelbar</code> is inflated with the
+<code>OkCancelBar</code> as the parent:</p>
+
+<pre class="prettyprint">public class OkCancelBar extends LinearLayout {
+    public OkCancelBar(Context context, AttributeSet attrs) {
+        super(context, attrs);
+        setOrientation(HORIZONTAL);
+        setGravity(Gravity.CENTER);
+        setWeightSum(1.0f);
+        
+        LayoutInflater.from(context).inflate(R.layout.okcancelbar, this, true);
+        
+        TypedArray array = context.obtainStyledAttributes(attrs, R.styleable.OkCancelBar, 0, 0);
+        
+        String text = array.getString(R.styleable.OkCancelBar_okLabel);
+        if (text == null) text = "Ok";
+        ((Button) findViewById(R.id.okcancelbar_ok)).setText(text);
+        
+        text = array.getString(R.styleable.OkCancelBar_cancelLabel);
+        if (text == null) text = "Cancel";
+        ((Button) findViewById(R.id.okcancelbar_cancel)).setText(text);
+        
+        array.recycle();
+    }
+}</pre>
+
+<p>The two buttons are defined in the following XML layout. As you can see, we
+use the <code>&lt;merge /&gt;</code> tag to add the two buttons directly to the
+<code>OkCancelBar</code>. Each button is included from the same external XML
+layout file to make them easier to maintain; we simply override their id:</p>
+
+<pre class="prettyprint">&lt;merge xmlns:android="http://schemas.android.com/apk/res/android"&gt;
+    &lt;include
+        layout="&#64;layout/okcancelbar_button"
+        android:id="&#64;+id/okcancelbar_ok" /&gt;
+        
+    &lt;include
+        layout="&#64;layout/okcancelbar_button"
+        android:id="&#64;+id/okcancelbar_cancel" /&gt;
+&lt;/merge&gt;</pre>
+
+<p>We have created a flexible and easy to maintain custom view that generates 
+an efficient view hierarchy:</p>
+
+<div style="text-align: center;"><img src="images/merge5.png" alt="The resulting hierarchy is simple and efficient"></div>
+
+<p>The <code>&lt;merge /&gt;</code> tag is extremely useful and can do wonders
+in your code. However, it suffers from a couple of limitations:</p>
+
+<ul>
+<li><code>&lt;merge /&gt;</code> can only be used as the root tag of an XML layout</li>
+<li>When inflating a layout starting with a <code>&lt;merge /&gt;</code>, you <strong>must</strong> 
+specify a parent <code>ViewGroup</code> and you must set <code>attachToRoot</code> to 
+<code>true</code> (see the documentation for 
+{@link android.view.LayoutInflater#inflate(int, android.view.ViewGroup, boolean)} method)</li>
+</ul>
+

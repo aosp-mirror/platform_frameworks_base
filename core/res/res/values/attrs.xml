@@ -2138,6 +2138,8 @@
     </declare-styleable>
     <declare-styleable name="ViewFlipper">
         <attr name="flipInterval" format="integer" min="0" />
+        <!-- When true, automatically start animating -->
+        <attr name="autoStart" format="boolean" />
     </declare-styleable>
     <declare-styleable name="ViewSwitcher">
     </declare-styleable>
@@ -2892,12 +2894,9 @@
         For a more in-depth discussion of search configuration, please refer to
         {@link android.app.SearchManager}. -->
     <declare-styleable name="Searchable">
-        <!-- If provided, this icon will be shown in place of the label above the search box.
-             This is a reference to a drawable (icon) resource. Note that the application icon
-             is also used as an icon to the left of the search box and you cannot modify this
-             behavior, so including the icon attribute is unecessary and this may be
-             deprecated in the future.
-             <i>Optional attribute.</i> -->
+          <!--<strong>This is deprecated.</strong><br/>The default
+              application icon is now always used, so this attribute is
+              obsolete.-->
         <attr name="icon" />
         <!-- This is the user-displayed name of the searchable activity.  <i>Required
             attribute.</i> -->
@@ -2920,9 +2919,9 @@
           <!-- If set, this flag enables the display of the search target (label) within the
                search bar.  If neither bad mode is selected, no badge will be shown. -->
           <flag name="showSearchLabelAsBadge" value="0x04" />
-          <!-- If set, this flag enables the display of the search target (icon) within the
-               search bar.  (Note, overrides showSearchLabel)  If neither bad mode is selected,
-               no badge will be shown.-->
+          <!--<strong>This is deprecated.</strong><br/>The default
+              application icon is now always used, so this option is
+              obsolete.-->
           <flag name="showSearchIconAsBadge" value="0x08" />
           <!-- If set, this flag causes the suggestion column SUGGEST_COLUMN_INTENT_DATA to
                be considered as the text for suggestion query rewriting.  This should only
@@ -3483,11 +3482,11 @@
         <!-- Reference to a the wallpaper's thumbnail bitmap. -->
         <attr name="thumbnail" format="reference" />
 
-        <!-- Name of the author of a wallpaper, e.g. Google. -->
-        <attr name="wallpaperAuthor" format="reference" />
+        <!-- Name of the author of this component, e.g. Google. -->
+        <attr name="author" format="reference" />
 
-        <!-- Short description of the wallpaper's purpose or behavior. -->
-        <attr name="wallpaperDescription" format="reference" />
+        <!-- Short description of the component's purpose or behavior. -->
+        <attr name="description" />
     </declare-styleable>
 
     <!-- =============================== -->
@@ -3557,6 +3556,16 @@
         <attr name="detailColumn" format="string" />
         <!-- Flag indicating that detail should be built from SocialProvider. -->
         <attr name="detailSocialSummary" format="boolean" />
+    </declare-styleable>
+
+    <!-- =============================== -->
+    <!-- TabSelector class attributes -->
+    <!-- =============================== -->
+    <eat-comment />
+
+    <declare-styleable name="SlidingTab">
+        <!-- Use "horizontal" for a row, "vertical" for a column.  The default is horizontal. -->
+        <attr name="orientation" />
     </declare-styleable>
 
 </resources>

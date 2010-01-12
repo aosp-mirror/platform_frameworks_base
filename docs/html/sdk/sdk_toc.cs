@@ -61,26 +61,31 @@
       </li>
     </ul>
     <ul>
-      <li><a href="<?cs var:toroot ?>sdk/android-2.0.html">Android 2.0 Platform</a>
-      <span class="new">new!</span>
+      <li><a href="<?cs var:toroot ?>sdk/android-2.1.html">Android 2.1
+        Platform</a> <span class="new">new!</span>
       </li>
-      <li><a href="<?cs var:toroot ?>sdk/android-1.6.html">Android 1.6 Platform</a></li>
+      <li><a href="<?cs var:toroot ?>sdk/android-1.6.html">Android 1.6 
+        Platform</a></li>
       <li><a href="<?cs var:toroot ?>sdk/android-1.5.html">Android 1.5 Platform</a></li>
       <li class="toggle-list">
         <div><a href="#" onclick="toggle(this.parentNode.parentNode,true); return false;">Older Platforms</a></div>
         <ul> 
+          <li><a href="<?cs var:toroot ?>sdk/android-2.0.1.html">Android 2.0.1
+            Platform</a>
+          </li>
+          <li><a href="<?cs var:toroot ?>sdk/android-2.0.html">Android 2.0
+            Platform</a>
+          </li>
           <li><a href="<?cs var:toroot ?>sdk/android-1.1.html">Android 1.1 Platform</a>
           </li>
         </ul>
       </li>
     </ul>
     <ul>
-      <li><a href="<?cs var:toroot ?>sdk/tools-notes.html">SDK Tools, r3</a>
-      <span class="new">new!</span>
+      <li><a href="<?cs var:toroot ?>sdk/tools-notes.html">SDK Tools, r4</a>
       </li>
       <li><a href="<?cs var:toroot ?>sdk/win-usb.html">USB Driver for
-Windows, r2</a>
-      <span class="new">new!</span>
+Windows, r3</a> <span class="new">new!</span>
       </li>
     </ul>
   </li>
@@ -105,10 +110,8 @@ Windows, r2</a>
       <span style="display:none" class="zh-CN"></span>
       <span style="display:none" class="zh-TW"></span></a>
       </li>
-      </ul>
-      <ul>
       <li><a href="<?cs var:toroot ?>sdk/adt-notes.html">ADT <?cs var:adt.zip.version ?> 
-          <span class="new">new!</span></span></a>
+          </a>
       </li>
     </ul>
   </li>
@@ -140,7 +143,11 @@ Windows, r2</a>
     <ul>
       <li><a href="<?cs var:toroot ?>sdk/requirements.html">SDK System Requirements</a></li>
       <li><a href="<?cs var:toroot ?>sdk/terms.html">SDK Terms and Conditions</a></li>
-      <li><a href="<?cs var:toroot ?>sdk/RELEASENOTES.html">SDK Release Notes</a></li>
+      <li><a href="<?cs var:toroot ?>sdk/RELEASENOTES.html">SDK Release
+            Notes</a></li>
+      <li><a href="<?cs var:toroot ?>sdk/older_releases.html">SDK
+            Archives</a></li>
+
     </ul>
   </li>
 

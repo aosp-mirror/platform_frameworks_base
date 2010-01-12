@@ -500,7 +500,7 @@ public class WebView extends AbsoluteLayout
     private boolean mMinZoomScaleFixed = true;
 
     // initial scale in percent. 0 means using default.
-    private int mInitialScale = 0;
+    private int mInitialScaleInPercent = 0;
 
     // while in the zoom overview mode, the page's width is fully fit to the
     // current window. The page is alive, in another words, you can click to
@@ -1525,7 +1525,7 @@ public class WebView extends AbsoluteLayout
         }
         nativeClearCursor(); // start next trackball movement from page edge
         if (bottom) {
-            return pinScrollTo(mScrollX, mContentHeight, true, 0);
+            return pinScrollTo(mScrollX, computeVerticalScrollRange(), true, 0);
         }
         // Page down.
         int h = getHeight();
@@ -1595,7 +1595,7 @@ public class WebView extends AbsoluteLayout
      * @param scaleInPercent The initial scale in percent.
      */
     public void setInitialScale(int scaleInPercent) {
-        mInitialScale = scaleInPercent;
+        mInitialScaleInPercent = scaleInPercent;
     }
 
     /**
@@ -2730,7 +2730,7 @@ public class WebView extends AbsoluteLayout
     */
     @Deprecated
     public static synchronized PluginList getPluginList() {
-        return null;
+        return new PluginList();
     }
 
    /**
@@ -3615,6 +3615,13 @@ public class WebView extends AbsoluteLayout
             mMinZoomScale = Math.min(1.0f, (float) getViewWidth()
                     / (mDrawHistory ? mHistoryPicture.getWidth()
                             : mZoomOverviewWidth));
+            if (mInitialScaleInPercent > 0) {
+                // limit the minZoomScale to the initialScale if it is set
+                float initialScale = mInitialScaleInPercent / 100.0f;
+                if (mMinZoomScale > initialScale) {
+                    mMinZoomScale = initialScale;
+                }
+            }
         }
 
         // we always force, in case our height changed, in which case we still
@@ -4297,7 +4304,7 @@ public class WebView extends AbsoluteLayout
 
     private int computeMaxScrollY() {
         int maxContentH = computeVerticalScrollRange() + getTitleHeight();
-        return Math.max(maxContentH - getHeight(), getTitleHeight());
+        return Math.max(maxContentH - getViewHeightWithTitle(), getTitleHeight());
     }
 
     public void flingScroll(int vx, int vy) {
@@ -4614,6 +4621,7 @@ public class WebView extends AbsoluteLayout
             View v = mWebTextView;
             int x = viewToContentX((v.getLeft() + v.getRight()) >> 1);
             int y = viewToContentY((v.getTop() + v.getBottom()) >> 1);
+            displaySoftKeyboard(true);
             nativeTextInputMotionUp(x, y);
         }
     }
@@ -4967,7 +4975,9 @@ public class WebView extends AbsoluteLayout
                     WebViewCore.RestoreState restoreState = draw.mRestoreState;
                     if (restoreState != null) {
                         mInZoomOverview = false;
-                        mLastScale = restoreState.mTextWrapScale;
+                        mLastScale = mInitialScaleInPercent > 0
+                                ? mInitialScaleInPercent / 100.0f
+                                        : restoreState.mTextWrapScale;
                         if (restoreState.mMinScale == 0) {
                             if (restoreState.mMobileSite) {
                                 if (draw.mMinPrefWidth >

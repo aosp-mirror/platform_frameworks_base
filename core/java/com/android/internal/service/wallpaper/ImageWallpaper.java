@@ -24,6 +24,7 @@ import android.graphics.drawable.Drawable;
 import android.os.HandlerThread;
 import android.os.Process;
 import android.service.wallpaper.WallpaperService;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.content.Context;
@@ -134,8 +135,8 @@ public class ImageWallpaper extends WallpaperService {
                     final Drawable background = mBackground;
                     final int dw = frame.width();
                     final int dh = frame.height();
-                    final int bw = mBackground.getIntrinsicWidth();
-                    final int bh = mBackground.getIntrinsicHeight();
+                    final int bw = background != null ? background.getIntrinsicWidth() : 0;
+                    final int bh = background != null ? background.getIntrinsicHeight() : 0;
                     final int availw = dw-bw;
                     final int availh = dh-bh;
                     int xPixels = availw < 0 ? (int)(availw*mXOffset+.5f) : (availw/2);
@@ -148,7 +149,9 @@ public class ImageWallpaper extends WallpaperService {
                         c.drawColor(0xff000000);
                         c.restore();
                     }
-                    background.draw(c);
+                    if (background != null) {
+                        background.draw(c);
+                    }
                 }
                 sh.unlockCanvasAndPost(c);
             }
@@ -156,7 +159,11 @@ public class ImageWallpaper extends WallpaperService {
 
         void updateWallpaper() {
             synchronized (mLock) {
-                mBackground = mWallpaperManager.getFastDrawable();
+                try {
+                    mBackground = mWallpaperManager.getFastDrawable();
+                } catch (RuntimeException e) {
+                    Log.w("ImageWallpaper", "Unable to load wallpaper!", e);
+                }
             }
         }
     }

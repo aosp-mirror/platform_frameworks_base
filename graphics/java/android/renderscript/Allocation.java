@@ -40,27 +40,36 @@ public class Allocation extends BaseObj {
     }
 
     public void uploadToTexture(int baseMipLevel) {
+        mRS.validate();
+        mRS.validateSurface();
         mRS.nAllocationUploadToTexture(mID, baseMipLevel);
     }
 
     public void uploadToBufferObject() {
+        mRS.validate();
+        mRS.validateSurface();
         mRS.nAllocationUploadToBufferObject(mID);
     }
 
     public void data(int[] d) {
+        mRS.validate();
         subData1D(0, mType.getElementCount(), d);
     }
     public void data(short[] d) {
+        mRS.validate();
         subData1D(0, mType.getElementCount(), d);
     }
     public void data(byte[] d) {
+        mRS.validate();
         subData1D(0, mType.getElementCount(), d);
     }
     public void data(float[] d) {
+        mRS.validate();
         subData1D(0, mType.getElementCount(), d);
     }
 
     private void data1DChecks(int off, int count, int len, int dataSize) {
+        mRS.validate();
         if((off < 0) || (count < 1) || ((off + count) > mType.getElementCount())) {
             throw new IllegalArgumentException("Offset or Count out of bounds.");
         }
@@ -93,30 +102,37 @@ public class Allocation extends BaseObj {
 
 
     public void subData2D(int xoff, int yoff, int w, int h, int[] d) {
+        mRS.validate();
         mRS.nAllocationSubData2D(mID, xoff, yoff, w, h, d, d.length * 4);
     }
 
     public void subData2D(int xoff, int yoff, int w, int h, float[] d) {
+        mRS.validate();
         mRS.nAllocationSubData2D(mID, xoff, yoff, w, h, d, d.length * 4);
     }
 
     public void readData(int[] d) {
+        mRS.validate();
         mRS.nAllocationRead(mID, d);
     }
 
     public void readData(float[] d) {
+        mRS.validate();
         mRS.nAllocationRead(mID, d);
     }
 
     public void data(Object o) {
+        mRS.validate();
         mRS.nAllocationSubDataFromObject(mID, mType, 0, o);
     }
 
     public void read(Object o) {
+        mRS.validate();
         mRS.nAllocationSubReadFromObject(mID, mType, 0, o);
     }
 
     public void subData(int offset, Object o) {
+        mRS.validate();
         mRS.nAllocationSubDataFromObject(mID, mType, offset, o);
     }
 
@@ -127,27 +143,33 @@ public class Allocation extends BaseObj {
         }
 
         public void setConstraint(Dimension dim, int value) {
+            mRS.validate();
             mRS.nAdapter1DSetConstraint(mID, dim.mID, value);
         }
 
         public void data(int[] d) {
+            mRS.validate();
             mRS.nAdapter1DData(mID, d);
         }
 
         public void data(float[] d) {
+            mRS.validate();
             mRS.nAdapter1DData(mID, d);
         }
 
         public void subData(int off, int count, int[] d) {
+            mRS.validate();
             mRS.nAdapter1DSubData(mID, off, count, d);
         }
 
         public void subData(int off, int count, float[] d) {
+            mRS.validate();
             mRS.nAdapter1DSubData(mID, off, count, d);
         }
     }
 
     public Adapter1D createAdapter1D() {
+        mRS.validate();
         int id = mRS.nAdapter1DCreate();
         if (id != 0) {
             mRS.nAdapter1DBindAllocation(id, mID);
@@ -163,27 +185,33 @@ public class Allocation extends BaseObj {
         }
 
         public void setConstraint(Dimension dim, int value) {
+            mRS.validate();
             mRS.nAdapter2DSetConstraint(mID, dim.mID, value);
         }
 
         public void data(int[] d) {
+            mRS.validate();
             mRS.nAdapter2DData(mID, d);
         }
 
         public void data(float[] d) {
+            mRS.validate();
             mRS.nAdapter2DData(mID, d);
         }
 
         public void subData(int xoff, int yoff, int w, int h, int[] d) {
+            mRS.validate();
             mRS.nAdapter2DSubData(mID, xoff, yoff, w, h, d);
         }
 
         public void subData(int xoff, int yoff, int w, int h, float[] d) {
+            mRS.validate();
             mRS.nAdapter2DSubData(mID, xoff, yoff, w, h, d);
         }
     }
 
     public Adapter2D createAdapter2D() {
+        mRS.validate();
         int id = mRS.nAdapter2DCreate();
         if (id != 0) {
             mRS.nAdapter2DBindAllocation(id, mID);
@@ -202,6 +230,7 @@ public class Allocation extends BaseObj {
     static public Allocation createTyped(RenderScript rs, Type type)
         throws IllegalArgumentException {
 
+        rs.validate();
         if(type.mID == 0) {
             throw new IllegalStateException("Bad Type");
         }
@@ -212,6 +241,7 @@ public class Allocation extends BaseObj {
     static public Allocation createSized(RenderScript rs, Element e, int count)
         throws IllegalArgumentException {
 
+        rs.validate();
         Type.Builder b = new Type.Builder(rs, e);
         b.add(Dimension.X, count);
         Type t = b.create();
@@ -226,6 +256,7 @@ public class Allocation extends BaseObj {
     static public Allocation createFromBitmap(RenderScript rs, Bitmap b, Element dstFmt, boolean genMips)
         throws IllegalArgumentException {
 
+        rs.validate();
         int id = rs.nAllocationCreateFromBitmap(dstFmt.mID, genMips, b);
         return new Allocation(id, rs, null);
     }
@@ -233,6 +264,7 @@ public class Allocation extends BaseObj {
     static public Allocation createFromBitmapBoxed(RenderScript rs, Bitmap b, Element dstFmt, boolean genMips)
         throws IllegalArgumentException {
 
+        rs.validate();
         int id = rs.nAllocationCreateFromBitmapBoxed(dstFmt.mID, genMips, b);
         return new Allocation(id, rs, null);
     }
@@ -240,6 +272,7 @@ public class Allocation extends BaseObj {
     static public Allocation createFromBitmapResource(RenderScript rs, Resources res, int id, Element dstFmt, boolean genMips)
         throws IllegalArgumentException {
 
+        rs.validate();
         InputStream is = null;
         try {
             final TypedValue value = new TypedValue();

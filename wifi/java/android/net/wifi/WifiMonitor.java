@@ -255,6 +255,8 @@ public class WifiMonitor {
                 mWifiStateTracker.notifyDriverStopped();
             } else if (state.equals("STARTED")) {
                 mWifiStateTracker.notifyDriverStarted();
+            } else if (state.equals("HANGED")) {
+                mWifiStateTracker.notifyDriverHung();
             }
         }
 

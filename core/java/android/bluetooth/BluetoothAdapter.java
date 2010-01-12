@@ -130,13 +130,13 @@ public final class BluetoothAdapter {
 
     /**
      * Activity Action: Show a system activity that requests discoverable mode.
-     * <p>This activity will also request the user to turn on Bluetooth if it
+     * This activity will also request the user to turn on Bluetooth if it
      * is not currently enabled.
      * <p>Discoverable mode is equivalent to {@link
      * #SCAN_MODE_CONNECTABLE_DISCOVERABLE}. It allows remote devices to see
      * this Bluetooth adapter when they perform a discovery.
-     * <p>For privacy, Android is not by default discoverable.
-     * <p>The sender can optionally use extra field {@link
+     * <p>For privacy, Android is not discoverable by default.
+     * <p>The sender of this Intent can optionally use extra field {@link
      * #EXTRA_DISCOVERABLE_DURATION} to request the duration of
      * discoverability. Currently the default duration is 120 seconds, and
      * maximum duration is capped at 300 seconds for each request.
@@ -147,7 +147,8 @@ public final class BluetoothAdapter {
      * {@link android.app.Activity#RESULT_CANCELED} if the user rejected
      * discoverability or an error has occurred.
      * <p>Applications can also listen for {@link #ACTION_SCAN_MODE_CHANGED}
-     * for global notification whenever the scan mode changes.
+     * for global notification whenever the scan mode changes. For example, an
+     * application can be notified when the device has ended discoverability.
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
@@ -369,9 +370,17 @@ public final class BluetoothAdapter {
     }
 
     /**
-     * Turn on the local Bluetooth adapter.
+     * Turn on the local Bluetooth adapter&mdash;do not use without explicit
+     * user action to turn on Bluetooth.
      * <p>This powers on the underlying Bluetooth hardware, and starts all
      * Bluetooth system services.
+     * <p class="caution"><strong>Bluetooth should never be enabled without
+     * direct user consent</strong>. If you want to turn on Bluetooth in order
+     * to create a wireless connection, you should use the {@link
+     * #ACTION_REQUEST_ENABLE} Intent, which will raise a dialog that requests
+     * user permission to turn on Bluetooth. The {@link #enable()} method is
+     * provided only for applications that include a user interface for changing
+     * system settings, such as a "power manager" app.</p>
      * <p>This is an asynchronous call: it will return immediately, and
      * clients should listen for {@link #ACTION_STATE_CHANGED}
      * to be notified of subsequent adapter state changes. If this call returns
@@ -381,7 +390,8 @@ public final class BluetoothAdapter {
      * #STATE_ON}. If this call returns false then there was an
      * immediate problem that will prevent the adapter from being turned on -
      * such as Airplane mode, or the adapter is already turned on.
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}
+     * <p>Requires the {@link android.Manifest.permission#BLUETOOTH_ADMIN}
+     * permission
      *
      * @return true to indicate adapter startup has begun, or false on
      *         immediate error
@@ -394,9 +404,14 @@ public final class BluetoothAdapter {
     }
 
     /**
-     * Turn off the local Bluetooth adapter.
+     * Turn off the local Bluetooth adapter&mdash;do not use without explicit
+     * user action to turn off Bluetooth.
      * <p>This gracefully shuts down all Bluetooth connections, stops Bluetooth
      * system services, and powers down the underlying Bluetooth hardware.
+     * <p class="caution"><strong>Bluetooth should never be disbled without
+     * direct user consent</strong>. The {@link #disable()} method is
+     * provided only for applications that include a user interface for changing
+     * system settings, such as a "power manager" app.</p>
      * <p>This is an asynchronous call: it will return immediately, and
      * clients should listen for {@link #ACTION_STATE_CHANGED}
      * to be notified of subsequent adapter state changes. If this call returns
@@ -406,7 +421,8 @@ public final class BluetoothAdapter {
      * #STATE_ON}. If this call returns false then there was an
      * immediate problem that will prevent the adapter from being turned off -
      * such as the adapter already being turned off.
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}
+     * <p>Requires the {@link android.Manifest.permission#BLUETOOTH_ADMIN}
+     * permission
      *
      * @return true to indicate adapter shutdown has begun, or false on
      *         immediate error
@@ -549,7 +565,10 @@ public final class BluetoothAdapter {
      * remote Bluetooth devices should not be attempted while discovery is in
      * progress, and existing connections will experience limited bandwidth
      * and high latency. Use {@link #cancelDiscovery()} to cancel an ongoing
-     * discovery.
+     * discovery. Discovery is not managed by the Activity,
+     * but is run as a system service, so an application should always call
+     * {@link BluetoothAdapter#cancelDiscovery()} even if it
+     * did not directly request a discovery, just to be sure.
      * <p>Device discovery will only find remote devices that are currently
      * <i>discoverable</i> (inquiry scan enabled). Many Bluetooth devices are
      * not discoverable by default, and need to be entered into a special mode.
@@ -567,6 +586,13 @@ public final class BluetoothAdapter {
     /**
      * Cancel the current device discovery process.
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}.
+     * <p>Because discovery is a heavyweight precedure for the Bluetooth
+     * adapter, this method should always be called before attempting to connect
+     * to a remote device with {@link
+     * android.bluetooth.BluetoothSocket#connect()}. Discovery is not managed by
+     * the  Activity, but is run as a system service, so an application should
+     * always call cancel discovery even if it did not directly request a
+     * discovery, just to be sure.
      *
      * @return true on success, false on error
      */

@@ -1434,6 +1434,12 @@
 
     <!-- Displayed in a progress dialog while a username and password are being checked. -->
     <string name="lockscreen_glogin_checking_password">Checking...</string>
+    <!-- Displayed on lock screen's left tab - unlock -->
+    <string name="lockscreen_unlock_label">Unlock</string>
+    <!-- Displayed on lock screen's right tab - turn sound on -->
+    <string name="lockscreen_sound_on_label">Sound on</string>
+    <!-- Displayed on lock screen's right tab - turn sound off -->
+    <string name="lockscreen_sound_off_label">Sound off</string>
 
     <!-- A format string for 12-hour time of day, just the hour, not the minute, with lower-case "am" or "pm" (example: "3pm"). -->
     <string name="hour_ampm">"<xliff:g id="hour" example="3">%-l</xliff:g><xliff:g id="ampm" example="pm">%P</xliff:g>"</string>

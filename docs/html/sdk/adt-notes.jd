@@ -16,16 +16,40 @@ android.com/sdk/adt-notes.html</a>.</p>
 feature. For more information, see <a
 href="{@docRoot}sdk/eclipse-adt.html">Installing and Updating ADT</a>. </p>
 
-<h2 id="0.9.4">ADT 0.9.4</h2>
 
-<p>ADT 0.9.4 provides several new features for developers, as described below.
+<h2 id="0.9.5">ADT 0.9.5</h2>
+
+<p>December 2009. ADT 0.9.5 provides several bug fixes for developers, 
+as described below.
 </p>
 
 <h3>Dependencies</h3>
 
-<p>ADT 0.9.4 requires features provided in SDK Tools, Revision 3. If you install
+<p>ADT 0.9.5 requires features provided in SDK Tools r4. If you install
+ADT 0.9.5, which is highly recommended, you should use the Android SDK and AVD
+Manager to download SDK Tools r4 or higher into your SDK. For more information,
+see <a href="{@docRoot}sdk/adding-components.html">Adding SDK Components</a>.
+</p>
+
+<h3>General Notes</h3>
+<ul>
+<li>AVD Launch dialog now shows scale value.</li>
+<li>Fixes potential NPE in SDK Manager on AVD launch, for older AVD with no skin name specified.</li>
+<li>Fixes XML validation issue in on older Java versions.</li>
+<li>.apk packaging now properly ignores vi swap files as well as hidden files.</li>
+</ul>
+
+
+<h2 id="0.9.4">ADT 0.9.4</h2>
+
+<p>October 2009. ADT 0.9.4 provides several new features for developers, as described below.
+</p>
+
+<h3>Dependencies</h3>
+
+<p>ADT 0.9.4 requires features provided in SDK Tools, revision 3. If you install
 ADT 0.9.4, which is highly recommended, you should use the Android SDK and AVD
-Manager to download SDK Tools 3 or higher into your SDK. For more information,
+Manager to download SDK Tools r3 or higher into your SDK. For more information,
 see <a href="{@docRoot}sdk/adding-components.html">Adding SDK Components</a>.
 </p>
 

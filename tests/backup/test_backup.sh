@@ -18,10 +18,12 @@
 #export DRY_RUN="echo"
 source test_backup_common.sh
 
-# wipe prior backup data for packages
+# figure out what packages are participating in backup
 b_pkgs=$(a shell dumpsys backup | \
-         ruby -ne 'print($1+" ") if $_ =~ /^\s*ApplicationInfo\S+ (.+?)\}/')
+         ruby -e 'p_stanza = STDIN.read.match(/Participants:.*?(?=Ever)/m)[0]
+                  puts p_stanza.scan(/^    (.+?)\s*$/).flatten.join(" ")')
 
+# wipe data for the package participating in backup
 for pkg in $b_pkgs; do
     a shell bmgr wipe "$pkg"
 done
@@ -36,7 +38,7 @@ adb_root
 set -x
 
 # set the transport
-a shell bmgr transport com.google.android.backup/.BackupTransportService
+#a shell bmgr transport com.google.android.backup/.BackupTransportService
 
 # load up the three files
 a shell \

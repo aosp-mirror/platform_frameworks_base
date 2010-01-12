@@ -311,9 +311,9 @@
     <string name="permdesc_flashlight" msgid="6433045942283802309">"Uygulamaların flaş ışığını denetlemesine izin verir."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"donanımı test et"</string>
     <string name="permdesc_hardware_test" msgid="3668894686500081699">"Uygulamanın donanım testi için çeşitli çevre birimlerini denetlemesine izin verir."</string>
-    <string name="permlab_callPhone" msgid="3925836347681847954">"telefon numaralarını doğrudan ara"</string>
-    <string name="permdesc_callPhone" msgid="3369867353692722456">"Uygulamanın müdahaleniz olmadan telefon numaralarını aramasına izin verir. Kötü amaçlı uygulamalar, telefon faturanızda beklenmedik görüşmeler çıkmasına neden olabilir. Bu işlev, uygulamanın acil numara aramasına izin vermez."</string>
-    <string name="permlab_callPrivileged" msgid="4198349211108497879">"herhangi bir telefon numarasını doğrudan ara"</string>
+    <string name="permlab_callPhone" msgid="3925836347681847954">"telefon numaralarına doğrudan çağrı yap"</string>
+    <string name="permdesc_callPhone" msgid="3369867353692722456">"Uygulamanın müdahaleniz olmadan telefon numaralarına çağrı yapmasına izin verir. Kötü amaçlı uygulamalar, telefon faturanızda beklenmedik görüşmeler çıkmasına neden olabilir. Bu işlev, uygulamanın acil numaralara çağrı yapmasına izin vermez."</string>
+    <string name="permlab_callPrivileged" msgid="4198349211108497879">"herhangi bir telefon numarasına doğrudan çağrı yap"</string>
     <string name="permdesc_callPrivileged" msgid="244405067160028452">"Uygulamanın, siz müdahale etmeden acil numaralar dahil herhangi bir numarayı aramasına izin verir. Kötü amaçlı uygulamalar acil servisleri gereksiz yere ve yasal olmayan şekilde arayabilir."</string>
     <string name="permlab_performCdmaProvisioning" msgid="5604848095315421425">"CDMA telefon kurulumunu doğrudan başlat"</string>
     <string name="permdesc_performCdmaProvisioning" msgid="6457447676108355905">"Uygulamaya CDMA hazırlığını başlatma izni verir. Kötü niyetli uygulamalar CDMA hazırlığını gereksiz yere başlatabilir"</string>
@@ -520,6 +520,9 @@
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Oturum aç"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Geçersiz kullanıcı adı veya şifre."</string>
     <string name="lockscreen_glogin_checking_password" msgid="6758890536332363322">"Kontrol ediliyor..."</string>
+    <string name="lockscreen_unlock_label" msgid="737440483220667054">"Kilit Aç"</string>
+    <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Sesi aç"</string>
+    <string name="lockscreen_sound_off_label" msgid="996822825154319026">"Sesi kapat"</string>
     <string name="hour_ampm" msgid="4329881288269772723">"<xliff:g id="HOUR">%-l</xliff:g> <xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_cap_ampm" msgid="1829009197680861107">"<xliff:g id="HOUR">%-l</xliff:g> <xliff:g id="AMPM">%p</xliff:g>"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Temizle"</string>
@@ -655,7 +658,7 @@
     <string name="elapsed_time_short_format_mm_ss" msgid="4431555943828711473">"<xliff:g id="MINUTES">%1$02d</xliff:g>:<xliff:g id="SECONDS">%2$02d</xliff:g>"</string>
     <string name="elapsed_time_short_format_h_mm_ss" msgid="1846071997616654124">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
     <string name="selectAll" msgid="6876518925844129331">"Tümünü seç"</string>
-    <string name="selectText" msgid="3889149123626888637">"Metni seç"</string>
+    <string name="selectText" msgid="3889149123626888637">"Metin seç"</string>
     <string name="stopSelectingText" msgid="4157931463872320996">"Metin seçmeyi durdur"</string>
     <string name="cut" msgid="3092569408438626261">"Kes"</string>
     <string name="cutAll" msgid="2436383270024931639">"Tümünü kes"</string>

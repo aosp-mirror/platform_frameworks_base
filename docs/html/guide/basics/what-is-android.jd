@@ -3,7 +3,7 @@ page.title=What is Android?
 
 <p>Android is a software stack for mobile devices that includes an operating
 system, middleware and key applications. The <a
-href="http://code.google.com/android/download.html">Android SDK</a>
+href="http://developer.android.com/sdk/index.html">Android SDK</a>
 provides the tools and APIs necessary to begin developing applications on the
 Android platform using the Java programming language.</p>
 
@@ -48,6 +48,12 @@ others. All applications are written using the Java programming language.</p>
 <a name="application_framework" id="application_framework"></a>
 <h2>Application Framework</h2>
 
+<p>By providing an open development platform, Android
+offers developers the ability to build extremely rich and innovative
+applications. Developers are free to take advantage of the
+device hardware, access location information, run background services, set alarms,
+add notifications to the status bar, and much, much more. </p>
+
 <p>Developers have full access to the same framework APIs used by the core
 applications. The application architecture is designed to simplify the reuse
 of components; any application can publish its capabilities and any other
@@ -58,7 +64,7 @@ to be replaced by the user.</p>
 <p>Underlying all applications is a set of services and systems, including:
 <ul>
     <li>A rich and extensible set of <a
-    href="{@docRoot}guide/tutorials/views/index.html">Views</a> that can be used to
+    href="{@docRoot}resources/tutorials/views/index.html">Views</a> that can be used to
     build an application, including lists, grids, text boxes, buttons, and even
     an embeddable web browser</li>
     <li><a href="{@docRoot}guide/topics/providers/content-providers.html">Content
@@ -74,7 +80,7 @@ to be replaced by the user.</p>
 </ul>
 
 <p>For more details and a walkthrough of an application, see the <a
-href="{@docRoot}guide/tutorials/notepad/index.html">Notepad Tutorial</a>.</p>
+href="{@docRoot}resources/tutorials/notepad/index.html">Notepad Tutorial</a>.</p>
     
 <a name="libraries" id="libraries"></a>
 <h2>Libraries</h2>

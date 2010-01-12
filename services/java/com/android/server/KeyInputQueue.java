@@ -56,7 +56,7 @@ public abstract class KeyInputQueue {
      * Turn on some hacks we have to improve the touch interaction with a
      * certain device whose screen currently is not all that good.
      */
-    static final boolean BAD_TOUCH_HACK = true;
+    static boolean BAD_TOUCH_HACK = false;
     
     private static final String EXCLUDED_DEVICES_PATH = "etc/excluded-input-devices.xml";
 
@@ -282,6 +282,9 @@ public abstract class KeyInputQueue {
             lt = new LatencyTimer(100, 1000);
         }
 
+        BAD_TOUCH_HACK = context.getResources().getBoolean(
+                com.android.internal.R.bool.config_filterTouchEvents);
+        
         mHapticFeedbackCallback = hapticFeedbackCallback;
         
         readExcludedDevices();
@@ -368,6 +371,40 @@ public abstract class KeyInputQueue {
         }
     }
     
+    public int getTrackballScancodeState(int code) {
+        synchronized (mFirst) {
+            final int N = mDevices.size();
+            for (int i=0; i<N; i++) {
+                InputDevice dev = mDevices.valueAt(i);
+                if ((dev.classes&RawInputEvent.CLASS_TRACKBALL) != 0) {
+                    int res = nativeGetScancodeState(dev.id, code);
+                    if (res > 0) {
+                        return res;
+                    }
+                }
+            }
+        }
+        
+        return 0;
+    }
+    
+    public int getDPadScancodeState(int code) {
+        synchronized (mFirst) {
+            final int N = mDevices.size();
+            for (int i=0; i<N; i++) {
+                InputDevice dev = mDevices.valueAt(i);
+                if ((dev.classes&RawInputEvent.CLASS_DPAD) != 0) {
+                    int res = nativeGetScancodeState(dev.id, code);
+                    if (res > 0) {
+                        return res;
+                    }
+                }
+            }
+        }
+        
+        return 0;
+    }
+    
     public int getKeycodeState(int code) {
         synchronized (mFirst) {
             VirtualKey vk = mPressedVirtualKey;
@@ -390,6 +427,40 @@ public abstract class KeyInputQueue {
             }
             return nativeGetKeycodeState(deviceId, code);
         }
+    }
+    
+    public int getTrackballKeycodeState(int code) {
+        synchronized (mFirst) {
+            final int N = mDevices.size();
+            for (int i=0; i<N; i++) {
+                InputDevice dev = mDevices.valueAt(i);
+                if ((dev.classes&RawInputEvent.CLASS_TRACKBALL) != 0) {
+                    int res = nativeGetKeycodeState(dev.id, code);
+                    if (res > 0) {
+                        return res;
+                    }
+                }
+            }
+        }
+        
+        return 0;
+    }
+    
+    public int getDPadKeycodeState(int code) {
+        synchronized (mFirst) {
+            final int N = mDevices.size();
+            for (int i=0; i<N; i++) {
+                InputDevice dev = mDevices.valueAt(i);
+                if ((dev.classes&RawInputEvent.CLASS_DPAD) != 0) {
+                    int res = nativeGetKeycodeState(dev.id, code);
+                    if (res > 0) {
+                        return res;
+                    }
+                }
+            }
+        }
+        
+        return 0;
     }
     
     public static native String getDeviceName(int deviceId);

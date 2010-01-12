@@ -31,7 +31,7 @@ or scale them up by a factor of 1.5 (high dpi screens).
 The screen density is expressed as dots-per-inch (dpi).</p>
 
 <p>For more information, see 
-<a href="{@docRoot}guide/practices/screens_suppport.html">Multiple Screens Support</a>.</p>
+<a href="{@docRoot}guide/practices/screens_support.html">Multiple Screens Support</a>.</p>
 
 
 <dt>attributes:</dt>
@@ -84,7 +84,7 @@ The screen density is expressed as dots-per-inch (dpi).</p>
 <dt>see also:</dt>
 <dd>
   <ul>
-    <li><a href="{@docRoot}guide/practices/screens_suppport.html">Multiple Screens Support</a></li>
+    <li><a href="{@docRoot}guide/practices/screens_support.html">Multiple Screens Support</a></li>
     <li>{@link android.util.DisplayMetrics}</li>
   </ul>
 </dd>

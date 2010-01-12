@@ -44,9 +44,16 @@ import android.view.ViewRoot;
 import android.view.WindowManager;
 import android.view.WindowManagerImpl;
 
+import java.util.ArrayList;
+
 /**
  * A wallpaper service is responsible for showing a live wallpaper behind
- * applications that would like to sit on top of it.
+ * applications that would like to sit on top of it.  This service object
+ * itself does very little -- its only purpose is to generate instances of
+ * {@link Engine} as needed.  Implementing a wallpaper thus
+ * involves subclassing from this, subclassing an Engine implementation,
+ * and implementing {@link #onCreateEngine()} to return a new instance of
+ * your engine.
  */
 public abstract class WallpaperService extends Service {
     /**
@@ -78,6 +85,8 @@ public abstract class WallpaperService extends Service {
     private static final int MSG_TOUCH_EVENT = 10040;
     
     private Looper mCallbackLooper;
+    private final ArrayList<Engine> mActiveEngines
+            = new ArrayList<Engine>();
     
     static final class WallpaperCommand {
         String action;
@@ -591,8 +600,10 @@ public abstract class WallpaperService extends Service {
         }
         
         void doVisibilityChanged(boolean visible) {
-            mVisible = visible;
-            reportVisibility();
+            if (!mDestroyed) {
+                mVisible = visible;
+                reportVisibility();
+            }
         }
         
         void reportVisibility() {
@@ -661,6 +672,10 @@ public abstract class WallpaperService extends Service {
         }
         
         void detach() {
+            if (mDestroyed) {
+                return;
+            }
+            
             mDestroyed = true;
             
             if (mVisible) {
@@ -768,10 +783,12 @@ public abstract class WallpaperService extends Service {
                     }
                     Engine engine = onCreateEngine();
                     mEngine = engine;
+                    mActiveEngines.add(engine);
                     engine.attach(this);
                     return;
                 }
                 case DO_DETACH: {
+                    mActiveEngines.remove(mEngine);
                     mEngine.detach();
                     return;
                 }
@@ -839,6 +856,20 @@ public abstract class WallpaperService extends Service {
         }
     }
     
+    @Override
+    public void onCreate() {
+        super.onCreate();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        for (int i=0; i<mActiveEngines.size(); i++) {
+            mActiveEngines.get(i).detach();
+        }
+        mActiveEngines.clear();
+    }
+
     /**
      * Implement to return the implementation of the internal accessibility
      * service interface.  Subclasses should not override.
@@ -861,5 +892,11 @@ public abstract class WallpaperService extends Service {
         mCallbackLooper = looper;
     }
     
+    /**
+     * Must be implemented to return a new instance of the wallpaper's engine.
+     * Note that multiple instances may be active at the same time, such as
+     * when the wallpaper is currently set as the active wallpaper and the user
+     * is in the wallpaper picker viewing a preview of it as well.
+     */
     public abstract Engine onCreateEngine();
 }

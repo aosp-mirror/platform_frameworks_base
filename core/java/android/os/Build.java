@@ -158,9 +158,14 @@ public class Build {
         public static final int ECLAIR = 5;
         
         /**
-         * Current work on Eclair MR1.
+         * December 2009: Android 2.0.1
          */
-        public static final int ECLAIR_MR1 = 6;
+        public static final int ECLAIR_0_1 = 6;
+        
+        /**
+         * January 2010: Android 2.1
+         */
+        public static final int ECLAIR_MR1 = 7;
     }
     
     /** The type of build, like "user" or "eng". */

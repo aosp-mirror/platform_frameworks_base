@@ -6,7 +6,7 @@ page.title=Android API Levels
 
   <h2>In this document</h2>
 <ol>
-  <li><a href="intro">What is API Level?</a></li>
+  <li><a href="#intro">What is API Level?</a></li>
   <li><a href="#uses">Uses of API Level in Android</a></li>
   <li><a href="#considerations">Development Considerations</a>
     <ol>
@@ -83,6 +83,7 @@ Android platform.</p>
 
 <table>
   <tr><th>Platform Version</th><th>API Level</th></tr>
+  <tr><td>Android 2.0.1</td><td>6</td></tr>
   <tr><td>Android 2.0</td><td>5</td></tr>
   <tr><td>Android 1.6</td><td>4</td></tr>
   <tr><td>Android 1.5</td><td>3</td></tr>
@@ -111,7 +112,7 @@ the Android system itself. </p>
 <p>Applications can use a manifest element provided by the framework API &mdash;
 <code>&lt;uses-sdk&gt;</code> &mdash; to describe the minimum and maximum API
 Levels under which they are able to run, as well as the preferred API Level that
-they are designed to support. The element offers two key attributes:</p>
+they are designed to support. The element offers three key attributes:</p>
 
 <ul>
 <li><code>android:minSdkVersion</code> &mdash; Specifies the minimum API Level
@@ -122,7 +123,9 @@ application to use manifest elements or behaviors defined in the target
 API Level, rather than being restricted to using only those defined 
 for the minimum API Level.</li>
 <li><code>android:maxSdkVersion</code> &mdash; Specifies the maximum API Level
-on which the application is able to run.</li>
+on which the application is able to run. <strong>Important:</strong> Please read the <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html"><code>&lt;uses-sdk&gt;</code></a>
+documentation before using this attribute.  </li>
 </ul>
 
 <p>For example, to specify the minimum system API Level that an application
@@ -132,10 +135,11 @@ attribute. The value of <code>android:minSdkVersion</code> would be the integer
 corresponding to the API Level of the earliest version of the Android platform
 under which the application can run. </p>
 
-<p>When the user attempts to install an application, the Android system first
-checks the <code>&lt;uses-sdk&gt;</code> attributes in the application's
-manifest and compares them against its own internal API Level. The system
-allows the installation to begin only if these conditions are met:</p>
+<p>When the user attempts to install an application, or when revalidating an
+appplication after a system update, the Android system first checks the
+<code>&lt;uses-sdk&gt;</code> attributes in the application's manifest and
+compares the values against its own internal API Level. The system allows the
+installation to begin only if these conditions are met:</p>
 
 <ul>
 <li>If a <code>android:minSdkVersion</code> attribute is declared, its value
@@ -144,7 +148,9 @@ the system assumes that the application requires API Level 1. </li>
 <li>If a <code>android:maxSdkVersion</code> attribute is declared, its value
 must be equal to or greater than the system's API Level integer. 
 If not declared, the system assumes that the application
-has no maximum API Level. </li>
+has no maximum API Level. Please read the <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html"><code>&lt;uses-sdk&gt;</code></a>
+documentation for more information about how the system handles this attribute.</li>
 </ul>
 
 <p>When declared in an application's manifest, a <code>&lt;uses-sdk&gt;</code>

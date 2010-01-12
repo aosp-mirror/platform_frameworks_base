@@ -380,11 +380,15 @@ public final class UsageStatsService extends IUsageStats.Stub {
             // Get the most recent file
             mFileLeaf = getCurrentDateStr(FILE_PREFIX);
             // Copy current file to back up
-            File backupFile =  new File(mFile.getPath() + ".bak");
-            if (!mFile.renameTo(backupFile)) {
-                Log.w(TAG, "Failed to persist new stats");
-                return;
+            File backupFile = null;
+            if (mFile != null && mFile.exists()) {
+                backupFile = new File(mFile.getPath() + ".bak");
+                if (!mFile.renameTo(backupFile)) {
+                    Log.w(TAG, "Failed to persist new stats");
+                    return;
+                }
             }
+
             try {
                 // Write mStats to file
                 writeStatsFLOCK();
@@ -468,16 +472,10 @@ public final class UsageStatsService extends IUsageStats.Stub {
             
             final boolean samePackage = pkgName.equals(mLastResumedPkg);
             if (mIsResumed) {
-                if (samePackage) {
-                    Log.w(TAG, "Something wrong here, didn't expect "
-                            + pkgName + " to be resumed");
-                    return;
-                }
-                
                 if (mLastResumedPkg != null) {
                     // We last resumed some other package...  just pause it now
                     // to recover.
-                    Log.w(TAG, "Unexpected resume of " + pkgName
+                    Log.i(TAG, "Unexpected resume of " + pkgName
                             + " while already resumed in " + mLastResumedPkg);
                     PkgUsageStatsExtended pus = mStats.get(mLastResumedPkg);
                     if (pus != null) {
@@ -516,7 +514,7 @@ public final class UsageStatsService extends IUsageStats.Stub {
                 return;
             }
             if (!mIsResumed) {
-                Log.w(TAG, "Something wrong here, didn't expect "
+                Log.i(TAG, "Something wrong here, didn't expect "
                         + pkgName + " to be paused");
                 return;
             }
@@ -527,7 +525,7 @@ public final class UsageStatsService extends IUsageStats.Stub {
             PkgUsageStatsExtended pus = mStats.get(pkgName);
             if (pus == null) {
                 // Weird some error here
-                Log.w(TAG, "No package stats for pkg:"+pkgName);
+                Log.i(TAG, "No package stats for pkg:"+pkgName);
                 return;
             }
             pus.updatePause();

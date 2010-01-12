@@ -61,7 +61,7 @@ examples of what you could do with them:</p>
   </li>
   <li>
     You could override the way that an EditText component is rendered on the screen
-    (the <a href="{@docRoot}guide/samples/NotePad/index.html">Notepad Tutorial</a> uses this to good effect, 
+    (the <a href="{@docRoot}resources/samples/NotePad/index.html">Notepad Tutorial</a> uses this to good effect, 
     to create a lined-notepad page).
   </li>
   <li>
@@ -318,9 +318,9 @@ Here's a summary of some of the other standard methods that the framework calls 
 
 <h3 id="customexample">A Custom View Example</h3>
 <p>The CustomView sample in the 
-<a href="{@docRoot}guide/samples/ApiDemos/index.html">API Demos</a> provides an example
+<a href="{@docRoot}resources/samples/ApiDemos/index.html">API Demos</a> provides an example
 of a customized View. The custom View is defined in the
-<a href="{@docRoot}guide/samples/ApiDemos/src/com/example/android/apis/view/LabelView.html">LabelView</a>
+<a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/view/LabelView.html">LabelView</a>
 class.</p>
 <p>The LabelView sample demonstrates a number of different aspects of custom components:</p>
 <ul>
@@ -339,7 +339,7 @@ class.</p>
   provided canvas.</li>
 </ul>
 <p>You can see some sample usages of the LabelView custom View in
-<a href="{@docRoot}guide/samples/ApiDemos/res/layout/custom_view_1.html">custom_view_1.xml</a>
+<a href="{@docRoot}resources/samples/ApiDemos/res/layout/custom_view_1.html">custom_view_1.xml</a>
 from the samples. In particular, you can see a mix of both <code>android:</code>
 namespace parameters and custom <code>app:</code> namespace parameters. These
 <code>app:</code> parameters are the custom ones that the LabelView recognizes
@@ -446,7 +446,7 @@ you would do with a fully customized component, but by starting with a more
 specialized class in the View heirarchy, you can also get a lot of behavior for
 free that probably does exactly what you want.</p>
 <p>For example, the SDK includes a <a
-href="{@docRoot}guide/samples/NotePad/index.html">NotePad application</a> in the
+href="{@docRoot}resources/samples/NotePad/index.html">NotePad application</a> in the
 samples. This demonstrates many aspects of using the Android platform, among
 them is extending an EditText View to make a lined notepad. This is not a
 perfect example, and the APIs for doing this might change from this early
@@ -455,7 +455,7 @@ preview, but it does demonstrate the principles.</p>
 NotePad sample into Eclipse (or
 just look at the source using the link provided). In particular look at the definition of
 <code>MyEditText</code> in the <a
-href="{@docRoot}guide/samples/NotePad/src/com/example/android/notepad/NoteEditor.html">NoteEditor.java</a>
+href="{@docRoot}resources/samples/NotePad/src/com/example/android/notepad/NoteEditor.html">NoteEditor.java</a>
 file.</p>
 <p>Some points to note here</p>
 <ol>

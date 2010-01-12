@@ -16,6 +16,8 @@
 
 package android.content.pm;
 
+import android.annotation.SdkConstant;
+import android.annotation.SdkConstant.SdkConstantType;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -513,6 +515,78 @@ public abstract class PackageManager {
      */
     public static final int DONT_DELETE_DATA = 0x00000001;
 
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device has a camera facing away
+     * from the screen.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_CAMERA = "android.hardware.camera";
+    
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device's camera supports auto-focus.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_CAMERA_AUTOFOCUS = "android.hardware.camera.autofocus";
+    
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device's camera supports flash.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_CAMERA_FLASH = "android.hardware.camera.flash";
+    
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device includes a light sensor.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_SENSOR_LIGHT = "android.hardware.sensor.light";
+    
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device includes a proximity sensor.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_SENSOR_PROXIMITY = "android.hardware.sensor.proximity";
+    
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device has a telephony radio with data
+     * communication support.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_TELEPHONY = "android.hardware.telephony";
+    
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device has a CDMA telephony stack.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_TELEPHONY_CDMA = "android.hardware.telephony.cdma";
+    
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device has a GSM telephony stack.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_TELEPHONY_GSM = "android.hardware.telephony.gsm";
+    
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device's touch screen supports multitouch.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_TOUCHSCREEN_MULTITOUCH = "android.hardware.touchscreen.multitouch";
+    
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device supports live wallpapers.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_LIVE_WALLPAPER = "android.software.live_wallpaper";
+    
     /**
      * Retrieve overall information about an application package that is
      * installed on the system.
@@ -1594,21 +1668,19 @@ public abstract class PackageManager {
             IPackageStatsObserver observer);
 
     /**
-     * Add a new package to the list of preferred packages.  This new package
-     * will be added to the front of the list (removed from its current location
-     * if already listed), meaning it will now be preferred over all other
-     * packages when resolving conflicts.
-     *
-     * @param packageName The package name of the new package to make preferred.
+     * @deprecated This function no longer does anything; it was an old
+     * approach to managing preferred activities, which has been superceeded
+     * (and conflicts with) the modern activity-based preferences.
      */
+    @Deprecated
     public abstract void addPackageToPreferred(String packageName);
 
     /**
-     * Remove a package from the list of preferred packages.  If it was on
-     * the list, it will no longer be preferred over other packages.
-     *
-     * @param packageName The package name to remove.
+     * @deprecated This function no longer does anything; it was an old
+     * approach to managing preferred activities, which has been superceeded
+     * (and conflicts with) the modern activity-based preferences.
      */
+    @Deprecated
     public abstract void removePackageFromPreferred(String packageName);
 
     /**

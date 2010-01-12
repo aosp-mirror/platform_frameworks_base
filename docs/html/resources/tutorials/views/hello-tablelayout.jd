@@ -1,0 +1,118 @@
+page.title=Hello, TableLayout
+parent.title=Hello, Views
+parent.link=index.html
+@jd:body
+
+<p>A {@link android.widget.TableLayout} is a ViewGroup that 
+will lay child View elements into rows and columns.</p>
+
+
+<ol>
+  <li>Start a new project/Activity called HelloTableLayout.</li>
+  <li>Open the layout file.
+    Make it like so:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:stretchColumns="1">
+
+    &lt;TableRow>
+        &lt;TextView
+            android:layout_column="1"
+            android:text="Open..."
+            android:padding="3dip" />
+        &lt;TextView
+            android:text="Ctrl-O"
+            android:gravity="right"
+            android:padding="3dip" />
+    &lt;/TableRow>
+
+    &lt;TableRow>
+        &lt;TextView
+            android:layout_column="1"
+            android:text="Save..."
+            android:padding="3dip" />
+        &lt;TextView
+            android:text="Ctrl-S"
+            android:gravity="right"
+            android:padding="3dip" />
+    &lt;/TableRow>
+
+    &lt;TableRow>
+        &lt;TextView
+            android:layout_column="1"
+            android:text="Save As..."
+            android:padding="3dip" />
+        &lt;TextView
+            android:text="Ctrl-Shift-S"
+            android:gravity="right"
+            android:padding="3dip" />
+    &lt;/TableRow>
+
+    &lt;View
+        android:layout_height="2dip"
+        android:background="#FF909090" />
+
+    &lt;TableRow>
+        &lt;TextView
+            android:text="X"
+            android:padding="3dip" />
+        &lt;TextView
+            android:text="Import..."
+            android:padding="3dip" />
+    &lt;/TableRow>
+
+    &lt;TableRow>
+        &lt;TextView
+            android:text="X"
+            android:padding="3dip" />
+        &lt;TextView
+            android:text="Export..."
+            android:padding="3dip" />
+        &lt;TextView
+            android:text="Ctrl-E"
+            android:gravity="right"
+            android:padding="3dip" />
+    &lt;/TableRow>
+
+    &lt;View
+        android:layout_height="2dip"
+        android:background="#FF909090" />
+
+    &lt;TableRow>
+        &lt;TextView
+            android:layout_column="1"
+            android:text="Quit"
+            android:padding="3dip" />
+    &lt;/TableRow>
+&lt;/TableLayout>
+</pre>
+<p>Notice how this resembles the structure of an HTML table. <code>TableLayout</code> is like the
+<code>table</code> element; <code>TableRow</code> is like a <code>tr</code> element; but for our cells like
+the html <code>td</code> element, we can use any kind of View. Here, we use <code>TextView</code> for the cells.</p>
+
+</li>
+<li>Make sure your Activity loads this layout in the <code>onCreate()</code> method:
+<pre>
+public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.main);
+}
+</pre>
+<p><code>R.layout.main</code> refers to the <code>main.xml</code> layout file.</p>
+</li>
+<li>Run it.</li>
+</ol>
+<p>You should see the following:</p>
+<img src="images/hello-tablelayout.png" width="150px" />
+
+<h3>References</h3>
+<ul>
+  <li>{@link android.widget.TableLayout}</li>
+  <li>{@link android.widget.TableRow}</li>
+  <li>{@link android.widget.TextView}</li>
+</ul>
+
+

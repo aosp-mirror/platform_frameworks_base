@@ -26,6 +26,7 @@ import android.view.ViewGroup;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.text.TextUtils;
 import com.android.internal.R;
 
 /**
@@ -59,7 +60,7 @@ public class GrantCredentialsPermissionActivity extends Activity implements View
 
         TextView messageView = (TextView) getWindow().findViewById(R.id.message);
         String authTokenLabel = getIntent().getExtras().getString(EXTRAS_AUTH_TOKEN_LABEL);
-        if (authTokenLabel.length() == 0) {
+        if (TextUtils.isEmpty(authTokenLabel)) {
             CharSequence grantCredentialsPermissionFormat = getResources().getText(
                     R.string.grant_credentials_permission_message_desc);
             messageView.setText(String.format(grantCredentialsPermissionFormat.toString(),

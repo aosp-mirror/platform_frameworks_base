@@ -1328,7 +1328,7 @@ public class PopupWindow {
                     getKeyDispatcherState().startTracking(event, this);
                     return true;
                 } else if (event.getAction() == KeyEvent.ACTION_UP
-                        && event.isTracking() && !event.isCanceled()) {
+                        && getKeyDispatcherState().isTracking(event) && !event.isCanceled()) {
                     dismiss();
                     return true;
                 }

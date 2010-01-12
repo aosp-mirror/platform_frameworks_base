@@ -243,9 +243,6 @@ public class AudioSystem
     public static final int DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES = 0x100;
     public static final int DEVICE_OUT_BLUETOOTH_A2DP_SPEAKER = 0x200;
     public static final int DEVICE_OUT_AUX_DIGITAL = 0x400;
-    public static final int DEVICE_OUT_FM_HEADPHONE = 0x800;
-    public static final int DEVICE_OUT_FM_SPEAKER = 0x1000;
-    public static final int DEVICE_OUT_TTY = 0x2000;
     public static final int DEVICE_OUT_DEFAULT = 0x8000;
     // input devices
     public static final int DEVICE_IN_COMMUNICATION = 0x10000;
@@ -274,12 +271,14 @@ public class AudioSystem
     public static final int FORCE_BT_SCO = 3;
     public static final int FORCE_BT_A2DP = 4;
     public static final int FORCE_WIRED_ACCESSORY = 5;
+    public static final int FORCE_BT_DOCK = 6;
     public static final int FORCE_DEFAULT = FORCE_NONE;
 
     // usage for serForceUse
     public static final int FOR_COMMUNICATION = 0;
     public static final int FOR_MEDIA = 1;
     public static final int FOR_RECORD = 2;
+    public static final int FOR_DOCK = 3;
 
     public static native int setDeviceConnectionState(int device, int state, String device_address);
     public static native int getDeviceConnectionState(int device, String device_address);

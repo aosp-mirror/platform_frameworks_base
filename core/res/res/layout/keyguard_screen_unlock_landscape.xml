@@ -35,55 +35,72 @@
             android:layout_width="0dip"
             android:layout_height="fill_parent"
             android:layout_weight="1.0"
-            android:gravity="center_horizontal"
+            android:layout_marginLeft="24dip"
+            android:gravity="left"
             >
+        <TextView
+            android:id="@+id/status1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dip"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            />
+
         <TextView
             android:id="@+id/carrier"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="5dip"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="?android:attr/textColorSecondary"
-            />
-        <TextView
-            android:id="@+id/centerDot"
-            android:visibility="gone"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="5dip"
-            android:layout_marginRight="5dip"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="?android:attr/textColorSecondary"
             android:textSize="17sp"
+            android:drawablePadding="4dip"
+            android:layout_marginTop="32dip"
             />
-        <TextView
-            android:id="@+id/time"
+        <com.android.internal.widget.DigitalClock android:id="@+id/time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="5dip"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:textSize="35sp"
-            />
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:layout_marginBottom="8dip"
+            android:layout_marginTop="8dip"
+            >
+
+            <TextView android:id="@+id/timeDisplay"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="bottom"
+                android:textSize="72sp"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:shadowColor="#C0000000"
+                android:shadowDx="0"
+                android:shadowDy="0"
+                android:shadowRadius="3.0"
+                />
+
+
+            <TextView android:id="@+id/am_pm"
+                android:layout_width="wrap_content"
+                android:layout_height="fill_parent"
+                android:gravity="bottom"
+                android:textSize="22sp"
+                android:singleLine="true"
+                android:layout_marginLeft="8dip"
+                android:layout_marginBottom="-6dip"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:shadowColor="#C0000000"
+                android:shadowDx="0"
+                android:shadowDy="0"
+                android:shadowRadius="3.0"
+                />
+
+        </com.android.internal.widget.DigitalClock>
+
         <TextView
             android:id="@+id/date"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_marginTop="-12dip"
+            android:layout_below="@id/time"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="?android:attr/textColorSecondary"
-            android:textSize="17sp"
             />
-
-
-        <View
-            android:id="@+id/divider"
-            android:layout_width="fill_parent"
-            android:layout_height="1dip"
-            android:layout_centerHorizontal="true"
-            android:background="@android:drawable/divider_horizontal_dark"
-                />
 
         <!-- used for instructions such as "draw pattern to unlock", the next alarm, and charging
              status.  -->
@@ -95,22 +112,12 @@
             android:gravity="center"
             >
             <TextView
-                android:id="@+id/status1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:textColor="?android:attr/textColorSecondary"
-                android:textSize="17sp"
-                android:drawablePadding="4dip"
-                />
-            <TextView
                 android:id="@+id/statusSep"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="5dip"
                 android:layout_marginRight="5dip"
                 android:textAppearance="?android:attr/textAppearanceMedium"
-                android:textColor="?android:attr/textColorSecondary"
                 android:textSize="17sp"
                 />
             <TextView
@@ -119,7 +126,6 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentTop="true"
                 android:textAppearance="?android:attr/textAppearanceMedium"
-                android:textColor="?android:attr/textColorSecondary"
                 android:textSize="17sp"
                 android:drawablePadding="4dip"
                 />
@@ -136,22 +142,20 @@
         <FrameLayout
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="16dip"
             >
 
             <!-- option 1: a single emergency call button -->
             <RelativeLayout android:id="@+id/footerNormal"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center"
+                android:gravity="left"
                 >
                 <Button android:id="@+id/emergencyCallAlone"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/lockscreen_emergency_call"
-                    android:textSize="14sp"
-                    android:background="@drawable/btn_lock_normal"
-                    android:textAppearance="?android:attr/textAppearanceSmall"
-                    android:textColor="?android:attr/textColorPrimary"
+                    style="@style/Widget.Button.Transparent"
                     android:drawableLeft="@drawable/ic_emergency"
                     android:drawablePadding="8dip"
                     />
@@ -162,25 +166,19 @@
                 android:orientation="vertical"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center"
+                android:gravity="left"
                 >
                 <Button android:id="@+id/forgotPattern"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
-                    android:textSize="14sp"
-                    android:background="@drawable/btn_lock_normal"
-                    android:textAppearance="?android:attr/textAppearanceSmall"
-                    android:textColor="?android:attr/textColorPrimary"
+                    style="@style/Widget.Button.Transparent"
                     android:visibility="invisible"
                     />
                 <Button android:id="@+id/emergencyCallTogether"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/lockscreen_emergency_call"
-                    android:textSize="14sp"
-                    android:background="@drawable/btn_lock_normal"
-                    android:textAppearance="?android:attr/textAppearanceSmall"
-                    android:textColor="?android:attr/textColorPrimary"
+                    style="@style/Widget.Button.Transparent"
                     android:drawableLeft="@drawable/ic_emergency"
                     android:drawablePadding="8dip"
                     />

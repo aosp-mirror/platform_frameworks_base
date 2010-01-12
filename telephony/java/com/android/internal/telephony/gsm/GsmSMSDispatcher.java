@@ -28,6 +28,7 @@ import android.util.Config;
 import android.util.Log;
 
 import com.android.internal.telephony.IccUtils;
+import com.android.internal.telephony.SmsMessageBase.TextEncodingDetails;
 import com.android.internal.telephony.gsm.SmsMessage;
 import com.android.internal.telephony.CommandsInterface;
 import com.android.internal.telephony.SMSDispatcher;
@@ -165,8 +166,19 @@ final class GsmSMSDispatcher extends SMSDispatcher {
             ArrayList<PendingIntent> deliveryIntents) {
 
         int refNumber = getNextConcatenatedRef() & 0x00FF;
+        int msgCount = parts.size();
+        int encoding = android.telephony.SmsMessage.ENCODING_UNKNOWN;
 
-        for (int i = 0, msgCount = parts.size(); i < msgCount; i++) {
+        for (int i = 0; i < msgCount; i++) {
+            TextEncodingDetails details = SmsMessage.calculateLength(parts.get(i), false);
+            if (encoding != details.codeUnitSize
+                    && (encoding == android.telephony.SmsMessage.ENCODING_UNKNOWN
+                            || encoding == android.telephony.SmsMessage.ENCODING_7BIT)) {
+                encoding = details.codeUnitSize;
+            }
+        }
+
+        for (int i = 0; i < msgCount; i++) {
             SmsHeader.ConcatRef concatRef = new SmsHeader.ConcatRef();
             concatRef.refNumber = refNumber;
             concatRef.seqNumber = i + 1;  // 1-based sequence
@@ -192,7 +204,8 @@ final class GsmSMSDispatcher extends SMSDispatcher {
             }
 
             SmsMessage.SubmitPdu pdus = SmsMessage.getSubmitPdu(scAddress, destinationAddress,
-                    parts.get(i), deliveryIntent != null, SmsHeader.toByteArray(smsHeader));
+                    parts.get(i), deliveryIntent != null, SmsHeader.toByteArray(smsHeader),
+                    encoding);
 
             sendRawPdu(pdus.encodedScAddress, pdus.encodedMessage, sentIntent, deliveryIntent);
         }
@@ -242,8 +255,19 @@ final class GsmSMSDispatcher extends SMSDispatcher {
         }
 
         int refNumber = getNextConcatenatedRef() & 0x00FF;
+        int msgCount = parts.size();
+        int encoding = android.telephony.SmsMessage.ENCODING_UNKNOWN;
 
-        for (int i = 0, msgCount = parts.size(); i < msgCount; i++) {
+        for (int i = 0; i < msgCount; i++) {
+            TextEncodingDetails details = SmsMessage.calculateLength(parts.get(i), false);
+            if (encoding != details.codeUnitSize
+                    && (encoding == android.telephony.SmsMessage.ENCODING_UNKNOWN
+                            || encoding == android.telephony.SmsMessage.ENCODING_7BIT)) {
+                encoding = details.codeUnitSize;
+            }
+        }
+
+        for (int i = 0; i < msgCount; i++) {
             SmsHeader.ConcatRef concatRef = new SmsHeader.ConcatRef();
             concatRef.refNumber = refNumber;
             concatRef.seqNumber = i + 1;  // 1-based sequence
@@ -263,7 +287,8 @@ final class GsmSMSDispatcher extends SMSDispatcher {
             }
 
             SmsMessage.SubmitPdu pdus = SmsMessage.getSubmitPdu(scAddress, destinationAddress,
-                    parts.get(i), deliveryIntent != null, SmsHeader.toByteArray(smsHeader));
+                    parts.get(i), deliveryIntent != null, SmsHeader.toByteArray(smsHeader),
+                    encoding);
 
             HashMap<String, Object> map = new HashMap<String, Object>();
             map.put("smsc", pdus.encodedScAddress);

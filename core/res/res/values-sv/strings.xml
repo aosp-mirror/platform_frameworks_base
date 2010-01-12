@@ -486,12 +486,12 @@
     <string name="contact_status_update_attribution_with_date" msgid="5945386376369979909">"<xliff:g id="DATE">%1$s</xliff:g> via <xliff:g id="SOURCE">%2$s</xliff:g>"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"Ange PIN-kod"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"Fel PIN-kod!"</string>
-    <string name="keyguard_label_text" msgid="861796461028298424">"Tryck på Meny och sedan på 0 om du vill låsa upp."</string>
+    <string name="keyguard_label_text" msgid="861796461028298424">"Tryck på Menu och sedan på 0 om du vill låsa upp."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"Nödsamtalsnummer"</string>
     <string name="lockscreen_carrier_default" msgid="8812714795156374435">"(Ingen tjänst)"</string>
     <string name="lockscreen_screen_locked" msgid="7288443074806832904">"Skärmen har låsts."</string>
-    <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Tryck på Meny om du vill låsa upp eller ringa nödsamtal."</string>
-    <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"Tryck på Meny om du vill låsa upp."</string>
+    <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Tryck på Menu om du vill låsa upp eller ringa nödsamtal."</string>
+    <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"Tryck på Menu om du vill låsa upp."</string>
     <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"Rita grafiskt lösenord för att låsa upp"</string>
     <string name="lockscreen_emergency_call" msgid="5347633784401285225">"Nödsamtal"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Korrekt!"</string>
@@ -520,6 +520,9 @@
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Logga in"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Ogiltigt användarnamn eller lösenord."</string>
     <string name="lockscreen_glogin_checking_password" msgid="6758890536332363322">"Kontrollerar ..."</string>
+    <string name="lockscreen_unlock_label" msgid="737440483220667054">"Lås upp"</string>
+    <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Ljud på"</string>
+    <string name="lockscreen_sound_off_label" msgid="996822825154319026">"Ljud av"</string>
     <string name="hour_ampm" msgid="4329881288269772723">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_cap_ampm" msgid="1829009197680861107">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Ta bort"</string>
@@ -552,7 +555,7 @@
     <string name="open_permission_deny" msgid="5661861460947222274">"Du har inte behörighet att öppna den här sidan."</string>
     <string name="text_copied" msgid="4985729524670131385">"Text har kopierats till urklipp."</string>
     <string name="more_item_label" msgid="4650918923083320495">"Mer"</string>
-    <string name="prepend_shortcut_label" msgid="2572214461676015642">"Meny+"</string>
+    <string name="prepend_shortcut_label" msgid="2572214461676015642">"Menu+"</string>
     <string name="menu_space_shortcut_label" msgid="2410328639272162537">"utrymme"</string>
     <string name="menu_enter_shortcut_label" msgid="2743362785111309668">"retur"</string>
     <string name="menu_delete_shortcut_label" msgid="3658178007202748164">"ta bort"</string>

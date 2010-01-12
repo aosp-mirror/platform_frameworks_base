@@ -675,9 +675,12 @@ public final class Bridge implements ILayoutBridge {
             name = name.substring(BridgeConstants.PREFIX_ANDROID.length());
         }
 
-        // at this point we could have the format style/<name>. we want only the name
+        // at this point we could have the format <type>/<name>. we want only the name as long as
+        // the type is style.
         if (name.startsWith(BridgeConstants.REFERENCE_STYLE)) {
             name = name.substring(BridgeConstants.REFERENCE_STYLE.length());
+        } else if (name.indexOf('/') != -1) {
+            return null;
         }
 
         IResourceValue parent = null;
@@ -697,7 +700,7 @@ public final class Bridge implements ILayoutBridge {
             return (IStyleResourceValue)parent;
         }
 
-        sLogger.error(String.format("Unable to resolve parent style name: ", parentName));
+        sLogger.error(String.format("Unable to resolve parent style name: %s", parentName));
 
         return null;
     }
@@ -1069,24 +1072,24 @@ public final class Bridge implements ILayoutBridge {
         public void wallpaperOffsetsComplete(IBinder window) {
             // pass for now.
         }
-        
+
         @SuppressWarnings("unused")
         public Bundle sendWallpaperCommand(IBinder window, String action, int x, int y,
                 int z, Bundle extras, boolean sync) {
             // pass for now.
             return null;
         }
-        
+
         @SuppressWarnings("unused")
         public void wallpaperCommandComplete(IBinder window, Bundle result) {
             // pass for now.
         }
-        
+
         @SuppressWarnings("unused")
         public void closeSystemDialogs(String reason) {
             // pass for now.
         }
-        
+
         public IBinder asBinder() {
             // pass for now.
             return null;
@@ -1151,12 +1154,12 @@ public final class Bridge implements ILayoutBridge {
                 int z, Bundle extras, boolean sync) {
             // pass for now.
         }
-        
+
         @SuppressWarnings("unused")
         public void closeSystemDialogs(String reason) {
             // pass for now.
         }
-        
+
         public IBinder asBinder() {
             // pass for now.
             return null;

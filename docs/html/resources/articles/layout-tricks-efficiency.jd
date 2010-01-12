@@ -1,0 +1,177 @@
+page.title=Layout Tricks: Creating Efficient Layouts
+@jd:body
+
+<p>The Android UI toolkit offers several layout managers that are
+rather easy to use and, most of the time, you only need the basic
+features of these layout managers to implement a user interface.</p>
+
+<p>Sticking to the basic features is unfortunately not the most efficient
+way to create user interfaces. A common example is the abuse of 
+{@link android.widget.LinearLayout}, which leads to a proliferation of 
+views in the view hierarchy. Every view &mdash; or worse, every layout 
+manager &mdash; that you add to your application comes at a cost: 
+initialization, layout and drawing become slower. The layout pass can be 
+especially expensive when you nest several <code>LinearLayout</code>
+that use the {@link android.R.attr#layout_weight weight} 
+parameter, which requires the child to be measured twice.</p>
+
+<p>Let's consider a very simple and common example of a layout: a list item 
+with an icon on the left, a title at the top and an optional description
+underneath the title. Here is what such an item looks like:</p>
+
+<div style="text-align: center;"><img src="images/relativelayout_1.png" alt="Simple list item"></div>
+
+<p>To clearly understand how the views, one {@link android.widget.ImageView} and
+two {@link android.widget.TextView}, are positioned with respect to each other,
+here is the wireframe of the layout as captured by <a
+href="{@docRoot}guide/developing/tools/hierarchy-viewer.html">HierarchyViewer</a
+>:</p>
+
+<div style="text-align: center;"><img src="images/relativelayout_wire_1.png" alt="Wireframe of the simple list item"></div>
+
+<p>Implementing this layout is straightforward with <code>LinearLayout</code>.
+The item itself is a horizontal <code>LinearLayout</code> with an
+<code>ImageView</code> and a vertical <code>LinearLayout</code>, which contains
+the two <code>TextView</code>. Here's the source code of this layout:</p>
+
+<pre class="prettyprint">&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="?android:attr/listPreferredItemHeight"
+    
+    android:padding="6dip"&gt;
+    
+    &lt;ImageView
+        android:id="&#64;+id/icon"
+        
+        android:layout_width="wrap_content"
+        android:layout_height="fill_parent"
+        android:layout_marginRight="6dip"
+        
+        android:src="&#64;drawable/icon" /&gt;
+
+    &lt;LinearLayout
+        android:orientation="vertical"
+    
+        android:layout_width="0dip"
+        android:layout_weight="1"
+        android:layout_height="fill_parent"&gt;
+
+        &lt;TextView
+            android:layout_width="fill_parent"
+            android:layout_height="0dip"
+            android:layout_weight="1"
+                    
+            android:gravity="center_vertical"
+            android:text="My Application" /&gt;
+            
+        &lt;TextView  
+            android:layout_width="fill_parent"
+            android:layout_height="0dip"
+            android:layout_weight="1" 
+            
+            android:singleLine="true"
+            android:ellipsize="marquee"
+            android:text="Simple application that shows how to use RelativeLayout" /&gt;
+            
+    &lt;/LinearLayout&gt;
+
+&lt;/LinearLayout&gt;</pre>
+
+<p>This layout works but can be wasteful if you instantiate it for every list
+item of a {@link android.widget.ListView}. The same layout can be rewritten
+using a single {@link android.widget.RelativeLayout}, thus saving one view, and
+even better one level in view hierarchy, per list item. The implementation of
+the layout with a <code>RelativeLayout</code> remains simple:</p>
+
+<pre class="prettyprint">&lt;RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="?android:attr/listPreferredItemHeight"
+    
+    android:padding="6dip"&gt;
+    
+    &lt;ImageView
+        android:id="&#64;+id/icon"
+        
+        android:layout_width="wrap_content"
+        android:layout_height="fill_parent"
+        
+        android:layout_alignParentTop="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginRight="6dip"
+        
+        android:src="&#64;drawable/icon" /&gt;
+
+    &lt;TextView  
+        android:id="&#64;+id/secondLine"
+
+        android:layout_width="fill_parent"
+        android:layout_height="26dip" 
+        
+        android:layout_toRightOf="&#64;id/icon"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        
+        android:singleLine="true"
+        android:ellipsize="marquee"
+        android:text="Simple application that shows how to use RelativeLayout" /&gt;
+
+    &lt;TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        
+        android:layout_toRightOf="&#64;id/icon"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:layout_above="&#64;id/secondLine"
+        android:layout_alignWithParentIfMissing="true"
+                
+        android:gravity="center_vertical"
+        android:text="My Application" /&gt;
+
+&lt;/RelativeLayout&gt;</pre>
+
+<p>This new implementation behaves exactly the same way as the previous
+implementation, except in one case. The list item we want to display has two
+lines of text: the title and an <em>optional</em> description. When a
+description is not available for a given list item, the application would simply
+set the visibility of the second <code>TextView</code> to 
+{@link android.view.View#GONE}. This works perfectly with the <code>LinearLayout</code>
+implementation but not with the <code>RelativeLayout</code> version:</p>
+
+<div style="text-align: center;"><img src="images/relativelayout_2.png" alt="RelativeLayout and description GONE"></div>
+<div style="text-align: center;"><img src="images/relativelayout_wire_2.png" alt="RelativeLayout and description GONE"></div>
+
+<p>In a <code>RelativeLayout</code>, views are aligned with their parent, with the
+<code>RelativeLayout</code> itself, or with other views. For instance, we declared that
+the description is aligned with the bottom of the <code>RelativeLayout</code> and
+that the title is positioned above the description and anchored to the
+parent's top. With the description GONE, RelativeLayout doesn't know
+where to position the title's bottom edge. To solve this problem, you
+can use a very special layout parameter called 
+{@link android.R.attr#layout_alignWithParentIfMissing}.
+</p>
+
+<p>This boolean parameter simply tells RelativeLayout to use its own edges as
+anchors when a constraint target is missing. For instance, if you position a
+view to the right of a GONE view and set <code>alignWithParentIfMissing</code>
+to <code>true</code>, <code>RelativeLayout</code> will instead anchor the view
+to its left edge. In our case, using <code>alignWithParentIfMissing</code> will
+cause <code>RelativeLayout</code> to align the title's bottom with its own
+bottom. The result is the following:</p>
+
+<div style="text-align: center;"><img src="images/relativelayout_3.png" alt="RelativeLayout, description GONE and alignWithParentIfMissing"></div>
+<div style="text-align: center;"><img src="images/relativelayout_wire_3.png" alt="RelativeLayout, description GONE and alignWithParentIfMissing"></div>
+
+<p>The
+behavior of our layout is now perfect, even when the description is
+GONE. Even better, the hierarchy is simpler and because we are not
+using LinearLayout's weights it's also more efficient. The difference
+between the two implementations becomes obvious when comparing the view
+hierarchies in HierarchyViewer:</p>
+
+<div style="text-align: center;"><img src="images/layouts_comparison_small.png" alt="LinearLayout vs RelativeLayout"></div>
+
+<p>Again, the difference will be much more important when you use such a layout
+for every item in a ListView for instance. Hopefully this simple
+example showed you that getting to know your layouts is the best way to
+learn how to optimize your UI.</p>

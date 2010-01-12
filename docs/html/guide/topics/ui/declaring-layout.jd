@@ -65,7 +65,7 @@ example, the EditText element has a <code>text</code> attribute that corresponds
 
 <p class="note"><strong>Tip:</strong> Learn more about different layout types in <a href="{@docRoot}guide/topics/ui/layout-objects.html">Common
 Layout Objects</a>. There are also a collection of tutorials on building various layouts in the
-<a href="{@docRoot}guide/tutorials/views/index.html">Hello Views</a> tutorial guide.</p>
+<a href="{@docRoot}resources/tutorials/views/index.html">Hello Views</a> tutorial guide.</p>
 
 <h2 id="write">Write the XML</h2>
 

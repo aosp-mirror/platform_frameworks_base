@@ -96,7 +96,11 @@ class NotificationManagerService extends INotificationManager.Stub
     private NotificationRecord mVibrateNotification;
     private Vibrator mVibrator = new Vibrator();
 
-    // adb
+    // for enabling and disabling notification pulse behavior
+    private boolean mScreenOn = true;
+    private boolean mNotificationPulseEnabled;
+
+    // for adb connected notifications
     private boolean mUsbConnected;
     private boolean mAdbEnabled = false;
     private boolean mAdbNotificationShown = false;
@@ -333,6 +337,12 @@ class NotificationManagerService extends INotificationManager.Stub
                     return;
                 }
                 cancelAllNotificationsInt(pkgName, 0, 0);
+            } else if (action.equals(Intent.ACTION_SCREEN_ON)) {
+                mScreenOn = true;
+                updateNotificationPulse();
+            } else if (action.equals(Intent.ACTION_SCREEN_OFF)) {
+                mScreenOn = false;
+                updateNotificationPulse();
             }
         }
     };
@@ -346,6 +356,8 @@ class NotificationManagerService extends INotificationManager.Stub
             ContentResolver resolver = mContext.getContentResolver();
             resolver.registerContentObserver(Settings.Secure.getUriFor(
                     Settings.Secure.ADB_ENABLED), false, this);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.NOTIFICATION_LIGHT_PULSE), false, this);
             update();
         }
 
@@ -355,13 +367,21 @@ class NotificationManagerService extends INotificationManager.Stub
 
         public void update() {
             ContentResolver resolver = mContext.getContentResolver();
-            mAdbEnabled = Settings.Secure.getInt(resolver,
+            boolean adbEnabled = Settings.Secure.getInt(resolver,
                         Settings.Secure.ADB_ENABLED, 0) != 0;
-            updateAdbNotification();
+            if (mAdbEnabled != adbEnabled) {
+                mAdbEnabled = adbEnabled;
+                updateAdbNotification();
+            }
+            boolean pulseEnabled = Settings.System.getInt(resolver,
+                        Settings.System.NOTIFICATION_LIGHT_PULSE, 0) != 0;
+            if (mNotificationPulseEnabled != pulseEnabled) {
+                mNotificationPulseEnabled = pulseEnabled;
+                updateNotificationPulse();
+            }
         }
     }
-    private final SettingsObserver mSettingsObserver;
-    
+
     NotificationManagerService(Context context, StatusBarService statusBar,
             HardwareService hardware)
     {
@@ -392,10 +412,12 @@ class NotificationManagerService extends INotificationManager.Stub
         filter.addAction(Intent.ACTION_UMS_DISCONNECTED);
         filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
         filter.addAction(Intent.ACTION_PACKAGE_RESTARTED);
+        filter.addAction(Intent.ACTION_SCREEN_ON);
+        filter.addAction(Intent.ACTION_SCREEN_OFF);
         mContext.registerReceiver(mIntentReceiver, filter);
         
-        mSettingsObserver = new SettingsObserver(mHandler);
-        mSettingsObserver.observe();
+        SettingsObserver observer = new SettingsObserver(mHandler);
+        observer.observe();
     }
 
     void systemReady() {
@@ -704,6 +726,9 @@ class NotificationManagerService extends INotificationManager.Stub
                     && (!(old != null
                         && (notification.flags & Notification.FLAG_ONLY_ALERT_ONCE) != 0 ))
                     && mSystemReady) {
+
+                final AudioManager audioManager = (AudioManager) mContext
+                .getSystemService(Context.AUDIO_SERVICE);
                 // sound
                 final boolean useDefaultSound =
                     (notification.defaults & Notification.DEFAULT_SOUND) != 0; 
@@ -722,18 +747,20 @@ class NotificationManagerService extends INotificationManager.Stub
                         audioStreamType = DEFAULT_STREAM_TYPE;
                     }
                     mSoundNotification = r;
-                    long identity = Binder.clearCallingIdentity();
-                    try {
-                        mSound.play(mContext, uri, looping, audioStreamType);
-                    }
-                    finally {
-                        Binder.restoreCallingIdentity(identity);
+                    // do not play notifications if stream volume is 0
+                    // (typically because ringer mode is silent).
+                    if (audioManager.getStreamVolume(audioStreamType) != 0) {
+                        long identity = Binder.clearCallingIdentity();
+                        try {
+                            mSound.play(mContext, uri, looping, audioStreamType);
+                        }
+                        finally {
+                            Binder.restoreCallingIdentity(identity);
+                        }
                     }
                 }
 
                 // vibrate
-                final AudioManager audioManager = (AudioManager) mContext
-                        .getSystemService(Context.AUDIO_SERVICE);
                 final boolean useDefaultVibrate =
                     (notification.defaults & Notification.DEFAULT_VIBRATE) != 0; 
                 if ((useDefaultVibrate || notification.vibrate != null)
@@ -997,7 +1024,9 @@ class NotificationManagerService extends INotificationManager.Stub
                 mLedNotification = mLights.get(n-1);
             }
         }
-        if (mLedNotification == null) {
+
+        // we only flash if screen is off and persistent pulsing is enabled
+        if (mLedNotification == null || mScreenOn || !mNotificationPulseEnabled) {
             mHardware.setLightOff_UNCHECKED(HardwareService.LIGHT_ID_NOTIFICATIONS);
         } else {
             mHardware.setLightFlashing_UNCHECKED(
@@ -1090,7 +1119,13 @@ class NotificationManagerService extends INotificationManager.Stub
             }
         }
     }
-    
+
+    private void updateNotificationPulse() {
+        synchronized (mNotificationList) {
+            updateLightsLocked();
+        }
+    }
+
     // ======================================================================
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {

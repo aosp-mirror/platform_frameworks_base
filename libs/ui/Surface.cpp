@@ -152,96 +152,85 @@ bool SurfaceControl::isSameSurface(
 
 status_t SurfaceControl::setLayer(int32_t layer) {
     const sp<SurfaceComposerClient>& client(mClient);
-    if (client == 0) return NO_INIT;
-    status_t err = validate(client->mControl);
+    status_t err = validate();
     if (err < 0) return err;
     return client->setLayer(mToken, layer);
 }
 status_t SurfaceControl::setPosition(int32_t x, int32_t y) {
     const sp<SurfaceComposerClient>& client(mClient);
-    if (client == 0) return NO_INIT;
-    status_t err = validate(client->mControl);
+    status_t err = validate();
     if (err < 0) return err;
     return client->setPosition(mToken, x, y);
 }
 status_t SurfaceControl::setSize(uint32_t w, uint32_t h) {
     const sp<SurfaceComposerClient>& client(mClient);
-    if (client == 0) return NO_INIT;
-    status_t err = validate(client->mControl);
+    status_t err = validate();
     if (err < 0) return err;
     return client->setSize(mToken, w, h);
 }
 status_t SurfaceControl::hide() {
     const sp<SurfaceComposerClient>& client(mClient);
-    if (client == 0) return NO_INIT;
-    status_t err = validate(client->mControl);
+    status_t err = validate();
     if (err < 0) return err;
     return client->hide(mToken);
 }
 status_t SurfaceControl::show(int32_t layer) {
     const sp<SurfaceComposerClient>& client(mClient);
-    if (client == 0) return NO_INIT;
-    status_t err = validate(client->mControl);
+    status_t err = validate();
     if (err < 0) return err;
     return client->show(mToken, layer);
 }
 status_t SurfaceControl::freeze() {
     const sp<SurfaceComposerClient>& client(mClient);
-    if (client == 0) return NO_INIT;
-    status_t err = validate(client->mControl);
+    status_t err = validate();
     if (err < 0) return err;
     return client->freeze(mToken);
 }
 status_t SurfaceControl::unfreeze() {
     const sp<SurfaceComposerClient>& client(mClient);
-    if (client == 0) return NO_INIT;
-    status_t err = validate(client->mControl);
+    status_t err = validate();
     if (err < 0) return err;
     return client->unfreeze(mToken);
 }
 status_t SurfaceControl::setFlags(uint32_t flags, uint32_t mask) {
     const sp<SurfaceComposerClient>& client(mClient);
-    if (client == 0) return NO_INIT;
-    status_t err = validate(client->mControl);
+    status_t err = validate();
     if (err < 0) return err;
     return client->setFlags(mToken, flags, mask);
 }
 status_t SurfaceControl::setTransparentRegionHint(const Region& transparent) {
     const sp<SurfaceComposerClient>& client(mClient);
-    if (client == 0) return NO_INIT;
-    status_t err = validate(client->mControl);
+    status_t err = validate();
     if (err < 0) return err;
     return client->setTransparentRegionHint(mToken, transparent);
 }
 status_t SurfaceControl::setAlpha(float alpha) {
     const sp<SurfaceComposerClient>& client(mClient);
-    if (client == 0) return NO_INIT;
-    status_t err = validate(client->mControl);
+    status_t err = validate();
     if (err < 0) return err;
     return client->setAlpha(mToken, alpha);
 }
 status_t SurfaceControl::setMatrix(float dsdx, float dtdx, float dsdy, float dtdy) {
     const sp<SurfaceComposerClient>& client(mClient);
-    if (client == 0) return NO_INIT;
-    status_t err = validate(client->mControl);
+    status_t err = validate();
     if (err < 0) return err;
     return client->setMatrix(mToken, dsdx, dtdx, dsdy, dtdy);
 }
 status_t SurfaceControl::setFreezeTint(uint32_t tint) {
     const sp<SurfaceComposerClient>& client(mClient);
-    if (client == 0) return NO_INIT;
-    status_t err = validate(client->mControl);
+    status_t err = validate();
     if (err < 0) return err;
     return client->setFreezeTint(mToken, tint);
 }
 
-status_t SurfaceControl::validate(SharedClient const* cblk) const
+status_t SurfaceControl::validate() const
 {
     if (mToken<0 || mClient==0) {
         LOGE("invalid token (%d, identity=%u) or client (%p)", 
                 mToken, mIdentity, mClient.get());
         return NO_INIT;
     }
+    SharedClient const* cblk = mClient->mControl;
     if (cblk == 0) {
         LOGE("cblk is null (surface id=%d, identity=%u)", mToken, mIdentity);
         return NO_INIT;
@@ -394,7 +383,7 @@ bool Surface::isValid() {
     return mToken>=0 && mClient!=0;
 }
 
-status_t Surface::validate(SharedClient const* cblk) const
+status_t Surface::validate() const
 {
     sp<SurfaceComposerClient> client(getClient());
     if (mToken<0 || mClient==0) {
@@ -402,6 +391,7 @@ status_t Surface::validate(SharedClient const* cblk) const
                 mToken, mIdentity, client.get());
         return NO_INIT;
     }
+    SharedClient const* cblk = mClient->mControl;
     if (cblk == 0) {
         LOGE("cblk is null (surface id=%d, identity=%u)", mToken, mIdentity);
         return NO_INIT;
@@ -488,7 +478,7 @@ status_t Surface::dequeueBuffer(sp<GraphicBuffer>* buffer) {
 int Surface::dequeueBuffer(android_native_buffer_t** buffer)
 {
     sp<SurfaceComposerClient> client(getClient());
-    status_t err = validate(client->mControl);
+    status_t err = validate();
     if (err != NO_ERROR)
         return err;
 
@@ -533,7 +523,7 @@ int Surface::dequeueBuffer(android_native_buffer_t** buffer)
 int Surface::lockBuffer(android_native_buffer_t* buffer)
 {
     sp<SurfaceComposerClient> client(getClient());
-    status_t err = validate(client->mControl);
+    status_t err = validate();
     if (err != NO_ERROR)
         return err;
 
@@ -546,7 +536,7 @@ int Surface::lockBuffer(android_native_buffer_t* buffer)
 int Surface::queueBuffer(android_native_buffer_t* buffer)
 {   
     sp<SurfaceComposerClient> client(getClient());
-    status_t err = validate(client->mControl);
+    status_t err = validate();
     if (err != NO_ERROR)
         return err;
 

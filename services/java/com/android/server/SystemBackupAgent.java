@@ -45,8 +45,16 @@ public class SystemBackupAgent extends BackupHelperAgent {
     public void onBackup(ParcelFileDescriptor oldState, BackupDataOutput data,
             ParcelFileDescriptor newState) throws IOException {
         // We only back up the data under the current "wallpaper" schema with metadata
-        addHelper("wallpaper", new AbsoluteFileBackupHelper(SystemBackupAgent.this,
-                new String[] { WALLPAPER_IMAGE, WALLPAPER_INFO }));
+        WallpaperManagerService wallpaper = (WallpaperManagerService)ServiceManager.getService(
+                Context.WALLPAPER_SERVICE);
+        String[] files = new String[] { WALLPAPER_IMAGE, WALLPAPER_INFO };
+        if (wallpaper != null && wallpaper.mName != null && wallpaper.mName.length() > 0) {
+            // When the wallpaper has a name, back up the info by itself.
+            // TODO: Don't rely on the innards of the service object like this!
+            // TODO: Send a delete for any stored wallpaper image in this case?
+            files = new String[] { WALLPAPER_INFO };
+        }
+        addHelper("wallpaper", new AbsoluteFileBackupHelper(SystemBackupAgent.this, files));
         super.onBackup(oldState, data, newState);
     }
 

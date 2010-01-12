@@ -41,6 +41,7 @@
     <protected-broadcast android:name="android.intent.action.PACKAGE_DATA_CLEARED" />
     <protected-broadcast android:name="android.intent.action.UID_REMOVED" />
     <protected-broadcast android:name="android.intent.action.CONFIGURATION_CHANGED" />
+    <protected-broadcast android:name="android.intent.action.LOCALE_CHANGED" />
     <protected-broadcast android:name="android.intent.action.BATTERY_CHANGED" />
     <protected-broadcast android:name="android.intent.action.BATTERY_LOW" />
     <protected-broadcast android:name="android.intent.action.BATTERY_OKAY" />
@@ -596,11 +597,9 @@
         android:label="@string/permlab_getPackageSize"
         android:description="@string/permdesc_getPackageSize" />
 
-    <!-- Allows an application to modify the list of preferred applications
-         with the {@link android.content.pm.PackageManager#addPackageToPreferred
-         PackageManager.addPackageToPreferred()} and
-         {@link android.content.pm.PackageManager#removePackageFromPreferred
-         PackageManager.removePackageFromPreferred()} methods. -->
+    <!-- @deprecated No longer useful, see
+         {@link android.content.pm.PackageManager#addPackageToPreferred}
+         for details. -->
     <permission android:name="android.permission.SET_PREFERRED_APPLICATIONS"
         android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
         android:protectionLevel="dangerous"

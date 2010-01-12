@@ -270,21 +270,31 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
 
     public void dump(Printer pw, String prefix) {
         super.dumpFront(pw, prefix);
-        pw.println(prefix + "className=" + className);
-        pw.println(prefix + "permission=" + permission
-                + " uid=" + uid);
-        pw.println(prefix + "taskAffinity=" + taskAffinity);
-        pw.println(prefix + "theme=0x" + Integer.toHexString(theme));
+        if (className != null) {
+            pw.println(prefix + "className=" + className);
+        }
+        if (permission != null) {
+            pw.println(prefix + "permission=" + permission);
+        }
+        pw.println(prefix + "uid=" + uid + " taskAffinity=" + taskAffinity);
+        if (theme != 0) {
+            pw.println(prefix + "theme=0x" + Integer.toHexString(theme));
+        }
         pw.println(prefix + "flags=0x" + Integer.toHexString(flags)
                 + " processName=" + processName);
         pw.println(prefix + "sourceDir=" + sourceDir);
         pw.println(prefix + "publicSourceDir=" + publicSourceDir);
-        pw.println(prefix + "sharedLibraryFiles=" + sharedLibraryFiles);
         pw.println(prefix + "dataDir=" + dataDir);
-        pw.println(prefix + "targetSdkVersion=" + targetSdkVersion);
-        pw.println(prefix + "enabled=" + enabled);
-        pw.println(prefix + "manageSpaceActivityName="+manageSpaceActivityName);
-        pw.println(prefix + "description=0x"+Integer.toHexString(descriptionRes));
+        if (sharedLibraryFiles != null) {
+            pw.println(prefix + "sharedLibraryFiles=" + sharedLibraryFiles);
+        }
+        pw.println(prefix + "enabled=" + enabled + " targetSdkVersion=" + targetSdkVersion);
+        if (manageSpaceActivityName != null) {
+            pw.println(prefix + "manageSpaceActivityName="+manageSpaceActivityName);
+        }
+        if (descriptionRes != 0) {
+            pw.println(prefix + "description=0x"+Integer.toHexString(descriptionRes));
+        }
         super.dumpBack(pw, prefix);
     }
     

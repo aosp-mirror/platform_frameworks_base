@@ -48,27 +48,23 @@ public class FountainView extends RSSurfaceView {
     private RenderScript mRS;
     private FountainRS mRender;
 
-    private void destroyRS() {
+    public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
+        super.surfaceChanged(holder, format, w, h);
+        if (mRS == null) {
+            mRS = createRenderScript(false, true);
+            mRS.contextSetSurface(w, h, holder.getSurface());
+            mRender = new FountainRS();
+            mRender.init(mRS, getResources(), w, h);
+        }
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
         if(mRS != null) {
             mRS = null;
             destroyRenderScript();
         }
-        java.lang.System.gc();
     }
-
-    public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
-        super.surfaceChanged(holder, format, w, h);
-        destroyRS();
-        mRS = createRenderScript(false, true);
-        mRender = new FountainRS();
-        mRender.init(mRS, getResources(), w, h);
-    }
-
-    public void surfaceDestroyed(SurfaceHolder holder) {
-        // Surface will be destroyed when we return
-        destroyRS();
-    }
-
 
 
     @Override

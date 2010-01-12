@@ -26,6 +26,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -539,10 +540,33 @@ import java.util.Set;
  * {@link #putExtra}.
  *
  * <ul>
- *     <li> {@link #EXTRA_TEMPLATE}
+ *     <li> {@link #EXTRA_ALARM_COUNT}
+ *     <li> {@link #EXTRA_BCC}
+ *     <li> {@link #EXTRA_CC}
+ *     <li> {@link #EXTRA_CHANGED_COMPONENT_NAME}
+ *     <li> {@link #EXTRA_DATA_REMOVED}
+ *     <li> {@link #EXTRA_DOCK_STATE}
+ *     <li> {@link #EXTRA_DOCK_STATE_CAR}
+ *     <li> {@link #EXTRA_DOCK_STATE_DESK}
+ *     <li> {@link #EXTRA_DOCK_STATE_UNDOCKED}
+ *     <li> {@link #EXTRA_DONT_KILL_APP}
+ *     <li> {@link #EXTRA_EMAIL}
+ *     <li> {@link #EXTRA_INITIAL_INTENTS}
  *     <li> {@link #EXTRA_INTENT}
+ *     <li> {@link #EXTRA_KEY_EVENT}
+ *     <li> {@link #EXTRA_PHONE_NUMBER}
+ *     <li> {@link #EXTRA_REMOTE_INTENT_TOKEN}
+ *     <li> {@link #EXTRA_REPLACING}
+ *     <li> {@link #EXTRA_SHORTCUT_ICON}
+ *     <li> {@link #EXTRA_SHORTCUT_ICON_RESOURCE}
+ *     <li> {@link #EXTRA_SHORTCUT_INTENT}
  *     <li> {@link #EXTRA_STREAM}
+ *     <li> {@link #EXTRA_SHORTCUT_NAME}
+ *     <li> {@link #EXTRA_SUBJECT}
+ *     <li> {@link #EXTRA_TEMPLATE}
  *     <li> {@link #EXTRA_TEXT}
+ *     <li> {@link #EXTRA_TITLE}
+ *     <li> {@link #EXTRA_UID}
  * </ul>
  *
  * <h3>Flags</h3>
@@ -1275,12 +1299,15 @@ public class Intent implements Parcelable {
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_PACKAGE_REMOVED = "android.intent.action.PACKAGE_REMOVED";
     /**
-     * Broadcast Action: An existing application package has been changed (e.g. a component has been
-     * enabled or disabled.  The data contains the name of the package.
+     * Broadcast Action: An existing application package has been changed (e.g.
+     * a component has been enabled or disabled).  The data contains the name of
+     * the package.
      * <ul>
      * <li> {@link #EXTRA_UID} containing the integer uid assigned to the package.
-     * <li> {@link #EXTRA_CHANGED_COMPONENT_NAME} containing the class name of the changed component.
-     * <li> {@link #EXTRA_DONT_KILL_APP} containing boolean field to override the default action of restarting the application.
+     * <li> {@link #EXTRA_CHANGED_COMPONENT_NAME_LIST} containing the class name
+     * of the changed components.
+     * <li> {@link #EXTRA_DONT_KILL_APP} containing boolean field to override the
+     * default action of restarting the application.
      * </ul>
      * 
      * <p class="note">This is a protected intent that can only be sent
@@ -1344,6 +1371,12 @@ public class Intent implements Parcelable {
      * can not be restarted will need to watch for this action and handle it
      * appropriately.
      * 
+     * <p class="note">
+     * You can <em>not</em> receive this through components declared
+     * in manifests, only by explicitly registering for it with
+     * {@link Context#registerReceiver(BroadcastReceiver, IntentFilter)
+     * Context.registerReceiver()}.
+     * 
      * <p class="note">This is a protected intent that can only be sent
      * by the system.
      *
@@ -1351,6 +1384,14 @@ public class Intent implements Parcelable {
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_CONFIGURATION_CHANGED = "android.intent.action.CONFIGURATION_CHANGED";
+    /**
+     * Broadcast Action: The current device's locale has changed.
+     * 
+     * <p class="note">This is a protected intent that can only be sent
+     * by the system.
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_LOCALE_CHANGED = "android.intent.action.LOCALE_CHANGED";
     /**
      * Broadcast Action:  This is a <em>sticky broadcast</em> containing the
      * charging state, level, and other information about the battery.
@@ -1661,6 +1702,7 @@ public class Intent implements Parcelable {
      * <ul>
      *   <li><em>state</em> - 0 for unplugged, 1 for plugged. </li>
      *   <li><em>name</em> - Headset type, human readable string </li>
+     *   <li><em>microphone</em> - 1 if headset has a microphone, 0 otherwise </li>
      * </ul>
      * </ul>
      */
@@ -2087,12 +2129,18 @@ public class Intent implements Parcelable {
             "android.intent.extra.remote_intent_token";
 
     /**
-     * Used as an int extra field in {@link android.content.Intent#ACTION_PACKAGE_CHANGED}
-     * intent to supply the name of the component that changed.
-     *
+     * @deprecated See {@link #EXTRA_CHANGED_COMPONENT_NAME_LIST}; this field
+     * will contain only the first name in the list.
      */
-    public static final String EXTRA_CHANGED_COMPONENT_NAME =
+    @Deprecated public static final String EXTRA_CHANGED_COMPONENT_NAME =
             "android.intent.extra.changed_component_name";
+
+    /**
+     * This field is part of {@link android.content.Intent#ACTION_PACKAGE_CHANGED}
+     * and contains a string array of all of the components that have changed.
+     */
+    public static final String EXTRA_CHANGED_COMPONENT_NAME_LIST =
+            "android.intent.extra.changed_component_name_list";
 
     /**
      * @hide
@@ -2393,6 +2441,7 @@ public class Intent implements Parcelable {
     private int mFlags;
     private HashSet<String> mCategories;
     private Bundle mExtras;
+    private Rect mSourceBounds;
 
     // ---------------------------------------------------------------------
 
@@ -2417,6 +2466,9 @@ public class Intent implements Parcelable {
         }
         if (o.mExtras != null) {
             this.mExtras = new Bundle(o.mExtras);
+        }
+        if (o.mSourceBounds != null) {
+            this.mSourceBounds = new Rect(o.mSourceBounds);
         }
     }
 
@@ -2611,7 +2663,7 @@ public class Intent implements Parcelable {
                     intent.mType = value;
                 }
 
-                // launch  flags
+                // launch flags
                 else if (uri.startsWith("launchFlags=", i)) {
                     intent.mFlags = Integer.decode(value).intValue();
                 }
@@ -2629,6 +2681,11 @@ public class Intent implements Parcelable {
                 // scheme
                 else if (uri.startsWith("scheme=", i)) {
                     scheme = value;
+                }
+
+                // source bounds
+                else if (uri.startsWith("sourceBounds=", i)) {
+                    intent.mSourceBounds = Rect.unflattenFromString(value);
                 }
 
                 // extra
@@ -3520,6 +3577,15 @@ public class Intent implements Parcelable {
      */
     public ComponentName getComponent() {
         return mComponent;
+    }
+
+    /**
+     * Get the bounds of the sender of this intent, in screen coordinates.  This can be
+     * used as a hint to the receiver for animations and the like.  Null means that there
+     * is no source bounds.
+     */
+    public Rect getSourceBounds() {
+        return mSourceBounds;
     }
 
     /**
@@ -4624,6 +4690,19 @@ public class Intent implements Parcelable {
     }
 
     /**
+     * Set the bounds of the sender of this intent, in screen coordinates.  This can be
+     * used as a hint to the receiver for animations and the like.  Null means that there
+     * is no source bounds.
+     */
+    public void setSourceBounds(Rect r) {
+        if (r != null) {
+            mSourceBounds = new Rect(r);
+        } else {
+            r = null;
+        }
+    }
+
+    /**
      * Use with {@link #fillIn} to allow the current action value to be
      * overwritten, even if it is already set.
      */
@@ -4654,6 +4733,12 @@ public class Intent implements Parcelable {
     public static final int FILL_IN_PACKAGE = 1<<4;
 
     /**
+     * Use with {@link #fillIn} to allow the current package value to be
+     * overwritten, even if it is already set.
+     */
+    public static final int FILL_IN_SOURCE_BOUNDS = 1<<5;
+
+    /**
      * Copy the contents of <var>other</var> in to this object, but only
      * where fields are not defined by this object.  For purposes of a field
      * being defined, the following pieces of data in the Intent are
@@ -4667,6 +4752,7 @@ public class Intent implements Parcelable {
      * <li> package, as set by {@link #setPackage}.
      * <li> component, as set by {@link #setComponent(ComponentName)} or
      * related methods.
+     * <li> source bounds, as set by {@link #setSourceBounds}
      * <li> each top-level name in the associated extras.
      * </ul>
      *
@@ -4728,6 +4814,11 @@ public class Intent implements Parcelable {
             changes |= FILL_IN_COMPONENT;
         }
         mFlags |= other.mFlags;
+        if (other.mSourceBounds != null
+                && (mSourceBounds == null || (flags&FILL_IN_SOURCE_BOUNDS) != 0)) {
+            mSourceBounds = new Rect(other.mSourceBounds);
+            changes |= FILL_IN_SOURCE_BOUNDS;
+        }
         if (mExtras == null) {
             if (other.mExtras != null) {
                 mExtras = new Bundle(other.mExtras);
@@ -4981,6 +5072,13 @@ public class Intent implements Parcelable {
             first = false;
             b.append("cmp=").append(mComponent.flattenToShortString());
         }
+        if (mSourceBounds != null) {
+            if (!first) {
+                b.append(' ');
+            }
+            first = false;
+            b.append("bnds=").append(mSourceBounds.toShortString());
+        }
         if (extras && mExtras != null) {
             if (!first) {
                 b.append(' ');
@@ -5072,6 +5170,11 @@ public class Intent implements Parcelable {
             uri.append("component=").append(Uri.encode(
                     mComponent.flattenToShortString(), "/")).append(';');
         }
+        if (mSourceBounds != null) {
+            uri.append("sourceBounds=")
+                    .append(Uri.encode(mSourceBounds.flattenToString()))
+                    .append(';');
+        }
         if (mExtras != null) {
             for (String key : mExtras.keySet()) {
                 final Object value = mExtras.get(key);
@@ -5115,6 +5218,13 @@ public class Intent implements Parcelable {
         out.writeString(mPackage);
         ComponentName.writeToParcel(mComponent, out);
 
+        if (mSourceBounds != null) {
+            out.writeInt(1);
+            mSourceBounds.writeToParcel(out, flags);
+        } else {
+            out.writeInt(0);
+        }
+
         if (mCategories != null) {
             out.writeInt(mCategories.size());
             for (String category : mCategories) {
@@ -5149,6 +5259,10 @@ public class Intent implements Parcelable {
         mFlags = in.readInt();
         mPackage = in.readString();
         mComponent = ComponentName.readFromParcel(in);
+
+        if (in.readInt() != 0) {
+            mSourceBounds = Rect.CREATOR.createFromParcel(in);
+        }
 
         int N = in.readInt();
         if (N > 0) {

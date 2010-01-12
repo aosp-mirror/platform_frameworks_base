@@ -1,0 +1,38 @@
+page.title=Developer Resources
+@jd:body
+
+<p>
+This section provides technical articles, tutorials, sample code, and other
+information to help you quickly implement the features you want in your
+application.
+</p>
+
+<dl>
+<dt><b>Technical Articles</b></dt>
+<dd>Focused discussions about Android development subjects, including
+optimizations, tips, interesting implementations,
+and so on. Most of the articles provide "how-to" instructions for adding
+features or functionality to your app. The articles are drawn from posts to the
+Android Developers Blog.
+</dd>
+
+<dt><b>Tutorials</b></dt>
+<dd>Step-by-step instructions demonstrating how to build an Android application
+that has the specific features you want. </dd>
+
+<dt><b>Sample Code</b></dt>
+<dd>Fully-functioning sample applications that you can look at or build and run,
+to learn about how Android works. Feel free to reuse any of the code or
+techniques that you find in the samples!</dd>
+
+<dt><b>Community</b></dt>
+<dd>Links to the Android discussion groups and information about other ways to
+collaborate with other developers. </dd>
+
+<dt><b>More</b></dt> 
+<dd>Quick development tips, troubleshooting information, and frequently asked
+questions (FAQs). </dd>
+</dl>
+
+<p>To return to this page later, just click the "Resources" tab while any
+Resources page is loaded. </p>

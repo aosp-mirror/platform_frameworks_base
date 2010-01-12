@@ -25,10 +25,6 @@ import android.os.Parcelable;
  * specify the general device type such as a phone, a computer, or
  * headset, and whether it's capable of services such as audio or telephony.
  *
- * <p>The Bluetooth class is useful as a hint to roughly describe a device (for example to
- * show an icon in the UI), but does not reliably describe which Bluetooth
- * profiles or services are actually supported by a device.
- *
  * <p>Every Bluetooth class is composed of zero or more service classes, and
  * exactly one device class. The device class is further broken down into major
  * and minor device class components.

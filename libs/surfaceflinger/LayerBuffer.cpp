@@ -26,6 +26,8 @@
 #include <ui/GraphicBuffer.h>
 #include <ui/PixelFormat.h>
 #include <ui/FramebufferNativeWindow.h>
+#include <ui/Rect.h>
+#include <ui/Region.h>
 
 #include <hardware/copybit.h>
 
@@ -46,12 +48,15 @@ gralloc_module_t const* LayerBuffer::sGrallocModule = 0;
 LayerBuffer::LayerBuffer(SurfaceFlinger* flinger, DisplayID display,
         const sp<Client>& client, int32_t i)
     : LayerBaseClient(flinger, display, client, i),
-      mNeedsBlending(false)
+      mNeedsBlending(false), mBlitEngine(0)
 {
 }
 
 LayerBuffer::~LayerBuffer()
 {
+    if (mBlitEngine) {
+        copybit_close(mBlitEngine);
+    }
 }
 
 void LayerBuffer::onFirstRef()
@@ -68,6 +73,10 @@ void LayerBuffer::onFirstRef()
         if (hw_get_module(GRALLOC_HARDWARE_MODULE_ID, &module) == 0) {
             sGrallocModule = (gralloc_module_t const *)module;
         }
+    }
+
+    if (hw_get_module(COPYBIT_HARDWARE_MODULE_ID, &module) == 0) {
+        copybit_open(module, &mBlitEngine);
     }
 }
 
@@ -109,7 +118,10 @@ uint32_t LayerBuffer::doTransaction(uint32_t flags)
     sp<Source> source(getSource());
     if (source != 0)
         source->onTransaction(flags);
-    return LayerBase::doTransaction(flags);    
+    uint32_t res = LayerBase::doTransaction(flags);
+    // we always want filtering for these surfaces
+    mUseLinearFiltering = !(mFlags & DisplayHardware::SLOW_CONFIG);
+    return res;
 }
 
 void LayerBuffer::unlockPageFlip(const Transform& planeTransform,
@@ -252,7 +264,16 @@ LayerBuffer::Buffer::Buffer(const ISurface::BufferHeap& buffers, ssize_t offset)
     : mBufferHeap(buffers)
 {
     NativeBuffer& src(mNativeBuffer);
-    src.img.handle = 0;
+    src.crop.l = 0;
+    src.crop.t = 0;
+    src.crop.r = buffers.w;
+    src.crop.b = buffers.h;
+
+    src.img.w       = buffers.hor_stride ?: buffers.w;
+    src.img.h       = buffers.ver_stride ?: buffers.h;
+    src.img.format  = buffers.format;
+    src.img.base    = (void*)(intptr_t(buffers.heap->base()) + offset);
+    src.img.handle  = 0;
 
     gralloc_module_t const * module = LayerBuffer::getGrallocModule();
     if (module && module->perform) {
@@ -262,19 +283,12 @@ LayerBuffer::Buffer::Buffer(const ISurface::BufferHeap& buffers, ssize_t offset)
                 offset, buffers.heap->base(),
                 &src.img.handle);
 
-        if (err == NO_ERROR) {
-            src.crop.l = 0;
-            src.crop.t = 0;
-            src.crop.r = buffers.w;
-            src.crop.b = buffers.h;
-
-            src.img.w       = buffers.hor_stride ?: buffers.w;
-            src.img.h       = buffers.ver_stride ?: buffers.h;
-            src.img.format  = buffers.format;
-            src.img.base    = (void*)(intptr_t(buffers.heap->base()) + offset);
-        }
+        LOGE_IF(err, "CREATE_HANDLE_FROM_BUFFER (heapId=%d, size=%d, "
+             "offset=%ld, base=%p) failed (%s)",
+                buffers.heap->heapID(), buffers.heap->getSize(),
+                offset, buffers.heap->base(), strerror(-err));
     }
-}
+ }
 
 LayerBuffer::Buffer::~Buffer()
 {
@@ -438,15 +452,24 @@ void LayerBuffer::BufferSource::onDraw(const Region& clip) const
 
 #if defined(EGL_ANDROID_image_native_buffer)
     if (mLayer.mFlags & DisplayHardware::DIRECT_TEXTURE) {
-         // NOTE: Assume the buffer is  allocated with the proper USAGE flags
-        sp<GraphicBuffer> graphicBuffer = new GraphicBuffer(
-                src.crop.r, src.crop.b, src.img.format, 
-                GraphicBuffer::USAGE_HW_TEXTURE,
-                src.img.w, src.img.handle, false);
+        copybit_device_t* copybit = mLayer.mBlitEngine;
+        if (copybit) {
+            // create our EGLImageKHR the first time
+            err = initTempBuffer();
+            if (err == NO_ERROR) {
+                // NOTE: Assume the buffer is allocated with the proper USAGE flags
+                const NativeBuffer& dst(mTempBuffer);
+                region_iterator clip(Region(Rect(dst.crop.r, dst.crop.b)));
+                copybit->set_parameter(copybit, COPYBIT_TRANSFORM, 0);
+                copybit->set_parameter(copybit, COPYBIT_PLANE_ALPHA, 0xFF);
+                copybit->set_parameter(copybit, COPYBIT_DITHER, COPYBIT_ENABLE);
+                err = copybit->stretch(copybit, &dst.img, &src.img,
+                        &dst.crop, &src.crop, &clip);
 
-        graphicBuffer->setVerticalStride(src.img.h);
-
-        err = mLayer.initializeEglImage(graphicBuffer, &mTexture);
+            }
+        } else {
+            err = INVALID_OPERATION;
+        }
     }
 #endif
     else {
@@ -469,6 +492,72 @@ void LayerBuffer::BufferSource::onDraw(const Region& clip) const
 
     mTexture.transform = mBufferHeap.transform;
     mLayer.drawWithOpenGL(clip, mTexture);
+}
+
+status_t LayerBuffer::BufferSource::initTempBuffer() const
+{
+    // figure out the size we need now
+    const ISurface::BufferHeap& buffers(mBufferHeap);
+    uint32_t w = mLayer.mTransformedBounds.width();
+    uint32_t h = mLayer.mTransformedBounds.height();
+    if (buffers.w * h != buffers.h * w) {
+        int t = w; w = h; h = t;
+    }
+
+    if (mTexture.image != EGL_NO_IMAGE_KHR) {
+        // we have an EGLImage, make sure the needed size didn't change
+        if (w!=mTexture.width || h!= mTexture.height) {
+            // delete the EGLImage and texture
+            EGLDisplay dpy(mLayer.mFlinger->graphicPlane(0).getEGLDisplay());
+            glDeleteTextures(1, &mTexture.name);
+            eglDestroyImageKHR(dpy, mTexture.image);
+            Texture defaultTexture;
+            mTexture = defaultTexture;
+            mTempGraphicBuffer.clear();
+        } else {
+            // we're good, we have an EGLImageKHR and it's (still) the
+            // right size
+            return NO_ERROR;
+        }
+    }
+
+    // figure out if we need linear filtering
+    if (buffers.w * h == buffers.h * w) {
+        // same pixel area, don't use filtering
+        mLayer.mUseLinearFiltering = false;
+    }
+
+    // Allocate a temporary buffer and create the corresponding EGLImageKHR
+
+    status_t err;
+    mTempGraphicBuffer.clear();
+    mTempGraphicBuffer = new GraphicBuffer(
+            w, h, HAL_PIXEL_FORMAT_RGB_565,
+            GraphicBuffer::USAGE_HW_TEXTURE |
+            GraphicBuffer::USAGE_HW_2D);
+
+    err = mTempGraphicBuffer->initCheck();
+    if (err == NO_ERROR) {
+        NativeBuffer& dst(mTempBuffer);
+        dst.img.w = mTempGraphicBuffer->getStride();
+        dst.img.h = h;
+        dst.img.format = mTempGraphicBuffer->getPixelFormat();
+        dst.img.handle = (native_handle_t *)mTempGraphicBuffer->handle;
+        dst.img.base = 0;
+        dst.crop.l = 0;
+        dst.crop.t = 0;
+        dst.crop.r = w;
+        dst.crop.b = h;
+
+        err = mLayer.initializeEglImage(
+                mTempGraphicBuffer, &mTexture);
+        // once the EGLImage has been created (whether it fails
+        // or not) we don't need the graphic buffer reference
+        // anymore.
+        mTempGraphicBuffer.clear();
+    }
+
+    return err;
 }
 
 // ---------------------------------------------------------------------------

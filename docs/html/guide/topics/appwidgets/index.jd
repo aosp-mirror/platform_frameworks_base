@@ -124,9 +124,9 @@ folder.</p>
 
 <pre>
 &lt;appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
-    android:minWidth="294dp" &lt;!-- density-independent pixels --&gt;
+    android:minWidth="294dp"
     android:minHeight="72dp"
-    android:updatePeriodMillis="86400000" &lt;!-- once per day --&gt;
+    android:updatePeriodMillis="86400000"
     android:initialLayout="@layout/example_appwidget"
     android:configure="com.example.android.ExampleAppWidgetConfigure" >
 &lt;/appwidget-provider>
@@ -339,7 +339,7 @@ without worrying about the AppWidgetProvider closing down due to an
 sample's AppWidgetProvider</a> for an example of an App Widget running a {@link android.app.Service}.</p>
 
 <p>Also see the <a 
-href="{@docRoot}guide/samples/ApiDemos/src/com/example/android/apis/appwidget/ExampleAppWidgetProvider.html">
+href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/appwidget/ExampleAppWidgetProvider.html">
 ExampleAppWidgetProvider.java</a> sample class.</p>
 
 
@@ -468,7 +468,7 @@ reaching the end, the App Widget host is notified that the configuration was can
 App Widget will not be added.</p>
 
 <p>See the <a 
-href="{@docRoot}guide/samples/ApiDemos/src/com/example/android/apis/appwidget/ExampleAppWidgetConfigure.html">
+href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/appwidget/ExampleAppWidgetConfigure.html">
 ExampleAppWidgetConfigure.java</a> sample class in ApiDemos for an example.</p>
 
 

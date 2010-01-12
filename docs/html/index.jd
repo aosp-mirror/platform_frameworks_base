@@ -76,11 +76,17 @@ home=true
                                       <td colspan="2"><div class="seperator">&nbsp;</div></td>
                               </tr>
                               <tr>
-                                      <td class="imageCell"><a href="http://www.youtube.com/user/androiddevelopers"><img src="{@docRoot}assets/images/video-droid.png" style="padding:0" /></a></td>
+                                      <td class="imageCell"><a
+href="{@docRoot}resources/dashboard/platform-versions.html"><img
+src="{@docRoot}images/icon_dashboard.png" style="padding:0" /></a></td>
                                       <td>
-                                              <h2 class="green">Watch</h2>
-                                              <object width="150" height="140"><param name="movie" value="http://www.youtube.com/v/N6YdwzAvwOA&hl=en&fs=1"></param><param name="allowFullScreen" value="true"></param><param name="allowscriptaccess" value="always"></param><embed src="http://www.youtube.com/v/N6YdwzAvwOA&hl=en&fs=1" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" width="150" height="140"></embed></object>
-                                              <p style="margin-top:1em"><a href="{@docRoot}videos/index.html">More Android videos &raquo;</a></p>
+                                              <h2 class="green">Target Devices</h2>
+                                              <p>The Device Dashboard
+provides information about deployed Android devices to
+help you target suitable device configurations as you build and update your
+apps.</p>
+                                              <p><a
+href="{@docRoot}resources/dashboard/platform-versions.html">Learn more &raquo;</a></p>
                                       </td>
                               </tr>
 
@@ -120,25 +126,33 @@ home=true
     'sdk': {
       'layout':"imgLeft",
       'icon':"sdk-small.png",
-      'name':"Android 2.0",
+      'name':"Android 2.0.1",
       'img':"eclair-android.png",
-      'title':"Android 2.0 has arrived!",
-      'desc': "<p>Android 2.0 includes exciting new features and APIs. "
+      'title':"Android 2.0.1",
+      'desc': "<p>Android 2.0.1 is a minor platform update to Android 2.0. "
                + "For information about what's included in the new platform, read "
-               + "the <a href='{@docRoot}sdk/android-2.0.html'>Android 2.0 version notes</a>.</p>"
-               + "<p>If you have the Android 1.6 SDK, you can update your environment "
-               + "by installing the Android 2.0 platform and updated tools as "
-               + "<a href='{@docRoot}sdk/adding-components.html'>SDK components</a>. Otherwise, "
+               + "the <a href='{@docRoot}sdk/android-2.0.1.html'>Android 2.0.1 "
+               + "version notes</a>.</p>"
+               + "<p>You can update your existing environment "
+               + "by installing the Android 2.0.1 platform and updated tools as"
+               + " <a href='{@docRoot}sdk/adding-components.html'>SDK "
+               + "components</a>. Otherwise, "
                + "<a href='{@docRoot}sdk/index.html'>download a new Android SDK</a>.</p>"
     },
 
     'devphone': {
       'layout':"imgLeft",
       'icon':"devphone-small.png",
-      'name':"Dev Phone 1",
+      'name':"Dev Phones",
       'img':"devphone-large.png",
-      'title':"Android Dev Phone 1",
-      'desc': "<p>Run and debug your Android applications directly on this device. Modify and rebuild the Android operating system, and flash it onto the phone. The Android Dev Phone 1 is carrier independent, and available for purchase by any developer registered with <a href='http://market.android.com/publish'>Android Market</a>.</p><p><a href='/guide/developing/device.html#dev-phone-1'>Learn more about the Android Dev Phone 1 &raquo;</a></p>"
+      'title':"Android Dev Phones",
+      'desc': "<p>Run and debug your Android applications directly on one of these "
+ + "device. Modify and rebuild the Android operating system, and flash it onto "
+ + "the phone. The Android Dev Phones are carrier independent, and available for "
+ + "purchase by any developer registered with <a "
+ + "href='http://market.android.com/publish'>Android Market</a>.</p><p><a "
+ + "href='/guide/developing/device.html#dev-phone-1'>Learn more about the "
+ + "Android Dev Phones &raquo;</a></p>"
     },
 
     'mapskey': {

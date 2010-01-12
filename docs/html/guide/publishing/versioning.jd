@@ -141,9 +141,16 @@ element in the application's manifest, with one or more of these attributes: </p
 <li><code>android:minSdkVersion</code> &mdash; The minimum version
 of the Android platform on which the application will run, specified
 by the platform's API Level identifier. </li>
+<li><code>android:targetSdkVersion</code> &mdash; Specifies the API Level
+on which the application is designed to run. In some cases, this allows the
+application to use manifest elements or behaviors defined in the target
+API Level, rather than being restricted to using only those defined 
+for the minimum API Level.</li>
 <li><code>android:maxSdkVersion</code> &mdash; The maximum version
 of the Android platform on which the application is designed to run, 
-specified by the platform's API Level identifier.  </li>
+specified by the platform's API Level identifier. <strong>Important:</strong> Please read the <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html"><code>&lt;uses-sdk&gt;</code></a>
+documentation before using this attribute. </li>
 </ul>
 
 <p>When preparing to install your application, the system checks the value of this
@@ -163,6 +170,6 @@ maximum API Level. </p>
 <code>android:minSdkVersion</code> as an attribute. </p>
 
 <p>For more information, see the <a
-href="{@docRoot}guide/developing/manifest/uses-sdk-element.html"><code>&lt;uses-
-sdk&gt;</code></a> manifest element documentation and the <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html"><code>&lt;uses-sdk&gt;</code></a>
+manifest element documentation and the <a
 href="{@docRoot}guide/appendix/api-levels.html">API Levels</a> document.</p>

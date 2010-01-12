@@ -125,8 +125,29 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
 
     int mWidth = -1;
     int mHeight = -1;
+    
+    /**
+     * Resource name if using a picture from the wallpaper gallery
+     */
     String mName = "";
+    
+    /**
+     * The component name of the currently set live wallpaper.
+     */
     ComponentName mWallpaperComponent;
+    
+    /**
+     * The component name of the wallpaper that should be set next.
+     */
+    ComponentName mNextWallpaperComponent;
+    
+    /**
+     * Name of the component used to display bitmap wallpapers from either the gallery or
+     * built-in wallpapers.
+     */
+    ComponentName mImageWallpaperComponent = new ComponentName("android", 
+            ImageWallpaper.class.getName());
+    
     WallpaperConnection mWallpaperConnection;
     long mLastDiedTime;
     
@@ -185,7 +206,7 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
     }
     
     public WallpaperManagerService(Context context) {
-        if (DEBUG) Log.d(TAG, "WallpaperService startup");
+        if (DEBUG) Log.v(TAG, "WallpaperService startup");
         mContext = context;
         mIWindowManager = IWindowManager.Stub.asInterface(
                 ServiceManager.getService(Context.WINDOW_SERVICE));
@@ -201,9 +222,10 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
     }
     
     public void systemReady() {
+        if (DEBUG) Log.v(TAG, "systemReady");
         synchronized (mLock) {
             try {
-                bindWallpaperComponentLocked(mWallpaperComponent);
+                bindWallpaperComponentLocked(mNextWallpaperComponent);
             } catch (RuntimeException e) {
                 Log.w(TAG, "Failure starting previous wallpaper", e);
                 try {
@@ -217,6 +239,7 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
     }
     
     public void clearWallpaper() {
+        if (DEBUG) Log.v(TAG, "clearWallpaper");
         synchronized (mLock) {
             File f = WALLPAPER_FILE;
             if (f.exists()) {
@@ -301,13 +324,16 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
     }
     
     public ParcelFileDescriptor setWallpaper(String name) {
+        if (DEBUG) Log.v(TAG, "setWallpaper");
+        
         checkPermission(android.Manifest.permission.SET_WALLPAPER);
         synchronized (mLock) {
             final long ident = Binder.clearCallingIdentity();
             try {
                 ParcelFileDescriptor pfd = updateWallpaperBitmapLocked(name);
                 if (pfd != null) {
-                    bindWallpaperComponentLocked(null);
+                    // Bind the wallpaper to an ImageWallpaper
+                    bindWallpaperComponentLocked(mImageWallpaperComponent);
                     saveSettingsLocked();
                 }
                 return pfd;
@@ -331,6 +357,7 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
     }
 
     public void setWallpaperComponent(ComponentName name) {
+        if (DEBUG) Log.v(TAG, "setWallpaperComponent name=" + name);
         checkPermission(android.Manifest.permission.SET_WALLPAPER_COMPONENT);
         synchronized (mLock) {
             final long ident = Binder.clearCallingIdentity();
@@ -342,41 +369,53 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
         }
     }
     
-    void bindWallpaperComponentLocked(ComponentName name) {
+    void bindWallpaperComponentLocked(ComponentName componentName) {
+        if (DEBUG) Log.v(TAG, "bindWallpaperComponentLocked: componentName=" + componentName);
+        
         // Has the component changed?
         if (mWallpaperConnection != null) {
             if (mWallpaperComponent == null) {
-                if (name == null) {
+                if (componentName == null) {
+                    if (DEBUG) Log.v(TAG, "bindWallpaperComponentLocked: still using default");
                     // Still using default wallpaper.
                     return;
                 }
-            } else if (mWallpaperComponent.equals(name)) {
+            } else if (mWallpaperComponent.equals(componentName)) {
                 // Changing to same wallpaper.
+                if (DEBUG) Log.v(TAG, "same wallpaper");
                 return;
             }
         }
         
         try {
-            ComponentName realName = name;
-            if (realName == null) {
-                // The default component is our static image wallpaper.
-                realName = new ComponentName("android",
-                        ImageWallpaper.class.getName());
-                //clearWallpaperComponentLocked();
-                //return;
+            if (componentName == null) {
+                String defaultComponent = 
+                    mContext.getString(com.android.internal.R.string.default_wallpaper_component);
+                if (defaultComponent != null) {
+                    // See if there is a default wallpaper component specified
+                    componentName = ComponentName.unflattenFromString(defaultComponent);
+                    if (DEBUG) Log.v(TAG, "Use default component walpaper:" + componentName);
+                }
+                if (componentName == null) {
+                    // Fall back to static image wallpaper
+                    componentName = mImageWallpaperComponent;
+                    //clearWallpaperComponentLocked();
+                    //return;
+                    if (DEBUG) Log.v(TAG, "Using image wallpaper");
+                }
             }
-            ServiceInfo si = mContext.getPackageManager().getServiceInfo(realName,
+            ServiceInfo si = mContext.getPackageManager().getServiceInfo(componentName,
                     PackageManager.GET_META_DATA | PackageManager.GET_PERMISSIONS);
             if (!android.Manifest.permission.BIND_WALLPAPER.equals(si.permission)) {
                 throw new SecurityException("Selected service does not require "
                         + android.Manifest.permission.BIND_WALLPAPER
-                        + ": " + realName);
+                        + ": " + componentName);
             }
             
             WallpaperInfo wi = null;
             
             Intent intent = new Intent(WallpaperService.SERVICE_INTERFACE);
-            if (name != null) {
+            if (componentName != null && !componentName.equals(mImageWallpaperComponent)) {
                 // Make sure the selected service is actually a wallpaper service.
                 List<ResolveInfo> ris = mContext.getPackageManager()
                         .queryIntentServices(intent, PackageManager.GET_META_DATA);
@@ -396,13 +435,14 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
                 }
                 if (wi == null) {
                     throw new SecurityException("Selected service is not a wallpaper: "
-                            + realName);
+                            + componentName);
                 }
             }
             
             // Bind the service!
+            if (DEBUG) Log.v(TAG, "Binding to:" + componentName);
             WallpaperConnection newConn = new WallpaperConnection(wi);
-            intent.setComponent(realName);
+            intent.setComponent(componentName);
             intent.putExtra(Intent.EXTRA_CLIENT_LABEL,
                     com.android.internal.R.string.wallpaper_binding_label);
             intent.putExtra(Intent.EXTRA_CLIENT_INTENT, PendingIntent.getActivity(
@@ -413,11 +453,11 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
             if (!mContext.bindService(intent, newConn,
                     Context.BIND_AUTO_CREATE)) {
                 throw new IllegalArgumentException("Unable to bind service: "
-                        + name);
+                        + componentName);
             }
             
             clearWallpaperComponentLocked();
-            mWallpaperComponent = name;
+            mWallpaperComponent = componentName;
             mWallpaperConnection = newConn;
             mLastDiedTime = SystemClock.uptimeMillis();
             try {
@@ -428,7 +468,7 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
             }
             
         } catch (PackageManager.NameNotFoundException e) {
-            throw new IllegalArgumentException("Unknown component " + name);
+            throw new IllegalArgumentException("Unknown component " + componentName);
         }
     }
     
@@ -526,6 +566,8 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
     }
 
     private void loadSettingsLocked() {
+        if (DEBUG) Log.v(TAG, "loadSettingsLocked");
+        
         JournaledFile journal = makeJournaledFile();
         FileInputStream stream = null;
         File file = journal.chooseForRead();
@@ -545,9 +587,16 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
                         mHeight = Integer.parseInt(parser.getAttributeValue(null, "height"));
                         mName = parser.getAttributeValue(null, "name");
                         String comp = parser.getAttributeValue(null, "component");
-                        mWallpaperComponent = comp != null
+                        mNextWallpaperComponent = comp != null
                                 ? ComponentName.unflattenFromString(comp)
                                 : null;
+                          
+                        if (DEBUG) {
+                            Log.v(TAG, "mWidth:" + mWidth);
+                            Log.v(TAG, "mHeight:" + mHeight);
+                            Log.v(TAG, "mName:" + mName);
+                            Log.v(TAG, "mNextWallpaperComponent:" + mNextWallpaperComponent);
+                        }
                     }
                 }
             } while (type != XmlPullParser.END_DOCUMENT);
@@ -579,15 +628,30 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
     }
 
     void settingsRestored() {
+        if (DEBUG) Log.v(TAG, "settingsRestored");
+        
         boolean success = false;
         synchronized (mLock) {
             loadSettingsLocked();
-            // If there's a wallpaper name, we use that.  If that can't be loaded, then we
-            // use the default.
-            if ("".equals(mName)) {
+            if (mNextWallpaperComponent != null && 
+                    !mNextWallpaperComponent.equals(mImageWallpaperComponent)) {
+                // We can't restore live wallpapers, so just go with the default
+                bindWallpaperComponentLocked(null);
                 success = true;
             } else {
-                success = restoreNamedResourceLocked();
+                // If there's a wallpaper name, we use that.  If that can't be loaded, then we
+                // use the default.
+                if ("".equals(mName)) {
+                    if (DEBUG) Log.v(TAG, "settingsRestored: name is empty");
+                    success = true;
+                } else {
+                    if (DEBUG) Log.v(TAG, "settingsRestored: attempting to restore named resource");
+                    success = restoreNamedResourceLocked();
+                }
+                if (DEBUG) Log.v(TAG, "settingsRestored: success=" + success);
+                if (success) {
+                    bindWallpaperComponentLocked(mImageWallpaperComponent);
+                }
             }
         }
 
@@ -644,7 +708,7 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
                     }
                     // mWallpaperObserver will notice the close and send the change broadcast
 
-                    Log.d(TAG, "Restored wallpaper: " + resName);
+                    Log.v(TAG, "Restored wallpaper: " + resName);
                     return true;
                 } catch (NameNotFoundException e) {
                     Log.e(TAG, "Package name " + pkg + " not found");

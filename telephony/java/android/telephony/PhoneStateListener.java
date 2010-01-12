@@ -49,8 +49,9 @@ public class PhoneStateListener {
      *
      * @see #onSignalStrengthChanged
      *
-     * TODO: @deprecated to be deprecated by LISTEN_SIGNAL_STRENGTHS, @see #onSignalStrengthsChanged
+     * @deprecated by {@link #LISTEN_SIGNAL_STRENGTHS}
      */
+    @Deprecated
     public static final int LISTEN_SIGNAL_STRENGTH                          = 0x00000002;
 
     /**
@@ -127,8 +128,6 @@ public class PhoneStateListener {
      * icon.
      *
      * @see #onSignalStrengthsChanged
-     *
-     * @hide
      */
     public static final int LISTEN_SIGNAL_STRENGTHS                         = 0x00000100;
 
@@ -154,7 +153,7 @@ public class PhoneStateListener {
      * @see ServiceState#STATE_IN_SERVICE
      * @see ServiceState#STATE_OUT_OF_SERVICE
      * @see ServiceState#STATE_POWER_OFF
-     * @deprecated see #onSignalStrengthsChanged
+     * @deprecated Use {@link #onSignalStrengthsChanged(SignalStrength)}
      */
     @Deprecated
     public void onSignalStrengthChanged(int asu) {
@@ -206,7 +205,6 @@ public class PhoneStateListener {
     }
 
     /**
-     * @hide
      * same as above, but with the network type.  Both called.
      */
     public void onDataConnectionStateChanged(int state, int networkType) {
@@ -232,8 +230,6 @@ public class PhoneStateListener {
      * @see ServiceState#STATE_IN_SERVICE
      * @see ServiceState#STATE_OUT_OF_SERVICE
      * @see ServiceState#STATE_POWER_OFF
-     *
-     * @hide
      */
     public void onSignalStrengthsChanged(SignalStrength signalStrength) {
         // default implementation empty

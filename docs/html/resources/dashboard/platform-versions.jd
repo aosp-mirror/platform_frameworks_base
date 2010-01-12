@@ -1,0 +1,79 @@
+page.title=Platform Versions
+@jd:body
+
+<style type="text/css">
+div.dashboard-panel {
+  max-width:928px;
+  margin:0 0 1em 0;
+  padding:20px 20px 0 20px;
+  border:1px solid #d3ecf5;
+  border-radius:7px;
+  -moz-border-radius:7px;
+  -webkit-border-radius:7px;
+  background-color: #DAF3FC;
+  box-shadow:2px 3px 1px #eee;
+  -moz-box-shadow:2px 3px 1px #eee;
+  -webkit-box-shadow:2px 3px 1px #eee;
+  overflow:hidden;
+}
+#jd-content div.dashboard-panel img {
+  margin:0 20px 20px 0;
+  padding:0;
+  border:1px solid #ccc;
+  float:left;
+}
+div.dashboard-panel table {
+  margin:0 0 20px 0;
+  float:left;
+  background-color:#fff;
+}
+div.dashboard-panel th {
+  white-space:nowrap;
+}
+</style>
+
+<p>This page provides data about the relative number of active devices
+running a given version of the Android platform. This can help you
+understand the landscape of device distribution and decide how to prioritize
+the development of your application features for the devices currently in
+the hands of users.</p>
+
+<p class="note"><strong>Note:</strong> This data is based on the number
+of Android devices that have accessed Android Market within a 14-day period
+ending on the data collection date noted below.</p>
+
+<div class="dashboard-panel">
+
+<img alt="" width="400" height="250"
+src="http://chart.apis.google.com/chart?cht=p&chs=400x250&chd=t:0.3,27.7,54.2,2.9,14.8&chl=Android%201.1|Android%201.5|Android%201.6|Android%202.0|Android%202.0.1&chco=c4df9b,6fad0c" />
+
+<!-- f6faf2,a3c539 -->
+
+<table>
+<tr>
+  <th>Android Platform</th>
+  <th>Percent of Devices</th>
+</tr>
+<tr>
+  <td>Android 1.1</td>
+  <td>0.3%</td>
+</tr>
+<tr>
+  <td>Android 1.5</td>
+  <td>27.7%</td>
+</tr>
+<tr>
+  <td>Android 1.6</td>
+  <td>54.2%</td></tr>
+<tr>
+  <td>Android 2.0</td>
+  <td>2.9%</td>
+</tr>
+<tr>
+  <td>Android 2.0.1</td>
+  <td>14.8%</td>
+</tr>
+</table>
+</div>
+
+<p><em>Data collected during two weeks ending on 12/14/2009</em></p>

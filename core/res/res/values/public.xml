@@ -933,7 +933,7 @@
   <public type="attr" name="marqueeRepeatLimit" id="0x0101021d" />
 
 <!-- ===============================================================
-     Resources added in version 3 of the platform.
+     Resources added in version 3 of the platform (Cupcake).
      =============================================================== -->
   <eat-comment />
 
@@ -1087,7 +1087,7 @@
   <public type="integer" name="config_longAnimTime" id="0x010e0002" />
 
 <!-- ===============================================================
-     Resources added in Donut.
+     Resources added in version 4 of the platform (Donut).
      =============================================================== -->
   <eat-comment />
 
@@ -1142,67 +1142,77 @@
   <public type="anim" name="linear_interpolator" id="0x010a000b" />
 
 <!-- ===============================================================
-     Resources added in Eclair.
+     Resources added in version 5 of the platform (Eclair).
      =============================================================== -->
   <eat-comment />
 
   <public type="attr" name="required" id="0x0101028e" />
-  <public type="attr" name="accountType" />
-  <public type="attr" name="contentAuthority" />
-  <public type="attr" name="userVisible" />
-  <public type="attr" name="windowShowWallpaper" />
-  <public type="attr" name="wallpaperOpenEnterAnimation" />
-  <public type="attr" name="wallpaperOpenExitAnimation" />
-  <public type="attr" name="wallpaperCloseEnterAnimation" />
-  <public type="attr" name="wallpaperCloseExitAnimation" />
-  <public type="attr" name="wallpaperIntraOpenEnterAnimation" />
-  <public type="attr" name="wallpaperIntraOpenExitAnimation" />
-  <public type="attr" name="wallpaperIntraCloseEnterAnimation" />
-  <public type="attr" name="wallpaperIntraCloseExitAnimation" />
-  <public type="attr" name="supportsUploading" />
-  <public type="attr" name="killAfterRestore" />
-  <public type="attr" name="restoreNeedsApplication" />
-  <public type="attr" name="smallIcon" />
-  <public type="attr" name="accountPreferences" />
-  <public type="attr" name="textAppearanceSearchResultSubtitle" />
-  <public type="attr" name="textAppearanceSearchResultTitle" />
-  <public type="attr" name="summaryColumn" />
-  <public type="attr" name="detailColumn" />
-  <public type="attr" name="detailSocialSummary" />
-  <public type="attr" name="thumbnail" />
-  <public type="attr" name="detachWallpaper" />
-  <public type="attr" name="finishOnCloseSystemDialogs" />
-  <public type="attr" name="scrollbarFadeDuration" />
-  <public type="attr" name="scrollbarDefaultDelayBeforeFade" />
-  <public type="attr" name="fadeScrollbars" />
-  <public type="attr" name="colorBackgroundCacheHint" />
-  <public type="attr" name="dropDownHorizontalOffset" />
-  <public type="attr" name="dropDownVerticalOffset" />
+  <public type="attr" name="accountType" id="0x0101028f" />
+  <public type="attr" name="contentAuthority" id="0x01010290" />
+  <public type="attr" name="userVisible" id="0x01010291" />
+  <public type="attr" name="windowShowWallpaper" id="0x01010292" />
+  <public type="attr" name="wallpaperOpenEnterAnimation" id="0x01010293" />
+  <public type="attr" name="wallpaperOpenExitAnimation" id="0x01010294" />
+  <public type="attr" name="wallpaperCloseEnterAnimation" id="0x01010295" />
+  <public type="attr" name="wallpaperCloseExitAnimation" id="0x01010296" />
+  <public type="attr" name="wallpaperIntraOpenEnterAnimation" id="0x01010297" />
+  <public type="attr" name="wallpaperIntraOpenExitAnimation" id="0x01010298" />
+  <public type="attr" name="wallpaperIntraCloseEnterAnimation" id="0x01010299" />
+  <public type="attr" name="wallpaperIntraCloseExitAnimation" id="0x0101029a" />
+  <public type="attr" name="supportsUploading" id="0x0101029b" />
+  <public type="attr" name="killAfterRestore" id="0x0101029c" />
+  <public type="attr" name="restoreNeedsApplication" id="0x0101029d" />
+  <public type="attr" name="smallIcon" id="0x0101029e" />
+  <public type="attr" name="accountPreferences" id="0x0101029f" />
+  <public type="attr" name="textAppearanceSearchResultSubtitle" id="0x010102a0" />
+  <public type="attr" name="textAppearanceSearchResultTitle" id="0x010102a1" />
+  <public type="attr" name="summaryColumn" id="0x010102a2" />
+  <public type="attr" name="detailColumn" id="0x010102a3" />
+  <public type="attr" name="detailSocialSummary" id="0x010102a4" />
+  <public type="attr" name="thumbnail" id="0x010102a5" />
+  <public type="attr" name="detachWallpaper" id="0x010102a6" />
+  <public type="attr" name="finishOnCloseSystemDialogs" id="0x010102a7" />
+  <public type="attr" name="scrollbarFadeDuration" id="0x010102a8" />
+  <public type="attr" name="scrollbarDefaultDelayBeforeFade" id="0x010102a9" />
+  <public type="attr" name="fadeScrollbars" id="0x010102aa" />
+  <public type="attr" name="colorBackgroundCacheHint" id="0x010102ab" />
+  <public type="attr" name="dropDownHorizontalOffset" id="0x010102ac" />
+  <public type="attr" name="dropDownVerticalOffset" id="0x010102ad" />
   
-  <public type="style" name="Theme.Wallpaper" />
-  <public type="style" name="Theme.Wallpaper.NoTitleBar" />
-  <public type="style" name="Theme.Wallpaper.NoTitleBar.Fullscreen" />
-  <public type="style" name="Theme.WallpaperSettings" />
-  <public type="style" name="Theme.Light.WallpaperSettings" />
-  <public type="style" name="TextAppearance.SearchResult.Title" />
-  <public type="style" name="TextAppearance.SearchResult.Subtitle" />
+  <public type="style" name="Theme.Wallpaper" id="0x0103005e" />
+  <public type="style" name="Theme.Wallpaper.NoTitleBar" id="0x0103005f" />
+  <public type="style" name="Theme.Wallpaper.NoTitleBar.Fullscreen" id="0x01030060" />
+  <public type="style" name="Theme.WallpaperSettings" id="0x01030061" />
+  <public type="style" name="Theme.Light.WallpaperSettings" id="0x01030062" />
+  <public type="style" name="TextAppearance.SearchResult.Title" id="0x01030063" />
+  <public type="style" name="TextAppearance.SearchResult.Subtitle" id="0x01030064" />
   
   <!-- Semi-transparent background that can be used when placing a dark
        themed UI on top of some arbitrary background (such as the
        wallpaper).  This darkens the background sufficiently that the UI
        can be seen. -->
-  <public type="drawable" name="screen_background_dark_transparent" />
-  <public type="drawable" name="screen_background_light_transparent" />
-  <public type="drawable" name="stat_notify_sdcard_prepare" />
+  <public type="drawable" name="screen_background_dark_transparent" id="0x010800a9" />
+  <public type="drawable" name="screen_background_light_transparent" id="0x010800aa" />
+  <public type="drawable" name="stat_notify_sdcard_prepare" id="0x010800ab" />
   
-  <public type="attr" name="quickContactBadgeStyleWindowSmall" />
-  <public type="attr" name="quickContactBadgeStyleWindowMedium" />
-  <public type="attr" name="quickContactBadgeStyleWindowLarge" />
-  <public type="attr" name="quickContactBadgeStyleSmallWindowSmall" />
-  <public type="attr" name="quickContactBadgeStyleSmallWindowMedium" />
-  <public type="attr" name="quickContactBadgeStyleSmallWindowLarge" />
+<!-- ===============================================================
+     Resources added in version 6 of the platform (Eclair 2.0.1).
+     =============================================================== -->
+  <eat-comment />
 
-  <public type="attr" name="wallpaperAuthor" />
-  <public type="attr" name="wallpaperDescription" />
+  <public type="attr" name="quickContactBadgeStyleWindowSmall" id="0x010102ae" />
+  <public type="attr" name="quickContactBadgeStyleWindowMedium" id="0x010102af" />
+  <public type="attr" name="quickContactBadgeStyleWindowLarge" id="0x010102b0" />
+  <public type="attr" name="quickContactBadgeStyleSmallWindowSmall" id="0x010102b1" />
+  <public type="attr" name="quickContactBadgeStyleSmallWindowMedium" id="0x010102b2" />
+  <public type="attr" name="quickContactBadgeStyleSmallWindowLarge" id="0x010102b3" />
+  
+<!-- ===============================================================
+     Resources added in version 7 of the platform (Eclair MR1).
+     =============================================================== -->
+  <eat-comment />
+
+  <public type="attr" name="author" id="0x010102b4" />
+  <public type="attr" name="autoStart" id="0x010102b5" />
   
 </resources>

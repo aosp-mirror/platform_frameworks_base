@@ -42,7 +42,7 @@ import java.util.HashSet;
  *
  * Currently the BluetoothA2dp service runs in the system server and this
  * proxy object will be immediately bound to the service on construction.
- * 
+ *
  * Currently this class provides methods to connect to A2DP audio sinks.
  *
  * @hide
@@ -74,9 +74,12 @@ public final class BluetoothA2dp {
     /** Playing implies connected */
     public static final int STATE_PLAYING    = 4;
 
+    /** Default priority for a2dp devices that we try to auto-connect
+     * and allow incoming connections */
+    public static final int PRIORITY_AUTO_CONNECT = 1000;
     /** Default priority for a2dp devices that should allow incoming
      * connections */
-    public static final int PRIORITY_AUTO = 100;
+    public static final int PRIORITY_ON = 100;
     /** Default priority for a2dp devices that should not allow incoming
      * connections */
     public static final int PRIORITY_OFF = 0;
@@ -190,6 +193,22 @@ public final class BluetoothA2dp {
         try {
             return Collections.unmodifiableSet(
                     new HashSet<BluetoothDevice>(Arrays.asList(mService.getConnectedSinks())));
+        } catch (RemoteException e) {
+            Log.e(TAG, "", e);
+            return null;
+        }
+    }
+
+    /** Check if any A2DP sink is in Non Disconnected state
+     * i.e playing, connected, connecting, disconnecting.
+     * @return a unmodifiable set of connected A2DP sinks, or null on error.
+     * @hide
+     */
+    public Set<BluetoothDevice> getNonDisconnectedSinks() {
+        if (DBG) log("getNonDisconnectedSinks()");
+        try {
+            return Collections.unmodifiableSet(
+                    new HashSet<BluetoothDevice>(Arrays.asList(mService.getNonDisconnectedSinks())));
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
             return null;

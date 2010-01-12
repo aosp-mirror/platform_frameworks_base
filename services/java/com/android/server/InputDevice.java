@@ -288,6 +288,10 @@ public class InputDevice {
                         + " weight: (" + x + "," + y + ")");
                 mAveragedData[ioff + MotionEvent.SAMPLE_X] = x;
                 mAveragedData[ioff + MotionEvent.SAMPLE_Y] = y;
+                mAveragedData[ioff + MotionEvent.SAMPLE_PRESSURE] =
+                        rawData[ioff + MotionEvent.SAMPLE_PRESSURE];
+                mAveragedData[ioff + MotionEvent.SAMPLE_SIZE] =
+                        rawData[ioff + MotionEvent.SAMPLE_SIZE];
             }
             return mAveragedData;
         }
@@ -309,14 +313,17 @@ public class InputDevice {
             long bestDistance = -1;
             int bestIndex = -1;
             for (int j=0; j<lastNumPointers; j++) {
-                if (!allowOverlap && last2Next[j] < 0) {
+                // If we are not allowing multiple new points to be assigned
+                // to the same old pointer, then skip this one if it is already
+                // detected as a conflict (-2).
+                if (!allowOverlap && last2Next[j] < -1) {
                     continue;
                 }
                 final int jd = j * MotionEvent.NUM_SAMPLE_DATA;
                 final int xd = lastData[jd + MotionEvent.SAMPLE_X] - x1;
                 final int yd = lastData[jd + MotionEvent.SAMPLE_Y] - y1;
                 final long distance = xd*(long)xd + yd*(long)yd;
-                if (j == 0 || distance < bestDistance) {
+                if (bestDistance == -1 || distance < bestDistance) {
                     bestDistance = distance;
                     bestIndex = j;
                 }
