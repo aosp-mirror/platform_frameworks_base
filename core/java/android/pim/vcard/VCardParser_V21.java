@@ -110,11 +110,11 @@ public class VCardParser_V21 extends VCardParser {
     private long mTimeHandleBase64;
 
     public VCardParser_V21() {
-        this(VCardConfig.PARSE_TYPE_UNKNOWN);
+        this(null);
     }
 
     public VCardParser_V21(VCardSourceDetector detector) {
-        this(detector.getEstimatedType());
+        this(detector != null ? detector.getEstimatedType() : VCardConfig.PARSE_TYPE_UNKNOWN);
     }
 
     public VCardParser_V21(int parseType) {
