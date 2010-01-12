@@ -48,6 +48,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * <p>Proxy for HTML5 video views.
@@ -70,6 +72,9 @@ class HTML5VideoViewProxy extends Handler
     private static final int PREPARED          = 200;
     private static final int ENDED             = 201;
     private static final int POSTER_FETCHED    = 202;
+
+    // Timer thread -> UI thread
+    private static final int TIMEUPDATE = 300;
 
     // The C++ MediaPlayerPrivateAndroid object.
     int mNativePointer;
@@ -95,6 +100,22 @@ class HTML5VideoViewProxy extends Handler
         private static View mProgressView;
         // The container for the progress view and video view
         private static FrameLayout mLayout;
+        // The timer for timeupate events.
+        // See http://www.whatwg.org/specs/web-apps/current-work/#event-media-timeupdate
+        private static Timer mTimer;
+        private static final class TimeupdateTask extends TimerTask {
+            private HTML5VideoViewProxy mProxy;
+
+            public TimeupdateTask(HTML5VideoViewProxy proxy) {
+                mProxy = proxy;
+            }
+
+            public void run() {
+                mProxy.onTimeupdate();
+            }
+        }
+        // The spec says the timer should fire every 250 ms or less.
+        private static final int TIMEUPDATE_PERIOD = 250;  // ms
 
         private static final WebChromeClient.CustomViewCallback mCallback =
             new WebChromeClient.CustomViewCallback() {
@@ -104,6 +125,8 @@ class HTML5VideoViewProxy extends Handler
                     // which happens when the video view is detached from its parent
                     // view. This happens in the WebChromeClient before this method
                     // is invoked.
+                    mTimer.cancel();
+                    mTimer = null;
                     mCurrentProxy.playbackEnded();
                     mCurrentProxy = null;
                     mLayout.removeView(mVideoView);
@@ -154,8 +177,21 @@ class HTML5VideoViewProxy extends Handler
                 mProgressView.setVisibility(View.VISIBLE);
             }
             mLayout.setVisibility(View.VISIBLE);
+            mTimer = new Timer();
             mVideoView.start();
             client.onShowCustomView(mLayout, mCallback);
+        }
+
+        public static boolean isPlaying(HTML5VideoViewProxy proxy) {
+            return (mCurrentProxy == proxy && mVideoView != null && mVideoView.isPlaying());
+        }
+
+        public static int getCurrentPosition() {
+            int currentPosMs = 0;
+            if (mVideoView != null) {
+                currentPosMs = mVideoView.getCurrentPosition();
+            }
+            return currentPosMs;
         }
 
         public static void seek(int time, HTML5VideoViewProxy proxy) {
@@ -167,10 +203,13 @@ class HTML5VideoViewProxy extends Handler
         public static void pause(HTML5VideoViewProxy proxy) {
             if (mCurrentProxy == proxy && mVideoView != null) {
                 mVideoView.pause();
+                mTimer.purge();
             }
         }
 
         public static void onPrepared() {
+            mTimer.schedule(new TimeupdateTask(mCurrentProxy), TIMEUPDATE_PERIOD, TIMEUPDATE_PERIOD);
+
             if (mProgressView == null || mLayout == null) {
                 return;
             }
@@ -211,7 +250,11 @@ class HTML5VideoViewProxy extends Handler
         sendMessage(obtainMessage(ENDED));
     }
 
-    // Handler for the messages from WebCore thread to the UI thread.
+    public void onTimeupdate() {
+        sendMessage(obtainMessage(TIMEUPDATE));
+    }
+
+    // Handler for the messages from WebCore or Timer thread to the UI thread.
     @Override
     public void handleMessage(Message msg) {
         // This executes on the UI thread.
@@ -246,6 +289,12 @@ class HTML5VideoViewProxy extends Handler
                 WebChromeClient client = mWebView.getWebChromeClient();
                 if (client != null) {
                     doSetPoster(client.getDefaultVideoPoster());
+                }
+                break;
+            }
+            case TIMEUPDATE: {
+                if (VideoPlayer.isPlaying(this)) {
+                    sendTimeupdate();
                 }
                 break;
             }
@@ -418,6 +467,9 @@ class HTML5VideoViewProxy extends Handler
                         Bitmap poster = (Bitmap) msg.obj;
                         nativeOnPosterFetched(poster, mNativePointer);
                         break;
+                    case TIMEUPDATE:
+                        nativeOnTimeupdate(msg.arg1, mNativePointer);
+                        break;
                 }
             }
         };
@@ -431,6 +483,12 @@ class HTML5VideoViewProxy extends Handler
         mPoster = poster;
         Message msg = Message.obtain(mWebCoreHandler, POSTER_FETCHED);
         msg.obj = poster;
+        mWebCoreHandler.sendMessage(msg);
+    }
+
+    private void sendTimeupdate() {
+        Message msg = Message.obtain(mWebCoreHandler, TIMEUPDATE);
+        msg.arg1 = VideoPlayer.getCurrentPosition();
         mWebCoreHandler.sendMessage(msg);
     }
 
@@ -514,4 +572,5 @@ class HTML5VideoViewProxy extends Handler
     private native void nativeOnPrepared(int duration, int width, int height, int nativePointer);
     private native void nativeOnEnded(int nativePointer);
     private native void nativeOnPosterFetched(Bitmap poster, int nativePointer);
+    private native void nativeOnTimeupdate(int position, int nativePointer);
 }
