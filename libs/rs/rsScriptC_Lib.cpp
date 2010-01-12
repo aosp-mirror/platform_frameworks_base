@@ -973,6 +973,13 @@ static void SC_uploadToBufferObject(RsAllocation va)
     rsi_AllocationUploadToBufferObject(rsc, va);
 }
 
+static void SC_syncToGL(RsAllocation va)
+{
+    GET_TLS();
+    Allocation *a = static_cast<Allocation *>(va);
+
+}
+
 static void SC_ClearColor(float r, float g, float b, float a)
 {
     //LOGE("c %f %f %f %f", r, g, b, a);
@@ -1319,6 +1326,9 @@ ScriptCState::SymbolTable_t ScriptCState::gSyms[] = {
     { "uploadToTexture", (void *)&SC_uploadToTexture,
         "void", "(int, int)" },
     { "uploadToBufferObject", (void *)&SC_uploadToBufferObject,
+        "void", "(int)" },
+
+    { "syncToGL", (void *)&SC_syncToGL,
         "void", "(int)" },
 
     { "colorFloatRGBAtoUNorm8", (void *)&SC_colorFloatRGBAtoUNorm8,

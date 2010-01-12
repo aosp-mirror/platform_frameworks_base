@@ -132,7 +132,7 @@ bool ShaderCache::lookup(Context *rsc, ProgramVertex *vtx, ProgramFragment *frag
                 LOGV("vtx U, %s = %d\n", vtx->getUniformName(ct).string(), e->mVtxUniformSlots[ct]);
             }
         }
-        for (uint32_t ct=0; ct < vtx->getUniformCount(); ct++) {
+        for (uint32_t ct=0; ct < frag->getUniformCount(); ct++) {
             e->mFragUniformSlots[ct] = glGetUniformLocation(pgm, frag->getUniformName(ct));
             if (rsc->props.mLogShaders) {
                 LOGV("frag U, %s = %d\n", frag->getUniformName(ct).string(), e->mFragUniformSlots[ct]);
