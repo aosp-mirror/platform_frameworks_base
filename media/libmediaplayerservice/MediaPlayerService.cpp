@@ -1258,22 +1258,24 @@ Exit:
 
 static const int NUMVIZBUF = 32;
 static const int VIZBUFFRAMES = 1024;
-static const int TOTALBUFTIMEMSEC = NUMVIZBUF * VIZBUFFRAMES * 1000 / 44100;
+static const int BUFTIMEMSEC = NUMVIZBUF * VIZBUFFRAMES * 1000 / 44100;
+static const int TOTALBUFTIMEMSEC = NUMVIZBUF * BUFTIMEMSEC;
 
 static bool gotMem = false;
+static sp<MemoryHeapBase> heap; 
 static sp<MemoryBase> mem[NUMVIZBUF];
-static uint64_t timeStamp[NUMVIZBUF];
+static uint64_t endTime;
 static uint64_t lastReadTime;
 static uint64_t lastWriteTime;
 static int writeIdx = 0;
 
 static void allocVizBufs() {
     if (!gotMem) {
+        heap = new MemoryHeapBase(NUMVIZBUF * VIZBUFFRAMES * 2, 0, "snooper");
         for (int i=0;i<NUMVIZBUF;i++) {
-            sp<MemoryHeapBase> heap = new MemoryHeapBase(VIZBUFFRAMES*2, 0, "snooper");
-            mem[i] = new MemoryBase(heap, 0, heap->getSize());
-            timeStamp[i] = 0;
+            mem[i] = new MemoryBase(heap, VIZBUFFRAMES * 2 * i, VIZBUFFRAMES * 2);
         }
+        endTime = 0;
         gotMem = true;
     }
 }
@@ -1290,68 +1292,48 @@ static sp<MemoryBase> getVizBuffer() {
 
     allocVizBufs();
 
-    lastReadTime = uptimeMillis() + 100; // account for renderer delay (we shouldn't be doing this here)
+    lastReadTime = uptimeMillis();
 
     // if there is no recent buffer (yet), just return empty handed
     if (lastWriteTime + TOTALBUFTIMEMSEC < lastReadTime) {
-        //LOGI("@@@@    no audio data to look at yet");
+        //LOGI("@@@@    no audio data to look at yet: %d + %d < %d", (int)lastWriteTime, TOTALBUFTIMEMSEC, (int)lastReadTime);
         return NULL;
     }
 
-    char buf[200];
-
-    int closestIdx = -1;
-    uint32_t closestTime = 0x7ffffff;
-
-    for (int i = 0; i < NUMVIZBUF; i++) {
-        uint64_t tsi = timeStamp[i];
-        uint64_t diff = tsi > lastReadTime ? tsi - lastReadTime : lastReadTime - tsi;
-        if (diff < closestTime) {
-            closestIdx = i;
-            closestTime = diff;
-        }
+    int timedelta = endTime - lastReadTime;
+    if (timedelta < 0) timedelta = 0;
+    int framedelta = timedelta * 44100 / 1000;
+    int headIdx = (writeIdx - framedelta) / VIZBUFFRAMES - 1;
+    while (headIdx < 0) {
+        headIdx += NUMVIZBUF;
     }
-
-
-    if (closestIdx >= 0) {
-        //LOGI("@@@ return buffer %d, %d/%d", closestIdx, uint32_t(lastReadTime), uint32_t(timeStamp[closestIdx]));
-        return mem[closestIdx];
-    }
-
-    // we won't get here, since we either bailed out early, or got a buffer
-    LOGD("Didn't expect to be here");
-    return NULL;
+    return mem[headIdx];
 }
 
-static void storeVizBuf(const void *data, int len, uint64_t time) {
-    // Copy the data in to the visualizer buffer
-    // Assume a 16 bit stereo source for now.
-    short *viz = (short*)mem[writeIdx]->pointer();
-    short *src = (short*)data;
-    for (int i = 0; i < VIZBUFFRAMES; i++) {
-        // Degrade quality by mixing to mono and clearing the lowest 3 bits.
-        // This should still be good enough for a visualization
-        *viz++ = ((int(src[0]) + int(src[1])) >> 1) & ~0x7;
-        src += 2;
-    }
-    timeStamp[writeIdx++] = time;
-    if (writeIdx >= NUMVIZBUF) {
-        writeIdx = 0;
-    }
-}
-
+// Append the data to the vizualization buffer
 static void makeVizBuffers(const char *data, int len, uint64_t time) {
 
     allocVizBufs();
 
     uint64_t startTime = time;
     const int frameSize = 4; // 16 bit stereo sample is 4 bytes
-    while (len >= VIZBUFFRAMES * frameSize) {
-        storeVizBuf(data, len, time);
-        data += VIZBUFFRAMES * frameSize;
-        len -= VIZBUFFRAMES * frameSize;
-        time += 1000 * VIZBUFFRAMES / 44100;
+    int offset = writeIdx;
+    int maxoff = heap->getSize() / 2; // in shorts
+    short *base = (short*)heap->getBase();
+    short *src = (short*)data;
+    while (len > 0) {
+        
+        // Degrade quality by mixing to mono and clearing the lowest 3 bits.
+        // This should still be good enough for a visualization
+        base[offset++] = ((int(src[0]) + int(src[1])) >> 1) & ~0x7;
+        src += 2;
+        len -= frameSize;
+        if (offset >= maxoff) {
+            offset = 0;
+        }
     }
+    writeIdx = offset;
+    endTime = time + (len / frameSize) / 44;
     //LOGI("@@@ stored buffers from %d to %d", uint32_t(startTime), uint32_t(time));
 }
 
@@ -1509,30 +1491,35 @@ void MediaPlayerService::AudioOutput::start()
     }
 }
 
+void MediaPlayerService::AudioOutput::snoopWrite(const void* buffer, size_t size) {
+    // Only make visualization buffers if anyone recently requested visualization data
+    uint64_t now = uptimeMillis();
+    if (lastReadTime + TOTALBUFTIMEMSEC >= now) {
+        // Based on the current play counter, the number of frames written and
+        // the current real time we can calculate the approximate real start
+        // time of the buffer we're about to write.
+        uint32_t pos;
+        mTrack->getPosition(&pos);
+
+        // we're writing ahead by this many frames:
+        int ahead = mNumFramesWritten - pos;
+        //LOGI("@@@ written: %d, playpos: %d, latency: %d", mNumFramesWritten, pos, mTrack->latency());
+        // which is this many milliseconds, assuming 44100 Hz:
+        ahead /= 44;
+
+        makeVizBuffers((const char*)buffer, size, now + ahead + mTrack->latency());
+        lastWriteTime = now;
+    }
+}
+
+
 ssize_t MediaPlayerService::AudioOutput::write(const void* buffer, size_t size)
 {
     LOG_FATAL_IF(mCallback != NULL, "Don't call write if supplying a callback.");
 
     //LOGV("write(%p, %u)", buffer, size);
     if (mTrack) {
-        // Only make visualization buffers if anyone recently requested visualization data
-        uint64_t now = uptimeMillis();
-        if (lastReadTime + TOTALBUFTIMEMSEC >= now) {
-            // Based on the current play counter, the number of frames written and
-            // the current real time we can calculate the approximate real start
-            // time of the buffer we're about to write.
-            uint32_t pos;
-            mTrack->getPosition(&pos);
-
-            // we're writing ahead by this many frames:
-            int ahead = mNumFramesWritten - pos;
-            //LOGI("@@@ written: %d, playpos: %d, latency: %d", mNumFramesWritten, pos, mTrack->latency());
-            // which is this many milliseconds, assuming 44100 Hz:
-            ahead /= 44;
-
-            makeVizBuffers((const char*)buffer, size, now + ahead + mTrack->latency());
-            lastWriteTime = now;
-        }
+        snoopWrite(buffer, size);
         ssize_t ret = mTrack->write(buffer, size);
         mNumFramesWritten += ret / 4; // assume 16 bit stereo
         return ret;
@@ -1580,6 +1567,7 @@ void MediaPlayerService::AudioOutput::setVolume(float left, float right)
 // static
 void MediaPlayerService::AudioOutput::CallbackWrapper(
         int event, void *cookie, void *info) {
+    //LOGV("callbackwrapper");
     if (event != AudioTrack::EVENT_MORE_DATA) {
         return;
     }
@@ -1589,6 +1577,7 @@ void MediaPlayerService::AudioOutput::CallbackWrapper(
 
     (*me->mCallback)(
             me, buffer->raw, buffer->size, me->mCallbackCookie);
+    me->snoopWrite(buffer->raw, buffer->size);
 }
 
 #undef LOG_TAG

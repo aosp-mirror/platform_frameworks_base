@@ -113,6 +113,7 @@ class MediaPlayerService : public BnMediaPlayerService
 
         public: // visualization hack support
         uint32_t                mNumFramesWritten;
+        void                    snoopWrite(const void*, size_t);
     };
 
     class AudioCache : public MediaPlayerBase::AudioSink
