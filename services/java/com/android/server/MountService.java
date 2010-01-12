@@ -108,12 +108,85 @@ class MountService extends IMountService.Stub {
 
     BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(Intent.ACTION_BOOT_COMPLETED)) {
+            String action = intent.getAction();
+
+            if (action.equals(Intent.ACTION_BOOT_COMPLETED)) {
                 Thread thread = new Thread(mListener, MountListener.class.getName());
                 thread.start();
             }
         }
     };
+
+    public void shutdown() {
+        if (mContext.checkCallingOrSelfPermission(
+                android.Manifest.permission.SHUTDOWN)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Requires SHUTDOWN permission");
+        }
+
+        Log.d(TAG, "Shutting down");
+        String state = Environment.getExternalStorageState();
+
+        if (state.equals(Environment.MEDIA_SHARED)) {
+            /*
+             * If the media is currently shared, unshare it.
+             * XXX: This is still dangerous!. We should not
+             * be rebooting at *all* if UMS is enabled, since
+             * the UMS host could have dirty FAT cache entries
+             * yet to flush.
+             */
+            try {
+               setMassStorageEnabled(false);
+            } catch (Exception e) {
+                Log.e(TAG, "ums disable failed", e);
+            }
+        } else if (state.equals(Environment.MEDIA_CHECKING)) {
+            /*
+             * If the media is being checked, then we need to wait for
+             * it to complete before being able to proceed.
+             */
+            // XXX: @hackbod - Should we disable the ANR timer here?
+            int retries = 30;
+            while (state.equals(Environment.MEDIA_CHECKING) && (retries-- >=0)) {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException iex) {
+                    Log.e(TAG, "Interrupted while waiting for media", iex);
+                    break;
+                }
+                state = Environment.getExternalStorageState();
+            }
+            if (retries == 0) {
+                Log.e(TAG, "Timed out waiting for media to check");
+            }
+        }
+
+        if (state.equals(Environment.MEDIA_MOUNTED)) {
+            /*
+             * If the media is mounted, then gracefully unmount it.
+             */
+            try {
+                String m = Environment.getExternalStorageDirectory().toString();
+                unmountMedia(m);
+
+                int retries = 12;
+                while (!state.equals(Environment.MEDIA_UNMOUNTED) && (retries-- >=0)) {
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException iex) {
+                        Log.e(TAG, "Interrupted while waiting for media", iex);
+                        break;
+                    }
+                    state = Environment.getExternalStorageState();
+                }
+                if (retries == 0) {
+                    Log.e(TAG, "Timed out waiting for media to unmount");
+            }
+            } catch (Exception e) {
+                Log.e(TAG, "external storage unmount failed", e);
+            }
+        }
+    }
 
     /**
      * @return true if USB mass storage support is enabled.
