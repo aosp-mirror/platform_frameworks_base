@@ -1518,7 +1518,7 @@ final class WebViewCore {
             } else if (mViewportWidth > 0) {
                 width = Math.max(w, mViewportWidth);
             } else {
-                width = Math.max(w, nativeGetContentMinPrefWidth());
+                width = Math.max(w, textwrapWidth);
             }
         }
         nativeSetSize(width, width == w ? h : Math.round((float) width * h / w),
