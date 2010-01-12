@@ -807,19 +807,21 @@ import java.util.ArrayList;
         int maxLength = -1;
         int inputType = EditorInfo.TYPE_CLASS_TEXT
                 | EditorInfo.TYPE_TEXT_VARIATION_WEB_EDIT_TEXT;
+        int imeOptions = EditorInfo.IME_FLAG_NO_EXTRACT_UI
+                | EditorInfo.IME_FLAG_NO_FULLSCREEN;
         switch (type) {
             case 1: // TEXT_AREA
                 single = false;
                 inputType |= EditorInfo.TYPE_TEXT_FLAG_MULTI_LINE
                         | EditorInfo.TYPE_TEXT_FLAG_CAP_SENTENCES
                         | EditorInfo.TYPE_TEXT_FLAG_AUTO_CORRECT;
-                setImeOptions(EditorInfo.IME_ACTION_NONE);
+                imeOptions |= EditorInfo.IME_ACTION_NONE;
                 break;
             case 2: // PASSWORD
                 inPassword = true;
                 break;
             case 3: // SEARCH
-                setImeOptions(EditorInfo.IME_ACTION_SEARCH);
+                imeOptions |= EditorInfo.IME_ACTION_SEARCH;
                 break;
             case 4: // EMAIL
                 // TYPE_TEXT_VARIATION_WEB_EDIT_TEXT prevents EMAIL_ADDRESS
@@ -858,14 +860,14 @@ import java.util.ArrayList;
                 switch (action) {
                     // Keep in sync with CachedRoot::ImeAction
                     case 0: // NEXT
-                        setImeOptions(EditorInfo.IME_ACTION_NEXT);
+                        imeOptions |= EditorInfo.IME_ACTION_NEXT;
                         break;
                     case 1: // GO
-                        setImeOptions(EditorInfo.IME_ACTION_GO);
+                        imeOptions |= EditorInfo.IME_ACTION_GO;
                         break;
                     case -1: // FAILURE
                     case 2: // DONE
-                        setImeOptions(EditorInfo.IME_ACTION_DONE);
+                        imeOptions |= EditorInfo.IME_ACTION_DONE;
                         break;
                 }
             }
@@ -874,6 +876,7 @@ import java.util.ArrayList;
         setMaxLength(maxLength);
         setHorizontallyScrolling(single);
         setInputType(inputType);
+        setImeOptions(imeOptions);
         setInPassword(inPassword);
         AutoCompleteAdapter adapter = null;
         setAdapterCustom(adapter);
