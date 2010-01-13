@@ -111,7 +111,15 @@ public class EditorInfo implements InputType, Parcelable {
      * flag for you on multi-line text views.
      */
     public static final int IME_FLAG_NO_ENTER_ACTION = 0x40000000;
-    
+
+    /**
+     * Flag of {@link #imeOptions}: used to request that the IME never go
+     * into fullscreen mode.  Applications need to be aware that the flag is not
+     * a guarantee, and not all IMEs will respect it.
+     * @hide
+     */
+    public static final int IME_FLAG_NO_FULLSCREEN = 0x80000000;
+
     /**
      * Generic unspecified type for {@link #imeOptions}.
      */
