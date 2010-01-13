@@ -1745,31 +1745,33 @@ writeProguardForAndroidManifest(ProguardKeepSet* keep, const sp<AaptAssets>& ass
                     fprintf(stderr, "ERROR: %s\n", error.string());
                     return -1;
                 }
-                // asdf     --> package.asdf
-                // .asdf  .a.b  --> package.asdf package.a.b
-                // asdf.adsf --> asdf.asdf
-                String8 rule("-keep class ");
-                const char* p = name.string();
-                const char* q = strchr(p, '.');
-                if (p == q) {
-                    rule += pkg;
-                    rule += name;
-                } else if (q == NULL) {
-                    rule += pkg;
-                    rule += ".";
-                    rule += name;
-                } else {
-                    rule += name;
+                if (name.length() > 0) {
+                    // asdf     --> package.asdf
+                    // .asdf  .a.b  --> package.asdf package.a.b
+                    // asdf.adsf --> asdf.asdf
+                    String8 rule("-keep class ");
+                    const char* p = name.string();
+                    const char* q = strchr(p, '.');
+                    if (p == q) {
+                        rule += pkg;
+                        rule += name;
+                    } else if (q == NULL) {
+                        rule += pkg;
+                        rule += ".";
+                        rule += name;
+                    } else {
+                        rule += name;
+                    }
+
+                    String8 location = tag;
+                    location += " ";
+                    location += assFile->getSourceFile();
+                    char lineno[20];
+                    sprintf(lineno, ":%d", tree.getLineNumber());
+                    location += lineno;
+
+                    keep->add(rule, location);
                 }
-
-                String8 location = tag;
-                location += " ";
-                location += assFile->getSourceFile();
-                char lineno[20];
-                sprintf(lineno, ":%d", tree.getLineNumber());
-                location += lineno;
-
-                keep->add(rule, location);
             }
         }
     }
