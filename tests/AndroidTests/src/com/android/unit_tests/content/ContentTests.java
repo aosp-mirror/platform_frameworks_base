@@ -23,10 +23,6 @@ public class ContentTests {
         TestSuite suite = new TestSuite(ContentTests.class.getName());
 
         suite.addTestSuite(AssetTest.class);
-        suite.addTestSuite(IntentFilterTest.class);
-        suite.addTest(ResourceTests.suite());
-        suite.addTestSuite(PluralResourcesTest.class);
-        suite.addTestSuite(ConfigTest.class);
         return suite;
     }
 }
