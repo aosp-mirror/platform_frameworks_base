@@ -129,14 +129,14 @@ public class ConnectivityManager
     public static final int TYPE_WIFI        = 1;
     /**
      * An MMS-specific Mobile data connection.  This connection may be the
-     * same as {@link #TYPEMOBILE} but it may be different.  This is used
+     * same as {@link #TYPE_MOBILE} but it may be different.  This is used
      * by applications needing to talk to the carrier's Multimedia Messaging
      * Service servers.  It may coexist with default data connections.
      */
     public static final int TYPE_MOBILE_MMS  = 2;
     /**
      * A SUPL-specific Mobile data connection.  This connection may be the
-     * same as {@link #TYPEMOBILE} but it may be different.  This is used
+     * same as {@link #TYPE_MOBILE} but it may be different.  This is used
      * by applications needing to talk to the carrier's Secure User Plane
      * Location servers for help locating the device.  It may coexist with
      * default data connections.
@@ -144,7 +144,7 @@ public class ConnectivityManager
     public static final int TYPE_MOBILE_SUPL = 3;
     /**
      * A DUN-specific Mobile data connection.  This connection may be the
-     * same as {@link #TYPEMOBILE} but it may be different.  This is used
+     * same as {@link #TYPE_MOBILE} but it may be different.  This is used
      * by applicaitons performing a Dial Up Networking bridge so that
      * the carrier is aware of DUN traffic.  It may coexist with default data
      * connections.
@@ -152,7 +152,7 @@ public class ConnectivityManager
     public static final int TYPE_MOBILE_DUN  = 4;
     /**
      * A High Priority Mobile data connection.  This connection is typically
-     * the same as {@link #TYPEMOBILE} but the routing setup is different.
+     * the same as {@link #TYPE_MOBILE} but the routing setup is different.
      * Only requesting processes will have access to the Mobile DNS servers
      * and only IP's explicitly requested via {@link #requestRouteToHost}
      * will route over this interface if a default route exists.
