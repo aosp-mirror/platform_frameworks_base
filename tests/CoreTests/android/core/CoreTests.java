@@ -59,7 +59,6 @@ public class CoreTests extends TestSuite {
         suite.addTestSuite(LocationManagerProximityTest.class);
         suite.addTestSuite(AndroidTestRunnerTest.class);
         suite.addTestSuite(InstrumentationTestRunnerTest.class);
-        suite.addTestSuite(CookieTest.class);
         
         return suite;
     }
