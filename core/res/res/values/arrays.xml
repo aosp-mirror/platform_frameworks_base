@@ -131,6 +131,7 @@
          the first component from this list which is found to be installed is set as the
          preferred activity. -->
     <string-array name="default_web_search_providers">
+        <item>com.android.quicksearchbox/com.android.googlesearch.GoogleSearch</item>
         <item>com.google.android.providers.enhancedgooglesearch/.Launcher</item>
         <item>com.android.googlesearch/.GoogleSearch</item>
         <item>com.android.websearch/.Search.1</item>
