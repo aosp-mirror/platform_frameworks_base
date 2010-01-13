@@ -1638,6 +1638,13 @@ public final class Telephony {
              */
             public static final String LAST_TRY = "last_try";
         }
+
+        public static final class WordsTable {
+            public static final String ID = "_id";
+            public static final String SOURCE_ROW_ID = "source_id";
+            public static final String TABLE_ID = "table_to_use";
+            public static final String INDEXED_TEXT = "index_text";
+        }
     }
 
     public static final class Carriers implements BaseColumns {
