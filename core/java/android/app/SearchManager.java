@@ -1332,7 +1332,7 @@ public class SearchManager
     public final static String EXTRA_DATA_KEY = "intent_extra_data_key";
 
     /**
-     * String extra data key for {@link Intent#ACTION_GLOBAL_SEARCH} intents. Contains the initial
+     * String extra data key for {@link #INTENT_ACTION_GLOBAL_SEARCH} intents. Contains the initial
      * query to show in the global search activity.
      *
      * @hide Pending API council approval
@@ -1340,7 +1340,7 @@ public class SearchManager
     public final static String INITIAL_QUERY = "initial_query";
 
     /**
-     * Boolean extra data key for {@link Intent#ACTION_GLOBAL_SEARCH} intents. If {@code true},
+     * Boolean extra data key for {@link Intent#INTENT_ACTION_GLOBAL_SEARCH} intents. If {@code true},
      * the initial query should be selected.
      *
      * @hide Pending API council approval
@@ -1816,7 +1816,7 @@ public class SearchManager
             Log.w(TAG, "No global search activity found.");
             return;
         }
-        Intent intent = new Intent(Intent.ACTION_GLOBAL_SEARCH);
+        Intent intent = new Intent(INTENT_ACTION_GLOBAL_SEARCH);
         intent.setComponent(globalSearchActivity);
         // TODO: Always pass name of calling package as an extra?
         if (appSearchData != null) {
@@ -1847,7 +1847,7 @@ public class SearchManager
      * we have settled on the right mechanism for finding the global search activity.
      */
     private ComponentName getGlobalSearchActivity() {
-        Intent intent = new Intent(Intent.ACTION_GLOBAL_SEARCH);
+        Intent intent = new Intent(INTENT_ACTION_GLOBAL_SEARCH);
         PackageManager pm = mContext.getPackageManager();
         List<ResolveInfo> activities =
                 pm.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
