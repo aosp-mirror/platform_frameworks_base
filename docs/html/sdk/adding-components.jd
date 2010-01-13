@@ -122,6 +122,21 @@ Manager:</p>
 <p>Any SDK components available from the site will now be listed under
 <strong>Available Components</strong>.</p>
 
+<h3 id="troubleshooting">Troubleshooting</h3>
+
+<p><strong>Problems connecting to the SDK repository</strong></p>
+
+<p>If you are using the SDK and AVD Manager to download components and are encountering
+connection problems, try connecting over http, rather than https. To switch the
+protocol used by the SDK and AVD Manager, follow these steps: </p>
+
+<ol>
+  <li>With the Android SDK and AVD Manager window open, select "Settings" in the
+  left pane. </li>
+  <li>On the right, in the "Misc" section, check the checkbox labeled "Force
+  https://... sources to be fetched using http://..." </li>
+  <li>Click <strong>Save &amp; Apply</strong>.</li>
+</ol>
 
 <h2 id="dependencies">SDK Component Dependencies</h2>
 
@@ -138,7 +153,3 @@ href="{@docRoot}sdk/tools-notes.html">SDK Tools Notes</a> documents. </p>
 
 <p>Additionally, the development tools will notify you with debug warnings
 if there is dependency that you need to address. </p>
-
-
-
-
