@@ -20,6 +20,8 @@ import com.android.internal.os.HandlerCaller;
 import com.android.internal.view.BaseIWindow;
 import com.android.internal.view.BaseSurfaceHolder;
 
+import android.annotation.SdkConstant;
+import android.annotation.SdkConstant.SdkConstantType;
 import android.app.Service;
 import android.app.WallpaperManager;
 import android.content.BroadcastReceiver;
@@ -58,9 +60,13 @@ import java.util.ArrayList;
 public abstract class WallpaperService extends Service {
     /**
      * The {@link Intent} that must be declared as handled by the service.
+     * To be supported, the service must also require the
+     * {@link android.Manifest.permission#BIND_WALLPAPER} permission so
+     * that other applications can not abuse it.
      */
+    @SdkConstant(SdkConstantType.SERVICE_ACTION)
     public static final String SERVICE_INTERFACE =
-        "android.service.wallpaper.WallpaperService";
+            "android.service.wallpaper.WallpaperService";
 
     /**
      * Name under which a WallpaperService component publishes information

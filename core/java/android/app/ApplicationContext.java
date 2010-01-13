@@ -186,6 +186,7 @@ class ApplicationContext extends Context {
     private boolean mRestricted;
     private AccountManager mAccountManager; // protected by mSync
     private DropBoxManager mDropBoxManager = null;
+    private DevicePolicyManager mDevicePolicyManager = null;
 
     private final Object mSync = new Object();
 
@@ -895,6 +896,8 @@ class ApplicationContext extends Context {
             return getWallpaperManager();
         } else if (DROPBOX_SERVICE.equals(name)) {
             return getDropBoxManager();
+        } else if (DEVICE_POLICY_SERVICE.equals(name)) {
+            return getDevicePolicyManager();
         }
 
         return null;
@@ -1062,6 +1065,16 @@ class ApplicationContext extends Context {
             }
         }
         return mDropBoxManager;
+    }
+
+    private DevicePolicyManager getDevicePolicyManager() {
+        synchronized (mSync) {
+            if (mDevicePolicyManager == null) {
+                mDevicePolicyManager = new DevicePolicyManager(this,
+                        mMainThread.getHandler());
+            }
+        }
+        return mDevicePolicyManager;
     }
 
     @Override
