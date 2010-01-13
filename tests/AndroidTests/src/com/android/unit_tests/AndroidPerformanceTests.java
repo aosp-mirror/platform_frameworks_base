@@ -27,12 +27,8 @@ public class AndroidPerformanceTests extends TestListActivity {
     public static class Suite {
         public static String[] children() {
             return new String[] {
-                DatabasePerformanceTests.class.getName(),
-                GraphicsPerformanceTests.class.getName(),
                 JavaPerformanceTests.class.getName(),
-                LogTest.PerformanceTest.class.getName(),
                 PerformanceTests.class.getName(),
-                TextViewPerformanceTest.class.getName(),
             };
         }
     }
