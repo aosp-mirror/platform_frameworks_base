@@ -275,9 +275,12 @@ void StagefrightMetadataRetriever::parseMetaData() {
         int to;
     };
     static const Map kMap[] = {
+        { kKeyCDTrackNumber, METADATA_KEY_CD_TRACK_NUMBER },
         { kKeyAlbum, METADATA_KEY_ALBUM },
         { kKeyArtist, METADATA_KEY_ARTIST },
+        { kKeyAuthor, METADATA_KEY_AUTHOR },
         { kKeyComposer, METADATA_KEY_COMPOSER },
+        { kKeyDate, METADATA_KEY_DATE },
         { kKeyGenre, METADATA_KEY_GENRE },
         { kKeyTitle, METADATA_KEY_TITLE },
         { kKeyYear, METADATA_KEY_YEAR },
@@ -301,9 +304,16 @@ void StagefrightMetadataRetriever::parseMetaData() {
         memcpy(mAlbumArt->mData, data, dataSize);
     }
 
+    size_t numTracks = mExtractor->countTracks();
+
+    char tmp[32];
+    sprintf(tmp, "%d", numTracks);
+
+    mMetaData.add(METADATA_KEY_NUM_TRACKS, String8(tmp));
+
     // The overall duration is the duration of the longest track.
     int64_t maxDurationUs = 0;
-    for (size_t i = 0; i < mExtractor->countTracks(); ++i) {
+    for (size_t i = 0; i < numTracks; ++i) {
         sp<MetaData> trackMeta = mExtractor->getTrackMetaData(i);
 
         int64_t durationUs;
@@ -315,7 +325,6 @@ void StagefrightMetadataRetriever::parseMetaData() {
     }
 
     // The duration value is a string representing the duration in ms.
-    char tmp[32];
     sprintf(tmp, "%lld", (maxDurationUs + 500) / 1000);
 
     mMetaData.add(METADATA_KEY_DURATION, String8(tmp));
