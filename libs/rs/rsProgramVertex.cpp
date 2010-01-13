@@ -124,7 +124,6 @@ void ProgramVertex::createShader()
         mShader.append(mUniformNames[0]);
         mShader.append(";\n");
 
-        LOGE("constant %i ", mConstantCount);
         for (uint32_t ct=0; ct < mConstantCount; ct++) {
             const Element *e = mConstantTypes[ct]->getElement();
             for (uint32_t field=0; field < e->getFieldCount(); field++) {
@@ -337,7 +336,7 @@ void ProgramVertex::init(Context *rsc)
 
         mUniformCount = 1;
         mUniformNames[0].setTo("UNI_MVP");
-        for (uint32_t ct=0; ct < mInputCount; ct++) {
+        for (uint32_t ct=0; ct < mConstantCount; ct++) {
             initAddUserElement(mConstantTypes[ct]->getElement(), mUniformNames, &mUniformCount, "UNI_");
         }
     } else {
