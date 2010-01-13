@@ -342,6 +342,7 @@ public class WebView extends AbsoluteLayout
      * choice. Maybe make this in the buildspec later.
      */
     private static final int TOUCH_SENT_INTERVAL = 50;
+    private int mCurrentTouchInterval = TOUCH_SENT_INTERVAL;
 
     /**
      * Helper class to get velocity for fling
@@ -4343,7 +4344,7 @@ public class WebView extends AbsoluteLayout
 
         // pass the touch events from UI thread to WebCore thread
         if (mForwardTouchEvents && (action != MotionEvent.ACTION_MOVE
-                || eventTime - mLastSentTouchTime > TOUCH_SENT_INTERVAL)) {
+                || eventTime - mLastSentTouchTime > mCurrentTouchInterval)) {
             WebViewCore.TouchEventData ted = new WebViewCore.TouchEventData();
             ted.mAction = action;
             ted.mX = viewToContentX((int) x + mScrollX);
@@ -6631,6 +6632,16 @@ public class WebView extends AbsoluteLayout
      */
     public void drawPage(Canvas canvas) {
         mWebViewCore.drawContentPicture(canvas, 0, false, false);
+    }
+
+    /**
+     * Set the time to wait between passing touches to WebCore. See also the
+     * TOUCH_SENT_INTERVAL member for further discussion.
+     *
+     * @hide This is only used by the DRT test application.
+     */
+    public void setTouchInterval(int interval) {
+        mCurrentTouchInterval = interval;
     }
 
     /**
