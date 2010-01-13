@@ -66,6 +66,8 @@ private:
     uint32_t mCurrentSampleIndex;
 
     bool mIsAVC;
+    size_t mNALLengthSize;
+
     bool mStarted;
 
     MediaBufferGroup *mGroup;
@@ -75,6 +77,8 @@ private:
     bool mWantsNALFragments;
 
     uint8_t *mSrcBuffer;
+
+    size_t parseNALSize(const uint8_t *data) const;
 
     MPEG4Source(const MPEG4Source &);
     MPEG4Source &operator=(const MPEG4Source &);
@@ -770,6 +774,7 @@ MPEG4Source::MPEG4Source(
       mSampleTable(sampleTable),
       mCurrentSampleIndex(0),
       mIsAVC(false),
+      mNALLengthSize(0),
       mStarted(false),
       mGroup(NULL),
       mBuffer(NULL),
@@ -780,6 +785,21 @@ MPEG4Source::MPEG4Source(
     CHECK(success);
 
     mIsAVC = !strcasecmp(mime, MEDIA_MIMETYPE_VIDEO_AVC);
+
+    if (mIsAVC) {
+        uint32_t type;
+        const void *data;
+        size_t size;
+        CHECK(format->findData(kKeyAVCC, &type, &data, &size));
+
+        const uint8_t *ptr = (const uint8_t *)data;
+
+        CHECK(size >= 7);
+        CHECK_EQ(ptr[0], 1);  // configurationVersion == 1
+
+        // The number of bytes used to encode the length of a NAL unit.
+        mNALLengthSize = 1 + (ptr[4] & 3);
+    }
 }
 
 MPEG4Source::~MPEG4Source() {
@@ -835,6 +855,25 @@ status_t MPEG4Source::stop() {
 
 sp<MetaData> MPEG4Source::getFormat() {
     return mFormat;
+}
+
+size_t MPEG4Source::parseNALSize(const uint8_t *data) const {
+    switch (mNALLengthSize) {
+        case 1:
+            return *data;
+        case 2:
+            return U16_AT(data);
+        case 3:
+            return ((size_t)data[0] << 16) | U16_AT(&data[1]);
+        case 4:
+            return U32_AT(data);
+    }
+
+    // This cannot happen, mNALLengthSize springs to life by adding 1 to
+    // a 2-bit integer.
+    CHECK(!"Should not be here.");
+
+    return 0;
 }
 
 status_t MPEG4Source::read(
@@ -919,21 +958,20 @@ status_t MPEG4Source::read(
         // Each NAL unit is split up into its constituent fragments and
         // each one of them returned in its own buffer.
 
-        CHECK(mBuffer->range_length() >= 2);
+        CHECK(mBuffer->range_length() >= mNALLengthSize);
 
         const uint8_t *src =
             (const uint8_t *)mBuffer->data() + mBuffer->range_offset();
 
-        size_t nal_size = U16_AT(src);
-
-        CHECK(mBuffer->range_length() >= 2 + nal_size);
+        size_t nal_size = parseNALSize(src);
+        CHECK(mBuffer->range_length() >= mNALLengthSize + nal_size);
 
         MediaBuffer *clone = mBuffer->clone();
-        clone->set_range(mBuffer->range_offset() + 2, nal_size);
+        clone->set_range(mBuffer->range_offset() + mNALLengthSize, nal_size);
 
         mBuffer->set_range(
-                mBuffer->range_offset() + 2 + nal_size,
-                mBuffer->range_length() - 2 - nal_size);
+                mBuffer->range_offset() + mNALLengthSize + nal_size,
+                mBuffer->range_length() - mNALLengthSize - nal_size);
 
         if (mBuffer->range_length() == 0) {
             mBuffer->release();
@@ -960,12 +998,12 @@ status_t MPEG4Source::read(
         uint8_t *dstData = (uint8_t *)mBuffer->data();
         size_t srcOffset = 0;
         size_t dstOffset = 0;
+
         while (srcOffset < size) {
-            CHECK(srcOffset + 1 < size);
-            size_t nalLength =
-                (mSrcBuffer[srcOffset] << 8) | mSrcBuffer[srcOffset + 1];
-            CHECK(srcOffset + 1 + nalLength < size);
-            srcOffset += 2;
+            CHECK(srcOffset + mNALLengthSize <= size);
+            size_t nalLength = parseNALSize(&mSrcBuffer[srcOffset]);
+            srcOffset += mNALLengthSize;
+            CHECK(srcOffset + nalLength <= size);
 
             if (nalLength == 0) {
                 continue;
@@ -981,6 +1019,7 @@ status_t MPEG4Source::read(
             srcOffset += nalLength;
             dstOffset += nalLength;
         }
+        CHECK_EQ(srcOffset, size);
 
         mBuffer->set_range(0, dstOffset);
         mBuffer->meta_data()->clear();
