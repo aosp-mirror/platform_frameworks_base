@@ -31,9 +31,11 @@ public:
     // Extractor assumes ownership of "source".
     MPEG4Extractor(const sp<DataSource> &source);
 
-    size_t countTracks();
-    sp<MediaSource> getTrack(size_t index);
-    sp<MetaData> getTrackMetaData(size_t index, uint32_t flags);
+    virtual size_t countTracks();
+    virtual sp<MediaSource> getTrack(size_t index);
+    virtual sp<MetaData> getTrackMetaData(size_t index, uint32_t flags);
+
+    virtual sp<MetaData> getMetaData();
 
 protected:
     virtual ~MPEG4Extractor();
@@ -49,6 +51,7 @@ private:
 
     sp<DataSource> mDataSource;
     bool mHaveMetadata;
+    bool mHasVideo;
 
     Track *mFirstTrack, *mLastTrack;
 

@@ -179,6 +179,12 @@ status_t StagefrightMediaScanner::processFile(
     if (mRetriever->setDataSource(path) == OK
             && mRetriever->setMode(
                 METADATA_MODE_METADATA_RETRIEVAL_ONLY) == OK) {
+        const char *value;
+        if ((value = mRetriever->extractMetadata(
+                        METADATA_KEY_MIMETYPE)) != NULL) {
+            client.setMimeType(value);
+        }
+
         struct KeyMap {
             const char *tag;
             int key;
