@@ -514,7 +514,7 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
             synchronized(this) {
                 if (mPendingRadioPowerOffAfterDataOff) {
                     if (DBG) log("EVENT_SET_RADIO_OFF, turn radio off now.");
-                    cm.setRadioPower(false, null);
+                    hangupAndPowerOff();
                     mPendingRadioPowerOffAfterDataOff = false;
                 }
             }
@@ -541,32 +541,42 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
                         dcTracker.getStateInString(),
                         dcTracker.getAnyDataEnabled() ? 1 : 0);
             }
-            Message msg = dcTracker.obtainMessage(DataConnectionTracker.EVENT_CLEAN_UP_CONNECTION);
-            msg.arg1 = 1; // tearDown is true
-            msg.obj = CDMAPhone.REASON_RADIO_TURNED_OFF;
-            dcTracker.sendMessage(msg);
 
-            synchronized(this) {
-                if (!mPendingRadioPowerOffAfterDataOff) {
-                    DataConnectionTracker.State currentState = dcTracker.getState();
-                    if (currentState != DataConnectionTracker.State.CONNECTED
-                            && currentState != DataConnectionTracker.State.DISCONNECTING
-                            && currentState != DataConnectionTracker.State.INITING) {
-                        if (DBG) log("Data disconnected, turn off radio right away.");
-                        cm.setRadioPower(false, null);
+            // If it's on and available and we want it off gracefully
+            powerOffRadioSafely();
+        } // Otherwise, we're in the desired state
+    }
+
+    @Override
+    protected void powerOffRadioSafely(){
+        // clean data connection
+        DataConnectionTracker dcTracker = phone.mDataConnection;
+
+        Message msg = dcTracker.obtainMessage(DataConnectionTracker.EVENT_CLEAN_UP_CONNECTION);
+        msg.arg1 = 1; // tearDown is true
+        msg.obj = CDMAPhone.REASON_RADIO_TURNED_OFF;
+        dcTracker.sendMessage(msg);
+
+        synchronized(this) {
+            if (!mPendingRadioPowerOffAfterDataOff) {
+                DataConnectionTracker.State currentState = dcTracker.getState();
+                if (currentState != DataConnectionTracker.State.CONNECTED
+                        && currentState != DataConnectionTracker.State.DISCONNECTING
+                        && currentState != DataConnectionTracker.State.INITING) {
+                    if (DBG) log("Data disconnected, turn off radio right away.");
+                    hangupAndPowerOff();
+                }
+                else if (sendEmptyMessageDelayed(EVENT_SET_RADIO_POWER_OFF, 30000)) {
+                    if (DBG) {
+                        log("Wait up to 30 sec for data to disconnect, then turn off radio.");
                     }
-                    else if (sendEmptyMessageDelayed(EVENT_SET_RADIO_POWER_OFF, 30000)) {
-                        if (DBG) {
-                            log("Wait up to 30 sec for data to disconnect, then turn off radio.");
-                        }
-                        mPendingRadioPowerOffAfterDataOff = true;
-                    } else {
-                        Log.w(LOG_TAG, "Cannot send delayed Msg, turn off radio right away.");
-                        cm.setRadioPower(false, null);
-                    }
+                    mPendingRadioPowerOffAfterDataOff = true;
+                } else {
+                    Log.w(LOG_TAG, "Cannot send delayed Msg, turn off radio right away.");
+                    hangupAndPowerOff();
                 }
             }
-        } // Otherwise, we're in the desired state
+        }
     }
 
     @Override
@@ -1644,11 +1654,19 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
             if (mPendingRadioPowerOffAfterDataOff) {
                 if (DBG) log("Process pending request to turn radio off.");
                 removeMessages(EVENT_SET_RADIO_POWER_OFF);
-                cm.setRadioPower(false, null);
+                hangupAndPowerOff();
                 mPendingRadioPowerOffAfterDataOff = false;
                 return true;
             }
             return false;
         }
+    }
+
+    private void hangupAndPowerOff() {
+        // hang up all active voice calls
+        phone.mCT.ringingCall.hangupIfAlive();
+        phone.mCT.backgroundCall.hangupIfAlive();
+        phone.mCT.foregroundCall.hangupIfAlive();
+        cm.setRadioPower(false, null);
     }
 }

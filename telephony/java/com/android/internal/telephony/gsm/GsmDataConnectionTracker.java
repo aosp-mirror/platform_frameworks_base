@@ -808,7 +808,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
     protected void restartRadio() {
         Log.d(LOG_TAG, "************TURN OFF RADIO**************");
         cleanUpConnection(true, Phone.REASON_RADIO_TURNED_OFF);
-        phone.mCM.setRadioPower(false, null);
+        mGsmPhone.mSST.powerOffRadioSafely();
         /* Note: no need to call setRadioPower(true).  Assuming the desired
          * radio power state is still ON (as tracked by ServiceStateTracker),
          * ServiceStateTracker will call setRadioPower when it receives the

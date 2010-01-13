@@ -271,6 +271,13 @@ public abstract class ServiceStateTracker extends Handler {
     protected abstract void updateSpnDisplay();
     protected abstract void setPowerStateToDesired();
 
+    /**
+     * Clean up existing voice and data connection then turn off radio power.
+     *
+     * Hang up the existing voice calls to decrease call drop rate.
+     */
+    protected abstract void powerOffRadioSafely();
+
     /** Cancel a pending (if any) pollState() operation */
     protected void cancelPollState() {
         // This will effectively cancel the rest of the poll requests.
