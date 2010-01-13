@@ -729,8 +729,10 @@ sp<MetaData> MP3Extractor::getMetaData() {
         { kKeyArtist, "TPE1", "TP1" },
         { kKeyComposer, "TCOM", "TCM" },
         { kKeyGenre, "TCON", "TCO" },
-        { kKeyTitle, "TALB", "TAL" },
+        { kKeyTitle, "TIT2", "TT2" },
         { kKeyYear, "TYE", "TYER" },
+        { kKeyAuthor, "TXT", "TEXT" },
+        { kKeyCDTrackNumber, "TRK", "TRCK" },
     };
     static const size_t kNumMapEntries = sizeof(kMap) / sizeof(kMap[0]);
 
