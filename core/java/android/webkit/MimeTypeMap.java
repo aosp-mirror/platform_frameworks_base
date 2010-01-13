@@ -124,6 +124,11 @@ public class MimeTypeMap {
         return null;
     }
 
+    // Static method called by jni.
+    private static String mimeTypeFromExtension(String extension) {
+        return getSingleton().getMimeTypeFromExtension(extension);
+    }
+
     /**
      * Return true if the given extension has a registered MIME type.
      * @param extension A file extension without the leading '.'
@@ -344,6 +349,7 @@ public class MimeTypeMap {
             sMimeTypeMap.loadEntry("application/x-pkcs7-crl", "crl");
             sMimeTypeMap.loadEntry("application/x-quicktimeplayer", "qtl");
             sMimeTypeMap.loadEntry("application/x-shar", "shar");
+            sMimeTypeMap.loadEntry("application/x-shockwave-flash", "swf");
             sMimeTypeMap.loadEntry("application/x-stuffit", "sit");
             sMimeTypeMap.loadEntry("application/x-sv4cpio", "sv4cpio");
             sMimeTypeMap.loadEntry("application/x-sv4crc", "sv4crc");
