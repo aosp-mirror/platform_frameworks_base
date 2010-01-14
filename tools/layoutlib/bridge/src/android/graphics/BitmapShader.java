@@ -41,7 +41,7 @@ public class BitmapShader extends Shader {
     }
 
     @Override
-    Paint getPaint() {
+    Paint getJavaPaint() {
         return null;
     }
 }

@@ -60,7 +60,7 @@ public class SweepGradient extends Shader {
     }
 
     @Override
-    Paint getPaint() {
+    Paint getJavaPaint() {
         // TODO Auto-generated method stub
         return null;
     }

@@ -46,7 +46,7 @@ public class ComposeShader extends Shader {
     }
 
     @Override
-    Paint getPaint() {
+    Paint getJavaPaint() {
         return null;
     }
 }
