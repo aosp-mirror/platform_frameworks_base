@@ -16,6 +16,8 @@
 
 package android.graphics;
 
+import java.awt.Paint;
+
 public class SweepGradient extends Shader {
 
     /**
@@ -41,7 +43,7 @@ public class SweepGradient extends Shader {
             throw new IllegalArgumentException(
                         "color and position arrays must be of equal length");
         }
-        
+
         // FIXME Implement shader
     }
 
@@ -55,6 +57,12 @@ public class SweepGradient extends Shader {
      */
     public SweepGradient(float cx, float cy, int color0, int color1) {
         // FIXME Implement shader
+    }
+
+    @Override
+    Paint getPaint() {
+        // TODO Auto-generated method stub
+        return null;
     }
 }
 
