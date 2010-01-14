@@ -3250,7 +3250,14 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * @param color The background color
      */
     public void setCacheColorHint(int color) {
-        mCacheColorHint = color;
+        if (color != mCacheColorHint) {
+            mCacheColorHint = color;
+            int count = getChildCount();
+            for (int i = 0; i < count; i++) {
+                getChildAt(i).setDrawingCacheBackgroundColor(color);
+            }
+            mRecycler.setCacheColorHint(color);
+        }
     }
 
     /**
@@ -3667,6 +3674,39 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 for (int i = 0; i < viewTypeCount; ++i) {
                     final ArrayList<View> scrapPile = scrapViews[i];
                     views.addAll(scrapPile);
+                }
+            }
+        }
+
+        /**
+         * Updates the cache color hint of all known views.
+         *
+         * @param color The new cache color hint.
+         */
+        void setCacheColorHint(int color) {
+            if (mViewTypeCount == 1) {
+                final ArrayList<View> scrap = mCurrentScrap;
+                final int scrapCount = scrap.size();
+                for (int i = 0; i < scrapCount; i++) {
+                    scrap.get(i).setDrawingCacheBackgroundColor(color);
+                }
+            } else {
+                final int typeCount = mViewTypeCount;
+                for (int i = 0; i < typeCount; i++) {
+                    final ArrayList<View> scrap = mScrapViews[i];
+                    final int scrapCount = scrap.size();
+                    for (int j = 0; j < scrapCount; j++) {
+                        scrap.get(i).setDrawingCacheBackgroundColor(color);
+                    }
+                }
+            }
+            // Just in case this is called during a layout pass
+            final View[] activeViews = mActiveViews;
+            final int count = activeViews.length;
+            for (int i = 0; i < count; ++i) {
+                final View victim = activeViews[i];
+                if (victim != null) {
+                    victim.setDrawingCacheBackgroundColor(color);
                 }
             }
         }
