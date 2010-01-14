@@ -436,6 +436,20 @@ public final class Settings {
     public static final String ACTION_MEMORY_CARD_SETTINGS =
             "android.settings.MEMORY_CARD_SETTINGS";
 
+    /**
+     * Activity Action: Show settings for global search.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_SEARCH_SETTINGS =
+        "android.search.action.SEARCH_SETTINGS";
+
     // End of Intent actions for Settings
 
     private static final String JID_RESOURCE_PREFIX = "android";
