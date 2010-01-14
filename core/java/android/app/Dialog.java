@@ -995,8 +995,7 @@ public class Dialog implements DialogInterface, Window.Callback,
 
     /**
      * Sets a listener to be invoked when the dialog is shown.
-     *
-     * @hide Pending API council approval
+     * @param listener The {@link DialogInterface.OnShowListener} to use.
      */
     public void setOnShowListener(OnShowListener listener) {
         if (listener != null) {

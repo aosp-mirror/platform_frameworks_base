@@ -94,7 +94,6 @@ public interface DialogInterface {
     /**
      * Interface used to allow the creator of a dialog to run some code when the
      * dialog is shown.
-     * @hide Pending API council approval
      */
     interface OnShowListener {
         /**
