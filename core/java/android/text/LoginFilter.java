@@ -158,11 +158,11 @@ public abstract class LoginFilter implements InputFilter {
 
     /**
      * This filter rejects characters in the user name that are not compatible with Google login.
-     * It is slightly less restrictive than the above filter in that it allows [a-zA-Z0-9._-]. 
+     * It is slightly less restrictive than the above filter in that it allows [a-zA-Z0-9._-+]. 
      * 
      */
     public static class UsernameFilterGeneric extends LoginFilter {
-        private static final String mAllowed = "@_-."; // Additional characters
+        private static final String mAllowed = "@_-+."; // Additional characters
         
         public UsernameFilterGeneric() {
             super(false);
