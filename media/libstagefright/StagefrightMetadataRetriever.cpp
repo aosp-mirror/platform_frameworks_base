@@ -107,6 +107,104 @@ status_t StagefrightMetadataRetriever::setDataSource(
     return OK;
 }
 
+static VideoFrame *extractVideoFrameWithCodecFlags(
+        OMXClient *client,
+        const sp<MetaData> &trackMeta,
+        const sp<MediaSource> &source, uint32_t flags) {
+    sp<MediaSource> decoder =
+        OMXCodec::Create(
+                client->interface(), source->getFormat(), false, source,
+                NULL, flags);
+
+    if (decoder.get() == NULL) {
+        LOGV("unable to instantiate video decoder.");
+
+        return NULL;
+    }
+
+    decoder->start();
+
+    // Read one output buffer, ignore format change notifications
+    // and spurious empty buffers.
+
+    MediaSource::ReadOptions options;
+    int64_t thumbNailTime;
+    if (trackMeta->findInt64(kKeyThumbnailTime, &thumbNailTime)) {
+        options.setSeekTo(thumbNailTime);
+    } else {
+        thumbNailTime = -1;
+    }
+
+    MediaBuffer *buffer = NULL;
+    status_t err;
+    do {
+        if (buffer != NULL) {
+            buffer->release();
+            buffer = NULL;
+        }
+        err = decoder->read(&buffer, &options);
+        options.clearSeekTo();
+    } while (err == INFO_FORMAT_CHANGED
+             || (buffer != NULL && buffer->range_length() == 0));
+
+    if (err != OK) {
+        CHECK_EQ(buffer, NULL);
+
+        LOGV("decoding frame failed.");
+        decoder->stop();
+
+        return NULL;
+    }
+
+    LOGV("successfully decoded video frame.");
+
+    int64_t timeUs;
+    CHECK(buffer->meta_data()->findInt64(kKeyTime, &timeUs));
+    if (thumbNailTime >= 0) {
+        if (timeUs != thumbNailTime) {
+            const char *mime;
+            CHECK(trackMeta->findCString(kKeyMIMEType, &mime));
+
+            LOGV("thumbNailTime = %lld us, timeUs = %lld us, mime = %s",
+                 thumbNailTime, timeUs, mime);
+        }
+    }
+
+    sp<MetaData> meta = decoder->getFormat();
+
+    int32_t width, height;
+    CHECK(meta->findInt32(kKeyWidth, &width));
+    CHECK(meta->findInt32(kKeyHeight, &height));
+
+    VideoFrame *frame = new VideoFrame;
+    frame->mWidth = width;
+    frame->mHeight = height;
+    frame->mDisplayWidth = width;
+    frame->mDisplayHeight = height;
+    frame->mSize = width * height * 2;
+    frame->mData = new uint8_t[frame->mSize];
+
+    int32_t srcFormat;
+    CHECK(meta->findInt32(kKeyColorFormat, &srcFormat));
+
+    ColorConverter converter(
+            (OMX_COLOR_FORMATTYPE)srcFormat, OMX_COLOR_Format16bitRGB565);
+    CHECK(converter.isValid());
+
+    converter.convert(
+            width, height,
+            (const uint8_t *)buffer->data() + buffer->range_offset(),
+            0,
+            frame->mData, width * 2);
+
+    buffer->release();
+    buffer = NULL;
+
+    decoder->stop();
+
+    return frame;
+}
+
 VideoFrame *StagefrightMetadataRetriever::captureFrame() {
     LOGV("captureFrame");
 
@@ -143,84 +241,16 @@ VideoFrame *StagefrightMetadataRetriever::captureFrame() {
         return NULL;
     }
 
-    sp<MetaData> meta = source->getFormat();
+    VideoFrame *frame =
+        extractVideoFrameWithCodecFlags(
+                &mClient, trackMeta, source, OMXCodec::kPreferSoftwareCodecs);
 
-    sp<MediaSource> decoder =
-        OMXCodec::Create(
-                mClient.interface(), meta, false, source,
-                NULL, OMXCodec::kPreferSoftwareCodecs);
+    if (frame == NULL) {
+        LOGV("Software decoder failed to extract thumbnail, "
+             "trying hardware decoder.");
 
-    if (decoder.get() == NULL) {
-        LOGV("unable to instantiate video decoder.");
-
-        return NULL;
+        frame = extractVideoFrameWithCodecFlags(&mClient, trackMeta, source, 0);
     }
-
-    decoder->start();
-
-    // Read one output buffer, ignore format change notifications
-    // and spurious empty buffers.
-
-    MediaSource::ReadOptions options;
-    int64_t thumbNailTime;
-    if (trackMeta->findInt64(kKeyThumbnailTime, &thumbNailTime)) {
-        options.setSeekTo(thumbNailTime);
-    }
-
-    MediaBuffer *buffer = NULL;
-    status_t err;
-    do {
-        if (buffer != NULL) {
-            buffer->release();
-            buffer = NULL;
-        }
-        err = decoder->read(&buffer, &options);
-        options.clearSeekTo();
-    } while (err == INFO_FORMAT_CHANGED
-             || (buffer != NULL && buffer->range_length() == 0));
-
-    if (err != OK) {
-        CHECK_EQ(buffer, NULL);
-
-        LOGV("decoding frame failed.");
-        decoder->stop();
-
-        return NULL;
-    }
-
-    LOGV("successfully decoded video frame.");
-
-    meta = decoder->getFormat();
-
-    int32_t width, height;
-    CHECK(meta->findInt32(kKeyWidth, &width));
-    CHECK(meta->findInt32(kKeyHeight, &height));
-
-    VideoFrame *frame = new VideoFrame;
-    frame->mWidth = width;
-    frame->mHeight = height;
-    frame->mDisplayWidth = width;
-    frame->mDisplayHeight = height;
-    frame->mSize = width * height * 2;
-    frame->mData = new uint8_t[frame->mSize];
-
-    int32_t srcFormat;
-    CHECK(meta->findInt32(kKeyColorFormat, &srcFormat));
-
-    ColorConverter converter(
-            (OMX_COLOR_FORMATTYPE)srcFormat, OMX_COLOR_Format16bitRGB565);
-    CHECK(converter.isValid());
-
-    converter.convert(
-            width, height,
-            (const uint8_t *)buffer->data() + buffer->range_offset(),
-            0,
-            frame->mData, width * 2);
-
-    buffer->release();
-    buffer = NULL;
-
-    decoder->stop();
 
     return frame;
 }
