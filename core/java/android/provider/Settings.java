@@ -2094,13 +2094,6 @@ public final class Settings {
         public static final String LOGGING_ID = "logging_id";
 
         /**
-         * The Logging ID (a unique 64-bit value) as a hex string.
-         * Used as a pseudonymous identifier for logging.
-         * @hide
-         */
-        public static final String LOGGING_ID2 = "logging_id2";
-
-        /**
          * User preference for which network(s) should be used. Only the
          * connectivity service should touch this.
          */
@@ -2316,32 +2309,6 @@ public final class Settings {
          * ConnectivityManager for more info.
          */
         public static final String BACKGROUND_DATA = "background_data";
-
-        /**
-         * The time in msec, when the LAST_KMSG file was send to the checkin server.
-         * We will only send the LAST_KMSG file if it was modified after this time.
-         *
-         * @hide
-         */
-        public static final String CHECKIN_SEND_LAST_KMSG_TIME = "checkin_kmsg_time";
-
-        /**
-         * The time in msec, when the apanic_console file was send to the checkin server.
-         * We will only send the apanic_console file if it was modified after this time.
-         *
-         * @hide
-         */
-        public static final String CHECKIN_SEND_APANIC_CONSOLE_TIME =
-            "checkin_apanic_console_time";
-
-        /**
-         * The time in msec, when the apanic_thread file was send to the checkin server.
-         * We will only send the apanic_thread file if it was modified after this time.
-         *
-         * @hide
-         */
-        public static final String CHECKIN_SEND_APANIC_THREAD_TIME =
-            "checkin_apanic_thread_time";
 
         /**
          * The CDMA roaming mode 0 = Home Networks, CDMA default
