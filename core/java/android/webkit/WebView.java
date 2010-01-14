@@ -50,6 +50,7 @@ import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
+import android.view.ScaleGestureDetector;
 import android.view.SoundEffectConstants;
 import android.view.VelocityTracker;
 import android.view.View;
@@ -430,6 +431,18 @@ public class WebView extends AbsoluteLayout
 
     private boolean mWrapContent;
 
+    // whether support multi-touch
+    private static boolean mSupportMultiTouch;
+    // use the framework's ScaleGestureDetector to handle multi-touch
+    private ScaleGestureDetector mScaleDetector;
+    // minimum scale change during multi-touch zoom
+    private static float PREVIEW_SCALE_INCREMENT = 0.01f;
+
+    // the anchor point in the document space where VIEW_SIZE_CHANGED should
+    // apply to
+    private int mAnchorX;
+    private int mAnchorY;
+
     /**
      * Private message ids
      */
@@ -747,9 +760,20 @@ public class WebView extends AbsoluteLayout
                     params;
             frameParams.gravity = Gravity.RIGHT;
         }
+        updateMultiTouchSupport(context);
+    }
 
+    void updateMultiTouchSupport(Context context) {
+        WebSettings settings = getSettings();
         mSupportMultiTouch = context.getPackageManager().hasSystemFeature(
-                PackageManager.FEATURE_TOUCHSCREEN_MULTITOUCH);
+                PackageManager.FEATURE_TOUCHSCREEN_MULTITOUCH)
+                && settings.supportZoom() && settings.getBuiltInZoomControls();
+        if (mSupportMultiTouch && (mScaleDetector == null)) {
+            mScaleDetector = new ScaleGestureDetector(context,
+                    new ScaleDetectorListener());
+        } else if (!mSupportMultiTouch && (mScaleDetector != null)) {
+            mScaleDetector = null;
+        }
     }
 
     private void updateZoomButtonsEnabled() {
@@ -3699,21 +3723,10 @@ public class WebView extends AbsoluteLayout
     private static final float MAX_SLOPE_FOR_DIAG = 1.5f;
     private static final int MIN_BREAK_SNAP_CROSS_DISTANCE = 80;
 
-    // MultiTouch handling
-    private static boolean mSupportMultiTouch;
+    private class ScaleDetectorListener implements
+            ScaleGestureDetector.OnScaleGestureListener {
 
-    private double mPinchDistance;
-    private float mLastPressure;
-    private int mAnchorX;
-    private int mAnchorY;
-
-    private static float SCALE_INCREMENT = 0.01f;
-    private static float PRESSURE_THRESHOLD = 0.67f;
-
-    private boolean doMultiTouch(MotionEvent ev) {
-        int action = ev.getAction();
-
-        if ((action & 0xff) == MotionEvent.ACTION_POINTER_DOWN) {
+        public boolean onScaleBegin(ScaleGestureDetector detector) {
             // cancel the single touch handling
             cancelTouch();
             // reset the zoom overview mode so that the page won't auto grow
@@ -3723,14 +3736,10 @@ public class WebView extends AbsoluteLayout
             if (inEditingMode() && nativeFocusCandidateIsPassword()) {
                 mWebTextView.setInPassword(false);
             }
-            // start multi (2-pointer) touch
-            float x0 = ev.getX(0);
-            float y0 = ev.getY(0);
-            float x1 = ev.getX(1);
-            float y1 = ev.getY(1);
-            mPinchDistance = Math.sqrt((x0 - x1) * (x0 - x1) + (y0 - y1)
-                    * (y0 - y1));
-        } else if ((action & 0xff) == MotionEvent.ACTION_POINTER_UP) {
+            return true;
+        }
+
+        public void onScaleEnd(ScaleGestureDetector detector) {
             if (mPreviewZoomOnly) {
                 mPreviewZoomOnly = false;
                 mAnchorX = viewToContentX((int) mZoomCenterX + mScrollX);
@@ -3751,24 +3760,14 @@ public class WebView extends AbsoluteLayout
             // may trigger the unwanted click, can't use TOUCH_DRAG_MODE as it
             // may trigger the unwanted fling.
             mTouchMode = TOUCH_PINCH_DRAG;
-            // action indicates which pointer is UP. Use the other one as drag's
-            // starting position.
-            int id = (((action & MotionEvent.ACTION_POINTER_ID_MASK)
-                    >> MotionEvent.ACTION_POINTER_ID_SHIFT) == 0) ? 1 : 0;
-            startTouch(ev.getX(id), ev.getY(id), ev.getEventTime());
-        } else if (action == MotionEvent.ACTION_MOVE) {
-            float x0 = ev.getX(0);
-            float y0 = ev.getY(0);
-            float x1 = ev.getX(1);
-            float y1 = ev.getY(1);
-            double distance = Math.sqrt((x0 - x1) * (x0 - x1) + (y0 - y1)
-                    * (y0 - y1));
-            float scale = (float) (Math.round(distance / mPinchDistance
+            startTouch(detector.getFocusX(), detector.getFocusY(),
+                    mLastTouchTime);
+        }
+
+        public boolean onScale(ScaleGestureDetector detector) {
+            float scale = (float) (Math.round(detector.getScaleFactor()
                     * mActualScale * 100) / 100.0);
-            float pressure = ev.getPressure(0) + ev.getPressure(1);
-            if (Math.abs(scale - mActualScale) >= SCALE_INCREMENT
-                    && (!mPreviewZoomOnly
-                    || (pressure / mLastPressure) > PRESSURE_THRESHOLD)) {
+            if (Math.abs(scale - mActualScale) >= PREVIEW_SCALE_INCREMENT) {
                 mPreviewZoomOnly = true;
                 // limit the scale change per step
                 if (scale > mActualScale) {
@@ -3776,18 +3775,14 @@ public class WebView extends AbsoluteLayout
                 } else {
                     scale = Math.max(scale, mActualScale * 0.8f);
                 }
-                mZoomCenterX = (x0 + x1) / 2;
-                mZoomCenterY = (y0 + y1) / 2;
+                mZoomCenterX = detector.getFocusX();
+                mZoomCenterY = detector.getFocusY();
                 setNewZoomScale(scale, false, false);
                 invalidate();
-                mPinchDistance = distance;
-                mLastPressure = pressure;
+                return true;
             }
-        } else {
-            Log.w(LOGTAG, action + " should not happen during doMultiTouch");
             return false;
         }
-        return true;
     }
 
     @Override
@@ -3801,9 +3796,12 @@ public class WebView extends AbsoluteLayout
                     + mTouchMode);
         }
 
-        if (mSupportMultiTouch && getSettings().supportZoom()
-                && mMinZoomScale < mMaxZoomScale && ev.getPointerCount() > 1) {
-            return doMultiTouch(ev);
+        // FIXME: we may consider to give WebKit an option to handle multi-touch
+        // events later.
+        if (mSupportMultiTouch && mMinZoomScale < mMaxZoomScale
+                && ev.getPointerCount() > 1) {
+            mLastTouchTime = ev.getEventTime();
+            return mScaleDetector.onTouchEvent(ev);
         }
 
         int action = ev.getAction();
@@ -5150,7 +5148,8 @@ public class WebView extends AbsoluteLayout
                         }
                         if (mInitialScaleInPercent > 0) {
                             setNewZoomScale(mInitialScaleInPercent / 100.0f,
-                                    true, false);
+                                    mInitialScaleInPercent != mTextWrapScale * 100,
+                                    false);
                         } else if (restoreState.mViewScale > 0) {
                             mTextWrapScale = restoreState.mTextWrapScale;
                             setNewZoomScale(restoreState.mViewScale, false,
@@ -5158,14 +5157,15 @@ public class WebView extends AbsoluteLayout
                         } else {
                             mInZoomOverview = useWideViewport
                                     && settings.getLoadWithOverviewMode();
+                            float scale;
                             if (mInZoomOverview) {
-                                setNewZoomScale((float) viewWidth
-                                        / WebViewCore.DEFAULT_VIEWPORT_WIDTH,
-                                        true, false);
+                                scale = (float) viewWidth
+                                        / WebViewCore.DEFAULT_VIEWPORT_WIDTH;
                             } else {
-                                setNewZoomScale(restoreState.mTextWrapScale,
-                                        true, false);
+                                scale = restoreState.mTextWrapScale;
                             }
+                            setNewZoomScale(scale, Math.abs(scale
+                                    - mTextWrapScale) >= 0.01f, false);
                         }
                         setContentScrollTo(restoreState.mScrollX,
                                 restoreState.mScrollY);
