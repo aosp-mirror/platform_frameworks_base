@@ -14,217 +14,337 @@
  * limitations under the License.
  */
 
+#include <dirent.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <limits.h>
+#include <poll.h>
+#include <signal.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
-#include <unistd.h>
+#include <sys/inotify.h>
 #include <sys/stat.h>
-#include <dirent.h>
-#include <limits.h>
-#include <fcntl.h>
-#include <signal.h>
 #include <sys/time.h>
 #include <sys/wait.h>
+#include <time.h>
+#include <unistd.h>
 
 #include <cutils/properties.h>
-#include <sys/system_properties.h>
+#include <cutils/sockets.h>
 
 #include "dumpstate.h"
 
 
 /* prints the contents of a file */
-int dump_file(const char* path) {
-    char    buffer[32768];
-    int fd, amount_read;
-    int ret = 0;
+int dump_file(const char *title, const char* path) {
+    char buffer[32768];
+    int fd = open(path, O_RDONLY);
+    if (fd < 0) {
+        int err = errno;
+        if (title) printf("----- %s (%s) -----\n", title, path);
+        printf("*** %s: %s\n", path, strerror(err));
+        if (title) printf("\n");
+        return -1;
+    }
 
-    fd = open(path, O_RDONLY);
-    if (fd < 0)
-        return fd;
+    if (title) printf("----- %s (%s", title, path);
 
-    do {
-        ret = read(fd, buffer, sizeof(buffer));
-        if (ret > 0)
-            ret = write(STDOUT_FILENO, buffer, ret);
-    } while (ret > 0);
+    if (title) {
+        struct stat st;
+        if (memcmp(path, "/proc/", 6) && memcmp(path, "/sys/", 5) && !fstat(fd, &st)) {
+            char stamp[80];
+            time_t mtime = st.st_mtime;
+            strftime(stamp, sizeof(stamp), "%Y-%m-%d %H:%M:%S", localtime(&mtime));
+            printf(": %s", stamp);
+        }
+        printf(") -----\n");
+    }
 
-    buffer[0] = '\n';
-    write(STDOUT_FILENO, buffer, 1);
+    int newline = 0;
+    for (;;) {
+        int ret = read(fd, buffer, sizeof(buffer));
+        if (ret > 0) {
+            newline = (buffer[ret - 1] == '\n');
+            ret = fwrite(buffer, ret, 1, stdout);
+        }
+        if (ret <= 0) break;
+    }
 
     close(fd);
-    return ret;
-}
-
-/* prints the contents of all files in a directory */
-void dump_files(const char* path) {
-    DIR* dir;
-    struct dirent* entry;
-    char buffer[PATH_MAX];
-
-    dir = opendir(path);
-    if (!dir) {
-        fprintf(stderr, "could not open directory %s\n", path);
-        return;
-    }
-
-    while ((entry = readdir(dir))) {
-        if (entry->d_type == DT_REG) {
-            snprintf(buffer, sizeof(buffer), "%s/%s", path, entry->d_name);
-            dump_file(path);
-            printf("\n");
-        }
-    }
-
-    closedir(dir);
-}
-
-/* prints the name and value of a system property */
-int print_property(const char* name) {
-    char    value[PROP_VALUE_MAX];
-
-    __system_property_get(name, value);
-    printf("%s=%s\n", name, value);
+    if (!newline) printf("\n");
+    if (title) printf("\n");
     return 0;
 }
 
-static pid_t alarm_pid = 0;
-static int timed_out = 0;
-static void sig_alarm(int sig)
-{
-    if (alarm_pid) {
-        kill(alarm_pid, SIGKILL);
-        timed_out = 1;
-        alarm_pid = 0;
-    }
-}
-
 /* forks a command and waits for it to finish */
-int run_command(struct Command* cmd, int timeout) {
-    struct sigaction sa;
-    pid_t pid;
-    int status;
+int run_command(const char *title, int timeout_seconds, const char *command, ...) {
+    fflush(stdout);
+    clock_t start = clock();
+    pid_t pid = fork();
 
-    pid = fork();
     /* handle error case */
-    if (pid < 0)
+    if (pid < 0) {
+        printf("*** fork: %s\n", strerror(errno));
         return pid;
+    }
 
     /* handle child case */
     if (pid == 0) {
-        int ret = execv(cmd->path, cmd->args);
-        if (ret)
-            fprintf(stderr, "execv %s returned %d\n", cmd->path, ret);
-        exit(ret);
+        const char *args[1024] = {command};
+        size_t arg;
+
+        va_list ap;
+        va_start(ap, command);
+        if (title) printf("----- %s (%s", title, command);
+        for (arg = 1; arg < sizeof(args) / sizeof(args[0]); ++arg) {
+            args[arg] = va_arg(ap, const char *);
+            if (args[arg] == NULL) break;
+            if (title) printf(" %s", args[arg]);
+        }
+        if (title) printf(") -----\n");
+        fflush(stdout);
+
+        execvp(command, (char**) args);
+        printf("*** exec(%s): %s\n", command, strerror(errno));
+        _exit(-1);
     }
 
     /* handle parent case */
-    timed_out = 0;
-    if (timeout) {
-        memset(&sa, 0, sizeof(sa));
-        sa.sa_flags = SA_RESETHAND;
-        sa.sa_handler = sig_alarm;
-        sigaction(SIGALRM, &sa, NULL);
+    for (;;) {
+        int status;
+        pid_t p = waitpid(pid, &status, WNOHANG);
+        float elapsed = (float) (clock() - start) / CLOCKS_PER_SEC;
+        if (p == pid) {
+            if (WIFSIGNALED(status)) {
+                printf("*** %s: Killed by signal %d\n", command, WTERMSIG(status));
+            } else if (WEXITSTATUS(status) > 0) {
+                printf("*** %s: Exit code %d\n", command, WEXITSTATUS(status));
+            }
+            if (title) printf("[%s: %.1fs elapsed]\n\n", command, elapsed);
+            return status;
+        }
 
-        /* set an alarm so we don't hang forever */
-        alarm_pid = pid;
-        alarm(timeout);
+        if (timeout_seconds && elapsed > timeout_seconds) {
+            printf("*** %s: Timed out after %.1fs (killing pid %d)\n", command, elapsed, pid);
+            kill(pid, SIGTERM);
+            return -1;
+        }
+
+        usleep(100000);  // poll every 0.1 sec
     }
-
-    waitpid(pid, &status, 0);
-
-    if (timed_out)
-        printf("ERROR: command %s timed out\n", cmd->path);
-
-    return status;
 }
 
-/* reads the current time into tm */
-void get_time(struct tm *tm) {
-    time_t t;
+size_t num_props = 0;
+static char* props[2000];
 
-    tzset();
-    time(&t);
-    localtime_r(&t, tm);
+static void print_prop(const char *key, const char *name, void *user) {
+    (void) user;
+    if (num_props < sizeof(props) / sizeof(props[0])) {
+        char buf[PROPERTY_KEY_MAX + PROPERTY_VALUE_MAX + 10];
+        snprintf(buf, sizeof(buf), "[%s]: [%s]\n", key, name);
+        props[num_props++] = strdup(buf);
+    }
 }
 
-/* prints the date in tm */
-void print_date(const char* prompt, struct tm *tm) {
-    char strbuf[260];
-
-    strftime(strbuf, sizeof(strbuf),
-             "%a %b %e %H:%M:%S %Z %Y",
-             tm);
-    printf("%s%s\n", prompt, strbuf);
-}
-
-
-static void print_prop(const char *key, const char *name, 
-                     void *user __attribute__((unused)))
-{
-    printf("[%s]: [%s]\n", key, name);
+static int compare_prop(const void *a, const void *b) {
+    return strcmp(*(char * const *) a, *(char * const *) b);
 }
 
 /* prints all the system properties */
 void print_properties() {
+    size_t i;
+    num_props = 0;
     property_list(print_prop, NULL);
+    qsort(&props, num_props, sizeof(props[0]), compare_prop);
+
+    printf("----- SYSTEM PROPERTIES -----\n");
+    for (i = 0; i < num_props; ++i) {
+        fputs(props[i], stdout);
+        free(props[i]);
+    }
+    printf("\n");
 }
 
-/* creates directories as needed for the given path */
-void create_directories(char *path)
-{
+/* redirect output to a service control socket */
+void redirect_to_socket(FILE *redirect, const char *service) {
+    int s = android_get_control_socket(service);
+    if (s < 0) {
+        fprintf(stderr, "android_get_control_socket(%s): %s\n", service, strerror(errno));
+        exit(1);
+    }
+    if (listen(s, 4) < 0) {
+        fprintf(stderr, "listen(control socket): %s\n", strerror(errno));
+        exit(1);
+    }
+
+    struct sockaddr addr;
+    socklen_t alen = sizeof(addr);
+    int fd = accept(s, &addr, &alen);
+    if (fd < 0) {
+        fprintf(stderr, "accept(control socket): %s\n", strerror(errno));
+        exit(1);
+    }
+
+    fflush(redirect);
+    dup2(fd, fileno(redirect));
+    close(fd);
+}
+
+/* redirect output to a file, optionally gzipping; returns gzip pid (or -1) */
+pid_t redirect_to_file(FILE *redirect, char *path, int gzip_level) {
     char *chp = path;
 
     /* skip initial slash */
     if (chp[0] == '/')
         chp++;
 
+    /* create leading directories, if necessary */
     while (chp && chp[0]) {
         chp = strchr(chp, '/');
         if (chp) {
             *chp = 0;
-            mkdir(path, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-            *chp = '/';
-            chp++;
+            mkdir(path, 0775);  /* drwxrwxr-x */
+            *chp++ = '/';
         }
     }
-}
 
-/* runs the vibrator using the given pattern */
-void vibrate_pattern(int fd, int* pattern)
-{
-    struct timespec tm;
-    char    buffer[10];
-
-    while (*pattern) {
-        /* read vibrate on time */
-        int on_time = *pattern++;
-        snprintf(buffer, sizeof(buffer), "%d", on_time);
-        write(fd, buffer, strlen(buffer));
-
-        /* read vibrate off time */
-        int delay = *pattern++;
-        if (delay) {
-            delay += on_time;
-
-            tm.tv_sec = delay / 1000;
-            tm.tv_nsec = (delay % 1000) * 1000000;
-            nanosleep(&tm, NULL);
-        } else
-            break;
+    int fd = open(path, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+    if (fd < 0) {
+        fprintf(stderr, "%s: %s\n", path, strerror(errno));
+        exit(1);
     }
-}
 
-/* prevents the OOM killer from killing us */
-void protect_from_oom_killer()
-{
-    int fd;
+    pid_t gzip_pid = -1;
+    if (gzip_level > 0) {
+        int fds[2];
+        if (pipe(fds)) {
+            fprintf(stderr, "pipe: %s\n", strerror(errno));
+            exit(1);
+        }
 
-    fd = open("/proc/self/oom_adj", O_WRONLY);
-    if (fd >= 0) {
-        // -17 should make us immune to OOM
-        const char* text = "-17";
-        write(fd, text, strlen(text));
+        fflush(redirect);
+        fflush(stdout);
+
+        gzip_pid = fork();
+        if (gzip_pid < 0) {
+            fprintf(stderr, "fork: %s\n", strerror(errno));
+            exit(1);
+        }
+
+        if (gzip_pid == 0) {
+            dup2(fds[0], STDIN_FILENO);
+            dup2(fd, STDOUT_FILENO);
+
+            close(fd);
+            close(fds[0]);
+            close(fds[1]);
+
+            char level[10];
+            snprintf(level, sizeof(level), "-%d", gzip_level);
+            execlp("gzip", "gzip", level, NULL);
+            fprintf(stderr, "exec(gzip): %s\n", strerror(errno));
+            _exit(-1);
+        }
+
         close(fd);
+        close(fds[0]);
+        fd = fds[1];
     }
+
+    dup2(fd, fileno(redirect));
+    close(fd);
+    return gzip_pid;
+}
+
+/* dump Dalvik stack traces, return the trace file location (NULL if none) */
+const char *dump_vm_traces() {
+    char traces_path[PROPERTY_VALUE_MAX] = "";
+    property_get("dalvik.vm.stack-trace-file", traces_path, "");
+    if (!traces_path[0]) return NULL;
+
+    /* move the old traces.txt (if any) out of the way temporarily */
+    char anr_traces_path[PATH_MAX];
+    strlcpy(anr_traces_path, traces_path, sizeof(anr_traces_path));
+    strlcat(anr_traces_path, ".anr", sizeof(anr_traces_path));
+    rename(traces_path, anr_traces_path);
+
+    /* create a new, empty traces.txt file to receive stack dumps */
+    int fd = open(traces_path, O_CREAT | O_WRONLY | O_TRUNC, 0666);  /* -rw-rw-rw- */
+    if (fd < 0) {
+        fprintf(stderr, "%s: %s\n", traces_path, strerror(errno));
+        return NULL;
+    }
+    close(fd);
+
+    /* walk /proc and kill -QUIT all Dalvik processes */
+    DIR *proc = opendir("/proc");
+    if (proc == NULL) {
+        fprintf(stderr, "/proc: %s\n", strerror(errno));
+        return NULL;
+    }
+
+    /* use inotify to find when processes are done dumping */
+    int ifd = inotify_init();
+    if (ifd < 0) {
+        fprintf(stderr, "inotify_init: %s\n", strerror(errno));
+        return NULL;
+    }
+
+    int wfd = inotify_add_watch(ifd, traces_path, IN_CLOSE_WRITE);
+    if (wfd < 0) {
+        fprintf(stderr, "inotify_add_watch(%s): %s\n", traces_path, strerror(errno));
+        return NULL;
+    }
+
+    struct dirent *d;
+    while ((d = readdir(proc))) {
+        int pid = atoi(d->d_name);
+        if (pid <= 0) continue;
+
+        /* identify Dalvik: /proc/(pid)/exe = /system/bin/app_process */
+        char path[PATH_MAX], data[PATH_MAX];
+        snprintf(path, sizeof(path), "/proc/%d/exe", pid);
+        size_t len = readlink(path, data, sizeof(data) - 1);
+        if (len <= 0 || memcmp(data, "/system/bin/app_process", 23)) continue;
+
+        /* skip zygote -- it won't dump its stack anyway */
+        snprintf(path, sizeof(path), "/proc/%d/cmdline", pid);
+        int fd = open(path, O_RDONLY);
+        len = read(fd, data, sizeof(data) - 1);
+        close(fd);
+        if (len <= 0 || !memcmp(data, "zygote", 6)) continue;
+
+        if (kill(pid, SIGQUIT)) {
+            fprintf(stderr, "kill(%d, SIGQUIT): %s\n", pid, strerror(errno));
+            continue;
+        }
+
+        /* wait for the writable-close notification from inotify */
+        struct pollfd pfd = { ifd, POLLIN, 0 };
+        int ret = poll(&pfd, 1, 200);  /* 200 msec timeout */
+        if (ret < 0) {
+            fprintf(stderr, "poll: %s\n", strerror(errno));
+        } else if (ret == 0) {
+            fprintf(stderr, "warning: timed out dumping pid %d\n", pid);
+        } else {
+            struct inotify_event ie;
+            read(ifd, &ie, sizeof(ie));
+        }
+    }
+
+    close(ifd);
+
+    static char dump_traces_path[PATH_MAX];
+    strlcpy(dump_traces_path, traces_path, sizeof(dump_traces_path));
+    strlcat(dump_traces_path, ".bugreport", sizeof(dump_traces_path));
+    if (rename(traces_path, dump_traces_path)) {
+        fprintf(stderr, "rename(%s, %s): %s\n", traces_path, dump_traces_path, strerror(errno));
+        return NULL;
+    }
+
+    /* replace the saved [ANR] traces.txt file */
+    rename(anr_traces_path, traces_path);
+    return dump_traces_path;
 }

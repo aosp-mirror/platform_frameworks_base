@@ -110,7 +110,6 @@ Program::~Program()
 
 void Program::bindAllocation(Allocation *alloc, uint32_t slot)
 {
-    LOGE("bind alloc %p %i", alloc, slot);
     if (mConstants[slot].get() == alloc) {
         return;
     }

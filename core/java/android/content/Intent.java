@@ -1102,16 +1102,6 @@ public class Intent implements Parcelable, Cloneable {
     public static final String ACTION_SEARCH_LONG_PRESS = "android.intent.action.SEARCH_LONG_PRESS";
 
     /**
-     * Activity Action: Start the global search activity.
-     * <p>Input: Nothing.
-     * <p>Output: Nothing.
-     *
-     * @hide Pending API council approval
-     */
-    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
-    public static final String ACTION_GLOBAL_SEARCH = "android.intent.action.GLOBAL_SEARCH";
-
-    /**
      * Activity Action: The user pressed the "Report" button in the crash/ANR dialog.
      * This intent is delivered to the package which installed the application, usually
      * the Market.

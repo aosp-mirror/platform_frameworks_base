@@ -18,6 +18,8 @@ package com.android.internal.telephony;
 
 import java.util.List;
 
+import android.util.Log;
+
 /**
  * {@hide}
  */
@@ -53,6 +55,8 @@ public abstract class Call {
     // if call waiting is answered, network timed out, dropped, 3 way
     // merged, etc.
     protected boolean isGeneric = false;
+
+    protected final String LOG_TAG = "Call";
 
     /* Instance Methods */
 
@@ -234,5 +238,18 @@ public abstract class Call {
      */
     public void setGeneric(boolean generic) {
         isGeneric = generic;
+    }
+
+    /**
+     * Hangup call if it is alive
+     */
+    public void hangupIfAlive() {
+        if (getState().isAlive()) {
+            try {
+                hangup();
+            } catch (CallStateException ex) {
+                Log.w(LOG_TAG, " hangupIfActive: caught " + ex);
+            }
+        }
     }
 }

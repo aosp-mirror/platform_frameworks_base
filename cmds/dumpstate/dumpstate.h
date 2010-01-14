@@ -18,157 +18,24 @@
 #define _DUMPSTATE_H_
 
 #include <time.h>
-
-// Commands time out after 60 seconds
-#define TIMEOUT     60
-
-#define PRINT(s) printf("%s\n", s)
-
-#define DUMP(file) dump_file(file)
-
-#define DUMP_FILES(path) dump_files(path)
-
-#define DUMP_PROMPT(prompt, file)   \
-{                                   \
-    printf(prompt);                 \
-    dump_file(file);                \
-}
-
-#define EXEC(cmd)               \
-{                               \
-    static struct Command c = { \
-        "/system/bin/" cmd,     \
-        { cmd, 0 }              \
-    };                          \
-    run_command(&c, TIMEOUT);   \
-}
-
-#define EXEC_TIMEOUT(cmd, tmout)\
-{                               \
-    static struct Command c = { \
-        "/system/bin/" cmd,     \
-        { cmd, 0 }              \
-    };                          \
-    run_command(&c, tmout);     \
-}
-
-#define EXEC_XBIN(cmd)          \
-{                               \
-    static struct Command c = { \
-        "/system/xbin/" cmd,    \
-        { cmd, 0 }              \
-    };                          \
-    run_command(&c, TIMEOUT);   \
-}
-
-#define EXEC1(cmd, a1)          \
-{                               \
-    static struct Command c = { \
-        "/system/bin/" cmd,     \
-        { cmd, a1, 0 }          \
-    };                          \
-    run_command(&c, TIMEOUT);   \
-}
-
-#define EXEC2(cmd, a1, a2)      \
-{                               \
-    static struct Command c = { \
-        "/system/bin/" cmd,     \
-        { cmd, a1, a2, 0 }      \
-    };                          \
-    run_command(&c, TIMEOUT);   \
-}
-
-#define EXEC3(cmd, a1, a2, a3)      \
-{                                   \
-    static struct Command c = {     \
-        "/system/bin/" cmd,         \
-        { cmd, a1, a2, a3, 0 }      \
-    };                              \
-    run_command(&c, TIMEOUT);       \
-}
-
-#define EXEC4(cmd, a1, a2, a3, a4)  \
-{                                   \
-    static struct Command c = {     \
-        "/system/bin/" cmd,         \
-        { cmd, a1, a2, a3, a4, 0 }  \
-    };                              \
-    run_command(&c, TIMEOUT);       \
-}
-
-#define EXEC6(cmd, a1, a2, a3, a4, a5, a6)  \
-{                                           \
-    static struct Command c = {             \
-        "/system/bin/" cmd,                 \
-        { cmd, a1, a2, a3, a4, a5, a6, 0 }  \
-    };                                      \
-    run_command(&c, TIMEOUT);               \
-}
-
-#define EXEC7(cmd, a1, a2, a3, a4, a5, a6, a7)  \
-{                                               \
-    static struct Command c = {                 \
-        "/system/bin/" cmd,                     \
-        { cmd, a1, a2, a3, a4, a5, a6, a7, 0 }  \
-    };                                          \
-    run_command(&c, TIMEOUT);                   \
-}
-
-#define EXEC8(cmd, a1, a2, a3, a4, a5, a6, a7, a8)  \
-{                                                   \
-    static struct Command c = {                     \
-        "/system/bin/" cmd,                         \
-        { cmd, a1, a2, a3, a4, a5, a6, a7, a8, 0 }  \
-    };                                              \
-    run_command(&c, TIMEOUT);                       \
-}
-
-#define EXEC_XBIN6(cmd, a1, a2, a3, a4, a5, a6)  \
-{                                           \
-    static struct Command c = {             \
-        "/system/xbin/" cmd,                \
-        { cmd, a1, a2, a3, a4, a5, a6, 0 }  \
-    };                                      \
-    run_command(&c, TIMEOUT);               \
-}
-
-#define PROPERTY(name) print_property(name)
-
-struct Command {
-    const char* path;
-    char* const args[];
-};
-typedef struct Command Command;
+#include <unistd.h>
 
 /* prints the contents of a file */
-int dump_file(const char* path);
+int dump_file(const char *title, const char* path);
 
-/* prints the contents of all files in a directory */
-void dump_files(const char* path);
-
-/* forks a command and waits for it to finish */
-int run_command(struct Command* cmd, int timeout);
-
-/* reads the current time into tm */
-void get_time(struct tm *tm);
-
-/* prints the date in tm */
-void print_date(const char* prompt, struct tm *tm);
-
-/* prints the name and value of a system property */
-int print_property(const char* name);
+/* forks a command and waits for it to finish -- terminate args with NULL */
+int run_command(const char *title, int timeout_seconds, const char *command, ...);
 
 /* prints all the system properties */
 void print_properties();
 
-/* creates directories as needed for the given path */
-void create_directories(char *path);
+/* redirect output to a service control socket */
+void redirect_to_socket(FILE *redirect, const char *service);
 
-/* runs the vibrator using the given pattern */
-void vibrate_pattern(int fd, int* pattern);
+/* redirect output to a file, optionally gzipping; returns gzip pid */
+pid_t redirect_to_file(FILE *redirect, char *path, int gzip_level);
 
-/* prevents the OOM killer from killing us */
-void protect_from_oom_killer();
+/* dump Dalvik stack traces, return the trace file location (NULL if none) */
+const char *dump_vm_traces();
 
 #endif /* _DUMPSTATE_H_ */

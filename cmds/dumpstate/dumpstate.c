@@ -14,361 +14,254 @@
  * limitations under the License.
  */
 
+#include <errno.h>
+#include <fcntl.h>
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
-#include <sys/stat.h>
-#include <limits.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <sys/time.h>
 #include <sys/resource.h>
+#include <sys/stat.h>
+#include <sys/time.h>
+#include <unistd.h>
 
-#include <cutils/sockets.h>
+#include <cutils/properties.h>
+
 #include "private/android_filesystem_config.h"
-
 
 #define LOG_TAG "dumpstate"
 #include <utils/Log.h>
 
 #include "dumpstate.h"
 
-static char* const gzip_args[] = { "gzip", "-6", 0 };
-static int start_pattern[] = { 150, 0 };
-static int end_pattern[] = { 75, 50, 75, 50, 75, 0 };
-
-static struct tm now;
-
-static void dump_kernel_log(const char *path, const char *title) ;
+/* read before root is shed */
+static char cmdline_buf[16384] = "(unknown)";
+static const char *dump_traces_path = NULL;
 
 /* dumps the current system state to stdout */
-static void dumpstate(int full) {
-    if (full) {
-        PRINT("========================================================");
-        PRINT("== dumpstate");
-        PRINT("========================================================");
-        PRINT("------ MEMORY INFO ------");
-        DUMP("/proc/meminfo");
-        PRINT("------ CPU INFO ------");
-        EXEC7("top", "-n", "1", "-d", "1", "-m", "30", "-t");
-        PRINT("------ PROCRANK ------");
-        EXEC_XBIN("procrank");
-        PRINT("------ VIRTUAL MEMORY STATS ------");
-        DUMP("/proc/vmstat");
-        PRINT("------ VMALLOC INFO ------");
-        DUMP("/proc/vmallocinfo");
-        PRINT("------ SLAB INFO ------");
-        DUMP("/proc/slabinfo");
-        PRINT("------ ZONEINFO ------");
-        DUMP("/proc/zoneinfo");
-        PRINT("------ SYSTEM LOG ------");
-        EXEC4("logcat", "-v", "time", "-d", "*:v");
-        PRINT("------ VM TRACES ------");
-        DUMP("/data/anr/traces.txt");
-        PRINT("------ EVENT LOG TAGS ------");
-        DUMP("/etc/event-log-tags");
-        PRINT("------ EVENT LOG ------");
-        EXEC6("logcat", "-b", "events", "-v", "time", "-d", "*:v");
-        PRINT("------ RADIO LOG ------");
-        EXEC6("logcat", "-b", "radio", "-v", "time", "-d", "*:v");
-        PRINT("------ NETWORK STATE ------");
-        PRINT("Interfaces:");
-        EXEC("netcfg");
-        PRINT("");
-        PRINT("Routes:");
-        DUMP("/proc/net/route");
+static void dumpstate() {
+    time_t now = time(NULL);
+    char build[PROPERTY_VALUE_MAX], fingerprint[PROPERTY_VALUE_MAX];
+    char radio[PROPERTY_VALUE_MAX], bootloader[PROPERTY_VALUE_MAX];
+    char network[PROPERTY_VALUE_MAX], date[80];
+
+    property_get("ro.build.display.id", build, "(unknown)");
+    property_get("ro.build.fingerprint", fingerprint, "(unknown)");
+    property_get("ro.baseband", radio, "(unknown)");
+    property_get("ro.bootloader", bootloader, "(unknown)");
+    property_get("gsm.operator.alpha", network, "(unknown)");
+    strftime(date, sizeof(date), "%Y-%m-%d %H:%M:%S", localtime(&now));
+
+    printf("========================================================\n");
+    printf("== dumpstate: %s\n", date);
+    printf("========================================================\n");
+
+    printf("\n");
+    printf("Build: %s\n", build);
+    printf("Bootloader: %s\n", bootloader);
+    printf("Radio: %s\n", radio);
+    printf("Network: %s\n", network);
+
+    printf("Kernel: ");
+    dump_file(NULL, "/proc/version");
+    printf("Command line: %s\n", strtok(cmdline_buf, "\n"));
+    printf("\n");
+
+    dump_file("MEMORY INFO", "/proc/meminfo");
+    run_command("CPU INFO", 10, "top", "-n", "1", "-d", "1", "-m", "30", "-t", NULL);
+    run_command("PROCRANK", 20, "procrank", NULL);
+    dump_file("VIRTUAL MEMORY STATS", "/proc/vmstat");
+    dump_file("VMALLOC INFO", "/proc/vmallocinfo");
+    dump_file("SLAB INFO", "/proc/slabinfo");
+    dump_file("ZONEINFO", "/proc/zoneinfo");
+
+    run_command("SYSTEM LOG", 20, "logcat", "-v", "time", "-d", "*:v", NULL);
+
+    /* show the traces we collected in main(), if that was done */
+    if (dump_traces_path != NULL) {
+        dump_file("VM TRACES JUST NOW", dump_traces_path);
+    }
+
+    /* only show ANR traces if they're less than 15 minutes old */
+    struct stat st;
+    char anr_traces_path[PATH_MAX];
+    property_get("dalvik.vm.stack-trace-file", anr_traces_path, "");
+    if (anr_traces_path[0] && !stat(anr_traces_path, &st) && time(NULL) - st.st_mtime < 15 * 60) {
+        dump_file("VM TRACES AT LAST ANR", anr_traces_path);
+    }
+
+    // dump_file("EVENT LOG TAGS", "/etc/event-log-tags");
+    run_command("EVENT LOG", 20, "logcat", "-b", "events", "-v", "time", "-d", "*:v", NULL);
+    run_command("RADIO LOG", 20, "logcat", "-b", "radio", "-v", "time", "-d", "*:v", NULL);
+
+    run_command("NETWORK INTERFACES", 10, "netcfg", NULL);
+    dump_file("NETWORK ROUTES", "/proc/net/route");
+
 #ifdef FWDUMP_bcm4329
-        PRINT("Dump wlan FW log");
-        EXEC_XBIN6("su", "root","dhdutil","-i","eth0","upload","/data/local/tmp/wlan_crash.dump");
+    run_command("DUMP WIFI FIRMWARE LOG", 60,
+            "dhdutil", "-i", "eth0", "upload", "/data/local/tmp/wlan_crash.dump", NULL);
 #endif
-        PRINT("------ SYSTEM PROPERTIES ------");
-        print_properties();
-        PRINT("------ KERNEL LOG ------");
-        EXEC("dmesg");
-        PRINT("------ KERNEL WAKELOCKS ------");
-        DUMP("/proc/wakelocks");
-        PRINT("------ KERNEL CPUFREQ ------");
-        DUMP("/sys/devices/system/cpu/cpu0/cpufreq/stats/time_in_state");
-        PRINT("");
-        PRINT("------ PROCESSES ------");
-        EXEC1("ps", "-P");
-        PRINT("------ PROCESSES AND THREADS ------");
-        EXEC3("ps", "-t", "-p", "-P");
-        PRINT("------ LIBRANK ------");
-        EXEC_XBIN("librank");
-        PRINT("------ BINDER FAILED TRANSACTION LOG ------");
-        DUMP("/proc/binder/failed_transaction_log");
-        PRINT("");
-        PRINT("------ BINDER TRANSACTION LOG ------");
-        DUMP("/proc/binder/transaction_log");
-        PRINT("");
-        PRINT("------ BINDER TRANSACTIONS ------");
-        DUMP("/proc/binder/transactions");
-        PRINT("");
-        PRINT("------ BINDER STATS ------");
-        DUMP("/proc/binder/stats");
-        PRINT("");
-        PRINT("------ BINDER PROCESS STATE: $i ------");
-        DUMP_FILES("/proc/binder/proc");
-        PRINT("------ FILESYSTEMS ------");
-        EXEC("df");
-        PRINT("------ PACKAGE SETTINGS ------");
-        DUMP("/data/system/packages.xml");
-        PRINT("------ PACKAGE UID ERRORS ------");
-        DUMP("/data/system/uiderrors.txt");
 
-        dump_kernel_log("/proc/last_kmsg", "LAST KMSG");
+    print_properties();
 
-        PRINT("------ LAST RADIO LOG ------");
-        EXEC1("parse_radio_log", "/proc/last_radio_log");
+    run_command("KERNEL LOG", 20, "dmesg", NULL);
 
-        dump_kernel_log("/data/dontpanic/apanic_console",
-                        "PANIC CONSOLE");
-        dump_kernel_log("/data/dontpanic/apanic_threads",
-                        "PANIC THREADS");
+    dump_file("KERNEL WAKELOCKS", "/proc/wakelocks");
+    dump_file("KERNEL CPUFREQ", "/sys/devices/system/cpu/cpu0/cpufreq/stats/time_in_state");
 
-        PRINT("------ BACKLIGHTS ------");
-        DUMP_PROMPT("LCD brightness=", "/sys/class/leds/lcd-backlight/brightness");
-        DUMP_PROMPT("Button brightness=", "/sys/class/leds/button-backlight/brightness");
-        DUMP_PROMPT("Keyboard brightness=", "/sys/class/leds/keyboard-backlight/brightness");
-        DUMP_PROMPT("ALS mode=", "/sys/class/leds/lcd-backlight/als");
-        DUMP_PROMPT("LCD driver registers:\n", "/sys/class/leds/lcd-backlight/registers");
-    }
-    PRINT("========================================================");
-    PRINT("== build.prop");
-    PRINT("========================================================");
+    run_command("PROCESSES", 10, "ps", "-P", NULL);
+    run_command("PROCESSES AND THREADS", 10, "ps", "-t", "-p", "-P", NULL);
+    run_command("LIBRANK", 10, "librank", NULL);
 
-    /* the crash server parses key-value pairs between the VERSION INFO and
-     * END lines so we can aggregate crash reports based on this data.
-     */
-    PRINT("------ VERSION INFO ------");
-    print_date("currenttime=", &now);
-    DUMP_PROMPT("kernel.version=", "/proc/version");
-    DUMP_PROMPT("kernel.cmdline=", "/proc/cmdline");
-    DUMP("/system/build.prop");
-    PROPERTY("gsm.version.ril-impl");
-    PROPERTY("gsm.version.baseband");
-    PROPERTY("gsm.imei");
-    PROPERTY("gsm.sim.operator.numeric");
-    PROPERTY("gsm.operator.alpha");
-    PRINT("------ END ------");
+    dump_file("BINDER FAILED TRANSACTION LOG", "/proc/binder/failed_transaction_log");
+    dump_file("BINDER TRANSACTION LOG", "/proc/binder/transaction_log");
+    dump_file("BINDER TRANSACTIONS", "/proc/binder/transactions");
+    dump_file("BINDER STATS", "/proc/binder/stats");
+    run_command("BINDER PROCESS STATE", 10, "sh", "-c", "cat /proc/binder/proc/*");
 
-    if (full) {
-        PRINT("========================================================");
-        PRINT("== dumpsys");
-        PRINT("========================================================");
-        /* the full dumpsys is starting to take a long time, so we need
-           to increase its timeout.  we really need to do the timeouts in
-           dumpsys itself... */
-        EXEC_TIMEOUT("dumpsys", 60);
-    }
+    run_command("FILESYSTEMS & FREE SPACE", 10, "df", NULL);
+
+    dump_file("PACKAGE SETTINGS", "/data/system/packages.xml");
+    dump_file("PACKAGE UID ERRORS", "/data/system/uiderrors.txt");
+
+    dump_file("LAST KMSG", "/proc/last_kmsg");
+    run_command("LAST RADIO LOG", 10, "parse_radio_log", "/proc/last_radio_log", NULL);
+    dump_file("LAST PANIC CONSOLE", "/data/dontpanic/apanic_console");
+    dump_file("LAST PANIC THREADS", "/data/dontpanic/apanic_threads");
+
+    printf("----- BACKLIGHTS -----\n");
+    printf("LCD brightness=");
+    dump_file(NULL, "/sys/class/leds/lcd-backlight/brightness");
+    printf("Button brightness=");
+    dump_file(NULL, "/sys/class/leds/button-backlight/brightness");
+    printf("Keyboard brightness=");
+    dump_file(NULL, "/sys/class/leds/keyboard-backlight/brightness");
+    printf("ALS mode=");
+    dump_file(NULL, "/sys/class/leds/lcd-backlight/als");
+    printf("LCD driver registers:\n");
+    dump_file(NULL, "/sys/class/leds/lcd-backlight/registers");
+    printf("\n");
+
+    printf("========================================================\n");
+    printf("== Android Framework Services\n");
+    printf("========================================================\n");
+
+    /* the full dumpsys is starting to take a long time, so we need
+       to increase its timeout.  we really need to do the timeouts in
+       dumpsys itself... */
+    run_command("DUMPSYS", 60, "dumpsys", NULL);
 }
 
-/* used to check the file name passed via argv[0] */
-static int check_command_name(const char* name, const char* test) {
-    int name_length, test_length;
 
-    if (!strcmp(name, test))
-        return 1;
-
-    name_length = strlen(name);
-    test_length = strlen(test);
-
-    if (name_length > test_length + 2) {
-        name += (name_length - test_length);
-        if (name[-1] != '/')
-            return 0;
-        if (!strcmp(name, test))
-            return 1;
-    }
-
-    return 0;
+static void usage() {
+    fprintf(stderr, "usage: dumpstate [-d] [-o file] [-s] [-z]\n"
+            "  -d: append date to filename (requires -o)\n"
+            "  -o: write to file (instead of stdout)\n"
+            "  -s: write output to control socket (for init)\n"
+            "  -z: gzip output (requires -o)\n");
 }
 
 int main(int argc, char *argv[]) {
-    int dumpcrash = check_command_name(argv[0], "dumpcrash");
-    int add_date = 0;
-    char* outfile = 0;
-    int vibrate = 0;
-    int compress = 0;
-    int socket = 0;
-    int c, fd, vibrate_fd, fds[2];
-    char path[PATH_MAX];
-    pid_t   pid;
-    gid_t groups[] = { AID_LOG, AID_SDCARD_RW };
+    int do_add_date = 0;
+    int do_compress = 0;
+    char* use_outfile = 0;
+    int use_socket = 0;
 
     LOGI("begin\n");
 
     /* set as high priority, and protect from OOM killer */
     setpriority(PRIO_PROCESS, 0, -20);
-    protect_from_oom_killer();
+    FILE *oom_adj = fopen("/proc/self/oom_adj", "w");
+    if (oom_adj) {
+        fputs("-17", oom_adj);
+        fclose(oom_adj);
+    }
 
-    get_time(&now);
+    /* very first thing, collect VM traces from Dalvik (needs root) */
+    dump_traces_path = dump_vm_traces();
 
-    do {
-        c = getopt(argc, argv, "do:svz");
-        if (c == EOF)
-            break;
+    int c;
+    while ((c = getopt(argc, argv, "dho:svz")) != -1) {
         switch (c) {
-            case 'd':
-                add_date = 1;
-                break;
-            case 'o':
-                outfile = optarg;
-                break;
-            case 'v':
-                vibrate = 1;
-                break;
-            case 'z':
-                compress = 1;
-                break;
-            case 's':
-                socket = 1;
-                break;
-            case '?':
-            fprintf(stderr, "%s: invalid option -%c\n",
-                argv[0], optopt);
+            case 'd': do_add_date = 1;       break;
+            case 'o': use_outfile = optarg;  break;
+            case 's': use_socket = 1;        break;
+            case 'v': break;  // compatibility no-op
+            case 'z': do_compress = 6;       break;
+            case '?': printf("\n");
+            case 'h':
+                usage();
                 exit(1);
         }
-    } while (1);
+    }
 
-    /* open vibrator before switching user */
-    if (vibrate) {
-        vibrate_fd = open("/sys/class/timed_output/vibrator/enable", O_WRONLY);
-        if (vibrate_fd > 0)
-            fcntl(vibrate_fd, F_SETFD, FD_CLOEXEC);
-    } else
-        vibrate_fd = -1;
+    /* open the vibrator before dropping root */
+    FILE *vibrator = fopen("/sys/class/timed_output/vibrator/enable", "w");
+    if (vibrator) fcntl(fileno(vibrator), F_SETFD, FD_CLOEXEC);
+
+    /* read /proc/cmdline before dropping root */
+    FILE *cmdline = fopen("/proc/cmdline", "r");
+    if (cmdline != NULL) {
+        fgets(cmdline_buf, sizeof(cmdline_buf), cmdline);
+        fclose(cmdline);
+    }
 
     /* switch to non-root user and group */
+    gid_t groups[] = { AID_LOG, AID_SDCARD_RW };
     setgroups(sizeof(groups)/sizeof(groups[0]), groups);
     setuid(AID_SHELL);
 
-    /* make it safe to use both printf and STDOUT_FILENO */ 
-    setvbuf(stdout, 0, _IONBF, 0);
+    char path[PATH_MAX], tmp_path[PATH_MAX];
+    pid_t gzip_pid = -1;
 
-    if (socket) {
-        struct sockaddr addr;
-        socklen_t alen;
-
-        int s = android_get_control_socket("dumpstate");
-        if (s < 0) {
-            fprintf(stderr, "could not open dumpstate socket\n");
-            exit(1);
+    if (use_socket) {
+        redirect_to_socket(stdout, "dumpstate");
+    } else if (use_outfile) {
+        strlcpy(path, use_outfile, sizeof(path));
+        if (do_add_date) {
+            char date[80];
+            time_t now = time(NULL);
+            strftime(date, sizeof(date), "-%Y-%m-%d-%H-%M-%S", localtime(&now));
+            strlcat(path, date, sizeof(path));
         }
-        if (listen(s, 4) < 0) {
-            fprintf(stderr, "could not listen on dumpstate socket\n");
-            exit(1);
-        }
-
-        alen = sizeof(addr);
-        fd = accept(s, &addr, &alen);
-        if (fd < 0) {
-            fprintf(stderr, "could not accept dumpstate socket\n");
-            exit(1);
-        }
-
-        /* redirect stdout to the socket */
-        dup2(fd, STDOUT_FILENO);
-        close(fd);
-    } else if (outfile) {
-        if (strlen(outfile) > sizeof(path) - 100)
-            exit(1);
-
-        strcpy(path, outfile);
-        if (add_date) {
-            char date[260];
-            strftime(date, sizeof(date),
-                "-%Y-%m-%d-%H-%M-%S",
-                &now);
-            strcat(path, date);
-        }
-        if (compress)
-            strcat(path, ".gz");
-        else
-            strcat(path, ".txt");
-
-        /* ensure that all directories in the path exist */ 
-        create_directories(path);
-        fd = open(path, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
-        if (fd < 0)
-            return fd;
-
-        if (compress) {
-            pipe(fds);
-
-            /* redirect our stdout to the pipe */
-            dup2(fds[1], STDOUT_FILENO);
-            close(fds[1]);
-
-            if ((pid = fork()) < 0)
-            {
-                fprintf(stderr, "fork error\n");
-                exit(1);
-            }
-
-            if (pid) {
-                /* parent case */
-
-                /* close our copy of the input to gzip */
-                close(fds[0]);
-                /* close our copy of the output file */
-                close(fd);
-            } else {
-                /* child case */
-
-               /* redirect our input pipe to stdin */
-                dup2(fds[0], STDIN_FILENO);
-                close(fds[0]);
-
-                /* redirect stdout to the output file */
-                dup2(fd, STDOUT_FILENO);
-                close(fd);
-
-                /* run gzip to postprocess our output */
-                execv("/system/bin/gzip", gzip_args);
-                fprintf(stderr, "execv returned\n");
-            }
-        } else {
-            /* redirect stdout to the output file */
-            dup2(fd, STDOUT_FILENO);
-            close(fd);
-        }
-    }
-    /* else everything will print to stdout */
-
-    if (vibrate) {
-        vibrate_pattern(vibrate_fd, start_pattern);
-    }
-    dumpstate(!dumpcrash);
-    if (vibrate) {
-        vibrate_pattern(vibrate_fd, end_pattern);
-        close(vibrate_fd);
+        strlcat(path, ".txt", sizeof(path));
+        if (do_compress) strlcat(path, ".gz", sizeof(path));
+        strlcpy(tmp_path, path, sizeof(tmp_path));
+        strlcat(tmp_path, ".tmp", sizeof(tmp_path));
+        gzip_pid = redirect_to_file(stdout, tmp_path, do_compress);
     }
 
-    /* so gzip will terminate */
-    close(STDOUT_FILENO);
+    /* bzzzzzz */
+    if (vibrator) {
+        fputs("150", vibrator);
+        fflush(vibrator);
+    }
+
+    dumpstate();
+
+    /* bzzz bzzz bzzz */
+    if (vibrator) {
+        int i;
+        for (i = 0; i < 3; i++) {
+            fputs("75\n", vibrator);
+            fflush(vibrator);
+            usleep((75 + 50) * 1000);
+        }
+        fclose(vibrator);
+    }
+
+    /* wait for gzip to finish, otherwise it might get killed when we exit */
+    if (gzip_pid > 0) {
+        fclose(stdout);
+        waitpid(gzip_pid, NULL, 0);
+    }
+
+    /* rename the (now complete) .tmp file to its final location */
+    if (use_outfile && rename(tmp_path, path)) {
+        fprintf(stderr, "rename(%s, %s): %s\n", tmp_path, path, strerror(errno));
+    }
 
     LOGI("done\n");
 
     return 0;
-}
-
-static void dump_kernel_log(const char *path, const char *title) 
-
-{
-    printf("------ KERNEL %s LOG ------\n", title);
-    if (access(path, R_OK) < 0)
-        printf("%s: %s\n", path, strerror(errno));
-    else {
-        struct stat sbuf;
-
-        if (stat(path, &sbuf) < 0)
-            printf("%s: stat failed (%s)\n", path, strerror(errno));
-        else
-            printf("Harvested %s", ctime(&sbuf.st_mtime));
-    
-        DUMP(path);
-    }
 }

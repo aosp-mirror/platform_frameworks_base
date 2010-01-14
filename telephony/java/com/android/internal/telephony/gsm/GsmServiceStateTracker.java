@@ -518,24 +518,39 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
                 EventLog.writeEvent(TelephonyEventLog.EVENT_LOG_DATA_STATE_RADIO_OFF,
                         dcTracker.getStateInString(), dcTracker.getAnyDataEnabled() ? 1 : 0);
             }
-            Message msg = dcTracker.obtainMessage(DataConnectionTracker.EVENT_CLEAN_UP_CONNECTION);
-            msg.arg1 = 1; // tearDown is true
-            msg.obj = GSMPhone.REASON_RADIO_TURNED_OFF;
-            dcTracker.sendMessage(msg);
-
-            // poll data state up to 15 times, with a 100ms delay
-            // totaling 1.5 sec. Normal data disable action will finish in 100ms.
-            for (int i = 0; i < MAX_NUM_DATA_STATE_READS; i++) {
-                if (dcTracker.getState() != DataConnectionTracker.State.CONNECTED
-                        && dcTracker.getState() != DataConnectionTracker.State.DISCONNECTING) {
-                    Log.d(LOG_TAG, "Data shutdown complete.");
-                    break;
-                }
-                SystemClock.sleep(DATA_STATE_POLL_SLEEP_MS);
-            }
-            // If it's on and available and we want it off..
-            cm.setRadioPower(false, null);
+            // If it's on and available and we want it off gracefully
+            powerOffRadioSafely();
         } // Otherwise, we're in the desired state
+    }
+
+    @Override
+    protected void powerOffRadioSafely() {
+        // clean data connection
+        DataConnectionTracker dcTracker = phone.mDataConnection;
+        Message msg = dcTracker.obtainMessage(DataConnectionTracker.EVENT_CLEAN_UP_CONNECTION);
+        msg.arg1 = 1; // tearDown is true
+        msg.obj = GSMPhone.REASON_RADIO_TURNED_OFF;
+        dcTracker.sendMessage(msg);
+
+        // poll data state up to 15 times, with a 100ms delay
+        // totaling 1.5 sec. Normal data disable action will finish in 100ms.
+        for (int i = 0; i < MAX_NUM_DATA_STATE_READS; i++) {
+            if (dcTracker.getState() != DataConnectionTracker.State.CONNECTED
+                    && dcTracker.getState() != DataConnectionTracker.State.DISCONNECTING) {
+                Log.d(LOG_TAG, "Data shutdown complete.");
+                break;
+            }
+            SystemClock.sleep(DATA_STATE_POLL_SLEEP_MS);
+        }
+
+        // hang up all active voice calls
+        if (phone.isInCall()) {
+            phone.mCT.ringingCall.hangupIfAlive();
+            phone.mCT.backgroundCall.hangupIfAlive();
+            phone.mCT.foregroundCall.hangupIfAlive();
+        }
+
+        cm.setRadioPower(false, null);
     }
 
     protected void updateSpnDisplay() {
