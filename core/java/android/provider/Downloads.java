@@ -27,7 +27,7 @@ import android.net.Uri;
  */
 // For 1.0 the download manager can't deal with abuse from untrusted apps, so
 // this API is hidden.
-public final class Downloads implements BaseColumns {
+public final class Downloads {
     private Downloads() {}
 
     /**
