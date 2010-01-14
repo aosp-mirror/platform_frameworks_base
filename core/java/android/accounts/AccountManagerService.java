@@ -449,6 +449,64 @@ public class AccountManagerService
         return db.insert(TABLE_EXTRAS, EXTRAS_KEY, values);
     }
 
+    public void testHasFeatures(IAccountManagerResponse response,
+            Account account, String[] features) {
+        checkReadAccountsPermission();
+        long identityToken = clearCallingIdentity();
+        try {
+            new TestFeaturesSession(response, account, features).bind();
+        } finally {
+            restoreCallingIdentity(identityToken);
+        }
+    }
+
+    private class TestFeaturesSession extends Session {
+        private final String[] mFeatures;
+        private final Account mAccount;
+
+        public TestFeaturesSession(IAccountManagerResponse response,
+                Account account, String[] features) {
+            super(response, account.type, false /* expectActivityLaunch */);
+            mFeatures = features;
+            mAccount = account;
+        }
+
+        public void run() throws RemoteException {
+            try {
+                mAuthenticator.hasFeatures(this, mAccount, mFeatures);
+            } catch (RemoteException e) {
+                onError(AccountManager.ERROR_CODE_REMOTE_EXCEPTION, "remote exception");
+            }
+        }
+
+        public void onResult(Bundle result) {
+            IAccountManagerResponse response = getResponseAndClose();
+            if (response != null) {
+                try {
+                    if (result == null) {
+                        onError(AccountManager.ERROR_CODE_INVALID_RESPONSE, "null bundle");
+                        return;
+                    }
+                    final Bundle newResult = new Bundle();
+                    newResult.putBoolean(AccountManager.KEY_BOOLEAN_RESULT,
+                            result.getBoolean(AccountManager.KEY_BOOLEAN_RESULT, false));
+                    response.onResult(newResult);
+                } catch (RemoteException e) {
+                    // if the caller is dead then there is no one to care about remote exceptions
+                    if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                        Log.v(TAG, "failure while notifying response", e);
+                    }
+                }
+            }
+        }
+
+        protected String toDebugString(long now) {
+            return super.toDebugString(now) + ", testHasFeatures"
+                    + ", " + mAccount
+                    + ", " + (mFeatures != null ? TextUtils.join(",", mFeatures) : null);
+        }
+    }
+    
     public void removeAccount(IAccountManagerResponse response, Account account) {
         checkManageAccountsPermission();
         long identityToken = clearCallingIdentity();

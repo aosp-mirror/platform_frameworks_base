@@ -230,6 +230,47 @@ public class AccountManager {
     }
 
     /**
+     * Tests that the given account has the specified features. If this account does not exist
+     * then this call returns false.
+     * <p>
+     * This call returns immediately but runs asynchronously and the result is accessed via the
+     * {@link AccountManagerFuture} that is returned. This future is also passed as the sole
+     * parameter to the {@link AccountManagerCallback}. If the caller wished to use this
+     * method asynchronously then they will generally pass in a callback object that will get
+     * invoked with the {@link AccountManagerFuture}. If they wish to use it synchronously then
+     * they will generally pass null for the callback and instead call
+     * {@link android.accounts.AccountManagerFuture#getResult()} on this method's return value,
+     * which will then block until the request completes.
+     * <p>
+     * Requires that the caller has permission {@link android.Manifest.permission#GET_ACCOUNTS}.
+     *
+     * @param account The {@link Account} to test
+     * @param features the features for which to test
+     * @param callback A callback to invoke when the request completes. If null then
+     * no callback is invoked.
+     * @param handler The {@link Handler} to use to invoke the callback. If null then the
+     * main thread's {@link Handler} is used.
+     * @return an {@link AccountManagerFuture} that represents the future result of the call.
+     * The future result is a {@link Boolean} that is true if the account exists and has the
+     * specified features.
+     */
+    public AccountManagerFuture<Boolean> testHasFeatures(final Account account,
+            final String[] features,
+            AccountManagerCallback<Boolean> callback, Handler handler) {
+        return new Future2Task<Boolean>(handler, callback) {
+            public void doWork() throws RemoteException {
+                mService.testHasFeatures(mResponse, account, features);
+            }
+            public Boolean bundleToResult(Bundle bundle) throws AuthenticatorException {
+                if (!bundle.containsKey(KEY_BOOLEAN_RESULT)) {
+                    throw new AuthenticatorException("no result in response");
+                }
+                return bundle.getBoolean(KEY_BOOLEAN_RESULT);
+            }
+        }.start();
+    }
+
+    /**
      * Add an account to the AccountManager's set of known accounts. 
      * <p>
      * Requires that the caller has permission
