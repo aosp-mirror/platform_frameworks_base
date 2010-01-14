@@ -22,6 +22,7 @@ import com.android.internal.telephony.Connection;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.net.Uri;
 import android.text.TextUtils;
 
@@ -111,25 +112,25 @@ public class CallLog {
          * <P>Type: TEXT</P>
          */
         public static final String CACHED_NAME = "name";
-        
+
         /**
          * The cached number type (Home, Work, etc) associated with the
          * phone number, if it exists.
          * This value is not guaranteed to be current, if the contact information
          * associated with this number has changed.
-         * <P>Type: INTEGER</P> 
+         * <P>Type: INTEGER</P>
          */
         public static final String CACHED_NUMBER_TYPE = "numbertype";
-        
+
         /**
          * The cached number label, for a custom number type, associated with the
          * phone number, if it exists.
          * This value is not guaranteed to be current, if the contact information
          * associated with this number has changed.
-         * <P>Type: TEXT</P> 
+         * <P>Type: TEXT</P>
          */
         public static final String CACHED_NUMBER_LABEL = "numberlabel";
-        
+
         /**
          * Adds a call to the call log.
          *
@@ -137,15 +138,15 @@ public class CallLog {
          * if the contact is unknown.
          * @param context the context used to get the ContentResolver
          * @param number the phone number to be added to the calls db
-         * @param presentation the number presenting rules set by the network for 
+         * @param presentation the number presenting rules set by the network for
          *        "allowed", "payphone", "restricted" or "unknown"
          * @param callType enumerated values for "incoming", "outgoing", or "missed"
          * @param start time stamp for the call in milliseconds
          * @param duration call duration in seconds
-         * 
+         *
          * {@hide}
          */
-        public static Uri addCall(CallerInfo ci, Context context, String number, 
+        public static Uri addCall(CallerInfo ci, Context context, String number,
                 int presentation, int callType, long start, int duration) {
             final ContentResolver resolver = context.getContentResolver();
 
@@ -175,22 +176,47 @@ public class CallLog {
                 values.put(CACHED_NUMBER_TYPE, ci.numberType);
                 values.put(CACHED_NUMBER_LABEL, ci.numberLabel);
             }
-            
+
             if ((ci != null) && (ci.person_id > 0)) {
                 ContactsContract.Contacts.markAsContacted(resolver, ci.person_id);
             }
-            
+
             Uri result = resolver.insert(CONTENT_URI, values);
-            
+
             removeExpiredEntries(context);
-            
+
             return result;
         }
-        
+
+        /**
+         * Query the call log database for the last dialed number.
+         * @param context Used to get the content resolver.
+         * @return The last phone number dialed (outgoing) or an empty
+         * string if none exist yet.
+         */
+        public static String getLastOutgoingCall(Context context) {
+            final ContentResolver resolver = context.getContentResolver();
+            Cursor c = null;
+            try {
+                c = resolver.query(
+                    CONTENT_URI,
+                    new String[] {NUMBER},
+                    TYPE + " = " + OUTGOING_TYPE,
+                    null,
+                    DEFAULT_SORT_ORDER + " LIMIT 1");
+                if (c == null || !c.moveToFirst()) {
+                    return "";
+                }
+                return c.getString(0);
+            } finally {
+                if (c != null) c.close();
+            }
+        }
+
         private static void removeExpiredEntries(Context context) {
             final ContentResolver resolver = context.getContentResolver();
             resolver.delete(CONTENT_URI, "_id IN " +
-                    "(SELECT _id FROM calls ORDER BY " + DEFAULT_SORT_ORDER 
+                    "(SELECT _id FROM calls ORDER BY " + DEFAULT_SORT_ORDER
                     + " LIMIT -1 OFFSET 500)", null);
         }
     }
