@@ -16,6 +16,8 @@
 
 package android.graphics;
 
+import java.awt.Paint;
+
 public class RadialGradient extends Shader {
 
    /** Create a shader that draws a radial gradient given the center and radius.
@@ -58,5 +60,11 @@ public class RadialGradient extends Shader {
        }
        // FIXME Implement shader
    }
+
+    @Override
+    Paint getPaint() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }
 
