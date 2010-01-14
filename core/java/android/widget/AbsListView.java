@@ -1567,7 +1567,12 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
         if (!hasWindowFocus) {
             setChildrenDrawingCacheEnabled(false);
-            removeCallbacks(mFlingRunnable);
+            if (mFlingRunnable != null) {
+                removeCallbacks(mFlingRunnable);
+                // let the fling runnable report it's new state which
+                // should be idle
+                mFlingRunnable.endFling();
+            }
             // Always hide the type filter
             dismissPopup();
 
