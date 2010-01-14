@@ -776,6 +776,17 @@ static void SC_drawSpriteScreenspace(float x, float y, float z, float w, float h
     glDrawTexfOES(x, y, z, w, h);
 }
 
+static void SC_drawSpriteScreenspaceCropped(float x, float y, float z, float w, float h,
+        float cx0, float cy0, float cx1, float cy1)
+{
+    GET_TLS();
+    rsc->setupCheck();
+
+    GLint crop[4] = {cx0, cy0, cx1, cy1};
+    glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_CROP_RECT_OES, crop);
+    glDrawTexfOES(x, y, z, w, h);
+}
+
 static void SC_drawSprite(float x, float y, float z, float w, float h)
 {
     GET_TLS();
@@ -1271,6 +1282,8 @@ ScriptCState::SymbolTable_t ScriptCState::gSyms[] = {
         "void", "(float x, float y, float z, float w, float h)" },
     { "drawSpriteScreenspace", (void *)&SC_drawSpriteScreenspace,
         "void", "(float x, float y, float z, float w, float h)" },
+    { "drawSpriteScreenspaceCropped", (void *)&SC_drawSpriteScreenspaceCropped,
+        "void", "(float x, float y, float z, float w, float h, float cx0, float cy0, float cx1, float cy1)" },
     { "drawLine", (void *)&SC_drawLine,
         "void", "(float x1, float y1, float z1, float x2, float y2, float z2)" },
     { "drawPoint", (void *)&SC_drawPoint,
