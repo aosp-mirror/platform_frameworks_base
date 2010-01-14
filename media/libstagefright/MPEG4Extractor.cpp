@@ -984,7 +984,14 @@ status_t MPEG4Source::read(
             (const uint8_t *)mBuffer->data() + mBuffer->range_offset();
 
         size_t nal_size = parseNALSize(src);
-        CHECK(mBuffer->range_length() >= mNALLengthSize + nal_size);
+        if (mBuffer->range_length() < mNALLengthSize + nal_size) {
+            LOGE("incomplete NAL unit.");
+
+            mBuffer->release();
+            mBuffer = NULL;
+
+            return ERROR_MALFORMED;
+        }
 
         MediaBuffer *clone = mBuffer->clone();
         clone->set_range(mBuffer->range_offset() + mNALLengthSize, nal_size);
@@ -1023,7 +1030,13 @@ status_t MPEG4Source::read(
             CHECK(srcOffset + mNALLengthSize <= size);
             size_t nalLength = parseNALSize(&mSrcBuffer[srcOffset]);
             srcOffset += mNALLengthSize;
-            CHECK(srcOffset + nalLength <= size);
+
+            if (srcOffset + nalLength > size) {
+                mBuffer->release();
+                mBuffer = NULL;
+
+                return ERROR_MALFORMED;
+            }
 
             if (nalLength == 0) {
                 continue;
