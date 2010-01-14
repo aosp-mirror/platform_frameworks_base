@@ -107,9 +107,5 @@ LOCAL_MODULE_TAGS := optional
 
 include $(BUILD_SHARED_LIBRARY)
 
-# Include the subdirectories ====================
-include $(addprefix $(LOCAL_PATH)/,$(addsuffix /Android.mk,\
-            java \
-    	))
 
 endif #simulator
