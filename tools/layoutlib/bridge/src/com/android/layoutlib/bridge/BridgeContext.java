@@ -259,7 +259,18 @@ public final class BridgeContext extends Context {
 
         // resolve the defStyleAttr value into a IStyleResourceValue
         IStyleResourceValue defStyleValues = null;
-        if (defStyleAttr != 0) {
+
+        // look for a custom style.
+        String customStyle = parser.getAttributeValue(null /* namespace*/, "style");
+        if (customStyle != null) {
+            IResourceValue item = findResValue(customStyle);
+
+            if (item instanceof IStyleResourceValue) {
+                defStyleValues = (IStyleResourceValue)item;
+            }
+        }
+
+        if (defStyleValues == null && defStyleAttr != 0) {
             // get the name from the int.
             String defStyleName = searchAttr(defStyleAttr);
 
@@ -1104,7 +1115,7 @@ public final class BridgeContext extends Context {
            Bundle initialExtras) {
         // TODO Auto-generated method stub
     }
-    
+
     @Override
     public void setTheme(int arg0) {
         // TODO Auto-generated method stub
@@ -1137,7 +1148,7 @@ public final class BridgeContext extends Context {
             throws IntentSender.SendIntentException {
         // TODO Auto-generated method stub
     }
-    
+
     @Override
     public boolean startInstrumentation(ComponentName arg0, String arg1,
             Bundle arg2) {

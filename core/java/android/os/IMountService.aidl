@@ -75,4 +75,9 @@ interface IMountService
      * when a UMS host is detected.
      */
     void setAutoStartUms(boolean value);
+
+    /**
+     * Shuts down the MountService and gracefully unmounts all external media.
+     */
+    void shutdown();
 }

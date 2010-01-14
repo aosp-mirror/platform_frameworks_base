@@ -361,6 +361,8 @@ web_docs_sample_code_flags := \
 		            resources/samples/ApiDemos "API Demos" \
 		-samplecode $(sample_dir)/BluetoothChat \
 		            resources/samples/BluetoothChat "Bluetooth Chat" \
+		-samplecode $(sample_dir)/BusinessCard \
+		            resources/samples/BusinessCard "Business Card" \
 		-samplecode $(sample_dir)/ContactManager \
 		            resources/samples/ContactManager "Contact Manager" \
 		-samplecode $(sample_dir)/Home \

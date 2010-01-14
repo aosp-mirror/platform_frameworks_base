@@ -105,7 +105,7 @@ static JNINativeMethod method_table[] = {
     { "setLastUserActivityTimeout", "(J)I", (void*)setLastUserActivityTimeout },
     { "setScreenState", "(Z)I", (void*)setScreenState },
     { "shutdown", "()V", (void*)android_os_Power_shutdown },
-    { "reboot", "(Ljava/lang/String;)V", (void*)android_os_Power_reboot },
+    { "rebootNative", "(Ljava/lang/String;)V", (void*)android_os_Power_reboot },
 };
 
 int register_android_os_Power(JNIEnv *env)
