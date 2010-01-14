@@ -739,6 +739,8 @@ public class WifiWatchdogService {
         
         // Black list this "bad" AP, this will cause an attempt to connect to another
         blacklistAp(ap.bssid);
+        // Initiate an association to an alternate AP
+        mWifiStateTracker.reassociate();
     }
 
     private void blacklistAp(String bssid) {

@@ -304,11 +304,13 @@ public class WifiStateTracker extends NetworkStateTracker {
      * thread.
      */
     private static class SupplicantStateChangeResult {
-        SupplicantStateChangeResult(int networkId, SupplicantState state) {
+        SupplicantStateChangeResult(int networkId, String BSSID, SupplicantState state) {
             this.state = state;
+            this.BSSID = BSSID;
             this.networkId = networkId;
         }
         int networkId;
+        String BSSID;
         SupplicantState state;
     }
 
@@ -512,10 +514,10 @@ public class WifiStateTracker extends NetworkStateTracker {
      * @param networkId the configured network on which the state change occurred
      * @param newState the new {@code SupplicantState}
      */
-    void notifyStateChange(int networkId, SupplicantState newState) {
+    void notifyStateChange(int networkId, String BSSID, SupplicantState newState) {
         Message msg = Message.obtain(
             this, EVENT_SUPPLICANT_STATE_CHANGED,
-            new SupplicantStateChangeResult(networkId, newState));
+            new SupplicantStateChangeResult(networkId, BSSID, newState));
         msg.sendToTarget();
     }
 
@@ -884,6 +886,13 @@ public class WifiStateTracker extends NetworkStateTracker {
 
                 int networkId = supplicantStateResult.networkId;
 
+                /**
+                 * The SupplicantState BSSID value is valid in ASSOCIATING state only.
+                 * The NetworkState BSSID value comes upon a successful connection.
+                 */
+                if (supplicantStateResult.state == SupplicantState.ASSOCIATING) {
+                    mLastBssid = supplicantStateResult.BSSID;
+                }
                 /*
                  * If we get disconnect or inactive we need to start our
                  * watchdog timer to start a scan
@@ -928,6 +937,7 @@ public class WifiStateTracker extends NetworkStateTracker {
                     setSupplicantState(newState);
                     if (newState == SupplicantState.DORMANT) {
                         DetailedState newDetailedState;
+                        Message reconnectMsg = obtainMessage(EVENT_DEFERRED_RECONNECT, mLastBssid);
                         if (mIsScanOnly || mRunState == RUN_STATE_STOPPING) {
                             newDetailedState = DetailedState.IDLE;
                         } else {
@@ -942,7 +952,7 @@ public class WifiStateTracker extends NetworkStateTracker {
                          * milliseconds.
                          */
                         if (mRunState == RUN_STATE_RUNNING && !mIsScanOnly && networkId != -1) {
-                            sendEmptyMessageDelayed(EVENT_DEFERRED_RECONNECT, RECONNECT_DELAY_MSECS);
+                            sendMessageDelayed(reconnectMsg, RECONNECT_DELAY_MSECS);
                         } else if (mRunState == RUN_STATE_STOPPING) {
                             synchronized (this) {
                                 WifiNative.stopDriverCommand();
@@ -1104,15 +1114,19 @@ public class WifiStateTracker extends NetworkStateTracker {
                 break;
 
             case EVENT_DEFERRED_RECONNECT:
-                /*
+                String BSSID = msg.obj.toString();
+                /**
                  * If we've exceeded the maximum number of retries for reconnecting
-                 * to a given network, disable the network so that the supplicant
-                 * will try some other network, if any is available.
-                 * TODO: network ID may have changed since we stored it.
+                 * to a given network, blacklist the BSSID to allow a connection attempt on
+                 * an alternate BSSID if available
                  */
                 if (mWifiInfo.getSupplicantState() != SupplicantState.UNINITIALIZED) {
                     if (++mReconnectCount > getMaxDhcpRetries()) {
-                        mWM.disableNetwork(mLastNetworkId);
+                        if (LOCAL_LOGD) {
+                            Log.d(TAG, "Failed reconnect count: " +
+                                    mReconnectCount + " Blacklisting " + BSSID);
+                        }
+                        addToBlacklist(BSSID);
                     }
                     synchronized(this) {
                         WifiNative.reconnectCommand();
@@ -1684,6 +1698,10 @@ public class WifiStateTracker extends NetworkStateTracker {
         mNumScansSinceNetworkStateChange = 0;
     }
     
+    public synchronized boolean reassociate() {
+        return WifiNative.reassociateCommand();
+    }
+
     public synchronized boolean addToBlacklist(String bssid) {
         return WifiNative.addToBlacklistCommand(bssid);
     }

@@ -293,11 +293,17 @@ public class WifiMonitor {
         private void handleSupplicantStateChange(String dataString) {
             String[] dataTokens = dataString.split(" ");
 
+            String BSSID = null;
             int networkId = -1;
             int newState  = -1;
             for (String token : dataTokens) {
                 String[] nameValue = token.split("=");
                 if (nameValue.length != 2) {
+                    continue;
+                }
+
+                if (nameValue[0].equals("BSSID")) {
+                    BSSID = nameValue[1];
                     continue;
                 }
 
@@ -328,7 +334,7 @@ public class WifiMonitor {
             if (newSupplicantState == SupplicantState.INVALID) {
                 Log.w(TAG, "Invalid supplicant state: " + newState);
             }
-            mWifiStateTracker.notifyStateChange(networkId, newSupplicantState);
+            mWifiStateTracker.notifyStateChange(networkId, BSSID, newSupplicantState);
         }
     }
 
