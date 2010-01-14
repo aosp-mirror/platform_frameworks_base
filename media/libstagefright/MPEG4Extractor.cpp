@@ -152,6 +152,7 @@ static const char *FourCC2MIME(uint32_t fourcc) {
 MPEG4Extractor::MPEG4Extractor(const sp<DataSource> &source)
     : mDataSource(source),
       mHaveMetadata(false),
+      mHasVideo(false),
       mFirstTrack(NULL),
       mLastTrack(NULL) {
 }
@@ -165,6 +166,23 @@ MPEG4Extractor::~MPEG4Extractor() {
         track = next;
     }
     mFirstTrack = mLastTrack = NULL;
+}
+
+sp<MetaData> MPEG4Extractor::getMetaData() {
+    sp<MetaData> meta = new MetaData;
+
+    status_t err;
+    if ((err = readMetaData()) != OK) {
+        return meta;
+    }
+
+    if (mHasVideo) {
+        meta->setCString(kKeyMIMEType, "video/mp4");
+    } else {
+        meta->setCString(kKeyMIMEType, "audio/mp4");
+    }
+
+    return meta;
 }
 
 size_t MPEG4Extractor::countTracks() {
@@ -235,7 +253,7 @@ status_t MPEG4Extractor::readMetaData() {
     status_t err;
     while ((err = parseChunk(&offset, 0)) == OK) {
     }
-    
+
     if (mHaveMetadata) {
         return OK;
     }
@@ -561,6 +579,8 @@ status_t MPEG4Extractor::parseChunk(off_t *offset, int depth) {
         case FOURCC('s', '2', '6', '3'):
         case FOURCC('a', 'v', 'c', '1'):
         {
+            mHasVideo = true;
+
             if (mHandlerType != FOURCC('v', 'i', 'd', 'e')) {
                 return ERROR_MALFORMED;
             }

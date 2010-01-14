@@ -53,6 +53,7 @@ enum {
     METADATA_KEY_VIDEO_HEIGHT    = 19,
     METADATA_KEY_VIDEO_WIDTH     = 20,
     METADATA_KEY_WRITER          = 21,
+    METADATA_KEY_MIMETYPE        = 22,
     // Add more here...
 };
 

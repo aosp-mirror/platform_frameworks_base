@@ -255,5 +255,6 @@ public class MediaMetadataRetriever
     public static final int METADATA_KEY_VIDEO_HEIGHT    = 19;
     public static final int METADATA_KEY_VIDEO_WIDTH     = 20;
     public static final int METADATA_KEY_WRITER          = 21;
+    public static final int METADATA_KEY_MIMETYPE        = 22;
     // Add more here...
 }
