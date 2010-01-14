@@ -126,7 +126,7 @@ public class Canvas extends _Original_Canvas {
 
         Shader shader = paint.getShader();
         if (shader != null) {
-            java.awt.Paint shaderPaint = shader.getPaint();
+            java.awt.Paint shaderPaint = shader.getJavaPaint();
             if (shaderPaint != null) {
                 g.setPaint(shaderPaint);
             } else {

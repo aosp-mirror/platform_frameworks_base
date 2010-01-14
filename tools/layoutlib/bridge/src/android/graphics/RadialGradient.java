@@ -62,7 +62,7 @@ public class RadialGradient extends Shader {
    }
 
     @Override
-    Paint getPaint() {
+    Paint getJavaPaint() {
         // TODO Auto-generated method stub
         return null;
     }

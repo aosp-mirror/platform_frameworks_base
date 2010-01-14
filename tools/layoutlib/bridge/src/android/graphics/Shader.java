@@ -76,5 +76,8 @@ public abstract class Shader {
         }
     }
 
-    abstract java.awt.Paint getPaint();
+    /**
+     * Returns a java.awt.Paint object matching this shader.
+     */
+    abstract java.awt.Paint getJavaPaint();
 }

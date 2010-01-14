@@ -48,6 +48,8 @@ public class LinearGradient extends Shader {
 
         // FIXME implement multi color linear gradient
         if (colors.length == 2) {
+            // The hasAlpha flag in Color() is only used to enforce alpha to 0xFF if false.
+            // If true the alpha is read from the int.
             mGradientPaint = new GradientPaint(x0, y0, new Color(colors[0], true /* hasalpha */),
                     x1, y1, new Color(colors[1], true /* hasalpha */), tile != TileMode.CLAMP);
         }
@@ -66,6 +68,8 @@ public class LinearGradient extends Shader {
      */
     public LinearGradient(float x0, float y0, float x1, float y1, int color0, int color1,
             TileMode tile) {
+        // The hasAlpha flag in Color() is only used to enforce alpha to 0xFF if false.
+        // If true the alpha is read from the int.
         mGradientPaint = new GradientPaint(x0, y0, new Color(color0, true /* hasalpha */), x1, y1,
                 new Color(color1, true /* hasalpha */), tile != TileMode.CLAMP);
     }
@@ -73,7 +77,7 @@ public class LinearGradient extends Shader {
     // ---------- Custom Methods
 
     @Override
-    public Paint getPaint() {
+    public Paint getJavaPaint() {
         return mGradientPaint;
     }
 }
