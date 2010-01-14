@@ -24,9 +24,8 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.MotionEvent;
-import android.view.TransformGestureDetector;
+import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.widget.LinearLayout;
 
@@ -48,9 +47,6 @@ public class TransformTestActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        final LayoutInflater li = (LayoutInflater)getSystemService(
-                LAYOUT_INFLATER_SERVICE);
         
         this.setTitle(R.string.act_title);
         LinearLayout root = new LinearLayout(this);
@@ -71,15 +67,19 @@ public class TransformTestActivity extends Activity {
         private float mPosY;
         private float mScale = 1.f;
         private Matrix mMatrix;
-        private TransformGestureDetector mDetector;
+        private ScaleGestureDetector mDetector;
         
-        private class Listener implements TransformGestureDetector.OnTransformGestureListener {
+        private float mLastX;
+        private float mLastY;
+        
+        private class Listener implements ScaleGestureDetector.OnScaleGestureListener {
 
-            public boolean onTransform(TransformGestureDetector detector) {
-                Log.d("ttest", "Translation: (" + detector.getTranslateX() +
-                        ", " + detector.getTranslateY() + ")");
+            public boolean onScale(ScaleGestureDetector detector) {
                 float scale = detector.getScaleFactor();
+                
                 Log.d("ttest", "Scale: " + scale);
+                
+                // Limit the scale so our object doesn't get too big or disappear
                 if (mScale * scale > 0.1f) {
                     if (mScale * scale < 10.f) {
                         mScale *= scale;
@@ -89,16 +89,13 @@ public class TransformTestActivity extends Activity {
                 } else {
                     mScale = 0.1f;
                 }
-
-                mPosX += detector.getTranslateX();
-                mPosY += detector.getTranslateY();
                 
                 Log.d("ttest", "mScale: " + mScale + " mPos: (" + mPosX + ", " + mPosY + ")");
                 
                 float sizeX = mDrawable.getIntrinsicWidth()/2;
                 float sizeY = mDrawable.getIntrinsicHeight()/2;
-                float centerX = detector.getCenterX();
-                float centerY = detector.getCenterY();
+                float centerX = detector.getFocusX();
+                float centerY = detector.getFocusY();
                 float diffX = centerX - mPosX;
                 float diffY = centerY - mPosY;
                 diffX = diffX*scale - diffX;
@@ -115,24 +112,20 @@ public class TransformTestActivity extends Activity {
                 return true;
             }
 
-            public boolean onTransformBegin(TransformGestureDetector detector) {
+            public boolean onScaleBegin(ScaleGestureDetector detector) {
                 return true;
             }
 
-            public boolean onTransformEnd(TransformGestureDetector detector) {
-                return true;
-            }
-
-            public boolean onTransformFling(TransformGestureDetector detector) {
-                return false;
-            }
-            
+            public void onScaleEnd(ScaleGestureDetector detector) {
+                mLastX = detector.getFocusX();
+                mLastY = detector.getFocusY();
+            }            
         }
         
         public TransformView(Context context) {
             super(context);
             mMatrix = new Matrix();
-            mDetector = new TransformGestureDetector(context, new Listener());
+            mDetector = new ScaleGestureDetector(context, new Listener());
             DisplayMetrics metrics = context.getResources().getDisplayMetrics();
             mPosX = metrics.widthPixels/2;
             mPosY = metrics.heightPixels/2;
@@ -151,12 +144,37 @@ public class TransformTestActivity extends Activity {
         
         @Override
         public boolean onTouchEvent(MotionEvent event) {
-            boolean handled = mDetector.onTouchEvent(event);
+            mDetector.onTouchEvent(event);
             
-            int pointerCount = event.getPointerCount();
-            Log.d("ttest", "pointerCount: " + pointerCount);
+            // Handling single finger pan
+            if (!mDetector.isInProgress()) {
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        mLastX = event.getX();
+                        mLastY = event.getY();
+                        break;
+                        
+                    case MotionEvent.ACTION_MOVE:
+                        final float x = event.getX();
+                        final float y = event.getY();
+                        mPosX += x - mLastX;
+                        mPosY += y - mLastY;
+                        mLastX = x;
+                        mLastY = y;
+                        
+                        float sizeX = mDrawable.getIntrinsicWidth()/2;
+                        float sizeY = mDrawable.getIntrinsicHeight()/2;
+                        
+                        mMatrix.reset();
+                        mMatrix.postTranslate(-sizeX, -sizeY);
+                        mMatrix.postScale(mScale, mScale);
+                        mMatrix.postTranslate(mPosX, mPosY);
+                        invalidate();
+                        break;
+                }
+            }
 
-            return handled;
+            return true;
         }
         
         @Override
