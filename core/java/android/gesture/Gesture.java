@@ -34,7 +34,9 @@ import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * A gesture can have a single or multiple strokes
+ * A gesture is a hand-drawn shape on a touch screen. It can have one or multiple strokes.
+ * Each stroke is a sequence of timed points. A user-defined gesture can be recognized by 
+ * a GestureLibrary and a built-in alpabet gesture can be recognized by a LetterRecognizer. 
  */
 
 public class Gesture implements Parcelable {
@@ -58,6 +60,19 @@ public class Gesture implements Parcelable {
         mGestureID = GESTURE_ID_BASE + sGestureCount.incrementAndGet();
     }
 
+    @Override
+    public Object clone() {
+        Gesture gesture = new Gesture();
+        gesture.mBoundingBox.set(mBoundingBox.left, mBoundingBox.top, 
+                                        mBoundingBox.right, mBoundingBox.bottom);
+        final int count = mStrokes.size();
+        for (int i = 0; i < count; i++) {
+            GestureStroke stroke = mStrokes.get(i);
+            gesture.mStrokes.add((GestureStroke)stroke.clone());
+        }
+        return gesture;
+    }
+    
     /**
      * @return all the strokes of the gesture
      */
@@ -73,7 +88,7 @@ public class Gesture implements Parcelable {
     }
 
     /**
-     * Add a stroke to the gesture
+     * Adds a stroke to the gesture.
      * 
      * @param stroke
      */
@@ -83,8 +98,8 @@ public class Gesture implements Parcelable {
     }
 
     /**
-     * Get the total length of the gesture. When there are multiple strokes in
-     * the gesture, this returns the sum of the lengths of all the strokes
+     * Calculates the total length of the gesture. When there are multiple strokes in
+     * the gesture, this returns the sum of the lengths of all the strokes.
      * 
      * @return the length of the gesture
      */
@@ -142,7 +157,7 @@ public class Gesture implements Parcelable {
     }
 
     /**
-     * Set the id of the gesture
+     * Sets the id of the gesture.
      * 
      * @param id
      */
@@ -158,7 +173,7 @@ public class Gesture implements Parcelable {
     }
 
     /**
-     * Create a bitmap of the gesture with a transparent background
+     * Creates a bitmap of the gesture with a transparent background.
      * 
      * @param width width of the target bitmap
      * @param height height of the target bitmap
@@ -194,7 +209,7 @@ public class Gesture implements Parcelable {
     }
 
     /**
-     * Create a bitmap of the gesture with a transparent background
+     * Creates a bitmap of the gesture with a transparent background.
      * 
      * @param width
      * @param height
