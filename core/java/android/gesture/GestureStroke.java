@@ -27,7 +27,8 @@ import java.io.DataInputStream;
 import java.util.ArrayList;
 
 /**
- * A gesture stroke started on a touch down and ended on a touch up.
+ * A gesture stroke started on a touch down and ended on a touch up. A stroke
+ * consists of a sequence of timed points. One or multiple strokes form a gesture.
  */
 public class GestureStroke {
     static final float TOUCH_TOLERANCE = 8;
@@ -41,7 +42,7 @@ public class GestureStroke {
     private Path mCachedPath;
 
     /**
-     * Construct a gesture stroke from a list of gesture points
+     * A constructor that constructs a gesture stroke from a list of gesture points.
      * 
      * @param points
      */
@@ -82,7 +83,22 @@ public class GestureStroke {
     }
 
     /**
-     * Draw the gesture with a given canvas and paint
+     * A faster constructor specially for cloning a stroke.
+     */
+    private GestureStroke(RectF bbx, float len, float[] pts, long[] times) {
+        boundingBox = new RectF(bbx.left, bbx.top, bbx.right, bbx.bottom);
+        length = len;
+        points = pts.clone();
+        timestamps = times.clone();
+    }
+    
+    @Override
+    public Object clone() {
+        return new GestureStroke(boundingBox, length, points, timestamps);
+    }
+    
+    /**
+     * Draws the stroke with a given canvas and paint.
      * 
      * @param canvas
      */
@@ -134,7 +150,7 @@ public class GestureStroke {
     }
 
     /**
-     * Convert the stroke to a Path based on the number of points
+     * Converts the stroke to a Path of a given number of points.
      * 
      * @param width the width of the bounding box of the target path
      * @param height the height of the bounding box of the target path
@@ -213,14 +229,15 @@ public class GestureStroke {
     }    
 
     /**
-     * Invalidate the cached path that is used to render the stroke
+     * Invalidates the cached path that is used to render the stroke.
      */
     public void clearPath() {
         if (mCachedPath != null) mCachedPath.rewind();
     }
     
     /**
-     * Compute an oriented bounding box of the stroke
+     * Computes an oriented bounding box of the stroke.
+     * 
      * @return OrientedBoundingBox
      */
     public OrientedBoundingBox computeOrientedBoundingBox() {
