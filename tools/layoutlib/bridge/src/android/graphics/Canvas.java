@@ -31,6 +31,7 @@ import android.graphics.Paint.Style;
 import android.graphics.Region.Op;
 
 import java.awt.AlphaComposite;
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Composite;
 import java.awt.Graphics2D;
@@ -104,11 +105,22 @@ public class Canvas extends _Original_Canvas {
      * <p/>The object must be disposed ({@link Graphics2D#dispose()}) after being used.
      */
     private Graphics2D getNewGraphics(Paint paint, Graphics2D g) {
+
         // make new one
         g = (Graphics2D)g.create();
         g.setColor(new Color(paint.getColor()));
         int alpha = paint.getAlpha();
         float falpha = alpha / 255.f;
+
+        if (paint.getStyle() == Style.STROKE) {
+            g.setStroke(new BasicStroke(
+                    paint.getStrokeWidth(),
+                    paint.getStrokeCap().getJavaCap(),
+                    paint.getStrokeJoin().getJavaJoin(),
+                    paint.getStrokeMiter()
+                    // FIXME: add dash info.
+                    ));
+        }
 
         Xfermode xfermode = paint.getXfermode();
         if (xfermode instanceof PorterDuffXfermode) {
@@ -784,23 +796,25 @@ public class Canvas extends _Original_Canvas {
 
     private final void doDrawRect(int left, int top, int width, int height, Paint paint) {
         // get current graphisc
-        Graphics2D g = getGraphics2d();
+        if (width > 0 && height > 0) {
+            Graphics2D g = getGraphics2d();
 
-        g = getNewGraphics(paint, g);
+            g = getNewGraphics(paint, g);
 
-        Style style = paint.getStyle();
+            Style style = paint.getStyle();
 
-        // draw
-        if (style == Style.FILL || style == Style.FILL_AND_STROKE) {
-            g.fillRect(left, top, width, height);
+            // draw
+            if (style == Style.FILL || style == Style.FILL_AND_STROKE) {
+                g.fillRect(left, top, width, height);
+            }
+
+            if (style == Style.STROKE || style == Style.FILL_AND_STROKE) {
+                g.drawRect(left, top, width, height);
+            }
+
+            // dispose Graphics2D object
+            g.dispose();
         }
-
-        if (style == Style.STROKE || style == Style.FILL_AND_STROKE) {
-            g.drawRect(left, top, width, height);
-        }
-
-        // dispose Graphics2D object
-        g.dispose();
     }
 
     /* (non-Javadoc)
@@ -809,29 +823,31 @@ public class Canvas extends _Original_Canvas {
     @Override
     public void drawRoundRect(RectF rect, float rx, float ry, Paint paint) {
         // get current graphisc
-        Graphics2D g = getGraphics2d();
+        if (rect.width() > 0 && rect.height() > 0) {
+            Graphics2D g = getGraphics2d();
 
-        g = getNewGraphics(paint, g);
+            g = getNewGraphics(paint, g);
 
-        Style style = paint.getStyle();
+            Style style = paint.getStyle();
 
-        // draw
+            // draw
 
-        int arcWidth = (int)(rx * 2);
-        int arcHeight = (int)(ry * 2);
+            int arcWidth = (int)(rx * 2);
+            int arcHeight = (int)(ry * 2);
 
-        if (style == Style.FILL || style == Style.FILL_AND_STROKE) {
-            g.fillRoundRect((int)rect.left, (int)rect.top, (int)rect.width(), (int)rect.height(),
-                    arcWidth, arcHeight);
+            if (style == Style.FILL || style == Style.FILL_AND_STROKE) {
+                g.fillRoundRect((int)rect.left, (int)rect.top, (int)rect.width(), (int)rect.height(),
+                        arcWidth, arcHeight);
+            }
+
+            if (style == Style.STROKE || style == Style.FILL_AND_STROKE) {
+                g.drawRoundRect((int)rect.left, (int)rect.top, (int)rect.width(), (int)rect.height(),
+                        arcWidth, arcHeight);
+            }
+
+            // dispose Graphics2D object
+            g.dispose();
         }
-
-        if (style == Style.STROKE || style == Style.FILL_AND_STROKE) {
-            g.drawRoundRect((int)rect.left, (int)rect.top, (int)rect.width(), (int)rect.height(),
-                    arcWidth, arcHeight);
-        }
-
-        // dispose Graphics2D object
-        g.dispose();
     }
 
 
