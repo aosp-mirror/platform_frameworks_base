@@ -1466,9 +1466,8 @@ public final class ContactsContract {
         /**
          * Do not use.
          *
-         * @deprecated in favor of {@link #AGGREGATION_MODE_DEFAULT}
+         * TODO: deprecate in favor of {@link #AGGREGATION_MODE_DEFAULT}
          */
-        @Deprecated
         public static final int AGGREGATION_MODE_IMMEDIATE = 1;
 
         /**
@@ -1538,9 +1537,8 @@ public final class ContactsContract {
          * {@link ContactsContract.Data} rows. To access this directory
          * append {@link Data#CONTENT_DIRECTORY} to the contact URI.
          *
-         * @deprecated in favor of {@link RawContacts.Entity}.
+         * TODO: deprecate in favor of {@link RawContacts.Entity}.
          */
-        @Deprecated
         public static final class Data implements BaseColumns, DataColumns {
             /**
              * no public constructor since this is a utility class
