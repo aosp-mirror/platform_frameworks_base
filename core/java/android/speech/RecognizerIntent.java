@@ -84,6 +84,42 @@ public class RecognizerIntent {
     public static final String ACTION_WEB_SEARCH = "android.speech.action.WEB_SEARCH";
 
     /**
+     * The minimum length of an utterance. We will not stop recording before this amount of time.
+     * 
+     * Note that it is extremely rare you'd want to specify this value in an intent. If you don't
+     * have a very good reason to change these, you should leave them as they are. Note also that
+     * certain values may cause undesired or unexpected results - use judiciously! Additionally,
+     * depending on the recognizer implementation, these values may have no effect.
+     */
+    public static final String EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS =
+            "android.speech.extras.SPEECH_INPUT_MINIMUM_LENGTH_MILLIS";
+
+    /**
+     * The amount of time that it should take after we stop hearing speech to consider the input
+     * complete. 
+     * 
+     * Note that it is extremely rare you'd want to specify this value in an intent. If
+     * you don't have a very good reason to change these, you should leave them as they are. Note
+     * also that certain values may cause undesired or unexpected results - use judiciously!
+     * Additionally, depending on the recognizer implementation, these values may have no effect.
+     */
+    public static final String EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS =
+            "android.speech.extras.SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS";
+
+    /**
+     * The amount of time that it should take after we stop hearing speech to consider the input
+     * possibly complete. This is used to prevent the endpointer cutting off during very short
+     * mid-speech pauses. 
+     * 
+     * Note that it is extremely rare you'd want to specify this value in an intent. If
+     * you don't have a very good reason to change these, you should leave them as they are. Note
+     * also that certain values may cause undesired or unexpected results - use judiciously!
+     * Additionally, depending on the recognizer implementation, these values may have no effect.
+     */
+    public static final String EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS =
+            "android.speech.extras.SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS";
+
+    /**
      * Informs the recognizer which speech model to prefer when performing
      * {@link #ACTION_RECOGNIZE_SPEECH}. The recognizer uses this
      * information to fine tune the results. This extra is required. Activities implementing
@@ -111,8 +147,9 @@ public class RecognizerIntent {
     public static final String EXTRA_PROMPT = "android.speech.extra.PROMPT";
 
     /**
-     * Optional language override to inform the recognizer that it should expect speech in
-     * a language different than the one set in the {@link java.util.Locale#getDefault()}. 
+     * Optional IETF language tag (as defined by BCP 47), for example "en-US". This tag informs the
+     * recognizer to perform speech recognition in a language different than the one set in the
+     * {@link java.util.Locale#getDefault()}.
      */
     public static final String EXTRA_LANGUAGE = "android.speech.extra.LANGUAGE";
 
@@ -121,7 +158,7 @@ public class RecognizerIntent {
      * will choose how many results to return. Must be an integer.
      */
     public static final String EXTRA_MAX_RESULTS = "android.speech.extra.MAX_RESULTS";
-    
+
     /**
      * When the intent is {@link #ACTION_RECOGNIZE_SPEECH}, the speech input activity will
      * return results to you via the activity results mechanism.  Alternatively, if you use this

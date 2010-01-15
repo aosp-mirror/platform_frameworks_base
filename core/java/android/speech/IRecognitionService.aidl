@@ -16,22 +16,41 @@
 
 package android.speech;
 
+import android.os.Bundle;
 import android.content.Intent;
 import android.speech.IRecognitionListener;
-import android.speech.RecognitionResult;
 
-// A Service interface to speech recognition. Call startListening when
-// you want to begin capturing audio; RecognitionService will automatically
-// determine when the user has finished speaking, stream the audio to the
-// recognition servers, and notify you when results are ready.
-/** {@hide} */
+/**
+* A Service interface to speech recognition. Call startListening when
+* you want to begin capturing audio; RecognitionService will automatically
+* determine when the user has finished speaking, stream the audio to the
+* recognition servers, and notify you when results are ready. In most of the cases, 
+* this class should not be used directly, instead use {@link RecognitionManager} for
+* accessing recognition service. 
+* {@hide}
+*/
 interface IRecognitionService {
-    // Start listening for speech. Can only call this from one thread at once.
-    // see RecognizerIntent.java for constants used to specify the intent.
-    void startListening(in Intent recognizerIntent,
-        in IRecognitionListener listener);
-        
-    List<RecognitionResult> getRecognitionResults(in long key);
+    /**
+     * Starts listening for speech. Please note that the recognition service supports
+     * one listener only, therefore, if this function is called from two different threads,
+     * only the latest one will get the notifications
+     *
+     * @param recognizerIntent the intent from which the invocation occurred. Additionally,
+     *        this intent can contain extra parameters to manipulate the behavior of the recognition
+     *        client. For more information see {@link RecognizerIntent}.
+     * @param listener to receive callbacks
+     */
+    void startListening(in Intent recognizerIntent, in IRecognitionListener listener);
 
+    /**
+     * Stops listening for speech. Speech captured so far will be recognized as
+     * if the user had stopped speaking at this point. The function has no effect unless it
+     * is called during the speech capturing.
+     */
+    void stopListening();
+
+    /**
+     * Cancels the speech recognition.
+     */
     void cancel();
 }

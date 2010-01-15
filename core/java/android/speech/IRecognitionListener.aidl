@@ -17,7 +17,6 @@
 package android.speech;
 
 import android.os.Bundle;
-import android.speech.RecognitionResult;
 
 /**
  * Listener for speech recognition events, used with RecognitionService.
@@ -26,35 +25,55 @@ import android.speech.RecognitionResult;
  *  {@hide}
  */
 interface IRecognitionListener {
-    /** Called when the endpointer is ready for the user to start speaking. */
-    void onReadyForSpeech(in Bundle noiseParams);
+    /**
+     * Called when the endpointer is ready for the user to start speaking.
+     *
+     * @param params parameters set by the recognition service. Reserved for future use.
+     */
+    void onReadyForSpeech(in Bundle params);
 
-    /** The user has started to speak. */
+    /**
+     * The user has started to speak.
+     */
     void onBeginningOfSpeech();
 
-    /** The sound level in the audio stream has changed. */
+    /**
+     * The sound level in the audio stream has changed.
+     *
+     * @param rmsdB the new RMS dB value
+     */
     void onRmsChanged(in float rmsdB);
 
     /**
-     * More sound has been received. Buffer is a byte buffer containing
-     * a sequence of 16-bit shorts. 
+     * More sound has been received.
+     *
+     * @param buffer the byte buffer containing a sequence of 16-bit shorts.
      */
     void onBufferReceived(in byte[] buffer);
 
-    /** Called after the user stops speaking. */
+    /**
+     * Called after the user stops speaking.
+     */
     void onEndOfSpeech();
 
     /**
-     * A network or recognition error occurred. The code is defined in
-     * {@link android.speech.RecognitionResult}
+     * A network or recognition error occurred.
+     *
+     * @param error code is defined in {@link RecognitionManager}
      */
     void onError(in int error);
 
-    /** 
+    /**
      * Called when recognition results are ready.
-     * @param results: an ordered list of the most likely results (N-best list).
-     * @param key: a key associated with the results. The same results can
-     * be retrieved asynchronously later using the key, if available. 
+     *
+     * @param results a Bundle containing the most likely results (N-best list).
      */
-    void onResults(in List<RecognitionResult> results, long key);
+    void onResults(in Bundle results);
+
+     /**
+     * Called when recognition partial results are ready.
+     *
+     * @param results a Bundle containing the current most likely result.
+     */
+    void onPartialResults(in Bundle results);
 }
