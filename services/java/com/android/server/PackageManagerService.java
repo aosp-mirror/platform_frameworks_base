@@ -7442,7 +7442,7 @@ class PackageManagerService extends IPackageManager.Stub {
     // ------- apps on sdcard specific code -------
     static final boolean DEBUG_SD_INSTALL = false;
     final private String mSdEncryptKey = "AppsOnSD";
-    final private String mSdEncryptAlg = "Blowfish";
+    final private String mSdEncryptAlg = "AES";
 
     private MountService getMountService() {
         return (MountService) ServiceManager.getService("mount");
