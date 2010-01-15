@@ -3756,7 +3756,7 @@ class PackageManagerService extends IPackageManager.Stub {
                                 (mIsRom ? PackageParser.PARSE_IS_SYSTEM : 0) |
                                 PackageParser.PARSE_CHATTY |
                                 PackageParser.PARSE_MUST_BE_APK,
-                                SCAN_MONITOR);
+                                SCAN_MONITOR | SCAN_NO_PATHS);
                         if (p != null) {
                             synchronized (mPackages) {
                                 grantPermissionsLP(p, false);
