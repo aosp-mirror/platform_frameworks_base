@@ -27,7 +27,6 @@ import java.io.IOException;
 import static android.gesture.GestureConstants.*;
 
 final class GestureUtilities {
-    private static final int TEMPORAL_SAMPLING_RATE = 16;
 
     private GestureUtilities() {
     }
@@ -51,29 +50,29 @@ final class GestureUtilities {
         final float targetPatchSize = sampleMatrixDimension - 1; // edge inclusive
         float[] sample = new float[sampleMatrixDimension * sampleMatrixDimension];
         Arrays.fill(sample, 0);
-
+  
         RectF rect = gesture.getBoundingBox();
         float sx = targetPatchSize / rect.width();
         float sy = targetPatchSize / rect.height();
         float scale = sx < sy ? sx : sy;
-
+  
         float preDx = -rect.centerX();
         float preDy = -rect.centerY();
         float postDx = targetPatchSize / 2;
         float postDy = targetPatchSize / 2;
-
+  
         final ArrayList<GestureStroke> strokes = gesture.getStrokes();
         final int count = strokes.size();
-
+  
         int size;
         float xpos;
         float ypos;
-
+  
         for (int index = 0; index < count; index++) {
             final GestureStroke stroke = strokes.get(index);
             float[] strokepoints = stroke.points;
             size = strokepoints.length;
-
+  
             final float[] pts = new float[size];
              
             for (int i = 0; i < size; i += 2) {
@@ -118,7 +117,7 @@ final class GestureUtilities {
                             xpos++;
                         }
                     }
-
+  
                     // evaluating vertically
                     if (segmentEndY > segmentStartY) {
                         ypos = (float) Math.ceil(segmentStartY);
@@ -143,11 +142,11 @@ final class GestureUtilities {
                 segmentEndY = segmentStartY;
             }
         }
-
-
+  
+  
         return sample;
     }
-
+  
     private static void plot(float x, float y, float[] sample, int sampleSize) {
         x = x < 0 ? 0 : x;
         y = y < 0 ? 0 : y;
@@ -286,8 +285,8 @@ final class GestureUtilities {
      * @param points
      * @return the covariance matrix
      */
-    private static double[][] computeCoVariance(float[] points) {
-        double[][] array = new double[2][2];
+    private static float[][] computeCoVariance(float[] points) {
+        float[][] array = new float[2][2];
         array[0][0] = 0;
         array[0][1] = 0;
         array[1][0] = 0;
@@ -321,17 +320,17 @@ final class GestureUtilities {
         return sum;
     }
 
-    static double computeStraightness(float[] points) {
+    static float computeStraightness(float[] points) {
         float totalLen = computeTotalLength(points);
         float dx = points[2] - points[0];
         float dy = points[3] - points[1];
-        return Math.sqrt(dx * dx + dy * dy) / totalLen;
+        return (float) Math.sqrt(dx * dx + dy * dy) / totalLen;
     }
 
-    static double computeStraightness(float[] points, float totalLen) {
+    static float computeStraightness(float[] points, float totalLen) {
         float dx = points[2] - points[0];
         float dy = points[3] - points[1];
-        return Math.sqrt(dx * dx + dy * dy) / totalLen;
+        return (float) Math.sqrt(dx * dx + dy * dy) / totalLen;
     }
 
     /**
@@ -341,8 +340,8 @@ final class GestureUtilities {
      * @param vector2
      * @return the distance
      */
-    static double squaredEuclideanDistance(float[] vector1, float[] vector2) {
-        double squaredDistance = 0;
+    static float squaredEuclideanDistance(float[] vector1, float[] vector2) {
+        float squaredDistance = 0;
         int size = vector1.length;
         for (int i = 0; i < size; i++) {
             float difference = vector1[i] - vector2[i];
@@ -358,13 +357,13 @@ final class GestureUtilities {
      * @param vector2
      * @return the distance between 0 and Math.PI
      */
-    static double cosineDistance(float[] vector1, float[] vector2) {
+    static float cosineDistance(float[] vector1, float[] vector2) {
         float sum = 0;
         int len = vector1.length;
         for (int i = 0; i < len; i++) {
             sum += vector1[i] * vector2[i];
         }
-        return Math.acos(sum);
+        return (float) Math.acos(sum);
     }
     
     /**
@@ -375,46 +374,58 @@ final class GestureUtilities {
      * @param numOrientations the maximum number of orientation allowed
      * @return the distance between the two instances (between 0 and Math.PI)
      */
-    static double minimumCosineDistance(float[] vector1, float[] vector2, int numOrientations) {
+    static float minimumCosineDistance(float[] vector1, float[] vector2, int numOrientations) {
         final int len = vector1.length;
-        double a = 0;
-        double b = 0;
+        float a = 0;
+        float b = 0;
         for (int i = 0; i < len; i += 2) {
             a += vector1[i] * vector2[i] + vector1[i + 1] * vector2[i + 1];
             b += vector1[i] * vector2[i + 1] - vector1[i + 1] * vector2[i];
         }
         if (a != 0) {
-            final double tan = b/a;
+            final float tan = b/a;
             final double angle = Math.atan(tan);
             if (numOrientations > 2 && Math.abs(angle) >= Math.PI / numOrientations) {
-                return Math.acos(a);
+                return (float) Math.acos(a);
             } else {
                 final double cosine = Math.cos(angle);
                 final double sine = cosine * tan; 
-                return Math.acos(a * cosine + b * sine);
+                return (float) Math.acos(a * cosine + b * sine);
             }
         } else {
-            return Math.PI / 2;
+            return (float) Math.PI / 2;
         }
     }
 
 
-    static OrientedBoundingBox computeOrientedBoundingBox(ArrayList<GesturePoint> pts) {
-        GestureStroke stroke = new GestureStroke(pts);
-        float[] points = temporalSampling(stroke, TEMPORAL_SAMPLING_RATE);
-        return computeOrientedBoundingBox(points);
-    }
-
-    static OrientedBoundingBox computeOrientedBoundingBox(float[] points) {
+    static OrientedBoundingBox computeOrientedBoundingBox(ArrayList<GesturePoint> originalPoints) {
+        final int count = originalPoints.size();
+        float[] points = new float[count * 2];
+        for (int i = 0; i < count; i++) {
+            GesturePoint point = originalPoints.get(i);
+            int index = i * 2;
+            points[index] = point.x;
+            points[index + 1] = point.y;
+        }
         float[] meanVector = computeCentroid(points);
         return computeOrientedBoundingBox(points, meanVector);
     }
 
-    static OrientedBoundingBox computeOrientedBoundingBox(float[] points, float[] centroid) {
+    static OrientedBoundingBox computeOrientedBoundingBox(float[] originalPoints) {
+        int size = originalPoints.length;
+        float[] points = new float[size];
+        for (int i = 0; i < size; i++) {
+            points[i] = originalPoints[i];
+        }
+        float[] meanVector = computeCentroid(points);
+        return computeOrientedBoundingBox(points, meanVector);
+    }
+
+    private static OrientedBoundingBox computeOrientedBoundingBox(float[] points, float[] centroid) {
         translate(points, -centroid[0], -centroid[1]);
 
-        double[][] array = computeCoVariance(points);
-        double[] targetVector = computeOrientation(array);
+        float[][] array = computeCoVariance(points);
+        float[] targetVector = computeOrientation(array);
 
         float angle;
         if (targetVector[0] == 0 && targetVector[1] == 0) {
@@ -448,25 +459,25 @@ final class GestureUtilities {
         return new OrientedBoundingBox((float) (angle * 180 / Math.PI), centroid[0], centroid[1], maxx - minx, maxy - miny);
     }
 
-    private static double[] computeOrientation(double[][] covarianceMatrix) {
-        double[] targetVector = new double[2];
+    private static float[] computeOrientation(float[][] covarianceMatrix) {
+        float[] targetVector = new float[2];
         if (covarianceMatrix[0][1] == 0 || covarianceMatrix[1][0] == 0) {
             targetVector[0] = 1;
             targetVector[1] = 0;
         }
 
-        double a = -covarianceMatrix[0][0] - covarianceMatrix[1][1];
-        double b = covarianceMatrix[0][0] * covarianceMatrix[1][1] - covarianceMatrix[0][1]
+        float a = -covarianceMatrix[0][0] - covarianceMatrix[1][1];
+        float b = covarianceMatrix[0][0] * covarianceMatrix[1][1] - covarianceMatrix[0][1]
                 * covarianceMatrix[1][0];
-        double value = a / 2;
-        double rightside = Math.sqrt(Math.pow(value, 2) - b);
-        double lambda1 = -value + rightside;
-        double lambda2 = -value - rightside;
+        float value = a / 2;
+        float rightside = (float) Math.sqrt(Math.pow(value, 2) - b);
+        float lambda1 = -value + rightside;
+        float lambda2 = -value - rightside;
         if (lambda1 == lambda2) {
             targetVector[0] = 0;
             targetVector[1] = 0;
         } else {
-            double lambda = lambda1 > lambda2 ? lambda1 : lambda2;
+            float lambda = lambda1 > lambda2 ? lambda1 : lambda2;
             targetVector[0] = 1;
             targetVector[1] = (lambda - covarianceMatrix[0][0]) / covarianceMatrix[0][1];
         }
@@ -474,13 +485,13 @@ final class GestureUtilities {
     }
     
     
-    static float[] rotate(float[] points, double angle) {
-        double cos = Math.cos(angle);
-        double sin = Math.sin(angle);
+    static float[] rotate(float[] points, float angle) {
+        float cos = (float) Math.cos(angle);
+        float sin = (float) Math.sin(angle);
         int size = points.length;
         for (int i = 0; i < size; i += 2) {
-            float x = (float) (points[i] * cos - points[i + 1] * sin);
-            float y = (float) (points[i] * sin + points[i + 1] * cos);
+            float x = points[i] * cos - points[i + 1] * sin;
+            float y = points[i] * sin + points[i + 1] * cos;
             points[i] = x;
             points[i + 1] = y;
         }
