@@ -455,7 +455,9 @@ class PackageManagerService extends IPackageManager.Stub {
             EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_PMS_SYSTEM_SCAN_START,
                     startTime);
 
-            int scanMode = SCAN_MONITOR;
+            // Set flag to monitor and not change apk file paths when
+            // scanning install directories.
+            int scanMode = SCAN_MONITOR | SCAN_NO_PATHS;
             if (mNoDexOpt) {
                 Log.w(TAG, "Running ENG build: no pre-dexopt!");
                 scanMode |= SCAN_NO_DEX;
@@ -573,12 +575,12 @@ class PackageManagerService extends IPackageManager.Stub {
                 mFrameworkDir.getPath(), OBSERVER_EVENTS, true);
             mFrameworkInstallObserver.startWatching();
             scanDirLI(mFrameworkDir, PackageParser.PARSE_IS_SYSTEM,
-                    scanMode | SCAN_NO_DEX | SCAN_NO_PATHS);
+                    scanMode | SCAN_NO_DEX);
             mSystemAppDir = new File(Environment.getRootDirectory(), "app");
             mSystemInstallObserver = new AppDirObserver(
                 mSystemAppDir.getPath(), OBSERVER_EVENTS, true);
             mSystemInstallObserver.startWatching();
-            scanDirLI(mSystemAppDir, PackageParser.PARSE_IS_SYSTEM, scanMode | SCAN_NO_PATHS);
+            scanDirLI(mSystemAppDir, PackageParser.PARSE_IS_SYSTEM, scanMode);
             mAppInstallDir = new File(dataDir, "app");
             if (mInstaller == null) {
                 // Make sure these dirs exist, when we are running in
