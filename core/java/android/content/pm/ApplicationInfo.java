@@ -218,6 +218,22 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public static final int FLAG_NEVER_ENCRYPT = 1<<17;
 
     /**
+     * Value for {@link #flags}: Set to true if the application has been
+     * installed using the forward lock option.
+     *
+     * {@hide}
+     */
+    public static final int FLAG_FORWARD_LOCK = 1<<18;
+
+    /**
+     * Value for {@link #flags}: Set to true if the application is
+     * currently installed on the sdcard.
+     *
+     * {@hide}
+     */
+    public static final int FLAG_ON_SDCARD = 1<<19;
+
+    /**
      * Flags associated with the application.  Any combination of
      * {@link #FLAG_SYSTEM}, {@link #FLAG_DEBUGGABLE}, {@link #FLAG_HAS_CODE},
      * {@link #FLAG_PERSISTENT}, {@link #FLAG_FACTORY_TEST}, and
@@ -226,7 +242,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * {@link #FLAG_TEST_ONLY}, {@link #FLAG_SUPPORTS_SMALL_SCREENS},
      * {@link #FLAG_SUPPORTS_NORMAL_SCREENS},
      * {@link #FLAG_SUPPORTS_LARGE_SCREENS}, {@link #FLAG_RESIZEABLE_FOR_SCREENS},
-     * {@link #FLAG_SUPPORTS_SCREEN_DENSITIES}.
+     * {@link #FLAG_SUPPORTS_SCREEN_DENSITIES}
      */
     public int flags = 0;
     

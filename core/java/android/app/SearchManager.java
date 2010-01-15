@@ -1332,20 +1332,11 @@ public class SearchManager
     public final static String EXTRA_DATA_KEY = "intent_extra_data_key";
 
     /**
-     * String extra data key for {@link #INTENT_ACTION_GLOBAL_SEARCH} intents. Contains the initial
-     * query to show in the global search activity.
-     *
-     * @hide Pending API council approval
+     * Boolean extra data key for {@link #INTENT_ACTION_GLOBAL_SEARCH} intents. If {@code true},
+     * the initial query should be selected when the global search activity is started, so
+     * that the user can easily replace it with another query.
      */
-    public final static String INITIAL_QUERY = "initial_query";
-
-    /**
-     * Boolean extra data key for {@link Intent#INTENT_ACTION_GLOBAL_SEARCH} intents. If {@code true},
-     * the initial query should be selected.
-     *
-     * @hide Pending API council approval
-     */
-    public final static String SELECT_INITIAL_QUERY = "select_initial_query";
+    public final static String EXTRA_SELECT_QUERY = "select_query";
 
     /**
      * Defines the constants used in the communication between {@link android.app.SearchDialog} and
@@ -1643,10 +1634,12 @@ public class SearchManager
             = "android.search.action.CHANGE_SEARCH_SOURCE";
 
     /**
-     * Intent action for finding the global search activity.
+     * Intent action for starting the global search activity.
      * The global search provider should handle this intent.
-     * 
-     * @hide Pending API council approval.
+     *
+     * Supported extra data keys: {@link #QUERY},
+     * {@link #EXTRA_SELECT_QUERY},
+     * {@link #APP_DATA}.
      */
     public final static String INTENT_ACTION_GLOBAL_SEARCH 
             = "android.search.action.GLOBAL_SEARCH";
@@ -1823,10 +1816,10 @@ public class SearchManager
             intent.putExtra(APP_DATA, appSearchData);
         }
         if (!TextUtils.isEmpty(initialQuery)) {
-            intent.putExtra(INITIAL_QUERY, initialQuery);
+            intent.putExtra(QUERY, initialQuery);
         }
         if (selectInitialQuery) {
-            intent.putExtra(SELECT_INITIAL_QUERY, selectInitialQuery);
+            intent.putExtra(EXTRA_SELECT_QUERY, selectInitialQuery);
         }
         try {
             if (DBG) Log.d(TAG, "Starting global search: " + intent.toUri(0));

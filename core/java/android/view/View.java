@@ -6177,7 +6177,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @see #getDrawingCache()
      */
     public void setDrawingCacheBackgroundColor(int color) {
-        mDrawingCacheBackgroundColor = color;
+        if (color != mDrawingCacheBackgroundColor) {
+            mDrawingCacheBackgroundColor = color;
+            mPrivateFlags &= ~DRAWING_CACHE_VALID;
+        }
     }
 
     /**

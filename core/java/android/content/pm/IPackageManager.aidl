@@ -296,4 +296,13 @@ interface IPackageManager {
      * in the special development "no pre-dexopt" mode.
      */
     boolean performDexOpt(String packageName);
+
+    /**
+     * Update status of external media on the package manager to scan and
+     * install packages installed on the external media. Like say the
+     * MountService uses this to call into the package manager to update
+     * status of sdcard.
+     */
+    void updateExternalMediaStatus(boolean mounted);
+
 }

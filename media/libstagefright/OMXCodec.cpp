@@ -1786,6 +1786,21 @@ void OMXCodec::enablePortAsync(OMX_U32 portIndex) {
 void OMXCodec::fillOutputBuffers() {
     CHECK_EQ(mState, EXECUTING);
 
+    // This is a workaround for some decoders not properly reporting
+    // end-of-output-stream. If we own all input buffers and also own
+    // all output buffers and we already signalled end-of-input-stream,
+    // the end-of-output-stream is implied.
+    if (mSignalledEOS
+            && countBuffersWeOwn(mPortBuffers[kPortIndexInput])
+                == mPortBuffers[kPortIndexInput].size()
+            && countBuffersWeOwn(mPortBuffers[kPortIndexOutput])
+                == mPortBuffers[kPortIndexOutput].size()) {
+        mNoMoreOutputData = true;
+        mBufferFilled.signal();
+
+        return;
+    }
+
     Vector<BufferInfo> *buffers = &mPortBuffers[kPortIndexOutput];
     for (size_t i = 0; i < buffers->size(); ++i) {
         fillOutputBuffer(&buffers->editItemAt(i));
@@ -1832,6 +1847,8 @@ void OMXCodec::drainInputBuffer(BufferInfo *info) {
         }
 
         mNoMoreOutputData = false;
+
+        CODEC_LOGV("calling emptyBuffer with codec specific data");
 
         status_t err = mOMX->emptyBuffer(
                 mNode, info->mBuffer, 0, size,

@@ -37,15 +37,13 @@ public abstract class SQLiteProgram extends SQLiteClosable {
     protected int nHandle = 0;
 
     /**
-     * the compiledSql object for the given sql statement.
+     * the SQLiteCompiledSql object for the given sql statement.
      */
-    private SQLiteCompiledSql compiledSql;
-    private boolean myCompiledSqlIsInCache;
+    private SQLiteCompiledSql mCompiledSql;
 
     /**
-     * compiledSql statement id is populated with the corresponding object from the above
-     * member compiledSql.
-     * this member is used by the native_bind_* methods
+     * SQLiteCompiledSql statement id is populated with the corresponding object from the above
+     * member. This member is used by the native_bind_* methods
      */
     protected int nStatement = 0;
 
@@ -60,38 +58,41 @@ public abstract class SQLiteProgram extends SQLiteClosable {
         db.addSQLiteClosable(this);
         this.nHandle = db.mNativeHandle;
 
-        compiledSql = db.getCompiledStatementForSql(sql);
-        if (compiledSql == null) {
+        mCompiledSql = db.getCompiledStatementForSql(sql);
+        if (mCompiledSql == null) {
             // create a new compiled-sql obj
-            compiledSql = new SQLiteCompiledSql(db, sql);
+            mCompiledSql = new SQLiteCompiledSql(db, sql);
 
             // add it to the cache of compiled-sqls
-            myCompiledSqlIsInCache = db.addToCompiledQueries(sql, compiledSql);
-        } else {
-            myCompiledSqlIsInCache = true;
+            db.addToCompiledQueries(sql, mCompiledSql);
         }
-        nStatement = compiledSql.nStatement;
+        nStatement = mCompiledSql.nStatement;
     }
 
     @Override
     protected void onAllReferencesReleased() {
-        // release the compiled sql statement used by me if it is NOT in cache
-        if (!myCompiledSqlIsInCache && compiledSql != null) {
-            compiledSql.releaseSqlStatement();
-            compiledSql = null; // so that GC doesn't call finalize() on it
-        }
+        releaseCompiledSqlIfInCache();
         mDatabase.releaseReference();
         mDatabase.removeSQLiteClosable(this);
     }
 
     @Override
     protected void onAllReferencesReleasedFromContainer() {
-        // release the compiled sql statement used by me if it is NOT in cache
-      if (!myCompiledSqlIsInCache && compiledSql != null) {
-            compiledSql.releaseSqlStatement();
-            compiledSql = null; // so that GC doesn't call finalize() on it
-        }
+        releaseCompiledSqlIfInCache();
         mDatabase.releaseReference();
+    }
+
+    private void releaseCompiledSqlIfInCache() {
+        if (mCompiledSql == null) {
+            return;
+        }
+        synchronized(mDatabase.mCompiledQueries) {
+            if (!mDatabase.mCompiledQueries.containsValue(mCompiledSql)) {
+                mCompiledSql.releaseSqlStatement();
+                mCompiledSql = null; // so that GC doesn't call finalize() on it
+                nStatement = 0;
+            }
+        }
     }
 
     /**
@@ -100,7 +101,7 @@ public abstract class SQLiteProgram extends SQLiteClosable {
      * @return a unique identifier for this program
      */
     public final int getUniqueId() {
-        return compiledSql.nStatement;
+        return nStatement;
     }
 
     /* package */ String getSqlString() {

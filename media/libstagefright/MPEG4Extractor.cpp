@@ -152,6 +152,7 @@ static const char *FourCC2MIME(uint32_t fourcc) {
 MPEG4Extractor::MPEG4Extractor(const sp<DataSource> &source)
     : mDataSource(source),
       mHaveMetadata(false),
+      mHasVideo(false),
       mFirstTrack(NULL),
       mLastTrack(NULL) {
 }
@@ -165,6 +166,23 @@ MPEG4Extractor::~MPEG4Extractor() {
         track = next;
     }
     mFirstTrack = mLastTrack = NULL;
+}
+
+sp<MetaData> MPEG4Extractor::getMetaData() {
+    sp<MetaData> meta = new MetaData;
+
+    status_t err;
+    if ((err = readMetaData()) != OK) {
+        return meta;
+    }
+
+    if (mHasVideo) {
+        meta->setCString(kKeyMIMEType, "video/mp4");
+    } else {
+        meta->setCString(kKeyMIMEType, "audio/mp4");
+    }
+
+    return meta;
 }
 
 size_t MPEG4Extractor::countTracks() {
@@ -235,7 +253,7 @@ status_t MPEG4Extractor::readMetaData() {
     status_t err;
     while ((err = parseChunk(&offset, 0)) == OK) {
     }
-    
+
     if (mHaveMetadata) {
         return OK;
     }
@@ -561,6 +579,8 @@ status_t MPEG4Extractor::parseChunk(off_t *offset, int depth) {
         case FOURCC('s', '2', '6', '3'):
         case FOURCC('a', 'v', 'c', '1'):
         {
+            mHasVideo = true;
+
             if (mHandlerType != FOURCC('v', 'i', 'd', 'e')) {
                 return ERROR_MALFORMED;
             }
@@ -964,7 +984,14 @@ status_t MPEG4Source::read(
             (const uint8_t *)mBuffer->data() + mBuffer->range_offset();
 
         size_t nal_size = parseNALSize(src);
-        CHECK(mBuffer->range_length() >= mNALLengthSize + nal_size);
+        if (mBuffer->range_length() < mNALLengthSize + nal_size) {
+            LOGE("incomplete NAL unit.");
+
+            mBuffer->release();
+            mBuffer = NULL;
+
+            return ERROR_MALFORMED;
+        }
 
         MediaBuffer *clone = mBuffer->clone();
         clone->set_range(mBuffer->range_offset() + mNALLengthSize, nal_size);
@@ -1003,7 +1030,13 @@ status_t MPEG4Source::read(
             CHECK(srcOffset + mNALLengthSize <= size);
             size_t nalLength = parseNALSize(&mSrcBuffer[srcOffset]);
             srcOffset += mNALLengthSize;
-            CHECK(srcOffset + nalLength <= size);
+
+            if (srcOffset + nalLength > size) {
+                mBuffer->release();
+                mBuffer = NULL;
+
+                return ERROR_MALFORMED;
+            }
 
             if (nalLength == 0) {
                 continue;

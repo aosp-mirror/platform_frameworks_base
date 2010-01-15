@@ -327,16 +327,18 @@ public class PackageParser {
         return null;
     }
 
-    public final static int PARSE_IS_SYSTEM = 0x0001;
-    public final static int PARSE_CHATTY = 0x0002;
-    public final static int PARSE_MUST_BE_APK = 0x0004;
-    public final static int PARSE_IGNORE_PROCESSES = 0x0008;
+    public final static int PARSE_IS_SYSTEM = 1<<0;
+    public final static int PARSE_CHATTY = 1<<1;
+    public final static int PARSE_MUST_BE_APK = 1<<2;
+    public final static int PARSE_IGNORE_PROCESSES = 1<<3;
+    public final static int PARSE_FORWARD_LOCK = 1<<4;
+    public final static int PARSE_ON_SDCARD = 1<<5;
 
     public int getParseError() {
         return mParseError;
     }
 
-    public Package parsePackage(File sourceFile, String destFileName,
+    public Package parsePackage(File sourceFile, String destCodePath,
             DisplayMetrics metrics, int flags) {
         mParseError = PackageManager.INSTALL_SUCCEEDED;
 
@@ -413,8 +415,11 @@ public class PackageParser {
         parser.close();
         assmgr.close();
 
-        pkg.applicationInfo.sourceDir = destFileName;
-        pkg.applicationInfo.publicSourceDir = destFileName;
+        // Set code and resource paths
+        pkg.mPath = destCodePath;
+        pkg.mScanPath = mArchiveSourcePath;
+        //pkg.applicationInfo.sourceDir = destCodePath;
+        //pkg.applicationInfo.publicSourceDir = destRes;
         pkg.mSignatures = null;
 
         return pkg;
@@ -1367,6 +1372,14 @@ public class PackageParser {
                     false)) {
                 ai.flags |= ApplicationInfo.FLAG_PERSISTENT;
             }
+        }
+
+        if ((flags & PARSE_FORWARD_LOCK) != 0) {
+            ai.flags |= ApplicationInfo.FLAG_FORWARD_LOCK;
+        }
+
+        if ((flags & PARSE_ON_SDCARD) != 0) {
+            ai.flags |= ApplicationInfo.FLAG_ON_SDCARD;
         }
 
         if (sa.getBoolean(
@@ -2530,10 +2543,6 @@ public class PackageParser {
         // preferred up order.
         public int mPreferredOrder = 0;
 
-        // For use by package manager service to keep track of which apps
-        // have been installed with forward locking.
-        public boolean mForwardLocked;
-        
         // For use by the package manager to keep track of the path to the
         // file an app came from.
         public String mScanPath;

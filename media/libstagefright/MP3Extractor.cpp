@@ -711,6 +711,10 @@ status_t MP3Source::read(
 sp<MetaData> MP3Extractor::getMetaData() {
     sp<MetaData> meta = new MetaData;
 
+    if (mFirstFramePos < 0) {
+        return meta;
+    }
+
     meta->setCString(kKeyMIMEType, "audio/mpeg");
 
     ID3 id3(mDataSource);

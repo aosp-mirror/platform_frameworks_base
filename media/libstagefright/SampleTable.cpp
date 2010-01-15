@@ -291,7 +291,7 @@ status_t SampleTable::getChunkOffset(uint32_t chunk_index, off_t *offset) {
 
 status_t SampleTable::getChunkForSample(
         uint32_t sample_index,
-        uint32_t *chunk_index, 
+        uint32_t *chunk_index,
         uint32_t *chunk_relative_sample_index,
         uint32_t *desc_index) {
     *chunk_index = 0;
@@ -469,7 +469,7 @@ status_t SampleTable::getMaxSampleSize(size_t *max_size) {
     for (uint32_t i = 0; i < mNumSampleSizes; ++i) {
         size_t sample_size;
         status_t err = getSampleSize(i, &sample_size);
-        
+
         if (err != OK) {
             return err;
         }
@@ -502,12 +502,16 @@ status_t SampleTable::getDecodingTime(uint32_t sample_index, uint32_t *time) {
 
             return OK;
         }
-        
+
         *time += delta * n;
         cur_sample += n;
     }
 
     return ERROR_OUT_OF_RANGE;
+}
+
+uint32_t abs_difference(uint32_t time1, uint32_t time2) {
+    return time1 > time2 ? time1 - time2 : time2 - time1;
 }
 
 status_t SampleTable::findClosestSample(
@@ -523,7 +527,16 @@ status_t SampleTable::findClosestSample(
         if (req_time < time + n * delta) {
             int j = (req_time - time) / delta;
 
-            *sample_index = cur_sample + j;
+            uint32_t time1 = time + j * delta;
+            uint32_t time2 = time1 + delta;
+
+            if (i+1 == mTimeToSampleCount
+                    || (abs_difference(req_time, time1)
+                        < abs_difference(req_time, time2))) {
+                *sample_index = cur_sample + j;
+            } else {
+                *sample_index = cur_sample + j + 1;
+            }
 
             if (flags & kSyncSample_Flag) {
                 return findClosestSyncSample(*sample_index, sample_index);
@@ -554,8 +567,9 @@ status_t SampleTable::findClosestSyncSample(
     uint32_t right = mNumSyncSamples;
     while (left < right) {
         uint32_t mid = (left + right) / 2;
+
         if (mDataSource->readAt(
-                    mSyncSampleOffset + 8 + (mid - 1) * 4, &x, 4) != 4) {
+                    mSyncSampleOffset + 8 + mid * 4, &x, 4) != 4) {
             return ERROR_IO;
         }
 

@@ -82,6 +82,18 @@ WAVExtractor::WAVExtractor(const sp<DataSource> &source)
 WAVExtractor::~WAVExtractor() {
 }
 
+sp<MetaData> WAVExtractor::getMetaData() {
+    sp<MetaData> meta = new MetaData;
+
+    if (mInitCheck != OK) {
+        return meta;
+    }
+
+    meta->setCString(kKeyMIMEType, "audio/x-wav");
+
+    return meta;
+}
+
 size_t WAVExtractor::countTracks() {
     return mInitCheck == OK ? 1 : 0;
 }
