@@ -55,7 +55,7 @@ test_document(document_item_type* d)
             printf("parcelable %s %s;\n", b->package, b->name.data);
         }
         else {
-            printf("UNKNOWN d=0x%08x d->item_type=%ld\n", (long)d, d->item_type);
+            printf("UNKNOWN d=0x%08lx d->item_type=%d\n", (long)d, d->item_type);
         }
         d = d->next;
     }
