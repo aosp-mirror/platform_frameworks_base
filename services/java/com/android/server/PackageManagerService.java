@@ -3986,7 +3986,8 @@ class PackageManagerService extends IPackageManager.Stub {
                 Log.w(TAG, "Package couldn't be installed in " + pkg.mPath);
                 if ((res.returnCode=mLastScanError) == PackageManager.INSTALL_SUCCEEDED) {
                     res.returnCode = PackageManager.INSTALL_FAILED_INVALID_APK;
-                }      
+                }
+            } else {
                 updateSettingsLI(newPackage,
                         installerPackageName,
                         res);
