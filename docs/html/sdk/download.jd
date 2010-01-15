@@ -58,10 +58,8 @@ The License Agreement constitutes a contract between you and Google with respect
   <h2>Thank you for downloading the Android SDK!</h2>
   <p>Your download should be underway. If not, <a id="click-download">click here to start the download</a>.</p>
   <p>To set up your Android development environment, please read the guide to
-    <a href="installing.html">Installing the Android SDK</a>.
-    Once you have completed the installation, see the
-    <a href="/guide/index.html">Dev Guide</a> for documentation about
-    developing Android applications.</p>
+    <a href="installing.html">Installing the Android SDK</a> and ensure that your development
+    machine meets the system requirements linked on that page.</p>
 </div>
 
 <script type="text/javascript">

@@ -16,14 +16,16 @@
 
 package android.graphics;
 
+
+
 /**
  * Shader is the based class for objects that return horizontal spans of colors
  * during drawing. A subclass of Shader is installed in a Paint calling
  * paint.setShader(shader). After that any object (other than a bitmap) that is
  * drawn with that paint will get its color(s) from the shader.
  */
-public class Shader {
-    
+public abstract class Shader {
+
     private final Matrix mMatrix = new Matrix();
 
     public enum TileMode {
@@ -41,7 +43,7 @@ public class Shader {
          * mirror images so that adjacent images always seam
          */
         MIRROR  (2);
-    
+
         TileMode(int nativeInt) {
             this.nativeInt = nativeInt;
         }
@@ -57,7 +59,7 @@ public class Shader {
         if (localM != null) {
             localM.set(mMatrix);
         }
-        
+
         return !mMatrix.isIdentity();
     }
 
@@ -73,4 +75,9 @@ public class Shader {
             mMatrix.reset();
         }
     }
+
+    /**
+     * Returns a java.awt.Paint object matching this shader.
+     */
+    abstract java.awt.Paint getJavaPaint();
 }

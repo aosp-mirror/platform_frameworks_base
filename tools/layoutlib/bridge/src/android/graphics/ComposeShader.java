@@ -16,6 +16,8 @@
 
 package android.graphics;
 
+import java.awt.Paint;
+
 /** A subclass of shader that returns the composition of two other shaders, combined by
     an {@link android.graphics.Xfermode} subclass.
 */
@@ -41,6 +43,11 @@ public class ComposeShader extends Shader {
     */
     public ComposeShader(Shader shaderA, Shader shaderB, PorterDuff.Mode mode) {
         // FIXME Implement shader
+    }
+
+    @Override
+    Paint getJavaPaint() {
+        return null;
     }
 }
 

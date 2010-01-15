@@ -20,6 +20,7 @@ package android.graphics;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 
 import javax.imageio.ImageIO;
 
@@ -31,6 +32,12 @@ public final class Bitmap extends _Original_Bitmap {
         super(1, true, null, -1);
 
         mImage = ImageIO.read(input);
+    }
+
+    public Bitmap(InputStream is) throws IOException {
+        super(1, true, null, -1);
+
+        mImage = ImageIO.read(is);
     }
 
     Bitmap(BufferedImage image) {
@@ -236,5 +243,36 @@ public final class Bitmap extends _Original_Bitmap {
                                       Config config) {
         return createBitmap(colors, 0, width, width, height, config);
     }
+
+    public static Bitmap createScaledBitmap(Bitmap src, int dstWidth,
+            int dstHeight, boolean filter) {
+        Matrix m;
+        synchronized (Bitmap.class) {
+            // small pool of just 1 matrix
+            m = sScaleMatrix;
+            sScaleMatrix = null;
+        }
+
+        if (m == null) {
+            m = new Matrix();
+        }
+
+        final int width = src.getWidth();
+        final int height = src.getHeight();
+        final float sx = dstWidth  / (float)width;
+        final float sy = dstHeight / (float)height;
+        m.setScale(sx, sy);
+        Bitmap b = Bitmap.createBitmap(src, 0, 0, width, height, m, filter);
+
+        synchronized (Bitmap.class) {
+            // do we need to check for null? why not just assign everytime?
+            if (sScaleMatrix == null) {
+                sScaleMatrix = m;
+            }
+        }
+
+        return b;
+    }
+
 
 }

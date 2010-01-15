@@ -125,13 +125,16 @@ public class Canvas extends _Original_Canvas {
         }
 
         Shader shader = paint.getShader();
-        if (shader instanceof LinearGradient) {
-            g.setPaint(((LinearGradient)shader).getPaint());
-        } else {
-            if (mLogger != null && shader != null) {
-                mLogger.warning(String.format(
-                        "Shader '%1$s' is not supported in the Layout Editor.",
-                        shader.getClass().getCanonicalName()));
+        if (shader != null) {
+            java.awt.Paint shaderPaint = shader.getJavaPaint();
+            if (shaderPaint != null) {
+                g.setPaint(shaderPaint);
+            } else {
+                if (mLogger != null) {
+                    mLogger.warning(String.format(
+                            "Shader '%1$s' is not supported in the Layout Editor.",
+                            shader.getClass().getCanonicalName()));
+                }
             }
         }
 
@@ -236,10 +239,15 @@ public class Canvas extends _Original_Canvas {
      */
     @Override
     public int save() {
+        // get the current save count
+        int count = mGraphicsStack.size();
+
+        // create a new graphics and add it to the stack
         Graphics2D g = (Graphics2D)getGraphics2d().create();
         mGraphicsStack.push(g);
 
-        return mGraphicsStack.size() - 1;
+        // return the old save count
+        return count;
     }
 
     /* (non-Javadoc)
@@ -274,9 +282,8 @@ public class Canvas extends _Original_Canvas {
      */
     @Override
     public int getSaveCount() {
-        return mGraphicsStack.size() - 1;
+        return mGraphicsStack.size();
     }
-
 
     /* (non-Javadoc)
      * @see android.graphics.Canvas#clipRect(float, float, float, float, android.graphics.Region.Op)
@@ -405,7 +412,7 @@ public class Canvas extends _Original_Canvas {
 
         g.setColor(new Color(color));
 
-        getGraphics2d().fillRect(0, 0, getWidth(), getHeight());
+        g.fillRect(0, 0, getWidth(), getHeight());
 
         g.setComposite(composite);
 
@@ -953,10 +960,6 @@ public class Canvas extends _Original_Canvas {
      */
     @Override
     public void setMatrix(Matrix matrix) {
-        // since SetMatrix *replaces* all the other transformation, we have to restore/save
-        restore();
-        save();
-
         // get the new current graphics
         Graphics2D g = getGraphics2d();
 
@@ -967,6 +970,27 @@ public class Canvas extends _Original_Canvas {
             mLogger.warning("android.graphics.Canvas#setMatrix(android.graphics.Matrix) only supports affine transformations in the Layout Editor.");
         }
     }
+
+    /* (non-Javadoc)
+     * @see android.graphics.Canvas#concat(android.graphics.Matrix)
+     */
+    @Override
+    public void concat(Matrix matrix) {
+        // get the current top graphics2D object.
+        Graphics2D g = getGraphics2d();
+
+        // get its current matrix
+        AffineTransform currentTx = g.getTransform();
+        // get the AffineTransform of the given matrix
+        AffineTransform matrixTx = matrix.getTransform();
+
+        // combine them so that the given matrix is applied after.
+        currentTx.preConcatenate(matrixTx);
+
+        // give it to the graphics2D as a new matrix replacing all previous transform
+        g.setTransform(currentTx);
+    }
+
 
     // --------------------
 
@@ -1005,15 +1029,6 @@ public class Canvas extends _Original_Canvas {
     public boolean clipRegion(Region region) {
         // TODO Auto-generated method stub
         return super.clipRegion(region);
-    }
-
-    /* (non-Javadoc)
-     * @see android.graphics.Canvas#concat(android.graphics.Matrix)
-     */
-    @Override
-    public void concat(Matrix matrix) {
-        // TODO Auto-generated method stub
-        super.concat(matrix);
     }
 
     /* (non-Javadoc)

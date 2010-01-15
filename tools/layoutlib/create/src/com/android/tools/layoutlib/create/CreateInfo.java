@@ -43,6 +43,7 @@ public class CreateInfo {
     public final static String[] RENAMED_CLASSES =
         new String[] {
             "android.graphics.Bitmap",              "android.graphics._Original_Bitmap",
+            "android.graphics.BitmapFactory",       "android.graphics._Original_BitmapFactory",
             "android.graphics.BitmapShader",        "android.graphics._Original_BitmapShader",
             "android.graphics.Canvas",              "android.graphics._Original_Canvas",
             "android.graphics.ComposeShader",       "android.graphics._Original_ComposeShader",
