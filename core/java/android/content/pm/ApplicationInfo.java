@@ -242,9 +242,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * {@link #FLAG_TEST_ONLY}, {@link #FLAG_SUPPORTS_SMALL_SCREENS},
      * {@link #FLAG_SUPPORTS_NORMAL_SCREENS},
      * {@link #FLAG_SUPPORTS_LARGE_SCREENS}, {@link #FLAG_RESIZEABLE_FOR_SCREENS},
-     * {@link #FLAG_SUPPORTS_SCREEN_DENSITIES}.
-     * {@link #FLAG_FWD_LOCKED},
-     * {@link #FLAG_ON_SDCARD}
+     * {@link #FLAG_SUPPORTS_SCREEN_DENSITIES}
      */
     public int flags = 0;
     
