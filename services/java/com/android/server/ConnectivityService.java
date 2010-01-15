@@ -180,6 +180,15 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     private ConnectivityService(Context context) {
         if (DBG) Log.v(TAG, "ConnectivityService starting up");
+
+        // setup our unique device name
+        String id = Settings.Secure.getString(context.getContentResolver(),
+                Settings.Secure.ANDROID_ID);
+        if (id != null && id.length() > 0) {
+            String name = new String("android_").concat(id);
+            SystemProperties.set("net.hostname", name);
+        }
+
         mContext = context;
         mNetTrackers = new NetworkStateTracker[
                 ConnectivityManager.MAX_NETWORK_TYPE+1];
