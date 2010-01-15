@@ -43,6 +43,9 @@ import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
 import android.text.format.DateFormat;
+import android.text.style.RelativeSizeSpan;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -61,6 +64,7 @@ import com.android.internal.telephony.cdma.EriInfo;
 import com.android.internal.telephony.cdma.TtyIntent;
 import com.android.server.am.BatteryStatsService;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.TimeZone;
 
@@ -532,10 +536,69 @@ public class StatusBarPolicy {
         sInstance = new StatusBarPolicy(context, service);
     }
 
+    private final CharSequence getSmallTime() {
+        boolean b24 = DateFormat.is24HourFormat(mContext);
+        int res;
+
+        if (b24) {
+            res = R.string.twenty_four_hour_time_format;
+        } else {
+            res = R.string.twelve_hour_time_format;
+        }
+
+        String format = mContext.getString(res);
+
+        /*
+         * Search for an unquoted "a" in the format string, so we can
+         * add dummy characters around it to let us find it again after
+         * formatting and change its size.
+         */
+        int a = -1;
+        boolean quoted = false;
+        for (int i = 0; i < format.length(); i++) {
+            char c = format.charAt(i);
+
+            if (c == '\'') {
+                quoted = !quoted;
+            }
+
+            if (!quoted && c == 'a') {
+                a = i;
+                break;
+            }
+        }
+
+        final char MAGIC1 = '\uEF00';
+        final char MAGIC2 = '\uEF01';
+
+        if (a >= 0) {
+            format = format.substring(0, a) + MAGIC1 + "a" + MAGIC2 +
+                     format.substring(a + 1);
+        }
+
+        String result = new SimpleDateFormat(format).format(mCalendar.getTime());
+
+        int magic1 = result.indexOf(MAGIC1);
+        int magic2 = result.indexOf(MAGIC2);
+
+        if (magic1 >= 0 && magic2 > magic1) {
+            SpannableStringBuilder formatted = new SpannableStringBuilder(result);
+
+            formatted.setSpan(new RelativeSizeSpan(0.7f), magic1, magic2,
+                              Spannable.SPAN_EXCLUSIVE_INCLUSIVE);
+
+            formatted.delete(magic2, magic2 + 1);
+            formatted.delete(magic1, magic1 + 1);
+
+            return formatted;
+        } else {
+            return result;
+        }
+    }
+
     private final void updateClock() {
         mCalendar.setTimeInMillis(System.currentTimeMillis());
-        mClockData.text = DateFormat.getTimeFormat(mContext)
-                .format(mCalendar.getTime());
+        mClockData.text = getSmallTime();
         mService.updateIcon(mClockIcon, mClockData, null);
     }
 
