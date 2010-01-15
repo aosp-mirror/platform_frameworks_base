@@ -196,12 +196,15 @@ public class LinearGradient extends Shader {
             public Raster getRaster(int x, int y, int w, int h) {
                 BufferedImage image = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
 
+                int[] data = new int[w*h];
+
                 if (mDx == 0) { // vertical gradient
                     // compute first column and copy to all other columns
+                    int index = 0;
                     for (int iy = 0 ; iy < h ; iy++) {
                         int color = getColor(iy + y, mY0, mDy);
                         for (int ix = 0 ; ix < w ; ix++) {
-                            image.setRGB(ix, iy, color);
+                            data[index++] = color;
                         }
                     }
                 } else if (mDy == 0) { // horizontal
@@ -212,15 +215,18 @@ public class LinearGradient extends Shader {
                     }
 
                     for (int iy = 0 ; iy < h ; iy++) {
-                        image.setRGB(0, iy, w, 1 /*h*/, line, 0 /* offset*/, w /*scansize*/);
+                        System.arraycopy(line, 0, data, iy*w, line.length);
                     }
                 } else {
+                    int index = 0;
                     for (int iy = 0 ; iy < h ; iy++) {
                         for (int ix = 0 ; ix < w ; ix++) {
-                            image.setRGB(ix, iy, getColor(ix + x, iy + y));
+                            data[index++] = getColor(ix + x, iy + y);
                         }
                     }
                 }
+
+                image.setRGB(0 /*startX*/, 0 /*startY*/, w, h, data, 0 /*offset*/, w /*scansize*/);
 
                 return image.getRaster();
             }
