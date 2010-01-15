@@ -51,6 +51,11 @@ public class SslErrorHandler extends Handler {
      */
     private Bundle mSslPrefTable;
 
+    /**
+     * Flag indicating that a client reponse is pending.
+     */
+    private boolean mResponsePending;
+
     // Message id for handling the response
     private static final int HANDLE_RESPONSE = 100;
 
@@ -191,6 +196,7 @@ public class SslErrorHandler extends Handler {
             // if we do not have information on record, ask
             // the user (display a dialog)
             CallbackProxy proxy = loader.getFrame().getCallbackProxy();
+            mResponsePending = true;
             proxy.onReceivedSslError(this, error);
         }
 
@@ -202,7 +208,11 @@ public class SslErrorHandler extends Handler {
      * Proceed with the SSL certificate.
      */
     public void proceed() {
-        sendMessage(obtainMessage(HANDLE_RESPONSE, 1, 0, mLoaderQueue.poll()));
+        if (mResponsePending) {
+            mResponsePending = false;
+            sendMessage(obtainMessage(HANDLE_RESPONSE, 1, 0,
+                        mLoaderQueue.poll()));
+        }
     }
 
     /**
@@ -210,7 +220,11 @@ public class SslErrorHandler extends Handler {
      * the error.
      */
     public void cancel() {
-        sendMessage(obtainMessage(HANDLE_RESPONSE, 0, 0, mLoaderQueue.poll()));
+        if (mResponsePending) {
+            mResponsePending = false;
+            sendMessage(obtainMessage(HANDLE_RESPONSE, 0, 0,
+                        mLoaderQueue.poll()));
+        }
     }
 
     /**
