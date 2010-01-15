@@ -5206,7 +5206,8 @@ public class WebView extends AbsoluteLayout
                         if (Math.abs((viewWidth * mInvActualScale)
                                 - mZoomOverviewWidth) > 1) {
                             setNewZoomScale((float) viewWidth
-                                    / mZoomOverviewWidth, true, false);
+                                    / mZoomOverviewWidth, Math.abs(mActualScale
+                                            - mTextWrapScale) < 0.01f, false);
                         }
                     }
                     break;
