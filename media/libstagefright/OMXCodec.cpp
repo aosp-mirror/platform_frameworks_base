@@ -1016,6 +1016,7 @@ OMXCodec::OMXCodec(
         const char *componentName,
         const sp<MediaSource> &source)
     : mOMX(omx),
+      mOMXLivesLocally(omx->livesLocally(getpid())),
       mNode(node),
       mQuirks(quirks),
       mIsEncoder(isEncoder),
@@ -1191,12 +1192,22 @@ status_t OMXCodec::allocateBuffersOnPort(OMX_U32 portIndex) {
         IOMX::buffer_id buffer;
         if (portIndex == kPortIndexInput
                 && (mQuirks & kRequiresAllocateBufferOnInputPorts)) {
-            err = mOMX->allocateBufferWithBackup(
-                    mNode, portIndex, mem, &buffer);
+            if (mOMXLivesLocally) {
+                err = mOMX->allocateBuffer(
+                        mNode, portIndex, def.nBufferSize, &buffer);
+            } else {
+                err = mOMX->allocateBufferWithBackup(
+                        mNode, portIndex, mem, &buffer);
+            }
         } else if (portIndex == kPortIndexOutput
                 && (mQuirks & kRequiresAllocateBufferOnOutputPorts)) {
-            err = mOMX->allocateBufferWithBackup(
-                    mNode, portIndex, mem, &buffer);
+            if (mOMXLivesLocally) {
+                err = mOMX->allocateBuffer(
+                        mNode, portIndex, def.nBufferSize, &buffer);
+            } else {
+                err = mOMX->allocateBufferWithBackup(
+                        mNode, portIndex, mem, &buffer);
+            }
         } else {
             err = mOMX->useBuffer(mNode, portIndex, mem, &buffer);
         }
