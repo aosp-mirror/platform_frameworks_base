@@ -1873,8 +1873,8 @@ public class SQLiteDatabase extends SQLiteClosable {
                  * JNI method. If entire cache is wiped out, it could cause a big GC activity
                  * just because a (rogue) process is using the cache incorrectly.
                  */
-                Log.wtf(TAG, "Too many sql statements in database cache. Make sure your sql " +
-                        "statements are using prepared-sql-statement syntax with '?' for" +
+                Log.w(TAG, "Too many sql statements in database cache. Make sure your sql " +
+                        "statements are using prepared-sql-statement syntax with '?' for " +
                         "bindargs, instead of using actual values");
                 Set<String> keySet = mCompiledQueries.keySet();
                 for (String s : keySet) {
