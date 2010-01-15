@@ -1257,11 +1257,11 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     info = (NetworkInfo) msg.obj;
                     int type = info.getType();
                     NetworkInfo.State state = info.getState();
-                    if(mNetAttributes[type].mLastState == state) {
+                    if (mNetAttributes[type].mLastState == state) {
                         if (DBG) {
                             // TODO - remove this after we validate the dropping doesn't break anything
                             Log.d(TAG, "Dropping ConnectivityChange for " +
-                                    info.getTypeName() +": " +
+                                    info.getTypeName() + ": " +
                                     state + "/" + info.getDetailedState());
                         }
                         return;
