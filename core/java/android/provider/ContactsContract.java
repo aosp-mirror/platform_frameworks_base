@@ -55,19 +55,21 @@ import java.io.InputStream;
  * </p>
  * <ul>
  * <li>
- * The {@link Data} table contains all kinds of personal data: phone numbers,
- * email addresses etc. The list of data kinds that can be stored in this table
- * is open-ended. There is a predefined set of common kinds, but any application
- * can add its own data kinds.
+ * A row in the {@link Data} table can store any kind of personal data, such
+ * as a phone number or email addresses.  The set of data kinds that can be
+ * stored in this table is open-ended. There is a predefined set of common
+ * kinds, but any application can add its own data kinds.
  * </li>
  * <li>
- * A row in the {@link RawContacts} table represents a set of Data describing a
- * person and associated with a single account (for example, a single Gmail
- * account).
+ * A row in the {@link RawContacts} table represents a set of data describing a
+ * person and associated with a single account (for example, one of the user's
+ * Gmail accounts).
  * </li>
  * <li>
  * A row in the {@link Contacts} table represents an aggregate of one or more
- * RawContacts presumably describing the same person.
+ * RawContacts presumably describing the same person.  When data in or associated with
+ * the RawContacts table is changed, the affected aggregate contacts are updated as
+ * necessary.
  * </li>
  * </ul>
  * <p>
@@ -75,7 +77,8 @@ import java.io.InputStream;
  * </p>
  * <ul>
  * <li>
- * {@link Groups}, which contains information about raw contact groups - the
+ * {@link Groups}, which contains information about raw contact groups
+ * such as Gmail contact groups.  The
  * current API does not support the notion of groups spanning multiple accounts.
  * </li>
  * <li>
@@ -106,11 +109,15 @@ public final class ContactsContract {
     public static final Uri AUTHORITY_URI = Uri.parse("content://" + AUTHORITY);
 
     /**
-     * An optional insert, update or delete URI parameter that allows the caller
+     * An optional URI parameter for insert, update, or delete queries
+     * that allows the caller
      * to specify that it is a sync adapter. The default value is false. If true
-     * the dirty flag is not automatically set and the "syncToNetwork" parameter
-     * is set to false when calling
-     * {@link ContentResolver#notifyChange(android.net.Uri, android.database.ContentObserver, boolean)}.
+     * {@link RawContacts#DIRTY} is not automatically set and the
+     * "syncToNetwork" parameter is set to false when calling
+     * {@link
+     * ContentResolver#notifyChange(android.net.Uri, android.database.ContentObserver, boolean)}.
+     * This prevents an unnecessary extra synchronization, see the discussion of
+     * the delete operation in {@link RawContacts}.
      */
     public static final String CALLER_IS_SYNCADAPTER = "caller_is_syncadapter";
 
@@ -459,19 +466,23 @@ public final class ContactsContract {
     protected interface ContactNameColumns {
 
         /**
-         * The kind of data that is used as the display name for the contact, see
-         * DisplayNameSources.
+         * The kind of data that is used as the display name for the contact, such as
+         * structured name or email address.  See DisplayNameSources.
+         *
+         * TODO: convert DisplayNameSources to a link after it is un-hidden
          */
         public static final String DISPLAY_NAME_SOURCE = "display_name_source";
 
         /**
          * The default text shown as the contact's display name.  It is based on
          * available data, see {@link #DISPLAY_NAME_SOURCE}.
+         *
+         * @see ContactsContract.ContactNameColumns#DISPLAY_NAME_ALTERNATIVE
          */
         public static final String DISPLAY_NAME_PRIMARY = "display_name";
 
         /**
-         * Alternative representation of the display name.  If display name is
+         * An alternative representation of the display name.  If display name is
          * based on the structured name and the structured name follows
          * the Western full name style, then this field contains the "family name first"
          * version of the full name.  Otherwise, it is the same as DISPLAY_NAME_PRIMARY.
@@ -479,27 +490,42 @@ public final class ContactsContract {
         public static final String DISPLAY_NAME_ALTERNATIVE = "display_name_alt";
 
         /**
-         * The type of alphabet used to capture the phonetic name.  See
+         * The phonetic alphabet used to represent the {@link #PHONETIC_NAME}.  See
          * PhoneticNameStyle.
+         *
+         * TODO: convert PhoneticNameStyle to a link after it is un-hidden
          */
         public static final String PHONETIC_NAME_STYLE = "phonetic_name_style";
 
         /**
-         * Pronunciation of the full name. See PhoneticNameStyle.
+         * <p>
+         * Pronunciation of the full name in the phonetic alphabet specified by
+         * {@link #PHONETIC_NAME_STYLE}.
+         * </p>
+         * <p>
+         * The value may be set manually by the user.
+         * This capability is is of interest only in countries
+         * with commonly used phonetic
+         * alphabets, such as Japan and Korea.  See PhoneticNameStyle.
+         * </p>
+         *
+         * TODO: convert PhoneticNameStyle to a link after it is un-hidden
          */
         public static final String PHONETIC_NAME = "phonetic_name";
 
         /**
          * Sort key that takes into account locale-based traditions for sorting
-         * names in address books.  More specifically, for Chinese names
-         * the sort key is the name's Pinyin spelling; for Japanese names
+         * names in address books.  The default
+         * sort key is {@link #DISPLAY_NAME_PRIMARY}.  For Chinese names
+         * the sort key is the name's Pinyin spelling, and for Japanese names
          * it is the Hiragana version of the phonetic name.
          */
         public static final String SORT_KEY_PRIMARY = "sort_key";
 
         /**
          * Sort key based on the alternative representation of the full name,
-         * specifically the one using the 'family name first' format for
+         * {@link #DISPLAY_NAME_ALTERNATIVE}.  Thus for Western names,
+         * it is the one using the "family name first" format for
          * Western names.
          */
         public static final String SORT_KEY_ALTERNATIVE = "sort_key_alt";
@@ -808,7 +834,10 @@ public final class ContactsContract {
         }
 
         /**
-         * Mark a contact as having been contacted.
+         * Mark a contact as having been contacted.  This updates the
+         * {@link #TIMES_CONTACTED} and {@link #LAST_TIME_CONTACTED} for the
+         * contact, plus the corresponding values of any associated raw
+         * contacts.
          *
          * @param resolver the ContentResolver to use
          * @param contactId the person who was contacted
@@ -1050,15 +1079,37 @@ public final class ContactsContract {
     }
 
     /**
-     * Constants for the raw contacts table, which contains the base contact
-     * information per sync source. Sync adapters and contact management apps
+     * Constants for the raw contacts table, which contains one row of contact
+     * information for each person in each synced account. Sync adapters and
+     * contact management apps
      * are the primary consumers of this API.
+     *
+     * <h3>Aggregation</h3>
+     * <p>
+     * As soon as a raw contact is inserted or whenever its constituent data
+     * changes, the provider will check if the raw contact matches other
+     * existing raw contacts and if so will aggregate it with those. The
+     * aggregation is reflected in the {@link RawContacts} table by the change of the
+     * {@link #CONTACT_ID} field, which is the reference to the aggregate contact.
+     * </p>
+     * <p>
+     * Changes to the structured name, organization, phone number, email address,
+     * or nickname trigger a re-aggregation.
+     * </p>
+     * <p>
+     * See also {@link AggregationExceptions} for a mechanism to control
+     * aggregation programmatically.
+     * </p>
+     *
      * <h3>Operations</h3>
      * <dl>
      * <dt><b>Insert</b></dt>
-     * <dd>There are two mechanisms that can be used to insert a raw contact: incremental and
-     * batch. The incremental method is more traditional but less efficient.  It should be used
-     * only if the constituent data rows are unavailable at the time the raw contact is created:
+     * <dd>
+     * <p>
+     * Raw contacts can be inserted incrementally or in a batch.
+     * The incremental method is more traditional but less efficient.
+     * It should be used
+     * only if no {@link Data} values are available at the time the raw contact is created:
      * <pre>
      * ContentValues values = new ContentValues();
      * values.put(RawContacts.ACCOUNT_TYPE, accountType);
@@ -1066,9 +1117,10 @@ public final class ContactsContract {
      * Uri rawContactUri = getContentResolver().insert(RawContacts.CONTENT_URI, values);
      * long rawContactId = ContentUris.parseId(rawContactUri);
      * </pre>
+     * </p>
      * <p>
-     * Once data rows are available, insert those.  For example, here's how you would insert
-     * a name:
+     * Once {@link Data} values become available, insert those.
+     * For example, here's how you would insert a name:
      *
      * <pre>
      * values.clear();
@@ -1084,6 +1136,7 @@ public final class ContactsContract {
      * and causes at most one aggregation pass.
      * <pre>
      * ArrayList&lt;ContentProviderOperation&gt; ops = Lists.newArrayList();
+     * ...
      * int rawContactInsertIndex = ops.size();
      * ops.add(ContentProviderOperation.newInsert(RawContacts.CONTENT_URI)
      *          .withValue(RawContacts.ACCOUNT_TYPE, accountType)
@@ -1100,21 +1153,27 @@ public final class ContactsContract {
      * </pre>
      * </p>
      * <p>
-     * Please note the use of back reference in the construction of the
-     * {@link ContentProviderOperation}. It allows an operation to use the result of
-     * a previous operation by referring to it by its index in the batch.
+     * Note the use of {@link ContentProviderOperation.Builder#withValueBackReference(String, int)}
+     * to refer to the as-yet-unknown index value of the raw contact inserted in the
+     * first operation.
      * </p>
+     *
      * <dt><b>Update</b></dt>
-     * <dd><p>Just as with insert, the update can be done incrementally or as a batch, the
-     * batch mode being the preferred method.</p></dd>
+     * <dd><p>
+     * Raw contacts can be updated incrementally or in a batch.
+     * Batch mode should be used whenever possible.
+     * The procedures and considerations are analogous to those documented above for inserts.
+     * </p></dd>
      * <dt><b>Delete</b></dt>
      * <dd><p>When a raw contact is deleted, all of its Data rows as well as StatusUpdates,
      * AggregationExceptions, PhoneLookup rows are deleted automatically. When all raw
-     * contacts in a Contact are deleted, the Contact itself is also deleted automatically.
+     * contacts associated with a {@link Contacts} row are deleted, the {@link Contacts} row
+     * itself is also deleted automatically.
      * </p>
      * <p>
-     * The invocation of {@code resolver.delete(...)}, does not physically delete
-     * a raw contacts row. It sets the {@link #DELETED} flag on the raw contact and
+     * The invocation of {@code resolver.delete(...)}, does not immediately delete
+     * a raw contacts row.
+     * Instead, it sets the {@link #DELETED} flag on the raw contact and
      * removes the raw contact from its aggregate contact.
      * The sync adapter then deletes the raw contact from the server and
      * finalizes phone-side deletion by calling {@code resolver.delete(...)}
@@ -1124,10 +1183,11 @@ public final class ContactsContract {
      * is marked for deletion, it will remain on the phone.  However it will be
      * effectively invisible, because it will not be part of any aggregate contact.
      * </dd>
+     *
      * <dt><b>Query</b></dt>
      * <dd>
      * <p>
-     * Finding all raw contacts in a Contact is easy:
+     * It is easy to find all raw contacts in a Contact:
      * <pre>
      * Cursor c = getContentResolver().query(RawContacts.CONTENT_URI,
      *          new String[]{RawContacts._ID},
@@ -1136,7 +1196,7 @@ public final class ContactsContract {
      * </pre>
      * </p>
      * <p>
-     * There are two ways to find raw contacts within a specific account,
+     * To find raw contacts within a specific account,
      * you can either put the account name and type in the selection or pass them as query
      * parameters.  The latter approach is preferable, especially when you can reuse the
      * URI:
@@ -1178,19 +1238,11 @@ public final class ContactsContract {
      * </p>
      * </dd>
      * </dl>
-     * <h3>Aggregation</h3>
-     * <p>
-     * As soon as a raw contact is inserted or whenever its constituent data
-     * changes, the provider will check if the raw contact matches other
-     * existing raw contacts and if so will aggregate it with those. From the
-     * data standpoint, aggregation is reflected in the change of the
-     * {@link #CONTACT_ID} field, which is the reference to the aggregate contact.
-     * </p>
-     * <p>
-     * See also {@link AggregationExceptions} for a mechanism to control
-     * aggregation programmatically.
-     * </p>
      * <h2>Columns</h2>
+     * TODO: include {@link #DISPLAY_NAME_PRIMARY}, {@link #DISPLAY_NAME_ALTERNATIVE},
+     * {@link #DISPLAY_NAME_SOURCE}, {@link #PHONETIC_NAME}, {@link #PHONETIC_NAME_STYLE},
+     * {@link #SORT_KEY_PRIMARY}, {@link #SORT_KEY_ALTERNATIVE}?
+     *
      * <table class="jd-sumtable">
      * <tr>
      * <th colspan='4'>RawContacts</th>
@@ -1199,15 +1251,16 @@ public final class ContactsContract {
      * <td>long</td>
      * <td>{@link #_ID}</td>
      * <td>read-only</td>
-     * <td>Row ID. Sync adapter should try to preserve row IDs during updates. In other words,
-     * it would be a really bad idea to delete and reinsert a raw contact. A sync adapter should
-     * always do an update instead.</td>
+     * <td>Row ID. Sync adapters should try to preserve row IDs during updates. In other words,
+     * it is much better for a sync adapter to update a raw contact rather than to delete and
+     * re-insert it.</td>
      * </tr>
      * <tr>
      * <td>long</td>
      * <td>{@link #CONTACT_ID}</td>
      * <td>read-only</td>
-     * <td>A reference to the {@link ContactsContract.Contacts#_ID} that this raw contact belongs
+     * <td>The ID of the row in the {@link ContactsContract.Contacts} table
+     * that this raw contact belongs
      * to. Raw contacts are linked to contacts by the aggregation process, which can be controlled
      * by the {@link #AGGREGATION_MODE} field and {@link AggregationExceptions}.</td>
      * </tr>
@@ -1238,7 +1291,8 @@ public final class ContactsContract {
      * <td>The number of times the contact has been contacted. To have an effect
      * on the corresponding value of the aggregate contact, this field
      * should be set at the time the raw contact is inserted.
-     * See {@link ContactsContract.Contacts#markAsContacted}.</td>
+     * After that, this value is typically updated via
+     * {@link ContactsContract.Contacts#markAsContacted}.</td>
      * </tr>
      * <tr>
      * <td>long</td>
@@ -1247,14 +1301,16 @@ public final class ContactsContract {
      * <td>The timestamp of the last time the contact was contacted. To have an effect
      * on the corresponding value of the aggregate contact, this field
      * should be set at the time the raw contact is inserted.
-     * See {@link ContactsContract.Contacts#markAsContacted}.</td>
+     * After that, this value is typically updated via
+     * {@link ContactsContract.Contacts#markAsContacted}.
+     * </td>
      * </tr>
      * <tr>
      * <td>int</td>
      * <td>{@link #STARRED}</td>
      * <td>read/write</td>
      * <td>An indicator for favorite contacts: '1' if favorite, '0' otherwise.
-     * Changing this field immediately effects the corresponding aggregate contact:
+     * Changing this field immediately affects the corresponding aggregate contact:
      * if any raw contacts in that aggregate contact are starred, then the contact
      * itself is marked as starred.</td>
      * </tr>
@@ -1267,7 +1323,8 @@ public final class ContactsContract {
      * {@link android.media.RingtoneManager#ACTION_RINGTONE_PICKER} intent.
      * To have an effect on the corresponding value of the aggregate contact, this field
      * should be set at the time the raw contact is inserted. To set a custom
-     * ringtone on a contact, use the field {@link ContactsContract.Contacts#CUSTOM_RINGTONE}
+     * ringtone on a contact, use the field {@link ContactsContract.Contacts#CUSTOM_RINGTONE
+     * Contacts.CUSTOM_RINGTONE}
      * instead.</td>
      * </tr>
      * <tr>
@@ -1284,16 +1341,27 @@ public final class ContactsContract {
      * <td>{@link #ACCOUNT_NAME}</td>
      * <td>read/write-once</td>
      * <td>The name of the account instance to which this row belongs, which when paired with
-     * {@link #ACCOUNT_TYPE} identifies a specific account. It should be set at the time
+     * {@link #ACCOUNT_TYPE} identifies a specific account.
+     * For example, this will be the Gmail address if it is a Google account.
+     * It should be set at the time
      * the raw contact is inserted and never changed afterwards.</td>
      * </tr>
      * <tr>
      * <td>String</td>
      * <td>{@link #ACCOUNT_TYPE}</td>
      * <td>read/write-once</td>
-     * <td>The type of account to which this row belongs, which when paired with
-     * {@link #ACCOUNT_NAME} identifies a specific account. It should be set at the time
-     * the raw contact is inserted and never changed afterwards.</td>
+     * <td>
+     * <p>
+     * The type of account to which this row belongs, which when paired with
+     * {@link #ACCOUNT_NAME} identifies a specific account.
+     * It should be set at the time
+     * the raw contact is inserted and never changed afterwards.
+     * </p>
+     * <p>
+     * To ensure uniqueness, new account types should be chosen according to the
+     * Java package naming convention.  Thus a Google account is of type "com.google".
+     * </p>
+     * </td>
      * </tr>
      * <tr>
      * <td>String</td>
@@ -1302,8 +1370,8 @@ public final class ContactsContract {
      * <td>String that uniquely identifies this row to its source account.
      * Typically it is set at the time the raw contact is inserted and never
      * changed afterwards. The one notable exception is a new raw contact: it
-     * will have an account name and type, but no source id. This should
-     * indicated to the sync adapter that a new contact needs to be created
+     * will have an account name and type, but no source id. This
+     * indicates to the sync adapter that a new contact needs to be created
      * server-side and its ID stored in the corresponding SOURCE_ID field on
      * the phone.
      * </td>
@@ -1335,7 +1403,8 @@ public final class ContactsContract {
      * <td>String</td>
      * <td>{@link #SYNC1}</td>
      * <td>read/write</td>
-     * <td>Generic column for use by sync adapters. Content provider
+     * <td>Generic column provided for arbitrary use by sync adapters.
+     * The content provider
      * stores this information on behalf of the sync adapter but does not
      * interpret it in any way.
      * </td>
@@ -1372,46 +1441,70 @@ public final class ContactsContract {
         }
 
         /**
-         * The content:// style URI for this table
+         * The content:// style URI for this table, which requests a directory of
+         * raw contact rows matching the selection criteria.
          */
         public static final Uri CONTENT_URI = Uri.withAppendedPath(AUTHORITY_URI, "raw_contacts");
 
         /**
-         * The MIME type of {@link #CONTENT_URI} providing a directory of
-         * people.
+         * The MIME type of the results from {@link #CONTENT_URI} when a specific
+         * ID value is not provided, and multiple raw contacts may be returned.
          */
         public static final String CONTENT_TYPE = "vnd.android.cursor.dir/raw_contact";
 
         /**
-         * The MIME type of a {@link #CONTENT_URI} subdirectory of a single
-         * person.
+         * The MIME type of the results when a raw contact ID is appended to {@link #CONTENT_URI},
+         * yielding a subdirectory of a single person.
          */
         public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/raw_contact";
 
         /**
-         * Aggregation mode: aggregate asynchronously.
+         * Aggregation mode: aggregate immediately after insert or update operation(s) are complete.
          */
         public static final int AGGREGATION_MODE_DEFAULT = 0;
 
         /**
-         * Aggregation mode: aggregate at the time the raw contact is inserted/updated.
-         * TODO: deprecate. Aggregation is now synchronous, this value is a no-op
+         * Do not use.
+         *
+         * @deprecated in favor of {@link #AGGREGATION_MODE_DEFAULT}
          */
+        @Deprecated
         public static final int AGGREGATION_MODE_IMMEDIATE = 1;
 
         /**
-         * If {@link #AGGREGATION_MODE} is {@link #AGGREGATION_MODE_SUSPENDED}, changes
-         * to the raw contact do not cause its aggregation to be revisited. Note that changing
+         * <p>
+         * Aggregation mode: aggregation suspended temporarily, and is likely to be resumed later.
+         * Changes to the raw contact will update the associated aggregate contact but will not
+         * result in any change in how the contact is aggregated. Similar to
+         * {@link #AGGREGATION_MODE_DISABLED}, but maintains a link to the corresponding
+         * {@link Contacts} aggregate.
+         * </p>
+         * <p>
+         * This can be used to postpone aggregation until after a series of updates, for better
+         * performance and/or user experience.
+         * </p>
+         * <p>
+         * Note that changing
          * {@link #AGGREGATION_MODE} from {@link #AGGREGATION_MODE_SUSPENDED} to
-         * {@link #AGGREGATION_MODE_DEFAULT} does not trigger an aggregation pass. Any subsequent
+         * {@link #AGGREGATION_MODE_DEFAULT} does not trigger an aggregation pass, but any
+         * subsequent
          * change to the raw contact's data will.
+         * </p>
          */
         public static final int AGGREGATION_MODE_SUSPENDED = 2;
 
         /**
-         * Aggregation mode: never aggregate this raw contact (note that the raw contact will not
-         * have a corresponding Aggregate and therefore will not be included in Aggregates
-         * query results.)
+         * <p>
+         * Aggregation mode: never aggregate this raw contact.  The raw contact will not
+         * have a corresponding {@link Contacts} aggregate and therefore will not be included in
+         * {@link Contacts} query results.
+         * </p>
+         * <p>
+         * For example, this mode can be used for a raw contact that is marked for deletion while
+         * waiting for the deletion to occur on the server side.
+         * </p>
+         *
+         * @see #AGGREGATION_MODE_SUSPENDED
          */
         public static final int AGGREGATION_MODE_DISABLED = 3;
 
@@ -1441,10 +1534,13 @@ public final class ContactsContract {
         }
 
         /**
-         * A sub-directory of a single raw contact that contains all of their
+         * A sub-directory of a single raw contact that contains all of its
          * {@link ContactsContract.Data} rows. To access this directory
          * append {@link Data#CONTENT_DIRECTORY} to the contact URI.
+         *
+         * @deprecated in favor of {@link RawContacts.Entity}.
          */
+        @Deprecated
         public static final class Data implements BaseColumns, DataColumns {
             /**
              * no public constructor since this is a utility class
@@ -1460,26 +1556,24 @@ public final class ContactsContract {
 
         /**
          * <p>
-         * A sub-directory of a single raw contact that contains all of their
+         * A sub-directory of a single raw contact that contains all of its
          * {@link ContactsContract.Data} rows. To access this directory append
          * {@link #CONTENT_DIRECTORY} to the contact URI. See
          * {@link RawContactsEntity} for a stand-alone table containing the same
          * data.
          * </p>
          * <p>
-         * The Entity directory is similar to the {@link RawContacts.Data}
-         * directory but with two important differences:
-         * <ul>
-         * <li>Entity has different ID fields: {@link #_ID} for the raw contact
-         * and {@link #DATA_ID} for the data rows.</li>
-         * <li>Entity always contains at least one row, even if there are no
+         * Entity has two ID fields: {@link #_ID} for the raw contact
+         * and {@link #DATA_ID} for the data rows.
+         * Entity always contains at least one row, even if there are no
          * actual data rows. In this case the {@link #DATA_ID} field will be
-         * null.</li>
-         * </ul>
-         * Using Entity should preferred to using two separate queries:
-         * RawContacts followed by Data. The reason is that Entity reads all
-         * data for a raw contact in one transaction, so there is no possibility
-         * of the data changing between the two queries.
+         * null.
+         * </p>
+         * <p>
+         * Entity reads all
+         * data for a raw contact in one transaction, to guarantee
+         * consistency.
+         * </p>
          */
         public static final class Entity implements BaseColumns, DataColumns {
             /**
@@ -1501,6 +1595,11 @@ public final class ContactsContract {
             public static final String DATA_ID = "data_id";
         }
 
+        /**
+         * TODO: javadoc
+         * @param cursor
+         * @return
+         */
         public static EntityIterator newEntityIterator(Cursor cursor) {
             return new EntityIteratorImpl(cursor);
         }
@@ -1839,7 +1938,12 @@ public final class ContactsContract {
      * By convention, {@link #DATA15} is used for storing BLOBs (binary data).
      * </p>
      * <p>
-     * Typically you should refrain from introducing new kinds of data for an other
+     * The sync adapter for a given account type must correctly handle every data type
+     * used in the corresponding raw contacts.  Otherwise it could result in lost or
+     * corrupted data.
+     * </p>
+     * <p>
+     * Similarly, you should refrain from introducing new kinds of data for an other
      * party's account types. For example, if you add a data row for
      * "favorite song" to a raw contact owned by a Google account, it will not
      * get synced to the server, because the Google sync adapter does not know
