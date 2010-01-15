@@ -16,19 +16,15 @@
 
 package android.graphics;
 
-import java.awt.GradientPaint;
-import java.awt.Color;
 import java.awt.Paint;
 import java.awt.PaintContext;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
-import java.awt.image.DataBuffer;
 import java.awt.image.Raster;
-import java.awt.image.SampleModel;
-import java.awt.image.WritableRaster;
 
 public class LinearGradient extends Shader {
 
@@ -56,14 +52,17 @@ public class LinearGradient extends Shader {
             throw new IllegalArgumentException("color and position arrays must be of equal length");
         }
 
-        if (colors.length == 2) { // for 2 colors: use the Java implementation
-            // The hasAlpha flag in Color() is only used to enforce alpha to 0xFF if false.
-            // If true the alpha is read from the int.
-            mJavaPaint = new GradientPaint(x0, y0, new Color(colors[0], true /* hasalpha */),
-                    x1, y1, new Color(colors[1], true /* hasalpha */), tile != TileMode.CLAMP);
-        } else {
-            mJavaPaint = new MultiPointLinearGradientPaint(x0, y0, x1, y1, colors, positions, tile);
+        if (positions == null) {
+            float spacing = 1.f / (colors.length - 1);
+            positions = new float[colors.length];
+            positions[0] = 0.f;
+            positions[colors.length-1] = 1.f;
+            for (int i = 1; i < colors.length - 1 ; i++) {
+                positions[i] = spacing * i;
+            }
         }
+
+        mJavaPaint = new MultiPointLinearGradientPaint(x0, y0, x1, y1, colors, positions, tile);
     }
 
     /**
@@ -79,10 +78,7 @@ public class LinearGradient extends Shader {
      */
     public LinearGradient(float x0, float y0, float x1, float y1, int color0, int color1,
             TileMode tile) {
-        // The hasAlpha flag in Color() is only used to enforce alpha to 0xFF if false.
-        // If true the alpha is read from the int.
-        mJavaPaint = new GradientPaint(x0, y0, new Color(color0, true /* hasalpha */), x1, y1,
-                new Color(color1, true /* hasalpha */), tile != TileMode.CLAMP);
+        this(x0, y0, x1, y1, new int[] { color0, color1}, null /*positions*/, tile);
     }
 
     // ---------- Custom Methods
@@ -198,19 +194,14 @@ public class LinearGradient extends Shader {
             }
 
             public Raster getRaster(int x, int y, int w, int h) {
-                SampleModel sampleModel = mColorModel.createCompatibleSampleModel(w, h);
-                WritableRaster raster = Raster.createWritableRaster(sampleModel,
-                        new java.awt.Point(x, y));
-
-                DataBuffer data = raster.getDataBuffer();
+                BufferedImage image = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
 
                 if (mDx == 0) { // vertical gradient
                     // compute first column and copy to all other columns
-                    int index = 0;
                     for (int iy = 0 ; iy < h ; iy++) {
                         int color = getColor(iy + y, mY0, mDy);
                         for (int ix = 0 ; ix < w ; ix++) {
-                            data.setElem(index++, color);
+                            image.setRGB(ix, iy, color);
                         }
                     }
                 } else if (mDy == 0) { // horizontal
@@ -220,22 +211,18 @@ public class LinearGradient extends Shader {
                         line[ix] = getColor(ix + x, mX0, mDx);
                     }
 
-                    int index = 0;
                     for (int iy = 0 ; iy < h ; iy++) {
-                        for (int ix = 0 ; ix < w ; ix++) {
-                            data.setElem(index++, line[ix]);
-                        }
+                        image.setRGB(0, iy, w, 1 /*h*/, line, 0 /* offset*/, w /*scansize*/);
                     }
                 } else {
-                    int index = 0;
                     for (int iy = 0 ; iy < h ; iy++) {
                         for (int ix = 0 ; ix < w ; ix++) {
-                            data.setElem(index++, getColor(ix + x, iy + y));
+                            image.setRGB(ix, iy, getColor(ix + x, iy + y));
                         }
                     }
                 }
 
-                return raster;
+                return image.getRaster();
             }
         }
 
