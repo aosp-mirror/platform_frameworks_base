@@ -24,6 +24,7 @@
 #include <utils/String8.h>
 #include <media/IMediaPlayerService.h>
 #include <media/IMediaRecorder.h>
+#include <media/mediaplayer.h>  // for MEDIA_ERROR_SERVER_DIED
 
 namespace android {
 
@@ -576,19 +577,8 @@ status_t MediaRecorder::release()
 MediaRecorder::MediaRecorder()
 {
     LOGV("constructor");
-    sp<IServiceManager> sm = defaultServiceManager();
-    sp<IBinder> binder;
 
-    do {
-        binder = sm->getService(String16("media.player"));
-        if (binder != NULL) {
-            break;
-        }
-        LOGW("MediaPlayerService not published, waiting...");
-        usleep(500000); // 0.5 s
-    } while(true);
-
-    sp<IMediaPlayerService> service = interface_cast<IMediaPlayerService>(binder);
+    const sp<IMediaPlayerService>& service(getMediaPlayerService());
     if (service != NULL) {
         mMediaRecorder = service->createMediaRecorder(getpid());
     }
@@ -635,6 +625,12 @@ void MediaRecorder::notify(int msg, int ext1, int ext2)
         listener->notify(msg, ext1, ext2);
         LOGV("back from callback");
     }
+}
+
+void MediaRecorder::died()
+{
+    LOGV("died");
+    notify(MEDIA_RECORDER_EVENT_ERROR, MEDIA_ERROR_SERVER_DIED, 0);
 }
 
 }; // namespace android

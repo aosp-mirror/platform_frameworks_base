@@ -24,7 +24,8 @@ LOCAL_SRC_FILES:= \
     IAudioPolicyService.cpp \
     MediaScanner.cpp \
     MediaScannerClient.cpp \
-    autodetect.cpp
+    autodetect.cpp \
+    IMediaDeathNotifier.cpp
 
 LOCAL_SHARED_LIBRARIES := \
 	libui libcutils libutils libbinder libsonivox libicuuc
