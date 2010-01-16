@@ -3747,8 +3747,10 @@ public class WebView extends AbsoluteLayout
                 mPreviewZoomOnly = false;
                 mAnchorX = viewToContentX((int) mZoomCenterX + mScrollX);
                 mAnchorY = viewToContentY((int) mZoomCenterY + mScrollY);
-                // for testing only, default don't reflow now
-                boolean reflowNow = !getSettings().getPluginsEnabled();
+                // don't reflow when zoom in; when zoom out, do reflow if the
+                // new scale is almost minimum scale;
+                boolean reflowNow = (mActualScale - mMinZoomScale <= 0.01f)
+                        || ((mActualScale <= 0.8 * mTextWrapScale));
                 // force zoom after mPreviewZoomOnly is set to false so that the
                 // new view size will be passed to the WebKit
                 setNewZoomScale(mActualScale, reflowNow, true);
