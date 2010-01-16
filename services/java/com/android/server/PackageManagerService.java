@@ -75,6 +75,7 @@ import android.os.Process;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.security.SystemKeyStore;
 import android.util.*;
 import android.view.Display;
 import android.view.WindowManager;
@@ -89,6 +90,7 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -7439,7 +7441,8 @@ class PackageManagerService extends IPackageManager.Stub {
 
     // ------- apps on sdcard specific code -------
     static final boolean DEBUG_SD_INSTALL = false;
-    final private String mSdEncryptKey = "none";
+    final private String mSdEncryptKey = "AppsOnSD";
+    final private String mSdEncryptAlg = "Blowfish";
 
     private MountService getMountService() {
         return (MountService) ServiceManager.getService("mount");
@@ -7457,10 +7460,25 @@ class PackageManagerService extends IPackageManager.Stub {
         String cachePath = null;
         // Remove any pending destroy messages
         mHandler.removeMessages(DESTROY_SD_CONTAINER, pkgName);
+        String sdEncKey;
+        try {
+            sdEncKey = SystemKeyStore.getInstance().retrieveKeyHexString(mSdEncryptKey);
+            if (sdEncKey == null) {
+                sdEncKey = SystemKeyStore.getInstance().
+                        generateNewKeyHexString(128, mSdEncryptAlg, mSdEncryptKey);
+                if (sdEncKey == null) {
+                    Log.e(TAG, "Failed to create encryption keys for package: " + pkgName + ".");
+                    return null;
+                }
+            }
+        } catch (NoSuchAlgorithmException nsae) {
+            Log.e(TAG, "Failed to create encryption keys with exception: " + nsae);
+            return null;
+        }
         try {
             cachePath = mountService.createSecureContainer(pkgName,
                 mbLen,
-                "vfat", mSdEncryptKey, Process.SYSTEM_UID);
+                "vfat", sdEncKey, Process.SYSTEM_UID);
             if (DEBUG_SD_INSTALL) Log.i(TAG, "Trying to install " + pkgName + ", cachePath =" + cachePath);
             return cachePath;
         } catch(IllegalStateException e) {
@@ -7477,7 +7495,7 @@ class PackageManagerService extends IPackageManager.Stub {
        try {
             cachePath = mountService.createSecureContainer(pkgName,
                 mbLen,
-                "vfat", mSdEncryptKey, Process.SYSTEM_UID);
+                "vfat", sdEncKey, Process.SYSTEM_UID);
             if (DEBUG_SD_INSTALL) Log.i(TAG, "Trying to install again " + pkgName + ", cachePath =" + cachePath);
             return cachePath;
         } catch(IllegalStateException e) {
@@ -7487,8 +7505,13 @@ class PackageManagerService extends IPackageManager.Stub {
     }
 
    private String mountSdDir(String pkgName, int ownerUid) {
+       String sdEncKey = SystemKeyStore.getInstance().retrieveKeyHexString(mSdEncryptKey);
+       if (sdEncKey == null) {
+           Log.e(TAG, "Failed to retrieve encryption keys to mount package code: " + pkgName + ".");
+           return null;
+       }
        try {
-           return getMountService().mountSecureContainer(pkgName, mSdEncryptKey, ownerUid);
+           return getMountService().mountSecureContainer(pkgName, sdEncKey, ownerUid);
        } catch (IllegalStateException e) {
            Log.i(TAG, "Failed to mount container for pkg : " + pkgName + " exception : " + e);
        }
