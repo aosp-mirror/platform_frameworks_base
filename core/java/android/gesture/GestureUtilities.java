@@ -48,6 +48,10 @@ final class GestureUtilities {
             }
         }
     }
+    
+    static float[] spatialSampling(Gesture gesture, int sampleMatrixDimension) {
+        return spatialSampling(gesture, sampleMatrixDimension, false);
+    }
 
     static float[] spatialSampling(Gesture gesture, int sampleMatrixDimension, 
             boolean uniformScaling) {
