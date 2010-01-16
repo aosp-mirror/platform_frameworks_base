@@ -3729,6 +3729,9 @@ public class WebView extends AbsoluteLayout
         public boolean onScaleBegin(ScaleGestureDetector detector) {
             // cancel the single touch handling
             cancelTouch();
+            if (mZoomButtonsController.isVisible()) {
+                mZoomButtonsController.setVisible(false);
+            }
             // reset the zoom overview mode so that the page won't auto grow
             mInZoomOverview = false;
             // If it is in password mode, turn it off so it does not draw
@@ -3937,20 +3940,18 @@ public class WebView extends AbsoluteLayout
                     if (!mDragFromTextInput) {
                         nativeHideCursor();
                     }
-                    if (!mSupportMultiTouch) {
-                        WebSettings settings = getSettings();
-                        if (settings.supportZoom()
-                                && settings.getBuiltInZoomControls()
-                                && !mZoomButtonsController.isVisible()
-                                && mMinZoomScale < mMaxZoomScale) {
-                            mZoomButtonsController.setVisible(true);
-                            int count = settings.getDoubleTapToastCount();
-                            if (mInZoomOverview && count > 0) {
-                                settings.setDoubleTapToastCount(--count);
-                                Toast.makeText(mContext,
-                                        com.android.internal.R.string.double_tap_toast,
-                                        Toast.LENGTH_LONG).show();
-                            }
+                    WebSettings settings = getSettings();
+                    if (settings.supportZoom()
+                            && settings.getBuiltInZoomControls()
+                            && !mZoomButtonsController.isVisible()
+                            && mMinZoomScale < mMaxZoomScale) {
+                        mZoomButtonsController.setVisible(true);
+                        int count = settings.getDoubleTapToastCount();
+                        if (mInZoomOverview && count > 0) {
+                            settings.setDoubleTapToastCount(--count);
+                            Toast.makeText(mContext,
+                                    com.android.internal.R.string.double_tap_toast,
+                                    Toast.LENGTH_LONG).show();
                         }
                     }
                 }
@@ -4029,8 +4030,7 @@ public class WebView extends AbsoluteLayout
                     mUserScroll = true;
                 }
 
-                if (!mSupportMultiTouch
-                        && !getSettings().getBuiltInZoomControls()) {
+                if (!getSettings().getBuiltInZoomControls()) {
                     boolean showPlusMinus = mMinZoomScale < mMaxZoomScale;
                     if (mZoomControls != null && showPlusMinus) {
                         if (mZoomControls.getVisibility() == View.VISIBLE) {
@@ -4776,22 +4776,20 @@ public class WebView extends AbsoluteLayout
         mAnchorX = viewToContentX((int) mZoomCenterX + mScrollX);
         mAnchorY = viewToContentY((int) mZoomCenterY + mScrollY);
         WebSettings settings = getSettings();
-        if (!mSupportMultiTouch) {
-            // remove the zoom control after double tap
-            if (settings.getBuiltInZoomControls()) {
-                if (mZoomButtonsController.isVisible()) {
-                    mZoomButtonsController.setVisible(false);
-                }
-            } else {
-                if (mZoomControlRunnable != null) {
-                    mPrivateHandler.removeCallbacks(mZoomControlRunnable);
-                }
-                if (mZoomControls != null) {
-                    mZoomControls.hide();
-                }
+        // remove the zoom control after double tap
+        if (settings.getBuiltInZoomControls()) {
+            if (mZoomButtonsController.isVisible()) {
+                mZoomButtonsController.setVisible(false);
             }
-            settings.setDoubleTapToastCount(0);
+        } else {
+            if (mZoomControlRunnable != null) {
+                mPrivateHandler.removeCallbacks(mZoomControlRunnable);
+            }
+            if (mZoomControls != null) {
+                mZoomControls.hide();
+            }
         }
+        settings.setDoubleTapToastCount(0);
         if ((settings.getLayoutAlgorithm() == WebSettings.LayoutAlgorithm.NARROW_COLUMNS)
                 && (Math.abs(mActualScale - mTextWrapScale) >= 0.01f)) {
             setNewZoomScale(mActualScale, true, true);
