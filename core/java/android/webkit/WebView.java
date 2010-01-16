@@ -4792,6 +4792,7 @@ public class WebView extends AbsoluteLayout
             }
         }
         settings.setDoubleTapToastCount(0);
+        boolean zoomToDefault = false;
         if ((settings.getLayoutAlgorithm() == WebSettings.LayoutAlgorithm.NARROW_COLUMNS)
                 && (Math.abs(mActualScale - mTextWrapScale) >= 0.01f)) {
             setNewZoomScale(mActualScale, true, true);
@@ -4807,9 +4808,12 @@ public class WebView extends AbsoluteLayout
                 if (mScrollY < getTitleHeight()) mScrollY = 0;
                 zoomWithPreview(newScale);
             } else if (Math.abs(mActualScale - mDefaultScale) >= 0.01f) {
-                mInZoomOverview = true;
+                zoomToDefault = true;
             }
         } else {
+            zoomToDefault = true;
+        }
+        if (zoomToDefault) {
             mInZoomOverview = false;
             int left = nativeGetBlockLeftEdge(mAnchorX, mAnchorY, mActualScale);
             if (left != NO_LEFTEDGE) {
