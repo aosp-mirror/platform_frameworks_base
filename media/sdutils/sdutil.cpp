@@ -86,7 +86,7 @@ static void millisecondSleep(int milliseconds) {
 
 static int mount(const char* path) {
     String16 string(path);
-    gMountService->mountMedia(string);
+    gMountService->mountVolume(string);
     
     for (int i = 0; i < 60; i++) {
         if (isMounted(path)) {
@@ -137,7 +137,7 @@ static int asec_path(const char *id) {
 
 static int unmount(const char* path) {
     String16 string(path);
-    gMountService->unmountMedia(string);
+    gMountService->unmountVolume(string);
 
     for (int i = 0; i < 20; i++) {
         if (!isMounted(path)) {
@@ -155,7 +155,7 @@ static int format(const char* path) {
 
     if (isMounted(path))
         return -EBUSY;
-    gMountService->formatMedia(string);
+    gMountService->formatVolume(string);
 
     return 0;
 }
