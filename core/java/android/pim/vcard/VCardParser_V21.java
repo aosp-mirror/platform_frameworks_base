@@ -522,7 +522,7 @@ public class VCardParser_V21 extends VCardParser {
     protected void handleParams(String params) throws VCardException {
         String[] strArray = params.split("=", 2);
         if (strArray.length == 2) {
-            String paramName = strArray[0].trim();
+            final String paramName = strArray[0].trim().toUpperCase();
             String paramValue = strArray[1].trim();
             if (paramName.equals("TYPE")) {
                 handleType(paramValue);
