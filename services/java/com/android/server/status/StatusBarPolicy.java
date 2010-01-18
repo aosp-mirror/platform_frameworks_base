@@ -88,6 +88,8 @@ public class StatusBarPolicy {
 
     // clock
     private Calendar mCalendar;
+    private String mClockFormatString;
+    private SimpleDateFormat mClockFormat;
     private IBinder mClockIcon;
     private IconData mClockData;
 
@@ -546,37 +548,48 @@ public class StatusBarPolicy {
             res = R.string.twelve_hour_time_format;
         }
 
-        String format = mContext.getString(res);
-
-        /*
-         * Search for an unquoted "a" in the format string, so we can
-         * add dummy characters around it to let us find it again after
-         * formatting and change its size.
-         */
-        int a = -1;
-        boolean quoted = false;
-        for (int i = 0; i < format.length(); i++) {
-            char c = format.charAt(i);
-
-            if (c == '\'') {
-                quoted = !quoted;
-            }
-
-            if (!quoted && c == 'a') {
-                a = i;
-                break;
-            }
-        }
-
         final char MAGIC1 = '\uEF00';
         final char MAGIC2 = '\uEF01';
 
-        if (a >= 0) {
-            format = format.substring(0, a) + MAGIC1 + "a" + MAGIC2 +
-                     format.substring(a + 1);
-        }
+        SimpleDateFormat sdf;
+        String format = mContext.getString(res);
+        if (!format.equals(mClockFormatString)) {
+            /*
+             * Search for an unquoted "a" in the format string, so we can
+             * add dummy characters around it to let us find it again after
+             * formatting and change its size.
+             */
+            int a = -1;
+            boolean quoted = false;
+            for (int i = 0; i < format.length(); i++) {
+                char c = format.charAt(i);
 
-        String result = new SimpleDateFormat(format).format(mCalendar.getTime());
+                if (c == '\'') {
+                    quoted = !quoted;
+                }
+
+                if (!quoted && c == 'a') {
+                    a = i;
+                    break;
+                }
+            }
+
+            if (a >= 0) {
+                // Move a back so any whitespace before the AM/PM is also in the alternate size.
+                final int b = a;
+                while (a > 0 && Character.isWhitespace(format.charAt(a-1))) {
+                    a--;
+                }
+                format = format.substring(0, a) + MAGIC1 + format.substring(a, b)
+                        + "a" + MAGIC2 + format.substring(b + 1);
+            }
+
+            mClockFormat = sdf = new SimpleDateFormat(format);
+            mClockFormatString = format;
+        } else {
+            sdf = mClockFormat;
+        }
+        String result = sdf.format(mCalendar.getTime());
 
         int magic1 = result.indexOf(MAGIC1);
         int magic2 = result.indexOf(MAGIC2);
