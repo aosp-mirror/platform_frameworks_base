@@ -129,6 +129,11 @@ static int asec_mount(const char *id, const char *key, int ownerUid) {
     return 0;
 }
 
+static void asec_unmount(const char *id) {
+    String16 sId(id);
+    gMountService->unmountSecureContainer(sId);
+}
+
 static int asec_path(const char *id) {
     String16 sId(id);
     gMountService->getSecureContainerPath(sId);
@@ -208,6 +213,9 @@ int main(int argc, char **argv)
             return android::asec_destroy(id);
         } else if (!strcmp(argument, "mount")) {
             return android::asec_mount(id, argv[4], atoi(argv[5]));
+        } else if (!strcmp(argument, "unmount")) {
+            android::asec_unmount(id);
+            return 0;
         } else if (!strcmp(argument, "path")) {
             return android::asec_path(id);
         }
@@ -224,6 +232,7 @@ usage:
                     "    sdutil asec finalize <id>\n"
                     "    sdutil asec destroy <id>\n"
                     "    sdutil asec mount <id> <key> <ownerUid>\n"
+                    "    sdutil asec unmount <id>\n"
                     "    sdutil asec path <id>\n"
                     );
     return -1;

@@ -94,6 +94,11 @@ interface IMountService
     String mountSecureContainer(String id, String key, int ownerUid);
 
     /*
+     * Unount a secure container.
+     */
+    void unmountSecureContainer(String id);
+
+    /*
      * Returns the filesystem path of a mounted secure container.
      */
     String getSecureContainerPath(String id);
