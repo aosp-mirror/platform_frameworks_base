@@ -28,6 +28,7 @@ import android.content.res.Resources;
 import android.net.Uri;
 import android.os.IMountService;
 import android.os.Environment;
+import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.os.UEventObserver;
 import android.os.Handler;
@@ -131,6 +132,8 @@ class MountService extends IMountService.Stub
 
     private String  mLegacyState = Environment.MEDIA_REMOVED;
 
+    private PackageManagerService mPms;
+
     /**
      * Constructs a new MountService instance
      * 
@@ -139,6 +142,7 @@ class MountService extends IMountService.Stub
     public MountService(Context context) {
         mContext = context;
 
+        mPms = (PackageManagerService) ServiceManager.getService("package");
         // Register a BOOT_COMPLETED handler so that we can start
         // our NativeDaemonConnector. We defer the startup so that we don't
         // start processing events before we ought-to
@@ -509,6 +513,8 @@ class MountService extends IMountService.Stub
     void handlePossibleExplicitUnmountBroadcast(String path) {
         if (mMounted) {
             mMounted = false;
+            // Update media status on PackageManagerService to unmount packages on sdcard
+            mPms.updateExternalMediaStatus(false);
             Intent intent = new Intent(Intent.ACTION_MEDIA_UNMOUNTED, 
                     Uri.parse("file://" + path));
             mContext.sendBroadcast(intent);
@@ -739,6 +745,8 @@ class MountService extends IMountService.Stub
 
         updatePublicVolumeState(path, Environment.MEDIA_UNMOUNTED);
 
+        // Update media status on PackageManagerService to unmount packages on sdcard
+        mPms.updateExternalMediaStatus(false);
         if (mShowSafeUnmountNotificationWhenUnmounted) {
             setMediaStorageNotification(
                     com.android.internal.R.string.ext_media_safe_unmount_notification_title,
@@ -800,6 +808,8 @@ class MountService extends IMountService.Stub
     void notifyMediaMounted(String path, boolean readOnly) {
         updatePublicVolumeState(path, Environment.MEDIA_MOUNTED);
 
+        // Update media status on PackageManagerService to mount packages on sdcard
+        mPms.updateExternalMediaStatus(true);
         setMediaStorageNotification(0, 0, 0, false, false, null);
         updateUsbMassStorageNotification(false, false);
         Intent intent = new Intent(Intent.ACTION_MEDIA_MOUNTED, 

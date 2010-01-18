@@ -4753,13 +4753,18 @@ class PackageManagerService extends IPackageManager.Stub {
             ret = deleteInstalledPackageLI (p, deleteCodeAndResources, flags, outInfo);
         }
         if (ret && onSd) {
-            // Post a delayed destroy on the container since there might
-            // be active processes holding open file handles to package
-            // resources which will get killed by the process killer when
-            // destroying the container. This might even kill the current
-            // process and crash the system. Delay the destroy a bit so
-            // that the active processes get to handle the uninstall broadcasts.
-            sendDelayedDestroySdDir(packageName);
+            if (deleteCodeAndResources) {
+                // Post a delayed destroy on the container since there might
+                // be active processes holding open file handles to package
+                // resources which will get killed by the process killer when
+                // destroying the container. This might even kill the current
+                // process and crash the system. Delay the destroy a bit so
+                // that the active processes get to handle the uninstall broadcasts.
+                sendDelayedDestroySdDir(packageName);
+            } else {
+                // Just unmount the directory
+                unMountSdDir(packageName);
+            }
         }
         return ret;
     }
@@ -5866,7 +5871,9 @@ class PackageManagerService extends IPackageManager.Stub {
         HashSet<String> loadedPermissions = new HashSet<String>();
 
         GrantedPermissions(int pkgFlags) {
-            this.pkgFlags = pkgFlags & ApplicationInfo.FLAG_SYSTEM;
+            this.pkgFlags = (pkgFlags & ApplicationInfo.FLAG_SYSTEM) |
+                    (pkgFlags & ApplicationInfo.FLAG_FORWARD_LOCK) |
+                    (pkgFlags & ApplicationInfo.FLAG_ON_SDCARD);
         }
     }
 
@@ -6672,9 +6679,8 @@ class PackageManagerService extends IPackageManager.Stub {
             if (!pkg.resourcePathString.equals(pkg.codePathString)) {
                 serializer.attribute(null, "resourcePath", pkg.resourcePathString);
             }
-            serializer.attribute(null, "system",
-                    (pkg.pkgFlags&ApplicationInfo.FLAG_SYSTEM) != 0
-                    ? "true" : "false");
+            serializer.attribute(null, "flags",
+                    Integer.toString(pkg.pkgFlags));
             serializer.attribute(null, "ts", pkg.getTimeStampStr());
             serializer.attribute(null, "version", String.valueOf(pkg.versionCode));
             if (pkg.sharedUser == null) {
@@ -7065,16 +7071,24 @@ class PackageManagerService extends IPackageManager.Stub {
                     } catch (NumberFormatException e) {
                     }
                 }
-                systemStr = parser.getAttributeValue(null, "system");
                 installerPackageName = parser.getAttributeValue(null, "installer");
+
+                systemStr = parser.getAttributeValue(null, "flags");
                 if (systemStr != null) {
-                    if ("true".equals(systemStr)) {
-                        pkgFlags |= ApplicationInfo.FLAG_SYSTEM;
+                    try {
+                        pkgFlags = Integer.parseInt(systemStr);
+                    } catch (NumberFormatException e) {
                     }
                 } else {
-                    // Old settings that don't specify system...  just treat
-                    // them as system, good enough.
-                    pkgFlags |= ApplicationInfo.FLAG_SYSTEM;
+                    // For backward compatibility
+                    systemStr = parser.getAttributeValue(null, "system");
+                    if (systemStr != null) {
+                        pkgFlags |= ("true".equalsIgnoreCase(systemStr)) ? ApplicationInfo.FLAG_SYSTEM : 0;
+                    } else {
+                        // Old settings that don't specify system...  just treat
+                        // them as system, good enough.
+                        pkgFlags |= ApplicationInfo.FLAG_SYSTEM;
+                    }
                 }
                 timeStampStr = parser.getAttributeValue(null, "ts");
                 if (timeStampStr != null) {
@@ -7443,6 +7457,7 @@ class PackageManagerService extends IPackageManager.Stub {
     static final boolean DEBUG_SD_INSTALL = false;
     final private String mSdEncryptKey = "AppsOnSD";
     final private String mSdEncryptAlg = "AES";
+    private boolean mMediaMounted = false;
 
     private MountService getMountService() {
         return (MountService) ServiceManager.getService("mount");
@@ -7518,6 +7533,11 @@ class PackageManagerService extends IPackageManager.Stub {
        return null;
    }
 
+   private boolean unMountSdDir(String pkgName) {
+       // STOPSHIP unmount directory
+       return true;
+   }
+
    private String getSdDir(String pkgName) {
        String cachePath = null;
        try {
@@ -7553,6 +7573,15 @@ class PackageManagerService extends IPackageManager.Stub {
        }
    }
 
+   private String[] getSecureContainerList() {
+       try {
+           return getMountService().getSecureContainerList();
+       } catch (IllegalStateException e) {
+           Log.i(TAG, "Failed to getSecureContainerList");
+       }
+       return null;
+   }
+
    private void sendDelayedDestroySdDir(String pkgName) {
        if (mHandler.hasMessages(DESTROY_SD_CONTAINER, pkgName)) {
            // Don't have to send message again
@@ -7562,7 +7591,63 @@ class PackageManagerService extends IPackageManager.Stub {
        mHandler.sendMessageDelayed(msg, DESTROY_SD_CONTAINER_DELAY);
    }
 
-   public void updateExternalMediaStatus(boolean mediaStatus) {
-       // TODO
+   public void updateExternalMediaStatus(final boolean mediaStatus) {
+       if (mediaStatus == mMediaMounted) {
+           return;
+       }
+       mMediaMounted = mediaStatus;
+        // Queue up an async operation since the package installation may take a little while.
+       mHandler.post(new Runnable() {
+           public void run() {
+               mHandler.removeCallbacks(this);
+               final String list[] = getSecureContainerList();
+               if (list == null || list.length == 0) {
+                   return;
+               }
+               for (int i = 0; i < list.length; i++) {
+                   String mountPkg = list[i];
+                   // TODO compare with default package
+                   synchronized (mPackages) {
+                       PackageSetting ps = mSettings.mPackages.get(mountPkg);
+                       if (ps != null && (ps.pkgFlags & ApplicationInfo.FLAG_ON_SDCARD) != 0) {
+                           if (mediaStatus) {
+                               String pkgPath = getSdDir(mountPkg);
+                               if (pkgPath == null) {
+                                   continue;
+                               }
+                               pkgPath = ps.codePathString;
+                               int parseFlags = PackageParser.PARSE_CHATTY |
+                               PackageParser.PARSE_ON_SDCARD | mDefParseFlags;
+                               PackageParser pp = new PackageParser(pkgPath);
+                               pp.setSeparateProcesses(mSeparateProcesses);
+                               final PackageParser.Package pkg = pp.parsePackage(new File(pkgPath),
+                                       null, mMetrics, parseFlags);
+                               if (pkg == null) {
+                                   Log.w(TAG, "Failed to install package : " + mountPkg + " from sd card");
+                                   continue;
+                               }
+                               int scanMode = SCAN_MONITOR;
+                               // Scan the package
+                               if (scanPackageLI(pkg, parseFlags, scanMode) != null) {
+                                   // Grant permissions
+                                   grantPermissionsLP(pkg, false);
+                                   // Persist settings
+                                   mSettings.writeLP();
+                               } else {
+                                   Log.i(TAG, "Failed to install package: " + mountPkg + " from sdcard");
+                               }
+                           } else {
+                               // Delete package
+                               PackageRemovedInfo outInfo = new PackageRemovedInfo();
+                               boolean res = deletePackageLI(mountPkg, false, PackageManager.DONT_DELETE_DATA, outInfo);
+                               if (!res) {
+                                   Log.e(TAG, "Failed to delete pkg  from sdcard : " + mountPkg);
+                               }
+                           }
+                       }
+                   }
+               }
+           }
+       });
    }
 }

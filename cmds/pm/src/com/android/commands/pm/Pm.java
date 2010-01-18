@@ -92,6 +92,11 @@ public final class Pm {
             return;
         }
 
+        if ("mountsd".equals(op)) {
+            runMountSd();
+            return;
+        }
+
         if ("uninstall".equals(op)) {
             runUninstall();
             return;
@@ -637,6 +642,37 @@ public final class Pm {
         }
     }
 
+    private void runMountSd() {
+        String opt;
+        boolean mount = false;
+        while ((opt=nextOption()) != null) {
+            if (opt.equals("-m")) {
+                String mountStr = nextOptionData();
+                if (mountStr == null) {
+                    System.err.println("Error: no value specified for -m");
+                    showUsage();
+                    return;
+                }
+                if ("true".equalsIgnoreCase(mountStr)) {
+                    mount = true;
+                } else if ("false".equalsIgnoreCase(mountStr)) {
+                    mount = false;
+                } else {
+                    System.err.println("Error: no value specified for -m");
+                    showUsage();
+                    return;
+                }
+            }
+        }
+
+        try {
+            mPm.updateExternalMediaStatus(mount);
+        } catch (RemoteException e) {
+            System.err.println(e.toString());
+            System.err.println(PM_NOT_RUNNING_ERR);
+        }
+    }
+
     class PackageDeleteObserver extends IPackageDeleteObserver.Stub {
         boolean finished;
         boolean result;
@@ -826,6 +862,7 @@ public final class Pm {
         System.err.println("       pm path PACKAGE");
         System.err.println("       pm install [-l] [-r] [-t] [-i INSTALLER_PACKAGE_NAME] [-s] PATH");
         System.err.println("       pm uninstall [-k] PACKAGE");
+        System.err.println("       pm mountsd [-m true/false]");
         System.err.println("       pm enable PACKAGE_OR_COMPONENT");
         System.err.println("       pm disable PACKAGE_OR_COMPONENT");
         System.err.println("");
@@ -861,6 +898,9 @@ public final class Pm {
         System.err.println("The uninstall command removes a package from the system. Options:");
         System.err.println("  -k: keep the data and cache directories around.");
         System.err.println("after the package removal.");
+        System.err.println("");
+        System.err.println("The mountsd command simulates mounting/unmounting sdcard.Options:");
+        System.err.println("  -m: true or false.");
         System.err.println("");
         System.err.println("The enable and disable commands change the enabled state of");
         System.err.println("a given package or component (written as \"package/class\").");
