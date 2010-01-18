@@ -1057,6 +1057,11 @@ class MountService extends IMountService.Stub
         return getSecureContainerPath(id);
     }
 
+    public void unmountSecureContainer(String id) throws IllegalStateException {
+        String cmd = String.format("unmount_asec %s ", id);
+        mConnector.doCommand(cmd);
+    }
+
     public String getSecureContainerPath(String id) throws IllegalStateException {
         ArrayList<String> rsp = mConnector.doCommand("asec_path " + id);
 
