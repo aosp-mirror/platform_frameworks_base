@@ -31,6 +31,7 @@ import android.graphics.Paint.Style;
 import android.graphics.Region.Op;
 
 import java.awt.AlphaComposite;
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Composite;
 import java.awt.Graphics2D;
@@ -104,11 +105,22 @@ public class Canvas extends _Original_Canvas {
      * <p/>The object must be disposed ({@link Graphics2D#dispose()}) after being used.
      */
     private Graphics2D getNewGraphics(Paint paint, Graphics2D g) {
+
         // make new one
         g = (Graphics2D)g.create();
         g.setColor(new Color(paint.getColor()));
         int alpha = paint.getAlpha();
         float falpha = alpha / 255.f;
+
+        if (paint.getStyle() == Style.STROKE) {
+            g.setStroke(new BasicStroke(
+                    paint.getStrokeWidth(),
+                    paint.getStrokeCap().getJavaCap(),
+                    paint.getStrokeJoin().getJavaJoin(),
+                    paint.getStrokeMiter()
+                    // FIXME: add dash info.
+                    ));
+        }
 
         Xfermode xfermode = paint.getXfermode();
         if (xfermode instanceof PorterDuffXfermode) {
@@ -784,7 +796,7 @@ public class Canvas extends _Original_Canvas {
 
     private final void doDrawRect(int left, int top, int width, int height, Paint paint) {
         // get current graphisc
-        if (width != 0 && height != 0) {
+        if (width > 0 && height > 0) {
             Graphics2D g = getGraphics2d();
 
             g = getNewGraphics(paint, g);
@@ -811,7 +823,7 @@ public class Canvas extends _Original_Canvas {
     @Override
     public void drawRoundRect(RectF rect, float rx, float ry, Paint paint) {
         // get current graphisc
-        if (rect.width() != 0 && rect.height() != 0) {
+        if (rect.width() > 0 && rect.height() > 0) {
             Graphics2D g = getGraphics2d();
 
             g = getNewGraphics(paint, g);
