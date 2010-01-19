@@ -16,6 +16,8 @@
 
 #include "../include/ID3.h"
 
+#include <sys/stat.h>
+
 #include <ctype.h>
 #include <dirent.h>
 
@@ -108,6 +110,12 @@ void scanFile(const char *path) {
 }
 
 void scan(const char *path) {
+    struct stat st;
+    if (stat(path, &st) == 0 && S_ISREG(st.st_mode)) {
+        scanFile(path);
+        return;
+    }
+
     DIR *dir = opendir(path);
 
     if (dir == NULL) {

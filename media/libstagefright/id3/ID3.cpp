@@ -33,7 +33,11 @@ ID3::ID3(const sp<DataSource> &source)
       mSize(0),
       mFirstFrameOffset(0),
       mVersion(ID3_UNKNOWN) {
-    mIsValid = parse(source);
+    mIsValid = parseV2(source);
+
+    if (!mIsValid) {
+        mIsValid = parseV1(source);
+    }
 }
 
 ID3::~ID3() {
@@ -51,7 +55,7 @@ ID3::Version ID3::version() const {
     return mVersion;
 }
 
-bool ID3::parse(const sp<DataSource> &source) {
+bool ID3::parseV2(const sp<DataSource> &source) {
     struct id3_header {
         char id[3];
         uint8_t version_major;
@@ -119,7 +123,7 @@ bool ID3::parse(const sp<DataSource> &source) {
     }
 
     if (header.flags & 0x80) {
-        LOGI("removing unsynchronization");
+        LOGV("removing unsynchronization");
         removeUnsynchronization();
     }
 
@@ -128,12 +132,18 @@ bool ID3::parse(const sp<DataSource> &source) {
         // Version 2.3 has an optional extended header.
 
         if (mSize < 4) {
+            free(mData);
+            mData = NULL;
+
             return false;
         }
 
         size_t extendedHeaderSize = U32_AT(&mData[0]) + 4;
 
         if (extendedHeaderSize > mSize) {
+            free(mData);
+            mData = NULL;
+
             return false;
         }
 
@@ -147,6 +157,9 @@ bool ID3::parse(const sp<DataSource> &source) {
                 size_t paddingSize = U32_AT(&mData[6]);
 
                 if (mFirstFrameOffset + paddingSize > mSize) {
+                    free(mData);
+                    mData = NULL;
+
                     return false;
                 }
 
@@ -154,7 +167,7 @@ bool ID3::parse(const sp<DataSource> &source) {
             }
 
             if (extendedFlags & 0x8000) {
-                LOGI("have crc");
+                LOGV("have crc");
             }
         }
     }
@@ -221,9 +234,37 @@ void ID3::Iterator::getID(String8 *id) const {
 
     if (mParent.mVersion == ID3_V2_2) {
         id->setTo((const char *)&mParent.mData[mOffset], 3);
-    } else {
-        CHECK_EQ(mParent.mVersion, ID3_V2_3);
+    } else if (mParent.mVersion == ID3_V2_3) {
         id->setTo((const char *)&mParent.mData[mOffset], 4);
+    } else {
+        CHECK(mParent.mVersion == ID3_V1 || mParent.mVersion == ID3_V1_1);
+
+        switch (mOffset) {
+            case 3:
+                id->setTo("TT2");
+                break;
+            case 33:
+                id->setTo("TP1");
+                break;
+            case 63:
+                id->setTo("TAL");
+                break;
+            case 93:
+                id->setTo("TYE");
+                break;
+            case 97:
+                id->setTo("COM");
+                break;
+            case 126:
+                id->setTo("TRK");
+                break;
+            case 127:
+                id->setTo("TCO");
+                break;
+            default:
+                CHECK(!"should not be here.");
+                break;
+        }
     }
 }
 
@@ -273,6 +314,20 @@ void ID3::Iterator::getString(String8 *id) const {
         return;
     }
 
+    if (mParent.mVersion == ID3_V1 || mParent.mVersion == ID3_V1_1) {
+        if (mOffset == 126 || mOffset == 127) {
+            // Special treatment for the track number and genre.
+            char tmp[16];
+            sprintf(tmp, "%d", (int)*mFrameData);
+
+            id->setTo(tmp);
+            return;
+        }
+
+        id->setTo((const char *)mFrameData, mFrameSize);
+        return;
+    }
+
     size_t n = mFrameSize - getHeaderLength() - 1;
 
     if (*mFrameData == 0x00) {
@@ -299,9 +354,11 @@ const uint8_t *ID3::Iterator::getData(size_t *length) const {
 size_t ID3::Iterator::getHeaderLength() const {
     if (mParent.mVersion == ID3_V2_2) {
         return 6;
-    } else {
-        CHECK_EQ(mParent.mVersion, ID3_V2_3);
+    } else if (mParent.mVersion == ID3_V2_3) {
         return 10;
+    } else {
+        CHECK(mParent.mVersion == ID3_V1 || mParent.mVersion == ID3_V1_1);
+        return 0;
     }
 }
 
@@ -345,9 +402,7 @@ void ID3::Iterator::findFrame() {
             if (!strcmp(id, mID)) {
                 break;
             }
-        } else {
-            CHECK_EQ(mParent.mVersion, ID3_V2_3);
-
+        } else if (mParent.mVersion == ID3_V2_3) {
             if (mOffset + 10 > mParent.mSize) {
                 return;
             }
@@ -375,6 +430,52 @@ void ID3::Iterator::findFrame() {
             id[4] = '\0';
 
             if (!strcmp(id, mID)) {
+                break;
+            }
+        } else {
+            CHECK(mParent.mVersion == ID3_V1 || mParent.mVersion == ID3_V1_1);
+
+            if (mOffset >= mParent.mSize) {
+                return;
+            }
+
+            mFrameData = &mParent.mData[mOffset];
+
+            switch (mOffset) {
+                case 3:
+                case 33:
+                case 63:
+                    mFrameSize = 30;
+                    break;
+                case 93:
+                    mFrameSize = 4;
+                    break;
+                case 97:
+                    if (mParent.mVersion == ID3_V1) {
+                        mFrameSize = 30;
+                    } else {
+                        mFrameSize = 29;
+                    }
+                    break;
+                case 126:
+                    mFrameSize = 1;
+                    break;
+                case 127:
+                    mFrameSize = 1;
+                    break;
+                default:
+                    CHECK(!"Should not be here, invalid offset.");
+                    break;
+            }
+
+            if (!mID) {
+                break;
+            }
+
+            String8 id;
+            getID(&id);
+
+            if (id == mID) {
                 break;
             }
         }
@@ -461,5 +562,40 @@ ID3::getAlbumArt(size_t *length, String8 *mime) const {
     return NULL;
 }
 
+bool ID3::parseV1(const sp<DataSource> &source) {
+    const size_t V1_TAG_SIZE = 128;
+
+    off_t size;
+    if (source->getSize(&size) != OK || size < (off_t)V1_TAG_SIZE) {
+        return false;
+    }
+
+    mData = (uint8_t *)malloc(V1_TAG_SIZE);
+    if (source->readAt(size - V1_TAG_SIZE, mData, V1_TAG_SIZE)
+            != (ssize_t)V1_TAG_SIZE) {
+        free(mData);
+        mData = NULL;
+
+        return false;
+    }
+
+    if (memcmp("TAG", mData, 3)) {
+        free(mData);
+        mData = NULL;
+
+        return false;
+    }
+
+    mSize = V1_TAG_SIZE;
+    mFirstFrameOffset = 3;
+
+    if (mData[V1_TAG_SIZE - 3] != 0) {
+        mVersion = ID3_V1;
+    } else {
+        mVersion = ID3_V1_1;
+    }
+
+    return true;
+}
 
 }  // namespace android
