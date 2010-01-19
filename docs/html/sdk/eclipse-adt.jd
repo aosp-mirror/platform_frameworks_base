@@ -25,7 +25,7 @@ sdk.preview=0
 Development Tools (ADT), that is designed to give you a powerful,
 integrated environment in which to build Android applications. </p>
 
-<p>ADT extends the capabilites of Eclipse to let you quickly set up new Android
+<p>ADT extends the capabilities of Eclipse to let you quickly set up new Android
 projects, create an application UI, add components based on the Android
 Framework API, debug your applications using the Android SDK tools, and even
 export signed (or unsigned) APKs in order to distribute your application.</p>
@@ -77,7 +77,7 @@ download the ADT plugin and install it in your respective Eclipse environment.
     <li>Click <strong>Add Site...</strong> </li>
     <li>In the Add Site dialog that appears, enter this URL in the "Location" field:
       <pre style="margin-left:0">https://dl-ssl.google.com/android/eclipse/</pre>
-        <p>Note: If you have trouble aqcuiring the plugin, try using "http" in the Location URL,
+        <p>Note: If you have trouble acquiring the plugin, try using "http" in the Location URL,
         instead of "https" (https is preferred for security reasons).</p>   
       <p>Click <strong>OK</strong>.</p></li>
     <li>Back in the Available Software view, you should see the plugin listed by the URL,
@@ -94,13 +94,13 @@ download the ADT plugin and install it in your respective Eclipse environment.
 <!-- 3.5 steps -->
 <ol>
     <li>Start Eclipse, then select <strong>Help</strong> &gt; <strong>Install
-        New Softare</strong>. </li>
+        New Software</strong>. </li>
     <li>In the Available Software dialog, click <strong>Add...</strong>.</li>
     <li>In the Add Site dialog that appears, enter a name for the remote site
         (for example, "Android Plugin") in the "Name" field. 
         <p>In the "Location" field, enter this URL:</p>
         <pre>https://dl-ssl.google.com/android/eclipse/</pre>
-        <p>Note: If you have trouble aqcuiring the plugin, you can try
+        <p>Note: If you have trouble acquiring the plugin, you can try
            using "http" in the URL, instead of "https" (https is preferred for 
            security reasons).</p>
         <p>Click <strong>OK</strong>.</p>
