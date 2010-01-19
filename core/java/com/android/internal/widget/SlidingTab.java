@@ -148,20 +148,6 @@ public class SlidingTab extends ViewGroup {
         void onGrabbedStateChange(View v, int grabbedState);
     }
 
-    // TODO: For debugging; remove after glitches debugged.
-    @Override
-    protected void dispatchDraw(Canvas canvas) {
-        int orientation = getResources().getConfiguration().orientation;
-        if (mOrientation == HORIZONTAL && orientation != Configuration.ORIENTATION_PORTRAIT
-                || mOrientation == VERTICAL && orientation != Configuration.ORIENTATION_LANDSCAPE) {
-            // UBER HACK ALERT.  This is a workaround for a configuration race condition between
-            // orientation changed notification and the resize notification. This just prevents
-            // us from drawing under this circumstance, though the view will still be wrong.
-            return;
-        }
-        super.dispatchDraw(canvas);
-    }
-
     /**
      * Simple container class for all things pertinent to a slider.
      * A slider consists of 3 Views:
@@ -436,7 +422,7 @@ public class SlidingTab extends ViewGroup {
         /**
          * Start animating the slider. Note we need two animations since an Animator
          * keeps internal state of the invalidation region which is just the view being animated.
-         * 
+         *
          * @param anim1
          * @param anim2
          */
@@ -674,7 +660,7 @@ public class SlidingTab extends ViewGroup {
                     resetView();
                 }
                 anim.setAnimationListener(mAnimationDoneListener);
-                
+
                 /* Animation can be the same for these since the animation just holds */
                 mLeftSlider.startAnimation(anim, anim);
                 mRightSlider.startAnimation(anim, anim);
