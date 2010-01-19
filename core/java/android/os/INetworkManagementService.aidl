@@ -102,4 +102,25 @@ interface INetworkManagementService
      *  Disables Network Address Translation between two interfaces.
      */
     void disableNat(String internalInterface, String externalInterface);
+
+    /**
+     ** PPPD
+     **/
+
+    /**
+     * Returns the list of currently known TTY devices on the system
+     */
+    String[] listTtys();
+
+    /**
+     * Attaches a PPP server daemon to the specified TTY with the specified
+     * local/remote addresses.
+     */
+    void attachPppd(String tty, String localAddr, String remoteAddr);
+
+    /**
+     * Detaches a PPP server daemon from the specified TTY.
+     */
+    void detachPppd(String tty);
+
 }
