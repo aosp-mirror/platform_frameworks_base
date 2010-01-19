@@ -586,14 +586,14 @@ status_t Harness::testSeek(
 
         double r = uniform_rand();
 
-        if (r < 0.5) {
+        if (i > 0 && r < 0.5) {
             // 50% chance of just continuing to decode from last position.
 
             requestedSeekTimeUs = -1;
 
             LOGI("requesting linear read");
         } else {
-            if (r < 0.55) {
+            if (i > 0 && r < 0.55) {
                 // 5% chance of seeking beyond end of stream.
 
                 requestedSeekTimeUs = durationUs;
