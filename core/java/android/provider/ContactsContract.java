@@ -1265,9 +1265,6 @@ public final class ContactsContract {
      * </dd>
      * </dl>
      * <h2>Columns</h2>
-     * TODO: include {@link #DISPLAY_NAME_PRIMARY}, {@link #DISPLAY_NAME_ALTERNATIVE},
-     * {@link #DISPLAY_NAME_SOURCE}, {@link #PHONETIC_NAME}, {@link #PHONETIC_NAME_STYLE},
-     * {@link #SORT_KEY_PRIMARY}, {@link #SORT_KEY_ALTERNATIVE}?
      *
      * <table class="jd-sumtable">
      * <tr>
