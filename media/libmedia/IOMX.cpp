@@ -12,6 +12,7 @@ namespace android {
 
 enum {
     CONNECT = IBinder::FIRST_CALL_TRANSACTION,
+    LIVES_LOCALLY,
     LIST_NODES,
     ALLOCATE_NODE,
     FREE_NODE,
@@ -73,6 +74,15 @@ class BpOMX : public BpInterface<IOMX> {
 public:
     BpOMX(const sp<IBinder> &impl)
         : BpInterface<IOMX>(impl) {
+    }
+
+    virtual bool livesLocally(pid_t pid) {
+        Parcel data, reply;
+        data.writeInterfaceToken(IOMX::getInterfaceDescriptor());
+        data.writeInt32(pid);
+        remote()->transact(LIVES_LOCALLY, data, &reply);
+
+        return reply.readInt32() != 0;
     }
 
     virtual status_t listNodes(List<ComponentInfo> *list) {
@@ -369,6 +379,14 @@ IMPLEMENT_META_INTERFACE(OMX, "android.hardware.IOMX");
 status_t BnOMX::onTransact(
     uint32_t code, const Parcel &data, Parcel *reply, uint32_t flags) {
     switch (code) {
+        case LIVES_LOCALLY:
+        {
+            CHECK_INTERFACE(IOMX, data, reply);
+            reply->writeInt32(livesLocally((pid_t)data.readInt32()));
+
+            return OK;
+        }
+
         case LIST_NODES:
         {
             CHECK_INTERFACE(IOMX, data, reply);
@@ -408,7 +426,7 @@ status_t BnOMX::onTransact(
             if (err == OK) {
                 reply->writeIntPtr((intptr_t)node);
             }
-                
+
             return NO_ERROR;
         }
 
@@ -419,7 +437,7 @@ status_t BnOMX::onTransact(
             node_id node = (void*)data.readIntPtr();
 
             reply->writeInt32(freeNode(node));
-                
+
             return NO_ERROR;
         }
 
@@ -631,7 +649,7 @@ status_t BnOMX::onTransact(
 
             node_id node = (void*)data.readIntPtr();
             const char *parameter_name = data.readCString();
-            
+
             OMX_INDEXTYPE index;
             status_t err = getExtensionIndex(node, parameter_name, &index);
 

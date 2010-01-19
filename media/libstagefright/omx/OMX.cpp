@@ -164,6 +164,10 @@ void OMX::binderDied(const wp<IBinder> &the_late_who) {
     instance->onObserverDied(mMaster);
 }
 
+bool OMX::livesLocally(pid_t pid) {
+    return pid == getpid();
+}
+
 status_t OMX::listNodes(List<ComponentInfo> *list) {
     list->clear();
 

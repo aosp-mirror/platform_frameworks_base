@@ -31,6 +31,8 @@ class OMX : public BnOMX,
 public:
     OMX();
 
+    virtual bool livesLocally(pid_t pid);
+
     virtual status_t listNodes(List<ComponentInfo> *list);
 
     virtual status_t allocateNode(

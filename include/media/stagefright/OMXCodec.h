@@ -109,6 +109,7 @@ private:
     };
 
     sp<IOMX> mOMX;
+    bool mOMXLivesLocally;
     IOMX::node_id mNode;
     uint32_t mQuirks;
     bool mIsEncoder;
