@@ -5867,7 +5867,7 @@ public class WebView extends AbsoluteLayout
                         // updates is a C++ pointer to a Vector of
                         // AnimationValues that we apply to the layers.
                         // The Vector is deallocated in nativeUpdateLayers().
-                        nativeUpdateLayers(mRootLayer, updates);
+                        nativeUpdateLayers(updates);
                     }
                     invalidate();
                     break;
@@ -6618,7 +6618,7 @@ public class WebView extends AbsoluteLayout
     private native void     nativeDestroyLayer(int layer);
     private native int      nativeEvaluateLayersAnimations(int layer);
     private native boolean  nativeLayersHaveAnimations(int layer);
-    private native void     nativeUpdateLayers(int layer, int updates);
+    private native void     nativeUpdateLayers(int updates);
     private native void     nativeDrawLayers(int layer,
                                              int scrollX, int scrollY,
                                              int width, int height,
