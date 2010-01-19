@@ -10276,7 +10276,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                                 sInfo.applicationInfo.uid, sInfo.packageName,
                                 sInfo.name);
                     }
-                    r = new ServiceRecord(ss, name, filter, sInfo, res);
+                    r = new ServiceRecord(this, ss, name, filter, sInfo, res);
                     res.setService(r);
                     mServices.put(name, r);
                     mServicesByIntent.put(filter, r);
