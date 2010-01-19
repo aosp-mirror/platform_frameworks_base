@@ -5194,8 +5194,9 @@ public class WebView extends AbsoluteLayout
                         mPictureListener.onNewPicture(WebView.this, capturePicture());
                     }
                     if (useWideViewport) {
-                        mZoomOverviewWidth = Math.max(draw.mMinPrefWidth,
-                                draw.mViewPoint.x);
+                        mZoomOverviewWidth = Math.max(
+                                (int) (viewWidth / mDefaultScale), Math.max(
+                                        draw.mMinPrefWidth, draw.mViewPoint.x));
                     }
                     if (!mMinZoomScaleFixed) {
                         mMinZoomScale = (float) viewWidth / mZoomOverviewWidth;
