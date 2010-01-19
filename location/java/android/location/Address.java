@@ -500,7 +500,10 @@ public class Address implements Parcelable {
             a.mAdminArea = in.readString();
             a.mSubAdminArea = in.readString();
             a.mLocality = in.readString();
+            a.mSubLocality = in.readString();
             a.mThoroughfare = in.readString();
+            a.mSubThoroughfare = in.readString();
+            a.mPremises = in.readString();
             a.mPostalCode = in.readString();
             a.mCountryCode = in.readString();
             a.mCountryName = in.readString();
@@ -544,7 +547,10 @@ public class Address implements Parcelable {
         parcel.writeString(mAdminArea);
         parcel.writeString(mSubAdminArea);
         parcel.writeString(mLocality);
+        parcel.writeString(mSubLocality);
         parcel.writeString(mThoroughfare);
+        parcel.writeString(mSubThoroughfare);
+        parcel.writeString(mPremises);
         parcel.writeString(mPostalCode);
         parcel.writeString(mCountryCode);
         parcel.writeString(mCountryName);
