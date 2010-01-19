@@ -135,50 +135,6 @@ void OMX::CallbackDispatcher::threadEntry() {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-class BufferMeta {
-public:
-    BufferMeta(OMX *owner, const sp<IMemory> &mem, bool is_backup = false)
-        : mOwner(owner),
-          mMem(mem),
-          mIsBackup(is_backup) {
-    }
-
-    BufferMeta(OMX *owner, size_t size)
-        : mOwner(owner),
-          mSize(size),
-          mIsBackup(false) {
-    }
-
-    void CopyFromOMX(const OMX_BUFFERHEADERTYPE *header) {
-        if (!mIsBackup) {
-            return;
-        }
-
-        memcpy((OMX_U8 *)mMem->pointer() + header->nOffset,
-               header->pBuffer + header->nOffset,
-               header->nFilledLen);
-    }
-
-    void CopyToOMX(const OMX_BUFFERHEADERTYPE *header) {
-        if (!mIsBackup) {
-            return;
-        }
-
-        memcpy(header->pBuffer + header->nOffset,
-               (const OMX_U8 *)mMem->pointer() + header->nOffset,
-               header->nFilledLen);
-    }
-
-private:
-    OMX *mOwner;
-    sp<IMemory> mMem;
-    size_t mSize;
-    bool mIsBackup;
-
-    BufferMeta(const BufferMeta &);
-    BufferMeta &operator=(const BufferMeta &);
-};
-
 OMX::OMX()
     : mMaster(new OMXMaster),
       mDispatcher(new CallbackDispatcher(this)),
