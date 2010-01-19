@@ -104,22 +104,35 @@ public class Canvas extends _Original_Canvas {
      * Creates a new {@link Graphics2D} based on the {@link Paint} parameters.
      * <p/>The object must be disposed ({@link Graphics2D#dispose()}) after being used.
      */
-    private Graphics2D getNewGraphics(Paint paint, Graphics2D g) {
-
+    private Graphics2D getCustomGraphics(Paint paint) {
         // make new one
+        Graphics2D g = getGraphics2d();
         g = (Graphics2D)g.create();
+
+        // configure it
         g.setColor(new Color(paint.getColor()));
         int alpha = paint.getAlpha();
         float falpha = alpha / 255.f;
 
-        if (paint.getStyle() == Style.STROKE) {
-            g.setStroke(new BasicStroke(
-                    paint.getStrokeWidth(),
-                    paint.getStrokeCap().getJavaCap(),
-                    paint.getStrokeJoin().getJavaJoin(),
-                    paint.getStrokeMiter()
-                    // FIXME: add dash info.
-                    ));
+        Style style = paint.getStyle();
+        if (style == Style.STROKE || style == Style.FILL_AND_STROKE) {
+            PathEffect e = paint.getPathEffect();
+            if (e instanceof DashPathEffect) {
+                DashPathEffect dpe = (DashPathEffect)e;
+                g.setStroke(new BasicStroke(
+                        paint.getStrokeWidth(),
+                        paint.getStrokeCap().getJavaCap(),
+                        paint.getStrokeJoin().getJavaJoin(),
+                        paint.getStrokeMiter(),
+                        dpe.getIntervals(),
+                        dpe.getPhase()));
+            } else {
+                g.setStroke(new BasicStroke(
+                        paint.getStrokeWidth(),
+                        paint.getStrokeCap().getJavaCap(),
+                        paint.getStrokeJoin().getJavaJoin(),
+                        paint.getStrokeMiter()));
+            }
         }
 
         Xfermode xfermode = paint.getXfermode();
@@ -795,11 +808,9 @@ public class Canvas extends _Original_Canvas {
     }
 
     private final void doDrawRect(int left, int top, int width, int height, Paint paint) {
-        // get current graphisc
         if (width > 0 && height > 0) {
-            Graphics2D g = getGraphics2d();
-
-            g = getNewGraphics(paint, g);
+            // get a Graphics2D object configured with the drawing parameters.
+            Graphics2D g = getCustomGraphics(paint);
 
             Style style = paint.getStyle();
 
@@ -822,11 +833,9 @@ public class Canvas extends _Original_Canvas {
      */
     @Override
     public void drawRoundRect(RectF rect, float rx, float ry, Paint paint) {
-        // get current graphisc
         if (rect.width() > 0 && rect.height() > 0) {
-            Graphics2D g = getGraphics2d();
-
-            g = getNewGraphics(paint, g);
+            // get a Graphics2D object configured with the drawing parameters.
+            Graphics2D g = getCustomGraphics(paint);
 
             Style style = paint.getStyle();
 
@@ -856,10 +865,8 @@ public class Canvas extends _Original_Canvas {
      */
     @Override
     public void drawLine(float startX, float startY, float stopX, float stopY, Paint paint) {
-        // get current graphisc
-        Graphics2D g = getGraphics2d();
-
-        g = getNewGraphics(paint, g);
+        // get a Graphics2D object configured with the drawing parameters.
+        Graphics2D g = getCustomGraphics(paint);
 
         g.drawLine((int)startX, (int)startY, (int)stopX, (int)stopY);
 
@@ -872,10 +879,8 @@ public class Canvas extends _Original_Canvas {
      */
     @Override
     public void drawLines(float[] pts, int offset, int count, Paint paint) {
-        // get current graphisc
-        Graphics2D g = getGraphics2d();
-
-        g = getNewGraphics(paint, g);
+        // get a Graphics2D object configured with the drawing parameters.
+        Graphics2D g = getCustomGraphics(paint);
 
         for (int i = 0 ; i < count ; i += 4) {
             g.drawLine((int)pts[i + offset], (int)pts[i + offset + 1],
@@ -899,10 +904,8 @@ public class Canvas extends _Original_Canvas {
      */
     @Override
     public void drawCircle(float cx, float cy, float radius, Paint paint) {
-        // get current graphisc
-        Graphics2D g = getGraphics2d();
-
-        g = getNewGraphics(paint, g);
+        // get a Graphics2D object configured with the drawing parameters.
+        Graphics2D g = getCustomGraphics(paint);
 
         Style style = paint.getStyle();
 
@@ -926,10 +929,8 @@ public class Canvas extends _Original_Canvas {
      */
     @Override
     public void drawOval(RectF oval, Paint paint) {
-        // get current graphics
-        Graphics2D g = getGraphics2d();
-
-        g = getNewGraphics(paint, g);
+        // get a Graphics2D object configured with the drawing parameters.
+        Graphics2D g = getCustomGraphics(paint);
 
         Style style = paint.getStyle();
 
@@ -951,10 +952,8 @@ public class Canvas extends _Original_Canvas {
      */
     @Override
     public void drawPath(Path path, Paint paint) {
-        // get current graphics
-        Graphics2D g = getGraphics2d();
-
-        g = getNewGraphics(paint, g);
+        // get a Graphics2D object configured with the drawing parameters.
+        Graphics2D g = getCustomGraphics(paint);
 
         Style style = paint.getStyle();
 
