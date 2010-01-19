@@ -17,14 +17,16 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.android.dumprendertree">
     <application android:name="HTMLHostApp">
         <uses-library android:name="android.test.runner" />
-        <activity android:name="Menu" android:label="1 Dump Render Tree">
+        <activity android:name="Menu" android:label="Dump Render Tree"
+          android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.TEST" />
             </intent-filter>
         </activity>
-        <activity android:name="TestShellActivity" android:launchMode="singleTop" />
-        <activity android:name="ReliabilityTestActivity" />
+        <activity android:name="TestShellActivity" android:launchMode="singleTop"
+          android:screenOrientation="portrait"/>
+        <activity android:name="ReliabilityTestActivity" android:screenOrientation="portrait"/>
     </application>
 
     <instrumentation android:name=".LayoutTestsAutoRunner"
