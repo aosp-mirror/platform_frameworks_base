@@ -335,7 +335,8 @@ void ID3::Iterator::getString(String8 *id) const {
         convertISO8859ToString8(mFrameData + 1, n, id);
     } else {
         // UCS-2
-        id->setTo((const char16_t *)(mFrameData + 1), n);
+        // API wants number of characters, not number of bytes...
+        id->setTo((const char16_t *)(mFrameData + 1), n / 2);
     }
 }
 
