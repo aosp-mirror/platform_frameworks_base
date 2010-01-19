@@ -1838,8 +1838,10 @@ public class SearchManager
      *
      * TODO: Doing this every time we start global search is inefficient. Will fix that once
      * we have settled on the right mechanism for finding the global search activity.
+     *
+     * @hide
      */
-    private ComponentName getGlobalSearchActivity() {
+    public ComponentName getGlobalSearchActivity() {
         Intent intent = new Intent(INTENT_ACTION_GLOBAL_SEARCH);
         PackageManager pm = mContext.getPackageManager();
         List<ResolveInfo> activities =

@@ -449,7 +449,7 @@ public class AccountManagerService
         return db.insert(TABLE_EXTRAS, EXTRAS_KEY, values);
     }
 
-    public void testHasFeatures(IAccountManagerResponse response,
+    public void hasFeatures(IAccountManagerResponse response,
             Account account, String[] features) {
         checkReadAccountsPermission();
         long identityToken = clearCallingIdentity();
@@ -501,7 +501,7 @@ public class AccountManagerService
         }
 
         protected String toDebugString(long now) {
-            return super.toDebugString(now) + ", testHasFeatures"
+            return super.toDebugString(now) + ", hasFeatures"
                     + ", " + mAccount
                     + ", " + (mFeatures != null ? TextUtils.join(",", mFeatures) : null);
         }

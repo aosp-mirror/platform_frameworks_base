@@ -201,6 +201,7 @@ class ServerThread extends Thread {
             Log.e("System", "Failure starting core service", e);
         }
 
+        DevicePolicyManagerService devicePolicy = null;
         StatusBarService statusBar = null;
         InputMethodManagerService imm = null;
         AppWidgetService appWidget = null;
@@ -209,16 +210,25 @@ class ServerThread extends Thread {
 
         if (factoryTest != SystemServer.FACTORY_TEST_LOW_LEVEL) {
             try {
+                Log.i(TAG, "Device Policy");
+                devicePolicy = new DevicePolicyManagerService(context);
+                ServiceManager.addService(Context.DEVICE_POLICY_SERVICE, devicePolicy);
+            } catch (Throwable e) {
+                Log.e(TAG, "Failure starting DevicePolicyService", e);
+            }
+
+            try {
                 Log.i(TAG, "Status Bar");
                 statusBar = new StatusBarService(context);
-                ServiceManager.addService("statusbar", statusBar);
+                ServiceManager.addService(Context.STATUS_BAR_SERVICE, statusBar);
             } catch (Throwable e) {
                 Log.e(TAG, "Failure starting StatusBarService", e);
             }
 
             try {
                 Log.i(TAG, "Clipboard Service");
-                ServiceManager.addService("clipboard", new ClipboardService(context));
+                ServiceManager.addService(Context.CLIPBOARD_SERVICE,
+                        new ClipboardService(context));
             } catch (Throwable e) {
                 Log.e(TAG, "Failure starting Clipboard Service", e);
             }
@@ -280,14 +290,16 @@ class ServerThread extends Thread {
 
             try {
                 Log.i(TAG, "Location Manager");
-                ServiceManager.addService(Context.LOCATION_SERVICE, new LocationManagerService(context));
+                ServiceManager.addService(Context.LOCATION_SERVICE,
+                        new LocationManagerService(context));
             } catch (Throwable e) {
                 Log.e(TAG, "Failure starting Location Manager", e);
             }
 
             try {
                 Log.i(TAG, "Search Service");
-                ServiceManager.addService( Context.SEARCH_SERVICE, new SearchManagerService(context) );
+                ServiceManager.addService(Context.SEARCH_SERVICE,
+                        new SearchManagerService(context));
             } catch (Throwable e) {
                 Log.e(TAG, "Failure starting Search Service", e);
             }
@@ -351,7 +363,8 @@ class ServerThread extends Thread {
 
             try {
                 Log.i(TAG, "Backup Service");
-                ServiceManager.addService(Context.BACKUP_SERVICE, new BackupManagerService(context));
+                ServiceManager.addService(Context.BACKUP_SERVICE,
+                        new BackupManagerService(context));
             } catch (Throwable e) {
                 Log.e(TAG, "Failure starting Backup Service", e);
             }
@@ -390,6 +403,10 @@ class ServerThread extends Thread {
         }
 
         // It is now time to start up the app processes...
+
+        if (devicePolicy != null) {
+            devicePolicy.systemReady();
+        }
 
         if (notification != null) {
             notification.systemReady();

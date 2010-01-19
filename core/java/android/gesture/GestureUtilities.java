@@ -27,7 +27,10 @@ import java.io.IOException;
 import static android.gesture.GestureConstants.*;
 
 final class GestureUtilities {
-
+  
+    private static final float SCALING_THRESHOLD = 0.26f;
+    private static final float NONUNIFORM_SCALE = (float) Math.sqrt(2);
+    
     private GestureUtilities() {
     }
 
@@ -45,64 +48,87 @@ final class GestureUtilities {
             }
         }
     }
-
+    
     static float[] spatialSampling(Gesture gesture, int sampleMatrixDimension) {
+        return spatialSampling(gesture, sampleMatrixDimension, false);
+    }
+
+    static float[] spatialSampling(Gesture gesture, int sampleMatrixDimension, 
+            boolean uniformScaling) {
         final float targetPatchSize = sampleMatrixDimension - 1; // edge inclusive
         float[] sample = new float[sampleMatrixDimension * sampleMatrixDimension];
         Arrays.fill(sample, 0);
   
         RectF rect = gesture.getBoundingBox();
-        float sx = targetPatchSize / rect.width();
-        float sy = targetPatchSize / rect.height();
-        float scale = sx < sy ? sx : sy;
-  
+        final float gestureWidth = rect.width();
+        final float gestureHeight = rect.height();
+        float sx = targetPatchSize / gestureWidth;
+        float sy = targetPatchSize / gestureHeight;
+        
+        if (uniformScaling) {
+            float scale = sx < sy ? sx : sy;
+            sx = scale;
+            sy = scale;
+        } else {
+
+            float aspectRatio = gestureWidth / gestureHeight;
+            if (aspectRatio > 1) {
+                aspectRatio = 1 / aspectRatio;
+            }
+            if (aspectRatio < SCALING_THRESHOLD) {
+                float scale = sx < sy ? sx : sy;
+                sx = scale;
+                sy = scale;
+            } else {
+                if (sx > sy) {
+                    float scale = sy * NONUNIFORM_SCALE;
+                    if (scale < sx) {
+                        sx = scale;
+                    }
+                } else {
+                    float scale = sx * NONUNIFORM_SCALE; 
+                    if (scale < sy) {
+                        sy = scale;
+                    }
+                }
+            }
+        }
         float preDx = -rect.centerX();
         float preDy = -rect.centerY();
         float postDx = targetPatchSize / 2;
         float postDy = targetPatchSize / 2;
-  
         final ArrayList<GestureStroke> strokes = gesture.getStrokes();
         final int count = strokes.size();
-  
         int size;
         float xpos;
         float ypos;
-  
         for (int index = 0; index < count; index++) {
             final GestureStroke stroke = strokes.get(index);
             float[] strokepoints = stroke.points;
             size = strokepoints.length;
-  
             final float[] pts = new float[size];
-             
             for (int i = 0; i < size; i += 2) {
-                pts[i] = (strokepoints[i] + preDx) * scale + postDx;
-                pts[i + 1] = (strokepoints[i + 1] + preDy) * scale + postDy;
+                pts[i] = (strokepoints[i] + preDx) * sx + postDx;
+                pts[i + 1] = (strokepoints[i + 1] + preDy) * sy + postDy;
             }
-        
             float segmentEndX = -1;
             float segmentEndY = -1;
-            
             for (int i = 0; i < size; i += 2) {
-                
                 float segmentStartX = pts[i] < 0 ? 0 : pts[i];
                 float segmentStartY = pts[i + 1] < 0 ? 0 : pts[i + 1];
-                
                 if (segmentStartX > targetPatchSize) {
                     segmentStartX = targetPatchSize;
                 } 
-                
                 if (segmentStartY > targetPatchSize) {
                     segmentStartY = targetPatchSize;
                 }
-                 
                 plot(segmentStartX, segmentStartY, sample, sampleMatrixDimension);
-                
                 if (segmentEndX != -1) {
                     // evaluate horizontally
                     if (segmentEndX > segmentStartX) {
                         xpos = (float) Math.ceil(segmentStartX);
-                        float slope = (segmentEndY - segmentStartY) / (segmentEndX - segmentStartX);
+                        float slope = (segmentEndY - segmentStartY) / 
+                                      (segmentEndX - segmentStartX);
                         while (xpos < segmentEndX) {
                             ypos = slope * (xpos - segmentStartX) + segmentStartY;
                             plot(xpos, ypos, sample, sampleMatrixDimension); 
@@ -110,18 +136,19 @@ final class GestureUtilities {
                         }
                     } else if (segmentEndX < segmentStartX){
                         xpos = (float) Math.ceil(segmentEndX);
-                        float slope = (segmentEndY - segmentStartY) / (segmentEndX - segmentStartX);
+                        float slope = (segmentEndY - segmentStartY) / 
+                                      (segmentEndX - segmentStartX);
                         while (xpos < segmentStartX) {
                             ypos = slope * (xpos - segmentStartX) + segmentStartY;
                             plot(xpos, ypos, sample, sampleMatrixDimension); 
                             xpos++;
                         }
                     }
-  
                     // evaluating vertically
                     if (segmentEndY > segmentStartY) {
                         ypos = (float) Math.ceil(segmentStartY);
-                        float invertSlope = (segmentEndX - segmentStartX) / (segmentEndY - segmentStartY);
+                        float invertSlope = (segmentEndX - segmentStartX) / 
+                                            (segmentEndY - segmentStartY);
                         while (ypos < segmentEndY) {
                             xpos = invertSlope * (ypos - segmentStartY) + segmentStartX;
                             plot(xpos, ypos, sample, sampleMatrixDimension); 
@@ -129,7 +156,8 @@ final class GestureUtilities {
                         }
                     } else if (segmentEndY < segmentStartY) {
                         ypos = (float) Math.ceil(segmentEndY);
-                        float invertSlope = (segmentEndX - segmentStartX) / (segmentEndY - segmentStartY);
+                        float invertSlope = (segmentEndX - segmentStartX) / 
+                                            (segmentEndY - segmentStartY);
                         while (ypos < segmentStartY) {
                             xpos = invertSlope * (ypos - segmentStartY) + segmentStartX; 
                             plot(xpos, ypos, sample, sampleMatrixDimension); 
@@ -137,13 +165,10 @@ final class GestureUtilities {
                         }
                     }
                 } 
-                
                 segmentEndX = segmentStartX;
                 segmentEndY = segmentStartY;
             }
         }
-  
-  
         return sample;
     }
   
@@ -162,40 +187,44 @@ final class GestureUtilities {
                 sample[index] = 1;
             }
         } else {
-            double topLeft = Math.sqrt(Math.pow(xFloor - x, 2) + Math.pow(yFloor - y, 2));
-            double topRight = Math.sqrt(Math.pow(xCeiling - x, 2) + Math.pow(yFloor - y, 2));
-            double btmLeft = Math.sqrt(Math.pow(xFloor - x, 2) + Math.pow(yCeiling - y, 2));
-            double btmRight = Math.sqrt(Math.pow(xCeiling - x, 2) + Math.pow(yCeiling - y, 2));
-            double sum = topLeft + topRight + btmLeft + btmRight;
+            final double xFloorSq = Math.pow(xFloor - x, 2);
+            final double yFloorSq = Math.pow(yFloor - y, 2);
+            final double xCeilingSq = Math.pow(xCeiling - x, 2);
+            final double yCeilingSq = Math.pow(yCeiling - y, 2);
+            float topLeft = (float) Math.sqrt(xFloorSq + yFloorSq);
+            float topRight = (float) Math.sqrt(xCeilingSq + yFloorSq);
+            float btmLeft = (float) Math.sqrt(xFloorSq + yCeilingSq);
+            float btmRight = (float) Math.sqrt(xCeilingSq + yCeilingSq);
+            float sum = topLeft + topRight + btmLeft + btmRight;
             
-            double value = topLeft / sum;
+            float value = topLeft / sum;
             int index = yFloor * sampleSize + xFloor;
             if (value > sample[index]){
-                sample[index] = (float) value;
+                sample[index] = value;
             }
             
             value = topRight / sum;
             index = yFloor * sampleSize + xCeiling;
             if (value > sample[index]){
-                sample[index] = (float) value;
+                sample[index] = value;
             }
             
             value = btmLeft / sum;
             index = yCeiling * sampleSize + xFloor;
             if (value > sample[index]){
-                sample[index] = (float) value;
+                sample[index] = value;
             }
             
             value = btmRight / sum;
             index = yCeiling * sampleSize + xCeiling;
             if (value > sample[index]){
-                sample[index] = (float) value;
+                sample[index] = value;
             }
         }
     }
-    
+
     /**
-     * Featurize a stroke into a vector of a given number of elements
+     * Featurizes a stroke into a vector of a given number of elements
      * 
      * @param stroke
      * @param sampleSize

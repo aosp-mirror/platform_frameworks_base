@@ -127,6 +127,7 @@ class MountService extends IMountService.Stub
 
     private boolean mUmsConnected = false;
     private boolean mUmsEnabled = false;
+    private boolean mUmsEnabling = false;
 
     private String  mLegacyState = Environment.MEDIA_REMOVED;
 
@@ -332,13 +333,16 @@ class MountService extends IMountService.Stub
             String vp = Environment.getExternalStorageDirectory().getPath();
             String vs = getVolumeState(vp);
 
+            mUmsEnabling = enable;
             if (enable && vs.equals(Environment.MEDIA_MOUNTED)) {
                 unmountVolume(vp);
+                mUmsEnabling = false;
                 updateUsbMassStorageNotification(true, false);
             }
 
             setShareMethodEnabled(vp, "ums", enable);
             mUmsEnabled = enable;
+            mUmsEnabling = false;
             if (!enable) {
                 mountVolume(vp);
                 if (mPromptUms) {
@@ -594,10 +598,14 @@ class MountService extends IMountService.Stub
         } else if (newState == VolumeState.NoMedia) {
             // NoMedia is handled via Disk Remove events
         } else if (newState == VolumeState.Idle) {
-            // Don't notify if we're in BAD_REMOVAL, NOFS, or UNMOUNTABLE
+            /*
+             * Don't notify if we're in BAD_REMOVAL, NOFS, UNMOUNTABLE, or
+             * if we're in the process of enabling UMS
+             */
             if (!vs.equals(Environment.MEDIA_BAD_REMOVAL) &&
                 !vs.equals(Environment.MEDIA_NOFS) &&
-                !vs.equals(Environment.MEDIA_UNMOUNTABLE)) {
+                !vs.equals(Environment.MEDIA_UNMOUNTABLE) &&
+                !mUmsEnabling) {
                 notifyMediaUnmounted(mountPoint);
             }
         } else if (newState == VolumeState.Pending) {
@@ -1047,6 +1055,11 @@ class MountService extends IMountService.Stub
                                    id, key, ownerUid);
         mConnector.doCommand(cmd);
         return getSecureContainerPath(id);
+    }
+
+    public void unmountSecureContainer(String id) throws IllegalStateException {
+        String cmd = String.format("unmount_asec %s ", id);
+        mConnector.doCommand(cmd);
     }
 
     public String getSecureContainerPath(String id) throws IllegalStateException {

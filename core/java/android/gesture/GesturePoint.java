@@ -20,7 +20,7 @@ import java.io.DataInputStream;
 import java.io.IOException;
 
 /**
- * A timed point of a gesture stroke
+ * A timed point of a gesture stroke. Multiple points form a stroke.
  */
 
 public class GesturePoint {
@@ -42,5 +42,10 @@ public class GesturePoint {
         // Read timestamp
         final long timeStamp = in.readLong();
         return new GesturePoint(x, y, timeStamp);
+    }
+    
+    @Override
+    public Object clone() {
+        return new GesturePoint(x, y, timestamp);
     }
 }

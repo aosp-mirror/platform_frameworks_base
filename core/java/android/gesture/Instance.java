@@ -84,7 +84,7 @@ class Instance {
     }
 
     private static float[] spatialSampler(Gesture gesture) {
-        return GestureUtilities.spatialSampling(gesture, PATCH_SAMPLE_SIZE);
+        return GestureUtilities.spatialSampling(gesture, PATCH_SAMPLE_SIZE, false);
     }
 
     private static float[] temporalSampler(int orientationType, Gesture gesture) {

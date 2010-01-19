@@ -927,20 +927,26 @@
         android:description="@string/permdesc_readInputState"
         android:protectionLevel="signature" />
 
-    <!-- Must be required by input method services, to ensure that only the
-         system can bind to them. -->
+    <!-- Must be required by an {@link android.inputmethodservice.InputMethodService},
+         to ensure that only the system can bind to it. -->
     <permission android:name="android.permission.BIND_INPUT_METHOD"
         android:label="@string/permlab_bindInputMethod"
         android:description="@string/permdesc_bindInputMethod"
         android:protectionLevel="signature" />
 
-    <!-- Must be required by wallpaper services, to ensure that only the
-         system can bind to them.
-         @hide Live Wallpaper -->
+    <!-- Must be required by a {@link android.service.wallpaper.WallpaperService},
+         to ensure that only the system can bind to it. -->
     <permission android:name="android.permission.BIND_WALLPAPER"
         android:label="@string/permlab_bindWallpaper"
         android:description="@string/permdesc_bindWallpaper"
         android:protectionLevel="signatureOrSystem" />
+
+    <!-- Must be required by device administration receiver, to ensure that only the
+         system can interact with it. -->
+    <permission android:name="android.permission.BIND_DEVICE_ADMIN"
+        android:label="@string/permlab_bindDeviceAdmin"
+        android:description="@string/permdesc_bindDeviceAdmin"
+        android:protectionLevel="signature" />
 
     <!-- Allows low-level access to setting the orientation (actually
          rotation) of the screen.  Not for use by normal applications. -->

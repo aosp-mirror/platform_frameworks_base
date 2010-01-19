@@ -8381,7 +8381,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                         ActivityInfo ai = ris.get(i).activityInfo;
                         intent.setComponent(new ComponentName(ai.packageName, ai.name));
                         IIntentReceiver finisher = null;
-                        if (i == 0) {
+                        if (i == ris.size()-1) {
                             finisher = new IIntentReceiver.Stub() {
                                 public void performReceive(Intent intent, int resultCode,
                                         String data, Bundle extras, boolean ordered,
@@ -8397,7 +8397,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                         Log.i(TAG, "Sending system update to: " + intent.getComponent());
                         broadcastIntentLocked(null, null, intent, null, finisher,
                                 0, null, null, null, true, false, MY_PID, Process.SYSTEM_UID);
-                        if (i == 0) {
+                        if (finisher != null) {
                             mWaitingUpdate = true;
                         }
                     }

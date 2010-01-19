@@ -19,41 +19,45 @@ package android.provider;
 import android.net.Uri;
 
 /**
- * Exposes constants used to interact with the download manager's
- * content provider.
- * The constants URI ... STATUS are the names of columns in the downloads table.
+ * The Download Manager
  *
- * @hide
+ * @pending
  */
-// For 1.0 the download manager can't deal with abuse from untrusted apps, so
-// this API is hidden.
-public final class Downloads implements BaseColumns {
+public final class Downloads {
+    /**
+     * @hide
+     */
     private Downloads() {}
 
     /**
      * The permission to access the download manager
+     * @hide
      */
     public static final String PERMISSION_ACCESS = "android.permission.ACCESS_DOWNLOAD_MANAGER";
 
     /**
      * The permission to access the download manager's advanced functions
+     * @hide
      */
     public static final String PERMISSION_ACCESS_ADVANCED =
             "android.permission.ACCESS_DOWNLOAD_MANAGER_ADVANCED";
 
     /**
      * The permission to directly access the download manager's cache directory
+     * @hide
      */
     public static final String PERMISSION_CACHE = "android.permission.ACCESS_CACHE_FILESYSTEM";
 
     /**
      * The permission to send broadcasts on download completion
+     * @hide
      */
     public static final String PERMISSION_SEND_INTENTS =
             "android.permission.SEND_DOWNLOAD_COMPLETED_INTENTS";
 
     /**
      * The content:// URI for the data table in the provider
+     * @hide
      */
     public static final Uri CONTENT_URI =
         Uri.parse("content://downloads/download");
@@ -62,6 +66,7 @@ public final class Downloads implements BaseColumns {
      * Broadcast Action: this is sent by the download manager to the app
      * that had initiated a download when that download completes. The
      * download's content: uri is specified in the intent's data.
+     * @hide
      */
     public static final String ACTION_DOWNLOAD_COMPLETED =
             "android.intent.action.DOWNLOAD_COMPLETED";
@@ -75,6 +80,7 @@ public final class Downloads implements BaseColumns {
      * multiple downloads.
      * Note: this is not currently sent for downloads that have completed
      * successfully.
+     * @hide
      */
     public static final String ACTION_NOTIFICATION_CLICKED =
             "android.intent.action.DOWNLOAD_NOTIFICATION_CLICKED";
@@ -83,6 +89,7 @@ public final class Downloads implements BaseColumns {
      * The name of the column containing the URI of the data being downloaded.
      * <P>Type: TEXT</P>
      * <P>Owner can Init/Read</P>
+     * @hide
      */
     public static final String COLUMN_URI = "uri";
 
@@ -90,6 +97,7 @@ public final class Downloads implements BaseColumns {
      * The name of the column containing application-specific data.
      * <P>Type: TEXT</P>
      * <P>Owner can Init/Read/Write</P>
+     * @hide
      */
     public static final String COLUMN_APP_DATA = "entity";
 
@@ -103,6 +111,7 @@ public final class Downloads implements BaseColumns {
      * whether a download fully completed).
      * <P>Type: BOOLEAN</P>
      * <P>Owner can Init</P>
+     * @hide
      */
     public static final String COLUMN_NO_INTEGRITY = "no_integrity";
 
@@ -112,6 +121,7 @@ public final class Downloads implements BaseColumns {
      * to use this filename, or a variation, as the actual name for the file.
      * <P>Type: TEXT</P>
      * <P>Owner can Init</P>
+     * @hide
      */
     public static final String COLUMN_FILE_NAME_HINT = "hint";
 
@@ -120,6 +130,7 @@ public final class Downloads implements BaseColumns {
      * was actually stored.
      * <P>Type: TEXT</P>
      * <P>Owner can Read</P>
+     * @hide
      */
     public static final String _DATA = "_data";
 
@@ -127,6 +138,7 @@ public final class Downloads implements BaseColumns {
      * The name of the column containing the MIME type of the downloaded data.
      * <P>Type: TEXT</P>
      * <P>Owner can Init/Read</P>
+     * @hide
      */
     public static final String COLUMN_MIME_TYPE = "mimetype";
 
@@ -135,6 +147,7 @@ public final class Downloads implements BaseColumns {
      * of the download. See the DESTINATION_* constants for a list of legal values.
      * <P>Type: INTEGER</P>
      * <P>Owner can Init</P>
+     * @hide
      */
     public static final String COLUMN_DESTINATION = "destination";
 
@@ -144,6 +157,7 @@ public final class Downloads implements BaseColumns {
      * a list of legal values.
      * <P>Type: INTEGER</P>
      * <P>Owner can Init/Read/Write</P>
+     * @hide
      */
     public static final String COLUMN_VISIBILITY = "visibility";
 
@@ -153,6 +167,7 @@ public final class Downloads implements BaseColumns {
      * the CONTROL_* constants for a list of legal values.
      * <P>Type: INTEGER</P>
      * <P>Owner can Read</P>
+     * @hide
      */
     public static final String COLUMN_CONTROL = "control";
 
@@ -162,6 +177,7 @@ public final class Downloads implements BaseColumns {
      * the STATUS_* constants for a list of legal values.
      * <P>Type: INTEGER</P>
      * <P>Owner can Read</P>
+     * @hide
      */
     public static final String COLUMN_STATUS = "status";
 
@@ -171,6 +187,7 @@ public final class Downloads implements BaseColumns {
      * value.
      * <P>Type: BIGINT</P>
      * <P>Owner can Read</P>
+     * @hide
      */
     public static final String COLUMN_LAST_MODIFICATION = "lastmod";
 
@@ -180,6 +197,7 @@ public final class Downloads implements BaseColumns {
      * notifications to a component in this package when the download completes.
      * <P>Type: TEXT</P>
      * <P>Owner can Init/Read</P>
+     * @hide
      */
     public static final String COLUMN_NOTIFICATION_PACKAGE = "notificationpackage";
 
@@ -190,6 +208,7 @@ public final class Downloads implements BaseColumns {
      * Intent.setClassName(String,String).
      * <P>Type: TEXT</P>
      * <P>Owner can Init/Read</P>
+     * @hide
      */
     public static final String COLUMN_NOTIFICATION_CLASS = "notificationclass";
 
@@ -198,6 +217,7 @@ public final class Downloads implements BaseColumns {
      * is sent to the specified class and package when a download has finished.
      * <P>Type: TEXT</P>
      * <P>Owner can Init</P>
+     * @hide
      */
     public static final String COLUMN_NOTIFICATION_EXTRAS = "notificationextras";
 
@@ -207,6 +227,7 @@ public final class Downloads implements BaseColumns {
      * header that gets sent with the request.
      * <P>Type: TEXT</P>
      * <P>Owner can Init</P>
+     * @hide
      */
     public static final String COLUMN_COOKIE_DATA = "cookiedata";
 
@@ -215,6 +236,7 @@ public final class Downloads implements BaseColumns {
      * application wants the download manager to use for this download.
      * <P>Type: TEXT</P>
      * <P>Owner can Init</P>
+     * @hide
      */
     public static final String COLUMN_USER_AGENT = "useragent";
 
@@ -223,6 +245,7 @@ public final class Downloads implements BaseColumns {
      * application wants the download manager to use for this download.
      * <P>Type: TEXT</P>
      * <P>Owner can Init</P>
+     * @hide
      */
     public static final String COLUMN_REFERER = "referer";
 
@@ -231,6 +254,7 @@ public final class Downloads implements BaseColumns {
      * downloaded.
      * <P>Type: INTEGER</P>
      * <P>Owner can Read</P>
+     * @hide
      */
     public static final String COLUMN_TOTAL_BYTES = "total_bytes";
 
@@ -239,6 +263,7 @@ public final class Downloads implements BaseColumns {
      * has been downloaded so far.
      * <P>Type: INTEGER</P>
      * <P>Owner can Read</P>
+     * @hide
      */
     public static final String COLUMN_CURRENT_BYTES = "current_bytes";
 
@@ -251,6 +276,7 @@ public final class Downloads implements BaseColumns {
      * android.permission.ACCESS_DOWNLOAD_MANAGER_ADVANCED.
      * <P>Type: INTEGER</P>
      * <P>Owner can Init</P>
+     * @hide
      */
     public static final String COLUMN_OTHER_UID = "otheruid";
 
@@ -260,6 +286,7 @@ public final class Downloads implements BaseColumns {
      * list of downloads.
      * <P>Type: TEXT</P>
      * <P>Owner can Init/Read/Write</P>
+     * @hide
      */
     public static final String COLUMN_TITLE = "title";
 
@@ -269,6 +296,7 @@ public final class Downloads implements BaseColumns {
      * user in the list of downloads.
      * <P>Type: TEXT</P>
      * <P>Owner can Init/Read/Write</P>
+     * @hide
      */
     public static final String COLUMN_DESCRIPTION = "description";
 
@@ -284,6 +312,7 @@ public final class Downloads implements BaseColumns {
      * Downloads to the external destination only write files for which
      * there is a registered handler. The resulting files are accessible
      * by filename to all applications.
+     * @hide
      */
     public static final int DESTINATION_EXTERNAL = 0;
 
@@ -295,6 +324,7 @@ public final class Downloads implements BaseColumns {
      * application can access the file (indirectly through a content
      * provider). This requires the
      * android.permission.ACCESS_DOWNLOAD_MANAGER_ADVANCED permission.
+     * @hide
      */
     public static final int DESTINATION_CACHE_PARTITION = 1;
 
@@ -304,6 +334,7 @@ public final class Downloads implements BaseColumns {
      * for private files (similar to CACHE_PARTITION) that aren't deleted
      * immediately after they are used, and are kept around by the download
      * manager as long as space is available.
+     * @hide
      */
     public static final int DESTINATION_CACHE_PARTITION_PURGEABLE = 2;
 
@@ -311,16 +342,19 @@ public final class Downloads implements BaseColumns {
      * This download will be saved to the download manager's private
      * partition, as with DESTINATION_CACHE_PARTITION, but the download
      * will not proceed if the user is on a roaming data connection.
+     * @hide
      */
     public static final int DESTINATION_CACHE_PARTITION_NOROAMING = 3;
 
     /**
      * This download is allowed to run.
+     * @hide
      */
     public static final int CONTROL_RUN = 0;
 
     /**
      * This download must pause at the first opportunity.
+     * @hide
      */
     public static final int CONTROL_PAUSED = 1;
 
@@ -337,6 +371,7 @@ public final class Downloads implements BaseColumns {
 
     /**
      * Returns whether the status is informational (i.e. 1xx).
+     * @hide
      */
     public static boolean isStatusInformational(int status) {
         return (status >= 100 && status < 200);
@@ -346,6 +381,7 @@ public final class Downloads implements BaseColumns {
      * Returns whether the download is suspended. (i.e. whether the download
      * won't complete without some action from outside the download
      * manager).
+     * @hide
      */
     public static boolean isStatusSuspended(int status) {
         return (status == STATUS_PENDING_PAUSED || status == STATUS_RUNNING_PAUSED);
@@ -353,6 +389,7 @@ public final class Downloads implements BaseColumns {
 
     /**
      * Returns whether the status is a success (i.e. 2xx).
+     * @hide
      */
     public static boolean isStatusSuccess(int status) {
         return (status >= 200 && status < 300);
@@ -360,6 +397,7 @@ public final class Downloads implements BaseColumns {
 
     /**
      * Returns whether the status is an error (i.e. 4xx or 5xx).
+     * @hide
      */
     public static boolean isStatusError(int status) {
         return (status >= 400 && status < 600);
@@ -367,6 +405,7 @@ public final class Downloads implements BaseColumns {
 
     /**
      * Returns whether the status is a client error (i.e. 4xx).
+     * @hide
      */
     public static boolean isStatusClientError(int status) {
         return (status >= 400 && status < 500);
@@ -374,6 +413,7 @@ public final class Downloads implements BaseColumns {
 
     /**
      * Returns whether the status is a server error (i.e. 5xx).
+     * @hide
      */
     public static boolean isStatusServerError(int status) {
         return (status >= 500 && status < 600);
@@ -382,6 +422,7 @@ public final class Downloads implements BaseColumns {
     /**
      * Returns whether the download has completed (either with success or
      * error).
+     * @hide
      */
     public static boolean isStatusCompleted(int status) {
         return (status >= 200 && status < 300) || (status >= 400 && status < 600);
@@ -389,21 +430,25 @@ public final class Downloads implements BaseColumns {
 
     /**
      * This download hasn't stated yet
+     * @hide
      */
     public static final int STATUS_PENDING = 190;
 
     /**
      * This download hasn't stated yet and is paused
+     * @hide
      */
     public static final int STATUS_PENDING_PAUSED = 191;
 
     /**
      * This download has started
+     * @hide
      */
     public static final int STATUS_RUNNING = 192;
 
     /**
      * This download has started and is paused
+     * @hide
      */
     public static final int STATUS_RUNNING_PAUSED = 193;
 
@@ -412,18 +457,21 @@ public final class Downloads implements BaseColumns {
      * Warning: there might be other status values that indicate success
      * in the future.
      * Use isSucccess() to capture the entire category.
+     * @hide
      */
     public static final int STATUS_SUCCESS = 200;
 
     /**
      * This request couldn't be parsed. This is also used when processing
      * requests with unknown/unsupported URI schemes.
+     * @hide
      */
     public static final int STATUS_BAD_REQUEST = 400;
 
     /**
      * This download can't be performed because the content type cannot be
      * handled.
+     * @hide
      */
     public static final int STATUS_NOT_ACCEPTABLE = 406;
 
@@ -435,6 +483,7 @@ public final class Downloads implements BaseColumns {
      * client when a response is received whose length cannot be determined
      * accurately (therefore making it impossible to know when a download
      * completes).
+     * @hide
      */
     public static final int STATUS_LENGTH_REQUIRED = 411;
 
@@ -442,11 +491,13 @@ public final class Downloads implements BaseColumns {
      * This download was interrupted and cannot be resumed.
      * This is the code for the HTTP error "Precondition Failed", and it is
      * also used in situations where the client doesn't have an ETag at all.
+     * @hide
      */
     public static final int STATUS_PRECONDITION_FAILED = 412;
 
     /**
      * This download was canceled
+     * @hide
      */
     public static final int STATUS_CANCELED = 490;
 
@@ -454,12 +505,14 @@ public final class Downloads implements BaseColumns {
      * This download has completed with an error.
      * Warning: there will be other status values that indicate errors in
      * the future. Use isStatusError() to capture the entire category.
+     * @hide
      */
     public static final int STATUS_UNKNOWN_ERROR = 491;
 
     /**
      * This download couldn't be completed because of a storage issue.
      * Typically, that's because the filesystem is missing or full.
+     * @hide
      */
     public static final int STATUS_FILE_ERROR = 492;
 
@@ -467,52 +520,66 @@ public final class Downloads implements BaseColumns {
      * This download couldn't be completed because of an HTTP
      * redirect response that the download manager couldn't
      * handle.
+     * @hide
      */
     public static final int STATUS_UNHANDLED_REDIRECT = 493;
 
     /**
      * This download couldn't be completed because of an
      * unspecified unhandled HTTP code.
+     * @hide
      */
     public static final int STATUS_UNHANDLED_HTTP_CODE = 494;
 
     /**
      * This download couldn't be completed because of an
      * error receiving or processing data at the HTTP level.
+     * @hide
      */
     public static final int STATUS_HTTP_DATA_ERROR = 495;
 
     /**
      * This download couldn't be completed because of an
      * HttpException while setting up the request.
+     * @hide
      */
     public static final int STATUS_HTTP_EXCEPTION = 496;
 
     /**
      * This download couldn't be completed because there were
      * too many redirects.
+     * @hide
      */
     public static final int STATUS_TOO_MANY_REDIRECTS = 497;
 
     /**
      * This download is visible but only shows in the notifications
      * while it's in progress.
+     * @hide
      */
     public static final int VISIBILITY_VISIBLE = 0;
 
     /**
      * This download is visible and shows in the notifications while
      * in progress and after completion.
+     * @hide
      */
     public static final int VISIBILITY_VISIBLE_NOTIFY_COMPLETED = 1;
 
     /**
      * This download doesn't show in the UI or in the notifications.
+     * @hide
      */
     public static final int VISIBILITY_HIDDEN = 2;
 
     /**
      * Implementation details
+     *
+     * Exposes constants used to interact with the download manager's
+     * content provider.
+     * The constants URI ... STATUS are the names of columns in the downloads table.
+     *
+     * @hide
      */
     public static final class Impl implements BaseColumns {
         private Impl() {}

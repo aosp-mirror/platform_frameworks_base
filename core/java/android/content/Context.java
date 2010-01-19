@@ -1132,6 +1132,7 @@ public abstract class Context {
      * you're running long tasks.
      */
     public static final String POWER_SERVICE = "power";
+    
     /**
      * Use with {@link #getSystemService} to retrieve a
      * {@link android.view.WindowManager} for accessing the system's window
@@ -1141,6 +1142,7 @@ public abstract class Context {
      * @see android.view.WindowManager
      */
     public static final String WINDOW_SERVICE = "window";
+    
     /**
      * Use with {@link #getSystemService} to retrieve a
      * {@link android.view.LayoutInflater} for inflating layout resources in this
@@ -1150,6 +1152,7 @@ public abstract class Context {
      * @see android.view.LayoutInflater
      */
     public static final String LAYOUT_INFLATER_SERVICE = "layout_inflater";
+    
     /**
      * Use with {@link #getSystemService} to retrieve a
      * {@link android.accounts.AccountManager} for receiving intents at a
@@ -1159,6 +1162,7 @@ public abstract class Context {
      * @see android.accounts.AccountManager
      */
     public static final String ACCOUNT_SERVICE = "account";
+    
     /**
      * Use with {@link #getSystemService} to retrieve a
      * {@link android.app.ActivityManager} for interacting with the global
@@ -1168,6 +1172,7 @@ public abstract class Context {
      * @see android.app.ActivityManager
      */
     public static final String ACTIVITY_SERVICE = "activity";
+    
     /**
      * Use with {@link #getSystemService} to retrieve a
      * {@link android.app.AlarmManager} for receiving intents at a
@@ -1177,6 +1182,7 @@ public abstract class Context {
      * @see android.app.AlarmManager
      */
     public static final String ALARM_SERVICE = "alarm";
+    
     /**
      * Use with {@link #getSystemService} to retrieve a
      * {@link android.app.NotificationManager} for informing the user of
@@ -1186,6 +1192,7 @@ public abstract class Context {
      * @see android.app.NotificationManager
      */
     public static final String NOTIFICATION_SERVICE = "notification";
+    
     /**
      * Use with {@link #getSystemService} to retrieve a
      * {@link android.view.accessibility.AccessibilityManager} for giving the user
@@ -1195,6 +1202,7 @@ public abstract class Context {
      * @see android.view.accessibility.AccessibilityManager
      */
     public static final String ACCESSIBILITY_SERVICE = "accessibility";
+    
     /**
      * Use with {@link #getSystemService} to retrieve a
      * {@link android.app.NotificationManager} for controlling keyguard.
@@ -1203,6 +1211,7 @@ public abstract class Context {
      * @see android.app.KeyguardManager
      */
     public static final String KEYGUARD_SERVICE = "keyguard";
+    
     /**
      * Use with {@link #getSystemService} to retrieve a {@link
      * android.location.LocationManager} for controlling location
@@ -1212,6 +1221,7 @@ public abstract class Context {
      * @see android.location.LocationManager
      */
     public static final String LOCATION_SERVICE = "location";
+    
     /**
      * Use with {@link #getSystemService} to retrieve a {@link
      * android.app.SearchManager} for handling searches.
@@ -1220,6 +1230,7 @@ public abstract class Context {
      * @see android.app.SearchManager
      */
     public static final String SEARCH_SERVICE = "search";
+    
     /**
      * Use with {@link #getSystemService} to retrieve a {@link
      * android.hardware.SensorManager} for accessing sensors.
@@ -1228,6 +1239,7 @@ public abstract class Context {
      * @see android.hardware.SensorManager
      */
     public static final String SENSOR_SERVICE = "sensor";
+    
     /**
      * Use with {@link #getSystemService} to retrieve a
      * com.android.server.WallpaperService for accessing wallpapers.
@@ -1235,6 +1247,7 @@ public abstract class Context {
      * @see #getSystemService
      */
     public static final String WALLPAPER_SERVICE = "wallpaper";
+    
     /**
      * Use with {@link #getSystemService} to retrieve a {@link
      * android.os.Vibrator} for interacting with the vibration hardware.
@@ -1243,6 +1256,7 @@ public abstract class Context {
      * @see android.os.Vibrator
      */
     public static final String VIBRATOR_SERVICE = "vibrator";
+    
     /**
      * Use with {@link #getSystemService} to retrieve a {@link
      * android.app.StatusBarManager} for interacting with the status bar.
@@ -1338,6 +1352,15 @@ public abstract class Context {
      * @see #getSystemService
      */
     public static final String DROPBOX_SERVICE = "dropbox";
+
+    /**
+     * Use with {@link #getSystemService} to retrieve a 
+     * {@link android.app.DevicePolicyManager} for working with global
+     * device policy management.
+     *
+     * @see #getSystemService
+     */
+    public static final String DEVICE_POLICY_SERVICE = "device_policy";
 
     /**
      * Determine whether the given permission is allowed for a particular

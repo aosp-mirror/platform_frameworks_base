@@ -254,12 +254,12 @@ public class AccountManager {
      * The future result is a {@link Boolean} that is true if the account exists and has the
      * specified features.
      */
-    public AccountManagerFuture<Boolean> testHasFeatures(final Account account,
+    public AccountManagerFuture<Boolean> hasFeatures(final Account account,
             final String[] features,
             AccountManagerCallback<Boolean> callback, Handler handler) {
         return new Future2Task<Boolean>(handler, callback) {
             public void doWork() throws RemoteException {
-                mService.testHasFeatures(mResponse, account, features);
+                mService.hasFeatures(mResponse, account, features);
             }
             public Boolean bundleToResult(Bundle bundle) throws AuthenticatorException {
                 if (!bundle.containsKey(KEY_BOOLEAN_RESULT)) {

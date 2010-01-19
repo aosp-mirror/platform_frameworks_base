@@ -86,7 +86,7 @@ static void millisecondSleep(int milliseconds) {
 
 static int mount(const char* path) {
     String16 string(path);
-    gMountService->mountMedia(string);
+    gMountService->mountVolume(string);
     
     for (int i = 0; i < 60; i++) {
         if (isMounted(path)) {
@@ -129,6 +129,11 @@ static int asec_mount(const char *id, const char *key, int ownerUid) {
     return 0;
 }
 
+static void asec_unmount(const char *id) {
+    String16 sId(id);
+    gMountService->unmountSecureContainer(sId);
+}
+
 static int asec_path(const char *id) {
     String16 sId(id);
     gMountService->getSecureContainerPath(sId);
@@ -137,7 +142,7 @@ static int asec_path(const char *id) {
 
 static int unmount(const char* path) {
     String16 string(path);
-    gMountService->unmountMedia(string);
+    gMountService->unmountVolume(string);
 
     for (int i = 0; i < 20; i++) {
         if (!isMounted(path)) {
@@ -155,7 +160,7 @@ static int format(const char* path) {
 
     if (isMounted(path))
         return -EBUSY;
-    gMountService->formatMedia(string);
+    gMountService->formatVolume(string);
 
     return 0;
 }
@@ -208,6 +213,9 @@ int main(int argc, char **argv)
             return android::asec_destroy(id);
         } else if (!strcmp(argument, "mount")) {
             return android::asec_mount(id, argv[4], atoi(argv[5]));
+        } else if (!strcmp(argument, "unmount")) {
+            android::asec_unmount(id);
+            return 0;
         } else if (!strcmp(argument, "path")) {
             return android::asec_path(id);
         }
@@ -224,6 +232,7 @@ usage:
                     "    sdutil asec finalize <id>\n"
                     "    sdutil asec destroy <id>\n"
                     "    sdutil asec mount <id> <key> <ownerUid>\n"
+                    "    sdutil asec unmount <id>\n"
                     "    sdutil asec path <id>\n"
                     );
     return -1;

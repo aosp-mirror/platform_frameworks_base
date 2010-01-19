@@ -32,6 +32,7 @@ import android.test.suitebuilder.annotation.MediumTest;
 public class SystemKeyStoreTest extends ActivityUnitTestCase<Activity> {
 
     private static final String keyName = "TestKey";
+    private static final String keyName2 = "TestKey2";
     private SystemKeyStore mSysKeyStore = null;
 
     public SystemKeyStoreTest() {
@@ -43,6 +44,7 @@ public class SystemKeyStoreTest extends ActivityUnitTestCase<Activity> {
         mSysKeyStore = SystemKeyStore.getInstance();
         try {
             mSysKeyStore.deleteKey(keyName);
+            mSysKeyStore.deleteKey(keyName2);
         } catch (Exception e) { }
         super.setUp();
     }
@@ -51,13 +53,14 @@ public class SystemKeyStoreTest extends ActivityUnitTestCase<Activity> {
     protected void tearDown() throws Exception {
         try {
             mSysKeyStore.deleteKey(keyName);
+            mSysKeyStore.deleteKey(keyName2);
         } catch (Exception e) { }
         super.tearDown();
     }
 
     public void testBasicAccess() throws Exception {
         try {
-            byte[] newKey = mSysKeyStore.generateNewKey(128, "AES", keyName);
+            byte[] newKey = mSysKeyStore.generateNewKey(128, "Blowfish", keyName);
             assertNotNull(newKey);
             byte[] recKey = mSysKeyStore.retrieveKey(keyName);
             assertEquals(newKey.length, recKey.length);
@@ -67,6 +70,14 @@ public class SystemKeyStoreTest extends ActivityUnitTestCase<Activity> {
             mSysKeyStore.deleteKey(keyName);
             byte[] nullKey = mSysKeyStore.retrieveKey(keyName);
             assertNull(nullKey);
+
+            String newKeyStr = mSysKeyStore.generateNewKeyHexString(128, "AES", keyName2);
+            assertNotNull(newKeyStr);
+            String recKeyStr = mSysKeyStore.retrieveKeyHexString(keyName2);
+            assertEquals(newKeyStr, recKeyStr);
+            mSysKeyStore.deleteKey(keyName2);
+            String nullKey2 = mSysKeyStore.retrieveKeyHexString(keyName);
+            assertNull(nullKey2);
         } catch (Exception e) {
             fail();
         }

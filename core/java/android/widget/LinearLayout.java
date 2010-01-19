@@ -50,6 +50,7 @@ public class LinearLayout extends ViewGroup {
      * Whether the children of this layout are baseline aligned.  Only applicable
      * if {@link #mOrientation} is horizontal.
      */
+    @ViewDebug.ExportedProperty
     private boolean mBaselineAligned = true;
 
     /**
@@ -59,6 +60,7 @@ public class LinearLayout extends ViewGroup {
      * Note: this is orthogonal to {@link #mBaselineAligned}, which is concerned
      * with whether the children of this layout are baseline aligned.
      */
+    @ViewDebug.ExportedProperty
     private int mBaselineAlignedChildIndex = -1;
 
     /**
@@ -66,12 +68,30 @@ public class LinearLayout extends ViewGroup {
      * We'll calculate the baseline of this layout as we measure vertically; for
      * horizontal linear layouts, the offset of 0 is appropriate.
      */
+    @ViewDebug.ExportedProperty
     private int mBaselineChildTop = 0;
 
+    @ViewDebug.ExportedProperty
     private int mOrientation;
+    @ViewDebug.ExportedProperty(mapping = {
+            @ViewDebug.IntToString(from =  -1,                       to = "NONE"),
+            @ViewDebug.IntToString(from = Gravity.NO_GRAVITY,        to = "NONE"),
+            @ViewDebug.IntToString(from = Gravity.TOP,               to = "TOP"),
+            @ViewDebug.IntToString(from = Gravity.BOTTOM,            to = "BOTTOM"),
+            @ViewDebug.IntToString(from = Gravity.LEFT,              to = "LEFT"),
+            @ViewDebug.IntToString(from = Gravity.RIGHT,             to = "RIGHT"),
+            @ViewDebug.IntToString(from = Gravity.CENTER_VERTICAL,   to = "CENTER_VERTICAL"),
+            @ViewDebug.IntToString(from = Gravity.FILL_VERTICAL,     to = "FILL_VERTICAL"),
+            @ViewDebug.IntToString(from = Gravity.CENTER_HORIZONTAL, to = "CENTER_HORIZONTAL"),
+            @ViewDebug.IntToString(from = Gravity.FILL_HORIZONTAL,   to = "FILL_HORIZONTAL"),
+            @ViewDebug.IntToString(from = Gravity.CENTER,            to = "CENTER"),
+            @ViewDebug.IntToString(from = Gravity.FILL,              to = "FILL")
+        })
     private int mGravity = Gravity.LEFT | Gravity.TOP;
+    @ViewDebug.ExportedProperty
     private int mTotalLength;
 
+    @ViewDebug.ExportedProperty
     private float mWeightSum;
 
     private int[] mMaxAscent;

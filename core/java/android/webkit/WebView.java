@@ -80,6 +80,7 @@ import java.io.IOException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 
 import junit.framework.Assert;
@@ -1131,6 +1132,16 @@ public class WebView extends AbsoluteLayout
                 networkUp ? 1 : 0, 0);
     }
 
+    /**
+     * Inform WebView about the current network type.
+     * {@hide}
+     */
+    public void setNetworkType(String type, String subtype) {
+        Map<String, String> map = new HashMap<String, String>();
+        map.put("type", type);
+        map.put("subtype", subtype);
+        mWebViewCore.sendMessage(EventHub.SET_NETWORK_TYPE, map);
+    }
     /**
      * Save the state of this WebView used in
      * {@link android.app.Activity#onSaveInstanceState}. Please note that this

@@ -16,6 +16,8 @@
 
 package android.view.inputmethod;
 
+import android.annotation.SdkConstant;
+import android.annotation.SdkConstant.SdkConstantType;
 import android.inputmethodservice.InputMethodService;
 import android.os.IBinder;
 import android.os.ResultReceiver;
@@ -54,9 +56,12 @@ public interface InputMethod {
     /**
      * This is the interface name that a service implementing an input
      * method should say that it supports -- that is, this is the action it
-     * uses for its intent filter.  (Note: this name is used because this
-     * interface should be moved to the view package.)
+     * uses for its intent filter.
+     * To be supported, the service must also require the
+     * {@link android.Manifest.permission#BIND_INPUT_METHOD} permission so
+     * that other applications can not abuse it.
      */
+    @SdkConstant(SdkConstantType.SERVICE_ACTION)
     public static final String SERVICE_INTERFACE = "android.view.InputMethod";
     
     /**
