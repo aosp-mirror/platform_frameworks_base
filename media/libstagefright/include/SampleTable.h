@@ -28,6 +28,7 @@
 namespace android {
 
 class DataSource;
+struct SampleIterator;
 
 class SampleTable : public RefBase {
 public:
@@ -50,21 +51,16 @@ public:
     ////////////////////////////////////////////////////////////////////////////
 
     uint32_t countChunkOffsets() const;
-    status_t getChunkOffset(uint32_t chunk_index, off_t *offset);
-
-    status_t getChunkForSample(
-            uint32_t sample_index, uint32_t *chunk_index,
-            uint32_t *chunk_relative_sample_index, uint32_t *desc_index);
 
     uint32_t countSamples() const;
-    status_t getSampleSize(uint32_t sample_index, size_t *sample_size);
-
-    status_t getSampleOffsetAndSize(
-            uint32_t sample_index, off_t *offset, size_t *size);
 
     status_t getMaxSampleSize(size_t *size);
 
-    status_t getDecodingTime(uint32_t sample_index, uint32_t *time);
+    status_t getMetaDataForSample(
+            uint32_t sampleIndex,
+            off_t *offset,
+            size_t *size,
+            uint32_t *decodingTime);
 
     enum {
         kSyncSample_Flag = 1
@@ -72,15 +68,17 @@ public:
     status_t findClosestSample(
             uint32_t req_time, uint32_t *sample_index, uint32_t flags);
 
-    status_t findClosestSyncSample(
-            uint32_t start_sample_index, uint32_t *sample_index);
-
     status_t findThumbnailSample(uint32_t *sample_index);
 
 protected:
     ~SampleTable();
 
 private:
+    static const uint32_t kChunkOffsetType32;
+    static const uint32_t kChunkOffsetType64;
+    static const uint32_t kSampleSizeType32;
+    static const uint32_t kSampleSizeTypeCompact;
+
     sp<DataSource> mDataSource;
     Mutex mLock;
 
@@ -101,6 +99,22 @@ private:
 
     off_t mSyncSampleOffset;
     uint32_t mNumSyncSamples;
+
+    SampleIterator *mSampleIterator;
+
+    struct SampleToChunkEntry {
+        uint32_t startChunk;
+        uint32_t samplesPerChunk;
+        uint32_t chunkDesc;
+    };
+    SampleToChunkEntry *mSampleToChunkEntries;
+
+    friend struct SampleIterator;
+
+    status_t findClosestSyncSample_l(
+            uint32_t start_sample_index, uint32_t *sample_index);
+
+    status_t getSampleSize_l(uint32_t sample_index, size_t *sample_size);
 
     SampleTable(const SampleTable &);
     SampleTable &operator=(const SampleTable &);

@@ -15,9 +15,11 @@
  */
 
 #define LOG_TAG "SampleTable"
+//#define LOG_NDEBUG 0
 #include <utils/Log.h>
 
 #include "include/SampleTable.h"
+#include "include/SampleIterator.h"
 
 #include <arpa/inet.h>
 
@@ -27,10 +29,16 @@
 
 namespace android {
 
-static const uint32_t kChunkOffsetType32 = FOURCC('s', 't', 'c', 'o');
-static const uint32_t kChunkOffsetType64 = FOURCC('c', 'o', '6', '4');
-static const uint32_t kSampleSizeType32 = FOURCC('s', 't', 's', 'z');
-static const uint32_t kSampleSizeTypeCompact = FOURCC('s', 't', 'z', '2');
+// static
+const uint32_t SampleTable::kChunkOffsetType32 = FOURCC('s', 't', 'c', 'o');
+// static
+const uint32_t SampleTable::kChunkOffsetType64 = FOURCC('c', 'o', '6', '4');
+// static
+const uint32_t SampleTable::kSampleSizeType32 = FOURCC('s', 't', 's', 'z');
+// static
+const uint32_t SampleTable::kSampleSizeTypeCompact = FOURCC('s', 't', 'z', '2');
+
+////////////////////////////////////////////////////////////////////////////////
 
 SampleTable::SampleTable(const sp<DataSource> &source)
     : mDataSource(source),
@@ -46,12 +54,20 @@ SampleTable::SampleTable(const sp<DataSource> &source)
       mTimeToSampleCount(0),
       mTimeToSample(NULL),
       mSyncSampleOffset(-1),
-      mNumSyncSamples(0) {
+      mNumSyncSamples(0),
+      mSampleToChunkEntries(NULL) {
+    mSampleIterator = new SampleIterator(this);
 }
 
 SampleTable::~SampleTable() {
+    delete[] mSampleToChunkEntries;
+    mSampleToChunkEntries = NULL;
+
     delete[] mTimeToSample;
     mTimeToSample = NULL;
+
+    delete mSampleIterator;
+    mSampleIterator = NULL;
 }
 
 status_t SampleTable::setChunkOffsetParams(
@@ -122,6 +138,25 @@ status_t SampleTable::setSampleToChunkParams(
 
     if (data_size < 8 + mNumSampleToChunkOffsets * 12) {
         return ERROR_MALFORMED;
+    }
+
+    mSampleToChunkEntries =
+        new SampleToChunkEntry[mNumSampleToChunkOffsets];
+
+    for (uint32_t i = 0; i < mNumSampleToChunkOffsets; ++i) {
+        uint8_t buffer[12];
+        if (mDataSource->readAt(
+                    mSampleToChunkOffset + 8 + i * 12, buffer, sizeof(buffer))
+                != (ssize_t)sizeof(buffer)) {
+            return ERROR_IO;
+        }
+
+        CHECK(U32_AT(buffer) >= 1);  // chunk index is 1 based in the spec.
+
+        // We want the chunk index to be 0-based.
+        mSampleToChunkEntries[i].startChunk = U32_AT(buffer) - 1;
+        mSampleToChunkEntries[i].samplesPerChunk = U32_AT(&buffer[4]);
+        mSampleToChunkEntries[i].chunkDesc = U32_AT(&buffer[8]);
     }
 
     return OK;
@@ -250,215 +285,8 @@ uint32_t SampleTable::countChunkOffsets() const {
     return mNumChunkOffsets;
 }
 
-status_t SampleTable::getChunkOffset(uint32_t chunk_index, off_t *offset) {
-    *offset = 0;
-
-    if (mChunkOffsetOffset < 0) {
-        return ERROR_MALFORMED;
-    }
-
-    if (chunk_index >= mNumChunkOffsets) {
-        return ERROR_OUT_OF_RANGE;
-    }
-
-    if (mChunkOffsetType == kChunkOffsetType32) {
-        uint32_t offset32;
-
-        if (mDataSource->readAt(
-                    mChunkOffsetOffset + 8 + 4 * chunk_index,
-                    &offset32,
-                    sizeof(offset32)) < (ssize_t)sizeof(offset32)) {
-            return ERROR_IO;
-        }
-
-        *offset = ntohl(offset32);
-    } else {
-        CHECK_EQ(mChunkOffsetType, kChunkOffsetType64);
-
-        uint64_t offset64;
-        if (mDataSource->readAt(
-                    mChunkOffsetOffset + 8 + 8 * chunk_index,
-                    &offset64,
-                    sizeof(offset64)) < (ssize_t)sizeof(offset64)) {
-            return ERROR_IO;
-        }
-
-        *offset = ntoh64(offset64);
-    }
-
-    return OK;
-}
-
-status_t SampleTable::getChunkForSample(
-        uint32_t sample_index,
-        uint32_t *chunk_index,
-        uint32_t *chunk_relative_sample_index,
-        uint32_t *desc_index) {
-    *chunk_index = 0;
-    *chunk_relative_sample_index = 0;
-    *desc_index = 0;
-
-    if (mSampleToChunkOffset < 0) {
-        return ERROR_MALFORMED;
-    }
-
-    if (sample_index >= countSamples()) {
-        return ERROR_END_OF_STREAM;
-    }
-
-    uint32_t first_chunk = 0;
-    uint32_t samples_per_chunk = 0;
-    uint32_t chunk_desc_index = 0;
-
-    uint32_t index = 0;
-    while (index < mNumSampleToChunkOffsets) {
-        uint8_t buffer[12];
-        if (mDataSource->readAt(mSampleToChunkOffset + 8 + index * 12,
-                                 buffer, sizeof(buffer)) < (ssize_t)sizeof(buffer)) {
-            return ERROR_IO;
-        }
-
-        uint32_t stop_chunk = U32_AT(buffer);
-        if (sample_index < (stop_chunk - first_chunk) * samples_per_chunk) {
-            break;
-        }
-
-        sample_index -= (stop_chunk - first_chunk) * samples_per_chunk;
-        first_chunk = stop_chunk;
-        samples_per_chunk = U32_AT(&buffer[4]);
-        chunk_desc_index = U32_AT(&buffer[8]);
-
-        ++index;
-    }
-
-    *chunk_index = sample_index / samples_per_chunk + first_chunk - 1;
-    *chunk_relative_sample_index = sample_index % samples_per_chunk;
-    *desc_index = chunk_desc_index;
-
-    return OK;
-}
-
 uint32_t SampleTable::countSamples() const {
     return mNumSampleSizes;
-}
-
-status_t SampleTable::getSampleSize(
-        uint32_t sample_index, size_t *sample_size) {
-    *sample_size = 0;
-
-    if (mSampleSizeOffset < 0) {
-        return ERROR_MALFORMED;
-    }
-
-    if (sample_index >= mNumSampleSizes) {
-        return ERROR_OUT_OF_RANGE;
-    }
-
-    if (mDefaultSampleSize > 0) {
-        *sample_size = mDefaultSampleSize;
-        return OK;
-    }
-
-    switch (mSampleSizeFieldSize) {
-        case 32:
-        {
-            if (mDataSource->readAt(
-                        mSampleSizeOffset + 12 + 4 * sample_index,
-                        sample_size, sizeof(*sample_size)) < (ssize_t)sizeof(*sample_size)) {
-                return ERROR_IO;
-            }
-
-            *sample_size = ntohl(*sample_size);
-            break;
-        }
-
-        case 16:
-        {
-            uint16_t x;
-            if (mDataSource->readAt(
-                        mSampleSizeOffset + 12 + 2 * sample_index,
-                        &x, sizeof(x)) < (ssize_t)sizeof(x)) {
-                return ERROR_IO;
-            }
-
-            *sample_size = ntohs(x);
-            break;
-        }
-
-        case 8:
-        {
-            uint8_t x;
-            if (mDataSource->readAt(
-                        mSampleSizeOffset + 12 + sample_index,
-                        &x, sizeof(x)) < (ssize_t)sizeof(x)) {
-                return ERROR_IO;
-            }
-
-            *sample_size = x;
-            break;
-        }
-
-        default:
-        {
-            CHECK_EQ(mSampleSizeFieldSize, 4);
-
-            uint8_t x;
-            if (mDataSource->readAt(
-                        mSampleSizeOffset + 12 + sample_index / 2,
-                        &x, sizeof(x)) < (ssize_t)sizeof(x)) {
-                return ERROR_IO;
-            }
-
-            *sample_size = (sample_index & 1) ? x & 0x0f : x >> 4;
-            break;
-        }
-    }
-
-    return OK;
-}
-
-status_t SampleTable::getSampleOffsetAndSize(
-        uint32_t sample_index, off_t *offset, size_t *size) {
-    Mutex::Autolock autoLock(mLock);
-
-    *offset = 0;
-    *size = 0;
-
-    uint32_t chunk_index;
-    uint32_t chunk_relative_sample_index;
-    uint32_t desc_index;
-    status_t err = getChunkForSample(
-            sample_index, &chunk_index, &chunk_relative_sample_index,
-            &desc_index);
-
-    if (err != OK) {
-        return err;
-    }
-
-    err = getChunkOffset(chunk_index, offset);
-
-    if (err != OK) {
-        return err;
-    }
-
-    for (uint32_t j = 0; j < chunk_relative_sample_index; ++j) {
-        size_t sample_size;
-        err = getSampleSize(sample_index - j - 1, &sample_size);
-
-        if (err != OK) {
-            return err;
-        }
-
-        *offset += sample_size;
-    }
-
-    err = getSampleSize(sample_index, size);
-
-    if (err != OK) {
-        return err;
-    }
-
-    return OK;
 }
 
 status_t SampleTable::getMaxSampleSize(size_t *max_size) {
@@ -468,7 +296,7 @@ status_t SampleTable::getMaxSampleSize(size_t *max_size) {
 
     for (uint32_t i = 0; i < mNumSampleSizes; ++i) {
         size_t sample_size;
-        status_t err = getSampleSize(i, &sample_size);
+        status_t err = getSampleSize_l(i, &sample_size);
 
         if (err != OK) {
             return err;
@@ -480,34 +308,6 @@ status_t SampleTable::getMaxSampleSize(size_t *max_size) {
     }
 
     return OK;
-}
-
-status_t SampleTable::getDecodingTime(uint32_t sample_index, uint32_t *time) {
-    // XXX FIXME idiotic (for the common use-case) O(n) algorithm below...
-
-    Mutex::Autolock autoLock(mLock);
-
-    if (sample_index >= mNumSampleSizes) {
-        return ERROR_OUT_OF_RANGE;
-    }
-
-    uint32_t cur_sample = 0;
-    *time = 0;
-    for (uint32_t i = 0; i < mTimeToSampleCount; ++i) {
-        uint32_t n = mTimeToSample[2 * i];
-        uint32_t delta = mTimeToSample[2 * i + 1];
-
-        if (sample_index < cur_sample + n) {
-            *time += delta * (sample_index - cur_sample);
-
-            return OK;
-        }
-
-        *time += delta * n;
-        cur_sample += n;
-    }
-
-    return ERROR_OUT_OF_RANGE;
 }
 
 uint32_t abs_difference(uint32_t time1, uint32_t time2) {
@@ -539,7 +339,7 @@ status_t SampleTable::findClosestSample(
             }
 
             if (flags & kSyncSample_Flag) {
-                return findClosestSyncSample(*sample_index, sample_index);
+                return findClosestSyncSample_l(*sample_index, sample_index);
             }
 
             return OK;
@@ -552,7 +352,7 @@ status_t SampleTable::findClosestSample(
     return ERROR_OUT_OF_RANGE;
 }
 
-status_t SampleTable::findClosestSyncSample(
+status_t SampleTable::findClosestSyncSample_l(
         uint32_t start_sample_index, uint32_t *sample_index) {
     *sample_index = 0;
 
@@ -590,6 +390,8 @@ status_t SampleTable::findClosestSyncSample(
 }
 
 status_t SampleTable::findThumbnailSample(uint32_t *sample_index) {
+    Mutex::Autolock autoLock(mLock);
+
     if (mSyncSampleOffset < 0) {
         // All samples are sync-samples.
         *sample_index = 0;
@@ -620,7 +422,7 @@ status_t SampleTable::findThumbnailSample(uint32_t *sample_index) {
 
         // Now x is a sample index.
         size_t sampleSize;
-        status_t err = getSampleSize(x, &sampleSize);
+        status_t err = getSampleSize_l(x, &sampleSize);
         if (err != OK) {
             return err;
         }
@@ -632,6 +434,39 @@ status_t SampleTable::findThumbnailSample(uint32_t *sample_index) {
     }
 
     *sample_index = bestSampleIndex;
+
+    return OK;
+}
+
+status_t SampleTable::getSampleSize_l(
+        uint32_t sampleIndex, size_t *sampleSize) {
+    return mSampleIterator->getSampleSizeDirect(
+            sampleIndex, sampleSize);
+}
+
+status_t SampleTable::getMetaDataForSample(
+        uint32_t sampleIndex,
+        off_t *offset,
+        size_t *size,
+        uint32_t *decodingTime) {
+    Mutex::Autolock autoLock(mLock);
+
+    status_t err;
+    if ((err = mSampleIterator->seekTo(sampleIndex)) != OK) {
+        return err;
+    }
+
+    if (offset) {
+        *offset = mSampleIterator->getSampleOffset();
+    }
+
+    if (size) {
+        *size = mSampleIterator->getSampleSize();
+    }
+
+    if (decodingTime) {
+        *decodingTime = mSampleIterator->getSampleTime();
+    }
 
     return OK;
 }
