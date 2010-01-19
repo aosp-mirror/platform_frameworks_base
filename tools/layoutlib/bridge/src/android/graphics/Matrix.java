@@ -87,8 +87,12 @@ public class Matrix extends _Original_Matrix {
     }
 
     public AffineTransform getTransform() {
-        return new AffineTransform(mValues[0], mValues[1], mValues[2],
-                mValues[3], mValues[4], mValues[5]);
+        // the AffineTransform constructor takes the value in a different order
+        // for a matrix [ 0 1 2 ]
+        //              [ 3 4 5 ]
+        // the order is 0, 3, 1, 4, 2, 5...
+        return new AffineTransform(mValues[0], mValues[3], mValues[1],
+                mValues[4], mValues[2], mValues[5]);
     }
 
     public boolean hasPerspective() {
