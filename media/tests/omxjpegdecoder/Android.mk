@@ -33,7 +33,8 @@ LOCAL_SHARED_LIBRARIES := \
     libskia \
     libstagefright \
     libbinder \
-    libutils
+    libutils \
+    libjpeg
 
 LOCAL_C_INCLUDES := \
     $(JNI_H_INCLUDE) \
