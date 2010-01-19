@@ -29,6 +29,7 @@ LOCAL_SRC_FILES +=                \
         MPEG4Extractor.cpp        \
         MPEG4Writer.cpp           \
         MediaExtractor.cpp        \
+        SampleIterator.cpp        \
         SampleTable.cpp           \
         ShoutcastSource.cpp       \
         StagefrightMediaScanner.cpp \
