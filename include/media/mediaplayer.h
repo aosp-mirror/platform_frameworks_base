@@ -21,8 +21,7 @@
 #include <ui/Surface.h>
 #include <media/IMediaPlayerClient.h>
 #include <media/IMediaPlayer.h>
-#include <media/IMediaPlayerService.h>
-#include <utils/SortedVector.h>
+#include <media/IMediaDeathNotifier.h>
 
 namespace android {
 
@@ -123,12 +122,13 @@ public:
     virtual void notify(int msg, int ext1, int ext2) = 0;
 };
 
-class MediaPlayer : public BnMediaPlayerClient
+class MediaPlayer : public BnMediaPlayerClient,
+                    public virtual IMediaDeathNotifier
 {
 public:
     MediaPlayer();
     ~MediaPlayer();
-            void            onFirstRef();
+            void            died();
             void            disconnect();
             status_t        setDataSource(const char *url);
             status_t        setDataSource(int fd, int64_t offset, int64_t length);
@@ -164,19 +164,6 @@ private:
             status_t        getDuration_l(int *msec);
             status_t        setDataSource(const sp<IMediaPlayer>& player);
 
-    static const sp<IMediaPlayerService>& getMediaPlayerService();
-    static void addObitRecipient(const wp<MediaPlayer>& recipient);
-    static void removeObitRecipient(const wp<MediaPlayer>& recipient);
-
-    class DeathNotifier: public IBinder::DeathRecipient
-    {
-    public:
-                DeathNotifier() {}
-        virtual ~DeathNotifier();
-
-        virtual void binderDied(const wp<IBinder>& who);
-    };
-
     sp<IMediaPlayer>            mPlayer;
     thread_id_t                 mLockThreadId;
     Mutex                       mLock;
@@ -196,13 +183,6 @@ private:
     float                       mRightVolume;
     int                         mVideoWidth;
     int                         mVideoHeight;
-
-    friend class DeathNotifier;
-
-    static  Mutex                           sServiceLock;
-    static  sp<IMediaPlayerService>         sMediaPlayerService;
-    static  sp<DeathNotifier>               sDeathNotifier;
-    static  SortedVector< wp<MediaPlayer> > sObitRecipients;
 };
 
 }; // namespace android

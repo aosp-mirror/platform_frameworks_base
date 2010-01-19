@@ -34,48 +34,6 @@
 
 namespace android {
 
-// client singleton for binder interface to service
-Mutex MediaPlayer::sServiceLock;
-sp<IMediaPlayerService> MediaPlayer::sMediaPlayerService;
-sp<MediaPlayer::DeathNotifier> MediaPlayer::sDeathNotifier;
-SortedVector< wp<MediaPlayer> > MediaPlayer::sObitRecipients;
-
-// establish binder interface to service
-const sp<IMediaPlayerService>& MediaPlayer::getMediaPlayerService()
-{
-    Mutex::Autolock _l(sServiceLock);
-    if (sMediaPlayerService.get() == 0) {
-        sp<IServiceManager> sm = defaultServiceManager();
-        sp<IBinder> binder;
-        do {
-            binder = sm->getService(String16("media.player"));
-            if (binder != 0)
-                break;
-            LOGW("MediaPlayerService not published, waiting...");
-            usleep(500000); // 0.5 s
-        } while(true);
-        if (sDeathNotifier == NULL) {
-            sDeathNotifier = new DeathNotifier();
-        }
-        binder->linkToDeath(sDeathNotifier);
-        sMediaPlayerService = interface_cast<IMediaPlayerService>(binder);
-    }
-    LOGE_IF(sMediaPlayerService==0, "no MediaPlayerService!?");
-    return sMediaPlayerService;
-}
-
-void MediaPlayer::addObitRecipient(const wp<MediaPlayer>& recipient)
-{
-    Mutex::Autolock _l(sServiceLock);
-    sObitRecipients.add(recipient);
-}
-
-void MediaPlayer::removeObitRecipient(const wp<MediaPlayer>& recipient)
-{
-    Mutex::Autolock _l(sServiceLock);
-    sObitRecipients.remove(recipient);
-}
-
 MediaPlayer::MediaPlayer()
 {
     LOGV("constructor");
@@ -94,15 +52,9 @@ MediaPlayer::MediaPlayer()
     mLockThreadId = 0;
 }
 
-void MediaPlayer::onFirstRef()
-{
-    addObitRecipient(this);
-}
-
 MediaPlayer::~MediaPlayer()
 {
     LOGV("destructor");
-    removeObitRecipient(this);
     disconnect();
     IPCThreadState::self()->flushCommands();
 }
@@ -630,50 +582,24 @@ void MediaPlayer::notify(int msg, int ext1, int ext2)
     }
 }
 
-void MediaPlayer::DeathNotifier::binderDied(const wp<IBinder>& who) {
-    LOGW("MediaPlayer server died!");
-
-    // Need to do this with the lock held
-    SortedVector< wp<MediaPlayer> > list;
-    {
-        Mutex::Autolock _l(MediaPlayer::sServiceLock);
-        MediaPlayer::sMediaPlayerService.clear();
-        list = sObitRecipients;
-    }
-
-    // Notify application when media server dies.
-    // Don't hold the static lock during callback in case app
-    // makes a call that needs the lock.
-    size_t count = list.size();
-    for (size_t iter = 0; iter < count; ++iter) {
-        sp<MediaPlayer> player = list[iter].promote();
-        if ((player != 0) && (player->mPlayer != 0)) {
-            player->notify(MEDIA_ERROR, MEDIA_ERROR_SERVER_DIED, 0);
-        }
-    }
-}
-
-MediaPlayer::DeathNotifier::~DeathNotifier()
-{
-    Mutex::Autolock _l(sServiceLock);
-    sObitRecipients.clear();
-    if (sMediaPlayerService != 0) {
-        sMediaPlayerService->asBinder()->unlinkToDeath(this);
-    }
-}
-
 /*static*/ sp<IMemory> MediaPlayer::decode(const char* url, uint32_t *pSampleRate, int* pNumChannels, int* pFormat)
 {
     LOGV("decode(%s)", url);
     sp<IMemory> p;
     const sp<IMediaPlayerService>& service = getMediaPlayerService();
     if (service != 0) {
-        p = sMediaPlayerService->decode(url, pSampleRate, pNumChannels, pFormat);
+        p = service->decode(url, pSampleRate, pNumChannels, pFormat);
     } else {
         LOGE("Unable to locate media service");
     }
     return p;
 
+}
+
+void MediaPlayer::died()
+{
+    LOGV("died");
+    notify(MEDIA_ERROR, MEDIA_ERROR_SERVER_DIED, 0);
 }
 
 /*static*/ sp<IMemory> MediaPlayer::decode(int fd, int64_t offset, int64_t length, uint32_t *pSampleRate, int* pNumChannels, int* pFormat)
@@ -682,7 +608,7 @@ MediaPlayer::DeathNotifier::~DeathNotifier()
     sp<IMemory> p;
     const sp<IMediaPlayerService>& service = getMediaPlayerService();
     if (service != 0) {
-        p = sMediaPlayerService->decode(fd, offset, length, pSampleRate, pNumChannels, pFormat);
+        p = service->decode(fd, offset, length, pSampleRate, pNumChannels, pFormat);
     } else {
         LOGE("Unable to locate media service");
     }
