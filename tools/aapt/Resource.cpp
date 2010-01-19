@@ -1727,51 +1727,59 @@ writeProguardForAndroidManifest(ProguardKeepSet* keep, const sp<AaptAssets>& ass
         depth++;
         String8 tag(tree.getElementName(&len));
         // printf("Depth %d tag %s\n", depth, tag.string());
+        bool keepTag = false;
         if (depth == 1) {
             if (tag != "manifest") {
                 fprintf(stderr, "ERROR: manifest does not start with <manifest> tag\n");
                 return -1;
             }
             pkg = getAttribute(tree, NULL, "package", NULL);
-        } else if (depth == 2 && tag == "application") {
-            inApplication = true;
+        } else if (depth == 2) {
+            if (tag == "application") {
+                inApplication = true;
+                keepTag = true;
+            } else if (tag == "instrumentation") {
+                keepTag = true;
+            }
         }
-        if (inApplication) {
-            if (tag == "application" || tag == "activity" || tag == "service" || tag == "receiver"
-                    || tag == "provider") {
-                String8 name = getAttribute(tree, "http://schemas.android.com/apk/res/android",
-                        "name", &error);
-                if (error != "") {
-                    fprintf(stderr, "ERROR: %s\n", error.string());
-                    return -1;
+        if (!keepTag && inApplication && depth == 3) {
+            if (tag == "activity" || tag == "service" || tag == "receiver" || tag == "provider") {
+                keepTag = true;
+            }
+        }
+        if (keepTag) {
+            String8 name = getAttribute(tree, "http://schemas.android.com/apk/res/android",
+                    "name", &error);
+            if (error != "") {
+                fprintf(stderr, "ERROR: %s\n", error.string());
+                return -1;
+            }
+            if (name.length() > 0) {
+                // asdf     --> package.asdf
+                // .asdf  .a.b  --> package.asdf package.a.b
+                // asdf.adsf --> asdf.asdf
+                String8 rule("-keep class ");
+                const char* p = name.string();
+                const char* q = strchr(p, '.');
+                if (p == q) {
+                    rule += pkg;
+                    rule += name;
+                } else if (q == NULL) {
+                    rule += pkg;
+                    rule += ".";
+                    rule += name;
+                } else {
+                    rule += name;
                 }
-                if (name.length() > 0) {
-                    // asdf     --> package.asdf
-                    // .asdf  .a.b  --> package.asdf package.a.b
-                    // asdf.adsf --> asdf.asdf
-                    String8 rule("-keep class ");
-                    const char* p = name.string();
-                    const char* q = strchr(p, '.');
-                    if (p == q) {
-                        rule += pkg;
-                        rule += name;
-                    } else if (q == NULL) {
-                        rule += pkg;
-                        rule += ".";
-                        rule += name;
-                    } else {
-                        rule += name;
-                    }
 
-                    String8 location = tag;
-                    location += " ";
-                    location += assFile->getSourceFile();
-                    char lineno[20];
-                    sprintf(lineno, ":%d", tree.getLineNumber());
-                    location += lineno;
+                String8 location = tag;
+                location += " ";
+                location += assFile->getSourceFile();
+                char lineno[20];
+                sprintf(lineno, ":%d", tree.getLineNumber());
+                location += lineno;
 
-                    keep->add(rule, location);
-                }
+                keep->add(rule, location);
             }
         }
     }
