@@ -1,52 +1,57 @@
-page.title=Hello, DatePicker
+page.title=Date Picker
 parent.title=Hello, Views
 parent.link=index.html
 @jd:body
 
-<p>A {@link android.widget.DatePicker} is a widget that allows the user to select a month, day and year.</p>
+<p>To provide a widget for selecting a date, use the {@link android.widget.DatePicker}
+widget, which allows the user to select the month, day, and year, in a familiar interface.</p>
 
+<p>In this tutorial, you'll create a {@link android.app.DatePickerDialog}, which presents the
+date picker in a floating dialog box at the press of a button. When the date is set by
+the user, a {@link android.widget.TextView} will update with the new date.</p>
 
 <ol>
-  <li>Start a new project/Activity called HelloDatePicker.</li>
-  <li>Open the layout file and make it like so:
-    <pre>
+  <li>Start a new project named <em>HelloDatePicker</em>.</li>
+  <li>Open the <code>res/layout/main.xml</code> file and insert the following:
+<pre>
 &lt;?xml version="1.0" encoding="utf-8"?>
 &lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:orientation="vertical">
-
     &lt;TextView android:id="@+id/dateDisplay"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text=""/>
-
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text=""/>
     &lt;Button android:id="@+id/pickDate"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Change the date"/>
-
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Change the date"/>
 &lt;/LinearLayout>
 </pre>
-	<p>For the layout, we're using a vertical LinearLayout, with a {@link android.widget.TextView} that
-	will display the date and a {@link android.widget.Button} that will initiate the DatePicker dialog.
-	With this layout, the TextView will sit above the Button.
-	The text value in the TextView is set empty, as it will be filled 
-	with the current date when our Activity runs.</p>
-    </li> 
+  <p>This creates a basic {@link android.widget.LinearLayout} with a {@link android.widget.TextView}
+  that will display the date and a {@link android.widget.Button} that will open the {@link
+  android.app.DatePickerDialog}.</p>
+  </li>
 
-  <li>Open HelloDatePicker.java. Insert the following to the HelloDatePicker class:
+  <li>Open <code>HelloDatePicker.java</code> and add the following members to the class:
 <pre>
     private TextView mDateDisplay;
     private Button mPickDate;
-
     private int mYear;
     private int mMonth;
     private int mDay;
 
     static final int DATE_DIALOG_ID = 0;
+</pre>
+  <p>The first group of members define variables for the layout {@link android.view.View}s and the
+date items. The <code>DATE_DIALOG_ID</code> is a static integer that uniquely identifies the {@link
+android.app.Dialog} that will display the date picker.</p>
+  </li>
 
-    &#64;Override
+  <li>Now add the following code for the {@link android.app.Activity#onCreate(Bundle) onCreate()}
+method:
+<pre>
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
@@ -68,43 +73,30 @@ parent.link=index.html
         mMonth = c.get(Calendar.MONTH);
         mDay = c.get(Calendar.DAY_OF_MONTH);
 
-        // display the current date
+        // display the current date (this method is below)
         updateDisplay();
     }
 </pre>
-<p class="note"><strong>Tip:</strong> Press Ctrl(or Cmd) + Shift + O to import all needed packages.</p>
-	<p>We start by instantiating variables for our Views and date fields.
-	The <code>DATE_DIALOG_ID</code> is a static integer that uniquely identifies the Dialog. In the
-	<code>onCreate()</code> method, we get prepared by setting the layout and capturing the View elements. 
-	Then we create an on-click listener for the Button, so that when it is clicked it will
-	show our DatePicker dialog. The <code>showDialog()</code> method  will pop-up the date picker dialog
-        by calling the <code>onCreateDialog()</code> callback method 
-        (which we'll define in the next section). We then create an
-	instance of {@link java.util.Calendar} and get the current year, month and day. Finally, we call 
-	<code>updateDisplay()</code>&mdash;our own method (defined later) that will fill the TextView.</p>
+
+<p>First, the content is set to the <code>main.xml</code> layout. Then the {@link
+android.widget.TextView} and {@link android.widget.Button} elements are captured from the layout
+with {@link android.app.Activity#findViewById(int)}. A
+new {@link android.view.View.OnClickListener} is created for the
+{@link android.widget.Button}, so that when it is clicked, it
+will call {@link android.app.Activity#showDialog(int)}, passing the unique integer ID for
+the date picker dialog. Using {@link android.app.Activity#showDialog(int)} allows the {@link
+android.app.Activity} to manage the life-cycle of the dialog and will call the {@link
+android.app.Activity#onCreateDialog(int)} callback method to request the {@link android.app.Dialog}
+that should be displayed (which you'll
+define later). After the on-click listener is set, a new {@link java.util.Calendar} is created
+and the current year, month and day are acquired. Finally, the private
+<code>updateDisplay()</code> method is called in order to fill the {@link android.widget.TextView}
+with the current date.</p>
 </li>
 
-<li>After the <code>onCreate()</code> method, add the <code>onCreateDialog()</code> callback method 
-(which is called by <code>showDialog()</code>)
+<li>Add the <code>updateDisplay()</code> method:
 <pre>
-&#64;Override
-protected Dialog onCreateDialog(int id) {
-    switch (id) {
-    case DATE_DIALOG_ID:
-        return new DatePickerDialog(this,
-                    mDateSetListener,
-                    mYear, mMonth, mDay);
-    }
-    return null;
-}
-</pre>
-	<p>This method is passed the identifier we gave <code>showDialog()</code> and initializes
-	the DatePicker to the date we retrieved from our Calendar instance.</p>
-</li>
-
-<li>Following that, add the <code>updateDisplay()</code> method:
-<pre>
-    // updates the date we display in the TextView
+    // updates the date in the TextView
     private void updateDisplay() {
         mDateDisplay.setText(
             new StringBuilder()
@@ -114,9 +106,13 @@ protected Dialog onCreateDialog(int id) {
                     .append(mYear).append(" "));
     }
 </pre>
-<p>This uses the member date values to write the date to our TextView.</p>
+<p>This method uses the member date values declared for the class to write the date to the layout's
+{@link android.widget.TextView}, {@code mDateDisplay}, which was also declared and initialized
+above.</p>
 </li>
-<li>Finally, add a listener that will be called when the user sets a new date:
+
+<li>Initialize a new {@link android.app.DatePickerDialog.OnDateSetListener} as a member of the
+<code>HelloDatePicker</code> class:
 <pre>
     // the callback received when the user "sets" the date in the dialog
     private DatePickerDialog.OnDateSetListener mDateSetListener =
@@ -131,19 +127,45 @@ protected Dialog onCreateDialog(int id) {
                 }
             };
 </pre>
-	<p>This <code>OnDateSetListener</code> method listens for when the user is done setting the date
-        (clicks the "Set" button). At that time, this fires and we update our member fields with
-	the new date defined by the user and update our TextView by calling <code>updateDisplay()</code>.</p>
+<p>The {@link android.app.DatePickerDialog.OnDateSetListener} listens for when the user
+has set the date (by clicking the "Set" button). At that time, the {@link
+android.app.DatePickerDialog.OnDateSetListener#onDateSet(DatePicker,int,int,int) onDateSet()}
+callback method is called, which is defined to update the {@code mYear}, {@code mMonth}, and
+{@code mDay} member fields with the new date then call the private <code>updateDisplay()</code>
+method to update the {@link android.widget.TextView}.</p>
 </li>
 
-<li>Now run it.</li>
+<li>Now add the {@link android.app.Activity#onCreateDialog(int)} callback method to the {@code
+HelloDatePicker} class:
+<pre>
+&#64;Override
+protected Dialog onCreateDialog(int id) {
+    switch (id) {
+    case DATE_DIALOG_ID:
+        return new DatePickerDialog(this,
+                    mDateSetListener,
+                    mYear, mMonth, mDay);
+    }
+    return null;
+}
+</pre>
+<p>This is an {@link android.app.Activity} callback method that is passed the integer ID given to
+{@link android.app.Activity#showDialog(int)} (which is called by the button's {@link
+android.view.View.OnClickListener}). When the ID matches the switch case defined here, a {@link
+android.app.DatePickerDialog} is instantiated with the {@link
+android.app.DatePickerDialog.OnDateSetListener} created in the previous
+step, along with the date variables to initialize the widget date.</p>
+</li>
+
+<li>Run the application.</li>
 </ol>
 <p>When you press the "Change the date" button, you should see the following:</p>
 <img src="images/hello-datepicker.png" width="150px" />
 
 <h3>References</h3>
 <ul>
-<li>{@link android.widget.DatePicker}</li>
+<li>{@link android.app.DatePickerDialog}</li>
+<li>{@link android.app.DatePickerDialog.OnDateSetListener}</li>
 <li>{@link android.widget.Button}</li>
 <li>{@link android.widget.TextView}</li>
 <li>{@link java.util.Calendar}</li>

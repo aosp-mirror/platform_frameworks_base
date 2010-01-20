@@ -120,50 +120,58 @@ public abstract class GradientShader extends Shader {
          */
         protected int getGradientColor(float pos) {
             if (pos < 0.f) {
-                switch (mTileMode) {
-                    case CLAMP:
-                        pos = 0.f;
-                        break;
-                    case REPEAT:
-                        // remove the integer part to stay in the [0,1] range
-                        // careful: this is a negative value, so use ceil instead of floor
-                        pos = pos - (float)Math.ceil(pos);
-                        break;
-                    case MIRROR:
-                        // get the integer and the decimal part
-                        // careful: this is a negative value, so use ceil instead of floor
-                        int intPart = (int)Math.ceil(pos);
-                        pos = pos - intPart;
-                        // 0  -> -1 : mirrored order
-                        // -1 -> -2: normal order
-                        // etc..
-                        // this means if the intpart is even we invert
-                        if ((intPart % 2) == 0) {
-                            pos = 1.f - pos;
-                        }
-                        break;
+                if (mTileMode != null) {
+                    switch (mTileMode) {
+                        case CLAMP:
+                            pos = 0.f;
+                            break;
+                        case REPEAT:
+                            // remove the integer part to stay in the [0,1] range
+                            // careful: this is a negative value, so use ceil instead of floor
+                            pos = pos - (float)Math.ceil(pos);
+                            break;
+                        case MIRROR:
+                            // get the integer and the decimal part
+                            // careful: this is a negative value, so use ceil instead of floor
+                            int intPart = (int)Math.ceil(pos);
+                            pos = pos - intPart;
+                            // 0  -> -1 : mirrored order
+                            // -1 -> -2: normal order
+                            // etc..
+                            // this means if the intpart is even we invert
+                            if ((intPart % 2) == 0) {
+                                pos = 1.f - pos;
+                            }
+                            break;
+                    }
+                } else {
+                    pos = 0.0f;
                 }
             } else if (pos > 1f) {
-                switch (mTileMode) {
-                    case CLAMP:
-                        pos = 1.f;
-                        break;
-                    case REPEAT:
-                        // remove the integer part to stay in the [0,1] range
-                        pos = pos - (float)Math.floor(pos);
-                        break;
-                    case MIRROR:
-                        // get the integer and the decimal part
-                        int intPart = (int)Math.floor(pos);
-                        pos = pos - intPart;
-                        // 0 -> 1 : normal order
-                        // 1 -> 2: mirrored
-                        // etc..
-                        // this means if the intpart is odd we invert
-                        if ((intPart % 2) == 1) {
-                            pos = 1.f - pos;
-                        }
-                        break;
+                if (mTileMode != null) {
+                    switch (mTileMode) {
+                        case CLAMP:
+                            pos = 1.f;
+                            break;
+                        case REPEAT:
+                            // remove the integer part to stay in the [0,1] range
+                            pos = pos - (float)Math.floor(pos);
+                            break;
+                        case MIRROR:
+                            // get the integer and the decimal part
+                            int intPart = (int)Math.floor(pos);
+                            pos = pos - intPart;
+                            // 0 -> 1 : normal order
+                            // 1 -> 2: mirrored
+                            // etc..
+                            // this means if the intpart is odd we invert
+                            if ((intPart % 2) == 1) {
+                                pos = 1.f - pos;
+                            }
+                            break;
+                    }
+                } else {
+                    pos = 1.0f;
                 }
             }
 
