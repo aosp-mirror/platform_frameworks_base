@@ -121,6 +121,20 @@ public class NotificationTestList extends TestActivity
             }
         },
 
+        new Test("Times") {
+            public void run()
+            {
+                long now = System.currentTimeMillis();
+
+                timeNotification(7, "24 hours from now", now+(1000*60*60*24));
+                timeNotification(6, "12:01:00 from now", now+(1000*60*60*12)+(60*1000));
+                timeNotification(5, "12 hours from now", now+(1000*60*60*12));
+                timeNotification(4, "now", now);
+                timeNotification(3, "11:59:00 ago", now-((1000*60*60*12)-(60*1000)));
+                timeNotification(2, "12 hours ago", now-(1000*60*60*12));
+                timeNotification(1, "24 hours ago", now-(1000*60*60*24));
+            }
+        },
         new StateStress("Stress - Ongoing / Latest", 100, 100, new Runnable[] {
                 new Runnable() {
                     public void run() {
@@ -589,6 +603,13 @@ public class NotificationTestList extends TestActivity
             mNext = 0;
             mHandler.postDelayed(mRunnable, mPause);
         }
+    }
+
+    void timeNotification(int n, String label, long time) {
+        mNM.notify(n, new Notification(NotificationTestList.this,
+                    R.drawable.ic_statusbar_missedcall, null,
+                    time, label, "" + new java.util.Date(time), null));
+
     }
 }
 

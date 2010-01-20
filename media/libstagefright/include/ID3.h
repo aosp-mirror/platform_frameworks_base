@@ -28,6 +28,8 @@ struct String8;
 struct ID3 {
     enum Version {
         ID3_UNKNOWN,
+        ID3_V1,
+        ID3_V1_1,
         ID3_V2_2,
         ID3_V2_3
     };
@@ -74,7 +76,8 @@ private:
     size_t mFirstFrameOffset;
     Version mVersion;
 
-    bool parse(const sp<DataSource> &source);
+    bool parseV1(const sp<DataSource> &source);
+    bool parseV2(const sp<DataSource> &source);
     void removeUnsynchronization();
 
     ID3(const ID3 &);

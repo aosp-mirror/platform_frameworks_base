@@ -753,10 +753,8 @@ java.math.BigInteger
 java.math.Multiplication
 java.net.ContentHandler
 java.net.InetAddress
-java.net.InetAddress$CacheElement
 java.net.InetAddress$WaitReachable
 java.net.JarURLConnection
-java.net.NegativeCache
 java.net.NetPermission
 java.net.ProxySelectorImpl
 java.net.Socket$ConnectLock

@@ -232,8 +232,9 @@ sp<MetaData> MPEG4Extractor::getTrackMetaData(
             uint32_t sampleIndex;
             uint32_t sampleTime;
             if (track->sampleTable->findThumbnailSample(&sampleIndex) == OK
-                    && track->sampleTable->getDecodingTime(
-                        sampleIndex, &sampleTime) == OK) {
+                    && track->sampleTable->getMetaDataForSample(
+                        sampleIndex, NULL /* offset */, NULL /* size */,
+                        &sampleTime) == OK) {
                 track->meta->setInt64(
                         kKeyThumbnailTime,
                         ((int64_t)sampleTime * 1000000) / track->timescale);
@@ -929,20 +930,16 @@ status_t MPEG4Source::read(
     if (mBuffer == NULL) {
         newBuffer = true;
 
-        status_t err = mSampleTable->getSampleOffsetAndSize(
-                mCurrentSampleIndex, &offset, &size);
-
-        if (err != OK) {
-            return err;
-        }
-
-        err = mSampleTable->getDecodingTime(mCurrentSampleIndex, &dts);
+        status_t err =
+            mSampleTable->getMetaDataForSample(
+                    mCurrentSampleIndex, &offset, &size, &dts);
 
         if (err != OK) {
             return err;
         }
 
         err = mGroup->acquire_buffer(&mBuffer);
+
         if (err != OK) {
             CHECK_EQ(mBuffer, NULL);
             return err;

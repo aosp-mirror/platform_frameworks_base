@@ -1331,20 +1331,26 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
         final int maxHeight = mPopup.getMaxAvailableHeight(
                 getDropDownAnchorView(), mDropDownVerticalOffset, ignoreBottomDecorations);
 
+        // getMaxAvailableHeight() subtracts the padding, so we put it back,
+        // to get the available height for the whole window
+        int padding = 0;
+        Drawable background = mPopup.getBackground();
+        if (background != null) {
+            background.getPadding(mTempRect);
+            padding = mTempRect.top + mTempRect.bottom;
+        }
+
         if (mDropDownAlwaysVisible || mDropDownHeight == ViewGroup.LayoutParams.MATCH_PARENT) {
-            // getMaxAvailableHeight() subtracts the padding, so we put it back,
-            // to get the available height for the whole window
-            int padding = 0;
-            Drawable background = mPopup.getBackground();
-            if (background != null) {
-                background.getPadding(mTempRect);
-                padding = mTempRect.top + mTempRect.bottom;
-            }
             return maxHeight + padding;
         }
 
-        return mDropDownList.measureHeightOfChildren(MeasureSpec.UNSPECIFIED,
-                0, ListView.NO_POSITION, maxHeight - otherHeights, 2) + otherHeights;
+        final int listContent = mDropDownList.measureHeightOfChildren(MeasureSpec.UNSPECIFIED,
+                0, ListView.NO_POSITION, maxHeight - otherHeights, 2);
+        // add padding only if the list has items in it, that way we don't show
+        // the popup if it is not needed
+        if (listContent > 0) otherHeights += padding;
+
+        return listContent + otherHeights;
     }
 
     private View getHintView(Context context) {

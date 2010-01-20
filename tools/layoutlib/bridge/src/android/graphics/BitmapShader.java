@@ -16,6 +16,8 @@
 
 package android.graphics;
 
+import java.awt.Paint;
+
 public class BitmapShader extends Shader {
 
     // we hold on just for the GC, since our native counterpart is using it
@@ -31,11 +33,16 @@ public class BitmapShader extends Shader {
     public BitmapShader(Bitmap bitmap, TileMode tileX, TileMode tileY) {
         mBitmap = bitmap;
     }
-    
+
     //---------- Custom methods
-    
+
     public Bitmap getBitmap() {
         return mBitmap;
+    }
+
+    @Override
+    Paint getJavaPaint() {
+        return null;
     }
 }
 

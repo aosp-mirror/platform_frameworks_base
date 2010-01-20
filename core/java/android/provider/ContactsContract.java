@@ -474,18 +474,44 @@ public final class ContactsContract {
         public static final String DISPLAY_NAME_SOURCE = "display_name_source";
 
         /**
-         * The default text shown as the contact's display name.  It is based on
-         * available data, see {@link #DISPLAY_NAME_SOURCE}.
+         * <p>
+         * The standard text shown as the contact's display name, based on the best
+         * available information for the contact (for example, it might be the email address
+         * if the name is not available).
+         * The information actually used to compute the name is stored in
+         * {@link #DISPLAY_NAME_SOURCE}.
+         * </p>
+         * <p>
+         * A contacts provider is free to choose whatever representation makes most
+         * sense for its target market.
+         * For example in the default Android Open Source Project implementation,
+         * if the display name is
+         * based on the structured name and the structured name follows
+         * the Western full-name style, then this field contains the "given name first"
+         * version of the full name.
+         * <p>
          *
          * @see ContactsContract.ContactNameColumns#DISPLAY_NAME_ALTERNATIVE
          */
         public static final String DISPLAY_NAME_PRIMARY = "display_name";
 
         /**
-         * An alternative representation of the display name.  If display name is
+         * <p>
+         * An alternative representation of the display name, such as "family name first"
+         * instead of "given name first" for Western names.  If an alternative is not
+         * available, the values should be the same as {@link #DISPLAY_NAME_PRIMARY}.
+         * </p>
+         * <p>
+         * A contacts provider is free to provide alternatives as necessary for
+         * its target market.
+         * For example the default Android Open Source Project contacts provider
+         * currently provides an
+         * alternative in a single case:  if the display name is
          * based on the structured name and the structured name follows
-         * the Western full name style, then this field contains the "family name first"
-         * version of the full name.  Otherwise, it is the same as DISPLAY_NAME_PRIMARY.
+         * the Western full name style, then the field contains the "family name first"
+         * version of the full name.
+         * Other cases may be added later.
+         * </p>
          */
         public static final String DISPLAY_NAME_ALTERNATIVE = "display_name_alt";
 

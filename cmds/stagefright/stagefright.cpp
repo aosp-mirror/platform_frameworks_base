@@ -34,12 +34,14 @@
 #include <media/stagefright/MetaData.h>
 #include <media/stagefright/OMXClient.h>
 #include <media/stagefright/OMXCodec.h>
+#include <media/mediametadataretriever.h>
 
 using namespace android;
 
 static long gNumRepetitions;
 static long gMaxNumFrames;  // 0 means decode all available.
 static long gReproduceBug;  // if not -1.
+static bool gPreferSoftwareCodec;
 
 static int64_t getNowUs() {
     struct timeval tv;
@@ -59,7 +61,9 @@ static void playSource(OMXClient *client, const sp<MediaSource> &source) {
         rawSource = source;
     } else {
         rawSource = OMXCodec::Create(
-            client->interface(), meta, false /* createEncoder */, source);
+            client->interface(), meta, false /* createEncoder */, source,
+            NULL /* matchComponentName */,
+            gPreferSoftwareCodec ? OMXCodec::kPreferSoftwareCodecs : 0);
 
         if (rawSource == NULL) {
             fprintf(stderr, "Failed to instantiate decoder for '%s'.\n", mime);
@@ -219,6 +223,8 @@ static void usage(const char *me) {
     fprintf(stderr, "       -m max-number-of-frames-to-decode in each pass\n");
     fprintf(stderr, "       -b bug to reproduce\n");
     fprintf(stderr, "       -p(rofiles) dump decoder profiles supported\n");
+    fprintf(stderr, "       -t(humbnail) extract video thumbnail\n");
+    fprintf(stderr, "       -s(oftware) prefer software codec\n");
 }
 
 int main(int argc, char **argv) {
@@ -227,12 +233,14 @@ int main(int argc, char **argv) {
     bool audioOnly = false;
     bool listComponents = false;
     bool dumpProfiles = false;
+    bool extractThumbnail = false;
     gNumRepetitions = 1;
     gMaxNumFrames = 0;
     gReproduceBug = -1;
+    gPreferSoftwareCodec = false;
 
     int res;
-    while ((res = getopt(argc, argv, "han:lm:b:p")) >= 0) {
+    while ((res = getopt(argc, argv, "han:lm:b:pts")) >= 0) {
         switch (res) {
             case 'a':
             {
@@ -274,6 +282,18 @@ int main(int argc, char **argv) {
                 break;
             }
 
+            case 't':
+            {
+                extractThumbnail = true;
+                break;
+            }
+
+            case 's':
+            {
+                gPreferSoftwareCodec = true;
+                break;
+            }
+
             case '?':
             case 'h':
             default:
@@ -287,6 +307,34 @@ int main(int argc, char **argv) {
 
     argc -= optind;
     argv += optind;
+
+    if (extractThumbnail) {
+        sp<IServiceManager> sm = defaultServiceManager();
+        sp<IBinder> binder = sm->getService(String16("media.player"));
+        sp<IMediaPlayerService> service =
+            interface_cast<IMediaPlayerService>(binder);
+
+        CHECK(service.get() != NULL);
+
+        sp<IMediaMetadataRetriever> retriever =
+            service->createMetadataRetriever(getpid());
+
+        CHECK(retriever != NULL);
+
+        for (int k = 0; k < argc; ++k) {
+            const char *filename = argv[k];
+
+            CHECK_EQ(retriever->setDataSource(filename), OK);
+            CHECK_EQ(retriever->setMode(METADATA_MODE_FRAME_CAPTURE_ONLY), OK);
+
+            sp<IMemory> mem = retriever->captureFrame();
+
+            printf("captureFrame(%s) => %s\n",
+                   filename, mem != NULL ? "OK" : "FAILED");
+        }
+
+        return 0;
+    }
 
     if (dumpProfiles) {
         sp<IServiceManager> sm = defaultServiceManager();
@@ -389,7 +437,8 @@ int main(int argc, char **argv) {
             sp<MetaData> meta;
             size_t i;
             for (i = 0; i < numTracks; ++i) {
-                meta = extractor->getTrackMetaData(i);
+                meta = extractor->getTrackMetaData(
+                        i, MediaExtractor::kIncludeExtensiveMetaData);
 
                 const char *mime;
                 meta->findCString(kKeyMIMEType, &mime);
@@ -401,6 +450,12 @@ int main(int argc, char **argv) {
                 if (!audioOnly && !strncasecmp(mime, "video/", 6)) {
                     break;
                 }
+            }
+
+            int64_t thumbTimeUs;
+            if (meta->findInt64(kKeyThumbnailTime, &thumbTimeUs)) {
+                printf("thumbnailTime: %lld us (%.2f secs)\n",
+                       thumbTimeUs, thumbTimeUs / 1E6);
             }
 
             mediaSource = extractor->getTrack(i);

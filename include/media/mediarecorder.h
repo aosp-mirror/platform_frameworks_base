@@ -23,6 +23,7 @@
 #include <utils/List.h>
 #include <utils/Errors.h>
 #include <media/IMediaPlayerClient.h>
+#include <media/IMediaDeathNotifier.h>
 
 namespace android {
 
@@ -145,12 +146,14 @@ public:
     virtual void notify(int msg, int ext1, int ext2) = 0;
 };
 
-class MediaRecorder : public BnMediaPlayerClient
+class MediaRecorder : public BnMediaPlayerClient,
+                      public virtual IMediaDeathNotifier
 {
 public:
     MediaRecorder();
     ~MediaRecorder();
 
+    void        died();
     status_t    initCheck();
     status_t    setCamera(const sp<ICamera>& camera);
     status_t    setPreviewSurface(const sp<Surface>& surface);
