@@ -135,6 +135,7 @@ private:
         virtual void destroy() { }
     private:
         status_t initTempBuffer() const;
+        void clearTempBufferImage() const;
         mutable Mutex                   mBufferSourceLock;
         sp<Buffer>                      mBuffer;
         status_t                        mStatus;
