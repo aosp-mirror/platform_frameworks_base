@@ -250,7 +250,11 @@ public class MediaMetadataTest extends AndroidTestCase {
         
         value = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
         Log.v(TAG, "Expected = " + meta_data_file[fileIndex][meta.DURATION.ordinal()] + "reult = " + value);
-        assertEquals(TAG, meta_data_file[fileIndex][meta.DURATION.ordinal()], value);
+        // Only require that the returned duration is within 100ms of the expected
+        // one as PV and stagefright differ slightly in their implementation.
+        assertTrue(TAG, Math.abs(Integer.parseInt(
+                        meta_data_file[fileIndex][meta.DURATION.ordinal()])
+                            - Integer.parseInt(value)) < 100);
         
         //METADATA_KEY_NUM_TRACKS should return the total number of tracks in the media
         //include the video and audio
