@@ -201,6 +201,9 @@ final class NativeDaemonConnector implements Runnable {
         }
     }
 
+    /**
+     * Issue a command to the native daemon and return the responses
+     */
     public synchronized ArrayList<String> doCommand(String cmd) throws IllegalStateException {
         sendCommand(cmd);
 
@@ -235,5 +238,39 @@ final class NativeDaemonConnector implements Runnable {
                                                 cmd, code));
         }
         return response;
+    }
+
+    /*
+     * Issues a list command and returns the cooked list
+     */
+    public String[] doListCommand(String cmd, int expectedResponseCode)
+            throws IllegalStateException {
+
+        ArrayList<String> rsp = doCommand(cmd);
+        String[] rdata = new String[rsp.size()-1];
+        int idx = 0;
+
+        for (String line : rsp) {
+            try {
+                String[] tok = line.split(" ");
+                int code = Integer.parseInt(tok[0]);
+                if (code == expectedResponseCode) {
+                    if (tok.length !=2) {
+                        throw new IllegalStateException(
+                                String.format("Malformatted list entry '%s'", line));
+                    }
+                    rdata[idx++] = tok[1];
+                } else if (code == NativeDaemonConnector.ResponseCode.CommandOkay) {
+                    return rdata;
+                } else {
+                    throw new IllegalStateException(
+                            String.format("Expected list response %d, but got %d",
+                                    expectedResponseCode, code));
+                }
+            } catch (NumberFormatException nfe) {
+                throw new IllegalStateException(String.format("Error reading code '%s'", line));
+            }
+        }
+        throw new IllegalStateException("Got an empty response");
     }
 }
