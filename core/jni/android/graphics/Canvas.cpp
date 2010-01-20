@@ -27,6 +27,9 @@
 #include "SkShader.h"
 #include "SkTemplates.h"
 
+#include "SkBoundaryPatch.h"
+#include "SkMeshUtils.h"
+
 #define TIME_DRAWx
 
 static uint32_t get_thread_msec() {
@@ -965,6 +968,42 @@ static JNINativeMethod gCanvasMethods[] = {
     {"freeCaches", "()V", (void*) SkCanvasGlue::freeCaches}
 };
 
+///////////////////////////////////////////////////////////////////////////////
+
+static void BoundaryPatch_computeCubic(JNIEnv* env, jobject, jfloatArray jpts,
+                                       int texW, int texH, int rows, int cols,
+                                       jfloatArray jverts, jshortArray jidx) {
+    AutoJavaFloatArray ptsArray(env, jpts, 24);
+
+    int vertCount = rows * cols;
+    AutoJavaFloatArray vertsArray(env, jverts, vertCount * 4);
+    SkPoint* verts = (SkPoint*)vertsArray.ptr();
+    SkPoint* texs = verts + vertCount;
+
+    int idxCount = (rows - 1) * (cols - 1) * 6;
+    AutoJavaShortArray idxArray(env, jidx, idxCount);
+    uint16_t* idx = (uint16_t*)idxArray.ptr();  // cast from int16_t*
+
+    SkCubicBoundary cubic;
+    memcpy(cubic.fPts, ptsArray.ptr(), 12 * sizeof(SkPoint));
+
+    SkBoundaryPatch patch;
+    patch.setBoundary(&cubic);
+    // generate our verts
+    patch.evalPatch(verts, rows, cols);
+
+    SkMeshIndices mesh;
+    // generate our texs and idx
+    mesh.init(texs, idx, texW, texH, rows, cols);
+}
+
+static JNINativeMethod gBoundaryPatchMethods[] = {
+    {"nativeComputeCubicPatch", "([FIIII[F[S)V",
+    (void*)BoundaryPatch_computeCubic },
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
 #include <android_runtime/AndroidRuntime.h>
 
 #define REG(env, name, array) \
@@ -976,7 +1015,8 @@ int register_android_graphics_Canvas(JNIEnv* env) {
     int result;
 
     REG(env, "android/graphics/Canvas", gCanvasMethods);
-    
+    REG(env, "android/graphics/utils/BoundaryPatch", gBoundaryPatchMethods);
+
     return result;
 }
 
