@@ -45,8 +45,10 @@ private:
     bool mValidFormat;
     uint16_t mNumChannels;
     uint32_t mSampleRate;
+    uint16_t mBitsPerSample;
     off_t mDataOffset;
     size_t mDataSize;
+    sp<MetaData> mTrackMeta;
 
     status_t init();
 

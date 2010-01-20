@@ -44,7 +44,8 @@ static uint16_t U16_LE_AT(const uint8_t *ptr) {
 struct WAVSource : public MediaSource {
     WAVSource(
             const sp<DataSource> &dataSource,
-            int32_t sampleRate, int32_t numChannels,
+            const sp<MetaData> &meta,
+            int32_t bitsPerSample,
             off_t offset, size_t size);
 
     virtual status_t start(MetaData *params = NULL);
@@ -61,8 +62,10 @@ private:
     static const size_t kMaxFrameSize;
 
     sp<DataSource> mDataSource;
+    sp<MetaData> mMeta;
     int32_t mSampleRate;
     int32_t mNumChannels;
+    int32_t mBitsPerSample;
     off_t mOffset;
     size_t mSize;
     bool mStarted;
@@ -104,7 +107,8 @@ sp<MediaSource> WAVExtractor::getTrack(size_t index) {
     }
 
     return new WAVSource(
-            mDataSource, mSampleRate, mNumChannels, mDataOffset, mDataSize);
+            mDataSource, mTrackMeta,
+            mBitsPerSample, mDataOffset, mDataSize);
 }
 
 sp<MetaData> WAVExtractor::getTrackMetaData(
@@ -113,17 +117,7 @@ sp<MetaData> WAVExtractor::getTrackMetaData(
         return NULL;
     }
 
-    sp<MetaData> meta = new MetaData;
-    meta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_AUDIO_RAW);
-    meta->setInt32(kKeyChannelCount, mNumChannels);
-    meta->setInt32(kKeySampleRate, mSampleRate);
-
-    int64_t durationUs =
-        1000000LL * (mDataSize / (mNumChannels * 2)) / mSampleRate;
-
-    meta->setInt64(kKeyDuration, durationUs);
-
-    return meta;
+    return mTrackMeta;
 }
 
 status_t WAVExtractor::init() {
@@ -149,7 +143,7 @@ status_t WAVExtractor::init() {
 
         remainingSize -= 8;
         offset += 8;
-        
+
         uint32_t chunkSize = U32_LE_AT(&chunkHeader[4]);
 
         if (chunkSize > remainingSize) {
@@ -178,7 +172,13 @@ status_t WAVExtractor::init() {
 
             mSampleRate = U32_LE_AT(&formatSpec[4]);
 
-            if (U16_LE_AT(&formatSpec[14]) != 16) {
+            if (mSampleRate == 0) {
+                return ERROR_MALFORMED;
+            }
+
+            mBitsPerSample = U16_LE_AT(&formatSpec[14]);
+
+            if (mBitsPerSample != 8 && mBitsPerSample != 16) {
                 return ERROR_UNSUPPORTED;
             }
 
@@ -187,6 +187,19 @@ status_t WAVExtractor::init() {
             if (mValidFormat) {
                 mDataOffset = offset;
                 mDataSize = chunkSize;
+
+                mTrackMeta = new MetaData;
+                mTrackMeta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_AUDIO_RAW);
+                mTrackMeta->setInt32(kKeyChannelCount, mNumChannels);
+                mTrackMeta->setInt32(kKeySampleRate, mSampleRate);
+
+                size_t bytesPerSample = mBitsPerSample >> 3;
+
+                int64_t durationUs =
+                    1000000LL * (mDataSize / (mNumChannels * bytesPerSample))
+                        / mSampleRate;
+
+                mTrackMeta->setInt64(kKeyDuration, durationUs);
 
                 return OK;
             }
@@ -202,15 +215,20 @@ const size_t WAVSource::kMaxFrameSize = 32768;
 
 WAVSource::WAVSource(
         const sp<DataSource> &dataSource,
-        int32_t sampleRate, int32_t numChannels,
+        const sp<MetaData> &meta,
+        int32_t bitsPerSample,
         off_t offset, size_t size)
     : mDataSource(dataSource),
-      mSampleRate(sampleRate),
-      mNumChannels(numChannels),
+      mMeta(meta),
+      mSampleRate(0),
+      mNumChannels(0),
+      mBitsPerSample(bitsPerSample),
       mOffset(offset),
       mSize(size),
       mStarted(false),
       mGroup(NULL) {
+    CHECK(mMeta->findInt32(kKeySampleRate, &mSampleRate));
+    CHECK(mMeta->findInt32(kKeyChannelCount, &mNumChannels));
 }
 
 WAVSource::~WAVSource() {
@@ -226,6 +244,11 @@ status_t WAVSource::start(MetaData *params) {
 
     mGroup = new MediaBufferGroup;
     mGroup->add_buffer(new MediaBuffer(kMaxFrameSize));
+
+    if (mBitsPerSample == 8) {
+        // As a temporary buffer for 8->16 bit conversion.
+        mGroup->add_buffer(new MediaBuffer(kMaxFrameSize));
+    }
 
     mCurrentPos = mOffset;
 
@@ -250,17 +273,7 @@ status_t WAVSource::stop() {
 sp<MetaData> WAVSource::getFormat() {
     LOGV("WAVSource::getFormat");
 
-    sp<MetaData> meta = new MetaData;
-    meta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_AUDIO_RAW);
-    meta->setInt32(kKeyChannelCount, mNumChannels);
-    meta->setInt32(kKeySampleRate, mSampleRate);
-
-    int64_t durationUs =
-        1000000LL * (mSize / (mNumChannels * 2)) / mSampleRate;
-
-    meta->setInt64(kKeyDuration, durationUs);
-
-    return meta;
+    return mMeta;
 }
 
 status_t WAVSource::read(
@@ -283,7 +296,8 @@ status_t WAVSource::read(
     }
 
     ssize_t n = mDataSource->readAt(
-            mCurrentPos, buffer->data(), kMaxFrameSize);
+            mCurrentPos, buffer->data(),
+            mBitsPerSample == 8 ? kMaxFrameSize / 2 : kMaxFrameSize);
 
     if (n <= 0) {
         buffer->release();
@@ -295,10 +309,34 @@ status_t WAVSource::read(
     mCurrentPos += n;
 
     buffer->set_range(0, n);
+
+    if (mBitsPerSample == 8) {
+        // Convert 8-bit unsigned samples to 16-bit signed.
+
+        MediaBuffer *tmp;
+        CHECK_EQ(mGroup->acquire_buffer(&tmp), OK);
+
+        // The new buffer holds the sample number of samples, but each
+        // one is 2 bytes wide.
+        tmp->set_range(0, 2 * n);
+
+        int16_t *dst = (int16_t *)tmp->data();
+        const uint8_t *src = (const uint8_t *)buffer->data();
+        while (n-- > 0) {
+            *dst++ = ((int16_t)(*src) - 128) * 256;
+            ++src;
+        }
+
+        buffer->release();
+        buffer = tmp;
+    }
+
+    size_t bytesPerSample = mBitsPerSample >> 3;
+
     buffer->meta_data()->setInt64(
             kKeyTime,
             1000000LL * (mCurrentPos - mOffset)
-                / (mNumChannels * 2) / mSampleRate);
+                / (mNumChannels * bytesPerSample) / mSampleRate);
 
 
     *out = buffer;
