@@ -99,7 +99,7 @@ class DockObserver extends UEventObserver {
     public DockObserver(Context context, PowerManagerService pm) {
         mContext = context;
         mPowerManager = pm;
-        mLockPatternUtils = new LockPatternUtils(context.getContentResolver());
+        mLockPatternUtils = new LockPatternUtils(context);
         init();  // set initial status
         startObserving(DOCK_UEVENT_MATCH);
     }
