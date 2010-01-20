@@ -66,6 +66,13 @@ public class ZygoteInit {
     /** when preloading, GC after allocating this many bytes */
     private static final int PRELOAD_GC_THRESHOLD = 50000;
 
+    /** throw on missing preload, only if this looks like a developer */
+    private static final boolean THROW_ON_MISSING_PRELOAD =
+            "1".equals(SystemProperties.get("persist.service.adb.enable"));
+
+    public static final String USAGE_STRING =
+            " <\"true\"|\"false\" for startSystemServer>";
+
     private static LocalServerSocket sServerSocket;
 
     /**
@@ -322,8 +329,8 @@ public class ZygoteInit {
                     }
                 }
 
-                if (missingClasses != null &&
-                        "1".equals(SystemProperties.get("persist.service.adb.enable"))) {
+                if (THROW_ON_MISSING_PRELOAD &&
+                    missingClasses != null) {
                     throw new IllegalStateException(
                             "Missing class(es) for preloading, update preloaded-classes ["
                             + missingClasses + "]");
@@ -597,12 +604,13 @@ public class ZygoteInit {
 
             // If requested, start system server directly from Zygote
             if (argv.length != 2) {
-                throw new RuntimeException(
-                        "ZygoteInit.main expects two arguments");
+                throw new RuntimeException(argv[0] + USAGE_STRING);
             }
 
             if (argv[1].equals("true")) {
                 startSystemServer();
+            } else if (!argv[1].equals("false")) {
+                throw new RuntimeException(argv[0] + USAGE_STRING);
             }
 
             Log.i(TAG, "Accepting command socket connections");
