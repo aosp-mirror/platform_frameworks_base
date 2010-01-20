@@ -93,6 +93,7 @@ private:
         virtual status_t    dump(int fd, const Vector<String16>& args);
         virtual status_t    setParameters(const String8& keyValuePairs);
         virtual String8     getParameters(const String8& keys);
+        virtual status_t    getRenderPosition(uint32_t *dspFrames);
 
     private:
         friend class A2dpAudioInterface;

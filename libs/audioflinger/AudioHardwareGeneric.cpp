@@ -298,6 +298,11 @@ String8 AudioStreamOutGeneric::getParameters(const String8& keys)
     return param.toString();
 }
 
+status_t AudioStreamOutGeneric::getRenderPosition(uint32_t *dspFrames)
+{
+    return INVALID_OPERATION;
+}
+
 // ----------------------------------------------------------------------------
 
 // record functions
@@ -310,9 +315,8 @@ status_t AudioStreamInGeneric::set(
         uint32_t *pRate,
         AudioSystem::audio_in_acoustics acoustics)
 {
-    // FIXME: remove logging
     if (pFormat == 0 || pChannels == 0 || pRate == 0) return BAD_VALUE;
-    LOGD("AudioStreamInGeneric::set(%p, %d, %d, %d, %u)", hw, fd, *pFormat, *pChannels, *pRate);
+    LOGV("AudioStreamInGeneric::set(%p, %d, %d, %d, %u)", hw, fd, *pFormat, *pChannels, *pRate);
     // check values
     if ((*pFormat != format()) ||
         (*pChannels != channels()) ||
@@ -332,14 +336,10 @@ status_t AudioStreamInGeneric::set(
 
 AudioStreamInGeneric::~AudioStreamInGeneric()
 {
-    // FIXME: remove logging
-    LOGD("AudioStreamInGeneric destructor");
 }
 
 ssize_t AudioStreamInGeneric::read(void* buffer, ssize_t bytes)
 {
-    // FIXME: remove logging
-    LOGD("AudioStreamInGeneric::read(%p, %d) from fd %d", buffer, (int)bytes, mFd);
     AutoMutex lock(mLock);
     if (mFd < 0) {
         LOGE("Attempt to read from unopened device");

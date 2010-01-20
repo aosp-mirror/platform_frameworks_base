@@ -130,6 +130,7 @@ public:
     virtual status_t setStreamOutput(uint32_t stream, int output) = 0;
 
     virtual status_t setVoiceVolume(float volume) = 0;
+    virtual status_t getRenderPosition(uint32_t *halFrames, uint32_t *dspFrames, int output) = 0;
 };
 
 
