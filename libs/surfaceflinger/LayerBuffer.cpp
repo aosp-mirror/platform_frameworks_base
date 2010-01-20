@@ -503,6 +503,16 @@ status_t LayerBuffer::BufferSource::initTempBuffer() const
         int t = w; w = h; h = t;
     }
 
+    // we're in the copybit case, so make sure we can handle this blit
+    // we don't have to keep the aspect ratio here
+    copybit_device_t* copybit = mLayer.mBlitEngine;
+    const int down = copybit->get(copybit, COPYBIT_MINIFICATION_LIMIT);
+    const int up = copybit->get(copybit, COPYBIT_MAGNIFICATION_LIMIT);
+    if (buffers.w > w*down)     w = buffers.w / down;
+    else if (w > buffers.w*up)  w = buffers.w*up;
+    if (buffers.h > h*down)     h = buffers.h / down;
+    else if (h > buffers.h*up)  h = buffers.h*up;
+
     if (mTexture.image != EGL_NO_IMAGE_KHR) {
         // we have an EGLImage, make sure the needed size didn't change
         if (w!=mTexture.width || h!= mTexture.height) {
