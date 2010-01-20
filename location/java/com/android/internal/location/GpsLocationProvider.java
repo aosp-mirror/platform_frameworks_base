@@ -182,6 +182,9 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
 
     // true if GPS is navigating
     private boolean mNavigating;
+
+    // true if GPS engine is on
+    private boolean mEngineOn;
     
     // requested frequency of fixes, in seconds
     private int mFixInterval = 1;
@@ -556,13 +559,17 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
             mNetworkThread = null;
         }
 
+        // do this before releasing wakelock
+        native_cleanup();
+
         // The GpsEventThread does not wait for the GPS to shutdown
         // so we need to report the GPS_STATUS_ENGINE_OFF event here
         if (mNavigating) {
+            reportStatus(GPS_STATUS_SESSION_END);
+        }
+        if (mEngineOn) {
             reportStatus(GPS_STATUS_ENGINE_OFF);
         }
-
-        native_cleanup();
     }
 
     public boolean isEnabled() {
@@ -874,9 +881,24 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
 
         synchronized(mListeners) {
             boolean wasNavigating = mNavigating;
-            mNavigating = (status == GPS_STATUS_SESSION_BEGIN);
 
-            if (mNavigating && !mWakeLock.isHeld()) {
+            switch (status) {
+                case GPS_STATUS_SESSION_BEGIN:
+                    mNavigating = true;
+                    break;
+                case GPS_STATUS_SESSION_END:
+                    mNavigating = false;
+                    break;
+                case GPS_STATUS_ENGINE_ON:
+                    mEngineOn = true;
+                    break;
+                case GPS_STATUS_ENGINE_OFF:
+                    mEngineOn = false;
+                    break;
+            }
+
+            // beware, the events can come out of order
+            if ((mNavigating || mEngineOn) && !mWakeLock.isHeld()) {
                 if (DEBUG) Log.d(TAG, "Acquiring wakelock");
                  mWakeLock.acquire();
             }
@@ -919,7 +941,8 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
                 mContext.sendBroadcast(intent);
             }
 
-            if (status == GPS_STATUS_ENGINE_OFF && mWakeLock.isHeld()) {
+            // beware, the events can come out of order
+            if (!mNavigating && !mEngineOn && mWakeLock.isHeld()) {
                 if (DEBUG) Log.d(TAG, "Releasing wakelock");
                 mWakeLock.release();
             }
