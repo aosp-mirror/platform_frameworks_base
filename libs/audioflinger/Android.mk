@@ -47,7 +47,7 @@ include $(BUILD_STATIC_LIBRARY)
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:=               \
-    AudioPolicyManagerGeneric.cpp
+    AudioPolicyManagerBase.cpp
 
 LOCAL_SHARED_LIBRARIES := \
     libcutils \
@@ -60,7 +60,7 @@ else
  LOCAL_SHARED_LIBRARIES += libdl
 endif
 
-LOCAL_MODULE:= libaudiopolicygeneric
+LOCAL_MODULE:= libaudiopolicybase
 
 ifeq ($(BOARD_HAVE_BLUETOOTH),true)
   LOCAL_CFLAGS += -DWITH_A2DP
@@ -70,7 +70,7 @@ ifeq ($(AUDIO_POLICY_TEST),true)
   LOCAL_CFLAGS += -DAUDIO_POLICY_TEST
 endif
 
-include $(BUILD_SHARED_LIBRARY)
+include $(BUILD_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
 
@@ -87,11 +87,10 @@ LOCAL_SHARED_LIBRARIES := \
     libutils \
 	libbinder \
     libmedia \
-    libhardware_legacy \
-    libaudiopolicygeneric
+    libhardware_legacy
 
 ifeq ($(strip $(BOARD_USES_GENERIC_AUDIO)),true)
-  LOCAL_STATIC_LIBRARIES += libaudiointerface
+  LOCAL_STATIC_LIBRARIES += libaudiointerface libaudiopolicybase
   LOCAL_CFLAGS += -DGENERIC_AUDIO
 else
   LOCAL_SHARED_LIBRARIES += libaudio libaudiopolicy
