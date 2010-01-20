@@ -125,13 +125,16 @@ public class Canvas extends _Original_Canvas {
         }
 
         Shader shader = paint.getShader();
-        if (shader instanceof LinearGradient) {
-            g.setPaint(((LinearGradient)shader).getPaint());
-        } else {
-            if (mLogger != null && shader != null) {
-                mLogger.warning(String.format(
-                        "Shader '%1$s' is not supported in the Layout Editor.",
-                        shader.getClass().getCanonicalName()));
+        if (shader != null) {
+            java.awt.Paint shaderPaint = shader.getPaint();
+            if (shaderPaint != null) {
+                g.setPaint(shaderPaint);
+            } else {
+                if (mLogger != null) {
+                    mLogger.warning(String.format(
+                            "Shader '%1$s' is not supported in the Layout Editor.",
+                            shader.getClass().getCanonicalName()));
+                }
             }
         }
 
@@ -409,7 +412,7 @@ public class Canvas extends _Original_Canvas {
 
         g.setColor(new Color(color));
 
-        getGraphics2d().fillRect(0, 0, getWidth(), getHeight());
+        g.fillRect(0, 0, getWidth(), getHeight());
 
         g.setComposite(composite);
 
