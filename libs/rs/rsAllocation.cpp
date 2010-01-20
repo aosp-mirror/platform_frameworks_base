@@ -366,6 +366,25 @@ static void mip8888(const Adapter2D &out, const Adapter2D &in)
     }
 }
 
+static void mip8(const Adapter2D &out, const Adapter2D &in)
+{
+    uint32_t w = out.getDimX();
+    uint32_t h = out.getDimY();
+
+    for (uint32_t y=0; y < h; y++) {
+        uint8_t *oPtr = static_cast<uint8_t *>(out.getElement(0, y));
+        const uint8_t *i1 = static_cast<uint8_t *>(in.getElement(0, y*2));
+        const uint8_t *i2 = static_cast<uint8_t *>(in.getElement(0, y*2+1));
+
+        for (uint32_t x=0; x < w; x++) {
+            *oPtr = (uint8_t)(((uint32_t)i1[0] + i1[1] + i2[0] + i2[1]) * 0.25f);
+            oPtr ++;
+            i1 += 2;
+            i2 += 2;
+        }
+    }
+}
+
 static void mip(const Adapter2D &out, const Adapter2D &in)
 {
     switch(out.getBaseType()->getElement()->getSizeBits()) {
@@ -374,6 +393,9 @@ static void mip(const Adapter2D &out, const Adapter2D &in)
         break;
     case 16:
         mip565(out, in);
+        break;
+    case 8:
+        mip8(out, in);
         break;
 
     }
