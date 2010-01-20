@@ -443,11 +443,7 @@ public class Notification implements Parcelable
             contentView.setTextViewText(com.android.internal.R.id.text, contentText);
         }
         if (this.when != 0) {
-            Date date = new Date(when);
-            CharSequence str = 
-                DateUtils.isToday(when) ? DateFormat.getTimeFormat(context).format(date)
-                    : DateFormat.getDateFormat(context).format(date);
-            contentView.setTextViewText(com.android.internal.R.id.time, str);
+            contentView.setLong(com.android.internal.R.id.time, "setTime", when);
         }
 
         this.contentView = contentView;
