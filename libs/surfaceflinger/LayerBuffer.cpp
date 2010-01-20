@@ -261,7 +261,7 @@ sp<OverlayRef> LayerBuffer::SurfaceLayerBuffer::createOverlay(
 // ============================================================================
 
 LayerBuffer::Buffer::Buffer(const ISurface::BufferHeap& buffers, ssize_t offset)
-    : mBufferHeap(buffers)
+    : mBufferHeap(buffers), mSupportsCopybit(false)
 {
     NativeBuffer& src(mNativeBuffer);
     src.crop.l = 0;
@@ -283,10 +283,8 @@ LayerBuffer::Buffer::Buffer(const ISurface::BufferHeap& buffers, ssize_t offset)
                 offset, buffers.heap->base(),
                 &src.img.handle);
 
-        LOGE_IF(err, "CREATE_HANDLE_FROM_BUFFER (heapId=%d, size=%d, "
-             "offset=%ld, base=%p) failed (%s)",
-                buffers.heap->heapID(), buffers.heap->getSize(),
-                offset, buffers.heap->base(), strerror(-err));
+        // we can fail here is the passed buffer is purely software
+        mSupportsCopybit = (err == NO_ERROR);
     }
  }
 
@@ -453,7 +451,7 @@ void LayerBuffer::BufferSource::onDraw(const Region& clip) const
 #if defined(EGL_ANDROID_image_native_buffer)
     if (mLayer.mFlags & DisplayHardware::DIRECT_TEXTURE) {
         copybit_device_t* copybit = mLayer.mBlitEngine;
-        if (copybit) {
+        if (copybit && ourBuffer->supportsCopybit()) {
             // create our EGLImageKHR the first time
             err = initTempBuffer();
             if (err == NO_ERROR) {
