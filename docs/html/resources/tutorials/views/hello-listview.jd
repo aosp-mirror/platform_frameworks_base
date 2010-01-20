@@ -1,36 +1,88 @@
-page.title=Hello, ListView
+page.title=List View
 parent.title=Hello, Views
 parent.link=index.html
 @jd:body
 
-<p>A {@link android.widget.ListView} is a View that shows items in a vertically scrolling list. The items are
- acquired from a {@link android.widget.ListAdapter}.</p>
+<p>{@link android.widget.ListView} is a {@link android.view.ViewGroup} that creates a list of
+scrollable items. The list items are automatically inserted to the list using a {@link
+android.widget.ListAdapter}.</p>
 
+<p>In this tutorial, you'll create a scrollable list of country names that are read from a string array.
+When a list item is selected, a toast message will display the position of the item in the list.</p>
 
 <ol>
-  <li>Start a new project/ListActivity called HelloListView.</li>
-  <li>Open the HelloListView Java file. Make the class extend ListActivity (instead of Activity).
+  <li>Start a new project named <em>HelloListView</em>.</li>
+  <li>Create an XML file named <code>list_item.xml</code> and save it inside the
+<code>res/layout/</code> folder. Insert the following:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:padding="10dp"
+    android:textSize="16sp" >
+&lt;/TextView>
+</pre>
+  <p>This file defines the layout for each item that will be placed in the {@link
+android.widget.ListView}.</p>
+  </li>
+
+  <li>Open the <code>HelloListView.java</code> and make the class extend {@link
+android.app.ListActivity} (instead of {@link android.app.Activity}):
 	<pre>public class HelloListView extends ListActivity {</pre>
   </li>
-  <li>Insert the following for the <code>onCreate()</code> method:
+  <li>Insert the following code for the {@link android.app.Activity#onCreate(Bundle) onCreate()}
+method:
 <pre>
 &#64;Override
 public void onCreate(Bundle savedInstanceState) {
   super.onCreate(savedInstanceState);
-  
-  setListAdapter(new ArrayAdapter&lt;String>(this,
-          android.R.layout.simple_list_item_1, COUNTRIES));
-  getListView().setTextFilterEnabled(true);
+
+  setListAdapter(new ArrayAdapter&lt;String>(this, R.layout.list_item, COUNTRIES));
+
+  ListView lv = getListView();
+  lv.setTextFilterEnabled(true);
+
+  lv.setOnItemClickListener(new OnItemClickListener() {
+    public void onItemClick(AdapterView&lt;?> parent, View view,
+        int position, long id) {
+      // When clicked, show a toast with the TextView text
+      Toast.makeText(getApplicationContext(), ((TextView) view).getText(),
+          Toast.LENGTH_SHORT).show();
+    }
+  });
 }
 </pre>
-	<p>Notice that we don't need to load a layout (at least, not in this case, because we're using
-	the whole screen for our list). Instead, we just call <code>setListAdapter()</code> (which automatically
-	adds a ListView to the ListActivity), and provide it with an ArrayAdapter that binds a 
-	<code>simple_list_item_1</code> layout item to each entry in the <code>COUNTRIES</code> 
-	array (added next). The next line of code adds a text filter to the ListView, so that when the user
-	begins typing, the list will filter the entire view to display only the items that match the entry.</p>
-  </li>
-  <li>Following the <code>onCreate()</code> method, add the String array:
+<p>Notice that this does not load a layout file for the Activity (which you usually do with {@link
+android.app.Activity#setContentView(int)}). Instead, {@link
+android.app.ListActivity#setListAdapter(ListAdapter)} automatically
+adds a {@link android.widget.ListView} to fill the entire screen of the {@link
+android.app.ListActivity}. This method takes an {@link android.widget.ArrayAdapter}, which
+manages the array of list items that will be placed into the {@link android.widget.ListView}. The
+{@link android.widget.ArrayAdapter} constructor takes the application {@link
+android.content.Context}, the
+layout description for each list item (created in
+the previous step), and a {@link java.util.List} of objects to insert in the {@link
+android.widget.ListView} (defined next).</p>
+
+<p>The {@link android.widget.ListView#setTextFilterEnabled(boolean)} method turns on text filtering
+for the {@link android.widget.ListView}, so that when the user begins typing, the list will be
+filtered.</p>
+
+<p>The {@link android.widget.ListView#setOnItemClickListener(OnItemClickListener)} method defines
+the on-click listener for each item. When an item in the {@link android.widget.ListView} is clicked,
+the {@link android.widget.AdapterView.OnItemClickListener#onItemClick(AdapterView,View,int,long)
+onItemClick()} method is called and a {@link android.widget.Toast} message is displayed, using the
+text from the clicked item.</p>
+
+<p class="note"><strong>Tip:</strong> You can use list item designs provided by the platform
+instead of defining your own layout file for the {@link android.widget.ListAdapter}. For example,
+try using <code>android.R.layout.simple_list_item_1</code> instead of
+<code>R.layout.list_item</code>.</p>
+</li>
+
+<li>After the {@link android.app.Activity#onCreate(Bundle) onCreate()} method, add the string
+array:
 <pre>
   static final String[] COUNTRIES = new String[] {
     "Afghanistan", "Albania", "Algeria", "American Samoa", "Andorra",
@@ -76,11 +128,39 @@ public void onCreate(Bundle savedInstanceState) {
     "Yemen", "Yugoslavia", "Zambia", "Zimbabwe"
   };
 </pre>
+  <p>This is the array of strings that will be placed into the {@link android.widget.ListView}.</p>
 </li>
-<li> Run it.</li>
+<li>Run the application.</li>
 </ol>
-<p>You can scroll the list, or type to filter it. You should see something like this:</p>
+<p>You can scroll the list, or type to filter it, then click an item to see a message. You
+should see something like this:</p>
 <img src="images/hello-listview.png" width="150px" />
+
+<p>Note that using a hard-coded string array is not the best design practice. One is
+used in this tutorial for simplicity, in order to demonstrate the {@link
+android.widget.ListView} widget. The better practice is to reference a string array
+defined by an external resource, such as with a {@code &lt;string-array&gt;}
+resource in your project {@code res/values/strings.xml} file. For example:</p>
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;resources>
+    &lt;string-array name="countries_array">
+        &lt;item>Bahrain&lt;/item>
+        &lt;item>Bangladesh&lt;/item>
+        &lt;item>Barbados&lt;/item>
+        &lt;item>Belarus&lt;/item>
+        &lt;item>Belgium&lt;/item>
+        &lt;item>Belize&lt;/item>
+        &lt;item>Benin&lt;/item>
+    &lt;/string-array>
+&lt;/resources>
+</pre>
+<p>To use these resource strings for the {@link android.widget.ArrayAdapter}, replace the original
+{@link android.app.ListActivity#setListAdapter(ListAdapter)} line with the following:</p>
+<pre>
+String[] countries = getResources().getStringArray(R.array.countries_array);
+setListAdapter(new ArrayAdapter&lt;String>(this, R.layout.list_item, countries));
+</pre>
 
 <h3>References</h3>
 <ul>
