@@ -1024,23 +1024,7 @@ class MountService extends IMountService.Stub
     }
 
     public String[] getSecureContainerList() throws IllegalStateException {
-        ArrayList<String> rsp = mConnector.doCommand("list_asec");
-
-        String[] rdata = new String[rsp.size()];
-        int idx = 0;
-
-        for (String line : rsp) {
-            String []tok = line.split(" ");
-            int code = Integer.parseInt(tok[0]);
-            if (code == VoldResponseCode.AsecListResult) {
-                rdata[idx++] = tok[1];
-            } else if (code == NativeDaemonConnector.ResponseCode.CommandOkay) {
-                return rdata;
-            } else {
-                throw new IllegalStateException(String.format("Unexpected response code %d", code));
-            }
-        }
-        throw new IllegalStateException("Got an empty response");
+        return mConnector.doListCommand("list_asec", VoldResponseCode.AsecListResult);
     }
 
     public String createSecureContainer(String id, int sizeMb, String fstype,
