@@ -91,7 +91,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
 
     private final static String TAG = "KeyguardViewMediator";
 
-    private static final String DELAYED_KEYGUARD_ACTION = 
+    private static final String DELAYED_KEYGUARD_ACTION =
         "com.android.internal.policy.impl.PhoneWindowManager.DELAYED_KEYGUARD";
 
     // used for handler messages
@@ -107,7 +107,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
     private static final int KEYGUARD_DONE_DRAWING = 10;
     private static final int KEYGUARD_DONE_AUTHENTICATING = 11;
     private static final int SET_HIDDEN = 12;
-    
+
     /**
      * The default amount of time we stay awake (used for all key input)
      */
@@ -133,13 +133,13 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
      * that is reenabling the keyguard.
      */
     private static final int KEYGUARD_DONE_DRAWING_TIMEOUT_MS = 2000;
-    
+
     private Context mContext;
     private AlarmManager mAlarmManager;
     private StatusBarManager mStatusBarManager;
 
     private boolean mSystemReady;
-    
+
     /** Low level access to the power manager for enableUserActivity.  Having this
      * requires that we run in the system process.  */
     LocalPowerManager mRealPowerManager;
@@ -234,7 +234,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
         mRealPowerManager = powerManager;
         mPM = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         mWakeLock = mPM.newWakeLock(
-                PowerManager.FULL_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP, 
+                PowerManager.FULL_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP,
                 "keyguard");
         mWakeLock.setReferenceCounted(false);
         mShowKeyguardWakeLock = mPM.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "show keyguard");
@@ -257,10 +257,8 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
 
         mUpdateMonitor.registerSimStateCallback(this);
 
-        mKeyguardViewProperties =
-                new LockPatternKeyguardViewProperties(
-                        new LockPatternUtils(mContext.getContentResolver()),
-                        mUpdateMonitor);
+        mKeyguardViewProperties = new LockPatternKeyguardViewProperties(
+                new LockPatternUtils(mContext), mUpdateMonitor);
 
         mKeyguardViewManager = new KeyguardViewManager(
                 context, WindowManagerImpl.getDefault(), this,
@@ -297,7 +295,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
                 mExitSecureCallback.onKeyguardExitResult(false);
                 mExitSecureCallback = null;
                 if (!mExternallyEnabled) {
-                    hideLocked();                    
+                    hideLocked();
                 }
             } else if (mShowing) {
                 notifyScreenOffLocked();
@@ -314,7 +312,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
                         0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
                 mAlarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, when,
                         sender);
-                if (DEBUG) Log.d(TAG, "setting alarm to turn off keyguard, seq = " 
+                if (DEBUG) Log.d(TAG, "setting alarm to turn off keyguard, seq = "
                                  + mDelayedShowingSequence);
             } else if (why == WindowManagerPolicy.OFF_BECAUSE_OF_PROX_SENSOR) {
                 // Do not enable the keyguard if the prox sensor forced the screen off.
@@ -508,7 +506,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
                 if (DEBUG) Log.d(TAG, "doKeyguard: not showing because it is already showing");
                 return;
             }
-            
+
             // if the setup wizard hasn't run yet, don't show
             final boolean requireSim = !SystemProperties.getBoolean("keyguard.no_require_sim",
                     false);
@@ -522,7 +520,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
                         + " and the sim is not locked or missing");
                 return;
             }
-            
+
             if (DEBUG) Log.d(TAG, "doKeyguard: showing the lock screen");
             showLocked();
         }
@@ -560,7 +558,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
 
     /**
      * Send a message to keyguard telling it the screen just turned on.
-     * @see #onScreenTurnedOn() 
+     * @see #onScreenTurnedOn()
      * @see #handleNotifyScreenOn
      */
     private void notifyScreenOnLocked() {
@@ -603,7 +601,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
 
     /**
      * Send message to keyguard telling it to hide itself
-     * @see #handleHide() 
+     * @see #handleHide()
      */
     private void hideLocked() {
         if (DEBUG) Log.d(TAG, "hideLocked");
@@ -651,7 +649,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
     public boolean isSecure() {
         return mKeyguardViewProperties.isSecure();
     }
-    
+
     private BroadcastReceiver mBroadCastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -692,7 +690,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
      * The 'Tq' suffix is per the documentation in {@link WindowManagerPolicy}.
      * Be sure not to take any action that takes a long time; any significant
      * action should be posted to a handler.
-     * 
+     *
      * @param keyCode The keycode of the key that woke the device
      * @return Whether we poked the wake lock (and turned the screen on)
      */
@@ -715,12 +713,12 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
             case KeyEvent.KEYCODE_VOLUME_UP:
             case KeyEvent.KEYCODE_VOLUME_DOWN:
             case KeyEvent.KEYCODE_MUTE:
-            case KeyEvent.KEYCODE_HEADSETHOOK: 
-            case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE: 
-            case KeyEvent.KEYCODE_MEDIA_STOP: 
-            case KeyEvent.KEYCODE_MEDIA_NEXT: 
-            case KeyEvent.KEYCODE_MEDIA_PREVIOUS: 
-            case KeyEvent.KEYCODE_MEDIA_REWIND: 
+            case KeyEvent.KEYCODE_HEADSETHOOK:
+            case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
+            case KeyEvent.KEYCODE_MEDIA_STOP:
+            case KeyEvent.KEYCODE_MEDIA_NEXT:
+            case KeyEvent.KEYCODE_MEDIA_PREVIOUS:
+            case KeyEvent.KEYCODE_MEDIA_REWIND:
             case KeyEvent.KEYCODE_MEDIA_FAST_FORWARD:
             case KeyEvent.KEYCODE_CAMERA:
                 return false;
@@ -753,7 +751,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
     /**
      * {@inheritDoc}
      *
-     * @see #handleKeyguardDone 
+     * @see #handleKeyguardDone
      */
     public void keyguardDone(boolean authenticated) {
         keyguardDone(authenticated, true);
@@ -761,14 +759,14 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
 
     public void keyguardDone(boolean authenticated, boolean wakeup) {
         synchronized (this) {
-            EventLog.writeEvent(70000, 2);       
+            EventLog.writeEvent(70000, 2);
             if (DEBUG) Log.d(TAG, "keyguardDone(" + authenticated + ")");
             Message msg = mHandler.obtainMessage(KEYGUARD_DONE);
             msg.arg1 = wakeup ? 1 : 0;
             mHandler.sendMessage(msg);
 
             if (authenticated) {
-                mUpdateMonitor.clearFailedAttempts();                
+                mUpdateMonitor.clearFailedAttempts();
             }
 
             if (mExitSecureCallback != null) {
@@ -902,7 +900,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
         synchronized (KeyguardViewMediator.this) {
             if (DEBUG) Log.d(TAG, "handleShow");
             if (!mSystemReady) return;
-            
+
             mKeyguardViewManager.show();
             mShowing = true;
             adjustUserActivityLocked();
@@ -992,7 +990,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
     }
 
     /**
-     * Handle message sent by {@link #resetStateLocked()} 
+     * Handle message sent by {@link #resetStateLocked()}
      * @see #RESET
      */
     private void handleReset() {
