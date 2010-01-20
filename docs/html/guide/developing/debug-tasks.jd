@@ -6,7 +6,8 @@ page.title=Debugging Tasks
   <h2>In this document</h2>
   <ol>
     <li><a href="#tools">Tools</a></li>
-    <li><a href="#additionaldebugging">Debug and Test Settings</a></li>
+    <li><a href="#additionaldebugging">Debug with Dev Tools</a></li>
+    <li><a href="#DebuggingWebPages">Debugging Web Pages</a></li>
     <li><a href="#toptips">Top Debugging Tips</a></li>
     <li><a href="#ide-debug-port">Configuring Your IDE to Attach to the Debugging Port</a></li>
   </ol>
@@ -17,177 +18,241 @@ page.title=Debugging Tasks
 
 
 <h2 id="tools">Tools</h2>
-<p>The Android SDK includes a fairly extensive set of tools to help you debug your programs: </p>
-<ul>
-    <li><a href="{@docRoot}guide/developing/tools/ddms.html"><strong>DDMS</strong></a> - A graphical program that
+
+<p>The Android SDK includes a set of tools to help you debug and profile
+your applications. Here are some tools that you'll use most often:</p>
+
+<dl>
+  <dt><strong><a href="{@docRoot}guide/developing/tools/adb.html">Android Debug Bridge
+(ADB)</a></strong></dt>
+  <dd>Provides various device management capabilities, including
+    moving and syncing files to the emulator, forwarding ports, and running a UNIX
+    shell on the emulator.</dd>
+  <dt><strong><a href="{@docRoot}guide/developing/tools/ddms.html">Dalvik Debug Monitor Server
+(DDMS)</a></strong></dt>
+  <dd>A graphical program that
         supports port forwarding (so you can set up breakpoints in your code in your
         IDE), screen captures on the emulator, thread and stack information,
-        and many other features. You can also run logcat to retrieve your Log messages.
-        See the linked topic for more information. </li>
-    <li><strong><a href="{@docRoot}guide/developing/tools/ddms.html#logcat">logcat</a></strong> - Dumps a log of system
-        messages. The messages include a stack trace when the emulator throws an error,
-        as well as Log messages. To run logcat, see the linked topic.
-        
-    <pre>...
-I/MemoryDealer( 763): MemoryDealer (this=0x54bda0): Creating 2621440 bytes heap at 0x438db000
-<span style="background-color:#CCCCCC; border-bottom:medium">I/Logger( 1858): getView() requesting item number 0
-I/Logger( 1858): getView() requesting item number 1
-I/Logger( 1858): getView() requesting item number 2</span>
-D/ActivityManager( 763): Stopping: HistoryRecord{409dbb20 com.android.home.AllApps}
-...</pre>
+        and many other features. You can also run logcat to retrieve your Log messages.</dd>
+  </dd>
+  <dt><strong><a href="{@docRoot}guide/developing/tools/traceview.html">Traceview</a></strong></dt>
+  <dd>A graphical viewer that displays trace file data for method calls and times saved by
+  your application, which can help you profile the performance of your application.</dd>
+  <dt><strong><a href="{@docRoot}guide/developing/tools/ddms.html#logcat">logcat</a></strong></dt>
+  <dd>Dumps a log of system
+      messages. The messages include a stack trace when the emulator throws an error,
+      as well as {@link android.util.Log} messages you've written from your application. To run
+      logcat, execute <code>adb logcat</code> or, from DDMS, select <strong>Device > Run
+      logcat</strong>.
+      <p>{@link android.util.Log} is a logging
+      class you can use to print out messages to the logcat. You can read messages
+      in real time if you run logcat on DDMS (covered next). Common logging methods include:
+      {@link android.util.Log#v(String,String)} (verbose), {@link
+      android.util.Log#d(String,String)} (debug), {@link android.util.Log#i(String,String)}
+      (information), {@link android.util.Log#w(String,String)} (warning) and {@link
+      android.util.Log#e(String,String)} (error). For example:</p>
+<pre class="no-pretty-print">
+Log.i("MyActivity", "MyClass.getView() &mdash; get item number " + position);
+</pre>
+      <p>The logcat will then output something like:</p>
+<pre class="no-pretty-print">
+I/MyActivity( 1557): MyClass.getView() &mdash; get item number 1
+</pre>
+      <p>Logcat is also the place to look when debugging a web page in the Android browser. All
+browser bugs will be output to logcat with the {@code WebCore} tag.
+</dl>
 
-    </li>
-    <li><p><strong>{@link android.util.Log Android Log}</strong>- A logging
-        class to print out messages to a log file on the emulator. You can read messages
-        in real time if you run logcat on DDMS (covered next). Add a few logging
-        method calls to your code.</p>
-        <p>To use the <code>Log</code> class, you just call <code>Log.v()</code>
-        (verbose), <code>Log.d()</code> (debug), <code>Log.i()</code> (information), 
-        <code>Log.w()</code> (warning) or <code>Log.e</code> (error) depending
-        on the importance you wish to assign the log message.</p>
-                <code>Log.i(&quot;MyActivity&quot;, &quot;MyClass.getView()
-                &mdash; Requesting item number &quot; + position)</code>
-        <p>You can use logcat to read these messages</p></li>
-    <li><strong><a href="{@docRoot}guide/developing/tools/traceview.html">Traceview</a> </strong>- Android can save
-        a log of method calls and times to a logging file that you can view in a
-        graphical reader called Traceview. See the linked topic for more information. </li>
-</ul>
-<ul>
-    <li><a href="{@docRoot}guide/developing/eclipse-adt.html"><strong>Eclipse plugin</strong></a> - The ADT Plugin
-        for Eclipse integrates a number of these tools (ADB, DDMS, logcat output,
-    and other functionality). See the linked topic for more information. </li>
-    <li><strong>Debug and Test Device Settings</strong> - Android exposes several settings
-        that expose useful information such as CPU usage and frame rate. See <a href="#additionaldebugging">Debug
-        and Test Settings on the Emulator</a> below. </li>
-</ul>
-<p>Also, see the <a href="{@docRoot}resources/faq/troubleshooting.html">Troubleshooting</a> section
-    of the doc to figure out why your application isn't appearing on the emulator,
-    or why it's not starting. </p>
+<p>For more information about all the development tools provided with the Android SDK, see the <a
+href="{@docRoot}guide/developing/tools/index.html">Tools</a> document.</p>
 
+<p>In addition to the above tools, you may also find the following useful for debugging:
+<dl>
+  <dt><a href="{@docRoot}guide/developing/eclipse-adt.html"><strong>Eclipse ADT
+plugin</strong></a></dt>
+  <dd>The ADT Plugin for Eclipse integrates a number of the Android development tools (ADB, DDMS,
+logcat output, and other functionality), so that you won't work with them directly but will utilize
+them through the Eclipse IDE.</dd>
+  <dt><strong>Developer Settings in the Dev Tools app</strong></dt>
+  <dd>The Dev Tools application included in the emulator system image exposes several settings
+        that provide useful information such as CPU usage and frame rate. See <a
+href="#additionaldebugging">Debugging and Testing with Dev Tools</a> below.</dd>
+</dl>
 
-<h2 id="additionaldebugging">Debug and Test Settings</h2>
+<h2 id="additionaldebugging">Debugging and Testing with Dev Tools</h2>
 
-<p>With the <strong>Dev Tools</strong> application, you can turn on a number of settings that will make it easier to test
-    and debug your applications. To get to the development settings page on the emulator, launch the
-    <strong>Dev Tools</strong> application and open <strong>Development Settings</strong>.
-    This will open the development settings page with the following options (among
-    others):</p>
-<ul>
-    <li><strong>Debug app</strong>&nbsp;&nbsp;&nbsp;Selects the application that
-        will be debugged. You do not need to set this to attach a debugger, but setting
-        this value has two effects:
+<p>With the Dev Tools application, you can turn on a number of settings that will
+make it easier to test and debug your applications. The Dev Tools application is automatically
+installed on all system images included with the SDK. The source code for the Dev Tools application
+is also provided in the SDK samples so that you may build it and then install the application on any
+development device.</p>
+
+<p>To get to the development settings page on the emulator, launch the Dev Tools application and
+select Development Settings. This will open the Development Settings page with the
+following options (among others):</p>
+
+<dl>
+    <dt><strong>Debug app</strong></dt>
+    <dd>Lets you select the application to debug. You do not need to set this to attach a debugger,
+    but setting this value has two effects:
         <ul>
-                <li>It will prevent Android from throwing an error if you pause on
+            <li>It will prevent Android from throwing an error if you pause on
                     a breakpoint for a long time while debugging.</li>
             <li>It will enable you to select the <em>Wait for Debugger</em> option
                 to pause application startup until your debugger attaches (described
                 next). </li>
         </ul>
-    </li>
-    <li><strong>Wait for debugger </strong> &nbsp;&nbsp;
-        Blocks the selected application from loading until a debugger attaches. This
+    </dd>
+    <dt><strong>Wait for debugger</strong></dt>
+    <dd>Blocks the selected application from loading until a debugger attaches. This
             way you can set a breakpoint in onCreate(), which is important to debug
             the startup process of an Activity. When you change this option, any
             currently running instances of the selected application will be killed.
             In order to check this box, you must have selected a debug application
             as described in the previous option. You can do the same thing by adding
-            {@link android.os.Debug#waitForDebugger()} to your code. </li>
-    <li><strong>Immediately destroy activities</strong>&nbsp;&nbsp;&nbsp;Tells the
+            {@link android.os.Debug#waitForDebugger()} to your code.</dd>
+    <dt><strong>Show screen updates</strong></dt>
+    <dd>Flashes a momentary pink rectangle on any screen sections that are being
+            redrawn. This is very useful for discovering unnecessary screen drawing.</dd>
+    <dt><strong>Immediately destroy activities</strong></dt>
+    <dd>Tells the
         system to destroy an activity as soon as it is stopped (as if Android had to
         reclaim memory).&nbsp; This is very useful for testing the {@link android.app.Activity#onSaveInstanceState}
         / {@link android.app.Activity#onCreate(android.os.Bundle)} code path, which would
         otherwise be difficult to force. Choosing this option will probably reveal
-        a number of problems in your application due to not saving state.</li>
-    <li><strong>Show screen updates</strong>&nbsp;&nbsp;&nbsp;
-        Flashes a momentary pink rectangle on any screen sections that are being
-            redrawn. This is very useful for discovering unnecessary screen drawing. </li>
-    <li><strong>Show CPU usage</strong>&nbsp;&nbsp;&nbsp;Displays CPU meters at the
+        a number of problems in your application due to not saving state.</dd>
+    <dt><strong>Show CPU usage</strong></dt>
+    <dd>Displays CPU meters at the
         top of the screen, showing how much the CPU is being used. The top red bar
         shows overall CPU usage, and the green bar underneath it shows the CPU time
         spent in compositing the screen. <em>Note: You cannot turn this feature off
-        once it is on, without restarting the emulator.</em> </li>
-    <li><strong>Show background</strong>&nbsp;&nbsp;&nbsp;Displays a background pattern
+        once it is on, without restarting the emulator.</em> </dd>
+    <dt><strong>Show background</strong></dt>
+    <dd>Displays a background pattern
         when no activity screens are visible. This typically does not happen, but
-        can happen during debugging. </li>
-</ul>
+        can happen during debugging.</dd>
+</dl>
+
 <p>These settings will be remembered across emulator restarts. </p>
 
+<h2 id="DebuggingWebPages">Debugging Web Pages</h2>
+
+<p>If you're developing a web application for Android devices, you can debug your JavaScript on
+Android using the Console APIs, which will output messages to logcat. If you're familiar
+debugging web pages with Firefox's FireBug or WebKit's Web Inspector, then you're probably familiar
+with the Console APIs. The Android Browser (and {@link android.webkit.WebChromeClient}) supports
+most of the same APIs.</p>
+
+<p>When you call a function from the Console APIs (in the DOM's {@code window.console} object),
+you will see the output in logcat as a warning. For example, if your web page
+executes the following JavaScript:</p>
+<pre class="no-pretty-print">
+console.log("Hello World");
+</pre>
+<p>Then the logcat output from the Android Browser will look like this:</p>
+<pre class="no-pretty-print">
+W/browser ( 202): Console: Hello World :0
+</pre>
+
+<p class="note"><strong>Note:</strong> All Console messages from the Android
+Browser are tagged with the name "browser" on Android platforms running API Level 7 or higher and
+tagged with the name "WebCore" for platforms running API Level 6 or lower.</p>
+
+<p>Not all of the Console APIs available in Firefox or other WebKit browsers are implemented
+on Android. Mostly, you need to depend on basic text logging provided by
+functions like {@code console.log(String)}, {@code console.info(String)}, {@code
+console.warn(String)}, and {@code console.error(String)}. Although other Console functions may not
+be implemented, they will not raise run-time errors, but will simply not behave as you might
+expect.</p>
+
+<p>If you've implemented a custom {@link android.webkit.WebView} in your application, then in order
+to receive messages that are sent through the Console APIs, you must provide a {@link
+android.webkit.WebChromeClient} that implements the {@link
+android.webkit.WebChromeClient#onConsoleMessage(String,int,String) onConsoleMessage()} callback
+method. For example, assuming that the {@code myWebView} field references the {@link
+android.webkit.WebView} in your application, you can log debug messages like this:</p>
+<pre>
+myWebView.setWebChromeClient(new WebChromeClient() {
+  public void onConsoleMessage(String message, int lineNumber, String sourceID) {
+    Log.d("MyApplication", message);
+  }
+});
+</pre>
+<p>The {@link android.webkit.WebChromeClient#onConsoleMessage(String,int,String)
+onConsoleMessage()} method will be called each time one of the Console methods is called from
+within your {@link android.webkit.WebView}.</p>
+<p>When the "Hello World" log is executed through your {@link android.webkit.WebView}, it will
+now look like this:</p>
+<pre class="no-pretty-print">
+D/MyApplication ( 430): Hello World
+</pre>
+
+<p class="note"><strong>Note:</strong> The {@link
+android.webkit.WebChromeClient#onConsoleMessage(String,int,String) onConsoleMessage()} callback
+method was added with API Level 7. If you are targetting platforms running API Level 6 or lower,
+then your Console messages will automatically be sent to logcat with the "WebCore" logging tag.</p>
+
+
+
+
 <h2 id="toptips">Top Debugging Tips</h2>
-<!--
-<ul>
-    <li><a href="#stackdump">Quick stack dump</a></li>
-    <li><a href="#displayinfo">Displaying useful info on the emulator screen </a></li>
-    <li><a href="#dumpstate">Getting system state information from the emulator (dumpstate)</a></li>
-    <li><a href="#dumpsys">Getting application state information from the emulator (dumpsys)</a></li>
-    <li><a href="#radioinfo">Getting wireless connectivity information</a></li>
-    <li><a href="#loggingdata">Logging Trace Data</a></li>
-    <li><a href="#logradio">Logging  Radio Data </a></li>
-    <li><a href="#adb">Running adb</a></li>
-    <li><a href="#screencaps">Getting screen captures from the emulator</a></li>
-    <li><a href="#debughelpers">Using debug helper classes</a></li>
-</ul>
--->
+
 <dl>
-<dt>Quick stack dump <a name="stackdump" id="stackdump"></a></dt>
+<dt><strong>Dump the stack trace</strong></dt>
 <dd>To obtain a stack dump from emulator, you can log
 in with <code>adb shell</code>, use &quot;ps&quot; to find the process you
 want, and then &quot;kill -3 &quot;. The stack trace appears in the log file.
 </dd>
 
-<dt>Displaying useful info on the emulator screen<a name="displayinfo" id="displayinfo"></a></dt>
+<dt><strong>Display useful info on the emulator screen</strong></dt>
 <dd>The device can display useful information such as CPU usage or highlights
 around redrawn areas. Turn these features on and off in the developer settings
 window as described in <a href="#additionaldebugging">Setting debug and test
 configurations on the emulator</a>.
 </dd>
 
-<dt>Getting system state information from the emulator (dumpstate)<a name="dumpstate" id="dumpstate"></a> </dt>
+<dt><strong>Get system state information from the emulator (dumpstate)</strong></dt>
 <dd>You can access dumpstate information from the Dalvik Debug Monitor Service
 tool. See <a href="{@docRoot}guide/developing/tools/adb.html#dumpsys">dumpsys and
 dumpstate</a> on the adb topic page.</dd>
 
-<dt>Getting application state information from the emulator (dumpsys)<a name="dumpsys" id="dumpsys"></a></dt>
+<dt><strong>Get application state information from the emulator (dumpsys)</strong></dt>
 <dd>You can access dumpsys information from the Dalvik Debug Monitor Service
 tool. See <a href="{@docRoot}guide/developing/tools/adb.html#dumpsys">dumpsys and
 dumpstate</a> on the adb topic page.</dd>
 
-<dt>Getting wireless connectivity information <a name="radioinfo" id="radioinfo"></a></dt>
+<dt><strong>Get wireless connectivity information</strong></dt>
 <dd>You can get information about wireless connectivity using the Dalvik Debug
 Monitor Service tool. From the <strong>Device</strong> menu, select &quot;Dump
 radio state&quot;.</dd>
 
-<dt>Logging Trace Data<a name="loggingdata" id="loggingdata"></a></dt>
+<dt><strong>Log trace data</strong></dt>
 <dd>You can log method calls and other tracing data in an activity by calling
-android.os.Debug.startMethodTracing(). See <a
+{@link android.os.Debug#startMethodTracing(String) startMethodTracing()}. See <a
 href="{@docRoot}guide/developing/tools/traceview.html">Running the Traceview Debugging
 Program</a> for details. </dd>
 
-<dt>Logging Radio Data<a name="logradio" id="logradio"></a></dt>
+<dt><strong>Log radio data</strong></dt>
 <dd>By default, radio information is not logged to the system (it is a lot of
 data). However, you can enable radio logging using the following commands:
 
-<pre>
+<pre class="no-pretty-print">
 adb shell
 logcat -b radio
 </pre>
 </dd>
 
-<dt>Running adb<a name="adb" id="adb"></a></dt>
-<dd>Android ships with a tool called adb that provides various capabilities, including
-moving and syncing files to the emulator, forwarding ports, and running a UNIX
-shell on the emulator. See <a href="{@docRoot}guide/developing/tools/adb.html">Using adb</a> for details.</dd>
+<dt><strong>Capture screenshots</strong></dt>
+<dd>The Dalvik Debug Monitor Server (DDMS) can capture screenshots from the emulator. Select
+<strong>Device > Screen capture</strong>.</dd>
 
-<dt>Getting screen captures from the emulator<a name="screencaps" id="screencaps"></a></dt>
-<dd> Dalvik Debug Monitor Server (DDMS) can capture screenshots from the emulator.</dd>
-
-
-<a name="debughelpers"></a>
-
-<dt>Using debugging helper classes</dt>
-
+<dt><strong>Use debugging helper classes</strong></dt>
 <dd>Android provides debug helper classes such as {@link android.util.Log
     util.Log} and {@link android.os.Debug} for your convenience. </dd>
 </dl>
+
+<p>Also see the <a href="{@docRoot}resources/faq/troubleshooting.html">Troubleshooting</a> document
+for answers to some common developing and debugging issues.</p>
+
 
 <h2 id="ide-debug-port">Configuring Your IDE to Attach to the Debugging Port</h2>
 
