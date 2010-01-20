@@ -580,7 +580,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             upgradeVersion = 46;
         }
 
- 
+
         if (upgradeVersion != currentVersion) {
             Log.w(TAG, "Got stuck trying to upgrade from version " + upgradeVersion
                     + ", must wipe the settings provider");
@@ -608,7 +608,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             if (!TextUtils.isEmpty(lockPattern)) {
                 // Convert lock pattern
                 try {
-                    LockPatternUtils lpu = new LockPatternUtils(mContext.getContentResolver());
+                    LockPatternUtils lpu = new LockPatternUtils(mContext);
                     List<LockPatternView.Cell> cellPattern =
                             LockPatternUtils.stringToPattern(lockPattern);
                     lpu.saveLockPattern(cellPattern);
@@ -928,11 +928,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private void loadSecure35Settings(SQLiteStatement stmt) {
         loadBooleanSetting(stmt, Settings.Secure.BACKUP_ENABLED,
                 R.bool.def_backup_enabled);
-        
+
         loadStringSetting(stmt, Settings.Secure.BACKUP_TRANSPORT,
                 R.string.def_backup_transport);
     }
-    
+
     private void loadSetting(SQLiteStatement stmt, String key, Object value) {
         stmt.bindString(1, key);
         stmt.bindString(2, value.toString());

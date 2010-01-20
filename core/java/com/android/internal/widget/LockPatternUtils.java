@@ -16,7 +16,10 @@
 
 package com.android.internal.widget;
 
+import android.app.DevicePolicyManager;
+import android.content.ComponentName;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.os.SystemClock;
 import android.provider.Settings;
 import android.security.MessageDigest;
@@ -93,15 +96,17 @@ public class LockPatternUtils {
     public final static String PASSWORD_TYPE_KEY = "lockscreen.password_type";
 
     private final ContentResolver mContentResolver;
-
+    private DevicePolicyManager mDevicePolicyManager;
     private static String sLockPatternFilename;
     private static String sLockPasswordFilename;
 
     /**
      * @param contentResolver Used to look up and save settings.
      */
-    public LockPatternUtils(ContentResolver contentResolver) {
-        mContentResolver = contentResolver;
+    public LockPatternUtils(Context context) {
+        mContentResolver = context.getContentResolver();
+        mDevicePolicyManager =
+                (DevicePolicyManager)context.getSystemService(Context.DEVICE_POLICY_SERVICE);
         // Initialize the location of gesture lock file
         if (sLockPatternFilename == null) {
             sLockPatternFilename = android.os.Environment.getDataDirectory()
@@ -110,6 +115,71 @@ public class LockPatternUtils {
                     .getAbsolutePath() + LOCK_PASSWORD_FILE;
         }
 
+    }
+
+    public boolean isDevicePolicyActive() {
+        ComponentName admin = mDevicePolicyManager.getActiveAdmin();
+        return admin != null ? mDevicePolicyManager.isAdminActive(admin) : false;
+    }
+
+    public int getRequestedMinimumPasswordLength() {
+        return mDevicePolicyManager.getMinimumPasswordLength();
+    }
+
+    public int getActiveMinimumPasswordLength() {
+        return mDevicePolicyManager.getActiveMinimumPasswordLength();
+    }
+
+    /**
+     * Gets the device policy password mode. If the mode is non-specific, returns
+     * MODE_PATTERN which allows the user to choose anything.
+     *
+     * @return
+     */
+    public int getRequestedPasswordMode() {
+        int policyMode = mDevicePolicyManager.getPasswordMode();
+        switch (policyMode) {
+            case DevicePolicyManager.PASSWORD_MODE_ALPHANUMERIC:
+                return MODE_PASSWORD;
+            case DevicePolicyManager.PASSWORD_MODE_NUMERIC:
+                return MODE_PIN;
+            case DevicePolicyManager.PASSWORD_MODE_UNSPECIFIED:
+                return MODE_PATTERN;
+        }
+        return MODE_PATTERN;
+    }
+
+    /**
+     * Returns the actual password mode, as set by keyguard after updating the password.
+     *
+     * @return
+     */
+    public int getActivePasswordMode() {
+        return mDevicePolicyManager.getActivePasswordMode();
+    }
+
+    public void reportFailedPasswordAttempt() {
+        mDevicePolicyManager.reportFailedPasswordAttempt();
+    }
+
+    public void reportSuccessfulPasswordAttempt() {
+        mDevicePolicyManager.reportSuccessfulPasswordAttempt();
+    }
+
+    public void setActivePasswordState(int mode, int length) {
+        int policyMode = DevicePolicyManager.PASSWORD_MODE_UNSPECIFIED;
+        switch (mode) {
+            case MODE_PATTERN:
+                policyMode = DevicePolicyManager.PASSWORD_MODE_UNSPECIFIED;
+                break;
+            case MODE_PIN:
+                policyMode = DevicePolicyManager.PASSWORD_MODE_NUMERIC;
+                break;
+            case MODE_PASSWORD:
+                policyMode = DevicePolicyManager.PASSWORD_MODE_ALPHANUMERIC;
+                break;
+        }
+        mDevicePolicyManager.setActivePasswordState(policyMode, length);
     }
 
     /**
@@ -227,6 +297,10 @@ public class LockPatternUtils {
             raf.close();
             setBoolean(PATTERN_EVER_CHOSEN_KEY, true);
             setLong(PASSWORD_TYPE_KEY, MODE_PATTERN);
+            if (pattern != null && isDevicePolicyActive()) {
+                setActivePasswordState(DevicePolicyManager.PASSWORD_MODE_UNSPECIFIED,
+                        pattern.size());
+            }
         } catch (FileNotFoundException fnfe) {
             // Cant do much, unless we want to fail over to using the settings provider
             Log.e(TAG, "Unable to save lock pattern to " + sLockPatternFilename);
@@ -255,6 +329,10 @@ public class LockPatternUtils {
             }
             raf.close();
             setLong(PASSWORD_TYPE_KEY, numericHint ? MODE_PIN : MODE_PASSWORD);
+            if (password != null && isDevicePolicyActive()) {
+                setActivePasswordState(numericHint ? DevicePolicyManager.PASSWORD_MODE_NUMERIC
+                    : DevicePolicyManager.PASSWORD_MODE_ALPHANUMERIC, password.length());
+            }
         } catch (FileNotFoundException fnfe) {
             // Cant do much, unless we want to fail over to using the settings provider
             Log.e(TAG, "Unable to save lock pattern to " + sLockPasswordFilename);
