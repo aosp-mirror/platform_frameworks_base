@@ -78,11 +78,11 @@ public class RadialGradient extends GradientShader {
         }
 
         public java.awt.PaintContext createContext(
-                java.awt.image.ColorModel colorModel,
-                java.awt.Rectangle deviceBounds,
-                java.awt.geom.Rectangle2D userBounds,
+                java.awt.image.ColorModel     colorModel,
+                java.awt.Rectangle            deviceBounds,
+                java.awt.geom.Rectangle2D     userBounds,
                 java.awt.geom.AffineTransform xform,
-                java.awt.RenderingHints hints) {
+                java.awt.RenderingHints       hints) {
             precomputeGradientColors();
             return new RadialGradientPaintContext(colorModel);
         }
