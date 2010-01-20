@@ -45,7 +45,7 @@
             android:textSize="14sp"
             android:paddingLeft="4dp"
             />
-        <TextView android:id="@+id/time"
+        <android.widget.DateTimeView android:id="@+id/time"
             android:layout_marginLeft="4dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
