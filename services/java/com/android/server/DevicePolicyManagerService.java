@@ -17,6 +17,7 @@
 package com.android.server;
 
 import com.android.common.FastXmlSerializer;
+import com.android.internal.widget.LockPatternUtils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -27,11 +28,19 @@ import android.app.DeviceAdminInfo;
 import android.app.DevicePolicyManager;
 import android.app.IDevicePolicyManager;
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Binder;
+import android.os.IBinder;
+import android.os.IPowerManager;
+import android.os.PowerManager;
+import android.os.RecoverySystem;
+import android.os.RemoteException;
+import android.os.ServiceManager;
+import android.provider.Settings;
 import android.util.Log;
 import android.util.Xml;
 
@@ -49,6 +58,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     
     private final Context mContext;
 
+    IPowerManager mIPowerManager;
+    
     int mActivePasswordMode = DevicePolicyManager.PASSWORD_MODE_UNSPECIFIED;
     int mActivePasswordLength = 0;
     int mFailedPasswordAttempts = 0;
@@ -75,8 +86,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         mContext = context;
     }
 
+    private IPowerManager getIPowerManager() {
+        if (mIPowerManager == null) {
+            IBinder b = ServiceManager.getService(Context.POWER_SERVICE);
+            mIPowerManager = IPowerManager.Stub.asInterface(b);
+        }
+        return mIPowerManager;
+    }
+    
     ActiveAdmin getActiveAdminForCallerLocked(ComponentName who) throws SecurityException {
-        if (mActiveAdmin != null && mActiveAdmin.getUid() == Binder.getCallingPid()) {
+        if (mActiveAdmin != null && mActiveAdmin.getUid() == Binder.getCallingUid()) {
             if (who != null) {
                 if (!who.getPackageName().equals(mActiveAdmin.info.getActivityInfo().packageName)
                         || !who.getClassName().equals(mActiveAdmin.info.getActivityInfo().name)) {
@@ -258,6 +277,17 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!success) {
             Log.w(TAG, "No valid start tag found in policies file");
         }
+        
+        long timeMs = getMaximumTimeToLock();
+        if (timeMs <= 0) {
+            timeMs = Integer.MAX_VALUE;
+        }
+        try {
+            getIPowerManager().setMaximumScreenOffTimeount((int)timeMs);
+        } catch (RemoteException e) {
+            Log.w(TAG, "Failure talking with power manager", e);
+        }
+        
     }
 
     public void systemReady() {
@@ -335,15 +365,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
     
-    public int getActivePasswordMode() {
-        synchronized (this) {
-            // This API can only be called by an active device admin,
-            // so try to retrieve it to check that the caller is one.
-            getActiveAdminForCallerLocked(null);
-            return mActivePasswordMode;
-        }
-    }
-    
     public void setMinimumPasswordLength(ComponentName who, int length) {
         synchronized (this) {
             if (who == null) {
@@ -363,12 +384,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
     
-    public int getActiveMinimumPasswordLength() {
+    public boolean isActivePasswordSufficient() {
         synchronized (this) {
             // This API can only be called by an active device admin,
             // so try to retrieve it to check that the caller is one.
             getActiveAdminForCallerLocked(null);
-            return mActivePasswordLength;
+            return mActivePasswordMode >= getPasswordMode()
+                    && mActivePasswordLength >= getMinimumPasswordLength();
         }
     }
     
@@ -381,6 +403,31 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
     
+    public boolean resetPassword(String password) {
+        int mode;
+        synchronized (this) {
+            // This API can only be called by an active device admin,
+            // so try to retrieve it to check that the caller is one.
+            getActiveAdminForCallerLocked(null);
+            mode = getPasswordMode();
+            if (password.length() < getMinimumPasswordLength()) {
+                return false;
+            }
+        }
+        
+        // Don't do this with the lock held, because it is going to call
+        // back in to the service.
+        long ident = Binder.clearCallingIdentity();
+        try {
+            LockPatternUtils utils = new LockPatternUtils(mContext);
+            utils.saveLockPassword(password, mode);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+        
+        return true;
+    }
+    
     public void setMaximumTimeToLock(ComponentName who, long timeMs) {
         synchronized (this) {
             if (who == null) {
@@ -389,7 +436,21 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             ActiveAdmin ap = getActiveAdminForCallerLocked(who);
             if (ap.maximumTimeToUnlock != timeMs) {
                 ap.maximumTimeToUnlock = timeMs;
-                saveSettingsLocked();
+                
+                long ident = Binder.clearCallingIdentity();
+                try {
+                    saveSettingsLocked();
+                    if (timeMs <= 0) {
+                        timeMs = Integer.MAX_VALUE;
+                    }
+                    try {
+                        getIPowerManager().setMaximumScreenOffTimeount((int)timeMs);
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "Failure talking with power manager", e);
+                    }
+                } finally {
+                    Binder.restoreCallingIdentity(ident);
+                }
             }
         }
     }
@@ -400,17 +461,28 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
     
+    public void lockNow() {
+        synchronized (this) {
+            // This API can only be called by an active device admin,
+            // so try to retrieve it to check that the caller is one.
+            getActiveAdminForCallerLocked(null);
+            // STOPSHIP need to implement.
+        }
+    }
+    
     public void wipeData(int flags) {
         synchronized (this) {
             // This API can only be called by an active device admin,
             // so try to retrieve it to check that the caller is one.
             getActiveAdminForCallerLocked(null);
-            long ident = Binder.clearCallingIdentity();
-            try {
-                Log.w(TAG, "*************** WIPE DATA HERE");
-            } finally {
-                Binder.restoreCallingIdentity(ident);
-            }
+        }
+        long ident = Binder.clearCallingIdentity();
+        try {
+            RecoverySystem.rebootWipeUserData(mContext);
+        } catch (IOException e) {
+            Log.w(TAG, "Failed requesting data wipe", e);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
         }
     }
     

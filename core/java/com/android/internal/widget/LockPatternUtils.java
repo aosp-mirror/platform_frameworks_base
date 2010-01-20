@@ -79,9 +79,9 @@ public class LockPatternUtils {
      * pin = digit-only password
      * password = alphanumeric password
      */
-    public static final int MODE_PATTERN = 0;
-    public static final int MODE_PIN = 1;
-    public static final int MODE_PASSWORD = 2;
+    public static final int MODE_PATTERN = DevicePolicyManager.PASSWORD_MODE_SOMETHING;
+    public static final int MODE_PIN = DevicePolicyManager.PASSWORD_MODE_NUMERIC;
+    public static final int MODE_PASSWORD = DevicePolicyManager.PASSWORD_MODE_ALPHANUMERIC;
 
     /**
      * The minimum number of dots the user must include in a wrong pattern
@@ -95,6 +95,7 @@ public class LockPatternUtils {
     private final static String PATTERN_EVER_CHOSEN_KEY = "lockscreen.patterneverchosen";
     public final static String PASSWORD_TYPE_KEY = "lockscreen.password_type";
 
+    private final Context mContext;
     private final ContentResolver mContentResolver;
     private DevicePolicyManager mDevicePolicyManager;
     private static String sLockPatternFilename;
@@ -104,6 +105,7 @@ public class LockPatternUtils {
      * @param contentResolver Used to look up and save settings.
      */
     public LockPatternUtils(Context context) {
+        mContext = context;
         mContentResolver = context.getContentResolver();
         mDevicePolicyManager =
                 (DevicePolicyManager)context.getSystemService(Context.DEVICE_POLICY_SERVICE);
@@ -124,10 +126,6 @@ public class LockPatternUtils {
 
     public int getRequestedMinimumPasswordLength() {
         return mDevicePolicyManager.getMinimumPasswordLength();
-    }
-
-    public int getActiveMinimumPasswordLength() {
-        return mDevicePolicyManager.getActiveMinimumPasswordLength();
     }
 
     /**
@@ -154,10 +152,6 @@ public class LockPatternUtils {
      *
      * @return
      */
-    public int getActivePasswordMode() {
-        return mDevicePolicyManager.getActivePasswordMode();
-    }
-
     public void reportFailedPasswordAttempt() {
         mDevicePolicyManager.reportFailedPasswordAttempt();
     }
@@ -279,6 +273,16 @@ public class LockPatternUtils {
     }
 
     /**
+     * Clear any lock pattern or password.
+     */
+    public void clearLock() {
+        saveLockPassword(null, LockPatternUtils.MODE_PATTERN);
+        setLockPatternEnabled(false);
+        saveLockPattern(null);
+        setLong(PASSWORD_TYPE_KEY, MODE_PATTERN);
+    }
+    
+    /**
      * Save a lock pattern.
      * @param pattern The new pattern to save.
      */
@@ -295,11 +299,13 @@ public class LockPatternUtils {
                 raf.write(hash, 0, hash.length);
             }
             raf.close();
-            setBoolean(PATTERN_EVER_CHOSEN_KEY, true);
-            setLong(PASSWORD_TYPE_KEY, MODE_PATTERN);
-            if (pattern != null && isDevicePolicyActive()) {
-                setActivePasswordState(DevicePolicyManager.PASSWORD_MODE_UNSPECIFIED,
-                        pattern.size());
+            if (pattern != null) {
+                setBoolean(PATTERN_EVER_CHOSEN_KEY, true);
+                setLong(PASSWORD_TYPE_KEY, MODE_PATTERN);
+                DevicePolicyManager dpm = (DevicePolicyManager)mContext.getSystemService(
+                        Context.DEVICE_POLICY_SERVICE);
+                dpm.setActivePasswordState(
+                        DevicePolicyManager.PASSWORD_MODE_SOMETHING, pattern.size());
             }
         } catch (FileNotFoundException fnfe) {
             // Cant do much, unless we want to fail over to using the settings provider
@@ -314,9 +320,8 @@ public class LockPatternUtils {
      * Save a lock password.
      * @param password The password to save
      */
-    public void saveLockPassword(String password) {
+    public void saveLockPassword(String password, int mode) {
         // Compute the hash
-        boolean numericHint = password != null ? TextUtils.isDigitsOnly(password) : false;
         final byte[] hash  = LockPatternUtils.passwordToHash(password);
         try {
             // Write the hash to file
@@ -328,10 +333,15 @@ public class LockPatternUtils {
                 raf.write(hash, 0, hash.length);
             }
             raf.close();
-            setLong(PASSWORD_TYPE_KEY, numericHint ? MODE_PIN : MODE_PASSWORD);
-            if (password != null && isDevicePolicyActive()) {
-                setActivePasswordState(numericHint ? DevicePolicyManager.PASSWORD_MODE_NUMERIC
-                    : DevicePolicyManager.PASSWORD_MODE_ALPHANUMERIC, password.length());
+            if (password != null) {
+                int textMode = TextUtils.isDigitsOnly(password) ? MODE_PIN : MODE_PASSWORD;
+                if (textMode > mode) {
+                    mode = textMode;
+                }
+                setLong(PASSWORD_TYPE_KEY, mode);
+                DevicePolicyManager dpm = (DevicePolicyManager)mContext.getSystemService(
+                        Context.DEVICE_POLICY_SERVICE);
+                dpm.setActivePasswordState(mode, password.length());
             }
         } catch (FileNotFoundException fnfe) {
             // Cant do much, unless we want to fail over to using the settings provider
@@ -554,6 +564,7 @@ public class LockPatternUtils {
     }
 
     private boolean getBoolean(String systemSettingKey) {
+        // STOPSHIP: these need to be moved to secure settings!
         return 1 ==
                 android.provider.Settings.System.getInt(
                         mContentResolver,
@@ -561,6 +572,7 @@ public class LockPatternUtils {
     }
 
     private void setBoolean(String systemSettingKey, boolean enabled) {
+        // STOPSHIP: these need to be moved to secure settings!
         android.provider.Settings.System.putInt(
                         mContentResolver,
                         systemSettingKey,
@@ -568,10 +580,12 @@ public class LockPatternUtils {
     }
 
     private long getLong(String systemSettingKey, long def) {
+        // STOPSHIP: these need to be moved to secure settings!
         return android.provider.Settings.System.getLong(mContentResolver, systemSettingKey, def);
     }
 
     private void setLong(String systemSettingKey, long value) {
+        // STOPSHIP: these need to be moved to secure settings!
         android.provider.Settings.System.putLong(mContentResolver, systemSettingKey, value);
     }
 

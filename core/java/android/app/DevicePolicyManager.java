@@ -79,9 +79,10 @@ public class DevicePolicyManager {
      * Activity action: have the user enter a new password.  This activity
      * should be launched after using {@link #setPasswordMode(ComponentName, int)}
      * or {@link #setMinimumPasswordLength(ComponentName, int)} to have the
-     * user enter a new password that meets the current requirements.  If the
-     * current password is sufficient, the activity will exit immediately without
-     * being displayed to the user.  Upon receiving a result from this activity,
+     * user enter a new password that meets the current requirements.  You can
+     * use {@link #isActivePasswordSufficient()} to determine whether you need
+     * to have the user select a new password in order to meet the current
+     * constraints.  Upon being resumed from this activity,
      * you can check the new password characteristics to see if they are
      * sufficient.
      */
@@ -122,21 +123,31 @@ public class DevicePolicyManager {
     
     /**
      * Constant for {@link #setPasswordMode}: the policy has no requirements
-     * for the password.
+     * for the password.  Note that mode constants are ordered so that higher
+     * values are more restrictive.
      */
     public static final int PASSWORD_MODE_UNSPECIFIED = 0;
     
     /**
-     * Constant for {@link #setPasswordMode}: the user must have at least a
-     * numeric password.
+     * Constant for {@link #setPasswordMode}: the policy requires some kind
+     * of password, but doesn't care what it is.  Note that mode constants
+     * are ordered so that higher values are more restrictive.
      */
-    public static final int PASSWORD_MODE_NUMERIC = 1000;
+    public static final int PASSWORD_MODE_SOMETHING = 1000;
+    
+    /**
+     * Constant for {@link #setPasswordMode}: the user must have at least a
+     * numeric password.  Note that mode constants are ordered so that higher
+     * values are more restrictive.
+     */
+    public static final int PASSWORD_MODE_NUMERIC = 2000;
     
     /**
      * Constant for {@link #setPasswordMode}: the user must have at least an
-     * alphanumeric password.
+     * alphanumeric password.  Note that mode constants are ordered so that higher
+     * values are more restrictive.
      */
-    public static final int PASSWORD_MODE_ALPHANUMERIC = 2000;
+    public static final int PASSWORD_MODE_ALPHANUMERIC = 3000;
     
     /**
      * Called by an application that is administering the device to set the
@@ -147,10 +158,15 @@ public class DevicePolicyManager {
      * take place immediately.  To prompt the user for a new password, use
      * {@link #ACTION_SET_NEW_PASSWORD} after setting this value.
      * 
+     * <p>Mode constants are ordered so that higher values are more restrictive;
+     * thus the highest requested mode constant (between the policy set here,
+     * the user's preference, and any other considerations) is the one that
+     * is in effect.
+     * 
      * @param admin Which {@link DeviceAdmin} this request is associated with.
      * @param mode The new desired mode.  One of
-     * {@link #PASSWORD_MODE_UNSPECIFIED}, {@link #PASSWORD_MODE_NUMERIC},
-     * or {@link #PASSWORD_MODE_ALPHANUMERIC}.
+     * {@link #PASSWORD_MODE_UNSPECIFIED}, {@link #PASSWORD_MODE_SOMETHING},
+     * {@link #PASSWORD_MODE_NUMERIC}, or {@link #PASSWORD_MODE_ALPHANUMERIC}.
      */
     public void setPasswordMode(ComponentName admin, int mode) {
         if (mService != null) {
@@ -170,21 +186,6 @@ public class DevicePolicyManager {
         if (mService != null) {
             try {
                 return mService.getPasswordMode();
-            } catch (RemoteException e) {
-                Log.w(TAG, "Failed talking with device policy service", e);
-            }
-        }
-        return PASSWORD_MODE_UNSPECIFIED;
-    }
-    
-    /**
-     * Retrieve the password mode associated with the last password the
-     * user selected.
-     */
-    public int getActivePasswordMode() {
-        if (mService != null) {
-            try {
-                return mService.getActivePasswordMode();
             } catch (RemoteException e) {
                 Log.w(TAG, "Failed talking with device policy service", e);
             }
@@ -234,18 +235,22 @@ public class DevicePolicyManager {
     }
     
     /**
-     * Retrieve the password length associated with the last password the
-     * user selected.
+     * Determine whether the current password the user has set is sufficient
+     * to meet the policy requirements (mode, minimum length) that have been
+     * requested.
+     * 
+     * @return Returns true if the password meets the current requirements,
+     * else false.
      */
-    public int getActiveMinimumPasswordLength() {
+    public boolean isActivePasswordSufficient() {
         if (mService != null) {
             try {
-                return mService.getActiveMinimumPasswordLength();
+                return mService.isActivePasswordSufficient();
             } catch (RemoteException e) {
                 Log.w(TAG, "Failed talking with device policy service", e);
             }
         }
-        return 0;
+        return false;
     }
     
     /**
@@ -261,6 +266,30 @@ public class DevicePolicyManager {
             }
         }
         return -1;
+    }
+
+    /**
+     * Force a new password on the user.  This takes effect immediately.  The
+     * given password must meet the current password minimum length constraint
+     * or it will be rejected.  The given password will be accepted regardless
+     * of the current password mode, automatically adjusting the password mode
+     * higher if needed.  (The string you give here is acceptable for any mode;
+     * if it contains only digits, that is still an acceptable alphanumeric
+     * password.)
+     * 
+     * @param password The new password for the user.
+     * @return Returns true if the password was applied, or false if it is
+     * not acceptable for the current constraints.
+     */
+    public boolean resetPassword(String password) {
+        if (mService != null) {
+            try {
+                return mService.resetPassword(password);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+        return false;
     }
     
     /**
@@ -298,22 +327,25 @@ public class DevicePolicyManager {
     }
     
     /**
-     * Constant for {@link #wipeData}: perform a low-level format of data
-     * storage.
+     * Make the device lock immediately, as if the lock screen timeout has
+     * expired at the point of this call.
      */
-    public static final int WIPE_LOW_LEVEL_FORMAT = 0x0001;
-    
-    /**
-     * Constant for {@link #wipeData}: also wipe any external storage.
-     */
-    public static final int WIPE_EXTERNAL_STORAGE = 0x0002;
+    public void lockNow() {
+        if (mService != null) {
+            try {
+                mService.lockNow();
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+    }
     
     /**
      * Ask the user date be wiped.  This will cause the device to reboot,
-     * erasing all user data while next booting up.
+     * erasing all user data while next booting up.  External storage such
+     * as SD cards will not be erased.
      * 
-     * @param flags Bit mask of additional options: currently
-     * {@link #WIPE_LOW_LEVEL_FORMAT} and {@link #WIPE_EXTERNAL_STORAGE}.
+     * @param flags Bit mask of additional options: currently must be 0.
      */
     public void wipeData(int flags) {
         if (mService != null) {
