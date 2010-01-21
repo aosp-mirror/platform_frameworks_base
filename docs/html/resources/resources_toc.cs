@@ -11,7 +11,7 @@
     </h2>
     <ul>
       <li><a href="<?cs var:toroot ?>resources/community-groups.html">
-            <span class="en">Android Developer Groups</span>
+            <span class="en">Developer Forums</span>
           </a></li>
       <li><a href="<?cs var:toroot ?>resources/community-more.html">
             <span class="en">IRC, Twitter</span>
