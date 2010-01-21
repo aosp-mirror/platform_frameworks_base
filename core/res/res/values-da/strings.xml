@@ -503,6 +503,7 @@
     <string name="lockscreen_missing_sim_message_short" msgid="7381499217732227295">"Der er ikke noget SIM-kort."</string>
     <string name="lockscreen_missing_sim_message" msgid="2186920585695169078">"Der er ikke noget SIM-kort i telefonen."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="8874620818937719067">"Indsæt et SIM-kort."</string>
+    <string name="emergency_calls_only" msgid="6733978304386365407">"Kun nødopkald"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"Netværket er låst"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"SIM-kortet er låst med PUK-koden."</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="635967534992394321">"Se brugervejledningen, eller kontakt kundeservice."</string>

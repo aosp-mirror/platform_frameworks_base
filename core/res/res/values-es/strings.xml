@@ -503,6 +503,7 @@
     <string name="lockscreen_missing_sim_message_short" msgid="7381499217732227295">"Falta la tarjeta SIM"</string>
     <string name="lockscreen_missing_sim_message" msgid="2186920585695169078">"No se ha insertado ninguna tarjeta SIM en el teléfono."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="8874620818937719067">"Inserta una tarjeta SIM."</string>
+    <string name="emergency_calls_only" msgid="6733978304386365407">"Sólo llamadas de emergencia"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"Bloqueada para la red"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"La tarjeta SIM está bloqueada con el código PUK."</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="635967534992394321">"Consulta la guía del usuario o ponte en contacto con el servicio de atención al cliente."</string>
