@@ -3965,18 +3965,40 @@ public class WebView extends AbsoluteLayout
                     + mTouchMode);
         }
 
+        int action;
+        float x, y;
+        long eventTime = ev.getEventTime();
+
         // FIXME: we may consider to give WebKit an option to handle multi-touch
         // events later.
         if (mSupportMultiTouch && mMinZoomScale < mMaxZoomScale
                 && ev.getPointerCount() > 1) {
-            mLastTouchTime = ev.getEventTime();
-            return mScaleDetector.onTouchEvent(ev);
+            mScaleDetector.onTouchEvent(ev);
+            if (mScaleDetector.isInProgress()) {
+                mLastTouchTime = eventTime;
+                return true;
+            }
+            x = mScaleDetector.getFocusX();
+            y = mScaleDetector.getFocusY();
+            action = ev.getAction() & MotionEvent.ACTION_MASK;
+            if (action == MotionEvent.ACTION_POINTER_DOWN) {
+                cancelTouch();
+                action = MotionEvent.ACTION_DOWN;
+            } else if (action == MotionEvent.ACTION_POINTER_UP) {
+                // set mLastTouchX/Y to the remaining point
+                mLastTouchX = x;
+                mLastTouchY = y;
+            } else if (action == MotionEvent.ACTION_MOVE) {
+                // negative x or y indicate it is on the edge, skip it.
+                if (x < 0 || y < 0) {
+                    return true;
+                }
+            }
+        } else {
+            action = ev.getAction();
+            x = ev.getX();
+            y = ev.getY();
         }
-
-        int action = ev.getAction();
-        float x = ev.getX();
-        float y = ev.getY();
-        long eventTime = ev.getEventTime();
 
         // Due to the touch screen edge effect, a touch closer to the edge
         // always snapped to the edge. As getViewWidth() can be different from
