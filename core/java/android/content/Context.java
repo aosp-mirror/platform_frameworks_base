@@ -250,22 +250,21 @@ public abstract class Context {
     public abstract ApplicationInfo getApplicationInfo();
     
     /**
-     * {@hide}
-     * Return the full path to this context's resource files.  This is the ZIP files
-     * containing the application's resources.
+     * Return the full path to this context's primary Android package.
+     * The Android package is a ZIP file which contains the application's
+     * primary resources.
      *
      * <p>Note: this is not generally useful for applications, since they should
      * not be directly accessing the file system.
-     *
      *
      * @return String Path to the resources.
      */
     public abstract String getPackageResourcePath();
 
     /**
-     * {@hide}
-     * Return the full path to this context's code and asset files.  This is the ZIP files
-     * containing the application's code and assets.
+     * Return the full path to this context's primary Android package.
+     * The Android package is a ZIP file which contains application's
+     * primary code and assets.
      *
      * <p>Note: this is not generally useful for applications, since they should
      * not be directly accessing the file system.
