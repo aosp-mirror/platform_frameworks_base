@@ -16,8 +16,6 @@
 
 package com.android.internal.util;
 
-import com.google.android.util.AbstractMessageParser.Token;
-
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -298,8 +296,10 @@ public class HanziToPinyin {
         };
 
     /** First and last Chinese character with known Pinyin according to zh collation */
-    private static final String FIRST_UNIHAN =  "\u5416";
-    private static final String LAST_UNIHAN =  "\u5497";
+    private static final String FIRST_PINYIN_UNIHAN =  "\u5416";
+    private static final String LAST_PINYIN_UNIHAN =  "\u5497";
+    /** The first Chinese character in Unicode block */
+    private static final char FIRST_UNIHAN = '\u3400';
     private static final Collator COLLATOR = Collator.getInstance(Locale.CHINA);
 
     private static HanziToPinyin sInstance;
@@ -311,10 +311,18 @@ public class HanziToPinyin {
          */
         public static final String SEPARATOR = " ";
 
-        public static final int ASCII = 1;
+        public static final int LATIN = 1;
         public static final int PINYIN = 2;
         public static final int UNKNOWN = 3;
 
+        public Token() {
+        }
+
+        public Token(int type, String source, String target) {
+            this.type = type;
+            this.source = source;
+            this.target = target;
+        }
         /**
          * Type of this token, ASCII, PINYIN or UNKNOWN.
          */
@@ -347,6 +355,7 @@ public class HanziToPinyin {
                     return sInstance;
                 }
             }
+            Log.w(TAG, "There is no Chinese collator, HanziToPinyin is disabled");
             sInstance = new HanziToPinyin(false);
             return sInstance;
         }
@@ -359,11 +368,15 @@ public class HanziToPinyin {
         int offset = -1;
         int cmp;
         if (character < 256) {
-            token.type = Token.ASCII;
+            token.type = Token.LATIN;
+            token.target = letter;
+            return token;
+        } else if (character < FIRST_UNIHAN) {
+            token.type = Token.UNKNOWN;
             token.target = letter;
             return token;
         } else {
-            cmp = COLLATOR.compare(letter, FIRST_UNIHAN);
+            cmp = COLLATOR.compare(letter, FIRST_PINYIN_UNIHAN);
             if (cmp < 0) {
                 token.type = Token.UNKNOWN;
                 token.target = letter;
@@ -372,7 +385,7 @@ public class HanziToPinyin {
                 token.type = Token.PINYIN;
                 offset = 0;
             } else {
-                cmp = COLLATOR.compare(letter, LAST_UNIHAN);
+                cmp = COLLATOR.compare(letter, LAST_PINYIN_UNIHAN);
                 if (cmp > 0) {
                     token.type = Token.UNKNOWN;
                     token.target = letter;
@@ -412,44 +425,71 @@ public class HanziToPinyin {
         return token;
     }
 
+    /**
+     * Convert the input to a array of tokens. The sequence of ASCII or Unknown
+     * characters without space will be put into a Token, One Hanzi character 
+     * which has pinyin will be treated as a Token.
+     * If these is no China collator, the empty token array is returned.
+     */
     public ArrayList<Token> get(final String input) {
-        if (!mHasChinaCollator || TextUtils.isEmpty(input)) {
-            return null;
-        }
-
         ArrayList<Token> tokens = new ArrayList<Token>();
-        Token currentToken;
-
+        if (!mHasChinaCollator || TextUtils.isEmpty(input)) {
+            // return empty tokens.
+            return tokens;
+        }
         final int inputLength = input.length();
-
-        currentToken = getToken(input.charAt(0));
-
-        for (int i = 1; i < inputLength; i++) {
+        final StringBuilder sb = new StringBuilder();
+        int tokenType = Token.LATIN;
+        // Go through the input, create a new token when
+        // a. Token type changed
+        // b. Get the Pinyin of current charater.
+        // c. current character is space.
+        for (int i = 0; i < inputLength; i++) {
             final char character = input.charAt(i);
-            Token token = getToken(character);
-
-            if (token.type != currentToken.type) {
-                currentToken.target = currentToken.target.trim();
-                tokens.add(currentToken);
-                currentToken = token;
+            if (character == ' ') {
+                if (sb.length() > 0) {
+                    addToken(sb, tokens, tokenType);
+                }
+            } else if (character < 256) {
+                if (tokenType != Token.LATIN && sb.length() > 0) {
+                    addToken(sb, tokens, tokenType);
+                }
+                tokenType = Token.LATIN;
+                sb.append(character);
+            } else if (character < FIRST_UNIHAN) {
+                if (tokenType != Token.UNKNOWN && sb.length() > 0) {
+                    addToken(sb, tokens, tokenType);
+                }
+                tokenType = Token.UNKNOWN;
+                sb.append(character);
             } else {
-                switch (token.type) {
-                    case Token.ASCII:
-                    case Token.UNKNOWN:
-                        currentToken.source += token.source;
-                        currentToken.target += token.target;
-                        break;
-                    case Token.PINYIN:
-                        currentToken.source += token.source;
-                        currentToken.target += " " + token.target;
-                        break;
+                Token t = getToken(character);
+                if (t.type == Token.PINYIN) {
+                    if (sb.length() > 0) {
+                        addToken(sb, tokens, tokenType);
+                    }
+                    tokens.add(t);
+                    tokenType = Token.PINYIN;
+                } else {
+                    if (tokenType != t.type && sb.length() > 0) {
+                        addToken(sb, tokens, tokenType);
+                    }
+                    tokenType = t.type;
+                    sb.append(character);
                 }
             }
         }
-
-        currentToken.target = currentToken.target.trim();
-        tokens.add(currentToken);
-
+        if (sb.length() > 0) {
+            addToken(sb, tokens, tokenType);
+        }
         return tokens;
     }
+
+    private void addToken(final StringBuilder sb, final ArrayList<Token> tokens,
+            final int tokenType) {
+        String str = sb.toString();
+        tokens.add(new Token(tokenType, str, str));
+        sb.setLength(0);
+    }
+
 }
