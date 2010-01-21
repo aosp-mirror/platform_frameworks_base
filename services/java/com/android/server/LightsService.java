@@ -80,11 +80,16 @@ public class LightsService {
             }
         }
 
+
         public void pulse() {
+            pulse(0x00ffffff, 7);
+        }
+
+        public void pulse(int color, int onMS) {
             synchronized (this) {
                 if (mColor == 0 && !mFlashing) {
-                    setLightLocked(0x00ffffff, LIGHT_FLASH_HARDWARE, 7, 0, BRIGHTNESS_MODE_USER);
-                    mH.sendMessageDelayed(Message.obtain(mH, 1, this), 3000);
+                    setLightLocked(color, LIGHT_FLASH_HARDWARE, onMS, 1000, BRIGHTNESS_MODE_USER);
+                    mH.sendMessageDelayed(Message.obtain(mH, 1, this), onMS);
                 }
             }
         }
