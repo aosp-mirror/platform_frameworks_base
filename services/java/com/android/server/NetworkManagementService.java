@@ -52,6 +52,7 @@ class NetworkManagementService extends INetworkManagementService.Stub {
         public static final int InterfaceListResult       = 110;
         public static final int TetherInterfaceListResult = 111;
         public static final int TetherDnsFwdTgtListResult = 112;
+        public static final int TtyListResult             = 113;
 
         public static final int TetherStatusResult        = 210;
         public static final int IpFwdStatusResult         = 211;
@@ -106,27 +107,7 @@ class NetworkManagementService extends INetworkManagementService.Stub {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.ACCESS_NETWORK_STATE, "NetworkManagementService");
 
-        ArrayList<String> rsp = mConnector.doCommand("list_interfaces");
-
-        String[] rdata = new String[rsp.size()];
-        int idx = 0;
-
-        for (String line : rsp) {
-            String []tok = line.split(" ");
-            int code = Integer.parseInt(tok[0]);
-            if (code == NetdResponseCode.InterfaceListResult) {
-                if (tok.length !=2) {
-                    throw new IllegalStateException(
-                            String.format("Malformatted list entry '%s'", line));
-                }
-                rdata[idx++] = tok[1];
-            } else if (code == NativeDaemonConnector.ResponseCode.CommandOkay) {
-                return rdata;
-            } else {
-                throw new IllegalStateException(String.format("Unexpected response code %d", code));
-            }
-        }
-        throw new IllegalStateException("Got an empty response");
+        return mConnector.doListCommand("list_interfaces", NetdResponseCode.InterfaceListResult);
     }
 
     public void shutdown() {
@@ -219,28 +200,8 @@ class NetworkManagementService extends INetworkManagementService.Stub {
     public String[] listTetheredInterfaces() throws IllegalStateException {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.ACCESS_NETWORK_STATE, "NetworkManagementService");
-
-        ArrayList<String> rsp = mConnector.doCommand("tether interface list");
-
-        String[] rdata = new String[rsp.size()];
-        int idx = 0;
-
-        for (String line : rsp) {
-            String []tok = line.split(" ");
-            int code = Integer.parseInt(tok[0]);
-            if (code == NetdResponseCode.TetherInterfaceListResult) {
-                if (tok.length !=2) {
-                    throw new IllegalStateException(
-                            String.format("Malformatted list entry '%s'", line));
-                }
-                rdata[idx++] = tok[1];
-            } else if (code == NativeDaemonConnector.ResponseCode.CommandOkay) {
-                return rdata;
-            } else {
-                throw new IllegalStateException(String.format("Unexpected response code %d", code));
-            }
-        }
-        throw new IllegalStateException("Got an empty response");
+        return mConnector.doListCommand(
+                "tether interface list", NetdResponseCode.TetherInterfaceListResult);
     }
 
     public void setDnsForwarders(String[] dns) throws IllegalStateException {
@@ -260,28 +221,8 @@ class NetworkManagementService extends INetworkManagementService.Stub {
     public String[] getDnsForwarders() throws IllegalStateException {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.ACCESS_NETWORK_STATE, "NetworkManagementService");
-
-        ArrayList<String> rsp = mConnector.doCommand("tether dns list");
-
-        String[] rdata = new String[rsp.size()];
-        int idx = 0;
-
-        for (String line : rsp) {
-            String []tok = line.split(" ");
-            int code = Integer.parseInt(tok[0]);
-            if (code == NetdResponseCode.TetherDnsFwdTgtListResult) {
-                if (tok.length !=2) {
-                    throw new IllegalStateException(
-                            String.format("Malformatted list entry '%s'", line));
-                }
-                rdata[idx++] = tok[1];
-            } else if (code == NativeDaemonConnector.ResponseCode.CommandOkay) {
-                return rdata;
-            } else {
-                throw new IllegalStateException(String.format("Unexpected response code %d", code));
-            }
-        }
-        throw new IllegalStateException("Got an empty response");
+        return mConnector.doListCommand(
+                "tether dns list", NetdResponseCode.TetherDnsFwdTgtListResult);
     }
 
     public void enableNat(String internalInterface, String externalInterface)
@@ -298,6 +239,31 @@ class NetworkManagementService extends INetworkManagementService.Stub {
                 android.Manifest.permission.CHANGE_NETWORK_STATE, "NetworkManagementService");
         mConnector.doCommand(
                 String.format("nat disable %s %s", internalInterface, externalInterface));
+    }
+
+    public String[] listTtys() throws IllegalStateException {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.ACCESS_NETWORK_STATE, "NetworkManagementService");
+        return mConnector.doListCommand("list_ttys", NetdResponseCode.TtyListResult);
+    }
+
+    public void attachPppd(String tty, String localAddr, String remoteAddr)
+            throws IllegalStateException {
+        try {
+            mContext.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.CHANGE_NETWORK_STATE, "NetworkManagementService");
+            mConnector.doCommand(String.format("pppd attach %s %s %s", tty,
+                    InetAddress.getByName(localAddr).toString(),
+                    InetAddress.getByName(localAddr).toString()));
+        } catch (UnknownHostException e) {
+            throw new IllegalStateException("Error resolving addr", e);
+        }
+    }
+
+    public void detachPppd(String tty) throws IllegalStateException {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.CHANGE_NETWORK_STATE, "NetworkManagementService");
+        mConnector.doCommand(String.format("pppd detach %s", tty));
     }
 }
 
