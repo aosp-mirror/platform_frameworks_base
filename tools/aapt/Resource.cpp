@@ -1831,10 +1831,16 @@ status_t
 writeProguardForLayouts(ProguardKeepSet* keep, const sp<AaptAssets>& assets)
 {
     status_t err;
-    sp<AaptDir> layout = assets->resDir(String8("layout"));
+    const Vector<sp<AaptDir> >& dirs = assets->resDirs();
+    const size_t K = dirs.size();
+    for (size_t k=0; k<K; k++) {
+        const sp<AaptDir>& d = dirs.itemAt(k);
+        const String8& dirName = d->getLeaf();
+        if ((dirName != String8("layout")) && (strncmp(dirName.string(), "layout-", 7) != 0)) {
+            continue;
+        }
 
-    if (layout != NULL) {
-        const KeyedVector<String8,sp<AaptGroup> > groups = layout->getFiles();
+        const KeyedVector<String8,sp<AaptGroup> > groups = d->getFiles();
         const size_t N = groups.size();
         for (size_t i=0; i<N; i++) {
             const sp<AaptGroup>& group = groups.valueAt(i);

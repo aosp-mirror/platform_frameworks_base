@@ -46,7 +46,7 @@ static SkTypeface* Typeface_createFromTypeface(JNIEnv* env, jobject, SkTypeface*
 }
  
 static void Typeface_unref(JNIEnv* env, jobject obj, SkTypeface* face) {
-    face->unref();
+    SkSafeUnref(face);
 }
 
 static int Typeface_getStyle(JNIEnv* env, jobject obj, SkTypeface* face) {

@@ -200,6 +200,8 @@ public class WebView extends AbsoluteLayout
         implements ViewTreeObserver.OnGlobalFocusChangeListener,
         ViewGroup.OnHierarchyChangeListener {
 
+    // enable debug output for drag trackers
+    private static final boolean DEBUG_DRAG_TRACKER = false;
     // if AUTO_REDRAW_HACK is true, then the CALL key will toggle redrawing
     // the screen all-the-time. Good for profiling our drawing code
     static private final boolean AUTO_REDRAW_HACK = false;
@@ -534,8 +536,10 @@ public class WebView extends AbsoluteLayout
     static int DEFAULT_SCALE_PERCENT;
     private float mDefaultScale;
 
-    // set to true temporarily while the zoom control is being dragged
+    // set to true temporarily during ScaleGesture triggered zoom
     private boolean mPreviewZoomOnly = false;
+    // extra scale during zoom preview
+    private float mPreviewExtraZoomScale = 1.0f;
 
     // computed scale and inverse, from mZoomWidth.
     private float mActualScale;
@@ -2796,16 +2800,7 @@ public class WebView extends AbsoluteLayout
         return super.drawChild(canvas, child, drawingTime);
     }
 
-    @Override
-    protected void onDraw(Canvas canvas) {
-        // if mNativeClass is 0, the WebView has been destroyed. Do nothing.
-        if (mNativeClass == 0) {
-            return;
-        }
-        int saveCount = canvas.save();
-        if (mTitleBar != null) {
-            canvas.translate(0, (int) mTitleBar.getHeight());
-        }
+    private void drawContent(Canvas canvas) {
         // Update the buttons in the picture, so when we draw the picture
         // to the screen, they are in the correct state.
         // Tell the native side if user is a) touching the screen,
@@ -2817,11 +2812,34 @@ public class WebView extends AbsoluteLayout
         nativeRecordButtons(hasFocus() && hasWindowFocus(),
                 mTouchMode == TOUCH_SHORTPRESS_START_MODE
                 || mTrackballDown || mGotCenterDown, false);
-        drawCoreAndCursorRing(canvas, mBackgroundColor, mDrawCursorRing);
+        // use the DKGRAY as background when drawing zoom preview
+        drawCoreAndCursorRing(canvas, mPreviewZoomOnly ? Color.DKGRAY
+                : mBackgroundColor, mDrawCursorRing);
+    }
+
+    @Override
+    protected void onDraw(Canvas canvas) {
+        // if mNativeClass is 0, the WebView has been destroyed. Do nothing.
+        if (mNativeClass == 0) {
+            return;
+        }
+        int saveCount = canvas.save();
+        if (mPreviewZoomOnly) {
+            // scale after canvas.save() so that the child, like titlebar, will
+            // not be scaled.
+            canvas.scale(mPreviewExtraZoomScale, mPreviewExtraZoomScale,
+                    mZoomCenterX + mScrollX, mZoomCenterY + mScrollY);
+        }
+        if (mTitleBar != null) {
+            canvas.translate(0, (int) mTitleBar.getHeight());
+        }
+        if (mDragTrackerHandler == null || !mDragTrackerHandler.draw(canvas)) {
+            drawContent(canvas);
+        }
         canvas.restoreToCount(saveCount);
 
-        // Now draw the shadow.
-        if (mTitleBar != null) {
+        // Now draw the shadow, skip if it is in zoom preview mode.
+        if ((mTitleBar != null && !mPreviewZoomOnly)) {
             int y = mScrollY + getVisibleTitleHeight();
             int height = (int) (5f * getContext().getResources()
                     .getDisplayMetrics().density);
@@ -3726,6 +3744,8 @@ public class WebView extends AbsoluteLayout
     private class ScaleDetectorListener implements
             ScaleGestureDetector.OnScaleGestureListener {
 
+        float mStartX, mStartY;
+
         public boolean onScaleBegin(ScaleGestureDetector detector) {
             // cancel the single touch handling
             cancelTouch();
@@ -3739,6 +3759,9 @@ public class WebView extends AbsoluteLayout
             if (inEditingMode() && nativeFocusCandidateIsPassword()) {
                 mWebTextView.setInPassword(false);
             }
+            mPreviewExtraZoomScale = 1.0f;
+            mStartX = detector.getFocusX();
+            mStartY = detector.getFocusY();
             return true;
         }
 
@@ -3747,13 +3770,12 @@ public class WebView extends AbsoluteLayout
                 mPreviewZoomOnly = false;
                 mAnchorX = viewToContentX((int) mZoomCenterX + mScrollX);
                 mAnchorY = viewToContentY((int) mZoomCenterY + mScrollY);
+                float scale = mPreviewExtraZoomScale * mActualScale;
                 // don't reflow when zoom in; when zoom out, do reflow if the
                 // new scale is almost minimum scale;
-                boolean reflowNow = (mActualScale - mMinZoomScale <= 0.01f)
-                        || ((mActualScale <= 0.8 * mTextWrapScale));
-                // force zoom after mPreviewZoomOnly is set to false so that the
-                // new view size will be passed to the WebKit
-                setNewZoomScale(mActualScale, reflowNow, true);
+                boolean reflowNow = (scale - mMinZoomScale <= 0.01f)
+                        || ((scale <= 0.8 * mTextWrapScale));
+                setNewZoomScale(scale, reflowNow, false);
                 // call invalidate() to draw without zoom filter
                 invalidate();
             }
@@ -3770,25 +3792,196 @@ public class WebView extends AbsoluteLayout
         }
 
         public boolean onScale(ScaleGestureDetector detector) {
+            float currScale = mPreviewExtraZoomScale * mActualScale;
             float scale = (float) (Math.round(detector.getScaleFactor()
-                    * mActualScale * 100) / 100.0);
-            if (Math.abs(scale - mActualScale) >= PREVIEW_SCALE_INCREMENT) {
+                    * currScale * 100) / 100.0);
+            // limit the scale change per step
+            if (scale > currScale) {
+                scale = Math.min(scale, currScale * 1.25f);
+            } else {
+                // the preview scale can be 80% of mMinZoomScale for feedback
+                scale = Math.max(Math.max(scale, currScale * 0.8f),
+                        mMinZoomScale * 0.8f);
+            }
+            if (Math.abs(scale - currScale) >= PREVIEW_SCALE_INCREMENT) {
                 mPreviewZoomOnly = true;
-                // limit the scale change per step
-                if (scale > mActualScale) {
-                    scale = Math.min(scale, mActualScale * 1.25f);
+                // FIXME: mZoomCenterX/Y need to be relative to mActualScale.
+                // Ideally the focusX/Y should be a fixed point. But currently
+                // it just returns the center of the two pointers. If only one
+                // pointer is moving, the center is shifting. Currently we only
+                // adjust it for zoom in case to get better result.
+                if (mPreviewExtraZoomScale > 1.0f) {
+                    mZoomCenterX = mStartX - (mStartX - detector.getFocusX())
+                            / mPreviewExtraZoomScale;
+                    mZoomCenterY = mStartY - (mStartY - detector.getFocusY())
+                            / mPreviewExtraZoomScale;
                 } else {
-                    scale = Math.max(scale, mActualScale * 0.8f);
+                    mZoomCenterX = detector.getFocusX();
+                    mZoomCenterY = detector.getFocusY();
                 }
-                mZoomCenterX = detector.getFocusX();
-                mZoomCenterY = detector.getFocusY();
-                setNewZoomScale(scale, false, false);
+                mPreviewExtraZoomScale = scale / mActualScale;
                 invalidate();
                 return true;
             }
             return false;
         }
     }
+
+    // if the page can scroll <= this value, we won't allow the drag tracker
+    // to have any effect.
+    private static final int MIN_SCROLL_AMOUNT_TO_DISABLE_DRAG_TRACKER = 4;
+
+    private class DragTrackerHandler {
+        private final DragTracker mProxy;
+        private final float mStartY, mStartX;
+        private final float mMinDY, mMinDX;
+        private final float mMaxDY, mMaxDX;
+        private float mCurrStretchY, mCurrStretchX;
+        private int mSX, mSY;
+
+        public DragTrackerHandler(float x, float y, DragTracker proxy) {
+            mProxy = proxy;
+
+            int docBottom = computeVerticalScrollRange() + getTitleHeight();
+            int viewTop = getScrollY();
+            int viewBottom = viewTop + getHeight();
+
+            mStartY = y;
+            mMinDY = -viewTop;
+            mMaxDY = docBottom - viewBottom;
+
+            if (DebugFlags.DRAG_TRACKER || DEBUG_DRAG_TRACKER) {
+                Log.d(DebugFlags.DRAG_TRACKER_LOGTAG, " dragtracker y= " + y +
+                      " up/down= " + mMinDY + " " + mMaxDY);
+            }
+
+            int docRight = computeHorizontalScrollRange();
+            int viewLeft = getScrollX();
+            int viewRight = viewLeft + getWidth();
+            mStartX = x;
+            mMinDX = -viewLeft;
+            mMaxDX = docRight - viewRight;
+
+            mProxy.onStartDrag(x, y);
+
+            // ensure we buildBitmap at least once
+            mSX = -99999;
+        }
+
+        private float computeStretch(float delta, float min, float max) {
+            float stretch = 0;
+            if (max - min > MIN_SCROLL_AMOUNT_TO_DISABLE_DRAG_TRACKER) {
+                if (delta < min) {
+                    stretch = delta - min;
+                } else if (delta > max) {
+                    stretch = delta - max;
+                }
+            }
+            return stretch;
+        }
+
+        public void dragTo(float x, float y) {
+            float sy = computeStretch(mStartY - y, mMinDY, mMaxDY);
+            float sx = computeStretch(mStartX - x, mMinDX, mMaxDX);
+
+            if (mCurrStretchX != sx || mCurrStretchY != sy) {
+                mCurrStretchX = sx;
+                mCurrStretchY = sy;
+                if (DebugFlags.DRAG_TRACKER || DEBUG_DRAG_TRACKER) {
+                    Log.d(DebugFlags.DRAG_TRACKER_LOGTAG, "---- stretch " + sx +
+                          " " + sy);
+                }
+                if (mProxy.onStretchChange(sx, sy)) {
+                    invalidate();
+                }
+            }
+        }
+
+        public void stopDrag() {
+            if (DebugFlags.DRAG_TRACKER || DEBUG_DRAG_TRACKER) {
+                Log.d(DebugFlags.DRAG_TRACKER_LOGTAG, "----- stopDrag");
+            }
+            mProxy.onStopDrag();
+        }
+
+        private int hiddenHeightOfTitleBar() {
+            return getTitleHeight() - getVisibleTitleHeight();
+        }
+
+        // need a way to know if 565 or 8888 is the right config for
+        // capturing the display and giving it to the drag proxy
+        private Bitmap.Config offscreenBitmapConfig() {
+            // hard code 565 for now
+            return Bitmap.Config.RGB_565;
+        }
+
+        /*  If the tracker draws, then this returns true, otherwise it will
+         return false, and draw nothing.
+         */
+        public boolean draw(Canvas canvas) {
+            if (mCurrStretchX != 0 || mCurrStretchY != 0) {
+                int sx = getScrollX();
+                int sy = getScrollY() - hiddenHeightOfTitleBar();
+
+                if (mSX != sx || mSY != sy) {
+                    buildBitmap(sx, sy);
+                    mSX = sx;
+                    mSY = sy;
+                }
+
+                int count = canvas.save(Canvas.MATRIX_SAVE_FLAG);
+                canvas.translate(sx, sy);
+                mProxy.onDraw(canvas);
+                canvas.restoreToCount(count);
+                return true;
+            }
+            if (DebugFlags.DRAG_TRACKER || DEBUG_DRAG_TRACKER) {
+                Log.d(DebugFlags.DRAG_TRACKER_LOGTAG, " -- draw false " +
+                      mCurrStretchX + " " + mCurrStretchY);
+            }
+            return false;
+        }
+
+        private void buildBitmap(int sx, int sy) {
+            int w = getWidth();
+            int h = getViewHeight();
+            Bitmap bm = Bitmap.createBitmap(w, h, offscreenBitmapConfig());
+            Canvas canvas = new Canvas(bm);
+            canvas.translate(-sx, -sy);
+            drawContent(canvas);
+
+            if (DebugFlags.DRAG_TRACKER || DEBUG_DRAG_TRACKER) {
+                Log.d(DebugFlags.DRAG_TRACKER_LOGTAG, "--- buildBitmap " + sx +
+                      " " + sy + " " + w + " " + h);
+            }
+            mProxy.onBitmapChange(bm);
+        }
+    }
+
+    /** @hide */
+    public static class DragTracker {
+        public void onStartDrag(float x, float y) {}
+        public boolean onStretchChange(float sx, float sy) {
+            // return true to have us inval the view
+            return false;
+        }
+        public void onStopDrag() {}
+        public void onBitmapChange(Bitmap bm) {}
+        public void onDraw(Canvas canvas) {}
+    }
+
+    /** @hide */
+    public DragTracker getDragTracker() {
+        return mDragTracker;
+    }
+
+    /** @hide */
+    public void setDragTracker(DragTracker tracker) {
+        mDragTracker = tracker;
+    }
+
+    private DragTracker mDragTracker;
+    private DragTrackerHandler mDragTrackerHandler;
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
@@ -3801,18 +3994,39 @@ public class WebView extends AbsoluteLayout
                     + mTouchMode);
         }
 
+        int action;
+        float x, y;
+        long eventTime = ev.getEventTime();
+
         // FIXME: we may consider to give WebKit an option to handle multi-touch
         // events later.
-        if (mSupportMultiTouch && mMinZoomScale < mMaxZoomScale
-                && ev.getPointerCount() > 1) {
-            mLastTouchTime = ev.getEventTime();
-            return mScaleDetector.onTouchEvent(ev);
+        if (mSupportMultiTouch && ev.getPointerCount() > 1) {
+            mScaleDetector.onTouchEvent(ev);
+            if (mScaleDetector.isInProgress()) {
+                mLastTouchTime = eventTime;
+                return true;
+            }
+            x = mScaleDetector.getFocusX();
+            y = mScaleDetector.getFocusY();
+            action = ev.getAction() & MotionEvent.ACTION_MASK;
+            if (action == MotionEvent.ACTION_POINTER_DOWN) {
+                cancelTouch();
+                action = MotionEvent.ACTION_DOWN;
+            } else if (action == MotionEvent.ACTION_POINTER_UP) {
+                // set mLastTouchX/Y to the remaining point
+                mLastTouchX = x;
+                mLastTouchY = y;
+            } else if (action == MotionEvent.ACTION_MOVE) {
+                // negative x or y indicate it is on the edge, skip it.
+                if (x < 0 || y < 0) {
+                    return true;
+                }
+            }
+        } else {
+            action = ev.getAction();
+            x = ev.getX();
+            y = ev.getY();
         }
-
-        int action = ev.getAction();
-        float x = ev.getX();
-        float y = ev.getY();
-        long eventTime = ev.getEventTime();
 
         // Due to the touch screen edge effect, a touch closer to the edge
         // always snapped to the edge. As getViewWidth() can be different from
@@ -3888,6 +4102,10 @@ public class WebView extends AbsoluteLayout
                 }
                 // Remember where the motion event started
                 startTouch(x, y, eventTime);
+                if (mDragTracker != null) {
+                    mDragTrackerHandler = new DragTrackerHandler(x, y,
+                                                                 mDragTracker);
+                }
                 break;
             }
             case MotionEvent.ACTION_MOVE: {
@@ -4045,6 +4263,10 @@ public class WebView extends AbsoluteLayout
                     }
                 }
 
+                if (mDragTrackerHandler != null) {
+                    mDragTrackerHandler.dragTo(x, y);
+                }
+
                 if (done) {
                     // keep the scrollbar on the screen even there is no scroll
                     awakenScrollBars(ViewConfiguration.getScrollDefaultDelay(),
@@ -4056,6 +4278,10 @@ public class WebView extends AbsoluteLayout
                 break;
             }
             case MotionEvent.ACTION_UP: {
+                if (mDragTrackerHandler != null) {
+                    mDragTrackerHandler.stopDrag();
+                    mDragTrackerHandler = null;
+                }
                 mLastTouchUpTime = eventTime;
                 switch (mTouchMode) {
                     case TOUCH_DOUBLE_TAP_MODE: // double tap
@@ -4131,6 +4357,10 @@ public class WebView extends AbsoluteLayout
                 break;
             }
             case MotionEvent.ACTION_CANCEL: {
+                if (mDragTrackerHandler != null) {
+                    mDragTrackerHandler.stopDrag();
+                    mDragTrackerHandler = null;
+                }
                 cancelTouch();
                 break;
             }
