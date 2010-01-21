@@ -26,16 +26,19 @@ import android.content.ComponentName;
 interface IDevicePolicyManager {
     void setPasswordMode(in ComponentName who, int mode);
     int getPasswordMode();
-    int getActivePasswordMode();
     
     void setMinimumPasswordLength(in ComponentName who, int length);
     int getMinimumPasswordLength();
-    int getActiveMinimumPasswordLength();
     
+    boolean isActivePasswordSufficient();
     int getCurrentFailedPasswordAttempts();
+    
+    boolean resetPassword(String password);
     
     void setMaximumTimeToLock(in ComponentName who, long timeMs);
     long getMaximumTimeToLock();
+    
+    void lockNow();
     
     void wipeData(int flags);
     
