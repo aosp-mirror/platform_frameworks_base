@@ -261,7 +261,7 @@ sp<OverlayRef> LayerBuffer::SurfaceLayerBuffer::createOverlay(
 // ============================================================================
 
 LayerBuffer::Buffer::Buffer(const ISurface::BufferHeap& buffers, ssize_t offset)
-    : mBufferHeap(buffers)
+    : mBufferHeap(buffers), mSupportsCopybit(false)
 {
     NativeBuffer& src(mNativeBuffer);
     src.crop.l = 0;
@@ -283,10 +283,8 @@ LayerBuffer::Buffer::Buffer(const ISurface::BufferHeap& buffers, ssize_t offset)
                 offset, buffers.heap->base(),
                 &src.img.handle);
 
-        LOGE_IF(err, "CREATE_HANDLE_FROM_BUFFER (heapId=%d, size=%d, "
-             "offset=%ld, base=%p) failed (%s)",
-                buffers.heap->heapID(), buffers.heap->getSize(),
-                offset, buffers.heap->base(), strerror(-err));
+        // we can fail here is the passed buffer is purely software
+        mSupportsCopybit = (err == NO_ERROR);
     }
  }
 
@@ -446,14 +444,10 @@ void LayerBuffer::BufferSource::onDraw(const Region& clip) const
     NativeBuffer src(ourBuffer->getBuffer());
     const Rect transformedBounds(mLayer.getTransformedBounds());
 
-    if (UNLIKELY(mTexture.name == -1LU)) {
-        mTexture.name = mLayer.createTexture();
-    }
-
 #if defined(EGL_ANDROID_image_native_buffer)
     if (mLayer.mFlags & DisplayHardware::DIRECT_TEXTURE) {
         copybit_device_t* copybit = mLayer.mBlitEngine;
-        if (copybit) {
+        if (copybit && ourBuffer->supportsCopybit()) {
             // create our EGLImageKHR the first time
             err = initTempBuffer();
             if (err == NO_ERROR) {
@@ -465,7 +459,9 @@ void LayerBuffer::BufferSource::onDraw(const Region& clip) const
                 copybit->set_parameter(copybit, COPYBIT_DITHER, COPYBIT_ENABLE);
                 err = copybit->stretch(copybit, &dst.img, &src.img,
                         &dst.crop, &src.crop, &clip);
-
+                if (err != NO_ERROR) {
+                    clearTempBufferImage();
+                }
             }
         } else {
             err = INVALID_OPERATION;
@@ -487,6 +483,9 @@ void LayerBuffer::BufferSource::onDraw(const Region& clip) const
         t.format = src.img.format;
         t.data = (GGLubyte*)src.img.base;
         const Region dirty(Rect(t.width, t.height));
+        if (UNLIKELY(mTexture.name == -1LU)) {
+            mTexture.name = mLayer.createTexture();
+        }
         mLayer.loadTexture(&mTexture, dirty, t);
     }
 
@@ -504,16 +503,21 @@ status_t LayerBuffer::BufferSource::initTempBuffer() const
         int t = w; w = h; h = t;
     }
 
+    // we're in the copybit case, so make sure we can handle this blit
+    // we don't have to keep the aspect ratio here
+    copybit_device_t* copybit = mLayer.mBlitEngine;
+    const int down = copybit->get(copybit, COPYBIT_MINIFICATION_LIMIT);
+    const int up = copybit->get(copybit, COPYBIT_MAGNIFICATION_LIMIT);
+    if (buffers.w > w*down)     w = buffers.w / down;
+    else if (w > buffers.w*up)  w = buffers.w*up;
+    if (buffers.h > h*down)     h = buffers.h / down;
+    else if (h > buffers.h*up)  h = buffers.h*up;
+
     if (mTexture.image != EGL_NO_IMAGE_KHR) {
         // we have an EGLImage, make sure the needed size didn't change
         if (w!=mTexture.width || h!= mTexture.height) {
             // delete the EGLImage and texture
-            EGLDisplay dpy(mLayer.mFlinger->graphicPlane(0).getEGLDisplay());
-            glDeleteTextures(1, &mTexture.name);
-            eglDestroyImageKHR(dpy, mTexture.image);
-            Texture defaultTexture;
-            mTexture = defaultTexture;
-            mTempGraphicBuffer.clear();
+            clearTempBufferImage();
         } else {
             // we're good, we have an EGLImageKHR and it's (still) the
             // right size
@@ -558,6 +562,16 @@ status_t LayerBuffer::BufferSource::initTempBuffer() const
     }
 
     return err;
+}
+
+void LayerBuffer::BufferSource::clearTempBufferImage() const
+{
+    EGLDisplay dpy(mLayer.mFlinger->graphicPlane(0).getEGLDisplay());
+    glDeleteTextures(1, &mTexture.name);
+    eglDestroyImageKHR(dpy, mTexture.image);
+    Texture defaultTexture;
+    mTexture = defaultTexture;
+    mTempGraphicBuffer.clear();
 }
 
 // ---------------------------------------------------------------------------

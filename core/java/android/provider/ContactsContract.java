@@ -1102,6 +1102,33 @@ public final class ContactsContract {
          * <P>Type: INTEGER</P>
          */
         public static final String DELETED = "deleted";
+
+        /**
+         * The "name_verified" flag: "1" means that the name fields on this raw
+         * contact can be trusted and therefore should be used for the entire
+         * aggregated contact.
+         * <p>
+         * If an aggregated contact contains more than one raw contact with a
+         * verified name, one of those verified names is chosen at random.
+         * If an aggregated contact contains no verified names, the
+         * name is chosen randomly from the constituent raw contacts.
+         * </p>
+         * <p>
+         * Updating this flag from "0" to "1" automatically resets it to "0" on
+         * all other raw contacts in the same aggregated contact.
+         * </p>
+         * <p>
+         * Sync adapters should only specify a value for this column when
+         * inserting a raw contact and leave it out when doing an update.
+         * </p>
+         * <p>
+         * The default value is "0"
+         * </p>
+         * <p>Type: INTEGER</p>
+         *
+         * @hide
+         */
+        public static final String NAME_VERIFIED = "name_verified";
     }
 
     /**
@@ -1265,9 +1292,6 @@ public final class ContactsContract {
      * </dd>
      * </dl>
      * <h2>Columns</h2>
-     * TODO: include {@link #DISPLAY_NAME_PRIMARY}, {@link #DISPLAY_NAME_ALTERNATIVE},
-     * {@link #DISPLAY_NAME_SOURCE}, {@link #PHONETIC_NAME}, {@link #PHONETIC_NAME_STYLE},
-     * {@link #SORT_KEY_PRIMARY}, {@link #SORT_KEY_ALTERNATIVE}?
      *
      * <table class="jd-sumtable">
      * <tr>
@@ -1676,6 +1700,7 @@ public final class ContactsContract {
                 DatabaseUtils.cursorLongToContentValuesIfPresent(cursor, cv, CONTACT_ID);
                 DatabaseUtils.cursorLongToContentValuesIfPresent(cursor, cv, STARRED);
                 DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv, IS_RESTRICTED);
+                DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv, NAME_VERIFIED);
                 android.content.Entity contact = new android.content.Entity(cv);
 
                 // read data rows until the contact id changes

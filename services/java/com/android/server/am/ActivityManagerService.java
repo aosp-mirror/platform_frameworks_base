@@ -8994,6 +8994,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         report.installerPackageName = r.errorReportReceiver.getPackageName();
         report.processName = r.processName;
         report.time = timeMillis;
+        report.systemApp = (r.info.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
 
         if (r.crashing) {
             report.type = ApplicationErrorReport.TYPE_CRASH;

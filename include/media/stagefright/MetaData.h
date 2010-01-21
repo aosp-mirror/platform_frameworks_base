@@ -60,6 +60,7 @@ enum {
     kKeyAuthor            = 'auth',  // cstring
     kKeyCDTrackNumber     = 'cdtr',  // cstring
     kKeyDate              = 'date',  // cstring
+    kKeyWriter            = 'writ',  // cstring
 };
 
 enum {

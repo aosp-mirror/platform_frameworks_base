@@ -132,7 +132,7 @@ private:
             SET_VOICE_VOLUME
         };
 
-        AudioCommandThread ();
+        AudioCommandThread (String8 name);
         virtual             ~AudioCommandThread();
 
                     status_t    dump(int fd);
@@ -195,7 +195,8 @@ private:
         Condition mWaitWorkCV;
         Vector <AudioCommand *> mAudioCommands; // list of pending commands
         ToneGenerator *mpToneGenerator;     // the tone generator
-        AudioCommand mLastCommand;
+        AudioCommand mLastCommand;          // last processed command (used by dump)
+        String8 mName;                      // string used by wake lock fo delayed commands
     };
 
     // Internal dump utilities.

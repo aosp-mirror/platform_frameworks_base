@@ -154,7 +154,8 @@ MPEG4Extractor::MPEG4Extractor(const sp<DataSource> &source)
       mHaveMetadata(false),
       mHasVideo(false),
       mFirstTrack(NULL),
-      mLastTrack(NULL) {
+      mLastTrack(NULL),
+      mFileMetaData(new MetaData) {
 }
 
 MPEG4Extractor::~MPEG4Extractor() {
@@ -169,20 +170,12 @@ MPEG4Extractor::~MPEG4Extractor() {
 }
 
 sp<MetaData> MPEG4Extractor::getMetaData() {
-    sp<MetaData> meta = new MetaData;
-
     status_t err;
     if ((err = readMetaData()) != OK) {
-        return meta;
+        return new MetaData;
     }
 
-    if (mHasVideo) {
-        meta->setCString(kKeyMIMEType, "video/mp4");
-    } else {
-        meta->setCString(kKeyMIMEType, "audio/mp4");
-    }
-
-    return meta;
+    return mFileMetaData;
 }
 
 size_t MPEG4Extractor::countTracks() {
@@ -256,6 +249,12 @@ status_t MPEG4Extractor::readMetaData() {
     }
 
     if (mHaveMetadata) {
+        if (mHasVideo) {
+            mFileMetaData->setCString(kKeyMIMEType, "video/mp4");
+        } else {
+            mFileMetaData->setCString(kKeyMIMEType, "audio/mp4");
+        }
+
         return OK;
     }
 
@@ -268,6 +267,41 @@ static void MakeFourCCString(uint32_t x, char *s) {
     s[2] = (x >> 8) & 0xff;
     s[3] = x & 0xff;
     s[4] = '\0';
+}
+
+struct PathAdder {
+    PathAdder(Vector<uint32_t> *path, uint32_t chunkType)
+        : mPath(path) {
+        mPath->push(chunkType);
+    }
+
+    ~PathAdder() {
+        mPath->pop();
+    }
+
+private:
+    Vector<uint32_t> *mPath;
+
+    PathAdder(const PathAdder &);
+    PathAdder &operator=(const PathAdder &);
+};
+
+static bool underMetaDataPath(const Vector<uint32_t> &path) {
+    return path.size() >= 5
+        && path[0] == FOURCC('m', 'o', 'o', 'v')
+        && path[1] == FOURCC('u', 'd', 't', 'a')
+        && path[2] == FOURCC('m', 'e', 't', 'a')
+        && path[3] == FOURCC('i', 'l', 's', 't');
+}
+
+// Given a time in seconds since Jan 1 1904, produce a human-readable string.
+static void convertTimeToDate(int64_t time_1904, String8 *s) {
+    time_t time_1970 = time_1904 - (((66 * 365 + 17) * 24) * 3600);
+
+    char tmp[32];
+    strftime(tmp, sizeof(tmp), "%Y%m%dT%H%M%S.000Z", gmtime(&time_1970));
+
+    s->setTo(tmp);
 }
 
 status_t MPEG4Extractor::parseChunk(off_t *offset, int depth) {
@@ -297,7 +331,8 @@ status_t MPEG4Extractor::parseChunk(off_t *offset, int depth) {
 
     char buffer[256];
     if (chunk_size <= sizeof(buffer)) {
-        if (mDataSource->readAt(*offset, buffer, chunk_size) < chunk_size) {
+        if (mDataSource->readAt(*offset, buffer, chunk_size)
+                < (ssize_t)chunk_size) {
             return ERROR_IO;
         }
 
@@ -305,7 +340,24 @@ status_t MPEG4Extractor::parseChunk(off_t *offset, int depth) {
     }
 #endif
 
+    PathAdder autoAdder(&mPath, chunk_type);
+
     off_t chunk_data_size = *offset + chunk_size - data_offset;
+
+    if (chunk_type != FOURCC('c', 'p', 'r', 't')
+            && mPath.size() == 5 && underMetaDataPath(mPath)) {
+        off_t stop_offset = *offset + chunk_size;
+        *offset = data_offset;
+        while (*offset < stop_offset) {
+            status_t err = parseChunk(offset, depth + 1);
+            if (err != OK) {
+                return err;
+            }
+        }
+        CHECK_EQ(*offset, stop_offset);
+
+        return OK;
+    }
 
     switch(chunk_type) {
         case FOURCC('m', 'o', 'o', 'v'):
@@ -319,6 +371,8 @@ status_t MPEG4Extractor::parseChunk(off_t *offset, int depth) {
         case FOURCC('t', 'r', 'a', 'f'):
         case FOURCC('m', 'f', 'r', 'a'):
         case FOURCC('s', 'k', 'i' ,'p'):
+        case FOURCC('u', 'd', 't', 'a'):
+        case FOURCC('i', 'l', 's', 't'):
         {
             off_t stop_offset = *offset + chunk_size;
             *offset = data_offset;
@@ -748,12 +802,178 @@ status_t MPEG4Extractor::parseChunk(off_t *offset, int depth) {
             break;
         }
 
+        case FOURCC('m', 'e', 't', 'a'):
+        {
+            uint8_t buffer[4];
+            CHECK(chunk_data_size >= (off_t)sizeof(buffer));
+            if (mDataSource->readAt(
+                        data_offset, buffer, 4) < 4) {
+                return ERROR_IO;
+            }
+
+            if (U32_AT(buffer) != 0) {
+                // Should be version 0, flags 0.
+                return ERROR_MALFORMED;
+            }
+
+            off_t stop_offset = *offset + chunk_size;
+            *offset = data_offset + sizeof(buffer);
+            while (*offset < stop_offset) {
+                status_t err = parseChunk(offset, depth + 1);
+                if (err != OK) {
+                    return err;
+                }
+            }
+            CHECK_EQ(*offset, stop_offset);
+            break;
+        }
+
+        case FOURCC('d', 'a', 't', 'a'):
+        {
+            if (mPath.size() == 6 && underMetaDataPath(mPath)) {
+                status_t err = parseMetaData(data_offset, chunk_data_size);
+
+                if (err != OK) {
+                    return err;
+                }
+            }
+
+            *offset += chunk_size;
+            break;
+        }
+
+        case FOURCC('m', 'v', 'h', 'd'):
+        {
+            if (chunk_data_size < 12) {
+                return ERROR_MALFORMED;
+            }
+
+            uint8_t header[12];
+            if (mDataSource->readAt(
+                        data_offset, header, sizeof(header))
+                    < (ssize_t)sizeof(header)) {
+                return ERROR_IO;
+            }
+
+            int64_t creationTime;
+            if (header[0] == 1) {
+                creationTime = U64_AT(&header[4]);
+            } else {
+                CHECK_EQ(header[0], 0);
+                creationTime = U32_AT(&header[4]);
+            }
+
+            String8 s;
+            convertTimeToDate(creationTime, &s);
+
+            mFileMetaData->setCString(kKeyDate, s.string());
+
+            *offset += chunk_size;
+            break;
+        }
+
         default:
         {
             *offset += chunk_size;
             break;
         }
     }
+
+    return OK;
+}
+
+status_t MPEG4Extractor::parseMetaData(off_t offset, size_t size) {
+    if (size < 4) {
+        return ERROR_MALFORMED;
+    }
+
+    uint8_t *buffer = new uint8_t[size + 1];
+    if (mDataSource->readAt(
+                offset, buffer, size) != (ssize_t)size) {
+        delete[] buffer;
+        buffer = NULL;
+
+        return ERROR_IO;
+    }
+
+    uint32_t flags = U32_AT(buffer);
+
+    uint32_t metadataKey = 0;
+    switch (mPath[4]) {
+        case FOURCC(0xa9, 'a', 'l', 'b'):
+        {
+            metadataKey = kKeyAlbum;
+            break;
+        }
+        case FOURCC(0xa9, 'A', 'R', 'T'):
+        {
+            metadataKey = kKeyArtist;
+            break;
+        }
+        case FOURCC(0xa9, 'd', 'a', 'y'):
+        {
+            metadataKey = kKeyYear;
+            break;
+        }
+        case FOURCC(0xa9, 'n', 'a', 'm'):
+        {
+            metadataKey = kKeyTitle;
+            break;
+        }
+        case FOURCC(0xa9, 'w', 'r', 't'):
+        {
+            metadataKey = kKeyWriter;
+            break;
+        }
+        case FOURCC('c', 'o', 'v', 'r'):
+        {
+            metadataKey = kKeyAlbumArt;
+            break;
+        }
+        case FOURCC('g', 'n', 'r', 'e'):
+        {
+            metadataKey = kKeyGenre;
+            break;
+        }
+        case FOURCC('t', 'r', 'k', 'n'):
+        {
+            if (size == 16 && flags == 0) {
+                char tmp[16];
+                sprintf(tmp, "%d/%d",
+                        (int)buffer[size - 5], (int)buffer[size - 3]);
+
+                printf("track: %s\n", tmp);
+                mFileMetaData->setCString(kKeyCDTrackNumber, tmp);
+            }
+            break;
+        }
+        default:
+            break;
+    }
+
+    if (size >= 8 && metadataKey) {
+        if (metadataKey == kKeyAlbumArt) {
+            mFileMetaData->setData(
+                    kKeyAlbumArt, MetaData::TYPE_NONE,
+                    buffer + 8, size - 8);
+        } else if (metadataKey == kKeyGenre) {
+            if (flags == 0) {
+                // uint8_t
+                char genre[10];
+                sprintf(genre, "%d", (int)buffer[size - 1]);
+
+                mFileMetaData->setCString(metadataKey, genre);
+            }
+        } else {
+            buffer[size] = '\0';
+
+            mFileMetaData->setCString(
+                    metadataKey, (const char *)buffer + 8);
+        }
+    }
+
+    delete[] buffer;
+    buffer = NULL;
 
     return OK;
 }

@@ -99,6 +99,9 @@ private:
     class Buffer : public LightRefBase<Buffer> {
     public:
         Buffer(const ISurface::BufferHeap& buffers, ssize_t offset);
+        inline bool supportsCopybit() const {
+            return mSupportsCopybit;
+        }
         inline status_t getStatus() const {
             return mBufferHeap.heap!=0 ? NO_ERROR : NO_INIT;
         }
@@ -113,6 +116,7 @@ private:
     private:
         ISurface::BufferHeap    mBufferHeap;
         NativeBuffer            mNativeBuffer;
+        bool                    mSupportsCopybit;
     };
 
     class BufferSource : public Source {
@@ -131,6 +135,7 @@ private:
         virtual void destroy() { }
     private:
         status_t initTempBuffer() const;
+        void clearTempBufferImage() const;
         mutable Mutex                   mBufferSourceLock;
         sp<Buffer>                      mBuffer;
         status_t                        mStatus;

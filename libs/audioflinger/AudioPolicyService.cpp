@@ -30,9 +30,10 @@
 #include <utils/String16.h>
 #include <utils/threads.h>
 #include "AudioPolicyService.h"
-#include "AudioPolicyManagerGeneric.h"
+#include <hardware_legacy/AudioPolicyManagerBase.h>
 #include <cutils/properties.h>
 #include <dlfcn.h>
+#include <hardware_legacy/power.h>
 
 // ----------------------------------------------------------------------------
 // the sim build doesn't have gettid
@@ -43,8 +44,9 @@
 
 namespace android {
 
-static const char* kDeadlockedString = "AudioPolicyService may be deadlocked\n";
-static const char* kCmdDeadlockedString = "AudioPolicyService command thread may be deadlocked\n";
+
+static const char *kDeadlockedString = "AudioPolicyService may be deadlocked\n";
+static const char *kCmdDeadlockedString = "AudioPolicyService command thread may be deadlocked\n";
 
 static const int kDumpLockRetries = 50;
 static const int kDumpLockSleep = 20000;
@@ -67,18 +69,18 @@ AudioPolicyService::AudioPolicyService()
     char value[PROPERTY_VALUE_MAX];
 
     // start tone playback thread
-    mTonePlaybackThread = new AudioCommandThread();
+    mTonePlaybackThread = new AudioCommandThread(String8(""));
     // start audio commands thread
-    mAudioCommandThread = new AudioCommandThread();
+    mAudioCommandThread = new AudioCommandThread(String8("ApmCommandThread"));
 
 #if (defined GENERIC_AUDIO) || (defined AUDIO_POLICY_TEST)
-    mpPolicyManager = new AudioPolicyManagerGeneric(this);
+    mpPolicyManager = new AudioPolicyManagerBase(this);
     LOGV("build for GENERIC_AUDIO - using generic audio policy");
 #else
     // if running in emulation - use the emulator driver
     if (property_get("ro.kernel.qemu", value, 0)) {
         LOGV("Running in emulation - using generic audio policy");
-        mpPolicyManager = new AudioPolicyManagerGeneric(this);
+        mpPolicyManager = new AudioPolicyManagerBase(this);
     }
     else {
         LOGV("Using hardware specific audio policy");
@@ -556,8 +558,8 @@ status_t AudioPolicyService::setVoiceVolume(float volume, int delayMs)
 
 // -----------  AudioPolicyService::AudioCommandThread implementation ----------
 
-AudioPolicyService::AudioCommandThread::AudioCommandThread()
-    :   Thread(false)
+AudioPolicyService::AudioCommandThread::AudioCommandThread(String8 name)
+    : Thread(false), mName(name)
 {
     mpToneGenerator = NULL;
 }
@@ -565,18 +567,20 @@ AudioPolicyService::AudioCommandThread::AudioCommandThread()
 
 AudioPolicyService::AudioCommandThread::~AudioCommandThread()
 {
+    if (mName != "" && !mAudioCommands.isEmpty()) {
+        release_wake_lock(mName.string());
+    }
     mAudioCommands.clear();
     if (mpToneGenerator != NULL) delete mpToneGenerator;
 }
 
 void AudioPolicyService::AudioCommandThread::onFirstRef()
 {
-    const size_t SIZE = 256;
-    char buffer[SIZE];
-
-    snprintf(buffer, SIZE, "AudioCommandThread");
-
-    run(buffer, ANDROID_PRIORITY_AUDIO);
+    if (mName != "") {
+        run(mName.string(), ANDROID_PRIORITY_AUDIO);
+    } else {
+        run("AudioCommandThread", ANDROID_PRIORITY_AUDIO);
+    }
 }
 
 bool AudioPolicyService::AudioCommandThread::threadLoop()
@@ -656,6 +660,10 @@ bool AudioPolicyService::AudioCommandThread::threadLoop()
                 waitTime = mAudioCommands[0]->mTime - curTime;
                 break;
             }
+        }
+        // release delayed commands wake lock
+        if (mName != "" && mAudioCommands.isEmpty()) {
+            release_wake_lock(mName.string());
         }
         LOGV("AudioCommandThread() going to sleep");
         mWaitWorkCV.waitRelative(mLock, waitTime);
@@ -815,6 +823,11 @@ void AudioPolicyService::AudioCommandThread::insertCommand_l(AudioCommand *comma
 
     command->mTime = systemTime() + milliseconds(delayMs);
 
+    // acquire wake lock to make sure delayed commands are processed
+    if (mName != "" && mAudioCommands.isEmpty()) {
+        acquire_wake_lock(PARTIAL_WAKE_LOCK, mName.string());
+    }
+
     // check same pending commands with later time stamps and eliminate them
     for (i = mAudioCommands.size()-1; i >= 0; i--) {
         AudioCommand *command2 = mAudioCommands[i];
@@ -883,7 +896,7 @@ void AudioPolicyService::AudioCommandThread::insertCommand_l(AudioCommand *comma
     removedCommands.clear();
 
     // insert command at the right place according to its time stamp
-    LOGV("inserting command: %d at index %ld, num commands %d", command->mCommand, i+1, mAudioCommands.size());
+    LOGV("inserting command: %d at index %d, num commands %d", command->mCommand, (int)i+1, mAudioCommands.size());
     mAudioCommands.insertAt(command, i + 1);
 }
 

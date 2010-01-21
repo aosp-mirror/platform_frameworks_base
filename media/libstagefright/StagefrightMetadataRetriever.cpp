@@ -315,6 +315,7 @@ void StagefrightMetadataRetriever::parseMetaData() {
         { kKeyGenre, METADATA_KEY_GENRE },
         { kKeyTitle, METADATA_KEY_TITLE },
         { kKeyYear, METADATA_KEY_YEAR },
+        { kKeyWriter, METADATA_KEY_WRITER },
     };
     static const size_t kNumMapEntries = sizeof(kMap) / sizeof(kMap[0]);
 
@@ -357,7 +358,6 @@ void StagefrightMetadataRetriever::parseMetaData() {
 
     // The duration value is a string representing the duration in ms.
     sprintf(tmp, "%lld", (maxDurationUs + 500) / 1000);
-
     mMetaData.add(METADATA_KEY_DURATION, String8(tmp));
 }
 

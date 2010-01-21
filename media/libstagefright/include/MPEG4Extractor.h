@@ -19,6 +19,7 @@
 #define MPEG4_EXTRACTOR_H_
 
 #include <media/stagefright/MediaExtractor.h>
+#include <utils/Vector.h>
 
 namespace android {
 
@@ -55,10 +56,14 @@ private:
 
     Track *mFirstTrack, *mLastTrack;
 
+    sp<MetaData> mFileMetaData;
+
     uint32_t mHandlerType;
+    Vector<uint32_t> mPath;
 
     status_t readMetaData();
     status_t parseChunk(off_t *offset, int depth);
+    status_t parseMetaData(off_t offset, size_t size);
 
     MPEG4Extractor(const MPEG4Extractor &);
     MPEG4Extractor &operator=(const MPEG4Extractor &);

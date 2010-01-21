@@ -65,7 +65,7 @@ public:
 
     virtual status_t allocateBuffer(
             node_id node, OMX_U32 port_index, size_t size,
-            buffer_id *buffer);
+            buffer_id *buffer, void **buffer_data);
 
     virtual status_t allocateBufferWithBackup(
             node_id node, OMX_U32 port_index, const sp<IMemory> &params,

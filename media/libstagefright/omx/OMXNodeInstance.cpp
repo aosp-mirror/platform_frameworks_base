@@ -258,7 +258,8 @@ status_t OMXNodeInstance::useBuffer(
 }
 
 status_t OMXNodeInstance::allocateBuffer(
-        OMX_U32 portIndex, size_t size, OMX::buffer_id *buffer) {
+        OMX_U32 portIndex, size_t size, OMX::buffer_id *buffer,
+        void **buffer_data) {
     Mutex::Autolock autoLock(mLock);
 
     BufferMeta *buffer_meta = new BufferMeta(size);
@@ -280,6 +281,7 @@ status_t OMXNodeInstance::allocateBuffer(
     }
 
     *buffer = header;
+    *buffer_data = header->pBuffer;
 
     addActiveBuffer(portIndex, *buffer);
 

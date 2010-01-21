@@ -249,6 +249,8 @@ public class SQLiteDatabase extends SQLiteClosable {
      */
     public static final int MAX_SQL_CACHE_SIZE = 250;
     private int mMaxSqlCacheSize = MAX_SQL_CACHE_SIZE; // max cache size per Database instance
+    private int mCacheFullWarnings;
+    private static final int MAX_WARNINGS_ON_CACHESIZE_CONDITION = 5;
 
     /** maintain stats about number of cache hits and misses */
     private int mNumCacheHits;
@@ -1873,13 +1875,30 @@ public class SQLiteDatabase extends SQLiteClosable {
                  * JNI method. If entire cache is wiped out, it could cause a big GC activity
                  * just because a (rogue) process is using the cache incorrectly.
                  */
-                Log.w(TAG, "Too many sql statements in database cache. Make sure your sql " +
+                Log.w(TAG, "Reached MAX size for compiled-sql statement cache for database " +
+                        getPath() + "; i.e., NO space for this sql statement in cache: " +
+                        sql + ". Make sure your sql " +
                         "statements are using prepared-sql-statement syntax with '?' for " +
                         "bindargs, instead of using actual values");
-                Set<String> keySet = mCompiledQueries.keySet();
-                for (String s : keySet) {
-                    mCompiledQueries.remove(s);
-                    break;
+                
+                /* increment the number of times this warnings has been printed.
+                 * if this warning is printed too many times, clear the whole cache - the app
+                 * is doing something weird or incorrect and printing more warnings will only
+                 * flood the logfile.
+                 */
+                if (++mCacheFullWarnings > MAX_WARNINGS_ON_CACHESIZE_CONDITION) {
+                    mCacheFullWarnings = 0;
+                    // clear the cache
+                    mCompiledQueries.clear();
+                    Log.w(TAG, "compiled-sql statement cache cleared for the database " +
+                            getPath());
+                } else {
+                    // clear just a single entry from cache
+                    Set<String> keySet = mCompiledQueries.keySet();
+                    for (String s : keySet) {
+                        mCompiledQueries.remove(s);
+                        break;
+                    }
                 }
             }
             mCompiledQueries.put(sql, compiledStatement);

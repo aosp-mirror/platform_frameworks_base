@@ -1189,12 +1189,19 @@ status_t OMXCodec::allocateBuffersOnPort(OMX_U32 portIndex) {
         sp<IMemory> mem = mDealer[portIndex]->allocate(def.nBufferSize);
         CHECK(mem.get() != NULL);
 
+        BufferInfo info;
+        info.mData = NULL;
+        info.mSize = def.nBufferSize;
+
         IOMX::buffer_id buffer;
         if (portIndex == kPortIndexInput
                 && (mQuirks & kRequiresAllocateBufferOnInputPorts)) {
             if (mOMXLivesLocally) {
+                mem.clear();
+
                 err = mOMX->allocateBuffer(
-                        mNode, portIndex, def.nBufferSize, &buffer);
+                        mNode, portIndex, def.nBufferSize, &buffer,
+                        &info.mData);
             } else {
                 err = mOMX->allocateBufferWithBackup(
                         mNode, portIndex, mem, &buffer);
@@ -1202,8 +1209,11 @@ status_t OMXCodec::allocateBuffersOnPort(OMX_U32 portIndex) {
         } else if (portIndex == kPortIndexOutput
                 && (mQuirks & kRequiresAllocateBufferOnOutputPorts)) {
             if (mOMXLivesLocally) {
+                mem.clear();
+
                 err = mOMX->allocateBuffer(
-                        mNode, portIndex, def.nBufferSize, &buffer);
+                        mNode, portIndex, def.nBufferSize, &buffer,
+                        &info.mData);
             } else {
                 err = mOMX->allocateBufferWithBackup(
                         mNode, portIndex, mem, &buffer);
@@ -1217,14 +1227,17 @@ status_t OMXCodec::allocateBuffersOnPort(OMX_U32 portIndex) {
             return err;
         }
 
-        BufferInfo info;
+        if (mem != NULL) {
+            info.mData = mem->pointer();
+        }
+
         info.mBuffer = buffer;
         info.mOwnedByComponent = false;
         info.mMem = mem;
         info.mMediaBuffer = NULL;
 
         if (portIndex == kPortIndexOutput) {
-            info.mMediaBuffer = new MediaBuffer(mem->pointer(), mem->size());
+            info.mMediaBuffer = new MediaBuffer(info.mData, info.mSize);
             info.mMediaBuffer->setObserver(this);
         }
 
@@ -1599,6 +1612,8 @@ void OMXCodec::onCmdComplete(OMX_COMMANDTYPE cmd, OMX_U32 data) {
 }
 
 void OMXCodec::onStateChange(OMX_STATETYPE newState) {
+    CODEC_LOGV("onStateChange %d", newState);
+
     switch (newState) {
         case OMX_StateIdle:
         {
@@ -1663,6 +1678,12 @@ void OMXCodec::onStateChange(OMX_STATETYPE newState) {
             CODEC_LOGV("Now Loaded.");
 
             setState(LOADED);
+            break;
+        }
+
+        case OMX_StateInvalid:
+        {
+            setState(ERROR);
             break;
         }
 
@@ -1845,16 +1866,16 @@ void OMXCodec::drainInputBuffer(BufferInfo *info) {
             static const uint8_t kNALStartCode[4] =
                     { 0x00, 0x00, 0x00, 0x01 };
 
-            CHECK(info->mMem->size() >= specific->mSize + 4);
+            CHECK(info->mSize >= specific->mSize + 4);
 
             size += 4;
 
-            memcpy(info->mMem->pointer(), kNALStartCode, 4);
-            memcpy((uint8_t *)info->mMem->pointer() + 4,
+            memcpy(info->mData, kNALStartCode, 4);
+            memcpy((uint8_t *)info->mData + 4,
                    specific->mData, specific->mSize);
         } else {
-            CHECK(info->mMem->size() >= specific->mSize);
-            memcpy(info->mMem->pointer(), specific->mData, specific->mSize);
+            CHECK(info->mSize >= specific->mSize);
+            memcpy(info->mData, specific->mData, specific->mSize);
         }
 
         mNoMoreOutputData = false;
@@ -1901,12 +1922,12 @@ void OMXCodec::drainInputBuffer(BufferInfo *info) {
 
         srcLength = srcBuffer->range_length();
 
-        if (info->mMem->size() < srcLength) {
-            LOGE("info->mMem->size() = %d, srcLength = %d",
-                 info->mMem->size(), srcLength);
+        if (info->mSize < srcLength) {
+            LOGE("info->mSize = %d, srcLength = %d",
+                 info->mSize, srcLength);
         }
-        CHECK(info->mMem->size() >= srcLength);
-        memcpy(info->mMem->pointer(),
+        CHECK(info->mSize >= srcLength);
+        memcpy(info->mData,
                (const uint8_t *)srcBuffer->data() + srcBuffer->range_offset(),
                srcLength);
 
