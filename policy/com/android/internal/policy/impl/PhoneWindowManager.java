@@ -1450,18 +1450,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
             } else if (mHideLockScreen) {
                 if (mKeyguard.hideLw(false)) {
-                    mKeyguardMediator.setHidden(true);
                     changes |= FINISH_LAYOUT_REDO_LAYOUT
                             | FINISH_LAYOUT_REDO_CONFIG
                             | FINISH_LAYOUT_REDO_WALLPAPER;
                 }
+                mKeyguardMediator.setHidden(true);
             } else {
                 if (mKeyguard.showLw(false)) {
-                    mKeyguardMediator.setHidden(false);
                     changes |= FINISH_LAYOUT_REDO_LAYOUT
                             | FINISH_LAYOUT_REDO_CONFIG
                             | FINISH_LAYOUT_REDO_WALLPAPER;
                 }
+                mKeyguardMediator.setHidden(false);
             }
         }
         
