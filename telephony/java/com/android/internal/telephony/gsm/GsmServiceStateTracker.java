@@ -867,8 +867,8 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
             int cid = -1;
             GsmCellLocation loc = ((GsmCellLocation)phone.getCellLocation());
             if (loc != null) cid = loc.getCid();
-            EventLog.List val = new EventLog.List(cid, networkType, newNetworkType);
-            EventLog.writeEvent(TelephonyEventLog.EVENT_LOG_GSM_RAT_SWITCHED, val);
+            EventLog.writeEvent(TelephonyEventLog.EVENT_LOG_GSM_RAT_SWITCHED,
+                    cid, networkType, newNetworkType);
             Log.d(LOG_TAG,
                     "RAT switched " + networkTypeToString(networkType) + " -> "
                     + networkTypeToString(newNetworkType) + " at cell " + cid);
