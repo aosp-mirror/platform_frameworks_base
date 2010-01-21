@@ -32,6 +32,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.List;
 
@@ -94,6 +95,7 @@ public class LockPatternUtils {
     private final static String LOCKOUT_ATTEMPT_DEADLINE = "lockscreen.lockoutattemptdeadline";
     private final static String PATTERN_EVER_CHOSEN_KEY = "lockscreen.patterneverchosen";
     public final static String PASSWORD_TYPE_KEY = "lockscreen.password_type";
+    private final static String LOCK_PASSWORD_SALT_KEY = "lockscreen.password_salt";
 
     private final Context mContext;
     private final ContentResolver mContentResolver;
@@ -218,7 +220,7 @@ public class LockPatternUtils {
                 return true;
             }
             // Compare the hash from the file with the entered password's hash
-            return Arrays.equals(stored, LockPatternUtils.passwordToHash(password));
+            return Arrays.equals(stored, passwordToHash(password));
         } catch (FileNotFoundException fnfe) {
             return true;
         } catch (IOException ioe) {
@@ -322,7 +324,7 @@ public class LockPatternUtils {
      */
     public void saveLockPassword(String password, int mode) {
         // Compute the hash
-        final byte[] hash  = LockPatternUtils.passwordToHash(password);
+        final byte[] hash = passwordToHash(password);
         try {
             // Write the hash to file
             RandomAccessFile raf = new RandomAccessFile(sLockPasswordFilename, "rw");
@@ -418,6 +420,21 @@ public class LockPatternUtils {
         }
     }
 
+    private String getSalt() {
+        long salt = getLong(LOCK_PASSWORD_SALT_KEY, 0);
+        if (salt == 0) {
+            try {
+                salt = SecureRandom.getInstance("SHA1PRNG").nextLong();
+                setLong(LOCK_PASSWORD_SALT_KEY, salt);
+                Log.v(TAG, "Initialized lock password salt");
+            } catch (NoSuchAlgorithmException e) {
+                // Throw an exception rather than storing a password we'll never be able to recover
+                throw new IllegalStateException("Couldn't get SecureRandom number", e);
+            }
+        }
+        return Long.toHexString(salt);
+    }
+
     /*
      * Generate a hash for the given password. To avoid brute force attacks, we use a salted hash.
      * Not the most secure, but it is at least a second level of protection. First level is that
@@ -425,15 +442,14 @@ public class LockPatternUtils {
      * @param password the gesture pattern.
      * @return the hash of the pattern in a byte array.
      */
-     public static byte[] passwordToHash(String password) {
+     public byte[] passwordToHash(String password) {
         if (password == null) {
             return null;
         }
         String algo = null;
         byte[] hashed = null;
         try {
-            long salt = 0x2374868151054924L; // TODO: make this unique to device
-            byte[] saltedPassword = (password + Long.toString(salt)).getBytes();
+            byte[] saltedPassword = (password + getSalt()).getBytes();
             byte[] sha1 = MessageDigest.getInstance(algo = "SHA-1").digest(saltedPassword);
             byte[] md5 = MessageDigest.getInstance(algo = "MD5").digest(saltedPassword);
             hashed = (toHex(sha1) + toHex(md5)).getBytes();
