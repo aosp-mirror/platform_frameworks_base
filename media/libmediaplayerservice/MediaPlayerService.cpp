@@ -199,6 +199,11 @@ extmap FILE_EXTS [] =  {
         {".ota", SONIVOX_PLAYER},
         {".ogg", VORBIS_PLAYER},
         {".oga", VORBIS_PLAYER},
+#ifndef NO_OPENCORE
+        {".wma", PV_PLAYER},
+        {".wmv", PV_PLAYER},
+        {".asf", PV_PLAYER},
+#endif
 };
 
 // TODO: Find real cause of Audio/Video delay in PV framework and remove this workaround
@@ -681,6 +686,14 @@ player_type getPlayerType(int fd, int64_t offset, int64_t length)
     // Ogg vorbis?
     if (ident == 0x5367674f) // 'OggS'
         return VORBIS_PLAYER;
+
+#ifndef NO_OPENCORE
+    if (ident == 0x75b22630) {
+        // The magic number for .asf files, i.e. wmv and wma content.
+        // These are not currently supported through stagefright.
+        return PV_PLAYER;
+    }
+#endif
 
     // Some kind of MIDI?
     EAS_DATA_HANDLE easdata;
