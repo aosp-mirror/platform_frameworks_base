@@ -1860,6 +1860,14 @@ public class SQLiteDatabase extends SQLiteClosable {
             return;
         }
 
+        /* don't cache PRAGMA sql statements.
+         * caching them makes sqlite return incorrect results on pragma sql execution!
+         */
+        String prefixSql = sql.substring(0, 6);
+        if (prefixSql.toLowerCase().startsWith("pragma")) {
+            return;
+        }
+
         SQLiteCompiledSql compiledSql = null;
         synchronized(mCompiledQueries) {
             // don't insert the new mapping if a mapping already exists
@@ -1925,6 +1933,12 @@ public class SQLiteDatabase extends SQLiteClosable {
      * returns null, if not found in the cache.
      */
     /* package */ SQLiteCompiledSql getCompiledStatementForSql(String sql) {
+        // don't look for PRAGMA sql statements in compiled-sql cache
+        String prefixSql = sql.substring(0, 6);
+        if (prefixSql.toLowerCase().startsWith("pragma")) {
+            return null;
+        }
+
         SQLiteCompiledSql compiledStatement = null;
         boolean cacheHit;
         synchronized(mCompiledQueries) {
