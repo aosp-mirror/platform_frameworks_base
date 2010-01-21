@@ -100,6 +100,8 @@ private:
         IOMX::buffer_id mBuffer;
         bool mOwnedByComponent;
         sp<IMemory> mMem;
+        size_t mSize;
+        void *mData;
         MediaBuffer *mMediaBuffer;
     };
 

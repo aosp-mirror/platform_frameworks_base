@@ -240,7 +240,7 @@ public:
 
     virtual status_t allocateBuffer(
             node_id node, OMX_U32 port_index, size_t size,
-            buffer_id *buffer) {
+            buffer_id *buffer, void **buffer_data) {
         Parcel data, reply;
         data.writeInterfaceToken(IOMX::getInterfaceDescriptor());
         data.writeIntPtr((intptr_t)node);
@@ -255,7 +255,8 @@ public:
             return err;
         }
 
-        *buffer = (void*)reply.readIntPtr();
+        *buffer = (void *)reply.readIntPtr();
+        *buffer_data = (void *)reply.readIntPtr();
 
         return err;
     }
@@ -569,11 +570,14 @@ status_t BnOMX::onTransact(
             size_t size = data.readInt32();
 
             buffer_id buffer;
-            status_t err = allocateBuffer(node, port_index, size, &buffer);
+            void *buffer_data;
+            status_t err = allocateBuffer(
+                    node, port_index, size, &buffer, &buffer_data);
             reply->writeInt32(err);
 
             if (err == OK) {
                 reply->writeIntPtr((intptr_t)buffer);
+                reply->writeIntPtr((intptr_t)buffer_data);
             }
 
             return NO_ERROR;
