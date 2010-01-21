@@ -506,7 +506,7 @@ public class AccountManagerService
                     + ", " + (mFeatures != null ? TextUtils.join(",", mFeatures) : null);
         }
     }
-    
+
     public void removeAccount(IAccountManagerResponse response, Account account) {
         checkManageAccountsPermission();
         long identityToken = clearCallingIdentity();
@@ -1660,9 +1660,16 @@ public class AccountManagerService
                 }
             }
         } else {
+            Account[] accounts = getAccounts(null /* type */);
+            fout.println("Accounts: " + accounts.length);
+            for (Account account : accounts) {
+                fout.println("  " + account);
+            }
+
+            fout.println();
             synchronized (mSessions) {
                 final long now = SystemClock.elapsedRealtime();
-                fout.println("AccountManagerService: " + mSessions.size() + " sessions");
+                fout.println("Active Sessions: " + mSessions.size());
                 for (Session session : mSessions.values()) {
                     fout.println("  " + session.toDebugString(now));
                 }

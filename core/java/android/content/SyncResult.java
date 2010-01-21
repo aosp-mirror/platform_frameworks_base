@@ -14,6 +14,9 @@ public final class SyncResult implements Parcelable {
     public boolean fullSyncRequested;
     public boolean partialSyncUnavailable;
     public boolean moreRecordsToGet;
+
+    // in seconds since epoch
+    public long delayUntil;
     public final SyncStats stats;
     public static final SyncResult ALREADY_IN_PROGRESS;
 
@@ -32,6 +35,7 @@ public final class SyncResult implements Parcelable {
         this.fullSyncRequested = false;
         this.partialSyncUnavailable = false;
         this.moreRecordsToGet = false;
+        this.delayUntil = 0;
         this.stats = new SyncStats();
     }
 
@@ -43,6 +47,7 @@ public final class SyncResult implements Parcelable {
         fullSyncRequested = parcel.readInt() != 0;
         partialSyncUnavailable = parcel.readInt() != 0;
         moreRecordsToGet = parcel.readInt() != 0;
+        delayUntil = parcel.readLong();
         stats = new SyncStats(parcel);
     }
 
@@ -80,6 +85,7 @@ public final class SyncResult implements Parcelable {
         fullSyncRequested = false;
         partialSyncUnavailable = false;
         moreRecordsToGet = false;
+        delayUntil = 0;
         stats.clear();
     }
 
@@ -105,6 +111,7 @@ public final class SyncResult implements Parcelable {
         parcel.writeInt(fullSyncRequested ? 1 : 0);
         parcel.writeInt(partialSyncUnavailable ? 1 : 0);
         parcel.writeInt(moreRecordsToGet ? 1 : 0);
+        parcel.writeLong(delayUntil);
         stats.writeToParcel(parcel, flags);
     }
 
@@ -123,6 +130,7 @@ public final class SyncResult implements Parcelable {
             sb.append(" partialSyncUnavailable: ").append(partialSyncUnavailable);
         }
         if (moreRecordsToGet) sb.append(" moreRecordsToGet: ").append(moreRecordsToGet);
+        if (delayUntil > 0) sb.append(" delayUntil: ").append(delayUntil);
         sb.append(stats);
         return sb.toString();
     }
