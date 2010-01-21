@@ -1372,6 +1372,8 @@
     <!-- Shown in the lock screen to ask the user to insert a SIM card. -->
     <string name="lockscreen_missing_sim_instructions">Please insert a SIM card.</string>
 
+    <!-- Shown in the lock screen when there is emergency calls only mode. -->
+    <string name="emergency_calls_only" msgid="2485604591272668370">Emergency calls only</string>
 
     <!-- When the user inserts a sim card from an unsupported network, it becomes network
          locked -->
