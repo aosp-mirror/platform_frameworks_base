@@ -68,6 +68,7 @@ public abstract class AbsSeekBar extends ProgressBar {
         // ...but allow layout to override this
         int thumbOffset =
                 a.getDimensionPixelOffset(com.android.internal.R.styleable.SeekBar_thumbOffset, getThumbOffset());
+	setThumbOffset(thumbOffset);
         a.recycle();
 
         a = context.obtainStyledAttributes(attrs,
