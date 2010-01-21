@@ -147,12 +147,9 @@ public class ScaleGestureDetector {
 
     public ScaleGestureDetector(Context context, OnScaleGestureListener listener) {
         ViewConfiguration config = ViewConfiguration.get(context);
-        DisplayMetrics metrics = context.getResources().getDisplayMetrics();
         mContext = context;
         mListener = listener;
         mEdgeSlop = config.getScaledEdgeSlop();
-        mRightSlopEdge = metrics.widthPixels - mEdgeSlop;
-        mBottomSlopEdge = metrics.heightPixels - mEdgeSlop;
     }
 
     public boolean onTouchEvent(MotionEvent event) {
@@ -164,6 +161,11 @@ public class ScaleGestureDetector {
                     action == MotionEvent.ACTION_POINTER_2_DOWN) &&
                     event.getPointerCount() >= 2) {
                 // We have a new multi-finger gesture
+
+                // as orientation can change, query the metrics in touch down
+                DisplayMetrics metrics = mContext.getResources().getDisplayMetrics();
+                mRightSlopEdge = metrics.widthPixels - mEdgeSlop;
+                mBottomSlopEdge = metrics.heightPixels - mEdgeSlop;
 
                 // Be paranoid in case we missed an event
                 reset();
