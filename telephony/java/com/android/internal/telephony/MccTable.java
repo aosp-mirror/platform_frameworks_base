@@ -587,7 +587,7 @@ public final class MccTable
         if (mcc != 0) {
             setTimezoneFromMccIfNeeded(phone, mcc);
             setLocaleFromMccIfNeeded(phone, mcc);
-            setWifiChannelsFromMccIfNeeded(phone, mcc);
+            setWifiChannelsFromMcc(phone, mcc);
         }
         try {
             Configuration config = ActivityManagerNative.getDefault().getConfiguration();
@@ -642,20 +642,14 @@ public final class MccTable
      * @param phone PhoneBase to act on (get context from).
      * @param mcc Mobile Country Code of the SIM or SIM-like entity (build prop on CDMA)
      */
-    private static void setWifiChannelsFromMccIfNeeded(PhoneBase phone, int mcc) {
+    private static void setWifiChannelsFromMcc(PhoneBase phone, int mcc) {
         int wifiChannels = MccTable.wifiChannelsForMcc(mcc);
         if (wifiChannels != 0) {
             Context context = phone.getContext();
-            // only set to this default if the user hasn't manually set it
-            try {
-                Settings.Secure.getInt(context.getContentResolver(),
-                        Settings.Secure.WIFI_NUM_ALLOWED_CHANNELS);
-            } catch (Settings.SettingNotFoundException e) {
-                Log.d(LOG_TAG, "WIFI_NUM_ALLOWED_CHANNESL set to " + wifiChannels);
-                WifiManager wM = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
-                // don't persist
-                wM.setNumAllowedChannels(wifiChannels, false);
-            }
+            Log.d(LOG_TAG, "WIFI_NUM_ALLOWED_CHANNELS set to " + wifiChannels);
+            WifiManager wM = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+            //persist
+            wM.setNumAllowedChannels(wifiChannels, true);
         }
     }
 }
