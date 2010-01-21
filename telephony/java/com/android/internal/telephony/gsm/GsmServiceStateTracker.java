@@ -38,6 +38,7 @@ import android.provider.Settings.SettingNotFoundException;
 import android.provider.Telephony.Intents;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
+import android.telephony.TelephonyManager;
 import android.telephony.gsm.GsmCellLocation;
 import android.text.TextUtils;
 import android.util.Config;
@@ -857,6 +858,21 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
         GsmCellLocation tcl = cellLoc;
         cellLoc = newCellLoc;
         newCellLoc = tcl;
+
+
+        // Add an event log when network type switched
+        // TODO: we may add filtering to reduce the event logged,
+        // i.e. check preferred network setting, only switch to 2G, etc
+        if (hasNetworkTypeChanged) {
+            int cid = -1;
+            GsmCellLocation loc = ((GsmCellLocation)phone.getCellLocation());
+            if (loc != null) cid = loc.getCid();
+            EventLog.List val = new EventLog.List(cid, networkType, newNetworkType);
+            EventLog.writeEvent(TelephonyEventLog.EVENT_LOG_GSM_RAT_SWITCHED, val);
+            Log.d(LOG_TAG,
+                    "RAT switched " + networkTypeToString(networkType) + " -> "
+                    + networkTypeToString(newNetworkType) + " at cell " + cid);
+        }
 
         gprsState = newGPRSState;
         networkType = newNetworkType;
