@@ -139,7 +139,7 @@ void AwesomePlayer::cancelPlayerEvents() {
     mStreamDoneEventPending = false;
 }
 
-void AwesomePlayer::setListener(const sp<MediaPlayerBase> &listener) {
+void AwesomePlayer::setListener(const wp<MediaPlayerBase> &listener) {
     Mutex::Autolock autoLock(mLock);
     mListener = listener;
 }
@@ -268,16 +268,23 @@ void AwesomePlayer::AudioNotify(void *_me, int what) {
 
         case AudioPlayer::SEEK_COMPLETE:
         {
-            if (me->mListener != NULL) {
-                me->mListener->sendEvent(MEDIA_SEEK_COMPLETE);
-            }
-
+            me->notifyListener_l(MEDIA_SEEK_COMPLETE);
             break;
         }
 
         default:
             CHECK(!"should not be here.");
             break;
+    }
+}
+
+void AwesomePlayer::notifyListener_l(int msg) {
+    if (mListener != NULL) {
+        sp<MediaPlayerBase> listener = mListener.promote();
+
+        if (listener != NULL) {
+            listener->sendEvent(msg);
+        }
     }
 }
 
@@ -294,9 +301,7 @@ void AwesomePlayer::onStreamDone() {
             postVideoEvent_l();
         }
     } else {
-        if (mListener != NULL) {
-            mListener->sendEvent(MEDIA_PLAYBACK_COMPLETE);
-        }
+        notifyListener_l(MEDIA_PLAYBACK_COMPLETE);
 
         pause_l();
     }
@@ -643,9 +648,7 @@ void AwesomePlayer::onEvent(int32_t code) {
         } else {
             // If we're playing video only, report seek complete now,
             // otherwise audio player will notify us later.
-            if (mListener != NULL) {
-                mListener->sendEvent(MEDIA_SEEK_COMPLETE);
-            }
+            notifyListener_l(MEDIA_SEEK_COMPLETE);
         }
 
         mFlags |= FIRST_FRAME;
