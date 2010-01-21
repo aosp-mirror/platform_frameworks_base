@@ -5558,6 +5558,28 @@ public final class ContactsContract {
                 "com.android.contacts.action.SHOW_OR_CREATE_CONTACT";
 
         /**
+         * Starts an Activity that lets the user select the multiple phones from a
+         * list of phone numbers which come from the contacts or
+         * {@link #EXTRA_PHONE_URIS}.
+         * <p>
+         * The phone numbers being passed in through {@link #EXTRA_PHONE_URIS}
+         * could belong to the contacts or not, and will be selected by default.
+         * <p>
+         * The user's selection will be returned from
+         * {@link android.app.Activity#onActivityResult(int, int, android.content.Intent)}
+         * if the resultCode is 
+         * {@link android.app.Activity#RESULT_OK}, the array of picked phone
+         * numbers are in the Intent's
+         * {@link #EXTRA_PHONE_URIS}; otherwise, the
+         * {@link android.app.Activity#RESULT_CANCELED} is returned if the user
+         * left the Activity without changing the selection.
+         *
+         * @hide
+         */
+        public static final String ACTION_GET_MULTIPLE_PHONES =
+                "com.android.contacts.action.GET_MULTIPLE_PHONES";
+
+        /**
          * Used with {@link #SHOW_OR_CREATE_CONTACT} to force creating a new
          * contact if no matching contact found. Otherwise, default behavior is
          * to prompt user with dialog before creating.
@@ -5576,6 +5598,23 @@ public final class ContactsContract {
          */
         public static final String EXTRA_CREATE_DESCRIPTION =
             "com.android.contacts.action.CREATE_DESCRIPTION";
+
+        /**
+         * Used with {@link #ACTION_GET_MULTIPLE_PHONES} as the input or output value.
+         * <p>
+         * The phone numbers want to be picked by default should be passed in as
+         * input value. These phone numbers could belong to the contacts or not.
+         * <p>
+         * The phone numbers which were picked by the user are returned as output
+         * value.
+         * <p>
+         * Type: array of URIs, the tel URI is used for the phone numbers which don't
+         * belong to any contact, the content URI is used for phone id in contacts.
+         * 
+         * @hide
+         */
+        public static final String EXTRA_PHONE_URIS =
+            "com.android.contacts.extra.PHONE_URIS";
 
         /**
          * Optional extra used with {@link #SHOW_OR_CREATE_CONTACT} to specify a
