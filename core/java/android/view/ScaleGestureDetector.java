@@ -185,12 +185,16 @@ public class ScaleGestureDetector {
                 final float x1 = getRawX(event, 1);
                 final float y1 = getRawY(event, 1);
 
-                boolean p0sloppy = x0 < edgeSlop || y0 < edgeSlop ||
-                        x1 < edgeSlop || y1 < edgeSlop;
-                boolean p1sloppy = x0 > rightSlop || y0 > bottomSlop ||
-                        x1 > rightSlop || y1 > bottomSlop;
+                boolean p0sloppy = x0 < edgeSlop || y0 < edgeSlop
+                        || x0 > rightSlop || y0 > bottomSlop;
+                boolean p1sloppy = x1 < edgeSlop || y1 < edgeSlop
+                        || x1 > rightSlop || y1 > bottomSlop;
 
-                if (p0sloppy) {
+                if(p0sloppy && p1sloppy) {
+                    mFocusX = -1;
+                    mFocusY = -1;
+                    mSloppyGesture = true;
+                } else if (p0sloppy) {
                     mFocusX = event.getX(1);
                     mFocusY = event.getY(1);
                     mSloppyGesture = true;
@@ -211,12 +215,15 @@ public class ScaleGestureDetector {
                 final float x1 = getRawX(event, 1);
                 final float y1 = getRawY(event, 1);
 
-                boolean p0sloppy = x0 < edgeSlop || y0 < edgeSlop ||
-                x1 < edgeSlop || y1 < edgeSlop;
-                boolean p1sloppy = x0 > rightSlop || y0 > bottomSlop ||
-                x1 > rightSlop || y1 > bottomSlop;
+                boolean p0sloppy = x0 < edgeSlop || y0 < edgeSlop
+                        || x0 > rightSlop || y0 > bottomSlop;
+                boolean p1sloppy = x1 < edgeSlop || y1 < edgeSlop
+                        || x1 > rightSlop || y1 > bottomSlop;
 
-                if (p0sloppy) {
+                if(p0sloppy && p1sloppy) {
+                    mFocusX = -1;
+                    mFocusY = -1;
+                } else if (p0sloppy) {
                     mFocusX = event.getX(1);
                     mFocusY = event.getY(1);
                 } else if (p1sloppy) {
@@ -226,6 +233,14 @@ public class ScaleGestureDetector {
                     mSloppyGesture = false;
                     mGestureInProgress = mListener.onScaleBegin(this);
                 }
+            } else if ((action == MotionEvent.ACTION_POINTER_1_UP
+                    || action == MotionEvent.ACTION_POINTER_2_UP)
+                    && mSloppyGesture) {
+                // Set focus point to the remaining finger
+                int id = (((action & MotionEvent.ACTION_POINTER_ID_MASK)
+                        >> MotionEvent.ACTION_POINTER_ID_SHIFT) == 0) ? 1 : 0;
+                mFocusX = event.getX(id);
+                mFocusY = event.getY(id);
             }
         } else {
             // Transform gesture in progress - attempt to handle it
