@@ -126,8 +126,7 @@ Windows, r3</a> <span class="new">new!</span>
       <span style="display:none" class="zh-TW"></span>
     </h2>
     <ul>
-      <li><a href="<?cs var:toroot ?>sdk/ndk/r3/index.html">Android NDK, r3</a> 
-       <span class="new">new!</span></li>
+      <li><a href="<?cs var:toroot ?>sdk/ndk/1.6_r1/index.html">Android 1.6 NDK, r1</a></li>
     </ul>
   </li>
   <li>
