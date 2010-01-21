@@ -58,6 +58,8 @@ import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.view.ViewTreeObserver;
 import android.view.animation.AlphaAnimation;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.WebTextView.AutoCompleteAdapter;
 import android.webkit.WebViewCore.EventHub;
@@ -3194,6 +3196,13 @@ public class WebView extends AbsoluteLayout
      */
     /* package */ void setSelection(int start, int end) {
         mWebViewCore.sendMessage(EventHub.SET_SELECTION, start, end);
+    }
+
+    @Override
+    public InputConnection onCreateInputConnection(EditorInfo outAttrs) {
+      InputConnection connection = super.onCreateInputConnection(outAttrs);
+      outAttrs.imeOptions |= EditorInfo.IME_FLAG_NO_FULLSCREEN;
+      return connection;
     }
 
     /**
