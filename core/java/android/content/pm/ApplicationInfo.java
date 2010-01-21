@@ -234,6 +234,14 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public static final int FLAG_ON_SDCARD = 1<<19;
 
     /**
+     * Value for {@link #flags}: Set to true if the application is
+     * native-debuggable, i.e. embeds a gdbserver binary in its .apk
+     *
+     * {@hide}
+     */
+    public static final int FLAG_NATIVE_DEBUGGABLE = 1<<20;
+
+    /**
      * Flags associated with the application.  Any combination of
      * {@link #FLAG_SYSTEM}, {@link #FLAG_DEBUGGABLE}, {@link #FLAG_HAS_CODE},
      * {@link #FLAG_PERSISTENT}, {@link #FLAG_FACTORY_TEST}, and
