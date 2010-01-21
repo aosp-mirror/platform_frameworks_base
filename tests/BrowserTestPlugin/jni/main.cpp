@@ -53,7 +53,7 @@ NPError NPP_GetValue(NPP instance, NPPVariable variable, void *value);
 NPError NPP_SetValue(NPP instance, NPNVariable variable, void *value);
 
 extern "C" {
-EXPORT NPError NP_Initialize(NPNetscapeFuncs* browserFuncs, NPPluginFuncs* pluginFuncs, void *java_env, void *application_context);
+EXPORT NPError NP_Initialize(NPNetscapeFuncs* browserFuncs, NPPluginFuncs* pluginFuncs, void *java_env);
 EXPORT NPError NP_GetValue(NPP instance, NPPVariable variable, void *value);
 EXPORT const char* NP_GetMIMEDescription(void);
 EXPORT void NP_Shutdown(void);
@@ -70,7 +70,7 @@ ANPWindowInterfaceV0        gWindowI;
 
 #define ARRAY_COUNT(array)      (sizeof(array) / sizeof(array[0]))
 
-NPError NP_Initialize(NPNetscapeFuncs* browserFuncs, NPPluginFuncs* pluginFuncs, void *java_env, void *application_context)
+NPError NP_Initialize(NPNetscapeFuncs* browserFuncs, NPPluginFuncs* pluginFuncs, void *java_env)
 {
     // Make sure we have a function table equal or larger than we are built against.
     if (browserFuncs->size < sizeof(NPNetscapeFuncs)) {
