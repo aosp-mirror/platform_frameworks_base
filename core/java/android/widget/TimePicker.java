@@ -23,9 +23,9 @@ import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.NumberPicker;
 
 import com.android.internal.R;
-import com.android.common.widget.NumberPicker;
 
 import java.text.DateFormatSymbols;
 import java.util.Calendar;

@@ -14,20 +14,22 @@
  * limitations under the License.
  */
 
-package com.android.common.widget;
+package android.widget;
 
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.widget.ImageButton;
+import android.widget.NumberPicker;
 
 import com.android.internal.R;
 
 /**
- * This class exists purely to cancel long click events.
+ * This class exists purely to cancel long click events, that got
+ * started in NumberPicker
  */
-public class NumberPickerButton extends ImageButton {
+class NumberPickerButton extends ImageButton {
 
     private NumberPicker mNumberPicker;
 
