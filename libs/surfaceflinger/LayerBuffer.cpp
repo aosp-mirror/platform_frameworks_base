@@ -444,6 +444,10 @@ void LayerBuffer::BufferSource::onDraw(const Region& clip) const
     NativeBuffer src(ourBuffer->getBuffer());
     const Rect transformedBounds(mLayer.getTransformedBounds());
 
+    if (UNLIKELY(mTexture.name == -1LU)) {
+        mTexture.name = mLayer.createTexture();
+    }
+
 #if defined(EGL_ANDROID_image_native_buffer)
     if (mLayer.mFlags & DisplayHardware::DIRECT_TEXTURE) {
         copybit_device_t* copybit = mLayer.mBlitEngine;
@@ -483,9 +487,6 @@ void LayerBuffer::BufferSource::onDraw(const Region& clip) const
         t.format = src.img.format;
         t.data = (GGLubyte*)src.img.base;
         const Region dirty(Rect(t.width, t.height));
-        if (UNLIKELY(mTexture.name == -1LU)) {
-            mTexture.name = mLayer.createTexture();
-        }
         mLayer.loadTexture(&mTexture, dirty, t);
     }
 
@@ -566,11 +567,17 @@ status_t LayerBuffer::BufferSource::initTempBuffer() const
 
 void LayerBuffer::BufferSource::clearTempBufferImage() const
 {
+    // delete the image
     EGLDisplay dpy(mLayer.mFlinger->graphicPlane(0).getEGLDisplay());
-    glDeleteTextures(1, &mTexture.name);
     eglDestroyImageKHR(dpy, mTexture.image);
+
+    // and the associated texture (recreate a name)
+    glDeleteTextures(1, &mTexture.name);
     Texture defaultTexture;
     mTexture = defaultTexture;
+    mTexture.name = mLayer.createTexture();
+
+    // and the associated buffer
     mTempGraphicBuffer.clear();
 }
 
