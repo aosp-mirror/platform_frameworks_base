@@ -19,21 +19,28 @@ package android.app;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
+import android.R;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
+import android.content.res.Resources.NotFoundException;
 import android.graphics.drawable.Drawable;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.Printer;
+import android.util.SparseArray;
 import android.util.Xml;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * This class is used to specify meta information of a device administrator
@@ -43,9 +50,121 @@ public final class DeviceAdminInfo implements Parcelable {
     static final String TAG = "DeviceAdminInfo";
     
     /**
+     * A type of policy that this device admin can use: limit the passwords
+     * that the user can select, via {@link DevicePolicyManager#setPasswordMode}
+     * and {@link DevicePolicyManager#setMinimumPasswordLength}.
+     * 
+     * <p>To control this policy, the device admin must have a "limit-password"
+     * tag in the "uses-policies" section of its meta-data.
+     */
+    public static final int USES_POLICY_LIMIT_PASSWORD = 0;
+    
+    /**
+     * A type of policy that this device admin can use: able to watch login
+     * attempts from the user, via {@link DeviceAdmin#ACTION_PASSWORD_FAILED},
+     * {@link DeviceAdmin#ACTION_PASSWORD_SUCCEEDED}, and
+     * {@link DevicePolicyManager#getCurrentFailedPasswordAttempts}.
+     * 
+     * <p>To control this policy, the device admin must have a "watch-login"
+     * tag in the "uses-policies" section of its meta-data.
+     */
+    public static final int USES_POLICY_WATCH_LOGIN = 1;
+
+    /**
+     * A type of policy that this device admin can use: able to reset the
+     * user's password via
+     * {@link DevicePolicyManager#resetPassword}.
+     * 
+     * <p>To control this policy, the device admin must have a "reset-password"
+     * tag in the "uses-policies" section of its meta-data.
+     */
+    public static final int USES_POLICY_RESET_PASSWORD = 2;
+
+    /**
+     * A type of policy that this device admin can use: able to limit the
+     * maximum lock timeout for the device via
+     * {@link DevicePolicyManager#setMaximumTimeToLock}.
+     * 
+     * <p>To control this policy, the device admin must have a "limit-unlock"
+     * tag in the "uses-policies" section of its meta-data.
+     */
+    public static final int USES_POLICY_LIMIT_UNLOCK = 3;
+
+    /**
+     * A type of policy that this device admin can use: able to force the device
+     * to lock via{@link DevicePolicyManager#lockNow}.
+     * 
+     * <p>To control this policy, the device admin must have a "force-lock"
+     * tag in the "uses-policies" section of its meta-data.
+     */
+    public static final int USES_POLICY_FORCE_LOCK = 4;
+
+    /**
+     * A type of policy that this device admin can use: able to factory
+     * reset the device, erasing all of the user's data, via
+     * {@link DevicePolicyManager#wipeData}.
+     * 
+     * <p>To control this policy, the device admin must have a "wipe-data"
+     * tag in the "uses-policies" section of its meta-data.
+     */
+    public static final int USES_POLICY_WIPE_DATA = 5;
+
+    /** @hide */
+    public static class PolicyInfo {
+        final public String tag;
+        final public int label;
+        final public int description;
+        
+        public PolicyInfo(String tagIn, int labelIn, int descriptionIn) {
+            tag = tagIn;
+            label = labelIn;
+            description = descriptionIn;
+        }
+    }
+    
+    static HashMap<String, Integer> sKnownPolicies = new HashMap<String, Integer>();
+    static SparseArray<PolicyInfo> sRevKnownPolicies = new SparseArray<PolicyInfo>();
+    
+    static {
+        sRevKnownPolicies.put(USES_POLICY_LIMIT_PASSWORD,
+                new PolicyInfo("limit-password",
+                        com.android.internal.R.string.policylab_limitPassword,
+                        com.android.internal.R.string.policydesc_limitPassword));
+        sRevKnownPolicies.put(USES_POLICY_WATCH_LOGIN,
+                new PolicyInfo("watch-login",
+                        com.android.internal.R.string.policylab_watchLogin,
+                        com.android.internal.R.string.policydesc_watchLogin));
+        sRevKnownPolicies.put(USES_POLICY_RESET_PASSWORD,
+                new PolicyInfo("reset-password",
+                        com.android.internal.R.string.policylab_resetPassword,
+                        com.android.internal.R.string.policydesc_resetPassword));
+        sRevKnownPolicies.put(USES_POLICY_LIMIT_UNLOCK,
+                new PolicyInfo("limit-unlock",
+                        com.android.internal.R.string.policylab_limitUnlock,
+                        com.android.internal.R.string.policydesc_limitUnlock));
+        sRevKnownPolicies.put(USES_POLICY_FORCE_LOCK,
+                new PolicyInfo("force-lock",
+                        com.android.internal.R.string.policylab_forceLock,
+                        com.android.internal.R.string.policydesc_forceLock));
+        sRevKnownPolicies.put(USES_POLICY_WIPE_DATA,
+                new PolicyInfo("wipe-data",
+                        com.android.internal.R.string.policylab_wipeData,
+                        com.android.internal.R.string.policydesc_wipeData));
+        for (int i=0; i<sRevKnownPolicies.size(); i++) {
+            sKnownPolicies.put(sRevKnownPolicies.valueAt(i).tag,
+                    sRevKnownPolicies.keyAt(i));
+        }
+    }
+    
+    /**
      * The BroadcastReceiver that implements this device admin component.
      */
     final ResolveInfo mReceiver;
+    
+    /**
+     * The policies this administrator needs access to.
+     */
+    int mUsesPolicies;
     
     /**
      * Constructor.
@@ -86,6 +205,32 @@ public final class DeviceAdminInfo implements Parcelable {
                     com.android.internal.R.styleable.Wallpaper);
 
             sa.recycle();
+            
+            int outerDepth = parser.getDepth();
+            while ((type=parser.next()) != XmlPullParser.END_DOCUMENT
+                   && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
+                if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
+                    continue;
+                }
+                String tagName = parser.getName();
+                if (tagName.equals("uses-policies")) {
+                    int innerDepth = parser.getDepth();
+                    while ((type=parser.next()) != XmlPullParser.END_DOCUMENT
+                           && (type != XmlPullParser.END_TAG || parser.getDepth() > innerDepth)) {
+                        if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
+                            continue;
+                        }
+                        String policyName = parser.getName();
+                        Integer val = sKnownPolicies.get(policyName);
+                        if (val != null) {
+                            mUsesPolicies |= 1 << val.intValue();
+                        } else {
+                            Log.w(TAG, "Unknown tag under uses-policies of "
+                                    + getComponent() + ": " + policyName);
+                        }
+                    }
+                }
+            }
         } finally {
             if (parser != null) parser.close();
         }
@@ -93,6 +238,7 @@ public final class DeviceAdminInfo implements Parcelable {
 
     DeviceAdminInfo(Parcel source) {
         mReceiver = ResolveInfo.CREATOR.createFromParcel(source);
+        mUsesPolicies = source.readInt();
     }
     
     /**
@@ -137,6 +283,26 @@ public final class DeviceAdminInfo implements Parcelable {
     }
     
     /**
+     * Load user-visible description associated with this device admin.
+     * 
+     * @param pm Supply a PackageManager used to load the device admin's
+     * resources.
+     */
+    public CharSequence loadDescription(PackageManager pm) throws NotFoundException {
+        if (mReceiver.activityInfo.descriptionRes != 0) {
+            String packageName = mReceiver.resolvePackageName;
+            ApplicationInfo applicationInfo = null;
+            if (packageName == null) {
+                packageName = mReceiver.activityInfo.packageName;
+                applicationInfo = mReceiver.activityInfo.applicationInfo;
+            }
+            return pm.getText(packageName,
+                    mReceiver.activityInfo.descriptionRes, applicationInfo);
+        }
+        throw new NotFoundException();
+    }
+    
+    /**
      * Load the user-displayed icon for this device admin.
      * 
      * @param pm Supply a PackageManager used to load the device admin's
@@ -144,6 +310,38 @@ public final class DeviceAdminInfo implements Parcelable {
      */
     public Drawable loadIcon(PackageManager pm) {
         return mReceiver.loadIcon(pm);
+    }
+    
+    /**
+     * Return true if the device admin has requested that it be able to use
+     * the given policy control.  The possible policy identifier inputs are:
+     * {@link #USES_POLICY_LIMIT_PASSWORD}, {@link #USES_POLICY_WATCH_LOGIN},
+     * {@link #USES_POLICY_RESET_PASSWORD}, {@link #USES_POLICY_LIMIT_UNLOCK},
+     * {@link #USES_POLICY_FORCE_LOCK}, {@link #USES_POLICY_WIPE_DATA}.
+     */
+    public boolean usesPolicy(int policyIdent) {
+        return (mUsesPolicies & (1<<policyIdent)) != 0;
+    }
+    
+    /**
+     * Return the XML tag name for the given policy identifier.  Valid identifiers
+     * are as per {@link #usesPolicy(int)}.  If the given identifier is not
+     * known, null is returned.
+     */
+    public String getTagForPolicy(int policyIdent) {
+        return sRevKnownPolicies.get(policyIdent).tag;
+    }
+    
+    /** @hide */
+    public ArrayList<PolicyInfo> getUsedPolicies() {
+        ArrayList<PolicyInfo> res = new ArrayList<PolicyInfo>();
+        for (int i=0; i<sRevKnownPolicies.size(); i++) {
+            int ident = sRevKnownPolicies.keyAt(i);
+            if (usesPolicy(ident)) {
+                res.add(sRevKnownPolicies.valueAt(i));
+            }
+        }
+        return res;
     }
     
     public void dump(Printer pw, String prefix) {
@@ -164,6 +362,7 @@ public final class DeviceAdminInfo implements Parcelable {
      */
     public void writeToParcel(Parcel dest, int flags) {
         mReceiver.writeToParcel(dest, flags);
+        dest.writeInt(mUsesPolicies);
     }
 
     /**

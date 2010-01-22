@@ -91,7 +91,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         return mIPowerManager;
     }
     
-    ActiveAdmin getActiveAdminForCallerLocked(ComponentName who) throws SecurityException {
+    ActiveAdmin getActiveAdminForCallerLocked(ComponentName who, int reqPolicy)
+            throws SecurityException {
         if (mActiveAdmin != null && mActiveAdmin.getUid() == Binder.getCallingUid()) {
             if (who != null) {
                 if (!who.getPackageName().equals(mActiveAdmin.info.getActivityInfo().packageName)
@@ -99,20 +100,27 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     throw new SecurityException("Current admin is not " + who);
                 }
             }
+            if (!mActiveAdmin.info.usesPolicy(reqPolicy)) {
+                throw new SecurityException("Admin " + mActiveAdmin.info.getComponent()
+                        + " did not specify uses-policy for: "
+                        + mActiveAdmin.info.getTagForPolicy(reqPolicy));
+            }
             return mActiveAdmin;
         }
         throw new SecurityException("Current admin is not owned by uid " + Binder.getCallingUid());
     }
     
-    
-    void sendAdminCommandLocked(ActiveAdmin policy, String action) {
+    void sendAdminCommandLocked(ActiveAdmin admin, String action) {
         Intent intent = new Intent(action);
-        intent.setComponent(policy.info.getComponent());
+        intent.setComponent(admin.info.getComponent());
         mContext.sendBroadcast(intent);
     }
     
-    void sendAdminCommandLocked(String action) {
+    void sendAdminCommandLocked(String action, int reqPolicy) {
         if (mActiveAdmin != null) {
+            if (mActiveAdmin.info.usesPolicy(reqPolicy)) {
+                return;
+            }
             sendAdminCommandLocked(mActiveAdmin, action);
         }
     }
@@ -353,7 +361,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             if (who == null) {
                 throw new NullPointerException("ComponentName is null");
             }
-            ActiveAdmin ap = getActiveAdminForCallerLocked(who);
+            ActiveAdmin ap = getActiveAdminForCallerLocked(who,
+                    DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD);
             if (ap.passwordMode != mode) {
                 ap.passwordMode = mode;
                 saveSettingsLocked();
@@ -373,7 +382,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             if (who == null) {
                 throw new NullPointerException("ComponentName is null");
             }
-            ActiveAdmin ap = getActiveAdminForCallerLocked(who);
+            ActiveAdmin ap = getActiveAdminForCallerLocked(who,
+                    DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD);
             if (ap.minimumPasswordLength != length) {
                 ap.minimumPasswordLength = length;
                 saveSettingsLocked();
@@ -391,7 +401,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         synchronized (this) {
             // This API can only be called by an active device admin,
             // so try to retrieve it to check that the caller is one.
-            getActiveAdminForCallerLocked(null);
+            getActiveAdminForCallerLocked(null,
+                    DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD);
             return mActivePasswordMode >= getPasswordMode()
                     && mActivePasswordLength >= getMinimumPasswordLength();
         }
@@ -401,7 +412,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         synchronized (this) {
             // This API can only be called by an active device admin,
             // so try to retrieve it to check that the caller is one.
-            getActiveAdminForCallerLocked(null);
+            getActiveAdminForCallerLocked(null,
+                    DeviceAdminInfo.USES_POLICY_WATCH_LOGIN);
             return mFailedPasswordAttempts;
         }
     }
@@ -411,7 +423,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         synchronized (this) {
             // This API can only be called by an active device admin,
             // so try to retrieve it to check that the caller is one.
-            getActiveAdminForCallerLocked(null);
+            getActiveAdminForCallerLocked(null,
+                    DeviceAdminInfo.USES_POLICY_RESET_PASSWORD);
             mode = getPasswordMode();
             if (password.length() < getMinimumPasswordLength()) {
                 return false;
@@ -436,7 +449,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             if (who == null) {
                 throw new NullPointerException("ComponentName is null");
             }
-            ActiveAdmin ap = getActiveAdminForCallerLocked(who);
+            ActiveAdmin ap = getActiveAdminForCallerLocked(who,
+                    DeviceAdminInfo.USES_POLICY_LIMIT_UNLOCK);
             if (ap.maximumTimeToUnlock != timeMs) {
                 ap.maximumTimeToUnlock = timeMs;
                 
@@ -468,7 +482,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         synchronized (this) {
             // This API can only be called by an active device admin,
             // so try to retrieve it to check that the caller is one.
-            getActiveAdminForCallerLocked(null);
+            getActiveAdminForCallerLocked(null,
+                    DeviceAdminInfo.USES_POLICY_FORCE_LOCK);
             // STOPSHIP need to implement.
         }
     }
@@ -477,7 +492,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         synchronized (this) {
             // This API can only be called by an active device admin,
             // so try to retrieve it to check that the caller is one.
-            getActiveAdminForCallerLocked(null);
+            getActiveAdminForCallerLocked(null,
+                    DeviceAdminInfo.USES_POLICY_WIPE_DATA);
         }
         long ident = Binder.clearCallingIdentity();
         try {
@@ -501,7 +517,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     mActivePasswordMode = mode;
                     mActivePasswordLength = length;
                     mFailedPasswordAttempts = 0;
-                    sendAdminCommandLocked(DeviceAdmin.ACTION_PASSWORD_CHANGED);
+                    sendAdminCommandLocked(DeviceAdmin.ACTION_PASSWORD_CHANGED,
+                            DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD);
                 } finally {
                     Binder.restoreCallingIdentity(ident);
                 }
@@ -517,7 +534,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             long ident = Binder.clearCallingIdentity();
             try {
                 mFailedPasswordAttempts++;
-                sendAdminCommandLocked(DeviceAdmin.ACTION_PASSWORD_FAILED);
+                sendAdminCommandLocked(DeviceAdmin.ACTION_PASSWORD_FAILED,
+                        DeviceAdminInfo.USES_POLICY_WATCH_LOGIN);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -533,7 +551,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 long ident = Binder.clearCallingIdentity();
                 try {
                     mFailedPasswordAttempts = 0;
-                    sendAdminCommandLocked(DeviceAdmin.ACTION_PASSWORD_SUCCEEDED);
+                    sendAdminCommandLocked(DeviceAdmin.ACTION_PASSWORD_SUCCEEDED,
+                            DeviceAdminInfo.USES_POLICY_WATCH_LOGIN);
                 } finally {
                     Binder.restoreCallingIdentity(ident);
                 }

@@ -21,6 +21,7 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
@@ -204,7 +205,7 @@ public final class WallpaperInfo implements Parcelable {
 
         return pm.getDrawable(mService.serviceInfo.packageName,
                               mThumbnailResource,
-                              null);
+                              mService.serviceInfo.applicationInfo);
     }
 
     /**
@@ -212,25 +213,33 @@ public final class WallpaperInfo implements Parcelable {
      */
     public CharSequence loadAuthor(PackageManager pm) throws NotFoundException {
         if (mAuthorResource <= 0) throw new NotFoundException();
-        return pm.getText(
-            (mService.resolvePackageName != null)
-                ? mService.resolvePackageName
-                : getPackageName(),
-            mAuthorResource,
-            null);
+        String packageName = mService.resolvePackageName;
+        ApplicationInfo applicationInfo = null;
+        if (packageName == null) {
+            packageName = mService.serviceInfo.packageName;
+            applicationInfo = mService.serviceInfo.applicationInfo;
+        }
+        return pm.getText(packageName, mAuthorResource, applicationInfo);
     }
 
     /**
      * Return a brief summary of this wallpaper's behavior.
      */
     public CharSequence loadDescription(PackageManager pm) throws NotFoundException {
+        String packageName = mService.resolvePackageName;
+        ApplicationInfo applicationInfo = null;
+        if (packageName == null) {
+            packageName = mService.serviceInfo.packageName;
+            applicationInfo = mService.serviceInfo.applicationInfo;
+        }
+        if (mService.serviceInfo.descriptionRes != 0) {
+            return pm.getText(packageName, mService.serviceInfo.descriptionRes,
+                    applicationInfo);
+            
+        }
         if (mDescriptionResource <= 0) throw new NotFoundException();
-        return pm.getText(
-            (mService.resolvePackageName != null)
-                ? mService.resolvePackageName
-                : getPackageName(),
-            mDescriptionResource,
-            null);
+        return pm.getText(packageName, mDescriptionResource,
+                mService.serviceInfo.applicationInfo);
     }
     
     /**

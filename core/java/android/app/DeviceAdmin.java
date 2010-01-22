@@ -82,6 +82,10 @@ public class DeviceAdmin extends BroadcastReceiver {
      * {@link DevicePolicyManager#getMinimumPasswordLength()
      * DevicePolicyManager.getMinimumPasswordLength()}.  You will generally
      * handle this in {@link DeviceAdmin#onPasswordChanged(Context, Intent)}.
+     * 
+     * <p>The calling device admin must have requested
+     * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to receive
+     * this broadcast.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_PASSWORD_CHANGED
@@ -94,6 +98,10 @@ public class DeviceAdmin extends BroadcastReceiver {
      * {@link DevicePolicyManager#getCurrentFailedPasswordAttempts()
      * DevicePolicyManager.getCurrentFailedPasswordAttempts()}.  You will generally
      * handle this in {@link DeviceAdmin#onPasswordFailed(Context, Intent)}.
+     * 
+     * <p>The calling device admin must have requested
+     * {@link DeviceAdminInfo#USES_POLICY_WATCH_LOGIN} to receive
+     * this broadcast.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_PASSWORD_FAILED
@@ -102,6 +110,10 @@ public class DeviceAdmin extends BroadcastReceiver {
     /**
      * Action sent to a device administrator when the user has successfully
      * entered their password, after failing one or more times.
+     * 
+     * <p>The calling device admin must have requested
+     * {@link DeviceAdminInfo#USES_POLICY_WATCH_LOGIN} to receive
+     * this broadcast.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_PASSWORD_SUCCEEDED
