@@ -370,8 +370,23 @@ LayerBuffer::BufferSource::BufferSource(LayerBuffer& layer,
 
 LayerBuffer::BufferSource::~BufferSource()
 {    
+    class MessageDestroyTexture : public MessageBase {
+        SurfaceFlinger* flinger;
+        GLuint name;
+    public:
+        MessageDestroyTexture(
+                SurfaceFlinger* flinger, GLuint name)
+            : flinger(flinger), name(name) { }
+        virtual bool handler() {
+            glDeleteTextures(1, &name);
+            return true;
+        }
+    };
+
     if (mTexture.name != -1U) {
-        glDeleteTextures(1, &mTexture.name);
+        // GL textures can only be destroyed from the GL thread
+        mLayer.mFlinger->mEventQueue.postMessage(
+                new MessageDestroyTexture(mLayer.mFlinger.get(), mTexture.name) );
     }
     if (mTexture.image != EGL_NO_IMAGE_KHR) {
         EGLDisplay dpy(mLayer.mFlinger->graphicPlane(0).getEGLDisplay());
