@@ -1,16 +1,15 @@
-page.title=Hello, TableLayout
+page.title=Table Layout
 parent.title=Hello, Views
 parent.link=index.html
 @jd:body
 
-<p>A {@link android.widget.TableLayout} is a ViewGroup that 
-will lay child View elements into rows and columns.</p>
 
+<p>{@link android.widget.TableLayout} is a {@link android.view.ViewGroup} that
+displays child {@link android.view.View} elements in rows and columns.</p>
 
 <ol>
-  <li>Start a new project/Activity called HelloTableLayout.</li>
-  <li>Open the layout file.
-    Make it like so:
+  <li>Start a new project named <em>HelloTableLayout</em>.</li>
+  <li>Open the <code>res/layout/main.xml</code> file and insert the following:
 <pre>
 &lt;?xml version="1.0" encoding="utf-8"?>
 &lt;TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -89,21 +88,28 @@ will lay child View elements into rows and columns.</p>
     &lt;/TableRow>
 &lt;/TableLayout>
 </pre>
-<p>Notice how this resembles the structure of an HTML table. <code>TableLayout</code> is like the
-<code>table</code> element; <code>TableRow</code> is like a <code>tr</code> element; but for our cells like
-the html <code>td</code> element, we can use any kind of View. Here, we use <code>TextView</code> for the cells.</p>
+<p>Notice how this resembles the structure of an HTML table. The {@link android.widget.TableLayout}
+element is like the HTML <code>&lt;table&gt;</code> element; {@link android.widget.TableRow} is like
+a <code>>&lt;tr>&gt;</code> element;
+but for the cells, you can use any kind of {@link android.view.View} element. In this example, a
+{@link android.widget.TextView} is used for each cell. In between some of the rows, there is also a
+basic {@link android.view.View}, which is used to draw a horizontal line.</p>
 
 </li>
-<li>Make sure your Activity loads this layout in the <code>onCreate()</code> method:
+<li>Make sure your <em>HelloTableLayout</em> Activity loads this layout in the
+{@link android.app.Activity#onCreate(Bundle) onCreate()} method:
 <pre>
 public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.main);
 }
 </pre>
-<p><code>R.layout.main</code> refers to the <code>main.xml</code> layout file.</p>
+<p>The {@link android.app.Activity#setContentView(int)} method loads the
+layout file for the {@link android.app.Activity}, specified by the resource
+ID &mdash; <code>R.layout.main</code> refers to the <code>res/layout/main.xml</code> layout
+file.</p>
 </li>
-<li>Run it.</li>
+<li>Run the application.</li>
 </ol>
 <p>You should see the following:</p>
 <img src="images/hello-tablelayout.png" width="150px" />
