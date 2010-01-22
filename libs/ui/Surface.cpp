@@ -607,13 +607,21 @@ status_t Surface::lock(SurfaceInfo* info, bool blocking) {
 status_t Surface::lock(SurfaceInfo* other, Region* dirtyIn, bool blocking) 
 {
     if (mApiLock.tryLock() != NO_ERROR) {
-        LOGE("calling Surface::lock() from different threads!");
+        LOGE("calling Surface::lock from different threads!");
         CallStack stack;
         stack.update();
         stack.dump("Surface::lock called from different threads");
         return WOULD_BLOCK;
     }
+
+    /* Here we're holding mApiLock */
     
+    if (mLockedBuffer != 0) {
+        LOGE("Surface::lock failed, already locked");
+        mApiLock.unlock();
+        return INVALID_OPERATION;
+    }
+
     // we're intending to do software rendering from this point
     setUsage(GRALLOC_USAGE_SW_READ_OFTEN | GRALLOC_USAGE_SW_WRITE_OFTEN);
 
@@ -682,8 +690,8 @@ status_t Surface::lock(SurfaceInfo* other, Region* dirtyIn, bool blocking)
 status_t Surface::unlockAndPost() 
 {
     if (mLockedBuffer == 0) {
-        LOGE("unlockAndPost failed, no locked buffer");
-        return BAD_VALUE;
+        LOGE("Surface::unlockAndPost failed, no locked buffer");
+        return INVALID_OPERATION;
     }
 
     status_t err = mLockedBuffer->unlock();
