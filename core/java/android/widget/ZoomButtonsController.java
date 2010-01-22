@@ -546,6 +546,11 @@ public class ZoomButtonsController implements View.OnTouchListener {
     public boolean onTouch(View v, MotionEvent event) {
         int action = event.getAction();
 
+        if (event.getPointerCount() > 1) {
+            // ZoomButtonsController doesn't handle mutitouch. Give up control.
+            return false;
+        }
+
         if (mReleaseTouchListenerOnUp) {
             // The controls were dismissed but we need to throw away all events until the up
             if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
