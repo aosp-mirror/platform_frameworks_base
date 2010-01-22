@@ -18,7 +18,8 @@
 */
 -->
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.android.internal.widget.WeightedLinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/parentPanel"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -27,7 +28,8 @@
     android:paddingBottom="3dip"
     android:paddingLeft="3dip"
     android:paddingRight="1dip"
-    >
+    android:majorWeight="0.5"
+    android:minorWeight="0.8">
 
     <LinearLayout android:id="@+id/topPanel"
         android:layout_width="match_parent"
@@ -143,4 +145,4 @@
                 android:visibility="gone" />
         </LinearLayout>
      </LinearLayout>
-</LinearLayout>
+</com.android.internal.widget.WeightedLinearLayout>
