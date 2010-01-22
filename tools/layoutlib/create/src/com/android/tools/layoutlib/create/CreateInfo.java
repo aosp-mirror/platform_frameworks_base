@@ -47,6 +47,7 @@ public class CreateInfo {
             "android.graphics.BitmapShader",        "android.graphics._Original_BitmapShader",
             "android.graphics.Canvas",              "android.graphics._Original_Canvas",
             "android.graphics.ComposeShader",       "android.graphics._Original_ComposeShader",
+            "android.graphics.DashPathEffect",       "android.graphics._Original_DashPathEffect",
             "android.graphics.LinearGradient",      "android.graphics._Original_LinearGradient",
             "android.graphics.Matrix",              "android.graphics._Original_Matrix",
             "android.graphics.Paint",               "android.graphics._Original_Paint",
