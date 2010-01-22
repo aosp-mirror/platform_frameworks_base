@@ -62,7 +62,7 @@ public final class Calendar {
     public static final String EVENT_BEGIN_TIME = "beginTime";
     public static final String EVENT_END_TIME = "endTime";
 
-    public static final String AUTHORITY = "calendar";
+    public static final String AUTHORITY = "com.android.calendar";
 
     /**
      * The content:// style URL for the top-level calendar authority
