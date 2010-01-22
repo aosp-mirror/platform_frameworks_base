@@ -182,14 +182,15 @@ status_t LayerBuffer::registerBuffers(const ISurface::BufferHeap& buffers)
 /**
  * This creates an "overlay" source for this surface
  */
-sp<OverlayRef> LayerBuffer::createOverlay(uint32_t w, uint32_t h, int32_t f)
+sp<OverlayRef> LayerBuffer::createOverlay(uint32_t w, uint32_t h, int32_t f,
+        int32_t orientation)
 {
     sp<OverlayRef> result;
     Mutex::Autolock _l(mLock);
     if (mSource != 0)
         return result;
 
-    sp<OverlaySource> source = new OverlaySource(*this, &result, w, h, f);
+    sp<OverlaySource> source = new OverlaySource(*this, &result, w, h, f, orientation);
     if (result != 0) {
         mSource = source;
     }
@@ -248,11 +249,11 @@ void LayerBuffer::SurfaceLayerBuffer::unregisterBuffers()
 }
 
 sp<OverlayRef> LayerBuffer::SurfaceLayerBuffer::createOverlay(
-        uint32_t w, uint32_t h, int32_t format) {
+        uint32_t w, uint32_t h, int32_t format, int32_t orientation) {
     sp<OverlayRef> result;
     sp<LayerBuffer> owner(getOwner());
     if (owner != 0)
-        result = owner->createOverlay(w, h, format);
+        result = owner->createOverlay(w, h, format, orientation);
     return result;
 }
 
@@ -600,9 +601,9 @@ void LayerBuffer::BufferSource::clearTempBufferImage() const
 
 LayerBuffer::OverlaySource::OverlaySource(LayerBuffer& layer,
         sp<OverlayRef>* overlayRef, 
-        uint32_t w, uint32_t h, int32_t format)
+        uint32_t w, uint32_t h, int32_t format, int32_t orientation)
     : Source(layer), mVisibilityChanged(false),
-    mOverlay(0), mOverlayHandle(0), mOverlayDevice(0)
+    mOverlay(0), mOverlayHandle(0), mOverlayDevice(0), mOrientation(orientation)
 {
     overlay_control_device_t* overlay_dev = mLayer.mFlinger->getOverlayEngine();
     if (overlay_dev == NULL) {
@@ -684,8 +685,12 @@ void LayerBuffer::OverlaySource::onVisibilityResolved(
             if (mOverlay) {
                 overlay_control_device_t* overlay_dev = mOverlayDevice;
                 overlay_dev->setPosition(overlay_dev, mOverlay, x,y,w,h);
+                // we need to combine the layer orientation and the
+                // user-requested orientation.
+                Transform finalTransform = Transform(mOrientation) *
+                        Transform(mLayer.getOrientation());
                 overlay_dev->setParameter(overlay_dev, mOverlay,
-                        OVERLAY_TRANSFORM, mLayer.getOrientation());
+                        OVERLAY_TRANSFORM, finalTransform.getOrientation());
                 overlay_dev->commit(overlay_dev, mOverlay);
             }
         }

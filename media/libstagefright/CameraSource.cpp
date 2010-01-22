@@ -56,7 +56,7 @@ struct DummySurface : public BnSurface {
     virtual void unregisterBuffers() {}
 
     virtual sp<OverlayRef> createOverlay(
-            uint32_t w, uint32_t h, int32_t format) {
+            uint32_t w, uint32_t h, int32_t format, int32_t orientation) {
         return NULL;
     }
 

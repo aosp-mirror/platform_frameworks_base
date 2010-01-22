@@ -182,6 +182,7 @@ private:
                     sp<CameraService>           mCameraService;
                     sp<ISurface>                mSurface;
                     int                         mPreviewCallbackFlag;
+                    int                         mOrientation;
 
                     sp<MediaPlayer>             mMediaPlayerClick;
                     sp<MediaPlayer>             mMediaPlayerBeep;
