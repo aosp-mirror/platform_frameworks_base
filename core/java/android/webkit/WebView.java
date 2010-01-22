@@ -536,10 +536,8 @@ public class WebView extends AbsoluteLayout
     static int DEFAULT_SCALE_PERCENT;
     private float mDefaultScale;
 
-    // set to true temporarily during ScaleGesture triggered zoom
+    // set to true temporarily while the zoom control is being dragged
     private boolean mPreviewZoomOnly = false;
-    // extra scale during zoom preview
-    private float mPreviewExtraZoomScale = 1.0f;
 
     // computed scale and inverse, from mZoomWidth.
     private float mActualScale;
@@ -2812,9 +2810,7 @@ public class WebView extends AbsoluteLayout
         nativeRecordButtons(hasFocus() && hasWindowFocus(),
                 mTouchMode == TOUCH_SHORTPRESS_START_MODE
                 || mTrackballDown || mGotCenterDown, false);
-        // use the DKGRAY as background when drawing zoom preview
-        drawCoreAndCursorRing(canvas, mPreviewZoomOnly ? Color.DKGRAY
-                : mBackgroundColor, mDrawCursorRing);
+        drawCoreAndCursorRing(canvas, mBackgroundColor, mDrawCursorRing);
     }
 
     @Override
@@ -2824,12 +2820,6 @@ public class WebView extends AbsoluteLayout
             return;
         }
         int saveCount = canvas.save();
-        if (mPreviewZoomOnly) {
-            // scale after canvas.save() so that the child, like titlebar, will
-            // not be scaled.
-            canvas.scale(mPreviewExtraZoomScale, mPreviewExtraZoomScale,
-                    mZoomCenterX + mScrollX, mZoomCenterY + mScrollY);
-        }
         if (mTitleBar != null) {
             canvas.translate(0, (int) mTitleBar.getHeight());
         }
@@ -2838,8 +2828,8 @@ public class WebView extends AbsoluteLayout
         }
         canvas.restoreToCount(saveCount);
 
-        // Now draw the shadow, skip if it is in zoom preview mode.
-        if ((mTitleBar != null && !mPreviewZoomOnly)) {
+        // Now draw the shadow.
+        if (mTitleBar != null) {
             int y = mScrollY + getVisibleTitleHeight();
             int height = (int) (5f * getContext().getResources()
                     .getDisplayMetrics().density);
@@ -3744,8 +3734,6 @@ public class WebView extends AbsoluteLayout
     private class ScaleDetectorListener implements
             ScaleGestureDetector.OnScaleGestureListener {
 
-        float mStartX, mStartY;
-
         public boolean onScaleBegin(ScaleGestureDetector detector) {
             // cancel the single touch handling
             cancelTouch();
@@ -3759,9 +3747,6 @@ public class WebView extends AbsoluteLayout
             if (inEditingMode() && nativeFocusCandidateIsPassword()) {
                 mWebTextView.setInPassword(false);
             }
-            mPreviewExtraZoomScale = 1.0f;
-            mStartX = detector.getFocusX();
-            mStartY = detector.getFocusY();
             return true;
         }
 
@@ -3770,12 +3755,13 @@ public class WebView extends AbsoluteLayout
                 mPreviewZoomOnly = false;
                 mAnchorX = viewToContentX((int) mZoomCenterX + mScrollX);
                 mAnchorY = viewToContentY((int) mZoomCenterY + mScrollY);
-                float scale = mPreviewExtraZoomScale * mActualScale;
                 // don't reflow when zoom in; when zoom out, do reflow if the
                 // new scale is almost minimum scale;
-                boolean reflowNow = (scale - mMinZoomScale <= 0.01f)
-                        || ((scale <= 0.8 * mTextWrapScale));
-                setNewZoomScale(scale, reflowNow, false);
+                boolean reflowNow = (mActualScale - mMinZoomScale <= 0.01f)
+                        || ((mActualScale <= 0.8 * mTextWrapScale));
+                // force zoom after mPreviewZoomOnly is set to false so that the
+                // new view size will be passed to the WebKit
+                setNewZoomScale(mActualScale, reflowNow, true);
                 // call invalidate() to draw without zoom filter
                 invalidate();
             }
@@ -3792,34 +3778,19 @@ public class WebView extends AbsoluteLayout
         }
 
         public boolean onScale(ScaleGestureDetector detector) {
-            float currScale = mPreviewExtraZoomScale * mActualScale;
             float scale = (float) (Math.round(detector.getScaleFactor()
-                    * currScale * 100) / 100.0);
-            // limit the scale change per step
-            if (scale > currScale) {
-                scale = Math.min(scale, currScale * 1.25f);
-            } else {
-                // the preview scale can be 80% of mMinZoomScale for feedback
-                scale = Math.max(Math.max(scale, currScale * 0.8f),
-                        mMinZoomScale * 0.8f);
-            }
-            if (Math.abs(scale - currScale) >= PREVIEW_SCALE_INCREMENT) {
+                    * mActualScale * 100) / 100.0);
+            if (Math.abs(scale - mActualScale) >= PREVIEW_SCALE_INCREMENT) {
                 mPreviewZoomOnly = true;
-                // FIXME: mZoomCenterX/Y need to be relative to mActualScale.
-                // Ideally the focusX/Y should be a fixed point. But currently
-                // it just returns the center of the two pointers. If only one
-                // pointer is moving, the center is shifting. Currently we only
-                // adjust it for zoom in case to get better result.
-                if (mPreviewExtraZoomScale > 1.0f) {
-                    mZoomCenterX = mStartX - (mStartX - detector.getFocusX())
-                            / mPreviewExtraZoomScale;
-                    mZoomCenterY = mStartY - (mStartY - detector.getFocusY())
-                            / mPreviewExtraZoomScale;
+                // limit the scale change per step
+                if (scale > mActualScale) {
+                    scale = Math.min(scale, mActualScale * 1.25f);
                 } else {
-                    mZoomCenterX = detector.getFocusX();
-                    mZoomCenterY = detector.getFocusY();
+                    scale = Math.max(scale, mActualScale * 0.8f);
                 }
-                mPreviewExtraZoomScale = scale / mActualScale;
+                mZoomCenterX = detector.getFocusX();
+                mZoomCenterY = detector.getFocusY();
+                setNewZoomScale(scale, false, false);
                 invalidate();
                 return true;
             }
@@ -4000,7 +3971,8 @@ public class WebView extends AbsoluteLayout
 
         // FIXME: we may consider to give WebKit an option to handle multi-touch
         // events later.
-        if (mSupportMultiTouch && ev.getPointerCount() > 1) {
+        if (mSupportMultiTouch && mMinZoomScale < mMaxZoomScale
+                && ev.getPointerCount() > 1) {
             mScaleDetector.onTouchEvent(ev);
             if (mScaleDetector.isInProgress()) {
                 mLastTouchTime = eventTime;
