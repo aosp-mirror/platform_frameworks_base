@@ -94,6 +94,9 @@ public class LinearLayout extends ViewGroup {
     @ViewDebug.ExportedProperty
     private float mWeightSum;
 
+    @ViewDebug.ExportedProperty
+    private boolean mUseLargestChild;
+
     private int[] mMaxAscent;
     private int[] mMaxDescent;
 
@@ -102,7 +105,7 @@ public class LinearLayout extends ViewGroup {
     private static final int INDEX_CENTER_VERTICAL = 0;
     private static final int INDEX_TOP = 1;
     private static final int INDEX_BOTTOM = 2;
-    private static final int INDEX_FILL = 3;    
+    private static final int INDEX_FILL = 3;
 
     public LinearLayout(Context context) {
         super(context);
@@ -133,6 +136,9 @@ public class LinearLayout extends ViewGroup {
 
         mBaselineAlignedChildIndex =
                 a.getInt(com.android.internal.R.styleable.LinearLayout_baselineAlignedChildIndex, -1);
+
+        // TODO: Better name, add Java APIs, make it public
+        mUseLargestChild = a.getBoolean(R.styleable.LinearLayout_useLargestChild, false);
 
         a.recycle();
     }
@@ -328,6 +334,9 @@ public class LinearLayout extends ViewGroup {
         boolean matchWidth = false;
 
         final int baselineChildIndex = mBaselineAlignedChildIndex;        
+        final boolean useLargestChild = mUseLargestChild;
+
+        int largestChildHeight = Integer.MIN_VALUE;
 
         // See how tall everyone is. Also remember max width.
         for (int i = 0; i < count; ++i) {
@@ -353,30 +362,35 @@ public class LinearLayout extends ViewGroup {
                 // there is any leftover space.
                 mTotalLength += lp.topMargin + lp.bottomMargin;
             } else {
-               int oldHeight = Integer.MIN_VALUE;
+                int oldHeight = Integer.MIN_VALUE;
 
-               if (lp.height == 0 && lp.weight > 0) {
+                if (lp.height == 0 && lp.weight > 0) {
                    // heightMode is either UNSPECIFIED OR AT_MOST, and this child
                    // wanted to stretch to fill available space. Translate that to
                    // WRAP_CONTENT so that it does not end up with a height of 0
                    oldHeight = 0;
                    lp.height = LayoutParams.WRAP_CONTENT;
-               }
+                }
 
-               // Determine how big this child would like to.  If this or
-               // previous children have given a weight, then we allow it to
-               // use all available space (and we will shrink things later
-               // if needed).
-               measureChildBeforeLayout(
+                // Determine how big this child would like to.  If this or
+                // previous children have given a weight, then we allow it to
+                // use all available space (and we will shrink things later
+                // if needed).
+                measureChildBeforeLayout(
                        child, i, widthMeasureSpec, 0, heightMeasureSpec,
                        totalWeight == 0 ? mTotalLength : 0);
 
-               if (oldHeight != Integer.MIN_VALUE) {
+                if (oldHeight != Integer.MIN_VALUE) {
                    lp.height = oldHeight;
-               }
+                }
 
-               mTotalLength += child.getMeasuredHeight() + lp.topMargin +
+                final int childHeight = child.getMeasuredHeight();
+                mTotalLength += childHeight + lp.topMargin +
                        lp.bottomMargin + getNextLocationOffset(child);
+
+                if (useLargestChild) {
+                    largestChildHeight = Math.max(childHeight, largestChildHeight);
+                }
             }
 
             /**
@@ -426,7 +440,30 @@ public class LinearLayout extends ViewGroup {
 
             i += getChildrenSkipCount(child, i);
         }
-        
+
+        if (useLargestChild) {
+            mTotalLength = 0;
+
+            for (int i = 0; i < count; ++i) {
+                final View child = getVirtualChildAt(i);
+
+                if (child == null) {
+                    mTotalLength += measureNullChild(i);
+                    continue;
+                }
+
+                if (child.getVisibility() == GONE) {
+                    i += getChildrenSkipCount(child, i);
+                    continue;
+                }
+
+                final LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams)
+                        child.getLayoutParams();
+                mTotalLength += largestChildHeight + lp.topMargin+ lp.bottomMargin +
+                        getNextLocationOffset(child);
+            }
+        }
+
         // Add in our padding
         mTotalLength += mPaddingTop + mPaddingBottom;
 
@@ -587,6 +624,9 @@ public class LinearLayout extends ViewGroup {
         maxDescent[0] = maxDescent[1] = maxDescent[2] = maxDescent[3] = -1;
 
         final boolean baselineAligned = mBaselineAligned;
+        final boolean useLargestChild = mUseLargestChild;
+
+        int largestChildWidth = Integer.MIN_VALUE;
 
         // See how wide everyone is. Also remember max height.
         for (int i = 0; i < count; ++i) {
@@ -602,7 +642,8 @@ public class LinearLayout extends ViewGroup {
                 continue;
             }
 
-            final LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) child.getLayoutParams();
+            final LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams)
+                    child.getLayoutParams();
 
             totalWeight += lp.weight;
             
@@ -643,9 +684,14 @@ public class LinearLayout extends ViewGroup {
                 if (oldWidth != Integer.MIN_VALUE) {
                     lp.width = oldWidth;
                 }
-               
-                mTotalLength += child.getMeasuredWidth() + lp.leftMargin +
-                        lp.rightMargin + getNextLocationOffset(child);
+
+                final int childWidth = child.getMeasuredWidth();
+                mTotalLength += childWidth + lp.leftMargin + lp.rightMargin +
+                        getNextLocationOffset(child);
+
+                if (useLargestChild) {
+                    largestChildWidth = Math.max(childWidth, largestChildWidth);
+                }
             }
 
             boolean matchHeightLocally = false;
@@ -706,6 +752,29 @@ public class LinearLayout extends ViewGroup {
                     Math.max(maxDescent[INDEX_CENTER_VERTICAL],
                     Math.max(maxDescent[INDEX_TOP], maxDescent[INDEX_BOTTOM])));
             maxHeight = Math.max(maxHeight, ascent + descent);
+        }
+
+        if (useLargestChild) {
+            mTotalLength = 0;
+
+            for (int i = 0; i < count; ++i) {
+                final View child = getVirtualChildAt(i);
+
+                if (child == null) {
+                    mTotalLength += measureNullChild(i);
+                    continue;
+                }
+
+                if (child.getVisibility() == GONE) {
+                    i += getChildrenSkipCount(child, i);
+                    continue;
+                }
+
+                final LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams)
+                        child.getLayoutParams();
+                mTotalLength += largestChildWidth + lp.leftMargin + lp.rightMargin +
+                        getNextLocationOffset(child);
+            }
         }
 
         // Add in our padding
@@ -953,7 +1022,7 @@ public class LinearLayout extends ViewGroup {
         final int paddingLeft = mPaddingLeft;
 
         int childTop = mPaddingTop;
-        int childLeft = paddingLeft;
+        int childLeft;
         
         // Where right end of child should go
         final int width = mRight - mLeft;
@@ -1038,7 +1107,7 @@ public class LinearLayout extends ViewGroup {
     void layoutHorizontal() {
         final int paddingTop = mPaddingTop;
 
-        int childTop = paddingTop;
+        int childTop;
         int childLeft = mPaddingLeft;
         
         // Where bottom of child should go
@@ -1103,7 +1172,7 @@ public class LinearLayout extends ViewGroup {
                         break;
 
                     case Gravity.CENTER_VERTICAL:
-                        // Removed support for baselign alignment when layout_gravity or
+                        // Removed support for baseline alignment when layout_gravity or
                         // gravity == center_vertical. See bug #1038483.
                         // Keep the code around if we need to re-enable this feature
                         // if (childBaseline != -1) {
