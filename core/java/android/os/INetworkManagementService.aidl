@@ -17,6 +17,8 @@
 
 package android.os;
 
+import android.net.InterfaceConfiguration;
+
 /**
  * @hide
  */
@@ -30,6 +32,17 @@ interface INetworkManagementService
      * Returns a list of currently known network interfaces
      */
     String[] listInterfaces();
+
+    /**
+     * Retrieves the specified interface config
+     *
+     */
+    InterfaceConfiguration getInterfaceConfig(String iface);
+
+    /**
+     * Sets the configuration of the specified interface
+     */
+    void setInterfaceConfig(String iface, in InterfaceConfiguration cfg);
 
     /**
      * Shuts down the service

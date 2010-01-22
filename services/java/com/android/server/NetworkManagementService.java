@@ -24,12 +24,13 @@ import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.net.InterfaceConfiguration;
 import android.os.INetworkManagementService;
 import android.os.Handler;
 import android.text.TextUtils;
 import android.util.Log;
 import java.util.ArrayList;
-
+import java.util.StringTokenizer;
 import android.provider.Settings;
 import android.content.ContentResolver;
 import android.database.ContentObserver;
@@ -56,6 +57,7 @@ class NetworkManagementService extends INetworkManagementService.Stub {
 
         public static final int TetherStatusResult        = 210;
         public static final int IpFwdStatusResult         = 211;
+        public static final int InterfaceGetCfgResult     = 213;
     }
 
     /**
@@ -99,6 +101,29 @@ class NetworkManagementService extends INetworkManagementService.Stub {
         }
     }
 
+    private static int stringToIpAddr(String addrString) throws UnknownHostException {
+        try {
+            String[] parts = addrString.split("\\.");
+            if (parts.length != 4) {
+                throw new UnknownHostException(addrString);
+            }
+
+            int a = Integer.parseInt(parts[0])      ;
+            int b = Integer.parseInt(parts[1]) <<  8;
+            int c = Integer.parseInt(parts[2]) << 16;
+            int d = Integer.parseInt(parts[3]) << 24;
+
+            return a | b | c | d;
+        } catch (NumberFormatException ex) {
+            throw new UnknownHostException(addrString);
+        }
+    }
+
+    public static String intToIpString(int i) {
+        return ((i >> 24 ) & 0xFF) + "." + ((i >> 16 ) & 0xFF) + "." + ((i >>  8 ) & 0xFF) + "." +
+               (i & 0xFF);
+    }
+
     //
     // INetworkManagementService members
     //
@@ -107,7 +132,53 @@ class NetworkManagementService extends INetworkManagementService.Stub {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.ACCESS_NETWORK_STATE, "NetworkManagementService");
 
-        return mConnector.doListCommand("list_interfaces", NetdResponseCode.InterfaceListResult);
+        return mConnector.doListCommand("interface list", NetdResponseCode.InterfaceListResult);
+    }
+
+    public InterfaceConfiguration getInterfaceConfig(String iface) throws IllegalStateException {
+        String rsp = mConnector.doCommand("interface getcfg " + iface).get(0);
+        Log.d(TAG, String.format("rsp <%s>", rsp));
+
+        // Rsp: 213 xx:xx:xx:xx:xx:xx yyy.yyy.yyy.yyy zzz.zzz.zzz.zzz [flag1 flag2 flag3]
+        StringTokenizer st = new StringTokenizer(rsp);
+
+        try {
+            int code = Integer.parseInt(st.nextToken(" "));
+            if (code != NetdResponseCode.InterfaceGetCfgResult) {
+                throw new IllegalStateException(
+                    String.format("Expected code %d, but got %d",
+                            NetdResponseCode.InterfaceGetCfgResult, code));
+            }
+        } catch (NumberFormatException nfe) {
+            throw new IllegalStateException(
+                    String.format("Invalid response from daemon (%s)", rsp));
+        }
+
+        InterfaceConfiguration cfg = new InterfaceConfiguration();
+        cfg.hwAddr = st.nextToken(" ");
+        try {
+            cfg.ipAddr = stringToIpAddr(st.nextToken(" "));
+        } catch (UnknownHostException uhe) {
+            Log.e(TAG, "Failed to parse ipaddr", uhe);
+            cfg.ipAddr = 0;
+        }
+
+        try {
+            cfg.netmask = stringToIpAddr(st.nextToken(" "));
+        } catch (UnknownHostException uhe) {
+            Log.e(TAG, "Failed to parse netmask", uhe);
+            cfg.netmask = 0;
+        }
+        cfg.interfaceFlags = st.nextToken("]");
+        Log.d(TAG, String.format("flags <%s>", cfg.interfaceFlags));
+        return cfg;
+    }
+
+    public void setInterfaceConfig(
+            String iface, InterfaceConfiguration cfg) throws IllegalStateException {
+        String cmd = String.format("interface setcfg %s %s %s", iface,
+                intToIpString(cfg.ipAddr), intToIpString(cfg.netmask), cfg.interfaceFlags);
+        mConnector.doCommand(cmd);
     }
 
     public void shutdown() {
