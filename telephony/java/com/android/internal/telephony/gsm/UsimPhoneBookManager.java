@@ -282,7 +282,7 @@ public class UsimPhoneBookManager extends Handler implements IccConstants {
     private void readAdnFileAndWait(int recNum) {
         Map <Integer,Integer> fileIds;
         fileIds = mPbrFile.mFileIds.get(recNum);
-        if (fileIds == null) return;
+        if (fileIds == null || fileIds.isEmpty()) return;
 
         mAdnCache.requestLoadAllAdnLike(fileIds.get(USIM_EFADN_TAG),
             fileIds.get(USIM_EFEXT1_TAG), obtainMessage(EVENT_USIM_ADN_LOAD_DONE));
