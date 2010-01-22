@@ -572,6 +572,26 @@ public final class AssetManager {
     public native final int addAssetPath(String path);
 
     /**
+     * Add multiple sets of assets to the asset manager at once.  See
+     * {@link #addAssetPath(String)} for more information.  Returns array of
+     * cookies for each added asset with 0 indicating failure, or null if
+     * the input array of paths is null.
+     * {@hide}
+     */
+    public final int[] addAssetPaths(String[] paths) {
+        if (paths == null) {
+            return null;
+        }
+
+        int[] cookies = new int[paths.length];
+        for (int i = 0; i < paths.length; i++) {
+            cookies[i] = addAssetPath(paths[i]);
+        }
+
+        return cookies;
+    }
+
+    /**
      * Determine whether the state in this asset manager is up-to-date with
      * the files on the filesystem.  If false is returned, you need to
      * instantiate a new AssetManager class to see the new data.
