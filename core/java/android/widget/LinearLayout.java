@@ -754,7 +754,7 @@ public class LinearLayout extends ViewGroup {
             maxHeight = Math.max(maxHeight, ascent + descent);
         }
 
-        if (useLargestChild) {
+        if (useLargestChild && widthMode == MeasureSpec.AT_MOST) {
             mTotalLength = 0;
 
             for (int i = 0; i < count; ++i) {
