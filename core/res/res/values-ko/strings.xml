@@ -503,6 +503,7 @@
     <string name="lockscreen_missing_sim_message_short" msgid="7381499217732227295">"SIM 카드가 없습니다."</string>
     <string name="lockscreen_missing_sim_message" msgid="2186920585695169078">"휴대전화에 SIM 카드가 없습니다."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="8874620818937719067">"SIM 카드를 삽입하세요."</string>
+    <string name="emergency_calls_only" msgid="6733978304386365407">"비상 전화만"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"네트워크 잠김"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"SIM 카드의 PUK가 잠겨 있습니다."</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="635967534992394321">"사용자 가이드를 참조하거나 고객지원팀에 문의하세요."</string>

@@ -255,13 +255,19 @@ public class MediaPlayerPerformance extends ActivityInstrumentationTestCase<Medi
     }
 
     //Write the ps output to the file
-    public void getMemoryWriteToLog(Writer output) {
+    public void getMemoryWriteToLog(Writer output, int writeCount) {
         String memusage = null;
-        memusage = captureMediaserverInfo();
-        Log.v(TAG, memusage);
         try {
-            //Write to file output
+            if (writeCount == 0) {
+                mStartMemory = getMediaserverVsize();
+                output.write("Start memory : " + mStartMemory + "\n");
+            }
+            memusage = captureMediaserverInfo();
             output.write(memusage);
+            if (writeCount == NUM_STRESS_LOOP - 1) {
+                mEndMemory = getMediaserverVsize();
+                output.write("End Memory :" + mEndMemory + "\n");
+            }
         } catch (Exception e) {
             e.toString();
         }
@@ -312,9 +318,6 @@ public class MediaPlayerPerformance extends ActivityInstrumentationTestCase<Medi
         //Wait for 10 seconds to make sure the memory settle.
         Thread.sleep(10000);
         mEndPid = getMediaserverPid();
-        mEndMemory = getMediaserverVsize();
-        Log.v(TAG, "End Memory " + mEndMemory);
-        output.write("End Memory :" + mEndMemory + "\n");
         int memDiff = mEndMemory - startMemory;
         if (memDiff < 0)
             memDiff = 0;
@@ -348,12 +351,9 @@ public class MediaPlayerPerformance extends ActivityInstrumentationTestCase<Medi
         File h263MemoryOut = new File(MEDIA_MEMORY_OUTPUT);
         Writer output = new BufferedWriter(new FileWriter(h263MemoryOut, true));
         output.write("H263 Video Playback Only\n");
-        mStartMemory = getMediaserverVsize();
-        output.write("Start memory : " + mStartMemory + "\n");
-        Log.v(TAG, "first mem : " + mStartMemory);
         for (int i = 0; i < NUM_STRESS_LOOP; i++) {
             mediaStressPlayback(MediaNames.VIDEO_HIGHRES_H263);
-            getMemoryWriteToLog(output);
+            getMemoryWriteToLog(output, i);
         }
         output.write("\n");
         memoryResult = validateMemoryResult(mStartPid, mStartMemory, output);
@@ -370,12 +370,9 @@ public class MediaPlayerPerformance extends ActivityInstrumentationTestCase<Medi
         File h264MemoryOut = new File(MEDIA_MEMORY_OUTPUT);
         Writer output = new BufferedWriter(new FileWriter(h264MemoryOut, true));
         output.write("H264 Video Playback only\n");
-        mStartMemory = getMediaserverVsize();
-        output.write("Start memory : " + mStartMemory + "\n");
-        Log.v(TAG, "first mem : " + mStartMemory);
         for (int i = 0; i < NUM_STRESS_LOOP; i++) {
             mediaStressPlayback(MediaNames.VIDEO_H264_AMR);
-            getMemoryWriteToLog(output);
+            getMemoryWriteToLog(output, i);
         }
         output.write("\n");
         memoryResult = validateMemoryResult(mStartPid, mStartMemory, output);
@@ -392,12 +389,9 @@ public class MediaPlayerPerformance extends ActivityInstrumentationTestCase<Medi
             File wmvMemoryOut = new File(MEDIA_MEMORY_OUTPUT);
             Writer output = new BufferedWriter(new FileWriter(wmvMemoryOut, true));
             output.write("WMV video playback only\n");
-            mStartMemory = getMediaserverVsize();
-            output.write("Start memory : " + mStartMemory + "\n");
-            Log.v(TAG, "first mem : " + mStartMemory);
             for (int i = 0; i < NUM_STRESS_LOOP; i++) {
                 mediaStressPlayback(MediaNames.VIDEO_WMV);
-                getMemoryWriteToLog(output);
+                getMemoryWriteToLog(output, i);
             }
             output.write("\n");
             memoryResult = validateMemoryResult(mStartPid, mStartMemory, output);
@@ -415,14 +409,10 @@ public class MediaPlayerPerformance extends ActivityInstrumentationTestCase<Medi
         File videoH263RecordOnlyMemoryOut = new File(MEDIA_MEMORY_OUTPUT);
         Writer output = new BufferedWriter(new FileWriter(videoH263RecordOnlyMemoryOut, true));
         output.write("H263 video record only\n");
-        mStartMemory = getMediaserverVsize();
-        output.write("Start memory : " + mStartMemory + "\n");
-        Log.v(TAG, "first mem : " + mStartMemory);
-
         for (int i = 0; i < NUM_STRESS_LOOP; i++) {
             stressVideoRecord(20, 352, 288, MediaRecorder.VideoEncoder.H263,
                     MediaRecorder.OutputFormat.MPEG_4, MediaNames.RECORDED_VIDEO_3GP, true);
-            getMemoryWriteToLog(output);
+            getMemoryWriteToLog(output, i);
         }
         output.write("\n");
         memoryResult = validateMemoryResult(mStartPid, mStartMemory, output);
@@ -439,14 +429,10 @@ public class MediaPlayerPerformance extends ActivityInstrumentationTestCase<Medi
         File videoMp4RecordOnlyMemoryOut = new File(MEDIA_MEMORY_OUTPUT);
         Writer output = new BufferedWriter(new FileWriter(videoMp4RecordOnlyMemoryOut, true));
         output.write("MPEG4 video record only\n");
-        mStartMemory = getMediaserverVsize();
-        output.write("Start memory : " + mStartMemory + "\n");
-        Log.v(TAG, "first mem : " + mStartMemory);
-
         for (int i = 0; i < NUM_STRESS_LOOP; i++) {
             stressVideoRecord(20, 352, 288, MediaRecorder.VideoEncoder.MPEG_4_SP,
                     MediaRecorder.OutputFormat.MPEG_4, MediaNames.RECORDED_VIDEO_3GP, true);
-            getMemoryWriteToLog(output);
+            getMemoryWriteToLog(output, i);
         }
         output.write("\n");
         memoryResult = validateMemoryResult(mStartPid, mStartMemory, output);
@@ -464,14 +450,10 @@ public class MediaPlayerPerformance extends ActivityInstrumentationTestCase<Medi
         File videoRecordAudioMemoryOut = new File(MEDIA_MEMORY_OUTPUT);
         Writer output = new BufferedWriter(new FileWriter(videoRecordAudioMemoryOut, true));
         output.write("Audio and h263 video record\n");
-        mStartMemory = getMediaserverVsize();
-        output.write("Start memory : " + mStartMemory + "\n");
-        Log.v(TAG, "first mem : " + mStartMemory);
-
         for (int i = 0; i < NUM_STRESS_LOOP; i++) {
             stressVideoRecord(20, 352, 288, MediaRecorder.VideoEncoder.H263,
                     MediaRecorder.OutputFormat.MPEG_4, MediaNames.RECORDED_VIDEO_3GP, false);
-            getMemoryWriteToLog(output);
+            getMemoryWriteToLog(output, i);
         }
         output.write("\n");
         memoryResult = validateMemoryResult(mStartPid, mStartMemory, output);
@@ -488,13 +470,9 @@ public class MediaPlayerPerformance extends ActivityInstrumentationTestCase<Medi
         File audioOnlyMemoryOut = new File(MEDIA_MEMORY_OUTPUT);
         Writer output = new BufferedWriter(new FileWriter(audioOnlyMemoryOut, true));
         output.write("Audio record only\n");
-        mStartMemory = getMediaserverVsize();
-        output.write("Start memory : " + mStartMemory + "\n");
-        Log.v(TAG, "first mem : " + mStartMemory);
-
         for (int i = 0; i < NUM_STRESS_LOOP; i++) {
             stressAudioRecord(MediaNames.RECORDER_OUTPUT);
-            getMemoryWriteToLog(output);
+            getMemoryWriteToLog(output, i);
         }
         output.write("\n");
         memoryResult = validateMemoryResult(mStartPid, mStartMemory, output);
