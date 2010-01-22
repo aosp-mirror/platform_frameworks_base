@@ -29,6 +29,7 @@ import android.accounts.OperationCanceledException;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
@@ -40,6 +41,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 
 import java.io.IOException;
@@ -138,6 +140,8 @@ public class LockPatternKeyguardView extends KeyguardViewBase
      * Used to lookup the state of the lock pattern
      */
     private final LockPatternUtils mLockPatternUtils;
+
+    private boolean mIsPortrait;
 
     /**
      * @return Whether we are stuck on the lock screen because the sim is
@@ -266,7 +270,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase
             public void reportFailedPatternAttempt() {
                 mUpdateMonitor.reportFailedAttempt();
                 final int failedAttempts = mUpdateMonitor.getFailedAttempts();
-                if (DEBUG) Log.d(TAG, 
+                if (DEBUG) Log.d(TAG,
                     "reportFailedPatternAttempt: #" + failedAttempts +
                     " (enableFallback=" + mEnableFallback + ")");
                 if (mEnableFallback && failedAttempts ==
@@ -307,7 +311,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase
         mLockScreen = createLockScreen();
         addView(mLockScreen);
         final UnlockMode unlockMode = getUnlockMode();
-        if (DEBUG) Log.d(TAG, 
+        if (DEBUG) Log.d(TAG,
             "LockPatternKeyguardView ctor: about to createUnlockScreenFor; mEnableFallback="
             + mEnableFallback);
         mUnlockScreen = createUnlockScreenFor(unlockMode);
@@ -333,6 +337,33 @@ public class LockPatternKeyguardView extends KeyguardViewBase
         updateScreen(mMode);
     }
 
+
+    // TODO:
+    // This overloaded method was added to workaround a race condition in the framework between
+    // notification for orientation changed, layout() and switching resources.  This code attempts
+    // to avoid drawing the incorrect layout while things are in transition.  The method can just
+    // be removed once the race condition is fixed. See bugs 2262578 and 2292713.
+    @Override
+    protected void dispatchDraw(Canvas canvas) {
+        final int orientation = getResources().getConfiguration().orientation;
+        if (mIsPortrait && Configuration.ORIENTATION_PORTRAIT != orientation
+                || getResources().getBoolean(R.bool.lockscreen_isPortrait) != mIsPortrait) {
+            // Make sure we redraw once things settle down.
+            // Log.v(TAG, "dispatchDraw(): not drawing because state is inconsistent");
+            postInvalidate();
+
+            // In order to minimize flashing, draw the first child's background for now.
+            ViewGroup view = (ViewGroup) (mMode == Mode.LockScreen ? mLockScreen : mUnlockScreen);
+            if (view != null && view.getChildAt(0) != null) {
+                Drawable background = view.getChildAt(0).getBackground();
+                if (background != null) {
+                    background.draw(canvas);
+                }
+            }
+            return;
+        }
+        super.dispatchDraw(canvas);
+    }
 
     @Override
     public void reset() {
@@ -482,6 +513,9 @@ public class LockPatternKeyguardView extends KeyguardViewBase
     }
 
     View createUnlockScreenFor(UnlockMode unlockMode) {
+        // Capture the orientation this layout was created in.
+        mIsPortrait = getResources().getBoolean(R.bool.lockscreen_isPortrait);
+
         if (unlockMode == UnlockMode.Pattern) {
             UnlockScreen view = new UnlockScreen(
                     mContext,
