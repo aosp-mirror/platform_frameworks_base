@@ -28,7 +28,6 @@ import android.app.DeviceAdminInfo;
 import android.app.DevicePolicyManager;
 import android.app.IDevicePolicyManager;
 import android.content.ComponentName;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -36,11 +35,9 @@ import android.content.pm.ResolveInfo;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.IPowerManager;
-import android.os.PowerManager;
 import android.os.RecoverySystem;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.provider.Settings;
 import android.util.Log;
 import android.util.Xml;
 
@@ -112,6 +109,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         Intent intent = new Intent(action);
         intent.setComponent(policy.info.getComponent());
         mContext.sendBroadcast(intent);
+    }
+    
+    void sendAdminCommandLocked(String action) {
+        if (mActiveAdmin != null) {
+            sendAdminCommandLocked(mActiveAdmin, action);
+        }
     }
     
     ComponentName getActiveAdminLocked() {
@@ -498,8 +501,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     mActivePasswordMode = mode;
                     mActivePasswordLength = length;
                     mFailedPasswordAttempts = 0;
-                    sendAdminCommandLocked(mActiveAdmin,
-                            DeviceAdmin.ACTION_PASSWORD_CHANGED);
+                    sendAdminCommandLocked(DeviceAdmin.ACTION_PASSWORD_CHANGED);
                 } finally {
                     Binder.restoreCallingIdentity(ident);
                 }
@@ -515,8 +517,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             long ident = Binder.clearCallingIdentity();
             try {
                 mFailedPasswordAttempts++;
-                sendAdminCommandLocked(mActiveAdmin,
-                        DeviceAdmin.ACTION_PASSWORD_FAILED);
+                sendAdminCommandLocked(DeviceAdmin.ACTION_PASSWORD_FAILED);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -532,8 +533,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 long ident = Binder.clearCallingIdentity();
                 try {
                     mFailedPasswordAttempts = 0;
-                    sendAdminCommandLocked(mActiveAdmin,
-                            DeviceAdmin.ACTION_PASSWORD_SUCCEEDED);
+                    sendAdminCommandLocked(DeviceAdmin.ACTION_PASSWORD_SUCCEEDED);
                 } finally {
                     Binder.restoreCallingIdentity(ident);
                 }
