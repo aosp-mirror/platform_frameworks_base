@@ -34,6 +34,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.RegisteredServicesCache;
 import android.content.pm.ProviderInfo;
+import android.content.pm.RegisteredServicesCacheListener;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -344,6 +345,14 @@ class SyncManager implements OnAccountsUpdateListener {
         mPackageManager = null;
 
         mSyncAdapters = new SyncAdaptersCache(mContext);
+        mSyncAdapters.setListener(new RegisteredServicesCacheListener<SyncAdapterType>() {
+            public void onServiceChanged(SyncAdapterType type, boolean removed) {
+                if (!removed) {
+                    scheduleSync(null, type.authority, null, 0 /* no delay */,
+                            false /* onlyThoseWithUnkownSyncableState */);
+                }
+            }
+        }, mSyncHandler);
 
         mSyncAlarmIntent = PendingIntent.getBroadcast(
                 mContext, 0 /* ignored */, new Intent(ACTION_SYNC_ALARM), 0);
