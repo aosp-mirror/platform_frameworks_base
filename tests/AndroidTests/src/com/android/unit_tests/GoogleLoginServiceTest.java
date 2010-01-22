@@ -17,9 +17,9 @@ import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.Suppress;
 import android.util.Log;
 
-import com.google.android.googleapps.GoogleLoginCredentialsResult;
-import com.google.android.googleapps.IGoogleLoginService;
-import com.google.android.googlelogin.GoogleLoginServiceConstants;
+import com.google.android.gsf.GoogleLoginCredentialsResult;
+import com.google.android.gsf.IGoogleLoginService;
+import com.google.android.gsf.GoogleLoginServiceConstants;
 
 import junit.framework.Assert;
 
@@ -60,8 +60,8 @@ public class GoogleLoginServiceTest extends AndroidTestCase {
     protected void setUp() throws Exception {
         super.setUp();
         getContext().bindService((new Intent())
-                                 .setClassName("com.google.android.googleapps",
-                                               "com.google.android.googleapps.GoogleLoginService"),
+                                 .setClassName("com.google.android.gsf",
+                                               "com.google.android.gsf.loginservice.GoogleLoginService"),
                                  mConnection, Context.BIND_AUTO_CREATE);
 
         // wait for the service to cnnnect
