@@ -16,9 +16,9 @@
 
 package android.graphics;
 
-import java.awt.Paint;
+public class SweepGradient extends GradientShader {
 
-public class SweepGradient extends Shader {
+    private SweepGradientPaint mPaint;
 
     /**
      * A subclass of Shader that draws a sweep gradient around a center point.
@@ -36,15 +36,9 @@ public class SweepGradient extends Shader {
      */
     public SweepGradient(float cx, float cy,
                          int colors[], float positions[]) {
-        if (colors.length < 2) {
-            throw new IllegalArgumentException("needs >= 2 number of colors");
-        }
-        if (positions != null && colors.length != positions.length) {
-            throw new IllegalArgumentException(
-                        "color and position arrays must be of equal length");
-        }
+        super(colors, positions);
 
-        // FIXME Implement shader
+        mPaint = new SweepGradientPaint(cx, cy, mColors, mPositions);
     }
 
     /**
@@ -56,13 +50,91 @@ public class SweepGradient extends Shader {
      * @param color1   The color to use at the end of the sweep
      */
     public SweepGradient(float cx, float cy, int color0, int color1) {
-        // FIXME Implement shader
+        this(cx, cy, new int[] { color0, color1}, null /*positions*/);
     }
 
     @Override
-    Paint getJavaPaint() {
-        // TODO Auto-generated method stub
-        return null;
+    java.awt.Paint getJavaPaint() {
+        return mPaint;
     }
+
+    private static class SweepGradientPaint extends GradientPaint {
+
+        private final float mCx;
+        private final float mCy;
+
+        public SweepGradientPaint(float cx, float cy, int[] colors, float[] positions) {
+            super(colors, positions, null /*tileMode*/);
+            mCx = cx;
+            mCy = cy;
+        }
+
+        public java.awt.PaintContext createContext(
+                java.awt.image.ColorModel     colorModel,
+                java.awt.Rectangle            deviceBounds,
+                java.awt.geom.Rectangle2D     userBounds,
+                java.awt.geom.AffineTransform xform,
+                java.awt.RenderingHints       hints) {
+            precomputeGradientColors();
+            return new SweepGradientPaintContext(colorModel);
+        }
+
+        private class SweepGradientPaintContext implements java.awt.PaintContext {
+
+            private final java.awt.image.ColorModel mColorModel;
+
+            public SweepGradientPaintContext(java.awt.image.ColorModel colorModel) {
+                mColorModel = colorModel;
+            }
+
+            public void dispose() {
+            }
+
+            public java.awt.image.ColorModel getColorModel() {
+                return mColorModel;
+            }
+
+            public java.awt.image.Raster getRaster(int x, int y, int w, int h) {
+                java.awt.image.BufferedImage image = new java.awt.image.BufferedImage(w, h,
+                        java.awt.image.BufferedImage.TYPE_INT_ARGB);
+
+                int[] data = new int[w*h];
+
+                // compute angle from each point to the center, and figure out the distance from
+                // it.
+                int index = 0;
+                for (int iy = 0 ; iy < h ; iy++) {
+                    for (int ix = 0 ; ix < w ; ix++) {
+                        float dx = x + ix - mCx;
+                        float dy = y + iy - mCy;
+                        float angle;
+                        if (dx == 0) {
+                            angle = (float) (dy < 0 ? 3 * Math.PI / 2 : Math.PI / 2);
+                        } else if (dy == 0) {
+                            angle = (float) (dx < 0 ? Math.PI : 0);
+                        } else {
+                            angle = (float) Math.atan(dy / dx);
+                            if (dx > 0) {
+                                if (dy < 0) {
+                                    angle += Math.PI * 2;
+                                }
+                            } else {
+                                angle += Math.PI;
+                            }
+                        }
+
+                        // convert to 0-1. value and get color
+                        data[index++] = getGradientColor((float) (angle / (2 * Math.PI)));
+                    }
+                }
+
+                image.setRGB(0 /*startX*/, 0 /*startY*/, w, h, data, 0 /*offset*/, w /*scansize*/);
+
+                return image.getRaster();
+            }
+
+        }
+    }
+
 }
 
