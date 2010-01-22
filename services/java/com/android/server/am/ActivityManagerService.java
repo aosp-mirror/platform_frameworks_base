@@ -4610,7 +4610,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
 
         // Log the ANR to the event log.
-        EventLog.writeEvent(EventLogTags.ANR, app.pid, app.processName, annotation);
+        EventLog.writeEvent(EventLogTags.AM_ANR, app.pid, app.processName, app.info.flags,
+                annotation);
 
         // Dump thread traces as quickly as we can, starting with "interesting" processes.
         ArrayList<Integer> pids = new ArrayList<Integer>(20);
@@ -8750,6 +8751,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
         EventLog.writeEvent(EventLogTags.AM_CRASH, Binder.getCallingPid(),
                 app == null ? "system" : (r == null ? "unknown" : r.processName),
+                r == null ? -1 : r.info.flags,
                 crashInfo.exceptionClassName,
                 crashInfo.exceptionMessage,
                 crashInfo.throwFileName,
@@ -8773,6 +8775,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
         EventLog.writeEvent(EventLogTags.AM_WTF, Binder.getCallingPid(),
                 app == null ? "system" : (r == null ? "unknown" : r.processName),
+                r == null ? -1 : r.info.flags,
                 tag, crashInfo.exceptionMessage);
 
         addErrorToDropBox("wtf", r, null, null, tag, null, null, crashInfo);
@@ -8842,6 +8845,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 sb.append("Process: system_server\n");
             } else {
                 sb.append("Process: ").append(process.processName).append("\n");
+                sb.append("Flags: 0x").append(Integer.toString(process.info.flags, 16)).append("\n");
             }
             if (activity != null) {
                 sb.append("Activity: ").append(activity.shortComponentName).append("\n");
