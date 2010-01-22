@@ -38,6 +38,7 @@ class Transform
 public:
                     Transform();
                     Transform(const Transform&  other);
+                    Transform(int32_t flags);
                     ~Transform();
 
             enum orientation_flags {

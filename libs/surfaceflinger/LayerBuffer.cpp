@@ -182,14 +182,15 @@ status_t LayerBuffer::registerBuffers(const ISurface::BufferHeap& buffers)
 /**
  * This creates an "overlay" source for this surface
  */
-sp<OverlayRef> LayerBuffer::createOverlay(uint32_t w, uint32_t h, int32_t f)
+sp<OverlayRef> LayerBuffer::createOverlay(uint32_t w, uint32_t h, int32_t f,
+        int32_t orientation)
 {
     sp<OverlayRef> result;
     Mutex::Autolock _l(mLock);
     if (mSource != 0)
         return result;
 
-    sp<OverlaySource> source = new OverlaySource(*this, &result, w, h, f);
+    sp<OverlaySource> source = new OverlaySource(*this, &result, w, h, f, orientation);
     if (result != 0) {
         mSource = source;
     }
@@ -248,11 +249,11 @@ void LayerBuffer::SurfaceLayerBuffer::unregisterBuffers()
 }
 
 sp<OverlayRef> LayerBuffer::SurfaceLayerBuffer::createOverlay(
-        uint32_t w, uint32_t h, int32_t format) {
+        uint32_t w, uint32_t h, int32_t format, int32_t orientation) {
     sp<OverlayRef> result;
     sp<LayerBuffer> owner(getOwner());
     if (owner != 0)
-        result = owner->createOverlay(w, h, format);
+        result = owner->createOverlay(w, h, format, orientation);
     return result;
 }
 
@@ -370,8 +371,23 @@ LayerBuffer::BufferSource::BufferSource(LayerBuffer& layer,
 
 LayerBuffer::BufferSource::~BufferSource()
 {    
+    class MessageDestroyTexture : public MessageBase {
+        SurfaceFlinger* flinger;
+        GLuint name;
+    public:
+        MessageDestroyTexture(
+                SurfaceFlinger* flinger, GLuint name)
+            : flinger(flinger), name(name) { }
+        virtual bool handler() {
+            glDeleteTextures(1, &name);
+            return true;
+        }
+    };
+
     if (mTexture.name != -1U) {
-        glDeleteTextures(1, &mTexture.name);
+        // GL textures can only be destroyed from the GL thread
+        mLayer.mFlinger->mEventQueue.postMessage(
+                new MessageDestroyTexture(mLayer.mFlinger.get(), mTexture.name) );
     }
     if (mTexture.image != EGL_NO_IMAGE_KHR) {
         EGLDisplay dpy(mLayer.mFlinger->graphicPlane(0).getEGLDisplay());
@@ -444,6 +460,10 @@ void LayerBuffer::BufferSource::onDraw(const Region& clip) const
     NativeBuffer src(ourBuffer->getBuffer());
     const Rect transformedBounds(mLayer.getTransformedBounds());
 
+    if (UNLIKELY(mTexture.name == -1LU)) {
+        mTexture.name = mLayer.createTexture();
+    }
+
 #if defined(EGL_ANDROID_image_native_buffer)
     if (mLayer.mFlags & DisplayHardware::DIRECT_TEXTURE) {
         copybit_device_t* copybit = mLayer.mBlitEngine;
@@ -483,9 +503,6 @@ void LayerBuffer::BufferSource::onDraw(const Region& clip) const
         t.format = src.img.format;
         t.data = (GGLubyte*)src.img.base;
         const Region dirty(Rect(t.width, t.height));
-        if (UNLIKELY(mTexture.name == -1LU)) {
-            mTexture.name = mLayer.createTexture();
-        }
         mLayer.loadTexture(&mTexture, dirty, t);
     }
 
@@ -566,11 +583,17 @@ status_t LayerBuffer::BufferSource::initTempBuffer() const
 
 void LayerBuffer::BufferSource::clearTempBufferImage() const
 {
+    // delete the image
     EGLDisplay dpy(mLayer.mFlinger->graphicPlane(0).getEGLDisplay());
-    glDeleteTextures(1, &mTexture.name);
     eglDestroyImageKHR(dpy, mTexture.image);
+
+    // and the associated texture (recreate a name)
+    glDeleteTextures(1, &mTexture.name);
     Texture defaultTexture;
     mTexture = defaultTexture;
+    mTexture.name = mLayer.createTexture();
+
+    // and the associated buffer
     mTempGraphicBuffer.clear();
 }
 
@@ -578,9 +601,9 @@ void LayerBuffer::BufferSource::clearTempBufferImage() const
 
 LayerBuffer::OverlaySource::OverlaySource(LayerBuffer& layer,
         sp<OverlayRef>* overlayRef, 
-        uint32_t w, uint32_t h, int32_t format)
+        uint32_t w, uint32_t h, int32_t format, int32_t orientation)
     : Source(layer), mVisibilityChanged(false),
-    mOverlay(0), mOverlayHandle(0), mOverlayDevice(0)
+    mOverlay(0), mOverlayHandle(0), mOverlayDevice(0), mOrientation(orientation)
 {
     overlay_control_device_t* overlay_dev = mLayer.mFlinger->getOverlayEngine();
     if (overlay_dev == NULL) {
@@ -662,8 +685,12 @@ void LayerBuffer::OverlaySource::onVisibilityResolved(
             if (mOverlay) {
                 overlay_control_device_t* overlay_dev = mOverlayDevice;
                 overlay_dev->setPosition(overlay_dev, mOverlay, x,y,w,h);
+                // we need to combine the layer orientation and the
+                // user-requested orientation.
+                Transform finalTransform = Transform(mOrientation) *
+                        Transform(mLayer.getOrientation());
                 overlay_dev->setParameter(overlay_dev, mOverlay,
-                        OVERLAY_TRANSFORM, mLayer.getOrientation());
+                        OVERLAY_TRANSFORM, finalTransform.getOrientation());
                 overlay_dev->commit(overlay_dev, mOverlay);
             }
         }

@@ -19,7 +19,7 @@
 
 <merge xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <com.android.common.widget.NumberPickerButton android:id="@+id/increment"
+    <NumberPickerButton android:id="@+id/increment"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/timepicker_up_btn" />
@@ -34,7 +34,7 @@
         android:textSize="30sp"
         android:background="@drawable/timepicker_input" />
 
-    <com.android.common.widget.NumberPickerButton android:id="@+id/decrement"
+    <NumberPickerButton android:id="@+id/decrement"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/timepicker_down_btn" />

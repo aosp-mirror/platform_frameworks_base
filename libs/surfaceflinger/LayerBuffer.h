@@ -74,7 +74,8 @@ public:
     status_t registerBuffers(const ISurface::BufferHeap& buffers);
     void postBuffer(ssize_t offset);
     void unregisterBuffers();
-    sp<OverlayRef> createOverlay(uint32_t w, uint32_t h, int32_t format);
+    sp<OverlayRef> createOverlay(uint32_t w, uint32_t h, int32_t format,
+            int32_t orientation);
     
     sp<Source> getSource() const;
     sp<Source> clearSource();
@@ -150,7 +151,7 @@ private:
     public:
         OverlaySource(LayerBuffer& layer,
                 sp<OverlayRef>* overlayRef, 
-                uint32_t w, uint32_t h, int32_t format);
+                uint32_t w, uint32_t h, int32_t format, int32_t orientation);
         virtual ~OverlaySource();
         virtual void onDraw(const Region& clip) const;
         virtual void onTransaction(uint32_t flags);
@@ -183,6 +184,7 @@ private:
         int32_t mFormat;
         int32_t mWidthStride;
         int32_t mHeightStride;
+        int32_t mOrientation;
         mutable Mutex mOverlaySourceLock;
         bool mInitialized;
     };
@@ -200,7 +202,7 @@ private:
         virtual void unregisterBuffers();
         
         virtual sp<OverlayRef> createOverlay(
-                uint32_t w, uint32_t h, int32_t format);
+                uint32_t w, uint32_t h, int32_t format, int32_t orientation);
     private:
         sp<LayerBuffer> getOwner() const {
             return static_cast<LayerBuffer*>(Surface::getOwner().get());

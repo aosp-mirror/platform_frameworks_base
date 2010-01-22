@@ -46,7 +46,7 @@ struct AwesomePlayer {
     AwesomePlayer();
     ~AwesomePlayer();
 
-    void setListener(const sp<MediaPlayerBase> &listener);
+    void setListener(const wp<MediaPlayerBase> &listener);
 
     status_t setDataSource(const char *uri);
     status_t setDataSource(int fd, int64_t offset, int64_t length);
@@ -82,7 +82,7 @@ private:
 
     OMXClient mClient;
     TimedEventQueue mQueue;
-    sp<MediaPlayerBase> mListener;
+    wp<MediaPlayerBase> mListener;
 
     sp<ISurface> mISurface;
     sp<MediaPlayerBase::AudioSink> mAudioSink;
@@ -132,6 +132,8 @@ private:
 
     static void AudioNotify(void *me, int what);
     void onStreamDone();
+
+    void notifyListener_l(int msg);
 
     AwesomePlayer(const AwesomePlayer &);
     AwesomePlayer &operator=(const AwesomePlayer &);

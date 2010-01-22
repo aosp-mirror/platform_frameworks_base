@@ -169,7 +169,8 @@ class PowerManagerService extends IPowerManager.Stub
     private boolean mProximitySensorActive = false;
     private int mProximityPendingValue = -1; // -1 == nothing, 0 == inactive, 1 == active
     private long mLastProximityEventTime;
-    private int mTotalDelaySetting;
+    private int mScreenOffTimeoutSetting;
+    private int mMaximumScreenOffTimeout = Integer.MAX_VALUE;
     private int mKeylightDelay;
     private int mDimDelay;
     private int mScreenOffDelay;
@@ -378,6 +379,16 @@ class PowerManagerService extends IPowerManager.Stub
                 Settings.System.STAY_ON_WHILE_PLUGGED_IN, val);
     }
 
+    public void setMaximumScreenOffTimeount(int timeMs) {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.WRITE_SECURE_SETTINGS, null);
+        synchronized (mLocks) {
+            mMaximumScreenOffTimeout = timeMs;
+            // recalculate everything
+            setScreenOffTimeoutsLocked();
+        }
+    }
+
     private class SettingsObserver implements Observer {
         private int getInt(String name) {
             return mSettings.getValues(name).getAsInteger(Settings.System.VALUE);
@@ -390,7 +401,7 @@ class PowerManagerService extends IPowerManager.Stub
                 updateWakeLockLocked();
 
                 // SCREEN_OFF_TIMEOUT
-                mTotalDelaySetting = getInt(SCREEN_OFF_TIMEOUT);
+                mScreenOffTimeoutSetting = getInt(SCREEN_OFF_TIMEOUT);
 
                  // DIM_SCREEN
                 //mDimScreen = getInt(DIM_SCREEN) != 0;
@@ -935,7 +946,8 @@ class PowerManagerService extends IPowerManager.Stub
         pw.println("  mPreventScreenOn=" + mPreventScreenOn
                 + "  mScreenBrightnessOverride=" + mScreenBrightnessOverride
                 + "  mButtonBrightnessOverride=" + mButtonBrightnessOverride);
-        pw.println("  mTotalDelaySetting=" + mTotalDelaySetting);
+        pw.println("  mScreenOffTimeoutSetting=" + mScreenOffTimeoutSetting
+                + " mMaximumScreenOffTimeout=" + mMaximumScreenOffTimeout);
         pw.println("  mLastScreenOnTime=" + mLastScreenOnTime);
         pw.println("  mBroadcastWakeLock=" + mBroadcastWakeLock);
         pw.println("  mStayOnWhilePluggedInScreenDimLock=" + mStayOnWhilePluggedInScreenDimLock);
@@ -2285,7 +2297,10 @@ class PowerManagerService extends IPowerManager.Stub
             mDimDelay = -1;
             mScreenOffDelay = 0;
         } else {
-            int totalDelay = mTotalDelaySetting;
+            int totalDelay = mScreenOffTimeoutSetting;
+            if (totalDelay > mMaximumScreenOffTimeout) {
+                totalDelay = mMaximumScreenOffTimeout;
+            }
             mKeylightDelay = LONG_KEYLIGHT_DELAY;
             if (totalDelay < 0) {
                 mScreenOffDelay = Integer.MAX_VALUE;

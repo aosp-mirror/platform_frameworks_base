@@ -91,6 +91,10 @@ class NotificationManagerService extends INotificationManager.Stub
     private LightsService.Light mNotificationLight;
     private LightsService.Light mAttentionLight;
 
+    private int mDefaultNotificationColor;
+    private int mDefaultNotificationLedOn;
+    private int mDefaultNotificationLedOff;
+
     private NotificationRecord mSoundNotification;
     private AsyncPlayer mSound;
     private boolean mSystemReady;
@@ -397,6 +401,14 @@ class NotificationManagerService extends INotificationManager.Stub
         mBatteryLight = lights.getLight(LightsService.LIGHT_ID_BATTERY);
         mNotificationLight = lights.getLight(LightsService.LIGHT_ID_NOTIFICATIONS);
         mAttentionLight = lights.getLight(LightsService.LIGHT_ID_ATTENTION);
+
+        Resources resources = mContext.getResources();
+        mDefaultNotificationColor = resources.getColor(
+                com.android.internal.R.color.config_defaultNotificationColor);
+        mDefaultNotificationLedOn = resources.getInteger(
+                com.android.internal.R.integer.config_defaultNotificationLedOn);
+        mDefaultNotificationLedOff = resources.getInteger(
+                com.android.internal.R.integer.config_defaultNotificationLedOff);
 
         // Don't start allowing notifications until the setup wizard has run once.
         // After that, including subsequent boots, init with notifications turned on.
@@ -1024,14 +1036,25 @@ class NotificationManagerService extends INotificationManager.Stub
         }
 
         // we only flash if screen is off and persistent pulsing is enabled
-        if (mLedNotification == null || mScreenOn || !mNotificationPulseEnabled) {
+        if (mLedNotification == null || mScreenOn) {
             mNotificationLight.turnOff();
         } else {
-            mNotificationLight.setFlashing(
-                    mLedNotification.notification.ledARGB,
-                    LightsService.LIGHT_FLASH_TIMED,
-                    mLedNotification.notification.ledOnMS,
-                    mLedNotification.notification.ledOffMS);
+            int ledARGB = mLedNotification.notification.ledARGB;
+            int ledOnMS = mLedNotification.notification.ledOnMS;
+            int ledOffMS = mLedNotification.notification.ledOffMS;
+            if ((mLedNotification.notification.defaults & Notification.DEFAULT_LIGHTS) != 0) {
+                ledARGB = mDefaultNotificationColor;
+                ledOnMS = mDefaultNotificationLedOn;
+                ledOffMS = mDefaultNotificationLedOff;
+            }
+            if (mNotificationPulseEnabled) {
+                // pulse repeatedly
+                mNotificationLight.setFlashing(ledARGB, LightsService.LIGHT_FLASH_TIMED,
+                        ledOnMS, ledOffMS);
+            } else {
+                // pulse only once
+                mNotificationLight.pulse(ledARGB, ledOnMS);
+            }
         }
     }
 

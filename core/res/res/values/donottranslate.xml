@@ -20,4 +20,6 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <!-- Default text encoding for WebSettings. -->
     <string name="default_text_encoding">Latin-1</string>
+    <!-- @hide DO NOT TRANSLATE. Workaround for resource race condition in lockscreen. -->
+    <bool name="lockscreen_isPortrait">true</bool>
 </resources>

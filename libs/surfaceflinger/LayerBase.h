@@ -351,7 +351,7 @@ public:
         virtual void postBuffer(ssize_t offset);
         virtual void unregisterBuffers();
         virtual sp<OverlayRef> createOverlay(uint32_t w, uint32_t h,
-                int32_t format);
+                int32_t format, int32_t orientation);
 
     protected:
         friend class LayerBaseClient;

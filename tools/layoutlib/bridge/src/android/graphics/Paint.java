@@ -21,6 +21,7 @@ import android.text.SpannableStringBuilder;
 import android.text.SpannedString;
 import android.text.TextUtils;
 
+import java.awt.BasicStroke;
 import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.font.FontRenderContext;
@@ -127,6 +128,19 @@ public class Paint extends _Original_Paint {
             this.nativeInt = nativeInt;
         }
         final int nativeInt;
+
+        /** custom for layoutlib */
+        public int getJavaCap() {
+            switch (this) {
+                case BUTT:
+                    return BasicStroke.CAP_BUTT;
+                case ROUND:
+                    return BasicStroke.CAP_ROUND;
+                default:
+                case SQUARE:
+                    return BasicStroke.CAP_SQUARE;
+            }
+        }
     }
 
     /**
@@ -151,6 +165,19 @@ public class Paint extends _Original_Paint {
             this.nativeInt = nativeInt;
         }
         final int nativeInt;
+
+        /** custom for layoutlib */
+        public int getJavaJoin() {
+            switch (this) {
+                default:
+                case MITER:
+                    return BasicStroke.JOIN_MITER;
+                case ROUND:
+                    return BasicStroke.JOIN_ROUND;
+                case BEVEL:
+                    return BasicStroke.JOIN_BEVEL;
+            }
+        }
     }
 
     /**

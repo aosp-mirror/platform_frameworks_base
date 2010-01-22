@@ -77,10 +77,10 @@ public class DeviceAdmin extends BroadcastReceiver {
     /**
      * Action sent to a device administrator when the user has changed the
      * password of their device.  You can at this point check the characteristics
-     * of the new password with {@link DevicePolicyManager#getActivePasswordMode()
+     * of the new password with {@link DevicePolicyManager#getPasswordMode()
      * DevicePolicyManager.getActivePasswordMode()} and
-     * {@link DevicePolicyManager#getActiveMinimumPasswordLength()
-     * DevicePolicyManager.getActiveMinimumPasswordLength()}.  You will generally
+     * {@link DevicePolicyManager#getMinimumPasswordLength()
+     * DevicePolicyManager.getMinimumPasswordLength()}.  You will generally
      * handle this in {@link DeviceAdmin#onPasswordChanged(Context, Intent)}.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)

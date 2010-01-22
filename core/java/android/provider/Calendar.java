@@ -229,7 +229,7 @@ public final class Calendar {
          * The content:// style URL for this table
          */
         public static final Uri CONTENT_URI =
-            Uri.parse("content://calendar/calendars");
+            Uri.parse("content://" + AUTHORITY + "/calendars");
 
         /**
          * The default sort order for this table
@@ -332,7 +332,7 @@ public final class Calendar {
     public static final class Attendees implements BaseColumns,
             AttendeesColumns, EventsColumns {
         public static final Uri CONTENT_URI =
-                Uri.parse("content://calendar/attendees");
+                Uri.parse("content://" + AUTHORITY + "/attendees");
 
         // TODO: fill out this class when we actually start utilizing attendees
         // in the calendar application.
@@ -576,7 +576,8 @@ public final class Calendar {
         /**
          * The content:// style URL for this table
          */
-        public static final Uri CONTENT_URI = Uri.parse("content://calendar/event_entities");
+        public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY +
+                "/event_entities");
 
         /**
          * The name of the account instance to which this row belongs, which when paired with
@@ -914,10 +915,10 @@ public final class Calendar {
          * The content:// style URL for this table
          */
         public static final Uri CONTENT_URI =
-                Uri.parse("content://calendar/events");
+                Uri.parse("content://" + AUTHORITY + "/events");
 
         public static final Uri DELETED_CONTENT_URI =
-                Uri.parse("content://calendar/deleted_events");
+                Uri.parse("content://" + AUTHORITY + "/deleted_events");
 
         /**
          * The default sort order for this table
@@ -957,9 +958,10 @@ public final class Calendar {
         /**
          * The content:// style URL for this table
          */
-        public static final Uri CONTENT_URI = Uri.parse("content://calendar/instances/when");
+        public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY +
+                "/instances/when");
         public static final Uri CONTENT_BY_DAY_URI =
-            Uri.parse("content://calendar/instances/whenbyday");
+            Uri.parse("content://" + AUTHORITY + "/instances/whenbyday");
 
         /**
          * The default sort order for this table.
@@ -1075,7 +1077,8 @@ public final class Calendar {
     }
 
     public static final class EventDays implements EventDaysColumns {
-        public static final Uri CONTENT_URI = Uri.parse("content://calendar/instances/groupbyday");
+        public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY +
+                "/instances/groupbyday");
 
         public static final String[] PROJECTION = { STARTDAY, ENDDAY };
         public static final String SELECTION = "selected==1";
@@ -1134,7 +1137,7 @@ public final class Calendar {
 
     public static final class Reminders implements BaseColumns, RemindersColumns, EventsColumns {
         public static final String TABLE_NAME = "Reminders";
-        public static final Uri CONTENT_URI = Uri.parse("content://calendar/reminders");
+        public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/reminders");
     }
 
     public interface CalendarAlertsColumns {
@@ -1210,7 +1213,8 @@ public final class Calendar {
     public static final class CalendarAlerts implements BaseColumns,
             CalendarAlertsColumns, EventsColumns, CalendarsColumns {
         public static final String TABLE_NAME = "CalendarAlerts";
-        public static final Uri CONTENT_URI = Uri.parse("content://calendar/calendar_alerts");
+        public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY +
+                "/calendar_alerts");
 
         /**
          * This URI is for grouping the query results by event_id and begin
@@ -1219,7 +1223,7 @@ public final class Calendar {
          * instances of a repeating event will show up multiple times.
          */
         public static final Uri CONTENT_URI_BY_INSTANCE =
-            Uri.parse("content://calendar/calendar_alerts/by_instance");
+            Uri.parse("content://" + AUTHORITY + "/calendar_alerts/by_instance");
 
         private static final boolean DEBUG = true;
 
@@ -1404,7 +1408,7 @@ public final class Calendar {
    public static final class ExtendedProperties implements BaseColumns,
             ExtendedPropertiesColumns, EventsColumns {
         public static final Uri CONTENT_URI =
-                Uri.parse("content://calendar/extendedproperties");
+                Uri.parse("content://" + AUTHORITY + "/extendedproperties");
 
         // TODO: fill out this class when we actually start utilizing extendedproperties
         // in the calendar application.

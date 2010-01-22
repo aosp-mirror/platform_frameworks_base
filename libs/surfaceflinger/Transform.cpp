@@ -42,6 +42,17 @@ Transform::Transform(const Transform&  other)
 {
 }
 
+Transform::Transform(int32_t flags) {
+    mTransform.reset();
+    int sx = (flags & FLIP_H) ? -1 : 1;
+    int sy = (flags & FLIP_V) ? -1 : 1;
+    if (flags & ROT_90) {
+        this->set(0, -sy, sx, 0);
+    } else {
+        this->set(sx, 0, 0, sy);
+    }
+}
+
 Transform::~Transform() {
 }
 

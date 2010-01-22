@@ -46,7 +46,6 @@ public class Policy {
         "com.android.phone",
         "com.google.android.apps.maps.FriendService",
         "com.google.android.apps.maps.LocationFriendService",
-        "com.google.android.googleapps",
         "com.google.process.gapps",
         "android.tts"
     ));

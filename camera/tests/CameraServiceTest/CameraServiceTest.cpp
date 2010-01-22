@@ -283,7 +283,7 @@ public:
     virtual void postBuffer(ssize_t offset);
     virtual void unregisterBuffers();
     virtual sp<OverlayRef> createOverlay(
-            uint32_t w, uint32_t h, int32_t format);
+            uint32_t w, uint32_t h, int32_t format, int32_t orientation);
     virtual sp<GraphicBuffer> requestBuffer(int bufferIdx, int usage);
 
     // new functions
@@ -346,7 +346,8 @@ void MSurface::waitUntil(int c0, int c1, int c2) {
     }
 }
 
-sp<OverlayRef> MSurface::createOverlay(uint32_t w, uint32_t h, int32_t format) {
+sp<OverlayRef> MSurface::createOverlay(uint32_t w, uint32_t h, int32_t format,
+        int32_t orientation) {
     // We don't expect this to be called in current hardware.
     ASSERT(0);
     sp<OverlayRef> dummy;

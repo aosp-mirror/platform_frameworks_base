@@ -235,6 +235,7 @@ CameraService::Client::Client(const sp<CameraService>& cameraService,
 
     // Callback is disabled by default
     mPreviewCallbackFlag = FRAME_CALLBACK_FLAG_NOOP;
+    mOrientation = 0;
     cameraService->incUsers();
     LOGV("Client::Client X (pid %d)", callingPid);
 }
@@ -570,7 +571,8 @@ status_t CameraService::Client::setOverlay()
             // wait in the createOverlay call if the previous overlay is in the 
             // process of being destroyed.
             for (int retry = 0; retry < 50; ++retry) {
-                mOverlayRef = mSurface->createOverlay(w, h, OVERLAY_FORMAT_DEFAULT);
+                mOverlayRef = mSurface->createOverlay(w, h, OVERLAY_FORMAT_DEFAULT,
+                                                      mOrientation);
                 if (mOverlayRef != NULL) break;
                 LOGW("Overlay create failed - retrying");
                 usleep(20000);
@@ -601,15 +603,9 @@ status_t CameraService::Client::registerPreviewBuffers()
     CameraParameters params(mHardware->getParameters());
     params.getPreviewSize(&w, &h);
 
-    uint32_t transform = 0;
-    if (params.getOrientation() ==
-        CameraParameters::CAMERA_ORIENTATION_PORTRAIT) {
-      LOGV("portrait mode");
-      transform = ISurface::BufferHeap::ROT_90;
-    }
     ISurface::BufferHeap buffers(w, h, w, h,
                                  PIXEL_FORMAT_YCbCr_420_SP,
-                                 transform,
+                                 mOrientation,
                                  0,
                                  mHardware->getPreviewHeap());
 
@@ -919,12 +915,6 @@ void CameraService::Client::handleShutter(
     if (mSurface != 0 && !mUseOverlay) {
         int w, h;
         CameraParameters params(mHardware->getParameters());
-        uint32_t transform = 0;
-        if (params.getOrientation() == CameraParameters::CAMERA_ORIENTATION_PORTRAIT) {
-            LOGV("portrait mode");
-            transform = ISurface::BufferHeap::ROT_90;
-        }
-
         if (size == NULL) {
             params.getPictureSize(&w, &h);
         } else {
@@ -935,7 +925,7 @@ void CameraService::Client::handleShutter(
             LOGV("Snapshot image width=%d, height=%d", w, h);
         }
         ISurface::BufferHeap buffers(w, h, w, h,
-            PIXEL_FORMAT_YCbCr_420_SP, transform, 0, mHardware->getRawHeap());
+            PIXEL_FORMAT_YCbCr_420_SP, mOrientation, 0, mHardware->getRawHeap());
 
         mSurface->registerBuffers(buffers);
     }
@@ -1200,6 +1190,15 @@ status_t CameraService::Client::setParameters(const String8& params)
     }
 
     CameraParameters p(params);
+
+    // The orientation parameter is actually for CameraService, not for the camera driver.
+    if (p.getOrientation() == CameraParameters::CAMERA_ORIENTATION_PORTRAIT) {
+        LOGV("portrait mode");
+        mOrientation = ISurface::BufferHeap::ROT_90;
+    } else {
+        mOrientation = 0;
+    }
+
     return mHardware->setParameters(p);
 }
 
