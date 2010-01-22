@@ -41,7 +41,6 @@ public class SettingsHelper {
     private AudioManager mAudioManager;
     private IContentService mContentService;
     private IPowerManager mPowerManager;
-    private static final String[] PROVIDERS = { "gmail-ls", "calendar", "contacts" };
 
     private boolean mSilent;
     private boolean mVibrate;
