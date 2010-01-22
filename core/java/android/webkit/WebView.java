@@ -5796,6 +5796,13 @@ public class WebView extends AbsoluteLayout
                         }
                         mFullScreenHolder = new PluginFullScreenHolder(
                                 WebView.this, data.mNpp);
+                        // as we are sharing the View between full screen and
+                        // embedded mode, we have to remove the
+                        // AbsoluteLayout.LayoutParams set by embedded mode to
+                        // ViewGroup.LayoutParams before adding it to the dialog
+                        data.mView.setLayoutParams(new ViewGroup.LayoutParams(
+                                ViewGroup.LayoutParams.FILL_PARENT,
+                                ViewGroup.LayoutParams.FILL_PARENT));
                         mFullScreenHolder.setContentView(data.mView);
                         mFullScreenHolder.setCancelable(false);
                         mFullScreenHolder.setCanceledOnTouchOutside(false);
