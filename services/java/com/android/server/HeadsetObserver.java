@@ -103,6 +103,7 @@ class HeadsetObserver extends UEventObserver {
         // Retain only relevant bits
         int headsetState = newState & SUPPORTED_HEADSETS;
         int newOrOld = headsetState | mHeadsetState;
+        int delay = 0;
         // reject all suspect transitions: only accept state changes from:
         // - a: 0 heaset to 1 headset
         // - b: 1 headset to 0 headset
@@ -117,21 +118,25 @@ class HeadsetObserver extends UEventObserver {
         if (headsetState == 0) {
             Intent intent = new Intent(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
             mContext.sendBroadcast(intent);
-
             // It can take hundreds of ms flush the audio pipeline after
             // apps pause audio playback, but audio route changes are
             // immediate, so delay the route change by 1000ms.
             // This could be improved once the audio sub-system provides an
             // interface to clear the audio pipeline.
-            mWakeLock.acquire();
-            mHandler.sendMessageDelayed(mHandler.obtainMessage(0,
-                                                               mHeadsetState,
-                                                               mPrevHeadsetState,
-                                                               mHeadsetName),
-                                        1000);
+            delay = 1000;
         } else {
-            sendIntents(mHeadsetState, mPrevHeadsetState, mHeadsetName);
+            // Insert the same delay for headset connection so that the connection event is not
+            // broadcast before the disconnection event in case of fast removal/insertion
+            if (mHandler.hasMessages(0)) {
+                delay = 1000;
+            }
         }
+        mWakeLock.acquire();
+        mHandler.sendMessageDelayed(mHandler.obtainMessage(0,
+                                                           mHeadsetState,
+                                                           mPrevHeadsetState,
+                                                           mHeadsetName),
+                                    delay);
     }
 
     private synchronized final void sendIntents(int headsetState, int prevHeadsetState, String headsetName) {
