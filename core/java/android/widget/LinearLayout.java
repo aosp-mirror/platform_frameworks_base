@@ -441,7 +441,7 @@ public class LinearLayout extends ViewGroup {
             i += getChildrenSkipCount(child, i);
         }
 
-        if (useLargestChild) {
+        if (useLargestChild && heightMode == MeasureSpec.AT_MOST) {
             mTotalLength = 0;
 
             for (int i = 0; i < count; ++i) {
