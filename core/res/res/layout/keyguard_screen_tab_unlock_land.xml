@@ -27,7 +27,7 @@
     android:orientation="horizontal"
     android:background="#70000000"
     android:id="@+id/root">
-     
+
     <!-- left side -->
     <RelativeLayout
             android:layout_width="0dip"
@@ -42,6 +42,8 @@
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
             android:layout_marginTop="20dip"
+            android:singleLine="true"
+            android:ellipsize="marquee"
             android:textAppearance="?android:attr/textAppearanceMedium"
             />
 

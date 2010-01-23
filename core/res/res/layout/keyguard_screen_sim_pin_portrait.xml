@@ -26,8 +26,7 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:orientation="vertical"
-            >
+        android:orientation="vertical">
 
         <!-- header text ('Enter Pin Code') -->
         <TextView android:id="@+id/headerText"
@@ -35,9 +34,20 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="9dip"
             android:gravity="center"
-            android:lines="2"
+            android:singleLine="true"
             android:textAppearance="?android:attr/textAppearanceLarge"
-            />
+        />
+
+        <!-- Carrier info -->
+        <TextView android:id="@+id/carrier"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="9dip"
+            android:gravity="center"
+            android:singleLine="true"
+            android:ellipsize="marquee"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+        />
 
         <RelativeLayout
             android:layout_width="fill_parent"
