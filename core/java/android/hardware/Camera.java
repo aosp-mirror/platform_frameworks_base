@@ -658,6 +658,25 @@ public class Camera {
             width = w;
             height = h;
         }
+        /**
+         * Compares {@code obj} to this size.
+         *
+         * @param obj the object to compare this size with.
+         * @return {@code true} if the width and height of {@code obj} is the
+         *         same as those of this size. {@code false} otherwise.
+         */
+        @Override
+        public boolean equals(Object obj) {
+            if (!(obj instanceof Size)) {
+                return false;
+            }
+            Size s = (Size) obj;
+            return width == s.width && height == s.height;
+        }
+        @Override
+        public int hashCode() {
+            return width * 32713 + height;
+        }
         /** width of the picture */
         public int width;
         /** height of the picture */
@@ -685,6 +704,7 @@ public class Camera {
         private static final String KEY_PREVIEW_FRAME_RATE = "preview-frame-rate";
         private static final String KEY_PICTURE_SIZE = "picture-size";
         private static final String KEY_PICTURE_FORMAT = "picture-format";
+        private static final String KEY_JPEG_THUMBNAIL_SIZE = "jpeg-thumbnail-size";
         private static final String KEY_JPEG_THUMBNAIL_WIDTH = "jpeg-thumbnail-width";
         private static final String KEY_JPEG_THUMBNAIL_HEIGHT = "jpeg-thumbnail-height";
         private static final String KEY_JPEG_THUMBNAIL_QUALITY = "jpeg-thumbnail-quality";
@@ -954,7 +974,9 @@ public class Camera {
         }
 
         /**
-         * Sets the dimensions for EXIF thumbnail in Jpeg picture.
+         * Sets the dimensions for EXIF thumbnail in Jpeg picture. If
+         * applications set both width and height to 0, EXIF will not contain
+         * thumbnail.
          *
          * @param width  the width of the thumbnail, in pixels
          * @param height the height of the thumbnail, in pixels
@@ -973,6 +995,18 @@ public class Camera {
         public Size getJpegThumbnailSize() {
             return new Size(getInt(KEY_JPEG_THUMBNAIL_WIDTH),
                             getInt(KEY_JPEG_THUMBNAIL_HEIGHT));
+        }
+
+        /**
+         * Gets the supported jpeg thumbnail sizes.
+         *
+         * @return a List of Size object. This method will always return a list
+         *         with at least two elements. Size 0,0 (no thumbnail) is always
+         *         supported.
+         */
+        public List<Size> getSupportedJpegThumbnailSizes() {
+            String str = get(KEY_JPEG_THUMBNAIL_SIZE + SUPPORTED_VALUES_SUFFIX);
+            return splitSize(str);
         }
 
         /**
