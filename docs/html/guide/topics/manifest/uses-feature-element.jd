@@ -14,23 +14,44 @@ page.title=&lt;uses-feature&gt;
 <dd><code><a
 href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></code></dd>
 
+ <div class="sidebox-wrapper"> 
+  <img id="rule" src="{@docRoot}assets/images/grad-rule-qv.png"> 
+  <div id="qv-sub-rule"> 
+    <img src="{@docRoot}assets/images/icon_market.jpg" style="float:left;margin:0;padding:0;"> 
+    <p style="color:#669999;">Android Market and &lt;uses-feature&gt; elements</p> 
+    <p>Android Market filters the applications that are visible to users, so
+that users can see and download only those applications that are compatible with their
+devices. One of the ways Market filters applications is by feature compatibility.</p>
+
+<p style="margin-top:1em;">To do this, Market checks the
+<code>&lt;uses-feature&gt;</code> elements in each application's manifest, to
+establish the app's feature needs. Market then shows or hides the application to
+each user, based on a comparison with the features available on the user's
+device. </p>
+
+<p style="margin-top:1em;">By specifying the features your application requires,
+you enable Android Market to present your application only to users whose
+devices meet the application's feature requirements, rather than presenting it
+to all users. </p>
+</div>
+</div>
+
 <dt>description:</dt>
-<dd>This element declares a specific feature used by the application.
-Android provides some features that may not be equally supported by all
-Android devices. In a manner similar to the <code><a
-href="uses-sdk-element.html">&lt;uses-sdk></a></code>
-element, this element allows an application to specify which device-variable
-features it uses. In this way, the application
-will not be installed on devices that do not offer the feature.</p>
+<dd>This element declares a specific feature used by the application. Android
+provides some features that may not be equally supported by all Android devices.
+In a manner similar to the <a
+href="uses-sdk-element.html">{@code &lt;uses-sdk>}</a> element, this element
+allows an application to specify which device-variable features it uses. For
+example, an application might specify that it requires a camera with auto-focus
+capabilities.</p>
 
-<p>For example, an application might specify that it requires a camera with auto-focus capabilities.
-If a device does not provide a camera with auto-focus, then it will not allow
-installation of the application.</p>
-
-<p>In order to maintain strict device compatibility, it's very important that you use
-this element to declare all applicable features (listed below) that your application uses. Failure
-to declare a feature may result in your application being installed on a device
-that does not support the feature and your application failing.</p>
+<p>Declaring a {@code &lt;uses-feature>} element is informational only, meaning
+that the Android system itself does not check for matching feature support on
+the device before installing an application. However, note that other services
+(such as Android Market) or applications may check your application's 
+{@code &lt;uses-feature>} declarations as part of handling or interacting 
+with your application. For this reason, it's very important that you declare all of
+the features (from the list below) that your application uses. </p>
 
 <p>For some features, there may exist a specfic attribute that allows you to define
 a version of the feature, such as the version of Open GL used (declared with
@@ -38,11 +59,12 @@ a version of the feature, such as the version of Open GL used (declared with
 exist for a device, such as a camera, are declared using the
 <a href="#name">{@code name}</a> attribute.</p>
 
-<p>Any software or hardware features that may vary among Android-powered
-devices will be listed on this page among the attributes below. If you see any features
-here that you use in your application, you should include a {@code
-&lt;uses-feature>} element for each one. For example, if your application uses the device
-camera, then you should include the following in your {@code AndroidManifest.xml}:</p>
+<p>Any software or hardware features that may vary among Android-powered devices
+will be listed on this page among the attributes below. If you see any features
+here that you use in your application, you should include a
+{@code &lt;uses-feature>} element for each one. For example, if your
+application uses the device camera, then you should include the following in
+your {@code AndroidManifest.xml}:</p>
 
 <pre>
 &lt;uses-feature android:name="android.hardware.camera" />
@@ -77,10 +99,29 @@ instance of this element.</p>
 <dd>
 <dl class="attr">
   <dt><a name="glEsVersion"></a>{@code android:glEsVersion}</dt>
-  <dd>The GLES version needed by the application.
-     The higher 16 bits represent the major number and the lower 16 bits
-     represent the minor number. For example, for GL 1.2,
-     the value should be set as {@code 0x00010002}.
+  <dd>The OpenGL ES version required by the application. The higher 16 bits
+represent the major number and the lower 16 bits represent the minor number. For
+example, to specify OpenGL ES version 2.0, you would set the value as
+"0x00020000". To specify OpenGL ES 2.1, if/when such a version were made
+available, you would set the value as "0x00020001".
+
+  <p>An application should specify at most one <code>android:glEsVersion</code>
+attribute in its manifest. If it specifies more than one, the
+<code>android:glEsVersion</code> with the numerically highest value is used and
+any other values are ignored.</p>
+
+  <p>If an application does not specify an <code>android:glEsVersion</code>
+attribute, then it is assumed that the application requires only OpenGL ES 1.0,
+which is supported by all Android-powered devices.</p>
+
+  <p>An application can assume that if a platform supports a given OpenGL ES
+version, it also supports all numerically lower OpenGL ES versions. Therefore,
+an application that requires both OpenGL ES 1.0 and OpenGL ES 2.0 must specify
+that it requires OpenGL ES 2.0.</p>
+
+  <p>An application that can work with any of several OpenGL ES versions should
+only specify the numerically lowest version of OpenGL ES that it requires. (It
+can check at run-time whether a higher level of OpenGL ES is available.)</p>
   </dd>
 
   <dt><a name="name"></a>{@code android:name}</dt>
@@ -90,7 +131,7 @@ instance of this element.</p>
   <table>
     <tr> 
        <th>Feature</th>
-       <th>Value</th> 
+       <th>Attribute Value</th> 
        <th>Description</th> 
     </tr><tr>
        <td rowspan="2">Camera</td>
@@ -128,6 +169,11 @@ instance of this element.</p>
       <td>Light sensor</td>
       <td>{@code android.hardware.sensor.light}</td>
       <td>The application requires a device with a light sensor.
+      </td>
+    </tr><tr>
+      <td>Live Wallpaper</td>
+      <td>{@code android.software.live_wallpaper}</td>
+      <td>The application uses or provides Live Wallpapers and should be installed only on devices that support Live Wallpapers.
       </td>
     </tr><tr>
       <td>Proximity sensor</td>

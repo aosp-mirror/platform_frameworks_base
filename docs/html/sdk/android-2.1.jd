@@ -218,6 +218,21 @@ href="{@docRoot}guide/appendix/api-levels.html">API Levels</a> document. </p>
 <li>Updated {@link android.app.WallpaperManager}.</li>
 </ul>
 
+<p>Additionally, if your application uses or provides Live Wallpapers, you must
+remember to add a <a
+href="{@docRoot}guide/topics/manifest/uses-feature-element.html"><code>&lt;uses-feature></code></a>
+ element to the application's manifest, declaring the attribute
+<code>android:name="android.software.live_wallpaper"</code>. For example:</p>
+
+<pre class="no-pretty-print">
+&lt;uses-feature android:name="android.software.live_wallpaper" />
+</pre>
+
+<p>When you've published your application, Android Market checks for the
+presence of this element and uses it as a filter, ensuring that your application
+is not made available to users whose devices do not support Live Wallpapers.
+</p>
+
 <h4>Telephony</h4>
 
 <ul>
