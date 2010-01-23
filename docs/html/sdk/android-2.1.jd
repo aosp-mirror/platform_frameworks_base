@@ -76,28 +76,28 @@ built-in applications:</p>
 	<li>Alarm Clock</li>
 	<li>Browser</li>
 	<li>Calculator</li>
-	<li>Camcorder</li>
 	<li>Camera</li>
 	<li>Contacts</li>
 	<li>Custom Locale (developer app)</li>
 	<li>Dev Tools (developer app)</li>
-	<li>Dialer</li>
+    <li>Email</li>
 	</ul>
 </td>
 <td style="border:0;padding-bottom:0;margin-bottom:0;padding-left:5em;">
 	<ul>
-	<li>Email</li>
+
 	<li>Gallery</li>
-	<li>Gestures Builder</li>
-	<li>IME for Japanese text input</li>
+	<li>IMEs for Japanese, Chinese, and Latin text input</li>
 	<li>Messaging</li>
 	<li>Music</li>
+	<li>Phone</li>
 	<li>Settings</li>
 	<li>Spare Parts (developer app)</li>
 	</ul>
 </td>
 </tr>
 </table>
+
 
 <h2 id="locs" style="margin-top:.75em;">Locales</h2>
 
