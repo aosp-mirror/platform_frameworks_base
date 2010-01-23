@@ -55,8 +55,11 @@ public:
     class BufferHeap {
     public:
         enum {
-            /* rotate source image 90 degrees */
+            /* rotate source image */
+            ROT_0     = 0,
             ROT_90    = HAL_TRANSFORM_ROT_90,
+            ROT_180   = HAL_TRANSFORM_ROT_180,
+            ROT_270   = HAL_TRANSFORM_ROT_270,
         };
         BufferHeap();
         
