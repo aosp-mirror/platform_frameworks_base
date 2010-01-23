@@ -25,6 +25,7 @@ import android.content.res.Resources;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.net.InterfaceConfiguration;
+import android.net.INetworkManagementEventObserver;
 import android.os.INetworkManagementService;
 import android.os.Handler;
 import android.text.TextUtils;
@@ -70,6 +71,8 @@ class NetworkManagementService extends INetworkManagementService.Stub {
      */
     private NativeDaemonConnector mConnector;
 
+    private ArrayList<INetworkManagementEventObserver> mObservers;
+
     /**
      * Constructs a new NetworkManagementService instance
      *
@@ -78,11 +81,63 @@ class NetworkManagementService extends INetworkManagementService.Stub {
     private NetworkManagementService(Context context) {
         mContext = context;
 
+        mObservers = new ArrayList<INetworkManagementEventObserver>();
+
         mConnector = new NativeDaemonConnector(
                 new NetdCallbackReceiver(), "netd", 10, "NetdConnector");
         Thread thread = new Thread(mConnector, NativeDaemonConnector.class.getName());
         thread.start();
     }
+
+    public void registerObserver(INetworkManagementEventObserver obs) {
+        Log.d(TAG, "Registering observer");
+        mObservers.add(obs);
+    }
+
+    public void unregisterObserver(INetworkManagementEventObserver obs) {
+        Log.d(TAG, "Unregistering observer");
+        mObservers.remove(mObservers.indexOf(obs));
+    }
+
+    /**
+     * Notify our observers of an interface link status change
+     */
+    private void notifyInterfaceLinkStatusChanged(String iface, boolean link) {
+        for (INetworkManagementEventObserver obs : mObservers) {
+            try {
+                obs.interfaceLinkStatusChanged(iface, link);
+            } catch (Exception ex) {
+                Log.w(TAG, "Observer notifier failed", ex);
+            }
+        }
+    }
+
+    /**
+     * Notify our observers of an interface addition.
+     */
+    private void notifyInterfaceAdded(String iface) {
+        for (INetworkManagementEventObserver obs : mObservers) {
+            try {
+                obs.interfaceAdded(iface);
+            } catch (Exception ex) {
+                Log.w(TAG, "Observer notifier failed", ex);
+            }
+        }
+    }
+
+    /**
+     * Notify our observers of an interface removal.
+     */
+    private void notifyInterfaceRemoved(String iface) {
+        for (INetworkManagementEventObserver obs : mObservers) {
+            try {
+                obs.interfaceRemoved(iface);
+            } catch (Exception ex) {
+                Log.w(TAG, "Observer notifier failed", ex);
+            }
+        }
+    }
+
 
     //
     // Netd Callback handling

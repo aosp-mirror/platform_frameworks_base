@@ -18,6 +18,7 @@
 package android.os;
 
 import android.net.InterfaceConfiguration;
+import android.net.INetworkManagementEventObserver;
 
 /**
  * @hide
@@ -27,6 +28,16 @@ interface INetworkManagementService
     /**
      ** GENERAL
      **/
+
+    /**
+     * Register an observer to receive events
+     */
+    void registerObserver(INetworkManagementEventObserver obs);
+
+    /**
+     * Unregister an observer from receiving events.
+     */
+    void unregisterObserver(INetworkManagementEventObserver obs);
 
     /**
      * Returns a list of currently known network interfaces
