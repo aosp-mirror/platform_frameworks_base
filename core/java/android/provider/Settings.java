@@ -1130,19 +1130,16 @@ public final class Settings {
 
         /**
          * Control whether to enable automatic brightness mode.
-         * @hide
          */
         public static final String SCREEN_BRIGHTNESS_MODE = "screen_brightness_mode";
 
         /**
          * SCREEN_BRIGHTNESS_MODE value for manual mode.
-         * @hide
          */
         public static final int SCREEN_BRIGHTNESS_MODE_MANUAL = 0;
 
         /**
          * SCREEN_BRIGHTNESS_MODE value for manual mode.
-         * @hide
          */
         public static final int SCREEN_BRIGHTNESS_MODE_AUTOMATIC = 1;
 
