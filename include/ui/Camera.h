@@ -82,6 +82,7 @@ enum {
 enum {
     CAMERA_CMD_START_SMOOTH_ZOOM     = 1,
     CAMERA_CMD_STOP_SMOOTH_ZOOM      = 2,
+    CAMERA_CMD_SET_DISPLAY_ORIENTATION = 3,
 };
 
 // camera fatal errors
@@ -209,4 +210,3 @@ private:
 }; // namespace android
 
 #endif
-

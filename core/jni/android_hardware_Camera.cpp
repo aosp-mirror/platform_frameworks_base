@@ -546,6 +546,18 @@ static void android_hardware_Camera_stopSmoothZoom(JNIEnv *env, jobject thiz)
     }
 }
 
+static void android_hardware_Camera_setDisplayOrientation(JNIEnv *env, jobject thiz,
+        jint value)
+{
+    LOGV("setDisplayOrientation");
+    sp<Camera> camera = get_native_camera(env, thiz, NULL);
+    if (camera == 0) return;
+
+    if (camera->sendCommand(CAMERA_CMD_SET_DISPLAY_ORIENTATION, value, 0) != NO_ERROR) {
+        jniThrowException(env, "java/lang/RuntimeException", "set display orientation failed");
+    }
+}
+
 //-------------------------------------------------
 
 static JNINativeMethod camMethods[] = {
@@ -603,6 +615,9 @@ static JNINativeMethod camMethods[] = {
   { "stopSmoothZoom",
     "()V",
     (void *)android_hardware_Camera_stopSmoothZoom },
+  { "setDisplayOrientation",
+    "(I)V",
+    (void *)android_hardware_Camera_setDisplayOrientation },
 };
 
 struct field {
