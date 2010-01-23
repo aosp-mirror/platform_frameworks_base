@@ -99,6 +99,11 @@ interface IMountService
     void unmountSecureContainer(String id);
 
     /*
+     * Rename an unmounted secure container.
+     */
+    void renameSecureContainer(String oldId, String newId);
+
+    /*
      * Returns the filesystem path of a mounted secure container.
      */
     String getSecureContainerPath(String id);
