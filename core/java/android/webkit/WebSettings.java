@@ -412,6 +412,7 @@ public class WebSettings {
      */
     public void setSupportZoom(boolean support) {
         mSupportZoom = support;
+        mWebView.updateMultiTouchSupport(mContext);
     }
 
     /**
@@ -426,6 +427,7 @@ public class WebSettings {
      */
     public void setBuiltInZoomControls(boolean enabled) {
         mBuiltInZoomControls = enabled;
+        mWebView.updateMultiTouchSupport(mContext);
     }
     
     /**
