@@ -22,6 +22,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.BluetoothPbap;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -30,7 +31,10 @@ import android.content.res.TypedArray;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.Binder;
 import android.os.Handler;
@@ -109,6 +113,7 @@ public class StatusBarPolicy {
     private int mBatteryViewSequence;
     private boolean mBatteryShowLowOnEndCall = false;
     private static final boolean SHOW_LOW_BATTERY_WARNING = true;
+    private static final boolean SHOW_BATTERY_WARNINGS_IN_CALL = true;
 
     // phone
     private TelephonyManager mPhone;
@@ -686,7 +691,7 @@ public class StatusBarPolicy {
                       + " mBatteryShowLowOnEndCall=" + mBatteryShowLowOnEndCall);
             }
 
-            if (mPhoneState == TelephonyManager.CALL_STATE_IDLE) {
+            if (SHOW_BATTERY_WARNINGS_IN_CALL || mPhoneState == TelephonyManager.CALL_STATE_IDLE) {
                 showLowBatteryWarning();
             } else {
                 mBatteryShowLowOnEndCall = true;
@@ -809,6 +814,21 @@ public class StatusBarPolicy {
             d.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
             d.show();
             mLowBatteryDialog = d;
+        }
+
+        final ContentResolver cr = mContext.getContentResolver();
+        if (Settings.System.getInt(cr,
+                Settings.System.POWER_SOUNDS_ENABLED, 1) == 1) 
+        {
+            final String soundPath = Settings.System.getString(cr,
+                Settings.System.LOW_BATTERY_SOUND);
+            if (soundPath != null) {
+                final Uri soundUri = Uri.parse("file://" + soundPath);
+                if (soundUri != null) {
+                    final Ringtone sfx = RingtoneManager.getRingtone(mContext, soundUri);
+                    if (sfx != null) sfx.play();
+                }
+            }
         }
     }
 

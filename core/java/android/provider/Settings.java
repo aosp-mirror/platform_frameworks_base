@@ -1497,6 +1497,66 @@ public final class Settings {
         public static final String POINTER_LOCATION = "pointer_location";
 
         /**
+         * Whether to play a sound for low-battery alerts.
+         * @hide
+         */
+        public static final String POWER_SOUNDS_ENABLED = "power_sounds_enabled";
+
+        /**
+         * Whether to play a sound for dock events.
+         * @hide
+         */
+        public static final String DOCK_SOUNDS_ENABLED = "dock_sounds_enabled";
+
+        /**
+         * Whether to play sounds when the keyguard is shown and dismissed.
+         * @hide
+         */
+        public static final String LOCKSCREEN_SOUNDS_ENABLED = "lockscreen_sounds_enabled";
+
+        /**
+         * URI for the low battery sound file.
+         * @hide
+         */
+        public static final String LOW_BATTERY_SOUND = "low_battery_sound";
+
+        /**
+         * URI for the desk dock "in" event sound.
+         * @hide
+         */
+        public static final String DESK_DOCK_SOUND = "desk_dock_sound";
+
+        /**
+         * URI for the desk dock "out" event sound.
+         * @hide
+         */
+        public static final String DESK_UNDOCK_SOUND = "desk_undock_sound";
+
+        /**
+         * URI for the car dock "in" event sound.
+         * @hide
+         */
+        public static final String CAR_DOCK_SOUND = "car_dock_sound";
+
+        /**
+         * URI for the car dock "out" event sound.
+         * @hide
+         */
+        public static final String CAR_UNDOCK_SOUND = "car_undock_sound";
+
+        /**
+         * URI for the "device locked" (keyguard shown) sound.
+         * @hide
+         */
+        public static final String LOCK_SOUND = "lock_sound";
+
+        /**
+         * URI for the "device unlocked" (keyguard dismissed) sound.
+         * @hide
+         */
+        public static final String UNLOCK_SOUND = "unlock_sound";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          * @hide

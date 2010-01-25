@@ -59,6 +59,11 @@ PRODUCT_COPY_FILES += \
 	$(LOCAL_PATH)/effects/KeypressReturn.ogg:system/media/audio/ui/KeypressReturn.ogg \
 	$(LOCAL_PATH)/effects/VideoRecord.ogg:system/media/audio/ui/VideoRecord.ogg \
 	$(LOCAL_PATH)/effects/camera_click.ogg:system/media/audio/ui/camera_click.ogg \
+	$(LOCAL_PATH)/effects/LowBattery.ogg:system/media/audio/ui/LowBattery.ogg \
+	$(LOCAL_PATH)/effects/Dock.ogg:system/media/audio/ui/Dock.ogg \
+	$(LOCAL_PATH)/effects/Undock.ogg:system/media/audio/ui/Undock.ogg \
+	$(LOCAL_PATH)/effects/Lock.ogg:system/media/audio/ui/Lock.ogg \
+	$(LOCAL_PATH)/effects/Unlock.ogg:system/media/audio/ui/Unlock.ogg \
 	$(LOCAL_PATH)/newwavelabs/Big_Easy.ogg:system/media/audio/ringtones/Big_Easy.ogg \
 	$(LOCAL_PATH)/newwavelabs/Bollywood.ogg:system/media/audio/ringtones/Bollywood.ogg \
 	$(LOCAL_PATH)/newwavelabs/Cairo.ogg:system/media/audio/ringtones/Cairo.ogg \
@@ -89,4 +94,3 @@ PRODUCT_COPY_FILES += \
 	$(LOCAL_PATH)/notifications/pixiedust.ogg:system/media/audio/notifications/pixiedust.ogg \
 	$(LOCAL_PATH)/notifications/pizzicato.ogg:system/media/audio/notifications/pizzicato.ogg \
 	$(LOCAL_PATH)/notifications/tweeters.ogg:system/media/audio/notifications/tweeters.ogg
-

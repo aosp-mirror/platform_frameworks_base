@@ -26,10 +26,14 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Binder;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
 import android.os.RemoteException;
@@ -60,8 +64,11 @@ class DockObserver extends UEventObserver {
     public static final int MODE_NIGHT_YES = Configuration.UI_MODE_NIGHT_YES >> 4;
 
     private int mDockState = Intent.EXTRA_DOCK_STATE_UNDOCKED;
+    private int mPreviousDockState = Intent.EXTRA_DOCK_STATE_UNDOCKED;
+
     private int mNightMode = MODE_NIGHT_NO;
     private boolean mCarModeEnabled = false;
+
     private boolean mSystemReady;
 
     private final Context mContext;
@@ -129,7 +136,7 @@ class DockObserver extends UEventObserver {
             try {
                 int newState = Integer.parseInt(event.get("SWITCH_STATE"));
                 if (newState != mDockState) {
-                    int oldState = mDockState;
+                    mPreviousDockState = mDockState;
                     mDockState = newState;
                     boolean carModeEnabled = mDockState == Intent.EXTRA_DOCK_STATE_CAR;
                     if (mCarModeEnabled != carModeEnabled) {
@@ -143,8 +150,8 @@ class DockObserver extends UEventObserver {
                         // Don't force screen on when undocking from the desk dock.
                         // The change in power state will do this anyway.
                         // FIXME - we should be configurable.
-                        if (oldState != Intent.EXTRA_DOCK_STATE_DESK ||
-                                newState != Intent.EXTRA_DOCK_STATE_UNDOCKED) {
+                        if (mPreviousDockState != Intent.EXTRA_DOCK_STATE_DESK ||
+                                mDockState != Intent.EXTRA_DOCK_STATE_UNDOCKED) {
                             mPowerManager.userActivityWithForce(SystemClock.uptimeMillis(),
                                     false, true);
                         }
@@ -163,7 +170,7 @@ class DockObserver extends UEventObserver {
         try {
             FileReader file = new FileReader(DOCK_STATE_PATH);
             int len = file.read(buffer, 0, 1024);
-            mDockState = Integer.valueOf((new String(buffer, 0, len)).trim());
+            mPreviousDockState = mDockState = Integer.valueOf((new String(buffer, 0, len)).trim());
 
         } catch (FileNotFoundException e) {
             Log.w(TAG, "This kernel does not have dock station support");
@@ -195,7 +202,10 @@ class DockObserver extends UEventObserver {
         public void handleMessage(Message msg) {
             synchronized (this) {
                 Log.i(TAG, "Dock state changed: " + mDockState);
-                if (Settings.Secure.getInt(mContext.getContentResolver(),
+
+                final ContentResolver cr = mContext.getContentResolver();
+
+                if (Settings.Secure.getInt(cr,
                         Settings.Secure.DEVICE_PROVISIONED, 0) == 0) {
                     Log.i(TAG, "Device not provisioned, skipping dock broadcast");
                     return;
@@ -216,6 +226,38 @@ class DockObserver extends UEventObserver {
                 if (address != null)
                     intent.putExtra(BluetoothDevice.EXTRA_DEVICE,
                             BluetoothAdapter.getDefaultAdapter().getRemoteDevice(address));
+
+                // User feedback to confirm dock connection. Particularly
+                // useful for flaky contact pins...
+                if (Settings.System.getInt(cr,
+                        Settings.System.DOCK_SOUNDS_ENABLED, 1) == 1)
+                {
+                    String whichSound = null;
+                    if (mDockState == Intent.EXTRA_DOCK_STATE_UNDOCKED) {
+                        if (mPreviousDockState == Intent.EXTRA_DOCK_STATE_DESK) {
+                            whichSound = Settings.System.DESK_UNDOCK_SOUND;
+                        } else if (mPreviousDockState == Intent.EXTRA_DOCK_STATE_CAR) {
+                            whichSound = Settings.System.CAR_UNDOCK_SOUND;
+                        }
+                    } else {
+                        if (mDockState == Intent.EXTRA_DOCK_STATE_DESK) {
+                            whichSound = Settings.System.DESK_DOCK_SOUND;
+                        } else if (mDockState == Intent.EXTRA_DOCK_STATE_CAR) {
+                            whichSound = Settings.System.CAR_DOCK_SOUND;
+                        }
+                    }
+
+                    if (whichSound != null) {
+                        final String soundPath = Settings.System.getString(cr, whichSound);
+                        if (soundPath != null) {
+                            final Uri soundUri = Uri.parse("file://" + soundPath);
+                            if (soundUri != null) {
+                                final Ringtone sfx = RingtoneManager.getRingtone(mContext, soundUri);
+                                if (sfx != null) sfx.play();
+                            }
+                        }
+                    }
+                }
 
                 // Send the ordered broadcast; the result receiver will receive after all
                 // broadcasts have been sent. If any broadcast receiver changes the result

@@ -76,7 +76,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // database gets upgraded properly. At a minimum, please confirm that 'upgradeVersion'
     // is properly propagated through your change.  Not doing so will result in a loss of user
     // settings.
-    private static final int DATABASE_VERSION = 49;
+    private static final int DATABASE_VERSION = 50;
 
     private Context mContext;
 
@@ -633,6 +633,24 @@ public class DatabaseHelper extends SQLiteOpenHelper {
            upgradeVersion = 49;
        }
 
+       if (upgradeVersion == 49) {
+           /*
+            * New settings for new user interface noises.
+            */
+           db.beginTransaction();
+           try {
+                SQLiteStatement stmt = db.compileStatement("INSERT INTO system(name,value)"
+                        + " VALUES(?,?);");
+                loadUISoundEffectsSettings(stmt);
+                stmt.close();
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+            }
+
+           upgradeVersion = 50;
+       }
+
        if (upgradeVersion != currentVersion) {
             Log.w(TAG, "Got stuck trying to upgrade from version " + upgradeVersion
                     + ", must wipe the settings provider");
@@ -894,7 +912,35 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         loadBooleanSetting(stmt, Settings.System.SET_INSTALL_LOCATION, R.bool.set_install_location);
         loadSetting(stmt, Settings.System.DEFAULT_INSTALL_LOCATION,
                 PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY);
+
+        loadUISoundEffectsSettings(stmt);
+
         stmt.close();
+    }
+
+    private void loadUISoundEffectsSettings(SQLiteStatement stmt) {
+        loadIntegerSetting(stmt, Settings.System.POWER_SOUNDS_ENABLED,
+            R.integer.def_power_sounds_enabled);
+        loadStringSetting(stmt, Settings.System.LOW_BATTERY_SOUND,
+            R.string.def_low_battery_sound);
+
+        loadIntegerSetting(stmt, Settings.System.DOCK_SOUNDS_ENABLED,
+            R.integer.def_dock_sounds_enabled);
+        loadStringSetting(stmt, Settings.System.DESK_DOCK_SOUND,
+            R.string.def_desk_dock_sound);
+        loadStringSetting(stmt, Settings.System.DESK_UNDOCK_SOUND,
+            R.string.def_desk_undock_sound);
+        loadStringSetting(stmt, Settings.System.CAR_DOCK_SOUND,
+            R.string.def_car_dock_sound);
+        loadStringSetting(stmt, Settings.System.CAR_UNDOCK_SOUND,
+            R.string.def_car_undock_sound);
+
+        loadIntegerSetting(stmt, Settings.System.LOCKSCREEN_SOUNDS_ENABLED,
+            R.integer.def_lockscreen_sounds_enabled);
+        loadStringSetting(stmt, Settings.System.LOCK_SOUND,
+            R.string.def_lock_sound);
+        loadStringSetting(stmt, Settings.System.UNLOCK_SOUND,
+            R.string.def_unlock_sound);
     }
 
     private void loadDefaultAnimationSettings(SQLiteStatement stmt) {
