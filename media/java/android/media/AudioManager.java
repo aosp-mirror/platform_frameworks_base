@@ -797,7 +797,7 @@ public class AudioManager {
     public void setMode(int mode) {
         IAudioService service = getService();
         try {
-            service.setMode(mode);
+            service.setMode(mode, mICallBack);
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in setMode", e);
         }
