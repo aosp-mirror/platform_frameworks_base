@@ -484,7 +484,7 @@ public class WebView extends AbsoluteLayout
     private static final int SWITCH_TO_LONGPRESS        = 4;
     private static final int RELEASE_SINGLE_TAP         = 5;
     private static final int REQUEST_FORM_DATA          = 6;
-    private static final int RESUME_WEBCORE_UPDATE      = 7;
+    private static final int RESUME_WEBCORE_PRIORITY    = 7;
     private static final int DRAG_HELD_MOTIONLESS       = 8;
     private static final int AWAKEN_SCROLL_BARS         = 9;
 
@@ -525,7 +525,7 @@ public class WebView extends AbsoluteLayout
         "SWITCH_TO_LONGPRESS", //            = 4;
         "RELEASE_SINGLE_TAP", //             = 5;
         "REQUEST_FORM_DATA", //              = 6;
-        "RESUME_WEBCORE_UPDATE", //          = 7;
+        "RESUME_WEBCORE_PRIORITY", //        = 7;
         "DRAG_HELD_MOTIONLESS", //           = 8;
         "AWAKEN_SCROLL_BARS", //             = 9;
         "SCROLL_TO_MSG_ID", //               = 10;
@@ -4334,7 +4334,7 @@ public class WebView extends AbsoluteLayout
                     // fling's velocity
                     mScroller.abortAnimation();
                     mTouchMode = TOUCH_DRAG_START_MODE;
-                    mPrivateHandler.removeMessages(RESUME_WEBCORE_UPDATE);
+                    mPrivateHandler.removeMessages(RESUME_WEBCORE_PRIORITY);
                 } else if (mShiftIsPressed) {
                     mSelectX = mScrollX + (int) x;
                     mSelectY = mScrollY + (int) y;
@@ -4438,7 +4438,7 @@ public class WebView extends AbsoluteLayout
                     deltaX = 0;
                     deltaY = 0;
 
-                    WebViewCore.pauseUpdate(mWebViewCore);
+                    WebViewCore.reducePriority(mWebViewCore);
                     if (!mDragFromTextInput) {
                         nativeHideCursor();
                     }
@@ -4601,7 +4601,7 @@ public class WebView extends AbsoluteLayout
                                     || computeVerticalScrollExtent() < computeVerticalScrollRange())) {
                                 // we will not rewrite drag code here, but we
                                 // will try fling if it applies.
-                                WebViewCore.pauseUpdate(mWebViewCore);
+                                WebViewCore.reducePriority(mWebViewCore);
                                 // fall through to TOUCH_DRAG_MODE
                             } else {
                                 break;
@@ -4641,7 +4641,7 @@ public class WebView extends AbsoluteLayout
                             break;
                         }
                         mLastVelocity = 0;
-                        WebViewCore.resumeUpdate(mWebViewCore);
+                        WebViewCore.resumePriority(mWebViewCore);
                         break;
                     case TOUCH_DRAG_START_MODE:
                     case TOUCH_DONE_MODE:
@@ -4690,7 +4690,7 @@ public class WebView extends AbsoluteLayout
             mVelocityTracker = null;
         }
         if (mTouchMode == TOUCH_DRAG_MODE) {
-            WebViewCore.resumeUpdate(mWebViewCore);
+            WebViewCore.resumePriority(mWebViewCore);
         }
         mPrivateHandler.removeMessages(SWITCH_TO_SHORTPRESS);
         mPrivateHandler.removeMessages(SWITCH_TO_LONGPRESS);
@@ -5016,7 +5016,7 @@ public class WebView extends AbsoluteLayout
             vy = vy * 3 / 4;
         }
         if ((maxX == 0 && vy == 0) || (maxY == 0 && vx == 0)) {
-            WebViewCore.resumeUpdate(mWebViewCore);
+            WebViewCore.resumePriority(mWebViewCore);
             return;
         }
         float currentVelocity = mScroller.getCurrVelocity();
@@ -5050,7 +5050,7 @@ public class WebView extends AbsoluteLayout
         // want to calculate how long the animation is going to run to precisely
         // resume the webcore update.
         final int time = mScroller.getDuration();
-        mPrivateHandler.sendEmptyMessageDelayed(RESUME_WEBCORE_UPDATE, time);
+        mPrivateHandler.sendEmptyMessageDelayed(RESUME_WEBCORE_PRIORITY, time);
         awakenScrollBars(time);
         invalidate();
     }
@@ -5235,7 +5235,7 @@ public class WebView extends AbsoluteLayout
         mLastTouchTime = eventTime;
         if (!mScroller.isFinished()) {
             abortAnimation();
-            mPrivateHandler.removeMessages(RESUME_WEBCORE_UPDATE);
+            mPrivateHandler.removeMessages(RESUME_WEBCORE_PRIORITY);
         }
         mSnapScrollMode = SNAP_NONE;
         mVelocityTracker = VelocityTracker.obtain();
@@ -5895,8 +5895,8 @@ public class WebView extends AbsoluteLayout
                         mWebTextView.setAdapterCustom(adapter);
                     }
                     break;
-                case RESUME_WEBCORE_UPDATE:
-                    WebViewCore.resumeUpdate(mWebViewCore);
+                case RESUME_WEBCORE_PRIORITY:
+                    WebViewCore.resumePriority(mWebViewCore);
                     break;
 
                 case LONG_PRESS_CENTER:

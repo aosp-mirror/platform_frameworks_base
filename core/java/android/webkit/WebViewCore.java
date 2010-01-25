@@ -1781,7 +1781,7 @@ final class WebViewCore {
         return result;
     }
 
-    static void pauseUpdate(WebViewCore core) {
+    static void reducePriority(WebViewCore core) {
         // remove the pending REDUCE_PRIORITY and RESUME_PRIORITY messages
         sWebCoreHandler.removeMessages(WebCoreThread.REDUCE_PRIORITY);
         sWebCoreHandler.removeMessages(WebCoreThread.RESUME_PRIORITY);
@@ -1789,7 +1789,7 @@ final class WebViewCore {
                 .obtainMessage(WebCoreThread.REDUCE_PRIORITY));
     }
 
-    static void resumeUpdate(WebViewCore core) {
+    static void resumePriority(WebViewCore core) {
         // remove the pending REDUCE_PRIORITY and RESUME_PRIORITY messages
         sWebCoreHandler.removeMessages(WebCoreThread.REDUCE_PRIORITY);
         sWebCoreHandler.removeMessages(WebCoreThread.RESUME_PRIORITY);
