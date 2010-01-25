@@ -154,4 +154,12 @@ public class RecognizerIntent {
      * {@link #ACTION_RECOGNIZE_SPEECH}. Only present when {@link Activity#RESULT_OK} is returned.
      */
     public static final String EXTRA_RESULTS = "android.speech.extra.RESULTS";
+    
+    /**
+     * Triggers the voice search settings activity.
+     * 
+     * @hide pending API council approval, to be unhidden for Froyo
+     */
+    public static final String ACTION_VOICE_SEARCH_SETTINGS =
+            "android.speech.action.VOICE_SEARCH_SETTINGS";
 }
