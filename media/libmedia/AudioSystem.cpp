@@ -348,6 +348,9 @@ void AudioSystem::AudioFlingerClient::binderDied(const wp<IBinder>& who) {
     Mutex::Autolock _l(AudioSystem::gLock);
 
     AudioSystem::gAudioFlinger.clear();
+    // clear output handles and stream to output map caches
+    AudioSystem::gStreamOutputMap.clear();
+    AudioSystem::gOutputs.clear();
 
     if (gAudioErrorCallback) {
         gAudioErrorCallback(DEAD_OBJECT);
