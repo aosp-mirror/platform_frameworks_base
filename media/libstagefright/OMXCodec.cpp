@@ -301,8 +301,8 @@ uint32_t OMXCodec::getComponentQuirks(const char *componentName) {
         quirks |= kRequiresAllocateBufferOnOutputPorts;
     }
     if (!strncmp(componentName, "OMX.qcom.video.decoder.", 23)) {
-        // XXX Required on P....on only.
         quirks |= kRequiresAllocateBufferOnOutputPorts;
+        quirks |= kDefersOutputBufferAllocation;
     }
 
     if (!strncmp(componentName, "OMX.TI.", 7)) {
@@ -1237,8 +1237,15 @@ status_t OMXCodec::allocateBuffersOnPort(OMX_U32 portIndex) {
         info.mMediaBuffer = NULL;
 
         if (portIndex == kPortIndexOutput) {
-            info.mMediaBuffer = new MediaBuffer(info.mData, info.mSize);
-            info.mMediaBuffer->setObserver(this);
+            if (!(mOMXLivesLocally
+                        && (mQuirks & kRequiresAllocateBufferOnOutputPorts)
+                        && (mQuirks & kDefersOutputBufferAllocation))) {
+                // If the node does not fill in the buffer ptr at this time,
+                // we will defer creating the MediaBuffer until receiving
+                // the first FILL_BUFFER_DONE notification instead.
+                info.mMediaBuffer = new MediaBuffer(info.mData, info.mSize);
+                info.mMediaBuffer->setObserver(this);
+            }
         }
 
         mPortBuffers[portIndex].push(info);
@@ -1345,6 +1352,22 @@ void OMXCodec::on_message(const omx_message &msg) {
 #endif
             } else if (mPortStatus[kPortIndexOutput] != SHUTTING_DOWN) {
                 CHECK_EQ(mPortStatus[kPortIndexOutput], ENABLED);
+
+                if (info->mMediaBuffer == NULL) {
+                    CHECK(mOMXLivesLocally);
+                    CHECK(mQuirks & kRequiresAllocateBufferOnOutputPorts);
+                    CHECK(mQuirks & kDefersOutputBufferAllocation);
+
+                    // The qcom video decoders on Nexus don't actually allocate
+                    // output buffer memory on a call to OMX_AllocateBuffer
+                    // the "pBuffer" member of the OMX_BUFFERHEADERTYPE
+                    // structure is only filled in later.
+
+                    info->mMediaBuffer = new MediaBuffer(
+                            msg.u.extended_buffer_data.data_ptr,
+                            info->mSize);
+                    info->mMediaBuffer->setObserver(this);
+                }
 
                 MediaBuffer *buffer = info->mMediaBuffer;
 
