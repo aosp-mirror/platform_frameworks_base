@@ -109,9 +109,10 @@ public:
     // The height (in pixels) of EXIF thumbnail in Jpeg picture.
     // Example value: "384". Read/write.
     static const char KEY_JPEG_THUMBNAIL_HEIGHT[];
-    // Supported EXIF thumbnail sizes (width x height).
-    // Example value: "512x384,320x240". Read only.
-    static const char KEY_SUPPORTED_THUMBNAIL_SIZES[];
+    // Supported EXIF thumbnail sizes (width x height). 0x0 means not thumbnail
+    // in EXIF.
+    // Example value: "512x384,320x240,0x0". Read only.
+    static const char KEY_SUPPORTED_JPEG_THUMBNAIL_SIZES[];
     // The quality of the EXIF thumbnail in Jpeg picture. The range is 1 to 100,
     // with 100 being the best.
     // Example value: "90". Read/write.
