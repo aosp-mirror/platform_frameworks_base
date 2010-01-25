@@ -92,9 +92,11 @@ MPEG4Writer::~MPEG4Writer() {
     mTracks.clear();
 }
 
-void MPEG4Writer::addSource(const sp<MediaSource> &source) {
+status_t MPEG4Writer::addSource(const sp<MediaSource> &source) {
     Track *track = new Track(this, source);
     mTracks.push_back(track);
+
+    return OK;
 }
 
 status_t MPEG4Writer::start() {

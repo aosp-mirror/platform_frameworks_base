@@ -23,7 +23,8 @@
 
 namespace android {
 
-class MPEG4Writer;
+struct MediaSource;
+struct MediaWriter;
 
 struct StagefrightRecorder : public MediaRecorderBase {
     StagefrightRecorder();
@@ -54,7 +55,7 @@ private:
     sp<ICamera> mCamera;
     sp<ISurface> mPreviewSurface;
     sp<IMediaPlayerClient> mListener;
-    sp<MPEG4Writer> mWriter;
+    sp<MediaWriter> mWriter;
 
     audio_source mAudioSource;
     video_source mVideoSource;
@@ -65,6 +66,10 @@ private:
     int mFrameRate;
     String8 mParams;
     int mOutputFd;
+
+    status_t startMPEG4Recording();
+    status_t startAMRRecording();
+    sp<MediaSource> createAMRAudioSource();
 
     StagefrightRecorder(const StagefrightRecorder &);
     StagefrightRecorder &operator=(const StagefrightRecorder &);
