@@ -136,6 +136,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/speech/tts/ITtsCallback.aidl \
 	core/java/com/android/internal/app/IBatteryStats.aidl \
 	core/java/com/android/internal/app/IUsageStats.aidl \
+	core/java/com/android/internal/app/IMediaContainerService.aidl \
 	core/java/com/android/internal/appwidget/IAppWidgetService.aidl \
 	core/java/com/android/internal/appwidget/IAppWidgetHost.aidl \
 	core/java/com/android/internal/backup/IBackupTransport.aidl \

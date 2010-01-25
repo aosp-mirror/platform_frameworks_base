@@ -2102,6 +2102,12 @@
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_pkgUsageStats">Allows the modification of collected component usage statistics. Not for use by normal applications.</string>
 
+    <!-- permission attributes related to default container service -->
+    <!-- Title of an application permission that lets an application use default container service. -->
+    <string name="permlab_copyProtectedData">Allows to invoke default container service to copy content. Not for use by normal applications.</string>
+    <!-- Description of an application permission,  used to invoke default container service to copy content. -->
+    <string name="permdesc_copyProtectedData">Allows to invoke default container service to copy content. Not for use by normal applications.</string>
+
     <!-- Shown in the tutorial for tap twice for zoom control. -->
     <string name="tutorial_double_tap_to_zoom_message_short">Tap twice for zoom control</string>
 

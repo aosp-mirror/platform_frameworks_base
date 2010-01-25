@@ -263,10 +263,15 @@ class Installer {
         return execute(builder.toString());
     }
 
-    public int setForwardLockPerm(String packageName, int gid) {
+    /*
+     * @param packagePathSuffix The name of the path relative to install
+     * directory. Say if the path name is /data/app/com.test-1.apk,
+     * the package suffix path will be com.test-1
+     */
+    public int setForwardLockPerm(String packagePathSuffix, int gid) {
         StringBuilder builder = new StringBuilder("protect");
         builder.append(' ');
-        builder.append(packageName);
+        builder.append(packagePathSuffix);
         builder.append(' ');
         builder.append(gid);
         return execute(builder.toString());
