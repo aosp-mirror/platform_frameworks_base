@@ -18,14 +18,12 @@ package android.widget;
 
 import com.android.internal.R;
 
-import java.util.ArrayList;
-
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Rect;
-import android.graphics.drawable.Drawable;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AttributeSet;
@@ -34,6 +32,8 @@ import android.view.SoundEffectConstants;
 import android.view.View;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.ExpandableListConnector.PositionMetadata;
+
+import java.util.ArrayList;
 
 /**
  * A view that shows items in a vertically scrolling two-level list. This
@@ -541,6 +541,12 @@ public class ExpandableListView extends ListView {
                 if (mOnGroupExpandListener != null) {
                     mOnGroupExpandListener.onGroupExpand(posMetadata.position.groupPos);
                 }
+                
+                final int groupPos = posMetadata.position.groupPos;
+                final int groupFlatPos = posMetadata.position.flatListPos;
+                
+                smoothScrollToPosition(groupFlatPos + mAdapter.getChildrenCount(groupPos),
+                        groupFlatPos);
             }
 
             returnValue = true;

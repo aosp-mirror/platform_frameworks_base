@@ -32,7 +32,6 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
 import android.view.KeyEvent;
@@ -307,6 +306,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * Handles one frame of a fling
      */
     private FlingRunnable mFlingRunnable;
+    
+    /**
+     * Handles scrolling between positions within the list.
+     */
+    private PositionScroller mPositionScroller;
 
     /**
      * The offset in pixels form the top of the AdapterView to the top
@@ -1588,6 +1592,10 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 // let the fling runnable report it's new state which
                 // should be idle
                 mFlingRunnable.endFling();
+                if (mScrollY != 0) {
+                    mScrollY = 0;
+                    invalidate();
+                }
             }
             // Always hide the type filter
             dismissPopup();
@@ -1935,9 +1943,13 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         } else {
             int touchMode = mTouchMode;
             if (touchMode == TOUCH_MODE_OVERSCROLL || touchMode == TOUCH_MODE_OVERFLING) {
-                mScrollY = 0;
                 if (mFlingRunnable != null) {
                     mFlingRunnable.endFling();
+                    
+                    if (mScrollY != 0) {
+                        mScrollY = 0;
+                        invalidate();
+                    }
                 }
             }
         }
@@ -2052,9 +2064,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     if (motionView != null) {
                         motionViewPrevTop = motionView.getTop();
                     }
+                    
                     // No need to do all this work if we're not going to move anyway
+                    boolean atEdge = false;
                     if (incrementalDeltaY != 0) {
-                        trackMotionScroll(deltaY, incrementalDeltaY);
+                        atEdge = trackMotionScroll(deltaY, incrementalDeltaY);
                     }
 
                     // Check to see if we have bumped into the scroll limit
@@ -2064,7 +2078,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                         // supposed to be
                         final int motionViewRealTop = motionView.getTop();
                         final int motionViewNewTop = mMotionViewNewTop;
-                        if (motionViewRealTop != motionViewNewTop) {
+                        if (atEdge) {
                             // Apply overscroll
                             
                             mScrollY -= incrementalDeltaY - (motionViewRealTop - motionViewPrevTop);
@@ -2440,7 +2454,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 }
             }
         }
-        
+
         void startSpringback() {
             if (mScroller.springback(0, mScrollY, 0, 0, 0, 0)) {
                 mTouchMode = TOUCH_MODE_OVERFLING;
@@ -2448,19 +2462,33 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 post(this);
             }
         }
-        
+
         void startOverfling(int initialVelocity) {
             mScroller.fling(0, mScrollY, 0, initialVelocity, 0, 0, 0, 0, 0, getHeight());
             mTouchMode = TOUCH_MODE_OVERFLING;
             invalidate();
             post(this);
         }
-        
+
+        void startScroll(int distance, int duration) {
+            int initialY = distance < 0 ? Integer.MAX_VALUE : 0;
+            mLastFlingY = initialY;
+            mScroller.startScroll(0, initialY, 0, distance, duration);
+            mTouchMode = TOUCH_MODE_FLING;
+            post(this);
+        }
+
         private void endFling() {
             mTouchMode = TOUCH_MODE_REST;
+
             reportScrollStateChange(OnScrollListener.SCROLL_STATE_IDLE);
             clearScrollingCache();
+
             removeCallbacks(this);
+
+            if (mPositionScroller != null) {
+                removeCallbacks(mPositionScroller);
+            }
         }
 
         public void run() {
@@ -2553,6 +2581,278 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
         }
     }
+    
+    
+    class PositionScroller implements Runnable {
+        private static final int SCROLL_DURATION = 400;
+        
+        private static final int MOVE_DOWN_POS = 1;
+        private static final int MOVE_UP_POS = 2;
+        private static final int MOVE_DOWN_BOUND = 3;
+        private static final int MOVE_UP_BOUND = 4;
+        
+        private int mMode;
+        private int mTargetPos;
+        private int mBoundPos;
+        private int mLastSeenPos;
+        private int mScrollDuration;
+        private int mExtraScroll;
+        
+        PositionScroller() {
+            mExtraScroll = ViewConfiguration.get(mContext).getScaledFadingEdgeLength();
+        }
+        
+        void start(int position) {
+            final int firstPos = mFirstPosition;
+            final int lastPos = firstPos + getChildCount() - 1;
+            
+            int viewTravelCount = 0;
+            if (position <= firstPos) {                
+                viewTravelCount = firstPos - position + 1;
+                mMode = MOVE_UP_POS;
+            } else if (position >= lastPos) {
+                viewTravelCount = position - lastPos + 1;
+                mMode = MOVE_DOWN_POS;
+            } else {
+                // Already on screen, nothing to do
+                return;
+            }
+            
+            if (viewTravelCount > 0) {
+                mScrollDuration = SCROLL_DURATION / viewTravelCount;
+            } else {
+                mScrollDuration = SCROLL_DURATION;
+            }
+            mTargetPos = position;
+            mBoundPos = INVALID_POSITION;
+            mLastSeenPos = INVALID_POSITION;
+            
+            post(this);
+        }
+        
+        void start(int position, int boundPosition) {
+            if (boundPosition == INVALID_POSITION) {
+                start(position);
+                return;
+            }
+            
+            final int firstPos = mFirstPosition;
+            final int lastPos = firstPos + getChildCount() - 1;
+            
+            int viewTravelCount = 0;
+            if (position < firstPos) {
+                final int boundPosFromLast = lastPos - boundPosition;
+                if (boundPosFromLast < 1) {
+                    // Moving would shift our bound position off the screen. Abort.
+                    return;
+                }
+                
+                final int posTravel = firstPos - position + 1;
+                final int boundTravel = boundPosFromLast - 1;
+                if (boundTravel < posTravel) {
+                    viewTravelCount = boundTravel;
+                    mMode = MOVE_UP_BOUND;
+                } else {
+                    viewTravelCount = posTravel;
+                    mMode = MOVE_UP_POS;
+                }
+            } else if (position > lastPos) {
+                final int boundPosFromFirst = boundPosition - firstPos;
+                if (boundPosFromFirst < 1) {
+                    // Moving would shift our bound position off the screen. Abort.
+                    return;
+                }
+
+                final int posTravel = position - lastPos + 1;
+                final int boundTravel = boundPosFromFirst - 1;
+                if (boundTravel < posTravel) {
+                    viewTravelCount = boundTravel;
+                    mMode = MOVE_DOWN_BOUND;
+                } else {
+                    viewTravelCount = posTravel;
+                    mMode = MOVE_DOWN_POS;
+                }
+            } else {
+                // Already on screen, nothing to do
+                return;
+            }
+            
+            if (viewTravelCount > 0) {
+                mScrollDuration = SCROLL_DURATION / viewTravelCount;
+            } else {
+                mScrollDuration = SCROLL_DURATION;
+            }
+            mTargetPos = position;
+            mBoundPos = boundPosition;
+            mLastSeenPos = INVALID_POSITION;
+            
+            post(this);
+        }
+        
+        void stop() {
+            removeCallbacks(this);
+        }
+        
+        public void run() {
+            final int listHeight = getHeight();
+            final int firstPos = mFirstPosition;
+            
+            switch (mMode) {
+            case MOVE_DOWN_POS: {
+                final int lastViewIndex = getChildCount() - 1;
+                final int lastPos = firstPos + lastViewIndex;
+
+                if (lastPos == mLastSeenPos) {
+                    // No new views, let things keep going.
+                    post(this);
+                    return;
+                }
+
+                final View lastView = getChildAt(lastViewIndex);
+                final int lastViewHeight = lastView.getHeight();
+                final int lastViewTop = lastView.getTop();
+                final int lastViewPixelsShowing = listHeight - lastViewTop;
+
+                smoothScrollBy(lastViewHeight - lastViewPixelsShowing + mExtraScroll,
+                        mScrollDuration);
+
+                mLastSeenPos = lastPos;
+                if (lastPos != mTargetPos) {
+                    post(this);
+                }
+                break;
+            }
+                
+            case MOVE_DOWN_BOUND: {
+                final int nextViewIndex = 1;
+                if (firstPos == mBoundPos || getChildCount() <= nextViewIndex) {
+                    return;
+                }
+                final int nextPos = firstPos + nextViewIndex;
+
+                if (nextPos == mLastSeenPos) {
+                    // No new views, let things keep going.
+                    post(this);
+                    return;
+                }
+
+                final View nextView = getChildAt(nextViewIndex);
+                final int nextViewHeight = nextView.getHeight();
+                final int nextViewTop = nextView.getTop();
+                final int extraScroll = mExtraScroll;
+                if (nextPos != mBoundPos) {
+                    smoothScrollBy(Math.max(0, nextViewHeight + nextViewTop - extraScroll),
+                            mScrollDuration);
+
+                    mLastSeenPos = nextPos;
+
+                    post(this);
+                } else  {
+                    if (nextViewTop > extraScroll) { 
+                        smoothScrollBy(nextViewTop - extraScroll, mScrollDuration);
+                    }
+                }
+                break;
+            }
+                
+            case MOVE_UP_POS: {
+                if (firstPos == mLastSeenPos) {
+                    // No new views, let things keep going.
+                    post(this);
+                    return;
+                }
+
+                final View firstView = getChildAt(0);
+                final int firstViewTop = firstView.getTop();
+
+                smoothScrollBy(firstViewTop - mExtraScroll, mScrollDuration);
+
+                mLastSeenPos = firstPos;
+
+                if (firstPos != mTargetPos) {
+                    post(this);
+                }
+                break;
+            }
+                
+            case MOVE_UP_BOUND: {
+                final int lastViewIndex = getChildCount() - 2;
+                if (lastViewIndex < 0) {
+                    return;
+                }
+                final int lastPos = firstPos + lastViewIndex;
+
+                if (lastPos == mLastSeenPos) {
+                    // No new views, let things keep going.
+                    post(this);
+                    return;
+                }
+
+                final View lastView = getChildAt(lastViewIndex);
+                final int lastViewHeight = lastView.getHeight();
+                final int lastViewTop = lastView.getTop();
+                final int lastViewPixelsShowing = listHeight - lastViewTop;
+                mLastSeenPos = lastPos;
+                if (lastPos != mBoundPos) {
+                    smoothScrollBy(-(lastViewPixelsShowing - mExtraScroll), mScrollDuration);
+                    post(this);
+                } else {
+                    final int bottom = listHeight - mExtraScroll;
+                    final int lastViewBottom = lastViewTop + lastViewHeight;
+                    if (bottom > lastViewBottom) {
+                        smoothScrollBy(-(bottom - lastViewBottom), mScrollDuration);
+                    }
+                }
+                break;
+            }
+
+            default:
+                break;
+            }
+        }
+    }
+    
+    /**
+     * Smoothly scroll to the specified adapter position. The view will
+     * scroll such that the indicated position is displayed.
+     * @param position Scroll to this adapter position.
+     */
+    public void smoothScrollToPosition(int position) {
+        if (mPositionScroller == null) {
+            mPositionScroller = new PositionScroller();
+        }
+        mPositionScroller.start(position);
+    }
+    
+    /**
+     * Smoothly scroll to the specified adapter position. The view will
+     * scroll such that the indicated position is displayed, but it will
+     * stop early if scrolling further would scroll boundPosition out of
+     * view. 
+     * @param position Scroll to this adapter position.
+     * @param boundPosition Do not scroll if it would move this adapter
+     *          position out of view.
+     */
+    public void smoothScrollToPosition(int position, int boundPosition) {
+        if (mPositionScroller == null) {
+            mPositionScroller = new PositionScroller();
+        }
+        mPositionScroller.start(position, boundPosition);
+    }
+    
+    /**
+     * Smoothly scroll by distance pixels over duration milliseconds.
+     * @param distance Distance to scroll in pixels.
+     * @param duration Duration of the scroll animation in milliseconds.
+     */
+    public void smoothScrollBy(int distance, int duration) {
+        if (mFlingRunnable == null) {
+            mFlingRunnable = new FlingRunnable();
+        } else {
+            mFlingRunnable.endFling();
+        }
+        mFlingRunnable.startScroll(distance, duration);
+    }
 
     private void createScrollingCache() {
         if (mScrollingCacheEnabled && !mCachingStarted) {
@@ -2588,11 +2888,12 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * @param deltaY Amount to offset mMotionView. This is the accumulated delta since the motion
      *        began. Positive numbers mean the user's finger is moving down the screen.
      * @param incrementalDeltaY Change in deltaY from the previous event.
+     * @return true if we're already at the beginning/end of the list and have nothing to do.
      */
-    void trackMotionScroll(int deltaY, int incrementalDeltaY) {
+    boolean trackMotionScroll(int deltaY, int incrementalDeltaY) {
         final int childCount = getChildCount();
         if (childCount == 0) {
-            return;
+            return true;
         }
 
         final int firstTop = getChildAt(0).getTop();
@@ -2618,98 +2919,99 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             incrementalDeltaY = Math.min(height - 1, incrementalDeltaY);
         }
 
-        final int absIncrementalDeltaY = Math.abs(incrementalDeltaY);
+        final int firstPosition = mFirstPosition;
 
-        if (spaceAbove >= absIncrementalDeltaY && spaceBelow >= absIncrementalDeltaY) {
-            hideSelector();
-            offsetChildrenTopAndBottom(incrementalDeltaY);
-            if (!awakenScrollBars()) {
-                invalidate();
-            }
-            mMotionViewNewTop = mMotionViewOriginalTop + deltaY;
-        } else {
-            final int firstPosition = mFirstPosition;
-
-            if (firstPosition == 0 && firstTop >= listPadding.top && deltaY > 0) {
-                // Don't need to move views down if the top of the first position is already visible
-                return;
-            }
-
-            if (firstPosition + childCount == mItemCount && lastBottom <= end && deltaY < 0) {
-                // Don't need to move views up if the bottom of the last position is already visible
-                return;
-            }
-
-            final boolean down = incrementalDeltaY < 0;
-
-            hideSelector();
-
-            final int headerViewsCount = getHeaderViewsCount();
-            final int footerViewsStart = mItemCount - getFooterViewsCount();
-
-            int start = 0;
-            int count = 0;
-
-            if (down) {
-                final int top = listPadding.top - incrementalDeltaY;
-                for (int i = 0; i < childCount; i++) {
-                    final View child = getChildAt(i);
-                    if (child.getBottom() >= top) {
-                        break;
-                    } else {
-                        count++;
-                        int position = firstPosition + i;
-                        if (position >= headerViewsCount && position < footerViewsStart) {
-                            mRecycler.addScrapView(child);
-
-                            if (ViewDebug.TRACE_RECYCLER) {
-                                ViewDebug.trace(child,
-                                        ViewDebug.RecyclerTraceType.MOVE_TO_SCRAP_HEAP,
-                                        firstPosition + i, -1);
-                            }
-                        }
-                    }
-                }
-            } else {
-                final int bottom = getHeight() - listPadding.bottom - incrementalDeltaY;
-                for (int i = childCount - 1; i >= 0; i--) {
-                    final View child = getChildAt(i);
-                    if (child.getTop() <= bottom) {
-                        break;
-                    } else {
-                        start = i;
-                        count++;
-                        int position = firstPosition + i;
-                        if (position >= headerViewsCount && position < footerViewsStart) {
-                            mRecycler.addScrapView(child);
-
-                            if (ViewDebug.TRACE_RECYCLER) {
-                                ViewDebug.trace(child,
-                                        ViewDebug.RecyclerTraceType.MOVE_TO_SCRAP_HEAP,
-                                        firstPosition + i, -1);
-                            }
-                        }
-                    }
-                }
-            }
-
-            mMotionViewNewTop = mMotionViewOriginalTop + deltaY;
-
-            mBlockLayoutRequests = true;
-            detachViewsFromParent(start, count);
-            offsetChildrenTopAndBottom(incrementalDeltaY);
-
-            if (down) {
-                mFirstPosition += count;
-            }
-
-            invalidate();
-            fillGap(down);
-            mBlockLayoutRequests = false;
-
-            invokeOnItemScrollListener();
-            awakenScrollBars();
+        if (firstPosition == 0 && firstTop >= listPadding.top && deltaY > 0) {
+            // Don't need to move views down if the top of the first position
+            // is already visible
+            return true;
         }
+
+        if (firstPosition + childCount == mItemCount && lastBottom <= end && deltaY < 0) {
+            // Don't need to move views up if the bottom of the last position
+            // is already visible
+            return true;
+        }
+
+        final boolean down = incrementalDeltaY < 0;
+
+        hideSelector();
+
+        final int headerViewsCount = getHeaderViewsCount();
+        final int footerViewsStart = mItemCount - getFooterViewsCount();
+
+        int start = 0;
+        int count = 0;
+
+        if (down) {
+            final int top = listPadding.top - incrementalDeltaY;
+            for (int i = 0; i < childCount; i++) {
+                final View child = getChildAt(i);
+                if (child.getBottom() >= top) {
+                    break;
+                } else {
+                    count++;
+                    int position = firstPosition + i;
+                    if (position >= headerViewsCount && position < footerViewsStart) {
+                        mRecycler.addScrapView(child);
+
+                        if (ViewDebug.TRACE_RECYCLER) {
+                            ViewDebug.trace(child,
+                                    ViewDebug.RecyclerTraceType.MOVE_TO_SCRAP_HEAP,
+                                    firstPosition + i, -1);
+                        }
+                    }
+                }
+            }
+        } else {
+            final int bottom = getHeight() - listPadding.bottom - incrementalDeltaY;
+            for (int i = childCount - 1; i >= 0; i--) {
+                final View child = getChildAt(i);
+                if (child.getTop() <= bottom) {
+                    break;
+                } else {
+                    start = i;
+                    count++;
+                    int position = firstPosition + i;
+                    if (position >= headerViewsCount && position < footerViewsStart) {
+                        mRecycler.addScrapView(child);
+
+                        if (ViewDebug.TRACE_RECYCLER) {
+                            ViewDebug.trace(child,
+                                    ViewDebug.RecyclerTraceType.MOVE_TO_SCRAP_HEAP,
+                                    firstPosition + i, -1);
+                        }
+                    }
+                }
+            }
+        }
+
+        mMotionViewNewTop = mMotionViewOriginalTop + deltaY;
+
+        mBlockLayoutRequests = true;
+
+        if (count > 0) {
+            detachViewsFromParent(start, count);
+        }
+        offsetChildrenTopAndBottom(incrementalDeltaY);
+
+        if (down) {
+            mFirstPosition += count;
+        }
+
+        invalidate();
+
+        final int absIncrementalDeltaY = Math.abs(incrementalDeltaY);
+        if (spaceAbove < absIncrementalDeltaY || spaceBelow < absIncrementalDeltaY) {
+            fillGap(down);
+        }
+
+        mBlockLayoutRequests = false;
+
+        invokeOnItemScrollListener();
+        awakenScrollBars();
+        
+        return false;
     }
 
     /**
