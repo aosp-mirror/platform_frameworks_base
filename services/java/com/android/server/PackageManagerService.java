@@ -573,7 +573,7 @@ class PackageManagerService extends IPackageManager.Stub {
                 mAppInstallDir.mkdirs(); // scanDirLI() assumes this dir exists
             }
             //look for any incomplete package installations
-            ArrayList<String> deletePkgsList = mSettings.getListOfIncompleteInstallPackages();
+            ArrayList<PackageSetting> deletePkgsList = mSettings.getListOfIncompleteInstallPackages();
             //clean up list
             for(int i = 0; i < deletePkgsList.size(); i++) {
                 //clean up here
@@ -628,20 +628,31 @@ class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-    void cleanupInstallFailedPackage(String packageName) {
+    void cleanupInstallFailedPackage(PackageSetting ps) {
+        Log.i(TAG, "Cleaning up incompletely installed app: " + ps.name);
         if (mInstaller != null) {
-            int retCode = mInstaller.remove(packageName);
+            int retCode = mInstaller.remove(ps.name);
             if (retCode < 0) {
                 Log.w(TAG, "Couldn't remove app data directory for package: "
-                           + packageName + ", retcode=" + retCode);
+                           + ps.name + ", retcode=" + retCode);
             }
         } else {
             //for emulator
-            PackageParser.Package pkg = mPackages.get(packageName);
+            PackageParser.Package pkg = mPackages.get(ps.name);
             File dataDir = new File(pkg.applicationInfo.dataDir);
             dataDir.delete();
         }
-        mSettings.removePackageLP(packageName);
+        if (ps.codePath != null) {
+            if (!ps.codePath.delete()) {
+                Log.w(TAG, "Unable to remove old code file: " + ps.codePath);
+            }
+        }
+        if (ps.resourcePath != null) {
+            if (!ps.resourcePath.delete() && !ps.resourcePath.equals(ps.codePath)) {
+                Log.w(TAG, "Unable to remove old code file: " + ps.resourcePath);
+            }
+        }
+        mSettings.removePackageLP(ps.name);
     }
 
     void readPermissions() {
@@ -6732,15 +6743,15 @@ class PackageManagerService extends IPackageManager.Stub {
             return mReadMessages.toString();
         }
 
-        ArrayList<String> getListOfIncompleteInstallPackages() {
+        ArrayList<PackageSetting> getListOfIncompleteInstallPackages() {
             HashSet<String> kList = new HashSet<String>(mPackages.keySet());
             Iterator<String> its = kList.iterator();
-            ArrayList<String> ret = new ArrayList<String>();
+            ArrayList<PackageSetting> ret = new ArrayList<PackageSetting>();
             while(its.hasNext()) {
                 String key = its.next();
                 PackageSetting ps = mPackages.get(key);
                 if(ps.getInstallStatus() == PKG_INSTALL_INCOMPLETE) {
-                    ret.add(key);
+                    ret.add(ps);
                 }
             }
             return ret;
