@@ -1709,7 +1709,7 @@ public class SearchManager
     /* package */ OnDismissListener mDismissListener = null;
     /* package */ OnCancelListener mCancelListener = null;
 
-    private final SearchManagerCallback mSearchManagerCallback = new SearchManagerCallback();
+    private SearchDialog mSearchDialog;
 
     /*package*/ SearchManager(Context context, Handler handler)  {
         mContext = context;
@@ -1778,31 +1778,29 @@ public class SearchManager
                             ComponentName launchActivity,
                             Bundle appSearchData,
                             boolean globalSearch) {
-        if (mIdent == 0) throw new IllegalArgumentException(
-                "Called from outside of an Activity context");
+        ensureSearchDialog();
 
         if (globalSearch) {
             startGlobalSearch(initialQuery, selectInitialQuery, appSearchData);
             return;
         }
 
-        if (!mAssociatedPackage.equals(launchActivity.getPackageName())) {
-            Log.w(TAG, "invoking app search on a different package " +
-                    "not associated with this search manager");
-        }
-        try {
-            // activate the search manager and start it up!
-            mService.startSearch(initialQuery, selectInitialQuery, launchActivity, appSearchData,
-                    globalSearch, mSearchManagerCallback, mIdent);
-        } catch (RemoteException ex) {
-            Log.e(TAG, "startSearch() failed.", ex);
+        mSearchDialog.show(initialQuery, selectInitialQuery, launchActivity, appSearchData,
+                globalSearch);
+    }
+
+    private void ensureSearchDialog() {
+        if (mSearchDialog == null) {
+            mSearchDialog = new SearchDialog(mContext, this);
+            mSearchDialog.setOnCancelListener(this);
+            mSearchDialog.setOnDismissListener(this);
         }
     }
 
     /**
      * Starts the global search activity.
      */
-    private void startGlobalSearch(String initialQuery, boolean selectInitialQuery,
+    /* package */ void startGlobalSearch(String initialQuery, boolean selectInitialQuery,
             Bundle appSearchData) {
         ComponentName globalSearchActivity = getGlobalSearchActivity();
         if (globalSearchActivity == null) {
@@ -1876,8 +1874,6 @@ public class SearchManager
     public void triggerSearch(String query,
                               ComponentName launchActivity,
                               Bundle appSearchData) {
-        if (mIdent == 0) throw new IllegalArgumentException(
-                "Called from outside of an Activity context");
         if (!mAssociatedPackage.equals(launchActivity.getPackageName())) {
             throw new IllegalArgumentException("invoking app search on a different package " +
                     "not associated with this search manager");
@@ -1886,12 +1882,8 @@ public class SearchManager
             Log.w(TAG, "triggerSearch called with empty query, ignoring.");
             return;
         }
-        try {
-            mService.triggerSearch(query, launchActivity, appSearchData, mSearchManagerCallback,
-                    mIdent);
-        } catch (RemoteException ex) {
-            Log.e(TAG, "triggerSearch() failed.", ex);
-        }
+        startSearch(query, false, launchActivity, appSearchData, false);
+        mSearchDialog.launchQuerySearch();
     }
 
     /**
@@ -1906,10 +1898,8 @@ public class SearchManager
      * @see #startSearch
      */
     public void stopSearch() {
-        if (DBG) debug("stopSearch()");
-        try {
-            mService.stopSearch();
-        } catch (RemoteException ex) {
+        if (mSearchDialog != null) {
+            mSearchDialog.cancel();
         }
     }
 
@@ -1923,13 +1913,7 @@ public class SearchManager
      * @hide
      */
     public boolean isVisible() {
-        if (DBG) debug("isVisible()");
-        try {
-            return mService.isVisible();
-        } catch (RemoteException e) {
-            Log.e(TAG, "isVisible() failed: " + e);
-            return false;
-        }
+        return mSearchDialog == null? false : mSearchDialog.isShowing();
     }
 
     /**
@@ -1976,44 +1960,14 @@ public class SearchManager
         mCancelListener = listener;
     }
 
-    private class SearchManagerCallback extends ISearchManagerCallback.Stub {
-
-        private final Runnable mFireOnDismiss = new Runnable() {
-            public void run() {
-                if (DBG) debug("mFireOnDismiss");
-                if (mDismissListener != null) {
-                    mDismissListener.onDismiss();
-                }
-            }
-        };
-
-        private final Runnable mFireOnCancel = new Runnable() {
-            public void run() {
-                if (DBG) debug("mFireOnCancel");
-                if (mCancelListener != null) {
-                    mCancelListener.onCancel();
-                }
-            }
-        };
-
-        public void onDismiss() {
-            if (DBG) debug("onDismiss()");
-            mHandler.post(mFireOnDismiss);
-        }
-
-        public void onCancel() {
-            if (DBG) debug("onCancel()");
-            mHandler.post(mFireOnCancel);
-        }
-
-    }
-
     /**
      * @deprecated This method is an obsolete internal implementation detail. Do not use.
      */
     @Deprecated
     public void onCancel(DialogInterface dialog) {
-        throw new UnsupportedOperationException();
+        if (mCancelListener != null) {
+            mCancelListener.onCancel();
+        }
     }
 
     /**
@@ -2021,7 +1975,9 @@ public class SearchManager
      */
     @Deprecated
     public void onDismiss(DialogInterface dialog) {
-        throw new UnsupportedOperationException();
+        if (mDismissListener != null) {
+            mDismissListener.onDismiss();
+        }
     }
 
     /**

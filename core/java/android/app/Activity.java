@@ -39,6 +39,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.text.Selection;
 import android.text.SpannableStringBuilder;
@@ -3449,17 +3450,7 @@ public class Activity extends ContextThemeWrapper
             return;
         }
         
-        // uses super.getSystemService() since this.getSystemService() looks at the
-        // mSearchManager field.
-        mSearchManager = (SearchManager) super.getSystemService(Context.SEARCH_SERVICE);
-        int ident = mIdent;
-        if (ident == 0) {
-            if (mParent != null) ident = mParent.mIdent;
-            if (ident == 0) {
-                throw new IllegalArgumentException("no ident");
-            }
-        }
-        mSearchManager.setIdent(ident, getComponentName());
+        mSearchManager = new SearchManager(this, null);
     }
     
     @Override
