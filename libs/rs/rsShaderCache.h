@@ -44,6 +44,7 @@ public:
     int32_t vtxUniformSlot(uint32_t a) const {return mCurrent->mVtxUniformSlots[a];}
     int32_t fragAttribSlot(uint32_t a) const {return mCurrent->mFragAttribSlots[a];}
     int32_t fragUniformSlot(uint32_t a) const {return mCurrent->mFragUniformSlots[a];}
+    bool isUserVertexProgram() const {return mCurrent->mUserVertexProgram;}
 
 protected:
     typedef struct {
@@ -54,6 +55,7 @@ protected:
         int32_t mVtxUniformSlots[Program::MAX_UNIFORMS];
         int32_t mFragAttribSlots[Program::MAX_ATTRIBS];
         int32_t mFragUniformSlots[Program::MAX_UNIFORMS];
+        bool mUserVertexProgram;
     } entry_t;
     entry_t *mEntries;
     entry_t *mCurrent;
