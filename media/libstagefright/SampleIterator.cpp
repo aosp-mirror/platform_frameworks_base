@@ -54,6 +54,10 @@ void SampleIterator::reset() {
 status_t SampleIterator::seekTo(uint32_t sampleIndex) {
     LOGV("seekTo(%d)", sampleIndex);
 
+    if (sampleIndex >= mTable->mNumSampleSizes) {
+        return ERROR_END_OF_STREAM;
+    }
+
     if (mTable->mSampleToChunkOffset < 0
             || mTable->mChunkOffsetOffset < 0
             || mTable->mSampleSizeOffset < 0
