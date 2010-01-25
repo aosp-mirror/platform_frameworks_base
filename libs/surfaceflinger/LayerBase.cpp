@@ -444,12 +444,21 @@ void LayerBase::drawWithOpenGL(const Region& clip, const Texture& texture) const
         glLoadIdentity();
 
         // the texture's source is rotated
-        if (texture.transform == HAL_TRANSFORM_ROT_90) {
-            // TODO: handle the other orientations
-            glTranslatef(0, 1, 0);
-            glRotatef(-90, 0, 0, 1);
+        switch (texture.transform) {
+            case HAL_TRANSFORM_ROT_90:
+                glTranslatef(0, 1, 0);
+                glRotatef(-90, 0, 0, 1);
+                break;
+            case HAL_TRANSFORM_ROT_180:
+                glTranslatef(1, 1, 0);
+                glRotatef(-180, 0, 0, 1);
+                break;
+            case HAL_TRANSFORM_ROT_270:
+                glTranslatef(1, 0, 0);
+                glRotatef(-270, 0, 0, 1);
+                break;
         }
-        
+
         if (texture.NPOTAdjust) {
             glScalef(texture.wScale, texture.hScale, 1.0f);
         }

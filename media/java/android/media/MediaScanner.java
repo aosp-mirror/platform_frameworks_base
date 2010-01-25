@@ -920,12 +920,17 @@ public class MediaScanner
                         String path = c.getString(PATH_AUDIO_COLUMN_INDEX);
                         long lastModified = c.getLong(DATE_MODIFIED_AUDIO_COLUMN_INDEX);
 
-                        String key = path;
-                        if (mCaseInsensitivePaths) {
-                            key = path.toLowerCase();
+                        // Only consider entries with absolute path names.
+                        // This allows storing URIs in the database without the
+                        // media scanner removing them.
+                        if (path.startsWith("/")) {
+                            String key = path;
+                            if (mCaseInsensitivePaths) {
+                                key = path.toLowerCase();
+                            }
+                            mFileCache.put(key, new FileCacheEntry(mAudioUri, rowId, path,
+                                    lastModified));
                         }
-                        mFileCache.put(key, new FileCacheEntry(mAudioUri, rowId, path,
-                                lastModified));
                     }
                 } finally {
                     c.close();
@@ -948,12 +953,17 @@ public class MediaScanner
                         String path = c.getString(PATH_VIDEO_COLUMN_INDEX);
                         long lastModified = c.getLong(DATE_MODIFIED_VIDEO_COLUMN_INDEX);
 
-                        String key = path;
-                        if (mCaseInsensitivePaths) {
-                            key = path.toLowerCase();
+                        // Only consider entries with absolute path names.
+                        // This allows storing URIs in the database without the
+                        // media scanner removing them.
+                        if (path.startsWith("/")) {
+                            String key = path;
+                            if (mCaseInsensitivePaths) {
+                                key = path.toLowerCase();
+                            }
+                            mFileCache.put(key, new FileCacheEntry(mVideoUri, rowId, path,
+                                    lastModified));
                         }
-                        mFileCache.put(key, new FileCacheEntry(mVideoUri, rowId, path,
-                                lastModified));
                     }
                 } finally {
                     c.close();
@@ -978,12 +988,17 @@ public class MediaScanner
                         String path = c.getString(PATH_IMAGES_COLUMN_INDEX);
                        long lastModified = c.getLong(DATE_MODIFIED_IMAGES_COLUMN_INDEX);
 
-                        String key = path;
-                        if (mCaseInsensitivePaths) {
-                            key = path.toLowerCase();
-                        }
-                        mFileCache.put(key, new FileCacheEntry(mImagesUri, rowId, path,
-                                lastModified));
+                       // Only consider entries with absolute path names.
+                       // This allows storing URIs in the database without the
+                       // media scanner removing them.
+                       if (path.startsWith("/")) {
+                           String key = path;
+                           if (mCaseInsensitivePaths) {
+                               key = path.toLowerCase();
+                           }
+                           mFileCache.put(key, new FileCacheEntry(mImagesUri, rowId, path,
+                                   lastModified));
+                       }
                     }
                 } finally {
                     c.close();
@@ -1003,7 +1018,7 @@ public class MediaScanner
                 if (c != null) {
                     try {
                         while (c.moveToNext()) {
-                            String path = c.getString(PATH_IMAGES_COLUMN_INDEX);
+                            String path = c.getString(PATH_PLAYLISTS_COLUMN_INDEX);
 
                             if (path != null && path.length() > 0) {
                                 long rowId = c.getLong(ID_PLAYLISTS_COLUMN_INDEX);

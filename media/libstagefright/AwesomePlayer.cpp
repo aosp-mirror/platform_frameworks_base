@@ -218,6 +218,8 @@ void AwesomePlayer::reset() {
 void AwesomePlayer::reset_l() {
     cancelPlayerEvents();
 
+    mVideoRenderer.clear();
+
     if (mLastVideoBuffer) {
         mLastVideoBuffer->release();
         mLastVideoBuffer = NULL;
@@ -242,8 +244,6 @@ void AwesomePlayer::reset_l() {
 
     delete mAudioPlayer;
     mAudioPlayer = NULL;
-
-    mVideoRenderer.clear();
 
     mDurationUs = -1;
     mFlags = 0;

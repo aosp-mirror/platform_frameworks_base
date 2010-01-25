@@ -56,7 +56,7 @@ public class DdmHandleHello extends ChunkHandler {
         if (Config.LOGV)
             Log.v("ddm-hello", "Connected!");
 
-        if (true) {
+        if (false) {
             /* test spontaneous transmission */
             byte[] data = new byte[] { 0, 1, 2, 3, 4, -4, -3, -2, -1, 127 };
             Chunk testChunk =
@@ -148,9 +148,7 @@ public class DdmHandleHello extends ChunkHandler {
     private Chunk handleFEAT(Chunk request) {
         // TODO: query the VM to ensure that support for these features
         // is actually compiled in
-        final String[] features = {
-            "hprof-heap-dump", "method-trace-profiling"
-        };
+        final String[] features = Debug.getVmFeatureList();
 
         if (Config.LOGV)
             Log.v("ddm-heap", "Got feature list request");

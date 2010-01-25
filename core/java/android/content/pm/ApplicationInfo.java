@@ -252,11 +252,19 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public String sourceDir;
 
     /**
-     * Full path to the location of the publicly available parts of this package (i.e. the resources
-     * and manifest).  For non-forward-locked apps this will be the same as {@link #sourceDir).
+     * Full path to the location of the publicly available parts of this
+     * package (i.e. the primary resource package and manifest).  For
+     * non-forward-locked apps this will be the same as {@link #sourceDir).
      */
     public String publicSourceDir;
     
+    /**
+     * Full paths to the locations of extra resource packages this application
+     * uses. This field is only used if there are extra resource packages,
+     * otherwise it is null.
+     */
+    public String[] resourceDirs;
+
     /**
      * Paths to all shared libraries this application is linked against.  This
      * field is only set if the {@link PackageManager#GET_SHARED_LIBRARY_FILES
@@ -310,6 +318,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
                 + " processName=" + processName);
         pw.println(prefix + "sourceDir=" + sourceDir);
         pw.println(prefix + "publicSourceDir=" + publicSourceDir);
+        pw.println(prefix + "resourceDirs=" + resourceDirs);
         pw.println(prefix + "dataDir=" + dataDir);
         if (sharedLibraryFiles != null) {
             pw.println(prefix + "sharedLibraryFiles=" + sharedLibraryFiles);
@@ -360,6 +369,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         flags = orig.flags;
         sourceDir = orig.sourceDir;
         publicSourceDir = orig.publicSourceDir;
+        resourceDirs = orig.resourceDirs;
         sharedLibraryFiles = orig.sharedLibraryFiles;
         dataDir = orig.dataDir;
         uid = orig.uid;
@@ -390,6 +400,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         dest.writeInt(flags);
         dest.writeString(sourceDir);
         dest.writeString(publicSourceDir);
+        dest.writeStringArray(resourceDirs);
         dest.writeStringArray(sharedLibraryFiles);
         dest.writeString(dataDir);
         dest.writeInt(uid);
@@ -420,6 +431,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         flags = source.readInt();
         sourceDir = source.readString();
         publicSourceDir = source.readString();
+        resourceDirs = source.readStringArray();
         sharedLibraryFiles = source.readStringArray();
         dataDir = source.readString();
         uid = source.readInt();

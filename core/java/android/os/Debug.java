@@ -264,6 +264,17 @@ public final class Debug
     }
 
     /**
+     * Returns an array of strings that identify VM features.  This is
+     * used by DDMS to determine what sorts of operations the VM can
+     * perform.
+     *
+     * @hide
+     */
+    public static String[] getVmFeatureList() {
+        return VMDebug.getVmFeatureList();
+    }
+
+    /**
      * Change the JDWP port.
      *
      * @deprecated no longer needed or useful

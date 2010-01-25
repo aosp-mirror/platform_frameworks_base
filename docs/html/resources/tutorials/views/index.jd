@@ -3,74 +3,95 @@ page.title=Hello, Views
 
 <style>
 .view {float:left; margin:10px; font-size:120%; font-weight:bold;}
-.view img {border:1px solid black; margin:5px 0 0; padding:5px;}
+#jd-content .view img {border:1px solid black; margin:8px 0 0 0; padding:5px;}
 </style>
 
-<p>This collection of "Hello World"-style tutorials is designed
-to get you quickly started with common Android Views and widgets. The aim is to let you copy and paste
-these kinds of boring bits so you can focus on developing the code that makes your Android application rock.
-Of course, we'll discuss some of the given code so that it all makes sense.</p>
+<p>This is a collection of "Hello World"-style tutorials designed
+to get you started quickly with common Android layouts and widgets.</p>
 
-<p>Note that a certain amount of knowledge is assumed for these tutorials. If you haven't
-completed the <a href="{@docRoot}resources/tutorials/hello-world.html">Hello, World</a> tutorial, 
-please do so&mdash;it will teach you many things you should know about basic 
-Android development and Eclipse features. More specifically, you should know:</p>
+<p>A certain amount of knowledge is assumed for these tutorials. Before you start,
+you should have completed the <a href="{@docRoot}resources/tutorials/hello-world.html">Hello,
+World</a> tutorial&mdash;it will teach you several things about basic
+Android development. More specifically, you should know:</p>
 <ul>
-  <li>How to create a new Android project.</li>
-  <li>The basic structure of an Android project (resource files, layout files, etc.).</li>
-  <li>The essential components of an {@link android.app.Activity}.</li>
-  <li>How to build and run a project.</li>
+  <li>How to create an Android project and run it</li>
+  <li>The basic structure of an Android project (resource files, layout files, etc.)</li>
+  <li>The basic components of an {@link android.app.Activity}</li>
 </ul>
-<p>Please, also notice that, in order to make these tutorials simple, some may
-not convey the better Android coding practices. In particular, many of them
-use hard-coded strings in the layout files&mdash;the better practice is to reference strings from
-your strings.xml file.</p>
-<p>With this knowledge, you're ready to begin, so take your pick.</p>
 
-<div>
+<p class="note"><strong>Note:</strong> In order to make these tutorials as simple as possible,
+some code may not conform to best practices for coding Android applications. In particular,
+hard-coded strings are used in places, when the better practice is to reference strings from a
+<code>res/values/strings.xml</code> resource file.</p>
+
+<p class="note"><strong>Tip:</strong> After you have pasted sample code into an Eclipse project,
+press <strong>Ctrl (or Cmd) + Shift + O</strong> to import the required packages.</p>
+
+<h2>Layouts</h2>
 
 <div class="view">
-<a href="hello-linearlayout.html">LinearLayout</a><br/>
-<a href="hello-linearlayout.html"><img src="images/hello-linearlayout.png" height="285" width="200" /></a>
-</div>
-<div class="view">
-<a href="hello-relativelayout.html">RelativeLayout</a><br/>
-<a href="hello-relativelayout.html"><img src="images/hello-relativelayout.png" height="285" width="200" /></a>
-</div>
-<div class="view">
-<a href="hello-tablelayout.html">TableLayout</a><br/>
-<a href="hello-tablelayout.html"><img src="images/hello-tablelayout.png" height="285" width="200" /></a>
+<a href="hello-linearlayout.html">Linear Layout</a><br/>
+<a href="hello-linearlayout.html"><img src="images/hello-linearlayout.png" height="285" width="200"
+/></a>
 </div>
 
 <div class="view">
-<a href="hello-datepicker.html">DatePicker</a><br/>
-<a href="hello-datepicker.html"><img src="images/hello-datepicker.png" height="285" width="200" /></a>
+<a href="hello-relativelayout.html">Relative Layout</a><br/>
+<a href="hello-relativelayout.html"><img src="images/hello-relativelayout.png" height="285"
+width="200" /></a>
 </div>
 
 <div class="view">
-<a href="hello-timepicker.html">TimePicker</a><br/>
-<a href="hello-timepicker.html"><img src="images/hello-timepicker.png" height="285" width="200" /></a>
+<a href="hello-tablelayout.html">Table Layout</a><br/>
+<a href="hello-tablelayout.html"><img src="images/hello-tablelayout.png" height="285" width="200"
+/></a>
 </div>
+
+<div class="view">
+<a href="hello-gridview.html">Grid View</a><br/>
+<a href="hello-gridview.html"><img src="images/hello-gridview.png" height="285" width="200" /></a>
+</div>
+
+<div class="view">
+<a href="hello-tabwidget.html">Tab Layout</a><br/>
+<a href="hello-tabwidget.html"><img src="images/hello-tabwidget.png" height="285" width="200" /></a>
+</div>
+
+<div class="view">
+<a href="hello-listview.html">List View</a><br/>
+<a href="hello-listview.html"><img src="images/hello-listview.png" height="285" width="200" /></a>
+</div>
+
+<p style="clear:left">&nbsp;</p>
+
+<h2>Widgets &amp; Other Views</h2>
+
+<div class="view">
+<a href="hello-datepicker.html">Date Picker</a><br/>
+<a href="hello-datepicker.html"><img src="images/hello-datepicker.png" height="285" width="200"
+/></a>
+</div>
+
+<div class="view">
+<a href="hello-timepicker.html">Time Picker</a><br/>
+<a href="hello-timepicker.html"><img src="images/hello-timepicker.png" height="285" width="200"
+/></a>
+</div>
+
 <div class="view">
 <a href="hello-formstuff.html">Form Stuff</a><br/>
 <a href="hello-formstuff.html"><img src="images/hello-formstuff.png" height="285" width="200" /></a>
 </div>
+
 <div class="view">
 <a href="hello-spinner.html">Spinner</a><br/>
 <a href="hello-spinner.html"><img src="images/hello-spinner.png" height="285" width="200" /></a>
 </div>
 
 <div class="view">
-<a href="hello-autocomplete.html">AutoComplete</a><br/>
-<a href="hello-autocomplete.html"><img src="images/hello-autocomplete.png" height="285" width="200" /></a>
-</div>
-<div class="view">
-<a href="hello-listview.html">ListView</a><br/>
-<a href="hello-listview.html"><img src="images/hello-listview.png" height="285" width="200" /></a>
-</div>
-<div class="view">
-<a href="hello-gridview.html">GridView</a><br/>
-<a href="hello-gridview.html"><img src="images/hello-gridview.png" height="285" width="200" /></a>
+<a href="hello-autocomplete.html">Auto Complete</a><br/>
+<a href="hello-autocomplete.html"><img src="images/hello-autocomplete.png" height="285" width="200"
+/></a>
 </div>
 
 <div class="view">
@@ -79,40 +100,20 @@ your strings.xml file.</p>
 </div>
 
 <div class="view">
-<a href="hello-tabwidget.html">TabWidget</a><br/>
-<a href="hello-tabwidget.html"><img src="images/hello-tabwidget.png" height="285" width="200" /></a>
-</div>
-
-<div class="view">
-<a href="hello-mapview.html">MapView</a><br/>
+<a href="hello-mapview.html">Google Map View</a><br/>
 <a href="hello-mapview.html"><img src="images/hello-mapview.png" height="285" width="200" /></a>
 </div>
 
 <div class="view">
-<a href="hello-webview.html">WebView</a><br/>
+<a href="hello-webview.html">Web View</a><br/>
 <a href="hello-webview.html"><img src="images/hello-webview.png" height="285" width="200" /></a>
 </div>
 
-<!--
-TODO
-
-<div class="view">
-<a href="hello-popupwindow.html">PopupWindow<br/>
-<img src="images/hello-popupwindow.png" height="285" width="200" /></a>
-</div>
-<div class="view">
-<a href="hello-tabhost.html">TabHost / TabWidget<br/>
-<img src="images/hello-tabhost.png" height="285" width="200" /></a>
-</div>
-ProgressBar; RatingBar; FrameLayout
-
--->
 
 <p class="note" style="clear:left">
-There are plenty more Views and widgets available. See the {@link android.view.View} class
+There are plenty more layouts and widgets available. See the {@link android.view.View} class
 for more on View layouts, and the {@link android.widget widget package}
 for more useful widgets. And for more raw code samples, visit the 
-<a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/view/index.html">Api Demos</a>.
-These can also be found offline, in <code>/&lt;sdk&gt;/samples/ApiDemos</code>.</p>
-</div>
+<a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/view/index.html">Api
+Demos</a>.</p>
 

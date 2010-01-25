@@ -382,7 +382,7 @@ static void tearDownEventLoop(native_data_t *nat) {
         dbus_connection_unregister_object_path(nat->conn, agent_path);
 
         dbus_bus_remove_match(nat->conn,
-                "type='signal',interface='org.bluez.audio.Sink'",
+                "type='signal',interface='org.bluez.AudioSink'",
                 &err);
         if (dbus_error_is_set(&err)) {
             LOG_AND_FREE_DBUS_ERROR(&err);

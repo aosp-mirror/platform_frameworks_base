@@ -2334,6 +2334,11 @@
         <attr name="orientation" />
     </declare-styleable>
 
+    <!-- @hide -->
+    <declare-styleable name="WeightedLinearLayout">
+        <attr name="majorWeight" format="float" />
+        <attr name="minorWeight" format="float" />
+    </declare-styleable>
 
     <!-- ========================= -->
     <!-- Drawable class attributes -->
