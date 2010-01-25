@@ -21,6 +21,7 @@ import android.backup.BackupDataInput;
 import android.backup.BackupDataOutput;
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.os.Binder;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
@@ -116,7 +117,9 @@ public abstract class BackupAgent extends ContextWrapper {
         public void doBackup(ParcelFileDescriptor oldState,
                 ParcelFileDescriptor data,
                 ParcelFileDescriptor newState) throws RemoteException {
-            // !!! TODO - real implementation; for now just invoke the callbacks directly
+            // Ensure that we're running with the app's normal permission level
+            long token = Binder.clearCallingIdentity();
+
             if (DEBUG) Log.v(TAG, "doBackup() invoked");
             BackupDataOutput output = new BackupDataOutput(data.getFileDescriptor());
             try {
@@ -127,12 +130,16 @@ public abstract class BackupAgent extends ContextWrapper {
             } catch (RuntimeException ex) {
                 Log.d(TAG, "onBackup (" + BackupAgent.this.getClass().getName() + ") threw", ex);
                 throw ex;
+            } finally {
+                Binder.restoreCallingIdentity(token);
             }
         }
 
         public void doRestore(ParcelFileDescriptor data, int appVersionCode,
                 ParcelFileDescriptor newState) throws RemoteException {
-            // !!! TODO - real implementation; for now just invoke the callbacks directly
+            // Ensure that we're running with the app's normal permission level
+            long token = Binder.clearCallingIdentity();
+
             if (DEBUG) Log.v(TAG, "doRestore() invoked");
             BackupDataInput input = new BackupDataInput(data.getFileDescriptor());
             try {
@@ -143,6 +150,8 @@ public abstract class BackupAgent extends ContextWrapper {
             } catch (RuntimeException ex) {
                 Log.d(TAG, "onRestore (" + BackupAgent.this.getClass().getName() + ") threw", ex);
                 throw ex;
+            } finally {
+                Binder.restoreCallingIdentity(token);
             }
         }
     }
