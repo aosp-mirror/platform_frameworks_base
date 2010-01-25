@@ -583,7 +583,7 @@ static void decodePalette4(const GLvoid *data, int level, int width, int height,
 
 
 static __attribute__((noinline))
-void set_depth_and_fog(ogles_context_t* c, GLint z)
+void set_depth_and_fog(ogles_context_t* c, GGLfixed z)
 {
     const uint32_t enables = c->rasterizer.state.enables;
     // we need to compute Zw
@@ -592,8 +592,8 @@ void set_depth_and_fog(ogles_context_t* c, GLint z)
     GGLfixed Zw;
     GGLfixed n = gglFloatToFixed(c->transforms.vpt.zNear);
     GGLfixed f = gglFloatToFixed(c->transforms.vpt.zFar);
-    if (z<=0)       Zw = n;
-    else if (z>=1)  Zw = f;
+    if (z<=0)               Zw = n;
+    else if (z>=0x10000)    Zw = f;
     else            Zw = gglMulAddx(z, (f-n), n);
     if (enables & GGL_ENABLE_FOG) {
         // set up fog if needed...
@@ -836,7 +836,7 @@ static void drawTexiOES(GLint x, GLint y, GLint z, GLint w, GLint h, ogles_conte
             c->rasterizer.procs.texCoord2i(c, s0, t0);
             const uint32_t enables = c->rasterizer.state.enables;
             if (ggl_unlikely(enables & (GGL_ENABLE_DEPTH_TEST|GGL_ENABLE_FOG)))
-                set_depth_and_fog(c, z);
+                set_depth_and_fog(c, gglIntToFixed(z));
 
             c->rasterizer.procs.color4xv(c, c->currentColorClamped.v);
             c->rasterizer.procs.disable(c, GGL_W_LERP);
