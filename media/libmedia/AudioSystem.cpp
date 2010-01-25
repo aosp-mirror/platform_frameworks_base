@@ -170,10 +170,10 @@ status_t AudioSystem::setMode(int mode)
 }
 
 
-status_t AudioSystem::isMusicActive(bool* state) {
+status_t AudioSystem::isStreamActive(int stream, bool* state) {
     const sp<IAudioFlinger>& af = AudioSystem::get_audio_flinger();
     if (af == 0) return PERMISSION_DENIED;
-    *state = af->isMusicActive();
+    *state = af->isStreamActive(stream);
     return NO_ERROR;
 }
 

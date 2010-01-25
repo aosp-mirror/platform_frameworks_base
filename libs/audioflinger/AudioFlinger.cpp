@@ -544,11 +544,11 @@ bool AudioFlinger::streamMute(int stream) const
     return mStreamTypes[stream].mute;
 }
 
-bool AudioFlinger::isMusicActive() const
+bool AudioFlinger::isStreamActive(int stream) const
 {
     Mutex::Autolock _l(mLock);
     for (uint32_t i = 0; i < mPlaybackThreads.size(); i++) {
-        if (mPlaybackThreads.valueAt(i)->isMusicActive()) {
+        if (mPlaybackThreads.valueAt(i)->isStreamActive(stream)) {
             return true;
         }
     }
@@ -1071,7 +1071,7 @@ bool AudioFlinger::PlaybackThread::streamMute(int stream) const
     return mStreamTypes[stream].mute;
 }
 
-bool AudioFlinger::PlaybackThread::isMusicActive() const
+bool AudioFlinger::PlaybackThread::isStreamActive(int stream) const
 {
     Mutex::Autolock _l(mLock);
     size_t count = mActiveTracks.size();
@@ -1079,7 +1079,7 @@ bool AudioFlinger::PlaybackThread::isMusicActive() const
         sp<Track> t = mActiveTracks[i].promote();
         if (t == 0) continue;
         Track* const track = t.get();
-        if (t->type() == AudioSystem::MUSIC)
+        if (t->type() == stream)
             return true;
     }
     return false;

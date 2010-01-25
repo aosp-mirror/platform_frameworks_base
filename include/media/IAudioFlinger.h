@@ -97,8 +97,8 @@ public:
     virtual     status_t    setMicMute(bool state) = 0;
     virtual     bool        getMicMute() const = 0;
 
-    // is a music stream active?
-    virtual     bool        isMusicActive() const = 0;
+    // is any track active on this stream?
+    virtual     bool        isStreamActive(int stream) const = 0;
 
     virtual     status_t    setParameters(int ioHandle, const String8& keyValuePairs) = 0;
     virtual     String8     getParameters(int ioHandle, const String8& keys) = 0;

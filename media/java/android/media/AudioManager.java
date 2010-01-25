@@ -924,7 +924,7 @@ public class AudioManager {
      * @return true if any music tracks are active.
      */
     public boolean isMusicActive() {
-        return AudioSystem.isMusicActive();
+        return AudioSystem.isStreamActive(STREAM_MUSIC);
     }
 
     /*
