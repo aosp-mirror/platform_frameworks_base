@@ -134,10 +134,7 @@ public class PreferenceManager {
     
     private OnPreferenceTreeClickListener mOnPreferenceTreeClickListener;
     
-    /**
-     * @hide
-     */
-    public PreferenceManager(Activity activity, int firstRequestCode) {
+    PreferenceManager(Activity activity, int firstRequestCode) {
         mActivity = activity;
         mNextRequestCode = firstRequestCode;
         
