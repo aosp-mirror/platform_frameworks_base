@@ -31,7 +31,7 @@ import java.util.ArrayList;
  * consists of a sequence of timed points. One or multiple strokes form a gesture.
  */
 public class GestureStroke {
-    static final float TOUCH_TOLERANCE = 8;
+    static final float TOUCH_TOLERANCE = 3;
 
     public final RectF boundingBox;
 
