@@ -1111,10 +1111,10 @@ EGLBoolean eglMakeCurrent(  EGLDisplay dpy, EGLSurface draw,
         if (cur_c == NULL) {
             // no current context
             if (draw != EGL_NO_SURFACE || read != EGL_NO_SURFACE) {
-                // calling eglMakeCurrent( ..., EGL_NO_CONTEXT, !=0, !=0);
-                return setError(EGL_BAD_PARAMETER, EGL_FALSE);
+                // calling eglMakeCurrent( ..., !=0, !=0, EGL_NO_CONTEXT);
+                return setError(EGL_BAD_MATCH, EGL_FALSE);
             }
-            // not an error, there is just not current context.
+            // not an error, there is just no current context.
             return EGL_TRUE;
         }
     }
