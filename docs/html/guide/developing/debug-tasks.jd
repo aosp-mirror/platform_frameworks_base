@@ -80,13 +80,25 @@ href="#additionaldebugging">Debugging and Testing with Dev Tools</a> below.</dd>
 
 <h2 id="additionaldebugging">Debugging and Testing with Dev Tools</h2>
 
-<p>With the Dev Tools application, you can turn on a number of settings that will
-make it easier to test and debug your applications. The Dev Tools application is automatically
-installed on all system images included with the SDK. The source code for the Dev Tools application
-is also provided in the SDK samples so that you may build it and then install the application on any
-development device.</p>
+<p>With the Dev Tools application, you can enable a number of settings on your device that will
+make it easier to test and debug your applications.</p>
 
-<p>To get to the development settings page on the emulator, launch the Dev Tools application and
+<p>The Dev Tools application is installed by default
+on all system images included with the SDK, so you can use it with the Android Emulator. If you'd
+like to install the Dev Tools application on a real development device, you can copy the
+application from your emulator and then install it on your device using ADB. To copy the
+application from a running emulator, execute:
+</p>
+<pre>
+adb -e pull /system/app/Development.apk ./Development.apk
+</pre>
+<p>This copies the .apk file into the current directory. Then install it on your connected device
+with:</p>
+<pre>
+adb -d install Development.apk
+</pre>
+
+<p>To get started, launch the Dev Tools application and
 select Development Settings. This will open the Development Settings page with the
 following options (among others):</p>
 
@@ -132,7 +144,7 @@ following options (among others):</p>
         can happen during debugging.</dd>
 </dl>
 
-<p>These settings will be remembered across emulator restarts. </p>
+<p>These settings will be remembered across emulator restarts.</p>
 
 <h2 id="DebuggingWebPages">Debugging Web Pages</h2>
 
