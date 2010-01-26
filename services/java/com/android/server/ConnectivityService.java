@@ -828,6 +828,28 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     info.getExtraInfo());
         }
 
+        NetworkStateTracker newNet = tryFailover(prevNetType);
+        if (newNet != null) {
+            NetworkInfo switchTo = newNet.getNetworkInfo();
+            intent.putExtra(ConnectivityManager.EXTRA_OTHER_NETWORK_INFO, switchTo);
+        } else {
+            intent.putExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, true);
+        }
+        // do this before we broadcast the change
+        handleConnectivityChange();
+
+        sendStickyBroadcast(intent);
+        /*
+         * If the failover network is already connected, then immediately send
+         * out a followup broadcast indicating successful failover
+         */
+        if (newNet != null && newNet.getNetworkInfo().isConnected()) {
+            sendConnectedBroadcast(newNet.getNetworkInfo());
+        }
+    }
+
+    // returns -1 if no failover available
+    private NetworkStateTracker tryFailover(int prevNetType) {
         /*
          * If this is a default network, check if other defaults are available
          * or active
@@ -840,8 +862,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
             int newType = -1;
             int newPriority = -1;
-            for (int checkType=0; checkType <=
-                    ConnectivityManager.MAX_NETWORK_TYPE; checkType++) {
+            for (int checkType=0; checkType <= ConnectivityManager.MAX_NETWORK_TYPE; checkType++) {
                 if (checkType == prevNetType) continue;
                 if (mNetAttributes[checkType] == null) continue;
                 if (mNetAttributes[checkType].isDefault()) {
@@ -884,29 +905,13 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                                     switchTo.getTypeName());
                         }
                     }
-                    intent.putExtra(ConnectivityManager.
-                            EXTRA_OTHER_NETWORK_INFO, switchTo);
                 } else {
-                    intent.putExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY,
-                            true);
                     newNet.reconnect();
                 }
-            } else {
-                intent.putExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY,
-                        true);
             }
         }
 
-        // do this before we broadcast the change
-        handleConnectivityChange();
-
-        sendStickyBroadcast(intent);
-        /*
-         * If the failover network is already connected, then immediately send
-         * out a followup broadcast indicating successful failover
-         */
-        if (newNet != null && newNet.getNetworkInfo().isConnected())
-            sendConnectedBroadcast(newNet.getNetworkInfo());
+        return newNet;
     }
 
     private void sendConnectedBroadcast(NetworkInfo info) {
@@ -964,7 +969,25 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             intent.putExtra(ConnectivityManager.EXTRA_IS_FAILOVER, true);
             info.setFailover(false);
         }
+
+        NetworkStateTracker newNet = tryFailover(info.getType());
+        if (newNet != null) {
+            NetworkInfo switchTo = newNet.getNetworkInfo();
+            intent.putExtra(ConnectivityManager.EXTRA_OTHER_NETWORK_INFO, switchTo);
+        } else {
+            intent.putExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, true);
+        }
+        // do this before we broadcast the change
+        handleConnectivityChange();
+
         sendStickyBroadcast(intent);
+        /*
+         * If the failover network is already connected, then immediately send
+         * out a followup broadcast indicating successful failover
+         */
+        if (newNet != null && newNet.getNetworkInfo().isConnected()) {
+            sendConnectedBroadcast(newNet.getNetworkInfo());
+        }
     }
 
     private void sendStickyBroadcast(Intent intent) {
