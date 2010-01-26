@@ -2033,10 +2033,10 @@ public final class Settings {
         public static final String ALLOW_MOCK_LOCATION = "mock_location";
 
         /**
-         * The Android ID (a unique 64-bit value) as a hex string.
-         * Identical to that obtained by calling
-         * GoogleLoginService.getAndroidId(); it is also placed here
-         * so you can get it without binding to a service.
+         * A 64-bit number (as a hex string) that is randomly
+         * generated on the device's first boot and should remain
+         * constant for the lifetime of the device.  (The value may
+         * change if a factory reset is performed on the device.)
          */
         public static final String ANDROID_ID = "android_id";
 
