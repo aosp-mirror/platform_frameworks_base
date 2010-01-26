@@ -526,21 +526,53 @@ class MountService extends IMountService.Stub
      * Callback from NativeDaemonConnector
      */
     public void onDaemonConnected() {
+        /*
+         * Since we'll be calling back into the NativeDaemonConnector,
+         * we need to do our work in a new thread.
+         */
         new Thread() {
             public void run() {
+                /**
+                 * Determine media state and UMS detection status
+                 */
+                String path = Environment.getExternalStorageDirectory().getPath();
+                String state = Environment.MEDIA_REMOVED;
+
                 try {
-                    if (!getVolumeState(Environment.getExternalStorageDirectory().getPath())
-                                 .equals(Environment.MEDIA_MOUNTED)) {
-                        try {
-                            mountVolume(Environment.getExternalStorageDirectory().getPath());
-                        } catch (Exception ex) {
-                            Log.w(TAG, "Connection-mount failed");
+                    String[] vols = mConnector.doListCommand(
+                        "list_volumes", VoldResponseCode.VolumeListResult);
+                    for (String volstr : vols) {
+                        String[] tok = volstr.split(" ");
+                        // FMT: <label> <mountpoint> <state>
+                        if (!tok[1].equals(path)) {
+                            Log.w(TAG, String.format(
+                                    "Skipping unknown volume '%s'",tok[1]));
+                            continue;
                         }
-                    } else {
-                        Log.d(TAG, "Skipping connection-mount; already mounted");
+                        int st = Integer.parseInt(tok[2]);
+                        if (st == VolumeState.NoMedia) {
+                            state = Environment.MEDIA_REMOVED;
+                        } else if (st == VolumeState.Idle) {
+                            state = Environment.MEDIA_UNMOUNTED;
+                            try {
+                                mountVolume(path);
+                            } catch (Exception ex) {
+                                Log.e(TAG, "Connection-mount failed", ex);
+                            }
+                        } else if (st == VolumeState.Mounted) {
+                            state = Environment.MEDIA_MOUNTED;
+                            Log.i(TAG, "Media already mounted on daemon connection");
+                        } else if (st == VolumeState.Shared) {
+                            state = Environment.MEDIA_SHARED;
+                            Log.i(TAG, "Media shared on daemon connection");
+                        } else {
+                            throw new Exception(String.format("Unexpected state %d", st));
+                        }
                     }
-                } catch (IllegalStateException rex) {
-                    Log.e(TAG, "Exception while handling connection mount ", rex);
+                    updatePublicVolumeState(path, state);
+                } catch (Exception e) {
+                    Log.e(TAG, "Error processing initial volume state", e);
+                    updatePublicVolumeState(path, Environment.MEDIA_REMOVED);
                 }
 
                 try {
