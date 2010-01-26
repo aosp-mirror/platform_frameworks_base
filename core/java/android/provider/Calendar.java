@@ -62,7 +62,7 @@ public final class Calendar {
     public static final String EVENT_BEGIN_TIME = "beginTime";
     public static final String EVENT_END_TIME = "endTime";
 
-    public static final String AUTHORITY = "calendar";
+    public static final String AUTHORITY = "com.android.calendar";
 
     /**
      * The content:// style URL for the top-level calendar authority
@@ -1413,4 +1413,25 @@ public final class Calendar {
         // TODO: fill out this class when we actually start utilizing extendedproperties
         // in the calendar application.
    }
+
+    /**
+     * A table provided for sync adapters to use for storing private sync state data.
+     *
+     * @see SyncStateContract
+     */
+    public static final class SyncState implements SyncStateContract.Columns {
+        /**
+         * This utility class cannot be instantiated
+         */
+        private SyncState() {}
+
+        public static final String CONTENT_DIRECTORY =
+                SyncStateContract.Constants.CONTENT_DIRECTORY;
+
+        /**
+         * The content:// style URI for this table
+         */
+        public static final Uri CONTENT_URI =
+                Uri.withAppendedPath(Calendar.CONTENT_URI, CONTENT_DIRECTORY);
+    }
 }

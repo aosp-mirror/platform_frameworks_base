@@ -797,7 +797,7 @@ public class AudioManager {
     public void setMode(int mode) {
         IAudioService service = getService();
         try {
-            service.setMode(mode);
+            service.setMode(mode, mICallBack);
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in setMode", e);
         }
@@ -924,7 +924,7 @@ public class AudioManager {
      * @return true if any music tracks are active.
      */
     public boolean isMusicActive() {
-        return AudioSystem.isMusicActive();
+        return AudioSystem.isStreamActive(STREAM_MUSIC);
     }
 
     /*

@@ -207,36 +207,48 @@ void Type::enableGLVertexBuffer(VertexArray *va) const
 
     uint32_t stride = mElement->getSizeBytes();
     if (mGL.mVtx.size) {
-        va->setPosition(mGL.mVtx.size,
-                        mGL.mVtx.type,
-                        stride,
-                        mGL.mVtx.offset);
+        va->addLegacy(mGL.mVtx.type,
+                      mGL.mVtx.size,
+                      stride,
+                      RS_KIND_POSITION,
+                      false,
+                      mGL.mVtx.offset);
     }
 
     if (mGL.mNorm.size) {
-        va->setNormal(mGL.mNorm.type,
-                      stride,
-                      mGL.mNorm.offset);
+        va->addLegacy(mGL.mNorm.type,
+                     3,
+                     stride,
+                     RS_KIND_NORMAL,
+                     false,
+                     mGL.mNorm.offset);
     }
 
     if (mGL.mColor.size) {
-        va->setColor(mGL.mColor.size,
-                     mGL.mColor.type,
+        va->addLegacy(mGL.mColor.type,
+                     mGL.mColor.size,
                      stride,
+                     RS_KIND_COLOR,
+                     true,
                      mGL.mColor.offset);
     }
 
     if (mGL.mTex.size) {
-        va->setTexture(mGL.mTex.size,
-                       mGL.mTex.type,
-                       stride,
-                       mGL.mTex.offset);
+        va->addLegacy(mGL.mTex.type,
+                     mGL.mTex.size,
+                     stride,
+                     RS_KIND_TEXTURE,
+                     false,
+                     mGL.mTex.offset);
     }
 
     if (mGL.mPointSize.size) {
-        va->setPointSize(mGL.mPointSize.type,
-                         stride,
-                         mGL.mPointSize.offset);
+        va->addLegacy(mGL.mPointSize.type,
+                     1,
+                     stride,
+                     RS_KIND_POINT_SIZE,
+                     false,
+                     mGL.mPointSize.offset);
     }
 
 }
@@ -249,7 +261,7 @@ void Type::enableGLVertexBuffer2(VertexArray *va) const
     uint32_t stride = mElement->getSizeBytes();
     for (uint32_t ct=0; ct < RS_MAX_ATTRIBS; ct++) {
         if (mGL.mUser[ct].size) {
-            va->setUser(mGL.mUser[ct], stride);
+            va->addUser(mGL.mUser[ct], stride);
         }
     }
 }

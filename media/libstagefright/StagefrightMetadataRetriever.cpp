@@ -276,8 +276,6 @@ MediaAlbumArt *StagefrightMetadataRetriever::extractAlbumArt() {
 }
 
 const char *StagefrightMetadataRetriever::extractMetadata(int keyCode) {
-    LOGV("extractMetadata %d", keyCode);
-
     if (mExtractor == NULL) {
         return NULL;
     }

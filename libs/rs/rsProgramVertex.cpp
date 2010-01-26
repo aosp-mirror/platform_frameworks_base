@@ -168,27 +168,27 @@ void ProgramVertex::createShader()
         }
         mShader.append(mUserShader);
     } else {
+        mShader.append("attribute vec4 ATTRIB_LegacyPosition;\n");
+        mShader.append("attribute vec4 ATTRIB_LegacyColor;\n");
+        mShader.append("attribute vec3 ATTRIB_LegacyNormal;\n");
+        mShader.append("attribute float ATTRIB_LegacyPointSize;\n");
+        mShader.append("attribute vec4 ATTRIB_LegacyTexture;\n");
+
         for (uint32_t ct=0; ct < mUniformCount; ct++) {
             mShader.append("uniform mat4 ");
             mShader.append(mUniformNames[ct]);
             mShader.append(";\n");
         }
 
-        for (uint32_t ct=VertexArray::POSITION; ct < mAttribCount; ct++) {
-            mShader.append("attribute vec4 ");
-            mShader.append(mAttribNames[ct]);
-            mShader.append(";\n");
-        }
-
         mShader.append("void main() {\n");
-        mShader.append("  gl_Position = UNI_MVP * ATTRIB_Position;\n");
-        mShader.append("  gl_PointSize = ATTRIB_PointSize.x;\n");
+        mShader.append("  gl_Position = UNI_MVP * ATTRIB_LegacyPosition;\n");
+        mShader.append("  gl_PointSize = ATTRIB_LegacyPointSize;\n");
 
-        mShader.append("  varColor = ATTRIB_Color;\n");
+        mShader.append("  varColor = ATTRIB_LegacyColor;\n");
         if (mTextureMatrixEnable) {
-            mShader.append("  varTex0 = UNI_TexMatrix * ATTRIB_Texture;\n");
+            mShader.append("  varTex0 = UNI_TexMatrix * ATTRIB_LegacyTexture;\n");
         } else {
-            mShader.append("  varTex0 = ATTRIB_Texture;\n");
+            mShader.append("  varTex0 = ATTRIB_LegacyTexture;\n");
         }
         //mShader.append("  pos.x = pos.x / 480.0;\n");
         //mShader.append("  pos.y = pos.y / 800.0;\n");
@@ -326,10 +326,11 @@ void ProgramVertex::initAddUserElement(const Element *e, String8 *names, uint32_
     }
 }
 
+
 void ProgramVertex::init(Context *rsc)
 {
+    mAttribCount = 0;
     if (mUserShader.size() > 0) {
-        mAttribCount = 0;
         for (uint32_t ct=0; ct < mInputCount; ct++) {
             initAddUserElement(mInputElements[ct].get(), mAttribNames, &mAttribCount, "ATTRIB_");
         }
@@ -340,13 +341,6 @@ void ProgramVertex::init(Context *rsc)
             initAddUserElement(mConstantTypes[ct]->getElement(), mUniformNames, &mUniformCount, "UNI_");
         }
     } else {
-        mAttribCount = 5;
-        mAttribNames[0].setTo("ATTRIB_Position");
-        mAttribNames[1].setTo("ATTRIB_Color");
-        mAttribNames[2].setTo("ATTRIB_Normal");
-        mAttribNames[3].setTo("ATTRIB_PointSize");
-        mAttribNames[4].setTo("ATTRIB_Texture");
-
         mUniformCount = 2;
         mUniformNames[0].setTo("UNI_MVP");
         mUniformNames[1].setTo("UNI_TexMatrix");

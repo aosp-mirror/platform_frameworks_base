@@ -54,7 +54,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-
 /**
  * The implementation of the volume manager service.
  * <p>
@@ -231,6 +230,9 @@ public class AudioService extends IAudioService.Stub {
     // Forced device usage for communications
     private int mForcedUseForComm;
 
+    // List of binder death handlers for setMode() client processes.
+    // The last process to have called setMode() is at the top of the list.
+    private ArrayList <SetModeDeathHandler> mSetModeDeathHandlers = new ArrayList <SetModeDeathHandler>();
 
     ///////////////////////////////////////////////////////////////////////////
     // Construction
@@ -248,11 +250,13 @@ public class AudioService extends IAudioService.Stub {
 
         mVolumePanel = new VolumePanel(context, this);
         mSettingsObserver = new SettingsObserver();
-        mMode = AudioSystem.MODE_NORMAL;
         mForcedUseForComm = AudioSystem.FORCE_NONE;
         createAudioSystemThread();
         readPersistedSettings();
         createStreamStates();
+        // Call setMode() to initialize mSetModeDeathHandlers
+        mMode = AudioSystem.MODE_INVALID;
+        setMode(AudioSystem.MODE_NORMAL, null);
         mMediaServerOk = true;
         AudioSystem.setErrorCallback(mAudioSystemCallback);
         loadSoundEffects();
@@ -582,8 +586,54 @@ public class AudioService extends IAudioService.Stub {
         return existingValue;
     }
 
+    private class SetModeDeathHandler implements IBinder.DeathRecipient {
+        private IBinder mCb; // To be notified of client's death
+        private int mMode = AudioSystem.MODE_NORMAL; // Current mode set by this client
+
+        SetModeDeathHandler(IBinder cb) {
+            mCb = cb;
+        }
+
+        public void binderDied() {
+            synchronized(mSetModeDeathHandlers) {
+                Log.w(TAG, "setMode() client died");
+                int index = mSetModeDeathHandlers.indexOf(this);
+                if (index < 0) {
+                    Log.w(TAG, "unregistered setMode() client died");
+                } else {
+                    mSetModeDeathHandlers.remove(this);
+                    // If dead client was a the top of client list,
+                    // apply next mode in the stack
+                    if (index == 0) {
+                        // mSetModeDeathHandlers is never empty as the initial entry
+                        // created when AudioService starts is never removed
+                        SetModeDeathHandler hdlr = mSetModeDeathHandlers.get(0);
+                        int mode = hdlr.getMode();
+                        if (AudioService.this.mMode != mode) {
+                            if (AudioSystem.setPhoneState(mode) == AudioSystem.AUDIO_STATUS_OK) {
+                                AudioService.this.mMode = mode;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        public void setMode(int mode) {
+            mMode = mode;
+        }
+
+        public int getMode() {
+            return mMode;
+        }
+
+        public IBinder getBinder() {
+            return mCb;
+        }
+    }
+
     /** @see AudioManager#setMode(int) */
-    public void setMode(int mode) {
+    public void setMode(int mode, IBinder cb) {
         if (!checkAudioSettingsPermission("setMode()")) {
             return;
         }
@@ -599,6 +649,37 @@ public class AudioService extends IAudioService.Stub {
             if (mode != mMode) {
                 if (AudioSystem.setPhoneState(mode) == AudioSystem.AUDIO_STATUS_OK) {
                     mMode = mode;
+
+                    synchronized(mSetModeDeathHandlers) {
+                        SetModeDeathHandler hdlr = null;
+                        Iterator iter = mSetModeDeathHandlers.iterator();
+                        while (iter.hasNext()) {
+                            SetModeDeathHandler h = (SetModeDeathHandler)iter.next();
+                            if (h.getBinder() == cb) {
+                                hdlr = h;
+                                // Remove from client list so that it is re-inserted at top of list
+                                iter.remove();
+                                break;
+                            }
+                        }
+                        if (hdlr == null) {
+                            hdlr = new SetModeDeathHandler(cb);
+                            // cb is null when setMode() is called by AudioService constructor
+                            if (cb != null) {
+                                // Register for client death notification
+                                try {
+                                    cb.linkToDeath(hdlr, 0);
+                                } catch (RemoteException e) {
+                                    // Client has died!
+                                    Log.w(TAG, "setMode() could not link to "+cb+" binder death");
+                                }
+                            }
+                        }
+                        // Last client to call setMode() is always at top of client list
+                        // as required by SetModeDeathHandler.binderDied()
+                        mSetModeDeathHandlers.add(0, hdlr);
+                        hdlr.setMode(mode);
+                    }
                 }
             }
             int streamType = getActiveStreamType(AudioManager.USE_DEFAULT_STREAM_TYPE);
@@ -876,10 +957,10 @@ public class AudioService extends IAudioService.Stub {
         if (AudioSystem.getForceUse(AudioSystem.FOR_COMMUNICATION) == AudioSystem.FORCE_BT_SCO) {
             // Log.v(TAG, "getActiveStreamType: Forcing STREAM_BLUETOOTH_SCO...");
             return AudioSystem.STREAM_BLUETOOTH_SCO;
-        } else if (isOffhook) {
+        } else if (isOffhook || AudioSystem.isStreamActive(AudioSystem.STREAM_VOICE_CALL)) {
             // Log.v(TAG, "getActiveStreamType: Forcing STREAM_VOICE_CALL...");
             return AudioSystem.STREAM_VOICE_CALL;
-        } else if (AudioSystem.isMusicActive()) {
+        } else if (AudioSystem.isStreamActive(AudioSystem.STREAM_MUSIC)) {
             // Log.v(TAG, "getActiveStreamType: Forcing STREAM_MUSIC...");
             return AudioSystem.STREAM_MUSIC;
         } else if (suggestedStreamType == AudioManager.USE_DEFAULT_STREAM_TYPE) {
@@ -1285,7 +1366,7 @@ public class AudioService extends IAudioService.Stub {
                     // Force creation of new IAudioflinger interface
                     if (!mMediaServerOk) {
                         Log.e(TAG, "Media server died.");
-                        AudioSystem.isMusicActive();
+                        AudioSystem.isStreamActive(AudioSystem.STREAM_MUSIC);
                         sendMsg(mAudioHandler, MSG_MEDIA_SERVER_DIED, SHARED_MSG, SENDMSG_NOOP, 0, 0,
                                 null, 500);
                     }

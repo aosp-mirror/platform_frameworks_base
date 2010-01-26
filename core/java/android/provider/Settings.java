@@ -450,6 +450,21 @@ public final class Settings {
     public static final String ACTION_SEARCH_SETTINGS =
         "android.search.action.SEARCH_SETTINGS";
 
+    /**
+     * Activity Action: Show general device information settings (serial
+     * number, software version, phone number, etc.).
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_DEVICE_INFO_SETTINGS =
+        "android.settings.DEVICE_INFO_SETTINGS";
+
     // End of Intent actions for Settings
 
     private static final String JID_RESOURCE_PREFIX = "android";

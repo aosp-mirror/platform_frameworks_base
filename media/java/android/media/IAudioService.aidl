@@ -47,7 +47,7 @@ interface IAudioService {
     
     boolean shouldVibrate(int vibrateType);
 
-    void setMode(int mode);
+    void setMode(int mode, IBinder cb);
 
     int getMode();
 

@@ -1056,6 +1056,11 @@ class MountService extends IMountService.Stub
         mConnector.doCommand(cmd);
     }
 
+    public void renameSecureContainer(String oldId, String newId) throws IllegalStateException {
+        String cmd = String.format("rename_asec %s %s", oldId, newId);
+        mConnector.doCommand(cmd);
+    }
+
     public String getSecureContainerPath(String id) throws IllegalStateException {
         ArrayList<String> rsp = mConnector.doCommand("asec_path " + id);
 

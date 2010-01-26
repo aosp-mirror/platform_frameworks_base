@@ -36,10 +36,11 @@ import android.os.Message;
 import android.os.Parcel;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
-import android.os.SystemProperties;
+import android.os.SystemClock;
 import android.util.Log;
 import android.util.SparseArray;
 import android.util.Xml;
+import android.util.Pair;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -88,6 +89,8 @@ public class SyncStorageEngine extends Handler {
     /** Enum value for a user-initiated sync. */
     public static final int SOURCE_USER = 3;
 
+    public static final long NOT_IN_BACKOFF_MODE = -1;
+
     private static final Intent SYNC_CONNECTION_SETTING_CHANGED_INTENT =
             new Intent("com.android.sync.SYNC_CONN_STATUS_CHANGED");
 
@@ -117,16 +120,18 @@ public class SyncStorageEngine extends Handler {
         final int syncSource;
         final String authority;
         final Bundle extras;        // note: read-only.
+        final boolean expedited;
 
         int authorityId;
         byte[] flatExtras;
 
         PendingOperation(Account account, int source,
-                String authority, Bundle extras) {
+                String authority, Bundle extras, boolean expedited) {
             this.account = account;
             this.syncSource = source;
             this.authority = authority;
             this.extras = extras != null ? new Bundle(extras) : extras;
+            this.expedited = expedited;
             this.authorityId = -1;
         }
 
@@ -136,6 +141,7 @@ public class SyncStorageEngine extends Handler {
             this.authority = other.authority;
             this.extras = other.extras;
             this.authorityId = other.authorityId;
+            this.expedited = other.expedited;
         }
     }
 
@@ -155,6 +161,9 @@ public class SyncStorageEngine extends Handler {
         final int ident;
         boolean enabled;
         int syncable;
+        long backoffTime;
+        long backoffDelay;
+        long delayUntil;
 
         AuthorityInfo(Account account, String authority, int ident) {
             this.account = account;
@@ -162,6 +171,8 @@ public class SyncStorageEngine extends Handler {
             this.ident = ident;
             enabled = SYNC_ENABLED_DEFAULT;
             syncable = -1; // default to "unknown"
+            backoffTime = -1; // if < 0 then we aren't in backoff mode
+            backoffDelay = -1; // if < 0 then we aren't in backoff mode
         }
     }
 
@@ -280,7 +291,7 @@ public class SyncStorageEngine extends Handler {
 
     public static void init(Context context) {
         if (sSyncStorageEngine != null) {
-            throw new IllegalStateException("already initialized");
+            return;
         }
         sSyncStorageEngine = new SyncStorageEngine(context);
     }
@@ -380,7 +391,7 @@ public class SyncStorageEngine extends Handler {
         }
 
         if (!wasEnabled && sync) {
-            mContext.getContentResolver().requestSync(account, providerName, new Bundle());
+            ContentResolver.requestSync(account, providerName, new Bundle());
         }
         reportChange(ContentResolver.SYNC_OBSERVER_TYPE_SETTINGS);
     }
@@ -424,9 +435,89 @@ public class SyncStorageEngine extends Handler {
         }
 
         if (oldState <= 0 && syncable > 0) {
-            mContext.getContentResolver().requestSync(account, providerName, new Bundle());
+            ContentResolver.requestSync(account, providerName, new Bundle());
         }
         reportChange(ContentResolver.SYNC_OBSERVER_TYPE_SETTINGS);
+    }
+
+    public Pair<Long, Long> getBackoff(Account account, String providerName) {
+        synchronized (mAuthorities) {
+            AuthorityInfo authority = getAuthorityLocked(account, providerName, "getBackoff");
+            if (authority == null || authority.backoffTime < 0) {
+                return null;
+            }
+            return Pair.create(authority.backoffTime, authority.backoffDelay);
+        }
+    }
+
+    public void setBackoff(Account account, String providerName,
+            long nextSyncTime, long nextDelay) {
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            Log.v(TAG, "setBackoff: " + account + ", provider " + providerName
+                    + " -> nextSyncTime " + nextSyncTime + ", nextDelay " + nextDelay);
+        }
+        boolean changed = false;
+        synchronized (mAuthorities) {
+            if (account == null || providerName == null) {
+                for (AccountInfo accountInfo : mAccounts.values()) {
+                    if (account != null && !account.equals(accountInfo.account)) continue;
+                    for (AuthorityInfo authorityInfo : accountInfo.authorities.values()) {
+                        if (providerName != null && !providerName.equals(authorityInfo.authority)) {
+                            continue;
+                        }
+                        if (authorityInfo.backoffTime != nextSyncTime
+                                || authorityInfo.backoffDelay != nextDelay) {
+                            authorityInfo.backoffTime = nextSyncTime;
+                            authorityInfo.backoffDelay = nextDelay;
+                            changed = true;
+                        }
+                    }
+                }
+            } else {
+                AuthorityInfo authority =
+                        getOrCreateAuthorityLocked(account, providerName, -1, false);
+                if (authority.backoffTime == nextSyncTime && authority.backoffDelay == nextDelay) {
+                    return;
+                }
+                authority.backoffTime = nextSyncTime;
+                authority.backoffDelay = nextDelay;
+                changed = true;
+            }
+            if (changed) {
+                writeAccountInfoLocked();
+            }
+        }
+
+        if (changed) {
+            reportChange(ContentResolver.SYNC_OBSERVER_TYPE_SETTINGS);
+        }
+    }
+
+    public void setDelayUntilTime(Account account, String providerName, long delayUntil) {
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            Log.v(TAG, "setDelayUntil: " + account + ", provider " + providerName
+                    + " -> delayUntil " + delayUntil);
+        }
+        synchronized (mAuthorities) {
+            AuthorityInfo authority = getOrCreateAuthorityLocked(account, providerName, -1, false);
+            if (authority.delayUntil == delayUntil) {
+                return;
+            }
+            authority.delayUntil = delayUntil;
+            writeAccountInfoLocked();
+        }
+
+        reportChange(ContentResolver.SYNC_OBSERVER_TYPE_SETTINGS);
+    }
+
+    public long getDelayUntilTime(Account account, String providerName) {
+        synchronized (mAuthorities) {
+            AuthorityInfo authority = getAuthorityLocked(account, providerName, "getDelayUntil");
+            if (authority == null) {
+                return 0;
+            }
+            return authority.delayUntil;
+        }
     }
 
     public void setMasterSyncAutomatically(boolean flag) {
@@ -437,7 +528,7 @@ public class SyncStorageEngine extends Handler {
             writeAccountInfoLocked();
         }
         if (!old && flag) {
-            mContext.getContentResolver().requestSync(null, null, new Bundle());
+            ContentResolver.requestSync(null, null, new Bundle());
         }
         reportChange(ContentResolver.SYNC_OBSERVER_TYPE_SETTINGS);
         mContext.sendBroadcast(SYNC_CONNECTION_SETTING_CHANGED_INTENT);
@@ -512,9 +603,6 @@ public class SyncStorageEngine extends Handler {
 
             SyncStatusInfo status = getOrCreateSyncStatusLocked(authority.ident);
             status.pending = true;
-            status.initialize = op.extras != null &&
-                 op.extras.containsKey(ContentResolver.SYNC_EXTRAS_INITIALIZE) &&
-                 op.extras.getBoolean(ContentResolver.SYNC_EXTRAS_INITIALIZE);
         }
 
         reportChange(ContentResolver.SYNC_OBSERVER_TYPE_PENDING);
@@ -1414,7 +1502,7 @@ public class SyncStorageEngine extends Handler {
         }
     }
 
-    public static final int PENDING_OPERATION_VERSION = 1;
+    public static final int PENDING_OPERATION_VERSION = 2;
 
     /**
      * Read all pending operations back in to the initial engine state.
@@ -1429,7 +1517,7 @@ public class SyncStorageEngine extends Handler {
             final int SIZE = in.dataSize();
             while (in.dataPosition() < SIZE) {
                 int version = in.readInt();
-                if (version != PENDING_OPERATION_VERSION) {
+                if (version != PENDING_OPERATION_VERSION && version != 1) {
                     Log.w(TAG, "Unknown pending operation version "
                             + version + "; dropping all ops");
                     break;
@@ -1437,6 +1525,12 @@ public class SyncStorageEngine extends Handler {
                 int authorityId = in.readInt();
                 int syncSource = in.readInt();
                 byte[] flatExtras = in.createByteArray();
+                boolean expedited;
+                if (version == PENDING_OPERATION_VERSION) {
+                    expedited = in.readInt() != 0;
+                } else {
+                    expedited = false;
+                }
                 AuthorityInfo authority = mAuthorities.get(authorityId);
                 if (authority != null) {
                     Bundle extras = null;
@@ -1445,12 +1539,13 @@ public class SyncStorageEngine extends Handler {
                     }
                     PendingOperation op = new PendingOperation(
                             authority.account, syncSource,
-                            authority.authority, extras);
+                            authority.authority, extras, expedited);
                     op.authorityId = authorityId;
                     op.flatExtras = flatExtras;
                     if (DEBUG_FILE) Log.v(TAG, "Adding pending op: account=" + op.account
                             + " auth=" + op.authority
                             + " src=" + op.syncSource
+                            + " expedited=" + op.expedited
                             + " extras=" + op.extras);
                     mPendingOperations.add(op);
                 }
@@ -1468,6 +1563,7 @@ public class SyncStorageEngine extends Handler {
             op.flatExtras = flattenBundle(op.extras);
         }
         out.writeByteArray(op.flatExtras);
+        out.writeInt(op.expedited ? 1 : 0);
     }
 
     /**

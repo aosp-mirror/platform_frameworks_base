@@ -687,7 +687,7 @@ static void SC_drawLine(float x1, float y1, float z1,
 
     float vtx[] = { x1, y1, z1, x2, y2, z2 };
     VertexArray va;
-    va.setPosition(2, GL_FLOAT, 12, (uint32_t)&vtx);
+    va.addLegacy(GL_FLOAT, 3, 12, RS_KIND_POSITION, false, (uint32_t)vtx);
     if (rsc->checkVersion2_0()) {
         va.setupGL2(rsc, &rsc->mStateVertexArray, &rsc->mShaderCache);
     } else {
@@ -705,7 +705,7 @@ static void SC_drawPoint(float x, float y, float z)
     float vtx[] = { x, y, z };
 
     VertexArray va;
-    va.setPosition(1, GL_FLOAT, 12, (uint32_t)&vtx);
+    va.addLegacy(GL_FLOAT, 3, 12, RS_KIND_POSITION, false, (uint32_t)vtx);
     if (rsc->checkVersion2_0()) {
         va.setupGL2(rsc, &rsc->mStateVertexArray, &rsc->mShaderCache);
     } else {
@@ -737,8 +737,8 @@ static void SC_drawQuadTexCoords(float x1, float y1, float z1,
     const float tex[] = {u1,v1, u2,v2, u3,v3, u4,v4};
 
     VertexArray va;
-    va.setPosition(3, GL_FLOAT, 12, (uint32_t)&vtx);
-    va.setTexture(2, GL_FLOAT, 8, (uint32_t)&tex);
+    va.addLegacy(GL_FLOAT, 3, 12, RS_KIND_POSITION, false, (uint32_t)vtx);
+    va.addLegacy(GL_FLOAT, 2, 8, RS_KIND_TEXTURE, false, (uint32_t)tex);
     if (rsc->checkVersion2_0()) {
         va.setupGL2(rsc, &rsc->mStateVertexArray, &rsc->mShaderCache);
     } else {

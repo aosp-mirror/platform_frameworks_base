@@ -33,14 +33,6 @@ public:
     VertexArray();
     virtual ~VertexArray();
 
-    enum AttribName {
-        POSITION,
-        COLOR,
-        NORMAL,
-        POINT_SIZE,
-        TEXTURE,
-        _LAST
-    };
 
     class Attrib {
     public:
@@ -51,6 +43,7 @@ public:
         uint32_t stride;
         bool normalized;
         String8 name;
+        RsDataKind kind;
 
         Attrib();
         void set(const Attrib &);
@@ -59,23 +52,19 @@ public:
 
 
     void clearAll();
-    void clear(AttribName);
-
     void setActiveBuffer(uint32_t id) {mActiveBuffer = id;}
-
-    void setUser(const Attrib &, uint32_t stride);
-    void setPosition(uint32_t size, uint32_t type, uint32_t stride, uint32_t offset);
-    void setColor(uint32_t size, uint32_t type, uint32_t stride, uint32_t offset);
-    void setNormal(uint32_t type, uint32_t stride, uint32_t offset);
-    void setPointSize(uint32_t type, uint32_t stride, uint32_t offset);
-    void setTexture(uint32_t size, uint32_t type, uint32_t stride, uint32_t offset);
+    void addUser(const Attrib &, uint32_t stride);
+    void addLegacy(uint32_t type, uint32_t size, uint32_t stride, RsDataKind kind, bool normalized, uint32_t offset);
 
     void setupGL(const Context *rsc, class VertexArrayState *) const;
     void setupGL2(const Context *rsc, class VertexArrayState *, ShaderCache *) const;
     void logAttrib(uint32_t idx, uint32_t slot) const;
 
 protected:
+    void clear(uint32_t index);
     uint32_t mActiveBuffer;
+    uint32_t mCount;
+
     Attrib mAttribs[RS_MAX_ATTRIBS];
 };
 

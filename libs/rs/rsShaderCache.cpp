@@ -86,6 +86,7 @@ bool ShaderCache::lookup(Context *rsc, ProgramVertex *vtx, ProgramFragment *frag
     e->vtx = vtx->getShaderID();
     e->frag = frag->getShaderID();
     e->program = glCreateProgram();
+    e->mUserVertexProgram = vtx->isUserProgram();
     if (mEntries[mEntryCount].program) {
         GLuint pgm = e->program;
         glAttachShader(pgm, vtx->getShaderID());
@@ -93,13 +94,16 @@ bool ShaderCache::lookup(Context *rsc, ProgramVertex *vtx, ProgramFragment *frag
         glAttachShader(pgm, frag->getShaderID());
 
         if (!vtx->isUserProgram()) {
-            glBindAttribLocation(pgm, VertexArray::POSITION, "ATTRIB_Position");
-            glBindAttribLocation(pgm, VertexArray::COLOR, "ATTRIB_Color");
-            glBindAttribLocation(pgm, VertexArray::NORMAL, "ATTRIB_Normal");
-            glBindAttribLocation(pgm, VertexArray::POINT_SIZE, "ATTRIB_PointSize");
-            glBindAttribLocation(pgm, VertexArray::TEXTURE, "ATTRIB_T0");
-        } else {
-
+            glBindAttribLocation(pgm, 0, "ATTRIB_LegacyPosition");
+            glBindAttribLocation(pgm, 1, "ATTRIB_LegacyColor");
+            glBindAttribLocation(pgm, 2, "ATTRIB_LegacyNormal");
+            glBindAttribLocation(pgm, 3, "ATTRIB_LegacyPointSize");
+            glBindAttribLocation(pgm, 4, "ATTRIB_LegacyTexture");
+            e->mVtxAttribSlots[RS_KIND_POSITION] = 0;
+            e->mVtxAttribSlots[RS_KIND_COLOR] = 1;
+            e->mVtxAttribSlots[RS_KIND_NORMAL] = 2;
+            e->mVtxAttribSlots[RS_KIND_POINT_SIZE] = 3;
+            e->mVtxAttribSlots[RS_KIND_TEXTURE] = 4;
         }
 
         //LOGE("e2 %x", glGetError());
@@ -120,10 +124,12 @@ bool ShaderCache::lookup(Context *rsc, ProgramVertex *vtx, ProgramFragment *frag
             }
             glDeleteProgram(pgm);
         }
-        for (uint32_t ct=0; ct < vtx->getAttribCount(); ct++) {
-            e->mVtxAttribSlots[ct] = glGetAttribLocation(pgm, vtx->getAttribName(ct));
-            if (rsc->props.mLogShaders) {
-                LOGV("vtx A %i, %s = %d\n", ct, vtx->getAttribName(ct).string(), e->mVtxAttribSlots[ct]);
+        if (vtx->isUserProgram()) {
+            for (uint32_t ct=0; ct < vtx->getAttribCount(); ct++) {
+                e->mVtxAttribSlots[ct] = glGetAttribLocation(pgm, vtx->getAttribName(ct));
+                if (rsc->props.mLogShaders) {
+                    LOGV("vtx A %i, %s = %d\n", ct, vtx->getAttribName(ct).string(), e->mVtxAttribSlots[ct]);
+                }
             }
         }
         for (uint32_t ct=0; ct < vtx->getUniformCount(); ct++) {

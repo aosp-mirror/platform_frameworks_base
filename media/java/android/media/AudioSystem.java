@@ -153,11 +153,11 @@ public class AudioSystem
     }
 
     /*
-     * Checks whether any music is active.
+     * Checks whether the specified stream type is active.
      *
-     * return true if any music tracks are active.
+     * return true if any track playing on this stream is active.
      */
-    public static native boolean isMusicActive();
+    public static native boolean isStreamActive(int stream);
 
     /*
      * Sets a group generic audio configuration parameters. The use of these parameters

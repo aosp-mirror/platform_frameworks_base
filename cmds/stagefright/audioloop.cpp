@@ -1,7 +1,10 @@
 #include "SineSource.h"
 
 #include <binder/ProcessState.h>
+#include <media/mediarecorder.h>
+#include <media/stagefright/AMRWriter.h>
 #include <media/stagefright/AudioPlayer.h>
+#include <media/stagefright/AudioSource.h>
 #include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/MediaDefs.h>
 #include <media/stagefright/MetaData.h>
@@ -21,7 +24,16 @@ int main() {
     OMXClient client;
     CHECK_EQ(client.connect(), OK);
 
+#if 0
     sp<MediaSource> source = new SineSource(kSampleRate, kNumChannels);
+#else
+    sp<MediaSource> source = new AudioSource(
+            AUDIO_SOURCE_DEFAULT,
+            kSampleRate,
+            kNumChannels == 1
+                ? AudioSystem::CHANNEL_IN_MONO
+                : AudioSystem::CHANNEL_IN_STEREO);
+#endif
 
     sp<MetaData> meta = new MetaData;
 
@@ -43,12 +55,19 @@ int main() {
             meta, true /* createEncoder */,
             source);
 
+#if 1
+    sp<AMRWriter> writer = new AMRWriter("/sdcard/out.amr");
+    writer->addSource(encoder);
+    writer->start();
+    sleep(10);
+    writer->stop();
+#else
     sp<MediaSource> decoder = OMXCodec::Create(
             client.interface(),
             meta, false /* createEncoder */,
             encoder);
 
-#if 1
+#if 0
     AudioPlayer *player = new AudioPlayer(NULL);
     player->setSource(decoder);
 
@@ -60,7 +79,7 @@ int main() {
 
     delete player;
     player = NULL;
-#else
+#elif 0
     CHECK_EQ(decoder->start(), OK);
 
     MediaBuffer *buffer;
@@ -75,6 +94,7 @@ int main() {
     }
 
     CHECK_EQ(decoder->stop(), OK);
+#endif
 #endif
 
     return 0;
