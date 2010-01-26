@@ -2122,7 +2122,7 @@
              to match the width of the screen, or wrap_content to match the width
              of the anchored view. -->
         <attr name="dropDownWidth" format="dimension">
-            <!-- {@deprecated Use match_parent instead.} -->
+            <!-- <strong>Deprecated.</strong> Use {@code match_parent} instead. -->
             <enum name="fill_parent" value="-1" />
             <!-- The dropdown should fit the width of the screen. -->
             <enum name="match_parent" value="-1" />
@@ -2134,7 +2134,7 @@
              to fill the width of the screen, or wrap_content to match the height of
              the content of the drop down. -->
         <attr name="dropDownHeight" format="dimension">
-            <!-- {@deprecated Use match_parent instead.} -->
+            <!-- <strong>Deprecated.</strong> Use {@code match_parent} instead. -->
             <enum name="fill_parent" value="-1" />
             <!-- The dropdown should fill the width of the screen. -->
             <enum name="match_parent" value="-1" />
