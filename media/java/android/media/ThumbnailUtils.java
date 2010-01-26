@@ -16,13 +16,6 @@
 
 package android.media;
 
-import android.net.Uri;
-import android.os.ParcelFileDescriptor;
-import android.provider.BaseColumns;
-import android.provider.MediaStore.Images;
-import android.provider.MediaStore.Images.Thumbnails;
-import android.util.Log;
-
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -34,47 +27,171 @@ import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaFile.MediaFileType;
+import android.net.Uri;
+import android.os.ParcelFileDescriptor;
+import android.provider.BaseColumns;
+import android.provider.MediaStore.Images;
+import android.provider.MediaStore.Images.Thumbnails;
+import android.util.Log;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.OutputStream;
 
 /**
- * Thumbnail generation routines for media provider. This class should only be used internaly.
- * {@hide} THIS IS NOT FOR PUBLIC API.
+ * Thumbnail generation routines for media provider.
  */
 
-public class ThumbnailUtil {
-    private static final String TAG = "ThumbnailUtil";
-    //Whether we should recycle the input (unless the output is the input).
-    public static final boolean RECYCLE_INPUT = true;
-    public static final boolean NO_RECYCLE_INPUT = false;
-    public static final boolean ROTATE_AS_NEEDED = true;
-    public static final boolean NO_ROTATE = false;
-    public static final boolean USE_NATIVE = true;
-    public static final boolean NO_NATIVE = false;
+public class ThumbnailUtils {
+    private static final String TAG = "ThumbnailUtils";
 
-    public static final int THUMBNAIL_TARGET_SIZE = 320;
-    public static final int MINI_THUMB_TARGET_SIZE = 96;
-    public static final int THUMBNAIL_MAX_NUM_PIXELS = 512 * 384;
-    public static final int MINI_THUMB_MAX_NUM_PIXELS = 128 * 128;
-    public static final int UNCONSTRAINED = -1;
+    /* Maximum pixels size for created bitmap. */
+    private static final int THUMBNAIL_MAX_NUM_PIXELS = 512 * 384;
+    private static final int MINI_THUMB_MAX_NUM_PIXELS = 128 * 128;
+    private static final int UNCONSTRAINED = -1;
 
-    // Returns Options that set the native alloc flag for Bitmap decode.
-    public static BitmapFactory.Options createNativeAllocOptions() {
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inNativeAlloc = true;
-        return options;
-    }
+    /* Whether we should rotate the resulting bitmap. */
+    private static final boolean ROTATE_AS_NEEDED = true;
+    private static final boolean NO_ROTATE = false;
+
+    /* Whether we should create bitmap in native memory. */
+    private static final boolean USE_NATIVE = true;
+    private static final boolean NO_NATIVE = false;
+
     /**
-     * Make a bitmap from a given Uri.
-     *
-     * @param uri
+     * Constant used to indicate we should recycle the input in
+     * {@link #extractMiniThumb(Bitmap, int, int, boolean)} unless the output is the input.
      */
-    public static Bitmap makeBitmap(int minSideLength, int maxNumOfPixels,
-            Uri uri, ContentResolver cr) {
-        return makeBitmap(minSideLength, maxNumOfPixels, uri, cr,
-                NO_NATIVE);
+    public static final boolean RECYCLE_INPUT = true;
+
+    /**
+     * Constant used to indicate we should not recycle the input in
+     * {@link #extractMiniThumb(Bitmap, int, int, boolean)}.
+     */
+    public static final boolean NO_RECYCLE_INPUT = false;
+
+    /**
+     * Constant used to indicate the dimension of normal thumbnail in
+     * {@link #extractMiniThumb(Bitmap, int, int, boolean)}.
+     */
+    public static final int THUMBNAIL_TARGET_SIZE = 320;
+
+    /**
+     * Constant used to indicate the dimension of mini thumbnail in
+     * {@link #extractMiniThumb(Bitmap, int, int, boolean)}.
+     */
+    public static final int MINI_THUMB_TARGET_SIZE = 96;
+
+    /**
+     * This method first examines if the thumbnail embedded in EXIF is bigger than our target
+     * size. If not, then it'll create a thumbnail from original image. Due to efficiency
+     * consideration, we want to let MediaThumbRequest avoid calling this method twice for
+     * both kinds, so it only requests for MICRO_KIND and set saveImage to true.
+     *
+     * This method always returns a "square thumbnail" for MICRO_KIND thumbnail.
+     *
+     * @param cr ContentResolver
+     * @param filePath file path needed by EXIF interface
+     * @param uri URI of original image
+     * @param origId image id
+     * @param kind either MINI_KIND or MICRO_KIND
+     * @param saveMini Whether to save MINI_KIND thumbnail obtained in this method.
+     * @return Bitmap
+     */
+    public static Bitmap createImageThumbnail(ContentResolver cr, String filePath, Uri uri,
+            long origId, int kind, boolean saveMini) {
+        boolean wantMini = (kind == Images.Thumbnails.MINI_KIND || saveMini);
+        int targetSize = wantMini ?
+                THUMBNAIL_TARGET_SIZE : MINI_THUMB_TARGET_SIZE;
+        int maxPixels = wantMini ?
+                THUMBNAIL_MAX_NUM_PIXELS : MINI_THUMB_MAX_NUM_PIXELS;
+        SizedThumbnailBitmap sizedThumbnailBitmap = new SizedThumbnailBitmap();
+        Bitmap bitmap = null;
+        MediaFileType fileType = MediaFile.getFileType(filePath);
+        if (fileType != null && fileType.fileType == MediaFile.FILE_TYPE_JPEG) {
+            createThumbnailFromEXIF(filePath, targetSize, maxPixels, sizedThumbnailBitmap);
+            bitmap = sizedThumbnailBitmap.mBitmap;
+        }
+
+        if (bitmap == null) {
+            bitmap = makeBitmap(targetSize, maxPixels, uri, cr);
+        }
+
+        if (bitmap == null) {
+            return null;
+        }
+
+        if (saveMini) {
+            if (sizedThumbnailBitmap.mThumbnailData != null) {
+                storeThumbnail(cr, origId,
+                        sizedThumbnailBitmap.mThumbnailData,
+                        sizedThumbnailBitmap.mThumbnailWidth,
+                        sizedThumbnailBitmap.mThumbnailHeight);
+            } else {
+                storeThumbnail(cr, origId, bitmap);
+            }
+        }
+
+        if (kind == Images.Thumbnails.MICRO_KIND) {
+            // now we make it a "square thumbnail" for MICRO_KIND thumbnail
+            bitmap = extractMiniThumb(bitmap,
+                    MINI_THUMB_TARGET_SIZE,
+                    MINI_THUMB_TARGET_SIZE, RECYCLE_INPUT);
+        }
+        return bitmap;
+    }
+
+    /**
+     * Create a video thumbnail for a video. May return null if the video is
+     * corrupt.
+     *
+     * @param filePath
+     */
+    public static Bitmap createVideoThumbnail(String filePath) {
+        Bitmap bitmap = null;
+        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+        try {
+            retriever.setMode(MediaMetadataRetriever.MODE_CAPTURE_FRAME_ONLY);
+            retriever.setDataSource(filePath);
+            bitmap = retriever.captureFrame();
+        } catch (IllegalArgumentException ex) {
+            // Assume this is a corrupt video file
+        } catch (RuntimeException ex) {
+            // Assume this is a corrupt video file.
+        } finally {
+            try {
+                retriever.release();
+            } catch (RuntimeException ex) {
+                // Ignore failures while cleaning up.
+            }
+        }
+        return bitmap;
+    }
+
+    /**
+     * Creates a centered bitmap of the desired size.
+     *
+     * @param source original bitmap source
+     * @param width targeted width
+     * @param height targeted height
+     * @param recycle whether we want to recycle the input
+     */
+    public static Bitmap extractMiniThumb(
+            Bitmap source, int width, int height, boolean recycle) {
+        if (source == null) {
+            return null;
+        }
+
+        float scale;
+        if (source.getWidth() < source.getHeight()) {
+            scale = width / (float) source.getWidth();
+        } else {
+            scale = height / (float) source.getHeight();
+        }
+        Matrix matrix = new Matrix();
+        matrix.setScale(scale, scale);
+        Bitmap miniThumbnail = transform(matrix, source, width, height, true, recycle);
+        return miniThumbnail;
     }
 
     /*
@@ -96,7 +213,7 @@ public class ThumbnailUtil {
      * For example, BitmapFactory downsamples an image by 2 even though the
      * request is 3. So we round up the sample size to avoid OOM.
      */
-    public static int computeSampleSize(BitmapFactory.Options options,
+    private static int computeSampleSize(BitmapFactory.Options options,
             int minSideLength, int maxNumOfPixels) {
         int initialSize = computeInitialSampleSize(options, minSideLength,
                 maxNumOfPixels);
@@ -140,7 +257,30 @@ public class ThumbnailUtil {
         }
     }
 
-    public static Bitmap makeBitmap(int minSideLength, int maxNumOfPixels,
+    /**
+     *  Returns Options that set the native alloc flag for Bitmap decode.
+     */
+    private static BitmapFactory.Options createNativeAllocOptions() {
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inNativeAlloc = true;
+        return options;
+    }
+
+    /**
+     * Make a bitmap from a given Uri, minimal side length, and maximum number of pixels.
+     */
+    private static Bitmap makeBitmap(int minSideLength, int maxNumOfPixels,
+            Uri uri, ContentResolver cr) {
+        return makeBitmap(minSideLength, maxNumOfPixels, uri, cr,
+                NO_NATIVE);
+    }
+
+    /**
+     * Make a bitmap from a given Uri, minimal side length, and maximum number of pixels.
+     * The image data will be read from specified ContentResolver and clients are allowed to specify
+     * whether they want the Bitmap be created in native memory.
+     */
+    private static Bitmap makeBitmap(int minSideLength, int maxNumOfPixels,
             Uri uri, ContentResolver cr, boolean useNative) {
         ParcelFileDescriptor input = null;
         try {
@@ -159,9 +299,52 @@ public class ThumbnailUtil {
         }
     }
 
-    // Rotates the bitmap by the specified degree.
-    // If a new bitmap is created, the original bitmap is recycled.
-    public static Bitmap rotate(Bitmap b, int degrees) {
+    /**
+     * Make a bitmap from a given Uri, minimal side length, and maximum number of pixels.
+     * The image data will be read from specified pfd if it's not null, otherwise
+     * a new input stream will be created using specified ContentResolver.
+     *
+     * Clients are allowed to pass their own BitmapFactory.Options used for bitmap decoding. A
+     * new BitmapFactory.Options will be created if options is null.
+     */
+    private static Bitmap makeBitmap(int minSideLength, int maxNumOfPixels,
+            Uri uri, ContentResolver cr, ParcelFileDescriptor pfd,
+            BitmapFactory.Options options) {
+            Bitmap b = null;
+        try {
+            if (pfd == null) pfd = makeInputStream(uri, cr);
+            if (pfd == null) return null;
+            if (options == null) options = new BitmapFactory.Options();
+
+            FileDescriptor fd = pfd.getFileDescriptor();
+            options.inSampleSize = 1;
+            options.inJustDecodeBounds = true;
+            BitmapFactory.decodeFileDescriptor(fd, null, options);
+            if (options.mCancel || options.outWidth == -1
+                    || options.outHeight == -1) {
+                return null;
+            }
+            options.inSampleSize = computeSampleSize(
+                    options, minSideLength, maxNumOfPixels);
+            options.inJustDecodeBounds = false;
+
+            options.inDither = false;
+            options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+            b = BitmapFactory.decodeFileDescriptor(fd, null, options);
+        } catch (OutOfMemoryError ex) {
+            Log.e(TAG, "Got oom exception ", ex);
+            return null;
+        } finally {
+            closeSilently(pfd);
+        }
+        return b;
+    }
+
+    /**
+     * Rotates the bitmap by the specified degree.
+     * If a new bitmap is created, the original bitmap is recycled.
+     */
+    private static Bitmap rotate(Bitmap b, int degrees) {
         if (degrees != 0 && b != null) {
             Matrix m = new Matrix();
             m.setRotate(degrees,
@@ -198,149 +381,10 @@ public class ThumbnailUtil {
         }
     }
 
-    public static Bitmap makeBitmap(int minSideLength, int maxNumOfPixels,
-        Uri uri, ContentResolver cr, ParcelFileDescriptor pfd,
-        BitmapFactory.Options options) {
-        Bitmap b = null;
-        try {
-            if (pfd == null) pfd = makeInputStream(uri, cr);
-            if (pfd == null) return null;
-            if (options == null) options = new BitmapFactory.Options();
-
-            FileDescriptor fd = pfd.getFileDescriptor();
-            options.inSampleSize = 1;
-            options.inJustDecodeBounds = true;
-            BitmapFactory.decodeFileDescriptor(fd, null, options);
-            if (options.mCancel || options.outWidth == -1
-                    || options.outHeight == -1) {
-                return null;
-            }
-            options.inSampleSize = computeSampleSize(
-                    options, minSideLength, maxNumOfPixels);
-            options.inJustDecodeBounds = false;
-
-            options.inDither = false;
-            options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-            b = BitmapFactory.decodeFileDescriptor(fd, null, options);
-        } catch (OutOfMemoryError ex) {
-            Log.e(TAG, "Got oom exception ", ex);
-            return null;
-        } finally {
-            closeSilently(pfd);
-        }
-        return b;
-    }
-
     /**
-     * Creates a centered bitmap of the desired size.
-     * @param source
-     * @param recycle whether we want to recycle the input
+     * Transform source Bitmap to targeted width and height.
      */
-    public static Bitmap extractMiniThumb(
-            Bitmap source, int width, int height, boolean recycle) {
-        if (source == null) {
-            return null;
-        }
-
-        float scale;
-        if (source.getWidth() < source.getHeight()) {
-            scale = width / (float) source.getWidth();
-        } else {
-            scale = height / (float) source.getHeight();
-        }
-        Matrix matrix = new Matrix();
-        matrix.setScale(scale, scale);
-        Bitmap miniThumbnail = transform(matrix, source, width, height, true, recycle);
-        return miniThumbnail;
-    }
-
-    /**
-     * Create a video thumbnail for a video. May return null if the video is
-     * corrupt.
-     *
-     * @param filePath
-     */
-    public static Bitmap createVideoThumbnail(String filePath) {
-        Bitmap bitmap = null;
-        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-        try {
-            retriever.setMode(MediaMetadataRetriever.MODE_CAPTURE_FRAME_ONLY);
-            retriever.setDataSource(filePath);
-            bitmap = retriever.captureFrame();
-        } catch (IllegalArgumentException ex) {
-            // Assume this is a corrupt video file
-        } catch (RuntimeException ex) {
-            // Assume this is a corrupt video file.
-        } finally {
-            try {
-                retriever.release();
-            } catch (RuntimeException ex) {
-                // Ignore failures while cleaning up.
-            }
-        }
-        return bitmap;
-    }
-
-    /**
-     * This method first examines if the thumbnail embedded in EXIF is bigger than our target
-     * size. If not, then it'll create a thumbnail from original image. Due to efficiency
-     * consideration, we want to let MediaThumbRequest avoid calling this method twice for
-     * both kinds, so it only requests for MICRO_KIND and set saveImage to true.
-     *
-     * This method always returns a "square thumbnail" for MICRO_KIND thumbnail.
-     *
-     * @param cr ContentResolver
-     * @param filePath file path needed by EXIF interface
-     * @param uri URI of original image
-     * @param origId image id
-     * @param kind either MINI_KIND or MICRO_KIND
-     * @param saveMini Whether to save MINI_KIND thumbnail obtained in this method.
-     * @return Bitmap
-     */
-    public static Bitmap createImageThumbnail(ContentResolver cr, String filePath, Uri uri,
-            long origId, int kind, boolean saveMini) {
-        boolean wantMini = (kind == Images.Thumbnails.MINI_KIND || saveMini);
-        int targetSize = wantMini ?
-                ThumbnailUtil.THUMBNAIL_TARGET_SIZE : ThumbnailUtil.MINI_THUMB_TARGET_SIZE;
-        int maxPixels = wantMini ?
-                ThumbnailUtil.THUMBNAIL_MAX_NUM_PIXELS : ThumbnailUtil.MINI_THUMB_MAX_NUM_PIXELS;
-        SizedThumbnailBitmap sizedThumbnailBitmap = new SizedThumbnailBitmap();
-        Bitmap bitmap = null;
-        MediaFileType fileType = MediaFile.getFileType(filePath);
-        if (fileType != null && fileType.fileType == MediaFile.FILE_TYPE_JPEG) {
-            createThumbnailFromEXIF(filePath, targetSize, maxPixels, sizedThumbnailBitmap);
-            bitmap = sizedThumbnailBitmap.mBitmap;
-        }
-
-        if (bitmap == null) {
-            bitmap = ThumbnailUtil.makeBitmap(targetSize, maxPixels, uri, cr);
-        }
-
-        if (bitmap == null) {
-            return null;
-        }
-
-        if (saveMini) {
-            if (sizedThumbnailBitmap.mThumbnailData != null) {
-                ThumbnailUtil.storeThumbnail(cr, origId,
-                        sizedThumbnailBitmap.mThumbnailData,
-                        sizedThumbnailBitmap.mThumbnailWidth,
-                        sizedThumbnailBitmap.mThumbnailHeight);
-            } else {
-                ThumbnailUtil.storeThumbnail(cr, origId, bitmap);
-            }
-        }
-
-        if (kind == Images.Thumbnails.MICRO_KIND) {
-            // now we make it a "square thumbnail" for MICRO_KIND thumbnail
-            bitmap = ThumbnailUtil.extractMiniThumb(bitmap,
-                    ThumbnailUtil.MINI_THUMB_TARGET_SIZE,
-                    ThumbnailUtil.MINI_THUMB_TARGET_SIZE, ThumbnailUtil.RECYCLE_INPUT);
-        }
-        return bitmap;
-    }
-
-    public static Bitmap transform(Matrix scaler,
+    private static Bitmap transform(Matrix scaler,
             Bitmap source,
             int targetWidth,
             int targetHeight,
@@ -441,10 +485,6 @@ public class ThumbnailUtil {
     /**
      * Look up thumbnail uri by given imageId, it will be automatically created if it's not created
      * yet. Most of the time imageId is identical to thumbId, but it's not always true.
-     * @param req
-     * @param width
-     * @param height
-     * @return Uri Thumbnail uri
      */
     private static Uri getImageThumbnailUri(ContentResolver cr, long origId, int width, int height) {
         Uri thumbUri = Images.Thumbnails.EXTERNAL_CONTENT_URI;
@@ -513,10 +553,14 @@ public class ThumbnailUtil {
         }
     }
 
-    // SizedThumbnailBitmap contains the bitmap, which is downsampled either from
-    // the thumbnail in exif or the full image.
-    // mThumbnailData, mThumbnailWidth and mThumbnailHeight are set together only if mThumbnail is not null.
-    // The width/height of the sized bitmap may be different from mThumbnailWidth/mThumbnailHeight.
+    /**
+     * SizedThumbnailBitmap contains the bitmap, which is downsampled either from
+     * the thumbnail in exif or the full image.
+     * mThumbnailData, mThumbnailWidth and mThumbnailHeight are set together only if mThumbnail
+     * is not null.
+     *
+     * The width/height of the sized bitmap may be different from mThumbnailWidth/mThumbnailHeight.
+     */
     private static class SizedThumbnailBitmap {
         public byte[] mThumbnailData;
         public Bitmap mBitmap;
@@ -524,9 +568,11 @@ public class ThumbnailUtil {
         public int mThumbnailHeight;
     }
 
-    // Creates a bitmap by either downsampling from the thumbnail in EXIF or the full image.
-    // The functions returns a SizedThumbnailBitmap,
-    // which contains a downsampled bitmap and the thumbnail data in EXIF if exists.
+    /**
+     * Creates a bitmap by either downsampling from the thumbnail in EXIF or the full image.
+     * The functions returns a SizedThumbnailBitmap,
+     * which contains a downsampled bitmap and the thumbnail data in EXIF if exists.
+     */
     private static void createThumbnailFromEXIF(String filePath, int targetSize,
             int maxPixels, SizedThumbnailBitmap sizedThumbBitmap) {
         if (filePath == null) return;

@@ -28,7 +28,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.media.MiniThumbFile;
-import android.media.ThumbnailUtil;
+import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
@@ -381,15 +381,15 @@ public final class MediaStore {
                         filePath = c.getString(1);
                     }
                     if (isVideo) {
-                        bitmap = ThumbnailUtil.createVideoThumbnail(filePath);
+                        bitmap = ThumbnailUtils.createVideoThumbnail(filePath);
                         if (kind == MICRO_KIND && bitmap != null) {
-                            bitmap = ThumbnailUtil.extractMiniThumb(bitmap,
-                                    ThumbnailUtil.MINI_THUMB_TARGET_SIZE,
-                                    ThumbnailUtil.MINI_THUMB_TARGET_SIZE,
-                                    ThumbnailUtil.RECYCLE_INPUT);
+                            bitmap = ThumbnailUtils.extractMiniThumb(bitmap,
+                                    ThumbnailUtils.MINI_THUMB_TARGET_SIZE,
+                                    ThumbnailUtils.MINI_THUMB_TARGET_SIZE,
+                                    ThumbnailUtils.RECYCLE_INPUT);
                         }
                     } else {
-                        bitmap = ThumbnailUtil.createImageThumbnail(cr, filePath, uri, origId,
+                        bitmap = ThumbnailUtils.createImageThumbnail(cr, filePath, uri, origId,
                                 kind, false);
                     }
                 }
