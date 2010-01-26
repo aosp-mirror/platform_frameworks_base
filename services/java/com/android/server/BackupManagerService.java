@@ -161,7 +161,7 @@ class BackupManagerService extends IBackupManager.Stub {
             = new HashMap<String,IBackupTransport>();
     String mCurrentTransport;
     IBackupTransport mLocalTransport, mGoogleTransport;
-    RestoreSession mActiveRestoreSession;
+    ActiveRestoreSession mActiveRestoreSession;
 
     class RestoreParams {
         public IBackupTransport transport;
@@ -2068,20 +2068,20 @@ class BackupManagerService extends IBackupManager.Stub {
                 Log.d(TAG, "Restore session requested but one already active");
                 return null;
             }
-            mActiveRestoreSession = new RestoreSession(transport);
+            mActiveRestoreSession = new ActiveRestoreSession(transport);
         }
         return mActiveRestoreSession;
     }
 
     // ----- Restore session -----
 
-    class RestoreSession extends IRestoreSession.Stub {
+    class ActiveRestoreSession extends IRestoreSession.Stub {
         private static final String TAG = "RestoreSession";
 
         private IBackupTransport mRestoreTransport = null;
         RestoreSet[] mRestoreSets = null;
 
-        RestoreSession(String transport) {
+        ActiveRestoreSession(String transport) {
             mRestoreTransport = getTransport(transport);
         }
 
