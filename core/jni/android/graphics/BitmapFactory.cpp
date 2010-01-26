@@ -645,6 +645,23 @@ static jbyteArray nativeScaleNinePatch(JNIEnv* env, jobject, jbyteArray chunkObj
     return chunkObject;
 }
 
+static void nativeSetDefaultConfig(JNIEnv* env, jobject, int nativeConfig) {
+    SkBitmap::Config config = static_cast<SkBitmap::Config>(nativeConfig);
+
+    // these are the only default configs that make sense for codecs right now
+    static const SkBitmap::Config gValidDefConfig[] = {
+        SkBitmap::kRGB_565_Config,
+        SkBitmap::kARGB_8888_Config,
+    };
+
+    for (size_t i = 0; i < SK_ARRAY_COUNT(gValidDefConfig); i++) {
+        if (config == gValidDefConfig[i]) {
+            SkImageDecoder::SetDeviceConfig(config);
+            break;
+        }
+    }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 static JNINativeMethod gMethods[] = {
@@ -671,8 +688,9 @@ static JNINativeMethod gMethods[] = {
     {   "nativeScaleNinePatch",
         "([BFLandroid/graphics/Rect;)[B",
         (void*)nativeScaleNinePatch
-    }
+    },
 
+    {   "nativeSetDefaultConfig", "(I)V", (void*)nativeSetDefaultConfig },
 };
 
 static JNINativeMethod gOptionsMethods[] = {
