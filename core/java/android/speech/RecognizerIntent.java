@@ -157,8 +157,6 @@ public class RecognizerIntent {
     
     /**
      * Triggers the voice search settings activity.
-     * 
-     * @hide pending API council approval, to be unhidden for Froyo
      */
     public static final String ACTION_VOICE_SEARCH_SETTINGS =
             "android.speech.action.VOICE_SEARCH_SETTINGS";
