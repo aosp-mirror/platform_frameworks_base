@@ -32,7 +32,6 @@
 #include <media/AudioTrack.h>
 
 #include <utils/Log.h>
-#include <binder/MemoryDealer.h>
 #include <binder/Parcel.h>
 #include <binder/IPCThreadState.h>
 #include <utils/Timers.h>

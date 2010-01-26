@@ -253,7 +253,7 @@ sp<IMemory> MetadataRetrieverClient::captureFrame()
         return NULL;
     }
     size_t size = sizeof(VideoFrame) + frame->mSize;
-    mThumbnailDealer = new MemoryDealer(size);
+    mThumbnailDealer = new MemoryDealer(size, "MetadataRetrieverClient");
     if (mThumbnailDealer == NULL) {
         LOGE("failed to create MemoryDealer");
         delete frame;
@@ -294,7 +294,7 @@ sp<IMemory> MetadataRetrieverClient::extractAlbumArt()
         return NULL;
     }
     size_t size = sizeof(MediaAlbumArt) + albumArt->mSize;
-    mAlbumArtDealer = new MemoryDealer(size);
+    mAlbumArtDealer = new MemoryDealer(size, "MetadataRetrieverClient");
     if (mAlbumArtDealer == NULL) {
         LOGE("failed to create MemoryDealer object");
         delete albumArt;

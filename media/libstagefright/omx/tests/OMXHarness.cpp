@@ -286,7 +286,7 @@ status_t Harness::testStateTransitions(
         return OK;
     }
 
-    sp<MemoryDealer> dealer = new MemoryDealer(8 * 1024 * 1024);
+    sp<MemoryDealer> dealer = new MemoryDealer(8 * 1024 * 1024, "OMXHarness");
     IOMX::node_id node;
 
     status_t err =

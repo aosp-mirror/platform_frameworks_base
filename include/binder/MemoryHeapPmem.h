@@ -20,10 +20,10 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-#include <binder/MemoryDealer.h>
 #include <binder/MemoryHeapBase.h>
 #include <binder/IMemory.h>
 #include <utils/SortedVector.h>
+#include <utils/threads.h>
 
 namespace android {
 
@@ -31,7 +31,7 @@ class MemoryHeapBase;
 
 // ---------------------------------------------------------------------------
 
-class MemoryHeapPmem : public HeapInterface, public MemoryHeapBase
+class MemoryHeapPmem : public MemoryHeapBase
 {
 public:
     class MemoryPmem : public BnMemory {

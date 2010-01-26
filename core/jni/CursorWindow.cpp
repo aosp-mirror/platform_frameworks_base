@@ -60,7 +60,7 @@ bool CursorWindow::initBuffer(bool localOnly)
 {
     //TODO Use a non-memory dealer mmap region for localOnly
 
-    mHeap = new MemoryDealer(new SharedHeap(mMaxSize, 0, "CursorWindow"));
+    mHeap = new MemoryDealer(mMaxSize, "CursorWindow");
     if (mHeap != NULL) {
         mMemory = mHeap->allocate(mMaxSize);
         if (mMemory != NULL) {
