@@ -255,11 +255,7 @@ final class NativeDaemonConnector implements Runnable {
                 String[] tok = line.split(" ");
                 int code = Integer.parseInt(tok[0]);
                 if (code == expectedResponseCode) {
-                    if (tok.length !=2) {
-                        throw new IllegalStateException(
-                                String.format("Malformatted list entry '%s'", line));
-                    }
-                    rdata[idx++] = tok[1];
+                    rdata[idx++] = line.substring(tok[0].length() + 1);
                 } else if (code == NativeDaemonConnector.ResponseCode.CommandOkay) {
                     return rdata;
                 } else {
