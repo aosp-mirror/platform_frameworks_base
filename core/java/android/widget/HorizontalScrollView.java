@@ -63,7 +63,7 @@ public class HorizontalScrollView extends FrameLayout {
     private long mLastScroll;
 
     private final Rect mTempRect = new Rect();
-    private Scroller mScroller;
+    private OverScroller mScroller;
 
     /**
      * Flag to indicate that we are moving focus ourselves. This is so the
@@ -177,7 +177,7 @@ public class HorizontalScrollView extends FrameLayout {
 
 
     private void initScrollView() {
-        mScroller = new Scroller(getContext());
+        mScroller = new OverScroller(getContext());
         setFocusable(true);
         setDescendantFocusability(FOCUS_AFTER_DESCENDANTS);
         setWillNotDraw(false);
@@ -380,11 +380,6 @@ public class HorizontalScrollView extends FrameLayout {
             return true;
         }
 
-        if (!canScroll()) {
-            mIsBeingDragged = false;
-            return false;
-        }
-
         final float x = ev.getX();
 
         switch (action) {
@@ -440,10 +435,6 @@ public class HorizontalScrollView extends FrameLayout {
             return false;
         }
 
-        if (!canScroll()) {
-            return false;
-        }
-
         if (mVelocityTracker == null) {
             mVelocityTracker = VelocityTracker.obtain();
         }
@@ -470,25 +461,23 @@ public class HorizontalScrollView extends FrameLayout {
                 final int deltaX = (int) (mLastMotionX - x);
                 mLastMotionX = x;
 
-                if (deltaX < 0) {
-                    if (mScrollX > 0) {
-                        scrollBy(deltaX, 0);
-                    }
-                } else if (deltaX > 0) {
-                    final int rightEdge = getWidth() - mPaddingRight;
-                    final int availableToScroll = getChildAt(0).getRight() - mScrollX - rightEdge;
-                    if (availableToScroll > 0) {
-                        scrollBy(Math.min(availableToScroll, deltaX), 0);
-                    }
-                }
+                super.scrollTo(mScrollX + deltaX, mScrollY);
                 break;
             case MotionEvent.ACTION_UP:
                 final VelocityTracker velocityTracker = mVelocityTracker;
                 velocityTracker.computeCurrentVelocity(1000, mMaximumVelocity);
                 int initialVelocity = (int) velocityTracker.getXVelocity();
 
-                if ((Math.abs(initialVelocity) > mMinimumVelocity) && getChildCount() > 0) {
-                    fling(-initialVelocity);
+                if (getChildCount() > 0) {
+                    if ((Math.abs(initialVelocity) > mMinimumVelocity)) {
+                        fling(-initialVelocity);
+                    } else {
+                        final int right = Math.max(0, getChildAt(0).getHeight() - 
+                                (getHeight() - mPaddingRight - mPaddingLeft));
+                        if (mScroller.springback(mScrollX, mScrollY, 0, 0, right, 0)) {
+                            invalidate();
+                        }
+                    }
                 }
 
                 if (mVelocityTracker != null) {
@@ -913,14 +902,10 @@ public class HorizontalScrollView extends FrameLayout {
             int oldY = mScrollY;
             int x = mScroller.getCurrX();
             int y = mScroller.getCurrY();
-            if (getChildCount() > 0) {
-                View child = getChildAt(0);
-                mScrollX = clamp(x, getWidth() - mPaddingRight - mPaddingLeft, child.getWidth());
-                mScrollY = clamp(y, getHeight() - mPaddingBottom - mPaddingTop, child.getHeight());
-            } else {
-                mScrollX = x;
-                mScrollY = y;
-            }
+
+            mScrollX = x;
+            mScrollY = y;
+
             if (oldX != mScrollX || oldY != mScrollY) {
                 onScrollChanged(mScrollX, mScrollY, oldX, oldY);
             }
@@ -1156,7 +1141,8 @@ public class HorizontalScrollView extends FrameLayout {
             int width = getWidth() - mPaddingRight - mPaddingLeft;
             int right = getChildAt(0).getWidth();
     
-            mScroller.fling(mScrollX, mScrollY, velocityX, 0, 0, right - width, 0, 0);
+            mScroller.fling(mScrollX, mScrollY, velocityX, 0, 0, 
+                    Math.max(0, right - width), 0, 0, width/2, 0);
     
             final boolean movingRight = velocityX > 0;
     
