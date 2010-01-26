@@ -64,10 +64,10 @@ android_media_AudioSystem_isMicrophoneMuted(JNIEnv *env, jobject thiz)
 }
 
 static jboolean
-android_media_AudioSystem_isMusicActive(JNIEnv *env, jobject thiz)
+android_media_AudioSystem_isStreamActive(JNIEnv *env, jobject thiz, jint stream)
 {
     bool state = false;
-    AudioSystem::isMusicActive(&state);
+    AudioSystem::isStreamActive(stream, &state);
     return state;
 }
 
@@ -195,7 +195,7 @@ static JNINativeMethod gMethods[] = {
     {"getParameters",        "(Ljava/lang/String;)Ljava/lang/String;", (void *)android_media_AudioSystem_getParameters},
     {"muteMicrophone",      "(Z)I",     (void *)android_media_AudioSystem_muteMicrophone},
     {"isMicrophoneMuted",   "()Z",      (void *)android_media_AudioSystem_isMicrophoneMuted},
-    {"isMusicActive",       "()Z",      (void *)android_media_AudioSystem_isMusicActive},
+    {"isStreamActive",      "(I)Z",     (void *)android_media_AudioSystem_isStreamActive},
     {"setDeviceConnectionState", "(IILjava/lang/String;)I", (void *)android_media_AudioSystem_setDeviceConnectionState},
     {"getDeviceConnectionState", "(ILjava/lang/String;)I",  (void *)android_media_AudioSystem_getDeviceConnectionState},
     {"setPhoneState",       "(I)I",     (void *)android_media_AudioSystem_setPhoneState},

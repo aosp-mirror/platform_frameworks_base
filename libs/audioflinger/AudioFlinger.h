@@ -100,7 +100,7 @@ public:
     virtual     status_t    setMicMute(bool state);
     virtual     bool        getMicMute() const;
 
-    virtual     bool        isMusicActive() const;
+    virtual     bool        isStreamActive(int stream) const;
 
     virtual     status_t    setParameters(int ioHandle, const String8& keyValuePairs);
     virtual     String8     getParameters(int ioHandle, const String8& keys);
@@ -506,7 +506,7 @@ private:
         virtual     float       streamVolume(int stream) const;
         virtual     bool        streamMute(int stream) const;
 
-                    bool        isMusicActive() const;
+                    bool        isStreamActive(int stream) const;
 
                     sp<Track>   createTrack_l(
                                     const sp<AudioFlinger::Client>& client,

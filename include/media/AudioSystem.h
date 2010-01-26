@@ -194,8 +194,8 @@ public:
     // set audio mode in audio hardware (see AudioSystem::audio_mode)
     static status_t setMode(int mode);
 
-    // returns true if tracks are active on AudioSystem::MUSIC stream
-    static status_t isMusicActive(bool *state);
+    // returns true in *state if tracks are active on the specified stream
+    static status_t isStreamActive(int stream, bool *state);
 
     // set/get audio hardware parameters. The function accepts a list of parameters
     // key value pairs in the form: key1=value1;key2=value2;...
