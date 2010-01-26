@@ -78,7 +78,7 @@ class NetworkManagementService extends INetworkManagementService.Stub {
      *
      * @param context  Binder context for this service
      */
-    private NetworkManagementService(Context context) {
+    public NetworkManagementService(Context context) {
         mContext = context;
 
         mObservers = new ArrayList<INetworkManagementEventObserver>();
