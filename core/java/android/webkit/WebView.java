@@ -4607,14 +4607,11 @@ public class WebView extends AbsoluteLayout
                                 break;
                             }
                         } else {
-                            if (mPreventDrag == PREVENT_DRAG_MAYBE_YES) {
-                                // if mPreventDrag is not confirmed, treat it as
-                                // no so that it won't block tap or double tap.
-                                mPreventDrag = PREVENT_DRAG_NO;
-                                mPreventLongPress = false;
-                                mPreventDoubleTap = false;
-                            }
-                            if (mPreventDrag == PREVENT_DRAG_NO) {
+                            // mPreventDrag can be PREVENT_DRAG_MAYBE_YES in
+                            // TOUCH_INIT_MODE. To give WebCoreThread a little
+                            // more time to send PREVENT_TOUCH_ID, we check
+                            // again in responding RELEASE_SINGLE_TAP.
+                            if (mPreventDrag != PREVENT_DRAG_YES) {
                                 if (mTouchMode == TOUCH_INIT_MODE) {
                                     mPrivateHandler.sendMessageDelayed(
                                             mPrivateHandler.obtainMessage(
@@ -5631,6 +5628,13 @@ public class WebView extends AbsoluteLayout
                     break;
                 }
                 case RELEASE_SINGLE_TAP: {
+                    if (mPreventDrag == PREVENT_DRAG_MAYBE_YES) {
+                        // if mPreventDrag is not confirmed, treat it as
+                        // no so that it won't block tap.
+                        mPreventDrag = PREVENT_DRAG_NO;
+                        mPreventLongPress = false;
+                        mPreventDoubleTap = false;
+                    }
                     if (mPreventDrag == PREVENT_DRAG_NO) {
                         mTouchMode = TOUCH_DONE_MODE;
                         doShortPress();
@@ -5996,6 +6000,11 @@ public class WebView extends AbsoluteLayout
                         mFullScreenHolder.setCancelable(false);
                         mFullScreenHolder.setCanceledOnTouchOutside(false);
                         mFullScreenHolder.show();
+                    } else if (mFullScreenHolder == null) {
+                        // this may happen if user dismisses the fullscreen and
+                        // then the WebCore re-position message finally reached
+                        // the UI thread.
+                        break;
                     }
                     // move the matching embedded view fully into the view so
                     // that touch will be valid instead of rejected due to out
