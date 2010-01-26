@@ -274,6 +274,7 @@ public class MediaNames {
     //video thumbnail
     public static final String THUMBNAIL_OUTPUT = "/sdcard/media_api/videoThumbnail.png";
     public static final String GOLDEN_THUMBNAIL_OUTPUT = "/sdcard/media_api/goldenThumbnail.png";
+    public static final String GOLDEN_THUMBNAIL_OUTPUT_2 = "/sdcard/media_api/goldenThumbnail2.png";
     
     //Metadata Utility
     public static final String[] THUMBNAIL_CAPTURE_TEST_FILES = {
