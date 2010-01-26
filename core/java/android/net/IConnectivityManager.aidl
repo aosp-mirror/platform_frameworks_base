@@ -50,4 +50,12 @@ interface IConnectivityManager
     boolean getBackgroundDataSetting();
 
     void setBackgroundDataSetting(boolean allowBackgroundData);
+
+    boolean tether(String iface);
+
+    boolean untether(String iface);
+
+    String[] getTetherableIfaces();
+
+    String[] getTetheredIfaces();
 }

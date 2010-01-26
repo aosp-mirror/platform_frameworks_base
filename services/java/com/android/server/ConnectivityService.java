@@ -43,6 +43,8 @@ import android.util.Log;
 
 import com.android.internal.telephony.Phone;
 
+import com.android.server.connectivity.Tethering;
+
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -61,6 +63,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     // system property that can override the above value
     private static final String NETWORK_RESTORE_DELAY_PROP_NAME =
             "android.telephony.apn-restore";
+
+
+    private Tethering mTethering;
 
     /**
      * Sometimes we want to refer to the individual network state
@@ -308,6 +313,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 continue;
             }
         }
+
+        mTethering = new Tethering(mContext);
     }
 
 
@@ -779,6 +786,13 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     }
 
     private void enforceChangePermission() {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.CHANGE_NETWORK_STATE,
+                "ConnectivityService");
+    }
+
+    // TODO Make this a special check when it goes public
+    private void enforceTetherChangePermission() {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.CHANGE_NETWORK_STATE,
                 "ConnectivityService");
@@ -1367,5 +1381,29 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     break;
             }
         }
+    }
+
+    // javadoc from interface
+    public boolean tether(String iface) {
+        enforceTetherChangePermission();
+        return mTethering.tether(iface);
+    }
+
+    // javadoc from interface
+    public boolean untether(String iface) {
+        enforceTetherChangePermission();
+        return mTethering.untether(iface);
+    }
+
+    // TODO - move iface listing, queries, etc to new module
+    // javadoc from interface
+    public String[] getTetherableIfaces() {
+        enforceAccessPermission();
+        return mTethering.getTetherableIfaces();
+    }
+
+    public String[] getTetheredIfaces() {
+        enforceAccessPermission();
+        return mTethering.getTetheredIfaces();
     }
 }

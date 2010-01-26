@@ -334,9 +334,9 @@ class NetworkManagementService extends INetworkManagementService.Stub {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.CHANGE_NETWORK_STATE, "NetworkManagementService");
         try {
-            String cmd = "tether dns set ";
+            String cmd = "tether dns set";
             for (String s : dns) {
-                cmd += InetAddress.getByName(s).toString() + " ";
+                cmd += " " + InetAddress.getByName(s).getHostAddress();
             }
             mConnector.doCommand(cmd);
         } catch (UnknownHostException e) {
@@ -373,14 +373,16 @@ class NetworkManagementService extends INetworkManagementService.Stub {
         return mConnector.doListCommand("list_ttys", NetdResponseCode.TtyListResult);
     }
 
-    public void attachPppd(String tty, String localAddr, String remoteAddr)
-            throws IllegalStateException {
+    public void attachPppd(String tty, String localAddr, String remoteAddr, String dns1Addr,
+            String dns2Addr) throws IllegalStateException {
         try {
             mContext.enforceCallingOrSelfPermission(
                     android.Manifest.permission.CHANGE_NETWORK_STATE, "NetworkManagementService");
-            mConnector.doCommand(String.format("pppd attach %s %s %s", tty,
-                    InetAddress.getByName(localAddr).toString(),
-                    InetAddress.getByName(localAddr).toString()));
+            mConnector.doCommand(String.format("pppd attach %s %s %s %s %s", tty,
+                    InetAddress.getByName(localAddr).getHostAddress(),
+                    InetAddress.getByName(remoteAddr).getHostAddress(),
+                    InetAddress.getByName(dns1Addr).getHostAddress(),
+                    InetAddress.getByName(dns2Addr).getHostAddress()));
         } catch (UnknownHostException e) {
             throw new IllegalStateException("Error resolving addr", e);
         }
@@ -392,4 +394,3 @@ class NetworkManagementService extends INetworkManagementService.Stub {
         mConnector.doCommand(String.format("pppd detach %s", tty));
     }
 }
-
