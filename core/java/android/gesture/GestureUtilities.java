@@ -26,6 +26,16 @@ import java.io.IOException;
 
 import static android.gesture.GestureConstants.*;
 
+/**
+ * Utility functions for gesture processing & analysis, including methods for:
+ * <ul> 
+ * <li>feature extraction (e.g., samplers and those for calculating bounding
+ * boxes and gesture path lengths);
+ * <li>geometric transformation (e.g., translation, rotation and scaling);
+ * <li>gesture similarity comparison (e.g., calculating Euclidean or Cosine
+ * distances between two gestures).
+ * </ul>
+ */
 public final class GestureUtilities {
   
     private static final float SCALING_THRESHOLD = 0.26f;
