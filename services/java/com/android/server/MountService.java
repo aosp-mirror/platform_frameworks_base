@@ -1058,11 +1058,21 @@ class MountService extends IMountService.Stub
     }
 
     public String[] getSecureContainerList() throws IllegalStateException {
+        if (mContext.checkCallingOrSelfPermission(
+                android.Manifest.permission.ASEC_ACCESS)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Requires ASEC_ACCESS permission");
+        }
         return mConnector.doListCommand("list_asec", VoldResponseCode.AsecListResult);
     }
 
     public String createSecureContainer(String id, int sizeMb, String fstype,
                                     String key, int ownerUid) throws IllegalStateException {
+        if (mContext.checkCallingOrSelfPermission(
+                android.Manifest.permission.ASEC_CREATE)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Requires ASEC_CREATE permission");
+        }
         String cmd = String.format("create_asec %s %d %s %s %d",
                                    id, sizeMb, fstype, key, ownerUid);
         mConnector.doCommand(cmd);
@@ -1070,15 +1080,31 @@ class MountService extends IMountService.Stub
     }
 
     public void finalizeSecureContainer(String id) throws IllegalStateException {
+        if (mContext.checkCallingOrSelfPermission(
+                android.Manifest.permission.ASEC_CREATE)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Requires ASEC_CREATE permission");
+        }
         mConnector.doCommand(String.format("finalize_asec %s", id));
     }
 
     public void destroySecureContainer(String id) throws IllegalStateException {
+        if (mContext.checkCallingOrSelfPermission(
+                android.Manifest.permission.ASEC_DESTROY)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Requires ASEC_DESTROY permission");
+        }
         mConnector.doCommand(String.format("destroy_asec %s", id));
     }
    
     public String mountSecureContainer(String id, String key,
                                        int ownerUid) throws IllegalStateException {
+        if (mContext.checkCallingOrSelfPermission(
+                android.Manifest.permission.ASEC_MOUNT_UNMOUNT)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Requires ASEC_MOUNT_UNMOUNT permission");
+        }
+        mConnector.doCommand(String.format("destroy_asec %s", id));
         String cmd = String.format("mount_asec %s %s %d",
                                    id, key, ownerUid);
         mConnector.doCommand(cmd);
@@ -1086,16 +1112,31 @@ class MountService extends IMountService.Stub
     }
 
     public void unmountSecureContainer(String id) throws IllegalStateException {
+        if (mContext.checkCallingOrSelfPermission(
+                android.Manifest.permission.ASEC_MOUNT_UNMOUNT)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Requires ASEC_MOUNT_UNMOUNT permission");
+        }
         String cmd = String.format("unmount_asec %s", id);
         mConnector.doCommand(cmd);
     }
 
     public void renameSecureContainer(String oldId, String newId) throws IllegalStateException {
+        if (mContext.checkCallingOrSelfPermission(
+                android.Manifest.permission.ASEC_RENAME)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Requires ASEC_RENAME permission");
+        }
         String cmd = String.format("rename_asec %s %s", oldId, newId);
         mConnector.doCommand(cmd);
     }
 
     public String getSecureContainerPath(String id) throws IllegalStateException {
+        if (mContext.checkCallingOrSelfPermission(
+                android.Manifest.permission.ASEC_ACCESS)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Requires ASEC_ACCESS permission");
+        }
         ArrayList<String> rsp = mConnector.doCommand("asec_path " + id);
 
         for (String line : rsp) {
