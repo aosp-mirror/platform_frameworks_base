@@ -2977,8 +2977,6 @@ public final class Settings {
          * @param cr the content resolver to use
          * @param provider the location provider to query
          * @return true if the provider is enabled
-         *
-         * @hide
          */
         public static final boolean isLocationProviderEnabled(ContentResolver cr, String provider) {
             String allowedProviders = Settings.Secure.getString(cr, LOCATION_PROVIDERS_ALLOWED);
@@ -2996,8 +2994,6 @@ public final class Settings {
          * @param cr the content resolver to use
          * @param provider the location provider to enable or disable
          * @param enabled true if the provider should be enabled
-         *
-         * @hide
          */
         public static final void setLocationProviderEnabled(ContentResolver cr,
                 String provider, boolean enabled) {
