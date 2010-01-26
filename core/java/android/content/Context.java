@@ -1278,6 +1278,17 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService} to retrieve a {@link
+     * android.net.NetworkManagementService} for handling management of
+     * system network services
+     *
+     * @hide
+     * @see #getSystemService
+     * @see android.net.NetworkManagementService
+     */
+    public static final String NETWORKMANAGEMENT_SERVICE = "network_management";
+
+    /**
+     * Use with {@link #getSystemService} to retrieve a {@link
      * android.net.wifi.WifiManager} for handling management of
      * Wi-Fi access.
      *
