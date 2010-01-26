@@ -16,7 +16,9 @@ ifeq ($(BUILD_WITH_FULL_STAGEFRIGHT),true)
 
 LOCAL_SRC_FILES +=                \
         AMRExtractor.cpp          \
+        AMRWriter.cpp             \
         AudioPlayer.cpp           \
+        AudioSource.cpp           \
         AwesomePlayer.cpp         \
         CachingDataSource.cpp     \
         CameraSource.cpp          \

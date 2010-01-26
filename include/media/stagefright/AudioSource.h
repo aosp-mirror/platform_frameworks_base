@@ -18,16 +18,20 @@
 
 #define AUDIO_SOURCE_H_
 
+#include <media/AudioSystem.h>
 #include <media/stagefright/MediaSource.h>
 
 namespace android {
 
 class AudioRecord;
+struct MediaBufferGroup;
 
-class AudioSource {
-public:
-    AudioSource(int inputSource);
-    virtual ~AudioSource();
+struct AudioSource : public MediaSource {
+    // Note that the "channels" parameter is _not_ the number of channels,
+    // but a bitmask of AudioSystem::audio_channels constants.
+    AudioSource(
+            int inputSource, uint32_t sampleRate,
+            uint32_t channels = AudioSystem::CHANNEL_IN_MONO);
 
     status_t initCheck() const;
 
@@ -38,9 +42,16 @@ public:
     virtual status_t read(
             MediaBuffer **buffer, const ReadOptions *options = NULL);
 
+protected:
+    virtual ~AudioSource();
+
 private:
+    enum { kMaxBufferSize = 8192 };
+
     AudioRecord *mRecord;
     status_t mInitCheck;
+    bool mStarted;
+    MediaBufferGroup *mGroup;
 
     AudioSource(const AudioSource &);
     AudioSource &operator=(const AudioSource &);
