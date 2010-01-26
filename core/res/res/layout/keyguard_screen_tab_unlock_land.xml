@@ -44,6 +44,7 @@
             android:layout_marginTop="20dip"
             android:singleLine="true"
             android:ellipsize="marquee"
+            android:gravity="right|bottom"
             android:textAppearance="?android:attr/textAppearanceMedium"
             />
 

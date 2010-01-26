@@ -23,6 +23,28 @@
     android:background="@android:color/background_dark"
         >
 
+    <!-- header text ('Enter Pin Code') -->
+    <TextView android:id="@+id/headerText"
+        android:layout_above="@+id/carrier"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="30dip"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="24sp"
+            />
+
+    <!-- Carrier info -->
+    <TextView android:id="@+id/carrier"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/pinDisplayGroup"
+        android:layout_marginTop="9dip"
+        android:gravity="left|bottom"
+        android:singleLine="true"
+        android:ellipsize="marquee"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+    />
+
     <!-- displays dots as user enters pin -->
     <LinearLayout android:id="@+id/pinDisplayGroup"
         android:orientation="horizontal"
@@ -60,16 +82,6 @@
 
     </LinearLayout>
         
-    <!-- header text ('Enter Pin Code') -->
-    <TextView android:id="@+id/headerText"
-        android:layout_above="@id/pinDisplayGroup"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="30dip"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="24sp"
-            />
-
     <LinearLayout
         android:orientation="horizontal"
         android:layout_alignParentBottom="true"
