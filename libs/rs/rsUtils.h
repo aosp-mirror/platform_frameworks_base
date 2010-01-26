@@ -17,6 +17,7 @@
 #ifndef ANDROID_RS_UTILS_H
 #define ANDROID_RS_UTILS_H
 
+#define LOG_NDEBUG 0
 #define LOG_TAG "RenderScript"
 #include <utils/Log.h>
 #include <utils/Vector.h>
