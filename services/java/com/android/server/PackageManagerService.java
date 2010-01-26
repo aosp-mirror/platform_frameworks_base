@@ -2855,9 +2855,8 @@ class PackageManagerService extends IPackageManager.Stub {
     // room left on the data partition, or a ZipException if the package
     // file is malformed.
     //
-    private int cachePackageSharedLibsForAbiLI( PackageParser.Package  pkg,
-        File dataPath, File scanFile, String cpuAbi)
-    throws IOException, ZipException {
+    private int cachePackageSharedLibsForAbiLI(PackageParser.Package pkg,
+        File dataPath, File scanFile, String cpuAbi) throws IOException, ZipException {
         File sharedLibraryDir = new File(dataPath.getPath() + "/lib");
         final String apkLib = "lib/";
         final int apkLibLen = apkLib.length();
@@ -2935,7 +2934,7 @@ class PackageManagerService extends IPackageManager.Stub {
                 if (mInstaller == null) {
                     sharedLibraryDir.mkdir();
                 }
-                cacheSharedLibLI(pkg, zipFile, entry, sharedLibraryDir,
+                cacheNativeBinaryLI(pkg, zipFile, entry, sharedLibraryDir,
                         sharedLibraryFile);
             }
         }
@@ -2948,6 +2947,54 @@ class PackageManagerService extends IPackageManager.Stub {
         return PACKAGE_INSTALL_NATIVE_FOUND_LIBRARIES;
     }
 
+    // Find the gdbserver executable program in a package at
+    // lib/<cpuAbi>/gdbserver and copy it to /data/data/<name>/lib/gdbserver
+    //
+    // Returns PACKAGE_INSTALL_NATIVE_FOUND_LIBRARIES on success,
+    // or PACKAGE_INSTALL_NATIVE_NO_LIBRARIES otherwise.
+    //
+    private int cachePackageGdbServerLI(PackageParser.Package pkg,
+        File dataPath, File scanFile, String cpuAbi) throws IOException, ZipException {
+        File installGdbServerDir = new File(dataPath.getPath() + "/lib");
+        final String GDBSERVER = "gdbserver";
+        final String apkGdbServerPath = "lib/" + cpuAbi + "/" + GDBSERVER;
+
+        ZipFile zipFile = new ZipFile(scanFile);
+        Enumeration<ZipEntry> entries =
+            (Enumeration<ZipEntry>) zipFile.entries();
+
+        while (entries.hasMoreElements()) {
+            ZipEntry entry = entries.nextElement();
+            // skip directories
+            if (entry.isDirectory()) {
+                continue;
+            }
+            String entryName = entry.getName();
+
+            if (!entryName.equals(apkGdbServerPath)) {
+                continue;
+            }
+
+            String installGdbServerPath = installGdbServerDir.getPath() +
+                "/" + GDBSERVER;
+            File installGdbServerFile = new File(installGdbServerPath);
+            if (! installGdbServerFile.exists() ||
+                installGdbServerFile.length() != entry.getSize() ||
+                installGdbServerFile.lastModified() != entry.getTime()) {
+                if (Config.LOGD) {
+                    Log.d(TAG, "Caching gdbserver " + entry.getName());
+                }
+                if (mInstaller == null) {
+                    installGdbServerDir.mkdir();
+                }
+                cacheNativeBinaryLI(pkg, zipFile, entry, installGdbServerDir,
+                        installGdbServerFile);
+            }
+            return PACKAGE_INSTALL_NATIVE_FOUND_LIBRARIES;
+        }
+        return PACKAGE_INSTALL_NATIVE_NO_LIBRARIES;
+    }
+
     // extract shared libraries stored in the APK as lib/<cpuAbi>/lib<name>.so
     // and copy them to /data/data/<appname>/lib.
     //
@@ -2957,7 +3004,7 @@ class PackageManagerService extends IPackageManager.Stub {
     //
     private int cachePackageSharedLibsLI(PackageParser.Package  pkg,
         File dataPath, File scanFile) {
-        final String cpuAbi = Build.CPU_ABI;
+        String cpuAbi = Build.CPU_ABI;
         try {
             int result = cachePackageSharedLibsForAbiLI(pkg, dataPath, scanFile, cpuAbi);
 
@@ -2968,7 +3015,7 @@ class PackageManagerService extends IPackageManager.Stub {
             //
             // only scan the package twice in case of ABI mismatch
             if (result == PACKAGE_INSTALL_NATIVE_ABI_MISMATCH) {
-                String  cpuAbi2 = SystemProperties.get("ro.product.cpu.abi2",null);
+                final String cpuAbi2 = SystemProperties.get("ro.product.cpu.abi2",null);
                 if (cpuAbi2 != null) {
                     result = cachePackageSharedLibsForAbiLI(pkg, dataPath, scanFile, cpuAbi2);
                 }
@@ -2976,6 +3023,20 @@ class PackageManagerService extends IPackageManager.Stub {
                 if (result == PACKAGE_INSTALL_NATIVE_ABI_MISMATCH) {
                     Log.w(TAG,"Native ABI mismatch from package file");
                     return PackageManager.INSTALL_FAILED_INVALID_APK;
+                }
+
+                if (result == PACKAGE_INSTALL_NATIVE_FOUND_LIBRARIES) {
+                    cpuAbi = cpuAbi2;
+                }
+            }
+
+            // for debuggable packages, also extract gdbserver from lib/<abi>
+            // into /data/data/<appname>/lib too.
+            if (result == PACKAGE_INSTALL_NATIVE_FOUND_LIBRARIES &&
+                (pkg.applicationInfo.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
+                int result2 = cachePackageGdbServerLI(pkg, dataPath, scanFile, cpuAbi);
+                if (result2 == PACKAGE_INSTALL_NATIVE_FOUND_LIBRARIES) {
+                    pkg.applicationInfo.flags |= ApplicationInfo.FLAG_NATIVE_DEBUGGABLE;
                 }
             }
         } catch (ZipException e) {
@@ -2988,26 +3049,27 @@ class PackageManagerService extends IPackageManager.Stub {
         return PackageManager.INSTALL_SUCCEEDED;
     }
 
-    private void cacheSharedLibLI(PackageParser.Package pkg,
+    private void cacheNativeBinaryLI(PackageParser.Package pkg,
             ZipFile zipFile, ZipEntry entry,
-            File sharedLibraryDir,
-            File sharedLibraryFile) throws IOException {
+            File binaryDir,
+            File binaryFile) throws IOException {
         InputStream inputStream = zipFile.getInputStream(entry);
         try {
-            File tempFile = File.createTempFile("tmp", "tmp", sharedLibraryDir);
+            File tempFile = File.createTempFile("tmp", "tmp", binaryDir);
             String tempFilePath = tempFile.getPath();
-            // XXX package manager can't change owner, so the lib files for
+            // XXX package manager can't change owner, so the executable files for
             // now need to be left as world readable and owned by the system.
             if (! FileUtils.copyToFile(inputStream, tempFile) ||
                 ! tempFile.setLastModified(entry.getTime()) ||
                 FileUtils.setPermissions(tempFilePath,
                         FileUtils.S_IRUSR|FileUtils.S_IWUSR|FileUtils.S_IRGRP
+                        |FileUtils.S_IXUSR|FileUtils.S_IXGRP|FileUtils.S_IXOTH
                         |FileUtils.S_IROTH, -1, -1) != 0 ||
-                ! tempFile.renameTo(sharedLibraryFile)) {
+                ! tempFile.renameTo(binaryFile)) {
                 // Failed to properly write file.
                 tempFile.delete();
-                throw new IOException("Couldn't create cached shared lib "
-                        + sharedLibraryFile + " in " + sharedLibraryDir);
+                throw new IOException("Couldn't create cached binary "
+                        + binaryFile + " in " + binaryDir);
             }
         } finally {
             inputStream.close();
