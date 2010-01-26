@@ -104,48 +104,6 @@ public class LocationManager {
      */
     public static final String KEY_LOCATION_CHANGED = "location";
 
-    public interface GeocodeProvider {
-        String getFromLocation(double latitude, double longitude, int maxResults,
-            GeocoderParams params, List<Address> addrs);
-
-        String getFromLocationName(String locationName,
-            double lowerLeftLatitude, double lowerLeftLongitude,
-            double upperRightLatitude, double upperRightLongitude, int maxResults,
-            GeocoderParams params, List<Address> addrs);
-    }
-
-    private static final class GeocodeProviderProxy extends IGeocodeProvider.Stub {
-        private GeocodeProvider mProvider;
-
-        GeocodeProviderProxy(GeocodeProvider provider) {
-            mProvider = provider;
-        }
-
-        /**
-         * This method is overridden to implement the
-         * {@link Geocoder#getFromLocation(double, double, int)} method.
-         * Classes implementing this method should not hold a reference to the params parameter.
-         */
-        public String getFromLocation(double latitude, double longitude, int maxResults,
-                GeocoderParams params, List<Address> addrs) {
-            return mProvider.getFromLocation(latitude, longitude, maxResults, params, addrs);
-        }
-
-        /**
-         * This method is overridden to implement the
-         * {@link Geocoder#getFromLocationName(String, int, double, double, double, double)} method.
-         * Classes implementing this method should not hold a reference to the params parameter.
-         */
-        public String getFromLocationName(String locationName,
-                double lowerLeftLatitude, double lowerLeftLongitude,
-                double upperRightLatitude, double upperRightLongitude, int maxResults,
-                GeocoderParams params, List<Address> addrs) {
-            return mProvider.getFromLocationName(locationName, lowerLeftLatitude,
-                    lowerLeftLongitude, upperRightLatitude, upperRightLongitude,
-                    maxResults, params, addrs);
-        }
-    }
-
     // Map from LocationListeners to their associated ListenerTransport objects
     private HashMap<LocationListener,ListenerTransport> mListeners =
         new HashMap<LocationListener,ListenerTransport>();
@@ -1393,75 +1351,6 @@ public class LocationManager {
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException in sendExtraCommand: ", e);
             return false;
-        }
-    }
-
-    /**
-     * Installs a location provider.
-     *
-     * @param name of the location provider
-     * @param provider Binder interface for the location provider
-     *
-     * @return true if the command succeeds.
-     *
-     * Requires the android.permission.INSTALL_LOCATION_PROVIDER permission.
-     *
-     * {@hide}
-     */
-    public boolean installLocationProvider(String name, ILocationProvider provider) {
-        try {
-            mService.installLocationProvider(name, provider);
-            return true;
-        } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException in installLocationProvider: ", e);
-            return false;
-        }
-    }
-
-    /**
-     * Installs a location provider.
-     *
-     * @param provider implementation of the location provider
-     *
-     * @return true if the command succeeds.
-     *
-     * Requires the android.permission.INSTALL_LOCATION_PROVIDER permission.
-     */
-    public boolean installLocationProvider(LocationProviderImpl provider) {
-        return installLocationProvider(provider.getName(), provider.getInterface());
-    }
-
-    /**
-     * Installs a geocoder server.
-     *
-     * @param provider Binder interface for the geocoder provider
-     *
-     * @return true if the command succeeds.
-     *
-     * Requires the android.permission.INSTALL_LOCATION_PROVIDER permission.
-     */
-    public boolean installGeocodeProvider(GeocodeProvider provider) {
-        try {
-            mService.installGeocodeProvider(new GeocodeProviderProxy(provider));
-            return true;
-        } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException in setGeocodeProvider: ", e);
-            return false;
-        }
-    }
-
-    /**
-     * Used by location providers to report new locations.
-     *
-     * @param location new Location to report
-     *
-     * Requires the android.permission.INSTALL_LOCATION_PROVIDER permission.
-     */
-    public void reportLocation(Location location) {
-        try {
-            mService.reportLocation(location);
-        } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException in reportLocation: ", e);
         }
     }
     

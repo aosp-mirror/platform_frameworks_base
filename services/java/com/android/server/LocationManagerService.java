@@ -29,16 +29,18 @@ import java.util.Set;
 
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.ContentQueryMap;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.location.Address;
 import android.location.GeocoderParams;
-import android.location.IGeocodeProvider;
 import android.location.IGpsStatusListener;
 import android.location.IGpsStatusProvider;
 import android.location.ILocationListener;
@@ -64,10 +66,11 @@ import android.provider.Settings;
 import android.util.Log;
 import android.util.PrintWriterPrinter;
 
+import com.android.internal.location.GeocoderProxy;
 import com.android.internal.location.GpsLocationProvider;
+import com.android.internal.location.GpsNetInitiatedHandler;
 import com.android.internal.location.LocationProviderProxy;
 import com.android.internal.location.MockProvider;
-import com.android.internal.location.GpsNetInitiatedHandler;
 
 /**
  * The service class that manages LocationProviders and issues location
@@ -105,7 +108,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
     private static boolean sProvidersLoaded = false;
 
     private final Context mContext;
-    private IGeocodeProvider mGeocodeProvider;
+    private GeocoderProxy mGeocodeProvider;
     private IGpsStatusProvider mGpsStatusProvider;
     private INetInitiatedListener mNetInitiatedListener;
     private LocationWorkerHandler mLocationHandler;
@@ -415,7 +418,6 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
 
     private void removeProvider(LocationProviderProxy provider) {
         mProviders.remove(provider);
-        provider.unlinkProvider();
         mProvidersByName.remove(provider.getName());
     }
 
@@ -446,9 +448,26 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             GpsLocationProvider provider = new GpsLocationProvider(mContext, this);
             mGpsStatusProvider = provider.getGpsStatusProvider();
             mNetInitiatedListener = provider.getNetInitiatedListener();
-            LocationProviderProxy proxy = new LocationProviderProxy(LocationManager.GPS_PROVIDER, provider);
+            LocationProviderProxy proxy =
+                    new LocationProviderProxy(mContext, LocationManager.GPS_PROVIDER, provider);
             addProvider(proxy);
             mGpsLocationProvider = proxy;
+        }
+
+        // initialize external network location and geocoder services
+        Resources resources = mContext.getResources();
+        String serviceName = resources.getString(
+                com.android.internal.R.string.config_networkLocationProvider);
+        if (serviceName != null) {
+            mNetworkLocationProvider =
+                new LocationProviderProxy(mContext, LocationManager.NETWORK_PROVIDER,
+                        serviceName, mLocationHandler);
+            addProvider(mNetworkLocationProvider);
+        }
+
+        serviceName = resources.getString(com.android.internal.R.string.config_geocodeProvider);
+        if (serviceName != null) {
+            mGeocodeProvider = new GeocoderProxy(mContext, serviceName);
         }
 
         updateProvidersLocked();
@@ -505,45 +524,6 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         mLocationHandler = new LocationWorkerHandler();
         initialize();
         Looper.loop();
-    }
-
-    public void installLocationProvider(String name, ILocationProvider provider) {
-        if (mContext.checkCallingOrSelfPermission(INSTALL_LOCATION_PROVIDER)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Requires INSTALL_LOCATION_PROVIDER permission");
-        }
-
-        synchronized (mLock) {
-            // check to see if we are reinstalling a dead provider
-            LocationProviderProxy oldProvider = mProvidersByName.get(name);
-            if (oldProvider != null) {
-                if (oldProvider.isDead()) {
-                    Log.d(TAG, "replacing dead provider");
-                    removeProvider(oldProvider);
-                } else {
-                    throw new IllegalArgumentException("Provider \"" + name + "\" already exists");
-                }
-            }
-
-            LocationProviderProxy proxy = new LocationProviderProxy(name, provider);
-            addProvider(proxy);
-            updateProvidersLocked();
-            if (LocationManager.NETWORK_PROVIDER.equals(name)) {
-                mNetworkLocationProvider = proxy;
-            }
-
-            // notify provider of current network state
-            proxy.updateNetworkState(mNetworkState, null);
-        }
-    }
-
-    public void installGeocodeProvider(IGeocodeProvider provider) {
-        if (mContext.checkCallingOrSelfPermission(INSTALL_LOCATION_PROVIDER)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Requires INSTALL_LOCATION_PROVIDER permission");
-        }
-
-        mGeocodeProvider = provider;
     }
 
     private boolean isAllowedBySettingsLocked(String provider) {
@@ -1313,7 +1293,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
      }
 
     /**
-     * @return null if the provider does not exits
+     * @return null if the provider does not exist
      * @throws SecurityException if the provider is not allowed to be
      * accessed by the caller
      */
@@ -1332,7 +1312,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
 
     private Bundle _getProviderInfoLocked(String provider) {
         LocationProviderProxy p = mProvidersByName.get(provider);
-        if (p == null) {
+        if (p == null || !p.isEnabled()) {
             return null;
         }
 
@@ -1618,7 +1598,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
                 synchronized (mLock) {
                     for (int i = mProviders.size() - 1; i >= 0; i--) {
                         LocationProviderProxy provider = mProviders.get(i);
-                        if (provider.requiresNetwork()) {
+                        if (provider.isEnabled() && provider.requiresNetwork()) {
                             provider.updateNetworkState(mNetworkState, info);
                         }
                     }
@@ -1669,13 +1649,8 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
     public String getFromLocation(double latitude, double longitude, int maxResults,
             GeocoderParams params, List<Address> addrs) {
         if (mGeocodeProvider != null) {
-            try {
-                return mGeocodeProvider.getFromLocation(latitude, longitude, maxResults,
-                        params, addrs);
-            } catch (RemoteException e) {
-                Log.e(TAG, "getFromLocation failed", e);
-                mGeocodeProvider = null;
-            }
+            return mGeocodeProvider.getFromLocation(latitude, longitude, maxResults,
+                    params, addrs);
         }
         return null;
     }
@@ -1687,14 +1662,9 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             GeocoderParams params, List<Address> addrs) {
 
         if (mGeocodeProvider != null) {
-            try {
-                return mGeocodeProvider.getFromLocationName(locationName, lowerLeftLatitude,
-                        lowerLeftLongitude, upperRightLatitude, upperRightLongitude,
-                        maxResults, params, addrs);
-            } catch (RemoteException e) {
-                Log.e(TAG, "getFromLocationName failed", e);
-                mGeocodeProvider = null;
-            }
+            return mGeocodeProvider.getFromLocationName(locationName, lowerLeftLatitude,
+                    lowerLeftLongitude, upperRightLatitude, upperRightLongitude,
+                    maxResults, params, addrs);
         }
         return null;
     }
@@ -1737,7 +1707,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             if (mProvidersByName.get(name) != null) {
                 throw new IllegalArgumentException("Provider \"" + name + "\" already exists");
             }
-            addProvider(new LocationProviderProxy(name, provider));
+            addProvider(new LocationProviderProxy(mContext, name, provider));
             mMockProviders.put(name, provider);
             mLastKnownLocation.put(name, null);
             updateProvidersLocked();
