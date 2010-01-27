@@ -552,8 +552,8 @@ public class Camera {
      * be called during preview.
      *
      * @param degrees the angle that the picture will be rotated clockwise.
-     *                Valid values are 0, 90, 180, and 270.
-     * @hide
+     *                Valid values are 0, 90, 180, and 270. The starting
+     *                position is 0 (landscape).
      */
     public native final void setDisplayOrientation(int degrees);
 
