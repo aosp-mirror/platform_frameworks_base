@@ -19,8 +19,6 @@ package android.graphics;
 import java.io.OutputStream;
 
 /**
- * @hide pending API council approval
- *
  * YuvImage contains YUV data and provides a method that compresses a region of
  * the YUV data to a Jpeg. The YUV data should be provided as a single byte
  * array irrespective of the number of image planes in it. The stride of each
