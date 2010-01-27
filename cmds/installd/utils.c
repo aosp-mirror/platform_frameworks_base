@@ -33,6 +33,7 @@ int create_pkg_path(char path[PKG_PATH_MAX],
     }
 
     x = pkgname;
+    int alpha = -1;
     while (*x) {
         if (isalnum(*x) || (*x == '_')) {
                 /* alphanumeric or underscore are fine */
@@ -42,12 +43,27 @@ int create_pkg_path(char path[PKG_PATH_MAX],
                 LOGE("invalid package name '%s'\n", pkgname);
                 return -1;
             }
-        } else {
+        } else if (*x == '-') {
+            /* Suffix -X is fine to let versioning of packages.
+               But whatever follows should be alphanumeric.*/
+            alpha = 1;
+        }else {
                 /* anything not A-Z, a-z, 0-9, _, or . is invalid */
             LOGE("invalid package name '%s'\n", pkgname);
             return -1;
         }
         x++;
+    }
+    if (alpha == 1) {
+        // Skip current character
+        x++;
+        while (*x) {
+            if (!isalnum(*x)) {
+                LOGE("invalid package name '%s' should include only numbers after -\n", pkgname);
+                return -1;
+            }
+            x++;
+        }
     }
 
     sprintf(path, "%s%s%s", prefix, pkgname, postfix);
