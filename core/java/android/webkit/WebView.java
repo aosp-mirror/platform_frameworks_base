@@ -2999,6 +2999,10 @@ public class WebView extends AbsoluteLayout
 
     @Override
     public boolean performLongClick() {
+        // performLongClick() is the result of a delayed message. If we switch
+        // to windows overview, the WebView will be temporarily removed from the
+        // view system. In that case, do nothing.
+        if (getParent() == null) return false;
         if (mNativeClass != 0 && nativeCursorIsTextInput()) {
             // Send the click so that the textfield is in focus
             centerKeyPressOnTextField();
@@ -5922,13 +5926,7 @@ public class WebView extends AbsoluteLayout
                     // the states
                     mGotCenterDown = false;
                     mTrackballDown = false;
-                    // LONG_PRESS_CENTER is sent as a delayed message. If we
-                    // switch to windows overview, the WebView will be
-                    // temporarily removed from the view system. In that case,
-                    // do nothing.
-                    if (getParent() != null) {
-                        performLongClick();
-                    }
+                    performLongClick();
                     break;
 
                 case WEBCORE_NEED_TOUCH_EVENTS:
