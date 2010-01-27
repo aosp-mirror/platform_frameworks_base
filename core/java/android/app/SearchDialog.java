@@ -73,8 +73,8 @@ import java.util.WeakHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * System search dialog. This is controlled by the 
- * SearchManagerService and runs in the system process.
+ * Search dialog. This is controlled by the 
+ * SearchManager and runs in the current foreground process.
  * 
  * @hide
  */
@@ -118,6 +118,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
     private Bundle mAppSearchData;
     private boolean mGlobalSearchMode;
     private Context mActivityContext;
+    private SearchManager mSearchManager;
     
     // Values we store to allow user to toggle between in-app search and global search.
     private ComponentName mStoredComponentName;
@@ -157,7 +158,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
      * 
      * @param context Application Context we can use for system acess
      */
-    public SearchDialog(Context context) {
+    public SearchDialog(Context context, SearchManager searchManager) {
         super(context, com.android.internal.R.style.Theme_GlobalSearchBar);
 
         // Save voice intent for later queries/launching
@@ -168,6 +169,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
 
         mVoiceAppSearchIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         mVoiceAppSearchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        mSearchManager = searchManager;
     }
 
     /**
@@ -180,7 +182,6 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
 
         Window theWindow = getWindow();
         WindowManager.LayoutParams lp = theWindow.getAttributes();
-        lp.type = WindowManager.LayoutParams.TYPE_SEARCH_BAR;
         lp.width = ViewGroup.LayoutParams.MATCH_PARENT;
         // taking up the whole window (even when transparent) is less than ideal,
         // but necessary to show the popup window until the window manager supports
@@ -291,8 +292,10 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
             //
             // TODO: When the browser icon issue is reconciled in Eclair, remove this special case.
             if (isBrowserSearch()) currentSearchText = "";
-            
-            return doShow(currentSearchText, false, null, mAppSearchData, true);
+
+            cancel();
+            mSearchManager.startGlobalSearch(currentSearchText, false, mStoredAppSearchData);
+            return true;
         } else {
             if (mStoredComponentName != null) {
                 // This means we should toggle *back* to an in-app search context from
@@ -1314,8 +1317,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
     }
 
     /**
-     * Launches an intent, including any special intent handling.  Doesn't dismiss the dialog
-     * since that will be handled in {@link SearchDialogWrapper#performActivityResuming}
+     * Launches an intent, including any special intent handling.
      */
     private void launchIntent(Intent intent) {
         if (intent == null) {

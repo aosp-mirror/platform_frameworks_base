@@ -29,23 +29,4 @@ interface ISearchManager {
    List<SearchableInfo> getSearchablesForWebSearch();
    SearchableInfo getDefaultSearchableForWebSearch();
    void setDefaultWebSearch(in ComponentName component);
-   void startSearch(in String initialQuery,
-            boolean selectInitialQuery,
-            in ComponentName launchActivity,
-            in Bundle appSearchData,
-            boolean globalSearch,
-            ISearchManagerCallback searchManagerCallback,
-            int ident);
-
-    void triggerSearch(in String query,
-            in ComponentName launchActivity,
-            in Bundle appSearchData,
-            ISearchManagerCallback searchManagerCallback,
-            int ident);
-
-    void stopSearch();
-
-
-    boolean isVisible();
-
 }
