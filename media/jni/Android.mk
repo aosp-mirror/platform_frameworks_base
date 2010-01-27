@@ -19,6 +19,8 @@ LOCAL_SHARED_LIBRARIES := \
     libcutils
 
 ifneq ($(BUILD_WITHOUT_PV),true)
+include external/opencore/Config.mk
+
 LOCAL_SRC_FILES += \
     android_media_AmrInputStream.cpp
 
