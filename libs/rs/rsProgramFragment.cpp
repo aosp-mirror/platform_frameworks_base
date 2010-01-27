@@ -109,7 +109,7 @@ void ProgramFragment::setupGL(const Context *rsc, ProgramFragmentState *state)
         }
 
         if (mSamplers[ct].get()) {
-            mSamplers[ct]->setupGL();
+            mSamplers[ct]->setupGL(rsc);
         } else {
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -141,32 +141,35 @@ void ProgramFragment::setupGL(const Context *rsc, ProgramFragmentState *state)
 
 void ProgramFragment::setupGL2(const Context *rsc, ProgramFragmentState *state, ShaderCache *sc)
 {
+
     //LOGE("sgl2 frag1 %x", glGetError());
     if ((state->mLast.get() == this) && !mDirty) {
         //return;
     }
     state->mLast.set(this);
 
+    rsc->checkError("ProgramFragment::setupGL2 start");
     for (uint32_t ct=0; ct < MAX_TEXTURE; ct++) {
         glActiveTexture(GL_TEXTURE0 + ct);
         if (!(mTextureEnableMask & (1 << ct)) || !mTextures[ct].get()) {
-            glDisable(GL_TEXTURE_2D);
             continue;
         }
 
         mTextures[ct]->uploadCheck(rsc);
         glBindTexture(GL_TEXTURE_2D, mTextures[ct]->getTextureID());
+        rsc->checkError("ProgramFragment::setupGL2 tex bind");
         if (mSamplers[ct].get()) {
-            mSamplers[ct]->setupGL();
+            mSamplers[ct]->setupGL(rsc);
         } else {
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+            rsc->checkError("ProgramFragment::setupGL2 tex env");
         }
 
-        glEnable(GL_TEXTURE_2D);
         glUniform1i(sc->fragUniformSlot(ct), ct);
+        rsc->checkError("ProgramFragment::setupGL2 uniforms");
     }
 
     glActiveTexture(GL_TEXTURE0);

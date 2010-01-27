@@ -180,10 +180,12 @@ void VertexArray::setupGL(const Context *rsc, class VertexArrayState *state) con
 
 void VertexArray::setupGL2(const Context *rsc, class VertexArrayState *state, ShaderCache *sc) const
 {
-    for (int ct=1; ct < RS_MAX_ATTRIBS; ct++) {
+    rsc->checkError("VertexArray::setupGL2 start");
+    for (uint32_t ct=1; ct <= state->mLastEnableCount; ct++) {
         glDisableVertexAttribArray(ct);
     }
 
+    rsc->checkError("VertexArray::setupGL2 disabled");
     for (uint32_t ct=0; ct < mCount; ct++) {
         uint32_t slot = 0;
         if (sc->isUserVertexProgram()) {
@@ -203,10 +205,12 @@ void VertexArray::setupGL2(const Context *rsc, class VertexArrayState *state, Sh
                               mAttribs[ct].stride,
                               (void *)mAttribs[ct].offset);
     }
-    rsc->checkError("VertexArray::setupGL2");
+    state->mLastEnableCount = mCount;
+    rsc->checkError("VertexArray::setupGL2 done");
 }
 ////////////////////////////////////////////
 
 void VertexArrayState::init(Context *) {
+    mLastEnableCount = 0;
 }
 
