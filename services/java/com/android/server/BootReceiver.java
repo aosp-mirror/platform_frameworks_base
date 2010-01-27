@@ -20,8 +20,10 @@ import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.DropBoxManager;
+import android.os.FileObserver;
 import android.os.FileUtils;
 import android.os.RecoverySystem;
 import android.os.SystemProperties;
@@ -38,9 +40,13 @@ import java.io.IOException;
 public class BootReceiver extends BroadcastReceiver {
     private static final String TAG = "BootReceiver";
 
-    // Negative meaning capture the *last* 64K of the file
-    // (passed to FileUtils.readTextFile)
+    // Negative to read the *last* 64K of the file (per FileUtils.readTextFile)
     private static final int LOG_SIZE = -65536;
+
+    private static final File TOMBSTONE_DIR = new File("/data/tombstones");
+
+    // Keep a reference to the observer so the finalizer doesn't disable it.
+    private static FileObserver sTombstoneObserver = null;
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -68,49 +74,71 @@ public class BootReceiver extends BroadcastReceiver {
         }
     }
 
-    private void logBootEvents(Context context) throws IOException {
-        DropBoxManager db = (DropBoxManager) context.getSystemService(Context.DROPBOX_SERVICE);
+    private void logBootEvents(Context ctx) throws IOException {
+        final DropBoxManager db = (DropBoxManager) ctx.getSystemService(Context.DROPBOX_SERVICE);
+        final SharedPreferences prefs = ctx.getSharedPreferences("log_files", Context.MODE_PRIVATE);
+        final String props = new StringBuilder()
+            .append("Build: ").append(Build.FINGERPRINT).append("\n")
+            .append("Hardware: ").append(Build.BOARD).append("\n")
+            .append("Bootloader: ").append(Build.BOOTLOADER).append("\n")
+            .append("Radio: ").append(Build.RADIO).append("\n")
+            .append("Kernel: ")
+            .append(FileUtils.readTextFile(new File("/proc/version"), 1024, "...\n"))
+            .toString();
 
-        StringBuilder props = new StringBuilder();
-        props.append("Build: ").append(Build.FINGERPRINT).append("\n");
-        props.append("Hardware: ").append(Build.BOARD).append("\n");
-        props.append("Bootloader: ").append(Build.BOOTLOADER).append("\n");
-        props.append("Radio: ").append(Build.RADIO).append("\n");
-        props.append("Kernel: ");
-        props.append(FileUtils.readTextFile(new File("/proc/version"), 1024, "...\n"));
+        if (db == null || prefs == null) return;
 
         if (SystemProperties.getLong("ro.runtime.firstboot", 0) == 0) {
             String now = Long.toString(System.currentTimeMillis());
             SystemProperties.set("ro.runtime.firstboot", now);
-            if (db != null) db.addText("SYSTEM_BOOT", props.toString());
+            db.addText("SYSTEM_BOOT", props);
+            addFileToDropBox(db, prefs, props, "/proc/last_kmsg", "SYSTEM_LAST_KMSG");
+            addFileToDropBox(db, prefs, props, "/cache/recovery/log", "SYSTEM_RECOVERY_LOG");
+            addFileToDropBox(db, prefs, props, "/data/dontpanic/apanic_console", "APANIC_CONSOLE");
+            addFileToDropBox(db, prefs, props, "/data/dontpanic/apanic_threads", "APANIC_THREADS");
         } else {
-            if (db != null) db.addText("SYSTEM_RESTART", props.toString());
-            return;  // Subsequent boot, don't log kernel boot log
+            db.addText("SYSTEM_RESTART", props);
         }
 
-        ContentResolver cr = context.getContentResolver();
-        logBootFile(cr, db, props, "/cache/recovery/log", "SYSTEM_RECOVERY_LOG");
-        logBootFile(cr, db, props, "/proc/last_kmsg", "SYSTEM_LAST_KMSG");
-        logBootFile(cr, db, props, "/data/dontpanic/apanic_console", "APANIC_CONSOLE");
-        logBootFile(cr, db, props, "/data/dontpanic/apanic_threads", "APANIC_THREADS");
+        // Scan existing tombstones (in case any new ones appeared)
+        File[] tombstoneFiles = TOMBSTONE_DIR.listFiles();
+        for (int i = 0; tombstoneFiles != null && i < tombstoneFiles.length; i++) {
+            addFileToDropBox(db, prefs, props, tombstoneFiles[i].getPath(), "SYSTEM_TOMBSTONE");
+        }
+
+        // Start watching for new tombstone files; will record them as they occur.
+        // This gets registered with the singleton file observer thread.
+        sTombstoneObserver = new FileObserver(TOMBSTONE_DIR.getPath(), FileObserver.CLOSE_WRITE) {
+            @Override
+            public void onEvent(int event, String path) {
+                try {
+                    String filename = new File(TOMBSTONE_DIR, path).getPath();
+                    addFileToDropBox(db, prefs, props, filename, "SYSTEM_TOMBSTONE");
+                } catch (IOException e) {
+                    Log.e(TAG, "Can't log tombstone", e);
+                }
+            }
+        };
+
+        sTombstoneObserver.startWatching();
     }
 
-    private void logBootFile(ContentResolver cr, DropBoxManager db,
-            CharSequence headers, String filename, String tag) throws IOException {
-        if (cr == null || db == null || !db.isTagEnabled(tag)) return;  // Logging disabled
+    private static void addFileToDropBox(
+            DropBoxManager db, SharedPreferences prefs,
+            String headers, String filename, String tag) throws IOException {
+        if (!db.isTagEnabled(tag)) return;  // Logging disabled
 
         File file = new File(filename);
         long fileTime = file.lastModified();
         if (fileTime <= 0) return;  // File does not exist
 
-        String setting = "logfile:" + filename;
-        long lastTime = Settings.Secure.getLong(cr, setting, 0);
+        long lastTime = prefs.getLong(filename, 0);
         if (lastTime == fileTime) return;  // Already logged this particular file
-        Settings.Secure.putLong(cr, setting, fileTime);
+        prefs.edit().putLong(filename, fileTime).commit();
 
-        StringBuilder report = new StringBuilder(headers);
-        report.append("\n");
-        report.append(FileUtils.readTextFile(new File(filename), LOG_SIZE, "[[TRUNCATED]]\n"));
+        StringBuilder report = new StringBuilder(headers).append("\n");
+        report.append(FileUtils.readTextFile(file, LOG_SIZE, "[[TRUNCATED]]\n"));
         db.addText(tag, report.toString());
+        Log.i(TAG, "Logging " + filename + " to DropBox (" + tag + ")");
     }
 }
