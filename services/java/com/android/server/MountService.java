@@ -553,7 +553,7 @@ class MountService extends IMountService.Stub
                         if (st == VolumeState.NoMedia) {
                             state = Environment.MEDIA_REMOVED;
                         } else if (st == VolumeState.Idle) {
-                            state = Environment.MEDIA_UNMOUNTED;
+                            state = null;
                             try {
                                 mountVolume(path);
                             } catch (Exception ex) {
@@ -569,7 +569,9 @@ class MountService extends IMountService.Stub
                             throw new Exception(String.format("Unexpected state %d", st));
                         }
                     }
-                    updatePublicVolumeState(path, state);
+                    if (state != null) {
+                        updatePublicVolumeState(path, state);
+                    }
                 } catch (Exception e) {
                     Log.e(TAG, "Error processing initial volume state", e);
                     updatePublicVolumeState(path, Environment.MEDIA_REMOVED);
