@@ -720,6 +720,9 @@ public class Camera {
         private static final String KEY_SCENE_MODE = "scene-mode";
         private static final String KEY_FLASH_MODE = "flash-mode";
         private static final String KEY_FOCUS_MODE = "focus-mode";
+        private static final String KEY_FOCAL_LENGTH = "focal-length";
+        private static final String KEY_HORIZONTAL_VIEW_ANGLE = "horizontal-view-angle";
+        private static final String KEY_VERTICAL_VIEW_ANGLE = "vertical-view-angle";
         // Parameter key suffix for supported values.
         private static final String SUPPORTED_VALUES_SUFFIX = "-values";
 
@@ -1504,6 +1507,36 @@ public class Camera {
         public List<String> getSupportedFocusModes() {
             String str = get(KEY_FOCUS_MODE + SUPPORTED_VALUES_SUFFIX);
             return split(str);
+        }
+
+        /**
+         * Gets the focal length (in millimeter) of the camera.
+         *
+         * @return the focal length. This method will always return a valid
+         *         value.
+         */
+        public float getFocalLength() {
+            return Float.parseFloat(get(KEY_FOCAL_LENGTH));
+        }
+
+        /**
+         * Gets the horizontal angle of view in degrees.
+         *
+         * @return horizontal angle of view. This method will always return a
+         *         valid value.
+         */
+        public float getHorizontalViewAngle() {
+            return Float.parseFloat(get(KEY_HORIZONTAL_VIEW_ANGLE));
+        }
+
+        /**
+         * Gets the vertical angle of view in degrees.
+         *
+         * @return vertical angle of view. This method will always return a
+         *         valid value.
+         */
+        public float getVerticalViewAngle() {
+            return Float.parseFloat(get(KEY_VERTICAL_VIEW_ANGLE));
         }
 
         /**
