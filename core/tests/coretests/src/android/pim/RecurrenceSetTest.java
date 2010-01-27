@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.core;
+package android.pim;
 
 import android.content.ContentValues;
 import android.pim.ICalendar;

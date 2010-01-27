@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.core;
+package android.bluetooth;
 
 import android.bluetooth.AtCommandHandler;
 import android.bluetooth.AtCommandResult;

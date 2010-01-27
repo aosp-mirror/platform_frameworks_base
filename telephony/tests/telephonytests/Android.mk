@@ -7,6 +7,6 @@ LOCAL_SRC_FILES := $(call all-subdir-java-files)
 
 LOCAL_JAVA_LIBRARIES := android.test.runner
 
-LOCAL_PACKAGE_NAME := telephonytest
+LOCAL_PACKAGE_NAME := FrameworksTelephonyTests
 
 include $(BUILD_PACKAGE)
