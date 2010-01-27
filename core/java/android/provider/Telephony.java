@@ -562,15 +562,24 @@ public final class Telephony {
              * values:</p>
              *
              * <ul>
-             *   <li><em>transactionId (Integer)</em> - The WAP transaction
-             *    ID</li>
+             *   <li><em>transactionId (Integer)</em> - The WAP transaction ID</li>
              *   <li><em>pduType (Integer)</em> - The WAP PDU type</li>
              *   <li><em>header (byte[])</em> - The header of the message</li>
              *   <li><em>data (byte[])</em> - The data payload of the message</li>
+             *   <li><em>contentTypeParameters (HashMap&lt;String,String&gt;)</em>
+             *   - Any parameters associated with the content type
+             *   (decoded from the WSP Content-Type header)</li>
              * </ul>
              *
              * <p>If a BroadcastReceiver encounters an error while processing
              * this intent it should set the result code appropriately.</p>
+             *
+             * <p>The contentTypeParameters extra value is map of content parameters keyed by
+             * their names.</p>
+             *
+             * <p>If any unassigned well-known parameters are encountered, the key of the map will
+             * be 'unassigned/0x...', where '...' is the hex value of the unassigned parameter.  If
+             * a parameter has No-Value the value in the map will be null.</p>
              */
             @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
             public static final String WAP_PUSH_RECEIVED_ACTION =
@@ -583,7 +592,7 @@ public final class Telephony {
              */
             @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
             public static final String SIM_FULL_ACTION =
-                "android.provider.Telephony.SIM_FULL";
+                    "android.provider.Telephony.SIM_FULL";
 
             /**
              * Broadcast Action: An incoming SMS has been rejected by the
