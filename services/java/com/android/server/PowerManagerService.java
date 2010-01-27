@@ -2011,6 +2011,10 @@ class PowerManagerService extends IPowerManager.Stub
                 }
             }
         }
+
+        if (mPolicy != null) {
+            mPolicy.userActivity();
+        }
     }
 
     private int getAutoBrightnessValue(int sensorValue, int[] values) {
