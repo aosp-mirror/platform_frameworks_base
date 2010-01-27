@@ -1931,7 +1931,19 @@ final class WebViewCore {
         }
 
         // if mViewportWidth is 0, it means device-width, always update.
-        if (mViewportWidth != 0 && !updateRestoreState) return;
+        if (mViewportWidth != 0 && !updateRestoreState) {
+            RestoreState restoreState = new RestoreState();
+            restoreState.mMinScale = mViewportMinimumScale / 100.0f;
+            restoreState.mMaxScale = mViewportMaximumScale / 100.0f;
+            restoreState.mDefaultScale = adjust;
+            // as mViewportWidth is not 0, it is not mobile site.
+            restoreState.mMobileSite = false;
+            // for non-mobile site, we don't need minPrefWidth, set it as 0
+            restoreState.mScrollX = 0;
+            Message.obtain(mWebView.mPrivateHandler,
+                    WebView.UPDATE_ZOOM_RANGE, restoreState).sendToTarget();
+            return;
+        }
 
         // now notify webview
         // webViewWidth refers to the width in the view system
