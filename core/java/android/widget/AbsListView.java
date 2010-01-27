@@ -2852,6 +2852,23 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         checkSelectionChanged();
     }
 
+    @Override
+    protected void onDisplayHint(int hint) {
+        super.onDisplayHint(hint);
+        switch (hint) {
+            case INVISIBLE:
+                if (mPopup != null && mPopup.isShowing()) {
+                    dismissPopup();
+                }
+                break;
+            case VISIBLE:
+                if (mFiltered && mPopup != null && !mPopup.isShowing()) {
+                    showPopup();
+                }
+                break;
+        }
+    }
+
     /**
      * Removes the filter window
      */
@@ -3140,7 +3157,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             }
         } else {
             // Hide the popup when we are no longer visible
-            if (mPopup.isShowing()) {
+            if (mPopup != null && mPopup.isShowing()) {
                 dismissPopup();
             }
         }
