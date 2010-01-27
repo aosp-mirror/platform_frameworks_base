@@ -1191,14 +1191,6 @@ status_t CameraService::Client::setParameters(const String8& params)
 
     CameraParameters p(params);
 
-    // The orientation parameter is actually for CameraService, not for the camera driver.
-    if (p.getOrientation() == CameraParameters::CAMERA_ORIENTATION_PORTRAIT) {
-        LOGV("portrait mode");
-        mOrientation = ISurface::BufferHeap::ROT_90;
-    } else {
-        mOrientation = 0;
-    }
-
     return mHardware->setParameters(p);
 }
 
@@ -1223,6 +1215,30 @@ status_t CameraService::Client::sendCommand(int32_t cmd, int32_t arg1, int32_t a
     Mutex::Autolock lock(mLock);
     status_t result = checkPid();
     if (result != NO_ERROR) return result;
+
+    if (cmd == CAMERA_CMD_SET_DISPLAY_ORIENTATION) {
+        // The orientation cannot be set during preview.
+        if (mHardware->previewEnabled()) {
+            return INVALID_OPERATION;
+        }
+        switch (arg1) {
+            case 0:
+                mOrientation = ISurface::BufferHeap::ROT_0;
+                break;
+            case 90:
+                mOrientation = ISurface::BufferHeap::ROT_90;
+                break;
+            case 180:
+                mOrientation = ISurface::BufferHeap::ROT_180;
+                break;
+            case 270:
+                mOrientation = ISurface::BufferHeap::ROT_270;
+                break;
+            default:
+                return BAD_VALUE;
+        }
+        return OK;
+    }
 
     if (mHardware == 0) {
         LOGE("mHardware is NULL, returning.");
