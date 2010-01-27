@@ -679,6 +679,19 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             }
         }
     }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void dispatchDisplayHint(int hint) {
+        super.dispatchDisplayHint(hint);
+        final int count = mChildrenCount;
+        final View[] children = mChildren;
+        for (int i = 0; i < count; i++) {
+            children[i].dispatchDisplayHint(hint);
+        }
+    }
 
     /**
      * {@inheritDoc}
