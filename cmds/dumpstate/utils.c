@@ -43,13 +43,13 @@ int dump_file(const char *title, const char* path) {
     int fd = open(path, O_RDONLY);
     if (fd < 0) {
         int err = errno;
-        if (title) printf("----- %s (%s) -----\n", title, path);
+        if (title) printf("------ %s (%s) ------\n", title, path);
         printf("*** %s: %s\n", path, strerror(err));
         if (title) printf("\n");
         return -1;
     }
 
-    if (title) printf("----- %s (%s", title, path);
+    if (title) printf("------ %s (%s", title, path);
 
     if (title) {
         struct stat st;
@@ -59,7 +59,7 @@ int dump_file(const char *title, const char* path) {
             strftime(stamp, sizeof(stamp), "%Y-%m-%d %H:%M:%S", localtime(&mtime));
             printf(": %s", stamp);
         }
-        printf(") -----\n");
+        printf(") ------\n");
     }
 
     int newline = 0;
@@ -97,13 +97,13 @@ int run_command(const char *title, int timeout_seconds, const char *command, ...
 
         va_list ap;
         va_start(ap, command);
-        if (title) printf("----- %s (%s", title, command);
+        if (title) printf("------ %s (%s", title, command);
         for (arg = 1; arg < sizeof(args) / sizeof(args[0]); ++arg) {
             args[arg] = va_arg(ap, const char *);
             if (args[arg] == NULL) break;
             if (title) printf(" %s", args[arg]);
         }
-        if (title) printf(") -----\n");
+        if (title) printf(") ------\n");
         fflush(stdout);
 
         execvp(command, (char**) args);
@@ -159,7 +159,7 @@ void print_properties() {
     property_list(print_prop, NULL);
     qsort(&props, num_props, sizeof(props[0]), compare_prop);
 
-    printf("----- SYSTEM PROPERTIES -----\n");
+    printf("------ SYSTEM PROPERTIES ------\n");
     for (i = 0; i < num_props; ++i) {
         fputs(props[i], stdout);
         free(props[i]);

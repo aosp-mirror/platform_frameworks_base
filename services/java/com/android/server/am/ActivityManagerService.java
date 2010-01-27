@@ -61,6 +61,7 @@ import android.content.pm.ConfigurationInfo;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageManager;
 import android.content.pm.InstrumentationInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PathPermission;
 import android.content.pm.ProviderInfo;
@@ -8845,7 +8846,26 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 sb.append("Process: system_server\n");
             } else {
                 sb.append("Process: ").append(process.processName).append("\n");
-                sb.append("Flags: 0x").append(Integer.toString(process.info.flags, 16)).append("\n");
+            }
+            if (process != null) {
+                int flags = process.info.flags;
+                IPackageManager pm = ActivityThread.getPackageManager();
+                sb.append("Flags: 0x").append(Integer.toString(flags, 16)).append("\n");
+                for (String pkg : process.pkgList) {
+                    sb.append("Package: ").append(pkg);
+                    try {
+                        PackageInfo pi = pm.getPackageInfo(pkg, 0);
+                        if (pi != null) {
+                            sb.append(" v").append(pi.versionCode);
+                            if (pi.versionName != null) {
+                                sb.append(" (").append(pi.versionName).append(")");
+                            }
+                        }
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Error getting package info: " + pkg, e);
+                    }
+                    sb.append("\n");
+                }
             }
             if (activity != null) {
                 sb.append("Activity: ").append(activity.shortComponentName).append("\n");

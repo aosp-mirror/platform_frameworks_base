@@ -89,14 +89,14 @@ public class BootReceiver extends BroadcastReceiver {
         }
 
         ContentResolver cr = context.getContentResolver();
-        logBootFile(cr, db, "/cache/recovery/log", "SYSTEM_RECOVERY_LOG");
-        logBootFile(cr, db, "/proc/last_kmsg", "SYSTEM_LAST_KMSG");
-        logBootFile(cr, db, "/data/dontpanic/apanic_console", "APANIC_CONSOLE");
-        logBootFile(cr, db, "/data/dontpanic/apanic_threads", "APANIC_THREADS");
+        logBootFile(cr, db, props, "/cache/recovery/log", "SYSTEM_RECOVERY_LOG");
+        logBootFile(cr, db, props, "/proc/last_kmsg", "SYSTEM_LAST_KMSG");
+        logBootFile(cr, db, props, "/data/dontpanic/apanic_console", "APANIC_CONSOLE");
+        logBootFile(cr, db, props, "/data/dontpanic/apanic_threads", "APANIC_THREADS");
     }
 
-    private void logBootFile(ContentResolver cr, DropBoxManager db, String filename, String tag)
-            throws IOException {
+    private void logBootFile(ContentResolver cr, DropBoxManager db,
+            CharSequence headers, String filename, String tag) throws IOException {
         if (cr == null || db == null || !db.isTagEnabled(tag)) return;  // Logging disabled
 
         File file = new File(filename);
@@ -108,10 +108,8 @@ public class BootReceiver extends BroadcastReceiver {
         if (lastTime == fileTime) return;  // Already logged this particular file
         Settings.Secure.putLong(cr, setting, fileTime);
 
-        StringBuilder report = new StringBuilder();
-        report.append("Build: ").append(Build.FINGERPRINT).append("\n");
-        report.append("Kernel: ");
-        report.append(FileUtils.readTextFile(new File("/proc/version"), 1024, "...\n"));
+        StringBuilder report = new StringBuilder(headers);
+        report.append("\n");
         report.append(FileUtils.readTextFile(new File(filename), LOG_SIZE, "[[TRUNCATED]]\n"));
         db.addText(tag, report.toString());
     }
