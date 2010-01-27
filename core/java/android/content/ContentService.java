@@ -32,6 +32,8 @@ import android.Manifest;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * {@hide}
@@ -268,6 +270,42 @@ public final class ContentService extends IContentService.Stub {
                 syncManager.getSyncStorageEngine().setSyncAutomatically(
                         account, providerName, sync);
             }
+        } finally {
+            restoreCallingIdentity(identityToken);
+        }
+    }
+
+    public void addPeriodicSync(Account account, String authority, Bundle extras,
+            long pollFrequency) {
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.WRITE_SYNC_SETTINGS,
+                "no permission to write the sync settings");
+        long identityToken = clearCallingIdentity();
+        try {
+            getSyncManager().getSyncStorageEngine().addPeriodicSync(
+                    account, authority, extras, pollFrequency);
+        } finally {
+            restoreCallingIdentity(identityToken);
+        }
+    }
+
+    public void removePeriodicSync(Account account, String authority, Bundle extras) {
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.WRITE_SYNC_SETTINGS,
+                "no permission to write the sync settings");
+        long identityToken = clearCallingIdentity();
+        try {
+            getSyncManager().getSyncStorageEngine().removePeriodicSync(account, authority, extras);
+        } finally {
+            restoreCallingIdentity(identityToken);
+        }
+    }
+
+    public List<PeriodicSync> getPeriodicSyncs(Account account, String providerName) {
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.READ_SYNC_SETTINGS,
+                "no permission to read the sync settings");
+        long identityToken = clearCallingIdentity();
+        try {
+            return getSyncManager().getSyncStorageEngine().getPeriodicSyncs(
+                    account, providerName);
         } finally {
             restoreCallingIdentity(identityToken);
         }

@@ -42,6 +42,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Collection;
 
 
 /**
@@ -962,6 +963,65 @@ public abstract class ContentResolver {
         } catch (RemoteException e) {
             // exception ignored; if this is thrown then it means the runtime is in the midst of
             // being restarted
+        }
+    }
+
+    /**
+     * Specifies that a sync should be requested with the specified the account, authority,
+     * and extras at the given frequency. If there is already another periodic sync scheduled
+     * with the account, authority and extras then a new periodic sync won't be added, instead
+     * the frequency of the previous one will be updated.
+     * <p>
+     * These periodic syncs honor the "syncAutomatically" and "masterSyncAutomatically" settings.
+     * Although these sync are scheduled at the specified frequency, it may take longer for it to
+     * actually be started if other syncs are ahead of it in the sync operation queue. This means
+     * that the actual start time may drift.
+     *
+     * @param account the account to specify in the sync
+     * @param authority the provider to specify in the sync request
+     * @param extras extra parameters to go along with the sync request
+     * @param pollFrequency how frequently the sync should be performed, in seconds.
+     */
+    public static void addPeriodicSync(Account account, String authority, Bundle extras,
+            long pollFrequency) {
+        validateSyncExtrasBundle(extras);
+        try {
+            getContentService().addPeriodicSync(account, authority, extras, pollFrequency);
+        } catch (RemoteException e) {
+            // exception ignored; if this is thrown then it means the runtime is in the midst of
+            // being restarted
+        }
+    }
+
+    /**
+     * Remove a periodic sync. Has no affect if account, authority and extras don't match
+     * an existing periodic sync.
+     *
+     * @param account the account of the periodic sync to remove
+     * @param authority the provider of the periodic sync to remove
+     * @param extras the extras of the periodic sync to remove
+     */
+    public static void removePeriodicSync(Account account, String authority, Bundle extras) {
+        validateSyncExtrasBundle(extras);
+        try {
+            getContentService().removePeriodicSync(account, authority, extras);
+        } catch (RemoteException e) {
+            throw new RuntimeException("the ContentService should always be reachable", e);
+        }
+    }
+
+    /**
+     * Get the list of information about the periodic syncs for the given account and authority.
+     *
+     * @param account the account whose periodic syncs we are querying
+     * @param authority the provider whose periodic syncs we are querying
+     * @return a list of PeriodicSync objects. This list may be empty but will never be null.
+     */
+    public static List<PeriodicSync> getPeriodicSyncs(Account account, String authority) {
+        try {
+            return getContentService().getPeriodicSyncs(account, authority);
+        } catch (RemoteException e) {
+            throw new RuntimeException("the ContentService should always be reachable", e);
         }
     }
 

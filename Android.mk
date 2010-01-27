@@ -222,6 +222,7 @@ aidl_files := \
 	frameworks/base/core/java/android/content/ComponentName.aidl \
 	frameworks/base/core/java/android/content/Intent.aidl \
 	frameworks/base/core/java/android/content/IntentSender.aidl \
+	frameworks/base/core/java/android/content/PeriodicSync.aidl \
 	frameworks/base/core/java/android/content/SyncStats.aidl \
 	frameworks/base/core/java/android/content/res/Configuration.aidl \
 	frameworks/base/core/java/android/appwidget/AppWidgetProviderInfo.aidl \
