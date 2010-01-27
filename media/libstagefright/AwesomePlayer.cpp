@@ -19,6 +19,7 @@
 #include <utils/Log.h>
 
 #include "include/AwesomePlayer.h"
+#include "include/Prefetcher.h"
 #include "include/SoftwareRenderer.h"
 
 #include <binder/IPCThreadState.h>
@@ -118,6 +119,8 @@ AwesomePlayer::AwesomePlayer()
     mVideoEventPending = false;
     mStreamDoneEvent = new AwesomeEvent(this, 1);
     mStreamDoneEventPending = false;
+    mBufferingEvent = new AwesomeEvent(this, 2);
+    mBufferingEventPending = false;
 
     mQueue.start();
 
@@ -132,11 +135,16 @@ AwesomePlayer::~AwesomePlayer() {
     mClient.disconnect();
 }
 
-void AwesomePlayer::cancelPlayerEvents() {
+void AwesomePlayer::cancelPlayerEvents(bool keepBufferingGoing) {
     mQueue.cancelEvent(mVideoEvent->eventID());
     mVideoEventPending = false;
     mQueue.cancelEvent(mStreamDoneEvent->eventID());
     mStreamDoneEventPending = false;
+
+    if (!keepBufferingGoing) {
+        mQueue.cancelEvent(mBufferingEvent->eventID());
+        mBufferingEventPending = false;
+    }
 }
 
 void AwesomePlayer::setListener(const wp<MediaPlayerBase> &listener) {
@@ -149,10 +157,20 @@ status_t AwesomePlayer::setDataSource(const char *uri) {
 
     reset_l();
 
-    sp<MediaExtractor> extractor = MediaExtractor::CreateFromURI(uri);
+    sp<DataSource> dataSource = DataSource::CreateFromURI(uri);
+
+    if (dataSource == NULL) {
+        return UNKNOWN_ERROR;
+    }
+
+    sp<MediaExtractor> extractor = MediaExtractor::Create(dataSource);
 
     if (extractor == NULL) {
         return UNKNOWN_ERROR;
+    }
+
+    if (dataSource->flags() & DataSource::kWantsPrefetching) {
+        mPrefetcher = new Prefetcher;
     }
 
     return setDataSource_l(extractor);
@@ -182,8 +200,6 @@ status_t AwesomePlayer::setDataSource(
 }
 
 status_t AwesomePlayer::setDataSource_l(const sp<MediaExtractor> &extractor) {
-    reset_l();
-
     bool haveAudio = false;
     bool haveVideo = false;
     for (size_t i = 0; i < extractor->countTracks(); ++i) {
@@ -253,6 +269,8 @@ void AwesomePlayer::reset_l() {
 
     mSeeking = false;
     mSeekTimeUs = 0;
+
+    mPrefetcher.clear();
 }
 
 // static
@@ -278,13 +296,35 @@ void AwesomePlayer::AudioNotify(void *_me, int what) {
     }
 }
 
-void AwesomePlayer::notifyListener_l(int msg) {
+void AwesomePlayer::notifyListener_l(int msg, int ext1) {
     if (mListener != NULL) {
         sp<MediaPlayerBase> listener = mListener.promote();
 
         if (listener != NULL) {
-            listener->sendEvent(msg);
+            listener->sendEvent(msg, ext1);
         }
+    }
+}
+
+void AwesomePlayer::onBufferingUpdate() {
+    Mutex::Autolock autoLock(mLock);
+    mBufferingEventPending = false;
+
+    if (mDurationUs >= 0) {
+        int64_t cachedDurationUs = mPrefetcher->getCachedDurationUs();
+        int64_t positionUs = 0;
+        if (mVideoRenderer != NULL) {
+            positionUs = mVideoTimeUs;
+        } else if (mAudioPlayer != NULL) {
+            positionUs = mAudioPlayer->getMediaTimeUs();
+        }
+
+        cachedDurationUs += positionUs;
+
+        double percentage = (double)cachedDurationUs / mDurationUs;
+        notifyListener_l(MEDIA_BUFFERING_UPDATE, percentage * 100.0);
+
+        postBufferingEvent_l();
     }
 }
 
@@ -361,6 +401,8 @@ status_t AwesomePlayer::play() {
         seekAudioIfNecessary_l();
     }
 
+    postBufferingEvent_l();
+
     return OK;
 }
 
@@ -414,7 +456,7 @@ status_t AwesomePlayer::pause_l() {
         return OK;
     }
 
-    cancelPlayerEvents();
+    cancelPlayerEvents(true /* keepBufferingGoing */);
 
     if (mAudioPlayer != NULL) {
         mAudioPlayer->pause();
@@ -518,9 +560,13 @@ status_t AwesomePlayer::getVideoDimensions(
     return OK;
 }
 
-status_t AwesomePlayer::setAudioSource(const sp<MediaSource> &source) {
+status_t AwesomePlayer::setAudioSource(sp<MediaSource> source) {
     if (source == NULL) {
         return UNKNOWN_ERROR;
+    }
+
+    if (mPrefetcher != NULL) {
+        source = mPrefetcher->addSource(source);
     }
 
     sp<MetaData> meta = source->getFormat();
@@ -549,9 +595,13 @@ status_t AwesomePlayer::setAudioSource(const sp<MediaSource> &source) {
     return mAudioSource != NULL ? OK : UNKNOWN_ERROR;
 }
 
-status_t AwesomePlayer::setVideoSource(const sp<MediaSource> &source) {
+status_t AwesomePlayer::setVideoSource(sp<MediaSource> source) {
     if (source == NULL) {
         return UNKNOWN_ERROR;
+    }
+
+    if (mPrefetcher != NULL) {
+        source = mPrefetcher->addSource(source);
     }
 
     mVideoSource = OMXCodec::Create(
@@ -580,9 +630,13 @@ void AwesomePlayer::onEvent(int32_t code) {
     if (code == 1) {
         onStreamDone();
         return;
+    } else if (code == 2) {
+        onBufferingUpdate();
+        return;
     }
 
     Mutex::Autolock autoLock(mLock);
+
     mVideoEventPending = false;
 
     if (mSeeking) {
@@ -716,6 +770,18 @@ void AwesomePlayer::postStreamDoneEvent_l() {
     }
     mStreamDoneEventPending = true;
     mQueue.postEvent(mStreamDoneEvent);
+}
+
+void AwesomePlayer::postBufferingEvent_l() {
+    if (mPrefetcher == NULL) {
+        return;
+    }
+
+    if (mBufferingEventPending) {
+        return;
+    }
+    mBufferingEventPending = true;
+    mQueue.postEventWithDelay(mBufferingEvent, 1000000ll);
 }
 
 }  // namespace android

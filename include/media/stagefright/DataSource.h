@@ -31,6 +31,10 @@ class String8;
 
 class DataSource : public RefBase {
 public:
+    enum Flags {
+        kWantsPrefetching = 1,
+    };
+
     static sp<DataSource> CreateFromURI(const char *uri);
 
     DataSource() {}
@@ -44,6 +48,10 @@ public:
 
     // May return ERROR_UNSUPPORTED.
     virtual status_t getSize(off_t *size);
+
+    virtual uint32_t flags() {
+        return 0;
+    }
 
     ////////////////////////////////////////////////////////////////////////////
 

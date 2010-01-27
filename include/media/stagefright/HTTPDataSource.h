@@ -33,6 +33,10 @@ public:
 
     virtual ssize_t readAt(off_t offset, void *data, size_t size);
 
+    virtual uint32_t flags() {
+        return kWantsPrefetching;
+    }
+
 protected:
     virtual ~HTTPDataSource();
 
@@ -51,6 +55,8 @@ private:
     off_t mBufferOffset;
 
     status_t mInitCheck;
+
+    ssize_t sendRangeRequest(size_t offset);
 
     HTTPDataSource(const HTTPDataSource &);
     HTTPDataSource &operator=(const HTTPDataSource &);
