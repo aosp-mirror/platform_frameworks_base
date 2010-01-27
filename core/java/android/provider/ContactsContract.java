@@ -130,6 +130,57 @@ public final class ContactsContract {
     public static final String REQUESTING_PACKAGE_PARAM_KEY = "requesting_package";
 
     /**
+     * @hide
+     */
+    public static final class Preferences {
+
+        /**
+         * A key in the {@link android.provider.Settings android.provider.Settings} provider
+         * that stores the preferred sorting order for contacts (by given name vs. by family name).
+         *
+         * @hide
+         */
+        public static final String SORT_ORDER = "android.contacts.SORT_ORDER";
+
+        /**
+         * The value for the SORT_ORDER key corresponding to sorting by given name first.
+         *
+         * @hide
+         */
+        public static final int SORT_ORDER_PRIMARY = 1;
+
+        /**
+         * The value for the SORT_ORDER key corresponding to sorting by family name first.
+         *
+         * @hide
+         */
+        public static final int SORT_ORDER_ALTERNATIVE = 2;
+
+        /**
+         * A key in the {@link android.provider.Settings android.provider.Settings} provider
+         * that stores the preferred display order for contacts (given name first vs. family
+         * name first).
+         *
+         * @hide
+         */
+        public static final String DISPLAY_ORDER = "android.contacts.DISPLAY_ORDER";
+
+        /**
+         * The value for the DISPLAY_ORDER key corresponding to showing the given name first.
+         *
+         * @hide
+         */
+        public static final int DISPLAY_ORDER_PRIMARY = 1;
+
+        /**
+         * The value for the DISPLAY_ORDER key corresponding to showing the family name first.
+         *
+         * @hide
+         */
+        public static final int DISPLAY_ORDER_ALTERNATIVE = 2;
+    }
+
+    /**
      * @hide should be removed when users are updated to refer to SyncState
      * @deprecated use SyncState instead
      */
@@ -551,8 +602,7 @@ public final class ContactsContract {
         /**
          * Sort key based on the alternative representation of the full name,
          * {@link #DISPLAY_NAME_ALTERNATIVE}.  Thus for Western names,
-         * it is the one using the "family name first" format for
-         * Western names.
+         * it is the one using the "family name first" format.
          */
         public static final String SORT_KEY_ALTERNATIVE = "sort_key_alt";
     }
