@@ -119,6 +119,26 @@ public class WifiMonitor {
 
     private final WifiStateTracker mWifiStateTracker;
 
+    /**
+     * This indicates the supplicant connection for the monitor is closed
+     */
+    private static final String monitorSocketClosed = "connection closed";
+
+    /**
+     * This indicates a read error on the monitor socket conenction
+     */
+    private static final String wpaRecvError = "recv error";
+
+    /**
+     * Tracks consecutive receive errors
+     */
+    private int mRecvErrors = 0;
+
+    /**
+     * Max errors before we close supplicant connection
+     */
+    private static final int MAX_RECV_ERRORS    = 10;
+
     public WifiMonitor(WifiStateTracker tracker) {
         mWifiStateTracker = tracker;
     }
@@ -151,16 +171,13 @@ public class WifiMonitor {
             for (;;) {
                 String eventStr = WifiNative.waitForEvent();
 
-                if (eventStr == null) {
-                    continue;
-                }
-
                 // Skip logging the common but mostly uninteresting scan-results event
                 if (Config.LOGD && eventStr.indexOf(scanResultsEvent) == -1) {
                     Log.v(TAG, "Event [" + eventStr + "]");
                 }
                 if (!eventStr.startsWith(eventPrefix)) {
-                    if (eventStr.startsWith(wpaEventPrefix) && 0 < eventStr.indexOf(passwordKeyMayBeIncorrectEvent)) {
+                    if (eventStr.startsWith(wpaEventPrefix) &&
+                            0 < eventStr.indexOf(passwordKeyMayBeIncorrectEvent)) {
                         handlePasswordKeyMayBeIncorrect();
                     }
                     continue;
@@ -216,12 +233,38 @@ public class WifiMonitor {
                 } else if (event == DRIVER_STATE) {
                     handleDriverEvent(eventData);
                 } else if (event == TERMINATING) {
+                    /**
+                     * If monitor socket is closed, we have already
+                     * stopped the supplicant, simply exit the monitor thread
+                     */
+                    if (eventData.startsWith(monitorSocketClosed)) {
+                        if (Config.LOGD) {
+                            Log.d(TAG, "Monitor socket is closed, exiting thread");
+                        }
+                        break;
+                    }
+
+                    /**
+                     * Close the supplicant connection if we see
+                     * too many recv errors
+                     */
+                    if (eventData.startsWith(wpaRecvError)) {
+                        if (++mRecvErrors > MAX_RECV_ERRORS) {
+                            if (Config.LOGD) {
+                                Log.d(TAG, "too many recv errors, closing connection");
+                            }
+                        } else {
+                            continue;
+                        }
+                    }
+
+                    // notify and exit
                     mWifiStateTracker.notifySupplicantLost();
-                    // If supplicant is gone, exit the thread
                     break;
                 } else {
                     handleEvent(event, eventData);
                 }
+                mRecvErrors = 0;
             }
         }
 
