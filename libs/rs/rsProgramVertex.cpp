@@ -204,6 +204,7 @@ void ProgramVertex::setupGL2(const Context *rsc, ProgramVertexState *state, Shad
         //return;
     }
 
+    rsc->checkError("ProgramVertex::setupGL2 start");
     glVertexAttrib4f(1, state->color[0], state->color[1], state->color[2], state->color[3]);
 
     const float *f = static_cast<const float *>(mConstants[0]->getPtr());
@@ -220,6 +221,7 @@ void ProgramVertex::setupGL2(const Context *rsc, ProgramVertexState *state, Shad
                            &f[RS_PROGRAM_VERTEX_TEXTURE_OFFSET]);
     }
 
+    rsc->checkError("ProgramVertex::setupGL2 begin uniforms");
     uint32_t uidx = 1;
     for (uint32_t ct=0; ct < mConstantCount; ct++) {
         Allocation *alloc = mConstants[ct+1].get();

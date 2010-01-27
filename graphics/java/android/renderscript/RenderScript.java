@@ -246,13 +246,8 @@ public class RenderScript {
         }
     }
 
-    void validateSurface() {
-        //if (mSurface == null) {
-            //throw new IllegalStateException("Uploading data to GL with no surface.");
-        //}
-    }
-
     public void contextSetPriority(Priority p) {
+        validate();
         nContextSetPriority(p.mID);
     }
 
@@ -312,14 +307,17 @@ public class RenderScript {
         mSurface = sur;
         mWidth = w;
         mHeight = h;
+        validate();
         nContextSetSurface(w, h, mSurface);
     }
 
     public void contextDump(int bits) {
+        validate();
         nContextDump(bits);
     }
 
     public void destroy() {
+        validate();
         nContextDeinitToClient();
         mMessageThread.mRun = false;
 
@@ -335,10 +333,12 @@ public class RenderScript {
     }
 
     void pause() {
+        validate();
         nContextPause();
     }
 
     void resume() {
+        validate();
         nContextResume();
     }
 
@@ -379,22 +379,27 @@ public class RenderScript {
     }
 
     public void contextBindRootScript(Script s) {
+        validate();
         nContextBindRootScript(safeID(s));
     }
 
     public void contextBindProgramFragmentStore(ProgramStore p) {
+        validate();
         nContextBindProgramFragmentStore(safeID(p));
     }
 
     public void contextBindProgramFragment(ProgramFragment p) {
+        validate();
         nContextBindProgramFragment(safeID(p));
     }
 
     public void contextBindProgramRaster(ProgramRaster p) {
+        validate();
         nContextBindProgramRaster(safeID(p));
     }
 
     public void contextBindProgramVertex(ProgramVertex p) {
+        validate();
         nContextBindProgramVertex(safeID(p));
     }
 
