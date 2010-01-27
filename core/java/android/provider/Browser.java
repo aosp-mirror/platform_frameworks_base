@@ -34,12 +34,6 @@ public class Browser {
         Uri.parse("content://browser/bookmarks");
 
     /**
-     * The inline scheme to show embedded content in a browser.
-     * @hide
-     */
-    public static final Uri INLINE_URI = Uri.parse("inline:");
-
-    /**
      * The name of extra data when starting Browser with ACTION_VIEW or
      * ACTION_SEARCH intent.
      * <p>
@@ -60,24 +54,6 @@ public class Browser {
      */
     public static final String EXTRA_APPLICATION_ID =
         "com.android.browser.application_id";
-
-    /**
-     * The content to be rendered when url's scheme is inline.
-     * @hide
-     */
-    public static final String EXTRA_INLINE_CONTENT ="com.android.browser.inline.content";
-
-    /**
-     * The encoding of the inlined content for inline scheme.
-     * @hide
-     */
-    public static final String EXTRA_INLINE_ENCODING ="com.android.browser.inline.encoding";
-
-    /**
-     * The url used when the inline content is falied to render.
-     * @hide
-     */
-    public static final String EXTRA_INLINE_FAILURL ="com.android.browser.inline.failurl";
 
     /**
      * The name of the extra data in the VIEW intent. The data is in boolean.
@@ -101,6 +77,27 @@ public class Browser {
      * @hide
      */
     public static final String EXTRA_POST_DATA = "com.android.browser.post_data";
+
+    /**
+     * The name of the extra data in the VIEW intent. The data is in the format
+     * of String array. This should be paired with EXTRA_HEADERS_VALUE.
+     * <p>
+     * The keys will be combined with the values and sent in the HTTP request
+     * headers for the provided url. The keys can't be the standard HTTP headers
+     * as they are set by the WebView. The url's schema must be http(s).
+     * <p>
+     */
+    public static final String EXTRA_HEADERS_KEY = "com.android.browser.headers_key";
+
+    /**
+     * The name of the extra data in the VIEW intent. The data is in the format
+     * of String array. This should be paired with EXTRA_HEADERS_KEY.
+     * <p>
+     * The values will be combined with the keys and sent in the HTTP request
+     * headers for the provided url. The url's schema must be http(s).
+     * <p>
+     */
+    public static final String EXTRA_HEADERS_VALUE = "com.android.browser.headers_value";
 
     /* if you change column order you must also change indices
        below */

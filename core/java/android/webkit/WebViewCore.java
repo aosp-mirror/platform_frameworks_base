@@ -686,6 +686,11 @@ final class WebViewCore {
         int mY;
     }
 
+    static class GetUrlData {
+        String mUrl;
+        Map<String, String> mExtraHeaders;
+    }
+
     static class PostUrlData {
         String mUrl;
         byte[] mPostData;
@@ -958,9 +963,11 @@ final class WebViewCore {
                                     ((Float) msg.obj).floatValue(), msg.arg1);
                             break;
 
-                        case LOAD_URL:
-                            loadUrl((String) msg.obj);
+                        case LOAD_URL: {
+                            GetUrlData param = (GetUrlData) msg.obj;
+                            loadUrl(param.mUrl, param.mExtraHeaders);
                             break;
+                        }
 
                         case POST_URL: {
                             PostUrlData param = (PostUrlData) msg.obj;
@@ -1545,9 +1552,9 @@ final class WebViewCore {
         }
     }
 
-    private void loadUrl(String url) {
+    private void loadUrl(String url, Map<String, String> extraHeaders) {
         if (DebugFlags.WEB_VIEW_CORE) Log.v(LOGTAG, " CORE loadUrl " + url);
-        mBrowserFrame.loadUrl(url);
+        mBrowserFrame.loadUrl(url, extraHeaders);
     }
 
     private void key(KeyEvent evt, boolean isDown) {

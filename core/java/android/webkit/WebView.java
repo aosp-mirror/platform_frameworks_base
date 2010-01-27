@@ -1376,6 +1376,22 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
+     * Load the given url with the extra headers.
+     * @param url The url of the resource to load.
+     * @param extraHeaders The extra headers sent with this url. This should not
+     *            include the common headers like "user-agent". If it does, it
+     *            will be replaced by the intrinsic value of the WebView.
+     */
+    public void loadUrl(String url, Map<String, String> extraHeaders) {
+        switchOutDrawHistory();
+        WebViewCore.GetUrlData arg = new WebViewCore.GetUrlData();
+        arg.mUrl = url;
+        arg.mExtraHeaders = extraHeaders;
+        mWebViewCore.sendMessage(EventHub.LOAD_URL, arg);
+        clearTextEntry();
+    }
+
+    /**
      * Load the given url.
      * @param url The url of the resource to load.
      */
@@ -1383,9 +1399,7 @@ public class WebView extends AbsoluteLayout
         if (url == null) {
             return;
         }
-        switchOutDrawHistory();
-        mWebViewCore.sendMessage(EventHub.LOAD_URL, url);
-        clearTextEntry();
+        loadUrl(url, null);
     }
 
     /**
