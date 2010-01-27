@@ -19,7 +19,6 @@ package android.app;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
-import android.R;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
@@ -111,48 +110,47 @@ public final class DeviceAdminInfo implements Parcelable {
 
     /** @hide */
     public static class PolicyInfo {
+        public final int ident;
         final public String tag;
         final public int label;
         final public int description;
         
-        public PolicyInfo(String tagIn, int labelIn, int descriptionIn) {
+        public PolicyInfo(int identIn, String tagIn, int labelIn, int descriptionIn) {
+            ident = identIn;
             tag = tagIn;
             label = labelIn;
             description = descriptionIn;
         }
     }
     
+    static ArrayList<PolicyInfo> sPoliciesDisplayOrder = new ArrayList<PolicyInfo>();
     static HashMap<String, Integer> sKnownPolicies = new HashMap<String, Integer>();
     static SparseArray<PolicyInfo> sRevKnownPolicies = new SparseArray<PolicyInfo>();
     
     static {
-        sRevKnownPolicies.put(USES_POLICY_LIMIT_PASSWORD,
-                new PolicyInfo("limit-password",
-                        com.android.internal.R.string.policylab_limitPassword,
-                        com.android.internal.R.string.policydesc_limitPassword));
-        sRevKnownPolicies.put(USES_POLICY_WATCH_LOGIN,
-                new PolicyInfo("watch-login",
-                        com.android.internal.R.string.policylab_watchLogin,
-                        com.android.internal.R.string.policydesc_watchLogin));
-        sRevKnownPolicies.put(USES_POLICY_RESET_PASSWORD,
-                new PolicyInfo("reset-password",
-                        com.android.internal.R.string.policylab_resetPassword,
-                        com.android.internal.R.string.policydesc_resetPassword));
-        sRevKnownPolicies.put(USES_POLICY_LIMIT_UNLOCK,
-                new PolicyInfo("limit-unlock",
-                        com.android.internal.R.string.policylab_limitUnlock,
-                        com.android.internal.R.string.policydesc_limitUnlock));
-        sRevKnownPolicies.put(USES_POLICY_FORCE_LOCK,
-                new PolicyInfo("force-lock",
-                        com.android.internal.R.string.policylab_forceLock,
-                        com.android.internal.R.string.policydesc_forceLock));
-        sRevKnownPolicies.put(USES_POLICY_WIPE_DATA,
-                new PolicyInfo("wipe-data",
-                        com.android.internal.R.string.policylab_wipeData,
-                        com.android.internal.R.string.policydesc_wipeData));
-        for (int i=0; i<sRevKnownPolicies.size(); i++) {
-            sKnownPolicies.put(sRevKnownPolicies.valueAt(i).tag,
-                    sRevKnownPolicies.keyAt(i));
+        sPoliciesDisplayOrder.add(new PolicyInfo(USES_POLICY_WIPE_DATA, "wipe-data",
+                com.android.internal.R.string.policylab_wipeData,
+                com.android.internal.R.string.policydesc_wipeData));
+        sPoliciesDisplayOrder.add(new PolicyInfo(USES_POLICY_RESET_PASSWORD, "reset-password",
+                com.android.internal.R.string.policylab_resetPassword,
+                com.android.internal.R.string.policydesc_resetPassword));
+        sPoliciesDisplayOrder.add(new PolicyInfo(USES_POLICY_LIMIT_PASSWORD, "limit-password",
+                com.android.internal.R.string.policylab_limitPassword,
+                com.android.internal.R.string.policydesc_limitPassword));
+        sPoliciesDisplayOrder.add(new PolicyInfo(USES_POLICY_WATCH_LOGIN, "watch-login",
+                com.android.internal.R.string.policylab_watchLogin,
+                com.android.internal.R.string.policydesc_watchLogin));
+        sPoliciesDisplayOrder.add(new PolicyInfo(USES_POLICY_LIMIT_UNLOCK, "limit-unlock",
+                com.android.internal.R.string.policylab_limitUnlock,
+                com.android.internal.R.string.policydesc_limitUnlock));
+        sPoliciesDisplayOrder.add(new PolicyInfo(USES_POLICY_FORCE_LOCK, "force-lock",
+                com.android.internal.R.string.policylab_forceLock,
+                com.android.internal.R.string.policydesc_forceLock));
+        
+        for (int i=0; i<sPoliciesDisplayOrder.size(); i++) {
+            PolicyInfo pi = sPoliciesDisplayOrder.get(i);
+            sRevKnownPolicies.put(pi.ident, pi);
+            sKnownPolicies.put(pi.tag, pi.ident);
         }
     }
     
@@ -335,10 +333,10 @@ public final class DeviceAdminInfo implements Parcelable {
     /** @hide */
     public ArrayList<PolicyInfo> getUsedPolicies() {
         ArrayList<PolicyInfo> res = new ArrayList<PolicyInfo>();
-        for (int i=0; i<sRevKnownPolicies.size(); i++) {
-            int ident = sRevKnownPolicies.keyAt(i);
-            if (usesPolicy(ident)) {
-                res.add(sRevKnownPolicies.valueAt(i));
+        for (int i=0; i<sPoliciesDisplayOrder.size(); i++) {
+            PolicyInfo pi = sPoliciesDisplayOrder.get(i);
+            if (usesPolicy(pi.ident)) {
+                res.add(pi);
             }
         }
         return res;

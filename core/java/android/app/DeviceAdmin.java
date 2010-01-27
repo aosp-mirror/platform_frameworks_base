@@ -22,6 +22,7 @@ import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 
 /**
  * Base class for implementing a device administration component.  This
@@ -61,6 +62,27 @@ public class DeviceAdmin extends BroadcastReceiver {
     public static final String ACTION_DEVICE_ADMIN_ENABLED
             = "android.app.action.DEVICE_ADMIN_ENABLED";
 
+    /**
+     * Action sent to a device administrator when the user has requested to
+     * disable it, but before this has actually been done.  This gives you
+     * a chance to supply a message to the user about the impact of
+     * disabling your admin, by setting the extra field
+     * {@link #EXTRA_DISABLE_WARNING} in the result Intent.  If not set,
+     * no warning will be displayed.  If set, the given text will be shown
+     * to the user before they disable your admin.
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_DEVICE_ADMIN_DISABLE_REQUESTED
+            = "android.app.action.DEVICE_ADMIN_DISABLE_REQUESTED";
+    
+    /**
+     * A CharSequence that can be shown to the user informing them of the
+     * impact of disabling your admin.
+     *
+     * @see #ACTION_DEVICE_ADMIN_DISABLE_REQUESTED
+     */
+    public static final String EXTRA_DISABLE_WARNING = "android.app.extra.DISABLE_WARNING";
+    
     /**
      * Action sent to a device administrator when the user has disabled
      * it.  Upon return, the application no longer has access to the
@@ -166,6 +188,21 @@ public class DeviceAdmin extends BroadcastReceiver {
     }
     
     /**
+     * Called when the user has asked to disable the administrator, as a result of
+     * receiving {@link #ACTION_DEVICE_ADMIN_DISABLE_REQUESTED}, giving you
+     * a chance to present a warning message to them.  The message is returned
+     * as the result; if null is returned (the default implementation), no
+     * message will be displayed.
+     * @param context The running context as per {@link #onReceive}.
+     * @param intent The received intent as per {@link #onReceive}.
+     * @return Return the warning message to display to the user before
+     * being disabled; if null is returned, no message is displayed.
+     */
+    public CharSequence onDisableRequested(Context context, Intent intent) {
+        return null;
+    }
+    
+    /**
      * Called prior to the administrator being disabled, as a result of
      * receiving {@link #ACTION_DEVICE_ADMIN_DISABLED}.  Upon return, you
      * can no longer use the protected parts of the {@link DevicePolicyManager}
@@ -226,6 +263,12 @@ public class DeviceAdmin extends BroadcastReceiver {
             onPasswordSucceeded(context, intent);
         } else if (ACTION_DEVICE_ADMIN_ENABLED.equals(action)) {
             onEnabled(context, intent);
+        } else if (ACTION_DEVICE_ADMIN_DISABLE_REQUESTED.equals(action)) {
+            CharSequence res = onDisableRequested(context, intent);
+            if (res != null) {
+                Bundle extras = getResultExtras(true);
+                extras.putCharSequence(EXTRA_DISABLE_WARNING, res);
+            }
         } else if (ACTION_DEVICE_ADMIN_DISABLED.equals(action)) {
             onDisabled(context, intent);
         }

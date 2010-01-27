@@ -1192,10 +1192,10 @@
     <!-- Title of policy access to watch user login attempts -->
     <string name="policylab_watchLogin">Watch login attempts</string>
     <!-- Description of policy access to watch user login attempts -->
-    <string name="policydesc_watchLogin">Monitor attempts to login to
-        the device, in particular to respond to failed login attempts.</string>
+    <string name="policydesc_watchLogin">Monitor failed attempts to login to
+        the device, to perform some action.</string>
     <!-- Title of policy access to reset user's password -->
-    <string name="policylab_resetPassword">Reset your password</string>
+    <string name="policylab_resetPassword">Reset password</string>
     <!-- Description of policy access to reset user's password -->
     <string name="policydesc_resetPassword">Force your password
         to a new value, requiring the administrator give it to you
@@ -1209,12 +1209,12 @@
     <string name="policylab_forceLock">Force lock</string>
     <!-- Description of policy access to limiting the user's password choices -->
     <string name="policydesc_forceLock">Force the device to immediately lock,
-        requiring that its password is re-entered.</string>
+        requiring that you re-enter its password.</string>
     <!-- Title of policy access to wipe the user's data -->
     <string name="policylab_wipeData">Erase all data</string>
     <!-- Description of policy access to wipe the user's data -->
     <string name="policydesc_wipeData">Perform a factory reset, deleting
-        all of your data without any confirmation from you.</string>
+        all of your data without any confirmation.</string>
 
     <!-- The order of these is important, don't reorder without changing Contacts.java --> <skip />
     <!-- Phone number types from android.provider.Contacts. This could be used when adding a new phone number for a contact, for example. -->
