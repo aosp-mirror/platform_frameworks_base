@@ -695,7 +695,6 @@ com.ibm.icu4jni.charset.CharsetEncoderICU
 com.ibm.icu4jni.charset.CharsetICU
 com.ibm.icu4jni.text.CollationAttribute
 com.ibm.icu4jni.text.DecimalFormat
-com.ibm.icu4jni.text.NativeDecimalFormat$UNumberFormatAttribute
 com.ibm.icu4jni.text.RuleBasedCollator
 com.ibm.icu4jni.util.Resources$DefaultTimeZones
 dalvik.system.DexFile
