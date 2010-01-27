@@ -420,7 +420,7 @@ public class MediaPlayerApiTest extends ActivityInstrumentationTestCase<MediaFra
   
     @LargeTest
     public void testGetThumbnail() throws Exception {
-      boolean getThumbnail = CodecTest.getThumbnail(MediaNames.VIDEO_H264_AAC, MediaNames.GOLDEN_THUMBNAIL_OUTPUT);
+      boolean getThumbnail = CodecTest.getThumbnail(MediaNames.VIDEO_H264_AAC, MediaNames.GOLDEN_THUMBNAIL_OUTPUT_2);
       assertTrue("Get Thumbnail", getThumbnail);         
     }
     
