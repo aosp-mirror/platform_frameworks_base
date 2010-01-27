@@ -31,6 +31,7 @@ LOCAL_SRC_FILES +=                \
         MPEG4Extractor.cpp        \
         MPEG4Writer.cpp           \
         MediaExtractor.cpp        \
+        Prefetcher.cpp            \
         SampleIterator.cpp        \
         SampleTable.cpp           \
         ShoutcastSource.cpp       \

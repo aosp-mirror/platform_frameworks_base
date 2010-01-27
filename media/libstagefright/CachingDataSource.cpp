@@ -65,6 +65,10 @@ status_t CachingDataSource::initCheck() const {
     return mSource->initCheck();
 }
 
+uint32_t CachingDataSource::flags() {
+    return mSource->flags();
+}
+
 ssize_t CachingDataSource::readAt(off_t offset, void *data, size_t size) {
     Mutex::Autolock autoLock(mLock);
 

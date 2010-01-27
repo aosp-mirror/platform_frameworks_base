@@ -190,30 +190,12 @@ HTTPDataSource::~HTTPDataSource() {
     mHttp = NULL;
 }
 
-ssize_t HTTPDataSource::readAt(off_t offset, void *data, size_t size) {
-    if (offset >= mBufferOffset
-            && offset < (off_t)(mBufferOffset + mBufferLength)) {
-        size_t num_bytes_available = mBufferLength - (offset - mBufferOffset);
-
-        size_t copy = num_bytes_available;
-        if (copy > size) {
-            copy = size;
-        }
-
-        memcpy(data, (const char *)mBuffer + (offset - mBufferOffset), copy);
-
-        return copy;
-    }
-
-    mBufferOffset = offset;
-    mBufferLength = 0;
-
+ssize_t HTTPDataSource::sendRangeRequest(size_t offset) {
     char host[128];
     sprintf(host, "Host: %s\r\n", mHost);
 
     char range[128];
-    sprintf(range, "Range: bytes=%ld-%ld\r\n\r\n",
-            mBufferOffset, mBufferOffset + kBufferSize - 1);
+    sprintf(range, "Range: bytes=%d-\r\n\r\n", offset);
 
     int http_status;
 
@@ -251,11 +233,43 @@ ssize_t HTTPDataSource::readAt(off_t offset, void *data, size_t size) {
     char *end;
     unsigned long contentLength = strtoul(value.c_str(), &end, 10);
 
-    ssize_t num_bytes_received = mHttp->receive(mBuffer, contentLength);
+    return contentLength;
+}
 
-    if (num_bytes_received <= 0) {
-        return num_bytes_received;
+ssize_t HTTPDataSource::readAt(off_t offset, void *data, size_t size) {
+    if (offset >= mBufferOffset
+            && offset < (off_t)(mBufferOffset + mBufferLength)) {
+        size_t num_bytes_available = mBufferLength - (offset - mBufferOffset);
+
+        size_t copy = num_bytes_available;
+        if (copy > size) {
+            copy = size;
+        }
+
+        memcpy(data, (const char *)mBuffer + (offset - mBufferOffset), copy);
+
+        return copy;
     }
+
+    ssize_t contentLength = 0;
+    if (mBufferLength <= 0 || offset != mBufferOffset + mBufferLength) {
+        mHttp->disconnect();
+        contentLength = sendRangeRequest(offset);
+
+        if (contentLength > kBufferSize) {
+            contentLength = kBufferSize;
+        }
+    } else {
+        contentLength = kBufferSize;
+    }
+
+    mBufferOffset = offset;
+
+    if (contentLength <= 0) {
+        return contentLength;
+    }
+
+    ssize_t num_bytes_received = mHttp->receive(mBuffer, contentLength);
 
     mBufferLength = (size_t)num_bytes_received;
 
