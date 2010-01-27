@@ -136,6 +136,8 @@ public:
 
     virtual status_t setVoiceVolume(float volume);
 
+    virtual status_t getRenderPosition(uint32_t *halFrames, uint32_t *dspFrames, int output);
+
     // IBinder::DeathRecipient
     virtual     void        binderDied(const wp<IBinder>& who);
 
@@ -526,6 +528,7 @@ private:
                     bool        isSuspended() { return (mSuspended != 0); }
         virtual     String8     getParameters(const String8& keys);
         virtual     void        audioConfigChanged(int event, int param = 0);
+        virtual     status_t    getRenderPosition(uint32_t *halFrames, uint32_t *dspFrames);
 
         struct  stream_type_t {
             stream_type_t()
