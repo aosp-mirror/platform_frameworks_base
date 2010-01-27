@@ -526,21 +526,55 @@ class MountService extends IMountService.Stub
      * Callback from NativeDaemonConnector
      */
     public void onDaemonConnected() {
+        /*
+         * Since we'll be calling back into the NativeDaemonConnector,
+         * we need to do our work in a new thread.
+         */
         new Thread() {
             public void run() {
+                /**
+                 * Determine media state and UMS detection status
+                 */
+                String path = Environment.getExternalStorageDirectory().getPath();
+                String state = Environment.MEDIA_REMOVED;
+
                 try {
-                    if (!getVolumeState(Environment.getExternalStorageDirectory().getPath())
-                                 .equals(Environment.MEDIA_MOUNTED)) {
-                        try {
-                            mountVolume(Environment.getExternalStorageDirectory().getPath());
-                        } catch (Exception ex) {
-                            Log.w(TAG, "Connection-mount failed");
+                    String[] vols = mConnector.doListCommand(
+                        "list_volumes", VoldResponseCode.VolumeListResult);
+                    for (String volstr : vols) {
+                        String[] tok = volstr.split(" ");
+                        // FMT: <label> <mountpoint> <state>
+                        if (!tok[1].equals(path)) {
+                            Log.w(TAG, String.format(
+                                    "Skipping unknown volume '%s'",tok[1]));
+                            continue;
                         }
-                    } else {
-                        Log.d(TAG, "Skipping connection-mount; already mounted");
+                        int st = Integer.parseInt(tok[2]);
+                        if (st == VolumeState.NoMedia) {
+                            state = Environment.MEDIA_REMOVED;
+                        } else if (st == VolumeState.Idle) {
+                            state = null;
+                            try {
+                                mountVolume(path);
+                            } catch (Exception ex) {
+                                Log.e(TAG, "Connection-mount failed", ex);
+                            }
+                        } else if (st == VolumeState.Mounted) {
+                            state = Environment.MEDIA_MOUNTED;
+                            Log.i(TAG, "Media already mounted on daemon connection");
+                        } else if (st == VolumeState.Shared) {
+                            state = Environment.MEDIA_SHARED;
+                            Log.i(TAG, "Media shared on daemon connection");
+                        } else {
+                            throw new Exception(String.format("Unexpected state %d", st));
+                        }
                     }
-                } catch (IllegalStateException rex) {
-                    Log.e(TAG, "Exception while handling connection mount ", rex);
+                    if (state != null) {
+                        updatePublicVolumeState(path, state);
+                    }
+                } catch (Exception e) {
+                    Log.e(TAG, "Error processing initial volume state", e);
+                    updatePublicVolumeState(path, Environment.MEDIA_REMOVED);
                 }
 
                 try {
@@ -1024,11 +1058,21 @@ class MountService extends IMountService.Stub
     }
 
     public String[] getSecureContainerList() throws IllegalStateException {
+        if (mContext.checkCallingOrSelfPermission(
+                android.Manifest.permission.ASEC_ACCESS)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Requires ASEC_ACCESS permission");
+        }
         return mConnector.doListCommand("list_asec", VoldResponseCode.AsecListResult);
     }
 
     public String createSecureContainer(String id, int sizeMb, String fstype,
                                     String key, int ownerUid) throws IllegalStateException {
+        if (mContext.checkCallingOrSelfPermission(
+                android.Manifest.permission.ASEC_CREATE)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Requires ASEC_CREATE permission");
+        }
         String cmd = String.format("create_asec %s %d %s %s %d",
                                    id, sizeMb, fstype, key, ownerUid);
         mConnector.doCommand(cmd);
@@ -1036,15 +1080,31 @@ class MountService extends IMountService.Stub
     }
 
     public void finalizeSecureContainer(String id) throws IllegalStateException {
+        if (mContext.checkCallingOrSelfPermission(
+                android.Manifest.permission.ASEC_CREATE)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Requires ASEC_CREATE permission");
+        }
         mConnector.doCommand(String.format("finalize_asec %s", id));
     }
 
     public void destroySecureContainer(String id) throws IllegalStateException {
+        if (mContext.checkCallingOrSelfPermission(
+                android.Manifest.permission.ASEC_DESTROY)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Requires ASEC_DESTROY permission");
+        }
         mConnector.doCommand(String.format("destroy_asec %s", id));
     }
    
     public String mountSecureContainer(String id, String key,
                                        int ownerUid) throws IllegalStateException {
+        if (mContext.checkCallingOrSelfPermission(
+                android.Manifest.permission.ASEC_MOUNT_UNMOUNT)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Requires ASEC_MOUNT_UNMOUNT permission");
+        }
+        mConnector.doCommand(String.format("destroy_asec %s", id));
         String cmd = String.format("mount_asec %s %s %d",
                                    id, key, ownerUid);
         mConnector.doCommand(cmd);
@@ -1052,16 +1112,31 @@ class MountService extends IMountService.Stub
     }
 
     public void unmountSecureContainer(String id) throws IllegalStateException {
+        if (mContext.checkCallingOrSelfPermission(
+                android.Manifest.permission.ASEC_MOUNT_UNMOUNT)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Requires ASEC_MOUNT_UNMOUNT permission");
+        }
         String cmd = String.format("unmount_asec %s", id);
         mConnector.doCommand(cmd);
     }
 
     public void renameSecureContainer(String oldId, String newId) throws IllegalStateException {
+        if (mContext.checkCallingOrSelfPermission(
+                android.Manifest.permission.ASEC_RENAME)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Requires ASEC_RENAME permission");
+        }
         String cmd = String.format("rename_asec %s %s", oldId, newId);
         mConnector.doCommand(cmd);
     }
 
     public String getSecureContainerPath(String id) throws IllegalStateException {
+        if (mContext.checkCallingOrSelfPermission(
+                android.Manifest.permission.ASEC_ACCESS)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Requires ASEC_ACCESS permission");
+        }
         ArrayList<String> rsp = mConnector.doCommand("asec_path " + id);
 
         for (String line : rsp) {

@@ -119,15 +119,18 @@ public class PackageParser {
     static class ParseComponentArgs extends ParsePackageItemArgs {
         final String[] sepProcesses;
         final int processRes;
+        final int descriptionRes;
         final int enabledRes;
         int flags;
         
         ParseComponentArgs(Package _owner, String[] _outError,
                 int _nameRes, int _labelRes, int _iconRes,
-                String[] _sepProcesses, int _processRes,int _enabledRes) {
+                String[] _sepProcesses, int _processRes,
+                int _descriptionRes, int _enabledRes) {
             super(_owner, _outError, _nameRes, _labelRes, _iconRes);
             sepProcesses = _sepProcesses;
             processRes = _processRes;
+            descriptionRes = _descriptionRes;
             enabledRes = _enabledRes;
         }
     }
@@ -1602,6 +1605,7 @@ public class PackageParser {
                     com.android.internal.R.styleable.AndroidManifestActivity_icon,
                     mSeparateProcesses,
                     com.android.internal.R.styleable.AndroidManifestActivity_process,
+                    com.android.internal.R.styleable.AndroidManifestActivity_description,
                     com.android.internal.R.styleable.AndroidManifestActivity_enabled);
         }
         
@@ -1803,6 +1807,7 @@ public class PackageParser {
                     com.android.internal.R.styleable.AndroidManifestActivityAlias_icon,
                     mSeparateProcesses,
                     0,
+                    com.android.internal.R.styleable.AndroidManifestActivityAlias_description,
                     com.android.internal.R.styleable.AndroidManifestActivityAlias_enabled);
             mParseActivityAliasArgs.tag = "<activity-alias>";
         }
@@ -1837,6 +1842,9 @@ public class PackageParser {
         info.nonLocalizedLabel = target.info.nonLocalizedLabel;
         info.launchMode = target.info.launchMode;
         info.processName = target.info.processName;
+        if (info.descriptionRes == 0) {
+            info.descriptionRes = target.info.descriptionRes;
+        }
         info.screenOrientation = target.info.screenOrientation;
         info.taskAffinity = target.info.taskAffinity;
         info.theme = target.info.theme;
@@ -1926,6 +1934,7 @@ public class PackageParser {
                     com.android.internal.R.styleable.AndroidManifestProvider_icon,
                     mSeparateProcesses,
                     com.android.internal.R.styleable.AndroidManifestProvider_process,
+                    com.android.internal.R.styleable.AndroidManifestProvider_description,
                     com.android.internal.R.styleable.AndroidManifestProvider_enabled);
             mParseProviderArgs.tag = "<provider>";
         }
@@ -2188,6 +2197,7 @@ public class PackageParser {
                     com.android.internal.R.styleable.AndroidManifestService_icon,
                     mSeparateProcesses,
                     com.android.internal.R.styleable.AndroidManifestService_process,
+                    com.android.internal.R.styleable.AndroidManifestService_description,
                     com.android.internal.R.styleable.AndroidManifestService_enabled);
             mParseServiceArgs.tag = "<service>";
         }
@@ -2640,6 +2650,11 @@ public class PackageParser {
                         owner.applicationInfo.processName, args.sa.getNonResourceString(args.processRes),
                         args.flags, args.sepProcesses, args.outError);
             }
+            
+            if (args.descriptionRes != 0) {
+                outInfo.descriptionRes = args.sa.getResourceId(args.descriptionRes, 0);
+            }
+            
             outInfo.enabled = args.sa.getBoolean(args.enabledRes, true);
         }
 

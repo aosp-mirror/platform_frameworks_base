@@ -20,8 +20,8 @@
 
 #include <stdio.h>
 
+#include <media/stagefright/MediaWriter.h>
 #include <utils/List.h>
-#include <utils/RefBase.h>
 #include <utils/threads.h>
 
 namespace android {
@@ -30,15 +30,15 @@ class MediaBuffer;
 class MediaSource;
 class MetaData;
 
-class MPEG4Writer : public RefBase {
+class MPEG4Writer : public MediaWriter {
 public:
     MPEG4Writer(const char *filename);
     MPEG4Writer(int fd);
 
-    void addSource(const sp<MediaSource> &source);
-    status_t start();
-    bool reachedEOS();
-    void stop();
+    virtual status_t addSource(const sp<MediaSource> &source);
+    virtual status_t start();
+    virtual bool reachedEOS();
+    virtual void stop();
 
     void beginBox(const char *fourcc);
     void writeInt8(int8_t x);

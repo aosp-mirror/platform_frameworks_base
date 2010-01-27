@@ -877,6 +877,31 @@
     <string name="permdesc_mount_format_filesystems">Allows the application to format removable storage.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_asec_access">get information on secure storage</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_asec_access">Allows the application to get information on secure storage.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_asec_create">create secure storage</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_asec_create">Allows the application to create secure storage.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_asec_destroy">destroy secure storage</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_asec_destroy">Allows the application to destroy secure storage.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_asec_mount_unmount">mount / unmount secure storage</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_asec_mount_unmount">Allows the application to mount / unmount secure storage.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_asec_rename">rename secure storage</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_asec_rename">Allows the application to rename secure storage.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_vibrate">control vibrator</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_vibrate">Allows the application to control
@@ -1156,6 +1181,40 @@
     <string name="permlab_cache_filesystem">access the cache filesystem</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_cache_filesystem">Allows an application to read and write the cache filesystem.</string>
+
+    <!-- Policy administration -->
+
+    <!-- Title of policy access to limiting the user's password choices -->
+    <string name="policylab_limitPassword">Limit password</string>
+    <!-- Description of policy access to limiting the user's password choices -->
+    <string name="policydesc_limitPassword">Restrict the types of passwords you
+        are allowed to use.</string>
+    <!-- Title of policy access to watch user login attempts -->
+    <string name="policylab_watchLogin">Watch login attempts</string>
+    <!-- Description of policy access to watch user login attempts -->
+    <string name="policydesc_watchLogin">Monitor attempts to login to
+        the device, in particular to respond to failed login attempts.</string>
+    <!-- Title of policy access to reset user's password -->
+    <string name="policylab_resetPassword">Reset your password</string>
+    <!-- Description of policy access to reset user's password -->
+    <string name="policydesc_resetPassword">Force your password
+        to a new value, requiring the administrator give it to you
+        before you can log in.</string>
+    <!-- Title of policy access to limiting the user's unlock timeout -->
+    <string name="policylab_limitUnlock">Limit lock timeout</string>
+    <!-- Description of policy access to limiting the user's unlock timeout -->
+    <string name="policydesc_limitUnlock">Restrict the unlock timeout
+        durations you can select.</string>
+    <!-- Title of policy access to force lock the device -->
+    <string name="policylab_forceLock">Force lock</string>
+    <!-- Description of policy access to limiting the user's password choices -->
+    <string name="policydesc_forceLock">Force the device to immediately lock,
+        requiring that its password is re-entered.</string>
+    <!-- Title of policy access to wipe the user's data -->
+    <string name="policylab_wipeData">Erase all data</string>
+    <!-- Description of policy access to wipe the user's data -->
+    <string name="policydesc_wipeData">Perform a factory reset, deleting
+        all of your data without any confirmation from you.</string>
 
     <!-- The order of these is important, don't reorder without changing Contacts.java --> <skip />
     <!-- Phone number types from android.provider.Contacts. This could be used when adding a new phone number for a contact, for example. -->

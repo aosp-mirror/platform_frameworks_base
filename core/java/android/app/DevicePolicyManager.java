@@ -163,6 +163,10 @@ public class DevicePolicyManager {
      * the user's preference, and any other considerations) is the one that
      * is in effect.
      * 
+     * <p>The calling device admin must have requested
+     * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call
+     * this method; if it has not, a security exception will be thrown.
+     * 
      * @param admin Which {@link DeviceAdmin} this request is associated with.
      * @param mode The new desired mode.  One of
      * {@link #PASSWORD_MODE_UNSPECIFIED}, {@link #PASSWORD_MODE_SOMETHING},
@@ -205,6 +209,10 @@ public class DevicePolicyManager {
      * {@link #PASSWORD_MODE_NUMERIC} or {@link #PASSWORD_MODE_ALPHANUMERIC}
      * with {@link #setPasswordMode}.
      * 
+     * <p>The calling device admin must have requested
+     * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call
+     * this method; if it has not, a security exception will be thrown.
+     * 
      * @param admin Which {@link DeviceAdmin} this request is associated with.
      * @param length The new desired minimum password length.  A value of 0
      * means there is no restriction.
@@ -239,6 +247,10 @@ public class DevicePolicyManager {
      * to meet the policy requirements (mode, minimum length) that have been
      * requested.
      * 
+     * <p>The calling device admin must have requested
+     * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call
+     * this method; if it has not, a security exception will be thrown.
+     * 
      * @return Returns true if the password meets the current requirements,
      * else false.
      */
@@ -256,6 +268,10 @@ public class DevicePolicyManager {
     /**
      * Retrieve the number of times the user has failed at entering a
      * password since that last successful password entry.
+     * 
+     * <p>The calling device admin must have requested
+     * {@link DeviceAdminInfo#USES_POLICY_WATCH_LOGIN} to be able to call
+     * this method; if it has not, a security exception will be thrown.
      */
     public int getCurrentFailedPasswordAttempts() {
         if (mService != null) {
@@ -277,6 +293,10 @@ public class DevicePolicyManager {
      * if it contains only digits, that is still an acceptable alphanumeric
      * password.)
      * 
+     * <p>The calling device admin must have requested
+     * {@link DeviceAdminInfo#USES_POLICY_RESET_PASSWORD} to be able to call
+     * this method; if it has not, a security exception will be thrown.
+     * 
      * @param password The new password for the user.
      * @return Returns true if the password was applied, or false if it is
      * not acceptable for the current constraints.
@@ -296,6 +316,10 @@ public class DevicePolicyManager {
      * Called by an application that is administering the device to set the
      * maximum time for user activity until the device will lock.  This limits
      * the length that the user can set.  It takes effect immediately.
+     * 
+     * <p>The calling device admin must have requested
+     * {@link DeviceAdminInfo#USES_POLICY_LIMIT_UNLOCK} to be able to call
+     * this method; if it has not, a security exception will be thrown.
      * 
      * @param admin Which {@link DeviceAdmin} this request is associated with.
      * @param timeMs The new desired maximum time to lock in milliseconds.
@@ -329,6 +353,10 @@ public class DevicePolicyManager {
     /**
      * Make the device lock immediately, as if the lock screen timeout has
      * expired at the point of this call.
+     * 
+     * <p>The calling device admin must have requested
+     * {@link DeviceAdminInfo#USES_POLICY_FORCE_LOCK} to be able to call
+     * this method; if it has not, a security exception will be thrown.
      */
     public void lockNow() {
         if (mService != null) {
@@ -344,6 +372,10 @@ public class DevicePolicyManager {
      * Ask the user date be wiped.  This will cause the device to reboot,
      * erasing all user data while next booting up.  External storage such
      * as SD cards will not be erased.
+     * 
+     * <p>The calling device admin must have requested
+     * {@link DeviceAdminInfo#USES_POLICY_WIPE_DATA} to be able to call
+     * this method; if it has not, a security exception will be thrown.
      * 
      * @param flags Bit mask of additional options: currently must be 0.
      */

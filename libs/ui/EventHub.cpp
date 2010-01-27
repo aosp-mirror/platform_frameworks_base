@@ -489,7 +489,6 @@ int EventHub::open_device(const char *deviceName)
 {
     int version;
     int fd;
-    int attempt;
     struct pollfd *new_mFDs;
     device_t **new_devices;
     char **new_device_names;
@@ -502,16 +501,11 @@ int EventHub::open_device(const char *deviceName)
 
     AutoMutex _l(mLock);
 
-    for (attempt = 0; attempt < 10; attempt++) {
-        fd = open(deviceName, O_RDWR);
-        if (fd >= 0) break;
-        usleep(100);
-    }
+    fd = open(deviceName, O_RDWR);
     if(fd < 0) {
         LOGE("could not open %s, %s\n", deviceName, strerror(errno));
         return -1;
     }
-    LOGV("Opened device: %s (%d failures)", deviceName, attempt);
 
     if(ioctl(fd, EVIOCGVERSION, &version)) {
         LOGE("could not get driver version for %s, %s\n", deviceName, strerror(errno));

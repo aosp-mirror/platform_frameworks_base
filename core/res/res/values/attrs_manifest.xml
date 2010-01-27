@@ -938,6 +938,7 @@
             is a period then it is appended to your package name. -->
         <attr name="name" />
         <attr name="label" />
+        <attr name="description" />
         <attr name="icon" />
         <attr name="process" />
         <attr name="authorities" />
@@ -1016,6 +1017,7 @@
             is a period then it is appended to your package name. -->
         <attr name="name" />
         <attr name="label" />
+        <attr name="description" />
         <attr name="icon" />
         <attr name="permission" />
         <attr name="process" />
@@ -1047,6 +1049,7 @@
             is a period then it is appended to your package name. -->
         <attr name="name" />
         <attr name="label" />
+        <attr name="description" />
         <attr name="icon" />
         <attr name="permission" />
         <attr name="process" />
@@ -1078,6 +1081,7 @@
         <attr name="name" />
         <attr name="theme" />
         <attr name="label" />
+        <attr name="description" />
         <attr name="icon" />
         <attr name="launchMode" />
         <attr name="screenOrientation" />
@@ -1130,6 +1134,7 @@
              "com.mycompany.MyName". -->  
         <attr name="targetActivity" format="string" />
         <attr name="label" />
+        <attr name="description" />
         <attr name="icon" />
         <attr name="permission" />
         <!-- Specify whether the activity-alias is enabled or not (that is, can be instantiated by the system).

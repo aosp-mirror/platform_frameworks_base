@@ -16,6 +16,7 @@
 
 package android.backup;
 
+import android.backup.RestoreSession;
 import android.content.Context;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -115,19 +116,21 @@ public class BackupManager {
      *
      * {@hide}
      */
-    public IRestoreSession beginRestoreSession(String transport) {
+    public RestoreSession beginRestoreSession() {
         if (!EVEN_THINK_ABOUT_DOING_RESTORE) {
             return null;
         }
-        IRestoreSession binder = null;
+        RestoreSession session = null;
         checkServiceBinder();
         if (sService != null) {
             try {
-                binder = sService.beginRestoreSession(transport);
+                String transport = sService.getCurrentTransport();
+                IRestoreSession binder = sService.beginRestoreSession(transport);
+                session = new RestoreSession(mContext, binder);
             } catch (RemoteException e) {
                 Log.d(TAG, "beginRestoreSession() couldn't connect");
             }
         }
-        return binder;
+        return session;
     }
 }

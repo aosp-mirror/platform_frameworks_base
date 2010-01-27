@@ -99,6 +99,7 @@ LOCAL_SRC_FILES:= \
 	android/graphics/Shader.cpp \
 	android/graphics/Typeface.cpp \
 	android/graphics/Xfermode.cpp \
+	android/graphics/YuvToJpegEncoder.cpp \
 	android_media_AudioRecord.cpp \
 	android_media_AudioSystem.cpp \
 	android_media_AudioTrack.cpp \
@@ -148,6 +149,7 @@ LOCAL_C_INCLUDES += \
 	external/tremor/Tremor \
 	external/icu4c/i18n \
 	external/icu4c/common \
+	external/jpeg \
 	frameworks/opt/emoji
 
 LOCAL_SHARED_LIBRARIES := \
@@ -175,7 +177,8 @@ LOCAL_SHARED_LIBRARIES := \
 	libicui18n \
 	libicudata \
 	libmedia \
-	libwpa_client
+	libwpa_client \
+	libjpeg
 
 ifeq ($(BOARD_HAVE_BLUETOOTH),true)
 LOCAL_C_INCLUDES += \

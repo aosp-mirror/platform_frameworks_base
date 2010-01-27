@@ -64,6 +64,7 @@ extern int register_android_graphics_PathEffect(JNIEnv* env);
 extern int register_android_graphics_Region(JNIEnv* env);
 extern int register_android_graphics_Shader(JNIEnv* env);
 extern int register_android_graphics_Typeface(JNIEnv* env);
+extern int register_android_graphics_YuvImage(JNIEnv* env);
 
 extern int register_com_google_android_gles_jni_EGLImpl(JNIEnv* env);
 extern int register_com_google_android_gles_jni_GLImpl(JNIEnv* env);
@@ -1215,6 +1216,7 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_graphics_Shader),
     REG_JNI(register_android_graphics_Typeface),
     REG_JNI(register_android_graphics_Xfermode),
+    REG_JNI(register_android_graphics_YuvImage),
     REG_JNI(register_com_android_internal_graphics_NativeUtils),
 
     REG_JNI(register_android_database_CursorWindow),

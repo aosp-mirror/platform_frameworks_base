@@ -115,6 +115,7 @@ status_t AMRWriter::start() {
     pthread_attr_init(&attr);
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
 
+    mReachedEOS = false;
     mDone = false;
 
     pthread_create(&mThread, &attr, ThreadWrapper, this);
@@ -179,6 +180,14 @@ void AMRWriter::threadFunc() {
             break;
         }
     }
+
+    Mutex::Autolock autoLock(mLock);
+    mReachedEOS = true;
+}
+
+bool AMRWriter::reachedEOS() {
+    Mutex::Autolock autoLock(mLock);
+    return mReachedEOS;
 }
 
 }  // namespace android

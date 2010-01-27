@@ -146,6 +146,19 @@ public class AppSecurityPermissions  implements View.OnClickListener {
         }
     }
     
+    /**
+     * Utility to retrieve a view displaying a single permission.
+     */
+    public static View getPermissionItemView(Context context,
+            CharSequence grpName, CharSequence description, boolean dangerous) {
+        LayoutInflater inflater = (LayoutInflater)context.getSystemService(
+                Context.LAYOUT_INFLATER_SERVICE);
+        Drawable icon = context.getResources().getDrawable(dangerous
+                ? R.drawable.ic_bullet_key_permission : R.drawable.ic_text_dot);
+        return getPermissionItemView(context, inflater, grpName,
+                description, dangerous, icon);
+    }
+    
     private void getAllUsedPermissions(int sharedUid, Set<PermissionInfo> permSet) {
         String sharedPkgList[] = mPm.getPackagesForUid(sharedUid);
         if(sharedPkgList == null || (sharedPkgList.length == 0)) {
@@ -304,15 +317,20 @@ public class AppSecurityPermissions  implements View.OnClickListener {
         mNoPermsView.setVisibility(View.VISIBLE);
     }
 
-    private View getPermissionItemView(CharSequence grpName, String permList,
+    private View getPermissionItemView(CharSequence grpName, CharSequence permList,
             boolean dangerous) {
-        View permView = mInflater.inflate(R.layout.app_permission_item, null);
-        Drawable icon = dangerous ? mDangerousIcon : mNormalIcon;
+        return getPermissionItemView(mContext, mInflater, grpName, permList,
+                dangerous, dangerous ? mDangerousIcon : mNormalIcon);
+    }
+
+    private static View getPermissionItemView(Context context, LayoutInflater inflater,
+            CharSequence grpName, CharSequence permList, boolean dangerous, Drawable icon) {
+        View permView = inflater.inflate(R.layout.app_permission_item, null);
 
         TextView permGrpView = (TextView) permView.findViewById(R.id.permission_group);
         TextView permDescView = (TextView) permView.findViewById(R.id.permission_list);
         if (dangerous) {
-            final Resources resources = mContext.getResources();
+            final Resources resources = context.getResources();
             permGrpView.setTextColor(resources.getColor(R.color.perms_dangerous_grp_color));
             permDescView.setTextColor(resources.getColor(R.color.perms_dangerous_perm_color));
         }

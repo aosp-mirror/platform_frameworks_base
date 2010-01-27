@@ -20,23 +20,23 @@
 
 #include <stdio.h>
 
-#include <utils/RefBase.h>
+#include <media/stagefright/MediaWriter.h>
 #include <utils/threads.h>
 
 namespace android {
 
 struct MediaSource;
 
-struct AMRWriter : public RefBase {
+struct AMRWriter : public MediaWriter {
     AMRWriter(const char *filename);
     AMRWriter(int fd);
 
     status_t initCheck() const;
 
-    status_t addSource(const sp<MediaSource> &source);
-
-    status_t start();
-    void stop();
+    virtual status_t addSource(const sp<MediaSource> &source);
+    virtual bool reachedEOS();
+    virtual status_t start();
+    virtual void stop();
 
 protected:
     virtual ~AMRWriter();
@@ -49,6 +49,7 @@ private:
     sp<MediaSource> mSource;
     bool mStarted;
     volatile bool mDone;
+    bool mReachedEOS;
     pthread_t mThread;
 
     static void *ThreadWrapper(void *);

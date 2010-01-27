@@ -129,7 +129,7 @@ static void dumpstate() {
     dump_file("LAST PANIC CONSOLE", "/data/dontpanic/apanic_console");
     dump_file("LAST PANIC THREADS", "/data/dontpanic/apanic_threads");
 
-    printf("----- BACKLIGHTS -----\n");
+    printf("------ BACKLIGHTS ------\n");
     printf("LCD brightness=");
     dump_file(NULL, "/sys/class/leds/lcd-backlight/brightness");
     printf("Button brightness=");

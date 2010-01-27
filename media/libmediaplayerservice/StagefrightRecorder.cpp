@@ -20,6 +20,8 @@
 
 #include "StagefrightRecorder.h"
 
+#include <media/stagefright/AudioSource.h>
+#include <media/stagefright/AMRWriter.h>
 #include <media/stagefright/CameraSource.h>
 #include <media/stagefright/MPEG4Writer.h>
 #include <media/stagefright/MediaDebug.h>
@@ -146,7 +148,90 @@ status_t StagefrightRecorder::start() {
         return UNKNOWN_ERROR;
     }
 
-    if (mVideoSource == VIDEO_SOURCE_CAMERA) {
+    switch (mOutputFormat) {
+        case OUTPUT_FORMAT_DEFAULT:
+        case OUTPUT_FORMAT_THREE_GPP:
+        case OUTPUT_FORMAT_MPEG_4:
+            return startMPEG4Recording();
+
+        case OUTPUT_FORMAT_AMR_NB:
+        case OUTPUT_FORMAT_AMR_WB:
+            return startAMRRecording();
+
+        default:
+            return UNKNOWN_ERROR;
+    }
+}
+
+sp<MediaSource> StagefrightRecorder::createAMRAudioSource() {
+    uint32_t sampleRate =
+        mAudioEncoder == AUDIO_ENCODER_AMR_NB ? 8000 : 16000;
+
+    sp<AudioSource> audioSource =
+        new AudioSource(
+                mAudioSource,
+                sampleRate,
+                AudioSystem::CHANNEL_IN_MONO);
+
+    status_t err = audioSource->initCheck();
+
+    if (err != OK) {
+        return NULL;
+    }
+
+    sp<MetaData> encMeta = new MetaData;
+    encMeta->setCString(
+            kKeyMIMEType,
+            mAudioEncoder == AUDIO_ENCODER_AMR_NB
+                ? MEDIA_MIMETYPE_AUDIO_AMR_NB : MEDIA_MIMETYPE_AUDIO_AMR_WB);
+
+    encMeta->setInt32(kKeyChannelCount, 1);
+    encMeta->setInt32(kKeySampleRate, sampleRate);
+
+    OMXClient client;
+    CHECK_EQ(client.connect(), OK);
+
+    sp<MediaSource> audioEncoder =
+        OMXCodec::Create(client.interface(), encMeta,
+                         true /* createEncoder */, audioSource);
+
+    return audioEncoder;
+}
+
+status_t StagefrightRecorder::startAMRRecording() {
+    if (mAudioSource == AUDIO_SOURCE_LIST_END
+        || mVideoSource != VIDEO_SOURCE_LIST_END) {
+        return UNKNOWN_ERROR;
+    }
+
+    if (mOutputFormat == OUTPUT_FORMAT_AMR_NB
+            && mAudioEncoder != AUDIO_ENCODER_DEFAULT
+            && mAudioEncoder != AUDIO_ENCODER_AMR_NB) {
+        return UNKNOWN_ERROR;
+    } else if (mOutputFormat == OUTPUT_FORMAT_AMR_WB
+            && mAudioEncoder != AUDIO_ENCODER_AMR_WB) {
+        return UNKNOWN_ERROR;
+    }
+
+    sp<MediaSource> audioEncoder = createAMRAudioSource();
+
+    if (audioEncoder == NULL) {
+        return UNKNOWN_ERROR;
+    }
+
+    CHECK(mOutputFd >= 0);
+    mWriter = new AMRWriter(dup(mOutputFd));
+    mWriter->addSource(audioEncoder);
+    mWriter->start();
+
+    return OK;
+}
+
+status_t StagefrightRecorder::startMPEG4Recording() {
+    mWriter = new MPEG4Writer(dup(mOutputFd));
+
+    if (mVideoSource == VIDEO_SOURCE_DEFAULT
+            || mVideoSource == VIDEO_SOURCE_CAMERA) {
         CHECK(mCamera != NULL);
 
         sp<CameraSource> cameraSource =
@@ -193,11 +278,20 @@ status_t StagefrightRecorder::start() {
                     true /* createEncoder */, cameraSource);
 
         CHECK(mOutputFd >= 0);
-        mWriter = new MPEG4Writer(dup(mOutputFd));
         mWriter->addSource(encoder);
-        mWriter->start();
     }
 
+    if (mAudioSource != AUDIO_SOURCE_LIST_END) {
+        sp<MediaSource> audioEncoder = createAMRAudioSource();
+
+        if (audioEncoder == NULL) {
+            return UNKNOWN_ERROR;
+        }
+
+        mWriter->addSource(audioEncoder);
+    }
+
+    mWriter->start();
     return OK;
 }
 
@@ -235,7 +329,9 @@ status_t StagefrightRecorder::reset() {
 }
 
 status_t StagefrightRecorder::getMaxAmplitude(int *max) {
-    return UNKNOWN_ERROR;
+    *max = 0;
+
+    return OK;
 }
 
 }  // namespace android
