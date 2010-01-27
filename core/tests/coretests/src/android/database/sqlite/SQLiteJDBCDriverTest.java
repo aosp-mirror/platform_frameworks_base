@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.core;
+package android.database.sqlite;
 
 import java.io.File;
 import java.sql.Connection;
