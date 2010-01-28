@@ -53,6 +53,7 @@ private:
     void *mBuffer;
     size_t mBufferLength;
     off_t mBufferOffset;
+    bool mFirstRequest;
 
     status_t mInitCheck;
 
