@@ -19,6 +19,7 @@ package android.app;
 import android.app.IBackupAgent;
 import android.backup.BackupDataInput;
 import android.backup.BackupDataOutput;
+import android.backup.IBackupManager;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.os.Binder;
@@ -94,12 +95,9 @@ public abstract class BackupAgent extends ContextWrapper {
 
 
     // ----- Core implementation -----
-    
-    /**
-     * Returns the private interface called by the backup system.  Applications will
-     * not typically override this.
-     */
-    public IBinder onBind() {
+
+    /** @hide */
+    public final IBinder onBind() {
         return mBinder;
     }
 
@@ -116,9 +114,10 @@ public abstract class BackupAgent extends ContextWrapper {
 
         public void doBackup(ParcelFileDescriptor oldState,
                 ParcelFileDescriptor data,
-                ParcelFileDescriptor newState) throws RemoteException {
+                ParcelFileDescriptor newState,
+                int token, IBackupManager callbackBinder) throws RemoteException {
             // Ensure that we're running with the app's normal permission level
-            long token = Binder.clearCallingIdentity();
+            long ident = Binder.clearCallingIdentity();
 
             if (DEBUG) Log.v(TAG, "doBackup() invoked");
             BackupDataOutput output = new BackupDataOutput(data.getFileDescriptor());
@@ -131,14 +130,20 @@ public abstract class BackupAgent extends ContextWrapper {
                 Log.d(TAG, "onBackup (" + BackupAgent.this.getClass().getName() + ") threw", ex);
                 throw ex;
             } finally {
-                Binder.restoreCallingIdentity(token);
+                Binder.restoreCallingIdentity(ident);
+                try {
+                    callbackBinder.opComplete(token);
+                } catch (RemoteException e) {
+                    // we'll time out anyway, so we're safe
+                }
             }
         }
 
         public void doRestore(ParcelFileDescriptor data, int appVersionCode,
-                ParcelFileDescriptor newState) throws RemoteException {
+                ParcelFileDescriptor newState,
+                int token, IBackupManager callbackBinder) throws RemoteException {
             // Ensure that we're running with the app's normal permission level
-            long token = Binder.clearCallingIdentity();
+            long ident = Binder.clearCallingIdentity();
 
             if (DEBUG) Log.v(TAG, "doRestore() invoked");
             BackupDataInput input = new BackupDataInput(data.getFileDescriptor());
@@ -151,7 +156,12 @@ public abstract class BackupAgent extends ContextWrapper {
                 Log.d(TAG, "onRestore (" + BackupAgent.this.getClass().getName() + ") threw", ex);
                 throw ex;
             } finally {
-                Binder.restoreCallingIdentity(token);
+                Binder.restoreCallingIdentity(ident);
+                try {
+                    callbackBinder.opComplete(token);
+                } catch (RemoteException e) {
+                    // we'll time out anyway, so we're safe
+                }
             }
         }
     }

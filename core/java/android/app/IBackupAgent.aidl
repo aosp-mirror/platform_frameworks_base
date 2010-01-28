@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.backup.IBackupManager;
 import android.os.ParcelFileDescriptor;
  
 /**
@@ -25,7 +26,7 @@ import android.os.ParcelFileDescriptor;
  *
  * {@hide}
  */ 
-interface IBackupAgent {
+oneway interface IBackupAgent {
     /**
      * Request that the app perform an incremental backup.
      *
@@ -39,10 +40,18 @@ interface IBackupAgent {
      *
      * @param newState Read-write file, empty when onBackup() is called,
      *        where the new state blob is to be recorded.
+     *
+     * @param token Opaque token identifying this transaction.  This must
+     *        be echoed back to the backup service binder once the new
+     *        data has been written to the data and newState files.
+     *
+     * @param callbackBinder Binder on which to indicate operation completion,
+     *        passed here as a convenience to the agent.
      */
     void doBackup(in ParcelFileDescriptor oldState,
             in ParcelFileDescriptor data,
-            in ParcelFileDescriptor newState);
+            in ParcelFileDescriptor newState,
+            int token, IBackupManager callbackBinder);
 
     /**
      * Restore an entire data snapshot to the application.
@@ -58,7 +67,15 @@ interface IBackupAgent {
      * @param newState Read-write file, empty when onRestore() is called,
      *        that is to be written with the state description that holds after
      *        the restore has been completed.
+     *
+     * @param token Opaque token identifying this transaction.  This must
+     *        be echoed back to the backup service binder once the agent is
+     *        finished restoring the application based on the restore data
+     *        contents.
+     *
+     * @param callbackBinder Binder on which to indicate operation completion,
+     *        passed here as a convenience to the agent.
      */
     void doRestore(in ParcelFileDescriptor data, int appVersionCode,
-            in ParcelFileDescriptor newState);
+            in ParcelFileDescriptor newState, int token, IBackupManager callbackBinder);
 }
