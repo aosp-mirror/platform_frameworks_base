@@ -24,6 +24,8 @@
 
 namespace android {
 
+static const char *kUserAgent = "stagefright-http";
+
 // Given a connected HTTPStream, determine if the given path redirects
 // somewhere else, if so, disconnect the stream, update host path and port
 // accordingly and return true, otherwise return false and leave the stream
@@ -34,6 +36,9 @@ static bool PerformRedirectIfNecessary(
     request.append("HEAD ");
     request.append(path->c_str());
     request.append(" HTTP/1.1\r\n");
+    request.append("User-Agent: ");
+    request.append(kUserAgent);
+    request.append("\r\n");
     request.append("Host: ");
     request.append(host->c_str());
     request.append("\r\n\r\n");
@@ -78,6 +83,8 @@ static bool PerformRedirectIfNecessary(
         CHECK(end > start && (*end == '\0'));
 
         *port = (tmp >= 0 && tmp < 65536) ? (int)tmp : 80;
+
+        host->erase(colonPos, host->size() - colonPos);
     } else {
         *port = 80;
     }
@@ -94,7 +101,8 @@ HTTPDataSource::HTTPDataSource(const char *uri)
       mPath(NULL),
       mBuffer(malloc(kBufferSize)),
       mBufferLength(0),
-      mBufferOffset(0) {
+      mBufferOffset(0),
+      mFirstRequest(true) {
     CHECK(!strncasecmp("http://", uri, 7));
 
     string host;
@@ -123,10 +131,10 @@ HTTPDataSource::HTTPDataSource(const char *uri)
         host = string(host, 0, colon - host.c_str());
     }
 
-    LOGI("Connecting to host '%s', port %d, path '%s'",
-         host.c_str(), port, path.c_str());
-
     do {
+        LOGI("Connecting to host '%s', port %d, path '%s'",
+             host.c_str(), port, path.c_str());
+
         mInitCheck = mHttp->connect(host.c_str(), port);
 
         if (mInitCheck != OK) {
@@ -146,7 +154,8 @@ HTTPDataSource::HTTPDataSource(const char *_host, int port, const char *_path)
       mPath(NULL),
       mBuffer(malloc(kBufferSize)),
       mBufferLength(0),
-      mBufferOffset(0) {
+      mBufferOffset(0),
+      mFirstRequest(true) {
     string host = _host;
     string path = _path;
 
@@ -191,11 +200,18 @@ HTTPDataSource::~HTTPDataSource() {
 }
 
 ssize_t HTTPDataSource::sendRangeRequest(size_t offset) {
+    char agent[128];
+    sprintf(agent, "User-Agent: %s\r\n", kUserAgent);
+
     char host[128];
     sprintf(host, "Host: %s\r\n", mHost);
 
     char range[128];
-    sprintf(range, "Range: bytes=%d-\r\n\r\n", offset);
+    if (offset > 0) {
+        sprintf(range, "Range: bytes=%d-\r\n\r\n", offset);
+    } else {
+        range[0] = '\0';
+    }
 
     int http_status;
 
@@ -205,6 +221,7 @@ ssize_t HTTPDataSource::sendRangeRequest(size_t offset) {
         if ((err = mHttp->send("GET ")) != OK
             || (err = mHttp->send(mPath)) != OK
             || (err = mHttp->send(" HTTP/1.1\r\n")) != OK
+            || (err = mHttp->send(agent)) != OK
             || (err = mHttp->send(host)) != OK
             || (err = mHttp->send(range)) != OK
             || (err = mHttp->send("\r\n")) != OK
@@ -227,7 +244,7 @@ ssize_t HTTPDataSource::sendRangeRequest(size_t offset) {
 
     string value;
     if (!mHttp->find_header_value("Content-Length", &value)) {
-        return UNKNOWN_ERROR;
+        return kBufferSize;
     }
 
     char *end;
@@ -252,8 +269,12 @@ ssize_t HTTPDataSource::readAt(off_t offset, void *data, size_t size) {
     }
 
     ssize_t contentLength = 0;
-    if (mBufferLength <= 0 || offset != mBufferOffset + mBufferLength) {
-        mHttp->disconnect();
+    if (mFirstRequest || offset != mBufferOffset + mBufferLength) {
+        if (!mFirstRequest) {
+            mHttp->disconnect();
+        }
+        mFirstRequest = false;
+
         contentLength = sendRangeRequest(offset);
 
         if (contentLength > kBufferSize) {
