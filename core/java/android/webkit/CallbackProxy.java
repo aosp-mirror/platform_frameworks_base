@@ -651,7 +651,42 @@ class CallbackProxy extends Handler {
                 String message = msg.getData().getString("message");
                 String sourceID = msg.getData().getString("sourceID");
                 int lineNumber = msg.getData().getInt("lineNumber");
-                mWebChromeClient.onConsoleMessage(message, lineNumber, sourceID);
+                int msgLevel = msg.getData().getInt("msgLevel");
+                int numberOfMessageLevels = ConsoleMessage.MessageLevel.values().length;
+                // Sanity bounds check as we'll index an array with msgLevel
+                if (msgLevel < 0 || msgLevel >= numberOfMessageLevels) {
+                    msgLevel = 0;
+                }
+
+                ConsoleMessage.MessageLevel messageLevel =
+                        ConsoleMessage.MessageLevel.values()[msgLevel];
+
+                if (!mWebChromeClient.onConsoleMessage(new ConsoleMessage(message, sourceID,
+                        lineNumber, messageLevel))) {
+                    // If false was returned the user did not provide their own console function so
+                    //  we should output some default messages to the system log.
+                    String logTag = "Web Console";
+                    String logMessage = message + " at " + sourceID + ":" + lineNumber;
+
+                    switch (messageLevel) {
+                        case TIP:
+                            Log.v(logTag, logMessage);
+                            break;
+                        case LOG:
+                            Log.i(logTag, logMessage);
+                            break;
+                        case WARNING:
+                            Log.w(logTag, logMessage);
+                            break;
+                        case ERROR:
+                            Log.e(logTag, logMessage);
+                            break;
+                        case DEBUG:
+                            Log.d(logTag, logMessage);
+                            break;
+                    }
+                }
+
                 break;
 
             case GET_VISITED_HISTORY:
@@ -1286,8 +1321,10 @@ class CallbackProxy extends Handler {
      *     occurred.
      * @param sourceID The filename of the source file in which the error
      *     occurred.
+     * @param msgLevel The message level, corresponding to the MessageLevel enum in
+     *     WebCore/page/Console.h
      */
-    public void addMessageToConsole(String message, int lineNumber, String sourceID) {
+    public void addMessageToConsole(String message, int lineNumber, String sourceID, int msgLevel) {
         if (mWebChromeClient == null) {
             return;
         }
@@ -1296,6 +1333,7 @@ class CallbackProxy extends Handler {
         msg.getData().putString("message", message);
         msg.getData().putString("sourceID", sourceID);
         msg.getData().putInt("lineNumber", lineNumber);
+        msg.getData().putInt("msgLevel", msgLevel);
         sendMessage(msg);
     }
 
