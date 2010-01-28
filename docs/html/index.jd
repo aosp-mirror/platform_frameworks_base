@@ -13,7 +13,7 @@ home=true
                             <!-- total max width is 520px -->
                                   <img src="/assets/images/home/Android_Dev_Lab_l.png" alt="Android developer labs" width="100px" style="padding-left:78px;padding-right:46px;padding-bottom: 8px;"/>
                                   <div id="announcement" style="width:275px">
-<p>We're hosting the next Android Developer Lab in Barcelona at <a href="http://www.mobileworldcongress.com/index.htm">Mobile World Congress&nbsp;&raquo;</a> on Wednesday February 17th at <a href="http://www.mobileworldcongress.com/exhibition/app_planet.htm">App Planet&nbsp;&raquo;</a>, located in Hall 7.  Come visit us to attend a technical presentation, talk to our Android developer relations team, and meet other members of the developer community.</p><p>Check the Android Developers blog for more information soon!</p>
+<p>We're hosting the next Android Developer Lab in Barcelona at <a href="http://www.mobileworldcongress.com/index.htm">Mobile World Congress&nbsp;&raquo;</a> on Wednesday February 17th at <a href="http://www.mobileworldcongress.com/exhibition/app_planet.htm">App Planet&nbsp;&raquo;</a>, located in Hall 7.  Come visit us to attend a technical presentation, talk to our Android developer relations team, and meet other members of the developer community.</p><p><a href="http://sites.google.com/site/androidmwc/home">Learn more &raquo;</a></p>
 <!--<p><a href="http://android-developers.blogspot.com/2009/11/bring-your-lab-coats.html">Learn more &raquo;</a></p>-->
                                 </div> <!-- end annoucement -->
                             </div> <!-- end annoucement-block -->

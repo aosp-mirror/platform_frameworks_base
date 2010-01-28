@@ -467,6 +467,7 @@ public class WebView extends AbsoluteLayout
     static final int UPDATE_TEXT_ENTRY_MSG_ID           = 15;
     static final int WEBCORE_INITIALIZED_MSG_ID         = 16;
     static final int UPDATE_TEXTFIELD_TEXT_MSG_ID       = 17;
+    static final int UPDATE_ZOOM_RANGE                  = 18;
     static final int MOVE_OUT_OF_PLUGIN                 = 19;
     static final int CLEAR_TEXT_ENTRY                   = 20;
     static final int UPDATE_TEXT_SELECTION_MSG_ID       = 21;
@@ -497,7 +498,7 @@ public class WebView extends AbsoluteLayout
         "UPDATE_TEXT_ENTRY_MSG_ID", //       = 15;
         "WEBCORE_INITIALIZED_MSG_ID", //     = 16;
         "UPDATE_TEXTFIELD_TEXT_MSG_ID", //   = 17;
-        "18", //        = 18;
+        "UPDATE_ZOOM_RANGE", //              = 18;
         "MOVE_OUT_OF_PLUGIN", //             = 19;
         "CLEAR_TEXT_ENTRY", //               = 20;
         "UPDATE_TEXT_SELECTION_MSG_ID", //   = 21;
@@ -5315,6 +5316,14 @@ public class WebView extends AbsoluteLayout
                 case SPAWN_SCROLL_TO_MSG_ID:
                     spawnContentScrollTo(msg.arg1, msg.arg2);
                     break;
+                case UPDATE_ZOOM_RANGE: {
+                    WebViewCore.RestoreState restoreState
+                            = (WebViewCore.RestoreState) msg.obj;
+                    // mScrollX contains the new minPrefWidth
+                    updateZoomRange(restoreState, getViewWidth(),
+                            restoreState.mScrollX, false);
+                    break;
+                }
                 case NEW_PICTURE_MSG_ID: {
                     WebSettings settings = mWebViewCore.getSettings();
                     // called for new content
@@ -5326,32 +5335,8 @@ public class WebView extends AbsoluteLayout
                     WebViewCore.RestoreState restoreState = draw.mRestoreState;
                     if (restoreState != null) {
                         mInZoomOverview = false;
-                        if (restoreState.mMinScale == 0) {
-                            if (restoreState.mMobileSite) {
-                                if (draw.mMinPrefWidth >
-                                        Math.max(0, draw.mViewPoint.x)) {
-                                    mMinZoomScale = (float) viewWidth
-                                            / draw.mMinPrefWidth;
-                                    mMinZoomScaleFixed = false;
-                                    mInZoomOverview = useWideViewport &&
-                                            settings.getLoadWithOverviewMode();
-                                } else {
-                                    mMinZoomScale = restoreState.mDefaultScale;
-                                    mMinZoomScaleFixed = true;
-                                }
-                            } else {
-                                mMinZoomScale = DEFAULT_MIN_ZOOM_SCALE;
-                                mMinZoomScaleFixed = false;
-                            }
-                        } else {
-                            mMinZoomScale = restoreState.mMinScale;
-                            mMinZoomScaleFixed = true;
-                        }
-                        if (restoreState.mMaxScale == 0) {
-                            mMaxZoomScale = DEFAULT_MAX_ZOOM_SCALE;
-                        } else {
-                            mMaxZoomScale = restoreState.mMaxScale;
-                        }
+                        updateZoomRange(restoreState, viewSize.x,
+                                draw.mMinPrefWidth, true);
                         if (mInitialScaleInPercent > 0) {
                             setNewZoomScale(mInitialScaleInPercent / 100.0f,
                                     mInitialScaleInPercent != mTextWrapScale * 100,
@@ -5820,6 +5805,37 @@ public class WebView extends AbsoluteLayout
             selectedArray) {
         mPrivateHandler.post(
                 new InvokeListBox(array, enabledArray, selectedArray));
+    }
+
+    private void updateZoomRange(WebViewCore.RestoreState restoreState,
+            int viewWidth, int minPrefWidth, boolean updateZoomOverview) {
+        if (restoreState.mMinScale == 0) {
+            if (restoreState.mMobileSite) {
+                if (minPrefWidth > Math.max(0, viewWidth)) {
+                    mMinZoomScale = (float) viewWidth / minPrefWidth;
+                    mMinZoomScaleFixed = false;
+                    if (updateZoomOverview) {
+                        WebSettings settings = getSettings();
+                        mInZoomOverview = settings.getUseWideViewPort() &&
+                                settings.getLoadWithOverviewMode();
+                    }
+                } else {
+                    mMinZoomScale = restoreState.mDefaultScale;
+                    mMinZoomScaleFixed = true;
+                }
+            } else {
+                mMinZoomScale = DEFAULT_MIN_ZOOM_SCALE;
+                mMinZoomScaleFixed = false;
+            }
+        } else {
+            mMinZoomScale = restoreState.mMinScale;
+            mMinZoomScaleFixed = true;
+        }
+        if (restoreState.mMaxScale == 0) {
+            mMaxZoomScale = DEFAULT_MAX_ZOOM_SCALE;
+        } else {
+            mMaxZoomScale = restoreState.mMaxScale;
+        }
     }
 
     /*
