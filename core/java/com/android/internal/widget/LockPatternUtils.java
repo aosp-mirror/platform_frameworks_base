@@ -122,7 +122,7 @@ public class LockPatternUtils {
     }
 
     public int getRequestedMinimumPasswordLength() {
-        return mDevicePolicyManager.getMinimumPasswordLength();
+        return mDevicePolicyManager.getPasswordMinimumLength(null);
     }
 
     /**
@@ -132,7 +132,7 @@ public class LockPatternUtils {
      * @return
      */
     public int getRequestedPasswordMode() {
-        int policyMode = mDevicePolicyManager.getPasswordMode();
+        int policyMode = mDevicePolicyManager.getPasswordMode(null);
         switch (policyMode) {
             case DevicePolicyManager.PASSWORD_MODE_ALPHANUMERIC:
                 return MODE_PASSWORD;

@@ -357,12 +357,17 @@ public interface WindowManagerPolicy {
      * previous activity, and both are on top of he wallpaper. */
     public final int TRANSIT_WALLPAPER_INTRA_CLOSE = 15 | TRANSIT_EXIT_MASK;
     
+    // NOTE: screen off reasons are in order of significance, with more
+    // important ones lower than less important ones.
+    
+    /** Screen turned off because of a device admin */
+    public final int OFF_BECAUSE_OF_ADMIN = 1;
     /** Screen turned off because of power button */
-    public final int OFF_BECAUSE_OF_USER = 1;
+    public final int OFF_BECAUSE_OF_USER = 2;
     /** Screen turned off because of timeout */
-    public final int OFF_BECAUSE_OF_TIMEOUT = 2;
+    public final int OFF_BECAUSE_OF_TIMEOUT = 3;
     /** Screen turned off because of proximity sensor */
-    public final int OFF_BECAUSE_OF_PROX_SENSOR = 3;
+    public final int OFF_BECAUSE_OF_PROX_SENSOR = 4;
 
     /**
      * Magic constant to {@link IWindowManager#setRotation} to not actually

@@ -26,19 +26,21 @@ import android.os.RemoteCallback;
  */
 interface IDevicePolicyManager {
     void setPasswordMode(in ComponentName who, int mode);
-    int getPasswordMode();
+    int getPasswordMode(in ComponentName who);
     
-    void setMinimumPasswordLength(in ComponentName who, int length);
-    int getMinimumPasswordLength();
+    void setPasswordMinimumLength(in ComponentName who, int length);
+    int getPasswordMinimumLength(in ComponentName who);
     
     boolean isActivePasswordSufficient();
     int getCurrentFailedPasswordAttempts();
+    
     void setMaximumFailedPasswordsForWipe(in ComponentName admin, int num);
+    int getMaximumFailedPasswordsForWipe(in ComponentName admin);
     
     boolean resetPassword(String password);
     
     void setMaximumTimeToLock(in ComponentName who, long timeMs);
-    long getMaximumTimeToLock();
+    long getMaximumTimeToLock(in ComponentName who);
     
     void lockNow();
     
