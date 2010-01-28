@@ -828,12 +828,15 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     info.getExtraInfo());
         }
 
-        NetworkStateTracker newNet = tryFailover(prevNetType);
-        if (newNet != null) {
-            NetworkInfo switchTo = newNet.getNetworkInfo();
-            intent.putExtra(ConnectivityManager.EXTRA_OTHER_NETWORK_INFO, switchTo);
-        } else {
-            intent.putExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, true);
+        NetworkStateTracker newNet = null;
+        if (mNetAttributes[prevNetType].isDefault()) {
+            newNet = tryFailover(prevNetType);
+            if (newNet != null) {
+                NetworkInfo switchTo = newNet.getNetworkInfo();
+                intent.putExtra(ConnectivityManager.EXTRA_OTHER_NETWORK_INFO, switchTo);
+            } else {
+                intent.putExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, true);
+            }
         }
         // do this before we broadcast the change
         handleConnectivityChange();
@@ -848,7 +851,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
     }
 
-    // returns -1 if no failover available
+    // returns null if no failover available
     private NetworkStateTracker tryFailover(int prevNetType) {
         /*
          * If this is a default network, check if other defaults are available
@@ -970,13 +973,17 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             info.setFailover(false);
         }
 
-        NetworkStateTracker newNet = tryFailover(info.getType());
-        if (newNet != null) {
-            NetworkInfo switchTo = newNet.getNetworkInfo();
-            intent.putExtra(ConnectivityManager.EXTRA_OTHER_NETWORK_INFO, switchTo);
-        } else {
-            intent.putExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, true);
+        NetworkStateTracker newNet = null;
+        if (mNetAttributes[info.getType()].isDefault()) {
+            newNet = tryFailover(info.getType());
+            if (newNet != null) {
+                NetworkInfo switchTo = newNet.getNetworkInfo();
+                intent.putExtra(ConnectivityManager.EXTRA_OTHER_NETWORK_INFO, switchTo);
+            } else {
+                intent.putExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, true);
+            }
         }
+
         // do this before we broadcast the change
         handleConnectivityChange();
 
