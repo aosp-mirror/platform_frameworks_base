@@ -45,7 +45,8 @@ interface IDevicePolicyManager {
     void wipeData(int flags);
     
     void setActiveAdmin(in ComponentName policyReceiver);
-    ComponentName getActiveAdmin();
+    boolean isAdminActive(in ComponentName policyReceiver);
+    List<ComponentName> getActiveAdmins();
     void getRemoveWarning(in ComponentName policyReceiver, in RemoteCallback result);
     void removeActiveAdmin(in ComponentName policyReceiver);
     

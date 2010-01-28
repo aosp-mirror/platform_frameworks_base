@@ -2518,7 +2518,7 @@ public class Activity extends ContextThemeWrapper
      * and restored for you.  Note that if the dialog is already created,
      * {@link #onCreateDialog(int, Bundle)} will not be called with the new
      * arguments but {@link #onPrepareDialog(int, Dialog, Bundle)} will be.
-     * If you need to rebuild the dialog, call {@link #removeDialog(int)}Êfirst.
+     * If you need to rebuild the dialog, call {@link #removeDialog(int)} first.
      * @return Returns true if the Dialog was created; false is returned if
      * it is not created because {@link #onCreateDialog(int, Bundle)} returns false.
      * 

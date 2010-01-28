@@ -121,11 +121,6 @@ public class LockPatternUtils {
 
     }
 
-    public boolean isDevicePolicyActive() {
-        ComponentName admin = mDevicePolicyManager.getActiveAdmin();
-        return admin != null ? mDevicePolicyManager.isAdminActive(admin) : false;
-    }
-
     public int getRequestedMinimumPasswordLength() {
         return mDevicePolicyManager.getMinimumPasswordLength();
     }

@@ -32,6 +32,7 @@ import android.os.ServiceManager;
 import android.util.Log;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * Public interface for managing policies enforced on a device.  Most clients
@@ -65,10 +66,6 @@ public class DevicePolicyManager {
      * <p>You can optionally include the {@link #EXTRA_ADD_EXPLANATION}
      * field to provide the user with additional explanation (in addition
      * to your component's description) about what is being added.
-     * 
-     * <p>Note: the current platform can only have one device administrator
-     * active at a time.  If you make this request while there is already
-     * an active administrator, this new request will be canceled automatically.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_ADD_DEVICE_ADMIN
@@ -111,12 +108,28 @@ public class DevicePolicyManager {
     public boolean isAdminActive(ComponentName who) {
         if (mService != null) {
             try {
-                return who.equals(mService.getActiveAdmin());
+                return mService.isAdminActive(who);
             } catch (RemoteException e) {
                 Log.w(TAG, "Failed talking with device policy service", e);
             }
         }
         return false;
+    }
+    
+    /**
+     * Return a list of all currently active device administrator's component
+     * names.  Note that if there are no administrators than null may be
+     * returned.
+     */
+    public List<ComponentName> getActiveAdmins() {
+        if (mService != null) {
+            try {
+                return mService.getActiveAdmins();
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+        return null;
     }
     
     /**
@@ -442,26 +455,7 @@ public class DevicePolicyManager {
     /**
      * @hide
      */
-    public ComponentName getActiveAdmin() {
-        if (mService != null) {
-            try {
-                return mService.getActiveAdmin();
-            } catch (RemoteException e) {
-                Log.w(TAG, "Failed talking with device policy service", e);
-            }
-        }
-        return null;
-    }
-    
-    /**
-     * @hide
-     */
-    public DeviceAdminInfo getActiveAdminInfo() {
-        ComponentName cn = getActiveAdmin();
-        if (cn == null) {
-            return null;
-        }
-        
+    public DeviceAdminInfo getAdminInfo(ComponentName cn) {
         ActivityInfo ai;
         try {
             ai = mContext.getPackageManager().getReceiverInfo(cn,
