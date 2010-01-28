@@ -1458,18 +1458,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
             } else if (mHideLockScreen) {
                 if (mKeyguard.hideLw(true)) {
-                    mKeyguardMediator.setHidden(true);
                     changes |= FINISH_LAYOUT_REDO_LAYOUT
                             | FINISH_LAYOUT_REDO_CONFIG
                             | FINISH_LAYOUT_REDO_WALLPAPER;
                 }
+                mKeyguardMediator.setHidden(true);
             } else {
                 if (mKeyguard.showLw(true)) {
-                    mKeyguardMediator.setHidden(false);
                     changes |= FINISH_LAYOUT_REDO_LAYOUT
                             | FINISH_LAYOUT_REDO_CONFIG
                             | FINISH_LAYOUT_REDO_WALLPAPER;
                 }
+                mKeyguardMediator.setHidden(false);
             }
         }
         
