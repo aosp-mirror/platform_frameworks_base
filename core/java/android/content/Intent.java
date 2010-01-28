@@ -1355,6 +1355,60 @@ public class Intent implements Parcelable, Cloneable {
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_UID_REMOVED = "android.intent.action.UID_REMOVED";
+
+    /**
+     * Broadcast Action: Resources for a set of packages (which were
+     * previously unavailable) are currently
+     * available since the media on which they exist is available.
+     * The extra data {@link #EXTRA_CHANGED_PACKAGE_LIST} contains a
+     * list of packages whose availability changed.
+     * The extra data {@link #EXTRA_CHANGED_UID_LIST} contains a
+     * list of uids of packages whose availability changed.
+     * Note that the
+     * packages in this list do <em>not</em> receive this broadcast.
+     * The specified set of packages are now available on the system.
+     * <p>Includes the following extras:
+     * <ul>
+     * <li> {@link #EXTRA_CHANGED_PACKAGE_LIST} is the set of packages
+     * whose resources(were previously unavailable) are currently available.
+     * {@link #EXTRA_CHANGED_UID_LIST} is the set of uids of the
+     * packages whose resources(were previously unavailable)
+     * are  currently available.
+     * </ul>
+     *
+     * <p class="note">This is a protected intent that can only be sent
+     * by the system.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_MEDIA_RESOURCES_AVAILABLE =
+        "android.intent.action.MEDIA_RESOURCES_AVAILABILE";
+
+    /**
+     * Broadcast Action: Resources for a set of packages are currently
+     * unavailable since the media on which they exist is unavailable.
+     * The extra data {@link #EXTRA_CHANGED_PACKAGE_LIST} contains a
+     * list of packages whose availability changed.
+     * The extra data {@link #EXTRA_CHANGED_UID_LIST} contains a
+     * list of uids of packages whose availability changed.
+     * The specified set of packages can no longer be
+     * launched and are practically unavailable on the system.
+     * <p>Inclues the following extras:
+     * <ul>
+     * <li> {@link #EXTRA_CHANGED_PACKAGE_LIST} is the set of packages
+     * whose resources are no longer available.
+     * {@link #EXTRA_CHANGED_UID_LIST} is the set of packages
+     * whose resources are no longer available.
+     * </ul>
+     *
+     * <p class="note">This is a protected intent that can only be sent
+     * by the system.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_MEDIA_RESOURCES_UNAVAILABLE =
+        "android.intent.action.MEDIA_RESOURCES_UNAVAILABILE";
+
     /**
      * Broadcast Action:  The current system wallpaper has changed.  See
      * {@link android.app.WallpaperManager} for retrieving the new wallpaper.
@@ -2136,11 +2190,32 @@ public class Intent implements Parcelable, Cloneable {
             "android.intent.extra.changed_component_name";
 
     /**
-     * This field is part of {@link android.content.Intent#ACTION_PACKAGE_CHANGED}
+     * This field is part of {@link android.content.Intent#ACTION_PACKAGE_CHANGED},
      * and contains a string array of all of the components that have changed.
      */
     public static final String EXTRA_CHANGED_COMPONENT_NAME_LIST =
             "android.intent.extra.changed_component_name_list";
+
+    /**
+     * This field is part of
+     * {@link android.content.Intent#ACTION_MEDIA_RESOURCES_AVAILABLE},
+     * {@link android.content.Intent#ACTION_MEDIA_RESOURCES_UNAVAILABLE}
+     * and contains a string array of all of the components that have changed.
+     * @hide
+     */
+    public static final String EXTRA_CHANGED_PACKAGE_LIST =
+            "android.intent.extra.changed_package_list";
+
+    /**
+     * This field is part of
+     * {@link android.content.Intent#ACTION_MEDIA_RESOURCES_AVAILABLE},
+     * {@link android.content.Intent#ACTION_MEDIA_RESOURCES_UNAVAILABLE}
+     * and contains an integer array of uids of all of the components
+     * that have changed.
+     * @hide
+     */
+    public static final String EXTRA_CHANGED_UID_LIST =
+            "android.intent.extra.changed_uid_list";
 
     /**
      * @hide

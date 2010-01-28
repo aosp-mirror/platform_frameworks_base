@@ -484,6 +484,8 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         intentFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
         intentFilter.addAction(Intent.ACTION_PACKAGE_RESTARTED);
         mContext.registerReceiver(mBroadcastReceiver, intentFilter);
+        IntentFilter sdFilter = new IntentFilter(Intent.ACTION_MEDIA_RESOURCES_UNAVAILABLE);
+        mContext.registerReceiver(mBroadcastReceiver, sdFilter);
 
         // listen for settings changes
         ContentResolver resolver = mContext.getContentResolver();
@@ -1549,43 +1551,54 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             String action = intent.getAction();
 
             if (action.equals(Intent.ACTION_PACKAGE_REMOVED)
-                    || action.equals(Intent.ACTION_PACKAGE_RESTARTED)) {
+                    || action.equals(Intent.ACTION_PACKAGE_RESTARTED)
+                    || action.equals(Intent.ACTION_MEDIA_RESOURCES_UNAVAILABLE)) {
                 synchronized (mLock) {
-                    int uid = intent.getIntExtra(Intent.EXTRA_UID, -1);
-                    if (uid >= 0) {
-                        ArrayList<Receiver> removedRecs = null;
-                        for (ArrayList<UpdateRecord> i : mRecordsByProvider.values()) {
-                            for (int j=i.size()-1; j>=0; j--) {
-                                UpdateRecord ur = i.get(j);
-                                if (ur.mReceiver.isPendingIntent() && ur.mUid == uid) {
-                                    if (removedRecs == null) {
-                                        removedRecs = new ArrayList<Receiver>();
+                    int uidList[] = null;
+                    if (action.equals(Intent.ACTION_MEDIA_RESOURCES_UNAVAILABLE)) {
+                        uidList = intent.getIntArrayExtra(Intent.EXTRA_CHANGED_UID_LIST);
+                    } else {
+                        uidList = new int[]{intent.getIntExtra(Intent.EXTRA_UID, -1)};
+                    }
+                    if (uidList == null || uidList.length == 0) {
+                        return;
+                    }
+                    for (int uid : uidList) {
+                        if (uid >= 0) {
+                            ArrayList<Receiver> removedRecs = null;
+                            for (ArrayList<UpdateRecord> i : mRecordsByProvider.values()) {
+                                for (int j=i.size()-1; j>=0; j--) {
+                                    UpdateRecord ur = i.get(j);
+                                    if (ur.mReceiver.isPendingIntent() && ur.mUid == uid) {
+                                        if (removedRecs == null) {
+                                            removedRecs = new ArrayList<Receiver>();
+                                        }
+                                        if (!removedRecs.contains(ur.mReceiver)) {
+                                            removedRecs.add(ur.mReceiver);
+                                        }
                                     }
-                                    if (!removedRecs.contains(ur.mReceiver)) {
-                                        removedRecs.add(ur.mReceiver);
+                                }
+                            }
+                            ArrayList<ProximityAlert> removedAlerts = null;
+                            for (ProximityAlert i : mProximityAlerts.values()) {
+                                if (i.mUid == uid) {
+                                    if (removedAlerts == null) {
+                                        removedAlerts = new ArrayList<ProximityAlert>();
+                                    }
+                                    if (!removedAlerts.contains(i)) {
+                                        removedAlerts.add(i);
                                     }
                                 }
                             }
-                        }
-                        ArrayList<ProximityAlert> removedAlerts = null;
-                        for (ProximityAlert i : mProximityAlerts.values()) {
-                            if (i.mUid == uid) {
-                                if (removedAlerts == null) {
-                                    removedAlerts = new ArrayList<ProximityAlert>();
-                                }
-                                if (!removedAlerts.contains(i)) {
-                                    removedAlerts.add(i);
+                            if (removedRecs != null) {
+                                for (int i=removedRecs.size()-1; i>=0; i--) {
+                                    removeUpdatesLocked(removedRecs.get(i));
                                 }
                             }
-                        }
-                        if (removedRecs != null) {
-                            for (int i=removedRecs.size()-1; i>=0; i--) {
-                                removeUpdatesLocked(removedRecs.get(i));
-                            }
-                        }
-                        if (removedAlerts != null) {
-                            for (int i=removedAlerts.size()-1; i>=0; i--) {
-                                removeProximityAlertLocked(removedAlerts.get(i).mIntent);
+                            if (removedAlerts != null) {
+                                for (int i=removedAlerts.size()-1; i>=0; i--) {
+                                    removeProximityAlertLocked(removedAlerts.get(i).mIntent);
+                                }
                             }
                         }
                     }
@@ -1599,7 +1612,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
                     mNetworkState = LocationProvider.TEMPORARILY_UNAVAILABLE;
                 }
                 NetworkInfo info =
-                        (NetworkInfo)intent.getExtra(ConnectivityManager.EXTRA_NETWORK_INFO);
+                    (NetworkInfo)intent.getExtra(ConnectivityManager.EXTRA_NETWORK_INFO);
 
                 // Notify location providers of current network state
                 synchronized (mLock) {

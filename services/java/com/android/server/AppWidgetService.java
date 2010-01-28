@@ -145,6 +145,11 @@ class AppWidgetService extends IAppWidgetService.Stub
         filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
         filter.addDataScheme("package");
         mContext.registerReceiver(mBroadcastReceiver, filter);
+        // Register for events related to sdcard installation.
+        IntentFilter sdFilter = new IntentFilter();
+        sdFilter.addAction(Intent.ACTION_MEDIA_RESOURCES_AVAILABLE);
+        sdFilter.addAction(Intent.ACTION_MEDIA_RESOURCES_UNAVAILABLE);
+        mContext.registerReceiver(mBroadcastReceiver, sdFilter);
     }
 
     @Override
@@ -1070,36 +1075,55 @@ class AppWidgetService extends IAppWidgetService.Stub
                     }
                 }
             } else {
-                Uri uri = intent.getData();
-                if (uri == null) {
+                boolean added = false;
+                String pkgList[] = null;
+                if (Intent.ACTION_MEDIA_RESOURCES_AVAILABLE.equals(action)) {
+                    pkgList = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
+                    added = true;
+                } if (Intent.ACTION_MEDIA_RESOURCES_UNAVAILABLE.equals(action)) {
+                    pkgList = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
+                    added = false;
+                } else  {
+                    Uri uri = intent.getData();
+                    if (uri == null) {
+                        return;
+                    }
+                    String pkgName = uri.getSchemeSpecificPart();
+                    if (pkgName == null) {
+                        return;
+                    }
+                    pkgList = new String[] { pkgName };
+                    added = Intent.ACTION_PACKAGE_ADDED.equals(action);
+                }
+                if (pkgList == null || pkgList.length == 0) {
                     return;
                 }
-                String pkgName = uri.getSchemeSpecificPart();
-                if (pkgName == null) {
-                    return;
-                }
-                
-                if (Intent.ACTION_PACKAGE_ADDED.equals(action)) {
+                if (added) {
                     synchronized (mAppWidgetIds) {
                         Bundle extras = intent.getExtras();
                         if (extras != null && extras.getBoolean(Intent.EXTRA_REPLACING, false)) {
-                            // The package was just upgraded
-                            updateProvidersForPackageLocked(pkgName);
+                            for (String pkgName : pkgList) {
+                                // The package was just upgraded
+                                updateProvidersForPackageLocked(pkgName);
+                            }
                         } else {
                             // The package was just added
-                            addProvidersForPackageLocked(pkgName);
+                            for (String pkgName : pkgList) {
+                                addProvidersForPackageLocked(pkgName);
+                            }
                         }
                         saveStateLocked();
                     }
-                }
-                else if (Intent.ACTION_PACKAGE_REMOVED.equals(action)) {
+                } else {
                     Bundle extras = intent.getExtras();
                     if (extras != null && extras.getBoolean(Intent.EXTRA_REPLACING, false)) {
                         // The package is being updated.  We'll receive a PACKAGE_ADDED shortly.
                     } else {
                         synchronized (mAppWidgetIds) {
-                            removeProvidersForPackageLocked(pkgName);
-                            saveStateLocked();
+                            for (String pkgName : pkgList) {
+                                removeProvidersForPackageLocked(pkgName);
+                                saveStateLocked();
+                            }
                         }
                     }
                 }

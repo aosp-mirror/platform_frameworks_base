@@ -329,16 +329,27 @@ class NotificationManagerService extends INotificationManager.Stub
                 mUsbConnected = false;
                 updateAdbNotification();
             } else if (action.equals(Intent.ACTION_PACKAGE_REMOVED)
-                    || action.equals(Intent.ACTION_PACKAGE_RESTARTED)) {
-                Uri uri = intent.getData();
-                if (uri == null) {
-                    return;
+                    || action.equals(Intent.ACTION_PACKAGE_RESTARTED)
+                    || action.equals(Intent.ACTION_MEDIA_RESOURCES_UNAVAILABLE)) {
+                String pkgList[] = null;
+                if (action.equals(Intent.ACTION_MEDIA_RESOURCES_UNAVAILABLE)) {
+                    pkgList = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
+                } else {
+                    Uri uri = intent.getData();
+                    if (uri == null) {
+                        return;
+                    }
+                    String pkgName = uri.getSchemeSpecificPart();
+                    if (pkgName == null) {
+                        return;
+                    }
+                    pkgList = new String[]{pkgName};
                 }
-                String pkgName = uri.getSchemeSpecificPart();
-                if (pkgName == null) {
-                    return;
+                if (pkgList != null && (pkgList.length > 0)) {
+                    for (String pkgName : pkgList) {
+                        cancelAllNotificationsInt(pkgName, 0, 0);
+                    }
                 }
-                cancelAllNotificationsInt(pkgName, 0, 0);
             } else if (action.equals(Intent.ACTION_SCREEN_ON)) {
                 mScreenOn = true;
                 updateNotificationPulse();
@@ -429,6 +440,8 @@ class NotificationManagerService extends INotificationManager.Stub
         filter.addAction(Intent.ACTION_SCREEN_ON);
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         mContext.registerReceiver(mIntentReceiver, filter);
+        IntentFilter sdFilter = new IntentFilter(Intent.ACTION_MEDIA_RESOURCES_UNAVAILABLE);
+        mContext.registerReceiver(mIntentReceiver, sdFilter);
 
         SettingsObserver observer = new SettingsObserver(mHandler);
         observer.observe();

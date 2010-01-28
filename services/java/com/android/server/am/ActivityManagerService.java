@@ -1196,7 +1196,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     int uid = msg.arg1;
                     boolean restart = (msg.arg2 == 1);
                     String pkg = (String) msg.obj;
-                    forceStopPackageLocked(pkg, uid, restart);
+                    forceStopPackageLocked(pkg, uid, restart, false);
                 }
             } break;
             }
@@ -4998,7 +4998,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     }
 
     private void forceStopPackageLocked(final String packageName, int uid) {
-        forceStopPackageLocked(packageName, uid, false);
+        forceStopPackageLocked(packageName, uid, false, false);
         Intent intent = new Intent(Intent.ACTION_PACKAGE_RESTARTED,
                 Uri.fromParts("package", packageName, null));
         intent.putExtra(Intent.EXTRA_UID, uid);
@@ -5037,9 +5037,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             removeProcessLocked(procs.get(i), callerWillRestart);
         }
     }
-    
+
     private final void forceStopPackageLocked(String name, int uid,
-            boolean callerWillRestart) {
+            boolean callerWillRestart, boolean purgeCache) {
         int i, N;
 
         if (uid < 0) {
@@ -5091,6 +5091,12 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
         
         resumeTopActivityLocked(null);
+        if (purgeCache) {
+            AttributeCache ac = AttributeCache.instance();
+            if (ac != null) {
+                ac.removePackage(name);
+            }
+        }
     }
 
     private final boolean removeProcessLocked(ProcessRecord app, boolean callerWillRestart) {
@@ -8054,7 +8060,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             mDebugTransient = !persistent;
             if (packageName != null) {
                 final long origId = Binder.clearCallingIdentity();
-                forceStopPackageLocked(packageName, -1, false);
+                forceStopPackageLocked(packageName, -1, false, false);
                 Binder.restoreCallingIdentity(origId);
             }
         }
@@ -11935,6 +11941,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 intent.getAction());
         if (intent.ACTION_PACKAGE_REMOVED.equals(intent.getAction())
                 || intent.ACTION_PACKAGE_CHANGED.equals(intent.getAction())
+                || Intent.ACTION_MEDIA_RESOURCES_UNAVAILABLE.equals(intent.getAction())
                 || uidRemoved) {
             if (checkComponentPermission(
                     android.Manifest.permission.BROADCAST_PACKAGE_REMOVED,
@@ -11951,15 +11958,22 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                         }
                     }
                 } else {
-                    Uri data = intent.getData();
-                    String ssp;
-                    if (data != null && (ssp=data.getSchemeSpecificPart()) != null) {
-                        if (!intent.getBooleanExtra(Intent.EXTRA_DONT_KILL_APP, false)) {
-                            forceStopPackageLocked(ssp,
-                                    intent.getIntExtra(Intent.EXTRA_UID, -1), false);
-                            AttributeCache ac = AttributeCache.instance();
-                            if (ac != null) {
-                                ac.removePackage(ssp);
+                    // If resources are unvailble just force stop all
+                    // those packages and flush the attribute cache as well.
+                    if (Intent.ACTION_MEDIA_RESOURCES_UNAVAILABLE.equals(intent.getAction())) {
+                        String list[] = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
+                        if (list != null && (list.length > 0)) {
+                            for (String pkg : list) {
+                                forceStopPackageLocked(pkg, -1, false, true);
+                            }
+                        }
+                    } else {
+                        Uri data = intent.getData();
+                        String ssp;
+                        if (data != null && (ssp=data.getSchemeSpecificPart()) != null) {
+                            if (!intent.getBooleanExtra(Intent.EXTRA_DONT_KILL_APP, false)) {
+                                forceStopPackageLocked(ssp,
+                                        intent.getIntExtra(Intent.EXTRA_UID, -1), false, true);
                             }
                         }
                     }
@@ -12121,25 +12135,32 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             // installed.  Maybe in the future we want to have a special install
             // broadcast or such for apps, but we'd like to deliberately make
             // this decision.
-            boolean skip = false;
-            if (intent.ACTION_PACKAGE_ADDED.equals(intent.getAction())) {
-                skip = true;
-            } else if (intent.ACTION_PACKAGE_RESTARTED.equals(intent.getAction())) {
-                skip = true;
-            } else if (intent.ACTION_PACKAGE_DATA_CLEARED.equals(intent.getAction())) {
-                skip = true;
+            String skipPackages[] = null;
+            if (intent.ACTION_PACKAGE_ADDED.equals(intent.getAction())
+                    || intent.ACTION_PACKAGE_RESTARTED.equals(intent.getAction())
+                    || intent.ACTION_PACKAGE_DATA_CLEARED.equals(intent.getAction())) {
+                Uri data = intent.getData();
+                if (data != null) {
+                    String pkgName = data.getSchemeSpecificPart();
+                    if (pkgName != null) {
+                        skipPackages = new String[] { pkgName };
+                    }
+                }
+            } else if (intent.ACTION_MEDIA_RESOURCES_AVAILABLE.equals(intent.getAction())) {
+                skipPackages = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
             }
-            String skipPackage = (skip && intent.getData() != null)
-                    ? intent.getData().getSchemeSpecificPart()
-                    : null;
-            if (skipPackage != null && receivers != null) {
-                int NT = receivers.size();
-                for (int it=0; it<NT; it++) {
-                    ResolveInfo curt = (ResolveInfo)receivers.get(it);
-                    if (curt.activityInfo.packageName.equals(skipPackage)) {
-                        receivers.remove(it);
-                        it--;
-                        NT--;
+            if (skipPackages != null && (skipPackages.length > 0)) {
+                for (String skipPackage : skipPackages) {
+                    if (skipPackage != null) {
+                        int NT = receivers.size();
+                        for (int it=0; it<NT; it++) {
+                            ResolveInfo curt = (ResolveInfo)receivers.get(it);
+                            if (curt.activityInfo.packageName.equals(skipPackage)) {
+                                receivers.remove(it);
+                                it--;
+                                NT--;
+                            }
+                        }
                     }
                 }
             }
@@ -12923,7 +12944,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             }
 
             final long origId = Binder.clearCallingIdentity();
-            forceStopPackageLocked(ii.targetPackage, -1, true);
+            forceStopPackageLocked(ii.targetPackage, -1, true, false);
             ProcessRecord app = addAppLocked(ai);
             app.instrumentationClass = className;
             app.instrumentationInfo = ai;
@@ -12978,7 +12999,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         app.instrumentationProfileFile = null;
         app.instrumentationArguments = null;
 
-        forceStopPackageLocked(app.processName, -1, false);
+        forceStopPackageLocked(app.processName, -1, false, false);
     }
 
     public void finishInstrumentation(IApplicationThread target,

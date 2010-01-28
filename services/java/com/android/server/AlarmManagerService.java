@@ -772,16 +772,33 @@ class AlarmManagerService extends IAlarmManager.Stub {
             filter.addAction(Intent.ACTION_PACKAGE_RESTARTED);
             filter.addDataScheme("package");
             mContext.registerReceiver(this, filter);
+             // Register for events related to sdcard installation.
+            IntentFilter sdFilter = new IntentFilter();
+            sdFilter.addAction(Intent.ACTION_MEDIA_RESOURCES_UNAVAILABLE);
+            mContext.registerReceiver(this, sdFilter);
         }
         
         @Override
         public void onReceive(Context context, Intent intent) {
             synchronized (mLock) {
-                Uri data = intent.getData();
-                if (data != null) {
-                    String pkg = data.getSchemeSpecificPart();
-                    removeLocked(pkg);
-                    mBroadcastStats.remove(pkg);
+                String action = intent.getAction();
+                String pkgList[] = null;
+                if (Intent.ACTION_MEDIA_RESOURCES_UNAVAILABLE.equals(action)) {
+                    pkgList = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
+                } else {
+                    Uri data = intent.getData();
+                    if (data != null) {
+                        String pkg = data.getSchemeSpecificPart();
+                        if (pkg != null) {
+                            pkgList = new String[]{pkg};
+                        }
+                    }
+                }
+                if (pkgList != null && (pkgList.length > 0)) {
+                    for (String pkg : pkgList) {
+                        removeLocked(pkg);
+                        mBroadcastStats.remove(pkg);
+                    }
                 }
             }
         }
