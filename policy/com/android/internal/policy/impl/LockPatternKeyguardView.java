@@ -625,7 +625,8 @@ public class LockPatternKeyguardView extends KeyguardViewBase
         final IccCard.State simState = mUpdateMonitor.getSimState();
         if (stuckOnLockScreenBecauseSimMissing() || (simState == IccCard.State.PUK_REQUIRED)) {
             return Mode.LockScreen;
-        } else if (isSecure()) {
+        } else if (isSecure()
+                && mLockPatternUtils.getPasswordMode() == LockPatternUtils.MODE_PATTERN) {
             return Mode.UnlockScreen;
         } else {
             return Mode.LockScreen;
