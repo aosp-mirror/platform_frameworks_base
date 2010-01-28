@@ -633,6 +633,20 @@ status_t AudioFlinger::setVoiceVolume(float value)
     return ret;
 }
 
+status_t AudioFlinger::getRenderPosition(uint32_t *halFrames, uint32_t *dspFrames, int output)
+{
+    status_t status;
+
+    Mutex::Autolock _l(mLock);
+
+    PlaybackThread *playbackThread = checkPlaybackThread_l(output);
+    if (playbackThread != NULL) {
+        return playbackThread->getRenderPosition(halFrames, dspFrames);
+    }
+
+    return BAD_VALUE;
+}
+
 void AudioFlinger::registerClient(const sp<IAudioFlingerClient>& client)
 {
 
@@ -1166,6 +1180,19 @@ void AudioFlinger::PlaybackThread::readOutputParameters()
     memset(mMixBuffer, 0, mFrameCount * 2 * sizeof(int16_t));
 }
 
+status_t AudioFlinger::PlaybackThread::getRenderPosition(uint32_t *halFrames, uint32_t *dspFrames)
+{
+    if (halFrames == 0 || dspFrames == 0) {
+        return BAD_VALUE;
+    }
+    if (mOutput == 0) {
+        return INVALID_OPERATION;
+    }
+    *halFrames = mBytesWritten/mOutput->frameSize();
+
+    return mOutput->getRenderPosition(dspFrames);
+}
+
 // ----------------------------------------------------------------------------
 
 AudioFlinger::MixerThread::MixerThread(const sp<AudioFlinger>& audioFlinger, AudioStreamOut* output, int id)
@@ -1290,8 +1317,9 @@ bool AudioFlinger::MixerThread::threadLoop()
         if (sleepTime == 0) {
             mLastWriteTime = systemTime();
             mInWrite = true;
+            mBytesWritten += mixBufferSize;
             int bytesWritten = (int)mOutput->write(curBuf, mixBufferSize);
-            if (bytesWritten > 0) mBytesWritten += bytesWritten;
+            if (bytesWritten < 0) mBytesWritten -= mixBufferSize;
             mNumWrites++;
             mInWrite = false;
             nsecs_t now = systemTime();
@@ -1812,8 +1840,9 @@ bool AudioFlinger::DirectOutputThread::threadLoop()
         if (sleepTime == 0) {
             mLastWriteTime = systemTime();
             mInWrite = true;
+            mBytesWritten += mixBufferSize;
             int bytesWritten = (int)mOutput->write(mMixBuffer, mixBufferSize);
-            if (bytesWritten) mBytesWritten += bytesWritten;
+            if (bytesWritten < 0) mBytesWritten -= mixBufferSize;
             mNumWrites++;
             mInWrite = false;
             mStandby = false;

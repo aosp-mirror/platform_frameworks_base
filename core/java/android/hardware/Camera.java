@@ -543,6 +543,21 @@ public class Camera {
     public native final void stopSmoothZoom();
 
     /**
+     * Set the display orientation. This affects the preview frames and the
+     * picture displayed after snapshot. This method is useful for portrait
+     * mode applications.
+     *
+     * This does not affect the order of byte array passed in
+     * {@link PreviewCallback#onPreviewFrame}. This method is not allowed to
+     * be called during preview.
+     *
+     * @param degrees the angle that the picture will be rotated clockwise.
+     *                Valid values are 0, 90, 180, and 270. The starting
+     *                position is 0 (landscape).
+     */
+    public native final void setDisplayOrientation(int degrees);
+
+    /**
      * Handles the zoom callback.
      *
      * @hide

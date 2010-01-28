@@ -517,6 +517,8 @@ public final class Downloads {
     /**
      * This download couldn't be completed because of a storage issue.
      * Typically, that's because the filesystem is missing or full.
+     * Use the more specific {@link #STATUS_INSUFFICIENT_SPACE_ERROR}
+     * and {@link #STATUS_DEVICE_NOT_FOUND_ERROR} when appropriate.
      * @hide
      */
     public static final int STATUS_FILE_ERROR = 492;
@@ -556,6 +558,21 @@ public final class Downloads {
      * @hide
      */
     public static final int STATUS_TOO_MANY_REDIRECTS = 497;
+
+    /**
+     * This download couldn't be completed due to insufficient storage
+     * space.  Typically, this is because the SD card is full.
+     * @hide
+     */
+    public static final int STATUS_INSUFFICIENT_SPACE_ERROR = 498;
+
+    /**
+     * This download couldn't be completed because no external storage
+     * device was found.  Typically, this is because the SD card is not
+     * mounted.
+     * @hide
+     */
+    public static final int STATUS_DEVICE_NOT_FOUND_ERROR = 499;
 
     /**
      * This download is visible but only shows in the notifications
@@ -1019,6 +1036,8 @@ public final class Downloads {
         /**
          * This download couldn't be completed because of a storage issue.
          * Typically, that's because the filesystem is missing or full.
+         * Use the more specific {@link #STATUS_INSUFFICIENT_SPACE_ERROR}
+         * and {@link #STATUS_DEVICE_NOT_FOUND_ERROR} when appropriate.
          */
         public static final int STATUS_FILE_ERROR = 492;
 
@@ -1052,6 +1071,19 @@ public final class Downloads {
          * too many redirects.
          */
         public static final int STATUS_TOO_MANY_REDIRECTS = 497;
+
+        /**
+         * This download couldn't be completed due to insufficient storage
+         * space.  Typically, this is because the SD card is full.
+         */
+        public static final int STATUS_INSUFFICIENT_SPACE_ERROR = 498;
+
+        /**
+         * This download couldn't be completed because no external storage
+         * device was found.  Typically, this is because the SD card is not
+         * mounted.
+         */
+        public static final int STATUS_DEVICE_NOT_FOUND_ERROR = 499;
 
         /**
          * This download is visible but only shows in the notifications

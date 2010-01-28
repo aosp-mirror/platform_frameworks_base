@@ -17,14 +17,17 @@
 package com.android.unit_tests;
 
 import android.content.ContentValues;
+import android.content.Context;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.CharArrayBuffer;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Parcel;
+import android.test.AndroidTestCase;
 import android.test.PerformanceTestCase;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -41,7 +44,7 @@ import junit.framework.TestCase;
 import static android.database.DatabaseUtils.InsertHelper.TABLE_INFO_PRAGMA_COLUMNNAME_INDEX;
 import static android.database.DatabaseUtils.InsertHelper.TABLE_INFO_PRAGMA_DEFAULT_INDEX;
 
-public class DatabaseGeneralTest extends TestCase implements PerformanceTestCase {
+public class DatabaseGeneralTest extends AndroidTestCase implements PerformanceTestCase {
 
     private static final String sString1 = "this is a test";
     private static final String sString2 = "and yet another test";
@@ -55,7 +58,8 @@ public class DatabaseGeneralTest extends TestCase implements PerformanceTestCase
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        mDatabaseFile = new File("/sqlite_stmt_journals", "database_test.db");
+        File dbDir = getContext().getDir(this.getClass().getName(), Context.MODE_PRIVATE);
+        mDatabaseFile = new File(dbDir, "database_test.db");
         if (mDatabaseFile.exists()) {
             mDatabaseFile.delete();
         }

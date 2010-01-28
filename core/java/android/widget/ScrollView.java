@@ -16,6 +16,8 @@
 
 package android.widget;
 
+import com.android.internal.R;
+
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
@@ -29,8 +31,6 @@ import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.view.animation.AnimationUtils;
-
-import com.android.internal.R;
 
 import java.util.List;
 
@@ -59,7 +59,7 @@ public class ScrollView extends FrameLayout {
     private long mLastScroll;
 
     private final Rect mTempRect = new Rect();
-    private Scroller mScroller;
+    private OverScroller mScroller;
 
     /**
      * Flag to indicate that we are moving focus ourselves. This is so the
@@ -173,7 +173,7 @@ public class ScrollView extends FrameLayout {
 
 
     private void initScrollView() {
-        mScroller = new Scroller(getContext());
+        mScroller = new OverScroller(getContext());
         setFocusable(true);
         setDescendantFocusability(FOCUS_AFTER_DESCENDANTS);
         setWillNotDraw(false);
@@ -378,11 +378,6 @@ public class ScrollView extends FrameLayout {
             return true;
         }
 
-        if (!canScroll()) {
-            mIsBeingDragged = false;
-            return false;
-        }
-
         final float y = ev.getY();
 
         switch (action) {
@@ -437,10 +432,6 @@ public class ScrollView extends FrameLayout {
             // descendants.
             return false;
         }
-        
-        if (!canScroll()) {
-            return false;
-        }
 
         if (mVelocityTracker == null) {
             mVelocityTracker = VelocityTracker.obtain();
@@ -468,25 +459,23 @@ public class ScrollView extends FrameLayout {
                 final int deltaY = (int) (mLastMotionY - y);
                 mLastMotionY = y;
 
-                if (deltaY < 0) {
-                    if (mScrollY > 0) {
-                        scrollBy(0, deltaY);
-                    }
-                } else if (deltaY > 0) {
-                    final int bottomEdge = getHeight() - mPaddingBottom;
-                    final int availableToScroll = getChildAt(0).getBottom() - mScrollY - bottomEdge;
-                    if (availableToScroll > 0) {
-                        scrollBy(0, Math.min(availableToScroll, deltaY));
-                    }
-                }
+                super.scrollTo(mScrollX, mScrollY + deltaY);
                 break;
             case MotionEvent.ACTION_UP:
                 final VelocityTracker velocityTracker = mVelocityTracker;
                 velocityTracker.computeCurrentVelocity(1000, mMaximumVelocity);
                 int initialVelocity = (int) velocityTracker.getYVelocity();
 
-                if ((Math.abs(initialVelocity) > mMinimumVelocity) && getChildCount() > 0) {
-                    fling(-initialVelocity);
+                if (getChildCount() > 0) {
+                    if ((Math.abs(initialVelocity) > mMinimumVelocity)) {
+                        fling(-initialVelocity);
+                    } else {
+                        final int bottom = Math.max(0, getChildAt(0).getHeight() - 
+                                (getHeight() - mPaddingBottom - mPaddingTop));
+                        if (mScroller.springback(mScrollX, mScrollY, 0, 0, 0, bottom)) {
+                            invalidate();
+                        }
+                    }
                 }
 
                 if (mVelocityTracker != null) {
@@ -915,14 +904,10 @@ public class ScrollView extends FrameLayout {
             int oldY = mScrollY;
             int x = mScroller.getCurrX();
             int y = mScroller.getCurrY();
-            if (getChildCount() > 0) {
-                View child = getChildAt(0);
-                mScrollX = clamp(x, getWidth() - mPaddingRight - mPaddingLeft, child.getWidth());
-                mScrollY = clamp(y, getHeight() - mPaddingBottom - mPaddingTop, child.getHeight());
-            } else {
-                mScrollX = x;
-                mScrollY = y;
-            }            
+
+            mScrollX = x;
+            mScrollY = y;
+
             if (oldX != mScrollX || oldY != mScrollY) {
                 onScrollChanged(mScrollX, mScrollY, oldX, oldY);
             }
@@ -1159,7 +1144,8 @@ public class ScrollView extends FrameLayout {
             int height = getHeight() - mPaddingBottom - mPaddingTop;
             int bottom = getChildAt(0).getHeight();
     
-            mScroller.fling(mScrollX, mScrollY, 0, velocityY, 0, 0, 0, bottom - height);
+            mScroller.fling(mScrollX, mScrollY, 0, velocityY, 0, 0, 0, 
+                    Math.max(0, bottom - height), 0, height/2);
     
             final boolean movingDown = velocityY > 0;
     

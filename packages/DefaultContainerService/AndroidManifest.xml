@@ -1,0 +1,18 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+        package="com.android.defcontainer">
+    <uses-permission android:name="android.permission.ACCESS_DOWNLOAD_MANAGER"/>
+    <uses-permission android:name="android.permission.ASEC_ACCESS"/>
+    <uses-permission android:name="android.permission.ASEC_CREATE"/>
+    <uses-permission android:name="android.permission.ASEC_DESTROY"/>
+    <uses-permission android:name="android.permission.ASEC_MOUNT_UNMOUNT"/>
+
+    <application android:process="def.container.service"
+                 android:label="@string/service_name">
+
+        <service android:name=".DefaultContainerService"
+                 android:enabled="true"
+                 android:exported="true"
+                 android:permission="android.permission.COPY_PROTECTED_DATA"/>
+    </application>
+
+</manifest>

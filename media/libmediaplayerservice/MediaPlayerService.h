@@ -76,6 +76,7 @@ class MediaPlayerService : public BnMediaPlayerService
         virtual ssize_t         frameSize() const;
         virtual uint32_t        latency() const;
         virtual float           msecsPerFrame() const;
+        virtual status_t        getPosition(uint32_t *position);
 
         virtual status_t        open(
                 uint32_t sampleRate, int channelCount,
@@ -130,6 +131,7 @@ class MediaPlayerService : public BnMediaPlayerService
         virtual ssize_t         frameSize() const { return ssize_t(mChannelCount * ((mFormat == AudioSystem::PCM_16_BIT)?sizeof(int16_t):sizeof(u_int8_t))); }
         virtual uint32_t        latency() const;
         virtual float           msecsPerFrame() const;
+        virtual status_t        getPosition(uint32_t *position);
 
         virtual status_t        open(
                 uint32_t sampleRate, int channelCount, int format,

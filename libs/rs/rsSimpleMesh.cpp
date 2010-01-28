@@ -63,7 +63,7 @@ void SimpleMesh::renderRange(Context *rsc, uint32_t start, uint32_t len) const
             va.setActiveBuffer(mVertexBuffers[ct]->getBufferObjectID());
             mVertexTypes[ct]->enableGLVertexBuffer2(&va);
         }
-        va.setupGL2(rsc, 0, &rsc->mShaderCache);
+        va.setupGL2(rsc, &rsc->mStateVertexArray, &rsc->mShaderCache);
     } else {
         for (uint32_t ct=0; ct < mVertexTypeCount; ct++) {
             mVertexBuffers[ct]->uploadCheck(rsc);

@@ -1202,6 +1202,16 @@
         android:description="@string/permdesc_cache_filesystem"
         android:protectionLevel="signatureOrSystem" />
 
+    <!-- Must be required by default container service so that only
+         the system can bind to it and use it to copy
+         protected data to secure containers or files
+         accessible to the system.
+         @hide -->
+    <permission android:name="android.permission.COPY_PROTECTED_DATA"
+        android:label="@string/permlab_copyProtectedData"
+        android:description="@string/permlab_copyProtectedData"
+        android:protectionLevel="signature" />
+
     <application android:process="system"
                  android:persistent="true"
                  android:hasCode="false"

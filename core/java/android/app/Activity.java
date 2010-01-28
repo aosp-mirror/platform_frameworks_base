@@ -39,6 +39,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.text.Selection;
 import android.text.SpannableStringBuilder;
@@ -608,8 +609,13 @@ public class Activity extends ContextThemeWrapper
     private static final String SAVED_DIALOG_IDS_KEY = "android:savedDialogIds";
     private static final String SAVED_DIALOGS_TAG = "android:savedDialogs";
     private static final String SAVED_DIALOG_KEY_PREFIX = "android:dialog_";
+    private static final String SAVED_DIALOG_ARGS_KEY_PREFIX = "android:dialog_args_";
 
-    private SparseArray<Dialog> mManagedDialogs;
+    private static class ManagedDialog {
+        Dialog mDialog;
+        Bundle mArgs;
+    }
+    private SparseArray<ManagedDialog> mManagedDialogs;
 
     // set by the thread after the constructor and before onCreate(Bundle savedInstanceState) is called.
     private Instrumentation mInstrumentation;
@@ -850,35 +856,41 @@ public class Activity extends ContextThemeWrapper
 
         final int[] ids = b.getIntArray(SAVED_DIALOG_IDS_KEY);
         final int numDialogs = ids.length;
-        mManagedDialogs = new SparseArray<Dialog>(numDialogs);
+        mManagedDialogs = new SparseArray<ManagedDialog>(numDialogs);
         for (int i = 0; i < numDialogs; i++) {
             final Integer dialogId = ids[i];
             Bundle dialogState = b.getBundle(savedDialogKeyFor(dialogId));
             if (dialogState != null) {
                 // Calling onRestoreInstanceState() below will invoke dispatchOnCreate
                 // so tell createDialog() not to do it, otherwise we get an exception
-                final Dialog dialog = createDialog(dialogId, dialogState);
-                mManagedDialogs.put(dialogId, dialog);
-                onPrepareDialog(dialogId, dialog);
-                dialog.onRestoreInstanceState(dialogState);
+                final ManagedDialog md = new ManagedDialog();
+                md.mArgs = b.getBundle(savedDialogArgsKeyFor(dialogId));
+                md.mDialog = createDialog(dialogId, dialogState, md.mArgs);
+                if (md.mDialog != null) {
+                    mManagedDialogs.put(dialogId, md);
+                    onPrepareDialog(dialogId, md.mDialog, md.mArgs);
+                    md.mDialog.onRestoreInstanceState(dialogState);
+                }
             }
         }
     }
 
-    private Dialog createDialog(Integer dialogId, Bundle state) {
-        final Dialog dialog = onCreateDialog(dialogId);
+    private Dialog createDialog(Integer dialogId, Bundle state, Bundle args) {
+        final Dialog dialog = onCreateDialog(dialogId, args);
         if (dialog == null) {
-            throw new IllegalArgumentException("Activity#onCreateDialog did "
-                    + "not create a dialog for id " + dialogId);
+            return null;
         }
         dialog.dispatchOnCreate(state);
         return dialog;
     }
 
-    private String savedDialogKeyFor(int key) {
+    private static String savedDialogKeyFor(int key) {
         return SAVED_DIALOG_KEY_PREFIX + key;
     }
 
+    private static String savedDialogArgsKeyFor(int key) {
+        return SAVED_DIALOG_ARGS_KEY_PREFIX + key;
+    }
 
     /**
      * Called when activity start-up is complete (after {@link #onStart}
@@ -1095,8 +1107,11 @@ public class Activity extends ContextThemeWrapper
         for (int i = 0; i < numDialogs; i++) {
             final int key = mManagedDialogs.keyAt(i);
             ids[i] = key;
-            final Dialog dialog = mManagedDialogs.valueAt(i);
-            dialogState.putBundle(savedDialogKeyFor(key), dialog.onSaveInstanceState());
+            final ManagedDialog md = mManagedDialogs.valueAt(i);
+            dialogState.putBundle(savedDialogKeyFor(key), md.mDialog.onSaveInstanceState());
+            if (md.mArgs != null) {
+                dialogState.putBundle(savedDialogArgsKeyFor(key), md.mArgs);
+            }
         }
 
         dialogState.putIntArray(SAVED_DIALOG_IDS_KEY, ids);
@@ -1282,14 +1297,14 @@ public class Activity extends ContextThemeWrapper
 
         // dismiss any dialogs we are managing.
         if (mManagedDialogs != null) {
-
             final int numDialogs = mManagedDialogs.size();
             for (int i = 0; i < numDialogs; i++) {
-                final Dialog dialog = mManagedDialogs.valueAt(i);
-                if (dialog.isShowing()) {
-                    dialog.dismiss();
+                final ManagedDialog md = mManagedDialogs.valueAt(i);
+                if (md.mDialog.isShowing()) {
+                    md.mDialog.dismiss();
                 }
             }
+            mManagedDialogs = null;
         }
 
         // close any cursors we are managing.
@@ -1300,6 +1315,7 @@ public class Activity extends ContextThemeWrapper
                 c.mCursor.close();
             }
         }
+        mManagedCursors.clear();
     }
 
     /**
@@ -2410,36 +2426,57 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * Callback for creating dialogs that are managed (saved and restored) for you
-     * by the activity.
-     *
-     * If you use {@link #showDialog(int)}, the activity will call through to
-     * this method the first time, and hang onto it thereafter.  Any dialog
-     * that is created by this method will automatically be saved and restored
-     * for you, including whether it is showing.
-     *
-     * If you would like the activity to manage the saving and restoring dialogs
-     * for you, you should override this method and handle any ids that are
-     * passed to {@link #showDialog}.
-     *
-     * If you would like an opportunity to prepare your dialog before it is shown,
-     * override {@link #onPrepareDialog(int, Dialog)}.
-     *
-     * @param id The id of the dialog.
-     * @return The dialog
-     *
-     * @see #onPrepareDialog(int, Dialog)
-     * @see #showDialog(int)
-     * @see #dismissDialog(int)
-     * @see #removeDialog(int)
+     * @deprecated Old no-arguments version of {@link #onCreateDialog(int, Bundle)}.
      */
+    @Deprecated
     protected Dialog onCreateDialog(int id) {
         return null;
     }
 
     /**
+     * Callback for creating dialogs that are managed (saved and restored) for you
+     * by the activity.  The default implementation calls through to
+     * {@link #onCreateDialog(int)} for compatibility.
+     *
+     * <p>If you use {@link #showDialog(int)}, the activity will call through to
+     * this method the first time, and hang onto it thereafter.  Any dialog
+     * that is created by this method will automatically be saved and restored
+     * for you, including whether it is showing.
+     *
+     * <p>If you would like the activity to manage saving and restoring dialogs
+     * for you, you should override this method and handle any ids that are
+     * passed to {@link #showDialog}.
+     *
+     * <p>If you would like an opportunity to prepare your dialog before it is shown,
+     * override {@link #onPrepareDialog(int, Dialog, Bundle)}.
+     *
+     * @param id The id of the dialog.
+     * @param args The dialog arguments provided to {@link #showDialog(int, Bundle)}.
+     * @return The dialog.  If you return null, the dialog will not be created.
+     *
+     * @see #onPrepareDialog(int, Dialog, Bundle)
+     * @see #showDialog(int, Bundle)
+     * @see #dismissDialog(int)
+     * @see #removeDialog(int)
+     */
+    protected Dialog onCreateDialog(int id, Bundle args) {
+        return onCreateDialog(id);
+    }
+
+    /**
+     * @deprecated Old no-arguments version of
+     * {@link #onPrepareDialog(int, Dialog, Bundle)}.
+     */
+    @Deprecated
+    protected void onPrepareDialog(int id, Dialog dialog) {
+        dialog.setOwnerActivity(this);
+    }
+
+    /**
      * Provides an opportunity to prepare a managed dialog before it is being
-     * shown.
+     * shown.  The default implementation calls through to
+     * {@link #onPrepareDialog(int, Dialog)} for compatibility.
+     * 
      * <p>
      * Override this if you need to update a managed dialog based on the state
      * of the application each time it is shown. For example, a time picker
@@ -2449,43 +2486,66 @@ public class Activity extends ContextThemeWrapper
      * 
      * @param id The id of the managed dialog.
      * @param dialog The dialog.
-     * @see #onCreateDialog(int)
+     * @param args The dialog arguments provided to {@link #showDialog(int, Bundle)}.
+     * @see #onCreateDialog(int, Bundle)
      * @see #showDialog(int)
      * @see #dismissDialog(int)
      * @see #removeDialog(int)
      */
-    protected void onPrepareDialog(int id, Dialog dialog) {
-        dialog.setOwnerActivity(this);
+    protected void onPrepareDialog(int id, Dialog dialog, Bundle args) {
+        onPrepareDialog(id, dialog);
     }
 
     /**
-     * Show a dialog managed by this activity.  A call to {@link #onCreateDialog(int)}
+     * Simple version of {@link #showDialog(int, Bundle)} that does not
+     * take any arguments.  Simply calls {@link #showDialog(int, Bundle)}
+     * with null arguments.
+     */
+    public final void showDialog(int id) {
+        showDialog(id, null);
+    }
+
+    /**
+     * Show a dialog managed by this activity.  A call to {@link #onCreateDialog(int, Bundle)}
      * will be made with the same id the first time this is called for a given
      * id.  From thereafter, the dialog will be automatically saved and restored.
      *
-     * Each time a dialog is shown, {@link #onPrepareDialog(int, Dialog)} will
+     * <p>Each time a dialog is shown, {@link #onPrepareDialog(int, Dialog, Bundle)} will
      * be made to provide an opportunity to do any timely preparation.
      *
      * @param id The id of the managed dialog.
-     *
+     * @param args Arguments to pass through to the dialog.  These will be saved
+     * and restored for you.  Note that if the dialog is already created,
+     * {@link #onCreateDialog(int, Bundle)} will not be called with the new
+     * arguments but {@link #onPrepareDialog(int, Dialog, Bundle)} will be.
+     * If you need to rebuild the dialog, call {@link #removeDialog(int)} first.
+     * @return Returns true if the Dialog was created; false is returned if
+     * it is not created because {@link #onCreateDialog(int, Bundle)} returns false.
+     * 
      * @see Dialog
-     * @see #onCreateDialog(int)
-     * @see #onPrepareDialog(int, Dialog)
+     * @see #onCreateDialog(int, Bundle)
+     * @see #onPrepareDialog(int, Dialog, Bundle)
      * @see #dismissDialog(int)
      * @see #removeDialog(int)
      */
-    public final void showDialog(int id) {
+    public final boolean showDialog(int id, Bundle args) {
         if (mManagedDialogs == null) {
-            mManagedDialogs = new SparseArray<Dialog>();
+            mManagedDialogs = new SparseArray<ManagedDialog>();
         }
-        Dialog dialog = mManagedDialogs.get(id);
-        if (dialog == null) {
-            dialog = createDialog(id, null);
-            mManagedDialogs.put(id, dialog);
+        ManagedDialog md = mManagedDialogs.get(id);
+        if (md == null) {
+            md = new ManagedDialog();
+            md.mDialog = createDialog(id, null, args);
+            if (md.mDialog == null) {
+                return false;
+            }
+            mManagedDialogs.put(id, md);
         }
         
-        onPrepareDialog(id, dialog);
-        dialog.show();
+        md.mArgs = args;
+        onPrepareDialog(id, md.mDialog, args);
+        md.mDialog.show();
+        return true;
     }
 
     /**
@@ -2496,21 +2556,21 @@ public class Activity extends ContextThemeWrapper
      * @throws IllegalArgumentException if the id was not previously shown via
      *   {@link #showDialog(int)}.
      *
-     * @see #onCreateDialog(int)
-     * @see #onPrepareDialog(int, Dialog)
+     * @see #onCreateDialog(int, Bundle)
+     * @see #onPrepareDialog(int, Dialog, Bundle)
      * @see #showDialog(int)
      * @see #removeDialog(int)
      */
     public final void dismissDialog(int id) {
         if (mManagedDialogs == null) {
             throw missingDialog(id);
-
         }
-        final Dialog dialog = mManagedDialogs.get(id);
-        if (dialog == null) {
+        
+        final ManagedDialog md = mManagedDialogs.get(id);
+        if (md == null) {
             throw missingDialog(id);
         }
-        dialog.dismiss();
+        md.mDialog.dismiss();
     }
 
     /**
@@ -2526,28 +2586,27 @@ public class Activity extends ContextThemeWrapper
      * Removes any internal references to a dialog managed by this Activity.
      * If the dialog is showing, it will dismiss it as part of the clean up.
      *
-     * This can be useful if you know that you will never show a dialog again and
+     * <p>This can be useful if you know that you will never show a dialog again and
      * want to avoid the overhead of saving and restoring it in the future.
      *
      * @param id The id of the managed dialog.
      *
-     * @see #onCreateDialog(int)
-     * @see #onPrepareDialog(int, Dialog)
+     * @see #onCreateDialog(int, Bundle)
+     * @see #onPrepareDialog(int, Dialog, Bundle)
      * @see #showDialog(int)
      * @see #dismissDialog(int)
      */
     public final void removeDialog(int id) {
-
         if (mManagedDialogs == null) {
             return;
         }
 
-        final Dialog dialog = mManagedDialogs.get(id);
-        if (dialog == null) {
+        final ManagedDialog md = mManagedDialogs.get(id);
+        if (md == null) {
             return;
         }
 
-        dialog.dismiss();
+        md.mDialog.dismiss();
         mManagedDialogs.remove(id);
     }
 
@@ -3449,17 +3508,7 @@ public class Activity extends ContextThemeWrapper
             return;
         }
         
-        // uses super.getSystemService() since this.getSystemService() looks at the
-        // mSearchManager field.
-        mSearchManager = (SearchManager) super.getSystemService(Context.SEARCH_SERVICE);
-        int ident = mIdent;
-        if (ident == 0) {
-            if (mParent != null) ident = mParent.mIdent;
-            if (ident == 0) {
-                throw new IllegalArgumentException("no ident");
-            }
-        }
-        mSearchManager.setIdent(ident, getComponentName());
+        mSearchManager = new SearchManager(this, null);
     }
     
     @Override

@@ -121,9 +121,6 @@ const char CameraParameters::FOCUS_MODE_INFINITY[] = "infinity";
 const char CameraParameters::FOCUS_MODE_MACRO[] = "macro";
 const char CameraParameters::FOCUS_MODE_FIXED[] = "fixed";
 
-static const char* portrait = "portrait";
-static const char* landscape = "landscape";
-
 CameraParameters::CameraParameters()
                 : mMap()
 {
@@ -280,23 +277,6 @@ int CameraParameters::getPreviewFrameRate() const
 void CameraParameters::setPreviewFormat(const char *format)
 {
     set(KEY_PREVIEW_FORMAT, format);
-}
-
-int CameraParameters::getOrientation() const
-{
-    const char* orientation = get("orientation");
-    if (orientation && !strcmp(orientation, portrait))
-        return CAMERA_ORIENTATION_PORTRAIT;
-    return CAMERA_ORIENTATION_LANDSCAPE;
-}
-
-void CameraParameters::setOrientation(int orientation)
-{
-    if (orientation == CAMERA_ORIENTATION_PORTRAIT) {
-        set("orientation", portrait);
-    } else {
-        set("orientation", landscape);
-    }
 }
 
 const char *CameraParameters::getPreviewFormat() const

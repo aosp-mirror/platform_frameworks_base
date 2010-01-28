@@ -18,6 +18,7 @@
 package android.app;
 
 import android.content.ComponentName;
+import android.os.RemoteCallback;
 
 /**
  * Internal IPC interface to the device policy service.
@@ -32,6 +33,7 @@ interface IDevicePolicyManager {
     
     boolean isActivePasswordSufficient();
     int getCurrentFailedPasswordAttempts();
+    void setMaximumFailedPasswordsForWipe(in ComponentName admin, int num);
     
     boolean resetPassword(String password);
     
@@ -43,7 +45,9 @@ interface IDevicePolicyManager {
     void wipeData(int flags);
     
     void setActiveAdmin(in ComponentName policyReceiver);
-    ComponentName getActiveAdmin();
+    boolean isAdminActive(in ComponentName policyReceiver);
+    List<ComponentName> getActiveAdmins();
+    void getRemoveWarning(in ComponentName policyReceiver, in RemoteCallback result);
     void removeActiveAdmin(in ComponentName policyReceiver);
     
     void setActivePasswordState(int mode, int length);

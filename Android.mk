@@ -117,6 +117,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/os/IParentalControlCallback.aidl \
 	core/java/android/os/IPermissionController.aidl \
 	core/java/android/os/IPowerManager.aidl \
+    core/java/android/os/IRemoteCallback.aidl \
 	core/java/android/os/IVibratorService.aidl \
     core/java/android/service/wallpaper/IWallpaperConnection.aidl \
     core/java/android/service/wallpaper/IWallpaperEngine.aidl \
@@ -136,6 +137,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/speech/tts/ITtsCallback.aidl \
 	core/java/com/android/internal/app/IBatteryStats.aidl \
 	core/java/com/android/internal/app/IUsageStats.aidl \
+	core/java/com/android/internal/app/IMediaContainerService.aidl \
 	core/java/com/android/internal/appwidget/IAppWidgetService.aidl \
 	core/java/com/android/internal/appwidget/IAppWidgetHost.aidl \
 	core/java/com/android/internal/backup/IBackupTransport.aidl \

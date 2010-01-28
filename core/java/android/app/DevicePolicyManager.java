@@ -26,11 +26,13 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Handler;
+import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Log;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * Public interface for managing policies enforced on a device.  Most clients
@@ -43,8 +45,9 @@ public class DevicePolicyManager {
     private static boolean localLOGV = DEBUG || android.util.Config.LOGV;
 
     private final Context mContext;
-    private final Handler mHandler;
     private final IDevicePolicyManager mService;
+    
+    private final Handler mHandler;
 
     /*package*/ DevicePolicyManager(Context context, Handler handler) {
         mContext = context;
@@ -60,9 +63,9 @@ public class DevicePolicyManager {
      * bring the user through adding the device administrator to the system (or
      * allowing them to reject it).
      * 
-     * <p>Note: the current platform can only have one device administrator
-     * active at a time.  If you make this request while there is already
-     * an active administrator, this new request will be canceled automatically.
+     * <p>You can optionally include the {@link #EXTRA_ADD_EXPLANATION}
+     * field to provide the user with additional explanation (in addition
+     * to your component's description) about what is being added.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_ADD_DEVICE_ADMIN
@@ -74,6 +77,14 @@ public class DevicePolicyManager {
      * @see #ACTION_ADD_DEVICE_ADMIN
      */
     public static final String EXTRA_DEVICE_ADMIN = "android.app.extra.DEVICE_ADMIN";
+    
+    /**
+     * An optional CharSequence providing additional explanation for why the
+     * admin is being added.
+     *
+     * @see #ACTION_ADD_DEVICE_ADMIN
+     */
+    public static final String EXTRA_ADD_EXPLANATION = "android.app.extra.ADD_EXPLANATION";
     
     /**
      * Activity action: have the user enter a new password.  This activity
@@ -97,12 +108,28 @@ public class DevicePolicyManager {
     public boolean isAdminActive(ComponentName who) {
         if (mService != null) {
             try {
-                return who.equals(mService.getActiveAdmin());
+                return mService.isAdminActive(who);
             } catch (RemoteException e) {
                 Log.w(TAG, "Failed talking with device policy service", e);
             }
         }
         return false;
+    }
+    
+    /**
+     * Return a list of all currently active device administrator's component
+     * names.  Note that if there are no administrators than null may be
+     * returned.
+     */
+    public List<ComponentName> getActiveAdmins() {
+        if (mService != null) {
+            try {
+                return mService.getActiveAdmins();
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+        return null;
     }
     
     /**
@@ -285,6 +312,29 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Set the maximum number of failed password attempts that are allowed
+     * before the device wipes its data.  This is convenience for implementing
+     * the corresponding functionality with a combination of watching failed
+     * password attempts and calling {@link #wipeData} upon reaching a certain
+     * count, and as such requires that you request both
+     * {@link DeviceAdminInfo#USES_POLICY_WATCH_LOGIN} and
+     * {@link DeviceAdminInfo#USES_POLICY_WIPE_DATA}}.
+     * 
+     * @param admin Which {@link DeviceAdmin} this request is associated with.
+     * @param num The number of failed password attempts at which point the
+     * device will wipe its data.
+     */
+    public void setMaximumFailedPasswordsForWipe(ComponentName admin, int num) {
+        if (mService != null) {
+            try {
+                mService.setMaximumFailedPasswordsForWipe(admin, num);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+    }
+    
+    /**
      * Force a new password on the user.  This takes effect immediately.  The
      * given password must meet the current password minimum length constraint
      * or it will be rejected.  The given password will be accepted regardless
@@ -405,26 +455,7 @@ public class DevicePolicyManager {
     /**
      * @hide
      */
-    public ComponentName getActiveAdmin() {
-        if (mService != null) {
-            try {
-                return mService.getActiveAdmin();
-            } catch (RemoteException e) {
-                Log.w(TAG, "Failed talking with device policy service", e);
-            }
-        }
-        return null;
-    }
-    
-    /**
-     * @hide
-     */
-    public DeviceAdminInfo getActiveAdminInfo() {
-        ComponentName cn = getActiveAdmin();
-        if (cn == null) {
-            return null;
-        }
-        
+    public DeviceAdminInfo getAdminInfo(ComponentName cn) {
         ActivityInfo ai;
         try {
             ai = mContext.getPackageManager().getReceiverInfo(cn,
@@ -448,6 +479,19 @@ public class DevicePolicyManager {
         }
     }
     
+    /**
+     * @hide
+     */
+    public void getRemoveWarning(ComponentName admin, RemoteCallback result) {
+        if (mService != null) {
+            try {
+                mService.getRemoveWarning(admin, result);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+    }
+
     /**
      * @hide
      */

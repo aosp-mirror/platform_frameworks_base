@@ -379,6 +379,12 @@ void AudioStreamOutDump::Close()
     }
 }
 
+status_t AudioStreamOutDump::getRenderPosition(uint32_t *dspFrames)
+{
+    if (mFinalStream != 0 ) return mFinalStream->getRenderPosition(dspFrames);
+    return INVALID_OPERATION;
+}
+
 // ----------------------------------------------------------------------------
 
 AudioStreamInDump::AudioStreamInDump(AudioDumpInterface *interface,

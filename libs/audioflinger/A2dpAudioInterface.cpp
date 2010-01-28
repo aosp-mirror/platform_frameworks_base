@@ -457,4 +457,10 @@ status_t A2dpAudioInterface::A2dpAudioStreamOut::dump(int fd, const Vector<Strin
     return NO_ERROR;
 }
 
+status_t A2dpAudioInterface::A2dpAudioStreamOut::getRenderPosition(uint32_t *driverFrames)
+{
+    //TODO: enable when supported by driver
+    return INVALID_OPERATION;
+}
+
 }; // namespace android

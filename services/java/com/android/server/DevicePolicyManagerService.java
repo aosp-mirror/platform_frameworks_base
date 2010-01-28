@@ -23,10 +23,12 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
+import android.app.Activity;
 import android.app.DeviceAdmin;
 import android.app.DeviceAdminInfo;
 import android.app.DevicePolicyManager;
 import android.app.IDevicePolicyManager;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -36,6 +38,7 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.IPowerManager;
 import android.os.RecoverySystem;
+import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Log;
@@ -45,6 +48,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -61,19 +66,74 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     int mActivePasswordLength = 0;
     int mFailedPasswordAttempts = 0;
     
-    ActiveAdmin mActiveAdmin;
+    final HashMap<ComponentName, ActiveAdmin> mAdminMap
+            = new HashMap<ComponentName, ActiveAdmin>();
+    final ArrayList<ActiveAdmin> mAdminList
+            = new ArrayList<ActiveAdmin>();
     
     static class ActiveAdmin {
-        ActiveAdmin(DeviceAdminInfo _info) {
-            info = _info;
-        }
-        
         final DeviceAdminInfo info;
-        int getUid() { return info.getActivityInfo().applicationInfo.uid; }
         
         int passwordMode = DevicePolicyManager.PASSWORD_MODE_UNSPECIFIED;
         int minimumPasswordLength = 0;
         long maximumTimeToUnlock = 0;
+        int maximumFailedPasswordsForWipe = 0;
+        
+        ActiveAdmin(DeviceAdminInfo _info) {
+            info = _info;
+        }
+        
+        int getUid() { return info.getActivityInfo().applicationInfo.uid; }
+        
+        void writeToXml(XmlSerializer out)
+                throws IllegalArgumentException, IllegalStateException, IOException {
+            if (passwordMode != DevicePolicyManager.PASSWORD_MODE_UNSPECIFIED) {
+                out.startTag(null, "password-mode");
+                out.attribute(null, "value", Integer.toString(passwordMode));
+                out.endTag(null, "password-mode");
+                if (minimumPasswordLength > 0) {
+                    out.startTag(null, "min-password-length");
+                    out.attribute(null, "value", Integer.toString(minimumPasswordLength));
+                    out.endTag(null, "mn-password-length");
+                }
+            }
+            if (maximumTimeToUnlock != DevicePolicyManager.PASSWORD_MODE_UNSPECIFIED) {
+                out.startTag(null, "max-time-to-unlock");
+                out.attribute(null, "value", Long.toString(maximumTimeToUnlock));
+                out.endTag(null, "max-time-to-unlock");
+            }
+            if (maximumFailedPasswordsForWipe != 0) {
+                out.startTag(null, "max-failed-password-wipe");
+                out.attribute(null, "value", Integer.toString(maximumFailedPasswordsForWipe));
+                out.endTag(null, "max-failed-password-wipe");
+            }
+        }
+        
+        void readFromXml(XmlPullParser parser)
+                throws XmlPullParserException, IOException {
+            int outerDepth = parser.getDepth();
+            int type;
+            while ((type=parser.next()) != XmlPullParser.END_DOCUMENT
+                   && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
+                if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
+                    continue;
+                }
+                String tag = parser.getName();
+                if ("password-mode".equals(tag)) {
+                    passwordMode = Integer.parseInt(
+                            parser.getAttributeValue(null, "value"));
+                } else if ("min-password-length".equals(tag)) {
+                    minimumPasswordLength = Integer.parseInt(
+                            parser.getAttributeValue(null, "value"));
+                } else if ("max-time-to-unlock".equals(tag)) {
+                    maximumTimeToUnlock = Long.parseLong(
+                            parser.getAttributeValue(null, "value"));
+                } else if ("max-failed-password-wipe".equals(tag)) {
+                    maximumFailedPasswordsForWipe = Integer.parseInt(
+                            parser.getAttributeValue(null, "value"));
+                }
+            }
+        }
     }
     
     /**
@@ -91,23 +151,40 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         return mIPowerManager;
     }
     
-    ActiveAdmin getActiveAdminForCallerLocked(ComponentName who, int reqPolicy)
+    ActiveAdmin getActiveAdminUncheckedLocked(ComponentName who) {
+        ActiveAdmin admin = mAdminMap.get(who);
+        if (admin != null
+                && who.getPackageName().equals(admin.info.getActivityInfo().packageName)
+                && who.getClassName().equals(admin.info.getActivityInfo().name)) {
+            return admin;
+        }
+        return null;
+    }
+    
+    ActiveAdmin getActiveAdminForCallerLocked(ComponentName who)
             throws SecurityException {
-        if (mActiveAdmin != null && mActiveAdmin.getUid() == Binder.getCallingUid()) {
+        ActiveAdmin admin = mAdminMap.get(who);
+        if (admin != null && admin.getUid() == Binder.getCallingUid()) {
             if (who != null) {
-                if (!who.getPackageName().equals(mActiveAdmin.info.getActivityInfo().packageName)
-                        || !who.getClassName().equals(mActiveAdmin.info.getActivityInfo().name)) {
+                if (!who.getPackageName().equals(admin.info.getActivityInfo().packageName)
+                        || !who.getClassName().equals(admin.info.getActivityInfo().name)) {
                     throw new SecurityException("Current admin is not " + who);
                 }
             }
-            if (!mActiveAdmin.info.usesPolicy(reqPolicy)) {
-                throw new SecurityException("Admin " + mActiveAdmin.info.getComponent()
-                        + " did not specify uses-policy for: "
-                        + mActiveAdmin.info.getTagForPolicy(reqPolicy));
-            }
-            return mActiveAdmin;
+            return admin;
         }
         throw new SecurityException("Current admin is not owned by uid " + Binder.getCallingUid());
+    }
+    
+    ActiveAdmin getActiveAdminForCallerLocked(ComponentName who, int reqPolicy)
+            throws SecurityException {
+        ActiveAdmin admin = getActiveAdminForCallerLocked(who);
+        if (!admin.info.usesPolicy(reqPolicy)) {
+            throw new SecurityException("Admin " + admin.info.getComponent()
+                    + " did not specify uses-policy for: "
+                    + admin.info.getTagForPolicy(reqPolicy));
+        }
+        return admin;
     }
     
     void sendAdminCommandLocked(ActiveAdmin admin, String action) {
@@ -117,28 +194,25 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
     
     void sendAdminCommandLocked(String action, int reqPolicy) {
-        if (mActiveAdmin != null) {
-            if (mActiveAdmin.info.usesPolicy(reqPolicy)) {
-                return;
+        final int N = mAdminList.size();
+        if (N > 0) {
+            for (int i=0; i<N; i++) {
+                ActiveAdmin admin = mAdminList.get(i);
+                if (admin.info.usesPolicy(reqPolicy)) {
+                    sendAdminCommandLocked(admin, action);
+                }
             }
-            sendAdminCommandLocked(mActiveAdmin, action);
         }
-    }
-    
-    ComponentName getActiveAdminLocked() {
-        if (mActiveAdmin != null) {
-            return mActiveAdmin.info.getComponent();
-        }
-        return null;
     }
     
     void removeActiveAdminLocked(ComponentName adminReceiver) {
-        ComponentName cur = getActiveAdminLocked();
-        if (cur != null && cur.equals(adminReceiver)) {
-            sendAdminCommandLocked(mActiveAdmin,
+        ActiveAdmin admin = getActiveAdminUncheckedLocked(adminReceiver);
+        if (admin != null) {
+            sendAdminCommandLocked(admin,
                     DeviceAdmin.ACTION_DEVICE_ADMIN_DISABLED);
             // XXX need to wait for it to complete.
-            mActiveAdmin = null;
+            mAdminList.remove(admin);
+            mAdminMap.remove(adminReceiver);
         }
     }
     
@@ -178,29 +252,25 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
             out.startTag(null, "policies");
             
-            ActiveAdmin ap = mActiveAdmin;
-            if (ap != null) {
-                out.startTag(null, "admin");
-                out.attribute(null, "name", ap.info.getComponent().flattenToString());
-                if (ap.passwordMode != DevicePolicyManager.PASSWORD_MODE_UNSPECIFIED) {
-                    out.startTag(null, "password-mode");
-                    out.attribute(null, "value", Integer.toString(ap.passwordMode));
-                    out.endTag(null, "password-mode");
-                    if (ap.minimumPasswordLength > 0) {
-                        out.startTag(null, "min-password-length");
-                        out.attribute(null, "value", Integer.toString(ap.minimumPasswordLength));
-                        out.endTag(null, "mn-password-length");
-                    }
+            final int N = mAdminList.size();
+            for (int i=0; i<N; i++) {
+                ActiveAdmin ap = mAdminList.get(i);
+                if (ap != null) {
+                    out.startTag(null, "admin");
+                    out.attribute(null, "name", ap.info.getComponent().flattenToString());
+                    ap.writeToXml(out);
+                    out.endTag(null, "admin");
                 }
-                if (ap.maximumTimeToUnlock != DevicePolicyManager.PASSWORD_MODE_UNSPECIFIED) {
-                    out.startTag(null, "max-time-to-unlock");
-                    out.attribute(null, "value", Long.toString(ap.maximumTimeToUnlock));
-                    out.endTag(null, "max-time-to-unlock");
-                }
-                out.endTag(null, "admin");
             }
+            
             out.endTag(null, "policies");
 
+            if (mFailedPasswordAttempts != 0) {
+                out.startTag(null, "failed-password-attempts");
+                out.attribute(null, "value", Integer.toString(mFailedPasswordAttempts));
+                out.endTag(null, "failed-password-attempts");
+            }
+            
             out.endDocument();
             stream.close();
             journal.commit();
@@ -220,51 +290,42 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         JournaledFile journal = makeJournaledFile();
         FileInputStream stream = null;
         File file = journal.chooseForRead();
-        boolean success = false;
         try {
             stream = new FileInputStream(file);
             XmlPullParser parser = Xml.newPullParser();
             parser.setInput(stream, null);
 
-            int type = parser.next();
-            while (type != XmlPullParser.START_TAG) {
-                type = parser.next();
+            int type;
+            while ((type=parser.next()) != XmlPullParser.END_DOCUMENT
+                    && type != XmlPullParser.START_TAG) {
             }
             String tag = parser.getName();
-            if ("policies".equals(tag)) {
-                ActiveAdmin ap = null;
-                do {
-                    type = parser.next();
-                    if (type == XmlPullParser.START_TAG) {
-                        tag = parser.getName();
-                        if (ap == null) {
-                            if ("admin".equals(tag)) {
-                                DeviceAdminInfo dai = findAdmin(
-                                        ComponentName.unflattenFromString(
-                                                parser.getAttributeValue(null, "name")));
-                                if (dai != null) {
-                                    ap = new ActiveAdmin(dai);
-                                }
-                            }
-                        } else if ("password-mode".equals(tag)) {
-                            ap.passwordMode = Integer.parseInt(
-                                    parser.getAttributeValue(null, "value"));
-                        } else if ("min-password-length".equals(tag)) {
-                            ap.minimumPasswordLength = Integer.parseInt(
-                                    parser.getAttributeValue(null, "value"));
-                        } else if ("max-time-to-unlock".equals(tag)) {
-                            ap.maximumTimeToUnlock = Long.parseLong(
-                                    parser.getAttributeValue(null, "value"));
-                        }
-                    } else if (type == XmlPullParser.END_TAG) {
-                        tag = parser.getName();
-                        if (ap != null && "admin".equals(tag)) {
-                            mActiveAdmin = ap;
-                            ap = null;
-                        }
+            if (!"policies".equals(tag)) {
+                throw new XmlPullParserException(
+                        "Settings do not start with policies tag: found " + tag);
+            }
+            type = parser.next();
+            int outerDepth = parser.getDepth();
+            while ((type=parser.next()) != XmlPullParser.END_DOCUMENT
+                   && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
+                if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
+                    continue;
+                }
+                tag = parser.getName();
+                if ("admin".equals(tag)) {
+                    DeviceAdminInfo dai = findAdmin(
+                            ComponentName.unflattenFromString(
+                                    parser.getAttributeValue(null, "name")));
+                    if (dai != null) {
+                        ActiveAdmin ap = new ActiveAdmin(dai);
+                        ap.readFromXml(parser);
+                        mAdminMap.put(ap.info.getComponent(), ap);
+                        mAdminList.add(ap);
                     }
-                } while (type != XmlPullParser.END_DOCUMENT);
-                success = true;
+                } else if ("failed-password-attempts".equals(tag)) {
+                    mFailedPasswordAttempts = Integer.parseInt(
+                            parser.getAttributeValue(null, "value"));
+                }
             }
         } catch (NullPointerException e) {
             Log.w(TAG, "failed parsing " + file + " " + e);
@@ -285,10 +346,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             // Ignore
         }
 
-        if (!success) {
-            Log.w(TAG, "No valid start tag found in policies file");
-        }
-        
         long timeMs = getMaximumTimeToLock();
         if (timeMs <= 0) {
             timeMs = Integer.MAX_VALUE;
@@ -318,16 +375,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         synchronized (this) {
             long ident = Binder.clearCallingIdentity();
             try {
-                ComponentName cur = getActiveAdminLocked();
-                if (cur != null && cur.equals(adminReceiver)) {
-                    throw new IllegalStateException("An admin is already set");
+                if (getActiveAdminUncheckedLocked(adminReceiver) != null) {
+                    throw new IllegalArgumentException("Admin is already added");
                 }
-                if (cur != null) {
-                    removeActiveAdminLocked(adminReceiver);
-                }
-                mActiveAdmin = new ActiveAdmin(info);
+                ActiveAdmin admin = new ActiveAdmin(info);
+                mAdminMap.put(adminReceiver, admin);
+                mAdminList.add(admin);
                 saveSettingsLocked();
-                sendAdminCommandLocked(mActiveAdmin,
+                sendAdminCommandLocked(admin,
                         DeviceAdmin.ACTION_DEVICE_ADMIN_ENABLED);
             } finally {
                 Binder.restoreCallingIdentity(ident);
@@ -335,15 +390,33 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
     
-    public ComponentName getActiveAdmin() {
+    public boolean isAdminActive(ComponentName adminReceiver) {
         synchronized (this) {
-            return getActiveAdminLocked();
+            return getActiveAdminUncheckedLocked(adminReceiver) != null;
+        }
+    }
+    
+    public List<ComponentName> getActiveAdmins() {
+        synchronized (this) {
+            final int N = mAdminList.size();
+            if (N <= 0) {
+                return null;
+            }
+            ArrayList<ComponentName> res = new ArrayList<ComponentName>(N);
+            for (int i=0; i<N; i++) {
+                res.add(mAdminList.get(i).info.getComponent());
+            }
+            return res;
         }
     }
     
     public void removeActiveAdmin(ComponentName adminReceiver) {
         synchronized (this) {
-            if (mActiveAdmin == null || mActiveAdmin.getUid() != Binder.getCallingUid()) {
+            ActiveAdmin admin = getActiveAdminUncheckedLocked(adminReceiver);
+            if (admin == null) {
+                return;
+            }
+            if (admin.getUid() != Binder.getCallingUid()) {
                 mContext.enforceCallingOrSelfPermission(
                         android.Manifest.permission.BIND_DEVICE_ADMIN, null);
             }
@@ -372,8 +445,15 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     
     public int getPasswordMode() {
         synchronized (this) {
-            return mActiveAdmin != null ? mActiveAdmin.passwordMode
-                    : DevicePolicyManager.PASSWORD_MODE_UNSPECIFIED;
+            final int N = mAdminList.size();
+            int mode = DevicePolicyManager.PASSWORD_MODE_UNSPECIFIED;
+            for  (int i=0; i<N; i++) {
+                ActiveAdmin admin = mAdminList.get(i);
+                if (mode < admin.passwordMode) {
+                    mode = admin.passwordMode;
+                }
+            }
+            return mode;
         }
     }
     
@@ -393,7 +473,15 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     
     public int getMinimumPasswordLength() {
         synchronized (this) {
-            return mActiveAdmin != null ? mActiveAdmin.minimumPasswordLength : 0;
+            final int N = mAdminList.size();
+            int length = 0;
+            for  (int i=0; i<N; i++) {
+                ActiveAdmin admin = mAdminList.get(i);
+                if (length < admin.minimumPasswordLength) {
+                    length = admin.minimumPasswordLength;
+                }
+            }
+            return length;
         }
     }
     
@@ -415,6 +503,38 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             getActiveAdminForCallerLocked(null,
                     DeviceAdminInfo.USES_POLICY_WATCH_LOGIN);
             return mFailedPasswordAttempts;
+        }
+    }
+    
+    public void setMaximumFailedPasswordsForWipe(ComponentName who, int num) {
+        synchronized (this) {
+            // This API can only be called by an active device admin,
+            // so try to retrieve it to check that the caller is one.
+            getActiveAdminForCallerLocked(who,
+                    DeviceAdminInfo.USES_POLICY_WIPE_DATA);
+            ActiveAdmin ap = getActiveAdminForCallerLocked(who,
+                    DeviceAdminInfo.USES_POLICY_WATCH_LOGIN);
+            if (ap.maximumFailedPasswordsForWipe != num) {
+                ap.maximumFailedPasswordsForWipe = num;
+                saveSettingsLocked();
+            }
+        }
+    }
+    
+    public int getMaximumFailedPasswordsForWipe() {
+        synchronized (this) {
+            final int N = mAdminList.size();
+            int count = 0;
+            for  (int i=0; i<N; i++) {
+                ActiveAdmin admin = mAdminList.get(i);
+                if (count == 0) {
+                    count = admin.maximumFailedPasswordsForWipe;
+                } else if (admin.maximumFailedPasswordsForWipe != 0
+                        && count > admin.maximumFailedPasswordsForWipe) {
+                    count = admin.maximumFailedPasswordsForWipe;
+                }
+            }
+            return count;
         }
     }
     
@@ -474,7 +594,18 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     
     public long getMaximumTimeToLock() {
         synchronized (this) {
-            return mActiveAdmin != null ? mActiveAdmin.maximumTimeToUnlock : 0;
+            final int N = mAdminList.size();
+            long time = 0;
+            for  (int i=0; i<N; i++) {
+                ActiveAdmin admin = mAdminList.get(i);
+                if (time == 0) {
+                    time = admin.maximumTimeToUnlock;
+                } else if (admin.maximumTimeToUnlock != 0
+                        && time > admin.maximumTimeToUnlock) {
+                    time = admin.maximumTimeToUnlock;
+                }
+            }
+            return time;
         }
     }
     
@@ -488,20 +619,53 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
     
+    void wipeDataLocked(int flags) {
+        try {
+            RecoverySystem.rebootWipeUserData(mContext);
+        } catch (IOException e) {
+            Log.w(TAG, "Failed requesting data wipe", e);
+        }
+    }
+    
     public void wipeData(int flags) {
         synchronized (this) {
             // This API can only be called by an active device admin,
             // so try to retrieve it to check that the caller is one.
             getActiveAdminForCallerLocked(null,
                     DeviceAdminInfo.USES_POLICY_WIPE_DATA);
+            long ident = Binder.clearCallingIdentity();
+            try {
+                wipeDataLocked(flags);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
         }
-        long ident = Binder.clearCallingIdentity();
-        try {
-            RecoverySystem.rebootWipeUserData(mContext);
-        } catch (IOException e) {
-            Log.w(TAG, "Failed requesting data wipe", e);
-        } finally {
-            Binder.restoreCallingIdentity(ident);
+    }
+    
+    public void getRemoveWarning(ComponentName comp, final RemoteCallback result) {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.BIND_DEVICE_ADMIN, null);
+        
+        synchronized (this) {
+            ActiveAdmin admin = getActiveAdminUncheckedLocked(comp);
+            if (admin == null) {
+                try {
+                    result.sendResult(null);
+                } catch (RemoteException e) {
+                }
+                return;
+            }
+            Intent intent = new Intent(DeviceAdmin.ACTION_DEVICE_ADMIN_DISABLE_REQUESTED);
+            intent.setComponent(admin.info.getComponent());
+            mContext.sendOrderedBroadcast(intent, null, new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    try {
+                        result.sendResult(getResultExtras(false));
+                    } catch (RemoteException e) {
+                    }
+                }
+            }, null, Activity.RESULT_OK, null, null);
         }
     }
     
@@ -516,7 +680,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 try {
                     mActivePasswordMode = mode;
                     mActivePasswordLength = length;
-                    mFailedPasswordAttempts = 0;
+                    if (mFailedPasswordAttempts != 0) {
+                        mFailedPasswordAttempts = 0;
+                        saveSettingsLocked();
+                    }
                     sendAdminCommandLocked(DeviceAdmin.ACTION_PASSWORD_CHANGED,
                             DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD);
                 } finally {
@@ -534,6 +701,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             long ident = Binder.clearCallingIdentity();
             try {
                 mFailedPasswordAttempts++;
+                saveSettingsLocked();
+                int max = getMaximumFailedPasswordsForWipe();
+                if (max > 0 && mFailedPasswordAttempts >= max) {
+                    wipeDataLocked(0);
+                }
                 sendAdminCommandLocked(DeviceAdmin.ACTION_PASSWORD_FAILED,
                         DeviceAdminInfo.USES_POLICY_WATCH_LOGIN);
             } finally {
@@ -551,6 +723,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 long ident = Binder.clearCallingIdentity();
                 try {
                     mFailedPasswordAttempts = 0;
+                    saveSettingsLocked();
                     sendAdminCommandLocked(DeviceAdmin.ACTION_PASSWORD_SUCCEEDED,
                             DeviceAdminInfo.USES_POLICY_WATCH_LOGIN);
                 } finally {

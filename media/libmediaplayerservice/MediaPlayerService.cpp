@@ -1432,6 +1432,12 @@ float MediaPlayerService::AudioOutput::msecsPerFrame() const
     return mMsecsPerFrame;
 }
 
+status_t MediaPlayerService::AudioOutput::getPosition(uint32_t *position)
+{
+    if (mTrack == 0) return NO_INIT;
+    return mTrack->getPosition(position);
+}
+
 status_t MediaPlayerService::AudioOutput::open(
         uint32_t sampleRate, int channelCount, int format, int bufferCount,
         AudioCallback cb, void *cookie)
@@ -1611,6 +1617,13 @@ uint32_t MediaPlayerService::AudioCache::latency () const
 float MediaPlayerService::AudioCache::msecsPerFrame() const
 {
     return mMsecsPerFrame;
+}
+
+status_t MediaPlayerService::AudioCache::getPosition(uint32_t *position)
+{
+    if (position == 0) return BAD_VALUE;
+    *position = mSize;
+    return NO_ERROR;
 }
 
 status_t MediaPlayerService::AudioCache::open(

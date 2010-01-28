@@ -1192,10 +1192,10 @@
     <!-- Title of policy access to watch user login attempts -->
     <string name="policylab_watchLogin">Watch login attempts</string>
     <!-- Description of policy access to watch user login attempts -->
-    <string name="policydesc_watchLogin">Monitor attempts to login to
-        the device, in particular to respond to failed login attempts.</string>
+    <string name="policydesc_watchLogin">Monitor failed attempts to login to
+        the device, to perform some action.</string>
     <!-- Title of policy access to reset user's password -->
-    <string name="policylab_resetPassword">Reset your password</string>
+    <string name="policylab_resetPassword">Reset password</string>
     <!-- Description of policy access to reset user's password -->
     <string name="policydesc_resetPassword">Force your password
         to a new value, requiring the administrator give it to you
@@ -1209,12 +1209,12 @@
     <string name="policylab_forceLock">Force lock</string>
     <!-- Description of policy access to limiting the user's password choices -->
     <string name="policydesc_forceLock">Force the device to immediately lock,
-        requiring that its password is re-entered.</string>
+        requiring that you re-enter its password.</string>
     <!-- Title of policy access to wipe the user's data -->
     <string name="policylab_wipeData">Erase all data</string>
     <!-- Description of policy access to wipe the user's data -->
     <string name="policydesc_wipeData">Perform a factory reset, deleting
-        all of your data without any confirmation from you.</string>
+        all of your data without any confirmation.</string>
 
     <!-- The order of these is important, don't reorder without changing Contacts.java --> <skip />
     <!-- Phone number types from android.provider.Contacts. This could be used when adding a new phone number for a contact, for example. -->
@@ -1453,6 +1453,8 @@
     <!-- Shown in the lock screen to ask the user to insert a SIM card. -->
     <string name="lockscreen_missing_sim_instructions">Please insert a SIM card.</string>
 
+    <!-- Shown in the lock screen when there is emergency calls only mode. -->
+    <string name="emergency_calls_only" msgid="2485604591272668370">Emergency calls only</string>
 
     <!-- When the user inserts a sim card from an unsupported network, it becomes network
          locked -->
@@ -2101,6 +2103,12 @@
     <string name="permlab_pkgUsageStats">update component usage statistics</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_pkgUsageStats">Allows the modification of collected component usage statistics. Not for use by normal applications.</string>
+
+    <!-- permission attributes related to default container service -->
+    <!-- Title of an application permission that lets an application use default container service. -->
+    <string name="permlab_copyProtectedData">Allows to invoke default container service to copy content. Not for use by normal applications.</string>
+    <!-- Description of an application permission,  used to invoke default container service to copy content. -->
+    <string name="permdesc_copyProtectedData">Allows to invoke default container service to copy content. Not for use by normal applications.</string>
 
     <!-- Shown in the tutorial for tap twice for zoom control. -->
     <string name="tutorial_double_tap_to_zoom_message_short">Tap twice for zoom control</string>

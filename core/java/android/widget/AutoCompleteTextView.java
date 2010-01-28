@@ -1033,6 +1033,18 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
     }
 
     @Override
+    protected void onDisplayHint(int hint) {
+        super.onDisplayHint(hint);
+        switch (hint) {
+            case INVISIBLE:
+                if (!mDropDownAlwaysVisible) {
+                    dismissDropDown();
+                }
+                break;
+        }
+    }
+
+    @Override
     protected void onFocusChanged(boolean focused, int direction, Rect previouslyFocusedRect) {
         super.onFocusChanged(focused, direction, previouslyFocusedRect);
         // Perform validation if the view is losing focus.

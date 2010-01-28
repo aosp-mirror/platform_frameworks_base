@@ -26,10 +26,11 @@
 
 namespace android {
 
+struct AudioPlayer;
 struct MediaBuffer;
 struct MediaExtractor;
 struct MediaSource;
-struct AudioPlayer;
+struct Prefetcher;
 struct TimeSource;
 
 struct AwesomeRenderer : public RefBase {
@@ -109,12 +110,17 @@ private:
     bool mVideoEventPending;
     sp<TimedEventQueue::Event> mStreamDoneEvent;
     bool mStreamDoneEventPending;
+    sp<TimedEventQueue::Event> mBufferingEvent;
+    bool mBufferingEventPending;
 
     void postVideoEvent_l(int64_t delayUs = -1);
+    void postBufferingEvent_l();
     void postStreamDoneEvent_l();
 
     MediaBuffer *mLastVideoBuffer;
     MediaBuffer *mVideoBuffer;
+
+    sp<Prefetcher> mPrefetcher;
 
     status_t setDataSource_l(const sp<MediaExtractor> &extractor);
     void reset_l();
@@ -123,17 +129,19 @@ private:
     void initRenderer_l();
     void seekAudioIfNecessary_l();
 
-    void cancelPlayerEvents();
+    void cancelPlayerEvents(bool keepBufferingGoing = false);
 
-    status_t setAudioSource(const sp<MediaSource> &source);
-    status_t setVideoSource(const sp<MediaSource> &source);
+    status_t setAudioSource(sp<MediaSource> source);
+    status_t setVideoSource(sp<MediaSource> source);
 
     void onEvent(int32_t code);
 
     static void AudioNotify(void *me, int what);
     void onStreamDone();
 
-    void notifyListener_l(int msg);
+    void notifyListener_l(int msg, int ext1 = 0);
+
+    void onBufferingUpdate();
 
     AwesomePlayer(const AwesomePlayer &);
     AwesomePlayer &operator=(const AwesomePlayer &);

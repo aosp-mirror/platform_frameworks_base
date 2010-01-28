@@ -33,6 +33,8 @@ public:
 
     virtual ssize_t readAt(off_t offset, void *data, size_t size);
 
+    virtual uint32_t flags();
+
 protected:
     virtual ~CachingDataSource();
 

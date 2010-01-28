@@ -177,18 +177,21 @@ class BrowserFrame extends Handler {
 
     /**
      * Load a url from the network or the filesystem into the main frame.
-     * Following the same behaviour as Safari, javascript: URLs are not
-     * passed to the main frame, instead they are evaluated immediately.
+     * Following the same behaviour as Safari, javascript: URLs are not passed
+     * to the main frame, instead they are evaluated immediately.
      * @param url The url to load.
+     * @param extraHeaders The extra headers sent with this url. This should not
+     *            include the common headers like "user-agent". If it does, it
+     *            will be replaced by the intrinsic value of the WebView.
      */
-    public void loadUrl(String url) {
+    public void loadUrl(String url, Map<String, String> extraHeaders) {
         mLoadInitFromJava = true;
         if (URLUtil.isJavaScriptUrl(url)) {
             // strip off the scheme and evaluate the string
             stringByEvaluatingJavaScriptFromString(
                     url.substring("javascript:".length()));
         } else {
-            nativeLoadUrl(url);
+            nativeLoadUrl(url, extraHeaders);
         }
         mLoadInitFromJava = false;
     }
@@ -904,7 +907,7 @@ class BrowserFrame extends Handler {
     /**
      * Returns false if the url is bad.
      */
-    private native void nativeLoadUrl(String url);
+    private native void nativeLoadUrl(String url, Map<String, String> headers);
 
     private native void nativePostUrl(String url, byte[] postData);
 

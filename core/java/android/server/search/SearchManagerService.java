@@ -51,10 +51,6 @@ public class SearchManagerService extends ISearchManager.Stub {
     // Only accessed by ensureSearchablesCreated() and getSearchables()
     private Searchables mSearchables;
 
-    // This field is initialized in ensureSearchDialogCreated(), and then never modified.
-    // Only accessed by ensureSearchDialogCreated() and getSearchDialog()
-    private SearchDialogWrapper mSearchDialog;
-
     /**
      * Initializes the Search Manager service in the provided system context.
      * Only one instance of this object should be created!
@@ -63,23 +59,6 @@ public class SearchManagerService extends ISearchManager.Stub {
      */
     public SearchManagerService(Context context)  {
         mContext = context;
-        // call initialize() after all pending actions on the main system thread have finished
-        new Handler().post(new Runnable() {
-            public void run() {
-                initialize();
-            }
-        });
-    }
-
-    /**
-     * Initializes the list of searchable activities and the search UI.
-     */
-    void initialize() {
-        try {
-            ActivityManagerNative.getDefault().registerActivityWatcher(
-                    mActivityWatcher);
-        } catch (RemoteException e) {
-        }
     }
 
     private synchronized void ensureSearchablesCreated() {
@@ -96,20 +75,9 @@ public class SearchManagerService extends ISearchManager.Stub {
         mContext.registerReceiver(mPackageChangedReceiver, packageFilter);
     }
 
-    private synchronized void ensureSearchDialogCreated() {
-        if (mSearchDialog != null) return;
-
-        mSearchDialog = new SearchDialogWrapper(mContext);
-    }
-
     private synchronized Searchables getSearchables() {
         ensureSearchablesCreated();
         return mSearchables;
-    }
-
-    private synchronized SearchDialogWrapper getSearchDialog() {
-        ensureSearchDialogCreated();
-        return mSearchDialog;
     }
 
     /**
@@ -124,8 +92,6 @@ public class SearchManagerService extends ISearchManager.Stub {
                     Intent.ACTION_PACKAGE_REMOVED.equals(action) ||
                     Intent.ACTION_PACKAGE_CHANGED.equals(action)) {
                 if (DBG) Log.d(TAG, "Got " + action);
-                // Dismiss search dialog, since the search context may no longer be valid
-                getSearchDialog().stopSearch();
                 // Update list of searchable activities
                 getSearchables().buildSearchableList();
                 broadcastSearchablesChanged();
@@ -133,19 +99,6 @@ public class SearchManagerService extends ISearchManager.Stub {
         }
     };
 
-    private IActivityWatcher.Stub mActivityWatcher = new IActivityWatcher.Stub() {
-        public void activityResuming(int activityId) throws RemoteException {
-            if (DBG) Log.i("foo", "********************** resuming: " + activityId);
-            if (mSearchDialog == null) return;
-            mSearchDialog.activityResuming(activityId);
-        }
-        public void closingSystemDialogs(String reason) {
-            if (DBG) Log.i("foo", "********************** closing dialogs: " + reason);
-            if (mSearchDialog == null) return;
-            mSearchDialog.closingSystemDialogs(reason);
-        }
-    };
-    
     /**
      * Informs all listeners that the list of searchables has been updated.
      */
@@ -214,62 +167,4 @@ public class SearchManagerService extends ISearchManager.Stub {
         getSearchables().setDefaultWebSearch(component);
         broadcastSearchablesChanged();
     }
-
-    // Search UI API
-
-    /**
-     * Launches the search UI. Can be called from any thread.
-     *
-     * @see SearchManager#startSearch(String, boolean, ComponentName, Bundle, boolean)
-     */
-    public void startSearch(String initialQuery,
-            boolean selectInitialQuery,
-            ComponentName launchActivity,
-            Bundle appSearchData,
-            boolean globalSearch,
-            ISearchManagerCallback searchManagerCallback,
-            int ident) {
-        getSearchDialog().startSearch(initialQuery,
-                selectInitialQuery,
-                launchActivity,
-                appSearchData,
-                globalSearch,
-                searchManagerCallback,
-                ident,
-                false); // don't trigger
-    }
-
-    /**
-     * Launches the search UI and triggers the search, as if the user had clicked on the
-     * search button within the dialog.
-     *
-     * @see SearchManager#triggerSearch(String, android.content.ComponentName, android.os.Bundle)
-     */
-    public void triggerSearch(String query,
-            ComponentName launchActivity,
-            Bundle appSearchData,
-            ISearchManagerCallback searchManagerCallback,
-            int ident) {
-        getSearchDialog().startSearch(
-                query,
-                false,
-                launchActivity,
-                appSearchData,
-                false,
-                searchManagerCallback,
-                ident,
-                true); // triger search after launching
-    }
-
-    /**
-     * Cancels the search dialog. Can be called from any thread.
-     */
-    public void stopSearch() {
-        getSearchDialog().stopSearch();
-    }
-
-    public boolean isVisible() {
-        return mSearchDialog != null && mSearchDialog.isVisible();
-    }
-
 }

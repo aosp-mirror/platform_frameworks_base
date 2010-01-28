@@ -73,6 +73,7 @@ class VertexArrayState {
 public:
     void init(Context *);
 
+    uint32_t mLastEnableCount;
     //VertexArray::Attrib mAttribs[VertexArray::_LAST];
 };
 

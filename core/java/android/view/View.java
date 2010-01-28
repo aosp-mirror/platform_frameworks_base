@@ -3789,7 +3789,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * ViewGroups should override to route to their children.
      * @param changedView The view whose visibility changed. Could be 'this' or
      * an ancestor view.
-     * @param visibility The new visibility of changedView.
+     * @param visibility The new visibility of changedView: {@link #VISIBLE},
+     * {@link #INVISIBLE} or {@link #GONE}.
      */
     protected void dispatchVisibilityChanged(View changedView, int visibility) {
         onVisibilityChanged(changedView, visibility);
@@ -3799,9 +3800,35 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * Called when the visibility of the view or an ancestor of the view is changed.
      * @param changedView The view whose visibility changed. Could be 'this' or
      * an ancestor view.
-     * @param visibility The new visibility of changedView.
+     * @param visibility The new visibility of changedView: {@link #VISIBLE},
+     * {@link #INVISIBLE} or {@link #GONE}.
      */
     protected void onVisibilityChanged(View changedView, int visibility) {
+    }
+
+    /**
+     * Dispatch a hint about whether this view is displayed. For instance, when
+     * a View moves out of the screen, it might receives a display hint indicating
+     * the view is not displayed. Applications should not <em>rely</em> on this hint
+     * as there is no guarantee that they will receive one.
+     * 
+     * @param hint A hint about whether or not this view is displayed:
+     * {@link #VISIBLE} or {@link #INVISIBLE}.
+     */
+    public void dispatchDisplayHint(int hint) {
+        onDisplayHint(hint);
+    }
+
+    /**
+     * Gives this view a hint about whether is displayed or not. For instance, when
+     * a View moves out of the screen, it might receives a display hint indicating
+     * the view is not displayed. Applications should not <em>rely</em> on this hint
+     * as there is no guarantee that they will receive one.
+     * 
+     * @param hint A hint about whether or not this view is displayed:
+     * {@link #VISIBLE} or {@link #INVISIBLE}.
+     */
+    protected void onDisplayHint(int hint) {
     }
 
     /**

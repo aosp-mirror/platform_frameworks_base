@@ -60,7 +60,8 @@ enum {
     OPEN_INPUT,
     CLOSE_INPUT,
     SET_STREAM_OUTPUT,
-    SET_VOICE_VOLUME
+    SET_VOICE_VOLUME,
+    GET_RENDER_POSITION
 };
 
 class BpAudioFlinger : public BpInterface<IAudioFlinger>
@@ -466,6 +467,26 @@ public:
         remote()->transact(SET_VOICE_VOLUME, data, &reply);
         return reply.readInt32();
     }
+
+    virtual status_t getRenderPosition(uint32_t *halFrames, uint32_t *dspFrames, int output)
+    {
+        Parcel data, reply;
+        data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
+        data.writeInt32(output);
+        remote()->transact(GET_RENDER_POSITION, data, &reply);
+        status_t status = reply.readInt32();
+        if (status == NO_ERROR) {
+            uint32_t tmp = reply.readInt32();
+            if (halFrames) {
+                *halFrames = tmp;
+            }
+            tmp = reply.readInt32();
+            if (dspFrames) {
+                *dspFrames = tmp;
+            }
+        }
+        return status;
+    }
 };
 
 IMPLEMENT_META_INTERFACE(AudioFlinger, "android.media.IAudioFlinger");
@@ -718,6 +739,19 @@ status_t BnAudioFlinger::onTransact(
             reply->writeInt32( setVoiceVolume(volume) );
             return NO_ERROR;
         } break;
+        case GET_RENDER_POSITION: {
+            CHECK_INTERFACE(IAudioFlinger, data, reply);
+            int output = data.readInt32();
+            uint32_t halFrames;
+            uint32_t dspFrames;
+            status_t status = getRenderPosition(&halFrames, &dspFrames, output);
+            reply->writeInt32(status);
+            if (status == NO_ERROR) {
+                reply->writeInt32(halFrames);
+                reply->writeInt32(dspFrames);
+            }
+            return NO_ERROR;
+        }
         default:
             return BBinder::onTransact(code, data, reply, flags);
     }

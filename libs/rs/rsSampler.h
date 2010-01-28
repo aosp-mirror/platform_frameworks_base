@@ -41,7 +41,7 @@ public:
     virtual ~Sampler();
 
     void bind(Allocation *);
-    void setupGL();
+    void setupGL(const Context *);
 
     void bindToContext(SamplerState *, uint32_t slot);
     void unbindFromContext(SamplerState *);
@@ -74,7 +74,7 @@ public:
 
     ObjectBaseRef<Sampler> mSamplers[RS_MAX_SAMPLER_SLOT];
 
-    void setupGL();
+    //void setupGL();
 
 };
 
