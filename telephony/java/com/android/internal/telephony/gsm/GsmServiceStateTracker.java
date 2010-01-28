@@ -96,6 +96,12 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
      */
     private boolean mDataRoaming = false;
 
+    /**
+     * Mark when service state is in emergency call only mode
+     */
+    private boolean mEmergencyOnly = false;
+    private boolean mNewEmergencyOnly = false;
+
     private RegistrantList gprsAttachedRegistrants = new RegistrantList();
     private RegistrantList gprsDetachedRegistrants = new RegistrantList();
     private RegistrantList psRestrictEnabledRegistrants = new RegistrantList();
@@ -559,6 +565,11 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
         String spn = phone.mSIMRecords.getServiceProviderName();
         String plmn = ss.getOperatorAlphaLong();
 
+        // For emergency calls only, pass the EmergencyCallsOnly string via EXTRA_PLMN
+        if (mEmergencyOnly && cm.getRadioState().isOn()) {
+            plmn = phone.getContext().getText(com.android.internal.R.string.emergency_calls_only).toString();
+        }
+
         if (rule != curSpnRule
                 || !TextUtils.equals(spn, curSpn)
                 || !TextUtils.equals(plmn, curPlmn)) {
@@ -566,6 +577,10 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
                 (rule & SIMRecords.SPN_RULE_SHOW_SPN) == SIMRecords.SPN_RULE_SHOW_SPN;
             boolean showPlmn =
                 (rule & SIMRecords.SPN_RULE_SHOW_PLMN) == SIMRecords.SPN_RULE_SHOW_PLMN;
+
+            if (mEmergencyOnly)
+                showPlmn = true;
+
             Intent intent = new Intent(Intents.SPN_STRINGS_UPDATED_ACTION);
             intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
             intent.putExtra(Intents.EXTRA_SHOW_SPN, showSpn);
@@ -574,6 +589,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
             intent.putExtra(Intents.EXTRA_PLMN, plmn);
             phone.getContext().sendStickyBroadcast(intent);
         }
+
         curSpnRule = rule;
         curSpn = spn;
         curPlmn = plmn;
@@ -639,6 +655,13 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
 
                     mGsmRoaming = regCodeIsRoaming(regState);
                     newSS.setState (regCodeToServiceState(regState));
+
+                    if (regState == 10 || regState == 12 || regState == 13 || regState == 14) {
+                        mNewEmergencyOnly = true;
+                    } else {
+                        mNewEmergencyOnly = false;
+                    }
+
                     // LAC and CID are -1 if not avail
                     newCellLoc.setLacAndCid(lac, cid);
                 break;
@@ -848,6 +871,8 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
 
         boolean hasLocationChanged = !newCellLoc.equals(cellLoc);
 
+        boolean hasEmergencyOnlyChanged = mNewEmergencyOnly != mEmergencyOnly;
+
         ServiceState tss;
         tss = ss;
         ss = newSS;
@@ -858,6 +883,8 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
         GsmCellLocation tcl = cellLoc;
         cellLoc = newCellLoc;
         newCellLoc = tcl;
+
+        mEmergencyOnly = mNewEmergencyOnly;
 
 
         // Add an event log when network type switched
@@ -958,8 +985,11 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
             phone.setSystemProperty(TelephonyProperties.PROPERTY_OPERATOR_ISROAMING,
                 ss.getRoaming() ? "true" : "false");
 
-            updateSpnDisplay();
             phone.notifyServiceStateChanged(ss);
+        }
+
+        if (hasChanged || hasEmergencyOnlyChanged) {
+            updateSpnDisplay();
         }
 
         if (hasGprsAttached) {
@@ -1208,6 +1238,10 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
             case 2: // 2 is "searching"
             case 3: // 3 is "registration denied"
             case 4: // 4 is "unknown" no vaild in current baseband
+            case 10:// same as 0, but indicates that emergency call is possible.
+            case 12:// same as 2, but indicates that emergency call is possible.
+            case 13:// same as 3, but indicates that emergency call is possible.
+            case 14:// same as 4, but indicates that emergency call is possible.
                 return ServiceState.STATE_OUT_OF_SERVICE;
 
             case 1:
