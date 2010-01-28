@@ -48,6 +48,12 @@ public class GLImpl implements GL10, GL10Ext, GL11, GL11Ext, GL11ExtensionPack {
     Buffer _pointSizePointerOES = null;
     Buffer _matrixIndexPointerOES = null;
     Buffer _weightPointerOES = null;
+    
+    private boolean haveCheckedExtensions;
+    private boolean have_OES_blend_equation_separate;
+    private boolean have_OES_blend_subtract;
+    private boolean have_OES_framebuffer_object;
+    private boolean have_OES_texture_cube_map;
 
     public GLImpl() {
     }
@@ -1935,7 +1941,7 @@ public class GLImpl implements GL10, GL10Ext, GL11, GL11Ext, GL11ExtensionPack {
         int target
     );
 
-    // C function void glDeleteFramebuffersOES ( GLint n, GLint *framebuffers )
+    // C function void glDeleteFramebuffersOES ( GLint n, GLuint *framebuffers )
 
     public native void glDeleteFramebuffersOES(
         int n,
@@ -1943,14 +1949,14 @@ public class GLImpl implements GL10, GL10Ext, GL11, GL11Ext, GL11ExtensionPack {
         int offset
     );
 
-    // C function void glDeleteFramebuffersOES ( GLint n, GLint *framebuffers )
+    // C function void glDeleteFramebuffersOES ( GLint n, GLuint *framebuffers )
 
     public native void glDeleteFramebuffersOES(
         int n,
         java.nio.IntBuffer framebuffers
     );
 
-    // C function void glDeleteRenderbuffersOES ( GLint n, GLint *renderbuffers )
+    // C function void glDeleteRenderbuffersOES ( GLint n, GLuint *renderbuffers )
 
     public native void glDeleteRenderbuffersOES(
         int n,
@@ -1958,7 +1964,7 @@ public class GLImpl implements GL10, GL10Ext, GL11, GL11Ext, GL11ExtensionPack {
         int offset
     );
 
-    // C function void glDeleteRenderbuffersOES ( GLint n, GLint *renderbuffers )
+    // C function void glDeleteRenderbuffersOES ( GLint n, GLuint *renderbuffers )
 
     public native void glDeleteRenderbuffersOES(
         int n,
@@ -1990,7 +1996,7 @@ public class GLImpl implements GL10, GL10Ext, GL11, GL11Ext, GL11ExtensionPack {
         int target
     );
 
-    // C function void glGenFramebuffersOES ( GLint n, GLint *framebuffers )
+    // C function void glGenFramebuffersOES ( GLint n, GLuint *framebuffers )
 
     public native void glGenFramebuffersOES(
         int n,
@@ -1998,14 +2004,14 @@ public class GLImpl implements GL10, GL10Ext, GL11, GL11Ext, GL11ExtensionPack {
         int offset
     );
 
-    // C function void glGenFramebuffersOES ( GLint n, GLint *framebuffers )
+    // C function void glGenFramebuffersOES ( GLint n, GLuint *framebuffers )
 
     public native void glGenFramebuffersOES(
         int n,
         java.nio.IntBuffer framebuffers
     );
 
-    // C function void glGenRenderbuffersOES ( GLint n, GLint *renderbuffers )
+    // C function void glGenRenderbuffersOES ( GLint n, GLuint *renderbuffers )
 
     public native void glGenRenderbuffersOES(
         int n,
@@ -2013,7 +2019,7 @@ public class GLImpl implements GL10, GL10Ext, GL11, GL11Ext, GL11ExtensionPack {
         int offset
     );
 
-    // C function void glGenRenderbuffersOES ( GLint n, GLint *renderbuffers )
+    // C function void glGenRenderbuffersOES ( GLint n, GLuint *renderbuffers )
 
     public native void glGenRenderbuffersOES(
         int n,

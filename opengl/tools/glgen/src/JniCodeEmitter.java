@@ -211,6 +211,8 @@ public class JniCodeEmitter {
                     index += 5;
                 } else if (checks[index].equals("unsupported")) {
                     index += 1;
+                } else if (checks[index].equals("requires")) {
+                    index += 2;
                 } else if (checks[index].equals("nullAllowed")) {
                     return true;
                 } else {
@@ -243,6 +245,8 @@ public class JniCodeEmitter {
                     index += 5;
                 } else if (checks[index].equals("unsupported")) {
                     index += 1;
+                } else if (checks[index].equals("requires")) {
+                    index += 2;
                 } else if (checks[index].equals("nullAllowed")) {
                     index += 1;
                 } else {
@@ -263,6 +267,8 @@ public class JniCodeEmitter {
             while (index < checks.length) {
                 if (checks[index].equals("unsupported")) {
                     return true;
+                } else if (checks[index].equals("requires")) {
+                    index += 2;
                 } else if (checks[index].equals("return")) {
                     index += 2;
                 } else if (checks[index].startsWith("check")) {
@@ -280,7 +286,34 @@ public class JniCodeEmitter {
         }
         return false;
     }
-
+    
+    String isRequiresFunc(CFunc cfunc) {
+        String[] checks = mChecker.getChecks(cfunc.getName());
+        int index = 1;
+        if (checks != null) {
+            while (index < checks.length) {
+                if (checks[index].equals("unsupported")) {
+                    index += 1;
+                } else if (checks[index].equals("requires")) {
+                    return checks[index+1];
+                } else if (checks[index].equals("return")) {
+                    index += 2;
+                } else if (checks[index].startsWith("check")) {
+                    index += 3;
+                } else if (checks[index].equals("ifcheck")) {
+                    index += 5;
+                } else if (checks[index].equals("nullAllowed")) {
+                    index += 1;
+                } else {
+                    System.out.println("Error: unknown keyword \"" +
+                                       checks[index] + "\"");
+                    System.exit(0);
+                }
+            }
+        }
+        return null;
+    }
+    
     void emitNativeBoundsChecks(CFunc cfunc, String cname, PrintStream out,
             boolean isBuffer, boolean emitExceptionCheck, String offset, String remaining, String iii) {
 
@@ -365,6 +398,9 @@ public class JniCodeEmitter {
                         } else if (checks[index].equals("unsupported")) {
                             // ignore
                             index += 1;
+                        } else if (checks[index].equals("requires")) {
+                            // ignore
+                            index += 2;
                         } else if (checks[index].equals("nullAllowed")) {
                             // ignore
                             index += 1;
@@ -776,7 +812,23 @@ public class JniCodeEmitter {
             out.println();
             return;
         }
-
+        
+        String requiresExtension = isRequiresFunc(cfunc);
+        if (requiresExtension != null) {
+            out.println(indent +
+                        "if (! supportsExtension(_env, _this, have_" + requiresExtension + "ID)) {");
+            out.println(indent + indent +
+                        "_env->ThrowNew(UOEClass,");
+            out.println(indent + indent +
+                        "    \"" + cfunc.getName() + "\");");
+            if (isVoid) {
+                out.println(indent + indent + "    return;");
+            } else {
+                String retval = getErrorReturnValue(cfunc);
+                out.println(indent + indent + "    return " + retval + ";");
+            }
+            out.println(indent + "}");
+        }
         if (mUseContextPointer) {
             out.println(indent +
                 "android::gl::ogles_context_t *ctx = getContext(_env, _this);");
