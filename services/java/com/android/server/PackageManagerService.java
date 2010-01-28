@@ -731,20 +731,32 @@ class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-    void cleanupInstallFailedPackage(PackageSetting pkgSettings) {
+    void cleanupInstallFailedPackage(PackageSetting ps) {
+        Log.i(TAG, "Cleaning up incompletely installed app: " + ps.name);
         if (mInstaller != null) {
-            boolean useSecureFS = useEncryptedFilesystemForPackage(pkgSettings.pkg);
-            int retCode = mInstaller.remove(pkgSettings.name, useSecureFS);
+            boolean useSecureFS = useEncryptedFilesystemForPackage(ps.pkg);
+            int retCode = mInstaller.remove(ps.name, useSecureFS);
             if (retCode < 0) {
                 Log.w(TAG, "Couldn't remove app data directory for package: "
-                           + pkgSettings.name + ", retcode=" + retCode);
+                           + ps.name + ", retcode=" + retCode);
             }
         } else {
             //for emulator
-            File dataDir = new File(pkgSettings.pkg.applicationInfo.dataDir);
+            PackageParser.Package pkg = mPackages.get(ps.name);
+            File dataDir = new File(pkg.applicationInfo.dataDir);
             dataDir.delete();
         }
-        mSettings.removePackageLP(pkgSettings.name);
+        if (ps.codePath != null) {
+            if (!ps.codePath.delete()) {
+                Log.w(TAG, "Unable to remove old code file: " + ps.codePath);
+            }
+        }
+        if (ps.resourcePath != null) {
+            if (!ps.resourcePath.delete() && !ps.resourcePath.equals(ps.codePath)) {
+                Log.w(TAG, "Unable to remove old code file: " + ps.resourcePath);
+            }
+        }
+        mSettings.removePackageLP(ps.name);
     }
 
     void readPermissions() {
