@@ -1104,7 +1104,6 @@ class MountService extends IMountService.Stub
                 != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Requires ASEC_MOUNT_UNMOUNT permission");
         }
-        mConnector.doCommand(String.format("destroy_asec %s", id));
         String cmd = String.format("mount_asec %s %s %d",
                                    id, key, ownerUid);
         mConnector.doCommand(cmd);
