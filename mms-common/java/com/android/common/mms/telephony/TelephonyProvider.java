@@ -14,41 +14,76 @@
  * limitations under the License.
  */
 
-package android.provider;
-
-import android.annotation.SdkConstant;
-import android.annotation.SdkConstant.SdkConstantType;
-import android.content.ContentResolver;
-import android.content.ContentValues;
-import android.content.Context;
-import android.content.Intent;
-import android.database.Cursor;
-import android.database.sqlite.SqliteWrapper;
-import android.net.Uri;
-import android.telephony.SmsMessage;
-import android.text.TextUtils;
-import android.util.Config;
-import android.util.Log;
-
-import com.android.common.Patterns;
+package com.android.mmscommon.telephony;
 
 import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import android.content.ContentResolver;
+import android.content.ContentValues;
+import android.content.Context;
+import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
+import android.provider.BaseColumns;
+import android.telephony.SmsMessage;
+import android.text.TextUtils;
+import android.util.Config;
+import android.util.Log;
+
+import com.android.common.Patterns;
+import android.database.sqlite.SqliteWrapper;
+
 /**
  * The Telephony provider contains data related to phone operation.
  *
  * @hide
  */
-public final class Telephony {
+
+// This is a copy of the private TelephoneProvider.java file found in:
+//      com.android.providers.telephony
+// TODO: keep these files in sync.
+
+public final class TelephonyProvider {
     private static final String TAG = "Telephony";
     private static final boolean DEBUG = true;
     private static final boolean LOCAL_LOGV = DEBUG ? Config.LOGD : Config.LOGV;
 
+//    public static final Pattern EMAIL_ADDRESS
+//        = Pattern.compile(
+//            "[a-zA-Z0-9\\+\\.\\_\\%\\-]{1,256}" +
+//            "\\@" +
+//            "[a-zA-Z0-9][a-zA-Z0-9\\-]{0,64}" +
+//            "(" +
+//                "\\." +
+//                "[a-zA-Z0-9][a-zA-Z0-9\\-]{0,25}" +
+//            ")+"
+//        );
+//
+//    /**
+//     * This pattern is intended for searching for things that look like they
+//     * might be phone numbers in arbitrary text, not for validating whether
+//     * something is in fact a phone number.  It will miss many things that
+//     * are legitimate phone numbers.
+//     *
+//     * <p> The pattern matches the following:
+//     * <ul>
+//     * <li>Optionally, a + sign followed immediately by one or more digits. Spaces, dots, or dashes
+//     * may follow.
+//     * <li>Optionally, sets of digits in parentheses, separated by spaces, dots, or dashes.
+//     * <li>A string starting and ending with a digit, containing digits, spaces, dots, and/or dashes.
+//     * </ul>
+//     */
+//    public static final Pattern PHONE
+//        = Pattern.compile(                                  // sdd = space, dot, or dash
+//                "(\\+[0-9]+[\\- \\.]*)?"                    // +<digits><sdd>*
+//                + "(\\([0-9]+\\)[\\- \\.]*)?"               // (<digits>)<sdd>*
+//                + "([0-9][0-9\\- \\.][0-9\\- \\.]+[0-9])"); // <digit><digit|sdd>+<digit>
+
     // Constructor
-    public Telephony() {
+    public TelephonyProvider() {
     }
 
     /**
@@ -519,7 +554,6 @@ public final class Telephony {
              * <p>If a BroadcastReceiver encounters an error while processing
              * this intent it should set the result code appropriately.</p>
              */
-            @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
             public static final String SMS_RECEIVED_ACTION =
                     "android.provider.Telephony.SMS_RECEIVED";
 
@@ -539,7 +573,6 @@ public final class Telephony {
              * <p>If a BroadcastReceiver encounters an error while processing
              * this intent it should set the result code appropriately.</p>
              */
-            @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
             public static final String DATA_SMS_RECEIVED_ACTION =
                     "android.intent.action.DATA_SMS_RECEIVED";
 
@@ -559,7 +592,6 @@ public final class Telephony {
              * <p>If a BroadcastReceiver encounters an error while processing
              * this intent it should set the result code appropriately.</p>
              */
-            @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
             public static final String WAP_PUSH_RECEIVED_ACTION =
                     "android.provider.Telephony.WAP_PUSH_RECEIVED";
 
@@ -568,7 +600,6 @@ public final class Telephony {
              * space is not freed, messages targeted for the SIM (class 2) may
              * not be saved.
              */
-            @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
             public static final String SIM_FULL_ACTION =
                 "android.provider.Telephony.SIM_FULL";
 
@@ -585,9 +616,38 @@ public final class Telephony {
              * </ul>
 
              */
-            @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
             public static final String SMS_REJECTED_ACTION =
                 "android.provider.Telephony.SMS_REJECTED";
+
+            /**
+             * Broadcast Action: The phone service state has changed. The intent will have the following
+             * extra values:</p>
+             * <ul>
+             *   <li><em>state</em> - An int with one of the following values:
+             *          {@link android.telephony.ServiceState#STATE_IN_SERVICE},
+             *          {@link android.telephony.ServiceState#STATE_OUT_OF_SERVICE},
+             *          {@link android.telephony.ServiceState#STATE_EMERGENCY_ONLY}
+             *          or {@link android.telephony.ServiceState#STATE_POWER_OFF}
+             *   <li><em>roaming</em> - A boolean value indicating whether the phone is roaming.</li>
+             *   <li><em>operator-alpha-long</em> - The carrier name as a string.</li>
+             *   <li><em>operator-alpha-short</em> - A potentially shortened version of the carrier name,
+             *          as a string.</li>
+             *   <li><em>operator-numeric</em> - A number representing the carrier, as a string. This is
+             *          a five or six digit number consisting of the MCC (Mobile Country Code, 3 digits)
+             *          and MNC (Mobile Network code, 2-3 digits).</li>
+             *   <li><em>manual</em> - A boolean, where true indicates that the user has chosen to select
+             *          the network manually, and false indicates that network selection is handled by the
+             *          phone.</li>
+             * </ul>
+             *
+             * <p class="note">
+             * Requires the READ_PHONE_STATE permission.
+             *
+             * <p class="note">This is a protected intent that can only be sent
+             * by the system.
+             */
+            public static final String ACTION_SERVICE_STATE_CHANGED =
+                "android.intent.action.SERVICE_STATE";
 
             /**
              * Read the PDUs out of an {@link #SMS_RECEIVED_ACTION} or a
@@ -1636,13 +1696,6 @@ public final class Telephony {
              * The time we last tried to send or download the message.
              */
             public static final String LAST_TRY = "last_try";
-        }
-
-        public static final class WordsTable {
-            public static final String ID = "_id";
-            public static final String SOURCE_ROW_ID = "source_id";
-            public static final String TABLE_ID = "table_to_use";
-            public static final String INDEXED_TEXT = "index_text";
         }
     }
 
