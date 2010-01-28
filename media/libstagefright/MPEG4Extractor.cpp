@@ -84,6 +84,112 @@ private:
     MPEG4Source &operator=(const MPEG4Source &);
 };
 
+// This custom data source wraps an existing one and satisfies requests
+// falling entirely within a cached range from the cache while forwarding
+// all remaining requests to the wrapped datasource.
+// This is used to cache the full sampletable metadata for a single track,
+// possibly wrapping multiple times to cover all tracks, i.e.
+// Each MPEG4DataSource caches the sampletable metadata for a single track.
+
+struct MPEG4DataSource : public DataSource {
+    MPEG4DataSource(const sp<DataSource> &source);
+
+    virtual status_t initCheck() const;
+    virtual ssize_t readAt(off_t offset, void *data, size_t size);
+    virtual status_t getSize(off_t *size);
+    virtual uint32_t flags();
+
+    status_t setCachedRange(off_t offset, size_t size);
+
+protected:
+    virtual ~MPEG4DataSource();
+
+private:
+    Mutex mLock;
+
+    sp<DataSource> mSource;
+    off_t mCachedOffset;
+    size_t mCachedSize;
+    uint8_t *mCache;
+
+    void clearCache();
+
+    MPEG4DataSource(const MPEG4DataSource &);
+    MPEG4DataSource &operator=(const MPEG4DataSource &);
+};
+
+MPEG4DataSource::MPEG4DataSource(const sp<DataSource> &source)
+    : mSource(source),
+      mCachedOffset(0),
+      mCachedSize(0),
+      mCache(NULL) {
+}
+
+MPEG4DataSource::~MPEG4DataSource() {
+    clearCache();
+}
+
+void MPEG4DataSource::clearCache() {
+    if (mCache) {
+        free(mCache);
+        mCache = NULL;
+    }
+
+    mCachedOffset = 0;
+    mCachedSize = 0;
+}
+
+status_t MPEG4DataSource::initCheck() const {
+    return mSource->initCheck();
+}
+
+ssize_t MPEG4DataSource::readAt(off_t offset, void *data, size_t size) {
+    Mutex::Autolock autoLock(mLock);
+
+    if (offset >= mCachedOffset
+            && offset + size <= mCachedOffset + mCachedSize) {
+        memcpy(data, &mCache[offset - mCachedOffset], size);
+        return size;
+    }
+
+    return mSource->readAt(offset, data, size);
+}
+
+status_t MPEG4DataSource::getSize(off_t *size) {
+    return mSource->getSize(size);
+}
+
+uint32_t MPEG4DataSource::flags() {
+    return mSource->flags();
+}
+
+status_t MPEG4DataSource::setCachedRange(off_t offset, size_t size) {
+    Mutex::Autolock autoLock(mLock);
+
+    clearCache();
+
+    mCache = (uint8_t *)malloc(size);
+
+    if (mCache == NULL) {
+        return -ENOMEM;
+    }
+
+    mCachedOffset = offset;
+    mCachedSize = size;
+
+    ssize_t err = mSource->readAt(mCachedOffset, mCache, mCachedSize);
+
+    if (err < (ssize_t)size) {
+        clearCache();
+
+        return ERROR_IO;
+    }
+
+    return OK;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 static void hexdump(const void *_data, size_t size) {
     const uint8_t *data = (const uint8_t *)_data;
     size_t offset = 0;
@@ -374,6 +480,19 @@ status_t MPEG4Extractor::parseChunk(off_t *offset, int depth) {
         case FOURCC('u', 'd', 't', 'a'):
         case FOURCC('i', 'l', 's', 't'):
         {
+            if (chunk_type == FOURCC('s', 't', 'b', 'l')) {
+                LOGV("sampleTable chunk is %d bytes long.", (size_t)chunk_size);
+
+                if (mDataSource->flags() & DataSource::kWantsPrefetching) {
+                    sp<MPEG4DataSource> cachedSource =
+                        new MPEG4DataSource(mDataSource);
+
+                    if (cachedSource->setCachedRange(*offset, chunk_size) == OK) {
+                        mDataSource = cachedSource;
+                    }
+                }
+            }
+
             off_t stop_offset = *offset + chunk_size;
             *offset = data_offset;
             while (*offset < stop_offset) {
