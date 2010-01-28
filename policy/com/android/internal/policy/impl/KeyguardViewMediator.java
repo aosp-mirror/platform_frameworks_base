@@ -107,6 +107,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
     private static final int KEYGUARD_DONE_DRAWING = 10;
     private static final int KEYGUARD_DONE_AUTHENTICATING = 11;
     private static final int SET_HIDDEN = 12;
+    private static final int KEYGUARD_TIMEOUT = 13;
 
     /**
      * The default amount of time we stay awake (used for all key input)
@@ -453,6 +454,16 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
                 adjustStatusBarLocked();
             }
         }
+    }
+
+    /**
+     * Used by PhoneWindowManager to enable the keyguard due to a user activity timeout.
+     * This must be safe to call from any thread and with any window manager locks held.
+     */
+    public void doKeyguardTimeout() {
+        mHandler.removeMessages(KEYGUARD_TIMEOUT);
+        Message msg = mHandler.obtainMessage(KEYGUARD_TIMEOUT);
+        mHandler.sendMessage(msg);
     }
 
     /**
@@ -838,6 +849,9 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
                     return;
                 case SET_HIDDEN:
                     handleSetHidden(msg.arg1 != 0);
+                    break;
+                case KEYGUARD_TIMEOUT:
+                    doKeyguard();
                     break;
             }
         }

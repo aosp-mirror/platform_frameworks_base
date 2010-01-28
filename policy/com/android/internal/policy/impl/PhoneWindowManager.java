@@ -70,6 +70,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
 import static android.view.WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD;
+import static android.view.WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
 import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
@@ -246,6 +247,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     boolean mSearchKeyPressed;
     boolean mConsumeSearchKeyUp;
 
+    // support for activating the lock screen while the screen is on
+    boolean mAllowLockscreenWhenOn;
+    int mLockScreenTimeout;
+    boolean mLockScreenTimerActive;
+
     static final int ENDCALL_HOME = 0x1;
     static final int ENDCALL_SLEEPS = 0x2;
     static final int DEFAULT_ENDCALL_BEHAVIOR = ENDCALL_SLEEPS;
@@ -272,6 +278,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     Settings.System.END_BUTTON_BEHAVIOR), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.ACCELEROMETER_ROTATION), false, this);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.SCREEN_OFF_TIMEOUT), false, this);
             resolver.registerContentObserver(Settings.Secure.getUriFor(
                     Settings.Secure.DEFAULT_INPUT_METHOD), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
@@ -303,6 +311,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     mAccelerometerDefault = accelerometerDefault;
                     updateOrientationListenerLp();
                 }
+                // use screen off timeout setting as the timeout for the lockscreen
+                mLockScreenTimeout = Settings.System.getInt(resolver,
+                        Settings.System.SCREEN_OFF_TIMEOUT, 0);
                 String imId = Settings.Secure.getString(resolver,
                         Settings.Secure.DEFAULT_INPUT_METHOD);
                 boolean hasSoftInput = imId != null && imId.length() > 0;
@@ -1173,6 +1184,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mTopFullscreenOpaqueWindowState = null;
         mForceStatusBar = false;
         mHideLockScreen = false;
+        mAllowLockscreenWhenOn = false;
         mDismissKeyguard = false;
         
         // decide where the status bar goes ahead of time
@@ -1390,6 +1402,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 if (localLOGV) Log.v(TAG, "Setting mDismissKeyguard to true by win " + win);
                 mDismissKeyguard = true;
             }
+            if ((attrs.flags & FLAG_ALLOW_LOCK_WHILE_SCREEN_ON) != 0) {
+                mAllowLockscreenWhenOn = true;
+            }
         }
         
         // Dock windows carve out the bottom of the screen, so normal windows
@@ -1483,7 +1498,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
             }
         }
-        
+
+        // update since mAllowLockscreenWhenOn might have changed
+        updateLockScreenTimeout();
         return changes;
     }
 
@@ -1946,6 +1963,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         synchronized (mLock) {
             mScreenOn = false;
             updateOrientationListenerLp();
+            updateLockScreenTimeout();
         }
     }
 
@@ -1956,6 +1974,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         synchronized (mLock) {
             mScreenOn = true;
             updateOrientationListenerLp();
+            updateLockScreenTimeout();
         }
     }
 
@@ -2090,6 +2109,42 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
    
+    /** {@inheritDoc} */
+    public void userActivity() {
+        synchronized (mScreenLockTimeout) {
+            if (mLockScreenTimerActive) {
+                // reset the timer
+                mHandler.removeCallbacks(mScreenLockTimeout);
+                mHandler.postDelayed(mScreenLockTimeout, mLockScreenTimeout);
+            }
+        }
+    }
+
+    Runnable mScreenLockTimeout = new Runnable() {
+        public void run() {
+            synchronized (this) {
+                if (localLOGV) Log.v(TAG, "mScreenLockTimeout activating keyguard");
+                mKeyguardMediator.doKeyguardTimeout();
+                mLockScreenTimerActive = false;
+            }
+        }
+    };
+
+    private void updateLockScreenTimeout() {
+        synchronized (mScreenLockTimeout) {
+            boolean enable = (mAllowLockscreenWhenOn && mScreenOn && mKeyguardMediator.isSecure());
+            if (mLockScreenTimerActive != enable) {
+                if (enable) {
+                    if (localLOGV) Log.v(TAG, "setting lockscreen timer");
+                    mHandler.postDelayed(mScreenLockTimeout, mLockScreenTimeout);
+                } else {
+                    if (localLOGV) Log.v(TAG, "clearing lockscreen timer");
+                    mHandler.removeCallbacks(mScreenLockTimeout);
+                }
+                mLockScreenTimerActive = enable;
+            }
+        }
+    }
 
     /** {@inheritDoc} */
     public void enableScreenAfterBoot() {
