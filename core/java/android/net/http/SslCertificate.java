@@ -196,26 +196,31 @@ public class SslCertificate {
          */
         public DName(String dName) {
             if (dName != null) {
-                X509Name x509Name = new X509Name(mDName = dName);
+                mDName = dName;
+                try {
+                    X509Name x509Name = new X509Name(dName);
 
-                Vector val = x509Name.getValues();
-                Vector oid = x509Name.getOIDs();
+                    Vector val = x509Name.getValues();
+                    Vector oid = x509Name.getOIDs();
 
-                for (int i = 0; i < oid.size(); i++) {
-                    if (oid.elementAt(i).equals(X509Name.CN)) {
-                        mCName = (String) val.elementAt(i);
-                        continue;
+                    for (int i = 0; i < oid.size(); i++) {
+                        if (oid.elementAt(i).equals(X509Name.CN)) {
+                            mCName = (String) val.elementAt(i);
+                            continue;
+                        }
+
+                        if (oid.elementAt(i).equals(X509Name.O)) {
+                            mOName = (String) val.elementAt(i);
+                            continue;
+                        }
+
+                        if (oid.elementAt(i).equals(X509Name.OU)) {
+                            mUName = (String) val.elementAt(i);
+                            continue;
+                        }
                     }
-
-                    if (oid.elementAt(i).equals(X509Name.O)) {
-                        mOName = (String) val.elementAt(i);
-                        continue;
-                    }
-
-                    if (oid.elementAt(i).equals(X509Name.OU)) {
-                        mUName = (String) val.elementAt(i);
-                        continue;
-                    }
+                } catch (IllegalArgumentException ex) {
+                    // thrown if there is an error parsing the string
                 }
             }
         }
