@@ -3953,8 +3953,9 @@ public class WebView extends AbsoluteLayout
         super.onSizeChanged(w, h, ow, oh);
         // Center zooming to the center of the screen.
         if (mZoomScale == 0) { // unless we're already zooming
-            mZoomCenterX = getViewWidth() * .5f;
-            mZoomCenterY = getViewHeight() * .5f;
+            // To anchor at top left corner.
+            mZoomCenterX = 0;
+            mZoomCenterY = getVisibleTitleHeight();
             mAnchorX = viewToContentX((int) mZoomCenterX + mScrollX);
             mAnchorY = viewToContentY((int) mZoomCenterY + mScrollY);
         }
@@ -3997,7 +3998,6 @@ public class WebView extends AbsoluteLayout
     @Override
     protected void onScrollChanged(int l, int t, int oldl, int oldt) {
         super.onScrollChanged(l, t, oldl, oldt);
-
         sendOurVisibleRect();
     }
 
@@ -6070,7 +6070,7 @@ public class WebView extends AbsoluteLayout
                 case SHOW_RECT_MSG_ID: {
                     WebViewCore.ShowRectData data = (WebViewCore.ShowRectData) msg.obj;
                     int x = mScrollX;
-                    int left = contentToViewDimension(data.mLeft);
+                    int left = contentToViewX(data.mLeft);
                     int width = contentToViewDimension(data.mWidth);
                     int maxWidth = contentToViewDimension(data.mContentWidth);
                     int viewWidth = getViewWidth();
@@ -6081,21 +6081,29 @@ public class WebView extends AbsoluteLayout
                         x += (int) (left + data.mXPercentInDoc * width
                                 - mScrollX - data.mXPercentInView * viewWidth);
                     }
+                    if (DebugFlags.WEB_VIEW) {
+                        Log.v(LOGTAG, "showRectMsg=(left=" + left + ",width=" +
+                              width + ",maxWidth=" + maxWidth +
+                              ",viewWidth=" + viewWidth + ",x="
+                              + x + ",xPercentInDoc=" + data.mXPercentInDoc +
+                              ",xPercentInView=" + data.mXPercentInView+ ")");
+                    }
                     // use the passing content width to cap x as the current
                     // mContentWidth may not be updated yet
                     x = Math.max(0,
                             (Math.min(maxWidth, x + viewWidth)) - viewWidth);
-                    int y = mScrollY;
-                    int top = contentToViewDimension(data.mTop);
+                    int top = contentToViewY(data.mTop);
                     int height = contentToViewDimension(data.mHeight);
                     int maxHeight = contentToViewDimension(data.mContentHeight);
                     int viewHeight = getViewHeight();
-                    if (height < viewHeight) {
-                        // middle align
-                        y += top + height / 2 - mScrollY - viewHeight / 2;
-                    } else {
-                        y += (int) (top + data.mYPercentInDoc * height
-                                - mScrollY - data.mYPercentInView * viewHeight);
+                    int y = (int) (top + data.mYPercentInDoc * height -
+                                   data.mYPercentInView * viewHeight);
+                    if (DebugFlags.WEB_VIEW) {
+                        Log.v(LOGTAG, "showRectMsg=(top=" + top + ",height=" +
+                              height + ",maxHeight=" + maxHeight +
+                              ",viewHeight=" + viewHeight + ",y="
+                              + y + ",yPercentInDoc=" + data.mYPercentInDoc +
+                              ",yPercentInView=" + data.mYPercentInView+ ")");
                     }
                     // use the passing content height to cap y as the current
                     // mContentHeight may not be updated yet
