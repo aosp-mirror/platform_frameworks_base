@@ -16,7 +16,7 @@
 
 package com.android.internal.app;
 
-import android.app.AlertDialog;
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -28,16 +28,23 @@ import android.os.IMountService;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.widget.ImageView;
+import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
+import android.view.View;
 
 /**
  * This activity is shown to the user for him/her to enable USB mass storage
  * on-demand (that is, when the USB cable is connected). It uses the alert
  * dialog style. It will be launched from a notification.
  */
-public class UsbStorageActivity extends AlertActivity implements DialogInterface.OnClickListener {
-
-    private static final int POSITIVE_BUTTON = AlertDialog.BUTTON1;
+public class UsbStorageActivity extends Activity {
+    private Button mMountButton;
+    private Button mUnmountButton;
+    private TextView mBanner;
+    private TextView mMessage;
+    private ImageView mIcon;
 
     /** Used to detect when the USB cable is unplugged, so we can call finish() */
     private BroadcastReceiver mBatteryReceiver = new BroadcastReceiver() {
@@ -53,16 +60,49 @@ public class UsbStorageActivity extends AlertActivity implements DialogInterface
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Set up the "dialog"
-        final AlertController.AlertParams p = mAlertParams;
-        p.mIconId = com.android.internal.R.drawable.ic_dialog_usb;
-        p.mTitle = getString(com.android.internal.R.string.usb_storage_title);
-        p.mMessage = getString(com.android.internal.R.string.usb_storage_message);
-        p.mPositiveButtonText = getString(com.android.internal.R.string.usb_storage_button_mount);
-        p.mPositiveButtonListener = this;
-        p.mNegativeButtonText = getString(com.android.internal.R.string.usb_storage_button_unmount);
-        p.mNegativeButtonListener = this;
-        setupAlert();
+        setTitle(getString(com.android.internal.R.string.usb_storage_activity_title));
+
+        setContentView(com.android.internal.R.layout.usb_storage_activity);
+
+        mIcon = (ImageView) findViewById(com.android.internal.R.id.icon);
+        mBanner = (TextView) findViewById(com.android.internal.R.id.banner);
+        mMessage = (TextView) findViewById(com.android.internal.R.id.message);
+
+        mMountButton = (Button) findViewById(com.android.internal.R.id.mount_button);
+        mMountButton.setOnClickListener(
+            new View.OnClickListener() { 
+                 public void onClick(View v) {
+                     mountAsUsbStorage();
+                     // TODO: replace with forthcoming MountService callbacks
+                     switchDisplay(true);
+                 }
+            });
+
+        mUnmountButton = (Button) findViewById(com.android.internal.R.id.unmount_button);
+        mUnmountButton.setOnClickListener(
+            new View.OnClickListener() { 
+                 public void onClick(View v) {
+                     stopUsbStorage();
+                     // TODO: replace with forthcoming MountService callbacks
+                     switchDisplay(false);
+                 }
+            });
+    }
+
+    private void switchDisplay(boolean usbStorageInUse) {
+        if (usbStorageInUse) {
+            mUnmountButton.setVisibility(View.VISIBLE);
+            mMountButton.setVisibility(View.GONE);
+            mIcon.setImageResource(com.android.internal.R.drawable.usb_android_connected);
+            mBanner.setText(com.android.internal.R.string.usb_storage_stop_title);
+            mMessage.setText(com.android.internal.R.string.usb_storage_stop_message);
+        } else {
+            mUnmountButton.setVisibility(View.GONE);
+            mMountButton.setVisibility(View.VISIBLE);
+            mIcon.setImageResource(com.android.internal.R.drawable.usb_android);
+            mBanner.setText(com.android.internal.R.string.usb_storage_title);
+            mMessage.setText(com.android.internal.R.string.usb_storage_message);
+        }
     }
 
     @Override
@@ -70,6 +110,18 @@ public class UsbStorageActivity extends AlertActivity implements DialogInterface
         super.onResume();
 
         registerReceiver(mBatteryReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+
+        boolean umsOn = false;
+        try {
+            IMountService mountService = IMountService.Stub.asInterface(ServiceManager
+                    .getService("mount"));
+            if (mountService != null) {
+                umsOn = mountService.getMassStorageEnabled();
+            }
+        } catch (android.os.RemoteException exc) {
+            // pass
+        }
+        switchDisplay(umsOn);
     }
 
     @Override
@@ -77,19 +129,6 @@ public class UsbStorageActivity extends AlertActivity implements DialogInterface
         super.onPause();
         
         unregisterReceiver(mBatteryReceiver);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public void onClick(DialogInterface dialog, int which) {
-
-        if (which == POSITIVE_BUTTON) {
-            mountAsUsbStorage();
-        }
-
-        // No matter what, finish the activity
-        finish();
     }
 
     private void mountAsUsbStorage() {
@@ -108,6 +147,22 @@ public class UsbStorageActivity extends AlertActivity implements DialogInterface
         }
     }
 
+    private void stopUsbStorage() {
+        IMountService mountService = IMountService.Stub.asInterface(ServiceManager
+                .getService("mount"));
+        if (mountService == null) {
+            showStoppingError();
+            return;
+        }
+
+        try {
+            mountService.setMassStorageEnabled(false);
+        } catch (RemoteException e) {
+            showStoppingError();
+            return;
+        }
+    }
+
     private void handleBatteryChanged(Intent intent) {
         int pluggedType = intent.getIntExtra("plugged", 0);
         if (pluggedType == 0) {
@@ -118,6 +173,11 @@ public class UsbStorageActivity extends AlertActivity implements DialogInterface
     
     private void showSharingError() {
         Toast.makeText(this, com.android.internal.R.string.usb_storage_error_message,
+                Toast.LENGTH_LONG).show();
+    }
+    
+    private void showStoppingError() {
+        Toast.makeText(this, com.android.internal.R.string.usb_storage_stop_error_message,
                 Toast.LENGTH_LONG).show();
     }
 
