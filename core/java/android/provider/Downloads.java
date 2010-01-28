@@ -629,6 +629,14 @@ public final class Downloads {
                 "android.permission.SEND_DOWNLOAD_COMPLETED_INTENTS";
 
         /**
+         * The permission to access downloads to {@link DESTINATION_EXTERNAL}
+         * which were downloaded by other applications.
+         * @hide
+         */
+        public static final String PERMISSION_SEE_ALL_EXTERNAL =
+                "android.permission.SEE_ALL_EXTERNAL";
+
+        /**
          * The content:// URI for the data table in the provider
          */
         public static final Uri CONTENT_URI =
@@ -1101,28 +1109,5 @@ public final class Downloads {
          * This download doesn't show in the UI or in the notifications.
          */
         public static final int VISIBILITY_HIDDEN = 2;
-
-        /**
-         * Using a file name, create a title for a download.  Then store it in
-         * the database and return it.
-         *
-         * @param context Context for reaching the {@link ContentResolver} so
-         *      the database can be updated with the new title.
-         * @param filename Full path to the file.  Used to generate a title.
-         * @param id Id of the download, so the new title can be stored in the
-         *      database
-         * @return String Newly created title.
-         * @hide
-         */
-        public static String createTitleFromFilename(Context context,
-                String filename, long id) {
-            if (filename == null) return null;
-            String title = new File(filename).getName();
-            ContentValues values = new ContentValues();
-            values.put(COLUMN_TITLE, title);
-            context.getContentResolver().update(ContentUris.withAppendedId(
-                    CONTENT_URI, id), values, null, null);
-            return title;
-        }
     }
 }
