@@ -293,6 +293,14 @@ public class LockPatternKeyguardView extends KeyguardViewBase
             public boolean doesFallbackUnlockScreenExist() {
                 return mEnableFallback;
             }
+
+            public void reportFailedUnlockAttempt() {
+                mLockPatternUtils.reportFailedPasswordAttempt();
+            }
+
+            public void reportSuccessfulUnlockAttempt() {
+                mLockPatternUtils.reportSuccessfulPasswordAttempt();
+            }
         };
 
         /**
