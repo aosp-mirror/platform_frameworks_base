@@ -254,12 +254,14 @@ sp<IMediaMetadataRetriever> MediaPlayerService::createMetadataRetriever(pid_t pi
     return retriever;
 }
 
-sp<IMediaPlayer> MediaPlayerService::create(pid_t pid, const sp<IMediaPlayerClient>& client, const char* url)
+sp<IMediaPlayer> MediaPlayerService::create(
+        pid_t pid, const sp<IMediaPlayerClient>& client, const char* url,
+        const KeyedVector<String8, String8> *headers)
 {
     int32_t connId = android_atomic_inc(&mNextConnId);
     sp<Client> c = new Client(this, pid, connId, client);
     LOGV("Create new client(%d) from pid %d, url=%s, connId=%d", connId, pid, url, connId);
-    if (NO_ERROR != c->setDataSource(url))
+    if (NO_ERROR != c->setDataSource(url, headers))
     {
         c.clear();
         return c;
@@ -803,7 +805,8 @@ sp<MediaPlayerBase> MediaPlayerService::Client::createPlayer(player_type playerT
     return p;
 }
 
-status_t MediaPlayerService::Client::setDataSource(const char *url)
+status_t MediaPlayerService::Client::setDataSource(
+        const char *url, const KeyedVector<String8, String8> *headers)
 {
     LOGV("setDataSource(%s)", url);
     if (url == NULL)
@@ -838,7 +841,7 @@ status_t MediaPlayerService::Client::setDataSource(const char *url)
 
         // now set data source
         LOGV(" setDataSource");
-        mStatus = p->setDataSource(url);
+        mStatus = p->setDataSource(url, headers);
         if (mStatus == NO_ERROR) {
             mPlayer = p;
         } else {

@@ -31,6 +31,8 @@
 #include "JNIHelp.h"
 #include "android_runtime/AndroidRuntime.h"
 #include "utils/Errors.h"  // for status_t
+#include "utils/KeyedVector.h"
+#include "utils/String8.h"
 #include "android_util_Binder.h"
 #include <binder/Parcel.h>
 
@@ -156,8 +158,8 @@ static void process_media_player_call(JNIEnv *env, jobject thiz, status_t opStat
 }
 
 static void
-android_media_MediaPlayer_setDataSource(JNIEnv *env, jobject thiz, jstring path)
-{
+android_media_MediaPlayer_setDataSourceAndHeaders(
+        JNIEnv *env, jobject thiz, jstring path, jobject headers) {
     sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
     if (mp == NULL ) {
         jniThrowException(env, "java/lang/IllegalStateException", NULL);
@@ -174,12 +176,96 @@ android_media_MediaPlayer_setDataSource(JNIEnv *env, jobject thiz, jstring path)
         jniThrowException(env, "java/lang/RuntimeException", "Out of memory");
         return;
     }
+
+    // headers is a Map<String, String>.
+    // We build a similar KeyedVector out of it.
+    KeyedVector<String8, String8> headersVector;
+    if (headers) {
+        // Get the Map's entry Set.
+        jclass mapClass = env->FindClass("java/util/Map");
+
+        jmethodID entrySet =
+            env->GetMethodID(mapClass, "entrySet", "()Ljava/util/Set;");
+
+        jobject set = env->CallObjectMethod(headers, entrySet);
+        // Obtain an iterator over the Set
+        jclass setClass = env->FindClass("java/util/Set");
+
+        jmethodID iterator =
+            env->GetMethodID(setClass, "iterator", "()Ljava/util/Iterator;");
+
+        jobject iter = env->CallObjectMethod(set, iterator);
+        // Get the Iterator method IDs
+        jclass iteratorClass = env->FindClass("java/util/Iterator");
+        jmethodID hasNext = env->GetMethodID(iteratorClass, "hasNext", "()Z");
+
+        jmethodID next =
+            env->GetMethodID(iteratorClass, "next", "()Ljava/lang/Object;");
+
+        // Get the Entry class method IDs
+        jclass entryClass = env->FindClass("java/util/Map$Entry");
+
+        jmethodID getKey =
+            env->GetMethodID(entryClass, "getKey", "()Ljava/lang/Object;");
+
+        jmethodID getValue =
+            env->GetMethodID(entryClass, "getValue", "()Ljava/lang/Object;");
+
+        // Iterate over the entry Set
+        while (env->CallBooleanMethod(iter, hasNext)) {
+            jobject entry = env->CallObjectMethod(iter, next);
+            jstring key = (jstring) env->CallObjectMethod(entry, getKey);
+            jstring value = (jstring) env->CallObjectMethod(entry, getValue);
+
+            const char* keyStr = env->GetStringUTFChars(key, NULL);
+            if (!keyStr) {  // Out of memory
+                jniThrowException(
+                        env, "java/lang/RuntimeException", "Out of memory");
+                return;
+            }
+
+            const char* valueStr = env->GetStringUTFChars(value, NULL);
+            if (!valueStr) {  // Out of memory
+                jniThrowException(
+                        env, "java/lang/RuntimeException", "Out of memory");
+                return;
+            }
+
+            headersVector.add(String8(keyStr), String8(valueStr));
+
+            env->DeleteLocalRef(entry);
+            env->ReleaseStringUTFChars(key, keyStr);
+            env->DeleteLocalRef(key);
+            env->ReleaseStringUTFChars(value, valueStr);
+            env->DeleteLocalRef(value);
+      }
+
+      env->DeleteLocalRef(entryClass);
+      env->DeleteLocalRef(iteratorClass);
+      env->DeleteLocalRef(iter);
+      env->DeleteLocalRef(setClass);
+      env->DeleteLocalRef(set);
+      env->DeleteLocalRef(mapClass);
+    }
+
     LOGV("setDataSource: path %s", pathStr);
-    status_t opStatus = mp->setDataSource(pathStr);
+    status_t opStatus =
+        mp->setDataSource(
+                String8(pathStr),
+                headers ? &headersVector : NULL);
 
     // Make sure that local ref is released before a potential exception
     env->ReleaseStringUTFChars(path, pathStr);
-    process_media_player_call( env, thiz, opStatus, "java/io/IOException", "setDataSource failed." );
+
+    process_media_player_call(
+            env, thiz, opStatus, "java/io/IOException",
+            "setDataSource failed." );
+}
+
+static void
+android_media_MediaPlayer_setDataSource(JNIEnv *env, jobject thiz, jstring path)
+{
+    android_media_MediaPlayer_setDataSourceAndHeaders(env, thiz, path, 0);
 }
 
 static void
@@ -610,6 +696,7 @@ android_media_MediaPlayer_snoop(JNIEnv* env, jobject thiz, jobject data, jint ki
 
 static JNINativeMethod gMethods[] = {
     {"setDataSource",       "(Ljava/lang/String;)V",            (void *)android_media_MediaPlayer_setDataSource},
+    {"setDataSource",       "(Ljava/lang/String;Ljava/util/Map;)V",(void *)android_media_MediaPlayer_setDataSourceAndHeaders},
     {"setDataSource",       "(Ljava/io/FileDescriptor;JJ)V",    (void *)android_media_MediaPlayer_setDataSourceFD},
     {"_setVideoSurface",    "()V",                              (void *)android_media_MediaPlayer_setVideoSurface},
     {"prepare",             "()V",                              (void *)android_media_MediaPlayer_prepare},

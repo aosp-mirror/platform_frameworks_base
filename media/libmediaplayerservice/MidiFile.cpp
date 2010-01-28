@@ -115,8 +115,8 @@ MidiFile::~MidiFile() {
     release();
 }
 
-status_t MidiFile::setDataSource(const char* path)
-{
+status_t MidiFile::setDataSource(
+        const char* path, const KeyedVector<String8, String8> *) {
     LOGV("MidiFile::setDataSource url=%s", path);
     Mutex::Autolock lock(mMutex);
 

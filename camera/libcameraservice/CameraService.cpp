@@ -197,7 +197,7 @@ void CameraService::decUsers() {
 static sp<MediaPlayer> newMediaPlayer(const char *file)
 {
     sp<MediaPlayer> mp = new MediaPlayer();
-    if (mp->setDataSource(file) == NO_ERROR) {
+    if (mp->setDataSource(file, NULL /* headers */) == NO_ERROR) {
         mp->setAudioStreamType(AudioSystem::ENFORCED_AUDIBLE);
         mp->prepare();
     } else {

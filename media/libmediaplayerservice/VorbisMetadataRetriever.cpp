@@ -39,7 +39,8 @@ status_t VorbisMetadataRetriever::setDataSource(const char *url)
     if (mVorbisPlayer == 0) {
         mVorbisPlayer = new VorbisPlayer();
     }
-    return mVorbisPlayer->setDataSource(url);
+    // TODO: support headers in MetadataRetriever interface!
+    return mVorbisPlayer->setDataSource(url, NULL /* headers */);
 }
 
 status_t VorbisMetadataRetriever::setDataSource(int fd, int64_t offset, int64_t length)

@@ -32,6 +32,9 @@
 
 #include <binder/MemoryBase.h>
 
+#include <utils/KeyedVector.h>
+#include <utils/String8.h>
+
 namespace android {
 
 MediaPlayer::MediaPlayer()
@@ -122,14 +125,16 @@ status_t MediaPlayer::setDataSource(const sp<IMediaPlayer>& player)
     return err;
 }
 
-status_t MediaPlayer::setDataSource(const char *url)
+status_t MediaPlayer::setDataSource(
+        const char *url, const KeyedVector<String8, String8> *headers)
 {
     LOGV("setDataSource(%s)", url);
     status_t err = BAD_VALUE;
     if (url != NULL) {
         const sp<IMediaPlayerService>& service(getMediaPlayerService());
         if (service != 0) {
-            sp<IMediaPlayer> player(service->create(getpid(), this, url));
+            sp<IMediaPlayer> player(
+                    service->create(getpid(), this, url, headers));
             err = setDataSource(player);
         }
     }

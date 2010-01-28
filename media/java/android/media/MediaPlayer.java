@@ -34,6 +34,7 @@ import android.media.AudioManager;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
+import java.util.Map;
 import java.util.Set;
 import java.lang.ref.WeakReference;
 
@@ -665,6 +666,20 @@ public class MediaPlayer
      */
     public void setDataSource(Context context, Uri uri)
         throws IOException, IllegalArgumentException, SecurityException, IllegalStateException {
+        setDataSource(context, uri, null);
+    }
+
+    /**
+     * Sets the data source as a content Uri.
+     *
+     * @param context the Context to use when resolving the Uri
+     * @param uri the Content URI of the data you want to play
+     * @param headers the headers to be sent together with the request for the data
+     * @throws IllegalStateException if it is called in an invalid state
+     * @hide pending API council
+     */
+    public void setDataSource(Context context, Uri uri, Map<String, String> headers)
+        throws IOException, IllegalArgumentException, SecurityException, IllegalStateException {
 
         String scheme = uri.getScheme();
         if(scheme == null || scheme.equals("file")) {
@@ -696,7 +711,7 @@ public class MediaPlayer
             }
         }
         Log.d(TAG, "Couldn't open file on client side, trying server side");
-        setDataSource(uri.toString());
+        setDataSource(uri.toString(), headers);
         return;
     }
 
@@ -707,6 +722,17 @@ public class MediaPlayer
      * @throws IllegalStateException if it is called in an invalid state
      */
     public native void setDataSource(String path) throws IOException, IllegalArgumentException, IllegalStateException;
+
+    /**
+     * Sets the data source (file-path or http/rtsp URL) to use.
+     *
+     * @param path the path of the file, or the http/rtsp URL of the stream you want to play
+     * @param headers the headers associated with the http request for the stream you want to play
+     * @throws IllegalStateException if it is called in an invalid state
+     * @hide pending API council
+     */
+    public native void setDataSource(String path,  Map<String, String> headers)
+            throws IOException, IllegalArgumentException, IllegalStateException;
 
     /**
      * Sets the data source (FileDescriptor) to use. It is the caller's responsibility

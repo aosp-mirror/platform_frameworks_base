@@ -23,6 +23,7 @@
 #include <utils/List.h>
 #include <utils/Errors.h>
 #include <utils/KeyedVector.h>
+#include <utils/String8.h>
 #include <utils/Vector.h>
 #include <ui/SurfaceComposerClient.h>
 
@@ -181,7 +182,10 @@ public:
     virtual sp<IMediaMetadataRetriever> createMetadataRetriever(pid_t pid);
 
     // House keeping for media player clients
-    virtual sp<IMediaPlayer>    create(pid_t pid, const sp<IMediaPlayerClient>& client, const char* url);
+    virtual sp<IMediaPlayer>    create(
+            pid_t pid, const sp<IMediaPlayerClient>& client, const char* url,
+            const KeyedVector<String8, String8> *headers);
+
     virtual sp<IMediaPlayer>    create(pid_t pid, const sp<IMediaPlayerClient>& client, int fd, int64_t offset, int64_t length);
     virtual sp<IMemory>         decode(const char* url, uint32_t *pSampleRate, int* pNumChannels, int* pFormat);
     virtual sp<IMemory>         decode(int fd, int64_t offset, int64_t length, uint32_t *pSampleRate, int* pNumChannels, int* pFormat);
@@ -219,7 +223,11 @@ private:
                                             Parcel *reply);
 
         sp<MediaPlayerBase>     createPlayer(player_type playerType);
-                status_t        setDataSource(const char *url);
+
+                status_t        setDataSource(
+                        const char *url,
+                        const KeyedVector<String8, String8> *headers);
+
                 status_t        setDataSource(int fd, int64_t offset, int64_t length);
         static  void            notify(void* cookie, int msg, int ext1, int ext2);
 

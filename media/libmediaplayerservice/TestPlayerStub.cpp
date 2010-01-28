@@ -112,8 +112,8 @@ status_t TestPlayerStub::parseUrl()
 // Load the dynamic library.
 // Create the test player.
 // Call setDataSource on the test player with the url in param.
-status_t TestPlayerStub::setDataSource(const char *url)
-{
+status_t TestPlayerStub::setDataSource(
+        const char *url, const KeyedVector<String8, String8> *headers) {
     if (!isTestUrl(url) || NULL != mHandle) {
         return INVALID_OPERATION;
     }
@@ -162,7 +162,7 @@ status_t TestPlayerStub::setDataSource(const char *url)
     }
 
     mPlayer = (*mNewPlayer)();
-    return mPlayer->setDataSource(mContentUrl);
+    return mPlayer->setDataSource(mContentUrl, headers);
 }
 
 // Internal cleanup.
