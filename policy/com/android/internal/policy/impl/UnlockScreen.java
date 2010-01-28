@@ -248,6 +248,10 @@ class UnlockScreen extends LinearLayoutWithDefaultTouchRecepient
         updateMonitor.registerConfigurationChangeCallback(this);
         setFocusableInTouchMode(true);
 
+        // Required to get Marquee to work.
+        mCarrier.setSelected(true);
+        mCarrier.setTextColor(0xffffffff);
+
         // until we get an update...
         mCarrier.setText(
                 LockScreen.getCarrierString(

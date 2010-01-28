@@ -180,6 +180,10 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
         }
 
         mCarrier = (TextView) findViewById(R.id.carrier);
+        // Required for Marquee to work
+        mCarrier.setSelected(true);
+        mCarrier.setTextColor(0xffffffff);
+
         mDate = (TextView) findViewById(R.id.date);
         mStatus1 = (TextView) findViewById(R.id.status1);
         mStatus2 = (TextView) findViewById(R.id.status2);
@@ -564,7 +568,7 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
         if (telephonyPlmn != null && telephonySpn == null) {
             return telephonyPlmn;
         } else if (telephonyPlmn != null && telephonySpn != null) {
-            return telephonyPlmn + "\n" + telephonySpn;
+            return telephonyPlmn + "|" + telephonySpn;
         } else if (telephonyPlmn == null && telephonySpn != null) {
             return telephonySpn;
         } else {
