@@ -167,6 +167,7 @@ LOCAL_SRC_FILES += \
 	location/java/android/location/ILocationProvider.aidl \
 	location/java/android/location/INetInitiatedListener.aidl \
 	media/java/android/media/IAudioService.aidl \
+	media/java/android/media/IAudioFocusDispatcher.aidl \
 	media/java/android/media/IMediaScannerListener.aidl \
 	media/java/android/media/IMediaScannerService.aidl \
 	telephony/java/com/android/internal/telephony/IPhoneStateListener.aidl \

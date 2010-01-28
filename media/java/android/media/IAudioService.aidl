@@ -16,6 +16,8 @@
 
 package android.media;
 
+import android.media.IAudioFocusDispatcher;
+
 /**
  * {@hide}
  */
@@ -68,4 +70,11 @@ interface IAudioService {
     void setBluetoothScoOn(boolean on);
 
     boolean isBluetoothScoOn();
+
+    int requestAudioFocus(int mainStreamType, int durationHint, IBinder cb, IAudioFocusDispatcher l,
+            String clientId);
+
+    int abandonAudioFocus(IAudioFocusDispatcher l, String clientId);
+    
+    void unregisterFocusClient(String clientId);
 }

@@ -23,10 +23,15 @@ import android.database.ContentObserver;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
+import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.provider.Settings;
 import android.util.Log;
+
+import java.util.Iterator;
+import java.util.HashMap;
 
 /**
  * AudioManager provides access to volume and ringer mode control.
@@ -1125,6 +1130,241 @@ public class AudioManager {
             Log.e(TAG, "Dead object in unloadSoundEffects"+e);
         }
     }
+
+    /**
+     * TODO unhide for SDK
+     * Used to indicate a loss of audio focus of unknown duration.
+     * @see OnAudioFocusChangeListener#onAudioFocusChanged(int)
+     * {@hide}
+     */
+    public static final int AUDIOFOCUS_LOSS = -1;
+    /**
+     * TODO unhide for SDK
+     * Used to indicate a transient loss of audio focus.
+     * @see OnAudioFocusChangeListener#onAudioFocusChanged(int)
+     * {@hide}
+     */
+    public static final int AUDIOFOCUS_LOSS_TRANSIENT = -2;
+    /**
+     * TODO unhide for SDK
+     * Used to indicate a gain of audio focus, or a request of audio focus, of unknown duration.
+     * @see OnAudioFocusChangeListener#onAudioFocusChanged(int)
+     * @see #requestAudioFocus(OnAudioFocusChangeListener, int, int)
+     * {@hide}
+     */
+    public static final int AUDIOFOCUS_GAIN = 1;
+    /**
+     * TODO unhide for SDK
+     * Used to indicate a temporary gain or request of audio focus, anticipated to last a short
+     * amount of time. Examples of temporary changes are the playback of driving directions, or an
+     * event notification.
+     * @see OnAudioFocusChangeListener#onAudioFocusChanged(int)
+     * @see #requestAudioFocus(OnAudioFocusChangeListener, int, int)
+     * {@hide}
+     */
+    public static final int AUDIOFOCUS_GAIN_TRANSIENT = 2;
+
+    /**
+     * TODO unhide for SDK
+     * {@hide}
+     * Interface definition for a callback to be invoked when the audio focus of the system is
+     * updated.
+     */
+    public interface OnAudioFocusChangeListener {
+        /**
+         * Called on the listener to notify it the audio focus for this listener has been changed.
+         * The focusChange value indicates whether the focus was gained,
+         * whether the focus was lost, and whether that loss is transient, or whether the new focus
+         * holder will hold it for an unknown amount of time.
+         * When losing focus, listeners can use the duration hint to decide what
+         * behavior to adopt when losing focus. A music player could for instance elect to duck its
+         * music stream for transient focus losses, and pause otherwise.
+         * @param focusChange one of {@link AudioManager#AUDIOFOCUS_GAIN}, 
+         *   {@link AudioManager#AUDIOFOCUS_LOSS}, {@link AudioManager#AUDIOFOCUS_LOSS_TRANSIENT}.
+         */
+        public void onAudioFocusChanged(int focusChange);
+    }
+
+    /**
+     * Map to convert focus event listener IDs, as used in the AudioService audio focus stack,
+     * to actual listener objects.
+     */
+    private HashMap<String, OnAudioFocusChangeListener> mFocusIdListenerMap =
+            new HashMap<String, OnAudioFocusChangeListener>();
+    /**
+     * Lock to prevent concurrent changes to the list of focus listeners for this AudioManager
+     * instance.
+     */
+    private final Object mFocusListenerLock = new Object();
+
+    private OnAudioFocusChangeListener findFocusListener(String id) {
+        return mFocusIdListenerMap.get(id);
+    }
+
+    /**
+     * Handler for audio focus events coming from the audio service.
+     */
+    private FocusEventHandlerDelegate mFocusEventHandlerDelegate = new FocusEventHandlerDelegate();
+    /**
+     * Event id denotes a loss of focus
+     */
+    private static final int AUDIOFOCUS_EVENT_LOSS  = 0;
+    /**
+     * Event id denotes a gain of focus
+     */
+    private static final int AUDIOFOCUS_EVENT_GAIN  = 1;
+    /**
+     * Helper class to handle the forwarding of audio focus events to the appropriate listener
+     */
+    private class FocusEventHandlerDelegate {
+        private final Handler mHandler;
+
+        FocusEventHandlerDelegate() {
+            Looper looper;
+            if ((looper = Looper.myLooper()) == null) {
+                looper = Looper.getMainLooper();
+            }
+
+            if (looper != null) {
+                // implement the event handler delegate to receive audio focus events
+                mHandler = new Handler(looper) {
+                    @Override
+                    public void handleMessage(Message msg) {
+                        OnAudioFocusChangeListener listener = null;
+                        synchronized(mFocusListenerLock) {
+                            listener = findFocusListener((String)msg.obj);
+                        }
+                        if (listener != null) {
+                            listener.onAudioFocusChanged(msg.what);
+                        }
+                    }
+                };
+            } else {
+                mHandler = null;
+            }
+        }
+
+        Handler getHandler() {
+            return mHandler;
+        }
+    }
+
+    private IAudioFocusDispatcher mFocusDispatcher = new IAudioFocusDispatcher.Stub() {
+
+        public void dispatchAudioFocusChange(int focusChange, String id) {
+            Message m = mFocusEventHandlerDelegate.getHandler().obtainMessage(focusChange, id);
+            mFocusEventHandlerDelegate.getHandler().sendMessage(m);
+        }
+
+    };
+
+    private String getIdForFocusListener(OnAudioFocusChangeListener l) {
+        if (l == null) {
+            return new String();
+        } else {
+            return new String(this.toString() + l.toString());
+        }
+    }
+
+    /**
+     * TODO unhide for SDK
+     * {@hide}
+     * Register a listener for audio focus updates.
+     */
+    public void registerAudioFocusListener(OnAudioFocusChangeListener l) {
+        if (l == null) {
+            return;
+        }
+        synchronized(mFocusListenerLock) {
+            if (mFocusIdListenerMap.containsKey(getIdForFocusListener(l))) {
+                return;
+            }
+            mFocusIdListenerMap.put(getIdForFocusListener(l), l);
+        }
+    }
+
+    /**
+     * TODO unhide for SDK
+     * TODO document for SDK
+     * {@hide}
+     */
+    public void unregisterAudioFocusListener(OnAudioFocusChangeListener l) {
+        // notify service to remove it from audio focus stack
+        IAudioService service = getService();
+        try {
+            service.unregisterFocusClient(getIdForFocusListener(l));
+        } catch (RemoteException e) {
+            Log.e(TAG, "Can't call unregisterFocusClient() from AudioService due to "+e);
+        }
+        // remove locally
+        synchronized(mFocusListenerLock) {
+            mFocusIdListenerMap.remove(getIdForFocusListener(l));
+        }
+    }
+
+
+    /**
+     * TODO unhide for SDK
+     * TODO document for SDK
+     * {@hide}
+     */
+    public static final int AUDIOFOCUS_REQUEST_FAILED = 0;
+    /**
+     * TODO unhide for SDK
+     * TODO document for SDK
+     * {@hide}
+     */
+    public static final int AUDIOFOCUS_REQUEST_GRANTED = 1;
+
+
+    /**
+     *  TODO unhide for SDK
+     *  {@hide}
+     *  Request audio focus.
+     *  Send a request to obtain the audio focus for a specific stream type
+     *  @param l the listener to be notified of audio focus changes
+     *  @param streamType the main audio stream type affected by the focus request
+     *  @param durationHint use {@link #AUDIOFOCUS_GAIN_TRANSIENT} to indicate this focus request
+     *      is temporary, and focus will be abandonned shortly. Examples of transient requests are
+     *      for the playback of driving directions, or notifications sounds. Use
+     *      {@link #AUDIOFOCUS_GAIN} for a focus request of unknown duration such
+     *      as the playback of a song or a video.
+     *  @return {@link #AUDIOFOCUS_REQUEST_FAILED} or {@link #AUDIOFOCUS_REQUEST_GRANTED}
+     */
+    public int requestAudioFocus(OnAudioFocusChangeListener l, int streamType, int durationHint) {
+        int status = AUDIOFOCUS_REQUEST_FAILED;
+        registerAudioFocusListener(l);
+        //TODO protect request by permission check?
+        IAudioService service = getService();
+        try {
+            status = service.requestAudioFocus(streamType, durationHint, mICallBack,
+                    mFocusDispatcher, getIdForFocusListener(l));
+        } catch (RemoteException e) {
+            Log.e(TAG, "Can't call requestAudioFocus() from AudioService due to "+e);
+        }
+        return status;
+    }
+
+
+    /**
+     *  TODO unhide for SDK
+     *  TODO document for SDK
+     *  {@hide}
+     *  Abandon audio focus.
+     *  @return {@link #AUDIOFOCUS_REQUEST_FAILED} or {@link #AUDIOFOCUS_REQUEST_GRANTED}
+     */
+    public int abandonAudioFocus(OnAudioFocusChangeListener l) {
+        int status = AUDIOFOCUS_REQUEST_FAILED;
+        registerAudioFocusListener(l);
+        IAudioService service = getService();
+        try {
+            status = service.abandonAudioFocus(mFocusDispatcher, getIdForFocusListener(l));
+        } catch (RemoteException e) {
+            Log.e(TAG, "Can't call abandonAudioFocus() from AudioService due to "+e);
+        }
+        return status;
+    }
+
 
     /**
      *  @hide
