@@ -27,6 +27,8 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.w3c.dom.TypeInfo;
+import org.w3c.dom.UserDataHandler;
 
 //???AWT
 //import org.w3c.dom.TypeInfo;
@@ -922,6 +924,14 @@ public class IIOMetadataNode implements Element, NodeList {
      */
     public Object getUserObject() {
         return userObject;
+    }
+
+    public TypeInfo getSchemaTypeInfo() {
+        throw new UnsupportedOperationException();
+    }
+
+    public Object setUserData(String key, Object data, UserDataHandler handler) {
+        throw new UnsupportedOperationException();
     }
 
     /**
