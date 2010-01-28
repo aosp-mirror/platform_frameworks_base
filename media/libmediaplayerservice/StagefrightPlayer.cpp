@@ -29,9 +29,9 @@ status_t StagefrightPlayer::initCheck() {
 }
 
 status_t StagefrightPlayer::setDataSource(
-        const char *url, const KeyedVector<String8, String8> *) {
+        const char *url, const KeyedVector<String8, String8> *headers) {
     LOGI("setDataSource('%s')", url);
-    return mPlayer->setDataSource(url);
+    return mPlayer->setDataSource(url, headers);
 }
 
 // Warning: The filedescriptor passed into this method will only be valid until

@@ -31,9 +31,6 @@ public:
     static sp<MediaExtractor> Create(
             const sp<DataSource> &source, const char *mime = NULL);
 
-    static sp<MediaExtractor> CreateFromURI(
-            const char *uri, const char *mime = NULL);
-
     virtual size_t countTracks() = 0;
     virtual sp<MediaSource> getTrack(size_t index) = 0;
 

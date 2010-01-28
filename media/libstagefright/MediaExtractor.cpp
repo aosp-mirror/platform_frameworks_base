@@ -67,16 +67,4 @@ sp<MediaExtractor> MediaExtractor::Create(
     return NULL;
 }
 
-// static
-sp<MediaExtractor> MediaExtractor::CreateFromURI(
-        const char *uri, const char *mime) {
-    sp<DataSource> source = DataSource::CreateFromURI(uri);
-
-    if (source == NULL || source->initCheck() != OK) {
-        return NULL;
-    }
-
-    return Create(source, mime);
-}
-
 }  // namespace android

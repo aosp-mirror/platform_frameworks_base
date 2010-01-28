@@ -152,12 +152,13 @@ void AwesomePlayer::setListener(const wp<MediaPlayerBase> &listener) {
     mListener = listener;
 }
 
-status_t AwesomePlayer::setDataSource(const char *uri) {
+status_t AwesomePlayer::setDataSource(
+        const char *uri, const KeyedVector<String8, String8> *headers) {
     Mutex::Autolock autoLock(mLock);
 
     reset_l();
 
-    sp<DataSource> dataSource = DataSource::CreateFromURI(uri);
+    sp<DataSource> dataSource = DataSource::CreateFromURI(uri, headers);
 
     if (dataSource == NULL) {
         return UNKNOWN_ERROR;
