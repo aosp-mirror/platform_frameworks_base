@@ -52,11 +52,19 @@ class UnlockScreen extends LinearLayoutWithDefaultTouchRecepient
     // how long before we clear the wrong pattern
     private static final int PATTERN_CLEAR_TIMEOUT_MS = 2000;
 
-    // how long we stay awake once the user is ready to enter a pattern
+    // how long we stay awake after each key beyond MIN_PATTERN_BEFORE_POKE_WAKELOCK
     private static final int UNLOCK_PATTERN_WAKE_INTERVAL_MS = 7000;
+
+    // how long we stay awake after the user hits the first dot.
+    private static final int UNLOCK_PATTERN_WAKE_INTERVAL_FIRST_DOTS_MS = 2000;
 
     // how many cells the user has to cross before we poke the wakelock
     private static final int MIN_PATTERN_BEFORE_POKE_WAKELOCK = 2;
+
+    // This dictates how long a pattern should be before we count it as an attempt.
+    // This should be long enough to avoid false triggers while the device is in a pocket,
+    // as this can lead to a wiped device if a {@link DeviceAdmin} is active and has it enabled.
+    private static final int MIN_PATTERN_BEFORE_REPORT = 3;
 
     private int mFailedPatternAttemptsSinceLastTimeout = 0;
     private int mTotalFailedPatternAttempts = 0;
@@ -466,6 +474,9 @@ class UnlockScreen extends LinearLayoutWithDefaultTouchRecepient
             // the user actually trying to draw a pattern of some minimal length.
             if (pattern.size() > MIN_PATTERN_BEFORE_POKE_WAKELOCK) {
                 mCallback.pokeWakelock(UNLOCK_PATTERN_WAKE_INTERVAL_MS);
+            } else {
+                // Give just a little extra time if they hit one of the first few dots
+                mCallback.pokeWakelock(UNLOCK_PATTERN_WAKE_INTERVAL_FIRST_DOTS_MS);
             }
         }
 
@@ -476,6 +487,7 @@ class UnlockScreen extends LinearLayoutWithDefaultTouchRecepient
                 mInstructions = "";
                 updateStatusLines();
                 mCallback.keyguardDone(true);
+                mCallback.reportSuccessfulUnlockAttempt();
             } else {
                 if (pattern.size() > MIN_PATTERN_BEFORE_POKE_WAKELOCK) {
                     mCallback.pokeWakelock(UNLOCK_PATTERN_WAKE_INTERVAL_MS);
@@ -484,19 +496,21 @@ class UnlockScreen extends LinearLayoutWithDefaultTouchRecepient
                 if (pattern.size() >= LockPatternUtils.MIN_PATTERN_REGISTER_FAIL) {
                     mTotalFailedPatternAttempts++;
                     mFailedPatternAttemptsSinceLastTimeout++;
-                    mCallback.reportFailedPatternAttempt();
                 }
                 if (mFailedPatternAttemptsSinceLastTimeout >= LockPatternUtils.FAILED_ATTEMPTS_BEFORE_TIMEOUT) {
                     long deadline = mLockPatternUtils.setLockoutAttemptDeadline();
                     handleAttemptLockout(deadline);
-                    return;
+                } else {
+                    // TODO mUnlockIcon.setVisibility(View.VISIBLE);
+                    mInstructions = getContext().getString(R.string.lockscreen_pattern_wrong);
+                    updateStatusLines();
+                    mLockPatternView.postDelayed(
+                            mCancelPatternRunnable,
+                            PATTERN_CLEAR_TIMEOUT_MS);
                 }
-                // TODO mUnlockIcon.setVisibility(View.VISIBLE);
-                mInstructions = getContext().getString(R.string.lockscreen_pattern_wrong);
-                updateStatusLines();
-                mLockPatternView.postDelayed(
-                        mCancelPatternRunnable,
-                        PATTERN_CLEAR_TIMEOUT_MS);
+                if (pattern.size() > MIN_PATTERN_BEFORE_REPORT) {
+                    mCallback.reportFailedUnlockAttempt();
+                }
             }
         }
     }

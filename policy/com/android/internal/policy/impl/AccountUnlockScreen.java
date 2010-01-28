@@ -177,12 +177,14 @@ public class AccountUnlockScreen extends RelativeLayout implements KeyguardScree
             intent.setClassName(LOCK_PATTERN_PACKAGE, LOCK_PATTERN_CLASS);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             mContext.startActivity(intent);
+            mCallback.reportSuccessfulUnlockAttempt();
 
             // close the keyguard
             mCallback.keyguardDone(true);
         } else {
             mInstructions.setText(R.string.lockscreen_glogin_invalid_input);
             mPassword.setText("");
+            mCallback.reportFailedUnlockAttempt();
         }
     }
 

@@ -51,10 +51,12 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
     private TextView mCarrier;
     private LockPatternUtils mLockPatternUtils;
     private Button mCancelButton;
-    private int mPasswordAttempts = 0;
-    private int mMinimumPasswordLength = 4; // TODO: get from policy store
 
     private static final char[] DIGITS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
+
+    // To avoid accidental lockout due to events while the device in in the pocket, ignore
+    // any passwords with length less than or equal to this length.
+    private static final int MINIMUM_PASSWORD_LENGTH_BEFORE_REPORT = 3;
 
     public PasswordUnlockScreen(Context context, LockPatternUtils lockPatternUtils,
             KeyguardUpdateMonitor updateMonitor, KeyguardScreenCallback callback) {
@@ -142,12 +144,12 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
     private void verifyPasswordAndUnlock() {
         String entry = mPasswordTextView.getText().toString();
         if (mLockPatternUtils.checkPassword(entry)) {
-            mPasswordAttempts = 0;
             mCallback.keyguardDone(true);
-        } else if (entry.length() >= mMinimumPasswordLength ) {
+            mCallback.reportSuccessfulUnlockAttempt();
+        } else if (entry.length() > MINIMUM_PASSWORD_LENGTH_BEFORE_REPORT ) {
             // to avoid accidental lockout, only count attempts that are long enough to be a
             // real password. This may require some tweaking.
-            mPasswordAttempts++;
+            mCallback.reportFailedUnlockAttempt();
         }
         mPasswordTextView.setText("");
     }
