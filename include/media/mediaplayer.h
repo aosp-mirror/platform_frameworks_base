@@ -23,6 +23,9 @@
 #include <media/IMediaPlayer.h>
 #include <media/IMediaDeathNotifier.h>
 
+#include <utils/KeyedVector.h>
+#include <utils/String8.h>
+
 namespace android {
 
 enum media_event_type {
@@ -130,7 +133,11 @@ public:
     ~MediaPlayer();
             void            died();
             void            disconnect();
-            status_t        setDataSource(const char *url);
+
+            status_t        setDataSource(
+                    const char *url,
+                    const KeyedVector<String8, String8> *headers);
+
             status_t        setDataSource(int fd, int64_t offset, int64_t length);
             status_t        setVideoSurface(const sp<Surface>& surface);
             status_t        setListener(const sp<MediaPlayerListener>& listener);

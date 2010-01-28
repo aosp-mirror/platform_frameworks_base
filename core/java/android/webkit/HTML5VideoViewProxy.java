@@ -73,6 +73,8 @@ class HTML5VideoViewProxy extends Handler
     private static final int ENDED             = 201;
     private static final int POSTER_FETCHED    = 202;
 
+    private static final String COOKIE = "Cookie";
+
     // Timer thread -> UI thread
     private static final int TIMEUPDATE = 300;
 
@@ -165,7 +167,15 @@ class HTML5VideoViewProxy extends Handler
             mVideoView = new VideoView(proxy.getContext());
             mVideoView.setWillNotDraw(false);
             mVideoView.setMediaController(new MediaController(proxy.getContext()));
-            mVideoView.setVideoURI(Uri.parse(url));
+
+            String cookieValue = CookieManager.getInstance().getCookie(url);
+            Map<String, String> headers = null;
+            if (cookieValue != null) {
+                headers = new HashMap<String, String>();
+                headers.put(COOKIE, cookieValue);
+            }
+
+            mVideoView.setVideoURI(Uri.parse(url), headers);
             mVideoView.setOnCompletionListener(proxy);
             mVideoView.setOnPreparedListener(proxy);
             mVideoView.setOnErrorListener(proxy);

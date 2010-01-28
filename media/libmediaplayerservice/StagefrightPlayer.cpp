@@ -28,8 +28,9 @@ status_t StagefrightPlayer::initCheck() {
     return OK;
 }
 
-status_t StagefrightPlayer::setDataSource(const char *url) {
-    LOGV("setDataSource('%s')", url);
+status_t StagefrightPlayer::setDataSource(
+        const char *url, const KeyedVector<String8, String8> *) {
+    LOGI("setDataSource('%s')", url);
     return mPlayer->setDataSource(url);
 }
 

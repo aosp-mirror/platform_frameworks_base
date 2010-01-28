@@ -35,6 +35,8 @@ using android::UNKNOWN_ERROR;
 using android::player_type;
 using android::sp;
 using android::status_t;
+using android::String8;
+using android::KeyedVector;
 
 // This file contains a test player that is loaded via the
 // TestPlayerStub class.  The player contains various implementation
@@ -53,7 +55,9 @@ class Player: public MediaPlayerBase
     virtual status_t    initCheck() {return OK;}
     virtual bool        hardwareOutput() {return true;}
 
-    virtual status_t    setDataSource(const char *url) {
+    virtual status_t    setDataSource(
+            const char *url,
+            const KeyedVector<String8, String8> *) {
         LOGV("setDataSource %s", url);
         mTest = TEST_UNKNOWN;
         if (strncmp(url, kPing, strlen(kPing)) == 0) {

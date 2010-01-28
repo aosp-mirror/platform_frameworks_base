@@ -21,8 +21,10 @@
 
 #include <sys/types.h>
 #include <ui/ISurface.h>
-#include <utils/RefBase.h>
 #include <utils/Errors.h>
+#include <utils/KeyedVector.h>
+#include <utils/String8.h>
+#include <utils/RefBase.h>
 
 #include <media/mediaplayer.h>
 #include <media/AudioSystem.h>
@@ -96,7 +98,11 @@ public:
     virtual             ~MediaPlayerBase() {}
     virtual status_t    initCheck() = 0;
     virtual bool        hardwareOutput() = 0;
-    virtual status_t    setDataSource(const char *url) = 0;
+
+    virtual status_t    setDataSource(
+            const char *url,
+            const KeyedVector<String8, String8> *headers = NULL) = 0;
+
     virtual status_t    setDataSource(int fd, int64_t offset, int64_t length) = 0;
     virtual status_t    setVideoSurface(const sp<ISurface>& surface) = 0;
     virtual status_t    prepare() = 0;
