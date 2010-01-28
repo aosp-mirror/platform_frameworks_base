@@ -95,12 +95,13 @@ void DataSource::RegisterDefaultSniffers() {
 }
 
 // static
-sp<DataSource> DataSource::CreateFromURI(const char *uri) {
+sp<DataSource> DataSource::CreateFromURI(
+        const char *uri, const KeyedVector<String8, String8> *headers) {
     sp<DataSource> source;
     if (!strncasecmp("file://", uri, 7)) {
         source = new FileSource(uri + 7);
     } else if (!strncasecmp("http://", uri, 7)) {
-        source = new HTTPDataSource(uri);
+        source = new HTTPDataSource(uri, headers);
         source = new CachingDataSource(source, 64 * 1024, 10);
     } else {
         // Assume it's a filename.
