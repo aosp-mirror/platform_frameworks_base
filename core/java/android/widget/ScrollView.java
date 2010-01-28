@@ -817,9 +817,16 @@ public class ScrollView extends FrameLayout {
      * @param dy the number of pixels to scroll by on the Y axis
      */
     public final void smoothScrollBy(int dx, int dy) {
+        if (getChildCount() == 0) {
+            // Nothing to do.
+            return;
+        }
         long duration = AnimationUtils.currentAnimationTimeMillis() - mLastScroll;
         if (duration > ANIMATED_SCROLL_GAP) {
-            mScroller.startScroll(mScrollX, mScrollY, dx, dy);
+            int height = getHeight() - mPaddingBottom - mPaddingTop;
+            int bottom = getChildAt(0).getHeight();
+            mScroller.startScroll(mScrollX, mScrollY, dx, dy,
+                    0, 0, 0, Math.max(0, bottom - height));
             awakenScrollBars(mScroller.getDuration());
             invalidate();
         } else {
