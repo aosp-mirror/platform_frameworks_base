@@ -32,6 +32,8 @@ public class DdmHandleProfiling extends ChunkHandler {
 
     public static final int CHUNK_MPRS = type("MPRS");
     public static final int CHUNK_MPRE = type("MPRE");
+    public static final int CHUNK_MPSS = type("MPSS");
+    public static final int CHUNK_MPSE = type("MPSE");
     public static final int CHUNK_MPRQ = type("MPRQ");
 
     private static DdmHandleProfiling mInstance = new DdmHandleProfiling();
@@ -46,6 +48,8 @@ public class DdmHandleProfiling extends ChunkHandler {
     public static void register() {
         DdmServer.registerHandler(CHUNK_MPRS, mInstance);
         DdmServer.registerHandler(CHUNK_MPRE, mInstance);
+        DdmServer.registerHandler(CHUNK_MPSS, mInstance);
+        DdmServer.registerHandler(CHUNK_MPSE, mInstance);
         DdmServer.registerHandler(CHUNK_MPRQ, mInstance);
     }
 
@@ -73,6 +77,10 @@ public class DdmHandleProfiling extends ChunkHandler {
             return handleMPRS(request);
         } else if (type == CHUNK_MPRE) {
             return handleMPRE(request);
+        } else if (type == CHUNK_MPSS) {
+            return handleMPSS(request);
+        } else if (type == CHUNK_MPSE) {
+            return handleMPSE(request);
         } else if (type == CHUNK_MPRQ) {
             return handleMPRQ(request);
         } else {
@@ -121,6 +129,50 @@ public class DdmHandleProfiling extends ChunkHandler {
         /* create a non-empty reply so the handler fires on completion */
         byte[] reply = { result };
         return new Chunk(CHUNK_MPRE, reply, 0, reply.length);
+    }
+
+    /*
+     * Handle a "Method Profiling w/Streaming Start" request.
+     */
+    private Chunk handleMPSS(Chunk request) {
+        ByteBuffer in = wrapChunk(request);
+
+        int bufferSize = in.getInt();
+        int flags = in.getInt();
+        if (Config.LOGV) {
+            Log.v("ddm-heap", "Method prof stream start: size=" + bufferSize
+                + ", flags=" + flags);
+        }
+
+        try {
+            Debug.startMethodTracingDdms(bufferSize, flags);
+            return null;        // empty response
+        } catch (RuntimeException re) {
+            return createFailChunk(1, re.getMessage());
+        }
+    }
+
+    /*
+     * Handle a "Method Profiling w/Streaming End" request.
+     */
+    private Chunk handleMPSE(Chunk request) {
+        byte result;
+
+        if (Config.LOGV) {
+            Log.v("ddm-heap", "Method prof stream end");
+        }
+
+        try {
+            Debug.stopMethodTracing();
+            result = 0;
+        } catch (RuntimeException re) {
+            Log.w("ddm-heap", "Method prof stream end failed: "
+                + re.getMessage());
+            return createFailChunk(1, re.getMessage());
+        }
+
+        /* VM sent the (perhaps very large) response directly */
+        return null;
     }
 
     /*

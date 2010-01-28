@@ -469,6 +469,17 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
     }
 
     /**
+     * Starts method tracing without a backing file.  When stopMethodTracing
+     * is called, the result is sent directly to DDMS.  (If DDMS is not
+     * attached when tracing ends, the profiling data will be discarded.)
+     *
+     * @hide
+     */
+    public static void startMethodTracingDdms(int bufferSize, int flags) {
+        VMDebug.startMethodTracingDdms(bufferSize, flags);
+    }
+
+    /**
      * Determine whether method tracing is currently active.
      * @hide
      */
