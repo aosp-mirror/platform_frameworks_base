@@ -17,6 +17,8 @@
 
 package android.os;
 
+import android.os.IMountServiceListener;
+
 /** WARNING! Update IMountService.h and IMountService.cpp if you change this file.
  * In particular, the ordering of the methods below must match the 
  * _TRANSACTION enum in IMountService.cpp
@@ -25,44 +27,60 @@ package android.os;
 interface IMountService
 {
     /**
-     * Is mass storage support enabled?
+     * Registers an IMountServiceListener for receiving async
+     * notifications.
      */
-    boolean getMassStorageEnabled();
+    void registerListener(IMountServiceListener listener);
 
     /**
-     * Enable or disable mass storage support.
+     * Unregisters an IMountServiceListener
      */
-    void setMassStorageEnabled(boolean enabled);
+    void unregisterListener(IMountServiceListener listener);
 
     /**
-     * Is mass storage connected?
+     * Gets an Array of supported share methods
      */
-    boolean getMassStorageConnected();
-    
+    String[] getShareMethodList();
+
+    /**
+     * Returns true if the share method is available
+     */
+    boolean getShareMethodAvailable(String method);
+
+    /**
+     * Shares a volume via the specified method
+     * Returns an int consistent with MountServiceResultCode
+     */
+    int shareVolume(String path, String method);
+
+    /**
+     * Unshares a volume via the specified method
+     * Returns an int consistent with MountServiceResultCode
+     */
+    int unshareVolume(String path, String method);
+
+    /**
+     * Returns true if the volume is shared via the specified method.
+     */
+    boolean getVolumeShared(String path, String method);
+
     /**
      * Mount external storage at given mount point.
+     * Returns an int consistent with MountServiceResultCode
      */
-    void mountVolume(String mountPoint);
+    int mountVolume(String mountPoint);
 
     /**
      * Safely unmount external storage at given mount point.
+     * Returns an int consistent with MountServiceResultCode
      */
-    void unmountVolume(String mountPoint);
+    int unmountVolume(String mountPoint);
 
     /**
      * Format external storage given a mount point.
+     * Returns an int consistent with MountServiceResultCode
      */
-    void formatVolume(String mountPoint);
-
-    /**
-     * Returns true if media notification sounds are enabled.
-     */
-    boolean getPlayNotificationSounds();
-
-    /**
-     * Sets whether or not media notification sounds are played.
-     */
-    void setPlayNotificationSounds(boolean value);
+    int formatVolume(String mountPoint);
 
     /**
      * Gets the state of an volume via it's mountpoint.
@@ -71,37 +89,41 @@ interface IMountService
 
     /*
      * Creates a secure container with the specified parameters.
-     * On success, the filesystem container-path is returned.
+     * Returns an int consistent with MountServiceResultCode
      */
-    String createSecureContainer(String id, int sizeMb, String fstype, String key, int ownerUid);
+    int createSecureContainer(String id, int sizeMb, String fstype, String key, int ownerUid);
 
     /*
      * Finalize a container which has just been created and populated.
      * After finalization, the container is immutable.
+     * Returns an int consistent with MountServiceResultCode
      */
-    void finalizeSecureContainer(String id);
+    int finalizeSecureContainer(String id);
 
     /*
      * Destroy a secure container, and free up all resources associated with it.
      * NOTE: Ensure all references are released prior to deleting.
+     * Returns an int consistent with MountServiceResultCode
      */
-    void destroySecureContainer(String id);
+     int destroySecureContainer(String id);
 
     /*
      * Mount a secure container with the specified key and owner UID.
-     * On success, the filesystem container-path is returned.
+     * Returns an int consistent with MountServiceResultCode
      */
-    String mountSecureContainer(String id, String key, int ownerUid);
+    int mountSecureContainer(String id, String key, int ownerUid);
 
     /*
      * Unount a secure container.
+     * Returns an int consistent with MountServiceResultCode
      */
-    void unmountSecureContainer(String id);
+    int unmountSecureContainer(String id);
 
     /*
      * Rename an unmounted secure container.
+     * Returns an int consistent with MountServiceResultCode
      */
-    void renameSecureContainer(String oldId, String newId);
+    int renameSecureContainer(String oldId, String newId);
 
     /*
      * Returns the filesystem path of a mounted secure container.

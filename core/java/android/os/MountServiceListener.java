@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 The Android Open Source Project
+ * Copyright (C) 2010 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,18 +17,19 @@
 package android.os;
 
 /**
- * Callback class for receiving events from MountService.
- *
+ * Callback class for receiving progress reports during a restore operation.  These
+ * methods will all be called on your application's main thread.
  * @hide
  */
-interface IMountServiceObserver {
+public abstract class MountServiceListener {
     /**
      * A sharing method has changed availability state.
      *
      * @param method The share method which has changed.
      * @param available The share availability state.
      */
-    void shareAvailabilityChange(String method, boolean available);
+    void shareAvailabilityChange(String method, boolean available) {
+    }
 
     /**
      * Media has been inserted
@@ -38,7 +39,8 @@ interface IMountServiceObserver {
      * @param major The backing device major number.
      * @param minor The backing device minor number.
      */
-    void mediaInserted(String label, String path, int major, int minor);
+    void mediaInserted(String label, String path, int major, int minor) {
+    }
 
     /**
      * Media has been removed
@@ -49,7 +51,8 @@ interface IMountServiceObserver {
      * @param minor The backing device minor number.
      * @param clean Indicates if the removal was clean (unmounted first).
      */
-    void mediaRemoved(String label, String path, int major, int minor, boolean clean);
+    void mediaRemoved(String label, String path, int major, int minor, boolean clean) {
+    }
 
     /**
      *  Volume state has changed.
@@ -61,6 +64,6 @@ interface IMountServiceObserver {
      *
      * Note: State is one of the values returned by Environment.getExternalStorageState()
      */
-    void volumeStateChange(String label, String path, String oldState, String newState);
-
+    void volumeStateChange(String label, String path, String oldState, String newState) {
+    }
 }
