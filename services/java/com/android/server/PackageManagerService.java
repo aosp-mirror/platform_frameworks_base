@@ -73,6 +73,7 @@ import android.os.Environment;
 import android.os.FileObserver;
 import android.os.FileUtils;
 import android.os.Handler;
+import android.os.MountServiceResultCode;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.ServiceManager;
@@ -7940,33 +7941,28 @@ class PackageManagerService extends IPackageManager.Stub {
             Log.e(TAG, "Failed to create encryption keys with exception: " + nsae);
             return null;
         }
-        try {
-            cachePath = mountService.createSecureContainer(pkgName,
-                mbLen,
-                "vfat", sdEncKey, Process.SYSTEM_UID);
-            if (DEBUG_SD_INSTALL) Log.i(TAG, "Trying to install " + pkgName + ", cachePath =" + cachePath);
-            return cachePath;
-        } catch(IllegalStateException e) {
-            Log.e(TAG, "Failed to create storage on sdcard with exception: " + e);
+
+        int rc = mountService.createSecureContainer(
+                pkgName, mbLen, "vfat", sdEncKey, Process.SYSTEM_UID);
+        if (rc != MountServiceResultCode.OperationSucceeded) {
+            Log.e(TAG, String.format("Failed to create container (%d)", rc));
+
+            rc = mountService.destroySecureContainer(pkgName);
+            if (rc != MountServiceResultCode.OperationSucceeded) {
+                Log.e(TAG, String.format("Failed to cleanup container (%d)", rc));
+                return null;
+            }
+            rc = mountService.createSecureContainer(
+                    pkgName, mbLen, "vfat", sdEncKey, Process.SYSTEM_UID);
+            if (rc != MountServiceResultCode.OperationSucceeded) {
+                Log.e(TAG, String.format("Failed to create container (2nd try) (%d)", rc));
+                return null;
+            }
         }
-        // TODO just fail here and let the user delete later on.
-        try {
-            mountService.destroySecureContainer(pkgName);
-            if (DEBUG_SD_INSTALL) Log.i(TAG, "Destroying cache for " + pkgName + ", cachePath =" + cachePath);
-        } catch(IllegalStateException e) {
-            Log.e(TAG, "Failed to destroy existing cache: " + e);
-            return null;
-        } 
-       try {
-            cachePath = mountService.createSecureContainer(pkgName,
-                mbLen,
-                "vfat", sdEncKey, Process.SYSTEM_UID);
-            if (DEBUG_SD_INSTALL) Log.i(TAG, "Trying to install again " + pkgName + ", cachePath =" + cachePath);
+
+        cachePath = mountService.getSecureContainerPath(pkgName);
+        if (DEBUG_SD_INSTALL) Log.i(TAG, "Trying to install " + pkgName + ", cachePath =" + cachePath);
             return cachePath;
-        } catch(IllegalStateException e) {
-            Log.e(TAG, "Failed to create storage on sdcard with exception: " + e);
-            return null;
-        }
     }
 
    private String mountSdDir(String pkgName, int ownerUid) {
@@ -7975,64 +7971,53 @@ class PackageManagerService extends IPackageManager.Stub {
            Log.e(TAG, "Failed to retrieve encryption keys to mount package code: " + pkgName + ".");
            return null;
        }
-       try {
-           return getMountService().mountSecureContainer(pkgName, sdEncKey, ownerUid);
-       } catch (IllegalStateException e) {
-           Log.i(TAG, "Failed to mount container for pkg : " + pkgName + " exception : " + e);
+
+       int rc = getMountService().mountSecureContainer(pkgName, sdEncKey, ownerUid);
+
+       if (rc != MountServiceResultCode.OperationSucceeded) {
+           Log.i(TAG, "Failed to mount container for pkg : " + pkgName + " rc : " + rc);
+           return null;
        }
-       return null;
+
+       return getMountService().getSecureContainerPath(pkgName);
    }
 
    private boolean unMountSdDir(String pkgName) {
        // STOPSHIP unmount directory
-       try {
-           getMountService().unmountSecureContainer(pkgName);
-           return true;
-       } catch (IllegalStateException e) {
-           Log.e(TAG, "Failed to unmount : " + pkgName + " with exception " + e);
-       }
-       return false;
-   }
-
-   private String getSdDir(String pkgName) {
-       String cachePath = null;
-       try {
-           cachePath = getMountService().getSecureContainerPath(pkgName);
-       } catch (IllegalStateException e) {
-           Log.e(TAG, "Failed to retrieve secure container path for pkg : " + pkgName + " with exception " + e);
-       }
-       return cachePath;
-   }
-
-   private boolean finalizeSdDir(String pkgName) {
-       try {
-           getMountService().finalizeSecureContainer(pkgName);
-           return true;
-       } catch (IllegalStateException e) {
-           Log.i(TAG, "Failed to destroy container for pkg : " + pkgName);
+       int rc = getMountService().unmountSecureContainer(pkgName);
+       if (rc != MountServiceResultCode.OperationSucceeded) {
+           Log.e(TAG, "Failed to unmount : " + pkgName + " with rc " + rc);
            return false;
        }
+       return true;
    }
 
-   private boolean destroySdDir(String pkgName) {
-       try {
-           // We need to destroy right away
-           getMountService().destroySecureContainer(pkgName);
-           return true;
-       } catch (IllegalStateException e) {
-           Log.i(TAG, "Failed to destroy container for pkg : " + pkgName);
-           return false;
-       }
-   }
+    private String getSdDir(String pkgName) {
+        return getMountService().getSecureContainerPath(pkgName);
+    }
 
-   static String[] getSecureContainerList() {
-       try {
-           return getMountService().getSecureContainerList();
-       } catch (IllegalStateException e) {
-           Log.i(TAG, "Failed to getSecureContainerList");
-       }
-       return null;
-   }
+    private boolean finalizeSdDir(String pkgName) {
+        int rc = getMountService().finalizeSecureContainer(pkgName);
+        if (rc != MountServiceResultCode.OperationSucceeded) {
+            Log.i(TAG, "Failed to finalize container for pkg : " + pkgName);
+            return false;
+        }
+        return true;
+    }
+
+    private boolean destroySdDir(String pkgName) {
+        int rc = getMountService().destroySecureContainer(pkgName);
+        if (rc != MountServiceResultCode.OperationSucceeded) {
+            Log.i(TAG, "Failed to destroy container for pkg : " + pkgName);
+            return false;
+        }
+        return true;
+    }
+
+    static String[] getSecureContainerList() {
+        String[] list = getMountService().getSecureContainerList();
+        return list.length == 0 ? null : list;
+    }
 
    static String getTempContainerId() {
        String prefix = "smdl1tmp";
