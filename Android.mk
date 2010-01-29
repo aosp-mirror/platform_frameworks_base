@@ -388,7 +388,7 @@ web_docs_sample_code_flags := \
 
 ## SDK version identifiers used in the published docs
   # major[.minor] version for current SDK. (full releases only)
-framework_docs_SDK_VERSION:=2.0.1
+framework_docs_SDK_VERSION:=2.1
   # release version (ie "Release x")  (full releases only)
 framework_docs_SDK_REL_ID:=1
   # name of current SDK directory (full releases only)
