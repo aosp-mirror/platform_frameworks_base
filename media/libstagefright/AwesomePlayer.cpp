@@ -378,7 +378,16 @@ status_t AwesomePlayer::play() {
                         &AwesomePlayer::AudioNotify, this);
 
                 mAudioPlayer->setSource(mAudioSource);
-                mAudioPlayer->start();
+                status_t err = mAudioPlayer->start();
+
+                if (err != OK) {
+                    delete mAudioPlayer;
+                    mAudioPlayer = NULL;
+
+                    mFlags &= ~(PLAYING | FIRST_FRAME);
+
+                    return err;
+                }
 
                 delete mTimeSource;
                 mTimeSource = mAudioPlayer;
