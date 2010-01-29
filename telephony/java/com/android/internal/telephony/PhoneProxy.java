@@ -343,6 +343,14 @@ public class PhoneProxy extends Handler implements Phone {
         mActivePhone.unregisterForRingbackTone(h);
     }
 
+    public void registerForResendIncallMute(Handler h, int what, Object obj) {
+        mActivePhone.registerForResendIncallMute(h,what,obj);
+    }
+
+    public void unregisterForResendIncallMute(Handler h) {
+        mActivePhone.unregisterForResendIncallMute(h);
+    }
+
     public boolean getIccRecordsLoaded() {
         return mActivePhone.getIccRecordsLoaded();
     }

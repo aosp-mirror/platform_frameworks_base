@@ -407,6 +407,16 @@ public interface Phone {
 
     void unregisterForRingbackTone(Handler h);
 
+    /**
+     * Registers the handler to reset the uplink mute state to get
+     * uplink audio.
+     */
+    void registerForResendIncallMute(Handler h, int what, Object obj);
+
+    /**
+     * Unregisters for resend incall mute notifications.
+     */
+    void unregisterForResendIncallMute(Handler h);
 
     /**
      * Notifies when a voice connection has disconnected, either due to local

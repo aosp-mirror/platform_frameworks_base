@@ -537,6 +537,18 @@ public interface CommandsInterface {
      void registerForRingbackTone(Handler h, int what, Object obj);
      void unregisterForRingbackTone(Handler h);
 
+     /**
+      * Registers the handler when mute/unmute need to be resent to get
+      * uplink audio during a call.<p>
+      *
+      * @param h Handler for notification message.
+      * @param what User-defined message code.
+      * @param obj User object.
+      *
+      */
+     void registerForResendIncallMute(Handler h, int what, Object obj);
+     void unregisterForResendIncallMute(Handler h);
+
     /**
      * Supply the ICC PIN to the ICC card
      *
