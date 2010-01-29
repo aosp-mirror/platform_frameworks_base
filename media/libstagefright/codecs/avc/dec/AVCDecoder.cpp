@@ -80,6 +80,8 @@ AVCDecoder::~AVCDecoder() {
         stop();
     }
 
+    PVAVCCleanUpDecoder(mHandle);
+
     delete mHandle;
     mHandle = NULL;
 }
