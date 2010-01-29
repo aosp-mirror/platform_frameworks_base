@@ -27,6 +27,8 @@ import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Environment;
+import android.os.StatFs;
 import android.util.AndroidException;
 import android.util.DisplayMetrics;
 
@@ -602,6 +604,89 @@ public abstract class PackageManager {
      */
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_LIVE_WALLPAPER = "android.software.live_wallpaper";
+
+    // No-installation limit for internal flash: 10% or less space available
+    private static final double LOW_NAND_FLASH_TRESHOLD = 0.1;
+
+    // SD-to-internal app size threshold: currently set to 1 MB
+    private static final long INSTALL_ON_SD_THRESHOLD = (1024 * 1024);
+
+    private static final int INSTALL_ON_INTERNAL_FLASH = 0;
+
+    /**
+     * Determines best place to install an application: either SD or internal FLASH.
+     * Tweak the algorithm for best results.
+     * @param tmpPackageFile APK file containing the application to install.
+     * @return <code>PKG_INSTALL_INTERNAL</code> if it is best to install package on internal
+     * storage, <code>PKG_INSTALL_ON_SD</code> if it is best to install package on SD card,
+     * and <code>PKG_CANNOT_FIT</code> if insufficient space to safely install the app.
+     * This response does not take into account the package's own flags.
+     * @hide
+     */
+    public static int recommendAppInstallLocation(ApplicationInfo appInfo, Uri packageURI) {
+        // Initial implementation:
+        // Package size = code size + cache size + data size
+        // If code size > 1 MB, install on SD card.
+        // Else install on internal NAND flash, unless space on NAND is less than 5%
+        // 0 = install on internal FLASH
+        // 1 = install on SD card
+        // (-1) = insufficient space - package cannot be installed.
+
+        if ((packageURI == null) || (appInfo == null)) {
+            return (-1);
+        }
+
+        StatFs internalFlashStats = new StatFs(Environment.getDataDirectory().getPath());
+        StatFs sdcardStats = new StatFs(Environment.getExternalStorageDirectory().getPath());
+
+        long totalInternalFlashSize = (long)internalFlashStats.getBlockCount() *
+                (long)internalFlashStats.getBlockSize();
+        long availInternalFlashSize = (long)internalFlashStats.getAvailableBlocks() *
+                (long)internalFlashStats.getBlockSize();
+        long availSDSize = (long)sdcardStats.getAvailableBlocks() *
+                (long)sdcardStats.getBlockSize();
+
+        double pctNandFree = (double)availInternalFlashSize / (double)totalInternalFlashSize;
+
+        final String archiveFilePath = packageURI.getPath();
+        File apkFile = new File(archiveFilePath);
+        long pkgLen = apkFile.length();
+
+        // Consider application flags preferences as well...
+        boolean installOnlyOnSD = ((appInfo.flags & PackageManager.INSTALL_ON_SDCARD) != 0);
+
+        // These are not very precise measures, but I guess it is hard to estimate sizes
+        // before installing the package.
+        // As a shortcut, I am assuming that the package fits on NAND flash if the available
+        // space is three times that of the APK size. For SD, we only worry about the APK size.
+        // Since packages are downloaded into SD, this might not even be necessary.
+        boolean fitsOnSD = (pkgLen < availSDSize) && ((2 * pkgLen) < availInternalFlashSize);
+        boolean fitsOnInternalFlash = ((pkgLen * 3) < availInternalFlashSize);
+
+        // Does not fit, recommend no installation.
+        if (!fitsOnSD && !fitsOnInternalFlash) {
+            return (-1);
+        }
+
+        if (pkgLen < (INSTALL_ON_SD_THRESHOLD) && fitsOnInternalFlash && !(installOnlyOnSD)) {
+            // recommend internal NAND likely
+            if (pctNandFree < LOW_NAND_FLASH_TRESHOLD) {
+                // Low space on NAND (<10%) - install on SD
+                return INSTALL_ON_SDCARD;
+            }
+            return INSTALL_ON_INTERNAL_FLASH;
+        } else {
+            if (fitsOnSD) {
+                // Recommend SD card
+                return INSTALL_ON_SDCARD;
+            } else if (fitsOnInternalFlash && (pctNandFree >= LOW_NAND_FLASH_TRESHOLD) &&
+                    !(installOnlyOnSD)) {
+                return INSTALL_ON_INTERNAL_FLASH;
+            } else {
+                return (-1);
+            }
+        }
+    }
     
     /**
      * Retrieve overall information about an application package that is
