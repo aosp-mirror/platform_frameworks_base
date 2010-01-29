@@ -130,4 +130,14 @@ interface IBackupManager {
      * @return An interface to the restore session, or null on error.
      */
     IRestoreSession beginRestoreSession(String transportID);
+
+    /**
+     * Notify the backup manager that a BackupAgent has completed the operation
+     * corresponding to the given token.
+     *
+     * @param token The transaction token passed to a BackupAgent's doBackup() or
+     *        doRestore() method.
+     * {@hide}
+     */
+    void opComplete(int token);
 }
