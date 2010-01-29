@@ -38,65 +38,27 @@ static void init() {
     }
 }
 
-static bool isMounted(const char* mountPoint) {
-    char s[2000];
-    FILE *f = fopen("/proc/mounts", "r");
-    bool mounted = false;
-
-    while (fgets(s, sizeof(s), f))
-    {
-        char *c, *path = NULL;
-
-        for (c = s; *c; c++) 
-        {
-            if (*c == ' ') 
-            {
-                *c = 0;
-                path = c + 1;
-                break;
-            }
-        }
-
-        for (c = path; *c; c++) 
-        {
-            if (*c == ' ') 
-            {
-                *c = '\0';
-                break;
-            }
-        }
-
-        if (strcmp(mountPoint, path) == 0) {
-            mounted = true;
-            break;
-        }
-    }
-
-    fclose(f);
-    return mounted;
-}
-
-static void millisecondSleep(int milliseconds) {
-	struct timespec reqt, remt;	
-	reqt.tv_sec = milliseconds / 1000;
-	reqt.tv_nsec = 1000000 * (milliseconds % 1000);
-	nanosleep(&reqt, &remt) ;
-
-}
-
 static int mount(const char* path) {
     String16 string(path);
-    gMountService->mountVolume(string);
-    
-    for (int i = 0; i < 60; i++) {
-        if (isMounted(path)) {
-            return 0;
-        }
-        millisecondSleep(500);
-    }
-        
-    fprintf(stderr, "failed to mount %s\n", path);   
-    return -1;
+    return gMountService->mountVolume(string);
+}
+
+static int share(const char *path, const char *method) {
+    String16 sPath(path);
+    String16 sMethod(method);
+    return gMountService->shareVolume(sPath, sMethod);
+}
+
+static int unshare(const char *path, const char *method) {
+    String16 sPath(path);
+    String16 sMethod(method);
+    return gMountService->unshareVolume(sPath, sMethod);
+}
+
+static bool shared(const char *path, const char *method) {
+    String16 sPath(path);
+    String16 sMethod(method);
+    return gMountService->getVolumeShared(sPath, sMethod);
 }
 
 static int asec_create(const char *id, int sizeMb, const char *fstype,
@@ -105,39 +67,35 @@ static int asec_create(const char *id, int sizeMb, const char *fstype,
     String16 sFstype(fstype);
     String16 sKey(key);
 
-    String16 r = gMountService->createSecureContainer(sId, sizeMb, sFstype,
-                                                      sKey, ownerUid);
-    return 0;
+    return gMountService->createSecureContainer(
+            sId, sizeMb, sFstype, sKey, ownerUid);
 }
 
 static int asec_finalize(const char *id) {
     String16 sId(id);
-    gMountService->finalizeSecureContainer(sId);
-    return 0;
+    return gMountService->finalizeSecureContainer(sId);
 }
 
 static int asec_destroy(const char *id) {
     String16 sId(id);
-    gMountService->destroySecureContainer(sId);
-    return 0;
+    return gMountService->destroySecureContainer(sId);
 }
 
 static int asec_mount(const char *id, const char *key, int ownerUid) {
     String16 sId(id);
     String16 sKey(key);
-    gMountService->mountSecureContainer(sId, sKey, ownerUid);
-    return 0;
+    return gMountService->mountSecureContainer(sId, sKey, ownerUid);
 }
 
-static void asec_unmount(const char *id) {
+static int asec_unmount(const char *id) {
     String16 sId(id);
-    gMountService->unmountSecureContainer(sId);
+    return gMountService->unmountSecureContainer(sId);
 }
 
-static void asec_rename(const char *oldId, const char *newId) {
+static int asec_rename(const char *oldId, const char *newId) {
     String16 sOldId(oldId);
     String16 sNewId(newId);
-    gMountService->renameSecureContainer(sOldId, sNewId);
+    return gMountService->renameSecureContainer(sOldId, sNewId);
 }
 
 static int asec_path(const char *id) {
@@ -148,98 +106,85 @@ static int asec_path(const char *id) {
 
 static int unmount(const char* path) {
     String16 string(path);
-    gMountService->unmountVolume(string);
-
-    for (int i = 0; i < 20; i++) {
-        if (!isMounted(path)) {
-            return 0;
-        }
-        millisecondSleep(500);
-    }
-        
-    fprintf(stderr, "failed to unmount %s\n", path);   
-    return -1;
+    return gMountService->unmountVolume(string);
 }
 
 static int format(const char* path) {
     String16 string(path);
-
-    if (isMounted(path))
-        return -EBUSY;
-    gMountService->formatVolume(string);
-
-    return 0;
-}
-
-static int umsEnable(bool enable) {
-    gMountService->setMassStorageEnabled(enable);
-    return 0;
+    return gMountService->formatVolume(string);
 }
 
 };
 
+static void usage(void);
+
 int main(int argc, char **argv)
 {
-    const char* command = (argc > 1 ? argv[1] : "");
-    const char* argument = (argc > 2 ? argv[2] : "");
+    if (argc < 2)
+        usage();
+
+    android::init();
+    int rc = 0;
     
-    if (strcmp(command, "mount") == 0) {
-        android::init();
-        return android::mount(argument);
-    } else if (strcmp(command, "format") == 0) {
-        android::init();
-        return android::format(argument);
-    } else if (strcmp(command, "unmount") == 0) {
-        android::init();
-        return android::unmount(argument);
-    } else if (strcmp(command, "ums") == 0) {
-        if (strcmp(argument, "enable") == 0) {
-            android::init();
-            return android::umsEnable(true);
-        } else if (strcmp(argument, "disable") == 0) {
-            android::init();
-            return android::umsEnable(false);
-        }
-    } else if (!strcmp(command, "asec")) {
-        const char* id = (argc > 3 ? argv[3] : NULL);
+    if (strcmp(argv[1], "mount") == 0) {
+        rc = android::mount(argv[2]);
+    } else if (strcmp(argv[1], "format") == 0) {
+        rc = android::format(argv[2]);
+    } else if (strcmp(argv[1], "unmount") == 0) {
+        rc = android::unmount(argv[2]);
+    } else if (strcmp(argv[1], "share") == 0) {
+        if (argc != 3)
+            usage();
+        rc = android::share(argv[2], argv[3]);
+    } else if (strcmp(argv[1], "unshare") == 0) {
+        if (argc != 3)
+            usage();
+        rc = android::unshare(argv[2], argv[3]);
+    } else if (strcmp(argv[1], "shared") == 0) {
+        if (argc != 3)
+            usage();
+        fprintf(stdout, "%s\n", (android::shared(argv[2], argv[3]) ? "true" : "false"));
+    } else if (!strcmp(argv[1], "asec")) {
+        if (argc < 3)
+            usage();
 
-        if (!id)
-            goto usage;
-
-        android::init();
-        if (!strcmp(argument, "create")) {
+        if (!strcmp(argv[2], "create")) {
 
             if (argc != 8)
-                goto usage;
-            return android::asec_create(id, atoi(argv[4]), argv[5], argv[6],
-                                        atoi(argv[7]));
-        } else if (!strcmp(argument, "finalize")) {
-            return android::asec_finalize(id);
-        } else if (!strcmp(argument, "destroy")) {
-            return android::asec_destroy(id);
-        } else if (!strcmp(argument, "mount")) {
-            if (argc == 6)
-                return android::asec_mount(id, argv[4], atoi(argv[5]));
-        } else if (!strcmp(argument, "rename")) {
-            if (argc == 5) {
-                android::asec_rename(id, argv[4]);
-                return 0;
-            }
-        } else if (!strcmp(argument, "unmount")) {
-            android::asec_unmount(id);
-            return 0;
-        } else if (!strcmp(argument, "path")) {
-            return android::asec_path(id);
+                usage();
+            rc = android::asec_create(argv[3], atoi(argv[4]), argv[5], argv[6], atoi(argv[7]));
+        } else if (!strcmp(argv[3], "finalize")) {
+            rc = android::asec_finalize(argv[3]);
+        } else if (!strcmp(argv[3], "destroy")) {
+            return android::asec_destroy(argv[3]);
+        } else if (!strcmp(argv[3], "mount")) {
+            if (argc != 6)
+                usage();
+            rc = android::asec_mount(argv[3], argv[4], atoi(argv[5]));
+        } else if (!strcmp(argv[3], "rename")) {
+            if (argc != 5)
+                usage();
+            rc = android::asec_rename(argv[3], argv[4]);
+        } else if (!strcmp(argv[3], "unmount")) {
+            rc = android::asec_unmount(argv[3]);
+        } else if (!strcmp(argv[3], "path")) {
+            rc = android::asec_path(argv[3]);
         }
     }
-    
-usage:
+
+    fprintf(stdout, "Operation completed with code %d\n", rc);
+    return rc;
+}
+
+static void usage()
+{
     fprintf(stderr, "usage:\n"
                     "    sdutil mount <mount path>          - mounts the SD card at the given mount point\n"
                     "    sdutil unmount <mount path>        - unmounts the SD card at the given mount point\n"
                     "    sdutil format <mount path>         - formats the SD card at the given mount point\n"
-                    "    sdutil ums enable                  - enables USB mass storage\n"
-                    "    sdutil ums disable                 - disables USB mass storage\n"
+                    "    sdutil share <path> <method>       - shares a volume\n"
+                    "    sdutil unshare <path> <method>     - unshares a volume\n"
+                    "    sdutil shared <path> <method>      - Queries volume share state\n"
                     "    sdutil asec create <id> <sizeMb> <fstype> <key> <ownerUid>\n"
                     "    sdutil asec finalize <id>\n"
                     "    sdutil asec destroy <id>\n"
@@ -248,5 +193,5 @@ usage:
                     "    sdutil asec rename <oldId, newId>\n"
                     "    sdutil asec path <id>\n"
                     );
-    return -1;
+    exit(1);
 }
