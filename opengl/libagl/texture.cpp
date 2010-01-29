@@ -1467,7 +1467,7 @@ void glReadPixels(
         ogles_error(c, GL_INVALID_VALUE);
         return;
     }
-    if (x<0 || x<0) {
+    if (x<0 || y<0) {
         ogles_error(c, GL_INVALID_VALUE);
         return;
     }
