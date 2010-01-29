@@ -19,6 +19,7 @@
 #define HTTP_DATASOURCE_H_
 
 #include <media/stagefright/DataSource.h>
+#include <utils/String8.h>
 
 namespace android {
 
@@ -26,8 +27,13 @@ class HTTPStream;
 
 class HTTPDataSource : public DataSource {
 public:
-    HTTPDataSource(const char *host, int port, const char *path);
-    HTTPDataSource(const char *uri);
+    HTTPDataSource(
+            const char *host, int port, const char *path,
+            const KeyedVector<String8, String8> *headers = NULL);
+
+    HTTPDataSource(
+            const char *uri,
+            const KeyedVector<String8, String8> *headers = NULL);
 
     virtual status_t initCheck() const;
 
@@ -45,6 +51,8 @@ private:
         kBufferSize = 64 * 1024
     };
 
+    String8 mHeaders;
+
     HTTPStream *mHttp;
     char *mHost;
     int mPort;
@@ -58,6 +66,7 @@ private:
     status_t mInitCheck;
 
     ssize_t sendRangeRequest(size_t offset);
+    void initHeaders(const KeyedVector<String8, String8> *overrides);
 
     HTTPDataSource(const HTTPDataSource &);
     HTTPDataSource &operator=(const HTTPDataSource &);

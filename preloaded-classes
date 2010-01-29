@@ -686,10 +686,6 @@ com.android.internal.widget.Smileys
 com.google.android.gles_jni.EGLDisplayImpl
 com.google.android.gles_jni.EGLImpl
 com.google.android.gles_jni.GLImpl
-com.google.android.mms.ContentType
-com.google.android.mms.pdu.CharacterSets
-com.google.android.mms.pdu.PduPart
-com.google.android.mms.pdu.PduPersister
 com.ibm.icu4jni.charset.CharsetDecoderICU
 com.ibm.icu4jni.charset.CharsetEncoderICU
 com.ibm.icu4jni.charset.CharsetICU

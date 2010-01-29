@@ -923,7 +923,7 @@ public class WifiService extends IWifiManager.Stub {
                 String value = field.value();
                 if (value != null) {
                     if (field != config.eap) {
-                        value = convertToQuotedString(value);
+                        value = (value.length() == 0) ? "NULL" : convertToQuotedString(value);
                     }
                     if (!WifiNative.setNetworkVariableCommand(
                                 netId,

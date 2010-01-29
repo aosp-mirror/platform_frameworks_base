@@ -43,7 +43,8 @@ status_t MidiMetadataRetriever::setDataSource(const char *url)
     if (mMidiPlayer == 0) {
         mMidiPlayer = new MidiFile();
     }
-    return mMidiPlayer->setDataSource(url);
+    // TODO: support headers in MetadataRetriever interface!
+    return mMidiPlayer->setDataSource(url, NULL /* headers */);
 }
 
 status_t MidiMetadataRetriever::setDataSource(int fd, int64_t offset, int64_t length)

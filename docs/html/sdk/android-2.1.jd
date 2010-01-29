@@ -76,28 +76,28 @@ built-in applications:</p>
 	<li>Alarm Clock</li>
 	<li>Browser</li>
 	<li>Calculator</li>
-	<li>Camcorder</li>
 	<li>Camera</li>
 	<li>Contacts</li>
 	<li>Custom Locale (developer app)</li>
 	<li>Dev Tools (developer app)</li>
-	<li>Dialer</li>
+    <li>Email</li>
 	</ul>
 </td>
 <td style="border:0;padding-bottom:0;margin-bottom:0;padding-left:5em;">
 	<ul>
-	<li>Email</li>
+
 	<li>Gallery</li>
-	<li>Gestures Builder</li>
-	<li>IME for Japanese text input</li>
+	<li>IMEs for Japanese, Chinese, and Latin text input</li>
 	<li>Messaging</li>
 	<li>Music</li>
+	<li>Phone</li>
 	<li>Settings</li>
 	<li>Spare Parts (developer app)</li>
 	</ul>
 </td>
 </tr>
 </table>
+
 
 <h2 id="locs" style="margin-top:.75em;">Locales</h2>
 
@@ -217,6 +217,21 @@ href="{@docRoot}guide/appendix/api-levels.html">API Levels</a> document. </p>
 <li>New {@link android.app.WallpaperInfo} class.</li>
 <li>Updated {@link android.app.WallpaperManager}.</li>
 </ul>
+
+<p>Additionally, if your application uses or provides Live Wallpapers, you must
+remember to add a <a
+href="{@docRoot}guide/topics/manifest/uses-feature-element.html"><code>&lt;uses-feature></code></a>
+ element to the application's manifest, declaring the attribute
+<code>android:name="android.software.live_wallpaper"</code>. For example:</p>
+
+<pre class="no-pretty-print">
+&lt;uses-feature android:name="android.software.live_wallpaper" />
+</pre>
+
+<p>When you've published your application, Android Market checks for the
+presence of this element and uses it as a filter, ensuring that your application
+is not made available to users whose devices do not support Live Wallpapers.
+</p>
 
 <h4>Telephony</h4>
 

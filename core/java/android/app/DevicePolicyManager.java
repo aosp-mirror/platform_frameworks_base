@@ -89,7 +89,7 @@ public class DevicePolicyManager {
     /**
      * Activity action: have the user enter a new password.  This activity
      * should be launched after using {@link #setPasswordMode(ComponentName, int)}
-     * or {@link #setMinimumPasswordLength(ComponentName, int)} to have the
+     * or {@link #setPasswordMinimumLength(ComponentName, int)} to have the
      * user enter a new password that meets the current requirements.  You can
      * use {@link #isActivePasswordSufficient()} to determine whether you need
      * to have the user select a new password in order to meet the current
@@ -210,13 +210,15 @@ public class DevicePolicyManager {
     }
     
     /**
-     * Retrieve the current password mode that is in effect due to all
-     * device admins.
+     * Retrieve the current minimum password mode for all admins
+     * or a particular one.
+     * @param admin The name of the admin component to check, or null to aggregate
+     * all admins.
      */
-    public int getPasswordMode() {
+    public int getPasswordMode(ComponentName admin) {
         if (mService != null) {
             try {
-                return mService.getPasswordMode();
+                return mService.getPasswordMode(admin);
             } catch (RemoteException e) {
                 Log.w(TAG, "Failed talking with device policy service", e);
             }
@@ -244,10 +246,10 @@ public class DevicePolicyManager {
      * @param length The new desired minimum password length.  A value of 0
      * means there is no restriction.
      */
-    public void setMinimumPasswordLength(ComponentName admin, int length) {
+    public void setPasswordMinimumLength(ComponentName admin, int length) {
         if (mService != null) {
             try {
-                mService.setMinimumPasswordLength(admin, length);
+                mService.setPasswordMinimumLength(admin, length);
             } catch (RemoteException e) {
                 Log.w(TAG, "Failed talking with device policy service", e);
             }
@@ -255,18 +257,31 @@ public class DevicePolicyManager {
     }
     
     /**
-     * Retrieve the current minimum password length that is in effect due to all
-     * device admins.
+     * Retrieve the current minimum password length for all admins
+     * or a particular one.
+     * @param admin The name of the admin component to check, or null to aggregate
+     * all admins.
      */
-    public int getMinimumPasswordLength() {
+    public int getPasswordMinimumLength(ComponentName admin) {
         if (mService != null) {
             try {
-                return mService.getMinimumPasswordLength();
+                return mService.getPasswordMinimumLength(admin);
             } catch (RemoteException e) {
                 Log.w(TAG, "Failed talking with device policy service", e);
             }
         }
         return 0;
+    }
+    
+    /**
+     * Return the maximum password length that the device supports for a
+     * particular password mode.
+     * @param mode The mode being interrogated.
+     * @return Returns the maximum length that the user can enter.
+     */
+    public int getPasswordMaximumLength(int mode) {
+        // Kind-of arbitrary.
+        return 16;
     }
     
     /**
@@ -335,11 +350,30 @@ public class DevicePolicyManager {
     }
     
     /**
+     * Retrieve the current maximum number of login attempts that are allowed
+     * before the device wipes itself, for all admins
+     * or a particular one.
+     * @param admin The name of the admin component to check, or null to aggregate
+     * all admins.
+     */
+    public int getMaximumFailedPasswordsForWipe(ComponentName admin) {
+        if (mService != null) {
+            try {
+                return mService.getMaximumFailedPasswordsForWipe(admin);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+        return 0;
+    }
+    
+    /**
      * Force a new password on the user.  This takes effect immediately.  The
      * given password must meet the current password minimum length constraint
      * or it will be rejected.  The given password will be accepted regardless
      * of the current password mode, automatically adjusting the password mode
-     * higher if needed.  (The string you give here is acceptable for any mode;
+     * higher if needed to meet the requirements of all active administrators.
+     * (The string you give here is acceptable for any mode;
      * if it contains only digits, that is still an acceptable alphanumeric
      * password.)
      * 
@@ -386,13 +420,15 @@ public class DevicePolicyManager {
     }
     
     /**
-     * Retrieve the current maximum time to lock that is in effect due to all
-     * device admins.  Returns 0 if no maximum is set.
+     * Retrieve the current maximum time to unlock for all admins
+     * or a particular one.
+     * @param admin The name of the admin component to check, or null to aggregate
+     * all admins.
      */
-    public long getMaximumTimeToLock() {
+    public long getMaximumTimeToLock(ComponentName admin) {
         if (mService != null) {
             try {
-                return mService.getMaximumTimeToLock();
+                return mService.getMaximumTimeToLock(admin);
             } catch (RemoteException e) {
                 Log.w(TAG, "Failed talking with device policy service", e);
             }

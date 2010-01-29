@@ -245,10 +245,20 @@ private:
     NodeReaper &operator=(const NodeReaper &);
 };
 
+static sp<MediaExtractor> CreateExtractorFromURI(const char *uri) {
+    sp<DataSource> source = DataSource::CreateFromURI(uri);
+
+    if (source == NULL) {
+        return NULL;
+    }
+
+    return MediaExtractor::Create(source);
+}
+
 static sp<MediaSource> MakeSource(
         const char *uri,
         const char *mimeType) {
-    sp<MediaExtractor> extractor = MediaExtractor::CreateFromURI(uri);
+    sp<MediaExtractor> extractor = CreateExtractorFromURI(uri);
 
     if (extractor == NULL) {
         return NULL;
@@ -500,7 +510,7 @@ static sp<MediaSource> CreateSourceForMime(const char *mime) {
     const char *url = GetURLForMime(mime);
     CHECK(url != NULL);
 
-    sp<MediaExtractor> extractor = MediaExtractor::CreateFromURI(url);
+    sp<MediaExtractor> extractor = CreateExtractorFromURI(url);
 
     CHECK(extractor != NULL);
 

@@ -99,11 +99,10 @@ public class DeviceAdmin extends BroadcastReceiver {
     /**
      * Action sent to a device administrator when the user has changed the
      * password of their device.  You can at this point check the characteristics
-     * of the new password with {@link DevicePolicyManager#getPasswordMode()
-     * DevicePolicyManager.getActivePasswordMode()} and
-     * {@link DevicePolicyManager#getMinimumPasswordLength()
-     * DevicePolicyManager.getMinimumPasswordLength()}.  You will generally
-     * handle this in {@link DeviceAdmin#onPasswordChanged(Context, Intent)}.
+     * of the new password with {@link DevicePolicyManager#isActivePasswordSufficient()
+     * DevicePolicyManager.isActivePasswordSufficient()}.
+     * You will generally
+     * handle this in {@link DeviceAdmin#onPasswordChanged}.
      * 
      * <p>The calling device admin must have requested
      * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to receive
@@ -117,9 +116,9 @@ public class DeviceAdmin extends BroadcastReceiver {
      * Action sent to a device administrator when the user has failed at
      * attempted to enter the password.  You can at this point check the
      * number of failed password attempts there have been with
-     * {@link DevicePolicyManager#getCurrentFailedPasswordAttempts()
+     * {@link DevicePolicyManager#getCurrentFailedPasswordAttempts
      * DevicePolicyManager.getCurrentFailedPasswordAttempts()}.  You will generally
-     * handle this in {@link DeviceAdmin#onPasswordFailed(Context, Intent)}.
+     * handle this in {@link DeviceAdmin#onPasswordFailed}.
      * 
      * <p>The calling device admin must have requested
      * {@link DeviceAdminInfo#USES_POLICY_WATCH_LOGIN} to receive

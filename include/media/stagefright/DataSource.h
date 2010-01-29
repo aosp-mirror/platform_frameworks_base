@@ -21,6 +21,7 @@
 #include <sys/types.h>
 
 #include <utils/Errors.h>
+#include <utils/KeyedVector.h>
 #include <utils/List.h>
 #include <utils/RefBase.h>
 #include <utils/threads.h>
@@ -35,7 +36,9 @@ public:
         kWantsPrefetching = 1,
     };
 
-    static sp<DataSource> CreateFromURI(const char *uri);
+    static sp<DataSource> CreateFromURI(
+            const char *uri,
+            const KeyedVector<String8, String8> *headers = NULL);
 
     DataSource() {}
 

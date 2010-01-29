@@ -260,7 +260,7 @@ UI dimensions are declared in dip, the result is that they are displayed at the
 same physical size on all screens in a given configuration. </p> -->
 
 <p>Although the platform currently supports the nine possible size-density
-configurations listed in the table, you do not necessarily need to custom
+configurations listed in the table, you do not necessarily need to create custom
 resources for each one of them. The platform provides robust compatibility
 features, described in the sections below, that can handle most of the work of
 rendering your application on the current device screen, provided that the UI is

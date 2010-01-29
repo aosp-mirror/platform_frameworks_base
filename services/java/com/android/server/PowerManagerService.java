@@ -1101,11 +1101,10 @@ class PowerManagerService extends IPowerManager.Stub
         // 0 was to turn it off, and we can't strip that, because keyguard needs to come
         // on, so have to run the queue then.
         if (index == 2) {
-            // Also, while we're collapsing them, if it's going to be an "off," and one
-            // is off because of user, then use that, regardless of whether it's the first
-            // or second one.
-            if (!on && why == WindowManagerPolicy.OFF_BECAUSE_OF_USER) {
-                mBroadcastWhy[0] = WindowManagerPolicy.OFF_BECAUSE_OF_USER;
+            // While we're collapsing them, if it's going off, and the new reason
+            // is more significant than the first, then use the new one.
+            if (!on && mBroadcastWhy[0] > why) {
+                mBroadcastWhy[0] = why;
             }
             mBroadcastQueue[0] = on ? 1 : 0;
             mBroadcastQueue[1] = -1;
@@ -2136,9 +2135,18 @@ class PowerManagerService extends IPowerManager.Stub
      */
     public void goToSleep(long time)
     {
+        goToSleepWithReason(time, WindowManagerPolicy.OFF_BECAUSE_OF_USER);
+    }
+
+    /**
+     * The user requested that we go to sleep (probably with the power button).
+     * This overrides all wake locks that are held.
+     */
+    public void goToSleepWithReason(long time, int reason)
+    {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER, null);
         synchronized (mLocks) {
-            goToSleepLocked(time, WindowManagerPolicy.OFF_BECAUSE_OF_USER);
+            goToSleepLocked(time, reason);
         }
     }
 

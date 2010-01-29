@@ -79,25 +79,13 @@ public class Browser {
     public static final String EXTRA_POST_DATA = "com.android.browser.post_data";
 
     /**
-     * The name of the extra data in the VIEW intent. The data is in the format
-     * of String array. This should be paired with EXTRA_HEADERS_VALUE.
-     * <p>
-     * The keys will be combined with the values and sent in the HTTP request
+     * The name of the extra data in the VIEW intent. The data are key/value
+     * pairs in the format of Bundle. They will be sent in the HTTP request
      * headers for the provided url. The keys can't be the standard HTTP headers
      * as they are set by the WebView. The url's schema must be http(s).
      * <p>
      */
-    public static final String EXTRA_HEADERS_KEY = "com.android.browser.headers_key";
-
-    /**
-     * The name of the extra data in the VIEW intent. The data is in the format
-     * of String array. This should be paired with EXTRA_HEADERS_KEY.
-     * <p>
-     * The values will be combined with the keys and sent in the HTTP request
-     * headers for the provided url. The url's schema must be http(s).
-     * <p>
-     */
-    public static final String EXTRA_HEADERS_VALUE = "com.android.browser.headers_value";
+    public static final String EXTRA_HEADERS = "com.android.browser.headers";
 
     /* if you change column order you must also change indices
        below */

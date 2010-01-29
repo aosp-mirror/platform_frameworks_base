@@ -31,14 +31,13 @@ static const char *kUserAgent = "stagefright-http";
 // accordingly and return true, otherwise return false and leave the stream
 // connected.
 static bool PerformRedirectIfNecessary(
-        HTTPStream *http, string *host, string *path, int *port) {
+        HTTPStream *http, const String8 &headers,
+        string *host, string *path, int *port) {
     String8 request;
     request.append("HEAD ");
     request.append(path->c_str());
     request.append(" HTTP/1.1\r\n");
-    request.append("User-Agent: ");
-    request.append(kUserAgent);
-    request.append("\r\n");
+    request.append(headers);
     request.append("Host: ");
     request.append(host->c_str());
     request.append("\r\n\r\n");
@@ -94,7 +93,8 @@ static bool PerformRedirectIfNecessary(
     return true;
 }
 
-HTTPDataSource::HTTPDataSource(const char *uri)
+HTTPDataSource::HTTPDataSource(
+        const char *uri, const KeyedVector<String8, String8> *headers)
     : mHttp(new HTTPStream),
       mHost(NULL),
       mPort(0),
@@ -104,6 +104,8 @@ HTTPDataSource::HTTPDataSource(const char *uri)
       mBufferOffset(0),
       mFirstRequest(true) {
     CHECK(!strncasecmp("http://", uri, 7));
+
+    initHeaders(headers);
 
     string host;
     string path;
@@ -140,14 +142,16 @@ HTTPDataSource::HTTPDataSource(const char *uri)
         if (mInitCheck != OK) {
             return;
         }
-    } while (PerformRedirectIfNecessary(mHttp, &host, &path, &port));
+    } while (PerformRedirectIfNecessary(mHttp, mHeaders, &host, &path, &port));
 
     mHost = strdup(host.c_str());
     mPort = port;
     mPath = strdup(path.c_str());
 }
 
-HTTPDataSource::HTTPDataSource(const char *_host, int port, const char *_path)
+HTTPDataSource::HTTPDataSource(
+        const char *_host, int port, const char *_path,
+        const KeyedVector<String8, String8> *headers)
     : mHttp(new HTTPStream),
       mHost(NULL),
       mPort(0),
@@ -156,6 +160,8 @@ HTTPDataSource::HTTPDataSource(const char *_host, int port, const char *_path)
       mBufferLength(0),
       mBufferOffset(0),
       mFirstRequest(true) {
+    initHeaders(headers);
+
     string host = _host;
     string path = _path;
 
@@ -168,7 +174,7 @@ HTTPDataSource::HTTPDataSource(const char *_host, int port, const char *_path)
         if (mInitCheck != OK) {
             return;
         }
-    } while (PerformRedirectIfNecessary(mHttp, &host, &path, &port));
+    } while (PerformRedirectIfNecessary(mHttp, mHeaders, &host, &path, &port));
 
     mHost = strdup(host.c_str());
     mPort = port;
@@ -200,9 +206,6 @@ HTTPDataSource::~HTTPDataSource() {
 }
 
 ssize_t HTTPDataSource::sendRangeRequest(size_t offset) {
-    char agent[128];
-    sprintf(agent, "User-Agent: %s\r\n", kUserAgent);
-
     char host[128];
     sprintf(host, "Host: %s\r\n", mHost);
 
@@ -221,7 +224,7 @@ ssize_t HTTPDataSource::sendRangeRequest(size_t offset) {
         if ((err = mHttp->send("GET ")) != OK
             || (err = mHttp->send(mPath)) != OK
             || (err = mHttp->send(" HTTP/1.1\r\n")) != OK
-            || (err = mHttp->send(agent)) != OK
+            || (err = mHttp->send(mHeaders.string())) != OK
             || (err = mHttp->send(host)) != OK
             || (err = mHttp->send(range)) != OK
             || (err = mHttp->send("\r\n")) != OK
@@ -302,6 +305,29 @@ ssize_t HTTPDataSource::readAt(off_t offset, void *data, size_t size) {
     memcpy(data, mBuffer, copy);
 
     return copy;
+}
+
+void HTTPDataSource::initHeaders(
+        const KeyedVector<String8, String8> *overrides) {
+    mHeaders = String8();
+
+    mHeaders.append("User-Agent: ");
+    mHeaders.append(kUserAgent);
+    mHeaders.append("\r\n");
+
+    if (overrides == NULL) {
+        return;
+    }
+
+    for (size_t i = 0; i < overrides->size(); ++i) {
+        String8 line;
+        line.append(overrides->keyAt(i));
+        line.append(": ");
+        line.append(overrides->valueAt(i));
+        line.append("\r\n");
+
+        mHeaders.append(line);
+    }
 }
 
 }  // namespace android

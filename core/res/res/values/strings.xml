@@ -2008,21 +2008,23 @@
     <string name="googlewebcontenthelper_loading">Loading\u2026</string>
 
     <!-- USB storage dialog strings -->
-    <!-- This is the label for the activity, and should never be visible to the user. -->
+    <!-- This is the title for the activity's window. -->
+    <string name="usb_storage_activity_title">USB Mass Storage</string>
+
     <!-- See USB_STORAGE.  USB_STORAGE_DIALOG:  After the user selects the notification, a dialog is shown asking if he wants to mount.  This is the title. -->
     <string name="usb_storage_title">USB connected</string>
     <!-- See USB_STORAGE.    This is the message. -->
-    <string name="usb_storage_message">You have connected your phone to your computer via USB. Select \"Mount\" if you want to copy files between your computer and your phone\'s SD card.</string>
+    <string name="usb_storage_message">You have connected your phone to your computer via USB. Select the button below if you want to copy files between your computer and your Android\u2018s SD card.</string>
     <!-- See USB_STORAGE.    This is the button text to mount the phone on the computer. -->
-    <string name="usb_storage_button_mount">Mount</string>
-    <!-- See USB_STORAGE.   This is the button text to ignore the plugging in of the phone.. -->
-    <string name="usb_storage_button_unmount">Don\'t mount</string>
+    <string name="usb_storage_button_mount">Turn on USB storage</string>
     <!-- See USB_STORAGE_DIALOG.  If there was an error mounting, this is the text. -->
     <string name="usb_storage_error_message">There is a problem using your SD card for USB storage.</string>
     <!-- USB_STORAGE: When the user connects the phone to a computer via USB, we show a notification asking if he wants to share files across.  This is the title -->
     <string name="usb_storage_notification_title">USB connected</string>
     <!-- See USB_STORAGE. This is the message. -->
     <string name="usb_storage_notification_message">Select to copy files to/from your computer.</string>
+
+
     <!-- USB_STORAGE_STOP: While USB storage is enabled, we show a notification dialog asking if he wants to stop. This is the title -->
     <string name="usb_storage_stop_notification_title">Turn off USB storage</string>
     <!-- See USB_STORAGE. This is the message. -->
@@ -2031,15 +2033,13 @@
     <!-- USB storage stop dialog strings -->
     <!-- This is the label for the activity, and should never be visible to the user. -->
     <!-- See USB_STORAGE_STOP.  USB_STORAGE_STOP_DIALOG:  After the user selects the notification, a dialog is shown asking if he wants to stop usb storage.  This is the title. -->
-    <string name="usb_storage_stop_title">Turn off USB storage</string>
+    <string name="usb_storage_stop_title">USB storage in use</string>
     <!-- See USB_STORAGE_STOP.    This is the message. -->
-    <string name="usb_storage_stop_message">Before turning off USB storage, make sure you have unmounted on the USB host. Select \"Turn Off\" to turn off USB storage.</string>
+    <string name="usb_storage_stop_message">Before turning off USB storage, make sure you have unmounted (\u201cejected\u201d) your Android\u2018s SD card from your computer.</string>
     <!-- See USB_STORAGE_STOP.    This is the button text to stop usb storage. -->
-    <string name="usb_storage_stop_button_mount">Turn Off</string>
-    <!-- See USB_STORAGE_STOP.   This is the button text to cancel stoping usb storage. -->
-    <string name="usb_storage_stop_button_unmount">Cancel</string>
+    <string name="usb_storage_stop_button_mount">Turn off USB storage</string>
     <!-- See USB_STORAGE_STOP_DIALOG.  If there was an error stopping, this is the text. -->
-    <string name="usb_storage_stop_error_message">We\'ve encountered a problem turning off USB storage. Check to make sure you have unmounted the USB host, then try again.</string>
+    <string name="usb_storage_stop_error_message">There was a problem turning off USB storage. Check to make sure you have unmounted the USB host, then try again.</string>
 
     <!-- External media format dialog strings -->
     <!-- This is the label for the activity, and should never be visible to the user. -->

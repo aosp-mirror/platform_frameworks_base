@@ -56,13 +56,26 @@ public:
         return interface_cast<IMediaMetadataRetriever>(reply.readStrongBinder());
     }
 
-    virtual sp<IMediaPlayer> create(pid_t pid, const sp<IMediaPlayerClient>& client, const char* url)
-    {
+    virtual sp<IMediaPlayer> create(
+            pid_t pid, const sp<IMediaPlayerClient>& client,
+            const char* url, const KeyedVector<String8, String8> *headers) {
         Parcel data, reply;
         data.writeInterfaceToken(IMediaPlayerService::getInterfaceDescriptor());
         data.writeInt32(pid);
         data.writeStrongBinder(client->asBinder());
         data.writeCString(url);
+
+        if (headers == NULL) {
+            data.writeInt32(0);
+        } else {
+            // serialize the headers
+            data.writeInt32(headers->size());
+            for (size_t i = 0; i < headers->size(); ++i) {
+                data.writeString8(headers->keyAt(i));
+                data.writeString8(headers->valueAt(i));
+            }
+        }
+
         remote()->transact(CREATE_URL, data, &reply);
         return interface_cast<IMediaPlayer>(reply.readStrongBinder());
     }
@@ -142,9 +155,21 @@ status_t BnMediaPlayerService::onTransact(
         case CREATE_URL: {
             CHECK_INTERFACE(IMediaPlayerService, data, reply);
             pid_t pid = data.readInt32();
-            sp<IMediaPlayerClient> client = interface_cast<IMediaPlayerClient>(data.readStrongBinder());
+            sp<IMediaPlayerClient> client =
+                interface_cast<IMediaPlayerClient>(data.readStrongBinder());
             const char* url = data.readCString();
-            sp<IMediaPlayer> player = create(pid, client, url);
+
+            KeyedVector<String8, String8> headers;
+            int32_t numHeaders = data.readInt32();
+            for (int i = 0; i < numHeaders; ++i) {
+                String8 key = data.readString8();
+                String8 value = data.readString8();
+                headers.add(key, value);
+            }
+
+            sp<IMediaPlayer> player = create(
+                    pid, client, url, numHeaders > 0 ? &headers : NULL);
+
             reply->writeStrongBinder(player->asBinder());
             return NO_ERROR;
         } break;

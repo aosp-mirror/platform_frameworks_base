@@ -112,6 +112,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/os/ICheckinService.aidl \
 	core/java/android/os/IMessenger.aidl \
 	core/java/android/os/IMountService.aidl \
+	core/java/android/os/IMountServiceObserver.aidl \
 	core/java/android/os/INetworkManagementService.aidl \
 	core/java/android/os/INetStatService.aidl \
 	core/java/android/os/IParentalControlCallback.aidl \
@@ -119,6 +120,8 @@ LOCAL_SRC_FILES += \
 	core/java/android/os/IPowerManager.aidl \
     core/java/android/os/IRemoteCallback.aidl \
 	core/java/android/os/IVibratorService.aidl \
+	core/java/android/service/urlrenderer/IUrlRendererService.aidl \
+	core/java/android/service/urlrenderer/IUrlRendererCallback.aidl \
     core/java/android/service/wallpaper/IWallpaperConnection.aidl \
     core/java/android/service/wallpaper/IWallpaperEngine.aidl \
     core/java/android/service/wallpaper/IWallpaperService.aidl \

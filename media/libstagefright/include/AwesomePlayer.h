@@ -49,7 +49,10 @@ struct AwesomePlayer {
 
     void setListener(const wp<MediaPlayerBase> &listener);
 
-    status_t setDataSource(const char *uri);
+    status_t setDataSource(
+            const char *uri,
+            const KeyedVector<String8, String8> *headers = NULL);
+
     status_t setDataSource(int fd, int64_t offset, int64_t length);
 
     void reset();

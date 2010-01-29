@@ -16,8 +16,6 @@
 
 package android.provider;
 
-import com.google.android.mms.util.SqliteWrapper;
-
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.content.ContentResolver;
@@ -25,6 +23,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.database.sqlite.SqliteWrapper;
 import android.net.Uri;
 import android.telephony.SmsMessage;
 import android.text.TextUtils;

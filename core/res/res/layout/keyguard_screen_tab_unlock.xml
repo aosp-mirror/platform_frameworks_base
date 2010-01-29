@@ -28,7 +28,7 @@
     android:background="#70000000"
     android:gravity="center_horizontal"
     android:id="@+id/root">
-    
+
     <TextView
         android:id="@+id/carrier"
         android:layout_width="wrap_content"
@@ -37,6 +37,9 @@
         android:layout_alignParentRight="true"
         android:layout_marginTop="10dip"
         android:layout_marginRight="8dip"
+        android:singleLine="true"
+        android:ellipsize="marquee"
+        android:gravity="right|bottom"
         android:textAppearance="?android:attr/textAppearanceMedium"
         />
 
@@ -144,7 +147,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_marginBottom="80dip" 
+        android:layout_marginBottom="80dip"
         />
 
 </RelativeLayout>

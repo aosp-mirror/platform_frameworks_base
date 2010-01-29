@@ -815,9 +815,19 @@ public class HorizontalScrollView extends FrameLayout {
      * @param dy the number of pixels to scroll by on the Y axis
      */
     public final void smoothScrollBy(int dx, int dy) {
+        if (getChildCount() == 0) {
+            // Nothing to do.
+            return;
+        }
         long duration = AnimationUtils.currentAnimationTimeMillis() - mLastScroll;
         if (duration > ANIMATED_SCROLL_GAP) {
-            mScroller.startScroll(mScrollX, mScrollY, dx, dy);
+            final int width = getWidth() - mPaddingRight - mPaddingLeft;
+            final int right = getChildAt(0).getWidth();
+            final int maxX = Math.max(0, right - width);
+            final int scrollX = mScrollX;
+            dx = Math.max(0, Math.min(scrollX + dx, maxX)) - scrollX;
+
+            mScroller.startScroll(scrollX, mScrollY, dx, 0);
             awakenScrollBars(mScroller.getDuration());
             invalidate();
         } else {

@@ -49,7 +49,7 @@ public class OverScroller {
     
     public OverScroller(Context context) {
         mDefaultScroller = new Scroller(context);
-        mDecelScroller = new Scroller(context, new DecelerateInterpolator(3.f));
+        mDecelScroller = new Scroller(context, new DecelerateInterpolator());
         mAccelDecelScroller = new Scroller(context, new AccelerateDecelerateInterpolator());
         mCurrScroller = mDefaultScroller;
     }
@@ -216,7 +216,7 @@ public class OverScroller {
     /**
      * Start scrolling by providing a starting point and the distance to travel.
      * The scroll will use the default value of 250 milliseconds for the
-     * duration.
+     * duration. This version does not spring back to boundaries.
      * 
      * @param startX Starting horizontal scroll offset in pixels. Positive
      *        numbers will scroll the content to the left.
@@ -228,13 +228,45 @@ public class OverScroller {
      *        content up.
      */
     public void startScroll(int startX, int startY, int dx, int dy) {
+        final int minX = Math.min(startX, startX + dx);
+        final int maxX = Math.max(startX, startX + dx);
+        final int minY = Math.min(startY, startY + dy);
+        final int maxY = Math.max(startY, startY + dy);
+        startScroll(startX, startY, dx, dy, minX, maxX, minY, maxY);
+    }
+    
+    /**
+     * Start scrolling by providing a starting point and the distance to travel.
+     * The scroll will use the default value of 250 milliseconds for the
+     * duration. This version will spring back to the provided boundaries if
+     * the scroll value would take it too far.
+     * 
+     * @param startX Starting horizontal scroll offset in pixels. Positive
+     *        numbers will scroll the content to the left.
+     * @param startY Starting vertical scroll offset in pixels. Positive numbers
+     *        will scroll the content up.
+     * @param dx Horizontal distance to travel. Positive numbers will scroll the
+     *        content to the left.
+     * @param dy Vertical distance to travel. Positive numbers will scroll the
+     *        content up.
+     * @param minX Minimum X value. The scroller will not scroll past this
+     *        point.
+     * @param maxX Maximum X value. The scroller will not scroll past this
+     *        point.
+     * @param minY Minimum Y value. The scroller will not scroll past this
+     *        point.
+     * @param maxY Maximum Y value. The scroller will not scroll past this
+     *        point.
+     */
+    public void startScroll(int startX, int startY, int dx, int dy,
+            int minX, int maxX, int minY, int maxY) {
         mCurrScroller.abortAnimation();
         mCurrScroller = mDefaultScroller;
         mScrollMode = MODE_DEFAULT;
-        mMinimumX = Math.min(startX, startX + dx);
-        mMinimumY = Math.min(startY, startY + dy);
-        mMaximumX = Math.max(startX, startX + dx);
-        mMaximumY = Math.max(startY, startY + dy);
+        mMinimumX = minX;
+        mMaximumX = maxX; 
+        mMinimumY = minY;
+        mMaximumY = maxY;
         mCurrScroller.startScroll(startX, startY, dx, dy);
     }
 

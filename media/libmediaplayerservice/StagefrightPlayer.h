@@ -30,7 +30,10 @@ public:
     virtual ~StagefrightPlayer();
 
     virtual status_t initCheck();
-    virtual status_t setDataSource(const char *url);
+
+    virtual status_t setDataSource(
+            const char *url, const KeyedVector<String8, String8> *headers);
+
     virtual status_t setDataSource(int fd, int64_t offset, int64_t length);
     virtual status_t setVideoSurface(const sp<ISurface> &surface);
     virtual status_t prepare();

@@ -41,6 +41,10 @@
             android:layout_marginTop="6dip"
             android:layout_alignParentRight="true"
             android:layout_marginRight="8dip"
+            android:layout_toRightOf="@+id/time"
+            android:singleLine="true"
+            android:ellipsize="marquee"
+            android:gravity="right|bottom"
             android:textAppearance="?android:attr/textAppearanceMedium"
             />
 
@@ -93,7 +97,7 @@
             android:layout_marginLeft="24dip"
             android:textAppearance="?android:attr/textAppearanceMedium"
             />
-    
+
     </RelativeLayout>
 
     <View

@@ -54,6 +54,9 @@
             android:textSize="17sp"
             android:drawablePadding="4dip"
             android:layout_marginTop="32dip"
+            android:singleLine="true"
+            android:ellipsize="marquee"
+            android:gravity="right|bottom"
             />
         <com.android.internal.widget.DigitalClock android:id="@+id/time"
             android:layout_width="wrap_content"

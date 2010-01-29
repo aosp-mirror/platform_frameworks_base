@@ -41,8 +41,10 @@ import android.os.RecoverySystem;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemClock;
 import android.util.Log;
 import android.util.Xml;
+import android.view.WindowManagerPolicy;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -161,30 +163,35 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         return null;
     }
     
-    ActiveAdmin getActiveAdminForCallerLocked(ComponentName who)
-            throws SecurityException {
-        ActiveAdmin admin = mAdminMap.get(who);
-        if (admin != null && admin.getUid() == Binder.getCallingUid()) {
-            if (who != null) {
-                if (!who.getPackageName().equals(admin.info.getActivityInfo().packageName)
-                        || !who.getClassName().equals(admin.info.getActivityInfo().name)) {
-                    throw new SecurityException("Current admin is not " + who);
-                }
-            }
-            return admin;
-        }
-        throw new SecurityException("Current admin is not owned by uid " + Binder.getCallingUid());
-    }
-    
     ActiveAdmin getActiveAdminForCallerLocked(ComponentName who, int reqPolicy)
             throws SecurityException {
-        ActiveAdmin admin = getActiveAdminForCallerLocked(who);
-        if (!admin.info.usesPolicy(reqPolicy)) {
-            throw new SecurityException("Admin " + admin.info.getComponent()
-                    + " did not specify uses-policy for: "
-                    + admin.info.getTagForPolicy(reqPolicy));
+        final int callingUid = Binder.getCallingUid();
+        if (who != null) {
+            ActiveAdmin admin = mAdminMap.get(who);
+            if (admin == null) {
+                throw new SecurityException("No active admin " + who);
+            }
+            if (admin.getUid() != callingUid) {
+                throw new SecurityException("Admin " + who + " is not owned by uid "
+                        + Binder.getCallingUid());
+            }
+            if (!admin.info.usesPolicy(reqPolicy)) {
+                throw new SecurityException("Admin " + admin.info.getComponent()
+                        + " did not specify uses-policy for: "
+                        + admin.info.getTagForPolicy(reqPolicy));
+            }
+            return admin;
+        } else {
+            final int N = mAdminList.size();
+            for (int i=0; i<N; i++) {
+                ActiveAdmin admin = mAdminList.get(i);
+                if (admin.getUid() == callingUid && admin.info.usesPolicy(reqPolicy)) {
+                    return admin;
+                }
+            }
+            throw new SecurityException("No active admin owned by uid "
+                    + Binder.getCallingUid() + " for policy #" + reqPolicy);
         }
-        return admin;
     }
     
     void sendAdminCommandLocked(ActiveAdmin admin, String action) {
@@ -346,7 +353,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             // Ignore
         }
 
-        long timeMs = getMaximumTimeToLock();
+        long timeMs = getMaximumTimeToLock(null);
         if (timeMs <= 0) {
             timeMs = Integer.MAX_VALUE;
         }
@@ -355,7 +362,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         } catch (RemoteException e) {
             Log.w(TAG, "Failure talking with power manager", e);
         }
-        
     }
 
     public void systemReady() {
@@ -443,10 +449,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
     
-    public int getPasswordMode() {
+    public int getPasswordMode(ComponentName who) {
         synchronized (this) {
-            final int N = mAdminList.size();
             int mode = DevicePolicyManager.PASSWORD_MODE_UNSPECIFIED;
+            
+            if (who != null) {
+                ActiveAdmin admin = getActiveAdminUncheckedLocked(who);
+                return admin != null ? admin.passwordMode : mode;
+            }
+            
+            final int N = mAdminList.size();
             for  (int i=0; i<N; i++) {
                 ActiveAdmin admin = mAdminList.get(i);
                 if (mode < admin.passwordMode) {
@@ -457,7 +469,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
     
-    public void setMinimumPasswordLength(ComponentName who, int length) {
+    public void setPasswordMinimumLength(ComponentName who, int length) {
         synchronized (this) {
             if (who == null) {
                 throw new NullPointerException("ComponentName is null");
@@ -471,10 +483,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
     
-    public int getMinimumPasswordLength() {
+    public int getPasswordMinimumLength(ComponentName who) {
         synchronized (this) {
-            final int N = mAdminList.size();
             int length = 0;
+            
+            if (who != null) {
+                ActiveAdmin admin = getActiveAdminUncheckedLocked(who);
+                return admin != null ? admin.minimumPasswordLength : length;
+            }
+            
+            final int N = mAdminList.size();
             for  (int i=0; i<N; i++) {
                 ActiveAdmin admin = mAdminList.get(i);
                 if (length < admin.minimumPasswordLength) {
@@ -491,8 +509,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             // so try to retrieve it to check that the caller is one.
             getActiveAdminForCallerLocked(null,
                     DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD);
-            return mActivePasswordMode >= getPasswordMode()
-                    && mActivePasswordLength >= getMinimumPasswordLength();
+            return mActivePasswordMode >= getPasswordMode(null)
+                    && mActivePasswordLength >= getPasswordMinimumLength(null);
         }
     }
     
@@ -521,10 +539,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
     
-    public int getMaximumFailedPasswordsForWipe() {
+    public int getMaximumFailedPasswordsForWipe(ComponentName who) {
         synchronized (this) {
-            final int N = mAdminList.size();
             int count = 0;
+            
+            if (who != null) {
+                ActiveAdmin admin = getActiveAdminUncheckedLocked(who);
+                return admin != null ? admin.maximumFailedPasswordsForWipe : count;
+            }
+            
+            final int N = mAdminList.size();
             for  (int i=0; i<N; i++) {
                 ActiveAdmin admin = mAdminList.get(i);
                 if (count == 0) {
@@ -545,8 +569,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             // so try to retrieve it to check that the caller is one.
             getActiveAdminForCallerLocked(null,
                     DeviceAdminInfo.USES_POLICY_RESET_PASSWORD);
-            mode = getPasswordMode();
-            if (password.length() < getMinimumPasswordLength()) {
+            mode = getPasswordMode(null);
+            if (password.length() < getPasswordMinimumLength(null)) {
                 return false;
             }
         }
@@ -577,9 +601,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 long ident = Binder.clearCallingIdentity();
                 try {
                     saveSettingsLocked();
+                    
+                    timeMs = getMaximumTimeToLock(null);
                     if (timeMs <= 0) {
                         timeMs = Integer.MAX_VALUE;
                     }
+                    
                     try {
                         getIPowerManager().setMaximumScreenOffTimeount((int)timeMs);
                     } catch (RemoteException e) {
@@ -592,10 +619,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
     
-    public long getMaximumTimeToLock() {
+    public long getMaximumTimeToLock(ComponentName who) {
         synchronized (this) {
-            final int N = mAdminList.size();
             long time = 0;
+            
+            if (who != null) {
+                ActiveAdmin admin = getActiveAdminUncheckedLocked(who);
+                return admin != null ? admin.maximumTimeToUnlock : time;
+            }
+            
+            final int N = mAdminList.size();
             for  (int i=0; i<N; i++) {
                 ActiveAdmin admin = mAdminList.get(i);
                 if (time == 0) {
@@ -615,7 +648,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             // so try to retrieve it to check that the caller is one.
             getActiveAdminForCallerLocked(null,
                     DeviceAdminInfo.USES_POLICY_FORCE_LOCK);
-            // STOPSHIP need to implement.
+            long ident = Binder.clearCallingIdentity();
+            try {
+                mIPowerManager.goToSleepWithReason(SystemClock.uptimeMillis(),
+                        WindowManagerPolicy.OFF_BECAUSE_OF_ADMIN);
+            } catch (RemoteException e) {
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
         }
     }
     
@@ -702,7 +742,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             try {
                 mFailedPasswordAttempts++;
                 saveSettingsLocked();
-                int max = getMaximumFailedPasswordsForWipe();
+                int max = getMaximumFailedPasswordsForWipe(null);
                 if (max > 0 && mFailedPasswordAttempts >= max) {
                     wipeDataLocked(0);
                 }

@@ -22,6 +22,7 @@ interface IPowerManager
 {
     void acquireWakeLock(int flags, IBinder lock, String tag);
     void goToSleep(long time);
+    void goToSleepWithReason(long time, int reason);
     void releaseWakeLock(IBinder lock, int flags);
     void userActivity(long when, boolean noChangeLights);
     void userActivityWithForce(long when, boolean noChangeLights, boolean force);
