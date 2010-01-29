@@ -4369,18 +4369,13 @@ class PackageManagerService extends IPackageManager.Stub {
         String idxStr = "";
         int idx = 1;
         if (oldCodePath != null) {
-            int eidx = -1;
-            if (suffix != null) {
-                eidx = oldCodePath.indexOf(suffix);
+            String subStr = oldCodePath;
+            if (subStr.startsWith(prefix)) {
+                subStr = subStr.substring(prefix.length());
             }
-            if (eidx == -1) {
-                eidx = oldCodePath.length();
+            if (subStr.endsWith(suffix)) {
+                subStr = subStr.substring(0, subStr.length() - suffix.length());
             }
-            int sidx = oldCodePath.indexOf(prefix);
-            if (sidx == -1) {
-                sidx = 0;
-            }
-            String subStr = oldCodePath.substring(sidx + prefix.length(), eidx);
             if (subStr != null) {
                 if (subStr.startsWith("-")) {
                     subStr = subStr.substring(1);
