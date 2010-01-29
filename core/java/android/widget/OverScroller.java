@@ -383,4 +383,15 @@ public class OverScroller {
     public int getFinalY() {
         return mCurrScroller.getFinalY();
     }
+    
+    /**
+     * @hide
+     * Returns the current velocity.
+     *
+     * @return The original velocity less the deceleration. Result may be
+     * negative.
+     */
+    public float getCurrVelocity() {
+        return mCurrScroller.getCurrVelocity();
+    }
 }
