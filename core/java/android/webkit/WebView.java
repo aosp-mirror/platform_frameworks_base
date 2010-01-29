@@ -3109,6 +3109,7 @@ public class WebView extends AbsoluteLayout
                 zoomScale = mZoomScale;
                 // set mZoomScale to be 0 as we have done animation
                 mZoomScale = 0;
+                WebViewCore.resumeUpdatePicture(mWebViewCore);
                 // call invalidate() again to draw with the final filters
                 invalidate();
                 if (mNeedToAdjustWebTextView) {
@@ -4458,7 +4459,7 @@ public class WebView extends AbsoluteLayout
                     deltaX = 0;
                     deltaY = 0;
 
-                    WebViewCore.reducePriority(mWebViewCore);
+                    WebViewCore.reducePriority();
                     if (!mDragFromTextInput) {
                         nativeHideCursor();
                     }
@@ -4621,7 +4622,7 @@ public class WebView extends AbsoluteLayout
                                     || computeVerticalScrollExtent() < computeVerticalScrollRange())) {
                                 // we will not rewrite drag code here, but we
                                 // will try fling if it applies.
-                                WebViewCore.reducePriority(mWebViewCore);
+                                WebViewCore.reducePriority();
                                 // fall through to TOUCH_DRAG_MODE
                             } else {
                                 break;
@@ -4658,7 +4659,7 @@ public class WebView extends AbsoluteLayout
                             break;
                         }
                         mLastVelocity = 0;
-                        WebViewCore.resumePriority(mWebViewCore);
+                        WebViewCore.resumePriority();
                         break;
                     case TOUCH_DRAG_START_MODE:
                     case TOUCH_DONE_MODE:
@@ -4707,7 +4708,7 @@ public class WebView extends AbsoluteLayout
             mVelocityTracker = null;
         }
         if (mTouchMode == TOUCH_DRAG_MODE) {
-            WebViewCore.resumePriority(mWebViewCore);
+            WebViewCore.resumePriority();
         }
         mPrivateHandler.removeMessages(SWITCH_TO_SHORTPRESS);
         mPrivateHandler.removeMessages(SWITCH_TO_LONGPRESS);
@@ -5033,7 +5034,7 @@ public class WebView extends AbsoluteLayout
             vy = vy * 3 / 4;
         }
         if ((maxX == 0 && vy == 0) || (maxY == 0 && vx == 0)) {
-            WebViewCore.resumePriority(mWebViewCore);
+            WebViewCore.resumePriority();
             return;
         }
         float currentVelocity = mScroller.getCurrVelocity();
@@ -5090,6 +5091,7 @@ public class WebView extends AbsoluteLayout
             mInvInitialZoomScale = 1.0f / oldScale;
             mInvFinalZoomScale = 1.0f / mActualScale;
             mZoomScale = mActualScale;
+            WebViewCore.pauseUpdatePicture(mWebViewCore);
             invalidate();
             return true;
         } else {
@@ -5904,7 +5906,7 @@ public class WebView extends AbsoluteLayout
                     }
                     break;
                 case RESUME_WEBCORE_PRIORITY:
-                    WebViewCore.resumePriority(mWebViewCore);
+                    WebViewCore.resumePriority();
                     break;
 
                 case LONG_PRESS_CENTER:
