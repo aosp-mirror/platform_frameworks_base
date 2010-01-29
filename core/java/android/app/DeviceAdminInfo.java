@@ -50,7 +50,7 @@ public final class DeviceAdminInfo implements Parcelable {
     
     /**
      * A type of policy that this device admin can use: limit the passwords
-     * that the user can select, via {@link DevicePolicyManager#setPasswordMode}
+     * that the user can select, via {@link DevicePolicyManager#setPasswordQuality}
      * and {@link DevicePolicyManager#setPasswordMinimumLength}.
      * 
      * <p>To control this policy, the device admin must have a "limit-password"

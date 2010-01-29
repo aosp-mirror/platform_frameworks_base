@@ -288,6 +288,8 @@ public interface IActivityManager extends IInterface {
     public void overridePendingTransition(IBinder token, String packageName,
             int enterAnim, int exitAnim) throws RemoteException;
     
+    public boolean isUserAMonkey() throws RemoteException;
+    
     /*
      * Private non-Binder interfaces
      */
@@ -450,4 +452,5 @@ public interface IActivityManager extends IInterface {
     int OVERRIDE_PENDING_TRANSITION_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+100;
     int HANDLE_APPLICATION_WTF_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+101;
     int KILL_BACKGROUND_PROCESSES_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+102;
+    int IS_USER_A_MONKEY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+103;
 }

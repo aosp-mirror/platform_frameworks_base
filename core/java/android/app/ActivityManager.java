@@ -957,4 +957,15 @@ public class ActivityManager {
         return null;
     }
     
+    /**
+     * Returns "true" if the user interface is currently being messed with
+     * by a monkey.
+     */
+    public static boolean isUserAMonkey() {
+        try {
+            return ActivityManagerNative.getDefault().isUserAMonkey();
+        } catch (RemoteException e) {
+        }
+        return false;
+    }
 }

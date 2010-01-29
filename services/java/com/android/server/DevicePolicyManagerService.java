@@ -64,7 +64,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     IPowerManager mIPowerManager;
     
-    int mActivePasswordMode = DevicePolicyManager.PASSWORD_MODE_UNSPECIFIED;
+    int mActivePasswordQuality = DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
     int mActivePasswordLength = 0;
     int mFailedPasswordAttempts = 0;
     
@@ -76,7 +76,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     static class ActiveAdmin {
         final DeviceAdminInfo info;
         
-        int passwordMode = DevicePolicyManager.PASSWORD_MODE_UNSPECIFIED;
+        int passwordQuality = DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
         int minimumPasswordLength = 0;
         long maximumTimeToUnlock = 0;
         int maximumFailedPasswordsForWipe = 0;
@@ -89,17 +89,17 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         
         void writeToXml(XmlSerializer out)
                 throws IllegalArgumentException, IllegalStateException, IOException {
-            if (passwordMode != DevicePolicyManager.PASSWORD_MODE_UNSPECIFIED) {
-                out.startTag(null, "password-mode");
-                out.attribute(null, "value", Integer.toString(passwordMode));
-                out.endTag(null, "password-mode");
+            if (passwordQuality != DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED) {
+                out.startTag(null, "password-quality");
+                out.attribute(null, "value", Integer.toString(passwordQuality));
+                out.endTag(null, "password-quality");
                 if (minimumPasswordLength > 0) {
                     out.startTag(null, "min-password-length");
                     out.attribute(null, "value", Integer.toString(minimumPasswordLength));
                     out.endTag(null, "mn-password-length");
                 }
             }
-            if (maximumTimeToUnlock != DevicePolicyManager.PASSWORD_MODE_UNSPECIFIED) {
+            if (maximumTimeToUnlock != DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED) {
                 out.startTag(null, "max-time-to-unlock");
                 out.attribute(null, "value", Long.toString(maximumTimeToUnlock));
                 out.endTag(null, "max-time-to-unlock");
@@ -121,8 +121,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     continue;
                 }
                 String tag = parser.getName();
-                if ("password-mode".equals(tag)) {
-                    passwordMode = Integer.parseInt(
+                if ("password-quality".equals(tag)) {
+                    passwordQuality = Integer.parseInt(
                             parser.getAttributeValue(null, "value"));
                 } else if ("min-password-length".equals(tag)) {
                     minimumPasswordLength = Integer.parseInt(
@@ -435,34 +435,34 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
     
-    public void setPasswordMode(ComponentName who, int mode) {
+    public void setPasswordQuality(ComponentName who, int mode) {
         synchronized (this) {
             if (who == null) {
                 throw new NullPointerException("ComponentName is null");
             }
             ActiveAdmin ap = getActiveAdminForCallerLocked(who,
                     DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD);
-            if (ap.passwordMode != mode) {
-                ap.passwordMode = mode;
+            if (ap.passwordQuality != mode) {
+                ap.passwordQuality = mode;
                 saveSettingsLocked();
             }
         }
     }
     
-    public int getPasswordMode(ComponentName who) {
+    public int getPasswordQuality(ComponentName who) {
         synchronized (this) {
-            int mode = DevicePolicyManager.PASSWORD_MODE_UNSPECIFIED;
+            int mode = DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
             
             if (who != null) {
                 ActiveAdmin admin = getActiveAdminUncheckedLocked(who);
-                return admin != null ? admin.passwordMode : mode;
+                return admin != null ? admin.passwordQuality : mode;
             }
             
             final int N = mAdminList.size();
             for  (int i=0; i<N; i++) {
                 ActiveAdmin admin = mAdminList.get(i);
-                if (mode < admin.passwordMode) {
-                    mode = admin.passwordMode;
+                if (mode < admin.passwordQuality) {
+                    mode = admin.passwordQuality;
                 }
             }
             return mode;
@@ -509,7 +509,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             // so try to retrieve it to check that the caller is one.
             getActiveAdminForCallerLocked(null,
                     DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD);
-            return mActivePasswordMode >= getPasswordMode(null)
+            return mActivePasswordQuality >= getPasswordQuality(null)
                     && mActivePasswordLength >= getPasswordMinimumLength(null);
         }
     }
@@ -563,14 +563,24 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
     
     public boolean resetPassword(String password) {
-        int mode;
+        int quality;
         synchronized (this) {
             // This API can only be called by an active device admin,
             // so try to retrieve it to check that the caller is one.
             getActiveAdminForCallerLocked(null,
                     DeviceAdminInfo.USES_POLICY_RESET_PASSWORD);
-            mode = getPasswordMode(null);
-            if (password.length() < getPasswordMinimumLength(null)) {
+            quality = getPasswordQuality(null);
+            if (quality != DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED) {
+                int adjQuality = LockPatternUtils.adjustPasswordMode(password, quality);
+                if (adjQuality == DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED) {
+                    Log.w(TAG, "resetPassword: password does not meet quality " + quality);
+                    return false;
+                }
+                quality = adjQuality;
+            }
+            int length = getPasswordMinimumLength(null);
+            if (password.length() < length) {
+                Log.w(TAG, "resetPassword: password does not meet length " + length);
                 return false;
             }
         }
@@ -580,7 +590,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         long ident = Binder.clearCallingIdentity();
         try {
             LockPatternUtils utils = new LockPatternUtils(mContext);
-            utils.saveLockPassword(password, mode);
+            utils.saveLockPassword(password, quality);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
@@ -709,16 +719,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
     
-    public void setActivePasswordState(int mode, int length) {
+    public void setActivePasswordState(int quality, int length) {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.BIND_DEVICE_ADMIN, null);
         
         synchronized (this) {
-            if (mActivePasswordMode != mode || mActivePasswordLength != length
+            if (mActivePasswordQuality != quality || mActivePasswordLength != length
                     || mFailedPasswordAttempts != 0) {
                 long ident = Binder.clearCallingIdentity();
                 try {
-                    mActivePasswordMode = mode;
+                    mActivePasswordQuality = quality;
                     mActivePasswordLength = length;
                     if (mFailedPasswordAttempts != 0) {
                         mFailedPasswordAttempts = 0;

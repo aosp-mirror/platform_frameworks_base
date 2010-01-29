@@ -8081,6 +8081,14 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
     }
 
+    public boolean isUserAMonkey() {
+        // For now the fact that there is a controller implies
+        // we have a monkey.
+        synchronized (this) {
+            return mController != null;
+        }
+    }
+    
     public void registerActivityWatcher(IActivityWatcher watcher) {
         mWatchers.register(watcher);
     }
