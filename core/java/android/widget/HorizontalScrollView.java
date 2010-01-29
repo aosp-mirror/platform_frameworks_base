@@ -821,10 +821,13 @@ public class HorizontalScrollView extends FrameLayout {
         }
         long duration = AnimationUtils.currentAnimationTimeMillis() - mLastScroll;
         if (duration > ANIMATED_SCROLL_GAP) {
-            int width = getWidth() - mPaddingRight - mPaddingLeft;
-            int right = getChildAt(0).getWidth();
-            mScroller.startScroll(mScrollX, mScrollY, dx, dy,
-                    0, Math.max(0, right - width), 0, 0);
+            final int width = getWidth() - mPaddingRight - mPaddingLeft;
+            final int right = getChildAt(0).getWidth();
+            final int maxX = Math.max(0, right - width);
+            final int scrollX = mScrollX;
+            dx = Math.max(0, Math.min(scrollX + dx, maxX)) - scrollX;
+
+            mScroller.startScroll(scrollX, mScrollY, dx, 0);
             awakenScrollBars(mScroller.getDuration());
             invalidate();
         } else {
