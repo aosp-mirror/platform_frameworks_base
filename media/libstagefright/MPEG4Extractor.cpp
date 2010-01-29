@@ -28,6 +28,7 @@
 #include <string.h>
 
 #include <media/stagefright/DataSource.h>
+#include "include/ESDS.h"
 #include <media/stagefright/MediaBuffer.h>
 #include <media/stagefright/MediaBufferGroup.h>
 #include <media/stagefright/MediaDebug.h>
@@ -898,6 +899,21 @@ status_t MPEG4Extractor::parseChunk(off_t *offset, int depth) {
             mLastTrack->meta->setData(
                     kKeyESDS, kTypeESDS, &buffer[4], chunk_data_size - 4);
 
+            if (mPath.size() >= 2
+                    && mPath[mPath.size() - 2] == FOURCC('m', 'p', '4', 'a')) {
+                // Information from the ESDS must be relied on for proper
+                // setup of sample rate and channel count for MPEG4 Audio.
+                // The generic header appears to only contain generic
+                // information...
+
+                status_t err = updateAudioTrackInfoFromESDS_MPEG4Audio(
+                        &buffer[4], chunk_data_size - 4);
+
+                if (err != OK) {
+                    return err;
+                }
+            }
+
             *offset += chunk_size;
             break;
         }
@@ -1119,6 +1135,86 @@ sp<MediaSource> MPEG4Extractor::getTrack(size_t index) {
 
     return new MPEG4Source(
             track->meta, mDataSource, track->timescale, track->sampleTable);
+}
+
+status_t MPEG4Extractor::updateAudioTrackInfoFromESDS_MPEG4Audio(
+        const void *esds_data, size_t esds_size) {
+    ESDS esds(esds_data, esds_size);
+    const uint8_t *csd;
+    size_t csd_size;
+    if (esds.getCodecSpecificInfo(
+                (const void **)&csd, &csd_size) != OK) {
+        return ERROR_MALFORMED;
+    }
+
+#if 0
+    printf("ESD of size %d\n", csd_size);
+    hexdump(csd, csd_size);
+#endif
+
+    if (csd_size < 2) {
+        return ERROR_MALFORMED;
+    }
+
+    uint32_t objectType = csd[0] >> 3;
+
+    if (objectType == 31) {
+        return ERROR_UNSUPPORTED;
+    }
+
+    uint32_t freqIndex = (csd[0] & 7) << 1 | (csd[1] >> 7);
+    int32_t sampleRate = 0;
+    int32_t numChannels = 0;
+    if (freqIndex == 15) {
+        if (csd_size < 5) {
+            return ERROR_MALFORMED;
+        }
+
+        sampleRate = (csd[1] & 0x7f) << 17
+                        | csd[2] << 9
+                        | csd[3] << 1
+                        | (csd[4] >> 7);
+
+        numChannels = (csd[4] >> 3) & 15;
+    } else {
+        static uint32_t kSamplingRate[] = {
+            96000, 88200, 64000, 48000, 44100, 32000, 24000, 22050,
+            16000, 12000, 11025, 8000, 7350
+        };
+
+        if (freqIndex == 13 || freqIndex == 14) {
+            return ERROR_MALFORMED;
+        }
+
+        sampleRate = kSamplingRate[freqIndex];
+        numChannels = (csd[1] >> 3) & 15;
+    }
+
+    if (numChannels == 0) {
+        return ERROR_UNSUPPORTED;
+    }
+
+    int32_t prevSampleRate;
+    CHECK(mLastTrack->meta->findInt32(kKeySampleRate, &prevSampleRate));
+
+    if (prevSampleRate != sampleRate) {
+        LOGW("mpeg4 audio sample rate different from previous setting. "
+             "was: %d, now: %d", prevSampleRate, sampleRate);
+    }
+
+    mLastTrack->meta->setInt32(kKeySampleRate, sampleRate);
+
+    int32_t prevChannelCount;
+    CHECK(mLastTrack->meta->findInt32(kKeyChannelCount, &prevChannelCount));
+
+    if (prevChannelCount != numChannels) {
+        LOGW("mpeg4 audio channel count different from previous setting. "
+             "was: %d, now: %d", prevChannelCount, numChannels);
+    }
+
+    mLastTrack->meta->setInt32(kKeyChannelCount, numChannels);
+
+    return OK;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

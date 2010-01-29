@@ -65,6 +65,9 @@ private:
     status_t parseChunk(off_t *offset, int depth);
     status_t parseMetaData(off_t offset, size_t size);
 
+    status_t updateAudioTrackInfoFromESDS_MPEG4Audio(
+            const void *esds_data, size_t esds_size);
+
     MPEG4Extractor(const MPEG4Extractor &);
     MPEG4Extractor &operator=(const MPEG4Extractor &);
 };
