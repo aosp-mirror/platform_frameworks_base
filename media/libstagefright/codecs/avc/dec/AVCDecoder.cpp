@@ -322,8 +322,10 @@ status_t AVCDecoder::read(
                 crop_top = crop_left = 0;
             }
 
-            mFormat->setInt32(kKeyWidth, crop_right - crop_left + 1);
-            mFormat->setInt32(kKeyHeight, crop_bottom - crop_top + 1);
+            int32_t aligned_width = (crop_right - crop_left + 1 + 15) & ~15;
+            int32_t aligned_height = (crop_bottom - crop_top + 1 + 15) & ~15;
+            mFormat->setInt32(kKeyWidth, aligned_width);
+            mFormat->setInt32(kKeyHeight, aligned_height);
 
             mInputBuffer->release();
             mInputBuffer = NULL;
