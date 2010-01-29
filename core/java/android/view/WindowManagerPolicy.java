@@ -827,6 +827,12 @@ public interface WindowManagerPolicy {
     public void systemReady();
 
     /**
+     * Called when userActivity is signalled in the power manager.
+     * This is safe to call from any thread, with any window manager locks held or not.
+     */
+    public void userActivity();
+
+    /**
      * Called when we have finished booting and can now display the home
      * screen to the user.  This wilWl happen after systemReady(), and at
      * this point the display is active.
