@@ -438,4 +438,12 @@ public class MockPackageManager extends PackageManager {
     public boolean isSafeMode() {
         throw new UnsupportedOperationException();
     }
+
+    /**
+     * @hide
+     */
+    @Override
+    public int recommendAppInstallLocation(ApplicationInfo appInfo, Uri packageURI) {
+        throw new UnsupportedOperationException();
+    }
 }
