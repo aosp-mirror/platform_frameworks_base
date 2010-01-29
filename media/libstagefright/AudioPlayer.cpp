@@ -58,12 +58,15 @@ void AudioPlayer::setSource(const sp<MediaSource> &source) {
     mSource = source;
 }
 
-void AudioPlayer::start() {
+status_t AudioPlayer::start() {
     CHECK(!mStarted);
     CHECK(mSource != NULL);
 
     status_t err = mSource->start();
-    CHECK_EQ(err, OK);
+
+    if (err != OK) {
+        return err;
+    }
 
     sp<MetaData> format = mSource->getFormat();
     const char *mime;
@@ -83,7 +86,11 @@ void AudioPlayer::start() {
                 mSampleRate, numChannels, AudioSystem::PCM_16_BIT,
                 DEFAULT_AUDIOSINK_BUFFERCOUNT,
                 &AudioPlayer::AudioSinkCallback, this);
-        CHECK_EQ(err, OK);
+        if (err != OK) {
+            mSource->stop();
+
+            return err;
+        }
 
         mLatencyUs = (int64_t)mAudioSink->latency() * 1000;
         mFrameSize = mAudioSink->frameSize();
@@ -97,7 +104,14 @@ void AudioPlayer::start() {
                     : AudioSystem::CHANNEL_OUT_MONO,
                 8192, 0, &AudioCallback, this, 0);
 
-        CHECK_EQ(mAudioTrack->initCheck(), OK);
+        if (mAudioTrack->initCheck() != OK) {
+            delete mAudioTrack;
+            mAudioTrack = NULL;
+
+            mSource->stop();
+
+            return mAudioTrack->initCheck();
+        }
 
         mLatencyUs = (int64_t)mAudioTrack->latency() * 1000;
         mFrameSize = mAudioTrack->frameSize();
@@ -106,6 +120,8 @@ void AudioPlayer::start() {
     }
 
     mStarted = true;
+
+    return OK;
 }
 
 void AudioPlayer::pause() {
