@@ -372,7 +372,7 @@ public interface WindowManager extends ViewManager {
         /** Window flag: as long as this window is visible to the user, allow
          *  the lock screen to activate while the screen is on. 
          *  This can be used independently, or in combination with 
-         *  {@link #FLAG_KEEP_SCREEN_ON} and/or {@link FLAG_SHOW_WHEN_LOCKED} */
+         *  {@link #FLAG_KEEP_SCREEN_ON} and/or {@link #FLAG_SHOW_WHEN_LOCKED} */
         public static final int FLAG_ALLOW_LOCK_WHILE_SCREEN_ON     = 0x00000001;
 
         /** Window flag: everything behind this window will be dimmed.
