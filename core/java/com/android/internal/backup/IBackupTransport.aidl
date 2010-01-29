@@ -102,7 +102,7 @@ interface IBackupTransport {
     int finishBackup();
 
     /**
-     * Get the set of backups currently available over this transport.
+     * Get the set of all backups currently available over this transport.
      *
      * @return Descriptions of the set of restore images available for this device,
      *   or null if an error occurred (the attempt should be rescheduled).
@@ -110,11 +110,22 @@ interface IBackupTransport {
     RestoreSet[] getAvailableRestoreSets();
 
     /**
+     * Get the identifying token of the backup set currently being stored from
+     * this device.  This is used in the case of applications wishing to restore
+     * their last-known-good data.
+     *
+     * @return A token that can be passed to {@link #startRestore}, or 0 if there
+     *   is no backup set available corresponding to the current device state.
+     */
+    long getCurrentRestoreSet();
+
+    /**
      * Start restoring application data from backup.  After calling this function,
      * alternate calls to {@link #nextRestorePackage} and {@link #nextRestoreData}
      * to walk through the actual application data.
      *
-     * @param token A backup token as returned by {@link #getAvailableRestoreSets}.
+     * @param token A backup token as returned by {@link #getAvailableRestoreSets}
+     *   or {@link #getCurrentRestoreSet}.
      * @param packages List of applications to restore (if data is available).
      *   Application data will be restored in the order given.
      * @return One of {@link BackupConstants#TRANSPORT_OK} (OK so far, call
