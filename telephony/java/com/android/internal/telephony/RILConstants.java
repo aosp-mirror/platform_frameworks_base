@@ -259,4 +259,5 @@ cat include/telephony/ril.h | \
     int RIL_UNSOL_CDMA_INFO_REC = 1027;
     int RIL_UNSOL_OEM_HOOK_RAW = 1028;
     int RIL_UNSOL_RINGBACK_TONE = 1029;
+    int RIL_UNSOL_RESEND_INCALL_MUTE = 1030;
 }

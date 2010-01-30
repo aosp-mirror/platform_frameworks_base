@@ -65,6 +65,7 @@ public abstract class BaseCommands implements CommandsInterface {
     protected RegistrantList mT53ClirInfoRegistrants = new RegistrantList();
     protected RegistrantList mT53AudCntrlInfoRegistrants = new RegistrantList();
     protected RegistrantList mRingbackToneRegistrants = new RegistrantList();
+    protected RegistrantList mResendIncallMuteRegistrants = new RegistrantList();
 
     protected Registrant mSMSRegistrant;
     protected Registrant mNITZTimeRegistrant;
@@ -577,6 +578,15 @@ public abstract class BaseCommands implements CommandsInterface {
 
     public void unregisterForRingbackTone(Handler h) {
         mRingbackToneRegistrants.remove(h);
+    }
+
+    public void registerForResendIncallMute(Handler h, int what, Object obj) {
+        Registrant r = new Registrant (h, what, obj);
+        mResendIncallMuteRegistrants.add(r);
+    }
+
+    public void unregisterForResendIncallMute(Handler h) {
+        mResendIncallMuteRegistrants.remove(h);
     }
 
     //***** Protected Methods
