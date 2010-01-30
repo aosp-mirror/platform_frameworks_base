@@ -277,7 +277,7 @@ public class DevicePolicyManager {
     /**
      * Return the maximum password length that the device supports for a
      * particular password quality.
-     * @param mode The mode being interrogated.
+     * @param quality The quality being interrogated.
      * @return Returns the maximum length that the user can enter.
      */
     public int getPasswordMaximumLength(int quality) {
