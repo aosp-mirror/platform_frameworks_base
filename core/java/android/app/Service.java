@@ -292,8 +292,8 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
      * callback in that case.  The <code>handleCommand</code> method is implemented by
      * you as appropriate:
      * 
-     * <pre>{@include development/samples/ApiDemos/src/com/example/android/apis/app/ForegroundService.java
-     *   start_compatibility}</pre>
+     * {@sample development/samples/ApiDemos/src/com/example/android/apis/app/ForegroundService.java
+     *   start_compatibility}
      * 
      * @param intent The Intent supplied to {@link android.content.Context#startService}, 
      * as given.  This may be null if the service is being restarted after
@@ -474,8 +474,8 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
      * level 5, you can use the following model to call the the older {@link #setForeground}
      * or this modern method as appropriate:
      * 
-     * <pre>{@include development/samples/ApiDemos/src/com/example/android/apis/app/ForegroundService.java
-     *   foreground_compatibility}</pre>
+     * {@sample development/samples/ApiDemos/src/com/example/android/apis/app/ForegroundService.java
+     *   foreground_compatibility}
      * 
      * @param id The identifier for this notification as per
      * {@link NotificationManager#notify(int, Notification)
