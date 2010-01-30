@@ -641,7 +641,7 @@ class BackupManagerService extends IBackupManager.Stub {
                 mTransports.put(name, transport);
             } else {
                 mTransports.remove(name);
-                if (mCurrentTransport.equals(name)) {
+                if ((mCurrentTransport != null) && mCurrentTransport.equals(name)) {
                     mCurrentTransport = null;
                 }
                 // Nothing further to do in the unregistration case
