@@ -17,7 +17,6 @@
 package android.database.sqlite;
 
 import android.os.Debug;
-import android.os.SystemClock;
 import android.util.Log;
 
 /**
@@ -56,6 +55,9 @@ public class SQLiteStatement extends SQLiteProgram
             if (SQLiteDebug.DEBUG_SQL_STATEMENTS) {
                 Log.v(TAG, "execute() for [" + mSql + "]");
             }
+            if (SQLiteDebug.DEBUG_CAPTURE_SQL) {
+                Log.v(TAG, SQLiteDebug.captureSql(mDatabase.getPath(), mSql, getBindArgs()));
+            }
             native_execute();
             mDatabase.logTimeStat(mSql, timeStart);
         } finally {
@@ -83,6 +85,9 @@ public class SQLiteStatement extends SQLiteProgram
             if (SQLiteDebug.DEBUG_SQL_STATEMENTS) {
                 Log.v(TAG, "executeInsert() for [" + mSql + "]");
             }
+            if (SQLiteDebug.DEBUG_CAPTURE_SQL) {
+                Log.v(TAG, SQLiteDebug.captureSql(mDatabase.getPath(), mSql, getBindArgs()));
+            }
             native_execute();
             mDatabase.logTimeStat(mSql, timeStart);
             return mDatabase.lastInsertRow();
@@ -109,6 +114,9 @@ public class SQLiteStatement extends SQLiteProgram
             if (SQLiteDebug.DEBUG_SQL_STATEMENTS) {
                 Log.v(TAG, "simpleQueryForLong() for [" + mSql + "]");
             }
+            if (SQLiteDebug.DEBUG_CAPTURE_SQL) {
+                Log.v(TAG, SQLiteDebug.captureSql(mDatabase.getPath(), mSql, getBindArgs()));
+            }
             long retValue = native_1x1_long();
             mDatabase.logTimeStat(mSql, timeStart);
             return retValue;
@@ -134,6 +142,9 @@ public class SQLiteStatement extends SQLiteProgram
         try {
             if (SQLiteDebug.DEBUG_SQL_STATEMENTS) {
                 Log.v(TAG, "simpleQueryForString() for [" + mSql + "]");
+            }
+            if (SQLiteDebug.DEBUG_CAPTURE_SQL) {
+                Log.v(TAG, SQLiteDebug.captureSql(mDatabase.getPath(), mSql, getBindArgs()));
             }
             String retValue = native_1x1_string();
             mDatabase.logTimeStat(mSql, timeStart);
