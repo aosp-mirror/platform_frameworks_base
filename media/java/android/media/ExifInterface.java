@@ -28,22 +28,37 @@ import java.util.TimeZone;
  * This is a class for reading and writing Exif tags in a JPEG file.
  */
 public class ExifInterface {
-
     // The Exif tag names
+    /** Type is int. */
     public static final String TAG_ORIENTATION = "Orientation";
+    /** Type is String. */
     public static final String TAG_DATETIME = "DateTime";
+    /** Type is String. */
     public static final String TAG_MAKE = "Make";
+    /** Type is String. */
     public static final String TAG_MODEL = "Model";
+    /** Type is int. */
     public static final String TAG_FLASH = "Flash";
+    /** Type is int. */
     public static final String TAG_IMAGE_WIDTH = "ImageWidth";
+    /** Type is int. */
     public static final String TAG_IMAGE_LENGTH = "ImageLength";
+    /** String. Format is "num1/denom1,num2/denom2,num3/denom3". */
     public static final String TAG_GPS_LATITUDE = "GPSLatitude";
+    /** String. Format is "num1/denom1,num2/denom2,num3/denom3". */
     public static final String TAG_GPS_LONGITUDE = "GPSLongitude";
+    /** Type is String. */
     public static final String TAG_GPS_LATITUDE_REF = "GPSLatitudeRef";
+    /** Type is String. */
     public static final String TAG_GPS_LONGITUDE_REF = "GPSLongitudeRef";
+    /** Type is String. */
     public static final String TAG_GPS_TIMESTAMP = "GPSTimeStamp";
+    /** Type is String. */
     public static final String TAG_GPS_DATESTAMP = "GPSDateStamp";
+    /** Type is int. */
     public static final String TAG_WHITE_BALANCE = "WhiteBalance";
+    /** Type is rational. */
+    public static final String TAG_FOCAL_LENGTH = "FocalLength";
 
     // Constants used for the Orientation Exif tag.
     public static final int ORIENTATION_UNDEFINED = 0;
@@ -108,6 +123,29 @@ public class ExifInterface {
         if (value == null) return defaultValue;
         try {
             return Integer.valueOf(value);
+        } catch (NumberFormatException ex) {
+            return defaultValue;
+        }
+    }
+
+    /**
+     * Returns the double value of the specified rational tag. If there is no
+     * such tag in the JPEG file or the value cannot be parsed as double, return
+     * <var>defaultValue</var>.
+     *
+     * @param tag the name of the tag.
+     * @param defaultValue the value to return if the tag is not available.
+     */
+    public double getAttributeDouble(String tag, double defaultValue) {
+        String value = mAttributes.get(tag);
+        if (value == null) return defaultValue;
+        try {
+            int index = value.indexOf("/");
+            if (index == -1) return defaultValue;
+            double denom = Double.parseDouble(value.substring(index + 1));
+            if (denom == 0) return defaultValue;
+            double num = Double.parseDouble(value.substring(0, index));
+            return num / denom;
         } catch (NumberFormatException ex) {
             return defaultValue;
         }
