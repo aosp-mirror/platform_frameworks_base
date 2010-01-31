@@ -34,8 +34,10 @@ public:
 
     void set(const char *key, const char *value);
     void set(const char *key, int value);
+    void setFloat(const char *key, float value);
     const char *get(const char *key) const;
     int getInt(const char *key) const;
+    float getFloat(const char *key) const;
 
     /* preview-size=176x144 */
     void setPreviewSize(int width, int height);
