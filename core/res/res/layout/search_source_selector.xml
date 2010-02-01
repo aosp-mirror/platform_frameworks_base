@@ -16,11 +16,10 @@
 
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="42dip"
+    android:layout_width="48dip"
     android:layout_height="match_parent"
-    android:layout_marginBottom="2dip"
     android:foreground="@drawable/search_source_selector_indicator"
-    android:foregroundGravity="bottom|center_horizontal"
+    android:foregroundGravity="bottom|right"
     >
 
     <ImageButton
@@ -28,7 +27,6 @@
         android:background="@drawable/search_source_selector_background"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginBottom="6dip"
         android:scaleType="centerInside"
         android:focusable="true"
         android:clickable="true"
