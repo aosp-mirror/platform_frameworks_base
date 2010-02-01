@@ -1107,10 +1107,9 @@ class AppWidgetService extends IAppWidgetService.Stub
         }
     };
 
-    // TODO: If there's a better way of matching an intent filter against the
-    // packages for a given package, use that.
     void addProvidersForPackageLocked(String pkgName) {
         Intent intent = new Intent(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
+        intent.setPackage(pkgName);
         List<ResolveInfo> broadcastReceivers = mPackageManager.queryBroadcastReceivers(intent,
                 PackageManager.GET_META_DATA);
 
@@ -1125,11 +1124,10 @@ class AppWidgetService extends IAppWidgetService.Stub
         }
     }
 
-    // TODO: If there's a better way of matching an intent filter against the
-    // packages for a given package, use that.
     void updateProvidersForPackageLocked(String pkgName) {
         HashSet<String> keep = new HashSet<String>();
         Intent intent = new Intent(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
+        intent.setPackage(pkgName);
         List<ResolveInfo> broadcastReceivers = mPackageManager.queryBroadcastReceivers(intent,
                 PackageManager.GET_META_DATA);
 
