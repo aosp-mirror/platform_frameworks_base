@@ -134,11 +134,6 @@ public abstract class LocationProviderImpl extends LocationProvider {
     public abstract void disable();
 
     /**
-     * Returns true if the provider is currently enabled
-     */
-    public abstract boolean isEnabled();
-
-    /**
      * Returns a information on the status of this provider.
      * {@link #OUT_OF_SERVICE} is returned if the provider is
      * out of service, and this is not expected to change in the near
