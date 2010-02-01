@@ -37,7 +37,6 @@ interface ILocationProvider {
     int getAccuracy();
     void enable();
     void disable();
-    boolean isEnabled();
     int getStatus(out Bundle extras);
     long getStatusUpdateTime();
     void enableLocationTracking(boolean enable);
