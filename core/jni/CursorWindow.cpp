@@ -18,7 +18,8 @@
 #define LOG_TAG "CursorWindow"
 
 #include <utils/Log.h>
-#include <binder/MemoryDealer.h>
+#include <binder/MemoryHeapBase.h>
+#include <binder/MemoryBase.h>
 
 #include <assert.h>
 #include <string.h>
@@ -37,7 +38,7 @@ CursorWindow::CursorWindow(size_t maxSize) :
 {
 }
 
-bool CursorWindow::setMemory(sp<IMemory> memory)     
+bool CursorWindow::setMemory(const sp<IMemory>& memory)
 {
     mMemory = memory;
     mData = (uint8_t *) memory->pointer();
@@ -47,7 +48,6 @@ bool CursorWindow::setMemory(sp<IMemory> memory)
     mHeader = (window_header_t *) mData;
 
     // Make the window read-only
-    mHeap = NULL;
     ssize_t size = memory->size();
     mSize = size;
     mMaxSize = size;
@@ -60,9 +60,10 @@ bool CursorWindow::initBuffer(bool localOnly)
 {
     //TODO Use a non-memory dealer mmap region for localOnly
 
-    mHeap = new MemoryDealer(mMaxSize, "CursorWindow");
-    if (mHeap != NULL) {
-        mMemory = mHeap->allocate(mMaxSize);
+    sp<MemoryHeapBase> heap;
+    heap = new MemoryHeapBase(mMaxSize, 0, "CursorWindow");
+    if (heap != NULL) {
+        mMemory = new MemoryBase(heap, 0, mMaxSize);
         if (mMemory != NULL) {
             mData = (uint8_t *) mMemory->pointer();
             if (mData) {
@@ -75,10 +76,10 @@ bool CursorWindow::initBuffer(bool localOnly)
                 return true;                
             }
         } 
-        LOGE("memory dealer allocation failed");
+        LOGE("CursorWindow heap allocation failed");
         return false;
     } else {
-        LOGE("failed to create the memory dealer");
+        LOGE("failed to create the CursorWindow heap");
         return false;
     }
 }
