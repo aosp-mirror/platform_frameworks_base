@@ -16,9 +16,6 @@
 
 package com.android.common.speech;
 
-import android.content.Intent;
-import android.content.Context;
-
 /**
  * Logging event constants used for Voice Search and VoiceIME. These are the
  * keys and values of extras to be specified in logging broadcast intents.
