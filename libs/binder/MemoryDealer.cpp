@@ -17,12 +17,13 @@
 #define LOG_TAG "MemoryDealer"
 
 #include <binder/MemoryDealer.h>
+#include <binder/IPCThreadState.h>
+#include <binder/MemoryBase.h>
 
 #include <utils/Log.h>
-#include <binder/IPCThreadState.h>
 #include <utils/SortedVector.h>
 #include <utils/String8.h>
-#include <binder/MemoryBase.h>
+#include <utils/threads.h>
 
 #include <stdint.h>
 #include <stdio.h>
@@ -40,90 +41,203 @@
 namespace android {
 // ----------------------------------------------------------------------------
 
-HeapInterface::HeapInterface() { }
-HeapInterface::~HeapInterface() { }
+/*
+ * A simple templatized doubly linked-list implementation
+ */
 
-// ----------------------------------------------------------------------------
+template <typename NODE>
+class LinkedList
+{
+    NODE*  mFirst;
+    NODE*  mLast;
 
-AllocatorInterface::AllocatorInterface() { }
-AllocatorInterface::~AllocatorInterface() { }
-
-// ----------------------------------------------------------------------------
-
-class SimpleMemory : public MemoryBase {
 public:
-    SimpleMemory(const sp<IMemoryHeap>& heap, ssize_t offset, size_t size);
-    virtual ~SimpleMemory();
+                LinkedList() : mFirst(0), mLast(0) { }
+    bool        isEmpty() const { return mFirst == 0; }
+    NODE const* head() const { return mFirst; }
+    NODE*       head() { return mFirst; }
+    NODE const* tail() const { return mLast; }
+    NODE*       tail() { return mLast; }
+
+    void insertAfter(NODE* node, NODE* newNode) {
+        newNode->prev = node;
+        newNode->next = node->next;
+        if (node->next == 0) mLast = newNode;
+        else                 node->next->prev = newNode;
+        node->next = newNode;
+    }
+
+    void insertBefore(NODE* node, NODE* newNode) {
+         newNode->prev = node->prev;
+         newNode->next = node;
+         if (node->prev == 0)   mFirst = newNode;
+         else                   node->prev->next = newNode;
+         node->prev = newNode;
+    }
+
+    void insertHead(NODE* newNode) {
+        if (mFirst == 0) {
+            mFirst = mLast = newNode;
+            newNode->prev = newNode->next = 0;
+        } else {
+            newNode->prev = 0;
+            newNode->next = mFirst;
+            mFirst->prev = newNode;
+            mFirst = newNode;
+        }
+    }
+
+    void insertTail(NODE* newNode) {
+        if (mLast == 0) {
+            insertHead(newNode);
+        } else {
+            newNode->prev = mLast;
+            newNode->next = 0;
+            mLast->next = newNode;
+            mLast = newNode;
+        }
+    }
+
+    NODE* remove(NODE* node) {
+        if (node->prev == 0)    mFirst = node->next;
+        else                    node->prev->next = node->next;
+        if (node->next == 0)    mLast = node->prev;
+        else                    node->next->prev = node->prev;
+        return node;
+    }
 };
 
+// ----------------------------------------------------------------------------
+
+class Allocation : public MemoryBase {
+public:
+    Allocation(const sp<MemoryDealer>& dealer,
+            const sp<IMemoryHeap>& heap, ssize_t offset, size_t size);
+    virtual ~Allocation();
+private:
+    sp<MemoryDealer> mDealer;
+};
 
 // ----------------------------------------------------------------------------
 
-MemoryDealer::Allocation::Allocation(
-        const sp<MemoryDealer>& dealer, ssize_t offset, size_t size,
-        const sp<IMemory>& memory)
-    : mDealer(dealer), mOffset(offset), mSize(size), mMemory(memory) 
+class SimpleBestFitAllocator
 {
+    enum {
+        PAGE_ALIGNED = 0x00000001
+    };
+public:
+    SimpleBestFitAllocator(size_t size);
+    ~SimpleBestFitAllocator();
+
+    size_t      allocate(size_t size, uint32_t flags = 0);
+    status_t    deallocate(size_t offset);
+    size_t      size() const;
+    void        dump(const char* what) const;
+    void        dump(String8& res, const char* what) const;
+
+private:
+
+    struct chunk_t {
+        chunk_t(size_t start, size_t size)
+        : start(start), size(size), free(1), prev(0), next(0) {
+        }
+        size_t              start;
+        size_t              size : 28;
+        int                 free : 4;
+        mutable chunk_t*    prev;
+        mutable chunk_t*    next;
+    };
+
+    ssize_t  alloc(size_t size, uint32_t flags);
+    chunk_t* dealloc(size_t start);
+    void     dump_l(const char* what) const;
+    void     dump_l(String8& res, const char* what) const;
+
+    static const int    kMemoryAlign;
+    mutable Mutex       mLock;
+    LinkedList<chunk_t> mList;
+    size_t              mHeapSize;
+};
+
+// ----------------------------------------------------------------------------
+
+Allocation::Allocation(
+        const sp<MemoryDealer>& dealer,
+        const sp<IMemoryHeap>& heap, ssize_t offset, size_t size)
+    : MemoryBase(heap, offset, size), mDealer(dealer)
+{
+#ifndef NDEBUG
+    void* const start_ptr = (void*)(intptr_t(heap->base()) + offset);
+    memset(start_ptr, 0xda, size);
+#endif
 }
 
-MemoryDealer::Allocation::~Allocation()
+Allocation::~Allocation()
 {
-    if (mSize) {
+    size_t freedOffset = getOffset();
+    size_t freedSize   = getSize();
+    if (freedSize) {
         /* NOTE: it's VERY important to not free allocations of size 0 because
          * they're special as they don't have any record in the allocator
          * and could alias some real allocation (their offset is zero). */
-        mDealer->deallocate(mOffset);
-    }
-}
+        mDealer->deallocate(freedOffset);
 
-sp<IMemoryHeap> MemoryDealer::Allocation::getMemory(
-    ssize_t* offset, size_t* size) const
-{
-    return mMemory->getMemory(offset, size);
+        // keep the size to unmap in excess
+        size_t pagesize = getpagesize();
+        size_t start = freedOffset;
+        size_t end = start + freedSize;
+        start &= ~(pagesize-1);
+        end = (end + pagesize-1) & ~(pagesize-1);
+
+        // give back to the kernel the pages we don't need
+        size_t free_start = freedOffset;
+        size_t free_end = free_start + freedSize;
+        if (start < free_start)
+            start = free_start;
+        if (end > free_end)
+            end = free_end;
+        start = (start + pagesize-1) & ~(pagesize-1);
+        end &= ~(pagesize-1);
+
+        if (start < end) {
+            void* const start_ptr = (void*)(intptr_t(getHeap()->base()) + start);
+            size_t size = end-start;
+
+#ifndef NDEBUG
+            memset(start_ptr, 0xdf, size);
+#endif
+
+            // MADV_REMOVE is not defined on Dapper based Goobuntu
+#ifdef MADV_REMOVE
+            if (size) {
+                int err = madvise(start_ptr, size, MADV_REMOVE);
+                LOGW_IF(err, "madvise(%p, %u, MADV_REMOVE) returned %s",
+                        start_ptr, size, err<0 ? strerror(errno) : "Ok");
+            }
+#endif
+        }
+    }
 }
 
 // ----------------------------------------------------------------------------
 
-MemoryDealer::MemoryDealer(size_t size, uint32_t flags, const char* name)
-    : mHeap(new SharedHeap(size, flags, name)),
+MemoryDealer::MemoryDealer(size_t size, const char* name)
+    : mHeap(new MemoryHeapBase(size, 0, name)),
     mAllocator(new SimpleBestFitAllocator(size))
 {    
 }
 
-MemoryDealer::MemoryDealer(const sp<HeapInterface>& heap)
-    : mHeap(heap),
-    mAllocator(new SimpleBestFitAllocator(heap->virtualSize()))
-{
-}
-
-MemoryDealer::MemoryDealer( const sp<HeapInterface>& heap,
-        const sp<AllocatorInterface>& allocator)
-    : mHeap(heap), mAllocator(allocator)
-{
-}
-
 MemoryDealer::~MemoryDealer()
 {
+    delete mAllocator;
 }
 
-sp<IMemory> MemoryDealer::allocate(size_t size, uint32_t flags)
+sp<IMemory> MemoryDealer::allocate(size_t size)
 {
     sp<IMemory> memory;
-    const ssize_t offset = allocator()->allocate(size, flags);
+    const ssize_t offset = allocator()->allocate(size);
     if (offset >= 0) {
-        sp<IMemory> new_memory = heap()->mapMemory(offset, size);
-        if (new_memory != 0) {
-            memory = new Allocation(this, offset, size, new_memory);
-        } else {
-            LOGE("couldn't map [%8lx, %u]", offset, size);
-            if (size) {
-                /* NOTE: it's VERY important to not free allocations of size 0
-                 * because they're special as they don't have any record in the 
-                 * allocator and could alias some real allocation 
-                 * (their offset is zero). */
-                allocator()->deallocate(offset);
-            }
-        }        
+        memory = new Allocation(this, heap(), offset, size);
     }
     return memory;
 }
@@ -133,16 +247,16 @@ void MemoryDealer::deallocate(size_t offset)
     allocator()->deallocate(offset);
 }
 
-void MemoryDealer::dump(const char* what, uint32_t flags) const
+void MemoryDealer::dump(const char* what) const
 {
-    allocator()->dump(what, flags);
+    allocator()->dump(what);
 }
 
-const sp<HeapInterface>& MemoryDealer::heap() const {
+const sp<IMemoryHeap>& MemoryDealer::heap() const {
     return mHeap;
 }
 
-const sp<AllocatorInterface>& MemoryDealer::allocator() const {
+SimpleBestFitAllocator* MemoryDealer::allocator() const {
     return mAllocator;
 }
 
@@ -287,28 +401,28 @@ SimpleBestFitAllocator::chunk_t* SimpleBestFitAllocator::dealloc(size_t start)
     return 0;
 }
 
-void SimpleBestFitAllocator::dump(const char* what, uint32_t flags) const
+void SimpleBestFitAllocator::dump(const char* what) const
 {
     Mutex::Autolock _l(mLock);
-    dump_l(what, flags);
+    dump_l(what);
 }
 
-void SimpleBestFitAllocator::dump_l(const char* what, uint32_t flags) const
+void SimpleBestFitAllocator::dump_l(const char* what) const
 {
     String8 result;
-    dump_l(result, what, flags);
+    dump_l(result, what);
     LOGD("%s", result.string());
 }
 
 void SimpleBestFitAllocator::dump(String8& result,
-        const char* what, uint32_t flags) const
+        const char* what) const
 {
     Mutex::Autolock _l(mLock);
-    dump_l(result, what, flags);
+    dump_l(result, what);
 }
 
 void SimpleBestFitAllocator::dump_l(String8& result,
-        const char* what, uint32_t flags) const
+        const char* what) const
 {
     size_t size = 0;
     int32_t i = 0;
@@ -341,81 +455,10 @@ void SimpleBestFitAllocator::dump_l(String8& result,
         i++;
         cur = cur->next;
     }
-    snprintf(buffer, SIZE, "  size allocated: %u (%u KB)\n", int(size), int(size/1024));
+    snprintf(buffer, SIZE,
+            "  size allocated: %u (%u KB)\n", int(size), int(size/1024));
     result.append(buffer);
 }
-        
-// ----------------------------------------------------------------------------
 
-SharedHeap::SharedHeap() 
-    : HeapInterface(), MemoryHeapBase() 
-{ 
-}
-
-SharedHeap::SharedHeap(size_t size, uint32_t flags, char const * name)
-    : MemoryHeapBase(size, flags, name)
-{
-}
-
-SharedHeap::~SharedHeap()
-{
-}
-
-sp<IMemory> SharedHeap::mapMemory(size_t offset, size_t size)
-{
-    return new SimpleMemory(this, offset, size);
-}
- 
-
-SimpleMemory::SimpleMemory(const sp<IMemoryHeap>& heap,
-        ssize_t offset, size_t size)
-    : MemoryBase(heap, offset, size)
-{
-#ifndef NDEBUG
-    void* const start_ptr = (void*)(intptr_t(heap->base()) + offset);
-    memset(start_ptr, 0xda, size);
-#endif
-}
-
-SimpleMemory::~SimpleMemory()
-{
-    size_t freedOffset = getOffset();
-    size_t freedSize   = getSize();
-
-    // keep the size to unmap in excess
-    size_t pagesize = getpagesize();
-    size_t start = freedOffset;
-    size_t end = start + freedSize;
-    start &= ~(pagesize-1);
-    end = (end + pagesize-1) & ~(pagesize-1);
-
-    // give back to the kernel the pages we don't need
-    size_t free_start = freedOffset;
-    size_t free_end = free_start + freedSize;
-    if (start < free_start)
-        start = free_start;
-    if (end > free_end)
-        end = free_end;
-    start = (start + pagesize-1) & ~(pagesize-1);
-    end &= ~(pagesize-1);    
-
-    if (start < end) {
-        void* const start_ptr = (void*)(intptr_t(getHeap()->base()) + start);
-        size_t size = end-start;
-
-#ifndef NDEBUG
-        memset(start_ptr, 0xdf, size);
-#endif
-
-        // MADV_REMOVE is not defined on Dapper based Goobuntu 
-#ifdef MADV_REMOVE 
-        if (size) {
-            int err = madvise(start_ptr, size, MADV_REMOVE);
-            LOGW_IF(err, "madvise(%p, %u, MADV_REMOVE) returned %s",
-                    start_ptr, size, err<0 ? strerror(errno) : "Ok");
-        }
-#endif
-    }
-}
 
 }; // namespace android

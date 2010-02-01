@@ -34,8 +34,10 @@ public:
 
     void set(const char *key, const char *value);
     void set(const char *key, int value);
+    void setFloat(const char *key, float value);
     const char *get(const char *key) const;
     int getInt(const char *key) const;
+    float getFloat(const char *key) const;
 
     /* preview-size=176x144 */
     void setPreviewSize(int width, int height);
@@ -176,6 +178,16 @@ public:
     // Supported focus modes.
     // Example value: "auto,macro,fixed". Read only.
     static const char KEY_SUPPORTED_FOCUS_MODES[];
+    // Focal length in millimeter.
+    // Example value: "4.31". Read only.
+    static const char KEY_FOCAL_LENGTH[];
+    // Horizontal angle of view in degrees.
+    // Example value: "54.8". Read only.
+    static const char KEY_HORIZONTAL_VIEW_ANGLE[];
+    // Vertical angle of view in degrees.
+    // Example value: "42.5". Read only.
+    static const char KEY_VERTICAL_VIEW_ANGLE[];
+
 
         // Values for white balance settings.
     static const char WHITE_BALANCE_AUTO[];

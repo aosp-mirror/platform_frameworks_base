@@ -34,6 +34,7 @@ public class DdmHandleHeap extends ChunkHandler {
     public static final int CHUNK_HPIF = type("HPIF");
     public static final int CHUNK_HPSG = type("HPSG");
     public static final int CHUNK_HPDU = type("HPDU");
+    public static final int CHUNK_HPDS = type("HPDS");
     public static final int CHUNK_NHSG = type("NHSG");
     public static final int CHUNK_HPGC = type("HPGC");
     public static final int CHUNK_REAE = type("REAE");
@@ -53,6 +54,7 @@ public class DdmHandleHeap extends ChunkHandler {
         DdmServer.registerHandler(CHUNK_HPIF, mInstance);
         DdmServer.registerHandler(CHUNK_HPSG, mInstance);
         DdmServer.registerHandler(CHUNK_HPDU, mInstance);
+        DdmServer.registerHandler(CHUNK_HPDS, mInstance);
         DdmServer.registerHandler(CHUNK_NHSG, mInstance);
         DdmServer.registerHandler(CHUNK_HPGC, mInstance);
         DdmServer.registerHandler(CHUNK_REAE, mInstance);
@@ -86,6 +88,8 @@ public class DdmHandleHeap extends ChunkHandler {
             return handleHPSGNHSG(request, false);
         } else if (type == CHUNK_HPDU) {
             return handleHPDU(request);
+        } else if (type == CHUNK_HPDS) {
+            return handleHPDS(request);
         } else if (type == CHUNK_NHSG) {
             return handleHPSGNHSG(request, true);
         } else if (type == CHUNK_HPGC) {
@@ -167,13 +171,45 @@ public class DdmHandleHeap extends ChunkHandler {
             result = -1;
         } catch (IOException ioe) {
             result = -1;
-        } catch (RuntimeException ioe) {
+        } catch (RuntimeException re) {
             result = -1;
         }
 
         /* create a non-empty reply so the handler fires on completion */
         byte[] reply = { result };
         return new Chunk(CHUNK_HPDU, reply, 0, reply.length);
+    }
+
+    /*
+     * Handle a "HeaP Dump Streaming" request.
+     *
+     * This tells the VM to create a heap dump and send it directly to
+     * DDMS.  The dumps are large enough that we don't want to copy the
+     * data into a byte[] and send it from here.
+     */
+    private Chunk handleHPDS(Chunk request) {
+        ByteBuffer in = wrapChunk(request);
+        byte result;
+
+        /* get the filename for the output file */
+        if (Config.LOGD)
+            Log.d("ddm-heap", "Heap dump: [DDMS]");
+
+        String failMsg = null;
+        try {
+            Debug.dumpHprofDataDdms();
+        } catch (UnsupportedOperationException uoe) {
+            failMsg = "hprof dumps not supported in this VM";
+        } catch (RuntimeException re) {
+            failMsg = "Exception: " + re.getMessage();
+        }
+
+        if (failMsg != null) {
+            Log.w("ddm-heap", failMsg);
+            return createFailChunk(1, failMsg);
+        } else {
+            return null;
+        }
     }
 
     /*

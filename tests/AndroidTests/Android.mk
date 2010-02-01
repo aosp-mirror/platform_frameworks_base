@@ -11,8 +11,7 @@ LOCAL_STATIC_JAVA_LIBRARIES := gsf-client
 LOCAL_AAPT_FLAGS = -c xx_YY -c cs -c 160dpi -c 32dpi -c 240dpi
 
 LOCAL_SRC_FILES := \
-	$(call all-subdir-java-files) \
-	src/com/android/unit_tests/os/IAidlTest.aidl
+	$(call all-subdir-java-files)
 
 LOCAL_PACKAGE_NAME := AndroidTests
 LOCAL_CERTIFICATE := platform

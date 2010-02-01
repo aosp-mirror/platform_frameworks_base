@@ -8,25 +8,13 @@
           http://www.apache.org/licenses/LICENSE-2.0
   
      Unless required by applicable law or agreed to in writing, software
-     distributed under the License is distributed on an "AS IS" BASIS,
+     distributed under the License is distributed on an "AS IS" BASI
      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="permlab_testGranted">Test Granted</string>
-    <string name="permdesc_testGranted">Used for running unit tests, for
-        testing operations where we have the permission.</string>
-    <string name="permlab_testDenied">Test Denied</string>
-    <string name="permdesc_testDenied">Used for running unit tests, for
-        testing operations where we do not have the permission.</string>
-
-    <string name="layout_five_text_text">S</string>
-
-    <string name="layout_four_text_text">S</string>
-
-    <string name="layout_six_text_text">S</string>
 
     <string name="coerceIntegerToString">100</string>
     <string name="coerceBooleanToString">true</string>
@@ -41,17 +29,10 @@
     
     <string name="reference">here</string>
     
-    <string name="metadata_text">text</string>
-
-    <string name="menu_test">test</string>
-    
     <plurals name="plurals_test">
         <item quantity="one">A dog</item>
         <item quantity="other">Some dogs</item>
     </plurals>
-    
-    <string name="searchable_label">SearchManager Test</string>
-    <string name="searchable_hint">A search hint</string>
     
 <!--    <string name="layout_six_text_text">F</string> -->
 </resources>

@@ -2385,7 +2385,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     // to provide the correct semantics while starting.
                     final int mask =
                         WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
-                        | WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD;
+                        | WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD
+                        | WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON;
                     WindowManager.LayoutParams sa = win.mAppToken.startingWindow.mAttrs;
                     sa.flags = (sa.flags&~mask) | (win.mAttrs.flags&mask);
                 }

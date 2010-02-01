@@ -127,7 +127,7 @@ void SubRegionMemory::revoke()
 
 MemoryHeapPmem::MemoryHeapPmem(const sp<MemoryHeapBase>& pmemHeap,
         uint32_t flags)
-    : HeapInterface(), MemoryHeapBase()
+    : MemoryHeapBase()
 {
     char const * const device = pmemHeap->getDevice();
 #if HAVE_ANDROID_OS

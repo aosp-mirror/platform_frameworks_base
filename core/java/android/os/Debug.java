@@ -726,6 +726,18 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
     }
 
     /**
+     * Collect "hprof" and send it to DDMS.  This will cause a GC.
+     *
+     * @throws UnsupportedOperationException if the VM was built without
+     *         HPROF support.
+     *
+     * @hide
+     */
+    public static void dumpHprofDataDdms() {
+        VMDebug.dumpHprofDataDdms();
+    }
+
+    /**
      * Returns the number of sent transactions from this process.
      * @return The number of sent transactions or -1 if it could not read t.
      */

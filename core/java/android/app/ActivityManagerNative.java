@@ -1178,6 +1178,14 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             int enterAnim = data.readInt();
             int exitAnim = data.readInt();
             overridePendingTransition(token, packageName, enterAnim, exitAnim);
+            reply.writeNoException();
+            return true;
+        }
+        
+        case IS_USER_A_MONKEY_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            reply.writeInt(isUserAMonkey() ? 1 : 0);
+            reply.writeNoException();
             return true;
         }
         }
@@ -2596,6 +2604,18 @@ class ActivityManagerProxy implements IActivityManager
         reply.readException();
         data.recycle();
         reply.recycle();
+    }
+    
+    public boolean isUserAMonkey() throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        mRemote.transact(IS_USER_A_MONKEY_TRANSACTION, data, reply, 0);
+        reply.readException();
+        boolean res = reply.readInt() != 0;
+        data.recycle();
+        reply.recycle();
+        return res;
     }
     
     private IBinder mRemote;

@@ -249,7 +249,16 @@ void AwesomePlayer::reset_l() {
 
     if (mVideoSource != NULL) {
         mVideoSource->stop();
+
+        // The following hack is necessary to ensure that the OMX
+        // component is completely released by the time we may try
+        // to instantiate it again.
+        wp<MediaSource> tmp = mVideoSource;
         mVideoSource.clear();
+        while (tmp.promote() != NULL) {
+            usleep(1000);
+        }
+        IPCThreadState::self()->flushCommands();
     }
 
     mAudioSource.clear();
@@ -369,7 +378,16 @@ status_t AwesomePlayer::play() {
                         &AwesomePlayer::AudioNotify, this);
 
                 mAudioPlayer->setSource(mAudioSource);
-                mAudioPlayer->start();
+                status_t err = mAudioPlayer->start();
+
+                if (err != OK) {
+                    delete mAudioPlayer;
+                    mAudioPlayer = NULL;
+
+                    mFlags &= ~(PLAYING | FIRST_FRAME);
+
+                    return err;
+                }
 
                 delete mTimeSource;
                 mTimeSource = mAudioPlayer;

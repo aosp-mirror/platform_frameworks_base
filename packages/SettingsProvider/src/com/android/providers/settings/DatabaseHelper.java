@@ -71,7 +71,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // database gets upgraded properly. At a minimum, please confirm that 'upgradeVersion'
     // is properly propagated through your change.  Not doing so will result in a loss of user
     // settings.
-    private static final int DATABASE_VERSION = 47;
+    private static final int DATABASE_VERSION = 48;
 
     private Context mContext;
 
@@ -595,8 +595,23 @@ public class DatabaseHelper extends SQLiteOpenHelper {
            upgradeVersion = 47;
        }
 
+        
+        if (upgradeVersion == 47) {
+            /*
+             * The password mode constants have changed again; reset back to no
+             * password.
+             */
+            db.beginTransaction();
+            try {
+                db.execSQL("DELETE FROM system WHERE name='lockscreen.password_type';");
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+            }
+           upgradeVersion = 48;
+       }
 
-        if (upgradeVersion != currentVersion) {
+       if (upgradeVersion != currentVersion) {
             Log.w(TAG, "Got stuck trying to upgrade from version " + upgradeVersion
                     + ", must wipe the settings provider");
             db.execSQL("DROP TABLE IF EXISTS system");

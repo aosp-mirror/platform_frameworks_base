@@ -65,9 +65,8 @@ public class SQLiteDatabase extends SQLiteClosable {
     /**
      * Algorithms used in ON CONFLICT clause
      * http://www.sqlite.org/lang_conflict.html
-     * @hide
      */
-    public enum ConflictAlgorithm {
+    public static final class ConflictAlgorithm {
         /**
          *  When a constraint violation occurs, an immediate ROLLBACK occurs,
          * thus ending the current transaction, and the command aborts with a
@@ -75,14 +74,14 @@ public class SQLiteDatabase extends SQLiteClosable {
          * (other than the implied transaction that is created on every command)
          *  then this algorithm works the same as ABORT.
          */
-        ROLLBACK("ROLLBACK"),
+        public static final int ROLLBACK = 1;
 
         /**
          * When a constraint violation occurs,no ROLLBACK is executed
          * so changes from prior commands within the same transaction
          * are preserved. This is the default behavior.
          */
-        ABORT("ABORT"),
+        public static final int ABORT = 2;
 
         /**
          * When a constraint violation occurs, the command aborts with a return
@@ -90,7 +89,7 @@ public class SQLiteDatabase extends SQLiteClosable {
          * the command made prior to encountering the constraint violation
          * are preserved and are not backed out.
          */
-        FAIL("FAIL"),
+        public static final int FAIL = 3;
 
         /**
          * When a constraint violation occurs, the one row that contains
@@ -99,7 +98,7 @@ public class SQLiteDatabase extends SQLiteClosable {
          * after the row that contained the constraint violation continue to be
          * inserted or updated normally. No error is returned.
          */
-        IGNORE("IGNORE"),
+        public static final int IGNORE = 4;
 
         /**
          * When a UNIQUE constraint violation occurs, the pre-existing rows that
@@ -114,15 +113,16 @@ public class SQLiteDatabase extends SQLiteClosable {
          * it does not invoke delete triggers on those rows.
          *  This behavior might change in a future release.
          */
-        REPLACE("REPLACE");
+        public static final int REPLACE = 5;
 
-        private final String mValue;
-        ConflictAlgorithm(String value) {
-            mValue = value;
-        }
-        public String value() {
-            return mValue;
-        }
+        /**
+         * use the following when no conflict action is specified.
+         */
+        public static final int NONE = 0;
+        private static final String[] VALUES = new String[]
+                {"", " OR ROLLBACK ", " OR ABORT ", " OR FAIL ", " OR IGNORE ", " OR REPLACE "};
+
+        private ConflictAlgorithm() {}  // disable instantiation of this class
     }
 
     /**
@@ -1334,7 +1334,7 @@ public class SQLiteDatabase extends SQLiteClosable {
      */
     public long insert(String table, String nullColumnHack, ContentValues values) {
         try {
-            return insertWithOnConflict(table, nullColumnHack, values, null);
+            return insertWithOnConflict(table, nullColumnHack, values, ConflictAlgorithm.NONE);
         } catch (SQLException e) {
             Log.e(TAG, "Error inserting " + values, e);
             return -1;
@@ -1356,7 +1356,7 @@ public class SQLiteDatabase extends SQLiteClosable {
      */
     public long insertOrThrow(String table, String nullColumnHack, ContentValues values)
             throws SQLException {
-        return insertWithOnConflict(table, nullColumnHack, values, null);
+        return insertWithOnConflict(table, nullColumnHack, values, ConflictAlgorithm.NONE);
     }
 
     /**
@@ -1408,12 +1408,14 @@ public class SQLiteDatabase extends SQLiteClosable {
      * @param initialValues this map contains the initial column values for the
      *            row. The keys should be the column names and the values the
      *            column values
-     * @param algorithm  {@link ConflictAlgorithm} for insert conflict resolver
-     * @return the row ID of the newly inserted row, or -1 if an error occurred
-     * @hide
+     * @param conflictAlgorithm  {@link ConflictAlgorithm} for insert conflict resolver
+     * @return the row ID of the newly inserted row
+     * OR the primary key of the existing row if the input param 'conflictAlgorithm' =
+     * {@link ConflictAlgorithm#IGNORE}
+     * OR -1 if any error
      */
     public long insertWithOnConflict(String table, String nullColumnHack,
-            ContentValues initialValues, ConflictAlgorithm algorithm) {
+            ContentValues initialValues, int conflictAlgorithm) {
         if (!isOpen()) {
             throw new IllegalStateException("database not open");
         }
@@ -1421,10 +1423,7 @@ public class SQLiteDatabase extends SQLiteClosable {
         // Measurements show most sql lengths <= 152
         StringBuilder sql = new StringBuilder(152);
         sql.append("INSERT");
-        if (algorithm != null) {
-            sql.append(" OR ");
-            sql.append(algorithm.value());
-        }
+        sql.append(ConflictAlgorithm.VALUES[conflictAlgorithm]);
         sql.append(" INTO ");
         sql.append(table);
         // Measurements show most values lengths < 40
@@ -1548,7 +1547,7 @@ public class SQLiteDatabase extends SQLiteClosable {
      * @return the number of rows affected
      */
     public int update(String table, ContentValues values, String whereClause, String[] whereArgs) {
-        return updateWithOnConflict(table, values, whereClause, whereArgs, null);
+        return updateWithOnConflict(table, values, whereClause, whereArgs, ConflictAlgorithm.NONE);
     }
 
     /**
@@ -1559,12 +1558,11 @@ public class SQLiteDatabase extends SQLiteClosable {
      *            valid value that will be translated to NULL.
      * @param whereClause the optional WHERE clause to apply when updating.
      *            Passing null will update all rows.
-     * @param algorithm  {@link ConflictAlgorithm} for update conflict resolver
+     * @param conflictAlgorithm  {@link ConflictAlgorithm} for update conflict resolver
      * @return the number of rows affected
-     * @hide
      */
     public int updateWithOnConflict(String table, ContentValues values,
-            String whereClause, String[] whereArgs, ConflictAlgorithm algorithm) {
+            String whereClause, String[] whereArgs, int conflictAlgorithm) {
         if (!isOpen()) {
             throw new IllegalStateException("database not open");
         }
@@ -1575,12 +1573,7 @@ public class SQLiteDatabase extends SQLiteClosable {
 
         StringBuilder sql = new StringBuilder(120);
         sql.append("UPDATE ");
-        if (algorithm != null) {
-            sql.append("OR ");
-            sql.append(algorithm.value());
-            sql.append(" ");
-        }
-
+        sql.append(ConflictAlgorithm.VALUES[conflictAlgorithm]);
         sql.append(table);
         sql.append(" SET ");
 

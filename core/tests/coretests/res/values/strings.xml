@@ -100,4 +100,21 @@
     <string name="include_button">I was included!</string>
 
     <string name="view">View</string>
+
+    <string name="layout_five_text_text">S</string>
+    <string name="layout_four_text_text">S</string>
+    <string name="layout_six_text_text">S</string>
+
+    <string name="menu_test">test</string>
+    <string name="metadata_text">text</string>
+
+    <string name="permlab_testGranted">Test Granted</string>
+    <string name="permdesc_testGranted">Used for running unit tests, for
+        testing operations where we have the permission.</string>
+    <string name="permlab_testDenied">Test Denied</string>
+    <string name="permdesc_testDenied">Used for running unit tests, for
+        testing operations where we do not have the permission.</string>
+
+    <string name="searchable_label">SearchManager Test</string>
+    <string name="searchable_hint">A search hint</string>
 </resources>

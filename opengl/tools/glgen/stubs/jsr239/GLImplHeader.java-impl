@@ -47,6 +47,12 @@ public class GLImpl implements GL10, GL10Ext, GL11, GL11Ext, GL11ExtensionPack {
     Buffer _pointSizePointerOES = null;
     Buffer _matrixIndexPointerOES = null;
     Buffer _weightPointerOES = null;
+    
+    private boolean haveCheckedExtensions;
+    private boolean have_OES_blend_equation_separate;
+    private boolean have_OES_blend_subtract;
+    private boolean have_OES_framebuffer_object;
+    private boolean have_OES_texture_cube_map;
 
     public GLImpl() {
     }

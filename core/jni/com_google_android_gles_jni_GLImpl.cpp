@@ -24,6 +24,23 @@
 #include <GLES/gl.h>
 #include <GLES/glext.h>
 
+// Work around differences between the generated name and the actual name.
+
+#define glBlendEquation glBlendEquationOES
+#define glBlendEquationSeparate glBlendEquationSeparateOES
+#define glBlendFuncSeparate glBlendFuncSeparateOES
+#define glGetTexGenfv glGetTexGenfvOES
+#define glGetTexGeniv glGetTexGenivOES
+#define glGetTexGenxv glGetTexGenxvOES
+#define glTexGenf glTexGenfOES
+#define glTexGenfv glTexGenfvOES
+#define glTexGeni glTexGeniOES
+#define glTexGeniv glTexGenivOES
+#define glTexGenx glTexGenxOES
+#define glTexGenxv glTexGenxvOES
+
+
+
 /* special calls implemented in Android's GLES wrapper used to more
  * efficiently bound-check passed arrays */
 extern "C" {
@@ -59,6 +76,11 @@ static jmethodID allowIndirectBuffersID;
 static jfieldID positionID;
 static jfieldID limitID;
 static jfieldID elementSizeShiftID;
+static jfieldID haveCheckedExtensionsID;
+static jfieldID have_OES_blend_equation_separateID;
+static jfieldID have_OES_blend_subtractID;
+static jfieldID have_OES_framebuffer_objectID;
+static jfieldID have_OES_texture_cube_mapID;
 
 /* Cache method IDs each time the class is loaded. */
 
@@ -73,6 +95,11 @@ nativeClassInitBuffer(JNIEnv *_env)
 
     jclass g11impClassLocal = _env->FindClass("com/google/android/gles_jni/GLImpl");
     G11ImplClass = (jclass) _env->NewGlobalRef(g11impClassLocal);
+    haveCheckedExtensionsID =  _env->GetFieldID(G11ImplClass, "haveCheckedExtensions", "Z");
+    have_OES_blend_equation_separateID =  _env->GetFieldID(G11ImplClass, "have_OES_blend_equation_separate", "Z");
+    have_OES_blend_subtractID =  _env->GetFieldID(G11ImplClass, "have_OES_blend_subtract", "Z");
+    have_OES_framebuffer_objectID =  _env->GetFieldID(G11ImplClass, "have_OES_framebuffer_object", "Z");
+    have_OES_texture_cube_mapID =  _env->GetFieldID(G11ImplClass, "have_OES_texture_cube_map", "Z");
 
     getBasePointerID = _env->GetStaticMethodID(nioAccessClass,
             "getBasePointer", "(Ljava/nio/Buffer;)J");
@@ -192,6 +219,64 @@ getNumCompressedTextureFormats() {
     int numCompressedTextureFormats = 0;
     glGetIntegerv(GL_NUM_COMPRESSED_TEXTURE_FORMATS, &numCompressedTextureFormats);
     return numCompressedTextureFormats;
+}
+
+// Check if the extension at the head of pExtensions is pExtension. Note that pExtensions is
+// terminated by either 0 or space, while pExtension is terminated by 0.
+
+static bool
+extensionEqual(const GLubyte* pExtensions, const GLubyte* pExtension) {
+    while (true) {
+        char a = *pExtensions++;
+        char b = *pExtension++;
+        bool aEnd = a == '\0' || a == ' ';
+        bool bEnd = b == '\0';
+        if ( aEnd || bEnd) {
+            return aEnd == bEnd;
+        }
+        if ( a != b ) {
+            return false;
+        }
+    }
+}
+
+static const GLubyte*
+nextExtension(const GLubyte* pExtensions) {
+    while (true) {
+        char a = *pExtensions++;
+        if ( a == '\0') {
+            return pExtensions-1;
+        } else if ( a == ' ') {
+            return pExtensions;
+        }
+    }
+}
+    
+static bool
+checkForExtension(const GLubyte* pExtensions, const GLubyte* pExtension) {
+    for (;*pExtensions != '\0'; pExtensions = nextExtension(pExtensions)) {
+        if (extensionEqual(pExtensions, pExtension)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+static bool
+supportsExtension(JNIEnv *_env, jobject impl, jfieldID fieldId) {
+    if (!_env->GetBooleanField(impl, haveCheckedExtensionsID)) {
+        _env->SetBooleanField(impl, haveCheckedExtensionsID, true);
+        const GLubyte* sExtensions = glGetString(GL_EXTENSIONS);
+        _env->SetBooleanField(impl, have_OES_blend_equation_separateID,
+            checkForExtension(sExtensions, (const GLubyte*) "GL_OES_blend_equation_separate"));
+        _env->SetBooleanField(impl, have_OES_blend_subtractID,
+            checkForExtension(sExtensions, (const GLubyte*) "GL_OES_blend_subtract"));
+        _env->SetBooleanField(impl, have_OES_framebuffer_objectID,
+            checkForExtension(sExtensions, (const GLubyte*) "GL_OES_framebuffer_object"));
+        _env->SetBooleanField(impl, have_OES_texture_cube_mapID,
+            checkForExtension(sExtensions, (const GLubyte*) "GL_OES_texture_cube_map"));
+    }
+    return _env->GetBooleanField(impl, fieldId);
 }
 
 // --------------------------------------------------------------------------
@@ -6137,315 +6222,1084 @@ android_glWeightPointerOES__IIII
 static void
 android_glBindFramebufferOES__II
   (JNIEnv *_env, jobject _this, jint target, jint framebuffer) {
-    _env->ThrowNew(UOEClass,
-        "glBindFramebufferOES");
+    if (! supportsExtension(_env, _this, have_OES_framebuffer_objectID)) {
+        _env->ThrowNew(UOEClass,
+            "glBindFramebufferOES");
+            return;
+    }
+    glBindFramebufferOES(
+        (GLint)target,
+        (GLint)framebuffer
+    );
 }
 
 /* void glBindRenderbufferOES ( GLint target, GLint renderbuffer ) */
 static void
 android_glBindRenderbufferOES__II
   (JNIEnv *_env, jobject _this, jint target, jint renderbuffer) {
-    _env->ThrowNew(UOEClass,
-        "glBindRenderbufferOES");
+    if (! supportsExtension(_env, _this, have_OES_framebuffer_objectID)) {
+        _env->ThrowNew(UOEClass,
+            "glBindRenderbufferOES");
+            return;
+    }
+    glBindRenderbufferOES(
+        (GLint)target,
+        (GLint)renderbuffer
+    );
 }
 
 /* void glBlendEquation ( GLint mode ) */
 static void
 android_glBlendEquation__I
   (JNIEnv *_env, jobject _this, jint mode) {
-    _env->ThrowNew(UOEClass,
-        "glBlendEquation");
+    if (! supportsExtension(_env, _this, have_OES_blend_subtractID)) {
+        _env->ThrowNew(UOEClass,
+            "glBlendEquation");
+            return;
+    }
+    glBlendEquation(
+        (GLint)mode
+    );
 }
 
 /* void glBlendEquationSeparate ( GLint modeRGB, GLint modeAlpha ) */
 static void
 android_glBlendEquationSeparate__II
   (JNIEnv *_env, jobject _this, jint modeRGB, jint modeAlpha) {
-    _env->ThrowNew(UOEClass,
-        "glBlendEquationSeparate");
+    if (! supportsExtension(_env, _this, have_OES_blend_equation_separateID)) {
+        _env->ThrowNew(UOEClass,
+            "glBlendEquationSeparate");
+            return;
+    }
+    glBlendEquationSeparate(
+        (GLint)modeRGB,
+        (GLint)modeAlpha
+    );
 }
 
 /* void glBlendFuncSeparate ( GLint srcRGB, GLint dstRGB, GLint srcAlpha, GLint dstAlpha ) */
 static void
 android_glBlendFuncSeparate__IIII
   (JNIEnv *_env, jobject _this, jint srcRGB, jint dstRGB, jint srcAlpha, jint dstAlpha) {
-    _env->ThrowNew(UOEClass,
-        "glBlendFuncSeparate");
+    if (! supportsExtension(_env, _this, have_OES_blend_equation_separateID)) {
+        _env->ThrowNew(UOEClass,
+            "glBlendFuncSeparate");
+            return;
+    }
+    glBlendFuncSeparate(
+        (GLint)srcRGB,
+        (GLint)dstRGB,
+        (GLint)srcAlpha,
+        (GLint)dstAlpha
+    );
 }
 
 /* GLint glCheckFramebufferStatusOES ( GLint target ) */
 static jint
 android_glCheckFramebufferStatusOES__I
   (JNIEnv *_env, jobject _this, jint target) {
-    _env->ThrowNew(UOEClass,
-        "glCheckFramebufferStatusOES");
-    return 0;
+    if (! supportsExtension(_env, _this, have_OES_framebuffer_objectID)) {
+        _env->ThrowNew(UOEClass,
+            "glCheckFramebufferStatusOES");
+            return 0;
+    }
+    GLint _returnValue = 0;
+    _returnValue = glCheckFramebufferStatusOES(
+        (GLint)target
+    );
+    return _returnValue;
 }
 
-/* void glDeleteFramebuffersOES ( GLint n, GLint *framebuffers ) */
+/* void glDeleteFramebuffersOES ( GLint n, GLuint *framebuffers ) */
 static void
 android_glDeleteFramebuffersOES__I_3II
   (JNIEnv *_env, jobject _this, jint n, jintArray framebuffers_ref, jint offset) {
-    _env->ThrowNew(UOEClass,
-        "glDeleteFramebuffersOES");
+    if (! supportsExtension(_env, _this, have_OES_framebuffer_objectID)) {
+        _env->ThrowNew(UOEClass,
+            "glDeleteFramebuffersOES");
+            return;
+    }
+    jint _exception = 0;
+    GLuint *framebuffers_base = (GLuint *) 0;
+    jint _remaining;
+    GLuint *framebuffers = (GLuint *) 0;
+
+    if (!framebuffers_ref) {
+        _exception = 1;
+        _env->ThrowNew(IAEClass, "framebuffers == null");
+        goto exit;
+    }
+    if (offset < 0) {
+        _exception = 1;
+        _env->ThrowNew(IAEClass, "offset < 0");
+        goto exit;
+    }
+    _remaining = _env->GetArrayLength(framebuffers_ref) - offset;
+    if (_remaining < n) {
+        _exception = 1;
+        _env->ThrowNew(IAEClass, "length - offset < n");
+        goto exit;
+    }
+    framebuffers_base = (GLuint *)
+        _env->GetPrimitiveArrayCritical(framebuffers_ref, (jboolean *)0);
+    framebuffers = framebuffers_base + offset;
+
+    glDeleteFramebuffersOES(
+        (GLint)n,
+        (GLuint *)framebuffers
+    );
+
+exit:
+    if (framebuffers_base) {
+        _env->ReleasePrimitiveArrayCritical(framebuffers_ref, framebuffers_base,
+            _exception ? JNI_ABORT: 0);
+    }
 }
 
-/* void glDeleteFramebuffersOES ( GLint n, GLint *framebuffers ) */
+/* void glDeleteFramebuffersOES ( GLint n, GLuint *framebuffers ) */
 static void
 android_glDeleteFramebuffersOES__ILjava_nio_IntBuffer_2
   (JNIEnv *_env, jobject _this, jint n, jobject framebuffers_buf) {
-    _env->ThrowNew(UOEClass,
-        "glDeleteFramebuffersOES");
+    if (! supportsExtension(_env, _this, have_OES_framebuffer_objectID)) {
+        _env->ThrowNew(UOEClass,
+            "glDeleteFramebuffersOES");
+            return;
+    }
+    jint _exception = 0;
+    jarray _array = (jarray) 0;
+    jint _remaining;
+    GLuint *framebuffers = (GLuint *) 0;
+
+    framebuffers = (GLuint *)getPointer(_env, framebuffers_buf, &_array, &_remaining);
+    if (_remaining < n) {
+        _exception = 1;
+        _env->ThrowNew(IAEClass, "remaining() < n");
+        goto exit;
+    }
+    glDeleteFramebuffersOES(
+        (GLint)n,
+        (GLuint *)framebuffers
+    );
+
+exit:
+    if (_array) {
+        releasePointer(_env, _array, framebuffers, _exception ? JNI_FALSE : JNI_TRUE);
+    }
 }
 
-/* void glDeleteRenderbuffersOES ( GLint n, GLint *renderbuffers ) */
+/* void glDeleteRenderbuffersOES ( GLint n, GLuint *renderbuffers ) */
 static void
 android_glDeleteRenderbuffersOES__I_3II
   (JNIEnv *_env, jobject _this, jint n, jintArray renderbuffers_ref, jint offset) {
-    _env->ThrowNew(UOEClass,
-        "glDeleteRenderbuffersOES");
+    if (! supportsExtension(_env, _this, have_OES_framebuffer_objectID)) {
+        _env->ThrowNew(UOEClass,
+            "glDeleteRenderbuffersOES");
+            return;
+    }
+    jint _exception = 0;
+    GLuint *renderbuffers_base = (GLuint *) 0;
+    jint _remaining;
+    GLuint *renderbuffers = (GLuint *) 0;
+
+    if (!renderbuffers_ref) {
+        _exception = 1;
+        _env->ThrowNew(IAEClass, "renderbuffers == null");
+        goto exit;
+    }
+    if (offset < 0) {
+        _exception = 1;
+        _env->ThrowNew(IAEClass, "offset < 0");
+        goto exit;
+    }
+    _remaining = _env->GetArrayLength(renderbuffers_ref) - offset;
+    if (_remaining < n) {
+        _exception = 1;
+        _env->ThrowNew(IAEClass, "length - offset < n");
+        goto exit;
+    }
+    renderbuffers_base = (GLuint *)
+        _env->GetPrimitiveArrayCritical(renderbuffers_ref, (jboolean *)0);
+    renderbuffers = renderbuffers_base + offset;
+
+    glDeleteRenderbuffersOES(
+        (GLint)n,
+        (GLuint *)renderbuffers
+    );
+
+exit:
+    if (renderbuffers_base) {
+        _env->ReleasePrimitiveArrayCritical(renderbuffers_ref, renderbuffers_base,
+            _exception ? JNI_ABORT: 0);
+    }
 }
 
-/* void glDeleteRenderbuffersOES ( GLint n, GLint *renderbuffers ) */
+/* void glDeleteRenderbuffersOES ( GLint n, GLuint *renderbuffers ) */
 static void
 android_glDeleteRenderbuffersOES__ILjava_nio_IntBuffer_2
   (JNIEnv *_env, jobject _this, jint n, jobject renderbuffers_buf) {
-    _env->ThrowNew(UOEClass,
-        "glDeleteRenderbuffersOES");
+    if (! supportsExtension(_env, _this, have_OES_framebuffer_objectID)) {
+        _env->ThrowNew(UOEClass,
+            "glDeleteRenderbuffersOES");
+            return;
+    }
+    jint _exception = 0;
+    jarray _array = (jarray) 0;
+    jint _remaining;
+    GLuint *renderbuffers = (GLuint *) 0;
+
+    renderbuffers = (GLuint *)getPointer(_env, renderbuffers_buf, &_array, &_remaining);
+    if (_remaining < n) {
+        _exception = 1;
+        _env->ThrowNew(IAEClass, "remaining() < n");
+        goto exit;
+    }
+    glDeleteRenderbuffersOES(
+        (GLint)n,
+        (GLuint *)renderbuffers
+    );
+
+exit:
+    if (_array) {
+        releasePointer(_env, _array, renderbuffers, _exception ? JNI_FALSE : JNI_TRUE);
+    }
 }
 
 /* void glFramebufferRenderbufferOES ( GLint target, GLint attachment, GLint renderbuffertarget, GLint renderbuffer ) */
 static void
 android_glFramebufferRenderbufferOES__IIII
   (JNIEnv *_env, jobject _this, jint target, jint attachment, jint renderbuffertarget, jint renderbuffer) {
-    _env->ThrowNew(UOEClass,
-        "glFramebufferRenderbufferOES");
+    if (! supportsExtension(_env, _this, have_OES_framebuffer_objectID)) {
+        _env->ThrowNew(UOEClass,
+            "glFramebufferRenderbufferOES");
+            return;
+    }
+    glFramebufferRenderbufferOES(
+        (GLint)target,
+        (GLint)attachment,
+        (GLint)renderbuffertarget,
+        (GLint)renderbuffer
+    );
 }
 
 /* void glFramebufferTexture2DOES ( GLint target, GLint attachment, GLint textarget, GLint texture, GLint level ) */
 static void
 android_glFramebufferTexture2DOES__IIIII
   (JNIEnv *_env, jobject _this, jint target, jint attachment, jint textarget, jint texture, jint level) {
-    _env->ThrowNew(UOEClass,
-        "glFramebufferTexture2DOES");
+    if (! supportsExtension(_env, _this, have_OES_framebuffer_objectID)) {
+        _env->ThrowNew(UOEClass,
+            "glFramebufferTexture2DOES");
+            return;
+    }
+    glFramebufferTexture2DOES(
+        (GLint)target,
+        (GLint)attachment,
+        (GLint)textarget,
+        (GLint)texture,
+        (GLint)level
+    );
 }
 
 /* void glGenerateMipmapOES ( GLint target ) */
 static void
 android_glGenerateMipmapOES__I
   (JNIEnv *_env, jobject _this, jint target) {
-    _env->ThrowNew(UOEClass,
-        "glGenerateMipmapOES");
+    if (! supportsExtension(_env, _this, have_OES_framebuffer_objectID)) {
+        _env->ThrowNew(UOEClass,
+            "glGenerateMipmapOES");
+            return;
+    }
+    glGenerateMipmapOES(
+        (GLint)target
+    );
 }
 
-/* void glGenFramebuffersOES ( GLint n, GLint *framebuffers ) */
+/* void glGenFramebuffersOES ( GLint n, GLuint *framebuffers ) */
 static void
 android_glGenFramebuffersOES__I_3II
   (JNIEnv *_env, jobject _this, jint n, jintArray framebuffers_ref, jint offset) {
-    _env->ThrowNew(UOEClass,
-        "glGenFramebuffersOES");
+    if (! supportsExtension(_env, _this, have_OES_framebuffer_objectID)) {
+        _env->ThrowNew(UOEClass,
+            "glGenFramebuffersOES");
+            return;
+    }
+    jint _exception = 0;
+    GLuint *framebuffers_base = (GLuint *) 0;
+    jint _remaining;
+    GLuint *framebuffers = (GLuint *) 0;
+
+    if (!framebuffers_ref) {
+        _exception = 1;
+        _env->ThrowNew(IAEClass, "framebuffers == null");
+        goto exit;
+    }
+    if (offset < 0) {
+        _exception = 1;
+        _env->ThrowNew(IAEClass, "offset < 0");
+        goto exit;
+    }
+    _remaining = _env->GetArrayLength(framebuffers_ref) - offset;
+    if (_remaining < n) {
+        _exception = 1;
+        _env->ThrowNew(IAEClass, "length - offset < n");
+        goto exit;
+    }
+    framebuffers_base = (GLuint *)
+        _env->GetPrimitiveArrayCritical(framebuffers_ref, (jboolean *)0);
+    framebuffers = framebuffers_base + offset;
+
+    glGenFramebuffersOES(
+        (GLint)n,
+        (GLuint *)framebuffers
+    );
+
+exit:
+    if (framebuffers_base) {
+        _env->ReleasePrimitiveArrayCritical(framebuffers_ref, framebuffers_base,
+            _exception ? JNI_ABORT: 0);
+    }
 }
 
-/* void glGenFramebuffersOES ( GLint n, GLint *framebuffers ) */
+/* void glGenFramebuffersOES ( GLint n, GLuint *framebuffers ) */
 static void
 android_glGenFramebuffersOES__ILjava_nio_IntBuffer_2
   (JNIEnv *_env, jobject _this, jint n, jobject framebuffers_buf) {
-    _env->ThrowNew(UOEClass,
-        "glGenFramebuffersOES");
+    if (! supportsExtension(_env, _this, have_OES_framebuffer_objectID)) {
+        _env->ThrowNew(UOEClass,
+            "glGenFramebuffersOES");
+            return;
+    }
+    jint _exception = 0;
+    jarray _array = (jarray) 0;
+    jint _remaining;
+    GLuint *framebuffers = (GLuint *) 0;
+
+    framebuffers = (GLuint *)getPointer(_env, framebuffers_buf, &_array, &_remaining);
+    if (_remaining < n) {
+        _exception = 1;
+        _env->ThrowNew(IAEClass, "remaining() < n");
+        goto exit;
+    }
+    glGenFramebuffersOES(
+        (GLint)n,
+        (GLuint *)framebuffers
+    );
+
+exit:
+    if (_array) {
+        releasePointer(_env, _array, framebuffers, _exception ? JNI_FALSE : JNI_TRUE);
+    }
 }
 
-/* void glGenRenderbuffersOES ( GLint n, GLint *renderbuffers ) */
+/* void glGenRenderbuffersOES ( GLint n, GLuint *renderbuffers ) */
 static void
 android_glGenRenderbuffersOES__I_3II
   (JNIEnv *_env, jobject _this, jint n, jintArray renderbuffers_ref, jint offset) {
-    _env->ThrowNew(UOEClass,
-        "glGenRenderbuffersOES");
+    if (! supportsExtension(_env, _this, have_OES_framebuffer_objectID)) {
+        _env->ThrowNew(UOEClass,
+            "glGenRenderbuffersOES");
+            return;
+    }
+    jint _exception = 0;
+    GLuint *renderbuffers_base = (GLuint *) 0;
+    jint _remaining;
+    GLuint *renderbuffers = (GLuint *) 0;
+
+    if (!renderbuffers_ref) {
+        _exception = 1;
+        _env->ThrowNew(IAEClass, "renderbuffers == null");
+        goto exit;
+    }
+    if (offset < 0) {
+        _exception = 1;
+        _env->ThrowNew(IAEClass, "offset < 0");
+        goto exit;
+    }
+    _remaining = _env->GetArrayLength(renderbuffers_ref) - offset;
+    if (_remaining < n) {
+        _exception = 1;
+        _env->ThrowNew(IAEClass, "length - offset < n");
+        goto exit;
+    }
+    renderbuffers_base = (GLuint *)
+        _env->GetPrimitiveArrayCritical(renderbuffers_ref, (jboolean *)0);
+    renderbuffers = renderbuffers_base + offset;
+
+    glGenRenderbuffersOES(
+        (GLint)n,
+        (GLuint *)renderbuffers
+    );
+
+exit:
+    if (renderbuffers_base) {
+        _env->ReleasePrimitiveArrayCritical(renderbuffers_ref, renderbuffers_base,
+            _exception ? JNI_ABORT: 0);
+    }
 }
 
-/* void glGenRenderbuffersOES ( GLint n, GLint *renderbuffers ) */
+/* void glGenRenderbuffersOES ( GLint n, GLuint *renderbuffers ) */
 static void
 android_glGenRenderbuffersOES__ILjava_nio_IntBuffer_2
   (JNIEnv *_env, jobject _this, jint n, jobject renderbuffers_buf) {
-    _env->ThrowNew(UOEClass,
-        "glGenRenderbuffersOES");
+    if (! supportsExtension(_env, _this, have_OES_framebuffer_objectID)) {
+        _env->ThrowNew(UOEClass,
+            "glGenRenderbuffersOES");
+            return;
+    }
+    jint _exception = 0;
+    jarray _array = (jarray) 0;
+    jint _remaining;
+    GLuint *renderbuffers = (GLuint *) 0;
+
+    renderbuffers = (GLuint *)getPointer(_env, renderbuffers_buf, &_array, &_remaining);
+    if (_remaining < n) {
+        _exception = 1;
+        _env->ThrowNew(IAEClass, "remaining() < n");
+        goto exit;
+    }
+    glGenRenderbuffersOES(
+        (GLint)n,
+        (GLuint *)renderbuffers
+    );
+
+exit:
+    if (_array) {
+        releasePointer(_env, _array, renderbuffers, _exception ? JNI_FALSE : JNI_TRUE);
+    }
 }
 
 /* void glGetFramebufferAttachmentParameterivOES ( GLint target, GLint attachment, GLint pname, GLint *params ) */
 static void
 android_glGetFramebufferAttachmentParameterivOES__III_3II
   (JNIEnv *_env, jobject _this, jint target, jint attachment, jint pname, jintArray params_ref, jint offset) {
-    _env->ThrowNew(UOEClass,
-        "glGetFramebufferAttachmentParameterivOES");
+    if (! supportsExtension(_env, _this, have_OES_framebuffer_objectID)) {
+        _env->ThrowNew(UOEClass,
+            "glGetFramebufferAttachmentParameterivOES");
+            return;
+    }
+    jint _exception = 0;
+    GLint *params_base = (GLint *) 0;
+    jint _remaining;
+    GLint *params = (GLint *) 0;
+
+    if (!params_ref) {
+        _exception = 1;
+        _env->ThrowNew(IAEClass, "params == null");
+        goto exit;
+    }
+    if (offset < 0) {
+        _exception = 1;
+        _env->ThrowNew(IAEClass, "offset < 0");
+        goto exit;
+    }
+    _remaining = _env->GetArrayLength(params_ref) - offset;
+    params_base = (GLint *)
+        _env->GetPrimitiveArrayCritical(params_ref, (jboolean *)0);
+    params = params_base + offset;
+
+    glGetFramebufferAttachmentParameterivOES(
+        (GLint)target,
+        (GLint)attachment,
+        (GLint)pname,
+        (GLint *)params
+    );
+
+exit:
+    if (params_base) {
+        _env->ReleasePrimitiveArrayCritical(params_ref, params_base,
+            _exception ? JNI_ABORT: 0);
+    }
 }
 
 /* void glGetFramebufferAttachmentParameterivOES ( GLint target, GLint attachment, GLint pname, GLint *params ) */
 static void
 android_glGetFramebufferAttachmentParameterivOES__IIILjava_nio_IntBuffer_2
   (JNIEnv *_env, jobject _this, jint target, jint attachment, jint pname, jobject params_buf) {
-    _env->ThrowNew(UOEClass,
-        "glGetFramebufferAttachmentParameterivOES");
+    if (! supportsExtension(_env, _this, have_OES_framebuffer_objectID)) {
+        _env->ThrowNew(UOEClass,
+            "glGetFramebufferAttachmentParameterivOES");
+            return;
+    }
+    jint _exception = 0;
+    jarray _array = (jarray) 0;
+    jint _remaining;
+    GLint *params = (GLint *) 0;
+
+    params = (GLint *)getPointer(_env, params_buf, &_array, &_remaining);
+    glGetFramebufferAttachmentParameterivOES(
+        (GLint)target,
+        (GLint)attachment,
+        (GLint)pname,
+        (GLint *)params
+    );
+    if (_array) {
+        releasePointer(_env, _array, params, _exception ? JNI_FALSE : JNI_TRUE);
+    }
 }
 
 /* void glGetRenderbufferParameterivOES ( GLint target, GLint pname, GLint *params ) */
 static void
 android_glGetRenderbufferParameterivOES__II_3II
   (JNIEnv *_env, jobject _this, jint target, jint pname, jintArray params_ref, jint offset) {
-    _env->ThrowNew(UOEClass,
-        "glGetRenderbufferParameterivOES");
+    if (! supportsExtension(_env, _this, have_OES_framebuffer_objectID)) {
+        _env->ThrowNew(UOEClass,
+            "glGetRenderbufferParameterivOES");
+            return;
+    }
+    jint _exception = 0;
+    GLint *params_base = (GLint *) 0;
+    jint _remaining;
+    GLint *params = (GLint *) 0;
+
+    if (!params_ref) {
+        _exception = 1;
+        _env->ThrowNew(IAEClass, "params == null");
+        goto exit;
+    }
+    if (offset < 0) {
+        _exception = 1;
+        _env->ThrowNew(IAEClass, "offset < 0");
+        goto exit;
+    }
+    _remaining = _env->GetArrayLength(params_ref) - offset;
+    params_base = (GLint *)
+        _env->GetPrimitiveArrayCritical(params_ref, (jboolean *)0);
+    params = params_base + offset;
+
+    glGetRenderbufferParameterivOES(
+        (GLint)target,
+        (GLint)pname,
+        (GLint *)params
+    );
+
+exit:
+    if (params_base) {
+        _env->ReleasePrimitiveArrayCritical(params_ref, params_base,
+            _exception ? JNI_ABORT: 0);
+    }
 }
 
 /* void glGetRenderbufferParameterivOES ( GLint target, GLint pname, GLint *params ) */
 static void
 android_glGetRenderbufferParameterivOES__IILjava_nio_IntBuffer_2
   (JNIEnv *_env, jobject _this, jint target, jint pname, jobject params_buf) {
-    _env->ThrowNew(UOEClass,
-        "glGetRenderbufferParameterivOES");
+    if (! supportsExtension(_env, _this, have_OES_framebuffer_objectID)) {
+        _env->ThrowNew(UOEClass,
+            "glGetRenderbufferParameterivOES");
+            return;
+    }
+    jint _exception = 0;
+    jarray _array = (jarray) 0;
+    jint _remaining;
+    GLint *params = (GLint *) 0;
+
+    params = (GLint *)getPointer(_env, params_buf, &_array, &_remaining);
+    glGetRenderbufferParameterivOES(
+        (GLint)target,
+        (GLint)pname,
+        (GLint *)params
+    );
+    if (_array) {
+        releasePointer(_env, _array, params, _exception ? JNI_FALSE : JNI_TRUE);
+    }
 }
 
 /* void glGetTexGenfv ( GLint coord, GLint pname, GLfloat *params ) */
 static void
 android_glGetTexGenfv__II_3FI
   (JNIEnv *_env, jobject _this, jint coord, jint pname, jfloatArray params_ref, jint offset) {
-    _env->ThrowNew(UOEClass,
-        "glGetTexGenfv");
+    if (! supportsExtension(_env, _this, have_OES_texture_cube_mapID)) {
+        _env->ThrowNew(UOEClass,
+            "glGetTexGenfv");
+            return;
+    }
+    jint _exception = 0;
+    GLfloat *params_base = (GLfloat *) 0;
+    jint _remaining;
+    GLfloat *params = (GLfloat *) 0;
+
+    if (!params_ref) {
+        _exception = 1;
+        _env->ThrowNew(IAEClass, "params == null");
+        goto exit;
+    }
+    if (offset < 0) {
+        _exception = 1;
+        _env->ThrowNew(IAEClass, "offset < 0");
+        goto exit;
+    }
+    _remaining = _env->GetArrayLength(params_ref) - offset;
+    params_base = (GLfloat *)
+        _env->GetPrimitiveArrayCritical(params_ref, (jboolean *)0);
+    params = params_base + offset;
+
+    glGetTexGenfv(
+        (GLint)coord,
+        (GLint)pname,
+        (GLfloat *)params
+    );
+
+exit:
+    if (params_base) {
+        _env->ReleasePrimitiveArrayCritical(params_ref, params_base,
+            _exception ? JNI_ABORT: 0);
+    }
 }
 
 /* void glGetTexGenfv ( GLint coord, GLint pname, GLfloat *params ) */
 static void
 android_glGetTexGenfv__IILjava_nio_FloatBuffer_2
   (JNIEnv *_env, jobject _this, jint coord, jint pname, jobject params_buf) {
-    _env->ThrowNew(UOEClass,
-        "glGetTexGenfv");
+    if (! supportsExtension(_env, _this, have_OES_texture_cube_mapID)) {
+        _env->ThrowNew(UOEClass,
+            "glGetTexGenfv");
+            return;
+    }
+    jint _exception = 0;
+    jarray _array = (jarray) 0;
+    jint _remaining;
+    GLfloat *params = (GLfloat *) 0;
+
+    params = (GLfloat *)getPointer(_env, params_buf, &_array, &_remaining);
+    glGetTexGenfv(
+        (GLint)coord,
+        (GLint)pname,
+        (GLfloat *)params
+    );
+    if (_array) {
+        releasePointer(_env, _array, params, _exception ? JNI_FALSE : JNI_TRUE);
+    }
 }
 
 /* void glGetTexGeniv ( GLint coord, GLint pname, GLint *params ) */
 static void
 android_glGetTexGeniv__II_3II
   (JNIEnv *_env, jobject _this, jint coord, jint pname, jintArray params_ref, jint offset) {
-    _env->ThrowNew(UOEClass,
-        "glGetTexGeniv");
+    if (! supportsExtension(_env, _this, have_OES_texture_cube_mapID)) {
+        _env->ThrowNew(UOEClass,
+            "glGetTexGeniv");
+            return;
+    }
+    jint _exception = 0;
+    GLint *params_base = (GLint *) 0;
+    jint _remaining;
+    GLint *params = (GLint *) 0;
+
+    if (!params_ref) {
+        _exception = 1;
+        _env->ThrowNew(IAEClass, "params == null");
+        goto exit;
+    }
+    if (offset < 0) {
+        _exception = 1;
+        _env->ThrowNew(IAEClass, "offset < 0");
+        goto exit;
+    }
+    _remaining = _env->GetArrayLength(params_ref) - offset;
+    params_base = (GLint *)
+        _env->GetPrimitiveArrayCritical(params_ref, (jboolean *)0);
+    params = params_base + offset;
+
+    glGetTexGeniv(
+        (GLint)coord,
+        (GLint)pname,
+        (GLint *)params
+    );
+
+exit:
+    if (params_base) {
+        _env->ReleasePrimitiveArrayCritical(params_ref, params_base,
+            _exception ? JNI_ABORT: 0);
+    }
 }
 
 /* void glGetTexGeniv ( GLint coord, GLint pname, GLint *params ) */
 static void
 android_glGetTexGeniv__IILjava_nio_IntBuffer_2
   (JNIEnv *_env, jobject _this, jint coord, jint pname, jobject params_buf) {
-    _env->ThrowNew(UOEClass,
-        "glGetTexGeniv");
+    if (! supportsExtension(_env, _this, have_OES_texture_cube_mapID)) {
+        _env->ThrowNew(UOEClass,
+            "glGetTexGeniv");
+            return;
+    }
+    jint _exception = 0;
+    jarray _array = (jarray) 0;
+    jint _remaining;
+    GLint *params = (GLint *) 0;
+
+    params = (GLint *)getPointer(_env, params_buf, &_array, &_remaining);
+    glGetTexGeniv(
+        (GLint)coord,
+        (GLint)pname,
+        (GLint *)params
+    );
+    if (_array) {
+        releasePointer(_env, _array, params, _exception ? JNI_FALSE : JNI_TRUE);
+    }
 }
 
 /* void glGetTexGenxv ( GLint coord, GLint pname, GLint *params ) */
 static void
 android_glGetTexGenxv__II_3II
   (JNIEnv *_env, jobject _this, jint coord, jint pname, jintArray params_ref, jint offset) {
-    _env->ThrowNew(UOEClass,
-        "glGetTexGenxv");
+    if (! supportsExtension(_env, _this, have_OES_texture_cube_mapID)) {
+        _env->ThrowNew(UOEClass,
+            "glGetTexGenxv");
+            return;
+    }
+    jint _exception = 0;
+    GLint *params_base = (GLint *) 0;
+    jint _remaining;
+    GLint *params = (GLint *) 0;
+
+    if (!params_ref) {
+        _exception = 1;
+        _env->ThrowNew(IAEClass, "params == null");
+        goto exit;
+    }
+    if (offset < 0) {
+        _exception = 1;
+        _env->ThrowNew(IAEClass, "offset < 0");
+        goto exit;
+    }
+    _remaining = _env->GetArrayLength(params_ref) - offset;
+    params_base = (GLint *)
+        _env->GetPrimitiveArrayCritical(params_ref, (jboolean *)0);
+    params = params_base + offset;
+
+    glGetTexGenxv(
+        (GLint)coord,
+        (GLint)pname,
+        (GLint *)params
+    );
+
+exit:
+    if (params_base) {
+        _env->ReleasePrimitiveArrayCritical(params_ref, params_base,
+            _exception ? JNI_ABORT: 0);
+    }
 }
 
 /* void glGetTexGenxv ( GLint coord, GLint pname, GLint *params ) */
 static void
 android_glGetTexGenxv__IILjava_nio_IntBuffer_2
   (JNIEnv *_env, jobject _this, jint coord, jint pname, jobject params_buf) {
-    _env->ThrowNew(UOEClass,
-        "glGetTexGenxv");
+    if (! supportsExtension(_env, _this, have_OES_texture_cube_mapID)) {
+        _env->ThrowNew(UOEClass,
+            "glGetTexGenxv");
+            return;
+    }
+    jint _exception = 0;
+    jarray _array = (jarray) 0;
+    jint _remaining;
+    GLint *params = (GLint *) 0;
+
+    params = (GLint *)getPointer(_env, params_buf, &_array, &_remaining);
+    glGetTexGenxv(
+        (GLint)coord,
+        (GLint)pname,
+        (GLint *)params
+    );
+    if (_array) {
+        releasePointer(_env, _array, params, _exception ? JNI_FALSE : JNI_TRUE);
+    }
 }
 
 /* GLboolean glIsFramebufferOES ( GLint framebuffer ) */
 static jboolean
 android_glIsFramebufferOES__I
   (JNIEnv *_env, jobject _this, jint framebuffer) {
-    _env->ThrowNew(UOEClass,
-        "glIsFramebufferOES");
-    return JNI_FALSE;
+    if (! supportsExtension(_env, _this, have_OES_framebuffer_objectID)) {
+        _env->ThrowNew(UOEClass,
+            "glIsFramebufferOES");
+            return JNI_FALSE;
+    }
+    GLboolean _returnValue = JNI_FALSE;
+    _returnValue = glIsFramebufferOES(
+        (GLint)framebuffer
+    );
+    return _returnValue;
 }
 
 /* GLboolean glIsRenderbufferOES ( GLint renderbuffer ) */
 static jboolean
 android_glIsRenderbufferOES__I
   (JNIEnv *_env, jobject _this, jint renderbuffer) {
-    _env->ThrowNew(UOEClass,
-        "glIsRenderbufferOES");
-    return JNI_FALSE;
+    if (! supportsExtension(_env, _this, have_OES_framebuffer_objectID)) {
+        _env->ThrowNew(UOEClass,
+            "glIsRenderbufferOES");
+            return JNI_FALSE;
+    }
+    GLboolean _returnValue = JNI_FALSE;
+    _returnValue = glIsRenderbufferOES(
+        (GLint)renderbuffer
+    );
+    return _returnValue;
 }
 
 /* void glRenderbufferStorageOES ( GLint target, GLint internalformat, GLint width, GLint height ) */
 static void
 android_glRenderbufferStorageOES__IIII
   (JNIEnv *_env, jobject _this, jint target, jint internalformat, jint width, jint height) {
-    _env->ThrowNew(UOEClass,
-        "glRenderbufferStorageOES");
+    if (! supportsExtension(_env, _this, have_OES_framebuffer_objectID)) {
+        _env->ThrowNew(UOEClass,
+            "glRenderbufferStorageOES");
+            return;
+    }
+    glRenderbufferStorageOES(
+        (GLint)target,
+        (GLint)internalformat,
+        (GLint)width,
+        (GLint)height
+    );
 }
 
 /* void glTexGenf ( GLint coord, GLint pname, GLfloat param ) */
 static void
 android_glTexGenf__IIF
   (JNIEnv *_env, jobject _this, jint coord, jint pname, jfloat param) {
-    _env->ThrowNew(UOEClass,
-        "glTexGenf");
+    if (! supportsExtension(_env, _this, have_OES_texture_cube_mapID)) {
+        _env->ThrowNew(UOEClass,
+            "glTexGenf");
+            return;
+    }
+    glTexGenf(
+        (GLint)coord,
+        (GLint)pname,
+        (GLfloat)param
+    );
 }
 
 /* void glTexGenfv ( GLint coord, GLint pname, GLfloat *params ) */
 static void
 android_glTexGenfv__II_3FI
   (JNIEnv *_env, jobject _this, jint coord, jint pname, jfloatArray params_ref, jint offset) {
-    _env->ThrowNew(UOEClass,
-        "glTexGenfv");
+    if (! supportsExtension(_env, _this, have_OES_texture_cube_mapID)) {
+        _env->ThrowNew(UOEClass,
+            "glTexGenfv");
+            return;
+    }
+    jint _exception = 0;
+    GLfloat *params_base = (GLfloat *) 0;
+    jint _remaining;
+    GLfloat *params = (GLfloat *) 0;
+
+    if (!params_ref) {
+        _exception = 1;
+        _env->ThrowNew(IAEClass, "params == null");
+        goto exit;
+    }
+    if (offset < 0) {
+        _exception = 1;
+        _env->ThrowNew(IAEClass, "offset < 0");
+        goto exit;
+    }
+    _remaining = _env->GetArrayLength(params_ref) - offset;
+    params_base = (GLfloat *)
+        _env->GetPrimitiveArrayCritical(params_ref, (jboolean *)0);
+    params = params_base + offset;
+
+    glTexGenfv(
+        (GLint)coord,
+        (GLint)pname,
+        (GLfloat *)params
+    );
+
+exit:
+    if (params_base) {
+        _env->ReleasePrimitiveArrayCritical(params_ref, params_base,
+            _exception ? JNI_ABORT: 0);
+    }
 }
 
 /* void glTexGenfv ( GLint coord, GLint pname, GLfloat *params ) */
 static void
 android_glTexGenfv__IILjava_nio_FloatBuffer_2
   (JNIEnv *_env, jobject _this, jint coord, jint pname, jobject params_buf) {
-    _env->ThrowNew(UOEClass,
-        "glTexGenfv");
+    if (! supportsExtension(_env, _this, have_OES_texture_cube_mapID)) {
+        _env->ThrowNew(UOEClass,
+            "glTexGenfv");
+            return;
+    }
+    jint _exception = 0;
+    jarray _array = (jarray) 0;
+    jint _remaining;
+    GLfloat *params = (GLfloat *) 0;
+
+    params = (GLfloat *)getPointer(_env, params_buf, &_array, &_remaining);
+    glTexGenfv(
+        (GLint)coord,
+        (GLint)pname,
+        (GLfloat *)params
+    );
+    if (_array) {
+        releasePointer(_env, _array, params, _exception ? JNI_FALSE : JNI_TRUE);
+    }
 }
 
 /* void glTexGeni ( GLint coord, GLint pname, GLint param ) */
 static void
 android_glTexGeni__III
   (JNIEnv *_env, jobject _this, jint coord, jint pname, jint param) {
-    _env->ThrowNew(UOEClass,
-        "glTexGeni");
+    if (! supportsExtension(_env, _this, have_OES_texture_cube_mapID)) {
+        _env->ThrowNew(UOEClass,
+            "glTexGeni");
+            return;
+    }
+    glTexGeni(
+        (GLint)coord,
+        (GLint)pname,
+        (GLint)param
+    );
 }
 
 /* void glTexGeniv ( GLint coord, GLint pname, GLint *params ) */
 static void
 android_glTexGeniv__II_3II
   (JNIEnv *_env, jobject _this, jint coord, jint pname, jintArray params_ref, jint offset) {
-    _env->ThrowNew(UOEClass,
-        "glTexGeniv");
+    if (! supportsExtension(_env, _this, have_OES_texture_cube_mapID)) {
+        _env->ThrowNew(UOEClass,
+            "glTexGeniv");
+            return;
+    }
+    jint _exception = 0;
+    GLint *params_base = (GLint *) 0;
+    jint _remaining;
+    GLint *params = (GLint *) 0;
+
+    if (!params_ref) {
+        _exception = 1;
+        _env->ThrowNew(IAEClass, "params == null");
+        goto exit;
+    }
+    if (offset < 0) {
+        _exception = 1;
+        _env->ThrowNew(IAEClass, "offset < 0");
+        goto exit;
+    }
+    _remaining = _env->GetArrayLength(params_ref) - offset;
+    params_base = (GLint *)
+        _env->GetPrimitiveArrayCritical(params_ref, (jboolean *)0);
+    params = params_base + offset;
+
+    glTexGeniv(
+        (GLint)coord,
+        (GLint)pname,
+        (GLint *)params
+    );
+
+exit:
+    if (params_base) {
+        _env->ReleasePrimitiveArrayCritical(params_ref, params_base,
+            _exception ? JNI_ABORT: 0);
+    }
 }
 
 /* void glTexGeniv ( GLint coord, GLint pname, GLint *params ) */
 static void
 android_glTexGeniv__IILjava_nio_IntBuffer_2
   (JNIEnv *_env, jobject _this, jint coord, jint pname, jobject params_buf) {
-    _env->ThrowNew(UOEClass,
-        "glTexGeniv");
+    if (! supportsExtension(_env, _this, have_OES_texture_cube_mapID)) {
+        _env->ThrowNew(UOEClass,
+            "glTexGeniv");
+            return;
+    }
+    jint _exception = 0;
+    jarray _array = (jarray) 0;
+    jint _remaining;
+    GLint *params = (GLint *) 0;
+
+    params = (GLint *)getPointer(_env, params_buf, &_array, &_remaining);
+    glTexGeniv(
+        (GLint)coord,
+        (GLint)pname,
+        (GLint *)params
+    );
+    if (_array) {
+        releasePointer(_env, _array, params, _exception ? JNI_FALSE : JNI_TRUE);
+    }
 }
 
 /* void glTexGenx ( GLint coord, GLint pname, GLint param ) */
 static void
 android_glTexGenx__III
   (JNIEnv *_env, jobject _this, jint coord, jint pname, jint param) {
-    _env->ThrowNew(UOEClass,
-        "glTexGenx");
+    if (! supportsExtension(_env, _this, have_OES_texture_cube_mapID)) {
+        _env->ThrowNew(UOEClass,
+            "glTexGenx");
+            return;
+    }
+    glTexGenx(
+        (GLint)coord,
+        (GLint)pname,
+        (GLint)param
+    );
 }
 
 /* void glTexGenxv ( GLint coord, GLint pname, GLint *params ) */
 static void
 android_glTexGenxv__II_3II
   (JNIEnv *_env, jobject _this, jint coord, jint pname, jintArray params_ref, jint offset) {
-    _env->ThrowNew(UOEClass,
-        "glTexGenxv");
+    if (! supportsExtension(_env, _this, have_OES_texture_cube_mapID)) {
+        _env->ThrowNew(UOEClass,
+            "glTexGenxv");
+            return;
+    }
+    jint _exception = 0;
+    GLint *params_base = (GLint *) 0;
+    jint _remaining;
+    GLint *params = (GLint *) 0;
+
+    if (!params_ref) {
+        _exception = 1;
+        _env->ThrowNew(IAEClass, "params == null");
+        goto exit;
+    }
+    if (offset < 0) {
+        _exception = 1;
+        _env->ThrowNew(IAEClass, "offset < 0");
+        goto exit;
+    }
+    _remaining = _env->GetArrayLength(params_ref) - offset;
+    params_base = (GLint *)
+        _env->GetPrimitiveArrayCritical(params_ref, (jboolean *)0);
+    params = params_base + offset;
+
+    glTexGenxv(
+        (GLint)coord,
+        (GLint)pname,
+        (GLint *)params
+    );
+
+exit:
+    if (params_base) {
+        _env->ReleasePrimitiveArrayCritical(params_ref, params_base,
+            _exception ? JNI_ABORT: 0);
+    }
 }
 
 /* void glTexGenxv ( GLint coord, GLint pname, GLint *params ) */
 static void
 android_glTexGenxv__IILjava_nio_IntBuffer_2
   (JNIEnv *_env, jobject _this, jint coord, jint pname, jobject params_buf) {
-    _env->ThrowNew(UOEClass,
-        "glTexGenxv");
+    if (! supportsExtension(_env, _this, have_OES_texture_cube_mapID)) {
+        _env->ThrowNew(UOEClass,
+            "glTexGenxv");
+            return;
+    }
+    jint _exception = 0;
+    jarray _array = (jarray) 0;
+    jint _remaining;
+    GLint *params = (GLint *) 0;
+
+    params = (GLint *)getPointer(_env, params_buf, &_array, &_remaining);
+    glTexGenxv(
+        (GLint)coord,
+        (GLint)pname,
+        (GLint *)params
+    );
+    if (_array) {
+        releasePointer(_env, _array, params, _exception ? JNI_FALSE : JNI_TRUE);
+    }
 }
 
 static const char *classPathName = "com/google/android/gles_jni/GLImpl";

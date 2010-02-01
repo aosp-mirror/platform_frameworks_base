@@ -109,9 +109,7 @@ public class RestoreSession {
 
     /*
      * We wrap incoming binder calls with a private class implementation that
-     * redirects them into main-thread actions.  This accomplishes two things:
-     * first, it ensures that the app's code is run on their own main thread,
-     * never with system Binder identity; and second, it serializes the restore
+     * redirects them into main-thread actions.  This serializes the restore
      * progress callbacks nicely within the usual main-thread lifecycle pattern.
      */
     private class RestoreObserverWrapper extends IRestoreObserver.Stub {

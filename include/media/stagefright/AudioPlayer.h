@@ -47,7 +47,7 @@ public:
     // Return time in us.
     virtual int64_t getRealTimeUs();
 
-    void start();
+    status_t start();
 
     void pause();
     void resume();

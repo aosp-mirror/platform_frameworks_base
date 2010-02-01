@@ -317,7 +317,8 @@ libcore_to_document := \
 	xml/src/main/java/org/w3c
 
 non_base_dirs := \
-	../../external/apache-http/src/org/apache/http
+	../../external/apache-http/src/org/apache/http \
+        ../../external/oauth/core/src/main/java/net/oauth
 
 # These are relative to frameworks/base
 dirs_to_document := \
@@ -399,7 +400,7 @@ web_docs_sample_code_flags := \
 
 ## SDK version identifiers used in the published docs
   # major[.minor] version for current SDK. (full releases only)
-framework_docs_SDK_VERSION:=2.0.1
+framework_docs_SDK_VERSION:=2.1
   # release version (ie "Release x")  (full releases only)
 framework_docs_SDK_REL_ID:=1
   # name of current SDK directory (full releases only)
@@ -548,6 +549,7 @@ include $(BUILD_DROIDDOC)
 
 ext_dirs := \
 	../../external/apache-http/src \
+        ../../external/oauth/core/src/main/java \
 	../../external/tagsoup/src
 
 ext_src_files := $(call all-java-files-under,$(ext_dirs))

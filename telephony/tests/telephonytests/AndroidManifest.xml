@@ -33,4 +33,5 @@
         android:label="Frameworks Telephony Tests">
     </instrumentation>
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+
 </manifest>

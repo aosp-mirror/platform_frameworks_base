@@ -28,6 +28,7 @@
 #include <string.h>
 
 #include <media/stagefright/DataSource.h>
+#include "include/ESDS.h"
 #include <media/stagefright/MediaBuffer.h>
 #include <media/stagefright/MediaBufferGroup.h>
 #include <media/stagefright/MediaDebug.h>
@@ -83,6 +84,112 @@ private:
     MPEG4Source(const MPEG4Source &);
     MPEG4Source &operator=(const MPEG4Source &);
 };
+
+// This custom data source wraps an existing one and satisfies requests
+// falling entirely within a cached range from the cache while forwarding
+// all remaining requests to the wrapped datasource.
+// This is used to cache the full sampletable metadata for a single track,
+// possibly wrapping multiple times to cover all tracks, i.e.
+// Each MPEG4DataSource caches the sampletable metadata for a single track.
+
+struct MPEG4DataSource : public DataSource {
+    MPEG4DataSource(const sp<DataSource> &source);
+
+    virtual status_t initCheck() const;
+    virtual ssize_t readAt(off_t offset, void *data, size_t size);
+    virtual status_t getSize(off_t *size);
+    virtual uint32_t flags();
+
+    status_t setCachedRange(off_t offset, size_t size);
+
+protected:
+    virtual ~MPEG4DataSource();
+
+private:
+    Mutex mLock;
+
+    sp<DataSource> mSource;
+    off_t mCachedOffset;
+    size_t mCachedSize;
+    uint8_t *mCache;
+
+    void clearCache();
+
+    MPEG4DataSource(const MPEG4DataSource &);
+    MPEG4DataSource &operator=(const MPEG4DataSource &);
+};
+
+MPEG4DataSource::MPEG4DataSource(const sp<DataSource> &source)
+    : mSource(source),
+      mCachedOffset(0),
+      mCachedSize(0),
+      mCache(NULL) {
+}
+
+MPEG4DataSource::~MPEG4DataSource() {
+    clearCache();
+}
+
+void MPEG4DataSource::clearCache() {
+    if (mCache) {
+        free(mCache);
+        mCache = NULL;
+    }
+
+    mCachedOffset = 0;
+    mCachedSize = 0;
+}
+
+status_t MPEG4DataSource::initCheck() const {
+    return mSource->initCheck();
+}
+
+ssize_t MPEG4DataSource::readAt(off_t offset, void *data, size_t size) {
+    Mutex::Autolock autoLock(mLock);
+
+    if (offset >= mCachedOffset
+            && offset + size <= mCachedOffset + mCachedSize) {
+        memcpy(data, &mCache[offset - mCachedOffset], size);
+        return size;
+    }
+
+    return mSource->readAt(offset, data, size);
+}
+
+status_t MPEG4DataSource::getSize(off_t *size) {
+    return mSource->getSize(size);
+}
+
+uint32_t MPEG4DataSource::flags() {
+    return mSource->flags();
+}
+
+status_t MPEG4DataSource::setCachedRange(off_t offset, size_t size) {
+    Mutex::Autolock autoLock(mLock);
+
+    clearCache();
+
+    mCache = (uint8_t *)malloc(size);
+
+    if (mCache == NULL) {
+        return -ENOMEM;
+    }
+
+    mCachedOffset = offset;
+    mCachedSize = size;
+
+    ssize_t err = mSource->readAt(mCachedOffset, mCache, mCachedSize);
+
+    if (err < (ssize_t)size) {
+        clearCache();
+
+        return ERROR_IO;
+    }
+
+    return OK;
+}
+
+////////////////////////////////////////////////////////////////////////////////
 
 static void hexdump(const void *_data, size_t size) {
     const uint8_t *data = (const uint8_t *)_data;
@@ -374,6 +481,19 @@ status_t MPEG4Extractor::parseChunk(off_t *offset, int depth) {
         case FOURCC('u', 'd', 't', 'a'):
         case FOURCC('i', 'l', 's', 't'):
         {
+            if (chunk_type == FOURCC('s', 't', 'b', 'l')) {
+                LOGV("sampleTable chunk is %d bytes long.", (size_t)chunk_size);
+
+                if (mDataSource->flags() & DataSource::kWantsPrefetching) {
+                    sp<MPEG4DataSource> cachedSource =
+                        new MPEG4DataSource(mDataSource);
+
+                    if (cachedSource->setCachedRange(*offset, chunk_size) == OK) {
+                        mDataSource = cachedSource;
+                    }
+                }
+            }
+
             off_t stop_offset = *offset + chunk_size;
             *offset = data_offset;
             while (*offset < stop_offset) {
@@ -779,6 +899,21 @@ status_t MPEG4Extractor::parseChunk(off_t *offset, int depth) {
             mLastTrack->meta->setData(
                     kKeyESDS, kTypeESDS, &buffer[4], chunk_data_size - 4);
 
+            if (mPath.size() >= 2
+                    && mPath[mPath.size() - 2] == FOURCC('m', 'p', '4', 'a')) {
+                // Information from the ESDS must be relied on for proper
+                // setup of sample rate and channel count for MPEG4 Audio.
+                // The generic header appears to only contain generic
+                // information...
+
+                status_t err = updateAudioTrackInfoFromESDS_MPEG4Audio(
+                        &buffer[4], chunk_data_size - 4);
+
+                if (err != OK) {
+                    return err;
+                }
+            }
+
             *offset += chunk_size;
             break;
         }
@@ -1000,6 +1135,86 @@ sp<MediaSource> MPEG4Extractor::getTrack(size_t index) {
 
     return new MPEG4Source(
             track->meta, mDataSource, track->timescale, track->sampleTable);
+}
+
+status_t MPEG4Extractor::updateAudioTrackInfoFromESDS_MPEG4Audio(
+        const void *esds_data, size_t esds_size) {
+    ESDS esds(esds_data, esds_size);
+    const uint8_t *csd;
+    size_t csd_size;
+    if (esds.getCodecSpecificInfo(
+                (const void **)&csd, &csd_size) != OK) {
+        return ERROR_MALFORMED;
+    }
+
+#if 0
+    printf("ESD of size %d\n", csd_size);
+    hexdump(csd, csd_size);
+#endif
+
+    if (csd_size < 2) {
+        return ERROR_MALFORMED;
+    }
+
+    uint32_t objectType = csd[0] >> 3;
+
+    if (objectType == 31) {
+        return ERROR_UNSUPPORTED;
+    }
+
+    uint32_t freqIndex = (csd[0] & 7) << 1 | (csd[1] >> 7);
+    int32_t sampleRate = 0;
+    int32_t numChannels = 0;
+    if (freqIndex == 15) {
+        if (csd_size < 5) {
+            return ERROR_MALFORMED;
+        }
+
+        sampleRate = (csd[1] & 0x7f) << 17
+                        | csd[2] << 9
+                        | csd[3] << 1
+                        | (csd[4] >> 7);
+
+        numChannels = (csd[4] >> 3) & 15;
+    } else {
+        static uint32_t kSamplingRate[] = {
+            96000, 88200, 64000, 48000, 44100, 32000, 24000, 22050,
+            16000, 12000, 11025, 8000, 7350
+        };
+
+        if (freqIndex == 13 || freqIndex == 14) {
+            return ERROR_MALFORMED;
+        }
+
+        sampleRate = kSamplingRate[freqIndex];
+        numChannels = (csd[1] >> 3) & 15;
+    }
+
+    if (numChannels == 0) {
+        return ERROR_UNSUPPORTED;
+    }
+
+    int32_t prevSampleRate;
+    CHECK(mLastTrack->meta->findInt32(kKeySampleRate, &prevSampleRate));
+
+    if (prevSampleRate != sampleRate) {
+        LOGW("mpeg4 audio sample rate different from previous setting. "
+             "was: %d, now: %d", prevSampleRate, sampleRate);
+    }
+
+    mLastTrack->meta->setInt32(kKeySampleRate, sampleRate);
+
+    int32_t prevChannelCount;
+    CHECK(mLastTrack->meta->findInt32(kKeyChannelCount, &prevChannelCount));
+
+    if (prevChannelCount != numChannels) {
+        LOGW("mpeg4 audio channel count different from previous setting. "
+             "was: %d, now: %d", prevChannelCount, numChannels);
+    }
+
+    mLastTrack->meta->setInt32(kKeyChannelCount, numChannels);
+
+    return OK;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

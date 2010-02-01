@@ -27,6 +27,8 @@ import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Environment;
+import android.os.StatFs;
 import android.util.AndroidException;
 import android.util.DisplayMetrics;
 
@@ -257,6 +259,13 @@ public abstract class PackageManager {
      * @hide
      */
     public static final int INSTALL_ON_SDCARD = 0x00000008;
+
+    /**
+     * Convenience flag parameter to indicate that this package has to be installed
+     * on internal flash.
+     * @hide
+     */
+    public static final int INSTALL_ON_INTERNAL_FLASH = 0x00000000;
 
     /**
      * Flag parameter for
@@ -602,7 +611,23 @@ public abstract class PackageManager {
      */
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_LIVE_WALLPAPER = "android.software.live_wallpaper";
-    
+
+    /**
+     * Determines best place to install an application: either SD or internal FLASH.
+     * Tweak the algorithm for best results.
+     * @param appInfo ApplicationInfo object og the package to install.
+     * Call utility method to obtain.
+     * @param packageURI URI identifying the package's APK file.
+     * @return <code>INSTALL_ON_INTERNAL_FLASH</code> if it is best to install package on internal
+     * storage, <code>INSTALL_ON_SDCARD</code> if it is best to install package on SD card,
+     * and <code>INSTALL_FAILED_INSUFFICIENT_STORAGE</code> if insufficient space to safely install
+     * the application. <code>INSTALL_PARSE_FAILED_NOT_APK</code> Is returned if any input
+     * parameter is <code>null</code>.
+     * This recommendation does take into account the package's own flags.
+     * @hide
+     */
+    public abstract int recommendAppInstallLocation(ApplicationInfo appInfo, Uri packageURI);
+
     /**
      * Retrieve overall information about an application package that is
      * installed on the system.

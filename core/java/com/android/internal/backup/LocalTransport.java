@@ -33,6 +33,9 @@ public class LocalTransport extends IBackupTransport.Stub {
     private static final String TRANSPORT_DIR_NAME
             = "com.android.internal.backup.LocalTransport";
 
+    // The single hardcoded restore set always has the same (nonzero!) token
+    private static final long RESTORE_TOKEN = 1;
+
     private Context mContext;
     private PackageManager mPackageManager;
     private File mDataDir = new File(Environment.getDownloadCacheDirectory(), "backup");
@@ -149,9 +152,14 @@ public class LocalTransport extends IBackupTransport.Stub {
     // Restore handling
     public RestoreSet[] getAvailableRestoreSets() throws android.os.RemoteException {
         // one hardcoded restore set
-        RestoreSet set = new RestoreSet("Local disk image", "flash", 0);
+        RestoreSet set = new RestoreSet("Local disk image", "flash", RESTORE_TOKEN);
         RestoreSet[] array = { set };
         return array;
+    }
+
+    public long getCurrentRestoreSet() {
+        // The hardcoded restore set always has the same token
+        return RESTORE_TOKEN;
     }
 
     public int startRestore(long token, PackageInfo[] packages) {

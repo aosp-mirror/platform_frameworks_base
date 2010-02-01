@@ -34,15 +34,13 @@ import android.os.Bundle;
  * {@link android.Manifest.permission#BIND_DEVICE_ADMIN} permission.  A typical
  * manifest entry would look like:</p>
  * 
- * <pre>{@include development/samples/ApiDemos/AndroidManifest.xml
- *   device_admin_declaration}</pre>
+ * {@sample development/samples/ApiDemos/AndroidManifest.xml device_admin_declaration}
  *   
  * <p>The meta-data referenced here provides addition information specific
  * to the device administrator, as parsed by the {@link DeviceAdminInfo} class.
  * A typical file would be:</p>
  * 
- * <pre>{@include development/samples/ApiDemos/res/xml/sample_device_admin.xml
- *   meta_data}</pre>
+ * {@sample development/samples/ApiDemos/res/xml/sample_device_admin.xml meta_data}
  */
 public class DeviceAdmin extends BroadcastReceiver {
     private static String TAG = "DevicePolicy";

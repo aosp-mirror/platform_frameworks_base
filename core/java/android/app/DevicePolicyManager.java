@@ -88,7 +88,7 @@ public class DevicePolicyManager {
     
     /**
      * Activity action: have the user enter a new password.  This activity
-     * should be launched after using {@link #setPasswordMode(ComponentName, int)}
+     * should be launched after using {@link #setPasswordQuality(ComponentName, int)}
      * or {@link #setPasswordMinimumLength(ComponentName, int)} to have the
      * user enter a new password that meets the current requirements.  You can
      * use {@link #isActivePasswordSufficient()} to determine whether you need
@@ -149,32 +149,33 @@ public class DevicePolicyManager {
     }
     
     /**
-     * Constant for {@link #setPasswordMode}: the policy has no requirements
-     * for the password.  Note that mode constants are ordered so that higher
+     * Constant for {@link #setPasswordQuality}: the policy has no requirements
+     * for the password.  Note that quality constants are ordered so that higher
      * values are more restrictive.
      */
-    public static final int PASSWORD_MODE_UNSPECIFIED = 0;
+    public static final int PASSWORD_QUALITY_UNSPECIFIED = 0;
     
     /**
-     * Constant for {@link #setPasswordMode}: the policy requires some kind
-     * of password, but doesn't care what it is.  Note that mode constants
+     * Constant for {@link #setPasswordQuality}: the policy requires some kind
+     * of password, but doesn't care what it is.  Note that quality constants
      * are ordered so that higher values are more restrictive.
      */
-    public static final int PASSWORD_MODE_SOMETHING = 1000;
+    public static final int PASSWORD_QUALITY_SOMETHING = 0x10000;
     
     /**
-     * Constant for {@link #setPasswordMode}: the user must have at least a
-     * numeric password.  Note that mode constants are ordered so that higher
-     * values are more restrictive.
+     * Constant for {@link #setPasswordQuality}: the user must have entered a
+     * password containing at least numeric characters.  Note that quality
+     * constants are ordered so that higher values are more restrictive.
      */
-    public static final int PASSWORD_MODE_NUMERIC = 2000;
+    public static final int PASSWORD_QUALITY_NUMERIC = 0x20000;
     
     /**
-     * Constant for {@link #setPasswordMode}: the user must have at least an
-     * alphanumeric password.  Note that mode constants are ordered so that higher
-     * values are more restrictive.
+     * Constant for {@link #setPasswordQuality}: the user must have entered a
+     * password containing at least <em>both></em> numeric <em>and</em>
+     * alphabeter (or other symbol) characters.  Note that quality constants are
+     * ordered so that higher values are more restrictive.
      */
-    public static final int PASSWORD_MODE_ALPHANUMERIC = 3000;
+    public static final int PASSWORD_QUALITY_ALPHANUMERIC = 0x30000;
     
     /**
      * Called by an application that is administering the device to set the
@@ -185,8 +186,8 @@ public class DevicePolicyManager {
      * take place immediately.  To prompt the user for a new password, use
      * {@link #ACTION_SET_NEW_PASSWORD} after setting this value.
      * 
-     * <p>Mode constants are ordered so that higher values are more restrictive;
-     * thus the highest requested mode constant (between the policy set here,
+     * <p>Quality constants are ordered so that higher values are more restrictive;
+     * thus the highest requested quality constant (between the policy set here,
      * the user's preference, and any other considerations) is the one that
      * is in effect.
      * 
@@ -195,14 +196,14 @@ public class DevicePolicyManager {
      * this method; if it has not, a security exception will be thrown.
      * 
      * @param admin Which {@link DeviceAdmin} this request is associated with.
-     * @param mode The new desired mode.  One of
-     * {@link #PASSWORD_MODE_UNSPECIFIED}, {@link #PASSWORD_MODE_SOMETHING},
-     * {@link #PASSWORD_MODE_NUMERIC}, or {@link #PASSWORD_MODE_ALPHANUMERIC}.
+     * @param quality The new desired quality.  One of
+     * {@link #PASSWORD_QUALITY_UNSPECIFIED}, {@link #PASSWORD_QUALITY_SOMETHING},
+     * {@link #PASSWORD_QUALITY_NUMERIC}, or {@link #PASSWORD_QUALITY_ALPHANUMERIC}.
      */
-    public void setPasswordMode(ComponentName admin, int mode) {
+    public void setPasswordQuality(ComponentName admin, int quality) {
         if (mService != null) {
             try {
-                mService.setPasswordMode(admin, mode);
+                mService.setPasswordQuality(admin, quality);
             } catch (RemoteException e) {
                 Log.w(TAG, "Failed talking with device policy service", e);
             }
@@ -210,20 +211,20 @@ public class DevicePolicyManager {
     }
     
     /**
-     * Retrieve the current minimum password mode for all admins
+     * Retrieve the current minimum password quality for all admins
      * or a particular one.
      * @param admin The name of the admin component to check, or null to aggregate
      * all admins.
      */
-    public int getPasswordMode(ComponentName admin) {
+    public int getPasswordQuality(ComponentName admin) {
         if (mService != null) {
             try {
-                return mService.getPasswordMode(admin);
+                return mService.getPasswordQuality(admin);
             } catch (RemoteException e) {
                 Log.w(TAG, "Failed talking with device policy service", e);
             }
         }
-        return PASSWORD_MODE_UNSPECIFIED;
+        return PASSWORD_QUALITY_UNSPECIFIED;
     }
     
     /**
@@ -235,8 +236,8 @@ public class DevicePolicyManager {
      * take place immediately.  To prompt the user for a new password, use
      * {@link #ACTION_SET_NEW_PASSWORD} after setting this value.  This
      * constraint is only imposed if the administrator has also requested either
-     * {@link #PASSWORD_MODE_NUMERIC} or {@link #PASSWORD_MODE_ALPHANUMERIC}
-     * with {@link #setPasswordMode}.
+     * {@link #PASSWORD_QUALITY_NUMERIC} or {@link #PASSWORD_QUALITY_ALPHANUMERIC}
+     * with {@link #setPasswordQuality}.
      * 
      * <p>The calling device admin must have requested
      * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call
@@ -275,18 +276,18 @@ public class DevicePolicyManager {
     
     /**
      * Return the maximum password length that the device supports for a
-     * particular password mode.
-     * @param mode The mode being interrogated.
+     * particular password quality.
+     * @param quality The quality being interrogated.
      * @return Returns the maximum length that the user can enter.
      */
-    public int getPasswordMaximumLength(int mode) {
+    public int getPasswordMaximumLength(int quality) {
         // Kind-of arbitrary.
         return 16;
     }
     
     /**
      * Determine whether the current password the user has set is sufficient
-     * to meet the policy requirements (mode, minimum length) that have been
+     * to meet the policy requirements (quality, minimum length) that have been
      * requested.
      * 
      * <p>The calling device admin must have requested
@@ -368,14 +369,15 @@ public class DevicePolicyManager {
     }
     
     /**
-     * Force a new password on the user.  This takes effect immediately.  The
-     * given password must meet the current password minimum length constraint
-     * or it will be rejected.  The given password will be accepted regardless
-     * of the current password mode, automatically adjusting the password mode
-     * higher if needed to meet the requirements of all active administrators.
-     * (The string you give here is acceptable for any mode;
-     * if it contains only digits, that is still an acceptable alphanumeric
-     * password.)
+     * Force a new password on the user.  This takes effect immediately.
+     * The given password must be sufficient for the
+     * current password quality and length constraints as returned by
+     * {@link #getPasswordQuality(ComponentName)} and
+     * {@link #getPasswordMinimumLength(ComponentName)}; if it does not meet
+     * these constraints, then it will be rejected and false returned.  Note
+     * that the password may be a stronger quality (containing alphanumeric
+     * characters when the requested quality is only numeric), in which case
+     * the currently active quality will be increased to match.
      * 
      * <p>The calling device admin must have requested
      * {@link DeviceAdminInfo#USES_POLICY_RESET_PASSWORD} to be able to call
@@ -531,10 +533,10 @@ public class DevicePolicyManager {
     /**
      * @hide
      */
-    public void setActivePasswordState(int mode, int length) {
+    public void setActivePasswordState(int quality, int length) {
         if (mService != null) {
             try {
-                mService.setActivePasswordState(mode, length);
+                mService.setActivePasswordState(quality, length);
             } catch (RemoteException e) {
                 Log.w(TAG, "Failed talking with device policy service", e);
             }

@@ -178,7 +178,8 @@ status_t WAVExtractor::init() {
 
             mBitsPerSample = U16_LE_AT(&formatSpec[14]);
 
-            if (mBitsPerSample != 8 && mBitsPerSample != 16) {
+            if (mBitsPerSample != 8 && mBitsPerSample != 16
+                && mBitsPerSample != 24) {
                 return ERROR_UNSUPPORTED;
             }
 
@@ -329,6 +330,24 @@ status_t WAVSource::read(
 
         buffer->release();
         buffer = tmp;
+    } else if (mBitsPerSample == 24) {
+        // Convert 24-bit signed samples to 16-bit signed.
+
+        const uint8_t *src =
+            (const uint8_t *)buffer->data() + buffer->range_offset();
+        int16_t *dst = (int16_t *)src;
+
+        size_t numSamples = buffer->range_length() / 3;
+        for (size_t i = 0; i < numSamples; ++i) {
+            int32_t x = (int32_t)(src[0] | src[1] << 8 | src[2] << 16);
+            x = (x << 8) >> 8;  // sign extension
+
+            x = x >> 8;
+            *dst++ = (int16_t)x;
+            src += 3;
+        }
+
+        buffer->set_range(buffer->range_offset(), 2 * numSamples);
     }
 
     size_t bytesPerSample = mBitsPerSample >> 3;

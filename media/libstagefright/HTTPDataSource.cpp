@@ -274,6 +274,9 @@ ssize_t HTTPDataSource::readAt(off_t offset, void *data, size_t size) {
     ssize_t contentLength = 0;
     if (mFirstRequest || offset != mBufferOffset + mBufferLength) {
         if (!mFirstRequest) {
+            LOGV("new range offset=%ld (old=%ld)",
+                 offset, mBufferOffset + mBufferLength);
+
             mHttp->disconnect();
         }
         mFirstRequest = false;

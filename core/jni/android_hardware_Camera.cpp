@@ -168,7 +168,7 @@ void JNICameraContext::copyAndPost(JNIEnv* env, const sp<IMemory>& dataPtr, int 
                 }
 
                 if(mCallbackBuffers.isEmpty()) {
-                    LOGW("Out of buffers, clearing callback!");
+                    LOGV("Out of buffers, clearing callback!");
                     mCamera->setPreviewCallbackFlags(FRAME_CALLBACK_FLAG_NOOP);
                     mManualCameraCallbackSet = false;
 
