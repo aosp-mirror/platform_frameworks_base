@@ -524,6 +524,8 @@ final class WebViewCore {
 
     private native void nativeDumpNavTree();
 
+    private native void nativeDumpV8Counters();
+
     private native void nativeSetJsFlags(String flags);
 
     /**
@@ -874,8 +876,9 @@ final class WebViewCore {
         static final int DUMP_DOMTREE = 170;
         static final int DUMP_RENDERTREE = 171;
         static final int DUMP_NAVTREE = 172;
+        static final int DUMP_V8COUNTERS = 173;
 
-        static final int SET_JS_FLAGS = 173;
+        static final int SET_JS_FLAGS = 174;
         // Geolocation
         static final int GEOLOCATION_PERMISSIONS_PROVIDE = 180;
 
@@ -1294,6 +1297,10 @@ final class WebViewCore {
 
                         case DUMP_NAVTREE:
                             nativeDumpNavTree();
+                            break;
+
+                        case DUMP_V8COUNTERS:
+                            nativeDumpV8Counters();
                             break;
 
                         case SET_JS_FLAGS:

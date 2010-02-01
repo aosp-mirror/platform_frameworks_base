@@ -3493,6 +3493,17 @@ public class WebView extends AbsoluteLayout
         mWebViewCore.sendMessage(EventHub.DUMP_RENDERTREE, toFile ? 1 : 0, 0);
     }
 
+    /**
+     * Dump the V8 counters to standard output.
+     * Note that you need a build with V8 and WEBCORE_INSTRUMENTATION set to
+     * true. Otherwise, this will do nothing.
+     *
+     * @hide debug only
+     */
+    public void dumpV8Counters() {
+        mWebViewCore.sendMessage(EventHub.DUMP_V8COUNTERS);
+    }
+
     // This is used to determine long press with the center key.  Does not
     // affect long press with the trackball/touch.
     private boolean mGotCenterDown = false;
