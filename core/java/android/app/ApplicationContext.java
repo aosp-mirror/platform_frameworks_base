@@ -81,6 +81,7 @@ import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.StorageManager;
 import android.os.StatFs;
 import android.os.Vibrator;
 import android.os.FileUtils.FileStatus;
@@ -180,6 +181,7 @@ class ApplicationContext extends Context {
     private Context mReceiverRestrictedContext = null;
     private SearchManager mSearchManager = null;
     private SensorManager mSensorManager = null;
+    private StorageManager mStorageManager = null;
     private Vibrator mVibrator = null;
     private LayoutInflater mLayoutInflater = null;
     private StatusBarManager mStatusBarManager = null;
@@ -879,6 +881,8 @@ class ApplicationContext extends Context {
             return getSearchManager();
         } else if (SENSOR_SERVICE.equals(name)) {
             return getSensorManager();
+        } else if (STORAGE_SERVICE.equals(name)) {
+            return getStorageManager();
         } else if (VIBRATOR_SERVICE.equals(name)) {
             return getVibrator();
         } else if (STATUS_BAR_SERVICE.equals(name)) {
@@ -1039,6 +1043,20 @@ class ApplicationContext extends Context {
             }
         }
         return mSensorManager;
+    }
+
+    private StorageManager getStorageManager() {
+        synchronized (mSync) {
+            if (mStorageManager == null) {
+                try {
+                    mStorageManager = new StorageManager(mMainThread.getHandler().getLooper());
+                } catch (RemoteException rex) {
+                    Log.e(TAG, "Failed to create StorageManager", rex);
+                    mStorageManager = null;
+                }
+            }
+        }
+        return mStorageManager;
     }
 
     private Vibrator getVibrator() {

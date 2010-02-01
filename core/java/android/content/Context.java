@@ -1109,6 +1109,8 @@ public abstract class Context {
      * @see android.app.SearchManager
      * @see #SENSOR_SERVICE
      * @see android.hardware.SensorManager
+     * @see #STORAGE_SERVICE
+     * @see android.os.StorageManager
      * @see #VIBRATOR_SERVICE
      * @see android.os.Vibrator
      * @see #CONNECTIVITY_SERVICE
@@ -1239,6 +1241,16 @@ public abstract class Context {
      */
     public static final String SENSOR_SERVICE = "sensor";
     
+    /**
+     * Use with {@link #getSystemService} to retrieve a {@link
+     * android.os.StorageManager} for accesssing system storage
+     * functions.
+     *
+     * @see #getSystemService
+     * @see android.os.StorageManager
+     */
+    public static final String STORAGE_SERVICE = "storage";
+
     /**
      * Use with {@link #getSystemService} to retrieve a
      * com.android.server.WallpaperService for accessing wallpapers.
