@@ -449,6 +449,10 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     private int mMaximumVelocity;
     
     final boolean[] mIsScrap = new boolean[1];
+    
+    // True when the popup should be hidden because of a call to
+    // dispatchDisplayHint()
+    private boolean mPopupHidden;
 
     /**
      * Interface definition for a callback to be invoked when the list or grid
@@ -3024,6 +3028,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 }
                 break;
         }
+        mPopupHidden = hint == INVISIBLE;
     }
 
     /**
@@ -3033,6 +3038,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         if (mPopup != null) {
             mPopup.dismiss();
         }
+        mPopupHidden = false;
     }
 
     /**
@@ -3309,7 +3315,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     public void onGlobalLayout() {
         if (isShown()) {
             // Show the popup if we are filtered
-            if (mFiltered && mPopup != null && !mPopup.isShowing()) {
+            if (mFiltered && mPopup != null && !mPopup.isShowing() && !mPopupHidden) {
                 showPopup();
             }
         } else {
