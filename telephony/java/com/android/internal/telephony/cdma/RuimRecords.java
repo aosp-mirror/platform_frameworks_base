@@ -166,10 +166,8 @@ public final class RuimRecords extends IccRecords {
             return null;
         }
 
-        // TODO(Moto): mncLength is not set anywhere.
         if (mncLength != UNINITIALIZED && mncLength != UNKNOWN) {
             // Length = length of MCC + length of MNC
-            // TODO: change spec name
             // length of mcc = 3 (3GPP2 C.S0005 - Section 2.3)
             return mImsi.substring(0, 3 + mncLength);
         }

@@ -2982,10 +2982,9 @@ public final class RIL extends BaseCommands implements CommandsInterface {
         numServiceCategories = p.readInt();
 
         if (numServiceCategories == 0) {
-            // TODO(Teleca) TODO(Moto): The logic of providing default
-            // values should not be done by this transport layer. And
-            // needs to be done by the vendor ril or application logic.
-            // TODO(Google): Remove ASAP
+            // TODO: The logic of providing default values should
+            // not be done by this transport layer. And needs to
+            // be done by the vendor ril or application logic.
             int numInts;
             numInts = CDMA_BROADCAST_SMS_NO_OF_SERVICE_CATEGORIES * CDMA_BSI_NO_OF_INTS_STRUCT + 1;
             response = new int[numInts];

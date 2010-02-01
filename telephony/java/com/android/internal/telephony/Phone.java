@@ -1399,11 +1399,6 @@ public interface Phone {
 
     /* CDMA support methods */
 
-    /*
-     * TODO(Moto) TODO(Teleca): can getCdmaMin, getEsn, getMeid use more generic calls
-     * already defined getXxxx above?
-     */
-
     /**
      * Retrieves the MIN for CDMA phones.
      */

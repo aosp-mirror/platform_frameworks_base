@@ -681,7 +681,7 @@ public class CDMAPhone extends PhoneBase {
     public String getVoiceMailNumber() {
         String number = null;
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getContext());
-        // TODO(Moto): The default value of voicemail number should be read from a system property
+        // TODO: The default value of voicemail number should be read from a system property
         number = sp.getString(VM_NUMBER_CDMA, "*86");
         return number;
     }
