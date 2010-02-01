@@ -47,11 +47,15 @@ public class RecognizerResultsIntent {
      * This intent should always be accompanied by at least
      * {@link #EXTRA_VOICE_SEARCH_RESULT_STRINGS}, and optionally but recommended,
      * {@link #EXTRA_VOICE_SEARCH_RESULT_URLS}, and sometimes
-     * {@link #EXTRA_VOICE_SEARCH_RESULT_HTML}. These are three parallel arrays, where a
-     * recognition result string at index N of {@link #EXTRA_VOICE_SEARCH_RESULT_STRINGS} should
-     * be accompanied by a url to use for searching based on that string at index N of
-     * {@link #EXTRA_VOICE_SEARCH_RESULT_URLS}, and, possibly, the full html to display for
-     * that result at index N of {@link #EXTRA_VOICE_SEARCH_RESULT_HTML}. 
+     * {@link #EXTRA_VOICE_SEARCH_RESULT_HTML} and
+     * {@link #EXTRA_VOICE_SEARCH_RESULT_HTML_BASE_URLS}.
+     * 
+     * These are parallel arrays, where a recognition result string at index N of
+     * {@link #EXTRA_VOICE_SEARCH_RESULT_STRINGS} should be accompanied by a url to use for
+     * searching based on that string at index N of {@link #EXTRA_VOICE_SEARCH_RESULT_URLS},
+     * and, possibly, the full html to display for that result at index N of
+     * {@link #EXTRA_VOICE_SEARCH_RESULT_HTML}. If full html is provided, a base url (or
+     * list of base urls) should be provided with {@link #EXTRA_VOICE_SEARCH_RESULT_HTML_BASE_URLS}.
      * 
      * @hide for making public in a later release
      */
@@ -101,4 +105,18 @@ public class RecognizerResultsIntent {
      */
     public static final String EXTRA_VOICE_SEARCH_RESULT_HTML =
             "android.speech.extras.VOICE_SEARCH_RESULT_HTML";
+    
+    /**
+     * The key to an extra {@link ArrayList} of {@link String}s that contains the base url to
+     * assume when interpreting html provided in {@link #EXTRA_VOICE_SEARCH_RESULT_HTML}.
+     * 
+     * A list of size 1 may be provided to apply the same base url to all html results.
+     * A list of the same size as {@link #EXTRA_VOICE_SEARCH_RESULT_STRINGS} may be provided
+     * to apply different base urls to each different html result in the
+     * {@link #EXTRA_VOICE_SEARCH_RESULT_HTML} list.
+     * 
+     * @hide not to be exposed immediately as the implementation details may change
+     */
+    public static final String EXTRA_VOICE_SEARCH_RESULT_HTML_BASE_URLS =
+            "android.speech.extras.VOICE_SEARCH_RESULT_HTML_BASE_URLS";
 }
