@@ -21,6 +21,7 @@ import android.backup.RestoreObserver;
 import android.backup.RestoreSet;
 import android.content.Context;
 import android.os.Handler;
+import android.os.Message;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -116,61 +117,44 @@ public class RestoreSession {
         final Handler mHandler;
         final RestoreObserver mAppObserver;
 
+        static final int MSG_RESTORE_STARTING = 1;
+        static final int MSG_UPDATE = 2;
+        static final int MSG_RESTORE_FINISHED = 3;
+
         RestoreObserverWrapper(Context context, RestoreObserver appObserver) {
-            mHandler = new Handler(context.getMainLooper());
+            mHandler = new Handler(context.getMainLooper()) {
+                @Override
+                public void handleMessage(Message msg) {
+                    switch (msg.what) {
+                    case MSG_RESTORE_STARTING:
+                        mAppObserver.restoreStarting(msg.arg1);
+                        break;
+                    case MSG_UPDATE:
+                        mAppObserver.onUpdate(msg.arg1);
+                        break;
+                    case MSG_RESTORE_FINISHED:
+                        mAppObserver.restoreFinished(msg.arg1);
+                        break;
+                    }
+                }
+            };
             mAppObserver = appObserver;
         }
 
-        // Wrap the IRestoreObserver -> RestoreObserver callthrough in Runnables
-        // posted to the app's main thread looper.
-        class RestoreStartingRunnable implements Runnable {
-            int mNumPackages;
-
-            RestoreStartingRunnable(int numPackages) {
-                mNumPackages = numPackages;
-            }
-
-            public void run() {
-                mAppObserver.restoreStarting(mNumPackages);
-            }
-        }
-
-        class OnUpdateRunnable implements Runnable {
-            int mNowRestoring;
-
-            OnUpdateRunnable(int nowRestoring) {
-                mNowRestoring = nowRestoring;
-            }
-
-            public void run() {
-                mAppObserver.onUpdate(mNowRestoring);
-            }
-        }
-
-        class RestoreFinishedRunnable implements Runnable {
-            int mError;
-
-            RestoreFinishedRunnable(int error) {
-                mError = error;
-            }
-
-            public void run() {
-                mAppObserver.restoreFinished(mError);
-            }
-        }
-
-        // The actual redirection code is quite simple using just the
-        // above Runnable subclasses
+        // Binder calls into this object just enqueue on the main-thread handler
         public void restoreStarting(int numPackages) {
-            mHandler.post(new RestoreStartingRunnable(numPackages));
+            mHandler.sendMessage(
+                    mHandler.obtainMessage(MSG_RESTORE_STARTING, numPackages, 0));
         }
 
         public void onUpdate(int nowBeingRestored) {
-            mHandler.post(new OnUpdateRunnable(nowBeingRestored));
+            mHandler.sendMessage(
+                    mHandler.obtainMessage(MSG_UPDATE, nowBeingRestored, 0));
         }
 
         public void restoreFinished(int error) {
-            mHandler.post(new RestoreFinishedRunnable(error));
+            mHandler.sendMessage(
+                    mHandler.obtainMessage(MSG_RESTORE_FINISHED, error, 0));
         }
     }
 }
