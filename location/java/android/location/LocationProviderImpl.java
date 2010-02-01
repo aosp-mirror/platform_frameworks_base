@@ -75,10 +75,6 @@ public abstract class LocationProviderImpl extends LocationProvider {
             LocationProviderImpl.this.disable();
         }
 
-        public boolean isEnabled() {
-            return LocationProviderImpl.this.isEnabled();
-        }
-
         public int getStatus(Bundle extras) {
             return LocationProviderImpl.this.getStatus(extras);
         }

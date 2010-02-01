@@ -95,10 +95,6 @@ public class MockProvider extends ILocationProvider.Stub {
         return mStatusUpdateTime;
     }
 
-    public boolean isEnabled() {
-        return mEnabled;
-    }
-
     public int getAccuracy() {
         return mAccuracy;
     }
