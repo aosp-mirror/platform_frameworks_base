@@ -18,7 +18,6 @@ package android.view;
 
 import android.content.Context;
 import android.util.DisplayMetrics;
-import android.util.Log;
 
 /**
  * Detects transformation gestures involving more than one pointer ("multitouch")
@@ -34,7 +33,6 @@ import android.util.Log;
  *          {@link #onTouchEvent(MotionEvent)}. The methods defined in your
  *          callback will be executed when the events occur.
  * </ul>
- * @hide Pending API approval
  */
 public class ScaleGestureDetector {
     /**
@@ -82,8 +80,7 @@ public class ScaleGestureDetector {
 
         /**
          * Responds to the end of a scale gesture. Reported by existing
-         * pointers going up. If the end of a gesture would result in a fling,
-         * {@link onTransformFling()} is called instead.
+         * pointers going up.
          * 
          * Once a scale has ended, {@link ScaleGestureDetector#getFocusX()}
          * and {@link ScaleGestureDetector#getFocusY()} will return the location
@@ -103,7 +100,7 @@ public class ScaleGestureDetector {
      * {@link OnScaleGestureListener#onScaleBegin(ScaleGestureDetector)} return
      * {@code true}. 
      */
-    public class SimpleOnScaleGestureListener implements OnScaleGestureListener {
+    public static class SimpleOnScaleGestureListener implements OnScaleGestureListener {
 
         public boolean onScale(ScaleGestureDetector detector) {
             return true;

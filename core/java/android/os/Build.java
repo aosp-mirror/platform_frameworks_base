@@ -178,6 +178,8 @@ public class Build {
          * January 2010: Android 2.1
          */
         public static final int ECLAIR_MR1 = 7;
+        
+        public static final int FROYO = 8;
     }
     
     /** The type of build, like "user" or "eng". */
