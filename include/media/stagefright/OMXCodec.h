@@ -95,6 +95,7 @@ private:
         kRequiresAllocateBufferOnOutputPorts = 32,
         kRequiresFlushBeforeShutdown         = 64,
         kDefersOutputBufferAllocation        = 128,
+        kDecoderLiesAboutNumberOfChannels    = 256,
     };
 
     struct BufferInfo {
