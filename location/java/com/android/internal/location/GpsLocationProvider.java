@@ -885,6 +885,7 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
             switch (status) {
                 case GPS_STATUS_SESSION_BEGIN:
                     mNavigating = true;
+                    mEngineOn = true;
                     break;
                 case GPS_STATUS_SESSION_END:
                     mNavigating = false;
@@ -894,6 +895,7 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
                     break;
                 case GPS_STATUS_ENGINE_OFF:
                     mEngineOn = false;
+                    mNavigating = false;
                     break;
             }
 
