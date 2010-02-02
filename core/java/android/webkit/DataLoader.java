@@ -16,6 +16,10 @@
 
 package android.webkit;
 
+import android.net.http.EventHandler;
+
+import com.android.internal.R;
+
 import java.io.ByteArrayInputStream;
 
 import org.apache.harmony.luni.util.Base64;
@@ -49,14 +53,22 @@ class DataLoader extends StreamLoader {
         } else {
             data = url.getBytes();
         }
-        mDataStream = new ByteArrayInputStream(data);
-        mContentLength = data.length;
+        if (data != null) {
+            mDataStream = new ByteArrayInputStream(data);
+            mContentLength = data.length;
+        }
     }
 
     @Override
     protected boolean setupStreamAndSendStatus() {
-        mHandler.status(1, 1, 0, "OK");
-        return true;
+        if (mDataStream != null) {
+            mHandler.status(1, 1, 200, "OK");
+            return true;
+        } else {
+            mHandler.error(EventHandler.ERROR,
+                    mContext.getString(R.string.httpError));
+            return false;
+        }
     }
 
     @Override
