@@ -74,7 +74,7 @@ public final class CdmaInformationRecords {
                 break;
 
             case RIL_CDMA_T53_RELEASE_INFO_REC:
-                // TODO(Moto): WHAT to do, for now fall through and throw exception
+                // TODO: WHAT to do, for now fall through and throw exception
             default:
                 throw new RuntimeException("RIL_UNSOL_CDMA_INFO_REC: unsupported record. Got "
                                             + CdmaInformationRecords.idToString(id) + " ");

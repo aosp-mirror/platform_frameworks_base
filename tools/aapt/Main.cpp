@@ -436,6 +436,15 @@ int main(int argc, char* const argv[])
                 } else if (strcmp(cp, "-utf16") == 0) {
                     bundle.setEncodingSpecified(true);
                     bundle.setUTF8(false);
+                } else if (strcmp(cp, "-rename-manifest-package") == 0) {
+                    argc--;
+                    argv++;
+                    if (!argc) {
+                        fprintf(stderr, "ERROR: No argument supplied for '--rename-manifest-package' option\n");
+                        wantUsage = true;
+                        goto bail;
+                    }
+                    bundle.setManifestPackageNameOverride(argv[0]);
                 } else {
                     fprintf(stderr, "ERROR: Unknown option '-%s'\n", cp);
                     wantUsage = true;

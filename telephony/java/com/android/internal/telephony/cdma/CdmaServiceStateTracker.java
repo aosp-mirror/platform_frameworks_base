@@ -1622,9 +1622,7 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
      * Returns IMSI as MCC + MNC + MIN
      */
     String getImsi() {
-        // TODO(Moto): When RUIM is enabled, IMSI will come from RUIM
-        // not build-time props. Moto will provide implementation
-        // for RUIM-ready case later.
+        // TODO: When RUIM is enabled, IMSI will come from RUIM not build-time props.
         String operatorNumeric = SystemProperties.get(
                 TelephonyProperties.PROPERTY_ICC_OPERATOR_NUMERIC, "");
 

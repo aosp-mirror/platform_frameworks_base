@@ -203,7 +203,7 @@ public class DateTimeView extends TextView {
     private DateFormat getDateFormat() {
         String format = Settings.System.getString(getContext().getContentResolver(),
                 Settings.System.DATE_FORMAT);
-        if ("".equals(format)) {
+        if (format == null || "".equals(format)) {
             return DateFormat.getDateInstance(DateFormat.SHORT);
         } else {
             return new SimpleDateFormat(format);

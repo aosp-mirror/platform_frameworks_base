@@ -1676,6 +1676,9 @@ final class WebViewCore {
     // Used to avoid posting more than one split picture message.
     private boolean mSplitPictureIsScheduled;
 
+    // Used to suspend drawing.
+    private boolean mDrawIsPaused;
+
     // mRestoreState is set in didFirstLayout(), and reset in the next
     // webkitDraw after passing it to the UI thread.
     private RestoreState mRestoreState = null;
@@ -1788,7 +1791,7 @@ final class WebViewCore {
         return result;
     }
 
-    static void reducePriority(WebViewCore core) {
+    static void reducePriority() {
         // remove the pending REDUCE_PRIORITY and RESUME_PRIORITY messages
         sWebCoreHandler.removeMessages(WebCoreThread.REDUCE_PRIORITY);
         sWebCoreHandler.removeMessages(WebCoreThread.RESUME_PRIORITY);
@@ -1796,7 +1799,7 @@ final class WebViewCore {
                 .obtainMessage(WebCoreThread.REDUCE_PRIORITY));
     }
 
-    static void resumePriority(WebViewCore core) {
+    static void resumePriority() {
         // remove the pending REDUCE_PRIORITY and RESUME_PRIORITY messages
         sWebCoreHandler.removeMessages(WebCoreThread.REDUCE_PRIORITY);
         sWebCoreHandler.removeMessages(WebCoreThread.RESUME_PRIORITY);
@@ -1812,6 +1815,33 @@ final class WebViewCore {
     static void endCacheTransaction() {
         sWebCoreHandler.sendMessage(sWebCoreHandler
                 .obtainMessage(WebCoreThread.BLOCK_CACHE_TICKER));
+    }
+
+    static void pauseUpdatePicture(WebViewCore core) {
+        // Note: there is one possible failure mode. If pauseUpdatePicture() is
+        // called from UI thread while WEBKIT_DRAW is just pulled out of the
+        // queue in WebCore thread to be executed. Then update won't be blocked.
+        if (core != null) {
+            synchronized (core) {
+                core.mDrawIsPaused = true;
+                if (core.mDrawIsScheduled) {
+                    core.mEventHub.removeMessages(EventHub.WEBKIT_DRAW);
+                }
+            }
+        }
+
+    }
+
+    static void resumeUpdatePicture(WebViewCore core) {
+        if (core != null) {
+            synchronized (core) {
+                core.mDrawIsPaused = false;
+                if (core.mDrawIsScheduled) {
+                    core.mDrawIsScheduled = false;
+                    core.contentDraw();
+                }
+            }
+        }
     }
 
     //////////////////////////////////////////////////////////////////////////
@@ -1842,6 +1872,7 @@ final class WebViewCore {
         synchronized (this) {
             if (mDrawIsScheduled) return;
             mDrawIsScheduled = true;
+            if (mDrawIsPaused) return;
             mEventHub.sendMessage(Message.obtain(null, EventHub.WEBKIT_DRAW));
         }
     }

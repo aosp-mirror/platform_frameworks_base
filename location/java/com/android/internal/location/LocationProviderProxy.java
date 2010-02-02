@@ -40,6 +40,7 @@ public class LocationProviderProxy implements IBinder.DeathRecipient {
     private final String mName;
     private final ILocationProvider mProvider;
     private boolean mLocationTracking = false;
+    private boolean mEnabled = false;
     private long mMinTime = 0;
     private boolean mDead;
 
@@ -152,6 +153,7 @@ public class LocationProviderProxy implements IBinder.DeathRecipient {
     public void enable() {
         try {
             mProvider.enable();
+            mEnabled = true;
         } catch (RemoteException e) {
             Log.e(TAG, "enable failed", e);
         }
@@ -160,18 +162,14 @@ public class LocationProviderProxy implements IBinder.DeathRecipient {
     public void disable() {
         try {
             mProvider.disable();
+            mEnabled = false;
         } catch (RemoteException e) {
             Log.e(TAG, "disable failed", e);
         }
     }
 
     public boolean isEnabled() {
-        try {
-            return mProvider.isEnabled();
-        } catch (RemoteException e) {
-            Log.e(TAG, "isEnabled failed", e);
-            return false;
-        }
+        return mEnabled;
     }
 
     public int getStatus(Bundle extras) {

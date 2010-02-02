@@ -290,6 +290,7 @@ uint32_t OMXCodec::getComponentQuirks(const char *componentName) {
     }
     if (!strcmp(componentName, "OMX.TI.MP3.decode")) {
         quirks |= kNeedsFlushBeforeDisable;
+        quirks |= kDecoderLiesAboutNumberOfChannels;
     }
     if (!strcmp(componentName, "OMX.TI.AAC.decode")) {
         quirks |= kNeedsFlushBeforeDisable;
@@ -2817,7 +2818,9 @@ void OMXCodec::initOutputFormat(const sp<MetaData> &inputFormat) {
 
                 if ((OMX_U32)numChannels != params.nChannels) {
                     LOGW("Codec outputs a different number of channels than "
-                         "the input stream contains.");
+                         "the input stream contains (contains %d channels, "
+                         "codec outputs %ld channels).",
+                         numChannels, params.nChannels);
                 }
 
                 mOutputFormat->setCString(
@@ -2825,8 +2828,12 @@ void OMXCodec::initOutputFormat(const sp<MetaData> &inputFormat) {
 
                 // Use the codec-advertised number of channels, as some
                 // codecs appear to output stereo even if the input data is
-                // mono.
-                mOutputFormat->setInt32(kKeyChannelCount, params.nChannels);
+                // mono. If we know the codec lies about this information,
+                // use the actual number of channels instead.
+                mOutputFormat->setInt32(
+                        kKeyChannelCount,
+                        (mQuirks & kDecoderLiesAboutNumberOfChannels)
+                            ? numChannels : params.nChannels);
 
                 // The codec-reported sampleRate is not reliable...
                 mOutputFormat->setInt32(kKeySampleRate, sampleRate);

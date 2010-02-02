@@ -63,8 +63,6 @@ private:
     int                                    mMode;
 
     // Keep the shared memory copy of album art and capture frame (for thumbnail)
-    sp<MemoryDealer>                       mAlbumArtDealer;
-    sp<MemoryDealer>                       mThumbnailDealer;
     sp<IMemory>                            mAlbumArt;
     sp<IMemory>                            mThumbnail;
 };

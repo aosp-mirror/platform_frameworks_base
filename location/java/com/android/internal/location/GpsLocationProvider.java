@@ -571,10 +571,6 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
         }
     }
 
-    public boolean isEnabled() {
-        return mEnabled;
-    }
-
     public int getStatus(Bundle extras) {
         if (extras != null) {
             extras.putInt("satellites", mSvCount);

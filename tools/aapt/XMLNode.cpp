@@ -555,6 +555,19 @@ const XMLNode::attribute_entry* XMLNode::getAttribute(const String16& ns,
     return NULL;
 }
 
+XMLNode::attribute_entry* XMLNode::editAttribute(const String16& ns,
+        const String16& name)
+{
+    for (size_t i=0; i<mAttributes.size(); i++) {
+        attribute_entry * ae = &mAttributes.editItemAt(i);
+        if (ae->ns == ns && ae->name == name) {
+            return ae;
+        }
+    }
+
+    return NULL;
+}
+
 const String16& XMLNode::getCData() const
 {
     return mChars;

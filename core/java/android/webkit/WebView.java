@@ -3109,6 +3109,7 @@ public class WebView extends AbsoluteLayout
                 zoomScale = mZoomScale;
                 // set mZoomScale to be 0 as we have done animation
                 mZoomScale = 0;
+                WebViewCore.resumeUpdatePicture(mWebViewCore);
                 // call invalidate() again to draw with the final filters
                 invalidate();
                 if (mNeedToAdjustWebTextView) {
@@ -3952,8 +3953,9 @@ public class WebView extends AbsoluteLayout
         super.onSizeChanged(w, h, ow, oh);
         // Center zooming to the center of the screen.
         if (mZoomScale == 0) { // unless we're already zooming
-            mZoomCenterX = getViewWidth() * .5f;
-            mZoomCenterY = getViewHeight() * .5f;
+            // To anchor at top left corner.
+            mZoomCenterX = 0;
+            mZoomCenterY = getVisibleTitleHeight();
             mAnchorX = viewToContentX((int) mZoomCenterX + mScrollX);
             mAnchorY = viewToContentY((int) mZoomCenterY + mScrollY);
         }
@@ -3996,7 +3998,6 @@ public class WebView extends AbsoluteLayout
     @Override
     protected void onScrollChanged(int l, int t, int oldl, int oldt) {
         super.onScrollChanged(l, t, oldl, oldt);
-
         sendOurVisibleRect();
     }
 
@@ -4458,7 +4459,7 @@ public class WebView extends AbsoluteLayout
                     deltaX = 0;
                     deltaY = 0;
 
-                    WebViewCore.reducePriority(mWebViewCore);
+                    WebViewCore.reducePriority();
                     if (!mDragFromTextInput) {
                         nativeHideCursor();
                     }
@@ -4621,7 +4622,7 @@ public class WebView extends AbsoluteLayout
                                     || computeVerticalScrollExtent() < computeVerticalScrollRange())) {
                                 // we will not rewrite drag code here, but we
                                 // will try fling if it applies.
-                                WebViewCore.reducePriority(mWebViewCore);
+                                WebViewCore.reducePriority();
                                 // fall through to TOUCH_DRAG_MODE
                             } else {
                                 break;
@@ -4658,7 +4659,7 @@ public class WebView extends AbsoluteLayout
                             break;
                         }
                         mLastVelocity = 0;
-                        WebViewCore.resumePriority(mWebViewCore);
+                        WebViewCore.resumePriority();
                         break;
                     case TOUCH_DRAG_START_MODE:
                     case TOUCH_DONE_MODE:
@@ -4707,7 +4708,7 @@ public class WebView extends AbsoluteLayout
             mVelocityTracker = null;
         }
         if (mTouchMode == TOUCH_DRAG_MODE) {
-            WebViewCore.resumePriority(mWebViewCore);
+            WebViewCore.resumePriority();
         }
         mPrivateHandler.removeMessages(SWITCH_TO_SHORTPRESS);
         mPrivateHandler.removeMessages(SWITCH_TO_LONGPRESS);
@@ -5033,7 +5034,7 @@ public class WebView extends AbsoluteLayout
             vy = vy * 3 / 4;
         }
         if ((maxX == 0 && vy == 0) || (maxY == 0 && vx == 0)) {
-            WebViewCore.resumePriority(mWebViewCore);
+            WebViewCore.resumePriority();
             return;
         }
         float currentVelocity = mScroller.getCurrVelocity();
@@ -5090,6 +5091,7 @@ public class WebView extends AbsoluteLayout
             mInvInitialZoomScale = 1.0f / oldScale;
             mInvFinalZoomScale = 1.0f / mActualScale;
             mZoomScale = mActualScale;
+            WebViewCore.pauseUpdatePicture(mWebViewCore);
             invalidate();
             return true;
         } else {
@@ -5904,7 +5906,7 @@ public class WebView extends AbsoluteLayout
                     }
                     break;
                 case RESUME_WEBCORE_PRIORITY:
-                    WebViewCore.resumePriority(mWebViewCore);
+                    WebViewCore.resumePriority();
                     break;
 
                 case LONG_PRESS_CENTER:
@@ -6068,7 +6070,7 @@ public class WebView extends AbsoluteLayout
                 case SHOW_RECT_MSG_ID: {
                     WebViewCore.ShowRectData data = (WebViewCore.ShowRectData) msg.obj;
                     int x = mScrollX;
-                    int left = contentToViewDimension(data.mLeft);
+                    int left = contentToViewX(data.mLeft);
                     int width = contentToViewDimension(data.mWidth);
                     int maxWidth = contentToViewDimension(data.mContentWidth);
                     int viewWidth = getViewWidth();
@@ -6079,21 +6081,29 @@ public class WebView extends AbsoluteLayout
                         x += (int) (left + data.mXPercentInDoc * width
                                 - mScrollX - data.mXPercentInView * viewWidth);
                     }
+                    if (DebugFlags.WEB_VIEW) {
+                        Log.v(LOGTAG, "showRectMsg=(left=" + left + ",width=" +
+                              width + ",maxWidth=" + maxWidth +
+                              ",viewWidth=" + viewWidth + ",x="
+                              + x + ",xPercentInDoc=" + data.mXPercentInDoc +
+                              ",xPercentInView=" + data.mXPercentInView+ ")");
+                    }
                     // use the passing content width to cap x as the current
                     // mContentWidth may not be updated yet
                     x = Math.max(0,
                             (Math.min(maxWidth, x + viewWidth)) - viewWidth);
-                    int y = mScrollY;
-                    int top = contentToViewDimension(data.mTop);
+                    int top = contentToViewY(data.mTop);
                     int height = contentToViewDimension(data.mHeight);
                     int maxHeight = contentToViewDimension(data.mContentHeight);
                     int viewHeight = getViewHeight();
-                    if (height < viewHeight) {
-                        // middle align
-                        y += top + height / 2 - mScrollY - viewHeight / 2;
-                    } else {
-                        y += (int) (top + data.mYPercentInDoc * height
-                                - mScrollY - data.mYPercentInView * viewHeight);
+                    int y = (int) (top + data.mYPercentInDoc * height -
+                                   data.mYPercentInView * viewHeight);
+                    if (DebugFlags.WEB_VIEW) {
+                        Log.v(LOGTAG, "showRectMsg=(top=" + top + ",height=" +
+                              height + ",maxHeight=" + maxHeight +
+                              ",viewHeight=" + viewHeight + ",y="
+                              + y + ",yPercentInDoc=" + data.mYPercentInDoc +
+                              ",yPercentInView=" + data.mYPercentInView+ ")");
                     }
                     // use the passing content height to cap y as the current
                     // mContentHeight may not be updated yet

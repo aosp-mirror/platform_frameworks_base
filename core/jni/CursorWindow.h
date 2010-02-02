@@ -21,7 +21,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include <binder/MemoryDealer.h>
+#include <binder/IMemory.h>
 #include <utils/RefBase.h>
 
 #include <jni.h>
@@ -101,7 +101,7 @@ class CursorWindow
 public:
                         CursorWindow(size_t maxSize);
                         CursorWindow(){}
-    bool                setMemory(sp<IMemory>);
+    bool                setMemory(const sp<IMemory>&);
                         ~CursorWindow();
 
     bool                initBuffer(bool localOnly);
@@ -189,7 +189,6 @@ private:
     size_t mSize;
     size_t mMaxSize;
     window_header_t * mHeader;
-    sp<MemoryDealer> mHeap;
     sp<IMemory> mMemory;
 
     /**
