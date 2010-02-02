@@ -25,10 +25,11 @@ LOCAL_SRC_FILES:= \
     MediaScanner.cpp \
     MediaScannerClient.cpp \
     autodetect.cpp \
-    IMediaDeathNotifier.cpp
+    IMediaDeathNotifier.cpp \
+    MediaProfiles.cpp
 
 LOCAL_SHARED_LIBRARIES := \
-	libui libcutils libutils libbinder libsonivox libicuuc
+	libui libcutils libutils libbinder libsonivox libicuuc libexpat
 
 LOCAL_MODULE:= libmedia
 
@@ -43,10 +44,11 @@ endif
 LOCAL_C_INCLUDES := \
     $(JNI_H_INCLUDE) \
     $(call include-path-for, graphics corecg) \
-        $(TOP)/external/opencore/extern_libs_v2/khronos/openmax/include \
-        external/speex/include \
-        external/speex/libspeex \
-        external/icu4c/common
+    $(TOP)/external/opencore/extern_libs_v2/khronos/openmax/include \
+    external/speex/include \
+    external/speex/libspeex \
+    external/icu4c/common \
+    external/expat/lib
 
 LOCAL_STATIC_LIBRARIES := libspeex
 

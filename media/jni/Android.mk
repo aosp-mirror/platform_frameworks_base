@@ -10,7 +10,8 @@ LOCAL_SRC_FILES:= \
     android_media_MediaRecorder.cpp \
     android_media_MediaScanner.cpp \
     android_media_MediaMetadataRetriever.cpp \
-    android_media_ResampleInputStream.cpp
+    android_media_ResampleInputStream.cpp \
+    android_media_MediaProfiles.cpp
 
 LOCAL_SHARED_LIBRARIES := \
     libandroid_runtime \

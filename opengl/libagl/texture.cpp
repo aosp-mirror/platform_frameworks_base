@@ -1389,9 +1389,20 @@ void glCopyTexImage2D(
     // (x,y) is the lower-left corner of colorBuffer
     y = cbSurface.height - (y + height);
 
+    /* The GLES spec says:
+     * If any of the pixels within the specified rectangle are outside
+     * the framebuffer associated with the current rendering context,
+     * then the values obtained for those pixels are undefined.
+     */
+    if (x+width > GLint(cbSurface.width))
+        width = cbSurface.width - x;
+
+    if (y+height > GLint(cbSurface.height))
+        height = cbSurface.height - y;
+
     int err = copyPixels(c,
             txSurface, 0, 0,
-            cbSurface, x, y, cbSurface.width, cbSurface.height);
+            cbSurface, x, y, width, height);
     if (err) {
         ogles_error(c, err);
     }
@@ -1438,6 +1449,17 @@ void glCopyTexSubImage2D(
     // (x,y) is the lower-left corner of colorBuffer
     const GGLSurface& cbSurface = c->rasterizer.state.buffers.color.s;
     y = cbSurface.height - (y + height);
+
+    /* The GLES spec says:
+     * If any of the pixels within the specified rectangle are outside
+     * the framebuffer associated with the current rendering context,
+     * then the values obtained for those pixels are undefined.
+     */
+    if (x+width > GLint(cbSurface.width))
+        width = cbSurface.width - x;
+
+    if (y+height > GLint(cbSurface.height))
+        height = cbSurface.height - y;
 
     int err = copyPixels(c,
             surface, xoffset, yoffset,
