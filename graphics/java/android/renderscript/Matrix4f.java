@@ -24,9 +24,9 @@ import android.util.Log;
  * @hide
  *
  **/
-public class Matrix {
+public class Matrix4f {
 
-    public Matrix() {
+    public Matrix4f() {
         mMat = new float[16];
         loadIdentity();
     }
@@ -49,7 +49,7 @@ public class Matrix {
         mMat[5] = 1;
         mMat[6] = 0;
         mMat[7] = 0;
-    
+
         mMat[8] = 0;
         mMat[9] = 0;
         mMat[10] = 1;
@@ -61,8 +61,8 @@ public class Matrix {
         mMat[15] = 1;
     }
 
-    public void load(Matrix src) {
-        mMat = src.mMat;
+    public void load(Matrix4f src) {
+        System.arraycopy(mMat, 0, src, 0, 16);
     }
 
     public void loadRotate(float rot, float x, float y, float z) {
@@ -77,7 +77,7 @@ public class Matrix {
         rot *= (float)(java.lang.Math.PI / 180.0f);
         c = (float)java.lang.Math.cos(rot);
         s = (float)java.lang.Math.sin(rot);
-    
+
         float len = (float)java.lang.Math.sqrt(x*x + y*y + z*z);
         if (!(len != 1)) {
             float recipLen = 1.f / len;
@@ -91,7 +91,7 @@ public class Matrix {
         float zx = z * x;
         float xs = x * s;
         float ys = y * s;
-        float zs = z * s;		
+        float zs = z * s;
         mMat[ 0] = x*x*nc +  c;
         mMat[ 4] =  xy*nc - zs;
         mMat[ 8] =  zx*nc + ys;
@@ -109,7 +109,7 @@ public class Matrix {
         mMat[5] = y;
         mMat[10] = z;
     }
-    
+
     public void loadTranslate(float x, float y, float z) {
         loadIdentity();
         mMat[12] = x;
@@ -117,7 +117,7 @@ public class Matrix {
         mMat[14] = z;
     }
 
-    public void loadMultiply(Matrix lhs, Matrix rhs) {
+    public void loadMultiply(Matrix4f lhs, Matrix4f rhs) {
         for (int i=0 ; i<4 ; i++) {
             float ri0 = 0;
             float ri1 = 0;
@@ -159,31 +159,28 @@ public class Matrix {
         mMat[15]= 0;
     }
 
-    public void multiply(Matrix rhs) {
-        Matrix tmp = new Matrix();
+    public void multiply(Matrix4f rhs) {
+        Matrix4f tmp = new Matrix4f();
         tmp.loadMultiply(this, rhs);
         load(tmp);
     }
     public void rotate(float rot, float x, float y, float z) {
-        Matrix tmp = new Matrix();
+        Matrix4f tmp = new Matrix4f();
         tmp.loadRotate(rot, x, y, z);
         multiply(tmp);
     }
     public void scale(float x, float y, float z) {
-        Matrix tmp = new Matrix();
+        Matrix4f tmp = new Matrix4f();
         tmp.loadScale(x, y, z);
         multiply(tmp);
     }
     public void translate(float x, float y, float z) {
-        Matrix tmp = new Matrix();
+        Matrix4f tmp = new Matrix4f();
         tmp.loadTranslate(x, y, z);
         multiply(tmp);
     }
 
-
-
-    float[] mMat;
-
+    final float[] mMat;
 }
 
 
