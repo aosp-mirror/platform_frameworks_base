@@ -63,7 +63,6 @@ private:
     void *mBuffer;
     size_t mBufferLength;
     off_t mBufferOffset;
-    bool mFirstRequest;
 
     bool mContentLengthValid;
     unsigned long long mContentLength;
