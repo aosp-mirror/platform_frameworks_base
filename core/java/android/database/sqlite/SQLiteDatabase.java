@@ -290,6 +290,10 @@ public class SQLiteDatabase extends SQLiteClosable {
     @Override
     protected void onAllReferencesReleased() {
         if (isOpen()) {
+            if (SQLiteDebug.DEBUG_CAPTURE_SQL) {
+                Log.d(TAG, "captured_sql|" + mPath + "|DETACH DATABASE " +
+                        getDatabaseName(mPath) + ";");
+            }
             if (SQLiteDebug.DEBUG_SQL_CACHE) {
                 mTimeClosed = getTime();
             }
@@ -1648,6 +1652,9 @@ public class SQLiteDatabase extends SQLiteClosable {
      */
     public void execSQL(String sql) throws SQLException {
         long timeStart = Debug.threadCpuTimeNanos();
+        if (SQLiteDebug.DEBUG_CAPTURE_SQL) {
+            Log.v(TAG, SQLiteDebug.captureSql(this.getPath(), sql, null));
+        }
         lock();
         try {
             native_execSQL(sql);
@@ -1673,7 +1680,9 @@ public class SQLiteDatabase extends SQLiteClosable {
         if (bindArgs == null) {
             throw new IllegalArgumentException("Empty bindArgs");
         }
-
+        if (SQLiteDebug.DEBUG_CAPTURE_SQL) {
+            Log.v(TAG, SQLiteDebug.captureSql(this.getPath(), sql, bindArgs));
+        }
         long timeStart = Debug.threadCpuTimeNanos();
         lock();
         SQLiteStatement statement = null;
@@ -1732,6 +1741,10 @@ public class SQLiteDatabase extends SQLiteClosable {
         mLeakedException = new IllegalStateException(path +
             " SQLiteDatabase created and never closed");
         mFactory = factory;
+        if (SQLiteDebug.DEBUG_CAPTURE_SQL) {
+            Log.d(TAG, "captured_sql|" + mPath + "|ATTACH DATABASE '" + mPath +
+                    "' as " + getDatabaseName(mPath) + ";");
+        }
         dbopen(mPath, mFlags);
         if (SQLiteDebug.DEBUG_SQL_CACHE) {
             mTimeOpened = getTime();
@@ -1741,6 +1754,10 @@ public class SQLiteDatabase extends SQLiteClosable {
             setLocale(Locale.getDefault());
         } catch (RuntimeException e) {
             Log.e(TAG, "Failed to setLocale() when constructing, closing the database", e);
+            if (SQLiteDebug.DEBUG_CAPTURE_SQL) {
+                Log.d(TAG, "captured_sql|" + mPath + "|DETACH DATABASE " +
+                        getDatabaseName(mPath) + ";");
+            }
             dbclose();
             if (SQLiteDebug.DEBUG_SQL_CACHE) {
                 mTimeClosed = getTime();
@@ -1751,6 +1768,20 @@ public class SQLiteDatabase extends SQLiteClosable {
 
     private String getTime() {
         return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS ").format(System.currentTimeMillis());
+    }
+
+    private String getDatabaseName(String path) {
+        if (path == null || path.trim().length() == 0) {
+            return "db not specified?";
+        }
+
+        if (path.equalsIgnoreCase(":memory:")) {
+            return "memorydb";
+        }
+        String[] tokens = path.split("/");
+        String[] lastNodeTokens = tokens[tokens.length - 1].split("\\.", 2);
+        return (lastNodeTokens.length == 1) ? lastNodeTokens[0]
+                : lastNodeTokens[0] + lastNodeTokens[1];
     }
 
     /**
