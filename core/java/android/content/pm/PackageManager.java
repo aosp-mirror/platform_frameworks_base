@@ -615,13 +615,13 @@ public abstract class PackageManager {
     /**
      * Determines best place to install an application: either SD or internal FLASH.
      * Tweak the algorithm for best results.
-     * @param appInfo ApplicationInfo object og the package to install.
+     * @param appInfo ApplicationInfo object of the package to install.
      * Call utility method to obtain.
      * @param packageURI URI identifying the package's APK file.
-     * @return <code>INSTALL_ON_INTERNAL_FLASH</code> if it is best to install package on internal
-     * storage, <code>INSTALL_ON_SDCARD</code> if it is best to install package on SD card,
-     * and <code>INSTALL_FAILED_INSUFFICIENT_STORAGE</code> if insufficient space to safely install
-     * the application. <code>INSTALL_PARSE_FAILED_NOT_APK</code> Is returned if any input
+     * @return {@link INSTALL_ON_INTERNAL_FLASH} if it is best to install package on internal
+     * storage, {@link INSTALL_ON_SDCARD} if it is best to install package on SD card,
+     * and {@link INSTALL_FAILED_INSUFFICIENT_STORAGE} if insufficient space to safely install
+     * the application. {@link INSTALL_PARSE_FAILED_NOT_APK} Is returned if any input
      * parameter is <code>null</code>.
      * This recommendation does take into account the package's own flags.
      * @hide
