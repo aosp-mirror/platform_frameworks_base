@@ -52,7 +52,7 @@ status_t HTTPStream::connect(const char *server, int port) {
 
     CHECK_EQ(mSocket, -1);
     mSocket = socket(AF_INET, SOCK_STREAM, 0);
-    
+
     if (mSocket < 0) {
         return UNKNOWN_ERROR;
     }
@@ -132,6 +132,14 @@ status_t HTTPStream::send(const char *data) {
     return send(data, strlen(data));
 }
 
+// A certain application spawns a local webserver that sends invalid responses,
+// specifically it terminates header line with only a newline instead of the
+// CRLF (carriage-return followed by newline) required by the HTTP specs.
+// The workaround accepts both behaviours but could potentially break
+// legitimate responses that use a single newline to "fold" headers, which is
+// why it's not yet on by default.
+#define WORKAROUND_FOR_MISSING_CR       0
+
 status_t HTTPStream::receive_line(char *line, size_t size) {
     if (mState != CONNECTED) {
         return ERROR_NOT_CONNECTED;
@@ -157,16 +165,27 @@ status_t HTTPStream::receive_line(char *line, size_t size) {
             return ERROR_CONNECTION_LOST;
         }
 
-        if (saw_CR && c == '\n') {
+#if WORKAROUND_FOR_MISSING_CR
+        if (c == '\n') {
+            // We have a complete line.
+
+            line[saw_CR ? length - 1 : length] = '\0';
+            return OK;
+        }
+#else
+        if (saw_CR &&  c == '\n') {
             // We have a complete line.
 
             line[length - 1] = '\0';
             return OK;
         }
+#endif
 
         saw_CR = (c == '\r');
 
-        CHECK(length + 1 < size);
+        if (length + 1 >= size) {
+            return ERROR_MALFORMED;
+        }
         line[length++] = c;
     }
 }
@@ -175,7 +194,7 @@ status_t HTTPStream::receive_header(int *http_status) {
     *http_status = -1;
     mHeaders.clear();
 
-    char line[1024];
+    char line[2048];
     status_t err = receive_line(line, sizeof(line));
     if (err != OK) {
         return err;
