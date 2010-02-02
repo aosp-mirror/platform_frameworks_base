@@ -464,7 +464,7 @@ public class WebView extends AbsoluteLayout
     private int mHeldMotionless;
 
     // whether support multi-touch
-    private static boolean mSupportMultiTouch;
+    private boolean mSupportMultiTouch;
     // use the framework's ScaleGestureDetector to handle multi-touch
     private ScaleGestureDetector mScaleDetector;
     // minimum scale change during multi-touch zoom
