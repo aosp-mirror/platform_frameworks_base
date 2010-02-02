@@ -96,16 +96,16 @@ public class ProgramVertex extends Program {
         static final int PROJECTION_OFFSET = 16;
         static final int TEXTURE_OFFSET = 32;
 
-        Matrix mModel;
-        Matrix mProjection;
-        Matrix mTexture;
+        Matrix4f mModel;
+        Matrix4f mProjection;
+        Matrix4f mTexture;
 
         public Allocation mAlloc;
 
         public MatrixAllocation(RenderScript rs) {
-            mModel = new Matrix();
-            mProjection = new Matrix();
-            mTexture = new Matrix();
+            mModel = new Matrix4f();
+            mProjection = new Matrix4f();
+            mTexture = new Matrix4f();
 
             mAlloc = Allocation.createSized(rs, Element.createUser(rs, Element.DataType.FLOAT_32), 48);
             mAlloc.subData1D(MODELVIEW_OFFSET, 16, mModel.mMat);
@@ -118,17 +118,17 @@ public class ProgramVertex extends Program {
             mAlloc = null;
         }
 
-        public void loadModelview(Matrix m) {
+        public void loadModelview(Matrix4f m) {
             mModel = m;
             mAlloc.subData1D(MODELVIEW_OFFSET, 16, m.mMat);
         }
 
-        public void loadProjection(Matrix m) {
+        public void loadProjection(Matrix4f m) {
             mProjection = m;
             mAlloc.subData1D(PROJECTION_OFFSET, 16, m.mMat);
         }
 
-        public void loadTexture(Matrix m) {
+        public void loadTexture(Matrix4f m) {
             mTexture = m;
             mAlloc.subData1D(TEXTURE_OFFSET, 16, m.mMat);
         }
@@ -152,8 +152,8 @@ public class ProgramVertex extends Program {
 
         public void setupProjectionNormalized(int w, int h) {
             // range -1,1 in the narrow axis at z = 0.
-            Matrix m1 = new Matrix();
-            Matrix m2 = new Matrix();
+            Matrix4f m1 = new Matrix4f();
+            Matrix4f m2 = new Matrix4f();
 
             if(w > h) {
                 float aspect = ((float)w) / h;
