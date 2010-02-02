@@ -28,7 +28,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.lang.IllegalStateException;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -82,12 +81,12 @@ final class NativeDaemonConnector implements Runnable {
                 listenToSocket();
             } catch (Exception e) {
                 Log.e(TAG, "Error in NativeDaemonConnector", e);
-                SystemClock.sleep(1000);
+                SystemClock.sleep(5000);
             }
         }
     }
 
-    private void listenToSocket() {
+    private void listenToSocket() throws IOException {
        LocalSocket socket = null;
 
         try {
@@ -143,31 +142,27 @@ final class NativeDaemonConnector implements Runnable {
             }
         } catch (IOException ex) {
             Log.e(TAG, "Communications error", ex);
-        }
-
-        synchronized (this) {
-            if (mOutputStream != null) {
-                try {
-                    mOutputStream.close();
-                } catch (IOException e) {
-                    Log.w(TAG, "Failed closing output stream", e);
+            throw ex;
+        } finally {
+            synchronized (this) {
+                if (mOutputStream != null) {
+                    try {
+                        mOutputStream.close();
+                    } catch (IOException e) {
+                        Log.w(TAG, "Failed closing output stream", e);
+                    }
+                    mOutputStream = null;
                 }
+            }
 
-                mOutputStream = null;
+            try {
+                if (socket != null) {
+                    socket.close();
+                }
+            } catch (IOException ex) {
+                Log.w(TAG, "Failed closing socket", ex);
             }
         }
-
-        try {
-            if (socket != null) {
-                socket.close();
-            }
-        } catch (IOException ex) {
-            Log.w(TAG, "Failed closing socket", ex);
-        }
-
-        Log.e(TAG, "Failed to connect to native daemon",
-                new IllegalStateException());
-        SystemClock.sleep(5000);
     }
 
     private void sendCommand(String command) {
@@ -204,7 +199,8 @@ final class NativeDaemonConnector implements Runnable {
     /**
      * Issue a command to the native daemon and return the responses
      */
-    public synchronized ArrayList<String> doCommand(String cmd) throws IllegalStateException {
+    public synchronized ArrayList<String> doCommand(String cmd)
+            throws NativeDaemonConnectorException  {
         sendCommand(cmd);
 
         ArrayList<String> response = new ArrayList<String>();
@@ -214,12 +210,12 @@ final class NativeDaemonConnector implements Runnable {
         while (!complete) {
             try {
                 String line = mResponseQueue.take();
-//                Log.d(TAG, "Removed off queue -> " + line);
+                Log.d(TAG, String.format("RSP -> {%s}", line));
                 String[] tokens = line.split(" ");
                 try {
                     code = Integer.parseInt(tokens[0]);
                 } catch (NumberFormatException nfe) {
-                    throw new IllegalStateException(
+                    throw new NativeDaemonConnectorException(
                             String.format("Invalid response from daemon (%s)", line));
                 }
 
@@ -233,7 +229,7 @@ final class NativeDaemonConnector implements Runnable {
 
         if (code >= ResponseCode.FailedRangeStart &&
                 code <= ResponseCode.FailedRangeEnd) {
-            throw new IllegalStateException(String.format(
+            throw new NativeDaemonConnectorException(code, String.format(
                                                "Command %s failed with code %d",
                                                 cmd, code));
         }
@@ -244,7 +240,7 @@ final class NativeDaemonConnector implements Runnable {
      * Issues a list command and returns the cooked list
      */
     public String[] doListCommand(String cmd, int expectedResponseCode)
-            throws IllegalStateException {
+            throws NativeDaemonConnectorException {
 
         ArrayList<String> rsp = doCommand(cmd);
         String[] rdata = new String[rsp.size()-1];
@@ -259,14 +255,15 @@ final class NativeDaemonConnector implements Runnable {
                 } else if (code == NativeDaemonConnector.ResponseCode.CommandOkay) {
                     return rdata;
                 } else {
-                    throw new IllegalStateException(
+                    throw new NativeDaemonConnectorException(
                             String.format("Expected list response %d, but got %d",
                                     expectedResponseCode, code));
                 }
             } catch (NumberFormatException nfe) {
-                throw new IllegalStateException(String.format("Error reading code '%s'", line));
+                throw new NativeDaemonConnectorException(
+                        String.format("Error reading code '%s'", line));
             }
         }
-        throw new IllegalStateException("Got an empty response");
+        throw new NativeDaemonConnectorException("Got an empty response");
     }
 }
