@@ -739,6 +739,7 @@ extern int register_android_media_MediaMetadataRetriever(JNIEnv *env);
 extern int register_android_media_MediaRecorder(JNIEnv *env);
 extern int register_android_media_MediaScanner(JNIEnv *env);
 extern int register_android_media_ResampleInputStream(JNIEnv *env);
+extern int register_android_media_MediaProfiles(JNIEnv *env);
 
 #ifndef NO_OPENCORE
 extern int register_android_media_AmrInputStream(JNIEnv *env);
@@ -784,6 +785,11 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved)
 
     if (register_android_media_ResampleInputStream(env) < 0) {
         LOGE("ERROR: ResampleInputStream native registration failed\n");
+        goto bail;
+    }
+
+    if (register_android_media_MediaProfiles(env) < 0) {
+        LOGE("ERROR: MediaProfiles native registration failed");
         goto bail;
     }
 
