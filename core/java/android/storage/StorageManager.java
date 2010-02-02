@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.os;
+package android.storage;
 
 import android.content.Context;
 import android.os.Binder;
@@ -261,9 +261,9 @@ public class StorageManager
 
 
     /**
-     * Registers a {@link android.os.StorageEventListener StorageEventListener}.
+     * Registers a {@link android.storage.StorageEventListener StorageEventListener}.
      *
-     * @param listener A {@link android.os.StorageEventListener StorageEventListener} object.
+     * @param listener A {@link android.storage.StorageEventListener StorageEventListener} object.
      *
      */
     public void registerListener(StorageEventListener listener) {
@@ -277,9 +277,9 @@ public class StorageManager
     }
 
     /**
-     * Unregisters a {@link android.os.StorageEventListener StorageEventListener}.
+     * Unregisters a {@link android.storage.StorageEventListener StorageEventListener}.
      *
-     * @param listener A {@link android.os.StorageEventListener StorageEventListener} object.
+     * @param listener A {@link android.storage.StorageEventListener StorageEventListener} object.
      *
      */
     public void unregisterListener(StorageEventListener listener) {

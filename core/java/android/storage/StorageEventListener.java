@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.os;
+package android.storage;
 
 /**
  * Used for receiving notifications from the StorageManager
