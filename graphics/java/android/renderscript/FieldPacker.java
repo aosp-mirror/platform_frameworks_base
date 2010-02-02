@@ -17,6 +17,10 @@
 package android.renderscript;
 
 
+/**
+ * @hide
+ *
+ **/
 public class FieldPacker {
     public FieldPacker(int len) {
         mPos = 0;
