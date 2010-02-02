@@ -1110,7 +1110,7 @@ public abstract class Context {
      * @see #SENSOR_SERVICE
      * @see android.hardware.SensorManager
      * @see #STORAGE_SERVICE
-     * @see android.os.StorageManager
+     * @see android.storage.StorageManager
      * @see #VIBRATOR_SERVICE
      * @see android.os.Vibrator
      * @see #CONNECTIVITY_SERVICE
@@ -1243,11 +1243,11 @@ public abstract class Context {
     
     /**
      * Use with {@link #getSystemService} to retrieve a {@link
-     * android.os.StorageManager} for accesssing system storage
+     * android.storage.StorageManager} for accesssing system storage
      * functions.
      *
      * @see #getSystemService
-     * @see android.os.StorageManager
+     * @see android.storage.StorageManager
      */
     public static final String STORAGE_SERVICE = "storage";
 
