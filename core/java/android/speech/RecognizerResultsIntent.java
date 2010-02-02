@@ -95,11 +95,11 @@ public class RecognizerResultsIntent {
      * {@link #EXTRA_VOICE_SEARCH_RESULT_URLS}, if available, or else should execute a search of
      * its own choosing, based on the recognition result string.
      * 
-     * Currently this html content should be expected in the form of an "inline:" uri for the
-     * Browser. In the future this may change to a "content://" uri or some other identifier.
-     * Anyone who reads this extra should confirm that a result is in fact an "inline:" uri and
-     * back off to the urls or strings gracefully if it is not, thus maintaining future backwards
-     * compatibility if this changes.
+     * Currently this html content should be expected in the form of a uri with scheme
+     * {@link #URI_SCHEME_INLINE} for the Browser. In the future this may change to a "content://"
+     * uri or some other identifier. Anyone who reads this extra should confirm that a result is
+     * in fact an "inline:" uri and back off to the urls or strings gracefully if it is not, thus
+     * maintaining future backwards compatibility if this changes.
      * 
      * @hide not to be exposed immediately as the implementation details may change
      */
@@ -119,4 +119,11 @@ public class RecognizerResultsIntent {
      */
     public static final String EXTRA_VOICE_SEARCH_RESULT_HTML_BASE_URLS =
             "android.speech.extras.VOICE_SEARCH_RESULT_HTML_BASE_URLS";
+    
+    /**
+     * The scheme used currently for html content in {@link #EXTRA_VOICE_SEARCH_RESULT_HTML}.
+     * 
+     * @hide not to be exposed immediately as the implementation details may change
+     */
+    public static final String URI_SCHEME_INLINE = "inline";
 }
