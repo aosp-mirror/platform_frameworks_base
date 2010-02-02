@@ -16,6 +16,7 @@
 
 package android.webkit;
 
+import android.content.Context;
 import android.net.http.EventHandler;
 import android.net.http.Headers;
 import android.os.Handler;
@@ -52,7 +53,8 @@ abstract class StreamLoader extends Handler {
     private static final int MSG_DATA = 102;  // Send data to loader
     private static final int MSG_END = 103;  // Send endData to loader
 
-    protected LoadListener mHandler; // loader class
+    protected final Context mContext;
+    protected final LoadListener mHandler; // loader class
     protected InputStream mDataStream; // stream to read data from
     protected long mContentLength; // content length of data
     private byte [] mData; // buffer to pass data to loader with.
@@ -66,6 +68,7 @@ abstract class StreamLoader extends Handler {
      */
     StreamLoader(LoadListener loadlistener) {
         mHandler = loadlistener;
+        mContext = loadlistener.getContext();
     }
 
     /**

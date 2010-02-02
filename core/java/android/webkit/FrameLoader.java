@@ -141,22 +141,21 @@ class FrameLoader {
             return true;
         }
         if (URLUtil.isAssetUrl(url)) {
-            FileLoader.requestUrl(url, loadListener, loadListener.getContext(),
-                    FileLoader.TYPE_ASSET, true);
+            FileLoader.requestUrl(url, loadListener, FileLoader.TYPE_ASSET,
+                    true);
             return true;
         } else if (URLUtil.isResourceUrl(url)) {
-            FileLoader.requestUrl(url, loadListener, loadListener.getContext(),
-                    FileLoader.TYPE_RES, true);
+            FileLoader.requestUrl(url, loadListener, FileLoader.TYPE_RES,
+                    true);
             return true;
         } else if (URLUtil.isFileUrl(url)) {
-            FileLoader.requestUrl(url, loadListener, loadListener.getContext(),
-                    FileLoader.TYPE_FILE, settings.getAllowFileAccess());
+            FileLoader.requestUrl(url, loadListener, FileLoader.TYPE_FILE,
+                    settings.getAllowFileAccess());
             return true;
         } else if (URLUtil.isContentUrl(url)) {
             // Send the raw url to the ContentLoader because it will do a
             // permission check and the url has to match..
-            ContentLoader.requestUrl(loadListener.url(), loadListener,
-                                     loadListener.getContext());
+            ContentLoader.requestUrl(loadListener.url(), loadListener);
             return true;
         } else if (URLUtil.isDataUrl(url)) {
             DataLoader.requestUrl(url, loadListener);

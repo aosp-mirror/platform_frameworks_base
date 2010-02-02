@@ -31,7 +31,6 @@ import java.io.FileInputStream;
 class ContentLoader extends StreamLoader {
 
     private String mUrl;
-    private Context mContext;
     private String mContentType;
 
     /**
@@ -40,11 +39,9 @@ class ContentLoader extends StreamLoader {
      * @param rawUrl "content:" url pointing to content to be loaded. This url
      *               is the same url passed in to the WebView.
      * @param loadListener LoadListener to pass the content to
-     * @param context Context to use to access the asset.
      */
-    ContentLoader(String rawUrl, LoadListener loadListener, Context context) {
+    ContentLoader(String rawUrl, LoadListener loadListener) {
         super(loadListener);
-        mContext = context;
 
         /* strip off mimetype */
         int mimeIndex = rawUrl.lastIndexOf('?');
@@ -81,7 +78,7 @@ class ContentLoader extends StreamLoader {
 
         try {
             mDataStream = mContext.getContentResolver().openInputStream(uri);
-            mHandler.status(1, 1, 0, "OK");
+            mHandler.status(1, 1, 200, "OK");
         } catch (java.io.FileNotFoundException ex) {
             mHandler.error(EventHandler.FILE_NOT_FOUND_ERROR, errString(ex));
             return false;
@@ -112,11 +109,9 @@ class ContentLoader extends StreamLoader {
      *
      * @param url "content:" url pointing to content to be loaded
      * @param loadListener LoadListener to pass the content to
-     * @param context Context to use to access the asset.
      */
-    public static void requestUrl(String url, LoadListener loadListener,
-            Context context) {
-        ContentLoader loader = new ContentLoader(url, loadListener, context);
+    public static void requestUrl(String url, LoadListener loadListener) {
+        ContentLoader loader = new ContentLoader(url, loadListener);
         loader.load();
     }
 
