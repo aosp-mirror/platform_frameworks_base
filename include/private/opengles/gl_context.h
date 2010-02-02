@@ -36,7 +36,12 @@ struct android_native_buffer_t;
 
 namespace android {
 
-const unsigned int OGLES_NUM_COMPRESSED_TEXTURE_FORMATS = 10;
+
+const unsigned int OGLES_NUM_COMPRESSED_TEXTURE_FORMATS = 10
+#ifdef GL_OES_compressed_ETC1_RGB8_texture
+        + 1
+#endif
+        ;
 
 class EGLTextureObject;
 class EGLSurfaceManager;

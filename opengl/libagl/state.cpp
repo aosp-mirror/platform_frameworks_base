@@ -51,6 +51,9 @@ static char const * const gExtensionsString =
     //        "GL_OES_point_size_array "              // TODO
     //        "GL_OES_point_sprite "                  // TODO
     "GL_OES_EGL_image "                     // OK
+#ifdef GL_OES_compressed_ETC1_RGB8_texture
+    "GL_OES_compressed_ETC1_RGB8_texture "  // OK
+#endif
     "GL_ARB_texture_compression "           // OK
     "GL_ARB_texture_non_power_of_two "      // OK
     "GL_ANDROID_user_clip_plane "           // OK
@@ -386,6 +389,7 @@ const GLubyte* glGetString(GLenum string)
 
 void glGetIntegerv(GLenum pname, GLint *params)
 {
+    int i;
     ogles_context_t* c = ogles_context_t::get();
     switch (pname) {
     case GL_ALIASED_POINT_SIZE_RANGE:
@@ -431,6 +435,10 @@ void glGetIntegerv(GLenum pname, GLint *params)
         params[ 7] = GL_PALETTE8_R5_G6_B5_OES;
         params[ 8] = GL_PALETTE8_RGBA4_OES;
         params[ 9] = GL_PALETTE8_RGB5_A1_OES;
+        i = 10;
+#ifdef GL_OES_compressed_ETC1_RGB8_texture
+        params[i++] = GL_ETC1_RGB8_OES;
+#endif
         break;
     case GL_DEPTH_BITS:
         params[0] = c->rasterizer.state.buffers.depth.format ? 0 : 16;
