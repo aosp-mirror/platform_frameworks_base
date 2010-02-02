@@ -65,6 +65,10 @@ status_t CachingDataSource::initCheck() const {
     return mSource->initCheck();
 }
 
+status_t CachingDataSource::getSize(off_t *size) {
+    return mSource->getSize(size);
+}
+
 uint32_t CachingDataSource::flags() {
     return mSource->flags();
 }

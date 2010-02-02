@@ -39,6 +39,8 @@ public:
 
     virtual ssize_t readAt(off_t offset, void *data, size_t size);
 
+    virtual status_t getSize(off_t *size);
+
     virtual uint32_t flags() {
         return kWantsPrefetching;
     }
@@ -63,7 +65,14 @@ private:
     off_t mBufferOffset;
     bool mFirstRequest;
 
+    bool mContentLengthValid;
+    unsigned long long mContentLength;
+
     status_t mInitCheck;
+
+    void init(
+            const char *_host, int port, const char *_path,
+            const KeyedVector<String8, String8> *headers);
 
     ssize_t sendRangeRequest(size_t offset);
     void initHeaders(const KeyedVector<String8, String8> *overrides);
