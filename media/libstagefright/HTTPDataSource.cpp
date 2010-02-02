@@ -34,7 +34,7 @@ static bool PerformRedirectIfNecessary(
         HTTPStream *http, const String8 &headers,
         string *host, string *path, int *port) {
     String8 request;
-    request.append("HEAD ");
+    request.append("GET ");
     request.append(path->c_str());
     request.append(" HTTP/1.1\r\n");
     request.append(headers);
@@ -142,7 +142,6 @@ void HTTPDataSource::init(
     mBuffer = malloc(kBufferSize);
     mBufferLength = 0;
     mBufferOffset = 0;
-    mFirstRequest = true;
     mContentLengthValid = false;
 
     initHeaders(headers);
@@ -153,13 +152,15 @@ void HTTPDataSource::init(
     LOGI("Connecting to host '%s', port %d, path '%s'",
          host.c_str(), port, path.c_str());
 
+    int numRedirectsRemaining = 5;
     do {
         mInitCheck = mHttp->connect(host.c_str(), port);
 
         if (mInitCheck != OK) {
             return;
         }
-    } while (PerformRedirectIfNecessary(mHttp, mHeaders, &host, &path, &port));
+    } while (PerformRedirectIfNecessary(mHttp, mHeaders, &host, &path, &port)
+             && numRedirectsRemaining-- > 0);
 
     string value;
     if (mHttp->find_header_value("Content-Length", &value)) {
@@ -280,14 +281,11 @@ ssize_t HTTPDataSource::readAt(off_t offset, void *data, size_t size) {
     }
 
     ssize_t contentLength = 0;
-    if (mFirstRequest || offset != (off_t)(mBufferOffset + mBufferLength)) {
-        if (!mFirstRequest) {
-            LOGV("new range offset=%ld (old=%ld)",
-                 offset, mBufferOffset + mBufferLength);
+    if (offset != (off_t)(mBufferOffset + mBufferLength)) {
+        LOGV("new range offset=%ld (old=%ld)",
+             offset, mBufferOffset + mBufferLength);
 
-            mHttp->disconnect();
-        }
-        mFirstRequest = false;
+        mHttp->disconnect();
 
         contentLength = sendRangeRequest(offset);
 
@@ -305,6 +303,12 @@ ssize_t HTTPDataSource::readAt(off_t offset, void *data, size_t size) {
     }
 
     ssize_t num_bytes_received = mHttp->receive(mBuffer, contentLength);
+
+    if (num_bytes_received < 0) {
+        mBufferLength = 0;
+
+        return num_bytes_received;
+    }
 
     mBufferLength = (size_t)num_bytes_received;
 
