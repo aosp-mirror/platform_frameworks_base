@@ -157,7 +157,6 @@ class BackupManagerService extends IBackupManager.Stub {
     final Object mAgentConnectLock = new Object();
     IBackupAgent mConnectedAgent;
     volatile boolean mConnecting;
-    volatile boolean mBackupOrRestoreInProgress = false;
     volatile long mLastBackupPass;
     volatile long mNextBackupPass;
 
@@ -217,7 +216,6 @@ class BackupManagerService extends IBackupManager.Stub {
     // Persistently track the need to do a full init
     static final String INIT_SENTINEL_FILE_NAME = "_need_init_";
     HashSet<String> mPendingInits = new HashSet<String>();  // transport names
-    volatile boolean mInitInProgress = false;
 
     // ----- Asynchronous backup/restore handler thread -----
 
@@ -237,9 +235,6 @@ class BackupManagerService extends IBackupManager.Stub {
                 IBackupTransport transport = getTransport(mCurrentTransport);
                 if (transport == null) {
                     Log.v(TAG, "Backup requested but no transport available");
-                    synchronized (mQueueLock) {
-                        mBackupOrRestoreInProgress = false;
-                    }
                     mWakelock.release();
                     break;
                 }
@@ -267,9 +262,6 @@ class BackupManagerService extends IBackupManager.Stub {
                         (new PerformBackupTask(transport, queue, oldJournal)).run();
                     } else {
                         Log.v(TAG, "Backup requested but nothing pending");
-                        synchronized (mQueueLock) {
-                            mBackupOrRestoreInProgress = false;
-                        }
                         mWakelock.release();
                     }
                 }
@@ -440,13 +432,10 @@ class BackupManagerService extends IBackupManager.Stub {
                             // can't really do more than bail here
                         }
                     } else {
-                        // Don't run backups now if we're disabled, not yet
-                        // fully set up, in the middle of a backup already,
-                        // or racing with an initialize pass.
-                        if (mEnabled && mProvisioned
-                                && !mBackupOrRestoreInProgress && !mInitInProgress) {
+                        // Don't run backups now if we're disabled or not yet
+                        // fully set up.
+                        if (mEnabled && mProvisioned) {
                             if (DEBUG) Log.v(TAG, "Running a backup pass");
-                            mBackupOrRestoreInProgress = true;
 
                             // Acquire the wakelock and pass it to the backup thread.  it will
                             // be released once backup concludes.
@@ -455,8 +444,7 @@ class BackupManagerService extends IBackupManager.Stub {
                             Message msg = mBackupHandler.obtainMessage(MSG_RUN_BACKUP);
                             mBackupHandler.sendMessage(msg);
                         } else {
-                            Log.w(TAG, "Backup pass but e=" + mEnabled + " p=" + mProvisioned
-                                    + " b=" + mBackupOrRestoreInProgress + " i=" + mInitInProgress);
+                            Log.w(TAG, "Backup pass but e=" + mEnabled + " p=" + mProvisioned);
                         }
                     }
                 }
@@ -469,7 +457,6 @@ class BackupManagerService extends IBackupManager.Stub {
             if (RUN_INITIALIZE_ACTION.equals(intent.getAction())) {
                 synchronized (mQueueLock) {
                     if (DEBUG) Log.v(TAG, "Running a device init");
-                    mInitInProgress = true;
 
                     // Acquire the wakelock and pass it to the init thread.  it will
                     // be released once init concludes.
@@ -1133,7 +1120,7 @@ class BackupManagerService extends IBackupManager.Stub {
                 if (status == BackupConstants.TRANSPORT_NOT_INITIALIZED) {
                     // The backend reports that our dataset has been wiped.  We need to
                     // reset all of our bookkeeping and instead run a new backup pass for
-                    // everything.  This must come after mBackupOrRestoreInProgress is cleared.
+                    // everything.
                     EventLog.writeEvent(EventLogTags.BACKUP_RESET, mTransport.transportDirName());
                     resetBackupState(mStateDir);
                 }
@@ -1166,14 +1153,8 @@ class BackupManagerService extends IBackupManager.Stub {
                     Log.e(TAG, "Unable to remove backup journal file " + mJournal);
                 }
 
-                // Only once we're entirely finished do we indicate our completion
-                // and release the wakelock
-                synchronized (mQueueLock) {
-                    mBackupOrRestoreInProgress = false;
-                }
-
+                // Only once we're entirely finished do we release the wakelock
                 if (status == BackupConstants.TRANSPORT_NOT_INITIALIZED) {
-                    // This must come after mBackupOrRestoreInProgress is cleared.
                     backupNow();
                 }
 
@@ -1635,9 +1616,6 @@ class BackupManagerService extends IBackupManager.Stub {
                 }
 
                 // done; we can finally release the wakelock
-                synchronized (mQueueLock) {
-                    mBackupOrRestoreInProgress = false;
-                }
                 mWakelock.release();
             }
         }
@@ -1762,9 +1740,6 @@ class BackupManagerService extends IBackupManager.Stub {
                 }
 
                 // Last but not least, release the cpu
-                synchronized (mQueueLock) {
-                    mBackupOrRestoreInProgress = false;
-                }
                 mWakelock.release();
             }
         }
@@ -1826,10 +1801,7 @@ class BackupManagerService extends IBackupManager.Stub {
             } catch (Exception e) {
                 Log.e(TAG, "Unexpected error performing init", e);
             } finally {
-                // Done; indicate that we're finished and release the wakelock
-                synchronized (mQueueLock) {
-                    mInitInProgress = false;
-                }
+                // Done; release the wakelock
                 mWakelock.release();
             }
         }
@@ -2220,16 +2192,9 @@ class BackupManagerService extends IBackupManager.Stub {
             }
 
             synchronized (mQueueLock) {
-                if (mBackupOrRestoreInProgress) {
-                    Log.e(TAG, "Backup pass in progress, restore aborted");
-                    return -1;
-                }
-
                 for (int i = 0; i < mRestoreSets.length; i++) {
                     if (token == mRestoreSets[i].token) {
                         long oldId = Binder.clearCallingIdentity();
-                        // Suppress backups until the restore operation is finished
-                        mBackupOrRestoreInProgress = true;
                         mWakelock.acquire();
                         Message msg = mBackupHandler.obtainMessage(MSG_RUN_RESTORE);
                         msg.obj = new RestoreParams(mRestoreTransport, observer, token);
@@ -2276,9 +2241,7 @@ class BackupManagerService extends IBackupManager.Stub {
         synchronized (mQueueLock) {
             pw.println("Backup Manager is " + (mEnabled ? "enabled" : "disabled")
                     + " / " + (!mProvisioned ? "not " : "") + "provisioned / "
-                    + (!mBackupOrRestoreInProgress ? "not " : "") + "in progress / "
-                    + (this.mPendingInits.size() == 0 ? "not " : "") + "pending init / "
-                    + (!mInitInProgress ? "not " : "") + "initializing");
+                    + (this.mPendingInits.size() == 0 ? "not " : "") + "pending init");
             pw.println("Last backup pass: " + mLastBackupPass
                     + " (now = " + System.currentTimeMillis() + ')');
             pw.println("  next scheduled: " + mNextBackupPass);
