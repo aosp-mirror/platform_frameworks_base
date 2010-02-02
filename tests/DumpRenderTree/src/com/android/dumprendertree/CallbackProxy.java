@@ -47,6 +47,7 @@ public class CallbackProxy extends Handler implements EventSender, LayoutTestCon
     private static final int EVENT_RELEASE_TOUCH_POINT = 16;
     private static final int EVENT_CLEAR_TOUCH_POINTS = 17;
     private static final int EVENT_CANCEL_TOUCH_POINT = 18;
+    private static final int EVENT_SET_TOUCH_MODIFIER = 19;
     
     private static final int LAYOUT_CLEAR_LIST = 20;
     private static final int LAYOUT_DISPLAY = 21;
@@ -143,6 +144,13 @@ public class CallbackProxy extends Handler implements EventSender, LayoutTestCon
             int y = args.getInt("y");
             int id = args.getInt("id");
             mEventSender.updateTouchPoint(id, x, y);
+            break;
+
+        case EVENT_SET_TOUCH_MODIFIER:
+            Bundle modifierArgs = (Bundle) msg.obj;
+            String modifier = modifierArgs.getString("modifier");
+            boolean enabled = modifierArgs.getBoolean("enabled");
+            mEventSender.setTouchModifier(modifier, enabled);
             break;
 
         case EVENT_RELEASE_TOUCH_POINT:
@@ -320,7 +328,10 @@ public class CallbackProxy extends Handler implements EventSender, LayoutTestCon
     }
 
     public void setTouchModifier(String modifier, boolean enabled) {
-        // TODO(benm): Android doesn't support key modifiers on touch events yet.
+        Bundle map = new Bundle();
+        map.putString("modifier", modifier);
+        map.putBoolean("enabled", enabled);
+        obtainMessage(EVENT_SET_TOUCH_MODIFIER, map).sendToTarget();
     }
 
     public void touchMove() {
