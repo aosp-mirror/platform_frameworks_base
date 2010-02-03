@@ -34,7 +34,7 @@ static bool PerformRedirectIfNecessary(
         HTTPStream *http, const String8 &headers,
         string *host, string *path, int *port) {
     String8 request;
-    request.append("HEAD ");
+    request.append("GET ");
     request.append(path->c_str());
     request.append(" HTTP/1.1\r\n");
     request.append(headers);
@@ -94,18 +94,8 @@ static bool PerformRedirectIfNecessary(
 }
 
 HTTPDataSource::HTTPDataSource(
-        const char *uri, const KeyedVector<String8, String8> *headers)
-    : mHttp(new HTTPStream),
-      mHost(NULL),
-      mPort(0),
-      mPath(NULL),
-      mBuffer(malloc(kBufferSize)),
-      mBufferLength(0),
-      mBufferOffset(0),
-      mFirstRequest(true) {
+        const char *uri, const KeyedVector<String8, String8> *headers) {
     CHECK(!strncasecmp("http://", uri, 7));
-
-    initHeaders(headers);
 
     string host;
     string path;
@@ -133,33 +123,27 @@ HTTPDataSource::HTTPDataSource(
         host = string(host, 0, colon - host.c_str());
     }
 
-    do {
-        LOGI("Connecting to host '%s', port %d, path '%s'",
-             host.c_str(), port, path.c_str());
-
-        mInitCheck = mHttp->connect(host.c_str(), port);
-
-        if (mInitCheck != OK) {
-            return;
-        }
-    } while (PerformRedirectIfNecessary(mHttp, mHeaders, &host, &path, &port));
-
-    mHost = strdup(host.c_str());
-    mPort = port;
-    mPath = strdup(path.c_str());
+    init(host.c_str(), port, path.c_str(), headers);
 }
 
 HTTPDataSource::HTTPDataSource(
         const char *_host, int port, const char *_path,
-        const KeyedVector<String8, String8> *headers)
-    : mHttp(new HTTPStream),
-      mHost(NULL),
-      mPort(0),
-      mPath(NULL),
-      mBuffer(malloc(kBufferSize)),
-      mBufferLength(0),
-      mBufferOffset(0),
-      mFirstRequest(true) {
+        const KeyedVector<String8, String8> *headers) {
+    init(_host, port, _path, headers);
+}
+
+void HTTPDataSource::init(
+        const char *_host, int port, const char *_path,
+        const KeyedVector<String8, String8> *headers) {
+    mHttp = new HTTPStream;
+    mHost = NULL;
+    mPort = 0;
+    mPath = NULL,
+    mBuffer = malloc(kBufferSize);
+    mBufferLength = 0;
+    mBufferOffset = 0;
+    mContentLengthValid = false;
+
     initHeaders(headers);
 
     string host = _host;
@@ -168,13 +152,22 @@ HTTPDataSource::HTTPDataSource(
     LOGI("Connecting to host '%s', port %d, path '%s'",
          host.c_str(), port, path.c_str());
 
+    int numRedirectsRemaining = 5;
     do {
         mInitCheck = mHttp->connect(host.c_str(), port);
 
         if (mInitCheck != OK) {
             return;
         }
-    } while (PerformRedirectIfNecessary(mHttp, mHeaders, &host, &path, &port));
+    } while (PerformRedirectIfNecessary(mHttp, mHeaders, &host, &path, &port)
+             && numRedirectsRemaining-- > 0);
+
+    string value;
+    if (mHttp->find_header_value("Content-Length", &value)) {
+        char *end;
+        mContentLength = strtoull(value.c_str(), &end, 10);
+        mContentLengthValid = true;
+    }
 
     mHost = strdup(host.c_str());
     mPort = port;
@@ -183,6 +176,22 @@ HTTPDataSource::HTTPDataSource(
 
 status_t HTTPDataSource::initCheck() const {
     return mInitCheck;
+}
+
+status_t HTTPDataSource::getSize(off_t *size) {
+    *size = 0;
+
+    if (mInitCheck != OK) {
+        return mInitCheck;
+    }
+
+    if (!mContentLengthValid) {
+        return ERROR_UNSUPPORTED;
+    }
+
+    *size = mContentLength;
+
+    return OK;
 }
 
 HTTPDataSource::~HTTPDataSource() {
@@ -272,14 +281,11 @@ ssize_t HTTPDataSource::readAt(off_t offset, void *data, size_t size) {
     }
 
     ssize_t contentLength = 0;
-    if (mFirstRequest || offset != mBufferOffset + mBufferLength) {
-        if (!mFirstRequest) {
-            LOGV("new range offset=%ld (old=%ld)",
-                 offset, mBufferOffset + mBufferLength);
+    if (offset != (off_t)(mBufferOffset + mBufferLength)) {
+        LOGV("new range offset=%ld (old=%ld)",
+             offset, mBufferOffset + mBufferLength);
 
-            mHttp->disconnect();
-        }
-        mFirstRequest = false;
+        mHttp->disconnect();
 
         contentLength = sendRangeRequest(offset);
 
@@ -297,6 +303,12 @@ ssize_t HTTPDataSource::readAt(off_t offset, void *data, size_t size) {
     }
 
     ssize_t num_bytes_received = mHttp->receive(mBuffer, contentLength);
+
+    if (num_bytes_received < 0) {
+        mBufferLength = 0;
+
+        return num_bytes_received;
+    }
 
     mBufferLength = (size_t)num_bytes_received;
 

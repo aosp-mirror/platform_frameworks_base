@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.os.Debug;
 import android.os.IBinder;
 import android.os.IMountService;
+import android.os.MountServiceResultCode;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
@@ -147,43 +148,35 @@ public class DefaultContainerService extends Service {
         String cachePath = null;
         int ownerUid = Process.myUid();
         try {
-            cachePath = mountService.createSecureContainer(containerId,
-                mbLen,
-                "vfat", sdEncKey, ownerUid);
+            int rc = mountService.createSecureContainer(
+                    containerId, mbLen, "vfat", sdEncKey, ownerUid);
+
+            if (rc != MountServiceResultCode.OperationSucceeded) {
+                Log.e(TAG, String.format("Container creation failed (%d)", rc));
+
+                // XXX: This destroy should not be necessary
+                rc = mountService.destroySecureContainer(containerId);
+                if (rc != MountServiceResultCode.OperationSucceeded) {
+                    Log.e(TAG, String.format("Container creation-cleanup failed (%d)", rc));
+                    return null;
+                }
+
+                // XXX: Does this ever actually succeed?
+                rc = mountService.createSecureContainer(
+                        containerId, mbLen, "vfat", sdEncKey, ownerUid);
+                if (rc != MountServiceResultCode.OperationSucceeded) {
+                    Log.e(TAG, String.format("Container creation retry failed (%d)", rc));
+                }
+            }
+
+            cachePath = mountService.getSecureContainerPath(containerId);
             if (localLOGV) Log.i(TAG, "Trying to create secure container for  "
                     + containerId + ", cachePath =" + cachePath);
             return cachePath;
-        } catch(IllegalStateException e) {
-            Log.e(TAG, "Failed to create storage on sdcard with exception: " + e);
         } catch(RemoteException e) {
-            Log.e(TAG, "MounteService not running?");
+            Log.e(TAG, "MountService not running?");
             return null;
         }
-        // TODO just fail here and let the user delete later on.
-        try {
-            mountService.destroySecureContainer(containerId);
-            if (localLOGV) Log.i(TAG, "Destroying cache for " + containerId
-                    + ", cachePath =" + cachePath);
-        } catch(IllegalStateException e) {
-            Log.e(TAG, "Failed to destroy existing cache: " + e);
-            return null;
-        } catch(RemoteException e) {
-            Log.e(TAG, "MounteService not running?");
-            return null;
-        }
-       try {
-            cachePath = mountService.createSecureContainer(containerId,
-                mbLen,
-                "vfat", sdEncKey, ownerUid);
-            if (localLOGV) Log.i(TAG, "Trying to install again " + containerId
-                   + ", cachePath =" + cachePath);
-            return cachePath;
-        } catch(IllegalStateException e) {
-            Log.e(TAG, "Failed to create storage on sdcard with exception: " + e);
-        } catch(RemoteException e) {
-            Log.e(TAG, "MounteService not running?");
-        }
-        return null;
     }
 
     private boolean destroySdDir(String containerId) {
@@ -194,7 +187,7 @@ public class DefaultContainerService extends Service {
         } catch (IllegalStateException e) {
             Log.i(TAG, "Failed to destroy container : " + containerId);
         } catch(RemoteException e) {
-            Log.e(TAG, "MounteService not running?");
+            Log.e(TAG, "MountService not running?");
         }
         return false;
     }
@@ -206,7 +199,7 @@ public class DefaultContainerService extends Service {
         } catch (IllegalStateException e) {
             Log.i(TAG, "Failed to finalize container for pkg : " + containerId);
         } catch(RemoteException e) {
-            Log.e(TAG, "MounteService not running?");
+            Log.e(TAG, "MountService not running?");
         }
         return false;
     }
@@ -218,19 +211,21 @@ public class DefaultContainerService extends Service {
         } catch (IllegalStateException e) {
             Log.e(TAG, "Failed to unmount id:  " + containerId + " with exception " + e);
         } catch(RemoteException e) {
-            Log.e(TAG, "MounteService not running?");
+            Log.e(TAG, "MountService not running?");
         }
         return false;
     }
 
     private String mountSdDir(String containerId, String key) {
         try {
-            return getMountService().mountSecureContainer(containerId, key, Process.myUid());
-        } catch (IllegalStateException e) {
-            Log.e(TAG, "Failed to mount id: " +
-                    containerId + " with exception " + e);
+            int rc = getMountService().mountSecureContainer(containerId, key, Process.myUid());
+            if (rc == MountServiceResultCode.OperationSucceeded) {
+                return getMountService().getSecureContainerPath(containerId);
+            } else {
+                Log.e(TAG, String.format("Failed to mount id %s with rc %d ", containerId, rc));
+            }
         } catch(RemoteException e) {
-            Log.e(TAG, "MounteService not running?");
+            Log.e(TAG, "MountService not running?");
         }
         return null;
     }

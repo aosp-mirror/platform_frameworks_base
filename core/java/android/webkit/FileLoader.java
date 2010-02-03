@@ -38,7 +38,6 @@ import java.lang.reflect.Field;
 class FileLoader extends StreamLoader {
 
     private String mPath;  // Full path to the file to load
-    private Context mContext;  // Application context, used for asset/res loads
     private int mType;  // Indicates the type of the load
     private boolean mAllowFileAccess; // Allow/block file system access
 
@@ -57,16 +56,14 @@ class FileLoader extends StreamLoader {
      *
      * @param url Full file url pointing to content to be loaded
      * @param loadListener LoadListener to pass the content to
-     * @param context Context to use to access the asset.
      * @param asset true if url points to an asset.
      * @param allowFileAccess true if this WebView is allowed to access files
      *                        on the file system.
      */
-    FileLoader(String url, LoadListener loadListener, Context context,
-            int type, boolean allowFileAccess) {
+    FileLoader(String url, LoadListener loadListener, int type,
+            boolean allowFileAccess) {
         super(loadListener);
         mType = type;
-        mContext = context;
         mAllowFileAccess = allowFileAccess;
 
         // clean the Url
@@ -174,7 +171,7 @@ class FileLoader extends StreamLoader {
                 mDataStream = new FileInputStream(mPath);
                 mContentLength = (new File(mPath)).length();
             }
-            mHandler.status(1, 1, 0, "OK");
+            mHandler.status(1, 1, 200, "OK");
 
         } catch (java.io.FileNotFoundException ex) {
             mHandler.error(EventHandler.FILE_NOT_FOUND_ERROR, errString(ex));
@@ -198,14 +195,13 @@ class FileLoader extends StreamLoader {
      *
      * @param url Full file url pointing to content to be loaded
      * @param loadListener LoadListener to pass the content to
-     * @param context Context to use to access the asset.
      * @param asset true if url points to an asset.
      * @param allowFileAccess true if this FileLoader can load files from the
      *                        file system.
      */
     public static void requestUrl(String url, LoadListener loadListener,
-            Context context, int type, boolean allowFileAccess) {
-        FileLoader loader = new FileLoader(url, loadListener, context, type,
+            int type, boolean allowFileAccess) {
+        FileLoader loader = new FileLoader(url, loadListener, type,
                 allowFileAccess);
         loader.load();
     }

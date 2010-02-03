@@ -41,6 +41,8 @@ public class ExifInterface {
     public static final String TAG_GPS_LONGITUDE = "GPSLongitude";
     public static final String TAG_GPS_LATITUDE_REF = "GPSLatitudeRef";
     public static final String TAG_GPS_LONGITUDE_REF = "GPSLongitudeRef";
+    public static final String TAG_GPS_TIMESTAMP = "GPSTimeStamp";
+    public static final String TAG_GPS_DATESTAMP = "GPSDateStamp";
     public static final String TAG_WHITE_BALANCE = "WhiteBalance";
 
     // Constants used for the Orientation Exif tag.
@@ -62,8 +64,7 @@ public class ExifInterface {
     static {
         System.loadLibrary("exif");
         sFormatter = new SimpleDateFormat("yyyy:MM:dd HH:mm:ss");
-        //TODO: uncomment this when our EXIF datetime is encoded as UTC
-        //sFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));
+        sFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
 
     private String mFilename;
@@ -248,7 +249,7 @@ public class ExifInterface {
     }
 
     /**
-     * Returns number of milliseconds since Jan. 1, 1970, midnight GMT.
+     * Returns number of milliseconds since Jan. 1, 1970, midnight.
      * Returns -1 if the date time information if not available.
      * @hide
      */
@@ -258,9 +259,32 @@ public class ExifInterface {
 
         ParsePosition pos = new ParsePosition(0);
         try {
-            Date date = sFormatter.parse(dateTimeString, pos);
-            if (date == null) return -1;
-            return date.getTime();
+            Date datetime = sFormatter.parse(dateTimeString, pos);
+            if (datetime == null) return -1;
+            return datetime.getTime();
+        } catch (IllegalArgumentException ex) {
+            return -1;
+        }
+    }
+
+    /**
+     * Returns number of milliseconds since Jan. 1, 1970, midnight UTC.
+     * Returns -1 if the date time information if not available.
+     * @hide
+     */
+    public long getGpsDateTime() {
+        String date = mAttributes.get(TAG_GPS_DATESTAMP);
+        String time = mAttributes.get(TAG_GPS_TIMESTAMP);
+        if (date == null || time == null) return -1;
+
+        String dateTimeString = date + ' ' + time;
+        if (dateTimeString == null) return -1;
+
+        ParsePosition pos = new ParsePosition(0);
+        try {
+            Date datetime = sFormatter.parse(dateTimeString, pos);
+            if (datetime == null) return -1;
+            return datetime.getTime();
         } catch (IllegalArgumentException ex) {
             return -1;
         }

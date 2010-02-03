@@ -112,7 +112,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/os/ICheckinService.aidl \
 	core/java/android/os/IMessenger.aidl \
 	core/java/android/os/IMountService.aidl \
-	core/java/android/os/IMountServiceObserver.aidl \
+	core/java/android/os/IMountServiceListener.aidl \
 	core/java/android/os/INetworkManagementService.aidl \
 	core/java/android/os/INetStatService.aidl \
 	core/java/android/os/IParentalControlCallback.aidl \
@@ -317,8 +317,7 @@ libcore_to_document := \
 	xml/src/main/java/org/w3c
 
 non_base_dirs := \
-	../../external/apache-http/src/org/apache/http \
-        ../../external/oauth/core/src/main/java/net/oauth
+	../../external/apache-http/src/org/apache/http
 
 # These are relative to frameworks/base
 dirs_to_document := \
@@ -549,7 +548,6 @@ include $(BUILD_DROIDDOC)
 
 ext_dirs := \
 	../../external/apache-http/src \
-        ../../external/oauth/core/src/main/java \
 	../../external/tagsoup/src
 
 ext_src_files := $(call all-java-files-under,$(ext_dirs))

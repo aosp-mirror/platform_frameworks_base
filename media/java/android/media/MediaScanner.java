@@ -744,7 +744,7 @@ public class MediaScanner
                         values.put(Images.Media.LONGITUDE, latlng[1]);
                     }
 
-                    long time = exif.getDateTime();
+                    long time = exif.getGpsDateTime();
                     if (time != -1) {
                         values.put(Images.Media.DATE_TAKEN, time);
                     }

@@ -24,7 +24,9 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Environment;
 import android.os.IMountService;
+import android.os.MountServiceResultCode;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -116,7 +118,8 @@ public class UsbStorageActivity extends Activity {
             IMountService mountService = IMountService.Stub.asInterface(ServiceManager
                     .getService("mount"));
             if (mountService != null) {
-                umsOn = mountService.getMassStorageEnabled();
+                umsOn = mountService.getVolumeShared(
+                        Environment.getExternalStorageDirectory().getPath(), "ums");
             }
         } catch (android.os.RemoteException exc) {
             // pass
@@ -140,10 +143,13 @@ public class UsbStorageActivity extends Activity {
         }
 
         try {
-            mountService.setMassStorageEnabled(true);
+            if (mountService.shareVolume(
+                    Environment.getExternalStorageDirectory().getPath(), "ums") !=
+                            MountServiceResultCode.OperationSucceeded) {
+                showSharingError();
+            }
         } catch (RemoteException e) {
             showSharingError();
-            return;
         }
     }
 
@@ -156,7 +162,8 @@ public class UsbStorageActivity extends Activity {
         }
 
         try {
-            mountService.setMassStorageEnabled(false);
+            mountService.unshareVolume(
+                    Environment.getExternalStorageDirectory().getPath(), "ums");
         } catch (RemoteException e) {
             showStoppingError();
             return;

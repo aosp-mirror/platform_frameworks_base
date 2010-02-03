@@ -52,6 +52,7 @@ public final class CacheManager {
     private static final String NO_STORE = "no-store";
     private static final String NO_CACHE = "no-cache";
     private static final String MAX_AGE = "max-age";
+    private static final String MANIFEST_MIME = "text/cache-manifest";
 
     private static long CACHE_THRESHOLD = 6 * 1024 * 1024;
     private static long CACHE_TRIM_AMOUNT = 2 * 1024 * 1024;
@@ -657,6 +658,15 @@ public final class CacheManager {
             String mimeType) {
         // if the contentLength is already larger than CACHE_MAX_SIZE, skip it
         if (headers.getContentLength() > CACHE_MAX_SIZE) return null;
+
+        // The HTML 5 spec, section 6.9.4, step 7.3 of the application cache
+        // process states that HTTP caching rules are ignored for the
+        // purposes of the application cache download process.
+        // At this point we can't tell that if a file is part of this process,
+        // except for the manifest, which has its own mimeType.
+        // TODO: work out a way to distinguish all responses that are part of
+        // the application download process and skip them.
+        if (MANIFEST_MIME.equals(mimeType)) return null;
 
         // TODO: if authenticated or secure, return null
         CacheResult ret = new CacheResult();

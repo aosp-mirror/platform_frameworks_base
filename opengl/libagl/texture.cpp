@@ -24,6 +24,7 @@
 #include "TextureObjectManager.h"
 
 #include <private/ui/android_natives_priv.h>
+#include <ETC1/etc1.h>
 
 #ifdef LIBAGL_USE_GRALLOC_COPYBITS
 #include "copybit.h"
@@ -1081,11 +1082,6 @@ void glCompressedTexImage2D(
         ogles_error(c, GL_INVALID_ENUM);
         return;
     }
-    if ((internalformat < GL_PALETTE4_RGB8_OES ||
-         internalformat > GL_PALETTE8_RGB5_A1_OES)) {
-        ogles_error(c, GL_INVALID_ENUM);
-        return;
-    }
     if (width<0 || height<0 || border!=0) {
         ogles_error(c, GL_INVALID_VALUE);
         return;
@@ -1121,6 +1117,12 @@ void glCompressedTexImage2D(
         format      = GL_RGBA;
         type        = GL_UNSIGNED_SHORT_5_5_5_1;
         break;
+#ifdef GL_OES_compressed_ETC1_RGB8_texture
+    case GL_ETC1_RGB8_OES:
+        format      = GL_RGB;
+        type        = GL_UNSIGNED_BYTE;
+        break;
+#endif
     default:
         ogles_error(c, GL_INVALID_ENUM);
         return;
@@ -1133,6 +1135,30 @@ void glCompressedTexImage2D(
 
     int32_t size;
     GGLSurface* surface;
+
+#ifdef GL_OES_compressed_ETC1_RGB8_texture
+    if (internalformat == GL_ETC1_RGB8_OES) {
+        GLsizei compressedSize = etc1_get_encoded_data_size(width, height);
+        if (compressedSize > imageSize) {
+            ogles_error(c, GL_INVALID_VALUE);
+            return;
+        }
+        int error = createTextureSurface(c, &surface, &size,
+                level, format, type, width, height);
+        if (error) {
+            ogles_error(c, error);
+            return;
+        }
+        if (etc1_decode_image(
+                (const etc1_byte*)data,
+                (etc1_byte*)surface->data,
+                width, height, 3, surface->stride*3) != 0) {
+            ogles_error(c, GL_INVALID_OPERATION);
+        }
+        return;
+    }
+#endif
+
     // all mipmap levels are specified at once.
     const int numLevels = level<0 ? -level : 1;
 

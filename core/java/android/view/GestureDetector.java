@@ -16,9 +16,10 @@
 
 package android.view;
 
+import android.content.Context;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
-import android.content.Context;
 
 /**
  * Detects various gestures and events using the supplied {@link MotionEvent}s.
@@ -231,6 +232,13 @@ public class GestureDetector {
     private float mLastMotionX;
 
     private boolean mIsLongpressEnabled;
+    
+    /**
+     * True if we are at a target API level of >= Froyo or the developer can
+     * explicitly set it. If true, input events with > 1 pointer will be ignored
+     * so we can work side by side with multitouch gesture detectors.
+     */
+    private boolean mIgnoreMultitouch;
 
     /**
      * Determines speed during touch scrolling
@@ -336,6 +344,26 @@ public class GestureDetector {
      * @throws NullPointerException if {@code listener} is null.
      */
     public GestureDetector(Context context, OnGestureListener listener, Handler handler) {
+        this(context, listener, handler, context != null &&
+                context.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.FROYO);
+    }
+    
+    /**
+     * Creates a GestureDetector with the supplied listener.
+     * You may only use this constructor from a UI thread (this is the usual situation).
+     * @see android.os.Handler#Handler()
+     *
+     * @param context the application's context
+     * @param listener the listener invoked for all the callbacks, this must
+     * not be null.
+     * @param handler the handler to use
+     * @param ignoreMultitouch whether events involving more than one pointer should
+     * be ignored.
+     *
+     * @throws NullPointerException if {@code listener} is null.
+     */
+    public GestureDetector(Context context, OnGestureListener listener, Handler handler,
+            boolean ignoreMultitouch) {
         if (handler != null) {
             mHandler = new GestureHandler(handler);
         } else {
@@ -345,14 +373,15 @@ public class GestureDetector {
         if (listener instanceof OnDoubleTapListener) {
             setOnDoubleTapListener((OnDoubleTapListener) listener);
         }
-        init(context);
+        init(context, ignoreMultitouch);
     }
 
-    private void init(Context context) {
+    private void init(Context context, boolean ignoreMultitouch) {
         if (mListener == null) {
             throw new NullPointerException("OnGestureListener must not be null");
         }
         mIsLongpressEnabled = true;
+        mIgnoreMultitouch = ignoreMultitouch;
 
         // Fallback to support pre-donuts releases
         int touchSlop, doubleTapSlop;
@@ -425,7 +454,26 @@ public class GestureDetector {
 
         boolean handled = false;
 
-        switch (action) {
+        switch (action & MotionEvent.ACTION_MASK) {
+        case MotionEvent.ACTION_POINTER_DOWN:
+            if (mIgnoreMultitouch) {
+                // Multitouch event - abort.
+                cancel();
+            }
+            break;
+
+        case MotionEvent.ACTION_POINTER_UP:
+            // Ending a multitouch gesture and going back to 1 finger
+            if (mIgnoreMultitouch && ev.getPointerCount() == 2) {
+                int id = (((action & MotionEvent.ACTION_POINTER_ID_MASK)
+                        >> MotionEvent.ACTION_POINTER_ID_SHIFT) == 0) ? 1 : 0;
+                mLastMotionX = ev.getX(id);
+                mLastMotionY = ev.getY(id);
+                mVelocityTracker.recycle();
+                mVelocityTracker = VelocityTracker.obtain();
+            }
+            break;
+
         case MotionEvent.ACTION_DOWN:
             if (mDoubleTapListener != null) {
                 boolean hadTapMessage = mHandler.hasMessages(TAP);
@@ -462,7 +510,7 @@ public class GestureDetector {
             break;
 
         case MotionEvent.ACTION_MOVE:
-            if (mInLongPress) {
+            if (mInLongPress || (mIgnoreMultitouch && ev.getPointerCount() > 1)) {
                 break;
             }
             final float scrollX = mLastMotionX - x;
@@ -525,19 +573,22 @@ public class GestureDetector {
             mHandler.removeMessages(LONG_PRESS);
             break;
         case MotionEvent.ACTION_CANCEL:
-            mHandler.removeMessages(SHOW_PRESS);
-            mHandler.removeMessages(LONG_PRESS);
-            mHandler.removeMessages(TAP);
-            mVelocityTracker.recycle();
-            mVelocityTracker = null;
-            mIsDoubleTapping = false;
-            mStillDown = false;
-            if (mInLongPress) {
-                mInLongPress = false;
-                break;
-            }
+            cancel();
         }
         return handled;
+    }
+
+    private void cancel() {
+        mHandler.removeMessages(SHOW_PRESS);
+        mHandler.removeMessages(LONG_PRESS);
+        mHandler.removeMessages(TAP);
+        mVelocityTracker.recycle();
+        mVelocityTracker = null;
+        mIsDoubleTapping = false;
+        mStillDown = false;
+        if (mInLongPress) {
+            mInLongPress = false;
+        }
     }
 
     private boolean isConsideredDoubleTap(MotionEvent firstDown, MotionEvent firstUp,

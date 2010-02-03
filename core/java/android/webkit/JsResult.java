@@ -26,7 +26,10 @@ public class JsResult {
     private boolean mTriedToNotifyBeforeReady;
     // This is a basic result of a confirm or prompt dialog.
     protected boolean mResult;
-    // This is the caller of the prompt and is the object that is waiting.
+    /**
+     *  This is the caller of the prompt and is the object that is waiting.
+     *  @hide
+     */
     protected final CallbackProxy mProxy;
     // This is the default value of the result.
     private final boolean mDefaultValue;

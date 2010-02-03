@@ -38,7 +38,7 @@ public:
     void stop();
     bool reachedEOS();
 
-    int64_t getDuration() const;
+    int64_t getDurationUs() const;
     void writeTrackHeader(int32_t trackID);
 
 private:
@@ -46,6 +46,7 @@ private:
     sp<MetaData> mMeta;
     sp<MediaSource> mSource;
     volatile bool mDone;
+    int64_t mMaxTimeStampUs;
 
     pthread_t mThread;
 
@@ -140,7 +141,7 @@ void MPEG4Writer::stop() {
          it != mTracks.end(); ++it) {
         (*it)->stop();
 
-        int64_t duration = (*it)->getDuration();
+        int64_t duration = (*it)->getDurationUs();
         if (duration > max_duration) {
             max_duration = duration;
         }
@@ -162,7 +163,7 @@ void MPEG4Writer::stop() {
         writeInt32(now);           // creation time
         writeInt32(now);           // modification time
         writeInt32(1000);          // timescale
-        writeInt32(max_duration);
+        writeInt32(max_duration / 1000);
         writeInt32(0x10000);       // rate
         writeInt16(0x100);         // volume
         writeInt16(0);             // reserved
@@ -316,6 +317,7 @@ MPEG4Writer::Track::Track(
       mMeta(source->getFormat()),
       mSource(source),
       mDone(false),
+      mMaxTimeStampUs(0),
       mCodecSpecificData(NULL),
       mCodecSpecificDataSize(0),
       mReachedEOS(false) {
@@ -343,6 +345,7 @@ status_t MPEG4Writer::Track::start() {
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
 
     mDone = false;
+    mMaxTimeStampUs = 0;
     mReachedEOS = false;
 
     pthread_create(&mThread, &attr, ThreadWrapper, this);
@@ -483,6 +486,10 @@ void MPEG4Writer::Track::threadEntry() {
         int64_t timestampUs;
         CHECK(buffer->meta_data()->findInt64(kKeyTime, &timestampUs));
 
+        if (timestampUs > mMaxTimeStampUs) {
+            mMaxTimeStampUs = timestampUs;
+        }
+
         // Our timestamp is in ms.
         info.timestamp = (timestampUs + 500) / 1000;
 
@@ -495,8 +502,8 @@ void MPEG4Writer::Track::threadEntry() {
     mReachedEOS = true;
 }
 
-int64_t MPEG4Writer::Track::getDuration() const {
-    return 10000;  // XXX
+int64_t MPEG4Writer::Track::getDurationUs() const {
+    return mMaxTimeStampUs;
 }
 
 void MPEG4Writer::Track::writeTrackHeader(int32_t trackID) {
@@ -516,7 +523,7 @@ void MPEG4Writer::Track::writeTrackHeader(int32_t trackID) {
         mOwner->writeInt32(now);           // modification time
         mOwner->writeInt32(trackID);
         mOwner->writeInt32(0);             // reserved
-        mOwner->writeInt32(getDuration());
+        mOwner->writeInt32(getDurationUs() / 1000);
         mOwner->writeInt32(0);             // reserved
         mOwner->writeInt32(0);             // reserved
         mOwner->writeInt16(0);             // layer
@@ -555,7 +562,7 @@ void MPEG4Writer::Track::writeTrackHeader(int32_t trackID) {
           mOwner->writeInt32(now);           // creation time
           mOwner->writeInt32(now);           // modification time
           mOwner->writeInt32(1000);          // timescale
-          mOwner->writeInt32(getDuration());
+          mOwner->writeInt32(getDurationUs() / 1000);
           mOwner->writeInt16(0);             // language code XXX
           mOwner->writeInt16(0);             // predefined
         mOwner->endBox();
