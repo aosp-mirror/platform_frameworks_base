@@ -30,8 +30,14 @@ public class RecognizerIntent {
 
     /**
      * Starts an activity that will prompt the user for speech and sends it through a
-     * speech recognizer.  The results will be returned via activity results, or forwarded
-     * via a PendingIntent if one is provided.
+     * speech recognizer.  The results will be returned via activity results (in
+     * {@link Activity#onActivityResult}, if you start the intent using
+     * {@link Activity#startActivityForResult(Intent, int)}), or forwarded via a PendingIntent
+     * if one is provided.
+     * 
+     * <p>Starting this intent with just {@link Activity#startActivity(Intent)} is not supported.
+     * You must either use {@link Activity#startActivityForResult(Intent, int)}, or provide a
+     * PendingIntent, to receive recognition results.
      * 
      * <p>Required extras:
      * <ul>
@@ -47,7 +53,7 @@ public class RecognizerIntent {
      *   <li>{@link #EXTRA_RESULTS_PENDINGINTENT_BUNDLE}
      * </ul>
      * 
-     * <p> Result extras:
+     * <p> Result extras (returned in the result, not to be specified in the request):
      * <ul>
      *   <li>{@link #EXTRA_RESULTS}
      * </ul>
@@ -73,7 +79,7 @@ public class RecognizerIntent {
      *   <li>{@link #EXTRA_MAX_RESULTS}
      * </ul>
      * 
-     * <p> Result extras:
+     * <p> Result extras (returned in the result, not to be specified in the request):
      * <ul>
      *   <li>{@link #EXTRA_RESULTS}
      * </ul>
@@ -167,6 +173,7 @@ public class RecognizerIntent {
      */
     public static final String EXTRA_RESULTS_PENDINGINTENT = 
             "android.speech.extra.RESULTS_PENDINGINTENT";
+    
     /**
      * If you use {@link #EXTRA_RESULTS_PENDINGINTENT} to supply a forwarding intent, you can
      * also use this extra to supply additional extras for the final intent.  The search results
@@ -187,8 +194,10 @@ public class RecognizerIntent {
     public static final int RESULT_AUDIO_ERROR = Activity.RESULT_FIRST_USER + 4;
 
     /**
-     * An ArrayList<String> of the potential results when performing
-     * {@link #ACTION_RECOGNIZE_SPEECH}. Only present when {@link Activity#RESULT_OK} is returned.
+     * An ArrayList&lt;String&gt; of the recognition results when performing
+     * {@link #ACTION_RECOGNIZE_SPEECH}. Returned in the results; not to be specified in the
+     * recognition request. Only present when {@link Activity#RESULT_OK} is returned in
+     * an activity result. In a PendingIntent, the lack of this extra indicates failure.
      */
     public static final String EXTRA_RESULTS = "android.speech.extra.RESULTS";
     
