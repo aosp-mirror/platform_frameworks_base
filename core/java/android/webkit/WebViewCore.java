@@ -512,7 +512,7 @@ final class WebViewCore {
     private native void nativeTouchUp(int touchGeneration,
             int framePtr, int nodePtr, int x, int y);
 
-    private native int nativeHandleTouchEvent(int action, int x, int y);
+    private native int nativeHandleTouchEvent(int action, int x, int y, long time);
 
     private native void nativeUpdateFrameCache();
 
@@ -726,6 +726,7 @@ final class WebViewCore {
         int mAction;
         int mX;
         int mY;
+        long mEventTime;
     }
 
     static class GeolocationPermissionsData {
@@ -1168,7 +1169,7 @@ final class WebViewCore {
                                     mWebView.mPrivateHandler,
                                     WebView.PREVENT_TOUCH_ID, ted.mAction,
                                     nativeHandleTouchEvent(ted.mAction, ted.mX,
-                                            ted.mY)).sendToTarget();
+                                    ted.mY, ted.mEventTime)).sendToTarget();
                             break;
                         }
 
