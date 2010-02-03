@@ -212,11 +212,13 @@ class PowerManagerService extends IPowerManager.Stub
     private Sensor mLightSensor;
     private boolean mLightSensorEnabled;
     private float mLightSensorValue = -1;
+    private int mHighestLightSensorValue = -1;
     private float mLightSensorPendingValue = -1;
     private int mLightSensorScreenBrightness = -1;
     private int mLightSensorButtonBrightness = -1;
     private int mLightSensorKeyboardBrightness = -1;
     private boolean mDimScreen = true;
+    private boolean mIsDocked = false;
     private long mNextTimeout;
     private volatile int mPokey = 0;
     private volatile boolean mPokeAwakeOnSet = false;
@@ -360,6 +362,15 @@ class PowerManagerService extends IPowerManager.Stub
         @Override
         public void onReceive(Context context, Intent intent) {
             bootCompleted();
+        }
+    }
+
+    private final class DockReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            int state = intent.getIntExtra(Intent.EXTRA_DOCK_STATE,
+                    Intent.EXTRA_DOCK_STATE_UNDOCKED);
+            dockStateChanged(state);
         }
     }
 
@@ -527,6 +538,9 @@ class PowerManagerService extends IPowerManager.Stub
         filter = new IntentFilter();
         filter.addAction(Intent.ACTION_BOOT_COMPLETED);
         mContext.registerReceiver(new BootCompletedReceiver(), filter);
+        filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_DOCK_EVENT);
+        mContext.registerReceiver(new DockReceiver(), filter);
 
         // Listen for secure settings changes
         mContext.getContentResolver().registerContentObserver(
@@ -1389,6 +1403,8 @@ class PowerManagerService extends IPowerManager.Stub
                     // clear current value so we will update based on the new conditions
                     // when the sensor is reenabled.
                     mLightSensorValue = -1;
+                    // reset our highest light sensor value when the screen turns off
+                    mHighestLightSensorValue = -1;
                 }
             }
         }
@@ -2059,15 +2075,40 @@ class PowerManagerService extends IPowerManager.Stub
         }
     };
 
+    private void dockStateChanged(int state) {
+        synchronized (mLocks) {
+            mIsDocked = (state != Intent.EXTRA_DOCK_STATE_UNDOCKED);
+            if (mIsDocked) {
+                mHighestLightSensorValue = -1;
+            }
+            if ((mPowerState & SCREEN_ON_BIT) != 0) {
+                // force lights recalculation
+                int value = (int)mLightSensorValue;
+                mLightSensorValue = -1;
+                lightSensorChangedLocked(value);
+            }
+        }
+    }
+
     private void lightSensorChangedLocked(int value) {
         if (mDebugLightSensor) {
             Log.d(TAG, "lightSensorChangedLocked " + value);
         }
 
+        // do not allow light sensor value to decrease
+        if (mHighestLightSensorValue < value) {
+            mHighestLightSensorValue = value;
+        }
+
         if (mLightSensorValue != value) {
             mLightSensorValue = value;
             if ((mPowerState & BATTERY_LOW_BIT) == 0) {
-                int lcdValue = getAutoBrightnessValue(value, mLcdBacklightValues);
+                // use maximum light sensor value seen since screen went on for LCD to avoid flicker
+                // we only do this if we are undocked, since lighting should be stable when
+                // stationary in a dock.
+                int lcdValue = getAutoBrightnessValue(
+                        (mIsDocked ? value : mHighestLightSensorValue),
+                        mLcdBacklightValues);
                 int buttonValue = getAutoBrightnessValue(value, mButtonBacklightValues);
                 int keyboardValue;
                 if (mKeyboardVisible) {
