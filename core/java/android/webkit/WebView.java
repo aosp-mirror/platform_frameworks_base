@@ -4348,6 +4348,7 @@ public class WebView extends AbsoluteLayout
             ted.mAction = action;
             ted.mX = viewToContentX((int) x + mScrollX);
             ted.mY = viewToContentY((int) y + mScrollY);
+            ted.mEventTime = eventTime;
             mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
             mLastSentTouchTime = eventTime;
         }
@@ -4611,6 +4612,7 @@ public class WebView extends AbsoluteLayout
                             ted.mAction = WebViewCore.ACTION_DOUBLETAP;
                             ted.mX = viewToContentX((int) x + mScrollX);
                             ted.mY = viewToContentY((int) y + mScrollY);
+                            ted.mEventTime = eventTime;
                             mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
                         } else if (mFullScreenHolder == null) {
                             doDoubleTap();
@@ -5650,6 +5652,7 @@ public class WebView extends AbsoluteLayout
                         ted.mAction = WebViewCore.ACTION_LONGPRESS;
                         ted.mX = viewToContentX((int) mLastTouchX + mScrollX);
                         ted.mY = viewToContentY((int) mLastTouchY + mScrollY);
+                        ted.mEventTime = SystemClock.uptimeMillis();
                         mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
                     } else if (mPreventDrag == PREVENT_DRAG_NO) {
                         mTouchMode = TOUCH_DONE_MODE;
