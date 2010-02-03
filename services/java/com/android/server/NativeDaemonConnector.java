@@ -219,19 +219,23 @@ final class NativeDaemonConnector implements Runnable {
                             String.format("Invalid response from daemon (%s)", line));
                 }
 
-                if ((code >= 200) && (code < 600))
+                if ((code >= 200) && (code < 600)) {
                     complete = true;
+                }
                 response.add(line);
             } catch (InterruptedException ex) {
-                Log.e(TAG, "InterruptedException");
+                Log.e(TAG, "Failed to process response", ex);
             }
         }
 
         if (code >= ResponseCode.FailedRangeStart &&
                 code <= ResponseCode.FailedRangeEnd) {
-            throw new NativeDaemonConnectorException(code, String.format(
-                                               "Command %s failed with code %d",
-                                                cmd, code));
+            /*
+             * Note: The format of the last response in this case is
+             *        "NNN <errmsg>"
+             */
+            throw new NativeDaemonConnectorException(
+                    code, cmd, response.get(response.size()-1).substring(4));
         }
         return response;
     }
