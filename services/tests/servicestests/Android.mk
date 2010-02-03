@@ -11,5 +11,7 @@ LOCAL_SRC_FILES := $(call all-java-files-under, src)
 LOCAL_JAVA_LIBRARIES := android.test.runner services
 LOCAL_PACKAGE_NAME := FrameworksServicesTests
 
+LOCAL_CERTIFICATE := platform
+
 include $(BUILD_PACKAGE)
 
