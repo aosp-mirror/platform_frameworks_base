@@ -73,6 +73,21 @@ interface IBackupManager {
     void setBackupEnabled(boolean isEnabled);
 
     /**
+     * Enable/disable automatic restore of application data at install time.  When
+     * enabled, installation of any package will involve the Backup Manager.  If data
+     * exists for the newly-installed package, either from the device's current [enabled]
+     * backup dataset or from the restore set used in the last wholesale restore operation,
+     * that data will be supplied to the new package's restore agent before the package
+     * is made generally available for launch.
+     *
+     * <p>Callers must hold  the android.permission.BACKUP permission to use this method.
+     *
+     * @param doAutoRestore When true, enables the automatic app-data restore facility.  When
+     *   false, this facility will be disabled.
+     */
+    void setAutoRestore(boolean doAutoRestore);
+
+    /**
      * Indicate that any necessary one-time provisioning has occurred.
      *
      * <p>Callers must hold the android.permission.BACKUP permission to use this method.
