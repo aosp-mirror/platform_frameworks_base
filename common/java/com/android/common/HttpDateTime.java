@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.webkit;
+package com.android.common;
 
 import android.text.format.Time;
 
