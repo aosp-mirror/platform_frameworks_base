@@ -17,9 +17,10 @@
 package com.android.providers.settings;
 
 import java.io.FileNotFoundException;
-import java.util.Random;
-import java.security.SecureRandom;
+import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.util.Random;
 
 import android.backup.BackupManager;
 import android.content.ContentProvider;
@@ -197,6 +198,14 @@ public class SettingsProvider extends ContentProvider {
             final String value = c.moveToNext() ? c.getString(0) : null;
             if (value == null) {
                 final SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
+                String serial = SystemProperties.get("ro.serialno");
+                if (serial != null) {
+                    try {
+                        random.setSeed(serial.getBytes("UTF-8"));
+                    } catch (UnsupportedEncodingException ignore) {
+                        // stick with default seed
+                    }
+                }
                 final String newAndroidIdValue = Long.toHexString(random.nextLong());
                 Log.d(TAG, "Generated and saved new ANDROID_ID");
                 final ContentValues values = new ContentValues();
