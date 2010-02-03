@@ -118,6 +118,7 @@ class BackupManagerService extends IBackupManager.Stub {
 
     boolean mEnabled;   // access to this is synchronized on 'this'
     boolean mProvisioned;
+    boolean mAutoRestore;
     PowerManager.WakeLock mWakelock;
     HandlerThread mHandlerThread = new HandlerThread("backup", Process.THREAD_PRIORITY_BACKGROUND);
     BackupHandler mBackupHandler;
@@ -340,6 +341,8 @@ class BackupManagerService extends IBackupManager.Stub {
                 Settings.Secure.BACKUP_ENABLED, 0) != 0;
         mProvisioned = Settings.Secure.getInt(context.getContentResolver(),
                 Settings.Secure.BACKUP_PROVISIONED, 0) != 0;
+        mAutoRestore = Settings.Secure.getInt(context.getContentResolver(),
+                Settings.Secure.BACKUP_AUTO_RESTORE, 0) != 0;
         // If Encrypted file systems is enabled or disabled, this call will return the
         // correct directory.
         mBaseStateDir = new File(Environment.getSecureDataDirectory(), "backup");
@@ -2016,6 +2019,20 @@ class BackupManagerService extends IBackupManager.Stub {
                             mRunInitIntent);
                 }
             }
+        }
+    }
+
+    // Enable/disable automatic restore of app data at install time
+    public void setAutoRestore(boolean doAutoRestore) {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
+        "setBackupEnabled");
+
+        Log.i(TAG, "Auto restore => " + doAutoRestore);
+
+        synchronized (this) {
+            Settings.Secure.putInt(mContext.getContentResolver(),
+                    Settings.Secure.BACKUP_AUTO_RESTORE, doAutoRestore ? 1 : 0);
+            mAutoRestore = doAutoRestore;
         }
     }
 
