@@ -22,6 +22,7 @@ package com.android.server;
 public class NativeDaemonConnectorException extends RuntimeException
 {
     private int mCode = -1;
+    private String mCmd;
 
     public NativeDaemonConnectorException() {}
 
@@ -30,13 +31,18 @@ public class NativeDaemonConnectorException extends RuntimeException
         super(error);
     }
 
-    public NativeDaemonConnectorException(int code, String error)
+    public NativeDaemonConnectorException(int code, String cmd, String error)
     {
-        super(error);
+        super(String.format("Cmd {%s} failed with code %d : {%s}", cmd, code, error));
         mCode = code;
+        mCmd = cmd;
     }
 
     public int getCode() {
         return mCode;
+    }
+
+    public String getCmd() {
+        return mCmd;
     }
 }
