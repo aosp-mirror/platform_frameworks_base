@@ -30,8 +30,6 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Map;
 
-import com.android.common.HttpDateTime;
-
 import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.digests.SHA1Digest;
 
