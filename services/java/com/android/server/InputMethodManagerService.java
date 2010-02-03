@@ -335,6 +335,22 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     class PackageReceiver extends android.content.BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            String pkgList[] = null;
+            if (Intent.ACTION_PACKAGE_ADDED.equals(action) ||
+                    Intent.ACTION_PACKAGE_REMOVED.equals(action)) {
+                Uri uri = intent.getData();
+                String pkg = uri != null ? uri.getSchemeSpecificPart() : null;
+                if (pkg != null) {
+                    pkgList = new String[] { pkg };
+                }
+            } else if (Intent.ACTION_MEDIA_RESOURCES_AVAILABLE.equals(action) ||
+                    Intent.ACTION_MEDIA_RESOURCES_UNAVAILABLE.equals(action)) {
+                pkgList = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
+            }
+            if (pkgList == null || pkgList.length == 0) {
+                return;
+            }
             synchronized (mMethodMap) {
                 buildInputMethodListLocked(mMethodList, mMethodMap);
 
@@ -352,38 +368,45 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
                 boolean changed = false;
 
-                Uri uri = intent.getData();
-                String pkg = uri != null ? uri.getSchemeSpecificPart() : null;
-                if (curIm != null && curIm.getPackageName().equals(pkg)) {
-                    ServiceInfo si = null;
-                    try {
-                        si = mContext.getPackageManager().getServiceInfo(
-                                curIm.getComponent(), 0);
-                    } catch (PackageManager.NameNotFoundException ex) {
-                    }
-                    if (si == null) {
-                        // Uh oh, current input method is no longer around!
-                        // Pick another one...
-                        Log.i(TAG, "Current input method removed: " + curInputMethodId);
-                        if (!chooseNewDefaultIME()) {
-                            changed = true;
-                            curIm = null;
-                            curInputMethodId = "";
-                            Log.i(TAG, "Unsetting current input method");
-                            Settings.Secure.putString(mContext.getContentResolver(),
-                                    Settings.Secure.DEFAULT_INPUT_METHOD,
-                                    curInputMethodId);
+                if (curIm != null) {
+                    boolean foundPkg = false;
+                    for (String pkg : pkgList) {
+                        if (curIm.getPackageName().equals(pkg)) {
+                            foundPkg = true;
+                            break;
                         }
                     }
+                    if (foundPkg) {
+                        ServiceInfo si = null;
+                        try {
+                            si = mContext.getPackageManager().getServiceInfo(
+                                    curIm.getComponent(), 0);
+                        } catch (PackageManager.NameNotFoundException ex) {
+                        }
+                        if (si == null) {
+                            // Uh oh, current input method is no longer around!
+                            // Pick another one...
+                            Log.i(TAG, "Current input method removed: " + curInputMethodId);
+                            if (!chooseNewDefaultIME()) {
+                                changed = true;
+                                curIm = null;
+                                curInputMethodId = "";
+                                Log.i(TAG, "Unsetting current input method");
+                                Settings.Secure.putString(mContext.getContentResolver(),
+                                        Settings.Secure.DEFAULT_INPUT_METHOD,
+                                        curInputMethodId);
+                            }
+                        }
 
-                } else if (curIm == null) {
-                    // We currently don't have a default input method... is
-                    // one now available?
-                    changed = chooseNewDefaultIME();
-                }
+                    } else if (curIm == null) {
+                        // We currently don't have a default input method... is
+                        // one now available?
+                        changed = chooseNewDefaultIME();
+                    }
 
-                if (changed) {
-                    updateFromSettingsLocked();
+                    if (changed) {
+                        updateFromSettingsLocked();
+                    }
                 }
             }
         }
@@ -415,13 +438,19 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
         });
 
+        PackageReceiver mBroadcastReceiver = new PackageReceiver();
         IntentFilter packageFilt = new IntentFilter();
         packageFilt.addAction(Intent.ACTION_PACKAGE_ADDED);
         packageFilt.addAction(Intent.ACTION_PACKAGE_CHANGED);
         packageFilt.addAction(Intent.ACTION_PACKAGE_REMOVED);
         packageFilt.addAction(Intent.ACTION_PACKAGE_RESTARTED);
         packageFilt.addDataScheme("package");
-        mContext.registerReceiver(new PackageReceiver(), packageFilt);
+        mContext.registerReceiver(mBroadcastReceiver, packageFilt);
+        // Register for events related to sdcard installation.
+        IntentFilter sdFilter = new IntentFilter();
+        sdFilter.addAction(Intent.ACTION_MEDIA_RESOURCES_AVAILABLE);
+        sdFilter.addAction(Intent.ACTION_MEDIA_RESOURCES_UNAVAILABLE);
+        mContext.registerReceiver(mBroadcastReceiver, sdFilter);
 
         IntentFilter screenOnOffFilt = new IntentFilter();
         screenOnOffFilt.addAction(Intent.ACTION_SCREEN_ON);
