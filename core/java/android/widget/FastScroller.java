@@ -435,7 +435,7 @@ class FastScroller {
                 cancelFling();
                 return true;
             }
-        } else if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
+        } else if (action == MotionEvent.ACTION_UP) { // don't add ACTION_CANCEL here
             if (mState == STATE_DRAGGING) {
                 if (mList != null) {
                     // ViewGroup does the right thing already, but there might
