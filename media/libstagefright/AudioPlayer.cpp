@@ -249,7 +249,8 @@ void AudioPlayer::fillBuffer(void *data, size_t size) {
                         kKeyTime, &mPositionTimeMediaUs));
 
             mPositionTimeRealUs =
-                ((mNumFramesPlayed + size_done / mFrameSize) * 1000000)
+                -mLatencyUs
+                + ((mNumFramesPlayed + size_done / mFrameSize) * 1000000)
                     / mSampleRate;
 
             LOGV("buffer->size() = %d, "
@@ -297,6 +298,10 @@ int64_t AudioPlayer::getRealTimeUsLocked() const {
 int64_t AudioPlayer::getMediaTimeUs() {
     Mutex::Autolock autoLock(mLock);
 
+    if (mPositionTimeMediaUs < 0 || mPositionTimeRealUs < 0) {
+        return 0;
+    }
+
     return mPositionTimeMediaUs + (getRealTimeUsLocked() - mPositionTimeRealUs);
 }
 
@@ -307,7 +312,7 @@ bool AudioPlayer::getMediaTimeMapping(
     *realtime_us = mPositionTimeRealUs;
     *mediatime_us = mPositionTimeMediaUs;
 
-    return mPositionTimeRealUs != -1 || mPositionTimeMediaUs != -1;
+    return mPositionTimeRealUs != -1 && mPositionTimeMediaUs != -1;
 }
 
 status_t AudioPlayer::seekTo(int64_t time_us) {
