@@ -16,6 +16,7 @@
 
 package com.android.dumprendertree;
 
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.webkit.MockGeolocation;
@@ -24,7 +25,7 @@ import android.webkit.WebStorage;
 import java.util.HashMap;
 
 public class CallbackProxy extends Handler implements EventSender, LayoutTestController {
-    
+
     private EventSender mEventSender;
     private LayoutTestController mLayoutTestController;
 
@@ -37,6 +38,15 @@ public class CallbackProxy extends Handler implements EventSender, LayoutTestCon
     private static final int EVENT_MOUSE_DOWN = 7;
     private static final int EVENT_MOUSE_MOVE = 8;
     private static final int EVENT_MOUSE_UP = 9;
+    private static final int EVENT_TOUCH_START = 10;
+    private static final int EVENT_TOUCH_MOVE = 11;
+    private static final int EVENT_TOUCH_END = 12;
+    private static final int EVENT_TOUCH_CANCEL = 13;
+    private static final int EVENT_ADD_TOUCH_POINT = 14;
+    private static final int EVENT_UPDATE_TOUCH_POINT = 15;
+    private static final int EVENT_RELEASE_TOUCH_POINT = 16;
+    private static final int EVENT_CLEAR_TOUCH_POINTS = 17;
+    private static final int EVENT_CANCEL_TOUCH_POINT = 18;
     
     private static final int LAYOUT_CLEAR_LIST = 20;
     private static final int LAYOUT_DISPLAY = 21;
@@ -105,6 +115,46 @@ public class CallbackProxy extends Handler implements EventSender, LayoutTestCon
 
         case EVENT_MOUSE_UP:
             mEventSender.mouseUp();
+            break;
+
+        case EVENT_TOUCH_START:
+            mEventSender.touchStart();
+            break;
+
+        case EVENT_TOUCH_MOVE:
+            mEventSender.touchMove();
+            break;
+
+        case EVENT_TOUCH_END:
+            mEventSender.touchEnd();
+            break;
+
+        case EVENT_TOUCH_CANCEL:
+            mEventSender.touchCancel();
+            break;
+
+        case EVENT_ADD_TOUCH_POINT:
+            mEventSender.addTouchPoint(msg.arg1, msg.arg2);
+            break;
+
+        case EVENT_UPDATE_TOUCH_POINT:
+            Bundle args = (Bundle) msg.obj;
+            int x = args.getInt("x");
+            int y = args.getInt("y");
+            int id = args.getInt("id");
+            mEventSender.updateTouchPoint(id, x, y);
+            break;
+
+        case EVENT_RELEASE_TOUCH_POINT:
+            mEventSender.releaseTouchPoint(msg.arg1);
+            break;
+
+        case EVENT_CLEAR_TOUCH_POINTS:
+            mEventSender.clearTouchPoints();
+            break;
+
+        case EVENT_CANCEL_TOUCH_POINT:
+            mEventSender.cancelTouchPoint(msg.arg1);
             break;
 
         case LAYOUT_CLEAR_LIST:
@@ -251,6 +301,51 @@ public class CallbackProxy extends Handler implements EventSender, LayoutTestCon
 
     public void mouseUp() {
         obtainMessage(EVENT_MOUSE_UP).sendToTarget();
+    }
+
+    public void touchStart() {
+        obtainMessage(EVENT_TOUCH_START).sendToTarget();
+    }
+
+    public void addTouchPoint(int x, int y) {
+        obtainMessage(EVENT_ADD_TOUCH_POINT, x, y).sendToTarget();
+    }
+
+    public void updateTouchPoint(int id, int x, int y) {
+        Bundle map = new Bundle();
+        map.putInt("x", x);
+        map.putInt("y", y);
+        map.putInt("id", id);
+        obtainMessage(EVENT_UPDATE_TOUCH_POINT, map).sendToTarget();
+    }
+
+    public void setTouchModifier(String modifier, boolean enabled) {
+        // TODO(benm): Android doesn't support key modifiers on touch events yet.
+    }
+
+    public void touchMove() {
+        obtainMessage(EVENT_TOUCH_MOVE).sendToTarget();
+    }
+
+    public void releaseTouchPoint(int id) {
+        obtainMessage(EVENT_RELEASE_TOUCH_POINT, id, 0).sendToTarget();
+    }
+
+    public void touchEnd() {
+        obtainMessage(EVENT_TOUCH_END).sendToTarget();
+    }
+
+    public void touchCancel() {
+        obtainMessage(EVENT_TOUCH_CANCEL).sendToTarget();
+    }
+
+
+    public void clearTouchPoints() {
+        obtainMessage(EVENT_CLEAR_TOUCH_POINTS).sendToTarget();
+    }
+
+    public void cancelTouchPoint(int id) {
+        obtainMessage(EVENT_CANCEL_TOUCH_POINT, id, 0).sendToTarget();
     }
     
     // LayoutTestController Methods
