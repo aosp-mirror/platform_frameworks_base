@@ -2194,4 +2194,10 @@
     <string name="reset">Reset</string>
     <!-- Label for <input type="submit"> button in html -->
     <string name="submit">Submit</string>
+
+    <!-- String describing the Star/Favorite checkbox
+
+         Used by AccessibilityService to announce the purpose of the view.
+    -->
+    <string name="description_star">favorite</string>
 </resources>
