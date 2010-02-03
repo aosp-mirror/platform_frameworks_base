@@ -1152,7 +1152,7 @@ void glCompressedTexImage2D(
         if (etc1_decode_image(
                 (const etc1_byte*)data,
                 (etc1_byte*)surface->data,
-                width, height, 3, surface->stride) != 0) {
+                width, height, 3, surface->stride*3) != 0) {
             ogles_error(c, GL_INVALID_OPERATION);
         }
         return;
