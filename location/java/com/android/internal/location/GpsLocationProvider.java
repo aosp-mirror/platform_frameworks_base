@@ -57,6 +57,7 @@ import java.io.StringBufferInputStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Properties;
 import java.util.Map.Entry;
 
@@ -240,10 +241,14 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
 
     // how often to request NTP time, in milliseconds
     // current setting 4 hours
-    private static final long NTP_INTERVAL = 4*60*60*1000; 
+    private static final long NTP_INTERVAL = 4*60*60*1000;
     // how long to wait if we have a network error in NTP or XTRA downloading
     // current setting - 5 minutes
-    private static final long RETRY_INTERVAL = 5*60*1000; 
+    private static final long RETRY_INTERVAL = 5*60*1000;
+
+    // to avoid injecting bad NTP time, we reject any time fixes that differ from system time
+    // by more than 5 minutes.
+    private static final long MAX_NTP_SYSTEM_TIME_OFFSET = 5*60*1000;
 
     private final IGpsStatusProvider mGpsStatusProvider = new IGpsStatusProvider.Stub() {
         public void addGpsStatusListener(IGpsStatusListener listener) throws RemoteException {
@@ -1253,13 +1258,26 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
                             long time = client.getNtpTime();
                             long timeReference = client.getNtpTimeReference();
                             int certainty = (int)(client.getRoundTripTime()/2);
+                            long now = System.currentTimeMillis();
+                            long systemTimeOffset = time - now;
         
-                            if (Config.LOGD) Log.d(TAG, "calling native_inject_time: " + 
-                                    time + " reference: " + timeReference 
-                                    + " certainty: " + certainty);
-        
-                            native_inject_time(time, timeReference, certainty);
-                            mNextNtpTime = System.currentTimeMillis() + NTP_INTERVAL;
+                            Log.d(TAG, "NTP server returned: "
+                                    + time + " (" + new Date(time)
+                                    + ") reference: " + timeReference
+                                    + " certainty: " + certainty
+                                    + " system time offset: " + systemTimeOffset);
+
+                            // sanity check NTP time and do not use if it is too far from system time
+                            if (systemTimeOffset < 0) {
+                                systemTimeOffset = -systemTimeOffset;
+                            }
+                            if (systemTimeOffset < MAX_NTP_SYSTEM_TIME_OFFSET) {
+                                native_inject_time(time, timeReference, certainty);
+                            } else {
+                                Log.e(TAG, "NTP time differs from system time by " + systemTimeOffset
+                                        + "ms.  Ignoring.");
+                            }
+                            mNextNtpTime = now + NTP_INTERVAL;
                         } else {
                             if (Config.LOGD) Log.d(TAG, "requestTime failed");
                             mNextNtpTime = System.currentTimeMillis() + RETRY_INTERVAL;

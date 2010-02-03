@@ -548,12 +548,22 @@ public class SlidingTab extends ViewGroup {
         return true;
     }
 
+    /**
+     * Reset the tabs to their original state and stop any existing animation.
+     * Animate them back into place if animate is true.
+     *
+     * @param animate
+     */
+    public void reset(boolean animate) {
+        mLeftSlider.reset(animate);
+        mRightSlider.reset(animate);
+    }
+
     @Override
     public void setVisibility(int visibility) {
         // Clear animations so sliders don't continue to animate when we show the widget again.
         if (visibility != getVisibility() && visibility == View.INVISIBLE) {
-            mLeftSlider.reset(false);
-            mRightSlider.reset(false);
+           reset(false);
         }
         super.setVisibility(visibility);
     }
