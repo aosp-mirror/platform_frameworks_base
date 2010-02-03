@@ -141,24 +141,29 @@ class FrameLoader {
             return true;
         }
         if (URLUtil.isAssetUrl(url)) {
-            FileLoader.requestUrl(url, loadListener, FileLoader.TYPE_ASSET,
-                    true);
+            // load asset in a separate thread as it involves IO
+            new FileLoader(url, loadListener, FileLoader.TYPE_ASSET, true)
+                    .enqueue();
             return true;
         } else if (URLUtil.isResourceUrl(url)) {
-            FileLoader.requestUrl(url, loadListener, FileLoader.TYPE_RES,
-                    true);
+            // load resource in a separate thread as it involves IO
+            new FileLoader(url, loadListener, FileLoader.TYPE_RES, true)
+                    .enqueue();
             return true;
         } else if (URLUtil.isFileUrl(url)) {
-            FileLoader.requestUrl(url, loadListener, FileLoader.TYPE_FILE,
-                    settings.getAllowFileAccess());
+            // load file in a separate thread as it involves IO
+            new FileLoader(url, loadListener, FileLoader.TYPE_FILE, settings
+                    .getAllowFileAccess()).enqueue();
             return true;
         } else if (URLUtil.isContentUrl(url)) {
             // Send the raw url to the ContentLoader because it will do a
-            // permission check and the url has to match..
-            ContentLoader.requestUrl(loadListener.url(), loadListener);
+            // permission check and the url has to match.
+            // load content in a separate thread as it involves IO
+            new ContentLoader(loadListener.url(), loadListener).enqueue();
             return true;
         } else if (URLUtil.isDataUrl(url)) {
-            DataLoader.requestUrl(url, loadListener);
+            // load data in the current thread to reduce the latency
+            new DataLoader(url, loadListener).load();
             return true;
         } else if (URLUtil.isAboutUrl(url)) {
             loadListener.data(mAboutBlank.getBytes(), mAboutBlank.length());

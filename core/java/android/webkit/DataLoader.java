@@ -62,10 +62,10 @@ class DataLoader extends StreamLoader {
     @Override
     protected boolean setupStreamAndSendStatus() {
         if (mDataStream != null) {
-            mHandler.status(1, 1, 200, "OK");
+            mLoadListener.status(1, 1, 200, "OK");
             return true;
         } else {
-            mHandler.error(EventHandler.ERROR,
+            mLoadListener.error(EventHandler.ERROR,
                     mContext.getString(R.string.httpError));
             return false;
         }
@@ -74,16 +74,4 @@ class DataLoader extends StreamLoader {
     @Override
     protected void buildHeaders(android.net.http.Headers h) {
     }
-
-    /**
-     * Construct a DataLoader and instruct it to start loading.
-     *
-     * @param url data: URL string optionally containing a mimetype
-     * @param loadListener LoadListener to pass the content to
-     */
-    public static void requestUrl(String url, LoadListener loadListener) {
-        DataLoader loader = new DataLoader(url, loadListener);
-        loader.load();
-    }
-
 }

@@ -18,11 +18,9 @@ package android.webkit;
 
 import com.android.internal.R;
 
-import android.content.Context;
 import android.content.res.AssetManager;
 import android.net.http.EventHandler;
 import android.net.http.Headers;
-import android.os.Environment;
 import android.util.Log;
 import android.util.TypedValue;
 
@@ -111,7 +109,7 @@ class FileLoader extends StreamLoader {
                 // "<package>.R$drawable"
                 if (mPath == null || mPath.length() == 0) {
                     Log.e(LOGTAG, "Need a path to resolve the res file");
-                    mHandler.error(EventHandler.FILE_ERROR, mContext
+                    mLoadListener.error(EventHandler.FILE_ERROR, mContext
                             .getString(R.string.httpErrorFileNotFound));
                     return false;
 
@@ -120,7 +118,7 @@ class FileLoader extends StreamLoader {
                 int dot = mPath.indexOf('.', slash);
                 if (slash == -1 || dot == -1) {
                     Log.e(LOGTAG, "Incorrect res path: " + mPath);
-                    mHandler.error(EventHandler.FILE_ERROR, mContext
+                    mLoadListener.error(EventHandler.FILE_ERROR, mContext
                             .getString(R.string.httpErrorFileNotFound));
                     return false;
                 }
@@ -157,13 +155,13 @@ class FileLoader extends StreamLoader {
                     errorMsg = "Caught IllegalAccessException: " + e;
                 }
                 if (errorMsg != null) {
-                    mHandler.error(EventHandler.FILE_ERROR, mContext
+                    mLoadListener.error(EventHandler.FILE_ERROR, mContext
                             .getString(R.string.httpErrorFileNotFound));
                     return false;
                 }
             } else {
                 if (!mAllowFileAccess) {
-                    mHandler.error(EventHandler.FILE_ERROR,
+                    mLoadListener.error(EventHandler.FILE_ERROR,
                             mContext.getString(R.string.httpErrorFileNotFound));
                     return false;
                 }
@@ -171,14 +169,14 @@ class FileLoader extends StreamLoader {
                 mDataStream = new FileInputStream(mPath);
                 mContentLength = (new File(mPath)).length();
             }
-            mHandler.status(1, 1, 200, "OK");
+            mLoadListener.status(1, 1, 200, "OK");
 
         } catch (java.io.FileNotFoundException ex) {
-            mHandler.error(EventHandler.FILE_NOT_FOUND_ERROR, errString(ex));
+            mLoadListener.error(EventHandler.FILE_NOT_FOUND_ERROR, errString(ex));
             return false;
 
         } catch (java.io.IOException ex) {
-            mHandler.error(EventHandler.FILE_ERROR, errString(ex));
+            mLoadListener.error(EventHandler.FILE_ERROR, errString(ex));
             return false;
         }
         return true;
@@ -188,22 +186,4 @@ class FileLoader extends StreamLoader {
     protected void buildHeaders(Headers headers) {
         // do nothing.
     }
-
-
-    /**
-     * Construct a FileLoader and instruct it to start loading.
-     *
-     * @param url Full file url pointing to content to be loaded
-     * @param loadListener LoadListener to pass the content to
-     * @param asset true if url points to an asset.
-     * @param allowFileAccess true if this FileLoader can load files from the
-     *                        file system.
-     */
-    public static void requestUrl(String url, LoadListener loadListener,
-            int type, boolean allowFileAccess) {
-        FileLoader loader = new FileLoader(url, loadListener, type,
-                allowFileAccess);
-        loader.load();
-    }
-
 }

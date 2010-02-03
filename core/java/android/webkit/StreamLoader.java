@@ -20,11 +20,12 @@ import android.content.Context;
 import android.net.http.EventHandler;
 import android.net.http.Headers;
 import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Looper;
 import android.os.Message;
 
 import java.io.IOException;
 import java.io.InputStream;
-
 
 /**
  * This abstract class is used for all content loaders that rely on streaming
@@ -44,9 +45,7 @@ import java.io.InputStream;
  * that indicates the content should not be cached.
  *
  */
-abstract class StreamLoader extends Handler {
-
-    public static final String NO_STORE       = "no-store";
+abstract class StreamLoader implements Handler.Callback {
 
     private static final int MSG_STATUS = 100;  // Send status to loader
     private static final int MSG_HEADERS = 101; // Send headers to loader
@@ -54,10 +53,18 @@ abstract class StreamLoader extends Handler {
     private static final int MSG_END = 103;  // Send endData to loader
 
     protected final Context mContext;
-    protected final LoadListener mHandler; // loader class
+    protected final LoadListener mLoadListener; // loader class
     protected InputStream mDataStream; // stream to read data from
     protected long mContentLength; // content length of data
     private byte [] mData; // buffer to pass data to loader with.
+
+    // Handler which will be initialized in the thread where load() is called.
+    private Handler mHandler;
+
+    // Handler which will be used to load StreamLoader in a separate thread
+    private static StreamQueueHandler sStreamQueueHandler;
+
+    private static final Object sStreamQueueLock = new Object();
 
     /**
      * Constructor. Although this class calls the LoadListener, it only calls
@@ -67,13 +74,13 @@ abstract class StreamLoader extends Handler {
      * @param loadlistener The LoadListener to call with the data.
      */
     StreamLoader(LoadListener loadlistener) {
-        mHandler = loadlistener;
+        mLoadListener = loadlistener;
         mContext = loadlistener.getContext();
     }
 
     /**
      * This method is called when the derived class should setup mDataStream,
-     * and call mHandler.status() to indicate that the load can occur. If it
+     * and call mLoadListener.status() to indicate that the load can occur. If it
      * fails to setup, it should still call status() with the error code.
      *
      * @return true if stream was successfully setup
@@ -89,15 +96,40 @@ abstract class StreamLoader extends Handler {
      */
     abstract protected void buildHeaders(Headers headers);
 
+    /**
+     * Calling this method to load this StreamLoader in a separate
+     * "StreamLoadingThread".
+     */
+    final void enqueue() {
+        synchronized (sStreamQueueLock) {
+            if (sStreamQueueHandler == null) {
+                HandlerThread thread = new HandlerThread(
+                        StreamQueueHandler.THREAD_NAME,
+                        android.os.Process.THREAD_PRIORITY_DEFAULT +
+                        android.os.Process.THREAD_PRIORITY_LESS_FAVORABLE);
+                thread.start();
+                sStreamQueueHandler = new StreamQueueHandler(thread.getLooper());
+            }
+        }
+
+        sStreamQueueHandler.obtainMessage(StreamQueueHandler.MSG_ADD_LOADER,
+                this).sendToTarget();
+    }
 
     /**
      * Calling this method starts the load of the content for this StreamLoader.
-     * This method simply posts a message to send the status and returns
-     * immediately.
+     * This method simply creates a Handler in the current thread and posts a
+     * message to send the status and returns immediately.
      */
-    public void load() {
-        if (!mHandler.isSynchronous()) {
-            sendMessage(obtainMessage(MSG_STATUS));
+    final void load() {
+        synchronized (this) {
+            if (mHandler == null) {
+                mHandler = new Handler(this);
+            }
+        }
+
+        if (!mLoadListener.isSynchronous()) {
+            mHandler.sendEmptyMessage(MSG_STATUS);
         } else {
             // Load the stream synchronously.
             if (setupStreamAndSendStatus()) {
@@ -105,23 +137,20 @@ abstract class StreamLoader extends Handler {
                 // to pass data to the loader
                 mData = new byte[8192];
                 sendHeaders();
-                while (!sendData() && !mHandler.cancelled());
+                while (!sendData() && !mLoadListener.cancelled());
                 closeStreamAndSendEndData();
-                mHandler.loadSynchronousMessages();
+                mLoadListener.loadSynchronousMessages();
             }
         }
     }
 
-    /* (non-Javadoc)
-     * @see android.os.Handler#handleMessage(android.os.Message)
-     */
-    public void handleMessage(Message msg) {
-        if (DebugFlags.STREAM_LOADER && mHandler.isSynchronous()) {
+    public boolean handleMessage(Message msg) {
+        if (mLoadListener.isSynchronous()) {
             throw new AssertionError();
         }
-        if (mHandler.cancelled()) {
+        if (mLoadListener.cancelled()) {
             closeStreamAndSendEndData();
-            return;
+            return true;
         }
         switch(msg.what) {
             case MSG_STATUS:
@@ -129,27 +158,27 @@ abstract class StreamLoader extends Handler {
                     // We were able to open the stream, create the array
                     // to pass data to the loader
                     mData = new byte[8192];
-                    sendMessage(obtainMessage(MSG_HEADERS));
+                    mHandler.sendEmptyMessage(MSG_HEADERS);
                 }
                 break;
             case MSG_HEADERS:
                 sendHeaders();
-                sendMessage(obtainMessage(MSG_DATA));
+                mHandler.sendEmptyMessage(MSG_DATA);
                 break;
             case MSG_DATA:
                 if (sendData()) {
-                    sendMessage(obtainMessage(MSG_END));
+                    mHandler.sendEmptyMessage(MSG_END);
                 } else {
-                    sendMessage(obtainMessage(MSG_DATA));
+                    mHandler.sendEmptyMessage(MSG_DATA);
                 }
                 break;
             case MSG_END:
                 closeStreamAndSendEndData();
                 break;
             default:
-                super.handleMessage(msg);
-                break;
+                return false;
         }
+        return true;
     }
 
     /**
@@ -161,7 +190,7 @@ abstract class StreamLoader extends Handler {
             headers.setContentLength(mContentLength);
         }
         buildHeaders(headers);
-        mHandler.headers(headers);
+        mLoadListener.headers(headers);
     }
 
     /**
@@ -176,12 +205,11 @@ abstract class StreamLoader extends Handler {
             try {
                 int amount = mDataStream.read(mData);
                 if (amount > 0) {
-                    mHandler.data(mData, amount);
+                    mLoadListener.data(mData, amount);
                     return false;
                 }
             } catch (IOException ex) {
-                mHandler.error(EventHandler.FILE_ERROR,
-                               ex.getMessage());
+                mLoadListener.error(EventHandler.FILE_ERROR, ex.getMessage());
             }
         }
         return true;
@@ -198,7 +226,24 @@ abstract class StreamLoader extends Handler {
                 // ignore.
             }
         }
-        mHandler.endData();
+        mLoadListener.endData();
     }
 
+    private static class StreamQueueHandler extends Handler {
+        private static final String THREAD_NAME = "StreamLoadingThread";
+
+        private static final int MSG_ADD_LOADER = 101;
+
+        StreamQueueHandler(Looper looper) {
+            super(looper);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            if (msg.what == MSG_ADD_LOADER) {
+                StreamLoader loader = (StreamLoader) msg.obj;
+                loader.load();
+            }
+        }
+    }
 }
