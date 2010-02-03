@@ -55,6 +55,7 @@ static void normal__nop(transform_t const*, vec4_t* c, vec4_t const* o);
 static void point2__generic(transform_t const*, vec4_t* c, vec4_t const* o);
 static void point3__generic(transform_t const*, vec4_t* c, vec4_t const* o);
 static void point4__generic(transform_t const*, vec4_t* c, vec4_t const* o);
+static void point3__mvui(transform_t const*, vec4_t* c, vec4_t const* o);
 static void point4__mvui(transform_t const*, vec4_t* c, vec4_t const* o);
 
 // ----------------------------------------------------------------------------
@@ -209,7 +210,7 @@ void mvui_transform_t::picker()
 {
     flags = 0;
     ops = OP_ALL;
-    point3 = point4__mvui;
+    point3 = point3__mvui;
     point4 = point4__mvui;
 }
 
@@ -600,17 +601,31 @@ void transform_state_t::update_mvui()
     GLfloat r[16];
     const GLfloat* const mv = modelview.top().elements();
     
-    // TODO: we need a faster invert, especially for when the modelview
-    // is a rigid-body matrix
+    /*
+    When evaluating the lighting equation in eye-space, normals
+    are transformed by the upper 3x3 modelview inverse-transpose.
+    http://www.opengl.org/documentation/specs/version1.1/glspec1.1/node26.html
+
+    (note that inverse-transpose is distributive).
+    Also note that:
+        l(obj) = inv(modelview).l(eye) for local light
+        l(obj) =  tr(modelview).l(eye) for infinite light
+    */
+
     invert(r, mv);
 
     GLfixed* const x = mvui.matrix.m;
-    for (int i=0 ; i<4 ; i++) {
-        x[I(i,0)] = gglFloatToFixed(r[I(i,0)]);
-        x[I(i,1)] = gglFloatToFixed(r[I(i,1)]);
-        x[I(i,2)] = gglFloatToFixed(r[I(i,2)]);
-        x[I(i,4)] = gglFloatToFixed(r[I(i,3)]);
-    }
+
+#if OBJECT_SPACE_LIGHTING
+    for (int i=0 ; i<4 ; i++)
+        for (int j=0 ; j<4 ; j++)
+            x[I(i,j)] = gglFloatToFixed(r[I(i,j)]);
+#else
+    for (int i=0 ; i<4 ; i++)
+        for (int j=0 ; j<4 ; j++)
+            x[I(i,j)] = gglFloatToFixed(r[I(j,i)]);
+#endif
+
     mvui.picker();
 }
 
@@ -739,8 +754,22 @@ void point4__generic(transform_t const* mx, vec4_t* lhs, vec4_t const* rhs) {
     lhs->w = mla4(rx, m[ 3], ry, m[ 7], rz, m[11], rw, m[15]);
 }
 
+void point3__mvui(transform_t const* mx, vec4_t* lhs, vec4_t const* rhs) {
+    // this is used for transforming light positions back to object space.
+    // w is used as a switch for directional lights, so we need
+    // to preserve it.
+    const GLfixed* const m = mx->matrix.m;
+    const GLfixed rx = rhs->x;
+    const GLfixed ry = rhs->y;
+    const GLfixed rz = rhs->z;
+    lhs->x = mla3(rx, m[ 0], ry, m[ 4], rz, m[ 8]);
+    lhs->y = mla3(rx, m[ 1], ry, m[ 5], rz, m[ 9]);
+    lhs->z = mla3(rx, m[ 2], ry, m[ 6], rz, m[10]);
+    lhs->w = 0;
+}
+
 void point4__mvui(transform_t const* mx, vec4_t* lhs, vec4_t const* rhs) {
-    // this used for transforming light positions back to object space.
+    // this is used for transforming light positions back to object space.
     // w is used as a switch for directional lights, so we need
     // to preserve it.
     const GLfixed* const m = mx->matrix.m;

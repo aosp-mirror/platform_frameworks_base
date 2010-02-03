@@ -22,6 +22,13 @@
 #include <stddef.h>
 #include <sys/types.h>
 
+
+// Set to 1 for object-space lighting evaluation.
+// There are still some bugs with object-space lighting,
+// especially visible in the San Angeles demo.
+#define OBJECT_SPACE_LIGHTING   0
+
+
 namespace android {
 
 namespace gl {
