@@ -464,7 +464,6 @@ android.webkit.CacheManager
 android.webkit.CallbackProxy
 android.webkit.CookieManager
 android.webkit.CookieSyncManager
-android.webkit.HttpDateTime
 android.webkit.JWebCoreJavaBridge
 android.webkit.LoadListener
 android.webkit.MimeTypeMap
