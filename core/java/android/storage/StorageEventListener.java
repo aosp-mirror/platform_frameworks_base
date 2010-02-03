@@ -50,8 +50,8 @@ public interface StorageEventListener {
      * Called when a volume has changed state
      * @param label the system defined label for the volume.
      * @param path the filesystem path for the volume.
-     * @param oldState the old state as returned by {@link android.os.Environment.getExternalStorageState()}.
-     * @param newState the old state as returned by {@link android.os.Environment.getExternalStorageState()}.
+     * @param oldState the old state as returned by {@link android.os.Environment#getExternalStorageState()}.
+     * @param newState the old state as returned by {@link android.os.Environment#getExternalStorageState()}.
      */
     public void onVolumeStateChanged(String label, String path, String oldState, String newState);
 }
