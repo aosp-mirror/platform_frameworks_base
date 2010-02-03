@@ -37,6 +37,7 @@ AudioPlayer::AudioPlayer(const sp<MediaPlayerBase::AudioSink> &audioSink)
       mPositionTimeMediaUs(-1),
       mPositionTimeRealUs(-1),
       mSeeking(false),
+      mReachedEOS(false),
       mStarted(false),
       mAudioSink(audioSink) {
 }
@@ -45,12 +46,6 @@ AudioPlayer::~AudioPlayer() {
     if (mStarted) {
         stop();
     }
-}
-
-void AudioPlayer::setListenerCallback(
-        void (*notify)(void *cookie, int what), void *cookie) {
-    mListenerCallback = notify;
-    mListenerCookie = cookie;
 }
 
 void AudioPlayer::setSource(const sp<MediaSource> &source) {
@@ -172,12 +167,23 @@ void AudioPlayer::stop() {
     mPositionTimeMediaUs = -1;
     mPositionTimeRealUs = -1;
     mSeeking = false;
+    mReachedEOS = false;
     mStarted = false;
 }
 
 // static
 void AudioPlayer::AudioCallback(int event, void *user, void *info) {
     static_cast<AudioPlayer *>(user)->AudioCallback(event, info);
+}
+
+bool AudioPlayer::isSeeking() {
+    Mutex::Autolock autoLock(mLock);
+    return mSeeking;
+}
+
+bool AudioPlayer::reachedEOS() {
+    Mutex::Autolock autoLock(mLock);
+    return mReachedEOS;
 }
 
 // static
@@ -201,6 +207,11 @@ void AudioPlayer::AudioCallback(int event, void *info) {
 void AudioPlayer::fillBuffer(void *data, size_t size) {
     if (mNumFramesPlayed == 0) {
         LOGV("AudioCallback");
+    }
+
+    if (mReachedEOS) {
+        memset(data, 0, size);
+        return;
     }
 
     size_t size_done = 0;
@@ -227,24 +238,16 @@ void AudioPlayer::fillBuffer(void *data, size_t size) {
             CHECK((err == OK && mInputBuffer != NULL)
                    || (err != OK && mInputBuffer == NULL));
 
-            if (mSeeking) {
-                mSeeking = false;
+            Mutex::Autolock autoLock(mLock);
 
-                if (mListenerCallback) {
-                    (*mListenerCallback)(mListenerCookie, SEEK_COMPLETE);
-                }
-            }
+            mSeeking = false;
 
             if (err != OK) {
-                if (mListenerCallback) {
-                    (*mListenerCallback)(mListenerCookie, REACHED_EOS);
-                }
-
+                mReachedEOS = true;
                 memset((char *)data + size_done, 0, size_remaining);
                 break;
             }
 
-            Mutex::Autolock autoLock(mLock);
             CHECK(mInputBuffer->meta_data()->findInt64(
                         kKeyTime, &mPositionTimeMediaUs));
 
@@ -319,6 +322,7 @@ status_t AudioPlayer::seekTo(int64_t time_us) {
     Mutex::Autolock autoLock(mLock);
 
     mSeeking = true;
+    mReachedEOS = false;
     mSeekTimeUs = time_us;
 
     return OK;

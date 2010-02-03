@@ -121,6 +121,8 @@ AwesomePlayer::AwesomePlayer()
     mStreamDoneEventPending = false;
     mBufferingEvent = new AwesomeEvent(this, 2);
     mBufferingEventPending = false;
+    mCheckAudioStatusEvent = new AwesomeEvent(this, 3);
+    mAudioStatusEventPending = false;
 
     mQueue.start();
 
@@ -140,6 +142,8 @@ void AwesomePlayer::cancelPlayerEvents(bool keepBufferingGoing) {
     mVideoEventPending = false;
     mQueue.cancelEvent(mStreamDoneEvent->eventID());
     mStreamDoneEventPending = false;
+    mQueue.cancelEvent(mCheckAudioStatusEvent->eventID());
+    mAudioStatusEventPending = false;
 
     if (!keepBufferingGoing) {
         mQueue.cancelEvent(mBufferingEvent->eventID());
@@ -283,29 +287,6 @@ void AwesomePlayer::reset_l() {
     mPrefetcher.clear();
 }
 
-// static
-void AwesomePlayer::AudioNotify(void *_me, int what) {
-    AwesomePlayer *me = (AwesomePlayer *)_me;
-
-    Mutex::Autolock autoLock(me->mLock);
-
-    switch (what) {
-        case AudioPlayer::REACHED_EOS:
-            me->postStreamDoneEvent_l();
-            break;
-
-        case AudioPlayer::SEEK_COMPLETE:
-        {
-            me->notifyListener_l(MEDIA_SEEK_COMPLETE);
-            break;
-        }
-
-        default:
-            CHECK(!"should not be here.");
-            break;
-    }
-}
-
 void AwesomePlayer::notifyListener_l(int msg, int ext1) {
     if (mListener != NULL) {
         sp<MediaPlayerBase> listener = mListener.promote();
@@ -373,10 +354,6 @@ status_t AwesomePlayer::play() {
         if (mAudioPlayer == NULL) {
             if (mAudioSink != NULL) {
                 mAudioPlayer = new AudioPlayer(mAudioSink);
-
-                mAudioPlayer->setListenerCallback(
-                        &AwesomePlayer::AudioNotify, this);
-
                 mAudioPlayer->setSource(mAudioSource);
                 status_t err = mAudioPlayer->start();
 
@@ -393,10 +370,15 @@ status_t AwesomePlayer::play() {
                 mTimeSource = mAudioPlayer;
 
                 deferredAudioSeek = true;
+
+                mWatchForAudioSeekComplete = false;
+                mWatchForAudioEOS = true;
             }
         } else {
             mAudioPlayer->resume();
         }
+
+        postCheckAudioStatusEvent_l();
     }
 
     if (mTimeSource == NULL && mAudioPlayer == NULL) {
@@ -561,6 +543,8 @@ void AwesomePlayer::seekAudioIfNecessary_l() {
     if (mSeeking && mVideoRenderer == NULL && mAudioPlayer != NULL) {
         mAudioPlayer->seekTo(mSeekTimeUs);
 
+        mWatchForAudioSeekComplete = true;
+        mWatchForAudioEOS = true;
         mSeeking = false;
     }
 }
@@ -652,6 +636,9 @@ void AwesomePlayer::onEvent(int32_t code) {
     } else if (code == 2) {
         onBufferingUpdate();
         return;
+    } else if (code == 3) {
+        onCheckAudioStatus();
+        return;
     }
 
     Mutex::Autolock autoLock(mLock);
@@ -718,6 +705,8 @@ void AwesomePlayer::onEvent(int32_t code) {
             LOGV("seeking audio to %lld us (%.2f secs).", timeUs, timeUs / 1E6);
 
             mAudioPlayer->seekTo(timeUs);
+            mWatchForAudioSeekComplete = true;
+            mWatchForAudioEOS = true;
         } else {
             // If we're playing video only, report seek complete now,
             // otherwise audio player will notify us later.
@@ -801,6 +790,31 @@ void AwesomePlayer::postBufferingEvent_l() {
     }
     mBufferingEventPending = true;
     mQueue.postEventWithDelay(mBufferingEvent, 1000000ll);
+}
+
+void AwesomePlayer::postCheckAudioStatusEvent_l() {
+    if (mAudioStatusEventPending) {
+        return;
+    }
+    mAudioStatusEventPending = true;
+    mQueue.postEventWithDelay(mCheckAudioStatusEvent, 100000ll);
+}
+
+void AwesomePlayer::onCheckAudioStatus() {
+    Mutex::Autolock autoLock(mLock);
+    mAudioStatusEventPending = false;
+
+    if (mWatchForAudioSeekComplete && !mAudioPlayer->isSeeking()) {
+        mWatchForAudioSeekComplete = false;
+        notifyListener_l(MEDIA_SEEK_COMPLETE);
+    }
+
+    if (mWatchForAudioEOS && mAudioPlayer->reachedEOS()) {
+        mWatchForAudioEOS = false;
+        postStreamDoneEvent_l();
+    }
+
+    postCheckAudioStatusEvent_l();
 }
 
 }  // namespace android
