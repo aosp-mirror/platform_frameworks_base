@@ -252,8 +252,7 @@ void AudioPlayer::fillBuffer(void *data, size_t size) {
                         kKeyTime, &mPositionTimeMediaUs));
 
             mPositionTimeRealUs =
-                -mLatencyUs
-                + ((mNumFramesPlayed + size_done / mFrameSize) * 1000000)
+                ((mNumFramesPlayed + size_done / mFrameSize) * 1000000)
                     / mSampleRate;
 
             LOGV("buffer->size() = %d, "
@@ -305,7 +304,12 @@ int64_t AudioPlayer::getMediaTimeUs() {
         return 0;
     }
 
-    return mPositionTimeMediaUs + (getRealTimeUsLocked() - mPositionTimeRealUs);
+    int64_t realTimeOffset = getRealTimeUsLocked() - mPositionTimeRealUs;
+    if (realTimeOffset < 0) {
+        realTimeOffset = 0;
+    }
+
+    return mPositionTimeMediaUs + realTimeOffset;
 }
 
 bool AudioPlayer::getMediaTimeMapping(
