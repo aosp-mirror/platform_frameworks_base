@@ -29,6 +29,7 @@ import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Certificate;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
+import java.util.Date;
 
 import javax.net.ssl.SSLHandshakeException;
 import javax.net.ssl.SSLSession;
@@ -51,20 +52,24 @@ class CertificateChainValidator {
             = new CertificateChainValidator();
 
     /**
-     * @return The singleton instance of the certificator chain validator
+     * @return The singleton instance of the certificates chain validator
      */
     public static CertificateChainValidator getInstance() {
         return sInstance;
     }
 
     /**
-     * Creates a new certificate chain validator. This is a pivate constructor.
+     * Creates a new certificate chain validator. This is a private constructor.
      * If you need a Certificate chain validator, call getInstance().
      */
     private CertificateChainValidator() {}
 
     /**
      * Performs the handshake and server certificates validation
+     * Notice a new chain will be rebuilt by tracing the issuer and subject
+     * before calling checkServerTrusted().
+     * And if the last traced certificate is self issued and it is expired, it
+     * will be dropped.
      * @param sslSocket The secure connection socket
      * @param domain The website domain
      * @return An SSL error object if there is an error and null otherwise
@@ -127,7 +132,58 @@ class CertificateChainValidator {
             }
         }
 
-        // first, we validate the chain using the standard validation
+        // Clean up the certificates chain and build a new one.
+        // Theoretically, we shouldn't have to do this, but various web servers
+        // in practice are mis-configured to have out-of-order certificates or
+        // expired self-issued root certificate.
+        int chainLength = serverCertificates.length;
+        if (serverCertificates.length > 1) {
+          // 1. we clean the received certificates chain.
+          // We start from the end-entity certificate, tracing down by matching
+          // the "issuer" field and "subject" field until we can't continue.
+          // This helps when the certificates are out of order or
+          // some certificates are not related to the site.
+          int currIndex;
+          for (currIndex = 0; currIndex < serverCertificates.length; ++currIndex) {
+            boolean foundNext = false;
+            for (int nextIndex = currIndex + 1;
+                 nextIndex < serverCertificates.length;
+                 ++nextIndex) {
+              if (serverCertificates[currIndex].getIssuerDN().equals(
+                  serverCertificates[nextIndex].getSubjectDN())) {
+                foundNext = true;
+                // Exchange certificates so that 0 through currIndex + 1 are in proper order
+                if (nextIndex != currIndex + 1) {
+                  X509Certificate tempCertificate = serverCertificates[nextIndex];
+                  serverCertificates[nextIndex] = serverCertificates[currIndex + 1];
+                  serverCertificates[currIndex + 1] = tempCertificate;
+                }
+                break;
+              }
+            }
+            if (!foundNext) break;
+          }
+
+          // 2. we exam if the last traced certificate is self issued and it is expired.
+          // If so, we drop it and pass the rest to checkServerTrusted(), hoping we might
+          // have a similar but unexpired trusted root.
+          chainLength = currIndex + 1;
+          X509Certificate lastCertificate = serverCertificates[chainLength - 1];
+          Date now = new Date();
+          if (lastCertificate.getSubjectDN().equals(lastCertificate.getIssuerDN())
+              && now.after(lastCertificate.getNotAfter())) {
+            --chainLength;
+          }
+        }
+
+        // 3. Now we copy the newly built chain into an appropriately sized array.
+        X509Certificate[] newServerCertificates = null;
+        newServerCertificates = new X509Certificate[chainLength];
+        for (int i = 0; i < chainLength; ++i) {
+          newServerCertificates[i] = serverCertificates[i];
+        }
+
+        // first, we validate the new chain using the standard validation
         // solution; if we do not find any errors, we are done; if we
         // fail the standard validation, we re-validate again below,
         // this time trying to retrieve any individual errors we can
@@ -135,167 +191,21 @@ class CertificateChainValidator {
         //
         try {
             SSLParameters.getDefaultTrustManager().checkServerTrusted(
-                serverCertificates, "RSA");
+                newServerCertificates, "RSA");
 
             // no errors!!!
             return null;
         } catch (CertificateException e) {
+            sslSocket.getSession().invalidate();
+
             if (HttpLog.LOGV) {
                 HttpLog.v(
                     "failed to pre-validate the certificate chain, error: " +
                     e.getMessage());
             }
-        }
-
-        sslSocket.getSession().invalidate();
-
-        SslError error = null;
-
-        // we check the root certificate separately from the rest of the
-        // chain; this is because we need to know what certificate in
-        // the chain resulted in an error if any
-        currCertificate =
-            serverCertificates[serverCertificates.length - 1];
-        if (currCertificate == null) {
-            closeSocketThrowException(
-                sslSocket, "root certificate is null");
-        }
-
-        // check if the last certificate in the chain (root) is trusted
-        X509Certificate[] rootCertificateChain = { currCertificate };
-        try {
-            SSLParameters.getDefaultTrustManager().checkServerTrusted(
-                rootCertificateChain, "RSA");
-        } catch (CertificateExpiredException e) {
-            String errorMessage = e.getMessage();
-            if (errorMessage == null) {
-                errorMessage = "root certificate has expired";
-            }
-
-            if (HttpLog.LOGV) {
-                HttpLog.v(errorMessage);
-            }
-
-            error = new SslError(
-                SslError.SSL_EXPIRED, currCertificate);
-        } catch (CertificateNotYetValidException e) {
-            String errorMessage = e.getMessage();
-            if (errorMessage == null) {
-                errorMessage = "root certificate not valid yet";
-            }
-
-            if (HttpLog.LOGV) {
-                HttpLog.v(errorMessage);
-            }
-
-            error = new SslError(
-                SslError.SSL_NOTYETVALID, currCertificate);
-        } catch (CertificateException e) {
-            String errorMessage = e.getMessage();
-            if (errorMessage == null) {
-                errorMessage = "root certificate not trusted";
-            }
-
-            if (HttpLog.LOGV) {
-                HttpLog.v(errorMessage);
-            }
-
             return new SslError(
                 SslError.SSL_UNTRUSTED, currCertificate);
         }
-
-        // Then go through the certificate chain checking that each
-        // certificate trusts the next and that each certificate is
-        // within its valid date range. Walk the chain in the order
-        // from the CA to the end-user
-        X509Certificate prevCertificate =
-            serverCertificates[serverCertificates.length - 1];
-
-        for (int i = serverCertificates.length - 2; i >= 0; --i) {
-            currCertificate = serverCertificates[i];
-
-            // if a certificate is null, we cannot verify the chain
-            if (currCertificate == null) {
-                closeSocketThrowException(
-                    sslSocket, "null certificate in the chain");
-            }
-
-            // verify if trusted by chain
-            if (!prevCertificate.getSubjectDN().equals(
-                    currCertificate.getIssuerDN())) {
-                String errorMessage = "not trusted by chain";
-
-                if (HttpLog.LOGV) {
-                    HttpLog.v(errorMessage);
-                }
-
-                return new SslError(
-                    SslError.SSL_UNTRUSTED, currCertificate);
-            }
-
-            try {
-                currCertificate.verify(prevCertificate.getPublicKey());
-            } catch (GeneralSecurityException e) {
-                String errorMessage = e.getMessage();
-                if (errorMessage == null) {
-                    errorMessage = "not trusted by chain";
-                }
-
-                if (HttpLog.LOGV) {
-                    HttpLog.v(errorMessage);
-                }
-
-                return new SslError(
-                    SslError.SSL_UNTRUSTED, currCertificate);
-            }
-
-            // verify if the dates are valid
-            try {
-              currCertificate.checkValidity();
-            } catch (CertificateExpiredException e) {
-                String errorMessage = e.getMessage();
-                if (errorMessage == null) {
-                    errorMessage = "certificate expired";
-                }
-
-                if (HttpLog.LOGV) {
-                    HttpLog.v(errorMessage);
-                }
-
-                if (error == null ||
-                    error.getPrimaryError() < SslError.SSL_EXPIRED) {
-                    error = new SslError(
-                        SslError.SSL_EXPIRED, currCertificate);
-                }
-            } catch (CertificateNotYetValidException e) {
-                String errorMessage = e.getMessage();
-                if (errorMessage == null) {
-                    errorMessage = "certificate not valid yet";
-                }
-
-                if (HttpLog.LOGV) {
-                    HttpLog.v(errorMessage);
-                }
-
-                if (error == null ||
-                    error.getPrimaryError() < SslError.SSL_NOTYETVALID) {
-                    error = new SslError(
-                        SslError.SSL_NOTYETVALID, currCertificate);
-                }
-            }
-
-            prevCertificate = currCertificate;
-        }
-
-        // if we do not have an error to report back to the user, throw
-        // an exception (a generic error will be reported instead)
-        if (error == null) {
-            closeSocketThrowException(
-                sslSocket,
-                "failed to pre-validate the certificate chain due to a non-standard error");
-        }
-
-        return error;
     }
 
     private void closeSocketThrowException(
