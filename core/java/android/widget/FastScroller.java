@@ -428,12 +428,21 @@ class FastScroller {
                 if (mListAdapter == null && mList != null) {
                     getSectionsFromIndexer();
                 }
+                if (mList != null) {
+                    mList.requestDisallowInterceptTouchEvent(true);
+                }
 
                 cancelFling();
                 return true;
             }
-        } else if (action == MotionEvent.ACTION_UP) {
+        } else if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
             if (mState == STATE_DRAGGING) {
+                if (mList != null) {
+                    // ViewGroup does the right thing already, but there might
+                    // be other classes that don't properly reset on touch-up,
+                    // so do this explicitly just in case.
+                    mList.requestDisallowInterceptTouchEvent(false);
+                }
                 setState(STATE_VISIBLE);
                 final Handler handler = mHandler;
                 handler.removeCallbacks(mScrollFade);
