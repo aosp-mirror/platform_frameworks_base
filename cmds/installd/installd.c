@@ -53,6 +53,11 @@ static int do_remove(char **arg, char reply[REPLY_MAX])
     return uninstall(arg[0], atoi(arg[1])); /* pkgname */
 }
 
+static int do_rename(char **arg, char reply[REPLY_MAX])
+{
+    return renamepkg(arg[0], arg[1], atoi(arg[2])); /* oldpkgname, newpkgname */
+}
+
 static int do_free_cache(char **arg, char reply[REPLY_MAX]) /* TODO int:free_size */
 {
     return free_cache(atoi(arg[0])); /* free_size */
@@ -87,6 +92,11 @@ static int do_rm_user_data(char **arg, char reply[REPLY_MAX])
     return delete_user_data(arg[0], atoi(arg[1])); /* pkgname */
 }
 
+static int do_movefiles(char **arg, char reply[REPLY_MAX])
+{
+    return movefiles();
+}
+
 struct cmdinfo {
     const char *name;
     unsigned numargs;
@@ -100,11 +110,13 @@ struct cmdinfo cmds[] = {
     { "movedex",              2, do_move_dex },
     { "rmdex",                1, do_rm_dex },
     { "remove",               2, do_remove },
+    { "rename",               3, do_rename },
     { "freecache",            1, do_free_cache },
     { "rmcache",              2, do_rm_cache },
     { "protect",              2, do_protect },
     { "getsize",              4, do_get_size },
     { "rmuserdata",           2, do_rm_user_data },
+    { "movefiles",            0, do_movefiles },
 };
 
 static int readx(int s, void *_buf, int count)

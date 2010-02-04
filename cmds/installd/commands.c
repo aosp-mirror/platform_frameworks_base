@@ -78,6 +78,30 @@ int uninstall(const char *pkgname, int encrypted_fs_flag)
     return delete_dir_contents(pkgdir, 1, 0);
 }
 
+int renamepkg(const char *oldpkgname, const char *newpkgname, int encrypted_fs_flag)
+{
+    char oldpkgdir[PKG_PATH_MAX];
+    char newpkgdir[PKG_PATH_MAX];
+
+    if (encrypted_fs_flag == USE_UNENCRYPTED_FS) {
+        if (create_pkg_path(oldpkgdir, PKG_DIR_PREFIX, oldpkgname, PKG_DIR_POSTFIX))
+            return -1;
+        if (create_pkg_path(newpkgdir, PKG_DIR_PREFIX, newpkgname, PKG_DIR_POSTFIX))
+            return -1;
+    } else {
+        if (create_pkg_path(oldpkgdir, PKG_SEC_DIR_PREFIX, oldpkgname, PKG_DIR_POSTFIX))
+            return -1;
+        if (create_pkg_path(newpkgdir, PKG_SEC_DIR_PREFIX, newpkgname, PKG_DIR_POSTFIX))
+            return -1;
+    }
+
+    if (rename(oldpkgdir, newpkgdir) < 0) {
+        LOGE("cannot rename dir '%s' to '%s': %s\n", oldpkgdir, newpkgdir, strerror(errno));
+        return -errno;
+    }
+    return 0;
+}
+
 int delete_user_data(const char *pkgname, int encrypted_fs_flag)
 {
     char pkgdir[PKG_PATH_MAX];
@@ -635,4 +659,204 @@ fail:
         close(zip_fd);
     }
     return -1;
+}
+
+int create_move_path(char path[PKG_PATH_MAX],
+    const char* prefix,
+    const char* pkgname,
+    const char* leaf)
+{
+    if ((strlen(prefix) + strlen(pkgname) + strlen(leaf) + 1) >= PKG_PATH_MAX) {
+        return -1;
+    }
+    
+    sprintf(path, "%s%s/%s", prefix, pkgname, leaf);
+    return 0;
+}
+
+void mkinnerdirs(char* path, int basepos, mode_t mode, int uid, int gid)
+{
+    while (path[basepos] != 0) {
+        if (path[basepos] == '/') {
+            path[basepos] = 0;
+            LOGI("Making directory: %s\n", path);
+            if (mkdir(path, mode) == 0) {
+                chown(path, uid, gid);
+            }
+            path[basepos] = '/';
+            basepos++;
+        }
+        basepos++;
+    }
+}
+
+int movefiles()
+{
+    DIR *d;
+    int dfd, subfd;
+    struct dirent *de;
+    struct stat s;
+    char buf[PKG_PATH_MAX+1];
+    int bufp, bufe, bufi, readlen;
+
+    char srcpkg[PKG_NAME_MAX];
+    char dstpkg[PKG_NAME_MAX];
+    char srcpath[PKG_PATH_MAX];
+    char dstpath[PKG_PATH_MAX];
+    int dstuid, dstgid;
+    int hasspace;
+
+    d = opendir(UPDATE_COMMANDS_DIR_PREFIX);
+    if (d == NULL) {
+        goto done;
+    }
+    dfd = dirfd(d);
+
+        /* Iterate through all files in the directory, executing the
+         * file movements requested there-in.
+         */
+    while ((de = readdir(d))) {
+        const char *name = de->d_name;
+
+        if (de->d_type == DT_DIR) {
+            continue;
+        } else {
+            subfd = openat(dfd, name, O_RDONLY);
+            if (subfd < 0) {
+                LOGW("Unable to open update commands at %s%s\n",
+                        UPDATE_COMMANDS_DIR_PREFIX, name);
+                continue;
+            }
+            
+            bufp = 0;
+            bufe = 0;
+            buf[PKG_PATH_MAX] = 0;
+            srcpkg[0] = dstpkg[0] = 0;
+            while (1) {
+                bufi = bufp;
+                while (bufi < bufe && buf[bufi] != '\n') {
+                    bufi++;
+                }
+                if (bufi < bufe) {
+                    buf[bufi] = 0;
+                    LOGV("Processing line: %s\n", buf+bufp);
+                    hasspace = 0;
+                    while (bufp < bufi && isspace(buf[bufp])) {
+                        hasspace = 1;
+                        bufp++;
+                    }
+                    if (buf[bufp] == '#' || bufp == bufi) {
+                        // skip comments and empty lines.
+                    } else if (hasspace) {
+                        if (dstpkg[0] == 0) {
+                            LOGW("Path before package line in %s%s: %s\n",
+                                    UPDATE_COMMANDS_DIR_PREFIX, name, buf+bufp);
+                        } else if (srcpkg[0] == 0) {
+                            // Skip -- source package no longer exists.
+                        } else {
+                            LOGV("Move file: %s (from %s to %s)\n", buf+bufp, srcpkg, dstpkg);
+                            if (!create_move_path(srcpath, PKG_DIR_PREFIX, srcpkg, buf+bufp) &&
+                                    !create_move_path(dstpath, PKG_DIR_PREFIX, dstpkg, buf+bufp)) {
+                                LOGI("Renaming %s to %s (uid %d)\n", srcpath, dstpath, dstuid);
+                                mkinnerdirs(dstpath, strlen(dstpath)-(bufi-bufp),
+                                    S_IRWXU|S_IRWXG|S_IXOTH, dstuid, dstgid);
+                                if (rename(srcpath, dstpath) >= 0) {
+                                    if (chown(dstpath, dstuid, dstgid) < 0) {
+                                        LOGE("cannot chown %s: %s\n", dstpath, strerror(errno));
+                                        unlink(dstpath);
+                                    }
+                                } else {
+                                    LOGW("Unable to rename %s to %s: %s\n",
+                                        srcpath, dstpath, strerror(errno));
+                                }
+                            }
+                        }
+                    } else {
+                        char* div = strchr(buf+bufp, ':');
+                        if (div == NULL) {
+                            LOGW("Bad package spec in %s%s; no ':' sep: %s\n",
+                                    UPDATE_COMMANDS_DIR_PREFIX, name, buf+bufp);
+                        } else {
+                            *div = 0;
+                            div++;
+                            if (strlen(buf+bufp) < PKG_NAME_MAX) {
+                                strcpy(dstpkg, buf+bufp);
+                            } else {
+                                srcpkg[0] = dstpkg[0] = 0;
+                                LOGW("Package name too long in %s%s: %s\n",
+                                        UPDATE_COMMANDS_DIR_PREFIX, name, buf+bufp);
+                            }
+                            if (strlen(div) < PKG_NAME_MAX) {
+                                strcpy(srcpkg, div);
+                            } else {
+                                srcpkg[0] = dstpkg[0] = 0;
+                                LOGW("Package name too long in %s%s: %s\n",
+                                        UPDATE_COMMANDS_DIR_PREFIX, name, div);
+                            }
+                            if (srcpkg[0] != 0) {
+                                if (!create_pkg_path(srcpath, PKG_DIR_PREFIX, srcpkg,
+                                        PKG_DIR_POSTFIX)) {
+                                    if (lstat(srcpath, &s) < 0) {
+                                        // Package no longer exists -- skip.
+                                        srcpkg[0] = 0;
+                                    }
+                                } else {
+                                    srcpkg[0] = 0;
+                                    LOGW("Can't create path %s in %s%s\n",
+                                            div, UPDATE_COMMANDS_DIR_PREFIX, name);
+                                }
+                                if (srcpkg[0] != 0) {
+                                    if (!create_pkg_path(dstpath, PKG_DIR_PREFIX, dstpkg,
+                                            PKG_DIR_POSTFIX)) {
+                                        if (lstat(dstpath, &s) == 0) {
+                                            dstuid = s.st_uid;
+                                            dstgid = s.st_gid;
+                                        } else {
+                                            srcpkg[0] = 0;
+                                            LOGW("Can't stat path %s in %s%s: %s\n",
+                                                    dstpath, UPDATE_COMMANDS_DIR_PREFIX,
+                                                    name, strerror(errno));
+                                        }
+                                    } else {
+                                        srcpkg[0] = 0;
+                                        LOGW("Can't create path %s in %s%s\n",
+                                                div, UPDATE_COMMANDS_DIR_PREFIX, name);
+                                    }
+                                }
+                                LOGV("Transfering from %s to %s: uid=%d\n",
+                                    srcpkg, dstpkg, dstuid);
+                            }
+                        }
+                    }
+                    bufp = bufi+1;
+                } else {
+                    if (bufp == 0) {
+                        if (bufp < bufe) {
+                            LOGW("Line too long in %s%s, skipping: %s\n",
+                                    UPDATE_COMMANDS_DIR_PREFIX, name, buf);
+                        }
+                    } else if (bufp < bufe) {
+                        memcpy(buf, buf+bufp, bufe-bufp);
+                        bufe -= bufp;
+                        bufp = 0;
+                    }
+                    readlen = read(subfd, buf+bufe, PKG_PATH_MAX-bufe);
+                    if (readlen < 0) {
+                        LOGW("Failure reading update commands in %s%s: %s\n",
+                                UPDATE_COMMANDS_DIR_PREFIX, name, strerror(errno));
+                        break;
+                    } else if (readlen == 0) {
+                        break;
+                    }
+                    bufe += readlen;
+                    buf[bufe] = 0;
+                    LOGV("Read buf: %s\n", buf);
+                }
+            }
+            close(subfd);
+        }
+    }
+    closedir(d);
+done:
+    return 0;
 }
