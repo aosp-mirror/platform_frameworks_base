@@ -61,6 +61,7 @@ import android.view.Display;
 import android.view.View;
 import android.view.ViewDebug;
 import android.view.ViewManager;
+import android.view.ViewRoot;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.WindowManagerImpl;
@@ -1813,6 +1814,7 @@ public final class ActivityThread {
         public static final int DESTROY_BACKUP_AGENT    = 129;
         public static final int SUICIDE                 = 130;
         public static final int REMOVE_PROVIDER         = 131;
+        public static final int ENABLE_JIT              = 132;
         String codeToString(int code) {
             if (localLOGV) {
                 switch (code) {
@@ -1848,6 +1850,7 @@ public final class ActivityThread {
                     case DESTROY_BACKUP_AGENT: return "DESTROY_BACKUP_AGENT";
                     case SUICIDE: return "SUICIDE";
                     case REMOVE_PROVIDER: return "REMOVE_PROVIDER";
+                    case ENABLE_JIT: return "ENABLE_JIT";
                 }
             }
             return "(unknown)";
@@ -1965,6 +1968,9 @@ public final class ActivityThread {
                 case REMOVE_PROVIDER:
                     completeRemoveProvider((IContentProvider)msg.obj);
                     break;
+                case ENABLE_JIT:
+                    ensureJitEnabled();
+                    break;
             }
         }
 
@@ -2000,6 +2006,7 @@ public final class ActivityThread {
                     prev.nextIdle = null;
                 } while (a != null);
             }
+            ensureJitEnabled();
             return false;
         }
     }
@@ -2064,6 +2071,7 @@ public final class ActivityThread {
     String mInstrumentationAppPackage = null;
     String mInstrumentedAppDir = null;
     boolean mSystemThread = false;
+    boolean mJitEnabled = false;
 
     /**
      * Activities that are enqueued to be relaunched.  This list is accessed
@@ -2269,6 +2277,13 @@ public final class ActivityThread {
         }
     }
 
+    void ensureJitEnabled() {
+        if (!mJitEnabled) {
+            mJitEnabled = true;
+            dalvik.system.VMRuntime.getRuntime().startJitCompilation();
+        }
+    }
+    
     void scheduleGcIdler() {
         if (!mGcIdlerScheduled) {
             mGcIdlerScheduled = true;
@@ -2808,6 +2823,7 @@ public final class ActivityThread {
                         ActivityManagerNative.getDefault().serviceDoneExecuting(
                                 data.token, 0, 0, 0);
                     }
+                    ensureJitEnabled();
                 } catch (RemoteException ex) {
                 }
             } catch (Exception e) {
@@ -2876,6 +2892,7 @@ public final class ActivityThread {
                 } catch (RemoteException e) {
                     // nothing to do.
                 }
+                ensureJitEnabled();
             } catch (Exception e) {
                 if (!mInstrumentation.onException(s, e)) {
                     throw new RuntimeException(
@@ -3864,10 +3881,6 @@ public final class ActivityThread {
         mBoundApplication = data;
         mConfiguration = new Configuration(data.config);
 
-        // We now rely on this being set by zygote.
-        //Process.setGid(data.appInfo.gid);
-        //Process.setUid(data.appInfo.uid);
-
         // send up app name; do this *before* waiting for debugger
         Process.setArgV0(data.processName);
         android.ddm.DdmHandleAppName.setAppName(data.processName);
@@ -3998,6 +4011,9 @@ public final class ActivityThread {
         List<ProviderInfo> providers = data.providers;
         if (providers != null) {
             installContentProviders(app, providers);
+            // For process that contain content providers, we want to
+            // ensure that the JIT is enabled "at some point".
+            mH.sendEmptyMessageDelayed(H.ENABLE_JIT, 10*1000);
         }
 
         try {
@@ -4303,6 +4319,11 @@ public final class ActivityThread {
         sThreadLocal.set(this);
         mSystemThread = system;
         if (!system) {
+            ViewRoot.addFirstDrawHandler(new Runnable() {
+                public void run() {
+                    ensureJitEnabled();
+                }
+            });
             android.ddm.DdmHandleAppName.setAppName("<pre-initialized>");
             RuntimeInit.setApplicationObject(mAppThread.asBinder());
             IActivityManager mgr = ActivityManagerNative.getDefault();
