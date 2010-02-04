@@ -670,7 +670,12 @@ public class TestShellActivity extends Activity implements LayoutTestController 
         public boolean onCreateWindow(WebView view, boolean dialog,
                 boolean userGesture, Message resultMsg) {
             if (!mCanOpenWindows) {
-                return false;
+                // We can't open windows, so just send null back.
+                WebView.WebViewTransport transport =
+                        (WebView.WebViewTransport) resultMsg.obj;
+                transport.setWebView(null);
+                resultMsg.sendToTarget();
+                return true;
             }
 
             // We never display the new window, just create the view and
@@ -687,6 +692,11 @@ public class TestShellActivity extends Activity implements LayoutTestController 
             transport.setWebView(newWindowView);
             resultMsg.sendToTarget();
             return true;
+        }
+
+        @Override
+        public void onCloseWindow(WebView view) {
+            view.destroy();
         }
     };
 
