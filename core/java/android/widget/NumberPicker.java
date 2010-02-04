@@ -39,6 +39,7 @@ import com.android.internal.R;
  * A view for selecting a number
  *
  * For a dialog using this view, see {@link android.app.TimePickerDialog}.
+ * @hide
  */
 @Widget
 public class NumberPicker extends LinearLayout {
