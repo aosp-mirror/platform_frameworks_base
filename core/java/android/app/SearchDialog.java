@@ -60,6 +60,7 @@ import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -105,7 +106,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
 
     // views & widgets
     private TextView mBadgeLabel;
-    private SearchSourceSelector mSourceSelector;
+    private ImageView mAppIcon;
     private SearchAutoComplete mSearchAutoComplete;
     private Button mGoButton;
     private ImageButton mVoiceButton;
@@ -209,8 +210,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         mBadgeLabel = (TextView) findViewById(com.android.internal.R.id.search_badge);
         mSearchAutoComplete = (SearchAutoComplete)
                 findViewById(com.android.internal.R.id.search_src_text);
-        mSourceSelector = new SearchSourceSelector(
-                findViewById(com.android.internal.R.id.search_source_selector));
+        mAppIcon = (ImageView) findViewById(com.android.internal.R.id.search_app_icon);
         mGoButton = (Button) findViewById(com.android.internal.R.id.search_go_btn);
         mVoiceButton = (ImageButton) findViewById(com.android.internal.R.id.search_voice_btn);
         mSearchPlate = findViewById(com.android.internal.R.id.search_plate);
@@ -609,16 +609,13 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
     }
     
     private void updateSearchAppIcon() {
-        mSourceSelector.setSource(mSearchable.getSearchActivity());
-        mSourceSelector.setAppSearchData(mAppSearchData);
-
         // In Donut, we special-case the case of the browser to hide the app icon as if it were
         // global search, for extra space for url entry.
         //
         // TODO: Remove this special case once the issue has been reconciled in Eclair. 
         if (mGlobalSearchMode || isBrowserSearch()) {
-            mSourceSelector.setSourceIcon(null);
-            mSourceSelector.setVisibility(View.GONE);
+            mAppIcon.setImageResource(0);
+            mAppIcon.setVisibility(View.GONE);
             mSearchPlate.setPadding(SEARCH_PLATE_LEFT_PADDING_GLOBAL,
                     mSearchPlate.getPaddingTop(),
                     mSearchPlate.getPaddingRight(),
@@ -634,8 +631,8 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
                 icon = pm.getDefaultActivityIcon();
                 Log.w(LOG_TAG, mLaunchComponent + " not found, using generic app icon");
             }
-            mSourceSelector.setSourceIcon(icon);
-            mSourceSelector.setVisibility(View.VISIBLE);
+            mAppIcon.setImageDrawable(icon);
+            mAppIcon.setVisibility(View.VISIBLE);
             mSearchPlate.setPadding(SEARCH_PLATE_LEFT_PADDING_NON_GLOBAL,
                     mSearchPlate.getPaddingTop(),
                     mSearchPlate.getPaddingRight(),
@@ -818,7 +815,6 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
             if (!mSearchAutoComplete.isPerformingCompletion()) {
                 // The user changed the query, remember it.
                 mUserQuery = s == null ? "" : s.toString();
-                mSourceSelector.setQuery(mUserQuery);
             }
         }
 
@@ -1932,7 +1928,6 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
              query = "";
          }
          mUserQuery = query;
-         mSourceSelector.setQuery(query);
          mSearchAutoComplete.setText(query);
          mSearchAutoComplete.setSelection(query.length());
      }
