@@ -43,7 +43,7 @@ class CacheLoader extends StreamLoader {
     protected boolean setupStreamAndSendStatus() {
         mDataStream = mCacheResult.inStream;
         mContentLength = mCacheResult.contentLength;
-        mHandler.status(1, 1, mCacheResult.httpStatusCode, "OK");
+        mLoadListener.status(1, 1, mCacheResult.httpStatusCode, "OK");
         return true;
     }
 
