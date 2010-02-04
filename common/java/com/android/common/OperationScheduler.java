@@ -192,7 +192,6 @@ public class OperationScheduler {
 
     /**
      * Forbid any operations until after a certain (absolute) time.
-     * Commonly used when a server returns a "Retry-After:" type directive.
      * Limited by {@link #Options.maxMoratoriumMillis}.
      *
      * @param millis wall clock time ({@link System#currentTimeMillis()}) to
@@ -203,6 +202,29 @@ public class OperationScheduler {
                 .putLong(PREFIX + "moratoriumTimeMillis", millis)
                 .putLong(PREFIX + "moratoriumSetTimeMillis", System.currentTimeMillis())
                 .commit();
+    }
+
+    /**
+     * Forbid any operations until after a certain time, as specified in
+     * the format used by the HTTP "Retry-After" header.
+     * Limited by {@link #Options.maxMoratoriumMillis}.
+     *
+     * @param retryAfter moratorium time in HTTP format
+     * @return true if a time was successfully parsed
+     */
+    public boolean setMoratoriumTimeHttp(String retryAfter) {
+        try {
+            long ms = Long.valueOf(retryAfter) * 1000;
+            setMoratoriumTimeMillis(ms + System.currentTimeMillis());
+            return true;
+        } catch (NumberFormatException nfe) {
+            try {
+                setMoratoriumTimeMillis(HttpDateTime.parse(retryAfter));
+                return true;
+            } catch (IllegalArgumentException iae) {
+                return false;
+            }
+        }
     }
 
     /**
