@@ -62,6 +62,11 @@ public class StatusBarTest extends TestActivity
                 mStatusBarManager.disable(StatusBarManager.DISABLE_NOTIFICATION_ALERTS);
             }
         },
+        new Test("Disable Ticker") {
+            public void run() {
+                mStatusBarManager.disable(StatusBarManager.DISABLE_NOTIFICATION_TICKER);
+            }
+        },
         new Test("Disable Expand in 3 sec.") {
             public void run() {
                 mHandler.postDelayed(new Runnable() {
@@ -80,7 +85,7 @@ public class StatusBarTest extends TestActivity
                     }, 3000);
             }
         },
-        new Test("Disable Both in 3 sec.") {
+        new Test("Disable Expand + Notifications in 3 sec.") {
             public void run() {
                 mHandler.postDelayed(new Runnable() {
                         public void run() {
@@ -90,7 +95,12 @@ public class StatusBarTest extends TestActivity
                     }, 3000);
             }
         },
-        new Test("Disable None in 3 sec.") {
+        new Test("Enable everything") {
+            public void run() {
+                mStatusBarManager.disable(0);
+            }
+        },
+        new Test("Enable everything in 3 sec.") {
             public void run() {
                 mHandler.postDelayed(new Runnable() {
                         public void run() {
