@@ -16,7 +16,6 @@
 
 package android.app;
 
-import android.app.SearchManager.DialogCursorProtocol;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -30,12 +29,10 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.StateListDrawable;
 import android.net.Uri;
-import android.os.Bundle;
 import android.text.Html;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
-import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Filter;
@@ -65,7 +62,6 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
     private Context mProviderContext;
     private WeakHashMap<String, Drawable.ConstantState> mOutsideDrawablesCache;
     private SparseArray<Drawable.ConstantState> mBackgroundsCache;
-    private boolean mGlobalSearchMode;
     private boolean mClosed = false;
 
     // Cached column indexes, updated when the cursor changes.
@@ -76,28 +72,7 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
     private int mIconName2Col;
     private int mBackgroundColorCol;
     
-    // The extra used to tell a cursor to close itself. This is a hack, see the description by
-    // its use later in this file.
-    private static final String EXTRA_CURSOR_RESPOND_CLOSE_CURSOR = "cursor_respond_close_cursor";
-
-    // The bundle which contains {EXTRA_CURSOR_RESPOND_CLOSE_CURSOR=true}, just cached once
-    // so we don't bother recreating it a bunch.
-    private final Bundle mCursorRespondCloseCursorBundle;
-
-    // This value is stored in SuggestionsAdapter by the SearchDialog to indicate whether
-    // a particular list item should be selected upon the next call to notifyDataSetChanged.
-    // This is used to indicate the index of the "More results..." list item so that when
-    // the data set changes after a click of "More results...", we can correctly tell the
-    // ListView to scroll to the right line item. It gets reset to NONE every time it
-    // is consumed.
-    private int mListItemToSelect = NONE;
     static final int NONE = -1;
-
-    // holds the maximum position that has been displayed to the user
-    int mMaxDisplayed = NONE;
-
-    // holds the position that, when displayed, should result in notifying the cursor
-    int mDisplayNotifyPos = NONE;
 
     private final Runnable mStartSpinnerRunnable;
     private final Runnable mStopSpinnerRunnable;
@@ -110,8 +85,7 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
 
     public SuggestionsAdapter(Context context, SearchDialog searchDialog,
             SearchableInfo searchable,
-            WeakHashMap<String, Drawable.ConstantState> outsideDrawablesCache,
-            boolean globalSearchMode) {
+            WeakHashMap<String, Drawable.ConstantState> outsideDrawablesCache) {
         super(context,
                 com.android.internal.R.layout.search_dropdown_item_icons_2line,
                 null,   // no initial cursor
@@ -126,7 +100,6 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
 
         mOutsideDrawablesCache = outsideDrawablesCache;
         mBackgroundsCache = new SparseArray<Drawable.ConstantState>();
-        mGlobalSearchMode = globalSearchMode;
 
         mStartSpinnerRunnable = new Runnable() {
                 public void run() {
@@ -140,10 +113,6 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
             }
         };
         
-        // Create this once because we'll reuse it a bunch.
-        mCursorRespondCloseCursorBundle = new Bundle();
-        mCursorRespondCloseCursorBundle.putBoolean(EXTRA_CURSOR_RESPOND_CLOSE_CURSOR, true);
-
         // delay 500ms when deleting
         getFilter().setDelayer(new Filter.Delayer() {
 
@@ -177,27 +146,22 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
     public Cursor runQueryOnBackgroundThread(CharSequence constraint) {
         if (DBG) Log.d(LOG_TAG, "runQueryOnBackgroundThread(" + constraint + ")");
         String query = (constraint == null) ? "" : constraint.toString();
-        if (!mGlobalSearchMode) {
-            /**
-             * for in app search we show the progress spinner until the cursor is returned with
-             * the results.  for global search we manage the progress bar using
-             * {@link DialogCursorProtocol#POST_REFRESH_RECEIVE_ISPENDING}.
-             */
-            mSearchDialog.getWindow().getDecorView().post(mStartSpinnerRunnable);
-        }
+        /**
+         * for in app search we show the progress spinner until the cursor is returned with
+         * the results.
+         */
+        mSearchDialog.getWindow().getDecorView().post(mStartSpinnerRunnable);
         try {
             final Cursor cursor = mSearchManager.getSuggestions(mSearchable, query, QUERY_LIMIT);
             // trigger fill window so the spinner stays up until the results are copied over and
             // closer to being ready
-            if (!mGlobalSearchMode && cursor != null) cursor.getCount();
+            if (cursor != null) cursor.getCount();
             return cursor;
         } catch (RuntimeException e) {
             Log.w(LOG_TAG, "Search suggestions query threw an exception.", e);
             return null;
         } finally {
-            if (!mGlobalSearchMode) {
-                mSearchDialog.getWindow().getDecorView().post(mStopSpinnerRunnable);
-            }
+            mSearchDialog.getWindow().getDecorView().post(mStopSpinnerRunnable);
         }
     }
 
@@ -221,21 +185,8 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
         }
 
         try {
-            Cursor oldCursor = getCursor();
             super.changeCursor(c);
-            
-            // We send a special respond to the cursor to tell it to close itself directly because
-            // it may not happen correctly for some cursors currently. This was originally
-            // included as a fix to http://b/2036290, in which the search dialog was holding
-            // on to references to the web search provider unnecessarily. This is being caused by
-            // the fact that the cursor is not being correctly closed in
-            // BulkCursorToCursorAdapter#close, which remains unfixed (see http://b/2015069).
-            //
-            // TODO: Remove this hack once http://b/2015069 is fixed.
-            if (oldCursor != null && oldCursor != c) {
-                oldCursor.respond(mCursorRespondCloseCursorBundle);
-            }
-            
+
             if (c != null) {
                 mFormatCol = c.getColumnIndex(SearchManager.SUGGEST_COLUMN_FORMAT);
                 mText1Col = c.getColumnIndex(SearchManager.SUGGEST_COLUMN_TEXT_1);
@@ -247,79 +198,6 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
         } catch (Exception e) {
             Log.e(LOG_TAG, "error changing cursor and caching columns", e);
         }
-    }
-
-    @Override
-    public void notifyDataSetChanged() {
-        if (DBG) Log.d(LOG_TAG, "notifyDataSetChanged");
-        super.notifyDataSetChanged();
-
-        callCursorPostRefresh(mCursor);
-
-        // look out for the pending item we are supposed to scroll to
-        if (mListItemToSelect != NONE) {
-            mSearchDialog.setListSelection(mListItemToSelect);
-            mListItemToSelect = NONE;
-        }
-    }
-
-    /**
-     * Handle sending and receiving information associated with
-     * {@link DialogCursorProtocol#POST_REFRESH}.
-     *
-     * @param cursor The cursor to call.
-     */
-    private void callCursorPostRefresh(Cursor cursor) {
-        if (!mGlobalSearchMode) return;
-        final Bundle request = new Bundle();
-        request.putInt(DialogCursorProtocol.METHOD, DialogCursorProtocol.POST_REFRESH);
-        final Bundle response = cursor.respond(request);
-
-        mSearchDialog.setWorking(
-                response.getBoolean(DialogCursorProtocol.POST_REFRESH_RECEIVE_ISPENDING, false));
-
-        mDisplayNotifyPos =
-                response.getInt(DialogCursorProtocol.POST_REFRESH_RECEIVE_DISPLAY_NOTIFY, -1);
-    }
-
-    /**
-     * Tell the cursor which position was clicked, handling sending and receiving information
-     * associated with {@link DialogCursorProtocol#CLICK}.
-     *
-     * @param cursor The cursor
-     * @param position The position that was clicked.
-     */
-    void callCursorOnClick(Cursor cursor, int position, int actionKey, String actionMsg) {
-        if (!mGlobalSearchMode) return;
-        final Bundle request = new Bundle(5);
-        request.putInt(DialogCursorProtocol.METHOD, DialogCursorProtocol.CLICK);
-        request.putInt(DialogCursorProtocol.CLICK_SEND_POSITION, position);
-        request.putInt(DialogCursorProtocol.CLICK_SEND_MAX_DISPLAY_POS, mMaxDisplayed);
-        if (actionKey != KeyEvent.KEYCODE_UNKNOWN) {
-            request.putInt(DialogCursorProtocol.CLICK_SEND_ACTION_KEY, actionKey);
-            request.putString(DialogCursorProtocol.CLICK_SEND_ACTION_MSG, actionMsg);
-        }
-        final Bundle response = cursor.respond(request);
-        mMaxDisplayed = -1;
-        mListItemToSelect = response.getInt(
-                DialogCursorProtocol.CLICK_RECEIVE_SELECTED_POS, SuggestionsAdapter.NONE);
-    }
-
-    /**
-     * Tell the cursor that a search was started without using a suggestion.
-     *
-     * @param query The search query.
-     */
-    void reportSearch(String query) {
-        if (!mGlobalSearchMode) return;
-        Cursor cursor = getCursor();
-        if (cursor == null) return;
-        final Bundle request = new Bundle(3);
-        request.putInt(DialogCursorProtocol.METHOD, DialogCursorProtocol.SEARCH);
-        request.putString(DialogCursorProtocol.SEARCH_SEND_QUERY, query);
-        request.putInt(DialogCursorProtocol.SEARCH_SEND_MAX_DISPLAY_POS, mMaxDisplayed);
-        // the response is always empty
-        cursor.respond(request);
     }
 
     /**
@@ -353,20 +231,6 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
         ChildViewCache views = (ChildViewCache) view.getTag();
-        final int pos = cursor.getPosition();
-
-        // update the maximum position displayed since last refresh
-        if (pos > mMaxDisplayed) {
-            mMaxDisplayed = pos;
-        }
-
-        // if the cursor wishes to be notified about this position, send it
-        if (mGlobalSearchMode && mDisplayNotifyPos != NONE && pos == mDisplayNotifyPos) {
-            final Bundle request = new Bundle();
-            request.putInt(DialogCursorProtocol.METHOD, DialogCursorProtocol.THRESH_HIT);
-            mCursor.respond(request);
-            mDisplayNotifyPos = NONE;  // only notify the first time
-        }
 
         int backgroundColor = 0;
         if (mBackgroundColorCol != -1) {
