@@ -58,25 +58,56 @@ public class RestoreSession {
      * Restore the given set onto the device, replacing the current data of any app
      * contained in the restore set with the data previously backed up.
      *
+     * <p>Callers must hold the android.permission.BACKUP permission to use this method.
+     *
      * @return Zero on success; nonzero on error.  The observer will only receive
      *   progress callbacks if this method returned zero.
-     * @param token The token from {@link #getAvailableRestoreSets()} corresponding to
+     * @param token The token from {@link getAvailableRestoreSets()} corresponding to
      *   the restore set that should be used.
-     * @param observer If non-null, this argument points to an object that will receive
-     *   progress callbacks during the restore operation. These callbacks will occur
-     *   on the main thread of the application.
+     * @param observer If non-null, this binder points to an object that will receive
+     *   progress callbacks during the restore operation.
      */
-    public int performRestore(long token, RestoreObserver observer) {
+    public int restoreAll(long token, RestoreObserver observer) {
         int err = -1;
         if (mObserver != null) {
-            Log.d(TAG, "performRestore() called during active restore");
+            Log.d(TAG, "restoreAll() called during active restore");
             return -1;
         }
         mObserver = new RestoreObserverWrapper(mContext, observer);
         try {
-            err = mBinder.performRestore(token, mObserver);
+            err = mBinder.restoreAll(token, mObserver);
         } catch (RemoteException e) {
-            Log.d(TAG, "Can't contact server to perform restore");
+            Log.d(TAG, "Can't contact server to restore");
+        }
+        return err;
+    }
+
+    /**
+     * Restore a single application from backup.  The data will be restored from the
+     * current backup dataset if the given package has stored data there, or from
+     * the dataset used during the last full device setup operation if the current
+     * backup dataset has no matching data.  If no backup data exists for this package
+     * in either source, a nonzero value will be returned.
+     *
+     * @return Zero on success; nonzero on error.  The observer will only receive
+     *   progress callbacks if this method returned zero.
+     * @param packageName The name of the package whose data to restore.  If this is
+     *   not the name of the caller's own package, then the android.permission.BACKUP
+     *   permission must be held.
+     * @param observer If non-null, this binder points to an object that will receive
+     *   progress callbacks during the restore operation.
+     */
+    public int restorePackage(String packageName, RestoreObserver observer) {
+        int err = -1;
+        if (mObserver != null) {
+            Log.d(TAG, "restorePackage() called during active restore");
+            return -1;
+        }
+        mObserver = new RestoreObserverWrapper(mContext, observer);
+        try {
+            err = mBinder.restorePackage(packageName, mObserver);
+        } catch (RemoteException e) {
+            Log.d(TAG, "Can't contact server to restore package");
         }
         return err;
     }
@@ -87,7 +118,7 @@ public class RestoreSession {
      *
      * <p><b>Note:</b> The caller <i>must</i> invoke this method to end the restore session,
      *   even if {@link #getAvailableRestoreSets()} or
-     *   {@link #performRestore(long, RestoreObserver)} failed.
+     *   {@link #restorePackage(long, String, RestoreObserver)} failed.
      */
     public void endRestoreSession() {
         try {

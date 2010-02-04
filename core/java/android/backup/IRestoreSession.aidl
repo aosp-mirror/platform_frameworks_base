@@ -40,6 +40,8 @@ interface IRestoreSession {
      * Restore the given set onto the device, replacing the current data of any app
      * contained in the restore set with the data previously backed up.
      *
+     * <p>Callers must hold the android.permission.BACKUP permission to use this method.
+     *
      * @return Zero on success; nonzero on error.  The observer will only receive
      *   progress callbacks if this method returned zero.
      * @param token The token from {@link getAvailableRestoreSets()} corresponding to
@@ -47,7 +49,24 @@ interface IRestoreSession {
      * @param observer If non-null, this binder points to an object that will receive
      *   progress callbacks during the restore operation.
      */
-    int performRestore(long token, IRestoreObserver observer);
+    int restoreAll(long token, IRestoreObserver observer);
+
+    /**
+     * Restore a single application from backup.  The data will be restored from the
+     * current backup dataset if the given package has stored data there, or from
+     * the dataset used during the last full device setup operation if the current
+     * backup dataset has no matching data.  If no backup data exists for this package
+     * in either source, a nonzero value will be returned.
+     *
+     * @return Zero on success; nonzero on error.  The observer will only receive
+     *   progress callbacks if this method returned zero.
+     * @param packageName The name of the package whose data to restore.  If this is
+     *   not the name of the caller's own package, then the android.permission.BACKUP
+     *   permission must be held.
+     * @param observer If non-null, this binder points to an object that will receive
+     *   progress callbacks during the restore operation.
+     */
+    int restorePackage(in String packageName, IRestoreObserver observer);
 
     /**
      * End this restore session.  After this method is called, the IRestoreSession binder

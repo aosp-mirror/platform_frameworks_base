@@ -176,11 +176,21 @@ class BackupManagerService extends IBackupManager.Stub {
         public IBackupTransport transport;
         public IRestoreObserver observer;
         public long token;
+        public PackageInfo pkgInfo;
+
+        RestoreParams(IBackupTransport _transport, IRestoreObserver _obs,
+                long _token, PackageInfo _pkg) {
+            transport = _transport;
+            observer = _obs;
+            token = _token;
+            pkgInfo = _pkg;
+        }
 
         RestoreParams(IBackupTransport _transport, IRestoreObserver _obs, long _token) {
             transport = _transport;
             observer = _obs;
             token = _token;
+            pkgInfo = null;
         }
     }
 
@@ -210,9 +220,15 @@ class BackupManagerService extends IBackupManager.Stub {
     File mJournalDir;
     File mJournal;
 
-    // Keep a log of all the apps we've ever backed up
+    // Keep a log of all the apps we've ever backed up, and what the
+    // dataset tokens are for both the current backup dataset and
+    // the ancestral dataset.
     private File mEverStored;
     HashSet<String> mEverStoredApps = new HashSet<String>();
+
+    File mTokenFile;
+    long mAncestralToken = 0;
+    long mCurrentToken = 0;
 
     // Persistently track the need to do a full init
     static final String INIT_SENTINEL_FILE_NAME = "_need_init_";
@@ -277,7 +293,7 @@ class BackupManagerService extends IBackupManager.Stub {
                 RestoreParams params = (RestoreParams)msg.obj;
                 Log.d(TAG, "MSG_RUN_RESTORE observer=" + params.observer);
                 (new PerformRestoreTask(params.transport, params.observer,
-                        params.token)).run();
+                        params.token, params.pkgInfo)).run();
                 break;
             }
 
@@ -475,6 +491,16 @@ class BackupManagerService extends IBackupManager.Stub {
     private void initPackageTracking() {
         if (DEBUG) Log.v(TAG, "Initializing package tracking");
 
+        // Remember our ancestral dataset
+        mTokenFile = new File(mBaseStateDir, "ancestral");
+        try {
+            RandomAccessFile tf = new RandomAccessFile(mTokenFile, "r");
+            mAncestralToken = tf.readLong();
+            mCurrentToken = tf.readLong();
+        } catch (IOException e) {
+            Log.w(TAG, "Unable to read token file", e);
+        }
+
         // Keep a log of what apps we've ever backed up.  Because we might have
         // rebooted in the middle of an operation that was removing something from
         // this log, we sanity-check its contents here and reconstruct it.
@@ -606,6 +632,9 @@ class BackupManagerService extends IBackupManager.Stub {
             // Wipe the "what we've ever backed up" tracking
             mEverStoredApps.clear();
             mEverStored.delete();
+
+            mCurrentToken = 0;
+            writeRestoreTokens();
 
             // Remove all the state files
             for (File sf : stateFileDir.listFiles()) {
@@ -880,7 +909,7 @@ class BackupManagerService extends IBackupManager.Stub {
         addPackageParticipantsLockedInner(packageName, allApps);
     }
 
-    // Called from the backup thread: record that the given app has been successfully
+    // Called from the backup task: record that the given app has been successfully
     // backed up at least once
     void logBackupComplete(String packageName) {
         if (packageName.equals(PACKAGE_MANAGER_SENTINEL)) return;
@@ -935,6 +964,18 @@ class BackupManagerService extends IBackupManager.Stub {
             } finally {
                 try { if (known != null) known.close(); } catch (IOException e) {}
             }
+        }
+    }
+
+    // Record the current and ancestral backup tokens persistently
+    void writeRestoreTokens() {
+        try {
+            RandomAccessFile af = new RandomAccessFile(mTokenFile, "rwd");
+            af.writeLong(mAncestralToken);
+            af.writeLong(mCurrentToken);
+            af.close();
+        } catch (IOException e) {
+            Log.w(TAG, "Unable to write token file:", e);
         }
     }
 
@@ -1154,6 +1195,16 @@ class BackupManagerService extends IBackupManager.Stub {
                 Log.e(TAG, "Error in backup thread", e);
                 status = BackupConstants.TRANSPORT_ERROR;
             } finally {
+                // If everything actually went through and this is the first time we've
+                // done a backup, we can now record what the current backup dataset token
+                // is.
+                if ((mCurrentToken == 0) && (status != BackupConstants.TRANSPORT_OK)) {
+                    try {
+                        mCurrentToken = mTransport.getCurrentRestoreSet();
+                    } catch (RemoteException e) { /* cannot happen */ }
+                    writeRestoreTokens();
+                }
+
                 // If things went wrong, we need to re-stage the apps we had expected
                 // to be backing up in this pass.  This journals the package names in
                 // the current active pending-backup file, not in the we are holding
@@ -1395,6 +1446,7 @@ class BackupManagerService extends IBackupManager.Stub {
         private IBackupTransport mTransport;
         private IRestoreObserver mObserver;
         private long mToken;
+        private PackageInfo mTargetPackage;
         private File mStateDir;
 
         class RestoreRequest {
@@ -1408,11 +1460,11 @@ class BackupManagerService extends IBackupManager.Stub {
         }
 
         PerformRestoreTask(IBackupTransport transport, IRestoreObserver observer,
-                long restoreSetToken) {
+                long restoreSetToken, PackageInfo targetPackage) {
             mTransport = transport;
-            Log.d(TAG, "PerformRestoreThread mObserver=" + mObserver);
             mObserver = observer;
             mToken = restoreSetToken;
+            mTargetPackage = targetPackage;
 
             try {
                 mStateDir = new File(mBaseStateDir, transport.transportDirName());
@@ -1424,7 +1476,8 @@ class BackupManagerService extends IBackupManager.Stub {
         public void run() {
             long startRealtime = SystemClock.elapsedRealtime();
             if (DEBUG) Log.v(TAG, "Beginning restore process mTransport=" + mTransport
-                    + " mObserver=" + mObserver + " mToken=" + Long.toHexString(mToken));
+                    + " mObserver=" + mObserver + " mToken=" + Long.toHexString(mToken)
+                    + " mTargetPackage=" + mTargetPackage);
             /**
              * Restore sequence:
              *
@@ -1441,7 +1494,7 @@ class BackupManagerService extends IBackupManager.Stub {
              *
              * On errors, we try our best to recover and move on to the next
              * application, but if necessary we abort the whole operation --
-             * the user is waiting, after al.
+             * the user is waiting, after all.
              */
 
             int error = -1; // assume error
@@ -1459,7 +1512,12 @@ class BackupManagerService extends IBackupManager.Stub {
                 restorePackages.add(omPackage);
 
                 List<PackageInfo> agentPackages = allAgentPackages();
-                restorePackages.addAll(agentPackages);
+                if (mTargetPackage == null) {
+                    restorePackages.addAll(agentPackages);
+                } else {
+                    // Just one package to attempt restore of
+                    restorePackages.add(mTargetPackage);
+                }
 
                 // let the observer know that we're running
                 if (mObserver != null) {
@@ -1639,6 +1697,13 @@ class BackupManagerService extends IBackupManager.Stub {
                     } catch (RemoteException e) {
                         Log.d(TAG, "Restore observer died at restoreFinished");
                     }
+                }
+
+                // If this was a restoreAll operation, record that this was our
+                // ancestral dataset
+                if (mTargetPackage == null) {
+                    mAncestralToken = mToken;
+                    writeRestoreTokens();
                 }
 
                 // done; we can finally release the wakelock
@@ -2219,7 +2284,7 @@ class BackupManagerService extends IBackupManager.Stub {
             }
         }
 
-        public synchronized int performRestore(long token, IRestoreObserver observer) {
+        public synchronized int restoreAll(long token, IRestoreObserver observer) {
             mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
                     "performRestore");
 
@@ -2247,6 +2312,55 @@ class BackupManagerService extends IBackupManager.Stub {
 
             Log.w(TAG, "Restore token " + Long.toHexString(token) + " not found");
             return -1;
+        }
+
+        public synchronized int restorePackage(String packageName, IRestoreObserver observer) {
+            if (DEBUG) Log.v(TAG, "restorePackage pkg=" + packageName + " obs=" + observer);
+
+            PackageInfo app = null;
+            try {
+                app = mPackageManager.getPackageInfo(packageName, 0);
+            } catch (NameNotFoundException nnf) {
+                Log.w(TAG, "Asked to restore nonexistent pkg " + packageName);
+                return -1;
+            }
+
+            // If the caller is not privileged and is not coming from the target
+            // app's uid, throw a permission exception back to the caller.
+            int perm = mContext.checkPermission(android.Manifest.permission.BACKUP,
+                    Binder.getCallingPid(), Binder.getCallingUid());
+            if ((perm == PackageManager.PERMISSION_DENIED) &&
+                    (app.applicationInfo.uid != Binder.getCallingUid())) {
+                Log.w(TAG, "restorePackage: bad packageName=" + packageName
+                        + " or calling uid=" + Binder.getCallingUid());
+                throw new SecurityException("No permission to restore other packages");
+            }
+
+            // So far so good; we're allowed to try to restore this package.  Now
+            // check whether there is data for it in the current dataset, falling back
+            // to the ancestral dataset if not.
+            long token = mAncestralToken;
+            synchronized (mQueueLock) {
+                if (mEverStoredApps.contains(packageName)) {
+                    token = mCurrentToken;
+                }
+            }
+
+            // If we didn't come up with a place to look -- no ancestral dataset and
+            // the app has never been backed up from this device -- there's nothing
+            // to do but return failure.
+            if (token == 0) {
+                return -1;
+            }
+
+            // Ready to go:  enqueue the restore request and claim success
+            long oldId = Binder.clearCallingIdentity();
+            mWakelock.acquire();
+            Message msg = mBackupHandler.obtainMessage(MSG_RUN_RESTORE);
+            msg.obj = new RestoreParams(mRestoreTransport, observer, token, app);
+            mBackupHandler.sendMessage(msg);
+            Binder.restoreCallingIdentity(oldId);
+            return 0;
         }
 
         public synchronized void endRestoreSession() {
