@@ -2425,6 +2425,14 @@ public final class Settings {
         public static final String BACKUP_ENABLED = "backup_enabled";
 
         /**
+         * Controls whether application data is automatically restored from backup
+         * at install time.
+         * Type: int ( 0 = disabled, 1 = enabled )
+         * @hide
+         */
+        public static final String BACKUP_AUTO_RESTORE = "backup_auto_restore";
+
+        /**
          * Indicates whether settings backup has been fully provisioned.
          * Type: int ( 0 = unprovisioned, 1 = fully provisioned )
          * @hide

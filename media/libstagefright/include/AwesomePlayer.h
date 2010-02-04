@@ -109,16 +109,22 @@ private:
     bool mSeeking;
     int64_t mSeekTimeUs;
 
+    bool mWatchForAudioSeekComplete;
+    bool mWatchForAudioEOS;
+
     sp<TimedEventQueue::Event> mVideoEvent;
     bool mVideoEventPending;
     sp<TimedEventQueue::Event> mStreamDoneEvent;
     bool mStreamDoneEventPending;
     sp<TimedEventQueue::Event> mBufferingEvent;
     bool mBufferingEventPending;
+    sp<TimedEventQueue::Event> mCheckAudioStatusEvent;
+    bool mAudioStatusEventPending;
 
     void postVideoEvent_l(int64_t delayUs = -1);
     void postBufferingEvent_l();
     void postStreamDoneEvent_l();
+    void postCheckAudioStatusEvent_l();
 
     MediaBuffer *mLastVideoBuffer;
     MediaBuffer *mVideoBuffer;
@@ -138,13 +144,12 @@ private:
     status_t setVideoSource(sp<MediaSource> source);
 
     void onEvent(int32_t code);
-
-    static void AudioNotify(void *me, int what);
     void onStreamDone();
 
     void notifyListener_l(int msg, int ext1 = 0);
 
     void onBufferingUpdate();
+    void onCheckAudioStatus();
 
     AwesomePlayer(const AwesomePlayer &);
     AwesomePlayer &operator=(const AwesomePlayer &);

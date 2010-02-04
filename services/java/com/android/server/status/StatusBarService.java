@@ -886,7 +886,8 @@ public class StatusBarService extends IStatusBar.Stub
                 && n.contentView.getPackage() != null
                 && oldData.contentView.getPackage() != null
                 && oldData.contentView.getPackage().equals(n.contentView.getPackage())
-                && oldData.contentView.getLayoutId() == n.contentView.getLayoutId()) {
+                && oldData.contentView.getLayoutId() == n.contentView.getLayoutId()
+                && notification.view != null) {
             mNotificationData.update(notification);
             try {
                 n.contentView.reapply(mContext, notification.contentView);
@@ -1807,16 +1808,30 @@ public class StatusBarService extends IStatusBar.Stub
             filter.addAction(Intent.ACTION_PACKAGE_RESTARTED);
             filter.addDataScheme("package");
             mContext.registerReceiver(this, filter);
+            IntentFilter sdFilter = new IntentFilter(Intent.ACTION_MEDIA_RESOURCES_UNAVAILABLE);
+            mContext.registerReceiver(this, sdFilter);
         }
         
         @Override
         public void onReceive(Context context, Intent intent) {
-            ArrayList<StatusBarNotification> list = null;
-            synchronized (StatusBarService.this) {
+            String pkgList[] = null;
+            if (Intent.ACTION_MEDIA_RESOURCES_UNAVAILABLE.equals(intent.getAction())) {
+                pkgList = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
+            } else {
                 Uri data = intent.getData();
                 if (data != null) {
                     String pkg = data.getSchemeSpecificPart();
-                    list = mNotificationData.notificationsForPackage(pkg);
+                    if (pkg != null) {
+                        pkgList = new String[]{pkg};
+                    }
+                }
+            }
+            ArrayList<StatusBarNotification> list = null;
+            if (pkgList != null) {
+                synchronized (StatusBarService.this) {
+                    for (String pkg : pkgList) {
+                        list = mNotificationData.notificationsForPackage(pkg);
+                    }
                 }
             }
             

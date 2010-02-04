@@ -705,6 +705,7 @@ public class TestShellActivity extends Activity implements LayoutTestController 
         mDumpDatabaseCallbacks = false;
         mCanOpenWindows = false;
         mEventSender.resetMouse();
+        mEventSender.clearTouchPoints();
         mPageFinished = false;
         mOneHundredPercentComplete = false;
         mDumpWebKitData = false;
@@ -769,6 +770,12 @@ public class TestShellActivity extends Activity implements LayoutTestController 
 
         webview.setWebChromeClient(mChromeClient);
         webview.setWebViewClient(mViewClient);
+        // Setting a touch interval of -1 effectively disables the optimisation in WebView
+        // that stops repeated touch events flooding WebCore. The Event Sender only sends a
+        // single event rather than a stream of events (like what would generally happen in
+        // a real use of touch events in a WebView)  and so if the WebView drops the event,
+        // the test will fail as the test expects one callback for every touch it synthesizes.
+        webview.setTouchInterval(-1);
     }
 
     private WebView mWebView;

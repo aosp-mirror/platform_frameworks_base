@@ -4323,6 +4323,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      */
     public void cancelLongPress() {
         removeLongPressCallback();
+
+        /*
+         * The prepressed state handled by the tap callback is a display
+         * construct, but the tap callback will post a long press callback
+         * less its own timeout. Remove it here.
+         */
+        removeTapCallback();
     }
 
     /**

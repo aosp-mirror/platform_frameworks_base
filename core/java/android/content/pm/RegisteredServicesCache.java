@@ -115,6 +115,11 @@ public abstract class RegisteredServicesCache<V> {
         intentFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
         intentFilter.addDataScheme("package");
         mContext.registerReceiver(receiver, intentFilter);
+        // Register for events related to sdcard installation.
+        IntentFilter sdFilter = new IntentFilter();
+        sdFilter.addAction(Intent.ACTION_MEDIA_RESOURCES_AVAILABLE);
+        sdFilter.addAction(Intent.ACTION_MEDIA_RESOURCES_UNAVAILABLE);
+        mContext.registerReceiver(receiver, sdFilter);
     }
 
     public void dump(FileDescriptor fd, PrintWriter fout, String[] args) {

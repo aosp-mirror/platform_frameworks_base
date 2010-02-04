@@ -26,4 +26,14 @@ public interface EventSender {
         public void keyDown (String character);
         public void enableDOMUIEventLogging(int DOMNode);
         public void fireKeyboardEventsToElement(int DOMNode);
+        public void touchStart();
+        public void touchMove();
+        public void touchEnd();
+        public void touchCancel();
+        public void addTouchPoint(int x, int y);
+        public void updateTouchPoint(int id, int x, int y);
+        public void setTouchModifier(String modifier, boolean enabled);
+        public void releaseTouchPoint(int id);
+        public void clearTouchPoints();
+        public void cancelTouchPoint(int id);
 }

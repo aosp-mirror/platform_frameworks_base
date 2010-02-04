@@ -294,7 +294,6 @@ struct light_t {
     vec4_t      normalizedObjPosition;
     vec4_t      spotDir;
     vec4_t      normalizedSpotDir;
-    vec4_t      objViewer;
     GLfixed     spotExp;
     GLfixed     spotCutoff;
     GLfixed     spotCutoffCosine;
@@ -327,9 +326,10 @@ struct lighting_t {
     material_t          front;
     light_model_t       lightModel;
     color_material_t    colorMaterial;
+    vec4_t              implicitSceneEmissionAndAmbient;
+    vec4_t              objViewer;
     uint32_t            enabledLights;
     GLboolean           enable;
-    vec4_t              implicitSceneEmissionAndAmbient;
     GLenum              shadeModel;
     typedef void (*light_fct_t)(ogles_context_t*, vertex_t*);
     void (*lightVertex)(ogles_context_t* c, vertex_t* v);

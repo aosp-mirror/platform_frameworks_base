@@ -260,9 +260,12 @@ final class WebViewCore {
      * @param message The message to add
      * @param lineNumber the line on which the error occurred
      * @param sourceID the filename of the source that caused the error.
+     * @param msgLevel the log level of this message. This is a value casted to int
+     *     from WebCore::MessageLevel in WebCore/page/Console.h.
      */
-    protected void addMessageToConsole(String message, int lineNumber, String sourceID) {
-        mCallbackProxy.addMessageToConsole(message, lineNumber, sourceID);
+    protected void addMessageToConsole(String message, int lineNumber, String sourceID,
+            int msgLevel) {
+        mCallbackProxy.addMessageToConsole(message, lineNumber, sourceID, msgLevel);
     }
 
     /**
@@ -512,7 +515,7 @@ final class WebViewCore {
     private native void nativeTouchUp(int touchGeneration,
             int framePtr, int nodePtr, int x, int y);
 
-    private native int nativeHandleTouchEvent(int action, int x, int y);
+    private native int nativeHandleTouchEvent(int action, int x, int y, long time);
 
     private native void nativeUpdateFrameCache();
 
@@ -731,6 +734,7 @@ final class WebViewCore {
         int mAction;
         int mX;
         int mY;
+        long mEventTime;
     }
 
     static class GeolocationPermissionsData {
@@ -1189,7 +1193,7 @@ final class WebViewCore {
                                     mWebView.mPrivateHandler,
                                     WebView.PREVENT_TOUCH_ID, ted.mAction,
                                     nativeHandleTouchEvent(ted.mAction, ted.mX,
-                                            ted.mY)).sendToTarget();
+                                    ted.mY, ted.mEventTime)).sendToTarget();
                             break;
                         }
 

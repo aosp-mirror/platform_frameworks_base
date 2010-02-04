@@ -953,6 +953,39 @@ public class PackageParser {
                     return null;
                 }
                 
+            } else if (tagName.equals("original-package")) {
+                sa = res.obtainAttributes(attrs,
+                        com.android.internal.R.styleable.AndroidManifestOriginalPackage);
+
+                String name = sa.getNonResourceString(
+                        com.android.internal.R.styleable.AndroidManifestOriginalPackage_name);
+
+                sa.recycle();
+
+                if (name != null && (flags&PARSE_IS_SYSTEM) != 0) {
+                    pkg.mOriginalPackage = name;
+                }
+
+                XmlUtils.skipCurrentTag(parser);
+                
+            } else if (tagName.equals("adopt-permissions")) {
+                sa = res.obtainAttributes(attrs,
+                        com.android.internal.R.styleable.AndroidManifestOriginalPackage);
+
+                String name = sa.getNonResourceString(
+                        com.android.internal.R.styleable.AndroidManifestOriginalPackage_name);
+
+                sa.recycle();
+
+                if (name != null && (flags&PARSE_IS_SYSTEM) != 0) {
+                    if (pkg.mAdoptPermissions == null) {
+                        pkg.mAdoptPermissions = new ArrayList<String>();
+                    }
+                    pkg.mAdoptPermissions.add(name);
+                }
+
+                XmlUtils.skipCurrentTag(parser);
+                
             } else if (tagName.equals("eat-comment")) {
                 // Just skip this tag
                 XmlUtils.skipCurrentTag(parser);
@@ -2528,6 +2561,9 @@ public class PackageParser {
         public ArrayList<String> usesOptionalLibraries = null;
         public String[] usesLibraryFiles = null;
 
+        public String mOriginalPackage = null;
+        public ArrayList<String> mAdoptPermissions = null;
+        
         // We store the application meta-data independently to avoid multiple unwanted references
         public Bundle mAppMetaData = null;
 

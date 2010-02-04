@@ -118,6 +118,7 @@ class BackupManagerService extends IBackupManager.Stub {
 
     boolean mEnabled;   // access to this is synchronized on 'this'
     boolean mProvisioned;
+    boolean mAutoRestore;
     PowerManager.WakeLock mWakelock;
     HandlerThread mHandlerThread = new HandlerThread("backup", Process.THREAD_PRIORITY_BACKGROUND);
     BackupHandler mBackupHandler;
@@ -340,6 +341,8 @@ class BackupManagerService extends IBackupManager.Stub {
                 Settings.Secure.BACKUP_ENABLED, 0) != 0;
         mProvisioned = Settings.Secure.getInt(context.getContentResolver(),
                 Settings.Secure.BACKUP_PROVISIONED, 0) != 0;
+        mAutoRestore = Settings.Secure.getInt(context.getContentResolver(),
+                Settings.Secure.BACKUP_AUTO_RESTORE, 0) != 0;
         // If Encrypted file systems is enabled or disabled, this call will return the
         // correct directory.
         mBaseStateDir = new File(Environment.getSecureDataDirectory(), "backup");
@@ -529,6 +532,11 @@ class BackupManagerService extends IBackupManager.Stub {
         filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
         filter.addDataScheme("package");
         mContext.registerReceiver(mBroadcastReceiver, filter);
+        // Register for events related to sdcard installation.
+        IntentFilter sdFilter = new IntentFilter();
+        sdFilter.addAction(Intent.ACTION_MEDIA_RESOURCES_AVAILABLE);
+        sdFilter.addAction(Intent.ACTION_MEDIA_RESOURCES_UNAVAILABLE);
+        mContext.registerReceiver(mBroadcastReceiver, sdFilter);
     }
 
     private void parseLeftoverJournals() {
@@ -665,35 +673,53 @@ class BackupManagerService extends IBackupManager.Stub {
         public void onReceive(Context context, Intent intent) {
             if (DEBUG) Log.d(TAG, "Received broadcast " + intent);
 
-            Uri uri = intent.getData();
-            if (uri == null) {
-                return;
-            }
-            String pkgName = uri.getSchemeSpecificPart();
-            if (pkgName == null) {
-                return;
-            }
-
             String action = intent.getAction();
-            if (Intent.ACTION_PACKAGE_ADDED.equals(action)) {
+            boolean replacing = false;
+            boolean added = false;
+            Bundle extras = intent.getExtras();
+            String pkgList[] = null;
+            if (Intent.ACTION_PACKAGE_ADDED.equals(action) ||
+                    Intent.ACTION_PACKAGE_REMOVED.equals(action)) {
+                Uri uri = intent.getData();
+                if (uri == null) {
+                    return;
+                }
+                String pkgName = uri.getSchemeSpecificPart();
+                if (pkgName != null) {
+                    pkgList = new String[] { pkgName };
+                }
+                added = Intent.ACTION_PACKAGE_ADDED.equals(action);
+                replacing = extras.getBoolean(Intent.EXTRA_REPLACING, false);
+            } else if (Intent.ACTION_MEDIA_RESOURCES_AVAILABLE.equals(action)) {
+                added = true;
+                pkgList = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
+            } else if (Intent.ACTION_MEDIA_RESOURCES_UNAVAILABLE.equals(action)) {
+                added = false;
+                pkgList = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
+            }
+            if (pkgList == null || pkgList.length == 0) {
+                return;
+            }
+            if (added) {
                 synchronized (mBackupParticipants) {
-                    Bundle extras = intent.getExtras();
-                    if (extras != null && extras.getBoolean(Intent.EXTRA_REPLACING, false)) {
-                        // The package was just upgraded
-                        updatePackageParticipantsLocked(pkgName);
-                    } else {
-                        // The package was just added
-                        addPackageParticipantsLocked(pkgName);
+                    for (String pkgName : pkgList) {
+                        if (replacing) {
+                            // The package was just upgraded
+                            updatePackageParticipantsLocked(pkgName);
+                        } else {
+                            // The package was just added
+                            addPackageParticipantsLocked(pkgName);
+                        }
                     }
                 }
-            }
-            else if (Intent.ACTION_PACKAGE_REMOVED.equals(action)) {
-                Bundle extras = intent.getExtras();
-                if (extras != null && extras.getBoolean(Intent.EXTRA_REPLACING, false)) {
+            } else {
+                if (replacing) {
                     // The package is being updated.  We'll receive a PACKAGE_ADDED shortly.
                 } else {
                     synchronized (mBackupParticipants) {
-                        removePackageParticipantsLocked(pkgName);
+                        for (String pkgName : pkgList) {
+                            removePackageParticipantsLocked(pkgName);
+                        }
                     }
                 }
             }
@@ -1993,6 +2019,20 @@ class BackupManagerService extends IBackupManager.Stub {
                             mRunInitIntent);
                 }
             }
+        }
+    }
+
+    // Enable/disable automatic restore of app data at install time
+    public void setAutoRestore(boolean doAutoRestore) {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
+        "setBackupEnabled");
+
+        Log.i(TAG, "Auto restore => " + doAutoRestore);
+
+        synchronized (this) {
+            Settings.Secure.putInt(mContext.getContentResolver(),
+                    Settings.Secure.BACKUP_AUTO_RESTORE, doAutoRestore ? 1 : 0);
+            mAutoRestore = doAutoRestore;
         }
     }
 

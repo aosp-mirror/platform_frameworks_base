@@ -97,11 +97,13 @@ public class DefaultContainerService extends Service {
         int errCode = CREATE_FAILED;
         // Create new container
         if ((newCachePath = createSdDir(packageURI, newCacheId, key)) != null) {
+            if (localLOGV) Log.i(TAG, "Created container for " + newCacheId
+                    + " at path : " + newCachePath);
             File resFile = new File(newCachePath, resFileName);
             errCode = COPY_FAILED;
-            if (localLOGV) Log.i(TAG, "Trying to copy " + codePath + " to " + resFile);
             // Copy file from codePath
             if (FileUtils.copyFile(new File(codePath), resFile)) {
+                if (localLOGV) Log.i(TAG, "Copied " + codePath + " to " + resFile);
                 errCode = FINALIZE_FAILED;
                 if (finalizeSdDir(newCacheId)) {
                     errCode = PASS;
@@ -116,18 +118,23 @@ public class DefaultContainerService extends Service {
                 break;
             case COPY_FAILED:
                 errMsg = "COPY_FAILED";
+                if (localLOGV) Log.i(TAG, "Destroying " + newCacheId +
+                        " at path " + newCachePath + " after " + errMsg);
                 destroySdDir(newCacheId);
                 break;
             case FINALIZE_FAILED:
                 errMsg = "FINALIZE_FAILED";
+                if (localLOGV) Log.i(TAG, "Destroying " + newCacheId +
+                        " at path " + newCachePath + " after " + errMsg);
                 destroySdDir(newCacheId);
                 break;
             default:
                 errMsg = "PASS";
+            if (localLOGV) Log.i(TAG, "Unmounting " + newCacheId +
+                    " at path " + newCachePath + " after " + errMsg);
                 unMountSdDir(newCacheId);
                 break;
         }
-        Log.i(TAG, "Status: " + errMsg);
         if (errCode != PASS) {
             return null;
         }
@@ -144,7 +151,7 @@ public class DefaultContainerService extends Service {
         if ((len - (mbLen * 1024 * 1024)) > 0) {
             mbLen++;
         }
-        if (localLOGV) Log.i(TAG, "mbLen="+mbLen);
+        if (localLOGV) Log.i(TAG, "mbLen=" + mbLen);
         String cachePath = null;
         int ownerUid = Process.myUid();
         try {

@@ -121,6 +121,8 @@ AwesomePlayer::AwesomePlayer()
     mStreamDoneEventPending = false;
     mBufferingEvent = new AwesomeEvent(this, 2);
     mBufferingEventPending = false;
+    mCheckAudioStatusEvent = new AwesomeEvent(this, 3);
+    mAudioStatusEventPending = false;
 
     mQueue.start();
 
@@ -140,6 +142,8 @@ void AwesomePlayer::cancelPlayerEvents(bool keepBufferingGoing) {
     mVideoEventPending = false;
     mQueue.cancelEvent(mStreamDoneEvent->eventID());
     mStreamDoneEventPending = false;
+    mQueue.cancelEvent(mCheckAudioStatusEvent->eventID());
+    mAudioStatusEventPending = false;
 
     if (!keepBufferingGoing) {
         mQueue.cancelEvent(mBufferingEvent->eventID());
@@ -283,29 +287,6 @@ void AwesomePlayer::reset_l() {
     mPrefetcher.clear();
 }
 
-// static
-void AwesomePlayer::AudioNotify(void *_me, int what) {
-    AwesomePlayer *me = (AwesomePlayer *)_me;
-
-    Mutex::Autolock autoLock(me->mLock);
-
-    switch (what) {
-        case AudioPlayer::REACHED_EOS:
-            me->postStreamDoneEvent_l();
-            break;
-
-        case AudioPlayer::SEEK_COMPLETE:
-        {
-            me->notifyListener_l(MEDIA_SEEK_COMPLETE);
-            break;
-        }
-
-        default:
-            CHECK(!"should not be here.");
-            break;
-    }
-}
-
 void AwesomePlayer::notifyListener_l(int msg, int ext1) {
     if (mListener != NULL) {
         sp<MediaPlayerBase> listener = mListener.promote();
@@ -323,7 +304,7 @@ void AwesomePlayer::onBufferingUpdate() {
     if (mDurationUs >= 0) {
         int64_t cachedDurationUs = mPrefetcher->getCachedDurationUs();
         int64_t positionUs = 0;
-        if (mVideoRenderer != NULL) {
+        if (mVideoSource != NULL) {
             positionUs = mVideoTimeUs;
         } else if (mAudioPlayer != NULL) {
             positionUs = mAudioPlayer->getMediaTimeUs();
@@ -347,7 +328,7 @@ void AwesomePlayer::onStreamDone() {
     if (mFlags & LOOPING) {
         seekTo_l(0);
 
-        if (mVideoRenderer != NULL) {
+        if (mVideoSource != NULL) {
             postVideoEvent_l();
         }
     } else {
@@ -373,10 +354,6 @@ status_t AwesomePlayer::play() {
         if (mAudioPlayer == NULL) {
             if (mAudioSink != NULL) {
                 mAudioPlayer = new AudioPlayer(mAudioSink);
-
-                mAudioPlayer->setListenerCallback(
-                        &AwesomePlayer::AudioNotify, this);
-
                 mAudioPlayer->setSource(mAudioSource);
                 status_t err = mAudioPlayer->start();
 
@@ -393,10 +370,15 @@ status_t AwesomePlayer::play() {
                 mTimeSource = mAudioPlayer;
 
                 deferredAudioSeek = true;
+
+                mWatchForAudioSeekComplete = false;
+                mWatchForAudioEOS = true;
             }
         } else {
             mAudioPlayer->resume();
         }
+
+        postCheckAudioStatusEvent_l();
     }
 
     if (mTimeSource == NULL && mAudioPlayer == NULL) {
@@ -404,14 +386,8 @@ status_t AwesomePlayer::play() {
     }
 
     if (mVideoSource != NULL) {
-        if (mVideoRenderer == NULL) {
-            initRenderer_l();
-        }
-
-        if (mVideoRenderer != NULL) {
-            // Kick off video playback
-            postVideoEvent_l();
-        }
+        // Kick off video playback
+        postVideoEvent_l();
     }
 
     if (deferredAudioSeek) {
@@ -532,7 +508,7 @@ status_t AwesomePlayer::getDuration(int64_t *durationUs) {
 status_t AwesomePlayer::getPosition(int64_t *positionUs) {
     Mutex::Autolock autoLock(mLock);
 
-    if (mVideoRenderer != NULL) {
+    if (mVideoSource != NULL) {
         *positionUs = mVideoTimeUs;
     } else if (mAudioPlayer != NULL) {
         *positionUs = mAudioPlayer->getMediaTimeUs();
@@ -558,9 +534,11 @@ status_t AwesomePlayer::seekTo_l(int64_t timeUs) {
 }
 
 void AwesomePlayer::seekAudioIfNecessary_l() {
-    if (mSeeking && mVideoRenderer == NULL && mAudioPlayer != NULL) {
+    if (mSeeking && mVideoSource == NULL && mAudioPlayer != NULL) {
         mAudioPlayer->seekTo(mSeekTimeUs);
 
+        mWatchForAudioSeekComplete = true;
+        mWatchForAudioEOS = true;
         mSeeking = false;
     }
 }
@@ -652,6 +630,9 @@ void AwesomePlayer::onEvent(int32_t code) {
     } else if (code == 2) {
         onBufferingUpdate();
         return;
+    } else if (code == 3) {
+        onCheckAudioStatus();
+        return;
     }
 
     Mutex::Autolock autoLock(mLock);
@@ -687,7 +668,9 @@ void AwesomePlayer::onEvent(int32_t code) {
                 if (err == INFO_FORMAT_CHANGED) {
                     LOGV("VideoSource signalled format change.");
 
-                    initRenderer_l();
+                    if (mVideoRenderer != NULL) {
+                        initRenderer_l();
+                    }
                     continue;
                 }
 
@@ -718,6 +701,8 @@ void AwesomePlayer::onEvent(int32_t code) {
             LOGV("seeking audio to %lld us (%.2f secs).", timeUs, timeUs / 1E6);
 
             mAudioPlayer->seekTo(timeUs);
+            mWatchForAudioSeekComplete = true;
+            mWatchForAudioEOS = true;
         } else {
             // If we're playing video only, report seek complete now,
             // otherwise audio player will notify us later.
@@ -762,7 +747,13 @@ void AwesomePlayer::onEvent(int32_t code) {
         return;
     }
 
-    mVideoRenderer->render(mVideoBuffer);
+    if (mVideoRenderer == NULL) {
+        initRenderer_l();
+    }
+
+    if (mVideoRenderer != NULL) {
+        mVideoRenderer->render(mVideoBuffer);
+    }
 
     if (mLastVideoBuffer) {
         mLastVideoBuffer->release();
@@ -801,6 +792,31 @@ void AwesomePlayer::postBufferingEvent_l() {
     }
     mBufferingEventPending = true;
     mQueue.postEventWithDelay(mBufferingEvent, 1000000ll);
+}
+
+void AwesomePlayer::postCheckAudioStatusEvent_l() {
+    if (mAudioStatusEventPending) {
+        return;
+    }
+    mAudioStatusEventPending = true;
+    mQueue.postEventWithDelay(mCheckAudioStatusEvent, 100000ll);
+}
+
+void AwesomePlayer::onCheckAudioStatus() {
+    Mutex::Autolock autoLock(mLock);
+    mAudioStatusEventPending = false;
+
+    if (mWatchForAudioSeekComplete && !mAudioPlayer->isSeeking()) {
+        mWatchForAudioSeekComplete = false;
+        notifyListener_l(MEDIA_SEEK_COMPLETE);
+    }
+
+    if (mWatchForAudioEOS && mAudioPlayer->reachedEOS()) {
+        mWatchForAudioEOS = false;
+        postStreamDoneEvent_l();
+    }
+
+    postCheckAudioStatusEvent_l();
 }
 
 }  // namespace android

@@ -73,6 +73,7 @@
 #define DALVIK_CACHE_PREFIX   "/data/dalvik-cache/"
 #define DALVIK_CACHE_POSTFIX  "/classes.dex"
 
+#define UPDATE_COMMANDS_DIR_PREFIX  "/system/etc/updatecmds/"
 
 #define PKG_NAME_MAX  128   /* largest allowed package name */
 #define PKG_PATH_MAX  256   /* max size of any path we use */
@@ -97,6 +98,7 @@ int delete_dir_contents_fd(int dfd, const char *name);
 
 int install(const char *pkgname, int encrypted_fs_flag, uid_t uid, gid_t gid);
 int uninstall(const char *pkgname, int encrypted_fs_flag);
+int renamepkg(const char *oldpkgname, const char *newpkgname, int encrypted_fs_flag);
 int delete_user_data(const char *pkgname, int encrypted_fs_flag);
 int delete_cache(const char *pkgname, int encrypted_fs_flag);
 int move_dex(const char *src, const char *dst);
@@ -106,3 +108,4 @@ int get_size(const char *pkgname, const char *apkpath, const char *fwdlock_apkpa
              int *codesize, int *datasize, int *cachesize, int encrypted_fs_flag);
 int free_cache(int free_size);
 int dexopt(const char *apk_path, uid_t uid, int is_public);
+int movefiles();

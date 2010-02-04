@@ -41,9 +41,6 @@ public:
     // Caller retains ownership of "source".
     void setSource(const sp<MediaSource> &source);
 
-    void setListenerCallback(
-            void (*notify)(void *cookie, int what), void *cookie);
-
     // Return time in us.
     virtual int64_t getRealTimeUs();
 
@@ -63,6 +60,9 @@ public:
 
     status_t seekTo(int64_t time_us);
 
+    bool isSeeking();
+    bool reachedEOS();
+
 private:
     sp<MediaSource> mSource;
     AudioTrack *mAudioTrack;
@@ -80,12 +80,10 @@ private:
     int64_t mPositionTimeRealUs;
 
     bool mSeeking;
+    bool mReachedEOS;
     int64_t mSeekTimeUs;
 
     bool mStarted;
-
-    void (*mListenerCallback)(void *cookie, int what);
-    void *mListenerCookie;
 
     sp<MediaPlayerBase::AudioSink> mAudioSink;
 

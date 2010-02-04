@@ -222,6 +222,21 @@ class Installer {
         return execute(builder.toString());
     }
 
+    public int rename(String oldname, String newname, boolean useEncryptedFilesystem) {
+        StringBuilder builder = new StringBuilder("rename");
+        builder.append(' ');
+        builder.append(oldname);
+        builder.append(' ');
+        builder.append(newname);
+        builder.append(' ');
+        if (useEncryptedFilesystem) {
+            builder.append('1');
+        } else {
+            builder.append('0');
+        }
+        return execute(builder.toString());
+    }
+
     public int deleteCacheFiles(String name, boolean useEncryptedFilesystem) {
         StringBuilder builder = new StringBuilder("rmcache");
         builder.append(' ');
@@ -308,4 +323,8 @@ class Installer {
             return -1;
         }
     }    
+
+    public int moveFiles() {
+        return execute("movefiles");
+    }
 }

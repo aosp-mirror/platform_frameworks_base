@@ -96,6 +96,8 @@ public class FileFilter {
         // tests expect "LayoutTests" in their output.
         "storage/domstorage/localstorage/iframe-events.html",
         "storage/domstorage/sessionstorage/iframe-events.html",
+        // We do not support multi touch events.
+        "fast/events/touch/basic-multi-touch-events.html",
         // below tests (failed or crashes) are filtered out temporarily due to prioritizing
         "editing/selection/move-left-right.html",
     };

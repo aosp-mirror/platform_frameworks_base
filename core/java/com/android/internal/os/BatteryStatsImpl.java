@@ -2705,6 +2705,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         mWifiOnTimer = new StopwatchTimer(-3, null, mUnpluggables);
         mWifiRunningTimer = new StopwatchTimer(-4, null, mUnpluggables);
         mBluetoothOnTimer = new StopwatchTimer(-5, null, mUnpluggables);
+        mAudioOnTimer = new StopwatchTimer(-6, null, mUnpluggables);
         mOnBattery = mOnBatteryInternal = false;
         mTrackBatteryPastUptime = 0;
         mTrackBatteryPastRealtime = 0;

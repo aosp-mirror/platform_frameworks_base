@@ -104,10 +104,25 @@ class NotificationViewList {
         return null;
     }
 
-    // gets the index of the notification in its expanded parent view
+    // gets the index of the notification's view in its expanded parent view
     int getExpandedIndex(StatusBarNotification notification) {
         ArrayList<StatusBarNotification> list = notification.data.ongoingEvent ? mOngoing : mLatest;
-        return list.size() - indexForKey(list, notification.key) - 1;
+        final IBinder key = notification.key;
+        int index = 0;
+        // (the view order is backwards from this list order)
+        for (int i=list.size()-1; i>=0; i--) {
+            StatusBarNotification item = list.get(i);
+            if (item.key == key) {
+                return index;
+            }
+            if (item.view != null) {
+                index++;
+            }
+        }
+        Log.e(StatusBarService.TAG, "Couldn't find notification in NotificationViewList.");
+        Log.e(StatusBarService.TAG, "notification=" + notification);
+        dump(notification);
+        return 0;
     }
 
     void clearViews() {
@@ -156,6 +171,13 @@ class NotificationViewList {
         list.add(index, notification);
 
         if (StatusBarService.SPEW) {
+            Log.d(StatusBarService.TAG, "NotificationViewList index=" + index);
+            dump(notification);
+        }
+    }
+
+    void dump(StatusBarNotification notification) {
+        if (StatusBarService.SPEW) {
             String s = "";
             for (int i=0; i<mOngoing.size(); i++) {
                 StatusBarNotification that = mOngoing.get(i);
@@ -168,7 +190,7 @@ class NotificationViewList {
                 }
                 s += " ";
             }
-            Log.d(StatusBarService.TAG, "NotificationViewList ongoing index=" + index + ": " + s);
+            Log.d(StatusBarService.TAG, "NotificationViewList ongoing: " + s);
 
             s = "";
             for (int i=0; i<mLatest.size(); i++) {
@@ -182,7 +204,7 @@ class NotificationViewList {
                 }
                 s += " ";
             }
-            Log.d(StatusBarService.TAG, "NotificationViewList latest  index=" + index + ": " + s);
+            Log.d(StatusBarService.TAG, "NotificationViewList latest:  " + s);
         }
     }
 

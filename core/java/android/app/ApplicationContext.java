@@ -2164,6 +2164,11 @@ class ApplicationContext extends Context {
                     filter.addDataScheme("package");
                     mContext.registerReceiverInternal(sPackageRemovedReceiver,
                             filter, null, null, null);
+                    // Register for events related to sdcard installation.
+                    IntentFilter sdFilter = new IntentFilter();
+                    sdFilter.addAction(Intent.ACTION_MEDIA_RESOURCES_UNAVAILABLE);
+                    mContext.registerReceiverInternal(sPackageRemovedReceiver,
+                            sdFilter, null, null, null);
                 }
             }
         }
@@ -2181,32 +2186,56 @@ class ApplicationContext extends Context {
         private static final class PackageRemovedReceiver extends BroadcastReceiver {
             @Override
             public void onReceive(Context context, Intent intent) {
-                Uri data = intent.getData();
-                String ssp;
-                if (data != null && (ssp=data.getSchemeSpecificPart()) != null) {
-                    boolean needCleanup = false;
-                    synchronized (sSync) {
-                        Iterator<ResourceName> it = sIconCache.keySet().iterator();
-                        while (it.hasNext()) {
-                            ResourceName nm = it.next();
-                            if (nm.packageName.equals(ssp)) {
-                                //Log.i(TAG, "Removing cached drawable for " + nm);
-                                it.remove();
-                                needCleanup = true;
-                            }
-                        }
-                        it = sStringCache.keySet().iterator();
-                        while (it.hasNext()) {
-                            ResourceName nm = it.next();
-                            if (nm.packageName.equals(ssp)) {
-                                //Log.i(TAG, "Removing cached string for " + nm);
-                                it.remove();
-                                needCleanup = true;
-                            }
+                String pkgList[] = null;
+                String action = intent.getAction();
+                boolean immediateGc = false;
+                if (Intent.ACTION_MEDIA_RESOURCES_UNAVAILABLE.equals(action)) {
+                    pkgList = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
+                    immediateGc = true;
+                } else {
+                    Uri data = intent.getData();
+                    if (data != null) {
+                        String ssp = data.getSchemeSpecificPart();
+                        if (ssp != null) {
+                            pkgList = new String[] { ssp };
                         }
                     }
-                    if (needCleanup || ActivityThread.currentActivityThread().hasPackageInfo(ssp)) {
-                        ActivityThread.currentActivityThread().scheduleGcIdler();
+                }
+                if (pkgList != null && (pkgList.length > 0)) {
+                    boolean needCleanup = false;
+                    boolean hasPkgInfo = false;
+                    for (String ssp : pkgList) {
+                        synchronized (sSync) {
+                            Iterator<ResourceName> it = sIconCache.keySet().iterator();
+                            while (it.hasNext()) {
+                                ResourceName nm = it.next();
+                                if (nm.packageName.equals(ssp)) {
+                                    //Log.i(TAG, "Removing cached drawable for " + nm);
+                                    it.remove();
+                                    needCleanup = true;
+                                }
+                            }
+                            it = sStringCache.keySet().iterator();
+                            while (it.hasNext()) {
+                                ResourceName nm = it.next();
+                                if (nm.packageName.equals(ssp)) {
+                                    //Log.i(TAG, "Removing cached string for " + nm);
+                                    it.remove();
+                                    needCleanup = true;
+                                }
+                            }
+                        }
+                        if (!hasPkgInfo) {
+                            hasPkgInfo = ActivityThread.currentActivityThread().hasPackageInfo(ssp);
+                        }
+                    }
+                    if (needCleanup || hasPkgInfo) {
+                        if (immediateGc) {
+                            // Schedule an immediate gc.
+                            Runtime.getRuntime().gc();
+                        } else {
+                            ActivityThread.currentActivityThread().scheduleGcIdler();
+                        }
                     }
                 }
             }
