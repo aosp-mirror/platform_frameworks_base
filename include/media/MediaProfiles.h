@@ -53,8 +53,8 @@ public:
      *
      * Supported param name are:
      * file.format - output file format. see mediarecorder.h for details
-     * codec.vid - video encoder. see mediarecorder.h for details.
-     * codec.aud - audio encoder. see mediarecorder.h for details.
+     * vid.codec - video encoder. see mediarecorder.h for details.
+     * aud.codec - audio encoder. see mediarecorder.h for details.
      * vid.width - video frame width
      * vid.height - video frame height
      * vid.fps - video frame rate
