@@ -60,8 +60,6 @@ LOCAL_SHARED_LIBRARIES := \
         libsonivox        \
         libvorbisidec
 
-ifeq ($(BUILD_WITH_FULL_STAGEFRIGHT),true)
-
 LOCAL_STATIC_LIBRARIES := \
         libstagefright_aacdec \
         libstagefright_amrnbdec \
@@ -69,12 +67,18 @@ LOCAL_STATIC_LIBRARIES := \
         libstagefright_amrwbdec \
         libstagefright_avcdec \
         libstagefright_m4vh263dec \
-        libstagefright_mp3dec \
-        libstagefright_id3
+        libstagefright_mp3dec
 
 LOCAL_SHARED_LIBRARIES += \
         libstagefright_amrnb_common \
-        libstagefright_avc_common \
+        libstagefright_avc_common
+
+ifeq ($(BUILD_WITH_FULL_STAGEFRIGHT),true)
+
+LOCAL_STATIC_LIBRARIES += \
+        libstagefright_id3
+
+LOCAL_SHARED_LIBRARIES += \
         libstagefright_color_conversion
 
 endif

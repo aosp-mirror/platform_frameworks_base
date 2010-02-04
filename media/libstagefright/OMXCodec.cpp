@@ -18,7 +18,6 @@
 #define LOG_TAG "OMXCodec"
 #include <utils/Log.h>
 
-#if BUILD_WITH_FULL_STAGEFRIGHT
 #include "include/AACDecoder.h"
 #include "include/AMRNBDecoder.h"
 #include "include/AMRNBEncoder.h"
@@ -26,7 +25,6 @@
 #include "include/AVCDecoder.h"
 #include "include/M4vH263Decoder.h"
 #include "include/MP3Decoder.h"
-#endif
 
 #include "include/ESDS.h"
 
@@ -55,9 +53,6 @@ struct CodecInfo {
     const char *mime;
     const char *codec;
 };
-
-#if BUILD_WITH_FULL_STAGEFRIGHT
-#define OPTIONAL(x,y) { x, y },
 
 #define FACTORY_CREATE(name) \
 static sp<MediaSource> Make##name(const sp<MediaSource> &source) { \
@@ -103,42 +98,30 @@ static sp<MediaSource> InstantiateSoftwareCodec(
 #undef FACTORY_REF
 #undef FACTORY_CREATE
 
-#else
-#define OPTIONAL(x,y)
-#endif
-
 static const CodecInfo kDecoderInfo[] = {
     { MEDIA_MIMETYPE_IMAGE_JPEG, "OMX.TI.JPEG.decode" },
     { MEDIA_MIMETYPE_AUDIO_MPEG, "OMX.TI.MP3.decode" },
-    OPTIONAL(MEDIA_MIMETYPE_AUDIO_MPEG, "MP3Decoder")
-    { MEDIA_MIMETYPE_AUDIO_MPEG, "OMX.PV.mp3dec" },
+    { MEDIA_MIMETYPE_AUDIO_MPEG, "MP3Decoder" },
     { MEDIA_MIMETYPE_AUDIO_AMR_NB, "OMX.TI.AMR.decode" },
-    OPTIONAL(MEDIA_MIMETYPE_AUDIO_AMR_NB, "AMRNBDecoder")
-    { MEDIA_MIMETYPE_AUDIO_AMR_NB, "OMX.PV.amrdec" },
+    { MEDIA_MIMETYPE_AUDIO_AMR_NB, "AMRNBDecoder" },
     { MEDIA_MIMETYPE_AUDIO_AMR_WB, "OMX.TI.WBAMR.decode" },
-    OPTIONAL(MEDIA_MIMETYPE_AUDIO_AMR_WB, "AMRWBDecoder")
-    { MEDIA_MIMETYPE_AUDIO_AMR_WB, "OMX.PV.amrdec" },
+    { MEDIA_MIMETYPE_AUDIO_AMR_WB, "AMRWBDecoder" },
     { MEDIA_MIMETYPE_AUDIO_AAC, "OMX.TI.AAC.decode" },
-    OPTIONAL(MEDIA_MIMETYPE_AUDIO_AAC, "AACDecoder")
-    { MEDIA_MIMETYPE_AUDIO_AAC, "OMX.PV.aacdec" },
+    { MEDIA_MIMETYPE_AUDIO_AAC, "AACDecoder" },
     { MEDIA_MIMETYPE_VIDEO_MPEG4, "OMX.qcom.video.decoder.mpeg4" },
     { MEDIA_MIMETYPE_VIDEO_MPEG4, "OMX.TI.Video.Decoder" },
-    OPTIONAL(MEDIA_MIMETYPE_VIDEO_MPEG4, "M4vH263Decoder")
-    { MEDIA_MIMETYPE_VIDEO_MPEG4, "OMX.PV.mpeg4dec" },
+    { MEDIA_MIMETYPE_VIDEO_MPEG4, "M4vH263Decoder" },
     { MEDIA_MIMETYPE_VIDEO_H263, "OMX.qcom.video.decoder.h263" },
     { MEDIA_MIMETYPE_VIDEO_H263, "OMX.TI.Video.Decoder" },
-    OPTIONAL(MEDIA_MIMETYPE_VIDEO_H263, "M4vH263Decoder")
-    { MEDIA_MIMETYPE_VIDEO_H263, "OMX.PV.h263dec" },
+    { MEDIA_MIMETYPE_VIDEO_H263, "M4vH263Decoder" },
     { MEDIA_MIMETYPE_VIDEO_AVC, "OMX.qcom.video.decoder.avc" },
     { MEDIA_MIMETYPE_VIDEO_AVC, "OMX.TI.Video.Decoder" },
-    OPTIONAL(MEDIA_MIMETYPE_VIDEO_AVC, "AVCDecoder")
-    { MEDIA_MIMETYPE_VIDEO_AVC, "OMX.PV.avcdec" },
+    { MEDIA_MIMETYPE_VIDEO_AVC, "AVCDecoder" },
 };
 
 static const CodecInfo kEncoderInfo[] = {
     { MEDIA_MIMETYPE_AUDIO_AMR_NB, "OMX.TI.AMR.encode" },
-    OPTIONAL(MEDIA_MIMETYPE_AUDIO_AMR_NB, "AMRNBEncoder")
-    { MEDIA_MIMETYPE_AUDIO_AMR_NB, "OMX.PV.amrencnb" },
+    { MEDIA_MIMETYPE_AUDIO_AMR_NB, "AMRNBEncoder" },
     { MEDIA_MIMETYPE_AUDIO_AMR_WB, "OMX.TI.WBAMR.encode" },
     { MEDIA_MIMETYPE_AUDIO_AAC, "OMX.TI.AAC.encode" },
     { MEDIA_MIMETYPE_AUDIO_AAC, "OMX.PV.aacenc" },
