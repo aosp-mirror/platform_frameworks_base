@@ -125,8 +125,8 @@ public class OverScroller {
         final float durationSecs = (OVERFLING_DURATION / 1000.f);
         int dx = (int)(xvel * durationSecs) / 8;
         int dy = (int)(yvel * durationSecs) / 8;
-        scroller.startScroll(startx, starty, dx, dy, OVERFLING_DURATION);
         mCurrScroller.abortAnimation();
+        scroller.startScroll(startx, starty, dx, dy, OVERFLING_DURATION);
         mCurrScroller = scroller;
         mScrollMode = MODE_OVERFLING;
     }
@@ -164,8 +164,8 @@ public class OverScroller {
         }
         
         if (xoff != 0 || yoff != 0) {
-            scroller.startScroll(startX, startY, xoff, yoff, SPRINGBACK_DURATION);
             mCurrScroller.abortAnimation();
+            scroller.startScroll(startX, startY, xoff, yoff, SPRINGBACK_DURATION);
             mCurrScroller = scroller;
             mScrollMode = MODE_SPRINGBACK;
             return true;

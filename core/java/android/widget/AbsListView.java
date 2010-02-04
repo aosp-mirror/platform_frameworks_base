@@ -1892,9 +1892,10 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         // Check if we have moved far enough that it looks more like a
         // scroll than a tap
         final int distance = Math.abs(deltaY);
-        if (distance > mTouchSlop) {
+        final boolean overscroll = mScrollY != 0;
+        if (overscroll || distance > mTouchSlop) {
             createScrollingCache();
-            mTouchMode = TOUCH_MODE_SCROLL;
+            mTouchMode = overscroll ? TOUCH_MODE_OVERSCROLL : TOUCH_MODE_SCROLL;
             mMotionCorrection = deltaY;
             final Handler handler = getHandler();
             // Handler should not be null unless the AbsListView is not attached to a
@@ -2097,7 +2098,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                         // Check to see if we are back in 
                         View motionView = this.getChildAt(mMotionPosition - mFirstPosition);
                         if (motionView != null) {
-                            int topOffset = motionView.getTop() - mMotionViewNewTop;
                             mTouchMode = TOUCH_MODE_SCROLL;
 
                             // We did not scroll the full amount. Treat this essentially like the
