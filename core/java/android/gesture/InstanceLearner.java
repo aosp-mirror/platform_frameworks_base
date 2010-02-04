@@ -53,9 +53,9 @@ class InstanceLearner extends Learner {
             }
             double distance;
             if (sequenceType == GestureStore.SEQUENCE_SENSITIVE) {
-                distance = GestureUtilities.minimumCosineDistance(sample.vector, vector, orientationType);
+                distance = GestureUtils.minimumCosineDistance(sample.vector, vector, orientationType);
             } else {
-                distance = GestureUtilities.squaredEuclideanDistance(sample.vector, vector);
+                distance = GestureUtils.squaredEuclideanDistance(sample.vector, vector);
             }
             double weight;
             if (distance == 0) {

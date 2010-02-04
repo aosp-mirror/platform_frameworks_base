@@ -638,7 +638,7 @@ public class GestureOverlayView extends FrameLayout {
 
                 if (mTotalLength > mGestureStrokeLengthThreshold) {
                     final OrientedBoundingBox box =
-                            GestureUtilities.computeOrientedBoundingBox(mStrokeBuffer);
+                            GestureUtils.computeOrientedBoundingBox(mStrokeBuffer);
 
                     float angle = Math.abs(box.orientation);
                     if (angle > 90) {

@@ -159,15 +159,15 @@ public class GestureStroke {
      * @return the path
      */
     public Path toPath(float width, float height, int numSample) {
-        final float[] pts = GestureUtilities.temporalSampling(this, numSample);
+        final float[] pts = GestureUtils.temporalSampling(this, numSample);
         final RectF rect = boundingBox;
 
-        GestureUtilities.translate(pts, -rect.left, -rect.top);
+        GestureUtils.translate(pts, -rect.left, -rect.top);
         
         float sx = width / rect.width();
         float sy = height / rect.height();
         float scale = sx > sy ? sy : sx;
-        GestureUtilities.scale(pts, scale, scale);
+        GestureUtils.scale(pts, scale, scale);
 
         float mX = 0;
         float mY = 0;
@@ -241,6 +241,6 @@ public class GestureStroke {
      * @return OrientedBoundingBox
      */
     public OrientedBoundingBox computeOrientedBoundingBox() {
-        return GestureUtilities.computeOrientedBoundingBox(points);
+        return GestureUtils.computeOrientedBoundingBox(points);
     }
 }

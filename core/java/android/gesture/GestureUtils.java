@@ -36,12 +36,12 @@ import static android.gesture.GestureConstants.*;
  * distances between two gestures).
  * </ul>
  */
-public final class GestureUtilities {
+public final class GestureUtils {
   
     private static final float SCALING_THRESHOLD = 0.26f;
     private static final float NONUNIFORM_SCALE = (float) Math.sqrt(2);
     
-    private GestureUtilities() {
+    private GestureUtils() {
     }
 
     /**
