@@ -27,11 +27,11 @@ public class NetStatService extends INetStatService.Stub {
     }
 
     public long getMobileTxPackets() {
-        return TrafficStats.getMobileTxPkts();
+        return TrafficStats.getMobileTxPackets();
     }
 
     public long getMobileRxPackets() {
-        return TrafficStats.getMobileRxPkts();
+        return TrafficStats.getMobileRxPackets();
     }
 
     public long getMobileTxBytes() {
@@ -43,11 +43,11 @@ public class NetStatService extends INetStatService.Stub {
     }
 
     public long getTotalTxPackets() {
-        return TrafficStats.getTotalTxPkts();
+        return TrafficStats.getTotalTxPackets();
     }
 
     public long getTotalRxPackets() {
-        return TrafficStats.getTotalRxPkts();
+        return TrafficStats.getTotalRxPackets();
     }
 
     public long getTotalTxBytes() {
