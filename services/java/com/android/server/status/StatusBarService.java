@@ -886,7 +886,8 @@ public class StatusBarService extends IStatusBar.Stub
                 && n.contentView.getPackage() != null
                 && oldData.contentView.getPackage() != null
                 && oldData.contentView.getPackage().equals(n.contentView.getPackage())
-                && oldData.contentView.getLayoutId() == n.contentView.getLayoutId()) {
+                && oldData.contentView.getLayoutId() == n.contentView.getLayoutId()
+                && notification.view != null) {
             mNotificationData.update(notification);
             try {
                 n.contentView.reapply(mContext, notification.contentView);

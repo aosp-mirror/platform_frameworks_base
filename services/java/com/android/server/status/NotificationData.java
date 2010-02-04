@@ -19,7 +19,7 @@ public class NotificationData {
     public PendingIntent deleteIntent;
 
     public String toString() {
-        return "NotificationData(package=" + pkg + " tickerText=" + tickerText
+        return "NotificationData(package=" + pkg + " id=" + id + " tickerText=" + tickerText
                 + " ongoingEvent=" + ongoingEvent + " contentIntent=" + contentIntent
                 + " deleteIntent=" + deleteIntent
                 + " clearable=" + clearable

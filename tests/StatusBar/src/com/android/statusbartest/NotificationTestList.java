@@ -121,6 +121,32 @@ public class NotificationTestList extends TestActivity
             }
         },
 
+        new Test("Bad resource #2") {
+            public void run()
+            {
+                Notification n = new Notification(NotificationTestList.this,
+                            R.drawable.ic_statusbar_missedcall,
+                            null, System.currentTimeMillis()-(1000*60*60*24),
+                            "(453) 123-2328",
+                            "", null);
+                n.contentView.setInt(1 /*bogus*/, "bogus method", 666);
+                mNM.notify(2, n);
+            }
+        },
+
+        new Test("Bad resource #3") {
+            public void run()
+            {
+                Notification n = new Notification(NotificationTestList.this,
+                            R.drawable.ic_statusbar_missedcall,
+                            null, System.currentTimeMillis()-(1000*60*60*24),
+                            "(453) 123-2328",
+                            "", null);
+                n.contentView.setInt(1 /*bogus*/, "bogus method", 666);
+                mNM.notify(3, n);
+            }
+        },
+
         new Test("Times") {
             public void run()
             {
@@ -402,6 +428,16 @@ public class NotificationTestList extends TestActivity
                 n.setLatestEventInfo(NotificationTestList.this, "Persistent #2",
                             "Notify me!!!", makeIntent());
                 mNM.notify(2, n);
+            }
+        },
+
+        new Test("Persistent #3") {
+            public void run() {
+                Notification n = new Notification(R.drawable.icon2, "tock tock tock",
+                        System.currentTimeMillis());
+                n.setLatestEventInfo(NotificationTestList.this, "Persistent #3",
+                            "Notify me!!!", makeIntent());
+                mNM.notify(3, n);
             }
         },
 
