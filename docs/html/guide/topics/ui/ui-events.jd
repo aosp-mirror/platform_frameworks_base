@@ -139,7 +139,7 @@ depends on the event. For the few that do, here's why:</p>
     this event can have multiple actions that follow each other. So, if you return <em>false</em> when the
     down action event is received, you indicate that you have not consumed the event and are also
     not interested in subsequent actions from this event. Thus, you will not be called for any other actions
-    within the event, such as a fingure gesture, or the eventual up action event.</li>
+    within the event, such as a finger gesture, or the eventual up action event.</li>
 </ul>
 
 <p>Remember that key events are always delivered to the View currently in focus. They are dispatched starting from the top
