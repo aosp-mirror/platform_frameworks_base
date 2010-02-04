@@ -304,7 +304,7 @@ void AwesomePlayer::onBufferingUpdate() {
     if (mDurationUs >= 0) {
         int64_t cachedDurationUs = mPrefetcher->getCachedDurationUs();
         int64_t positionUs = 0;
-        if (mVideoRenderer != NULL) {
+        if (mVideoSource != NULL) {
             positionUs = mVideoTimeUs;
         } else if (mAudioPlayer != NULL) {
             positionUs = mAudioPlayer->getMediaTimeUs();
@@ -328,7 +328,7 @@ void AwesomePlayer::onStreamDone() {
     if (mFlags & LOOPING) {
         seekTo_l(0);
 
-        if (mVideoRenderer != NULL) {
+        if (mVideoSource != NULL) {
             postVideoEvent_l();
         }
     } else {
@@ -386,14 +386,8 @@ status_t AwesomePlayer::play() {
     }
 
     if (mVideoSource != NULL) {
-        if (mVideoRenderer == NULL) {
-            initRenderer_l();
-        }
-
-        if (mVideoRenderer != NULL) {
-            // Kick off video playback
-            postVideoEvent_l();
-        }
+        // Kick off video playback
+        postVideoEvent_l();
     }
 
     if (deferredAudioSeek) {
@@ -514,7 +508,7 @@ status_t AwesomePlayer::getDuration(int64_t *durationUs) {
 status_t AwesomePlayer::getPosition(int64_t *positionUs) {
     Mutex::Autolock autoLock(mLock);
 
-    if (mVideoRenderer != NULL) {
+    if (mVideoSource != NULL) {
         *positionUs = mVideoTimeUs;
     } else if (mAudioPlayer != NULL) {
         *positionUs = mAudioPlayer->getMediaTimeUs();
@@ -540,7 +534,7 @@ status_t AwesomePlayer::seekTo_l(int64_t timeUs) {
 }
 
 void AwesomePlayer::seekAudioIfNecessary_l() {
-    if (mSeeking && mVideoRenderer == NULL && mAudioPlayer != NULL) {
+    if (mSeeking && mVideoSource == NULL && mAudioPlayer != NULL) {
         mAudioPlayer->seekTo(mSeekTimeUs);
 
         mWatchForAudioSeekComplete = true;
@@ -674,7 +668,9 @@ void AwesomePlayer::onEvent(int32_t code) {
                 if (err == INFO_FORMAT_CHANGED) {
                     LOGV("VideoSource signalled format change.");
 
-                    initRenderer_l();
+                    if (mVideoRenderer != NULL) {
+                        initRenderer_l();
+                    }
                     continue;
                 }
 
@@ -751,7 +747,13 @@ void AwesomePlayer::onEvent(int32_t code) {
         return;
     }
 
-    mVideoRenderer->render(mVideoBuffer);
+    if (mVideoRenderer == NULL) {
+        initRenderer_l();
+    }
+
+    if (mVideoRenderer != NULL) {
+        mVideoRenderer->render(mVideoBuffer);
+    }
 
     if (mLastVideoBuffer) {
         mLastVideoBuffer->release();
