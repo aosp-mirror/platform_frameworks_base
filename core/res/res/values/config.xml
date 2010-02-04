@@ -218,4 +218,8 @@
     <!-- Component name of the default wallpaper. This will be ImageWallpaper if not 
          specified -->
     <string name="default_wallpaper_component">@null</string>
+
+    <!-- Flag indicating whether headset events are used by kernel to indicate
+    TTY mode changes. -->
+    <bool name="tty_mode_uses_headset_events">false</bool>
 </resources>
