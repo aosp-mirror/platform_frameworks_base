@@ -22,7 +22,6 @@ android.app.ActivityThread$ProviderRecord
 android.app.ActivityThread$ProviderRefCount
 android.app.AlertDialog
 android.app.Application
-android.app.ApplicationContext
 android.app.ApplicationContext$ApplicationContentResolver
 android.app.ApplicationContext$ApplicationPackageManager
 android.app.ApplicationContext$ApplicationPackageManager$PackageRemovedReceiver
@@ -30,6 +29,7 @@ android.app.ApplicationContext$ApplicationPackageManager$ResourceName
 android.app.ApplicationContext$SharedPreferencesImpl
 android.app.ApplicationLoaders
 android.app.ApplicationThreadNative
+android.app.ContextImpl
 android.app.Dialog
 android.app.ExpandableListActivity
 android.app.IActivityManager
