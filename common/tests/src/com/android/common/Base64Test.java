@@ -31,8 +31,8 @@ public class Base64Test extends TestCase {
      * Encodes the string 'in' using 'flags'.  Asserts that decoding
      * gives the same string.  Returns the encoded string.
      */
-    private String encodeString(String in, int flags) throws Exception {
-        String b64 = Base64.encodeString(in.getBytes(), flags);
+    private String encodeToString(String in, int flags) throws Exception {
+        String b64 = Base64.encodeToString(in.getBytes(), flags);
         String dec = decodeString(b64);
         assertEquals(in, dec);
         return b64;
@@ -124,45 +124,45 @@ public class Base64Test extends TestCase {
         assertEquals(BYTES, 7, Base64.decode("_-7dzLuqmQ==", Base64.WEB_SAFE));
         assertEquals(BYTES, 8, Base64.decode("_-7dzLuqmYg=", Base64.WEB_SAFE));
 
-        assertEquals("", Base64.encodeString(BYTES, 0, 0, Base64.WEB_SAFE));
-        assertEquals("_w==\n", Base64.encodeString(BYTES, 0, 1, Base64.WEB_SAFE));
-        assertEquals("_-4=\n", Base64.encodeString(BYTES, 0, 2, Base64.WEB_SAFE));
-        assertEquals("_-7d\n", Base64.encodeString(BYTES, 0, 3, Base64.WEB_SAFE));
-        assertEquals("_-7dzA==\n", Base64.encodeString(BYTES, 0, 4, Base64.WEB_SAFE));
-        assertEquals("_-7dzLs=\n", Base64.encodeString(BYTES, 0, 5, Base64.WEB_SAFE));
-        assertEquals("_-7dzLuq\n", Base64.encodeString(BYTES, 0, 6, Base64.WEB_SAFE));
-        assertEquals("_-7dzLuqmQ==\n", Base64.encodeString(BYTES, 0, 7, Base64.WEB_SAFE));
-        assertEquals("_-7dzLuqmYg=\n", Base64.encodeString(BYTES, 0, 8, Base64.WEB_SAFE));
+        assertEquals("", Base64.encodeToString(BYTES, 0, 0, Base64.WEB_SAFE));
+        assertEquals("_w==\n", Base64.encodeToString(BYTES, 0, 1, Base64.WEB_SAFE));
+        assertEquals("_-4=\n", Base64.encodeToString(BYTES, 0, 2, Base64.WEB_SAFE));
+        assertEquals("_-7d\n", Base64.encodeToString(BYTES, 0, 3, Base64.WEB_SAFE));
+        assertEquals("_-7dzA==\n", Base64.encodeToString(BYTES, 0, 4, Base64.WEB_SAFE));
+        assertEquals("_-7dzLs=\n", Base64.encodeToString(BYTES, 0, 5, Base64.WEB_SAFE));
+        assertEquals("_-7dzLuq\n", Base64.encodeToString(BYTES, 0, 6, Base64.WEB_SAFE));
+        assertEquals("_-7dzLuqmQ==\n", Base64.encodeToString(BYTES, 0, 7, Base64.WEB_SAFE));
+        assertEquals("_-7dzLuqmYg=\n", Base64.encodeToString(BYTES, 0, 8, Base64.WEB_SAFE));
     }
 
     public void testFlags() throws Exception {
-        assertEquals("YQ==\n",       encodeString("a", 0));
-        assertEquals("YQ==",         encodeString("a", Base64.NO_WRAP));
-        assertEquals("YQ\n",         encodeString("a", Base64.NO_PADDING));
-        assertEquals("YQ",           encodeString("a", Base64.NO_PADDING | Base64.NO_WRAP));
-        assertEquals("YQ==\r\n",     encodeString("a", Base64.CRLF));
-        assertEquals("YQ\r\n",       encodeString("a", Base64.CRLF | Base64.NO_PADDING));
+        assertEquals("YQ==\n",       encodeToString("a", 0));
+        assertEquals("YQ==",         encodeToString("a", Base64.NO_WRAP));
+        assertEquals("YQ\n",         encodeToString("a", Base64.NO_PADDING));
+        assertEquals("YQ",           encodeToString("a", Base64.NO_PADDING | Base64.NO_WRAP));
+        assertEquals("YQ==\r\n",     encodeToString("a", Base64.CRLF));
+        assertEquals("YQ\r\n",       encodeToString("a", Base64.CRLF | Base64.NO_PADDING));
 
-        assertEquals("YWI=\n",       encodeString("ab", 0));
-        assertEquals("YWI=",         encodeString("ab", Base64.NO_WRAP));
-        assertEquals("YWI\n",        encodeString("ab", Base64.NO_PADDING));
-        assertEquals("YWI",          encodeString("ab", Base64.NO_PADDING | Base64.NO_WRAP));
-        assertEquals("YWI=\r\n",     encodeString("ab", Base64.CRLF));
-        assertEquals("YWI\r\n",      encodeString("ab", Base64.CRLF | Base64.NO_PADDING));
+        assertEquals("YWI=\n",       encodeToString("ab", 0));
+        assertEquals("YWI=",         encodeToString("ab", Base64.NO_WRAP));
+        assertEquals("YWI\n",        encodeToString("ab", Base64.NO_PADDING));
+        assertEquals("YWI",          encodeToString("ab", Base64.NO_PADDING | Base64.NO_WRAP));
+        assertEquals("YWI=\r\n",     encodeToString("ab", Base64.CRLF));
+        assertEquals("YWI\r\n",      encodeToString("ab", Base64.CRLF | Base64.NO_PADDING));
 
-        assertEquals("YWJj\n",       encodeString("abc", 0));
-        assertEquals("YWJj",         encodeString("abc", Base64.NO_WRAP));
-        assertEquals("YWJj\n",       encodeString("abc", Base64.NO_PADDING));
-        assertEquals("YWJj",         encodeString("abc", Base64.NO_PADDING | Base64.NO_WRAP));
-        assertEquals("YWJj\r\n",     encodeString("abc", Base64.CRLF));
-        assertEquals("YWJj\r\n",     encodeString("abc", Base64.CRLF | Base64.NO_PADDING));
+        assertEquals("YWJj\n",       encodeToString("abc", 0));
+        assertEquals("YWJj",         encodeToString("abc", Base64.NO_WRAP));
+        assertEquals("YWJj\n",       encodeToString("abc", Base64.NO_PADDING));
+        assertEquals("YWJj",         encodeToString("abc", Base64.NO_PADDING | Base64.NO_WRAP));
+        assertEquals("YWJj\r\n",     encodeToString("abc", Base64.CRLF));
+        assertEquals("YWJj\r\n",     encodeToString("abc", Base64.CRLF | Base64.NO_PADDING));
 
-        assertEquals("YWJjZA==\n",   encodeString("abcd", 0));
-        assertEquals("YWJjZA==",     encodeString("abcd", Base64.NO_WRAP));
-        assertEquals("YWJjZA\n",     encodeString("abcd", Base64.NO_PADDING));
-        assertEquals("YWJjZA",       encodeString("abcd", Base64.NO_PADDING | Base64.NO_WRAP));
-        assertEquals("YWJjZA==\r\n", encodeString("abcd", Base64.CRLF));
-        assertEquals("YWJjZA\r\n",   encodeString("abcd", Base64.CRLF | Base64.NO_PADDING));
+        assertEquals("YWJjZA==\n",   encodeToString("abcd", 0));
+        assertEquals("YWJjZA==",     encodeToString("abcd", Base64.NO_WRAP));
+        assertEquals("YWJjZA\n",     encodeToString("abcd", Base64.NO_PADDING));
+        assertEquals("YWJjZA",       encodeToString("abcd", Base64.NO_PADDING | Base64.NO_WRAP));
+        assertEquals("YWJjZA==\r\n", encodeToString("abcd", Base64.CRLF));
+        assertEquals("YWJjZA\r\n",   encodeToString("abcd", Base64.CRLF | Base64.NO_PADDING));
     }
 
     public void testLineLength() throws Exception {
@@ -182,27 +182,27 @@ public class Base64Test extends TestCase {
         String out_61 = prefix + "Y2Rl\nZmdoaQ==\n";
 
         // no newline for an empty input array.
-        assertEquals("", encodeString("", 0));
+        assertEquals("", encodeToString("", 0));
 
-        assertEquals(out_56, encodeString(in_56, 0));
-        assertEquals(out_57, encodeString(in_57, 0));
-        assertEquals(out_58, encodeString(in_58, 0));
-        assertEquals(out_59, encodeString(in_59, 0));
-        assertEquals(out_60, encodeString(in_60, 0));
-        assertEquals(out_61, encodeString(in_61, 0));
+        assertEquals(out_56, encodeToString(in_56, 0));
+        assertEquals(out_57, encodeToString(in_57, 0));
+        assertEquals(out_58, encodeToString(in_58, 0));
+        assertEquals(out_59, encodeToString(in_59, 0));
+        assertEquals(out_60, encodeToString(in_60, 0));
+        assertEquals(out_61, encodeToString(in_61, 0));
 
-        assertEquals(out_56.replaceAll("=", ""), encodeString(in_56, Base64.NO_PADDING));
-        assertEquals(out_57.replaceAll("=", ""), encodeString(in_57, Base64.NO_PADDING));
-        assertEquals(out_58.replaceAll("=", ""), encodeString(in_58, Base64.NO_PADDING));
-        assertEquals(out_59.replaceAll("=", ""), encodeString(in_59, Base64.NO_PADDING));
-        assertEquals(out_60.replaceAll("=", ""), encodeString(in_60, Base64.NO_PADDING));
-        assertEquals(out_61.replaceAll("=", ""), encodeString(in_61, Base64.NO_PADDING));
+        assertEquals(out_56.replaceAll("=", ""), encodeToString(in_56, Base64.NO_PADDING));
+        assertEquals(out_57.replaceAll("=", ""), encodeToString(in_57, Base64.NO_PADDING));
+        assertEquals(out_58.replaceAll("=", ""), encodeToString(in_58, Base64.NO_PADDING));
+        assertEquals(out_59.replaceAll("=", ""), encodeToString(in_59, Base64.NO_PADDING));
+        assertEquals(out_60.replaceAll("=", ""), encodeToString(in_60, Base64.NO_PADDING));
+        assertEquals(out_61.replaceAll("=", ""), encodeToString(in_61, Base64.NO_PADDING));
 
-        assertEquals(out_56.replaceAll("\n", ""), encodeString(in_56, Base64.NO_WRAP));
-        assertEquals(out_57.replaceAll("\n", ""), encodeString(in_57, Base64.NO_WRAP));
-        assertEquals(out_58.replaceAll("\n", ""), encodeString(in_58, Base64.NO_WRAP));
-        assertEquals(out_59.replaceAll("\n", ""), encodeString(in_59, Base64.NO_WRAP));
-        assertEquals(out_60.replaceAll("\n", ""), encodeString(in_60, Base64.NO_WRAP));
-        assertEquals(out_61.replaceAll("\n", ""), encodeString(in_61, Base64.NO_WRAP));
+        assertEquals(out_56.replaceAll("\n", ""), encodeToString(in_56, Base64.NO_WRAP));
+        assertEquals(out_57.replaceAll("\n", ""), encodeToString(in_57, Base64.NO_WRAP));
+        assertEquals(out_58.replaceAll("\n", ""), encodeToString(in_58, Base64.NO_WRAP));
+        assertEquals(out_59.replaceAll("\n", ""), encodeToString(in_59, Base64.NO_WRAP));
+        assertEquals(out_60.replaceAll("\n", ""), encodeToString(in_60, Base64.NO_WRAP));
+        assertEquals(out_61.replaceAll("\n", ""), encodeToString(in_61, Base64.NO_WRAP));
     }
 }

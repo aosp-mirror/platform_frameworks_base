@@ -365,7 +365,7 @@ public class Base64 {
      *               Passing 0 results in output that adheres to RFC
      *               2045.
      */
-    public static String encodeString(byte[] input, int flags) {
+    public static String encodeToString(byte[] input, int flags) {
         return new String(encode(input, flags));
     }
 
@@ -381,7 +381,7 @@ public class Base64 {
      *               Passing 0 results in output that adheres to RFC
      *               2045.
      */
-    public static String encodeString(byte[] input, int offset, int len, int flags) {
+    public static String encodeToString(byte[] input, int offset, int len, int flags) {
         return new String(encode(input, offset, len, flags));
     }
 
