@@ -383,10 +383,10 @@ public final class MediaStore {
                     if (isVideo) {
                         bitmap = ThumbnailUtils.createVideoThumbnail(filePath);
                         if (kind == MICRO_KIND && bitmap != null) {
-                            bitmap = ThumbnailUtils.extractMiniThumb(bitmap,
-                                    ThumbnailUtils.MINI_THUMB_TARGET_SIZE,
-                                    ThumbnailUtils.MINI_THUMB_TARGET_SIZE,
-                                    ThumbnailUtils.RECYCLE_INPUT);
+                            bitmap = ThumbnailUtils.extractThumbnail(bitmap,
+                                    ThumbnailUtils.TARGET_SIZE_MICRO_THUMBNAIL,
+                                    ThumbnailUtils.TARGET_SIZE_MICRO_THUMBNAIL,
+                                    ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
                         }
                     } else {
                         bitmap = ThumbnailUtils.createImageThumbnail(cr, filePath, uri, origId,

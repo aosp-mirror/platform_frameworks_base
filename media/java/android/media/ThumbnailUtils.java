@@ -46,41 +46,32 @@ public class ThumbnailUtils {
     private static final String TAG = "ThumbnailUtils";
 
     /* Maximum pixels size for created bitmap. */
-    private static final int THUMBNAIL_MAX_NUM_PIXELS = 512 * 384;
-    private static final int MINI_THUMB_MAX_NUM_PIXELS = 128 * 128;
+    private static final int MAX_NUM_PIXELS_THUMBNAIL = 512 * 384;
+    private static final int MAX_NUM_PIXELS_MICRO_THUMBNAIL = 128 * 128;
     private static final int UNCONSTRAINED = -1;
 
-    /* Whether we should rotate the resulting bitmap. */
-    private static final boolean ROTATE_AS_NEEDED = true;
-    private static final boolean NO_ROTATE = false;
-
-    /* Whether we should create bitmap in native memory. */
-    private static final boolean USE_NATIVE = true;
-    private static final boolean NO_NATIVE = false;
+    /* Options used internally. */
+    private static final int OPTIONS_NONE = 0x0;
+    private static final int OPTIONS_DO_NOT_USE_NATIVE = 0x1;
+    private static final int OPTIONS_SCALE_UP = 0x2;
 
     /**
      * Constant used to indicate we should recycle the input in
-     * {@link #extractMiniThumb(Bitmap, int, int, boolean)} unless the output is the input.
+     * {@link #extractThumbnail(Bitmap, int, int, int)} unless the output is the input.
      */
-    public static final boolean RECYCLE_INPUT = true;
-
-    /**
-     * Constant used to indicate we should not recycle the input in
-     * {@link #extractMiniThumb(Bitmap, int, int, boolean)}.
-     */
-    public static final boolean NO_RECYCLE_INPUT = false;
+    public static final int OPTIONS_RECYCLE_INPUT = 0x4;
 
     /**
      * Constant used to indicate the dimension of normal thumbnail in
-     * {@link #extractMiniThumb(Bitmap, int, int, boolean)}.
+     * {@link #extractThumbnail(Bitmap, int, int, int)}.
      */
-    public static final int THUMBNAIL_TARGET_SIZE = 320;
+    public static final int TARGET_SIZE_NORMAL_THUMBNAIL = 320;
 
     /**
-     * Constant used to indicate the dimension of mini thumbnail in
-     * {@link #extractMiniThumb(Bitmap, int, int, boolean)}.
+     * Constant used to indicate the dimension of micro thumbnail in
+     * {@link #extractThumbnail(Bitmap, int, int, int)}.
      */
-    public static final int MINI_THUMB_TARGET_SIZE = 96;
+    public static final int TARGET_SIZE_MICRO_THUMBNAIL = 96;
 
     /**
      * This method first examines if the thumbnail embedded in EXIF is bigger than our target
@@ -97,14 +88,16 @@ public class ThumbnailUtils {
      * @param kind either MINI_KIND or MICRO_KIND
      * @param saveMini Whether to save MINI_KIND thumbnail obtained in this method.
      * @return Bitmap
+     *
+     * @hide This method is only used by media framework and media provider internally.
      */
     public static Bitmap createImageThumbnail(ContentResolver cr, String filePath, Uri uri,
             long origId, int kind, boolean saveMini) {
         boolean wantMini = (kind == Images.Thumbnails.MINI_KIND || saveMini);
         int targetSize = wantMini ?
-                THUMBNAIL_TARGET_SIZE : MINI_THUMB_TARGET_SIZE;
+                TARGET_SIZE_NORMAL_THUMBNAIL : TARGET_SIZE_MICRO_THUMBNAIL;
         int maxPixels = wantMini ?
-                THUMBNAIL_MAX_NUM_PIXELS : MINI_THUMB_MAX_NUM_PIXELS;
+                MAX_NUM_PIXELS_THUMBNAIL : MAX_NUM_PIXELS_MICRO_THUMBNAIL;
         SizedThumbnailBitmap sizedThumbnailBitmap = new SizedThumbnailBitmap();
         Bitmap bitmap = null;
         MediaFileType fileType = MediaFile.getFileType(filePath);
@@ -134,16 +127,16 @@ public class ThumbnailUtils {
 
         if (kind == Images.Thumbnails.MICRO_KIND) {
             // now we make it a "square thumbnail" for MICRO_KIND thumbnail
-            bitmap = extractMiniThumb(bitmap,
-                    MINI_THUMB_TARGET_SIZE,
-                    MINI_THUMB_TARGET_SIZE, RECYCLE_INPUT);
+            bitmap = extractThumbnail(bitmap,
+                    TARGET_SIZE_MICRO_THUMBNAIL,
+                    TARGET_SIZE_MICRO_THUMBNAIL, OPTIONS_RECYCLE_INPUT);
         }
         return bitmap;
     }
 
     /**
      * Create a video thumbnail for a video. May return null if the video is
-     * corrupt.
+     * corrupt or the format is not supported.
      *
      * @param filePath
      */
@@ -174,10 +167,22 @@ public class ThumbnailUtils {
      * @param source original bitmap source
      * @param width targeted width
      * @param height targeted height
-     * @param recycle whether we want to recycle the input
      */
-    public static Bitmap extractMiniThumb(
-            Bitmap source, int width, int height, boolean recycle) {
+    public static Bitmap extractThumbnail(
+            Bitmap source, int width, int height) {
+        return extractThumbnail(source, width, height, OPTIONS_NONE);
+    }
+
+    /**
+     * Creates a centered bitmap of the desired size.
+     *
+     * @param source original bitmap source
+     * @param width targeted width
+     * @param height targeted height
+     * @param options options used during thumbnail extraction
+     */
+    public static Bitmap extractThumbnail(
+            Bitmap source, int width, int height, int options) {
         if (source == null) {
             return null;
         }
@@ -190,8 +195,9 @@ public class ThumbnailUtils {
         }
         Matrix matrix = new Matrix();
         matrix.setScale(scale, scale);
-        Bitmap miniThumbnail = transform(matrix, source, width, height, true, recycle);
-        return miniThumbnail;
+        Bitmap thumbnail = transform(matrix, source, width, height,
+                OPTIONS_SCALE_UP | options);
+        return thumbnail;
     }
 
     /*
@@ -272,7 +278,7 @@ public class ThumbnailUtils {
     private static Bitmap makeBitmap(int minSideLength, int maxNumOfPixels,
             Uri uri, ContentResolver cr) {
         return makeBitmap(minSideLength, maxNumOfPixels, uri, cr,
-                NO_NATIVE);
+            OPTIONS_DO_NOT_USE_NATIVE);
     }
 
     /**
@@ -281,7 +287,8 @@ public class ThumbnailUtils {
      * whether they want the Bitmap be created in native memory.
      */
     private static Bitmap makeBitmap(int minSideLength, int maxNumOfPixels,
-            Uri uri, ContentResolver cr, boolean useNative) {
+            Uri uri, ContentResolver cr, int opt) {
+        boolean useNative = (opt & OPTIONS_DO_NOT_USE_NATIVE) != 0;
         ParcelFileDescriptor input = null;
         try {
             input = cr.openFileDescriptor(uri, "r");
@@ -340,29 +347,6 @@ public class ThumbnailUtils {
         return b;
     }
 
-    /**
-     * Rotates the bitmap by the specified degree.
-     * If a new bitmap is created, the original bitmap is recycled.
-     */
-    private static Bitmap rotate(Bitmap b, int degrees) {
-        if (degrees != 0 && b != null) {
-            Matrix m = new Matrix();
-            m.setRotate(degrees,
-                    (float) b.getWidth() / 2, (float) b.getHeight() / 2);
-            try {
-                Bitmap b2 = Bitmap.createBitmap(
-                        b, 0, 0, b.getWidth(), b.getHeight(), m, true);
-                if (b != b2) {
-                    b.recycle();
-                    b = b2;
-                }
-            } catch (OutOfMemoryError ex) {
-                // We have no memory to rotate. Return the original bitmap.
-            }
-        }
-        return b;
-    }
-
     private static void closeSilently(ParcelFileDescriptor c) {
       if (c == null) return;
       try {
@@ -388,8 +372,9 @@ public class ThumbnailUtils {
             Bitmap source,
             int targetWidth,
             int targetHeight,
-            boolean scaleUp,
-            boolean recycle) {
+            int options) {
+        boolean scaleUp = (options & OPTIONS_SCALE_UP) != 0;
+        boolean recycle = (options & OPTIONS_RECYCLE_INPUT) != 0;
 
         int deltaX = source.getWidth() - targetWidth;
         int deltaY = source.getHeight() - targetHeight;
