@@ -880,7 +880,7 @@ public abstract class Animation implements Cloneable {
         region.inset(-1.0f, -1.0f);
         if (mFillBefore) {
             final Transformation previousTransformation = mPreviousTransformation;
-            applyTransformation(0.0f, previousTransformation);
+            applyTransformation(mInterpolator.getInterpolation(0.0f), previousTransformation);
         }
     }
 
