@@ -116,6 +116,24 @@ public class ConnectivityManager
             "android.net.conn.BACKGROUND_DATA_SETTING_CHANGED";
 
     /**
+     * Broadcast Action: A tetherable connection has come or gone
+     * TODO - finish the doc
+     * @hide
+     */
+    public static final String ACTION_TETHER_STATE_CHANGED =
+            "android.net.conn.TETHER_STATE_CHANGED";
+
+    /**
+     * @hide
+     */
+    public static final String EXTRA_AVAILABLE_TETHER_COUNT = "availableCount";
+
+    /**
+     * @hide
+     */
+    public static final String EXTRA_ACTIVE_TETHER_COUNT = "activeCount";
+
+    /**
      * The Default Mobile data connection.  When active, all data traffic
      * will use this connection by default.  Should not coexist with other
      * default connections.
@@ -337,5 +355,49 @@ public class ConnectivityManager
                 "ConnectivityManager() cannot be constructed with null service");
         }
         mService = service;
+    }
+
+    /**
+     * {@hide}
+     */
+    public String[] getTetherableIfaces() {
+        try {
+            return mService.getTetherableIfaces();
+        } catch (RemoteException e) {
+            return new String[0];
+        }
+    }
+
+    /**
+     * {@hide}
+     */
+    public String[] getTetheredIfaces() {
+        try {
+            return mService.getTetheredIfaces();
+        } catch (RemoteException e) {
+            return new String[0];
+        }
+    }
+
+    /**
+     * {@hide}
+     */
+    public boolean tether(String iface) {
+        try {
+            return mService.tether(iface);
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    /**
+     * {@hide}
+     */
+    public boolean untether(String iface) {
+        try {
+            return mService.untether(iface);
+        } catch (RemoteException e) {
+            return false;
+        }
     }
 }

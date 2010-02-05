@@ -98,6 +98,9 @@ public final class ViewRoot extends Handler implements ViewParent,
 
     static final ThreadLocal<RunQueue> sRunQueues = new ThreadLocal<RunQueue>();
 
+    static final ArrayList<Runnable> sFirstDrawHandlers = new ArrayList<Runnable>();
+    static boolean sFirstDrawComplete = false;
+    
     private static int sDrawTime;
 
     long mLastTrackballTime = 0;
@@ -254,6 +257,14 @@ public final class ViewRoot extends Handler implements ViewParent,
         return sInstanceCount;
     }
 
+    public static void addFirstDrawHandler(Runnable callback) {
+        synchronized (sFirstDrawHandlers) {
+            if (!sFirstDrawComplete) {
+                sFirstDrawHandlers.add(callback);
+            }
+        }
+    }
+    
     // FIXME for perf testing only
     private boolean mProfile = false;
 
@@ -1189,6 +1200,15 @@ public final class ViewRoot extends Handler implements ViewParent,
             return;
         }
 
+        if (!sFirstDrawComplete) {
+            synchronized (sFirstDrawHandlers) {
+                sFirstDrawComplete = true;
+                for (int i=0; i<sFirstDrawHandlers.size(); i++) {
+                    post(sFirstDrawHandlers.get(i));
+                }
+            }
+        }
+        
         scrollToRectOrFocus(null, false);
 
         if (mAttachInfo.mViewScrollChanged) {

@@ -162,7 +162,54 @@ android_media_MediaProfiles_native_get_audio_encoder_cap(JNIEnv *env, jobject th
     return cap;
 }
 
-static JNINativeMethod gMethods[] = {
+static jobject
+android_media_MediaProfiles_native_get_camcorder_profile(JNIEnv *env, jobject thiz, jint quality)
+{
+    LOGV("native_get_camcorder_profile: %d", quality);
+    if (quality != CAMCORDER_QUALITY_HIGH && quality != CAMCORDER_QUALITY_LOW) {
+        jniThrowException(env, "java/lang/RuntimeException", "Unknown camcorder profile quality");
+        return NULL;
+    }
+
+    camcorder_quality q = static_cast<camcorder_quality>(quality);
+    int fileFormat       = sProfiles->getCamcorderProfileParamByName("file.format", q);
+    int videoCodec       = sProfiles->getCamcorderProfileParamByName("vid.codec",   q);
+    int videoBitRate     = sProfiles->getCamcorderProfileParamByName("vid.bps",     q);
+    int videoFrameRate   = sProfiles->getCamcorderProfileParamByName("vid.fps",     q);
+    int videoFrameWidth  = sProfiles->getCamcorderProfileParamByName("vid.width",   q);
+    int videoFrameHeight = sProfiles->getCamcorderProfileParamByName("vid.height",  q);
+    int audioCodec       = sProfiles->getCamcorderProfileParamByName("aud.codec",   q);
+    int audioBitRate     = sProfiles->getCamcorderProfileParamByName("aud.bps",     q);
+    int audioSampleRate  = sProfiles->getCamcorderProfileParamByName("aud.hz",      q);
+    int audioChannels    = sProfiles->getCamcorderProfileParamByName("aud.ch",      q);
+
+    // Check on the values retrieved
+    if (fileFormat == -1 || videoCodec == -1 || audioCodec == -1 ||
+        videoBitRate == -1 || videoFrameRate == -1 || videoFrameWidth == -1 || videoFrameHeight == -1 ||
+        audioBitRate == -1 || audioSampleRate == -1 || audioChannels == -1) {
+
+        jniThrowException(env, "java/lang/RuntimeException", "Error retrieving camcorder profile params");
+        return NULL;
+    }
+
+    jclass camcorderProfileClazz = env->FindClass("android/media/CamcorderProfile");
+    jmethodID camcorderProfileConstructorMethodID = env->GetMethodID(camcorderProfileClazz, "<init>", "(IIIIIIIIIII)V");
+    return env->NewObject(camcorderProfileClazz,
+                          camcorderProfileConstructorMethodID,
+                          quality,
+                          fileFormat,
+                          videoCodec,
+                          videoBitRate,
+                          videoFrameRate,
+                          videoFrameWidth,
+                          videoFrameHeight,
+                          audioCodec,
+                          audioBitRate,
+                          audioSampleRate,
+                          audioChannels);
+}
+
+static JNINativeMethod gMethodsForEncoderCapabilitiesClass[] = {
     {"native_init",                            "()V",                    (void *)android_media_MediaProfiles_native_init},
     {"native_get_num_file_formats",            "()I",                    (void *)android_media_MediaProfiles_native_get_num_file_formats},
     {"native_get_file_format",                 "(I)I",                   (void *)android_media_MediaProfiles_native_get_file_format},
@@ -176,12 +223,29 @@ static JNINativeMethod gMethods[] = {
                                                                          (void *)android_media_MediaProfiles_native_get_audio_encoder_cap},
 };
 
-static const char* const kClassPathName = "android/media/MediaProfiles";
+static JNINativeMethod gMethodsForCamcorderProfileClass[] = {
+    {"native_init",                            "()V",                    (void *)android_media_MediaProfiles_native_init},
+    {"native_get_camcorder_profile",           "(I)Landroid/media/CamcorderProfile;",
+                                                                         (void *)android_media_MediaProfiles_native_get_camcorder_profile},
+};
+
+static const char* const kEncoderCapabilitiesClassPathName = "android/media/EncoderCapabilities";
+static const char* const kCamcorderProfileClassPathName = "android/media/CamcorderProfile";
 
 // This function only registers the native methods, and is called from
 // JNI_OnLoad in android_media_MediaPlayer.cpp
 int register_android_media_MediaProfiles(JNIEnv *env)
 {
-    return AndroidRuntime::registerNativeMethods(env,
-                "android/media/EncoderCapabilities", gMethods, NELEM(gMethods));
+    int ret1 = AndroidRuntime::registerNativeMethods(env,
+               kEncoderCapabilitiesClassPathName,
+               gMethodsForEncoderCapabilitiesClass,
+               NELEM(gMethodsForEncoderCapabilitiesClass));
+
+    int ret2 = AndroidRuntime::registerNativeMethods(env,
+               kCamcorderProfileClassPathName,
+               gMethodsForCamcorderProfileClass,
+               NELEM(gMethodsForCamcorderProfileClass));
+
+    // Success if ret1 == 0 && ret2 == 0
+    return (ret1 || ret2);
 }

@@ -41,7 +41,6 @@ public class Rfc822Tokenizer implements MultiAutoCompleteTextView.Tokenizer {
      * It will try to be tolerant of broken syntax instead of
      * returning an error.
      *
-     * @hide
      */
     public static void tokenize(CharSequence text, Collection<Rfc822Token> out) {
         StringBuilder name = new StringBuilder();

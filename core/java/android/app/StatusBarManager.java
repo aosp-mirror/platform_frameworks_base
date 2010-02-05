@@ -31,12 +31,12 @@ import android.os.ServiceManager;
 public class StatusBarManager {
     /**
      * Flag for {@link #disable} to make the status bar not expandable.  Unless you also
-     * set {@link #DISABLE_NOTIFICATIONS}, new notifications will continue to show.
+     * set {@link #DISABLE_NOTIFICATION_ICONS}, new notifications will continue to show.
      */
     public static final int DISABLE_EXPAND = 0x00000001;
 
     /**
-     * Flag for {@link #disable} to hide notification icons and ticker text.
+     * Flag for {@link #disable} to hide notification icons and scrolling ticker text.
      */
     public static final int DISABLE_NOTIFICATION_ICONS = 0x00000002;
 
@@ -45,6 +45,12 @@ public class StatusBarManager {
      * icons, but it will block sound, vibrating and other visual or aural notifications.
      */
     public static final int DISABLE_NOTIFICATION_ALERTS = 0x00000004;
+
+    /**
+     * Flag for {@link #disable} to hide only the scrolling ticker.  Note that
+     * {@link #DISABLE_NOTIFICATION_ICONS} implies {@link #DISABLE_NOTIFICATION_TICKER}.
+     */
+    public static final int DISABLE_NOTIFICATION_TICKER = 0x00000008;
 
     /**
      * Re-enable all of the status bar features that you've disabled.

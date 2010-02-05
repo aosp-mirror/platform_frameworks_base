@@ -113,4 +113,32 @@ public class OperationSchedulerTest extends AndroidTestCase {
                 "OperationScheduler.Options[backoff=10.0+2.5 max=12345.6 min=7.0 period=3800.0]",
                  OperationScheduler.parseOptions("", options).toString());
     }
+
+    public void testMoratoriumWithHttpDate() throws Exception {
+        String name = "OperationSchedulerTest.testMoratoriumWithHttpDate";
+        SharedPreferences storage = getContext().getSharedPreferences(name, 0);
+        storage.edit().clear().commit();
+
+        OperationScheduler scheduler = new OperationScheduler(storage);
+        OperationScheduler.Options options = new OperationScheduler.Options();
+
+        long beforeTrigger = System.currentTimeMillis();
+        scheduler.setTriggerTimeMillis(beforeTrigger + 1000000);
+        assertEquals(beforeTrigger + 1000000, scheduler.getNextTimeMillis(options));
+
+        scheduler.setMoratoriumTimeMillis(beforeTrigger + 2000000);
+        assertEquals(beforeTrigger + 2000000, scheduler.getNextTimeMillis(options));
+
+        long beforeMoratorium = System.currentTimeMillis();
+        assertTrue(scheduler.setMoratoriumTimeHttp("3000"));
+        long afterMoratorium = System.currentTimeMillis();
+        assertTrue(beforeMoratorium + 3000000 <= scheduler.getNextTimeMillis(options));
+        assertTrue(afterMoratorium + 3000000 >= scheduler.getNextTimeMillis(options));
+
+        options.maxMoratoriumMillis = Long.MAX_VALUE / 2;
+        assertTrue(scheduler.setMoratoriumTimeHttp("Fri, 31 Dec 2030 23:59:59 GMT"));
+        assertEquals(1924991999000L, scheduler.getNextTimeMillis(options));
+
+        assertFalse(scheduler.setMoratoriumTimeHttp("not actually a date"));
+    }
 }

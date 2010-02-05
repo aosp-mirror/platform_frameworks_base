@@ -54,7 +54,7 @@ public class TrafficStats {
      * @return number of packets.  If the statistics are not supported by this device,
      * {@link #UNSUPPORTED} will be returned.
      */
-    public static long getMobileTxPkts() {
+    public static long getMobileTxPackets() {
         return getMobileStat(MOBILE_TX_PACKETS);
     }
 
@@ -64,7 +64,7 @@ public class TrafficStats {
      * @return number of packets.  If the statistics are not supported by this device,
      * {@link #UNSUPPORTED} will be returned.
      */
-    public static long getMobileRxPkts() {
+    public static long getMobileRxPackets() {
         return getMobileStat(MOBILE_RX_PACKETS);
     }
 
@@ -94,7 +94,7 @@ public class TrafficStats {
      * @return the number of packets.  If the statistics are not supported by this device,
      * {@link #UNSUPPORTED} will be returned.
      */
-    public static long getTotalTxPkts() {
+    public static long getTotalTxPackets() {
         return getTotalStat("tx_packets");
     }
 
@@ -104,7 +104,7 @@ public class TrafficStats {
      * @return number of packets.  If the statistics are not supported by this device,
      * {@link #UNSUPPORTED} will be returned.
      */
-    public static long getTotalRxPkts() {
+    public static long getTotalRxPackets() {
         return getTotalStat("rx_packets");
     }
 

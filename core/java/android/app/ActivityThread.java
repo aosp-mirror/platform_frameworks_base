@@ -61,6 +61,7 @@ import android.view.Display;
 import android.view.View;
 import android.view.ViewDebug;
 import android.view.ViewManager;
+import android.view.ViewRoot;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.WindowManagerImpl;
@@ -291,7 +292,7 @@ public final class ActivityThread {
             if (mAppDir == null) {
                 if (mSystemContext == null) {
                     mSystemContext =
-                        ApplicationContext.createSystemContext(mainThread);
+                        ContextImpl.createSystemContext(mainThread);
                     mSystemContext.getResources().updateConfiguration(
                              mainThread.getConfiguration(),
                              mainThread.getDisplayMetricsLocked(false));
@@ -512,7 +513,7 @@ public final class ActivityThread {
 
             try {
                 java.lang.ClassLoader cl = getClassLoader();
-                ApplicationContext appContext = new ApplicationContext();
+                ContextImpl appContext = new ContextImpl();
                 appContext.init(this, null, mActivityThread);
                 app = mActivityThread.mInstrumentation.newApplication(
                         cl, appClass, appContext);
@@ -1144,7 +1145,7 @@ public final class ActivityThread {
         }
     }
 
-    private static ApplicationContext mSystemContext = null;
+    private static ContextImpl mSystemContext = null;
 
     private static final class ActivityRecord {
         IBinder token;
@@ -1307,7 +1308,7 @@ public final class ActivityThread {
     }
 
     private static final class ContextCleanupInfo {
-        ApplicationContext context;
+        ContextImpl context;
         String what;
         String who;
     }
@@ -1628,7 +1629,7 @@ public final class ActivityThread {
             long dalvikAllocated = dalvikMax - dalvikFree;
             long viewInstanceCount = ViewDebug.getViewInstanceCount();
             long viewRootInstanceCount = ViewDebug.getViewRootInstanceCount();
-            long appContextInstanceCount = ApplicationContext.getInstanceCount();
+            long appContextInstanceCount = ContextImpl.getInstanceCount();
             long activityInstanceCount = Activity.getInstanceCount();
             int globalAssetCount = AssetManager.getGlobalAssetCount();
             int globalAssetManagerCount = AssetManager.getGlobalAssetManagerCount();
@@ -1813,6 +1814,7 @@ public final class ActivityThread {
         public static final int DESTROY_BACKUP_AGENT    = 129;
         public static final int SUICIDE                 = 130;
         public static final int REMOVE_PROVIDER         = 131;
+        public static final int ENABLE_JIT              = 132;
         String codeToString(int code) {
             if (localLOGV) {
                 switch (code) {
@@ -1848,6 +1850,7 @@ public final class ActivityThread {
                     case DESTROY_BACKUP_AGENT: return "DESTROY_BACKUP_AGENT";
                     case SUICIDE: return "SUICIDE";
                     case REMOVE_PROVIDER: return "REMOVE_PROVIDER";
+                    case ENABLE_JIT: return "ENABLE_JIT";
                 }
             }
             return "(unknown)";
@@ -1965,6 +1968,9 @@ public final class ActivityThread {
                 case REMOVE_PROVIDER:
                     completeRemoveProvider((IContentProvider)msg.obj);
                     break;
+                case ENABLE_JIT:
+                    ensureJitEnabled();
+                    break;
             }
         }
 
@@ -2000,6 +2006,7 @@ public final class ActivityThread {
                     prev.nextIdle = null;
                 } while (a != null);
             }
+            ensureJitEnabled();
             return false;
         }
     }
@@ -2064,6 +2071,7 @@ public final class ActivityThread {
     String mInstrumentationAppPackage = null;
     String mInstrumentedAppDir = null;
     boolean mSystemThread = false;
+    boolean mJitEnabled = false;
 
     /**
      * Activities that are enqueued to be relaunched.  This list is accessed
@@ -2245,11 +2253,11 @@ public final class ActivityThread {
         return mBoundApplication.processName;
     }
 
-    public ApplicationContext getSystemContext() {
+    public ContextImpl getSystemContext() {
         synchronized (this) {
             if (mSystemContext == null) {
-                ApplicationContext context =
-                    ApplicationContext.createSystemContext(this);
+                ContextImpl context =
+                    ContextImpl.createSystemContext(this);
                 PackageInfo info = new PackageInfo(this, "android", context, null);
                 context.init(info, null, this);
                 context.getResources().updateConfiguration(
@@ -2264,11 +2272,18 @@ public final class ActivityThread {
 
     public void installSystemApplicationInfo(ApplicationInfo info) {
         synchronized (this) {
-            ApplicationContext context = getSystemContext();
+            ContextImpl context = getSystemContext();
             context.init(new PackageInfo(this, "android", context, info), null, this);
         }
     }
 
+    void ensureJitEnabled() {
+        if (!mJitEnabled) {
+            mJitEnabled = true;
+            dalvik.system.VMRuntime.getRuntime().startJitCompilation();
+        }
+    }
+    
     void scheduleGcIdler() {
         if (!mGcIdlerScheduled) {
             mGcIdlerScheduled = true;
@@ -2372,7 +2387,7 @@ public final class ActivityThread {
         }
     }
 
-    final void scheduleContextCleanup(ApplicationContext context, String who,
+    final void scheduleContextCleanup(ContextImpl context, String who,
             String what) {
         ContextCleanupInfo cci = new ContextCleanupInfo();
         cci.context = context;
@@ -2431,7 +2446,7 @@ public final class ActivityThread {
                     + ", dir=" + r.packageInfo.getAppDir());
 
             if (activity != null) {
-                ApplicationContext appContext = new ApplicationContext();
+                ContextImpl appContext = new ContextImpl();
                 appContext.init(r.packageInfo, r.token, this);
                 appContext.setOuterContext(activity);
                 CharSequence title = r.activityInfo.loadLabel(appContext.getPackageManager());
@@ -2628,7 +2643,7 @@ public final class ActivityThread {
                 + ", comp=" + data.intent.getComponent().toShortString()
                 + ", dir=" + packageInfo.getAppDir());
 
-            ApplicationContext context = (ApplicationContext)app.getBaseContext();
+            ContextImpl context = (ContextImpl)app.getBaseContext();
             receiver.setOrderedHint(true);
             receiver.setResult(data.resultCode, data.resultData,
                 data.resultExtras);
@@ -2697,7 +2712,7 @@ public final class ActivityThread {
                 if (DEBUG_BACKUP) Log.v(TAG, "Initializing BackupAgent "
                         + data.appInfo.backupAgentName);
 
-                ApplicationContext context = new ApplicationContext();
+                ContextImpl context = new ContextImpl();
                 context.init(packageInfo, null, this);
                 context.setOuterContext(agent);
                 agent.attach(context);
@@ -2769,7 +2784,7 @@ public final class ActivityThread {
         try {
             if (localLOGV) Log.v(TAG, "Creating service " + data.info.name);
 
-            ApplicationContext context = new ApplicationContext();
+            ContextImpl context = new ContextImpl();
             context.init(packageInfo, null, this);
 
             Application app = packageInfo.makeApplication(false, mInstrumentation);
@@ -2808,6 +2823,7 @@ public final class ActivityThread {
                         ActivityManagerNative.getDefault().serviceDoneExecuting(
                                 data.token, 0, 0, 0);
                     }
+                    ensureJitEnabled();
                 } catch (RemoteException ex) {
                 }
             } catch (Exception e) {
@@ -2876,6 +2892,7 @@ public final class ActivityThread {
                 } catch (RemoteException e) {
                     // nothing to do.
                 }
+                ensureJitEnabled();
             } catch (Exception e) {
                 if (!mInstrumentation.onException(s, e)) {
                     throw new RuntimeException(
@@ -2893,9 +2910,9 @@ public final class ActivityThread {
                 if (localLOGV) Log.v(TAG, "Destroying service " + s);
                 s.onDestroy();
                 Context context = s.getBaseContext();
-                if (context instanceof ApplicationContext) {
+                if (context instanceof ContextImpl) {
                     final String who = s.getClassName();
-                    ((ApplicationContext) context).scheduleFinalCleanup(who, "Service");
+                    ((ContextImpl) context).scheduleFinalCleanup(who, "Service");
                 }
                 try {
                     ActivityManagerNative.getDefault().serviceDoneExecuting(
@@ -3510,8 +3527,8 @@ public final class ActivityThread {
             // ApplicationContext we need to have it tear down things
             // cleanly.
             Context c = r.activity.getBaseContext();
-            if (c instanceof ApplicationContext) {
-                ((ApplicationContext) c).scheduleFinalCleanup(
+            if (c instanceof ContextImpl) {
+                ((ContextImpl) c).scheduleFinalCleanup(
                         r.activity.getClass().getName(), "Activity");
             }
         }
@@ -3773,7 +3790,7 @@ public final class ActivityThread {
 
             Resources.updateSystemConfiguration(config, dm);
 
-            ApplicationContext.ApplicationPackageManager.configurationChanged();
+            ContextImpl.ApplicationPackageManager.configurationChanged();
             //Log.i(TAG, "Configuration changed in " + currentPackageName());
             {
                 Iterator<WeakReference<Resources>> it =
@@ -3864,10 +3881,6 @@ public final class ActivityThread {
         mBoundApplication = data;
         mConfiguration = new Configuration(data.config);
 
-        // We now rely on this being set by zygote.
-        //Process.setGid(data.appInfo.gid);
-        //Process.setUid(data.appInfo.uid);
-
         // send up app name; do this *before* waiting for debugger
         Process.setArgV0(data.processName);
         android.ddm.DdmHandleAppName.setAppName(data.processName);
@@ -3929,7 +3942,7 @@ public final class ActivityThread {
         }
 
         if (data.instrumentationName != null) {
-            ApplicationContext appContext = new ApplicationContext();
+            ContextImpl appContext = new ContextImpl();
             appContext.init(data.info, null, this);
             InstrumentationInfo ii = null;
             try {
@@ -3954,7 +3967,7 @@ public final class ActivityThread {
             instrApp.dataDir = ii.dataDir;
             PackageInfo pi = getPackageInfo(instrApp,
                     appContext.getClassLoader(), false, true);
-            ApplicationContext instrContext = new ApplicationContext();
+            ContextImpl instrContext = new ContextImpl();
             instrContext.init(pi, null, this);
 
             try {
@@ -3998,6 +4011,9 @@ public final class ActivityThread {
         List<ProviderInfo> providers = data.providers;
         if (providers != null) {
             installContentProviders(app, providers);
+            // For process that contain content providers, we want to
+            // ensure that the JIT is enabled "at some point".
+            mH.sendEmptyMessageDelayed(H.ENABLE_JIT, 10*1000);
         }
 
         try {
@@ -4303,6 +4319,11 @@ public final class ActivityThread {
         sThreadLocal.set(this);
         mSystemThread = system;
         if (!system) {
+            ViewRoot.addFirstDrawHandler(new Runnable() {
+                public void run() {
+                    ensureJitEnabled();
+                }
+            });
             android.ddm.DdmHandleAppName.setAppName("<pre-initialized>");
             RuntimeInit.setApplicationObject(mAppThread.asBinder());
             IActivityManager mgr = ActivityManagerNative.getDefault();
@@ -4316,7 +4337,7 @@ public final class ActivityThread {
             android.ddm.DdmHandleAppName.setAppName("system_process");
             try {
                 mInstrumentation = new Instrumentation();
-                ApplicationContext context = new ApplicationContext();
+                ContextImpl context = new ContextImpl();
                 context.init(getSystemContext().mPackageInfo, null, this);
                 Application app = Instrumentation.newApplication(Application.class, context);
                 mAllApplications.add(app);

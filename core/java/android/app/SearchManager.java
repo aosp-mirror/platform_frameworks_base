@@ -1604,15 +1604,6 @@ public class SearchManager
     public final static String SUGGEST_PARAMETER_LIMIT = "limit";
 
     /**
-     * Intent action for opening the search source selection activity.
-     * The intent may include these extra values:
-     * {@link #QUERY},
-     * {@link #APP_DATA}.
-     */
-    public static final String INTENT_ACTION_SELECT_SEARCH_SOURCE
-            = "android.intent.action.SELECT_SEARCH_SOURCE";
-
-    /**
      * If a suggestion has this value in {@link #SUGGEST_COLUMN_INTENT_ACTION},
      * the search dialog will switch to a different suggestion source when the
      * suggestion is clicked. 

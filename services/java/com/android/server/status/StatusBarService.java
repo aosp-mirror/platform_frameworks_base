@@ -687,7 +687,8 @@ public class StatusBarService extends IStatusBar.Stub
                     && (oldData == null
                         || oldData.tickerText == null
                         || !CharSequences.equals(oldData.tickerText, n.tickerText))) {
-                if ((mDisabled & StatusBarManager.DISABLE_NOTIFICATION_ICONS) == 0) {
+                if (0 == (mDisabled & 
+                    (StatusBarManager.DISABLE_NOTIFICATION_ICONS | StatusBarManager.DISABLE_NOTIFICATION_TICKER))) {
                     mTicker.addEntry(n, StatusBarIcon.getIcon(mContext, data), n.tickerText);
                 }
             }
@@ -1697,6 +1698,10 @@ public class StatusBarService extends IStatusBar.Stub
                 if (!mExpandedVisible) {
                     setNotificationIconVisibility(true, com.android.internal.R.anim.fade_in);
                 }
+            }
+        } else if ((diff & StatusBarManager.DISABLE_NOTIFICATION_TICKER) != 0) {
+            if (mTicking && (net & StatusBarManager.DISABLE_NOTIFICATION_TICKER) != 0) {
+                mTicker.halt();
             }
         }
     }

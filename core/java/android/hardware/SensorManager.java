@@ -287,6 +287,7 @@ public class SensorManager
     static private class SensorThread {
 
         Thread mThread;
+        boolean mSensorsReady;
 
         SensorThread() {
             // this gets to the sensor module. We can have only one per process.
@@ -299,17 +300,28 @@ public class SensorManager
         }
 
         // must be called with sListeners lock
-        void startLocked(ISensorService service) {
+        boolean startLocked(ISensorService service) {
             try {
                 if (mThread == null) {
                     Bundle dataChannel = service.getDataChannel();
-                    mThread = new Thread(new SensorThreadRunnable(dataChannel),
-                            SensorThread.class.getName());
-                    mThread.start();
+                    if (dataChannel != null) {
+                        mSensorsReady = false;
+                        SensorThreadRunnable runnable = new SensorThreadRunnable(dataChannel);
+                        Thread thread = new Thread(runnable, SensorThread.class.getName());
+                        thread.start();
+                        synchronized (runnable) {
+                            while (mSensorsReady == false) {
+                                runnable.wait();
+                            }
+                        }
+                        mThread = thread;
+                    }
                 }
             } catch (RemoteException e) {
                 Log.e(TAG, "RemoteException in startLocked: ", e);
+            } catch (InterruptedException e) {
             }
+            return mThread == null ? false : true;
         }
 
         private class SensorThreadRunnable implements Runnable {
@@ -319,13 +331,9 @@ public class SensorManager
             }
 
             private boolean open() {
-                if (mDataChannel == null) {
-                    Log.e(TAG, "mDataChannel == NULL, exiting");
-                    synchronized (sListeners) {
-                        mThread = null;
-                    }
-                    return false;
-                }
+                // NOTE: this cannot synchronize on sListeners, since
+                // it's held in the main thread at least until we
+                // return from here.
 
                 // this thread is guaranteed to be unique
                 Parcelable[] pfds = mDataChannel.getParcelableArray("fds");
@@ -368,6 +376,12 @@ public class SensorManager
 
                 if (!open()) {
                     return;
+                }
+
+                synchronized (this) {
+                    // we've open the driver, we're ready to open the sensors
+                    mSensorsReady = true;
+                    this.notify();
                 }
 
                 while (true) {
@@ -907,14 +921,18 @@ public class SensorManager
                 String name = sensor.getName();
                 int handle = sensor.getHandle();
                 if (l == null) {
+                    result = false;
                     l = new ListenerDelegate(listener, sensor, handler);
-                    result = mSensorService.enableSensor(l, name, handle, delay);
-                    if (result) {
-                        sListeners.add(l);
-                        sListeners.notify();
-                    }
+                    sListeners.add(l);
                     if (!sListeners.isEmpty()) {
-                        sSensorThread.startLocked(mSensorService);
+                        result = sSensorThread.startLocked(mSensorService);
+                        if (result) {
+                            result = mSensorService.enableSensor(l, name, handle, delay);
+                            if (!result) {
+                                // there was an error, remove the listeners
+                                sListeners.remove(l);
+                            }
+                        }
                     }
                 } else {
                     result = mSensorService.enableSensor(l, name, handle, delay);

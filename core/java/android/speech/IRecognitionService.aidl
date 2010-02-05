@@ -29,7 +29,7 @@ import android.speech.IRecognitionListener;
 * accessing recognition service. 
 * {@hide}
 */
-interface IRecognitionService {
+oneway interface IRecognitionService {
     /**
      * Starts listening for speech. Please note that the recognition service supports
      * one listener only, therefore, if this function is called from two different threads,
@@ -38,7 +38,7 @@ interface IRecognitionService {
      * @param recognizerIntent the intent from which the invocation occurred. Additionally,
      *        this intent can contain extra parameters to manipulate the behavior of the recognition
      *        client. For more information see {@link RecognizerIntent}.
-     * @param listener to receive callbacks
+     * @param listener to receive callbacks, note that this must be non-null
      */
     void startListening(in Intent recognizerIntent, in IRecognitionListener listener);
 
@@ -46,11 +46,15 @@ interface IRecognitionService {
      * Stops listening for speech. Speech captured so far will be recognized as
      * if the user had stopped speaking at this point. The function has no effect unless it
      * is called during the speech capturing.
+     *
+     * @param listener to receive callbacks, note that this must be non-null
      */
-    void stopListening();
+    void stopListening(in IRecognitionListener listener);
 
     /**
      * Cancels the speech recognition.
+     *
+     * @param listener to receive callbacks, note that this must be non-null
      */
-    void cancel();
+    void cancel(in IRecognitionListener listener);
 }

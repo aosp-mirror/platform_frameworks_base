@@ -293,7 +293,7 @@ public class Gesture implements Parcelable {
             } catch (IOException e) {
                 Log.e(GestureConstants.LOG_TAG, "Error reading Gesture from parcel:", e);
             } finally {
-                GestureUtilities.closeStream(inStream);
+                GestureUtils.closeStream(inStream);
             }
 
             if (gesture != null) {
@@ -322,8 +322,8 @@ public class Gesture implements Parcelable {
         } catch (IOException e) {
             Log.e(GestureConstants.LOG_TAG, "Error writing Gesture to parcel:", e);
         } finally {
-            GestureUtilities.closeStream(outStream);
-            GestureUtilities.closeStream(byteStream);
+            GestureUtils.closeStream(outStream);
+            GestureUtils.closeStream(byteStream);
         }
 
         if (result) {

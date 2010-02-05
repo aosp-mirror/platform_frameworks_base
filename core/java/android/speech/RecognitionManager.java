@@ -22,17 +22,23 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
+import android.os.Message;
 import android.os.RemoteException;
 import android.util.Log;
 
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 /**
  * This class provides access to the speech recognition service. This service allows access to the
  * speech recognizer. Do not instantiate this class directly, instead, call
- * {@link RecognitionManager#createRecognitionManager(Context, RecognitionListener, Intent)}. This
- * class is not thread safe and must be synchronized externally if accessed from multiple threads.
+ * {@link RecognitionManager#createRecognitionManager(Context)}. This class's methods must be
+ * invoked only from the main application thread. Please note that the application must have
+ * {@link android.Manifest.permission#RECORD_AUDIO} permission to use this class.
  */
 public class RecognitionManager {
     /** DEBUG value to enable verbose debug prints */
@@ -47,8 +53,40 @@ public class RecognitionManager {
      * {@link RecognitionListener#onPartialResults(Bundle)} methods. These strings are the possible
      * recognition results, where the first element is the most likely candidate.
      */
-    public static final String RECOGNITION_RESULTS_STRING_ARRAY =
-            "recognition_results_string_array";
+    public static final String RESULTS_RECOGNITION = "results_recognition";
+
+    /** Network operation timed out. */
+    public static final int ERROR_NETWORK_TIMEOUT = 1;
+
+    /** Other network related errors. */
+    public static final int ERROR_NETWORK = 2;
+
+    /** Audio recording error. */
+    public static final int ERROR_AUDIO = 3;
+
+    /** Server sends error status. */
+    public static final int ERROR_SERVER = 4;
+
+    /** Other client side errors. */
+    public static final int ERROR_CLIENT = 5;
+
+    /** No speech input */
+    public static final int ERROR_SPEECH_TIMEOUT = 6;
+
+    /** No recognition result matched. */
+    public static final int ERROR_NO_MATCH = 7;
+
+    /** RecognitionService busy. */
+    public static final int ERROR_RECOGNIZER_BUSY = 8;
+
+    /** Insufficient permissions */
+    public static final int ERROR_INSUFFICIENT_PERMISSIONS = 9;
+
+    /** action codes */
+    private final static int MSG_START = 1;
+    private final static int MSG_STOP = 2;
+    private final static int MSG_CANCEL = 3;
+    private final static int MSG_CHANGE_LISTENER = 4;
 
     /** The actual RecognitionService endpoint */
     private IRecognitionService mService;
@@ -59,80 +97,74 @@ public class RecognitionManager {
     /** Context with which the manager was created */
     private final Context mContext;
 
-    /** Listener that will receive all the callbacks */
-    private final RecognitionListener mListener;
-
-    /** Helper class wrapping the IRecognitionListener */
-    private final InternalRecognitionListener mInternalRecognitionListener;
-
-    /** Network operation timed out. */
-    public static final int NETWORK_TIMEOUT_ERROR = 1;
-
-    /** Other network related errors. */
-    public static final int NETWORK_ERROR = 2;
-
-    /** Audio recording error. */
-    public static final int AUDIO_ERROR = 3;
-
-    /** Server sends error status. */
-    public static final int SERVER_ERROR = 4;
-
-    /** Other client side errors. */
-    public static final int CLIENT_ERROR = 5;
-
-    /** No speech input */
-    public static final int SPEECH_TIMEOUT_ERROR = 6;
-
-    /** No recognition result matched. */
-    public static final int NO_MATCH_ERROR = 7;
-
-    /** RecognitionService busy. */
-    public static final int SERVER_BUSY_ERROR = 8;
+    /** Handler that will execute the main tasks */
+    private Handler mHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case MSG_START:
+                    handleStartListening((Intent) msg.obj);
+                    break;
+                case MSG_STOP:
+                    handleStopMessage();
+                    break;
+                case MSG_CANCEL:
+                    handleCancelMessage();
+                    break;
+                case MSG_CHANGE_LISTENER:
+                    handleChangeListener((RecognitionListener) msg.obj);
+                    break;
+            }
+        }
+    };
 
     /**
-     * RecognitionManager was not initialized yet, most probably because
-     * {@link RecognitionListener#onInit()} was not called yet.
+     * Temporary queue, saving the messages until the connection will be established, afterwards,
+     * only mHandler will receive the messages
      */
-    public static final int MANAGER_NOT_INITIALIZED_ERROR = 9;
+    private final Queue<Message> mPendingTasks = new LinkedList<Message>();
+
+    /** The Listener that will receive all the callbacks */
+    private final InternalListener mListener = new InternalListener();
 
     /**
-     * The right way to create a RecognitionManager is by using
+     * The right way to create a {@code RecognitionManager} is by using
      * {@link #createRecognitionManager} static factory method
      */
-    private RecognitionManager(final RecognitionListener listener, final Context context) {
-        mInternalRecognitionListener = new InternalRecognitionListener();
+    private RecognitionManager(final Context context) {
         mContext = context;
-        mListener = listener;
     }
 
     /**
-     * Basic ServiceConnection which just records mService variable.
+     * Basic ServiceConnection that records the mService variable. Additionally, on creation it
+     * invokes the {@link IRecognitionService#startListening(Intent, IRecognitionListener)}.
      */
     private class Connection implements ServiceConnection {
 
-        public synchronized void onServiceConnected(final ComponentName name,
-                final IBinder service) {
+        public void onServiceConnected(final ComponentName name, final IBinder service) {
+            // always done on the application main thread, so no need to send message to mHandler
             mService = IRecognitionService.Stub.asInterface(service);
-            if (mListener != null) {
-                mListener.onInit();
-            }
             if (DBG) Log.d(TAG, "onServiceConnected - Success");
+            while (!mPendingTasks.isEmpty()) {
+                mHandler.sendMessage(mPendingTasks.poll());
+            }
         }
 
         public void onServiceDisconnected(final ComponentName name) {
+            // always done on the application main thread, so no need to send message to mHandler
             mService = null;
             mConnection = null;
+            mPendingTasks.clear();
             if (DBG) Log.d(TAG, "onServiceDisconnected - Success");
         }
     }
 
     /**
      * Checks whether a speech recognition service is available on the system. If this method
-     * returns {@code false},
-     * {@link RecognitionManager#createRecognitionManager(Context, RecognitionListener, Intent)}
-     * will fail.
+     * returns {@code false}, {@link RecognitionManager#createRecognitionManager(Context)} will
+     * fail.
      * 
-     * @param context with which RecognitionManager will be created
+     * @param context with which {@code RecognitionManager} will be created
      * @return {@code true} if recognition is available, {@code false} otherwise
      */
     public static boolean isRecognitionAvailable(final Context context) {
@@ -142,78 +174,61 @@ public class RecognitionManager {
     }
 
     /**
-     * Factory method to create a new RecognitionManager
+     * Factory method to create a new {@code RecognitionManager}, please note that
+     * {@link #setRecognitionListener(RecognitionListener)} must be called before dispatching any
+     * command to the created {@code RecognitionManager}.
      * 
-     * @param context in which to create RecognitionManager
-     * @param listener that will receive all the callbacks from the created
-     *        {@link RecognitionManager}
-     * @param recognizerIntent contains initialization parameters for the speech recognizer. The
-     *        intent action should be {@link RecognizerIntent#ACTION_RECOGNIZE_SPEECH}. Future
-     *        versions of this API may add startup parameters for speech recognizer.
-     * @return null if a recognition service implementation is not installed or if speech
-     *         recognition is not supported by the device, otherwise a new RecognitionManager is
-     *         returned. The created RecognitionManager can only be used after the
-     *         {@link RecognitionListener#onInit()} method has been called.
+     * @param context in which to create {@code RecognitionManager}
+     * @return a new {@code RecognitionManager}
      */
-    public static RecognitionManager createRecognitionManager(final Context context,
-            final RecognitionListener listener, final Intent recognizerIntent) {
-        if (context == null || recognizerIntent == null) {
-            throw new IllegalArgumentException(
-                    "Context and recognizerListener argument cannot be null)");
+    public static RecognitionManager createRecognitionManager(final Context context) {
+        if (context == null) {
+            throw new IllegalArgumentException("Context cannot be null)");
         }
-        RecognitionManager manager = new RecognitionManager(listener, context);
-        manager.mConnection = manager.new Connection();
-        if (!context.bindService(recognizerIntent, manager.mConnection, Context.BIND_AUTO_CREATE)) {
-            Log.e(TAG, "bind to recognition service failed");
-            listener.onError(CLIENT_ERROR);
-            return null;
-        }
-        return manager;
+        checkIsCalledFromMainThread();
+        return new RecognitionManager(context);
     }
 
     /**
-     * Checks whether the service is connected
-     *
-     * @param functionName from which the call originated
-     * @return {@code true} if the service was successfully initialized, {@code false} otherwise
+     * Sets the listener that will receive all the callbacks. The previous unfinished commands will
+     * be executed with the old listener, while any following command will be executed with the new
+     * listener.
+     * 
+     * @param listener listener that will receive all the callbacks from the created
+     *        {@link RecognitionManager}, this must not be null.
      */
-    private boolean connectToService(final String functionName) {
-        if (mService != null) {
-            return true;
-        }
-        if (mConnection == null) {
-            if (DBG) Log.d(TAG, "restarting connection to the recognition service");
-            mConnection = new Connection();
-            mContext.bindService(new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH), mConnection,
-                    Context.BIND_AUTO_CREATE);
-        }
-        mInternalRecognitionListener.onError(MANAGER_NOT_INITIALIZED_ERROR);
-        Log.e(TAG, functionName + " was called before service connection was initialized");
-        return false;
+    public void setRecognitionListener(RecognitionListener listener) {
+        checkIsCalledFromMainThread();
+        putMessage(Message.obtain(mHandler, MSG_CHANGE_LISTENER, listener));
     }
 
     /**
-     * Starts listening for speech.
+     * Starts listening for speech. Please note that
+     * {@link #setRecognitionListener(RecognitionListener)} must be called beforehand, otherwise a
+     * {@link RuntimeException} will be thrown.
      * 
      * @param recognizerIntent contains parameters for the recognition to be performed. The intent
-     *        action should be {@link RecognizerIntent#ACTION_RECOGNIZE_SPEECH}. The intent may also
-     *        contain optional extras, see {@link RecognizerIntent}. If these values are not set
-     *        explicitly, default values will be used by the recognizer.
+     *        may also contain optional extras, see {@link RecognizerIntent}. If these values are
+     *        not set explicitly, default values will be used by the recognizer.
      */
-    public void startListening(Intent recognizerIntent) {
+    public void startListening(final Intent recognizerIntent) {
         if (recognizerIntent == null) {
-            throw new IllegalArgumentException("recognizerIntent argument cannot be null");
+            throw new IllegalArgumentException("intent must not be null");
         }
-        if (!connectToService("startListening")) {
-            return; // service is not connected yet, reconnect in progress
+        checkIsCalledFromMainThread();
+        checkIsCommandAllowed();
+        if (mConnection == null) { // first time connection
+            mConnection = new Connection();
+            if (!mContext.bindService(new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH),
+                    mConnection, Context.BIND_AUTO_CREATE)) {
+                Log.e(TAG, "bind to recognition service failed");
+                mConnection = null;
+                mService = null;
+                mListener.onError(ERROR_CLIENT);
+                return;
+            }
         }
-        try {
-            mService.startListening(recognizerIntent, mInternalRecognitionListener);
-            if (DBG) Log.d(TAG, "service start listening command succeded");
-        } catch (final RemoteException e) {
-            Log.e(TAG, "startListening() failed", e);
-            mInternalRecognitionListener.onError(CLIENT_ERROR);
-        }
+        putMessage(Message.obtain(mHandler, MSG_START, recognizerIntent));
     }
 
     /**
@@ -222,100 +237,190 @@ public class RecognitionManager {
      * called, as the speech endpointer will automatically stop the recognizer listening when it
      * determines speech has completed. However, you can manipulate endpointer parameters directly
      * using the intent extras defined in {@link RecognizerIntent}, in which case you may sometimes
-     * want to manually call this method to stop listening sooner.
+     * want to manually call this method to stop listening sooner. Please note that
+     * {@link #setRecognitionListener(RecognitionListener)} must be called beforehand, otherwise a
+     * {@link RuntimeException} will be thrown.
      */
     public void stopListening() {
-        if (mService == null) {
-            return; // service is not connected, but no need to reconnect at this point
+        checkIsCalledFromMainThread();
+        checkIsCommandAllowed();
+        putMessage(Message.obtain(mHandler, MSG_STOP));
+    }
+
+    /**
+     * Cancels the speech recognition. Please note that
+     * {@link #setRecognitionListener(RecognitionListener)} must be called beforehand, otherwise a
+     * {@link RuntimeException} will be thrown.
+     */
+    public void cancel() {
+        checkIsCalledFromMainThread();
+        checkIsCommandAllowed();
+        putMessage(Message.obtain(mHandler, MSG_CANCEL));
+    }
+
+    private static void checkIsCalledFromMainThread() {
+        if (Looper.myLooper() != Looper.getMainLooper()) {
+            throw new RuntimeException(
+                    "RecognitionManager should be used only from the application's main thread");
         }
+    }
+
+    private void checkIsCommandAllowed() {
+        if (mService == null && mPendingTasks.isEmpty()) { // setListener message must be there
+            throw new IllegalStateException("Listener must be set before any command is called");
+        }
+    }
+
+    private void putMessage(Message msg) {
+        if (mService == null) {
+            mPendingTasks.offer(msg);
+        } else {
+            mHandler.sendMessage(msg);
+        }
+    }
+
+    /** sends the actual message to the service */
+    private void handleStartListening(Intent recognizerIntent) {
         try {
-            mService.stopListening();
+            mService.startListening(recognizerIntent, mListener);
+            if (DBG) Log.d(TAG, "service start listening command succeded");
+        } catch (final RemoteException e) {
+            Log.e(TAG, "startListening() failed", e);
+            mListener.onError(ERROR_CLIENT);
+        }
+    }
+
+    /** sends the actual message to the service */
+    private void handleStopMessage() {
+        try {
+            mService.stopListening(mListener);
             if (DBG) Log.d(TAG, "service stop listening command succeded");
         } catch (final RemoteException e) {
             Log.e(TAG, "stopListening() failed", e);
-            mInternalRecognitionListener.onError(CLIENT_ERROR);
+            mListener.onError(ERROR_CLIENT);
         }
     }
 
-    /**
-     * Cancels the speech recognition.
-     */
-    public void cancel() {
-        if (mService == null) {
-            return; // service is not connected, but no need to reconnect at this point
-        }
+    /** sends the actual message to the service */
+    private void handleCancelMessage() {
         try {
-            mService.cancel();
+            mService.cancel(mListener);
             if (DBG) Log.d(TAG, "service cancel command succeded");
         } catch (final RemoteException e) {
             Log.e(TAG, "cancel() failed", e);
-            mInternalRecognitionListener.onError(CLIENT_ERROR);
+            mListener.onError(ERROR_CLIENT);
         }
     }
 
+    /** changes the listener */
+    private void handleChangeListener(RecognitionListener listener) {
+        if (DBG) Log.d(TAG, "handleChangeListener, listener=" + listener);
+        mListener.mInternalListener = listener;
+    }
+
     /**
-     * Destroys the RecognitionManager object. Note that after calling this method all method calls
-     * on this object will fail, triggering {@link RecognitionListener#onError}.
+     * Destroys the {@code RecognitionManager} object. Note that after calling this method all
+     * method calls on this object will fail, triggering {@link RecognitionListener#onError}.
      */
     public void destroy() {
         if (mConnection != null) {
             mContext.unbindService(mConnection);
         }
+        mPendingTasks.clear();
         mService = null;
+        mConnection = null;
     }
 
     /**
-     * Internal wrapper of IRecognitionListener which will propagate the results
-     * to RecognitionListener
+     * Internal wrapper of IRecognitionListener which will propagate the results to
+     * RecognitionListener
      */
-    private class InternalRecognitionListener extends IRecognitionListener.Stub {
+    private class InternalListener extends IRecognitionListener.Stub {
+        private RecognitionListener mInternalListener;
+
+        private final static int MSG_BEGINNING_OF_SPEECH = 1;
+        private final static int MSG_BUFFER_RECEIVED = 2;
+        private final static int MSG_END_OF_SPEECH = 3;
+        private final static int MSG_ERROR = 4;
+        private final static int MSG_READY_FOR_SPEECH = 5;
+        private final static int MSG_RESULTS = 6;
+        private final static int MSG_PARTIAL_RESULTS = 7;
+        private final static int MSG_RMS_CHANGED = 8;
+        private final static int MSG_ON_EVENT = 9;
+
+        private final Handler mInternalHandler = new Handler() {
+            @Override
+            public void handleMessage(Message msg) {
+                if (mInternalListener == null) {
+                    return;
+                }
+                switch (msg.what) {
+                    case MSG_BEGINNING_OF_SPEECH:
+                        mInternalListener.onBeginningOfSpeech();
+                        break;
+                    case MSG_BUFFER_RECEIVED:
+                        mInternalListener.onBufferReceived((byte[]) msg.obj);
+                        break;
+                    case MSG_END_OF_SPEECH:
+                        mInternalListener.onEndOfSpeech();
+                        break;
+                    case MSG_ERROR:
+                        mInternalListener.onError((Integer) msg.obj);
+                        break;
+                    case MSG_READY_FOR_SPEECH:
+                        mInternalListener.onReadyForSpeech((Bundle) msg.obj);
+                        break;
+                    case MSG_RESULTS:
+                        mInternalListener.onResults((Bundle) msg.obj);
+                        break;
+                    case MSG_PARTIAL_RESULTS:
+                        mInternalListener.onPartialResults((Bundle) msg.obj);
+                        break;
+                    case MSG_RMS_CHANGED:
+                        mInternalListener.onRmsChanged((Float) msg.obj);
+                        break;
+                    case MSG_ON_EVENT:
+                        mInternalListener.onEvent(msg.arg1, (Bundle) msg.obj);
+                        break;
+                }
+            }
+        };
 
         public void onBeginningOfSpeech() {
-            if (mListener != null) {
-                mListener.onBeginningOfSpeech();
-            }
+            Message.obtain(mInternalHandler, MSG_BEGINNING_OF_SPEECH).sendToTarget();
         }
 
         public void onBufferReceived(final byte[] buffer) {
-            if (mListener != null) {
-                mListener.onBufferReceived(buffer);
-            }
+            Message.obtain(mInternalHandler, MSG_BUFFER_RECEIVED, buffer).sendToTarget();
         }
 
         public void onEndOfSpeech() {
-            if (mListener != null) {
-                mListener.onEndOfSpeech();
-            }
+            Message.obtain(mInternalHandler, MSG_END_OF_SPEECH).sendToTarget();
         }
 
         public void onError(final int error) {
-            if (mListener != null) {
-                mListener.onError(error);
-            }
+            Message.obtain(mInternalHandler, MSG_ERROR, error).sendToTarget();
         }
 
         public void onReadyForSpeech(final Bundle noiseParams) {
-            if (mListener != null) {
-                mListener.onReadyForSpeech(noiseParams);
-            }
+            Message.obtain(mInternalHandler, MSG_READY_FOR_SPEECH, noiseParams).sendToTarget();
         }
 
         public void onResults(final Bundle results) {
-            if (mListener != null) {
-                mListener.onResults(results);
-            }
+            Message.obtain(mInternalHandler, MSG_RESULTS, results).sendToTarget();
         }
 
         public void onPartialResults(final Bundle results) {
-            if (mListener != null) {
-                mListener.onPartialResults(results);
-            }
+            Message.obtain(mInternalHandler, MSG_PARTIAL_RESULTS, results).sendToTarget();
         }
 
         public void onRmsChanged(final float rmsdB) {
-            if (mListener != null) {
-                mListener.onRmsChanged(rmsdB);
-            }
+            Message.obtain(mInternalHandler, MSG_RMS_CHANGED, rmsdB).sendToTarget();
+        }
+
+        public void onEvent(final int eventType, final Bundle params) {
+            Message.obtain(mInternalHandler, MSG_ON_EVENT, eventType, eventType, params)
+                    .sendToTarget();
         }
     }
 }

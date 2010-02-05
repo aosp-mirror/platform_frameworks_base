@@ -264,7 +264,7 @@ public class GestureStore {
 
             mChanged = false;
         } finally {
-            if (closeStream) GestureUtilities.closeStream(out);
+            if (closeStream) GestureUtils.closeStream(out);
         }
     }
 
@@ -299,7 +299,7 @@ public class GestureStore {
                 Log.d(LOG_TAG, "Loading gestures library = " + (end - start) + " ms");
             }
         } finally {
-            if (closeStream) GestureUtilities.closeStream(in);
+            if (closeStream) GestureUtils.closeStream(in);
         }
     }
 

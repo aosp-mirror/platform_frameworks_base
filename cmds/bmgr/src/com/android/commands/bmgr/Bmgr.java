@@ -315,7 +315,7 @@ public final class Bmgr {
                 for (RestoreSet s : sets) {
                     if (s.token == token) {
                         System.out.println("Scheduling restore: " + s.name);
-                        didRestore = (mRestore.performRestore(token, observer) == 0);
+                        didRestore = (mRestore.restoreAll(token, observer) == 0);
                         break;
                     }
                 }

@@ -529,7 +529,8 @@ public class SystemServer
         // The system server has to run all of the time, so it needs to be
         // as efficient as possible with its memory usage.
         VMRuntime.getRuntime().setTargetHeapUtilization(0.8f);
-
+        VMRuntime.getRuntime().startJitCompilation();
+        
         System.loadLibrary("android_servers");
         init1(args);
     }

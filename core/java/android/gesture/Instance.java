@@ -84,13 +84,13 @@ class Instance {
     }
 
     private static float[] spatialSampler(Gesture gesture) {
-        return GestureUtilities.spatialSampling(gesture, PATCH_SAMPLE_SIZE, false);
+        return GestureUtils.spatialSampling(gesture, PATCH_SAMPLE_SIZE, false);
     }
 
     private static float[] temporalSampler(int orientationType, Gesture gesture) {
-        float[] pts = GestureUtilities.temporalSampling(gesture.getStrokes().get(0),
+        float[] pts = GestureUtils.temporalSampling(gesture.getStrokes().get(0),
                 SEQUENCE_SAMPLE_SIZE);
-        float[] center = GestureUtilities.computeCentroid(pts);
+        float[] center = GestureUtils.computeCentroid(pts);
         float orientation = (float)Math.atan2(pts[1] - center[1], pts[0] - center[0]);
 
         float adjustment = -orientation;
@@ -104,8 +104,8 @@ class Instance {
             }
         }
 
-        GestureUtilities.translate(pts, -center[0], -center[1]);
-        GestureUtilities.rotate(pts, adjustment);
+        GestureUtils.translate(pts, -center[0], -center[1]);
+        GestureUtils.rotate(pts, adjustment);
 
         return pts;
     }

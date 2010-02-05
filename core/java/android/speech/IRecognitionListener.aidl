@@ -19,12 +19,12 @@ package android.speech;
 import android.os.Bundle;
 
 /**
- * Listener for speech recognition events, used with RecognitionService.
+ *  Listener for speech recognition events, used with RecognitionService.
  *  This gives you both the final recognition results, as well as various
  *  intermediate events that can be used to show visual feedback to the user.
  *  {@hide}
  */
-interface IRecognitionListener {
+oneway interface IRecognitionListener {
     /**
      * Called when the endpointer is ready for the user to start speaking.
      *
@@ -76,4 +76,12 @@ interface IRecognitionListener {
      * @param results a Bundle containing the current most likely result.
      */
     void onPartialResults(in Bundle results);
+
+    /**
+     * Reserved for adding future events.
+     *
+     * @param eventType the type of the occurred event
+     * @param params a Bundle containing the passed parameters
+     */
+    void onEvent(in int eventType, in Bundle params);
 }
