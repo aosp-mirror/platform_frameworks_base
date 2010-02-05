@@ -145,6 +145,7 @@ private:
         mutable LayerBase::Texture      mTexture;
         mutable NativeBuffer            mTempBuffer;
         mutable sp<GraphicBuffer>       mTempGraphicBuffer;
+        mutable bool                    mUseEGLImageDirectly;
     };
     
     class OverlaySource : public Source {
