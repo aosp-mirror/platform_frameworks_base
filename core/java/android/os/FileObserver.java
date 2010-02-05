@@ -52,73 +52,75 @@ public abstract class FileObserver {
 
     public static final int ALL_EVENTS = ACCESS | MODIFY | ATTRIB | CLOSE_WRITE 
             | CLOSE_NOWRITE | OPEN | MOVED_FROM | MOVED_TO | DELETE | CREATE
-	    | DELETE_SELF | MOVE_SELF;
+            | DELETE_SELF | MOVE_SELF;
 
     private static final String LOG_TAG = "FileObserver";
 
     private static class ObserverThread extends Thread {
-	private HashMap<Integer, WeakReference> m_observers = new HashMap<Integer, WeakReference>();
-	private int m_fd;
+        private HashMap<Integer, WeakReference> m_observers = new HashMap<Integer, WeakReference>();
+        private int m_fd;
 
-	public ObserverThread() {
-	    super("FileObserver");
-	    m_fd = init();
-	}
+        public ObserverThread() {
+            super("FileObserver");
+            m_fd = init();
+        }
 
-	public void run() {
-	    observe(m_fd);
-	}
+        public void run() {
+            observe(m_fd);
+        }
 
-	public int startWatching(String path, int mask, FileObserver observer) {
-	    int wfd = startWatching(m_fd, path, mask);
+        public int startWatching(String path, int mask, FileObserver observer) {
+            int wfd = startWatching(m_fd, path, mask);
 
-	    Integer i = new Integer(wfd);
-	    if (wfd >= 0) {
-		synchronized (m_observers) {
-		    m_observers.put(i, new WeakReference(observer));
-		}
-	    }
+            Integer i = new Integer(wfd);
+            if (wfd >= 0) {
+                synchronized (m_observers) {
+                    m_observers.put(i, new WeakReference(observer));
+                }
+            }
 
-	    return i;
-	}
+            return i;
+        }
 
-	public void stopWatching(int descriptor) {
-	    stopWatching(m_fd, descriptor);
-	}
+        public void stopWatching(int descriptor) {
+            stopWatching(m_fd, descriptor);
+        }
 
-    public void onEvent(int wfd, int mask, String path) {
-        // look up our observer, fixing up the map if necessary...
-        FileObserver observer;
+        public void onEvent(int wfd, int mask, String path) {
+            // look up our observer, fixing up the map if necessary...
+            FileObserver observer = null;
 
-        synchronized (m_observers) {
-            WeakReference weak = m_observers.get(wfd);
-            observer = (FileObserver) weak.get();
-            if (observer == null) {
-                m_observers.remove(wfd);
+            synchronized (m_observers) {
+                WeakReference weak = m_observers.get(wfd);
+                if (weak != null) {  // can happen with lots of events from a dead wfd
+                    observer = (FileObserver) weak.get();
+                    if (observer == null) {
+                        m_observers.remove(wfd);
+                    }
+                }
+            }
+
+            // ...then call out to the observer without the sync lock held
+            if (observer != null) {
+                try {
+                    observer.onEvent(mask, path);
+                } catch (Throwable throwable) {
+                    Log.wtf(LOG_TAG, "Unhandled exception in FileObserver " + observer, throwable);
+                }
             }
         }
 
-        // ...then call out to the observer without the sync lock held
-        if (observer != null) {
-            try {
-                observer.onEvent(mask, path);
-            } catch (Throwable throwable) {
-                Log.wtf(LOG_TAG, "Unhandled exception in FileObserver " + observer, throwable);
-            }
-        }
-    }
-
-	private native int init();
-	private native void observe(int fd);
-	private native int startWatching(int fd, String path, int mask);
-	private native void stopWatching(int fd, int wfd);
+        private native int init();
+        private native void observe(int fd);
+        private native int startWatching(int fd, String path, int mask);
+        private native void stopWatching(int fd, int wfd);
     }
 
     private static ObserverThread s_observerThread;
 
     static {
-	s_observerThread = new ObserverThread();
-	s_observerThread.start();
+        s_observerThread = new ObserverThread();
+        s_observerThread.start();
     }
 
     // instance
@@ -127,30 +129,30 @@ public abstract class FileObserver {
     private int m_mask;
 
     public FileObserver(String path) {
-	this(path, ALL_EVENTS);
+        this(path, ALL_EVENTS);
     }
 
     public FileObserver(String path, int mask) {
-	m_path = path;
-	m_mask = mask;
-	m_descriptor = -1;
+        m_path = path;
+        m_mask = mask;
+        m_descriptor = -1;
     }
 
     protected void finalize() {
-	stopWatching();
+        stopWatching();
     }
 
     public void startWatching() {
-	if (m_descriptor < 0) {
-	    m_descriptor = s_observerThread.startWatching(m_path, m_mask, this);
-	}
+        if (m_descriptor < 0) {
+            m_descriptor = s_observerThread.startWatching(m_path, m_mask, this);
+        }
     }
 
     public void stopWatching() {
-	if (m_descriptor >= 0) {
-	    s_observerThread.stopWatching(m_descriptor);
-	    m_descriptor = -1;
-	}
+        if (m_descriptor >= 0) {
+            s_observerThread.stopWatching(m_descriptor);
+            m_descriptor = -1;
+        }
     }
 
     public abstract void onEvent(int event, String path);
