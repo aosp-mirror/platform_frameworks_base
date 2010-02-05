@@ -258,8 +258,11 @@ class BackupManagerService extends IBackupManager.Stub {
 
                 // snapshot the pending-backup set and work on that
                 ArrayList<BackupRequest> queue = new ArrayList<BackupRequest>();
+                File oldJournal = mJournal;
                 synchronized (mQueueLock) {
-                    // Do we have any work to do?
+                    // Do we have any work to do?  Construct the work queue
+                    // then release the synchronization lock to actually run
+                    // the backup.
                     if (mPendingBackups.size() > 0) {
                         for (BackupRequest b: mPendingBackups.values()) {
                             queue.add(b);
@@ -268,19 +271,21 @@ class BackupManagerService extends IBackupManager.Stub {
                         mPendingBackups.clear();
 
                         // Start a new backup-queue journal file too
-                        File oldJournal = mJournal;
                         mJournal = null;
 
-                        // At this point, we have started a new journal file, and the old
-                        // file identity is being passed to the backup processing thread.
-                        // When it completes successfully, that old journal file will be
-                        // deleted.  If we crash prior to that, the old journal is parsed
-                        // at next boot and the journaled requests fulfilled.
-                        (new PerformBackupTask(transport, queue, oldJournal)).run();
-                    } else {
-                        Log.v(TAG, "Backup requested but nothing pending");
-                        mWakelock.release();
                     }
+                }
+
+                if (queue.size() > 0) {
+                    // At this point, we have started a new journal file, and the old
+                    // file identity is being passed to the backup processing thread.
+                    // When it completes successfully, that old journal file will be
+                    // deleted.  If we crash prior to that, the old journal is parsed
+                    // at next boot and the journaled requests fulfilled.
+                    (new PerformBackupTask(transport, queue, oldJournal)).run();
+                } else {
+                    Log.v(TAG, "Backup requested but nothing pending");
+                    mWakelock.release();
                 }
                 break;
             }
