@@ -928,6 +928,12 @@ public final class BridgeContext extends Context {
     }
 
     @Override
+    public File getExternalCacheDir() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
     public ContentResolver getContentResolver() {
         if (mContentResolver == null) {
             mContentResolver = new BridgeContentResolver(this);
@@ -955,6 +961,12 @@ public final class BridgeContext extends Context {
 
     @Override
     public File getFilesDir() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public File getExternalFilesDir(String type) {
         // TODO Auto-generated method stub
         return null;
     }

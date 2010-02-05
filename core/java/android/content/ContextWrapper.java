@@ -179,8 +179,18 @@ public class ContextWrapper extends Context {
     }
     
     @Override
+    public File getExternalFilesDir(String type) {
+        return mBase.getExternalFilesDir(type);
+    }
+    
+    @Override
     public File getCacheDir() {
         return mBase.getCacheDir();
+    }
+
+    @Override
+    public File getExternalCacheDir() {
+        return mBase.getExternalCacheDir();
     }
 
     @Override

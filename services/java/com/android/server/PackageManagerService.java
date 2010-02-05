@@ -148,6 +148,10 @@ class PackageManagerService extends IPackageManager.Stub {
     static final int SCAN_NEW_INSTALL = 1<<4;
     static final int SCAN_NO_PATHS = 1<<5;
 
+    static final ComponentName DEFAULT_CONTAINER_COMPONENT = new ComponentName(
+            "com.android.defcontainer",
+            "com.android.defcontainer.DefaultContainerService");
+    
     final HandlerThread mHandlerThread = new HandlerThread("PackageManager",
             Process.THREAD_PRIORITY_BACKGROUND);
     final PackageHandler mHandler;
@@ -298,6 +302,7 @@ class PackageManagerService extends IPackageManager.Stub {
     static final int END_COPY = 4;
     static final int INIT_COPY = 5;
     static final int MCS_UNBIND = 6;
+    static final int START_CLEANING_PACKAGE = 7;
     // Delay time in millisecs
     static final int BROADCAST_DELAY = 10 * 1000;
     private ServiceConnection mDefContainerConn = new ServiceConnection() {
@@ -328,9 +333,7 @@ class PackageManagerService extends IPackageManager.Stub {
                 case INIT_COPY: {
                     InstallArgs args = (InstallArgs) msg.obj;
                     args.createCopyFile();
-                    Intent service = new Intent().setComponent(new ComponentName(
-                            "com.android.defcontainer",
-                            "com.android.defcontainer.DefaultContainerService"));
+                    Intent service = new Intent().setComponent(DEFAULT_CONTAINER_COMPONENT);
                     if (mContainerService != null) {
                         // No need to add to pending list. Use remote stub directly
                         handleStartCopy(args);
@@ -405,6 +408,15 @@ class PackageManagerService extends IPackageManager.Stub {
                     }
                     break;
                 }
+                case START_CLEANING_PACKAGE: {
+                    String packageName = (String)msg.obj;
+                    synchronized (mPackages) {
+                        if (!mSettings.mPackagesToBeCleaned.contains(packageName)) {
+                            mSettings.mPackagesToBeCleaned.add(packageName);
+                        }
+                    }
+                    startCleaningPackages();
+                } break;
             }
         }
 
@@ -2823,6 +2835,9 @@ class PackageManagerService extends IPackageManager.Stub {
             mSettings.insertPackageSettingLP(pkgSetting, pkg);
             // Add the new setting to mPackages
             mPackages.put(pkg.applicationInfo.packageName, pkg);
+            // Make sure we don't accidentally delete its data.
+            mSettings.mPackagesToBeCleaned.remove(pkgName);
+            
             int N = pkg.providers.size();
             StringBuilder r = null;
             int i;
@@ -4018,7 +4033,47 @@ class PackageManagerService extends IPackageManager.Stub {
             }
         }
     }
+    
+    public String nextPackageToClean(String lastPackage) {
+        synchronized (mPackages) {
+            if (!mMediaMounted) {
+                // If the external storage is no longer mounted at this point,
+                // the caller may not have been able to delete all of this
+                // packages files and can not delete any more.  Bail.
+                return null;
+            }
+            if (lastPackage != null) {
+                mSettings.mPackagesToBeCleaned.remove(lastPackage);
+            }
+            return mSettings.mPackagesToBeCleaned.size() > 0
+                    ? mSettings.mPackagesToBeCleaned.get(0) : null;
+        }
+    }
 
+    void schedulePackageCleaning(String packageName) {
+        mHandler.sendMessage(mHandler.obtainMessage(START_CLEANING_PACKAGE, packageName));
+    }
+    
+    void startCleaningPackages() {
+        synchronized (mPackages) {
+            if (!mMediaMounted) {
+                return;
+            }
+            if (mSettings.mPackagesToBeCleaned.size() <= 0) {
+                return;
+            }
+        }
+        Intent intent = new Intent(PackageManager.ACTION_CLEAN_EXTERNAL_STORAGE);
+        intent.setComponent(DEFAULT_CONTAINER_COMPONENT);
+        IActivityManager am = ActivityManagerNative.getDefault();
+        if (am != null) {
+            try {
+                am.startService(null, intent, null);
+            } catch (RemoteException e) {
+            }
+        }
+    }
+    
     private final class AppDirObserver extends FileObserver {
         public AppDirObserver(String path, int mask, boolean isrom) {
             super(path, mask);
@@ -5224,7 +5279,6 @@ class PackageManagerService extends IPackageManager.Stub {
      *  persisting settings for later use
      *  sending a broadcast if necessary
      */
-
     private boolean deletePackageX(String packageName, boolean sendBroadCast,
                                    boolean deleteCodeAndResources, int flags) {
         PackageRemovedInfo info = new PackageRemovedInfo();
@@ -5316,6 +5370,7 @@ class PackageManagerService extends IPackageManager.Stub {
                 File dataDir = new File(pkg.applicationInfo.dataDir);
                 dataDir.delete();
             }
+            schedulePackageCleaning(packageName);
             synchronized (mPackages) {
                 if (outInfo != null) {
                     outInfo.removedUid = mSettings.removePackageLP(packageName);
@@ -5328,7 +5383,7 @@ class PackageManagerService extends IPackageManager.Stub {
                 mSettings.updateSharedUserPermsLP(deletedPs, mGlobalGids);
             }
             // Save settings now
-            mSettings.writeLP ();
+            mSettings.writeLP();
         }
     }
 
@@ -6817,6 +6872,10 @@ class PackageManagerService extends IPackageManager.Stub {
         final HashMap<String, BasePermission> mPermissionTrees =
                 new HashMap<String, BasePermission>();
 
+        // Packages that have been uninstalled and still need their external
+        // storage data deleted.
+        final ArrayList<String> mPackagesToBeCleaned = new ArrayList<String>();
+        
         private final StringBuilder mReadMessages = new StringBuilder();
 
         private static final class PendingPackage extends PackageSettingBase {
@@ -7380,6 +7439,14 @@ class PackageManagerService extends IPackageManager.Stub {
                     serializer.endTag(null, "shared-user");
                 }
 
+                if (mPackagesToBeCleaned.size() > 0) {
+                    for (int i=0; i<mPackagesToBeCleaned.size(); i++) {
+                        serializer.startTag(null, "cleaning-package");
+                        serializer.attribute(null, "name", mPackagesToBeCleaned.get(i));
+                        serializer.endTag(null, "cleaning-package");
+                    }
+                }
+                
                 serializer.endTag(null, "packages");
 
                 serializer.endDocument();
@@ -7412,7 +7479,7 @@ class PackageManagerService extends IPackageManager.Stub {
         }
 
         void writeDisabledSysPackage(XmlSerializer serializer, final PackageSetting pkg)
-        throws java.io.IOException {
+                throws java.io.IOException {
             serializer.startTag(null, "updated-package");
             serializer.attribute(null, "name", pkg.name);
             serializer.attribute(null, "codePath", pkg.codePathString);
@@ -7450,7 +7517,7 @@ class PackageManagerService extends IPackageManager.Stub {
         }
 
         void writePackage(XmlSerializer serializer, final PackageSetting pkg)
-        throws java.io.IOException {
+                throws java.io.IOException {
             serializer.startTag(null, "package");
             serializer.attribute(null, "name", pkg.name);
             serializer.attribute(null, "codePath", pkg.codePathString);
@@ -7640,6 +7707,11 @@ class PackageManagerService extends IPackageManager.Stub {
                         readPreferredActivitiesLP(parser);
                     } else if(tagName.equals("updated-package")) {
                         readDisabledSysPackageLP(parser);
+                    } else if (tagName.equals("cleaning-package")) {
+                        String name = parser.getAttributeValue(null, "name");
+                        if (name != null) {
+                            mPackagesToBeCleaned.add(name);
+                        }
                     } else {
                         Log.w(TAG, "Unknown element under <packages>: "
                               + parser.getName());
@@ -7765,7 +7837,7 @@ class PackageManagerService extends IPackageManager.Stub {
         }
 
         private void readDisabledSysPackageLP(XmlPullParser parser)
-        throws XmlPullParserException, IOException {
+                throws XmlPullParserException, IOException {
             String name = parser.getAttributeValue(null, "name");
             String codePathStr = parser.getAttributeValue(null, "codePath");
             String resourcePathStr = parser.getAttributeValue(null, "resourcePath");
@@ -8435,19 +8507,21 @@ class PackageManagerService extends IPackageManager.Stub {
    }
 
    public void updateExternalMediaStatus(final boolean mediaStatus) {
-       if (DEBUG_SD_INSTALL) Log.i(TAG, "updateExternalMediaStatus:: mediaStatus=" +
-               mediaStatus+", mMediaMounted=" + mMediaMounted);
-       if (mediaStatus == mMediaMounted) {
-           return;
-       }
-       mMediaMounted = mediaStatus;
-        // Queue up an async operation since the package installation may take a little while.
-       mHandler.post(new Runnable() {
-           public void run() {
-               mHandler.removeCallbacks(this);
-               updateExternalMediaStatusInner(mediaStatus);
+       synchronized (mPackages) {
+           if (DEBUG_SD_INSTALL) Log.i(TAG, "updateExternalMediaStatus:: mediaStatus=" +
+                   mediaStatus+", mMediaMounted=" + mMediaMounted);
+           if (mediaStatus == mMediaMounted) {
+               return;
            }
-       });
+           mMediaMounted = mediaStatus;
+            // Queue up an async operation since the package installation may take a little while.
+           mHandler.post(new Runnable() {
+               public void run() {
+                   mHandler.removeCallbacks(this);
+                   updateExternalMediaStatusInner(mediaStatus);
+               }
+           });
+       }
    }
 
    void updateExternalMediaStatusInner(boolean mediaStatus) {
@@ -8505,6 +8579,7 @@ class PackageManagerService extends IPackageManager.Stub {
        if (mediaStatus) {
            if (DEBUG_SD_INSTALL) Log.i(TAG, "Loading packages");
            loadMediaPackages(processCids, uidArr);
+           startCleaningPackages();
        } else {
            if (DEBUG_SD_INSTALL) Log.i(TAG, "Unloading packages");
            unloadMediaPackages(processCids, uidArr);
