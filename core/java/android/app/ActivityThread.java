@@ -292,7 +292,7 @@ public final class ActivityThread {
             if (mAppDir == null) {
                 if (mSystemContext == null) {
                     mSystemContext =
-                        ApplicationContext.createSystemContext(mainThread);
+                        ContextImpl.createSystemContext(mainThread);
                     mSystemContext.getResources().updateConfiguration(
                              mainThread.getConfiguration(),
                              mainThread.getDisplayMetricsLocked(false));
@@ -513,7 +513,7 @@ public final class ActivityThread {
 
             try {
                 java.lang.ClassLoader cl = getClassLoader();
-                ApplicationContext appContext = new ApplicationContext();
+                ContextImpl appContext = new ContextImpl();
                 appContext.init(this, null, mActivityThread);
                 app = mActivityThread.mInstrumentation.newApplication(
                         cl, appClass, appContext);
@@ -1145,7 +1145,7 @@ public final class ActivityThread {
         }
     }
 
-    private static ApplicationContext mSystemContext = null;
+    private static ContextImpl mSystemContext = null;
 
     private static final class ActivityRecord {
         IBinder token;
@@ -1308,7 +1308,7 @@ public final class ActivityThread {
     }
 
     private static final class ContextCleanupInfo {
-        ApplicationContext context;
+        ContextImpl context;
         String what;
         String who;
     }
@@ -1629,7 +1629,7 @@ public final class ActivityThread {
             long dalvikAllocated = dalvikMax - dalvikFree;
             long viewInstanceCount = ViewDebug.getViewInstanceCount();
             long viewRootInstanceCount = ViewDebug.getViewRootInstanceCount();
-            long appContextInstanceCount = ApplicationContext.getInstanceCount();
+            long appContextInstanceCount = ContextImpl.getInstanceCount();
             long activityInstanceCount = Activity.getInstanceCount();
             int globalAssetCount = AssetManager.getGlobalAssetCount();
             int globalAssetManagerCount = AssetManager.getGlobalAssetManagerCount();
@@ -2253,11 +2253,11 @@ public final class ActivityThread {
         return mBoundApplication.processName;
     }
 
-    public ApplicationContext getSystemContext() {
+    public ContextImpl getSystemContext() {
         synchronized (this) {
             if (mSystemContext == null) {
-                ApplicationContext context =
-                    ApplicationContext.createSystemContext(this);
+                ContextImpl context =
+                    ContextImpl.createSystemContext(this);
                 PackageInfo info = new PackageInfo(this, "android", context, null);
                 context.init(info, null, this);
                 context.getResources().updateConfiguration(
@@ -2272,7 +2272,7 @@ public final class ActivityThread {
 
     public void installSystemApplicationInfo(ApplicationInfo info) {
         synchronized (this) {
-            ApplicationContext context = getSystemContext();
+            ContextImpl context = getSystemContext();
             context.init(new PackageInfo(this, "android", context, info), null, this);
         }
     }
@@ -2387,7 +2387,7 @@ public final class ActivityThread {
         }
     }
 
-    final void scheduleContextCleanup(ApplicationContext context, String who,
+    final void scheduleContextCleanup(ContextImpl context, String who,
             String what) {
         ContextCleanupInfo cci = new ContextCleanupInfo();
         cci.context = context;
@@ -2446,7 +2446,7 @@ public final class ActivityThread {
                     + ", dir=" + r.packageInfo.getAppDir());
 
             if (activity != null) {
-                ApplicationContext appContext = new ApplicationContext();
+                ContextImpl appContext = new ContextImpl();
                 appContext.init(r.packageInfo, r.token, this);
                 appContext.setOuterContext(activity);
                 CharSequence title = r.activityInfo.loadLabel(appContext.getPackageManager());
@@ -2643,7 +2643,7 @@ public final class ActivityThread {
                 + ", comp=" + data.intent.getComponent().toShortString()
                 + ", dir=" + packageInfo.getAppDir());
 
-            ApplicationContext context = (ApplicationContext)app.getBaseContext();
+            ContextImpl context = (ContextImpl)app.getBaseContext();
             receiver.setOrderedHint(true);
             receiver.setResult(data.resultCode, data.resultData,
                 data.resultExtras);
@@ -2712,7 +2712,7 @@ public final class ActivityThread {
                 if (DEBUG_BACKUP) Log.v(TAG, "Initializing BackupAgent "
                         + data.appInfo.backupAgentName);
 
-                ApplicationContext context = new ApplicationContext();
+                ContextImpl context = new ContextImpl();
                 context.init(packageInfo, null, this);
                 context.setOuterContext(agent);
                 agent.attach(context);
@@ -2784,7 +2784,7 @@ public final class ActivityThread {
         try {
             if (localLOGV) Log.v(TAG, "Creating service " + data.info.name);
 
-            ApplicationContext context = new ApplicationContext();
+            ContextImpl context = new ContextImpl();
             context.init(packageInfo, null, this);
 
             Application app = packageInfo.makeApplication(false, mInstrumentation);
@@ -2910,9 +2910,9 @@ public final class ActivityThread {
                 if (localLOGV) Log.v(TAG, "Destroying service " + s);
                 s.onDestroy();
                 Context context = s.getBaseContext();
-                if (context instanceof ApplicationContext) {
+                if (context instanceof ContextImpl) {
                     final String who = s.getClassName();
-                    ((ApplicationContext) context).scheduleFinalCleanup(who, "Service");
+                    ((ContextImpl) context).scheduleFinalCleanup(who, "Service");
                 }
                 try {
                     ActivityManagerNative.getDefault().serviceDoneExecuting(
@@ -3527,8 +3527,8 @@ public final class ActivityThread {
             // ApplicationContext we need to have it tear down things
             // cleanly.
             Context c = r.activity.getBaseContext();
-            if (c instanceof ApplicationContext) {
-                ((ApplicationContext) c).scheduleFinalCleanup(
+            if (c instanceof ContextImpl) {
+                ((ContextImpl) c).scheduleFinalCleanup(
                         r.activity.getClass().getName(), "Activity");
             }
         }
@@ -3790,7 +3790,7 @@ public final class ActivityThread {
 
             Resources.updateSystemConfiguration(config, dm);
 
-            ApplicationContext.ApplicationPackageManager.configurationChanged();
+            ContextImpl.ApplicationPackageManager.configurationChanged();
             //Log.i(TAG, "Configuration changed in " + currentPackageName());
             {
                 Iterator<WeakReference<Resources>> it =
@@ -3942,7 +3942,7 @@ public final class ActivityThread {
         }
 
         if (data.instrumentationName != null) {
-            ApplicationContext appContext = new ApplicationContext();
+            ContextImpl appContext = new ContextImpl();
             appContext.init(data.info, null, this);
             InstrumentationInfo ii = null;
             try {
@@ -3967,7 +3967,7 @@ public final class ActivityThread {
             instrApp.dataDir = ii.dataDir;
             PackageInfo pi = getPackageInfo(instrApp,
                     appContext.getClassLoader(), false, true);
-            ApplicationContext instrContext = new ApplicationContext();
+            ContextImpl instrContext = new ContextImpl();
             instrContext.init(pi, null, this);
 
             try {
@@ -4337,7 +4337,7 @@ public final class ActivityThread {
             android.ddm.DdmHandleAppName.setAppName("system_process");
             try {
                 mInstrumentation = new Instrumentation();
-                ApplicationContext context = new ApplicationContext();
+                ContextImpl context = new ContextImpl();
                 context.init(getSystemContext().mPackageInfo, null, this);
                 Application app = Instrumentation.newApplication(Application.class, context);
                 mAllApplications.add(app);

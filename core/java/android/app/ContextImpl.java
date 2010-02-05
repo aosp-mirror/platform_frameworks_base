@@ -148,10 +148,10 @@ class ReceiverRestrictedContext extends ContextWrapper {
 }
 
 /**
- * Common implementation of Context API, which Activity and other application
- * classes inherit.
+ * Common implementation of Context API, which provides the base
+ * context object for Activity and other application components.
  */
-class ApplicationContext extends Context {
+class ContextImpl extends Context {
     private final static String TAG = "ApplicationContext";
     private final static boolean DEBUG = false;
     private final static boolean DEBUG_ICONS = false;
@@ -1328,13 +1328,13 @@ class ApplicationContext extends Context {
     public Context createPackageContext(String packageName, int flags)
         throws PackageManager.NameNotFoundException {
         if (packageName.equals("system") || packageName.equals("android")) {
-            return new ApplicationContext(mMainThread.getSystemContext());
+            return new ContextImpl(mMainThread.getSystemContext());
         }
 
         ActivityThread.PackageInfo pi =
             mMainThread.getPackageInfo(packageName, flags);
         if (pi != null) {
-            ApplicationContext c = new ApplicationContext();
+            ContextImpl c = new ContextImpl();
             c.mRestricted = (flags & CONTEXT_RESTRICTED) == CONTEXT_RESTRICTED;
             c.init(pi, null, mMainThread, mResources);
             if (c.mResources != null) {
@@ -1371,13 +1371,13 @@ class ApplicationContext extends Context {
         return file;
     }
 
-    static ApplicationContext createSystemContext(ActivityThread mainThread) {
-        ApplicationContext context = new ApplicationContext();
+    static ContextImpl createSystemContext(ActivityThread mainThread) {
+        ContextImpl context = new ContextImpl();
         context.init(Resources.getSystem(), mainThread);
         return context;
     }
 
-    ApplicationContext() {
+    ContextImpl() {
         ++sInstanceCount;
         mOuterContext = this;
     }
@@ -1388,7 +1388,7 @@ class ApplicationContext extends Context {
      *
      * @param context Existing application context.
      */
-    public ApplicationContext(ApplicationContext context) {
+    public ContextImpl(ContextImpl context) {
         ++sInstanceCount;
         mPackageInfo = context.mPackageInfo;
         mResources = context.mResources;
@@ -2124,7 +2124,7 @@ class ApplicationContext extends Context {
             }
         }
 
-        ApplicationPackageManager(ApplicationContext context,
+        ApplicationPackageManager(ContextImpl context,
                 IPackageManager pm) {
             mContext = context;
             mPM = pm;
@@ -2656,7 +2656,7 @@ class ApplicationContext extends Context {
             }
         }
 
-        private final ApplicationContext mContext;
+        private final ContextImpl mContext;
         private final IPackageManager mPM;
 
         private static final Object sSync = new Object();
