@@ -1381,8 +1381,8 @@ public class Intent implements Parcelable, Cloneable {
      * @hide
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String ACTION_MEDIA_RESOURCES_AVAILABLE =
-        "android.intent.action.MEDIA_RESOURCES_AVAILABILE";
+    public static final String ACTION_EXTERNAL_APPLICATIONS_AVAILABLE =
+        "android.intent.action.EXTERNAL_APPLICATIONS_AVAILABLE";
 
     /**
      * Broadcast Action: Resources for a set of packages are currently
@@ -1406,8 +1406,8 @@ public class Intent implements Parcelable, Cloneable {
      * @hide
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String ACTION_MEDIA_RESOURCES_UNAVAILABLE =
-        "android.intent.action.MEDIA_RESOURCES_UNAVAILABILE";
+    public static final String ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE =
+        "android.intent.action.EXTERNAL_APPLICATIONS_UNAVAILABILE";
 
     /**
      * Broadcast Action:  The current system wallpaper has changed.  See
@@ -2198,8 +2198,8 @@ public class Intent implements Parcelable, Cloneable {
 
     /**
      * This field is part of
-     * {@link android.content.Intent#ACTION_MEDIA_RESOURCES_AVAILABLE},
-     * {@link android.content.Intent#ACTION_MEDIA_RESOURCES_UNAVAILABLE}
+     * {@link android.content.Intent#ACTION_EXTERNAL_APPLICATIONS_AVAILABLE},
+     * {@link android.content.Intent#ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE}
      * and contains a string array of all of the components that have changed.
      * @hide
      */
@@ -2208,8 +2208,8 @@ public class Intent implements Parcelable, Cloneable {
 
     /**
      * This field is part of
-     * {@link android.content.Intent#ACTION_MEDIA_RESOURCES_AVAILABLE},
-     * {@link android.content.Intent#ACTION_MEDIA_RESOURCES_UNAVAILABLE}
+     * {@link android.content.Intent#ACTION_EXTERNAL_APPLICATIONS_AVAILABLE},
+     * {@link android.content.Intent#ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE}
      * and contains an integer array of uids of all of the components
      * that have changed.
      * @hide

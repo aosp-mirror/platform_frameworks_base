@@ -74,6 +74,10 @@
     <uses-permission android:name="android.permission.ACCESSIBILITY_EVENT_TRANSITION_TYPES" />
     <uses-permission android:name="android.permission.ACCESSIBILITY_EVENT_NOTIFICATION_TYPES" />
 
+    <!-- package manager test permissions -->
+    <uses-permission android:name="android.permission.INSTALL_PACKAGES" />
+    <uses-permission android:name="android.permission.DELETE_PACKAGES" />
+
     <application android:theme="@style/Theme">
         <uses-library android:name="android.test.runner" />
         <activity android:name="StubTestBrowserActivity" android:label="Stubbed Test Browser">

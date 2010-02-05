@@ -2166,7 +2166,7 @@ class ContextImpl extends Context {
                             filter, null, null, null);
                     // Register for events related to sdcard installation.
                     IntentFilter sdFilter = new IntentFilter();
-                    sdFilter.addAction(Intent.ACTION_MEDIA_RESOURCES_UNAVAILABLE);
+                    sdFilter.addAction(Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE);
                     mContext.registerReceiverInternal(sPackageRemovedReceiver,
                             sdFilter, null, null, null);
                 }
@@ -2189,7 +2189,7 @@ class ContextImpl extends Context {
                 String pkgList[] = null;
                 String action = intent.getAction();
                 boolean immediateGc = false;
-                if (Intent.ACTION_MEDIA_RESOURCES_UNAVAILABLE.equals(action)) {
+                if (Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE.equals(action)) {
                     pkgList = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
                     immediateGc = true;
                 } else {

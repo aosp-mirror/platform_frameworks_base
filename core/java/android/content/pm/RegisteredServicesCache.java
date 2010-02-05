@@ -117,8 +117,8 @@ public abstract class RegisteredServicesCache<V> {
         mContext.registerReceiver(receiver, intentFilter);
         // Register for events related to sdcard installation.
         IntentFilter sdFilter = new IntentFilter();
-        sdFilter.addAction(Intent.ACTION_MEDIA_RESOURCES_AVAILABLE);
-        sdFilter.addAction(Intent.ACTION_MEDIA_RESOURCES_UNAVAILABLE);
+        sdFilter.addAction(Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE);
+        sdFilter.addAction(Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE);
         mContext.registerReceiver(receiver, sdFilter);
     }
 

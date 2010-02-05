@@ -344,8 +344,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 if (pkg != null) {
                     pkgList = new String[] { pkg };
                 }
-            } else if (Intent.ACTION_MEDIA_RESOURCES_AVAILABLE.equals(action) ||
-                    Intent.ACTION_MEDIA_RESOURCES_UNAVAILABLE.equals(action)) {
+            } else if (Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE.equals(action) ||
+                    Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE.equals(action)) {
                 pkgList = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
             }
             if (pkgList == null || pkgList.length == 0) {
@@ -448,8 +448,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         mContext.registerReceiver(mBroadcastReceiver, packageFilt);
         // Register for events related to sdcard installation.
         IntentFilter sdFilter = new IntentFilter();
-        sdFilter.addAction(Intent.ACTION_MEDIA_RESOURCES_AVAILABLE);
-        sdFilter.addAction(Intent.ACTION_MEDIA_RESOURCES_UNAVAILABLE);
+        sdFilter.addAction(Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE);
+        sdFilter.addAction(Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE);
         mContext.registerReceiver(mBroadcastReceiver, sdFilter);
 
         IntentFilter screenOnOffFilt = new IntentFilter();

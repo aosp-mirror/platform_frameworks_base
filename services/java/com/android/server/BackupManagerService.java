@@ -565,8 +565,8 @@ class BackupManagerService extends IBackupManager.Stub {
         mContext.registerReceiver(mBroadcastReceiver, filter);
         // Register for events related to sdcard installation.
         IntentFilter sdFilter = new IntentFilter();
-        sdFilter.addAction(Intent.ACTION_MEDIA_RESOURCES_AVAILABLE);
-        sdFilter.addAction(Intent.ACTION_MEDIA_RESOURCES_UNAVAILABLE);
+        sdFilter.addAction(Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE);
+        sdFilter.addAction(Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE);
         mContext.registerReceiver(mBroadcastReceiver, sdFilter);
     }
 
@@ -724,10 +724,10 @@ class BackupManagerService extends IBackupManager.Stub {
                 }
                 added = Intent.ACTION_PACKAGE_ADDED.equals(action);
                 replacing = extras.getBoolean(Intent.EXTRA_REPLACING, false);
-            } else if (Intent.ACTION_MEDIA_RESOURCES_AVAILABLE.equals(action)) {
+            } else if (Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE.equals(action)) {
                 added = true;
                 pkgList = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
-            } else if (Intent.ACTION_MEDIA_RESOURCES_UNAVAILABLE.equals(action)) {
+            } else if (Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE.equals(action)) {
                 added = false;
                 pkgList = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
             }
