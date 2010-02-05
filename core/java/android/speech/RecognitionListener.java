@@ -24,12 +24,6 @@ import android.os.Bundle;
  * Application main thread.
  */
 public interface RecognitionListener {
-
-    /**
-     * Called when RecognitionManager is successfully initialized
-     */
-    void onInit();
-
     /**
      * Called when the endpointer is ready for the user to start speaking.
      * 
@@ -76,7 +70,7 @@ public interface RecognitionListener {
      * 
      * @param results the recognition results. To retrieve the results in {@code
      *        ArrayList&lt;String&gt;} format use {@link Bundle#getStringArrayList(String)} with
-     *        {@link RecognitionManager#RECOGNITION_RESULTS_STRING_ARRAY} as a parameter
+     *        {@link RecognitionManager#RESULTS_RECOGNITION} as a parameter
      */
     void onResults(Bundle results);
 
@@ -89,8 +83,15 @@ public interface RecognitionListener {
      * 
      * @param partialResults the returned results. To retrieve the results in
      *        ArrayList&lt;String&gt; format use {@link Bundle#getStringArrayList(String)} with
-     *        {@link RecognitionManager#RECOGNITION_RESULTS_STRING_ARRAY} as a parameter
+     *        {@link RecognitionManager#RESULTS_RECOGNITION} as a parameter
      */
     void onPartialResults(Bundle partialResults);
 
+    /**
+     * Reserved for adding future events.
+     * 
+     * @param eventType the type of the occurred event
+     * @param params a Bundle containing the passed parameters
+     */
+    void onEvent(int eventType, Bundle params);
 }
