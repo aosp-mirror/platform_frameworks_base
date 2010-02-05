@@ -28,6 +28,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.LocalPowerManager;
 import android.os.Message;
 import android.os.PowerManager;
@@ -138,6 +139,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
     private Context mContext;
     private AlarmManager mAlarmManager;
     private StatusBarManager mStatusBarManager;
+    private IBinder mSecureLockIcon = null;
 
     private boolean mSystemReady;
 
@@ -965,6 +967,19 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
         if (mStatusBarManager == null) {
             Log.w(TAG, "Could not get status bar manager");
         } else {
+            // Give feedback to user when secure keyguard is active and engaged
+            if (mShowing && isSecure()) {
+                if (mSecureLockIcon == null) {
+                    mSecureLockIcon = mStatusBarManager.addIcon("secure",
+                        com.android.internal.R.drawable.stat_sys_secure, 0);
+                }
+            } else {
+                if (mSecureLockIcon != null) {
+                    mStatusBarManager.removeIcon(mSecureLockIcon);
+                    mSecureLockIcon = null;
+                }
+            }
+
             // if the keyguard is shown, allow the status bar to open
             // only if the keyguard is insecure and is covered by another window
             boolean enable = !mShowing || (mHidden && !isSecure());
