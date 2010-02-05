@@ -360,7 +360,8 @@ public class LinearLayout extends ViewGroup {
                 // Optimization: don't bother measuring children who are going to use
                 // leftover space. These views will get measured again down below if
                 // there is any leftover space.
-                mTotalLength += lp.topMargin + lp.bottomMargin;
+                final int totalLength = mTotalLength;
+                mTotalLength = Math.max(totalLength, totalLength + lp.topMargin + lp.bottomMargin);
             } else {
                 int oldHeight = Integer.MIN_VALUE;
 
@@ -385,8 +386,9 @@ public class LinearLayout extends ViewGroup {
                 }
 
                 final int childHeight = child.getMeasuredHeight();
-                mTotalLength += childHeight + lp.topMargin +
-                       lp.bottomMargin + getNextLocationOffset(child);
+                final int totalLength = mTotalLength;
+                mTotalLength = Math.max(totalLength, totalLength + childHeight + lp.topMargin +
+                       lp.bottomMargin + getNextLocationOffset(child));
 
                 if (useLargestChild) {
                     largestChildHeight = Math.max(childHeight, largestChildHeight);
@@ -459,8 +461,10 @@ public class LinearLayout extends ViewGroup {
 
                 final LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams)
                         child.getLayoutParams();
-                mTotalLength += largestChildHeight + lp.topMargin+ lp.bottomMargin +
-                        getNextLocationOffset(child);
+                // Account for negative margins
+                final int totalLength = mTotalLength;
+                mTotalLength = Math.max(totalLength, totalLength + largestChildHeight +
+                        lp.topMargin + lp.bottomMargin + getNextLocationOffset(child));
             }
         }
 
@@ -536,12 +540,14 @@ public class LinearLayout extends ViewGroup {
 
                 allFillParent = allFillParent && lp.width == LayoutParams.MATCH_PARENT;
 
-                mTotalLength += child.getMeasuredHeight() + lp.topMargin +
-                        lp.bottomMargin + getNextLocationOffset(child);
+                final int totalLength = mTotalLength;
+                mTotalLength = Math.max(totalLength, totalLength + child.getMeasuredHeight() +
+                        lp.topMargin + lp.bottomMargin + getNextLocationOffset(child));
             }
 
             // Add in our padding
-            mTotalLength += mPaddingTop + mPaddingBottom;            
+            mTotalLength += mPaddingTop + mPaddingBottom;
+            // TODO: Should we recompute the heightSpec based on the new total length?
         } else {
             alternativeMaxWidth = Math.max(alternativeMaxWidth,
                                            weightedMaxWidth);
@@ -651,7 +657,8 @@ public class LinearLayout extends ViewGroup {
                 // Optimization: don't bother measuring children who are going to use
                 // leftover space. These views will get measured again down below if
                 // there is any leftover space.
-                mTotalLength += lp.leftMargin + lp.rightMargin;
+                final int totalLength = mTotalLength;
+                mTotalLength = Math.max(totalLength, totalLength + lp.leftMargin + lp.rightMargin);
 
                 // Baseline alignment requires to measure widgets to obtain the
                 // baseline offset (in particular for TextViews).
@@ -686,8 +693,9 @@ public class LinearLayout extends ViewGroup {
                 }
 
                 final int childWidth = child.getMeasuredWidth();
-                mTotalLength += childWidth + lp.leftMargin + lp.rightMargin +
-                        getNextLocationOffset(child);
+                final int totalLength = mTotalLength;
+                mTotalLength = Math.max(totalLength, totalLength + childWidth + lp.leftMargin +
+                        lp.rightMargin + getNextLocationOffset(child));
 
                 if (useLargestChild) {
                     largestChildWidth = Math.max(childWidth, largestChildWidth);
@@ -772,8 +780,9 @@ public class LinearLayout extends ViewGroup {
 
                 final LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams)
                         child.getLayoutParams();
-                mTotalLength += largestChildWidth + lp.leftMargin + lp.rightMargin +
-                        getNextLocationOffset(child);
+                final int totalLength = mTotalLength;
+                mTotalLength = Math.max(totalLength, totalLength + largestChildWidth +
+                        lp.leftMargin + lp.rightMargin + getNextLocationOffset(child));
             }
         }
 
@@ -843,8 +852,9 @@ public class LinearLayout extends ViewGroup {
                     }
                 }
 
-                mTotalLength += child.getMeasuredWidth() + lp.leftMargin +
-                        lp.rightMargin + getNextLocationOffset(child);
+                final int totalLength = mTotalLength;
+                mTotalLength = Math.max(totalLength, totalLength + child.getMeasuredWidth() +
+                        lp.leftMargin + lp.rightMargin + getNextLocationOffset(child));
 
                 boolean matchHeightLocally = heightMode != MeasureSpec.EXACTLY &&
                         lp.height == LayoutParams.MATCH_PARENT;
@@ -875,6 +885,7 @@ public class LinearLayout extends ViewGroup {
 
             // Add in our padding
             mTotalLength += mPaddingLeft + mPaddingRight;
+            // TODO: Should we update widthSize with the new total length?
 
             // Check mMaxAscent[INDEX_TOP] first because it maps to Gravity.TOP,
             // the most common case
