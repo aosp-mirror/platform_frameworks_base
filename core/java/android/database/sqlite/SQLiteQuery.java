@@ -18,7 +18,6 @@ package android.database.sqlite;
 
 import android.database.CursorWindow;
 import android.os.Debug;
-import android.os.SystemClock;
 import android.util.Log;
 
 /**

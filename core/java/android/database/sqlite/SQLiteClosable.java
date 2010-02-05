@@ -29,7 +29,7 @@ public abstract class SQLiteClosable {
         synchronized(mLock) {
             if (mReferenceCount <= 0) {
                 throw new IllegalStateException(
-                        "attempt to acquire a reference on a close SQLiteClosable");
+                        "attempt to acquire a reference on an already-closed SQLiteClosable obj.");
             }
             mReferenceCount++;     
         }
