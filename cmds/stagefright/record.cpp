@@ -106,6 +106,9 @@ sp<MediaSource> createSource(const char *filename) {
 
     sp<MediaExtractor> extractor =
         MediaExtractor::Create(new FileSource(filename));
+    if (extractor == NULL) {
+        return NULL;
+    }
 
     size_t num_tracks = extractor->countTracks();
 
