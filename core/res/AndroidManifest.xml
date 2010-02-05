@@ -679,6 +679,12 @@
         android:label="@string/permlab_setWallpaperHints"
         android:description="@string/permdesc_setWallpaperHints" />
 
+    <!-- Allows applications to set the system time -->
+    <permission android:name="android.permission.SET_TIME"
+        android:protectionLevel="signatureOrSystem"
+        android:label="@string/permlab_setTime"
+        android:description="@string/permdesc_setTime" />
+
     <!-- Allows applications to set the system time zone -->
     <permission android:name="android.permission.SET_TIME_ZONE"
         android:permissionGroup="android.permission-group.SYSTEM_TOOLS"

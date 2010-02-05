@@ -242,6 +242,14 @@ class AlarmManagerService extends IAlarmManager.Stub {
         setRepeating(type, bucketTime, interval, operation);
     }
 
+    public void setTime(long millis) {
+        mContext.enforceCallingOrSelfPermission(
+                "android.permission.SET_TIME",
+                "setTime");
+
+        SystemClock.setCurrentTimeMillis(millis);
+    }
+
     public void setTimeZone(String tz) {
         mContext.enforceCallingOrSelfPermission(
                 "android.permission.SET_TIME_ZONE",
