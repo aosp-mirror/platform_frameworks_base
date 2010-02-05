@@ -16,7 +16,7 @@
 
 package com.android.unit_tests;
 
-import android.os.IMountService.Stub;
+import android.os.storage.IMountService.Stub;
 
 import android.net.Uri;
 import android.os.FileUtils;
@@ -54,8 +54,8 @@ import android.util.Log;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.IMountService;
-import android.os.MountServiceResultCode;
+import android.os.storage.IMountService;
+import android.os.storage.StorageResultCode;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.StatFs;
@@ -662,7 +662,7 @@ public class PackageManagerTests extends AndroidTestCase {
         try {
         String mPath = Environment.getExternalStorageDirectory().toString();
         int ret = getMs().mountVolume(mPath);
-        return ret == MountServiceResultCode.OperationSucceeded;
+        return ret == StorageResultCode.OperationSucceeded;
         } catch (RemoteException e) {
             return false;
         }
@@ -675,7 +675,7 @@ public class PackageManagerTests extends AndroidTestCase {
         try {
         String mPath = Environment.getExternalStorageDirectory().toString();
         int ret = getMs().unmountVolume(mPath);
-        return ret == MountServiceResultCode.OperationSucceeded;
+        return ret == StorageResultCode.OperationSucceeded;
         } catch (RemoteException e) {
             return true;
         }

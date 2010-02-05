@@ -41,7 +41,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
-import android.os.IMountService;
+import android.os.storage.IMountService;
 import android.os.IPowerManager;
 import android.os.LocalPowerManager;
 import android.os.Power;

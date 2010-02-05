@@ -111,8 +111,8 @@ LOCAL_SRC_FILES += \
 	core/java/android/net/INetworkManagementEventObserver.aidl \
 	core/java/android/os/ICheckinService.aidl \
 	core/java/android/os/IMessenger.aidl \
-	core/java/android/os/IMountService.aidl \
-	core/java/android/os/IMountServiceListener.aidl \
+	core/java/android/os/storage/IMountService.aidl \
+	core/java/android/os/storage/IMountServiceListener.aidl \
 	core/java/android/os/INetworkManagementService.aidl \
 	core/java/android/os/INetStatService.aidl \
 	core/java/android/os/IParentalControlCallback.aidl \

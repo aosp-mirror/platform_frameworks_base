@@ -6,8 +6,8 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Debug;
 import android.os.IBinder;
-import android.os.IMountService;
-import android.os.MountServiceResultCode;
+import android.os.storage.IMountService;
+import android.os.storage.StorageResultCode;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
@@ -158,12 +158,12 @@ public class DefaultContainerService extends Service {
             int rc = mountService.createSecureContainer(
                     containerId, mbLen, "vfat", sdEncKey, ownerUid);
 
-            if (rc != MountServiceResultCode.OperationSucceeded) {
+            if (rc != StorageResultCode.OperationSucceeded) {
                 Log.e(TAG, String.format("Container creation failed (%d)", rc));
 
                 // XXX: This destroy should not be necessary
                 rc = mountService.destroySecureContainer(containerId);
-                if (rc != MountServiceResultCode.OperationSucceeded) {
+                if (rc != StorageResultCode.OperationSucceeded) {
                     Log.e(TAG, String.format("Container creation-cleanup failed (%d)", rc));
                     return null;
                 }
@@ -171,7 +171,7 @@ public class DefaultContainerService extends Service {
                 // XXX: Does this ever actually succeed?
                 rc = mountService.createSecureContainer(
                         containerId, mbLen, "vfat", sdEncKey, ownerUid);
-                if (rc != MountServiceResultCode.OperationSucceeded) {
+                if (rc != StorageResultCode.OperationSucceeded) {
                     Log.e(TAG, String.format("Container creation retry failed (%d)", rc));
                 }
             }
@@ -226,7 +226,7 @@ public class DefaultContainerService extends Service {
     private String mountSdDir(String containerId, String key) {
         try {
             int rc = getMountService().mountSecureContainer(containerId, key, Process.myUid());
-            if (rc == MountServiceResultCode.OperationSucceeded) {
+            if (rc == StorageResultCode.OperationSucceeded) {
                 return getMountService().getSecureContainerPath(containerId);
             } else {
                 Log.e(TAG, String.format("Failed to mount id %s with rc %d ", containerId, rc));

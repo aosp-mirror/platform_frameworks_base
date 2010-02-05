@@ -23,9 +23,9 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.net.Uri;
-import android.os.IMountService;
-import android.os.IMountServiceListener;
-import android.os.MountServiceResultCode;
+import android.os.storage.IMountService;
+import android.os.storage.IMountServiceListener;
+import android.os.storage.StorageResultCode;
 import android.os.RemoteException;
 import android.os.IBinder;
 import android.os.Environment;
@@ -42,11 +42,14 @@ import java.io.File;
 import java.io.FileReader;
 
 /**
- * MountService implements an to the mount service daemon
- * @hide
+ * MountService implements back-end services for platform storage
+ * management.
+ * @hide - Applications should use android.os.storage.StorageManager
+ * to access the MountService.
  */
 class MountService extends IMountService.Stub
         implements INativeDaemonConnectorCallbacks {
+    private static final boolean LOCAL_LOGD = false;
     
     private static final String TAG = "MountService";
 
@@ -135,7 +138,7 @@ class MountService extends IMountService.Stub
                 String path = Environment.getExternalStorageDirectory().getPath();
                 if (getVolumeState(path).equals(Environment.MEDIA_UNMOUNTED)) {
                     int rc = doMountVolume(path);
-                    if (rc != MountServiceResultCode.OperationSucceeded) {
+                    if (rc != StorageResultCode.OperationSucceeded) {
                         Log.e(TAG, String.format("Boot-time mount failed (%d)", rc));
                     }
                 }
@@ -152,7 +155,7 @@ class MountService extends IMountService.Stub
         }
 
         public void binderDied() {
-            Log.d(TAG, "An IMountServiceListener has died!");
+            if (LOCAL_LOGD) Log.d(TAG, "An IMountServiceListener has died!");
             synchronized(mListeners) {
                 mListeners.remove(this);
                 mListener.asBinder().unlinkToDeath(this, 0);
@@ -173,9 +176,9 @@ class MountService extends IMountService.Stub
          */
         String vs = getVolumeState(path);
         if (enable && vs.equals(Environment.MEDIA_MOUNTED)) {
-            mUmsEnabling = enable; // Supress unmounted events
+            mUmsEnabling = enable; // Override for isUsbMassStorageEnabled()
             doUnmountVolume(path);
-            mUmsEnabling = false; // Unsupress unmounted events
+            mUmsEnabling = false; // Clear override
         }
 
         try {
@@ -183,14 +186,14 @@ class MountService extends IMountService.Stub
                     "volume %sshare %s %s", (enable ? "" : "un"), path, method));
         } catch (NativeDaemonConnectorException e) {
             Log.e(TAG, "Failed to share/unshare", e);
-            return MountServiceResultCode.OperationFailedInternalError;
+            return StorageResultCode.OperationFailedInternalError;
         }
 
         /*
          * If we disabled UMS then mount the volume
          */
         if (!enable) {
-            if (doMountVolume(path) != MountServiceResultCode.OperationSucceeded) {
+            if (doMountVolume(path) != StorageResultCode.OperationSucceeded) {
                 Log.e(TAG, String.format(
                         "Failed to remount %s after disabling share method %s", path, method));
                 /*
@@ -201,7 +204,7 @@ class MountService extends IMountService.Stub
             }
         }
 
-        return MountServiceResultCode.OperationSucceeded;
+        return StorageResultCode.OperationSucceeded;
     }
 
     private void updatePublicVolumeState(String path, String state) {
@@ -209,7 +212,11 @@ class MountService extends IMountService.Stub
             Log.w(TAG, "Multiple volumes not currently supported");
             return;
         }
-        Log.i(TAG, "State for {" + path + "} = {" + state + "}");
+
+        if (mLegacyState.equals(state)) {
+            Log.w(TAG, String.format("Duplicate state transition (%s -> %s)", mLegacyState, state));
+            return;
+        }
 
         String oldState = mLegacyState;
         mLegacyState = state;
@@ -218,7 +225,7 @@ class MountService extends IMountService.Stub
             for (int i = mListeners.size() -1; i >= 0; i--) {
                 MountServiceBinderListener bl = mListeners.get(i);
                 try {
-                    bl.mListener.onVolumeStateChanged("", path, oldState, state);
+                    bl.mListener.onStorageStateChanged(path, oldState, state);
                 } catch (RemoteException rex) {
                     Log.e(TAG, "Listener dead");
                     mListeners.remove(i);
@@ -296,13 +303,11 @@ class MountService extends IMountService.Stub
     }
 
     /**
-     *
      * Callback from NativeDaemonConnector
      */
     public boolean onEvent(int code, String raw, String[] cooked) {
         Intent in = null;
 
-        // Log.d(TAG, "event {" + raw + "}");
         if (code == VoldResponseCode.VolumeStateChange) {
             /*
              * One of the volumes we're managing has changed state.
@@ -339,34 +344,12 @@ class MountService extends IMountService.Stub
                 Log.e(TAG, "Failed to parse major/minor", ex);
             }
 
-            synchronized (mListeners) {
-                for (int i = mListeners.size() -1; i >= 0; i--) {
-                    MountServiceBinderListener bl = mListeners.get(i);
-                    try {
-                        if (code == VoldResponseCode.VolumeDiskInserted) {
-                            bl.mListener.onMediaInserted(label, path, major, minor);
-                        } else if (code == VoldResponseCode.VolumeDiskRemoved) {
-                            bl.mListener.onMediaRemoved(label, path, major, minor, true);
-                        } else if (code == VoldResponseCode.VolumeBadRemoval) {
-                            bl.mListener.onMediaRemoved(label, path, major, minor, false);
-                        } else {
-                            Log.e(TAG, String.format("Unknown code {%d}", code));
-                        }
-                    } catch (RemoteException rex) {
-                        Log.e(TAG, "Listener dead");
-                        mListeners.remove(i);
-                    } catch (Exception ex) {
-                        Log.e(TAG, "Listener failed", ex);
-                    }
-                }
-            }
-
             if (code == VoldResponseCode.VolumeDiskInserted) {
                 new Thread() {
                     public void run() {
                         try {
                             int rc;
-                            if ((rc = doMountVolume(path)) != MountServiceResultCode.OperationSucceeded) {
+                            if ((rc = doMountVolume(path)) != StorageResultCode.OperationSucceeded) {
                                 Log.w(TAG, String.format("Insertion mount failed (%d)", rc));
                             }
                         } catch (Exception ex) {
@@ -489,7 +472,7 @@ class MountService extends IMountService.Stub
     }
 
     private int doMountVolume(String path) {
-        int rc = MountServiceResultCode.OperationSucceeded;
+        int rc = StorageResultCode.OperationSucceeded;
 
         try {
             mConnector.doCommand(String.format("volume mount %s", path));
@@ -503,23 +486,23 @@ class MountService extends IMountService.Stub
                 /*
                  * Attempt to mount but no media inserted
                  */
-                rc = MountServiceResultCode.OperationFailedNoMedia;
+                rc = StorageResultCode.OperationFailedNoMedia;
             } else if (code == VoldResponseCode.OpFailedMediaBlank) {
                 /*
                  * Media is blank or does not contain a supported filesystem
                  */
                 updatePublicVolumeState(path, Environment.MEDIA_NOFS);
                 in = new Intent(Intent.ACTION_MEDIA_NOFS, Uri.parse("file://" + path));
-                rc = MountServiceResultCode.OperationFailedMediaBlank;
+                rc = StorageResultCode.OperationFailedMediaBlank;
             } else if (code == VoldResponseCode.OpFailedMediaCorrupt) {
                 /*
                  * Volume consistency check failed
                  */
                 updatePublicVolumeState(path, Environment.MEDIA_UNMOUNTABLE);
                 in = new Intent(Intent.ACTION_MEDIA_UNMOUNTABLE, Uri.parse("file://" + path));
-                rc = MountServiceResultCode.OperationFailedMediaCorrupt;
+                rc = StorageResultCode.OperationFailedMediaCorrupt;
             } else {
-                rc = MountServiceResultCode.OperationFailedInternalError;
+                rc = StorageResultCode.OperationFailedInternalError;
             }
 
             /*
@@ -544,15 +527,15 @@ class MountService extends IMountService.Stub
         mPms.updateExternalMediaStatus(false);
         try {
             mConnector.doCommand(String.format("volume unmount %s", path));
-            return MountServiceResultCode.OperationSucceeded;
+            return StorageResultCode.OperationSucceeded;
         } catch (NativeDaemonConnectorException e) {
             // Don't worry about mismatch in PackageManager since the
             // call back will handle the status changes any way.
             int code = e.getCode();
             if (code == VoldResponseCode.OpFailedVolNotMounted) {
-                return MountServiceResultCode.OperationFailedVolumeNotMounted;
+                return StorageResultCode.OperationFailedVolumeNotMounted;
             } else {
-                return MountServiceResultCode.OperationFailedInternalError;
+                return StorageResultCode.OperationFailedInternalError;
             }
         }
     }
@@ -561,17 +544,43 @@ class MountService extends IMountService.Stub
         try {
             String cmd = String.format("volume format %s", path);
             mConnector.doCommand(cmd);
-            return MountServiceResultCode.OperationSucceeded;
+            return StorageResultCode.OperationSucceeded;
         } catch (NativeDaemonConnectorException e) {
             int code = e.getCode();
             if (code == VoldResponseCode.OpFailedNoMedia) {
-                return MountServiceResultCode.OperationFailedNoMedia;
+                return StorageResultCode.OperationFailedNoMedia;
             } else if (code == VoldResponseCode.OpFailedMediaCorrupt) {
-                return MountServiceResultCode.OperationFailedMediaCorrupt;
+                return StorageResultCode.OperationFailedMediaCorrupt;
             } else {
-                return MountServiceResultCode.OperationFailedInternalError;
+                return StorageResultCode.OperationFailedInternalError;
             }
         }
+    }
+
+    private boolean doGetVolumeShared(String path, String method) {
+        String cmd = String.format("volume shared %s %s", path, method);
+        ArrayList<String> rsp = mConnector.doCommand(cmd);
+
+        for (String line : rsp) {
+            String []tok = line.split(" ");
+            int code;
+            try {
+                code = Integer.parseInt(tok[0]);
+            } catch (NumberFormatException nfe) {
+                Log.e(TAG, String.format("Error parsing code %s", tok[0]));
+                return false;
+            }
+            if (code == VoldResponseCode.ShareEnabledResult) {
+                if (tok[2].equals("enabled"))
+                    return true;
+                return false;
+            } else {
+                Log.e(TAG, String.format("Unexpected response code %d", code));
+                return false;
+            }
+        }
+        Log.e(TAG, "Got an empty response");
+        return false;
     }
 
     private void notifyShareAvailabilityChange(String method, final boolean avail) {
@@ -584,7 +593,7 @@ class MountService extends IMountService.Stub
             for (int i = mListeners.size() -1; i >= 0; i--) {
                 MountServiceBinderListener bl = mListeners.get(i);
                 try {
-                    bl.mListener.onShareAvailabilityChanged(method, avail);
+                    bl.mListener.onUsbMassStorageConnectionChanged(avail);
                 } catch (RemoteException rex) {
                     Log.e(TAG, "Listener dead");
                     mListeners.remove(i);
@@ -685,7 +694,7 @@ class MountService extends IMountService.Stub
              * the UMS host could have dirty FAT cache entries
              * yet to flush.
              */
-            if (unshareVolume(path, "ums") != MountServiceResultCode.OperationSucceeded) {
+            if (setUsbMassStorageEnabled(false) != StorageResultCode.OperationSucceeded) {
                 Log.e(TAG, "UMS disable on shutdown failed");
             }
         } else if (state.equals(Environment.MEDIA_CHECKING)) {
@@ -713,58 +722,30 @@ class MountService extends IMountService.Stub
             /*
              * If the media is mounted, then gracefully unmount it.
              */
-            if (doUnmountVolume(path) != MountServiceResultCode.OperationSucceeded) {
+            if (doUnmountVolume(path) != StorageResultCode.OperationSucceeded) {
                 Log.e(TAG, "Failed to unmount media for shutdown");
             }
         }
     }
 
-    public String[] getShareMethodList() {
-        String[] rdata = new String[1];
-        rdata[0] = "ums";
-        return rdata;
-    }
-
-    public boolean getShareMethodAvailable(String method) {
+    public boolean isUsbMassStorageConnected() {
         waitForReady();
-        return doGetShareMethodAvailable(method);
-    }
 
-    public int shareVolume(String path, String method) {
-        waitForReady();
-        return doShareUnshareVolume(path, method, true);
-    }
-
-    public int unshareVolume(String path, String method) {
-        waitForReady();
-        return doShareUnshareVolume(path, method, false);
-    }
-
-    public boolean getVolumeShared(String path, String method) {
-        waitForReady();
-        String cmd = String.format("volume shared %s %s", path, method);
-        ArrayList<String> rsp = mConnector.doCommand(cmd);
-
-        for (String line : rsp) {
-            String []tok = line.split(" ");
-            int code;
-            try {
-                code = Integer.parseInt(tok[0]);
-            } catch (NumberFormatException nfe) {
-                Log.e(TAG, String.format("Error parsing code %s", tok[0]));
-                return false;
-            }
-            if (code == VoldResponseCode.ShareEnabledResult) {
-                if (tok[2].equals("enabled"))
-                    return true;
-                return false;
-            } else {
-                Log.e(TAG, String.format("Unexpected response code %d", code));
-                return false;
-            }
+        if (mUmsEnabling) {
+            return true;
         }
-        Log.e(TAG, "Got an empty response");
-        return false;
+        return doGetShareMethodAvailable("ums");
+    }
+
+    public int setUsbMassStorageEnabled(boolean enable) {
+        waitForReady();
+
+        return doShareUnshareVolume(Environment.getExternalStorageDirectory().getPath(), "ums", enable);
+    }
+
+    public boolean isUsbMassStorageEnabled() {
+        waitForReady();
+        return doGetVolumeShared(Environment.getExternalStorageDirectory().getPath(), "ums");
     }
     
     /**
@@ -804,12 +785,16 @@ class MountService extends IMountService.Stub
         return doFormatVolume(path);
     }
 
+    private void warnOnNotMounted() {
+        if (!Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
+            Log.w(TAG, "getSecureContainerList() called when storage not mounted");
+        }
+    }
+
     public String[] getSecureContainerList() {
         validatePermission(android.Manifest.permission.ASEC_ACCESS);
         waitForReady();
-        if (Environment.getExternalStorageState() != Environment.MEDIA_MOUNTED) {
-            Log.w(TAG, "getSecureContainerList() called when storage not mounted");
-        }
+        warnOnNotMounted();
 
         try {
             return mConnector.doListCommand("asec list", VoldResponseCode.AsecListResult);
@@ -822,31 +807,27 @@ class MountService extends IMountService.Stub
                                     String key, int ownerUid) {
         validatePermission(android.Manifest.permission.ASEC_CREATE);
         waitForReady();
-        if (Environment.getExternalStorageState() != Environment.MEDIA_MOUNTED) {
-            Log.w(TAG, "createSecureContainer() called when storage not mounted");
-        }
+        warnOnNotMounted();
 
-        int rc = MountServiceResultCode.OperationSucceeded;
+        int rc = StorageResultCode.OperationSucceeded;
         String cmd = String.format("asec create %s %d %s %s %d", id, sizeMb, fstype, key, ownerUid);
         try {
             mConnector.doCommand(cmd);
         } catch (NativeDaemonConnectorException e) {
-            rc = MountServiceResultCode.OperationFailedInternalError;
+            rc = StorageResultCode.OperationFailedInternalError;
         }
         return rc;
     }
 
     public int finalizeSecureContainer(String id) {
         validatePermission(android.Manifest.permission.ASEC_CREATE);
-        if (Environment.getExternalStorageState() != Environment.MEDIA_MOUNTED) {
-            Log.w(TAG, "finalizeSecureContainer() called when storage not mounted");
-        }
+        warnOnNotMounted();
 
-        int rc = MountServiceResultCode.OperationSucceeded;
+        int rc = StorageResultCode.OperationSucceeded;
         try {
             mConnector.doCommand(String.format("asec finalize %s", id));
         } catch (NativeDaemonConnectorException e) {
-            rc = MountServiceResultCode.OperationFailedInternalError;
+            rc = StorageResultCode.OperationFailedInternalError;
         }
         return rc;
     }
@@ -854,15 +835,13 @@ class MountService extends IMountService.Stub
     public int destroySecureContainer(String id) {
         validatePermission(android.Manifest.permission.ASEC_DESTROY);
         waitForReady();
-        if (Environment.getExternalStorageState() != Environment.MEDIA_MOUNTED) {
-            Log.w(TAG, "destroySecureContainer() called when storage not mounted");
-        }
+        warnOnNotMounted();
 
-        int rc = MountServiceResultCode.OperationSucceeded;
+        int rc = StorageResultCode.OperationSucceeded;
         try {
             mConnector.doCommand(String.format("asec destroy %s", id));
         } catch (NativeDaemonConnectorException e) {
-            rc = MountServiceResultCode.OperationFailedInternalError;
+            rc = StorageResultCode.OperationFailedInternalError;
         }
         return rc;
     }
@@ -870,16 +849,14 @@ class MountService extends IMountService.Stub
     public int mountSecureContainer(String id, String key, int ownerUid) {
         validatePermission(android.Manifest.permission.ASEC_MOUNT_UNMOUNT);
         waitForReady();
-        if (Environment.getExternalStorageState() != Environment.MEDIA_MOUNTED) {
-            Log.w(TAG, "mountSecureContainer() called when storage not mounted");
-        }
+        warnOnNotMounted();
 
-        int rc = MountServiceResultCode.OperationSucceeded;
+        int rc = StorageResultCode.OperationSucceeded;
         String cmd = String.format("asec mount %s %s %d", id, key, ownerUid);
         try {
             mConnector.doCommand(cmd);
         } catch (NativeDaemonConnectorException e) {
-            rc = MountServiceResultCode.OperationFailedInternalError;
+            rc = StorageResultCode.OperationFailedInternalError;
         }
         return rc;
     }
@@ -887,16 +864,14 @@ class MountService extends IMountService.Stub
     public int unmountSecureContainer(String id) {
         validatePermission(android.Manifest.permission.ASEC_MOUNT_UNMOUNT);
         waitForReady();
-        if (Environment.getExternalStorageState() != Environment.MEDIA_MOUNTED) {
-            Log.w(TAG, "unmountSecureContainer() called when storage not mounted");
-        }
+        warnOnNotMounted();
 
-        int rc = MountServiceResultCode.OperationSucceeded;
+        int rc = StorageResultCode.OperationSucceeded;
         String cmd = String.format("asec unmount %s", id);
         try {
             mConnector.doCommand(cmd);
         } catch (NativeDaemonConnectorException e) {
-            rc = MountServiceResultCode.OperationFailedInternalError;
+            rc = StorageResultCode.OperationFailedInternalError;
         }
         return rc;
     }
@@ -904,16 +879,14 @@ class MountService extends IMountService.Stub
     public int renameSecureContainer(String oldId, String newId) {
         validatePermission(android.Manifest.permission.ASEC_RENAME);
         waitForReady();
-        if (Environment.getExternalStorageState() != Environment.MEDIA_MOUNTED) {
-            Log.w(TAG, "renameSecureContainer() called when storage not mounted");
-        }
+        warnOnNotMounted();
 
-        int rc = MountServiceResultCode.OperationSucceeded;
+        int rc = StorageResultCode.OperationSucceeded;
         String cmd = String.format("asec rename %s %s", oldId, newId);
         try {
             mConnector.doCommand(cmd);
         } catch (NativeDaemonConnectorException e) {
-            rc = MountServiceResultCode.OperationFailedInternalError;
+            rc = StorageResultCode.OperationFailedInternalError;
         }
         return rc;
     }
@@ -921,9 +894,7 @@ class MountService extends IMountService.Stub
     public String getSecureContainerPath(String id) {
         validatePermission(android.Manifest.permission.ASEC_ACCESS);
         waitForReady();
-        if (Environment.getExternalStorageState() != Environment.MEDIA_MOUNTED) {
-            Log.w(TAG, "getSecureContainerPath() called when storage not mounted");
-        }
+        warnOnNotMounted();
 
         ArrayList<String> rsp = mConnector.doCommand("asec path " + id);
 

@@ -18,7 +18,7 @@ package android.os;
 
 import java.io.File;
 
-import android.os.IMountService;
+import android.os.storage.IMountService;
 
 /**
  * Provides access to environment variables.

@@ -74,7 +74,7 @@ import android.os.Environment;
 import android.os.FileObserver;
 import android.os.FileUtils;
 import android.os.Handler;
-import android.os.MountServiceResultCode;
+import android.os.storage.StorageResultCode;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.ServiceManager;
@@ -8295,17 +8295,17 @@ class PackageManagerService extends IPackageManager.Stub {
 
         int rc = mountService.createSecureContainer(
                 pkgName, mbLen, "vfat", sdEncKey, Process.SYSTEM_UID);
-        if (rc != MountServiceResultCode.OperationSucceeded) {
+        if (rc != StorageResultCode.OperationSucceeded) {
             Log.e(TAG, String.format("Failed to create container (%d)", rc));
 
             rc = mountService.destroySecureContainer(pkgName);
-            if (rc != MountServiceResultCode.OperationSucceeded) {
+            if (rc != StorageResultCode.OperationSucceeded) {
                 Log.e(TAG, String.format("Failed to cleanup container (%d)", rc));
                 return null;
             }
             rc = mountService.createSecureContainer(
                     pkgName, mbLen, "vfat", sdEncKey, Process.SYSTEM_UID);
-            if (rc != MountServiceResultCode.OperationSucceeded) {
+            if (rc != StorageResultCode.OperationSucceeded) {
                 Log.e(TAG, String.format("Failed to create container (2nd try) (%d)", rc));
                 return null;
             }
@@ -8325,7 +8325,7 @@ class PackageManagerService extends IPackageManager.Stub {
 
        int rc = getMountService().mountSecureContainer(pkgName, sdEncKey, ownerUid);
 
-       if (rc != MountServiceResultCode.OperationSucceeded) {
+       if (rc != StorageResultCode.OperationSucceeded) {
            Log.i(TAG, "Failed to mount container for pkg : " + pkgName + " rc : " + rc);
            return null;
        }
@@ -8336,7 +8336,7 @@ class PackageManagerService extends IPackageManager.Stub {
    private boolean unMountSdDir(String pkgName) {
        // STOPSHIP unmount directory
        int rc = getMountService().unmountSecureContainer(pkgName);
-       if (rc != MountServiceResultCode.OperationSucceeded) {
+       if (rc != StorageResultCode.OperationSucceeded) {
            Log.e(TAG, "Failed to unmount : " + pkgName + " with rc " + rc);
            return false;
        }
@@ -8360,7 +8360,7 @@ class PackageManagerService extends IPackageManager.Stub {
 
     private boolean finalizeSdDir(String pkgName) {
         int rc = getMountService().finalizeSecureContainer(pkgName);
-        if (rc != MountServiceResultCode.OperationSucceeded) {
+        if (rc != StorageResultCode.OperationSucceeded) {
             Log.i(TAG, "Failed to finalize container for pkg : " + pkgName);
             return false;
         }
@@ -8369,7 +8369,7 @@ class PackageManagerService extends IPackageManager.Stub {
 
     private boolean destroySdDir(String pkgName) {
         int rc = getMountService().destroySecureContainer(pkgName);
-        if (rc != MountServiceResultCode.OperationSucceeded) {
+        if (rc != StorageResultCode.OperationSucceeded) {
             Log.i(TAG, "Failed to destroy container for pkg : " + pkgName);
             return false;
         }

@@ -84,7 +84,7 @@ import android.os.ServiceManager;
 import android.os.StatFs;
 import android.os.Vibrator;
 import android.os.FileUtils.FileStatus;
-import android.storage.StorageManager;
+import android.os.storage.StorageManager;
 import android.telephony.TelephonyManager;
 import android.text.ClipboardManager;
 import android.util.AndroidRuntimeException;

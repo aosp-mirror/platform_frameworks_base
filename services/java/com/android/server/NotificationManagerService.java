@@ -50,7 +50,7 @@ import android.os.Message;
 import android.os.Power;
 import android.os.Process;
 import android.os.RemoteException;
-import android.storage.StorageManager;
+import android.os.storage.StorageManager;
 import android.os.SystemProperties;
 import android.os.Vibrator;
 import android.provider.Settings;
