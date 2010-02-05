@@ -1840,7 +1840,7 @@ public class Intent implements Parcelable, Cloneable {
      * @hide
      */
     public static final String ACTION_REMOTE_INTENT =
-            "android.intent.action.REMOTE_INTENT";
+            "com.google.android.pushmessaging.intent.RECEIVE";
 
     /**
      * Broadcast Action: hook for permforming cleanup after a system update.

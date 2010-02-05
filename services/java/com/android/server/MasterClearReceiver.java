@@ -30,7 +30,7 @@ public class MasterClearReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         if (intent.getAction().equals(Intent.ACTION_REMOTE_INTENT)) {
-            if (!intent.getBooleanExtra("android.intent.extra.from_trusted_server", false)) {
+            if (!"google.com".equals(intent.getStringExtra("from"))) {
                 Log.w(TAG, "Ignoring master clear request -- not from trusted server.");
                 return;
             }
