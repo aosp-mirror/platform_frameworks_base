@@ -184,6 +184,20 @@ public final class Calendar {
          * <P>Type: INTEGER (long)</P>
          */
         public static final String _SYNC_DIRTY = "_sync_dirty";
+
+        /**
+         * The name of the account instance to which this row belongs, which when paired with
+         * {@link #ACCOUNT_TYPE} identifies a specific account.
+         * <P>Type: TEXT</P>
+         */
+        public static final String ACCOUNT_NAME = "account_name";
+
+        /**
+         * The type of account to which this row belongs, which when paired with
+         * {@link #ACCOUNT_NAME} identifies a specific account.
+         * <P>Type: TEXT</P>
+         */
+        public static final String ACCOUNT_TYPE = "account_type";
     }
 
     /**
@@ -578,20 +592,6 @@ public final class Calendar {
          */
         public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY +
                 "/event_entities");
-
-        /**
-         * The name of the account instance to which this row belongs, which when paired with
-         * {@link #ACCOUNT_TYPE} identifies a specific account.
-         * <P>Type: TEXT</P>
-         */
-        public static final String ACCOUNT_NAME = "_sync_account";
-
-        /**
-         * The type of account to which this row belongs, which when paired with
-         * {@link #ACCOUNT_NAME} identifies a specific account.
-         * <P>Type: TEXT</P>
-         */
-        public static final String ACCOUNT_TYPE = "_sync_account_type";
 
         public static EntityIterator newEntityIterator(Cursor cursor, ContentResolver resolver) {
             return new EntityIteratorImpl(cursor, resolver);
