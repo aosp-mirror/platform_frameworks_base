@@ -113,10 +113,14 @@ public class SyncQueue {
         SyncOperation best = null;
         long bestRunTime = 0;
         for (SyncOperation op : mOperationsMap.values()) {
-            long opRunTime = SyncManager.runTimeWithBackoffs(mSyncStorageEngine, op.account,
-                    op.authority,
-                    op.extras.getBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, false),
-                    op.earliestRunTime);
+            long opRunTime = op.earliestRunTime;
+            if (!op.extras.getBoolean(ContentResolver.SYNC_EXTRAS_IGNORE_BACKOFF, false)) {
+                Pair<Long, Long> backoff = mSyncStorageEngine.getBackoff(op.account, op.authority);
+                long delayUntil = mSyncStorageEngine.getDelayUntilTime(op.account, op.authority);
+                opRunTime = Math.max(
+                        Math.max(opRunTime, delayUntil),
+                        backoff != null ? backoff.first : 0);
+            }
             // if the expedited state of both ops are the same then compare their runtime.
             // Otherwise the candidate is only better than the current best if the candidate
             // is expedited.
