@@ -373,8 +373,11 @@ public class WifiService extends IWifiManager.Stub {
                     failedToStopSupplicantOrUnloadDriver = true;
                 }
 
-                // We must reset the interface before we unload the driver
-                mWifiStateTracker.resetInterface(false);
+                /**
+                 * Reset connections and disable interface
+                 * before we unload the driver
+                 */
+                mWifiStateTracker.resetConnections(true);
 
                 if (!WifiNative.unloadDriver()) {
                     Log.e(TAG, "Failed to unload Wi-Fi driver.");
