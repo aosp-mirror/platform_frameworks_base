@@ -102,7 +102,7 @@ public abstract class SQLiteProgram extends SQLiteClosable {
     }
 
     /**
-     * @deprecated use this.compiledStatement.compile instead
+     * @deprecated This method is deprecated and must not be used.
      *
      * @param sql the SQL string to compile
      * @param forceCompilation forces the SQL to be recompiled in the event that there is an
@@ -223,6 +223,7 @@ public abstract class SQLiteProgram extends SQLiteClosable {
     }
 
     /**
+     * @deprecated This method is deprecated and must not be used.
      * Compiles SQL into a SQLite program.
      *
      * <P>The database lock must be held when calling this method.
@@ -230,6 +231,10 @@ public abstract class SQLiteProgram extends SQLiteClosable {
      */
     @Deprecated
     protected final native void native_compile(String sql);
+
+    /**
+     * @deprecated This method is deprecated and must not be used.
+     */
     @Deprecated
     protected final native void native_finalize();
 

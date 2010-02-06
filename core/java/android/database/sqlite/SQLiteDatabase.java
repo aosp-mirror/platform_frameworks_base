@@ -66,64 +66,60 @@ public class SQLiteDatabase extends SQLiteClosable {
      * Algorithms used in ON CONFLICT clause
      * http://www.sqlite.org/lang_conflict.html
      */
-    public static final class ConflictAlgorithm {
-        /**
-         *  When a constraint violation occurs, an immediate ROLLBACK occurs,
-         * thus ending the current transaction, and the command aborts with a
-         * return code of SQLITE_CONSTRAINT. If no transaction is active
-         * (other than the implied transaction that is created on every command)
-         *  then this algorithm works the same as ABORT.
-         */
-        public static final int ROLLBACK = 1;
+    /**
+     *  When a constraint violation occurs, an immediate ROLLBACK occurs,
+     * thus ending the current transaction, and the command aborts with a
+     * return code of SQLITE_CONSTRAINT. If no transaction is active
+     * (other than the implied transaction that is created on every command)
+     *  then this algorithm works the same as ABORT.
+     */
+    public static final int CONFLICT_ROLLBACK = 1;
 
-        /**
-         * When a constraint violation occurs,no ROLLBACK is executed
-         * so changes from prior commands within the same transaction
-         * are preserved. This is the default behavior.
-         */
-        public static final int ABORT = 2;
+    /**
+     * When a constraint violation occurs,no ROLLBACK is executed
+     * so changes from prior commands within the same transaction
+     * are preserved. This is the default behavior.
+     */
+    public static final int CONFLICT_ABORT = 2;
 
-        /**
-         * When a constraint violation occurs, the command aborts with a return
-         * code SQLITE_CONSTRAINT. But any changes to the database that
-         * the command made prior to encountering the constraint violation
-         * are preserved and are not backed out.
-         */
-        public static final int FAIL = 3;
+    /**
+     * When a constraint violation occurs, the command aborts with a return
+     * code SQLITE_CONSTRAINT. But any changes to the database that
+     * the command made prior to encountering the constraint violation
+     * are preserved and are not backed out.
+     */
+    public static final int CONFLICT_FAIL = 3;
 
-        /**
-         * When a constraint violation occurs, the one row that contains
-         * the constraint violation is not inserted or changed.
-         * But the command continues executing normally. Other rows before and
-         * after the row that contained the constraint violation continue to be
-         * inserted or updated normally. No error is returned.
-         */
-        public static final int IGNORE = 4;
+    /**
+     * When a constraint violation occurs, the one row that contains
+     * the constraint violation is not inserted or changed.
+     * But the command continues executing normally. Other rows before and
+     * after the row that contained the constraint violation continue to be
+     * inserted or updated normally. No error is returned.
+     */
+    public static final int CONFLICT_IGNORE = 4;
 
-        /**
-         * When a UNIQUE constraint violation occurs, the pre-existing rows that
-         * are causing the constraint violation are removed prior to inserting
-         * or updating the current row. Thus the insert or update always occurs.
-         * The command continues executing normally. No error is returned.
-         * If a NOT NULL constraint violation occurs, the NULL value is replaced
-         * by the default value for that column. If the column has no default
-         * value, then the ABORT algorithm is used. If a CHECK constraint
-         * violation occurs then the IGNORE algorithm is used. When this conflict
-         * resolution strategy deletes rows in order to satisfy a constraint,
-         * it does not invoke delete triggers on those rows.
-         *  This behavior might change in a future release.
-         */
-        public static final int REPLACE = 5;
+    /**
+     * When a UNIQUE constraint violation occurs, the pre-existing rows that
+     * are causing the constraint violation are removed prior to inserting
+     * or updating the current row. Thus the insert or update always occurs.
+     * The command continues executing normally. No error is returned.
+     * If a NOT NULL constraint violation occurs, the NULL value is replaced
+     * by the default value for that column. If the column has no default
+     * value, then the ABORT algorithm is used. If a CHECK constraint
+     * violation occurs then the IGNORE algorithm is used. When this conflict
+     * resolution strategy deletes rows in order to satisfy a constraint,
+     * it does not invoke delete triggers on those rows.
+     *  This behavior might change in a future release.
+     */
+    public static final int CONFLICT_REPLACE = 5;
 
-        /**
-         * use the following when no conflict action is specified.
-         */
-        public static final int NONE = 0;
-        private static final String[] VALUES = new String[]
-                {"", " OR ROLLBACK ", " OR ABORT ", " OR FAIL ", " OR IGNORE ", " OR REPLACE "};
-
-        private ConflictAlgorithm() {}  // disable instantiation of this class
-    }
+    /**
+     * use the following when no conflict action is specified.
+     */
+    public static final int CONFLICT_NONE = 0;
+    private static final String[] CONFLICT_VALUES = new String[]
+            {"", " OR ROLLBACK ", " OR ABORT ", " OR FAIL ", " OR IGNORE ", " OR REPLACE "};
 
     /**
      * Maximum Length Of A LIKE Or GLOB Pattern
@@ -1341,7 +1337,7 @@ public class SQLiteDatabase extends SQLiteClosable {
      */
     public long insert(String table, String nullColumnHack, ContentValues values) {
         try {
-            return insertWithOnConflict(table, nullColumnHack, values, ConflictAlgorithm.NONE);
+            return insertWithOnConflict(table, nullColumnHack, values, CONFLICT_NONE);
         } catch (SQLException e) {
             Log.e(TAG, "Error inserting " + values, e);
             return -1;
@@ -1363,7 +1359,7 @@ public class SQLiteDatabase extends SQLiteClosable {
      */
     public long insertOrThrow(String table, String nullColumnHack, ContentValues values)
             throws SQLException {
-        return insertWithOnConflict(table, nullColumnHack, values, ConflictAlgorithm.NONE);
+        return insertWithOnConflict(table, nullColumnHack, values, CONFLICT_NONE);
     }
 
     /**
@@ -1380,7 +1376,7 @@ public class SQLiteDatabase extends SQLiteClosable {
     public long replace(String table, String nullColumnHack, ContentValues initialValues) {
         try {
             return insertWithOnConflict(table, nullColumnHack, initialValues,
-                    ConflictAlgorithm.REPLACE);
+                    CONFLICT_REPLACE);
         } catch (SQLException e) {
             Log.e(TAG, "Error inserting " + initialValues, e);
             return -1;
@@ -1402,7 +1398,7 @@ public class SQLiteDatabase extends SQLiteClosable {
     public long replaceOrThrow(String table, String nullColumnHack,
             ContentValues initialValues) throws SQLException {
         return insertWithOnConflict(table, nullColumnHack, initialValues,
-                ConflictAlgorithm.REPLACE);
+                CONFLICT_REPLACE);
     }
 
     /**
@@ -1415,10 +1411,10 @@ public class SQLiteDatabase extends SQLiteClosable {
      * @param initialValues this map contains the initial column values for the
      *            row. The keys should be the column names and the values the
      *            column values
-     * @param conflictAlgorithm  {@link ConflictAlgorithm} for insert conflict resolver
+     * @param conflictAlgorithm for insert conflict resolver
      * @return the row ID of the newly inserted row
      * OR the primary key of the existing row if the input param 'conflictAlgorithm' =
-     * {@link ConflictAlgorithm#IGNORE}
+     * {@link #CONFLICT_IGNORE}
      * OR -1 if any error
      */
     public long insertWithOnConflict(String table, String nullColumnHack,
@@ -1430,7 +1426,7 @@ public class SQLiteDatabase extends SQLiteClosable {
         // Measurements show most sql lengths <= 152
         StringBuilder sql = new StringBuilder(152);
         sql.append("INSERT");
-        sql.append(ConflictAlgorithm.VALUES[conflictAlgorithm]);
+        sql.append(CONFLICT_VALUES[conflictAlgorithm]);
         sql.append(" INTO ");
         sql.append(table);
         // Measurements show most values lengths < 40
@@ -1554,7 +1550,7 @@ public class SQLiteDatabase extends SQLiteClosable {
      * @return the number of rows affected
      */
     public int update(String table, ContentValues values, String whereClause, String[] whereArgs) {
-        return updateWithOnConflict(table, values, whereClause, whereArgs, ConflictAlgorithm.NONE);
+        return updateWithOnConflict(table, values, whereClause, whereArgs, CONFLICT_NONE);
     }
 
     /**
@@ -1565,7 +1561,7 @@ public class SQLiteDatabase extends SQLiteClosable {
      *            valid value that will be translated to NULL.
      * @param whereClause the optional WHERE clause to apply when updating.
      *            Passing null will update all rows.
-     * @param conflictAlgorithm  {@link ConflictAlgorithm} for update conflict resolver
+     * @param conflictAlgorithm for update conflict resolver
      * @return the number of rows affected
      */
     public int updateWithOnConflict(String table, ContentValues values,
@@ -1580,7 +1576,7 @@ public class SQLiteDatabase extends SQLiteClosable {
 
         StringBuilder sql = new StringBuilder(120);
         sql.append("UPDATE ");
-        sql.append(ConflictAlgorithm.VALUES[conflictAlgorithm]);
+        sql.append(CONFLICT_VALUES[conflictAlgorithm]);
         sql.append(table);
         sql.append(" SET ");
 
