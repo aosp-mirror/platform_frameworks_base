@@ -802,8 +802,8 @@ public class TtsService extends Service implements OnCompletionListener {
                     }
                     if (synthAvailable) {
                         synthesizerLock.unlock();
+                        processSpeechQueue();
                     }
-                    processSpeechQueue();
                 }
             }
         }
@@ -882,8 +882,8 @@ public class TtsService extends Service implements OnCompletionListener {
                     }
                     if (synthAvailable) {
                         synthesizerLock.unlock();
+                        processSpeechQueue();
                     }
-                    processSpeechQueue();
                 }
             }
         }
