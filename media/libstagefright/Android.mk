@@ -49,7 +49,7 @@ LOCAL_C_INCLUDES:= \
 	$(JNI_H_INCLUDE) \
         $(TOP)/external/opencore/extern_libs_v2/khronos/openmax/include \
         $(TOP)/external/opencore/android \
-        $(TOP)/external/tremolo/Tremolo
+        $(TOP)/external/tremor/Tremor
 
 LOCAL_SHARED_LIBRARIES := \
         libbinder         \
