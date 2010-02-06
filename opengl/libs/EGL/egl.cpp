@@ -166,7 +166,8 @@ struct egl_display_t {
     uint32_t    magic;
     DisplayImpl disp[IMPL_NUM_IMPLEMENTATIONS];
     EGLint      numTotalConfigs;
-    volatile int32_t refs;
+    uint32_t    refs;
+    Mutex       lock;
     
     egl_display_t() : magic('_dpy'), numTotalConfigs(0) { }
     ~egl_display_t() { magic = 0; }
@@ -644,7 +645,9 @@ EGLBoolean eglInitialize(EGLDisplay dpy, EGLint *major, EGLint *minor)
     egl_display_t * const dp = get_display(dpy);
     if (!dp) return setError(EGL_BAD_DISPLAY, EGL_FALSE);
 
-    if (android_atomic_inc(&dp->refs) > 0) {
+    Mutex::Autolock _l(dp->lock);
+
+    if (dp->refs > 0) {
         if (major != NULL) *major = VERSION_MAJOR;
         if (minor != NULL) *minor = VERSION_MINOR;
         return EGL_TRUE;
@@ -728,6 +731,7 @@ EGLBoolean eglInitialize(EGLDisplay dpy, EGLint *major, EGLint *minor)
     }
 
     if (res == EGL_TRUE) {
+        dp->refs++;
         if (major != NULL) *major = VERSION_MAJOR;
         if (minor != NULL) *minor = VERSION_MINOR;
         return EGL_TRUE;
@@ -743,7 +747,15 @@ EGLBoolean eglTerminate(EGLDisplay dpy)
 
     egl_display_t* const dp = get_display(dpy);
     if (!dp) return setError(EGL_BAD_DISPLAY, EGL_FALSE);
-    if (android_atomic_dec(&dp->refs) != 1)
+
+    Mutex::Autolock _l(dp->lock);
+
+    if (dp->refs == 0) {
+        return setError(EGL_NOT_INITIALIZED, EGL_FALSE);
+    }
+
+    // this is specific to Android, display termination is ref-counted.
+    if (dp->refs > 1)
         return EGL_TRUE;
 
     EGLBoolean res = EGL_FALSE;
@@ -767,6 +779,7 @@ EGLBoolean eglTerminate(EGLDisplay dpy)
     
     // TODO: all egl_object_t should be marked for termination
     
+    dp->refs--;
     dp->numTotalConfigs = 0;
     clearTLS();
     return res;
