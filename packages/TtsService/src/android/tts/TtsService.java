@@ -133,6 +133,7 @@ public class TtsService extends Service implements OnCompletionListener {
     private HashMap<String, ITtsCallback> mCallbacksMap;
 
     private Boolean mIsSpeaking;
+    private Boolean mSynthBusy;
     private ArrayList<SpeechItem> mSpeechQueue;
     private HashMap<String, SoundResource> mEarcons;
     private HashMap<String, SoundResource> mUtterances;
@@ -168,6 +169,7 @@ public class TtsService extends Service implements OnCompletionListener {
 
         mSelf = this;
         mIsSpeaking = false;
+        mSynthBusy = false;
 
         mEarcons = new HashMap<String, SoundResource>();
         mUtterances = new HashMap<String, SoundResource>();
@@ -733,10 +735,11 @@ public class TtsService extends Service implements OnCompletionListener {
                 try {
                     synthAvailable = synthesizerLock.tryLock();
                     if (!synthAvailable) {
+                        mSynthBusy = true;
                         Thread.sleep(100);
                         Thread synth = (new Thread(new SynthThread()));
-                        //synth.setPriority(Thread.MIN_PRIORITY);
                         synth.start();
+                        mSynthBusy = false;
                         return;
                     }
                     int streamType = DEFAULT_STREAM_TYPE;
@@ -821,10 +824,11 @@ public class TtsService extends Service implements OnCompletionListener {
                 try {
                     synthAvailable = synthesizerLock.tryLock();
                     if (!synthAvailable) {
+                        mSynthBusy = true;
                         Thread.sleep(100);
                         Thread synth = (new Thread(new SynthThread()));
-                        //synth.setPriority(Thread.MIN_PRIORITY);
                         synth.start();
+                        mSynthBusy = false;
                         return;
                     }
                     String language = "";
@@ -959,6 +963,12 @@ public class TtsService extends Service implements OnCompletionListener {
 
     private void processSpeechQueue() {
         boolean speechQueueAvailable = false;
+        synchronized (this) {
+            if (mSynthBusy){
+                // There is already a synth thread waiting to run.
+                return;
+            }
+        }
         try {
             speechQueueAvailable =
                     speechQueueLock.tryLock(SPEECHQUEUELOCK_TIMEOUT, TimeUnit.MILLISECONDS);
