@@ -274,7 +274,9 @@ static void convertISO8859ToString8(
         String8 *s) {
     size_t utf8len = 0;
     for (size_t i = 0; i < size; ++i) {
-        if (data[i] < 0x80) {
+        if (data[i] == '\0') {
+            break;
+        } else if (data[i] < 0x80) {
             ++utf8len;
         } else {
             utf8len += 2;
@@ -291,7 +293,9 @@ static void convertISO8859ToString8(
     char *tmp = new char[utf8len];
     char *ptr = tmp;
     for (size_t i = 0; i < size; ++i) {
-        if (data[i] < 0x80) {
+        if (data[i] == '\0') {
+            break;
+        } else if (data[i] < 0x80) {
             *ptr++ = data[i];
         } else if (data[i] < 0xc0) {
             *ptr++ = 0xc2;
@@ -325,7 +329,7 @@ void ID3::Iterator::getString(String8 *id) const {
             return;
         }
 
-        id->setTo((const char *)mFrameData, mFrameSize);
+        convertISO8859ToString8(mFrameData, mFrameSize, id);
         return;
     }
 
