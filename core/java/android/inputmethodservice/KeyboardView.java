@@ -742,6 +742,10 @@ public class KeyboardView extends View implements View.OnClickListener {
             final Key key = keys[nearestKeyIndices[i]];
             int dist = 0;
             boolean isInside = key.isInside(x,y);
+            if (isInside) {
+                primaryIndex = nearestKeyIndices[i];
+            }
+
             if (((mProximityCorrectOn 
                     && (dist = key.squaredDistanceFrom(x, y)) < mProximityThreshold) 
                     || isInside)
@@ -769,10 +773,6 @@ public class KeyboardView extends View implements View.OnClickListener {
                         break;
                     }
                 }
-            }
-            
-            if (isInside) {
-                primaryIndex = nearestKeyIndices[i];
             }
         }
         if (primaryIndex == NOT_A_KEY) {
