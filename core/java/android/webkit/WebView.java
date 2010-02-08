@@ -26,6 +26,7 @@ import android.database.DataSetObserver;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Interpolator;
 import android.graphics.Picture;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -2972,8 +2973,16 @@ public class WebView extends AbsoluteLayout
         if (mTitleBar != null) {
             canvas.translate(0, (int) mTitleBar.getHeight());
         }
-        if (mDragTrackerHandler == null || !mDragTrackerHandler.draw(canvas)) {
+        if (mDragTrackerHandler == null) {
             drawContent(canvas);
+        } else {
+            if (!mDragTrackerHandler.draw(canvas)) {
+                // sometimes the tracker doesn't draw, even though its active
+                drawContent(canvas);
+            }
+            if (mDragTrackerHandler.isFinished()) {
+                mDragTrackerHandler = null;
+            }
         }
         canvas.restoreToCount(saveCount);
 
@@ -4066,6 +4075,14 @@ public class WebView extends AbsoluteLayout
         private final float mMaxDY, mMaxDX;
         private float mCurrStretchY, mCurrStretchX;
         private int mSX, mSY;
+        private Interpolator mInterp;
+        private float[] mXY = new float[2];
+
+        // inner (non-state) classes can't have enums :(
+        private static final int DRAGGING_STATE = 0;
+        private static final int ANIMATING_STATE = 1;
+        private static final int FINISHED_STATE = 2;
+        private int mState;
 
         public DragTrackerHandler(float x, float y, DragTracker proxy) {
             mProxy = proxy;
@@ -4090,6 +4107,7 @@ public class WebView extends AbsoluteLayout
             mMinDX = -viewLeft;
             mMaxDX = docRight - viewRight;
 
+            mState = DRAGGING_STATE;
             mProxy.onStartDrag(x, y);
 
             // ensure we buildBitmap at least once
@@ -4112,6 +4130,12 @@ public class WebView extends AbsoluteLayout
             float sy = computeStretch(mStartY - y, mMinDY, mMaxDY);
             float sx = computeStretch(mStartX - x, mMinDX, mMaxDX);
 
+            if ((mSnapScrollMode & SNAP_X) != 0) {
+                sy = 0;
+            } else if ((mSnapScrollMode & SNAP_Y) != 0) {
+                sx = 0;
+            }
+
             if (mCurrStretchX != sx || mCurrStretchY != sy) {
                 mCurrStretchX = sx;
                 mCurrStretchY = sy;
@@ -4126,10 +4150,26 @@ public class WebView extends AbsoluteLayout
         }
 
         public void stopDrag() {
+            final int DURATION = 200;
+            int now = (int)SystemClock.uptimeMillis();
+            mInterp = new Interpolator(2);
+            mXY[0] = mCurrStretchX;
+            mXY[1] = mCurrStretchY;
+         //   float[] blend = new float[] { 0.5f, 0, 0.75f, 1 };
+            float[] blend = new float[] { 0, 0.5f, 0.75f, 1 };
+            mInterp.setKeyFrame(0, now, mXY, blend);
+            float[] zerozero = new float[] { 0, 0 };
+            mInterp.setKeyFrame(1, now + DURATION, zerozero, null);
+            mState = ANIMATING_STATE;
+
             if (DebugFlags.DRAG_TRACKER || DEBUG_DRAG_TRACKER) {
-                Log.d(DebugFlags.DRAG_TRACKER_LOGTAG, "----- stopDrag");
+                Log.d(DebugFlags.DRAG_TRACKER_LOGTAG, "----- stopDrag, starting animation");
             }
-            mProxy.onStopDrag();
+        }
+
+        // Call this after each draw. If it ruturns null, the tracker is done
+        public boolean isFinished() {
+            return mState == FINISHED_STATE;
         }
 
         private int hiddenHeightOfTitleBar() {
@@ -4150,13 +4190,23 @@ public class WebView extends AbsoluteLayout
             if (mCurrStretchX != 0 || mCurrStretchY != 0) {
                 int sx = getScrollX();
                 int sy = getScrollY() - hiddenHeightOfTitleBar();
-
                 if (mSX != sx || mSY != sy) {
                     buildBitmap(sx, sy);
                     mSX = sx;
                     mSY = sy;
                 }
 
+                if (mState == ANIMATING_STATE) {
+                    Interpolator.Result result = mInterp.timeToValues(mXY);
+                    if (result == Interpolator.Result.FREEZE_END) {
+                        mState = FINISHED_STATE;
+                        return false;
+                    } else {
+                        mProxy.onStretchChange(mXY[0], mXY[1]);
+                        invalidate();
+                        // fall through to the draw
+                    }
+                }
                 int count = canvas.save(Canvas.MATRIX_SAVE_FLAG);
                 canvas.translate(sx, sy);
                 mProxy.onDraw(canvas);
@@ -4600,7 +4650,6 @@ public class WebView extends AbsoluteLayout
             case MotionEvent.ACTION_UP: {
                 if (mDragTrackerHandler != null) {
                     mDragTrackerHandler.stopDrag();
-                    mDragTrackerHandler = null;
                 }
                 mLastTouchUpTime = eventTime;
                 switch (mTouchMode) {
@@ -4712,7 +4761,6 @@ public class WebView extends AbsoluteLayout
     private void cancelTouch() {
         if (mDragTrackerHandler != null) {
             mDragTrackerHandler.stopDrag();
-            mDragTrackerHandler = null;
         }
         // we also use mVelocityTracker == null to tell us that we are
         // not "moving around", so we can take the slower/prettier
