@@ -512,7 +512,9 @@ static sp<MediaSource> CreateSourceForMime(const char *mime) {
 
     sp<MediaExtractor> extractor = CreateExtractorFromURI(url);
 
-    CHECK(extractor != NULL);
+    if (extractor == NULL) {
+        return NULL;
+    }
 
     for (size_t i = 0; i < extractor->countTracks(); ++i) {
         sp<MetaData> meta = extractor->getTrackMetaData(i);
@@ -571,6 +573,10 @@ status_t Harness::testSeek(
     sp<MediaSource> source = CreateSourceForMime(mime);
 
     sp<MediaSource> seekSource = CreateSourceForMime(mime);
+    if (source == NULL || seekSource == NULL) {
+        return UNKNOWN_ERROR;
+    }
+
     CHECK_EQ(seekSource->start(), OK);
 
     sp<MediaSource> codec = OMXCodec::Create(

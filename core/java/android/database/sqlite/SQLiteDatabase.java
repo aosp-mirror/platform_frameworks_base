@@ -1922,8 +1922,9 @@ public class SQLiteDatabase extends SQLiteClosable {
                     mCacheFullWarnings = 0;
                     // clear the cache
                     mCompiledQueries.clear();
-                    Log.w(TAG, "compiled-sql statement cache cleared for the database " +
-                            getPath());
+                    Log.w(TAG, "Compiled-sql statement cache for database: " +
+                            getPath() + " hit MAX size-limit too many times. " +
+                            "Removing all compiled-sql statements from the cache.");
                 } else {
                     // clear just a single entry from cache
                     Set<String> keySet = mCompiledQueries.keySet();

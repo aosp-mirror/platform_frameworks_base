@@ -66,22 +66,22 @@ public class SyncQueueTest extends AndroidTestCase {
 
         long now = SystemClock.elapsedRealtime() + 200;
 
-        assertEquals(op6, mSyncQueue.nextReadyToRun(now));
+        assertEquals(op6, mSyncQueue.nextReadyToRun(now).first);
         mSyncQueue.remove(op6);
 
-        assertEquals(op1, mSyncQueue.nextReadyToRun(now));
+        assertEquals(op1, mSyncQueue.nextReadyToRun(now).first);
         mSyncQueue.remove(op1);
 
-        assertEquals(op4, mSyncQueue.nextReadyToRun(now));
+        assertEquals(op4, mSyncQueue.nextReadyToRun(now).first);
         mSyncQueue.remove(op4);
 
-        assertEquals(op5, mSyncQueue.nextReadyToRun(now));
+        assertEquals(op5, mSyncQueue.nextReadyToRun(now).first);
         mSyncQueue.remove(op5);
 
-        assertEquals(op2, mSyncQueue.nextReadyToRun(now));
+        assertEquals(op2, mSyncQueue.nextReadyToRun(now).first);
         mSyncQueue.remove(op2);
 
-        assertEquals(op3, mSyncQueue.nextReadyToRun(now));
+        assertEquals(op3, mSyncQueue.nextReadyToRun(now).first);
         mSyncQueue.remove(op3);
     }
 
@@ -109,32 +109,32 @@ public class SyncQueueTest extends AndroidTestCase {
 
         long now = SystemClock.elapsedRealtime() + 200;
 
-        assertEquals(op6, mSyncQueue.nextReadyToRun(now));
+        assertEquals(op6, mSyncQueue.nextReadyToRun(now).first);
         mSyncQueue.remove(op6);
 
-        assertEquals(op1, mSyncQueue.nextReadyToRun(now));
+        assertEquals(op1, mSyncQueue.nextReadyToRun(now).first);
         mSyncQueue.remove(op1);
 
         mSettings.setBackoff(ACCOUNT2,  AUTHORITY3, now + 200, 5);
-        assertEquals(op5, mSyncQueue.nextReadyToRun(now));
+        assertEquals(op5, mSyncQueue.nextReadyToRun(now).first);
 
         mSettings.setBackoff(ACCOUNT2,  AUTHORITY3, SyncStorageEngine.NOT_IN_BACKOFF_MODE, 0);
-        assertEquals(op4, mSyncQueue.nextReadyToRun(now));
+        assertEquals(op4, mSyncQueue.nextReadyToRun(now).first);
 
         mSettings.setDelayUntilTime(ACCOUNT2,  AUTHORITY3, now + 200);
-        assertEquals(op5, mSyncQueue.nextReadyToRun(now));
+        assertEquals(op5, mSyncQueue.nextReadyToRun(now).first);
 
         mSettings.setDelayUntilTime(ACCOUNT2,  AUTHORITY3, 0);
-        assertEquals(op4, mSyncQueue.nextReadyToRun(now));
+        assertEquals(op4, mSyncQueue.nextReadyToRun(now).first);
         mSyncQueue.remove(op4);
 
-        assertEquals(op5, mSyncQueue.nextReadyToRun(now));
+        assertEquals(op5, mSyncQueue.nextReadyToRun(now).first);
         mSyncQueue.remove(op5);
 
-        assertEquals(op2, mSyncQueue.nextReadyToRun(now));
+        assertEquals(op2, mSyncQueue.nextReadyToRun(now).first);
         mSyncQueue.remove(op2);
 
-        assertEquals(op3, mSyncQueue.nextReadyToRun(now));
+        assertEquals(op3, mSyncQueue.nextReadyToRun(now).first);
         mSyncQueue.remove(op3);
     }
 

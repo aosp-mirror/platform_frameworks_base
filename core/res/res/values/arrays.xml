@@ -107,6 +107,7 @@
          icons in the status bar that are not notifications. -->
     <string-array name="status_bar_icon_order">
         <item><xliff:g id="id">clock</xliff:g></item>
+        <item><xliff:g id="id">secure</xliff:g></item>
         <item><xliff:g id="id">alarm_clock</xliff:g></item>
         <item><xliff:g id="id">battery</xliff:g></item>
         <item><xliff:g id="id">phone_signal</xliff:g></item>

@@ -1628,6 +1628,11 @@ void glEGLImageTargetTexture2DOES(GLenum target, GLeglImageOES image)
         return;
     }
 
+    if (image == EGL_NO_IMAGE_KHR) {
+        ogles_error(c, GL_INVALID_VALUE);
+        return;
+    }
+
     android_native_buffer_t* native_buffer = (android_native_buffer_t*)image;
     if (native_buffer->common.magic != ANDROID_NATIVE_BUFFER_MAGIC) {
         ogles_error(c, GL_INVALID_VALUE);
@@ -1652,4 +1657,26 @@ void glEGLImageTargetTexture2DOES(GLenum target, GLeglImageOES image)
 
 void glEGLImageTargetRenderbufferStorageOES(GLenum target, GLeglImageOES image)
 {
+    ogles_context_t* c = ogles_context_t::get();
+    if (target != GL_RENDERBUFFER_OES) {
+        ogles_error(c, GL_INVALID_ENUM);
+        return;
+    }
+
+    if (image == EGL_NO_IMAGE_KHR) {
+        ogles_error(c, GL_INVALID_VALUE);
+        return;
+    }
+
+    android_native_buffer_t* native_buffer = (android_native_buffer_t*)image;
+    if (native_buffer->common.magic != ANDROID_NATIVE_BUFFER_MAGIC) {
+        ogles_error(c, GL_INVALID_VALUE);
+        return;
+    }
+    if (native_buffer->common.version != sizeof(android_native_buffer_t)) {
+        ogles_error(c, GL_INVALID_VALUE);
+        return;
+    }
+
+    // well, we're not supporting this extension anyways
 }

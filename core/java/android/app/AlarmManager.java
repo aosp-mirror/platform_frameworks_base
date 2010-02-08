@@ -277,7 +277,26 @@ public class AlarmManager
         } catch (RemoteException ex) {
         }
     }
-    
+
+    /**
+     * Set the system wall clock time.
+     * Requires the permission android.permission.SET_TIME.
+     *
+     * @param millis time in milliseconds since the Epoch
+     */
+    public void setTime(long millis) {
+        try {
+            mService.setTime(millis);
+        } catch (RemoteException ex) {
+        }
+    }
+
+    /**
+     * Set the system default time zone.
+     * Requires the permission android.permission.SET_TIME_ZONE.
+     *
+     * @param timeZone in the format understood by {@link java.util.TimeZone}
+     */
     public void setTimeZone(String timeZone) {
         try {
             mService.setTimeZone(timeZone);

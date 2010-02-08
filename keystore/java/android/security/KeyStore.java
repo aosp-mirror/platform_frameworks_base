@@ -28,16 +28,16 @@ import java.util.ArrayList;
  * {@hide}
  */
 public class KeyStore {
-    public static int NO_ERROR = 1;
-    public static int LOCKED = 2;
-    public static int UNINITIALIZED = 3;
-    public static int SYSTEM_ERROR = 4;
-    public static int PROTOCOL_ERROR = 5;
-    public static int PERMISSION_DENIED = 6;
-    public static int KEY_NOT_FOUND = 7;
-    public static int VALUE_CORRUPTED = 8;
-    public static int UNDEFINED_ACTION = 9;
-    public static int WRONG_PASSWORD = 10;
+    public static final int NO_ERROR = 1;
+    public static final int LOCKED = 2;
+    public static final int UNINITIALIZED = 3;
+    public static final int SYSTEM_ERROR = 4;
+    public static final int PROTOCOL_ERROR = 5;
+    public static final int PERMISSION_DENIED = 6;
+    public static final int KEY_NOT_FOUND = 7;
+    public static final int VALUE_CORRUPTED = 8;
+    public static final int UNDEFINED_ACTION = 9;
+    public static final int WRONG_PASSWORD = 10;
 
     private static final LocalSocketAddress sAddress = new LocalSocketAddress(
             "keystore", LocalSocketAddress.Namespace.RESERVED);
@@ -56,8 +56,8 @@ public class KeyStore {
     }
 
     public byte[] get(byte[] key) {
-        byte[][] values = execute('g', key);
-        return (values == null) ? null : values[0];
+        ArrayList<byte[]> values = execute('g', key);
+        return (values == null || values.size() == 0) ? null : values.get(0);
     }
 
     public String get(String key) {
@@ -93,7 +93,8 @@ public class KeyStore {
     }
 
     public byte[][] saw(byte[] prefix) {
-        return execute('s', prefix);
+        ArrayList<byte[]> values = execute('s', prefix);
+        return (values == null) ? null : values.toArray(new byte[values.size()][]);
     }
 
     public String[] saw(String prefix) {
@@ -148,7 +149,7 @@ public class KeyStore {
         return mError;
     }
 
-    private byte[][] execute(int code, byte[]... parameters) {
+    private ArrayList<byte[]> execute(int code, byte[]... parameters) {
         mError = PROTOCOL_ERROR;
 
         for (byte[] parameter : parameters) {
@@ -179,7 +180,7 @@ public class KeyStore {
                 return null;
             }
 
-            ArrayList<byte[]> results = new ArrayList<byte[]>();
+            ArrayList<byte[]> values = new ArrayList<byte[]>();
             while (true) {
                 int i, j;
                 if ((i = in.read()) == -1) {
@@ -188,16 +189,16 @@ public class KeyStore {
                 if ((j = in.read()) == -1) {
                     return null;
                 }
-                byte[] result = new byte[i << 8 | j];
-                for (i = 0; i < result.length; i += j) {
-                    if ((j = in.read(result, i, result.length - i)) == -1) {
+                byte[] value = new byte[i << 8 | j];
+                for (i = 0; i < value.length; i += j) {
+                    if ((j = in.read(value, i, value.length - i)) == -1) {
                         return null;
                     }
                 }
-                results.add(result);
+                values.add(value);
             }
             mError = NO_ERROR;
-            return results.toArray(new byte[results.size()][]);
+            return values;
         } catch (IOException e) {
             // ignore
         } finally {

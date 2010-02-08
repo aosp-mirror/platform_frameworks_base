@@ -431,6 +431,10 @@ int main(int argc, char **argv) {
             mediaSource = new JPEGSource(dataSource);
         } else {
             sp<MediaExtractor> extractor = MediaExtractor::Create(dataSource);
+            if (extractor == NULL) {
+                fprintf(stderr, "could not create data source\n");
+                return -1;
+            }
 
             size_t numTracks = extractor->countTracks();
 

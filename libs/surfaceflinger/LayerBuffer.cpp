@@ -328,7 +328,8 @@ bool LayerBuffer::Source::transformed() const {
 
 LayerBuffer::BufferSource::BufferSource(LayerBuffer& layer,
         const ISurface::BufferHeap& buffers)
-    : Source(layer), mStatus(NO_ERROR), mBufferSize(0)
+    : Source(layer), mStatus(NO_ERROR), mBufferSize(0),
+      mUseEGLImageDirectly(true)
 {
     if (buffers.heap == NULL) {
         // this is allowed, but in this case, it is illegal to receive
@@ -466,25 +467,38 @@ void LayerBuffer::BufferSource::onDraw(const Region& clip) const
 
 #if defined(EGL_ANDROID_image_native_buffer)
     if (mLayer.mFlags & DisplayHardware::DIRECT_TEXTURE) {
-        copybit_device_t* copybit = mLayer.mBlitEngine;
-        if (copybit && ourBuffer->supportsCopybit()) {
-            // create our EGLImageKHR the first time
-            err = initTempBuffer();
-            if (err == NO_ERROR) {
+        err = INVALID_OPERATION;
+        if (ourBuffer->supportsCopybit()) {
+            // First, try to use the buffer as an EGLImage directly
+            if (mUseEGLImageDirectly) {
                 // NOTE: Assume the buffer is allocated with the proper USAGE flags
-                const NativeBuffer& dst(mTempBuffer);
-                region_iterator clip(Region(Rect(dst.crop.r, dst.crop.b)));
-                copybit->set_parameter(copybit, COPYBIT_TRANSFORM, 0);
-                copybit->set_parameter(copybit, COPYBIT_PLANE_ALPHA, 0xFF);
-                copybit->set_parameter(copybit, COPYBIT_DITHER, COPYBIT_ENABLE);
-                err = copybit->stretch(copybit, &dst.img, &src.img,
-                        &dst.crop, &src.crop, &clip);
+                sp<GraphicBuffer> buffer = new  GraphicBuffer(
+                        src.img.w, src.img.h, src.img.format,
+                        GraphicBuffer::USAGE_HW_TEXTURE,
+                        src.img.w, src.img.handle, false);
+                err = mLayer.initializeEglImage(buffer, &mTexture);
                 if (err != NO_ERROR) {
-                    clearTempBufferImage();
+                    mUseEGLImageDirectly = false;
                 }
             }
-        } else {
-            err = INVALID_OPERATION;
+            copybit_device_t* copybit = mLayer.mBlitEngine;
+            if (copybit && err != NO_ERROR) {
+                // create our EGLImageKHR the first time
+                err = initTempBuffer();
+                if (err == NO_ERROR) {
+                    // NOTE: Assume the buffer is allocated with the proper USAGE flags
+                    const NativeBuffer& dst(mTempBuffer);
+                    region_iterator clip(Region(Rect(dst.crop.r, dst.crop.b)));
+                    copybit->set_parameter(copybit, COPYBIT_TRANSFORM, 0);
+                    copybit->set_parameter(copybit, COPYBIT_PLANE_ALPHA, 0xFF);
+                    copybit->set_parameter(copybit, COPYBIT_DITHER, COPYBIT_ENABLE);
+                    err = copybit->stretch(copybit, &dst.img, &src.img,
+                            &dst.crop, &src.crop, &clip);
+                    if (err != NO_ERROR) {
+                        clearTempBufferImage();
+                    }
+                }
+            }
         }
     }
 #endif

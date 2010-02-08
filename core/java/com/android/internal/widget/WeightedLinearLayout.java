@@ -52,7 +52,8 @@ public class WeightedLinearLayout extends LinearLayout {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         final DisplayMetrics metrics = getContext().getResources().getDisplayMetrics();
-        final boolean isPortrait = metrics.widthPixels < metrics.heightPixels;
+        final int screenWidth = metrics.widthPixels;
+        final boolean isPortrait = screenWidth < metrics.heightPixels;
 
         final int widthMode = getMode(widthMeasureSpec);
 
@@ -62,14 +63,13 @@ public class WeightedLinearLayout extends LinearLayout {
         int height = getMeasuredHeight();
         boolean measure = false;
 
-        final int widthSize = getSize(widthMeasureSpec);
         widthMeasureSpec = MeasureSpec.makeMeasureSpec(width, EXACTLY);
         heightMeasureSpec = MeasureSpec.makeMeasureSpec(height, EXACTLY);
 
         final float widthWeight = isPortrait ? mMinorWeight : mMajorWeight;
         if (widthMode == AT_MOST && widthWeight > 0.0f) {
-            if (width < (widthSize * widthWeight)) {
-                widthMeasureSpec = MeasureSpec.makeMeasureSpec((int) (widthSize * widthWeight),
+            if (width < (screenWidth * widthWeight)) {
+                widthMeasureSpec = MeasureSpec.makeMeasureSpec((int) (screenWidth * widthWeight),
                         EXACTLY);
                 measure = true;
             }

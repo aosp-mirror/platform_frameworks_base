@@ -2092,7 +2092,20 @@ EGLImageKHR eglCreateImageKHR(EGLDisplay dpy, EGLContext ctx, EGLenum target,
 
     if (native_buffer->common.version != sizeof(android_native_buffer_t))
         return setError(EGL_BAD_PARAMETER, EGL_NO_IMAGE_KHR);
-    
+
+    switch (native_buffer->format) {
+        case HAL_PIXEL_FORMAT_RGBA_8888:
+        case HAL_PIXEL_FORMAT_RGBX_8888:
+        case HAL_PIXEL_FORMAT_RGB_888:
+        case HAL_PIXEL_FORMAT_RGB_565:
+        case HAL_PIXEL_FORMAT_BGRA_8888:
+        case HAL_PIXEL_FORMAT_RGBA_5551:
+        case HAL_PIXEL_FORMAT_RGBA_4444:
+            break;
+        default:
+            return setError(EGL_BAD_PARAMETER, EGL_NO_IMAGE_KHR);
+    }
+
     native_buffer->common.incRef(&native_buffer->common);
     return (EGLImageKHR)native_buffer;
 }

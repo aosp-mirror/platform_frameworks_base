@@ -271,7 +271,7 @@ public class AccountManager {
     }
 
     /**
-     * Add an account to the AccountManager's set of known accounts. 
+     * Add an account to the AccountManager's set of known accounts.
      * <p>
      * Requires that the caller has permission
      * {@link android.Manifest.permission#AUTHENTICATE_ACCOUNTS} and is running
@@ -560,9 +560,13 @@ public class AccountManager {
      * user to enter credentials. If it is able to retrieve the authtoken it will be returned
      * in the result.
      * <p>
-     * If the authenticator needs to prompt the user for credentials it will return an intent for
+     * If the authenticator needs to prompt the user for credentials, rather than returning the
+     * authtoken it will instead return an intent for
      * an activity that will do the prompting. If an intent is returned and notifyAuthFailure
-     * is true then a notification will be created that launches this intent.
+     * is true then a notification will be created that launches this intent. This intent can be
+     * invoked by the caller directly to start the activity that prompts the user for the
+     * updated credentials. Otherwise this activity will not be run until the user activates
+     * the notification.
      * <p>
      * This call returns immediately but runs asynchronously and the result is accessed via the
      * {@link AccountManagerFuture} that is returned. This future is also passed as the sole
@@ -653,7 +657,7 @@ public class AccountManager {
                 if (accountType == null) {
                     Log.e(TAG, "the account must not be null");
                     // to unblock caller waiting on Future.get()
-                    set(new Bundle()); 
+                    set(new Bundle());
                     return;
                 }
                 mService.addAcount(mResponse, accountType, authTokenType,
@@ -1372,7 +1376,7 @@ public class AccountManager {
                 IntentFilter intentFilter = new IntentFilter();
                 intentFilter.addAction(LOGIN_ACCOUNTS_CHANGED_ACTION);
                 // To recover from disk-full.
-                intentFilter.addAction(Intent.ACTION_DEVICE_STORAGE_OK); 
+                intentFilter.addAction(Intent.ACTION_DEVICE_STORAGE_OK);
                 mContext.registerReceiver(mAccountsChangedBroadcastReceiver, intentFilter);
             }
         }

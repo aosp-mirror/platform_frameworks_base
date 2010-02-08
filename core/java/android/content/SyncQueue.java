@@ -2,8 +2,6 @@ package android.content;
 
 import com.google.android.collect.Maps;
 
-import android.os.Bundle;
-import android.os.SystemClock;
 import android.util.Pair;
 import android.util.Log;
 import android.accounts.Account;
@@ -32,10 +30,9 @@ public class SyncQueue {
         final int N = ops.size();
         for (int i=0; i<N; i++) {
             SyncStorageEngine.PendingOperation op = ops.get(i);
-            // -1 is a special value that means expedited
-            final int delay = op.expedited ? -1 : 0;
             SyncOperation syncOperation = new SyncOperation(
-                    op.account, op.syncSource, op.authority, op.extras, delay);
+                    op.account, op.syncSource, op.authority, op.extras, 0 /* delay */);
+            syncOperation.expedited = op.expedited;
             syncOperation.pendingOperation = op;
             add(syncOperation, op);
         }
@@ -90,8 +87,15 @@ public class SyncQueue {
         return true;
     }
 
+    /**
+     * Remove the specified operation if it is in the queue.
+     * @param operation the operation to remove
+     */
     public void remove(SyncOperation operation) {
         SyncOperation operationToRemove = mOperationsMap.remove(operation.key);
+        if (operationToRemove == null) {
+            return;
+        }
         if (!mSyncStorageEngine.deleteFromPending(operationToRemove.pendingOperation)) {
             final String errorMessage = "unable to find pending row for " + operationToRemove;
             Log.e(TAG, errorMessage, new IllegalStateException(errorMessage));
@@ -102,54 +106,30 @@ public class SyncQueue {
      * Find the operation that should run next. Operations are sorted by their earliestRunTime,
      * prioritizing expedited operations. The earliestRunTime is adjusted by the sync adapter's
      * backoff and delayUntil times, if any.
-     * @param now the current {@link android.os.SystemClock#elapsedRealtime()}
      * @return the operation that should run next and when it should run. The time may be in
      * the future. It is expressed in milliseconds since boot.
      */
-    private Pair<SyncOperation, Long> nextOperation(long now) {
-        SyncOperation lowestOp = null;
-        long lowestOpRunTime = 0;
+    public Pair<SyncOperation, Long> nextOperation() {
+        SyncOperation best = null;
+        long bestRunTime = 0;
         for (SyncOperation op : mOperationsMap.values()) {
-            // effectiveRunTime:
-            //   - backoffTime > currentTime : backoffTime
-            //   - backoffTime <= currentTime : op.runTime
-            Pair<Long, Long> backoff = null;
-            long delayUntilTime = 0;
-            final boolean isManualSync =
-                    op.extras.getBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, false);
-            if (!isManualSync) {
-                backoff = mSyncStorageEngine.getBackoff(op.account, op.authority);
-                delayUntilTime = mSyncStorageEngine.getDelayUntilTime(op.account, op.authority);
-            }
-            long backoffTime = Math.max(backoff != null ? backoff.first : 0, delayUntilTime);
-            long opRunTime = backoffTime > now ? backoffTime : op.earliestRunTime;
-            if (lowestOp == null
-                    || (lowestOp.expedited == op.expedited
-                        ? opRunTime < lowestOpRunTime
-                        : op.expedited)) {
-                lowestOp = op;
-                lowestOpRunTime = opRunTime;
+            long opRunTime = SyncManager.runTimeWithBackoffs(mSyncStorageEngine, op.account,
+                    op.authority,
+                    op.extras.getBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, false),
+                    op.earliestRunTime);
+            // if the expedited state of both ops are the same then compare their runtime.
+            // Otherwise the candidate is only better than the current best if the candidate
+            // is expedited.
+            if (best == null
+                    || (best.expedited == op.expedited ? opRunTime < bestRunTime : op.expedited)) {
+                best = op;
+                bestRunTime = opRunTime;
             }
         }
-        if (lowestOp == null) {
+        if (best == null) {
             return null;
         }
-        return Pair.create(lowestOp, lowestOpRunTime);
-    }
-
-    /**
-     * Return when the next SyncOperation will be ready to run or null if there are
-     * none.
-     * @param now the current {@link android.os.SystemClock#elapsedRealtime()}, used to
-     * decide if the sync operation is ready to run
-     * @return when the next SyncOperation will be ready to run, expressed in elapsedRealtime()
-     */
-    public Long nextRunTime(long now) {
-        Pair<SyncOperation, Long> nextOpAndRunTime = nextOperation(now);
-        if (nextOpAndRunTime == null) {
-            return null;
-        }
-        return nextOpAndRunTime.second;
+        return Pair.create(best, bestRunTime);
     }
 
     /**
@@ -158,21 +138,25 @@ public class SyncQueue {
      * decide if the sync operation is ready to run
      * @return the SyncOperation that should be run next and is ready to run.
      */
-    public SyncOperation nextReadyToRun(long now) {
-        Pair<SyncOperation, Long> nextOpAndRunTime = nextOperation(now);
+    public Pair<SyncOperation, Long> nextReadyToRun(long now) {
+        Pair<SyncOperation, Long> nextOpAndRunTime = nextOperation();
         if (nextOpAndRunTime == null || nextOpAndRunTime.second > now) {
             return null;
         }
-        return nextOpAndRunTime.first;
+        return nextOpAndRunTime;
     }
 
-    public void clear(Account account, String authority) {
+    public void remove(Account account, String authority) {
         Iterator<Map.Entry<String, SyncOperation>> entries = mOperationsMap.entrySet().iterator();
         while (entries.hasNext()) {
             Map.Entry<String, SyncOperation> entry = entries.next();
             SyncOperation syncOperation = entry.getValue();
-            if (account != null && !syncOperation.account.equals(account)) continue;
-            if (authority != null && !syncOperation.authority.equals(authority)) continue;
+            if (account != null && !syncOperation.account.equals(account)) {
+                continue;
+            }
+            if (authority != null && !syncOperation.authority.equals(authority)) {
+                continue;
+            }
             entries.remove();
             if (!mSyncStorageEngine.deleteFromPending(syncOperation.pendingOperation)) {
                 final String errorMessage = "unable to find pending row for " + syncOperation;
