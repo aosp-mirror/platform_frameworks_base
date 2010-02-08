@@ -22,6 +22,11 @@ package com.android.common;
  */
 public class Base64 {
     /**
+     * Default values for encoder/decoder flags.
+     */
+    public static final int DEFAULT = 0;
+
+    /**
      * Encoder flag bit to indicate you want the padding '='
      * characters at the end (if any) to be omitted.
      */
@@ -106,7 +111,7 @@ public class Base64 {
      * @param input the input String to decode, which is converted to
      *               bytes using the default charset
      * @param flags  controls certain features of the decoded output.
-     *               Passing 0 to decode standard Base64.
+     *               Pass {@code DEFAULT} to decode standard Base64.
      *
      * @throws IllegalArgumentException if the input contains
      * incorrect padding
@@ -124,7 +129,7 @@ public class Base64 {
      *
      * @param input the input array to decode
      * @param flags  controls certain features of the decoded output.
-     *               Passing 0 to decode standard Base64.
+     *               Pass {@code DEFAULT} to decode standard Base64.
      *
      * @throws IllegalArgumentException if the input contains
      * incorrect padding
@@ -144,7 +149,7 @@ public class Base64 {
      * @param offset the position within the input array at which to start
      * @param len    the number of bytes of input to decode
      * @param flags  controls certain features of the decoded output.
-     *               Passing 0 to decode standard Base64.
+     *               Pass {@code DEFAULT} to decode standard Base64.
      *
      * @throws IllegalArgumentException if the input contains
      * incorrect padding
@@ -362,8 +367,8 @@ public class Base64 {
      *
      * @param input  the data to encode
      * @param flags  controls certain features of the encoded output.
-     *               Passing 0 results in output that adheres to RFC
-     *               2045.
+     *               Passing {@code DEFAULT} results in output that
+     *               adheres to RFC 2045.
      */
     public static String encodeToString(byte[] input, int flags) {
         return new String(encode(input, flags));
@@ -378,8 +383,8 @@ public class Base64 {
      *               start
      * @param len    the number of bytes of input to encode
      * @param flags  controls certain features of the encoded output.
-     *               Passing 0 results in output that adheres to RFC
-     *               2045.
+     *               Passing {@code DEFAULT} results in output that
+     *               adheres to RFC 2045.
      */
     public static String encodeToString(byte[] input, int offset, int len, int flags) {
         return new String(encode(input, offset, len, flags));
@@ -391,8 +396,8 @@ public class Base64 {
      *
      * @param input  the data to encode
      * @param flags  controls certain features of the encoded output.
-     *               Passing 0 results in output that adheres to RFC
-     *               2045.
+     *               Passing {@code DEFAULT} results in output that
+     *               adheres to RFC 2045.
      */
     public static byte[] encode(byte[] input, int flags) {
         return encode(input, 0, input.length, flags);
@@ -407,8 +412,8 @@ public class Base64 {
      *               start
      * @param len    the number of bytes of input to encode
      * @param flags  controls certain features of the encoded output.
-     *               Passing 0 results in output that adheres to RFC
-     *               2045.
+     *               Passing {@code DEFAULT} results in output that
+     *               adheres to RFC 2045.
      */
     public static byte[] encode(byte[] input, int offset, int len, int flags) {
         final boolean do_padding = (flags & NO_PADDING) == 0;
@@ -494,4 +499,6 @@ public class Base64 {
         assert op == output.length;
         return output;
     }
+
+    private Base64() { }   // don't instantiate
 }
