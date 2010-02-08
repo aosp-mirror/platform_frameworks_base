@@ -30,7 +30,7 @@ import java.lang.Comparable;
  * name inside of that package.
  * 
  */
-public final class ComponentName implements Parcelable, Comparable<ComponentName> {
+public final class ComponentName implements Parcelable, Cloneable, Comparable<ComponentName> {
     private final String mPackage;
     private final String mClass;
 
@@ -74,6 +74,10 @@ public final class ComponentName implements Parcelable, Comparable<ComponentName
     public ComponentName(Context pkg, Class<?> cls) {
         mPackage = pkg.getPackageName();
         mClass = cls.getName();
+    }
+
+    public ComponentName clone() {
+        return new ComponentName(mPackage, mClass);
     }
 
     /**
