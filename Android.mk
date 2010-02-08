@@ -33,6 +33,9 @@ include $(CLEAR_VARS)
 # FRAMEWORKS_BASE_SUBDIRS comes from build/core/pathmap.mk
 LOCAL_SRC_FILES := $(call find-other-java-files,$(FRAMEWORKS_BASE_SUBDIRS))
 
+# EventLogTags files.
+LOCAL_SRC_FILES += core/java/android/content/EventLogTags.logtags
+
 # The following filters out code we are temporarily not including at all.
 # TODO: Move AWT and beans (and associated harmony code) back into libcore.
 # TODO: Maybe remove javax.microedition entirely?
