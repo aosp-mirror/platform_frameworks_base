@@ -17,7 +17,6 @@
 package android.database.sqlite;
 
 import android.os.Debug;
-import android.util.Log;
 
 /**
  * A pre-compiled statement against a {@link SQLiteDatabase} that can be reused.
@@ -27,8 +26,6 @@ import android.util.Log;
  */
 public class SQLiteStatement extends SQLiteProgram
 {
-    private static final String TAG = "SQLiteStatement";
-
     /**
      * Don't use SQLiteStatement constructor directly, please use
      * {@link SQLiteDatabase#compileStatement(String)}
@@ -52,12 +49,6 @@ public class SQLiteStatement extends SQLiteProgram
 
         acquireReference();
         try {
-            if (SQLiteDebug.DEBUG_SQL_STATEMENTS) {
-                Log.v(TAG, "execute() for [" + mSql + "]");
-            }
-            if (SQLiteDebug.DEBUG_CAPTURE_SQL) {
-                Log.v(TAG, SQLiteDebug.captureSql(mDatabase.getPath(), mSql, getBindArgs()));
-            }
             native_execute();
             mDatabase.logTimeStat(mSql, timeStart);
         } finally {
@@ -82,12 +73,6 @@ public class SQLiteStatement extends SQLiteProgram
 
         acquireReference();
         try {
-            if (SQLiteDebug.DEBUG_SQL_STATEMENTS) {
-                Log.v(TAG, "executeInsert() for [" + mSql + "]");
-            }
-            if (SQLiteDebug.DEBUG_CAPTURE_SQL) {
-                Log.v(TAG, SQLiteDebug.captureSql(mDatabase.getPath(), mSql, getBindArgs()));
-            }
             native_execute();
             mDatabase.logTimeStat(mSql, timeStart);
             return mDatabase.lastInsertRow();
@@ -111,12 +96,6 @@ public class SQLiteStatement extends SQLiteProgram
 
         acquireReference();
         try {
-            if (SQLiteDebug.DEBUG_SQL_STATEMENTS) {
-                Log.v(TAG, "simpleQueryForLong() for [" + mSql + "]");
-            }
-            if (SQLiteDebug.DEBUG_CAPTURE_SQL) {
-                Log.v(TAG, SQLiteDebug.captureSql(mDatabase.getPath(), mSql, getBindArgs()));
-            }
             long retValue = native_1x1_long();
             mDatabase.logTimeStat(mSql, timeStart);
             return retValue;
@@ -140,12 +119,6 @@ public class SQLiteStatement extends SQLiteProgram
 
         acquireReference();
         try {
-            if (SQLiteDebug.DEBUG_SQL_STATEMENTS) {
-                Log.v(TAG, "simpleQueryForString() for [" + mSql + "]");
-            }
-            if (SQLiteDebug.DEBUG_CAPTURE_SQL) {
-                Log.v(TAG, SQLiteDebug.captureSql(mDatabase.getPath(), mSql, getBindArgs()));
-            }
             String retValue = native_1x1_string();
             mDatabase.logTimeStat(mSql, timeStart);
             return retValue;

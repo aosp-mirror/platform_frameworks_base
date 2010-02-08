@@ -16,19 +16,10 @@
 
 package android.database.sqlite;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
-import android.util.Log;
-
 /**
  * A base class for compiled SQLite programs.
  */
 public abstract class SQLiteProgram extends SQLiteClosable {
-    private static final String TAG = "SQLiteProgram";
 
     /** The database this program is compiled against. */
     protected SQLiteDatabase mDatabase;
@@ -53,16 +44,7 @@ public abstract class SQLiteProgram extends SQLiteClosable {
      */
     protected int nStatement = 0;
 
-    /**
-     * stores all bindargs for debugging purposes
-     */
-    private Map<Integer, String> mBindArgs = null;
-
     /* package */ SQLiteProgram(SQLiteDatabase db, String sql) {
-        if (SQLiteDebug.DEBUG_SQL_STATEMENTS) {
-            Log.d(TAG, "processing sql: " + sql);
-        }
-
         mDatabase = db;
         mSql = sql;
         db.acquireReference();
@@ -138,9 +120,6 @@ public abstract class SQLiteProgram extends SQLiteClosable {
      * @param index The 1-based index to the parameter to bind null to
      */
     public void bindNull(int index) {
-        if (SQLiteDebug.DEBUG_CAPTURE_SQL) {
-            addToBindArgs(index, "null");
-        }
         acquireReference();
         try {
             native_bind_null(index);
@@ -157,9 +136,6 @@ public abstract class SQLiteProgram extends SQLiteClosable {
      * @param value The value to bind
      */
     public void bindLong(int index, long value) {
-        if (SQLiteDebug.DEBUG_CAPTURE_SQL) {
-            addToBindArgs(index, value + "");
-        }
         acquireReference();
         try {
             native_bind_long(index, value);
@@ -176,9 +152,6 @@ public abstract class SQLiteProgram extends SQLiteClosable {
      * @param value The value to bind
      */
     public void bindDouble(int index, double value) {
-        if (SQLiteDebug.DEBUG_CAPTURE_SQL) {
-            addToBindArgs(index, value + "");
-        }
         acquireReference();
         try {
             native_bind_double(index, value);
@@ -195,9 +168,6 @@ public abstract class SQLiteProgram extends SQLiteClosable {
      * @param value The value to bind
      */
     public void bindString(int index, String value) {
-        if (SQLiteDebug.DEBUG_CAPTURE_SQL) {
-            addToBindArgs(index, "'" + value + "'");
-        }
         if (value == null) {
             throw new IllegalArgumentException("the bind value at index " + index + " is null");
         }
@@ -217,9 +187,6 @@ public abstract class SQLiteProgram extends SQLiteClosable {
      * @param value The value to bind
      */
     public void bindBlob(int index, byte[] value) {
-        if (SQLiteDebug.DEBUG_CAPTURE_SQL) {
-            addToBindArgs(index, "blob");
-        }
         if (value == null) {
             throw new IllegalArgumentException("the bind value at index " + index + " is null");
         }
@@ -235,9 +202,6 @@ public abstract class SQLiteProgram extends SQLiteClosable {
      * Clears all existing bindings. Unset bindings are treated as NULL.
      */
     public void clearBindings() {
-        if (SQLiteDebug.DEBUG_CAPTURE_SQL) {
-            mBindArgs = null;
-        }
         acquireReference();
         try {
             native_clear_bindings();
@@ -256,39 +220,6 @@ public abstract class SQLiteProgram extends SQLiteClosable {
         } finally {
             mDatabase.unlock();
         }
-    }
-
-    /**
-     * this method is called under the debug flag {@link SQLiteDebug.DEBUG_CAPTURE_SQL} only.
-     * it collects the bindargs as they are called by the callers the bind... methods in this
-     * class.
-     */
-    private void addToBindArgs(int index, String obj) {
-        if (mBindArgs == null) {
-            mBindArgs = new HashMap<Integer, String>();
-        }
-        mBindArgs.put(index, obj);
-    }
-
-    /**
-     * constructs all the bindargs in sequence and returns a String Array of the values.
-     * it uses the HashMap built up by the above method.
-     *
-     * @return the string array of bindArgs with the args arranged in sequence
-     */
-    /* package */ String[] getBindArgs() {
-        if (mBindArgs == null) {
-            return null;
-        }
-        Set<Integer> indexSet = mBindArgs.keySet();
-        ArrayList<Integer> indexList = new ArrayList<Integer>(indexSet);
-        Collections.sort(indexList);
-        int len = indexList.size();
-        String[] bindObjs = new String[len];
-        for (int i = 0; i < len; i++) {
-            bindObjs[i] = mBindArgs.get(indexList.get(i));
-        }
-        return bindObjs;
     }
 
     /**
