@@ -216,7 +216,6 @@ public class RecognitionManager {
             throw new IllegalArgumentException("intent must not be null");
         }
         checkIsCalledFromMainThread();
-        checkIsCommandAllowed();
         if (mConnection == null) { // first time connection
             mConnection = new Connection();
             if (!mContext.bindService(new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH),
@@ -243,7 +242,6 @@ public class RecognitionManager {
      */
     public void stopListening() {
         checkIsCalledFromMainThread();
-        checkIsCommandAllowed();
         putMessage(Message.obtain(mHandler, MSG_STOP));
     }
 
@@ -254,7 +252,6 @@ public class RecognitionManager {
      */
     public void cancel() {
         checkIsCalledFromMainThread();
-        checkIsCommandAllowed();
         putMessage(Message.obtain(mHandler, MSG_CANCEL));
     }
 
@@ -262,12 +259,6 @@ public class RecognitionManager {
         if (Looper.myLooper() != Looper.getMainLooper()) {
             throw new RuntimeException(
                     "RecognitionManager should be used only from the application's main thread");
-        }
-    }
-
-    private void checkIsCommandAllowed() {
-        if (mService == null && mPendingTasks.isEmpty()) { // setListener message must be there
-            throw new IllegalStateException("Listener must be set before any command is called");
         }
     }
 
@@ -281,6 +272,9 @@ public class RecognitionManager {
 
     /** sends the actual message to the service */
     private void handleStartListening(Intent recognizerIntent) {
+        if (!checkOpenConnection()) {
+            return;
+        }
         try {
             mService.startListening(recognizerIntent, mListener);
             if (DBG) Log.d(TAG, "service start listening command succeded");
@@ -292,6 +286,9 @@ public class RecognitionManager {
 
     /** sends the actual message to the service */
     private void handleStopMessage() {
+        if (!checkOpenConnection()) {
+            return;
+        }
         try {
             mService.stopListening(mListener);
             if (DBG) Log.d(TAG, "service stop listening command succeded");
@@ -303,6 +300,9 @@ public class RecognitionManager {
 
     /** sends the actual message to the service */
     private void handleCancelMessage() {
+        if (!checkOpenConnection()) {
+            return;
+        }
         try {
             mService.cancel(mListener);
             if (DBG) Log.d(TAG, "service cancel command succeded");
@@ -310,6 +310,15 @@ public class RecognitionManager {
             Log.e(TAG, "cancel() failed", e);
             mListener.onError(ERROR_CLIENT);
         }
+    }
+    
+    private boolean checkOpenConnection() {
+        if (mService != null) {
+            return true;
+        }
+        mListener.onError(ERROR_CLIENT);
+        Log.e(TAG, "not connected to the recognition service");
+        return false;
     }
 
     /** changes the listener */
