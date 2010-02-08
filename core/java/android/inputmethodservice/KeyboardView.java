@@ -620,7 +620,10 @@ public class KeyboardView extends View implements View.OnClickListener {
         if (mBuffer == null || mKeyboardChanged) {
             if (mBuffer == null || mKeyboardChanged &&
                     (mBuffer.getWidth() != getWidth() || mBuffer.getHeight() != getHeight())) {
-                mBuffer = Bitmap.createBitmap(getWidth(), getHeight(), Bitmap.Config.ARGB_8888);
+                // Make sure our bitmap is at least 1x1
+                final int width = Math.max(1, getWidth());
+                final int height = Math.max(1, getHeight());
+                mBuffer = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
                 mCanvas = new Canvas(mBuffer);
             }
             invalidateAllKeys();
