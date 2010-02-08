@@ -24,6 +24,7 @@
 #include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/Utils.h>
 #include <utils/String8.h>
+#include <sys/endian.h>
 
 namespace android {
 
@@ -336,7 +337,26 @@ void ID3::Iterator::getString(String8 *id) const {
     } else {
         // UCS-2
         // API wants number of characters, not number of bytes...
-        id->setTo((const char16_t *)(mFrameData + 1), n / 2);
+        int len = n / 2;
+        const char16_t *framedata = (const char16_t *) (mFrameData + 1);
+        char16_t *framedatacopy = NULL;
+        if (*framedata == 0xfffe) {
+            // endianness marker doesn't match host endianness, convert
+            framedatacopy = new char16_t[len];
+            for (int i = 0; i < len; i++) {
+                framedatacopy[i] = swap16(framedata[i]);
+            }
+            framedata = framedatacopy;
+        }
+        // If the string starts with an endianness marker, skip it
+        if (*framedata == 0xfeff) {
+            framedata++;
+            len--;
+        }
+        id->setTo(framedata, len);
+        if (framedatacopy != NULL) {
+            delete[] framedatacopy;
+        }
     }
 }
 
