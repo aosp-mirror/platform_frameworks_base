@@ -36,6 +36,11 @@ public class HapticFeedbackConstants {
     public static final int VIRTUAL_KEY = 1;
     
     /**
+     * The user has hit the barrier point while scrolling a view.
+     */
+    public static final int SCROLL_BARRIER = 2;
+    
+    /**
      * This is a private constant.  Feel free to renumber as desired.
      * @hide
      */

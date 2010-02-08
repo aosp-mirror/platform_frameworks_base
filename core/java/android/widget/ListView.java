@@ -2916,7 +2916,14 @@ public class ListView extends AbsListView {
 
             if (!mStackFromBottom) {
                 int bottom;
-                int listBottom = mBottom - mTop - mListPadding.bottom;
+                int listBottom = mBottom - mTop - mListPadding.bottom + mScrollY;
+                
+                // Draw top divider for overscroll
+                if (count > 0 && mScrollY < 0) {
+                    bounds.bottom = 0;
+                    bounds.top = -dividerHeight;
+                    drawDivider(canvas, bounds, -1);
+                }
 
                 for (int i = 0; i < count; i++) {
                     if ((headerDividers || first + i >= headerCount) &&
