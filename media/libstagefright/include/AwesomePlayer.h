@@ -57,6 +57,10 @@ struct AwesomePlayer {
 
     void reset();
 
+    status_t prepare();
+    status_t prepareAsync();
+    status_t prepareAsync_l();
+
     status_t play();
     status_t pause();
 
@@ -121,6 +125,9 @@ private:
     sp<TimedEventQueue::Event> mCheckAudioStatusEvent;
     bool mAudioStatusEventPending;
 
+    sp<TimedEventQueue::Event> mAsyncPrepareEvent;
+    Condition mPreparedCondition;
+
     void postVideoEvent_l(int64_t delayUs = -1);
     void postBufferingEvent_l();
     void postStreamDoneEvent_l();
@@ -143,13 +150,14 @@ private:
     status_t setAudioSource(sp<MediaSource> source);
     status_t setVideoSource(sp<MediaSource> source);
 
-    void onEvent(int32_t code);
     void onStreamDone();
 
-    void notifyListener_l(int msg, int ext1 = 0);
+    void notifyListener_l(int msg, int ext1 = 0, int ext2 = 0);
 
+    void onVideoEvent();
     void onBufferingUpdate();
     void onCheckAudioStatus();
+    void onPrepareAsyncEvent();
 
     AwesomePlayer(const AwesomePlayer &);
     AwesomePlayer &operator=(const AwesomePlayer &);
