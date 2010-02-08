@@ -59,6 +59,7 @@ enum {
     kKeyAlbumArtMIME      = 'alAM',  // cstring
     kKeyAuthor            = 'auth',  // cstring
     kKeyCDTrackNumber     = 'cdtr',  // cstring
+    kKeyDiscNumber        = 'dnum',  // cstring
     kKeyDate              = 'date',  // cstring
     kKeyWriter            = 'writ',  // cstring
 };
