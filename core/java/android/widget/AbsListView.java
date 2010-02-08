@@ -1953,6 +1953,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 }
             }
         }
+        mLastTouchMode = isInTouchMode ? TOUCH_MODE_ON : TOUCH_MODE_OFF;
     }
 
     @Override
