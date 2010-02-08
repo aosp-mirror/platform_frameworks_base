@@ -6784,8 +6784,6 @@ public class WebView extends AbsoluteLayout
     private native void     nativeSetFindIsUp();
     private native void     nativeSetFollowedLink(boolean followed);
     private native void     nativeSetHeightCanMeasure(boolean measure);
-    // Returns a value corresponding to CachedFrame::ImeAction
-    /* package */ native int  nativeTextFieldAction();
     private native int      nativeTextGeneration();
     // Never call this version except by updateCachedTextfield(String) -
     // we always want to pass in our generation number.
