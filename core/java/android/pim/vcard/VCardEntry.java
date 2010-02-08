@@ -281,6 +281,29 @@ public class VCardEntry {
                     isPrimary == organization.isPrimary);
         }
 
+        public String getFormattedString() {
+            final StringBuilder builder = new StringBuilder();
+            if (!TextUtils.isEmpty(companyName)) {
+                builder.append(companyName);
+            }
+
+            if (!TextUtils.isEmpty(departmentName)) {
+                if (builder.length() > 0) {
+                    builder.append(", ");
+                }
+                builder.append(departmentName);
+            }
+
+            if (!TextUtils.isEmpty(titleName)) {
+                if (builder.length() > 0) {
+                    builder.append(", ");
+                }
+                builder.append(titleName);
+            }
+
+            return builder.toString();
+        }
+
         @Override
         public String toString() {
             return String.format(
@@ -1008,6 +1031,8 @@ public class VCardEntry {
             mDisplayName = mPhoneList.get(0).data;
         } else if (mPostalList != null && mPostalList.size() > 0) {
             mDisplayName = mPostalList.get(0).getFormattedAddress(mVCardType);
+        } else if (mOrganizationList != null && mOrganizationList.size() > 0) {
+            mDisplayName = mOrganizationList.get(0).getFormattedString();
         }
 
         if (mDisplayName == null) {
