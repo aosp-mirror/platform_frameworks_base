@@ -1813,14 +1813,14 @@ public class StatusBarService extends IStatusBar.Stub
             filter.addAction(Intent.ACTION_PACKAGE_RESTARTED);
             filter.addDataScheme("package");
             mContext.registerReceiver(this, filter);
-            IntentFilter sdFilter = new IntentFilter(Intent.ACTION_MEDIA_RESOURCES_UNAVAILABLE);
+            IntentFilter sdFilter = new IntentFilter(Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE);
             mContext.registerReceiver(this, sdFilter);
         }
         
         @Override
         public void onReceive(Context context, Intent intent) {
             String pkgList[] = null;
-            if (Intent.ACTION_MEDIA_RESOURCES_UNAVAILABLE.equals(intent.getAction())) {
+            if (Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE.equals(intent.getAction())) {
                 pkgList = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
             } else {
                 Uri data = intent.getData();

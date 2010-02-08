@@ -484,7 +484,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         intentFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
         intentFilter.addAction(Intent.ACTION_PACKAGE_RESTARTED);
         mContext.registerReceiver(mBroadcastReceiver, intentFilter);
-        IntentFilter sdFilter = new IntentFilter(Intent.ACTION_MEDIA_RESOURCES_UNAVAILABLE);
+        IntentFilter sdFilter = new IntentFilter(Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE);
         mContext.registerReceiver(mBroadcastReceiver, sdFilter);
 
         // listen for settings changes
@@ -1552,10 +1552,10 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
 
             if (action.equals(Intent.ACTION_PACKAGE_REMOVED)
                     || action.equals(Intent.ACTION_PACKAGE_RESTARTED)
-                    || action.equals(Intent.ACTION_MEDIA_RESOURCES_UNAVAILABLE)) {
+                    || action.equals(Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE)) {
                 synchronized (mLock) {
                     int uidList[] = null;
-                    if (action.equals(Intent.ACTION_MEDIA_RESOURCES_UNAVAILABLE)) {
+                    if (action.equals(Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE)) {
                         uidList = intent.getIntArrayExtra(Intent.EXTRA_CHANGED_UID_LIST);
                     } else {
                         uidList = new int[]{intent.getIntExtra(Intent.EXTRA_UID, -1)};

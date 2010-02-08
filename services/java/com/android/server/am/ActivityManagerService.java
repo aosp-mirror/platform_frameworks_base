@@ -11941,7 +11941,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 intent.getAction());
         if (intent.ACTION_PACKAGE_REMOVED.equals(intent.getAction())
                 || intent.ACTION_PACKAGE_CHANGED.equals(intent.getAction())
-                || Intent.ACTION_MEDIA_RESOURCES_UNAVAILABLE.equals(intent.getAction())
+                || Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE.equals(intent.getAction())
                 || uidRemoved) {
             if (checkComponentPermission(
                     android.Manifest.permission.BROADCAST_PACKAGE_REMOVED,
@@ -11960,7 +11960,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 } else {
                     // If resources are unvailble just force stop all
                     // those packages and flush the attribute cache as well.
-                    if (Intent.ACTION_MEDIA_RESOURCES_UNAVAILABLE.equals(intent.getAction())) {
+                    if (Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE.equals(intent.getAction())) {
                         String list[] = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
                         if (list != null && (list.length > 0)) {
                             for (String pkg : list) {
@@ -12146,7 +12146,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                         skipPackages = new String[] { pkgName };
                     }
                 }
-            } else if (intent.ACTION_MEDIA_RESOURCES_AVAILABLE.equals(intent.getAction())) {
+            } else if (intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE.equals(intent.getAction())) {
                 skipPackages = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
             }
             if (skipPackages != null && (skipPackages.length > 0)) {

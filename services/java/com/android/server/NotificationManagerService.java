@@ -330,9 +330,9 @@ class NotificationManagerService extends INotificationManager.Stub
                 updateAdbNotification();
             } else if (action.equals(Intent.ACTION_PACKAGE_REMOVED)
                     || action.equals(Intent.ACTION_PACKAGE_RESTARTED)
-                    || action.equals(Intent.ACTION_MEDIA_RESOURCES_UNAVAILABLE)) {
+                    || action.equals(Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE)) {
                 String pkgList[] = null;
-                if (action.equals(Intent.ACTION_MEDIA_RESOURCES_UNAVAILABLE)) {
+                if (action.equals(Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE)) {
                     pkgList = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
                 } else {
                     Uri uri = intent.getData();
@@ -440,7 +440,7 @@ class NotificationManagerService extends INotificationManager.Stub
         filter.addAction(Intent.ACTION_SCREEN_ON);
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         mContext.registerReceiver(mIntentReceiver, filter);
-        IntentFilter sdFilter = new IntentFilter(Intent.ACTION_MEDIA_RESOURCES_UNAVAILABLE);
+        IntentFilter sdFilter = new IntentFilter(Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE);
         mContext.registerReceiver(mIntentReceiver, sdFilter);
 
         SettingsObserver observer = new SettingsObserver(mHandler);
