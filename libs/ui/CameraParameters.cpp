@@ -59,6 +59,8 @@ const char CameraParameters::KEY_SUPPORTED_FOCUS_MODES[] = "focus-mode-values";
 const char CameraParameters::KEY_FOCAL_LENGTH[] = "focal-length";
 const char CameraParameters::KEY_HORIZONTAL_VIEW_ANGLE[] = "horizontal-view-angle";
 const char CameraParameters::KEY_VERTICAL_VIEW_ANGLE[] = "vertical-view-angle";
+const char CameraParameters::KEY_EXPOSURE_COMPENSATION[] = "exposure-compensation";
+const char CameraParameters::KEY_SUPPORTED_EXPOSURE_COMPENSATION[] = "exposure-compensation-values";
 
 // Values for white balance settings.
 const char CameraParameters::WHITE_BALANCE_AUTO[] = "auto";
