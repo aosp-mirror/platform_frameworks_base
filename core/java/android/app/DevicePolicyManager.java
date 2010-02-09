@@ -328,13 +328,19 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Set the maximum number of failed password attempts that are allowed
-     * before the device wipes its data.  This is convenience for implementing
-     * the corresponding functionality with a combination of watching failed
-     * password attempts and calling {@link #wipeData} upon reaching a certain
-     * count, and as such requires that you request both
-     * {@link DeviceAdminInfo#USES_POLICY_WATCH_LOGIN} and
+     * Setting this to a value greater than zero enables a built-in policy
+     * that will perform a device wipe after too many incorrect
+     * device-unlock passwords have been entered.  This built-in policy combines
+     * watching for failed passwords and wiping the device, and requires
+     * that you request both {@link DeviceAdminInfo#USES_POLICY_WATCH_LOGIN} and
      * {@link DeviceAdminInfo#USES_POLICY_WIPE_DATA}}.
+     * 
+     * <p>To implement any other policy (e.g. wiping data for a particular
+     * application only, erasing or revoking credentials, or reporting the
+     * failure to a server), you should implement
+     * {@link DeviceAdmin#onPasswordFailed(Context, android.content.Intent)}
+     * instead.  Do not use this API, because if the maximum count is reached,
+     * the device will be wiped immediately, and your callback will not be invoked.
      * 
      * @param admin Which {@link DeviceAdmin} this request is associated with.
      * @param num The number of failed password attempts at which point the
