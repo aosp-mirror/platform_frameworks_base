@@ -320,14 +320,18 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 }
                 tag = parser.getName();
                 if ("admin".equals(tag)) {
-                    DeviceAdminInfo dai = findAdmin(
-                            ComponentName.unflattenFromString(
-                                    parser.getAttributeValue(null, "name")));
-                    if (dai != null) {
-                        ActiveAdmin ap = new ActiveAdmin(dai);
-                        ap.readFromXml(parser);
-                        mAdminMap.put(ap.info.getComponent(), ap);
-                        mAdminList.add(ap);
+                    String name = parser.getAttributeValue(null, "name");
+                    try {
+                        DeviceAdminInfo dai = findAdmin(
+                                ComponentName.unflattenFromString(name));
+                        if (dai != null) {
+                            ActiveAdmin ap = new ActiveAdmin(dai);
+                            ap.readFromXml(parser);
+                            mAdminMap.put(ap.info.getComponent(), ap);
+                            mAdminList.add(ap);
+                        }
+                    } catch (RuntimeException e) {
+                        Log.w(TAG, "Failed loading admin " + name, e);
                     }
                 } else if ("failed-password-attempts".equals(tag)) {
                     mFailedPasswordAttempts = Integer.parseInt(

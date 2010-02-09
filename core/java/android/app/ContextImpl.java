@@ -197,9 +197,9 @@ class ContextImpl extends Context {
     private File mDatabasesDir;
     private File mPreferencesDir;
     private File mFilesDir;
-    
-
     private File mCacheDir;
+    private File mExternalFilesDir;
+    private File mExternalCacheDir;
     
     private static long sInstanceCount = 0;
 
@@ -438,6 +438,38 @@ class ContextImpl extends Context {
     }
     
     @Override
+    public File getExternalFilesDir(String type) {
+        synchronized (mSync) {
+            if (mExternalFilesDir == null) {
+                mExternalFilesDir = Environment.getExternalStorageAppFilesDirectory(
+                        getPackageName());
+            }
+            if (!mExternalFilesDir.exists()) {
+                try {
+                    (new File(Environment.getExternalStorageAndroidDataDir(),
+                            ".nomedia")).createNewFile();
+                } catch (IOException e) {
+                }
+                if (!mExternalFilesDir.mkdirs()) {
+                    Log.w(TAG, "Unable to create external files directory");
+                    return null;
+                }
+            }
+            if (type == null) {
+                return mExternalFilesDir;
+            }
+            File dir = new File(mExternalFilesDir, type);
+            if (!dir.exists()) {
+                if (!dir.mkdirs()) {
+                    Log.w(TAG, "Unable to create external media directory " + dir);
+                    return null;
+                }
+            }
+            return dir;
+        }
+    }
+    
+    @Override
     public File getCacheDir() {
         synchronized (mSync) {
             if (mCacheDir == null) {
@@ -457,7 +489,28 @@ class ContextImpl extends Context {
         return mCacheDir;
     }
     
-
+    @Override
+    public File getExternalCacheDir() {
+        synchronized (mSync) {
+            if (mExternalCacheDir == null) {
+                mExternalCacheDir = Environment.getExternalStorageAppCacheDirectory(
+                        getPackageName());
+            }
+            if (!mExternalCacheDir.exists()) {
+                try {
+                    (new File(Environment.getExternalStorageAndroidDataDir(),
+                            ".nomedia")).createNewFile();
+                } catch (IOException e) {
+                }
+                if (!mExternalCacheDir.mkdirs()) {
+                    Log.w(TAG, "Unable to create external cache directory");
+                    return null;
+                }
+            }
+            return mExternalCacheDir;
+        }
+    }
+    
     @Override
     public File getFileStreamPath(String name) {
         return makeFilename(getFilesDir(), name);

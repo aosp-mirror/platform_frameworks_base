@@ -305,4 +305,5 @@ interface IPackageManager {
      */
     void updateExternalMediaStatus(boolean mounted);
 
+    String nextPackageToClean(String lastPackage);
 }

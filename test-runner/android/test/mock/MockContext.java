@@ -158,7 +158,17 @@ public class MockContext extends Context {
     }
 
     @Override
+    public File getExternalFilesDir(String type) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public File getCacheDir() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public File getExternalCacheDir() {
         throw new UnsupportedOperationException();
     }
 
