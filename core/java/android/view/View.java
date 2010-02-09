@@ -8191,6 +8191,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * Cancels any animations for this view.
      */
     public void clearAnimation() {
+        if (mCurrentAnimation != null) {
+            mCurrentAnimation.cancel();
+        }
         mCurrentAnimation = null;
     }
 
