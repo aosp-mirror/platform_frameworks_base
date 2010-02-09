@@ -42,7 +42,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Collection;
 
 
 /**
@@ -62,7 +61,31 @@ public abstract class ContentResolver {
      */
     @Deprecated
     public static final String SYNC_EXTRAS_FORCE = "force";
+
+    /**
+     * If this extra is set to true then the sync settings (like getSyncAutomatically())
+     * are ignored by the sync scheduler.
+     */
+    public static final String SYNC_EXTRAS_IGNORE_SETTINGS = "ignore_settings";
+
+    /**
+     * If this extra is set to true then any backoffs for the initial attempt (e.g. due to retries)
+     * are ignored by the sync scheduler. If this request fails and gets rescheduled then the
+     * retries will still honor the backoff.
+     */
+    public static final String SYNC_EXTRAS_IGNORE_BACKOFF = "ignore_backoff";
+
+    /**
+     * If this extra is set to true then the request will not be retried if it fails.
+     */
+    public static final String SYNC_EXTRAS_DO_NOT_RETRY = "do_not_retry";
+
+    /**
+     * Setting this extra is the equivalent of setting both {@link #SYNC_EXTRAS_IGNORE_SETTINGS}
+     * and {@link #SYNC_EXTRAS_IGNORE_BACKOFF}
+     */
     public static final String SYNC_EXTRAS_MANUAL = "force";
+
     public static final String SYNC_EXTRAS_UPLOAD = "upload";
     public static final String SYNC_EXTRAS_OVERRIDE_TOO_MANY_DELETIONS = "deletions_override";
     public static final String SYNC_EXTRAS_DISCARD_LOCAL_DELETIONS = "discard_deletions";
@@ -976,15 +999,38 @@ public abstract class ContentResolver {
      * Although these sync are scheduled at the specified frequency, it may take longer for it to
      * actually be started if other syncs are ahead of it in the sync operation queue. This means
      * that the actual start time may drift.
+     * <p>
+     * Periodic syncs are not allowed to have any of {@link #SYNC_EXTRAS_DO_NOT_RETRY},
+     * {@link #SYNC_EXTRAS_IGNORE_BACKOFF}, {@link #SYNC_EXTRAS_IGNORE_SETTINGS},
+     * {@link #SYNC_EXTRAS_INITIALIZE}, {@link #SYNC_EXTRAS_FORCE},
+     * {@link #SYNC_EXTRAS_EXPEDITED}, {@link #SYNC_EXTRAS_MANUAL} set to true.
+     * If any are supplied then an {@link IllegalArgumentException} will be thrown.
      *
      * @param account the account to specify in the sync
      * @param authority the provider to specify in the sync request
      * @param extras extra parameters to go along with the sync request
      * @param pollFrequency how frequently the sync should be performed, in seconds.
+     * @throws IllegalArgumentException if an illegal extra was set or if any of the parameters
+     * are null.
      */
     public static void addPeriodicSync(Account account, String authority, Bundle extras,
             long pollFrequency) {
         validateSyncExtrasBundle(extras);
+        if (account == null) {
+            throw new IllegalArgumentException("account must not be null");
+        }
+        if (authority == null) {
+            throw new IllegalArgumentException("authority must not be null");
+        }
+        if (extras.getBoolean(SYNC_EXTRAS_MANUAL, false)
+                || extras.getBoolean(SYNC_EXTRAS_DO_NOT_RETRY, false)
+                || extras.getBoolean(SYNC_EXTRAS_IGNORE_BACKOFF, false)
+                || extras.getBoolean(SYNC_EXTRAS_IGNORE_SETTINGS, false)
+                || extras.getBoolean(SYNC_EXTRAS_INITIALIZE, false)
+                || extras.getBoolean(SYNC_EXTRAS_FORCE, false)
+                || extras.getBoolean(SYNC_EXTRAS_EXPEDITED, false)) {
+            throw new IllegalArgumentException("illegal extras were set");
+        }
         try {
             getContentService().addPeriodicSync(account, authority, extras, pollFrequency);
         } catch (RemoteException e) {
@@ -1003,6 +1049,12 @@ public abstract class ContentResolver {
      */
     public static void removePeriodicSync(Account account, String authority, Bundle extras) {
         validateSyncExtrasBundle(extras);
+        if (account == null) {
+            throw new IllegalArgumentException("account must not be null");
+        }
+        if (authority == null) {
+            throw new IllegalArgumentException("authority must not be null");
+        }
         try {
             getContentService().removePeriodicSync(account, authority, extras);
         } catch (RemoteException e) {
@@ -1018,6 +1070,12 @@ public abstract class ContentResolver {
      * @return a list of PeriodicSync objects. This list may be empty but will never be null.
      */
     public static List<PeriodicSync> getPeriodicSyncs(Account account, String authority) {
+        if (account == null) {
+            throw new IllegalArgumentException("account must not be null");
+        }
+        if (authority == null) {
+            throw new IllegalArgumentException("authority must not be null");
+        }
         try {
             return getContentService().getPeriodicSyncs(account, authority);
         } catch (RemoteException e) {

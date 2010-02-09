@@ -620,7 +620,10 @@ public class KeyboardView extends View implements View.OnClickListener {
         if (mBuffer == null || mKeyboardChanged) {
             if (mBuffer == null || mKeyboardChanged &&
                     (mBuffer.getWidth() != getWidth() || mBuffer.getHeight() != getHeight())) {
-                mBuffer = Bitmap.createBitmap(getWidth(), getHeight(), Bitmap.Config.ARGB_8888);
+                // Make sure our bitmap is at least 1x1
+                final int width = Math.max(1, getWidth());
+                final int height = Math.max(1, getHeight());
+                mBuffer = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
                 mCanvas = new Canvas(mBuffer);
             }
             invalidateAllKeys();
@@ -739,6 +742,10 @@ public class KeyboardView extends View implements View.OnClickListener {
             final Key key = keys[nearestKeyIndices[i]];
             int dist = 0;
             boolean isInside = key.isInside(x,y);
+            if (isInside) {
+                primaryIndex = nearestKeyIndices[i];
+            }
+
             if (((mProximityCorrectOn 
                     && (dist = key.squaredDistanceFrom(x, y)) < mProximityThreshold) 
                     || isInside)
@@ -766,10 +773,6 @@ public class KeyboardView extends View implements View.OnClickListener {
                         break;
                     }
                 }
-            }
-            
-            if (isInside) {
-                primaryIndex = nearestKeyIndices[i];
             }
         }
         if (primaryIndex == NOT_A_KEY) {

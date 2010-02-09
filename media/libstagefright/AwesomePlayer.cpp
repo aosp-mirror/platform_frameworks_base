@@ -37,21 +37,23 @@
 namespace android {
 
 struct AwesomeEvent : public TimedEventQueue::Event {
-    AwesomeEvent(AwesomePlayer *player, int32_t code)
+    AwesomeEvent(
+            AwesomePlayer *player,
+            void (AwesomePlayer::*method)())
         : mPlayer(player),
-          mCode(code) {
+          mMethod(method) {
     }
 
 protected:
     virtual ~AwesomeEvent() {}
 
     virtual void fire(TimedEventQueue *queue, int64_t /* now_us */) {
-        mPlayer->onEvent(mCode);
+        (mPlayer->*mMethod)();
     }
 
 private:
     AwesomePlayer *mPlayer;
-    int32_t mCode;
+    void (AwesomePlayer::*mMethod)();
 
     AwesomeEvent(const AwesomeEvent &);
     AwesomeEvent &operator=(const AwesomeEvent &);
@@ -115,13 +117,16 @@ AwesomePlayer::AwesomePlayer()
 
     DataSource::RegisterDefaultSniffers();
 
-    mVideoEvent = new AwesomeEvent(this, 0);
+    mVideoEvent = new AwesomeEvent(this, &AwesomePlayer::onVideoEvent);
     mVideoEventPending = false;
-    mStreamDoneEvent = new AwesomeEvent(this, 1);
+    mStreamDoneEvent = new AwesomeEvent(this, &AwesomePlayer::onStreamDone);
     mStreamDoneEventPending = false;
-    mBufferingEvent = new AwesomeEvent(this, 2);
+    mBufferingEvent = new AwesomeEvent(this, &AwesomePlayer::onBufferingUpdate);
     mBufferingEventPending = false;
-    mCheckAudioStatusEvent = new AwesomeEvent(this, 3);
+
+    mCheckAudioStatusEvent = new AwesomeEvent(
+            this, &AwesomePlayer::onCheckAudioStatus);
+
     mAudioStatusEventPending = false;
 
     mQueue.start();
@@ -287,12 +292,12 @@ void AwesomePlayer::reset_l() {
     mPrefetcher.clear();
 }
 
-void AwesomePlayer::notifyListener_l(int msg, int ext1) {
+void AwesomePlayer::notifyListener_l(int msg, int ext1, int ext2) {
     if (mListener != NULL) {
         sp<MediaPlayerBase> listener = mListener.promote();
 
         if (listener != NULL) {
-            listener->sendEvent(msg, ext1);
+            listener->sendEvent(msg, ext1, ext2);
         }
     }
 }
@@ -623,18 +628,7 @@ status_t AwesomePlayer::setVideoSource(sp<MediaSource> source) {
     return mVideoSource != NULL ? OK : UNKNOWN_ERROR;
 }
 
-void AwesomePlayer::onEvent(int32_t code) {
-    if (code == 1) {
-        onStreamDone();
-        return;
-    } else if (code == 2) {
-        onBufferingUpdate();
-        return;
-    } else if (code == 3) {
-        onCheckAudioStatus();
-        return;
-    }
-
+void AwesomePlayer::onVideoEvent() {
     Mutex::Autolock autoLock(mLock);
 
     mVideoEventPending = false;
@@ -817,6 +811,66 @@ void AwesomePlayer::onCheckAudioStatus() {
     }
 
     postCheckAudioStatusEvent_l();
+}
+
+status_t AwesomePlayer::prepare() {
+    Mutex::Autolock autoLock(mLock);
+
+    status_t err = prepareAsync_l();
+
+    if (err != OK) {
+        return err;
+    }
+
+    while (mAsyncPrepareEvent != NULL) {
+        mPreparedCondition.wait(mLock);
+    }
+
+    return OK;
+}
+
+status_t AwesomePlayer::prepareAsync() {
+    Mutex::Autolock autoLock(mLock);
+    return prepareAsync_l();
+}
+
+status_t AwesomePlayer::prepareAsync_l() {
+    if (mAsyncPrepareEvent != NULL) {
+        return UNKNOWN_ERROR;  // async prepare already pending.
+    }
+
+    mAsyncPrepareEvent = new AwesomeEvent(
+            this, &AwesomePlayer::onPrepareAsyncEvent);
+
+    mQueue.postEvent(mAsyncPrepareEvent);
+
+    return OK;
+}
+
+void AwesomePlayer::onPrepareAsyncEvent() {
+    sp<Prefetcher> prefetcher;
+
+    {
+        Mutex::Autolock autoLock(mLock);
+        prefetcher = mPrefetcher;
+    }
+
+    if (prefetcher != NULL) {
+        prefetcher->prepare();
+    }
+
+    Mutex::Autolock autoLock(mLock);
+
+    if (mVideoWidth < 0 || mVideoHeight < 0) {
+        notifyListener_l(MEDIA_SET_VIDEO_SIZE, 0, 0);
+    } else {
+        notifyListener_l(MEDIA_SET_VIDEO_SIZE, mVideoWidth, mVideoHeight);
+    }
+
+    notifyListener_l(MEDIA_PREPARED);
+
+    mAsyncPrepareEvent = NULL;
+    mPreparedCondition.signal();
 }
 
 }  // namespace android

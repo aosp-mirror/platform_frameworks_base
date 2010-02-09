@@ -171,7 +171,7 @@ void Prefetcher::threadFunc() {
     }
 }
 
-int64_t Prefetcher::getCachedDurationUs() {
+int64_t Prefetcher::getCachedDurationUs(bool *noMoreData) {
     Mutex::Autolock autoLock(mLock);
 
     int64_t minCacheDurationUs = -1;
@@ -197,7 +197,23 @@ int64_t Prefetcher::getCachedDurationUs() {
         }
     }
 
+    if (noMoreData) {
+        *noMoreData = minCacheDurationUs < 0;
+    }
+
     return minCacheDurationUs < 0 ? 0 : minCacheDurationUs;
+}
+
+status_t Prefetcher::prepare() {
+    // Buffer about 2 secs worth of data on prepare.
+
+    int64_t duration;
+    bool noMoreData;
+    do {
+        duration = getCachedDurationUs(&noMoreData);
+    } while (!noMoreData && duration < 2000000);
+
+    return OK;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -231,15 +247,6 @@ status_t PrefetchedSource::start(MetaData *params) {
     }
 
     mStarted = true;
-
-    for (;;) {
-        // Buffer 2 secs on startup.
-        if (mReachedEOS || mCacheDurationUs > 2000000) {
-            break;
-        }
-
-        mCondition.wait(mLock);
-    }
 
     return OK;
 }

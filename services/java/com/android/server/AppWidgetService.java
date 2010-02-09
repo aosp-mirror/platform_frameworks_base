@@ -147,8 +147,8 @@ class AppWidgetService extends IAppWidgetService.Stub
         mContext.registerReceiver(mBroadcastReceiver, filter);
         // Register for events related to sdcard installation.
         IntentFilter sdFilter = new IntentFilter();
-        sdFilter.addAction(Intent.ACTION_MEDIA_RESOURCES_AVAILABLE);
-        sdFilter.addAction(Intent.ACTION_MEDIA_RESOURCES_UNAVAILABLE);
+        sdFilter.addAction(Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE);
+        sdFilter.addAction(Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE);
         mContext.registerReceiver(mBroadcastReceiver, sdFilter);
     }
 
@@ -1077,10 +1077,10 @@ class AppWidgetService extends IAppWidgetService.Stub
             } else {
                 boolean added = false;
                 String pkgList[] = null;
-                if (Intent.ACTION_MEDIA_RESOURCES_AVAILABLE.equals(action)) {
+                if (Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE.equals(action)) {
                     pkgList = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
                     added = true;
-                } if (Intent.ACTION_MEDIA_RESOURCES_UNAVAILABLE.equals(action)) {
+                } if (Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE.equals(action)) {
                     pkgList = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
                     added = false;
                 } else  {

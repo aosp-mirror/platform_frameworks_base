@@ -837,14 +837,11 @@ public class AccountManager {
     private void ensureNotOnMainThread() {
         final Looper looper = Looper.myLooper();
         if (looper != null && looper == mContext.getMainLooper()) {
-            // We really want to throw an exception here, but GTalkService exercises this
-            // path quite a bit and needs some serious rewrite in order to work properly.
-            //noinspection ThrowableInstanceNeverThrow
-//            Log.e(TAG, "calling this from your main thread can lead to deadlock and/or ANRs",
-//                    new Exception());
-            // TODO remove the log and throw this exception when the callers are fixed
-//            throw new IllegalStateException(
-//                    "calling this from your main thread can lead to deadlock");
+            final IllegalStateException exception = new IllegalStateException(
+                    "calling this from your main thread can lead to deadlock");
+            Log.e(TAG, "calling this from your main thread can lead to deadlock and/or ANRs",
+                    exception);
+            throw exception;
         }
     }
 
@@ -909,7 +906,9 @@ public class AccountManager {
 
         private Bundle internalGetResult(Long timeout, TimeUnit unit)
                 throws OperationCanceledException, IOException, AuthenticatorException {
-            ensureNotOnMainThread();
+            if (!isDone()) {
+                ensureNotOnMainThread();
+            }
             try {
                 if (timeout == null) {
                     return get();
@@ -1075,7 +1074,9 @@ public class AccountManager {
 
         private T internalGetResult(Long timeout, TimeUnit unit)
                 throws OperationCanceledException, IOException, AuthenticatorException {
-            ensureNotOnMainThread();
+            if (!isDone()) {
+                ensureNotOnMainThread();
+            }
             try {
                 if (timeout == null) {
                     return get();

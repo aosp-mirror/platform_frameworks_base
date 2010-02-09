@@ -16,6 +16,8 @@
 
 package com.android.unit_tests;
 
+import android.os.IMountService.Stub;
+
 import android.net.Uri;
 import android.os.FileUtils;
 
@@ -34,7 +36,7 @@ import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageInstallObserver;
-import android.content.pm.IPackageStatsObserver;
+import android.content.pm.IPackageDeleteObserver;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
 import android.content.pm.PackageStats;
@@ -51,15 +53,27 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.IBinder;
+import android.os.IMountService;
+import android.os.MountServiceResultCode;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.StatFs;
 
 public class PackageManagerTests extends AndroidTestCase {
-    private static final boolean localLOGV = false;
+    private static final boolean localLOGV = true;
     public static final String TAG="PackageManagerTests";
-    public final long MAX_WAIT_TIME=60*1000;
-    public final long WAIT_TIME_INCR=10*1000;
+    public final long MAX_WAIT_TIME=120*1000;
+    public final long WAIT_TIME_INCR=20*1000;
+
+    void failStr(String errMsg) {
+        Log.w(TAG, "errMsg="+errMsg);
+        fail(errMsg);
+    }
+    void failStr(Exception e) {
+        Log.w(TAG, "e.getMessage="+e.getMessage());
+        Log.w(TAG, "e="+e);
+    }
 
     @Override
     protected void setUp() throws Exception {
@@ -146,6 +160,7 @@ public class PackageManagerTests extends AndroidTestCase {
         try {
             // Wait on observer
             synchronized(observer) {
+                synchronized (receiver) {
                     getPm().installPackage(packageURI, observer, flags, null);
                     long waitTime = 0;
                     while((!observer.isDone()) && (waitTime < MAX_WAIT_TIME) ) {
@@ -158,7 +173,6 @@ public class PackageManagerTests extends AndroidTestCase {
                     if (observer.returnCode != PackageManager.INSTALL_SUCCEEDED) {
                         return false;
                     }
-                    synchronized (receiver) {
                     // Verify we received the broadcast
                     waitTime = 0;
                     while((!receiver.isDone()) && (waitTime < MAX_WAIT_TIME) ) {
@@ -262,6 +276,7 @@ public class PackageManagerTests extends AndroidTestCase {
         PackageParser.Package pkg = parsePackage(packageURI);
         assertNotNull(pkg);
         InstallReceiver receiver = new InstallReceiver(pkg.packageName);
+        InstallParams ip = null;
         try {
             try {
                 assertTrue(invokeInstallPackage(packageURI, flags,
@@ -271,13 +286,11 @@ public class PackageManagerTests extends AndroidTestCase {
             }
             // Verify installed information
             assertInstall(pkg.packageName, flags);
-            return new InstallParams(pkg, outFileName, packageURI);
+            ip = new InstallParams(pkg, outFileName, packageURI);
+            return ip;
         } finally {
             if (cleanUp) {
-                getPm().deletePackage(pkg.packageName, null, 0);
-                if (outFile != null && outFile.exists()) {
-                    outFile.delete();
-                }
+                cleanUpInstall(ip);
             }
         }
     }
@@ -300,28 +313,52 @@ public class PackageManagerTests extends AndroidTestCase {
     /* ------------------------- Test replacing packages --------------*/
     class ReplaceReceiver extends GenericReceiver {
         String pkgName;
-        boolean removed = false;
+        final static int INVALID = -1;
+        final static int REMOVED = 1;
+        final static int ADDED = 2;
+        final static int REPLACED = 3;
+        int removed = INVALID;
+        // for updated system apps only
+        boolean update = false;
 
         ReplaceReceiver(String pkgName) {
             this.pkgName = pkgName;
             filter = new IntentFilter(Intent.ACTION_PACKAGE_REMOVED);
-            filter.addAction(Intent.ACTION_PACKAGE_REPLACED);
+            filter.addAction(Intent.ACTION_PACKAGE_ADDED);
+            if (update) {
+                filter.addAction(Intent.ACTION_PACKAGE_REPLACED);
+            }
+            filter.addDataScheme("package");
             super.setFilter(filter);
         }
 
         public boolean notifyNow(Intent intent) {
             String action = intent.getAction();
-            if (Intent.ACTION_PACKAGE_REMOVED.equals(action) ||
-                    Intent.ACTION_PACKAGE_REPLACED.equals(action)) {
-                Uri data = intent.getData();
-                String installedPkg = data.getEncodedSchemeSpecificPart();
-                if (pkgName.equals(installedPkg)) {
-                    if (removed) {
-                        return true;
-                    } else {
-                        removed = true;
-                    }
+            Uri data = intent.getData();
+            String installedPkg = data.getEncodedSchemeSpecificPart();
+            if (pkgName == null || !pkgName.equals(installedPkg)) {
+                return false;
+            }
+            if (Intent.ACTION_PACKAGE_REMOVED.equals(action)) {
+                removed = REMOVED;
+            } else if (Intent.ACTION_PACKAGE_ADDED.equals(action)) {
+                if (removed != REMOVED) {
+                    return false;
                 }
+                boolean replacing = intent.getBooleanExtra(Intent.EXTRA_REPLACING, false);
+                if (!replacing) {
+                    return false;
+                }
+                removed = ADDED;
+                if (!update) {
+                    return true;
+                }
+            } else if (Intent.ACTION_PACKAGE_REPLACED.equals(action)) {
+                if (removed != ADDED) {
+                    return false;
+                }
+                removed = REPLACED;
+                return true;
             }
             return false;
         }
@@ -335,29 +372,26 @@ public class PackageManagerTests extends AndroidTestCase {
      */
     public void replaceFromRawResource(int flags) {
         InstallParams ip = installFromRawResource(flags, false);
-        boolean result = ((flags & PackageManager.INSTALL_REPLACE_EXISTING) != 0);
+        boolean replace = ((flags & PackageManager.INSTALL_REPLACE_EXISTING) != 0);
         GenericReceiver receiver;
-        if (result) {
+        if (replace) {
             receiver = new ReplaceReceiver(ip.pkg.packageName);
+            Log.i(TAG, "Creating replaceReceiver");
         } else {
             receiver = new InstallReceiver(ip.pkg.packageName);
         }
         try {
             try {
                 assertEquals(invokeInstallPackage(ip.packageURI, flags,
-                        ip.pkg.packageName, receiver), result);
-                if (result) {
+                        ip.pkg.packageName, receiver), replace);
+                if (replace) {
                     assertInstall(ip.pkg.packageName, flags);
                 }
             } catch (Exception e) {
                 failStr("Failed with exception : " + e);
             }
         } finally {
-            getPm().deletePackage(ip.pkg.packageName, null, 0);
-            File outFile = new File(ip.outFileName);
-            if (outFile != null && outFile.exists()) {
-                outFile.delete();
-            }
+            cleanUpInstall(ip);
         }
     }
 
@@ -376,12 +410,362 @@ public class PackageManagerTests extends AndroidTestCase {
         replaceFromRawResource(PackageManager.INSTALL_ON_SDCARD);
     }
 
-    void failStr(String errMsg) {
-        Log.w(TAG, "errMsg="+errMsg);
-        fail(errMsg);
+    @MediumTest
+    public void testReplaceNormalInternal() {
+        replaceFromRawResource(PackageManager.INSTALL_REPLACE_EXISTING);
     }
-    void failStr(Exception e) {
-        Log.w(TAG, "e.getMessage="+e.getMessage());
-        Log.w(TAG, "e="+e);
+
+    @MediumTest
+    public void testReplaceFwdLockedInternal() {
+        replaceFromRawResource(PackageManager.INSTALL_REPLACE_EXISTING |
+                PackageManager.INSTALL_FORWARD_LOCK);
     }
+
+    @MediumTest
+    public void testReplaceSdcard() {
+        replaceFromRawResource(PackageManager.INSTALL_REPLACE_EXISTING |
+                PackageManager.INSTALL_ON_SDCARD);
+    }
+
+    /* -------------- Delete tests ---*/
+    class DeleteObserver extends IPackageDeleteObserver.Stub {
+
+        public boolean succeeded;
+        private boolean doneFlag = false;
+
+        public boolean isDone() {
+            return doneFlag;
+        }
+
+        public void packageDeleted(boolean succeeded) throws RemoteException {
+            synchronized(this) {
+                this.succeeded = succeeded;
+                doneFlag = true;
+                notifyAll();
+            }
+        }
+    }
+
+    class DeleteReceiver extends GenericReceiver {
+        String pkgName;
+
+        DeleteReceiver(String pkgName) {
+            this.pkgName = pkgName;
+            IntentFilter filter = new IntentFilter(Intent.ACTION_PACKAGE_REMOVED);
+            filter.addDataScheme("package");
+            super.setFilter(filter);
+        }
+
+        public boolean notifyNow(Intent intent) {
+            String action = intent.getAction();
+            if (!Intent.ACTION_PACKAGE_REMOVED.equals(action)) {
+                return false;
+            }
+            Uri data = intent.getData();
+            String installedPkg = data.getEncodedSchemeSpecificPart();
+            if (pkgName.equals(installedPkg)) {
+                return true;
+            }
+            return false;
+        }
+    }
+
+    public boolean invokeDeletePackage(Uri packageURI, int flags,
+            final String pkgName, GenericReceiver receiver) throws Exception {
+        DeleteObserver observer = new DeleteObserver();
+        final boolean received = false;
+        mContext.registerReceiver(receiver, receiver.filter);
+        try {
+            // Wait on observer
+            synchronized(observer) {
+                synchronized (receiver) {
+                    getPm().deletePackage(pkgName, observer, flags);
+                    long waitTime = 0;
+                    while((!observer.isDone()) && (waitTime < MAX_WAIT_TIME) ) {
+                        observer.wait(WAIT_TIME_INCR);
+                        waitTime += WAIT_TIME_INCR;
+                    }
+                    if(!observer.isDone()) {
+                        throw new Exception("Timed out waiting for packageInstalled callback");
+                    }
+                    // Verify we received the broadcast
+                    waitTime = 0;
+                    while((!receiver.isDone()) && (waitTime < MAX_WAIT_TIME) ) {
+                        receiver.wait(WAIT_TIME_INCR);
+                        waitTime += WAIT_TIME_INCR;
+                    }
+                    if(!receiver.isDone()) {
+                        throw new Exception("Timed out waiting for PACKAGE_ADDED notification");
+                    }
+                    return receiver.received;
+                }
+            }
+        } finally {
+            mContext.unregisterReceiver(receiver);
+        }
+    }
+
+    public void deleteFromRawResource(int iFlags, int dFlags) {
+        InstallParams ip = installFromRawResource(iFlags, false);
+        boolean retainData = ((dFlags & PackageManager.DONT_DELETE_DATA) != 0);
+        GenericReceiver receiver = new DeleteReceiver(ip.pkg.packageName);
+        DeleteObserver observer = new DeleteObserver();
+        try {
+            assertTrue(invokeDeletePackage(ip.packageURI, dFlags,
+                    ip.pkg.packageName, receiver));
+            ApplicationInfo info = null;
+            Log.i(TAG, "okay4");
+            try {
+            info = getPm().getApplicationInfo(ip.pkg.packageName,
+                    PackageManager.GET_UNINSTALLED_PACKAGES);
+            } catch (NameNotFoundException e) {
+                info = null;
+            }
+            if (retainData) {
+                assertNotNull(info);
+                assertEquals(info.packageName, ip.pkg.packageName);
+                File file = new File(info.dataDir);
+                assertTrue(file.exists());
+            } else {
+                assertNull(info);
+            }
+        } catch (Exception e) {
+            failStr(e);
+        } finally {
+            cleanUpInstall(ip);
+        }
+    }
+
+    @MediumTest
+    public void testDeleteNormalInternal() {
+        deleteFromRawResource(0, 0);
+    }
+
+    @MediumTest
+    public void testDeleteFwdLockedInternal() {
+        deleteFromRawResource(PackageManager.INSTALL_FORWARD_LOCK, 0);
+    }
+
+    @MediumTest
+    public void testDeleteSdcard() {
+        deleteFromRawResource(PackageManager.INSTALL_ON_SDCARD, 0);
+    }
+
+    @MediumTest
+    public void testDeleteNormalInternalRetainData() {
+        deleteFromRawResource(0, PackageManager.DONT_DELETE_DATA);
+    }
+
+    @MediumTest
+    public void testDeleteFwdLockedInternalRetainData() {
+        deleteFromRawResource(PackageManager.INSTALL_FORWARD_LOCK, PackageManager.DONT_DELETE_DATA);
+    }
+
+    @MediumTest
+    public void testDeleteSdcardRetainData() {
+        deleteFromRawResource(PackageManager.INSTALL_ON_SDCARD, PackageManager.DONT_DELETE_DATA);
+    }
+
+    /* sdcard mount/unmount tests ******/
+
+    class SdMountReceiver extends GenericReceiver {
+        String pkgNames[];
+        boolean status = true;
+
+        SdMountReceiver(String[] pkgNames) {
+            this.pkgNames = pkgNames;
+            IntentFilter filter = new IntentFilter(Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE);
+            super.setFilter(filter);
+        }
+
+        public boolean notifyNow(Intent intent) {
+            Log.i(TAG, "okay 1");
+            String action = intent.getAction();
+            if (!Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE.equals(action)) {
+                return false;
+            }
+            String rpkgList[] = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
+            for (String pkg : pkgNames) {
+                boolean found = false;
+                for (String rpkg : rpkgList) {
+                    if (rpkg.equals(pkg)) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    status = false;
+                    return true;
+                }
+            }
+            return true;
+        }
+    }
+
+    class SdUnMountReceiver extends GenericReceiver {
+        String pkgNames[];
+        boolean status = true;
+
+        SdUnMountReceiver(String[] pkgNames) {
+            this.pkgNames = pkgNames;
+            IntentFilter filter = new IntentFilter(Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE);
+            super.setFilter(filter);
+        }
+
+        public boolean notifyNow(Intent intent) {
+            String action = intent.getAction();
+            if (!Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE.equals(action)) {
+                return false;
+            }
+            String rpkgList[] = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
+            for (String pkg : pkgNames) {
+                boolean found = false;
+                for (String rpkg : rpkgList) {
+                    if (rpkg.equals(pkg)) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    status = false;
+                    return true;
+                }
+            }
+            return true;
+        }
+    }
+
+    IMountService getMs() {
+        IBinder service = ServiceManager.getService("mount");
+        if (service != null) {
+            return IMountService.Stub.asInterface(service);
+        } else {
+            Log.e(TAG, "Can't get mount service");
+        }
+        return null;
+    }
+
+    boolean getMediaState() {
+        try {
+        String mPath = Environment.getExternalStorageDirectory().toString();
+        String state = getMs().getVolumeState(mPath);
+        return Environment.MEDIA_MOUNTED.equals(state);
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    boolean mountMedia() {
+        if (getMediaState()) {
+            return true;
+        }
+        try {
+        String mPath = Environment.getExternalStorageDirectory().toString();
+        int ret = getMs().mountVolume(mPath);
+        return ret == MountServiceResultCode.OperationSucceeded;
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    private boolean unmountMedia() {
+        if (!getMediaState()) {
+            return true;
+        }
+        try {
+        String mPath = Environment.getExternalStorageDirectory().toString();
+        int ret = getMs().unmountVolume(mPath);
+        return ret == MountServiceResultCode.OperationSucceeded;
+        } catch (RemoteException e) {
+            return true;
+        }
+    }
+
+    /*
+     * Install package on sdcard. Unmount and then mount the media.
+     * (Use PackageManagerService private api for now)
+     * Make sure the installed package is available.
+     * STOPSHIP will uncomment when MountService api's to mount/unmount
+     * are made asynchronous.
+     */
+    public void xxxtestMountSdNormalInternal() {
+        assertTrue(mountFromRawResource());
+    }
+
+    private boolean mountFromRawResource() {
+        // Install pkg on sdcard
+        InstallParams ip = installFromRawResource(PackageManager.INSTALL_ON_SDCARD |
+                PackageManager.INSTALL_REPLACE_EXISTING, false);
+        if (localLOGV) Log.i(TAG, "Installed pkg on sdcard");
+        boolean origState = getMediaState();
+        SdMountReceiver receiver = new SdMountReceiver(new String[]{ip.pkg.packageName});
+        try {
+            if (localLOGV) Log.i(TAG, "Unmounting media");
+            // Unmount media
+            assertTrue(unmountMedia());
+            if (localLOGV) Log.i(TAG, "Unmounted media");
+            try {
+                if (localLOGV) Log.i(TAG, "Sleeping for 10 second");
+                Thread.sleep(10*1000);
+            } catch (InterruptedException e) {
+                failStr(e);
+            }
+            // Register receiver here
+            PackageManager pm = getPm();
+            mContext.registerReceiver(receiver, receiver.filter);
+
+            // Wait on receiver
+            synchronized (receiver) {
+                if (localLOGV) Log.i(TAG, "Mounting media");
+                // Mount media again
+                assertTrue(mountMedia());
+                if (localLOGV) Log.i(TAG, "Mounted media");
+                if (localLOGV) Log.i(TAG, "Waiting for notification");
+                long waitTime = 0;
+                // Verify we received the broadcast
+                waitTime = 0;
+                while((!receiver.isDone()) && (waitTime < MAX_WAIT_TIME) ) {
+                    receiver.wait(WAIT_TIME_INCR);
+                    waitTime += WAIT_TIME_INCR;
+                }
+                if(!receiver.isDone()) {
+                    failStr("Timed out waiting for EXTERNAL_APPLICATIONS notification");
+                }
+                return receiver.received;
+            }
+        } catch (InterruptedException e) {
+            failStr(e);
+            return false;
+        } finally {
+            mContext.unregisterReceiver(receiver);
+            // Restore original media state
+            if (origState) {
+                mountMedia();
+            } else {
+                unmountMedia();
+            }
+            if (localLOGV) Log.i(TAG, "Cleaning up install");
+            cleanUpInstall(ip);
+        }
+    }
+
+    void cleanUpInstall(InstallParams ip) {
+        if (ip == null) {
+            return;
+        }
+        Runtime.getRuntime().gc();
+        Log.i(TAG, "Deleting package : " + ip.pkg.packageName);
+        getPm().deletePackage(ip.pkg.packageName, null, 0);
+        File outFile = new File(ip.outFileName);
+        if (outFile != null && outFile.exists()) {
+            outFile.delete();
+        }
+    }
+    /*
+     * TODO's
+     * check version numbers for upgrades
+     * check permissions of installed packages
+     * how to do tests on updated system apps?
+     * verify updates to system apps cannot be installed on the sdcard.
+     */
 }

@@ -191,6 +191,7 @@ status_t StagefrightMediaScanner::processFile(
         };
         static const KeyMap kKeyMap[] = {
             { "tracknumber", METADATA_KEY_CD_TRACK_NUMBER },
+            { "discnumber", METADATA_KEY_DISC_NUMBER },
             { "album", METADATA_KEY_ALBUM },
             { "artist", METADATA_KEY_ARTIST },
             { "composer", METADATA_KEY_COMPOSER },

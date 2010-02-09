@@ -782,7 +782,7 @@ class AlarmManagerService extends IAlarmManager.Stub {
             mContext.registerReceiver(this, filter);
              // Register for events related to sdcard installation.
             IntentFilter sdFilter = new IntentFilter();
-            sdFilter.addAction(Intent.ACTION_MEDIA_RESOURCES_UNAVAILABLE);
+            sdFilter.addAction(Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE);
             mContext.registerReceiver(this, sdFilter);
         }
         
@@ -791,7 +791,7 @@ class AlarmManagerService extends IAlarmManager.Stub {
             synchronized (mLock) {
                 String action = intent.getAction();
                 String pkgList[] = null;
-                if (Intent.ACTION_MEDIA_RESOURCES_UNAVAILABLE.equals(action)) {
+                if (Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE.equals(action)) {
                     pkgList = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
                 } else {
                     Uri data = intent.getData();

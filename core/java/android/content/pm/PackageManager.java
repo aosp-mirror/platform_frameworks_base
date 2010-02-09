@@ -437,6 +437,15 @@ public abstract class PackageManager {
     public static final int INSTALL_FAILED_CONTAINER_ERROR = -18;
 
     /**
+     * Installation return code: this is passed to the {@link IPackageInstallObserver} by
+     * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)} if
+     * the new package couldn't be installed in the specified install
+     * location.
+     * @hide
+     */
+    public static final int INSTALL_FAILED_INVALID_INSTALL_LOCATION = -19;
+
+    /**
      * Installation parse return code: this is passed to the {@link IPackageInstallObserver} by
      * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)}
      * if the parser was given a path that is not a file, or does not end with the expected

@@ -124,7 +124,7 @@ public class SyncManager implements OnAccountsUpdateListener {
 
     private Context mContext;
 
-    private volatile Account[] mAccounts = null;
+    private volatile Account[] mAccounts = INITIAL_ACCOUNTS_ARRAY;
 
     volatile private PowerManager.WakeLock mSyncWakeLock;
     volatile private PowerManager.WakeLock mHandleAlarmWakeLock;
@@ -186,9 +186,11 @@ public class SyncManager implements OnAccountsUpdateListener {
         }
     };
 
+    private static final Account[] INITIAL_ACCOUNTS_ARRAY = new Account[0];
+
     public void onAccountsUpdated(Account[] accounts) {
         // remember if this was the first time this was called after an update
-        final boolean justBootedUp = mAccounts == null;
+        final boolean justBootedUp = mAccounts == INITIAL_ACCOUNTS_ARRAY;
         mAccounts = accounts;
 
         // if a sync is in progress yet it is no longer in the accounts list,
@@ -486,11 +488,6 @@ public class SyncManager implements OnAccountsUpdateListener {
             Bundle extras, long delay, boolean onlyThoseWithUnkownSyncableState) {
         boolean isLoggable = Log.isLoggable(TAG, Log.VERBOSE);
 
-        if (mAccounts == null) {
-            Log.e(TAG, "scheduleSync: the accounts aren't known yet, this should never happen");
-            return;
-        }
-
         if (!isSyncEnabled()) {
             if (isLoggable) {
                 Log.v(TAG, "not syncing because sync is disabled");
@@ -515,13 +512,6 @@ public class SyncManager implements OnAccountsUpdateListener {
             // if the accounts aren't configured yet then we can't support an account-less
             // sync request
             accounts = mAccounts;
-            if (accounts == null) {
-                // not ready yet
-                if (isLoggable) {
-                    Log.v(TAG, "scheduleSync: no accounts yet, dropping");
-                }
-                return;
-            }
             if (accounts.length == 0) {
                 if (isLoggable) {
                     Log.v(TAG, "scheduleSync: no accounts configured, dropping");
@@ -532,6 +522,12 @@ public class SyncManager implements OnAccountsUpdateListener {
 
         final boolean uploadOnly = extras.getBoolean(ContentResolver.SYNC_EXTRAS_UPLOAD, false);
         final boolean manualSync = extras.getBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, false);
+        if (manualSync) {
+            extras.putBoolean(ContentResolver.SYNC_EXTRAS_IGNORE_BACKOFF, true);
+            extras.putBoolean(ContentResolver.SYNC_EXTRAS_IGNORE_SETTINGS, true);
+        }
+        final boolean ignoreSettings =
+                extras.getBoolean(ContentResolver.SYNC_EXTRAS_IGNORE_SETTINGS, false);
 
         int source;
         if (uploadOnly) {
@@ -590,7 +586,7 @@ public class SyncManager implements OnAccountsUpdateListener {
                     final boolean syncAutomatically = masterSyncAutomatically
                             && mSyncStorageEngine.getSyncAutomatically(account, authority);
                     boolean syncAllowed =
-                            manualSync || (backgroundDataUsageAllowed && syncAutomatically);
+                            ignoreSettings || (backgroundDataUsageAllowed && syncAutomatically);
                     if (!syncAllowed) {
                         if (isLoggable) {
                             Log.d(TAG, "scheduleSync: sync of " + account + ", " + authority
@@ -797,21 +793,29 @@ public class SyncManager implements OnAccountsUpdateListener {
             Log.d(TAG, "encountered error(s) during the sync: " + syncResult + ", " + operation);
         }
 
+        operation = new SyncOperation(operation);
+
+        // The SYNC_EXTRAS_IGNORE_BACKOFF only applies to the first attempt to sync a given
+        // request. Retries of the request will always honor the backoff, so clear the
+        // flag in case we retry this request.
+        if (operation.extras.getBoolean(ContentResolver.SYNC_EXTRAS_IGNORE_BACKOFF, false)) {
+            operation.extras.remove(ContentResolver.SYNC_EXTRAS_IGNORE_BACKOFF);
+        }
+
         // If this sync aborted because the internal sync loop retried too many times then
         //   don't reschedule. Otherwise we risk getting into a retry loop.
         // If the operation succeeded to some extent then retry immediately.
         // If this was a two-way sync then retry soft errors with an exponential backoff.
         // If this was an upward sync then schedule a two-way sync immediately.
         // Otherwise do not reschedule.
-        if (operation.extras.getBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, false)) {
-            Log.d(TAG, "not retrying sync operation because it is a manual sync: "
+        if (operation.extras.getBoolean(ContentResolver.SYNC_EXTRAS_DO_NOT_RETRY, false)) {
+            Log.d(TAG, "not retrying sync operation because SYNC_EXTRAS_DO_NOT_RETRY was specified "
                     + operation);
         } else if (operation.extras.getBoolean(ContentResolver.SYNC_EXTRAS_UPLOAD, false)) {
-            final SyncOperation newSyncOperation = new SyncOperation(operation);
-            newSyncOperation.extras.remove(ContentResolver.SYNC_EXTRAS_UPLOAD);
+            operation.extras.remove(ContentResolver.SYNC_EXTRAS_UPLOAD);
             Log.d(TAG, "retrying sync operation as a two-way sync because an upload-only sync "
                     + "encountered an error: " + operation);
-            scheduleSyncOperation(newSyncOperation);
+            scheduleSyncOperation(operation);
         } else if (syncResult.tooManyRetries) {
             Log.d(TAG, "not retrying sync operation because it retried too many times: "
                     + operation);
@@ -820,13 +824,13 @@ public class SyncManager implements OnAccountsUpdateListener {
                 Log.d(TAG, "retrying sync operation because even though it had an error "
                         + "it achieved some success");
             }
-            scheduleSyncOperation(new SyncOperation(operation));
+            scheduleSyncOperation(operation);
         } else if (syncResult.hasSoftError()) {
             if (isLoggable) {
                 Log.d(TAG, "retrying sync operation because it encountered a soft error: "
                         + operation);
             }
-            scheduleSyncOperation(new SyncOperation(operation));
+            scheduleSyncOperation(operation);
         } else {
             Log.d(TAG, "not retrying sync operation because the error is a hard error: "
                     + operation);
@@ -942,10 +946,10 @@ public class SyncManager implements OnAccountsUpdateListener {
 
         final Account[] accounts = mAccounts;
         pw.print("accounts: ");
-        if (accounts != null) {
+        if (accounts != INITIAL_ACCOUNTS_ARRAY) {
             pw.println(accounts.length);
         } else {
-            pw.println("none");
+            pw.println("not known yet");
         }
         final long now = SystemClock.elapsedRealtime();
         pw.print("now: "); pw.print(now);
@@ -1448,7 +1452,7 @@ public class SyncManager implements OnAccountsUpdateListener {
             }
         }
 
-        private boolean isSyncAllowed(Account account, String authority, boolean manualSync,
+        private boolean isSyncAllowed(Account account, String authority, boolean ignoreSettings,
                 boolean backgroundDataUsageAllowed) {
             Account[] accounts = mAccounts;
 
@@ -1458,7 +1462,7 @@ public class SyncManager implements OnAccountsUpdateListener {
             }
 
             // skip the sync if the account of this operation no longer exists
-            if (accounts == null || !ArrayUtils.contains(accounts, account)) {
+            if (!ArrayUtils.contains(accounts, account)) {
                 return false;
             }
 
@@ -1466,7 +1470,7 @@ public class SyncManager implements OnAccountsUpdateListener {
             final boolean syncAutomatically =
                     mSyncStorageEngine.getSyncAutomatically(account, authority)
                             && mSyncStorageEngine.getMasterSyncAutomatically();
-            if (!(manualSync || (backgroundDataUsageAllowed && syncAutomatically))) {
+            if (!(ignoreSettings || (backgroundDataUsageAllowed && syncAutomatically))) {
                 return false;
             }
 
@@ -1525,7 +1529,7 @@ public class SyncManager implements OnAccountsUpdateListener {
             // If the accounts aren't known yet then we aren't ready to run. We will be kicked
             // when the account lookup request does complete.
             Account[] accounts = mAccounts;
-            if (accounts == null) {
+            if (accounts == INITIAL_ACCOUNTS_ARRAY) {
                 if (isLoggable) {
                     Log.v(TAG, "runStateIdle: accounts not known, skipping");
                 }
@@ -1553,8 +1557,9 @@ public class SyncManager implements OnAccountsUpdateListener {
                     // from the queue now
                     mSyncQueue.remove(op);
 
-                    if (!isSyncAllowed(op.account, op.authority,
-                            op.extras.getBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, false),
+                    final boolean ignoreSettings = op.extras
+                            .getBoolean(ContentResolver.SYNC_EXTRAS_IGNORE_SETTINGS, false);
+                    if (!isSyncAllowed(op.account, op.authority, ignoreSettings,
                             backgroundDataUsageAllowed)) {
                         continue;
                     }
@@ -1609,7 +1614,7 @@ public class SyncManager implements OnAccountsUpdateListener {
             Bundle bestExtras = null;
             ArrayList<SyncStorageEngine.AuthorityInfo> infos = mSyncStorageEngine.getAuthorities();
             for (SyncStorageEngine.AuthorityInfo info : infos) {
-                if (!isSyncAllowed(info.account, info.authority, false /* manualSync */,
+                if (!isSyncAllowed(info.account, info.authority, false /* ignoreSettings */,
                         backgroundDataUsageAllowed)) {
                     continue;
                 }
@@ -1881,7 +1886,6 @@ public class SyncManager implements OnAccountsUpdateListener {
             // in each of these cases the sync loop will be kicked, which will cause this
             // method to be called again
             if (!mDataConnectionIsConnected) return;
-            if (mAccounts == null) return;
             if (mStorageIsLow) return;
 
             final long now = SystemClock.elapsedRealtime();
@@ -1895,7 +1899,7 @@ public class SyncManager implements OnAccountsUpdateListener {
             if (activeSyncContext == null) {
                 synchronized (mSyncQueue) {
                     Pair<SyncOperation, Long> candidate = bestSyncOperationCandidate();
-                    alarmTime = candidate != null ? candidate.second : 0;
+                    alarmTime = candidate != null ? candidate.second : null;
                 }
             } else {
                 final long notificationTime =
@@ -2039,19 +2043,5 @@ public class SyncManager implements OnAccountsUpdateListener {
             mSyncStorageEngine.stopSyncEvent(rowId, syncOperation.extras, elapsedTime,
                     resultMessage, downstreamActivity, upstreamActivity);
         }
-    }
-
-    public static long runTimeWithBackoffs(SyncStorageEngine syncStorageEngine,
-            Account account, String authority, boolean isManualSync, long runTime) {
-        // if this is a manual sync, the run time is unchanged
-        // otherwise, the run time is the max of the backoffs and the run time.
-        if (isManualSync) {
-            return runTime;
-        }
-
-        Pair<Long, Long> backoff = syncStorageEngine.getBackoff(account, authority);
-        long delayUntilTime = syncStorageEngine.getDelayUntilTime(account, authority);
-
-        return Math.max(Math.max(runTime, delayUntilTime), backoff != null ? backoff.first : 0);
     }
 }

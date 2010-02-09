@@ -81,10 +81,6 @@ interface ILocationManager
     void setTestProviderStatus(String provider, int status, in Bundle extras, long updateTime);
     void clearTestProviderStatus(String provider);
 
-    /* for installing external Location Providers */
-    void installLocationProvider(String name, ILocationProvider provider);
-    void installGeocodeProvider(IGeocodeProvider provider);
-
     // for NI support
     boolean sendNiResponse(int notifId, int userResponse);
 }

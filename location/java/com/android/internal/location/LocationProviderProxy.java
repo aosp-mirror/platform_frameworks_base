@@ -16,155 +16,229 @@
 
 package com.android.internal.location;
 
-import android.location.Address;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.location.ILocationProvider;
 import android.location.Location;
-import android.location.LocationManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.util.Log;
 
-import java.util.List;
-
 /**
- * A class for proxying remote ILocationProvider implementations.
+ * A class for proxying ILocationProvider implementations.
  *
  * {@hide}
  */
-public class LocationProviderProxy implements IBinder.DeathRecipient {
+public class LocationProviderProxy {
 
     private static final String TAG = "LocationProviderProxy";
 
+    private final Context mContext;
     private final String mName;
-    private final ILocationProvider mProvider;
+    private ILocationProvider mProvider;
+    private Intent mIntent;
+    private Handler mHandler;
+    private final Connection mServiceConnection = new Connection();
+
+    // cached values set by the location manager
     private boolean mLocationTracking = false;
     private boolean mEnabled = false;
-    private long mMinTime = 0;
-    private boolean mDead;
+    private long mMinTime = -1;
+    private int mNetworkState;
+    private NetworkInfo mNetworkInfo;
 
-    public LocationProviderProxy(String name, ILocationProvider provider) {
+    // for caching requiresNetwork, requiresSatellite, etc.
+    private DummyLocationProvider mCachedAttributes;
+
+    // constructor for proxying built-in location providers
+    public LocationProviderProxy(Context context, String name, ILocationProvider provider) {
+        mContext = context;
         mName = name;
         mProvider = provider;
-        try {
-            provider.asBinder().linkToDeath(this, 0);
-        } catch (RemoteException e) {
-            Log.e(TAG, "linkToDeath failed", e);
-            mDead = true;
+    }
+
+    // constructor for proxying location providers implemented in a separate service
+    public LocationProviderProxy(Context context, String name, String serviceName,
+            Handler handler) {
+        mContext = context;
+        mName = name;
+        mIntent = new Intent(serviceName);
+        mHandler = handler;
+        mContext.bindService(mIntent, mServiceConnection, Context.BIND_AUTO_CREATE);
+    }
+
+    private class Connection implements ServiceConnection {
+        public void onServiceConnected(ComponentName className, IBinder service) {
+            Log.d(TAG, "LocationProviderProxy.onServiceConnected " + className);
+            synchronized (this) {
+                mProvider = ILocationProvider.Stub.asInterface(service);
+                if (mProvider != null) {
+                    mHandler.post(mServiceConnectedTask);
+                }
+            }
+        }
+
+        public void onServiceDisconnected(ComponentName className) {
+            Log.d(TAG, "LocationProviderProxy.onServiceDisconnected " + className);
+            synchronized (this) {
+                mProvider = null;
+            }
         }
     }
 
-    public void unlinkProvider() {
-        if (mProvider != null) {
-            mProvider.asBinder().unlinkToDeath(this, 0);
+    private Runnable mServiceConnectedTask = new Runnable() {
+        public void run() {
+            ILocationProvider provider;
+            synchronized (mServiceConnection) {
+                provider = mProvider;
+                if (provider == null) {
+                    return;
+                }
+            }
+
+            if (mCachedAttributes == null) {
+                try {
+                    mCachedAttributes = new DummyLocationProvider(mName);
+                    mCachedAttributes.setRequiresNetwork(provider.requiresNetwork());
+                    mCachedAttributes.setRequiresSatellite(provider.requiresSatellite());
+                    mCachedAttributes.setRequiresCell(provider.requiresCell());
+                    mCachedAttributes.setHasMonetaryCost(provider.hasMonetaryCost());
+                    mCachedAttributes.setSupportsAltitude(provider.supportsAltitude());
+                    mCachedAttributes.setSupportsSpeed(provider.supportsSpeed());
+                    mCachedAttributes.setSupportsBearing(provider.supportsBearing());
+                    mCachedAttributes.setPowerRequirement(provider.getPowerRequirement());
+                    mCachedAttributes.setAccuracy(provider.getAccuracy());
+                } catch (RemoteException e) {
+                    mCachedAttributes = null;
+                }
+            }
+
+            // resend previous values from the location manager if the service has restarted
+            try {
+                if (mEnabled) {
+                    provider.enable();
+                }
+                if (mLocationTracking) {
+                    provider.enableLocationTracking(true);
+                }
+                if (mMinTime >= 0) {
+                    provider.setMinTime(mMinTime);
+                }
+                if (mNetworkInfo != null) {
+                    provider.updateNetworkState(mNetworkState, mNetworkInfo);
+                }
+            } catch (RemoteException e) {
+            }
         }
-    }
+    };
 
     public String getName() {
         return mName;
     }
 
-    public boolean isDead() {
-        return mDead;
-    }
-
     public boolean requiresNetwork() {
-        try {
-            return mProvider.requiresNetwork();
-        } catch (RemoteException e) {
-            Log.e(TAG, "requiresNetwork failed", e);
+        if (mCachedAttributes != null) {
+            return mCachedAttributes.requiresNetwork();
+        } else {
             return false;
         }
     }
 
     public boolean requiresSatellite() {
-        try {
-            return mProvider.requiresSatellite();
-        } catch (RemoteException e) {
-            Log.e(TAG, "requiresSatellite failed", e);
+        if (mCachedAttributes != null) {
+            return mCachedAttributes.requiresSatellite();
+        } else {
             return false;
         }
     }
 
     public boolean requiresCell() {
-        try {
-            return mProvider.requiresCell();
-        } catch (RemoteException e) {
-            Log.e(TAG, "requiresCell failed", e);
+        if (mCachedAttributes != null) {
+            return mCachedAttributes.requiresCell();
+        } else {
             return false;
         }
     }
 
     public boolean hasMonetaryCost() {
-        try {
-            return mProvider.hasMonetaryCost();
-        } catch (RemoteException e) {
-            Log.e(TAG, "hasMonetaryCost failed", e);
+        if (mCachedAttributes != null) {
+            return mCachedAttributes.hasMonetaryCost();
+        } else {
             return false;
         }
     }
 
     public boolean supportsAltitude() {
-        try {
-            return mProvider.supportsAltitude();
-        } catch (RemoteException e) {
-            Log.e(TAG, "supportsAltitude failed", e);
+        if (mCachedAttributes != null) {
+            return mCachedAttributes.supportsAltitude();
+        } else {
             return false;
         }
     }
 
     public boolean supportsSpeed() {
-        try {
-            return mProvider.supportsSpeed();
-        } catch (RemoteException e) {
-            Log.e(TAG, "supportsSpeed failed", e);
+        if (mCachedAttributes != null) {
+            return mCachedAttributes.supportsSpeed();
+        } else {
             return false;
         }
     }
 
      public boolean supportsBearing() {
-        try {
-            return mProvider.supportsBearing();
-        } catch (RemoteException e) {
-            Log.e(TAG, "supportsBearing failed", e);
+        if (mCachedAttributes != null) {
+            return mCachedAttributes.supportsBearing();
+        } else {
             return false;
         }
     }
 
     public int getPowerRequirement() {
-        try {
-            return mProvider.getPowerRequirement();
-        } catch (RemoteException e) {
-            Log.e(TAG, "getPowerRequirement failed", e);
-            return 0;
+        if (mCachedAttributes != null) {
+            return mCachedAttributes.getPowerRequirement();
+        } else {
+            return -1;
         }
     }
 
     public int getAccuracy() {
-        try {
-            return mProvider.getAccuracy();
-        } catch (RemoteException e) {
-            Log.e(TAG, "getAccuracy failed", e);
-            return 0;
+        if (mCachedAttributes != null) {
+            return mCachedAttributes.getAccuracy();
+        } else {
+            return -1;
         }
     }
 
     public void enable() {
-        try {
-            mProvider.enable();
-            mEnabled = true;
-        } catch (RemoteException e) {
-            Log.e(TAG, "enable failed", e);
+        mEnabled = true;
+        ILocationProvider provider;
+        synchronized (mServiceConnection) {
+            provider = mProvider;
+        }
+        if (provider != null) {
+            try {
+                provider.enable();
+            } catch (RemoteException e) {
+            }
         }
     }
 
     public void disable() {
-        try {
-            mProvider.disable();
-            mEnabled = false;
-        } catch (RemoteException e) {
-            Log.e(TAG, "disable failed", e);
+        mEnabled = false;
+        ILocationProvider provider;
+        synchronized (mServiceConnection) {
+            provider = mProvider;
+        }
+        if (provider != null) {
+            try {
+                provider.disable();
+            } catch (RemoteException e) {
+            }
         }
     }
 
@@ -173,22 +247,32 @@ public class LocationProviderProxy implements IBinder.DeathRecipient {
     }
 
     public int getStatus(Bundle extras) {
-        try {
-            return mProvider.getStatus(extras);
-        } catch (RemoteException e) {
-            Log.e(TAG, "getStatus failed", e);
-            return 0;
+        ILocationProvider provider;
+        synchronized (mServiceConnection) {
+            provider = mProvider;
         }
+        if (provider != null) {
+            try {
+                return provider.getStatus(extras);
+            } catch (RemoteException e) {
+            }
+        }
+        return 0;
     }
 
     public long getStatusUpdateTime() {
-        try {
-            return mProvider.getStatusUpdateTime();
-        } catch (RemoteException e) {
-            Log.e(TAG, "getStatusUpdateTime failed", e);
-            return 0;
+         ILocationProvider provider;
+        synchronized (mServiceConnection) {
+            provider = mProvider;
         }
-    }
+        if (provider != null) {
+            try {
+                return provider.getStatusUpdateTime();
+            } catch (RemoteException e) {
+            }
+        }
+        return 0;
+     }
 
     public boolean isLocationTracking() {
         return mLocationTracking;
@@ -196,10 +280,18 @@ public class LocationProviderProxy implements IBinder.DeathRecipient {
 
     public void enableLocationTracking(boolean enable) {
         mLocationTracking = enable;
-        try {
-            mProvider.enableLocationTracking(enable);
-        } catch (RemoteException e) {
-            Log.e(TAG, "enableLocationTracking failed", e);
+        if (!enable) {
+            mMinTime = -1;
+        }
+        ILocationProvider provider;
+        synchronized (mServiceConnection) {
+            provider = mProvider;
+        }
+        if (provider != null) {
+            try {
+                provider.enableLocationTracking(enable);
+            } catch (RemoteException e) {
+            }
         }
     }
 
@@ -208,58 +300,84 @@ public class LocationProviderProxy implements IBinder.DeathRecipient {
     }
 
     public void setMinTime(long minTime) {
-        mMinTime = minTime;
-        try {
-            mProvider.setMinTime(minTime);
-        } catch (RemoteException e) {
-            Log.e(TAG, "setMinTime failed", e);
+       mMinTime = minTime;
+        ILocationProvider provider;
+        synchronized (mServiceConnection) {
+            provider = mProvider;
+        }
+        if (provider != null) {
+            try {
+                provider.setMinTime(minTime);
+            } catch (RemoteException e) {
+            }
         }
     }
 
     public void updateNetworkState(int state, NetworkInfo info) {
-        try {
-            mProvider.updateNetworkState(state, info);
-        } catch (RemoteException e) {
-            Log.e(TAG, "updateNetworkState failed", e);
+        mNetworkState = state;
+        mNetworkInfo = info;
+        ILocationProvider provider;
+        synchronized (mServiceConnection) {
+            provider = mProvider;
+        }
+        if (provider != null) {
+            try {
+                provider.updateNetworkState(state, info);
+            } catch (RemoteException e) {
+            }
         }
     }
 
     public void updateLocation(Location location) {
-        try {
-            mProvider.updateLocation(location);
-        } catch (RemoteException e) {
-            Log.e(TAG, "updateLocation failed", e);
+        ILocationProvider provider;
+        synchronized (mServiceConnection) {
+            provider = mProvider;
+        }
+        if (provider != null) {
+            try {
+                provider.updateLocation(location);
+            } catch (RemoteException e) {
+            }
         }
     }
 
     public boolean sendExtraCommand(String command, Bundle extras) {
-        try {
-            return mProvider.sendExtraCommand(command, extras);
-        } catch (RemoteException e) {
-            Log.e(TAG, "sendExtraCommand failed", e);
-            return false;
+        ILocationProvider provider;
+        synchronized (mServiceConnection) {
+            provider = mProvider;
         }
+        if (provider != null) {
+            try {
+                provider.sendExtraCommand(command, extras);
+            } catch (RemoteException e) {
+            }
+        }
+        return false;
     }
 
     public void addListener(int uid) {
-        try {
-            mProvider.addListener(uid);
-        } catch (RemoteException e) {
-            Log.e(TAG, "addListener failed", e);
+        ILocationProvider provider;
+        synchronized (mServiceConnection) {
+            provider = mProvider;
+        }
+        if (provider != null) {
+            try {
+                provider.addListener(uid);
+            } catch (RemoteException e) {
+            }
         }
     }
 
     public void removeListener(int uid) {
-        try {
-            mProvider.removeListener(uid);
-        } catch (RemoteException e) {
-            Log.e(TAG, "removeListener failed", e);
+        ILocationProvider provider;
+        synchronized (mServiceConnection) {
+            provider = mProvider;
         }
-    }
-
-    public void binderDied() {
-        Log.w(TAG, "Location Provider " + mName + " died");
-        mDead = true;
-        mProvider.asBinder().unlinkToDeath(this, 0);
+        if (provider != null) {
+            try {
+                provider.removeListener(uid);
+            } catch (RemoteException e) {
+            }
+        }
     }
 }

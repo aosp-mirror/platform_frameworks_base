@@ -40,7 +40,7 @@ import android.os.Bundle;
  * to the device administrator, as parsed by the {@link DeviceAdminInfo} class.
  * A typical file would be:</p>
  * 
- * {@sample development/samples/ApiDemos/res/xml/sample_device_admin.xml meta_data}
+ * {@sample development/samples/ApiDemos/res/xml/device_admin_sample.xml meta_data}
  */
 public class DeviceAdmin extends BroadcastReceiver {
     private static String TAG = "DevicePolicy";

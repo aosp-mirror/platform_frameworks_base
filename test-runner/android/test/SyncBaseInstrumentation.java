@@ -46,7 +46,7 @@ public class SyncBaseInstrumentation extends InstrumentationTestCase {
      */
     protected void syncProvider(Uri uri, String accountName, String authority) throws Exception {
         Bundle extras = new Bundle();
-        extras.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
+        extras.putBoolean(ContentResolver.SYNC_EXTRAS_IGNORE_SETTINGS, true);
         Account account = new Account(accountName, "com.google");
 
         ContentResolver.requestSync(account, authority, extras);

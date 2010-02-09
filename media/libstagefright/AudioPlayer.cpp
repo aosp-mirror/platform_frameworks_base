@@ -229,6 +229,8 @@ void AudioPlayer::fillBuffer(void *data, size_t size) {
                     mInputBuffer->release();
                     mInputBuffer = NULL;
                 }
+
+                mSeeking = false;
             }
         }
 
@@ -239,8 +241,6 @@ void AudioPlayer::fillBuffer(void *data, size_t size) {
                    || (err != OK && mInputBuffer == NULL));
 
             Mutex::Autolock autoLock(mLock);
-
-            mSeeking = false;
 
             if (err != OK) {
                 mReachedEOS = true;

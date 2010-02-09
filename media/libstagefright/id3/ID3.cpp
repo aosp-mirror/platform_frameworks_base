@@ -24,6 +24,7 @@
 #include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/Utils.h>
 #include <utils/String8.h>
+#include <sys/endian.h>
 
 namespace android {
 
@@ -273,7 +274,9 @@ static void convertISO8859ToString8(
         String8 *s) {
     size_t utf8len = 0;
     for (size_t i = 0; i < size; ++i) {
-        if (data[i] < 0x80) {
+        if (data[i] == '\0') {
+            break;
+        } else if (data[i] < 0x80) {
             ++utf8len;
         } else {
             utf8len += 2;
@@ -290,7 +293,9 @@ static void convertISO8859ToString8(
     char *tmp = new char[utf8len];
     char *ptr = tmp;
     for (size_t i = 0; i < size; ++i) {
-        if (data[i] < 0x80) {
+        if (data[i] == '\0') {
+            break;
+        } else if (data[i] < 0x80) {
             *ptr++ = data[i];
         } else if (data[i] < 0xc0) {
             *ptr++ = 0xc2;
@@ -324,7 +329,7 @@ void ID3::Iterator::getString(String8 *id) const {
             return;
         }
 
-        id->setTo((const char *)mFrameData, mFrameSize);
+        convertISO8859ToString8(mFrameData, mFrameSize, id);
         return;
     }
 
@@ -336,7 +341,26 @@ void ID3::Iterator::getString(String8 *id) const {
     } else {
         // UCS-2
         // API wants number of characters, not number of bytes...
-        id->setTo((const char16_t *)(mFrameData + 1), n / 2);
+        int len = n / 2;
+        const char16_t *framedata = (const char16_t *) (mFrameData + 1);
+        char16_t *framedatacopy = NULL;
+        if (*framedata == 0xfffe) {
+            // endianness marker doesn't match host endianness, convert
+            framedatacopy = new char16_t[len];
+            for (int i = 0; i < len; i++) {
+                framedatacopy[i] = swap16(framedata[i]);
+            }
+            framedata = framedatacopy;
+        }
+        // If the string starts with an endianness marker, skip it
+        if (*framedata == 0xfeff) {
+            framedata++;
+            len--;
+        }
+        id->setTo(framedata, len);
+        if (framedatacopy != NULL) {
+            delete[] framedatacopy;
+        }
     }
 }
 

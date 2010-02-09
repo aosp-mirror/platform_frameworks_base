@@ -305,6 +305,7 @@ void StagefrightMetadataRetriever::parseMetaData() {
     static const Map kMap[] = {
         { kKeyMIMEType, METADATA_KEY_MIMETYPE },
         { kKeyCDTrackNumber, METADATA_KEY_CD_TRACK_NUMBER },
+        { kKeyDiscNumber, METADATA_KEY_DISC_NUMBER },
         { kKeyAlbum, METADATA_KEY_ALBUM },
         { kKeyArtist, METADATA_KEY_ARTIST },
         { kKeyAuthor, METADATA_KEY_AUTHOR },

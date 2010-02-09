@@ -143,12 +143,68 @@ done:
     if (handle != NULL) sqlite3_close(handle);
 }
 
+void sqlTrace(void *databaseName, const char *sql) {
+    LOGI("sql_statement|%s|%s\n", (char *)databaseName, sql);
+}
+
+/* public native void enableSqlTracing(); */
+static void enableSqlTracing(JNIEnv* env, jobject object, jstring databaseName)
+{
+    sqlite3 * handle = (sqlite3 *)env->GetIntField(object, offset_db_handle);
+    char const *path = env->GetStringUTFChars(databaseName, NULL);
+    if (path == NULL) {
+        LOGE("Failure in enableSqlTracing(). VM ran out of memory?\n");
+        return; // VM would have thrown OutOfMemoryError
+    }
+    int len = strlen(path);
+    char *traceFuncArg = (char *)malloc(len + 1);
+    strncpy(traceFuncArg, path, len);
+    traceFuncArg[len-1] = NULL;
+    env->ReleaseStringUTFChars(databaseName, path);
+    sqlite3_trace(handle, &sqlTrace, (void *)traceFuncArg);
+    LOGI("will be printing all sql statements executed on database = %s\n", traceFuncArg);
+}
+
+void sqlProfile(void *databaseName, const char *sql, sqlite3_uint64 tm) {
+    double d = tm/1000000.0;
+    LOGI("elapsedTime4Sql|%s|%.3f ms|%s\n", (char *)databaseName, d, sql);
+}
+
+/* public native void enableSqlProfiling(); */
+static void enableSqlProfiling(JNIEnv* env, jobject object, jstring databaseName)
+{
+    sqlite3 * handle = (sqlite3 *)env->GetIntField(object, offset_db_handle);
+    char const *path = env->GetStringUTFChars(databaseName, NULL);
+    if (path == NULL) {
+        LOGE("Failure in enableSqlProfiling(). VM ran out of memory?\n");
+        return; // VM would have thrown OutOfMemoryError
+    }
+    int len = strlen(path);
+    char *traceFuncArg = (char *)malloc(len + 1);
+    strncpy(traceFuncArg, path, len);
+    traceFuncArg[len-1] = NULL;
+    env->ReleaseStringUTFChars(databaseName, path);
+    sqlite3_profile(handle, &sqlProfile, (void *)traceFuncArg);
+    LOGI("will be printing execution time of all sql statements executed on database = %s\n",
+            traceFuncArg);
+}
+
 /* public native void close(); */
 static void dbclose(JNIEnv* env, jobject object)
 {
     sqlite3 * handle = (sqlite3 *)env->GetIntField(object, offset_db_handle);
 
     if (handle != NULL) {
+        // release the memory associated with the traceFuncArg in enableSqlTracing function
+        void *traceFuncArg = sqlite3_trace(handle, &sqlTrace, NULL);
+        if (traceFuncArg != NULL) {
+            free(traceFuncArg);
+        }
+        // release the memory associated with the traceFuncArg in enableSqlProfiling function
+        traceFuncArg = sqlite3_profile(handle, &sqlProfile, NULL);
+        if (traceFuncArg != NULL) {
+            free(traceFuncArg);
+        }
         LOGV("Closing database: handle=%p\n", handle);
         int result = sqlite3_close(handle);
         if (result == SQLITE_OK) {
@@ -357,6 +413,8 @@ static JNINativeMethod sMethods[] =
     /* name, signature, funcPtr */
     {"dbopen", "(Ljava/lang/String;I)V", (void *)dbopen},
     {"dbclose", "()V", (void *)dbclose},
+    {"enableSqlTracing", "(Ljava/lang/String;)V", (void *)enableSqlTracing},
+    {"enableSqlProfiling", "(Ljava/lang/String;)V", (void *)enableSqlProfiling},
     {"native_execSQL", "(Ljava/lang/String;)V", (void *)native_execSQL},
     {"lastInsertRow", "()J", (void *)lastInsertRow},
     {"lastChangeCount", "()I", (void *)lastChangeCount},

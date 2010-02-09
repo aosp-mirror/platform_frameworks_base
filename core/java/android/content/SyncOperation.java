@@ -26,6 +26,9 @@ public class SyncOperation implements Comparable {
         this.extras = new Bundle(extras);
         removeFalseExtra(ContentResolver.SYNC_EXTRAS_UPLOAD);
         removeFalseExtra(ContentResolver.SYNC_EXTRAS_MANUAL);
+        removeFalseExtra(ContentResolver.SYNC_EXTRAS_IGNORE_SETTINGS);
+        removeFalseExtra(ContentResolver.SYNC_EXTRAS_IGNORE_BACKOFF);
+        removeFalseExtra(ContentResolver.SYNC_EXTRAS_DO_NOT_RETRY);
         removeFalseExtra(ContentResolver.SYNC_EXTRAS_DISCARD_LOCAL_DELETIONS);
         removeFalseExtra(ContentResolver.SYNC_EXTRAS_EXPEDITED);
         removeFalseExtra(ContentResolver.SYNC_EXTRAS_OVERRIDE_TOO_MANY_DELETIONS);

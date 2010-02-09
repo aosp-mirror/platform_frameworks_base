@@ -49,30 +49,11 @@ status_t StagefrightPlayer::setVideoSurface(const sp<ISurface> &surface) {
 }
 
 status_t StagefrightPlayer::prepare() {
-    LOGV("prepare");
-
-    int32_t width, height;
-    if (mPlayer->getVideoDimensions(&width, &height) != OK) {
-        width = height = 0;
-    }
-
-    sendEvent(MEDIA_SET_VIDEO_SIZE, width, height);
-
-    return OK;
+    return mPlayer->prepare();
 }
 
 status_t StagefrightPlayer::prepareAsync() {
-    LOGV("prepareAsync");
-
-    status_t err = prepare();
-
-    if (err != OK) {
-        return err;
-    }
-
-    sendEvent(MEDIA_PREPARED);
-
-    return OK;
+    return mPlayer->prepareAsync();
 }
 
 status_t StagefrightPlayer::start() {

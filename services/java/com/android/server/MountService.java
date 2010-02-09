@@ -670,7 +670,6 @@ class MountService extends IMountService.Stub
      */
     public int mountVolume(String path) {
         validatePermission(android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS);
-
         int rc = MountServiceResultCode.OperationSucceeded;
 
         try {
@@ -721,10 +720,21 @@ class MountService extends IMountService.Stub
     public int unmountVolume(String path) {
         validatePermission(android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS);
 
+        // Check if media has been mounted
+        String oldState = mLegacyState;
+        if (!oldState.equals(Environment.MEDIA_MOUNTED)) {
+            return VoldResponseCode.OpFailedVolNotMounted;
+        }
+        // Notify PackageManager of potential media removal and deal with
+        // return code later on. The caller of this api should be aware or have been
+        // notified that the applications installed on the media will be killed.
+        mPms.updateExternalMediaStatus(false);
         try {
             mConnector.doCommand(String.format("volume unmount %s", path));
             return MountServiceResultCode.OperationSucceeded;
         } catch (NativeDaemonConnectorException e) {
+            // Don't worry about mismatch in PackageManager since the
+            // call back will handle the status changes any way.
             int code = e.getCode();
             if (code == VoldResponseCode.OpFailedVolNotMounted) {
                 return MountServiceResultCode.OperationFailedVolumeNotMounted;

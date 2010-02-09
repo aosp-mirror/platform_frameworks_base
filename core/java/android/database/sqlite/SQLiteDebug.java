@@ -31,17 +31,17 @@ public final class SQLiteDebug {
             Log.isLoggable("SQLiteStatements", Log.VERBOSE);
 
     /**
+     * Controls the printing of wall-clock time taken to execute SQL statements
+     * as they are executed.
+     */
+    public static final boolean DEBUG_SQL_TIME =
+            Log.isLoggable("SQLiteTime", Log.VERBOSE);
+
+    /**
      * Controls the printing of compiled-sql-statement cache stats.
      */
     public static final boolean DEBUG_SQL_CACHE =
             Log.isLoggable("SQLiteCompiledSql", Log.VERBOSE);
-
-    /**
-     * Controls the capturing and printing of complete sql statement including the bind args and
-     * the database name.
-     */
-    public static final boolean DEBUG_CAPTURE_SQL =
-            Log.isLoggable("SQLiteCaptureSql", Log.VERBOSE);
 
     /**
      * Controls the stack trace reporting of active cursors being
@@ -120,63 +120,5 @@ public final class SQLiteDebug {
 
     static synchronized void notifyActiveCursorFinalized() {
         sNumActiveCursorsFinalized++;
-    }
-
-    /**
-     * returns a  message containing the given database name (path) and the string built by
-     * replacing "?" characters in the given sql string with the corresponding
-     * positional values from the given param bindArgs.
-     *
-     * @param path the database name
-     * @param sql sql string with possibly "?" for bindargs
-     * @param bindArgs args for "?"s in the above string
-     * @return the String to be logged
-     */
-    /* package */ static String captureSql(String path, String sql, Object[] bindArgs) {
-        // how many bindargs in sql
-        sql = sql.trim();
-        String args[] = sql.split("\\?");
-        // how many "?"s in the given sql string?
-        int varArgsInSql = (sql.endsWith("?")) ? args.length : args.length - 1;
-
-        // how many bind args do we have in the given input param bindArgs
-        int bindArgsLen = (bindArgs == null) ? 0 : bindArgs.length;
-        if (varArgsInSql < bindArgsLen) {
-            return "too many bindArgs provided. " +
-                    "# of bindArgs = " + bindArgsLen + ", # of varargs = " + varArgsInSql +
-                    "; sql = " + sql;
-        }
-
-        // if there are no bindArgs, we are done. log the sql as is.
-        if (bindArgsLen == 0 && varArgsInSql == 0) {
-            return logSql(path, sql);
-        }
-
-        StringBuilder buf = new StringBuilder();
-
-        // take the supplied bindArgs and plug them into sql
-        for (int i = 0; i < bindArgsLen; i++) {
-            buf.append(args[i]);
-            buf.append(bindArgs[i]);
-        }
-
-        // does given sql have more varArgs than the supplied bindArgs
-        // if so, assign nulls to the extra varArgs in sql
-        for (int i = bindArgsLen; i < varArgsInSql; i ++) {
-            buf.append(args[i]);
-            buf.append("null");
-        }
-
-        // if there are any characters left in the given sql string AFTER the last "?"
-        // log them also. for example, if the given sql = "select * from test where a=? and b=1
-        // then the following code appends " and b=1" string to buf.
-        if (varArgsInSql < args.length) {
-            buf.append(args[varArgsInSql]);
-        }
-        return logSql(path, buf.toString());
-    }
-
-    private static String logSql(String path, String sql) {
-        return "captured_sql|" + path + "|" + sql + ";";
     }
 }

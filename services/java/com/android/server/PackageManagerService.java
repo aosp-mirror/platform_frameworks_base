@@ -2111,6 +2111,12 @@ class PackageManagerService extends IPackageManager.Stub {
             File file = new File(dir, files[i]);
             PackageParser.Package pkg = scanPackageLI(file,
                     flags|PackageParser.PARSE_MUST_BE_APK, scanMode);
+            // Don't mess around with apps in system partition.
+            if (pkg == null && (flags & PackageParser.PARSE_IS_SYSTEM) == 0) {
+                // Delete the apk
+                Log.w(TAG, "Cleaning up failed install of " + file);
+                file.delete();
+            }
         }
     }
 
@@ -2353,6 +2359,13 @@ class PackageManagerService extends IPackageManager.Stub {
     private PackageParser.Package scanPackageLI(
         PackageParser.Package pkg, int parseFlags, int scanMode) {
         File scanFile = new File(pkg.mScanPath);
+        if (scanFile == null || pkg.applicationInfo.sourceDir == null ||
+                pkg.applicationInfo.publicSourceDir == null) {
+            // Bail out. The resource and code paths haven't been set.
+            Log.w(TAG, " Code and resource paths haven't been set correctly");
+            mLastScanError = PackageManager.INSTALL_FAILED_INVALID_APK;
+            return null;
+        }
         mScanningPath = scanFile;
         if (pkg == null) {
             mLastScanError = PackageManager.INSTALL_PARSE_FAILED_BAD_PACKAGE_NAME;
@@ -4959,69 +4972,82 @@ class PackageManagerService extends IPackageManager.Stub {
         File tmpPackageFile = new File(args.getCodePath());
         boolean forwardLocked = ((pFlags & PackageManager.INSTALL_FORWARD_LOCK) != 0);
         boolean onSd = ((pFlags & PackageManager.INSTALL_ON_SDCARD) != 0);
-        boolean replacingExistingPackage = false;
+        boolean replace = false;
         int scanMode = SCAN_MONITOR | SCAN_FORCE_DEX | SCAN_UPDATE_SIGNATURE
                 | (newInstall ? SCAN_NEW_INSTALL : 0);
         // Result object to be returned
         res.returnCode = PackageManager.INSTALL_SUCCEEDED;
 
-        main_flow: try {
-            // Retrieve PackageSettings and parse package
-            int parseFlags = PackageParser.PARSE_CHATTY |
-                    (forwardLocked ? PackageParser.PARSE_FORWARD_LOCK : 0) |
-                    (onSd ? PackageParser.PARSE_ON_SDCARD : 0);
-            parseFlags |= mDefParseFlags;
-            PackageParser pp = new PackageParser(tmpPackageFile.getPath());
-            pp.setSeparateProcesses(mSeparateProcesses);
-            final PackageParser.Package pkg = pp.parsePackage(tmpPackageFile,
-                    null, mMetrics, parseFlags);
-            if (pkg == null) {
-                res.returnCode = pp.getParseError();
-                break main_flow;
+        // Retrieve PackageSettings and parse package
+        int parseFlags = PackageParser.PARSE_CHATTY |
+        (forwardLocked ? PackageParser.PARSE_FORWARD_LOCK : 0) |
+        (onSd ? PackageParser.PARSE_ON_SDCARD : 0);
+        parseFlags |= mDefParseFlags;
+        PackageParser pp = new PackageParser(tmpPackageFile.getPath());
+        pp.setSeparateProcesses(mSeparateProcesses);
+        final PackageParser.Package pkg = pp.parsePackage(tmpPackageFile,
+                null, mMetrics, parseFlags);
+        if (pkg == null) {
+            res.returnCode = pp.getParseError();
+            return;
+        }
+        String pkgName = res.name = pkg.packageName;
+        if ((pkg.applicationInfo.flags&ApplicationInfo.FLAG_TEST_ONLY) != 0) {
+            if ((pFlags&PackageManager.INSTALL_ALLOW_TEST) == 0) {
+                res.returnCode = PackageManager.INSTALL_FAILED_TEST_ONLY;
+                return;
             }
-            String pkgName = res.name = pkg.packageName;
-            if ((pkg.applicationInfo.flags&ApplicationInfo.FLAG_TEST_ONLY) != 0) {
-                if ((pFlags&PackageManager.INSTALL_ALLOW_TEST) == 0) {
-                    res.returnCode = PackageManager.INSTALL_FAILED_TEST_ONLY;
-                    break main_flow;
+        }
+        if (GET_CERTIFICATES && !pp.collectCertificates(pkg, parseFlags)) {
+            res.returnCode = pp.getParseError();
+            return;
+        }
+        // Some preinstall checks
+        if (forwardLocked && onSd) {
+            // Make sure forward locked apps can only be installed
+            // on internal storage
+            Log.w(TAG, "Cannot install protected apps on sdcard");
+            res.returnCode = PackageManager.INSTALL_FAILED_INVALID_INSTALL_LOCATION;
+            return;
+        }
+        // Get rid of all references to package scan path via parser.
+        pp = null;
+        String oldCodePath = null;
+        boolean systemApp = false;
+        synchronized (mPackages) {
+            // Check if installing already existing package
+            if ((pFlags&PackageManager.INSTALL_REPLACE_EXISTING) != 0
+                    && mPackages.containsKey(pkgName)) {
+                replace = true;
+            }
+            PackageSetting ps = mSettings.mPackages.get(pkgName);
+            if (ps != null) {
+                oldCodePath = mSettings.mPackages.get(pkgName).codePathString;
+                if (ps.pkg != null && ps.pkg.applicationInfo != null) {
+                    systemApp = (ps.pkg.applicationInfo.flags &
+                            ApplicationInfo.FLAG_SYSTEM) != 0;
                 }
             }
-            if (GET_CERTIFICATES && !pp.collectCertificates(pkg, parseFlags)) {
-                res.returnCode = pp.getParseError();
-                break main_flow;
-            }
+        }
 
-            // Get rid of all references to package scan path via parser.
-            pp = null;
-            String oldCodePath = null;
-            synchronized (mPackages) {
-                //check if installing already existing package
-                if ((pFlags&PackageManager.INSTALL_REPLACE_EXISTING) != 0
-                        && mPackages.containsKey(pkgName)) {
-                    replacingExistingPackage = true;
-                }
-                PackageSetting ps = mSettings.mPackages.get(pkgName);
-                if (ps != null) {
-                    oldCodePath = mSettings.mPackages.get(pkgName).codePathString;
-                }
-            }
-
-            if (!args.doRename(res.returnCode, pkgName, oldCodePath)) {
-                res.returnCode = PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
-                break main_flow;
-            }
-            // Set application objects path explicitly after the rename
-            setApplicationInfoPaths(pkg, args.getCodePath(), args.getResourcePath());
-            if(replacingExistingPackage) {
-                replacePackageLI(pkg, parseFlags, scanMode,
-                        installerPackageName, res);
-            } else {
-                installNewPackageLI(pkg, parseFlags, scanMode,
-                        installerPackageName,res);
-            }
-        } finally {
-            if (res.returnCode == PackageManager.INSTALL_SUCCEEDED) {
-            }
+        if (systemApp && onSd) {
+            // Disable updates to system apps on sdcard
+            Log.w(TAG, "Cannot install updates to system apps on sdcard");
+            res.returnCode = PackageManager.INSTALL_FAILED_INVALID_INSTALL_LOCATION;
+            return;
+        }
+        if (!args.doRename(res.returnCode, pkgName, oldCodePath)) {
+            res.returnCode = PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
+            return;
+        }
+        // Set application objects path explicitly after the rename
+        setApplicationInfoPaths(pkg, args.getCodePath(), args.getResourcePath());
+        if(replace) {
+            replacePackageLI(pkg, parseFlags, scanMode,
+                    installerPackageName, res);
+        } else {
+            installNewPackageLI(pkg, parseFlags, scanMode,
+                    installerPackageName,res);
         }
     }
 
@@ -8409,8 +8435,8 @@ class PackageManagerService extends IPackageManager.Stub {
    }
 
    public void updateExternalMediaStatus(final boolean mediaStatus) {
-       final boolean DEBUG = true;
-       if (DEBUG) Log.i(TAG, "updateExterMediaStatus::");
+       if (DEBUG_SD_INSTALL) Log.i(TAG, "updateExternalMediaStatus:: mediaStatus=" +
+               mediaStatus+", mMediaMounted=" + mMediaMounted);
        if (mediaStatus == mMediaMounted) {
            return;
        }
@@ -8432,9 +8458,6 @@ class PackageManagerService extends IPackageManager.Stub {
        HashMap<SdInstallArgs, String> processCids = new HashMap<SdInstallArgs, String>();
        int uidList[] = new int[list.length];
        int num = 0;
-       for (int i = 0; i < uidList.length; i++) {
-           uidList[i] = Process.LAST_APPLICATION_UID;
-       }
        synchronized (mPackages) {
            Set<String> appList = mSettings.findPackagesWithFlag(ApplicationInfo.FLAG_ON_SDCARD);
            for (String cid : list) {
@@ -8456,24 +8479,34 @@ class PackageManagerService extends IPackageManager.Stub {
                processCids.put(args, ps.codePathString);
                int uid = ps.userId;
                if (uid != -1) {
-                   int idx = Arrays.binarySearch(uidList, uid);
-                   if (idx < 0) {
-                       uidList[-idx] = uid;
-                       num++;
-                   }
+                   uidList[num++] = uid;
                }
            }
        }
-       int uidArr[] = uidList;
-       if ((num > 0) && (num < uidList.length)) {
+       int uidArr[] = null;
+       if (num > 0) {
+           // Sort uid list
+           Arrays.sort(uidList, 0, num);
+           // Throw away duplicates
            uidArr = new int[num];
-           for (int i = 0; i < num; i++) {
-               uidArr[i] = uidList[i];
+           uidArr[0] = uidList[0];
+           int di = 0;
+           for (int i = 1; i < num; i++) {
+               if (uidList[i-1] != uidList[i]) {
+                   uidArr[di++] = uidList[i];
+               }
+           }
+           if (true) {
+               for (int j = 0; j < num; j++) {
+                   Log.i(TAG, "uidArr[" + j + "]=" + uidArr[j]);
+               }
            }
        }
        if (mediaStatus) {
+           if (DEBUG_SD_INSTALL) Log.i(TAG, "Loading packages");
            loadMediaPackages(processCids, uidArr);
        } else {
+           if (DEBUG_SD_INSTALL) Log.i(TAG, "Unloading packages");
            unloadMediaPackages(processCids, uidArr);
        }
    }
@@ -8486,9 +8519,11 @@ class PackageManagerService extends IPackageManager.Stub {
            Bundle extras = new Bundle();
            extras.putStringArray(Intent.EXTRA_CHANGED_PACKAGE_LIST,
                    pkgList.toArray(new String[size]));
-           extras.putIntArray(Intent.EXTRA_CHANGED_UID_LIST, uidArr);
-           String action = mediaStatus ? Intent.ACTION_MEDIA_RESOURCES_AVAILABLE
-                   : Intent.ACTION_MEDIA_RESOURCES_UNAVAILABLE;
+           if (uidArr != null) {
+               extras.putIntArray(Intent.EXTRA_CHANGED_UID_LIST, uidArr);
+           }
+           String action = mediaStatus ? Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE
+                   : Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE;
            sendPackageBroadcast(action, null, extras);
        }
    }
@@ -8497,10 +8532,11 @@ class PackageManagerService extends IPackageManager.Stub {
        ArrayList<String> pkgList = new ArrayList<String>();
        Set<SdInstallArgs> keys = processCids.keySet();
        for (SdInstallArgs args : keys) {
-           String cid = args.cid;
            String codePath = processCids.get(args);
+           if (DEBUG_SD_INSTALL) Log.i(TAG, "Trying to install pkg : "
+                   + args.cid + " from " + args.cachePath);
            if (args.doPreInstall(PackageManager.INSTALL_SUCCEEDED) != PackageManager.INSTALL_SUCCEEDED) {
-               Log.i(TAG, "Failed to install package: " + codePath + " from sdcard");
+               Log.e(TAG, "Failed to install package: " + codePath + " from sdcard");
                continue;
            }
            // Parse package
@@ -8511,7 +8547,8 @@ class PackageManagerService extends IPackageManager.Stub {
            final PackageParser.Package pkg = pp.parsePackage(new File(codePath),
                    codePath, mMetrics, parseFlags);
            if (pkg == null) {
-               Log.w(TAG, "Failed to install package : " + cid + " from sd card");
+               Log.e(TAG, "Trying to install pkg : "
+                       + args.cid + " from " + args.cachePath);
                continue;
            }
            setApplicationInfoPaths(pkg, codePath, codePath);
@@ -8532,22 +8569,24 @@ class PackageManagerService extends IPackageManager.Stub {
                }
            }
            args.doPostInstall(retCode);
-           pkgList.add(pkg.packageName);
        }
        // Send broadcasts first
-       sendResourcesChangedBroadcast(true, pkgList, uidArr);
-       Runtime.getRuntime().gc();
-       // If something failed do we clean up here or next install?
+       if (pkgList.size() > 0) {
+           sendResourcesChangedBroadcast(true, pkgList, uidArr);
+           Runtime.getRuntime().gc();
+           // If something failed do we clean up here or next install?
+       }
    }
 
    void unloadMediaPackages(HashMap<SdInstallArgs, String> processCids, int uidArr[]) {
+       if (DEBUG_SD_INSTALL) Log.i(TAG, "unloading media packages");
        ArrayList<String> pkgList = new ArrayList<String>();
+       ArrayList<SdInstallArgs> failedList = new ArrayList<SdInstallArgs>();
        Set<SdInstallArgs> keys = processCids.keySet();
        for (SdInstallArgs args : keys) {
            String cid = args.cid;
            String pkgName = args.getPackageName();
-           // STOPSHIP Send broadcast to apps to remove references
-           // STOPSHIP Unmount package
+           if (DEBUG_SD_INSTALL) Log.i(TAG, "Trying to unload pkg : " + pkgName);
            // Delete package internally
            PackageRemovedInfo outInfo = new PackageRemovedInfo();
            synchronized (mInstallLock) {
@@ -8557,14 +8596,17 @@ class PackageManagerService extends IPackageManager.Stub {
                    pkgList.add(pkgName);
                } else {
                    Log.e(TAG, "Failed to delete pkg  from sdcard : " + pkgName);
+                   failedList.add(args);
                }
            }
        }
        // Send broadcasts
-       sendResourcesChangedBroadcast(false, pkgList, uidArr);
-       Runtime.getRuntime().gc();
+       if (pkgList.size() > 0) {
+           sendResourcesChangedBroadcast(false, pkgList, uidArr);
+           Runtime.getRuntime().gc();
+       }
        // Do clean up. Just unmount
-       for (SdInstallArgs args : keys) {
+       for (SdInstallArgs args : failedList) {
            synchronized (mInstallLock) {
                args.doPostDeleteLI(false);
            }

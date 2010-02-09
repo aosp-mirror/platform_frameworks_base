@@ -282,7 +282,9 @@ public class AnimationSet extends Animation {
                 final Animation a = animations.get(i);
 
                 temp.clear();
-                a.applyTransformation(0.0f, temp);
+                final Interpolator interpolator = a.mInterpolator;
+                a.applyTransformation(interpolator != null ? interpolator.getInterpolation(0.0f)
+                        : 0.0f, temp);
                 previousTransformation.compose(temp);
             }
         }
