@@ -1429,6 +1429,12 @@ public class PackageParser {
         }
 
         if (sa.getBoolean(
+                com.android.internal.R.styleable.AndroidManifestApplication_safeMode,
+                false)) {
+            ai.flags |= ApplicationInfo.FLAG_VM_SAFE_MODE;
+        }
+
+        if (sa.getBoolean(
                 com.android.internal.R.styleable.AndroidManifestApplication_hasCode,
                 true)) {
             ai.flags |= ApplicationInfo.FLAG_HAS_CODE;

@@ -295,7 +295,10 @@ class ZygoteConnection {
         /** from --peer-wait */
         boolean peerWait;
 
-        /** from --enable-debugger, --enable-checkjni, --enable-assert */
+        /**
+         * From --enable-debugger, --enable-checkjni, --enable-assert, and
+         * --enable-safemode
+         */
         int debugFlags;
 
         /** from --classpath */
@@ -363,6 +366,8 @@ class ZygoteConnection {
                             arg.substring(arg.indexOf('=') + 1));
                 } else if (arg.equals("--enable-debugger")) {
                     debugFlags |= Zygote.DEBUG_ENABLE_DEBUGGER;
+                } else if (arg.equals("--enable-safemode")) {
+                    debugFlags |= Zygote.DEBUG_ENABLE_SAFEMODE;
                 } else if (arg.equals("--enable-checkjni")) {
                     debugFlags |= Zygote.DEBUG_ENABLE_CHECKJNI;
                 } else if (arg.equals("--enable-assert")) {

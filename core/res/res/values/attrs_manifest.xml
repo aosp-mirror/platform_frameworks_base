@@ -215,6 +215,10 @@
          running on a device that is running in user mode. -->
     <attr name="debuggable" format="boolean" />
     
+    <!-- Flag indicating whether the application requests the VM to operate in
+         the safe mode.  -->
+    <attr name="safeMode" format="boolean" />
+
     <!-- Flag indicating whether the given application component is available
          to other applications.  If false, it can only be accessed by
          applications with its same user id (which usually means only by
@@ -685,6 +689,7 @@
              override the component specific values). -->
         <attr name="enabled" />
         <attr name="debuggable" />
+        <attr name="safeMode" />
         <!-- Name of activity to be launched for managing the application's space on the device. -->
         <attr name="manageSpaceActivity" />
         <attr name="allowClearUserData" />
