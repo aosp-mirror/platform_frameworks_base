@@ -52,6 +52,7 @@ import android.content.pm.PermissionInfo;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
+import android.content.pm.PackageParser.Package;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
@@ -85,6 +86,7 @@ import android.os.StatFs;
 import android.os.Vibrator;
 import android.os.FileUtils.FileStatus;
 import android.os.storage.StorageManager;
+import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.text.ClipboardManager;
 import android.util.AndroidRuntimeException;
@@ -2646,14 +2648,13 @@ class ContextImpl extends Context {
         // SD-to-internal app size threshold: currently set to 1 MB
         private static final long INSTALL_ON_SD_THRESHOLD = (1024 * 1024);
 
-        @Override
-        public int recommendAppInstallLocation(ApplicationInfo appInfo, Uri packageURI) {
+        public int recommendAppInstallLocation(Package pkg) {
             // Initial implementation:
             // Package size = code size + cache size + data size
             // If code size > 1 MB, install on SD card.
             // Else install on internal NAND flash, unless space on NAND is less than 10%
 
-            if ((packageURI == null) || (appInfo == null)) {
+            if (pkg == null) {
                 return INSTALL_PARSE_FAILED_NOT_APK;
             }
 
@@ -2669,44 +2670,71 @@ class ContextImpl extends Context {
 
             double pctNandFree = (double)availInternalFlashSize / (double)totalInternalFlashSize;
 
-            final String archiveFilePath = packageURI.getPath();
+            final String archiveFilePath = pkg.mScanPath;
             File apkFile = new File(archiveFilePath);
             long pkgLen = apkFile.length();
 
+            boolean auto = true;
+            // To make final copy
+            long reqInstallSize = pkgLen;
+            // For dex files
+            long reqInternalSize = 1 * pkgLen;
+            boolean intThresholdOk = (pctNandFree >= LOW_NAND_FLASH_TRESHOLD);
+            boolean intAvailOk = ((reqInstallSize + reqInternalSize) < availInternalFlashSize);
+            boolean fitsOnSd = (reqInstallSize < availSDSize) && intThresholdOk &&
+                    (reqInternalSize < availInternalFlashSize);
+            boolean fitsOnInt = intThresholdOk && intAvailOk;
+
             // Consider application flags preferences as well...
-            boolean installOnlyOnSD = ((appInfo.flags & PackageManager.INSTALL_ON_SDCARD) != 0);
-
-            // These are not very precise measures, but I guess it is hard to estimate sizes
-            // before installing the package.
-            // As a shortcut, I am assuming that the package fits on NAND flash if the available
-            // space is three times that of the APK size. For SD, we only worry about the APK size.
-            // Since packages are downloaded into SD, this might not even be necessary.
-            boolean fitsOnSD = (pkgLen < availSDSize) && ((2 * pkgLen) < availInternalFlashSize);
-            boolean fitsOnInternalFlash = ((pkgLen * 3) < availInternalFlashSize);
-
-            // Does not fit, recommend no installation.
-            if (!fitsOnSD && !fitsOnInternalFlash) {
-                return INSTALL_FAILED_INSUFFICIENT_STORAGE;
-            }
-
-            if (pkgLen < (INSTALL_ON_SD_THRESHOLD) && fitsOnInternalFlash && !(installOnlyOnSD)) {
-                // recommend internal NAND likely
-                if (pctNandFree < LOW_NAND_FLASH_TRESHOLD) {
-                    // Low space on NAND (<10%) - install on SD
-                    return INSTALL_ON_SDCARD;
+            boolean installOnlyOnSd = (pkg.installLocation ==
+                    PackageInfo.INSTALL_LOCATION_PREFER_EXTERNAL);
+            boolean installOnlyInternal = (pkg.installLocation ==
+                    PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY);
+            if (installOnlyInternal) {
+                // If set explicitly in manifest,
+                // let that override everything else
+                auto = false;
+            } else if (installOnlyOnSd){
+                // Check if this can be accommodated on the sdcard
+                if (fitsOnSd) {
+                    auto = false;
                 }
-                return INSTALL_ON_INTERNAL_FLASH;
             } else {
-                if (fitsOnSD) {
-                    // Recommend SD card
-                    return INSTALL_ON_SDCARD;
-                } else if (fitsOnInternalFlash && (pctNandFree >= LOW_NAND_FLASH_TRESHOLD) &&
-                        !(installOnlyOnSD)) {
-                    return INSTALL_ON_INTERNAL_FLASH;
-                } else {
-                    return INSTALL_FAILED_INSUFFICIENT_STORAGE;
+                // Check if user option is enabled
+                boolean setInstallLoc = Settings.System.getInt(mContext.getContentResolver(),
+                        Settings.System.SET_INSTALL_LOCATION, 0) != 0;
+                if (setInstallLoc) {
+                    // Pick user preference
+                    int installPreference = Settings.System.getInt(mContext.getContentResolver(),
+                            Settings.System.DEFAULT_INSTALL_LOCATION,
+                            PackageInfo.INSTALL_LOCATION_AUTO);
+                    if (installPreference == 1) {
+                        installOnlyInternal = true;
+                        auto = false;
+                    } else if (installPreference == 2) {
+                        installOnlyOnSd = true;
+                        auto = false;
+                    }
                 }
             }
+            if (!auto) {
+                if (installOnlyOnSd) {
+                    return fitsOnSd ? INSTALL_ON_SDCARD : INSTALL_FAILED_INSUFFICIENT_STORAGE;
+                } else if (installOnlyInternal){
+                    // Check on internal flash
+                    return fitsOnInt ? INSTALL_ON_INTERNAL_FLASH : INSTALL_FAILED_INSUFFICIENT_STORAGE;
+                }
+            }
+            // Try to install internally
+            if (fitsOnInt) {
+                return INSTALL_ON_INTERNAL_FLASH;
+            }
+            // Try the sdcard now.
+            if (fitsOnSd) {
+                return INSTALL_ON_SDCARD;
+            }
+            // Return error code
+            return INSTALL_FAILED_INSUFFICIENT_STORAGE;
         }
 
         private final ContextImpl mContext;

@@ -864,6 +864,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         loadBooleanSetting(stmt, Settings.System.NOTIFICATION_LIGHT_PULSE,
                 R.bool.def_notification_pulse);
+        loadBooleanSetting(stmt, Settings.System.SET_INSTALL_LOCATION, R.bool.set_install_location);
+        loadIntegerSetting(stmt, Settings.System.DEFAULT_INSTALL_LOCATION, 0);
         stmt.close();
     }
 

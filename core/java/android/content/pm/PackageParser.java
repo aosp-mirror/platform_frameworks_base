@@ -177,6 +177,7 @@ public class PackageParser {
         pi.sharedUserId = p.mSharedUserId;
         pi.sharedUserLabel = p.mSharedUserLabel;
         pi.applicationInfo = p.applicationInfo;
+        pi.installLocation = p.installLocation;
         if ((flags&PackageManager.GET_GIDS) != 0) {
             pi.gids = gids;
         }
@@ -709,6 +710,9 @@ public class PackageParser {
                     com.android.internal.R.styleable.AndroidManifest_sharedUserLabel, 0);
         }
         sa.recycle();
+        pkg.installLocation = sa.getInteger(
+                com.android.internal.R.styleable.AndroidManifest_installLocation,
+                PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY);
 
         // Resource boolean are -1, so 1 means we don't know the value.
         int supportsSmallScreens = 1;
@@ -2609,6 +2613,8 @@ public class PackageParser {
          *  Applications requested features
          */
         public ArrayList<FeatureInfo> reqFeatures = null;
+
+        public int installLocation;
 
         public Package(String _name) {
             packageName = _name;

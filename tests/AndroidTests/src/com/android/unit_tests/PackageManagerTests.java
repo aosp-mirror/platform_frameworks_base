@@ -37,6 +37,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageInstallObserver;
 import android.content.pm.IPackageDeleteObserver;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
 import android.content.pm.PackageStats;
@@ -59,6 +60,7 @@ import android.os.storage.StorageResultCode;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.StatFs;
+import android.provider.Settings;
 
 public class PackageManagerTests extends AndroidTestCase {
     private static final boolean localLOGV = true;
@@ -761,6 +763,170 @@ public class PackageManagerTests extends AndroidTestCase {
             outFile.delete();
         }
     }
+
+    public void invokeRecommendAppInstallLocation(String outFileName,
+            int fileResId, int expected) {
+        int origSetting = Settings.System.getInt(mContext.getContentResolver(),
+                Settings.System.SET_INSTALL_LOCATION, 0);
+        try {
+            // Make sure the set install location setting is diabled.
+            Settings.System.putInt(mContext.getContentResolver(),
+                    Settings.System.SET_INSTALL_LOCATION, 0);
+            File filesDir = mContext.getFilesDir();
+            File outFile = new File(filesDir, outFileName);
+            Uri packageURI = getInstallablePackage(fileResId, outFile);
+            PackageParser.Package pkg = parsePackage(packageURI);
+            assertNotNull(pkg);
+            int installLoc = getPm().recommendAppInstallLocation(pkg);
+            Log.i(TAG, "expected=" + expected +", installLoc="+installLoc);
+            // Atleast one of the specified expected flags should be set.
+            boolean onFlash = (installLoc &
+                    PackageManager.INSTALL_ON_INTERNAL_FLASH) != 0;
+            boolean onSd = (installLoc &
+                    PackageManager.INSTALL_ON_SDCARD) != 0;
+            boolean expOnFlash = (expected &
+                    PackageManager.INSTALL_ON_INTERNAL_FLASH) != 0;
+            boolean expOnSd = (expected &
+                    PackageManager.INSTALL_ON_SDCARD) != 0;
+            assertTrue(expOnFlash == onFlash || expOnSd == onSd);
+        } finally {
+            // Restore original setting
+            Settings.System.putInt(mContext.getContentResolver(),
+                    Settings.System.SET_INSTALL_LOCATION, origSetting);
+        }
+    }
+
+    /*
+     * Tests if an apk can be installed on internal flash by
+     * explicitly specifying in its manifest.
+     */
+    public void testInstallLocationInternal() {
+        invokeRecommendAppInstallLocation("install.apk",
+                R.raw.install_loc_internal, PackageManager.INSTALL_ON_INTERNAL_FLASH);
+    }
+
+    /*
+     * Tests if an apk can be installed on internal flash by
+     * explicitly specifying in its manifest and filling up
+     * internal flash. Should fail to install.
+     * TODO
+     */
+    public void xxxtestInstallLocationInternalFail() {
+    }
+
+    /*
+     * Tests if an apk can be installed on sdcard by
+     * explicitly specifying in its manifest.
+     */
+    public void testInstallLocationSdcard() {
+        // TODO No guarantee this will be on sdcard.
+        invokeRecommendAppInstallLocation("install.apk",
+                R.raw.install_loc_sdcard, PackageManager.INSTALL_ON_SDCARD
+                | PackageManager.INSTALL_ON_INTERNAL_FLASH);
+    }
+
+    /*
+     * Tests if an apk can be installed on sdcard by
+     * explicitly specifying in its manifest and filling up
+     * the sdcard. Should result in install failure
+     * TODO
+     */
+    public void xxxtestInstallLocationSdcardFail() {
+    }
+
+    /*
+     * Tests if an apk can be installed by specifying
+     * auto for install location
+     */
+    public void xxxtestInstallLocationAutoInternal() {
+        // TODO clear and make room on internal flash
+        invokeRecommendAppInstallLocation("install.apk",
+                R.raw.install_loc_auto, PackageManager.INSTALL_ON_INTERNAL_FLASH);
+    }
+
+    /*
+     * Tests if an apk can be installed by specifying
+     * auto for install location
+     */
+    public void testInstallLocationAutoSdcard() {
+        // TODO clear and make room on sdcard.
+        // Fill up internal
+        invokeRecommendAppInstallLocation("install.apk",
+                R.raw.install_loc_auto, PackageManager.INSTALL_ON_SDCARD |
+                PackageManager.INSTALL_ON_INTERNAL_FLASH);
+    }
+
+    /*
+     * Tests if an apk can be installed by specifying
+     * auto for install location
+     * fill up both internal and sdcard
+     * TODO
+     */
+    public void xxxtestInstallLocationAutoFail() {
+    }
+    /*
+     * Tests where an apk gets installed based
+     * on a not specifying anything in manifest.
+     */
+    public void testInstallLocationUnspecifiedInt() {
+        invokeRecommendAppInstallLocation("install.apk",
+                R.raw.install_loc_unspecified, PackageManager.INSTALL_ON_INTERNAL_FLASH);
+    }
+
+    public void xxxtestInstallLocationUnspecifiedStorage() {
+        // TODO Fill up internal storage
+        invokeRecommendAppInstallLocation("install.apk",
+                R.raw.install_loc_unspecified, PackageManager.INSTALL_ON_SDCARD
+                | PackageManager.INSTALL_ON_INTERNAL_FLASH);
+    }
+
+    /*
+     * Tests where an apk gets installed by expcitly setting
+     * the user specified install location
+     */
+    public void testInstallLocationUserSpecifiedInternal() {
+        // Enable user setting
+        Settings.System.putInt(mContext.getContentResolver(),
+                Settings.System.SET_INSTALL_LOCATION, 1);
+        Settings.System.putInt(mContext.getContentResolver(),
+                Settings.System.DEFAULT_INSTALL_LOCATION, 1);
+        invokeRecommendAppInstallLocation("install.apk",
+                R.raw.install_loc_unspecified, PackageManager.INSTALL_ON_INTERNAL_FLASH);
+    }
+
+    /*
+     * Tests where an apk gets installed by expcitly setting
+     * the user specified install location
+     */
+    public void testInstallLocationUserSpecifiedSdcard() {
+        // Enable user setting
+        Settings.System.putInt(mContext.getContentResolver(),
+                Settings.System.SET_INSTALL_LOCATION, 1);
+        Settings.System.putInt(mContext.getContentResolver(),
+                Settings.System.DEFAULT_INSTALL_LOCATION, 2);
+        int i = Settings.System.getInt(mContext.getContentResolver(),
+                Settings.System.DEFAULT_INSTALL_LOCATION, 0);
+        invokeRecommendAppInstallLocation("install.apk",
+                R.raw.install_loc_unspecified, PackageManager.INSTALL_ON_SDCARD);
+        Settings.System.putInt(mContext.getContentResolver(),
+                Settings.System.SET_INSTALL_LOCATION, 0);
+    }
+    /*
+     * Tests where an apk gets installed by expcitly setting
+     * the user specified install location
+     */
+    public void testInstallLocationUserSpecifiedAuto() {
+        // Enable user setting
+        Settings.System.putInt(mContext.getContentResolver(),
+                Settings.System.SET_INSTALL_LOCATION, 1);
+        Settings.System.putInt(mContext.getContentResolver(),
+                Settings.System.DEFAULT_INSTALL_LOCATION, 0);
+        invokeRecommendAppInstallLocation("install.apk",
+                R.raw.install_loc_unspecified, PackageManager.INSTALL_ON_INTERNAL_FLASH);
+        Settings.System.putInt(mContext.getContentResolver(),
+                Settings.System.SET_INSTALL_LOCATION, 0);
+    }
+
     /*
      * TODO's
      * check version numbers for upgrades

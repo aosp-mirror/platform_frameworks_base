@@ -131,6 +131,34 @@ public class PackageInfo implements Parcelable {
      * The features that this application has said it requires.
      */
     public FeatureInfo[] reqFeatures;
+
+    /**
+     * Constant corresponding to <code>auto</code> in
+     * the {@link android.R.attr#installLocation} attribute.
+     * @hide
+     */
+    public static final int INSTALL_LOCATION_AUTO = 0;
+    /**
+     * Constant corresponding to <code>internalOnly</code> in
+     * the {@link android.R.attr#installLocation} attribute.
+     * @hide
+     */
+    public static final int INSTALL_LOCATION_INTERNAL_ONLY = 1;
+    /**
+     * Constant corresponding to <code>preferExternal</code> in
+     * the {@link android.R.attr#installLocation} attribute.
+     * @hide
+     */
+    public static final int INSTALL_LOCATION_PREFER_EXTERNAL = 2;
+    /**
+     * The launch mode style requested by the activity.  From the
+     * {@link android.R.attr#installLocation} attribute, one of
+     * {@link #INSTALL_LOCATION_AUTO},
+     * {@link #INSTALL_LOCATION_INTERNAL_ONLY},
+     * {@link #INSTALL_LOCATION_PREFER_EXTERNAL}
+     * @hide
+     */
+    public int installLocation = INSTALL_LOCATION_INTERNAL_ONLY;
     
     public PackageInfo() {
     }
@@ -168,6 +196,7 @@ public class PackageInfo implements Parcelable {
         dest.writeTypedArray(signatures, parcelableFlags);
         dest.writeTypedArray(configPreferences, parcelableFlags);
         dest.writeTypedArray(reqFeatures, parcelableFlags);
+        dest.writeInt(installLocation);
     }
 
     public static final Parcelable.Creator<PackageInfo> CREATOR
@@ -202,5 +231,6 @@ public class PackageInfo implements Parcelable {
         signatures = source.createTypedArray(Signature.CREATOR);
         configPreferences = source.createTypedArray(ConfigurationInfo.CREATOR);
         reqFeatures = source.createTypedArray(FeatureInfo.CREATOR);
+        installLocation = source.readInt();
     }
 }

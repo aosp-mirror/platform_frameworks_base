@@ -600,6 +600,20 @@
          Application class to avoid interference with application logic. -->
     <attr name="restoreNeedsApplication" format="boolean" />
 
+    <!-- The default install location defined by an application. -->
+    <attr name="installLocation">
+        <!-- Let the system decide ideal install location -->
+        <enum name="auto" value="0" />
+        <!-- Explicitly request to be installed on internal phone storate
+             only. -->
+        <enum name="internalOnly" value="1" />
+        <!-- Prefer to be installed on sdcard. There is no guarantee that
+             the system will honour this request. The application might end
+             up being installed on internal storage if external media
+             is unavailable or too full. -->
+        <enum name="preferExternal" value="2" />
+    </attr>
+
     <!-- The <code>manifest</code> tag is the root of an
          <code>AndroidManifest.xml</code> file,
          describing the contents of an Android package (.apk) file.  One
@@ -624,6 +638,7 @@
         <attr name="versionName" />
         <attr name="sharedUserId" />
         <attr name="sharedUserLabel" />
+        <attr name="installLocation" />
     </declare-styleable>
     
     <!-- The <code>application</code> tag describes application-level components

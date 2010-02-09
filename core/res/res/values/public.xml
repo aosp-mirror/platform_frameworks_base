@@ -1224,9 +1224,10 @@
   <public type="attr" name="expandableListViewWhiteStyle" id="0x010102b6" />
 
 <!-- ===============================================================
-     Resources proposed for Flan.
+     Resources proposed for Froyo.
      =============================================================== -->
   <eat-comment />
   <public type="attr" name="neverEncrypt" id="0x010102b7" />
+  <public type="attr" name="installLocation" id="0x010102b8" />
     
 </resources>

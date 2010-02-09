@@ -30,6 +30,7 @@ import android.content.pm.IPackageStatsObserver;
 import android.content.pm.InstrumentationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageParser;
 import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
 import android.content.pm.ProviderInfo;
@@ -443,7 +444,7 @@ public class MockPackageManager extends PackageManager {
      * @hide
      */
     @Override
-    public int recommendAppInstallLocation(ApplicationInfo appInfo, Uri packageURI) {
+    public int recommendAppInstallLocation(PackageParser.Package pkg) {
         throw new UnsupportedOperationException();
     }
 }

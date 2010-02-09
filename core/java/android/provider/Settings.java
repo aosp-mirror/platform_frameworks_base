@@ -1473,6 +1473,21 @@ public final class Settings {
         public static final String NOTIFICATION_LIGHT_PULSE = "notification_light_pulse";
 
         /**
+         * Let user pick default install location.
+         * @hide
+         */
+        public static final String SET_INSTALL_LOCATION = "set_install_location";
+
+        /**
+         * Default install location value.
+         * 0 = auto, let system decide
+         * 1 = internal
+         * 2 = sdcard
+         * @hide
+         */
+        public static final String DEFAULT_INSTALL_LOCATION = "default_install_location";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          * @hide
