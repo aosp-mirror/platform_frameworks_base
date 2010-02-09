@@ -40,6 +40,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * We back up the signatures of each package so that during a system restore,
@@ -99,6 +100,20 @@ public class PackageManagerBackupAgent extends BackupAgent {
         }
 
         return mRestoredSignatures.get(packageName);
+    }
+
+    public Set<String> getRestoredPackages() {
+        if (mRestoredSignatures == null) {
+            Log.w(TAG, "getRestoredPackages() before metadata read!");
+            return null;
+        }
+
+        // This is technically the set of packages on the originating handset
+        // that had backup agents at all, not limited to the set of packages
+        // that had actually contributed a restore dataset, but it's a
+        // close enough approximation for our purposes and does not require any
+        // additional involvement by the transport to obtain.
+        return mRestoredSignatures.keySet();
     }
     
     // The backed up data is the signature block for each app, keyed by

@@ -76,6 +76,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 
 class BackupManagerService extends IBackupManager.Stub {
     private static final String TAG = "BackupManagerService";
@@ -226,7 +227,9 @@ class BackupManagerService extends IBackupManager.Stub {
     private File mEverStored;
     HashSet<String> mEverStoredApps = new HashSet<String>();
 
+    static final int CURRENT_ANCESTRAL_RECORD_VERSION = 1;  // increment when the schema changes
     File mTokenFile;
+    Set<String> mAncestralPackages = null;
     long mAncestralToken = 0;
     long mCurrentToken = 0;
 
@@ -500,8 +503,20 @@ class BackupManagerService extends IBackupManager.Stub {
         mTokenFile = new File(mBaseStateDir, "ancestral");
         try {
             RandomAccessFile tf = new RandomAccessFile(mTokenFile, "r");
-            mAncestralToken = tf.readLong();
-            mCurrentToken = tf.readLong();
+            int version = tf.readInt();
+            if (version == CURRENT_ANCESTRAL_RECORD_VERSION) {
+                mAncestralToken = tf.readLong();
+                mCurrentToken = tf.readLong();
+
+                int numPackages = tf.readInt();
+                if (numPackages >= 0) {
+                    mAncestralPackages = new HashSet<String>();
+                    for (int i = 0; i < numPackages; i++) {
+                        String pkgName = tf.readUTF();
+                        mAncestralPackages.add(pkgName);
+                    }
+                }
+            }
         } catch (IOException e) {
             Log.w(TAG, "Unable to read token file", e);
         }
@@ -972,12 +987,31 @@ class BackupManagerService extends IBackupManager.Stub {
         }
     }
 
-    // Record the current and ancestral backup tokens persistently
+    // Persistently record the current and ancestral backup tokens as well
+    // as the set of packages with data [supposedly] available in the
+    // ancestral dataset.
     void writeRestoreTokens() {
         try {
             RandomAccessFile af = new RandomAccessFile(mTokenFile, "rwd");
+
+            // First, the version number of this record, for futureproofing
+            af.writeInt(CURRENT_ANCESTRAL_RECORD_VERSION);
+
+            // Write the ancestral and current tokens
             af.writeLong(mAncestralToken);
             af.writeLong(mCurrentToken);
+
+            // Now write the set of ancestral packages
+            if (mAncestralPackages == null) {
+                af.writeInt(-1);
+            } else {
+                af.writeInt(mAncestralPackages.size());
+                if (DEBUG) Log.v(TAG, "Ancestral packages:  " + mAncestralPackages.size());
+                for (String pkgName : mAncestralPackages) {
+                    af.writeUTF(pkgName);
+                    if (DEBUG) Log.v(TAG, "   " + pkgName);
+                }
+            }
             af.close();
         } catch (IOException e) {
             Log.w(TAG, "Unable to write token file:", e);
@@ -1502,6 +1536,7 @@ class BackupManagerService extends IBackupManager.Stub {
              * the user is waiting, after all.
              */
 
+            PackageManagerBackupAgent pmAgent = null;
             int error = -1; // assume error
 
             // build the set of apps to restore
@@ -1562,7 +1597,7 @@ class BackupManagerService extends IBackupManager.Stub {
                 }
 
                 // Pull the Package Manager metadata from the restore set first
-                PackageManagerBackupAgent pmAgent = new PackageManagerBackupAgent(
+                pmAgent = new PackageManagerBackupAgent(
                         mPackageManager, agentPackages);
                 processOneRestore(omPackage, 0, IBackupAgent.Stub.asInterface(pmAgent.onBind()));
 
@@ -1705,8 +1740,10 @@ class BackupManagerService extends IBackupManager.Stub {
                 }
 
                 // If this was a restoreAll operation, record that this was our
-                // ancestral dataset
-                if (mTargetPackage == null) {
+                // ancestral dataset, as well as the set of apps that are possibly
+                // restoreable from the dataset
+                if (mTargetPackage == null && pmAgent != null) {
+                    mAncestralPackages = pmAgent.getRestoredPackages();
                     mAncestralToken = mToken;
                     writeRestoreTokens();
                 }
@@ -2434,6 +2471,12 @@ class BackupManagerService extends IBackupManager.Stub {
                 for (ApplicationInfo app: participants) {
                     pw.println("    " + app.packageName);
                 }
+            }
+
+            pw.println("Ancestral packages: "
+                    + (mAncestralPackages == null ? "none" : mAncestralPackages.size()));
+            for (String pkg : mAncestralPackages) {
+                pw.println("    " + pkg);
             }
 
             pw.println("Ever backed up: " + mEverStoredApps.size());
