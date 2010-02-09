@@ -116,9 +116,10 @@ public:
         bool                    initialized() const;
 
         void                    setDisplayHardware(DisplayHardware *);
-        void                    setTransform(const Transform& tr);
         status_t                setOrientation(int orientation);
         int                     getOrientation() const { return mOrientation; }
+        int                     getWidth() const;
+        int                     getHeight() const;
 
         const DisplayHardware&  displayHardware() const;
         const Transform&        transform() const;
@@ -129,10 +130,13 @@ private:
         GraphicPlane            operator = (const GraphicPlane&);
 
         DisplayHardware*        mHw;
-        Transform               mTransform;
-        Transform               mOrientationTransform;
         Transform               mGlobalTransform;
+        Transform               mDisplayTransform;
         int                     mOrientation;
+        float                   mDisplayWidth;
+        float                   mDisplayHeight;
+        int                     mWidth;
+        int                     mHeight;
 };
 
 // ---------------------------------------------------------------------------
