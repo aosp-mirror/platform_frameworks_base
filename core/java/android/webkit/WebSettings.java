@@ -1355,8 +1355,6 @@ public class WebSettings {
             junit.framework.Assert.assertTrue(frame.mNativeFrame != 0);
         }
 
-        GoogleLocationSettingManager.getInstance().start(mContext);
-
         SharedPreferences sp = mContext.getSharedPreferences(PREF_FILE,
                 Context.MODE_PRIVATE);
         if (mDoubleTapToastCount > 0) {
@@ -1373,7 +1371,6 @@ public class WebSettings {
      */
     /*package*/
     synchronized void onDestroyed() {
-        GoogleLocationSettingManager.getInstance().stop();
     }
 
     private int pin(int size) {
