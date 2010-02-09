@@ -1198,7 +1198,7 @@ status_t MPEG4Extractor::updateAudioTrackInfoFromESDS_MPEG4Audio(
     CHECK(mLastTrack->meta->findInt32(kKeySampleRate, &prevSampleRate));
 
     if (prevSampleRate != sampleRate) {
-        LOGW("mpeg4 audio sample rate different from previous setting. "
+        LOGV("mpeg4 audio sample rate different from previous setting. "
              "was: %d, now: %d", prevSampleRate, sampleRate);
     }
 
@@ -1208,7 +1208,7 @@ status_t MPEG4Extractor::updateAudioTrackInfoFromESDS_MPEG4Audio(
     CHECK(mLastTrack->meta->findInt32(kKeyChannelCount, &prevChannelCount));
 
     if (prevChannelCount != numChannels) {
-        LOGW("mpeg4 audio channel count different from previous setting. "
+        LOGV("mpeg4 audio channel count different from previous setting. "
              "was: %d, now: %d", prevChannelCount, numChannels);
     }
 

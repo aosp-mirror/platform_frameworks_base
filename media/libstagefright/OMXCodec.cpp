@@ -1284,7 +1284,8 @@ void OMXCodec::on_message(const omx_message &msg) {
                 CHECK_EQ(err, OK);
 
                 buffers->removeAt(i);
-            } else if (mPortStatus[kPortIndexInput] != SHUTTING_DOWN) {
+            } else if (mState != ERROR
+                    && mPortStatus[kPortIndexInput] != SHUTTING_DOWN) {
                 CHECK_EQ(mPortStatus[kPortIndexInput], ENABLED);
                 drainInputBuffer(&buffers->editItemAt(i));
             }
@@ -2250,7 +2251,7 @@ status_t OMXCodec::start(MetaData *) {
 }
 
 status_t OMXCodec::stop() {
-    CODEC_LOGV("stop");
+    CODEC_LOGV("stop mState=%d", mState);
 
     Mutex::Autolock autoLock(mLock);
 
@@ -2308,6 +2309,8 @@ status_t OMXCodec::stop() {
     }
 
     mSource->stop();
+
+    CODEC_LOGV("stopped");
 
     return OK;
 }
