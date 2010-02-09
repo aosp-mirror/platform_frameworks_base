@@ -2814,22 +2814,6 @@ public final class Settings {
                 "sms_outgoing_check_max_count";
 
         /**
-         * Enable use of ssl session caching.
-         * 'db' - save each session in a (per process) database
-         * 'file' - save each session in a (per process) file
-         * not set or any other value - normal java in-memory caching
-         * @hide
-         */
-        public static final String SSL_SESSION_CACHE = "ssl_session_cache";
-
-        /**
-         * How many bytes long a message has to be, in order to be gzipped.
-         * @hide
-         */
-        public static final String SYNC_MIN_GZIP_BYTES =
-                "sync_min_gzip_bytes";
-
-        /**
          * The number of promoted sources in GlobalSearch.
          * @hide
          */
