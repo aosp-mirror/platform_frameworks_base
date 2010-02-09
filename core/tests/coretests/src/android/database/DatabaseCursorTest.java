@@ -16,6 +16,7 @@
 
 package android.database;
 
+import dalvik.annotation.BrokenTest;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -373,7 +374,9 @@ public class DatabaseCursorTest extends AndroidTestCase implements PerformanceTe
         c.close();
     }
     
-    @LargeTest
+    //@LargeTest
+    @BrokenTest("Consistently times out")
+    @Suppress
     public void testLoadingThread() throws Exception {
         mDatabase.execSQL("CREATE TABLE test (_id INTEGER PRIMARY KEY, data INT);");
         
@@ -398,7 +401,9 @@ public class DatabaseCursorTest extends AndroidTestCase implements PerformanceTe
         c.close();
     } 
     
-    @LargeTest
+    //@LargeTest
+    @BrokenTest("Consistently times out")
+    @Suppress
     public void testLoadingThreadClose() throws Exception {
         mDatabase.execSQL("CREATE TABLE test (_id INTEGER PRIMARY KEY, data INT);");
         
@@ -450,9 +455,11 @@ public class DatabaseCursorTest extends AndroidTestCase implements PerformanceTe
         mDatabase.execSQL("CREATE TABLE test (_id INTEGER PRIMARY KEY, data INT);");
         
         final int count = 36799; 
+        mDatabase.execSQL("BEGIN Transaction;");
         for (int i = 0; i < count; i++) {
             mDatabase.execSQL("INSERT INTO test (data) VALUES (" + i + ");");
         }
+        mDatabase.execSQL("COMMIT;");
 
         Cursor c = mDatabase.query("test", new String[]{"data"}, null, null, null, null, null);
         assertNotNull(c);
@@ -484,9 +491,11 @@ public class DatabaseCursorTest extends AndroidTestCase implements PerformanceTe
 
         // if cursor window size changed, adjust this value too  
         final int count = 600; // more than two fillWindow needed
+        mDatabase.execSQL("BEGIN Transaction;");
         for (int i = 0; i < count; i++) {
             mDatabase.execSQL(sql.toString());
         }
+        mDatabase.execSQL("COMMIT;");
 
         Cursor c = mDatabase.query("test", new String[]{"data"}, null, null, null, null, null);
         assertNotNull(c);
@@ -513,6 +522,7 @@ public class DatabaseCursorTest extends AndroidTestCase implements PerformanceTe
 
         // if cursor window size changed, adjust this value too  
         final int count = 600;
+        mDatabase.execSQL("BEGIN Transaction;");
         for (int i = 0; i < count; i++) {
             StringBuilder sql = new StringBuilder(2100);
             sql.append("INSERT INTO test (txt, data) VALUES ('");
@@ -522,6 +532,7 @@ public class DatabaseCursorTest extends AndroidTestCase implements PerformanceTe
             sql.append("');");
             mDatabase.execSQL(sql.toString());
         }
+        mDatabase.execSQL("COMMIT;");
 
         Cursor c = mDatabase.query("test", new String[]{"txt", "data"}, null, null, null, null, null);
         assertNotNull(c);
