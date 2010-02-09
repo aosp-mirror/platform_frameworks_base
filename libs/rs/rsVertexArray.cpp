@@ -191,6 +191,9 @@ void VertexArray::setupGL2(const Context *rsc, class VertexArrayState *state, Sh
         if (sc->isUserVertexProgram()) {
             slot = sc->vtxAttribSlot(ct);
         } else {
+            if (mAttribs[ct].kind == RS_KIND_USER) {
+                continue;
+            }
             slot = sc->vtxAttribSlot(mAttribs[ct].kind);
         }
 
