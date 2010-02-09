@@ -3050,6 +3050,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      *
      * @param enabled True if this view is enabled, false otherwise.
      */
+    @RemotableViewMethod
     public void setEnabled(boolean enabled) {
         if (enabled == isEnabled()) return;
 
