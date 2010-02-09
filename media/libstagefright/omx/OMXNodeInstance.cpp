@@ -129,10 +129,15 @@ status_t OMXNodeInstance::freeNode(OMXMaster *master) {
             sendCommand(OMX_CommandStateSet, OMX_StateIdle);
             OMX_ERRORTYPE err;
             while ((err = OMX_GetState(mHandle, &state)) == OMX_ErrorNone
-                   && state != OMX_StateIdle) {
+                   && state != OMX_StateIdle
+                   && state != OMX_StateInvalid) {
                 usleep(100000);
             }
             CHECK_EQ(err, OMX_ErrorNone);
+
+            if (state == OMX_StateInvalid) {
+                break;
+            }
 
             // fall through
         }
@@ -146,7 +151,8 @@ status_t OMXNodeInstance::freeNode(OMXMaster *master) {
 
             OMX_ERRORTYPE err;
             while ((err = OMX_GetState(mHandle, &state)) == OMX_ErrorNone
-                   && state != OMX_StateLoaded) {
+                   && state != OMX_StateLoaded
+                   && state != OMX_StateInvalid) {
                 LOGV("waiting for Loaded state...");
                 usleep(100000);
             }
