@@ -102,6 +102,24 @@ android_media_SoundPool_resume(JNIEnv *env, jobject thiz, jint channelID)
 }
 
 static void
+android_media_SoundPool_autoPause(JNIEnv *env, jobject thiz)
+{
+    LOGV("android_media_SoundPool_autoPause");
+    SoundPool *ap = MusterSoundPool(env, thiz);
+    if (ap == NULL) return;
+    ap->autoPause();
+}
+
+static void
+android_media_SoundPool_autoResume(JNIEnv *env, jobject thiz)
+{
+    LOGV("android_media_SoundPool_autoResume");
+    SoundPool *ap = MusterSoundPool(env, thiz);
+    if (ap == NULL) return;
+    ap->autoResume();
+}
+
+static void
 android_media_SoundPool_stop(JNIEnv *env, jobject thiz, jint channelID)
 {
     LOGV("android_media_SoundPool_stop");
@@ -222,6 +240,14 @@ static JNINativeMethod gMethods[] = {
     {   "resume",
         "(I)V",
         (void *)android_media_SoundPool_resume
+    },
+    {   "autoPause",
+        "()V",
+        (void *)android_media_SoundPool_autoPause
+    },
+    {   "autoResume",
+        "()V",
+        (void *)android_media_SoundPool_autoResume
     },
     {   "stop",
         "(I)V",
