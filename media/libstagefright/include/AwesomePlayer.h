@@ -58,6 +58,7 @@ struct AwesomePlayer {
     void reset();
 
     status_t prepare();
+    status_t prepare_l();
     status_t prepareAsync();
     status_t prepareAsync_l();
 
@@ -84,6 +85,8 @@ private:
         PLAYING     = 1,
         LOOPING     = 2,
         FIRST_FRAME = 4,
+        PREPARING   = 8,
+        PREPARED    = 16,
     };
 
     mutable Mutex mLock;
@@ -96,6 +99,9 @@ private:
     sp<MediaPlayerBase::AudioSink> mAudioSink;
 
     TimeSource *mTimeSource;
+
+    String8 mUri;
+    KeyedVector<String8, String8> mUriHeaders;
 
     sp<MediaSource> mVideoSource;
     sp<AwesomeRenderer> mVideoRenderer;
@@ -127,6 +133,8 @@ private:
 
     sp<TimedEventQueue::Event> mAsyncPrepareEvent;
     Condition mPreparedCondition;
+    bool mIsAsyncPrepare;
+    status_t mPrepareResult;
 
     void postVideoEvent_l(int64_t delayUs = -1);
     void postBufferingEvent_l();
@@ -158,6 +166,7 @@ private:
     void onBufferingUpdate();
     void onCheckAudioStatus();
     void onPrepareAsyncEvent();
+    status_t finishSetDataSource_l();
 
     AwesomePlayer(const AwesomePlayer &);
     AwesomePlayer &operator=(const AwesomePlayer &);
