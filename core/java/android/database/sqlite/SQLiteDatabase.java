@@ -1880,8 +1880,7 @@ public class SQLiteDatabase extends SQLiteClosable {
                  */
                 Log.w(TAG, "Reached MAX size for compiled-sql statement cache for database " +
                         getPath() + "; i.e., NO space for this sql statement in cache: " +
-                        sql + ". Make sure your sql " +
-                        "statements are using prepared-sql-statement syntax with '?' for " +
+                        sql + ". Please change your sql statements to use '?' for " +
                         "bindargs, instead of using actual values");
                 
                 /* increment the number of times this warnings has been printed.
