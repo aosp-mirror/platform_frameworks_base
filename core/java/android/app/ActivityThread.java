@@ -77,9 +77,12 @@ import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -460,6 +463,7 @@ public final class ActivityThread {
                     mClassLoader =
                         ApplicationLoaders.getDefault().getClassLoader(
                             zip, mDataDir, mBaseClassLoader);
+                    initializeJavaContextClassLoader();
                 } else {
                     if (mBaseClassLoader == null) {
                         mClassLoader = ClassLoader.getSystemClassLoader();
@@ -468,6 +472,120 @@ public final class ActivityThread {
                     }
                 }
                 return mClassLoader;
+            }
+        }
+
+        /**
+         * Setup value for Thread.getContextClassLoader(). If the
+         * package will not run in in a VM with other packages, we set
+         * the Java context ClassLoader to the
+         * PackageInfo.getClassLoader value. However, if this VM can
+         * contain multiple packages, we intead set the Java context
+         * ClassLoader to a proxy that will warn about the use of Java
+         * context ClassLoaders and then fall through to use the
+         * system ClassLoader.
+         *
+         * <p> Note that this is similar to but not the same as the
+         * android.content.Context.getClassLoader(). While both
+         * context class loaders are typically set to the
+         * PathClassLoader used to load the package archive in the
+         * single application per VM case, a single Android process
+         * may contain several Contexts executing on one thread with
+         * their own logical ClassLoaders while the Java context
+         * ClassLoader is a thread local. This is why in the case when
+         * we have multiple packages per VM we do not set the Java
+         * context ClassLoader to an arbitrary but instead warn the
+         * user to set their own if we detect that they are using a
+         * Java library that expects it to be set.
+         */
+        private void initializeJavaContextClassLoader() {
+            IPackageManager pm = getPackageManager();
+            android.content.pm.PackageInfo pi;
+            try {
+                pi = pm.getPackageInfo(mPackageName, 0);
+            } catch (RemoteException e) {
+                throw new AssertionError(e);
+            }
+            /*
+             * Two possible indications that this package could be
+             * sharing its virtual machine with other packages:
+             *
+             * 1.) the sharedUserId attribute is set in the manifest,
+             *     indicating a request to share a VM with other
+             *     packages with the same sharedUserId.
+             *
+             * 2.) the application element of the manifest has an
+             *     attribute specifying a non-default process name,
+             *     indicating the desire to run in another packages VM.
+             */
+            boolean sharedUserIdSet = (pi.sharedUserId != null);
+            boolean processNameNotDefault =
+                (pi.applicationInfo != null &&
+                 !mPackageName.equals(pi.applicationInfo.processName));
+            boolean sharable = (sharedUserIdSet || processNameNotDefault);
+            ClassLoader contextClassLoader =
+                (sharable)
+                ? new WarningContextClassLoader()
+                : mClassLoader;
+            Thread.currentThread().setContextClassLoader(contextClassLoader);
+        }
+
+        private static class WarningContextClassLoader extends ClassLoader {
+
+            private static boolean warned = false;
+
+            private void warn(String methodName) {
+                if (warned) {
+                    return;
+                }
+                warned = true;
+                Thread.currentThread().setContextClassLoader(getParent());
+                Log.w(TAG, "ClassLoader." + methodName + ": " +
+                      "The class loader returned by " +
+                      "Thread.getContextClassLoader() may fail for processes " +
+                      "that host multiple applications. You should explicitly " +
+                      "specify a context class loader. For example: " +
+                      "Thread.setContextClassLoader(getClass().getClassLoader());");
+            }
+
+            @Override public URL getResource(String resName) {
+                warn("getResource");
+                return getParent().getResource(resName);
+            }
+
+            @Override public Enumeration<URL> getResources(String resName) throws IOException {
+                warn("getResources");
+                return getParent().getResources(resName);
+            }
+
+            @Override public InputStream getResourceAsStream(String resName) {
+                warn("getResourceAsStream");
+                return getParent().getResourceAsStream(resName);
+            }
+
+            @Override public Class<?> loadClass(String className) throws ClassNotFoundException {
+                warn("loadClass");
+                return getParent().loadClass(className);
+            }
+
+            @Override public void setClassAssertionStatus(String cname, boolean enable) {
+                warn("setClassAssertionStatus");
+                getParent().setClassAssertionStatus(cname, enable);
+            }
+
+            @Override public void setPackageAssertionStatus(String pname, boolean enable) {
+                warn("setPackageAssertionStatus");
+                getParent().setPackageAssertionStatus(pname, enable);
+            }
+
+            @Override public void setDefaultAssertionStatus(boolean enable) {
+                warn("setDefaultAssertionStatus");
+                getParent().setDefaultAssertionStatus(enable);
+            }
+
+            @Override public void clearAssertionStatus() {
+                warn("clearAssertionStatus");
+                getParent().clearAssertionStatus();
             }
         }
 
