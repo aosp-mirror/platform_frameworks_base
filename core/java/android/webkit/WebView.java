@@ -3379,6 +3379,10 @@ public class WebView extends AbsoluteLayout
                 text = "";
             }
             mWebTextView.setTextAndKeepSelection(text);
+            InputMethodManager imm = InputMethodManager.peekInstance();
+            if (imm != null && imm.isActive(mWebTextView)) {
+                imm.restartInput(mWebTextView);
+            }
         }
         mWebTextView.requestFocus();
     }
