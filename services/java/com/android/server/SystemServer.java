@@ -273,19 +273,22 @@ class ServerThread extends Thread {
             }
 
             try {
+                /*
+                 * NotificationManagerService is dependant on MountService,
+                 * (for media / usb notifications) so we must start MountService first.
+                 */
+                Log.i(TAG, "Mount Service");
+                ServiceManager.addService("mount", new MountService(context));
+            } catch (Throwable e) {
+                Log.e(TAG, "Failure starting Mount Service", e);
+            }
+
+            try {
                 Log.i(TAG, "Notification Manager");
                 notification = new NotificationManagerService(context, statusBar, lights);
                 ServiceManager.addService(Context.NOTIFICATION_SERVICE, notification);
             } catch (Throwable e) {
                 Log.e(TAG, "Failure starting Notification Manager", e);
-            }
-
-            try {
-                // MountService must start after NotificationManagerService
-                Log.i(TAG, "Mount Service");
-                ServiceManager.addService("mount", new MountService(context));
-            } catch (Throwable e) {
-                Log.e(TAG, "Failure starting Mount Service", e);
             }
 
             try {

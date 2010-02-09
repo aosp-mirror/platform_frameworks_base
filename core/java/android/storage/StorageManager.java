@@ -254,6 +254,10 @@ public class StorageManager
      */
     public StorageManager(Looper tgtLooper) throws RemoteException {
         mMountService = IMountService.Stub.asInterface(ServiceManager.getService("mount"));
+        if (mMountService == null) {
+            Log.e(TAG, "Unable to connect to mount service! - is it running yet?");
+            return;
+        }
         mTgtLooper = tgtLooper;
         mBinderListener = new MountServiceBinderListener();
         mMountService.registerListener(mBinderListener);
