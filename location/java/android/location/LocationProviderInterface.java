@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 The Android Open Source Project
+ * Copyright (C) 2010 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,12 @@ import android.net.NetworkInfo;
 import android.os.Bundle;
 
 /**
- * Binder interface for services that implement location providers.
+ * Location Manager's interface for location providers.
  *
  * {@hide}
  */
-interface ILocationProvider {
+public interface LocationProviderInterface {
+    String getName();
     boolean requiresNetwork();
     boolean requiresSatellite();
     boolean requiresCell();
@@ -35,15 +36,16 @@ interface ILocationProvider {
     boolean supportsBearing();
     int getPowerRequirement();
     int getAccuracy();
+    boolean isEnabled();
     void enable();
     void disable();
-    int getStatus(out Bundle extras);
+    int getStatus(Bundle extras);
     long getStatusUpdateTime();
     void enableLocationTracking(boolean enable);
     void setMinTime(long minTime);
-    void updateNetworkState(int state, in NetworkInfo info);
-    void updateLocation(in Location location);
-    boolean sendExtraCommand(String command, inout Bundle extras);
+    void updateNetworkState(int state, NetworkInfo info);
+    void updateLocation(Location location);
+    boolean sendExtraCommand(String command, Bundle extras);
     void addListener(int uid);
     void removeListener(int uid);
 }
