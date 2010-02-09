@@ -1070,6 +1070,11 @@ status_t MPEG4Extractor::parseMetaData(off_t offset, size_t size) {
             metadataKey = kKeyGenre;
             break;
         }
+        case FOURCC(0xa9, 'g', 'e', 'n'):
+        {
+            metadataKey = kKeyGenre;
+            break;
+        }
         case FOURCC('t', 'r', 'k', 'n'):
         {
             if (size == 16 && flags == 0) {
@@ -1077,11 +1082,22 @@ status_t MPEG4Extractor::parseMetaData(off_t offset, size_t size) {
                 sprintf(tmp, "%d/%d",
                         (int)buffer[size - 5], (int)buffer[size - 3]);
 
-                printf("track: %s\n", tmp);
                 mFileMetaData->setCString(kKeyCDTrackNumber, tmp);
             }
             break;
         }
+        case FOURCC('d', 'i', 's', 'k'):
+        {
+            if (size == 14 && flags == 0) {
+                char tmp[16];
+                sprintf(tmp, "%d/%d",
+                        (int)buffer[size - 3], (int)buffer[size - 1]);
+
+                mFileMetaData->setCString(kKeyDiscNumber, tmp);
+            }
+            break;
+        }
+
         default:
             break;
     }
@@ -1093,11 +1109,25 @@ status_t MPEG4Extractor::parseMetaData(off_t offset, size_t size) {
                     buffer + 8, size - 8);
         } else if (metadataKey == kKeyGenre) {
             if (flags == 0) {
-                // uint8_t
+                // uint8_t genre code, iTunes genre codes are
+                // the standard id3 codes, except they start
+                // at 1 instead of 0 (e.g. Pop is 14, not 13)
+                // We use standard id3 numbering, so subtract 1.
+                int genrecode = (int)buffer[size - 1];
+                genrecode--;
+                if (genrecode < 0) {
+                    genrecode = 255; // reserved for 'unknown genre'
+                }
                 char genre[10];
-                sprintf(genre, "%d", (int)buffer[size - 1]);
+                sprintf(genre, "%d", genrecode);
 
                 mFileMetaData->setCString(metadataKey, genre);
+            } else if (flags == 1) {
+                // custom genre string
+                buffer[size] = '\0';
+
+                mFileMetaData->setCString(
+                        metadataKey, (const char *)buffer + 8);
             }
         } else {
             buffer[size] = '\0';
