@@ -34,7 +34,9 @@ struct Prefetcher : public RefBase {
     // that will benefit from prefetching/caching the original one.
     sp<MediaSource> addSource(const sp<MediaSource> &source);
 
-    int64_t getCachedDurationUs();
+    int64_t getCachedDurationUs(bool *noMoreData = NULL);
+
+    status_t prepare();
 
 protected:
     virtual ~Prefetcher();
