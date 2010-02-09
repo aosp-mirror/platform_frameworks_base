@@ -1788,7 +1788,7 @@ public class AccountManagerService
         if (!permissionGranted && isDebuggableMonkeyBuild) {
             // TODO: Skip this check when running automated tests. Replace this
             // with a more general solution.
-            Log.w(TAG, "no credentials permission for usage of " + account + ", "
+            Log.d(TAG, "no credentials permission for usage of " + account + ", "
                     + authTokenType + " by uid " + Binder.getCallingUid()
                     + " but ignoring since this is a monkey build");
             return true;

@@ -27,6 +27,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.Parcelable;
+import android.os.Build;
 import android.util.Log;
 
 import java.io.IOException;
@@ -841,7 +842,9 @@ public class AccountManager {
                     "calling this from your main thread can lead to deadlock");
             Log.e(TAG, "calling this from your main thread can lead to deadlock and/or ANRs",
                     exception);
-            throw exception;
+            if (mContext.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.FROYO) {
+                throw exception;
+            }
         }
     }
 
