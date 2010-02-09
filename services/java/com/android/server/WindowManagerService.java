@@ -5477,7 +5477,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         + " fin=" + finished + " gfw=" + gotFirstWindow
                         + " ed=" + eventDispatching + " tts=" + timeToSwitch
                         + " wf=" + wasFrozen + " fp=" + focusPaused
-                        + " mcf=" + mCurrentFocus + "}}";
+                        + " mcf=" + curFocus + "}}";
             }
         };
         private DispatchState mDispatchState = null;
