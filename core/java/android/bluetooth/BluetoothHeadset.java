@@ -112,11 +112,9 @@ public final class BluetoothHeadset {
     /** Default priority when not set or when the device is unpaired */
     public static final int PRIORITY_UNDEFINED = -1;
 
-    /** The voice dialer 'works' but the user experience is poor. The voice
-     *  recognizer has trouble dealing with the 8kHz SCO signal, and it still
-     *  requires visual confirmation. Disable for cupcake.
-     */
-    public static final boolean DISABLE_BT_VOICE_DIALING = true;
+    /** Set this to true to prevent the bluetooth headset from
+     * activating the VoiceDialer. */
+    public static final boolean DISABLE_BT_VOICE_DIALING = false;
 
     /**
      * An interface for notifying BluetoothHeadset IPC clients when they have
