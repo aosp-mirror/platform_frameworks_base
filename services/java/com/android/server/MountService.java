@@ -771,6 +771,10 @@ class MountService extends IMountService.Stub
 
     public String[] getSecureContainerList() {
         validatePermission(android.Manifest.permission.ASEC_ACCESS);
+        if (Environment.getExternalStorageState() != Environment.MEDIA_MOUNTED) {
+            Log.w(TAG, "getSecureContainerList() called when storage not mounted");
+        }
+
         try {
             return mConnector.doListCommand("asec list", VoldResponseCode.AsecListResult);
         } catch (NativeDaemonConnectorException e) {
@@ -781,6 +785,9 @@ class MountService extends IMountService.Stub
     public int createSecureContainer(String id, int sizeMb, String fstype,
                                     String key, int ownerUid) {
         validatePermission(android.Manifest.permission.ASEC_CREATE);
+        if (Environment.getExternalStorageState() != Environment.MEDIA_MOUNTED) {
+            Log.w(TAG, "createSecureContainer() called when storage not mounted");
+        }
 
         int rc = MountServiceResultCode.OperationSucceeded;
         String cmd = String.format("asec create %s %d %s %s %d", id, sizeMb, fstype, key, ownerUid);
@@ -794,6 +801,9 @@ class MountService extends IMountService.Stub
 
     public int finalizeSecureContainer(String id) {
         validatePermission(android.Manifest.permission.ASEC_CREATE);
+        if (Environment.getExternalStorageState() != Environment.MEDIA_MOUNTED) {
+            Log.w(TAG, "finalizeSecureContainer() called when storage not mounted");
+        }
 
         int rc = MountServiceResultCode.OperationSucceeded;
         try {
@@ -807,6 +817,10 @@ class MountService extends IMountService.Stub
     public int destroySecureContainer(String id) {
         validatePermission(android.Manifest.permission.ASEC_DESTROY);
 
+        if (Environment.getExternalStorageState() != Environment.MEDIA_MOUNTED) {
+            Log.w(TAG, "destroySecureContainer() called when storage not mounted");
+        }
+
         int rc = MountServiceResultCode.OperationSucceeded;
         try {
             mConnector.doCommand(String.format("asec destroy %s", id));
@@ -818,6 +832,9 @@ class MountService extends IMountService.Stub
    
     public int mountSecureContainer(String id, String key, int ownerUid) {
         validatePermission(android.Manifest.permission.ASEC_MOUNT_UNMOUNT);
+        if (Environment.getExternalStorageState() != Environment.MEDIA_MOUNTED) {
+            Log.w(TAG, "mountSecureContainer() called when storage not mounted");
+        }
 
         int rc = MountServiceResultCode.OperationSucceeded;
         String cmd = String.format("asec mount %s %s %d", id, key, ownerUid);
@@ -831,6 +848,9 @@ class MountService extends IMountService.Stub
 
     public int unmountSecureContainer(String id) {
         validatePermission(android.Manifest.permission.ASEC_MOUNT_UNMOUNT);
+        if (Environment.getExternalStorageState() != Environment.MEDIA_MOUNTED) {
+            Log.w(TAG, "unmountSecureContainer() called when storage not mounted");
+        }
 
         int rc = MountServiceResultCode.OperationSucceeded;
         String cmd = String.format("asec unmount %s", id);
@@ -844,6 +864,9 @@ class MountService extends IMountService.Stub
 
     public int renameSecureContainer(String oldId, String newId) {
         validatePermission(android.Manifest.permission.ASEC_RENAME);
+        if (Environment.getExternalStorageState() != Environment.MEDIA_MOUNTED) {
+            Log.w(TAG, "renameSecureContainer() called when storage not mounted");
+        }
 
         int rc = MountServiceResultCode.OperationSucceeded;
         String cmd = String.format("asec rename %s %s", oldId, newId);
@@ -857,6 +880,10 @@ class MountService extends IMountService.Stub
 
     public String getSecureContainerPath(String id) {
         validatePermission(android.Manifest.permission.ASEC_ACCESS);
+        if (Environment.getExternalStorageState() != Environment.MEDIA_MOUNTED) {
+            Log.w(TAG, "getSecureContainerPath() called when storage not mounted");
+        }
+
         ArrayList<String> rsp = mConnector.doCommand("asec path " + id);
 
         for (String line : rsp) {
