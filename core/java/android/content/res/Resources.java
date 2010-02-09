@@ -1294,7 +1294,7 @@ public class Resources {
                     mConfiguration.touchscreen,
                     (int)(mMetrics.density*160), mConfiguration.keyboard,
                     keyboardHidden, mConfiguration.navigation, width, height,
-                    mConfiguration.screenLayout, sSdkVersion);
+                    mConfiguration.screenLayout, mConfiguration.uiMode, sSdkVersion);
             int N = mDrawableCache.size();
             if (DEBUG_CONFIG) {
                 Log.d(TAG, "Cleaning up drawables config changes: 0x"

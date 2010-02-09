@@ -939,10 +939,23 @@ struct ResTable_config
         SCREENLONG_YES = 0x20,
     };
     
+    enum {
+        // uiMode bits for the mode type.
+        MASK_UI_MODE_TYPE = 0x0f,
+        UI_MODE_TYPE_NORMAL = 0x00,
+        UI_MODE_TYPE_CAR = 0x01,
+
+        // uiMode bits for the night switch.
+        MASK_UI_MODE_NIGHT = 0x30,
+        UI_MODE_NIGHT_ANY = 0x00,
+        UI_MODE_NIGHT_NO = 0x10,
+        UI_MODE_NIGHT_YES = 0x20,
+    };
+
     union {
         struct {
             uint8_t screenLayout;
-            uint8_t screenConfigPad0;
+            uint8_t uiMode;
             uint8_t screenConfigPad1;
             uint8_t screenConfigPad2;
         };
@@ -996,6 +1009,8 @@ struct ResTable_config
         diff = (int32_t)(version - o.version);
         if (diff != 0) return diff;
         diff = (int32_t)(screenLayout - o.screenLayout);
+        if (diff != 0) return diff;
+        diff = (int32_t)(uiMode - o.uiMode);
         return (int)diff;
     }
     
@@ -1014,7 +1029,8 @@ struct ResTable_config
         CONFIG_DENSITY = 0x0100,
         CONFIG_SCREEN_SIZE = 0x0200,
         CONFIG_VERSION = 0x0400,
-        CONFIG_SCREEN_LAYOUT = 0x0800
+        CONFIG_SCREEN_LAYOUT = 0x0800,
+        CONFIG_UI_MODE = 0x1000
     };
     
     // Compare two configuration, returning CONFIG_* flags set for each value
@@ -1034,6 +1050,7 @@ struct ResTable_config
         if (screenSize != o.screenSize) diffs |= CONFIG_SCREEN_SIZE;
         if (version != o.version) diffs |= CONFIG_VERSION;
         if (screenLayout != o.screenLayout) diffs |= CONFIG_SCREEN_LAYOUT;
+        if (uiMode != o.uiMode) diffs |= CONFIG_UI_MODE;
         return diffs;
     }
     
@@ -1078,19 +1095,28 @@ struct ResTable_config
             }
         }
 
-        if (screenType || o.screenType) {
-            if (orientation != o.orientation) {
-                if (!orientation) return false;
-                if (!o.orientation) return true;
-            }
+        if (orientation != o.orientation) {
+            if (!orientation) return false;
+            if (!o.orientation) return true;
+        }
 
-            // density is never 'more specific'
-            // as the default just equals 160
-
-            if (touchscreen != o.touchscreen) {
-                if (!touchscreen) return false;
-                if (!o.touchscreen) return true;
+        if (screenConfig || o.screenConfig) {
+            if (((uiMode^o.uiMode) & MASK_UI_MODE_TYPE) != 0) {
+                if (!(uiMode & MASK_UI_MODE_TYPE)) return false;
+                if (!(o.uiMode & MASK_UI_MODE_TYPE)) return true;
             }
+            if (((uiMode^o.uiMode) & MASK_UI_MODE_NIGHT) != 0) {
+                if (!(uiMode & MASK_UI_MODE_NIGHT)) return false;
+                if (!(o.uiMode & MASK_UI_MODE_NIGHT)) return true;
+            }
+        }
+
+        // density is never 'more specific'
+        // as the default just equals 160
+
+        if (touchscreen != o.touchscreen) {
+            if (!touchscreen) return false;
+            if (!o.touchscreen) return true;
         }
 
         if (input || o.input) {
@@ -1186,11 +1212,22 @@ struct ResTable_config
                 }
             }
 
-            if (screenType || o.screenType) {
-                if ((orientation != o.orientation) && requested->orientation) {
-                    return (orientation);
-                }
+            if ((orientation != o.orientation) && requested->orientation) {
+                return (orientation);
+            }
 
+            if (screenConfig || o.screenConfig) {
+                if (((uiMode^o.uiMode) & MASK_UI_MODE_TYPE) != 0
+                        && (requested->uiMode & MASK_UI_MODE_TYPE)) {
+                    return (uiMode & MASK_UI_MODE_TYPE);
+                }
+                if (((uiMode^o.uiMode) & MASK_UI_MODE_NIGHT) != 0
+                        && (requested->uiMode & MASK_UI_MODE_NIGHT)) {
+                    return (uiMode & MASK_UI_MODE_NIGHT);
+                }
+            }
+
+            if (screenType || o.screenType) {
                 if (density != o.density) {
                     // density is tough.  Any density is potentially useful
                     // because the system will scale it.  Scaling down
@@ -1340,6 +1377,20 @@ struct ResTable_config
                     && screenLong != setScreenLong) {
                 return false;
             }
+
+            const int uiModeType = uiMode&MASK_UI_MODE_TYPE;
+            const int setUiModeType = settings.uiMode&MASK_UI_MODE_TYPE;
+            if (setUiModeType != 0 && uiModeType != 0
+                    && uiModeType != setUiModeType) {
+                return false;
+            }
+
+            const int uiModeNight = uiMode&MASK_UI_MODE_NIGHT;
+            const int setUiModeNight = settings.uiMode&MASK_UI_MODE_NIGHT;
+            if (setUiModeNight != 0 && uiModeNight != 0
+                    && uiModeNight != setUiModeNight) {
+                return false;
+            }
         }
         if (screenType != 0) {
             if (settings.orientation != 0 && orientation != 0
@@ -1420,13 +1471,15 @@ struct ResTable_config
     String8 toString() const {
         char buf[200];
         sprintf(buf, "imsi=%d/%d lang=%c%c reg=%c%c orient=%d touch=%d dens=%d "
-                "kbd=%d nav=%d input=%d scrnW=%d scrnH=%d sz=%d long=%d vers=%d.%d",
+                "kbd=%d nav=%d input=%d scrnW=%d scrnH=%d sz=%d long=%d "
+                "ui=%d night=%d vers=%d.%d",
                 mcc, mnc,
                 language[0] ? language[0] : '-', language[1] ? language[1] : '-',
                 country[0] ? country[0] : '-', country[1] ? country[1] : '-',
                 orientation, touchscreen, density, keyboard, navigation, inputFlags,
                 screenWidth, screenHeight,
                 screenLayout&MASK_SCREENSIZE, screenLayout&MASK_SCREENLONG,
+                uiMode&MASK_UI_MODE_TYPE, uiMode&MASK_UI_MODE_NIGHT,
                 sdkVersion, minorVersion);
         return String8(buf);
     }

@@ -90,6 +90,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/app/IStatusBar.aidl \
 	core/java/android/app/IThumbnailReceiver.aidl \
 	core/java/android/app/ITransientNotification.aidl \
+	core/java/android/app/IUiModeManager.aidl \
 	core/java/android/app/IWallpaperManager.aidl \
 	core/java/android/app/IWallpaperManagerCallback.aidl \
 	core/java/android/backup/IBackupManager.aidl \

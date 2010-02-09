@@ -59,7 +59,7 @@ public class BridgeAssetManager extends AssetManager {
     public void setConfiguration(int mcc, int mnc, String locale,
             int orientation, int touchscreen, int density, int keyboard,
             int keyboardHidden, int navigation, int screenWidth, int screenHeight,
-            int screenLayout, int version)  {
+            int screenLayout, int uiMode, int version)  {
         
         Configuration c = new Configuration();
         c.mcc = mcc;
@@ -71,5 +71,6 @@ public class BridgeAssetManager extends AssetManager {
         c.navigation = navigation;
         c.orientation = orientation;
         c.screenLayout = screenLayout;
+        c.uiMode = uiMode;
     }
 }
