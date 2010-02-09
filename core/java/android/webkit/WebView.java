@@ -6172,6 +6172,9 @@ public class WebView extends AbsoluteLayout
                     // mContentHeight may not be updated yet
                     y = Math.max(0,
                             (Math.min(maxHeight, y + viewHeight) - viewHeight));
+                    // We need to take into account the visible title height
+                    // when scrolling since y is an absolute view position.
+                    y = Math.max(0, y - getVisibleTitleHeight());
                     scrollTo(x, y);
                     }
                     break;
