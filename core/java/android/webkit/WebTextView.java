@@ -816,6 +816,9 @@ import java.util.ArrayList;
         int imeOptions = EditorInfo.IME_FLAG_NO_EXTRACT_UI
                 | EditorInfo.IME_FLAG_NO_FULLSCREEN;
         switch (type) {
+            case 0: // NORMAL_TEXT_FIELD
+                imeOptions |= EditorInfo.IME_ACTION_GO;
+                break;
             case 1: // TEXT_AREA
                 single = false;
                 inputType |= EditorInfo.TYPE_TEXT_FLAG_MULTI_LINE
@@ -851,6 +854,7 @@ import java.util.ArrayList;
                 imeOptions |= EditorInfo.IME_ACTION_GO;
                 break;
             default:
+                imeOptions |= EditorInfo.IME_ACTION_GO;
                 break;
         }
         setHint(null);
