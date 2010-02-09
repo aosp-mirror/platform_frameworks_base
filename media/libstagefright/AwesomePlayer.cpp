@@ -111,6 +111,7 @@ private:
 AwesomePlayer::AwesomePlayer()
     : mTimeSource(NULL),
       mAudioPlayer(NULL),
+      mFlags(0),
       mLastVideoBuffer(NULL),
       mVideoBuffer(NULL) {
     CHECK_EQ(mClient.connect(), OK);
@@ -167,23 +168,17 @@ status_t AwesomePlayer::setDataSource(
 
     reset_l();
 
-    sp<DataSource> dataSource = DataSource::CreateFromURI(uri, headers);
+    mUri = uri;
 
-    if (dataSource == NULL) {
-        return UNKNOWN_ERROR;
+    if (headers) {
+        mUriHeaders = *headers;
     }
 
-    sp<MediaExtractor> extractor = MediaExtractor::Create(dataSource);
+    // The actual work will be done during preparation in the call to
+    // ::finishSetDataSource_l to avoid blocking the calling thread in
+    // setDataSource for any significant time.
 
-    if (extractor == NULL) {
-        return UNKNOWN_ERROR;
-    }
-
-    if (dataSource->flags() & DataSource::kWantsPrefetching) {
-        mPrefetcher = new Prefetcher;
-    }
-
-    return setDataSource_l(extractor);
+    return OK;
 }
 
 status_t AwesomePlayer::setDataSource(
@@ -242,6 +237,10 @@ void AwesomePlayer::reset() {
 }
 
 void AwesomePlayer::reset_l() {
+    while (mFlags & PREPARING) {
+        mPreparedCondition.wait(mLock);
+    }
+
     cancelPlayerEvents();
 
     mVideoRenderer.clear();
@@ -290,6 +289,9 @@ void AwesomePlayer::reset_l() {
     mSeekTimeUs = 0;
 
     mPrefetcher.clear();
+
+    mUri.setTo("");
+    mUriHeaders.clear();
 }
 
 void AwesomePlayer::notifyListener_l(int msg, int ext1, int ext2) {
@@ -348,6 +350,14 @@ status_t AwesomePlayer::play() {
 
     if (mFlags & PLAYING) {
         return OK;
+    }
+
+    if (!(mFlags & PREPARED)) {
+        status_t err = prepare_l();
+
+        if (err != OK) {
+            return err;
+        }
     }
 
     mFlags |= PLAYING;
@@ -815,30 +825,49 @@ void AwesomePlayer::onCheckAudioStatus() {
 
 status_t AwesomePlayer::prepare() {
     Mutex::Autolock autoLock(mLock);
+    return prepare_l();
+}
 
+status_t AwesomePlayer::prepare_l() {
+    if (mFlags & PREPARED) {
+        return OK;
+    }
+
+    if (mFlags & PREPARING) {
+        return UNKNOWN_ERROR;
+    }
+
+    mIsAsyncPrepare = false;
     status_t err = prepareAsync_l();
 
     if (err != OK) {
         return err;
     }
 
-    while (mAsyncPrepareEvent != NULL) {
+    while (mFlags & PREPARING) {
         mPreparedCondition.wait(mLock);
     }
 
-    return OK;
+    return mPrepareResult;
 }
 
 status_t AwesomePlayer::prepareAsync() {
     Mutex::Autolock autoLock(mLock);
+
+    if (mFlags & PREPARING) {
+        return UNKNOWN_ERROR;  // async prepare already pending
+    }
+
+    mIsAsyncPrepare = true;
     return prepareAsync_l();
 }
 
 status_t AwesomePlayer::prepareAsync_l() {
-    if (mAsyncPrepareEvent != NULL) {
-        return UNKNOWN_ERROR;  // async prepare already pending.
+    if (mFlags & PREPARING) {
+        return UNKNOWN_ERROR;  // async prepare already pending
     }
 
+    mFlags |= PREPARING;
     mAsyncPrepareEvent = new AwesomeEvent(
             this, &AwesomePlayer::onPrepareAsyncEvent);
 
@@ -847,7 +876,49 @@ status_t AwesomePlayer::prepareAsync_l() {
     return OK;
 }
 
+status_t AwesomePlayer::finishSetDataSource_l() {
+    sp<DataSource> dataSource =
+        DataSource::CreateFromURI(mUri.string(), &mUriHeaders);
+
+    if (dataSource == NULL) {
+        return UNKNOWN_ERROR;
+    }
+
+    sp<MediaExtractor> extractor = MediaExtractor::Create(dataSource);
+
+    if (extractor == NULL) {
+        return UNKNOWN_ERROR;
+    }
+
+    if (dataSource->flags() & DataSource::kWantsPrefetching) {
+        mPrefetcher = new Prefetcher;
+    }
+
+    return setDataSource_l(extractor);
+}
+
 void AwesomePlayer::onPrepareAsyncEvent() {
+    {
+        Mutex::Autolock autoLock(mLock);
+
+        if (mUri.size() > 0) {
+            status_t err = finishSetDataSource_l();
+
+            if (err != OK) {
+                if (mIsAsyncPrepare) {
+                    notifyListener_l(MEDIA_ERROR, MEDIA_ERROR_UNKNOWN, err);
+                }
+
+                mPrepareResult = err;
+                mFlags &= ~PREPARING;
+                mAsyncPrepareEvent = NULL;
+                mPreparedCondition.broadcast();
+
+                return;
+            }
+        }
+    }
+
     sp<Prefetcher> prefetcher;
 
     {
@@ -861,16 +932,21 @@ void AwesomePlayer::onPrepareAsyncEvent() {
 
     Mutex::Autolock autoLock(mLock);
 
-    if (mVideoWidth < 0 || mVideoHeight < 0) {
-        notifyListener_l(MEDIA_SET_VIDEO_SIZE, 0, 0);
-    } else {
-        notifyListener_l(MEDIA_SET_VIDEO_SIZE, mVideoWidth, mVideoHeight);
+    if (mIsAsyncPrepare) {
+        if (mVideoWidth < 0 || mVideoHeight < 0) {
+            notifyListener_l(MEDIA_SET_VIDEO_SIZE, 0, 0);
+        } else {
+            notifyListener_l(MEDIA_SET_VIDEO_SIZE, mVideoWidth, mVideoHeight);
+        }
+
+        notifyListener_l(MEDIA_PREPARED);
     }
 
-    notifyListener_l(MEDIA_PREPARED);
-
+    mPrepareResult = OK;
+    mFlags &= ~PREPARING;
+    mFlags |= PREPARED;
     mAsyncPrepareEvent = NULL;
-    mPreparedCondition.signal();
+    mPreparedCondition.broadcast();
 }
 
 }  // namespace android
