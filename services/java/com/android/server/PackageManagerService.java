@@ -2750,9 +2750,9 @@ class PackageManagerService extends IPackageManager.Stub {
                                     + pkgSetting.name;
                                 reportSettingsProblem(Log.WARN, msg);
                             }
+                            // And now uninstall the old package.
+                            mInstaller.remove(pkgSetting.origPackage.name, useEncryptedFSDir);
                         }
-                        // And now uninstall the old package.
-                        mInstaller.remove(pkgSetting.origPackage.name, useEncryptedFSDir);
                         mSettings.removePackageLP(pkgSetting.origPackage.name);
                     }
                 }
