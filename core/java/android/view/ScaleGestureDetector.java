@@ -18,7 +18,6 @@ package android.view;
 
 import android.content.Context;
 import android.util.DisplayMetrics;
-import android.util.Log;
 
 /**
  * Detects transformation gestures involving more than one pointer ("multitouch")
@@ -45,9 +44,9 @@ public class ScaleGestureDetector {
      * 
      * An application will receive events in the following order:
      * <ul>
-     *  <li>One {@link OnScaleGestureListener#onScaleBegin()}
-     *  <li>Zero or more {@link OnScaleGestureListener#onScale()}
-     *  <li>One {@link OnScaleGestureListener#onTransformEnd()}
+     *  <li>One {@link OnScaleGestureListener#onScaleBegin(ScaleGestureDetector)}
+     *  <li>Zero or more {@link OnScaleGestureListener#onScale(ScaleGestureDetector)}
+     *  <li>One {@link OnScaleGestureListener#onScaleEnd(ScaleGestureDetector)}
      * </ul>
      */
     public interface OnScaleGestureListener {
@@ -82,8 +81,7 @@ public class ScaleGestureDetector {
 
         /**
          * Responds to the end of a scale gesture. Reported by existing
-         * pointers going up. If the end of a gesture would result in a fling,
-         * {@link onTransformFling()} is called instead.
+         * pointers going up.
          * 
          * Once a scale has ended, {@link ScaleGestureDetector#getFocusX()}
          * and {@link ScaleGestureDetector#getFocusY()} will return the location
@@ -103,7 +101,7 @@ public class ScaleGestureDetector {
      * {@link OnScaleGestureListener#onScaleBegin(ScaleGestureDetector)} return
      * {@code true}. 
      */
-    public class SimpleOnScaleGestureListener implements OnScaleGestureListener {
+    public static class SimpleOnScaleGestureListener implements OnScaleGestureListener {
 
         public boolean onScale(ScaleGestureDetector detector) {
             return true;
@@ -373,7 +371,7 @@ public class ScaleGestureDetector {
      * the two pointers forming the gesture.
      * If a gesture is ending, the focal point is the location of the
      * remaining pointer on the screen.
-     * If {@link isInProgress()} would return false, the result of this
+     * If {@link #isInProgress()} would return false, the result of this
      * function is undefined.
      * 
      * @return X coordinate of the focal point in pixels.
@@ -388,7 +386,7 @@ public class ScaleGestureDetector {
      * the two pointers forming the gesture.
      * If a gesture is ending, the focal point is the location of the
      * remaining pointer on the screen.
-     * If {@link isInProgress()} would return false, the result of this
+     * If {@link #isInProgress()} would return false, the result of this
      * function is undefined.
      * 
      * @return Y coordinate of the focal point in pixels.
@@ -430,7 +428,7 @@ public class ScaleGestureDetector {
     /**
      * Return the scaling factor from the previous scale event to the current
      * event. This value is defined as
-     * ({@link getCurrentSpan()} / {@link getPreviousSpan()}).
+     * ({@link #getCurrentSpan()} / {@link #getPreviousSpan()}).
      * 
      * @return The current scaling factor.
      */
