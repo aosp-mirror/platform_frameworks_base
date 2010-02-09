@@ -16,10 +16,14 @@
 
 package android.media;
 
+import org.xml.sax.Attributes;
+import org.xml.sax.ContentHandler;
+import org.xml.sax.SAXException;
+
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.IContentProvider;
-import android.content.ContentUris;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.graphics.BitmapFactory;
@@ -42,11 +46,12 @@ import android.util.Config;
 import android.util.Log;
 import android.util.Xml;
 
-import org.xml.sax.Attributes;
-import org.xml.sax.ContentHandler;
-import org.xml.sax.SAXException;
-
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileDescriptor;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -586,6 +591,9 @@ public class MediaScanner
                     }
                     if (genreCode >= 0 && genreCode < ID3_GENRES.length) {
                         value = ID3_GENRES[genreCode];
+                    } else if (genreCode == 255) {
+                        // 255 is defined to be unknown
+                        value = null;
                     }
                 }
                 mGenre = value;
