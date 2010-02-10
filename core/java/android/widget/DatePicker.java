@@ -103,6 +103,18 @@ public class DatePicker extends FrameLayout {
         mMonthPicker.setFormatter(NumberPicker.TWO_DIGIT_FORMATTER);
         DateFormatSymbols dfs = new DateFormatSymbols();
         String[] months = dfs.getShortMonths();
+
+        /*
+         * If the user is in a locale where the month names are numeric,
+         * use just the number instead of the "month" character for
+         * consistency with the other fields.
+         */
+        if (months[0].startsWith("1")) {
+            for (int i = 0; i < months.length; i++) {
+                months[i] = String.valueOf(i + 1);
+            }
+        }
+
         mMonthPicker.setRange(1, 12, months);
         mMonthPicker.setSpeed(200);
         mMonthPicker.setOnChangeListener(new OnChangedListener() {
