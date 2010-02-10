@@ -273,7 +273,7 @@ public class IccProvider extends ContentProvider {
             }
         }
 
-        if (TextUtils.isEmpty(tag)) {
+        if (TextUtils.isEmpty(number)) {
             return 0;
         }
 
