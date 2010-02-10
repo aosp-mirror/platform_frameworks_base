@@ -1628,8 +1628,6 @@ public class SearchManager
     /**
      * Intent action for starting the global search settings activity.
      * The global search provider should handle this intent.
-     * 
-     * @hide Pending API council approval.
      */
     public final static String INTENT_ACTION_SEARCH_SETTINGS 
             = "android.search.action.SEARCH_SETTINGS";
