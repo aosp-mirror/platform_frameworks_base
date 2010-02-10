@@ -1597,9 +1597,12 @@ void MediaPlayerService::AudioOutput::CallbackWrapper(
     AudioOutput *me = (AudioOutput *)cookie;
     AudioTrack::Buffer *buffer = (AudioTrack::Buffer *)info;
 
-    (*me->mCallback)(
+    size_t actualSize = (*me->mCallback)(
             me, buffer->raw, buffer->size, me->mCallbackCookie);
-    me->snoopWrite(buffer->raw, buffer->size);
+
+    if (actualSize > 0) {
+        me->snoopWrite(buffer->raw, actualSize);
+    }
 }
 
 #undef LOG_TAG
@@ -1629,14 +1632,75 @@ status_t MediaPlayerService::AudioCache::getPosition(uint32_t *position)
     return NO_ERROR;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+
+struct CallbackThread : public Thread {
+    CallbackThread(const wp<MediaPlayerBase::AudioSink> &sink,
+                   MediaPlayerBase::AudioSink::AudioCallback cb,
+                   void *cookie);
+
+protected:
+    virtual ~CallbackThread();
+
+    virtual bool threadLoop();
+
+private:
+    wp<MediaPlayerBase::AudioSink> mSink;
+    MediaPlayerBase::AudioSink::AudioCallback mCallback;
+    void *mCookie;
+    void *mBuffer;
+    size_t mBufferSize;
+
+    CallbackThread(const CallbackThread &);
+    CallbackThread &operator=(const CallbackThread &);
+};
+
+CallbackThread::CallbackThread(
+        const wp<MediaPlayerBase::AudioSink> &sink,
+        MediaPlayerBase::AudioSink::AudioCallback cb,
+        void *cookie)
+    : mSink(sink),
+      mCallback(cb),
+      mCookie(cookie),
+      mBuffer(NULL),
+      mBufferSize(0) {
+}
+
+CallbackThread::~CallbackThread() {
+    if (mBuffer) {
+        free(mBuffer);
+        mBuffer = NULL;
+    }
+}
+
+bool CallbackThread::threadLoop() {
+    sp<MediaPlayerBase::AudioSink> sink = mSink.promote();
+    if (sink == NULL) {
+        return false;
+    }
+
+    if (mBuffer == NULL) {
+        mBufferSize = sink->bufferSize();
+        mBuffer = malloc(mBufferSize);
+    }
+
+    size_t actualSize =
+        (*mCallback)(sink.get(), mBuffer, mBufferSize, mCookie);
+
+    if (actualSize > 0) {
+        sink->write(mBuffer, actualSize);
+    }
+
+    return true;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 status_t MediaPlayerService::AudioCache::open(
         uint32_t sampleRate, int channelCount, int format, int bufferCount,
         AudioCallback cb, void *cookie)
 {
     LOGV("open(%u, %d, %d, %d)", sampleRate, channelCount, format, bufferCount);
-    if (cb != NULL) {
-        return UNKNOWN_ERROR;  // TODO: implement this.
-    }
     if (mHeap->getHeapID() < 0) {
         return NO_INIT;
     }
@@ -1645,7 +1709,23 @@ status_t MediaPlayerService::AudioCache::open(
     mChannelCount = (uint16_t)channelCount;
     mFormat = (uint16_t)format;
     mMsecsPerFrame = 1.e3 / (float) sampleRate;
+
+    if (cb != NULL) {
+        mCallbackThread = new CallbackThread(this, cb, cookie);
+    }
     return NO_ERROR;
+}
+
+void MediaPlayerService::AudioCache::start() {
+    if (mCallbackThread != NULL) {
+        mCallbackThread->run("AudioCache callback");
+    }
+}
+
+void MediaPlayerService::AudioCache::stop() {
+    if (mCallbackThread != NULL) {
+        mCallbackThread->requestExitAndWait();
+    }
 }
 
 ssize_t MediaPlayerService::AudioCache::write(const void* buffer, size_t size)

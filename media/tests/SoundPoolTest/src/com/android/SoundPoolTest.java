@@ -43,10 +43,9 @@ public class SoundPoolTest extends Activity
     private TestThread mThread;
 
     private static final int[] mTestFiles = new int[] {
-        // FIXME: Restore when Stagefright bug is fixed
         R.raw.organ441,
         R.raw.sine441,
-        //R.raw.test1,
+        R.raw.test1,
         R.raw.test2,
         R.raw.test3,
         R.raw.test4,
