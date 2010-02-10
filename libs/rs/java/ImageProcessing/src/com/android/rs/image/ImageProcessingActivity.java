@@ -126,14 +126,13 @@ public class ImageProcessingActivity extends Activity implements SurfaceHolder.C
     }
 
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-        mRS.contextSetSurface(width, height, holder.getSurface());
     }
 
     public void surfaceDestroyed(SurfaceHolder holder) {
     }
 
     private Script.Invokable createScript() {
-        mRS = new RenderScript(false, false);
+        mRS = RenderScript.create();
         mRS.mMessageCallback = new FilterCallback();
 
         mParamsType = Type.createFromClass(mRS, Params.class, 1, "Parameters");
@@ -164,7 +163,7 @@ public class ImageProcessingActivity extends Activity implements SurfaceHolder.C
         sb.setType(true, 2);
         Script.Invokable invokable = sb.addInvokable("main");
         sb.setScript(getResources(), R.raw.threshold);
-        sb.setRoot(true);
+        //sb.setRoot(true);
 
         ScriptC script = sb.create();
         script.bindAllocation(mParamsAllocation, 0);

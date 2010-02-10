@@ -289,15 +289,17 @@ void * Context::threadProc(void *vrsc)
          LOGE("pthread_setspecific %i", status);
      }
 
-     rsc->mStateRaster.init(rsc, rsc->mEGL.mWidth, rsc->mEGL.mHeight);
-     rsc->setRaster(NULL);
-     rsc->mStateVertex.init(rsc, rsc->mEGL.mWidth, rsc->mEGL.mHeight);
-     rsc->setVertex(NULL);
-     rsc->mStateFragment.init(rsc, rsc->mEGL.mWidth, rsc->mEGL.mHeight);
-     rsc->setFragment(NULL);
-     rsc->mStateFragmentStore.init(rsc, rsc->mEGL.mWidth, rsc->mEGL.mHeight);
-     rsc->setFragmentStore(NULL);
-     rsc->mStateVertexArray.init(rsc);
+     if (rsc->mIsGraphicsContext) {
+         rsc->mStateRaster.init(rsc, rsc->mEGL.mWidth, rsc->mEGL.mHeight);
+         rsc->setRaster(NULL);
+         rsc->mStateVertex.init(rsc, rsc->mEGL.mWidth, rsc->mEGL.mHeight);
+         rsc->setVertex(NULL);
+         rsc->mStateFragment.init(rsc, rsc->mEGL.mWidth, rsc->mEGL.mHeight);
+         rsc->setFragment(NULL);
+         rsc->mStateFragmentStore.init(rsc, rsc->mEGL.mWidth, rsc->mEGL.mHeight);
+         rsc->setFragmentStore(NULL);
+         rsc->mStateVertexArray.init(rsc);
+     }
 
      rsc->mRunning = true;
      bool mDraw = true;
@@ -307,7 +309,7 @@ void * Context::threadProc(void *vrsc)
          mDraw &= (rsc->mWndSurface != NULL);
 
          uint32_t targetTime = 0;
-         if (mDraw) {
+         if (mDraw && rsc->mIsGraphicsContext) {
              targetTime = rsc->runRootScript();
              mDraw = targetTime && !rsc->mPaused;
              rsc->timerSet(RS_TIMER_CLEAR_SWAP);
@@ -329,23 +331,27 @@ void * Context::threadProc(void *vrsc)
      }
 
      LOGV("RS Thread exiting");
-     rsc->mRaster.clear();
-     rsc->mFragment.clear();
-     rsc->mVertex.clear();
-     rsc->mFragmentStore.clear();
-     rsc->mRootScript.clear();
-     rsc->mStateRaster.deinit(rsc);
-     rsc->mStateVertex.deinit(rsc);
-     rsc->mStateFragment.deinit(rsc);
-     rsc->mStateFragmentStore.deinit(rsc);
+     if (rsc->mIsGraphicsContext) {
+         rsc->mRaster.clear();
+         rsc->mFragment.clear();
+         rsc->mVertex.clear();
+         rsc->mFragmentStore.clear();
+         rsc->mRootScript.clear();
+         rsc->mStateRaster.deinit(rsc);
+         rsc->mStateVertex.deinit(rsc);
+         rsc->mStateFragment.deinit(rsc);
+         rsc->mStateFragmentStore.deinit(rsc);
+     }
      ObjectBase::zeroAllUserRef(rsc);
 
      rsc->mObjDestroy.mNeedToEmpty = true;
      rsc->objDestroyOOBRun();
 
-     pthread_mutex_lock(&gInitMutex);
-     rsc->deinitEGL();
-     pthread_mutex_unlock(&gInitMutex);
+     if (rsc->mIsGraphicsContext) {
+         pthread_mutex_lock(&gInitMutex);
+         rsc->deinitEGL();
+         pthread_mutex_unlock(&gInitMutex);
+     }
 
      LOGV("RS Thread exited");
      return NULL;
@@ -371,7 +377,7 @@ void Context::setPriority(int32_t p)
 #endif
 }
 
-Context::Context(Device *dev, bool useDepth)
+Context::Context(Device *dev, bool isGraphics, bool useDepth)
 {
     pthread_mutex_lock(&gInitMutex);
 
@@ -383,6 +389,8 @@ Context::Context(Device *dev, bool useDepth)
     mPaused = false;
     mObjHead = NULL;
     memset(&mEGL, 0, sizeof(mEGL));
+    memset(&mGL, 0, sizeof(mGL));
+    mIsGraphicsContext = isGraphics;
 
     int status;
     pthread_attr_t threadAttr;
@@ -454,7 +462,7 @@ Context::~Context()
 
 void Context::setSurface(uint32_t w, uint32_t h, Surface *sur)
 {
-    LOGV("setSurface %i %i %p", w, h, sur);
+    rsAssert(mIsGraphicsContext);
 
     EGLBoolean ret;
     if (mEGL.mSurface != NULL) {
@@ -544,21 +552,25 @@ void Context::setSurface(uint32_t w, uint32_t h, Surface *sur)
 
 void Context::pause()
 {
+    rsAssert(mIsGraphicsContext);
     mPaused = true;
 }
 
 void Context::resume()
 {
+    rsAssert(mIsGraphicsContext);
     mPaused = false;
 }
 
 void Context::setRootScript(Script *s)
 {
+    rsAssert(mIsGraphicsContext);
     mRootScript.set(s);
 }
 
 void Context::setFragmentStore(ProgramFragmentStore *pfs)
 {
+    rsAssert(mIsGraphicsContext);
     if (pfs == NULL) {
         mFragmentStore.set(mStateFragmentStore.mDefault);
     } else {
@@ -568,6 +580,7 @@ void Context::setFragmentStore(ProgramFragmentStore *pfs)
 
 void Context::setFragment(ProgramFragment *pf)
 {
+    rsAssert(mIsGraphicsContext);
     if (pf == NULL) {
         mFragment.set(mStateFragment.mDefault);
     } else {
@@ -577,6 +590,7 @@ void Context::setFragment(ProgramFragment *pf)
 
 void Context::setRaster(ProgramRaster *pr)
 {
+    rsAssert(mIsGraphicsContext);
     if (pr == NULL) {
         mRaster.set(mStateRaster.mDefault);
     } else {
@@ -586,6 +600,7 @@ void Context::setRaster(ProgramRaster *pr)
 
 void Context::setVertex(ProgramVertex *pv)
 {
+    rsAssert(mIsGraphicsContext);
     if (pv == NULL) {
         mVertex.set(mStateVertex.mDefault);
     } else {
@@ -860,10 +875,19 @@ void rsi_ContextDump(Context *rsc, int32_t bits)
 }
 
 
-RsContext rsContextCreate(RsDevice vdev, uint32_t version, bool useDepth)
+RsContext rsContextCreate(RsDevice vdev, uint32_t version)
 {
+    LOGV("rsContextCreate %p", vdev);
     Device * dev = static_cast<Device *>(vdev);
-    Context *rsc = new Context(dev, useDepth);
+    Context *rsc = new Context(dev, false, false);
+    return rsc;
+}
+
+RsContext rsContextCreateGL(RsDevice vdev, uint32_t version, bool useDepth)
+{
+    LOGV("rsContextCreateGL %p, %i", vdev, useDepth);
+    Device * dev = static_cast<Device *>(vdev);
+    Context *rsc = new Context(dev, true, useDepth);
     return rsc;
 }
 

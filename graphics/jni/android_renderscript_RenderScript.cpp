@@ -151,10 +151,17 @@ nDeviceSetConfig(JNIEnv *_env, jobject _this, jint dev, jint p, jint value)
 }
 
 static jint
-nContextCreate(JNIEnv *_env, jobject _this, jint dev, jint ver, jboolean useDepth)
+nContextCreate(JNIEnv *_env, jobject _this, jint dev, jint ver)
 {
     LOG_API("nContextCreate");
-    return (jint)rsContextCreate((RsDevice)dev, ver, useDepth);
+    return (jint)rsContextCreate((RsDevice)dev, ver);
+}
+
+static jint
+nContextCreateGL(JNIEnv *_env, jobject _this, jint dev, jint ver, jboolean useDepth)
+{
+    LOG_API("nContextCreateGL");
+    return (jint)rsContextCreateGL((RsDevice)dev, ver, useDepth);
 }
 
 static void
@@ -260,7 +267,7 @@ nElementCreate2(JNIEnv *_env, jobject _this, jintArray _ids, jobjectArray _names
 {
     int fieldCount = _env->GetArrayLength(_ids);
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nElementCreate, con(%p), type(%i), kind(%i), norm(%i), size(%i)", con, type, kind, norm, size);
+    LOG_API("nElementCreate2, con(%p)", con);
 
     jint *ids = _env->GetIntArrayElements(_ids, NULL);
     const char ** nameArray = (const char **)calloc(fieldCount, sizeof(char *));
@@ -1089,7 +1096,7 @@ nProgramFragmentCreate(JNIEnv *_env, jobject _this, jintArray params)
     jint *paramPtr = _env->GetIntArrayElements(params, NULL);
     jint paramLen = _env->GetArrayLength(params);
 
-    LOG_API("nProgramFragmentCreate, con(%p), paramLen(%i)", con, shaderLen, paramLen);
+    LOG_API("nProgramFragmentCreate, con(%p), paramLen(%i)", con, paramLen);
 
     jint ret = (jint)rsProgramFragmentCreate(con, (uint32_t *)paramPtr, paramLen);
     _env->ReleaseIntArrayElements(params, paramPtr, JNI_ABORT);
@@ -1332,7 +1339,8 @@ static JNINativeMethod methods[] = {
 {"nDeviceCreate",                  "()I",                                  (void*)nDeviceCreate },
 {"nDeviceDestroy",                 "(I)V",                                 (void*)nDeviceDestroy },
 {"nDeviceSetConfig",               "(III)V",                               (void*)nDeviceSetConfig },
-{"nContextCreate",                 "(IIZ)I",                               (void*)nContextCreate },
+{"nContextCreate",                 "(II)I",                                (void*)nContextCreate },
+{"nContextCreateGL",               "(IIZ)I",                               (void*)nContextCreateGL },
 {"nContextSetPriority",            "(I)V",                                 (void*)nContextSetPriority },
 {"nContextSetSurface",             "(IILandroid/view/Surface;)V",          (void*)nContextSetSurface },
 {"nContextDestroy",                "(I)V",                                 (void*)nContextDestroy },

@@ -51,7 +51,7 @@ namespace renderscript {
 class Context
 {
 public:
-    Context(Device *, bool useDepth);
+    Context(Device *, bool isGraphics, bool useDepth);
     ~Context();
 
     static pthread_key_t gThreadTLSKey;
@@ -201,6 +201,7 @@ protected:
     uint32_t mWidth;
     uint32_t mHeight;
     int32_t mThreadPriority;
+    bool mIsGraphicsContext;
 
     bool mRunning;
     bool mExit;
