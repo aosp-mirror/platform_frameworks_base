@@ -51,6 +51,10 @@ public class Base64 {
      */
     public static final int WEB_SAFE = 8;
 
+    //  --------------------------------------------------------
+    //  decoding
+    //  --------------------------------------------------------
+
     /**
      * Lookup table for turning bytes into their position in the
      * Base64 alphabet.
@@ -155,18 +159,71 @@ public class Base64 {
      * incorrect padding
      */
     public static byte[] decode(byte[] input, int offset, int len, int flags) {
-        int p = offset;
         // Allocate space for the most data the input could represent.
         // (It could contain less if it contains whitespace, etc.)
-        byte[] output = new byte[len*3/4];
-        len += offset;
+        DecoderState state = new DecoderState(flags, new byte[len*3/4]);
+
+        if (!decodeInternal(input, offset, len, state, true)) {
+            throw new IllegalArgumentException("bad base-64");
+        }
+
+        // Maybe we got lucky and allocated exactly enough output space.
+        if (state.op == state.output.length) {
+            return state.output;
+        }
+
+        // Need to shorten the array, so allocate a new one of the
+        // right size and copy.
+        byte[] temp = new byte[state.op];
+        System.arraycopy(state.output, 0, temp, 0, state.op);
+        return temp;
+    }
+
+    /* package */ static class DecoderState {
+        public byte[] output;
+        public int op;
+
+        public int state;   // state number (0 to 6)
+        public int value;
+
+        final public int[] alphabet;
+
+        public DecoderState(int flags, byte[] output) {
+            this.output = output;
+
+            alphabet = ((flags & WEB_SAFE) == 0) ? DECODE : DECODE_WEBSAFE;
+            state = 0;
+            value = 0;
+        }
+    }
+
+    /**
+     * Decode another block of input data.
+     *
+     * @param dstate a DecoderState object whose (caller-provided)
+     *        output array is big enough to hold all the decoded data.
+     *        On return, dstate.op will be set to the length of the
+     *        decoded data.
+     * @param finish true if this is the final call to decodeInternal
+     *        with the given DecoderState object.  Will finalize the
+     *        decoder state and include any final bytes in the output.
+     *
+     * @return true if the state machine is still healthy.  false if
+     *         bad base-64 data has been detected in the input stream.
+     */
+
+    /* package */ static boolean decodeInternal(
+        byte[] input, int offset, int len, final DecoderState dstate, boolean finish) {
+        if (dstate.state == 6) return false;
+
+        int state = dstate.state;
+        int value = dstate.value;
+        final int[] decode = dstate.alphabet;
+        final byte[] output = dstate.output;
         int op = 0;
 
-        final int[] decode = ((flags & WEB_SAFE) == 0) ?
-            DECODE : DECODE_WEBSAFE;
-
-        int state = 0;
-        int value = 0;
+        int p = offset;
+        len += offset;
 
         while (p < len) {
 
@@ -207,6 +264,8 @@ public class Base64 {
             // one more.
             // State 5 is expecting no more data or padding characters
             // in the input.
+            // State 6 is the error state; an error has been detected
+            // in the input and no future input can "fix" it.
 
             int d = decode[input[p++] & 0xff];
 
@@ -216,7 +275,8 @@ public class Base64 {
                         value = d;
                         ++state;
                     } else if (d != SKIP) {
-                        throw new IllegalArgumentException("bad base-64");
+                        dstate.state = 6;
+                        return false;
                     }
                     break;
 
@@ -225,7 +285,8 @@ public class Base64 {
                         value = (value << 6) | d;
                         ++state;
                     } else if (d != SKIP) {
-                        throw new IllegalArgumentException("bad base-64");
+                        dstate.state = 6;
+                        return false;
                     }
                     break;
 
@@ -239,7 +300,8 @@ public class Base64 {
                         output[op++] = (byte) (value >> 4);
                         state = 4;
                     } else if (d != SKIP) {
-                        throw new IllegalArgumentException("bad base-64");
+                        dstate.state = 6;
+                        return false;
                     }
                     break;
 
@@ -260,7 +322,8 @@ public class Base64 {
                         op += 2;
                         state = 5;
                     } else if (d != SKIP) {
-                        throw new IllegalArgumentException("bad base-64");
+                        dstate.state = 6;
+                        return false;
                     }
                     break;
 
@@ -268,16 +331,28 @@ public class Base64 {
                     if (d == EQUALS) {
                         ++state;
                     } else if (d != SKIP) {
-                        throw new IllegalArgumentException("bad base-64");
+                        dstate.state = 6;
+                        return false;
                     }
                     break;
 
                 case 5:
                     if (d != SKIP) {
-                        throw new IllegalArgumentException("bad base-64");
+                        dstate.state = 6;
+                        return false;
                     }
                     break;
             }
+        }
+
+        if (!finish) {
+            // We're out of input, but a future call could provide
+            // more.  Return the output we've produced on this call
+            // and save the current state of the state machine.
+            dstate.state = state;
+            dstate.value = value;
+            dstate.op = op;
+            return true;
         }
 
         // Done reading input.  Now figure out where we are left in
@@ -290,7 +365,8 @@ public class Base64 {
             case 1:
                 // Read one extra input byte, which isn't enough to
                 // make another output byte.  Illegal.
-                throw new IllegalArgumentException("bad base-64");
+                dstate.state = 6;
+                return false;
             case 2:
                 // Read two extra input bytes, enough to emit 1 more
                 // output byte.  Fine.
@@ -305,24 +381,21 @@ public class Base64 {
                 break;
             case 4:
                 // Read one padding '=' when we expected 2.  Illegal.
-                throw new IllegalArgumentException("bad base-64");
+                dstate.state = 6;
+                return false;
             case 5:
                 // Read all the padding '='s we expected and no more.
                 // Fine.
                 break;
         }
 
-        // Maybe we got lucky and allocated exactly enough output space.
-        if (op == output.length) {
-            return output;
-        }
-
-        // Need to shorten the array, so allocate a new one of the
-        // right size and copy.
-        byte[] temp = new byte[op];
-        System.arraycopy(output, 0, temp, 0, op);
-        return temp;
+        dstate.op = op;
+        return true;
     }
+
+    //  --------------------------------------------------------
+    //  encoding
+    //  --------------------------------------------------------
 
     /**
      * Emit a new line every this many output tuples.  Corresponds to
@@ -416,17 +489,13 @@ public class Base64 {
      *               adheres to RFC 2045.
      */
     public static byte[] encode(byte[] input, int offset, int len, int flags) {
-        final boolean do_padding = (flags & NO_PADDING) == 0;
-        final boolean do_newline = (flags & NO_WRAP) == 0;
-        final boolean do_cr = (flags & CRLF) != 0;
-
-        final byte[] encode = ((flags & WEB_SAFE) == 0) ? ENCODE : ENCODE_WEBSAFE;
+        EncoderState state = new EncoderState(flags, null);
 
         // Compute the exact length of the array we will produce.
         int output_len = len / 3 * 4;
 
         // Account for the tail of the data and the padding bytes, if any.
-        if (do_padding) {
+        if (state.do_padding) {
             if (len % 3 > 0) {
                 output_len += 4;
             }
@@ -439,26 +508,107 @@ public class Base64 {
         }
 
         // Account for the newlines, if any.
-        if (do_newline && len > 0) {
-            output_len += (((len-1) / (3 * LINE_GROUPS)) + 1) * (do_cr ? 2 : 1);
+        if (state.do_newline && len > 0) {
+            output_len += (((len-1) / (3 * LINE_GROUPS)) + 1) * (state.do_cr ? 2 : 1);
         }
 
-        int op = 0;
-        byte[] output = new byte[output_len];
+        state.output = new byte[output_len];
+        encodeInternal(input, offset, len, state, true);
 
-        // The main loop, turning 3 input bytes into 4 output bytes on
-        // each iteration.
-        int count = do_newline ? LINE_GROUPS : -1;
+        assert state.op == output_len;
+
+        return state.output;
+    }
+
+    /* package */ static class EncoderState {
+        public byte[] output;
+        public int op;
+
+        final public byte[] tail;
+        public int tailLen;
+        public int count;
+
+        final public boolean do_padding;
+        final public boolean do_newline;
+        final public boolean do_cr;
+        final public byte[] alphabet;
+
+        public EncoderState(int flags, byte[] output) {
+            this.output = output;
+
+            do_padding = (flags & NO_PADDING) == 0;
+            do_newline = (flags & NO_WRAP) == 0;
+            do_cr = (flags & CRLF) != 0;
+            alphabet = ((flags & WEB_SAFE) == 0) ? ENCODE : ENCODE_WEBSAFE;
+
+            tail = new byte[2];
+            tailLen = 0;
+
+            count = do_newline ? LINE_GROUPS : -1;
+        }
+    }
+
+    /**
+     * Encode another block of input data.
+     *
+     * @param estate an EncoderState object whose (caller-provided)
+     *        output array is big enough to hold all the encoded data.
+     *        On return, estate.op will be set to the length of the
+     *        encoded data.
+     * @param finish true if this is the final call to encodeInternal
+     *        with the given EncoderState object.  Will finalize the
+     *        encoder state and include any final bytes in the output.
+     */
+    static void encodeInternal(byte[] input, int offset, int len,
+                               final EncoderState estate, boolean finish) {
+        final boolean do_cr = estate.do_cr;
+        final boolean do_newline = estate.do_newline;
+        final boolean do_padding = estate.do_padding;
+        final byte[] output = estate.output;
+
+        int op = 0;
+
         int p = offset;
         len += offset;
-        while (p+3 <= len) {
-            int v = ((input[p++] & 0xff) << 16) |
-                ((input[p++] & 0xff) << 8) |
-                (input[p++] & 0xff);
-            output[op++] = encode[(v >> 18) & 0x3f];
-            output[op++] = encode[(v >> 12) & 0x3f];
-            output[op++] = encode[(v >> 6) & 0x3f];
-            output[op++] = encode[v & 0x3f];
+        int v = -1;
+        int count = estate.count;
+
+        // First we need to concatenate the tail of the previous call
+        // with any input bytes available now and see if we can empty
+        // the tail.
+
+        switch (estate.tailLen) {
+            case 0:
+                // There was no tail.
+                break;
+
+            case 1:
+                if (p+2 <= len) {
+                    // A 1-byte tail with at least 2 bytes of
+                    // input available now.
+                    v = ((estate.tail[0] & 0xff) << 16) |
+                        ((input[p++] & 0xff) << 8) |
+                        (input[p++] & 0xff);
+                    estate.tailLen = 0;
+                };
+                break;
+
+            case 2:
+                if (p+1 <= len) {
+                    // A 2-byte tail with at least 1 byte of input.
+                    v = ((estate.tail[0] & 0xff) << 16) |
+                        ((estate.tail[1] & 0xff) << 8) |
+                        (input[p++] & 0xff);
+                    estate.tailLen = 0;
+                }
+                break;
+        }
+
+        if (v != -1) {
+            output[op++] = estate.alphabet[(v >> 18) & 0x3f];
+            output[op++] = estate.alphabet[(v >> 12) & 0x3f];
+            output[op++] = estate.alphabet[(v >> 6) & 0x3f];
+            output[op++] = estate.alphabet[v & 0x3f];
             if (--count == 0) {
                 if (do_cr) output[op++] = '\r';
                 output[op++] = '\n';
@@ -466,38 +616,82 @@ public class Base64 {
             }
         }
 
-        // Finish up the tail of the input.
-        if (p == len-1) {
-            int v = (input[p] & 0xff) << 4;
-            output[op++] = encode[(v >> 6) & 0x3f];
-            output[op++] = encode[v & 0x3f];
-            if (do_padding) {
-                output[op++] = '=';
-                output[op++] = '=';
-            }
-            if (do_newline) {
+        // At this point either there is no tail, or there are fewer
+        // than 3 bytes of input available.
+
+        // The main loop, turning 3 input bytes into 4 output bytes on
+        // each iteration.
+        while (p+3 <= len) {
+            v = ((input[p++] & 0xff) << 16) |
+                ((input[p++] & 0xff) << 8) |
+                (input[p++] & 0xff);
+            output[op++] = estate.alphabet[(v >> 18) & 0x3f];
+            output[op++] = estate.alphabet[(v >> 12) & 0x3f];
+            output[op++] = estate.alphabet[(v >> 6) & 0x3f];
+            output[op++] = estate.alphabet[v & 0x3f];
+            if (--count == 0) {
                 if (do_cr) output[op++] = '\r';
                 output[op++] = '\n';
+                count = LINE_GROUPS;
             }
-        } else if (p == len-2) {
-            int v = ((input[p] & 0xff) << 10) | ((input[p+1] & 0xff) << 2);
-            output[op++] = encode[(v >> 12) & 0x3f];
-            output[op++] = encode[(v >> 6) & 0x3f];
-            output[op++] = encode[v & 0x3f];
-            if (do_padding) {
-                output[op++] = '=';
-            }
-            if (do_newline) {
-                if (do_cr) output[op++] = '\r';
-                output[op++] = '\n';
-            }
-        } else if (do_newline && op > 0 && count != LINE_GROUPS) {
-            if (do_cr) output[op++] = '\r';
-            output[op++] = '\n';
         }
 
-        assert op == output.length;
-        return output;
+        if (finish) {
+            // Finish up the tail of the input.  Note that we need to
+            // consume any bytes in estate.tail before any bytes
+            // remaining in input; there should be at most two bytes
+            // total.
+
+            if (p-estate.tailLen == len-1) {
+                int t = 0;
+                v = ((estate.tailLen > 0 ? estate.tail[t++] : input[p++]) & 0xff) << 4;
+                estate.tailLen -= t;
+                output[op++] = estate.alphabet[(v >> 6) & 0x3f];
+                output[op++] = estate.alphabet[v & 0x3f];
+                if (do_padding) {
+                    output[op++] = '=';
+                    output[op++] = '=';
+                }
+                if (do_newline) {
+                    if (do_cr) output[op++] = '\r';
+                    output[op++] = '\n';
+                }
+            } else if (p-estate.tailLen == len-2) {
+                int t = 0;
+                v = (((estate.tailLen > 1 ? estate.tail[t++] : input[p++]) & 0xff) << 10) |
+                    (((estate.tailLen > 0 ? estate.tail[t++] : input[p++]) & 0xff) << 2);
+                estate.tailLen -= t;
+                output[op++] = estate.alphabet[(v >> 12) & 0x3f];
+                output[op++] = estate.alphabet[(v >> 6) & 0x3f];
+                output[op++] = estate.alphabet[v & 0x3f];
+                if (do_padding) {
+                    output[op++] = '=';
+                }
+                if (do_newline) {
+                    if (do_cr) output[op++] = '\r';
+                    output[op++] = '\n';
+                }
+            } else if (do_newline && op > 0 && count != LINE_GROUPS) {
+                if (do_cr) output[op++] = '\r';
+                output[op++] = '\n';
+            }
+
+            assert estate.tailLen == 0;
+            assert p == len;
+        } else {
+            // Save the leftovers in tail to be consumed on the next
+            // call to encodeInternal.
+
+            if (p == len-1) {
+                estate.tail[estate.tailLen++] = input[p];
+            } else if (p == len-2) {
+                estate.tail[estate.tailLen++] = input[p];
+                estate.tail[estate.tailLen++] = input[p+1];
+            }
+        }
+
+        estate.op = op;
+        estate.count = count;
     }
 
     private Base64() { }   // don't instantiate
