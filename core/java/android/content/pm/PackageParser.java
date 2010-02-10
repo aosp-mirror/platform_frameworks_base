@@ -961,14 +961,14 @@ public class PackageParser {
                 sa = res.obtainAttributes(attrs,
                         com.android.internal.R.styleable.AndroidManifestOriginalPackage);
 
-                String name = sa.getNonResourceString(
+                String orig =sa.getNonResourceString(
                         com.android.internal.R.styleable.AndroidManifestOriginalPackage_name);
+                if (!pkg.packageName.equals(orig)) {
+                    pkg.mOriginalPackage = orig;
+                    pkg.mRealPackage = pkg.packageName;
+                }
 
                 sa.recycle();
-
-                if (name != null && (flags&PARSE_IS_SYSTEM) != 0) {
-                    pkg.mOriginalPackage = name;
-                }
 
                 XmlUtils.skipCurrentTag(parser);
                 
@@ -981,7 +981,7 @@ public class PackageParser {
 
                 sa.recycle();
 
-                if (name != null && (flags&PARSE_IS_SYSTEM) != 0) {
+                if (name != null) {
                     if (pkg.mAdoptPermissions == null) {
                         pkg.mAdoptPermissions = new ArrayList<String>();
                     }
@@ -2550,7 +2550,7 @@ public class PackageParser {
     }
 
     public final static class Package {
-        public final String packageName;
+        public String packageName;
 
         // For now we only support one application per package.
         public final ApplicationInfo applicationInfo = new ApplicationInfo();
@@ -2572,6 +2572,7 @@ public class PackageParser {
         public String[] usesLibraryFiles = null;
 
         public String mOriginalPackage = null;
+        public String mRealPackage = null;
         public ArrayList<String> mAdoptPermissions = null;
         
         // We store the application meta-data independently to avoid multiple unwanted references
@@ -2628,6 +2629,32 @@ public class PackageParser {
             applicationInfo.uid = -1;
         }
 
+        public void setPackageName(String newName) {
+            packageName = newName;
+            applicationInfo.packageName = newName;
+            for (int i=permissions.size()-1; i>=0; i--) {
+                permissions.get(i).setPackageName(newName);
+            }
+            for (int i=permissionGroups.size()-1; i>=0; i--) {
+                permissionGroups.get(i).setPackageName(newName);
+            }
+            for (int i=activities.size()-1; i>=0; i--) {
+                activities.get(i).setPackageName(newName);
+            }
+            for (int i=receivers.size()-1; i>=0; i--) {
+                receivers.get(i).setPackageName(newName);
+            }
+            for (int i=providers.size()-1; i>=0; i--) {
+                providers.get(i).setPackageName(newName);
+            }
+            for (int i=services.size()-1; i>=0; i--) {
+                services.get(i).setPackageName(newName);
+            }
+            for (int i=instrumentation.size()-1; i>=0; i--) {
+                instrumentation.get(i).setPackageName(newName);
+            }
+        }
+        
         public String toString() {
             return "Package{"
                 + Integer.toHexString(System.identityHashCode(this))
@@ -2638,15 +2665,16 @@ public class PackageParser {
     public static class Component<II extends IntentInfo> {
         public final Package owner;
         public final ArrayList<II> intents;
-        public final ComponentName component;
-        public final String componentShortName;
+        public final String className;
         public Bundle metaData;
 
+        ComponentName componentName;
+        String componentShortName;
+        
         public Component(Package _owner) {
             owner = _owner;
             intents = null;
-            component = null;
-            componentShortName = null;
+            className = null;
         }
 
         public Component(final ParsePackageItemArgs args, final PackageItemInfo outInfo) {
@@ -2654,8 +2682,7 @@ public class PackageParser {
             intents = new ArrayList<II>(0);
             String name = args.sa.getNonResourceString(args.nameRes);
             if (name == null) {
-                component = null;
-                componentShortName = null;
+                className = null;
                 args.outError[0] = args.tag + " does not specify android:name";
                 return;
             }
@@ -2663,15 +2690,12 @@ public class PackageParser {
             outInfo.name
                 = buildClassName(owner.applicationInfo.packageName, name, args.outError);
             if (outInfo.name == null) {
-                component = null;
-                componentShortName = null;
+                className = null;
                 args.outError[0] = args.tag + " does not have valid android:name";
                 return;
             }
 
-            component = new ComponentName(owner.applicationInfo.packageName,
-                    outInfo.name);
-            componentShortName = component.flattenToShortString();
+            className = outInfo.name;
 
             int iconVal = args.sa.getResourceId(args.iconRes, 0);
             if (iconVal != 0) {
@@ -2709,9 +2733,36 @@ public class PackageParser {
         public Component(Component<II> clone) {
             owner = clone.owner;
             intents = clone.intents;
-            component = clone.component;
+            className = clone.className;
+            componentName = clone.componentName;
             componentShortName = clone.componentShortName;
-            metaData = clone.metaData;
+        }
+        
+        public ComponentName getComponentName() {
+            if (componentName != null) {
+                return componentName;
+            }
+            if (className != null) {
+                componentName = new ComponentName(owner.applicationInfo.packageName,
+                        className);
+            }
+            return componentName;
+        }
+        
+        public String getComponentShortName() {
+            if (componentShortName != null) {
+                return componentShortName;
+            }
+            ComponentName component = getComponentName();
+            if (component != null) {
+                componentShortName = component.flattenToShortString();
+            }
+            return componentShortName;
+        }
+        
+        public void setPackageName(String packageName) {
+            componentName = null;
+            componentShortName = null;
         }
     }
     
@@ -2728,6 +2779,11 @@ public class PackageParser {
         public Permission(Package _owner, PermissionInfo _info) {
             super(_owner);
             info = _info;
+        }
+        
+        public void setPackageName(String packageName) {
+            super.setPackageName(packageName);
+            info.packageName = packageName;
         }
 
         public String toString() {
@@ -2748,6 +2804,11 @@ public class PackageParser {
         public PermissionGroup(Package _owner, PermissionGroupInfo _info) {
             super(_owner);
             info = _info;
+        }
+
+        public void setPackageName(String packageName) {
+            super.setPackageName(packageName);
+            info.packageName = packageName;
         }
 
         public String toString() {
@@ -2825,10 +2886,15 @@ public class PackageParser {
             info.applicationInfo = args.owner.applicationInfo;
         }
         
+        public void setPackageName(String packageName) {
+            super.setPackageName(packageName);
+            info.packageName = packageName;
+        }
+
         public String toString() {
             return "Activity{"
                 + Integer.toHexString(System.identityHashCode(this))
-                + " " + component.flattenToString() + "}";
+                + " " + getComponentShortName() + "}";
         }
     }
 
@@ -2854,10 +2920,15 @@ public class PackageParser {
             info.applicationInfo = args.owner.applicationInfo;
         }
         
+        public void setPackageName(String packageName) {
+            super.setPackageName(packageName);
+            info.packageName = packageName;
+        }
+
         public String toString() {
             return "Service{"
                 + Integer.toHexString(System.identityHashCode(this))
-                + " " + component.flattenToString() + "}";
+                + " " + getComponentShortName() + "}";
         }
     }
 
@@ -2888,6 +2959,11 @@ public class PackageParser {
             super(existingProvider);
             this.info = existingProvider.info;
             this.syncable = existingProvider.syncable;
+        }
+
+        public void setPackageName(String packageName) {
+            super.setPackageName(packageName);
+            info.packageName = packageName;
         }
 
         public String toString() {
@@ -2923,10 +2999,15 @@ public class PackageParser {
             info = _info;
         }
         
+        public void setPackageName(String packageName) {
+            super.setPackageName(packageName);
+            info.packageName = packageName;
+        }
+
         public String toString() {
             return "Instrumentation{"
                 + Integer.toHexString(System.identityHashCode(this))
-                + " " + component.flattenToString() + "}";
+                + " " + getComponentShortName() + "}";
         }
     }
 
