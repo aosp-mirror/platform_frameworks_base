@@ -27,6 +27,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteStatement;
 import android.util.Log;
 import android.webkit.CookieManager.Cookie;
@@ -174,7 +175,16 @@ public class WebViewDatabase {
     public static synchronized WebViewDatabase getInstance(Context context) {
         if (mInstance == null) {
             mInstance = new WebViewDatabase();
-            mDatabase = context.openOrCreateDatabase(DATABASE_FILE, 0, null);
+            try {
+                mDatabase = context
+                        .openOrCreateDatabase(DATABASE_FILE, 0, null);
+            } catch (SQLiteException e) {
+                // try again by deleting the old db and create a new one
+                if (context.deleteDatabase(DATABASE_FILE)) {
+                    mDatabase = context.openOrCreateDatabase(DATABASE_FILE, 0,
+                            null);
+                }
+            }
 
             // mDatabase should not be null, 
             // the only case is RequestAPI test has problem to create db 
@@ -194,8 +204,16 @@ public class WebViewDatabase {
                 mDatabase.setLockingEnabled(false);
             }
 
-            mCacheDatabase = context.openOrCreateDatabase(CACHE_DATABASE_FILE,
-                    0, null);
+            try {
+                mCacheDatabase = context.openOrCreateDatabase(
+                        CACHE_DATABASE_FILE, 0, null);
+            } catch (SQLiteException e) {
+                // try again by deleting the old db and create a new one
+                if (context.deleteDatabase(CACHE_DATABASE_FILE)) {
+                    mCacheDatabase = context.openOrCreateDatabase(
+                            CACHE_DATABASE_FILE, 0, null);
+                }
+            }
 
             // mCacheDatabase should not be null, 
             // the only case is RequestAPI test has problem to create db 
