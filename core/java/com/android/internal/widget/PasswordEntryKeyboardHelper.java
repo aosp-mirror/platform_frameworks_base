@@ -22,15 +22,11 @@ import android.inputmethodservice.KeyboardView;
 import android.inputmethodservice.KeyboardView.OnKeyboardActionListener;
 import android.os.Handler;
 import android.os.SystemClock;
-import android.text.Editable;
-import android.text.Selection;
-import android.util.Log;
+import android.provider.Settings;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewRoot;
-import android.view.inputmethod.InputConnection;
-import android.widget.EditText;
 import com.android.internal.R;
 
 public class PasswordEntryKeyboardHelper implements OnKeyboardActionListener {
@@ -40,7 +36,6 @@ public class PasswordEntryKeyboardHelper implements OnKeyboardActionListener {
     private static final int KEYBOARD_STATE_NORMAL = 0;
     private static final int KEYBOARD_STATE_SHIFTED = 1;
     private static final int KEYBOARD_STATE_CAPSLOCK = 2;
-    private static final String TAG = "PasswordEntryKeyboardHelper";
     private int mKeyboardMode = KEYBOARD_MODE_ALPHA;
     private int mKeyboardState = KEYBOARD_STATE_NORMAL;
     private PasswordEntryKeyboard mQwertyKeyboard;
@@ -90,10 +85,15 @@ public class PasswordEntryKeyboardHelper implements OnKeyboardActionListener {
             case KEYBOARD_MODE_ALPHA:
                 mKeyboardView.setKeyboard(mQwertyKeyboard);
                 mKeyboardState = KEYBOARD_STATE_NORMAL;
+                final boolean visiblePassword = Settings.System.getInt(
+                        mContext.getContentResolver(),
+                        Settings.System.TEXT_SHOW_PASSWORD, 1) != 0;
+                mKeyboardView.setPreviewEnabled(visiblePassword);
                 break;
             case KEYBOARD_MODE_NUMERIC:
                 mKeyboardView.setKeyboard(mNumericKeyboard);
                 mKeyboardState = KEYBOARD_STATE_NORMAL;
+                mKeyboardView.setPreviewEnabled(false); // never show popup for numeric keypad
                 break;
         }
         mKeyboardMode = mode;
@@ -122,7 +122,6 @@ public class PasswordEntryKeyboardHelper implements OnKeyboardActionListener {
     }
 
     public void onKey(int primaryCode, int[] keyCodes) {
-        Log.v(TAG, "Key code = " + Integer.toHexString(primaryCode));
         if (primaryCode == Keyboard.KEYCODE_DELETE) {
             handleBackspace();
         } else if (primaryCode == Keyboard.KEYCODE_SHIFT) {
@@ -201,7 +200,7 @@ public class PasswordEntryKeyboardHelper implements OnKeyboardActionListener {
     }
 
     public void onPress(int primaryCode) {
-
+        // TODO: vibration support.
     }
 
     public void onRelease(int primaryCode) {
