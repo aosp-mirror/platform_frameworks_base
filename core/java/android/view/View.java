@@ -8282,7 +8282,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      */
     public void clearAnimation() {
         if (mCurrentAnimation != null) {
-            mCurrentAnimation.cancel();
+            mCurrentAnimation.detach();
         }
         mCurrentAnimation = null;
     }
