@@ -175,6 +175,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // Vibrator pattern for haptic feedback of virtual key press.
     long[] mVirtualKeyVibePattern;
     
+    // Vibrator pattern for a short vibration.
+    long[] mKeyboardTapVibePattern;
+
     // Vibrator pattern for haptic feedback during boot when safe mode is disabled.
     long[] mSafeModeDisabledVibePattern;
     
@@ -539,6 +542,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 com.android.internal.R.array.config_longPressVibePattern);
         mVirtualKeyVibePattern = getLongIntArray(mContext.getResources(),
                 com.android.internal.R.array.config_virtualKeyVibePattern);
+        mKeyboardTapVibePattern = getLongIntArray(mContext.getResources(),
+                com.android.internal.R.array.config_keyboardTapVibePattern);
         mSafeModeDisabledVibePattern = getLongIntArray(mContext.getResources(),
                 com.android.internal.R.array.config_safeModeDisabledVibePattern);
         mSafeModeEnabledVibePattern = getLongIntArray(mContext.getResources(),
@@ -2368,31 +2373,44 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
         }
     }
-    
+
     public boolean performHapticFeedbackLw(WindowState win, int effectId, boolean always) {
         final boolean hapticsDisabled = Settings.System.getInt(mContext.getContentResolver(),
                 Settings.System.HAPTIC_FEEDBACK_ENABLED, 0) == 0;
         if (!always && (hapticsDisabled || mKeyguardMediator.isShowingAndNotHidden())) {
             return false;
         }
+        long[] pattern = null;
         switch (effectId) {
             case HapticFeedbackConstants.LONG_PRESS:
-                mVibrator.vibrate(mLongPressVibePattern, -1);
-                return true;
+                pattern = mLongPressVibePattern;
+                break;
             case HapticFeedbackConstants.VIRTUAL_KEY:
-                mVibrator.vibrate(mVirtualKeyVibePattern, -1);
-                return true;
+                pattern = mVirtualKeyVibePattern;
+                break;
+            case HapticFeedbackConstants.KEYBOARD_TAP:
+                pattern = mKeyboardTapVibePattern;
+                break;
             case HapticFeedbackConstants.SAFE_MODE_DISABLED:
-                mVibrator.vibrate(mSafeModeDisabledVibePattern, -1);
-                return true;
+                pattern = mSafeModeDisabledVibePattern;
+                break;
             case HapticFeedbackConstants.SAFE_MODE_ENABLED:
-                mVibrator.vibrate(mSafeModeEnabledVibePattern, -1);
-                return true;
+                pattern = mSafeModeEnabledVibePattern;
+                break;
             case HapticFeedbackConstants.SCROLL_BARRIER:
-                mVibrator.vibrate(mScrollBarrierVibePattern, -1);
-                return true;
+                pattern = mScrollBarrierVibePattern;
+                break;
+            default:
+                return false;
         }
-        return false;
+        if (pattern.length == 1) {
+            // One-shot vibration
+            mVibrator.vibrate(pattern[0]);
+        } else {
+            // Pattern vibration
+            mVibrator.vibrate(pattern, -1);
+        }
+        return true;
     }
     
     public void keyFeedbackFromInput(KeyEvent event) {
