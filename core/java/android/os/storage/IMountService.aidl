@@ -109,6 +109,11 @@ interface IMountService
     int unmountSecureContainer(String id);
 
     /*
+     * Returns true if the specified container is mounted
+     */
+    boolean isSecureContainerMounted(String id);
+
+    /*
      * Rename an unmounted secure container.
      * Returns an int consistent with MountServiceResultCode
      */

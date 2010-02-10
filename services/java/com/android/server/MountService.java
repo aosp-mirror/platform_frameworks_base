@@ -37,6 +37,7 @@ import android.os.Handler;
 import android.text.TextUtils;
 import android.util.Log;
 import java.util.ArrayList;
+import java.util.HashSet;
 
 import java.io.File;
 import java.io.FileReader;
@@ -115,6 +116,11 @@ class MountService extends IMountService.Stub
     private ArrayList<MountServiceBinderListener> mListeners;
     private boolean                               mBooted;
     private boolean                               mReady;
+
+    /**
+     * Private hash of currently mounted secure containers.
+     */
+    private HashSet<String> mAsecMountSet = new HashSet<String>();
 
     private void waitForReady() {
         while (mReady == false) {
@@ -862,6 +868,12 @@ class MountService extends IMountService.Stub
         } catch (NativeDaemonConnectorException e) {
             rc = StorageResultCode.OperationFailedInternalError;
         }
+
+        if (rc == StorageResultCode.OperationSucceeded) {
+            synchronized (mAsecMountSet) {
+                mAsecMountSet.add(id);
+            }
+        }
         return rc;
     }
 
@@ -870,6 +882,12 @@ class MountService extends IMountService.Stub
         waitForReady();
         warnOnNotMounted();
 
+        synchronized (mAsecMountSet) {
+            if (!mAsecMountSet.contains(id)) {
+                return StorageResultCode.OperationFailedVolumeNotMounted;
+            }
+         }
+
         int rc = StorageResultCode.OperationSucceeded;
         String cmd = String.format("asec unmount %s", id);
         try {
@@ -877,7 +895,23 @@ class MountService extends IMountService.Stub
         } catch (NativeDaemonConnectorException e) {
             rc = StorageResultCode.OperationFailedInternalError;
         }
+
+        if (rc == StorageResultCode.OperationSucceeded) {
+            synchronized (mAsecMountSet) {
+                mAsecMountSet.remove(id);
+            }
+        }
         return rc;
+    }
+
+    public boolean isSecureContainerMounted(String id) {
+        validatePermission(android.Manifest.permission.ASEC_ACCESS);
+        waitForReady();
+        warnOnNotMounted();
+
+        synchronized (mAsecMountSet) {
+            return mAsecMountSet.contains(id);
+        }
     }
 
     public int renameSecureContainer(String oldId, String newId) {
