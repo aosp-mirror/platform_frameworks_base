@@ -23,11 +23,11 @@
 #include <binder/Parcel.h>
 #include <binder/IMemory.h>
 
-#include <ui/ISurface.h>
 #include <ui/Overlay.h>
-#include <ui/Surface.h>
-
 #include <ui/GraphicBuffer.h>
+
+#include <surfaceflinger/Surface.h>
+#include <surfaceflinger/ISurface.h>
 
 namespace android {
 

@@ -19,12 +19,15 @@
 //#define LOG_NDEBUG 0
 #define LOG_TAG "Camera"
 #include <utils/Log.h>
-#include <binder/IServiceManager.h>
 #include <utils/threads.h>
+
+#include <binder/IServiceManager.h>
 #include <binder/IMemory.h>
-#include <ui/Surface.h>
-#include <ui/Camera.h>
-#include <ui/ICameraService.h>
+
+#include <camera/Camera.h>
+#include <camera/ICameraService.h>
+
+#include <surfaceflinger/Surface.h>
 
 namespace android {
 

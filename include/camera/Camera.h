@@ -19,9 +19,11 @@
 #define ANDROID_HARDWARE_CAMERA_H
 
 #include <utils/Timers.h>
-#include <ui/ICameraClient.h>
+#include <camera/ICameraClient.h>
 
 namespace android {
+
+class ISurface;
 
 /*
  * A set of bit masks for specifying how the received preview frames are

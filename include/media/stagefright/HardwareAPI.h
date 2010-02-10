@@ -20,7 +20,7 @@
 
 #include <media/stagefright/OMXPluginBase.h>
 #include <media/stagefright/VideoRenderer.h>
-#include <ui/ISurface.h>
+#include <surfaceflinger/ISurface.h>
 #include <utils/RefBase.h>
 
 #include <OMX_Component.h>

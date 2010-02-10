@@ -20,7 +20,7 @@
 #include <utils/Log.h>
 #include <stdint.h>
 #include <sys/types.h>
-#include <ui/ICameraClient.h>
+#include <camera/ICameraClient.h>
 
 namespace android {
 

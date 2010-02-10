@@ -23,13 +23,14 @@
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 
-#include <private/ui/SharedBufferStack.h>
-#include <private/ui/LayerState.h>
-
 #include <utils/RefBase.h>
 
 #include <ui/Region.h>
 #include <ui/Overlay.h>
+
+#include <surfaceflinger/ISurfaceFlingerClient.h>
+#include <private/surfaceflinger/SharedBufferStack.h>
+#include <private/surfaceflinger/LayerState.h>
 
 #include <pixelflinger/pixelflinger.h>
 

@@ -27,7 +27,8 @@
 
 #include <ui/GraphicBuffer.h>
 #include <ui/PixelFormat.h>
-#include <ui/Surface.h>
+
+#include <surfaceflinger/Surface.h>
 
 #include "clz.h"
 #include "Layer.h"

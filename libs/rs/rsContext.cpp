@@ -19,6 +19,7 @@
 #include "rsThreadIO.h"
 #include <ui/FramebufferNativeWindow.h>
 #include <ui/EGLUtils.h>
+#include <surfaceflinger/Surface.h>
 
 #include <sys/types.h>
 #include <sys/resource.h>

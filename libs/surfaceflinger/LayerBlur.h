@@ -20,8 +20,6 @@
 #include <stdint.h>
 #include <sys/types.h>
 
-#include <private/ui/LayerState.h>
-
 #include <ui/Region.h>
 
 #include "LayerBase.h"

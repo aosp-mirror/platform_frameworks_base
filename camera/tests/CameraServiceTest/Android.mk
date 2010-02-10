@@ -17,6 +17,8 @@ LOCAL_SHARED_LIBRARIES += \
 		libbinder \
                 libcutils \
                 libutils \
-                libui
+                libui \
+                libcamera_client \
+                libsurfaceflinger_client
 
 include $(BUILD_EXECUTABLE)

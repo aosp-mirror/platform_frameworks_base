@@ -22,7 +22,7 @@
 #include <binder/MemoryHeapBase.h>
 #include <binder/MemoryHeapPmem.h>
 #include <media/stagefright/MediaDebug.h>
-#include <ui/ISurface.h>
+#include <surfaceflinger/ISurface.h>
 
 namespace android {
 

@@ -21,7 +21,7 @@
 #include <binder/Parcel.h>
 
 #include <media/IMediaPlayer.h>
-#include <ui/ISurface.h>
+#include <surfaceflinger/ISurface.h>
 
 namespace android {
 

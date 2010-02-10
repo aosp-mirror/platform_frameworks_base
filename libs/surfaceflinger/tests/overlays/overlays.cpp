@@ -3,10 +3,11 @@
 #include <binder/IServiceManager.h>
 #include <utils/Log.h>
 
-#include <ui/Surface.h>
-#include <ui/ISurface.h>
 #include <ui/Overlay.h>
-#include <ui/SurfaceComposerClient.h>
+
+#include <surfaceflinger/Surface.h>
+#include <surfaceflinger/ISurface.h>
+#include <surfaceflinger/SurfaceComposerClient.h>
 
 using namespace android;
 

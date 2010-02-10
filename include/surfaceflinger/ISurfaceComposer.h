@@ -14,24 +14,23 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_ISURFACE_COMPOSER_H
-#define ANDROID_ISURFACE_COMPOSER_H
+#ifndef ANDROID_SF_ISURFACE_COMPOSER_H
+#define ANDROID_SF_ISURFACE_COMPOSER_H
 
 #include <stdint.h>
 #include <sys/types.h>
 
 #include <utils/RefBase.h>
 #include <utils/Errors.h>
+
 #include <binder/IInterface.h>
 
 #include <ui/PixelFormat.h>
-#include <ui/ISurfaceFlingerClient.h>
+
+#include <surfaceflinger/ISurfaceFlingerClient.h>
 
 namespace android {
-
 // ----------------------------------------------------------------------------
-
-class DisplayInfo;
 
 class ISurfaceComposer : public IInterface
 {
@@ -92,19 +91,19 @@ public:
     /* retrieve the control block */
     virtual sp<IMemoryHeap> getCblk() const = 0;
 
-    /* open/close transactions. recquires ACCESS_SURFACE_FLINGER permission */
+    /* open/close transactions. requires ACCESS_SURFACE_FLINGER permission */
     virtual void openGlobalTransaction() = 0;
     virtual void closeGlobalTransaction() = 0;
 
-    /* [un]freeze display. recquires ACCESS_SURFACE_FLINGER permission */
+    /* [un]freeze display. requires ACCESS_SURFACE_FLINGER permission */
     virtual status_t freezeDisplay(DisplayID dpy, uint32_t flags) = 0;
     virtual status_t unfreezeDisplay(DisplayID dpy, uint32_t flags) = 0;
 
-    /* Set display orientation. recquires ACCESS_SURFACE_FLINGER permission */
+    /* Set display orientation. requires ACCESS_SURFACE_FLINGER permission */
     virtual int setOrientation(DisplayID dpy, int orientation, uint32_t flags) = 0;
 
     /* signal that we're done booting.
-     * recquires ACCESS_SURFACE_FLINGER permission
+     * Requires ACCESS_SURFACE_FLINGER permission
      */
     virtual void bootFinished() = 0;
 
@@ -143,4 +142,4 @@ public:
 
 }; // namespace android
 
-#endif // ANDROID_ISURFACE_COMPOSER_H
+#endif // ANDROID_SF_ISURFACE_COMPOSER_H

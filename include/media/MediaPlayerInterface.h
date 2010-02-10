@@ -20,7 +20,6 @@
 #ifdef __cplusplus
 
 #include <sys/types.h>
-#include <ui/ISurface.h>
 #include <utils/Errors.h>
 #include <utils/KeyedVector.h>
 #include <utils/String8.h>
@@ -33,6 +32,8 @@
 namespace android {
 
 class Parcel;
+class ISurface;
+
 template<typename T> class SortedVector;
 
 enum player_type {

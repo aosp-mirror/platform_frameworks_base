@@ -29,8 +29,8 @@
 #include <media/stagefright/MetaData.h>
 #include <media/stagefright/OMXClient.h>
 #include <media/stagefright/OMXCodec.h>
-#include <ui/ICamera.h>
-#include <ui/ISurface.h>
+#include <camera/ICamera.h>
+#include <surfaceflinger/ISurface.h>
 #include <utils/Errors.h>
 
 namespace android {

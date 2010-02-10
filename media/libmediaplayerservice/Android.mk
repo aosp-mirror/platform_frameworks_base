@@ -13,7 +13,7 @@ LOCAL_SRC_FILES:=               \
     TestPlayerStub.cpp          \
     VorbisPlayer.cpp            \
     VorbisMetadataRetriever.cpp \
-    MidiMetadataRetriever.cpp \
+    MidiMetadataRetriever.cpp 	\
     MidiFile.cpp
 
 ifeq ($(BUILD_WITH_FULL_STAGEFRIGHT),true)
@@ -30,17 +30,18 @@ ifeq ($(TARGET_OS)-$(TARGET_SIMULATOR),linux-true)
 LOCAL_LDLIBS += -ldl -lpthread
 endif
 
-LOCAL_SHARED_LIBRARIES :=     \
-	libcutils             \
-	libutils              \
-	libbinder             \
-	libvorbisidec         \
-	libsonivox            \
-	libmedia              \
-	libandroid_runtime    \
-	libstagefright        \
-	libstagefright_omx    \
-	libstagefright_color_conversion
+LOCAL_SHARED_LIBRARIES :=     		\
+	libcutils             			\
+	libutils              			\
+	libbinder             			\
+	libvorbisidec         			\
+	libsonivox            			\
+	libmedia              			\
+	libandroid_runtime    			\
+	libstagefright        			\
+	libstagefright_omx    			\
+	libstagefright_color_conversion \
+	libsurfaceflinger_client
 
 ifneq ($(BUILD_WITHOUT_PV),true)
 LOCAL_SHARED_LIBRARIES += \
@@ -54,7 +55,7 @@ ifneq ($(TARGET_SIMULATOR),true)
 LOCAL_SHARED_LIBRARIES += libdl
 endif
 
-LOCAL_C_INCLUDES :=                                                     \
+LOCAL_C_INCLUDES :=                                                 \
 	$(JNI_H_INCLUDE)                                                \
 	$(call include-path-for, graphics corecg)                       \
 	$(TOP)/external/opencore/extern_libs_v2/khronos/openmax/include \

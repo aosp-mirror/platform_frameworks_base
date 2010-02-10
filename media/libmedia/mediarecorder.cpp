@@ -18,7 +18,7 @@
 //#define LOG_NDEBUG 0
 #define LOG_TAG "MediaRecorder"
 #include <utils/Log.h>
-#include <ui/Surface.h>
+#include <surfaceflinger/Surface.h>
 #include <media/mediarecorder.h>
 #include <binder/IServiceManager.h>
 #include <utils/String8.h>

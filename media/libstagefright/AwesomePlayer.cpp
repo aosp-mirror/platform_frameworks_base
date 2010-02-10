@@ -36,6 +36,8 @@
 #include <media/stagefright/MetaData.h>
 #include <media/stagefright/OMXCodec.h>
 
+#include <surfaceflinger/ISurface.h>
+
 namespace android {
 
 struct AwesomeEvent : public TimedEventQueue::Event {

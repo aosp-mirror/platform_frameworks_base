@@ -5,8 +5,8 @@
 #include <binder/IMemory.h>
 #include <binder/Parcel.h>
 #include <media/IOMX.h>
-#include <ui/ISurface.h>
-#include <ui/Surface.h>
+#include <surfaceflinger/ISurface.h>
+#include <surfaceflinger/Surface.h>
 
 namespace android {
 

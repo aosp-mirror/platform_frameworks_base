@@ -19,9 +19,9 @@
 #ifndef ANDROID_SERVERS_CAMERA_CAMERASERVICE_H
 #define ANDROID_SERVERS_CAMERA_CAMERASERVICE_H
 
-#include <ui/ICameraService.h>
-#include <ui/CameraHardwareInterface.h>
-#include <ui/Camera.h>
+#include <camera/ICameraService.h>
+#include <camera/CameraHardwareInterface.h>
+#include <camera/Camera.h>
 
 namespace android {
 

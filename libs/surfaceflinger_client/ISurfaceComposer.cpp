@@ -25,8 +25,9 @@
 #include <binder/IPCThreadState.h>
 #include <binder/IServiceManager.h>
 
-#include <ui/ISurfaceComposer.h>
 #include <ui/DisplayInfo.h>
+
+#include <surfaceflinger/ISurfaceComposer.h>
 
 // ---------------------------------------------------------------------------
 

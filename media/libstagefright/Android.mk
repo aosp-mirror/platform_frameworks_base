@@ -65,7 +65,9 @@ LOCAL_SHARED_LIBRARIES := \
         libcutils         \
         libui             \
         libsonivox        \
-        libvorbisidec
+        libvorbisidec     \
+        libsurfaceflinger_client \
+        libcamera_client
 
 LOCAL_STATIC_LIBRARIES := \
         libstagefright_aacdec \

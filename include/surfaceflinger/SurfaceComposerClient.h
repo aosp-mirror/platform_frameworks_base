@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_SURFACE_COMPOSER_CLIENT_H
-#define ANDROID_SURFACE_COMPOSER_CLIENT_H
+#ifndef ANDROID_SF_SURFACE_COMPOSER_CLIENT_H
+#define ANDROID_SF_SURFACE_COMPOSER_CLIENT_H
 
 #include <stdint.h>
 #include <sys/types.h>
@@ -27,17 +27,18 @@
 #include <utils/threads.h>
 
 #include <ui/PixelFormat.h>
-#include <ui/ISurfaceComposer.h>
 #include <ui/Region.h>
-#include <ui/Surface.h>
+
+#include <surfaceflinger/Surface.h>
 
 namespace android {
 
 // ---------------------------------------------------------------------------
 
 class Region;
-class SurfaceFlingerSynchro;
 class SharedClient;
+class ISurfaceComposer;
+class DisplayInfo;
 
 class SurfaceComposerClient : virtual public RefBase
 {
@@ -158,5 +159,5 @@ private:
 
 }; // namespace android
 
-#endif // ANDROID_SURFACE_COMPOSER_CLIENT_H
+#endif // ANDROID_SF_SURFACE_COMPOSER_CLIENT_H
 

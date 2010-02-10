@@ -22,7 +22,7 @@
 #include <binder/IPCThreadState.h>
 #include <binder/IServiceManager.h>
 
-#include <ui/ICameraService.h>
+#include <camera/ICameraService.h>
 
 namespace android {
 

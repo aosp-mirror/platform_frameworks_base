@@ -39,7 +39,8 @@ LOCAL_SHARED_LIBRARIES := \
 	libEGL \
 	libGLESv1_CM \
 	libbinder \
-	libui
+	libui \
+	libsurfaceflinger_client
 
 LOCAL_C_INCLUDES := \
 	$(call include-path-for, corecg graphics)

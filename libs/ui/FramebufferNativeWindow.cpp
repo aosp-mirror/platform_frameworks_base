@@ -27,7 +27,6 @@
 #include <utils/threads.h>
 #include <utils/RefBase.h>
 
-#include <ui/SurfaceComposerClient.h>
 #include <ui/Rect.h>
 #include <ui/FramebufferNativeWindow.h>
 

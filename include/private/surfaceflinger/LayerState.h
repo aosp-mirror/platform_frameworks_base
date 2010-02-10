@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_COMPOSER_LAYER_STATE_H
-#define ANDROID_COMPOSER_LAYER_STATE_H
+#ifndef ANDROID_SF_LAYER_STATE_H
+#define ANDROID_SF_LAYER_STATE_H
 
 #include <stdint.h>
 #include <sys/types.h>
 
 #include <utils/Errors.h>
 
-#include <ui/ISurfaceFlingerClient.h>
 #include <ui/Region.h>
+
+#include <surfaceflinger/ISurface.h>
 
 namespace android {
 
@@ -69,5 +70,5 @@ struct layer_state_t {
 
 }; // namespace android
 
-#endif // ANDROID_COMPOSER_LAYER_STATE_H
+#endif // ANDROID_SF_LAYER_STATE_H
 
