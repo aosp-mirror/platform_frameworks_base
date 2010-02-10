@@ -1052,7 +1052,8 @@ public class Camera {
         }
 
         /**
-         * Sets the rate at which preview frames are received.
+         * Sets the rate at which preview frames are received. This is the
+         * target frame rate. The actual frame rate depends on the driver.
          *
          * @param fps the frame rate (frames per second)
          */
@@ -1061,8 +1062,9 @@ public class Camera {
         }
 
         /**
-         * Returns the setting for the rate at which preview frames
-         * are received.
+         * Returns the setting for the rate at which preview frames are
+         * received. This is the target frame rate. The actual frame rate
+         * depends on the driver.
          *
          * @return the frame rate setting (frames per second)
          */
