@@ -37,6 +37,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.RemoteException;
+import android.os.storage.StorageManager;
 import android.provider.Settings;
 import android.telephony.PhoneStateListener;
 import android.telephony.ServiceState;
@@ -92,6 +93,9 @@ public class StatusBarPolicy {
     private SimpleDateFormat mClockFormat;
     private IBinder mClockIcon;
     private IconData mClockData;
+
+    // storage
+    private StorageManager mStorageManager;
 
     // battery
     private IBinder mBatteryIcon;
@@ -406,6 +410,11 @@ public class StatusBarPolicy {
         mClockData = IconData.makeText("clock", "");
         mClockIcon = service.addIcon(mClockData, null);
         updateClock();
+
+        // storage
+        mStorageManager = (StorageManager) context.getSystemService(Context.STORAGE_SERVICE);
+        mStorageManager.registerListener(
+                new com.android.server.status.StorageNotification(context));
 
         // battery
         mBatteryData = IconData.makeIcon("battery",

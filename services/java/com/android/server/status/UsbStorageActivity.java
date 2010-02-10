@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.app;
+package com.android.server.status;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
