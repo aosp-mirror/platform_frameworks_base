@@ -1279,16 +1279,6 @@ public class SearchManager
     public final static String APP_DATA = "app_data";
 
     /**
-     * Intent app_data bundle key: Use this key with the bundle from
-     * {@link android.content.Intent#getBundleExtra
-     * content.Intent.getBundleExtra(APP_DATA)} to obtain the source identifier
-     * set by the activity that launched the search.
-     *
-     * @hide
-     */
-    public final static String SOURCE = "source";
-
-    /**
      * Intent extra data key: Use {@link android.content.Intent#getBundleExtra
      * content.Intent.getBundleExtra(SEARCH_MODE)} to get the search mode used
      * to launch the intent.
