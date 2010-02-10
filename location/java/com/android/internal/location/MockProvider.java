@@ -17,9 +17,9 @@
 package com.android.internal.location;
 
 import android.location.ILocationManager;
-import android.location.ILocationProvider;
 import android.location.Location;
 import android.location.LocationProvider;
+import android.location.LocationProviderInterface;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.RemoteException;
@@ -33,7 +33,7 @@ import java.io.PrintWriter;
  *
  * {@hide}
  */
-public class MockProvider extends ILocationProvider.Stub {
+public class MockProvider implements LocationProviderInterface {
     private final String mName;
     private final ILocationManager mLocationManager;
     private final boolean mRequiresNetwork;
@@ -73,12 +73,20 @@ public class MockProvider extends ILocationProvider.Stub {
         mLocation = new Location(name);
     }
 
+    public String getName() {
+        return mName;
+    }
+
     public void disable() {
         mEnabled = false;
     }
 
     public void enable() {
         mEnabled = true;
+    }
+
+    public boolean isEnabled() {
+        return mEnabled;
     }
 
     public int getStatus(Bundle extras) {

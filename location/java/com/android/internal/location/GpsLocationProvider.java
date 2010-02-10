@@ -26,11 +26,11 @@ import android.location.Criteria;
 import android.location.IGpsStatusListener;
 import android.location.IGpsStatusProvider;
 import android.location.ILocationManager;
-import android.location.ILocationProvider;
 import android.location.INetInitiatedListener;
 import android.location.Location;
 import android.location.LocationManager;
 import android.location.LocationProvider;
+import android.location.LocationProviderInterface;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.SntpClient;
@@ -65,7 +65,7 @@ import java.util.Map.Entry;
  *
  * {@hide}
  */
-public class GpsLocationProvider extends ILocationProvider.Stub {
+public class GpsLocationProvider implements LocationProviderInterface {
 
     private static final String TAG = "GpsLocationProvider";
 
@@ -374,6 +374,13 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
     }
 
     /**
+     * Returns the name of this provider.
+     */
+    public String getName() {
+        return LocationManager.GPS_PROVIDER;
+    }
+
+    /**
      * Returns true if the provider requires access to a
      * data network (e.g., the Internet), false otherwise.
      */
@@ -574,6 +581,10 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
         if (mEngineOn) {
             reportStatus(GPS_STATUS_ENGINE_OFF);
         }
+    }
+
+    public boolean isEnabled() {
+        return mEnabled;
     }
 
     public int getStatus(Bundle extras) {
