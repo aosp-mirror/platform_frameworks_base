@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.app;
+package com.android.server.status;
 
 import android.app.Activity;
 import android.app.Notification;
@@ -119,7 +119,7 @@ public class StorageNotification extends StorageEventListener {
              * for stopping UMS.
              */
             Intent intent = new Intent();
-            intent.setClass(mContext, com.android.internal.app.UsbStorageActivity.class);
+            intent.setClass(mContext, com.android.server.status.UsbStorageActivity.class);
             PendingIntent pi = PendingIntent.getActivity(mContext, 0, intent, 0);
             setUsbStorageNotification(
                     com.android.internal.R.string.usb_storage_stop_notification_title,
@@ -237,7 +237,7 @@ public class StorageNotification extends StorageEventListener {
 
         if (available) {
             Intent intent = new Intent();
-            intent.setClass(mContext, com.android.internal.app.UsbStorageActivity.class);
+            intent.setClass(mContext, com.android.server.status.UsbStorageActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             PendingIntent pi = PendingIntent.getActivity(mContext, 0, intent, 0);
             setUsbStorageNotification(
@@ -253,8 +253,8 @@ public class StorageNotification extends StorageEventListener {
     /**
      * Sets the USB storage notification.
      */
-    private synchronized void setUsbStorageNotification(int titleId, int messageId, int icon, boolean sound, boolean visible,
-                                                        PendingIntent pi) {
+    private synchronized void setUsbStorageNotification(int titleId, int messageId, int icon,
+            boolean sound, boolean visible, PendingIntent pi) {
 
         if (!visible && mUsbStorageNotification == null) {
             return;

@@ -1249,11 +1249,7 @@
                 android:theme="@style/Theme.Dialog.Alert"
                 android:excludeFromRecents="true">
         </activity>
-        <activity android:name="com.android.internal.app.UsbStorageActivity"
-                android:excludeFromRecents="true">
-        </activity>
-        <activity android:name="com.android.internal.app.UsbStorageStopActivity"
-                android:theme="@style/Theme.Dialog.Alert"
+        <activity android:name="com.android.server.status.UsbStorageActivity"
                 android:excludeFromRecents="true">
         </activity>
         <activity android:name="com.android.internal.app.ExternalMediaFormatActivity"
