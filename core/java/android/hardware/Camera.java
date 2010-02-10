@@ -723,6 +723,7 @@ public class Camera {
         private static final String KEY_FOCAL_LENGTH = "focal-length";
         private static final String KEY_HORIZONTAL_VIEW_ANGLE = "horizontal-view-angle";
         private static final String KEY_VERTICAL_VIEW_ANGLE = "vertical-view-angle";
+        private static final String KEY_EXPOSURE_COMPENSATION = "exposure-compensation";
         // Parameter key suffix for supported values.
         private static final String SUPPORTED_VALUES_SUFFIX = "-values";
 
@@ -1537,6 +1538,41 @@ public class Camera {
          */
         public float getVerticalViewAngle() {
             return Float.parseFloat(get(KEY_VERTICAL_VIEW_ANGLE));
+        }
+
+        /**
+         * Gets the current exposure compensation setting.
+         *
+         * @return the current exposure compensation value multiplied by 100.
+         *         null if exposure compensation is not supported. Ex: -100
+         *         means -1 EV. 130 means +1.3 EV.
+         * @hide
+         */
+        public int getExposureCompensation() {
+            return getInt(KEY_EXPOSURE_COMPENSATION);
+        }
+
+        /**
+         * Sets the exposure compensation.
+         *
+         * @param value exposure compensation multiplied by 100. Ex: -100 means
+         *        -1 EV. 130 means +1.3 EV.
+         * @hide
+         */
+        public void setExposureCompensation(int value) {
+            set(KEY_EXPOSURE_COMPENSATION, value);
+        }
+
+        /**
+         * Gets the supported exposure compensation.
+         *
+         * @return a List of Integer constants. null if exposure compensation is
+         *         not supported. The list is sorted from small to large. Ex:
+         *         -100, -66, -33, 0, 33, 66, 100.
+         * @hide
+         */
+        public List<Integer> getSupportedExposureCompensation() {
+            return splitInt(get(KEY_EXPOSURE_COMPENSATION + SUPPORTED_VALUES_SUFFIX));
         }
 
         /**

@@ -187,6 +187,13 @@ public:
     // Vertical angle of view in degrees.
     // Example value: "42.5". Read only.
     static const char KEY_VERTICAL_VIEW_ANGLE[];
+    // Exposure compensation. The value is multiplied by 100. -100 means -1 EV.
+    // 130 means +1.3 EV.
+    // Example value: "0" or "133". Read/write.
+    static const char KEY_EXPOSURE_COMPENSATION[];
+    // Supported exposure compensation.
+    // Example value: "-100,-66,-33,0,33,66,100". Read only.
+    static const char KEY_SUPPORTED_EXPOSURE_COMPENSATION[];
 
 
         // Values for white balance settings.
