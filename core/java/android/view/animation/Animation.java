@@ -278,6 +278,16 @@ public abstract class Animation implements Cloneable {
     }
 
     /**
+     * @hide
+     */
+    public void detach() {
+        if (mStarted && !mEnded) {
+            if (mListener != null) mListener.onAnimationEnd(this);
+            mEnded = true;
+        }
+    }
+
+    /**
      * Whether or not the animation has been initialized.
      *
      * @return Has this animation been initialized.
