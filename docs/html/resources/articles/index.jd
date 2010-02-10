@@ -77,6 +77,11 @@ page.title=Technical Articles
 </dl>
 
 <dl>
+  <dt><a href="{@docRoot}resources/articles/live-wallpapers.html">Live Wallpapers</a></dt>
+  <dd>Live wallpapers are richer, animated, interactive backgrounds that users can display in their home screens. Learn how to create a live wallpaper and bundle it in an application that users can install on their devices.</dd>
+</dl>
+
+<dl>
   <dt><a href="{@docRoot}resources/articles/on-screen-inputs.html">Onscreen Input Methods</a></dt>
   <dd>The Input Method Framework (IMF) allows users to take advantage of on-screen input methods, such as software keyboards. This article provides an overview of Input Method Editors (IMEs) and how applications interact with them.</dd>
 </dl>

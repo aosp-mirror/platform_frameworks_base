@@ -83,6 +83,9 @@
         <li><a href="<?cs var:toroot ?>resources/articles/live-folders.html">
                 <span class="en">Live Folders</span>
                 </a></li>
+        <li><a href="<?cs var:toroot ?>resources/articles/live-wallpapers.html">
+                <span class="en">Live Wallpapers</span>
+                </a> <span class="new">new!</span></li>
         <li><a href="<?cs var:toroot ?>resources/articles/on-screen-inputs.html">
                 <span class="en">Onscreen Input Methods</span>
                 </a></li>
@@ -178,28 +181,34 @@
               </a></li>
           <li><a href="<?cs var:toroot ?>resources/samples/BluetoothChat/index.html">
                 <span class="en">Bluetooth Chat</span>
-              </a> <span class="new">new!</span></li>
+              </a></li>
           <li><a href="<?cs var:toroot ?>resources/samples/BusinessCard/index.html">
                 <span class="en">Business Card</span>
-              </a> <span class="new">new!</span></li>
+              </a></li>
           <li><a href="<?cs var:toroot ?>resources/samples/ContactManager/index.html">
                 <span class="en">Contact Manager</span>
-              </a> <span class="new">new!</span></li>
+              </a></li>
           <li><a href="<?cs var:toroot ?>resources/samples/Home/index.html">
                 <span class="en">Home</span>
               </a></li>
           <li><a href="<?cs var:toroot ?>resources/samples/JetBoy/index.html">
                 <span class="en">JetBoy</span>
               </a></li>
+          <li><a href="<?cs var:toroot ?>resources/samples/CubeLiveWallpaper/index.html">
+                <span class="en">Live Wallpaper</span>
+                </a> <span class="new">new!</span></li>
           <li><a href="<?cs var:toroot ?>resources/samples/LunarLander/index.html">
                 <span class="en">Lunar Lander</span>
               </a></li>
           <li><a href="<?cs var:toroot ?>resources/samples/MultiResolution/index.html">
                 <span class="en">Multiple Resolutions</span>
-              </a> <span class="new">new!</span></li>
+              </a></li>
           <li><a href="<?cs var:toroot ?>resources/samples/NotePad/index.html">
                 <span class="en">Note Pad</span>
               </a></li>
+          <li><a href="<?cs var:toroot ?>resources/samples/SampleSyncAdapter/index.html">
+                <span class="en">Sample Sync Adapter</span>
+              </a> <span class="new">new!</span></li>
           <li><a href="<?cs var:toroot ?>resources/samples/SearchableDictionary/index.html">
                 <span class="en">Searchable Dictionary</span>
               </a></li>
@@ -211,10 +220,10 @@
               </a></li>
           <li><a href="<?cs var:toroot ?>resources/samples/Wiktionary/index.html">
                 <span class="en">Wiktionary</span>
-              </a> <span class="new">new!</span></li>
+              </a></li>
           <li><a href="<?cs var:toroot ?>resources/samples/WiktionarySimple/index.html">
                 <span class="en">Wiktionary (Simplified)</span>
-              </a> <span class="new">new!</span></li>
+              </a></li>
         </ul>
       </li>
     </ul>
