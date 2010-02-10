@@ -179,6 +179,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // Vibrator pattern for haptic feedback during boot when safe mode is enabled.
     long[] mSafeModeEnabledVibePattern;
     
+    // Vibrator pattern for haptic feedback when the user hits a touch scroll barrier.
+    long[] mScrollBarrierVibePattern;
+    
     /** If true, hitting shift & menu will broadcast Intent.ACTION_BUG_REPORT */
     boolean mEnableShiftMenuBugReports = false;
     
@@ -562,6 +565,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 com.android.internal.R.array.config_safeModeDisabledVibePattern);
         mSafeModeEnabledVibePattern = getLongIntArray(mContext.getResources(),
                 com.android.internal.R.array.config_safeModeEnabledVibePattern);
+        mScrollBarrierVibePattern = getLongIntArray(mContext.getResources(),
+                com.android.internal.R.array.config_scrollBarrierVibePattern);
     }
 
     void updatePlugged(Intent powerIntent) {
@@ -2315,6 +2320,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 return true;
             case HapticFeedbackConstants.SAFE_MODE_ENABLED:
                 mVibrator.vibrate(mSafeModeEnabledVibePattern, -1);
+                return true;
+            case HapticFeedbackConstants.SCROLL_BARRIER:
+                mVibrator.vibrate(mScrollBarrierVibePattern, -1);
                 return true;
         }
         return false;
