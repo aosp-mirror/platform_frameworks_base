@@ -20,6 +20,7 @@ import com.android.internal.app.IMediaContainerService;
 import com.android.internal.app.ResolverActivity;
 import com.android.common.FastXmlSerializer;
 import com.android.common.XmlUtils;
+import com.android.server.JournaledFile;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -6826,6 +6827,7 @@ class PackageManagerService extends IPackageManager.Stub {
     private static final class Settings {
         private final File mSettingsFilename;
         private final File mBackupSettingsFilename;
+        private final File mPackageListFilename;
         private final HashMap<String, PackageSetting> mPackages =
                 new HashMap<String, PackageSetting>();
         // List of replaced system applications
@@ -6907,6 +6909,7 @@ class PackageManagerService extends IPackageManager.Stub {
                     -1, -1);
             mSettingsFilename = new File(systemDir, "packages.xml");
             mBackupSettingsFilename = new File(systemDir, "packages-backup.xml");
+            mPackageListFilename = new File(systemDir, "packages.list");
         }
 
         PackageSetting getPackageLP(PackageParser.Package pkg, PackageSetting origPackage,
@@ -7446,7 +7449,7 @@ class PackageManagerService extends IPackageManager.Stub {
                         serializer.endTag(null, "cleaning-package");
                     }
                 }
-                
+
                 serializer.endTag(null, "packages");
 
                 serializer.endDocument();
@@ -7462,6 +7465,61 @@ class PackageManagerService extends IPackageManager.Stub {
                         |FileUtils.S_IRGRP|FileUtils.S_IWGRP
                         |FileUtils.S_IROTH,
                         -1, -1);
+
+                // Write package list file now, use a JournaledFile.
+                //
+                File tempFile = new File(mPackageListFilename.toString() + ".tmp");
+                JournaledFile journal = new JournaledFile(mPackageListFilename, tempFile);
+
+                str = new FileOutputStream(journal.chooseForWrite());
+                try {
+                    StringBuilder sb = new StringBuilder();
+                    for (PackageSetting pkg : mPackages.values()) {
+                        ApplicationInfo ai = pkg.pkg.applicationInfo;
+                        String  dataPath = ai.dataDir;
+                        boolean isDebug  = (ai.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
+
+                        // Avoid any application that has a space in its path
+                        // or that is handled by the system.
+                        if (dataPath.indexOf(" ") >= 0 || ai.uid <= Process.FIRST_APPLICATION_UID)
+                            continue;
+
+                        // we store on each line the following information for now:
+                        //
+                        // pkgName    - package name
+                        // userId     - application-specific user id
+                        // debugFlag  - 0 or 1 if the package is debuggable.
+                        // dataPath   - path to package's data path
+                        //
+                        // NOTE: We prefer not to expose all ApplicationInfo flags for now.
+                        //
+                        // DO NOT MODIFY THIS FORMAT UNLESS YOU CAN ALSO MODIFY ITS USERS
+                        // FROM NATIVE CODE. AT THE MOMENT, LOOK AT THE FOLLOWING SOURCES:
+                        //   system/core/run-as/run-as.c
+                        //
+                        sb.setLength(0);
+                        sb.append(ai.packageName);
+                        sb.append(" ");
+                        sb.append((int)ai.uid);
+                        sb.append(isDebug ? " 1 " : " 0 ");
+                        sb.append(dataPath);
+                        sb.append("\n");
+                        str.write(sb.toString().getBytes());
+                    }
+                    str.flush();
+                    str.close();
+                    journal.commit();
+                }
+                catch (Exception  e) {
+                    journal.rollback();
+                }
+
+                FileUtils.setPermissions(mPackageListFilename.toString(),
+                        FileUtils.S_IRUSR|FileUtils.S_IWUSR
+                        |FileUtils.S_IRGRP|FileUtils.S_IWGRP
+                        |FileUtils.S_IROTH,
+                        -1, -1);
+
                 return;
 
             } catch(XmlPullParserException e) {
@@ -7469,7 +7527,7 @@ class PackageManagerService extends IPackageManager.Stub {
             } catch(java.io.IOException e) {
                 Log.w(TAG, "Unable to write package manager settings, current changes will be lost at reboot", e);
             }
-            // Clean up partially written file
+            // Clean up partially written files
             if (mSettingsFilename.exists()) {
                 if (!mSettingsFilename.delete()) {
                     Log.i(TAG, "Failed to clean up mangled file: " + mSettingsFilename);
