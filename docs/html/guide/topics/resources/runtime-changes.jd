@@ -1,0 +1,245 @@
+page.title=Handling Runtime Changes
+parent.title=Application Resources
+parent.link=index.html
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+  <h2>In this document</h2>
+  <ol>
+    <li><a href="#CarryingAnObject">Carrying an Object During a Configuration Change</a></li>
+    <li><a href="#HandlingTheChange">Handling the Configuration Change Yourself</a>
+  </ol>
+
+  <h2>See also</h2>
+  <ol>
+    <li><a href="providing-resources.html">Providing Resources</a></li>
+    <li><a href="accessing-resources.html">Accessing Resources</a></li>
+    <li><a href="{@docRoot}resources/articles/faster-screen-orientation-change.html">Faster Screen
+Orientation Change</a></li>
+  </ol>
+</div>
+</div>
+
+<p>Some device configurations can change during runtime
+(such as screen orientation, keyboard availability, and language). When such a change occurs,
+Android's default behavior is to restart the running
+Activity ({@link android.app.Activity#onDestroy()} is called, followed by {@link
+android.app.Activity#onCreate(Bundle) onCreate()}). In doing so, the system re-queries your
+application resources for alternatives that might apply to the new configuration.</p>
+
+<p>It is important that your Activity safely handles restarts and restores its previous
+state through the normal <a href="{@docRoot}guide/topics/fundamentals.html#lcycles">Activity
+lifecycle</a>. In fact, it's a useful field test to invoke configuration changes (such as changing
+the screen orientation) during various states of your application to be sure that it properly
+restarts itself with the application state intact. So it's in the best interest of your application
+to allow the system to restart your application during any configuration change&mdash;this behavior
+is in place to help you by automatically handling configuration changes and adapting your
+application as necessary.</p>
+
+<p>However, you might encounter a situation in which restarting your application and
+restoring significant amounts of data can be costly, create a slow user experience, and
+using {@link android.app.Activity#onSaveInstanceState(Bundle) onSaveInstanceState()} does not
+suffice. In such a situation, you have two options:</p>
+
+<ol type="a">
+  <li><a href="#CarryingAnObject">Carrying an Object During a Configuration Change</a>
+  <p>Allow your
+application to restart so that the appropriate configuration changes can take effect, but also
+implement {@link android.app.Activity#onRetainNonConfigurationInstance()} paired with {@link
+android.app.Activity#getLastNonConfigurationInstance()} to carry an {@link java.lang.Object} over
+to the new instance of your Activity.</p>
+  <p>This is the recommended technique if you're facing performance issues during the
+configuration restart. It allows your Activity to properly restart and reload resources for
+the new configuration and also allows you to carry your arbitrary data that may be expensive to
+collect again.</p>
+  </li>
+  <li><a href="#HandlingTheChange">Handling the Configuration Change Yourself</a>
+  <p>Declare that your
+application will handle certain configuration changes and prevent the system from restarting your
+application when such a change occurs. For example, you can declare in your manifest that your
+Activity will handle configuration changes to the screen orientation. When the orientation
+changes, your Activity will not be restarted and your Activity will receive a call to {@link
+android.app.Activity#onConfigurationChanged(Configuration) onConfigurationChanged()} so that you can
+perform necessary changes based on the new configuration.</p>
+  <p>This technique should be considered a last resort and temporary solution, because not all
+runtime configuration changes can be handled this way&mdash;your application will eventually
+encounter a runtime configuration in which you cannot prevent the Activity from being restarted,
+whereas the first option will handle all configuration changes.</p>
+  </li>
+</ol>
+
+<p class="note"><strong>Note:</strong> Your application should always be able to successfully
+restart at any time without any loss of user data or state in order to handle other events such as
+when the user receives an incoming phone call and then returns to your application (read about the
+<a href="{@docRoot}guide/topics/fundamentals.html#lcycles">Activity lifecycle</a>). The following
+techniques for handling runtime configuration changes should only be necessary to optimize
+performance during specific configuration changes.</p>
+
+
+<h2 id="CarryingAnObject">Carrying an Object During a Configuration Change</h2>
+
+<p>If your application has acquired significant amounts of data during its life, which would be
+costly to recover due to a restart of the Activity, you can use {@link
+android.app.Activity#onRetainNonConfigurationInstance()} paired with {@link
+android.app.Activity#getLastNonConfigurationInstance()} to pass an {@link java.lang.Object}
+to the new Activity instance. The {@link android.app.Activity#onRetainNonConfigurationInstance()}
+method is called between {@link android.app.Activity#onStop()} and {@link
+android.app.Activity#onDestroy()} when your Activity is being shut down due to a configuration
+change. In your implementation of this method, you can return any {@link java.lang.Object} that you
+need to efficiently restore your state after the configuration change. When your Activity is
+created again, you can call {@link
+android.app.Activity#getLastNonConfigurationInstance()} to retrieve the {@link
+java.lang.Object}.</p>
+
+<p>A scenario in which this can be valuable is if your application loads a lot of data from the
+web. If the user changes the orientation of the device and the Activity restarts, your application
+will need to re-fetch the data, which could be slow. What you can do is implement
+{@link android.app.Activity#onRetainNonConfigurationInstance()} to return an object carrying your
+data and then retrieve the data when your Activity restarts with {@link
+android.app.Activity#getLastNonConfigurationInstance()}. For example:</p>
+
+<pre>
+&#64;Override
+public Object onRetainNonConfigurationInstance() {
+    final MyDataObject data = collectMyLoadedData();
+    return data;
+}
+</pre>
+
+<p class="caution"><strong>Caution:</strong> While you can return any object, you
+should never pass an object that is tied to the {@link android.app.Activity}, such as a {@link
+android.graphics.drawable.Drawable}, an {@link android.widget.Adapter}, a {@link android.view.View}
+or any other object that's associated with a {@link android.content.Context}. If you do, it will
+leak all the Views and resources of the original Activity instance. (To leak the resources
+means that your application maintains a hold on them and they cannot be garbage-collected, so
+lots of memory can be lost.)</p>
+
+<p>Then get the {@code data} after the restart:</p>
+
+<pre>
+&#64;Override
+public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.main);
+
+    final MyDataObject data = (MyDataObject) getLastNonConfigurationInstance();
+    if (data == null) {
+        data = loadMyData();
+    }
+    ...
+}
+</pre>
+
+<p>In this case, {@link android.app.Activity#getLastNonConfigurationInstance()} is called to get
+the data saved during the configuration change, and if it is null (which will happen if the
+Activity is started in any case other than a configuration change) then the data is loaded
+from the original source.</p>
+
+
+
+
+
+<h2 id="HandlingTheChange">Handling the Configuration Change Yourself</h2>
+
+<p>If your application doesn't need to update resources during a specific configuration
+change <em>and</em> you have a performance limitation that requires you to
+avoid the Activity restart, then you can declare that your Activity handles the configuration change
+itself, which will prevent the system from restarting your Activity.</p>
+
+<p class="note"><strong>Note:</strong> Handling the configuration change yourself can make it much
+more difficult to use alternative resources, because the system will not automatically apply them
+for you.</p>
+
+<p>To declare that your Activity handles a configuration change, edit the appropriate <a
+href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a> element
+in your manifest file to include the <a
+href="{@docRoot}guide/topics/manifest/activity-element.html#config">{@code
+android:configChanges}</a> attribute with a string value that represents the configuration that you
+want to handle. Possible values are listed in the documentation for
+the <a href="{@docRoot}guide/topics/manifest/activity-element.html#config">{@code
+android:configChanges}</a> attribute (the most commonly used values are {@code orientation} to
+handle when the screen orientation changes and {@code keyboardHidden} to handle when the
+keyboard availability changes).  You can declare multiple configuration values in the attribute
+by separating them with a pipe character ("|").</p>
+
+<p>For example, the following manifest snippet declares an Activity that handles both the
+screen orientation change and keyboard availability change:</p>
+
+<pre>
+&lt;activity android:name=".MyActivity"
+          android:configChanges="orientation|keyboardHidden"
+          android:label="@string/app_name">
+</pre>
+
+<p>Now when one of these configurations change, {@code MyActivity} is not restarted.
+Instead, the Activity receives a call to {@link
+android.app.Activity#onConfigurationChanged(Configuration) onConfigurationChanged()}. This method
+is passed a {@link android.content.res.Configuration} object that specifies
+the new device configuration. By reading fields in the {@link android.content.res.Configuration},
+you can determine the new configuration and make appropriate changes by updating
+the resources used in your interface. At the
+time this method is called, your Activity's {@link android.content.res.Resources} object is updated
+to return resources based on the new configuration, so you can easily
+reset elements of your UI without the system restarting your Activity.</p>
+
+<p>For example, the following {@link
+android.app.Activity#onConfigurationChanged(Configuration) onConfigurationChanged()} implementation
+checks the availability of a hardware keyboard and the current device orientation:</p>
+
+<pre>
+&#64;Override
+public void onConfigurationChanged(Configuration newConfig) {
+    super.onConfigurationChanged(newConfig);
+
+    // Checks the orientation of the screen
+    if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+        Toast.makeText(this, "landscape", Toast.LENGTH_SHORT).show();
+    } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT){
+        Toast.makeText(this, "portrait", Toast.LENGTH_SHORT).show();
+    }
+    // Checks whether a hardware keyboard is available
+    if (newConfig.hardKeyboardHidden == Configuration.HARDKEYBOARDHIDDEN_NO) {
+        Toast.makeText(this, "keyboard visible", Toast.LENGTH_SHORT).show();
+    } else if (newConfig.hardKeyboardHidden == Configuration.HARDKEYBOARDHIDDEN_YES) {
+        Toast.makeText(this, "keyboard hidden", Toast.LENGTH_SHORT).show();
+    }
+}
+</pre>
+
+<p>The {@link android.content.res.Configuration} object represents all of the current
+configurations, not just the ones that have changed. Most of the time, you won't care exactly how
+the configuration has changed and can simply re-assign all your resources that provide alternatives
+to the configuration that you're handling. For example, because the {@link
+android.content.res.Resources} object is now updated, you can reset
+any {@link android.widget.ImageView}s with {@link android.widget.ImageView#setImageResource(int)}
+and the appropriate resource for the new configuration is used (as described in <a
+href="providing-resources.html#AlternateResources">Providing Resources</a>).</p>
+
+<p>Notice that the values from the {@link
+android.content.res.Configuration} fields are integers that are matched to specific constants
+from the {@link android.content.res.Configuration} class. For documentation about which constants
+to use with each field, refer to the appropriate field in the {@link
+android.content.res.Configuration} reference.</p>
+
+<p class="note"><strong>Remember:</strong> When you declare your Activity to handle a configuration
+change, you are responsible for resetting any elements for which you provide alternatives. If you
+declare your Activity to handle the orientation change and have images that should change
+between landscape and portrait, you must re-assign each resource to each element during {@link
+android.app.Activity#onConfigurationChanged(Configuration) onConfigurationChanged()}.</p>
+
+<p>If you don't need to update your application based on these configuration
+changes, you can instead <em>not</em> implement {@link
+android.app.Activity#onConfigurationChanged(Configuration) onConfigurationChanged()}. In
+which case, all of the resources used before the configuration change are still used
+and you've only avoided the restart of your Activity. However, your application should always be
+able to shutdown and restart with its previous state intact. Not only because
+there are other configuration changes that you cannot prevent from restarting your application but
+also in order to handle events such as when the user receives an incoming phone call and then
+returns to your application.</p>
+
+<p>For more about which configuration changes you can handle in your Activity, see the <a
+href="{@docRoot}guide/topics/manifest/activity-element.html#config">{@code
+android:configChanges}</a> documentation and the {@link android.content.res.Configuration}
+class.</p>

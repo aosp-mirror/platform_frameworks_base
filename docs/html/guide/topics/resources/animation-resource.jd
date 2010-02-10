@@ -1,0 +1,564 @@
+page.title=Animation Resources
+parent.title=Resource Types
+parent.link=available-resources.html
+@jd:body
+
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>See also</h2>
+    <ol>
+      <li><a href="{@docRoot}guide/topics/graphics/2d-graphics.html#tween-animation">2D
+Graphics</a></li>
+    </ol>
+  </div>
+</div>
+
+
+<p>An animation resource can define one of two types of animations:</p>
+<dl>
+  <dt><a href="#Tween">Tween Animation</a></dt>
+  <dd>Creates an animation by performing a series of transformations on a single image.
+    An {@link android.view.animation.Animation}.</dd>
+  <dt><a href="#Frame">Frame Animation</a></dt>
+  <dd>Creates an animation by showing a sequence of images in order.
+    An {@link android.graphics.drawable.AnimationDrawable}.</dd>
+</dl>
+
+
+
+<h2 id="Tween">Tween Animation</h2>
+
+<p>An animation defined in XML that performs transitions such as rotating,
+fading, moving, and stretching on a graphic.
+</p>
+
+<dl class="xml">
+
+<dt>file location:</dt>
+<dd><code>res/anim/<em>filename</em>.xml</code><br/>
+The filename will be used as the resource ID.</dd>
+
+<dt>compiled resource datatype:</dt>
+<dd>Resource pointer to an {@link android.view.animation.Animation}.</dd>
+
+<dt>resource reference:</dt>
+<dd>
+In Java: <code>R.anim.<em>filename</em></code><br/>
+In XML: <code>@[<em>package</em>:]anim/<em>filename</em></code>
+</dd>
+
+<dt>syntax:</dt>
+<dd>
+<pre class="stx">
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;<a href="#set-element">set</a> xmlns:android="http://schemas.android.com/apk/res/android"
+    android:interpolator="@[package:]anim/<em>interpolator_resource</em>"
+    android:shareInterpolator=["true" | "false"] &gt;
+    &lt;<a href="#alpha-element">alpha</a>
+        android:fromAlpha="<em>float</em>"
+        android:toAlpha="<em>float</em>" /&gt;
+    &lt;<a href="#scale-element">scale</a>
+        android:fromXScale="<em>float</em>"
+        android:toXScale="<em>float</em>"
+        android:fromYScale="<em>float</em>"
+        android:toYScale="<em>float</em>"
+        android:pivotX="<em>string</em>"
+        android:pivotY="<em>string</em>" /&gt;
+    &lt;<a href="#translate-element">translate</a>
+        android:fromX="<em>string</em>"
+        android:toX="<em>string</em>"
+        android:fromY="<em>string</em>"
+        android:toY="<em>string</em>" /&gt;
+    &lt;<a href="#rotate-element">rotate</a>
+        android:fromDegrees="<em>float</em>"
+        android:toDegrees="<em>float</em>"
+        android:pivotX="<em>string</em>"
+        android:pivotY="<em>string</em>" /&gt;
+    &lt;<a href="#set-element">set</a>&gt;
+        ...
+    &lt;/set&gt;
+&lt;/set&gt;
+</pre>
+
+<p>The file must have a single root element: either an
+<code>&lt;alpha&gt;</code>, <code>&lt;scale&gt;</code>, <code>&lt;translate&gt;</code>,
+<code>&lt;rotate&gt;</code>, or <code>&lt;set&gt;</code> element that holds
+a group (or groups) of other animation elements (even nested <code>&lt;set&gt;</code> elements).
+</p>
+</dd>
+
+<dt>elements:</dt>
+<dd>
+<dl class="tag-list">
+  <dt id="set-element"><code>&lt;set&gt;</code></dt>
+    <dd>A container that holds other animation elements
+(<code>&lt;alpha&gt;</code>, <code>&lt;scale&gt;</code>, <code>&lt;translate&gt;</code>,
+<code>&lt;rotate&gt;</code>) or other <code>&lt;set&gt;</code> elements. Represents an {@link
+android.view.animation.AnimationSet}.
+      <p class="caps">attributes:</p>
+      <dl class="atn-list">
+        <dt><code>android:interpolator</code></dt>
+          <dd><em>Interpolator resource</em>.
+          An {@link android.view.animation.Interpolator} to apply on the animation.
+          The value must be a reference to a resource that specifies an interpolator
+          (not an interpolator class name). There are default interpolator
+          resources available from the platform or you can create your own interpolator resource.
+          See the discussion below for more about <a href="#Interpolators">Interpolators</a>.</dd>
+        <dt><code>android:shareInterpolator</code></dt>
+          <dd><em>Boolean</em>. "true" if you want to share the same interpolator among all child
+elements.</dd>
+      </dl>
+    </dd>
+  <dt id="alpha-element"><code>&lt;alpha&gt;</code></dt>
+    <dd>A fade-in or fade-out animation. Represents an {@link
+android.view.animation.AlphaAnimation}.
+      <p class="caps">attributes:</p>
+      <dl class="atn-list">
+        <dt><code>android:fromAlpha</code></dt>
+          <dd><em>Float</em>. Starting opacity offset, where 0.0 is transparent and 1.0
+is opaque.</dd>
+        <dt><code>android:toAlpha</code></dt>
+          <dd><em>Float</em>. Ending opacity offset, where 0.0 is transparent and 1.0
+is opaque.</dd>
+      </dl>
+      <p>For more attributes supported by <code>&lt;alpha&gt;</code>, see the
+{@link android.view.animation.Animation} class reference (of which, all XML attributes are
+inherrited by this element).</p>
+    </dd>
+  <dt id="scale-element"><code>&lt;scale&gt;</code></dt>
+    <dd>A resizing animation. You can specify the center point of the image from which it grows
+outward (or inward) by specifying {@code pivotX} and {@code pivotY}. For example, if these values
+are 0, 0 (top-left corner), all growth will be down and to the right. Represents a {@link
+android.view.animation.ScaleAnimation}.
+      <p class="caps">attributes:</p>
+      <dl class="atn-list">
+        <dt><code>android:fromXScale</code></dt>
+          <dd><em>Float</em>. Starting X size offset, where 1.0 is no change.</dd>
+        <dt><code>android:toXScale</code></dt>
+          <dd><em>Float</em>. Ending X size offset, where 1.0 is no change.</dd>
+        <dt><code>android:fromYScale</code></dt>
+          <dd><em>Float</em>. Starting Y size offset, where 1.0 is no change.</dd>
+        <dt><code>android:toYScale</code></dt>
+          <dd><em>Float</em>. Ending Y size offset, where 1.0 is no change.</dd>
+        <dt><code>android:pivotX</code></dt>
+          <dd><em>Float</em>. The X coordinate to remain fixed when the object is scaled.</dd>
+        <dt><code>android:pivotY</code></dt>
+          <dd><em>Float</em>. The Y coordinate to remain fixed when the object is scaled.</dd>
+      </dl>
+      <p>For more attributes supported by <code>&lt;scale&gt;</code>, see the
+{@link android.view.animation.Animation} class reference (of which, all XML attributes are
+inherrited by this element).</p>
+    </dd>
+  <dt id="translate-element"><code>&lt;translate&gt;</code></dt>
+    <dd>A vertical and/or horizontal motion. Supports the following attributes in any of
+the following three formats: values from -100 to 100 ending with "%", indicating a percentage
+relative to itself; values from -100 to 100 ending in "%p", indicating a percentage relative to its
+parent; a float value with no suffix, indicating an absolute value. Represents a {@link
+android.view.animation.TranslateAnimation}.
+      <p class="caps">attributes:</p>
+      <dl class="atn-list">
+        <dt><code>android:fromXDelta</code></dt>
+          <dd><em>Float or percentage</em>. Starting X offset. Either in: pixels relative to the
+normal position, in percentage relative to the element width (%), or relative to the parent width
+(%p).</dd>
+        <dt><code>android:toXDelta</code></dt>
+          <dd><em>Float or percentage</em>. Ending X offset. Either in: pixels relative to the
+normal position, in percentage relative to the element width (%), or relative to the parent width
+(%p).</dd>
+        <dt><code>android:fromYDelta</code></dt>
+          <dd><em>Float or percentage</em>. Starting Y offset. Either in: pixels relative to the
+normal position, in percentage relative to the element height (%), or relative to the parent height
+(%p).</dd>
+        <dt><code>android:toYDelta</code></dt>
+          <dd><em>Float or percentage</em>. Ending Y offset. Either in: pixels relative to the
+normal position, in percentage relative to the element height (%), or relative to the parent height
+(%p).</dd>
+      </dl>
+      <p>For more attributes supported by <code>&lt;translate&gt;</code>, see the
+{@link android.view.animation.Animation} class reference (of which, all XML attributes are
+inherrited by this element).</p>
+    </dd>
+  <dt id="rotate-element"><code>&lt;rotate&gt;</code></dt>
+    <dd>A rotation animation. Represents a {@link android.view.animation.RotateAnimation}.
+      <p class="caps">attributes:</p>
+      <dl class="atn-list">
+        <dt><code>android:fromDegrees</code></dt>
+          <dd><em>Integer</em>. Starting angular position, in degrees.</dd>
+        <dt><code>android:toDegrees</code></dt>
+          <dd><em>Integer</em>. Ending angular position, in degrees.</dd>
+        <dt><code>android:pivotX</code></dt>
+          <dd><em>Integer or percentage</em>. The X coordinate of the center of rotation, in total
+pixels (where 0 is the left edge) or percentage of the screen width.</dd>
+        <dt><code>android:pivotY</code></dt>
+          <dd><em>Integer or percentage</em>. The Y coordinate of the center of rotation, in total
+pixels (where 0 is the top edge) or percentage of the screen height.</dd>
+        </dl>
+      <p>For more attributes supported by <code>&lt;rotate&gt;</code>, see the
+{@link android.view.animation.Animation} class reference (of which, all XML attributes are
+inherrited by this element).</p>
+    </dd>
+</dl>
+</dd> <!-- end  elements and attributes -->
+
+<dt>example:</dt>
+<dd>
+  <pp>XML file saved at <code>res/anim/hyperspace_jump.xml</code>:</p>
+<pre>
+&lt;set xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shareInterpolator="false">
+    &lt;scale
+        android:interpolator="@android:anim/accelerate_decelerate_interpolator"
+        android:fromXScale="1.0" 
+        android:toXScale="1.4" 
+        android:fromYScale="1.0" 
+        android:toYScale="0.6" 
+        android:pivotX="50%"
+        android:pivotY="50%"
+        android:fillAfter="false"
+        android:duration="700" />
+    &lt;set
+        android:interpolator="@android:anim/accelerate_interpolator"
+        android:startOffset="700">
+        &lt;scale
+            android:fromXScale="1.4" 
+            android:toXScale="0.0"
+            android:fromYScale="0.6"
+            android:toYScale="0.0" 
+            android:pivotX="50%" 
+            android:pivotY="50%" 
+            android:duration="400" />
+        &lt;rotate
+            android:fromDegrees="0" 
+            android:toDegrees="-45"
+            android:toYScale="0.0" 
+            android:pivotX="50%" 
+            android:pivotY="50%"
+            android:duration="400" />
+    &lt;/set>
+&lt;/set>
+</pre>
+  <p>This application code will apply the animation to an {@link android.widget.ImageView} and
+start the animation:</p>
+<pre>
+ImageView image = (ImageView) findViewById(R.id.image);
+Animation hyperspaceJump = AnimationUtils.{@link android.view.animation.AnimationUtils#loadAnimation(Context,int) loadAnimation}(this, R.anim.hyperspace_jump);
+image.{@link android.view.View#startAnimation(Animation) startAnimation}(hyperspaceJump);
+</pre>
+</dd> <!-- end example -->
+
+
+<dt>see also:</dt>
+<dd>
+<ul>
+  <li><a href="{@docRoot}guide/topics/graphics/2d-graphics.html#tween-animation">2D
+Graphics: Tween Animation</a></li>
+</ul>
+</dd>
+
+</dl>
+
+
+
+
+
+<h3 id="Interpolators">Interpolators</h3>
+
+<p>An interpolator is an animation modifier defined in XML that affects the rate of change in an
+animation. This allows your existing animation effects to be accelerated, decelerated, repeated,
+bounced, etc.</p>
+
+<p>An interpolator is applied to an animation element with the {@code android:interpolator}
+attribute, the value of which is a reference to an interpolator resource.</p>
+
+<p>All interpolators available in Android are subclasses of the {@link
+android.view.animation.Interpolator} class. For each interpolator class, Android
+includes a public resource you can reference in order to apply the interpolator to an animation
+using the the {@code android:interpolator} attribute.
+The following table specifies the resource to use for each interpolator:</p>
+
+<table>
+  <tr><th>Interpolator class</th><th>Resource ID</th></tr>
+  <tr>
+    <td>{@link android.view.animation.AccelerateDecelerateInterpolator}</td>
+    <td>{@code @android:anim/accelerate_decelerate_interpolator}</td>
+  </tr>
+  <tr>
+    <td>{@link android.view.animation.AccelerateInterpolator}</td>
+    <td>{@code @android:anim/accelerate_interpolator}</td>
+  </tr>
+  <tr>
+    <td>{@link android.view.animation.AnticipateInterpolator}</td>
+    <td>{@code @android:anim/anticipate_interpolator}</td>
+  </tr>
+  <tr>
+    <td>{@link android.view.animation.AnticipateOvershootInterpolator}</td>
+    <td>{@code @android:anim/anticipate_overshoot_interpolator}</td>
+  </tr>
+  <tr>
+    <td>{@link android.view.animation.BounceInterpolator}</td>
+    <td>{@code @android:anim/bounce_interpolator}</td>
+  </tr>
+  <tr>
+    <td>{@link android.view.animation.CycleInterpolator}</td>
+    <td>{@code @android:anim/cycle_interpolator}</td>
+  </tr>
+  <tr>
+    <td>{@link android.view.animation.DecelerateInterpolator}</td>
+    <td>{@code @android:anim/decelerate_interpolator}</td>
+  </tr>
+  <tr>
+    <td>{@link android.view.animation.LinearInterpolator}</td>
+    <td>{@code @android:anim/linear_interpolator}</td>
+  </tr>
+  <tr>
+    <td>{@link android.view.animation.OvershootInterpolator}</td>
+    <td>{@code @android:anim/overshoot_interpolator}</td>
+  </tr>
+</table>
+
+<p>Here's how you can apply one of these with the {@code android:interpolator} attribute:</p>
+<pre>
+&lt;set android:interpolator="@android:anim/accelerate_interpolator"&gt;
+    ...
+&lt;/set&gt;
+</pre>
+
+
+<h4>Custom interpolators</h4>
+
+<p>If you're not satisfied with the interpolators provided by the platform (listed in the
+table above), you can create a custom interpolator resource with modified attributes.
+For example, you can adjust the rate of
+acceleration for the {@link android.view.animation.AnticipateInterpolator}, or adjust the number of
+cycles for the {@link android.view.animation.CycleInterpolator}. In order to do so, you need to
+create your own interpolator resource in an XML file.
+</p>
+
+<dl class="xml">
+
+<dt>file location:</dt>
+<dd><code>res/anim/<em>filename</em>.xml</code><br/>
+The filename will be used as the resource ID.</dd>
+
+<dt>compiled resource datatype:</dt>
+<dd>Resource pointer to the corresponding interpolator object.</dd>
+
+<dt>resource reference:</dt>
+<dd>
+In XML: <code>@[<em>package</em>:]anim/<em>filename</em></code>
+</dd>
+
+<dt>syntax:</dt>
+<dd>
+<pre class="stx">
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;<em>InterpolatorName</em> xmlns:android="http://schemas.android.com/apk/res/android"
+    android:<em>attribute_name</em>="<em>value</em>"
+    />
+</pre>
+<p>If you don't apply any attributes, then your interpolator will function exactly the same as
+those provided by the platform (listed in the table above).</p>
+</dd>
+
+<dt>elements:</dt>
+<dd>Notice that each {@link android.view.animation.Interpolator} implementation, when
+defined in XML, begins its name in lowercase.</p>
+
+<dl class="tag-list">
+  <dt><code>&lt;accelerateDecelerateInterpolator&gt;</code></dt>
+    <dd>The rate of change starts and ends slowly but accelerates through the
+middle. <p>No attributes.</p></dd>
+  <dt><code>&lt;accelerateInterpolator&gt;</code></dt>
+    <dd>The rate of change starts out slowly, then accelerates.
+      <p class="caps">attributes:</p>
+      <dl class="atn-list">
+        <dt><code>android:factor</code></dt>
+        <dd><em>Float</em>. The acceleration rate (default is 1).</dd>
+      </dl>
+    </dd>
+  <dt><code>&lt;anticipateInterpolator&gt;</code></dt>
+    <dd>The change starts backward then flings forward.
+      <p class="caps">attributes:</p>
+      <dl class="atn-list">
+        <dt><code>android:tension</code></dt>
+        <dd><em>Float</em>. The amount of tension to apply (default is 2).</dd>
+      </dl>
+    </dd>
+  <dt><code>&lt;anticipateOvershootInterpolator&gt;</code></dt>
+    <dd>The change starts backward, flings forward and overshoots the target value, then
+settles at the final value.
+      <p class="caps">attributes:</p>
+      <dl class="atn-list">
+        <dt><code>android:tension</code></dt>
+        <dd><em>Float</em>. The amount of tension to apply (default is 2).</dd>
+        <dt><code>android:extraTension</code></dt>
+        <dd><em>Float</em>. The amount by which to multiply the tension (default is
+          1.5).</dd>
+      </dl>
+    </dd>
+  <dt><code>&lt;bounceInterpolator&gt;</code></dt>
+    <dd>The change bounces at the end. <p>No attributes</p></dd>
+  <dt><code>&lt;cycleInterpolator&gt;</code></dt>
+    <dd>Repeats the animation for a specified number of cycles. The rate of change follows a
+sinusoidal pattern.
+      <p class="caps">attributes:</p>
+      <dl class="atn-list">
+        <dt><code>android:cycles</code></dt>
+        <dd><em>Integer</em>. The number of cycles (default is 1).</dd>
+      </dl>
+    </dd>
+  <dt><code>&lt;decelerateInterpolator&gt;</code></dt>
+    <dd>The rate of change starts out quickly, then decelerates.
+      <p class="caps">attributes:</p>
+      <dl class="atn-list">
+        <dt><code>android:factor</code></dt>
+        <dd><em>Float</em>. The deceleration rate (default is 1).</dd>
+      </dl>
+    </dd>
+  <dt><code>&lt;linearInterpolator&gt;</code></dt>
+    <dd>The rate of change is constant. <p>No attributes.</p></dd>
+  <dt><code>&lt;overshootInterpolator&gt;</code></dt>
+    <dd>The change flings forward and overshoots the last value, then comes back.
+      <p class="caps">attributes:</p>
+      <dl class="atn-list">
+        <dt><code>android:tension</code></dt>
+        <dd><em>Float</em>. The amount of tension to apply (default is 2).</dd>
+      </dl>
+    </dd>
+</dl>
+
+<dt>example:</dt>
+<dd>
+  <p>XML file saved at <code>res/anim/my_overshoot_interpolator.xml</code>:</p>
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;overshootInterpolator xmlns:android="http://schemas.android.com/apk/res/android"
+    android:tension="7.0"
+    />
+</pre>
+  <p>This animation XML will apply the interpolator:</p>
+<pre>
+&lt;scale xmlns:android="http://schemas.android.com/apk/res/android"
+    android:interpolator="@anim/my_overshoot_interpolator"
+    android:fromXScale="1.0"
+    android:toXScale="3.0"
+    android:fromYScale="1.0"
+    android:toYScale="3.0"
+    android:pivotX="50%"
+    android:pivotY="50%"
+    android:duration="700" />
+</pre>
+</dd>
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h2 id="Frame">Frame Animation</h2>
+
+<p>An animation defined in XML that shows a sequence of images in order (like a film).
+</p>
+
+
+<dl class="xml">
+
+<dt>file location:</dt>
+<dd><code>res/drawable/<em>filename</em>.xml</code><br/>
+The filename will be used as the resource ID.</dd>
+
+<dt>compiled resource datatype:</dt>
+<dd>Resource pointer to an {@link android.graphics.drawable.AnimationDrawable}.</dd>
+
+<dt>resource reference:</dt>
+<dd>
+In Java: <code>R.drawable.<em>filename</em></code><br/>
+In XML: <code>@[<em>package</em>:]drawable.<em>filename</em></code>
+</dd>
+
+<dt>syntax:</dt>
+<dd>
+<pre class="stx">
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;<a href="#animation-list-element">animation-list</a> xmlns:android="http://schemas.android.com/apk/res/android"
+    android:oneshot=["true" | "false"] >
+    &lt;<a href="#item-element">item</a>
+        android:drawable="@[package:]drawable/<em>drawable_resource_name</em>"
+        android:duration="<em>integer</em>" />
+&lt;/animation-list>
+</pre>
+</dd>
+
+<dt>elements:</dt>
+<dd>
+<dl class="tag-list">
+<dt id="animation-list-element"><code>&lt;animation-list&gt;</code></dt>
+  <dd><strong>Required</strong>. This must be the root element. Contains one or more
+<code>&lt;item&gt;</code> elements.
+  <p class="caps">attributes:</p>
+    <dl class="atn-list">
+      <dt><code>android:oneshot</code></dt>
+      <dd><em>Boolean</em>. "true" if you want to perform the animation once; "false" to loop the
+animation.</dd>
+    </dl>
+  </dd>
+<dt id="item-element"><code>&lt;item&gt;</code></dt>
+  <dd>A single frame of animation. Must be a child of a <code>&lt;animation-list&gt;</code> element.
+  <p class="caps">attributes:</p>
+    <dl class="atn-list">
+      <dt><code>android:drawable</code></dt>
+      <dd><em>Drawable resource</em>. The drawable to use for this frame.</dd>
+      <dt><code>android:duration</code></dt>
+      <dd><em>Integer</em>. The duration to show this frame, in milliseconds.</dd>
+    </dl>
+  </dd>
+</dl>
+</dd> <!-- end  elements and attributes -->
+
+<dt>example:</dt>
+<dd>
+  <dl>
+    <dt>XML file saved at <code>res/anim/rocket.xml</code>:</dt>
+    <dd>
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;animation-list xmlns:android="http://schemas.android.com/apk/res/android"
+    android:oneshot="false">
+    &lt;item android:drawable="@drawable/rocket_thrust1" android:duration="200" />
+    &lt;item android:drawable="@drawable/rocket_thrust2" android:duration="200" />
+    &lt;item android:drawable="@drawable/rocket_thrust3" android:duration="200" />
+&lt;/animation-list>
+</pre>
+    </dd>
+
+    <dt>This application code will set the animation as the background for a View,
+      then play the animation:</dt>
+    <dd>
+<pre>
+ImageView rocketImage = (ImageView) findViewById(R.id.rocket_image);
+rocketImage.{@link android.view.View#setBackgroundResource(int) setBackgroundResource}(R.drawable.rocket_thrust);
+
+rocketAnimation = (AnimationDrawable) rocketImage.{@link android.view.View#getBackground()};
+rocketAnimation.{@link android.graphics.drawable.AnimationDrawable#start()};
+</pre>
+    </dd>
+
+  </dl>
+</dd> <!-- end example -->
+
+</dl>
+
+
+
