@@ -1229,5 +1229,6 @@
   <eat-comment />
   <public type="attr" name="neverEncrypt" id="0x010102b7" />
   <public type="attr" name="installLocation" id="0x010102b8" />
+  <public type="attr" name="safeMode" id="0x010102b9" />
     
 </resources>
