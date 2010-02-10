@@ -39,7 +39,7 @@ int install(const char *pkgname, int encrypted_fs_flag, uid_t uid, gid_t gid)
             return -1;
     }
 
-    if (mkdir(pkgdir, 0755) < 0) {
+    if (mkdir(pkgdir, 0751) < 0) {
         LOGE("cannot create dir '%s': %s\n", pkgdir, strerror(errno));
         return -errno;
     }
