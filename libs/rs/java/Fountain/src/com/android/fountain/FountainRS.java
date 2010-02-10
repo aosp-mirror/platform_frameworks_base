@@ -37,7 +37,7 @@ public class FountainRS {
     public FountainRS() {
     }
 
-    public void init(RenderScript rs, Resources res, int width, int height) {
+    public void init(RenderScriptGL rs, Resources res, int width, int height) {
         mRS = rs;
         mRes = res;
         initRS();
@@ -65,7 +65,7 @@ public class FountainRS {
 
     private Resources mRes;
 
-    private RenderScript mRS;
+    private RenderScriptGL mRS;
     private Allocation mIntAlloc;
     private SimpleMesh mSM;
     private SomeData mSD;

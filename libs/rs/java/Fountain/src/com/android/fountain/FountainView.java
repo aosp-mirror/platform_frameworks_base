@@ -22,6 +22,7 @@ import java.util.concurrent.Semaphore;
 
 import android.renderscript.RSSurfaceView;
 import android.renderscript.RenderScript;
+import android.renderscript.RenderScriptGL;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -45,7 +46,7 @@ public class FountainView extends RSSurfaceView {
         //setFocusable(true);
     }
 
-    private RenderScript mRS;
+    private RenderScriptGL mRS;
     private FountainRS mRender;
 
     public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
