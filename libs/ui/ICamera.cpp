@@ -344,7 +344,7 @@ status_t BnCamera::onTransact(
             return NO_ERROR;
          } break;
         case SEND_COMMAND: {
-            LOGD("SEND_COMMAND");
+            LOGV("SEND_COMMAND");
             CHECK_INTERFACE(ICamera, data, reply);
             int command = data.readInt32();
             int arg1 = data.readInt32();

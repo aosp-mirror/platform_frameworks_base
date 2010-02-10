@@ -39,7 +39,6 @@
 
 #include <ui/GraphicBufferAllocator.h>
 #include <ui/PixelFormat.h>
-#include <ui/DisplayInfo.h>
 
 #include <pixelflinger/pixelflinger.h>
 #include <GLES/gl.h>
@@ -350,8 +349,8 @@ status_t SurfaceFlinger::readyToRun()
     mServerCblk->connected |= 1<<dpy;
     display_cblk_t* dcblk = mServerCblk->displays + dpy;
     memset(dcblk, 0, sizeof(display_cblk_t));
-    dcblk->w            = w;
-    dcblk->h            = h;
+    dcblk->w            = plane.getWidth();
+    dcblk->h            = plane.getHeight();
     dcblk->format       = f;
     dcblk->orientation  = ISurfaceComposer::eOrientationDefault;
     dcblk->xdpi         = hw.getDpiX();
@@ -621,14 +620,8 @@ void SurfaceFlinger::handleTransactionLocked(
             const DisplayHardware& hw(plane.displayHardware());
             volatile display_cblk_t* dcblk = mServerCblk->displays + dpy;
             dcblk->orientation = orientation;
-            if (orientation & eOrientationSwapMask) {
-                // 90 or 270 degrees orientation
-                dcblk->w = hw.getHeight();
-                dcblk->h = hw.getWidth();
-            } else {
-                dcblk->w = hw.getWidth();
-                dcblk->h = hw.getHeight();
-            }
+            dcblk->w = plane.getWidth();
+            dcblk->h = plane.getHeight();
 
             mVisibleRegionsDirty = true;
             mDirtyRegion.set(hw.bounds());
@@ -1795,13 +1788,47 @@ bool GraphicPlane::initialized() const {
     return mHw ? true : false;
 }
 
-void GraphicPlane::setDisplayHardware(DisplayHardware *hw) {
-    mHw = hw;
+int GraphicPlane::getWidth() const {
+    return mWidth;
 }
 
-void GraphicPlane::setTransform(const Transform& tr) {
-    mTransform = tr;
-    mGlobalTransform = mOrientationTransform * mTransform;
+int GraphicPlane::getHeight() const {
+    return mHeight;
+}
+
+void GraphicPlane::setDisplayHardware(DisplayHardware *hw)
+{
+    mHw = hw;
+
+    // initialize the display orientation transform.
+    // it's a constant that should come from the display driver.
+    int displayOrientation = ISurfaceComposer::eOrientationDefault;
+    char property[PROPERTY_VALUE_MAX];
+    if (property_get("ro.sf.hwrotation", property, NULL) > 0) {
+        //displayOrientation
+        switch (atoi(property)) {
+        case 90:
+            displayOrientation = ISurfaceComposer::eOrientation90;
+            break;
+        case 270:
+            displayOrientation = ISurfaceComposer::eOrientation270;
+            break;
+        }
+    }
+
+    const float w = hw->getWidth();
+    const float h = hw->getHeight();
+    GraphicPlane::orientationToTransfrom(displayOrientation, w, h,
+            &mDisplayTransform);
+    if (displayOrientation & ISurfaceComposer::eOrientationSwapMask) {
+        mDisplayWidth = h;
+        mDisplayHeight = w;
+    } else {
+        mDisplayWidth = w;
+        mDisplayHeight = h;
+    }
+
+    setOrientation(ISurfaceComposer::eOrientationDefault);
 }
 
 status_t GraphicPlane::orientationToTransfrom(
@@ -1810,8 +1837,9 @@ status_t GraphicPlane::orientationToTransfrom(
     float a, b, c, d, x, y;
     switch (orientation) {
     case ISurfaceComposer::eOrientationDefault:
-        a=1; b=0; c=0; d=1; x=0; y=0;
-        break;
+        // make sure the default orientation is optimal
+        tr->reset();
+        return NO_ERROR;
     case ISurfaceComposer::eOrientation90:
         a=0; b=-1; c=1; d=0; x=w; y=0;
         break;
@@ -1831,20 +1859,16 @@ status_t GraphicPlane::orientationToTransfrom(
 
 status_t GraphicPlane::setOrientation(int orientation)
 {
-    const DisplayHardware& hw(displayHardware());
-    const float w = hw.getWidth();
-    const float h = hw.getHeight();
-
-    if (orientation == ISurfaceComposer::eOrientationDefault) {
-        // make sure the default orientation is optimal
-        mOrientationTransform.reset();
-        mOrientation = orientation;
-        mGlobalTransform = mTransform;
-        return NO_ERROR;
-    }
-
     // If the rotation can be handled in hardware, this is where
     // the magic should happen.
+
+    const DisplayHardware& hw(displayHardware());
+    const float w = mDisplayWidth;
+    const float h = mDisplayHeight;
+    mWidth = int(w);
+    mHeight = int(h);
+
+    Transform orientationTransform;
     if (UNLIKELY(orientation == 42)) {
         float a, b, c, d, x, y;
         const float r = (3.14159265f / 180.0f) * 42.0f;
@@ -1853,14 +1877,18 @@ status_t GraphicPlane::setOrientation(int orientation)
         a=co; b=-si; c=si; d=co;
         x = si*(h*0.5f) + (1-co)*(w*0.5f);
         y =-si*(w*0.5f) + (1-co)*(h*0.5f);
-        mOrientationTransform.set(a, b, c, d);
-        mOrientationTransform.set(x, y);
+        orientationTransform.set(a, b, c, d);
+        orientationTransform.set(x, y);
     } else {
         GraphicPlane::orientationToTransfrom(orientation, w, h,
-                &mOrientationTransform);
+                &orientationTransform);
+        if (orientation & ISurfaceComposer::eOrientationSwapMask) {
+            mWidth = int(h);
+            mHeight = int(w);
+        }
     }
     mOrientation = orientation;
-    mGlobalTransform = mOrientationTransform * mTransform;
+    mGlobalTransform = mDisplayTransform * orientationTransform;
     return NO_ERROR;
 }
 

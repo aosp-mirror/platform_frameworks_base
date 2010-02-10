@@ -33,6 +33,9 @@ include $(CLEAR_VARS)
 # FRAMEWORKS_BASE_SUBDIRS comes from build/core/pathmap.mk
 LOCAL_SRC_FILES := $(call find-other-java-files,$(FRAMEWORKS_BASE_SUBDIRS))
 
+# EventLogTags files.
+LOCAL_SRC_FILES += core/java/android/content/EventLogTags.logtags
+
 # The following filters out code we are temporarily not including at all.
 # TODO: Move AWT and beans (and associated harmony code) back into libcore.
 # TODO: Maybe remove javax.microedition entirely?
@@ -111,8 +114,8 @@ LOCAL_SRC_FILES += \
 	core/java/android/net/INetworkManagementEventObserver.aidl \
 	core/java/android/os/ICheckinService.aidl \
 	core/java/android/os/IMessenger.aidl \
-	core/java/android/os/IMountService.aidl \
-	core/java/android/os/IMountServiceListener.aidl \
+	core/java/android/os/storage/IMountService.aidl \
+	core/java/android/os/storage/IMountServiceListener.aidl \
 	core/java/android/os/INetworkManagementService.aidl \
 	core/java/android/os/INetStatService.aidl \
 	core/java/android/os/IParentalControlCallback.aidl \
@@ -367,6 +370,8 @@ framework_docs_LOCAL_ADDITIONAL_JAVA_DIR:=$(call intermediates-dir-for,JAVA_LIBR
 
 sample_dir := development/samples
 
+# the list here should match the list of samples included in the sdk samples package
+# (see development/build/sdk.atree)
 web_docs_sample_code_flags := \
 		-hdf android.hasSamples 1 \
 		-samplecode $(sample_dir)/ApiDemos \
@@ -377,6 +382,8 @@ web_docs_sample_code_flags := \
 		            resources/samples/BusinessCard "Business Card" \
 		-samplecode $(sample_dir)/ContactManager \
 		            resources/samples/ContactManager "Contact Manager" \
+                -samplecode $(sample_dir)/CubeLiveWallpaper \
+                            resources/samples/CubeLiveWallpaper "Live Wallpaper" \
 		-samplecode $(sample_dir)/Home \
 		            resources/samples/Home "Home" \
 		-samplecode $(sample_dir)/JetBoy \
@@ -387,6 +394,8 @@ web_docs_sample_code_flags := \
 		            resources/samples/MultiResolution "Multiple Resolutions" \
 		-samplecode $(sample_dir)/NotePad \
 		            resources/samples/NotePad "Note Pad" \
+                -samplecode $(sample_dir)/SampleSyncAdapter \
+                            resources/samples/SampleSyncAdapter "Sample Sync Adapter" \
 		-samplecode $(sample_dir)/SearchableDictionary \
 		            resources/samples/SearchableDictionary "Searchable Dictionary" \
 		-samplecode $(sample_dir)/Snake \

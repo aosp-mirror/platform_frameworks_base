@@ -14,21 +14,47 @@
  * limitations under the License.
  */
 
-package android.os;
-
-import java.io.IOException;
+package android.os.storage;
 
 /**
- * Class that provides access to constants returned from MountService APIs
- *
- * {@hide}
+ * Class that provides access to constants returned from StorageManager
+ * and lower level MountService APIs.
  */
-public class MountServiceResultCode
+public class StorageResultCode
 {
+    /**
+     * Operation succeeded.
+     * @see android.os.storage.StorageManager
+     */
     public static final int OperationSucceeded               =  0;
+
+    /**
+     * Operation failed: Internal error.
+     * @see android.os.storage.StorageManager
+     */
     public static final int OperationFailedInternalError     = -1;
+
+    /**
+     * Operation failed: Missing media.
+     * @see android.os.storage.StorageManager
+     */
     public static final int OperationFailedNoMedia           = -2;
+
+    /**
+     * Operation failed: Media is blank.
+     * @see android.os.storage.StorageManager
+     */
     public static final int OperationFailedMediaBlank        = -3;
+
+    /**
+     * Operation failed: Media is corrupt.
+     * @see android.os.storage.StorageManager
+     */
     public static final int OperationFailedMediaCorrupt      = -4;
+
+    /**
+     * Operation failed: Media not mounted.
+     * @see android.os.storage.StorageManager
+     */
     public static final int OperationFailedVolumeNotMounted  = -5;
 }

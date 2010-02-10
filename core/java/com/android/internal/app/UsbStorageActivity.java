@@ -25,8 +25,9 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Environment;
-import android.os.IMountService;
-import android.os.MountServiceResultCode;
+import android.os.storage.StorageManager;
+import android.os.storage.StorageEventListener;
+import android.os.storage.StorageResultCode;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -35,6 +36,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.view.View;
+import android.util.Log;
 
 /**
  * This activity is shown to the user for him/her to enable USB mass storage
@@ -42,11 +44,13 @@ import android.view.View;
  * dialog style. It will be launched from a notification.
  */
 public class UsbStorageActivity extends Activity {
+    private static final String TAG = "UsbStorageActivity";
     private Button mMountButton;
     private Button mUnmountButton;
     private TextView mBanner;
     private TextView mMessage;
     private ImageView mIcon;
+    private StorageManager mStorageManager = null;
 
     /** Used to detect when the USB cable is unplugged, so we can call finish() */
     private BroadcastReceiver mBatteryReceiver = new BroadcastReceiver() {
@@ -57,10 +61,29 @@ public class UsbStorageActivity extends Activity {
             }
         }
     };
+
+    private StorageEventListener mStorageListener = new StorageEventListener() {
+        @Override
+        public void onStorageStateChanged(String path, String oldState, String newState) {
+            if (newState.equals(Environment.MEDIA_SHARED)) {
+                switchDisplay(true);
+            } else {
+                switchDisplay(false);
+            }
+        }
+    };
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        if (mStorageManager == null) {
+            mStorageManager = (StorageManager) getSystemService(Context.STORAGE_SERVICE);
+            if (mStorageManager == null) {
+                Log.w(TAG, "Failed to get StorageManager");
+            }
+            mStorageManager.registerListener(mStorageListener);
+        }
 
         setTitle(getString(com.android.internal.R.string.usb_storage_activity_title));
 
@@ -74,9 +97,11 @@ public class UsbStorageActivity extends Activity {
         mMountButton.setOnClickListener(
             new View.OnClickListener() { 
                  public void onClick(View v) {
-                     mountAsUsbStorage();
-                     // TODO: replace with forthcoming MountService callbacks
-                     switchDisplay(true);
+                     int rc = mStorageManager.enableUsbMassStorage();
+                     if (rc != StorageResultCode.OperationSucceeded) {
+                         Log.e(TAG, String.format("UMS enable failed (%d)", rc));
+                         showSharingError();
+                     }
                  }
             });
 
@@ -84,9 +109,11 @@ public class UsbStorageActivity extends Activity {
         mUnmountButton.setOnClickListener(
             new View.OnClickListener() { 
                  public void onClick(View v) {
-                     stopUsbStorage();
-                     // TODO: replace with forthcoming MountService callbacks
-                     switchDisplay(false);
+                     int rc = mStorageManager.disableUsbMassStorage();
+                     if (rc != StorageResultCode.OperationSucceeded) {
+                         Log.e(TAG, String.format("UMS disable failed (%d)", rc));
+                         showStoppingError();
+                     }
                  }
             });
     }
@@ -112,19 +139,11 @@ public class UsbStorageActivity extends Activity {
         super.onResume();
 
         registerReceiver(mBatteryReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
-
-        boolean umsOn = false;
         try {
-            IMountService mountService = IMountService.Stub.asInterface(ServiceManager
-                    .getService("mount"));
-            if (mountService != null) {
-                umsOn = mountService.getVolumeShared(
-                        Environment.getExternalStorageDirectory().getPath(), "ums");
-            }
-        } catch (android.os.RemoteException exc) {
-            // pass
+            switchDisplay(mStorageManager.isUsbMassStorageEnabled());
+        } catch (Exception ex) {
+            Log.e(TAG, "Failed to read UMS enable state", ex);
         }
-        switchDisplay(umsOn);
     }
 
     @Override
@@ -132,42 +151,6 @@ public class UsbStorageActivity extends Activity {
         super.onPause();
         
         unregisterReceiver(mBatteryReceiver);
-    }
-
-    private void mountAsUsbStorage() {
-        IMountService mountService = IMountService.Stub.asInterface(ServiceManager
-                .getService("mount"));
-        if (mountService == null) {
-            showSharingError();
-            return;
-        }
-
-        try {
-            if (mountService.shareVolume(
-                    Environment.getExternalStorageDirectory().getPath(), "ums") !=
-                            MountServiceResultCode.OperationSucceeded) {
-                showSharingError();
-            }
-        } catch (RemoteException e) {
-            showSharingError();
-        }
-    }
-
-    private void stopUsbStorage() {
-        IMountService mountService = IMountService.Stub.asInterface(ServiceManager
-                .getService("mount"));
-        if (mountService == null) {
-            showStoppingError();
-            return;
-        }
-
-        try {
-            mountService.unshareVolume(
-                    Environment.getExternalStorageDirectory().getPath(), "ums");
-        } catch (RemoteException e) {
-            showStoppingError();
-            return;
-        }
     }
 
     private void handleBatteryChanged(Intent intent) {

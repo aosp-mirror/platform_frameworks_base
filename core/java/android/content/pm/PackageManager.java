@@ -622,6 +622,13 @@ public abstract class PackageManager {
     public static final String FEATURE_LIVE_WALLPAPER = "android.software.live_wallpaper";
 
     /**
+     * Action to external storage service to clean out removed apps.
+     * @hide
+     */
+    public static final String ACTION_CLEAN_EXTERNAL_STORAGE
+            = "android.content.pm.CLEAN_EXTERNAL_STORAGE";
+    
+    /**
      * Determines best place to install an application: either SD or internal FLASH.
      * Tweak the algorithm for best results.
      * @param appInfo ApplicationInfo object of the package to install.

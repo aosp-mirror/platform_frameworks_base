@@ -5,9 +5,9 @@
     <uses-permission android:name="android.permission.ASEC_CREATE"/>
     <uses-permission android:name="android.permission.ASEC_DESTROY"/>
     <uses-permission android:name="android.permission.ASEC_MOUNT_UNMOUNT"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
-    <application android:process="def.container.service"
-                 android:label="@string/service_name">
+    <application android:label="@string/service_name">
 
         <service android:name=".DefaultContainerService"
                  android:enabled="true"

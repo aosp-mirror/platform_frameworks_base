@@ -281,7 +281,7 @@ String8 Camera::getParameters() const
 // send command to camera driver
 status_t Camera::sendCommand(int32_t cmd, int32_t arg1, int32_t arg2)
 {
-    LOGD("sendCommand");
+    LOGV("sendCommand");
     sp <ICamera> c = mCamera;
     if (c == 0) return NO_INIT;
     return c->sendCommand(cmd, arg1, arg2);

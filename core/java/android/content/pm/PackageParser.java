@@ -2138,7 +2138,7 @@ public class PackageParser {
                     havePerm = true;
                 }
                 if (writePermission != null) {
-                    writePermission = readPermission.intern();
+                    writePermission = writePermission.intern();
                     havePerm = true;
                 }
 

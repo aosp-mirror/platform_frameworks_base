@@ -42,7 +42,7 @@ public abstract class IntentService extends Service {
      * {@link #onStartCommand(Intent, int, int)} will return
      * {@link Service#START_REDELIVER_INTENT} instead of
      * {@link Service#START_NOT_STICKY}, so that if this service's process
-     * is called while it is executing the Intent in
+     * is killed while it is executing the Intent in
      * {@link #onHandleIntent(Intent)}, then when later restarted the same Intent
      * will be re-delivered to it, to retry its execution.
      */

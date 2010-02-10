@@ -145,6 +145,12 @@ import java.util.ArrayList;
                 break;
         }
 
+        if (KeyEvent.KEYCODE_TAB == keyCode) {
+            if (down) {
+                onEditorAction(EditorInfo.IME_ACTION_NEXT);
+            }
+            return true;
+        }
         Spannable text = (Spannable) getText();
         int oldLength = text.length();
         // Normally the delete key's dom events are sent via onTextChanged.
@@ -810,6 +816,9 @@ import java.util.ArrayList;
         int imeOptions = EditorInfo.IME_FLAG_NO_EXTRACT_UI
                 | EditorInfo.IME_FLAG_NO_FULLSCREEN;
         switch (type) {
+            case 0: // NORMAL_TEXT_FIELD
+                imeOptions |= EditorInfo.IME_ACTION_GO;
+                break;
             case 1: // TEXT_AREA
                 single = false;
                 inputType |= EditorInfo.TYPE_TEXT_FLAG_MULTI_LINE
@@ -819,6 +828,7 @@ import java.util.ArrayList;
                 break;
             case 2: // PASSWORD
                 inPassword = true;
+                imeOptions |= EditorInfo.IME_ACTION_GO;
                 break;
             case 3: // SEARCH
                 imeOptions |= EditorInfo.IME_ACTION_SEARCH;
@@ -826,22 +836,25 @@ import java.util.ArrayList;
             case 4: // EMAIL
                 // TYPE_TEXT_VARIATION_WEB_EDIT_TEXT prevents EMAIL_ADDRESS
                 // from working, so exclude it for now.
-                inputType = EditorInfo.TYPE_CLASS_TEXT
-                        | EditorInfo.TYPE_TEXT_VARIATION_EMAIL_ADDRESS;
+                imeOptions |= EditorInfo.IME_ACTION_GO;
                 break;
             case 5: // NUMBER
-                inputType = EditorInfo.TYPE_CLASS_NUMBER;
+                inputType |= EditorInfo.TYPE_CLASS_NUMBER;
+                // Number and telephone do not have both a Tab key and an
+                // action, so set the action to NEXT
+                imeOptions |= EditorInfo.IME_ACTION_NEXT;
                 break;
             case 6: // TELEPHONE
-                inputType = EditorInfo.TYPE_CLASS_PHONE;
+                inputType |= EditorInfo.TYPE_CLASS_PHONE;
+                imeOptions |= EditorInfo.IME_ACTION_NEXT;
                 break;
             case 7: // URL
-                // TYPE_TEXT_VARIATION_WEB_EDIT_TEXT prevents URI
-                // from working, so exclude it for now.
-                inputType = EditorInfo.TYPE_CLASS_TEXT
-                        | EditorInfo.TYPE_TEXT_VARIATION_URI;
+                // TYPE_TEXT_VARIATION_URI prevents Tab key from showing, so
+                // exclude it for now.
+                imeOptions |= EditorInfo.IME_ACTION_GO;
                 break;
             default:
+                imeOptions |= EditorInfo.IME_ACTION_GO;
                 break;
         }
         setHint(null);
@@ -853,22 +866,6 @@ import java.util.ArrayList;
                 String name = mWebView.nativeFocusCandidateName();
                 if (name != null && name.length() > 0) {
                     mWebView.requestFormData(name, mNodePointer);
-                }
-            }
-            if (type != 3 /* SEARCH */) {
-                int action = mWebView.nativeTextFieldAction();
-                switch (action) {
-                    // Keep in sync with CachedRoot::ImeAction
-                    case 0: // NEXT
-                        imeOptions |= EditorInfo.IME_ACTION_NEXT;
-                        break;
-                    case 1: // GO
-                        imeOptions |= EditorInfo.IME_ACTION_GO;
-                        break;
-                    case -1: // FAILURE
-                    case 2: // DONE
-                        imeOptions |= EditorInfo.IME_ACTION_DONE;
-                        break;
                 }
             }
         }

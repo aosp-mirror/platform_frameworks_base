@@ -21,7 +21,6 @@ import android.net.LocalSocket;
 import android.os.Environment;
 import android.os.SystemClock;
 import android.os.SystemProperties;
-import android.util.Config;
 import android.util.Log;
 
 import java.io.IOException;
@@ -41,6 +40,7 @@ import java.util.concurrent.LinkedBlockingQueue;
  * protocol.
  */
 final class NativeDaemonConnector implements Runnable {
+    private static final boolean LOCAL_LOGD = false;
 
     private BlockingQueue<String> mResponseQueue;
     private OutputStream          mOutputStream;
@@ -110,7 +110,7 @@ final class NativeDaemonConnector implements Runnable {
                 for (int i = 0; i < count; i++) {
                     if (buffer[i] == 0) {
                         String event = new String(buffer, start, i - start);
-//                        Log.d(TAG, "Got packet {" + event + "}");
+                        if (LOCAL_LOGD) Log.d(TAG, String.format("RCV <- {%s}", event));
 
                         String[] tokens = event.split(" ");
                         try {
@@ -177,7 +177,7 @@ final class NativeDaemonConnector implements Runnable {
      */
     private void sendCommand(String command, String argument) {
         synchronized (this) {
-             Log.d(TAG, "sendCommand {" + command + "} {" + argument + "}");
+            if (LOCAL_LOGD) Log.d(TAG, String.format("SND -> {%s} {%s}", command, argument));
             if (mOutputStream == null) {
                 Log.e(TAG, "No connection to daemon", new IllegalStateException());
             } else {
@@ -210,7 +210,7 @@ final class NativeDaemonConnector implements Runnable {
         while (!complete) {
             try {
                 String line = mResponseQueue.take();
-                Log.d(TAG, String.format("RSP -> {%s}", line));
+                if (LOCAL_LOGD) Log.d(TAG, String.format("RSP <- {%s}", line));
                 String[] tokens = line.split(" ");
                 try {
                     code = Integer.parseInt(tokens[0]);
@@ -250,13 +250,18 @@ final class NativeDaemonConnector implements Runnable {
         String[] rdata = new String[rsp.size()-1];
         int idx = 0;
 
-        for (String line : rsp) {
+        for (int i = 0; i < rsp.size(); i++) {
+            String line = rsp.get(i);
             try {
                 String[] tok = line.split(" ");
                 int code = Integer.parseInt(tok[0]);
                 if (code == expectedResponseCode) {
                     rdata[idx++] = line.substring(tok[0].length() + 1);
                 } else if (code == NativeDaemonConnector.ResponseCode.CommandOkay) {
+                    if (LOCAL_LOGD) Log.d(TAG, String.format("List terminated with {%s}", line));
+                    if (i != rsp.size()) {
+                        Log.w(TAG, String.format("Recv'd %d lines after list term", (rsp.size()-i)));
+                    }
                     return rdata;
                 } else {
                     throw new NativeDaemonConnectorException(

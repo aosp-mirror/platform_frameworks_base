@@ -31,11 +31,9 @@ import android.view.Surface;
  **/
 public class RenderScript {
     static final String LOG_TAG = "RenderScript_jni";
-    private static final boolean DEBUG  = false;
+    protected static final boolean DEBUG  = false;
     @SuppressWarnings({"UnusedDeclaration", "deprecation"})
-    private static final boolean LOG_ENABLED = DEBUG ? Config.LOGD : Config.LOGV;
-    int mWidth;
-    int mHeight;
+    protected static final boolean LOG_ENABLED = DEBUG ? Config.LOGD : Config.LOGV;
 
 
 
@@ -44,8 +42,8 @@ public class RenderScript {
      * field offsets.
      */
     @SuppressWarnings({"FieldCanBeLocal", "UnusedDeclaration"})
-    private static boolean sInitialized;
-    native private static void _nInit();
+    protected static boolean sInitialized;
+    native protected static void _nInit();
 
 
     static {
@@ -64,7 +62,8 @@ public class RenderScript {
     native int  nDeviceCreate();
     native void nDeviceDestroy(int dev);
     native void nDeviceSetConfig(int dev, int param, int value);
-    native int  nContextCreate(int dev, int ver, boolean useDepth);
+    native int  nContextCreateGL(int dev, int ver, boolean useDepth);
+    native int  nContextCreate(int dev, int ver);
     native void nContextDestroy(int con);
     native void nContextSetSurface(int w, int h, Surface sur);
     native void nContextSetPriority(int p);
@@ -190,11 +189,10 @@ public class RenderScript {
     native void nAnimationAdd(float time, float[] attribs);
     native int  nAnimationCreate();
 
-    private int     mDev;
-    private int     mContext;
+    protected int     mDev;
+    protected int     mContext;
     @SuppressWarnings({"FieldCanBeLocal"})
-    private Surface mSurface;
-    private MessageThread mMessageThread;
+    protected MessageThread mMessageThread;
 
     Element mElement_USER_U8;
     Element mElement_USER_I8;
@@ -251,7 +249,7 @@ public class RenderScript {
         nContextSetPriority(p.mID);
     }
 
-    private static class MessageThread extends Thread {
+    protected static class MessageThread extends Thread {
         RenderScript mRS;
         boolean mRun = true;
 
@@ -289,26 +287,18 @@ public class RenderScript {
         }
     }
 
-    public RenderScript(boolean useDepth, boolean forceSW) {
-        mSurface = null;
-        mWidth = 0;
-        mHeight = 0;
-        mDev = nDeviceCreate();
-        if(forceSW) {
-            nDeviceSetConfig(mDev, 0, 1);
-        }
-        mContext = nContextCreate(mDev, 0, useDepth);
-        mMessageThread = new MessageThread(this);
-        mMessageThread.start();
-        Element.initPredefined(this);
+    protected RenderScript() {
     }
 
-    public void contextSetSurface(int w, int h, Surface sur) {
-        mSurface = sur;
-        mWidth = w;
-        mHeight = h;
-        validate();
-        nContextSetSurface(w, h, mSurface);
+    public static RenderScript create() {
+        RenderScript rs = new RenderScript();
+
+        rs.mDev = rs.nDeviceCreate();
+        rs.mContext = rs.nContextCreate(rs.mDev, 0);
+        rs.mMessageThread = new MessageThread(rs);
+        rs.mMessageThread.start();
+        Element.initPredefined(rs);
+        return rs;
     }
 
     public void contextDump(int bits) {
@@ -332,77 +322,15 @@ public class RenderScript {
         return mContext != 0;
     }
 
-    void pause() {
-        validate();
-        nContextPause();
-    }
-
-    void resume() {
-        validate();
-        nContextResume();
-    }
-
-    //////////////////////////////////////////////////////////////////////////////////
-    // File
-
-    public class File extends BaseObj {
-        File(int id) {
-            super(RenderScript.this);
-            mID = id;
-        }
-    }
-
-    public File fileOpen(String s) throws IllegalStateException, IllegalArgumentException
-    {
-        if(s.length() < 1) {
-            throw new IllegalArgumentException("fileOpen does not accept a zero length string.");
-        }
-
-        try {
-            byte[] bytes = s.getBytes("UTF-8");
-            int id = nFileOpen(bytes);
-            return new File(id);
-        } catch (java.io.UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-
     ///////////////////////////////////////////////////////////////////////////////////
     // Root state
 
-    private int safeID(BaseObj o) {
+    protected int safeID(BaseObj o) {
         if(o != null) {
             return o.mID;
         }
         return 0;
     }
-
-    public void contextBindRootScript(Script s) {
-        validate();
-        nContextBindRootScript(safeID(s));
-    }
-
-    public void contextBindProgramFragmentStore(ProgramStore p) {
-        validate();
-        nContextBindProgramFragmentStore(safeID(p));
-    }
-
-    public void contextBindProgramFragment(ProgramFragment p) {
-        validate();
-        nContextBindProgramFragment(safeID(p));
-    }
-
-    public void contextBindProgramRaster(ProgramRaster p) {
-        validate();
-        nContextBindProgramRaster(safeID(p));
-    }
-
-    public void contextBindProgramVertex(ProgramVertex p) {
-        validate();
-        nContextBindProgramVertex(safeID(p));
-    }
-
 }
 
 

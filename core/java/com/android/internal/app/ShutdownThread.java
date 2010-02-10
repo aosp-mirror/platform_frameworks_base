@@ -32,7 +32,7 @@ import android.os.RemoteException;
 import android.os.Power;
 import android.os.ServiceManager;
 import android.os.SystemClock;
-import android.os.IMountService;
+import android.os.storage.IMountService;
 
 import com.android.internal.telephony.ITelephony;
 import android.util.Log;

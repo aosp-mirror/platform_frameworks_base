@@ -3379,6 +3379,10 @@ public class WebView extends AbsoluteLayout
                 text = "";
             }
             mWebTextView.setTextAndKeepSelection(text);
+            InputMethodManager imm = InputMethodManager.peekInstance();
+            if (imm != null && imm.isActive(mWebTextView)) {
+                imm.restartInput(mWebTextView);
+            }
         }
         mWebTextView.requestFocus();
     }
@@ -6172,6 +6176,9 @@ public class WebView extends AbsoluteLayout
                     // mContentHeight may not be updated yet
                     y = Math.max(0,
                             (Math.min(maxHeight, y + viewHeight) - viewHeight));
+                    // We need to take into account the visible title height
+                    // when scrolling since y is an absolute view position.
+                    y = Math.max(0, y - getVisibleTitleHeight());
                     scrollTo(x, y);
                     }
                     break;
@@ -6784,8 +6791,6 @@ public class WebView extends AbsoluteLayout
     private native void     nativeSetFindIsUp();
     private native void     nativeSetFollowedLink(boolean followed);
     private native void     nativeSetHeightCanMeasure(boolean measure);
-    // Returns a value corresponding to CachedFrame::ImeAction
-    /* package */ native int  nativeTextFieldAction();
     private native int      nativeTextGeneration();
     // Never call this version except by updateCachedTextfield(String) -
     // we always want to pass in our generation number.

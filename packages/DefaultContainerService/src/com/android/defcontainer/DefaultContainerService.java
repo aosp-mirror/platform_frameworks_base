@@ -3,15 +3,19 @@ package com.android.defcontainer;
 import com.android.internal.app.IMediaContainerService;
 
 import android.content.Intent;
+import android.content.pm.IPackageManager;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Debug;
+import android.os.Environment;
 import android.os.IBinder;
-import android.os.IMountService;
-import android.os.MountServiceResultCode;
+import android.os.storage.IMountService;
+import android.os.storage.StorageResultCode;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.app.IntentService;
 import android.app.Service;
 import android.util.Log;
 
@@ -25,7 +29,6 @@ import java.io.OutputStream;
 
 import android.os.FileUtils;
 
-
 /*
  * This service copies a downloaded apk to a file passed in as
  * a ParcelFileDescriptor or to a newly created container specified
@@ -33,7 +36,7 @@ import android.os.FileUtils;
  * based on its uid. This process also needs the ACCESS_DOWNLOAD_MANAGER
  * permission to access apks downloaded via the download manager.
  */
-public class DefaultContainerService extends Service {
+public class DefaultContainerService extends IntentService {
     private static final String TAG = "DefContainer";
     private static final boolean localLOGV = false;
 
@@ -78,6 +81,40 @@ public class DefaultContainerService extends Service {
         }
     };
 
+    public DefaultContainerService() {
+        super("DefaultContainerService");
+        setIntentRedelivery(true);
+    }
+
+    @Override
+    protected void onHandleIntent(Intent intent) {
+        if (PackageManager.ACTION_CLEAN_EXTERNAL_STORAGE.equals(intent.getAction())) {
+            IPackageManager pm = IPackageManager.Stub.asInterface(
+                    ServiceManager.getService("package"));
+            String pkg = null;
+            try {
+                while ((pkg=pm.nextPackageToClean(pkg)) != null) {
+                    eraseFiles(Environment.getExternalStorageAppDataDirectory(pkg));
+                    eraseFiles(Environment.getExternalStorageAppMediaDirectory(pkg));
+                }
+            } catch (RemoteException e) {
+            }
+        }
+    }
+
+    void eraseFiles(File path) {
+        if (path.isDirectory()) {
+            String[] files = path.list();
+            if (files != null) {
+                for (String file : files) {
+                    eraseFiles(new File(path, file));
+                }
+            }
+        }
+        //Log.i(TAG, "Deleting: " + path);
+        path.delete();
+    }
+    
     public IBinder onBind(Intent intent) {
         return mBinder;
     }
@@ -158,12 +195,12 @@ public class DefaultContainerService extends Service {
             int rc = mountService.createSecureContainer(
                     containerId, mbLen, "vfat", sdEncKey, ownerUid);
 
-            if (rc != MountServiceResultCode.OperationSucceeded) {
+            if (rc != StorageResultCode.OperationSucceeded) {
                 Log.e(TAG, String.format("Container creation failed (%d)", rc));
 
                 // XXX: This destroy should not be necessary
                 rc = mountService.destroySecureContainer(containerId);
-                if (rc != MountServiceResultCode.OperationSucceeded) {
+                if (rc != StorageResultCode.OperationSucceeded) {
                     Log.e(TAG, String.format("Container creation-cleanup failed (%d)", rc));
                     return null;
                 }
@@ -171,7 +208,7 @@ public class DefaultContainerService extends Service {
                 // XXX: Does this ever actually succeed?
                 rc = mountService.createSecureContainer(
                         containerId, mbLen, "vfat", sdEncKey, ownerUid);
-                if (rc != MountServiceResultCode.OperationSucceeded) {
+                if (rc != StorageResultCode.OperationSucceeded) {
                     Log.e(TAG, String.format("Container creation retry failed (%d)", rc));
                 }
             }
@@ -226,7 +263,7 @@ public class DefaultContainerService extends Service {
     private String mountSdDir(String containerId, String key) {
         try {
             int rc = getMountService().mountSecureContainer(containerId, key, Process.myUid());
-            if (rc == MountServiceResultCode.OperationSucceeded) {
+            if (rc == StorageResultCode.OperationSucceeded) {
                 return getMountService().getSecureContainerPath(containerId);
             } else {
                 Log.e(TAG, String.format("Failed to mount id %s with rc %d ", containerId, rc));

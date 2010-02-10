@@ -1,0 +1,84 @@
+page.title=Live Wallpapers
+@jd:body
+
+<p>Starting with Android 2.1 (API Level 7), users can now enjoy <em>live
+wallpapers</em> &mdash; richer, animated, interactive backgrounds &mdash; on
+their home screens. A live wallpaper is very similar to a normal Android
+application and has access to all the facilities of the platform: SGL (2D
+drawing), OpenGL (3D drawing), GPS, accelerometers, network access, etc. The
+live wallpapers included on Nexus One demonstrate the use of some of these APIs
+to create fun and interesting user experiences. For instance, the Grass
+wallpaper uses the phone's location to compute sunrise and sunset times in order
+to display the appropriate sky.</p>
+
+<img src="images/live_wallpapers_small.png" style="align:center" />
+
+<p>Creating your own live wallpaper is easy, especially if you have had
+previous experience with <a
+href="../../../reference/android/view/SurfaceView.html"><code>SurfaceView</code></a> or <a
+href="../../../reference/android/graphics/Canvas.html"><code>Canvas</code></a>. 
+To learn how to create a live wallpaper, you should check out the <a 
+href="../samples/CubeLiveWallpaper/index.html">CubeLiveWallpaper sample code</a>.</p>
+
+<p>In terms of implementation, a live wallpaper is very similar to a regular
+Android <a href="../../../reference/android/app/Service.html">service</a>. The
+only difference is the addition of a new method, <a
+href="../../../reference/android/service/wallpaper/WallpaperService.
+html#onCreateEngine()"><code>onCreateEngine()</code></a>, whose goal is to create a <a
+href="../../../reference/android/service/wallpaper/WallpaperService.Engine.html">
+<code>WallpaperService.Engine</code></a>. The engine is responsible for
+handling the lifecycle and drawing of a wallpaper. The system provides a surface
+on which you can draw, just like you would with a <code>SurfaceView</code></a>.
+Drawing a wallpaper can be very expensive so you should optimize your code
+as much as possible to avoid using too much CPU, not only for battery life
+but also to avoid slowing down the rest of the system. That is also why the
+most important part of the lifecycle of a wallpaper is <a href="../../../reference/android/service/wallpaper/WallpaperService.Engine.html#onVisibilityChanged%28boolean%29">when it becomes invisible</a>. 
+When invisible, such as when the user launches an application that covers
+the home screen, a wallpaper must stop all activity.</p>
+
+<p>The engine can also implement several methods to interact with the user
+or the home application. For instance, if you want your wallpaper to scroll
+along when the user swipes from one home screen to another, you can use <a href="../../../reference/android/service/wallpaper/WallpaperService.Engine.html#onOffsetsChanged%28float,%20float,%20float,%20float,%20int,%20int%29"><code>onOffsetsChanged()</code></a>.
+To react to touch events, simply implement <a href="../../../reference/android/service/wallpaper/WallpaperService.Engine.html#onTouchEvent%28android.view.MotionEvent%29"><code>onTouchEvent(MotionEvent)</code></a>.
+Finally, applications can send arbitrary commands to the live wallpaper.
+Currently, only the standard home application sends commands to the <a
+href="../../../reference/android/service/wallpaper/WallpaperService.Engine.html#onCommand%28java.lang.String,%20int,%20int,%20int,%20android.os.Bundle,%20boolean%29"><code>onCommand()</code></a>
+method of the live wallpaper:</p>
+
+<ul>
+<li><code>android.wallpaper.tap</code>: When the user taps an empty space
+on the workspace. This command is interpreted by the Nexus and Water live
+wallpapers to make the wallpaper react to user interaction. For instance,
+if you tap an empty space on the Water live wallpaper, new ripples appear
+under your finger.</li>
+<li><code>android.home.drop</code>: When the user drops an icon or a widget
+on the workspace. This command is also interpreted by the Nexus and Water
+live wallpapers.</li>
+</ul>
+
+<p>If you are developing a live wallpaper, remember that the feature is
+supported only on Android 2.1 (API level 7) and higher versions of the platform.
+To ensure that your application can only be installed on devices that support
+live wallpapers, remember to add the following to the application's manifest
+before publishing to Android Market:</p>
+
+<ul>
+<li><code>&lt;uses-sdk android:minSdkVersion="7" /&gt;</code>, which indicates
+to Android Market and the platform that your application requires Android 2.1 or
+higher. For more information, see the <a href="../../../guide/appendix/api-levels.html">API
+Levels</a> and the documentation for the
+<a href="../../../guide/topics/manifest/uses-sdk-element.html"><code>&lt;uses-sdk&gt;</code></a>
+element.</li>
+<li><code>&lt;uses-feature android:name="android.software.live_wallpaper" /&gt;</code>,
+which tells Android Market that your application includes a live wallpaper
+Android Market uses this feature as a filter, when presenting users lists of
+available applications. When you declaring this feature, Android Market
+displays your application only to users whose devices support live wallpapers,
+while hiding it from other devices on which it would not be able to run. For
+more information, see the documentation for the
+<a href="../../../guide/topics/manifest/uses-feature-element.html"><code>&lt;uses-feature&gt;</code></a>
+element.</li>
+</ul>
+
+<p>Many great live wallpapers are already available on Android Market and
+we can't wait to see more!</p>

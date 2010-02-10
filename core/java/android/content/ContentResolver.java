@@ -16,6 +16,8 @@
 
 package android.content;
 
+import android.accounts.Account;
+import android.app.ActivityThread;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.Resources;
@@ -30,8 +32,8 @@ import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.text.TextUtils;
-import android.accounts.Account;
 import android.util.Config;
+import android.util.EventLog;
 import android.util.Log;
 
 import java.io.File;
@@ -41,6 +43,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
+import java.util.Random;
 import java.util.ArrayList;
 
 
@@ -163,6 +166,11 @@ public abstract class ContentResolver {
     /** @hide */
     public static final int SYNC_OBSERVER_TYPE_ALL = 0x7fffffff;
 
+    // Always log queries which take 100ms+; shorter queries are
+    // sampled accordingly.
+    private static final int SLOW_THRESHOLD_MILLIS = 100;
+    private final Random mRandom = new Random();  // guarded by itself
+
     public ContentResolver(Context context) {
         mContext = context;
     }
@@ -235,12 +243,15 @@ public abstract class ContentResolver {
             return null;
         }
         try {
+            long startTime = System.currentTimeMillis();
             Cursor qCursor = provider.query(uri, projection, selection, selectionArgs, sortOrder);
-            if(qCursor == null) {
+            if (qCursor == null) {
                 releaseProvider(provider);
                 return null;
             }
-            //Wrap the cursor object into CursorWrapperInner object
+            long durationMillis = System.currentTimeMillis() - startTime;
+            maybeLogQueryToEventLog(durationMillis, uri, projection, selection, sortOrder);
+            // Wrap the cursor object into CursorWrapperInner object
             return new CursorWrapperInner(qCursor, provider);
         } catch (RemoteException e) {
             releaseProvider(provider);
@@ -572,7 +583,11 @@ public abstract class ContentResolver {
             throw new IllegalArgumentException("Unknown URL " + url);
         }
         try {
-            return provider.insert(url, values);
+            long startTime = System.currentTimeMillis();
+            Uri createdRow = provider.insert(url, values);
+            long durationMillis = System.currentTimeMillis() - startTime;
+            maybeLogUpdateToEventLog(durationMillis, url, "insert", null /* where */);
+            return createdRow;
         } catch (RemoteException e) {
             return null;
         } finally {
@@ -627,7 +642,11 @@ public abstract class ContentResolver {
             throw new IllegalArgumentException("Unknown URL " + url);
         }
         try {
-            return provider.bulkInsert(url, values);
+            long startTime = System.currentTimeMillis();
+            int rowsCreated = provider.bulkInsert(url, values);
+            long durationMillis = System.currentTimeMillis() - startTime;
+            maybeLogUpdateToEventLog(durationMillis, url, "bulkinsert", null /* where */);
+            return rowsCreated;
         } catch (RemoteException e) {
             return 0;
         } finally {
@@ -652,7 +671,11 @@ public abstract class ContentResolver {
             throw new IllegalArgumentException("Unknown URL " + url);
         }
         try {
-            return provider.delete(url, where, selectionArgs);
+            long startTime = System.currentTimeMillis();
+            int rowsDeleted = provider.delete(url, where, selectionArgs);
+            long durationMillis = System.currentTimeMillis() - startTime;
+            maybeLogUpdateToEventLog(durationMillis, url, "delete", where);
+            return rowsDeleted;
         } catch (RemoteException e) {
             return -1;
         } finally {
@@ -680,7 +703,11 @@ public abstract class ContentResolver {
             throw new IllegalArgumentException("Unknown URI " + uri);
         }
         try {
-            return provider.update(uri, values, where, selectionArgs);
+            long startTime = System.currentTimeMillis();
+            int rowsUpdated = provider.update(uri, values, where, selectionArgs);
+            long durationMillis = System.currentTimeMillis() - startTime;
+            maybeLogUpdateToEventLog(durationMillis, uri, "update", where);
+            return rowsUpdated;
         } catch (RemoteException e) {
             return -1;
         } finally {
@@ -1217,6 +1244,78 @@ public abstract class ContentResolver {
         }
     }
 
+    /**
+     * Returns sampling percentage for a given duration.
+     *
+     * Always returns at least 1%.
+     */
+    private int samplePercentForDuration(long durationMillis) {
+        if (durationMillis >= SLOW_THRESHOLD_MILLIS) {
+            return 100;
+        }
+        return (int) (100 * durationMillis / SLOW_THRESHOLD_MILLIS) + 1;
+    }
+
+    private void maybeLogQueryToEventLog(long durationMillis,
+                                         Uri uri, String[] projection,
+                                         String selection, String sortOrder) {
+        int samplePercent = samplePercentForDuration(durationMillis);
+        if (samplePercent < 100) {
+            synchronized (mRandom) {
+                if (mRandom.nextInt(100) >= samplePercent) {
+                    return;
+                }
+            }
+        }
+
+        StringBuilder projectionBuffer = new StringBuilder(100);
+        if (projection != null) {
+            for (int i = 0; i < projection.length; ++i) {
+                // Note: not using a comma delimiter here, as the
+                // multiple arguments to EventLog.writeEvent later
+                // stringify with a comma delimiter, which would make
+                // parsing uglier later.
+                if (i != 0) projectionBuffer.append('/');
+                projectionBuffer.append(projection[i]);
+            }
+        }
+
+        // ActivityThread.currentPackageName() only returns non-null if the
+        // current thread is an application main thread.  This parameter tells
+        // us whether an event loop is blocked, and if so, which app it is.
+        String blockingPackage = ActivityThread.currentPackageName();
+
+        EventLog.writeEvent(
+            EventLogTags.CONTENT_QUERY_OPERATION,
+            uri.toString(),
+            projectionBuffer.toString(),
+            selection != null ? selection : "",
+            sortOrder != null ? sortOrder : "",
+            durationMillis,
+            blockingPackage != null ? blockingPackage : "",
+            samplePercent);
+    }
+
+    private void maybeLogUpdateToEventLog(
+        long durationMillis, Uri uri, String operation, String selection) {
+        int samplePercent = samplePercentForDuration(durationMillis);
+        if (samplePercent < 100) {
+            synchronized (mRandom) {
+                if (mRandom.nextInt(100) >= samplePercent) {
+                    return;
+                }
+            }
+        }
+        String blockingPackage = ActivityThread.currentPackageName();
+        EventLog.writeEvent(
+            EventLogTags.CONTENT_UPDATE_OPERATION,
+            uri.toString(),
+            operation,
+            selection != null ? selection : "",
+            durationMillis,
+            blockingPackage != null ? blockingPackage : "",
+            samplePercent);
+    }
 
     private final class CursorWrapperInner extends CursorWrapper {
         private IContentProvider mContentProvider;

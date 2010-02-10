@@ -139,6 +139,7 @@ static const CodecInfo kEncoderInfo[] = {
 
 #define CODEC_LOGI(x, ...) LOGI("[%s] "x, mComponentName, ##__VA_ARGS__)
 #define CODEC_LOGV(x, ...) LOGV("[%s] "x, mComponentName, ##__VA_ARGS__)
+#define CODEC_LOGE(x, ...) LOGE("[%s] "x, mComponentName, ##__VA_ARGS__)
 
 struct OMXCodecObserver : public BnOMXObserver {
     OMXCodecObserver() {
@@ -1284,7 +1285,8 @@ void OMXCodec::on_message(const omx_message &msg) {
                 CHECK_EQ(err, OK);
 
                 buffers->removeAt(i);
-            } else if (mPortStatus[kPortIndexInput] != SHUTTING_DOWN) {
+            } else if (mState != ERROR
+                    && mPortStatus[kPortIndexInput] != SHUTTING_DOWN) {
                 CHECK_EQ(mPortStatus[kPortIndexInput], ENABLED);
                 drainInputBuffer(&buffers->editItemAt(i));
             }
@@ -1930,10 +1932,17 @@ void OMXCodec::drainInputBuffer(BufferInfo *info) {
         srcLength = srcBuffer->range_length();
 
         if (info->mSize < srcLength) {
-            LOGE("info->mSize = %d, srcLength = %d",
+            CODEC_LOGE(
+                 "Codec's input buffers are too small to accomodate "
+                 "buffer read from source (info->mSize = %d, srcLength = %d)",
                  info->mSize, srcLength);
+
+            srcBuffer->release();
+            srcBuffer = NULL;
+
+            setState(ERROR);
+            return;
         }
-        CHECK(info->mSize >= srcLength);
         memcpy(info->mData,
                (const uint8_t *)srcBuffer->data() + srcBuffer->range_offset(),
                srcLength);
@@ -2250,7 +2259,7 @@ status_t OMXCodec::start(MetaData *) {
 }
 
 status_t OMXCodec::stop() {
-    CODEC_LOGV("stop");
+    CODEC_LOGV("stop mState=%d", mState);
 
     Mutex::Autolock autoLock(mLock);
 
@@ -2308,6 +2317,8 @@ status_t OMXCodec::stop() {
     }
 
     mSource->stop();
+
+    CODEC_LOGV("stopped");
 
     return OK;
 }

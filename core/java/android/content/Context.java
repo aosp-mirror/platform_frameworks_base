@@ -25,6 +25,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.media.MediaScannerConnection.ScanResultListener;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -137,7 +138,28 @@ public abstract class Context {
     
     /**
      * Return the context of the single, global Application object of the
-     * current process.
+     * current process.  This generally should only be used if you need a
+     * Context whose lifecycle is separate from the current context, that is
+     * tied to the lifetime of the process rather than the current component.
+     * 
+     * <p>Consider for example how this interacts with
+     * {@ #registerReceiver(BroadcastReceiver, IntentFilter)}:
+     * <ul>
+     * <li> <p>If used from an Activity context, the receiver is being registered
+     * within that activity.  This means that you are expected to unregister
+     * before the activity is done being destroyed; in fact if you do not do
+     * so, the framework will clean up your leaked registration as it removes
+     * the activity and log an error.  Thus, if you use the Activity context
+     * to register a receiver that is static (global to the process, not
+     * associated with an Activity instance) then that registration will be
+     * removed on you at whatever point the activity you used is destroyed.
+     * <li> <p>If used from the Context returned here, the receiver is being
+     * registered with the global state associated with your application.  Thus
+     * it will never be unregistered for you.  This is necessary if the receiver
+     * is associated with static data, not a particular component.  However
+     * using the ApplicationContext elsewhere can easily lead to serious leaks
+     * if you forget to unregister, unbind, etc.
+     * </ul>
      */
     public abstract Context getApplicationContext();
 
@@ -393,11 +415,84 @@ public abstract class Context {
     public abstract File getFilesDir();
     
     /**
+     * Returns the absolute path to the directory on the external filesystem
+     * (that is somewhere on {@link android.os.Environment#getExternalStorageDirectory()
+     * Environment.getExternalStorageDirectory()} where the application can
+     * place persistent files it owns.  These files are private to the
+     * applications, and not typically visible to the user as media.
+     * 
+     * <p>This is like {@link #getFilesDir()} in that these
+     * files will be deleted when the application is uninstalled, however there
+     * are some important differences:
+     * 
+     * <ul>
+     * <li>External files are not always available: they will disappear if the
+     * user mounts the external storage on a computer or removes it.  See the
+     * APIs on {@link android.os.Environment} for information in the storage state.
+     * <li>There is no security enforced with these files.  All applications
+     * can read and write files placed here.
+     * </ul>
+     * 
+     * <p>Here is an example of typical code to manipulate a file in
+     * an application's private storage:</p>
+     * 
+     * {@sample development/samples/ApiDemos/src/com/example/android/apis/content/ExternalStorage.java
+     * private_file}
+     *
+     * <p>If you install a non-null <var>type</var> to this function, the returned
+     * file will be a path to a sub-directory of the given type.  Though these files
+     * are not automatically scanned by the media scanner, you can explicitly
+     * add them to the media database with
+     * {@link android.media.MediaScannerConnection#scanFile(Context, String[], String[],
+     *      ScanResultListener) MediaScannerConnection.scanFile}.
+     * Note that this is not the same as
+     * {@link android.os.Environment#getExternalStoragePublicDirectory
+     * Environment.getExternalStoragePublicDirectory()}, which provides
+     * directories of media shared by all applications.  The
+     * directories returned here are
+     * owned by the application, and its contents will be removed when the
+     * application is uninstalled.  Unlike
+     * {@link android.os.Environment#getExternalStoragePublicDirectory
+     * Environment.getExternalStoragePublicDirectory()}, the directory
+     * returned here will be automatically created for you.
+     * 
+     * <p>Here is an example of typical code to manipulate a picture in
+     * an application's private storage and add it to the media database:</p>
+     * 
+     * {@sample development/samples/ApiDemos/src/com/example/android/apis/content/ExternalStorage.java
+     * private_picture}
+     * 
+     * @param type The type of files directory to return.  May be null for
+     * the root of the files directory or one of
+     * the following Environment constants for a subdirectory:
+     * {@link android.os.Environment#DIRECTORY_MUSIC},
+     * {@link android.os.Environment#DIRECTORY_PODCASTS},
+     * {@link android.os.Environment#DIRECTORY_RINGTONES},
+     * {@link android.os.Environment#DIRECTORY_ALARMS},
+     * {@link android.os.Environment#DIRECTORY_NOTIFICATIONS},
+     * {@link android.os.Environment#DIRECTORY_PICTURES}, or
+     * {@link android.os.Environment#DIRECTORY_MOVIES}.
+     * 
+     * @return Returns the path of the directory holding application files
+     * on external storage.  Returns null if external storage is not currently
+     * mounted so it could not ensure the path exists; you will need to call
+     * this method again when it is available.
+     *
+     * @see #getFilesDir
+     */
+    public abstract File getExternalFilesDir(String type);
+    
+    /**
      * Returns the absolute path to the application specific cache directory 
      * on the filesystem. These files will be ones that get deleted first when the
-     * device runs low on storage
+     * device runs low on storage.
      * There is no guarantee when these files will be deleted.
-     *
+     * 
+     * <strong>Note: you should not <em>rely</em> on the system deleting these
+     * files for you; you should always have a reasonable maximum, such as 1 MB,
+     * for the amount of space you consume with cache files, and prune those
+     * files when exceeding that space.</strong>
+     * 
      * @return Returns the path of the directory holding application cache files.
      *
      * @see #openFileOutput
@@ -406,6 +501,37 @@ public abstract class Context {
      */
     public abstract File getCacheDir();
 
+    /**
+     * Returns the absolute path to the directory on the external filesystem
+     * (that is somewhere on {@link android.os.Environment#getExternalStorageDirectory()
+     * Environment.getExternalStorageDirectory()} where the application can
+     * place cache files it owns.
+     * 
+     * <p>This is like {@link #getCacheDir()} in that these
+     * files will be deleted when the application is uninstalled, however there
+     * are some important differences:
+     * 
+     * <ul>
+     * <li>The platform does not monitor the space available in external storage,
+     * and thus will not automatically delete these files.  Note that you should
+     * be managing the maximum space you will use for these anyway, just like
+     * with {@link #getCacheDir()}.
+     * <li>External files are not always available: they will disappear if the
+     * user mounts the external storage on a computer or removes it.  See the
+     * APIs on {@link android.os.Environment} for information in the storage state.
+     * <li>There is no security enforced with these files.  All applications
+     * can read and write files placed here.
+     * </ul>
+     *
+     * @return Returns the path of the directory holding application cache files
+     * on external storage.  Returns null if external storage is not currently
+     * mounted so it could not ensure the path exists; you will need to call
+     * this method again when it is available.
+     *
+     * @see #getCacheDir
+     */
+    public abstract File getExternalCacheDir();
+    
     /**
      * Returns an array of strings naming the private files associated with
      * this Context's application package.
@@ -1110,7 +1236,7 @@ public abstract class Context {
      * @see #SENSOR_SERVICE
      * @see android.hardware.SensorManager
      * @see #STORAGE_SERVICE
-     * @see android.storage.StorageManager
+     * @see android.os.storage.StorageManager
      * @see #VIBRATOR_SERVICE
      * @see android.os.Vibrator
      * @see #CONNECTIVITY_SERVICE
@@ -1243,11 +1369,11 @@ public abstract class Context {
     
     /**
      * Use with {@link #getSystemService} to retrieve a {@link
-     * android.storage.StorageManager} for accesssing system storage
+     * android.os.storage.StorageManager} for accesssing system storage
      * functions.
      *
      * @see #getSystemService
-     * @see android.storage.StorageManager
+     * @see android.os.storage.StorageManager
      */
     public static final String STORAGE_SERVICE = "storage";
 

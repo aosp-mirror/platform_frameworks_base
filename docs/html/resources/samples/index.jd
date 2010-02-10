@@ -27,10 +27,10 @@ android update project -s -n API Demos -t <em>&lt;target_ID></em> -p <em>&lt;pat
 platforms) and allow you to view the source files in your browser. </p>
 
 <div class="special">
-  <p>Some of the samples in this listing are not yet available in the
-  SDK. While we work to update the SDK, you can
-  <a href="{@docRoot}shareables/latest_samples.zip">download the latest samples</a> as a ZIP
-  archive.</p>
+  <p>Some of the samples in this listing may not yet be available in the
+  SDK. To ensure that you have the latest versions of the samples, you can
+  <a href="{@docRoot}shareables/latest_samples.zip">download the samples pack</a>
+  as a .zip archive.</p>
 </div>
 
 <dl>
@@ -55,11 +55,15 @@ platforms) and allow you to view the source files in your browser. </p>
 
  <dt><a href="Home/index.html">Home</a></dt>
   <dd>A home screen replacement application.</dd>
-  
+
  <dt><a href="JetBoy/index.html">JetBoy</a></dt>
   <dd>A game that demonstrates the SONiVOX JET interactive music technology,
   with {@link android.media.JetPlayer}.</dd>
-    
+
+ <dt><a href="CubeLiveWallpaper/index.html">Live Wallpaper</a></dt>
+  <dd>An application that demonstrates how to create a live wallpaper and 
+  bundle it in an application that users can install on their devices.</dd>
+
  <dt><a href="LunarLander/index.html">Lunar Lander</a></dt>
   <dd>A classic Lunar Lander game.</dd>
 
@@ -70,14 +74,21 @@ platforms) and allow you to view the source files in your browser. </p>
  <dt><a href="NotePad/index.html">Note Pad</a></dt>
   <dd>An application for saving notes. Similar (but not identical) to the 
     <a href="{@docRoot}resources/tutorials/notepad/index.html">Notepad tutorial</a>.</dd>
-  
+
+ <dt><a href="SampleSyncAdapter/index.html">SampleSyncAdapter</a></dt>
+  <dd>Demonstrates how an application can communicate with a
+cloud-based service and synchronize its data with data stored locally in a
+content provider. The sample uses two related parts of the Android framework
+&mdash; the account manager and the synchronization manager (through a sync
+adapter).</dd>
+
  <dt><a href="SearchableDictionary/index.html">Searchable Dictionary</a></dt>
   <dd>A sample application that demonstrates Android's search framework, 
   including how to provide search suggestions for Quick Search Box.</dd>
-  
+
  <dt><a href="Snake/index.html">Snake</a></dt>
   <dd>An implementation of the classic game "Snake."</dd>
-  
+
  <dt><a href="SoftKeyboard/index.html">Soft Keyboard</a></dt>
   <dd>An example of writing an input method for a software keyboard.</dd>
 

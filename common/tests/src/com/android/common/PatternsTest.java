@@ -31,6 +31,20 @@ public class PatternsTest extends TestCase {
         t = Patterns.TOP_LEVEL_DOMAIN.matcher("com").matches();
         assertTrue("Missed valid TLD", t);
 
+        // One of the new top level domain.
+        t = Patterns.TOP_LEVEL_DOMAIN.matcher("me").matches();
+        assertTrue("Missed valid TLD", t);
+
+        // One of the new top level test domain.
+        t = Patterns.TOP_LEVEL_DOMAIN.matcher("xn--0zwm56d").matches();
+        assertTrue("Missed valid TLD", t);
+
+        t = Patterns.TOP_LEVEL_DOMAIN.matcher("mem").matches();
+        assertFalse("Matched invalid TLD!", t);
+
+        t = Patterns.TOP_LEVEL_DOMAIN.matcher("xn").matches();
+        assertFalse("Matched invalid TLD!", t);
+
         t = Patterns.TOP_LEVEL_DOMAIN.matcher("xer").matches();
         assertFalse("Matched invalid TLD!", t);
     }
@@ -40,6 +54,18 @@ public class PatternsTest extends TestCase {
         boolean t;
 
         t = Patterns.WEB_URL.matcher("http://www.google.com").matches();
+        assertTrue("Valid URL", t);
+
+        // Google in one of the new top level domain.
+        t = Patterns.WEB_URL.matcher("http://www.google.me").matches();
+        assertTrue("Valid URL", t);
+        t = Patterns.WEB_URL.matcher("google.me").matches();
+        assertTrue("Valid URL", t);
+
+        // Test url in Chinese: http://xn--fsqu00a.xn--0zwm56d
+        t = Patterns.WEB_URL.matcher("http://xn--fsqu00a.xn--0zwm56d").matches();
+        assertTrue("Valid URL", t);
+        t = Patterns.WEB_URL.matcher("xn--fsqu00a.xn--0zwm56d").matches();
         assertTrue("Valid URL", t);
 
         t = Patterns.WEB_URL.matcher("ftp://www.example.com").matches();

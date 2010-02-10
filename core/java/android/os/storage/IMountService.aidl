@@ -15,14 +15,15 @@
 ** limitations under the License.
 */
 
-package android.os;
+package android.os.storage;
 
-import android.os.IMountServiceListener;
+import android.os.storage.IMountServiceListener;
 
 /** WARNING! Update IMountService.h and IMountService.cpp if you change this file.
  * In particular, the ordering of the methods below must match the 
  * _TRANSACTION enum in IMountService.cpp
- * @hide
+ * @hide - Applications should use android.os.storage.StorageManager to access
+ * storage functions.
  */
 interface IMountService
 {
@@ -38,31 +39,19 @@ interface IMountService
     void unregisterListener(IMountServiceListener listener);
 
     /**
-     * Gets an Array of supported share methods
+     * Returns true if a USB mass storage host is connected
      */
-    String[] getShareMethodList();
+    boolean isUsbMassStorageConnected();
 
     /**
-     * Returns true if the share method is available
+     * Enables / disables USB mass storage.
      */
-    boolean getShareMethodAvailable(String method);
+    int setUsbMassStorageEnabled(boolean enable);
 
     /**
-     * Shares a volume via the specified method
-     * Returns an int consistent with MountServiceResultCode
+     * Returns true if a USB mass storage host is enabled (media is shared)
      */
-    int shareVolume(String path, String method);
-
-    /**
-     * Unshares a volume via the specified method
-     * Returns an int consistent with MountServiceResultCode
-     */
-    int unshareVolume(String path, String method);
-
-    /**
-     * Returns true if the volume is shared via the specified method.
-     */
-    boolean getVolumeShared(String path, String method);
+    boolean isUsbMassStorageEnabled();
 
     /**
      * Mount external storage at given mount point.
@@ -118,6 +107,11 @@ interface IMountService
      * Returns an int consistent with MountServiceResultCode
      */
     int unmountSecureContainer(String id);
+
+    /*
+     * Returns true if the specified container is mounted
+     */
+    boolean isSecureContainerMounted(String id);
 
     /*
      * Rename an unmounted secure container.

@@ -24,7 +24,7 @@
 #include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/Utils.h>
 #include <utils/String8.h>
-#include <sys/endian.h>
+#include <byteswap.h>
 
 namespace android {
 
@@ -348,7 +348,7 @@ void ID3::Iterator::getString(String8 *id) const {
             // endianness marker doesn't match host endianness, convert
             framedatacopy = new char16_t[len];
             for (int i = 0; i < len; i++) {
-                framedatacopy[i] = swap16(framedata[i]);
+                framedatacopy[i] = bswap_16(framedata[i]);
             }
             framedata = framedatacopy;
         }

@@ -5465,7 +5465,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 curFocus = mCurrentFocus;
                 // cache the paused state at ctor time as well
                 if (theFocus == null || theFocus.mToken == null) {
-                    Log.i(TAG, "focus " + theFocus + " mToken is null at event dispatch!");
                     focusPaused = false;
                 } else {
                     focusPaused = theFocus.mToken.paused;
@@ -5478,7 +5477,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         + " fin=" + finished + " gfw=" + gotFirstWindow
                         + " ed=" + eventDispatching + " tts=" + timeToSwitch
                         + " wf=" + wasFrozen + " fp=" + focusPaused
-                        + " mcf=" + mCurrentFocus + "}}";
+                        + " mcf=" + curFocus + "}}";
             }
         };
         private DispatchState mDispatchState = null;
@@ -5651,10 +5650,11 @@ public class WindowManagerService extends IWindowManager.Stub
                     synchronized (this) {
                         Log.w(TAG, "Key dispatching timed out sending to " +
                               (targetWin != null ? targetWin.mAttrs.getTitle()
-                              : "<null>"));
+                              : "<null>: no window ready for key dispatch"));
                         // NOSHIP debugging
-                        Log.w(TAG, "Dispatch state: " + mDispatchState);
-                        Log.w(TAG, "Current state:  " + new DispatchState(nextKey, targetWin));
+                        Log.w(TAG, "Previous dispatch state: " + mDispatchState);
+                        Log.w(TAG, "Current dispatch state: " +
+                                new DispatchState(nextKey, targetWin));
                         // END NOSHIP
                         //dump();
                         if (targetWin != null) {

@@ -18,7 +18,7 @@ package android.os;
 
 import java.io.IOException;
 import android.os.ServiceManager;
-import android.os.IMountService;
+import android.os.storage.IMountService;
 
 /**
  * Class that provides access to some of the power management functions.
