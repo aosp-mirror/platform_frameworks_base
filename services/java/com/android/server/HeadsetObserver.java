@@ -53,19 +53,6 @@ class HeadsetObserver extends UEventObserver {
     private final Context mContext;
     private final WakeLock mWakeLock;  // held while there is a pending route change
 
-    private boolean mHandleTTY;
-    private int mTTYState;
-    private AudioManager mAudioManager = null;
-
-    // special use of bits in headset state received from kernel made by some
-    // platforms to indicate changes in TTY mode.
-    private static final int BIT_TTY_OFF = 0;
-    private static final int BIT_TTY_FULL = (1 << 2);
-    private static final int BIT_TTY_VCO = (1 << 5);
-    private static final int BIT_TTY_HCO = (1 << 6);
-    private static final int TTY_BITS_MASK = (BIT_TTY_FULL | BIT_TTY_VCO | BIT_TTY_HCO);
-
-
     public HeadsetObserver(Context context) {
         mContext = context;
         PowerManager pm = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
@@ -73,11 +60,6 @@ class HeadsetObserver extends UEventObserver {
         mWakeLock.setReferenceCounted(false);
 
         startObserving(HEADSET_UEVENT_MATCH);
-
-        // read settings for TTY mode indication method
-        mHandleTTY = context.getResources().getBoolean(
-                com.android.internal.R.bool.tty_mode_uses_headset_events);
-        mTTYState = BIT_TTY_OFF;
 
         init();  // set initial status
     }
@@ -118,39 +100,6 @@ class HeadsetObserver extends UEventObserver {
     }
 
     private synchronized final void update(String newName, int newState) {
-        // handle TTY state change first
-        if (mHandleTTY) {
-            int ttyState = newState  & TTY_BITS_MASK;
-            if (ttyState != mTTYState) {
-                String ttyMode;
-
-                switch (ttyState) {
-                case BIT_TTY_FULL:
-                    ttyMode = "tty_full";
-                    break;
-                case BIT_TTY_VCO:
-                    ttyMode = "tty_vco";
-                    break;
-                case BIT_TTY_HCO:
-                    ttyMode = "tty_hco";
-                    break;
-                case BIT_TTY_OFF:
-                    ttyMode = "tty_off";
-                    break;
-                default:
-                    ttyMode = "tty_invalid";
-                    break;
-
-                }
-                if (ttyMode != "tty_invalid") {
-                    mTTYState = ttyState;
-                    if (mAudioManager == null) {
-                        mAudioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
-                    }
-                    mAudioManager.setParameters("tty_mode="+ttyMode);
-                }
-            }
-        }
         // Retain only relevant bits
         int headsetState = newState & SUPPORTED_HEADSETS;
         int newOrOld = headsetState | mHeadsetState;
