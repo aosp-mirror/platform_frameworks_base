@@ -1041,7 +1041,7 @@ public class SyncManager implements OnAccountsUpdateListener {
                     continue;
                 }
 
-                SyncStorageEngine.AuthorityInfo settings = mSyncStorageEngine.getAuthority(
+                SyncStorageEngine.AuthorityInfo settings = mSyncStorageEngine.getOrCreateAuthority(
                         account, syncAdapterType.type.authority);
                 SyncStatusInfo status = mSyncStorageEngine.getOrCreateSyncStatus(settings);
                 pw.print("    "); pw.print(settings.authority);
