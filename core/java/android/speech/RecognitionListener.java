@@ -79,7 +79,8 @@ public interface RecognitionListener {
      * time between {@link #onBeginningOfSpeech()} and {@link #onResults(Bundle)} when partial
      * results are ready. This method may be called zero, one or multiple times for each call to
      * {@link RecognitionManager#startListening(Intent)}, depending on the speech recognition
-     * service implementation.
+     * service implementation.  To request partial results, use
+     * {@link RecognizerIntent#EXTRA_PARTIAL_RESULTS}
      * 
      * @param partialResults the returned results. To retrieve the results in
      *        ArrayList&lt;String&gt; format use {@link Bundle#getStringArrayList(String)} with

@@ -77,6 +77,7 @@ public class RecognizerIntent {
      *   <li>{@link #EXTRA_PROMPT}
      *   <li>{@link #EXTRA_LANGUAGE}
      *   <li>{@link #EXTRA_MAX_RESULTS}
+     *   <li>{@link #EXTRA_PARTIAL_RESULTS}
      * </ul>
      * 
      * <p> Result extras (returned in the result, not to be specified in the request):
@@ -164,6 +165,13 @@ public class RecognizerIntent {
      * will choose how many results to return. Must be an integer.
      */
     public static final String EXTRA_MAX_RESULTS = "android.speech.extra.MAX_RESULTS";
+
+    /**
+     * Optional boolean to indicate whether partial results should be returned by the recognizer
+     * as the user speaks (default is false).  The server may ignore a request for partial
+     * results in some or all cases.
+     */
+    public static final String EXTRA_PARTIAL_RESULTS = "android.speech.extra.PARTIAL_RESULTS";
 
     /**
      * When the intent is {@link #ACTION_RECOGNIZE_SPEECH}, the speech input activity will
