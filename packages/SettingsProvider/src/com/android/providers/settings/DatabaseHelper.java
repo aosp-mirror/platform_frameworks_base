@@ -23,6 +23,8 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.content.pm.ServiceInfo;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -36,6 +38,7 @@ import android.net.ConnectivityManager;
 import android.os.Environment;
 import android.os.SystemProperties;
 import android.provider.Settings;
+import android.speech.RecognizerIntent;
 import android.text.TextUtils;
 import android.util.Config;
 import android.util.Log;
@@ -72,7 +75,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // database gets upgraded properly. At a minimum, please confirm that 'upgradeVersion'
     // is properly propagated through your change.  Not doing so will result in a loss of user
     // settings.
-    private static final int DATABASE_VERSION = 48;
+    private static final int DATABASE_VERSION = 49;
 
     private Context mContext;
 
@@ -611,6 +614,23 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             }
            upgradeVersion = 48;
        }
+        
+       if (upgradeVersion == 48) {
+           /*
+            * Adding a new setting for which voice recognition service to use.
+            */
+           db.beginTransaction();
+           try {
+               SQLiteStatement stmt = db.compileStatement("INSERT OR IGNORE INTO secure(name,value)"
+                       + " VALUES(?,?);");
+               loadVoiceRecognitionServiceSetting(stmt);
+               stmt.close();
+               db.setTransactionSuccessful();
+           } finally {
+               db.endTransaction();
+           }
+           upgradeVersion = 49;
+       }
 
        if (upgradeVersion != currentVersion) {
             Log.w(TAG, "Got stuck trying to upgrade from version " + upgradeVersion
@@ -955,6 +975,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         loadBooleanSetting(stmt, Settings.Secure.MOUNT_UMS_NOTIFY_ENABLED,
                 R.bool.def_mount_ums_notify_enabled);
+        
+        loadVoiceRecognitionServiceSetting(stmt);
 
         stmt.close();
     }
@@ -965,6 +987,32 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         loadStringSetting(stmt, Settings.Secure.BACKUP_TRANSPORT,
                 R.string.def_backup_transport);
+    }
+    
+    /**
+     * Introduced in database version 49.
+     */
+    private void loadVoiceRecognitionServiceSetting(SQLiteStatement stmt) {
+        String selectedService = null;
+        List<ResolveInfo> availableRecognitionServices =
+                mContext.getPackageManager().queryIntentServices(
+                        new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH), 0);
+        int numAvailable = availableRecognitionServices.size();
+        
+        if (numAvailable == 0) {
+            Log.w(TAG, "no available voice recognition services found");
+        } else {
+            if (numAvailable > 1) {
+                Log.w(TAG, "more than one voice recognition service found, picking first");
+            }
+            
+            ServiceInfo serviceInfo = availableRecognitionServices.get(0).serviceInfo;
+            selectedService =
+                    new ComponentName(serviceInfo.packageName, serviceInfo.name).flattenToString();
+        }
+        
+        loadSetting(stmt, Settings.Secure.VOICE_RECOGNITION_SERVICE,
+                selectedService == null ? "" : selectedService);
     }
 
     private void loadSetting(SQLiteStatement stmt, String key, Object value) {

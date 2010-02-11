@@ -27,6 +27,8 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
+import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.Log;
 
 import java.util.LinkedList;
@@ -218,8 +220,20 @@ public class RecognitionManager {
         checkIsCalledFromMainThread();
         if (mConnection == null) { // first time connection
             mConnection = new Connection();
-            if (!mContext.bindService(new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH),
-                    mConnection, Context.BIND_AUTO_CREATE)) {
+            
+            Intent serviceIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+            String serviceComponent = Settings.Secure.getString(mContext.getContentResolver(),
+                    Settings.Secure.VOICE_RECOGNITION_SERVICE);
+            
+            if (TextUtils.isEmpty(serviceComponent)) {
+                Log.e(TAG, "no selected voice recognition service");
+                mListener.onError(ERROR_CLIENT);
+                return;
+            }
+            
+            serviceIntent.setComponent(ComponentName.unflattenFromString(serviceComponent));
+            
+            if (!mContext.bindService(serviceIntent, mConnection, Context.BIND_AUTO_CREATE)) {
                 Log.e(TAG, "bind to recognition service failed");
                 mConnection = null;
                 mService = null;

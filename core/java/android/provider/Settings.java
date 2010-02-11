@@ -22,6 +22,7 @@ import org.apache.commons.codec.binary.Base64;
 
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.content.ComponentName;
 import android.content.ContentQueryMap;
 import android.content.ContentResolver;
 import android.content.ContentValues;
@@ -2955,6 +2956,14 @@ public final class Settings {
          * @hide
          */
         public static final String ANR_SHOW_BACKGROUND = "anr_show_background";
+        
+        /**
+         * The {@link ComponentName} string of the service to be used as the voice recognition
+         * service.
+         * 
+         * @hide
+         */
+        public static final String VOICE_RECOGNITION_SERVICE = "voice_recognition_service";
 
         /**
          * @hide
