@@ -761,12 +761,6 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
             return false;
         }
 
-        if (keyCode == KeyEvent.KEYCODE_SEARCH && event.getRepeatCount() == 0) {
-            event.startTracking();
-            // Consume search key for later use.
-            return true;
-        }
-
         // if it's an action specified by the searchable activity, launch the
         // entered query with the action key
         SearchableInfo.ActionKeyInfo actionKey = mSearchable.findActionKey(keyCode);
@@ -776,24 +770,6 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         }
 
         return super.onKeyDown(keyCode, event);
-    }
-    
-    @Override
-    public boolean onKeyUp(int keyCode, KeyEvent event) {
-        if (DBG) Log.d(LOG_TAG, "onKeyUp(" + keyCode + "," + event + ")");
-        if (mSearchable == null) {
-            return false;
-        }
-
-        if (keyCode == KeyEvent.KEYCODE_SEARCH && event.isTracking()
-                && !event.isCanceled()) {
-            // If the search key is pressed, toggle between global and in-app search. If we are
-            // currently doing global search and there is no in-app search context to toggle to,
-            // just don't do anything.
-            return toggleGlobalSearch();
-        }
-
-        return super.onKeyUp(keyCode, event);
     }
     
     /**
