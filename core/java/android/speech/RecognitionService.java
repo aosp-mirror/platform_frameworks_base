@@ -16,6 +16,8 @@
 
 package android.speech;
 
+import android.annotation.SdkConstant;
+import android.annotation.SdkConstant.SdkConstantType;
 import android.app.Service;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -32,6 +34,18 @@ import android.util.Log;
  * implementation of this service is state-less.
  */
 public abstract class RecognitionService extends Service {
+    /**
+     * The {@link Intent} that must be declared as handled by the service.
+     */
+    @SdkConstant(SdkConstantType.SERVICE_ACTION)
+    public static final String SERVICE_INTERFACE = "android.speech.RecognitionService";
+    
+    /**
+     * Name under which a RecognitionService component publishes information about itself.
+     * This meta-data should reference an XML resource containing a
+     * <code>&lt;{@link android.R.styleable#RecognitionService recognition-service}&gt;</code> tag.
+     */
+    public static final String SERVICE_META_DATA = "android.speech";
 
     /** Log messages identifier */
     private static final String TAG = "RecognitionService";
