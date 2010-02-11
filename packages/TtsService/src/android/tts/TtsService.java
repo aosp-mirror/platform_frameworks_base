@@ -824,11 +824,15 @@ public class TtsService extends Service implements OnCompletionListener {
                 try {
                     synthAvailable = synthesizerLock.tryLock();
                     if (!synthAvailable) {
-                        mSynthBusy = true;
+                        synchronized (this) {
+                            mSynthBusy = true;
+                        }
                         Thread.sleep(100);
                         Thread synth = (new Thread(new SynthThread()));
                         synth.start();
-                        mSynthBusy = false;
+                        synchronized (this) {
+                            mSynthBusy = false;
+                        }
                         return;
                     }
                     String language = "";
