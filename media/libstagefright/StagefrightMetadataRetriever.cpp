@@ -308,6 +308,7 @@ void StagefrightMetadataRetriever::parseMetaData() {
         { kKeyDiscNumber, METADATA_KEY_DISC_NUMBER },
         { kKeyAlbum, METADATA_KEY_ALBUM },
         { kKeyArtist, METADATA_KEY_ARTIST },
+        { kKeyAlbumArtist, METADATA_KEY_ALBUMARTIST },
         { kKeyAuthor, METADATA_KEY_AUTHOR },
         { kKeyComposer, METADATA_KEY_COMPOSER },
         { kKeyDate, METADATA_KEY_DATE },

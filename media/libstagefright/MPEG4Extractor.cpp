@@ -1045,6 +1045,11 @@ status_t MPEG4Extractor::parseMetaData(off_t offset, size_t size) {
             metadataKey = kKeyArtist;
             break;
         }
+        case FOURCC('a', 'A', 'R', 'T'):
+        {
+            metadataKey = kKeyAlbumArtist;
+            break;
+        }
         case FOURCC(0xa9, 'd', 'a', 'y'):
         {
             metadataKey = kKeyYear;
