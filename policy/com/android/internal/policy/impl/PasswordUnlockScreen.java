@@ -17,18 +17,15 @@
 package com.android.internal.policy.impl;
 
 import android.content.Context;
+import android.graphics.Rect;
 
-import com.android.internal.telephony.IccCard.State;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.PasswordEntryKeyboardView;
 
-import android.text.Editable;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -89,8 +86,13 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
                 : PasswordEntryKeyboardHelper.KEYBOARD_MODE_NUMERIC);
 
         updateMonitor.registerConfigurationChangeCallback(this);
-        setFocusableInTouchMode(true);
         mPasswordEntry.requestFocus();
+    }
+
+    @Override
+    protected boolean onRequestFocusInDescendants(int direction, Rect previouslyFocusedRect) {
+        // send focus to the password field
+        return mPasswordEntry.requestFocus(direction, previouslyFocusedRect);
     }
 
     /** {@inheritDoc} */
