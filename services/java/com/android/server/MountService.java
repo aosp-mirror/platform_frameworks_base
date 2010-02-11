@@ -543,7 +543,7 @@ class MountService extends IMountService.Stub
             // call back will handle the status changes any way.
             int code = e.getCode();
             if (code == VoldResponseCode.OpFailedVolNotMounted) {
-                return StorageResultCode.OperationFailedVolumeNotMounted;
+                return StorageResultCode.OperationFailedStorageNotMounted;
             } else {
                 return StorageResultCode.OperationFailedInternalError;
             }
@@ -826,6 +826,12 @@ class MountService extends IMountService.Stub
         } catch (NativeDaemonConnectorException e) {
             rc = StorageResultCode.OperationFailedInternalError;
         }
+
+        if (rc == StorageResultCode.OperationSucceeded) {
+            synchronized (mAsecMountSet) {
+                mAsecMountSet.add(id);
+            }
+        }
         return rc;
     }
 
@@ -836,6 +842,10 @@ class MountService extends IMountService.Stub
         int rc = StorageResultCode.OperationSucceeded;
         try {
             mConnector.doCommand(String.format("asec finalize %s", id));
+            /*
+             * Finalization does a remount, so no need
+             * to update mAsecMountSet
+             */
         } catch (NativeDaemonConnectorException e) {
             rc = StorageResultCode.OperationFailedInternalError;
         }
@@ -853,6 +863,15 @@ class MountService extends IMountService.Stub
         } catch (NativeDaemonConnectorException e) {
             rc = StorageResultCode.OperationFailedInternalError;
         }
+
+        if (rc == StorageResultCode.OperationSucceeded) {
+            synchronized (mAsecMountSet) {
+                if (mAsecMountSet.contains(id)) {
+                    mAsecMountSet.remove(id);
+                }
+            }
+        }
+
         return rc;
     }
    
@@ -860,6 +879,12 @@ class MountService extends IMountService.Stub
         validatePermission(android.Manifest.permission.ASEC_MOUNT_UNMOUNT);
         waitForReady();
         warnOnNotMounted();
+
+        synchronized (mAsecMountSet) {
+            if (mAsecMountSet.contains(id)) {
+                return StorageResultCode.OperationFailedStorageMounted;
+            }
+        }
 
         int rc = StorageResultCode.OperationSucceeded;
         String cmd = String.format("asec mount %s %s %d", id, key, ownerUid);
@@ -884,7 +909,7 @@ class MountService extends IMountService.Stub
 
         synchronized (mAsecMountSet) {
             if (!mAsecMountSet.contains(id)) {
-                return StorageResultCode.OperationFailedVolumeNotMounted;
+                return StorageResultCode.OperationFailedStorageNotMounted;
             }
          }
 
@@ -919,6 +944,12 @@ class MountService extends IMountService.Stub
         waitForReady();
         warnOnNotMounted();
 
+        synchronized (mAsecMountSet) {
+            if (mAsecMountSet.contains(oldId)) {
+                return StorageResultCode.OperationFailedStorageMounted;
+            }
+        }
+
         int rc = StorageResultCode.OperationSucceeded;
         String cmd = String.format("asec rename %s %s", oldId, newId);
         try {
@@ -926,6 +957,7 @@ class MountService extends IMountService.Stub
         } catch (NativeDaemonConnectorException e) {
             rc = StorageResultCode.OperationFailedInternalError;
         }
+
         return rc;
     }
 
