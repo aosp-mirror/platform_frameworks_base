@@ -40,8 +40,8 @@ import java.io.IOException;
 public class BootReceiver extends BroadcastReceiver {
     private static final String TAG = "BootReceiver";
 
-    // Negative to read the *last* 64K of the file (per FileUtils.readTextFile)
-    private static final int LOG_SIZE = -65536;
+    // Maximum size of a logged event (files get truncated if they're longer)
+    private static final int LOG_SIZE = 65536;
 
     private static final File TOMBSTONE_DIR = new File("/data/tombstones");
 
@@ -92,10 +92,16 @@ public class BootReceiver extends BroadcastReceiver {
             String now = Long.toString(System.currentTimeMillis());
             SystemProperties.set("ro.runtime.firstboot", now);
             db.addText("SYSTEM_BOOT", props);
-            addFileToDropBox(db, prefs, props, "/proc/last_kmsg", "SYSTEM_LAST_KMSG");
-            addFileToDropBox(db, prefs, props, "/cache/recovery/log", "SYSTEM_RECOVERY_LOG");
-            addFileToDropBox(db, prefs, props, "/data/dontpanic/apanic_console", "APANIC_CONSOLE");
-            addFileToDropBox(db, prefs, props, "/data/dontpanic/apanic_threads", "APANIC_THREADS");
+
+            // Negative sizes mean to take the *tail* of the file (see FileUtils.readTextFile())
+            addFileToDropBox(db, prefs, props, "/proc/last_kmsg",
+                    -LOG_SIZE, "SYSTEM_LAST_KMSG");
+            addFileToDropBox(db, prefs, props, "/cache/recovery/log",
+                    -LOG_SIZE, "SYSTEM_RECOVERY_LOG");
+            addFileToDropBox(db, prefs, props, "/data/dontpanic/apanic_console",
+                    -LOG_SIZE, "APANIC_CONSOLE");
+            addFileToDropBox(db, prefs, props, "/data/dontpanic/apanic_threads",
+                    -LOG_SIZE, "APANIC_THREADS");
         } else {
             db.addText("SYSTEM_RESTART", props);
         }
@@ -103,7 +109,8 @@ public class BootReceiver extends BroadcastReceiver {
         // Scan existing tombstones (in case any new ones appeared)
         File[] tombstoneFiles = TOMBSTONE_DIR.listFiles();
         for (int i = 0; tombstoneFiles != null && i < tombstoneFiles.length; i++) {
-            addFileToDropBox(db, prefs, props, tombstoneFiles[i].getPath(), "SYSTEM_TOMBSTONE");
+            addFileToDropBox(db, prefs, props, tombstoneFiles[i].getPath(),
+                    LOG_SIZE, "SYSTEM_TOMBSTONE");
         }
 
         // Start watching for new tombstone files; will record them as they occur.
@@ -113,7 +120,7 @@ public class BootReceiver extends BroadcastReceiver {
             public void onEvent(int event, String path) {
                 try {
                     String filename = new File(TOMBSTONE_DIR, path).getPath();
-                    addFileToDropBox(db, prefs, props, filename, "SYSTEM_TOMBSTONE");
+                    addFileToDropBox(db, prefs, props, filename, LOG_SIZE, "SYSTEM_TOMBSTONE");
                 } catch (IOException e) {
                     Log.e(TAG, "Can't log tombstone", e);
                 }
@@ -125,7 +132,7 @@ public class BootReceiver extends BroadcastReceiver {
 
     private static void addFileToDropBox(
             DropBoxManager db, SharedPreferences prefs,
-            String headers, String filename, String tag) throws IOException {
+            String headers, String filename, int maxSize, String tag) throws IOException {
         if (!db.isTagEnabled(tag)) return;  // Logging disabled
 
         File file = new File(filename);
@@ -137,7 +144,7 @@ public class BootReceiver extends BroadcastReceiver {
         prefs.edit().putLong(filename, fileTime).commit();
 
         StringBuilder report = new StringBuilder(headers).append("\n");
-        report.append(FileUtils.readTextFile(file, LOG_SIZE, "[[TRUNCATED]]\n"));
+        report.append(FileUtils.readTextFile(file, maxSize, "[[TRUNCATED]]\n"));
         db.addText(tag, report.toString());
         Log.i(TAG, "Logging " + filename + " to DropBox (" + tag + ")");
     }
