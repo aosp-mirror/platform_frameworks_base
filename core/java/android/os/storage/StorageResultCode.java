@@ -53,8 +53,15 @@ public class StorageResultCode
     public static final int OperationFailedMediaCorrupt      = -4;
 
     /**
-     * Operation failed: Media not mounted.
+     * Operation failed: Storage not mounted.
      * @see android.os.storage.StorageManager
      */
-    public static final int OperationFailedVolumeNotMounted  = -5;
+    public static final int OperationFailedStorageNotMounted  = -5;
+
+    /**
+     * Operation failed: Storage is mounted.
+     * @see android.os.storage.StorageManager
+     */
+    public static final int OperationFailedStorageMounted     = -6;
+
 }
