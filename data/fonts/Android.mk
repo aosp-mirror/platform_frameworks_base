@@ -26,14 +26,11 @@ copy_from :=                \
     Clockopia.ttf
 
 ifneq ($(NO_FALLBACK_FONT),true)
+ifeq ($(filter %system/fonts/DroidSansFallback.ttf,$(PRODUCT_COPY_FILES)),)
+    # if the product makefile has set the the fallback font, don't override it.
     copy_from += DroidSansFallback.ttf
 endif
+endif
 
-copy_to := $(addprefix $(TARGET_OUT)/fonts/,$(copy_from))
-
-$(copy_to) : PRIVATE_MODULE := fonts
-$(copy_to) : $(TARGET_OUT)/fonts/% : $(LOCAL_PATH)/% | $(ACP)
-	$(transform-prebuilt-to-target)
-
-ALL_PREBUILT += $(copy_to)
-
+copy_file_pairs := $(foreach cf,$(copy_from),$(LOCAL_PATH)/$(cf):system/fonts/$(cf))
+PRODUCT_COPY_FILES += $(copy_file_pairs)
