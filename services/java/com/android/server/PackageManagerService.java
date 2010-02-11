@@ -1076,6 +1076,28 @@ class PackageManagerService extends IPackageManager.Stub {
         return null;
     }
 
+    public String[] currentToCanonicalPackageNames(String[] names) {
+        String[] out = new String[names.length];
+        synchronized (mPackages) {
+            for (int i=names.length-1; i>=0; i--) {
+                PackageSetting ps = mSettings.mPackages.get(names[i]);
+                out[i] = ps != null && ps.realName != null ? ps.realName : names[i];
+            }
+        }
+        return out;
+    }
+    
+    public String[] canonicalToCurrentPackageNames(String[] names) {
+        String[] out = new String[names.length];
+        synchronized (mPackages) {
+            for (int i=names.length-1; i>=0; i--) {
+                String cur = mSettings.mRenamedPackages.get(names[i]);
+                out[i] = cur != null ? cur : names[i];
+            }
+        }
+        return out;
+    }
+    
     public int getPackageUid(String packageName) {
         synchronized (mPackages) {
             PackageParser.Package p = mPackages.get(packageName);

@@ -691,6 +691,23 @@ public abstract class PackageManager {
             throws NameNotFoundException;
 
     /**
+     * Map from the current package names in use on the device to whatever
+     * the current canonical name of that package is.
+     * @param names Array of current names to be mapped.
+     * @return Returns an array of the same size as the original, containing
+     * the canonical name for each package.
+     */
+    public abstract String[] currentToCanonicalPackageNames(String[] names);
+    
+    /**
+     * Map from a packages canonical name to the current name in use on the device.
+     * @param names Array of new names to be mapped.
+     * @return Returns an array of the same size as the original, containing
+     * the current name for each package.
+     */
+    public abstract String[] canonicalToCurrentPackageNames(String[] names);
+    
+    /**
      * Return a "good" intent to launch a front-door activity in a package,
      * for use for example to implement an "open" button when browsing through
      * packages.  The current implementation will look first for a main

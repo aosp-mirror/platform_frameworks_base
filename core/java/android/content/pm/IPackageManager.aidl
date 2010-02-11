@@ -47,6 +47,9 @@ interface IPackageManager {
     PackageInfo getPackageInfo(String packageName, int flags);
     int getPackageUid(String packageName);
     int[] getPackageGids(String packageName);
+    
+    String[] currentToCanonicalPackageNames(in String[] names);
+    String[] canonicalToCurrentPackageNames(in String[] names);
 
     PermissionInfo getPermissionInfo(String name, int flags);
     

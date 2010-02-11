@@ -59,6 +59,16 @@ public class MockPackageManager extends PackageManager {
     }
 
     @Override
+    public String[] currentToCanonicalPackageNames(String[] names) {
+        throw new UnsupportedOperationException();
+    }
+    
+    @Override
+    public String[] canonicalToCurrentPackageNames(String[] names) {
+        throw new UnsupportedOperationException();
+    }
+    
+    @Override
     public Intent getLaunchIntentForPackage(String packageName) {
         throw new UnsupportedOperationException();
     }
