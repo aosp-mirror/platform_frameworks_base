@@ -608,7 +608,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 throw new NullPointerException("ComponentName is null");
             }
             ActiveAdmin ap = getActiveAdminForCallerLocked(who,
-                    DeviceAdminInfo.USES_POLICY_LIMIT_UNLOCK);
+                    DeviceAdminInfo.USES_POLICY_FORCE_LOCK);
             if (ap.maximumTimeToUnlock != timeMs) {
                 ap.maximumTimeToUnlock = timeMs;
                 
