@@ -52,20 +52,19 @@ public class ThumbnailUtils {
 
     /* Options used internally. */
     private static final int OPTIONS_NONE = 0x0;
-    private static final int OPTIONS_DO_NOT_USE_NATIVE = 0x1;
-    private static final int OPTIONS_SCALE_UP = 0x2;
+    private static final int OPTIONS_SCALE_UP = 0x1;
 
     /**
      * Constant used to indicate we should recycle the input in
      * {@link #extractThumbnail(Bitmap, int, int, int)} unless the output is the input.
      */
-    public static final int OPTIONS_RECYCLE_INPUT = 0x4;
+    public static final int OPTIONS_RECYCLE_INPUT = 0x2;
 
     /**
-     * Constant used to indicate the dimension of normal thumbnail in
+     * Constant used to indicate the dimension of mini thumbnail in
      * {@link #extractThumbnail(Bitmap, int, int, int)}.
      */
-    public static final int TARGET_SIZE_NORMAL_THUMBNAIL = 320;
+    public static final int TARGET_SIZE_MINI_THUMBNAIL = 320;
 
     /**
      * Constant used to indicate the dimension of micro thumbnail in
@@ -95,7 +94,7 @@ public class ThumbnailUtils {
             long origId, int kind, boolean saveMini) {
         boolean wantMini = (kind == Images.Thumbnails.MINI_KIND || saveMini);
         int targetSize = wantMini ?
-                TARGET_SIZE_NORMAL_THUMBNAIL : TARGET_SIZE_MICRO_THUMBNAIL;
+                TARGET_SIZE_MINI_THUMBNAIL : TARGET_SIZE_MICRO_THUMBNAIL;
         int maxPixels = wantMini ?
                 MAX_NUM_PIXELS_THUMBNAIL : MAX_NUM_PIXELS_MICRO_THUMBNAIL;
         SizedThumbnailBitmap sizedThumbnailBitmap = new SizedThumbnailBitmap();
@@ -264,40 +263,16 @@ public class ThumbnailUtils {
     }
 
     /**
-     *  Returns Options that set the native alloc flag for Bitmap decode.
-     */
-    private static BitmapFactory.Options createNativeAllocOptions() {
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inNativeAlloc = true;
-        return options;
-    }
-
-    /**
      * Make a bitmap from a given Uri, minimal side length, and maximum number of pixels.
+     * The image data will be read from specified ContentResolver.
      */
     private static Bitmap makeBitmap(int minSideLength, int maxNumOfPixels,
             Uri uri, ContentResolver cr) {
-        return makeBitmap(minSideLength, maxNumOfPixels, uri, cr,
-            OPTIONS_DO_NOT_USE_NATIVE);
-    }
-
-    /**
-     * Make a bitmap from a given Uri, minimal side length, and maximum number of pixels.
-     * The image data will be read from specified ContentResolver and clients are allowed to specify
-     * whether they want the Bitmap be created in native memory.
-     */
-    private static Bitmap makeBitmap(int minSideLength, int maxNumOfPixels,
-            Uri uri, ContentResolver cr, int opt) {
-        boolean useNative = (opt & OPTIONS_DO_NOT_USE_NATIVE) != 0;
         ParcelFileDescriptor input = null;
         try {
             input = cr.openFileDescriptor(uri, "r");
-            BitmapFactory.Options options = null;
-            if (useNative) {
-                options = createNativeAllocOptions();
-            }
             return makeBitmap(minSideLength, maxNumOfPixels, uri, cr, input,
-                    options);
+                    null);
         } catch (IOException ex) {
             Log.e(TAG, "", ex);
             return null;
