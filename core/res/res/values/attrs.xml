@@ -1452,7 +1452,7 @@
          included in that tag. -->
     <declare-styleable name="InputMethod">
         <!-- Component name of an activity that allows the user to modify
-             the settings for this input method. -->
+             the settings for this service. -->
         <attr name="settingsActivity" format="string" />
         <!-- Set to true in all of the configurations for which this input
              method should be considered an option as the default. -->
@@ -3494,8 +3494,6 @@
          meta-data entry.  Described here are the attributes that can be
          included in that tag. -->
     <declare-styleable name="Wallpaper">
-        <!-- Component name of an activity that allows the user to modify
-             the current settings for this wallpaper. -->
         <attr name="settingsActivity" />
 
         <!-- Reference to a the wallpaper's thumbnail bitmap. -->
@@ -3585,6 +3583,14 @@
     <declare-styleable name="SlidingTab">
         <!-- Use "horizontal" for a row, "vertical" for a column.  The default is horizontal. -->
         <attr name="orientation" />
+    </declare-styleable>
+    
+    <!-- Use <code>recognition-service</code> as the root tag of the XML resource that
+         describes a {@link android.speech.RecognitionService}, which is reference from
+         its {@link android.speech.RecognitionService#SERVICE_META_DATA} meta-data entry.
+         Described here are the attributes that can be included in that tag. -->
+    <declare-styleable name="RecognitionService">
+        <attr name="settingsActivity" />
     </declare-styleable>
 
 </resources>
