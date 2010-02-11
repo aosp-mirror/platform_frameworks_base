@@ -221,7 +221,7 @@ public class RecognitionManager {
         if (mConnection == null) { // first time connection
             mConnection = new Connection();
             
-            Intent serviceIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+            Intent serviceIntent = new Intent(RecognitionService.SERVICE_INTERFACE);
             String serviceComponent = Settings.Secure.getString(mContext.getContentResolver(),
                     Settings.Secure.VOICE_RECOGNITION_SERVICE);
             
