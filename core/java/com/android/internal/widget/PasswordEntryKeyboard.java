@@ -216,61 +216,6 @@ public class PasswordEntryKeyboard extends Keyboard {
         }
     }
 
-    /**
-     * Sets keyboard extension. Keyboard extension is shown when input is detected above keyboard
-     * while keyboard has focus.
-     *
-     * @param resId
-     */
-    public void setExtension(int resId) {
-        mExtensionResId = resId;
-    }
-
-    /**
-     * Get current extesion resource id.
-     *
-     * @return resource id, 0 if not set.
-     */
-    public int getExtension() {
-        return mExtensionResId;
-    }
-
-    private void updateSpaceBarForLocale() {
-        if (mLocale != null) {
-            // Create the graphic for spacebar
-            Bitmap buffer = Bitmap.createBitmap(mSpaceKey.width, mSpaceIcon.getIntrinsicHeight(),
-                    Bitmap.Config.ARGB_8888);
-            Canvas canvas = new Canvas(buffer);
-            canvas.drawColor(0x00000000, PorterDuff.Mode.CLEAR);
-            Paint paint = new Paint();
-            paint.setAntiAlias(true);
-            // TODO: Make the text size a customizable attribute
-            paint.setTextSize(22);
-            paint.setTextAlign(Align.CENTER);
-            // Draw a drop shadow for the text
-            paint.setShadowLayer(1f, 0, 0, 0xFF000000);
-            paint.setColor(0x80C0C0C0);
-            canvas.drawText(mLocale.getDisplayLanguage(mLocale),
-                    buffer.getWidth() / 2, - paint.ascent() + 2, paint);
-            int x = (buffer.getWidth() - mSpaceIcon.getIntrinsicWidth()) / 2;
-            int y = buffer.getHeight() - mSpaceIcon.getIntrinsicHeight();
-            mSpaceIcon.setBounds(x, y,
-                    x + mSpaceIcon.getIntrinsicWidth(), y + mSpaceIcon.getIntrinsicHeight());
-            mSpaceIcon.draw(canvas);
-            mSpaceKey.icon = new BitmapDrawable(mRes, buffer);
-            mSpaceKey.repeatable = false;
-        } else {
-            mSpaceKey.icon = mRes.getDrawable(R.drawable.sym_keyboard_space);
-            mSpaceKey.repeatable = true;
-        }
-    }
-
-    public void setLanguage(Locale locale) {
-        if (mLocale != null && mLocale.equals(locale)) return;
-        mLocale = locale;
-        updateSpaceBarForLocale();
-    }
-
     static class LatinKey extends Keyboard.Key {
         private boolean mShiftLockEnabled;
         private boolean mEnabled = true;

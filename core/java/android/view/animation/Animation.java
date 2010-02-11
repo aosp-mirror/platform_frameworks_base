@@ -281,8 +281,8 @@ public abstract class Animation implements Cloneable {
      */
     public void detach() {
         if (mStarted && !mEnded) {
-            if (mListener != null) mListener.onAnimationEnd(this);
             mEnded = true;
+            if (mListener != null) mListener.onAnimationEnd(this);
         }
     }
 
@@ -776,10 +776,10 @@ public abstract class Animation implements Cloneable {
         if (expired) {
             if (mRepeatCount == mRepeated) {
                 if (!mEnded) {
+                    mEnded = true;
                     if (mListener != null) {
                         mListener.onAnimationEnd(this);
                     }
-                    mEnded = true;
                 }
             } else {
                 if (mRepeatCount > 0) {

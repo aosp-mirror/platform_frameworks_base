@@ -632,9 +632,11 @@ public class SyncStorageEngine extends Handler {
         }
     }
 
-    public AuthorityInfo getAuthority(Account account, String authority) {
+    public AuthorityInfo getOrCreateAuthority(Account account, String authority) {
         synchronized (mAuthorities) {
-            return getAuthorityLocked(account, authority, null);
+            return getOrCreateAuthorityLocked(account, authority,
+                    -1 /* assign a new identifier if creating a new authority */,
+                    true /* write to storage if this results in a change */);
         }
     }
 

@@ -187,12 +187,12 @@ bool AudioPlayer::reachedEOS() {
 }
 
 // static
-void AudioPlayer::AudioSinkCallback(
+size_t AudioPlayer::AudioSinkCallback(
         MediaPlayerBase::AudioSink *audioSink,
         void *buffer, size_t size, void *cookie) {
     AudioPlayer *me = (AudioPlayer *)cookie;
 
-    me->fillBuffer(buffer, size);
+    return me->fillBuffer(buffer, size);
 }
 
 void AudioPlayer::AudioCallback(int event, void *info) {
@@ -201,17 +201,18 @@ void AudioPlayer::AudioCallback(int event, void *info) {
     }
 
     AudioTrack::Buffer *buffer = (AudioTrack::Buffer *)info;
-    fillBuffer(buffer->raw, buffer->size);
+    size_t numBytesWritten = fillBuffer(buffer->raw, buffer->size);
+
+    buffer->size = numBytesWritten;
 }
 
-void AudioPlayer::fillBuffer(void *data, size_t size) {
+size_t AudioPlayer::fillBuffer(void *data, size_t size) {
     if (mNumFramesPlayed == 0) {
         LOGV("AudioCallback");
     }
 
     if (mReachedEOS) {
-        memset(data, 0, size);
-        return;
+        return 0;
     }
 
     size_t size_done = 0;
@@ -244,7 +245,6 @@ void AudioPlayer::fillBuffer(void *data, size_t size) {
 
             if (err != OK) {
                 mReachedEOS = true;
-                memset((char *)data + size_done, 0, size_remaining);
                 break;
             }
 
@@ -285,7 +285,9 @@ void AudioPlayer::fillBuffer(void *data, size_t size) {
     }
 
     Mutex::Autolock autoLock(mLock);
-    mNumFramesPlayed += size / mFrameSize;
+    mNumFramesPlayed += size_done / mFrameSize;
+
+    return size_done;
 }
 
 int64_t AudioPlayer::getRealTimeUs() {

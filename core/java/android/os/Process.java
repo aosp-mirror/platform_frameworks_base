@@ -504,6 +504,9 @@ public class Process {
             argsForZygote.add("--runtime-init");
             argsForZygote.add("--setuid=" + uid);
             argsForZygote.add("--setgid=" + gid);
+            if ((debugFlags & Zygote.DEBUG_ENABLE_SAFEMODE) != 0) {
+                argsForZygote.add("--enable-safemode");
+            }
             if ((debugFlags & Zygote.DEBUG_ENABLE_DEBUGGER) != 0) {
                 argsForZygote.add("--enable-debugger");
             }

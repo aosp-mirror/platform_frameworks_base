@@ -62,7 +62,8 @@ public:
     // AudioSink: abstraction layer for audio output
     class AudioSink : public RefBase {
     public:
-        typedef void (*AudioCallback)(
+        // Callback returns the number of bytes actually written to the buffer.
+        typedef size_t (*AudioCallback)(
                 AudioSink *audioSink, void *buffer, size_t size, void *cookie);
 
         virtual             ~AudioSink() {}
@@ -77,8 +78,7 @@ public:
         virtual status_t    getPosition(uint32_t *position) = 0;
 
         // If no callback is specified, use the "write" API below to submit
-        // audio data. Otherwise return a full buffer of audio data on each
-        // callback.
+        // audio data.
         virtual status_t    open(
                 uint32_t sampleRate, int channelCount,
                 int format=AudioSystem::PCM_16_BIT,

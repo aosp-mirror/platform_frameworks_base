@@ -139,9 +139,9 @@ class MediaPlayerService : public BnMediaPlayerService
                 int bufferCount = 1,
                 AudioCallback cb = NULL, void *cookie = NULL);
 
-        virtual void            start() {}
+        virtual void            start();
         virtual ssize_t         write(const void* buffer, size_t size);
-        virtual void            stop() {}
+        virtual void            stop();
         virtual void            flush() {}
         virtual void            pause() {}
         virtual void            close() {}
@@ -171,6 +171,8 @@ class MediaPlayerService : public BnMediaPlayerService
         uint32_t            mSize;
         int                 mError;
         bool                mCommandComplete;
+
+        sp<Thread>          mCallbackThread;
     };
 
 public:

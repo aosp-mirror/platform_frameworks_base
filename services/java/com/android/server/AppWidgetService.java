@@ -573,7 +573,7 @@ class AppWidgetService extends IAppWidgetService.Stub
         List<ResolveInfo> broadcastReceivers = pm.queryBroadcastReceivers(intent,
                 PackageManager.GET_META_DATA);
 
-        final int N = broadcastReceivers.size();
+        final int N = broadcastReceivers == null ? 0 : broadcastReceivers.size();
         for (int i=0; i<N; i++) {
             ResolveInfo ri = broadcastReceivers.get(i);
             addProviderLocked(ri);
@@ -1137,7 +1137,7 @@ class AppWidgetService extends IAppWidgetService.Stub
         List<ResolveInfo> broadcastReceivers = mPackageManager.queryBroadcastReceivers(intent,
                 PackageManager.GET_META_DATA);
 
-        final int N = broadcastReceivers.size();
+        final int N = broadcastReceivers == null ? 0 : broadcastReceivers.size();
         for (int i=0; i<N; i++) {
             ResolveInfo ri = broadcastReceivers.get(i);
             ActivityInfo ai = ri.activityInfo;
@@ -1156,7 +1156,7 @@ class AppWidgetService extends IAppWidgetService.Stub
                 PackageManager.GET_META_DATA);
 
         // add the missing ones and collect which ones to keep
-        int N = broadcastReceivers.size();
+        int N = broadcastReceivers == null ? 0 : broadcastReceivers.size();
         for (int i=0; i<N; i++) {
             ResolveInfo ri = broadcastReceivers.get(i);
             ActivityInfo ai = ri.activityInfo;

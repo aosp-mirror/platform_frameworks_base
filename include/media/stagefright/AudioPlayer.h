@@ -90,11 +90,11 @@ private:
     static void AudioCallback(int event, void *user, void *info);
     void AudioCallback(int event, void *info);
 
-    static void AudioSinkCallback(
+    static size_t AudioSinkCallback(
             MediaPlayerBase::AudioSink *audioSink,
             void *data, size_t size, void *me);
 
-    void fillBuffer(void *data, size_t size);
+    size_t fillBuffer(void *data, size_t size);
 
     int64_t getRealTimeUsLocked() const;
 

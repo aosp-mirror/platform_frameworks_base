@@ -22,7 +22,6 @@ import android.location.GeocoderParams;
 import android.location.IGeocodeProvider;
 import android.location.IGpsStatusListener;
 import android.location.ILocationListener;
-import android.location.ILocationProvider;
 import android.location.Location;
 import android.os.Bundle;
 

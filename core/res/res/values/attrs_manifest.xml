@@ -215,6 +215,10 @@
          running on a device that is running in user mode. -->
     <attr name="debuggable" format="boolean" />
     
+    <!-- Flag indicating whether the application requests the VM to operate in
+         the safe mode.  -->
+    <attr name="safeMode" format="boolean" />
+
     <!-- Flag indicating whether the given application component is available
          to other applications.  If false, it can only be accessed by
          applications with its same user id (which usually means only by
@@ -600,6 +604,20 @@
          Application class to avoid interference with application logic. -->
     <attr name="restoreNeedsApplication" format="boolean" />
 
+    <!-- The default install location defined by an application. -->
+    <attr name="installLocation">
+        <!-- Let the system decide ideal install location -->
+        <enum name="auto" value="0" />
+        <!-- Explicitly request to be installed on internal phone storate
+             only. -->
+        <enum name="internalOnly" value="1" />
+        <!-- Prefer to be installed on sdcard. There is no guarantee that
+             the system will honour this request. The application might end
+             up being installed on internal storage if external media
+             is unavailable or too full. -->
+        <enum name="preferExternal" value="2" />
+    </attr>
+
     <!-- The <code>manifest</code> tag is the root of an
          <code>AndroidManifest.xml</code> file,
          describing the contents of an Android package (.apk) file.  One
@@ -624,6 +642,7 @@
         <attr name="versionName" />
         <attr name="sharedUserId" />
         <attr name="sharedUserLabel" />
+        <attr name="installLocation" />
     </declare-styleable>
     
     <!-- The <code>application</code> tag describes application-level components
@@ -670,6 +689,7 @@
              override the component specific values). -->
         <attr name="enabled" />
         <attr name="debuggable" />
+        <attr name="safeMode" />
         <!-- Name of activity to be launched for managing the application's space on the device. -->
         <attr name="manageSpaceActivity" />
         <attr name="allowClearUserData" />

@@ -60,7 +60,7 @@ public class SystemKeyStoreTest extends ActivityUnitTestCase<Activity> {
 
     public void testBasicAccess() throws Exception {
         try {
-            byte[] newKey = mSysKeyStore.generateNewKey(128, "Blowfish", keyName);
+            byte[] newKey = mSysKeyStore.generateNewKey(128, "AES", keyName);
             assertNotNull(newKey);
             byte[] recKey = mSysKeyStore.retrieveKey(keyName);
             assertEquals(newKey.length, recKey.length);
@@ -75,8 +75,9 @@ public class SystemKeyStoreTest extends ActivityUnitTestCase<Activity> {
             assertNotNull(newKeyStr);
             String recKeyStr = mSysKeyStore.retrieveKeyHexString(keyName2);
             assertEquals(newKeyStr, recKeyStr);
+
             mSysKeyStore.deleteKey(keyName2);
-            String nullKey2 = mSysKeyStore.retrieveKeyHexString(keyName);
+            String nullKey2 = mSysKeyStore.retrieveKeyHexString(keyName2);
             assertNull(nullKey2);
         } catch (Exception e) {
             fail();

@@ -173,12 +173,15 @@ void AMRWriter::threadFunc() {
                 buffer->range_length(),
                 mFile);
 
-        buffer->release();
-        buffer = NULL;
-
         if (n < (ssize_t)buffer->range_length()) {
+            buffer->release();
+            buffer = NULL;
+
             break;
         }
+
+        buffer->release();
+        buffer = NULL;
     }
 
     Mutex::Autolock autoLock(mLock);

@@ -50,7 +50,6 @@ import android.os.Message;
 import android.os.Power;
 import android.os.Process;
 import android.os.RemoteException;
-import android.os.storage.StorageManager;
 import android.os.SystemProperties;
 import android.os.Vibrator;
 import android.provider.Settings;
@@ -407,9 +406,6 @@ class NotificationManagerService extends INotificationManager.Stub
         mSound.setUsesWakeLock(context);
         mToastQueue = new ArrayList<ToastRecord>();
         mHandler = new WorkerHandler();
-
-        StorageManager sm = (StorageManager) context.getSystemService(Context.STORAGE_SERVICE);
-        sm.registerListener(new com.android.internal.app.StorageNotification(context));
 
         mStatusBarService = statusBar;
         statusBar.setNotificationCallbacks(mNotificationCallbacks);

@@ -18,6 +18,9 @@ package com.android.common;
 
 import junit.framework.TestCase;
 
+import java.io.ByteArrayOutputStream;
+import java.util.Random;
+
 public class Base64Test extends TestCase {
     private static final String TAG = "B64Test";
 
@@ -51,6 +54,22 @@ public class Base64Test extends TestCase {
     private void assertEquals(byte[] expected, int len, byte[] actual) {
         assertEquals(len, actual.length);
         for (int i = 0; i < len; ++i) {
+            assertEquals(expected[i], actual[i]);
+        }
+    }
+
+    /** Assert that actual equals the first len bytes of expected. */
+    private void assertEquals(byte[] expected, int len, byte[] actual, int alen) {
+        assertEquals(len, alen);
+        for (int i = 0; i < len; ++i) {
+            assertEquals(expected[i], actual[i]);
+        }
+    }
+
+    /** Assert that actual equals the first len bytes of expected. */
+    private void assertEquals(byte[] expected, byte[] actual) {
+        assertEquals(expected.length, actual.length);
+        for (int i = 0; i < expected.length; ++i) {
             assertEquals(expected[i], actual[i]);
         }
     }
@@ -204,5 +223,188 @@ public class Base64Test extends TestCase {
         assertEquals(out_59.replaceAll("\n", ""), encodeToString(in_59, Base64.NO_WRAP));
         assertEquals(out_60.replaceAll("\n", ""), encodeToString(in_60, Base64.NO_WRAP));
         assertEquals(out_61.replaceAll("\n", ""), encodeToString(in_61, Base64.NO_WRAP));
+    }
+
+    /**
+     * Tests that Base64.encodeInternal does correct handling of the
+     * tail for each call.
+     */
+    public void testEncodeInternal() throws Exception {
+        byte[] input = { (byte) 0x61, (byte) 0x62, (byte) 0x63 };
+        byte[] output = new byte[100];
+
+        Base64.EncoderState state = new Base64.EncoderState(Base64.NO_PADDING | Base64.NO_WRAP,
+                                                            output);
+
+        Base64.encodeInternal(input, 0, 3, state, false);
+        assertEquals("YWJj".getBytes(), 4, state.output, state.op);
+        assertEquals(0, state.tailLen);
+
+        Base64.encodeInternal(input, 0, 3, state, false);
+        assertEquals("YWJj".getBytes(), 4, state.output, state.op);
+        assertEquals(0, state.tailLen);
+
+        Base64.encodeInternal(input, 0, 1, state, false);
+        assertEquals(0, state.op);
+        assertEquals(1, state.tailLen);
+
+        Base64.encodeInternal(input, 0, 1, state, false);
+        assertEquals(0, state.op);
+        assertEquals(2, state.tailLen);
+
+        Base64.encodeInternal(input, 0, 1, state, false);
+        assertEquals("YWFh".getBytes(), 4, state.output, state.op);
+        assertEquals(0, state.tailLen);
+
+        Base64.encodeInternal(input, 0, 2, state, false);
+        assertEquals(0, state.op);
+        assertEquals(2, state.tailLen);
+
+        Base64.encodeInternal(input, 0, 2, state, false);
+        assertEquals("YWJh".getBytes(), 4, state.output, state.op);
+        assertEquals(1, state.tailLen);
+
+        Base64.encodeInternal(input, 0, 2, state, false);
+        assertEquals("YmFi".getBytes(), 4, state.output, state.op);
+        assertEquals(0, state.tailLen);
+
+        Base64.encodeInternal(input, 0, 1, state, true);
+        assertEquals("YQ".getBytes(), 2, state.output, state.op);
+    }
+
+    /**
+     * Tests that Base64OutputStream produces exactly the same results
+     * as calling Base64.encode/.decode on an in-memory array.
+     */
+    public void testOutputStream() throws Exception {
+        int[] flagses = { Base64.DEFAULT,
+                          Base64.NO_PADDING,
+                          Base64.NO_WRAP,
+                          Base64.NO_PADDING | Base64.NO_WRAP,
+                          Base64.CRLF,
+                          Base64.WEB_SAFE };
+        int[] writeLengths = { -10, -5, -1, 0, 1, 1, 2, 2, 3, 10, 100 };
+        Random rng = new Random(32176L);
+
+        // input needs to be at least 1024 bytes to test filling up
+        // the write(int) buffer.
+        byte[] input = ("Lorem ipsum dolor sit amet, consectetur adipiscing elit. " +
+                        "Quisque congue eleifend odio, eu ornare nulla facilisis eget. " +
+                        "Integer eget elit diam, sit amet laoreet nibh. Quisque enim " +
+                        "urna, pharetra vitae consequat eget, adipiscing eu ante. " +
+                        "Aliquam venenatis arcu nec nibh imperdiet tempor. In id dui " +
+                        "eget lorem aliquam rutrum vel vitae eros. In placerat ornare " +
+                        "pretium. Curabitur non fringilla mi. Fusce ultricies, turpis " +
+                        "eu ultrices suscipit, ligula nisi consectetur eros, dapibus " +
+                        "aliquet dui sapien a turpis. Donec ultricies varius ligula, " +
+                        "ut hendrerit arcu malesuada at. Praesent sed elit pretium " +
+                        "eros luctus gravida. In ac dolor lorem. Cras condimentum " +
+                        "convallis elementum. Phasellus vel felis in nulla ultrices " +
+                        "venenatis. Nam non tortor non orci convallis convallis. " +
+                        "Nam tristique lacinia hendrerit. Pellentesque habitant morbi " +
+                        "tristique senectus et netus et malesuada fames ac turpis " +
+                        "egestas. Vivamus cursus, nibh eu imperdiet porta, magna " +
+                        "ipsum mollis mauris, sit amet fringilla mi nisl eu mi. " +
+                        "Phasellus posuere, leo at ultricies vehicula, massa risus " +
+                        "volutpat sapien, eu tincidunt diam ipsum eget nulla. Cras " +
+                        "molestie dapibus commodo. Ut vel tellus at massa gravida " +
+                        "semper non sed orci.").getBytes();
+
+        for (int f = 0; f < flagses.length; ++f) {
+            int flags = flagses[f];
+
+            byte[] expected = Base64.encode(input, flags);
+
+            ByteArrayOutputStream baos;
+            Base64OutputStream b64os;
+            byte[] actual;
+            int p;
+
+            // ----- test encoding ("input" -> "expected") -----
+
+            // one large write(byte[]) of the whole input
+            baos = new ByteArrayOutputStream();
+            b64os = new Base64OutputStream(baos, flags);
+            b64os.write(input);
+            b64os.close();
+            actual = baos.toByteArray();
+            assertEquals(expected, actual);
+
+            // many calls to write(int)
+            baos = new ByteArrayOutputStream();
+            b64os = new Base64OutputStream(baos, flags);
+            for (int i = 0; i < input.length; ++i) {
+                b64os.write(input[i]);
+            }
+            b64os.close();
+            actual = baos.toByteArray();
+            assertEquals(expected, actual);
+
+            // intermixed sequences of write(int) with
+            // write(byte[],int,int) of various lengths.
+            baos = new ByteArrayOutputStream();
+            b64os = new Base64OutputStream(baos, flags);
+            p = 0;
+            while (p < input.length) {
+                int l = writeLengths[rng.nextInt(writeLengths.length)];
+                l = Math.min(l, input.length-p);
+                if (l >= 0) {
+                    b64os.write(input, p, l);
+                    p += l;
+                } else {
+                    l = Math.min(-l, input.length-p);
+                    for (int i = 0; i < l; ++i) {
+                        b64os.write(input[p+i]);
+                    }
+                    p += l;
+                }
+            }
+            b64os.close();
+            actual = baos.toByteArray();
+            assertEquals(expected, actual);
+
+            // ----- test decoding ("expected" -> "input") -----
+
+            // one large write(byte[]) of the whole input
+            baos = new ByteArrayOutputStream();
+            b64os = new Base64OutputStream(baos, flags, false);
+            b64os.write(expected);
+            b64os.close();
+            actual = baos.toByteArray();
+            assertEquals(input, actual);
+
+            // many calls to write(int)
+            baos = new ByteArrayOutputStream();
+            b64os = new Base64OutputStream(baos, flags, false);
+            for (int i = 0; i < expected.length; ++i) {
+                b64os.write(expected[i]);
+            }
+            b64os.close();
+            actual = baos.toByteArray();
+            assertEquals(input, actual);
+
+            // intermixed sequences of write(int) with
+            // write(byte[],int,int) of various lengths.
+            baos = new ByteArrayOutputStream();
+            b64os = new Base64OutputStream(baos, flags, false);
+            p = 0;
+            while (p < expected.length) {
+                int l = writeLengths[rng.nextInt(writeLengths.length)];
+                l = Math.min(l, expected.length-p);
+                if (l >= 0) {
+                    b64os.write(expected, p, l);
+                    p += l;
+                } else {
+                    l = Math.min(-l, expected.length-p);
+                    for (int i = 0; i < l; ++i) {
+                        b64os.write(expected[p+i]);
+                    }
+                    p += l;
+                }
+            }
+            b64os.close();
+            actual = baos.toByteArray();
+            assertEquals(input, actual);
+        }
     }
 }

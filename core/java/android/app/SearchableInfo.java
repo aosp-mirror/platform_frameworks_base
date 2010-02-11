@@ -73,7 +73,7 @@ public final class SearchableInfo implements Parcelable {
     private final boolean mIncludeInGlobalSearch;
     private final boolean mQueryAfterZeroResults;
     private final boolean mAutoUrlDetect;
-    private final String mSettingsDescription;
+    private final int mSettingsDescriptionId;
     private final String mSuggestAuthority;
     private final String mSuggestPath;
     private final String mSuggestSelection;
@@ -155,11 +155,11 @@ public final class SearchableInfo implements Parcelable {
     }
     
     /**
-     * Gets the description to use for this source in system search settings, or null if
-     * none has been specified.
+     * Gets the resource ID of the description string to use for this source in system search
+     * settings, or {@code 0} if none has been specified.
      */
-    public String getSettingsDescription() {
-        return mSettingsDescription;
+    public int getSettingsDescriptionId() {
+        return mSettingsDescriptionId;
     }
 
     /**
@@ -311,8 +311,8 @@ public final class SearchableInfo implements Parcelable {
         mAutoUrlDetect = a.getBoolean(
                 com.android.internal.R.styleable.Searchable_autoUrlDetect, false);
 
-        mSettingsDescription = a.getString(
-                com.android.internal.R.styleable.Searchable_searchSettingsDescription);
+        mSettingsDescriptionId = a.getResourceId(
+                com.android.internal.R.styleable.Searchable_searchSettingsDescription, 0);
         mSuggestAuthority = a.getString(
                 com.android.internal.R.styleable.Searchable_searchSuggestAuthority);
         mSuggestPath = a.getString(
@@ -495,7 +495,7 @@ public final class SearchableInfo implements Parcelable {
                         + ",suggestAuthority=" + searchable.getSuggestAuthority()
                         + ",target=" + searchable.getSearchActivity().getClassName()
                         + ",global=" + searchable.shouldIncludeInGlobalSearch()
-                        + ",settingsDescription=" + searchable.getSettingsDescription()
+                        + ",settingsDescription=" + searchable.getSettingsDescriptionId()
                         + ",threshold=" + searchable.getSuggestThreshold());
             } else {
                 Log.d(LOG_TAG, "Checked " + activityInfo.name + ", no searchable meta-data");
@@ -746,7 +746,7 @@ public final class SearchableInfo implements Parcelable {
         mQueryAfterZeroResults = in.readInt() != 0;
         mAutoUrlDetect = in.readInt() != 0;
         
-        mSettingsDescription = in.readString();
+        mSettingsDescriptionId = in.readInt();
         mSuggestAuthority = in.readString();
         mSuggestPath = in.readString();
         mSuggestSelection = in.readString();
@@ -784,7 +784,7 @@ public final class SearchableInfo implements Parcelable {
         dest.writeInt(mQueryAfterZeroResults ? 1 : 0);
         dest.writeInt(mAutoUrlDetect ? 1 : 0);
         
-        dest.writeString(mSettingsDescription);
+        dest.writeInt(mSettingsDescriptionId);
         dest.writeString(mSuggestAuthority);
         dest.writeString(mSuggestPath);
         dest.writeString(mSuggestSelection);

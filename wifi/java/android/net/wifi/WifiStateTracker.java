@@ -835,7 +835,7 @@ public class WifiStateTracker extends NetworkStateTracker {
                     WifiNative.closeSupplicantConnection();
                 }
                 if (died) {
-                    resetInterface(false);
+                    resetConnections(true);
                 }
                 // When supplicant dies, kill the DHCP thread
                 if (mDhcpTarget != null) {
@@ -1074,6 +1074,13 @@ public class WifiStateTracker extends NetworkStateTracker {
                         DetailedState saveState = getNetworkInfo().getDetailedState();
                         handleDisconnectedState(DetailedState.DISCONNECTED);
                         setDetailedStateInternal(saveState);
+                    } else {
+                        /**
+                         *  stop DHCP to ensure there is a new IP address
+                         *  even if the supplicant transitions without disconnect
+                         *  COMPLETED -> ASSOCIATED -> COMPLETED
+                         */
+                        resetConnections(false);
                     }
                     configureInterface();
                     mLastBssid = result.BSSID;
@@ -1279,12 +1286,11 @@ public class WifiStateTracker extends NetworkStateTracker {
      * {@code DISCONNECTED} or {@code FAILED}.
      */
     private void handleDisconnectedState(DetailedState newState) {
-        if (LOCAL_LOGD) Log.d(TAG, "Deconfiguring interface and stopping DHCP");
         if (mDisconnectPending) {
             cancelDisconnect();
         }
         mDisconnectExpected = false;
-        resetInterface(true);
+        resetConnections(true);
         setDetailedState(newState);
         sendNetworkStateChangeBroadcast(mLastBssid);
         mWifiInfo.setBSSID(null);
@@ -1294,10 +1300,11 @@ public class WifiStateTracker extends NetworkStateTracker {
     }
 
     /**
-     * Resets the Wi-Fi interface by clearing any state, resetting any sockets
+     * Resets the Wi-Fi Connections by clearing any state, resetting any sockets
      * using the interface, stopping DHCP, and disabling the interface.
      */
-    public void resetInterface(boolean reenable) {
+    public void resetConnections(boolean disableInterface) {
+        if (LOCAL_LOGD) Log.d(TAG, "Reset connections and stopping DHCP");
         mHaveIpAddress = false;
         mObtainingIpAddress = false;
         mWifiInfo.setIpAddress(0);
@@ -1317,9 +1324,14 @@ public class WifiStateTracker extends NetworkStateTracker {
             Log.e(TAG, "Could not stop DHCP");
         }
 
-        NetworkUtils.disableInterface(mInterfaceName);
-        // we no longer net to start the interface (driver does this for us)
-        // and it led to problems - removed.
+        /**
+         * Interface is re-enabled in the supplicant
+         * when moving out of ASSOCIATING state
+         */
+        if(disableInterface) {
+            if (LOCAL_LOGD) Log.d(TAG, "Disabling interface");
+            NetworkUtils.disableInterface(mInterfaceName);
+        }
     }
 
     /**
@@ -1538,7 +1550,7 @@ public class WifiStateTracker extends NetworkStateTracker {
     public synchronized boolean restart() {
         if (mRunState == RUN_STATE_STOPPED) {
             mRunState = RUN_STATE_STARTING;
-            resetInterface(true);
+            resetConnections(true);
             return WifiNative.startDriverCommand();
         } else if (mRunState == RUN_STATE_STOPPING) {
             mRunState = RUN_STATE_STARTING;
@@ -1969,7 +1981,7 @@ public class WifiStateTracker extends NetworkStateTracker {
                         oDns2 != mDhcpInfo.dns2));
 
             if (changed) {
-                resetInterface(true);
+                resetConnections(true);
                 configureInterface();
                 if (mUseStaticIp) {
                     mTarget.sendEmptyMessage(EVENT_CONFIGURATION_CHANGED);

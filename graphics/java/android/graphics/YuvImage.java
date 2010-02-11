@@ -21,13 +21,11 @@ import java.io.OutputStream;
 /**
  * YuvImage contains YUV data and provides a method that compresses a region of
  * the YUV data to a Jpeg. The YUV data should be provided as a single byte
- * array irrespective of the number of image planes in it. The stride of each
- * image plane should be provided as well.
+ * array irrespective of the number of image planes in it.
+ * Currently only PixelFormat.YCbCr_420_SP and PixelFormat.YCbCr_422_I are supported.
  *
- * To compress a rectangle region in the YUV data, users have to specify a
- * region by width, height and offsets, where each image plane has a
- * corresponding offset. All offsets are measured as a displacement in bytes
- * from yuv[0], where yuv[0] is the beginning of the yuv data.
+ * To compress a rectangle region in the YUV data, users have to specify the
+ * region by left, top, width and height.
  */
 public class YuvImage {
 
@@ -55,21 +53,56 @@ public class YuvImage {
     private int[] mStrides;
 
     /**
+     * The width of the image.
+     */
+    private int mWidth;
+
+    /**
+     * The height of the the image.
+     */
+    private int mHeight;
+
+    /**
      * Construct an YuvImage.
      *
-     * @param yuv The YUV data. In the case of more than one image plane, all the planes must be
-     *            concatenated into a single byte array.
-     * @param format The YUV data format as defined in {@link PixelFormat}.
-     * @param strides Row bytes of each image plane.
+     * @param yuv     The YUV data. In the case of more than one image plane, all the planes must be
+     *                concatenated into a single byte array.
+     * @param format  The YUV data format as defined in {@link PixelFormat}.
+     * @param width   The width of the YuvImage.
+     * @param height  The height of the YuvImage.
+     * @param strides (Optional) Row bytes of each image plane. If yuv contains padding, the stride
+     *                of each image must be provided. If strides is null, the method assumes no
+     *                padding and derives the row bytes by format and width itself.
+     * @throws IllegalArgumentException if format is not support; width or height <= 0; or yuv is
+     *                null.
      */
-    public YuvImage(byte[] yuv, int format, int[] strides) {
-        if ((yuv == null) || (strides == null)) {
+    public YuvImage(byte[] yuv, int format, int width, int height, int[] strides) {
+        if (format != PixelFormat.YCbCr_420_SP &&
+                format != PixelFormat.YCbCr_422_I) {
             throw new IllegalArgumentException(
-                    "yuv or strides cannot be null");
+                    "only support PixelFormat.YCbCr_420_SP " +
+                    "and PixelFormat.YCbCr_422_I for now");
         }
+
+        if (width <= 0  || height <= 0) {
+            throw new IllegalArgumentException(
+                    "width and height must large than 0");
+        }
+
+        if (yuv == null) {
+            throw new IllegalArgumentException("yuv cannot be null");
+        }
+
+        if (strides == null) {
+            mStrides = calculateStrides(width, format);
+        } else {
+            mStrides = strides;
+        }
+
         mData = yuv;
         mFormat = format;
-        mStrides = strides;
+        mWidth = width;
+        mHeight = height;
     }
 
     /**
@@ -77,22 +110,21 @@ public class YuvImage {
      * Only PixelFormat.YCbCr_420_SP and PixelFormat.YCbCr_422_I
      * are supported for now.
      *
-     * @param width The width of the rectangle region.
-     * @param height The height of the rectangle region.
-     * @param offsets The offsets of the rectangle region in each image plane.
-     *                The offsets are measured as a displacement in bytes from
-     *                yuv[0], where yuv[0] is the beginning of the yuv data.
-     * @param quality  Hint to the compressor, 0-100. 0 meaning compress for
-     *                 small size, 100 meaning compress for max quality.
-     * @param stream   The outputstream to write the compressed data.
-     *
-     * @return true if successfully compressed to the specified stream.
-     *
+     * @param rectangle The rectangle region to be compressed. The medthod checks if rectangle is
+     *                  inside the image. Also, the method modifies rectangle if the chroma pixels
+     *                  in it are not matched with the luma pixels in it.
+     * @param quality   Hint to the compressor, 0-100. 0 meaning compress for
+     *                  small size, 100 meaning compress for max quality.
+     * @param stream    OutputStream to write the compressed data.
+     * @return          True if the compression is successful.
+     * @throws IllegalArgumentException if rectangle is invalid; quality is not within [0,
+     *                  100]; or stream is null.
      */
-    public boolean compressToJpeg(int width, int height, int[] offsets, int quality,
-            OutputStream stream) {
-        if (!validate(mFormat, width, height, offsets)) {
-            return false;
+    public boolean compressToJpeg(Rect rectangle, int quality, OutputStream stream) {
+        Rect wholeImage = new Rect(0, 0, mWidth, mHeight);
+        if (!wholeImage.contains(rectangle)) {
+            throw new IllegalArgumentException(
+                    "rectangle is not inside the image");
         }
 
         if (quality < 0 || quality > 100) {
@@ -100,14 +132,19 @@ public class YuvImage {
         }
 
         if (stream == null) {
-            throw new NullPointerException();
+            throw new IllegalArgumentException("stream cannot be null");
         }
 
-        return nativeCompressToJpeg(mData, mFormat, width, height, offsets,
-                mStrides, quality, stream, new byte[WORKING_COMPRESS_STORAGE]);
+        adjustRectangle(rectangle);
+        int[] offsets = calculateOffsets(rectangle.left, rectangle.top);
+
+        return nativeCompressToJpeg(mData, mFormat, rectangle.width(),
+                rectangle.height(), offsets, mStrides, quality, stream,
+                new byte[WORKING_COMPRESS_STORAGE]);
     }
 
-    /**
+
+   /**
      * @return the YUV data.
      */
     public byte[] getYuvData() {
@@ -128,37 +165,71 @@ public class YuvImage {
         return mStrides;
     }
 
-    protected boolean validate(int format, int width, int height, int[] offsets) {
-        if (format != PixelFormat.YCbCr_420_SP &&
-                format != PixelFormat.YCbCr_422_I) {
-            throw new IllegalArgumentException(
-                    "only support PixelFormat.YCbCr_420_SP " +
-                    "and PixelFormat.YCbCr_422_I for now");
+    /**
+     * @return the width of the image.
+     */
+    public int getWidth() {
+        return mWidth;
+    }
+
+    /**
+     * @return the height of the image.
+     */
+    public int getHeight() {
+        return mHeight;
+    }
+
+    int[] calculateOffsets(int left, int top) {
+        int[] offsets = null;
+        if (mFormat == PixelFormat.YCbCr_420_SP) {
+            offsets = new int[] {top * mStrides[0] + left,
+                  mHeight * mStrides[0] + top / 2 * mStrides[1]
+                  + left / 2 * 2 };
+            return offsets;
         }
 
-        if (offsets.length != mStrides.length) {
-            throw new IllegalArgumentException(
-                    "the number of image planes are mismatched");
+        if (mFormat == PixelFormat.YCbCr_422_I) {
+            offsets = new int[] {top * mStrides[0] + left / 2 * 4};
+            return offsets;
         }
 
-        if (width <= 0  || height <= 0) {
-            throw new IllegalArgumentException(
-                    "width and height must large than 0");
-        }
+        return offsets;
+    }
 
-        int requiredSize;
+    private int[] calculateStrides(int width, int format) {
+        int[] strides = null;
         if (format == PixelFormat.YCbCr_420_SP) {
-            requiredSize = height * mStrides[0] +(height >> 1) * mStrides[1];
-        } else {
-            requiredSize = height * mStrides[0];
+            strides = new int[] {width, width};
+            return strides;
         }
 
-        if (requiredSize > mData.length) {
-            throw new IllegalArgumentException(
-                    "width or/and height is larger than the yuv data");
+        if (format == PixelFormat.YCbCr_422_I) {
+            strides = new int[] {width * 2};
+            return strides;
         }
 
-        return true;
+        return strides;
+    }
+
+   private void adjustRectangle(Rect rect) {
+       int width = rect.width();
+       int height = rect.height();
+       if (mFormat == PixelFormat.YCbCr_420_SP) {
+           // Make sure left, top, width and height are all even.
+           width &= ~1;
+           height &= ~1;
+           rect.left &= ~1;
+           rect.top &= ~1;
+           rect.right = rect.left + width;
+           rect.bottom = rect.top + height;
+        }
+
+        if (mFormat == PixelFormat.YCbCr_422_I) {
+            // Make sure left and width are both even.
+            width &= ~1;
+            rect.left &= ~1;
+            rect.right = rect.left + width;
+        }
     }
 
     //////////// native methods

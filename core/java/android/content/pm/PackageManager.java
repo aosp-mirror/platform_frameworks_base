@@ -630,10 +630,11 @@ public abstract class PackageManager {
     
     /**
      * Determines best place to install an application: either SD or internal FLASH.
-     * Tweak the algorithm for best results.
-     * @param appInfo ApplicationInfo object of the package to install.
+     * If applications explicitly set installLocation in their manifest, that
+     * preference takes precedence. If not a recommended location is returned
+     * based on current available storage on internal flash or sdcard.
+     * @param pkgInfo PackageParser.Package of the package that is to be installed.
      * Call utility method to obtain.
-     * @param packageURI URI identifying the package's APK file.
      * @return {@link INSTALL_ON_INTERNAL_FLASH} if it is best to install package on internal
      * storage, {@link INSTALL_ON_SDCARD} if it is best to install package on SD card,
      * and {@link INSTALL_FAILED_INSUFFICIENT_STORAGE} if insufficient space to safely install
@@ -642,7 +643,7 @@ public abstract class PackageManager {
      * This recommendation does take into account the package's own flags.
      * @hide
      */
-    public abstract int recommendAppInstallLocation(ApplicationInfo appInfo, Uri packageURI);
+    public abstract int recommendAppInstallLocation(PackageParser.Package pkg);
 
     /**
      * Retrieve overall information about an application package that is

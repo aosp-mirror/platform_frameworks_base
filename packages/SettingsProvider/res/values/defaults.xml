@@ -56,5 +56,6 @@
     <bool name="def_mount_ums_autostart">false</bool>
     <bool name="def_mount_ums_prompt">true</bool>
     <bool name="def_mount_ums_notify_enabled">true</bool>
+    <bool name="set_install_location">true</bool>
 
 </resources>

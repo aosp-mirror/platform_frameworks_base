@@ -1473,6 +1473,21 @@ public final class Settings {
         public static final String NOTIFICATION_LIGHT_PULSE = "notification_light_pulse";
 
         /**
+         * Let user pick default install location.
+         * @hide
+         */
+        public static final String SET_INSTALL_LOCATION = "set_install_location";
+
+        /**
+         * Default install location value.
+         * 0 = auto, let system decide
+         * 1 = internal
+         * 2 = sdcard
+         * @hide
+         */
+        public static final String DEFAULT_INSTALL_LOCATION = "default_install_location";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          * @hide
@@ -2797,22 +2812,6 @@ public final class Settings {
          */
         public static final String SMS_OUTGOING_CHECK_MAX_COUNT =
                 "sms_outgoing_check_max_count";
-
-        /**
-         * Enable use of ssl session caching.
-         * 'db' - save each session in a (per process) database
-         * 'file' - save each session in a (per process) file
-         * not set or any other value - normal java in-memory caching
-         * @hide
-         */
-        public static final String SSL_SESSION_CACHE = "ssl_session_cache";
-
-        /**
-         * How many bytes long a message has to be, in order to be gzipped.
-         * @hide
-         */
-        public static final String SYNC_MIN_GZIP_BYTES =
-                "sync_min_gzip_bytes";
 
         /**
          * The number of promoted sources in GlobalSearch.

@@ -185,6 +185,11 @@ sp<MediaSource> StagefrightRecorder::createAMRAudioSource() {
             mAudioEncoder == AUDIO_ENCODER_AMR_NB
                 ? MEDIA_MIMETYPE_AUDIO_AMR_NB : MEDIA_MIMETYPE_AUDIO_AMR_WB);
 
+    int32_t maxInputSize;
+    CHECK(audioSource->getFormat()->findInt32(
+                kKeyMaxInputSize, &maxInputSize));
+
+    encMeta->setInt32(kKeyMaxInputSize, maxInputSize);
     encMeta->setInt32(kKeyChannelCount, 1);
     encMeta->setInt32(kKeySampleRate, sampleRate);
 

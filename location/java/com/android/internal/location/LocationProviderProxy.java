@@ -22,6 +22,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.location.ILocationProvider;
 import android.location.Location;
+import android.location.LocationProviderInterface;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Handler;
@@ -31,18 +32,17 @@ import android.os.SystemClock;
 import android.util.Log;
 
 /**
- * A class for proxying ILocationProvider implementations.
+ * A class for proxying location providers implemented as services.
  *
  * {@hide}
  */
-public class LocationProviderProxy {
+public class LocationProviderProxy implements LocationProviderInterface {
 
     private static final String TAG = "LocationProviderProxy";
 
     private final Context mContext;
     private final String mName;
     private ILocationProvider mProvider;
-    private Intent mIntent;
     private Handler mHandler;
     private final Connection mServiceConnection = new Connection();
 
@@ -56,21 +56,13 @@ public class LocationProviderProxy {
     // for caching requiresNetwork, requiresSatellite, etc.
     private DummyLocationProvider mCachedAttributes;
 
-    // constructor for proxying built-in location providers
-    public LocationProviderProxy(Context context, String name, ILocationProvider provider) {
-        mContext = context;
-        mName = name;
-        mProvider = provider;
-    }
-
     // constructor for proxying location providers implemented in a separate service
     public LocationProviderProxy(Context context, String name, String serviceName,
             Handler handler) {
         mContext = context;
         mName = name;
-        mIntent = new Intent(serviceName);
         mHandler = handler;
-        mContext.bindService(mIntent, mServiceConnection, Context.BIND_AUTO_CREATE);
+        mContext.bindService(new Intent(serviceName), mServiceConnection, Context.BIND_AUTO_CREATE);
     }
 
     private class Connection implements ServiceConnection {

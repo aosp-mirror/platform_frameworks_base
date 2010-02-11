@@ -21,6 +21,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.database.Cursor;
@@ -864,6 +865,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         loadBooleanSetting(stmt, Settings.System.NOTIFICATION_LIGHT_PULSE,
                 R.bool.def_notification_pulse);
+        loadBooleanSetting(stmt, Settings.System.SET_INSTALL_LOCATION, R.bool.set_install_location);
+        loadSetting(stmt, Settings.System.DEFAULT_INSTALL_LOCATION,
+                PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY);
         stmt.close();
     }
 

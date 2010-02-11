@@ -21,7 +21,7 @@ import android.net.NetworkInfo;
 import android.os.Bundle;
 
 /**
- * Binder interface for location providers.
+ * Binder interface for services that implement location providers.
  *
  * {@hide}
  */

@@ -178,12 +178,20 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public static final int FLAG_SUPPORTS_SCREEN_DENSITIES = 1<<13;
     
     /**
+     * Value for {@link #flags}: set to true if this application would like to
+     * request the VM to operate under the safe mode. Comes from
+     * {@link android.R.styleable#AndroidManifestApplication_safeMode
+     * android:safeMode} of the &lt;application&gt; tag.
+     */
+    public static final int FLAG_VM_SAFE_MODE = 1<<14;
+
+    /**
      * Value for {@link #flags}: this is false if the application has set
      * its android:allowBackup to false, true otherwise.
      * 
      * {@hide}
      */
-    public static final int FLAG_ALLOW_BACKUP = 1<<14;
+    public static final int FLAG_ALLOW_BACKUP = 1<<15;
 
     /**
      * Value for {@link #flags}: this is false if the application has set
@@ -194,7 +202,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      *
      * {@hide}
      */
-    public static final int FLAG_KILL_AFTER_RESTORE = 1<<15;
+    public static final int FLAG_KILL_AFTER_RESTORE = 1<<16;
 
     /**
      * Value for {@link #flags}: this is true if the application has set
@@ -205,7 +213,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      *
      * {@hide}
      */
-    public static final int FLAG_RESTORE_NEEDS_APPLICATION = 1<<16;
+    public static final int FLAG_RESTORE_NEEDS_APPLICATION = 1<<17;
 
     /**
      * Value for {@link #flags}: this is true if the application has set
@@ -215,7 +223,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      *
      * {@hide}
      */
-    public static final int FLAG_NEVER_ENCRYPT = 1<<17;
+    public static final int FLAG_NEVER_ENCRYPT = 1<<18;
 
     /**
      * Value for {@link #flags}: Set to true if the application has been
@@ -223,7 +231,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      *
      * {@hide}
      */
-    public static final int FLAG_FORWARD_LOCK = 1<<18;
+    public static final int FLAG_FORWARD_LOCK = 1<<19;
 
     /**
      * Value for {@link #flags}: Set to true if the application is
@@ -231,7 +239,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      *
      * {@hide}
      */
-    public static final int FLAG_ON_SDCARD = 1<<19;
+    public static final int FLAG_ON_SDCARD = 1<<20;
 
     /**
      * Value for {@link #flags}: Set to true if the application is
@@ -239,7 +247,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      *
      * {@hide}
      */
-    public static final int FLAG_NATIVE_DEBUGGABLE = 1<<20;
+    public static final int FLAG_NATIVE_DEBUGGABLE = 1<<21;
 
     /**
      * Flags associated with the application.  Any combination of
@@ -250,7 +258,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * {@link #FLAG_TEST_ONLY}, {@link #FLAG_SUPPORTS_SMALL_SCREENS},
      * {@link #FLAG_SUPPORTS_NORMAL_SCREENS},
      * {@link #FLAG_SUPPORTS_LARGE_SCREENS}, {@link #FLAG_RESIZEABLE_FOR_SCREENS},
-     * {@link #FLAG_SUPPORTS_SCREEN_DENSITIES}
+     * {@link #FLAG_SUPPORTS_SCREEN_DENSITIES}, {@link #FLAG_VM_SAFE_MODE}
      */
     public int flags = 0;
     
