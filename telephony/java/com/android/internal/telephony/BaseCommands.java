@@ -22,7 +22,6 @@ import android.os.RegistrantList;
 import android.os.Registrant;
 import android.os.Handler;
 import android.os.AsyncResult;
-import android.provider.Checkin;
 import android.util.Config;
 import android.util.Log;
 
@@ -616,13 +615,6 @@ public abstract class BaseCommands implements CommandsInterface {
             if (oldState == mState) {
                 // no state transition
                 return;
-            }
-
-            if (mContext != null &&
-                    newState == RadioState.RADIO_UNAVAILABLE &&
-                    oldState != RadioState.RADIO_OFF) {
-                Checkin.updateStats(mContext.getContentResolver(),
-                        Checkin.Stats.Tag.PHONE_RADIO_RESETS, 1, 0.0);
             }
 
             mRadioStateChangedRegistrants.notifyRegistrants();

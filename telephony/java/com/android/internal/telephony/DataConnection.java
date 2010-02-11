@@ -536,8 +536,7 @@ public abstract class DataConnection extends HierarchicalStateMachine {
                             break;
                         case ERR_BadDns:
                             // Connection succeeded but DNS info is bad so disconnect
-                            EventLog.writeEvent(TelephonyEventLog.EVENT_LOG_BAD_DNS_ADDRESS,
-                                    dnsServers[0]);
+                            EventLog.writeEvent(EventLogTags.PDP_BAD_DNS_ADDRESS, dnsServers[0]);
                             tearDownData(cp);
                             transitionTo(mDisconnectingBadDnsState);
                             break;

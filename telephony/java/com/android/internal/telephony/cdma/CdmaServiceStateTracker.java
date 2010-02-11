@@ -29,7 +29,6 @@ import android.os.Registrant;
 import android.os.RegistrantList;
 import android.os.SystemClock;
 import android.os.SystemProperties;
-import android.provider.Checkin;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.provider.Telephony.Intents;
@@ -45,10 +44,10 @@ import android.util.TimeUtils;
 import com.android.internal.telephony.CommandException;
 import com.android.internal.telephony.CommandsInterface;
 import com.android.internal.telephony.DataConnectionTracker;
+import com.android.internal.telephony.EventLogTags;
 import com.android.internal.telephony.IccCard;
 import com.android.internal.telephony.MccTable;
 import com.android.internal.telephony.ServiceStateTracker;
-import com.android.internal.telephony.TelephonyEventLog;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.telephony.TelephonyProperties;
 
@@ -537,7 +536,7 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
         } else if (!mDesiredPowerState && cm.getRadioState().isOn()) {
             DataConnectionTracker dcTracker = phone.mDataConnection;
             if (! dcTracker.isDataConnectionAsDesired()) {
-                EventLog.writeEvent(TelephonyEventLog.EVENT_LOG_DATA_STATE_RADIO_OFF,
+                EventLog.writeEvent(EventLogTags.DATA_NETWORK_STATUS_ON_RADIO_OFF,
                         dcTracker.getStateInString(),
                         dcTracker.getAnyDataEnabled() ? 1 : 0);
             }
@@ -1013,6 +1012,14 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
 
         boolean hasLocationChanged = !newCellLoc.equals(cellLoc);
 
+        // Add an event log when connection state changes
+        if (ss.getState() != newSS.getState() ||
+                cdmaDataConnectionState != newCdmaDataConnectionState) {
+            EventLog.writeEvent(EventLogTags.CDMA_SERVICE_STATE_CHANGE,
+                    ss.getState(), cdmaDataConnectionState,
+                    newSS.getState(), newCdmaDataConnectionState);
+        }
+
         ServiceState tss;
         tss = ss;
         ss = newSS;
@@ -1035,7 +1042,6 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
         }
 
         if (hasRegistered) {
-            Checkin.updateStats(cr, Checkin.Stats.Tag.PHONE_CDMA_REGISTERED, 1, 0.0);
             networkAttachedRegistrants.notifyRegistrants();
         }
 

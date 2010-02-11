@@ -1,0 +1,11 @@
+# See system/core/logcat/event.logtags for a description of the format of this file.
+
+option java_package android.webkit;
+
+# browser stats for diary study
+70101 browser_zoom_level_change (start level|1|5),(end level|1|5),(time|2|3)
+70102 browser_double_tap_duration (duration|1|3),(time|2|3)
+# 70103- used by the browser app itself
+
+70150 browser_snap_center
+70151 browser_text_size_change (oldSize|1|5), (newSize|1|5)

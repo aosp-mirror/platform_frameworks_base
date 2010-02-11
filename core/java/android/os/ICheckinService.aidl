@@ -26,12 +26,6 @@ import android.os.IParentalControlCallback;
  * {@hide}
  */
 interface ICheckinService {
-    /** Reboot into the recovery system and wipe all user data. */
-    void masterClear();
-
-    /** Reboot into the recovery system, wipe all user data and enable Encrypted File Systems. */
-    void masterClearAndToggleEFS(boolean efsEnabled);
-
     /**
      * Determine if the device is under parental control. Return null if
      * we are unable to check the parental control status.

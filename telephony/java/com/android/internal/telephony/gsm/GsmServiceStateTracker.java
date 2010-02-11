@@ -35,7 +35,6 @@ import android.os.Registrant;
 import android.os.RegistrantList;
 import android.os.SystemClock;
 import android.os.SystemProperties;
-import android.provider.Checkin;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.provider.Telephony.Intents;
@@ -52,11 +51,11 @@ import android.util.TimeUtils;
 import com.android.internal.telephony.CommandException;
 import com.android.internal.telephony.CommandsInterface;
 import com.android.internal.telephony.DataConnectionTracker;
+import com.android.internal.telephony.EventLogTags;
 import com.android.internal.telephony.IccCard;
 import com.android.internal.telephony.MccTable;
 import com.android.internal.telephony.RILConstants;
 import com.android.internal.telephony.ServiceStateTracker;
-import com.android.internal.telephony.TelephonyEventLog;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.telephony.TelephonyProperties;
 
@@ -508,7 +507,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
                     // i.e. CREG is ok while CGREG is not
                     // possible a network or baseband side error
                     GsmCellLocation loc = ((GsmCellLocation)phone.getCellLocation());
-                    EventLog.writeEvent(TelephonyEventLog.EVENT_LOG_CGREG_FAIL,
+                    EventLog.writeEvent(EventLogTags.DATA_NETWORK_REGISTRATION_FAIL,
                             ss.getOperatorNumeric(), loc != null ? loc.getCid() : -1);
                     mReportedGprsNoReg = true;
                 }
@@ -540,7 +539,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
         } else if (!mDesiredPowerState && cm.getRadioState().isOn()) {
             DataConnectionTracker dcTracker = phone.mDataConnection;
             if (! dcTracker.isDataConnectionAsDesired()) {
-                EventLog.writeEvent(TelephonyEventLog.EVENT_LOG_DATA_STATE_RADIO_OFF,
+                EventLog.writeEvent(EventLogTags.DATA_NETWORK_STATUS_ON_RADIO_OFF,
                         dcTracker.getStateInString(), dcTracker.getAnyDataEnabled() ? 1 : 0);
             }
             // If it's on and available and we want it off gracefully
@@ -889,6 +888,12 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
 
         boolean hasEmergencyOnlyChanged = mNewEmergencyOnly != mEmergencyOnly;
 
+        // Add an event log when connection state changes
+        if (ss.getState() != newSS.getState() || gprsState != newGPRSState) {
+            EventLog.writeEvent(EventLogTags.GSM_SERVICE_STATE_CHANGE,
+                ss.getState(), gprsState, newSS.getState(), newGPRSState);
+        }
+
         ServiceState tss;
         tss = ss;
         ss = newSS;
@@ -902,7 +907,6 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
 
         mEmergencyOnly = mNewEmergencyOnly;
 
-
         // Add an event log when network type switched
         // TODO: we may add filtering to reduce the event logged,
         // i.e. check preferred network setting, only switch to 2G, etc
@@ -910,8 +914,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
             int cid = -1;
             GsmCellLocation loc = ((GsmCellLocation)phone.getCellLocation());
             if (loc != null) cid = loc.getCid();
-            EventLog.writeEvent(TelephonyEventLog.EVENT_LOG_GSM_RAT_SWITCHED,
-                    cid, networkType, newNetworkType);
+            EventLog.writeEvent(EventLogTags.GSM_RAT_SWITCHED, cid, networkType, newNetworkType);
             Log.d(LOG_TAG,
                     "RAT switched " + networkTypeToString(networkType) + " -> "
                     + networkTypeToString(newNetworkType) + " at cell " + cid);
@@ -928,8 +931,6 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
         }
 
         if (hasRegistered) {
-            Checkin.updateStats(phone.getContext().getContentResolver(),
-                    Checkin.Stats.Tag.PHONE_GSM_REGISTERED, 1, 0.0);
             networkAttachedRegistrants.notifyRegistrants();
         }
 

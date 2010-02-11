@@ -33,7 +33,6 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.preference.PreferenceManager;
-import android.provider.Checkin;
 import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
 import android.telephony.cdma.CdmaCellLocation;
@@ -43,13 +42,13 @@ import android.util.Log;
 
 import com.android.internal.telephony.CommandsInterface;
 import com.android.internal.telephony.DataCallState;
-import com.android.internal.telephony.DataConnection;
 import com.android.internal.telephony.DataConnection.FailCause;
+import com.android.internal.telephony.DataConnection;
 import com.android.internal.telephony.DataConnectionTracker;
-import com.android.internal.telephony.RetryManager;
+import com.android.internal.telephony.EventLogTags;
 import com.android.internal.telephony.Phone;
+import com.android.internal.telephony.RetryManager;
 import com.android.internal.telephony.ServiceStateTracker;
-import com.android.internal.telephony.TelephonyEventLog;
 
 import java.util.ArrayList;
 
@@ -232,18 +231,10 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
     protected void setState(State s) {
         if (DBG) log ("setState: " + s);
         if (state != s) {
-            if (s == State.INITING) { // request Data connection context
-                Checkin.updateStats(phone.getContext().getContentResolver(),
-                        Checkin.Stats.Tag.PHONE_CDMA_DATA_ATTEMPTED, 1, 0.0);
-            }
-
-            if (s == State.CONNECTED) { // pppd is up
-                Checkin.updateStats(phone.getContext().getContentResolver(),
-                        Checkin.Stats.Tag.PHONE_CDMA_DATA_CONNECTED, 1, 0.0);
-            }
+            EventLog.writeEvent(EventLogTags.CDMA_DATA_STATE_CHANGE,
+                    state.toString(), s.toString());
+            state = s;
         }
-
-        state = s;
     }
 
     @Override
@@ -528,7 +519,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
 
                     if (mNoRecvPollCount == 0) {
                         EventLog.writeEvent(
-                                TelephonyEventLog.EVENT_LOG_RADIO_RESET_COUNTDOWN_TRIGGERED,
+                                EventLogTags.PDP_RADIO_RESET_COUNTDOWN_TRIGGERED,
                                 sentSinceLastRecv);
                     }
 
@@ -543,8 +534,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
                         netStatPollEnabled = false;
                         stopNetStatPoll();
                         restartRadio();
-                        EventLog.writeEvent(TelephonyEventLog.EVENT_LOG_RADIO_RESET,
-                                NO_RECV_POLL_LIMIT);
+                        EventLog.writeEvent(EventLogTags.PDP_RADIO_RESET, NO_RECV_POLL_LIMIT);
                     }
                 } else {
                     mNoRecvPollCount = 0;
@@ -822,7 +812,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
                 mRetryMgr.resetRetryCount();
 
                 CdmaCellLocation loc = (CdmaCellLocation)(phone.getCellLocation());
-                EventLog.writeEvent(TelephonyEventLog.EVENT_LOG_CDMA_DATA_SETUP_FAILED,
+                EventLog.writeEvent(EventLogTags.CDMA_DATA_SETUP_FAILED,
                         loc != null ? loc.getBaseStationId() : -1,
                         TelephonyManager.getDefault().getNetworkType());
             }
@@ -863,7 +853,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
 
     private void writeEventLogCdmaDataDrop() {
         CdmaCellLocation loc = (CdmaCellLocation)(phone.getCellLocation());
-        EventLog.writeEvent(TelephonyEventLog.EVENT_LOG_CDMA_DATA_DROP,
+        EventLog.writeEvent(EventLogTags.CDMA_DATA_DROP,
                 loc != null ? loc.getBaseStationId() : -1,
                 TelephonyManager.getDefault().getNetworkType());
     }

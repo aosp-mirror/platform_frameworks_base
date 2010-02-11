@@ -38,7 +38,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.ServiceManager;
 import android.os.SystemClock;
-import android.provider.Checkin;
 import android.text.IClipboard;
 import android.text.Selection;
 import android.text.Spannable;
@@ -623,8 +622,6 @@ public class WebView extends AbsoluteLayout
     private boolean mGotKeyDown;
 
     /* package */ static boolean mLogEvent = true;
-    private static final int EVENT_LOG_ZOOM_LEVEL_CHANGE = 70101;
-    private static final int EVENT_LOG_DOUBLE_TAP_DURATION = 70102;
 
     // for event log
     private long mLastTouchUpTime = 0;
@@ -4453,7 +4450,7 @@ public class WebView extends AbsoluteLayout
                     mWebViewCore.sendMessage(
                             EventHub.UPDATE_FRAME_CACHE_IF_LOADING);
                     if (mLogEvent && eventTime - mLastTouchUpTime < 1000) {
-                        EventLog.writeEvent(EVENT_LOG_DOUBLE_TAP_DURATION,
+                        EventLog.writeEvent(EventLogTags.BROWSER_DOUBLE_TAP_DURATION,
                                 (eventTime - mLastTouchUpTime), eventTime);
                     }
                 }
@@ -5389,11 +5386,8 @@ public class WebView extends AbsoluteLayout
     }
 
     private void doMotionUp(int contentX, int contentY) {
-        if (nativeMotionUp(contentX, contentY, mNavSlop)) {
-            if (mLogEvent) {
-                Checkin.updateStats(mContext.getContentResolver(),
-                        Checkin.Stats.Tag.BROWSER_SNAP_CENTER, 1, 0.0);
-            }
+        if (mLogEvent && nativeMotionUp(contentX, contentY, mNavSlop)) {
+            EventLog.writeEvent(EventLogTags.BROWSER_SNAP_CENTER);
         }
         if (nativeHasCursorNode() && !nativeCursorIsTextInput()) {
             playSoundEffect(SoundEffectConstants.CLICK);
