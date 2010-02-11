@@ -18,6 +18,8 @@
 #define LOG_TAG "AwesomePlayer"
 #include <utils/Log.h>
 
+#include <dlfcn.h>
+
 #include "include/AwesomePlayer.h"
 #include "include/Prefetcher.h"
 #include "include/SoftwareRenderer.h"
@@ -80,13 +82,16 @@ private:
 
 struct AwesomeLocalRenderer : public AwesomeRenderer {
     AwesomeLocalRenderer(
+            const char *componentName,
             OMX_COLOR_FORMATTYPE colorFormat,
             const sp<ISurface> &surface,
             size_t displayWidth, size_t displayHeight,
             size_t decodedWidth, size_t decodedHeight)
-        : mTarget(new SoftwareRenderer(
-                    colorFormat, surface, displayWidth, displayHeight,
-                    decodedWidth, decodedHeight)) {
+        : mTarget(NULL),
+          mLibHandle(NULL) {
+            init(componentName,
+                 colorFormat, surface, displayWidth,
+                 displayHeight, decodedWidth, decodedHeight);
     }
 
     virtual void render(MediaBuffer *buffer) {
@@ -99,14 +104,63 @@ protected:
     virtual ~AwesomeLocalRenderer() {
         delete mTarget;
         mTarget = NULL;
+
+        if (mLibHandle) {
+            dlclose(mLibHandle);
+            mLibHandle = NULL;
+        }
     }
 
 private:
-    SoftwareRenderer *mTarget;
+    VideoRenderer *mTarget;
+    void *mLibHandle;
+
+    void init(
+            const char *componentName,
+            OMX_COLOR_FORMATTYPE colorFormat,
+            const sp<ISurface> &surface,
+            size_t displayWidth, size_t displayHeight,
+            size_t decodedWidth, size_t decodedHeight);
 
     AwesomeLocalRenderer(const AwesomeLocalRenderer &);
     AwesomeLocalRenderer &operator=(const AwesomeLocalRenderer &);;
 };
+
+void AwesomeLocalRenderer::init(
+        const char *componentName,
+        OMX_COLOR_FORMATTYPE colorFormat,
+        const sp<ISurface> &surface,
+        size_t displayWidth, size_t displayHeight,
+        size_t decodedWidth, size_t decodedHeight) {
+    mLibHandle = dlopen("libstagefrighthw.so", RTLD_NOW);
+
+    if (mLibHandle) {
+        typedef VideoRenderer *(*CreateRendererFunc)(
+                const sp<ISurface> &surface,
+                const char *componentName,
+                OMX_COLOR_FORMATTYPE colorFormat,
+                size_t displayWidth, size_t displayHeight,
+                size_t decodedWidth, size_t decodedHeight);
+
+        CreateRendererFunc func =
+            (CreateRendererFunc)dlsym(
+                    mLibHandle,
+                    "_Z14createRendererRKN7android2spINS_8ISurfaceEEEPKc20"
+                    "OMX_COLOR_FORMATTYPEjjjj");
+
+        if (func) {
+            mTarget =
+                (*func)(surface, componentName, colorFormat,
+                    displayWidth, displayHeight, decodedWidth, decodedHeight);
+        }
+    }
+
+    if (mTarget == NULL) {
+        mTarget = new SoftwareRenderer(
+                colorFormat, surface, displayWidth, displayHeight,
+                decodedWidth, decodedHeight);
+    }
+}
 
 AwesomePlayer::AwesomePlayer()
     : mTimeSource(NULL),
@@ -448,6 +502,7 @@ void AwesomePlayer::initRenderer_l() {
             // Other decoders are instantiated locally and as a consequence
             // allocate their buffers in local address space.
             mVideoRenderer = new AwesomeLocalRenderer(
+                component,
                 (OMX_COLOR_FORMATTYPE)format,
                 mISurface,
                 mVideoWidth, mVideoHeight,
