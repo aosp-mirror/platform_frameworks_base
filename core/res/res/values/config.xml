@@ -237,8 +237,4 @@
 
     <!-- Component name of the service providing geocoder API support. -->
     <string name="config_geocodeProvider">@null</string>
-
-    <!-- Flag indicating whether headset events are used by kernel to indicate
-    TTY mode changes. -->
-    <bool name="tty_mode_uses_headset_events">false</bool>
 </resources>
