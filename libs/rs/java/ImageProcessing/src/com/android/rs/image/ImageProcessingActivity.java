@@ -134,7 +134,7 @@ public class ImageProcessingActivity extends Activity implements SurfaceHolder.C
                     mParams.threshold = progress / 100.0f;
                     mParamsAllocation.data(mParams);
 
-                    if (false) {
+                    if (true) {
                         mInvokable.execute();
                     } else {
                         javaFilter();
