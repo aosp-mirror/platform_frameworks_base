@@ -43,4 +43,25 @@ public class TtyIntent {
      */
     public static final String TTY_ENABLED = "ttyEnabled";
 
+    /**
+     * Broadcast intent action indicating that the TTY preferred operating mode
+     * has changed. An intent extra provides the new mode as an int.
+     * @see #TTY_PREFFERED_MODE
+     *
+     * {@hide}
+     */
+    public static final String TTY_PREFERRED_MODE_CHANGE_ACTION =
+        "com.android.internal.telephony.cdma.intent.action.TTY_PREFERRED_MODE_CHANGE";
+
+    /**
+     * The lookup key for an int that indicates preferred TTY mode.
+     * Valid modes are:
+     * - {@link Phone.TTY_MODE_OFF}
+     * - {@link Phone.TTY_MODE_FULL}
+     * - {@link Phone.TTY_MODE_HCO}
+     * - {@link Phone.TTY_MODE_VCO}
+     *
+     * {@hide}
+     */
+    public static final String TTY_PREFFERED_MODE = "ttyPreferredMode";
 }
