@@ -194,6 +194,7 @@ status_t StagefrightMediaScanner::processFile(
             { "discnumber", METADATA_KEY_DISC_NUMBER },
             { "album", METADATA_KEY_ALBUM },
             { "artist", METADATA_KEY_ARTIST },
+            { "albumartist", METADATA_KEY_ALBUMARTIST },
             { "composer", METADATA_KEY_COMPOSER },
             { "genre", METADATA_KEY_GENRE },
             { "title", METADATA_KEY_TITLE },

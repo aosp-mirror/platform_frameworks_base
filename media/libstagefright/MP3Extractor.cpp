@@ -731,6 +731,7 @@ sp<MetaData> MP3Extractor::getMetaData() {
     static const Map kMap[] = {
         { kKeyAlbum, "TALB", "TAL" },
         { kKeyArtist, "TPE1", "TP1" },
+        { kKeyAlbumArtist, "TPE2", "TP2" },
         { kKeyComposer, "TCOM", "TCM" },
         { kKeyGenre, "TCON", "TCO" },
         { kKeyTitle, "TIT2", "TT2" },
