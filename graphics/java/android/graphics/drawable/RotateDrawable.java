@@ -204,13 +204,27 @@ public class RotateDrawable extends Drawable implements Drawable.Callback {
                 com.android.internal.R.styleable.RotateDrawable_visible);
         
         TypedValue tv = a.peekValue(com.android.internal.R.styleable.RotateDrawable_pivotX);
-        boolean pivotXRel = tv.type == TypedValue.TYPE_FRACTION;
-        float pivotX = pivotXRel ? tv.getFraction(1.0f, 1.0f) : tv.getFloat();
+        boolean pivotXRel;
+        float pivotX;
+        if (tv == null) {
+            pivotXRel = true;
+            pivotX = 0.5f;
+        } else {
+            pivotXRel = tv.type == TypedValue.TYPE_FRACTION;
+            pivotX = pivotXRel ? tv.getFraction(1.0f, 1.0f) : tv.getFloat();
+        }
         
         tv = a.peekValue(com.android.internal.R.styleable.RotateDrawable_pivotY);
-        boolean pivotYRel = tv.type == TypedValue.TYPE_FRACTION;
-        float pivotY = pivotYRel ? tv.getFraction(1.0f, 1.0f) : tv.getFloat();
-        
+        boolean pivotYRel;
+        float pivotY;
+        if (tv == null) {
+            pivotYRel = true;
+            pivotY = 0.5f;
+        } else {
+            pivotYRel = tv.type == TypedValue.TYPE_FRACTION;
+            pivotY = pivotYRel ? tv.getFraction(1.0f, 1.0f) : tv.getFloat();
+        }
+
         float fromDegrees = a.getFloat(
                 com.android.internal.R.styleable.RotateDrawable_fromDegrees, 0.0f);
         float toDegrees = a.getFloat(
