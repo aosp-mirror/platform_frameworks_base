@@ -16,6 +16,8 @@
 
 package android.net;
 
+import static com.android.common.Patterns.GOOD_IRI_CHAR;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -54,7 +56,7 @@ public class WebAddress {
     static Pattern sAddressPattern = Pattern.compile(
             /* scheme    */ "(?:(http|HTTP|https|HTTPS|file|FILE)\\:\\/\\/)?" +
             /* authority */ "(?:([-A-Za-z0-9$_.+!*'(),;?&=]+(?:\\:[-A-Za-z0-9$_.+!*'(),;?&=]+)?)@)?" +
-            /* host      */ "([-A-Za-z0-9%_]+(?:\\.[-A-Za-z0-9%_]+)*|\\[[0-9a-fA-F:\\.]+\\])?" +
+            /* host      */ "([-" + GOOD_IRI_CHAR + "%_]+(?:\\.[-" + GOOD_IRI_CHAR + "%_]+)*|\\[[0-9a-fA-F:\\.]+\\])?" +
             /* port      */ "(?:\\:([0-9]+))?" +
             /* path      */ "(\\/?.*)?");
 
