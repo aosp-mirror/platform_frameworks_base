@@ -31,11 +31,13 @@ import android.view.SurfaceView;
 import android.view.SurfaceHolder;
 import android.widget.ImageView;
 import android.widget.SeekBar;
+import java.lang.Math;
 
 public class ImageProcessingActivity extends Activity implements SurfaceHolder.Callback {
     private Bitmap mBitmap;
     private Params mParams;
     private Script.Invokable mInvokable;
+    private int[] mInData;
     private int[] mOutData;
 
     @SuppressWarnings({"FieldCanBeLocal"})
@@ -87,6 +89,31 @@ public class ImageProcessingActivity extends Activity implements SurfaceHolder.C
         }
     }
 
+    private void javaFilter() {
+        long t = java.lang.System.currentTimeMillis();
+        int count = mParams.inWidth * mParams.inHeight;
+        float threshold = mParams.threshold * 255.f;
+
+        for (int i = 0; i < count; i++) {
+            final float r = (float)((mInData[i] >> 0) & 0xff);
+            final float g = (float)((mInData[i] >> 8) & 0xff);
+            final float b = (float)((mInData[i] >> 16) & 0xff);
+
+            final float luminance = 0.2125f * r +
+                              0.7154f * g +
+                              0.0721f * b;
+            if (luminance > threshold) {
+                mOutData[i] = mInData[i];
+            } else {
+                mOutData[i] = mInData[i] & 0xff000000;
+            }
+        }
+
+        t = java.lang.System.currentTimeMillis() - t;
+
+        android.util.Log.v("Img", "frame time ms " + t);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -106,7 +133,15 @@ public class ImageProcessingActivity extends Activity implements SurfaceHolder.C
                 if (fromUser) {
                     mParams.threshold = progress / 100.0f;
                     mParamsAllocation.data(mParams);
-                    mInvokable.execute();
+
+                    if (false) {
+                        mInvokable.execute();
+                    } else {
+                        javaFilter();
+                        mBitmap.setPixels(mOutData, 0, mParams.outWidth, 0, 0,
+                                mParams.outWidth, mParams.outHeight);
+                        mDisplayView.invalidate();
+                    }
                 }
             }
 
@@ -149,9 +184,9 @@ public class ImageProcessingActivity extends Activity implements SurfaceHolder.C
                 Element.createUser(mRS, Element.DataType.SIGNED_32),
                 pixelCount);
 
-        final int[] data = new int[pixelCount];
-        mBitmap.getPixels(data, 0, mParams.inWidth, 0, 0, mParams.inWidth, mParams.inHeight);
-        mInPixelsAllocation.data(data);
+        mInData = new int[pixelCount];
+        mBitmap.getPixels(mInData, 0, mParams.inWidth, 0, 0, mParams.inWidth, mParams.inHeight);
+        mInPixelsAllocation.data(mInData);
 
         mOutData = new int[pixelCount];
         mOutPixelsAllocation.data(mOutData);

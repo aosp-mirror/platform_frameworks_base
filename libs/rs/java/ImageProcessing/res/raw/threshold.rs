@@ -15,16 +15,17 @@ void main() {
     int i;
     float threshold = (Params->threshold * 255.f);
 
+    //testFnc(count, threshold, in, out);
+
     for (i = 0; i < count; i++) {
         float luminance = 0.2125f * in->r +
                           0.7154f * in->g +
                           0.0721f * in->b;
-        luminance = maxf(0.0f, luminance - threshold);
-        vec3Scale(&pixel, luminance > 0);
-        out->a = in->a;
-        out->r = pixel.x;
-        out->g = pixel.y;
-        out->b = pixel.z;
+        if (luminance > threshold) {
+            *out = *in;
+        } else {
+            *((int *)out) = *((int *)in) & 0xff000000;
+        }
 
         in++;
         out++;
