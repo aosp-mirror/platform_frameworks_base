@@ -213,8 +213,6 @@ public class WebView extends AbsoluteLayout
     // true means redraw the screen all-the-time. Only with AUTO_REDRAW_HACK
     private boolean mAutoRedraw;
     private int mRootLayer; // C++ pointer to the root layer
-    private boolean mLayersHaveAnimations;
-    private EvaluateLayersAnimations mEvaluateThread;
 
     static final String LOGTAG = "webview";
 
@@ -3072,6 +3070,15 @@ public class WebView extends AbsoluteLayout
             int scrollY = computeVerticalScrollOffset();
             int viewHeight = getHeight() - getVisibleTitleHeight();
 
+            // Currently for each draw we compute the animation values;
+            // We may in the future decide to do that independently.
+            if (nativeEvaluateLayersAnimations(mRootLayer)) {
+                // If we have unfinished (or unstarted) animations,
+                // we ask for a repaint.
+                invalidate();
+            }
+
+            // We can now draw the layers.
             nativeDrawLayers(mRootLayer, mScrollX, scrollY,
                              getWidth(), viewHeight,
                              mActualScale, canvas);
@@ -3412,40 +3419,6 @@ public class WebView extends AbsoluteLayout
     /* package */ void requestLabel(int framePointer, int nodePointer) {
         mWebViewCore.sendMessage(EventHub.REQUEST_LABEL, framePointer,
                 nodePointer);
-    }
-
-    /*
-     * This class runs the layers animations in their own thread,
-     * so that we do not slow down the UI.
-     */
-    private class EvaluateLayersAnimations extends Thread {
-        boolean mRunning = true;
-        // delay corresponds to 40fps, no need to go faster.
-        int mDelay = 25; // in ms
-        public void run() {
-            while (mRunning) {
-                if (mLayersHaveAnimations && mRootLayer != 0) {
-                    // updates is a C++ pointer to a Vector of AnimationValues
-                    int updates = nativeEvaluateLayersAnimations(mRootLayer);
-                    if (updates == 0) {
-                        mRunning = false;
-                    }
-                    Message.obtain(mPrivateHandler,
-                          WebView.IMMEDIATE_REPAINT_MSG_ID,
-                          updates, 0).sendToTarget();
-                } else {
-                    mRunning = false;
-                }
-                try {
-                    Thread.currentThread().sleep(mDelay);
-                } catch (InterruptedException e) {
-                    mRunning = false;
-                }
-            }
-        }
-        public void cancel() {
-            mRunning = false;
-        }
     }
 
     /*
@@ -5929,13 +5902,6 @@ public class WebView extends AbsoluteLayout
                     break;
                 }
                 case IMMEDIATE_REPAINT_MSG_ID: {
-                    int updates = msg.arg1;
-                    if (updates != 0) {
-                        // updates is a C++ pointer to a Vector of
-                        // AnimationValues that we apply to the layers.
-                        // The Vector is deallocated in nativeUpdateLayers().
-                        nativeUpdateLayers(updates);
-                    }
                     invalidate();
                     break;
                 }
@@ -5944,18 +5910,6 @@ public class WebView extends AbsoluteLayout
                     mRootLayer = msg.arg1;
                     if (oldLayer > 0) {
                         nativeDestroyLayer(oldLayer);
-                    }
-                    if (mRootLayer == 0) {
-                        mLayersHaveAnimations = false;
-                    }
-                    if (mEvaluateThread != null) {
-                        mEvaluateThread.cancel();
-                        mEvaluateThread = null;
-                    }
-                    if (nativeLayersHaveAnimations(mRootLayer)) {
-                        mLayersHaveAnimations = true;
-                        mEvaluateThread = new EvaluateLayersAnimations();
-                        mEvaluateThread.start();
                     }
                     invalidate();
                     break;
@@ -6729,9 +6683,7 @@ public class WebView extends AbsoluteLayout
     private native void     nativeDestroy();
     private native void     nativeDrawCursorRing(Canvas content);
     private native void     nativeDestroyLayer(int layer);
-    private native int      nativeEvaluateLayersAnimations(int layer);
-    private native boolean  nativeLayersHaveAnimations(int layer);
-    private native void     nativeUpdateLayers(int updates);
+    private native boolean  nativeEvaluateLayersAnimations(int layer);
     private native void     nativeDrawLayers(int layer,
                                              int scrollX, int scrollY,
                                              int width, int height,
