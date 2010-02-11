@@ -19,7 +19,7 @@
 
 #include <private/utils/Static.h>
 
-#include <ui/ISurfaceComposer.h>
+#include <surfaceflinger/ISurfaceComposer.h>
 
 #include <android_runtime/AndroidRuntime.h>
 
