@@ -44,14 +44,14 @@ android_media_MediaProfiles_native_init(JNIEnv *env)
     }
 }
 
-static int
+static jint
 android_media_MediaProfiles_native_get_num_file_formats(JNIEnv *env, jobject thiz)
 {
     LOGV("native_get_num_file_formats");
     return sProfiles->getOutputFileFormats().size();
 }
 
-static int
+static jint
 android_media_MediaProfiles_native_get_file_format(JNIEnv *env, jobject thiz, jint index)
 {
     LOGV("native_get_file_format: %d", index);
@@ -61,11 +61,10 @@ android_media_MediaProfiles_native_get_file_format(JNIEnv *env, jobject thiz, ji
         jniThrowException(env, "java/lang/IllegalArgumentException", "out of array boundary");
         return -1;
     }
-    int format = static_cast<int>(formats[index]);
-    return format;
+    return static_cast<jint>(formats[index]);
 }
 
-static int
+static jint
 android_media_MediaProfiles_native_get_num_video_encoders(JNIEnv *env, jobject thiz)
 {
     LOGV("native_get_num_video_encoders");
@@ -116,7 +115,7 @@ android_media_MediaProfiles_native_get_video_encoder_cap(JNIEnv *env, jobject th
     return cap;
 }
 
-static int
+static jint
 android_media_MediaProfiles_native_get_num_audio_encoders(JNIEnv *env, jobject thiz)
 {
     LOGV("native_get_num_audio_encoders");
@@ -209,6 +208,48 @@ android_media_MediaProfiles_native_get_camcorder_profile(JNIEnv *env, jobject th
                           audioChannels);
 }
 
+static jint
+android_media_MediaProfiles_native_get_num_video_decoders(JNIEnv *env, jobject thiz)
+{
+    LOGV("native_get_num_video_decoders");
+    return sProfiles->getVideoDecoders().size();
+}
+
+static jint
+android_media_MediaProfiles_native_get_video_decoder_type(JNIEnv *env, jobject thiz, jint index)
+{
+    LOGV("native_get_video_decoder_type: %d", index);
+    Vector<video_decoder> decoders = sProfiles->getVideoDecoders();
+    int nSize = decoders.size();
+    if (index < 0 || index >= nSize) {
+        jniThrowException(env, "java/lang/IllegalArgumentException", "out of array boundary");
+        return -1;
+    }
+
+    return static_cast<jint>(decoders[index]);
+}
+
+static jint
+android_media_MediaProfiles_native_get_num_audio_decoders(JNIEnv *env, jobject thiz)
+{
+    LOGV("native_get_num_audio_decoders");
+    return sProfiles->getAudioDecoders().size();
+}
+
+static jint
+android_media_MediaProfiles_native_get_audio_decoder_type(JNIEnv *env, jobject thiz, jint index)
+{
+    LOGV("native_get_audio_decoder_type: %d", index);
+    Vector<audio_decoder> decoders = sProfiles->getAudioDecoders();
+    int nSize = decoders.size();
+    if (index < 0 || index >= nSize) {
+        jniThrowException(env, "java/lang/IllegalArgumentException", "out of array boundary");
+        return -1;
+    }
+
+    return static_cast<jint>(decoders[index]);
+}
+
 static JNINativeMethod gMethodsForEncoderCapabilitiesClass[] = {
     {"native_init",                            "()V",                    (void *)android_media_MediaProfiles_native_init},
     {"native_get_num_file_formats",            "()I",                    (void *)android_media_MediaProfiles_native_get_num_file_formats},
@@ -229,7 +270,16 @@ static JNINativeMethod gMethodsForCamcorderProfileClass[] = {
                                                                          (void *)android_media_MediaProfiles_native_get_camcorder_profile},
 };
 
+static JNINativeMethod gMethodsForDecoderCapabilitiesClass[] = {
+    {"native_init",                            "()V",                    (void *)android_media_MediaProfiles_native_init},
+    {"native_get_num_video_decoders",          "()I",                    (void *)android_media_MediaProfiles_native_get_num_video_decoders},
+    {"native_get_num_audio_decoders",          "()I",                    (void *)android_media_MediaProfiles_native_get_num_audio_decoders},
+    {"native_get_video_decoder_type",          "(I)I",                   (void *)android_media_MediaProfiles_native_get_video_decoder_type},
+    {"native_get_audio_decoder_type",          "(I)I",                   (void *)android_media_MediaProfiles_native_get_audio_decoder_type},
+};
+
 static const char* const kEncoderCapabilitiesClassPathName = "android/media/EncoderCapabilities";
+static const char* const kDecoderCapabilitiesClassPathName = "android/media/DecoderCapabilities";
 static const char* const kCamcorderProfileClassPathName = "android/media/CamcorderProfile";
 
 // This function only registers the native methods, and is called from
@@ -246,6 +296,11 @@ int register_android_media_MediaProfiles(JNIEnv *env)
                gMethodsForCamcorderProfileClass,
                NELEM(gMethodsForCamcorderProfileClass));
 
-    // Success if ret1 == 0 && ret2 == 0
-    return (ret1 || ret2);
+    int ret3 = AndroidRuntime::registerNativeMethods(env,
+               kDecoderCapabilitiesClassPathName,
+               gMethodsForDecoderCapabilitiesClass,
+               NELEM(gMethodsForDecoderCapabilitiesClass));
+
+    // Success if ret1 == 0 && ret2 == 0 && ret3 == 0
+    return (ret1 || ret2 || ret3);
 }
