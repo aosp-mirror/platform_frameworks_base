@@ -261,6 +261,7 @@ public class TextToSpeech {
          * the TextToSpeech engine returns an ArrayList<String> of all the available voices.
          * The format of each voice is: lang-COUNTRY-variant where COUNTRY and variant are
          * optional (ie, "eng" or "eng-USA" or "eng-USA-FEMALE").
+         * {@hide}
          */
         public static final String EXTRA_AVAILABLE_VOICES = "availableVoices";
         /**
@@ -268,6 +269,7 @@ public class TextToSpeech {
          * the TextToSpeech engine returns an ArrayList<String> of all the unavailable voices.
          * The format of each voice is: lang-COUNTRY-variant where COUNTRY and variant are
          * optional (ie, "eng" or "eng-USA" or "eng-USA-FEMALE").
+         * {@hide}
          */
         public static final String EXTRA_UNAVAILABLE_VOICES = "unavailableVoices";
         /**
@@ -276,6 +278,7 @@ public class TextToSpeech {
          * check for by sending an ArrayList<String> of the voices that are of interest.
          * The format of each voice is: lang-COUNTRY-variant where COUNTRY and variant are
          * optional (ie, "eng" or "eng-USA" or "eng-USA-FEMALE").
+         * {@hide}
          */
         public static final String EXTRA_CHECK_VOICE_DATA_FOR = "checkVoiceDataFor";
 
