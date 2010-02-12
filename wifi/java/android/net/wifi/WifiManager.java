@@ -123,7 +123,88 @@ public class WifiManager {
      * @see #getWifiState()
      */
     public static final int WIFI_STATE_UNKNOWN = 4;
-    
+
+    /**
+     * Broadcast intent action indicating that Wi-Fi AP has been enabled, disabled,
+     * enabling, disabling, or failed.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String WIFI_AP_STATE_CHANGED_ACTION =
+        "android.net.wifi.WIFI_AP_STATE_CHANGED";
+
+    /**
+     * The lookup key for an int that indicates whether Wi-Fi AP is enabled,
+     * disabled, enabling, disabling, or failed.  Retrieve it with
+     * {@link android.content.Intent#getIntExtra(String,int)}.
+     *
+     * @see #WIFI_AP_STATE_DISABLED
+     * @see #WIFI_AP_STATE_DISABLING
+     * @see #WIFI_AP_STATE_ENABLED
+     * @see #WIFI_AP_STATE_ENABLING
+     * @see #WIFI_AP_STATE_FAILED
+     *
+     * @hide
+     */
+    public static final String EXTRA_WIFI_AP_STATE = "wifi_state";
+    /**
+     * The previous Wi-Fi state.
+     *
+     * @see #EXTRA_WIFI_AP_STATE
+     *
+     * @hide
+     */
+    public static final String EXTRA_PREVIOUS_WIFI_AP_STATE = "previous_wifi_state";
+    /**
+     * Wi-Fi AP is currently being disabled. The state will change to
+     * {@link #WIFI_AP_STATE_DISABLED} if it finishes successfully.
+     *
+     * @see #WIFI_AP_STATE_CHANGED_ACTION
+     * @see #getWifiApState()
+     *
+     * @hide
+     */
+    public static final int WIFI_AP_STATE_DISABLING = 0;
+    /**
+     * Wi-Fi AP is disabled.
+     *
+     * @see #WIFI_AP_STATE_CHANGED_ACTION
+     * @see #getWifiState()
+     *
+     * @hide
+     */
+    public static final int WIFI_AP_STATE_DISABLED = 1;
+    /**
+     * Wi-Fi AP is currently being enabled. The state will change to
+     * {@link #WIFI_AP_STATE_ENABLED} if it finishes successfully.
+     *
+     * @see #WIFI_AP_STATE_CHANGED_ACTION
+     * @see #getWifiApState()
+     *
+     * @hide
+     */
+    public static final int WIFI_AP_STATE_ENABLING = 2;
+    /**
+     * Wi-Fi AP is enabled.
+     *
+     * @see #WIFI_AP_STATE_CHANGED_ACTION
+     * @see #getWifiApState()
+     *
+     * @hide
+     */
+    public static final int WIFI_AP_STATE_ENABLED = 3;
+    /**
+     * Wi-Fi AP is in a failed state. This state will occur when an error occurs during
+     * enabling or disabling
+     *
+     * @see #WIFI_AP_STATE_CHANGED_ACTION
+     * @see #getWifiApState()
+     *
+     * @hide
+     */
+    public static final int WIFI_AP_STATE_FAILED = 4;
+
     /**
      * Broadcast intent action indicating that a connection to the supplicant has
      * been established (and it is now possible
@@ -678,6 +759,54 @@ public class WifiManager {
      */
     public static int compareSignalLevel(int rssiA, int rssiB) {
         return rssiA - rssiB;
+    }
+
+    /**
+     * Start AccessPoint mode with the specified
+     * configuration. If the radio is already running in
+     * AP mode, update the new configuration
+     * Note that starting in access point mode disables station
+     * mode operation
+     * @param wifiConfig SSID, security and channel details as
+     *        part of WifiConfiguration
+     * @return {@code true} if the operation succeeds, {@code false} otherwise
+     *
+     * @hide Dont open up yet
+     */
+    public boolean setWifiApEnabled(WifiConfiguration wifiConfig, boolean enabled) {
+        try {
+            return mService.setWifiApEnabled(wifiConfig, enabled);
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Gets the Wi-Fi enabled state.
+     * @return One of {@link #WIFI_AP_STATE_DISABLED},
+     *         {@link #WIFI_AP_STATE_DISABLING}, {@link #WIFI_AP_STATE_ENABLED},
+     *         {@link #WIFI_AP_STATE_ENABLING}, {@link #WIFI_AP_STATE_FAILED}
+     * @see #isWifiApEnabled()
+     *
+     * @hide Dont open yet
+     */
+    public int getWifiApState() {
+        try {
+            return mService.getWifiApEnabledState();
+        } catch (RemoteException e) {
+            return WIFI_AP_STATE_FAILED;
+        }
+    }
+
+    /**
+     * Return whether Wi-Fi AP is enabled or disabled.
+     * @return {@code true} if Wi-Fi AP is enabled
+     * @see #getWifiApState()
+     *
+     * @hide Dont open yet
+     */
+    public boolean isWifiApEnabled() {
+        return getWifiApState() == WIFI_AP_STATE_ENABLED;
     }
 
     /**

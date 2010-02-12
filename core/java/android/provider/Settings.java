@@ -2386,6 +2386,13 @@ public final class Settings {
         public static final String WIFI_ON = "wifi_on";
 
         /**
+         * Whether the Wi-Fi AP should be on.
+         *
+         * @hide
+         */
+        public static final String WIFI_AP_ON = "wifi_ap_on";
+
+        /**
          * The acceptable packet loss percentage (range 0 - 100) before trying
          * another AP on the same network.
          */

@@ -456,4 +456,23 @@ class NetworkManagementService extends INetworkManagementService.Stub {
         }
         throw new IllegalStateException("Got an empty response");
     }
+
+    public void startAccessPoint()
+             throws IllegalStateException {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.CHANGE_NETWORK_STATE, "NetworkManagementService");
+        mContext.enforceCallingOrSelfPermission(
+            android.Manifest.permission.CHANGE_WIFI_STATE, "NetworkManagementService");
+        mConnector.doCommand(String.format("softap set"));
+        mConnector.doCommand(String.format("softap start"));
+    }
+
+    public void stopAccessPoint() throws IllegalStateException {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.CHANGE_NETWORK_STATE, "NetworkManagementService");
+        mContext.enforceCallingOrSelfPermission(
+            android.Manifest.permission.CHANGE_WIFI_STATE, "NetworkManagementService");
+        mConnector.doCommand("softap stop");
+    }
+
 }
