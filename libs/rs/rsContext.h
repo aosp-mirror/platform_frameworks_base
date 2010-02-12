@@ -41,10 +41,11 @@
 #include "rsgApiStructs.h"
 #include "rsLocklessFifo.h"
 
-#include <ui/egl/android_natives.h>
 
 // ---------------------------------------------------------------------------
 namespace android {
+
+class Surface;
 
 namespace renderscript {
 
@@ -98,7 +99,7 @@ public:
 
     void pause();
     void resume();
-    void setSurface(uint32_t w, uint32_t h, android_native_window_t *sur);
+    void setSurface(uint32_t w, uint32_t h, Surface *sur);
     void setPriority(int32_t p);
 
     void assignName(ObjectBase *obj, const char *name, uint32_t len);
@@ -238,7 +239,7 @@ private:
 
     static void * threadProc(void *);
 
-    android_native_window_t *mWndSurface;
+    Surface *mWndSurface;
 
     Vector<ObjectBase *> mNames;
 

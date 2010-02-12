@@ -19,7 +19,7 @@
 #include "rsThreadIO.h"
 #include <ui/FramebufferNativeWindow.h>
 #include <ui/EGLUtils.h>
-#include <ui/egl/android_natives.h>
+#include <surfaceflinger/Surface.h>
 
 #include <sys/types.h>
 #include <sys/resource.h>
@@ -461,7 +461,7 @@ Context::~Context()
     objDestroyOOBDestroy();
 }
 
-void Context::setSurface(uint32_t w, uint32_t h, android_native_window_t *sur)
+void Context::setSurface(uint32_t w, uint32_t h, Surface *sur)
 {
     rsAssert(mIsGraphicsContext);
 
@@ -859,7 +859,7 @@ void rsi_ContextResume(Context *rsc)
 
 void rsi_ContextSetSurface(Context *rsc, uint32_t w, uint32_t h, void *sur)
 {
-    rsc->setSurface(w, h, (android_native_window_t *)sur);
+    rsc->setSurface(w, h, (Surface *)sur);
 }
 
 void rsi_ContextSetPriority(Context *rsc, int32_t p)
