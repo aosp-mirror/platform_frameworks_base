@@ -1489,6 +1489,14 @@ public final class Settings {
         public static final String DEFAULT_INSTALL_LOCATION = "default_install_location";
 
         /**
+         * Show pointer location on screen?
+         * 0 = no
+         * 1 = yes
+         * @hide
+         */
+        public static final String POINTER_LOCATION = "pointer_location";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          * @hide
