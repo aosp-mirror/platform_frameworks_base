@@ -202,7 +202,7 @@ public class SQLiteDatabase extends SQLiteClosable {
     private long mLastLockMessageTime = 0L;
 
     // always log queries which take 100ms+; shorter queries are sampled accordingly
-    private static final int QUERY_LOG_TIME_IN_NANOS = 100 * 1000000;
+    private static final int QUERY_LOG_TIME_IN_MILLIS = 100;
     private static final int QUERY_LOG_SQL_LENGTH = 64;
     private final Random mRandom = new Random();
 
@@ -1650,7 +1650,7 @@ public class SQLiteDatabase extends SQLiteClosable {
      * @throws SQLException If the SQL string is invalid for some reason
      */
     public void execSQL(String sql) throws SQLException {
-        long timeStart = Debug.threadCpuTimeNanos();
+        long timeStart = SystemClock.uptimeMillis();
         lock();
         try {
             native_execSQL(sql);
@@ -1676,7 +1676,7 @@ public class SQLiteDatabase extends SQLiteClosable {
         if (bindArgs == null) {
             throw new IllegalArgumentException("Empty bindArgs");
         }
-        long timeStart = Debug.threadCpuTimeNanos();
+        long timeStart = SystemClock.uptimeMillis();
         lock();
         SQLiteStatement statement = null;
         try {
@@ -1785,17 +1785,17 @@ public class SQLiteDatabase extends SQLiteClosable {
 
 
 
-    /* package */ void logTimeStat(String sql, long beginNanos) {
+    /* package */ void logTimeStat(String sql, long beginMillis) {
         // Sample fast queries in proportion to the time taken.
         // Quantize the % first, so the logged sampling probability
         // exactly equals the actual sampling rate for this query.
 
         int samplePercent;
-        long nanos = Debug.threadCpuTimeNanos() - beginNanos;
-        if (nanos >= QUERY_LOG_TIME_IN_NANOS) {
+        long durationMillis = SystemClock.uptimeMillis() - beginMillis;
+        if (durationMillis >= QUERY_LOG_TIME_IN_MILLIS) {
             samplePercent = 100;
         } else {
-            samplePercent = (int) (100 * nanos / QUERY_LOG_TIME_IN_NANOS) + 1;
+            samplePercent = (int) (100 * durationMillis / QUERY_LOG_TIME_IN_MILLIS) + 1;
             if (mRandom.nextInt(100) >= samplePercent) return;
         }
 
@@ -1812,8 +1812,8 @@ public class SQLiteDatabase extends SQLiteClosable {
         String blockingPackage = ActivityThread.currentPackageName();
         if (blockingPackage == null) blockingPackage = "";
 
-        int millis = (int) (nanos / 1000000);
-        EventLog.writeEvent(EVENT_DB_OPERATION, mPath, sql, millis, blockingPackage, samplePercent);
+        EventLog.writeEvent(
+            EVENT_DB_OPERATION, mPath, sql, durationMillis, blockingPackage, samplePercent);
     }
 
     /**

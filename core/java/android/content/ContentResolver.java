@@ -31,6 +31,7 @@ import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.Config;
 import android.util.EventLog;
@@ -243,13 +244,13 @@ public abstract class ContentResolver {
             return null;
         }
         try {
-            long startTime = System.currentTimeMillis();
+            long startTime = SystemClock.uptimeMillis();
             Cursor qCursor = provider.query(uri, projection, selection, selectionArgs, sortOrder);
             if (qCursor == null) {
                 releaseProvider(provider);
                 return null;
             }
-            long durationMillis = System.currentTimeMillis() - startTime;
+            long durationMillis = SystemClock.uptimeMillis() - startTime;
             maybeLogQueryToEventLog(durationMillis, uri, projection, selection, sortOrder);
             // Wrap the cursor object into CursorWrapperInner object
             return new CursorWrapperInner(qCursor, provider);
@@ -583,9 +584,9 @@ public abstract class ContentResolver {
             throw new IllegalArgumentException("Unknown URL " + url);
         }
         try {
-            long startTime = System.currentTimeMillis();
+            long startTime = SystemClock.uptimeMillis();
             Uri createdRow = provider.insert(url, values);
-            long durationMillis = System.currentTimeMillis() - startTime;
+            long durationMillis = SystemClock.uptimeMillis() - startTime;
             maybeLogUpdateToEventLog(durationMillis, url, "insert", null /* where */);
             return createdRow;
         } catch (RemoteException e) {
@@ -642,9 +643,9 @@ public abstract class ContentResolver {
             throw new IllegalArgumentException("Unknown URL " + url);
         }
         try {
-            long startTime = System.currentTimeMillis();
+            long startTime = SystemClock.uptimeMillis();
             int rowsCreated = provider.bulkInsert(url, values);
-            long durationMillis = System.currentTimeMillis() - startTime;
+            long durationMillis = SystemClock.uptimeMillis() - startTime;
             maybeLogUpdateToEventLog(durationMillis, url, "bulkinsert", null /* where */);
             return rowsCreated;
         } catch (RemoteException e) {
@@ -671,9 +672,9 @@ public abstract class ContentResolver {
             throw new IllegalArgumentException("Unknown URL " + url);
         }
         try {
-            long startTime = System.currentTimeMillis();
+            long startTime = SystemClock.uptimeMillis();
             int rowsDeleted = provider.delete(url, where, selectionArgs);
-            long durationMillis = System.currentTimeMillis() - startTime;
+            long durationMillis = SystemClock.uptimeMillis() - startTime;
             maybeLogUpdateToEventLog(durationMillis, url, "delete", where);
             return rowsDeleted;
         } catch (RemoteException e) {
@@ -703,9 +704,9 @@ public abstract class ContentResolver {
             throw new IllegalArgumentException("Unknown URI " + uri);
         }
         try {
-            long startTime = System.currentTimeMillis();
+            long startTime = SystemClock.uptimeMillis();
             int rowsUpdated = provider.update(uri, values, where, selectionArgs);
-            long durationMillis = System.currentTimeMillis() - startTime;
+            long durationMillis = SystemClock.uptimeMillis() - startTime;
             maybeLogUpdateToEventLog(durationMillis, uri, "update", where);
             return rowsUpdated;
         } catch (RemoteException e) {
