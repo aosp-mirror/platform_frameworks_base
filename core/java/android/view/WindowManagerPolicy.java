@@ -851,6 +851,11 @@ public interface WindowManagerPolicy {
      */
     public boolean isCheekPressedAgainstScreen(MotionEvent ev);
     
+    /**
+     * Called every time the window manager is dispatching a pointer event.
+     */
+    public void dispatchedPointerEventLw(MotionEvent ev, int targetX, int targetY);
+    
     public void setCurrentOrientationLw(int newOrientation);
     
     /**

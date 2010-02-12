@@ -1773,6 +1773,32 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    void dispatchPointerElsewhereLocked(WindowState srcWin, WindowState relWin,
+            MotionEvent pointer, long eventTime, boolean skipped) {
+        if (relWin != null) {
+            mPolicy.dispatchedPointerEventLw(pointer, relWin.mFrame.left, relWin.mFrame.top);
+        } else {
+            mPolicy.dispatchedPointerEventLw(pointer, 0, 0);
+        }
+        
+        // If we sent an initial down to the wallpaper, then continue
+        // sending events until the final up.
+        if (mSendingPointersToWallpaper) {
+            if (skipped) {
+                Log.i(TAG, "Sending skipped pointer to wallpaper!");
+            }
+            sendPointerToWallpaperLocked(relWin, pointer, eventTime);
+            
+        // If we are on top of the wallpaper, then the wallpaper also
+        // gets to see this movement.
+        } else if (srcWin != null
+                && pointer.getAction() == MotionEvent.ACTION_DOWN
+                && mWallpaperTarget == srcWin
+                && srcWin.mAttrs.type != WindowManager.LayoutParams.TYPE_KEYGUARD) {
+            sendPointerToWallpaperLocked(relWin, pointer, eventTime);
+        }
+    }
+    
     public int addWindow(Session session, IWindow client,
             WindowManager.LayoutParams attrs, int viewVisibility,
             Rect outContentInsets) {
@@ -4918,10 +4944,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 Log.w(TAG, "No window to dispatch pointer action " + ev.getAction());
             }
             synchronized (mWindowMap) {
-                if (mSendingPointersToWallpaper) {
-                    Log.i(TAG, "Sending skipped pointer to wallpaper!");
-                    sendPointerToWallpaperLocked(null, ev, ev.getEventTime());
-                }
+                dispatchPointerElsewhereLocked(null, null, ev, ev.getEventTime(), true);
             }
             if (qev != null) {
                 mQueue.recycleEvent(qev);
@@ -4931,10 +4954,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
         if (targetObj == mKeyWaiter.CONSUMED_EVENT_TOKEN) {
             synchronized (mWindowMap) {
-                if (mSendingPointersToWallpaper) {
-                    Log.i(TAG, "Sending skipped pointer to wallpaper!");
-                    sendPointerToWallpaperLocked(null, ev, ev.getEventTime());
-                }
+                dispatchPointerElsewhereLocked(null, null, ev, ev.getEventTime(), true);
             }
             if (qev != null) {
                 mQueue.recycleEvent(qev);
@@ -5059,9 +5079,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (!target.isVisibleLw()) {
                 // During this motion dispatch, the target window has become
                 // invisible.
-                if (mSendingPointersToWallpaper) {
-                    sendPointerToWallpaperLocked(null, ev, eventTime);
-                }
+                dispatchPointerElsewhereLocked(null, null, ev, ev.getEventTime(), false);
                 if (qev != null) {
                     mQueue.recycleEvent(qev);
                 }
@@ -5094,13 +5112,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                 }
 
-                // If we are on top of the wallpaper, then the wallpaper also
-                // gets to see this movement.
-                if ((mWallpaperTarget == target &&
-                        target.mAttrs.type != WindowManager.LayoutParams.TYPE_KEYGUARD)
-                        || mSendingPointersToWallpaper) {
-                    sendPointerToWallpaperLocked(null, ev, eventTime);
-                }
+                dispatchPointerElsewhereLocked(target, null, ev, ev.getEventTime(), false);
 
                 final Rect frame = target.mFrame;
                 ev.offsetLocation(-(float)frame.left, -(float)frame.top);
@@ -6031,11 +6043,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             if (res != null && returnWhat == RETURN_PENDING_POINTER) {
                 synchronized (mWindowMap) {
-                    if ((mWallpaperTarget == win &&
-                            win.mAttrs.type != WindowManager.LayoutParams.TYPE_KEYGUARD)
-                            || mSendingPointersToWallpaper) {
-                        sendPointerToWallpaperLocked(win, res, res.getEventTime());
-                    }
+                    dispatchPointerElsewhereLocked(win, win, res, res.getEventTime(), false);
                 }
             }
 
