@@ -222,6 +222,8 @@ private:
         virtual status_t        getMetadata(bool update_only,
                                             bool apply_filter,
                                             Parcel *reply);
+        virtual status_t        suspend();
+        virtual status_t        resume();
 
         sp<MediaPlayerBase>     createPlayer(player_type playerType);
 

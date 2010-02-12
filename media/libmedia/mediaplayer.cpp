@@ -167,6 +167,16 @@ status_t MediaPlayer::invoke(const Parcel& request, Parcel *reply)
     return INVALID_OPERATION;
 }
 
+status_t MediaPlayer::suspend() {
+    Mutex::Autolock _l(mLock);
+    return mPlayer->suspend();
+}
+
+status_t MediaPlayer::resume() {
+    Mutex::Autolock _l(mLock);
+    return mPlayer->resume();
+}
+
 status_t MediaPlayer::setMetadataFilter(const Parcel& filter)
 {
     LOGD("setMetadataFilter");
