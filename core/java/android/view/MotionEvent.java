@@ -76,61 +76,81 @@ public final class MotionEvent implements Parcelable {
     public static final int ACTION_POINTER_DOWN     = 5;
     
     /**
-     * Synonym for {@link #ACTION_POINTER_DOWN} with
-     * {@link #ACTION_POINTER_ID_MASK} of 0: the primary pointer has gone done.
-     */
-    public static final int ACTION_POINTER_1_DOWN   = ACTION_POINTER_DOWN | 0x0000;
-    
-    /**
-     * Synonym for {@link #ACTION_POINTER_DOWN} with
-     * {@link #ACTION_POINTER_ID_MASK} of 1: the secondary pointer has gone done.
-     */
-    public static final int ACTION_POINTER_2_DOWN   = ACTION_POINTER_DOWN | 0x0100;
-    
-    /**
-     * Synonym for {@link #ACTION_POINTER_DOWN} with
-     * {@link #ACTION_POINTER_ID_MASK} of 2: the tertiary pointer has gone done.
-     */
-    public static final int ACTION_POINTER_3_DOWN   = ACTION_POINTER_DOWN | 0x0200;
-    
-    /**
      * A non-primary pointer has gone up.  The bits in
      * {@link #ACTION_POINTER_ID_MASK} indicate which pointer changed.
      */
     public static final int ACTION_POINTER_UP       = 6;
     
     /**
-     * Synonym for {@link #ACTION_POINTER_UP} with
-     * {@link #ACTION_POINTER_ID_MASK} of 0: the primary pointer has gone up.
+     * Bits in the action code that represent a pointer index, used with
+     * {@link #ACTION_POINTER_DOWN} and {@link #ACTION_POINTER_UP}.  Shifting
+     * down by {@link #ACTION_POINTER_INDEX_SHIFT} provides the actual pointer
+     * index where the data for the pointer going up or down can be found; you can
+     * get its identifier with {@link #getPointerId(int)} and the actual
+     * data with {@link #getX(int)} etc.
      */
+    public static final int ACTION_POINTER_INDEX_MASK  = 0xff00;
+    
+    /**
+     * Bit shift for the action bits holding the pointer index as
+     * defined by {@link #ACTION_POINTER_INDEX_MASK}.
+     */
+    public static final int ACTION_POINTER_INDEX_SHIFT = 8;
+    
+    /**
+     * @deprecated Use {@link #ACTION_POINTER_INDEX_MASK} to retrieve the
+     * data index associated with {@link #ACTION_POINTER_DOWN}.
+     */
+    @Deprecated
+    public static final int ACTION_POINTER_1_DOWN   = ACTION_POINTER_DOWN | 0x0000;
+    
+    /**
+     * @deprecated Use {@link #ACTION_POINTER_INDEX_MASK} to retrieve the
+     * data index associated with {@link #ACTION_POINTER_DOWN}.
+     */
+    @Deprecated
+    public static final int ACTION_POINTER_2_DOWN   = ACTION_POINTER_DOWN | 0x0100;
+    
+    /**
+     * @deprecated Use {@link #ACTION_POINTER_INDEX_MASK} to retrieve the
+     * data index associated with {@link #ACTION_POINTER_DOWN}.
+     */
+    @Deprecated
+    public static final int ACTION_POINTER_3_DOWN   = ACTION_POINTER_DOWN | 0x0200;
+    
+    /**
+     * @deprecated Use {@link #ACTION_POINTER_INDEX_MASK} to retrieve the
+     * data index associated with {@link #ACTION_POINTER_UP}.
+     */
+    @Deprecated
     public static final int ACTION_POINTER_1_UP     = ACTION_POINTER_UP | 0x0000;
     
     /**
-     * Synonym for {@link #ACTION_POINTER_UP} with
-     * {@link #ACTION_POINTER_ID_MASK} of 1: the secondary pointer has gone up.
+     * @deprecated Use {@link #ACTION_POINTER_INDEX_MASK} to retrieve the
+     * data index associated with {@link #ACTION_POINTER_UP}.
      */
+    @Deprecated
     public static final int ACTION_POINTER_2_UP     = ACTION_POINTER_UP | 0x0100;
     
     /**
-     * Synonym for {@link #ACTION_POINTER_UP} with
-     * {@link #ACTION_POINTER_ID_MASK} of 2: the tertiary pointer has gone up.
+     * @deprecated Use {@link #ACTION_POINTER_INDEX_MASK} to retrieve the
+     * data index associated with {@link #ACTION_POINTER_UP}.
      */
+    @Deprecated
     public static final int ACTION_POINTER_3_UP     = ACTION_POINTER_UP | 0x0200;
     
     /**
-     * Bits in the action code that represent a pointer ID, used with
-     * {@link #ACTION_POINTER_DOWN} and {@link #ACTION_POINTER_UP}.  Pointer IDs
-     * start at 0, with 0 being the primary (first) pointer in the motion.  Note
-     * that this not <em>not</em> an index into the array of pointer values,
-     * which is compacted to only contain pointers that are down; the pointer
-     * ID for a particular index can be found with {@link #findPointerIndex}.
+     * @deprecated Renamed to {@link #ACTION_POINTER_INDEX_MASK} to match
+     * the actual data contained in these bits.
      */
+    @Deprecated
     public static final int ACTION_POINTER_ID_MASK  = 0xff00;
     
     /**
-     * Bit shift for the action bits holding the pointer identifier as
-     * defined by {@link #ACTION_POINTER_ID_MASK}.
+     * @deprecated Renamed to {@link #ACTION_POINTER_INDEX_SHIFT} to match
+     * the actual data contained in these bits.
      */
+    @Deprecated
     public static final int ACTION_POINTER_ID_SHIFT = 8;
     
     private static final boolean TRACK_RECYCLED_LOCATION = false;
@@ -618,10 +638,36 @@ public final class MotionEvent implements Parcelable {
     /**
      * Return the kind of action being performed -- one of either
      * {@link #ACTION_DOWN}, {@link #ACTION_MOVE}, {@link #ACTION_UP}, or
-     * {@link #ACTION_CANCEL}.
+     * {@link #ACTION_CANCEL}.  Consider using {@link #getActionMasked}
+     * and {@link #getActionIndex} to retrieve the separate masked action
+     * and pointer index.
      */
     public final int getAction() {
         return mAction;
+    }
+
+    /**
+     * Return the masked action being performed, without pointer index
+     * information.  May be any of the actions: {@link #ACTION_DOWN},
+     * {@link #ACTION_MOVE}, {@link #ACTION_UP}, {@link #ACTION_CANCEL},
+     * {@link #ACTION_POINTER_DOWN}, or {@link #ACTION_POINTER_UP}.
+     * Use {@link #getActionIndex} to return the index associated with
+     * pointer actions.
+     */
+    public final int getActionMasked() {
+        return mAction & ACTION_MASK;
+    }
+
+    /**
+     * For {@link #ACTION_POINTER_DOWN} or {@link #ACTION_POINTER_UP}
+     * as returned by {@link #getActionMasked}, this returns the associated
+     * pointer index.  The index may be used with {@link #getPointerId(int)},
+     * {@link #getX(int)}, {@link #getY(int)}, {@link #getPressure(int)},
+     * and {@link #getSize(int)} to get information about the pointer that has
+     * gone down or up.
+     */
+    public final int getActionIndex() {
+        return (mAction & ACTION_POINTER_INDEX_MASK) >> ACTION_POINTER_INDEX_SHIFT;
     }
 
     /**

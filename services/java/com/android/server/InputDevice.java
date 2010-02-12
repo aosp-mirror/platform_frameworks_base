@@ -570,14 +570,14 @@ public class InputDevice {
                         mDownTime = curTime;
                     } else {
                         action = MotionEvent.ACTION_POINTER_DOWN
-                                | (upOrDownPointer << MotionEvent.ACTION_POINTER_ID_SHIFT);
+                                | (upOrDownPointer << MotionEvent.ACTION_POINTER_INDEX_SHIFT);
                     }
                 } else {
                     if (numPointers == 1) {
                         action = MotionEvent.ACTION_UP;
                     } else {
                         action = MotionEvent.ACTION_POINTER_UP
-                                | (upOrDownPointer << MotionEvent.ACTION_POINTER_ID_SHIFT);
+                                | (upOrDownPointer << MotionEvent.ACTION_POINTER_INDEX_SHIFT);
                     }
                 }
                 currentMove = null;

@@ -234,8 +234,9 @@ public class PointerLocationView extends View {
             }
             
             if ((action&MotionEvent.ACTION_MASK) == MotionEvent.ACTION_POINTER_DOWN) {
-                final int id = (action&MotionEvent.ACTION_POINTER_ID_MASK)
-                        >> MotionEvent.ACTION_POINTER_ID_SHIFT;
+                final int index = (action&MotionEvent.ACTION_POINTER_INDEX_MASK)
+                        >> MotionEvent.ACTION_POINTER_INDEX_SHIFT;
+                final int id = event.getPointerId(index);
                 while (NP <= id) {
                     PointerState ps = new PointerState();
                     ps.mVelocity = VelocityTracker.obtain();
@@ -260,13 +261,14 @@ public class PointerLocationView extends View {
             }
             
             for (int i=0; i<NI; i++) {
-                final PointerState ps = mPointers.get(event.getPointerId(i));
+                final int id = event.getPointerId(i);
+                final PointerState ps = mPointers.get(id);
                 ps.mVelocity.addMovement(event);
                 ps.mVelocity.computeCurrentVelocity(1);
                 final int N = event.getHistorySize();
                 for (int j=0; j<N; j++) {
                     if (mPrintCoords) {
-                        Log.i("Pointer", "Pointer " + (i+1) + ": ("
+                        Log.i("Pointer", "Pointer " + (id+1) + ": ("
                                 + event.getHistoricalX(i, j)
                                 + ", " + event.getHistoricalY(i, j) + ")"
                                 + " Prs=" + event.getHistoricalPressure(i, j)
@@ -276,7 +278,7 @@ public class PointerLocationView extends View {
                     ps.mYs.add(event.getHistoricalY(i, j));
                 }
                 if (mPrintCoords) {
-                    Log.i("Pointer", "Pointer " + (i+1) + ": ("
+                    Log.i("Pointer", "Pointer " + (id+1) + ": ("
                             + event.getX(i) + ", " + event.getY(i) + ")"
                             + " Prs=" + event.getPressure(i)
                             + " Size=" + event.getSize(i));
@@ -293,8 +295,9 @@ public class PointerLocationView extends View {
             }
             
             if ((action&MotionEvent.ACTION_MASK) == MotionEvent.ACTION_POINTER_UP) {
-                final int id = (action&MotionEvent.ACTION_POINTER_ID_MASK)
-                        >> MotionEvent.ACTION_POINTER_ID_SHIFT;
+                final int index = (action&MotionEvent.ACTION_POINTER_INDEX_MASK)
+                        >> MotionEvent.ACTION_POINTER_INDEX_SHIFT;
+                final int id = event.getPointerId(index);
                 final PointerState ps = mPointers.get(id);
                 ps.mXs.add(Float.NaN);
                 ps.mYs.add(Float.NaN);
@@ -306,11 +309,12 @@ public class PointerLocationView extends View {
             
             if (action == MotionEvent.ACTION_UP) {
                 for (int i=0; i<NI; i++) {
-                    final PointerState ps = mPointers.get(event.getPointerId(i));
+                    final int id = event.getPointerId(i);
+                    final PointerState ps = mPointers.get(id);
                     if (ps.mCurDown) {
                         ps.mCurDown = false;
                         if (mPrintCoords) {
-                            Log.i("Pointer", "Pointer " + (i+1) + ": UP");
+                            Log.i("Pointer", "Pointer " + (id+1) + ": UP");
                         }
                     }
                 }
