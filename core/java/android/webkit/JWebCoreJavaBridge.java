@@ -21,6 +21,8 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
+import java.util.Set;
+
 final class JWebCoreJavaBridge extends Handler {
     // Identifier for the timer message.
     private static final int TIMER_MESSAGE = 1;
@@ -248,4 +250,7 @@ final class JWebCoreJavaBridge extends Handler {
             boolean reload);
     public native void setNetworkOnLine(boolean online);
     public native void setNetworkType(String type, String subtype);
+    public native void addPackageNames(Set<String> packageNames);
+    public native void addPackageName(String packageName);
+    public native void removePackageName(String packageName);
 }
