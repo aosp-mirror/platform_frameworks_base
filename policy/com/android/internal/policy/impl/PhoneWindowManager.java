@@ -31,6 +31,7 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.ContentObserver;
+import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.os.BatteryManager;
 import android.os.Handler;
@@ -44,6 +45,7 @@ import android.os.SystemProperties;
 import android.os.Vibrator;
 import android.provider.Settings;
 
+import com.android.common.ui.PointerLocationView;
 import com.android.internal.policy.PolicyManager;
 import com.android.internal.telephony.ITelephony;
 import android.util.Config;
@@ -197,6 +199,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     final IntentFilter mBatteryStatusFilter = new IntentFilter();
     
+    boolean mSystemReady;
     boolean mLidOpen;
     int mPlugged;
     boolean mRegisteredBatteryReceiver;
@@ -216,6 +219,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final int DEFAULT_ACCELEROMETER_ROTATION = 0;
     int mAccelerometerDefault = DEFAULT_ACCELEROMETER_ROTATION;
     boolean mHasSoftInput = false;
+    
+    int mPointerLocationMode = 0;
+    PointerLocationView mPointerLocationView = null;
     
     // The current size of the screen.
     int mW, mH;
@@ -283,50 +289,22 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     Settings.System.ACCELEROMETER_ROTATION), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.SCREEN_OFF_TIMEOUT), false, this);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.POINTER_LOCATION), false, this);
             resolver.registerContentObserver(Settings.Secure.getUriFor(
                     Settings.Secure.DEFAULT_INPUT_METHOD), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     "fancy_rotation_anim"), false, this);
-            update();
+            updateSettings();
         }
 
         @Override public void onChange(boolean selfChange) {
-            update();
+            updateSettings();
             try {
                 mWindowManager.setRotation(USE_LAST_ROTATION, false,
                         mFancyRotationAnimation);
             } catch (RemoteException e) {
                 // Ignore
-            }
-        }
-
-        public void update() {
-            ContentResolver resolver = mContext.getContentResolver();
-            boolean updateRotation = false;
-            synchronized (mLock) {
-                mEndcallBehavior = Settings.System.getInt(resolver,
-                        Settings.System.END_BUTTON_BEHAVIOR, DEFAULT_ENDCALL_BEHAVIOR);
-                mFancyRotationAnimation = Settings.System.getInt(resolver,
-                        "fancy_rotation_anim", 0) != 0 ? 0x80 : 0;
-                int accelerometerDefault = Settings.System.getInt(resolver,
-                        Settings.System.ACCELEROMETER_ROTATION, DEFAULT_ACCELEROMETER_ROTATION);
-                if (mAccelerometerDefault != accelerometerDefault) {
-                    mAccelerometerDefault = accelerometerDefault;
-                    updateOrientationListenerLp();
-                }
-                // use screen off timeout setting as the timeout for the lockscreen
-                mLockScreenTimeout = Settings.System.getInt(resolver,
-                        Settings.System.SCREEN_OFF_TIMEOUT, 0);
-                String imId = Settings.Secure.getString(resolver,
-                        Settings.Secure.DEFAULT_INPUT_METHOD);
-                boolean hasSoftInput = imId != null && imId.length() > 0;
-                if (mHasSoftInput != hasSoftInput) {
-                    mHasSoftInput = hasSoftInput;
-                    updateRotation = true;
-                }
-            }
-            if (updateRotation) {
-                updateRotation(0);
             }
         }
     }
@@ -569,6 +547,75 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 com.android.internal.R.array.config_scrollBarrierVibePattern);
     }
 
+    public void updateSettings() {
+        ContentResolver resolver = mContext.getContentResolver();
+        boolean updateRotation = false;
+        View addView = null;
+        View removeView = null;
+        synchronized (mLock) {
+            mEndcallBehavior = Settings.System.getInt(resolver,
+                    Settings.System.END_BUTTON_BEHAVIOR, DEFAULT_ENDCALL_BEHAVIOR);
+            mFancyRotationAnimation = Settings.System.getInt(resolver,
+                    "fancy_rotation_anim", 0) != 0 ? 0x80 : 0;
+            int accelerometerDefault = Settings.System.getInt(resolver,
+                    Settings.System.ACCELEROMETER_ROTATION, DEFAULT_ACCELEROMETER_ROTATION);
+            if (mAccelerometerDefault != accelerometerDefault) {
+                mAccelerometerDefault = accelerometerDefault;
+                updateOrientationListenerLp();
+            }
+            if (mSystemReady) {
+                int pointerLocation = Settings.System.getInt(resolver,
+                        Settings.System.POINTER_LOCATION, 0);
+                if (mPointerLocationMode != pointerLocation) {
+                    mPointerLocationMode = pointerLocation;
+                    if (pointerLocation != 0) {
+                        if (mPointerLocationView == null) {
+                            mPointerLocationView = new PointerLocationView(mContext);
+                            mPointerLocationView.setPrintCoords(false);
+                            addView = mPointerLocationView;
+                        }
+                    } else {
+                        removeView = mPointerLocationView;
+                        mPointerLocationView = null;
+                    }
+                }
+            }
+            // use screen off timeout setting as the timeout for the lockscreen
+            mLockScreenTimeout = Settings.System.getInt(resolver,
+                    Settings.System.SCREEN_OFF_TIMEOUT, 0);
+            String imId = Settings.Secure.getString(resolver,
+                    Settings.Secure.DEFAULT_INPUT_METHOD);
+            boolean hasSoftInput = imId != null && imId.length() > 0;
+            if (mHasSoftInput != hasSoftInput) {
+                mHasSoftInput = hasSoftInput;
+                updateRotation = true;
+            }
+        }
+        if (updateRotation) {
+            updateRotation(0);
+        }
+        if (addView != null) {
+            WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT);
+            lp.type = WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY;
+            lp.flags = 
+                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE|
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE|
+                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
+            lp.format = PixelFormat.TRANSLUCENT;
+            lp.setTitle("PointerLocation");
+            WindowManagerImpl wm = (WindowManagerImpl)
+                    mContext.getSystemService(Context.WINDOW_SERVICE);
+            wm.addView(addView, lp);
+        }
+        if (removeView != null) {
+            WindowManagerImpl wm = (WindowManagerImpl)
+                    mContext.getSystemService(Context.WINDOW_SERVICE);
+            wm.removeView(removeView);
+        }
+    }
+    
     void updatePlugged(Intent powerIntent) {
         if (localLOGV) Log.v(TAG, "New battery status: " + powerIntent.getExtras());
         if (powerIntent != null) {
@@ -695,6 +742,20 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
         }
         return false;
+    }
+    
+    public void dispatchedPointerEventLw(MotionEvent ev, int targetX, int targetY) {
+        if (mPointerLocationView == null) {
+            return;
+        }
+        synchronized (mLock) {
+            if (mPointerLocationView == null) {
+                return;
+            }
+            ev.offsetLocation(targetX, targetY);
+            mPointerLocationView.addTouchEvent(ev);
+            ev.offsetLocation(-targetX, -targetY);
+        }
     }
     
     /** {@inheritDoc} */
@@ -2111,6 +2172,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         android.os.SystemProperties.set("dev.bootcomplete", "1"); 
         synchronized (mLock) {
             updateOrientationListenerLp();
+            mSystemReady = true;
+            mHandler.post(new Runnable() {
+                public void run() {
+                    updateSettings();
+                }
+            });
         }
     }
    
