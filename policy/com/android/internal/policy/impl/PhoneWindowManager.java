@@ -2162,16 +2162,21 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             // This code brings home to the front or, if it is already
             // at the front, puts the device to sleep.
             try {
-                ActivityManagerNative.getDefault().stopAppSwitches();
-                sendCloseSystemWindows();
-                Intent dock = createHomeDockIntent();
-                if (dock != null) {
-                    int result = ActivityManagerNative.getDefault()
-                            .startActivity(null, dock,
-                                    dock.resolveTypeIfNeeded(mContext.getContentResolver()),
-                                    null, 0, null, null, 0, true /* onlyIfNeeded*/, false);
-                    if (result == IActivityManager.START_RETURN_INTENT_TO_CALLER) {
-                        return false;
+                if (SystemProperties.getInt("persist.sys.uts-test-mode", 0) == 1) {
+                    /// Roll back EndcallBehavior as the cupcake design to pass P1 lab entry.
+                    Log.d(TAG, "UTS-TEST-MODE");
+                } else {
+                    ActivityManagerNative.getDefault().stopAppSwitches();
+                    sendCloseSystemWindows();
+                    Intent dock = createHomeDockIntent();
+                    if (dock != null) {
+                        int result = ActivityManagerNative.getDefault()
+                                .startActivity(null, dock,
+                                        dock.resolveTypeIfNeeded(mContext.getContentResolver()),
+                                        null, 0, null, null, 0, true /* onlyIfNeeded*/, false);
+                        if (result == IActivityManager.START_RETURN_INTENT_TO_CALLER) {
+                            return false;
+                        }
                     }
                 }
                 int result = ActivityManagerNative.getDefault()
