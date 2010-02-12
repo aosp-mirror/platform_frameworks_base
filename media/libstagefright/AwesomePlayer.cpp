@@ -84,6 +84,7 @@ private:
 
 struct AwesomeLocalRenderer : public AwesomeRenderer {
     AwesomeLocalRenderer(
+            bool previewOnly,
             const char *componentName,
             OMX_COLOR_FORMATTYPE colorFormat,
             const sp<ISurface> &surface,
@@ -91,15 +92,18 @@ struct AwesomeLocalRenderer : public AwesomeRenderer {
             size_t decodedWidth, size_t decodedHeight)
         : mTarget(NULL),
           mLibHandle(NULL) {
-            init(componentName,
+            init(previewOnly, componentName,
                  colorFormat, surface, displayWidth,
                  displayHeight, decodedWidth, decodedHeight);
     }
 
     virtual void render(MediaBuffer *buffer) {
-        mTarget->render(
-                (const uint8_t *)buffer->data() + buffer->range_offset(),
-                buffer->range_length(), NULL);
+        render((const uint8_t *)buffer->data() + buffer->range_offset(),
+               buffer->range_length());
+    }
+
+    void render(const void *data, size_t size) {
+        mTarget->render(data, size, NULL);
     }
 
 protected:
@@ -118,6 +122,7 @@ private:
     void *mLibHandle;
 
     void init(
+            bool previewOnly,
             const char *componentName,
             OMX_COLOR_FORMATTYPE colorFormat,
             const sp<ISurface> &surface,
@@ -129,31 +134,39 @@ private:
 };
 
 void AwesomeLocalRenderer::init(
+        bool previewOnly,
         const char *componentName,
         OMX_COLOR_FORMATTYPE colorFormat,
         const sp<ISurface> &surface,
         size_t displayWidth, size_t displayHeight,
         size_t decodedWidth, size_t decodedHeight) {
-    mLibHandle = dlopen("libstagefrighthw.so", RTLD_NOW);
+    if (!previewOnly) {
+        // We will stick to the vanilla software-color-converting renderer
+        // for "previewOnly" mode, to avoid unneccessarily switching overlays
+        // more often than necessary.
 
-    if (mLibHandle) {
-        typedef VideoRenderer *(*CreateRendererFunc)(
-                const sp<ISurface> &surface,
-                const char *componentName,
-                OMX_COLOR_FORMATTYPE colorFormat,
-                size_t displayWidth, size_t displayHeight,
-                size_t decodedWidth, size_t decodedHeight);
+        mLibHandle = dlopen("libstagefrighthw.so", RTLD_NOW);
 
-        CreateRendererFunc func =
-            (CreateRendererFunc)dlsym(
-                    mLibHandle,
-                    "_Z14createRendererRKN7android2spINS_8ISurfaceEEEPKc20"
-                    "OMX_COLOR_FORMATTYPEjjjj");
+        if (mLibHandle) {
+            typedef VideoRenderer *(*CreateRendererFunc)(
+                    const sp<ISurface> &surface,
+                    const char *componentName,
+                    OMX_COLOR_FORMATTYPE colorFormat,
+                    size_t displayWidth, size_t displayHeight,
+                    size_t decodedWidth, size_t decodedHeight);
 
-        if (func) {
-            mTarget =
-                (*func)(surface, componentName, colorFormat,
-                    displayWidth, displayHeight, decodedWidth, decodedHeight);
+            CreateRendererFunc func =
+                (CreateRendererFunc)dlsym(
+                        mLibHandle,
+                        "_Z14createRendererRKN7android2spINS_8ISurfaceEEEPKc20"
+                        "OMX_COLOR_FORMATTYPEjjjj");
+
+            if (func) {
+                mTarget =
+                    (*func)(surface, componentName, colorFormat,
+                        displayWidth, displayHeight,
+                        decodedWidth, decodedHeight);
+            }
         }
     }
 
@@ -166,6 +179,7 @@ void AwesomeLocalRenderer::init(
 
 AwesomePlayer::AwesomePlayer()
     : mTimeSource(NULL),
+      mVideoRendererIsPreview(false),
       mAudioPlayer(NULL),
       mFlags(0),
       mLastVideoBuffer(NULL),
@@ -532,6 +546,7 @@ void AwesomePlayer::initRenderer_l() {
             // Other decoders are instantiated locally and as a consequence
             // allocate their buffers in local address space.
             mVideoRenderer = new AwesomeLocalRenderer(
+                false,  // previewOnly
                 component,
                 (OMX_COLOR_FORMATTYPE)format,
                 mISurface,
@@ -765,6 +780,7 @@ void AwesomePlayer::onVideoEvent() {
                     LOGV("VideoSource signalled format change.");
 
                     if (mVideoRenderer != NULL) {
+                        mVideoRendererIsPreview = false;
                         initRenderer_l();
                     }
                     continue;
@@ -843,7 +859,9 @@ void AwesomePlayer::onVideoEvent() {
         return;
     }
 
-    if (mVideoRenderer == NULL) {
+    if (mVideoRendererIsPreview || mVideoRenderer == NULL) {
+        mVideoRendererIsPreview = false;
+
         initRenderer_l();
     }
 
@@ -1062,6 +1080,26 @@ status_t AwesomePlayer::suspend() {
     state->mFlags = mFlags & (PLAYING | LOOPING);
     getPosition_l(&state->mPositionUs);
 
+    if (mLastVideoBuffer) {
+        size_t size = mLastVideoBuffer->range_length();
+        if (size) {
+            state->mLastVideoFrameSize = size;
+            state->mLastVideoFrame = malloc(size);
+            memcpy(state->mLastVideoFrame,
+                   (const uint8_t *)mLastVideoBuffer->data()
+                        + mLastVideoBuffer->range_offset(),
+                   size);
+
+            state->mVideoWidth = mVideoWidth;
+            state->mVideoHeight = mVideoHeight;
+
+            sp<MetaData> meta = mVideoSource->getFormat();
+            CHECK(meta->findInt32(kKeyColorFormat, &state->mColorFormat));
+            CHECK(meta->findInt32(kKeyWidth, &state->mDecodedWidth));
+            CHECK(meta->findInt32(kKeyHeight, &state->mDecodedHeight));
+        }
+    }
+
     reset_l();
 
     mSuspensionState = state;
@@ -1101,6 +1139,24 @@ status_t AwesomePlayer::resume() {
     seekTo_l(state->mPositionUs);
 
     mFlags = state->mFlags & LOOPING;
+
+    if (state->mLastVideoFrame && mISurface != NULL) {
+        mVideoRenderer =
+            new AwesomeLocalRenderer(
+                    true,  // previewOnly
+                    "",
+                    (OMX_COLOR_FORMATTYPE)state->mColorFormat,
+                    mISurface,
+                    state->mVideoWidth,
+                    state->mVideoHeight,
+                    state->mDecodedWidth,
+                    state->mDecodedHeight);
+
+        mVideoRendererIsPreview = true;
+
+        ((AwesomeLocalRenderer *)mVideoRenderer.get())->render(
+                state->mLastVideoFrame, state->mLastVideoFrameSize);
+    }
 
     if (state->mFlags & PLAYING) {
         play_l();
