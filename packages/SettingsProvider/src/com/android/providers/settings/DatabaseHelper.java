@@ -600,7 +600,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
            upgradeVersion = 47;
        }
 
-        
+
         if (upgradeVersion == 47) {
             /*
              * The password mode constants have changed again; reset back to no
@@ -615,7 +615,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             }
            upgradeVersion = 48;
        }
-        
+
        if (upgradeVersion == 48) {
            /*
             * Adding a new setting for which voice recognition service to use.
@@ -648,6 +648,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             db.execSQL("DROP INDEX IF EXISTS bookmarksIndex2");
             db.execSQL("DROP TABLE IF EXISTS favorites");
             onCreate(db);
+
+            // Added for diagnosing settings.db wipes after the fact
+            String wipeReason = oldVersion + "/" + upgradeVersion + "/" + currentVersion;
+            db.execSQL("INSERT INTO secure(name,value) values('" +
+                    "wiped_db_reason" + "','" + wipeReason + "');");
         }
     }
 
@@ -976,7 +981,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         loadBooleanSetting(stmt, Settings.Secure.MOUNT_UMS_NOTIFY_ENABLED,
                 R.bool.def_mount_ums_notify_enabled);
-        
+
         loadVoiceRecognitionServiceSetting(stmt);
 
         stmt.close();
@@ -989,7 +994,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         loadStringSetting(stmt, Settings.Secure.BACKUP_TRANSPORT,
                 R.string.def_backup_transport);
     }
-    
+
     /**
      * Introduced in database version 49.
      */
@@ -999,19 +1004,19 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 mContext.getPackageManager().queryIntentServices(
                         new Intent(RecognitionService.SERVICE_INTERFACE), 0);
         int numAvailable = availableRecognitionServices.size();
-        
+
         if (numAvailable == 0) {
             Log.w(TAG, "no available voice recognition services found");
         } else {
             if (numAvailable > 1) {
                 Log.w(TAG, "more than one voice recognition service found, picking first");
             }
-            
+
             ServiceInfo serviceInfo = availableRecognitionServices.get(0).serviceInfo;
             selectedService =
                     new ComponentName(serviceInfo.packageName, serviceInfo.name).flattenToString();
         }
-        
+
         loadSetting(stmt, Settings.Secure.VOICE_RECOGNITION_SERVICE,
                 selectedService == null ? "" : selectedService);
     }
