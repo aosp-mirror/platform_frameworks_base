@@ -247,36 +247,39 @@ static void nContextDeinitToClient(JNIEnv *_env, jobject _this)
 }
 
 
-static void
-nElementBegin(JNIEnv *_env, jobject _this)
+static jint
+nElementCreate(JNIEnv *_env, jobject _this, jint type, jint kind, jboolean norm, jint size)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nElementBegin, con(%p)", con);
-    rsElementBegin(con);
-}
-
-
-static void
-nElementAdd(JNIEnv *_env, jobject _this, jint kind, jint type, jboolean norm, jint bits, jstring name)
-{
-    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    const char* n = NULL;
-    if (name) {
-        n = _env->GetStringUTFChars(name, NULL);
-    }
-    LOG_API("nElementAdd, con(%p), kind(%i), type(%i), norm(%i), bits(%i)", con, kind, type, norm, bits);
-    rsElementAdd(con, (RsDataKind)kind, (RsDataType)type, norm != 0, (size_t)bits, n);
-    if (n) {
-        _env->ReleaseStringUTFChars(name, n);
-    }
+    LOG_API("nElementCreate, con(%p), type(%i), kind(%i), norm(%i), size(%i)", con, type, kind, norm, size);
+    return (jint)rsElementCreate(con, (RsDataType)type, (RsDataKind)kind, norm, size);
 }
 
 static jint
-nElementCreate(JNIEnv *_env, jobject _this)
+nElementCreate2(JNIEnv *_env, jobject _this, jintArray _ids, jobjectArray _names)
 {
+    int fieldCount = _env->GetArrayLength(_ids);
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nElementCreate, con(%p)", con);
-    return (jint)rsElementCreate(con);
+    LOG_API("nElementCreate, con(%p), type(%i), kind(%i), norm(%i), size(%i)", con, type, kind, norm, size);
+
+    jint *ids = _env->GetIntArrayElements(_ids, NULL);
+    const char ** nameArray = (const char **)calloc(fieldCount, sizeof(char *));
+    size_t* sizeArray = (size_t*)calloc(fieldCount, sizeof(size_t));
+
+    for (int ct=0; ct < fieldCount; ct++) {
+        jstring s = (jstring)_env->GetObjectArrayElement(_names, ct);
+        nameArray[ct] = _env->GetStringUTFChars(s, NULL);
+        sizeArray[ct] = _env->GetStringUTFLength(s);
+    }
+    jint id = (jint)rsElementCreate2(con, fieldCount, (RsElement *)ids, nameArray, sizeArray);
+    for (int ct=0; ct < fieldCount; ct++) {
+        jstring s = (jstring)_env->GetObjectArrayElement(_names, ct);
+        _env->ReleaseStringUTFChars(s, nameArray[ct]);
+    }
+    _env->ReleaseIntArrayElements(_ids, ids, JNI_ABORT);
+    free(nameArray);
+    free(sizeArray);
+    return (jint)id;
 }
 
 // -----------------------------------
@@ -395,26 +398,24 @@ nTypeSetupFields(JNIEnv *_env, jobject _this, jobject _type, jintArray _types, j
         tfc[ct].bits = fBits[ct];
 
         switch(fType[ct]) {
-        case RS_TYPE_FLOAT:
+        case RS_TYPE_FLOAT_32:
             tfc[ct].ptr = SF_LoadFloat;
             tfc[ct].readPtr = SF_SaveFloat;
             break;
-        case RS_TYPE_UNSIGNED:
-        case RS_TYPE_SIGNED:
-            switch(tfc[ct].bits) {
-            case 32:
-                tfc[ct].ptr = SF_LoadInt;
-                tfc[ct].readPtr = SF_SaveInt;
-                break;
-            case 16:
-                tfc[ct].ptr = SF_LoadShort;
-                tfc[ct].readPtr = SF_SaveShort;
-                break;
-            case 8:
-                tfc[ct].ptr = SF_LoadByte;
-                tfc[ct].readPtr = SF_SaveByte;
-                break;
-            }
+        case RS_TYPE_UNSIGNED_32:
+        case RS_TYPE_SIGNED_32:
+            tfc[ct].ptr = SF_LoadInt;
+            tfc[ct].readPtr = SF_SaveInt;
+            break;
+        case RS_TYPE_UNSIGNED_16:
+        case RS_TYPE_SIGNED_16:
+            tfc[ct].ptr = SF_LoadShort;
+            tfc[ct].readPtr = SF_SaveShort;
+            break;
+        case RS_TYPE_UNSIGNED_8:
+        case RS_TYPE_SIGNED_8:
+            tfc[ct].ptr = SF_LoadByte;
+            tfc[ct].readPtr = SF_SaveByte;
             break;
         }
         tc->size += 4;
@@ -1056,87 +1057,89 @@ nProgramFragmentStoreCreate(JNIEnv *_env, jobject _this)
 // ---------------------------------------------------------------------------
 
 static void
-nProgramFragmentBegin(JNIEnv *_env, jobject _this, jint in, jint out, jboolean pointSpriteEnable)
+nProgramBindConstants(JNIEnv *_env, jobject _this, jint vpv, jint slot, jint a)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nProgramFragmentBegin, con(%p), in(%p), out(%p) PointSprite(%i)", con, (RsElement)in, (RsElement)out, pointSpriteEnable);
-    rsProgramFragmentBegin(con, (RsElement)in, (RsElement)out, pointSpriteEnable);
+    LOG_API("nProgramBindConstants, con(%p), vpf(%p), sloat(%i), a(%p)", con, (RsProgramVertex)vpv, slot, (RsAllocation)a);
+    rsProgramBindConstants(con, (RsProgram)vpv, slot, (RsAllocation)a);
 }
 
 static void
-nProgramFragmentBindTexture(JNIEnv *_env, jobject _this, jint vpf, jint slot, jint a)
+nProgramBindTexture(JNIEnv *_env, jobject _this, jint vpf, jint slot, jint a)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nProgramFragmentBindTexture, con(%p), vpf(%p), slot(%i), a(%p)", con, (RsProgramFragment)vpf, slot, (RsAllocation)a);
-    rsProgramFragmentBindTexture(con, (RsProgramFragment)vpf, slot, (RsAllocation)a);
+    LOG_API("nProgramBindTexture, con(%p), vpf(%p), slot(%i), a(%p)", con, (RsProgramFragment)vpf, slot, (RsAllocation)a);
+    rsProgramBindTexture(con, (RsProgramFragment)vpf, slot, (RsAllocation)a);
 }
 
 static void
-nProgramFragmentBindSampler(JNIEnv *_env, jobject _this, jint vpf, jint slot, jint a)
+nProgramBindSampler(JNIEnv *_env, jobject _this, jint vpf, jint slot, jint a)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nProgramFragmentBindSampler, con(%p), vpf(%p), slot(%i), a(%p)", con, (RsProgramFragment)vpf, slot, (RsSampler)a);
-    rsProgramFragmentBindSampler(con, (RsProgramFragment)vpf, slot, (RsSampler)a);
-}
-
-static void
-nProgramFragmentSetSlot(JNIEnv *_env, jobject _this, jint slot, jboolean enable, jint env, jint vt)
-{
-    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nProgramFragmentSetType, con(%p), slot(%i), enable(%i), env(%i), vt(%p)", con, slot, enable, env, (RsType)vt);
-    rsProgramFragmentSetSlot(con, slot, enable, (RsTexEnvMode)env, (RsType)vt);
-}
-
-static jint
-nProgramFragmentCreate(JNIEnv *_env, jobject _this, jint slot, jboolean enable)
-{
-    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nProgramFragmentCreate, con(%p)", con);
-    return (jint)rsProgramFragmentCreate(con);
+    LOG_API("nProgramBindSampler, con(%p), vpf(%p), slot(%i), a(%p)", con, (RsProgramFragment)vpf, slot, (RsSampler)a);
+    rsProgramBindSampler(con, (RsProgramFragment)vpf, slot, (RsSampler)a);
 }
 
 // ---------------------------------------------------------------------------
 
-static void
-nProgramVertexBegin(JNIEnv *_env, jobject _this, jint in, jint out)
+static jint
+nProgramFragmentCreate(JNIEnv *_env, jobject _this, jintArray params)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nProgramVertexBegin, con(%p), in(%p), out(%p)", con, (RsElement)in, (RsElement)out);
-    rsProgramVertexBegin(con, (RsElement)in, (RsElement)out);
-}
+    jint *paramPtr = _env->GetIntArrayElements(params, NULL);
+    jint paramLen = _env->GetArrayLength(params);
 
-static void
-nProgramVertexBindAllocation(JNIEnv *_env, jobject _this, jint vpv, jint a)
-{
-    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nProgramVertexBindAllocation, con(%p), vpf(%p), a(%p)", con, (RsProgramVertex)vpv, (RsAllocation)a);
-    rsProgramVertexBindAllocation(con, (RsProgramFragment)vpv, (RsAllocation)a);
-}
+    LOG_API("nProgramFragmentCreate, con(%p), paramLen(%i)", con, shaderLen, paramLen);
 
-static void
-nProgramVertexSetTextureMatrixEnable(JNIEnv *_env, jobject _this, jboolean enable)
-{
-    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nProgramVertexSetTextureMatrixEnable, con(%p), enable(%i)", con, enable);
-    rsProgramVertexSetTextureMatrixEnable(con, enable);
-}
-
-static void
-nProgramVertexAddLight(JNIEnv *_env, jobject _this, jint light)
-{
-    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nProgramVertexAddLight, con(%p), light(%p)", con, (RsLight)light);
-    rsProgramVertexAddLight(con, (RsLight)light);
+    jint ret = (jint)rsProgramFragmentCreate(con, (uint32_t *)paramPtr, paramLen);
+    _env->ReleaseIntArrayElements(params, paramPtr, JNI_ABORT);
+    return ret;
 }
 
 static jint
-nProgramVertexCreate(JNIEnv *_env, jobject _this)
+nProgramFragmentCreate2(JNIEnv *_env, jobject _this, jstring shader, jintArray params)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nProgramVertexCreate, con(%p)", con);
-    return (jint)rsProgramVertexCreate(con);
+    const char* shaderUTF = _env->GetStringUTFChars(shader, NULL);
+    jint shaderLen = _env->GetStringUTFLength(shader);
+    jint *paramPtr = _env->GetIntArrayElements(params, NULL);
+    jint paramLen = _env->GetArrayLength(params);
+
+    LOG_API("nProgramFragmentCreate2, con(%p), shaderLen(%i), paramLen(%i)", con, shaderLen, paramLen);
+
+    jint ret = (jint)rsProgramFragmentCreate2(con, shaderUTF, shaderLen, (uint32_t *)paramPtr, paramLen);
+    _env->ReleaseStringUTFChars(shader, shaderUTF);
+    _env->ReleaseIntArrayElements(params, paramPtr, JNI_ABORT);
+    return ret;
 }
 
+
+// ---------------------------------------------------------------------------
+
+static jint
+nProgramVertexCreate(JNIEnv *_env, jobject _this, jboolean texMat)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nProgramVertexCreate, con(%p), texMat(%i)", con, texMat);
+    return (jint)rsProgramVertexCreate(con, texMat);
+}
+
+static jint
+nProgramVertexCreate2(JNIEnv *_env, jobject _this, jstring shader, jintArray params)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    const char* shaderUTF = _env->GetStringUTFChars(shader, NULL);
+    jint shaderLen = _env->GetStringUTFLength(shader);
+    jint *paramPtr = _env->GetIntArrayElements(params, NULL);
+    jint paramLen = _env->GetArrayLength(params);
+
+    LOG_API("nProgramVertexCreate2, con(%p), shaderLen(%i), paramLen(%i)", con, shaderLen, paramLen);
+
+    jint ret = (jint)rsProgramVertexCreate2(con, shaderUTF, shaderLen, (uint32_t *)paramPtr, paramLen);
+    _env->ReleaseStringUTFChars(shader, shaderUTF);
+    _env->ReleaseIntArrayElements(params, paramPtr, JNI_ABORT);
+    return ret;
+}
 
 // ---------------------------------------------------------------------------
 
@@ -1207,26 +1210,6 @@ nContextBindProgramRaster(JNIEnv *_env, jobject _this, jint pf)
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nContextBindProgramRaster, con(%p), pf(%p)", con, (RsProgramRaster)pf);
     rsContextBindProgramRaster(con, (RsProgramRaster)pf);
-}
-
-static void
-nContextAddDefineI32(JNIEnv *_env, jobject _this, jstring name, jint value)
-{
-    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    const char* n = _env->GetStringUTFChars(name, NULL);
-    LOG_API("nScriptCAddDefineI32, con(%p) name(%s) value(%d)", con, n, value);
-    rsContextSetDefineI32(con, n, value);
-    _env->ReleaseStringUTFChars(name, n);
-}
-
-static void
-nContextAddDefineF(JNIEnv *_env, jobject _this, jstring name, jfloat value)
-{
-    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    const char* n = _env->GetStringUTFChars(name, NULL);
-    LOG_API("nScriptCAddDefineF, con(%p) name(%s) value(%f)", con, n, value);
-    rsContextSetDefineF(con, n, value);
-    _env->ReleaseStringUTFChars(name, n);
 }
 
 
@@ -1365,9 +1348,8 @@ static JNINativeMethod methods[] = {
 
 {"nFileOpen",                      "([B)I",                                (void*)nFileOpen },
 
-{"nElementBegin",                  "()V",                                  (void*)nElementBegin },
-{"nElementAdd",                    "(IIZILjava/lang/String;)V",            (void*)nElementAdd },
-{"nElementCreate",                 "()I",                                  (void*)nElementCreate },
+{"nElementCreate",                 "(IIZI)I",                              (void*)nElementCreate },
+{"nElementCreate2",                "([I[Ljava/lang/String;)I",             (void*)nElementCreate2 },
 
 {"nTypeBegin",                     "(I)V",                                 (void*)nTypeBegin },
 {"nTypeAdd",                       "(II)V",                                (void*)nTypeAdd },
@@ -1432,21 +1414,19 @@ static JNINativeMethod methods[] = {
 {"nProgramFragmentStoreDither",    "(Z)V",                                 (void*)nProgramFragmentStoreDither },
 {"nProgramFragmentStoreCreate",    "()I",                                  (void*)nProgramFragmentStoreCreate },
 
-{"nProgramFragmentBegin",          "(IIZ)V",                               (void*)nProgramFragmentBegin },
-{"nProgramFragmentBindTexture",    "(III)V",                               (void*)nProgramFragmentBindTexture },
-{"nProgramFragmentBindSampler",    "(III)V",                               (void*)nProgramFragmentBindSampler },
-{"nProgramFragmentSetSlot",        "(IZII)V",                              (void*)nProgramFragmentSetSlot },
-{"nProgramFragmentCreate",         "()I",                                  (void*)nProgramFragmentCreate },
+{"nProgramBindConstants",          "(III)V",                               (void*)nProgramBindConstants },
+{"nProgramBindTexture",            "(III)V",                               (void*)nProgramBindTexture },
+{"nProgramBindSampler",            "(III)V",                               (void*)nProgramBindSampler },
+
+{"nProgramFragmentCreate",         "([I)I",                                (void*)nProgramFragmentCreate },
+{"nProgramFragmentCreate2",        "(Ljava/lang/String;[I)I",              (void*)nProgramFragmentCreate2 },
 
 {"nProgramRasterCreate",           "(IIZZZ)I",                             (void*)nProgramRasterCreate },
 {"nProgramRasterSetPointSize",     "(IF)V",                                (void*)nProgramRasterSetPointSize },
 {"nProgramRasterSetLineWidth",     "(IF)V",                                (void*)nProgramRasterSetLineWidth },
 
-{"nProgramVertexBindAllocation",   "(II)V",                                (void*)nProgramVertexBindAllocation },
-{"nProgramVertexBegin",            "(II)V",                                (void*)nProgramVertexBegin },
-{"nProgramVertexSetTextureMatrixEnable",   "(Z)V",                         (void*)nProgramVertexSetTextureMatrixEnable },
-{"nProgramVertexAddLight",         "(I)V",                                 (void*)nProgramVertexAddLight },
-{"nProgramVertexCreate",           "()I",                                  (void*)nProgramVertexCreate },
+{"nProgramVertexCreate",           "(Z)I",                                 (void*)nProgramVertexCreate },
+{"nProgramVertexCreate2",          "(Ljava/lang/String;[I)I",              (void*)nProgramVertexCreate2 },
 
 {"nLightBegin",                    "()V",                                  (void*)nLightBegin },
 {"nLightSetIsMono",                "(Z)V",                                 (void*)nLightSetIsMono },

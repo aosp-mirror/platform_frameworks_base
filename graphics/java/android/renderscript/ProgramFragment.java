@@ -25,134 +25,115 @@ import android.util.Log;
  * @hide
  *
  **/
-public class ProgramFragment extends BaseObj {
-    public static final int MAX_SLOT = 2;
-
-    public enum EnvMode {
-        REPLACE (0),
-        MODULATE (1),
-        DECAL (2);
-
-        int mID;
-        EnvMode(int id) {
-            mID = id;
-        }
-    }
-
-
+public class ProgramFragment extends Program {
     ProgramFragment(int id, RenderScript rs) {
-        super(rs);
-        mID = id;
+        super(id, rs);
     }
 
-    public void bindTexture(Allocation va, int slot)
-        throws IllegalArgumentException {
-        mRS.validate();
-        if((slot < 0) || (slot >= MAX_SLOT)) {
-            throw new IllegalArgumentException("Slot ID out of range.");
+    public static class ShaderBuilder extends BaseProgramBuilder {
+        public ShaderBuilder(RenderScript rs) {
+            super(rs);
         }
 
-        mRS.nProgramFragmentBindTexture(mID, slot, va.mID);
-    }
+        public ProgramFragment create() {
+            mRS.validate();
+            int[] tmp = new int[(mInputCount + mOutputCount + mConstantCount + 1) * 2];
+            int idx = 0;
 
-    public void bindSampler(Sampler vs, int slot)
-        throws IllegalArgumentException {
-        mRS.validate();
-        if((slot < 0) || (slot >= MAX_SLOT)) {
-            throw new IllegalArgumentException("Slot ID out of range.");
+            for (int i=0; i < mInputCount; i++) {
+                tmp[idx++] = 0;
+                tmp[idx++] = mInputs[i].mID;
+            }
+            for (int i=0; i < mOutputCount; i++) {
+                tmp[idx++] = 1;
+                tmp[idx++] = mOutputs[i].mID;
+            }
+            for (int i=0; i < mConstantCount; i++) {
+                tmp[idx++] = 2;
+                tmp[idx++] = mConstants[i].mID;
+            }
+            tmp[idx++] = 3;
+            tmp[idx++] = mTextureCount;
+
+            int id = mRS.nProgramFragmentCreate2(mShader, tmp);
+            ProgramFragment pf = new ProgramFragment(id, mRS);
+            initProgram(pf);
+            return pf;
         }
-
-        mRS.nProgramFragmentBindSampler(mID, slot, vs.mID);
     }
-
 
     public static class Builder {
+        public static final int MAX_TEXTURE = 2;
         RenderScript mRS;
-        Element mIn;
-        Element mOut;
         boolean mPointSpriteEnable;
 
-        private class Slot {
-            Type mType;
-            EnvMode mEnv;
-            boolean mTexEnable;
+        public enum EnvMode {
+            REPLACE (1),
+            MODULATE (2),
+            DECAL (3);
 
-            Slot() {
-                mTexEnable = false;
+            int mID;
+            EnvMode(int id) {
+                mID = id;
+            }
+        }
+
+        public enum Format {
+            ALPHA (1),
+            LUMINANCE_ALPHA (2),
+            RGB (3),
+            RGBA (4);
+
+            int mID;
+            Format(int id) {
+                mID = id;
+            }
+        }
+
+        private class Slot {
+            EnvMode env;
+            Format format;
+            Slot(EnvMode _env, Format _fmt) {
+                env = _env;
+                format = _fmt;
             }
         }
         Slot[] mSlots;
 
-        public Builder(RenderScript rs, Element in, Element out) {
+        public Builder(RenderScript rs) {
             mRS = rs;
-            mIn = in;
-            mOut = out;
-            mSlots = new Slot[MAX_SLOT];
+            mSlots = new Slot[MAX_TEXTURE];
             mPointSpriteEnable = false;
-            for(int ct=0; ct < MAX_SLOT; ct++) {
-                mSlots[ct] = new Slot();
-            }
         }
 
-        public void setType(int slot, Type t)
+        public void setTexture(EnvMode env, Format fmt, int slot)
             throws IllegalArgumentException {
-            if((slot < 0) || (slot >= MAX_SLOT)) {
-                throw new IllegalArgumentException("Slot ID out of range.");
+            if((slot < 0) || (slot >= MAX_TEXTURE)) {
+                throw new IllegalArgumentException("MAX_TEXTURE exceeded.");
             }
-
-            mSlots[slot].mType = t;
-        }
-
-        public void setTexEnable(boolean enable, int slot)
-            throws IllegalArgumentException {
-            if((slot < 0) || (slot >= MAX_SLOT)) {
-                throw new IllegalArgumentException("Slot ID out of range.");
-            }
-
-            mSlots[slot].mTexEnable = enable;
-        }
-
-        public void setTexEnvMode(EnvMode env, int slot)
-            throws IllegalArgumentException {
-            if((slot < 0) || (slot >= MAX_SLOT)) {
-                throw new IllegalArgumentException("Slot ID out of range.");
-            }
-
-            mSlots[slot].mEnv = env;
+            mSlots[slot] = new Slot(env, fmt);
         }
 
         public void setPointSpriteTexCoordinateReplacement(boolean enable) {
             mPointSpriteEnable = enable;
         }
 
-        static synchronized ProgramFragment internalCreate(RenderScript rs, Builder b) {
-            int inID = 0;
-            int outID = 0;
-            if (b.mIn != null) {
-                inID = b.mIn.mID;
-            }
-            if (b.mOut != null) {
-                outID = b.mOut.mID;
-            }
-            rs.nProgramFragmentBegin(inID, outID, b.mPointSpriteEnable);
-            for(int ct=0; ct < MAX_SLOT; ct++) {
-                if(b.mSlots[ct].mTexEnable) {
-                    Slot s = b.mSlots[ct];
-                    int typeID = 0;
-                    if(s.mType != null) {
-                        typeID = s.mType.mID;
-                    }
-                    rs.nProgramFragmentSetSlot(ct, true, s.mEnv.mID, typeID);
-                }
-            }
-
-            int id = rs.nProgramFragmentCreate();
-            return new ProgramFragment(id, rs);
-        }
-
         public ProgramFragment create() {
             mRS.validate();
-            return internalCreate(mRS, this);
+            int[] tmp = new int[MAX_TEXTURE * 2 + 1];
+            if (mSlots[0] != null) {
+                tmp[0] = mSlots[0].env.mID;
+                tmp[1] = mSlots[0].format.mID;
+            }
+            if (mSlots[1] != null) {
+                tmp[2] = mSlots[1].env.mID;
+                tmp[3] = mSlots[1].format.mID;
+            }
+            tmp[4] = mPointSpriteEnable ? 1 : 0;
+            int id = mRS.nProgramFragmentCreate(tmp);
+            ProgramFragment pf = new ProgramFragment(id, mRS);
+            pf.mTextureCount = MAX_TEXTURE;
+            return pf;
         }
     }
 }
