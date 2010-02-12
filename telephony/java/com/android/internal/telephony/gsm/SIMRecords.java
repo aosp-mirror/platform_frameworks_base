@@ -93,6 +93,7 @@ public final class SIMRecords extends IccRecords {
     static final int SPN_RULE_SHOW_PLMN = 0x02;
 
     // From TS 51.011 EF[SPDI] section
+    static final int TAG_SPDI = 0xA3;
     static final int TAG_SPDI_PLMN_LIST = 0x80;
 
     // Full Name IEI from TS 24.008
@@ -1426,8 +1427,12 @@ public final class SIMRecords extends IccRecords {
 
         byte[] plmnEntries = null;
 
-        // There should only be one TAG_SPDI_PLMN_LIST
         for ( ; tlv.isValidObject() ; tlv.nextObject()) {
+            // Skip SPDI tag, if existant
+            if (tlv.getTag() == TAG_SPDI) {
+              tlv = new SimTlv(tlv.getData(), 0, tlv.getData().length);
+            }
+            // There should only be one TAG_SPDI_PLMN_LIST
             if (tlv.getTag() == TAG_SPDI_PLMN_LIST) {
                 plmnEntries = tlv.getData();
                 break;
