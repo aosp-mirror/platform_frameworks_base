@@ -17,7 +17,7 @@
 package android.database.sqlite;
 
 import android.database.CursorWindow;
-import android.os.Debug;
+import android.os.SystemClock;
 import android.util.Log;
 
 /**
@@ -57,7 +57,7 @@ public class SQLiteQuery extends SQLiteProgram {
      */
     /* package */ int fillWindow(CursorWindow window,  
             int maxRead, int lastPos) {
-        long timeStart = Debug.threadCpuTimeNanos();
+        long timeStart = SystemClock.uptimeMillis();
         mDatabase.lock();
 
         try {
