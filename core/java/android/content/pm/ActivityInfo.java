@@ -251,6 +251,13 @@ public class ActivityInfo extends ComponentInfo
     public static final int CONFIG_SCREEN_LAYOUT = 0x0100;
     /**
      * Bit in {@link #configChanges} that indicates that the activity
+     * can itself handle the ui mode. Set from the
+     * {@link android.R.attr#configChanges} attribute.
+     * @hide (UIMODE) Pending API council approval
+     */
+    public static final int CONFIG_UI_MODE = 0x0200;
+    /**
+     * Bit in {@link #configChanges} that indicates that the activity
      * can itself handle changes to the font scaling factor.  Set from the
      * {@link android.R.attr#configChanges} attribute.  This is
      * not a core resource configutation, but a higher-level value, so its

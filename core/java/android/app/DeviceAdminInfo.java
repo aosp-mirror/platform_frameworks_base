@@ -80,23 +80,15 @@ public final class DeviceAdminInfo implements Parcelable {
     public static final int USES_POLICY_RESET_PASSWORD = 2;
 
     /**
-     * A type of policy that this device admin can use: able to limit the
+     * A type of policy that this device admin can use: able to force the device
+     * to lock via{@link DevicePolicyManager#lockNow} or limit the
      * maximum lock timeout for the device via
      * {@link DevicePolicyManager#setMaximumTimeToLock}.
-     * 
-     * <p>To control this policy, the device admin must have a "limit-unlock"
-     * tag in the "uses-policies" section of its meta-data.
-     */
-    public static final int USES_POLICY_LIMIT_UNLOCK = 3;
-
-    /**
-     * A type of policy that this device admin can use: able to force the device
-     * to lock via{@link DevicePolicyManager#lockNow}.
      * 
      * <p>To control this policy, the device admin must have a "force-lock"
      * tag in the "uses-policies" section of its meta-data.
      */
-    public static final int USES_POLICY_FORCE_LOCK = 4;
+    public static final int USES_POLICY_FORCE_LOCK = 3;
 
     /**
      * A type of policy that this device admin can use: able to factory
@@ -106,7 +98,7 @@ public final class DeviceAdminInfo implements Parcelable {
      * <p>To control this policy, the device admin must have a "wipe-data"
      * tag in the "uses-policies" section of its meta-data.
      */
-    public static final int USES_POLICY_WIPE_DATA = 5;
+    public static final int USES_POLICY_WIPE_DATA = 4;
 
     /** @hide */
     public static class PolicyInfo {
@@ -140,9 +132,6 @@ public final class DeviceAdminInfo implements Parcelable {
         sPoliciesDisplayOrder.add(new PolicyInfo(USES_POLICY_WATCH_LOGIN, "watch-login",
                 com.android.internal.R.string.policylab_watchLogin,
                 com.android.internal.R.string.policydesc_watchLogin));
-        sPoliciesDisplayOrder.add(new PolicyInfo(USES_POLICY_LIMIT_UNLOCK, "limit-unlock",
-                com.android.internal.R.string.policylab_limitUnlock,
-                com.android.internal.R.string.policydesc_limitUnlock));
         sPoliciesDisplayOrder.add(new PolicyInfo(USES_POLICY_FORCE_LOCK, "force-lock",
                 com.android.internal.R.string.policylab_forceLock,
                 com.android.internal.R.string.policydesc_forceLock));
@@ -314,8 +303,8 @@ public final class DeviceAdminInfo implements Parcelable {
      * Return true if the device admin has requested that it be able to use
      * the given policy control.  The possible policy identifier inputs are:
      * {@link #USES_POLICY_LIMIT_PASSWORD}, {@link #USES_POLICY_WATCH_LOGIN},
-     * {@link #USES_POLICY_RESET_PASSWORD}, {@link #USES_POLICY_LIMIT_UNLOCK},
-     * {@link #USES_POLICY_FORCE_LOCK}, {@link #USES_POLICY_WIPE_DATA}.
+     * {@link #USES_POLICY_RESET_PASSWORD}, {@link #USES_POLICY_FORCE_LOCK},
+     * {@link #USES_POLICY_WIPE_DATA}.
      */
     public boolean usesPolicy(int policyIdent) {
         return (mUsesPolicies & (1<<policyIdent)) != 0;

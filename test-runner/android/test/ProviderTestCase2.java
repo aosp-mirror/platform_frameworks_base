@@ -8,6 +8,8 @@ import android.test.mock.MockContext;
 import android.test.mock.MockContentResolver;
 import android.database.DatabaseUtils;
 
+import java.io.File;
+
 /**
  * This TestCase class provides a framework for isolated testing of a single
  * ContentProvider.  It uses a {@link android.test.mock.MockContentResolver} to
@@ -32,6 +34,13 @@ public abstract class ProviderTestCase2<T extends ContentProvider> extends Andro
         @Override
         public Resources getResources() {
             return getContext().getResources();
+        }
+
+        @Override
+        public File getDir(String name, int mode) {
+            // name the directory so the directory will be seperated from
+            // one created through the regular Context
+            return getContext().getDir("mockcontext2_" + name, mode);
         }
     }
 

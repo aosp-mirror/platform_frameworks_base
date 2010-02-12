@@ -51,6 +51,7 @@ enum {
 
     kKeyAlbum             = 'albu',  // cstring
     kKeyArtist            = 'arti',  // cstring
+    kKeyAlbumArtist       = 'aart',  // cstring
     kKeyComposer          = 'comp',  // cstring
     kKeyGenre             = 'genr',  // cstring
     kKeyTitle             = 'titl',  // cstring

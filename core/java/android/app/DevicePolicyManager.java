@@ -410,7 +410,7 @@ public class DevicePolicyManager {
      * the length that the user can set.  It takes effect immediately.
      * 
      * <p>The calling device admin must have requested
-     * {@link DeviceAdminInfo#USES_POLICY_LIMIT_UNLOCK} to be able to call
+     * {@link DeviceAdminInfo#USES_POLICY_FORCE_LOCK} to be able to call
      * this method; if it has not, a security exception will be thrown.
      * 
      * @param admin Which {@link DeviceAdmin} this request is associated with.

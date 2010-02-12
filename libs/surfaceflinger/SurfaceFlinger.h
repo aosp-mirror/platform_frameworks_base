@@ -31,11 +31,8 @@
 #include <binder/Permission.h>
 
 #include <ui/PixelFormat.h>
-#include <ui/ISurfaceComposer.h>
-#include <ui/ISurfaceFlingerClient.h>
-
-#include <private/ui/SharedBufferStack.h>
-#include <private/ui/LayerState.h>
+#include <surfaceflinger/ISurfaceComposer.h>
+#include <surfaceflinger/ISurfaceFlingerClient.h>
 
 #include "Barrier.h"
 #include "Layer.h"

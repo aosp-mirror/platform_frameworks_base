@@ -21,10 +21,10 @@ import android.content.Context;
 import android.content.res.AssetFileDescriptor;
 import android.graphics.Bitmap;
 import android.net.Uri;
-import android.os.ParcelFileDescriptor;
+
 import java.io.FileDescriptor;
-import java.io.IOException;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 
 /**
  * MediaMetadataRetriever class provides a unified interface for retrieving
@@ -256,5 +256,7 @@ public class MediaMetadataRetriever
     public static final int METADATA_KEY_VIDEO_WIDTH     = 20;
     public static final int METADATA_KEY_WRITER          = 21;
     public static final int METADATA_KEY_MIMETYPE        = 22;
+    public static final int METADATA_KEY_DISCNUMBER      = 23;
+    public static final int METADATA_KEY_ALBUMARTIST     = 24;
     // Add more here...
 }

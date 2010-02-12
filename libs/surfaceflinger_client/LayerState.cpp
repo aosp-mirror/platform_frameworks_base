@@ -16,37 +16,25 @@
 
 #include <utils/Errors.h>
 #include <binder/Parcel.h>
-#include <private/ui/LayerState.h>
+#include <private/surfaceflinger/LayerState.h>
 
 namespace android {
 
 status_t layer_state_t::write(Parcel& output) const
 {
     size_t size = sizeof(layer_state_t);
-
-    //output.writeStrongBinder(surface->asBinder());
-    //size -= sizeof(surface);
-
     transparentRegion.write(output);
     size -= sizeof(transparentRegion);
-    
     output.write(this, size);
-    
     return NO_ERROR;
 }
 
 status_t layer_state_t::read(const Parcel& input)
 {
     size_t size = sizeof(layer_state_t);
-
-    //surface = interface_cast<ISurface>(input.readStrongBinder());
-    //size -= sizeof(surface);
-
     transparentRegion.read(input);
     size -= sizeof(transparentRegion);
-
     input.read(this, size);
-    
     return NO_ERROR;
 }
 

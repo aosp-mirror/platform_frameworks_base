@@ -25,7 +25,6 @@
 #include <utils/KeyedVector.h>
 #include <utils/String8.h>
 #include <utils/Vector.h>
-#include <ui/SurfaceComposerClient.h>
 
 #include <media/IMediaPlayerService.h>
 #include <media/MediaPlayerInterface.h>

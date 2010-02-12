@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_UI_SURFACE_H
-#define ANDROID_UI_SURFACE_H
+#ifndef ANDROID_SF_SURFACE_H
+#define ANDROID_SF_SURFACE_H
 
 #include <stdint.h>
 #include <sys/types.h>
@@ -23,12 +23,12 @@
 #include <utils/RefBase.h>
 #include <utils/threads.h>
 
-#include <ui/ISurface.h>
 #include <ui/PixelFormat.h>
 #include <ui/Region.h>
-#include <ui/ISurfaceFlingerClient.h>
-
 #include <ui/egl/android_natives.h>
+
+#include <surfaceflinger/ISurface.h>
+#include <surfaceflinger/ISurfaceFlingerClient.h>
 
 namespace android {
 
@@ -250,5 +250,5 @@ private:
 
 }; // namespace android
 
-#endif // ANDROID_UI_SURFACE_H
+#endif // ANDROID_SF_SURFACE_H
 

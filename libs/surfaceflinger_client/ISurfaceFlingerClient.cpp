@@ -26,12 +26,12 @@
 #include <binder/IPCThreadState.h>
 #include <binder/IServiceManager.h>
 
-#include <ui/ISurface.h>
-#include <ui/ISurfaceFlingerClient.h>
 #include <ui/Point.h>
 #include <ui/Rect.h>
 
-#include <private/ui/LayerState.h>
+#include <surfaceflinger/ISurface.h>
+#include <surfaceflinger/ISurfaceFlingerClient.h>
+#include <private/surfaceflinger/LayerState.h>
 
 // ---------------------------------------------------------------------------
 

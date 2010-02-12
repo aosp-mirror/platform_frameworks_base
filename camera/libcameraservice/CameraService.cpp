@@ -25,7 +25,9 @@
 #include <utils/Errors.h>
 #include <binder/MemoryBase.h>
 #include <binder/MemoryHeapBase.h>
-#include <ui/ICameraService.h>
+#include <camera/ICameraService.h>
+#include <surfaceflinger/ISurface.h>
+#include <ui/Overlay.h>
 
 #include <media/mediaplayer.h>
 #include <media/AudioSystem.h>

@@ -21,7 +21,7 @@
 #include <stdint.h>
 #include <sys/types.h>
 #include <binder/Parcel.h>
-#include <ui/ICamera.h>
+#include <camera/ICamera.h>
 
 namespace android {
 

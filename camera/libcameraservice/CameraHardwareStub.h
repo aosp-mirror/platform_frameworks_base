@@ -20,7 +20,7 @@
 
 #include "FakeCamera.h"
 #include <utils/threads.h>
-#include <ui/CameraHardwareInterface.h>
+#include <camera/CameraHardwareInterface.h>
 #include <binder/MemoryBase.h>
 #include <binder/MemoryHeapBase.h>
 #include <utils/threads.h>

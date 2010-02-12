@@ -65,7 +65,9 @@ LOCAL_SHARED_LIBRARIES := \
         libcutils         \
         libui             \
         libsonivox        \
-        libvorbisidec
+        libvorbisidec     \
+        libsurfaceflinger_client \
+        libcamera_client
 
 LOCAL_STATIC_LIBRARIES := \
         libstagefright_aacdec \
@@ -87,6 +89,14 @@ LOCAL_STATIC_LIBRARIES += \
 
 LOCAL_SHARED_LIBRARIES += \
         libstagefright_color_conversion
+
+ifeq ($(TARGET_OS)-$(TARGET_SIMULATOR),linux-true)
+        LOCAL_LDLIBS += -lpthread -ldl
+endif
+
+ifneq ($(TARGET_SIMULATOR),true)
+LOCAL_SHARED_LIBRARIES += libdl
+endif
 
 endif
 

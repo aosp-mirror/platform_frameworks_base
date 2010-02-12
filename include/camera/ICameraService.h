@@ -21,8 +21,8 @@
 #include <binder/IInterface.h>
 #include <binder/Parcel.h>
 
-#include <ui/ICameraClient.h>
-#include <ui/ICamera.h>
+#include <camera/ICameraClient.h>
+#include <camera/ICamera.h>
 
 namespace android {
 

@@ -16,11 +16,16 @@
 
 package com.android.internal.telephony.gsm;
 
-import android.os.*;
-import android.telephony.gsm.GsmCellLocation;
+import android.os.AsyncResult;
+import android.os.Handler;
+import android.os.Message;
+import android.os.Registrant;
+import android.os.RegistrantList;
+import android.os.SystemProperties;
 import android.telephony.PhoneNumberUtils;
 import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
+import android.telephony.gsm.GsmCellLocation;
 import android.util.EventLog;
 import android.util.Log;
 
@@ -29,13 +34,13 @@ import com.android.internal.telephony.CallTracker;
 import com.android.internal.telephony.CommandsInterface;
 import com.android.internal.telephony.Connection;
 import com.android.internal.telephony.DriverCall;
+import com.android.internal.telephony.EventLogTags;
+import com.android.internal.telephony.Phone;
+import com.android.internal.telephony.TelephonyProperties;
 import com.android.internal.telephony.gsm.CallFailCause;
+import com.android.internal.telephony.gsm.GSMPhone;
 import com.android.internal.telephony.gsm.GsmCall;
 import com.android.internal.telephony.gsm.GsmConnection;
-import com.android.internal.telephony.gsm.GSMPhone;
-import com.android.internal.telephony.Phone;
-import com.android.internal.telephony.TelephonyEventLog;
-import com.android.internal.telephony.*;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -869,7 +874,7 @@ public final class GsmCallTracker extends CallTracker {
                     causeCode == CallFailCause.BEARER_NOT_AVAIL ||
                     causeCode == CallFailCause.ERROR_UNSPECIFIED) {
                     GsmCellLocation loc = ((GsmCellLocation)phone.getCellLocation());
-                    EventLog.writeEvent(TelephonyEventLog.EVENT_LOG_CALL_DROP,
+                    EventLog.writeEvent(EventLogTags.CALL_DROP,
                             causeCode, loc != null ? loc.getCid() : -1,
                             TelephonyManager.getDefault().getNetworkType());
                 }

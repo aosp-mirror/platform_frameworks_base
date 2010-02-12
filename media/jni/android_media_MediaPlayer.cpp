@@ -35,7 +35,7 @@
 #include "utils/String8.h"
 #include "android_util_Binder.h"
 #include <binder/Parcel.h>
-
+#include <surfaceflinger/Surface.h>
 
 // ----------------------------------------------------------------------------
 

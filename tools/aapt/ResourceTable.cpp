@@ -2472,6 +2472,12 @@ ResourceFilter::match(const ResTable_config& config)
     if (!match(AXIS_ORIENTATION, config.orientation)) {
         return false;
     }
+    if (!match(AXIS_UIMODETYPE, (config.uiMode&ResTable_config::MASK_UI_MODE_TYPE))) {
+        return false;
+    }
+    if (!match(AXIS_UIMODENIGHT, (config.uiMode&ResTable_config::MASK_UI_MODE_NIGHT))) {
+        return false;
+    }
     if (!match(AXIS_DENSITY, config.density)) {
         return false;
     }
@@ -2674,7 +2680,7 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<AaptFile>& dest)
                 ConfigDescription config = t->getUniqueConfigs().itemAt(ci);
 
                 NOISY(printf("Writing config %d config: imsi:%d/%d lang:%c%c cnt:%c%c "
-                     "orien:%d touch:%d density:%d key:%d inp:%d nav:%d w:%d h:%d\n",
+                     "orien:%d ui:%d touch:%d density:%d key:%d inp:%d nav:%d w:%d h:%d\n",
                       ti+1,
                       config.mcc, config.mnc,
                       config.language[0] ? config.language[0] : '-',
@@ -2682,6 +2688,7 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<AaptFile>& dest)
                       config.country[0] ? config.country[0] : '-',
                       config.country[1] ? config.country[1] : '-',
                       config.orientation,
+                      config.uiMode,
                       config.touchscreen,
                       config.density,
                       config.keyboard,
@@ -2711,7 +2718,7 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<AaptFile>& dest)
                 tHeader->entriesStart = htodl(typeSize);
                 tHeader->config = config;
                 NOISY(printf("Writing type %d config: imsi:%d/%d lang:%c%c cnt:%c%c "
-                     "orien:%d touch:%d density:%d key:%d inp:%d nav:%d w:%d h:%d\n",
+                     "orien:%d ui:%d touch:%d density:%d key:%d inp:%d nav:%d w:%d h:%d\n",
                       ti+1,
                       tHeader->config.mcc, tHeader->config.mnc,
                       tHeader->config.language[0] ? tHeader->config.language[0] : '-',
@@ -2719,6 +2726,7 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<AaptFile>& dest)
                       tHeader->config.country[0] ? tHeader->config.country[0] : '-',
                       tHeader->config.country[1] ? tHeader->config.country[1] : '-',
                       tHeader->config.orientation,
+                      tHeader->config.uiMode,
                       tHeader->config.touchscreen,
                       tHeader->config.density,
                       tHeader->config.keyboard,

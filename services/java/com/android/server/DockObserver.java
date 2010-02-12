@@ -17,15 +17,23 @@
 package com.android.server;
 
 import android.app.Activity;
+import android.app.ActivityManagerNative;
+import android.app.IActivityManager;
+import android.app.IUiModeManager;
 import android.app.KeyguardManager;
+import android.app.StatusBarManager;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
+import android.os.Binder;
 import android.os.Handler;
 import android.os.Message;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UEventObserver;
 import android.provider.Settings;
@@ -47,7 +55,13 @@ class DockObserver extends UEventObserver {
     private static final String DOCK_UEVENT_MATCH = "DEVPATH=/devices/virtual/switch/dock";
     private static final String DOCK_STATE_PATH = "/sys/class/switch/dock/state";
 
+    public static final int MODE_NIGHT_AUTO = Configuration.UI_MODE_NIGHT_MASK >> 4;
+    public static final int MODE_NIGHT_NO = Configuration.UI_MODE_NIGHT_NO >> 4;
+    public static final int MODE_NIGHT_YES = Configuration.UI_MODE_NIGHT_YES >> 4;
+
     private int mDockState = Intent.EXTRA_DOCK_STATE_UNDOCKED;
+    private int mNightMode = MODE_NIGHT_NO;
+    private boolean mCarModeEnabled = false;
     private boolean mSystemReady;
 
     private final Context mContext;
@@ -57,6 +71,8 @@ class DockObserver extends UEventObserver {
     private KeyguardManager.KeyguardLock mKeyguardLock;
     private boolean mKeyguardDisabled;
     private LockPatternUtils mLockPatternUtils;
+
+    private StatusBarManager mStatusBarManager;    
 
     // The broadcast receiver which receives the result of the ordered broadcast sent when
     // the dock state changes. The original ordered broadcast is sent with an initial result
@@ -71,16 +87,12 @@ class DockObserver extends UEventObserver {
 
             // Launch a dock activity
             String category;
-            switch (mDockState) {
-                case Intent.EXTRA_DOCK_STATE_CAR:
-                    category = Intent.CATEGORY_CAR_DOCK;
-                    break;
-                case Intent.EXTRA_DOCK_STATE_DESK:
-                    category = Intent.CATEGORY_DESK_DOCK;
-                    break;
-                default:
-                    category = null;
-                    break;
+            if (mCarModeEnabled || mDockState == Intent.EXTRA_DOCK_STATE_CAR) {
+                category = Intent.CATEGORY_CAR_DOCK;
+            } else if (mDockState == Intent.EXTRA_DOCK_STATE_DESK) {
+                category = Intent.CATEGORY_DESK_DOCK;
+            } else {
+                category = null;
             }
             if (category != null) {
                 intent = new Intent(Intent.ACTION_MAIN);
@@ -101,6 +113,9 @@ class DockObserver extends UEventObserver {
         mPowerManager = pm;
         mLockPatternUtils = new LockPatternUtils(context);
         init();  // set initial status
+
+        ServiceManager.addService("uimode", mBinder);
+
         startObserving(DOCK_UEVENT_MATCH);
     }
 
@@ -116,6 +131,14 @@ class DockObserver extends UEventObserver {
                 if (newState != mDockState) {
                     int oldState = mDockState;
                     mDockState = newState;
+                    boolean carModeEnabled = mDockState == Intent.EXTRA_DOCK_STATE_CAR;
+                    if (mCarModeEnabled != carModeEnabled) {
+                        try {
+                            setCarMode(carModeEnabled);
+                        } catch (RemoteException e1) {
+                            Log.w(TAG, "Unable to change car mode.", e1);
+                        }
+                    }
                     if (mSystemReady) {
                         // Don't force screen on when undocking from the desk dock.
                         // The change in power state will do this anyway.
@@ -180,7 +203,13 @@ class DockObserver extends UEventObserver {
                 // Pack up the values and broadcast them to everyone
                 Intent intent = new Intent(Intent.ACTION_DOCK_EVENT);
                 intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
-                intent.putExtra(Intent.EXTRA_DOCK_STATE, mDockState);
+                if (mCarModeEnabled && mDockState != Intent.EXTRA_DOCK_STATE_CAR) {
+                    // Pretend to be in DOCK_STATE_CAR.
+                    intent.putExtra(Intent.EXTRA_DOCK_STATE, Intent.EXTRA_DOCK_STATE_CAR);
+                } else {
+                    intent.putExtra(Intent.EXTRA_DOCK_STATE, mDockState);
+                }
+                intent.putExtra(Intent.EXTRA_CAR_MODE_ENABLED, mCarModeEnabled);
 
                 // Check if this is Bluetooth Dock
                 String address = BluetoothService.readDockBluetoothAddress();
@@ -197,6 +226,93 @@ class DockObserver extends UEventObserver {
                 mContext.sendStickyOrderedBroadcast(
                         intent, mResultReceiver, null, Activity.RESULT_OK, null, null);
             }
+        }
+    };
+
+    private void setCarMode(boolean enabled) throws RemoteException {
+        mCarModeEnabled = enabled;
+        if (enabled) {
+            setMode(Configuration.UI_MODE_TYPE_CAR, mNightMode);
+        } else {
+            // Disabling the car mode clears the night mode.
+            setMode(Configuration.UI_MODE_TYPE_NORMAL, MODE_NIGHT_NO);
+        }
+
+        if (mStatusBarManager == null) {
+            mStatusBarManager = (StatusBarManager) mContext.getSystemService(Context.STATUS_BAR_SERVICE);
+        }
+
+        // Fear not: StatusBarService manages a list of requests to disable
+        // features of the status bar; these are ORed together to form the
+        // active disabled list. So if (for example) the device is locked and
+        // the status bar should be totally disabled, the calls below will
+        // have no effect until the device is unlocked.
+        if (mStatusBarManager != null) {
+            mStatusBarManager.disable(enabled 
+                ? StatusBarManager.DISABLE_NOTIFICATION_TICKER
+                : StatusBarManager.DISABLE_NONE);
+        }
+    }
+
+    private void setMode(int modeType, int modeNight) throws RemoteException {
+        final IActivityManager am = ActivityManagerNative.getDefault();
+        Configuration config = am.getConfiguration();
+
+        if (config.uiMode != (modeType | modeNight)) {
+            config.uiMode = modeType | modeNight;
+            long ident = Binder.clearCallingIdentity();
+            am.updateConfiguration(config);
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    private void setNightMode(int mode) throws RemoteException {
+        mNightMode = mode;
+        switch (mode) {
+            case MODE_NIGHT_NO:
+            case MODE_NIGHT_YES:
+                setMode(Configuration.UI_MODE_TYPE_CAR, mode << 4);
+                break;
+            case MODE_NIGHT_AUTO:
+                // FIXME: not yet supported, this functionality will be
+                // added in a separate change.
+                break;
+            default:
+                setMode(Configuration.UI_MODE_TYPE_CAR, MODE_NIGHT_NO << 4);
+                break;
+        }
+    }
+
+    /**
+     * Wrapper class implementing the IUiModeManager interface.
+     */
+    private final IUiModeManager.Stub mBinder = new IUiModeManager.Stub() {
+
+        public void disableCarMode() throws RemoteException {
+            if (mCarModeEnabled) {
+                setCarMode(false);
+                update();
+            }
+        }
+
+        public void enableCarMode() throws RemoteException {
+            mContext.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.ENABLE_CAR_MODE,
+                    "Need ENABLE_CAR_MODE permission");
+            if (!mCarModeEnabled) {
+                setCarMode(true);
+                update();
+            }
+        }
+
+        public void setNightMode(int mode) throws RemoteException {
+            if (mCarModeEnabled) {
+                DockObserver.this.setNightMode(mode);
+            }
+        }
+
+        public int getNightMode() throws RemoteException {
+            return mNightMode;
         }
     };
 }

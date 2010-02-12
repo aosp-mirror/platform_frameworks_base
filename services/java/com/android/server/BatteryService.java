@@ -27,11 +27,11 @@ import android.content.pm.PackageManager;
 import android.os.BatteryManager;
 import android.os.Binder;
 import android.os.IBinder;
+import android.os.DropBoxManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UEventObserver;
-import android.provider.Checkin;
 import android.provider.Settings;
 import android.util.EventLog;
 import android.util.Log;
@@ -363,50 +363,39 @@ class BatteryService extends Binder {
     }
 
     private final void logBatteryStats() {
-
         IBinder batteryInfoService = ServiceManager.getService(BATTERY_STATS_SERVICE_NAME);
-        if (batteryInfoService != null) {
-            byte[] buffer = new byte[DUMP_MAX_LENGTH];
-            File dumpFile = null;
-            FileOutputStream dumpStream = null;
-            try {
-                // dump the service to a file
-                dumpFile = new File(DUMPSYS_DATA_PATH + BATTERY_STATS_SERVICE_NAME + ".dump");
-                dumpStream = new FileOutputStream(dumpFile);
-                batteryInfoService.dump(dumpStream.getFD(), DUMPSYS_ARGS);
-                dumpStream.getFD().sync();
+        if (batteryInfoService == null) return;
 
-                // read dumped file above into buffer truncated to DUMP_MAX_LENGTH
-                // and insert into events table.
-                int length = (int) Math.min(dumpFile.length(), DUMP_MAX_LENGTH);
-                FileInputStream fileInputStream = new FileInputStream(dumpFile);
-                int nread = fileInputStream.read(buffer, 0, length);
-                if (nread > 0) {
-                    Checkin.logEvent(mContext.getContentResolver(),
-                            Checkin.Events.Tag.BATTERY_DISCHARGE_INFO,
-                            new String(buffer, 0, nread));
-                    if (LOCAL_LOGV) Log.v(TAG, "dumped " + nread + "b from " +
-                            batteryInfoService + "to log");
-                    if (LOCAL_LOGV) Log.v(TAG, "actual dump:" + new String(buffer, 0, nread));
+        DropBoxManager db = (DropBoxManager) mContext.getSystemService(Context.DROPBOX_SERVICE);
+        if (db == null || !db.isTagEnabled("BATTERY_DISCHARGE_INFO")) return;
+
+        File dumpFile = null;
+        FileOutputStream dumpStream = null;
+        try {
+            // dump the service to a file
+            dumpFile = new File(DUMPSYS_DATA_PATH + BATTERY_STATS_SERVICE_NAME + ".dump");
+            dumpStream = new FileOutputStream(dumpFile);
+            batteryInfoService.dump(dumpStream.getFD(), DUMPSYS_ARGS);
+            dumpStream.getFD().sync();
+
+            // add dump file to drop box
+            db.addFile("BATTERY_DISCHARGE_INFO", dumpFile, DropBoxManager.IS_TEXT);
+        } catch (RemoteException e) {
+            Log.e(TAG, "failed to dump battery service", e);
+        } catch (IOException e) {
+            Log.e(TAG, "failed to write dumpsys file", e);
+        } finally {
+            // make sure we clean up
+            if (dumpStream != null) {
+                try {
+                    dumpStream.close();
+                } catch (IOException e) {
+                    Log.e(TAG, "failed to close dumpsys output stream");
                 }
-            } catch (RemoteException e) {
-                Log.e(TAG, "failed to dump service '" + BATTERY_STATS_SERVICE_NAME +
-                        "':" + e);
-            } catch (IOException e) {
-                Log.e(TAG, "failed to write dumpsys file: " +  e);
-            } finally {
-                // make sure we clean up
-                if (dumpStream != null) {
-                    try {
-                        dumpStream.close();
-                    } catch (IOException e) {
-                        Log.e(TAG, "failed to close dumpsys output stream");
-                    }
-                }
-                if (dumpFile != null && !dumpFile.delete()) {
-                    Log.e(TAG, "failed to delete temporary dumpsys file: "
-                            + dumpFile.getAbsolutePath());
-                }
+            }
+            if (dumpFile != null && !dumpFile.delete()) {
+                Log.e(TAG, "failed to delete temporary dumpsys file: "
+                        + dumpFile.getAbsolutePath());
             }
         }
     }

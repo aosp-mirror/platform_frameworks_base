@@ -48,7 +48,9 @@ LOCAL_SHARED_LIBRARIES:= \
     libutils \
     libbinder \
     libcutils \
-    libmedia
+    libmedia \
+    libcamera_client \
+    libsurfaceflinger_client
 
 LOCAL_MODULE:= libcameraservice
 

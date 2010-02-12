@@ -19,8 +19,6 @@
 
 #include "rsUtils.h"
 
-#include <ui/Surface.h>
-
 #include "rsThreadIO.h"
 #include "rsType.h"
 #include "rsMatrix.h"
@@ -46,6 +44,9 @@
 
 // ---------------------------------------------------------------------------
 namespace android {
+
+class Surface;
+
 namespace renderscript {
 
 class Context

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_UI_SHARED_BUFFER_STACK_H
-#define ANDROID_UI_SHARED_BUFFER_STACK_H
+#ifndef ANDROID_SF_SHARED_BUFFER_STACK_H
+#define ANDROID_SF_SHARED_BUFFER_STACK_H
 
 #include <stdint.h>
 #include <sys/types.h>
@@ -356,4 +356,4 @@ COMPILE_TIME_ASSERT(sizeof(surface_flinger_cblk_t) <= 4096)
 // ---------------------------------------------------------------------------
 }; // namespace android
 
-#endif /* ANDROID_UI_SHARED_BUFFER_STACK_H */
+#endif /* ANDROID_SF_SHARED_BUFFER_STACK_H */

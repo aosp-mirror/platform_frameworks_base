@@ -34,10 +34,11 @@
 #include <ui/Rect.h>
 #include <ui/Region.h>
 #include <ui/DisplayInfo.h>
-#include <ui/ISurfaceComposer.h>
-#include <ui/ISurfaceFlingerClient.h>
 #include <ui/FramebufferNativeWindow.h>
 #include <ui/EGLUtils.h>
+
+#include <surfaceflinger/ISurfaceComposer.h>
+#include <surfaceflinger/ISurfaceFlingerClient.h>
 
 #include <core/SkBitmap.h>
 #include <images/SkImageDecoder.h>

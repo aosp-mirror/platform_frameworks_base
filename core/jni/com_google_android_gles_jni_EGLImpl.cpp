@@ -21,7 +21,7 @@
 #include <EGL/egl.h>
 #include <GLES/gl.h>
 
-#include <ui/Surface.h>
+#include <surfaceflinger/Surface.h>
 #include <SkBitmap.h>
 #include <SkPixelRef.h>
 

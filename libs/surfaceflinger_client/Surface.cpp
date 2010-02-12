@@ -26,22 +26,25 @@
 #include <utils/Errors.h>
 #include <utils/threads.h>
 #include <utils/CallStack.h>
+#include <utils/Log.h>
+
+#include <pixelflinger/pixelflinger.h>
+
 #include <binder/IPCThreadState.h>
 #include <binder/IMemory.h>
-#include <utils/Log.h>
 
 #include <ui/DisplayInfo.h>
 #include <ui/GraphicBuffer.h>
 #include <ui/GraphicBufferMapper.h>
-#include <ui/ISurface.h>
-#include <ui/Surface.h>
-#include <ui/SurfaceComposerClient.h>
 #include <ui/Rect.h>
 
-#include <pixelflinger/pixelflinger.h>
+#include <surfaceflinger/Surface.h>
+#include <surfaceflinger/ISurface.h>
+#include <surfaceflinger/ISurfaceComposer.h>
+#include <surfaceflinger/SurfaceComposerClient.h>
 
-#include <private/ui/SharedBufferStack.h>
-#include <private/ui/LayerState.h>
+#include <private/surfaceflinger/SharedBufferStack.h>
+#include <private/surfaceflinger/LayerState.h>
 
 namespace android {
 

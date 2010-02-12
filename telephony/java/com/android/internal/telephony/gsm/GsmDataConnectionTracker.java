@@ -38,7 +38,6 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.preference.PreferenceManager;
-import android.provider.Checkin;
 import android.provider.Settings;
 import android.provider.Telephony;
 import android.telephony.ServiceState;
@@ -53,7 +52,7 @@ import com.android.internal.telephony.DataConnection;
 import com.android.internal.telephony.DataConnectionTracker;
 import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.RetryManager;
-import com.android.internal.telephony.TelephonyEventLog;
+import com.android.internal.telephony.EventLogTags;
 import com.android.internal.telephony.DataConnection.FailCause;
 
 import java.io.IOException;
@@ -301,20 +300,9 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
     protected void setState(State s) {
         if (DBG) log ("setState: " + s);
         if (state != s) {
-            if (s == State.INITING) { // request PDP context
-                Checkin.updateStats(
-                        phone.getContext().getContentResolver(),
-                        Checkin.Stats.Tag.PHONE_GPRS_ATTEMPTED, 1, 0.0);
-            }
-
-            if (s == State.CONNECTED) { // pppd is up
-                Checkin.updateStats(
-                        phone.getContext().getContentResolver(),
-                        Checkin.Stats.Tag.PHONE_GPRS_CONNECTED, 1, 0.0);
-            }
+            EventLog.writeEvent(EventLogTags.GSM_DATA_STATE_CHANGE, state.toString(), s.toString());
+            state = s;
         }
-
-        state = s;
 
         if (state == State.FAILED) {
             if (waitingApns != null)
@@ -711,7 +699,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
 
                 // Add an event log when the network drops PDP
                 GsmCellLocation loc = ((GsmCellLocation)phone.getCellLocation());
-                EventLog.writeEvent(TelephonyEventLog.EVENT_LOG_PDP_NETWORK_DROP,
+                EventLog.writeEvent(EventLogTags.PDP_NETWORK_DROP,
                         loc != null ? loc.getCid() : -1,
                         TelephonyManager.getDefault().getNetworkType());
 
@@ -732,7 +720,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
 
                     // Log the network drop on the event log.
                     GsmCellLocation loc = ((GsmCellLocation)phone.getCellLocation());
-                    EventLog.writeEvent(TelephonyEventLog.EVENT_LOG_PDP_NETWORK_DROP,
+                    EventLog.writeEvent(EventLogTags.PDP_NETWORK_DROP,
                             loc != null ? loc.getCid() : -1,
                             TelephonyManager.getDefault().getNetworkType());
 
@@ -778,11 +766,11 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                     DEFAULT_MAX_PDP_RESET_FAIL);
             if (mPdpResetCount < maxPdpReset) {
                 mPdpResetCount++;
-                EventLog.writeEvent(TelephonyEventLog.EVENT_LOG_PDP_RESET, sentSinceLastRecv);
+                EventLog.writeEvent(EventLogTags.PDP_RADIO_RESET, sentSinceLastRecv);
                 cleanUpConnection(true, Phone.REASON_PDP_RESET);
             } else {
                 mPdpResetCount = 0;
-                EventLog.writeEvent(TelephonyEventLog.EVENT_LOG_REREGISTER_NETWORK, sentSinceLastRecv);
+                EventLog.writeEvent(EventLogTags.PDP_REREGISTER_NETWORK, sentSinceLastRecv);
                 mGsmPhone.mSST.reRegisterNetwork(null);
             }
             // TODO: Add increasingly drastic recovery steps, eg,
@@ -882,7 +870,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             if (sentSinceLastRecv >= watchdogTrigger) {
                 // we already have NUMBER_SENT_PACKETS sent without ack
                 if (mNoRecvPollCount == 0) {
-                    EventLog.writeEvent(TelephonyEventLog.EVENT_LOG_RADIO_RESET_COUNTDOWN_TRIGGERED,
+                    EventLog.writeEvent(EventLogTags.PDP_RADIO_RESET_COUNTDOWN_TRIGGERED,
                             sentSinceLastRecv);
                 }
 
@@ -955,7 +943,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         if (status == 0) {
             // ping succeeded.  False alarm.  Reset netStatPoll.
             // ("-1" for this event indicates a false alarm)
-            EventLog.writeEvent(TelephonyEventLog.EVENT_LOG_PDP_RESET, -1);
+            EventLog.writeEvent(EventLogTags.PDP_RADIO_RESET, -1);
             mPdpResetCount = 0;
             sendMessage(obtainMessage(EVENT_START_NETSTAT_POLL));
         } else {
@@ -1145,7 +1133,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                     // Log this failure to the Event Logs.
             if (cause.isEventLoggable()) {
                 GsmCellLocation loc = ((GsmCellLocation)phone.getCellLocation());
-                EventLog.writeEvent(TelephonyEventLog.EVENT_LOG_RADIO_PDP_SETUP_FAIL,
+                EventLog.writeEvent(EventLogTags.PDP_SETUP_FAIL,
                         cause.ordinal(), loc != null ? loc.getCid() : -1,
                         TelephonyManager.getDefault().getNetworkType());
             }

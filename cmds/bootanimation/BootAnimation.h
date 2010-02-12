@@ -23,8 +23,8 @@
 #include <utils/threads.h>
 #include <utils/AssetManager.h>
 
-#include <ui/ISurfaceComposer.h>
-#include <ui/SurfaceComposerClient.h>
+#include <surfaceflinger/ISurfaceComposer.h>
+#include <surfaceflinger/SurfaceComposerClient.h>
 
 #include <EGL/egl.h>
 #include <GLES/gl.h>

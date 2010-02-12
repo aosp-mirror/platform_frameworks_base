@@ -17,7 +17,7 @@
 #include <stdio.h>
 #include <assert.h>
 
-#include <ui/SurfaceComposerClient.h>
+#include <surfaceflinger/SurfaceComposerClient.h>
 #include <ui/PixelFormat.h>
 #include <ui/DisplayInfo.h>
 

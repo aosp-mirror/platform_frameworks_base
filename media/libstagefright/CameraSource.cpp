@@ -25,11 +25,11 @@
 #include <media/stagefright/MediaDefs.h>
 #include <media/stagefright/MediaErrors.h>
 #include <media/stagefright/MetaData.h>
-#include <ui/Camera.h>
-#include <ui/CameraParameters.h>
+#include <camera/Camera.h>
+#include <camera/CameraParameters.h>
 #include <ui/GraphicBuffer.h>
-#include <ui/ISurface.h>
 #include <ui/Overlay.h>
+#include <surfaceflinger/ISurface.h>
 #include <utils/String8.h>
 
 namespace android {

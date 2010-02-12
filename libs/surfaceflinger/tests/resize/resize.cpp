@@ -1,14 +1,16 @@
 #include <cutils/memory.h>
 
-#include <utils/IPCThreadState.h>
-#include <utils/ProcessState.h>
-#include <utils/IServiceManager.h>
 #include <utils/Log.h>
 
-#include <ui/Surface.h>
-#include <ui/ISurface.h>
+#include <binder/IPCThreadState.h>
+#include <binder/ProcessState.h>
+#include <binder/IServiceManager.h>
+
+#include <surfaceflinger/Surface.h>
+#include <surfaceflinger/ISurface.h>
+#include <surfaceflinger/SurfaceComposerClient.h>
+
 #include <ui/Overlay.h>
-#include <ui/SurfaceComposerClient.h>
 
 using namespace android;
 

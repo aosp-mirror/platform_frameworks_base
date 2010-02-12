@@ -23,7 +23,7 @@
 #include <utils/Log.h>
 #include <utils/threads.h>
 
-#include <private/ui/SharedBufferStack.h>
+#include <private/surfaceflinger/SharedBufferStack.h>
 
 #include <ui/Rect.h>
 #include <ui/Region.h>

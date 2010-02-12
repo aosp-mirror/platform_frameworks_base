@@ -19,12 +19,14 @@
 
 #include <binder/IMemory.h>
 #include <utils/RefBase.h>
-#include <ui/ISurface.h>
-#include <ui/Camera.h>
-#include <ui/CameraParameters.h>
-#include <ui/Overlay.h>
+#include <surfaceflinger/ISurface.h>
+#include <camera/Camera.h>
+#include <camera/CameraParameters.h>
 
 namespace android {
+
+class Overlay;
+
 /**
  *  The size of image for display.
  */

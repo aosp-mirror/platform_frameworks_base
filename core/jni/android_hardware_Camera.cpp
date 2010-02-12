@@ -25,8 +25,8 @@
 
 #include <utils/Vector.h>
 
-#include <ui/Surface.h>
-#include <ui/Camera.h>
+#include <surfaceflinger/Surface.h>
+#include <camera/Camera.h>
 #include <binder/IMemory.h>
 
 using namespace android;

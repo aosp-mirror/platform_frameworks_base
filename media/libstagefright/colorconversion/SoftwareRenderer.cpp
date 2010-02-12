@@ -22,7 +22,7 @@
 #include <binder/MemoryHeapBase.h>
 #include <binder/MemoryHeapPmem.h>
 #include <media/stagefright/MediaDebug.h>
-#include <ui/ISurface.h>
+#include <surfaceflinger/ISurface.h>
 
 namespace android {
 
@@ -40,7 +40,6 @@ SoftwareRenderer::SoftwareRenderer(
       mDecodedHeight(decodedHeight),
       mFrameSize(mDecodedWidth * mDecodedHeight * 2),  // RGB565
       mIndex(0) {
-    // TODO: How do I allocate physical memory on Droid?
     mMemoryHeap = new MemoryHeapBase("/dev/pmem_adsp", 2 * mFrameSize);
     if (mMemoryHeap->heapID() < 0) {
         LOGI("Creating physical memory heap failed, reverting to regular heap.");

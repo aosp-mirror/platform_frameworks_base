@@ -39,40 +39,6 @@ public final class FallbackCheckinService extends ICheckinService.Stub {
         mContext = context;
     }
 
-    public void masterClear() {
-        if (mContext.checkCallingOrSelfPermission("android.permission.MASTER_CLEAR") !=
-                PackageManager.PERMISSION_GRANTED) {
-            Log.e(TAG, "Permission Denial: can't invoke masterClear from "
-                    + "pid=" + Binder.getCallingPid() + ", "
-                    + "uid=" + Binder.getCallingUid());
-            return;
-        }
-
-        // Save the android ID so the new system can get it erased.
-        try {
-            RecoverySystem.rebootWipeUserData(mContext);
-        } catch (IOException e) {
-            Log.e(TAG, "Reboot for masterClear() failed", e);
-        }
-    }
-
-    public void masterClearAndToggleEFS(boolean efsEnabled) {
-        if (mContext.checkCallingOrSelfPermission("android.permission.MASTER_CLEAR") !=
-			PackageManager.PERMISSION_GRANTED) {
-            Log.e(TAG, "Permission Denial: can't invoke masterClearAndToggleEFS from "
-				  + "pid=" + Binder.getCallingPid() + ", "
-				  + "uid=" + Binder.getCallingUid());
-            return;
-        }
-
-        // Save the android ID so the new system can get it erased.
-        try {
-            RecoverySystem.rebootToggleEFS(mContext, efsEnabled);
-        } catch (IOException e) {
-            Log.e(TAG, "Reboot for toggle EFS failed", e);
-        }
-    }
-
     public void getParentalControlState(IParentalControlCallback p, String requestingApp)
             throws android.os.RemoteException {
         ParentalControlState state = new ParentalControlState();

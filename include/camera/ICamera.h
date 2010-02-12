@@ -20,10 +20,10 @@
 #include <utils/RefBase.h>
 #include <binder/IInterface.h>
 #include <binder/Parcel.h>
-#include <ui/ISurface.h>
+#include <surfaceflinger/ISurface.h>
 #include <binder/IMemory.h>
 #include <utils/String8.h>
-#include <ui/Camera.h>
+#include <camera/Camera.h>
 
 namespace android {
 

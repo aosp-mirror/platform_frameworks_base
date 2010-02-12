@@ -16,7 +16,7 @@
 
 package android.database.sqlite;
 
-import android.os.Debug;
+import android.os.SystemClock;
 
 /**
  * A pre-compiled statement against a {@link SQLiteDatabase} that can be reused.
@@ -44,7 +44,7 @@ public class SQLiteStatement extends SQLiteProgram
      *         some reason
      */
     public void execute() {
-        long timeStart = Debug.threadCpuTimeNanos();
+        long timeStart = SystemClock.uptimeMillis();
         mDatabase.lock();
 
         acquireReference();
@@ -68,7 +68,7 @@ public class SQLiteStatement extends SQLiteProgram
      *         some reason
      */
     public long executeInsert() {
-        long timeStart = Debug.threadCpuTimeNanos();
+        long timeStart = SystemClock.uptimeMillis();
         mDatabase.lock();
 
         acquireReference();
@@ -91,7 +91,7 @@ public class SQLiteStatement extends SQLiteProgram
      * @throws android.database.sqlite.SQLiteDoneException if the query returns zero rows
      */
     public long simpleQueryForLong() {
-        long timeStart = Debug.threadCpuTimeNanos();
+        long timeStart = SystemClock.uptimeMillis();
         mDatabase.lock();
 
         acquireReference();
@@ -114,7 +114,7 @@ public class SQLiteStatement extends SQLiteProgram
      * @throws android.database.sqlite.SQLiteDoneException if the query returns zero rows
      */
     public String simpleQueryForString() {
-        long timeStart = Debug.threadCpuTimeNanos();
+        long timeStart = SystemClock.uptimeMillis();
         mDatabase.lock();
 
         acquireReference();

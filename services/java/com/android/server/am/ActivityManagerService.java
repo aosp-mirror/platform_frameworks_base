@@ -92,7 +92,6 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
-import android.provider.Checkin;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Config;
@@ -966,7 +965,6 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     static final int IM_FEELING_LUCKY_MSG = 15;
     static final int LAUNCH_TIMEOUT_MSG = 16;
     static final int DESTROY_TIMEOUT_MSG = 17;
-    static final int SERVICE_ERROR_MSG = 18;
     static final int RESUME_TOP_ACTIVITY_MSG = 19;
     static final int PROC_START_TIMEOUT_MSG = 20;
     static final int DO_PENDING_ACTIVITY_LAUNCHES_MSG = 21;
@@ -1160,13 +1158,6 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                         mLaunchingActivity.release();
                     }
                 }
-            } break;
-            case SERVICE_ERROR_MSG: {
-                ServiceRecord srv = (ServiceRecord)msg.obj;
-                // This needs to be *un*synchronized to avoid deadlock.
-                Checkin.logEvent(mContext.getContentResolver(),
-                        Checkin.Events.Tag.SYSTEM_SERVICE_LOOPING,
-                        srv.name.toShortString());
             } break;
             case RESUME_TOP_ACTIVITY_MSG: {
                 synchronized (ActivityManagerService.this) {
@@ -10767,11 +10758,6 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         EventLog.writeEvent(EventLogTags.AM_SCHEDULE_SERVICE_RESTART,
                 r.shortName, r.restartDelay);
 
-        Message msg = Message.obtain();
-        msg.what = SERVICE_ERROR_MSG;
-        msg.obj = r;
-        mHandler.sendMessage(msg);
-        
         return canceled;
     }
 

@@ -16,16 +16,15 @@
 
 package com.android.server;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.BroadcastReceiver;
-import android.os.RemoteException;
-import android.os.ICheckinService;
-import android.os.ServiceManager;
+import android.os.RecoverySystem;
 import android.util.Log;
 
-public class MasterClearReceiver extends BroadcastReceiver {
+import java.io.IOException;
 
+public class MasterClearReceiver extends BroadcastReceiver {
     private static final String TAG = "MasterClear";
 
     @Override
@@ -36,18 +35,17 @@ public class MasterClearReceiver extends BroadcastReceiver {
                 return;
             }
         }
-        Log.w(TAG, "!!! FACTORY RESETTING DEVICE !!!");
-        ICheckinService service =
-            ICheckinService.Stub.asInterface(
-                ServiceManager.getService("checkin"));
-        if (service != null) {
-            try {
-                // This RPC should never return.
-                service.masterClear();
-            } catch (RemoteException e) {
-                Log.w("MasterClear",
-                      "Unable to invoke ICheckinService.masterClear()");
+
+        try {
+            Log.w(TAG, "!!! FACTORY RESET !!!");
+            if (intent.hasExtra("enableEFS")) {
+                RecoverySystem.rebootToggleEFS(context, intent.getBooleanExtra("enableEFS", false));
+            } else {
+                RecoverySystem.rebootWipeUserData(context);
             }
+            Log.wtf(TAG, "Still running after master clear?!");
+        } catch (IOException e) {
+            Log.e(TAG, "Can't perform master clear/factory reset", e);
         }
     }
 }

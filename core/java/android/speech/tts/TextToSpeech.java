@@ -256,6 +256,31 @@ public class TextToSpeech {
          * the TextToSpeech engine specifies the locale associated with each resource file.
          */
         public static final String EXTRA_VOICE_DATA_FILES_INFO = "dataFilesInfo";
+        /**
+         * Extra information received with the {@link #ACTION_CHECK_TTS_DATA} intent where
+         * the TextToSpeech engine returns an ArrayList<String> of all the available voices.
+         * The format of each voice is: lang-COUNTRY-variant where COUNTRY and variant are
+         * optional (ie, "eng" or "eng-USA" or "eng-USA-FEMALE").
+         * {@hide}
+         */
+        public static final String EXTRA_AVAILABLE_VOICES = "availableVoices";
+        /**
+         * Extra information received with the {@link #ACTION_CHECK_TTS_DATA} intent where
+         * the TextToSpeech engine returns an ArrayList<String> of all the unavailable voices.
+         * The format of each voice is: lang-COUNTRY-variant where COUNTRY and variant are
+         * optional (ie, "eng" or "eng-USA" or "eng-USA-FEMALE").
+         * {@hide}
+         */
+        public static final String EXTRA_UNAVAILABLE_VOICES = "unavailableVoices";
+        /**
+         * Extra information sent with the {@link #ACTION_CHECK_TTS_DATA} intent where the
+         * caller indicates to the TextToSpeech engine which specific sets of voice data to
+         * check for by sending an ArrayList<String> of the voices that are of interest.
+         * The format of each voice is: lang-COUNTRY-variant where COUNTRY and variant are
+         * optional (ie, "eng" or "eng-USA" or "eng-USA-FEMALE").
+         * {@hide}
+         */
+        public static final String EXTRA_CHECK_VOICE_DATA_FOR = "checkVoiceDataFor";
 
         // extras for a TTS engine's data installation
         /**

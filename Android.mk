@@ -34,7 +34,10 @@ include $(CLEAR_VARS)
 LOCAL_SRC_FILES := $(call find-other-java-files,$(FRAMEWORKS_BASE_SUBDIRS))
 
 # EventLogTags files.
-LOCAL_SRC_FILES += core/java/android/content/EventLogTags.logtags
+LOCAL_SRC_FILES += \
+       core/java/android/content/EventLogTags.logtags \
+       core/java/android/webkit/EventLogTags.logtags \
+       telephony/java/com/android/internal/telephony/EventLogTags.logtags \
 
 # The following filters out code we are temporarily not including at all.
 # TODO: Move AWT and beans (and associated harmony code) back into libcore.
@@ -87,6 +90,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/app/IStatusBar.aidl \
 	core/java/android/app/IThumbnailReceiver.aidl \
 	core/java/android/app/ITransientNotification.aidl \
+	core/java/android/app/IUiModeManager.aidl \
 	core/java/android/app/IWallpaperManager.aidl \
 	core/java/android/app/IWallpaperManagerCallback.aidl \
 	core/java/android/backup/IBackupManager.aidl \

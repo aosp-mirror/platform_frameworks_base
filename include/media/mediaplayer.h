@@ -18,7 +18,6 @@
 #define ANDROID_MEDIAPLAYER_H
 
 #include <binder/IMemory.h>
-#include <ui/Surface.h>
 #include <media/IMediaPlayerClient.h>
 #include <media/IMediaPlayer.h>
 #include <media/IMediaDeathNotifier.h>
@@ -27,6 +26,8 @@
 #include <utils/String8.h>
 
 namespace android {
+
+class Surface;
 
 enum media_event_type {
     MEDIA_NOP               = 0, // interface test message

@@ -159,6 +159,8 @@ LOCAL_SHARED_LIBRARIES := \
 	libbinder \
 	libnetutils \
 	libui \
+	libsurfaceflinger_client \
+	libcamera_client \
 	libskiagl \
 	libskia \
 	libsqlite \

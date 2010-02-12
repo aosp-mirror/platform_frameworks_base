@@ -1615,6 +1615,24 @@ class ContextImpl extends Context {
         }
 
         @Override
+        public String[] currentToCanonicalPackageNames(String[] names) {
+            try {
+                return mPM.currentToCanonicalPackageNames(names);
+            } catch (RemoteException e) {
+                throw new RuntimeException("Package manager has died", e);
+            }
+        }
+        
+        @Override
+        public String[] canonicalToCurrentPackageNames(String[] names) {
+            try {
+                return mPM.canonicalToCurrentPackageNames(names);
+            } catch (RemoteException e) {
+                throw new RuntimeException("Package manager has died", e);
+            }
+        }
+        
+        @Override
         public Intent getLaunchIntentForPackage(String packageName) {
             // First see if the package has an INFO activity; the existence of
             // such an activity is implied to be the desired front-door for the

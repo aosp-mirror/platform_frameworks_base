@@ -462,6 +462,12 @@
         size.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_enableCarMode">enable car mode</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_enableCarMode">Allows an application to
+        enable the car mode.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_killBackgroundProcesses">kill background processes</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_killBackgroundProcesses">Allows an application to
@@ -1212,16 +1218,11 @@
     <string name="policydesc_resetPassword">Force your password
         to a new value, requiring the administrator give it to you
         before you can log in.</string>
-    <!-- Title of policy access to limiting the user's unlock timeout -->
-    <string name="policylab_limitUnlock">Limit lock timeout</string>
-    <!-- Description of policy access to limiting the user's unlock timeout -->
-    <string name="policydesc_limitUnlock">Restrict the unlock timeout
-        durations you can select.</string>
     <!-- Title of policy access to force lock the device -->
     <string name="policylab_forceLock">Force lock</string>
     <!-- Description of policy access to limiting the user's password choices -->
-    <string name="policydesc_forceLock">Force the device to immediately lock,
-        requiring that you re-enter its password.</string>
+    <string name="policydesc_forceLock">Control when device locks,
+        requiring you re-enter its password.</string>
     <!-- Title of policy access to wipe the user's data -->
     <string name="policylab_wipeData">Erase all data</string>
     <!-- Description of policy access to wipe the user's data -->

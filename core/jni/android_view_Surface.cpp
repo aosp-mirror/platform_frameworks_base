@@ -18,7 +18,7 @@
 
 #include "android_util_Binder.h"
 
-#include <ui/SurfaceComposerClient.h>
+#include <surfaceflinger/SurfaceComposerClient.h>
 #include <ui/Region.h>
 #include <ui/Rect.h>
 

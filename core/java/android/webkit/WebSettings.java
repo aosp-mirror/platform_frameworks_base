@@ -22,7 +22,7 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
-import android.provider.Checkin;
+import android.util.EventLog;
 import java.lang.SecurityException;
 import java.util.Locale;
 
@@ -501,8 +501,8 @@ public class WebSettings {
      */
     public synchronized void setTextSize(TextSize t) {
         if (WebView.mLogEvent && mTextSize != t ) {
-            Checkin.updateStats(mContext.getContentResolver(),
-                    Checkin.Stats.Tag.BROWSER_TEXT_SIZE_CHANGE, 1, 0.0);
+            EventLog.writeEvent(EventLogTags.BROWSER_TEXT_SIZE_CHANGE,
+                    mTextSize.value, t.value);
         }
         mTextSize = t;
         postSync();

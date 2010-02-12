@@ -29,19 +29,21 @@
 #include <utils/Errors.h>
 #include <utils/threads.h>
 #include <utils/KeyedVector.h>
-#include <binder/IServiceManager.h>
-#include <binder/IMemory.h>
 #include <utils/Log.h>
 
+#include <binder/IServiceManager.h>
+#include <binder/IMemory.h>
+
 #include <ui/DisplayInfo.h>
-#include <ui/ISurfaceComposer.h>
-#include <ui/ISurfaceFlingerClient.h>
-#include <ui/ISurface.h>
-#include <ui/SurfaceComposerClient.h>
 #include <ui/Rect.h>
 
-#include <private/ui/LayerState.h>
-#include <private/ui/SharedBufferStack.h>
+#include <surfaceflinger/ISurfaceComposer.h>
+#include <surfaceflinger/ISurfaceFlingerClient.h>
+#include <surfaceflinger/ISurface.h>
+#include <surfaceflinger/SurfaceComposerClient.h>
+
+#include <private/surfaceflinger/LayerState.h>
+#include <private/surfaceflinger/SharedBufferStack.h>
 
 #define VERBOSE(...)	((void)0)
 //#define VERBOSE			LOGD

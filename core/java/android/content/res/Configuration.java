@@ -161,7 +161,37 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      * or {@link #ORIENTATION_SQUARE}.
      */
     public int orientation;
-    
+
+    /** @hide (UIMODE) Pending API council approval */
+    public static final int UI_MODE_TYPE_MASK = 0x0f;
+    /** @hide (UIMODE) Pending API council approval */
+    public static final int UI_MODE_TYPE_NORMAL = 0x00;
+    /** @hide (UIMODE) Pending API council approval */
+    public static final int UI_MODE_TYPE_CAR = 0x01;
+
+    /** @hide (UIMODE) Pending API council approval */
+    public static final int UI_MODE_NIGHT_MASK = 0x30;
+    /** @hide (UIMODE) Pending API council approval */
+    public static final int UI_MODE_NIGHT_UNDEFINED = 0x00;
+    /** @hide (UIMODE) Pending API council approval */
+    public static final int UI_MODE_NIGHT_NO = 0x10;
+    /** @hide (UIMODE) Pending API council approval */
+    public static final int UI_MODE_NIGHT_YES = 0x20;
+
+    /**
+     * Bit mask of the ui mode.  Currently there are two fields:
+     * <p>The {@link #UI_MODE_TYPE_MASK} bits define the overall ui mode of the
+     * device. They may be one of
+     * {@link #UI_MODE_TYPE_NORMAL} or {@link #UI_MODE_TYPE_CAR}.
+     *
+     * <p>The {@link #UI_MODE_NIGHT_MASK} defines whether the screen
+     * is in a special mode. They may be one of
+     * {@link #UI_MODE_NIGHT_NO} or {@link #UI_MODE_NIGHT_YES}.
+     *
+     * @hide (UIMODE) Pending API council approval
+     */
+    public int uiMode;
+
     /**
      * Construct an invalid Configuration.  You must call {@link #setToDefaults}
      * for this object to be valid.  {@more}
@@ -189,6 +219,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         navigationHidden = o.navigationHidden;
         orientation = o.orientation;
         screenLayout = o.screenLayout;
+        uiMode = o.uiMode;
     }
 
     public String toString() {
@@ -217,6 +248,8 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         sb.append(orientation);
         sb.append(" layout=");
         sb.append(screenLayout);
+        sb.append(" uiMode=");
+        sb.append(uiMode);
         sb.append('}');
         return sb.toString();
     }
@@ -237,6 +270,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         navigationHidden = NAVIGATIONHIDDEN_UNDEFINED;
         orientation = ORIENTATION_UNDEFINED;
         screenLayout = SCREENLAYOUT_SIZE_UNDEFINED;
+        uiMode = UI_MODE_TYPE_NORMAL;
     }
 
     /** {@hide} */
@@ -317,6 +351,11 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             changed |= ActivityInfo.CONFIG_SCREEN_LAYOUT;
             screenLayout = delta.screenLayout;
         }
+        if (delta.uiMode != UI_MODE_TYPE_NORMAL
+                && uiMode != delta.uiMode) {
+            changed |= ActivityInfo.CONFIG_UI_MODE;
+            uiMode = delta.uiMode;
+        }
         
         return changed;
     }
@@ -393,6 +432,10 @@ public final class Configuration implements Parcelable, Comparable<Configuration
                 && screenLayout != delta.screenLayout) {
             changed |= ActivityInfo.CONFIG_SCREEN_LAYOUT;
         }
+        if (delta.uiMode != UI_MODE_TYPE_NORMAL
+                && uiMode != delta.uiMode) {
+            changed |= ActivityInfo.CONFIG_UI_MODE;
+        }
         
         return changed;
     }
@@ -444,6 +487,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         dest.writeInt(navigationHidden);
         dest.writeInt(orientation);
         dest.writeInt(screenLayout);
+        dest.writeInt(uiMode);
     }
 
     public static final Parcelable.Creator<Configuration> CREATOR
@@ -477,6 +521,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         navigationHidden = source.readInt();
         orientation = source.readInt();
         screenLayout = source.readInt();
+        uiMode = source.readInt();
     }
 
     public int compareTo(Configuration that) {
@@ -510,6 +555,8 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         n = this.orientation - that.orientation;
         if (n != 0) return n;
         n = this.screenLayout - that.screenLayout;
+        if (n != 0) return n;
+        n = this.uiMode - that.uiMode;
         //if (n != 0) return n;
         return n;
     }
@@ -533,6 +580,6 @@ public final class Configuration implements Parcelable, Comparable<Configuration
                 + this.locale.hashCode() + this.touchscreen
                 + this.keyboard + this.keyboardHidden + this.hardKeyboardHidden
                 + this.navigation + this.navigationHidden
-                + this.orientation + this.screenLayout;
+                + this.orientation + this.screenLayout + this.uiMode;
     }
 }
