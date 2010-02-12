@@ -21,6 +21,7 @@
 #include "TimedEventQueue.h"
 
 #include <media/MediaPlayerInterface.h>
+#include <media/stagefright/DataSource.h>
 #include <media/stagefright/OMXClient.h>
 #include <utils/threads.h>
 
@@ -111,6 +112,7 @@ private:
 
     sp<MediaSource> mVideoSource;
     sp<AwesomeRenderer> mVideoRenderer;
+    bool mVideoRendererIsPreview;
 
     sp<MediaSource> mAudioSource;
     AudioPlayer *mAudioPlayer;
@@ -162,6 +164,22 @@ private:
         uint32_t mFlags;
         int64_t mPositionUs;
 
+        void *mLastVideoFrame;
+        size_t mLastVideoFrameSize;
+        int32_t mColorFormat;
+        int32_t mVideoWidth, mVideoHeight;
+        int32_t mDecodedWidth, mDecodedHeight;
+
+        SuspensionState()
+            : mLastVideoFrame(NULL) {
+        }
+
+        ~SuspensionState() {
+            if (mLastVideoFrame) {
+                free(mLastVideoFrame);
+                mLastVideoFrame = NULL;
+            }
+        }
     } *mSuspensionState;
 
     status_t setDataSource_l(
