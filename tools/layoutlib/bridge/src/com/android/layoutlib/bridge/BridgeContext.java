@@ -66,14 +66,14 @@ import java.util.Map.Entry;
  */
 public final class BridgeContext extends Context {
 
-    private Resources mResources;
-    private Theme mTheme;
-    private HashMap<View, Object> mViewKeyMap = new HashMap<View, Object>();
-    private IStyleResourceValue mThemeValues;
+    private final Resources mResources;
+    private final Theme mTheme;
+    private final HashMap<View, Object> mViewKeyMap = new HashMap<View, Object>();
+    private final IStyleResourceValue mThemeValues;
     private final Object mProjectKey;
-    private Map<String, Map<String, IResourceValue>> mProjectResources;
-    private Map<String, Map<String, IResourceValue>> mFrameworkResources;
-    private Map<IStyleResourceValue, IStyleResourceValue> mStyleInheritanceMap;
+    private final Map<String, Map<String, IResourceValue>> mProjectResources;
+    private final Map<String, Map<String, IResourceValue>> mFrameworkResources;
+    private final Map<IStyleResourceValue, IStyleResourceValue> mStyleInheritanceMap;
 
     // maps for dynamically generated id representing style objects (IStyleResourceValue)
     private Map<Integer, IStyleResourceValue> mDynamicIdToStyleMap;
@@ -927,7 +927,6 @@ public final class BridgeContext extends Context {
         return null;
     }
 
-    @Override
     public File getExternalCacheDir() {
         // TODO Auto-generated method stub
         return null;
@@ -965,7 +964,6 @@ public final class BridgeContext extends Context {
         return null;
     }
 
-    @Override
     public File getExternalFilesDir(String type) {
         // TODO Auto-generated method stub
         return null;

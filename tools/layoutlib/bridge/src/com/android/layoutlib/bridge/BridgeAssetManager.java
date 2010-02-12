@@ -17,12 +17,9 @@
 package com.android.layoutlib.bridge;
 
 import android.content.res.AssetManager;
-import android.content.res.Configuration;
-
-import java.util.Locale;
 
 public class BridgeAssetManager extends AssetManager {
-    
+
     /**
      * This initializes the static field {@link AssetManager#mSystem} which is used
      * by methods who get a global asset manager using {@link AssetManager#getSystem()}.
@@ -40,7 +37,7 @@ public class BridgeAssetManager extends AssetManager {
         }
         return AssetManager.sSystem;
     }
-    
+
     /**
      * Clears the static {@link AssetManager#sSystem} to make sure we don't leave objects
      * around that would prevent us from unloading the library.
@@ -48,29 +45,7 @@ public class BridgeAssetManager extends AssetManager {
     /*package*/ static void clearSystem() {
         AssetManager.sSystem = null;
     }
-    
+
     private BridgeAssetManager() {
-    }
-    
-    /**
-     * Change the configuration used when retrieving resources.  Not for use by applications.
-     */
-    @Override
-    public void setConfiguration(int mcc, int mnc, String locale,
-            int orientation, int touchscreen, int density, int keyboard,
-            int keyboardHidden, int navigation, int screenWidth, int screenHeight,
-            int screenLayout, int uiMode, int version)  {
-        
-        Configuration c = new Configuration();
-        c.mcc = mcc;
-        c.mnc = mnc;
-        c.locale = new Locale(locale);
-        c.touchscreen = touchscreen;
-        c.keyboard = keyboard;
-        c.keyboardHidden = keyboardHidden;
-        c.navigation = navigation;
-        c.orientation = orientation;
-        c.screenLayout = screenLayout;
-        c.uiMode = uiMode;
     }
 }
