@@ -201,10 +201,17 @@ public class SQLiteDatabase extends SQLiteClosable {
 
     private long mLastLockMessageTime = 0L;
 
-    // always log queries which take 100ms+; shorter queries are sampled accordingly
+    // Things related to query logging/sampling for debugging
+    // slow/frequent queries during development.  Always log queries
+    // which take 100ms+; shorter queries are sampled accordingly.
+    // Commit statements, which are typically slow, are logged
+    // together with the most recently executed SQL statement, for
+    // disambiguation.
     private static final int QUERY_LOG_TIME_IN_MILLIS = 100;
     private static final int QUERY_LOG_SQL_LENGTH = 64;
+    private static final String COMMIT_SQL = "COMMIT;";
     private final Random mRandom = new Random();
+    private String mLastSqlStatement = null;
 
     /** Used by native code, do not rename */
     /* package */ int mNativeHandle = 0;
@@ -540,7 +547,7 @@ public class SQLiteDatabase extends SQLiteClosable {
                 }
             }
             if (mTransactionIsSuccessful) {
-                execSQL("COMMIT;");
+                execSQL(COMMIT_SQL);
             } else {
                 try {
                     execSQL("ROLLBACK;");
@@ -1660,7 +1667,15 @@ public class SQLiteDatabase extends SQLiteClosable {
         } finally {
             unlock();
         }
-        logTimeStat(sql, timeStart);
+
+        // Log commit statements along with the most recently executed
+        // SQL statement for disambiguation.  Note that instance
+        // equality to COMMIT_SQL is safe here.
+        if (sql == COMMIT_SQL) {
+            logTimeStat(sql + mLastSqlStatement, timeStart);
+        } else {
+            logTimeStat(sql, timeStart);
+        }
     }
 
     /**
@@ -1786,6 +1801,11 @@ public class SQLiteDatabase extends SQLiteClosable {
 
 
     /* package */ void logTimeStat(String sql, long beginMillis) {
+        // Keep track of the last statement executed here, as this is
+        // the common funnel through which all methods of hitting
+        // libsqlite eventually flow.
+        mLastSqlStatement = sql;
+
         // Sample fast queries in proportion to the time taken.
         // Quantize the % first, so the logged sampling probability
         // exactly equals the actual sampling rate for this query.
