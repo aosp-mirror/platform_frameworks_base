@@ -46,6 +46,8 @@ public:
     virtual status_t        setAudioStreamType(int type) = 0;
     virtual status_t        setLooping(int loop) = 0;
     virtual status_t        setVolume(float leftVolume, float rightVolume) = 0;
+    virtual status_t        suspend() = 0;
+    virtual status_t        resume() = 0;
 
     // Invoke a generic method on the player by using opaque parcels
     // for the request and reply.
