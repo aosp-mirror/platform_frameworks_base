@@ -38,6 +38,7 @@ import android.net.ConnectivityManager;
 import android.os.Environment;
 import android.os.SystemProperties;
 import android.provider.Settings;
+import android.speech.RecognitionService;
 import android.speech.RecognizerIntent;
 import android.text.TextUtils;
 import android.util.Config;
@@ -996,7 +997,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         String selectedService = null;
         List<ResolveInfo> availableRecognitionServices =
                 mContext.getPackageManager().queryIntentServices(
-                        new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH), 0);
+                        new Intent(RecognitionService.SERVICE_INTERFACE), 0);
         int numAvailable = availableRecognitionServices.size();
         
         if (numAvailable == 0) {
