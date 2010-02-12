@@ -1977,12 +1977,6 @@ class PackageManagerService extends IPackageManager.Stub {
             }
             PackageParser.Package pkg = scanPackageLI(file, file, resFile,
                     flags|PackageParser.PARSE_MUST_BE_APK, scanMode);
-            // Don't mess around with apps in system partition.
-            if (pkg == null && (flags & PackageParser.PARSE_IS_SYSTEM) == 0) {
-                // Delete the apk
-                Log.w(TAG, "Cleaning up failed install of " + file);
-                file.delete();
-            }
         }
     }
 
@@ -2177,13 +2171,6 @@ class PackageManagerService extends IPackageManager.Stub {
         File scanFile, File destCodeFile, File destResourceFile,
         PackageParser.Package pkg, int parseFlags, int scanMode) {
 
-        if (scanFile == null || destCodeFile == null ||
-                destResourceFile == null) {
-            // Bail out. The resource and code paths haven't been set.
-            Log.w(TAG, " Code and resource paths haven't been set correctly");
-            mLastScanError = PackageManager.INSTALL_FAILED_INVALID_APK;
-            return null;
-        }
         mScanningPath = scanFile;
         if (pkg == null) {
             mLastScanError = PackageManager.INSTALL_PARSE_FAILED_BAD_PACKAGE_NAME;
