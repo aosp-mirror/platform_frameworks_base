@@ -798,6 +798,12 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 "ConnectivityService");
     }
 
+    private void enforceTetherAccessPermission() {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.ACCESS_NETWORK_STATE,
+                "ConnectivityService");
+    }
+
     /**
      * Handle a {@code DISCONNECTED} event. If this pertains to the non-active
      * network, we ignore it. If it is for the active network, we send out a
@@ -1289,6 +1295,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             pw.println(requester.toString());
         }
         pw.println();
+
+        mTethering.dump(fd, pw, args);
     }
 
     // must be stateless - things change under us.
@@ -1386,24 +1394,54 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     // javadoc from interface
     public boolean tether(String iface) {
         enforceTetherChangePermission();
-        return mTethering.tether(iface);
+        return isTetheringSupported() && mTethering.tether(iface);
     }
 
     // javadoc from interface
     public boolean untether(String iface) {
         enforceTetherChangePermission();
-        return mTethering.untether(iface);
+        return isTetheringSupported() && mTethering.untether(iface);
+    }
+
+    // TODO - proper iface API for selection by property, inspection, etc
+    public String[] getTetherableUsbRegexs() {
+        enforceTetherAccessPermission();
+        if (isTetheringSupported()) {
+            return mTethering.getTetherableUsbRegexs();
+        } else {
+            return new String[0];
+        }
+    }
+
+    public String[] getTetherableWifiRegexs() {
+        enforceTetherAccessPermission();
+        if (isTetheringSupported()) {
+            return mTethering.getTetherableWifiRegexs();
+        } else {
+            return new String[0];
+        }
     }
 
     // TODO - move iface listing, queries, etc to new module
     // javadoc from interface
     public String[] getTetherableIfaces() {
-        enforceAccessPermission();
+        enforceTetherAccessPermission();
         return mTethering.getTetherableIfaces();
     }
 
     public String[] getTetheredIfaces() {
-        enforceAccessPermission();
+        enforceTetherAccessPermission();
         return mTethering.getTetheredIfaces();
+    }
+
+    // if ro.tether.denied = true we default to no tethering
+    // gservices could set the secure setting to 1 though to enable it on a build where it
+    // had previously been turned off.
+    public boolean isTetheringSupported() {
+        enforceTetherAccessPermission();
+        int defaultVal = (SystemProperties.get("ro.tether.denied").equals("true") ? 0 : 1);
+        return ((Settings.Secure.getInt(mContext.getContentResolver(),
+                Settings.Secure.TETHER_SUPPORTED, defaultVal) != 0) &&
+                (mNetTrackers[ConnectivityManager.TYPE_MOBILE_DUN] != null));
     }
 }
