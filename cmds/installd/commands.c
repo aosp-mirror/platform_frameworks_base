@@ -690,6 +690,83 @@ void mkinnerdirs(char* path, int basepos, mode_t mode, int uid, int gid)
     }
 }
 
+int movefileordir(char* srcpath, char* dstpath, int dstuid, int dstgid,
+        struct stat* statbuf)
+{
+    DIR *d;
+    struct dirent *de;
+    int res;
+
+    int srcend = strlen(srcpath);
+    int dstend = strlen(dstpath);
+    
+    if (lstat(srcpath, statbuf) < 0) {
+        LOGW("Unable to stat %s: %s\n", srcpath, strerror(errno));
+        return 1;
+    }
+    
+    if ((statbuf->st_mode&S_IFDIR) == 0) {
+        LOGI("Renaming %s to %s (uid %d)\n", srcpath, dstpath, dstuid);
+        mkinnerdirs(dstpath, dstend-1, S_IRWXU|S_IRWXG|S_IXOTH, dstuid, dstgid);
+        if (rename(srcpath, dstpath) >= 0) {
+            if (chown(dstpath, dstuid, dstgid) < 0) {
+                LOGE("cannot chown %s: %s\n", dstpath, strerror(errno));
+                unlink(dstpath);
+                return 1;
+            }
+        } else {
+            LOGW("Unable to rename %s to %s: %s\n",
+                srcpath, dstpath, strerror(errno));
+            return 1;
+        }
+        return 0;
+    }
+
+    d = opendir(srcpath);
+    if (d == NULL) {
+        LOGW("Unable to opendir %s: %s\n", srcpath, strerror(errno));
+        return 1;
+    }
+
+    res = 0;
+    
+    while ((de = readdir(d))) {
+        const char *name = de->d_name;
+            /* always skip "." and ".." */
+        if (name[0] == '.') {
+            if (name[1] == 0) continue;
+            if ((name[1] == '.') && (name[2] == 0)) continue;
+        }
+        
+        if ((srcend+strlen(name)) >= (PKG_PATH_MAX-2)) {
+            LOGW("Source path too long; skipping: %s/%s\n", srcpath, name);
+            continue;
+        }
+        
+        if ((dstend+strlen(name)) >= (PKG_PATH_MAX-2)) {
+            LOGW("Destination path too long; skipping: %s/%s\n", dstpath, name);
+            continue;
+        }
+        
+        srcpath[srcend] = dstpath[dstend] = '/';
+        strcpy(srcpath+srcend+1, name);
+        strcpy(dstpath+dstend+1, name);
+        
+        if (movefileordir(srcpath, dstpath, dstuid, dstgid, statbuf) != 0) {
+            res = 1;
+        }
+        
+        // Note: we will be leaving empty directories behind in srcpath,
+        // but that is okay, the package manager will be erasing all of the
+        // data associated with .apks that disappear.
+        
+        srcpath[srcend] = dstpath[dstend] = 0;
+    }
+    
+    closedir(d);
+    return res;
+}
+
 int movefiles()
 {
     DIR *d;
@@ -703,7 +780,7 @@ int movefiles()
     char dstpkg[PKG_NAME_MAX];
     char srcpath[PKG_PATH_MAX];
     char dstpath[PKG_PATH_MAX];
-    int dstuid, dstgid;
+    int dstuid=-1, dstgid=-1;
     int hasspace;
 
     d = opendir(UPDATE_COMMANDS_DIR_PREFIX);
@@ -757,18 +834,7 @@ int movefiles()
                             LOGV("Move file: %s (from %s to %s)\n", buf+bufp, srcpkg, dstpkg);
                             if (!create_move_path(srcpath, PKG_DIR_PREFIX, srcpkg, buf+bufp) &&
                                     !create_move_path(dstpath, PKG_DIR_PREFIX, dstpkg, buf+bufp)) {
-                                LOGI("Renaming %s to %s (uid %d)\n", srcpath, dstpath, dstuid);
-                                mkinnerdirs(dstpath, strlen(dstpath)-(bufi-bufp),
-                                    S_IRWXU|S_IRWXG|S_IXOTH, dstuid, dstgid);
-                                if (rename(srcpath, dstpath) >= 0) {
-                                    if (chown(dstpath, dstuid, dstgid) < 0) {
-                                        LOGE("cannot chown %s: %s\n", dstpath, strerror(errno));
-                                        unlink(dstpath);
-                                    }
-                                } else {
-                                    LOGW("Unable to rename %s to %s: %s\n",
-                                        srcpath, dstpath, strerror(errno));
-                                }
+                                movefileordir(srcpath, dstpath, dstuid, dstgid, &s);
                             }
                         }
                     } else {
@@ -812,10 +878,11 @@ int movefiles()
                                             dstuid = s.st_uid;
                                             dstgid = s.st_gid;
                                         } else {
+                                            // Destination package doesn't
+                                            // exist...  due to original-package,
+                                            // this is normal, so don't be
+                                            // noisy about it.
                                             srcpkg[0] = 0;
-                                            LOGW("Can't stat path %s in %s%s: %s\n",
-                                                    dstpath, UPDATE_COMMANDS_DIR_PREFIX,
-                                                    name, strerror(errno));
                                         }
                                     } else {
                                         srcpkg[0] = 0;
