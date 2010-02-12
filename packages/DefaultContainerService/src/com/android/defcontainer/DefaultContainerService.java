@@ -1,10 +1,13 @@
 package com.android.defcontainer;
 
 import com.android.internal.app.IMediaContainerService;
-
+import com.android.internal.content.PackageHelper;
 import android.content.Intent;
 import android.content.pm.IPackageManager;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageParser;
+import android.content.pm.PackageParser.Package;
 import android.net.Uri;
 import android.os.Debug;
 import android.os.Environment;
@@ -15,8 +18,10 @@ import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.StatFs;
 import android.app.IntentService;
 import android.app.Service;
+import android.util.DisplayMetrics;
 import android.util.Log;
 
 import java.io.File;
@@ -28,6 +33,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import android.os.FileUtils;
+import android.provider.Settings;
 
 /*
  * This service copies a downloaded apk to a file passed in as
@@ -79,6 +85,44 @@ public class DefaultContainerService extends IntentService {
             autoOut = new ParcelFileDescriptor.AutoCloseOutputStream(outStream);
             return copyFile(packageURI, autoOut);
         }
+
+        /*
+         * Determine the recommended install location for package
+         * specified by file uri location.
+         * @param fileUri the uri of resource to be copied. Should be a
+         * file uri
+         * @return Returns
+         *  PackageHelper.RECOMMEND_INSTALL_INTERNAL to install on internal storage
+         *  PackageHelper.RECOMMEND_INSTALL_EXTERNAL to install on external media
+         *  PackageHelper.RECOMMEND_FAILED_INSUFFICIENT_STORAGE for storage errors
+         *  PackageHelper.RECOMMEND_FAILED_INVALID_APK for parse errors.
+         */
+        public int getRecommendedInstallLocation(final Uri fileUri) {
+            if (!fileUri.getScheme().equals("file")) {
+                Log.w(TAG, "Falling back to installing on internal storage only");
+                return PackageHelper.RECOMMEND_INSTALL_INTERNAL;
+            }
+            final String archiveFilePath = fileUri.getPath();
+            PackageParser packageParser = new PackageParser(archiveFilePath);
+            File sourceFile = new File(archiveFilePath);
+            DisplayMetrics metrics = new DisplayMetrics();
+            metrics.setToDefaults();
+            PackageParser.Package pkg = packageParser.parsePackage(sourceFile, archiveFilePath, metrics, 0);
+            if (pkg == null) {
+                Log.w(TAG, "Failed to parse package");
+                return PackageHelper.RECOMMEND_FAILED_INVALID_APK;
+            }
+            int loc = recommendAppInstallLocation(pkg);
+            if (loc == PackageManager.INSTALL_EXTERNAL) {
+                return PackageHelper.RECOMMEND_INSTALL_EXTERNAL;
+            } else if (loc == ERR_LOC) {
+                Log.i(TAG, "Failed to install insufficient storage");
+                return PackageHelper.RECOMMEND_FAILED_INSUFFICIENT_STORAGE;
+            } else {
+                // Implies install on internal storage.
+                return 0;
+            }
+        }
     };
 
     public DefaultContainerService() {
@@ -111,7 +155,6 @@ public class DefaultContainerService extends IntentService {
                 }
             }
         }
-        //Log.i(TAG, "Deleting: " + path);
         path.delete();
     }
     
@@ -341,4 +384,104 @@ public class DefaultContainerService extends IntentService {
         }
         return true;
     }
+
+    // Constants related to app heuristics
+    // No-installation limit for internal flash: 10% or less space available
+    private static final double LOW_NAND_FLASH_TRESHOLD = 0.1;
+
+    // SD-to-internal app size threshold: currently set to 1 MB
+    private static final long INSTALL_ON_SD_THRESHOLD = (1024 * 1024);
+    private static final int ERR_LOC = -1;
+
+    public int recommendAppInstallLocation(Package pkg) {
+        // Initial implementation:
+        // Package size = code size + cache size + data size
+        // If code size > 1 MB, install on SD card.
+        // Else install on internal NAND flash, unless space on NAND is less than 10%
+
+        if (pkg == null) {
+            return ERR_LOC;
+        }
+
+        StatFs internalFlashStats = new StatFs(Environment.getDataDirectory().getPath());
+        StatFs sdcardStats = new StatFs(Environment.getExternalStorageDirectory().getPath());
+
+        long totalInternalFlashSize = (long)internalFlashStats.getBlockCount() *
+                (long)internalFlashStats.getBlockSize();
+        long availInternalFlashSize = (long)internalFlashStats.getAvailableBlocks() *
+                (long)internalFlashStats.getBlockSize();
+        long availSDSize = (long)sdcardStats.getAvailableBlocks() *
+                (long)sdcardStats.getBlockSize();
+
+        double pctNandFree = (double)availInternalFlashSize / (double)totalInternalFlashSize;
+
+        final String archiveFilePath = pkg.mScanPath;
+        File apkFile = new File(archiveFilePath);
+        long pkgLen = apkFile.length();
+
+        boolean auto = true;
+        // To make final copy
+        long reqInstallSize = pkgLen;
+        // For dex files
+        long reqInternalSize = 1 * pkgLen;
+        boolean intThresholdOk = (pctNandFree >= LOW_NAND_FLASH_TRESHOLD);
+        boolean intAvailOk = ((reqInstallSize + reqInternalSize) < availInternalFlashSize);
+        boolean fitsOnSd = (reqInstallSize < availSDSize) && intThresholdOk &&
+                (reqInternalSize < availInternalFlashSize);
+        boolean fitsOnInt = intThresholdOk && intAvailOk;
+
+        // Consider application flags preferences as well...
+        boolean installOnlyOnSd = (pkg.installLocation ==
+                PackageInfo.INSTALL_LOCATION_PREFER_EXTERNAL);
+        boolean installOnlyInternal = (pkg.installLocation ==
+                PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY);
+        if (installOnlyInternal) {
+            // If set explicitly in manifest,
+            // let that override everything else
+            auto = false;
+        } else if (installOnlyOnSd){
+            // Check if this can be accommodated on the sdcard
+            if (fitsOnSd) {
+                auto = false;
+            }
+        } else {
+            // Check if user option is enabled
+            boolean setInstallLoc = Settings.System.getInt(getApplicationContext()
+                    .getContentResolver(),
+                    Settings.System.SET_INSTALL_LOCATION, 0) != 0;
+            if (setInstallLoc) {
+                // Pick user preference
+                int installPreference = Settings.System.getInt(getApplicationContext()
+                        .getContentResolver(),
+                        Settings.System.DEFAULT_INSTALL_LOCATION,
+                        PackageInfo.INSTALL_LOCATION_AUTO);
+                if (installPreference == 1) {
+                    installOnlyInternal = true;
+                    auto = false;
+                } else if (installPreference == 2) {
+                    installOnlyOnSd = true;
+                    auto = false;
+                }
+            }
+        }
+        if (!auto) {
+            if (installOnlyOnSd) {
+                return fitsOnSd ? PackageManager.INSTALL_EXTERNAL : ERR_LOC;
+            } else if (installOnlyInternal){
+                // Check on internal flash
+                return fitsOnInt ? 0 : ERR_LOC;
+            }
+        }
+        // Try to install internally
+        if (fitsOnInt) {
+            return 0;
+        }
+        // Try the sdcard now.
+        if (fitsOnSd) {
+            return PackageManager.INSTALL_EXTERNAL;
+        }
+        // Return error code
+        return ERR_LOC;
+    }
+
 }

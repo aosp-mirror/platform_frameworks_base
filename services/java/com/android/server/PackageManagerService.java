@@ -20,6 +20,7 @@ import com.android.internal.app.IMediaContainerService;
 import com.android.internal.app.ResolverActivity;
 import com.android.common.FastXmlSerializer;
 import com.android.common.XmlUtils;
+import com.android.internal.content.PackageHelper;
 import com.android.server.JournaledFile;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -304,6 +305,7 @@ class PackageManagerService extends IPackageManager.Stub {
     static final int INIT_COPY = 5;
     static final int MCS_UNBIND = 6;
     static final int START_CLEANING_PACKAGE = 7;
+    static final int FIND_INSTALL_LOC = 8;
     // Delay time in millisecs
     static final int BROADCAST_DELAY = 10 * 1000;
     private ServiceConnection mDefContainerConn = new ServiceConnection() {
@@ -319,8 +321,8 @@ class PackageManagerService extends IPackageManager.Stub {
     };
 
     class PackageHandler extends Handler {
-        final ArrayList<InstallArgs> mPendingInstalls =
-            new ArrayList<InstallArgs>();
+        final ArrayList<InstallParams> mPendingInstalls =
+            new ArrayList<InstallParams>();
         // Service Connection to remote media container service to copy
         // package uri's from external media onto secure containers
         // or internal storage.
@@ -332,21 +334,20 @@ class PackageManagerService extends IPackageManager.Stub {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case INIT_COPY: {
-                    InstallArgs args = (InstallArgs) msg.obj;
-                    args.createCopyFile();
+                    InstallParams params = (InstallParams) msg.obj;
                     Intent service = new Intent().setComponent(DEFAULT_CONTAINER_COMPONENT);
                     if (mContainerService != null) {
                         // No need to add to pending list. Use remote stub directly
-                        handleStartCopy(args);
+                        handleStartCopy(params);
                     } else {
                         if (mContext.bindService(service, mDefContainerConn,
                                 Context.BIND_AUTO_CREATE)) {
-                            mPendingInstalls.add(args);
+                            mPendingInstalls.add(params);
                         } else {
                             Log.e(TAG, "Failed to bind to media container service");
                             // Indicate install failure TODO add new error code
-                            processPendingInstall(args,
-                                    PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE);
+                            processPendingInstall(createInstallArgs(params),
+                                    PackageManager.INSTALL_FAILED_INTERNAL_ERROR);
                         }
                     }
                     break;
@@ -357,9 +358,9 @@ class PackageManagerService extends IPackageManager.Stub {
                         mContainerService = (IMediaContainerService) msg.obj;
                     }
                     if (mPendingInstalls.size() > 0) {
-                        InstallArgs args = mPendingInstalls.remove(0);
-                        if (args != null) {
-                            handleStartCopy(args);
+                        InstallParams params = mPendingInstalls.remove(0);
+                        if (params != null) {
+                            handleStartCopy(params);
                         }
                     }
                     break;
@@ -423,22 +424,56 @@ class PackageManagerService extends IPackageManager.Stub {
 
         // Utility method to initiate copying apk via media
         // container service.
-        private void handleStartCopy(InstallArgs args) {
-            int ret = PackageManager.INSTALL_SUCCEEDED;
-            if (mContainerService == null) {
-                // Install error
-                ret = PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
-            } else {
-                ret = args.copyApk(mContainerService);
+        private void handleStartCopy(InstallParams params) {
+            int ret = PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
+            if (mContainerService != null) {
+                // Remote call to find out default install location
+                int loc = params.getInstallLocation(mContainerService);
+                // Use install location to create InstallArgs and temporary
+                // install location
+                if (loc == PackageHelper.RECOMMEND_FAILED_INSUFFICIENT_STORAGE){
+                    ret = PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
+                } else if (loc == PackageHelper.RECOMMEND_FAILED_INVALID_APK) {
+                    ret = PackageManager.INSTALL_FAILED_INVALID_APK;
+                } else {
+                    if ((params.flags & PackageManager.INSTALL_EXTERNAL) == 0){
+                        if (loc == PackageHelper.RECOMMEND_INSTALL_EXTERNAL) {
+                            // Set the flag to install on external media.
+                            params.flags |= PackageManager.INSTALL_EXTERNAL;
+                        } else {
+                            // Make sure the flag for installing on external
+                            // media is unset
+                            params.flags &= ~PackageManager.INSTALL_EXTERNAL;
+                        }
+                    }
+                    // Disable forward locked apps on sdcard.
+                    if ((params.flags & PackageManager.INSTALL_FORWARD_LOCK) != 0 &&
+                            (params.flags & PackageManager.INSTALL_EXTERNAL) != 0) {
+                        // Make sure forward locked apps can only be installed
+                        // on internal storage
+                        Log.w(TAG, "Cannot install protected apps on sdcard");
+                        ret = PackageManager.INSTALL_FAILED_INVALID_INSTALL_LOCATION;
+                    } else {
+                        ret = PackageManager.INSTALL_SUCCEEDED;
+                    }
+                }
             }
             mHandler.sendEmptyMessage(MCS_UNBIND);
+            // Create the file args now.
+            InstallArgs args = createInstallArgs(params);
+            if (ret == PackageManager.INSTALL_SUCCEEDED) {
+                // Create copy only if we are not in an erroneous state.
+                args.createCopyFile();
+                // Remote call to initiate copy
+                ret = args.copyApk(mContainerService);
+            }
             processPendingInstall(args, ret);
         }
     }
 
     static boolean installOnSd(int flags) {
         if (((flags & PackageManager.INSTALL_FORWARD_LOCK) != 0) ||
-                ((flags & PackageManager.INSTALL_ON_SDCARD) == 0)) {
+                ((flags & PackageManager.INSTALL_EXTERNAL) == 0)) {
             return false;
         }
         return true;
@@ -4249,27 +4284,9 @@ class PackageManagerService extends IPackageManager.Stub {
                 android.Manifest.permission.INSTALL_PACKAGES, null);
 
         Message msg = mHandler.obtainMessage(INIT_COPY);
-        msg.obj = createInstallArgs(packageURI, observer, flags, installerPackageName);
+        msg.obj = new InstallParams(packageURI, observer, flags,
+                installerPackageName);
         mHandler.sendMessage(msg);
-    }
-
-    private InstallArgs createInstallArgs(Uri packageURI, IPackageInstallObserver observer,
-            int flags, String installerPackageName) {
-        if (installOnSd(flags)) {
-            return new SdInstallArgs(packageURI, observer, flags,
-                    installerPackageName);
-        } else {
-            return new FileInstallArgs(packageURI, observer, flags,
-                    installerPackageName);
-        }
-    }
-
-    private InstallArgs createInstallArgs(int flags, String fullCodePath, String fullResourcePath) {
-        if (installOnSd(flags)) {
-            return new SdInstallArgs(fullCodePath, fullResourcePath);
-        } else {
-            return new FileInstallArgs(fullCodePath, fullResourcePath);
-        }
     }
 
     private void processPendingInstall(final InstallArgs args, final int currentStatus) {
@@ -4327,6 +4344,45 @@ class PackageManagerService extends IPackageManager.Stub {
         });
     }
 
+    static final class InstallParams {
+        final IPackageInstallObserver observer;
+        int flags;
+        final Uri packageURI;
+        final String installerPackageName;
+        InstallParams(Uri packageURI,
+                IPackageInstallObserver observer, int flags,
+                String installerPackageName) {
+            this.packageURI = packageURI;
+            this.flags = flags;
+            this.observer = observer;
+            this.installerPackageName = installerPackageName;
+        }
+
+        public int getInstallLocation(IMediaContainerService imcs) {
+            try {
+                return imcs.getRecommendedInstallLocation(packageURI);
+            } catch (RemoteException e) {
+            }
+            return  -1;
+        }
+    };
+
+    private InstallArgs createInstallArgs(InstallParams params) {
+        if (installOnSd(params.flags)) {
+            return new SdInstallArgs(params);
+        } else {
+            return new FileInstallArgs(params);
+        }
+    }
+
+    private InstallArgs createInstallArgs(int flags, String fullCodePath, String fullResourcePath) {
+        if (installOnSd(flags)) {
+            return new SdInstallArgs(fullCodePath, fullResourcePath);
+        } else {
+            return new FileInstallArgs(fullCodePath, fullResourcePath);
+        }
+    }
+
     static abstract class InstallArgs {
         final IPackageInstallObserver observer;
         final int flags;
@@ -4359,10 +4415,9 @@ class PackageManagerService extends IPackageManager.Stub {
         String codeFileName;
         String resourceFileName;
 
-        FileInstallArgs(Uri packageURI,
-                IPackageInstallObserver observer, int flags,
-                String installerPackageName) {
-            super(packageURI, observer, flags, installerPackageName);
+        FileInstallArgs(InstallParams params) {
+            super(params.packageURI, params.observer,
+                    params.flags, params.installerPackageName);
         }
 
         FileInstallArgs(String fullCodePath, String fullResourcePath) {
@@ -4373,15 +4428,15 @@ class PackageManagerService extends IPackageManager.Stub {
             resourceFileName = fullResourcePath;
         }
 
+        String getCodePath() {
+            return codeFileName;
+        }
+
         void createCopyFile() {
             boolean fwdLocked = isFwdLocked(flags);
             installDir = fwdLocked ? mDrmAppPrivateInstallDir : mAppInstallDir;
             codeFileName = createTempPackageFile(installDir).getPath();
             resourceFileName = getResourcePathFromCodePath();
-        }
-
-        String getCodePath() {
-            return codeFileName;
         }
 
         int copyApk(IMediaContainerService imcs) {
@@ -4528,10 +4583,9 @@ class PackageManagerService extends IPackageManager.Stub {
         String cachePath;
         static final String RES_FILE_NAME = "pkg.apk";
 
-        SdInstallArgs(Uri packageURI,
-                IPackageInstallObserver observer, int flags,
-                String installerPackageName) {
-           super(packageURI, observer, flags, installerPackageName);
+        SdInstallArgs(InstallParams params) {
+            super(params.packageURI, params.observer,
+                    params.flags, params.installerPackageName);
         }
 
         SdInstallArgs(String fullCodePath, String fullResourcePath) {
@@ -5105,7 +5159,7 @@ class PackageManagerService extends IPackageManager.Stub {
         String installerPackageName = args.installerPackageName;
         File tmpPackageFile = new File(args.getCodePath());
         boolean forwardLocked = ((pFlags & PackageManager.INSTALL_FORWARD_LOCK) != 0);
-        boolean onSd = ((pFlags & PackageManager.INSTALL_ON_SDCARD) != 0);
+        boolean onSd = ((pFlags & PackageManager.INSTALL_EXTERNAL) != 0);
         boolean replace = false;
         int scanMode = SCAN_MONITOR | SCAN_FORCE_DEX | SCAN_UPDATE_SIGNATURE
                 | (newInstall ? SCAN_NEW_INSTALL : 0);
@@ -5134,14 +5188,6 @@ class PackageManagerService extends IPackageManager.Stub {
         }
         if (GET_CERTIFICATES && !pp.collectCertificates(pkg, parseFlags)) {
             res.returnCode = pp.getParseError();
-            return;
-        }
-        // Some preinstall checks
-        if (forwardLocked && onSd) {
-            // Make sure forward locked apps can only be installed
-            // on internal storage
-            Log.w(TAG, "Cannot install protected apps on sdcard");
-            res.returnCode = PackageManager.INSTALL_FAILED_INVALID_INSTALL_LOCATION;
             return;
         }
         // Get rid of all references to package scan path via parser.
@@ -5560,7 +5606,7 @@ class PackageManagerService extends IPackageManager.Stub {
         if (deleteCodeAndResources) {
             // TODO can pick up from PackageSettings as well
             int installFlags = ((p.applicationInfo.flags & ApplicationInfo.FLAG_ON_SDCARD)!=0) ?
-                    PackageManager.INSTALL_ON_SDCARD : 0;
+                    PackageManager.INSTALL_EXTERNAL : 0;
             installFlags |= ((p.applicationInfo.flags & ApplicationInfo.FLAG_FORWARD_LOCK)!=0) ?
                     PackageManager.INSTALL_FORWARD_LOCK : 0;
             outInfo.args = createInstallArgs(installFlags,

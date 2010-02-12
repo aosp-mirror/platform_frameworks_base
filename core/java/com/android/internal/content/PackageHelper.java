@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008 The Android Open Source Project
+ * Copyright (C) 2009 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-package com.android.internal.app;
+package com.android.internal.content;
 
-import android.net.Uri;
-import android.os.ParcelFileDescriptor;
-
-interface IMediaContainerService {
-    String copyResourceToContainer(in Uri packageURI,
-                String containerId,
-                String key, String resFileName);
-    boolean copyResource(in Uri packageURI,
-                in ParcelFileDescriptor outStream);
-    int getRecommendedInstallLocation(in Uri fileUri);
+/**
+ * Constants used internally between the PackageManager
+ * and media container service transports.
+ */
+public class PackageHelper {
+    public static final int RECOMMEND_INSTALL_INTERNAL = 1;
+    public static final int RECOMMEND_INSTALL_EXTERNAL = 2;
+    public static final int RECOMMEND_FAILED_INSUFFICIENT_STORAGE = -1;
+    public static final int RECOMMEND_FAILED_INVALID_APK = -2;
 }
