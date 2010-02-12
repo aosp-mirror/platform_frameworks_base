@@ -303,8 +303,8 @@ public final class DeviceAdminInfo implements Parcelable {
      * Return true if the device admin has requested that it be able to use
      * the given policy control.  The possible policy identifier inputs are:
      * {@link #USES_POLICY_LIMIT_PASSWORD}, {@link #USES_POLICY_WATCH_LOGIN},
-     * {@link #USES_POLICY_RESET_PASSWORD}, {@link #USES_POLICY_LIMIT_UNLOCK},
-     * {@link #USES_POLICY_FORCE_LOCK}, {@link #USES_POLICY_WIPE_DATA}.
+     * {@link #USES_POLICY_RESET_PASSWORD}, {@link #USES_POLICY_FORCE_LOCK},
+     * {@link #USES_POLICY_WIPE_DATA}.
      */
     public boolean usesPolicy(int policyIdent) {
         return (mUsesPolicies & (1<<policyIdent)) != 0;
