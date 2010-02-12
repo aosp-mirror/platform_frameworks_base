@@ -21,6 +21,7 @@ import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
 import android.app.IUiModeManager;
 import android.app.KeyguardManager;
+import android.app.StatusBarManager;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.ActivityNotFoundException;
@@ -70,6 +71,8 @@ class DockObserver extends UEventObserver {
     private KeyguardManager.KeyguardLock mKeyguardLock;
     private boolean mKeyguardDisabled;
     private LockPatternUtils mLockPatternUtils;
+
+    private StatusBarManager mStatusBarManager;    
 
     // The broadcast receiver which receives the result of the ordered broadcast sent when
     // the dock state changes. The original ordered broadcast is sent with an initial result
@@ -233,6 +236,21 @@ class DockObserver extends UEventObserver {
         } else {
             // Disabling the car mode clears the night mode.
             setMode(Configuration.UI_MODE_TYPE_NORMAL, MODE_NIGHT_NO);
+        }
+
+        if (mStatusBarManager == null) {
+            mStatusBarManager = (StatusBarManager) mContext.getSystemService(Context.STATUS_BAR_SERVICE);
+        }
+
+        // Fear not: StatusBarService manages a list of requests to disable
+        // features of the status bar; these are ORed together to form the
+        // active disabled list. So if (for example) the device is locked and
+        // the status bar should be totally disabled, the calls below will
+        // have no effect until the device is unlocked.
+        if (mStatusBarManager != null) {
+            mStatusBarManager.disable(enabled 
+                ? StatusBarManager.DISABLE_NOTIFICATION_TICKER
+                : StatusBarManager.DISABLE_NONE);
         }
     }
 
