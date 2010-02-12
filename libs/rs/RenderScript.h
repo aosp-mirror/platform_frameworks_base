@@ -36,11 +36,11 @@ typedef void * RsElement;
 typedef void * RsFile;
 typedef void * RsSampler;
 typedef void * RsScript;
-typedef void * RsScriptBasicTemp;
 typedef void * RsSimpleMesh;
 typedef void * RsType;
 typedef void * RsLight;
 
+typedef void * RsProgram;
 typedef void * RsProgramVertex;
 typedef void * RsProgramFragment;
 typedef void * RsProgramFragmentStore;
@@ -64,34 +64,53 @@ void rsContextInitToClient(RsContext);
 void rsContextDeinitToClient(RsContext);
 
 #define RS_MAX_TEXTURE 2
+#define RS_MAX_ATTRIBS 16
 
 enum RsDataType {
-    RS_TYPE_FLOAT,
-    RS_TYPE_UNSIGNED,
-    RS_TYPE_SIGNED
+    RS_TYPE_NONE,
+    RS_TYPE_FLOAT_16,
+    RS_TYPE_FLOAT_32,
+    RS_TYPE_FLOAT_64,
+    RS_TYPE_SIGNED_8,
+    RS_TYPE_SIGNED_16,
+    RS_TYPE_SIGNED_32,
+    RS_TYPE_SIGNED_64,
+    RS_TYPE_UNSIGNED_8,
+    RS_TYPE_UNSIGNED_16,
+    RS_TYPE_UNSIGNED_32,
+    RS_TYPE_UNSIGNED_64,
+
+    RS_TYPE_UNSIGNED_5_6_5,
+    RS_TYPE_UNSIGNED_5_5_5_1,
+    RS_TYPE_UNSIGNED_4_4_4_4,
+
+    RS_TYPE_ELEMENT,
+    RS_TYPE_TYPE,
+    RS_TYPE_ALLOCATION,
+    RS_TYPE_SAMPLER,
+    RS_TYPE_SCRIPT,
+    RS_TYPE_MESH,
+    RS_TYPE_PROGRAM_FRAGMENT,
+    RS_TYPE_PROGRAM_VERTEX,
+    RS_TYPE_PROGRAM_RASTER,
+    RS_TYPE_PROGRAM_STORE
 };
 
 enum RsDataKind {
     RS_KIND_USER,
-    RS_KIND_RED,
-    RS_KIND_GREEN,
-    RS_KIND_BLUE,
-    RS_KIND_ALPHA,
-    RS_KIND_LUMINANCE,
-    RS_KIND_INTENSITY,
-    RS_KIND_X,
-    RS_KIND_Y,
-    RS_KIND_Z,
-    RS_KIND_W,
-    RS_KIND_S,
-    RS_KIND_T,
-    RS_KIND_Q,
-    RS_KIND_R,
-    RS_KIND_NX,
-    RS_KIND_NY,
-    RS_KIND_NZ,
+    RS_KIND_COLOR,
+    RS_KIND_POSITION,
+    RS_KIND_TEXTURE,
+    RS_KIND_NORMAL,
     RS_KIND_INDEX,
-    RS_KIND_POINT_SIZE
+    RS_KIND_POINT_SIZE,
+
+    RS_KIND_PIXEL_L,
+    RS_KIND_PIXEL_A,
+    RS_KIND_PIXEL_LA,
+    RS_KIND_PIXEL_RGB,
+    RS_KIND_PIXEL_RGBA,
+
 };
 
 enum RsSamplerParam {
@@ -158,9 +177,17 @@ enum RsBlendDstFunc {
 };
 
 enum RsTexEnvMode {
+    RS_TEX_ENV_MODE_NONE,
     RS_TEX_ENV_MODE_REPLACE,
     RS_TEX_ENV_MODE_MODULATE,
     RS_TEX_ENV_MODE_DECAL
+};
+
+enum RsProgramParam {
+    RS_PROGRAM_PARAM_INPUT,
+    RS_PROGRAM_PARAM_OUTPUT,
+    RS_PROGRAM_PARAM_CONSTANT,
+    RS_PROGRAM_PARAM_TEXTURE_COUNT,
 };
 
 enum RsPrimitive {

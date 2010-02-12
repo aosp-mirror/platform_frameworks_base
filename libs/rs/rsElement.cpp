@@ -24,19 +24,13 @@ using namespace android::renderscript;
 
 Element::Element(Context *rsc) : ObjectBase(rsc)
 {
+    mBits = 0;
     mAllocFile = __FILE__;
     mAllocLine = __LINE__;
-    mComponents = NULL;
-    mComponentCount = 0;
+    mFields = NULL;
+    mFieldCount = 0;
 }
 
-Element::Element(Context *rsc, uint32_t count) : ObjectBase(rsc)
-{
-    mAllocFile = __FILE__;
-    mAllocLine = __LINE__;
-    mComponents = new ObjectBaseRef<Component> [count];
-    mComponentCount = count;
-}
 
 Element::~Element()
 {
@@ -45,152 +39,128 @@ Element::~Element()
 
 void Element::clear()
 {
-    delete [] mComponents;
-    mComponents = NULL;
-    mComponentCount = 0;
+    delete [] mFields;
+    mFields = NULL;
+    mFieldCount = 0;
 }
-
-void Element::setComponent(uint32_t idx, Component *c)
-{
-    rsAssert(!mComponents[idx].get());
-    rsAssert(idx < mComponentCount);
-    mComponents[idx].set(c);
-
-// Fixme: This should probably not be here
-    c->incUserRef();
-}
-
 
 size_t Element::getSizeBits() const
 {
+    if (!mFieldCount) {
+        return mBits;
+    }
+
     size_t total = 0;
-    for (size_t ct=0; ct < mComponentCount; ct++) {
-        total += mComponents[ct]->getBits();
+    for (size_t ct=0; ct < mFieldCount; ct++) {
+        total += mFields[ct].e->mBits;
     }
     return total;
 }
 
-size_t Element::getComponentOffsetBits(uint32_t componentNumber) const
+size_t Element::getFieldOffsetBits(uint32_t componentNumber) const
 {
     size_t offset = 0;
     for (uint32_t ct = 0; ct < componentNumber; ct++) {
-        offset += mComponents[ct]->getBits();
+        offset += mFields[ct].e->mBits;
     }
     return offset;
 }
 
-uint32_t Element::getGLType() const
-{
-    int bits[4];
-
-    if (mComponentCount > 4) {
-        return 0;
-    }
-
-    for (uint32_t ct=0; ct < mComponentCount; ct++) {
-        bits[ct] = mComponents[ct]->getBits();
-        if (mComponents[ct]->getType() != Component::UNSIGNED) {
-            return 0;
-        }
-        if (!mComponents[ct]->getIsNormalized()) {
-            return 0;
-        }
-    }
-
-    switch(mComponentCount) {
-    case 1:
-        if (bits[0] == 8) {
-            return GL_UNSIGNED_BYTE;
-        }
-        return 0;
-    case 2:
-        if ((bits[0] == 8) &&
-            (bits[1] == 8)) {
-            return GL_UNSIGNED_BYTE;
-        }
-        return 0;
-    case 3:
-        if ((bits[0] == 8) &&
-            (bits[1] == 8) &&
-            (bits[2] == 8)) {
-            return GL_UNSIGNED_BYTE;
-        }
-        if ((bits[0] == 5) &&
-            (bits[1] == 6) &&
-            (bits[2] == 5)) {
-            return GL_UNSIGNED_SHORT_5_6_5;
-        }
-        return 0;
-    case 4:
-        if ((bits[0] == 8) &&
-            (bits[1] == 8) &&
-            (bits[2] == 8) &&
-            (bits[3] == 8)) {
-            return GL_UNSIGNED_BYTE;
-        }
-        if ((bits[0] == 4) &&
-            (bits[1] == 4) &&
-            (bits[2] == 4) &&
-            (bits[3] == 4)) {
-            return GL_UNSIGNED_SHORT_4_4_4_4;
-        }
-        if ((bits[0] == 5) &&
-            (bits[1] == 5) &&
-            (bits[2] == 5) &&
-            (bits[3] == 1)) {
-            return GL_UNSIGNED_SHORT_5_5_5_1;
-        }
-    }
-    return 0;
-}
-
-uint32_t Element::getGLFormat() const
-{
-    switch(mComponentCount) {
-    case 1:
-        if (mComponents[0]->getKind() == Component::ALPHA) {
-            return GL_ALPHA;
-        }
-        if (mComponents[0]->getKind() == Component::LUMINANCE) {
-            return GL_LUMINANCE;
-        }
-        break;
-    case 2:
-        if ((mComponents[0]->getKind() == Component::LUMINANCE) &&
-            (mComponents[1]->getKind() == Component::ALPHA)) {
-            return GL_LUMINANCE_ALPHA;
-        }
-        break;
-    case 3:
-        if ((mComponents[0]->getKind() == Component::RED) &&
-            (mComponents[1]->getKind() == Component::GREEN) &&
-            (mComponents[2]->getKind() == Component::BLUE)) {
-            return GL_RGB;
-        }
-        break;
-    case 4:
-        if ((mComponents[0]->getKind() == Component::RED) &&
-            (mComponents[1]->getKind() == Component::GREEN) &&
-            (mComponents[2]->getKind() == Component::BLUE) &&
-            (mComponents[3]->getKind() == Component::ALPHA)) {
-            return GL_RGBA;
-        }
-        break;
-    }
-    return 0;
-}
-
-
 void Element::dumpLOGV(const char *prefix) const
 {
     ObjectBase::dumpLOGV(prefix);
-    LOGV("%s   Element: components %i,  size %i", prefix, mComponentCount, getSizeBytes());
-    for (uint32_t ct = 0; ct < mComponentCount; ct++) {
+    LOGV("%s   Element: components %i,  size %i", prefix, mFieldCount, mBits);
+    for (uint32_t ct = 0; ct < mFieldCount; ct++) {
         char buf[1024];
         sprintf(buf, "%s component %i: ", prefix, ct);
-        mComponents[ct]->dumpLOGV(buf);
+        //mComponents[ct]->dumpLOGV(buf);
     }
 }
+
+
+Element * Element::create(Context *rsc, RsDataType dt, RsDataKind dk,
+                            bool isNorm, uint32_t vecSize)
+{
+    Element *e = new Element(rsc);
+    e->mComponent.set(dt, dk, isNorm, vecSize);
+    e->mBits = e->mComponent.getBits();
+    return e;
+}
+
+Element * Element::create(Context *rsc, size_t count, const Element **ein,
+                            const char **nin, const size_t * lengths)
+{
+    Element *e = new Element(rsc);
+    e->mFields = new ElementField_t [count];
+    e->mFieldCount = count;
+
+    for (size_t ct=0; ct < count; ct++) {
+        e->mFields[ct].e.set(ein[ct]);
+        e->mFields[ct].name.setTo(nin[ct], lengths[ct]);
+    }
+
+    return e;
+}
+
+String8 Element::getCStructBody(uint32_t indent) const
+{
+    String8 si;
+    for (uint32_t ct=0; ct < indent; ct++) {
+        si.append(" ");
+    }
+
+    String8 s(si);
+    s.append("{\n");
+    for (uint32_t ct = 0; ct < mFieldCount; ct++) {
+        s.append(si);
+        s.append(mFields[ct].e->getCType(indent+4));
+        s.append(" ");
+        s.append(mFields[ct].name);
+        s.append(";\n");
+    }
+    s.append(si);
+    s.append("}");
+    return s;
+}
+
+String8 Element::getCType(uint32_t indent) const
+{
+    String8 s;
+    for (uint32_t ct=0; ct < indent; ct++) {
+        s.append(" ");
+    }
+
+    if (!mFieldCount) {
+        // Basic component.
+        s.append(mComponent.getCType());
+    } else {
+        s.append("struct ");
+        s.append(getCStructBody(indent));
+    }
+
+    return s;
+}
+
+String8 Element::getGLSLType(uint32_t indent) const
+{
+    String8 s;
+    for (uint32_t ct=0; ct < indent; ct++) {
+        s.append(" ");
+    }
+
+    if (!mFieldCount) {
+        // Basic component.
+        s.append(mComponent.getGLSLType());
+    } else {
+        rsAssert(0);
+        //s.append("struct ");
+        //s.append(getCStructBody(indent));
+    }
+
+    return s;
+}
+
+
 
 ElementState::ElementState()
 {
@@ -200,46 +170,35 @@ ElementState::~ElementState()
 {
 }
 
+
 /////////////////////////////////////////
 //
 
 namespace android {
 namespace renderscript {
 
-void rsi_ElementBegin(Context *rsc)
+RsElement rsi_ElementCreate(Context *rsc,
+                            RsDataType dt,
+                            RsDataKind dk,
+                            bool norm,
+                            uint32_t vecSize)
 {
-    rsc->mStateElement.mComponentBuildList.clear();
+    //LOGE("rsi_ElementCreate %i %i %i %i", dt, dk, norm, vecSize);
+    Element *e = Element::create(rsc, dt, dk, norm, vecSize);
+    e->incUserRef();
+    return e;
 }
 
-void rsi_ElementAdd(Context *rsc, RsDataKind dk, RsDataType dt, bool isNormalized, size_t bits, const char *name)
+RsElement rsi_ElementCreate2(Context *rsc,
+                             size_t count,
+                             const RsElement * ein,
+                             const char ** names,
+                             const size_t * nameLengths)
 {
-    ElementState * sec = &rsc->mStateElement;
-
-    rsAssert(bits > 0);
-
-    Component *c = new Component(rsc,
-                                 static_cast<Component::DataKind>(dk),
-                                 static_cast<Component::DataType>(dt),
-                                 isNormalized,
-                                 bits,
-                                 name);
-    sec->mComponentBuildList.add(c);
-}
-
-RsElement rsi_ElementCreate(Context *rsc)
-{
-    ElementState * sec = &rsc->mStateElement;
-    Element *se = new Element(rsc, sec->mComponentBuildList.size());
-
-    rsAssert(se->getComponentCount() > 0);
-
-    for (size_t ct = 0; ct < se->getComponentCount(); ct++) {
-        se->setComponent(ct, sec->mComponentBuildList[ct]);
-    }
-
-    rsc->mStateElement.mComponentBuildList.clear();
-    se->incUserRef();
-    return se;
+    //LOGE("rsi_ElementCreate2 %i", count);
+    Element *e = Element::create(rsc, count, (const Element **)ein, names, nameLengths);
+    e->incUserRef();
+    return e;
 }
 
 

@@ -121,13 +121,13 @@ public class FilmRS {
         bs.setWrapT(Sampler.Value.WRAP);
         mSampler = bs.create();
 
-        ProgramFragment.Builder b = new ProgramFragment.Builder(mRS, null, null);
-
+        ProgramFragment.Builder b = new ProgramFragment.Builder(mRS);
         mPFBackground = b.create();
         mPFBackground.setName("PFBackground");
 
-        b.setTexEnable(true, 0);
-        b.setTexEnvMode(ProgramFragment.EnvMode.REPLACE, 0);
+        b = new ProgramFragment.Builder(mRS);
+        b.setTexture(ProgramFragment.Builder.EnvMode.REPLACE,
+                     ProgramFragment.Builder.Format.RGBA, 0);
         mPFImages = b.create();
         mPFImages.bindSampler(mSampler, 0);
         mPFImages.setName("PFImages");
@@ -138,7 +138,7 @@ public class FilmRS {
         mLight.setPosition(0, -0.5f, -1.0f);
 
         ProgramVertex.Builder pvb = new ProgramVertex.Builder(mRS, null, null);
-        pvb.addLight(mLight);
+        //pvb.addLight(mLight);
         mPVBackground = pvb.create();
         mPVBackground.setName("PVBackground");
 
@@ -152,9 +152,10 @@ public class FilmRS {
         mBufferIDs = new int[13];
         mImages = new Allocation[13];
         mAllocIDs = Allocation.createSized(mRS,
-            Element.USER_F32(mRS), mBufferIDs.length);
+            Element.createUser(mRS, Element.DataType.FLOAT_32),
+            mBufferIDs.length);
 
-        Element ie = Element.RGB_565(mRS);
+        Element ie = Element.createPixel(mRS, Element.DataType.UNSIGNED_5_6_5, Element.DataKind.PIXEL_RGB);
         mImages[0] = Allocation.createFromBitmapResourceBoxed(mRS, mRes, R.drawable.p01, ie, true);
         mImages[1] = Allocation.createFromBitmapResourceBoxed(mRS, mRes, R.drawable.p02, ie, true);
         mImages[2] = Allocation.createFromBitmapResourceBoxed(mRS, mRes, R.drawable.p03, ie, true);
@@ -195,7 +196,8 @@ public class FilmRS {
     {
         mBufferState = new int[10];
         mAllocState = Allocation.createSized(mRS,
-            Element.USER_F32(mRS), mBufferState.length);
+            Element.createUser(mRS, Element.DataType.FLOAT_32),
+            mBufferState.length);
         mBufferState[STATE_LAST_FOCUS] = -1;
         mAllocState.data(mBufferState);
     }
@@ -238,12 +240,12 @@ public class FilmRS {
 
 
         mAllocOffsets = Allocation.createSized(mRS,
-            Element.USER_I32(mRS), mFSM.mTriangleOffsets.length);
+            Element.createUser(mRS, Element.DataType.SIGNED_32), mFSM.mTriangleOffsets.length);
         mAllocOffsets.data(mFSM.mTriangleOffsets);
         mScriptStrip.bindAllocation(mAllocOffsets, 4);
 
         mAllocOffsetsTex = Allocation.createSized(mRS,
-            Element.USER_F32(mRS), mFSM.mTriangleOffsetsTex.length);
+            Element.createUser(mRS, Element.DataType.FLOAT_32), mFSM.mTriangleOffsetsTex.length);
         mAllocOffsetsTex.data(mFSM.mTriangleOffsetsTex);
         mScriptStrip.bindAllocation(mAllocOffsetsTex, 5);
 

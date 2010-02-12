@@ -45,9 +45,9 @@ public:
     uint32_t mGLPrimitive;
 
 
-    void render() const;
-    void renderRange(uint32_t start, uint32_t len) const;
-    void uploadAll();
+    void render(Context *) const;
+    void renderRange(Context *, uint32_t start, uint32_t len) const;
+    void uploadAll(Context *);
 
 
 protected:

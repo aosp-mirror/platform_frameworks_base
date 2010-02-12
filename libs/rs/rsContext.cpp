@@ -27,6 +27,8 @@
 
 #include <GLES/gl.h>
 #include <GLES/glext.h>
+#include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
 
 #include <cutils/sched_policy.h>
 
@@ -50,17 +52,24 @@ static void checkEglError(const char* op, EGLBoolean returnVal = EGL_TRUE) {
     }
 }
 
-void Context::initEGL()
+void Context::initEGL(bool useGL2)
 {
     mEGL.mNumConfigs = -1;
     EGLint configAttribs[128];
     EGLint *configAttribsPtr = configAttribs;
+    EGLint context_attribs2[] = { EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE };
 
     memset(configAttribs, 0, sizeof(configAttribs));
 
     configAttribsPtr[0] = EGL_SURFACE_TYPE;
     configAttribsPtr[1] = EGL_WINDOW_BIT;
     configAttribsPtr += 2;
+
+    if (useGL2) {
+        configAttribsPtr[0] = EGL_RENDERABLE_TYPE;
+        configAttribsPtr[1] = EGL_OPENGL_ES2_BIT;
+        configAttribsPtr += 2;
+    }
 
     if (mUseDepth) {
         configAttribsPtr[0] = EGL_DEPTH_SIZE;
@@ -91,7 +100,11 @@ void Context::initEGL()
     //eglChooseConfig(mEGL.mDisplay, configAttribs, &mEGL.mConfig, 1, &mEGL.mNumConfigs);
 
 
-    mEGL.mContext = eglCreateContext(mEGL.mDisplay, mEGL.mConfig, EGL_NO_CONTEXT, NULL);
+    if (useGL2) {
+        mEGL.mContext = eglCreateContext(mEGL.mDisplay, mEGL.mConfig, EGL_NO_CONTEXT, context_attribs2);
+    } else {
+        mEGL.mContext = eglCreateContext(mEGL.mDisplay, mEGL.mConfig, EGL_NO_CONTEXT, NULL);
+    }
     checkEglError("eglCreateContext");
     if (mEGL.mContext == EGL_NO_CONTEXT) {
         LOGE("eglCreateContext returned EGL_NO_CONTEXT");
@@ -129,6 +142,13 @@ uint32_t Context::runScript(Script *s, uint32_t launchID)
     return ret;
 }
 
+void Context::checkError(const char *msg) const
+{
+    GLenum err = glGetError();
+    if (err != GL_NO_ERROR) {
+        LOGE("GL Error, 0x%x, from %s", err, msg);
+    }
+}
 
 uint32_t Context::runRootScript()
 {
@@ -156,11 +176,7 @@ uint32_t Context::runRootScript()
     mStateFragmentStore.mLast.clear();
     uint32_t ret = runScript(mRootScript.get(), 0);
 
-    GLenum err = glGetError();
-    if (err != GL_NO_ERROR) {
-        LOGE("Pending GL Error, 0x%x", err);
-    }
-
+    checkError("runRootScript");
     return ret;
 }
 
@@ -225,10 +241,20 @@ void Context::timerPrint()
 
 void Context::setupCheck()
 {
-    mFragmentStore->setupGL(this, &mStateFragmentStore);
-    mFragment->setupGL(this, &mStateFragment);
-    mRaster->setupGL(this, &mStateRaster);
-    mVertex->setupGL(this, &mStateVertex);
+    if (checkVersion2_0()) {
+        mShaderCache.lookup(this, mVertex.get(), mFragment.get());
+
+        mFragmentStore->setupGL2(this, &mStateFragmentStore);
+        mFragment->setupGL2(this, &mStateFragment, &mShaderCache);
+        mRaster->setupGL2(this, &mStateRaster);
+        mVertex->setupGL2(this, &mStateVertex, &mShaderCache);
+
+    } else {
+        mFragmentStore->setupGL(this, &mStateFragmentStore);
+        mFragment->setupGL(this, &mStateFragment);
+        mRaster->setupGL(this, &mStateRaster);
+        mVertex->setupGL(this, &mStateVertex);
+    }
 }
 
 static bool getProp(const char *str)
@@ -248,11 +274,8 @@ void * Context::threadProc(void *vrsc)
 
      rsc->props.mLogTimes = getProp("debug.rs.profile");
      rsc->props.mLogScripts = getProp("debug.rs.script");
-     rsc->props.mLogObjects = getProp("debug.rs.objects");
-
-     //pthread_mutex_lock(&gInitMutex);
-     //rsc->initEGL();
-     //pthread_mutex_unlock(&gInitMutex);
+     rsc->props.mLogObjects = getProp("debug.rs.object");
+     rsc->props.mLogShaders = getProp("debug.rs.shader");
 
      ScriptTLSStruct *tlsStruct = new ScriptTLSStruct;
      if (!tlsStruct) {
@@ -274,6 +297,7 @@ void * Context::threadProc(void *vrsc)
      rsc->setFragment(NULL);
      rsc->mStateFragmentStore.init(rsc, rsc->mEGL.mWidth, rsc->mEGL.mHeight);
      rsc->setFragmentStore(NULL);
+     rsc->mStateVertexArray.init(rsc);
 
      rsc->mRunning = true;
      bool mDraw = true;
@@ -318,10 +342,6 @@ void * Context::threadProc(void *vrsc)
 
      rsc->mObjDestroy.mNeedToEmpty = true;
      rsc->objDestroyOOBRun();
-
-     glClearColor(0,0,0,0);
-     glClear(GL_COLOR_BUFFER_BIT);
-     eglSwapBuffers(rsc->mEGL.mDisplay, rsc->mEGL.mSurface);
 
      pthread_mutex_lock(&gInitMutex);
      rsc->deinitEGL();
@@ -457,7 +477,7 @@ void Context::setSurface(uint32_t w, uint32_t h, Surface *sur)
         if (!mEGL.mContext) {
             first = true;
             pthread_mutex_lock(&gInitMutex);
-            initEGL();
+            initEGL(true);
             pthread_mutex_unlock(&gInitMutex);
         }
 
@@ -488,15 +508,35 @@ void Context::setSurface(uint32_t w, uint32_t h, Surface *sur)
 
             //LOGV("EGL Version %i %i", mEGL.mMajorVersion, mEGL.mMinorVersion);
             LOGV("GL Version %s", mGL.mVersion);
-            LOGV("GL Vendor %s", mGL.mVendor);
+            //LOGV("GL Vendor %s", mGL.mVendor);
             LOGV("GL Renderer %s", mGL.mRenderer);
             //LOGV("GL Extensions %s", mGL.mExtensions);
 
-            if ((strlen((const char *)mGL.mVersion) < 12) || memcmp(mGL.mVersion, "OpenGL ES-CM", 12)) {
+            const char *verptr = NULL;
+            if (strlen((const char *)mGL.mVersion) > 9) {
+                if (!memcmp(mGL.mVersion, "OpenGL ES-CM", 12)) {
+                    verptr = (const char *)mGL.mVersion + 12;
+                }
+                if (!memcmp(mGL.mVersion, "OpenGL ES ", 10)) {
+                    verptr = (const char *)mGL.mVersion + 9;
+                }
+            }
+
+            if (!verptr) {
                 LOGE("Error, OpenGL ES Lite not supported");
             } else {
-                sscanf((const char *)mGL.mVersion + 13, "%i.%i", &mGL.mMajorVersion, &mGL.mMinorVersion);
+                sscanf(verptr, " %i.%i", &mGL.mMajorVersion, &mGL.mMinorVersion);
             }
+
+            glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &mGL.mMaxVertexAttribs);
+            glGetIntegerv(GL_MAX_VERTEX_UNIFORM_VECTORS, &mGL.mMaxVertexUniformVectors);
+            glGetIntegerv(GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS, &mGL.mMaxVertexTextureUnits);
+
+            glGetIntegerv(GL_MAX_VARYING_VECTORS, &mGL.mMaxVaryingVectors);
+            glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &mGL.mMaxTextureImageUnits);
+
+            glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &mGL.mMaxFragmentTextureImageUnits);
+            glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_VECTORS, &mGL.mMaxFragmentUniformVectors);
         }
 
     }
@@ -544,13 +584,6 @@ void Context::setRaster(ProgramRaster *pr)
     }
 }
 
-void Context::allocationCheck(const Allocation *a)
-{
-    mVertex->checkUpdatedAllocation(a);
-    mFragment->checkUpdatedAllocation(a);
-    mFragmentStore->checkUpdatedAllocation(a);
-}
-
 void Context::setVertex(ProgramVertex *pv)
 {
     if (pv == NULL) {
@@ -558,7 +591,6 @@ void Context::setVertex(ProgramVertex *pv)
     } else {
         mVertex.set(pv);
     }
-    mVertex->forceDirty();
 }
 
 void Context::assignName(ObjectBase *obj, const char *name, uint32_t len)
@@ -596,26 +628,6 @@ void Context::appendNameDefines(String8 *str) const
         str->append(mNames[ct]->getName());
         str->append(" ");
         sprintf(buf, "%i\n", (int)mNames[ct]);
-        str->append(buf);
-    }
-}
-
-void Context::appendVarDefines(String8 *str) const
-{
-    char buf[256];
-    for (size_t ct=0; ct < mInt32Defines.size(); ct++) {
-        str->append("#define ");
-        str->append(mInt32Defines.keyAt(ct));
-        str->append(" ");
-        sprintf(buf, "%i\n", (int)mInt32Defines.valueAt(ct));
-        str->append(buf);
-
-    }
-    for (size_t ct=0; ct < mFloatDefines.size(); ct++) {
-        str->append("#define ");
-        str->append(mFloatDefines.keyAt(ct));
-        str->append(" ");
-        sprintf(buf, "%ff\n", mFloatDefines.valueAt(ct));
         str->append(buf);
     }
 }
@@ -751,6 +763,10 @@ void Context::dumpDebug() const
     LOGE(" RS running %i, exit %i, useDepth %i, paused %i", mRunning, mExit, mUseDepth, mPaused);
     LOGE(" RS pThreadID %li, nativeThreadID %i", mThreadId, mNativeThreadId);
 
+    LOGV("MAX Textures %i, %i  %i", mGL.mMaxVertexTextureUnits, mGL.mMaxFragmentTextureImageUnits, mGL.mMaxTextureImageUnits);
+    LOGV("MAX Attribs %i", mGL.mMaxVertexAttribs);
+    LOGV("MAX Uniforms %i, %i", mGL.mMaxVertexUniformVectors, mGL.mMaxFragmentUniformVectors);
+    LOGV("MAX Varyings %i", mGL.mMaxVaryingVectors);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -813,16 +829,6 @@ void rsi_ObjDestroy(Context *rsc, void *obj)
     ObjectBase *ob = static_cast<ObjectBase *>(obj);
     rsc->removeName(ob);
     ob->decUserRef();
-}
-
-void rsi_ContextSetDefineF(Context *rsc, const char* name, float value)
-{
-    rsc->addInt32Define(name, value);
-}
-
-void rsi_ContextSetDefineI32(Context *rsc, const char* name, int32_t value)
-{
-    rsc->addFloatDefine(name, value);
 }
 
 void rsi_ContextPause(Context *rsc)

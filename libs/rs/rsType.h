@@ -18,6 +18,7 @@
 #define ANDROID_STRUCTURED_TYPE_H
 
 #include "rsElement.h"
+#include "rsVertexArray.h"
 
 // ---------------------------------------------------------------------------
 namespace android {
@@ -67,7 +68,8 @@ public:
     void clear();
     void compute();
 
-    void enableGLVertexBuffer() const;
+    void enableGLVertexBuffer(class VertexArray *) const;
+    void enableGLVertexBuffer2(class VertexArray *) const;
 
     void dumpLOGV(const char *prefix) const;
 
@@ -108,18 +110,13 @@ protected:
     LOD *mLODs;
     uint32_t mLODCount;
 
-    struct VertexComponent_t {
-        uint32_t offset;
-        uint32_t type;
-        uint32_t size;
-        uint32_t stride;
-    };
     struct GLState_t {
-        VertexComponent_t mVtx;
-        VertexComponent_t mNorm;
-        VertexComponent_t mColor;
-        VertexComponent_t mTex[RS_MAX_TEXTURE];
-        VertexComponent_t mPointSize;
+        VertexArray::Attrib mUser[RS_MAX_ATTRIBS];
+        VertexArray::Attrib mVtx;
+        VertexArray::Attrib mNorm;
+        VertexArray::Attrib mColor;
+        VertexArray::Attrib mTex;
+        VertexArray::Attrib mPointSize;
     };
     GLState_t mGL;
     void makeGLComponents();

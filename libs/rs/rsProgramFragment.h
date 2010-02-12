@@ -28,40 +28,23 @@ class ProgramFragmentState;
 class ProgramFragment : public Program
 {
 public:
-    const static uint32_t MAX_TEXTURE = 2;
-
-
-
-    ProgramFragment(Context *, Element *in, Element *out, bool pointSpriteEnable);
+    ProgramFragment(Context *, const uint32_t * params, uint32_t paramLength);
+    ProgramFragment(Context *rsc, const char * shaderText,
+                             uint32_t shaderLength, const uint32_t * params,
+                             uint32_t paramLength);
     virtual ~ProgramFragment();
 
     virtual void setupGL(const Context *, ProgramFragmentState *);
+    virtual void setupGL2(const Context *, ProgramFragmentState *, ShaderCache *sc);
 
-
-
-    void bindTexture(uint32_t slot, Allocation *);
-    void bindSampler(uint32_t slot, Sampler *);
-    void setType(uint32_t slot, const Element *, uint32_t dim);
-
-    void setEnvMode(uint32_t slot, RsTexEnvMode);
-    void setTexEnable(uint32_t slot, bool);
-
-
+    virtual void createShader();
+    virtual void loadShader(Context *rsc);
+    virtual void init(Context *rsc);
 
 protected:
-    // The difference between Textures and Constants is how they are accessed
-    // Texture lookups go though a sampler which in effect converts normalized
-    // coordinates into type specific.  Multiple samples may also be taken
-    // and filtered.
-    //
-    // Constants are strictly accessed by programetic loads.
-    ObjectBaseRef<Allocation> mTextures[MAX_TEXTURE];
-    ObjectBaseRef<Sampler> mSamplers[MAX_TEXTURE];
-    ObjectBaseRef<const Element> mTextureFormats[MAX_TEXTURE];
-    uint32_t mTextureDimensions[MAX_TEXTURE];
-
-
     // Hacks to create a program for now
+    uint32_t mTextureFormats[MAX_TEXTURE];
+    uint32_t mTextureDimensions[MAX_TEXTURE];
     RsTexEnvMode mEnvModes[MAX_TEXTURE];
     uint32_t mTextureEnableMask;
     bool mPointSpriteEnable;

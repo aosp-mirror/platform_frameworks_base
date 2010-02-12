@@ -29,14 +29,13 @@ class ProgramRaster : public Program
 {
 public:
     ProgramRaster(Context *rsc,
-                  Element *in,
-                  Element *out,
                   bool pointSmooth,
                   bool lineSmooth,
                   bool pointSprite);
     virtual ~ProgramRaster();
 
     virtual void setupGL(const Context *, ProgramRasterState *);
+    virtual void setupGL2(const Context *, ProgramRasterState *);
 
     void setLineWidth(float w);
     void setPointSize(float s);

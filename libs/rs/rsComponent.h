@@ -14,65 +14,56 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_RS_STRUCTURED_COMPONENT_H
-#define ANDROID_RS_STRUCTURED_COMPONENT_H
+#ifndef ANDROID_COMPONENT_H
+#define ANDROID_COMPONENT_H
 
 #include "rsUtils.h"
-#include "rsObjectBase.h"
 
 // ---------------------------------------------------------------------------
 namespace android {
 namespace renderscript {
 
-class Component : public ObjectBase
+
+// An element is a group of Components that occupies one cell in a structure.
+class Component
 {
 public:
-    enum DataType {
-        FLOAT,
-        UNSIGNED,
-        SIGNED
-    };
+    Component();
+    ~Component();
 
-    enum DataKind {
-        USER,
-        RED, GREEN, BLUE, ALPHA, LUMINANCE, INTENSITY,
-        X, Y, Z, W,
-        S, T, Q, R,
-        NX, NY, NZ,
-        INDEX,
-        POINT_SIZE
-    };
-
-
-    Component(Context *rsc, DataKind dk, DataType dt, bool isNorm, uint32_t bits, const char *);
-    virtual ~Component();
-
-    DataType getType() const {return mType;}
-    bool getIsNormalized() const {return mIsNormalized;}
-    DataKind getKind() const {return mKind;}
-    uint32_t getBits() const {return mBits;}
+    void set(RsDataType dt, RsDataKind dk, bool norm, uint32_t vecSize=1);
 
     uint32_t getGLType() const;
-    const char * getCType() const;
+    uint32_t getGLFormat() const;
+    String8 getCType() const;
+    String8 getGLSLType() const;
+    void dumpLOGV(const char *prefix) const;
 
-    const char * getComponentName() const {return mName.string();}
-    virtual void dumpLOGV(const char *prefix) const;
+
+    RsDataType getType() const {return mType;}
+    RsDataKind getKind() const {return mKind;}
+    bool getIsNormalized() const {return mNormalized;}
+    uint32_t getVectorSize() const {return mVectorSize;}
+    bool getIsFloat() const {return mIsFloat;}
+    bool getIsSigned() const {return mIsSigned;}
+    uint32_t getBits() const {return mBits;}
 
 protected:
+    RsDataType mType;
+    RsDataKind mKind;
+    bool mNormalized;
+    uint32_t mVectorSize;
 
-    DataType mType;
-    bool mIsNormalized;
-    DataKind mKind;
+    // derived
     uint32_t mBits;
-    String8 mName;
-
-private:
-    Component(Context *rsc);
+    uint32_t mTypeBits;
+    bool mIsFloat;
+    bool mIsSigned;
+    bool mIsPixel;
 };
 
-
 }
 }
 
-#endif //ANDROID_RS_STRUCTURED_COMPONENT_H
+#endif
 
