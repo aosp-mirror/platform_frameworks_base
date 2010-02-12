@@ -26,6 +26,8 @@
 
 #include <GLES/gl.h>
 #include <GLES/glext.h>
+#include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
 
 #include <time.h>
 
@@ -102,8 +104,9 @@ static float* SC_loadSimpleMeshVerticesF(RsSimpleMesh mesh, uint32_t idx)
 
 static void SC_updateSimpleMesh(RsSimpleMesh mesh)
 {
+    GET_TLS();
     SimpleMesh *sm = static_cast<SimpleMesh *>(mesh);
-    sm->uploadAll();
+    sm->uploadAll(rsc);
 }
 
 static uint32_t SC_loadU32(uint32_t bank, uint32_t offset)
@@ -616,20 +619,20 @@ static void SC_vec2Rand(float *vec, float maxLen)
 static void SC_bindTexture(RsProgramFragment vpf, uint32_t slot, RsAllocation va)
 {
     GET_TLS();
-    rsi_ProgramFragmentBindTexture(rsc,
-                                   static_cast<ProgramFragment *>(vpf),
-                                   slot,
-                                   static_cast<Allocation *>(va));
+    rsi_ProgramBindTexture(rsc,
+                           static_cast<ProgramFragment *>(vpf),
+                           slot,
+                           static_cast<Allocation *>(va));
 
 }
 
 static void SC_bindSampler(RsProgramFragment vpf, uint32_t slot, RsSampler vs)
 {
     GET_TLS();
-    rsi_ProgramFragmentBindSampler(rsc,
-                                   static_cast<ProgramFragment *>(vpf),
-                                   slot,
-                                   static_cast<Sampler *>(vs));
+    rsi_ProgramBindSampler(rsc,
+                           static_cast<ProgramFragment *>(vpf),
+                           slot,
+                           static_cast<Sampler *>(vs));
 
 }
 
@@ -683,13 +686,13 @@ static void SC_drawLine(float x1, float y1, float z1,
     rsc->setupCheck();
 
     float vtx[] = { x1, y1, z1, x2, y2, z2 };
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glVertexPointer(3, GL_FLOAT, 0, vtx);
-
-    glDisableClientState(GL_NORMAL_ARRAY);
-    glDisableClientState(GL_COLOR_ARRAY);
+    VertexArray va;
+    va.addLegacy(GL_FLOAT, 3, 12, RS_KIND_POSITION, false, (uint32_t)vtx);
+    if (rsc->checkVersion2_0()) {
+        va.setupGL2(rsc, &rsc->mStateVertexArray, &rsc->mShaderCache);
+    } else {
+        va.setupGL(rsc, &rsc->mStateVertexArray);
+    }
 
     glDrawArrays(GL_LINES, 0, 2);
 }
@@ -701,12 +704,13 @@ static void SC_drawPoint(float x, float y, float z)
 
     float vtx[] = { x, y, z };
 
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glVertexPointer(3, GL_FLOAT, 0, vtx);
-
-    glDisableClientState(GL_NORMAL_ARRAY);
-    glDisableClientState(GL_COLOR_ARRAY);
+    VertexArray va;
+    va.addLegacy(GL_FLOAT, 3, 12, RS_KIND_POSITION, false, (uint32_t)vtx);
+    if (rsc->checkVersion2_0()) {
+        va.setupGL2(rsc, &rsc->mStateVertexArray, &rsc->mShaderCache);
+    } else {
+        va.setupGL(rsc, &rsc->mStateVertexArray);
+    }
 
     glDrawArrays(GL_POINTS, 0, 1);
 }
@@ -721,6 +725,7 @@ static void SC_drawQuadTexCoords(float x1, float y1, float z1,
                                  float u4, float v4)
 {
     GET_TLS();
+    rsc->setupCheck();
 
     //LOGE("Quad");
     //LOGE("%4.2f, %4.2f, %4.2f", x1, y1, z1);
@@ -731,26 +736,15 @@ static void SC_drawQuadTexCoords(float x1, float y1, float z1,
     float vtx[] = {x1,y1,z1, x2,y2,z2, x3,y3,z3, x4,y4,z4};
     const float tex[] = {u1,v1, u2,v2, u3,v3, u4,v4};
 
-    rsc->setupCheck();
+    VertexArray va;
+    va.addLegacy(GL_FLOAT, 3, 12, RS_KIND_POSITION, false, (uint32_t)vtx);
+    va.addLegacy(GL_FLOAT, 2, 8, RS_KIND_TEXTURE, false, (uint32_t)tex);
+    if (rsc->checkVersion2_0()) {
+        va.setupGL2(rsc, &rsc->mStateVertexArray, &rsc->mShaderCache);
+    } else {
+        va.setupGL(rsc, &rsc->mStateVertexArray);
+    }
 
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, tm->mBufferObjects[1]);
-
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glVertexPointer(3, GL_FLOAT, 0, vtx);
-
-    glClientActiveTexture(GL_TEXTURE0);
-    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-    glTexCoordPointer(2, GL_FLOAT, 0, tex);
-    glClientActiveTexture(GL_TEXTURE1);
-    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-    glTexCoordPointer(2, GL_FLOAT, 0, tex);
-    glClientActiveTexture(GL_TEXTURE0);
-
-    glDisableClientState(GL_NORMAL_ARRAY);
-    glDisableClientState(GL_COLOR_ARRAY);
-
-    //glColorPointer(4, GL_UNSIGNED_BYTE, 12, ptr);
 
     glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 }
@@ -769,29 +763,46 @@ static void SC_drawQuad(float x1, float y1, float z1,
 static void SC_drawSpriteScreenspace(float x, float y, float z, float w, float h)
 {
     GET_TLS();
-    rsc->setupCheck();
+    ObjectBaseRef<const ProgramVertex> tmp(rsc->getVertex());
+    rsc->setVertex(rsc->getDefaultProgramVertex());
+    //rsc->setupCheck();
 
-    GLint crop[4] = {0, h, w, -h};
-    glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_CROP_RECT_OES, crop);
-    glDrawTexfOES(x, y, z, w, h);
+    //GLint crop[4] = {0, h, w, -h};
+
+    float sh = rsc->getHeight();
+
+    SC_drawQuad(x,   sh - y,     z,
+                x+w, sh - y,     z,
+                x+w, sh - (y+h), z,
+                x,   sh - (y+h), z);
+    rsc->setVertex((ProgramVertex *)tmp.get());
 }
 
 static void SC_drawSpriteScreenspaceCropped(float x, float y, float z, float w, float h,
         float cx0, float cy0, float cx1, float cy1)
 {
     GET_TLS();
-    rsc->setupCheck();
+    ObjectBaseRef<const ProgramVertex> tmp(rsc->getVertex());
+    rsc->setVertex(rsc->getDefaultProgramVertex());
 
-    GLint crop[4] = {cx0, cy0, cx1, cy1};
-    glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_CROP_RECT_OES, crop);
-    glDrawTexfOES(x, y, z, w, h);
+    float tw = rsc->getFragment()->getTexture(0)->getType()->getDimY();
+    float th = rsc->getFragment()->getTexture(0)->getType()->getDimX();
+    float sh = rsc->getHeight();
+    float u0 = cx0 / tw;
+    float u1 = (cx1 + cx0) / tw;
+    float v0 = cy0 / th;
+    float v1 = (cy1 + cy0) / th;
+
+    SC_drawQuadTexCoords(x,   sh - y,     z, u0, v0,
+                         x+w, sh - y,     z, u1, v0,
+                         x+w, sh - (y+h), z, u1, v1,
+                         x,   sh - (y+h), z, u0, v1);
+    rsc->setVertex((ProgramVertex *)tmp.get());
 }
 
 static void SC_drawSprite(float x, float y, float z, float w, float h)
 {
     GET_TLS();
-    rsc->setupCheck();
-
     float vin[3] = {x, y, z};
     float vout[4];
 
@@ -813,9 +824,8 @@ static void SC_drawSprite(float x, float y, float z, float w, float h)
     //LOGE("ds  out2 %f %f %f", vout[0], vout[1], vout[2]);
 
     // U, V, W, H
-    GLint crop[4] = {0, h, w, -h};
-    glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_CROP_RECT_OES, crop);
-    glDrawTexiOES(vout[0], vout[1], 0/*vout[2]*/, w, h);
+    SC_drawSpriteScreenspace(vout[0], vout[1], z, h, w);
+    //rsc->setupCheck();
 }
 
 
@@ -833,7 +843,7 @@ static void SC_drawSimpleMesh(RsSimpleMesh vsm)
     GET_TLS();
     SimpleMesh *sm = static_cast<SimpleMesh *>(vsm);
     rsc->setupCheck();
-    sm->render();
+    sm->render(rsc);
 }
 
 static void SC_drawSimpleMeshRange(RsSimpleMesh vsm, uint32_t start, uint32_t len)
@@ -841,7 +851,7 @@ static void SC_drawSimpleMeshRange(RsSimpleMesh vsm, uint32_t start, uint32_t le
     GET_TLS();
     SimpleMesh *sm = static_cast<SimpleMesh *>(vsm);
     rsc->setupCheck();
-    sm->renderRange(start, len);
+    sm->renderRange(rsc, start, len);
 }
 
 
@@ -851,7 +861,14 @@ static void SC_drawSimpleMeshRange(RsSimpleMesh vsm, uint32_t start, uint32_t le
 
 static void SC_color(float r, float g, float b, float a)
 {
-    glColor4f(r, g, b, a);
+    GET_TLS();
+    rsc->mStateVertex.color[0] = r;
+    rsc->mStateVertex.color[1] = g;
+    rsc->mStateVertex.color[2] = b;
+    rsc->mStateVertex.color[3] = a;
+    if (!rsc->checkVersion2_0()) {
+        glColor4f(r, g, b, a);
+    }
 }
 
 static void SC_ambient(float r, float g, float b, float a)
@@ -956,9 +973,14 @@ static int SC_hsbToAbgr(float h, float s, float b, float a)
 
 static void SC_hsb(float h, float s, float b, float a)
 {
+    GET_TLS();
     float rgb[3];
     SC_hsbToRgb(h, s, b, rgb);
-    glColor4f(rgb[0], rgb[1], rgb[2], a);
+    if (rsc->checkVersion2_0()) {
+        glVertexAttrib4f(1, rgb[0], rgb[1], rgb[2], a);
+    } else {
+        glColor4f(rgb[0], rgb[1], rgb[2], a);
+    }
 }
 
 static void SC_uploadToTexture(RsAllocation va, uint32_t baseMipLevel)
@@ -971,6 +993,13 @@ static void SC_uploadToBufferObject(RsAllocation va)
 {
     GET_TLS();
     rsi_AllocationUploadToBufferObject(rsc, va);
+}
+
+static void SC_syncToGL(RsAllocation va)
+{
+    GET_TLS();
+    Allocation *a = static_cast<Allocation *>(va);
+
 }
 
 static void SC_ClearColor(float r, float g, float b, float a)
@@ -1221,33 +1250,33 @@ ScriptCState::SymbolTable_t ScriptCState::gSyms[] = {
 
     // vec3
     { "vec3Norm", (void *)&SC_vec3Norm,
-        "void", "(struct vec3_s *)" },
+        "void", "(struct vecF32_3_s *)" },
     { "vec3Length", (void *)&SC_vec3Length,
-        "float", "(struct vec3_s *)" },
+        "float", "(struct vecF32_3_s *)" },
     { "vec3Add", (void *)&SC_vec3Add,
-        "void", "(struct vec3_s *dest, struct vec3_s *lhs, struct vec3_s *rhs)" },
+        "void", "(struct vecF32_3_s *dest, struct vecF32_3_s *lhs, struct vecF32_3_s *rhs)" },
     { "vec3Sub", (void *)&SC_vec3Sub,
-        "void", "(struct vec3_s *dest, struct vec3_s *lhs, struct vec3_s *rhs)" },
+        "void", "(struct vecF32_3_s *dest, struct vecF32_3_s *lhs, struct vecF32_3_s *rhs)" },
     { "vec3Cross", (void *)&SC_vec3Cross,
-        "void", "(struct vec3_s *dest, struct vec3_s *lhs, struct vec3_s *rhs)" },
+        "void", "(struct vecF32_3_s *dest, struct vecF32_3_s *lhs, struct vecF32_3_s *rhs)" },
     { "vec3Dot", (void *)&SC_vec3Dot,
-        "float", "(struct vec3_s *lhs, struct vec3_s *rhs)" },
+        "float", "(struct vecF32_3_s *lhs, struct vecF32_3_s *rhs)" },
     { "vec3Scale", (void *)&SC_vec3Scale,
-        "void", "(struct vec3_s *lhs, float scale)" },
+        "void", "(struct vecF32_3_s *lhs, float scale)" },
 
     // vec4
     { "vec4Norm", (void *)&SC_vec4Norm,
-        "void", "(struct vec4_s *)" },
+        "void", "(struct vecF32_4_s *)" },
     { "vec4Length", (void *)&SC_vec4Length,
-        "float", "(struct vec4_s *)" },
+        "float", "(struct vecF32_4_s *)" },
     { "vec4Add", (void *)&SC_vec4Add,
-        "void", "(struct vec4_s *dest, struct vec4_s *lhs, struct vec4_s *rhs)" },
+        "void", "(struct vecF32_4_s *dest, struct vecF32_4_s *lhs, struct vecF32_4_s *rhs)" },
     { "vec4Sub", (void *)&SC_vec4Sub,
-        "void", "(struct vec4_s *dest, struct vec4_s *lhs, struct vec4_s *rhs)" },
+        "void", "(struct vecF32_4_s *dest, struct vecF32_4_s *lhs, struct vecF32_4_s *rhs)" },
     { "vec4Dot", (void *)&SC_vec4Dot,
-        "float", "(struct vec4_s *lhs, struct vec4_s *rhs)" },
+        "float", "(struct vecF32_4_s *lhs, struct vecF32_4_s *rhs)" },
     { "vec4Scale", (void *)&SC_vec4Scale,
-        "void", "(struct vec4_s *lhs, float scale)" },
+        "void", "(struct vecF32_4_s *lhs, float scale)" },
 
     // context
     { "bindProgramFragment", (void *)&SC_bindProgramFragment,
@@ -1321,6 +1350,9 @@ ScriptCState::SymbolTable_t ScriptCState::gSyms[] = {
     { "uploadToTexture", (void *)&SC_uploadToTexture,
         "void", "(int, int)" },
     { "uploadToBufferObject", (void *)&SC_uploadToBufferObject,
+        "void", "(int)" },
+
+    { "syncToGL", (void *)&SC_syncToGL,
         "void", "(int)" },
 
     { "colorFloatRGBAtoUNorm8", (void *)&SC_colorFloatRGBAtoUNorm8,
