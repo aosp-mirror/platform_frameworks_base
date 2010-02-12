@@ -857,9 +857,9 @@ void rsi_ContextResume(Context *rsc)
     rsc->resume();
 }
 
-void rsi_ContextSetSurface(Context *rsc, uint32_t w, uint32_t h, void *sur)
+void rsi_ContextSetSurface(Context *rsc, uint32_t w, uint32_t h, android_native_window_t *sur)
 {
-    rsc->setSurface(w, h, (android_native_window_t *)sur);
+    rsc->setSurface(w, h, sur);
 }
 
 void rsi_ContextSetPriority(Context *rsc, int32_t p)
