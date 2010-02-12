@@ -5610,7 +5610,7 @@ public class WindowManagerService extends IWindowManager.Stub
                             // If an app switch key has been pressed, and we have
                             // waited too long for the current app to finish
                             // processing keys, then wait no more!
-                            doFinishedKeyLocked(true);
+                            doFinishedKeyLocked(false);
                             continue;
                         }
                         long switchTimeout = mTimeToSwitch - now;
@@ -6008,7 +6008,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         + ((mLastWin != null) ? mLastWin.mToken.paused : "null"));
                     if (mLastWin != null && (!mLastWin.mToken.paused || force
                             || !mEventDispatching)) {
-                        doFinishedKeyLocked(false);
+                        doFinishedKeyLocked(true);
                     } else {
                         // Make sure to wake up anyone currently waiting to
                         // dispatch a key, so they can re-evaluate their
@@ -6086,13 +6086,9 @@ public class WindowManagerService extends IWindowManager.Stub
                         // The new window is above the old; finish pending input to the last
                         // window and start directing it to the new one.
                         mLastWin.mToken.paused = false;
-                        doFinishedKeyLocked(true);  // does a notifyAll()
+                        doFinishedKeyLocked(false);  // does a notifyAll()
+                        return;
                     }
-                    // Either the new window is lower, so there is no need to wake key waiters,
-                    // or we just finished key input to the previous window, which implicitly
-                    // notified the key waiters.  In both cases, we don't need to issue the
-                    // notification here.
-                    return;
                 }
 
                 // Now that we've put a new window state in place, make the event waiter
@@ -6134,7 +6130,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         + token.paused);
                     token.paused = false;
                     if (mLastWin != null && mLastWin.mToken == token && mFinished) {
-                        doFinishedKeyLocked(true);
+                        doFinishedKeyLocked(false);
                     } else {
                         notifyAll();
                     }
@@ -6162,14 +6158,14 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
 
-        private final void doFinishedKeyLocked(boolean doRecycle) {
+        private final void doFinishedKeyLocked(boolean force) {
             if (mLastWin != null) {
                 releasePendingPointerLocked(mLastWin.mSession);
                 releasePendingTrackballLocked(mLastWin.mSession);
             }
 
-            if (mLastWin == null || !mLastWin.mToken.paused
-                || !mLastWin.isVisibleLw()) {
+            if (force || mLastWin == null || !mLastWin.mToken.paused
+                    || !mLastWin.isVisibleLw()) {
                 // If the current window has been paused, we aren't -really-
                 // finished...  so let the waiters still wait.
                 mLastWin = null;
