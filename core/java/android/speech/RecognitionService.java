@@ -30,8 +30,8 @@ import android.util.Log;
 
 /**
  * This class provides a base class for recognition service implementations. This class should be
- * extended only in case you wish to implement a new speech recognizer. Please not that the
- * implementation of this service is state-less.
+ * extended only in case you wish to implement a new speech recognizer. Please note that the
+ * implementation of this service is stateless.
  */
 public abstract class RecognitionService extends Service {
     /**
