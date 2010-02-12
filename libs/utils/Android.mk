@@ -75,7 +75,6 @@ include $(CLEAR_VARS)
 # we have the common sources, plus some device-specific stuff
 LOCAL_SRC_FILES:= \
 	$(commonSources) \
-	Unicode.cpp \
     BackupData.cpp \
 	BackupHelpers.cpp
 
