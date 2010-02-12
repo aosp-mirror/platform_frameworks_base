@@ -171,7 +171,7 @@ public class RecognitionManager {
      */
     public static boolean isRecognitionAvailable(final Context context) {
         final List<ResolveInfo> list = context.getPackageManager().queryIntentServices(
-                new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH), 0);
+                new Intent(RecognitionService.SERVICE_INTERFACE), 0);
         return list != null && list.size() != 0;
     }
 
