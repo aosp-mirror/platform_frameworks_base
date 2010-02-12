@@ -79,69 +79,6 @@ namespace android {
         };
 
         /**
-         * Character types as specified in the Unicode standard. These map directly to
-         * java.lang.Character.
-         */
-        enum CharType {
-            CHARTYPE_UNASSIGNED = 0,
-            CHARTYPE_UPPERCASE_LETTER,
-            CHARTYPE_LOWERCASE_LETTER,
-            CHARTYPE_TITLECASE_LETTER,
-            CHARTYPE_MODIFIER_LETTER,
-            CHARTYPE_OTHER_LETTER,
-            CHARTYPE_NON_SPACING_MARK,
-            CHARTYPE_ENCLOSING_MARK,
-            CHARTYPE_COMBINING_SPACING_MARK,
-            CHARTYPE_DECIMAL_DIGIT_NUMBER,
-            CHARTYPE_LETTER_NUMBER,
-            CHARTYPE_OTHER_NUMBER,
-            CHARTYPE_SPACE_SEPARATOR,
-            CHARTYPE_LINE_SEPARATOR,
-            CHARTYPE_PARAGRAPH_SEPARATOR,
-            CHARTYPE_CONTROL,
-            CHARTYPE_FORMAT,
-            CHARTYPE_MISSING_VALUE_FOR_JAVA,    /* This is the mysterious missing 17 value from the java constants */
-            CHARTYPE_PRIVATE_USE,
-            CHARTYPE_SURROGATE,
-            CHARTYPE_DASH_PUNCTUATION,
-            CHARTYPE_START_PUNCTUATION,
-            CHARTYPE_END_PUNCTUATION,
-            CHARTYPE_CONNECTOR_PUNCTUATION,
-            CHARTYPE_OTHER_PUNCTUATION,
-            CHARTYPE_MATH_SYMBOL,
-            CHARTYPE_CURRENCY_SYMBOL,
-            CHARTYPE_MODIFIER_SYMBOL,
-            CHARTYPE_OTHER_SYMBOL,
-            CHARTYPE_INITIAL_QUOTE_PUNCTUATION,
-            CHARTYPE_FINAL_QUOTE_PUNCTUATION
-        };
-
-        /**
-         * Decomposition types as described by the unicode standard. These values map to
-         * the same values in uchar.h in ICU.
-         */
-        enum DecompositionType {
-            DECOMPOSITION_NONE = 0,
-            DECOMPOSITION_CANONICAL,
-            DECOMPOSITION_COMPAT,
-            DECOMPOSITION_CIRCLE,
-            DECOMPOSITION_FINAL,
-            DECOMPOSITION_FONT,
-            DECOMPOSITION_FRACTION,
-            DECOMPOSITION_INITIAL,
-            DECOMPOSITION_ISOLATED,
-            DECOMPOSITION_MEDIAL,
-            DECOMPOSITION_NARROW,
-            DECOMPOSITION_NOBREAK,
-            DECOMPOSITION_SMALL,
-            DECOMPOSITION_SQUARE,
-            DECOMPOSITION_SUB,
-            DECOMPOSITION_SUPER,
-            DECOMPOSITION_VERTICAL,
-            DECOMPOSITION_WIDE
-        };
-
-        /**
          * Returns the packed data for java calls
          * @param c The unicode character.
          * @return The packed data for the character.
@@ -161,61 +98,6 @@ namespace android {
          */
         static uint32_t getPackedData(UChar32 c);
         
-        /**
-         * Get the Character type.
-         * @param c The unicode character.
-         * @return The character's type or CHARTYPE_UNASSIGNED if the character is invalid
-         *         or has an unassigned class.
-         */
-        static CharType getType(UChar32 c);    
-
-        /**
-         * Get the Character's decomposition type.
-         * @param c The unicode character.
-         * @return The character's decomposition type or DECOMPOSITION_NONE is there 
-         *         is no decomposition.
-         */
-        static DecompositionType getDecompositionType(UChar32 c);
-        
-        /**
-         * Returns the digit value of a character or -1 if the character
-         * is not within the specified radix.
-         *
-         * The digit value is computed for integer characters and letters
-         * within the given radix. This function does not handle Roman Numerals,
-         * fractions, or any other characters that may represent numbers.
-         * 
-         * @param c The unicode character
-         * @param radix The intended radix.
-         * @return The digit value or -1 if there is no digit value or if the value is outside the radix.
-         */
-        static int getDigitValue(UChar32 c, int radix = 10);
-
-        /**
-         * Return the numeric value of a character
-         *
-         * @param c The unicode character.
-         * @return The numeric value of the character. -1 if the character has no numeric value, 
-         *         -2 if the character has a numeric value that is not representable by an integer.
-         */
-        static int getNumericValue(UChar32 c);
-
-        /**
-         * Convert the character to lowercase
-         * @param c The unicode character.
-         * @return The lowercase character equivalent of c. If c does not have a lowercase equivalent,
-         *         the original character is returned.
-         */
-        static UChar32 toLower(UChar32 c);
-            
-        /**
-         * Convert the character to uppercase
-         * @param c The unicode character.
-         * @return The uppercase character equivalent of c. If c does not have an uppercase equivalent,
-         *         the original character is returned.
-         */
-        static UChar32 toUpper(UChar32 c);
-    
         /**
          * Get the directionality of the character.
          * @param c The unicode character.
@@ -239,15 +121,6 @@ namespace android {
          * @see isMirrored
          */
         static UChar32 toMirror(UChar32 c);
-        
-        /**
-         * Convert the character to title case.
-         * @param c The unicode character.
-         * @return The titlecase equivalent of c. If c does not have a titlecase equivalent,
-         *         the original character is returned.
-         */
-        static UChar32 toTitle(UChar32 c);
-
    };
 
 }

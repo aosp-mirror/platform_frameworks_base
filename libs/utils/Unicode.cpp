@@ -103,55 +103,6 @@ uint32_t android::Unicode::getPackedData(UChar32 c)
     return CharacterData::PACKED_DATA[findCharacterValue(c) & 0x7FF];
 }
 
-android::Unicode::CharType android::Unicode::getType(UChar32 c)
-{
-    if (c < 0 || c >= 0x10FFFF)
-        return CHARTYPE_UNASSIGNED;
-    return (CharType)((getPackedData(c) >> TYPE_SHIFT) & TYPE_MASK);
-}
-
-android::Unicode::DecompositionType android::Unicode::getDecompositionType(UChar32 c)
-{
-    // findCharacterValue returns a 16-bit value with the top 5 bits containing a decomposition type
-    // and the remaining bits containing an index.
-    return (DecompositionType)((findCharacterValue(c) >> DECOMPOSITION_SHIFT) & DECOMPOSITION_MASK);
-}
-
-int android::Unicode::getDigitValue(UChar32 c, int radix)
-{
-    if (radix < MIN_RADIX || radix > MAX_RADIX)
-        return -1;
-
-    int tempValue = radix;
-    
-    if (c >= '0' && c <= '9')
-        tempValue = c - '0';
-    else if (c >= 'a' && c <= 'z')
-        tempValue = c - 'a' + 10;
-    else if (c >= 'A' && c <= 'Z')
-        tempValue = c - 'A' + 10;
-    
-    return tempValue < radix ? tempValue : -1;
-}
-
-int android::Unicode::getNumericValue(UChar32 c)
-{
-    if (isMirrored(c))
-        return -1;
-    
-    return (int) CharacterData::NUMERICS[((getPackedData(c) >> NUMERIC_SHIFT) & NUMERIC_MASK)];
-}
-
-UChar32 android::Unicode::toLower(UChar32 c)
-{
-    return c + CharacterData::LCDIFF[(getPackedData(c) >> TOLOWER_SHIFT) & TOLOWER_MASK];
-}
-
-UChar32 android::Unicode::toUpper(UChar32 c)
-{
-    return c + CharacterData::UCDIFF[(getPackedData(c) >> TOUPPER_SHIFT) & TOUPPER_MASK];
-}
-
 android::Unicode::Direction android::Unicode::getDirectionality(UChar32 c)
 {
     uint32_t data = getPackedData(c);
@@ -179,15 +130,3 @@ UChar32 android::Unicode::toMirror(UChar32 c)
 
     return c + CharacterData::MIRROR_DIFF[(getPackedData(c) >> MIRROR_SHIFT) & MIRROR_MASK];
 }
-
-UChar32 android::Unicode::toTitle(UChar32 c)
-{
-    int32_t diff = CharacterData::TCDIFF[(getPackedData(c) >> TOTITLE_SHIFT) & TOTITLE_MASK];
-
-    if (TOTITLE_MASK == diff)
-        return toUpper(c);
-    
-    return c + diff;
-}
-
-
