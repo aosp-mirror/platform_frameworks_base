@@ -38,8 +38,8 @@ public class GsmCellLocation extends CellLocation {
      * Initialize the object from a bundle.
      */
     public GsmCellLocation(Bundle bundle) {
-        mLac = bundle.getInt("lac");
-        mCid = bundle.getInt("cid");
+        mLac = bundle.getInt("lac", mLac);
+        mCid = bundle.getInt("cid", mCid);
     }
 
     /**
@@ -120,5 +120,3 @@ public class GsmCellLocation extends CellLocation {
         m.putInt("cid", mCid);
     }
 }
-
-
