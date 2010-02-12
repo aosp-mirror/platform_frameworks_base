@@ -68,7 +68,6 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemSelectedListener;
 
 import com.android.common.Patterns;
-import com.android.common.speech.Recognition;
 
 import java.util.ArrayList;
 import java.util.WeakHashMap;
@@ -94,6 +93,9 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
     private static final String INSTANCE_KEY_STORED_APPDATA = "sData";
     private static final String INSTANCE_KEY_PREVIOUS_COMPONENTS = "sPrev";
     private static final String INSTANCE_KEY_USER_QUERY = "uQry";
+    
+    // The extra key used in an intent to the speech recognizer for in-app voice search.
+    private static final String EXTRA_CALLING_PACKAGE = "calling_package";
     
     // The string used for privateImeOptions to identify to the IME that it should not show
     // a microphone button since one already exists in the search dialog.
@@ -946,7 +948,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         voiceIntent.putExtra(RecognizerIntent.EXTRA_PROMPT, prompt);
         voiceIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, language);
         voiceIntent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, maxResults);
-        voiceIntent.putExtra(Recognition.EXTRA_CALLING_PACKAGE,
+        voiceIntent.putExtra(EXTRA_CALLING_PACKAGE,
                 searchActivity == null ? null : searchActivity.toShortString());
         
         // Add the values that configure forwarding the results
