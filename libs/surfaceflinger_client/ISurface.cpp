@@ -78,7 +78,8 @@ public:
         data.writeInt32(bufferIdx);
         data.writeInt32(usage);
         remote()->transact(REQUEST_BUFFER, data, &reply);
-        sp<GraphicBuffer> buffer = new GraphicBuffer(reply);
+        sp<GraphicBuffer> buffer = new GraphicBuffer();
+        reply.read(*buffer);
         return buffer;
     }
 
@@ -141,7 +142,9 @@ status_t BnSurface::onTransact(
             int bufferIdx = data.readInt32();
             int usage = data.readInt32();
             sp<GraphicBuffer> buffer(requestBuffer(bufferIdx, usage));
-            return GraphicBuffer::writeToParcel(reply, buffer.get());
+            if (buffer == NULL)
+                return BAD_VALUE;
+            return reply->write(*buffer);
         }
         case REGISTER_BUFFERS: {
             CHECK_INTERFACE(ISurface, data, reply);
