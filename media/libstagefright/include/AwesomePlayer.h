@@ -27,6 +27,7 @@
 namespace android {
 
 struct AudioPlayer;
+struct DataSource;
 struct MediaBuffer;
 struct MediaExtractor;
 struct MediaSource;
@@ -78,6 +79,9 @@ struct AwesomePlayer {
 
     status_t getVideoDimensions(int32_t *width, int32_t *height) const;
 
+    status_t suspend();
+    status_t resume();
+
 private:
     friend struct AwesomeEvent;
 
@@ -102,6 +106,8 @@ private:
 
     String8 mUri;
     KeyedVector<String8, String8> mUriHeaders;
+
+    sp<DataSource> mFileSource;
 
     sp<MediaSource> mVideoSource;
     sp<AwesomeRenderer> mVideoRenderer;
@@ -140,12 +146,29 @@ private:
     void postBufferingEvent_l();
     void postStreamDoneEvent_l();
     void postCheckAudioStatusEvent_l();
+    status_t getPosition_l(int64_t *positionUs);
+    status_t play_l();
 
     MediaBuffer *mLastVideoBuffer;
     MediaBuffer *mVideoBuffer;
 
     sp<Prefetcher> mPrefetcher;
 
+    struct SuspensionState {
+        String8 mUri;
+        KeyedVector<String8, String8> mUriHeaders;
+        sp<DataSource> mFileSource;
+
+        uint32_t mFlags;
+        int64_t mPositionUs;
+
+    } *mSuspensionState;
+
+    status_t setDataSource_l(
+            const char *uri,
+            const KeyedVector<String8, String8> *headers = NULL);
+
+    status_t setDataSource_l(const sp<DataSource> &dataSource);
     status_t setDataSource_l(const sp<MediaExtractor> &extractor);
     void reset_l();
     status_t seekTo_l(int64_t timeUs);
