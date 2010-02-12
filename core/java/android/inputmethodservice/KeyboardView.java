@@ -165,6 +165,7 @@ public class KeyboardView extends View implements View.OnClickListener {
 
     private static final int DELAY_BEFORE_PREVIEW = 0;
     private static final int DELAY_AFTER_PREVIEW = 70;
+    private static final int DEBOUNCE_TIME = 70;
     
     private int mVerticalCorrection;
     private int mProximityThreshold;
@@ -1122,7 +1123,8 @@ public class KeyboardView extends View implements View.OnClickListener {
         mSwipeTracker.addMovement(me);
 
         // Ignore all motion events until a DOWN.
-        if (mAbortKey && action != MotionEvent.ACTION_DOWN) {
+        if (mAbortKey
+                && action != MotionEvent.ACTION_DOWN && action != MotionEvent.ACTION_CANCEL) {
             return true;
         }
 
@@ -1206,6 +1208,7 @@ public class KeyboardView extends View implements View.OnClickListener {
                     }
                 }
                 showPreview(mCurrentKey);
+                mLastMoveTime = eventTime;
                 break;
 
             case MotionEvent.ACTION_UP:
@@ -1219,7 +1222,8 @@ public class KeyboardView extends View implements View.OnClickListener {
                     mCurrentKey = keyIndex;
                     mCurrentKeyTime = 0;
                 }
-                if (mCurrentKeyTime < mLastKeyTime && mLastKey != NOT_A_KEY) {
+                if (mCurrentKeyTime < mLastKeyTime && mCurrentKeyTime < DEBOUNCE_TIME
+                        && mLastKey != NOT_A_KEY) {
                     mCurrentKey = mLastKey;
                     touchX = mLastCodeX;
                     touchY = mLastCodeY;
