@@ -8551,8 +8551,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     /**
      * Scroll the view with standard behavior for scrolling beyond the normal
      * content boundaries. Views that call this method should override
-     * {@link #onOverscrolled()} to respond to the results of an overscroll
-     * operation.
+     * {@link #onOverscrolled(int, int, boolean, boolean)} to respond to the
+     * results of an overscroll operation.
      * 
      * Views can use this method to handle any touch or fling-based scrolling.
      * 
