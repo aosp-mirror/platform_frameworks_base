@@ -93,7 +93,7 @@ public class PasswordEntryKeyboard extends Keyboard {
         LatinKey key = new LatinKey(res, parent, x, y, parser);
         final int code = key.codes[0];
         if (code >=0 && code != '\n' && (code < 32 || code > 127)) {
-            Log.w(TAG, "Key code for " + key.label + " is not latin-1");
+            // Log.w(TAG, "Key code for " + key.label + " is not latin-1");
             key.label = " ";
             key.setEnabled(false);
         }
