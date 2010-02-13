@@ -120,7 +120,7 @@ public class Base64 {
      * The padding '=' characters at the end are considered optional, but
      * if any are present, there must be the correct number of them.
      *
-     * @param input the input String to decode, which is converted to
+     * @param str    the input String to decode, which is converted to
      *               bytes using the default charset
      * @param flags  controls certain features of the decoded output.
      *               Pass {@code DEFAULT} to decode standard Base64.
