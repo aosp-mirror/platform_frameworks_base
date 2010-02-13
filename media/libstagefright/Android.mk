@@ -48,15 +48,8 @@ endif
 LOCAL_C_INCLUDES:= \
 	$(JNI_H_INCLUDE) \
         $(TOP)/external/opencore/extern_libs_v2/khronos/openmax/include \
-        $(TOP)/external/opencore/android
-
-ifeq ($(TARGET_ARCH),arm)
-    LOCAL_C_INCLUDES += \
+        $(TOP)/external/opencore/android \
         $(TOP)/external/tremolo/Tremolo
-else
-    LOCAL_C_INCLUDES += \
-        $(TOP)/external/tremor/Tremor
-endif
 
 LOCAL_SHARED_LIBRARIES := \
         libbinder         \
