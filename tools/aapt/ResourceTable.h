@@ -424,7 +424,8 @@ public:
                            const SourcePos& pos,
                            const ResTable_config* config = NULL,
                            bool doSetIndex = false,
-                           bool overlay = false);
+                           bool overlay = false,
+                           bool autoAddOverlay = false);
 
         const SourcePos& getFirstPublicSourcePos() const { return *mFirstPublicSourcePos; }
 

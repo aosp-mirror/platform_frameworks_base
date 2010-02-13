@@ -1587,7 +1587,7 @@ status_t ResourceTable::startBag(const SourcePos& sourcePos,
                sourcePos.file.striing(), sourcePos.line, String8(type).string());
     }
 #endif
-    if (overlay && !hasBagOrEntry(package, type, name)) {
+    if (overlay && !mBundle->getAutoAddOverlay() && !hasBagOrEntry(package, type, name)) {
         bool canAdd = false;
         sp<Package> p = mPackages.valueFor(package);
         if (p != NULL) {
@@ -3275,12 +3275,13 @@ sp<ResourceTable::Entry> ResourceTable::Type::getEntry(const String16& entry,
                                                        const SourcePos& sourcePos,
                                                        const ResTable_config* config,
                                                        bool doSetIndex,
-                                                       bool overlay)
+                                                       bool overlay,
+                                                       bool autoAddOverlay)
 {
     int pos = -1;
     sp<ConfigList> c = mConfigs.valueFor(entry);
     if (c == NULL) {
-        if (overlay == true && mCanAddEntries.indexOf(entry) < 0) {
+        if (overlay && !autoAddOverlay && mCanAddEntries.indexOf(entry) < 0) {
             sourcePos.error("Resource at %s appears in overlay but not"
                             " in the base package; use <add-resource> to add.\n",
                             String8(entry).string());
@@ -3592,7 +3593,7 @@ sp<ResourceTable::Entry> ResourceTable::getEntry(const String16& package,
     if (t == NULL) {
         return NULL;
     }
-    return t->getEntry(name, sourcePos, config, doSetIndex, overlay);
+    return t->getEntry(name, sourcePos, config, doSetIndex, overlay, mBundle->getAutoAddOverlay());
 }
 
 sp<const ResourceTable::Entry> ResourceTable::getEntry(uint32_t resID,

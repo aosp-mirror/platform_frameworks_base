@@ -60,6 +60,7 @@ void usage(void)
         "        [--min-sdk-version VAL] [--target-sdk-version VAL] \\\n"
         "        [--max-sdk-version VAL] [--app-version VAL] \\\n"
         "        [--app-version-name TEXT] [--custom-package VAL] \\\n"
+        "        [--auto-add-overlay] \\\n"
         "        [-I base-package [-I base-package ...]] \\\n"
         "        [-A asset-source-dir]  [-G class-list-file] [-P public-definitions-file] \\\n"
         "        [-S resource-sources [-S resource-sources ...]] "
@@ -134,7 +135,9 @@ void usage(void)
         "   --version-name\n"
         "       inserts android:versionName in to manifest.\n"
         "   --custom-package\n"
-        "       generates R.java into a different package.\n");
+        "       generates R.java into a different package.\n"
+        "   --auto-add-overlay\n"
+        "       Automatically add resources that are only in overlays.\n");
 }
 
 /*
@@ -429,6 +432,8 @@ int main(int argc, char* const argv[])
                         goto bail;
                     }
                     bundle.setCustomPackage(argv[0]);
+                } else if (strcmp(cp, "-auto-add-overlay") == 0) {
+                    bundle.setAutoAddOverlay(true);
                 } else {
                     fprintf(stderr, "ERROR: Unknown option '-%s'\n", cp);
                     wantUsage = true;
