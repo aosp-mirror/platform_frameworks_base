@@ -22,7 +22,6 @@ import android.app.IActivityManager;
 import android.os.Build;
 import android.os.Debug;
 import android.os.IBinder;
-import android.os.ICheckinService;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;

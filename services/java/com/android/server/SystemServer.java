@@ -329,19 +329,6 @@ class ServerThread extends Thread {
             }
 
             try {
-                Log.i(TAG, "Checkin Service");
-                Intent intent = new Intent().setComponent(new ComponentName(
-                        "com.google.android.server.checkin",
-                        "com.google.android.server.checkin.CheckinService"));
-                if (context.startService(intent) == null) {
-                    Log.w(TAG, "Using fallback Checkin Service.");
-                    ServiceManager.addService("checkin", new FallbackCheckinService(context));
-                }
-            } catch (Throwable e) {
-                Log.e(TAG, "Failure starting Checkin Service", e);
-            }
-
-            try {
                 Log.i(TAG, "Wallpaper Service");
                 wallpaper = new WallpaperManagerService(context);
                 ServiceManager.addService(Context.WALLPAPER_SERVICE, wallpaper);

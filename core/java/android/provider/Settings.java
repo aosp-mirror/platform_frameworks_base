@@ -2210,14 +2210,17 @@ public final class Settings {
         public static final String NETWORK_PREFERENCE = "network_preference";
 
         /**
+         * No longer supported.
          */
         public static final String PARENTAL_CONTROL_ENABLED = "parental_control_enabled";
 
         /**
+         * No longer supported.
          */
         public static final String PARENTAL_CONTROL_LAST_UPDATE = "parental_control_last_update";
 
         /**
+         * No longer supported.
          */
         public static final String PARENTAL_CONTROL_REDIRECT_URL = "parental_control_redirect_url";
 
