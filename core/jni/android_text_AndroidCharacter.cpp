@@ -23,7 +23,8 @@
 #include "utils/Log.h"
 #include "unicode/uchar.h"
 
-#define DIRECTIONALITY_UNDEFINED (-1)
+#define PROPERTY_UNDEFINED (-1)
+
 // ICU => JDK mapping
 static int directionality_map[U_CHAR_DIRECTION_COUNT] = {
     0, // U_LEFT_TO_RIGHT (0) => DIRECTIONALITY_LEFT_TO_RIGHT (0)
@@ -79,7 +80,7 @@ static void getDirectionalities(JNIEnv* env, jobject obj, jcharArray srcArray, j
                                  (src[i + 1] & 0x3FF);
             int dir = u_charDirection(c);
             if (dir < 0 || dir >= U_CHAR_DIRECTION_COUNT)
-                dir = DIRECTIONALITY_UNDEFINED;
+                dir = PROPERTY_UNDEFINED;
             else
                 dir = directionality_map[dir];
 
@@ -89,13 +90,67 @@ static void getDirectionalities(JNIEnv* env, jobject obj, jcharArray srcArray, j
             int c = src[i];
             int dir = u_charDirection(c);
             if (dir < 0 || dir >= U_CHAR_DIRECTION_COUNT)
-                dest[i] = DIRECTIONALITY_UNDEFINED;
+                dest[i] = PROPERTY_UNDEFINED;
             else
                 dest[i] = directionality_map[dir];
         }
     }
     
 DIRECTION_END:
+    env->ReleaseCharArrayElements(srcArray, src, JNI_ABORT);
+    env->ReleaseByteArrayElements(destArray, dest, JNI_ABORT);
+}
+
+static jint getEastAsianWidth(JNIEnv* env, jobject obj, jchar input)
+{
+    int width = u_getIntPropertyValue(input, UCHAR_EAST_ASIAN_WIDTH);
+    if (width < 0 || width >= U_EA_COUNT)
+        width = PROPERTY_UNDEFINED;
+
+    return width;
+}
+
+static void getEastAsianWidths(JNIEnv* env, jobject obj, jcharArray srcArray,
+                               int start, int count, jbyteArray destArray)
+{
+    jchar* src = env->GetCharArrayElements(srcArray, NULL);
+    jbyte* dest = env->GetByteArrayElements(destArray, NULL);
+    if (src == NULL || dest == NULL) {
+        jniThrowException(env, "java/lang/NullPointerException", NULL);
+        goto EA_END;
+    }
+
+    if (start < 0 || start > start + count
+            || env->GetArrayLength(srcArray) < (start + count)
+            || env->GetArrayLength(destArray) < count) {
+        jniThrowException(env, "java/lang/ArrayIndexOutOfBoundsException", NULL);
+        goto EA_END;
+    }
+
+    for (int i = 0; i < count; i++) {
+        const int srci = start + i;
+        if (src[srci] >= 0xD800 && src[srci] <= 0xDBFF &&
+            i + 1 < count &&
+            src[srci + 1] >= 0xDC00 && src[srci + 1] <= 0xDFFF) {
+            int c = 0x00010000 + ((src[srci] - 0xD800) << 10) +
+                                 (src[srci + 1] & 0x3FF);
+            int width = u_getIntPropertyValue(c, UCHAR_EAST_ASIAN_WIDTH);
+            if (width < 0 || width >= U_EA_COUNT)
+                width = PROPERTY_UNDEFINED;
+
+            dest[i++] = width;
+            dest[i] = width;
+        } else {
+            int c = src[srci];
+            int width = u_getIntPropertyValue(c, UCHAR_EAST_ASIAN_WIDTH);
+            if (width < 0 || width >= U_EA_COUNT)
+                width = PROPERTY_UNDEFINED;
+
+            dest[i] = width;
+        }
+    }
+
+EA_END:
     env->ReleaseCharArrayElements(srcArray, src, JNI_ABORT);
     env->ReleaseByteArrayElements(destArray, dest, JNI_ABORT);
 }
@@ -140,6 +195,10 @@ static jchar getMirror(JNIEnv* env, jobject obj, jchar c)
 static JNINativeMethod gMethods[] = {
 	{ "getDirectionalities", "([C[BI)V",
         (void*) getDirectionalities },
+	{ "getEastAsianWidth", "(C)I",
+        (void*) getEastAsianWidth },
+	{ "getEastAsianWidths", "([CII[B)V",
+        (void*) getEastAsianWidths },
 	{ "mirror", "([CII)Z",
         (void*) mirror },
 	{ "getMirror", "(C)C",
