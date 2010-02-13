@@ -13463,6 +13463,12 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                             app.hidden = false;
                         }
                     }
+                    // If we have let the service slide into the background
+                    // state, still have some text describing what it is doing
+                    // even though the service no longer has an impact.
+                    if (adj > SECONDARY_SERVER_ADJ) {
+                        app.adjType = "started-bg-services";
+                    }
                 }
                 if (s.connections.size() > 0 && (adj > FOREGROUND_APP_ADJ
                         || schedGroup == Process.THREAD_GROUP_BG_NONINTERACTIVE)) {
@@ -13853,6 +13859,15 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
         mAdjSeq++;
 
+        // Let's determine how many processes we have running vs.
+        // how many slots we have for background processes; we may want
+        // to put multiple processes in a slot of there are enough of
+        // them.
+        int numSlots = HIDDEN_APP_MAX_ADJ - HIDDEN_APP_MIN_ADJ + 1;
+        int factor = (mLruProcesses.size()-4)/numSlots;
+        if (factor < 1) factor = 1;
+        int step = 0;
+        
         // First try updating the OOM adjustment for each of the
         // application processes based on their current state.
         int i = mLruProcesses.size();
@@ -13864,7 +13879,11 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             if (updateOomAdjLocked(app, curHiddenAdj, TOP_APP)) {
                 if (curHiddenAdj < EMPTY_APP_ADJ
                     && app.curAdj == curHiddenAdj) {
-                    curHiddenAdj++;
+                    step++;
+                    if (step >= factor) {
+                        step = 0;
+                        curHiddenAdj++;
+                    }
                 }
             } else {
                 didOomAdj = false;
