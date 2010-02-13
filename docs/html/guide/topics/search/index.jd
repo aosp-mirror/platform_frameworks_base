@@ -1,0 +1,111 @@
+page.title=Search
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+<h2>Topics</h2>
+<ol>
+<li><a href="search-dialog.html">Using the Android Search Dialog</a></li>
+<li><a href="adding-recent-query-suggestions.html">Adding Recent Query Suggestions</a></li>
+<li><a href="adding-custom-suggestions.html">Adding Custom Suggestions</a></li>
+</ol>
+<h2>Reference</h2>
+<ol>
+<li><a href="searchable-config.html">Searchable Configuration</a></li>
+</ol>
+<h2>See also</h2>
+<ol>
+<li><a href="{@docRoot}resources/samples/SearchableDictionary/index.html">Searchable
+Dictionary sample app</a></li>
+</ol>
+</div>
+</div>
+
+
+<p>The ability to search is considered to be a core user feature on Android. The user should be able
+to search any data that is available to them, whether the content is located on the device or the
+Internet. This experience should be seamless and consistent across the entire
+system, which is why Android provides a simple search framework to help you provide users with
+a familiar search dialog and a great search experience.</p>
+
+<img src="{@docRoot}images/search/search-suggest-custom.png" alt="" height="417"
+style="float:right;clear:right;" />
+
+<p>Android's search framework provides a user interface in which the user can perform a search and
+an interaction layer that communicates with your application. This way, you don't have to build
+a search box that the user must find in order to begin a search. Instead,
+a custom search dialog will appear at the top of the screen at the user's command.
+The search framework will manage the search dialog and when the user executes their search, the
+search framework will pass the query text to your application so that your application can begin a
+search. The screenshot to the right shows an example of the search dialog (using
+search suggestions).</p>
+
+<p>Once your application is set up to use the search dialog, you can:</p>
+
+<ul>
+<li>Customize some of the search dialog characteristics</li>
+<li>Enable voice search</li>
+<li>Provide search suggestions based on recent user queries</li>
+<li>Provide search suggestions that match actual results in your application data</li>
+<li>Offer your application's search suggestions in the system-wide Quick Search Box</li>
+</ul>
+
+<p>The following documents will teach you how to use the search dialog in
+your application:</p>
+
+<dl>
+  <dt><strong><a href="search-dialog.html">Using the Android Search Dialog</a></strong></dt>
+  <dd>How to set up your application to use the search dialog for searches. </dd>
+  <dt><strong><a href="adding-recent-query-suggestions.html">Adding Recent Query
+Suggestions</a></strong></dt>
+  <dd>How to show suggestions based on queries previously used in the search dialog.</dd>
+  <dt><strong><a href="adding-custom-suggestions.html">Adding Custom Suggestions</a></strong></dt>
+  <dd>How to show suggestions based on custom data from your application and offer your suggestions
+in the system-wide Quick Search Box.</dd>
+</dl>
+
+<p>Also, the <strong><a href="searchable-config.html">Searchable Configuration</a></strong> document
+provides a reference for the searchable configuration file (though the above
+documents also discuss the configuration file in terms of specific behaviors).</p>
+
+<p class="note"><strong>Note</strong>: The search framework does <em>not</em> provide APIs to
+perform searches on your data. Performing actual searches is a task that you must accomplish
+using APIs appropriate for your data, such as those in {@link android.database.sqlite}
+if your data is in an SQLite database.</p>
+
+
+<h2>Protecting User Privacy</h2>
+
+<p>When you implement search in your application, you should take steps to protect the user's
+privacy whenever possible. Many users consider their activities on the phone, including searches, to
+be private information. To protect the user's privacy, you should abide by the following
+principles:</p>
+
+<ul>
+<li><strong>Don't send personal information to servers, and if you do, don't log it.</strong>
+<p>"Personal information" is information that can personally identify your users, such as their
+name, email address, billing information, or other data which can be reasonably linked to such
+information. If
+your application implements search with the assistance of a server, try to avoid sending personal
+information along with the search queries. For example, if you are searching for businesses near a
+zip code,
+you don't need to send the user ID as well &mdash; send only the zip code to the server. If you must
+send the personal information, you should take steps to avoid logging it. If you must log it, you
+should protect that data very carefully and erase it as soon as possible.</p>
+</li>
+<li><strong>Provide the user with a way to clear their search history.</strong>
+<p>The search framework helps your application provide context-specific suggestions while they type.
+Sometimes these
+suggestions are based on previous searches, or other actions taken by the user in an earlier
+session. A user may not wish for previous searches to be revealed to other users, for instance if
+they share their phone with a friend. If your application provides suggestions that can reveal
+previous activities, you should implement a "Clear History" menu item, preference, or button. If you
+are
+using {@link android.provider.SearchRecentSuggestions}, you can simply call its {@link
+android.provider.SearchRecentSuggestions#clearHistory()} method. If you are implementing custom
+suggestions, you'll need to provide a
+similar "clear history" method in your provider that can be invoked by the user.</p>
+</li>
+</ul>
+
+
