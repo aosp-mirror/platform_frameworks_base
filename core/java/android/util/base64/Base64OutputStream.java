@@ -21,9 +21,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 /**
- * An OutputStream that does either Base64 encoding or decoding on the
- * data written to it, writing the resulting data to another
- * OutputStream.
+ * An OutputStream that does Base64 encoding on the data written to
+ * it, writing the resulting data to another OutputStream.
  */
 public class Base64OutputStream extends FilterOutputStream {
     private final boolean encode;
@@ -57,6 +56,8 @@ public class Base64OutputStream extends FilterOutputStream {
      * @param flags bit flags for controlling the encoder; see the
      *        constants in {@link Base64}
      * @param encode true to encode, false to decode
+     *
+     * @hide
      */
     public Base64OutputStream(OutputStream out, int flags, boolean encode) {
         super(out);
