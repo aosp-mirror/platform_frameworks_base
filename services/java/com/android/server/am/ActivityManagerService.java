@@ -9493,7 +9493,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         String[] newArgs;
         String componentNameString;
         ServiceRecord r;
-        if (opti <= args.length) {
+        if (opti >= args.length) {
             componentNameString = null;
             newArgs = EMPTY_STRING_ARRAY;
             r = null;
