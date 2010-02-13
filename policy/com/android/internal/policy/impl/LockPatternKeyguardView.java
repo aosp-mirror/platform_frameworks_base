@@ -173,8 +173,8 @@ public class LockPatternKeyguardView extends KeyguardViewBase
 
         if (mUnlockScreen == null) {
             Log.w(TAG, "no unlock screen when receiving AccountManager information");
-        } else if (mUnlockScreen instanceof UnlockScreen) {
-            ((UnlockScreen)mUnlockScreen).setEnableFallback(mEnableFallback);
+        } else if (mUnlockScreen instanceof PatternUnlockScreen) {
+            ((PatternUnlockScreen)mUnlockScreen).setEnableFallback(mEnableFallback);
         }
     }
 
@@ -411,7 +411,6 @@ public class LockPatternKeyguardView extends KeyguardViewBase
         }
     }
 
-
     private void recreateScreens() {
         if (mLockScreen.getVisibility() == View.VISIBLE) {
             ((KeyguardScreen) mLockScreen).onPause();
@@ -504,8 +503,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase
         mMode = mode;
 
         final View goneScreen = (mode == Mode.LockScreen) ? mUnlockScreen : mLockScreen;
-        final View visibleScreen = (mode == Mode.LockScreen)
-                ? mLockScreen : getUnlockScreenForCurrentUnlockMode();
+        final View visibleScreen = (mode == Mode.LockScreen) ? mLockScreen : mUnlockScreen;
 
         // do this before changing visibility so focus isn't requested before the input
         // flag is set
@@ -544,7 +542,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase
         mIsPortrait = getResources().getBoolean(R.bool.lockscreen_isPortrait);
 
         if (unlockMode == UnlockMode.Pattern) {
-            UnlockScreen view = new UnlockScreen(
+            PatternUnlockScreen view = new PatternUnlockScreen(
                     mContext,
                     mLockPatternUtils,
                     mUpdateMonitor,

@@ -53,6 +53,7 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
     private LockPatternUtils mLockPatternUtils;
     private PasswordEntryKeyboardView mKeyboardView;
     private PasswordEntryKeyboardHelper mKeyboardHelper;
+    private boolean mIsInPortrait;
 
     // To avoid accidental lockout due to events while the device in in the pocket, ignore
     // any passwords with length less than or equal to this length.
@@ -66,10 +67,10 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
         mCreatedWithKeyboardOpen = mUpdateMonitor.isKeyboardOpen();
 
         LayoutInflater layoutInflater = LayoutInflater.from(context);
-        if (mCreatedWithKeyboardOpen) {
-            layoutInflater.inflate(R.layout.keyguard_screen_password_landscape, this, true);
-        } else {
+        if (mUpdateMonitor.isInPortrait()) {
             layoutInflater.inflate(R.layout.keyguard_screen_password_portrait, this, true);
+        } else {
+            layoutInflater.inflate(R.layout.keyguard_screen_password_landscape, this, true);
         }
 
         boolean isAlpha = lockPatternUtils.getPasswordMode() == LockPatternUtils.MODE_PASSWORD;
@@ -85,7 +86,7 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
         mKeyboardHelper.setKeyboardMode(isAlpha ? PasswordEntryKeyboardHelper.KEYBOARD_MODE_ALPHA
                 : PasswordEntryKeyboardHelper.KEYBOARD_MODE_NUMERIC);
 
-        updateMonitor.registerConfigurationChangeCallback(this);
+        mKeyboardView.setVisibility(mCreatedWithKeyboardOpen ? View.INVISIBLE : View.VISIBLE);
         mPasswordEntry.requestFocus();
     }
 
@@ -144,13 +145,12 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
     }
 
     public void onOrientationChange(boolean inPortrait) {
-
+        mCallback.recreateMe();
     }
 
     public void onKeyboardChange(boolean isKeyboardOpen) {
-        if (isKeyboardOpen != mCreatedWithKeyboardOpen) {
-            mCallback.recreateMe();
-        }
+        // Don't show the soft keyboard when the real keyboard is open
+        mKeyboardView.setVisibility(isKeyboardOpen ? View.INVISIBLE : View.VISIBLE);
     }
 
     public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
