@@ -124,24 +124,37 @@ public final class VelocityTracker implements Poolable<VelocityTracker> {
      * @param ev The MotionEvent you received and would like to track.
      */
     public void addMovement(MotionEvent ev) {
-        long time = ev.getEventTime();
         final int N = ev.getHistorySize();
         final int pointerCount = ev.getPointerCount();
-        for (int p = 0; p < pointerCount; p++) {
-            for (int i=0; i<N; i++) {
-                addPoint(p, ev.getHistoricalX(p, i), ev.getHistoricalY(p, i),
-                        ev.getHistoricalEventTime(i));
+        int touchIndex = (mLastTouch + 1) % NUM_PAST;
+        for (int i=0; i<N; i++) {
+            for (int id = 0; id < MotionEvent.BASE_AVAIL_POINTERS; id++) {
+                mPastTime[id][touchIndex] = 0;
             }
-            addPoint(p, ev.getX(p), ev.getY(p), time);
-        }
-    }
+            for (int p = 0; p < pointerCount; p++) {
+                int id = ev.getPointerId(p);
+                mPastX[id][touchIndex] = ev.getHistoricalX(p, i);
+                mPastY[id][touchIndex] = ev.getHistoricalY(p, i);
+                mPastTime[id][touchIndex] = ev.getHistoricalEventTime(i);
+            }
 
-    private void addPoint(int pos, float x, float y, long time) {
-        final int lastTouch = (mLastTouch + 1) % NUM_PAST;
-        mPastX[pos][lastTouch] = x;
-        mPastY[pos][lastTouch] = y;
-        mPastTime[pos][lastTouch] = time;
-        mLastTouch = lastTouch;
+            touchIndex = (touchIndex + 1) % NUM_PAST;
+        }
+
+        // During calculation any pointer values with a time of 0 are treated
+        // as a break in input. Initialize all to 0 for each new touch index.
+        for (int id = 0; id < MotionEvent.BASE_AVAIL_POINTERS; id++) {
+            mPastTime[id][touchIndex] = 0;
+        }
+        final long time = ev.getEventTime();
+        for (int p = 0; p < pointerCount; p++) {
+            int id = ev.getPointerId(p);
+            mPastX[id][touchIndex] = ev.getX(p);
+            mPastY[id][touchIndex] = ev.getY(p);
+            mPastTime[id][touchIndex] = time;
+        }
+
+        mLastTouch = touchIndex;
     }
 
     /**
@@ -177,10 +190,12 @@ public final class VelocityTracker implements Poolable<VelocityTracker> {
             // find oldest acceptable time
             int oldestTouch = lastTouch;
             if (pastTime[lastTouch] > 0) { // cleared ?
-                oldestTouch = (lastTouch + 1) % NUM_PAST;
                 final float acceptableTime = pastTime[lastTouch] - LONGEST_PAST_TIME;
-                while (pastTime[oldestTouch] < acceptableTime) {
-                    oldestTouch = (oldestTouch + 1) % NUM_PAST;
+                int nextOldestTouch = (NUM_PAST + oldestTouch - 1) % NUM_PAST;
+                while (pastTime[nextOldestTouch] >= acceptableTime &&
+                        nextOldestTouch != lastTouch) {
+                    oldestTouch = nextOldestTouch;
+                    nextOldestTouch = (NUM_PAST + oldestTouch - 1) % NUM_PAST;
                 }
             }
         
@@ -241,25 +256,25 @@ public final class VelocityTracker implements Poolable<VelocityTracker> {
      * Retrieve the last computed X velocity.  You must first call
      * {@link #computeCurrentVelocity(int)} before calling this function.
      * 
-     * @param pos Which pointer's velocity to return.
+     * @param id Which pointer's velocity to return.
      * @return The previously computed X velocity.
      * 
      * @hide Pending API approval
      */
-    public float getXVelocity(int pos) {
-        return mXVelocity[pos];
+    public float getXVelocity(int id) {
+        return mXVelocity[id];
     }
     
     /**
      * Retrieve the last computed Y velocity.  You must first call
      * {@link #computeCurrentVelocity(int)} before calling this function.
      * 
-     * @param pos Which pointer's velocity to return.
+     * @param id Which pointer's velocity to return.
      * @return The previously computed Y velocity.
      * 
      * @hide Pending API approval
      */
-    public float getYVelocity(int pos) {
-        return mYVelocity[pos];
+    public float getYVelocity(int id) {
+        return mYVelocity[id];
     }
 }
