@@ -472,10 +472,12 @@ void LayerBuffer::BufferSource::onDraw(const Region& clip) const
             // First, try to use the buffer as an EGLImage directly
             if (mUseEGLImageDirectly) {
                 // NOTE: Assume the buffer is allocated with the proper USAGE flags
+
                 sp<GraphicBuffer> buffer = new  GraphicBuffer(
                         src.img.w, src.img.h, src.img.format,
                         GraphicBuffer::USAGE_HW_TEXTURE,
                         src.img.w, src.img.handle, false);
+
                 err = mLayer.initializeEglImage(buffer, &mTexture);
                 if (err != NO_ERROR) {
                     mUseEGLImageDirectly = false;
@@ -563,33 +565,27 @@ status_t LayerBuffer::BufferSource::initTempBuffer() const
     }
 
     // Allocate a temporary buffer and create the corresponding EGLImageKHR
-
-    status_t err;
-    mTempGraphicBuffer.clear();
-    mTempGraphicBuffer = new GraphicBuffer(
+    // once the EGLImage has been created we don't need the
+    // graphic buffer reference anymore.
+    sp<GraphicBuffer> buffer = new GraphicBuffer(
             w, h, HAL_PIXEL_FORMAT_RGB_565,
             GraphicBuffer::USAGE_HW_TEXTURE |
             GraphicBuffer::USAGE_HW_2D);
 
-    err = mTempGraphicBuffer->initCheck();
+    status_t err = buffer->initCheck();
     if (err == NO_ERROR) {
         NativeBuffer& dst(mTempBuffer);
-        dst.img.w = mTempGraphicBuffer->getStride();
+        dst.img.w = buffer->getStride();
         dst.img.h = h;
-        dst.img.format = mTempGraphicBuffer->getPixelFormat();
-        dst.img.handle = (native_handle_t *)mTempGraphicBuffer->handle;
+        dst.img.format = buffer->getPixelFormat();
+        dst.img.handle = (native_handle_t *)buffer->handle;
         dst.img.base = 0;
         dst.crop.l = 0;
         dst.crop.t = 0;
         dst.crop.r = w;
         dst.crop.b = h;
 
-        err = mLayer.initializeEglImage(
-                mTempGraphicBuffer, &mTexture);
-        // once the EGLImage has been created (whether it fails
-        // or not) we don't need the graphic buffer reference
-        // anymore.
-        mTempGraphicBuffer.clear();
+        err = mLayer.initializeEglImage(buffer, &mTexture);
     }
 
     return err;
@@ -606,9 +602,6 @@ void LayerBuffer::BufferSource::clearTempBufferImage() const
     Texture defaultTexture;
     mTexture = defaultTexture;
     mTexture.name = mLayer.createTexture();
-
-    // and the associated buffer
-    mTempGraphicBuffer.clear();
 }
 
 // ---------------------------------------------------------------------------

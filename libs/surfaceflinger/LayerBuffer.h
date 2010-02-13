@@ -144,7 +144,6 @@ private:
         size_t                          mBufferSize;
         mutable LayerBase::Texture      mTexture;
         mutable NativeBuffer            mTempBuffer;
-        mutable sp<GraphicBuffer>       mTempGraphicBuffer;
         mutable bool                    mUseEGLImageDirectly;
     };
     
