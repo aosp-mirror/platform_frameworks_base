@@ -24,9 +24,13 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.StatusBarManager;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.LocalPowerManager;
@@ -35,6 +39,7 @@ import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.util.Config;
 import android.util.EventLog;
@@ -908,6 +913,30 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
         }
     }
 
+    private void playSounds(boolean locked) {
+        // User feedback for keyguard.
+        final ContentResolver cr = mContext.getContentResolver();
+        if (Settings.System.getInt(cr, Settings.System.LOCKSCREEN_SOUNDS_ENABLED, 1) == 1)
+        {
+            final String whichSound = locked
+                ? Settings.System.LOCK_SOUND
+                : Settings.System.UNLOCK_SOUND;
+            final String soundPath = Settings.System.getString(cr, whichSound);
+            if (soundPath != null) {
+                final Uri soundUri = Uri.parse("file://" + soundPath);
+                if (soundUri != null) {
+                    final Ringtone sfx = RingtoneManager.getRingtone(mContext, soundUri);
+                    if (sfx != null) sfx.play();
+                    else Log.d(TAG, "playSounds: failed to load ringtone from uri: " + soundUri);
+                } else {
+                    Log.d(TAG, "playSounds: could not parse Uri: " + soundPath);
+                }
+            } else {
+                Log.d(TAG, "playSounds: whichSound = " + whichSound + "; soundPath was null");
+            }
+        }
+    }        
+
     /**
      * Handle message sent by {@link #showLocked}.
      * @see #SHOW
@@ -916,6 +945,8 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
         synchronized (KeyguardViewMediator.this) {
             if (DEBUG) Log.d(TAG, "handleShow");
             if (!mSystemReady) return;
+
+            playSounds(true);
 
             mKeyguardViewManager.show();
             mShowing = true;
@@ -940,6 +971,8 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
                 Log.w(TAG, "attempt to hide the keyguard while waking, ignored");
                 return;
             }
+
+            playSounds(false);
 
             mKeyguardViewManager.hide();
             mShowing = false;
