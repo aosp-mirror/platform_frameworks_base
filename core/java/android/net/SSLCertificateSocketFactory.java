@@ -50,12 +50,14 @@ import org.apache.harmony.xnet.provider.jsse.SSLParameters;
  * <ul>
  * <li>Timeout specification for SSL handshake operations
  * <li>Optional SSL session caching with {@link SSLSessionCache}
- * <li>On development devices, "setprop socket.relaxsslcheck yes" bypasses all
- * SSL certificate checks, for testing with development servers
+ * <li>Optionally bypass all SSL certificate checks
  * </ul>
  * Note that the handshake timeout does not apply to actual connection.
  * If you want a connection timeout as well, use {@link #createSocket()} and
  * {@link Socket#connect(SocketAddress, int)}.
+ * <p>
+ * On development devices, "setprop socket.relaxsslcheck yes" bypasses all
+ * SSL certificate checks, for testing with development servers.
  */
 public class SSLCertificateSocketFactory extends SSLSocketFactory {
     private static final String TAG = "SSLCertificateSocketFactory";
@@ -73,41 +75,57 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
 
     private final int mHandshakeTimeoutMillis;
     private final SSLClientSessionCache mSessionCache;
+    private final boolean mSecure;
 
     /** @deprecated Use {@link #getDefault(int)} instead. */
     public SSLCertificateSocketFactory(int handshakeTimeoutMillis) {
-        this(handshakeTimeoutMillis, null /* cache */);
+        this(handshakeTimeoutMillis, null, true);
     }
 
-    private SSLCertificateSocketFactory(int handshakeTimeoutMillis, SSLSessionCache cache) {
+    private SSLCertificateSocketFactory(
+            int handshakeTimeoutMillis, SSLSessionCache cache, boolean secure) {
         mHandshakeTimeoutMillis = handshakeTimeoutMillis;
         mSessionCache = cache == null ? null : cache.mSessionCache;
+        mSecure = secure;
     }
 
     /**
-     * Returns a new instance of a socket factory using the specified socket read
-     * timeout while connecting with the server/negotiating an ssl session.
+     * Returns a new socket factory instance with an optional handshake timeout.
      *
      * @param handshakeTimeoutMillis to use for SSL connection handshake, or 0
      *         for none.  The socket timeout is reset to 0 after the handshake.
      * @return a new SocketFactory with the specified parameters
      */
     public static SocketFactory getDefault(int handshakeTimeoutMillis) {
-        return getDefault(handshakeTimeoutMillis, null /* cache */);
+        return new SSLCertificateSocketFactory(handshakeTimeoutMillis, null, true);
     }
 
     /**
-     * Returns a new instance of a socket factory using the specified socket
-     * read timeout while connecting with the server/negotiating an ssl session
-     * Persists ssl sessions using the provided {@link SSLClientSessionCache}.
+     * Returns a new socket factory instance with an optional handshake timeout
+     * and SSL session cache.
      *
      * @param handshakeTimeoutMillis to use for SSL connection handshake, or 0
      *         for none.  The socket timeout is reset to 0 after the handshake.
      * @param cache The {@link SSLClientSessionCache} to use, or null for no cache.
      * @return a new SocketFactory with the specified parameters
      */
-    public static SocketFactory getDefault(int handshakeTimeoutMillis, SSLSessionCache cache) {
-        return new SSLCertificateSocketFactory(handshakeTimeoutMillis, cache);
+    public static SSLSocketFactory getDefault(int handshakeTimeoutMillis, SSLSessionCache cache) {
+        return new SSLCertificateSocketFactory(handshakeTimeoutMillis, cache, true);
+    }
+
+    /**
+     * Returns a new instance of a socket factory with all SSL security checks
+     * disabled, using an optional handshake timeout and SSL session cache.
+     * Sockets created using this factory are vulnerable to man-in-the-middle
+     * attacks!
+     *
+     * @param handshakeTimeoutMillis to use for SSL connection handshake, or 0
+     *         for none.  The socket timeout is reset to 0 after the handshake.
+     * @param cache The {@link SSLClientSessionCache} to use, or null for no cache.
+     * @return an insecure SocketFactory with the specified parameters
+     */
+    public static SSLSocketFactory getInsecure(int handshakeTimeoutMillis, SSLSessionCache cache) {
+        return new SSLCertificateSocketFactory(handshakeTimeoutMillis, cache, false);
     }
 
     /**
@@ -123,7 +141,7 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
             int handshakeTimeoutMillis,
             SSLSessionCache cache) {
         return new org.apache.http.conn.ssl.SSLSocketFactory(
-                new SSLCertificateSocketFactory(handshakeTimeoutMillis, cache));
+                new SSLCertificateSocketFactory(handshakeTimeoutMillis, cache, true));
     }
 
     private SSLSocketFactory makeSocketFactory(TrustManager[] trustManagers) {
@@ -138,12 +156,15 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
     }
 
     private synchronized SSLSocketFactory getDelegate() {
-        // only allow relaxing the ssl check on non-secure builds where the relaxation is
-        // specifically requested.
-        if ("0".equals(SystemProperties.get("ro.secure")) &&
-            "yes".equals(SystemProperties.get("socket.relaxsslcheck"))) {
+        // Relax the SSL check if instructed (for this factory, or systemwide)
+        if (!mSecure || ("0".equals(SystemProperties.get("ro.secure")) &&
+            "yes".equals(SystemProperties.get("socket.relaxsslcheck")))) {
             if (mInsecureFactory == null) {
-                Log.w(TAG, "*** BYPASSING SSL SECURITY CHECKS (socket.relaxsslcheck=yes) ***");
+                if (mSecure) {
+                    Log.w(TAG, "*** BYPASSING SSL SECURITY CHECKS (socket.relaxsslcheck=yes) ***");
+                } else {
+                    Log.w(TAG, "Bypassing SSL security checks at caller's request");
+                }
                 mInsecureFactory = makeSocketFactory(INSECURE_TRUST_MANAGER);
             }
             return mInsecureFactory;
