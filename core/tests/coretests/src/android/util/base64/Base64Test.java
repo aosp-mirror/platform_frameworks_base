@@ -134,25 +134,25 @@ public class Base64Test extends TestCase {
     }
 
     public void testWebSafe() throws Exception {
-        assertEquals(BYTES, 0, Base64.decode("", Base64.WEB_SAFE));
-        assertEquals(BYTES, 1, Base64.decode("_w==", Base64.WEB_SAFE));
-        assertEquals(BYTES, 2, Base64.decode("_-4=", Base64.WEB_SAFE));
-        assertEquals(BYTES, 3, Base64.decode("_-7d", Base64.WEB_SAFE));
-        assertEquals(BYTES, 4, Base64.decode("_-7dzA==", Base64.WEB_SAFE));
-        assertEquals(BYTES, 5, Base64.decode("_-7dzLs=", Base64.WEB_SAFE));
-        assertEquals(BYTES, 6, Base64.decode("_-7dzLuq", Base64.WEB_SAFE));
-        assertEquals(BYTES, 7, Base64.decode("_-7dzLuqmQ==", Base64.WEB_SAFE));
-        assertEquals(BYTES, 8, Base64.decode("_-7dzLuqmYg=", Base64.WEB_SAFE));
+        assertEquals(BYTES, 0, Base64.decode("", Base64.URL_SAFE));
+        assertEquals(BYTES, 1, Base64.decode("_w==", Base64.URL_SAFE));
+        assertEquals(BYTES, 2, Base64.decode("_-4=", Base64.URL_SAFE));
+        assertEquals(BYTES, 3, Base64.decode("_-7d", Base64.URL_SAFE));
+        assertEquals(BYTES, 4, Base64.decode("_-7dzA==", Base64.URL_SAFE));
+        assertEquals(BYTES, 5, Base64.decode("_-7dzLs=", Base64.URL_SAFE));
+        assertEquals(BYTES, 6, Base64.decode("_-7dzLuq", Base64.URL_SAFE));
+        assertEquals(BYTES, 7, Base64.decode("_-7dzLuqmQ==", Base64.URL_SAFE));
+        assertEquals(BYTES, 8, Base64.decode("_-7dzLuqmYg=", Base64.URL_SAFE));
 
-        assertEquals("", Base64.encodeToString(BYTES, 0, 0, Base64.WEB_SAFE));
-        assertEquals("_w==\n", Base64.encodeToString(BYTES, 0, 1, Base64.WEB_SAFE));
-        assertEquals("_-4=\n", Base64.encodeToString(BYTES, 0, 2, Base64.WEB_SAFE));
-        assertEquals("_-7d\n", Base64.encodeToString(BYTES, 0, 3, Base64.WEB_SAFE));
-        assertEquals("_-7dzA==\n", Base64.encodeToString(BYTES, 0, 4, Base64.WEB_SAFE));
-        assertEquals("_-7dzLs=\n", Base64.encodeToString(BYTES, 0, 5, Base64.WEB_SAFE));
-        assertEquals("_-7dzLuq\n", Base64.encodeToString(BYTES, 0, 6, Base64.WEB_SAFE));
-        assertEquals("_-7dzLuqmQ==\n", Base64.encodeToString(BYTES, 0, 7, Base64.WEB_SAFE));
-        assertEquals("_-7dzLuqmYg=\n", Base64.encodeToString(BYTES, 0, 8, Base64.WEB_SAFE));
+        assertEquals("", Base64.encodeToString(BYTES, 0, 0, Base64.URL_SAFE));
+        assertEquals("_w==\n", Base64.encodeToString(BYTES, 0, 1, Base64.URL_SAFE));
+        assertEquals("_-4=\n", Base64.encodeToString(BYTES, 0, 2, Base64.URL_SAFE));
+        assertEquals("_-7d\n", Base64.encodeToString(BYTES, 0, 3, Base64.URL_SAFE));
+        assertEquals("_-7dzA==\n", Base64.encodeToString(BYTES, 0, 4, Base64.URL_SAFE));
+        assertEquals("_-7dzLs=\n", Base64.encodeToString(BYTES, 0, 5, Base64.URL_SAFE));
+        assertEquals("_-7dzLuq\n", Base64.encodeToString(BYTES, 0, 6, Base64.URL_SAFE));
+        assertEquals("_-7dzLuqmQ==\n", Base64.encodeToString(BYTES, 0, 7, Base64.URL_SAFE));
+        assertEquals("_-7dzLuqmYg=\n", Base64.encodeToString(BYTES, 0, 8, Base64.URL_SAFE));
     }
 
     public void testFlags() throws Exception {
@@ -227,55 +227,55 @@ public class Base64Test extends TestCase {
     }
 
     /**
-     * Tests that Base64.encodeInternal does correct handling of the
+     * Tests that Base64.Encoder.encode() does correct handling of the
      * tail for each call.
      *
      * This test is disabled because while it passes if you can get it
      * to run, android's test infrastructure currently doesn't allow
-     * us to get at package-private members (Base64.EncoderState in
+     * us to get at package-private members (Base64.Encoder in
      * this case).
      */
     public void XXXtestEncodeInternal() throws Exception {
         byte[] input = { (byte) 0x61, (byte) 0x62, (byte) 0x63 };
         byte[] output = new byte[100];
 
-        Base64.EncoderState state = new Base64.EncoderState(Base64.NO_PADDING | Base64.NO_WRAP,
-                                                            output);
+        Base64.Encoder encoder = new Base64.Encoder(Base64.NO_PADDING | Base64.NO_WRAP,
+                                                    output);
 
-        Base64.encodeInternal(input, 0, 3, state, false);
-        assertEquals("YWJj".getBytes(), 4, state.output, state.op);
-        assertEquals(0, state.tailLen);
+        encoder.process(input, 0, 3, false);
+        assertEquals("YWJj".getBytes(), 4, encoder.output, encoder.op);
+        assertEquals(0, encoder.tailLen);
 
-        Base64.encodeInternal(input, 0, 3, state, false);
-        assertEquals("YWJj".getBytes(), 4, state.output, state.op);
-        assertEquals(0, state.tailLen);
+        encoder.process(input, 0, 3, false);
+        assertEquals("YWJj".getBytes(), 4, encoder.output, encoder.op);
+        assertEquals(0, encoder.tailLen);
 
-        Base64.encodeInternal(input, 0, 1, state, false);
-        assertEquals(0, state.op);
-        assertEquals(1, state.tailLen);
+        encoder.process(input, 0, 1, false);
+        assertEquals(0, encoder.op);
+        assertEquals(1, encoder.tailLen);
 
-        Base64.encodeInternal(input, 0, 1, state, false);
-        assertEquals(0, state.op);
-        assertEquals(2, state.tailLen);
+        encoder.process(input, 0, 1, false);
+        assertEquals(0, encoder.op);
+        assertEquals(2, encoder.tailLen);
 
-        Base64.encodeInternal(input, 0, 1, state, false);
-        assertEquals("YWFh".getBytes(), 4, state.output, state.op);
-        assertEquals(0, state.tailLen);
+        encoder.process(input, 0, 1, false);
+        assertEquals("YWFh".getBytes(), 4, encoder.output, encoder.op);
+        assertEquals(0, encoder.tailLen);
 
-        Base64.encodeInternal(input, 0, 2, state, false);
-        assertEquals(0, state.op);
-        assertEquals(2, state.tailLen);
+        encoder.process(input, 0, 2, false);
+        assertEquals(0, encoder.op);
+        assertEquals(2, encoder.tailLen);
 
-        Base64.encodeInternal(input, 0, 2, state, false);
-        assertEquals("YWJh".getBytes(), 4, state.output, state.op);
-        assertEquals(1, state.tailLen);
+        encoder.process(input, 0, 2, false);
+        assertEquals("YWJh".getBytes(), 4, encoder.output, encoder.op);
+        assertEquals(1, encoder.tailLen);
 
-        Base64.encodeInternal(input, 0, 2, state, false);
-        assertEquals("YmFi".getBytes(), 4, state.output, state.op);
-        assertEquals(0, state.tailLen);
+        encoder.process(input, 0, 2, false);
+        assertEquals("YmFi".getBytes(), 4, encoder.output, encoder.op);
+        assertEquals(0, encoder.tailLen);
 
-        Base64.encodeInternal(input, 0, 1, state, true);
-        assertEquals("YQ".getBytes(), 2, state.output, state.op);
+        encoder.process(input, 0, 1, true);
+        assertEquals("YQ".getBytes(), 2, encoder.output, encoder.op);
     }
 
     private static final String lipsum =
@@ -307,7 +307,7 @@ public class Base64Test extends TestCase {
                           Base64.NO_WRAP,
                           Base64.NO_PADDING | Base64.NO_WRAP,
                           Base64.CRLF,
-                          Base64.WEB_SAFE };
+                          Base64.URL_SAFE };
         int[] writeLengths = { -10, -5, -1, 0, 1, 1, 2, 2, 3, 10, 100 };
         Random rng = new Random(32176L);
 
@@ -414,7 +414,7 @@ public class Base64Test extends TestCase {
                           Base64.NO_WRAP,
                           Base64.NO_PADDING | Base64.NO_WRAP,
                           Base64.CRLF,
-                          Base64.WEB_SAFE };
+                          Base64.URL_SAFE };
         int[] writeLengths = { -10, -5, -1, 0, 1, 1, 2, 2, 3, 10, 100 };
         Random rng = new Random(32176L);
 
