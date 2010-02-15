@@ -22,6 +22,7 @@ import com.android.internal.os.BinderInternal;
 import com.android.internal.os.SamplingProfilerIntegration;
 
 import dalvik.system.VMRuntime;
+import dalvik.system.Zygote;
 
 import android.app.ActivityManagerNative;
 import android.bluetooth.BluetoothAdapter;
@@ -396,8 +397,15 @@ class ServerThread extends Thread {
         if (safeMode) {
             try {
                 ActivityManagerNative.getDefault().enterSafeMode();
+                // Post the safe mode state in the Zygote class
+                Zygote.systemInSafeMode = true;
+                // Disable the JIT for the system_server process
+                VMRuntime.getRuntime().disableJitCompilation();
             } catch (RemoteException e) {
             }
+        } else {
+            // Enable the JIT for the system_server process
+            VMRuntime.getRuntime().startJitCompilation();
         }
 
         // It is now time to start up the app processes...
@@ -519,7 +527,6 @@ public class SystemServer
         // The system server has to run all of the time, so it needs to be
         // as efficient as possible with its memory usage.
         VMRuntime.getRuntime().setTargetHeapUtilization(0.8f);
-        VMRuntime.getRuntime().startJitCompilation();
         
         System.loadLibrary("android_servers");
         init1(args);
