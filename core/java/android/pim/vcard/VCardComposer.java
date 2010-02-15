@@ -25,6 +25,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.net.Uri;
 import android.os.RemoteException;
+import android.pim.vcard.exception.VCardException;
 import android.provider.CallLog;
 import android.provider.CallLog.Calls;
 import android.provider.ContactsContract.Contacts;
@@ -54,6 +55,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.ArrayList;
@@ -199,6 +201,10 @@ public class VCardComposer {
                 try {
                     // Create one empty entry.
                     mWriter.write(createOneEntryInternal("-1", null));
+                } catch (VCardException e) {
+                    Log.e(LOG_TAG, "VCardException has been thrown during on Init(): " +
+                            e.getMessage());
+                    return false;
                 } catch (IOException e) {
                     Log.e(LOG_TAG,
                             "IOException occurred during exportOneContactData: "
@@ -455,6 +461,9 @@ public class VCardComposer {
                     return true;
                 }
             }
+        } catch (VCardException e) {
+            Log.e(LOG_TAG, "VCardException has been thrown: " + e.getMessage());
+            return false;
         } catch (OutOfMemoryError error) {
             // Maybe some data (e.g. photo) is too big to have in memory. But it
             // should be rare.
@@ -486,27 +495,37 @@ public class VCardComposer {
     }
 
     private String createOneEntryInternal(final String contactId,
-            Method getEntityIteratorMethod) {
+            Method getEntityIteratorMethod) throws VCardException {
         final Map<String, List<ContentValues>> contentValuesListMap =
                 new HashMap<String, List<ContentValues>>();
         // The resolver may return the entity iterator with no data. It is possiible.
         // e.g. If all the data in the contact of the given contact id are not exportable ones,
         //      they are hidden from the view of this method, though contact id itself exists.
-        boolean dataExists = false;
         EntityIterator entityIterator = null;
         try {
-
             if (getEntityIteratorMethod != null) {
+                final Uri uri = RawContacts.CONTENT_URI.buildUpon()
+                        .appendQueryParameter(Data.FOR_EXPORT_ONLY, "1")
+                        .build();
+                final String selection = Data.CONTACT_ID + "=?";
+                final String[] selectionArgs = new String[] {contactId};
                 try {
-                    final Uri uri = RawContacts.CONTENT_URI.buildUpon()
-                            .appendQueryParameter(Data.FOR_EXPORT_ONLY, "1")
-                            .build();
-                    final String selection = Data.CONTACT_ID + "=?";
-                    final String[] selectionArgs = new String[] {contactId};
                     entityIterator = (EntityIterator)getEntityIteratorMethod.invoke(null,
                             mContentResolver, uri, selection, selectionArgs, null);
-                } catch (Exception e) {
-                    e.printStackTrace();
+                } catch (IllegalArgumentException e) {
+                    Log.e(LOG_TAG, "IllegalArgumentException has been thrown: " +
+                            e.getMessage());
+                } catch (IllegalAccessException e) {
+                    Log.e(LOG_TAG, "IllegalAccessException has been thrown: " +
+                            e.getMessage());
+                } catch (InvocationTargetException e) {
+                    Log.e(LOG_TAG, "InvocationTargetException has been thrown: ");
+                    StackTraceElement[] stackTraceElements = e.getCause().getStackTrace();
+                    for (StackTraceElement element : stackTraceElements) {
+                        Log.e(LOG_TAG, "    at " + element.toString());
+                    }
+                    throw new VCardException("InvocationTargetException has been thrown: " +
+                            e.getCause().getMessage());
                 }
             } else {
                 final Uri uri = RawContacts.CONTENT_URI.buildUpon()
@@ -523,7 +542,11 @@ public class VCardComposer {
                 return "";
             }
 
-            dataExists = entityIterator.hasNext();
+            if (!entityIterator.hasNext()) {
+                Log.w(LOG_TAG, "Data does not exist. contactId: " + contactId);
+                return "";
+            }
+
             while (entityIterator.hasNext()) {
                 Entity entity = entityIterator.next();
                 for (NamedContentValues namedContentValues : entity.getSubValues()) {
@@ -548,10 +571,6 @@ public class VCardComposer {
             if (entityIterator != null) {
                 entityIterator.close();
             }
-        }
-
-        if (!dataExists) {
-            return "";
         }
 
         final VCardBuilder builder = new VCardBuilder(mVCardType);
