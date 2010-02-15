@@ -407,7 +407,8 @@ class BrowserFrame extends Handler {
                         }
                     }
                 }
-                CacheManager.trimCacheIfNeeded();
+                WebViewWorker.getHandler().sendEmptyMessage(
+                        WebViewWorker.MSG_TRIM_CACHE);
                 break;
             }
 

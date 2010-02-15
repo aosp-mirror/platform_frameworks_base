@@ -110,7 +110,9 @@ class FrameLoader {
                 return false;
             }
             mNetwork = Network.getInstance(mListener.getContext());
-            return handleHTTPLoad();
+            WebViewWorker.getHandler().obtainMessage(
+                    WebViewWorker.MSG_ADD_HTTPLOADER, this).sendToTarget();
+            return true;
         } else if (handleLocalFile(url, mListener, mSettings)) {
             return true;
         }
@@ -142,24 +144,33 @@ class FrameLoader {
         }
         if (URLUtil.isAssetUrl(url)) {
             // load asset in a separate thread as it involves IO
-            new FileLoader(url, loadListener, FileLoader.TYPE_ASSET, true)
-                    .enqueue();
+            WebViewWorker.getHandler().obtainMessage(
+                    WebViewWorker.MSG_ADD_STREAMLOADER,
+                    new FileLoader(url, loadListener, FileLoader.TYPE_ASSET,
+                            true)).sendToTarget();
             return true;
         } else if (URLUtil.isResourceUrl(url)) {
             // load resource in a separate thread as it involves IO
-            new FileLoader(url, loadListener, FileLoader.TYPE_RES, true)
-                    .enqueue();
+            WebViewWorker.getHandler().obtainMessage(
+                    WebViewWorker.MSG_ADD_STREAMLOADER,
+                    new FileLoader(url, loadListener, FileLoader.TYPE_RES,
+                            true)).sendToTarget();
             return true;
         } else if (URLUtil.isFileUrl(url)) {
             // load file in a separate thread as it involves IO
-            new FileLoader(url, loadListener, FileLoader.TYPE_FILE, settings
-                    .getAllowFileAccess()).enqueue();
+            WebViewWorker.getHandler().obtainMessage(
+                    WebViewWorker.MSG_ADD_STREAMLOADER,
+                    new FileLoader(url, loadListener, FileLoader.TYPE_FILE,
+                            settings.getAllowFileAccess())).sendToTarget();
             return true;
         } else if (URLUtil.isContentUrl(url)) {
             // Send the raw url to the ContentLoader because it will do a
             // permission check and the url has to match.
             // load content in a separate thread as it involves IO
-            new ContentLoader(loadListener.url(), loadListener).enqueue();
+            WebViewWorker.getHandler().obtainMessage(
+                    WebViewWorker.MSG_ADD_STREAMLOADER,
+                    new ContentLoader(loadListener.url(), loadListener))
+                    .sendToTarget();
             return true;
         } else if (URLUtil.isDataUrl(url)) {
             // load data in the current thread to reduce the latency
@@ -172,8 +183,8 @@ class FrameLoader {
         }
         return false;
     }
-    
-    private boolean handleHTTPLoad() {
+
+    boolean handleHTTPLoad() {
         if (mHeaders == null) {
             mHeaders = new HashMap<String, String>();
         }
@@ -229,7 +240,9 @@ class FrameLoader {
         CacheLoader cacheLoader =
                 new CacheLoader(mListener, result);
         mListener.setCacheLoader(cacheLoader);
-        cacheLoader.load();
+        // Load the cached file in a separate thread
+        WebViewWorker.getHandler().obtainMessage(
+                WebViewWorker.MSG_ADD_STREAMLOADER, cacheLoader).sendToTarget();
     }
 
     /*

@@ -20,8 +20,6 @@ import android.content.Context;
 import android.net.http.EventHandler;
 import android.net.http.Headers;
 import android.os.Handler;
-import android.os.HandlerThread;
-import android.os.Looper;
 import android.os.Message;
 
 import java.io.IOException;
@@ -61,11 +59,6 @@ abstract class StreamLoader implements Handler.Callback {
     // Handler which will be initialized in the thread where load() is called.
     private Handler mHandler;
 
-    // Handler which will be used to load StreamLoader in a separate thread
-    private static StreamQueueHandler sStreamQueueHandler;
-
-    private static final Object sStreamQueueLock = new Object();
-
     /**
      * Constructor. Although this class calls the LoadListener, it only calls
      * the EventHandler Interface methods. LoadListener concrete class is used
@@ -95,26 +88,6 @@ abstract class StreamLoader implements Handler.Callback {
      * @param headers Map of HTTP headers that will be sent to the loader.
      */
     abstract protected void buildHeaders(Headers headers);
-
-    /**
-     * Calling this method to load this StreamLoader in a separate
-     * "StreamLoadingThread".
-     */
-    final void enqueue() {
-        synchronized (sStreamQueueLock) {
-            if (sStreamQueueHandler == null) {
-                HandlerThread thread = new HandlerThread(
-                        StreamQueueHandler.THREAD_NAME,
-                        android.os.Process.THREAD_PRIORITY_DEFAULT +
-                        android.os.Process.THREAD_PRIORITY_LESS_FAVORABLE);
-                thread.start();
-                sStreamQueueHandler = new StreamQueueHandler(thread.getLooper());
-            }
-        }
-
-        sStreamQueueHandler.obtainMessage(StreamQueueHandler.MSG_ADD_LOADER,
-                this).sendToTarget();
-    }
 
     /**
      * Calling this method starts the load of the content for this StreamLoader.
@@ -227,23 +200,5 @@ abstract class StreamLoader implements Handler.Callback {
             }
         }
         mLoadListener.endData();
-    }
-
-    private static class StreamQueueHandler extends Handler {
-        private static final String THREAD_NAME = "StreamLoadingThread";
-
-        private static final int MSG_ADD_LOADER = 101;
-
-        StreamQueueHandler(Looper looper) {
-            super(looper);
-        }
-
-        @Override
-        public void handleMessage(Message msg) {
-            if (msg.what == MSG_ADD_LOADER) {
-                StreamLoader loader = (StreamLoader) msg.obj;
-                loader.load();
-            }
-        }
     }
 }
