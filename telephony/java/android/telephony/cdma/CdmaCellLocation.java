@@ -26,12 +26,17 @@ public class CdmaCellLocation extends CellLocation {
     private int mBaseStationId = -1;
 
     /**
+     * @hide
+     */
+    public final static int INVALID_LAT_LONG = Integer.MAX_VALUE;
+
+    /**
      * Latitude is a decimal number as specified in 3GPP2 C.S0005-A v6.0.
      * It is represented in units of 0.25 seconds and ranges from -1296000
      * to 1296000, both values inclusive (corresponding to a range of -90
      * to +90 degrees). Integer.MAX_VALUE is considered invalid value.
      */
-    private int mBaseStationLatitude = Integer.MAX_VALUE;
+    private int mBaseStationLatitude = INVALID_LAT_LONG;
 
     /**
      * Longitude is a decimal number as specified in 3GPP2 C.S0005-A v6.0.
@@ -39,7 +44,7 @@ public class CdmaCellLocation extends CellLocation {
      * to 2592000, both values inclusive (corresponding to a range of -180
      * to +180 degrees). Integer.MAX_VALUE is considered invalid value.
      */
-    private int mBaseStationLongitude = Integer.MAX_VALUE;
+    private int mBaseStationLongitude = INVALID_LAT_LONG;
 
     private int mSystemId = -1;
     private int mNetworkId = -1;
@@ -51,8 +56,8 @@ public class CdmaCellLocation extends CellLocation {
      */
     public CdmaCellLocation() {
         this.mBaseStationId = -1;
-        this.mBaseStationLatitude = Integer.MAX_VALUE;
-        this.mBaseStationLongitude = Integer.MAX_VALUE;
+        this.mBaseStationLatitude = INVALID_LAT_LONG;
+        this.mBaseStationLongitude = INVALID_LAT_LONG;
         this.mSystemId = -1;
         this.mNetworkId = -1;
     }
@@ -60,12 +65,12 @@ public class CdmaCellLocation extends CellLocation {
     /**
      * Initialize the object from a bundle.
      */
-    public CdmaCellLocation(Bundle bundleWithValues) {
-        this.mBaseStationId = bundleWithValues.getInt("baseStationId");
-        this.mBaseStationLatitude = bundleWithValues.getInt("baseStationLatitude");
-        this.mBaseStationLongitude = bundleWithValues.getInt("baseStationLongitude");
-        this.mSystemId = bundleWithValues.getInt("systemId");
-        this.mNetworkId = bundleWithValues.getInt("networkId");
+    public CdmaCellLocation(Bundle bundle) {
+        this.mBaseStationId = bundle.getInt("baseStationId", mBaseStationId);
+        this.mBaseStationLatitude = bundle.getInt("baseStationLatitude", mBaseStationLatitude);
+        this.mBaseStationLongitude = bundle.getInt("baseStationLongitude", mBaseStationLongitude);
+        this.mSystemId = bundle.getInt("systemId", mSystemId);
+        this.mNetworkId = bundle.getInt("networkId", mNetworkId);
     }
 
     /**
@@ -108,8 +113,8 @@ public class CdmaCellLocation extends CellLocation {
      */
     public void setStateInvalid() {
         this.mBaseStationId = -1;
-        this.mBaseStationLatitude = Integer.MAX_VALUE;
-        this.mBaseStationLongitude = Integer.MAX_VALUE;
+        this.mBaseStationLatitude = INVALID_LAT_LONG;
+        this.mBaseStationLongitude = INVALID_LAT_LONG;
         this.mSystemId = -1;
         this.mNetworkId = -1;
     }

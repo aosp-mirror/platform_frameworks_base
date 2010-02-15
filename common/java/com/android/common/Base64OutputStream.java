@@ -29,6 +29,7 @@ public class Base64OutputStream extends FilterOutputStream {
     private final boolean encode;
     private final Base64.EncoderState estate;
     private final Base64.DecoderState dstate;
+    private final int flags;
 
     private byte[] buffer = null;
     private int bpos = 0;
@@ -59,6 +60,7 @@ public class Base64OutputStream extends FilterOutputStream {
      */
     public Base64OutputStream(OutputStream out, int flags, boolean encode) {
         super(out);
+        this.flags = flags;
         this.encode = encode;
         if (encode) {
             estate = new Base64.EncoderState(flags, null);
@@ -106,7 +108,11 @@ public class Base64OutputStream extends FilterOutputStream {
     public void close() throws IOException {
         flushBuffer();
         internalWrite(EMPTY, 0, 0, true);
-        out.close();
+        if ((flags & Base64.NO_CLOSE) == 0) {
+            out.close();
+        } else {
+            out.flush();
+        }
     }
 
     /**

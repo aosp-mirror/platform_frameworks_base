@@ -60,6 +60,8 @@ protected:
     virtual ~MPEG4Source();
 
 private:
+    Mutex mLock;
+
     sp<MetaData> mFormat;
     sp<DataSource> mDataSource;
     int32_t mTimescale;
@@ -1300,6 +1302,8 @@ MPEG4Source::~MPEG4Source() {
 }
 
 status_t MPEG4Source::start(MetaData *params) {
+    Mutex::Autolock autoLock(mLock);
+
     CHECK(!mStarted);
 
     int32_t val;
@@ -1325,6 +1329,8 @@ status_t MPEG4Source::start(MetaData *params) {
 }
 
 status_t MPEG4Source::stop() {
+    Mutex::Autolock autoLock(mLock);
+
     CHECK(mStarted);
 
     if (mBuffer != NULL) {
@@ -1345,6 +1351,8 @@ status_t MPEG4Source::stop() {
 }
 
 sp<MetaData> MPEG4Source::getFormat() {
+    Mutex::Autolock autoLock(mLock);
+
     return mFormat;
 }
 
@@ -1369,6 +1377,8 @@ size_t MPEG4Source::parseNALSize(const uint8_t *data) const {
 
 status_t MPEG4Source::read(
         MediaBuffer **out, const ReadOptions *options) {
+    Mutex::Autolock autoLock(mLock);
+
     CHECK(mStarted);
 
     *out = NULL;
@@ -1428,6 +1438,7 @@ status_t MPEG4Source::read(
                 return ERROR_IO;
             }
 
+            CHECK(mBuffer != NULL);
             mBuffer->set_range(0, size);
             mBuffer->meta_data()->clear();
             mBuffer->meta_data()->setInt64(
@@ -1461,8 +1472,10 @@ status_t MPEG4Source::read(
         }
 
         MediaBuffer *clone = mBuffer->clone();
+        CHECK(clone != NULL);
         clone->set_range(mBuffer->range_offset() + mNALLengthSize, nal_size);
 
+        CHECK(mBuffer != NULL);
         mBuffer->set_range(
                 mBuffer->range_offset() + mNALLengthSize + nal_size,
                 mBuffer->range_length() - mNALLengthSize - nal_size);
@@ -1521,6 +1534,7 @@ status_t MPEG4Source::read(
         }
         CHECK_EQ(srcOffset, size);
 
+        CHECK(mBuffer != NULL);
         mBuffer->set_range(0, dstOffset);
         mBuffer->meta_data()->clear();
         mBuffer->meta_data()->setInt64(

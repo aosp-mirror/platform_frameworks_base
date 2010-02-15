@@ -31,7 +31,6 @@ namespace android {
 
 struct PrefetchedSource : public MediaSource {
     PrefetchedSource(
-            const sp<Prefetcher> &prefetcher,
             size_t index,
             const sp<MediaSource> &source);
 
@@ -52,13 +51,13 @@ private:
     Mutex mLock;
     Condition mCondition;
 
-    sp<Prefetcher> mPrefetcher;
     sp<MediaSource> mSource;
     size_t mIndex;
     bool mStarted;
     bool mReachedEOS;
     int64_t mSeekTimeUs;
     int64_t mCacheDurationUs;
+    bool mPrefetcherStopped;
 
     List<MediaBuffer *> mCachedBuffers;
 
@@ -69,6 +68,7 @@ private:
     void clearCache_l();
 
     void cacheMore();
+    void onPrefetcherStopped();
 
     PrefetchedSource(const PrefetchedSource &);
     PrefetchedSource &operator=(const PrefetchedSource &);
@@ -88,7 +88,7 @@ sp<MediaSource> Prefetcher::addSource(const sp<MediaSource> &source) {
     Mutex::Autolock autoLock(mLock);
 
     sp<PrefetchedSource> psource =
-        new PrefetchedSource(this, mSources.size(), source);
+        new PrefetchedSource(mSources.size(), source);
 
     mSources.add(psource);
 
@@ -130,8 +130,6 @@ void Prefetcher::threadFunc() {
     for (;;) {
         Mutex::Autolock autoLock(mLock);
         if (mDone) {
-            mThreadExited = true;
-            mCondition.signal();
             break;
         }
         mCondition.waitRelative(mLock, 10000000ll);
@@ -169,6 +167,19 @@ void Prefetcher::threadFunc() {
             source->cacheMore();
         }
     }
+
+    for (size_t i = 0; i < mSources.size(); ++i) {
+        sp<PrefetchedSource> source = mSources[i].promote();
+
+        if (source == NULL) {
+            continue;
+        }
+
+        source->onPrefetcherStopped();
+    }
+
+    mThreadExited = true;
+    mCondition.signal();
 }
 
 int64_t Prefetcher::getCachedDurationUs(bool *noMoreData) {
@@ -219,16 +230,15 @@ status_t Prefetcher::prepare() {
 ////////////////////////////////////////////////////////////////////////////////
 
 PrefetchedSource::PrefetchedSource(
-        const sp<Prefetcher> &prefetcher,
         size_t index,
         const sp<MediaSource> &source)
-    : mPrefetcher(prefetcher),
-      mSource(source),
+    : mSource(source),
       mIndex(index),
       mStarted(false),
       mReachedEOS(false),
       mSeekTimeUs(0),
-      mCacheDurationUs(0) {
+      mCacheDurationUs(0),
+      mPrefetcherStopped(false) {
 }
 
 PrefetchedSource::~PrefetchedSource() {
@@ -238,6 +248,8 @@ PrefetchedSource::~PrefetchedSource() {
 }
 
 status_t PrefetchedSource::start(MetaData *params) {
+    CHECK(!mStarted);
+
     Mutex::Autolock autoLock(mLock);
 
     status_t err = mSource->start(params);
@@ -252,6 +264,8 @@ status_t PrefetchedSource::start(MetaData *params) {
 }
 
 status_t PrefetchedSource::stop() {
+    CHECK(mStarted);
+
     Mutex::Autolock autoLock(mLock);
 
     clearCache_l();
@@ -281,7 +295,7 @@ status_t PrefetchedSource::read(
         mSeekTimeUs = seekTimeUs;
     }
 
-    while (!mReachedEOS && mCachedBuffers.empty()) {
+    while (!mPrefetcherStopped && !mReachedEOS && mCachedBuffers.empty()) {
         mCondition.wait(mLock);
     }
 
@@ -388,6 +402,12 @@ void PrefetchedSource::clearCache_l() {
     }
 
     updateCacheDuration_l();
+}
+
+void PrefetchedSource::onPrefetcherStopped() {
+    Mutex::Autolock autoLock(mLock);
+    mPrefetcherStopped = true;
+    mCondition.signal();
 }
 
 }  // namespace android

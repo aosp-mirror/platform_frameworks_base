@@ -84,6 +84,7 @@ private:
 
 struct AwesomeLocalRenderer : public AwesomeRenderer {
     AwesomeLocalRenderer(
+            bool previewOnly,
             const char *componentName,
             OMX_COLOR_FORMATTYPE colorFormat,
             const sp<ISurface> &surface,
@@ -91,15 +92,18 @@ struct AwesomeLocalRenderer : public AwesomeRenderer {
             size_t decodedWidth, size_t decodedHeight)
         : mTarget(NULL),
           mLibHandle(NULL) {
-            init(componentName,
+            init(previewOnly, componentName,
                  colorFormat, surface, displayWidth,
                  displayHeight, decodedWidth, decodedHeight);
     }
 
     virtual void render(MediaBuffer *buffer) {
-        mTarget->render(
-                (const uint8_t *)buffer->data() + buffer->range_offset(),
-                buffer->range_length(), NULL);
+        render((const uint8_t *)buffer->data() + buffer->range_offset(),
+               buffer->range_length());
+    }
+
+    void render(const void *data, size_t size) {
+        mTarget->render(data, size, NULL);
     }
 
 protected:
@@ -118,6 +122,7 @@ private:
     void *mLibHandle;
 
     void init(
+            bool previewOnly,
             const char *componentName,
             OMX_COLOR_FORMATTYPE colorFormat,
             const sp<ISurface> &surface,
@@ -129,31 +134,39 @@ private:
 };
 
 void AwesomeLocalRenderer::init(
+        bool previewOnly,
         const char *componentName,
         OMX_COLOR_FORMATTYPE colorFormat,
         const sp<ISurface> &surface,
         size_t displayWidth, size_t displayHeight,
         size_t decodedWidth, size_t decodedHeight) {
-    mLibHandle = dlopen("libstagefrighthw.so", RTLD_NOW);
+    if (!previewOnly) {
+        // We will stick to the vanilla software-color-converting renderer
+        // for "previewOnly" mode, to avoid unneccessarily switching overlays
+        // more often than necessary.
 
-    if (mLibHandle) {
-        typedef VideoRenderer *(*CreateRendererFunc)(
-                const sp<ISurface> &surface,
-                const char *componentName,
-                OMX_COLOR_FORMATTYPE colorFormat,
-                size_t displayWidth, size_t displayHeight,
-                size_t decodedWidth, size_t decodedHeight);
+        mLibHandle = dlopen("libstagefrighthw.so", RTLD_NOW);
 
-        CreateRendererFunc func =
-            (CreateRendererFunc)dlsym(
-                    mLibHandle,
-                    "_Z14createRendererRKN7android2spINS_8ISurfaceEEEPKc20"
-                    "OMX_COLOR_FORMATTYPEjjjj");
+        if (mLibHandle) {
+            typedef VideoRenderer *(*CreateRendererFunc)(
+                    const sp<ISurface> &surface,
+                    const char *componentName,
+                    OMX_COLOR_FORMATTYPE colorFormat,
+                    size_t displayWidth, size_t displayHeight,
+                    size_t decodedWidth, size_t decodedHeight);
 
-        if (func) {
-            mTarget =
-                (*func)(surface, componentName, colorFormat,
-                    displayWidth, displayHeight, decodedWidth, decodedHeight);
+            CreateRendererFunc func =
+                (CreateRendererFunc)dlsym(
+                        mLibHandle,
+                        "_Z14createRendererRKN7android2spINS_8ISurfaceEEEPKc20"
+                        "OMX_COLOR_FORMATTYPEjjjj");
+
+            if (func) {
+                mTarget =
+                    (*func)(surface, componentName, colorFormat,
+                        displayWidth, displayHeight,
+                        decodedWidth, decodedHeight);
+            }
         }
     }
 
@@ -166,10 +179,12 @@ void AwesomeLocalRenderer::init(
 
 AwesomePlayer::AwesomePlayer()
     : mTimeSource(NULL),
+      mVideoRendererIsPreview(false),
       mAudioPlayer(NULL),
       mFlags(0),
       mLastVideoBuffer(NULL),
-      mVideoBuffer(NULL) {
+      mVideoBuffer(NULL),
+      mSuspensionState(NULL) {
     CHECK_EQ(mClient.connect(), OK);
 
     DataSource::RegisterDefaultSniffers();
@@ -221,7 +236,11 @@ void AwesomePlayer::setListener(const wp<MediaPlayerBase> &listener) {
 status_t AwesomePlayer::setDataSource(
         const char *uri, const KeyedVector<String8, String8> *headers) {
     Mutex::Autolock autoLock(mLock);
+    return setDataSource_l(uri, headers);
+}
 
+status_t AwesomePlayer::setDataSource_l(
+        const char *uri, const KeyedVector<String8, String8> *headers) {
     reset_l();
 
     mUri = uri;
@@ -243,15 +262,22 @@ status_t AwesomePlayer::setDataSource(
 
     reset_l();
 
-    sp<DataSource> source = new FileSource(fd, offset, length);
+    sp<DataSource> dataSource = new FileSource(fd, offset, length);
 
-    status_t err = source->initCheck();
+    status_t err = dataSource->initCheck();
 
     if (err != OK) {
         return err;
     }
 
-    sp<MediaExtractor> extractor = MediaExtractor::Create(source);
+    mFileSource = dataSource;
+
+    return setDataSource_l(dataSource);
+}
+
+status_t AwesomePlayer::setDataSource_l(
+        const sp<DataSource> &dataSource) {
+    sp<MediaExtractor> extractor = MediaExtractor::Create(dataSource);
 
     if (extractor == NULL) {
         return UNKNOWN_ERROR;
@@ -299,6 +325,26 @@ void AwesomePlayer::reset_l() {
 
     cancelPlayerEvents();
 
+    if (mPrefetcher != NULL) {
+        CHECK_EQ(mPrefetcher->getStrongCount(), 1);
+    }
+    mPrefetcher.clear();
+
+    // Shutdown audio first, so that the respone to the reset request
+    // appears to happen instantaneously as far as the user is concerned
+    // If we did this later, audio would continue playing while we
+    // shutdown the video-related resources and the player appear to
+    // not be as responsive to a reset request.
+    mAudioSource.clear();
+
+    if (mTimeSource != mAudioPlayer) {
+        delete mTimeSource;
+    }
+    mTimeSource = NULL;
+
+    delete mAudioPlayer;
+    mAudioPlayer = NULL;
+
     mVideoRenderer.clear();
 
     if (mLastVideoBuffer) {
@@ -325,16 +371,6 @@ void AwesomePlayer::reset_l() {
         IPCThreadState::self()->flushCommands();
     }
 
-    mAudioSource.clear();
-
-    if (mTimeSource != mAudioPlayer) {
-        delete mTimeSource;
-    }
-    mTimeSource = NULL;
-
-    delete mAudioPlayer;
-    mAudioPlayer = NULL;
-
     mDurationUs = -1;
     mFlags = 0;
     mVideoWidth = mVideoHeight = -1;
@@ -344,10 +380,13 @@ void AwesomePlayer::reset_l() {
     mSeeking = false;
     mSeekTimeUs = 0;
 
-    mPrefetcher.clear();
-
     mUri.setTo("");
     mUriHeaders.clear();
+
+    mFileSource.clear();
+
+    delete mSuspensionState;
+    mSuspensionState = NULL;
 }
 
 void AwesomePlayer::notifyListener_l(int msg, int ext1, int ext2) {
@@ -403,7 +442,10 @@ void AwesomePlayer::onStreamDone() {
 
 status_t AwesomePlayer::play() {
     Mutex::Autolock autoLock(mLock);
+    return play_l();
+}
 
+status_t AwesomePlayer::play_l() {
     if (mFlags & PLAYING) {
         return OK;
     }
@@ -504,6 +546,7 @@ void AwesomePlayer::initRenderer_l() {
             // Other decoders are instantiated locally and as a consequence
             // allocate their buffers in local address space.
             mVideoRenderer = new AwesomeLocalRenderer(
+                false,  // previewOnly
                 component,
                 (OMX_COLOR_FORMATTYPE)format,
                 mISurface,
@@ -579,7 +622,10 @@ status_t AwesomePlayer::getDuration(int64_t *durationUs) {
 
 status_t AwesomePlayer::getPosition(int64_t *positionUs) {
     Mutex::Autolock autoLock(mLock);
+    return getPosition_l(positionUs);
+}
 
+status_t AwesomePlayer::getPosition_l(int64_t *positionUs) {
     if (mVideoSource != NULL) {
         *positionUs = mVideoTimeUs;
     } else if (mAudioPlayer != NULL) {
@@ -697,7 +743,11 @@ status_t AwesomePlayer::setVideoSource(sp<MediaSource> source) {
 
 void AwesomePlayer::onVideoEvent() {
     Mutex::Autolock autoLock(mLock);
-
+    if (!mVideoEventPending) {
+        // The event has been cancelled in reset_l() but had already
+        // been scheduled for execution at that time.
+        return;
+    }
     mVideoEventPending = false;
 
     if (mSeeking) {
@@ -730,6 +780,7 @@ void AwesomePlayer::onVideoEvent() {
                     LOGV("VideoSource signalled format change.");
 
                     if (mVideoRenderer != NULL) {
+                        mVideoRendererIsPreview = false;
                         initRenderer_l();
                     }
                     continue;
@@ -808,7 +859,9 @@ void AwesomePlayer::onVideoEvent() {
         return;
     }
 
-    if (mVideoRenderer == NULL) {
+    if (mVideoRendererIsPreview || mVideoRenderer == NULL) {
+        mVideoRendererIsPreview = false;
+
         initRenderer_l();
     }
 
@@ -985,6 +1038,7 @@ void AwesomePlayer::onPrepareAsyncEvent() {
 
     if (prefetcher != NULL) {
         prefetcher->prepare();
+        prefetcher.clear();
     }
 
     Mutex::Autolock autoLock(mLock);
@@ -1004,6 +1058,114 @@ void AwesomePlayer::onPrepareAsyncEvent() {
     mFlags |= PREPARED;
     mAsyncPrepareEvent = NULL;
     mPreparedCondition.broadcast();
+}
+
+status_t AwesomePlayer::suspend() {
+    LOGI("suspend");
+    Mutex::Autolock autoLock(mLock);
+
+    if (mSuspensionState != NULL) {
+        return INVALID_OPERATION;
+    }
+
+    while (mFlags & PREPARING) {
+        mPreparedCondition.wait(mLock);
+    }
+
+    SuspensionState *state = new SuspensionState;
+    state->mUri = mUri;
+    state->mUriHeaders = mUriHeaders;
+    state->mFileSource = mFileSource;
+
+    state->mFlags = mFlags & (PLAYING | LOOPING);
+    getPosition_l(&state->mPositionUs);
+
+    if (mLastVideoBuffer) {
+        size_t size = mLastVideoBuffer->range_length();
+        if (size) {
+            state->mLastVideoFrameSize = size;
+            state->mLastVideoFrame = malloc(size);
+            memcpy(state->mLastVideoFrame,
+                   (const uint8_t *)mLastVideoBuffer->data()
+                        + mLastVideoBuffer->range_offset(),
+                   size);
+
+            state->mVideoWidth = mVideoWidth;
+            state->mVideoHeight = mVideoHeight;
+
+            sp<MetaData> meta = mVideoSource->getFormat();
+            CHECK(meta->findInt32(kKeyColorFormat, &state->mColorFormat));
+            CHECK(meta->findInt32(kKeyWidth, &state->mDecodedWidth));
+            CHECK(meta->findInt32(kKeyHeight, &state->mDecodedHeight));
+        }
+    }
+
+    reset_l();
+
+    mSuspensionState = state;
+
+    return OK;
+}
+
+status_t AwesomePlayer::resume() {
+    LOGI("resume");
+    Mutex::Autolock autoLock(mLock);
+
+    if (mSuspensionState == NULL) {
+        return INVALID_OPERATION;
+    }
+
+    SuspensionState *state = mSuspensionState;
+    mSuspensionState = NULL;
+
+    status_t err;
+    if (state->mFileSource != NULL) {
+        err = setDataSource_l(state->mFileSource);
+
+        if (err == OK) {
+            mFileSource = state->mFileSource;
+        }
+    } else {
+        err = setDataSource_l(state->mUri, &state->mUriHeaders);
+    }
+
+    if (err != OK) {
+        delete state;
+        state = NULL;
+
+        return err;
+    }
+
+    seekTo_l(state->mPositionUs);
+
+    mFlags = state->mFlags & LOOPING;
+
+    if (state->mLastVideoFrame && mISurface != NULL) {
+        mVideoRenderer =
+            new AwesomeLocalRenderer(
+                    true,  // previewOnly
+                    "",
+                    (OMX_COLOR_FORMATTYPE)state->mColorFormat,
+                    mISurface,
+                    state->mVideoWidth,
+                    state->mVideoHeight,
+                    state->mDecodedWidth,
+                    state->mDecodedHeight);
+
+        mVideoRendererIsPreview = true;
+
+        ((AwesomeLocalRenderer *)mVideoRenderer.get())->render(
+                state->mLastVideoFrame, state->mLastVideoFrameSize);
+    }
+
+    if (state->mFlags & PLAYING) {
+        play_l();
+    }
+
+    delete state;
+    state = NULL;
+
+    return OK;
 }
 
 }  // namespace android

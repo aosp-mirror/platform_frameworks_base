@@ -892,6 +892,11 @@ final class WebViewCore {
 
         static final int SET_NETWORK_TYPE = 183;
 
+        // navigator.isApplicationInstalled()
+        static final int ADD_PACKAGE_NAMES = 184;
+        static final int ADD_PACKAGE_NAME = 185;
+        static final int REMOVE_PACKAGE_NAME = 186;
+
         // private message ids
         private static final int DESTROY =     200;
 
@@ -1362,6 +1367,33 @@ final class WebViewCore {
 
                         case HIDE_FULLSCREEN:
                             nativeFullScreenPluginHidden(msg.arg1);
+                            break;
+
+                        case ADD_PACKAGE_NAMES:
+                            if (BrowserFrame.sJavaBridge == null) {
+                                throw new IllegalStateException("No WebView " +
+                                        "has been created in this process!");
+                            }
+                            BrowserFrame.sJavaBridge.addPackageNames(
+                                    (Set<String>) msg.obj);
+                            break;
+
+                        case ADD_PACKAGE_NAME:
+                            if (BrowserFrame.sJavaBridge == null) {
+                                throw new IllegalStateException("No WebView " +
+                                        "has been created in this process!");
+                            }
+                            BrowserFrame.sJavaBridge.addPackageName(
+                                    (String) msg.obj);
+                            break;
+
+                        case REMOVE_PACKAGE_NAME:
+                            if (BrowserFrame.sJavaBridge == null) {
+                                throw new IllegalStateException("No WebView " +
+                                        "has been created in this process!");
+                            }
+                            BrowserFrame.sJavaBridge.removePackageName(
+                                    (String) msg.obj);
                             break;
                     }
                 }

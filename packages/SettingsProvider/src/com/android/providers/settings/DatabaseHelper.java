@@ -76,7 +76,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // database gets upgraded properly. At a minimum, please confirm that 'upgradeVersion'
     // is properly propagated through your change.  Not doing so will result in a loss of user
     // settings.
-    private static final int DATABASE_VERSION = 49;
+    private static final int DATABASE_VERSION = 50;
 
     private Context mContext;
 
@@ -600,7 +600,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
            upgradeVersion = 47;
        }
 
-        
+
         if (upgradeVersion == 47) {
             /*
              * The password mode constants have changed again; reset back to no
@@ -615,7 +615,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             }
            upgradeVersion = 48;
        }
-        
+
        if (upgradeVersion == 48) {
            /*
             * Adding a new setting for which voice recognition service to use.
@@ -633,6 +633,24 @@ public class DatabaseHelper extends SQLiteOpenHelper {
            upgradeVersion = 49;
        }
 
+       if (upgradeVersion == 49) {
+           /*
+            * New settings for new user interface noises.
+            */
+           db.beginTransaction();
+           try {
+                SQLiteStatement stmt = db.compileStatement("INSERT INTO system(name,value)"
+                        + " VALUES(?,?);");
+                loadUISoundEffectsSettings(stmt);
+                stmt.close();
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+            }
+
+           upgradeVersion = 50;
+       }
+
        if (upgradeVersion != currentVersion) {
             Log.w(TAG, "Got stuck trying to upgrade from version " + upgradeVersion
                     + ", must wipe the settings provider");
@@ -648,6 +666,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             db.execSQL("DROP INDEX IF EXISTS bookmarksIndex2");
             db.execSQL("DROP TABLE IF EXISTS favorites");
             onCreate(db);
+
+            // Added for diagnosing settings.db wipes after the fact
+            String wipeReason = oldVersion + "/" + upgradeVersion + "/" + currentVersion;
+            db.execSQL("INSERT INTO secure(name,value) values('" +
+                    "wiped_db_reason" + "','" + wipeReason + "');");
         }
     }
 
@@ -889,7 +912,35 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         loadBooleanSetting(stmt, Settings.System.SET_INSTALL_LOCATION, R.bool.set_install_location);
         loadSetting(stmt, Settings.System.DEFAULT_INSTALL_LOCATION,
                 PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY);
+
+        loadUISoundEffectsSettings(stmt);
+
         stmt.close();
+    }
+
+    private void loadUISoundEffectsSettings(SQLiteStatement stmt) {
+        loadIntegerSetting(stmt, Settings.System.POWER_SOUNDS_ENABLED,
+            R.integer.def_power_sounds_enabled);
+        loadStringSetting(stmt, Settings.System.LOW_BATTERY_SOUND,
+            R.string.def_low_battery_sound);
+
+        loadIntegerSetting(stmt, Settings.System.DOCK_SOUNDS_ENABLED,
+            R.integer.def_dock_sounds_enabled);
+        loadStringSetting(stmt, Settings.System.DESK_DOCK_SOUND,
+            R.string.def_desk_dock_sound);
+        loadStringSetting(stmt, Settings.System.DESK_UNDOCK_SOUND,
+            R.string.def_desk_undock_sound);
+        loadStringSetting(stmt, Settings.System.CAR_DOCK_SOUND,
+            R.string.def_car_dock_sound);
+        loadStringSetting(stmt, Settings.System.CAR_UNDOCK_SOUND,
+            R.string.def_car_undock_sound);
+
+        loadIntegerSetting(stmt, Settings.System.LOCKSCREEN_SOUNDS_ENABLED,
+            R.integer.def_lockscreen_sounds_enabled);
+        loadStringSetting(stmt, Settings.System.LOCK_SOUND,
+            R.string.def_lock_sound);
+        loadStringSetting(stmt, Settings.System.UNLOCK_SOUND,
+            R.string.def_unlock_sound);
     }
 
     private void loadDefaultAnimationSettings(SQLiteStatement stmt) {
@@ -976,7 +1027,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         loadBooleanSetting(stmt, Settings.Secure.MOUNT_UMS_NOTIFY_ENABLED,
                 R.bool.def_mount_ums_notify_enabled);
-        
+
         loadVoiceRecognitionServiceSetting(stmt);
 
         stmt.close();
@@ -989,7 +1040,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         loadStringSetting(stmt, Settings.Secure.BACKUP_TRANSPORT,
                 R.string.def_backup_transport);
     }
-    
+
     /**
      * Introduced in database version 49.
      */
@@ -999,19 +1050,19 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 mContext.getPackageManager().queryIntentServices(
                         new Intent(RecognitionService.SERVICE_INTERFACE), 0);
         int numAvailable = availableRecognitionServices.size();
-        
+
         if (numAvailable == 0) {
             Log.w(TAG, "no available voice recognition services found");
         } else {
             if (numAvailable > 1) {
                 Log.w(TAG, "more than one voice recognition service found, picking first");
             }
-            
+
             ServiceInfo serviceInfo = availableRecognitionServices.get(0).serviceInfo;
             selectedService =
                     new ComponentName(serviceInfo.packageName, serviceInfo.name).flattenToString();
         }
-        
+
         loadSetting(stmt, Settings.Secure.VOICE_RECOGNITION_SERVICE,
                 selectedService == null ? "" : selectedService);
     }

@@ -1,3 +1,29 @@
+/*
+// block of defines matching what RS will insert at runtime.
+struct Params_s{
+    int inHeight;
+    int inWidth;
+    int outHeight;
+    int outWidth;
+    float threshold;
+};
+struct Params_s * Params;
+struct InPixel_s{
+    char a;
+    char b;
+    char g;
+    char r;
+};
+struct InPixel_s * InPixel;
+struct OutPixel_s{
+    char a;
+    char b;
+    char g;
+    char r;
+};
+struct OutPixel_s * OutPixel;
+*/
+
 struct color_s {
     char b;
     char g;
@@ -14,8 +40,6 @@ void main() {
     int count = Params->inWidth * Params->inHeight;
     int i;
     float threshold = (Params->threshold * 255.f);
-
-    //testFnc(count, threshold, in, out);
 
     for (i = 0; i < count; i++) {
         float luminance = 0.2125f * in->r +

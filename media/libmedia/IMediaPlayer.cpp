@@ -43,6 +43,8 @@ enum {
     INVOKE,
     SET_METADATA_FILTER,
     GET_METADATA,
+    SUSPEND,
+    RESUME,
 };
 
 class BpMediaPlayer: public BpInterface<IMediaPlayer>
@@ -199,6 +201,26 @@ public:
         remote()->transact(GET_METADATA, request, reply);
         return reply->readInt32();
     }
+
+    status_t suspend() {
+        Parcel request;
+        request.writeInterfaceToken(IMediaPlayer::getInterfaceDescriptor());
+
+        Parcel reply;
+        remote()->transact(SUSPEND, request, &reply);
+
+        return reply.readInt32();
+    }
+
+    status_t resume() {
+        Parcel request;
+        request.writeInterfaceToken(IMediaPlayer::getInterfaceDescriptor());
+
+        Parcel reply;
+        remote()->transact(RESUME, request, &reply);
+
+        return reply.readInt32();
+    }
 };
 
 IMPLEMENT_META_INTERFACE(MediaPlayer, "android.media.IMediaPlayer");
@@ -297,6 +319,16 @@ status_t BnMediaPlayer::onTransact(
         case SET_METADATA_FILTER: {
             CHECK_INTERFACE(IMediaPlayer, data, reply);
             reply->writeInt32(setMetadataFilter(data));
+            return NO_ERROR;
+        } break;
+        case SUSPEND: {
+            CHECK_INTERFACE(IMediaPlayer, data, reply);
+            reply->writeInt32(suspend());
+            return NO_ERROR;
+        } break;
+        case RESUME: {
+            CHECK_INTERFACE(IMediaPlayer, data, reply);
+            reply->writeInt32(resume());
             return NO_ERROR;
         } break;
         case GET_METADATA: {

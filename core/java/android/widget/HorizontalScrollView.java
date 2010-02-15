@@ -461,7 +461,8 @@ public class HorizontalScrollView extends FrameLayout {
                 final int deltaX = (int) (mLastMotionX - x);
                 mLastMotionX = x;
 
-                super.scrollTo(mScrollX + deltaX, mScrollY);
+                overscrollBy(deltaX, 0, mScrollX, 0, getScrollRange(), 0,
+                        getOverscrollMax(), 0);
                 break;
             case MotionEvent.ACTION_UP:
                 final VelocityTracker velocityTracker = mVelocityTracker;
@@ -472,8 +473,7 @@ public class HorizontalScrollView extends FrameLayout {
                     if ((Math.abs(initialVelocity) > mMinimumVelocity)) {
                         fling(-initialVelocity);
                     } else {
-                        final int right = Math.max(0, getChildAt(0).getHeight() - 
-                                (getHeight() - mPaddingRight - mPaddingLeft));
+                        final int right = getScrollRange();
                         if (mScroller.springback(mScrollX, mScrollY, 0, 0, right, 0)) {
                             invalidate();
                         }
@@ -486,6 +486,41 @@ public class HorizontalScrollView extends FrameLayout {
                 }
         }
         return true;
+    }
+    
+    @Override
+    protected void onOverscrolled(int scrollX, int scrollY,
+            boolean clampedX, boolean clampedY) {
+        // Treat animating scrolls differently; see #computeScroll() for why.
+        if (!mScroller.isFinished()) {
+            mScrollX = scrollX;
+            mScrollY = scrollY;
+            if (clampedX) {
+                mScroller.springback(mScrollX, mScrollY, 0, getScrollRange(), 0, 0);
+            }
+        } else {
+            super.scrollTo(scrollX, scrollY);
+        }
+    }
+    
+    private int getOverscrollMax() {
+        int childCount = getChildCount();
+        int containerOverscroll = (getWidth() - mPaddingLeft - mPaddingRight) / 3;
+        if (childCount > 0) {
+            return Math.min(containerOverscroll, getChildAt(0).getWidth() / 3);
+        } else {
+            return containerOverscroll;
+        }
+    }
+    
+    private int getScrollRange() {
+        int scrollRange = 0;
+        if (getChildCount() > 0) {
+            View child = getChildAt(0);
+            scrollRange = Math.max(0,
+                    child.getWidth() - getWidth() - mPaddingLeft - mPaddingRight);
+        }
+        return scrollRange;
     }
 
     /**
@@ -856,9 +891,26 @@ public class HorizontalScrollView extends FrameLayout {
     @Override
     protected int computeHorizontalScrollRange() {
         int count = getChildCount();
-        return count == 0 ? getWidth() : getChildAt(0).getRight();
+        if (count == 0) {
+            return getWidth();
+        }
+        
+        int scrollRange = getChildAt(0).getRight();
+        int scrollX = mScrollX;
+        int overscrollRight = scrollRange - getWidth() - mPaddingLeft - mPaddingRight;
+        if (scrollX < 0) {
+            scrollRange -= scrollX;
+        } else if (scrollX > overscrollRight) {
+            scrollRange += scrollX - overscrollRight;
+        }
+        
+        return scrollRange;
     }
-
+    
+    @Override
+    protected int computeHorizontalScrollOffset() {
+        return Math.max(0, super.computeHorizontalScrollOffset());
+    }
 
     @Override
     protected void measureChild(View child, int parentWidthMeasureSpec, int parentHeightMeasureSpec) {
@@ -913,10 +965,9 @@ public class HorizontalScrollView extends FrameLayout {
             int x = mScroller.getCurrX();
             int y = mScroller.getCurrY();
 
-            mScrollX = x;
-            mScrollY = y;
-
-            if (oldX != mScrollX || oldY != mScrollY) {
+            if (oldX != x || oldY != y) {
+                overscrollBy(x - oldX, y - oldY, oldX, oldY, getScrollRange(), 0,
+                        getOverscrollMax(), 0);
                 onScrollChanged(mScrollX, mScrollY, oldX, oldY);
             }
 

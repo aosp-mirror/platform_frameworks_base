@@ -86,6 +86,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import junit.framework.Assert;
 
@@ -2900,6 +2901,45 @@ public class WebView extends AbsoluteLayout
      */
     public WebSettings getSettings() {
         return mWebViewCore.getSettings();
+    }
+
+    /**
+     * Use this method to inform the webview about packages that are installed
+     * in the system. This information will be used by the
+     * navigator.isApplicationInstalled() API.
+     * @param packageNames is a set of package names that are known to be
+     * installed in the system.
+     *
+     * @hide not a public API
+     */
+    public void addPackageNames(Set<String> packageNames) {
+        mWebViewCore.sendMessage(EventHub.ADD_PACKAGE_NAMES, packageNames);
+    }
+
+    /**
+     * Use this method to inform the webview about single packages that are
+     * installed in the system. This information will be used by the
+     * navigator.isApplicationInstalled() API.
+     * @param packageName is the name of a package that is known to be
+     * installed in the system.
+     *
+     * @hide not a public API
+     */
+    public void addPackageName(String packageName) {
+        mWebViewCore.sendMessage(EventHub.ADD_PACKAGE_NAME, packageName);
+    }
+
+    /**
+     * Use this method to inform the webview about packages that are uninstalled
+     * in the system. This information will be used by the
+     * navigator.isApplicationInstalled() API.
+     * @param packageName is the name of a package that has been uninstalled in
+     * the system.
+     *
+     * @hide not a public API
+     */
+    public void removePackageName(String packageName) {
+        mWebViewCore.sendMessage(EventHub.REMOVE_PACKAGE_NAME, packageName);
     }
 
    /**

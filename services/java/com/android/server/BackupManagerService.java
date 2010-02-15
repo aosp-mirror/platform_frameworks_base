@@ -896,9 +896,7 @@ class BackupManagerService extends IBackupManager.Stub {
             try {
                 ApplicationInfo app = pkg.applicationInfo;
                 if (((app.flags&ApplicationInfo.FLAG_ALLOW_BACKUP) == 0)
-                        || app.backupAgentName == null
-                        || (mPackageManager.checkPermission(android.Manifest.permission.BACKUP_DATA,
-                                pkg.packageName) != PackageManager.PERMISSION_GRANTED)) {
+                        || app.backupAgentName == null) {
                     packages.remove(a);
                 }
                 else {
@@ -1281,15 +1279,6 @@ class BackupManagerService extends IBackupManager.Stub {
         private int doQueuedBackups(IBackupTransport transport) {
             for (BackupRequest request : mQueue) {
                 Log.d(TAG, "starting agent for backup of " + request);
-
-                // Don't run backup, even if requested, if the target app does not have
-                // the requisite permission
-                if (mPackageManager.checkPermission(android.Manifest.permission.BACKUP_DATA,
-                        request.appInfo.packageName) != PackageManager.PERMISSION_GRANTED) {
-                    Log.w(TAG, "Skipping backup of unprivileged package "
-                            + request.appInfo.packageName);
-                    continue;
-                }
 
                 IBackupAgent agent = null;
                 int mode = (request.fullBackup)
@@ -1759,12 +1748,6 @@ class BackupManagerService extends IBackupManager.Stub {
             final String packageName = app.packageName;
 
             if (DEBUG) Log.d(TAG, "processOneRestore packageName=" + packageName);
-
-            // Don't restore to unprivileged packages
-            if (mPackageManager.checkPermission(android.Manifest.permission.BACKUP_DATA,
-                    packageName) != PackageManager.PERMISSION_GRANTED) {
-                Log.d(TAG, "Skipping restore of unprivileged package " + packageName);
-            }
 
             // !!! TODO: get the dirs from the transport
             File backupDataName = new File(mDataDir, packageName + ".restore");

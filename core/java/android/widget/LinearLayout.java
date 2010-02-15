@@ -16,6 +16,8 @@
 
 package android.widget;
 
+import com.android.internal.R;
+
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
@@ -24,8 +26,6 @@ import android.view.View;
 import android.view.ViewDebug;
 import android.view.ViewGroup;
 import android.widget.RemoteViews.RemoteView;
-
-import com.android.internal.R;
 
 
 /**
@@ -366,14 +366,15 @@ public class LinearLayout extends ViewGroup {
                 int oldHeight = Integer.MIN_VALUE;
 
                 if (lp.height == 0 && lp.weight > 0) {
-                   // heightMode is either UNSPECIFIED OR AT_MOST, and this child
-                   // wanted to stretch to fill available space. Translate that to
-                   // WRAP_CONTENT so that it does not end up with a height of 0
-                   oldHeight = 0;
-                   lp.height = LayoutParams.WRAP_CONTENT;
+                    // heightMode is either UNSPECIFIED or AT_MOST, and this
+                    // child wanted to stretch to fill available space.
+                    // Translate that to WRAP_CONTENT so that it does not end up
+                    // with a height of 0
+                    oldHeight = 0;
+                    lp.height = LayoutParams.WRAP_CONTENT;
                 }
 
-                // Determine how big this child would like to.  If this or
+                // Determine how big this child would like to be. If this or
                 // previous children have given a weight, then we allow it to
                 // use all available space (and we will shrink things later
                 // if needed).
@@ -673,7 +674,8 @@ public class LinearLayout extends ViewGroup {
                 int oldWidth = Integer.MIN_VALUE;
 
                 if (lp.width == 0 && lp.weight > 0) {
-                    // widthMode is either UNSPECIFIED OR AT_MOST, and this child
+                    // widthMode is either UNSPECIFIED or AT_MOST, and this
+                    // child
                     // wanted to stretch to fill available space. Translate that to
                     // WRAP_CONTENT so that it does not end up with a width of 0
                     oldWidth = 0;

@@ -692,6 +692,19 @@ android_media_MediaPlayer_snoop(JNIEnv* env, jobject thiz, jobject data, jint ki
     return ret;
 }
 
+static jint
+android_media_MediaPlayer_native_suspend_resume(
+        JNIEnv *env, jobject thiz, jboolean isSuspend) {
+    LOGV("suspend_resume(%d)", isSuspend);
+    sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
+    if (mp == NULL ) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return UNKNOWN_ERROR;
+    }
+
+    return isSuspend ? mp->suspend() : mp->resume();
+}
+
 // ----------------------------------------------------------------------------
 
 static JNINativeMethod gMethods[] = {
@@ -724,6 +737,7 @@ static JNINativeMethod gMethods[] = {
     {"native_setup",        "(Ljava/lang/Object;)V",            (void *)android_media_MediaPlayer_native_setup},
     {"native_finalize",     "()V",                              (void *)android_media_MediaPlayer_native_finalize},
     {"snoop",               "([SI)I",                           (void *)android_media_MediaPlayer_snoop},
+    {"native_suspend_resume", "(Z)I",                           (void *)android_media_MediaPlayer_native_suspend_resume},
 };
 
 static const char* const kClassPathName = "android/media/MediaPlayer";

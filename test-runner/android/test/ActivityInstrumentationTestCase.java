@@ -40,29 +40,26 @@ public abstract class ActivityInstrumentationTestCase<T extends Activity>
     boolean mInitialTouchMode = false;
 
     /**
-     * <b>NOTE:</b> The parameter <i>pkg</i> must refer to the package identifier of the
-     * package hosting the activity to be launched, which is specified in the AndroidManifest.xml
-     * file.  This is not necessarily the same as the java package name.
+     * Creates an {@link ActivityInstrumentationTestCase} in non-touch mode.
      * 
-     * @param pkg The package hosting the activity to be launched.
-     * @param activityClass The activity to test.
+     * @param pkg ignored - no longer in use.
+     * @param activityClass The activity to test. This must be a class in the instrumentation
+     * targetPackage specified in the AndroidManifest.xml
      */
     public ActivityInstrumentationTestCase(String pkg, Class<T> activityClass) {
         this(pkg, activityClass, false);
     }
 
     /**
-     * <b>NOTE:</b> The parameter <i>pkg</i> must refer to the package identifier of the
-     * package hosting the activity to be launched, which is specified in the AndroidManifest.xml
-     * file.  This is not necessarily the same as the java package name.
-     * 
-     * @param pkg The package hosting the activity to be launched.
-     * @param activityClass The activity to test.
+     * Creates an {@link ActivityInstrumentationTestCase}.
+     *
+     * @param pkg ignored - no longer in use.
+     * @param activityClass The activity to test. This must be a class in the instrumentation
+     * targetPackage specified in the AndroidManifest.xml
      * @param initialTouchMode true = in touch mode
      */
     public ActivityInstrumentationTestCase(String pkg, Class<T> activityClass, 
             boolean initialTouchMode) {
-        mPackage = pkg;
         mActivityClass = activityClass;
         mInitialTouchMode = initialTouchMode;
     }
@@ -77,7 +74,8 @@ public abstract class ActivityInstrumentationTestCase<T extends Activity>
         super.setUp();
         // set initial touch mode
         getInstrumentation().setInTouchMode(mInitialTouchMode);
-        setActivity(launchActivity(mPackage, mActivityClass, null));
+        final String targetPackageName = getInstrumentation().getTargetContext().getPackageName();
+        setActivity(launchActivity(targetPackageName, mActivityClass, null));
     }
 
     @Override

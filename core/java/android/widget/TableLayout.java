@@ -575,6 +575,16 @@ public class TableLayout extends LinearLayout {
         final int totalExtraSpace = size - totalWidth;
         int extraSpace = totalExtraSpace / count;
 
+        // Column's widths are changed: force child table rows to re-measure.
+        // (done by super.measureVertical after shrinkAndStretchColumns.)
+        final int nbChildren = getChildCount();
+        for (int i = 0; i < nbChildren; i++) {
+            View child = getChildAt(i);
+            if (child instanceof TableRow) {
+                child.forceLayout();
+            }
+        }
+
         if (!allColumns) {
             for (int i = 0; i < count; i++) {
                 int column = columns.keyAt(i);

@@ -8547,7 +8547,119 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         LayoutInflater factory = LayoutInflater.from(context);
         return factory.inflate(resource, root);
     }
+    
+    /**
+     * Scroll the view with standard behavior for scrolling beyond the normal
+     * content boundaries. Views that call this method should override
+     * {@link #onOverscrolled(int, int, boolean, boolean)} to respond to the
+     * results of an overscroll operation.
+     * 
+     * Views can use this method to handle any touch or fling-based scrolling.
+     * 
+     * @param deltaX Change in X in pixels 
+     * @param deltaY Change in Y in pixels
+     * @param scrollX Current X scroll value in pixels before applying deltaX
+     * @param scrollY Current Y scroll value in pixels before applying deltaY
+     * @param scrollRangeX Maximum content scroll range along the X axis
+     * @param scrollRangeY Maximum content scroll range along the Y axis
+     * @param maxOverscrollX Number of pixels to overscroll by in either direction
+     *          along the X axis.
+     * @param maxOverscrollY Number of pixels to overscroll by in either direction
+     *          along the Y axis.
+     * @return true if scrolling was clamped to an overscroll boundary along either
+     *          axis, false otherwise.
+     */
+    protected boolean overscrollBy(int deltaX, int deltaY,
+            int scrollX, int scrollY,
+            int scrollRangeX, int scrollRangeY,
+            int maxOverscrollX, int maxOverscrollY) {
+        // Scale the scroll amount if we're in the dropoff zone
+        final int dropoffX = maxOverscrollX / 2;
+        final int dropoffLeft = -dropoffX;
+        final int dropoffRight = dropoffX + scrollRangeX;
+        int newScrollX;
+        if ((scrollX < dropoffLeft && deltaX < 0) ||
+                (scrollX > dropoffRight && deltaX > 0)) {
+            newScrollX = scrollX + deltaX / 2;
+        } else {
+            newScrollX = scrollX + deltaX;
+            if (newScrollX > dropoffRight && deltaX > 0) {
+                int extra = newScrollX - dropoffRight;
+                newScrollX = dropoffRight + extra / 2;
+            } else if (newScrollX < dropoffLeft && deltaX < 0) {
+                int extra = newScrollX - dropoffLeft;
+                newScrollX = dropoffLeft + extra / 2;
+            }
+        }
+        
+        final int dropoffY = maxOverscrollY / 2;
+        final int dropoffTop = -dropoffY;
+        final int dropoffBottom = dropoffY + scrollRangeY;
+        int newScrollY;
+        if ((scrollY < dropoffTop && deltaY < 0) ||
+                (scrollY > dropoffBottom && deltaY > 0)) {
+            newScrollY = scrollY + deltaY / 2;
+        } else {
+            newScrollY = scrollY + deltaY;
+            if (newScrollY > dropoffBottom && deltaY > 0) {
+                int extra = newScrollY - dropoffBottom;
+                newScrollY = dropoffBottom + extra / 2;
+            } else if (newScrollY < dropoffTop && deltaY < 0) {
+                int extra = newScrollY - dropoffTop;
+                newScrollY = dropoffTop + extra / 2;
+            }
+        }
 
+        // Clamp values if at the limits and record
+        final int left = -maxOverscrollX;
+        final int right = maxOverscrollX + scrollRangeX;
+        final int top = -maxOverscrollY;
+        final int bottom = maxOverscrollY + scrollRangeY;
+
+        boolean clampedX = false;
+        if (newScrollX > right) {
+            newScrollX = right;
+            clampedX = true;
+        } else if (newScrollX < left) {
+            newScrollX = left;
+            clampedX = true;
+        }
+        
+        boolean clampedY = false;
+        if (newScrollY > bottom) {
+            newScrollY = bottom;
+            clampedY = true;
+        } else if (newScrollY < top) {
+            newScrollY = top;
+            clampedY = true;
+        }
+        
+        // Bump the device with some haptic feedback if we're at the edge
+        // and didn't start there.
+        if ((clampedX && scrollX != left && scrollX != right) ||
+                (clampedY && scrollY != top && scrollY != bottom)) {
+            performHapticFeedback(HapticFeedbackConstants.SCROLL_BARRIER);
+        }
+
+        onOverscrolled(newScrollX, newScrollY, clampedX, clampedY);
+        
+        return clampedX || clampedY;
+    }
+    
+    /**
+     * Called by {@link #overscrollBy(int, int, int, int, int, int, int, int)} to
+     * respond to the results of an overscroll operation.
+     * 
+     * @param scrollX New X scroll value in pixels
+     * @param scrollY New Y scroll value in pixels
+     * @param clampedX True if scrollX was clamped to an overscroll boundary
+     * @param clampedY True if scrollY was clamped to an overscroll boundary
+     */
+    protected void onOverscrolled(int scrollX, int scrollY,
+            boolean clampedX, boolean clampedY) {
+        // Intentionally empty.
+    }
+    
     /**
      * A MeasureSpec encapsulates the layout requirements passed from parent to child.
      * Each MeasureSpec represents a requirement for either the width or the height.

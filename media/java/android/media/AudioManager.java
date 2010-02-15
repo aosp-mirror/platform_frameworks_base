@@ -751,6 +751,8 @@ public class AudioManager {
      */
     public boolean isWiredHeadsetOn() {
         if (AudioSystem.getDeviceConnectionState(AudioSystem.DEVICE_OUT_WIRED_HEADSET,"")
+                == AudioSystem.DEVICE_STATE_UNAVAILABLE &&
+            AudioSystem.getDeviceConnectionState(AudioSystem.DEVICE_OUT_WIRED_HEADPHONE,"")
                 == AudioSystem.DEVICE_STATE_UNAVAILABLE) {
             return false;
         } else {

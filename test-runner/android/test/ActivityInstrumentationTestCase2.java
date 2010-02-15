@@ -40,21 +40,31 @@ import java.lang.reflect.Method;
  */
 public abstract class ActivityInstrumentationTestCase2<T extends Activity> 
         extends ActivityTestCase {
-    String mPackage;
     Class<T> mActivityClass;
     boolean mInitialTouchMode = false;
     Intent mActivityIntent = null;
 
     /**
-     * <b>NOTE:</b> The parameter <i>pkg</i> must refer to the package identifier of the
-     * package hosting the activity to be launched, which is specified in the AndroidManifest.xml
-     * file.  This is not necessarily the same as the java package name.
-     * 
-     * @param pkg The package hosting the activity to be launched.
-     * @param activityClass The activity to test.
+     * Creates an {@link ActivityInstrumentationTestCase2}.
+     *
+     * @param pkg ignored - no longer in use.
+     * @param activityClass The activity to test. This must be a class in the instrumentation
+     * targetPackage specified in the AndroidManifest.xml
+     *
+     * @deprecated use {@link #ActivityInstrumentationTestCase2(Class)} instead
      */
+    @Deprecated
     public ActivityInstrumentationTestCase2(String pkg, Class<T> activityClass) {
-        mPackage = pkg;
+        this(activityClass);
+    }
+
+    /**
+     * Creates an {@link ActivityInstrumentationTestCase2}.
+     *
+     * @param activityClass The activity to test. This must be a class in the instrumentation
+     * targetPackage specified in the AndroidManifest.xml
+     */
+    public ActivityInstrumentationTestCase2(Class<T> activityClass) {
         mActivityClass = activityClass;
     }
 
@@ -82,11 +92,12 @@ public abstract class ActivityInstrumentationTestCase2<T extends Activity>
         if (a == null) {
             // set initial touch mode
             getInstrumentation().setInTouchMode(mInitialTouchMode);
+            final String targetPackage = getInstrumentation().getTargetContext().getPackageName();
             // inject custom intent, if provided
             if (mActivityIntent == null) {
-                a = launchActivity(mPackage, mActivityClass, null);
+                a = launchActivity(targetPackage, mActivityClass, null);
             } else {
-                a = launchActivityWithIntent(mPackage, mActivityClass, mActivityIntent);
+                a = launchActivityWithIntent(targetPackage, mActivityClass, mActivityIntent);
             }
             setActivity(a);
         }

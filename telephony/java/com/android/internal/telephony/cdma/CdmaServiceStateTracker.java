@@ -357,8 +357,8 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
             if (ar.exception == null) {
                 String states[] = (String[])ar.result;
                 int baseStationId = -1;
-                int baseStationLatitude = Integer.MAX_VALUE;
-                int baseStationLongitude = Integer.MAX_VALUE;
+                int baseStationLatitude = CdmaCellLocation.INVALID_LAT_LONG;
+                int baseStationLongitude = CdmaCellLocation.INVALID_LAT_LONG;
                 int systemId = -1;
                 int networkId = -1;
 
@@ -372,6 +372,11 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
                         }
                         if (states[6] != null) {
                             baseStationLongitude = Integer.parseInt(states[6]);
+                        }
+                        // Some carriers only return lat-lngs of 0,0
+                        if (baseStationLatitude == 0 && baseStationLongitude == 0) {
+                            baseStationLatitude  = CdmaCellLocation.INVALID_LAT_LONG;
+                            baseStationLongitude = CdmaCellLocation.INVALID_LAT_LONG;
                         }
                         if (states[8] != null) {
                             systemId = Integer.parseInt(states[8]);
@@ -662,8 +667,10 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
                 int registrationState = 4;     //[0] registrationState
                 int radioTechnology = -1;      //[3] radioTechnology
                 int baseStationId = -1;        //[4] baseStationId
-                int baseStationLatitude = Integer.MAX_VALUE;  //[5] baseStationLatitude
-                int baseStationLongitude = Integer.MAX_VALUE; //[6] baseStationLongitude
+                //[5] baseStationLatitude
+                int baseStationLatitude = CdmaCellLocation.INVALID_LAT_LONG;
+                //[6] baseStationLongitude
+                int baseStationLongitude = CdmaCellLocation.INVALID_LAT_LONG;
                 int cssIndicator = 0;          //[7] init with 0, because it is treated as a boolean
                 int systemId = 0;              //[8] systemId
                 int networkId = 0;             //[9] networkId
@@ -688,6 +695,11 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
                         }
                         if (states[6] != null) {
                             baseStationLongitude = Integer.parseInt(states[6]);
+                        }
+                        // Some carriers only return lat-lngs of 0,0
+                        if (baseStationLatitude == 0 && baseStationLongitude == 0) {
+                            baseStationLatitude  = CdmaCellLocation.INVALID_LAT_LONG;
+                            baseStationLongitude = CdmaCellLocation.INVALID_LAT_LONG;
                         }
                         if (states[7] != null) {
                             cssIndicator = Integer.parseInt(states[7]);
@@ -1191,32 +1203,23 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
         } else {
             int[] ints = (int[])ar.result;
             int offset = 2;
-
             int cdmaDbm = (ints[offset] > 0) ? -ints[offset] : -120;
             int cdmaEcio = (ints[offset+1] > 0) ? -ints[offset+1] : -160;
+            int evdoRssi = (ints[offset+2] > 0) ? -ints[offset+2] : -120;
+            int evdoEcio = (ints[offset+3] > 0) ? -ints[offset+3] : -1;
+            int evdoSnr  = ((ints[offset+4] > 0) && (ints[offset+4] <= 8)) ? ints[offset+4] : -1;
 
-            int evdoRssi = -1;
-            int evdoEcio = -1;
-            int evdoSnr = -1;
-            if ((networkType == ServiceState.RADIO_TECHNOLOGY_EVDO_0)
-                    || (networkType == ServiceState.RADIO_TECHNOLOGY_EVDO_A)) {
-                evdoRssi = (ints[offset+2] > 0) ? -ints[offset+2] : -120;
-                evdoEcio = (ints[offset+3] > 0) ? -ints[offset+3] : -1;
-                evdoSnr  = ((ints[offset+4] > 0) && (ints[offset+4] <= 8)) ? ints[offset+4] : -1;
-            }
-
+            //log(String.format("onSignalStrengthResult cdmaDbm=%d cdmaEcio=%d evdoRssi=%d evdoEcio=%d evdoSnr=%d",
+            //        cdmaDbm, cdmaEcio, evdoRssi, evdoEcio, evdoSnr));
             mSignalStrength = new SignalStrength(99, -1, cdmaDbm, cdmaEcio,
                     evdoRssi, evdoEcio, evdoSnr, false);
         }
 
-        if (!mSignalStrength.equals(oldSignalStrength)) {
-            try { // This takes care of delayed EVENT_POLL_SIGNAL_STRENGTH (scheduled after
-                  // POLL_PERIOD_MILLIS) during Radio Technology Change)
-                phone.notifySignalStrength();
-           } catch (NullPointerException ex) {
-                log("onSignalStrengthResult() Phone already destroyed: " + ex
-                        + "SignalStrength not notified");
-           }
+        try {
+            phone.notifySignalStrength();
+        } catch (NullPointerException ex) {
+            log("onSignalStrengthResult() Phone already destroyed: " + ex
+                    + "SignalStrength not notified");
         }
     }
 

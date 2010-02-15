@@ -16,6 +16,8 @@
 
 package android.widget;
 
+import com.android.internal.R;
+
 import android.app.LocalActivityManager;
 import android.content.Context;
 import android.content.Intent;
@@ -32,8 +34,6 @@ import android.view.Window;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import com.android.internal.R;
 
 /**
  * Container for a tabbed window view. This object holds two children: a set of tab labels that the
@@ -624,7 +624,7 @@ mTabHost.addTab(TAB_TAG_1, "Hello, world!", "Tab 1");
         }
 
         public void tabClosed() {
-            mTabContent.setVisibility(View.INVISIBLE);
+            mTabContent.setVisibility(View.GONE);
         }
     }
 

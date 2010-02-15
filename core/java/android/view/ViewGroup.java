@@ -3398,7 +3398,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
         /**
          * Special value for the height or width requested by a View.
-         * MATCH_PARENT means that the view wants to be as bigas its parent,
+         * MATCH_PARENT means that the view wants to be as big as its parent,
          * minus the parent's padding, if any.
          */
         public static final int MATCH_PARENT = -1;

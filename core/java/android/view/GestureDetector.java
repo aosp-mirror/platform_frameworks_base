@@ -465,10 +465,10 @@ public class GestureDetector {
         case MotionEvent.ACTION_POINTER_UP:
             // Ending a multitouch gesture and going back to 1 finger
             if (mIgnoreMultitouch && ev.getPointerCount() == 2) {
-                int id = (((action & MotionEvent.ACTION_POINTER_ID_MASK)
-                        >> MotionEvent.ACTION_POINTER_ID_SHIFT) == 0) ? 1 : 0;
-                mLastMotionX = ev.getX(id);
-                mLastMotionY = ev.getY(id);
+                int index = (((action & MotionEvent.ACTION_POINTER_INDEX_MASK)
+                        >> MotionEvent.ACTION_POINTER_INDEX_SHIFT) == 0) ? 1 : 0;
+                mLastMotionX = ev.getX(index);
+                mLastMotionY = ev.getY(index);
                 mVelocityTracker.recycle();
                 mVelocityTracker = VelocityTracker.obtain();
             }

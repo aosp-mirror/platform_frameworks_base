@@ -116,13 +116,11 @@ LOCAL_SRC_FILES += \
 	core/java/android/hardware/ISensorService.aidl \
 	core/java/android/net/IConnectivityManager.aidl \
 	core/java/android/net/INetworkManagementEventObserver.aidl \
-	core/java/android/os/ICheckinService.aidl \
 	core/java/android/os/IMessenger.aidl \
 	core/java/android/os/storage/IMountService.aidl \
 	core/java/android/os/storage/IMountServiceListener.aidl \
 	core/java/android/os/INetworkManagementService.aidl \
 	core/java/android/os/INetStatService.aidl \
-	core/java/android/os/IParentalControlCallback.aidl \
 	core/java/android/os/IPermissionController.aidl \
 	core/java/android/os/IPowerManager.aidl \
     core/java/android/os/IRemoteCallback.aidl \
@@ -409,7 +407,9 @@ web_docs_sample_code_flags := \
 		-samplecode $(sample_dir)/Wiktionary \
 		            resources/samples/Wiktionary "Wiktionary" \
 		-samplecode $(sample_dir)/WiktionarySimple \
-		            resources/samples/WiktionarySimple "Wiktionary (Simplified)"
+		            resources/samples/WiktionarySimple "Wiktionary (Simplified)" \
+		-samplecode $(sample_dir)/VoiceRecognitionService \
+		            resources/samples/VoiceRecognitionService "Voice Recognition Service"
 
 ## SDK version identifiers used in the published docs
   # major[.minor] version for current SDK. (full releases only)
