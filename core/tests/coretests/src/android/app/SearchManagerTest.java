@@ -141,7 +141,6 @@ public class SearchManagerTest extends ActivityInstrumentationTestCase2<LocalAct
      * Tests that startSearch() can be called multiple times without stopSearch()
      * in between.
      */
-    @MediumTest
     public void testStartSearchIdempotent() throws Exception {
          SearchManager searchManager = (SearchManager)
                  mContext.getSystemService(Context.SEARCH_SERVICE);
@@ -156,7 +155,6 @@ public class SearchManagerTest extends ActivityInstrumentationTestCase2<LocalAct
      * Tests that stopSearch() can be called when the search UI is not visible and can be
      * called multiple times without startSearch() in between.
      */
-    @MediumTest
     public void testStopSearchIdempotent() throws Exception {
          SearchManager searchManager = (SearchManager)
                  mContext.getSystemService(Context.SEARCH_SERVICE);
@@ -172,7 +170,6 @@ public class SearchManagerTest extends ActivityInstrumentationTestCase2<LocalAct
      * The goal of this test is to confirm that we can start and then
      * stop a simple search.
      */
-    @MediumTest
     public void testSearchManagerInvocations() throws Exception {
         SearchManager searchManager = (SearchManager)
                 mContext.getSystemService(Context.SEARCH_SERVICE);
