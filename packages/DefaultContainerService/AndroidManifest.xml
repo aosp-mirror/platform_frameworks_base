@@ -6,6 +6,7 @@
     <uses-permission android:name="android.permission.ASEC_DESTROY"/>
     <uses-permission android:name="android.permission.ASEC_MOUNT_UNMOUNT"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.ACCESS_CACHE_FILESYSTEM" />
 
     <application android:label="@string/service_name">
 
