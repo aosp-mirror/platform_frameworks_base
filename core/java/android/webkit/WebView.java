@@ -5893,6 +5893,10 @@ public class WebView extends AbsoluteLayout
                     }
                     break;
                 case UPDATE_TEXT_SELECTION_MSG_ID:
+                    // If no textfield was in focus, and the user touched one,
+                    // causing it to send this message, then WebTextView has not
+                    // been set up yet.  Rebuild it so it can set its selection.
+                    rebuildWebTextView();
                     if (inEditingMode()
                             && mWebTextView.isSameTextField(msg.arg1)
                             && msg.arg2 == mTextGeneration) {
