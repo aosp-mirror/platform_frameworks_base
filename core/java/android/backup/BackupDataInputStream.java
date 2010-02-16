@@ -16,12 +16,11 @@
 
 package android.backup;
 
-import android.util.Log;
-
 import java.io.InputStream;
 import java.io.IOException;
 
-/** @hide */
+/**
+ * STOPSHIP: document */
 public class BackupDataInputStream extends InputStream {
 
     String key;
@@ -30,6 +29,7 @@ public class BackupDataInputStream extends InputStream {
     BackupDataInput mData;
     byte[] mOneByte;
 
+    /** @hide */
     BackupDataInputStream(BackupDataInput data) {
         mData = data;
     }

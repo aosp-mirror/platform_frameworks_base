@@ -21,7 +21,9 @@ import android.content.Context;
 import java.io.FileDescriptor;
 import java.io.IOException;
 
-/** @hide */
+/**
+ * STOPSHIP: document!
+ */
 public class BackupDataInput {
     int mBackupReader;
 
@@ -33,6 +35,7 @@ public class BackupDataInput {
         int dataSize;
     }
 
+    /** @hide */
     public BackupDataInput(FileDescriptor fd) {
         if (fd == null) throw new NullPointerException();
         mBackupReader = ctor(fd);
@@ -41,6 +44,7 @@ public class BackupDataInput {
         }
     }
 
+    /** @hide */
     protected void finalize() throws Throwable {
         try {
             dtor(mBackupReader);
@@ -49,6 +53,13 @@ public class BackupDataInput {
         }
     }
 
+    /**
+     * Consumes the next header from the restore stream.
+     *
+     * @return true when there is an entity ready for consumption from the restore stream,
+     *    false if the restore stream has been fully consumed.
+     * @throws IOException if an error occurred while reading the restore stream
+     */
     public boolean readNextHeader() throws IOException {
         int result = readNextHeader_native(mBackupReader, mHeader);
         if (result == 0) {
@@ -66,6 +77,11 @@ public class BackupDataInput {
         }
     }
 
+    /**
+     * Report the key associated with the current record in the restore stream
+     * @return the current record's key string
+     * @throws IllegalStateException if the next record header has not yet been read
+     */
     public String getKey() {
         if (mHeaderReady) {
             return mHeader.key;
@@ -74,6 +90,13 @@ public class BackupDataInput {
         }
     }
 
+    /**
+     * Report the size in bytes of the data associated with the current record in the
+     * restore stream.
+     *
+     * @return The size of the record's raw data, in bytes
+     * @throws IllegalStateException if the next record header has not yet been read
+     */
     public int getDataSize() {
         if (mHeaderReady) {
             return mHeader.dataSize;
@@ -82,6 +105,19 @@ public class BackupDataInput {
         }
     }
 
+    /**
+     * Read a record's raw data from the restore stream.  The record's header must first
+     * have been processed by the {@link #readNextHeader()} method.  Multiple calls to
+     * this method may be made in order to process the data in chunks; not all of it
+     * must be read in a single call.
+     *
+     * @param data An allocated byte array of at least 'size' bytes
+     * @param offset Offset within the 'data' array at which the data will be placed
+     *    when read from the stream.
+     * @param size The number of bytes to read in this pass.
+     * @return The number of bytes of data read
+     * @throws IOException if an error occurred when trying to read the restore data stream
+     */
     public int readEntityData(byte[] data, int offset, int size) throws IOException {
         if (mHeaderReady) {
             int result = readEntityData_native(mBackupReader, data, offset, size);
@@ -95,6 +131,14 @@ public class BackupDataInput {
         }
     }
 
+    /**
+     * Consume the current record's data without actually reading it into a buffer
+     * for further processing.  This allows a {@link android.backup.BackupAgent} to
+     * efficiently discard obsolete or otherwise uninteresting records during the
+     * restore operation.
+     * 
+     * @throws IOException if an error occurred when trying to read the restore data stream
+     */
     public void skipEntityData() throws IOException {
         if (mHeaderReady) {
             skipEntityData_native(mBackupReader);

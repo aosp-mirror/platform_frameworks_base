@@ -26,28 +26,54 @@ import android.util.Log;
 
 import java.io.IOException;
 
-/** @hide */
+/**
+ * A convenient BackupAgent wrapper class that automatically manages heterogeneous
+ * data sets within the backup data, each identified by a unique key prefix.  An
+ * application will typically extend this class in their own backup agent.  Then,
+ * within the agent's onBackup() and onRestore() methods, it will call
+ * {@link #addHelper(String, BackupHelper)} one or more times to specify the data
+ * sets, then invoke super.onBackup() or super.onRestore() to have the BackupHelperAgent
+ * implementation process the data.
+ *
+ * STOPSHIP: document!
+ */
 public class BackupHelperAgent extends BackupAgent {
     static final String TAG = "BackupHelperAgent";
 
     BackupHelperDispatcher mDispatcher = new BackupHelperDispatcher();
 
+    /**
+     * Run the backup process on each of the configured handlers.
+     */
     @Override
     public void onBackup(ParcelFileDescriptor oldState, BackupDataOutput data,
              ParcelFileDescriptor newState) throws IOException {
         mDispatcher.performBackup(oldState, data, newState);
     }
 
+    /**
+     * Run the restore process on each of the configured handlers.
+     */
     @Override
     public void onRestore(BackupDataInput data, int appVersionCode, ParcelFileDescriptor newState)
             throws IOException {
         mDispatcher.performRestore(data, appVersionCode, newState);
     }
 
+    /** @hide */
     public BackupHelperDispatcher getDispatcher() {
         return mDispatcher;
     }
 
+    /**
+     * Add a helper for a given data subset to the agent's configuration.  Each helper
+     * must have a prefix string that is unique within this backup agent's set of
+     * helpers.
+     *
+     * @param keyPrefix A string used to disambiguate the various helpers within this agent
+     * @param helper A backup/restore helper object to be invoked during backup and restore
+     *    operations.
+     */
     public void addHelper(String keyPrefix, BackupHelper helper) {
         mDispatcher.addHelper(keyPrefix, helper);
     }

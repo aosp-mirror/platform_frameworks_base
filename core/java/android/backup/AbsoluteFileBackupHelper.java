@@ -27,7 +27,7 @@ import java.io.FileDescriptor;
  * Like FileBackupHelper, but takes absolute paths for the files instead of
  * subpaths of getFilesDir()
  *
- * @hide
+ * STOPSHIP: document!
  */
 public class AbsoluteFileBackupHelper extends FileBackupHelperBase implements BackupHelper {
     private static final String TAG = "AbsoluteFileBackupHelper";
@@ -36,6 +36,13 @@ public class AbsoluteFileBackupHelper extends FileBackupHelperBase implements Ba
     Context mContext;
     String[] mFiles;
 
+    /**
+     * Construct a helper for backing up / restoring the files at the given absolute locations
+     * within the file system.
+     *
+     * @param context
+     * @param files
+     */
     public AbsoluteFileBackupHelper(Context context, String... files) {
         super(context);
 
@@ -54,6 +61,9 @@ public class AbsoluteFileBackupHelper extends FileBackupHelperBase implements Ba
         performBackup_checked(oldState, data, newState, mFiles, mFiles);
     }
 
+    /**
+     * Restore one absolute file entity from the restore stream
+     */
     public void restoreEntity(BackupDataInputStream data) {
         if (DEBUG) Log.d(TAG, "got entity '" + data.getKey() + "' size=" + data.size());
         String key = data.getKey();

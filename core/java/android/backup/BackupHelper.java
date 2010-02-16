@@ -20,7 +20,9 @@ import android.os.ParcelFileDescriptor;
 
 import java.io.InputStream;
 
-/** @hide */
+/**
+ * STOPSHIP: document!
+ */
 public interface BackupHelper {
     /**
      * Based on oldState, determine which of the files from the application's data directory
@@ -31,16 +33,18 @@ public interface BackupHelper {
             ParcelFileDescriptor newState);
 
     /**
-     * Called by BackupHelperDispatcher to dispatch one entity of data.
+     * Called by BackupHelperAgent to restore one entity from the restore dataset.
      * <p class=note>
      * Do not close the <code>data</code> stream.  Do not read more than
-     * <code>dataSize</code> bytes from <code>data</code>.
+     * <code>data.size()</code> bytes from <code>data</code>.
      */
     public void restoreEntity(BackupDataInputStream data);
 
     /**
-     *
+     * Called by BackupHelperAgent to write the new backup state file corresponding to
+     * the current state of the app's data at the time the backup operation was
+     * performed.
      */
-    public void writeRestoreSnapshot(ParcelFileDescriptor fd);
+    public void writeNewStateDescription(ParcelFileDescriptor fd);
 }
 

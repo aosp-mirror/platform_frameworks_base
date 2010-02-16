@@ -27,7 +27,6 @@ import android.util.Log;
 
 /**
  * Interface for applications to use when managing a restore session.
- * @hide
  */
 public class RestoreSession {
     static final String TAG = "RestoreSession";
@@ -44,6 +43,8 @@ public class RestoreSession {
      *   and a String array under the key "names" whose entries are the user-meaningful
      *   text corresponding to the backup sets at each index in the tokens array.
      *   On error, returns null.
+     *
+     * {@hide}
      */
     public RestoreSet[] getAvailableRestoreSets() {
         try {
@@ -66,6 +67,8 @@ public class RestoreSession {
      *   the restore set that should be used.
      * @param observer If non-null, this binder points to an object that will receive
      *   progress callbacks during the restore operation.
+     *
+     * {@hide}
      */
     public int restoreAll(long token, RestoreObserver observer) {
         int err = -1;
