@@ -584,9 +584,9 @@ static jboolean android_text_format_Time_parse3339(JNIEnv* env,
             inUtc = true;
 
 	    if (offset != 0) {
-	        if (len < tz_index + 5) {
+	        if (len < tz_index + 6) {
 	            char msg[100];
-	            sprintf(msg, "Unexpected length; should be %d characters", tz_index + 5);
+	            sprintf(msg, "Unexpected length; should be %d characters", tz_index + 6);
 	            jniThrowException(env, "android/util/TimeFormatException", msg);
 	            return false;
 	        }
