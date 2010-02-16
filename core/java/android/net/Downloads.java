@@ -297,7 +297,7 @@ public final class Downloads {
 
         /**
          * The column for the id in the Cursor returned by
-         * {@link #getProgressCursor()}
+         * getProgressCursor()
          */
         public static final int getProgressColumnId() {
             return 0;
@@ -305,7 +305,7 @@ public final class Downloads {
 
         /**
          * The column for the current byte count in the Cursor returned by
-         * {@link #getProgressCursor()}
+         * getProgressCursor()
          */
         public static final int getProgressColumnCurrentBytes() {
             return 1;
@@ -313,7 +313,7 @@ public final class Downloads {
 
         /**
          * The column for the total byte count in the Cursor returned by
-         * {@link #getProgressCursor()}
+         * getProgressCursor()
          */
         public static final int getProgressColumnTotalBytes() {
             return 2;
