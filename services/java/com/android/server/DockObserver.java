@@ -486,9 +486,11 @@ class DockObserver extends UEventObserver {
         // the status bar should be totally disabled, the calls below will
         // have no effect until the device is unlocked.
         if (mStatusBarManager != null) {
-            mStatusBarManager.disable(enabled
+            long ident = Binder.clearCallingIdentity();
+            mStatusBarManager.disable(enabled 
                 ? StatusBarManager.DISABLE_NOTIFICATION_TICKER
                 : StatusBarManager.DISABLE_NONE);
+            Binder.restoreCallingIdentity(ident);
         }
     }
 
