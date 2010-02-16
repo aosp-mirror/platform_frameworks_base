@@ -890,14 +890,15 @@ public class HorizontalScrollView extends FrameLayout {
      */
     @Override
     protected int computeHorizontalScrollRange() {
-        int count = getChildCount();
+        final int count = getChildCount();
+        final int contentWidth = getWidth() - mPaddingLeft - mPaddingRight;
         if (count == 0) {
-            return getWidth();
+            return contentWidth;
         }
         
         int scrollRange = getChildAt(0).getRight();
-        int scrollX = mScrollX;
-        int overscrollRight = scrollRange - getWidth() - mPaddingLeft - mPaddingRight;
+        final int scrollX = mScrollX;
+        final int overscrollRight = Math.max(0, scrollRange - contentWidth);
         if (scrollX < 0) {
             scrollRange -= scrollX;
         } else if (scrollX > overscrollRight) {
