@@ -296,21 +296,24 @@ public final class Downloads {
         }
 
         /**
-         * @pending
+         * The column for the id in the Cursor returned by
+         * {@link #getProgressCursor()}
          */
         public static final int getProgressColumnId() {
             return 0;
         }
 
         /**
-         * @pending
+         * The column for the current byte count in the Cursor returned by
+         * {@link #getProgressCursor()}
          */
         public static final int getProgressColumnCurrentBytes() {
             return 1;
         }
 
         /**
-         * @pending
+         * The column for the total byte count in the Cursor returned by
+         * {@link #getProgressCursor()}
          */
         public static final int getProgressColumnTotalBytes() {
             return 2;
@@ -324,7 +327,7 @@ public final class Downloads {
         };
 
         /**
-         * @pending
+         * Returns a Cursor representing the progress of the download identified by the ID.
          */
         public static final Cursor getProgressCursor(Context context, long id) {
             Uri downloadUri = Uri.withAppendedPath(android.provider.Downloads.Impl.CONTENT_URI,
