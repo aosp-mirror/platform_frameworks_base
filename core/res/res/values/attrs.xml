@@ -396,6 +396,8 @@
         <attr name="tabWidgetStyle" format="reference" />
         <!-- Default TextView style. -->
         <attr name="textViewStyle" format="reference" />
+        <!-- Default WebTextView style. -->
+        <attr name="webTextViewStyle" format="reference" />
         <!-- Default WebView style. -->
         <attr name="webViewStyle" format="reference" />
         <!-- Default style for drop down items. -->

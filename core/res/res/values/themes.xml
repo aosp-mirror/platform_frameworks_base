@@ -170,6 +170,7 @@
         <item name="starStyle">@android:style/Widget.CompoundButton.Star</item>
         <item name="tabWidgetStyle">@android:style/Widget.TabWidget</item>
         <item name="textViewStyle">@android:style/Widget.TextView</item>
+        <item name="webTextViewStyle">@android:style/Widget.WebTextView</item>
         <item name="webViewStyle">@android:style/Widget.WebView</item>
         <item name="dropDownItemStyle">@android:style/Widget.DropDownItem</item>
         <item name="spinnerDropDownItemStyle">@android:style/Widget.DropDownItem.Spinner</item>
