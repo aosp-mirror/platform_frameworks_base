@@ -58,7 +58,8 @@ public class WebAddress {
             /* authority */ "(?:([-A-Za-z0-9$_.+!*'(),;?&=]+(?:\\:[-A-Za-z0-9$_.+!*'(),;?&=]+)?)@)?" +
             /* host      */ "([-" + GOOD_IRI_CHAR + "%_]+(?:\\.[-" + GOOD_IRI_CHAR + "%_]+)*|\\[[0-9a-fA-F:\\.]+\\])?" +
             /* port      */ "(?:\\:([0-9]+))?" +
-            /* path      */ "(\\/?.*)?");
+            /* path      */ "(\\/?[^#]*)?" +
+            /* anchor    */ ".*");
 
     /** parses given uriString. */
     public WebAddress(String address) throws ParseException {
