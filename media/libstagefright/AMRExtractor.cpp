@@ -225,14 +225,10 @@ status_t AMRSource::read(
         return ERROR_IO;
     }
 
-    MediaBuffer *buffer;
-    status_t err = mGroup->acquire_buffer(&buffer);
-    if (err != OK) {
-        return err;
-    }
-
     if (header & 0x83) {
         // Padding bits must be 0.
+
+        LOGE("padding bits must be 0, header is 0x%02x", header);
 
         return ERROR_MALFORMED;
     }
@@ -240,11 +236,20 @@ status_t AMRSource::read(
     unsigned FT = (header >> 3) & 0x0f;
 
     if (FT > 8 || (!mIsWide && FT > 7)) {
+
+        LOGE("illegal AMR frame type %d", FT);
+
         return ERROR_MALFORMED;
     }
 
     size_t frameSize = getFrameSize(mIsWide, FT);
     CHECK_EQ(frameSize, mFrameSize);
+
+    MediaBuffer *buffer;
+    status_t err = mGroup->acquire_buffer(&buffer);
+    if (err != OK) {
+        return err;
+    }
 
     n = mDataSource->readAt(mOffset, buffer->data(), frameSize);
 
