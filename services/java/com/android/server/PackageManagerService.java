@@ -2180,10 +2180,15 @@ class PackageManagerService extends IPackageManager.Stub {
         int i;
         for (i=0; i<files.length; i++) {
             File file = new File(dir, files[i]);
+            if (files[i] != null && files[i].endsWith(".zip")) {
+                // Public resource for forward locked package. Ignore
+                continue;
+            }
             PackageParser.Package pkg = scanPackageLI(file,
                     flags|PackageParser.PARSE_MUST_BE_APK, scanMode);
             // Don't mess around with apps in system partition.
-            if (pkg == null && (flags & PackageParser.PARSE_IS_SYSTEM) == 0) {
+            if (pkg == null && (flags & PackageParser.PARSE_IS_SYSTEM) == 0 &&
+                    mLastScanError == PackageManager.INSTALL_FAILED_INVALID_APK) {
                 // Delete the apk
                 Log.w(TAG, "Cleaning up failed install of " + file);
                 file.delete();
@@ -4631,13 +4636,11 @@ class PackageManagerService extends IPackageManager.Stub {
         int doPreInstall(int status) {
             if (status != PackageManager.INSTALL_SUCCEEDED) {
                 // Destroy container
-                destroySdDir(cid);
+                PackageHelper.destroySdDir(cid);
             } else {
-                // STOPSHIP Remove once new api is added in MountService
-                //boolean mounted = isContainerMounted(cid);
-                boolean mounted = false;
+                boolean mounted = PackageHelper.isContainerMounted(cid);
                 if (!mounted) {
-                    cachePath = mountSdDir(cid, Process.SYSTEM_UID);
+                    cachePath = PackageHelper.mountSdDir(cid, getEncryptKey(), Process.SYSTEM_UID);
                     if (cachePath == null) {
                         return PackageManager.INSTALL_FAILED_CONTAINER_ERROR;
                     }
@@ -4650,96 +4653,41 @@ class PackageManagerService extends IPackageManager.Stub {
                 String oldCodePath) {
             String newCacheId = getNextCodePath(oldCodePath, pkgName, "/" + RES_FILE_NAME);
             String newCachePath = null;
-            /*final int RENAME_FAILED = 1;
+            final int RENAME_FAILED = 1;
             final int MOUNT_FAILED = 2;
-            final int DESTROY_FAILED = 3;
             final int PASS = 4;
             int errCode = RENAME_FAILED;
+            String errMsg = "RENAME_FAILED";
+            boolean mounted = PackageHelper.isContainerMounted(cid);
             if (mounted) {
                 // Unmount the container
-                if (!unMountSdDir(cid)) {
+                if (!PackageHelper.unMountSdDir(cid)) {
                     Log.i(TAG, "Failed to unmount " + cid + " before renaming");
                     return false;
                 }
                 mounted = false;
             }
-            if (renameSdDir(cid, newCacheId)) {
+            if (PackageHelper.renameSdDir(cid, newCacheId)) {
                 errCode = MOUNT_FAILED;
-                if ((newCachePath = mountSdDir(newCacheId, Process.SYSTEM_UID)) != null) {
+                errMsg = "MOUNT_FAILED";
+                if ((newCachePath = PackageHelper.mountSdDir(newCacheId,
+                        getEncryptKey(), Process.SYSTEM_UID)) != null) {
                     errCode = PASS;
+                    errMsg = "PASS";
                 }
             }
-            String errMsg = "";
-            switch (errCode) {
-                case RENAME_FAILED:
-                    errMsg = "RENAME_FAILED";
-                    break;
-                case MOUNT_FAILED:
-                    errMsg = "MOUNT_FAILED";
-                    break;
-                case DESTROY_FAILED:
-                    errMsg = "DESTROY_FAILED";
-                    break;
-                default:
-                    errMsg = "PASS";
-                break;
-            }
-            Log.i(TAG, "Status: " + errMsg);
             if (errCode != PASS) {
+                Log.i(TAG, "Failed to rename " + cid + " to " + newCacheId +
+                        " at path: " + cachePath + " to new path: " + newCachePath +
+                        "err = " + errMsg);
+                // Mount old container?
                 return false;
-            }
-            Log.i(TAG, "Succesfully renamed " + cid + " to " +newCacheId +
-                    " at path: " + cachePath + " to new path: " + newCachePath);
-            cid = newCacheId;
-            cachePath = newCachePath;
-            return true;
-            */
-            // STOPSHIP TEMPORARY HACK FOR RENAME
-            // Create new container at newCachePath
-            String codePath = getCodePath();
-            final int CREATE_FAILED = 1;
-            final int COPY_FAILED = 3;
-            final int FINALIZE_FAILED = 5;
-            final int PASS = 7;
-            int errCode = CREATE_FAILED;
-
-            if ((newCachePath = createSdDir(new File(codePath), newCacheId)) != null) {
-                errCode = COPY_FAILED;
-                // Copy file from codePath
-                if (FileUtils.copyFile(new File(codePath), new File(newCachePath, RES_FILE_NAME))) {
-                    errCode = FINALIZE_FAILED;
-                    if (finalizeSdDir(newCacheId)) {
-                        errCode = PASS;
-                    }
-                }
-            }
-            // Print error based on errCode
-            String errMsg = "";
-            switch (errCode) {
-                case CREATE_FAILED:
-                    errMsg = "CREATE_FAILED";
-                    break;
-                case COPY_FAILED:
-                    errMsg = "COPY_FAILED";
-                    destroySdDir(newCacheId);
-                    break;
-                case FINALIZE_FAILED:
-                    errMsg = "FINALIZE_FAILED";
-                    destroySdDir(newCacheId);
-                    break;
-                default:
-                    errMsg = "PASS";
-                break;
-            }
-            // Destroy the temporary container
-            destroySdDir(cid);
-            Log.i(TAG, "Status: " + errMsg);
-            if (errCode != PASS) {
-                return false;
+            } else {
+                Log.i(TAG, "Succesfully renamed " + cid + " to " + newCacheId +
+                        " at path: " + cachePath + " to new path: " + newCachePath);
             }
             cid = newCacheId;
             cachePath = newCachePath;
-
             return true;
         }
 
@@ -4747,11 +4695,10 @@ class PackageManagerService extends IPackageManager.Stub {
             if (status != PackageManager.INSTALL_SUCCEEDED) {
                 cleanUp();
             } else {
-                // STOP SHIP Change this once new api is added.
-                //boolean mounted = isContainerMounted(cid);
-                boolean mounted = false;
+                boolean mounted = PackageHelper.isContainerMounted(cid);
                 if (!mounted) {
-                    mountSdDir(cid, Process.SYSTEM_UID);
+                    PackageHelper.mountSdDir(cid,
+                            getEncryptKey(), Process.myUid());
                 }
             }
             return status;
@@ -4759,7 +4706,7 @@ class PackageManagerService extends IPackageManager.Stub {
 
         private void cleanUp() {
             // Destroy secure container
-            destroySdDir(cid);
+            PackageHelper.destroySdDir(cid);
         }
 
         void cleanUpResourcesLI() {
@@ -4794,10 +4741,10 @@ class PackageManagerService extends IPackageManager.Stub {
 
         boolean doPostDeleteLI(boolean delete) {
             boolean ret = false;
-            boolean mounted = isContainerMounted(cid);
+            boolean mounted = PackageHelper.isContainerMounted(cid);
             if (mounted) {
                 // Unmount first
-                ret = unMountSdDir(cid);
+                ret = PackageHelper.unMountSdDir(cid);
             }
             if (ret && delete) {
                 cleanUpResourcesLI();
@@ -8590,11 +8537,6 @@ class PackageManagerService extends IPackageManager.Stub {
     private boolean mMediaMounted = false;
     private static final int MAX_CONTAINERS = 250;
 
-
-    static MountService getMountService() {
-        return (MountService) ServiceManager.getService("mount");
-    }
-
     private String getEncryptKey() {
         try {
             String sdEncKey = SystemKeyStore.getInstance().retrieveKeyHexString(mSdEncryptKey);
@@ -8613,134 +8555,10 @@ class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-   private String createSdDir(File tmpPackageFile, String pkgName) {
-        // Create mount point via MountService
-        MountService mountService = getMountService();
-        long len = tmpPackageFile.length();
-        int mbLen = (int) (len/(1024*1024));
-        if ((len - (mbLen * 1024 * 1024)) > 0) {
-            mbLen++;
-        }
-        if (DEBUG_SD_INSTALL) Log.i(TAG, "mbLen="+mbLen);
-        String cachePath = null;
-        String sdEncKey;
-        try {
-            sdEncKey = SystemKeyStore.getInstance().retrieveKeyHexString(mSdEncryptKey);
-            if (sdEncKey == null) {
-                sdEncKey = SystemKeyStore.getInstance().
-                        generateNewKeyHexString(128, mSdEncryptAlg, mSdEncryptKey);
-                if (sdEncKey == null) {
-                    Log.e(TAG, "Failed to create encryption keys for package: " + pkgName + ".");
-                    return null;
-                }
-            }
-        } catch (NoSuchAlgorithmException nsae) {
-            Log.e(TAG, "Failed to create encryption keys with exception: " + nsae);
-            return null;
-        }
-
-        int rc = mountService.createSecureContainer(
-                pkgName, mbLen, "vfat", sdEncKey, Process.SYSTEM_UID);
-        if (rc != StorageResultCode.OperationSucceeded) {
-            Log.e(TAG, String.format("Failed to create container (%d)", rc));
-
-            rc = mountService.destroySecureContainer(pkgName);
-            if (rc != StorageResultCode.OperationSucceeded) {
-                Log.e(TAG, String.format("Failed to cleanup container (%d)", rc));
-                return null;
-            }
-            rc = mountService.createSecureContainer(
-                    pkgName, mbLen, "vfat", sdEncKey, Process.SYSTEM_UID);
-            if (rc != StorageResultCode.OperationSucceeded) {
-                Log.e(TAG, String.format("Failed to create container (2nd try) (%d)", rc));
-                return null;
-            }
-        }
-
-        cachePath = mountService.getSecureContainerPath(pkgName);
-        if (DEBUG_SD_INSTALL) Log.i(TAG, "Trying to install " + pkgName + ", cachePath =" + cachePath);
-            return cachePath;
-    }
-
-   private String mountSdDir(String pkgName, int ownerUid) {
-       String sdEncKey = SystemKeyStore.getInstance().retrieveKeyHexString(mSdEncryptKey);
-       if (sdEncKey == null) {
-           Log.e(TAG, "Failed to retrieve encryption keys to mount package code: " + pkgName + ".");
-           return null;
-       }
-
-       int rc = getMountService().mountSecureContainer(pkgName, sdEncKey, ownerUid);
-
-       if (rc != StorageResultCode.OperationSucceeded) {
-           Log.i(TAG, "Failed to mount container for pkg : " + pkgName + " rc : " + rc);
-           return null;
-       }
-
-       return getMountService().getSecureContainerPath(pkgName);
-   }
-
-   private boolean unMountSdDir(String pkgName) {
-       // STOPSHIP unmount directory
-       int rc = getMountService().unmountSecureContainer(pkgName);
-       if (rc != StorageResultCode.OperationSucceeded) {
-           Log.e(TAG, "Failed to unmount : " + pkgName + " with rc " + rc);
-           return false;
-       }
-       return true;
-   }
-
-   private boolean renameSdDir(String oldId, String newId) {
-       try {
-           getMountService().renameSecureContainer(oldId, newId);
-           return true;
-       } catch (IllegalStateException e) {
-           Log.i(TAG, "Failed ot rename  " + oldId + " to " + newId +
-                   " with exception : " + e);
-       }
-       return false;
-   }
-
-   private String getSdDir(String pkgName) {
-       return getMountService().getSecureContainerPath(pkgName);
-   }
-
-    private boolean finalizeSdDir(String pkgName) {
-        int rc = getMountService().finalizeSecureContainer(pkgName);
-        if (rc != StorageResultCode.OperationSucceeded) {
-            Log.i(TAG, "Failed to finalize container for pkg : " + pkgName);
-            return false;
-        }
-        return true;
-    }
-
-    private boolean destroySdDir(String pkgName) {
-        int rc = getMountService().destroySecureContainer(pkgName);
-        if (rc != StorageResultCode.OperationSucceeded) {
-            Log.i(TAG, "Failed to destroy container for pkg : " + pkgName);
-            return false;
-        }
-        return true;
-    }
-
-    static String[] getSecureContainerList() {
-        String[] list = getMountService().getSecureContainerList();
-        return list.length == 0 ? null : list;
-    }
-
-   static boolean isContainerMounted(String cid) {
-       // STOPSHIP
-       // New api from MountService
-       try {
-           return (getMountService().getSecureContainerPath(cid) != null);
-       } catch (IllegalStateException e) {
-       }
-       return false;
-   }
-
    static String getTempContainerId() {
        String prefix = "smdl1tmp";
        int tmpIdx = 1;
-       String list[] = getSecureContainerList();
+       String list[] = PackageHelper.getSecureContainerList();
        if (list != null) {
            int idx = 0;
            int idList[] = new int[MAX_CONTAINERS];
@@ -8799,7 +8617,7 @@ class PackageManagerService extends IPackageManager.Stub {
    }
 
    void updateExternalMediaStatusInner(boolean mediaStatus) {
-       final String list[] = getSecureContainerList();
+       final String list[] = PackageHelper.getSecureContainerList();
        if (list == null || list.length == 0) {
            return;
        }
