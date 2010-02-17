@@ -208,10 +208,4 @@ public class RecognizerIntent {
      * an activity result. In a PendingIntent, the lack of this extra indicates failure.
      */
     public static final String EXTRA_RESULTS = "android.speech.extra.RESULTS";
-    
-    /**
-     * Triggers the voice search settings activity.
-     */
-    public static final String ACTION_VOICE_SEARCH_SETTINGS =
-            "android.speech.action.VOICE_SEARCH_SETTINGS";
 }
