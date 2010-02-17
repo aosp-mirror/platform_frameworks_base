@@ -45,7 +45,7 @@ extends ParagraphStyle
 
     /**
      * Renders the leading margin.  This is called before the margin has been
-     * adjusted by the value returned by {@link getLeadingMargin(boolean)}.
+     * adjusted by the value returned by {@link #getLeadingMargin(boolean)}.
      * 
      * @param c the canvas
      * @param p the paint. The this should be left unchanged on exit.
