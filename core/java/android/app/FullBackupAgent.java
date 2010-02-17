@@ -48,7 +48,8 @@ public class FullBackupAgent extends BackupAgent {
         }
 
         // That's the file set; now back it all up
-        FileBackupHelper helper = new FileBackupHelper(this, (String[])allFiles.toArray());
+        FileBackupHelper helper = new FileBackupHelper(this,
+                allFiles.toArray(new String[allFiles.size()]));
         helper.performBackup(oldState, data, newState);
     }
 
