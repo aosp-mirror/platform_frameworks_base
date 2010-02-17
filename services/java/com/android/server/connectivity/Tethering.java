@@ -431,7 +431,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                 try {
                     NetworkInfo info = service.getNetworkInfo(ConnectivityManager.TYPE_MOBILE_DUN);
                     int msg;
-                    if (info.isConnected() == true) {
+                    if (info != null && info.isConnected() == true) {
                         msg = TetherMasterSM.CMD_CELL_DUN_ENABLED;
                     } else {
                         msg = TetherMasterSM.CMD_CELL_DUN_DISABLED;
