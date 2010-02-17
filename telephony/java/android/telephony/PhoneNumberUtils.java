@@ -1654,7 +1654,7 @@ public class PhoneNumberUtils
         if (DBG) log("processPlusCodeWithinNanp,networkDialStr=" + networkDialStr);
         // If there is a plus sign at the beginning of the dial string,
         // Convert the plus sign to the default IDP since it's an international number
-        if (networkDialStr != null &
+        if (networkDialStr != null &&
             networkDialStr.charAt(0) == PLUS_SIGN_CHAR &&
             networkDialStr.length() > 1) {
             String newStr = networkDialStr.substring(1);
