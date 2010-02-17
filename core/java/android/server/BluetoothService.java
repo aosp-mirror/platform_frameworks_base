@@ -136,6 +136,14 @@ public class BluetoothService extends IBluetooth.Stub {
             }
             return false;
         }
+
+        @Override
+        public int hashCode() {
+            int hash = 1;
+            hash = hash * 31 + (address == null ? 0 : address.hashCode());
+            hash = hash * 31 + (uuid == null ? 0 : uuid.hashCode());
+            return hash;
+        }
     }
 
     static {
