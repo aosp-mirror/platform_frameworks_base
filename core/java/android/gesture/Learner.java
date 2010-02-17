@@ -72,7 +72,8 @@ abstract class Learner {
         for (int i = 0; i < count; i++) {
             final Instance instance = instances.get(i);
             // the label can be null, as specified in Instance
-            if ((instance.label == null && name == null) || instance.label.equals(name)) {
+            if ((instance.label == null && name == null)
+                    || (instance.label != null && instance.label.equals(name))) {
                 toDelete.add(instance);
             }
         }
