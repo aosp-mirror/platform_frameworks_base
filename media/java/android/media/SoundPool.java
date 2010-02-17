@@ -327,8 +327,6 @@ public class SoundPool
      * iterates through all the active streams and pauses any that
      * are playing. It also sets a flag so that any streams that
      * are playing can be resumed by calling autoResume().
-     *
-     * @hide
      */
     public native final void autoPause();
 
@@ -337,8 +335,6 @@ public class SoundPool
      *
      * Automatically resumes all streams that were paused in previous
      * calls to autoPause().
-     *
-     * @hide
      */
     public native final void autoResume();
 
@@ -412,8 +408,6 @@ public class SoundPool
     /**
      * Interface definition for a callback to be invoked when all the
      * sounds are loaded.
-     *
-     * @hide
      */
     public interface OnLoadCompleteListener
     {
@@ -429,8 +423,6 @@ public class SoundPool
 
     /**
      * Sets the callback hook for the OnLoadCompleteListener.
-     *
-     * @hide
      */
     public void setOnLoadCompleteListener(OnLoadCompleteListener listener)
     {
