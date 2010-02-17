@@ -401,6 +401,9 @@ void AwesomePlayer::notifyListener_l(int msg, int ext1, int ext2) {
 
 void AwesomePlayer::onBufferingUpdate() {
     Mutex::Autolock autoLock(mLock);
+    if (!mBufferingEventPending) {
+        return;
+    }
     mBufferingEventPending = false;
 
     if (mDurationUs >= 0) {
@@ -425,6 +428,9 @@ void AwesomePlayer::onStreamDone() {
     // Posted whenever any stream finishes playing.
 
     Mutex::Autolock autoLock(mLock);
+    if (!mStreamDoneEventPending) {
+        return;
+    }
     mStreamDoneEventPending = false;
 
     if (mFlags & LOOPING) {
@@ -918,6 +924,12 @@ void AwesomePlayer::postCheckAudioStatusEvent_l() {
 
 void AwesomePlayer::onCheckAudioStatus() {
     Mutex::Autolock autoLock(mLock);
+    if (!mAudioStatusEventPending) {
+        // Event was dispatched and while we were blocking on the mutex,
+        // has already been cancelled.
+        return;
+    }
+
     mAudioStatusEventPending = false;
 
     if (mWatchForAudioSeekComplete && !mAudioPlayer->isSeeking()) {
