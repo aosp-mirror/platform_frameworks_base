@@ -72,6 +72,12 @@ interface IMountService
     int formatVolume(String mountPoint);
 
     /**
+     * Returns an array of pids with open files on
+     * the specified path.
+     */
+    int[] getStorageUsers(String path);
+
+    /**
      * Gets the state of an volume via it's mountpoint.
      */
     String getVolumeState(String mountPoint);
@@ -94,7 +100,7 @@ interface IMountService
      * NOTE: Ensure all references are released prior to deleting.
      * Returns an int consistent with MountServiceResultCode
      */
-     int destroySecureContainer(String id);
+    int destroySecureContainer(String id);
 
     /*
      * Mount a secure container with the specified key and owner UID.

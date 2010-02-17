@@ -80,6 +80,7 @@ class MountService extends IMountService.Stub
          */
         public static final int VolumeListResult               = 110;
         public static final int AsecListResult                 = 111;
+        public static final int StorageUsersListResult         = 112;
 
         /*
          * 200 series - Requestion action has been successfully completed.
@@ -793,6 +794,31 @@ class MountService extends IMountService.Stub
         waitForReady();
 
         return doFormatVolume(path);
+    }
+
+    public int []getStorageUsers(String path) {
+        validatePermission(android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS);
+        waitForReady();
+        try {
+            String[] r = mConnector.doListCommand(
+                    String.format("storage users %s", path),
+                            VoldResponseCode.StorageUsersListResult);
+            // FMT: <pid> <process name>
+            int[] data = new int[r.length];
+            for (int i = 0; i < r.length; i++) {
+                String []tok = r[i].split(" ");
+                try {
+                    data[i] = Integer.parseInt(tok[0]);
+                } catch (NumberFormatException nfe) {
+                    Log.e(TAG, String.format("Error parsing pid %s", tok[0]));
+                    return new int[0];
+                }
+            }
+            return data;
+        } catch (NativeDaemonConnectorException e) {
+            Log.e(TAG, "Failed to retrieve storage users list", e);
+            return new int[0];
+        }
     }
 
     private void warnOnNotMounted() {
