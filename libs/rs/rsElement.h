@@ -60,9 +60,9 @@ public:
 
     void dumpLOGV(const char *prefix) const;
 
-    static Element * create(Context *rsc, RsDataType dt, RsDataKind dk,
+    static const Element * create(Context *rsc, RsDataType dt, RsDataKind dk,
                             bool isNorm, uint32_t vecSize);
-    static Element * create(Context *rsc, size_t count, const Element **,
+    static const Element * create(Context *rsc, size_t count, const Element **,
                             const char **, const size_t * lengths);
 
 protected:
@@ -89,6 +89,8 @@ public:
     ElementState();
     ~ElementState();
 
+    // Cache of all existing elements.
+    Vector<const Element *> mElements;
 };
 
 

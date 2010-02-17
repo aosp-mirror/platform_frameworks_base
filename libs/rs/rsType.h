@@ -137,6 +137,10 @@ public:
     uint32_t mLOD;
     bool mFaces;
     ObjectBaseRef<const Element> mElement;
+
+
+    // Cache of all existing types.
+    Vector<Type *> mTypes;
 };
 
 

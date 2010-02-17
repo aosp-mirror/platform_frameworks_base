@@ -31,6 +31,12 @@ Type::Type(Context *rsc) : ObjectBase(rsc)
 
 Type::~Type()
 {
+    for (uint32_t ct = 0; ct < mRSC->mStateType.mTypes.size(); ct++) {
+        if (mRSC->mStateType.mTypes[ct] == this) {
+            mRSC->mStateType.mTypes.removeAt(ct);
+            break;
+        }
+    }
     if (mLODs) {
         delete [] mLODs;
     }
@@ -341,6 +347,18 @@ RsType rsi_TypeCreate(Context *rsc)
 {
     TypeState * stc = &rsc->mStateType;
 
+    for (uint32_t ct=0; ct < stc->mTypes.size(); ct++) {
+        Type *t = stc->mTypes[ct];
+        if (t->getElement() != stc->mElement.get()) continue;
+        if (t->getDimX() != stc->mX) continue;
+        if (t->getDimY() != stc->mY) continue;
+        if (t->getDimZ() != stc->mZ) continue;
+        if (t->getDimLOD() != stc->mLOD) continue;
+        if (t->getDimFaces() != stc->mFaces) continue;
+        t->incUserRef();
+        return t;
+    }
+
     Type * st = new Type(rsc);
     st->incUserRef();
     st->setDimX(stc->mX);
@@ -351,7 +369,7 @@ RsType rsi_TypeCreate(Context *rsc)
     st->setDimFaces(stc->mFaces);
     st->compute();
     stc->mElement.clear();
-
+    stc->mTypes.push(st);
     return st;
 }
 
