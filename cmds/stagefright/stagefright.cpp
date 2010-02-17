@@ -157,13 +157,18 @@ static void playSource(OMXClient *client, const sp<MediaSource> &source) {
     long numIterationsLeft = gNumRepetitions;
     MediaSource::ReadOptions options;
 
+    int64_t sumDecodeUs = 0;
+
     while (numIterationsLeft-- > 0) {
         long numFrames = 0;
 
         MediaBuffer *buffer;
 
         for (;;) {
+            int64_t startDecodeUs = getNowUs();
             status_t err = rawSource->read(&buffer, &options);
+            int64_t delayDecodeUs = getNowUs() - startDecodeUs;
+
             options.clearSeekTo();
 
             if (err != OK) {
@@ -181,6 +186,8 @@ static void playSource(OMXClient *client, const sp<MediaSource> &source) {
                 printf(".");
                 fflush(stdout);
             }
+
+            sumDecodeUs += delayDecodeUs;
 
             buffer->release();
             buffer = NULL;
@@ -210,6 +217,8 @@ static void playSource(OMXClient *client, const sp<MediaSource> &source) {
 
     int64_t delay = getNowUs() - startTime;
     printf("avg. %.2f fps\n", n * 1E6 / delay);
+    printf("avg. time to decode one buffer %.2f usecs\n",
+           (double)sumDecodeUs / n);
 
     printf("decoded a total of %d frame(s).\n", n);
 }
