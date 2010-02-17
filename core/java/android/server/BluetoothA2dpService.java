@@ -121,9 +121,43 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
                         handleSinkStateChange(device, state, BluetoothA2dp.STATE_DISCONNECTED);
                     }
                 }
+            } else if (action.equals(AudioManager.VOLUME_CHANGED_ACTION)) {
+                int streamType = intent.getIntExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE, -1);
+                if (streamType == AudioManager.STREAM_MUSIC) {
+                    BluetoothDevice sinks[] = getConnectedSinks();
+                    if (sinks.length != 0 && isPhoneDocked(sinks[0])) {
+                        String address = sinks[0].getAddress();
+                        int newVolLevel =
+                          intent.getIntExtra(AudioManager.EXTRA_VOLUME_STREAM_VALUE, 0);
+                        int oldVolLevel =
+                          intent.getIntExtra(AudioManager.EXTRA_PREV_VOLUME_STREAM_VALUE, 0);
+                        String path = mBluetoothService.getObjectPathFromAddress(address);
+                        if (newVolLevel > oldVolLevel) {
+                            avrcpVolumeUpNative(path);
+                        } else if (newVolLevel < oldVolLevel) {
+                            avrcpVolumeDownNative(path);
+                        }
+                    }
+                }
             }
         }
     };
+
+
+    private boolean isPhoneDocked(BluetoothDevice device) {
+        // This works only because these broadcast intents are "sticky"
+        Intent i = mContext.registerReceiver(null, new IntentFilter(Intent.ACTION_DOCK_EVENT));
+        if (i != null) {
+            int state = i.getIntExtra(Intent.EXTRA_DOCK_STATE, Intent.EXTRA_DOCK_STATE_UNDOCKED);
+            if (state != Intent.EXTRA_DOCK_STATE_UNDOCKED) {
+                BluetoothDevice dockDevice = i.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                if (dockDevice != null && device.equals(dockDevice)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 
     public BluetoothA2dpService(Context context, BluetoothService bluetoothService) {
         mContext = context;
@@ -145,6 +179,7 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
         mIntentFilter.addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
         mIntentFilter.addAction(BluetoothDevice.ACTION_ACL_CONNECTED);
         mIntentFilter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED);
+        mIntentFilter.addAction(AudioManager.VOLUME_CHANGED_ACTION);
         mContext.registerReceiver(mReceiver, mIntentFilter);
 
         mAudioDevices = new HashMap<BluetoothDevice, Integer>();
@@ -551,4 +586,6 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
     private synchronized native boolean suspendSinkNative(String path);
     private synchronized native boolean resumeSinkNative(String path);
     private synchronized native Object []getSinkPropertiesNative(String path);
+    private synchronized native boolean avrcpVolumeUpNative(String path);
+    private synchronized native boolean avrcpVolumeDownNative(String path);
 }

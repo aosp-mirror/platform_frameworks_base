@@ -200,6 +200,38 @@ static jboolean resumeSinkNative(JNIEnv *env, jobject object,
     return JNI_FALSE;
 }
 
+static jboolean avrcpVolumeUpNative(JNIEnv *env, jobject object,
+                                     jstring path) {
+#ifdef HAVE_BLUETOOTH
+    LOGV(__FUNCTION__);
+    if (nat) {
+        const char *c_path = env->GetStringUTFChars(path, NULL);
+        bool ret = dbus_func_args_async(env, nat->conn, -1, NULL, NULL, nat,
+                           c_path, "org.bluez.Control", "VolumeUp",
+                           DBUS_TYPE_INVALID);
+        env->ReleaseStringUTFChars(path, c_path);
+        return ret ? JNI_TRUE : JNI_FALSE;
+    }
+#endif
+    return JNI_FALSE;
+}
+
+static jboolean avrcpVolumeDownNative(JNIEnv *env, jobject object,
+                                     jstring path) {
+#ifdef HAVE_BLUETOOTH
+    LOGV(__FUNCTION__);
+    if (nat) {
+        const char *c_path = env->GetStringUTFChars(path, NULL);
+        bool ret = dbus_func_args_async(env, nat->conn, -1, NULL, NULL, nat,
+                           c_path, "org.bluez.Control", "VolumeDown",
+                           DBUS_TYPE_INVALID);
+        env->ReleaseStringUTFChars(path, c_path);
+        return ret ? JNI_TRUE : JNI_FALSE;
+    }
+#endif
+    return JNI_FALSE;
+}
+
 #ifdef HAVE_BLUETOOTH
 DBusHandlerResult a2dp_event_filter(DBusMessage *msg, JNIEnv *env) {
     DBusError err;
@@ -267,6 +299,7 @@ void onConnectSinkResult(DBusMessage *msg, void *user, void *n) {
     free(user);
 }
 
+
 #endif
 
 
@@ -281,6 +314,8 @@ static JNINativeMethod sMethods[] = {
     {"resumeSinkNative", "(Ljava/lang/String;)Z", (void*)resumeSinkNative},
     {"getSinkPropertiesNative", "(Ljava/lang/String;)[Ljava/lang/Object;",
                                     (void *)getSinkPropertiesNative},
+    {"avrcpVolumeUpNative", "(Ljava/lang/String;)Z", (void*)avrcpVolumeUpNative},
+    {"avrcpVolumeDownNative", "(Ljava/lang/String;)Z", (void*)avrcpVolumeDownNative},
 };
 
 int register_android_server_BluetoothA2dpService(JNIEnv *env) {
