@@ -259,8 +259,12 @@ final class NativeDaemonConnector implements Runnable {
                     rdata[idx++] = line.substring(tok[0].length() + 1);
                 } else if (code == NativeDaemonConnector.ResponseCode.CommandOkay) {
                     if (LOCAL_LOGD) Log.d(TAG, String.format("List terminated with {%s}", line));
-                    if (i != rsp.size()) {
-                        Log.w(TAG, String.format("Recv'd %d lines after list term", (rsp.size()-i)));
+                    int last = rsp.size() -1;
+                    if (i != last) {
+                        Log.w(TAG, String.format("Recv'd %d lines after end of list {%s}", (last-i), cmd));
+                        for (int j = i; j <= last ; j++) {
+                            Log.w(TAG, String.format("ExtraData <%s>", rsp.get(i)));
+                        }
                     }
                     return rdata;
                 } else {
