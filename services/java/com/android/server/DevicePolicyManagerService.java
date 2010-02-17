@@ -24,7 +24,7 @@ import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
 import android.app.Activity;
-import android.app.DeviceAdmin;
+import android.app.DeviceAdminReceiver;
 import android.app.DeviceAdminInfo;
 import android.app.DevicePolicyManager;
 import android.app.IDevicePolicyManager;
@@ -216,7 +216,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         ActiveAdmin admin = getActiveAdminUncheckedLocked(adminReceiver);
         if (admin != null) {
             sendAdminCommandLocked(admin,
-                    DeviceAdmin.ACTION_DEVICE_ADMIN_DISABLED);
+                    DeviceAdminReceiver.ACTION_DEVICE_ADMIN_DISABLED);
             // XXX need to wait for it to complete.
             mAdminList.remove(admin);
             mAdminMap.remove(adminReceiver);
@@ -393,7 +393,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 mAdminList.add(admin);
                 saveSettingsLocked();
                 sendAdminCommandLocked(admin,
-                        DeviceAdmin.ACTION_DEVICE_ADMIN_ENABLED);
+                        DeviceAdminReceiver.ACTION_DEVICE_ADMIN_ENABLED);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -709,7 +709,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 }
                 return;
             }
-            Intent intent = new Intent(DeviceAdmin.ACTION_DEVICE_ADMIN_DISABLE_REQUESTED);
+            Intent intent = new Intent(DeviceAdminReceiver.ACTION_DEVICE_ADMIN_DISABLE_REQUESTED);
             intent.setComponent(admin.info.getComponent());
             mContext.sendOrderedBroadcast(intent, null, new BroadcastReceiver() {
                 @Override
@@ -738,7 +738,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         mFailedPasswordAttempts = 0;
                         saveSettingsLocked();
                     }
-                    sendAdminCommandLocked(DeviceAdmin.ACTION_PASSWORD_CHANGED,
+                    sendAdminCommandLocked(DeviceAdminReceiver.ACTION_PASSWORD_CHANGED,
                             DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD);
                 } finally {
                     Binder.restoreCallingIdentity(ident);
@@ -760,7 +760,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 if (max > 0 && mFailedPasswordAttempts >= max) {
                     wipeDataLocked(0);
                 }
-                sendAdminCommandLocked(DeviceAdmin.ACTION_PASSWORD_FAILED,
+                sendAdminCommandLocked(DeviceAdminReceiver.ACTION_PASSWORD_FAILED,
                         DeviceAdminInfo.USES_POLICY_WATCH_LOGIN);
             } finally {
                 Binder.restoreCallingIdentity(ident);
@@ -778,7 +778,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 try {
                     mFailedPasswordAttempts = 0;
                     saveSettingsLocked();
-                    sendAdminCommandLocked(DeviceAdmin.ACTION_PASSWORD_SUCCEEDED,
+                    sendAdminCommandLocked(DeviceAdminReceiver.ACTION_PASSWORD_SUCCEEDED,
                             DeviceAdminInfo.USES_POLICY_WATCH_LOGIN);
                 } finally {
                     Binder.restoreCallingIdentity(ident);

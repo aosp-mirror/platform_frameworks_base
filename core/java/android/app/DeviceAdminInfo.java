@@ -60,8 +60,8 @@ public final class DeviceAdminInfo implements Parcelable {
     
     /**
      * A type of policy that this device admin can use: able to watch login
-     * attempts from the user, via {@link DeviceAdmin#ACTION_PASSWORD_FAILED},
-     * {@link DeviceAdmin#ACTION_PASSWORD_SUCCEEDED}, and
+     * attempts from the user, via {@link DeviceAdminReceiver#ACTION_PASSWORD_FAILED},
+     * {@link DeviceAdminReceiver#ACTION_PASSWORD_SUCCEEDED}, and
      * {@link DevicePolicyManager#getCurrentFailedPasswordAttempts}.
      * 
      * <p>To control this policy, the device admin must have a "watch-login"
@@ -169,10 +169,10 @@ public final class DeviceAdminInfo implements Parcelable {
         
         XmlResourceParser parser = null;
         try {
-            parser = ai.loadXmlMetaData(pm, DeviceAdmin.DEVICE_ADMIN_META_DATA);
+            parser = ai.loadXmlMetaData(pm, DeviceAdminReceiver.DEVICE_ADMIN_META_DATA);
             if (parser == null) {
                 throw new XmlPullParserException("No "
-                        + DeviceAdmin.DEVICE_ADMIN_META_DATA + " meta-data");
+                        + DeviceAdminReceiver.DEVICE_ADMIN_META_DATA + " meta-data");
             }
         
             AttributeSet attrs = Xml.asAttributeSet(parser);
