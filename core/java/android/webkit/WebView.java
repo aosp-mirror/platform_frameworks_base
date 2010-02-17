@@ -1102,7 +1102,7 @@ public class WebView extends AbsoluteLayout
      * methods may be called on a WebView after destroy.
      */
     public void destroy() {
-        clearTextEntry();
+        clearTextEntry(false);
         if (mWebViewCore != null) {
             // Set the handlers to null before destroying WebViewCore so no
             // more messages will be posted.
@@ -1388,7 +1388,7 @@ public class WebView extends AbsoluteLayout
         arg.mUrl = url;
         arg.mExtraHeaders = extraHeaders;
         mWebViewCore.sendMessage(EventHub.LOAD_URL, arg);
-        clearTextEntry();
+        clearTextEntry(false);
     }
 
     /**
@@ -1417,7 +1417,7 @@ public class WebView extends AbsoluteLayout
             arg.mUrl = url;
             arg.mPostData = postData;
             mWebViewCore.sendMessage(EventHub.POST_URL, arg);
-            clearTextEntry();
+            clearTextEntry(false);
         } else {
             loadUrl(url);
         }
@@ -1473,7 +1473,7 @@ public class WebView extends AbsoluteLayout
         arg.mEncoding = encoding;
         arg.mFailUrl = failUrl;
         mWebViewCore.sendMessage(EventHub.LOAD_DATA, arg);
-        clearTextEntry();
+        clearTextEntry(false);
     }
 
     /**
@@ -1490,7 +1490,7 @@ public class WebView extends AbsoluteLayout
      * Reload the current url.
      */
     public void reload() {
-        clearTextEntry();
+        clearTextEntry(false);
         switchOutDrawHistory();
         mWebViewCore.sendMessage(EventHub.RELOAD);
     }
@@ -1577,7 +1577,7 @@ public class WebView extends AbsoluteLayout
         // null, and that will be the case
         mCertificate = null;
         if (steps != 0) {
-            clearTextEntry();
+            clearTextEntry(false);
             mWebViewCore.sendMessage(EventHub.GO_BACK_FORWARD, steps,
                     ignoreSnapshot ? 1 : 0);
         }
@@ -1677,9 +1677,17 @@ public class WebView extends AbsoluteLayout
                 && mWebTextView.hasFocus();
     }
 
-    private void clearTextEntry() {
+    /**
+     * Remove the WebTextView.
+     * @param disableFocusController If true, send a message to webkit
+     *     disabling the focus controller, so the caret stops blinking.
+     */
+    private void clearTextEntry(boolean disableFocusController) {
         if (inEditingMode()) {
             mWebTextView.remove();
+            if (disableFocusController) {
+                setFocusControllerInactive();
+            }
         }
     }
 
@@ -1713,7 +1721,7 @@ public class WebView extends AbsoluteLayout
             Log.w(LOGTAG, "This WebView doesn't support zoom.");
             return;
         }
-        clearTextEntry();
+        clearTextEntry(false);
         if (getSettings().getBuiltInZoomControls()) {
             mZoomButtonsController.setVisible(true);
         } else {
@@ -3759,6 +3767,7 @@ public class WebView extends AbsoluteLayout
                 }
                 return true;
             }
+            clearTextEntry(true);
             nativeSetFollowedLink(true);
             if (!mCallbackProxy.uiOverrideUrlLoading(nativeCursorText())) {
                 mWebViewCore.sendMessage(EventHub.CLICK, data.mFrame,
@@ -3839,7 +3848,7 @@ public class WebView extends AbsoluteLayout
 
     @Override
     protected void onDetachedFromWindow() {
-        clearTextEntry();
+        clearTextEntry(false);
         super.onDetachedFromWindow();
         // Clean up the zoom controller
         mZoomButtonsController.setVisible(false);
@@ -5826,7 +5835,7 @@ public class WebView extends AbsoluteLayout
                         // is necessary for page loads driven by webkit, and in
                         // particular when the user was on a password field, so
                         // the WebTextView was visible.
-                        clearTextEntry();
+                        clearTextEntry(false);
                         // update the zoom buttons as the scale can be changed
                         if (getSettings().getBuiltInZoomControls()) {
                             updateZoomButtonsEnabled();
@@ -5948,7 +5957,7 @@ public class WebView extends AbsoluteLayout
                     }
                     break;
                 case CLEAR_TEXT_ENTRY:
-                    clearTextEntry();
+                    clearTextEntry(false);
                     break;
                 case INVAL_RECT_MSG_ID: {
                     Rect r = (Rect)msg.obj;
@@ -6555,8 +6564,7 @@ public class WebView extends AbsoluteLayout
      */
     private void sendMoveMouseIfLatest(boolean removeFocus) {
         if (removeFocus) {
-            clearTextEntry();
-            setFocusControllerInactive();
+            clearTextEntry(true);
         }
         mWebViewCore.sendMessage(EventHub.SET_MOVE_MOUSE_IF_LATEST,
                 cursorData());
