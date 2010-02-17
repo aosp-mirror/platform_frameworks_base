@@ -39,6 +39,8 @@ import android.view.KeyEvent;
  */
 public abstract class Layout {
     private static final boolean DEBUG = false;
+    private static final ParagraphStyle[] NO_PARA_SPANS =
+        ArrayUtils.emptyArray(ParagraphStyle.class);
 
     /* package */ static final EmojiFactory EMOJI_FACTORY =
         EmojiFactory.newAvailableInstance();
@@ -57,7 +59,7 @@ public abstract class Layout {
     private RectF mEmojiRect;
 
     /**
-     * Return how wide a layout would be necessary to display the
+     * Return how wide a layout must be in order to display the
      * specified text with one line per paragraph.
      */
     public static float getDesiredWidth(CharSequence source,
@@ -66,7 +68,7 @@ public abstract class Layout {
     }
     
     /**
-     * Return how wide a layout would be necessary to display the
+     * Return how wide a layout must be in order to display the
      * specified text slice with one line per paragraph.
      */
     public static float getDesiredWidth(CharSequence source,
@@ -82,6 +84,7 @@ public abstract class Layout {
             if (next < 0)
                 next = end;
 
+            // note, omits trailing paragraph char
             float w = measureText(paint, workPaint,
                                   source, i, next, null, true, null);
 
@@ -97,10 +100,19 @@ public abstract class Layout {
     /**
      * Subclasses of Layout use this constructor to set the display text,
      * width, and other standard properties.
+     * @param text the text to render
+     * @param paint the default paint for the layout.  Styles can override
+     * various attributes of the paint.
+     * @param width the wrapping width for the text.
+     * @param align whether to left, right, or center the text.  Styles can
+     * override the alignment.
+     * @param spacingMult factor by which to scale the font size to get the
+     * default line spacing
+     * @param spacingAdd amount to add to the default line spacing
      */
     protected Layout(CharSequence text, TextPaint paint,
                      int width, Alignment align,
-                     float spacingmult, float spacingadd) {
+                     float spacingMult, float spacingAdd) {
         if (width < 0)
             throw new IllegalArgumentException("Layout: " + width + " < 0");
 
@@ -109,8 +121,8 @@ public abstract class Layout {
         mWorkPaint = new TextPaint();
         mWidth = width;
         mAlignment = align;
-        mSpacingMult = spacingmult;
-        mSpacingAdd = spacingadd;
+        mSpacingMult = spacingMult;
+        mSpacingAdd = spacingAdd;
         mSpannedText = text instanceof Spanned;
     }
 
@@ -141,10 +153,16 @@ public abstract class Layout {
     }
 
     /**
-     * Draw the specified rectangle from this Layout on the specified Canvas,
-     * with the specified path drawn between the background and the text.
+     * Draw this Layout on the specified canvas, with the highlight path drawn
+     * between the background and the text.
+     *
+     * @param c the canvas
+     * @param highlight the path of the highlight or cursor; can be null
+     * @param highlightPaint the paint for the highlight
+     * @param cursorOffsetVertical the amount to temporarily translate the
+     *        canvas while rendering the highlight
      */
-    public void draw(Canvas c, Path highlight, Paint highlightpaint,
+    public void draw(Canvas c, Path highlight, Paint highlightPaint,
                      int cursorOffsetVertical) {
         int dtop, dbottom;
 
@@ -157,12 +175,9 @@ public abstract class Layout {
             dbottom = sTempRect.bottom;
         }
 
-        TextPaint paint = mPaint;
 
         int top = 0;
-        // getLineBottom(getLineCount() -1) just calls getLineTop(getLineCount) 
         int bottom = getLineTop(getLineCount());
-
 
         if (dtop > top) {
             top = dtop;
@@ -177,16 +192,19 @@ public abstract class Layout {
         int previousLineBottom = getLineTop(first);
         int previousLineEnd = getLineStart(first);
         
+        TextPaint paint = mPaint;
         CharSequence buf = mText;
-
-        ParagraphStyle[] nospans = ArrayUtils.emptyArray(ParagraphStyle.class);
-        ParagraphStyle[] spans = nospans;
-        int spanend = 0;
-        int textLength = 0;
+        int width = mWidth;
         boolean spannedText = mSpannedText;
 
+        ParagraphStyle[] spans = NO_PARA_SPANS;
+        int spanend = 0;
+        int textLength = 0;
+
+        // First, draw LineBackgroundSpans.
+        // LineBackgroundSpans know nothing about the alignment or direction of
+        // the layout or line.  XXX: Should they?
         if (spannedText) {
-            spanend = 0;
             textLength = buf.length();
             for (int i = first; i <= last; i++) {
                 int start = previousLineEnd;
@@ -209,7 +227,7 @@ public abstract class Layout {
                 for (int n = 0; n < spans.length; n++) {
                     LineBackgroundSpan back = (LineBackgroundSpan) spans[n];
 
-                    back.drawBackground(c, paint, 0, mWidth,
+                    back.drawBackground(c, paint, 0, width,
                                        ltop, lbaseline, lbottom,
                                        buf, start, end,
                                        i);
@@ -219,7 +237,7 @@ public abstract class Layout {
             spanend = 0;
             previousLineBottom = getLineTop(first);
             previousLineEnd = getLineStart(first);
-            spans = nospans;
+            spans = NO_PARA_SPANS;
         } 
 
         // There can be a highlight even without spans if we are drawing
@@ -229,7 +247,7 @@ public abstract class Layout {
                 c.translate(0, cursorOffsetVertical);
             }
 
-            c.drawPath(highlight, highlightpaint);
+            c.drawPath(highlight, highlightPaint);
 
             if (cursorOffsetVertical != 0) {
                 c.translate(0, -cursorOffsetVertical);
@@ -238,6 +256,9 @@ public abstract class Layout {
 
         Alignment align = mAlignment;
         
+        // Next draw the lines, one at a time.
+        // the baseline is the top of the following line minus the current
+        // line's descent.
         for (int i = first; i <= last; i++) {
             int start = previousLineEnd;
 
@@ -249,21 +270,20 @@ public abstract class Layout {
             previousLineBottom = lbottom;
             int lbaseline = lbottom - getLineDescent(i);
 
-            boolean par = false;
+            boolean isFirstParaLine = false;
             if (spannedText) { 
                 if (start == 0 || buf.charAt(start - 1) == '\n') {
-                    par = true;
+                    isFirstParaLine = true;
                 }
+                // New batch of paragraph styles, compute the alignment.
+                // Last alignment style wins.
                 if (start >= spanend) {
-
                     Spanned sp = (Spanned) buf;
-
                     spanend = sp.nextSpanTransition(start, textLength,
                                                     ParagraphStyle.class);
                     spans = sp.getSpans(start, spanend, ParagraphStyle.class);
                     
                     align = mAlignment;
-                    
                     for (int n = spans.length-1; n >= 0; n--) {
                         if (spans[n] instanceof AlignmentSpan) {
                             align = ((AlignmentSpan) spans[n]).getAlignment();
@@ -277,6 +297,8 @@ public abstract class Layout {
             int left = 0;
             int right = mWidth;
 
+            // Draw all leading margin spans.  Adjust left or right according
+            // to the paragraph direction of the line.
             if (spannedText) {
                 final int length = spans.length;
                 for (int n = 0; n < length; n++) {
@@ -286,15 +308,15 @@ public abstract class Layout {
                         if (dir == DIR_RIGHT_TO_LEFT) {
                             margin.drawLeadingMargin(c, paint, right, dir, ltop,
                                                      lbaseline, lbottom, buf,
-                                                     start, end, par, this);
+                                                     start, end, isFirstParaLine, this);
                                 
-                            right -= margin.getLeadingMargin(par);
+                            right -= margin.getLeadingMargin(isFirstParaLine);
                         } else {
                             margin.drawLeadingMargin(c, paint, left, dir, ltop,
                                                      lbaseline, lbottom, buf,
-                                                     start, end, par, this);
+                                                     start, end, isFirstParaLine, this);
 
-                            boolean useMargin = par;
+                            boolean useMargin = isFirstParaLine;
                             if (margin instanceof LeadingMarginSpan.LeadingMarginSpan2) {
                                 int count = ((LeadingMarginSpan.LeadingMarginSpan2)margin).getLeadingMarginLineCount();
                                 useMargin = count > i;
@@ -305,6 +327,8 @@ public abstract class Layout {
                 }
             }
 
+            // Adjust the point at which to start rendering depending on the
+            // alignment of the paragraph.
             int x;
             if (align == Alignment.ALIGN_NORMAL) {
                 if (dir == DIR_LEFT_TO_RIGHT) {
@@ -340,6 +364,7 @@ public abstract class Layout {
                     Assert.assertTrue(dir == DIR_LEFT_TO_RIGHT);
                     Assert.assertNotNull(c);
                 }
+                // XXX: assumes there's nothing additional to be done
                 c.drawText(buf, start, end, x, lbaseline, paint);
             } else {
                 drawText(c, buf, start, end, dir, directions,
@@ -382,7 +407,7 @@ public abstract class Layout {
 
     /**
      * Increase the width of this layout to the specified width.
-     * Be careful to use this only when you know it is appropriate --
+     * Be careful to use this only when you know it is appropriate&mdash;
      * it does not cause the text to reflow to use the full new width.
      */
     public final void increaseWidthTo(int wid) {
@@ -397,7 +422,7 @@ public abstract class Layout {
      * Return the total height of this layout.
      */
     public int getHeight() {
-        return getLineTop(getLineCount());  // same as getLineBottom(getLineCount() - 1);
+        return getLineTop(getLineCount());
     }
 
     /**
@@ -439,33 +464,35 @@ public abstract class Layout {
             bounds.left = 0;     // ???
             bounds.top = getLineTop(line);
             bounds.right = mWidth;   // ???
-            bounds.bottom = getLineBottom(line);
+            bounds.bottom = getLineTop(line + 1);
         }
         return getLineBaseline(line);
     }
 
     /**
-     * Return the vertical position of the top of the specified line.
-     * If the specified line is one beyond the last line, returns the
+     * Return the vertical position of the top of the specified line
+     * (0&hellip;getLineCount()).
+     * If the specified line is equal to the line count, returns the
      * bottom of the last line.
      */
     public abstract int getLineTop(int line);
 
     /**
-     * Return the descent of the specified line.
+     * Return the descent of the specified line(0&hellip;getLineCount() - 1).
      */
     public abstract int getLineDescent(int line);
 
     /**
-     * Return the text offset of the beginning of the specified line.
-     * If the specified line is one beyond the last line, returns the
-     * end of the last line.
+     * Return the text offset of the beginning of the specified line (
+     * 0&hellip;getLineCount()). If the specified line is equal to the line
+     * count, returns the length of the text.
      */
     public abstract int getLineStart(int line);
 
     /**
-     * Returns the primary directionality of the paragraph containing
-     * the specified line.
+     * Returns the primary directionality of the paragraph containing the
+     * specified line, either 1 for left-to-right lines, or -1 for right-to-left
+     * lines (see {@link #DIR_LEFT_TO_RIGHT}, {@link #DIR_RIGHT_TO_LEFT}).
      */
     public abstract int getParagraphDirection(int line);
 
@@ -477,9 +504,11 @@ public abstract class Layout {
     public abstract boolean getLineContainsTab(int line);
 
     /**
-     * Returns an array of directionalities for the specified line.
+     * Returns the directional run information for the specified line.
      * The array alternates counts of characters in left-to-right
      * and right-to-left segments of the line.
+     *
+     * <p>NOTE: this is inadequate to support bidirectional text, and will change.
      */
     public abstract Directions getLineDirections(int line);
 
@@ -1565,6 +1594,21 @@ public abstract class Layout {
         return h;
     }
 
+    /**
+     * Measure width of a run of text on a single line that is known to all be
+     * in the same direction as the paragraph base direction. Returns the width,
+     * and the line metrics in fm if fm is not null.
+     *
+     * @param paint the paint for the text; will not be modified
+     * @param workPaint paint available for modification
+     * @param text text
+     * @param start start of the line
+     * @param end limit of the line
+     * @param fm object to return integer metrics in, can be null
+     * @param hasTabs true if it is known that the line has tabs
+     * @param tabs tab position information
+     * @return the width of the text from start to end
+     */
     /* package */ static float measureText(TextPaint paint,
                                            TextPaint workPaint,
                                            CharSequence text,
@@ -1580,37 +1624,36 @@ public abstract class Layout {
 
         int len = end - start;
 
-        int here = 0;
-        float h = 0;
-        int ab = 0, be = 0;
-        int top = 0, bot = 0;
+        int lastPos = 0;
+        float width = 0;
+        int ascent = 0, descent = 0, top = 0, bottom = 0;
 
         if (fm != null) {
             fm.ascent = 0;
             fm.descent = 0;
         }
 
-        for (int i = hasTabs ? 0 : len; i <= len; i++) {
+        for (int pos = hasTabs ? 0 : len; pos <= len; pos++) {
             int codept = 0;
             Bitmap bm = null;
 
-            if (hasTabs && i < len) {
-                codept = buf[i];
+            if (hasTabs && pos < len) {
+                codept = buf[pos];
             }
 
-            if (codept >= 0xD800 && codept <= 0xDFFF && i < len) {
-                codept = Character.codePointAt(buf, i);
+            if (codept >= 0xD800 && codept <= 0xDFFF && pos < len) {
+                codept = Character.codePointAt(buf, pos);
 
                 if (codept >= MIN_EMOJI && codept <= MAX_EMOJI) {
                     bm = EMOJI_FACTORY.getBitmapFromAndroidPua(codept);
                 }
             }
 
-            if (i == len || codept == '\t' || bm != null) {
+            if (pos == len || codept == '\t' || bm != null) {
                 workPaint.baselineShift = 0;
 
-                h += Styled.measureText(paint, workPaint, text,
-                                        start + here, start + i,
+                width += Styled.measureText(paint, workPaint, text,
+                                        start + lastPos, start + pos,
                                         fm);
 
                 if (fm != null) {
@@ -1623,60 +1666,80 @@ public abstract class Layout {
                     }
                 }
 
-                if (i != len) {
+                if (pos != len) {
                     if (bm == null) {
-                        h = nextTab(text, start, end, h, tabs);
+                        // no emoji, must have hit a tab
+                        width = nextTab(text, start, end, width, tabs);
                     } else {
+                        // This sets up workPaint with the font on the emoji
+                        // text, so that we can extract the ascent and scale.
+
+                        // We can't use the result of the previous call to
+                        // measureText because the emoji might have its own style.
+                        // We have to initialize workPaint here because if the
+                        // text is unstyled measureText might not use workPaint
+                        // at all.
                         workPaint.set(paint);
                         Styled.measureText(paint, workPaint, text,
-                                           start + i, start + i + 1, null);
+                                           start + pos, start + pos + 1, null);
 
-                        float wid = (float) bm.getWidth() *
+                        width += (float) bm.getWidth() *
                                     -workPaint.ascent() / bm.getHeight();
 
-                        h += wid;
-                        i++;
+                        // Since we had an emoji, we bump past the second half
+                        // of the surrogate pair.
+                        pos++;
                     }
                 }
 
                 if (fm != null) {
-                    if (fm.ascent < ab) {
-                        ab = fm.ascent;
+                    if (fm.ascent < ascent) {
+                        ascent = fm.ascent;
                     }
-                    if (fm.descent > be) {
-                        be = fm.descent;
+                    if (fm.descent > descent) {
+                        descent = fm.descent;
                     }
 
                     if (fm.top < top) {
                         top = fm.top;
                     }
-                    if (fm.bottom > bot) {
-                        bot = fm.bottom;
+                    if (fm.bottom > bottom) {
+                        bottom = fm.bottom;
                     }
 
-                    /*
-                     * No need to take bitmap height into account here,
-                     * since it is scaled to match the text height.
-                     */
+                    // No need to take bitmap height into account here,
+                    // since it is scaled to match the text height.
                 }
 
-                here = i + 1;
+                lastPos = pos + 1;
             }
         }
 
         if (fm != null) {
-            fm.ascent = ab;
-            fm.descent = be;
+            fm.ascent = ascent;
+            fm.descent = descent;
             fm.top = top;
-            fm.bottom = bot;
+            fm.bottom = bottom;
         }
 
         if (hasTabs)
             TextUtils.recycle(buf);
 
-        return h;
+        return width;
     }
 
+    /**
+     * Returns the position of the next tab stop after h on the line.
+     *
+     * @param text the text
+     * @param start start of the line
+     * @param end limit of the line
+     * @param h the current horizontal offset
+     * @param tabs the tabs, can be null.  If it is null, any tabs in effect
+     * on the line will be used.  If there are no tabs, a default offset
+     * will be used to compute the tab stop.
+     * @return the offset of the next tab stop.
+     */
     /* package */ static float nextTab(CharSequence text, int start, int end,
                                        float h, Object[] tabs) {
         float nh = Float.MAX_VALUE;
@@ -1747,6 +1810,16 @@ public abstract class Layout {
     public static class Directions {
         private short[] mDirections;
 
+        // The values in mDirections are the offsets from the first character
+        // in the line to the next flip in direction.  Runs at even indices
+        // are left-to-right, the others are right-to-left.  So, for example,
+        // a line that starts with a right-to-left run has 0 at mDirections[0],
+        // since the 'first' (ltr) run is zero length.
+        //
+        // The code currently assumes that each run is adjacent to the previous
+        // one, progressing in the base line direction.  This isn't sufficient
+        // to handle nested runs, for example numeric text in an rtl context
+        // in an ltr paragraph.
         /* package */ Directions(short[] dirs) {
             mDirections = dirs;
         }
