@@ -143,7 +143,7 @@ public class MockProvider implements LocationProviderInterface {
         mLocation.set(l);
         mHasLocation = true;
         try {
-            mLocationManager.reportLocation(mLocation);
+            mLocationManager.reportLocation(mLocation, false);
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException calling reportLocation");
         }

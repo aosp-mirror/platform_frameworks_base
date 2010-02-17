@@ -863,7 +863,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
             }
 
             try {
-                mLocationManager.reportLocation(mLocation);
+                mLocationManager.reportLocation(mLocation, false);
             } catch (RemoteException e) {
                 Log.e(TAG, "RemoteException calling reportLocation");
             }
