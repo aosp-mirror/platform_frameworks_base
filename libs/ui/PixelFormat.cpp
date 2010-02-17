@@ -69,9 +69,6 @@ status_t getPixelFormatInfo(PixelFormat format, PixelFormatInfo* info)
         COMPONENT(RGBA)
         COMPONENT(LUMINANCE)
         COMPONENT(LUMINANCE_ALPHA)
-        COMPONENT(Y_CB_CR_SP)
-        COMPONENT(Y_CB_CR_P)
-        COMPONENT(Y_CB_CR_I)
         default:
             return BAD_INDEX;
     }

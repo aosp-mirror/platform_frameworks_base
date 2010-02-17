@@ -48,19 +48,8 @@ static void textureToCopyBitImage(
         const GGLSurface* surface, int32_t opFormat, 
         android_native_buffer_t* buffer, copybit_image_t* img)
 {
-    uint32_t vstride = 0;
-    if (opFormat == COPYBIT_FORMAT_YCbCr_422_SP ||
-            opFormat == COPYBIT_FORMAT_YCbCr_420_SP) {
-        // NOTE: this static_cast is really not safe b/c we can't know for
-        // sure the buffer passed is of the right type.
-        // However, since we do this only for YUV formats, we should be safe
-        // since only SurfaceFlinger makes use of them.
-        GraphicBuffer* graphicBuffer = static_cast<GraphicBuffer*>(buffer);
-        vstride = graphicBuffer->getVerticalStride();
-    }
-
     img->w      = surface->stride;
-    img->h      = vstride ? vstride : surface->height;
+    img->h      = surface->height;
     img->format = opFormat;
     img->base   = surface->data;
     img->handle = (native_handle_t *)buffer->handle;
@@ -98,8 +87,6 @@ static bool supportedCopybitsFormat(int format) {
     case COPYBIT_FORMAT_BGRA_8888:
     case COPYBIT_FORMAT_RGBA_5551:
     case COPYBIT_FORMAT_RGBA_4444:
-    case COPYBIT_FORMAT_YCbCr_422_SP:
-    case COPYBIT_FORMAT_YCbCr_420_SP:
         return true;
     default:
         return false;

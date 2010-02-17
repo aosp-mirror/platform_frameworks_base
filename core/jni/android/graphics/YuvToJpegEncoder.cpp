@@ -1,16 +1,17 @@
 #include "CreateJavaOutputStreamAdaptor.h"
 #include "SkJpegUtility.h"
 #include "YuvToJpegEncoder.h"
-#include "ui/PixelFormat.h"
+#include <ui/PixelFormat.h>
+#include <hardware/hardware.h>
 
 #include <jni.h>
 
 YuvToJpegEncoder* YuvToJpegEncoder::create(int format, int* strides) {
     // Only PIXEL_FORMAT_YCbCr_420_SP and PIXEl_FOMAT_YCbCr_422_I are supported
     // for now.
-    if (format == android::PIXEL_FORMAT_YCbCr_420_SP) {
+    if (format == HAL_PIXEL_FORMAT_YCbCr_420_SP) {
         return new Yuv420SpToJpegEncoder(strides);
-    } else if (format == android::PIXEL_FORMAT_YCbCr_422_I) {
+    } else if (format == HAL_PIXEL_FORMAT_YCbCr_422_I) {
         return new Yuv422IToJpegEncoder(strides);
     } else {
       return NULL;
