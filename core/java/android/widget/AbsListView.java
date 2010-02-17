@@ -2589,7 +2589,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 if (trackMotionScroll(delta, delta)) {
                     if (motionView != null) {
                         // Tweak the scroll for how far we overshot
-                        mScrollY -= delta - (motionView.getTop() - oldTop);
+                        int overshoot = -(delta - (motionView.getTop() - oldTop));
+                        overscrollBy(0, overshoot, 0, mScrollY, 0, 0, 0, getOverscrollMax());
                     }
                     float vel = scroller.getCurrVelocity();
                     if (delta > 0) {

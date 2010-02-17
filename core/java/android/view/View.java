@@ -1504,6 +1504,31 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @hide
      */
     private static final int PREPRESSED             = 0x02000000;
+    
+    /**
+     * Always allow a user to overscroll this view, provided it is a
+     * view that can scroll.
+     */
+    private static final int OVERSCROLL_ALWAYS = 0;
+    
+    /**
+     * Allow a user to overscroll this view only if the content is large
+     * enough to meaningfully scroll, provided it is a view that can scroll.
+     */
+    private static final int OVERSCROLL_IF_CONTENT_SCROLLS = 1;
+    
+    /**
+     * Never allow a user to overscroll this view.
+     */
+    private static final int OVERSCROLL_NEVER = 2;
+    
+    /**
+     * Controls the overscroll mode for this view.
+     * See {@link #overscrollBy(int, int, int, int, int, int, int, int)},
+     * {@link #OVERSCROLL_ALWAYS}, {@link #OVERSCROLL_IF_CONTENT_SCROLLS},
+     * and {@link #OVERSCROLL_NEVER}.
+     */
+    private int mOverscrollMode = OVERSCROLL_ALWAYS;
 
     /**
      * The parent this view is attached to.
@@ -2052,6 +2077,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                             }
                         });
                     }
+                    break;
+                case R.styleable.View_overscrollMode:
+                    mOverscrollMode = a.getInt(attr, OVERSCROLL_ALWAYS);
                     break;
             }
         }
@@ -8573,43 +8601,59 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             int scrollX, int scrollY,
             int scrollRangeX, int scrollRangeY,
             int maxOverscrollX, int maxOverscrollY) {
-        // Scale the scroll amount if we're in the dropoff zone
-        final int dropoffX = maxOverscrollX / 2;
-        final int dropoffLeft = -dropoffX;
-        final int dropoffRight = dropoffX + scrollRangeX;
-        int newScrollX;
-        if ((scrollX < dropoffLeft && deltaX < 0) ||
-                (scrollX > dropoffRight && deltaX > 0)) {
-            newScrollX = scrollX + deltaX / 2;
-        } else {
-            newScrollX = scrollX + deltaX;
-            if (newScrollX > dropoffRight && deltaX > 0) {
-                int extra = newScrollX - dropoffRight;
-                newScrollX = dropoffRight + extra / 2;
-            } else if (newScrollX < dropoffLeft && deltaX < 0) {
-                int extra = newScrollX - dropoffLeft;
-                newScrollX = dropoffLeft + extra / 2;
-            }
-        }
+        final int overscrollMode = mOverscrollMode;
+        final boolean canScrollHorizontal = 
+                computeHorizontalScrollRange() > computeHorizontalScrollExtent();
+        final boolean canScrollVertical = 
+                computeVerticalScrollRange() > computeVerticalScrollExtent();
+        final boolean overscrollHorizontal = overscrollMode == OVERSCROLL_ALWAYS ||
+                (overscrollMode == OVERSCROLL_IF_CONTENT_SCROLLS && canScrollHorizontal);
+        final boolean overscrollVertical = overscrollMode == OVERSCROLL_ALWAYS ||
+                (overscrollMode == OVERSCROLL_IF_CONTENT_SCROLLS && canScrollVertical);
         
-        final int dropoffY = maxOverscrollY / 2;
-        final int dropoffTop = -dropoffY;
-        final int dropoffBottom = dropoffY + scrollRangeY;
-        int newScrollY;
-        if ((scrollY < dropoffTop && deltaY < 0) ||
-                (scrollY > dropoffBottom && deltaY > 0)) {
-            newScrollY = scrollY + deltaY / 2;
-        } else {
-            newScrollY = scrollY + deltaY;
-            if (newScrollY > dropoffBottom && deltaY > 0) {
-                int extra = newScrollY - dropoffBottom;
-                newScrollY = dropoffBottom + extra / 2;
-            } else if (newScrollY < dropoffTop && deltaY < 0) {
-                int extra = newScrollY - dropoffTop;
-                newScrollY = dropoffTop + extra / 2;
+        int newScrollX = scrollX + deltaX;
+        if (overscrollHorizontal) {
+            // Scale the scroll amount if we're in the dropoff zone
+            final int dropoffX = maxOverscrollX / 2;
+            final int dropoffLeft = -dropoffX;
+            final int dropoffRight = dropoffX + scrollRangeX;
+            if ((scrollX < dropoffLeft && deltaX < 0) ||
+                    (scrollX > dropoffRight && deltaX > 0)) {
+                newScrollX = scrollX + deltaX / 2;
+            } else {
+                if (newScrollX > dropoffRight && deltaX > 0) {
+                    int extra = newScrollX - dropoffRight;
+                    newScrollX = dropoffRight + extra / 2;
+                } else if (newScrollX < dropoffLeft && deltaX < 0) {
+                    int extra = newScrollX - dropoffLeft;
+                    newScrollX = dropoffLeft + extra / 2;
+                }
             }
+        } else {
+            maxOverscrollX = 0;
         }
 
+        int newScrollY = scrollY + deltaY;
+        if (overscrollVertical) {
+            final int dropoffY = maxOverscrollY / 2;
+            final int dropoffTop = -dropoffY;
+            final int dropoffBottom = dropoffY + scrollRangeY;
+            if ((scrollY < dropoffTop && deltaY < 0) ||
+                    (scrollY > dropoffBottom && deltaY > 0)) {
+                newScrollY = scrollY + deltaY / 2;
+            } else {
+                if (newScrollY > dropoffBottom && deltaY > 0) {
+                    int extra = newScrollY - dropoffBottom;
+                    newScrollY = dropoffBottom + extra / 2;
+                } else if (newScrollY < dropoffTop && deltaY < 0) {
+                    int extra = newScrollY - dropoffTop;
+                    newScrollY = dropoffTop + extra / 2;
+                }
+            }
+        } else {
+            maxOverscrollY = 0;
+        }
+        
         // Clamp values if at the limits and record
         final int left = -maxOverscrollX;
         final int right = maxOverscrollX + scrollRangeX;
@@ -8636,8 +8680,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         
         // Bump the device with some haptic feedback if we're at the edge
         // and didn't start there.
-        if ((clampedX && scrollX != left && scrollX != right) ||
-                (clampedY && scrollY != top && scrollY != bottom)) {
+        if ((overscrollHorizontal && clampedX && scrollX != left && scrollX != right) ||
+                (overscrollVertical && clampedY && scrollY != top && scrollY != bottom)) {
             performHapticFeedback(HapticFeedbackConstants.SCROLL_BARRIER);
         }
 
