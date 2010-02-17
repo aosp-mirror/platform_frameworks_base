@@ -364,7 +364,7 @@ ProgramVertexState::~ProgramVertexState()
 
 void ProgramVertexState::init(Context *rsc, int32_t w, int32_t h)
 {
-    RsElement e = Element::create(rsc, RS_TYPE_FLOAT_32, RS_KIND_USER, false, 1);
+    RsElement e = (RsElement) Element::create(rsc, RS_TYPE_FLOAT_32, RS_KIND_USER, false, 1);
 
     rsi_TypeBegin(rsc, e);
     rsi_TypeAdd(rsc, RS_DIMENSION_X, 48);
