@@ -30,6 +30,7 @@
 #include <sys/types.h>
 #include <utils/Errors.h>
 #include <pixelflinger/format.h>
+#include <hardware/hardware.h>
 
 namespace android {
 
@@ -57,24 +58,17 @@ enum {
     
     // real pixel formats supported for rendering -----------------------------
 
-    PIXEL_FORMAT_RGBA_8888   = GGL_PIXEL_FORMAT_RGBA_8888,  // 4x8-bit RGBA
-    PIXEL_FORMAT_RGBX_8888   = GGL_PIXEL_FORMAT_RGBX_8888,  // 4x8-bit RGB0
-    PIXEL_FORMAT_RGB_888     = GGL_PIXEL_FORMAT_RGB_888,    // 3x8-bit RGB
-    PIXEL_FORMAT_RGB_565     = GGL_PIXEL_FORMAT_RGB_565,    // 16-bit RGB
-    PIXEL_FORMAT_BGRA_8888   = GGL_PIXEL_FORMAT_BGRA_8888,  // 4x8-bit BGRA
-    PIXEL_FORMAT_RGBA_5551   = GGL_PIXEL_FORMAT_RGBA_5551,  // 16-bit ARGB
-    PIXEL_FORMAT_RGBA_4444   = GGL_PIXEL_FORMAT_RGBA_4444,  // 16-bit ARGB
+    PIXEL_FORMAT_RGBA_8888   = HAL_PIXEL_FORMAT_RGBA_8888,  // 4x8-bit RGBA
+    PIXEL_FORMAT_RGBX_8888   = HAL_PIXEL_FORMAT_RGBX_8888,  // 4x8-bit RGB0
+    PIXEL_FORMAT_RGB_888     = HAL_PIXEL_FORMAT_RGB_888,    // 3x8-bit RGB
+    PIXEL_FORMAT_RGB_565     = HAL_PIXEL_FORMAT_RGB_565,    // 16-bit RGB
+    PIXEL_FORMAT_BGRA_8888   = HAL_PIXEL_FORMAT_BGRA_8888,  // 4x8-bit BGRA
+    PIXEL_FORMAT_RGBA_5551   = HAL_PIXEL_FORMAT_RGBA_5551,  // 16-bit ARGB
+    PIXEL_FORMAT_RGBA_4444   = HAL_PIXEL_FORMAT_RGBA_4444,  // 16-bit ARGB
     PIXEL_FORMAT_A_8         = GGL_PIXEL_FORMAT_A_8,        // 8-bit A
     PIXEL_FORMAT_L_8         = GGL_PIXEL_FORMAT_L_8,        // 8-bit L (R=G=B=L)
     PIXEL_FORMAT_LA_88       = GGL_PIXEL_FORMAT_LA_88,      // 16-bit LA
     PIXEL_FORMAT_RGB_332     = GGL_PIXEL_FORMAT_RGB_332,    // 8-bit RGB
-
-    PIXEL_FORMAT_YCbCr_422_SP= GGL_PIXEL_FORMAT_YCbCr_422_SP,
-    PIXEL_FORMAT_YCbCr_420_SP= GGL_PIXEL_FORMAT_YCbCr_420_SP,
-    PIXEL_FORMAT_YCbCr_422_P = GGL_PIXEL_FORMAT_YCbCr_422_P,
-    PIXEL_FORMAT_YCbCr_420_P = GGL_PIXEL_FORMAT_YCbCr_420_P,
-    PIXEL_FORMAT_YCbCr_422_I = GGL_PIXEL_FORMAT_YCbCr_422_I,
-    PIXEL_FORMAT_YCbCr_420_I = GGL_PIXEL_FORMAT_YCbCr_420_I,
 
     // New formats can be added if they're also defined in
     // pixelflinger/format.h
@@ -97,9 +91,7 @@ struct PixelFormatInfo
         RGBA                = 3,
         LUMINANCE           = 4,
         LUMINANCE_ALPHA     = 5,
-        Y_CB_CR_SP          = 6,
-        Y_CB_CR_P           = 7,
-        Y_CB_CR_I           = 8,
+        OTHER               = 0xFF
     };
 
     struct szinfo {

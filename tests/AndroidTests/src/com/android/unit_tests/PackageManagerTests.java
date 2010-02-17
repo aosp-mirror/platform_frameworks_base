@@ -192,6 +192,27 @@ public class PackageManagerTests extends AndroidTestCase {
         }
     }
 
+    public boolean invokeInstallPackageFail(Uri packageURI, int flags,
+            final String pkgName, int result) throws Exception {
+        PackageInstallObserver observer = new PackageInstallObserver();
+        try {
+            // Wait on observer
+            synchronized(observer) {
+                getPm().installPackage(packageURI, observer, flags, null);
+                long waitTime = 0;
+                while((!observer.isDone()) && (waitTime < MAX_WAIT_TIME) ) {
+                    observer.wait(WAIT_TIME_INCR);
+                    waitTime += WAIT_TIME_INCR;
+                }
+                if(!observer.isDone()) {
+                    throw new Exception("Timed out waiting for packageInstalled callback");
+                }
+                return (observer.returnCode == result);
+            }
+        } finally {
+        }
+    }
+
     Uri getInstallablePackage(int fileResId, File outFile) {
         Resources res = mContext.getResources();
         InputStream is = null;
@@ -238,7 +259,7 @@ public class PackageManagerTests extends AndroidTestCase {
             assertEquals(publicSrcPath, appInstallPath);
         } else {
             assertFalse((info.flags & ApplicationInfo.FLAG_FORWARD_LOCK) != 0);
-            if ((flags & PackageManager.INSTALL_ON_SDCARD) != 0) {
+            if ((flags & PackageManager.INSTALL_EXTERNAL) != 0) {
                 assertTrue((info.flags & ApplicationInfo.FLAG_ON_SDCARD) != 0);
                 // Hardcoded for now
                 assertTrue(srcPath.startsWith("/asec"));
@@ -253,6 +274,13 @@ public class PackageManagerTests extends AndroidTestCase {
             failStr("failed with exception : " + e);
         }
     }
+    private void assertNotInstalled(String pkgName) {
+        try {
+            ApplicationInfo info = getPm().getApplicationInfo(pkgName, 0);
+            fail(pkgName + " shouldnt be installed");
+        } catch (NameNotFoundException e) {
+        }
+    }
 
     class InstallParams {
         String outFileName;
@@ -265,30 +293,42 @@ public class PackageManagerTests extends AndroidTestCase {
         }
     }
 
+    private InstallParams sampleInstallFromRawResource(int flags, boolean cleanUp) {
+        return installFromRawResource("install.apk", R.raw.install, flags, cleanUp,
+                false, -1);
+    }
     /*
      * Utility function that reads a apk bundled as a raw resource
      * copies it into own data directory and invokes
      * PackageManager api to install it.
      */
-    public InstallParams installFromRawResource(int flags, boolean cleanUp) {
-        String outFileName = "install.apk";
+    private InstallParams installFromRawResource(String outFileName,
+            int rawResId, int flags, boolean cleanUp, boolean fail, int result) {
         File filesDir = mContext.getFilesDir();
         File outFile = new File(filesDir, outFileName);
-        Uri packageURI = getInstallablePackage(R.raw.install, outFile);
+        Uri packageURI = getInstallablePackage(rawResId, outFile);
         PackageParser.Package pkg = parsePackage(packageURI);
         assertNotNull(pkg);
-        InstallReceiver receiver = new InstallReceiver(pkg.packageName);
         InstallParams ip = null;
         try {
             try {
-                assertTrue(invokeInstallPackage(packageURI, flags,
-                        pkg.packageName, receiver));
+                if (fail) {
+                    // Make sure it doesn't exist
+                    getPm().deletePackage(pkg.packageName, null, 0);
+                    assertTrue(invokeInstallPackageFail(packageURI, flags,
+                            pkg.packageName, result));
+                    assertNotInstalled(pkg.packageName);
+                } else {
+                    InstallReceiver receiver = new InstallReceiver(pkg.packageName);
+                    assertTrue(invokeInstallPackage(packageURI, flags,
+                            pkg.packageName, receiver));
+                    // Verify installed information
+                    assertInstall(pkg.packageName, flags);
+                    ip = new InstallParams(pkg, outFileName, packageURI);
+                }
             } catch (Exception e) {
                 failStr("Failed with exception : " + e);
             }
-            // Verify installed information
-            assertInstall(pkg.packageName, flags);
-            ip = new InstallParams(pkg, outFileName, packageURI);
             return ip;
         } finally {
             if (cleanUp) {
@@ -299,17 +339,17 @@ public class PackageManagerTests extends AndroidTestCase {
 
     @MediumTest
     public void testInstallNormalInternal() {
-        installFromRawResource(0, true);
+        sampleInstallFromRawResource(0, true);
     }
 
     @MediumTest
     public void testInstallFwdLockedInternal() {
-        installFromRawResource(PackageManager.INSTALL_FORWARD_LOCK, true);
+        sampleInstallFromRawResource(PackageManager.INSTALL_FORWARD_LOCK, true);
     }
 
     @MediumTest
     public void testInstallSdcard() {
-        installFromRawResource(PackageManager.INSTALL_ON_SDCARD, true);
+        sampleInstallFromRawResource(PackageManager.INSTALL_EXTERNAL, true);
     }
 
     /* ------------------------- Test replacing packages --------------*/
@@ -373,7 +413,7 @@ public class PackageManagerTests extends AndroidTestCase {
      * again.
      */
     public void replaceFromRawResource(int flags) {
-        InstallParams ip = installFromRawResource(flags, false);
+        InstallParams ip = sampleInstallFromRawResource(flags, false);
         boolean replace = ((flags & PackageManager.INSTALL_REPLACE_EXISTING) != 0);
         GenericReceiver receiver;
         if (replace) {
@@ -409,7 +449,7 @@ public class PackageManagerTests extends AndroidTestCase {
 
     @MediumTest
     public void testReplaceFailSdcard() {
-        replaceFromRawResource(PackageManager.INSTALL_ON_SDCARD);
+        replaceFromRawResource(PackageManager.INSTALL_EXTERNAL);
     }
 
     @MediumTest
@@ -426,7 +466,7 @@ public class PackageManagerTests extends AndroidTestCase {
     @MediumTest
     public void testReplaceSdcard() {
         replaceFromRawResource(PackageManager.INSTALL_REPLACE_EXISTING |
-                PackageManager.INSTALL_ON_SDCARD);
+                PackageManager.INSTALL_EXTERNAL);
     }
 
     /* -------------- Delete tests ---*/
@@ -508,7 +548,7 @@ public class PackageManagerTests extends AndroidTestCase {
     }
 
     public void deleteFromRawResource(int iFlags, int dFlags) {
-        InstallParams ip = installFromRawResource(iFlags, false);
+        InstallParams ip = sampleInstallFromRawResource(iFlags, false);
         boolean retainData = ((dFlags & PackageManager.DONT_DELETE_DATA) != 0);
         GenericReceiver receiver = new DeleteReceiver(ip.pkg.packageName);
         DeleteObserver observer = new DeleteObserver();
@@ -550,7 +590,7 @@ public class PackageManagerTests extends AndroidTestCase {
 
     @MediumTest
     public void testDeleteSdcard() {
-        deleteFromRawResource(PackageManager.INSTALL_ON_SDCARD, 0);
+        deleteFromRawResource(PackageManager.INSTALL_EXTERNAL, 0);
     }
 
     @MediumTest
@@ -565,7 +605,7 @@ public class PackageManagerTests extends AndroidTestCase {
 
     @MediumTest
     public void testDeleteSdcardRetainData() {
-        deleteFromRawResource(PackageManager.INSTALL_ON_SDCARD, PackageManager.DONT_DELETE_DATA);
+        deleteFromRawResource(PackageManager.INSTALL_EXTERNAL, PackageManager.DONT_DELETE_DATA);
     }
 
     /* sdcard mount/unmount tests ******/
@@ -696,7 +736,7 @@ public class PackageManagerTests extends AndroidTestCase {
 
     private boolean mountFromRawResource() {
         // Install pkg on sdcard
-        InstallParams ip = installFromRawResource(PackageManager.INSTALL_ON_SDCARD |
+        InstallParams ip = sampleInstallFromRawResource(PackageManager.INSTALL_EXTERNAL |
                 PackageManager.INSTALL_REPLACE_EXISTING, false);
         if (localLOGV) Log.i(TAG, "Installed pkg on sdcard");
         boolean origState = getMediaState();
@@ -764,169 +804,32 @@ public class PackageManagerTests extends AndroidTestCase {
         }
     }
 
-    public void invokeRecommendAppInstallLocation(String outFileName,
-            int fileResId, int expected) {
-        int origSetting = Settings.System.getInt(mContext.getContentResolver(),
-                Settings.System.SET_INSTALL_LOCATION, 0);
-        try {
-            // Make sure the set install location setting is diabled.
-            Settings.System.putInt(mContext.getContentResolver(),
-                    Settings.System.SET_INSTALL_LOCATION, 0);
-            File filesDir = mContext.getFilesDir();
-            File outFile = new File(filesDir, outFileName);
-            Uri packageURI = getInstallablePackage(fileResId, outFile);
-            PackageParser.Package pkg = parsePackage(packageURI);
-            assertNotNull(pkg);
-            int installLoc = getPm().recommendAppInstallLocation(pkg);
-            Log.i(TAG, "expected=" + expected +", installLoc="+installLoc);
-            // Atleast one of the specified expected flags should be set.
-            boolean onFlash = (installLoc &
-                    PackageManager.INSTALL_ON_INTERNAL_FLASH) != 0;
-            boolean onSd = (installLoc &
-                    PackageManager.INSTALL_ON_SDCARD) != 0;
-            boolean expOnFlash = (expected &
-                    PackageManager.INSTALL_ON_INTERNAL_FLASH) != 0;
-            boolean expOnSd = (expected &
-                    PackageManager.INSTALL_ON_SDCARD) != 0;
-            assertTrue(expOnFlash == onFlash || expOnSd == onSd);
-        } finally {
-            // Restore original setting
-            Settings.System.putInt(mContext.getContentResolver(),
-                    Settings.System.SET_INSTALL_LOCATION, origSetting);
-        }
+    public void testManifestInstallLocationInternal() {
+        installFromRawResource("install.apk", R.raw.install_loc_internal,
+                0, true, false, -1);
     }
 
-    /*
-     * Tests if an apk can be installed on internal flash by
-     * explicitly specifying in its manifest.
-     */
-    public void testInstallLocationInternal() {
-        invokeRecommendAppInstallLocation("install.apk",
-                R.raw.install_loc_internal, PackageManager.INSTALL_ON_INTERNAL_FLASH);
+    public void testManifestInstallLocationSdcard() {
+        installFromRawResource("install.apk", R.raw.install_loc_sdcard,
+                PackageManager.INSTALL_EXTERNAL, true, false, -1);
     }
 
-    /*
-     * Tests if an apk can be installed on internal flash by
-     * explicitly specifying in its manifest and filling up
-     * internal flash. Should fail to install.
-     * TODO
-     */
-    public void xxxtestInstallLocationInternalFail() {
+    public void testManifestInstallLocationAuto() {
+        installFromRawResource("install.apk", R.raw.install_loc_auto,
+                0, true, false, -1);
     }
 
-    /*
-     * Tests if an apk can be installed on sdcard by
-     * explicitly specifying in its manifest.
-     */
-    public void testInstallLocationSdcard() {
-        // TODO No guarantee this will be on sdcard.
-        invokeRecommendAppInstallLocation("install.apk",
-                R.raw.install_loc_sdcard, PackageManager.INSTALL_ON_SDCARD
-                | PackageManager.INSTALL_ON_INTERNAL_FLASH);
+    public void testManifestInstallLocationUnspecified() {
+        installFromRawResource("install.apk", R.raw.install_loc_unspecified,
+                0, true, false, -1);
     }
 
-    /*
-     * Tests if an apk can be installed on sdcard by
-     * explicitly specifying in its manifest and filling up
-     * the sdcard. Should result in install failure
-     * TODO
-     */
-    public void xxxtestInstallLocationSdcardFail() {
+    public void testManifestInstallLocationFwdLockedSdcard() {
+        installFromRawResource("install.apk", R.raw.install_loc_sdcard,
+                PackageManager.INSTALL_FORWARD_LOCK |
+                PackageManager.INSTALL_EXTERNAL, true, true,
+                PackageManager.INSTALL_FAILED_INVALID_INSTALL_LOCATION);
     }
-
-    /*
-     * Tests if an apk can be installed by specifying
-     * auto for install location
-     */
-    public void xxxtestInstallLocationAutoInternal() {
-        // TODO clear and make room on internal flash
-        invokeRecommendAppInstallLocation("install.apk",
-                R.raw.install_loc_auto, PackageManager.INSTALL_ON_INTERNAL_FLASH);
-    }
-
-    /*
-     * Tests if an apk can be installed by specifying
-     * auto for install location
-     */
-    public void testInstallLocationAutoSdcard() {
-        // TODO clear and make room on sdcard.
-        // Fill up internal
-        invokeRecommendAppInstallLocation("install.apk",
-                R.raw.install_loc_auto, PackageManager.INSTALL_ON_SDCARD |
-                PackageManager.INSTALL_ON_INTERNAL_FLASH);
-    }
-
-    /*
-     * Tests if an apk can be installed by specifying
-     * auto for install location
-     * fill up both internal and sdcard
-     * TODO
-     */
-    public void xxxtestInstallLocationAutoFail() {
-    }
-    /*
-     * Tests where an apk gets installed based
-     * on a not specifying anything in manifest.
-     */
-    public void testInstallLocationUnspecifiedInt() {
-        invokeRecommendAppInstallLocation("install.apk",
-                R.raw.install_loc_unspecified, PackageManager.INSTALL_ON_INTERNAL_FLASH);
-    }
-
-    public void xxxtestInstallLocationUnspecifiedStorage() {
-        // TODO Fill up internal storage
-        invokeRecommendAppInstallLocation("install.apk",
-                R.raw.install_loc_unspecified, PackageManager.INSTALL_ON_SDCARD
-                | PackageManager.INSTALL_ON_INTERNAL_FLASH);
-    }
-
-    /*
-     * Tests where an apk gets installed by expcitly setting
-     * the user specified install location
-     */
-    public void testInstallLocationUserSpecifiedInternal() {
-        // Enable user setting
-        Settings.System.putInt(mContext.getContentResolver(),
-                Settings.System.SET_INSTALL_LOCATION, 1);
-        Settings.System.putInt(mContext.getContentResolver(),
-                Settings.System.DEFAULT_INSTALL_LOCATION, 1);
-        invokeRecommendAppInstallLocation("install.apk",
-                R.raw.install_loc_unspecified, PackageManager.INSTALL_ON_INTERNAL_FLASH);
-    }
-
-    /*
-     * Tests where an apk gets installed by expcitly setting
-     * the user specified install location
-     */
-    public void testInstallLocationUserSpecifiedSdcard() {
-        // Enable user setting
-        Settings.System.putInt(mContext.getContentResolver(),
-                Settings.System.SET_INSTALL_LOCATION, 1);
-        Settings.System.putInt(mContext.getContentResolver(),
-                Settings.System.DEFAULT_INSTALL_LOCATION, 2);
-        int i = Settings.System.getInt(mContext.getContentResolver(),
-                Settings.System.DEFAULT_INSTALL_LOCATION, 0);
-        invokeRecommendAppInstallLocation("install.apk",
-                R.raw.install_loc_unspecified, PackageManager.INSTALL_ON_SDCARD);
-        Settings.System.putInt(mContext.getContentResolver(),
-                Settings.System.SET_INSTALL_LOCATION, 0);
-    }
-    /*
-     * Tests where an apk gets installed by expcitly setting
-     * the user specified install location
-     */
-    public void testInstallLocationUserSpecifiedAuto() {
-        // Enable user setting
-        Settings.System.putInt(mContext.getContentResolver(),
-                Settings.System.SET_INSTALL_LOCATION, 1);
-        Settings.System.putInt(mContext.getContentResolver(),
-                Settings.System.DEFAULT_INSTALL_LOCATION, 0);
-        invokeRecommendAppInstallLocation("install.apk",
-                R.raw.install_loc_unspecified, PackageManager.INSTALL_ON_INTERNAL_FLASH);
-        Settings.System.putInt(mContext.getContentResolver(),
-                Settings.System.SET_INSTALL_LOCATION, 0);
-    }
-
     /*
      * TODO's
      * check version numbers for upgrades

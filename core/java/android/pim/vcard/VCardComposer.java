@@ -31,6 +31,7 @@ import android.provider.CallLog.Calls;
 import android.provider.ContactsContract.Contacts;
 import android.provider.ContactsContract.Data;
 import android.provider.ContactsContract.RawContacts;
+import android.provider.ContactsContract.RawContactsEntity;
 import android.provider.ContactsContract.CommonDataKinds.Email;
 import android.provider.ContactsContract.CommonDataKinds.Event;
 import android.provider.ContactsContract.CommonDataKinds.Im;
@@ -498,17 +499,18 @@ public class VCardComposer {
             Method getEntityIteratorMethod) throws VCardException {
         final Map<String, List<ContentValues>> contentValuesListMap =
                 new HashMap<String, List<ContentValues>>();
-        // The resolver may return the entity iterator with no data. It is possiible.
+        // The resolver may return the entity iterator with no data. It is possible.
         // e.g. If all the data in the contact of the given contact id are not exportable ones,
         //      they are hidden from the view of this method, though contact id itself exists.
         EntityIterator entityIterator = null;
         try {
+            final Uri uri = RawContactsEntity.CONTENT_URI.buildUpon()
+                    .appendQueryParameter(Data.FOR_EXPORT_ONLY, "1")
+                    .build();
+            final String selection = Data.CONTACT_ID + "=?";
+            final String[] selectionArgs = new String[] {contactId};
             if (getEntityIteratorMethod != null) {
-                final Uri uri = RawContacts.CONTENT_URI.buildUpon()
-                        .appendQueryParameter(Data.FOR_EXPORT_ONLY, "1")
-                        .build();
-                final String selection = Data.CONTACT_ID + "=?";
-                final String[] selectionArgs = new String[] {contactId};
+                // Please note that this branch is executed by some tests only
                 try {
                     entityIterator = (EntityIterator)getEntityIteratorMethod.invoke(null,
                             mContentResolver, uri, selection, selectionArgs, null);
@@ -528,13 +530,8 @@ public class VCardComposer {
                             e.getCause().getMessage());
                 }
             } else {
-                final Uri uri = RawContacts.CONTENT_URI.buildUpon()
-                        .appendEncodedPath(contactId)
-                        .appendEncodedPath(RawContacts.Entity.CONTENT_DIRECTORY)
-                        .appendQueryParameter(Data.FOR_EXPORT_ONLY, "1")
-                        .build();
                 entityIterator = RawContacts.newEntityIterator(mContentResolver.query(
-                        uri, null, null, null, null));
+                        uri, null, selection, selectionArgs, null));
             }
 
             if (entityIterator == null) {

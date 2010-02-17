@@ -276,11 +276,11 @@ ssize_t HTTPStream::receive(void *data, size_t size) {
             }
 
             disconnect();
-            return total == 0 ? ERROR_IO : total;
+            return total == 0 ? (ssize_t)ERROR_IO : total;
         } else if (n == 0) {
             disconnect();
 
-            return total == 0 ? ERROR_CONNECTION_LOST : total;
+            return total == 0 ? (ssize_t)ERROR_CONNECTION_LOST : total;
         }
 
         total += (size_t)n;

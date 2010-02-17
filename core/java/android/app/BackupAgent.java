@@ -33,8 +33,8 @@ import java.io.IOException;
 /**
  * This is the central interface between an application and Android's
  * settings backup mechanism.
- * 
- * @hide pending API solidification
+ *
+ * <p>STOPSHIP write more documentation about the backup process here.
  */
 public abstract class BackupAgent extends ContextWrapper {
     private static final String TAG = "BackupAgent";
@@ -62,9 +62,9 @@ public abstract class BackupAgent extends ContextWrapper {
      *                 state provided by the application.  May be null, in which
      *                 case no prior state is being provided and the application should
      *                 perform a full backup.
-     * @param data An open, read/write ParcelFileDescriptor pointing to the backup data
-     *             destination.  Typically the application will use backup helper
-     *             classes to write to this file.
+     * @param data A structured wrapper around an open, read/write ParcelFileDescriptor
+     *             pointing to the backup data destination.  Typically the application will use
+     *             backup helper classes to write to this file.
      * @param newState An open, read/write ParcelFileDescriptor pointing to an empty
      *                 file.  The application should record the final backup state
      *                 here after writing the requested data to dataFd.
@@ -77,10 +77,18 @@ public abstract class BackupAgent extends ContextWrapper {
      * existing data with the contents of the backup.  The backup data is
      * provided in the file pointed to by the dataFd file descriptor.  Once
      * the restore is finished, the application should write a representation
-     * of the final state to the newStateFd file descriptor, 
+     * of the final state to the newStateFd file descriptor,
      *
-     * @param data An open, read-only ParcelFileDescriptor pointing to a full snapshot
-     *             of the application's data.
+     * <p>The application is responsible for properly erasing its old data and
+     * replacing it with the data supplied to this method.  No "clear user data"
+     * operation will be performed automatically by the operating system.  The
+     * exception to this is in the case of a failed restore attempt:  if onRestore()
+     * throws an exception, the OS will assume that the application's data may now
+     * be in an incoherent state, and will clear it before proceeding.
+     *
+     * @param data A structured wrapper around an open, read-only ParcelFileDescriptor
+     *             pointing to a full snapshot of the application's data.  Typically the
+     *             application will use helper classes to read this data.
      * @param appVersionCode The android:versionCode value of the application that backed
      *        up this particular data set.  This makes it easier for an application's
      *        agent to distinguish among several possible older data versions when

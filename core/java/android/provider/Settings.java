@@ -2210,6 +2210,12 @@ public final class Settings {
         public static final String NETWORK_PREFERENCE = "network_preference";
 
         /**
+         * Used to disable Tethering on a device - defaults to true
+         * @hide
+         */
+        public static final String TETHER_SUPPORTED = "tether_supported";
+
+        /**
          * No longer supported.
          */
         public static final String PARENTAL_CONTROL_ENABLED = "parental_control_enabled";

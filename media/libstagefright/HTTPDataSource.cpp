@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+//#define LOG_NDEBUG 0
+#define LOG_TAG "HTTPDataSource"
+#include <utils/Log.h>
+
 #include "include/stagefright_string.h"
 #include "include/HTTPStream.h"
 
@@ -266,6 +270,8 @@ ssize_t HTTPDataSource::sendRangeRequest(size_t offset) {
 }
 
 ssize_t HTTPDataSource::readAt(off_t offset, void *data, size_t size) {
+    LOGV("readAt %ld, size %d", offset, size);
+
     if (offset >= mBufferOffset
             && offset < (off_t)(mBufferOffset + mBufferLength)) {
         size_t num_bytes_available = mBufferLength - (offset - mBufferOffset);
@@ -297,6 +303,15 @@ ssize_t HTTPDataSource::readAt(off_t offset, void *data, size_t size) {
     }
 
     mBufferOffset = offset;
+
+    if (mContentLengthValid
+            && mBufferOffset + contentLength >= mContentLength) {
+        // If we never triggered a range request but know the content length,
+        // make sure to not read more data than there could be, otherwise
+        // we'd block indefinitely if the server doesn't close the connection.
+
+        contentLength = mContentLength - mBufferOffset;
+    }
 
     if (contentLength <= 0) {
         return contentLength;

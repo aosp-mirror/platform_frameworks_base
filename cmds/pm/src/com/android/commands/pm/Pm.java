@@ -600,7 +600,7 @@ public final class Pm {
             } else if (opt.equals("-t")) {
                 installFlags |= PackageManager.INSTALL_ALLOW_TEST;
             } else if (opt.equals("-s")) {
-                installFlags |= PackageManager.INSTALL_ON_SDCARD;
+                installFlags |= PackageManager.INSTALL_EXTERNAL;
             } else {
                 System.err.println("Error: Unknown option: " + opt);
                 showUsage();

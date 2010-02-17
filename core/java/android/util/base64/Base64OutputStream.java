@@ -25,9 +25,7 @@ import java.io.OutputStream;
  * it, writing the resulting data to another OutputStream.
  */
 public class Base64OutputStream extends FilterOutputStream {
-    private final boolean encode;
-    private final Base64.EncoderState estate;
-    private final Base64.DecoderState dstate;
+    private final Base64.Coder coder;
     private final int flags;
 
     private byte[] buffer = null;
@@ -62,13 +60,10 @@ public class Base64OutputStream extends FilterOutputStream {
     public Base64OutputStream(OutputStream out, int flags, boolean encode) {
         super(out);
         this.flags = flags;
-        this.encode = encode;
         if (encode) {
-            estate = new Base64.EncoderState(flags, null);
-            dstate = null;
+            coder = new Base64.Encoder(flags, null);
         } else {
-            estate = null;
-            dstate = new Base64.DecoderState(flags, null);
+            coder = new Base64.Decoder(flags, null);
         }
     }
 
@@ -107,12 +102,28 @@ public class Base64OutputStream extends FilterOutputStream {
     }
 
     public void close() throws IOException {
-        flushBuffer();
-        internalWrite(EMPTY, 0, 0, true);
-        if ((flags & Base64.NO_CLOSE) == 0) {
-            out.close();
-        } else {
-            out.flush();
+        IOException thrown = null;
+        try {
+            flushBuffer();
+            internalWrite(EMPTY, 0, 0, true);
+        } catch (IOException e) {
+            thrown = e;
+        }
+
+        try {
+            if ((flags & Base64.NO_CLOSE) == 0) {
+                out.close();
+            } else {
+                out.flush();
+            }
+        } catch (IOException e) {
+            if (thrown != null) {
+                thrown = e;
+            }
+        }
+
+        if (thrown != null) {
+            throw thrown;
         }
     }
 
@@ -123,21 +134,11 @@ public class Base64OutputStream extends FilterOutputStream {
      *        encoder/decoder state to be finalized.
      */
     private void internalWrite(byte[] b, int off, int len, boolean finish) throws IOException {
-        if (encode) {
-            // len*8/5+10 is an overestimate of the most bytes the
-            // encoder can produce for len bytes of input.
-            estate.output = embiggen(estate.output, len*8/5+10);
-            Base64.encodeInternal(b, off, len, estate, finish);
-            out.write(estate.output, 0, estate.op);
-        } else {
-            // len*3/4+10 is an overestimate of the most bytes the
-            // decoder can produce for len bytes of input.
-            dstate.output = embiggen(dstate.output, len*3/4+10);
-            if (!Base64.decodeInternal(b, off, len, dstate, finish)) {
-                throw new IOException("bad base-64");
-            }
-            out.write(dstate.output, 0, dstate.op);
+        coder.output = embiggen(coder.output, coder.maxOutputSize(len));
+        if (!coder.process(b, off, len, finish)) {
+            throw new IOException("bad base-64");
         }
+        out.write(coder.output, 0, coder.op);
     }
 
     /**

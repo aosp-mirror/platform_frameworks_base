@@ -21,13 +21,16 @@ import android.content.Context;
 import java.io.FileDescriptor;
 import java.io.IOException;
 
-/** @hide */
+/**
+ * STOPSHIP: document 
+ */
 public class BackupDataOutput {
     int mBackupWriter;
 
     public static final int OP_UPDATE = 1;
     public static final int OP_DELETE = 2;
 
+    /** @hide */
     public BackupDataOutput(FileDescriptor fd) {
         if (fd == null) throw new NullPointerException();
         mBackupWriter = ctor(fd);
@@ -36,7 +39,15 @@ public class BackupDataOutput {
         }
     }
 
-    // A dataSize of -1 indicates that the record under this key should be deleted
+    /**
+     * Mark the beginning of one record in the backup data stream.
+     *
+     * @param key
+     * @param dataSize The size in bytes of this record's data.  Passing a dataSize
+     *    of -1 indicates that the record under this key should be deleted.
+     * @return The number of bytes written to the backup stream
+     * @throws IOException if the write failed
+     */
     public int writeEntityHeader(String key, int dataSize) throws IOException {
         int result = writeEntityHeader_native(mBackupWriter, key, dataSize);
         if (result >= 0) {
@@ -46,6 +57,13 @@ public class BackupDataOutput {
         }
     }
 
+    /**
+     * Write a chunk of data under the current entity to the backup transport.
+     * @param data A raw data buffer to send
+     * @param size The number of bytes to be sent in this chunk
+     * @return the number of bytes written
+     * @throws IOException if the write failed
+     */
     public int writeEntityData(byte[] data, int size) throws IOException {
         int result = writeEntityData_native(mBackupWriter, data, size);
         if (result >= 0) {
@@ -59,6 +77,7 @@ public class BackupDataOutput {
         setKeyPrefix_native(mBackupWriter, keyPrefix);
     }
 
+    /** @hide */
     protected void finalize() throws Throwable {
         try {
             dtor(mBackupWriter);

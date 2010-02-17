@@ -1021,7 +1021,7 @@ public class HierarchicalStateMachine {
      * @param msg that couldn't be handled.
      */
     protected void unhandledMessage(Message msg) {
-        Log.e(TAG, "unhandledMessage: msg.what=" + msg.what);
+        Log.e(TAG, mName + " - unhandledMessage: msg.what=" + msg.what);
     }
 
     /**

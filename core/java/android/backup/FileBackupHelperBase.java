@@ -20,7 +20,6 @@ import android.content.Context;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
-import java.io.InputStream;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
@@ -80,18 +79,14 @@ class FileBackupHelperBase {
         }
     }
 
-    void writeFile(File f, InputStream in) {
-        if (!(in instanceof BackupDataInputStream)) {
-            throw new IllegalStateException("input stream must be a BackupDataInputStream");
-        }
+    void writeFile(File f, BackupDataInputStream in) {
         int result = -1;
 
         // Create the enclosing directory.
         File parent = f.getParentFile();
         parent.mkdirs();
 
-        result = writeFile_native(mPtr, f.getAbsolutePath(),
-                ((BackupDataInputStream)in).mData.mBackupReader);
+        result = writeFile_native(mPtr, f.getAbsolutePath(), in.mData.mBackupReader);
         if (result != 0) {
             // Bail on this entity.  Only log one failure per helper object.
             if (!mExceptionLogged) {
@@ -103,7 +98,7 @@ class FileBackupHelperBase {
         }
     }
 
-    public void writeRestoreSnapshot(ParcelFileDescriptor fd) {
+    public void writeNewStateDescription(ParcelFileDescriptor fd) {
         int result = writeSnapshot_native(mPtr, fd.getFileDescriptor());
         // TODO: Do something with the error.
     }

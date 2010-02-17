@@ -25,16 +25,13 @@ import java.io.InputStream;
  * it.
  */
 public class Base64InputStream extends FilterInputStream {
-    private final boolean encode;
-    private final Base64.EncoderState estate;
-    private final Base64.DecoderState dstate;
+    private final Base64.Coder coder;
 
     private static byte[] EMPTY = new byte[0];
 
     private static final int BUFFER_SIZE = 2048;
     private boolean eof;
     private byte[] inputBuffer;
-    private byte[] outputBuffer;
     private int outputStart;
     private int outputEnd;
 
@@ -63,22 +60,14 @@ public class Base64InputStream extends FilterInputStream {
      */
     public Base64InputStream(InputStream in, int flags, boolean encode) {
         super(in);
-        this.encode = encode;
         eof = false;
         inputBuffer = new byte[BUFFER_SIZE];
         if (encode) {
-            // len*8/5+10 is an overestimate of the most bytes the
-            // encoder can produce for len bytes of input.
-            outputBuffer = new byte[BUFFER_SIZE * 8/5 + 10];
-            estate = new Base64.EncoderState(flags, outputBuffer);
-            dstate = null;
+            coder = new Base64.Encoder(flags, null);
         } else {
-            // len*3/4+10 is an overestimate of the most bytes the
-            // decoder can produce for len bytes of input.
-            outputBuffer = new byte[BUFFER_SIZE * 3/4 + 10];
-            estate = null;
-            dstate = new Base64.DecoderState(flags, outputBuffer);
+            coder = new Base64.Decoder(flags, null);
         }
+        coder.output = new byte[coder.maxOutputSize(BUFFER_SIZE)];
         outputStart = 0;
         outputEnd = 0;
     }
@@ -123,7 +112,7 @@ public class Base64InputStream extends FilterInputStream {
         if (outputStart >= outputEnd) {
             return -1;
         } else {
-            return outputBuffer[outputStart++];
+            return coder.output[outputStart++];
         }
     }
 
@@ -135,36 +124,30 @@ public class Base64InputStream extends FilterInputStream {
             return -1;
         }
         int bytes = Math.min(len, outputEnd-outputStart);
-        System.arraycopy(outputBuffer, outputStart, b, off, bytes);
+        System.arraycopy(coder.output, outputStart, b, off, bytes);
         outputStart += bytes;
         return bytes;
     }
 
     /**
      * Read data from the input stream into inputBuffer, then
-     * decode/encode it into the empty outputBuffer, and reset the
+     * decode/encode it into the empty coder.output, and reset the
      * outputStart and outputEnd pointers.
      */
     private void refill() throws IOException {
         if (eof) return;
         int bytesRead = in.read(inputBuffer);
-        if (encode) {
-            if (bytesRead == -1) {
-                eof = true;
-                Base64.encodeInternal(EMPTY, 0, 0, estate, true);
-            } else {
-                Base64.encodeInternal(inputBuffer, 0, bytesRead, estate, false);
-            }
-            outputEnd = estate.op;
+        boolean success;
+        if (bytesRead == -1) {
+            eof = true;
+            success = coder.process(EMPTY, 0, 0, true);
         } else {
-            if (bytesRead == -1) {
-                eof = true;
-                Base64.decodeInternal(EMPTY, 0, 0, dstate, true);
-            } else {
-                Base64.decodeInternal(inputBuffer, 0, bytesRead, dstate, false);
-            }
-            outputEnd = dstate.op;
+            success = coder.process(inputBuffer, 0, bytesRead, false);
         }
+        if (!success) {
+            throw new IOException("bad base-64");
+        }
+        outputEnd = coder.op;
         outputStart = 0;
     }
 }

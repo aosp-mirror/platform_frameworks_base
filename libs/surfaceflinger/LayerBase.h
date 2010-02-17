@@ -265,6 +265,7 @@ protected:
           status_t initializeEglImage(
                   const sp<GraphicBuffer>& buffer, Texture* texture);
 
+          bool isSupportedYuvFormat(int format) const;
           
                 sp<SurfaceFlinger> mFlinger;
                 uint32_t        mFlags;

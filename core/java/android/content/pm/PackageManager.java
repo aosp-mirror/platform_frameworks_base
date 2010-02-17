@@ -258,14 +258,7 @@ public abstract class PackageManager {
      * package has to be installed on the sdcard.
      * @hide
      */
-    public static final int INSTALL_ON_SDCARD = 0x00000008;
-
-    /**
-     * Convenience flag parameter to indicate that this package has to be installed
-     * on internal flash.
-     * @hide
-     */
-    public static final int INSTALL_ON_INTERNAL_FLASH = 0x00000000;
+    public static final int INSTALL_EXTERNAL = 0x00000008;
 
     /**
      * Flag parameter for
@@ -529,6 +522,14 @@ public abstract class PackageManager {
     public static final int INSTALL_PARSE_FAILED_MANIFEST_EMPTY = -109;
 
     /**
+     * Installation failed return code: this is passed to the {@link IPackageInstallObserver} by
+     * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)}
+     * if the system failed to install the package because of system issues.
+     * @hide
+     */
+    public static final int INSTALL_FAILED_INTERNAL_ERROR = -110;
+
+    /**
      * Indicates the state of installation. Used by PackageManager to
      * figure out incomplete installations. Say a package is being installed
      * (the state is set to PKG_INSTALL_INCOMPLETE) and remains so till
@@ -627,23 +628,6 @@ public abstract class PackageManager {
      */
     public static final String ACTION_CLEAN_EXTERNAL_STORAGE
             = "android.content.pm.CLEAN_EXTERNAL_STORAGE";
-    
-    /**
-     * Determines best place to install an application: either SD or internal FLASH.
-     * If applications explicitly set installLocation in their manifest, that
-     * preference takes precedence. If not a recommended location is returned
-     * based on current available storage on internal flash or sdcard.
-     * @param pkgInfo PackageParser.Package of the package that is to be installed.
-     * Call utility method to obtain.
-     * @return {@link INSTALL_ON_INTERNAL_FLASH} if it is best to install package on internal
-     * storage, {@link INSTALL_ON_SDCARD} if it is best to install package on SD card,
-     * and {@link INSTALL_FAILED_INSUFFICIENT_STORAGE} if insufficient space to safely install
-     * the application. {@link INSTALL_PARSE_FAILED_NOT_APK} Is returned if any input
-     * parameter is <code>null</code>.
-     * This recommendation does take into account the package's own flags.
-     * @hide
-     */
-    public abstract int recommendAppInstallLocation(PackageParser.Package pkg);
 
     /**
      * Retrieve overall information about an application package that is

@@ -38,7 +38,11 @@ import android.util.Log;
  * documentation for {@link android.app.BackupAgent} for a detailed description
  * of how the backup then proceeds.
  *
- * @hide pending API solidification
+ * <p>STOPSHIP more documentation here!  Include the attributes:
+ *    android:backupAgent
+ *    android:allowBackup
+ *    android:restoreNeedsApplication
+ *    android:killAfterRestore
  */
 public class BackupManager {
     private static final String TAG = "BackupManager";
@@ -110,11 +114,8 @@ public class BackupManager {
     }
 
     /**
-     * Begin the process of restoring system data from backup.  This method requires
-     * that the application hold the "android.permission.BACKUP" permission, and is
-     * not public.
-     *
-     * {@hide}
+     * Begin the process of restoring data from backup.  See the
+     * {@link android.backup.RestoreSession} class for documentation on that process.
      */
     public RestoreSession beginRestoreSession() {
         if (!EVEN_THINK_ABOUT_DOING_RESTORE) {
@@ -128,7 +129,7 @@ public class BackupManager {
                 IRestoreSession binder = sService.beginRestoreSession(transport);
                 session = new RestoreSession(mContext, binder);
             } catch (RemoteException e) {
-                Log.d(TAG, "beginRestoreSession() couldn't connect");
+                Log.w(TAG, "beginRestoreSession() couldn't connect");
             }
         }
         return session;

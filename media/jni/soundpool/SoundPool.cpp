@@ -294,6 +294,16 @@ void SoundPool::pause(int channelID)
     }
 }
 
+void SoundPool::autoPause()
+{
+    LOGV("pauseAll()");
+    Mutex::Autolock lock(&mLock);
+    for (int i = 0; i < mMaxChannels; ++i) {
+        SoundChannel* channel = &mChannelPool[i];
+        channel->autoPause();
+    }
+}
+
 void SoundPool::resume(int channelID)
 {
     LOGV("resume(%d)", channelID);
@@ -301,6 +311,16 @@ void SoundPool::resume(int channelID)
     SoundChannel* channel = findChannel(channelID);
     if (channel) {
         channel->resume();
+    }
+}
+
+void SoundPool::autoResume()
+{
+    LOGV("pauseAll()");
+    Mutex::Autolock lock(&mLock);
+    for (int i = 0; i < mMaxChannels; ++i) {
+        SoundChannel* channel = &mChannelPool[i];
+        channel->autoResume();
     }
 }
 
@@ -710,12 +730,35 @@ void SoundChannel::pause()
     }
 }
 
+void SoundChannel::autoPause()
+{
+    Mutex::Autolock lock(&mLock);
+    if (mState == PLAYING) {
+        LOGV("pause track");
+        mState = PAUSED;
+        mAutoPaused = true;
+        mAudioTrack->pause();
+    }
+}
+
 void SoundChannel::resume()
 {
     Mutex::Autolock lock(&mLock);
     if (mState == PAUSED) {
         LOGV("resume track");
         mState = PLAYING;
+        mAutoPaused = false;
+        mAudioTrack->start();
+    }
+}
+
+void SoundChannel::autoResume()
+{
+    Mutex::Autolock lock(&mLock);
+    if (mAutoPaused && (mState == PAUSED)) {
+        LOGV("resume track");
+        mState = PLAYING;
+        mAutoPaused = false;
         mAudioTrack->start();
     }
 }

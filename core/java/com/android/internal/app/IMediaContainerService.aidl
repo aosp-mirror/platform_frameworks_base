@@ -25,4 +25,5 @@ interface IMediaContainerService {
                 String key, String resFileName);
     boolean copyResource(in Uri packageURI,
                 in ParcelFileDescriptor outStream);
+    int getRecommendedInstallLocation(in Uri fileUri);
 }

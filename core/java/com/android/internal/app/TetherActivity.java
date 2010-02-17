@@ -32,15 +32,18 @@ import android.widget.Toast;
 import android.util.Log;
 
 /**
- * This activity is shown to the user for him/her to connect/disconnect a Tether
- * connection.  It will display notification when a suitable connection is made
- * to allow the tether to be setup.  A second notification will be show when a
- * tether is active, allowing the user to manage tethered connections.
+ * This activity is shown to the user in two cases: when a connection is possible via
+ * a usb tether and when any type of tether is connected.  In the connecting case
+ * It allows them to start a USB tether.  In the Tethered/disconnecting case it
+ * will disconnect all tethers.
  */
 public class TetherActivity extends AlertActivity implements
         DialogInterface.OnClickListener {
 
     private static final int POSITIVE_BUTTON = AlertDialog.BUTTON1;
+
+    // count of the number of tethered connections at activity create time.
+    private int mTethered;
 
     /* Used to detect when the USB cable is unplugged, so we can call finish() */
     private BroadcastReceiver mTetherReceiver = new BroadcastReceiver() {
@@ -52,8 +55,6 @@ public class TetherActivity extends AlertActivity implements
         }
     };
 
-    private boolean mWantTethering;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,17 +62,18 @@ public class TetherActivity extends AlertActivity implements
         // determine if we advertise tethering or untethering
         ConnectivityManager cm =
                 (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
-        if (cm.getTetheredIfaces().length > 0) {
-            mWantTethering = false;
-        } else if (cm.getTetherableIfaces().length > 0) {
-            mWantTethering = true;
-        } else {
+        mTethered = cm.getTetheredIfaces().length;
+        int tetherable = cm.getTetherableIfaces().length;
+        if ((mTethered == 0) && (tetherable == 0)) {
             finish();
             return;
         }
 
-        // Set up the "dialog"
-        if (mWantTethering == true) {
+        // Set up the dialog
+        // if we have a tethered connection we put up a "Do you want to Disconect" dialog
+        // otherwise we must have a tetherable interface (else we'd return above)
+        // and so we want to put up the "do you want to connect" dialog
+        if (mTethered == 0) {
             mAlertParams.mIconId = com.android.internal.R.drawable.ic_dialog_usb;
             mAlertParams.mTitle = getString(com.android.internal.R.string.tether_title);
             mAlertParams.mMessage = getString(com.android.internal.R.string.tether_message);
@@ -114,17 +116,36 @@ public class TetherActivity extends AlertActivity implements
      * {@inheritDoc}
      */
     public void onClick(DialogInterface dialog, int which) {
+        boolean error =  false;
 
         if (which == POSITIVE_BUTTON) {
-            ConnectivityManager connManager =
+            ConnectivityManager cm =
                     (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
             // start/stop tethering
-            if (mWantTethering) {
-                if (!connManager.tether("ppp0")) {
+            String[] tethered = cm.getTetheredIfaces();
+
+            if (tethered.length == 0) {
+                String[] tetherable = cm.getTetherableIfaces();
+                String[] usbRegexs = cm.getTetherableUsbRegexs();
+                for (String t : tetherable) {
+                    for (String r : usbRegexs) {
+                        if (t.matches(r)) {
+                            if (!cm.tether(t))
+                                error = true;
+                            break;
+                        }
+                    }
+                }
+                if (error) {
                     showTetheringError();
                 }
             } else {
-                if (!connManager.untether("ppp0")) {
+                for (String t : tethered) {
+                    if (!cm.untether("ppp0")) {
+                        error = true;
+                    }
+                }
+                if (error) {
                     showUnTetheringError();
                 }
             }
@@ -134,7 +155,12 @@ public class TetherActivity extends AlertActivity implements
     }
 
     private void handleTetherStateChanged(Intent intent) {
-        finish();
+        // determine if we advertise tethering or untethering
+        ConnectivityManager cm =
+                (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (mTethered != cm.getTetheredIfaces().length) {
+            finish();
+        }
     }
 
     private void showTetheringError() {

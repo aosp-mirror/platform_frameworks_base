@@ -892,14 +892,15 @@ public class ScrollView extends FrameLayout {
      */
     @Override
     protected int computeVerticalScrollRange() {
-        int count = getChildCount();
+        final int count = getChildCount();
+        final int contentHeight = getHeight() - mPaddingBottom - mPaddingTop;
         if (count == 0) {
-            return getHeight();
+            return contentHeight;
         }
         
         int scrollRange = getChildAt(0).getBottom();
-        int scrollY = mScrollY;
-        int overscrollBottom = scrollRange - getHeight() - mPaddingBottom - mPaddingTop;
+        final int scrollY = mScrollY;
+        final int overscrollBottom = Math.max(0, scrollRange - contentHeight);
         if (scrollY < 0) {
             scrollRange -= scrollY;
         } else if (scrollY > overscrollBottom) {

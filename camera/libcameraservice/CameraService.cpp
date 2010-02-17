@@ -29,6 +29,8 @@
 #include <surfaceflinger/ISurface.h>
 #include <ui/Overlay.h>
 
+#include <hardware/hardware.h>
+
 #include <media/mediaplayer.h>
 #include <media/AudioSystem.h>
 #include "CameraService.h"
@@ -605,8 +607,9 @@ status_t CameraService::Client::registerPreviewBuffers()
     CameraParameters params(mHardware->getParameters());
     params.getPreviewSize(&w, &h);
 
+    // don't use a hardcoded format here
     ISurface::BufferHeap buffers(w, h, w, h,
-                                 PIXEL_FORMAT_YCbCr_420_SP,
+                                 HAL_PIXEL_FORMAT_YCrCb_420_SP,
                                  mOrientation,
                                  0,
                                  mHardware->getPreviewHeap());
@@ -926,8 +929,10 @@ void CameraService::Client::handleShutter(
             h &= ~1;
             LOGV("Snapshot image width=%d, height=%d", w, h);
         }
+        // FIXME: don't use hardcoded format constants here
         ISurface::BufferHeap buffers(w, h, w, h,
-            PIXEL_FORMAT_YCbCr_420_SP, mOrientation, 0, mHardware->getRawHeap());
+            HAL_PIXEL_FORMAT_YCrCb_420_SP, mOrientation, 0,
+            mHardware->getRawHeap());
 
         mSurface->registerBuffers(buffers);
     }

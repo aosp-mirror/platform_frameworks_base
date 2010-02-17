@@ -125,13 +125,21 @@ public class ConnectivityManager
 
     /**
      * @hide
+     * gives a String[]
      */
-    public static final String EXTRA_AVAILABLE_TETHER_COUNT = "availableCount";
+    public static final String EXTRA_AVAILABLE_TETHER = "availableArray";
 
     /**
      * @hide
+     * gives a String[]
      */
-    public static final String EXTRA_ACTIVE_TETHER_COUNT = "activeCount";
+    public static final String EXTRA_ACTIVE_TETHER = "activeArray";
+
+    /**
+     * @hide
+     * gives a String[]
+     */
+    public static final String EXTRA_ERRORED_TETHER = "erroredArray";
 
     /**
      * The Default Mobile data connection.  When active, all data traffic
@@ -398,6 +406,39 @@ public class ConnectivityManager
             return mService.untether(iface);
         } catch (RemoteException e) {
             return false;
+        }
+    }
+
+    /**
+     * {@hide}
+     */
+    public boolean isTetheringSupported() {
+        try {
+            return mService.isTetheringSupported();
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    /**
+     * {@hide}
+     */
+    public String[] getTetherableUsbRegexs() {
+        try {
+            return mService.getTetherableUsbRegexs();
+        } catch (RemoteException e) {
+            return new String[0];
+        }
+    }
+
+    /**
+     * {@hide}
+     */
+    public String[] getTetherableWifiRegexs() {
+        try {
+            return mService.getTetherableWifiRegexs();
+        } catch (RemoteException e) {
+            return new String[0];
         }
     }
 }

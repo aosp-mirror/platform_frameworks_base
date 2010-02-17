@@ -17,14 +17,15 @@
 
 package com.android.mmscommon.mms.pdu;
 
-import com.android.mmscommon.ContentType;
 import com.android.mmscommon.CharacterSets;
+import com.android.mmscommon.ContentType;
 import com.android.mmscommon.EncodedStringValue;
 import com.android.mmscommon.InvalidHeaderValueException;
 import com.android.mmscommon.PduHeaders;
 
 import android.util.Config;
 import android.util.Log;
+import android.util.base64.Base64;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -790,7 +791,7 @@ public class PduParser {
                     String encoding = new String(partDataEncoding);
                     if (encoding.equalsIgnoreCase(PduPart.P_BASE64)) {
                         // Decode "base64" into "binary".
-                        partData = Base64.decodeBase64(partData);
+                        partData = Base64.decode(partData, Base64.DEFAULT);
                     } else if (encoding.equalsIgnoreCase(PduPart.P_QUOTED_PRINTABLE)) {
                         // Decode "quoted-printable" into "binary".
                         partData = QuotedPrintable.decodeQuotedPrintable(partData);

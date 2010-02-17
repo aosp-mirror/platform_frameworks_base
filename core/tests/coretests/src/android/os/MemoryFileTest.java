@@ -16,10 +16,8 @@
 
 package android.os;
 
-import android.os.MemoryFile;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.LargeTest;
-import android.test.suitebuilder.annotation.MediumTest;
 import android.test.suitebuilder.annotation.SmallTest;
 
 import java.io.File;
@@ -44,24 +42,29 @@ public class MemoryFileTest extends AndroidTestCase {
     /**
      * Keep allocating new files till the system purges them.
      */
-    @MediumTest
+    @LargeTest
     public void testPurge() throws Exception {
         List<MemoryFile> files = new ArrayList<MemoryFile>();
-        while (true) {
-            MemoryFile newFile = new MemoryFile("MemoryFileTest", 1000000);
-            newFile.allowPurging(true);
-            newFile.writeBytes(testString, 0, 0, testString.length);
-            files.add(newFile);
-            for (MemoryFile file : files) {
-                try {
-                    file.readBytes(testString, 0, 0, testString.length);
-                } catch (IOException e) {
-                    // Expected
-                    for (MemoryFile fileToClose : files) {
-                        fileToClose.close();
+        try {
+            while (true) {
+                // This will fail if the process runs out of file descriptors before
+                // the kernel starts purging ashmem areas.
+                MemoryFile newFile = new MemoryFile("MemoryFileTest", 10000000);
+                newFile.allowPurging(true);
+                newFile.writeBytes(testString, 0, 0, testString.length);
+                files.add(newFile);
+                for (MemoryFile file : files) {
+                    try {
+                        file.readBytes(testString, 0, 0, testString.length);
+                    } catch (IOException e) {
+                        // Expected
+                        return;
                     }
-                    return;
                 }
+            }
+        } finally {
+            for (MemoryFile fileToClose : files) {
+                fileToClose.close();
             }
         }
     }

@@ -20,6 +20,7 @@ import com.android.internal.app.IMediaContainerService;
 import com.android.internal.app.ResolverActivity;
 import com.android.common.FastXmlSerializer;
 import com.android.common.XmlUtils;
+import com.android.internal.content.PackageHelper;
 import com.android.server.JournaledFile;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -304,6 +305,7 @@ class PackageManagerService extends IPackageManager.Stub {
     static final int INIT_COPY = 5;
     static final int MCS_UNBIND = 6;
     static final int START_CLEANING_PACKAGE = 7;
+    static final int FIND_INSTALL_LOC = 8;
     // Delay time in millisecs
     static final int BROADCAST_DELAY = 10 * 1000;
     private ServiceConnection mDefContainerConn = new ServiceConnection() {
@@ -319,8 +321,8 @@ class PackageManagerService extends IPackageManager.Stub {
     };
 
     class PackageHandler extends Handler {
-        final ArrayList<InstallArgs> mPendingInstalls =
-            new ArrayList<InstallArgs>();
+        final ArrayList<InstallParams> mPendingInstalls =
+            new ArrayList<InstallParams>();
         // Service Connection to remote media container service to copy
         // package uri's from external media onto secure containers
         // or internal storage.
@@ -332,21 +334,20 @@ class PackageManagerService extends IPackageManager.Stub {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case INIT_COPY: {
-                    InstallArgs args = (InstallArgs) msg.obj;
-                    args.createCopyFile();
+                    InstallParams params = (InstallParams) msg.obj;
                     Intent service = new Intent().setComponent(DEFAULT_CONTAINER_COMPONENT);
                     if (mContainerService != null) {
                         // No need to add to pending list. Use remote stub directly
-                        handleStartCopy(args);
+                        handleStartCopy(params);
                     } else {
                         if (mContext.bindService(service, mDefContainerConn,
                                 Context.BIND_AUTO_CREATE)) {
-                            mPendingInstalls.add(args);
+                            mPendingInstalls.add(params);
                         } else {
                             Log.e(TAG, "Failed to bind to media container service");
                             // Indicate install failure TODO add new error code
-                            processPendingInstall(args,
-                                    PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE);
+                            processPendingInstall(createInstallArgs(params),
+                                    PackageManager.INSTALL_FAILED_INTERNAL_ERROR);
                         }
                     }
                     break;
@@ -357,9 +358,9 @@ class PackageManagerService extends IPackageManager.Stub {
                         mContainerService = (IMediaContainerService) msg.obj;
                     }
                     if (mPendingInstalls.size() > 0) {
-                        InstallArgs args = mPendingInstalls.remove(0);
-                        if (args != null) {
-                            handleStartCopy(args);
+                        InstallParams params = mPendingInstalls.remove(0);
+                        if (params != null) {
+                            handleStartCopy(params);
                         }
                     }
                     break;
@@ -423,22 +424,56 @@ class PackageManagerService extends IPackageManager.Stub {
 
         // Utility method to initiate copying apk via media
         // container service.
-        private void handleStartCopy(InstallArgs args) {
-            int ret = PackageManager.INSTALL_SUCCEEDED;
-            if (mContainerService == null) {
-                // Install error
-                ret = PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
-            } else {
-                ret = args.copyApk(mContainerService);
+        private void handleStartCopy(InstallParams params) {
+            int ret = PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
+            if (mContainerService != null) {
+                // Remote call to find out default install location
+                int loc = params.getInstallLocation(mContainerService);
+                // Use install location to create InstallArgs and temporary
+                // install location
+                if (loc == PackageHelper.RECOMMEND_FAILED_INSUFFICIENT_STORAGE){
+                    ret = PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
+                } else if (loc == PackageHelper.RECOMMEND_FAILED_INVALID_APK) {
+                    ret = PackageManager.INSTALL_FAILED_INVALID_APK;
+                } else {
+                    if ((params.flags & PackageManager.INSTALL_EXTERNAL) == 0){
+                        if (loc == PackageHelper.RECOMMEND_INSTALL_EXTERNAL) {
+                            // Set the flag to install on external media.
+                            params.flags |= PackageManager.INSTALL_EXTERNAL;
+                        } else {
+                            // Make sure the flag for installing on external
+                            // media is unset
+                            params.flags &= ~PackageManager.INSTALL_EXTERNAL;
+                        }
+                    }
+                    // Disable forward locked apps on sdcard.
+                    if ((params.flags & PackageManager.INSTALL_FORWARD_LOCK) != 0 &&
+                            (params.flags & PackageManager.INSTALL_EXTERNAL) != 0) {
+                        // Make sure forward locked apps can only be installed
+                        // on internal storage
+                        Log.w(TAG, "Cannot install protected apps on sdcard");
+                        ret = PackageManager.INSTALL_FAILED_INVALID_INSTALL_LOCATION;
+                    } else {
+                        ret = PackageManager.INSTALL_SUCCEEDED;
+                    }
+                }
             }
             mHandler.sendEmptyMessage(MCS_UNBIND);
+            // Create the file args now.
+            InstallArgs args = createInstallArgs(params);
+            if (ret == PackageManager.INSTALL_SUCCEEDED) {
+                // Create copy only if we are not in an erroneous state.
+                args.createCopyFile();
+                // Remote call to initiate copy
+                ret = args.copyApk(mContainerService);
+            }
             processPendingInstall(args, ret);
         }
     }
 
     static boolean installOnSd(int flags) {
         if (((flags & PackageManager.INSTALL_FORWARD_LOCK) != 0) ||
-                ((flags & PackageManager.INSTALL_ON_SDCARD) == 0)) {
+                ((flags & PackageManager.INSTALL_EXTERNAL) == 0)) {
             return false;
         }
         return true;
@@ -2145,10 +2180,15 @@ class PackageManagerService extends IPackageManager.Stub {
         int i;
         for (i=0; i<files.length; i++) {
             File file = new File(dir, files[i]);
+            if (files[i] != null && files[i].endsWith(".zip")) {
+                // Public resource for forward locked package. Ignore
+                continue;
+            }
             PackageParser.Package pkg = scanPackageLI(file,
                     flags|PackageParser.PARSE_MUST_BE_APK, scanMode);
             // Don't mess around with apps in system partition.
-            if (pkg == null && (flags & PackageParser.PARSE_IS_SYSTEM) == 0) {
+            if (pkg == null && (flags & PackageParser.PARSE_IS_SYSTEM) == 0 &&
+                    mLastScanError == PackageManager.INSTALL_FAILED_INVALID_APK) {
                 // Delete the apk
                 Log.w(TAG, "Cleaning up failed install of " + file);
                 file.delete();
@@ -4249,27 +4289,9 @@ class PackageManagerService extends IPackageManager.Stub {
                 android.Manifest.permission.INSTALL_PACKAGES, null);
 
         Message msg = mHandler.obtainMessage(INIT_COPY);
-        msg.obj = createInstallArgs(packageURI, observer, flags, installerPackageName);
+        msg.obj = new InstallParams(packageURI, observer, flags,
+                installerPackageName);
         mHandler.sendMessage(msg);
-    }
-
-    private InstallArgs createInstallArgs(Uri packageURI, IPackageInstallObserver observer,
-            int flags, String installerPackageName) {
-        if (installOnSd(flags)) {
-            return new SdInstallArgs(packageURI, observer, flags,
-                    installerPackageName);
-        } else {
-            return new FileInstallArgs(packageURI, observer, flags,
-                    installerPackageName);
-        }
-    }
-
-    private InstallArgs createInstallArgs(int flags, String fullCodePath, String fullResourcePath) {
-        if (installOnSd(flags)) {
-            return new SdInstallArgs(fullCodePath, fullResourcePath);
-        } else {
-            return new FileInstallArgs(fullCodePath, fullResourcePath);
-        }
     }
 
     private void processPendingInstall(final InstallArgs args, final int currentStatus) {
@@ -4327,6 +4349,45 @@ class PackageManagerService extends IPackageManager.Stub {
         });
     }
 
+    static final class InstallParams {
+        final IPackageInstallObserver observer;
+        int flags;
+        final Uri packageURI;
+        final String installerPackageName;
+        InstallParams(Uri packageURI,
+                IPackageInstallObserver observer, int flags,
+                String installerPackageName) {
+            this.packageURI = packageURI;
+            this.flags = flags;
+            this.observer = observer;
+            this.installerPackageName = installerPackageName;
+        }
+
+        public int getInstallLocation(IMediaContainerService imcs) {
+            try {
+                return imcs.getRecommendedInstallLocation(packageURI);
+            } catch (RemoteException e) {
+            }
+            return  -1;
+        }
+    };
+
+    private InstallArgs createInstallArgs(InstallParams params) {
+        if (installOnSd(params.flags)) {
+            return new SdInstallArgs(params);
+        } else {
+            return new FileInstallArgs(params);
+        }
+    }
+
+    private InstallArgs createInstallArgs(int flags, String fullCodePath, String fullResourcePath) {
+        if (installOnSd(flags)) {
+            return new SdInstallArgs(fullCodePath, fullResourcePath);
+        } else {
+            return new FileInstallArgs(fullCodePath, fullResourcePath);
+        }
+    }
+
     static abstract class InstallArgs {
         final IPackageInstallObserver observer;
         final int flags;
@@ -4359,10 +4420,9 @@ class PackageManagerService extends IPackageManager.Stub {
         String codeFileName;
         String resourceFileName;
 
-        FileInstallArgs(Uri packageURI,
-                IPackageInstallObserver observer, int flags,
-                String installerPackageName) {
-            super(packageURI, observer, flags, installerPackageName);
+        FileInstallArgs(InstallParams params) {
+            super(params.packageURI, params.observer,
+                    params.flags, params.installerPackageName);
         }
 
         FileInstallArgs(String fullCodePath, String fullResourcePath) {
@@ -4373,15 +4433,15 @@ class PackageManagerService extends IPackageManager.Stub {
             resourceFileName = fullResourcePath;
         }
 
+        String getCodePath() {
+            return codeFileName;
+        }
+
         void createCopyFile() {
             boolean fwdLocked = isFwdLocked(flags);
             installDir = fwdLocked ? mDrmAppPrivateInstallDir : mAppInstallDir;
             codeFileName = createTempPackageFile(installDir).getPath();
             resourceFileName = getResourcePathFromCodePath();
-        }
-
-        String getCodePath() {
-            return codeFileName;
         }
 
         int copyApk(IMediaContainerService imcs) {
@@ -4528,10 +4588,9 @@ class PackageManagerService extends IPackageManager.Stub {
         String cachePath;
         static final String RES_FILE_NAME = "pkg.apk";
 
-        SdInstallArgs(Uri packageURI,
-                IPackageInstallObserver observer, int flags,
-                String installerPackageName) {
-           super(packageURI, observer, flags, installerPackageName);
+        SdInstallArgs(InstallParams params) {
+            super(params.packageURI, params.observer,
+                    params.flags, params.installerPackageName);
         }
 
         SdInstallArgs(String fullCodePath, String fullResourcePath) {
@@ -4577,13 +4636,11 @@ class PackageManagerService extends IPackageManager.Stub {
         int doPreInstall(int status) {
             if (status != PackageManager.INSTALL_SUCCEEDED) {
                 // Destroy container
-                destroySdDir(cid);
+                PackageHelper.destroySdDir(cid);
             } else {
-                // STOPSHIP Remove once new api is added in MountService
-                //boolean mounted = isContainerMounted(cid);
-                boolean mounted = false;
+                boolean mounted = PackageHelper.isContainerMounted(cid);
                 if (!mounted) {
-                    cachePath = mountSdDir(cid, Process.SYSTEM_UID);
+                    cachePath = PackageHelper.mountSdDir(cid, getEncryptKey(), Process.SYSTEM_UID);
                     if (cachePath == null) {
                         return PackageManager.INSTALL_FAILED_CONTAINER_ERROR;
                     }
@@ -4596,96 +4653,41 @@ class PackageManagerService extends IPackageManager.Stub {
                 String oldCodePath) {
             String newCacheId = getNextCodePath(oldCodePath, pkgName, "/" + RES_FILE_NAME);
             String newCachePath = null;
-            /*final int RENAME_FAILED = 1;
+            final int RENAME_FAILED = 1;
             final int MOUNT_FAILED = 2;
-            final int DESTROY_FAILED = 3;
             final int PASS = 4;
             int errCode = RENAME_FAILED;
+            String errMsg = "RENAME_FAILED";
+            boolean mounted = PackageHelper.isContainerMounted(cid);
             if (mounted) {
                 // Unmount the container
-                if (!unMountSdDir(cid)) {
+                if (!PackageHelper.unMountSdDir(cid)) {
                     Log.i(TAG, "Failed to unmount " + cid + " before renaming");
                     return false;
                 }
                 mounted = false;
             }
-            if (renameSdDir(cid, newCacheId)) {
+            if (PackageHelper.renameSdDir(cid, newCacheId)) {
                 errCode = MOUNT_FAILED;
-                if ((newCachePath = mountSdDir(newCacheId, Process.SYSTEM_UID)) != null) {
+                errMsg = "MOUNT_FAILED";
+                if ((newCachePath = PackageHelper.mountSdDir(newCacheId,
+                        getEncryptKey(), Process.SYSTEM_UID)) != null) {
                     errCode = PASS;
+                    errMsg = "PASS";
                 }
             }
-            String errMsg = "";
-            switch (errCode) {
-                case RENAME_FAILED:
-                    errMsg = "RENAME_FAILED";
-                    break;
-                case MOUNT_FAILED:
-                    errMsg = "MOUNT_FAILED";
-                    break;
-                case DESTROY_FAILED:
-                    errMsg = "DESTROY_FAILED";
-                    break;
-                default:
-                    errMsg = "PASS";
-                break;
-            }
-            Log.i(TAG, "Status: " + errMsg);
             if (errCode != PASS) {
+                Log.i(TAG, "Failed to rename " + cid + " to " + newCacheId +
+                        " at path: " + cachePath + " to new path: " + newCachePath +
+                        "err = " + errMsg);
+                // Mount old container?
                 return false;
-            }
-            Log.i(TAG, "Succesfully renamed " + cid + " to " +newCacheId +
-                    " at path: " + cachePath + " to new path: " + newCachePath);
-            cid = newCacheId;
-            cachePath = newCachePath;
-            return true;
-            */
-            // STOPSHIP TEMPORARY HACK FOR RENAME
-            // Create new container at newCachePath
-            String codePath = getCodePath();
-            final int CREATE_FAILED = 1;
-            final int COPY_FAILED = 3;
-            final int FINALIZE_FAILED = 5;
-            final int PASS = 7;
-            int errCode = CREATE_FAILED;
-
-            if ((newCachePath = createSdDir(new File(codePath), newCacheId)) != null) {
-                errCode = COPY_FAILED;
-                // Copy file from codePath
-                if (FileUtils.copyFile(new File(codePath), new File(newCachePath, RES_FILE_NAME))) {
-                    errCode = FINALIZE_FAILED;
-                    if (finalizeSdDir(newCacheId)) {
-                        errCode = PASS;
-                    }
-                }
-            }
-            // Print error based on errCode
-            String errMsg = "";
-            switch (errCode) {
-                case CREATE_FAILED:
-                    errMsg = "CREATE_FAILED";
-                    break;
-                case COPY_FAILED:
-                    errMsg = "COPY_FAILED";
-                    destroySdDir(newCacheId);
-                    break;
-                case FINALIZE_FAILED:
-                    errMsg = "FINALIZE_FAILED";
-                    destroySdDir(newCacheId);
-                    break;
-                default:
-                    errMsg = "PASS";
-                break;
-            }
-            // Destroy the temporary container
-            destroySdDir(cid);
-            Log.i(TAG, "Status: " + errMsg);
-            if (errCode != PASS) {
-                return false;
+            } else {
+                Log.i(TAG, "Succesfully renamed " + cid + " to " + newCacheId +
+                        " at path: " + cachePath + " to new path: " + newCachePath);
             }
             cid = newCacheId;
             cachePath = newCachePath;
-
             return true;
         }
 
@@ -4693,11 +4695,10 @@ class PackageManagerService extends IPackageManager.Stub {
             if (status != PackageManager.INSTALL_SUCCEEDED) {
                 cleanUp();
             } else {
-                // STOP SHIP Change this once new api is added.
-                //boolean mounted = isContainerMounted(cid);
-                boolean mounted = false;
+                boolean mounted = PackageHelper.isContainerMounted(cid);
                 if (!mounted) {
-                    mountSdDir(cid, Process.SYSTEM_UID);
+                    PackageHelper.mountSdDir(cid,
+                            getEncryptKey(), Process.myUid());
                 }
             }
             return status;
@@ -4705,7 +4706,7 @@ class PackageManagerService extends IPackageManager.Stub {
 
         private void cleanUp() {
             // Destroy secure container
-            destroySdDir(cid);
+            PackageHelper.destroySdDir(cid);
         }
 
         void cleanUpResourcesLI() {
@@ -4740,10 +4741,10 @@ class PackageManagerService extends IPackageManager.Stub {
 
         boolean doPostDeleteLI(boolean delete) {
             boolean ret = false;
-            boolean mounted = isContainerMounted(cid);
+            boolean mounted = PackageHelper.isContainerMounted(cid);
             if (mounted) {
                 // Unmount first
-                ret = unMountSdDir(cid);
+                ret = PackageHelper.unMountSdDir(cid);
             }
             if (ret && delete) {
                 cleanUpResourcesLI();
@@ -5105,7 +5106,7 @@ class PackageManagerService extends IPackageManager.Stub {
         String installerPackageName = args.installerPackageName;
         File tmpPackageFile = new File(args.getCodePath());
         boolean forwardLocked = ((pFlags & PackageManager.INSTALL_FORWARD_LOCK) != 0);
-        boolean onSd = ((pFlags & PackageManager.INSTALL_ON_SDCARD) != 0);
+        boolean onSd = ((pFlags & PackageManager.INSTALL_EXTERNAL) != 0);
         boolean replace = false;
         int scanMode = SCAN_MONITOR | SCAN_FORCE_DEX | SCAN_UPDATE_SIGNATURE
                 | (newInstall ? SCAN_NEW_INSTALL : 0);
@@ -5134,14 +5135,6 @@ class PackageManagerService extends IPackageManager.Stub {
         }
         if (GET_CERTIFICATES && !pp.collectCertificates(pkg, parseFlags)) {
             res.returnCode = pp.getParseError();
-            return;
-        }
-        // Some preinstall checks
-        if (forwardLocked && onSd) {
-            // Make sure forward locked apps can only be installed
-            // on internal storage
-            Log.w(TAG, "Cannot install protected apps on sdcard");
-            res.returnCode = PackageManager.INSTALL_FAILED_INVALID_INSTALL_LOCATION;
             return;
         }
         // Get rid of all references to package scan path via parser.
@@ -5560,7 +5553,7 @@ class PackageManagerService extends IPackageManager.Stub {
         if (deleteCodeAndResources) {
             // TODO can pick up from PackageSettings as well
             int installFlags = ((p.applicationInfo.flags & ApplicationInfo.FLAG_ON_SDCARD)!=0) ?
-                    PackageManager.INSTALL_ON_SDCARD : 0;
+                    PackageManager.INSTALL_EXTERNAL : 0;
             installFlags |= ((p.applicationInfo.flags & ApplicationInfo.FLAG_FORWARD_LOCK)!=0) ?
                     PackageManager.INSTALL_FORWARD_LOCK : 0;
             outInfo.args = createInstallArgs(installFlags,
@@ -8544,11 +8537,6 @@ class PackageManagerService extends IPackageManager.Stub {
     private boolean mMediaMounted = false;
     private static final int MAX_CONTAINERS = 250;
 
-
-    static MountService getMountService() {
-        return (MountService) ServiceManager.getService("mount");
-    }
-
     private String getEncryptKey() {
         try {
             String sdEncKey = SystemKeyStore.getInstance().retrieveKeyHexString(mSdEncryptKey);
@@ -8567,134 +8555,10 @@ class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-   private String createSdDir(File tmpPackageFile, String pkgName) {
-        // Create mount point via MountService
-        MountService mountService = getMountService();
-        long len = tmpPackageFile.length();
-        int mbLen = (int) (len/(1024*1024));
-        if ((len - (mbLen * 1024 * 1024)) > 0) {
-            mbLen++;
-        }
-        if (DEBUG_SD_INSTALL) Log.i(TAG, "mbLen="+mbLen);
-        String cachePath = null;
-        String sdEncKey;
-        try {
-            sdEncKey = SystemKeyStore.getInstance().retrieveKeyHexString(mSdEncryptKey);
-            if (sdEncKey == null) {
-                sdEncKey = SystemKeyStore.getInstance().
-                        generateNewKeyHexString(128, mSdEncryptAlg, mSdEncryptKey);
-                if (sdEncKey == null) {
-                    Log.e(TAG, "Failed to create encryption keys for package: " + pkgName + ".");
-                    return null;
-                }
-            }
-        } catch (NoSuchAlgorithmException nsae) {
-            Log.e(TAG, "Failed to create encryption keys with exception: " + nsae);
-            return null;
-        }
-
-        int rc = mountService.createSecureContainer(
-                pkgName, mbLen, "vfat", sdEncKey, Process.SYSTEM_UID);
-        if (rc != StorageResultCode.OperationSucceeded) {
-            Log.e(TAG, String.format("Failed to create container (%d)", rc));
-
-            rc = mountService.destroySecureContainer(pkgName);
-            if (rc != StorageResultCode.OperationSucceeded) {
-                Log.e(TAG, String.format("Failed to cleanup container (%d)", rc));
-                return null;
-            }
-            rc = mountService.createSecureContainer(
-                    pkgName, mbLen, "vfat", sdEncKey, Process.SYSTEM_UID);
-            if (rc != StorageResultCode.OperationSucceeded) {
-                Log.e(TAG, String.format("Failed to create container (2nd try) (%d)", rc));
-                return null;
-            }
-        }
-
-        cachePath = mountService.getSecureContainerPath(pkgName);
-        if (DEBUG_SD_INSTALL) Log.i(TAG, "Trying to install " + pkgName + ", cachePath =" + cachePath);
-            return cachePath;
-    }
-
-   private String mountSdDir(String pkgName, int ownerUid) {
-       String sdEncKey = SystemKeyStore.getInstance().retrieveKeyHexString(mSdEncryptKey);
-       if (sdEncKey == null) {
-           Log.e(TAG, "Failed to retrieve encryption keys to mount package code: " + pkgName + ".");
-           return null;
-       }
-
-       int rc = getMountService().mountSecureContainer(pkgName, sdEncKey, ownerUid);
-
-       if (rc != StorageResultCode.OperationSucceeded) {
-           Log.i(TAG, "Failed to mount container for pkg : " + pkgName + " rc : " + rc);
-           return null;
-       }
-
-       return getMountService().getSecureContainerPath(pkgName);
-   }
-
-   private boolean unMountSdDir(String pkgName) {
-       // STOPSHIP unmount directory
-       int rc = getMountService().unmountSecureContainer(pkgName);
-       if (rc != StorageResultCode.OperationSucceeded) {
-           Log.e(TAG, "Failed to unmount : " + pkgName + " with rc " + rc);
-           return false;
-       }
-       return true;
-   }
-
-   private boolean renameSdDir(String oldId, String newId) {
-       try {
-           getMountService().renameSecureContainer(oldId, newId);
-           return true;
-       } catch (IllegalStateException e) {
-           Log.i(TAG, "Failed ot rename  " + oldId + " to " + newId +
-                   " with exception : " + e);
-       }
-       return false;
-   }
-
-   private String getSdDir(String pkgName) {
-       return getMountService().getSecureContainerPath(pkgName);
-   }
-
-    private boolean finalizeSdDir(String pkgName) {
-        int rc = getMountService().finalizeSecureContainer(pkgName);
-        if (rc != StorageResultCode.OperationSucceeded) {
-            Log.i(TAG, "Failed to finalize container for pkg : " + pkgName);
-            return false;
-        }
-        return true;
-    }
-
-    private boolean destroySdDir(String pkgName) {
-        int rc = getMountService().destroySecureContainer(pkgName);
-        if (rc != StorageResultCode.OperationSucceeded) {
-            Log.i(TAG, "Failed to destroy container for pkg : " + pkgName);
-            return false;
-        }
-        return true;
-    }
-
-    static String[] getSecureContainerList() {
-        String[] list = getMountService().getSecureContainerList();
-        return list.length == 0 ? null : list;
-    }
-
-   static boolean isContainerMounted(String cid) {
-       // STOPSHIP
-       // New api from MountService
-       try {
-           return (getMountService().getSecureContainerPath(cid) != null);
-       } catch (IllegalStateException e) {
-       }
-       return false;
-   }
-
    static String getTempContainerId() {
        String prefix = "smdl1tmp";
        int tmpIdx = 1;
-       String list[] = getSecureContainerList();
+       String list[] = PackageHelper.getSecureContainerList();
        if (list != null) {
            int idx = 0;
            int idList[] = new int[MAX_CONTAINERS];
@@ -8753,7 +8617,7 @@ class PackageManagerService extends IPackageManager.Stub {
    }
 
    void updateExternalMediaStatusInner(boolean mediaStatus) {
-       final String list[] = getSecureContainerList();
+       final String list[] = PackageHelper.getSecureContainerList();
        if (list == null || list.length == 0) {
            return;
        }

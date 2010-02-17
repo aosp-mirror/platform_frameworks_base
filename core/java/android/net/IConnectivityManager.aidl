@@ -55,7 +55,13 @@ interface IConnectivityManager
 
     boolean untether(String iface);
 
+    boolean isTetheringSupported();
+
     String[] getTetherableIfaces();
 
     String[] getTetheredIfaces();
+
+    String[] getTetherableUsbRegexs();
+
+    String[] getTetherableWifiRegexs();
 }

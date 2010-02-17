@@ -68,6 +68,12 @@ public class PatternsTest extends TestCase {
         t = Patterns.WEB_URL.matcher("xn--fsqu00a.xn--0zwm56d").matches();
         assertTrue("Valid URL", t);
 
+        // Internationalized URL.
+        t = Patterns.WEB_URL.matcher("http://\uD604\uAE08\uC601\uC218\uC99D.kr").matches();
+        assertTrue("Valid URL", t);
+        t = Patterns.WEB_URL.matcher("\uD604\uAE08\uC601\uC218\uC99D.kr").matches();
+        assertTrue("Valid URL", t);
+
         t = Patterns.WEB_URL.matcher("ftp://www.example.com").matches();
         assertFalse("Matched invalid protocol", t);
 
@@ -97,6 +103,13 @@ public class PatternsTest extends TestCase {
         boolean t;
 
         t = Patterns.DOMAIN_NAME.matcher("mail.example.com").matches();
+        assertTrue("Valid domain", t);
+
+        t = Patterns.WEB_URL.matcher("google.me").matches();
+        assertTrue("Valid domain", t);
+
+        // Internationalized domains.
+        t = Patterns.DOMAIN_NAME.matcher("\uD604\uAE08\uC601\uC218\uC99D.kr").matches();
         assertTrue("Valid domain", t);
 
         t = Patterns.DOMAIN_NAME.matcher("__+&42.xer").matches();

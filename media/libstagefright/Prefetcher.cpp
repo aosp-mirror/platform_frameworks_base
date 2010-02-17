@@ -128,46 +128,52 @@ static int64_t kMaxCacheDurationUs = 10000000ll;
 
 void Prefetcher::threadFunc() {
     for (;;) {
-        Mutex::Autolock autoLock(mLock);
-        if (mDone) {
-            break;
-        }
-        mCondition.waitRelative(mLock, 10000000ll);
+        sp<PrefetchedSource> minSource;
 
-        int64_t minCacheDurationUs = -1;
-        ssize_t minIndex = -1;
-        for (size_t i = 0; i < mSources.size(); ++i) {
-            sp<PrefetchedSource> source = mSources[i].promote();
+        {
+            Mutex::Autolock autoLock(mLock);
+            if (mDone) {
+                break;
+            }
+            mCondition.waitRelative(mLock, 10000000ll);
 
-            if (source == NULL) {
+            int64_t minCacheDurationUs = -1;
+            ssize_t minIndex = -1;
+            for (size_t i = 0; i < mSources.size(); ++i) {
+                sp<PrefetchedSource> source = mSources[i].promote();
+
+                if (source == NULL) {
+                    continue;
+                }
+
+                int64_t cacheDurationUs;
+                if (!source->getCacheDurationUs(&cacheDurationUs)) {
+                    continue;
+                }
+
+                if (cacheDurationUs >= kMaxCacheDurationUs) {
+                    continue;
+                }
+
+                if (minIndex < 0 || cacheDurationUs < minCacheDurationUs) {
+                    minCacheDurationUs = cacheDurationUs;
+                    minIndex = i;
+                    minSource = source;
+                }
+            }
+
+            if (minIndex < 0) {
                 continue;
             }
-
-            int64_t cacheDurationUs;
-            if (!source->getCacheDurationUs(&cacheDurationUs)) {
-                continue;
-            }
-
-            if (cacheDurationUs >= kMaxCacheDurationUs) {
-                continue;
-            }
-
-            if (minIndex < 0 || cacheDurationUs < minCacheDurationUs) {
-                minCacheDurationUs = cacheDurationUs;
-                minIndex = i;
-            }
         }
 
-        if (minIndex < 0) {
-            continue;
-        }
-
-        sp<PrefetchedSource> source = mSources[minIndex].promote();
-        if (source != NULL) {
-            source->cacheMore();
-        }
+        // Make sure not to hold the lock while calling into the source.
+        // The lock guards the list of sources, not the individual sources
+        // themselves.
+        minSource->cacheMore();
     }
 
+    Mutex::Autolock autoLock(mLock);
     for (size_t i = 0; i < mSources.size(); ++i) {
         sp<PrefetchedSource> source = mSources[i].promote();
 
