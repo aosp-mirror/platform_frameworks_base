@@ -52,7 +52,6 @@ public class SoundPoolTest extends Activity
         R.raw.test5
     };
 
-    private final static int MAX_STREAMS = 1;
     private final static float SEMITONE = 1.059463094f;
     private final static float DEFAULT_VOLUME = 0.707f;
     private final static float MAX_VOLUME = 1.0f;
@@ -70,6 +69,7 @@ public class SoundPoolTest extends Activity
         private boolean mRunning;
         private SoundPool mSoundPool = null;
         private int mLastSample;
+        private int mMaxStreams;
         private int mLoadStatus;
         private int[] mSounds;
         private float mScale[];
@@ -101,17 +101,18 @@ public class SoundPoolTest extends Activity
             return id;
         }
 
-        private int initSoundPool() throws java.lang.InterruptedException {
+        private int initSoundPool(int numStreams) throws java.lang.InterruptedException {
 
             if (mSoundPool != null) {
-                if (mLoadStatus == 0) return mLoadStatus;
+                if ((mMaxStreams == numStreams) && (mLoadStatus == 0)) return mLoadStatus;
                 mSoundPool.release();
                 mSoundPool = null;
             }
 
             // create sound pool
             mLoadStatus = 0;
-            mSoundPool = new SoundPool(MAX_STREAMS, AudioSystem.STREAM_MUSIC, 0);
+            mMaxStreams = numStreams;
+            mSoundPool = new SoundPool(numStreams, AudioSystem.STREAM_MUSIC, 0);
             mSoundPool.setOnLoadCompleteListener(new LoadCompleteCallback());
             int numSounds = mTestFiles.length;
             mSounds = new int[numSounds];
@@ -262,6 +263,31 @@ public class SoundPoolTest extends Activity
 
             mSoundPool.stop(id);
 
+            // play 5 sounds, forces one to be stolen
+            int ids[] = new int[5];
+            for (int i = 0; i < 5; i++) {
+                ids[i] = mSoundPool.play(mSounds[0], DEFAULT_VOLUME, DEFAULT_VOLUME,
+                        NORMAL_PRIORITY, DEFAULT_LOOP, mScale[i]);
+                if (DEBUG) Log.d(LOG_TAG, "Start note " + ids[i]);
+                if (ids[i] == 0) {
+                    Log.e(LOG_TAG, "Error occurred starting note");
+                    return false;
+                }
+                sleep(250);
+            }
+
+            // pause and resume sound a few times
+            for (int count = 0; count < 5; count++) {
+                mSoundPool.autoPause();
+                sleep(250);
+                mSoundPool.autoResume();
+                sleep(250);
+            }
+
+            for (int i = 0; i < 5; i++) {
+                mSoundPool.stop(ids[i]);
+            }
+
             if (DEBUG) Log.d(LOG_TAG, "End pause/resume test");
             return result;
         }
@@ -309,16 +335,17 @@ public class SoundPoolTest extends Activity
 
             try {
 
-                // load sound pool
-                initSoundPool();
-
-                // do tests
+                // do single stream tests
+                initSoundPool(1);
                 if (!TestSounds()) failures = failures + 1;
                 if (!TestScales()) failures = failures + 1;
                 if (!TestRates()) failures = failures + 1;
                 if (!TestPriority()) failures = failures + 1;
-                if (!TestPauseResume()) failures = failures + 1;
                 if (!TestVolume()) failures = failures + 1;
+
+                // do multiple stream tests
+                initSoundPool(4);
+                if (!TestPauseResume()) failures = failures + 1;
 
             } catch (java.lang.InterruptedException e) {
                 if (DEBUG) Log.d(LOG_TAG, "Test interrupted");

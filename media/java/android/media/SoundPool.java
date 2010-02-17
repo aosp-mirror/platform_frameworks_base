@@ -321,6 +321,28 @@ public class SoundPool
     public native final void resume(int streamID);
 
     /**
+     * Pause all active streams.
+     *
+     * Pause all streams that are currently playing. This function
+     * iterates through all the active streams and pauses any that
+     * are playing. It also sets a flag so that any streams that
+     * are playing can be resumed by calling autoResume().
+     *
+     * @hide
+     */
+    public native final void autoPause();
+
+    /**
+     * Resume all previously active streams.
+     *
+     * Automatically resumes all streams that were paused in previous
+     * calls to autoPause().
+     *
+     * @hide
+     */
+    public native final void autoResume();
+
+    /**
      * Stop a playback stream.
      *
      * Stop the stream specified by the streamID. This
