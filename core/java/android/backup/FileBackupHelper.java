@@ -23,7 +23,9 @@ import android.util.Log;
 import java.io.File;
 import java.io.FileDescriptor;
 
-/** @hide */
+/**
+ * STOPSHIP: document!  [manages backup of a set of files; restore is totally opaque]
+ */
 public class FileBackupHelper extends FileBackupHelperBase implements BackupHelper {
     private static final String TAG = "FileBackupHelper";
     private static final boolean DEBUG = false;
@@ -32,6 +34,13 @@ public class FileBackupHelper extends FileBackupHelperBase implements BackupHelp
     File mFilesDir;
     String[] mFiles;
 
+    /**
+     * Construct a helper to manage backup/restore of entire files within the
+     * application's data directory hierarchy.
+     *
+     * @param context The backup agent's Context object
+     * @param files A list of the files to be backed up or restored.
+     */
     public FileBackupHelper(Context context, String... files) {
         super(context);
 
@@ -60,6 +69,9 @@ public class FileBackupHelper extends FileBackupHelperBase implements BackupHelp
         performBackup_checked(oldState, data, newState, fullPaths, files);
     }
 
+    /**
+     * Restore one record [representing a single file] from the restore dataset.
+     */
     public void restoreEntity(BackupDataInputStream data) {
         if (DEBUG) Log.d(TAG, "got entity '" + data.getKey() + "' size=" + data.size());
         String key = data.getKey();

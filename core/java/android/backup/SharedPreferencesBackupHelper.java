@@ -23,7 +23,9 @@ import android.util.Log;
 import java.io.File;
 import java.io.FileDescriptor;
 
-/** @hide */
+/**
+ * STOPSHIP: document!
+ */
 public class SharedPreferencesBackupHelper extends FileBackupHelperBase implements BackupHelper {
     private static final String TAG = "SharedPreferencesBackupHelper";
     private static final boolean DEBUG = false;
@@ -31,6 +33,13 @@ public class SharedPreferencesBackupHelper extends FileBackupHelperBase implemen
     private Context mContext;
     private String[] mPrefGroups;
 
+    /**
+     * Construct a helper for backing up and restoring the
+     * {@link android.content.SharedPreferences} under the given names.
+     *
+     * @param context
+     * @param prefGroups
+     */
     public SharedPreferencesBackupHelper(Context context, String... prefGroups) {
         super(context);
 
@@ -38,6 +47,9 @@ public class SharedPreferencesBackupHelper extends FileBackupHelperBase implemen
         mPrefGroups = prefGroups;
     }
 
+    /**
+     * Backs up the configured SharedPreferences groups
+     */
     public void performBackup(ParcelFileDescriptor oldState, BackupDataOutput data,
             ParcelFileDescriptor newState) {
         Context context = mContext;
@@ -54,6 +66,10 @@ public class SharedPreferencesBackupHelper extends FileBackupHelperBase implemen
         performBackup_checked(oldState, data, newState, files, prefGroups);
     }
 
+    /**
+     * Restores one entity from the restore data stream to its proper shared
+     * preferences file store.
+     */
     public void restoreEntity(BackupDataInputStream data) {
         Context context = mContext;
         

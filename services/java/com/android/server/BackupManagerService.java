@@ -1083,15 +1083,11 @@ class BackupManagerService extends IBackupManager.Stub {
 
         synchronized(mClearDataLock) {
             mClearingData = true;
-            /* This is causing some critical processes to be killed during setup.
-               Temporarily revert this change until we find a better solution.
             try {
                 mActivityManager.clearApplicationUserData(packageName, observer);
             } catch (RemoteException e) {
                 // can't happen because the activity manager is in this process
             }
-            */
-            mPackageManager.clearApplicationUserData(packageName, observer);
 
             // only wait 10 seconds for the clear data to happen
             long timeoutMark = System.currentTimeMillis() + TIMEOUT_INTERVAL;
@@ -1659,10 +1655,6 @@ class BackupManagerService extends IBackupManager.Stub {
                             + " restore version [" + metaInfo.versionCode
                             + "] is compatible with installed version ["
                             + packageInfo.versionCode + "]");
-
-                    // Now perform the actual restore:  first clear the app's data
-                    // if appropriate
-                    clearApplicationDataSynchronous(packageName);
 
                     // Then set up and bind the agent (with a restricted Application object
                     // unless the application says otherwise)

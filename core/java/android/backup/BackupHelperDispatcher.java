@@ -138,7 +138,7 @@ public class BackupHelperDispatcher {
 
         // Write out the state files -- mHelpers is a TreeMap, so the order is well defined.
         for (BackupHelper helper: mHelpers.values()) {
-            helper.writeRestoreSnapshot(newState);
+            helper.writeNewStateDescription(newState);
         }
     }
 

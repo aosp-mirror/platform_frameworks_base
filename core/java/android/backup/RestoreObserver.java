@@ -19,7 +19,6 @@ package android.backup;
 /**
  * Callback class for receiving progress reports during a restore operation.  These
  * methods will all be called on your application's main thread.
- * @hide
  */
 public abstract class RestoreObserver {
     /**
