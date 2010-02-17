@@ -17,13 +17,16 @@
 package android.media;
 
 import android.content.ContentValues;
-import android.os.SystemProperties;
 import android.provider.MediaStore.Audio;
 import android.provider.MediaStore.Images;
 import android.provider.MediaStore.Video;
+import android.media.DecoderCapabilities;
+import android.media.DecoderCapabilities.VideoDecoder;
+import android.media.DecoderCapabilities.AudioDecoder;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * MediaScanner helper class.
@@ -98,13 +101,34 @@ public class MediaFile {
         sFileTypeMap.put(extension, new MediaFileType(fileType, mimeType));
         sMimeTypeMap.put(mimeType, Integer.valueOf(fileType));
     }
+
+    private static boolean isWMAEnabled() {
+        List<AudioDecoder> decoders = DecoderCapabilities.getAudioDecoders();
+        for (AudioDecoder decoder: decoders) {
+            if (decoder == AudioDecoder.AUDIO_DECODER_WMA) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean isWMVEnabled() {
+        List<VideoDecoder> decoders = DecoderCapabilities.getVideoDecoders();
+        for (VideoDecoder decoder: decoders) {
+            if (decoder == VideoDecoder.VIDEO_DECODER_WMV) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     static {
         addFileType("MP3", FILE_TYPE_MP3, "audio/mpeg");
         addFileType("M4A", FILE_TYPE_M4A, "audio/mp4");
         addFileType("WAV", FILE_TYPE_WAV, "audio/x-wav");
         addFileType("AMR", FILE_TYPE_AMR, "audio/amr");
         addFileType("AWB", FILE_TYPE_AWB, "audio/amr-wb");
-        if (SystemProperties.getInt("ro.media.dec.aud.wma.enabled", 0) != 0) {
+        if (isWMAEnabled()) {
             addFileType("WMA", FILE_TYPE_WMA, "audio/x-ms-wma");
         }
         addFileType("OGG", FILE_TYPE_OGG, "application/ogg");
@@ -127,7 +151,7 @@ public class MediaFile {
         addFileType("3GPP", FILE_TYPE_3GPP, "video/3gpp");
         addFileType("3G2", FILE_TYPE_3GPP2, "video/3gpp2");
         addFileType("3GPP2", FILE_TYPE_3GPP2, "video/3gpp2");
-        if (SystemProperties.getInt("ro.media.dec.vid.wmv.enabled", 0) != 0) {
+        if (isWMVEnabled()) {
             addFileType("WMV", FILE_TYPE_WMV, "video/x-ms-wmv");
             addFileType("ASF", FILE_TYPE_ASF, "video/x-ms-asf");
         }
