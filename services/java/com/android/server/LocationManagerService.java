@@ -71,6 +71,7 @@ import com.android.internal.location.GpsLocationProvider;
 import com.android.internal.location.GpsNetInitiatedHandler;
 import com.android.internal.location.LocationProviderProxy;
 import com.android.internal.location.MockProvider;
+import com.android.internal.location.PassiveProvider;
 
 /**
  * The service class that manages LocationProviders and issues location
@@ -452,6 +453,11 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             mGpsLocationProvider = gpsProvider;
         }
 
+        // create a passive location provider, which is always enabled
+        PassiveProvider passiveProvider = new PassiveProvider(this);
+        addProvider(passiveProvider);
+        mEnabledProviders.add(passiveProvider.getName());
+
         // initialize external network location and geocoder services
         Resources resources = mContext.getResources();
         String serviceName = resources.getString(
@@ -538,7 +544,8 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
     }
 
     private void checkPermissionsSafe(String provider) {
-        if (LocationManager.GPS_PROVIDER.equals(provider)
+        if ((LocationManager.GPS_PROVIDER.equals(provider)
+                 || LocationManager.PASSIVE_PROVIDER.equals(provider))
             && (mContext.checkCallingOrSelfPermission(ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED)) {
             throw new SecurityException("Requires ACCESS_FINE_LOCATION permission");
@@ -1343,7 +1350,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         }
     }
 
-    public void reportLocation(Location location) {
+    public void reportLocation(Location location, boolean passive) {
         if (mContext.checkCallingOrSelfPermission(INSTALL_LOCATION_PROVIDER)
                 != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Requires INSTALL_LOCATION_PROVIDER permission");
@@ -1351,6 +1358,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
 
         mLocationHandler.removeMessages(MESSAGE_LOCATION_CHANGED, location);
         Message m = Message.obtain(mLocationHandler, MESSAGE_LOCATION_CHANGED, location);
+        m.arg1 = (passive ? 1 : 0);
         mLocationHandler.sendMessageAtFrontOfQueue(m);
     }
 
@@ -1415,8 +1423,8 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         return true;
     }
 
-    private void handleLocationChangedLocked(Location location) {
-        String provider = location.getProvider();
+    private void handleLocationChangedLocked(Location location, boolean passive) {
+        String provider = (passive ? LocationManager.PASSIVE_PROVIDER : location.getProvider());
         ArrayList<UpdateRecord> records = mRecordsByProvider.get(provider);
         if (records == null || records.size() == 0) {
             return;
@@ -1502,17 +1510,20 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
                     synchronized (mLock) {
                         Location location = (Location) msg.obj;
                         String provider = location.getProvider();
+                        boolean passive = (msg.arg1 == 1);
 
-                        // notify other providers of the new location
-                        for (int i = mProviders.size() - 1; i >= 0; i--) {
-                            LocationProviderInterface p = mProviders.get(i);
-                            if (!provider.equals(p.getName())) {
-                                p.updateLocation(location);
+                        if (!passive) {
+                            // notify other providers of the new location
+                            for (int i = mProviders.size() - 1; i >= 0; i--) {
+                                LocationProviderInterface p = mProviders.get(i);
+                                if (!provider.equals(p.getName())) {
+                                    p.updateLocation(location);
+                                }
                             }
                         }
 
                         if (isAllowedBySettingsLocked(provider)) {
-                            handleLocationChangedLocked(location);
+                            handleLocationChangedLocked(location, passive);
                         }
                     }
                 }
@@ -1686,6 +1697,10 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         boolean requiresCell, boolean hasMonetaryCost, boolean supportsAltitude,
         boolean supportsSpeed, boolean supportsBearing, int powerRequirement, int accuracy) {
         checkMockPermissionsSafe();
+
+        if (LocationManager.PASSIVE_PROVIDER.equals(name)) {
+            throw new IllegalArgumentException("Cannot mock the passive location provider");
+        }
 
         long identity = Binder.clearCallingIdentity();
         synchronized (mLock) {

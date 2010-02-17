@@ -59,8 +59,10 @@ interface ILocationManager
 
     Location getLastKnownLocation(String provider);
 
-    /* used by location providers to tell the location manager when it has a new location */
-    void reportLocation(in Location location);
+    // Used by location providers to tell the location manager when it has a new location.
+    // Passive is true if the location is coming from the passive provider, in which case
+    // it need not be shared with other providers.
+    void reportLocation(in Location location, boolean passive);
 
     String getFromLocation(double latitude, double longitude, int maxResults,
         in GeocoderParams params, out List<Address> addrs);
