@@ -1252,6 +1252,10 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+        <activity android:name="com.android.internal.app.DisableCarModeActivity"
+                android:theme="@style/Theme.NoDisplay"
+                android:excludeFromRecents="true">
+        </activity>
         <activity android:name="com.android.internal.app.RingtonePickerActivity"
                 android:theme="@style/Theme.Dialog.Alert"
                 android:excludeFromRecents="true"

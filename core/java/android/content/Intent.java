@@ -1815,11 +1815,18 @@ public class Intent implements Parcelable, Cloneable {
 
     /**
      * Broadcast Action:  A sticky broadcast indicating the phone was docked
-     * or undocked.  Includes the extra
-     * field {@link #EXTRA_DOCK_STATE}, containing the current dock state. It also
-     * includes the boolean extra field {@link #EXTRA_CAR_MODE_ENABLED}, indicating
-     * the state of the car mode.
-     * This is intended for monitoring the current dock state.
+     * or undocked.
+     *
+     * <p>The intent will have the following extra values:
+     * <ul>
+     *   <li><em>{@link #EXTRA_DOCK_STATE}</em> - the current dock
+     *       state, which depends on the state of the car mode.</li>
+     *   <li><em>{@link #EXTRA_PHYSICAL_DOCK_STATE}</em> - the physical dock
+     *       state.</li>
+     *   <li><em>{@link #EXTRA_CAR_MODE_ENABLED}</em> - a boolean indicating the
+     *       state of the car mode.</li>
+     * </ul>
+     * <p>This is intended for monitoring the current dock state.
      * To launch an activity from a dock state change, use {@link #CATEGORY_CAR_DOCK}
      * or {@link #CATEGORY_DESK_DOCK} instead.
      */
@@ -2152,6 +2159,16 @@ public class Intent implements Parcelable, Cloneable {
      * to represent that the phone is in a car dock.
      */
     public static final int EXTRA_DOCK_STATE_CAR = 2;
+
+    /**
+     * Used as an int extra field in {@link android.content.Intent#ACTION_DOCK_EVENT}
+     * intents to request the physical dock state. Possible values are
+     * {@link android.content.Intent#EXTRA_DOCK_STATE_UNDOCKED},
+     * {@link android.content.Intent#EXTRA_DOCK_STATE_DESK}, or
+     * {@link android.content.Intent#EXTRA_DOCK_STATE_CAR}.
+     */
+    public static final String EXTRA_PHYSICAL_DOCK_STATE =
+            "android.intent.extra.PHYSICAL_DOCK_STATE";
 
     /**
      * Used as an boolean extra field in {@link android.content.Intent#ACTION_DOCK_EVENT}
