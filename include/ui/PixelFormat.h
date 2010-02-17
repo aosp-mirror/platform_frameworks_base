@@ -90,7 +90,8 @@ struct PixelFormatInfo
         RGB                 = 2,
         RGBA                = 3,
         LUMINANCE           = 4,
-        LUMINANCE_ALPHA     = 5
+        LUMINANCE_ALPHA     = 5,
+        OTHER               = 0xFF
     };
 
     struct szinfo {

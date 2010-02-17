@@ -16,14 +16,17 @@
 
 #include <ui/PixelFormat.h>
 #include <pixelflinger/format.h>
+#include <hardware/hardware.h>
 
 namespace android {
+
+static const int COMPONENT_YUV = 0xFF;
 
 size_t PixelFormatInfo::getScanlineSize(unsigned int width) const
 {
     size_t size;
-    if ((components >= 6) && (components <= 8)) {
-        // YCbCr formats are differents.
+    if (components == COMPONENT_YUV) {
+        // YCbCr formats are different.
         size = (width * bitsPerPixel)>>3;
     } else {
         size = width * bytesPerPixel;
@@ -53,14 +56,42 @@ status_t getPixelFormatInfo(PixelFormat format, PixelFormatInfo* info)
     if (info->version != sizeof(PixelFormatInfo))
         return INVALID_OPERATION;
 
+    // YUV format from the HAL are handled here
+    switch (format) {
+    case HAL_PIXEL_FORMAT_YCbCr_422_SP:
+    case HAL_PIXEL_FORMAT_YCrCb_422_SP:
+    case HAL_PIXEL_FORMAT_YCbCr_422_P:
+    case HAL_PIXEL_FORMAT_YCbCr_422_I:
+    case HAL_PIXEL_FORMAT_CbYCrY_422_I:
+        info->bitsPerPixel = 16;
+        goto done;
+    case HAL_PIXEL_FORMAT_YCbCr_420_SP:
+    case HAL_PIXEL_FORMAT_YCrCb_420_SP:
+    case HAL_PIXEL_FORMAT_YCbCr_420_SP_TILED:
+    case HAL_PIXEL_FORMAT_YCrCb_420_SP_TILED:
+    case HAL_PIXEL_FORMAT_YCbCr_420_P:
+    case HAL_PIXEL_FORMAT_YCbCr_420_I:
+    case HAL_PIXEL_FORMAT_CbYCrY_420_I:
+        info->bitsPerPixel = 12;
+     done:
+        info->format = format;
+        info->components = COMPONENT_YUV;
+        info->bytesPerPixel = 1;
+        info->h_alpha = 0;
+        info->l_alpha = 0;
+        info->h_red = info->h_green = info->h_blue = 8;
+        info->l_red = info->l_green = info->l_blue = 0;
+        return NO_ERROR;
+    }
+
     size_t numEntries;
     const GGLFormat *i = gglGetPixelFormatTable(&numEntries) + format;
     bool valid = uint32_t(format) < numEntries;
     if (!valid) {
         return BAD_INDEX;
     }
-    
-    #define COMPONENT(name) \ 
+
+    #define COMPONENT(name) \
         case GGL_##name: info->components = PixelFormatInfo::name; break;
     
     switch (i->components) {
