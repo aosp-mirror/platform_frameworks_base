@@ -296,7 +296,7 @@ void SoundPool::pause(int channelID)
 
 void SoundPool::autoPause()
 {
-    LOGV("pauseAll()");
+    LOGV("autoPause()");
     Mutex::Autolock lock(&mLock);
     for (int i = 0; i < mMaxChannels; ++i) {
         SoundChannel* channel = &mChannelPool[i];
@@ -316,7 +316,7 @@ void SoundPool::resume(int channelID)
 
 void SoundPool::autoResume()
 {
-    LOGV("pauseAll()");
+    LOGV("autoResume()");
     Mutex::Autolock lock(&mLock);
     for (int i = 0; i < mMaxChannels; ++i) {
         SoundChannel* channel = &mChannelPool[i];
