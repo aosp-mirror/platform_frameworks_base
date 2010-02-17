@@ -2364,7 +2364,16 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     public void draw(Canvas canvas) {
         super.draw(canvas);
         if (mFastScroller != null) {
-            mFastScroller.draw(canvas);
+            final int scrollY = mScrollY;
+            if (scrollY != 0) {
+                // Pin the fast scroll thumb to the top/bottom during overscroll.
+                int restoreCount = canvas.save();
+                canvas.translate(0, (float) scrollY);
+                mFastScroller.draw(canvas);
+                canvas.restoreToCount(restoreCount);
+            } else {
+                mFastScroller.draw(canvas);
+            }
         }
     }
 
