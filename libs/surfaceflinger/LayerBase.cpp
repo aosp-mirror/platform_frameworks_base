@@ -509,6 +509,21 @@ void LayerBase::validateTexture(GLint textureName) const
     }
 }
 
+bool LayerBase::isSupportedYuvFormat(int format) const
+{
+    switch (format) {
+        case HAL_PIXEL_FORMAT_YCbCr_422_SP:
+        case HAL_PIXEL_FORMAT_YCbCr_420_SP:
+        case HAL_PIXEL_FORMAT_YCbCr_422_P:
+        case HAL_PIXEL_FORMAT_YCbCr_420_P:
+        case HAL_PIXEL_FORMAT_YCbCr_422_I:
+        case HAL_PIXEL_FORMAT_YCbCr_420_I:
+        case HAL_PIXEL_FORMAT_YCrCb_420_SP:
+            return true;
+    }
+    return false;
+}
+
 void LayerBase::loadTexture(Texture* texture, 
         const Region& dirty, const GGLSurface& t) const
 {
@@ -573,21 +588,20 @@ void LayerBase::loadTexture(Texture* texture,
             data = t.data;
         }
 
-        if (t.format == GGL_PIXEL_FORMAT_RGB_565) {
+        if (t.format == HAL_PIXEL_FORMAT_RGB_565) {
             glTexImage2D(GL_TEXTURE_2D, 0,
                     GL_RGB, texture->potWidth, texture->potHeight, 0,
                     GL_RGB, GL_UNSIGNED_SHORT_5_6_5, data);
-        } else if (t.format == GGL_PIXEL_FORMAT_RGBA_4444) {
+        } else if (t.format == HAL_PIXEL_FORMAT_RGBA_4444) {
             glTexImage2D(GL_TEXTURE_2D, 0,
                     GL_RGBA, texture->potWidth, texture->potHeight, 0,
                     GL_RGBA, GL_UNSIGNED_SHORT_4_4_4_4, data);
-        } else if (t.format == GGL_PIXEL_FORMAT_RGBA_8888 || 
-                   t.format == GGL_PIXEL_FORMAT_RGBX_8888) {
+        } else if (t.format == HAL_PIXEL_FORMAT_RGBA_8888 ||
+                   t.format == HAL_PIXEL_FORMAT_RGBX_8888) {
             glTexImage2D(GL_TEXTURE_2D, 0,
                     GL_RGBA, texture->potWidth, texture->potHeight, 0,
                     GL_RGBA, GL_UNSIGNED_BYTE, data);
-        } else if ( t.format == GGL_PIXEL_FORMAT_YCbCr_422_SP ||
-                    t.format == GGL_PIXEL_FORMAT_YCbCr_420_SP) {
+        } else if (isSupportedYuvFormat(t.format)) {
             // just show the Y plane of YUV buffers
             glTexImage2D(GL_TEXTURE_2D, 0,
                     GL_LUMINANCE, texture->potWidth, texture->potHeight, 0,
@@ -599,24 +613,23 @@ void LayerBase::loadTexture(Texture* texture,
         }
     }
     if (!data) {
-        if (t.format == GGL_PIXEL_FORMAT_RGB_565) {
+        if (t.format == HAL_PIXEL_FORMAT_RGB_565) {
             glTexSubImage2D(GL_TEXTURE_2D, 0,
                     0, bounds.top, t.width, bounds.height(),
                     GL_RGB, GL_UNSIGNED_SHORT_5_6_5,
                     t.data + bounds.top*t.stride*2);
-        } else if (t.format == GGL_PIXEL_FORMAT_RGBA_4444) {
+        } else if (t.format == HAL_PIXEL_FORMAT_RGBA_4444) {
             glTexSubImage2D(GL_TEXTURE_2D, 0,
                     0, bounds.top, t.width, bounds.height(),
                     GL_RGBA, GL_UNSIGNED_SHORT_4_4_4_4,
                     t.data + bounds.top*t.stride*2);
-        } else if (t.format == GGL_PIXEL_FORMAT_RGBA_8888 ||
-                   t.format == GGL_PIXEL_FORMAT_RGBX_8888) {
+        } else if (t.format == HAL_PIXEL_FORMAT_RGBA_8888 ||
+                   t.format == HAL_PIXEL_FORMAT_RGBX_8888) {
             glTexSubImage2D(GL_TEXTURE_2D, 0,
                     0, bounds.top, t.width, bounds.height(),
                     GL_RGBA, GL_UNSIGNED_BYTE,
                     t.data + bounds.top*t.stride*4);
-        } else if ( t.format == GGL_PIXEL_FORMAT_YCbCr_422_SP ||
-                    t.format == GGL_PIXEL_FORMAT_YCbCr_420_SP) {
+        } else if (isSupportedYuvFormat(t.format)) {
             // just show the Y plane of YUV buffers
             glTexSubImage2D(GL_TEXTURE_2D, 0,
                     0, bounds.top, t.width, bounds.height(),

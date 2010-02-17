@@ -29,6 +29,8 @@
 #include <surfaceflinger/ISurface.h>
 #include <ui/Overlay.h>
 
+#include <hardware/hardware.h>
+
 #include <media/mediaplayer.h>
 #include <media/AudioSystem.h>
 #include "CameraService.h"
@@ -606,7 +608,7 @@ status_t CameraService::Client::registerPreviewBuffers()
     params.getPreviewSize(&w, &h);
 
     ISurface::BufferHeap buffers(w, h, w, h,
-                                 PIXEL_FORMAT_YCbCr_420_SP,
+                                 HAL_PIXEL_FORMAT_YCbCr_420_SP,
                                  mOrientation,
                                  0,
                                  mHardware->getPreviewHeap());
@@ -927,7 +929,8 @@ void CameraService::Client::handleShutter(
             LOGV("Snapshot image width=%d, height=%d", w, h);
         }
         ISurface::BufferHeap buffers(w, h, w, h,
-            PIXEL_FORMAT_YCbCr_420_SP, mOrientation, 0, mHardware->getRawHeap());
+            HAL_PIXEL_FORMAT_YCbCr_420_SP, mOrientation, 0,
+            mHardware->getRawHeap());
 
         mSurface->registerBuffers(buffers);
     }

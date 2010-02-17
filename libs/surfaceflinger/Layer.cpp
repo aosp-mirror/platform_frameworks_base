@@ -185,20 +185,20 @@ void Layer::reloadTexture(const Region& dirty)
                 if (res == NO_ERROR) {
                     int bpp = 0;
                     switch (t.format) {
-                    case GGL_PIXEL_FORMAT_RGB_565:
-                    case GGL_PIXEL_FORMAT_RGBA_4444:
+                    case HAL_PIXEL_FORMAT_RGB_565:
+                    case HAL_PIXEL_FORMAT_RGBA_4444:
                         bpp = 2;
                         break;
-                    case GGL_PIXEL_FORMAT_RGBA_8888:
-                    case GGL_PIXEL_FORMAT_RGBX_8888:
+                    case HAL_PIXEL_FORMAT_RGBA_8888:
+                    case HAL_PIXEL_FORMAT_RGBX_8888:
                         bpp = 4;
                         break;
-                    case GGL_PIXEL_FORMAT_YCbCr_422_SP:
-                    case GGL_PIXEL_FORMAT_YCbCr_420_SP:
-                        // just show the Y plane of YUV buffers
-                        bpp = 1;
-                        break;
                     default:
+                        if (isSupportedYuvFormat(t.format)) {
+                            // just show the Y plane of YUV buffers
+                            bpp = 1;
+                            break;
+                        }
                         // oops, we don't handle this format!
                         LOGE("layer %p, texture=%d, using format %d, which is not "
                                 "supported by the GL", this, texture->name, t.format);
