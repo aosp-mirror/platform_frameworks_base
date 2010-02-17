@@ -214,39 +214,29 @@ public class FileFilter {
         ignoreResultList.add("fast/loader/opaque-base-url.html");
         ignoreResultList.add("fast/text/plain-text-line-breaks.html");
     }
-    
+
     static void fillBugTable() {
-        bugList.put("fast/forms/check-box-enter-key.html", "716715");
         bugList.put("fast/forms/focus-control-to-page.html", "716638");
         bugList.put("fast/html/tab-order.html", "719289");
         bugList.put("fast/dom/attribute-namespaces-get-set.html", "733229");
-        bugList.put("fast/dom/location-hash.html", "733822");
         bugList.put("fast/dom/set-innerHTML.html", "733823");
         bugList.put("fast/dom/xmlhttprequest-get.html", "733846");
         bugList.put("fast/encoding/css-charset-default.html", "733856");
         bugList.put("fast/encoding/default-xhtml-encoding.html", "733882");
         bugList.put("fast/encoding/meta-in-xhtml.html", "733882");
         bugList.put("fast/events/frame-tab-focus.html", "734308");
-        bugList.put("fast/events/keydown-keypress-focus-change.html", "653224");
-        bugList.put("fast/events/keypress-focus-change.html", "653224");
         bugList.put("fast/events/option-tab.html", "734308");
         bugList.put("fast/forms/focus2.html", "735111");
         bugList.put("fast/forms/listbox-selection.html", "735116");
         bugList.put("fast/forms/search-event-delay.html", "735120");
         bugList.put("fast/frames/iframe-window-focus.html", "735140");
         bugList.put("fast/innerHTML/004.html", "733882");
-        bugList.put("fast/js/date-DST-time-cusps.html", "735144");
         bugList.put("fast/js/string-capitalization.html", "516936");
         bugList.put("fast/js/string-concatenate-outofmemory.html","735152");
         bugList.put("fast/parser/external-entities.html", "735176");
-        bugList.put("fast/events/div-focus.html", "735185");
         bugList.put("fast/overflow/scroll-vertical-not-horizontal.html", "735196");
         bugList.put("fast/events/arrow-navigation.html", "735233");
         bugList.put("fast/forms/select-type-ahead-non-latin.html", "735244");
-        bugList.put("fast/events/js-keyboard-event-creation.html", "735255");
-        
     }
-    
-    
-    
+
 }
