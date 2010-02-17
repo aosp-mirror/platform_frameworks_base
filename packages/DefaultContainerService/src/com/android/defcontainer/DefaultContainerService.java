@@ -9,18 +9,14 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.Package;
 import android.net.Uri;
-import android.os.Debug;
 import android.os.Environment;
 import android.os.IBinder;
-import android.os.storage.IMountService;
-import android.os.storage.StorageResultCode;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.StatFs;
 import android.app.IntentService;
-import android.app.Service;
 import android.util.DisplayMetrics;
 import android.util.Log;
 
@@ -30,7 +26,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 
 import android.os.FileUtils;
 import android.provider.Settings;
@@ -51,7 +46,7 @@ public class DefaultContainerService extends IntentService {
          * Creates a new container and copies resource there.
          * @param paackageURI the uri of resource to be copied. Can be either
          * a content uri or a file uri
-         * @param containerId the id of the secure container that should
+         * @param cid the id of the secure container that should
          * be used for creating a secure container into which the resource
          * will be copied.
          * @param key Refers to key used for encrypting the secure container
@@ -61,12 +56,12 @@ public class DefaultContainerService extends IntentService {
          *
          */
         public String copyResourceToContainer(final Uri packageURI,
-                final String containerId,
+                final String cid,
                 final String key, final String resFileName) {
-            if (packageURI == null || containerId == null) {
+            if (packageURI == null || cid == null) {
                 return null;
             }
-            return copyResourceInner(packageURI, containerId, key, resFileName);
+            return copyResourceInner(packageURI, cid, key, resFileName);
         }
 
         /*
@@ -162,13 +157,10 @@ public class DefaultContainerService extends IntentService {
         return mBinder;
     }
 
-    private IMountService getMountService() {
-        return IMountService.Stub.asInterface(ServiceManager.getService("mount"));
-    }
-
-    private String copyResourceInner(Uri packageURI, String newCacheId, String key, String resFileName) {
+    private String copyResourceInner(Uri packageURI, String newCid, String key, String resFileName) {
         // Create new container at newCachePath
         String codePath = packageURI.getPath();
+        File codeFile = new File(codePath);
         String newCachePath = null;
         final int CREATE_FAILED = 1;
         final int COPY_FAILED = 2;
@@ -176,8 +168,9 @@ public class DefaultContainerService extends IntentService {
         final int PASS = 4;
         int errCode = CREATE_FAILED;
         // Create new container
-        if ((newCachePath = createSdDir(packageURI, newCacheId, key)) != null) {
-            if (localLOGV) Log.i(TAG, "Created container for " + newCacheId
+        if ((newCachePath = PackageHelper.createSdDir(codeFile,
+                newCid, key, Process.myUid())) != null) {
+            if (localLOGV) Log.i(TAG, "Created container for " + newCid
                     + " at path : " + newCachePath);
             File resFile = new File(newCachePath, resFileName);
             errCode = COPY_FAILED;
@@ -185,7 +178,8 @@ public class DefaultContainerService extends IntentService {
             if (FileUtils.copyFile(new File(codePath), resFile)) {
                 if (localLOGV) Log.i(TAG, "Copied " + codePath + " to " + resFile);
                 errCode = FINALIZE_FAILED;
-                if (finalizeSdDir(newCacheId)) {
+                if (PackageHelper.finalizeSdDir(newCid)) {
+                    if (localLOGV) Log.i(TAG, "Finalized container " + newCid);
                     errCode = PASS;
                 }
             }
@@ -198,123 +192,31 @@ public class DefaultContainerService extends IntentService {
                 break;
             case COPY_FAILED:
                 errMsg = "COPY_FAILED";
-                if (localLOGV) Log.i(TAG, "Destroying " + newCacheId +
+                if (localLOGV) Log.i(TAG, "Destroying " + newCid +
                         " at path " + newCachePath + " after " + errMsg);
-                destroySdDir(newCacheId);
+                PackageHelper.destroySdDir(newCid);
                 break;
             case FINALIZE_FAILED:
                 errMsg = "FINALIZE_FAILED";
-                if (localLOGV) Log.i(TAG, "Destroying " + newCacheId +
+                if (localLOGV) Log.i(TAG, "Destroying " + newCid +
                         " at path " + newCachePath + " after " + errMsg);
-                destroySdDir(newCacheId);
+                PackageHelper.destroySdDir(newCid);
                 break;
             default:
                 errMsg = "PASS";
-            if (localLOGV) Log.i(TAG, "Unmounting " + newCacheId +
-                    " at path " + newCachePath + " after " + errMsg);
-                unMountSdDir(newCacheId);
+                if (PackageHelper.isContainerMounted(newCid)) {
+                    if (localLOGV) Log.i(TAG, "Unmounting " + newCid +
+                            " at path " + newCachePath + " after " + errMsg);
+                    PackageHelper.unMountSdDir(newCid);
+                } else {
+                    if (localLOGV) Log.i(TAG, "Container " + newCid + " not mounted");
+                }
                 break;
         }
         if (errCode != PASS) {
             return null;
         }
         return newCachePath;
-    }
-
-    private String createSdDir(final Uri packageURI,
-            String containerId, String sdEncKey) {
-        File tmpPackageFile = new File(packageURI.getPath());
-        // Create mount point via MountService
-        IMountService mountService = getMountService();
-        long len = tmpPackageFile.length();
-        int mbLen = (int) (len/(1024*1024));
-        if ((len - (mbLen * 1024 * 1024)) > 0) {
-            mbLen++;
-        }
-        if (localLOGV) Log.i(TAG, "mbLen=" + mbLen);
-        String cachePath = null;
-        int ownerUid = Process.myUid();
-        try {
-            int rc = mountService.createSecureContainer(
-                    containerId, mbLen, "vfat", sdEncKey, ownerUid);
-
-            if (rc != StorageResultCode.OperationSucceeded) {
-                Log.e(TAG, String.format("Container creation failed (%d)", rc));
-
-                // XXX: This destroy should not be necessary
-                rc = mountService.destroySecureContainer(containerId);
-                if (rc != StorageResultCode.OperationSucceeded) {
-                    Log.e(TAG, String.format("Container creation-cleanup failed (%d)", rc));
-                    return null;
-                }
-
-                // XXX: Does this ever actually succeed?
-                rc = mountService.createSecureContainer(
-                        containerId, mbLen, "vfat", sdEncKey, ownerUid);
-                if (rc != StorageResultCode.OperationSucceeded) {
-                    Log.e(TAG, String.format("Container creation retry failed (%d)", rc));
-                }
-            }
-
-            cachePath = mountService.getSecureContainerPath(containerId);
-            if (localLOGV) Log.i(TAG, "Trying to create secure container for  "
-                    + containerId + ", cachePath =" + cachePath);
-            return cachePath;
-        } catch(RemoteException e) {
-            Log.e(TAG, "MountService not running?");
-            return null;
-        }
-    }
-
-    private boolean destroySdDir(String containerId) {
-        try {
-            // We need to destroy right away
-            getMountService().destroySecureContainer(containerId);
-            return true;
-        } catch (IllegalStateException e) {
-            Log.i(TAG, "Failed to destroy container : " + containerId);
-        } catch(RemoteException e) {
-            Log.e(TAG, "MountService not running?");
-        }
-        return false;
-    }
-
-    private boolean finalizeSdDir(String containerId){
-        try {
-            getMountService().finalizeSecureContainer(containerId);
-            return true;
-        } catch (IllegalStateException e) {
-            Log.i(TAG, "Failed to finalize container for pkg : " + containerId);
-        } catch(RemoteException e) {
-            Log.e(TAG, "MountService not running?");
-        }
-        return false;
-    }
-
-    private boolean unMountSdDir(String containerId) {
-        try {
-            getMountService().unmountSecureContainer(containerId);
-            return true;
-        } catch (IllegalStateException e) {
-            Log.e(TAG, "Failed to unmount id:  " + containerId + " with exception " + e);
-        } catch(RemoteException e) {
-            Log.e(TAG, "MountService not running?");
-        }
-        return false;
-    }
-
-    private String mountSdDir(String containerId, String key) {
-        try {
-            int rc = getMountService().mountSecureContainer(containerId, key, Process.myUid());
-            if (rc == StorageResultCode.OperationSucceeded) {
-                return getMountService().getSecureContainerPath(containerId);
-            } else {
-                Log.e(TAG, String.format("Failed to mount id %s with rc %d ", containerId, rc));
-            }
-        } catch(RemoteException e) {
-            Log.e(TAG, "MountService not running?");
-        }
-        return null;
     }
 
     public static boolean copyToFile(InputStream inputStream, FileOutputStream out) {
@@ -483,5 +385,4 @@ public class DefaultContainerService extends IntentService {
         // Return error code
         return ERR_LOC;
     }
-
 }
