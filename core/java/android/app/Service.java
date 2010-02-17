@@ -56,6 +56,8 @@ import java.io.PrintWriter;
  * <li><a href="#ServiceLifecycle">Service Lifecycle</a>
  * <li><a href="#Permissions">Permissions</a>
  * <li><a href="#ProcessLifecycle">Process Lifecycle</a>
+ * <li><a href="#LocalServiceSample">Local Service Sample</a>
+ * <li><a href="#RemoteMessengerServiceSample">Remote Messenger Service Sample</a>
  * </ol>
  * 
  * <a name="ServiceLifecycle"></a>
@@ -166,6 +168,64 @@ import java.io.PrintWriter;
  * (such as an {@link android.app.Activity}) can, of course, increase the
  * importance of the overall
  * process beyond just the importance of the service itself.
+ * 
+ * <a name="LocalServiceSample"></a>
+ * <h3>Local Service Sample</h3>
+ * 
+ * <p>One of the most common uses of a Service is as a secondary component
+ * running alongside other parts of an application, in the same process as
+ * the rest of the components.  All components of an .apk run in the same
+ * process unless explicitly stated otherwise, so this is a typical situation.
+ * 
+ * <p>When used in this way, by assuming the
+ * components are in the same process, you can greatly simplify the interaction
+ * between them: clients of the service can simply cast the IBinder they
+ * receive from it to a concrete class published by the service.
+ * 
+ * <p>An example of this use of a Service is shown here.  First is the Service
+ * itself, publishing a custom class when bound:
+ * 
+ * {@sample development/samples/ApiDemos/src/com/example/android/apis/app/LocalService.java
+ *      service}
+ * 
+ * <p>With that done, one can now write client code that directly accesses the
+ * running service, such as:
+ * 
+ * {@sample development/samples/ApiDemos/src/com/example/android/apis/app/LocalServiceActivities.java
+ *      bind}
+ * 
+ * <a name="RemoteMessengerServiceSample"></a>
+ * <h3>Remote Messenger Service Sample</h3>
+ * 
+ * <p>If you need to be able to write a Service that can perform complicated
+ * communication with clients in remote processes (beyond simply the use of
+ * {@link Context#startService(Intent) Context.startService} to send
+ * commands to it), then you can use the {@link android.os.Messenger} class
+ * instead of writing full AIDL files.
+ * 
+ * <p>An example of a Service that uses Messenger as its client interface
+ * is shown here.  First is the Service itself, publishing a Messenger to
+ * an internal Handler when bound:
+ * 
+ * {@sample development/samples/ApiDemos/src/com/example/android/apis/app/MessengerService.java
+ *      service}
+ * 
+ * <p>If we want to make this service run in a remote process (instead of the
+ * standard one for its .apk), we can use <code>android:process</code> in its
+ * manifest tag to specify one:
+ * 
+ * {@sample development/samples/ApiDemos/AndroidManifest.xml remote_service_declaration}
+ * 
+ * <p>Note that the name "remote" chosen here is arbitrary, and you can use
+ * other names if you want additional processes.  The ':' prefix appends the
+ * name to your package's standard process name.
+ * 
+ * <p>With that done, clients can now bind to the service and send messages
+ * to it.  Note that this allows clients to register with it to receive
+ * messages back as well:
+ * 
+ * {@sample development/samples/ApiDemos/src/com/example/android/apis/app/MessengerServiceActivities.java
+ *      bind}
  */
 public abstract class Service extends ContextWrapper implements ComponentCallbacks {
     private static final String TAG = "Service";
