@@ -492,7 +492,11 @@ public class KeyguardUpdateMonitor {
      * @param callback The callback.
      */
     public void registerConfigurationChangeCallback(ConfigurationChangeCallback callback) {
-        mConfigurationChangeCallbacks.add(callback);
+        if (!mConfigurationChangeCallbacks.contains(callback)) {
+            mConfigurationChangeCallbacks.add(callback);
+        } else {
+            Log.e(TAG, "Object tried to add another CONFIG callback", new Exception("Whoops"));
+        }
     }
 
     /**
@@ -501,7 +505,11 @@ public class KeyguardUpdateMonitor {
      * @param callback The callback.
      */
     public void registerInfoCallback(InfoCallback callback) {
-        mInfoCallbacks.add(callback);
+        if (!mInfoCallbacks.contains(callback)) {
+            mInfoCallbacks.add(callback);
+        } else {
+            Log.e(TAG, "Object tried to add another INFO callback", new Exception("Whoops"));
+        }
     }
 
     /**
@@ -509,7 +517,11 @@ public class KeyguardUpdateMonitor {
      * @param callback The callback.
      */
     public void registerSimStateCallback(SimStateCallback callback) {
-        mSimStateCallbacks.add(callback);
+        if (!mSimStateCallbacks.contains(callback)) {
+            mSimStateCallbacks.add(callback);
+        } else {
+            Log.e(TAG, "Object tried to add another SIM callback", new Exception("Whoops"));
+        }
     }
 
     public IccCard.State getSimState() {

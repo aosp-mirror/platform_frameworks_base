@@ -42,7 +42,7 @@ import java.util.Date;
  * This is the screen that shows the 9 circle unlock widget and instructs
  * the user how to unlock their device, or make an emergency call.
  */
-class UnlockScreen extends LinearLayoutWithDefaultTouchRecepient
+class PatternUnlockScreen extends LinearLayoutWithDefaultTouchRecepient
         implements KeyguardScreen, KeyguardUpdateMonitor.ConfigurationChangeCallback,
         KeyguardUpdateMonitor.InfoCallback, KeyguardUpdateMonitor.SimStateCallback {
 
@@ -160,7 +160,7 @@ class UnlockScreen extends LinearLayoutWithDefaultTouchRecepient
      *        their pattern (e.g they have a google account so we can show them the account based
      *        backup option).
      */
-    UnlockScreen(Context context,
+    PatternUnlockScreen(Context context,
                  LockPatternUtils lockPatternUtils,
                  KeyguardUpdateMonitor updateMonitor,
                  KeyguardScreenCallback callback,
