@@ -87,10 +87,11 @@ public class AudioManager {
 
     /**
      * @hide Broadcast intent when the volume for a particular stream type changes.
-     * Includes the stream and the new volume
+     * Includes the stream, the new volume and previous volumes
      *
      * @see #EXTRA_VOLUME_STREAM_TYPE
      * @see #EXTRA_VOLUME_STREAM_VALUE
+     * @see #EXTRA_PREV_VOLUME_STREAM_VALUE
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String VOLUME_CHANGED_ACTION = "android.media.VOLUME_CHANGED_ACTION";
@@ -125,6 +126,12 @@ public class AudioManager {
      */
     public static final String EXTRA_VOLUME_STREAM_VALUE =
         "android.media.EXTRA_VOLUME_STREAM_VALUE";
+
+    /**
+     * @hide The previous volume associated with the stream for the volume changed intent.
+     */
+    public static final String EXTRA_PREV_VOLUME_STREAM_VALUE =
+        "android.media.EXTRA_PREV_VOLUME_STREAM_VALUE";
 
     /** The audio stream for phone calls */
     public static final int STREAM_VOICE_CALL = AudioSystem.STREAM_VOICE_CALL;

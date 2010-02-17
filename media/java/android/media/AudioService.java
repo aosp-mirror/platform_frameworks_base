@@ -403,30 +403,34 @@ public class AudioService extends IAudioService.Stub {
         // UI
         mVolumePanel.postVolumeChanged(streamType, flags);
         // Broadcast Intent
-        sendVolumeUpdate(streamType);
+        sendVolumeUpdate(streamType, oldIndex, streamState.mIndex);
     }
 
     /** @see AudioManager#setStreamVolume(int, int, int) */
     public void setStreamVolume(int streamType, int index, int flags) {
         ensureValidStreamType(streamType);
+
+        final int oldIndex = mStreamStates[STREAM_VOLUME_ALIAS[streamType]].mIndex;
+
         index = rescaleIndex(index * 10, streamType, STREAM_VOLUME_ALIAS[streamType]);
         setStreamVolumeInt(STREAM_VOLUME_ALIAS[streamType], index, false, true);
 
         // UI, etc.
         mVolumePanel.postVolumeChanged(streamType, flags);
         // Broadcast Intent
-        sendVolumeUpdate(streamType);
+        sendVolumeUpdate(streamType, oldIndex, index);
     }
 
-    private void sendVolumeUpdate(int streamType) {
+    private void sendVolumeUpdate(int streamType, int oldIndex, int index) {
+        oldIndex = (oldIndex + 5) / 10;
+        index = (index + 5) / 10;
+
         Intent intent = new Intent(AudioManager.VOLUME_CHANGED_ACTION);
         intent.putExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE, streamType);
-        intent.putExtra(AudioManager.EXTRA_VOLUME_STREAM_VALUE, getStreamVolume(streamType));
+        intent.putExtra(AudioManager.EXTRA_VOLUME_STREAM_VALUE, index);
+        intent.putExtra(AudioManager.EXTRA_PREV_VOLUME_STREAM_VALUE, oldIndex);
 
-        // Currently, sending the intent only when the stream is BLUETOOTH_SCO
-        if (streamType == AudioSystem.STREAM_BLUETOOTH_SCO) {
-            mContext.sendBroadcast(intent);
-        }
+        mContext.sendBroadcast(intent);
     }
 
     /**
