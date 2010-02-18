@@ -63,16 +63,10 @@ Region::Region(const Rect& rhs)
 {
 }
 
-Region::Region(const Parcel& parcel)
-{
-    status_t err = read(parcel);
-    LOGE_IF(err<0, "error %s reading Region from parcel", strerror(err));
-}
-
 Region::Region(const void* buffer)
 {
     status_t err = read(buffer);
-    LOGE_IF(err<0, "error %s reading Region from parcel", strerror(err));
+    LOGE_IF(err<0, "error %s reading Region from buffer", strerror(err));
 }
 
 Region::~Region()
@@ -532,37 +526,6 @@ void Region::translate(Region& dst, const Region& reg, int dx, int dy)
 
 // ----------------------------------------------------------------------------
 
-status_t Region::write(Parcel& parcel) const
-{
-#if VALIDATE_REGIONS
-    validate(*this, "write(Parcel)");
-#endif
-    status_t err;
-    const size_t count = mStorage.size();
-    const size_t sizeNeeded = sizeof(int32_t) + (1+count)*sizeof(Rect);
-    void* buffer = parcel.writeInplace(sizeNeeded);
-    if (!buffer) return NO_MEMORY;
-    ssize_t written = Region::write(buffer, sizeNeeded);
-    if (written < 0) return status_t(written);
-    return NO_ERROR;
-}
-
-status_t Region::read(const Parcel& parcel)
-{
-    void const* buffer = parcel.readInplace(sizeof(int32_t));
-    if (!buffer) return NO_MEMORY;
-    const size_t count = *static_cast<int32_t const *>(buffer);
-    void const* dummy = parcel.readInplace((1+count)*sizeof(Rect));
-    if (!dummy) return NO_MEMORY;
-    const size_t sizeNeeded = sizeof(int32_t) + (1+count)*sizeof(Rect);
-    const ssize_t read = Region::read(buffer);
-    if (read < 0) return status_t(read);
-#if VALIDATE_REGIONS
-    validate(*this, "read(Parcel)");
-#endif
-    return NO_ERROR;
-}
-
 ssize_t Region::write(void* buffer, size_t size) const
 {
 #if VALIDATE_REGIONS
@@ -570,12 +533,14 @@ ssize_t Region::write(void* buffer, size_t size) const
 #endif
     const size_t count = mStorage.size();
     const size_t sizeNeeded = sizeof(int32_t) + (1+count)*sizeof(Rect);
-    if (sizeNeeded > size) return NO_MEMORY;
-    int32_t* const p = static_cast<int32_t*>(buffer); 
-    *p = count;
-    memcpy(p+1, &mBounds, sizeof(Rect));
-    if (count) {
-        memcpy(p+5, mStorage.array(), count*sizeof(Rect));
+    if (buffer != NULL) {
+        if (sizeNeeded > size) return NO_MEMORY;
+        int32_t* const p = static_cast<int32_t*>(buffer);
+        *p = count;
+        memcpy(p+1, &mBounds, sizeof(Rect));
+        if (count) {
+            memcpy(p+5, mStorage.array(), count*sizeof(Rect));
+        }
     }
     return ssize_t(sizeNeeded);
 }

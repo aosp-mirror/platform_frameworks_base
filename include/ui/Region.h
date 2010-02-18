@@ -21,7 +21,6 @@
 #include <sys/types.h>
 
 #include <utils/Vector.h>
-#include <binder/Parcel.h>
 
 #include <ui/Rect.h>
 
@@ -39,7 +38,6 @@ public:
                         Region();
                         Region(const Region& rhs);
     explicit            Region(const Rect& rhs);
-    explicit            Region(const Parcel& parcel);
     explicit            Region(const void* buffer);
                         ~Region();
                         
@@ -117,10 +115,6 @@ public:
             // add a rectangle to the internal list. This rectangle must
             // be sorted in Y and X and must not make the region invalid.
             void        addRectUnchecked(int l, int t, int r, int b);
-
-            // flatten/unflatten a region to/from a Parcel
-            status_t    write(Parcel& parcel) const;
-            status_t    read(const Parcel& parcel);
 
             // flatten/unflatten a region to/from a raw buffer
             ssize_t     write(void* buffer, size_t size) const;
