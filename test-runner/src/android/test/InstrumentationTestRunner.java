@@ -480,8 +480,11 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
             // needed
             mResults.putString(REPORT_KEY_COVERAGE_PATH, coverageFilePath);
             // also output a more user friendly msg
+            final String currentStream = mResults.getString(
+                    Instrumentation.REPORT_KEY_STREAMRESULT);
             mResults.putString(Instrumentation.REPORT_KEY_STREAMRESULT,
-                String.format("Generated code coverage data to %s", coverageFilePath));
+                String.format("%s\nGenerated code coverage data to %s", currentStream,
+                coverageFilePath));
         } catch (ClassNotFoundException e) {
             reportEmmaError("Is emma jar on classpath?", e);
         } catch (SecurityException e) {
