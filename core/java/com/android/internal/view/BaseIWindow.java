@@ -1,5 +1,6 @@
 package com.android.internal.view;
 
+import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
@@ -17,7 +18,7 @@ public class BaseIWindow extends IWindow.Stub {
     }
     
     public void resized(int w, int h, Rect coveredInsets,
-            Rect visibleInsets, boolean reportDraw) {
+            Rect visibleInsets, boolean reportDraw, Configuration newConfig) {
         if (reportDraw) {
             try {
                 mSession.finishDrawing(this);

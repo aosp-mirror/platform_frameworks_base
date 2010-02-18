@@ -20,6 +20,7 @@ import com.android.internal.R;
 import com.android.internal.view.menu.MenuBuilder;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
@@ -3930,6 +3931,32 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         }
         Display d = WindowManagerImpl.getDefault().getDefaultDisplay();
         outRect.set(0, 0, d.getWidth(), d.getHeight());
+    }
+
+    /**
+     * Dispatch a notification about a resource configuration change down
+     * the view hierarchy.
+     * ViewGroups should override to route to their children.
+     *
+     * @param newConfig The new resource configuration.
+     *
+     * @see #onConfigurationChanged
+     */
+    public void dispatchConfigurationChanged(Configuration newConfig) {
+        onConfigurationChanged(newConfig);
+    }
+
+    /**
+     * Called when the current configuration of the resources being used
+     * by the application have changed.  You can use this to decide when
+     * to reload resources that can changed based on orientation and other
+     * configuration characterstics.  You only need to use this if you are
+     * not relying on the normal {@link android.app.Activity} mechanism of
+     * recreating the activity instance upon a configuration change.
+     *
+     * @param newConfig The new resource configuration.
+     */
+    protected void onConfigurationChanged(Configuration newConfig) {
     }
 
     /**

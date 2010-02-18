@@ -373,10 +373,15 @@ public class WindowManagerService extends IWindowManager.Stub
     boolean mLayoutNeeded = true;
     boolean mAnimationPending = false;
     boolean mDisplayFrozen = false;
+    boolean mWaitingForConfig = false;
     boolean mWindowsFreezingScreen = false;
     long mFreezeGcPending = 0;
     int mAppsFreezingScreen = 0;
 
+    int mLayoutSeq = 0;
+    
+    Configuration mCurConfiguration = new Configuration();
+    
     // This is held as long as we have the screen frozen, to give us time to
     // perform a rotation animation when turning off shows the lock screen which
     // changes the orientation.
@@ -1828,7 +1833,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             if (attrs.type >= FIRST_SUB_WINDOW && attrs.type <= LAST_SUB_WINDOW) {
-                attachedWindow = windowForClientLocked(null, attrs.token);
+                attachedWindow = windowForClientLocked(null, attrs.token, false);
                 if (attachedWindow == null) {
                     Log.w(TAG, "Attempted to add window with token that is not a window: "
                           + attrs.token + ".  Aborting.");
@@ -1988,6 +1993,10 @@ public class WindowManagerService extends IWindowManager.Stub
             if (localLOGV) Log.v(
                 TAG, "New client " + client.asBinder()
                 + ": window=" + win);
+            
+            if (win.isVisibleOrAdding() && updateOrientationFromAppTokensLocked()) {
+                reportNewConfig = true;
+            }
         }
 
         // sendNewConfiguration() checks caller permissions so we must call it with
@@ -1997,14 +2006,6 @@ public class WindowManagerService extends IWindowManager.Stub
         final long origId = Binder.clearCallingIdentity();
         if (reportNewConfig) {
             sendNewConfiguration();
-        } else {
-            // Update Orientation after adding a window, only if the window needs to be
-            // displayed right away
-            if (win.isVisibleOrAdding()) {
-                if (updateOrientationFromAppTokensUnchecked(null, null) != null) {
-                    sendNewConfiguration();
-                }
-            }
         }
         Binder.restoreCallingIdentity(origId);
 
@@ -2013,7 +2014,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     public void removeWindow(Session session, IWindow client) {
         synchronized(mWindowMap) {
-            WindowState win = windowForClientLocked(session, client);
+            WindowState win = windowForClientLocked(session, client, false);
             if (win == null) {
                 return;
             }
@@ -2081,8 +2082,9 @@ public class WindowManagerService extends IWindowManager.Stub
         // Removing a visible window will effect the computed orientation
         // So just update orientation if needed.
         if (wasVisible && computeForcedAppOrientationLocked()
-                != mForcedAppOrientation) {
-            mH.sendMessage(mH.obtainMessage(H.COMPUTE_AND_SEND_NEW_CONFIGURATION));
+                != mForcedAppOrientation
+                && updateOrientationFromAppTokensLocked()) {
+            mH.sendEmptyMessage(H.SEND_NEW_CONFIGURATION);
         }
         updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL);
         Binder.restoreCallingIdentity(origId);
@@ -2177,7 +2179,7 @@ public class WindowManagerService extends IWindowManager.Stub
         long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mWindowMap) {
-                WindowState w = windowForClientLocked(session, client);
+                WindowState w = windowForClientLocked(session, client, false);
                 if ((w != null) && (w.mSurface != null)) {
                     if (SHOW_TRANSACTIONS) Log.i(TAG, ">>> OPEN TRANSACTION");
                     Surface.openTransaction();
@@ -2203,7 +2205,7 @@ public class WindowManagerService extends IWindowManager.Stub
         long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mWindowMap) {
-                WindowState w = windowForClientLocked(session, client);
+                WindowState w = windowForClientLocked(session, client, false);
                 if (w != null) {
                     w.mGivenInsetsPending = false;
                     w.mGivenContentInsets.set(contentInsets);
@@ -2221,7 +2223,7 @@ public class WindowManagerService extends IWindowManager.Stub
     public void getWindowDisplayFrame(Session session, IWindow client,
             Rect outDisplayFrame) {
         synchronized(mWindowMap) {
-            WindowState win = windowForClientLocked(session, client);
+            WindowState win = windowForClientLocked(session, client, false);
             if (win == null) {
                 outDisplayFrame.setEmpty();
                 return;
@@ -2291,11 +2293,11 @@ public class WindowManagerService extends IWindowManager.Stub
             Surface outSurface) {
         boolean displayed = false;
         boolean inTouchMode;
-        Configuration newConfig = null;
+        boolean configChanged;
         long origId = Binder.clearCallingIdentity();
 
         synchronized(mWindowMap) {
-            WindowState win = windowForClientLocked(session, client);
+            WindowState win = windowForClientLocked(session, client, false);
             if (win == null) {
                 return 0;
             }
@@ -2507,7 +2509,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (assignLayers) {
                 assignLayersLocked();
             }
-            newConfig = updateOrientationFromAppTokensLocked(null, null);
+            configChanged = updateOrientationFromAppTokensLocked();
             performLayoutAndPlaceSurfacesLocked();
             if (displayed && win.mIsWallpaper) {
                 updateWallpaperOffsetLocked(win, mDisplay.getWidth(),
@@ -2533,7 +2535,7 @@ public class WindowManagerService extends IWindowManager.Stub
             inTouchMode = mInTouchMode;
         }
 
-        if (newConfig != null) {
+        if (configChanged) {
             sendNewConfiguration();
         }
 
@@ -2546,7 +2548,7 @@ public class WindowManagerService extends IWindowManager.Stub
     public void finishDrawingWindow(Session session, IWindow client) {
         final long origId = Binder.clearCallingIdentity();
         synchronized(mWindowMap) {
-            WindowState win = windowForClientLocked(session, client);
+            WindowState win = windowForClientLocked(session, client, false);
             if (win != null && win.finishDrawingLocked()) {
                 if ((win.mAttrs.flags&FLAG_SHOW_WALLPAPER) != 0) {
                     adjustWallpaperWindowsLocked();
@@ -2988,62 +2990,62 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     public int getOrientationFromAppTokensLocked() {
-            int pos = mAppTokens.size() - 1;
-            int curGroup = 0;
-            int lastOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
-            boolean findingBehind = false;
-            boolean haveGroup = false;
-            boolean lastFullscreen = false;
-            while (pos >= 0) {
-                AppWindowToken wtoken = mAppTokens.get(pos);
-                pos--;
-                // if we're about to tear down this window and not seek for
-                // the behind activity, don't use it for orientation
-                if (!findingBehind
-                        && (!wtoken.hidden && wtoken.hiddenRequested)) {
+        int pos = mAppTokens.size() - 1;
+        int curGroup = 0;
+        int lastOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+        boolean findingBehind = false;
+        boolean haveGroup = false;
+        boolean lastFullscreen = false;
+        while (pos >= 0) {
+            AppWindowToken wtoken = mAppTokens.get(pos);
+            pos--;
+            // if we're about to tear down this window and not seek for
+            // the behind activity, don't use it for orientation
+            if (!findingBehind
+                    && (!wtoken.hidden && wtoken.hiddenRequested)) {
+                continue;
+            }
+
+            if (!haveGroup) {
+                // We ignore any hidden applications on the top.
+                if (wtoken.hiddenRequested || wtoken.willBeHidden) {
                     continue;
                 }
-
-                if (!haveGroup) {
-                    // We ignore any hidden applications on the top.
-                    if (wtoken.hiddenRequested || wtoken.willBeHidden) {
-                        continue;
-                    }
-                    haveGroup = true;
-                    curGroup = wtoken.groupId;
-                    lastOrientation = wtoken.requestedOrientation;
-                } else if (curGroup != wtoken.groupId) {
-                    // If we have hit a new application group, and the bottom
-                    // of the previous group didn't explicitly say to use
-                    // the orientation behind it, and the last app was
-                    // full screen, then we'll stick with the
-                    // user's orientation.
-                    if (lastOrientation != ActivityInfo.SCREEN_ORIENTATION_BEHIND
-                            && lastFullscreen) {
-                        return lastOrientation;
-                    }
+                haveGroup = true;
+                curGroup = wtoken.groupId;
+                lastOrientation = wtoken.requestedOrientation;
+            } else if (curGroup != wtoken.groupId) {
+                // If we have hit a new application group, and the bottom
+                // of the previous group didn't explicitly say to use
+                // the orientation behind it, and the last app was
+                // full screen, then we'll stick with the
+                // user's orientation.
+                if (lastOrientation != ActivityInfo.SCREEN_ORIENTATION_BEHIND
+                        && lastFullscreen) {
+                    return lastOrientation;
                 }
-                int or = wtoken.requestedOrientation;
-                // If this application is fullscreen, and didn't explicitly say
-                // to use the orientation behind it, then just take whatever
-                // orientation it has and ignores whatever is under it.
-                lastFullscreen = wtoken.appFullscreen;
-                if (lastFullscreen
-                        && or != ActivityInfo.SCREEN_ORIENTATION_BEHIND) {
-                    return or;
-                }
-                // If this application has requested an explicit orientation,
-                // then use it.
-                if (or == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE ||
-                        or == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT ||
-                        or == ActivityInfo.SCREEN_ORIENTATION_SENSOR ||
-                        or == ActivityInfo.SCREEN_ORIENTATION_NOSENSOR ||
-                        or == ActivityInfo.SCREEN_ORIENTATION_USER) {
-                    return or;
-                }
-                findingBehind |= (or == ActivityInfo.SCREEN_ORIENTATION_BEHIND);
             }
-            return ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+            int or = wtoken.requestedOrientation;
+            // If this application is fullscreen, and didn't explicitly say
+            // to use the orientation behind it, then just take whatever
+            // orientation it has and ignores whatever is under it.
+            lastFullscreen = wtoken.appFullscreen;
+            if (lastFullscreen
+                    && or != ActivityInfo.SCREEN_ORIENTATION_BEHIND) {
+                return or;
+            }
+            // If this application has requested an explicit orientation,
+            // then use it.
+            if (or == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE ||
+                    or == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT ||
+                    or == ActivityInfo.SCREEN_ORIENTATION_SENSOR ||
+                    or == ActivityInfo.SCREEN_ORIENTATION_NOSENSOR ||
+                    or == ActivityInfo.SCREEN_ORIENTATION_USER) {
+                return or;
+            }
+            findingBehind |= (or == ActivityInfo.SCREEN_ORIENTATION_BEHIND);
+        }
+        return ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
     }
 
     public Configuration updateOrientationFromAppTokens(
@@ -3053,81 +3055,75 @@ public class WindowManagerService extends IWindowManager.Stub
             throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         }
 
-        Configuration config;
+        Configuration config = null;
         long ident = Binder.clearCallingIdentity();
-        config = updateOrientationFromAppTokensUnchecked(currentConfig,
-                freezeThisOneIfNeeded);
+        
+        synchronized(mWindowMap) {
+            if (updateOrientationFromAppTokensLocked()) {
+                if (freezeThisOneIfNeeded != null) {
+                    AppWindowToken wtoken = findAppWindowToken(
+                            freezeThisOneIfNeeded);
+                    if (wtoken != null) {
+                        startAppFreezingScreenLocked(wtoken,
+                                ActivityInfo.CONFIG_ORIENTATION);
+                    }
+                }
+                config = computeNewConfigurationLocked();
+                
+            } else if (currentConfig != null) {
+                // No obvious action we need to take, but if our current
+                // state mismatches the activity maanager's, update it
+                mTempConfiguration.setToDefaults();
+                if (computeNewConfigurationLocked(mTempConfiguration)) {
+                    if (currentConfig.diff(mTempConfiguration) != 0) {
+                        mWaitingForConfig = true;
+                        mLayoutNeeded = true;
+                        startFreezingDisplayLocked();
+                        config = new Configuration(mTempConfiguration);
+                    }
+                }
+            }
+        }
+        
         Binder.restoreCallingIdentity(ident);
         return config;
     }
 
-    Configuration updateOrientationFromAppTokensUnchecked(
-            Configuration currentConfig, IBinder freezeThisOneIfNeeded) {
-        Configuration config;
-        synchronized(mWindowMap) {
-            config = updateOrientationFromAppTokensLocked(currentConfig, freezeThisOneIfNeeded);
-            if (config != null) {
-                mLayoutNeeded = true;
-                performLayoutAndPlaceSurfacesLocked();
-            }
-        }
-        return config;
-    }
-
     /*
+     * Determine the new desired orientation of the display, returning
+     * a non-null new Configuration if it has changed from the current
+     * orientation.  IF TRUE IS RETURNED SOMEONE MUST CALL
+     * setNewConfiguration() TO TELL THE WINDOW MANAGER IT CAN UNFREEZE THE
+     * SCREEN.  This will typically be done for you if you call
+     * sendNewConfiguration().
+     * 
      * The orientation is computed from non-application windows first. If none of
      * the non-application windows specify orientation, the orientation is computed from
      * application tokens.
      * @see android.view.IWindowManager#updateOrientationFromAppTokens(
      * android.os.IBinder)
      */
-    Configuration updateOrientationFromAppTokensLocked(
-            Configuration appConfig, IBinder freezeThisOneIfNeeded) {
+    boolean updateOrientationFromAppTokensLocked() {
         boolean changed = false;
         long ident = Binder.clearCallingIdentity();
         try {
             int req = computeForcedAppOrientationLocked();
 
             if (req != mForcedAppOrientation) {
-                changed = true;
                 mForcedAppOrientation = req;
                 //send a message to Policy indicating orientation change to take
                 //action like disabling/enabling sensors etc.,
                 mPolicy.setCurrentOrientationLw(req);
-            }
-
-            if (changed) {
-                changed = setRotationUncheckedLocked(
-                        WindowManagerPolicy.USE_LAST_ROTATION,
-                        mLastRotationFlags & (~Surface.FLAGS_ORIENTATION_ANIMATION_DISABLE));
-                if (changed) {
-                    if (freezeThisOneIfNeeded != null) {
-                        AppWindowToken wtoken = findAppWindowToken(
-                                freezeThisOneIfNeeded);
-                        if (wtoken != null) {
-                            startAppFreezingScreenLocked(wtoken,
-                                    ActivityInfo.CONFIG_ORIENTATION);
-                        }
-                    }
-                    return computeNewConfigurationLocked();
+                if (setRotationUncheckedLocked(WindowManagerPolicy.USE_LAST_ROTATION,
+                        mLastRotationFlags | Surface.FLAGS_ORIENTATION_ANIMATION_DISABLE)) {
+                    changed = true;
                 }
             }
 
-            // No obvious action we need to take, but if our current
-            // state mismatches the activity maanager's, update it
-            if (appConfig != null) {
-                mTempConfiguration.setToDefaults();
-                if (computeNewConfigurationLocked(mTempConfiguration)) {
-                    if (appConfig.diff(mTempConfiguration) != 0) {
-                        return new Configuration(mTempConfiguration);
-                    }
-                }
-            }
+            return changed;
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
-
-        return null;
     }
 
     int computeForcedAppOrientationLocked() {
@@ -3138,6 +3134,19 @@ public class WindowManagerService extends IWindowManager.Stub
         return req;
     }
 
+    public void setNewConfiguration(Configuration config) {
+        if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
+                "setNewConfiguration()")) {
+            throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
+        }
+
+        synchronized(mWindowMap) {
+            mCurConfiguration = new Configuration(config);
+            mWaitingForConfig = false;
+            performLayoutAndPlaceSurfacesLocked();
+        }
+    }
+    
     public void setAppOrientation(IApplicationToken token, int requestedOrientation) {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
                 "setAppOrientation()")) {
@@ -3648,9 +3657,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     mLayoutNeeded = true;
                     performLayoutAndPlaceSurfacesLocked();
                 }
-                if (mAppsFreezingScreen == 0 && !mWindowsFreezingScreen) {
-                    stopFreezingDisplayLocked();
-                }
+                stopFreezingDisplayLocked();
             }
         }
     }
@@ -4403,20 +4410,21 @@ public class WindowManagerService extends IWindowManager.Stub
             changed = setRotationUncheckedLocked(rotation, animFlags);
         }
 
-        if (changed) {
-            sendNewConfiguration();
-            synchronized(mWindowMap) {
-                mLayoutNeeded = true;
-                performLayoutAndPlaceSurfacesLocked();
-            }
-        } else if (alwaysSendConfiguration) {
-            //update configuration ignoring orientation change
+        if (changed || alwaysSendConfiguration) {
             sendNewConfiguration();
         }
 
         Binder.restoreCallingIdentity(origId);
     }
 
+    /**
+     * Apply a new rotation to the screen, respecting the requests of
+     * applications.  Use WindowManagerPolicy.USE_LAST_ROTATION to simply
+     * re-evaluate the desired rotation.
+     * 
+     * Returns null if the rotation has been changed.  In this case YOU
+     * MUST CALL setNewConfiguration() TO UNFREEZE THE SCREEN.
+     */
     public boolean setRotationUncheckedLocked(int rotation, int animFlags) {
         boolean changed;
         if (rotation == WindowManagerPolicy.USE_LAST_ROTATION) {
@@ -4442,6 +4450,8 @@ public class WindowManagerService extends IWindowManager.Stub
             mH.removeMessages(H.WINDOW_FREEZE_TIMEOUT);
             mH.sendMessageDelayed(mH.obtainMessage(H.WINDOW_FREEZE_TIMEOUT),
                     2000);
+            mWaitingForConfig = true;
+            mLayoutNeeded = true;
             startFreezingDisplayLocked();
             Log.i(TAG, "Setting rotation to " + rotation + ", animFlags=" + animFlags);
             mQueue.setOrientation(rotation);
@@ -6707,7 +6717,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 long ident = Binder.clearCallingIdentity();
                 try {
                     return mPolicy.performHapticFeedbackLw(
-                            windowForClientLocked(this, window), effectId, always);
+                            windowForClientLocked(this, window, true),
+                            effectId, always);
                 } finally {
                     Binder.restoreCallingIdentity(ident);
                 }
@@ -6718,7 +6729,8 @@ public class WindowManagerService extends IWindowManager.Stub
             synchronized(mWindowMap) {
                 long ident = Binder.clearCallingIdentity();
                 try {
-                    setWindowWallpaperPositionLocked(windowForClientLocked(this, window),
+                    setWindowWallpaperPositionLocked(
+                            windowForClientLocked(this, window, true),
                             x, y, xStep, yStep);
                 } finally {
                     Binder.restoreCallingIdentity(ident);
@@ -6736,7 +6748,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 long ident = Binder.clearCallingIdentity();
                 try {
                     return sendWindowWallpaperCommandLocked(
-                            windowForClientLocked(this, window),
+                            windowForClientLocked(this, window, true),
                             action, x, y, z, extras, sync);
                 } finally {
                     Binder.restoreCallingIdentity(ident);
@@ -6852,6 +6864,10 @@ public class WindowManagerService extends IWindowManager.Stub
 
         WindowState mNextOutsideTouch;
 
+        int mLayoutSeq = -1;
+        
+        Configuration mConfiguration = null;
+        
         // Actual frame shown on-screen (may be modified by animation)
         final Rect mShownFrame = new Rect();
         final Rect mLastShownFrame = new Rect();
@@ -7980,7 +7996,7 @@ public class WindowManagerService extends IWindowManager.Stub
             public void binderDied() {
                 try {
                     synchronized(mWindowMap) {
-                        WindowState win = windowForClientLocked(mSession, mClient);
+                        WindowState win = windowForClientLocked(mSession, mClient, false);
                         Log.i(TAG, "WIN DEATH: " + win);
                         if (win != null) {
                             removeWindowLocked(mSession, win);
@@ -8056,8 +8072,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         void dump(PrintWriter pw, String prefix) {
-            StringBuilder sb = new StringBuilder(64);
-
             pw.print(prefix); pw.print("mSession="); pw.print(mSession);
                     pw.print(" mClient="); pw.println(mClient.asBinder());
             pw.print(prefix); pw.print("mAttrs="); pw.println(mAttrs);
@@ -8105,7 +8119,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 pw.print(prefix); pw.print("mRelayoutCalled="); pw.println(mRelayoutCalled);
             }
             pw.print(prefix); pw.print("Requested w="); pw.print(mRequestedWidth);
-                    pw.print(" h="); pw.println(mRequestedHeight);
+                    pw.print(" h="); pw.print(mRequestedHeight);
+                    pw.print(" mLayoutSeq="); pw.println(mLayoutSeq);
             if (mXOffset != 0 || mYOffset != 0) {
                 pw.print(prefix); pw.print("Offsets x="); pw.print(mXOffset);
                         pw.print(" y="); pw.println(mYOffset);
@@ -8119,6 +8134,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 pw.print(prefix); pw.print("mTouchableInsets="); pw.print(mTouchableInsets);
                         pw.print(" mGivenInsetsPending="); pw.println(mGivenInsetsPending);
             }
+            pw.print(prefix); pw.print("mConfiguration="); pw.println(mConfiguration);
             pw.print(prefix); pw.print("mShownFrame=");
                     mShownFrame.printShortString(pw);
                     pw.print(" last="); mLastShownFrame.printShortString(pw);
@@ -8693,7 +8709,7 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int FORCE_GC = 15;
         public static final int ENABLE_SCREEN = 16;
         public static final int APP_FREEZE_TIMEOUT = 17;
-        public static final int COMPUTE_AND_SEND_NEW_CONFIGURATION = 18;
+        public static final int SEND_NEW_CONFIGURATION = 18;
 
         private Session mLastReportedHold;
 
@@ -9019,10 +9035,9 @@ public class WindowManagerService extends IWindowManager.Stub
                     break;
                 }
 
-                case COMPUTE_AND_SEND_NEW_CONFIGURATION: {
-                    if (updateOrientationFromAppTokensUnchecked(null, null) != null) {
-                        sendNewConfiguration();
-                    }
+                case SEND_NEW_CONFIGURATION: {
+                    removeMessages(SEND_NEW_CONFIGURATION);
+                    sendNewConfiguration();
                     break;
                 }
 
@@ -9064,23 +9079,33 @@ public class WindowManagerService extends IWindowManager.Stub
     // Internals
     // -------------------------------------------------------------
 
-    final WindowState windowForClientLocked(Session session, IWindow client) {
-        return windowForClientLocked(session, client.asBinder());
+    final WindowState windowForClientLocked(Session session, IWindow client,
+            boolean throwOnError) {
+        return windowForClientLocked(session, client.asBinder(), throwOnError);
     }
 
-    final WindowState windowForClientLocked(Session session, IBinder client) {
+    final WindowState windowForClientLocked(Session session, IBinder client,
+            boolean throwOnError) {
         WindowState win = mWindowMap.get(client);
         if (localLOGV) Log.v(
             TAG, "Looking up client " + client + ": " + win);
         if (win == null) {
-            RuntimeException ex = new RuntimeException();
-            Log.w(TAG, "Requested window " + client + " does not exist", ex);
+            RuntimeException ex = new IllegalArgumentException(
+                    "Requested window " + client + " does not exist");
+            if (throwOnError) {
+                throw ex;
+            }
+            Log.w(TAG, "Failed looking up window", ex);
             return null;
         }
         if (session != null && win.mSession != session) {
-            RuntimeException ex = new RuntimeException();
-            Log.w(TAG, "Requested window " + client + " is in session " +
-                  win.mSession + ", not " + session, ex);
+            RuntimeException ex = new IllegalArgumentException(
+                    "Requested window " + client + " is in session " +
+                    win.mSession + ", not " + session);
+            if (throwOnError) {
+                throw ex;
+            }
+            Log.w(TAG, "Failed looking up window", ex);
             return null;
         }
 
@@ -9183,6 +9208,13 @@ public class WindowManagerService extends IWindowManager.Stub
             return;
         }
 
+        if (mWaitingForConfig) {
+            // Our configuration has changed (most likely rotation), but we
+            // don't yet have the complete configuration to report to
+            // applications.  Don't do any window layout until we have it.
+            return;
+        }
+        
         boolean recoveringMemory = false;
         if (mForceRemoves != null) {
             recoveringMemory = true;
@@ -9249,6 +9281,10 @@ public class WindowManagerService extends IWindowManager.Stub
         while (mLayoutNeeded) {
             mPolicy.beginLayoutLw(dw, dh);
 
+            int seq = mLayoutSeq+1;
+            if (seq < 0) seq = 0;
+            mLayoutSeq = seq;
+            
             // First perform layout of any root windows (not attached
             // to another window).
             int topAttached = -1;
@@ -9266,7 +9302,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         || win.mAttachedHidden
                         || win.mExiting || win.mDestroying;
 
-                if (win.mLayoutAttached) {
+                if (!win.mLayoutAttached) {
                     if (DEBUG_LAYOUT) Log.v(TAG, "First pass " + win
                             + ": gone=" + gone + " mHaveFrame=" + win.mHaveFrame
                             + " mLayoutAttached=" + win.mLayoutAttached);
@@ -9286,6 +9322,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (!gone || !win.mHaveFrame) {
                     if (!win.mLayoutAttached) {
                         mPolicy.layoutWindowLw(win, win.mAttrs, null);
+                        win.mLayoutSeq = seq;
                         if (DEBUG_LAYOUT) Log.v(TAG, "-> mFrame="
                                 + win.mFrame + " mContainingFrame="
                                 + win.mContainingFrame + " mDisplayFrame="
@@ -9316,6 +9353,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     if ((win.mViewVisibility != View.GONE && win.mRelayoutCalled)
                             || !win.mHaveFrame) {
                         mPolicy.layoutWindowLw(win, win.mAttrs, win.mAttachedWindow);
+                        win.mLayoutSeq = seq;
                         if (DEBUG_LAYOUT) Log.v(TAG, "-> mFrame="
                                 + win.mFrame + " mContainingFrame="
                                 + win.mContainingFrame + " mDisplayFrame="
@@ -9336,11 +9374,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 Log.w(TAG, "Layout repeat aborted after too many iterations");
                 mLayoutNeeded = false;
                 if ((changes&WindowManagerPolicy.FINISH_LAYOUT_REDO_CONFIG) != 0) {
-                    Configuration newConfig = updateOrientationFromAppTokensLocked(
-                            null, null);
-                    if (newConfig != null) {
-                        mLayoutNeeded = true;
-                        mH.sendEmptyMessage(H.COMPUTE_AND_SEND_NEW_CONFIGURATION);
+                    if (updateOrientationFromAppTokensLocked()) {
+                        mH.sendEmptyMessage(H.SEND_NEW_CONFIGURATION);
                     }
                 }
             } else {
@@ -9349,10 +9384,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 repeats++;
                 if ((changes&WindowManagerPolicy.FINISH_LAYOUT_REDO_CONFIG) != 0) {
                     if (DEBUG_LAYOUT) Log.v(TAG, "Computing new config from layout");
-                    Configuration newConfig = updateOrientationFromAppTokensLocked(
-                            null, null);
-                    if (newConfig != null) {
-                        mH.sendEmptyMessage(H.COMPUTE_AND_SEND_NEW_CONFIGURATION);
+                    if (updateOrientationFromAppTokensLocked()) {
+                        mH.sendEmptyMessage(H.SEND_NEW_CONFIGURATION);
                     }
                 }
             }
@@ -9996,14 +10029,22 @@ public class WindowManagerService extends IWindowManager.Stub
                             }
                         }
                     }
-                    if (!w.mAppFreezing) {
+                    if (!w.mAppFreezing && w.mLayoutSeq == mLayoutSeq) {
                         w.mContentInsetsChanged =
                             !w.mLastContentInsets.equals(w.mContentInsets);
                         w.mVisibleInsetsChanged =
                             !w.mLastVisibleInsets.equals(w.mVisibleInsets);
+                        boolean configChanged =
+                            w.mConfiguration != mCurConfiguration
+                            && (w.mConfiguration == null
+                                    || mCurConfiguration.diff(w.mConfiguration) != 0);
+                        if (localLOGV) Log.v(TAG, "Resizing " + w
+                                + ": configChanged=" + configChanged
+                                + " last=" + w.mLastFrame + " frame=" + w.mFrame);
                         if (!w.mLastFrame.equals(w.mFrame)
                                 || w.mContentInsetsChanged
-                                || w.mVisibleInsetsChanged) {
+                                || w.mVisibleInsetsChanged
+                                || configChanged) {
                             w.mLastFrame.set(w.mFrame);
                             w.mLastContentInsets.set(w.mContentInsets);
                             w.mLastVisibleInsets.set(w.mVisibleInsets);
@@ -10014,7 +10055,7 @@ public class WindowManagerService extends IWindowManager.Stub
                                 if (DEBUG_ORIENTATION) Log.v(TAG,
                                         "Resizing while display frozen: " + w);
                                 w.mOrientationChanging = true;
-                                if (mWindowsFreezingScreen) {
+                                if (!mWindowsFreezingScreen) {
                                     mWindowsFreezingScreen = true;
                                     // XXX should probably keep timeout from
                                     // when we first froze the display.
@@ -10327,9 +10368,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 mWindowsFreezingScreen = false;
                 mH.removeMessages(H.WINDOW_FREEZE_TIMEOUT);
             }
-            if (mAppsFreezingScreen == 0) {
-                stopFreezingDisplayLocked();
-            }
+            stopFreezingDisplayLocked();
         }
 
         i = mResizingWindows.size();
@@ -10340,9 +10379,20 @@ public class WindowManagerService extends IWindowManager.Stub
                 try {
                     if (DEBUG_ORIENTATION) Log.v(TAG, "Reporting new frame to "
                             + win + ": " + win.mFrame);
+                    boolean configChanged =
+                        win.mConfiguration != mCurConfiguration
+                        && (win.mConfiguration == null
+                                || mCurConfiguration.diff(win.mConfiguration) != 0);
+                    win.mConfiguration = mCurConfiguration;
+                    if (DEBUG_ORIENTATION && configChanged) {
+                        Log.i(TAG, "Sending new config to window " + win + ": "
+                                + win.mFrame.width() + "x" + win.mFrame.height()
+                                + " / " + win.mConfiguration);
+                    }
                     win.mClient.resized(win.mFrame.width(),
                             win.mFrame.height(), win.mLastContentInsets,
-                            win.mLastVisibleInsets, win.mDrawPending);
+                            win.mLastVisibleInsets, win.mDrawPending,
+                            configChanged ? win.mConfiguration : null);
                     win.mContentInsetsChanged = false;
                     win.mVisibleInsetsChanged = false;
                 } catch (RemoteException e) {
@@ -10732,6 +10782,10 @@ public class WindowManagerService extends IWindowManager.Stub
             return;
         }
 
+        if (mWaitingForConfig || mAppsFreezingScreen > 0 || mWindowsFreezingScreen) {
+            return;
+        }
+        
         mDisplayFrozen = false;
         mH.removeMessages(H.APP_FREEZE_TIMEOUT);
         if (PROFILE_ORIENTATION) {
@@ -10921,7 +10975,9 @@ public class WindowManagerService extends IWindowManager.Stub
                 pw.print("  mLowerWallpaperTarget="); pw.println(mLowerWallpaperTarget);
                 pw.print("  mUpperWallpaperTarget="); pw.println(mUpperWallpaperTarget);
             }
-            pw.print("  mInTouchMode="); pw.println(mInTouchMode);
+            pw.print("  mCurConfiguration="); pw.println(this.mCurConfiguration);
+            pw.print("  mInTouchMode="); pw.print(mInTouchMode);
+                    pw.print(" mLayoutSeq="); pw.println(mLayoutSeq);
             pw.print("  mSystemBooted="); pw.print(mSystemBooted);
                     pw.print(" mDisplayEnabled="); pw.println(mDisplayEnabled);
             pw.print("  mLayoutNeeded="); pw.print(mLayoutNeeded);
@@ -10939,7 +10995,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     pw.print(" mLastWallpaperY="); pw.println(mLastWallpaperY);
             pw.print("  mDisplayFrozen="); pw.print(mDisplayFrozen);
                     pw.print(" mWindowsFreezingScreen="); pw.print(mWindowsFreezingScreen);
-                    pw.print(" mAppsFreezingScreen="); pw.println(mAppsFreezingScreen);
+                    pw.print(" mAppsFreezingScreen="); pw.print(mAppsFreezingScreen);
+                    pw.print(" mWaitingForConfig="); pw.println(mWaitingForConfig);
             pw.print("  mRotation="); pw.print(mRotation);
                     pw.print(", mForcedAppOrientation="); pw.print(mForcedAppOrientation);
                     pw.print(", mRequestedRotation="); pw.println(mRequestedRotation);

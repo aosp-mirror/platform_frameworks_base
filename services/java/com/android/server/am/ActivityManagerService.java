@@ -766,6 +766,12 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     Configuration mConfiguration = new Configuration();
 
     /**
+     * Current sequencing integer of the configuration, for skipping old
+     * configurations.
+     */
+    int mConfigurationSeq = 0;
+    
+    /**
      * Hardware-reported OpenGLES version.
      */
     final int GL_ES_VERSION;
@@ -2662,20 +2668,6 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                         mConfiguration,
                         next.mayFreezeScreenLocked(next.app) ? next : null);
                 if (config != null) {
-                    /*
-                     * Explicitly restore the locale to the one from the
-                     * old configuration, since the one that comes back from
-                     * the window manager has the default (boot) locale.
-                     *
-                     * It looks like previously the locale picker only worked
-                     * by coincidence: usually it would do its setting of
-                     * the locale after the activity transition, so it didn't
-                     * matter that this lost it.  With the synchronized
-                     * block now keeping them from happening at the same time,
-                     * this one always would happen second and undo what the
-                     * locale picker had just done.
-                     */
-                    config.locale = mConfiguration.locale;
                     next.frozenBeforeDestroy = true;
                 }
                 updated = updateConfigurationLocked(config, next);
@@ -8347,7 +8339,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             mAlwaysFinishActivities = alwaysFinishActivities;
             // This happens before any activities are started, so we can
             // change mConfiguration in-place.
+            mConfiguration.locale = Locale.getDefault();
             mConfiguration.updateFrom(configuration);
+            mConfigurationSeq = mConfiguration.seq = 1;
             if (DEBUG_CONFIGURATION) Log.v(TAG, "Initial config: " + mConfiguration);
         }
     }
@@ -13090,6 +13084,11 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                                      values.userSetLocale);
                 }
 
+                mConfigurationSeq++;
+                if (mConfigurationSeq <= 0) {
+                    mConfigurationSeq = 1;
+                }
+                newConfig.seq = mConfigurationSeq;
                 mConfiguration = newConfig;
                 Log.i(TAG, "Config changed: " + newConfig);
                 
@@ -13144,6 +13143,10 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                         + ", ensuring others are correct.");
                 ensureActivitiesVisibleLocked(starting, changes);
             }
+        }
+        
+        if (values != null && mWindowManager != null) {
+            mWindowManager.setNewConfiguration(mConfiguration);
         }
         
         return kept;

@@ -1392,7 +1392,7 @@ public final class ActivityThread {
             r.startsNotResumed = notResumed;
             r.createdConfig = config;
 
-            synchronized (mRelaunchingActivities) {
+            synchronized (mPackages) {
                 mRelaunchingActivities.add(r);
             }
 
@@ -1523,8 +1523,11 @@ public final class ActivityThread {
         }
 
         public void scheduleConfigurationChanged(Configuration config) {
-            synchronized (mRelaunchingActivities) {
-                mPendingConfiguration = config;
+            synchronized (mPackages) {
+                if (mPendingConfiguration == null ||
+                        mPendingConfiguration.isOtherSeqNewer(config)) {
+                    mPendingConfiguration = config;
+                }
             }
             queueOrSendMessage(H.CONFIGURATION_CHANGED, config);
         }
@@ -2060,6 +2063,7 @@ public final class ActivityThread {
             = new HashMap<IBinder, Service>();
     AppBindData mBoundApplication;
     Configuration mConfiguration;
+    Configuration mResConfiguration;
     Application mInitialApplication;
     final ArrayList<Application> mAllApplications
             = new ArrayList<Application>();
@@ -2073,14 +2077,6 @@ public final class ActivityThread {
     boolean mSystemThread = false;
     boolean mJitEnabled = false;
 
-    /**
-     * Activities that are enqueued to be relaunched.  This list is accessed
-     * by multiple threads, so you must synchronize on it when accessing it.
-     */
-    final ArrayList<ActivityRecord> mRelaunchingActivities
-            = new ArrayList<ActivityRecord>();
-    Configuration mPendingConfiguration = null;
-
     // These can be accessed by multiple threads; mPackages is the lock.
     // XXX For now we keep around information about all packages we have
     // seen, not removing entries from this map.
@@ -2092,6 +2088,9 @@ public final class ActivityThread {
     DisplayMetrics mDisplayMetrics = null;
     HashMap<ResourcesKey, WeakReference<Resources> > mActiveResources
         = new HashMap<ResourcesKey, WeakReference<Resources> >();
+    final ArrayList<ActivityRecord> mRelaunchingActivities
+            = new ArrayList<ActivityRecord>();
+        Configuration mPendingConfiguration = null;
 
     // The lock of mProviderMap protects the following variables.
     final HashMap<String, ProviderRecord> mProviderMap
@@ -3555,7 +3554,7 @@ public final class ActivityThread {
         // First: make sure we have the most recent configuration and most
         // recent version of the activity, or skip it if some previous call
         // had taken a more recent version.
-        synchronized (mRelaunchingActivities) {
+        synchronized (mPackages) {
             int N = mRelaunchingActivities.size();
             IBinder token = tmp.token;
             tmp = null;
@@ -3585,8 +3584,12 @@ public final class ActivityThread {
             // assume that is really what we want regardless of what we
             // may have pending.
             if (mConfiguration == null
-                    || mConfiguration.diff(tmp.createdConfig) != 0) {
-                changedConfig = tmp.createdConfig;
+                    || (tmp.createdConfig.isOtherSeqNewer(mConfiguration)
+                            && mConfiguration.diff(tmp.createdConfig) != 0)) {
+                if (changedConfig == null
+                        || tmp.createdConfig.isOtherSeqNewer(changedConfig)) {
+                    changedConfig = tmp.createdConfig;
+                }
             }
         }
         
@@ -3761,62 +3764,81 @@ public final class ActivityThread {
         }
     }
 
-    final void handleConfigurationChanged(Configuration config) {
+    final void applyConfigurationToResourcesLocked(Configuration config) {
+        if (mResConfiguration == null) {
+            mResConfiguration = new Configuration();
+        }
+        if (!mResConfiguration.isOtherSeqNewer(config)) {
+            return;
+        }
+        mResConfiguration.updateFrom(config);
+        DisplayMetrics dm = getDisplayMetricsLocked(true);
 
-        synchronized (mRelaunchingActivities) {
-            if (mPendingConfiguration != null) {
-                config = mPendingConfiguration;
-                mPendingConfiguration = null;
-            }
+        // set it for java, this also affects newly created Resources
+        if (config.locale != null) {
+            Locale.setDefault(config.locale);
         }
 
-        ArrayList<ComponentCallbacks> callbacks
-                = new ArrayList<ComponentCallbacks>();
+        Resources.updateSystemConfiguration(config, dm);
 
-        if (DEBUG_CONFIGURATION) Log.v(TAG, "Handle configuration changed: "
-                + config);
+        ContextImpl.ApplicationPackageManager.configurationChanged();
+        //Log.i(TAG, "Configuration changed in " + currentPackageName());
         
-        synchronized(mPackages) {
+        Iterator<WeakReference<Resources>> it =
+            mActiveResources.values().iterator();
+        //Iterator<Map.Entry<String, WeakReference<Resources>>> it =
+        //    mActiveResources.entrySet().iterator();
+        while (it.hasNext()) {
+            WeakReference<Resources> v = it.next();
+            Resources r = v.get();
+            if (r != null) {
+                r.updateConfiguration(config, dm);
+                //Log.i(TAG, "Updated app resources " + v.getKey()
+                //        + " " + r + ": " + r.getConfiguration());
+            } else {
+                //Log.i(TAG, "Removing old resources " + v.getKey());
+                it.remove();
+            }
+        }
+    }
+    
+    final void handleConfigurationChanged(Configuration config) {
+
+        ArrayList<ComponentCallbacks> callbacks = null;
+
+        synchronized (mPackages) {
+            if (mPendingConfiguration != null) {
+                if (!mPendingConfiguration.isOtherSeqNewer(config)) {
+                    config = mPendingConfiguration;
+                }
+                mPendingConfiguration = null;
+            }
+
+            if (config == null) {
+                return;
+            }
+            
+            if (DEBUG_CONFIGURATION) Log.v(TAG, "Handle configuration changed: "
+                    + config);
+        
+            applyConfigurationToResourcesLocked(config);
+            
             if (mConfiguration == null) {
                 mConfiguration = new Configuration();
             }
+            if (!mConfiguration.isOtherSeqNewer(config)) {
+                return;
+            }
             mConfiguration.updateFrom(config);
-            DisplayMetrics dm = getDisplayMetricsLocked(true);
-
-            // set it for java, this also affects newly created Resources
-            if (config.locale != null) {
-                Locale.setDefault(config.locale);
-            }
-
-            Resources.updateSystemConfiguration(config, dm);
-
-            ContextImpl.ApplicationPackageManager.configurationChanged();
-            //Log.i(TAG, "Configuration changed in " + currentPackageName());
-            {
-                Iterator<WeakReference<Resources>> it =
-                    mActiveResources.values().iterator();
-                //Iterator<Map.Entry<String, WeakReference<Resources>>> it =
-                //    mActiveResources.entrySet().iterator();
-                while (it.hasNext()) {
-                    WeakReference<Resources> v = it.next();
-                    Resources r = v.get();
-                    if (r != null) {
-                        r.updateConfiguration(config, dm);
-                        //Log.i(TAG, "Updated app resources " + v.getKey()
-                        //        + " " + r + ": " + r.getConfiguration());
-                    } else {
-                        //Log.i(TAG, "Removing old resources " + v.getKey());
-                        it.remove();
-                    }
-                }
-            }
 
             callbacks = collectComponentCallbacksLocked(false, config);
         }
 
-        final int N = callbacks.size();
-        for (int i=0; i<N; i++) {
-            performConfigurationChanged(callbacks.get(i), config);
+        if (callbacks != null) {
+            final int N = callbacks.size();
+            for (int i=0; i<N; i++) {
+                performConfigurationChanged(callbacks.get(i), config);
+            }
         }
     }
 
@@ -3856,7 +3878,7 @@ public final class ActivityThread {
         ArrayList<ComponentCallbacks> callbacks
                 = new ArrayList<ComponentCallbacks>();
 
-        synchronized(mPackages) {
+        synchronized (mPackages) {
             callbacks = collectComponentCallbacksLocked(true, null);
         }
 
@@ -4348,6 +4370,25 @@ public final class ActivityThread {
                         "Unable to instantiate Application():" + e.toString(), e);
             }
         }
+        
+        ViewRoot.addConfigCallback(new ComponentCallbacks() {
+            public void onConfigurationChanged(Configuration newConfig) {
+                synchronized (mPackages) {
+                    if (mPendingConfiguration == null ||
+                            mPendingConfiguration.isOtherSeqNewer(newConfig)) {
+                        mPendingConfiguration = newConfig;
+                        
+                        // We need to apply this change to the resources
+                        // immediately, because upon returning the view
+                        // hierarchy will be informed about it.
+                        applyConfigurationToResourcesLocked(newConfig);
+                    }
+                }
+                queueOrSendMessage(H.CONFIGURATION_CHANGED, newConfig);
+            }
+            public void onLowMemory() {
+            }
+        });
     }
 
     private final void detach()
