@@ -256,14 +256,14 @@ class NetworkManagementService extends INetworkManagementService.Stub {
             Log.e(TAG, "Failed to parse netmask", uhe);
             cfg.netmask = 0;
         }
-        cfg.interfaceFlags = st.nextToken("]");
+        cfg.interfaceFlags = st.nextToken("]").trim() +"]";
         Log.d(TAG, String.format("flags <%s>", cfg.interfaceFlags));
         return cfg;
     }
 
     public void setInterfaceConfig(
             String iface, InterfaceConfiguration cfg) throws IllegalStateException {
-        String cmd = String.format("interface setcfg %s %s %s", iface,
+        String cmd = String.format("interface setcfg %s %s %s %s", iface,
                 intToIpString(cfg.ipAddr), intToIpString(cfg.netmask), cfg.interfaceFlags);
         mConnector.doCommand(cmd);
     }
