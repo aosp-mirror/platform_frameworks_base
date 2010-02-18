@@ -44,6 +44,9 @@ import android.util.Log;
      */
     /* package */ int nStatement = 0;
 
+    /** when in cache and is in use, this member is set */
+    private boolean mInUse = false;
+
     /* package */ SQLiteCompiledSql(SQLiteDatabase db, String sql) {
         mDatabase = db;
         this.nHandle = db.mNativeHandle;
@@ -90,6 +93,18 @@ import android.util.Log;
                 mDatabase.unlock();
             }
         }
+    }
+
+    /* package */ synchronized boolean isInUse() {
+        return mInUse;
+    }
+
+    /* package */ synchronized void acquire() {
+        mInUse = true;
+    }
+
+    /* package */ synchronized void release() {
+        mInUse = false;
     }
 
     /**
