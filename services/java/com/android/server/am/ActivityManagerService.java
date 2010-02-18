@@ -4638,11 +4638,12 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         if (activity != null && activity.shortComponentName != null) {
             info.append(" (").append(activity.shortComponentName).append(")");
         }
+        info.append("\n");
         if (annotation != null) {
-            info.append("\nReason: ").append(annotation).append("\n");
+            info.append("Reason: ").append(annotation).append("\n");
         }
         if (parent != null && parent != activity) {
-            info.append("\nParent: ").append(parent.shortComponentName);
+            info.append("Parent: ").append(parent.shortComponentName).append("\n");
         }
 
         String cpuInfo = null;
