@@ -147,6 +147,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
     private IBinder mSecureLockIcon = null;
 
     private boolean mSystemReady;
+    private boolean mFirstShow = true;
 
     /** Low level access to the power manager for enableUserActivity.  Having this
      * requires that we run in the system process.  */
@@ -946,7 +947,11 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
             if (DEBUG) Log.d(TAG, "handleShow");
             if (!mSystemReady) return;
 
-            playSounds(true);
+            if (mFirstShow) {
+                mFirstShow = false;
+            } else {
+                playSounds(true);
+            }
 
             mKeyguardViewManager.show();
             mShowing = true;
