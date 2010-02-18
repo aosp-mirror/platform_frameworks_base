@@ -29,6 +29,7 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.util.Log;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -267,6 +268,9 @@ class ServiceRecord extends Binder {
                         int[] outId = new int[1];
                         inm.enqueueNotification(localPackageName, localForegroundId,
                                 localForegroundNoti, outId);
+                    } catch (RuntimeException e) {
+                        Log.w(ActivityManagerService.TAG, "Error showing notification for service",
+                            e);
                     } catch (RemoteException e) {
                     }
                 }
@@ -288,6 +292,9 @@ class ServiceRecord extends Binder {
                     }
                     try {
                         inm.cancelNotification(localPackageName, localForegroundId);
+                    } catch (RuntimeException e) {
+                        Log.w(ActivityManagerService.TAG, "Error canceling notification for"
+                            + " service", e);
                     } catch (RemoteException e) {
                     }
                 }
