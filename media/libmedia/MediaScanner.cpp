@@ -58,7 +58,7 @@ status_t MediaScanner::processDirectory(
 
     int pathRemaining = PATH_MAX - pathLength;
     strcpy(pathBuffer, path);
-    if (pathBuffer[pathLength - 1] != '/') {
+    if (pathLength > 0 && pathBuffer[pathLength - 1]) {
         pathBuffer[pathLength] = '/';
         pathBuffer[pathLength + 1] = 0;
         --pathRemaining;
