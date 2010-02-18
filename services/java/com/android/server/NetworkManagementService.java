@@ -28,6 +28,7 @@ import android.net.InterfaceConfiguration;
 import android.net.INetworkManagementEventObserver;
 import android.os.INetworkManagementService;
 import android.os.Handler;
+import android.os.SystemProperties;
 import android.text.TextUtils;
 import android.util.Log;
 import java.util.ArrayList;
@@ -86,6 +87,10 @@ class NetworkManagementService extends INetworkManagementService.Stub {
         mContext = context;
 
         mObservers = new ArrayList<INetworkManagementEventObserver>();
+
+        if ("simulator".equals(SystemProperties.get("ro.product.device"))) {
+            return;
+        }
 
         mConnector = new NativeDaemonConnector(
                 new NetdCallbackReceiver(), "netd", 10, "NetdConnector");

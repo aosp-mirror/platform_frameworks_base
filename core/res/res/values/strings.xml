@@ -2261,4 +2261,9 @@
     <!-- See TETHER_STOP_DIALOG.  If there was an error disconnect, this is the text. -->
     <string name="tether_stop_error_message">We\'ve encountered a problem turning off Tethering. Please try again.</string>
 
+    <!-- Strings for car mode notification -->
+    <!-- Shown when car mode is enabled -->
+    <string name="car_mode_disable_notification_title">Car mode enabled</string>
+    <string name="car_mode_disable_notification_message">Select to disable car mode.</string>
+
 </resources>

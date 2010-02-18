@@ -22,8 +22,10 @@ import android.app.AlarmManager;
 import android.app.IActivityManager;
 import android.app.IUiModeManager;
 import android.app.KeyguardManager;
-import android.app.StatusBarManager;
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.StatusBarManager;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.ActivityNotFoundException;
@@ -55,6 +57,8 @@ import android.text.format.DateUtils;
 import android.text.format.Time;
 import android.util.Log;
 
+import com.android.internal.R;
+import com.android.internal.app.DisableCarModeActivity;
 import com.android.internal.widget.LockPatternUtils;
 
 import java.io.FileNotFoundException;
@@ -101,6 +105,7 @@ class DockObserver extends UEventObserver {
     private final Context mContext;
 
     private PowerManagerService mPowerManager;
+    private NotificationManager mNotificationManager;
 
     private KeyguardManager.KeyguardLock mKeyguardLock;
     private boolean mKeyguardDisabled;
@@ -125,7 +130,8 @@ class DockObserver extends UEventObserver {
 
             // Launch a dock activity
             String category;
-            if (mCarModeEnabled || mDockState == Intent.EXTRA_DOCK_STATE_CAR) {
+            if (mCarModeEnabled) {
+                // Only launch car home when car mode is enabled.
                 category = Intent.CATEGORY_CAR_DOCK;
             } else if (mDockState == Intent.EXTRA_DOCK_STATE_DESK) {
                 category = Intent.CATEGORY_DESK_DOCK;
@@ -332,9 +338,13 @@ class DockObserver extends UEventObserver {
                         if (mCarModeEnabled && mDockState != Intent.EXTRA_DOCK_STATE_CAR) {
                             // Pretend to be in DOCK_STATE_CAR.
                             intent.putExtra(Intent.EXTRA_DOCK_STATE, Intent.EXTRA_DOCK_STATE_CAR);
+                        } else if (!mCarModeEnabled && mDockState == Intent.EXTRA_DOCK_STATE_CAR) {
+                            // Pretend to be in DOCK_STATE_UNDOCKED.
+                            intent.putExtra(Intent.EXTRA_DOCK_STATE, Intent.EXTRA_DOCK_STATE_UNDOCKED);
                         } else {
                             intent.putExtra(Intent.EXTRA_DOCK_STATE, mDockState);
                         }
+                        intent.putExtra(Intent.EXTRA_PHYSICAL_DOCK_STATE, mDockState);
                         intent.putExtra(Intent.EXTRA_CAR_MODE_ENABLED, mCarModeEnabled);
 
                         // Check if this is Bluetooth Dock
@@ -462,6 +472,52 @@ class DockObserver extends UEventObserver {
         }
     };
 
+    private void adjustStatusBarCarMode() {
+        if (mStatusBarManager == null) {
+            mStatusBarManager = (StatusBarManager) mContext.getSystemService(Context.STATUS_BAR_SERVICE);
+        }
+
+        // Fear not: StatusBarService manages a list of requests to disable
+        // features of the status bar; these are ORed together to form the
+        // active disabled list. So if (for example) the device is locked and
+        // the status bar should be totally disabled, the calls below will
+        // have no effect until the device is unlocked.
+        if (mStatusBarManager != null) {
+            long ident = Binder.clearCallingIdentity();
+            mStatusBarManager.disable(mCarModeEnabled
+                ? StatusBarManager.DISABLE_NOTIFICATION_TICKER
+                : StatusBarManager.DISABLE_NONE);
+            Binder.restoreCallingIdentity(ident);
+        }
+
+        if (mNotificationManager == null) {
+            mNotificationManager = (NotificationManager)
+                    mContext.getSystemService(Context.NOTIFICATION_SERVICE);
+        }
+
+        if (mNotificationManager != null) {
+            long ident = Binder.clearCallingIdentity();
+            if (mCarModeEnabled) {
+                Intent carModeOffIntent = new Intent(mContext, DisableCarModeActivity.class);
+
+                Notification n = new Notification();
+                n.icon = R.drawable.stat_notify_car_mode;
+                n.defaults = Notification.DEFAULT_LIGHTS;
+                n.flags = Notification.FLAG_ONGOING_EVENT;
+                n.when = 0;
+                n.setLatestEventInfo(
+                        mContext,
+                        mContext.getString(R.string.car_mode_disable_notification_title),
+                        mContext.getString(R.string.car_mode_disable_notification_message),
+                        PendingIntent.getActivity(mContext, 0, carModeOffIntent, 0));
+                mNotificationManager.notify(0, n);
+            } else {
+                mNotificationManager.cancel(0);
+            }
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
     private void setCarMode(boolean enabled) throws RemoteException {
         mCarModeEnabled = enabled;
         if (enabled) {
@@ -475,23 +531,7 @@ class DockObserver extends UEventObserver {
             setMode(Configuration.UI_MODE_TYPE_NORMAL,
                     Configuration.UI_MODE_NIGHT_UNDEFINED);
         }
-
-        if (mStatusBarManager == null) {
-            mStatusBarManager = (StatusBarManager) mContext.getSystemService(Context.STATUS_BAR_SERVICE);
-        }
-
-        // Fear not: StatusBarService manages a list of requests to disable
-        // features of the status bar; these are ORed together to form the
-        // active disabled list. So if (for example) the device is locked and
-        // the status bar should be totally disabled, the calls below will
-        // have no effect until the device is unlocked.
-        if (mStatusBarManager != null) {
-            long ident = Binder.clearCallingIdentity();
-            mStatusBarManager.disable(enabled 
-                ? StatusBarManager.DISABLE_NOTIFICATION_TICKER
-                : StatusBarManager.DISABLE_NONE);
-            Binder.restoreCallingIdentity(ident);
-        }
+        adjustStatusBarCarMode();
     }
 
     private void setMode(int modeType, int modeNight) throws RemoteException {
