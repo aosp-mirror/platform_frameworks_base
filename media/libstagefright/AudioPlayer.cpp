@@ -99,13 +99,13 @@ status_t AudioPlayer::start() {
                     : AudioSystem::CHANNEL_OUT_MONO,
                 8192, 0, &AudioCallback, this, 0);
 
-        if (mAudioTrack->initCheck() != OK) {
+        if ((err = mAudioTrack->initCheck()) != OK) {
             delete mAudioTrack;
             mAudioTrack = NULL;
 
             mSource->stop();
 
-            return mAudioTrack->initCheck();
+            return err;
         }
 
         mLatencyUs = (int64_t)mAudioTrack->latency() * 1000;
