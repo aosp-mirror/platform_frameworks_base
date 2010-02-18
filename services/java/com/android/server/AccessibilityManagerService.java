@@ -16,8 +16,6 @@
 
 package com.android.server;
 
-import static android.util.Config.LOGV;
-
 import com.android.internal.os.HandlerCaller;
 import com.android.internal.os.HandlerCaller.SomeArgs;
 
@@ -47,6 +45,7 @@ import android.os.RemoteException;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.text.TextUtils.SimpleStringSplitter;
+import android.util.Config;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.accessibility.AccessibilityEvent;
@@ -137,10 +136,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
         registerPackageChangeAndBootCompletedBroadcastReceiver();
         registerSettingsContentObservers();
-
-        synchronized (mLock) {
-            populateAccessibilityServiceListLocked();
-        }
     }
 
     /**
@@ -155,13 +150,19 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             public void onReceive(Context context, Intent intent) {
                 synchronized (mLock) {
                     populateAccessibilityServiceListLocked();
-                    manageServicesLocked();
 
                     if (intent.getAction() == Intent.ACTION_BOOT_COMPLETED) {
+                        // get the accessibility enabled setting on boot
                         mIsEnabled = Settings.Secure.getInt(mContext.getContentResolver(),
                                 Settings.Secure.ACCESSIBILITY_ENABLED, 0) == 1;
-                        updateClientsLocked();
+
+                        // if accessibility is enabled inform our clients we are on
+                        if (mIsEnabled) {
+                            updateClientsLocked();
+                        }
                     }
+
+                    manageServicesLocked();
                 }
             }
         };
@@ -169,7 +170,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         // package changes
         IntentFilter packageFilter = new IntentFilter();
         packageFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
-        packageFilter.addAction(Intent.ACTION_PACKAGE_CHANGED);
         packageFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
         packageFilter.addAction(Intent.ACTION_PACKAGE_RESTARTED);
         packageFilter.addDataScheme("package");
@@ -409,7 +409,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
         try {
             listener.onAccessibilityEvent(event);
-            if (LOGV) {
+            if (Config.DEBUG) {
                 Log.i(LOG_TAG, "Event " + event + " sent to " + listener);
             }
         } catch (RemoteException re) {
@@ -434,7 +434,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         mServices.remove(service);
         mHandler.removeMessages(service.mId);
 
-        if (LOGV) {
+        if (Config.DEBUG) {
             Log.i(LOG_TAG, "Dead service " + service.mService + " removed");
         }
 
@@ -547,6 +547,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
         Map<ComponentName, Service> componentNameToServiceMap = mComponentNameToServiceMap;
         List<Service> services = mServices;
+        boolean isEnabled = mIsEnabled;
 
         for (int i = 0, count = installedServices.size(); i < count; i++) {
             ServiceInfo intalledService = installedServices.get(i);
@@ -554,7 +555,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     intalledService.name);
             Service service = componentNameToServiceMap.get(componentName);
 
-            if (enabledServices.contains(componentName)) {
+            if (isEnabled && enabledServices.contains(componentName)) {
                 if (service == null) {
                     new Service(componentName).bind();
                 }
