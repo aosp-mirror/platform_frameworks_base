@@ -551,7 +551,7 @@ android_tts_SynthProxy_setSpeechRate(JNIEnv *env, jobject thiz, jint jniData,
         return result;
     }
 
-    int bufSize = 10;
+    int bufSize = 12;
     char buffer [bufSize];
     sprintf(buffer, "%d", speechRate);
 
@@ -581,7 +581,7 @@ android_tts_SynthProxy_setPitch(JNIEnv *env, jobject thiz, jint jniData,
 
     Mutex::Autolock l(engineMutex);
 
-    int bufSize = 10;
+    int bufSize = 12;
     char buffer [bufSize];
     sprintf(buffer, "%d", pitch);
 
