@@ -71,28 +71,32 @@ static void android_os_fileobserver_observe(JNIEnv* env, jobject object, jint fd
             return;
         }
         
-    	while (num_bytes >= (int)sizeof(*event))
-    	{
-			int event_size;
-			event = (struct inotify_event *)(event_buf + event_pos);
-			
+        while (num_bytes >= (int)sizeof(*event))
+        {
+            int event_size;
+            event = (struct inotify_event *)(event_buf + event_pos);
+
             jstring path = NULL;
             
             if (event->len > 0)
             {
                 path = env->NewStringUTF(event->name);
             }
-            
-		    env->CallVoidMethod(object, method_onEvent, event->wd, event->mask, path);
+
+            env->CallVoidMethod(object, method_onEvent, event->wd, event->mask, path);
+            if (env->ExceptionCheck()) {
+                env->ExceptionDescribe();
+                env->ExceptionClear();
+            }
             if (path != NULL)
             {
                 env->DeleteLocalRef(path);
             }
-		    
-		    event_size = sizeof(*event) + event->len;
-			num_bytes -= event_size;
-			event_pos += event_size;
-		}
+
+            event_size = sizeof(*event) + event->len;
+            num_bytes -= event_size;
+            event_pos += event_size;
+        }
     }
     
 #endif // HAVE_INOTIFY
