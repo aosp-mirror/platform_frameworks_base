@@ -337,23 +337,19 @@ bool PrefetchedSource::getCacheDurationUs(int64_t *durationUs) {
 void PrefetchedSource::cacheMore() {
     MediaSource::ReadOptions options;
 
-    {
-        Mutex::Autolock autoLock(mLock);
+    Mutex::Autolock autoLock(mLock);
 
-        if (!mStarted) {
-            return;
-        }
+    if (!mStarted) {
+        return;
+    }
 
-        if (mSeekTimeUs >= 0) {
-            options.setSeekTo(mSeekTimeUs);
-            mSeekTimeUs = -1;
-        }
+    if (mSeekTimeUs >= 0) {
+        options.setSeekTo(mSeekTimeUs);
+        mSeekTimeUs = -1;
     }
 
     MediaBuffer *buffer;
     status_t err = mSource->read(&buffer, &options);
-
-    Mutex::Autolock autoLock(mLock);
 
     if (err != OK) {
         mReachedEOS = true;
