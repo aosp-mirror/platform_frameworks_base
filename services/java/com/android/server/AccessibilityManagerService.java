@@ -579,6 +579,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             } catch (RemoteException re) {
                 mClients.remove(i);
                 count--;
+                i--;
             }
         }
     }
