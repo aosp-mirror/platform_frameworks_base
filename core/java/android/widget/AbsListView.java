@@ -1960,7 +1960,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             if (getHeight() > 0 && getChildCount() > 0) {
                 // We do not lose focus initiating a touch (since AbsListView is focusable in
                 // touch mode). Force an initial layout to get rid of the selection.
-                mLayoutMode = LAYOUT_NORMAL;
                 layoutChildren();
             }
         } else {
@@ -3118,7 +3117,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
     void hideSelector() {
         if (mSelectedPosition != INVALID_POSITION) {
-            mResurrectToPosition = mSelectedPosition;
+            if (mLayoutMode != LAYOUT_SPECIFIC) {
+                mResurrectToPosition = mSelectedPosition;
+            }
             if (mNextSelectedPosition >= 0 && mNextSelectedPosition != mSelectedPosition) {
                 mResurrectToPosition = mNextSelectedPosition;
             }
