@@ -16,14 +16,17 @@
 
 package android.widget;
 
+import com.android.internal.R;
+import com.google.android.collect.Lists;
+
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
-import android.graphics.Rect;
-import android.graphics.PixelFormat;
 import android.graphics.Paint;
-import android.graphics.drawable.Drawable;
+import android.graphics.PixelFormat;
+import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AttributeSet;
@@ -31,15 +34,12 @@ import android.util.SparseBooleanArray;
 import android.view.FocusFinder;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
+import android.view.SoundEffectConstants;
 import android.view.View;
 import android.view.ViewDebug;
 import android.view.ViewGroup;
 import android.view.ViewParent;
-import android.view.SoundEffectConstants;
 import android.view.accessibility.AccessibilityEvent;
-
-import com.google.android.collect.Lists;
-import com.android.internal.R;
 
 import java.util.ArrayList;
 
@@ -2722,7 +2722,8 @@ public class ListView extends AbsListView {
 
     /**
      * Determine the distance to the nearest edge of a view in a particular
-     * direciton.
+     * direction.
+     * 
      * @param descendant A descendant of this list.
      * @return The distance, or 0 if the nearest edge is already on screen.
      */
@@ -3307,9 +3308,9 @@ public class ListView extends AbsListView {
      * Sets the checked state of the specified position. The is only valid if
      * the choice mode has been set to {@link #CHOICE_MODE_SINGLE} or
      * {@link #CHOICE_MODE_MULTIPLE}.
-     *
+     * 
      * @param position The item whose checked state is to be checked
-     * @param value The new checked sate for the item
+     * @param value The new checked state for the item
      */
     public void setItemChecked(int position, boolean value) {
         if (mChoiceMode == CHOICE_MODE_NONE) {
@@ -3392,10 +3393,11 @@ public class ListView extends AbsListView {
     }
 
     /**
-     * Returns the set of checked items ids. The result is only valid if
-     * the choice mode has not been set to {@link #CHOICE_MODE_SINGLE}.
-     *
-     * @return A new array which contains the id of each checked item in the list.
+     * Returns the set of checked items ids. The result is only valid if the
+     * choice mode has not been set to {@link #CHOICE_MODE_SINGLE}.
+     * 
+     * @return A new array which contains the id of each checked item in the
+     *         list.
      */
     public long[] getCheckItemIds() {
         if (mChoiceMode != CHOICE_MODE_NONE && mCheckStates != null && mAdapter != null) {
@@ -3404,11 +3406,23 @@ public class ListView extends AbsListView {
             final long[] ids = new long[count];
             final ListAdapter adapter = mAdapter;
 
+            int checkedCount = 0;
             for (int i = 0; i < count; i++) {
-                ids[i]= adapter.getItemId(states.keyAt(i));
+                if (states.valueAt(i)) {
+                    ids[checkedCount++] = adapter.getItemId(states.keyAt(i));
+                }
             }
 
-            return ids;
+            // Trim array if needed. mCheckStates may contain false values
+            // resulting in checkedCount being smaller than count.
+            if (checkedCount == count) {
+                return ids;
+            } else {
+                final long[] result = new long[checkedCount];
+                System.arraycopy(ids, 0, result, 0, checkedCount);
+
+                return result;
+            }
         }
 
         return new long[0];
