@@ -28,6 +28,8 @@ public class OperationSchedulerTest extends AndroidTestCase {
         OperationScheduler scheduler = new OperationScheduler(storage);
         OperationScheduler.Options options = new OperationScheduler.Options();
         assertEquals(Long.MAX_VALUE, scheduler.getNextTimeMillis(options));
+        assertEquals(0, scheduler.getLastSuccessTimeMillis());
+        assertEquals(0, scheduler.getLastAttemptTimeMillis());
 
         long beforeTrigger = System.currentTimeMillis();
         scheduler.setTriggerTimeMillis(beforeTrigger + 1000000);
@@ -49,6 +51,9 @@ public class OperationSchedulerTest extends AndroidTestCase {
         long beforeError = System.currentTimeMillis();
         scheduler.onTransientError();
         long afterError = System.currentTimeMillis();
+        assertEquals(0, scheduler.getLastSuccessTimeMillis());
+        assertTrue(beforeError <= scheduler.getLastAttemptTimeMillis());
+        assertTrue(afterError >= scheduler.getLastAttemptTimeMillis());
         assertEquals(beforeTrigger + 1500000, scheduler.getNextTimeMillis(options));
         options.backoffFixedMillis = 1000000;
         options.backoffIncrementalMillis = 500000;
@@ -59,8 +64,17 @@ public class OperationSchedulerTest extends AndroidTestCase {
         beforeError = System.currentTimeMillis();
         scheduler.onTransientError();
         afterError = System.currentTimeMillis();
+        assertTrue(beforeError <= scheduler.getLastAttemptTimeMillis());
+        assertTrue(afterError >= scheduler.getLastAttemptTimeMillis());
         assertTrue(beforeError + 2000000 <= scheduler.getNextTimeMillis(options));
         assertTrue(afterError + 2000000 >= scheduler.getNextTimeMillis(options));
+
+        // Reset transient error: no backoff interval
+        scheduler.resetTransientError();
+        assertEquals(0, scheduler.getLastSuccessTimeMillis());
+        assertEquals(beforeTrigger + 1500000, scheduler.getNextTimeMillis(options));
+        assertTrue(beforeError <= scheduler.getLastAttemptTimeMillis());
+        assertTrue(afterError >= scheduler.getLastAttemptTimeMillis());
 
         // Permanent error holds true even if transient errors are reset
         // However, we remember that the transient error was reset...
@@ -75,6 +89,10 @@ public class OperationSchedulerTest extends AndroidTestCase {
         long beforeSuccess = System.currentTimeMillis();
         scheduler.onSuccess();
         long afterSuccess = System.currentTimeMillis();
+        assertTrue(beforeSuccess <= scheduler.getLastAttemptTimeMillis());
+        assertTrue(afterSuccess >= scheduler.getLastAttemptTimeMillis());
+        assertTrue(beforeSuccess <= scheduler.getLastSuccessTimeMillis());
+        assertTrue(afterSuccess >= scheduler.getLastSuccessTimeMillis());
         assertEquals(Long.MAX_VALUE, scheduler.getNextTimeMillis(options));
 
         // The moratorium is not reset by success!
