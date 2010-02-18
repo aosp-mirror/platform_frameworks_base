@@ -63,7 +63,7 @@ interface IMountService
      * Safely unmount external storage at given mount point.
      * Returns an int consistent with MountServiceResultCode
      */
-    int unmountVolume(String mountPoint);
+    int unmountVolume(String mountPoint, boolean force);
 
     /**
      * Format external storage given a mount point.
@@ -100,7 +100,7 @@ interface IMountService
      * NOTE: Ensure all references are released prior to deleting.
      * Returns an int consistent with MountServiceResultCode
      */
-    int destroySecureContainer(String id);
+    int destroySecureContainer(String id, boolean force);
 
     /*
      * Mount a secure container with the specified key and owner UID.
@@ -112,7 +112,7 @@ interface IMountService
      * Unount a secure container.
      * Returns an int consistent with MountServiceResultCode
      */
-    int unmountSecureContainer(String id);
+    int unmountSecureContainer(String id, boolean force);
 
     /*
      * Returns true if the specified container is mounted

@@ -716,7 +716,7 @@ public class PackageManagerTests extends AndroidTestCase {
         }
         try {
         String mPath = Environment.getExternalStorageDirectory().toString();
-        int ret = getMs().unmountVolume(mPath);
+        int ret = getMs().unmountVolume(mPath, false);
         return ret == StorageResultCode.OperationSucceeded;
         } catch (RemoteException e) {
             return true;

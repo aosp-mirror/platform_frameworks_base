@@ -64,4 +64,10 @@ public class StorageResultCode
      */
     public static final int OperationFailedStorageMounted     = -6;
 
+    /**
+     * Operation failed: Storage is busy.
+     * @see android.os.storage.StorageManager
+     */
+    public static final int OperationFailedStorageBusy        = -7;
+
 }
