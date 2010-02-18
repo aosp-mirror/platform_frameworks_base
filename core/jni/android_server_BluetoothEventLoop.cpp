@@ -1122,9 +1122,10 @@ void onCreateDeviceResult(DBusMessage *msg, void *user, void *n) {
     if (dbus_set_error_from_message(&err, msg)) {
         if (dbus_error_has_name(&err, "org.bluez.Error.AlreadyExists")) {
             result = CREATE_DEVICE_ALREADY_EXISTS;
+        } else {
+            result = CREATE_DEVICE_FAILED;
         }
         LOG_AND_FREE_DBUS_ERROR(&err);
-        result = CREATE_DEVICE_FAILED;
     }
     env->CallVoidMethod(nat->me,
                         method_onCreateDeviceResult,
