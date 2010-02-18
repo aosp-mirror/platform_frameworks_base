@@ -972,7 +972,7 @@ public class StatusBarService extends IStatusBar.Stub
             return;
         }
 
-        prepareTracking(0);
+        prepareTracking(0, true);
         performFling(0, 2000.0f, true);
     }
     
@@ -980,7 +980,9 @@ public class StatusBarService extends IStatusBar.Stub
         if (SPEW) {
             Log.d(TAG, "animateCollapse(): mExpanded=" + mExpanded
                     + " mExpandedVisible=" + mExpandedVisible
+                    + " mExpanded=" + mExpanded
                     + " mAnimating=" + mAnimating
+                    + " mAnimY=" + mAnimY
                     + " mAnimVel=" + mAnimVel);
         }
         
@@ -988,12 +990,16 @@ public class StatusBarService extends IStatusBar.Stub
             return;
         }
 
+        int y;
         if (mAnimating) {
-            return;
+            y = (int)mAnimY;
+        } else {
+            y = mDisplay.getHeight()-1;
         }
-
-        int y = mDisplay.getHeight()-1;
-        prepareTracking(y);
+        // Let the fling think that we're open so it goes in the right direction
+        // and doesn't try to re-open the windowshade.
+        mExpanded = true;
+        prepareTracking(y, false);
         performFling(y, -2000.0f, true);
     }
     
@@ -1108,10 +1114,9 @@ public class StatusBarService extends IStatusBar.Stub
         }
     }
     
-    void prepareTracking(int y) {
+    void prepareTracking(int y, boolean opening) {
         mTracking = true;
         mVelocityTracker = VelocityTracker.obtain();
-        boolean opening = !mExpanded;
         if (opening) {
             mAnimAccel = 2000.0f;
             mAnimVel = 200;
@@ -1199,10 +1204,11 @@ public class StatusBarService extends IStatusBar.Stub
     }
     
     boolean interceptTouchEvent(MotionEvent event) {
-        if (SPEW) Log.d(TAG, "Touch: rawY=" + event.getRawY() + " event=" + event);
+        if (SPEW) Log.d(TAG, "Touch: rawY=" + event.getRawY() + " event=" + event + " mDisabled="
+                + mDisabled);
 
         if ((mDisabled & StatusBarManager.DISABLE_EXPAND) != 0) {
-            return true;
+            return false;
         }
         
         final int statusBarSize = mStatusBarView.getHeight();
@@ -1218,7 +1224,7 @@ public class StatusBarService extends IStatusBar.Stub
             }
             if ((!mExpanded && y < hitSize) ||
                     (mExpanded && y > (mDisplay.getHeight()-hitSize))) {
-                prepareTracking(y);
+                prepareTracking(y, !mExpanded); // opening if we're not already fully visible
                 mVelocityTracker.addMovement(event);
             }
         } else if (mTracking) {
@@ -1679,9 +1685,7 @@ public class StatusBarService extends IStatusBar.Stub
         if ((diff & StatusBarManager.DISABLE_EXPAND) != 0) {
             if ((net & StatusBarManager.DISABLE_EXPAND) != 0) {
                 Log.d(TAG, "DISABLE_EXPAND: yes");
-                mAnimating = false;
-                updateExpandedViewPos(0);
-                performCollapse();
+                animateCollapse();
             }
         }
         if ((diff & StatusBarManager.DISABLE_NOTIFICATION_ICONS) != 0) {
