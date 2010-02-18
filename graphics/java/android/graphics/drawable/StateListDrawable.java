@@ -238,7 +238,10 @@ public class StateListDrawable extends DrawableContainer {
             final int count = sets.length;
             mStateListState.mStateSets = new int[count][];
             for (int i = 0; i < count; i++) {
-                mStateListState.mStateSets[i] = sets[i].clone();
+                final int[] set = sets[i];
+                if (set != null) {
+                    mStateListState.mStateSets[i] = set.clone();
+                }
             }
             mMutated = true;
         }

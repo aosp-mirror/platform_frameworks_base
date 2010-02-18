@@ -350,7 +350,7 @@ import java.util.List;
  * <p><b>Configuring your Content Provider to Receive Suggestion Queries.</b>  The basic job of
  * a search suggestions {@link android.content.ContentProvider Content Provider} is to provide
  * "live" (while-you-type) conversion of the user's query text into a set of zero or more 
- * suggestions.  Each application is free to define the conversion, and as described above there are
+ * suggestions. Each application is free to define the conversion, and as described above there are
  * many possible solutions.  This section simply defines how to communicate with the suggestion
  * provider.  
  * 
@@ -360,7 +360,8 @@ import java.util.List;
  * 
  * <p>Every query includes a Uri, and the Search Manager will format the Uri as shown:
  * <p><pre class="prettyprint">
- * content:// your.suggest.authority / your.suggest.path / SearchManager.SUGGEST_URI_PATH_QUERY</pre>
+ * content:// your.suggest.authority / your.suggest.path / SearchManager.SUGGEST_URI_PATH_QUERY
+ *    </pre>
  * 
  * <p>Your Content Provider can receive the query text in one of two ways.
  * <ul>
@@ -379,7 +380,7 @@ import java.util.List;
  * <p><b>Providing access to Content Providers that require permissions.</b>  If your content
  * provider declares an android:readPermission in your application's manifest, you must provide
  * access to the search infrastructure to the search suggestion path by including a path-permission
- * that grants android:readPermission access to "android.permission.GLOBAL_SEARCH".  Granting access
+ * that grants android:readPermission access to "android.permission.GLOBAL_SEARCH". Granting access
  * explicitly to the search infrastructure ensures it will be able to access the search suggestions
  * without needing to know ahead of time any other details of the permissions protecting your
  * provider.  Content providers that require no permissions are already available to the search
@@ -546,7 +547,8 @@ import java.util.List;
  * taken directly to a specific result.
  *   <ul>
  *   <li><b>Action:</b> {@link android.content.Intent#ACTION_VIEW ACTION_VIEW}</li>
- *   <li><b>Data:</b> a complete Uri, supplied by the cursor, that identifies the desired data.</li>
+ *   <li><b>Data:</b> a complete Uri, supplied by the cursor, that identifies the desired data.
+ *   </li>
  *   <li><b>Query:</b> query text supplied with the suggestion (probably ignored)</li>
  *   </ul>
  * </li>
@@ -570,7 +572,7 @@ import java.util.List;
  * 
  * <p><b>Suggestion Rewriting.</b>  If the user navigates through the suggestions list, the UI
  * may temporarily rewrite the user's query with a query that matches the currently selected 
- * suggestion.  This enables the user to see what query is being suggested, and also allows the user
+ * suggestion. This enables the user to see what query is being suggested, and also allows the user
  * to click or touch in the entry EditText element and make further edits to the query before
  * dispatching it.  In order to perform this correctly, the Search UI needs to know exactly what
  * text to rewrite the query with.
@@ -1289,15 +1291,6 @@ public class SearchManager
     public final static String SEARCH_MODE = "search_mode";
 
     /**
-     * Value for the {@link #SEARCH_MODE} key.
-     * This is used if the intent was launched by clicking a suggestion in global search
-     * mode (Quick Search Box).
-     *
-     * @hide
-     */
-    public static final String MODE_GLOBAL_SEARCH_SUGGESTION = "global_search_suggestion";
-
-    /**
      * Intent extra data key: Use this key with Intent.ACTION_SEARCH and
      * {@link android.content.Intent#getIntExtra content.Intent.getIntExtra()}
      * to obtain the keycode that the user used to trigger this query.  It will be zero if the
@@ -1307,14 +1300,6 @@ public class SearchManager
      */
     public final static String ACTION_KEY = "action_key";
     
-    /**
-     * Intent component name key: This key will be used for the extra populated by the
-     * {@link #SUGGEST_COLUMN_INTENT_COMPONENT_NAME} column.
-     *
-     * {@hide}
-     */
-    public final static String COMPONENT_NAME_KEY = "intent_component_name_key";
-
     /**
      * Intent extra data key: This key will be used for the extra populated by the
      * {@link #SUGGEST_COLUMN_INTENT_EXTRA_DATA} column.
@@ -1327,58 +1312,6 @@ public class SearchManager
      * that the user can easily replace it with another query.
      */
     public final static String EXTRA_SELECT_QUERY = "select_query";
-
-    /**
-     * Defines the constants used in the communication between {@link android.app.SearchDialog} and
-     * the global search provider via {@link Cursor#respond(android.os.Bundle)}.
-     *
-     * @hide
-     */
-    public static class DialogCursorProtocol {
-
-        /**
-         * The sent bundle will contain this integer key, with a value set to one of the events
-         * below.
-         */
-        public final static String METHOD = "DialogCursorProtocol.method";
-
-        /**
-         * After data has been refreshed.
-         */
-        public final static int POST_REFRESH = 0;
-        public final static String POST_REFRESH_RECEIVE_ISPENDING
-                = "DialogCursorProtocol.POST_REFRESH.isPending";
-        public final static String POST_REFRESH_RECEIVE_DISPLAY_NOTIFY
-                = "DialogCursorProtocol.POST_REFRESH.displayNotify";
-
-        /**
-         * When a position has been clicked.
-         */
-        public final static int CLICK = 2;
-        public final static String CLICK_SEND_POSITION
-                = "DialogCursorProtocol.CLICK.sendPosition";
-        public final static String CLICK_SEND_MAX_DISPLAY_POS
-                = "DialogCursorProtocol.CLICK.sendDisplayPosition";
-        public final static String CLICK_SEND_ACTION_KEY
-                = "DialogCursorProtocol.CLICK.sendActionKey";
-        public final static String CLICK_SEND_ACTION_MSG
-                = "DialogCursorProtocol.CLICK.sendActionMsg";
-        public final static String CLICK_RECEIVE_SELECTED_POS
-                = "DialogCursorProtocol.CLICK.receiveSelectedPosition";
-
-        /**
-         * When the threshold received in {@link #POST_REFRESH_RECEIVE_DISPLAY_NOTIFY} is displayed.
-         */
-        public final static int THRESH_HIT = 3;
-
-        /**
-         * When a search is started without using a suggestion.
-         */
-        public final static int SEARCH = 4;
-        public final static String SEARCH_SEND_MAX_DISPLAY_POS
-                = "DialogCursorProtocol.SEARCH.sendDisplayPosition";
-        public final static String SEARCH_SEND_QUERY = "DialogCursorProtocol.SEARCH.query";
-    }
 
     /**
      * Intent extra data key: Use this key with Intent.ACTION_SEARCH and
@@ -1420,40 +1353,6 @@ public class SearchManager
      */
     public final static String SHORTCUT_MIME_TYPE = 
             "vnd.android.cursor.item/vnd.android.search.suggest";
-
-
-    /**
-     * The authority of the provider to report clicks to when a click is detected after pivoting
-     * into a specific app's search from global search.
-     *
-     * In addition to the columns below, the suggestion columns are used to pass along the full
-     * suggestion so it can be shortcutted.
-     *
-     * @hide
-     */
-    public final static String SEARCH_CLICK_REPORT_AUTHORITY =
-            "com.android.globalsearch.stats";
-
-    /**
-     * The path the write goes to.
-     *
-     * @hide
-     */
-    public final static String SEARCH_CLICK_REPORT_URI_PATH = "click";
-
-    /**
-     * The column storing the query for the click.
-     *
-     * @hide
-     */
-    public final static String SEARCH_CLICK_REPORT_COLUMN_QUERY = "query";
-
-    /**
-     * The column storing the component name of the application that was pivoted into.
-     *
-     * @hide
-     */
-    public final static String SEARCH_CLICK_REPORT_COLUMN_COMPONENT = "component";
 
     /**
      * Column name for suggestions cursor.  <i>Unused - can be null or column can be omitted.</i>
@@ -1531,10 +1430,7 @@ public class SearchManager
      */
     public final static String SUGGEST_COLUMN_INTENT_EXTRA_DATA = "suggest_intent_extra_data";
     /**
-     * Column name for suggestions cursor.  <i>Optional.</i>  This column allows suggestions
-     *  to provide additional arbitrary data which will be included as an extra under the key
-     *  {@link #COMPONENT_NAME_KEY}. For use by the global search system only - if other providers
-     *  attempt to use this column, the value will be overwritten by global search.
+     * TODO: Remove
      *
      * @hide
      */
@@ -1594,27 +1490,6 @@ public class SearchManager
     public final static String SUGGEST_PARAMETER_LIMIT = "limit";
 
     /**
-     * If a suggestion has this value in {@link #SUGGEST_COLUMN_INTENT_ACTION},
-     * the search dialog will switch to a different suggestion source when the
-     * suggestion is clicked. 
-     * 
-     * {@link #SUGGEST_COLUMN_INTENT_DATA} must contain
-     * the flattened {@link ComponentName} of the activity which is to be searched.
-     * 
-     * TODO: Should {@link #SUGGEST_COLUMN_INTENT_DATA} instead contain a URI in the format
-     * used by {@link android.provider.Applications}?
-     * 
-     * TODO: This intent should be protected by the same permission that we use
-     * for replacing the global search provider.
-     * 
-     * The query text field will be set to the value of {@link #SUGGEST_COLUMN_QUERY}.
-     * 
-     * @hide Pending API council approval.
-     */
-    public final static String INTENT_ACTION_CHANGE_SEARCH_SOURCE 
-            = "android.search.action.CHANGE_SEARCH_SOURCE";
-
-    /**
      * Intent action for starting the global search activity.
      * The global search provider should handle this intent.
      *
@@ -1663,20 +1538,13 @@ public class SearchManager
      * @hide
      */
     public final static String INTENT_ACTION_NONE = "android.search.action.ZILCH";
-    
+
     /**
      * Reference to the shared system search service.
      */
     private static ISearchManager mService;
 
     private final Context mContext;
-
-    /**
-     * compact representation of the activity associated with this search manager so
-     * we can say who we are when starting search.  the search managerservice, in turn,
-     * uses this to properly handle the back stack.
-     */
-    private int mIdent;
 
     /**
      * The package associated with this seach manager.
@@ -1695,21 +1563,6 @@ public class SearchManager
         mHandler = handler;
         mService = ISearchManager.Stub.asInterface(
                 ServiceManager.getService(Context.SEARCH_SERVICE));
-    }
-
-    /*package*/ boolean hasIdent() {
-        return mIdent != 0;
-    }
-    
-    /*package*/ void setIdent(int ident, ComponentName component) {
-        if (mIdent != 0) {
-            throw new IllegalStateException("mIdent already set");
-        }
-        if (component == null) {
-            throw new IllegalArgumentException("component must be non-null");
-        }
-        mIdent = ident;
-        mAssociatedPackage = component.getPackageName();
     }
     
     /**
@@ -1757,15 +1610,14 @@ public class SearchManager
                             ComponentName launchActivity,
                             Bundle appSearchData,
                             boolean globalSearch) {
-        ensureSearchDialog();
-
         if (globalSearch) {
             startGlobalSearch(initialQuery, selectInitialQuery, appSearchData);
             return;
         }
 
-        mSearchDialog.show(initialQuery, selectInitialQuery, launchActivity, appSearchData,
-                globalSearch);
+        ensureSearchDialog();
+
+        mSearchDialog.show(initialQuery, selectInitialQuery, launchActivity, appSearchData);
     }
 
     private void ensureSearchDialog() {
@@ -1994,17 +1846,6 @@ public class SearchManager
             return null;
         }
     }
-    
-    /**
-     * Checks whether the given searchable is the default searchable.
-     * 
-     * @hide because SearchableInfo is not part of the API.
-     */
-    public boolean isDefaultSearchable(SearchableInfo searchable) {
-        SearchableInfo defaultSearchable = getSearchableInfo(null, true);
-        return defaultSearchable != null 
-                && defaultSearchable.getSearchActivity().equals(searchable.getSearchActivity());
-    }
 
     /**
      * Gets a cursor with search suggestions.
@@ -2091,56 +1932,4 @@ public class SearchManager
         }
     }
 
-    /**
-     * Returns a list of the searchable activities that handle web searches.
-     *
-     * @return a list of all searchable activities that handle
-     *         {@link android.content.Intent#ACTION_WEB_SEARCH}.
-     *
-     * @hide because SearchableInfo is not part of the API.
-     */
-    public List<SearchableInfo> getSearchablesForWebSearch() {
-        try {
-            return mService.getSearchablesForWebSearch();
-        } catch (RemoteException e) {
-            Log.e(TAG, "getSearchablesForWebSearch() failed: " + e);
-            return null;
-        }
-    }
-
-    /**
-     * Returns the default searchable activity for web searches.
-     *
-     * @return searchable information for the activity handling web searches by default.
-     *
-     * @hide because SearchableInfo is not part of the API.
-     */
-    public SearchableInfo getDefaultSearchableForWebSearch() {
-        try {
-            return mService.getDefaultSearchableForWebSearch();
-        } catch (RemoteException e) {
-            Log.e(TAG, "getDefaultSearchableForWebSearch() failed: " + e);
-            return null;
-        }
-    }
-
-    /**
-     * Sets the default searchable activity for web searches.
-     *
-     * @param component Name of the component to set as default activity for web searches.
-     *
-     * @hide
-     */
-    public void setDefaultWebSearch(ComponentName component) {
-        try {
-            mService.setDefaultWebSearch(component);
-        } catch (RemoteException e) {
-            Log.e(TAG, "setDefaultWebSearch() failed: " + e);
-        }
-    }
-
-    private static void debug(String msg) {
-        Thread thread = Thread.currentThread();
-        Log.d(TAG, msg + " (" + thread.getName() + "-" + thread.getId() + ")");
-    }
 }

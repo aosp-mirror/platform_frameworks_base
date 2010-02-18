@@ -1102,7 +1102,7 @@ public class WebView extends AbsoluteLayout
      * methods may be called on a WebView after destroy.
      */
     public void destroy() {
-        clearTextEntry();
+        clearTextEntry(false);
         if (mWebViewCore != null) {
             // Set the handlers to null before destroying WebViewCore so no
             // more messages will be posted.
@@ -1388,7 +1388,7 @@ public class WebView extends AbsoluteLayout
         arg.mUrl = url;
         arg.mExtraHeaders = extraHeaders;
         mWebViewCore.sendMessage(EventHub.LOAD_URL, arg);
-        clearTextEntry();
+        clearTextEntry(false);
     }
 
     /**
@@ -1417,7 +1417,7 @@ public class WebView extends AbsoluteLayout
             arg.mUrl = url;
             arg.mPostData = postData;
             mWebViewCore.sendMessage(EventHub.POST_URL, arg);
-            clearTextEntry();
+            clearTextEntry(false);
         } else {
             loadUrl(url);
         }
@@ -1473,7 +1473,7 @@ public class WebView extends AbsoluteLayout
         arg.mEncoding = encoding;
         arg.mFailUrl = failUrl;
         mWebViewCore.sendMessage(EventHub.LOAD_DATA, arg);
-        clearTextEntry();
+        clearTextEntry(false);
     }
 
     /**
@@ -1490,7 +1490,7 @@ public class WebView extends AbsoluteLayout
      * Reload the current url.
      */
     public void reload() {
-        clearTextEntry();
+        clearTextEntry(false);
         switchOutDrawHistory();
         mWebViewCore.sendMessage(EventHub.RELOAD);
     }
@@ -1577,7 +1577,7 @@ public class WebView extends AbsoluteLayout
         // null, and that will be the case
         mCertificate = null;
         if (steps != 0) {
-            clearTextEntry();
+            clearTextEntry(false);
             mWebViewCore.sendMessage(EventHub.GO_BACK_FORWARD, steps,
                     ignoreSnapshot ? 1 : 0);
         }
@@ -1677,9 +1677,17 @@ public class WebView extends AbsoluteLayout
                 && mWebTextView.hasFocus();
     }
 
-    private void clearTextEntry() {
+    /**
+     * Remove the WebTextView.
+     * @param disableFocusController If true, send a message to webkit
+     *     disabling the focus controller, so the caret stops blinking.
+     */
+    private void clearTextEntry(boolean disableFocusController) {
         if (inEditingMode()) {
             mWebTextView.remove();
+            if (disableFocusController) {
+                setFocusControllerInactive();
+            }
         }
     }
 
@@ -1713,7 +1721,7 @@ public class WebView extends AbsoluteLayout
             Log.w(LOGTAG, "This WebView doesn't support zoom.");
             return;
         }
-        clearTextEntry();
+        clearTextEntry(false);
         if (getSettings().getBuiltInZoomControls()) {
             mZoomButtonsController.setVisible(true);
         } else {
@@ -3105,11 +3113,26 @@ public class WebView extends AbsoluteLayout
         }
     }
 
+    private static class Metrics {
+        int mScrollX;
+        int mScrollY;
+        int mWidth;
+        int mHeight;
+        float mScale;
+    }
+
+    private Metrics getViewMetrics() {
+        Metrics metrics = new Metrics();
+        metrics.mScrollX = mScrollX;
+        metrics.mScrollY = computeVerticalScrollOffset();
+        metrics.mWidth = getWidth();
+        metrics.mHeight = getHeight() - getVisibleTitleHeight();
+        metrics.mScale = mActualScale;
+        return metrics;
+    }
+
     private void drawLayers(Canvas canvas) {
         if (mRootLayer != 0) {
-            int scrollY = computeVerticalScrollOffset();
-            int viewHeight = getHeight() - getVisibleTitleHeight();
-
             // Currently for each draw we compute the animation values;
             // We may in the future decide to do that independently.
             if (nativeEvaluateLayersAnimations(mRootLayer)) {
@@ -3119,9 +3142,7 @@ public class WebView extends AbsoluteLayout
             }
 
             // We can now draw the layers.
-            nativeDrawLayers(mRootLayer, mScrollX, scrollY,
-                             getWidth(), viewHeight,
-                             mActualScale, canvas);
+            nativeDrawLayers(mRootLayer, canvas);
         }
     }
 
@@ -3209,7 +3230,15 @@ public class WebView extends AbsoluteLayout
 
         mWebViewCore.drawContentPicture(canvas, color,
                 (animateZoom || mPreviewZoomOnly), animateScroll);
-
+        boolean cursorIsInLayer = nativeCursorIsInLayer();
+        if (drawCursorRing && !cursorIsInLayer) {
+            nativeDrawCursorRing(canvas);
+        }
+        // When the FindDialog is up, only draw the matches if we are not in
+        // the process of scrolling them into view.
+        if (mFindIsUp && !animateScroll) {
+            nativeDrawMatches(canvas);
+        }
         drawLayers(canvas);
 
         if (mNativeClass == 0) return;
@@ -3232,12 +3261,7 @@ public class WebView extends AbsoluteLayout
                             LONG_PRESS_TIMEOUT);
                 }
             }
-            nativeDrawCursorRing(canvas);
-        }
-        // When the FindDialog is up, only draw the matches if we are not in
-        // the process of scrolling them into view.
-        if (mFindIsUp && !animateScroll) {
-            nativeDrawMatches(canvas);
+            if (cursorIsInLayer) nativeDrawCursorRing(canvas);
         }
         if (mFocusSizeChanged) {
             mFocusSizeChanged = false;
@@ -3743,6 +3767,7 @@ public class WebView extends AbsoluteLayout
                 }
                 return true;
             }
+            clearTextEntry(true);
             nativeSetFollowedLink(true);
             if (!mCallbackProxy.uiOverrideUrlLoading(nativeCursorText())) {
                 mWebViewCore.sendMessage(EventHub.CLICK, data.mFrame,
@@ -3823,7 +3848,7 @@ public class WebView extends AbsoluteLayout
 
     @Override
     protected void onDetachedFromWindow() {
-        clearTextEntry();
+        clearTextEntry(false);
         super.onDetachedFromWindow();
         // Clean up the zoom controller
         mZoomButtonsController.setVisible(false);
@@ -5810,7 +5835,7 @@ public class WebView extends AbsoluteLayout
                         // is necessary for page loads driven by webkit, and in
                         // particular when the user was on a password field, so
                         // the WebTextView was visible.
-                        clearTextEntry();
+                        clearTextEntry(false);
                         // update the zoom buttons as the scale can be changed
                         if (getSettings().getBuiltInZoomControls()) {
                             updateZoomButtonsEnabled();
@@ -5932,7 +5957,7 @@ public class WebView extends AbsoluteLayout
                     }
                     break;
                 case CLEAR_TEXT_ENTRY:
-                    clearTextEntry();
+                    clearTextEntry(false);
                     break;
                 case INVAL_RECT_MSG_ID: {
                     Rect r = (Rect)msg.obj;
@@ -5952,6 +5977,7 @@ public class WebView extends AbsoluteLayout
                 case SET_ROOT_LAYER_MSG_ID: {
                     int oldLayer = mRootLayer;
                     mRootLayer = msg.arg1;
+                    nativeSetRootLayer(mRootLayer);
                     if (oldLayer > 0) {
                         nativeDestroyLayer(oldLayer);
                     }
@@ -6538,8 +6564,7 @@ public class WebView extends AbsoluteLayout
      */
     private void sendMoveMouseIfLatest(boolean removeFocus) {
         if (removeFocus) {
-            clearTextEntry();
-            setFocusControllerInactive();
+            clearTextEntry(true);
         }
         mWebViewCore.sendMessage(EventHub.SET_MOVE_MOUSE_IF_LATEST,
                 cursorData());
@@ -6715,6 +6740,7 @@ public class WebView extends AbsoluteLayout
     /* package */ native boolean nativeCursorMatchesFocus();
     private native boolean  nativeCursorIntersects(Rect visibleRect);
     private native boolean  nativeCursorIsAnchor();
+    private native boolean  nativeCursorIsInLayer();
     private native boolean  nativeCursorIsTextInput();
     private native Point    nativeCursorPosition();
     private native String   nativeCursorText();
@@ -6728,10 +6754,7 @@ public class WebView extends AbsoluteLayout
     private native void     nativeDrawCursorRing(Canvas content);
     private native void     nativeDestroyLayer(int layer);
     private native boolean  nativeEvaluateLayersAnimations(int layer);
-    private native void     nativeDrawLayers(int layer,
-                                             int scrollX, int scrollY,
-                                             int width, int height,
-                                             float scale, Canvas canvas);
+    private native void     nativeDrawLayers(int layer, Canvas canvas);
     private native void     nativeDrawMatches(Canvas canvas);
     private native void     nativeDrawSelectionPointer(Canvas content,
             float scale, int x, int y, boolean extendSelection);
@@ -6781,6 +6804,7 @@ public class WebView extends AbsoluteLayout
     private native void     nativeSetFindIsUp();
     private native void     nativeSetFollowedLink(boolean followed);
     private native void     nativeSetHeightCanMeasure(boolean measure);
+    private native void     nativeSetRootLayer(int layer);
     private native int      nativeTextGeneration();
     // Never call this version except by updateCachedTextfield(String) -
     // we always want to pass in our generation number.

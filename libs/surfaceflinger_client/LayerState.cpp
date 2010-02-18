@@ -22,17 +22,37 @@ namespace android {
 
 status_t layer_state_t::write(Parcel& output) const
 {
+    status_t err;
+
+    size_t len = transparentRegion.write(NULL, 0);
+    err = output.writeInt32(len);
+    if (err < NO_ERROR) return err;
+
+    void* buf = output.writeInplace(len);
+    if (buf == NULL) return NO_MEMORY;
+
+    err = transparentRegion.write(buf, len);
+    if (err < NO_ERROR) return err;
+
+    // NOTE: regions are at the end of the structure
     size_t size = sizeof(layer_state_t);
-    transparentRegion.write(output);
     size -= sizeof(transparentRegion);
-    output.write(this, size);
-    return NO_ERROR;
+    err = output.write(this, size);
+    return err;
 }
 
 status_t layer_state_t::read(const Parcel& input)
 {
+    status_t err;
+    size_t len = input.readInt32();
+    void const* buf = input.readInplace(len);
+    if (buf == NULL) return NO_MEMORY;
+
+    err = transparentRegion.read(buf);
+    if (err < NO_ERROR) return err;
+
+    // NOTE: regions are at the end of the structure
     size_t size = sizeof(layer_state_t);
-    transparentRegion.read(input);
     size -= sizeof(transparentRegion);
     input.read(this, size);
     return NO_ERROR;

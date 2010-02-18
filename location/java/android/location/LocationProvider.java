@@ -71,6 +71,10 @@ public abstract class LocationProvider {
      * false otherwise.
      */
     public boolean meetsCriteria(Criteria criteria) {
+        // We do not want to match the special passive provider based on criteria.
+        if (LocationManager.PASSIVE_PROVIDER.equals(mName)) {
+            return false;
+        }
         if ((criteria.getAccuracy() != Criteria.NO_REQUIREMENT) && 
             (criteria.getAccuracy() < getAccuracy())) {
             return false;

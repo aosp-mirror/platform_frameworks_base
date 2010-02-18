@@ -116,7 +116,7 @@ import java.util.ArrayList;
      * @param   webView The WebView that created this.
      */
     /* package */ WebTextView(Context context, WebView webView) {
-        super(context);
+        super(context, null, com.android.internal.R.attr.webTextViewStyle);
         mWebView = webView;
         mMaxLength = -1;
     }

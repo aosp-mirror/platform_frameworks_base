@@ -34,6 +34,12 @@ Element::Element(Context *rsc) : ObjectBase(rsc)
 
 Element::~Element()
 {
+    for (uint32_t ct = 0; ct < mRSC->mStateElement.mElements.size(); ct++) {
+        if (mRSC->mStateElement.mElements[ct] == this) {
+            mRSC->mStateElement.mElements.removeAt(ct);
+            break;
+        }
+    }
     clear();
 }
 
@@ -78,27 +84,62 @@ void Element::dumpLOGV(const char *prefix) const
 }
 
 
-Element * Element::create(Context *rsc, RsDataType dt, RsDataKind dk,
+const Element * Element::create(Context *rsc, RsDataType dt, RsDataKind dk,
                             bool isNorm, uint32_t vecSize)
 {
+    // Look for an existing match.
+    for (uint32_t ct=0; ct < rsc->mStateElement.mElements.size(); ct++) {
+        const Element *ee = rsc->mStateElement.mElements[ct];
+        if (!ee->getFieldCount() &&
+            (ee->getComponent().getType() == dt) &&
+            (ee->getComponent().getKind() == dk) &&
+            (ee->getComponent().getIsNormalized() == isNorm) &&
+            (ee->getComponent().getVectorSize() == vecSize)) {
+            // Match
+            ee->incUserRef();
+            return ee;
+        }
+    }
+
     Element *e = new Element(rsc);
     e->mComponent.set(dt, dk, isNorm, vecSize);
     e->mBits = e->mComponent.getBits();
+    rsc->mStateElement.mElements.push(e);
     return e;
 }
 
-Element * Element::create(Context *rsc, size_t count, const Element **ein,
+const Element * Element::create(Context *rsc, size_t count, const Element **ein,
                             const char **nin, const size_t * lengths)
 {
+    // Look for an existing match.
+    for (uint32_t ct=0; ct < rsc->mStateElement.mElements.size(); ct++) {
+        const Element *ee = rsc->mStateElement.mElements[ct];
+        if (ee->getFieldCount() == count) {
+            bool match = true;
+            for (uint32_t i=0; i < count; i++) {
+                if ((ee->mFields[i].e.get() != ein[i]) ||
+                    (ee->mFields[i].name.length() != lengths[i]) ||
+                    (ee->mFields[i].name != nin[i])) {
+                    match = false;
+                    break;
+                }
+            }
+            if (match) {
+                ee->incUserRef();
+                return ee;
+            }
+        }
+    }
+
     Element *e = new Element(rsc);
     e->mFields = new ElementField_t [count];
     e->mFieldCount = count;
-
     for (size_t ct=0; ct < count; ct++) {
         e->mFields[ct].e.set(ein[ct]);
         e->mFields[ct].name.setTo(nin[ct], lengths[ct]);
     }
 
+    rsc->mStateElement.mElements.push(e);
     return e;
 }
 
@@ -168,6 +209,7 @@ ElementState::ElementState()
 
 ElementState::~ElementState()
 {
+    rsAssert(!mElements.size());
 }
 
 
@@ -184,9 +226,9 @@ RsElement rsi_ElementCreate(Context *rsc,
                             uint32_t vecSize)
 {
     //LOGE("rsi_ElementCreate %i %i %i %i", dt, dk, norm, vecSize);
-    Element *e = Element::create(rsc, dt, dk, norm, vecSize);
+    const Element *e = Element::create(rsc, dt, dk, norm, vecSize);
     e->incUserRef();
-    return e;
+    return (RsElement)e;
 }
 
 RsElement rsi_ElementCreate2(Context *rsc,
@@ -196,9 +238,9 @@ RsElement rsi_ElementCreate2(Context *rsc,
                              const size_t * nameLengths)
 {
     //LOGE("rsi_ElementCreate2 %i", count);
-    Element *e = Element::create(rsc, count, (const Element **)ein, names, nameLengths);
+    const Element *e = Element::create(rsc, count, (const Element **)ein, names, nameLengths);
     e->incUserRef();
-    return e;
+    return (RsElement)e;
 }
 
 

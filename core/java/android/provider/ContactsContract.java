@@ -608,6 +608,45 @@ public final class ContactsContract {
     }
 
     /**
+     * URI parameter and cursor extras that return counts of rows grouped by the
+     * address book index, which is usually the first letter of the sort key.
+     * When this parameter is supplied, the row counts are returned in the
+     * cursor extras bundle.
+     *
+     * @hide
+     */
+    public final static class ContactCounts {
+
+        /**
+         * Add this query parameter to a URI to get back row counts grouped by
+         * the address book index as cursor extras. For most languages it is the
+         * first letter of the sort key. This parameter does not affect the main
+         * content of the cursor.
+         *
+         * @hide
+         */
+        public static final String ADDRESS_BOOK_INDEX_EXTRAS = "address_book_index_extras";
+
+        /**
+         * The array of address book index titles, which are returned in the
+         * same order as the data in the cursor.
+         * <p>TYPE: String[]</p>
+         *
+         * @hide
+         */
+        public static final String EXTRA_ADDRESS_BOOK_INDEX_TITLES = "address_book_index_titles";
+
+        /**
+         * The array of group counts for the corresponding group.  Contains the same number
+         * of elements as the EXTRA_ADDRESS_BOOK_INDEX_TITLES array.
+         * <p>TYPE: int[]</p>
+         *
+         * @hide
+         */
+        public static final String EXTRA_ADDRESS_BOOK_INDEX_COUNTS = "address_book_index_counts";
+    }
+
+    /**
      * Constants for the contacts table, which contains a record per aggregate
      * of raw contacts representing the same person.
      * <h3>Operations</h3>
@@ -5695,5 +5734,4 @@ public final class ContactsContract {
             public static final String IM_ISPRIMARY = "im_isprimary";
         }
     }
-
 }

@@ -268,7 +268,10 @@ const char *dump_vm_traces() {
     char anr_traces_path[PATH_MAX];
     strlcpy(anr_traces_path, traces_path, sizeof(anr_traces_path));
     strlcat(anr_traces_path, ".anr", sizeof(anr_traces_path));
-    rename(traces_path, anr_traces_path);
+    if (rename(traces_path, anr_traces_path) && errno != ENOENT) {
+        fprintf(stderr, "rename(%s, %s): %s\n", traces_path, anr_traces_path, strerror(errno));
+        return NULL;  // Can't rename old traces.txt -- no permission? -- leave it alone instead
+    }
 
     /* create a new, empty traces.txt file to receive stack dumps */
     int fd = open(traces_path, O_CREAT | O_WRONLY | O_TRUNC, 0666);  /* -rw-rw-rw- */

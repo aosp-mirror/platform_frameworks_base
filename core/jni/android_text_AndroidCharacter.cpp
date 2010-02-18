@@ -165,7 +165,8 @@ static jboolean mirror(JNIEnv* env, jobject obj, jcharArray charArray, int start
         goto MIRROR_END;
     }
 
-    if (start > start + count || env->GetArrayLength(charArray) < count) {
+    if (start < 0 || start > start + count
+            || env->GetArrayLength(charArray) < start + count) {
         jniThrowException(env, "java/lang/ArrayIndexOutOfBoundsException", NULL);
         goto MIRROR_END;
     }

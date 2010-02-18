@@ -120,23 +120,6 @@ public class SearchManagerTest extends ActivityInstrumentationTestCase2<LocalAct
         assertSame(searchManager1, searchManager2 );
     }
 
-    @MediumTest
-    public void testSearchables() {
-        SearchManager searchManager = (SearchManager)
-                mContext.getSystemService(Context.SEARCH_SERVICE);
-        SearchableInfo si;
-
-        si = searchManager.getSearchableInfo(SEARCHABLE_ACTIVITY, false);
-        assertNotNull(si);
-        assertFalse(searchManager.isDefaultSearchable(si));
-        si = searchManager.getSearchableInfo(SEARCHABLE_ACTIVITY, true);
-        assertNotNull(si);
-        assertTrue(searchManager.isDefaultSearchable(si));
-        si = searchManager.getSearchableInfo(null, true);
-        assertNotNull(si);
-        assertTrue(searchManager.isDefaultSearchable(si));
-    }
-
     /**
      * Tests that startSearch() can be called multiple times without stopSearch()
      * in between.

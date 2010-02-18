@@ -29,6 +29,13 @@ import android.os.Bundle;
  * class provides a convenience for interpreting the raw intent actions
  * that are sent by the system.
  * 
+ * <p>The callback methods, like the base
+ * {@link BroadcastReceiver#onReceive(Context, Intent) BroadcastReceiver.onReceive()}
+ * method, happen on the main thread of the process.  Thus long running
+ * operations must be done on another thread.  Note that because a receiver
+ * is done once returning from its receive function, such long-running operations
+ * should probably be done in a {@link Service}.
+ * 
  * <p>When publishing your DeviceAdmin subclass as a receiver, it must
  * handle {@link #ACTION_DEVICE_ADMIN_ENABLED} and require the
  * {@link android.Manifest.permission#BIND_DEVICE_ADMIN} permission.  A typical
@@ -42,7 +49,7 @@ import android.os.Bundle;
  * 
  * {@sample development/samples/ApiDemos/res/xml/device_admin_sample.xml meta_data}
  */
-public class DeviceAdmin extends BroadcastReceiver {
+public class DeviceAdminReceiver extends BroadcastReceiver {
     private static String TAG = "DevicePolicy";
     private static boolean DEBUG = false;
     private static boolean localLOGV = DEBUG || android.util.Config.LOGV;
@@ -51,7 +58,7 @@ public class DeviceAdmin extends BroadcastReceiver {
      * This is the primary action that a device administrator must implement to be
      * allowed to manage a device.  This will be set to the receiver
      * when the user enables it for administration.  You will generally
-     * handle this in {@link DeviceAdmin#onEnabled(Context, Intent)}.  To be
+     * handle this in {@link DeviceAdminReceiver#onEnabled(Context, Intent)}.  To be
      * supported, the receiver must also require the
      * {@link android.Manifest.permission#BIND_DEVICE_ADMIN} permission so
      * that other applications can not abuse it.
@@ -85,7 +92,7 @@ public class DeviceAdmin extends BroadcastReceiver {
      * Action sent to a device administrator when the user has disabled
      * it.  Upon return, the application no longer has access to the
      * protected device policy manager APIs.  You will generally
-     * handle this in {@link DeviceAdmin#onDisabled(Context, Intent)}.  Note
+     * handle this in {@link DeviceAdminReceiver#onDisabled(Context, Intent)}.  Note
      * that this action will be
      * sent the receiver regardless of whether it is explicitly listed in
      * its intent filter.
@@ -100,7 +107,7 @@ public class DeviceAdmin extends BroadcastReceiver {
      * of the new password with {@link DevicePolicyManager#isActivePasswordSufficient()
      * DevicePolicyManager.isActivePasswordSufficient()}.
      * You will generally
-     * handle this in {@link DeviceAdmin#onPasswordChanged}.
+     * handle this in {@link DeviceAdminReceiver#onPasswordChanged}.
      * 
      * <p>The calling device admin must have requested
      * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to receive
@@ -116,7 +123,7 @@ public class DeviceAdmin extends BroadcastReceiver {
      * number of failed password attempts there have been with
      * {@link DevicePolicyManager#getCurrentFailedPasswordAttempts
      * DevicePolicyManager.getCurrentFailedPasswordAttempts()}.  You will generally
-     * handle this in {@link DeviceAdmin#onPasswordFailed}.
+     * handle this in {@link DeviceAdminReceiver#onPasswordFailed}.
      * 
      * <p>The calling device admin must have requested
      * {@link DeviceAdminInfo#USES_POLICY_WATCH_LOGIN} to receive

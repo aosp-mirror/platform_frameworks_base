@@ -32,6 +32,7 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.RemotableViewMethod;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
@@ -69,6 +70,7 @@ public class ImageView extends View {
     private ColorFilter mColorFilter;
     private int mAlpha = 255;
     private int mViewAlphaScale = 256;
+    private boolean mColorMod = false;
 
     private Drawable mDrawable = null;
     private int[] mState = null;
@@ -138,7 +140,7 @@ public class ImageView extends View {
 
         int tint = a.getInt(com.android.internal.R.styleable.ImageView_tint, 0);
         if (tint != 0) {
-            setColorFilter(tint, PorterDuff.Mode.SRC_ATOP);
+            setColorFilter(tint);
         }
         
         mCropToPadding = a.getBoolean(
@@ -877,6 +879,18 @@ public class ImageView extends View {
         setColorFilter(new PorterDuffColorFilter(color, mode));
     }
 
+    /**
+     * Set a tinting option for the image. Assumes
+     * {@link PorterDuff.Mode#SRC_ATOP} blending mode.
+     *
+     * @param color Color tint to apply.
+     * @attr ref android.R.styleable#ImageView_tint
+     */
+    @RemotableViewMethod
+    public final void setColorFilter(int color) {
+        setColorFilter(color, PorterDuff.Mode.SRC_ATOP);
+    }
+
     public final void clearColorFilter() {
         setColorFilter(null);
     }
@@ -889,22 +903,29 @@ public class ImageView extends View {
     public void setColorFilter(ColorFilter cf) {
         if (mColorFilter != cf) {
             mColorFilter = cf;
+            mColorMod = true;
             applyColorMod();
             invalidate();
         }
     }
 
+    @RemotableViewMethod
     public void setAlpha(int alpha) {
         alpha &= 0xFF;          // keep it legal
         if (mAlpha != alpha) {
             mAlpha = alpha;
+            mColorMod = true;
             applyColorMod();
             invalidate();
         }
     }
 
     private void applyColorMod() {
-        if (mDrawable != null) {
+        // Only mutate and apply when modifications have occurred. This should
+        // not reset the mColorMod flag, since these filters need to be
+        // re-applied if the Drawable is changed.
+        if (mDrawable != null && mColorMod) {
+            mDrawable = mDrawable.mutate();
             mDrawable.setColorFilter(mColorFilter);
             mDrawable.setAlpha(mAlpha * mViewAlphaScale >> 8);
         }

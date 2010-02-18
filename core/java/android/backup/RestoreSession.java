@@ -63,7 +63,7 @@ public class RestoreSession {
      *
      * @return Zero on success; nonzero on error.  The observer will only receive
      *   progress callbacks if this method returned zero.
-     * @param token The token from {@link getAvailableRestoreSets()} corresponding to
+     * @param token The token from {@link #getAvailableRestoreSets()} corresponding to
      *   the restore set that should be used.
      * @param observer If non-null, this binder points to an object that will receive
      *   progress callbacks during the restore operation.
@@ -120,8 +120,7 @@ public class RestoreSession {
      * object is no longer valid.
      *
      * <p><b>Note:</b> The caller <i>must</i> invoke this method to end the restore session,
-     *   even if {@link #getAvailableRestoreSets()} or
-     *   {@link #restorePackage(long, String, RestoreObserver)} failed.
+     *   even if {@link #restorePackage(String, RestoreObserver)} failed.
      */
     public void endRestoreSession() {
         try {

@@ -2364,7 +2364,16 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     public void draw(Canvas canvas) {
         super.draw(canvas);
         if (mFastScroller != null) {
-            mFastScroller.draw(canvas);
+            final int scrollY = mScrollY;
+            if (scrollY != 0) {
+                // Pin the fast scroll thumb to the top/bottom during overscroll.
+                int restoreCount = canvas.save();
+                canvas.translate(0, (float) scrollY);
+                mFastScroller.draw(canvas);
+                canvas.restoreToCount(restoreCount);
+            } else {
+                mFastScroller.draw(canvas);
+            }
         }
     }
 
@@ -2589,7 +2598,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 if (trackMotionScroll(delta, delta)) {
                     if (motionView != null) {
                         // Tweak the scroll for how far we overshot
-                        mScrollY -= delta - (motionView.getTop() - oldTop);
+                        int overshoot = -(delta - (motionView.getTop() - oldTop));
+                        overscrollBy(0, overshoot, 0, mScrollY, 0, 0, 0, getOverscrollMax());
                     }
                     float vel = scroller.getCurrVelocity();
                     if (delta > 0) {

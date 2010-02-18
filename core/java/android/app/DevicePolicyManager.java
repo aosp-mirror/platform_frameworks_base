@@ -36,7 +36,7 @@ import java.util.List;
 
 /**
  * Public interface for managing policies enforced on a device.  Most clients
- * of this class must have published a {@link DeviceAdmin} that the user
+ * of this class must have published a {@link DeviceAdminReceiver} that the user
  * has currently enabled.
  */
 public class DevicePolicyManager {
@@ -195,7 +195,7 @@ public class DevicePolicyManager {
      * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call
      * this method; if it has not, a security exception will be thrown.
      * 
-     * @param admin Which {@link DeviceAdmin} this request is associated with.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param quality The new desired quality.  One of
      * {@link #PASSWORD_QUALITY_UNSPECIFIED}, {@link #PASSWORD_QUALITY_SOMETHING},
      * {@link #PASSWORD_QUALITY_NUMERIC}, or {@link #PASSWORD_QUALITY_ALPHANUMERIC}.
@@ -243,7 +243,7 @@ public class DevicePolicyManager {
      * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call
      * this method; if it has not, a security exception will be thrown.
      * 
-     * @param admin Which {@link DeviceAdmin} this request is associated with.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param length The new desired minimum password length.  A value of 0
      * means there is no restriction.
      */
@@ -338,11 +338,11 @@ public class DevicePolicyManager {
      * <p>To implement any other policy (e.g. wiping data for a particular
      * application only, erasing or revoking credentials, or reporting the
      * failure to a server), you should implement
-     * {@link DeviceAdmin#onPasswordFailed(Context, android.content.Intent)}
+     * {@link DeviceAdminReceiver#onPasswordFailed(Context, android.content.Intent)}
      * instead.  Do not use this API, because if the maximum count is reached,
      * the device will be wiped immediately, and your callback will not be invoked.
      * 
-     * @param admin Which {@link DeviceAdmin} this request is associated with.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param num The number of failed password attempts at which point the
      * device will wipe its data.
      */
@@ -375,7 +375,9 @@ public class DevicePolicyManager {
     }
     
     /**
-     * Force a new password on the user.  This takes effect immediately.
+     * Force a new device unlock password (the password needed to access the
+     * entire device, not for individual accounts) on the user.  This takes
+     * effect immediately.
      * The given password must be sufficient for the
      * current password quality and length constraints as returned by
      * {@link #getPasswordQuality(ComponentName)} and
@@ -413,7 +415,7 @@ public class DevicePolicyManager {
      * {@link DeviceAdminInfo#USES_POLICY_FORCE_LOCK} to be able to call
      * this method; if it has not, a security exception will be thrown.
      * 
-     * @param admin Which {@link DeviceAdmin} this request is associated with.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param timeMs The new desired maximum time to lock in milliseconds.
      * A value of 0 means there is no restriction.
      */

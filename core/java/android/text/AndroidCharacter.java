@@ -73,6 +73,11 @@ public class AndroidCharacter
      * Replace the specified slice of <code>text</code> with the chars'
      * right-to-left mirrors (if any), returning true if any
      * replacements were made.
+     *
+     * @param text array of characters to apply mirror operation
+     * @param start first character in array to mirror
+     * @param count maximum number of characters to mirror
+     * @return true if replacements were made
      */
     public native static boolean mirror(char[] text, int start, int count);
 

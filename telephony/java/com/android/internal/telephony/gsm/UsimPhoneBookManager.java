@@ -409,7 +409,7 @@ public class UsimPhoneBookManager extends Handler implements IccConstants {
                     case USIM_EFIAP_TAG:
                     case USIM_EFSNE_TAG:
                         data = tlv.getData();
-                        int efid = data[0] << 8 | data[1];
+                        int efid = ((data[0] & 0xFF) << 8) | (data[1] & 0xFF);
                         val.put(tag, efid);
                         break;
                 }
