@@ -142,6 +142,14 @@ class MountService extends IMountService.Stub
             if (action.equals(Intent.ACTION_BOOT_COMPLETED)) {
                 mBooted = true;
 
+                /*
+                 * In the simulator, we need to broadcast a volume mounted event
+                 * to make the media scanner run.
+                 */
+                if ("simulator".equals(SystemProperties.get("ro.product.device"))) {
+                    notifyVolumeStateChange(null, "/sdcard", VolumeState.NoMedia, VolumeState.Mounted);
+                    return;
+                }
                 String path = Environment.getExternalStorageDirectory().getPath();
                 if (getVolumeState(path).equals(Environment.MEDIA_UNMOUNTED)) {
                     int rc = doMountVolume(path);
@@ -642,15 +650,6 @@ class MountService extends IMountService.Stub
     public MountService(Context context) {
         mContext = context;
 
-        /*
-         * Vold does not run in the simulator, so fake out a mounted
-         * event to trigger MediaScanner
-         */
-        if ("simulator".equals(SystemProperties.get("ro.product.device"))) {
-            updatePublicVolumeState("/sdcard", Environment.MEDIA_MOUNTED);
-            return;
-        }
-
         // XXX: This will go away soon in favor of IMountServiceObserver
         mPms = (PackageManagerService) ServiceManager.getService("package");
 
@@ -658,6 +657,16 @@ class MountService extends IMountService.Stub
                 new IntentFilter(Intent.ACTION_BOOT_COMPLETED), null, null);
 
         mListeners = new ArrayList<MountServiceBinderListener>();
+
+        /*
+         * Vold does not run in the simulator, so pretend the connector thread
+         * ran and did its thing.
+         */
+        if ("simulator".equals(SystemProperties.get("ro.product.device"))) {
+            mReady = true;
+            mUmsEnabling = true;
+            return;
+        }
 
         mConnector = new NativeDaemonConnector(this, "vold", 10, "VoldConnector");
         mReady = false;
