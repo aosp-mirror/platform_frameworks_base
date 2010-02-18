@@ -1690,6 +1690,25 @@ public class SearchManager
     }
 
     /**
+     * Gets the name of the web search activity.
+     *
+     * @return The name of the default activity for web searches. This activity
+     *         can be used to get web search suggestions. Returns {@code null} if
+     *         there is no default web search activity.
+     *
+     * @hide
+     */
+    public ComponentName getWebSearchActivity() {
+        ComponentName globalSearch = getGlobalSearchActivity();
+        if (globalSearch == null) {
+            return null;
+        }
+        Intent intent = new Intent(Intent.ACTION_WEB_SEARCH);
+        intent.setPackage(globalSearch.getPackageName());
+        return intent.resolveActivity(mContext.getPackageManager());
+    }
+
+    /**
      * Similar to {@link #startSearch} but actually fires off the search query after invoking
      * the search dialog.  Made available for testing purposes.
      *
