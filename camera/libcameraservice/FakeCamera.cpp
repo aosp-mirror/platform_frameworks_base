@@ -234,7 +234,7 @@ uint32_t temp;
             uint8_t   y0, y1, u, v;
 
             pixels =  inputRGB[i];
-            temp = (ALPHA*(pixels & 0x001F) + BETA*(pixels>>11) );
+            temp = (BETA*(pixels & 0x001F) + ALPHA*(pixels>>11) );
             y0   = y_tab[(temp>>SHIFT1) + ((pixels>>3) & 0x00FC)];
 
             G_ds    += (pixels>>1) & 0x03E0;
@@ -242,7 +242,7 @@ uint32_t temp;
             R_ds    += (pixels>>6) & 0x03E0;
 
             pixels =  inputRGB[i+1];
-            temp = (ALPHA*(pixels & 0x001F) + BETA*(pixels>>11) );
+            temp = (BETA*(pixels & 0x001F) + ALPHA*(pixels>>11) );
             y1   = y_tab[(temp>>SHIFT1) + ((pixels>>3) & 0x00FC)];
 
             G_ds    += (pixels>>1) & 0x03E0;
@@ -255,8 +255,8 @@ uint32_t temp;
 
             tmp = R_ds - B_ds;
 
-            u = cb_tab[(((R_ds-G_ds)<<SHIFT2) + DELTA*tmp)>>(SHIFT2+2)];
-            v = cr_tab[(((B_ds-G_ds)<<SHIFT2) - GAMMA*tmp)>>(SHIFT2+2)];
+            u = cb_tab[(((B_ds-G_ds)<<SHIFT2) - GAMMA*tmp)>>(SHIFT2+2)];
+            v = cr_tab[(((R_ds-G_ds)<<SHIFT2) + DELTA*tmp)>>(SHIFT2+2)];
 
             tempY[0] = y0;
             tempY[1] = y1;
