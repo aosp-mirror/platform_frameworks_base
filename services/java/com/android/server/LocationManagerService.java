@@ -561,7 +561,8 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
     }
 
     private boolean isAllowedProviderSafe(String provider) {
-        if (LocationManager.GPS_PROVIDER.equals(provider)
+        if ((LocationManager.GPS_PROVIDER.equals(provider)
+                || LocationManager.PASSIVE_PROVIDER.equals(provider))
             && (mContext.checkCallingOrSelfPermission(ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED)) {
             return false;
