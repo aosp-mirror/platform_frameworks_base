@@ -22,7 +22,7 @@ import java.io.OutputStream;
  * YuvImage contains YUV data and provides a method that compresses a region of
  * the YUV data to a Jpeg. The YUV data should be provided as a single byte
  * array irrespective of the number of image planes in it.
- * Currently only PixelFormat.YCbCr_420_SP and PixelFormat.YCbCr_422_I are supported.
+ * Currently only ImageFormat.NV21 and ImageFormat.YUY2 are supported.
  *
  * To compress a rectangle region in the YUV data, users have to specify the
  * region by left, top, width and height.
@@ -77,11 +77,11 @@ public class YuvImage {
      *                null.
      */
     public YuvImage(byte[] yuv, int format, int width, int height, int[] strides) {
-        if (format != PixelFormat.YCbCr_420_SP &&
-                format != PixelFormat.YCbCr_422_I) {
+        if (format != ImageFormat.NV21 &&
+                format != ImageFormat.YUY2) {
             throw new IllegalArgumentException(
-                    "only support PixelFormat.YCbCr_420_SP " +
-                    "and PixelFormat.YCbCr_422_I for now");
+                    "only support ImageFormat.NV21 " +
+                    "and ImageFormat.YUY2 for now");
         }
 
         if (width <= 0  || height <= 0) {
@@ -107,7 +107,7 @@ public class YuvImage {
 
     /**
      * Compress a rectangle region in the YuvImage to a jpeg.
-     * Only PixelFormat.YCbCr_420_SP and PixelFormat.YCbCr_422_I
+     * Only ImageFormat.NV21 and ImageFormat.YUY2
      * are supported for now.
      *
      * @param rectangle The rectangle region to be compressed. The medthod checks if rectangle is
@@ -181,14 +181,14 @@ public class YuvImage {
 
     int[] calculateOffsets(int left, int top) {
         int[] offsets = null;
-        if (mFormat == PixelFormat.YCbCr_420_SP) {
+        if (mFormat == ImageFormat.NV21) {
             offsets = new int[] {top * mStrides[0] + left,
                   mHeight * mStrides[0] + top / 2 * mStrides[1]
                   + left / 2 * 2 };
             return offsets;
         }
 
-        if (mFormat == PixelFormat.YCbCr_422_I) {
+        if (mFormat == ImageFormat.YUY2) {
             offsets = new int[] {top * mStrides[0] + left / 2 * 4};
             return offsets;
         }
@@ -198,12 +198,12 @@ public class YuvImage {
 
     private int[] calculateStrides(int width, int format) {
         int[] strides = null;
-        if (format == PixelFormat.YCbCr_420_SP) {
+        if (format == ImageFormat.NV21) {
             strides = new int[] {width, width};
             return strides;
         }
 
-        if (format == PixelFormat.YCbCr_422_I) {
+        if (format == ImageFormat.YUY2) {
             strides = new int[] {width * 2};
             return strides;
         }
@@ -214,7 +214,7 @@ public class YuvImage {
    private void adjustRectangle(Rect rect) {
        int width = rect.width();
        int height = rect.height();
-       if (mFormat == PixelFormat.YCbCr_420_SP) {
+       if (mFormat == ImageFormat.NV21) {
            // Make sure left, top, width and height are all even.
            width &= ~1;
            height &= ~1;
@@ -224,7 +224,7 @@ public class YuvImage {
            rect.bottom = rect.top + height;
         }
 
-        if (mFormat == PixelFormat.YCbCr_422_I) {
+        if (mFormat == ImageFormat.YUY2) {
             // Make sure left and width are both even.
             width &= ~1;
             rect.left &= ~1;

@@ -7,9 +7,9 @@
 #include <jni.h>
 
 YuvToJpegEncoder* YuvToJpegEncoder::create(int format, int* strides) {
-    // Only PIXEL_FORMAT_YCbCr_420_SP and PIXEl_FOMAT_YCbCr_422_I are supported
+    // Only ImageFormat.NV21 and ImageFormat.YUY2 are supported
     // for now.
-    if (format == HAL_PIXEL_FORMAT_YCbCr_420_SP) {
+    if (format == HAL_PIXEL_FORMAT_YCrCb_420_SP) {
         return new Yuv420SpToJpegEncoder(strides);
     } else if (format == HAL_PIXEL_FORMAT_YCbCr_422_I) {
         return new Yuv422IToJpegEncoder(strides);
