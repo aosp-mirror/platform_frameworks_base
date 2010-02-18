@@ -54,6 +54,13 @@ public final class MediaStore {
     private static final String CONTENT_AUTHORITY_SLASH = "content://" + AUTHORITY + "/";
 
     /**
+     * Activity Action: Launch a music player.
+     * The activity should be able to play, browse, or manipulate music files stored on the device.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String INTENT_ACTION_MUSIC_PLAYER = "android.intent.action.MUSIC_PLAYER";
+
+    /**
      * Activity Action: Perform a search for media.
      * Contains at least the {@link android.app.SearchManager#QUERY} extra.
      * May also contain any combination of the following extras:
