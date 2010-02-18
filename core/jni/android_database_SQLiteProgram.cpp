@@ -45,8 +45,8 @@ static jfieldID gStatementField;
 
 static void native_compile(JNIEnv* env, jobject object, jstring sqlString)
 {
-    char buf[32];
-    sprintf(buf, "android_database_SQLiteProgram->native_compile() not implemented");
+    char buf[65];
+    strcpy(buf, "android_database_SQLiteProgram->native_compile() not implemented");
     throw_sqlite3_exception(env, GET_HANDLE(env, object), buf);
     return;
 }
@@ -152,8 +152,8 @@ static void native_clear_bindings(JNIEnv* env, jobject object)
 
 static void native_finalize(JNIEnv* env, jobject object)
 {
-    char buf[32];
-    sprintf(buf, "android_database_SQLiteProgram->native_finalize() not implemented");
+    char buf[66];
+    strcpy(buf, "android_database_SQLiteProgram->native_finalize() not implemented");
     throw_sqlite3_exception(env, GET_HANDLE(env, object), buf);
     return;
 }
