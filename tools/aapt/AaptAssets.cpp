@@ -938,17 +938,17 @@ bool AaptGroupEntry::getKeysHiddenName(const char* name,
     uint8_t mask = 0;
     uint8_t value = 0;
     if (strcmp(name, kWildcardName) == 0) {
-        mask = out->MASK_KEYSHIDDEN;
-        value = out->KEYSHIDDEN_ANY;
+        mask = ResTable_config::MASK_KEYSHIDDEN;
+        value = ResTable_config::KEYSHIDDEN_ANY;
     } else if (strcmp(name, "keysexposed") == 0) {
-        mask = out->MASK_KEYSHIDDEN;
-        value = out->KEYSHIDDEN_NO;
+        mask = ResTable_config::MASK_KEYSHIDDEN;
+        value = ResTable_config::KEYSHIDDEN_NO;
     } else if (strcmp(name, "keyshidden") == 0) {
-        mask = out->MASK_KEYSHIDDEN;
-        value = out->KEYSHIDDEN_YES;
+        mask = ResTable_config::MASK_KEYSHIDDEN;
+        value = ResTable_config::KEYSHIDDEN_YES;
     } else if (strcmp(name, "keyssoft") == 0) {
-        mask = out->MASK_KEYSHIDDEN;
-        value = out->KEYSHIDDEN_SOFT;
+        mask = ResTable_config::MASK_KEYSHIDDEN;
+        value = ResTable_config::KEYSHIDDEN_SOFT;
     }
 
     if (mask != 0) {

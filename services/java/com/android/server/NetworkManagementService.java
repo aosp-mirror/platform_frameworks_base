@@ -59,6 +59,10 @@ class NetworkManagementService extends INetworkManagementService.Stub {
         public static final int TetherStatusResult        = 210;
         public static final int IpFwdStatusResult         = 211;
         public static final int InterfaceGetCfgResult     = 213;
+        public static final int SoftapStatusResult        = 214;
+        public static final int UsbRNDISStatusResult      = 215;
+
+        public static final int InterfaceChange           = 600;
     }
 
     /**
@@ -147,12 +151,35 @@ class NetworkManagementService extends INetworkManagementService.Stub {
         public void onDaemonConnected() {
             new Thread() {
                 public void run() {
-                    // XXX: Run some tests
                 }
             }.start();
         }
         public boolean onEvent(int code, String raw, String[] cooked) {
-           return false;
+            if (code == NetdResponseCode.InterfaceChange) {
+                /*
+                 * a network interface change occured
+                 * Format: "NNN Iface added <name>"
+                 *         "NNN Iface removed <name>"
+                 *         "NNN Iface changed <name> <up/down>"
+                 */
+                if (cooked.length < 4 || !cooked[1].equals("Iface")) {
+                    throw new IllegalStateException(
+                            String.format("Invalid event from daemon (%s)", raw));
+                }
+                if (cooked[2].equals("added")) {
+                    notifyInterfaceAdded(cooked[3]);
+                    return true;
+                } else if (cooked[2].equals("removed")) {
+                    notifyInterfaceRemoved(cooked[3]);
+                    return true;
+                } else if (cooked[2].equals("changed") && cooked.length == 5) {
+                    notifyInterfaceLinkStatusChanged(cooked[3], cooked[4].equals("up"));
+                    return true;
+                }
+                throw new IllegalStateException(
+                        String.format("Invalid event from daemon (%s)", raw));
+            }
+            return false;
         }
     }
 

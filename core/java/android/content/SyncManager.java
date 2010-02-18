@@ -447,17 +447,6 @@ public class SyncManager implements OnAccountsUpdateListener {
     }
 
     /**
-     * Returns whether or not sync is enabled.  Sync can be enabled by
-     * setting the system property "ro.config.sync" to the value "yes".
-     * This is normally done at boot time on builds that support sync.
-     * @return true if sync is enabled
-     */
-    private boolean isSyncEnabled() {
-        // Require the precise value "yes" to discourage accidental activation.
-        return "yes".equals(SystemProperties.get("ro.config.sync"));
-    }
-
-    /**
      * Initiate a sync. This can start a sync for all providers
      * (pass null to url, set onlyTicklable to false), only those
      * providers that are marked as ticklable (pass null to url,
@@ -487,13 +476,6 @@ public class SyncManager implements OnAccountsUpdateListener {
     public void scheduleSync(Account requestedAccount, String requestedAuthority,
             Bundle extras, long delay, boolean onlyThoseWithUnkownSyncableState) {
         boolean isLoggable = Log.isLoggable(TAG, Log.VERBOSE);
-
-        if (!isSyncEnabled()) {
-            if (isLoggable) {
-                Log.v(TAG, "not syncing because sync is disabled");
-            }
-            return;
-        }
 
         final boolean backgroundDataUsageAllowed = !mBootCompleted ||
                 getConnectivityManager().getBackgroundDataSetting();
@@ -922,9 +904,7 @@ public class SyncManager implements OnAccountsUpdateListener {
     protected void dump(FileDescriptor fd, PrintWriter pw) {
         StringBuilder sb = new StringBuilder();
         dumpSyncState(pw, sb);
-        if (isSyncEnabled()) {
-            dumpSyncHistory(pw, sb);
-        }
+        dumpSyncHistory(pw, sb);
 
         pw.println();
         pw.println("SyncAdapters:");
@@ -940,7 +920,6 @@ public class SyncManager implements OnAccountsUpdateListener {
     }
 
     protected void dumpSyncState(PrintWriter pw, StringBuilder sb) {
-        pw.print("sync enabled: "); pw.println(isSyncEnabled());
         pw.print("data connected: "); pw.println(mDataConnectionIsConnected);
         pw.print("memory low: "); pw.println(mStorageIsLow);
 
@@ -1455,11 +1434,6 @@ public class SyncManager implements OnAccountsUpdateListener {
         private boolean isSyncAllowed(Account account, String authority, boolean ignoreSettings,
                 boolean backgroundDataUsageAllowed) {
             Account[] accounts = mAccounts;
-
-            // Sync is disabled, drop this operation.
-            if (!isSyncEnabled()) {
-                return false;
-            }
 
             // skip the sync if the account of this operation no longer exists
             if (!ArrayUtils.contains(accounts, account)) {

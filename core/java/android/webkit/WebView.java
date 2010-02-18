@@ -3088,14 +3088,11 @@ public class WebView extends AbsoluteLayout
         Rect vBox = contentToViewRect(contentBounds);
         Rect visibleRect = new Rect();
         calcOurVisibleRect(visibleRect);
-        // The IME may have shown, resulting in the textfield being offscreen.
-        // If so, the textfield will be scrolled on screen, so treat it as
-        // though it is on screen.  If it is on screen, place the WebTextView in
-        // its new place, accounting for our new scroll/zoom values.
-        InputMethodManager imm = InputMethodManager.peekInstance();
-        if ((imm != null && imm.isActive(mWebTextView))
-                || (allowIntersect ? Rect.intersects(visibleRect, vBox)
-                : visibleRect.contains(vBox))) {
+        // If the textfield is on screen, place the WebTextView in
+        // its new place, accounting for our new scroll/zoom values,
+        // and adjust its textsize.
+        if (allowIntersect ? Rect.intersects(visibleRect, vBox)
+                : visibleRect.contains(vBox)) {
             mWebTextView.setRect(vBox.left, vBox.top, vBox.width(),
                     vBox.height());
             mWebTextView.setTextSize(TypedValue.COMPLEX_UNIT_PX,
