@@ -470,7 +470,7 @@ void throw_sqlite3_exception_errcode(JNIEnv* env, int errcode, const char* messa
     if (errcode == SQLITE_DONE) {
         throw_sqlite3_exception(env, errcode, NULL, message);
     } else {
-        char temp[20];
+        char temp[21];
         sprintf(temp, "error code %d", errcode);
         throw_sqlite3_exception(env, errcode, temp, message);
     }
