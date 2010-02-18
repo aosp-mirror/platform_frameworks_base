@@ -66,10 +66,10 @@ public class AccessibilityServiceInfo implements Parcelable {
      * The event types an {@link AccessibilityService} is interested in.
      *
      * @see android.view.accessibility.AccessibilityEvent#TYPE_VIEW_CLICKED
+     * @see android.view.accessibility.AccessibilityEvent#TYPE_VIEW_LONG_CLICKED
      * @see android.view.accessibility.AccessibilityEvent#TYPE_VIEW_FOCUSED
      * @see android.view.accessibility.AccessibilityEvent#TYPE_VIEW_SELECTED
      * @see android.view.accessibility.AccessibilityEvent#TYPE_VIEW_TEXT_CHANGED
-     * @see android.view.accessibility.AccessibilityEvent#TYPE_ACTIVITY_STARTED
      * @see android.view.accessibility.AccessibilityEvent#TYPE_WINDOW_STATE_CHANGED
      * @see android.view.accessibility.AccessibilityEvent#TYPE_NOTIFICATION_STATE_CHANGED
      */
@@ -115,7 +115,7 @@ public class AccessibilityServiceInfo implements Parcelable {
         return 0;
     }
 
-    public void writeToParcel(Parcel parcel, int flags) {
+    public void writeToParcel(Parcel parcel, int flagz) {
         parcel.writeInt(eventTypes);
         parcel.writeStringArray(packageNames);
         parcel.writeInt(feedbackType);
