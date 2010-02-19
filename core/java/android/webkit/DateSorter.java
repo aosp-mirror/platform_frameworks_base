@@ -66,13 +66,12 @@ public class DateSorter {
         mLabels[0] = context.getText(com.android.internal.R.string.today).toString();
         mLabels[1] = context.getText(com.android.internal.R.string.yesterday).toString();
 
-        int resId = com.android.internal.R.plurals.num_days_ago;
+        int resId = com.android.internal.R.plurals.last_num_days;
         String format = resources.getQuantityString(resId, NUM_DAYS_AGO);
         mLabels[2] = String.format(format, NUM_DAYS_AGO);
 
-        mLabels[3] = context.getText(com.android.internal.R.string.oneMonthDurationPast).toString();
-        mLabels[4] = context.getText(com.android.internal.R.string.beforeOneMonthDurationPast)
-                .toString();
+        mLabels[3] = context.getString(com.android.internal.R.string.last_month);
+        mLabels[4] = context.getString(com.android.internal.R.string.older);
     }
 
     /**
