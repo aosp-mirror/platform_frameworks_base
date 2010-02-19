@@ -54,6 +54,9 @@ public class FsUtils {
         String[] files = d.list();
         for (int i = 0; i < files.length; i++) {
             String s = dir + "/" + files[i];
+            if (s.endsWith("TEMPLATE.html")) {
+                continue;
+            }
             if (FileFilter.ignoreTest(s)) {
                 Log.v(LOGTAG, "  Ignoring: " + s);
                 continue;
