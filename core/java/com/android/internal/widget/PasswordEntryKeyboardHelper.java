@@ -17,12 +17,15 @@
 package com.android.internal.widget;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.inputmethodservice.Keyboard;
 import android.inputmethodservice.KeyboardView;
 import android.inputmethodservice.KeyboardView.OnKeyboardActionListener;
 import android.os.Handler;
 import android.os.SystemClock;
+import android.os.Vibrator;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.View;
@@ -36,6 +39,7 @@ public class PasswordEntryKeyboardHelper implements OnKeyboardActionListener {
     private static final int KEYBOARD_STATE_NORMAL = 0;
     private static final int KEYBOARD_STATE_SHIFTED = 1;
     private static final int KEYBOARD_STATE_CAPSLOCK = 2;
+    private static final String TAG = "PasswordEntryKeyboardHelper";
     private int mKeyboardMode = KEYBOARD_MODE_ALPHA;
     private int mKeyboardState = KEYBOARD_STATE_NORMAL;
     private PasswordEntryKeyboard mQwertyKeyboard;
@@ -46,6 +50,8 @@ public class PasswordEntryKeyboardHelper implements OnKeyboardActionListener {
     private Context mContext;
     private View mTargetView;
     private KeyboardView mKeyboardView;
+    private long[] mVibratePattern;
+    private Vibrator mVibrator;
 
     public PasswordEntryKeyboardHelper(Context context, KeyboardView keyboardView, View targetView) {
         mContext = context;
@@ -53,6 +59,7 @@ public class PasswordEntryKeyboardHelper implements OnKeyboardActionListener {
         mKeyboardView = keyboardView;
         createKeyboards();
         mKeyboardView.setOnKeyboardActionListener(this);
+        mVibrator = new Vibrator();
     }
 
     public boolean isAlpha() {
@@ -142,6 +149,29 @@ public class PasswordEntryKeyboardHelper implements OnKeyboardActionListener {
         }
     }
 
+    /**
+     * Sets and enables vibrate pattern.  If id is 0 (or can't be loaded), vibrate is disabled.
+     * @param id resource id for array containing vibrate pattern.
+     */
+    public void setVibratePattern(int id) {
+        int[] tmpArray = null;
+        try {
+            tmpArray = mContext.getResources().getIntArray(id);
+        } catch (Resources.NotFoundException e) {
+            if (id != 0) {
+                Log.e(TAG, "Vibrate pattern missing", e);
+            }
+        }
+        if (tmpArray == null) {
+            mVibratePattern = null;
+            return;
+        }
+        mVibratePattern = new long[tmpArray.length];
+        for (int i = 0; i < tmpArray.length; i++) {
+            mVibratePattern[i] = tmpArray[i];
+        }
+    }
+
     private void handleModeChange() {
         final Keyboard current = mKeyboardView.getKeyboard();
         Keyboard next = null;
@@ -200,7 +230,9 @@ public class PasswordEntryKeyboardHelper implements OnKeyboardActionListener {
     }
 
     public void onPress(int primaryCode) {
-        // TODO: vibration support.
+        if (mVibratePattern != null) {
+            mVibrator.vibrate(mVibratePattern, -1);
+        }
     }
 
     public void onRelease(int primaryCode) {
