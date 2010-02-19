@@ -146,7 +146,7 @@ public final class WebStorage {
      * @hide
      * Message handler, webcore side
      */
-    public void createHandler() {
+    public synchronized void createHandler() {
         if (mHandler == null) {
             mHandler = new Handler() {
                 @Override
@@ -342,7 +342,7 @@ public final class WebStorage {
     /**
      * Utility function to send a message to our handler
      */
-    private void postMessage(Message msg) {
+    private synchronized void postMessage(Message msg) {
         if (mHandler != null) {
             mHandler.sendMessage(msg);
         }

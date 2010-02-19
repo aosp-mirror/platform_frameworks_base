@@ -126,7 +126,7 @@ public final class GeolocationPermissions {
      * Creates the message handler. Must be called on the WebKit thread.
      * @hide
      */
-    public void createHandler() {
+    public synchronized void createHandler() {
         if (mHandler == null) {
             mHandler = new Handler() {
                 @Override
@@ -180,7 +180,7 @@ public final class GeolocationPermissions {
     /**
      * Utility function to send a message to our handler.
      */
-    private void postMessage(Message msg) {
+    private synchronized void postMessage(Message msg) {
         assert(mHandler != null);
         mHandler.sendMessage(msg);
     }
