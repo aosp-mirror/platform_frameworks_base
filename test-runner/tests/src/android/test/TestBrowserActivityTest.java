@@ -215,17 +215,22 @@ public class TestBrowserActivityTest extends InstrumentationTestCase {
     }
 
     private TestBrowserActivity createActivity() throws RemoteException {
-        return launchActivity("android.test", StubTestBrowserActivity.class, null);
+        return launchActivity(getAndroidPackageName(), StubTestBrowserActivity.class, null);
     }
 
     private Intent createIntent(TestSuite testSuite) {
         Intent intent = new Intent(Intent.ACTION_RUN);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         String className = StubTestBrowserActivity.class.getName();
-        String packageName = className.substring(0, className.lastIndexOf("."));
+        String packageName = getAndroidPackageName();
         intent.setClassName(packageName, className);
         intent.setData(Uri.parse(testSuite.getName()));
         return intent;
+    }
+
+    private String getAndroidPackageName() {
+        String packageName = getInstrumentation().getTargetContext().getPackageName();
+        return packageName;
     }
 
     private TestBrowserActivity launchTestBrowserActivity(TestSuite testSuite)
