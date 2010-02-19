@@ -194,6 +194,7 @@ class ContextImpl extends Context {
     private AccountManager mAccountManager; // protected by mSync
     private DropBoxManager mDropBoxManager = null;
     private DevicePolicyManager mDevicePolicyManager = null;
+    private UiModeManager mUiModeManager = null;
 
     private final Object mSync = new Object();
 
@@ -960,6 +961,8 @@ class ContextImpl extends Context {
             return getDropBoxManager();
         } else if (DEVICE_POLICY_SERVICE.equals(name)) {
             return getDevicePolicyManager();
+        } else if (UIMODE_SERVICE.equals(name)) {
+            return getUiModeManager();
         }
 
         return null;
@@ -1151,6 +1154,15 @@ class ContextImpl extends Context {
             }
         }
         return mDevicePolicyManager;
+    }
+
+    private UiModeManager getUiModeManager() {
+        synchronized (mSync) {
+            if (mUiModeManager == null) {
+                mUiModeManager = new UiModeManager();
+            }
+        }
+        return mUiModeManager;
     }
 
     @Override

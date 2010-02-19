@@ -1204,6 +1204,8 @@ public abstract class Context {
      * <dt> {@link #INPUT_METHOD_SERVICE} ("input_method")
      * <dd> An {@link android.view.inputmethod.InputMethodManager InputMethodManager}
      * for management of input methods.
+     * <dt> {@link #UI_MODE_SERVICE} ("uimode")
+     * <dd> An {@link android.app.UiModeManager} for controlling UI modes.
      * </dl>
      * 
      * <p>Note:  System services obtained via this API may be closely associated with
@@ -1249,6 +1251,8 @@ public abstract class Context {
      * @see android.telephony.TelephonyManager
      * @see #INPUT_METHOD_SERVICE
      * @see android.view.inputmethod.InputMethodManager
+     * @see #UI_MODE_SERVICE
+     * @see android.app.UiModeManager
      */
     public abstract Object getSystemService(String name);
 
@@ -1509,6 +1513,14 @@ public abstract class Context {
      * @see #getSystemService
      */
     public static final String DEVICE_POLICY_SERVICE = "device_policy";
+
+    /**
+     * Use with {@link #getSystemService} to retrieve a
+     * {@link android.app.UiModeManager} for controlling UI modes.
+     *
+     * @see #getSystemService
+     */
+    public static final String UI_MODE_SERVICE = "uimode";
 
     /**
      * Determine whether the given permission is allowed for a particular
