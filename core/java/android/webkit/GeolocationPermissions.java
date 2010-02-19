@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.Vector;
 
 
 /**
@@ -61,11 +62,8 @@ public final class GeolocationPermissions {
     private Handler mHandler;
     private Handler mUIHandler;
 
-    // Members used to transfer the origins and permissions between threads.
-    private Set<String> mOrigins;
-    private boolean mAllowed;
-    private Set<String> mOriginsToClear;
-    private Set<String> mOriginsToAllow;
+    // A queue to store messages until the handler is ready.
+    private Vector<Message> mQueuedMessages;
 
     // Message ids
     static final int GET_ORIGINS = 0;
@@ -134,21 +132,21 @@ public final class GeolocationPermissions {
                     // Runs on the WebKit thread.
                     switch (msg.what) {
                         case GET_ORIGINS: {
-                            getOriginsImpl();
+                            Set origins = nativeGetOrigins();
                             ValueCallback callback = (ValueCallback) msg.obj;
                             Map values = new HashMap<String, Object>();
                             values.put(CALLBACK, callback);
-                            values.put(ORIGINS, mOrigins);
+                            values.put(ORIGINS, origins);
                             postUIMessage(Message.obtain(null, RETURN_ORIGINS, values));
                             } break;
                         case GET_ALLOWED: {
                             Map values = (Map) msg.obj;
                             String origin = (String) values.get(ORIGIN);
                             ValueCallback callback = (ValueCallback) values.get(CALLBACK);
-                            getAllowedImpl(origin);
+                            boolean allowed = nativeGetAllowed(origin);
                             Map retValues = new HashMap<String, Object>();
                             retValues.put(CALLBACK, callback);
-                            retValues.put(ALLOWED, new Boolean(mAllowed));
+                            retValues.put(ALLOWED, new Boolean(allowed));
                             postUIMessage(Message.obtain(null, RETURN_ALLOWED, retValues));
                             } break;
                         case CLEAR:
@@ -164,15 +162,12 @@ public final class GeolocationPermissions {
                 }
             };
 
-            if (mOriginsToClear != null) {
-                for (String origin : mOriginsToClear) {
-                    nativeClear(origin);
+            // Handle the queued messages
+            if (mQueuedMessages != null) {
+                while (!mQueuedMessages.isEmpty()) {
+                    mHandler.sendMessage(mQueuedMessages.remove(0));
                 }
-            }
-            if (mOriginsToAllow != null) {
-                for (String origin : mOriginsToAllow) {
-                    nativeAllow(origin);
-                }
+                mQueuedMessages = null;
             }
         }
     }
@@ -181,8 +176,14 @@ public final class GeolocationPermissions {
      * Utility function to send a message to our handler.
      */
     private synchronized void postMessage(Message msg) {
-        assert(mHandler != null);
-        mHandler.sendMessage(msg);
+        if (mHandler == null) {
+            if (mQueuedMessages == null) {
+                mQueuedMessages = new Vector<Message>();
+            }
+            mQueuedMessages.add(msg);
+        } else {
+            mHandler.sendMessage(msg);
+        }
     }
 
     /**
@@ -207,20 +208,12 @@ public final class GeolocationPermissions {
     public void getOrigins(ValueCallback<Set<String> > callback) {
         if (callback != null) {
             if (WebViewCore.THREAD_NAME.equals(Thread.currentThread().getName())) {
-                getOriginsImpl();
-                callback.onReceiveValue(mOrigins);
+                Set origins = nativeGetOrigins();
+                callback.onReceiveValue(origins);
             } else {
                 postMessage(Message.obtain(null, GET_ORIGINS, callback));
             }
         }
-    }
-
-    /**
-     * Helper method to get the set of origins.
-     */
-    private void getOriginsImpl() {
-        // Called on the WebKit thread.
-        mOrigins = nativeGetOrigins();
     }
 
     /**
@@ -238,8 +231,8 @@ public final class GeolocationPermissions {
             return;
         }
         if (WebViewCore.THREAD_NAME.equals(Thread.currentThread().getName())) {
-            getAllowedImpl(origin);
-            callback.onReceiveValue(new Boolean(mAllowed));
+            boolean allowed = nativeGetAllowed(origin);
+            callback.onReceiveValue(new Boolean(allowed));
         } else {
             Map values = new HashMap<String, Object>();
             values.put(ORIGIN, origin);
@@ -249,31 +242,13 @@ public final class GeolocationPermissions {
     }
 
     /**
-     * Helper method to get the permission state for the specified origin.
-     */
-    private void getAllowedImpl(String origin) {
-        // Called on the WebKit thread.
-        mAllowed = nativeGetAllowed(origin);
-    }
-
-    /**
      * Clears the permission state for the specified origin. This method may be
      * called before the WebKit thread has intialized the message handler.
      * Messages will be queued until this time.
      */
     public void clear(String origin) {
         // Called on the UI thread.
-        if (mHandler == null) {
-            if (mOriginsToClear == null) {
-                mOriginsToClear = new HashSet<String>();
-            }
-            mOriginsToClear.add(origin);
-            if (mOriginsToAllow != null) {
-                mOriginsToAllow.remove(origin);
-            }
-        } else {
-            postMessage(Message.obtain(null, CLEAR, origin));
-        }
+        postMessage(Message.obtain(null, CLEAR, origin));
     }
 
     /**
@@ -283,17 +258,7 @@ public final class GeolocationPermissions {
      */
     public void allow(String origin) {
         // Called on the UI thread.
-        if (mHandler == null) {
-            if (mOriginsToAllow == null) {
-                mOriginsToAllow = new HashSet<String>();
-            }
-            mOriginsToAllow.add(origin);
-            if (mOriginsToClear != null) {
-                mOriginsToClear.remove(origin);
-            }
-        } else {
-            postMessage(Message.obtain(null, ALLOW, origin));
-        }
+        postMessage(Message.obtain(null, ALLOW, origin));
     }
 
     /**
