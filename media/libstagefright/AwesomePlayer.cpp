@@ -178,7 +178,8 @@ void AwesomeLocalRenderer::init(
 }
 
 AwesomePlayer::AwesomePlayer()
-    : mTimeSource(NULL),
+    : mQueueStarted(false),
+      mTimeSource(NULL),
       mVideoRendererIsPreview(false),
       mAudioPlayer(NULL),
       mFlags(0),
@@ -201,13 +202,13 @@ AwesomePlayer::AwesomePlayer()
 
     mAudioStatusEventPending = false;
 
-    mQueue.start();
-
     reset();
 }
 
 AwesomePlayer::~AwesomePlayer() {
-    mQueue.stop();
+    if (mQueueStarted) {
+        mQueue.stop();
+    }
 
     reset();
 
@@ -443,6 +444,8 @@ void AwesomePlayer::onStreamDone() {
         notifyListener_l(MEDIA_PLAYBACK_COMPLETE);
 
         pause_l();
+
+        mFlags |= AT_EOS;
     }
 }
 
@@ -516,6 +519,12 @@ status_t AwesomePlayer::play_l() {
     }
 
     postBufferingEvent_l();
+
+    if (mFlags & AT_EOS) {
+        // Legacy behaviour, if a stream finishes playing and then
+        // is started again, we play from the start...
+        seekTo_l(0);
+    }
 
     return OK;
 }
@@ -651,6 +660,7 @@ status_t AwesomePlayer::seekTo(int64_t timeUs) {
 status_t AwesomePlayer::seekTo_l(int64_t timeUs) {
     mSeeking = true;
     mSeekTimeUs = timeUs;
+    mFlags &= ~AT_EOS;
 
     seekAudioIfNecessary_l();
 
@@ -989,6 +999,11 @@ status_t AwesomePlayer::prepareAsync_l() {
         return UNKNOWN_ERROR;  // async prepare already pending
     }
 
+    if (!mQueueStarted) {
+        mQueue.start();
+        mQueueStarted = true;
+    }
+
     mFlags |= PREPARING;
     mAsyncPrepareEvent = new AwesomeEvent(
             this, &AwesomePlayer::onPrepareAsyncEvent);
@@ -1089,7 +1104,7 @@ status_t AwesomePlayer::suspend() {
     state->mUriHeaders = mUriHeaders;
     state->mFileSource = mFileSource;
 
-    state->mFlags = mFlags & (PLAYING | LOOPING);
+    state->mFlags = mFlags & (PLAYING | LOOPING | AT_EOS);
     getPosition_l(&state->mPositionUs);
 
     if (mLastVideoBuffer) {
@@ -1150,7 +1165,7 @@ status_t AwesomePlayer::resume() {
 
     seekTo_l(state->mPositionUs);
 
-    mFlags = state->mFlags & LOOPING;
+    mFlags = state->mFlags & (LOOPING | AT_EOS);
 
     if (state->mLastVideoFrame && mISurface != NULL) {
         mVideoRenderer =
