@@ -39,14 +39,14 @@ public final class ContentValues implements Parcelable {
      * Creates an empty set of values using the default initial size
      */
     public ContentValues() {
-        // Choosing a default size of 8 based on analysis of typical 
+        // Choosing a default size of 8 based on analysis of typical
         // consumption by applications.
         mValues = new HashMap<String, Object>(8);
     }
 
     /**
      * Creates an empty set of values using the given initial size
-     * 
+     *
      * @param size the initial size of the set of values
      */
     public ContentValues(int size) {
@@ -55,7 +55,7 @@ public final class ContentValues implements Parcelable {
 
     /**
      * Creates a set of values copied from the given set
-     * 
+     *
      * @param from the values to copy
      */
     public ContentValues(ContentValues from) {
@@ -65,7 +65,7 @@ public final class ContentValues implements Parcelable {
     /**
      * Creates a set of values copied from the given HashMap. This is used
      * by the Parcel unmarshalling code.
-     * 
+     *
      * @param from the values to start with
      * {@hide}
      */
@@ -174,7 +174,7 @@ public final class ContentValues implements Parcelable {
     public void put(String key, Boolean value) {
         mValues.put(key, value);
     }
-    
+
     /**
      * Adds a value to the set.
      *
@@ -187,7 +187,7 @@ public final class ContentValues implements Parcelable {
 
     /**
      * Adds a null value to the set.
-     * 
+     *
      * @param key the name of the value to make null
      */
     public void putNull(String key) {
@@ -196,7 +196,7 @@ public final class ContentValues implements Parcelable {
 
     /**
      * Returns the number of values.
-     * 
+     *
      * @return the number of values
      */
     public int size() {
@@ -223,7 +223,7 @@ public final class ContentValues implements Parcelable {
      * Returns true if this object has the named value.
      *
      * @param key the value to check for
-     * @return {@code true} if the value is present, {@code false} otherwise 
+     * @return {@code true} if the value is present, {@code false} otherwise
      */
     public boolean containsKey(String key) {
         return mValues.containsKey(key);
@@ -242,7 +242,7 @@ public final class ContentValues implements Parcelable {
 
     /**
      * Gets a value and converts it to a String.
-     * 
+     *
      * @param key the value to get
      * @return the String for the value
      */
@@ -253,7 +253,7 @@ public final class ContentValues implements Parcelable {
 
     /**
      * Gets a value and converts it to a Long.
-     * 
+     *
      * @param key the value to get
      * @return the Long value, or null if the value is missing or cannot be converted
      */
@@ -270,7 +270,7 @@ public final class ContentValues implements Parcelable {
                     return null;
                 }
             } else {
-                Log.e(TAG, "Cannot cast value for " + key + " to a Long");
+                Log.e(TAG, "Cannot cast value for " + key + " to a Long: " + value, e);
                 return null;
             }
         }
@@ -278,7 +278,7 @@ public final class ContentValues implements Parcelable {
 
     /**
      * Gets a value and converts it to an Integer.
-     * 
+     *
      * @param key the value to get
      * @return the Integer value, or null if the value is missing or cannot be converted
      */
@@ -295,7 +295,7 @@ public final class ContentValues implements Parcelable {
                     return null;
                 }
             } else {
-                Log.e(TAG, "Cannot cast value for " + key + " to a Integer");
+                Log.e(TAG, "Cannot cast value for " + key + " to a Integer: " + value, e);
                 return null;
             }
         }
@@ -303,7 +303,7 @@ public final class ContentValues implements Parcelable {
 
     /**
      * Gets a value and converts it to a Short.
-     * 
+     *
      * @param key the value to get
      * @return the Short value, or null if the value is missing or cannot be converted
      */
@@ -320,7 +320,7 @@ public final class ContentValues implements Parcelable {
                     return null;
                 }
             } else {
-                Log.e(TAG, "Cannot cast value for " + key + " to a Short");
+                Log.e(TAG, "Cannot cast value for " + key + " to a Short: " + value, e);
                 return null;
             }
         }
@@ -328,7 +328,7 @@ public final class ContentValues implements Parcelable {
 
     /**
      * Gets a value and converts it to a Byte.
-     * 
+     *
      * @param key the value to get
      * @return the Byte value, or null if the value is missing or cannot be converted
      */
@@ -345,7 +345,7 @@ public final class ContentValues implements Parcelable {
                     return null;
                 }
             } else {
-                Log.e(TAG, "Cannot cast value for " + key + " to a Byte");
+                Log.e(TAG, "Cannot cast value for " + key + " to a Byte: " + value, e);
                 return null;
             }
         }
@@ -353,7 +353,7 @@ public final class ContentValues implements Parcelable {
 
     /**
      * Gets a value and converts it to a Double.
-     * 
+     *
      * @param key the value to get
      * @return the Double value, or null if the value is missing or cannot be converted
      */
@@ -370,7 +370,7 @@ public final class ContentValues implements Parcelable {
                     return null;
                 }
             } else {
-                Log.e(TAG, "Cannot cast value for " + key + " to a Double");
+                Log.e(TAG, "Cannot cast value for " + key + " to a Double: " + value, e);
                 return null;
             }
         }
@@ -378,7 +378,7 @@ public final class ContentValues implements Parcelable {
 
     /**
      * Gets a value and converts it to a Float.
-     * 
+     *
      * @param key the value to get
      * @return the Float value, or null if the value is missing or cannot be converted
      */
@@ -395,7 +395,7 @@ public final class ContentValues implements Parcelable {
                     return null;
                 }
             } else {
-                Log.e(TAG, "Cannot cast value for " + key + " to a Float");
+                Log.e(TAG, "Cannot cast value for " + key + " to a Float: " + value, e);
                 return null;
             }
         }
@@ -403,7 +403,7 @@ public final class ContentValues implements Parcelable {
 
     /**
      * Gets a value and converts it to a Boolean.
-     * 
+     *
      * @param key the value to get
      * @return the Boolean value, or null if the value is missing or cannot be converted
      */
@@ -415,7 +415,7 @@ public final class ContentValues implements Parcelable {
             if (value instanceof CharSequence) {
                 return Boolean.valueOf(value.toString());
             } else {
-                Log.e(TAG, "Cannot cast value for " + key + " to a Boolean");
+                Log.e(TAG, "Cannot cast value for " + key + " to a Boolean: " + value, e);
                 return null;
             }
         }
@@ -424,7 +424,7 @@ public final class ContentValues implements Parcelable {
     /**
      * Gets a value that is a byte array. Note that this method will not convert
      * any other types to byte arrays.
-     * 
+     *
      * @param key the value to get
      * @return the byte[] value, or null is the value is missing or not a byte[]
      */
@@ -439,13 +439,13 @@ public final class ContentValues implements Parcelable {
 
     /**
      * Returns a set of all of the keys and values
-     * 
+     *
      * @return a set of all of the keys and values
      */
     public Set<Map.Entry<String, Object>> valueSet() {
         return mValues.entrySet();
     }
-    
+
     public static final Parcelable.Creator<ContentValues> CREATOR =
             new Parcelable.Creator<ContentValues>() {
         @SuppressWarnings({"deprecation", "unchecked"})
