@@ -295,14 +295,18 @@ public class Spinner extends AbsSpinner implements OnClickListener {
      */
     private static class DropDownAdapter implements ListAdapter, SpinnerAdapter {
         private SpinnerAdapter mAdapter;
+        private ListAdapter mListAdapter;
 
         /**
-         * <p>Creates a new ListAddapter wrapper for the specified adapter.</p>
+         * <p>Creates a new ListAdapter wrapper for the specified adapter.</p>
          *
          * @param adapter the Adapter to transform into a ListAdapter
          */
         public DropDownAdapter(SpinnerAdapter adapter) {
             this.mAdapter = adapter;
+            if (adapter instanceof ListAdapter) {
+                this.mListAdapter = (ListAdapter) adapter;
+            }
         }
 
         public int getCount() {
@@ -343,21 +347,29 @@ public class Spinner extends AbsSpinner implements OnClickListener {
         }
 
         /**
-         * <p>Always returns false.</p>
-         *
-         * @return false
+         * If the wrapped SpinnerAdapter is also a ListAdapter, delegate this call.
+         * Otherwise, return true. 
          */
         public boolean areAllItemsEnabled() {
-            return true;
+            final ListAdapter adapter = mListAdapter;
+            if (adapter != null) {
+                return adapter.areAllItemsEnabled();
+            } else {
+                return true;
+            }
         }
 
         /**
-         * <p>Always returns false.</p>
-         *
-         * @return false
+         * If the wrapped SpinnerAdapter is also a ListAdapter, delegate this call.
+         * Otherwise, return true.
          */
         public boolean isEnabled(int position) {
-            return true;
+            final ListAdapter adapter = mListAdapter;
+            if (adapter != null) {
+                return adapter.isEnabled(position);
+            } else {
+                return true;
+            }
         }
 
         public int getItemViewType(int position) {
