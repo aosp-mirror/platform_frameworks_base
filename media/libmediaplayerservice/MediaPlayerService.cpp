@@ -1614,6 +1614,8 @@ void MediaPlayerService::AudioOutput::CallbackWrapper(
     size_t actualSize = (*me->mCallback)(
             me, buffer->raw, buffer->size, me->mCallbackCookie);
 
+    buffer->size = actualSize;
+
     if (actualSize > 0) {
         me->snoopWrite(buffer->raw, actualSize);
     }
