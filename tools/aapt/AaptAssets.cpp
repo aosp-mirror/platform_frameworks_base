@@ -985,14 +985,14 @@ bool AaptGroupEntry::getNavHiddenName(const char* name,
     uint8_t mask = 0;
     uint8_t value = 0;
     if (strcmp(name, kWildcardName) == 0) {
-        mask = out->MASK_NAVHIDDEN;
-        value = out->NAVHIDDEN_ANY;
+        mask = ResTable_config::MASK_NAVHIDDEN;
+        value = ResTable_config::NAVHIDDEN_ANY;
     } else if (strcmp(name, "navexposed") == 0) {
-        mask = out->MASK_NAVHIDDEN;
-        value = out->NAVHIDDEN_NO;
+        mask = ResTable_config::MASK_NAVHIDDEN;
+        value = ResTable_config::NAVHIDDEN_NO;
     } else if (strcmp(name, "navhidden") == 0) {
-        mask = out->MASK_NAVHIDDEN;
-        value = out->NAVHIDDEN_YES;
+        mask = ResTable_config::MASK_NAVHIDDEN;
+        value = ResTable_config::NAVHIDDEN_YES;
     }
 
     if (mask != 0) {
