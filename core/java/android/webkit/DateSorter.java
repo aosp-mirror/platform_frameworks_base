@@ -26,7 +26,7 @@ import java.util.Date;
  * Sorts dates into the following groups:
  *   Today
  *   Yesterday
- *   five days ago
+ *   seven days ago
  *   one month ago
  *   older than a month ago
  */
@@ -41,7 +41,7 @@ public class DateSorter {
     private long [] mBins = new long[DAY_COUNT-1];
     private String [] mLabels = new String[DAY_COUNT];
     
-    private static final int NUM_DAYS_AGO = 5;
+    private static final int NUM_DAYS_AGO = 7;
 
     /**
      * @param context Application context
