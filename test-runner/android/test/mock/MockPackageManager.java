@@ -26,6 +26,7 @@ import android.content.pm.FeatureInfo;
 import android.content.pm.IPackageDeleteObserver;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageInstallObserver;
+import android.content.pm.IPackageMoveObserver;
 import android.content.pm.IPackageStatsObserver;
 import android.content.pm.InstrumentationInfo;
 import android.content.pm.PackageInfo;
@@ -306,6 +307,14 @@ public class MockPackageManager extends PackageManager {
     @Override
     public void installPackage(Uri packageURI, IPackageInstallObserver observer,
             int flags, String installerPackageName) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * @hide - to match hiding in superclass
+     */
+    @Override
+    public void movePackage(String packageName, IPackageMoveObserver observer, int flags) {
         throw new UnsupportedOperationException();
     }
     

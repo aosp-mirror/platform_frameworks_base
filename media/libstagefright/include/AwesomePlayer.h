@@ -92,12 +92,14 @@ private:
         FIRST_FRAME = 4,
         PREPARING   = 8,
         PREPARED    = 16,
+        AT_EOS      = 32,
     };
 
     mutable Mutex mLock;
 
     OMXClient mClient;
     TimedEventQueue mQueue;
+    bool mQueueStarted;
     wp<MediaPlayerBase> mListener;
 
     sp<ISurface> mISurface;

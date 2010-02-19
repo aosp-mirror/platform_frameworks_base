@@ -53,9 +53,9 @@ public class HandlerThread extends Thread {
         Looper.prepare();
         synchronized (this) {
             mLooper = Looper.myLooper();
-            Process.setThreadPriority(mPriority);
             notifyAll();
         }
+        Process.setThreadPriority(mPriority);
         onLooperPrepared();
         Looper.loop();
         mTid = -1;

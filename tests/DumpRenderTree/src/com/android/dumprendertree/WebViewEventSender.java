@@ -207,7 +207,7 @@ public class WebViewEventSender implements EventSender {
 
         tp.setDownTime(SystemClock.uptimeMillis());
         MotionEvent event = MotionEvent.obtain(tp.downTime(), tp.downTime(),
-                MotionEvent.ACTION_DOWN, tp.getX(), tp.getY(), 0);
+                MotionEvent.ACTION_DOWN, tp.getX(), tp.getY(), mTouchMetaState);
         mWebView.onTouchEvent(event);
     }
 
@@ -223,7 +223,7 @@ public class WebViewEventSender implements EventSender {
         }
 
         MotionEvent event = MotionEvent.obtain(tp.downTime(), SystemClock.uptimeMillis(),
-                MotionEvent.ACTION_MOVE, tp.getX(), tp.getY(), 0);
+                MotionEvent.ACTION_MOVE, tp.getX(), tp.getY(), mTouchMetaState);
         mWebView.onTouchEvent(event);
 
         tp.setMoved(false);
@@ -237,7 +237,7 @@ public class WebViewEventSender implements EventSender {
         }
 
         MotionEvent event = MotionEvent.obtain(tp.downTime(), SystemClock.uptimeMillis(),
-                MotionEvent.ACTION_UP, tp.getX(), tp.getY(), 0);
+                MotionEvent.ACTION_UP, tp.getX(), tp.getY(), mTouchMetaState);
         mWebView.onTouchEvent(event);
 
         if (tp.isReleased()) {
@@ -253,7 +253,7 @@ public class WebViewEventSender implements EventSender {
 
         if (tp.cancelled()) {
             MotionEvent event = MotionEvent.obtain(tp.downTime(), SystemClock.uptimeMillis(),
-                    MotionEvent.ACTION_CANCEL, tp.getX(), tp.getY(), 0);
+                    MotionEvent.ACTION_CANCEL, tp.getX(), tp.getY(), mTouchMetaState);
             mWebView.onTouchEvent(event);
         }
     }
@@ -285,8 +285,20 @@ public class WebViewEventSender implements EventSender {
     }
 
     public void setTouchModifier(String modifier, boolean enabled) {
-        // TODO(benm): This needs implementing when Android supports sending key modifiers
-        // in touch events.
+        int mask = 0;
+        if ("alt".equals(modifier.toLowerCase())) {
+            mask = KeyEvent.META_ALT_ON;
+        } else if ("shift".equals(modifier.toLowerCase())) {
+            mask = KeyEvent.META_SHIFT_ON;
+        } else if ("ctrl".equals(modifier.toLowerCase())) {
+            mask = KeyEvent.META_SYM_ON;
+        }
+
+        if (enabled) {
+            mTouchMetaState |= mask;
+        } else {
+            mTouchMetaState &= ~mask;
+        }
     }
 
     public void releaseTouchPoint(int id) {
@@ -300,6 +312,10 @@ public class WebViewEventSender implements EventSender {
 
     public void clearTouchPoints() {
         mTouchPoints.clear();
+    }
+
+    public void clearTouchMetaState() {
+        mTouchMetaState = 0;
     }
 
     private int contentsToWindowX(int x) {
@@ -352,4 +368,5 @@ public class WebViewEventSender implements EventSender {
     };
 
     private Vector<TouchPoint> mTouchPoints;
+    private int mTouchMetaState;
 }

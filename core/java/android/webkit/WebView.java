@@ -4436,6 +4436,7 @@ public class WebView extends AbsoluteLayout
             ted.mX = viewToContentX((int) x + mScrollX);
             ted.mY = viewToContentY((int) y + mScrollY);
             ted.mEventTime = eventTime;
+            ted.mMetaState = ev.getMetaState();
             mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
             mLastSentTouchTime = eventTime;
         }
@@ -4699,6 +4700,7 @@ public class WebView extends AbsoluteLayout
                             ted.mX = viewToContentX((int) x + mScrollX);
                             ted.mY = viewToContentY((int) y + mScrollY);
                             ted.mEventTime = eventTime;
+                            ted.mMetaState = ev.getMetaState();
                             mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
                         } else if (mFullScreenHolder == null) {
                             doDoubleTap();
@@ -5735,6 +5737,11 @@ public class WebView extends AbsoluteLayout
                         ted.mX = viewToContentX((int) mLastTouchX + mScrollX);
                         ted.mY = viewToContentY((int) mLastTouchY + mScrollY);
                         ted.mEventTime = SystemClock.uptimeMillis();
+                        // metaState for long press is tricky. Should it be the state
+                        // when the press started or when the press was released? Or
+                        // some intermediary key state? For simplicity for now, we
+                        // don't set it.
+                        ted.mMetaState = 0;
                         mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
                     } else if (mPreventDrag == PREVENT_DRAG_NO) {
                         mTouchMode = TOUCH_DONE_MODE;

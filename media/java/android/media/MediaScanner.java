@@ -500,22 +500,6 @@ public class MediaScanner
             doScanFile(path, mimeType, lastModified, fileSize, false);
         }
 
-        private boolean isMetadataSupported(int fileType) {
-            if (mFileType == MediaFile.FILE_TYPE_MP3 ||
-                    mFileType == MediaFile.FILE_TYPE_MP4 ||
-                    mFileType == MediaFile.FILE_TYPE_M4A ||
-                    mFileType == MediaFile.FILE_TYPE_3GPP ||
-                    mFileType == MediaFile.FILE_TYPE_3GPP2 ||
-                    mFileType == MediaFile.FILE_TYPE_OGG ||
-                    mFileType == MediaFile.FILE_TYPE_AAC ||
-                    mFileType == MediaFile.FILE_TYPE_MID ||
-                    mFileType == MediaFile.FILE_TYPE_WMA) {
-                // we only extract metadata from MP3, M4A, OGG, MID, AAC and WMA files.
-                // check MP4 files, to determine if they contain only audio.
-                return true;
-            }
-            return false;
-        }
         public Uri doScanFile(String path, String mimeType, long lastModified, long fileSize, boolean scanAlways) {
             Uri result = null;
 //            long t1 = System.currentTimeMillis();
@@ -531,10 +515,8 @@ public class MediaScanner
                     boolean music = (lowpath.indexOf(MUSIC_DIR) > 0) ||
                         (!ringtones && !notifications && !alarms && !podcasts);
 
-                    if( isMetadataSupported(mFileType) ) {
+                    if (!MediaFile.isImageFileType(mFileType)) {
                         processFile(path, mimeType, this);
-                    } else if (MediaFile.isImageFileType(mFileType)) {
-                        // we used to compute the width and height but it's not worth it
                     }
 
                     result = endFile(entry, ringtones, notifications, alarms, music, podcasts);

@@ -111,6 +111,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/content/pm/IPackageDeleteObserver.aidl \
 	core/java/android/content/pm/IPackageInstallObserver.aidl \
 	core/java/android/content/pm/IPackageManager.aidl \
+	core/java/android/content/pm/IPackageMoveObserver.aidl \
 	core/java/android/content/pm/IPackageStatsObserver.aidl \
 	core/java/android/database/IContentObserver.aidl \
 	core/java/android/hardware/ISensorService.aidl \

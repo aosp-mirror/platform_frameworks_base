@@ -425,4 +425,35 @@ class NetworkManagementService extends INetworkManagementService.Stub {
                 android.Manifest.permission.CHANGE_NETWORK_STATE, "NetworkManagementService");
         mConnector.doCommand(String.format("pppd detach %s", tty));
     }
+
+    public void startUsbRNDIS() throws IllegalStateException {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.CHANGE_NETWORK_STATE, "NetworkManagementService");
+        mConnector.doCommand("usb startrndis");
+    }
+
+    public void stopUsbRNDIS() throws IllegalStateException {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.CHANGE_NETWORK_STATE, "NetworkManagementService");
+        mConnector.doCommand("usb stoprndis");
+    }
+
+    public boolean isUsbRNDISStarted() throws IllegalStateException {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.ACCESS_NETWORK_STATE, "NetworkManagementService");
+        ArrayList<String> rsp = mConnector.doCommand("usb rndisstatus");
+
+        for (String line : rsp) {
+            String []tok = line.split(" ");
+            int code = Integer.parseInt(tok[0]);
+            if (code == NetdResponseCode.UsbRNDISStatusResult) {
+                if (tok[2].equals("started"))
+                    return true;
+                return false;
+            } else {
+                throw new IllegalStateException(String.format("Unexpected response code %d", code));
+            }
+        }
+        throw new IllegalStateException("Got an empty response");
+    }
 }

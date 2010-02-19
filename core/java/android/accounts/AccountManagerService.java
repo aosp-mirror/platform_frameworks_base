@@ -466,7 +466,8 @@ public class AccountManagerService
 
         public TestFeaturesSession(IAccountManagerResponse response,
                 Account account, String[] features) {
-            super(response, account.type, false /* expectActivityLaunch */);
+            super(response, account.type, false /* expectActivityLaunch */,
+                    true /* stripAuthTokenFromResult */);
             mFeatures = features;
             mAccount = account;
         }
@@ -520,7 +521,8 @@ public class AccountManagerService
     private class RemoveAccountSession extends Session {
         final Account mAccount;
         public RemoveAccountSession(IAccountManagerResponse response, Account account) {
-            super(response, account.type, false /* expectActivityLaunch */);
+            super(response, account.type, false /* expectActivityLaunch */,
+                    true /* stripAuthTokenFromResult */);
             mAccount = account;
         }
 
@@ -794,7 +796,8 @@ public class AccountManagerService
                 }
             }
 
-            new Session(response, account.type, expectActivityLaunch) {
+            new Session(response, account.type, expectActivityLaunch,
+                    false /* stripAuthTokenFromResult */) {
                 protected String toDebugString(long now) {
                     if (loginOptions != null) loginOptions.keySet();
                     return super.toDebugString(now) + ", getAuthToken"
@@ -945,7 +948,8 @@ public class AccountManagerService
         checkManageAccountsPermission();
         long identityToken = clearCallingIdentity();
         try {
-            new Session(response, accountType, expectActivityLaunch) {
+            new Session(response, accountType, expectActivityLaunch,
+                    true /* stripAuthTokenFromResult */) {
                 public void run() throws RemoteException {
                     mAuthenticator.addAccount(this, mAccountType, authTokenType, requiredFeatures,
                             options);
@@ -970,7 +974,8 @@ public class AccountManagerService
         checkManageAccountsPermission();
         long identityToken = clearCallingIdentity();
         try {
-            new Session(response, account.type, expectActivityLaunch) {
+            new Session(response, account.type, expectActivityLaunch,
+                    true /* stripAuthTokenFromResult */) {
                 public void run() throws RemoteException {
                     mAuthenticator.confirmCredentials(this, account, options);
                 }
@@ -990,7 +995,8 @@ public class AccountManagerService
         checkManageAccountsPermission();
         long identityToken = clearCallingIdentity();
         try {
-            new Session(response, account.type, expectActivityLaunch) {
+            new Session(response, account.type, expectActivityLaunch,
+                    true /* stripAuthTokenFromResult */) {
                 public void run() throws RemoteException {
                     mAuthenticator.updateCredentials(this, account, authTokenType, loginOptions);
                 }
@@ -1012,7 +1018,8 @@ public class AccountManagerService
         checkManageAccountsPermission();
         long identityToken = clearCallingIdentity();
         try {
-            new Session(response, accountType, expectActivityLaunch) {
+            new Session(response, accountType, expectActivityLaunch,
+                    true /* stripAuthTokenFromResult */) {
                 public void run() throws RemoteException {
                     mAuthenticator.editProperties(this, mAccountType);
                 }
@@ -1034,7 +1041,8 @@ public class AccountManagerService
 
         public GetAccountsByTypeAndFeatureSession(IAccountManagerResponse response,
             String type, String[] features) {
-            super(response, type, false /* expectActivityLaunch */);
+            super(response, type, false /* expectActivityLaunch */,
+                    true /* stripAuthTokenFromResult */);
             mFeatures = features;
         }
 
@@ -1176,11 +1184,14 @@ public class AccountManagerService
 
         IAccountAuthenticator mAuthenticator = null;
 
+        private final boolean mStripAuthTokenFromResult;
+
         public Session(IAccountManagerResponse response, String accountType,
-                boolean expectActivityLaunch) {
+                boolean expectActivityLaunch, boolean stripAuthTokenFromResult) {
             super();
             if (response == null) throw new IllegalArgumentException("response is null");
             if (accountType == null) throw new IllegalArgumentException("accountType is null");
+            mStripAuthTokenFromResult = stripAuthTokenFromResult;
             mResponse = response;
             mAccountType = accountType;
             mExpectActivityLaunch = expectActivityLaunch;
@@ -1319,6 +1330,9 @@ public class AccountManagerService
                         response.onError(AccountManager.ERROR_CODE_INVALID_RESPONSE,
                                 "null bundle returned");
                     } else {
+                        if (mStripAuthTokenFromResult) {
+                            result.remove(AccountManager.KEY_AUTHTOKEN);
+                        }
                         response.onResult(result);
                     }
                 } catch (RemoteException e) {

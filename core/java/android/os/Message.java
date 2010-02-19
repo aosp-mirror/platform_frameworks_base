@@ -40,20 +40,36 @@ public final class Message implements Parcelable {
      */
     public int what;
 
-    // Use these fields instead of using the class's Bundle if you can. 
-    /** arg1 and arg2 are lower-cost alternatives to using {@link #setData(Bundle) setData()}
-    if you only need to store a few integer values. */
+    /**
+     * arg1 and arg2 are lower-cost alternatives to using
+     * {@link #setData(Bundle) setData()} if you only need to store a
+     * few integer values.
+     */
     public int arg1; 
 
-    /** arg1 and arg2 are lower-cost alternatives to using {@link #setData(Bundle) setData()}
-    if you only need to store a few integer values.*/ 
+    /**
+     * arg1 and arg2 are lower-cost alternatives to using
+     * {@link #setData(Bundle) setData()} if you only need to store a
+     * few integer values.
+     */
     public int arg2;
 
-    /** An arbitrary object to send to the recipient.  This must be null when
-     * sending messages across processes. */
+    /**
+     * An arbitrary object to send to the recipient.  When using
+     * {@link Messenger} to send the message across processes this can only
+     * be non-null if it contains a Parcelable of a framework class (not one
+     * implemented by the application).   For other data transfer use
+     * {@link #setData}.
+     * 
+     * <p>Note that Parcelable objects here are not supported prior to
+     * the {@link android.os.Build.VERSION_CODES#FROYO} release.
+     */
     public Object obj;
 
-    /** Optional Messenger where replies to this message can be sent.
+    /**
+     * Optional Messenger where replies to this message can be sent.  The
+     * semantics of exactly how this is used are up to the sender and
+     * receiver.
      */
     public Messenger replyTo;
     
@@ -278,14 +294,22 @@ public final class Message implements Parcelable {
      * the <em>target</em> {@link Handler} that is receiving this Message to
      * dispatch it.  If
      * not set, the message will be dispatched to the receiving Handler's
-     * {@link Handler#handleMessage(Message Handler.handleMessage())}. */
+     * {@link Handler#handleMessage(Message Handler.handleMessage())}.
+     */
     public Runnable getCallback() {
         return callback;
     }
     
     /** 
      * Obtains a Bundle of arbitrary data associated with this
-     * event, lazily creating it if necessary. Set this value by calling {@link #setData(Bundle)}.
+     * event, lazily creating it if necessary. Set this value by calling
+     * {@link #setData(Bundle)}.  Note that when transferring data across
+     * processes via {@link Messenger}, you will need to set your ClassLoader
+     * on the Bundle via {@link Bundle#setClassLoader(ClassLoader)
+     * Bundle.setClassLoader()} so that it can instantiate your objects when
+     * you retrieve them.
+     * @see #peekData()
+     * @see #setData(Bundle)
      */
     public Bundle getData() {
         if (data == null) {
@@ -297,14 +321,21 @@ public final class Message implements Parcelable {
 
     /** 
      * Like getData(), but does not lazily create the Bundle.  A null
-     * is returned if the Bundle does not already exist.
+     * is returned if the Bundle does not already exist.  See
+     * {@link #getData} for further information on this.
+     * @see #getData()
+     * @see #setData(Bundle)
      */
     public Bundle peekData() {
         return data;
     }
 
-    /** Sets a Bundle of arbitrary data values. Use arg1 and arg1 members 
-     * as a lower cost way to send a few simple integer values, if you can. */
+    /**
+     * Sets a Bundle of arbitrary data values. Use arg1 and arg1 members 
+     * as a lower cost way to send a few simple integer values, if you can.
+     * @see #getData() 
+     * @see #peekData()
+     */
     public void setData(Bundle data) {
         this.data = data;
     }
@@ -381,13 +412,25 @@ public final class Message implements Parcelable {
     }
 
     public void writeToParcel(Parcel dest, int flags) {
-        if (obj != null || callback != null) {
+        if (callback != null) {
             throw new RuntimeException(
-                "Can't marshal objects across processes.");
+                "Can't marshal callbacks across processes.");
         }
         dest.writeInt(what);
         dest.writeInt(arg1);
         dest.writeInt(arg2);
+        if (obj != null) {
+            try {
+                Parcelable p = (Parcelable)obj;
+                dest.writeInt(1);
+                dest.writeParcelable(p, flags);
+            } catch (ClassCastException e) {
+                throw new RuntimeException(
+                    "Can't marshal non-Parcelable objects across processes.");
+            }
+        } else {
+            dest.writeInt(0);
+        }
         dest.writeLong(when);
         dest.writeBundle(data);
         Messenger.writeMessengerOrNullToParcel(replyTo, dest);
@@ -397,6 +440,9 @@ public final class Message implements Parcelable {
         what = source.readInt();
         arg1 = source.readInt();
         arg2 = source.readInt();
+        if (source.readInt() != 0) {
+            obj = source.readParcelable(getClass().getClassLoader());
+        }
         when = source.readLong();
         data = source.readBundle();
         replyTo = Messenger.readMessengerOrNullFromParcel(source);

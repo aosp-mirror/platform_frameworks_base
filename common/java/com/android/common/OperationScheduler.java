@@ -158,9 +158,32 @@ public class OperationScheduler {
             time = Math.max(time, moratoriumTimeMillis);
         }
         time = Math.max(time, lastSuccessTimeMillis + options.minTriggerMillis);
-        time = Math.max(time, lastErrorTimeMillis + options.backoffFixedMillis +
-                options.backoffIncrementalMillis * errorCount);
+        if (errorCount > 0) {
+            time = Math.max(time, lastErrorTimeMillis + options.backoffFixedMillis +
+                    options.backoffIncrementalMillis * errorCount);
+        }
         return time;
+    }
+
+    /**
+     * Return the last time the operation completed.  Does not modify any state.
+     *
+     * @return the wall clock time when {@link #onSuccess()} was last called.
+     */
+    public long getLastSuccessTimeMillis() {
+        return mStorage.getLong(PREFIX + "lastSuccessTimeMillis", 0);
+    }
+
+    /**
+     * Return the last time the operation was attempted.  Does not modify any state.
+     *
+     * @return the wall clock time when {@link #onSuccess()} or {@link
+     * #onTransientError()} was last called.
+     */
+    public long getLastAttemptTimeMillis() {
+        return Math.max(
+                mStorage.getLong(PREFIX + "lastSuccessTimeMillis", 0),
+                mStorage.getLong(PREFIX + "lastErrorTimeMillis", 0));
     }
 
     /**
@@ -273,9 +296,7 @@ public class OperationScheduler {
      * where there is reason to hope things might start working better.
      */
     public void resetTransientError() {
-        mStorage.edit()
-                .remove(PREFIX + "lastErrorTimeMillis")
-                .remove(PREFIX + "errorCount").commit();
+        mStorage.edit().remove(PREFIX + "errorCount").commit();
     }
 
     /**

@@ -115,6 +115,11 @@ public class SyncManager implements OnAccountsUpdateListener {
     private static final long DEFAULT_MAX_SYNC_RETRY_TIME_IN_SECONDS = 60 * 60; // one hour
 
     /**
+     * How long to wait before retrying a sync that failed due to one already being in progress.
+     */
+    private static final int DELAY_RETRY_SYNC_IN_PROGRESS_IN_SECONDS = 10;
+
+    /**
      * An error notification is sent if sync of any of the providers has been failing for this long.
      */
     private static final long ERROR_NOTIFICATION_DELAY_MS = 1000 * 60 * 10; // 10 minutes
@@ -807,6 +812,14 @@ public class SyncManager implements OnAccountsUpdateListener {
                         + "it achieved some success");
             }
             scheduleSyncOperation(operation);
+        } else if (syncResult.syncAlreadyInProgress) {
+            if (isLoggable) {
+                Log.d(TAG, "retrying sync operation that failed because there was already a "
+                        + "sync in progress: " + operation);
+            }
+            scheduleSyncOperation(new SyncOperation(operation.account, operation.syncSource,
+                    operation.authority, operation.extras,
+                    DELAY_RETRY_SYNC_IN_PROGRESS_IN_SECONDS));
         } else if (syncResult.hasSoftError()) {
             if (isLoggable) {
                 Log.d(TAG, "retrying sync operation because it encountered a soft error: "

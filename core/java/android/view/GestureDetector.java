@@ -494,6 +494,9 @@ public class GestureDetector {
 
             mLastMotionX = x;
             mLastMotionY = y;
+            if (mCurrentDownEvent != null) {
+                mCurrentDownEvent.recycle();
+            }
             mCurrentDownEvent = MotionEvent.obtain(ev);
             mAlwaysInTapRegion = true;
             mAlwaysInBiggerTapRegion = true;
@@ -562,10 +565,14 @@ public class GestureDetector {
 
                 if ((Math.abs(velocityY) > mMinimumFlingVelocity)
                         || (Math.abs(velocityX) > mMinimumFlingVelocity)){
-                    handled = mListener.onFling(mCurrentDownEvent, currentUpEvent, velocityX, velocityY);
+                    handled = mListener.onFling(mCurrentDownEvent, ev, velocityX, velocityY);
                 }
             }
-            mPreviousUpEvent = MotionEvent.obtain(ev);
+            if (mPreviousUpEvent != null) {
+                mPreviousUpEvent.recycle();
+            }
+            // Hold the event we obtained above - listeners may have changed the original.
+            mPreviousUpEvent = currentUpEvent;
             mVelocityTracker.recycle();
             mVelocityTracker = null;
             mIsDoubleTapping = false;

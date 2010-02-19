@@ -102,7 +102,11 @@ public class DefaultContainerService extends IntentService {
             File sourceFile = new File(archiveFilePath);
             DisplayMetrics metrics = new DisplayMetrics();
             metrics.setToDefaults();
-            PackageParser.Package pkg = packageParser.parsePackage(sourceFile, archiveFilePath, metrics, 0);
+            PackageParser.Package pkg = packageParser.parsePackage(sourceFile,
+                    archiveFilePath, metrics, 0);
+            // Nuke the parser reference right away and force a gc
+            Runtime.getRuntime().gc();
+            packageParser = null;
             if (pkg == null) {
                 Log.w(TAG, "Failed to parse package");
                 return PackageHelper.RECOMMEND_FAILED_INVALID_APK;
@@ -115,7 +119,7 @@ public class DefaultContainerService extends IntentService {
                 return PackageHelper.RECOMMEND_FAILED_INSUFFICIENT_STORAGE;
             } else {
                 // Implies install on internal storage.
-                return 0;
+                return PackageHelper.RECOMMEND_INSTALL_INTERNAL;
             }
         }
     };

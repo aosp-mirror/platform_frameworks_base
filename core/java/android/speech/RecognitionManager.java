@@ -98,6 +98,9 @@ public class RecognitionManager {
 
     /** Context with which the manager was created */
     private final Context mContext;
+    
+    /** Component to direct service intent to */
+    private final ComponentName mServiceComponent;
 
     /** Handler that will execute the main tasks */
     private Handler mHandler = new Handler() {
@@ -133,8 +136,9 @@ public class RecognitionManager {
      * The right way to create a {@code RecognitionManager} is by using
      * {@link #createRecognitionManager} static factory method
      */
-    private RecognitionManager(final Context context) {
+    private RecognitionManager(final Context context, final ComponentName serviceComponent) {
         mContext = context;
+        mServiceComponent = serviceComponent;
     }
 
     /**
@@ -184,11 +188,31 @@ public class RecognitionManager {
      * @return a new {@code RecognitionManager}
      */
     public static RecognitionManager createRecognitionManager(final Context context) {
+        return createRecognitionManager(context, null);
+    }
+
+    /**
+     * Factory method to create a new {@code RecognitionManager}, please note that
+     * {@link #setRecognitionListener(RecognitionListener)} must be called before dispatching any
+     * command to the created {@code RecognitionManager}.
+     * 
+     * Use this version of the method to specify a specific service to direct this
+     * {@link RecognitionManager} to. Normally you would not use this; use
+     * {@link #createRecognitionManager(Context)} instead to use the system default
+     * recognition service.
+     * 
+     * @param context in which to create {@code RecognitionManager}
+     * @param serviceComponent the {@link ComponentName} of a specific service to direct this
+     *        {@code RecognitionManager} to
+     * @return a new {@code RecognitionManager}
+     */
+    public static RecognitionManager createRecognitionManager(final Context context,
+            final ComponentName serviceComponent) {
         if (context == null) {
             throw new IllegalArgumentException("Context cannot be null)");
         }
         checkIsCalledFromMainThread();
-        return new RecognitionManager(context);
+        return new RecognitionManager(context, serviceComponent);
     }
 
     /**
@@ -222,16 +246,21 @@ public class RecognitionManager {
             mConnection = new Connection();
             
             Intent serviceIntent = new Intent(RecognitionService.SERVICE_INTERFACE);
-            String serviceComponent = Settings.Secure.getString(mContext.getContentResolver(),
-                    Settings.Secure.VOICE_RECOGNITION_SERVICE);
             
-            if (TextUtils.isEmpty(serviceComponent)) {
-                Log.e(TAG, "no selected voice recognition service");
-                mListener.onError(ERROR_CLIENT);
-                return;
+            if (mServiceComponent == null) {
+                String serviceComponent = Settings.Secure.getString(mContext.getContentResolver(),
+                        Settings.Secure.VOICE_RECOGNITION_SERVICE);
+                
+                if (TextUtils.isEmpty(serviceComponent)) {
+                    Log.e(TAG, "no selected voice recognition service");
+                    mListener.onError(ERROR_CLIENT);
+                    return;
+                }
+                
+                serviceIntent.setComponent(ComponentName.unflattenFromString(serviceComponent));                
+            } else {
+                serviceIntent.setComponent(mServiceComponent);
             }
-            
-            serviceIntent.setComponent(ComponentName.unflattenFromString(serviceComponent));
             
             if (!mContext.bindService(serviceIntent, mConnection, Context.BIND_AUTO_CREATE)) {
                 Log.e(TAG, "bind to recognition service failed");

@@ -716,6 +716,7 @@ public class TestShellActivity extends Activity implements LayoutTestController 
         mCanOpenWindows = false;
         mEventSender.resetMouse();
         mEventSender.clearTouchPoints();
+        mEventSender.clearTouchMetaState();
         mPageFinished = false;
         mOneHundredPercentComplete = false;
         mDumpWebKitData = false;
