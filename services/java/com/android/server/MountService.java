@@ -150,13 +150,23 @@ class MountService extends IMountService.Stub
                     notifyVolumeStateChange(null, "/sdcard", VolumeState.NoMedia, VolumeState.Mounted);
                     return;
                 }
-                String path = Environment.getExternalStorageDirectory().getPath();
-                if (getVolumeState(path).equals(Environment.MEDIA_UNMOUNTED)) {
-                    int rc = doMountVolume(path);
-                    if (rc != StorageResultCode.OperationSucceeded) {
-                        Log.e(TAG, String.format("Boot-time mount failed (%d)", rc));
+                new Thread() {
+                    public void run() {
+                        try {
+                            String path = Environment.getExternalStorageDirectory().getPath();
+                            if (getVolumeState(
+                                    Environment.getExternalStorageDirectory().getPath()).equals(
+                                            Environment.MEDIA_UNMOUNTED)) {
+                                int rc = doMountVolume(path);
+                                if (rc != StorageResultCode.OperationSucceeded) {
+                                    Log.e(TAG, String.format("Boot-time mount failed (%d)", rc));
+                                }
+                            }
+                        } catch (Exception ex) {
+                            Log.e(TAG, "Boot-time mount exception", ex);
+                        }
                     }
-                }
+                }.start();
             }
         }
     };
