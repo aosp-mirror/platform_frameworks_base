@@ -37,6 +37,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageInstallObserver;
 import android.content.pm.IPackageDeleteObserver;
+import android.content.pm.IPackageMoveObserver;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
@@ -159,6 +160,7 @@ public class PackageManagerTests extends AndroidTestCase {
         PackageInstallObserver observer = new PackageInstallObserver();
         final boolean received = false;
         mContext.registerReceiver(receiver, receiver.filter);
+        final boolean DEBUG = true;
         try {
             // Wait on observer
             synchronized(observer) {
@@ -173,6 +175,7 @@ public class PackageManagerTests extends AndroidTestCase {
                         throw new Exception("Timed out waiting for packageInstalled callback");
                     }
                     if (observer.returnCode != PackageManager.INSTALL_SUCCEEDED) {
+                        Log.i(TAG, "Failed to install with error code = " + observer.returnCode);
                         return false;
                     }
                     // Verify we received the broadcast
@@ -237,7 +240,9 @@ public class PackageManagerTests extends AndroidTestCase {
         File sourceFile = new File(archiveFilePath);
         DisplayMetrics metrics = new DisplayMetrics();
         metrics.setToDefaults();
-        return packageParser.parsePackage(sourceFile, archiveFilePath, metrics, 0);
+        PackageParser.Package pkg = packageParser.parsePackage(sourceFile, archiveFilePath, metrics, 0);
+        packageParser = null;
+        return pkg;
     }
 
     private void assertInstall(String pkgName, int flags) {
@@ -297,6 +302,25 @@ public class PackageManagerTests extends AndroidTestCase {
         return installFromRawResource("install.apk", R.raw.install, flags, cleanUp,
                 false, -1);
     }
+
+    public void clearSecureContainersForPkg(String pkgName) {
+        IMountService ms = getMs();
+        try {
+            String list[] = ms.getSecureContainerList();
+            if (list != null) {
+                for (String cid : list) {
+                    boolean delete = false;
+                    // STOPSHIP issues with rename should be fixed.
+                    if (cid.contains(pkgName) ||
+                            cid.contains("smdltmp")) {
+                        Log.i(TAG, "Destroying container " + cid);
+                        ms.destroySecureContainer(cid, true);
+                    }
+                }
+            }
+        } catch (RemoteException e) {}
+    }
+
     /*
      * Utility function that reads a apk bundled as a raw resource
      * copies it into own data directory and invokes
@@ -310,11 +334,15 @@ public class PackageManagerTests extends AndroidTestCase {
         PackageParser.Package pkg = parsePackage(packageURI);
         assertNotNull(pkg);
         InstallParams ip = null;
+        // Make sure the package doesn't exist
+        getPm().deletePackage(pkg.packageName, null, 0);
+        // Clean up the containers as well
+        if ((flags & PackageManager.INSTALL_EXTERNAL) != 0) {
+            clearSecureContainersForPkg(pkg.packageName);
+        }
         try {
             try {
                 if (fail) {
-                    // Make sure it doesn't exist
-                    getPm().deletePackage(pkg.packageName, null, 0);
                     assertTrue(invokeInstallPackageFail(packageURI, flags,
                             pkg.packageName, result));
                     assertNotInstalled(pkg.packageName);
@@ -811,7 +839,7 @@ public class PackageManagerTests extends AndroidTestCase {
 
     public void testManifestInstallLocationSdcard() {
         installFromRawResource("install.apk", R.raw.install_loc_sdcard,
-                PackageManager.INSTALL_EXTERNAL, true, false, -1);
+                0, true, false, -1);
     }
 
     public void testManifestInstallLocationAuto() {
@@ -826,9 +854,185 @@ public class PackageManagerTests extends AndroidTestCase {
 
     public void testManifestInstallLocationFwdLockedSdcard() {
         installFromRawResource("install.apk", R.raw.install_loc_sdcard,
-                PackageManager.INSTALL_FORWARD_LOCK |
-                PackageManager.INSTALL_EXTERNAL, true, true,
+                PackageManager.INSTALL_FORWARD_LOCK, true, true,
                 PackageManager.INSTALL_FAILED_INVALID_INSTALL_LOCATION);
+    }
+
+    public void xxxtestClearAllSecureContainers() {
+        IMountService ms = getMs();
+        try {
+            String list[] = ms.getSecureContainerList();
+            if (list != null) {
+                for (String cid : list) {
+                    Log.i(TAG, "Destroying container " + cid);
+                    ms.destroySecureContainer(cid, false);
+                }
+            }
+        } catch (RemoteException e) {}
+    }
+
+    class MoveReceiver extends GenericReceiver {
+        String pkgName;
+        final static int INVALID = -1;
+        final static int REMOVED = 1;
+        final static int ADDED = 2;
+        int removed = INVALID;
+
+        MoveReceiver(String pkgName) {
+            this.pkgName = pkgName;
+            filter = new IntentFilter(Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE);
+            filter.addAction(Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE);
+            super.setFilter(filter);
+        }
+
+        public boolean notifyNow(Intent intent) {
+            String action = intent.getAction();
+            Log.i(TAG, "MoveReceiver::" + action);
+            if (Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE.equals(action)) {
+                String[] list = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
+                if (list != null) {
+                    for (String pkg : list) {
+                        if (pkg.equals(pkgName)) {
+                            removed = REMOVED;
+                            break;
+                        }
+                    }
+                }
+                removed = REMOVED;
+            } else if (Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE.equals(action)) {
+                if (removed != REMOVED) {
+                    return false;
+                }
+                String[] list = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
+                if (list != null) {
+                    for (String pkg : list) {
+                        if (pkg.equals(pkgName)) {
+                            removed = ADDED;
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+    }
+
+    private class PackageMoveObserver extends IPackageMoveObserver.Stub {
+        public int returnCode;
+        private boolean doneFlag = false;
+
+        public void packageMoved(String packageName, int returnCode) {
+            synchronized(this) {
+                this.returnCode = returnCode;
+                doneFlag = true;
+                notifyAll();
+            }
+        }
+
+        public boolean isDone() {
+            return doneFlag;
+        }
+    }
+
+    public boolean invokeMovePackage(String pkgName, int flags,
+            GenericReceiver receiver) throws Exception {
+        PackageMoveObserver observer = new PackageMoveObserver();
+        final boolean received = false;
+        mContext.registerReceiver(receiver, receiver.filter);
+        try {
+            // Wait on observer
+            synchronized(observer) {
+                synchronized (receiver) {
+                    getPm().movePackage(pkgName, observer, flags);
+                    long waitTime = 0;
+                    while((!observer.isDone()) && (waitTime < MAX_WAIT_TIME) ) {
+                        observer.wait(WAIT_TIME_INCR);
+                        waitTime += WAIT_TIME_INCR;
+                    }
+                    if(!observer.isDone()) {
+                        throw new Exception("Timed out waiting for pkgmove callback");
+                    }
+                    if (observer.returnCode != PackageManager.MOVE_SUCCEEDED) {
+                        return false;
+                    }
+                    // Verify we received the broadcast
+                    waitTime = 0;
+                    while((!receiver.isDone()) && (waitTime < MAX_WAIT_TIME) ) {
+                        receiver.wait(WAIT_TIME_INCR);
+                        waitTime += WAIT_TIME_INCR;
+                    }
+                    if(!receiver.isDone()) {
+                        throw new Exception("Timed out waiting for MOVE notifications");
+                    }
+                    return receiver.received;
+                }
+            }
+        } finally {
+            mContext.unregisterReceiver(receiver);
+        }
+    }
+
+    /*
+     * Utility function that reads a apk bundled as a raw resource
+     * copies it into own data directory and invokes
+     * PackageManager api to install first and then replace it
+     * again.
+     */
+    public void moveFromRawResource(int installFlags, int moveFlags,
+            int expRetCode) {
+        // Install first
+        InstallParams ip = sampleInstallFromRawResource(installFlags, false);
+        ApplicationInfo oldAppInfo = null;
+        try {
+            oldAppInfo = getPm().getApplicationInfo(ip.pkg.packageName, 0);
+        } catch (NameNotFoundException e) {
+            failStr("Pkg hasnt been installed correctly");
+        }
+
+        // Create receiver based on expRetCode
+        MoveReceiver receiver = new MoveReceiver(ip.pkg.packageName);
+        try {
+            boolean retCode = invokeMovePackage(ip.pkg.packageName, moveFlags,
+                    receiver);
+            if (expRetCode == PackageManager.MOVE_SUCCEEDED) {
+                assertTrue(retCode);
+                ApplicationInfo info = getPm().getApplicationInfo(ip.pkg.packageName, 0);
+                assertNotNull(info);
+                if ((moveFlags & PackageManager.MOVE_INTERNAL) != 0) {
+                    assertTrue((info.flags & ApplicationInfo.FLAG_ON_SDCARD) == 0);
+                } else if ((moveFlags & PackageManager.MOVE_EXTERNAL_MEDIA) != 0){
+                    assertTrue((info.flags & ApplicationInfo.FLAG_ON_SDCARD) != 0);
+                }
+            } else {
+                assertFalse(retCode);
+                ApplicationInfo info = getPm().getApplicationInfo(ip.pkg.packageName, 0);
+                assertNotNull(info);
+                assertEquals(oldAppInfo.flags, info.flags);
+            }
+        } catch (Exception e) {
+            failStr("Failed with exception : " + e);
+        } finally {
+            cleanUpInstall(ip);
+        }
+    }
+
+    public void testMoveAppInternalToExternal() {
+        moveFromRawResource(0, PackageManager.MOVE_EXTERNAL_MEDIA,
+                PackageManager.MOVE_SUCCEEDED);
+    }
+
+    public void testMoveAppInternalToInternal() {
+        moveFromRawResource(0, PackageManager.MOVE_INTERNAL,
+                PackageManager.MOVE_FAILED_INVALID_LOCATION);
+    }
+
+    public void testMoveAppExternalToExternal() {
+        moveFromRawResource(PackageManager.INSTALL_EXTERNAL, PackageManager.MOVE_EXTERNAL_MEDIA,
+                PackageManager.MOVE_FAILED_INVALID_LOCATION);
+    }
+    public void testMoveAppExternalToInternal() {
+        moveFromRawResource(PackageManager.INSTALL_EXTERNAL, PackageManager.MOVE_INTERNAL,
+                PackageManager.MOVE_SUCCEEDED);
     }
     /*
      * TODO's

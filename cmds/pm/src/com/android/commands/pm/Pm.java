@@ -600,6 +600,7 @@ public final class Pm {
             } else if (opt.equals("-t")) {
                 installFlags |= PackageManager.INSTALL_ALLOW_TEST;
             } else if (opt.equals("-s")) {
+                // Override if -s option is specified.
                 installFlags |= PackageManager.INSTALL_EXTERNAL;
             } else {
                 System.err.println("Error: Unknown option: " + opt);

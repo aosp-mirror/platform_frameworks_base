@@ -551,6 +551,69 @@ public abstract class PackageManager {
     public static final int DONT_DELETE_DATA = 0x00000001;
 
     /**
+     * Return code that is passed to the {@link IPackageMoveObserver} by
+     * {@link #movePackage(android.net.Uri, IPackageMoveObserver)}
+     * when the package has been successfully moved by the system.
+     * @hide
+     */
+    public static final int MOVE_SUCCEEDED = 1;
+    /**
+     * Error code that is passed to the {@link IPackageMoveObserver} by
+     * {@link #movePackage(android.net.Uri, IPackageMoveObserver)}
+     * when the package hasn't been successfully moved by the system
+     * because of insufficient memory on specified media.
+     * @hide
+     */
+    public static final int MOVE_FAILED_INSUFFICIENT_STORAGE = -1;
+
+    /**
+     * Error code that is passed to the {@link IPackageMoveObserver} by
+     * {@link #movePackage(android.net.Uri, IPackageMoveObserver)}
+     * if the specified package doesn't exist.
+     * @hide
+     */
+    public static final int MOVE_FAILED_DOESNT_EXIST = -2;
+
+    /**
+     * Error code that is passed to the {@link IPackageMoveObserver} by
+     * {@link #movePackage(android.net.Uri, IPackageMoveObserver)}
+     * if the specified package cannot be moved since its a system package.
+     * @hide
+     */
+    public static final int MOVE_FAILED_SYSTEM_PACKAGE = -3;
+
+    /**
+     * Error code that is passed to the {@link IPackageMoveObserver} by
+     * {@link #movePackage(android.net.Uri, IPackageMoveObserver)}
+     * if the specified package cannot be moved since its forward locked.
+     * @hide
+     */
+    public static final int MOVE_FAILED_FORWARD_LOCKED = -4;
+
+    /**
+     * Error code that is passed to the {@link IPackageMoveObserver} by
+     * {@link #movePackage(android.net.Uri, IPackageMoveObserver)}
+     * if the specified package cannot be moved to the specified location.
+     * @hide
+     */
+    public static final int MOVE_FAILED_INVALID_LOCATION = -5;
+
+    /**
+     * Flag parameter for {@link #movePackage} to indicate that
+     * the package should be moved to internal storage if its
+     * been installed on external media.
+     * @hide
+     */
+    public static final int MOVE_INTERNAL = 0x00000001;
+
+    /**
+     * Flag parameter for {@link #movePackage} to indicate that
+     * the package should be moved to external media.
+     * @hide
+     */
+    public static final int MOVE_EXTERNAL_MEDIA = 0x00000002;
+
+    /**
      * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device has a camera facing away
      * from the screen.
@@ -1922,4 +1985,23 @@ public abstract class PackageManager {
      * Return whether the device has been booted into safe mode.
      */
     public abstract boolean isSafeMode();
+
+    /**
+     * Attempts to move package resources from internal to external media or vice versa.
+     * Since this may take a little while, the result will
+     * be posted back to the given observer.   This call may fail if the calling context
+     * lacks the {@link android.Manifest.permission#MOVE_PACKAGE} permission, if the
+     * named package cannot be found, or if the named package is a "system package".
+     *
+     * @param packageName The name of the package to delete
+     * @param observer An observer callback to get notified when the package move is
+     * complete. {@link android.content.pm.IPackageMoveObserver#packageMoved(boolean)} will be
+     * called when that happens.  observer may be null to indicate that no callback is desired.
+     * @param flags To indicate install location {@link #MOVE_INTERNAL} or
+     * {@link #MOVE_EXTERNAL_MEDIA}
+     *
+     * @hide
+     */
+    public abstract void movePackage(
+            String packageName, IPackageMoveObserver observer, int flags);
 }
