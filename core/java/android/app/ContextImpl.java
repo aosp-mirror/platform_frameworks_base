@@ -42,6 +42,7 @@ import android.content.pm.FeatureInfo;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageDeleteObserver;
 import android.content.pm.IPackageInstallObserver;
+import android.content.pm.IPackageMoveObserver;
 import android.content.pm.IPackageManager;
 import android.content.pm.IPackageStatsObserver;
 import android.content.pm.InstrumentationInfo;
@@ -2483,6 +2484,15 @@ class ContextImpl extends Context {
                 String installerPackageName) {
             try {
                 mPM.installPackage(packageURI, observer, flags, installerPackageName);
+            } catch (RemoteException e) {
+                // Should never happen!
+            }
+        }
+
+        @Override
+        public void movePackage(String packageName, IPackageMoveObserver observer, int flags) {
+            try {
+                mPM.movePackage(packageName, observer, flags);
             } catch (RemoteException e) {
                 // Should never happen!
             }

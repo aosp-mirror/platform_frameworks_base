@@ -1041,6 +1041,12 @@
         android:description="@string/permdesc_deletePackages"
         android:protectionLevel="signatureOrSystem" />
 
+    <!-- Allows an application to move location of installed package. -->
+    <permission android:name="android.permission.MOVE_PACKAGE"
+        android:label="@string/permlab_movePackage"
+        android:description="@string/permdesc_movePackage"
+        android:protectionLevel="signatureOrSystem" />
+
     <!-- Allows an application to change whether an application component (other than its own) is
          enabled or not. -->
     <permission android:name="android.permission.CHANGE_COMPONENT_ENABLED_STATE"
