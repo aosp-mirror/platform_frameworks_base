@@ -43,36 +43,92 @@ import java.util.Map;
 import com.google.android.collect.Maps;
 
 /**
- * A class that helps with interactions with the AccountManager Service. It provides
- * methods to allow for account, password, and authtoken management for all accounts on the
- * device. One accesses the {@link AccountManager} by calling:
- * <pre>
- *    AccountManager accountManager = AccountManager.get(context);
- * </pre>
+ * This class provides access to a centralized registry of the user's
+ * online accounts.  With this service, users only need to enter their
+ * credentials (username and password) once for any account, granting
+ * applications access to online resources with "one-click" approval.
  *
- * <p>
- * The AccountManager Service provides storage for the accounts known to the system,
- * provides methods to manage them, and allows the registration of authenticators to
- * which operations such as addAccount and getAuthToken are delegated.
- * <p>
- * Many of the calls take an {@link AccountManagerCallback} and {@link Handler} as parameters.
- * These calls return immediately but run asynchronously. If a callback is provided then
- * {@link AccountManagerCallback#run} will be invoked wen the request completes, successfully
- * or not. An {@link AccountManagerFuture} is returned by these requests and also passed into the
- * callback. The result if retrieved by calling {@link AccountManagerFuture#getResult()} which
- * either returns the result or throws an exception as appropriate.
- * <p>
- * The asynchronous request can be made blocking by not providing a callback and instead
- * calling {@link AccountManagerFuture#getResult()} on the future that is returned. This will
- * cause the running thread to block until the result is returned. Keep in mind that one
- * should not block the main thread in this way. Instead one should either use a callback,
- * thus making the call asynchronous, or make the blocking call on a separate thread.
- * getResult() will throw an {@link IllegalStateException} if you call it from the main thread
- * before the request has completed, i.e. before the callback has been invoked.
- * <p>
- * If one wants to ensure that the callback is invoked from a specific handler then they should
- * pass the handler to the request. This makes it easier to ensure thread-safety by running
- * all of one's logic from a single handler.
+ * <p>Different online services have different ways of handling accounts and
+ * authentication, so the account manager uses pluggable <em>authenticator</em>
+ * modules for different <em>account types</em>.  The authenticators (which
+ * may be written by third parties) handle the actual details of validating
+ * account credentials and storing account information.  For example, Google,
+ * Facebook, and Microsoft Exchange each have their own authenticator.
+ *
+ * <p>Many servers support some notion of an <em>authentication token</em>,
+ * which can be used to authenticate a request to the server without sending
+ * the user's actual password.  (Auth tokens are normally created with a
+ * separate request which does include the user's credentials.)  AccountManager
+ * can generate these auth tokens for applications, so the application doesn't
+ * need to handle passwords directly.  Auth tokens are normally reusable, and
+ * cached by AccountManager, but must be refreshed periodically.  It's the
+ * responsibility of applications to <em>invalidate</em> auth tokens when they
+ * stop working so the AccountManager knows it needs to regenerate them.
+ *
+ * <p>Applications accessing a server normally go through these steps:
+ *
+ * <ul>
+ * <li>Get an instance of AccountManager using {@link #get(Context)}.
+ *
+ * <li>List the available accounts using {@link #getAccountsByType} or
+ * {@link #getAccountsByTypeAndFeatures}.  Normally applications will only
+ * be interested in accounts with one particular <em>type</em>, which
+ * identifies the authenticator.  Account <em>features</em> are used to
+ * identify particular account subtypes and capabilities.  Both the account
+ * type and features are authenticator-specific strings, and must be known by
+ * the application in coordination with its preferred authenticators.
+ *
+ * <li>Select one or more of the available accounts, possibly by asking the
+ * user for their preference.  If no suitable accounts are available,
+ * {@link #addAccount} may be called to prompt the user to create an
+ * account of the appropriate type.
+ *
+ * <li>Request an auth token for the selected account(s) using one of the
+ * {@link #getAuthToken} methods or related helpers.  Refer to the description
+ * of each method for exact usage and error handling details.
+ *
+ * <li>Make the request using the auth token.  The form of the auth token,
+ * the format of the request, and the protocol used are all specific to the
+ * service you are accessing.  The application makes the request itself, using
+ * whatever network and protocol libraries are useful.
+ *
+ * <li><b>Important:</b> If the request fails with an authentication error,
+ * it could be that a cached auth token is stale and no longer honored by
+ * the server.  The application must call {@link #invalidateAuthToken} to remove
+ * the token from the cache, otherwise requests will continue failing!  After
+ * invalidating the auth token, immediately go back to the "Request an auth
+ * token" step above.  If the process fails the second time, then it can be
+ * treated as a "genuine" authentication failure and the user notified or other
+ * appropriate actions taken.
+ * </ul>
+ *
+ * <p>Some AccountManager methods may require interaction with the user to
+ * prompt for credentials, present options, or ask the user to add an account.
+ * The caller may choose whether to allow AccountManager to directly launch the
+ * necessary user interface and wait for the user, or to return an Intent which
+ * the caller may use to launch the interface, or (in some cases) to install a
+ * notification which the user can select at any time to launch the interface.
+ * To have AccountManager launch the interface directly, the caller must supply
+ * the current foreground {@link Activity} context.
+ *
+ * <p>Many AccountManager methods take {@link AccountManagerCallback} and
+ * {@link Handler} as parameters.  These methods return immediately but
+ * run asynchronously. If a callback is provided then
+ * {@link AccountManagerCallback#run} will be invoked on the Handler's
+ * thread when the request completes, successfully or not.
+ * An {@link AccountManagerFuture} is returned by these requests and also
+ * supplied to the callback (if any).  The result is retrieved by calling
+ * {@link AccountManagerFuture#getResult()} which waits for the operation
+ * to complete (if necessary) and either returns the result or throws an
+ * exception if an error occurred during the operation.
+ * To make the request synchronously, call
+ * {@link AccountManagerFuture#getResult()} immediately on receiving the
+ * future from the method.  No callback need be supplied.
+ *
+ * <p>Requests which may block, including
+ * {@link AccountManagerFuture#getResult()}, must never be called on
+ * the application's main event thread.  These operations throw
+ * {@link IllegalStateException} if they are used on the main thread.
  */
 public class AccountManager {
     private static final String TAG = "AccountManager";
@@ -85,34 +141,65 @@ public class AccountManager {
     public static final int ERROR_CODE_BAD_ARGUMENTS = 7;
     public static final int ERROR_CODE_BAD_REQUEST = 8;
 
-    public static final String KEY_ACCOUNTS = "accounts";
-    public static final String KEY_AUTHENTICATOR_TYPES = "authenticator_types";
-    public static final String KEY_USERDATA = "userdata";
-    public static final String KEY_AUTHTOKEN = "authtoken";
-    public static final String KEY_PASSWORD = "password";
+    /**
+     * The Bundle key used for the {@link String} account name in results
+     * from methods which return information about a particular account.
+     */
     public static final String KEY_ACCOUNT_NAME = "authAccount";
+
+    /**
+     * The Bundle key used for the {@link String} account type in results
+     * from methods which return information about a particular account.
+     */
     public static final String KEY_ACCOUNT_TYPE = "accountType";
-    public static final String KEY_ERROR_CODE = "errorCode";
-    public static final String KEY_ERROR_MESSAGE = "errorMessage";
+
+    /**
+     * The Bundle key used for the auth token value in results
+     * from {@link #getAuthToken} and friends.
+     */
+    public static final String KEY_AUTHTOKEN = "authtoken";
+
+    /**
+     * The Bundle key used for an {@link Intent} in results from methods that
+     * may require the caller to interact with the user.  The Intent can
+     * be used to start the corresponding user interface activity.
+     */
     public static final String KEY_INTENT = "intent";
-    public static final String KEY_BOOLEAN_RESULT = "booleanResult";
+
+    /**
+     * The Bundle key used to supply the password directly in options to
+     * {@link #confirmCredentials}, rather than prompting the user with
+     * the standard password prompt.
+     */
+    public static final String KEY_PASSWORD = "password";
+
+    public static final String KEY_ACCOUNTS = "accounts";
     public static final String KEY_ACCOUNT_AUTHENTICATOR_RESPONSE = "accountAuthenticatorResponse";
     public static final String KEY_ACCOUNT_MANAGER_RESPONSE = "accountManagerResponse";
+    public static final String KEY_AUTHENTICATOR_TYPES = "authenticator_types";
     public static final String KEY_AUTH_FAILED_MESSAGE = "authFailedMessage";
     public static final String KEY_AUTH_TOKEN_LABEL = "authTokenLabelKey";
+    public static final String KEY_BOOLEAN_RESULT = "booleanResult";
+    public static final String KEY_ERROR_CODE = "errorCode";
+    public static final String KEY_ERROR_MESSAGE = "errorMessage";
+    public static final String KEY_USERDATA = "userdata";
+
     public static final String ACTION_AUTHENTICATOR_INTENT =
             "android.accounts.AccountAuthenticator";
     public static final String AUTHENTICATOR_META_DATA_NAME =
-                    "android.accounts.AccountAuthenticator";
+            "android.accounts.AccountAuthenticator";
     public static final String AUTHENTICATOR_ATTRIBUTES_NAME = "account-authenticator";
 
     private final Context mContext;
     private final IAccountManager mService;
     private final Handler mMainHandler;
+
     /**
      * Action sent as a broadcast Intent by the AccountsService
-     * when accounts are added to and/or removed from the device's
-     * database.
+     * when accounts are added, accounts are removed, or an
+     * account's credentials (saved password, etc) are changed.
+     *
+     * @see #addOnAccountsUpdatedListener
      */
     public static final String LOGIN_ACCOUNTS_CHANGED_ACTION =
         "android.accounts.LOGIN_ACCOUNTS_CHANGED";
@@ -136,26 +223,36 @@ public class AccountManager {
     }
 
     /**
-     * Retrieve an AccountManager instance that is associated with the context that is passed in.
-     * Certain calls such as {@link #addOnAccountsUpdatedListener} use this context internally,
-     * so the caller must take care to use a {@link Context} whose lifetime is associated with
-     * the listener registration.
+     * Gets an AccountManager instance associated with a Context.
+     * The {@link Context} will be used as long as the AccountManager is
+     * active, so make sure to use a {@link Context} whose lifetime is
+     * commensurate with any listeners registered to
+     * {@link #addOnAccountsUpdatedListener} or similar methods.
+     *
+     * <p>It is safe to call this method from the main thread.
+     *
+     * <p>No permission is required to call this method.
+     *
      * @param context The {@link Context} to use when necessary
-     * @return an {@link AccountManager} instance that is associated with context
+     * @return An {@link AccountManager} instance
      */
     public static AccountManager get(Context context) {
         return (AccountManager) context.getSystemService(Context.ACCOUNT_SERVICE);
     }
 
     /**
-     * Get the password that is associated with the account. Returns null if the account does
-     * not exist.
-     * <p>
-     * It is safe to call this method from the main thread.
-     * <p>
-     * Requires that the caller has permission
-     * {@link android.Manifest.permission#AUTHENTICATE_ACCOUNTS} and is running
-     * with the same UID as the Authenticator for the account.
+     * Gets the saved password associated with the account.
+     * This is intended for authenticators and related code; applications
+     * should get an auth token instead.
+     *
+     * <p>It is safe to call this method from the main thread.
+     *
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#AUTHENTICATE_ACCOUNTS}
+     * and to have the same UID as the account's authenticator.
+     *
+     * @param account The account to query for a password
+     * @return The account's password, null if none or if the account doesn't exist
      */
     public String getPassword(final Account account) {
         try {
@@ -167,14 +264,19 @@ public class AccountManager {
     }
 
     /**
-     * Get the user data named by "key" that is associated with the account.
-     * Returns null if the account does not exist or if it does not have a value for key.
-     * <p>
-     * It is safe to call this method from the main thread.
-     * <p>
-     * Requires that the caller has permission
-     * {@link android.Manifest.permission#AUTHENTICATE_ACCOUNTS} and is running
-     * with the same UID as the Authenticator for the account.
+     * Gets the user data named by "key" associated with the account.
+     * This is intended for authenticators and related code to store
+     * arbitrary metadata along with accounts.  The meaning of the keys
+     * and values is up to the authenticator for the account.
+     *
+     * <p>It is safe to call this method from the main thread.
+     *
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#AUTHENTICATE_ACCOUNTS}
+     * and to have the same UID as the account's authenticator.
+     *
+     * @param account The account to query for user data
+     * @return The user data, null if the account or key doesn't exist
      */
     public String getUserData(final Account account, final String key) {
         try {
@@ -186,14 +288,15 @@ public class AccountManager {
     }
 
     /**
-     * Query the AccountManager Service for an array that contains a
-     * {@link AuthenticatorDescription} for each registered authenticator.
-     * @return an array that contains all the authenticators known to the AccountManager service.
-     * This array will be empty if there are no authenticators and will never return null.
-     * <p>
-     * It is safe to call this method from the main thread.
-     * <p>
-     * No permission is required to make this call.
+     * Lists the currently registered authenticators.
+     *
+     * <p>It is safe to call this method from the main thread.
+     *
+     * <p>No permission is required to call this method.
+     *
+     * @return An array of {@link AuthenticatorDescription} for every
+     *     authenticator known to the AccountManager service.  Empty (never
+     *     null) if no authenticators are known.
      */
     public AuthenticatorDescription[] getAuthenticatorTypes() {
         try {
@@ -205,13 +308,16 @@ public class AccountManager {
     }
 
     /**
-     * Query the AccountManager Service for all accounts.
-     * @return an array that contains all the accounts known to the AccountManager service.
-     * This array will be empty if there are no accounts and will never return null.
-     * <p>
-     * It is safe to call this method from the main thread.
-     * <p>
-     * Requires that the caller has permission {@link android.Manifest.permission#GET_ACCOUNTS}
+     * Lists all accounts of any type registered on the device.
+     * Equivalent to getAccountsByType(null).
+     *
+     * <p>It is safe to call this method from the main thread.
+     *
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#GET_ACCOUNTS}.
+     *
+     * @return An array of {@link Account}, one for each account.  Empty
+     *     (never null) if no accounts have been added.
      */
     public Account[] getAccounts() {
         try {
@@ -223,15 +329,20 @@ public class AccountManager {
     }
 
     /**
-     * Query the AccountManager for the set of accounts that have a given type. If null
-     * is passed as the type than all accounts are returned.
-     * @param type the account type by which to filter, or null to get all accounts
-     * @return an array that contains the accounts that match the specified type. This array
-     * will be empty if no accounts match. It will never return null.
-     * <p>
-     * It is safe to call this method from the main thread.
-     * <p>
-     * Requires that the caller has permission {@link android.Manifest.permission#GET_ACCOUNTS}
+     * Lists all accounts of a particular type.  The account type is a
+     * string token corresponding to the authenticator and useful domain
+     * of the account.  For example, there are types corresponding to Google
+     * and Facebook.  The exact string token to use will be published somewhere
+     * associated with the authenticator in question.
+     *
+     * <p>It is safe to call this method from the main thread.
+     *
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#GET_ACCOUNTS}.
+     *
+     * @param type The type of accounts to return, null to retrieve all accounts
+     * @return An array of {@link Account}, one per matching account.  Empty
+     *     (never null) if no accounts of the specified type have been added.
      */
     public Account[] getAccountsByType(String type) {
         try {
@@ -243,45 +354,27 @@ public class AccountManager {
     }
 
     /**
-     * Tests that the given account has the specified features. If this account does not exist
-     * then this call returns false.
-     * <p>
-     * This call returns immediately but runs asynchronously and the result is accessed via the
-     * {@link AccountManagerFuture} that is returned. This future is also passed as the sole
-     * parameter to the {@link AccountManagerCallback}. If the caller wished to use this
-     * method asynchronously then they will generally pass in a callback object that will get
-     * invoked with the {@link AccountManagerFuture}. If they wish to use it synchronously then
-     * they will generally pass null for the callback and instead call
-     * {@link android.accounts.AccountManagerFuture#getResult()} on this method's return value,
-     * which will then block until the request completes.
-     * <p>
-     * Do not block the main thread waiting this method's result.
-     * <p>
-     * Not allowed from main thread (but allowed from other threads):
-     * <pre>
-     * Boolean result = hasFeatures(account, features, callback, handler).getResult();
-     * </pre>
-     * Allowed from main thread:
-     * <pre>
-     * hasFeatures(account, features, new AccountManagerCallback<Boolean>() {
-     *    public void run(AccountManagerFuture<Boolean> future) {
-     *        Boolean result = future.getResult();
-     *        // use result
-     *    }
-     * }, handler);
-     * </pre>
-     * <p>
-     * Requires that the caller has permission {@link android.Manifest.permission#GET_ACCOUNTS}.
+     * Finds out whether a particular account has all the specified features.
+     * Account features are authenticator-specific string tokens identifying
+     * boolean account properties.  For example, features are used to tell
+     * whether Google accounts have a particular service (such as Google
+     * Calendar or Google Talk) enabled.  The feature names and their meanings
+     * are published somewhere associated with the authenticator in question.
+     *
+     * <p>This method may be called from any thread, but the returned
+     * {@link AccountManagerFuture} must not be used on the main thread.
+     *
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#GET_ACCOUNTS}.
      *
      * @param account The {@link Account} to test
-     * @param features the features for which to test
-     * @param callback A callback to invoke when the request completes. If null then
-     * no callback is invoked.
-     * @param handler The {@link Handler} to use to invoke the callback. If null then the
-     * main thread's {@link Handler} is used.
-     * @return an {@link AccountManagerFuture} that represents the future result of the call.
-     * The future result is a {@link Boolean} that is true if the account exists and has the
-     * specified features.
+     * @param features An array of the account features to check
+     * @param callback Callback to invoke when the request completes,
+     *     null for no callback
+     * @param handler {@link Handler} identifying the callback thread,
+     *     null for the main thread
+     * @return An {@link AccountManagerFuture} which resolves to a Boolean,
+     * true if the account exists and has all of the specified features.
      */
     public AccountManagerFuture<Boolean> hasFeatures(final Account account,
             final String[] features,
@@ -300,527 +393,31 @@ public class AccountManager {
     }
 
     /**
-     * Add an account to the AccountManager's set of known accounts.
-     * <p>
-     * It is safe to call this method from the main thread.
-     * <p>
-     * Requires that the caller has permission
-     * {@link android.Manifest.permission#AUTHENTICATE_ACCOUNTS} and is running
-     * with the same UID as the Authenticator for the account.
-     * @param account The account to add
-     * @param password The password to associate with the account. May be null.
-     * @param userdata A bundle of key/value pairs to set as the account's userdata. May be null.
-     * @return true if the account was sucessfully added, false otherwise, for example,
-     * if the account already exists or if the account is null
-     */
-    public boolean addAccountExplicitly(Account account, String password, Bundle userdata) {
-        try {
-            return mService.addAccount(account, password, userdata);
-        } catch (RemoteException e) {
-            // won't ever happen
-            throw new RuntimeException(e);
-        }
-    }
-
-    /**
-     * Removes the given account. If this account does not exist then this call has no effect.
-     * <p>
-     * This call returns immediately but runs asynchronously and the result is accessed via the
-     * {@link AccountManagerFuture} that is returned. This future is also passed as the sole
-     * parameter to the {@link AccountManagerCallback}. If the caller wished to use this
-     * method asynchronously then they will generally pass in a callback object that will get
-     * invoked with the {@link AccountManagerFuture}. If they wish to use it synchronously then
-     * they will generally pass null for the callback and instead call
-     * {@link android.accounts.AccountManagerFuture#getResult()} on this method's return value,
-     * which will then block until the request completes.
-     * <p>
-     * Do not block the main thread waiting this method's result.
-     * <p>
-     * Not allowed from main thread (but allowed from other threads):
-     * <pre>
-     * Boolean result = removeAccount(account, callback, handler).getResult();
-     * </pre>
-     * Allowed from main thread:
-     * <pre>
-     * removeAccount(account, new AccountManagerCallback<Boolean>() {
-     *    public void run(AccountManagerFuture<Boolean> future) {
-     *        Boolean result = future.getResult();
-     *        // use result
-     *    }
-     * }, handler);
-     * </pre>
-     * <p>
-     * Requires that the caller has permission {@link android.Manifest.permission#MANAGE_ACCOUNTS}.
+     * Lists all accounts of a type which have certain features.  The account
+     * type identifies the authenticator (see {@link #getAccountsByType}).
+     * Account features are authenticator-specific string tokens identifying
+     * boolean account properties (see {@link #hasFeatures}).
      *
-     * @param account The {@link Account} to remove
-     * @param callback A callback to invoke when the request completes. If null then
-     * no callback is invoked.
-     * @param handler The {@link Handler} to use to invoke the callback. If null then the
-     * main thread's {@link Handler} is used.
-     * @return an {@link AccountManagerFuture} that represents the future result of the call.
-     * The future result is a {@link Boolean} that is true if the account is successfully removed
-     * or false if the authenticator refuses to remove the account.
-     */
-    public AccountManagerFuture<Boolean> removeAccount(final Account account,
-            AccountManagerCallback<Boolean> callback, Handler handler) {
-        return new Future2Task<Boolean>(handler, callback) {
-            public void doWork() throws RemoteException {
-                mService.removeAccount(mResponse, account);
-            }
-            public Boolean bundleToResult(Bundle bundle) throws AuthenticatorException {
-                if (!bundle.containsKey(KEY_BOOLEAN_RESULT)) {
-                    throw new AuthenticatorException("no result in response");
-                }
-                return bundle.getBoolean(KEY_BOOLEAN_RESULT);
-            }
-        }.start();
-    }
-
-    /**
-     * Removes the given authtoken. If this authtoken does not exist for the given account type
-     * then this call has no effect.
-     * <p>
-     * It is safe to call this method from the main thread.
-     * <p>
-     * Requires that the caller has permission {@link android.Manifest.permission#MANAGE_ACCOUNTS}.
-     * @param accountType the account type of the authtoken to invalidate
-     * @param authToken the authtoken to invalidate
-     */
-    public void invalidateAuthToken(final String accountType, final String authToken) {
-        try {
-            mService.invalidateAuthToken(accountType, authToken);
-        } catch (RemoteException e) {
-            // won't ever happen
-            throw new RuntimeException(e);
-        }
-    }
-
-    /**
-     * Gets the authtoken named by "authTokenType" for the specified account if it is cached
-     * by the AccountManager. If no authtoken is cached then null is returned rather than
-     * asking the authenticaticor to generate one. If the account or the
-     * authtoken do not exist then null is returned.
-     * <p>
-     * It is safe to call this method from the main thread.
-     * <p>
-     * Requires that the caller has permission
-     * {@link android.Manifest.permission#AUTHENTICATE_ACCOUNTS} and is running
-     * with the same UID as the Authenticator for the account.
-     * @param account the account whose authtoken is to be retrieved, must not be null
-     * @param authTokenType the type of authtoken to retrieve
-     * @return an authtoken for the given account and authTokenType, if one is cached by the
-     * AccountManager, null otherwise.
-     */
-    public String peekAuthToken(final Account account, final String authTokenType) {
-        if (account == null) {
-            Log.e(TAG, "peekAuthToken: the account must not be null");
-            return null;
-        }
-        if (authTokenType == null) {
-            return null;
-        }
-        try {
-            return mService.peekAuthToken(account, authTokenType);
-        } catch (RemoteException e) {
-            // won't ever happen
-            throw new RuntimeException(e);
-        }
-    }
-
-    /**
-     * Sets the password for the account. The password may be null. If the account does not exist
-     * then this call has no affect.
-     * <p>
-     * It is safe to call this method from the main thread.
-     * <p>
-     * Requires that the caller has permission
-     * {@link android.Manifest.permission#AUTHENTICATE_ACCOUNTS} and is running
-     * with the same UID as the Authenticator for the account.
-     * @param account the account whose password is to be set. Must not be null.
-     * @param password the password to set for the account. May be null.
-     */
-    public void setPassword(final Account account, final String password) {
-        if (account == null) {
-            Log.e(TAG, "the account must not be null");
-            return;
-        }
-        try {
-            mService.setPassword(account, password);
-        } catch (RemoteException e) {
-            // won't ever happen
-            throw new RuntimeException(e);
-        }
-    }
-
-    /**
-     * Sets the password for account to null. If the account does not exist then this call
-     * has no effect.
-     * <p>
-     * It is safe to call this method from the main thread.
-     * <p>
-     * Requires that the caller has permission {@link android.Manifest.permission#MANAGE_ACCOUNTS}.
-     * @param account the account whose password is to be cleared. Must not be null.
-     */
-    public void clearPassword(final Account account) {
-        if (account == null) {
-            Log.e(TAG, "the account must not be null");
-            return;
-        }
-        try {
-            mService.clearPassword(account);
-        } catch (RemoteException e) {
-            // won't ever happen
-            throw new RuntimeException(e);
-        }
-    }
-
-    /**
-     * Sets account's userdata named "key" to the specified value. If the account does not
-     * exist then this call has no effect.
-     * <p>
-     * It is safe to call this method from the main thread.
-     * <p>
-     * Requires that the caller has permission
-     * {@link android.Manifest.permission#AUTHENTICATE_ACCOUNTS} and is running
-     * with the same UID as the Authenticator for the account.
-     * @param account the account whose userdata is to be set. Must not be null.
-     * @param key the key of the userdata to set. Must not be null.
-     * @param value the value to set. May be null.
-     */
-    public void setUserData(final Account account, final String key, final String value) {
-        if (account == null) {
-            Log.e(TAG, "the account must not be null");
-            return;
-        }
-        if (key == null) {
-            Log.e(TAG, "the key must not be null");
-            return;
-        }
-        try {
-            mService.setUserData(account, key, value);
-        } catch (RemoteException e) {
-            // won't ever happen
-            throw new RuntimeException(e);
-        }
-    }
-
-    /**
-     * Sets the authtoken named by "authTokenType" to the value specified by authToken.
-     * If the account does not exist then this call has no effect.
-     * <p>
-     * It is safe to call this method from the main thread.
-     * <p>
-     * Requires that the caller has permission
-     * {@link android.Manifest.permission#AUTHENTICATE_ACCOUNTS} and is running
-     * with the same UID as the Authenticator for the account.
-     * @param account the account whose authtoken is to be set. Must not be null.
-     * @param authTokenType the type of the authtoken to set. Must not be null.
-     * @param authToken the authToken to set. May be null.
-     */
-    public void setAuthToken(Account account, final String authTokenType, final String authToken) {
-        try {
-            mService.setAuthToken(account, authTokenType, authToken);
-        } catch (RemoteException e) {
-            // won't ever happen
-            throw new RuntimeException(e);
-        }
-    }
-
-    /**
-     * Convenience method that makes a blocking call to
-     * {@link #getAuthToken(Account, String, boolean, AccountManagerCallback, Handler)}
-     * then extracts and returns the value of {@link #KEY_AUTHTOKEN} from its result.
-     * <p>
-     * It is not safe to call this method from the main thread. See {@link #getAuthToken}.
-     * <p>
-     * Requires that the caller has permission {@link android.Manifest.permission#USE_CREDENTIALS}.
-     * @param account the account whose authtoken is to be retrieved, must not be null
-     * @param authTokenType the type of authtoken to retrieve
-     * @param notifyAuthFailure if true, cause the AccountManager to put up a "sign-on" notification
-     * for the account if no authtoken is cached by the AccountManager and the the authenticator
-     * does not have valid credentials to get an authtoken.
-     * @return an authtoken for the given account and authTokenType, if one is cached by the
-     * AccountManager, null otherwise.
-     * @throws AuthenticatorException if the authenticator is not present, unreachable or returns
-     * an invalid response.
-     * @throws OperationCanceledException if the request is canceled for any reason
-     * @throws java.io.IOException if the authenticator experiences an IOException while attempting
-     * to communicate with its backend server.
-     */
-    public String blockingGetAuthToken(Account account, String authTokenType,
-            boolean notifyAuthFailure)
-            throws OperationCanceledException, IOException, AuthenticatorException {
-        Bundle bundle = getAuthToken(account, authTokenType, notifyAuthFailure, null /* callback */,
-                null /* handler */).getResult();
-        return bundle.getString(KEY_AUTHTOKEN);
-    }
-
-    /**
-     * Request that an authtoken of the specified type be returned for an account.
-     * If the Account Manager has a cached authtoken of the requested type then it will
-     * service the request itself. Otherwise it will pass the request on to the authenticator.
-     * The authenticator can try to service this request with information it already has stored
-     * in the AccountManager but may need to launch an activity to prompt the
-     * user to enter credentials. If it is able to retrieve the authtoken it will be returned
-     * in the result.
-     * <p>
-     * If the authenticator needs to prompt the user for credentials it will return an intent to
-     * an activity that will do the prompting. The supplied activity will be used to launch the
-     * intent and the result will come from the launched activity.
-     * <p>
-     * This call returns immediately but runs asynchronously and the result is accessed via the
-     * {@link AccountManagerFuture} that is returned. This future is also passed as the sole
-     * parameter to the {@link AccountManagerCallback}. If the caller wished to use this
-     * method asynchronously then they will generally pass in a callback object that will get
-     * invoked with the {@link AccountManagerFuture}. If they wish to use it synchronously then
-     * they will generally pass null for the callback and instead call
-     * {@link android.accounts.AccountManagerFuture#getResult()} on this method's return value,
-     * which will then block until the request completes.
-     * <p>
-     * Do not block the main thread waiting this method's result.
-     * <p>
-     * Not allowed from main thread (but allowed from other threads):
-     * <pre>
-     * Bundle result = getAuthToken(
-     *   account, authTokenType, options, activity, callback, handler).getResult();
-     * </pre>
-     * Allowed from main thread:
-     * <pre>
-     * getAuthToken(account, authTokenType, options, activity, new AccountManagerCallback<Bundle>() {
-     *    public void run(AccountManagerFuture<Bundle> future) {
-     *        Bundle result = future.getResult();
-     *        // use result
-     *    }
-     * }, handler);
-     * </pre>
-     * <p>
-     * Requires that the caller has permission {@link android.Manifest.permission#USE_CREDENTIALS}.
+     * <p>Unlike {@link #getAccountsByType}, this method calls the authenticator,
+     * which may contact the server or do other work to check account features,
+     * so the method returns an {@link AccountManagerFuture}.
      *
-     * @param account The account whose credentials are to be updated.
-     * @param authTokenType the auth token to retrieve as part of updating the credentials.
-     * May be null.
-     * @param options authenticator specific options for the request
-     * @param activity If the authenticator returns a {@link #KEY_INTENT} in the result then
-     * the intent will be started with this activity. If you do not with to have the intent
-     * started automatically then use the other form,
-     * {@link #getAuthToken(Account, String, boolean, AccountManagerCallback, android.os.Handler)}
-     * @param callback A callback to invoke when the request completes. If null then
-     * no callback is invoked.
-     * @param handler The {@link Handler} to use to invoke the callback. If null then the
-     * main thread's {@link Handler} is used.
-     * @return an {@link AccountManagerFuture} that represents the future result of the call.
-     * The future result is a {@link Bundle} that contains:
-     * <ul>
-     * <li> {@link #KEY_ACCOUNT_NAME}, {@link #KEY_ACCOUNT_TYPE} and {@link #KEY_AUTHTOKEN}
-     * </ul>
-     * If the user presses "back" then the request will be canceled.
-     */
-    public AccountManagerFuture<Bundle> getAuthToken(
-            final Account account, final String authTokenType, final Bundle options,
-            final Activity activity, AccountManagerCallback<Bundle> callback, Handler handler) {
-        if (activity == null) throw new IllegalArgumentException("activity is null");
-        if (authTokenType == null) throw new IllegalArgumentException("authTokenType is null");
-        return new AmsTask(activity, handler, callback) {
-            public void doWork() throws RemoteException {
-                mService.getAuthToken(mResponse, account, authTokenType,
-                        false /* notifyOnAuthFailure */, true /* expectActivityLaunch */,
-                        options);
-            }
-        }.start();
-    }
-
-    /**
-     * Request that an authtoken of the specified type be returned for an account.
-     * If the Account Manager has a cached authtoken of the requested type then it will
-     * service the request itself. Otherwise it will pass the request on to the authenticator.
-     * The authenticator can try to service this request with information it already has stored
-     * in the AccountManager but may need to launch an activity to prompt the
-     * user to enter credentials. If it is able to retrieve the authtoken it will be returned
-     * in the result.
-     * <p>
-     * If the authenticator needs to prompt the user for credentials, rather than returning the
-     * authtoken it will instead return an intent for
-     * an activity that will do the prompting. If an intent is returned and notifyAuthFailure
-     * is true then a notification will be created that launches this intent. This intent can be
-     * invoked by the caller directly to start the activity that prompts the user for the
-     * updated credentials. Otherwise this activity will not be run until the user activates
-     * the notification.
-     * <p>
-     * This call returns immediately but runs asynchronously and the result is accessed via the
-     * {@link AccountManagerFuture} that is returned. This future is also passed as the sole
-     * parameter to the {@link AccountManagerCallback}. If the caller wished to use this
-     * method asynchronously then they will generally pass in a callback object that will get
-     * invoked with the {@link AccountManagerFuture}. If they wish to use it synchronously then
-     * they will generally pass null for the callback and instead call
-     * {@link android.accounts.AccountManagerFuture#getResult()} on this method's return value,
-     * which will then block until the request completes.
-     * <p>
-     * Do not block the main thread waiting this method's result.
-     * <p>
-     * Not allowed from main thread (but allowed from other threads):
-     * <pre>
-     * Bundle result = getAuthToken(
-     *   account, authTokenType, notifyAuthFailure, callback, handler).getResult();
-     * </pre>
-     * Allowed from main thread:
-     * <pre>
-     * getAuthToken(account, authTokenType, notifyAuthFailure, new AccountManagerCallback<Bundle>() {
-     *    public void run(AccountManagerFuture<Bundle> future) {
-     *        Bundle result = future.getResult();
-     *        // use result
-     *    }
-     * }, handler);
-     * </pre>
-     * <p>
-     * Requires that the caller has permission {@link android.Manifest.permission#USE_CREDENTIALS}.
+     * <p>This method may be called from any thread, but the returned
+     * {@link AccountManagerFuture} must not be used on the main thread.
      *
-     * @param account The account whose credentials are to be updated.
-     * @param authTokenType the auth token to retrieve as part of updating the credentials.
-     * May be null.
-     * @param notifyAuthFailure if true and the authenticator returns a {@link #KEY_INTENT} in the
-     * result then a "sign-on needed" notification will be created that will launch this intent.
-     * @param callback A callback to invoke when the request completes. If null then
-     * no callback is invoked.
-     * @param handler The {@link Handler} to use to invoke the callback. If null then the
-     * main thread's {@link Handler} is used.
-     * @return an {@link AccountManagerFuture} that represents the future result of the call.
-     * The future result is a {@link Bundle} that contains either:
-     * <ul>
-     * <li> {@link #KEY_INTENT}, which is to be used to prompt the user for the credentials
-     * <li> {@link #KEY_ACCOUNT_NAME}, {@link #KEY_ACCOUNT_TYPE} and {@link #KEY_AUTHTOKEN}
-     * if the authenticator is able to retrieve the auth token
-     * </ul>
-     * If the user presses "back" then the request will be canceled.
-     */
-    public AccountManagerFuture<Bundle> getAuthToken(
-            final Account account, final String authTokenType, final boolean notifyAuthFailure,
-            AccountManagerCallback<Bundle> callback, Handler handler) {
-        if (account == null) throw new IllegalArgumentException("account is null");
-        if (authTokenType == null) throw new IllegalArgumentException("authTokenType is null");
-        return new AmsTask(null, handler, callback) {
-            public void doWork() throws RemoteException {
-                mService.getAuthToken(mResponse, account, authTokenType,
-                        notifyAuthFailure, false /* expectActivityLaunch */, null /* options */);
-            }
-        }.start();
-    }
-
-    /**
-     * Request that an account be added with the given accountType. This request
-     * is processed by the authenticator for the account type. If no authenticator is registered
-     * in the system then {@link AuthenticatorException} is thrown.
-     * <p>
-     * This call returns immediately but runs asynchronously and the result is accessed via the
-     * {@link AccountManagerFuture} that is returned. This future is also passed as the sole
-     * parameter to the {@link AccountManagerCallback}. If the caller wished to use this
-     * method asynchronously then they will generally pass in a callback object that will get
-     * invoked with the {@link AccountManagerFuture}. If they wish to use it synchronously then
-     * they will generally pass null for the callback and instead call
-     * {@link android.accounts.AccountManagerFuture#getResult()} on this method's return value,
-     * which will then block until the request completes.
-     * <p>
-     * Do not block the main thread waiting this method's result.
-     * <p>
-     * Not allowed from main thread (but allowed from other threads):
-     * <pre>
-     * Bundle result = addAccount(
-     *   account, authTokenType, features, options, activity, callback, handler).getResult();
-     * </pre>
-     * Allowed from main thread:
-     * <pre>
-     * addAccount(account, authTokenType, features, options, activity, new AccountManagerCallback<Bundle>() {
-     *    public void run(AccountManagerFuture<Bundle> future) {
-     *        Bundle result = future.getResult();
-     *        // use result
-     *    }
-     * }, handler);
-     * </pre>
-     * <p>
-     * Requires that the caller has permission {@link android.Manifest.permission#MANAGE_ACCOUNTS}.
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#GET_ACCOUNTS}.
      *
-     * @param accountType The type of account to add. This must not be null.
-     * @param authTokenType The account that is added should be able to service this auth token
-     * type. This may be null.
-     * @param requiredFeatures The account that is added should support these features.
-     * This array may be null or empty.
-     * @param addAccountOptions A bundle of authenticator-specific options that is passed on
-     * to the authenticator. This may be null.
-     * @param activity If the authenticator returns a {@link #KEY_INTENT} in the result then
-     * the intent will be started with this activity. If activity is null then the result will
-     * be returned as-is.
-     * @param callback A callback to invoke when the request completes. If null then
-     * no callback is invoked.
-     * @param handler The {@link Handler} to use to invoke the callback. If null then the
-     * main thread's {@link Handler} is used.
-     * @return an {@link AccountManagerFuture} that represents the future result of the call.
-     * The future result is a {@link Bundle} that contains either:
-     * <ul>
-     * <li> {@link #KEY_INTENT}, or
-     * <li> {@link #KEY_ACCOUNT_NAME}, {@link #KEY_ACCOUNT_TYPE}
-     * </ul>
-     */
-    public AccountManagerFuture<Bundle> addAccount(final String accountType,
-            final String authTokenType, final String[] requiredFeatures,
-            final Bundle addAccountOptions,
-            final Activity activity, AccountManagerCallback<Bundle> callback, Handler handler) {
-        return new AmsTask(activity, handler, callback) {
-            public void doWork() throws RemoteException {
-                if (accountType == null) {
-                    Log.e(TAG, "the account must not be null");
-                    // to unblock caller waiting on Future.get()
-                    set(new Bundle());
-                    return;
-                }
-                mService.addAcount(mResponse, accountType, authTokenType,
-                        requiredFeatures, activity != null, addAccountOptions);
-            }
-        }.start();
-    }
-
-    /**
-     * Queries for accounts that match the given account type and feature set.
-     * <p>
-     * This call returns immediately but runs asynchronously and the result is accessed via the
-     * {@link AccountManagerFuture} that is returned. This future is also passed as the sole
-     * parameter to the {@link AccountManagerCallback}. If the caller wished to use this
-     * method asynchronously then they will generally pass in a callback object that will get
-     * invoked with the {@link AccountManagerFuture}. If they wish to use it synchronously then
-     * they will generally pass null for the callback and instead call
-     * {@link android.accounts.AccountManagerFuture#getResult()} on this method's return value,
-     * which will then block until the request completes.
-     * <p>
-     * Do not block the main thread waiting this method's result.
-     * <p>
-     * Not allowed from main thread (but allowed from other threads):
-     * <pre>
-     * Account[] result =
-     *   getAccountsByTypeAndFeatures(accountType, features, callback, handler).getResult();
-     * </pre>
-     * Allowed from main thread:
-     * <pre>
-     * getAccountsByTypeAndFeatures(accountType, features, new AccountManagerCallback<Account[]>() {
-     *    public void run(AccountManagerFuture<Account[]> future) {
-     *         Account[] result = future.getResult();
-     *        // use result
-     *    }
-     * }, handler);
-     * </pre>
-     * <p>
-     * Requires that the caller has permission {@link android.Manifest.permission#GET_ACCOUNTS}.
-     *
-     * @param type The type of {@link Account} to return. If null is passed in then an empty
-     * array will be returned.
-     * @param features the features with which to filter the accounts list. Each returned account
-     * will have all specified features. This may be null, which will mean the account list will
-     * not be filtered by features, making this functionally identical to
-     * {@link #getAccountsByType(String)}.
-     * @param callback A callback to invoke when the request completes. If null then
-     * no callback is invoked.
-     * @param handler The {@link Handler} to use to invoke the callback. If null then the
-     * main thread's {@link Handler} is used.
-     * @return an {@link AccountManagerFuture} that represents the future result of the call.
-     * The future result is a an {@link Account} array that contains accounts of the specified
-     * type that match all the requested features.
+     * @param type The type of accounts to return, must not be null
+     * @param features An array of the account features to require,
+     *     may be null or empty
+     * @param callback Callback to invoke when the request completes,
+     *     null for no callback
+     * @param handler {@link Handler} identifying the callback thread,
+     *     null for the main thread
+     * @return An {@link AccountManagerFuture} which resolves to an array of
+     *     {@link Account}, one per account of the specified type which
+     *     matches the requested features.
      */
     public AccountManagerFuture<Account[]> getAccountsByTypeAndFeatures(
             final String type, final String[] features,
@@ -849,57 +446,536 @@ public class AccountManager {
     }
 
     /**
-     * Requests that the authenticator checks that the user knows the credentials for the account.
-     * This is typically done by returning an intent to an activity that prompts the user to
-     * enter the credentials. This request
-     * is processed by the authenticator for the account. If no matching authenticator is
-     * registered in the system then {@link AuthenticatorException} is thrown.
-     * <p>
-     * This call returns immediately but runs asynchronously and the result is accessed via the
-     * {@link AccountManagerFuture} that is returned. This future is also passed as the sole
-     * parameter to the {@link AccountManagerCallback}. If the caller wished to use this
-     * method asynchronously then they will generally pass in a callback object that will get
-     * invoked with the {@link AccountManagerFuture}. If they wish to use it synchronously then
-     * they will generally pass null for the callback and instead call
-     * {@link android.accounts.AccountManagerFuture#getResult()} on this method's return value,
-     * which will then block until the request completes.
-     * <p>
-     * Do not block the main thread waiting this method's result.
-     * <p>
-     * Not allowed from main thread (but allowed from other threads):
-     * <pre>
-     * Bundle result = confirmCredentials(
-     *   account, options, activity, callback, handler).getResult();
-     * </pre>
-     * Allowed from main thread:
-     * <pre>
-     * confirmCredentials(account, options, activity, new AccountManagerCallback<Bundle>() {
-     *    public void run(AccountManagerFuture<Bundle> future) {
-     *        Bundle result = future.getResult();
-     *        // use result
-     *    }
-     * }, handler);
-     * </pre>
-     * <p>
-     * Requires that the caller has permission {@link android.Manifest.permission#MANAGE_ACCOUNTS}.
+     * Adds an account directly to the AccountManager.  Normally used by sign-up
+     * wizards associated with authenticators, not directly by applications.
      *
-     * @param account The account whose credentials are to be checked
-     * @param options authenticator specific options for the request
-     * @param activity If the authenticator returns a {@link #KEY_INTENT} in the result then
-     * the intent will be started with this activity. If activity is null then the result will
-     * be returned as-is.
-     * @param callback A callback to invoke when the request completes. If null then
-     * no callback is invoked.
-     * @param handler The {@link Handler} to use to invoke the callback. If null then the
-     * main thread's {@link Handler} is used.
-     * @return an {@link AccountManagerFuture} that represents the future result of the call.
-     * The future result is a {@link Bundle} that contains either:
+     * <p>It is safe to call this method from the main thread.
+     *
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#AUTHENTICATE_ACCOUNTS}
+     * and to have the same UID as the added account's authenticator.
+     *
+     * @param account The {@link Account} to add
+     * @param password The password to associate with the account, null for none
+     * @param userdata String values to use for the account's userdata, null for none
+     * @return Whether the account was successfully added.  False if the account
+     *     already exists, the account is null, or another error occurs.
+     */
+    public boolean addAccountExplicitly(Account account, String password, Bundle userdata) {
+        try {
+            return mService.addAccount(account, password, userdata);
+        } catch (RemoteException e) {
+            // won't ever happen
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Removes an account from the AccountManager.  Does nothing if the account
+     * does not exist.  Does not delete the account from the server.
+     * The authenticator may have its own policies preventing account
+     * deletion, in which case the account will not be deleted.
+     *
+     * <p>This method may be called from any thread, but the returned
+     * {@link AccountManagerFuture} must not be used on the main thread.
+     *
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#MANAGE_ACCOUNTS}.
+     *
+     * @param account The {@link Account} to remove
+     * @param callback Callback to invoke when the request completes,
+     *     null for no callback
+     * @param handler {@link Handler} identifying the callback thread,
+     *     null for the main thread
+     * @return An {@link AccountManagerFuture} which resolves to a Boolean,
+     *     true if the account has been successfully removed,
+     *     false if the authenticator forbids deleting this account.
+     */
+    public AccountManagerFuture<Boolean> removeAccount(final Account account,
+            AccountManagerCallback<Boolean> callback, Handler handler) {
+        return new Future2Task<Boolean>(handler, callback) {
+            public void doWork() throws RemoteException {
+                mService.removeAccount(mResponse, account);
+            }
+            public Boolean bundleToResult(Bundle bundle) throws AuthenticatorException {
+                if (!bundle.containsKey(KEY_BOOLEAN_RESULT)) {
+                    throw new AuthenticatorException("no result in response");
+                }
+                return bundle.getBoolean(KEY_BOOLEAN_RESULT);
+            }
+        }.start();
+    }
+
+    /**
+     * Removes an auth token from the AccountManager's cache.  Does nothing if
+     * the auth token is not currently in the cache.  Applications must call this
+     * method when the auth token is found to have expired or otherwise become
+     * invalid for authenticating requests.  The AccountManager does not validate
+     * or expire cached auth tokens otherwise.
+     *
+     * <p>It is safe to call this method from the main thread.
+     *
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#MANAGE_ACCOUNTS}.
+     *
+     * @param accountType The account type of the auth token to invalidate
+     * @param authToken The auth token to invalidate
+     */
+    public void invalidateAuthToken(final String accountType, final String authToken) {
+        try {
+            mService.invalidateAuthToken(accountType, authToken);
+        } catch (RemoteException e) {
+            // won't ever happen
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Gets an auth token from the AccountManager's cache.  If no auth
+     * token is cached for this account, null will be returned -- a new
+     * auth token will not be generated, and the server will not be contacted.
+     * Intended for use by the authenticator, not directly by applications.
+     *
+     * <p>It is safe to call this method from the main thread.
+     *
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#AUTHENTICATE_ACCOUNTS}
+     * and to have the same UID as the account's authenticator.
+     *
+     * @param account The account to fetch an auth token for
+     * @param authTokenType The type of auth token to fetch, see {#getAuthToken}
+     * @return The cached auth token for this account and type, or null if
+     *     no auth token is cached or the account does not exist.
+     */
+    public String peekAuthToken(final Account account, final String authTokenType) {
+        if (account == null) {
+            Log.e(TAG, "peekAuthToken: the account must not be null");
+            return null;
+        }
+        if (authTokenType == null) {
+            return null;
+        }
+        try {
+            return mService.peekAuthToken(account, authTokenType);
+        } catch (RemoteException e) {
+            // won't ever happen
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Sets or forgets a saved password.  This modifies the local copy of the
+     * password used to automatically authenticate the user; it does
+     * not change the user's account password on the server.  Intended for use
+     * by the authenticator, not directly by applications.
+     *
+     * <p>It is safe to call this method from the main thread.
+     *
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#AUTHENTICATE_ACCOUNTS}
+     * and have the same UID as the account's authenticator.
+     *
+     * @param account The account to set a password for
+     * @param password The password to set, null to clear the password
+     */
+    public void setPassword(final Account account, final String password) {
+        if (account == null) {
+            Log.e(TAG, "the account must not be null");
+            return;
+        }
+        try {
+            mService.setPassword(account, password);
+        } catch (RemoteException e) {
+            // won't ever happen
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Forgets a saved password.  This erases the local copy of the password;
+     * it does not change the user's account password on the server.
+     * Has the same effect as setPassword(account, null) but requires fewer
+     * permissions, and may be used by applications or management interfaces
+     * to "sign out" from an account.
+     *
+     * <p>It is safe to call this method from the main thread.
+     *
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#MANAGE_ACCOUNTS}
+     *
+     * @param account The account whose password to clear
+     */
+    public void clearPassword(final Account account) {
+        if (account == null) {
+            Log.e(TAG, "the account must not be null");
+            return;
+        }
+        try {
+            mService.clearPassword(account);
+        } catch (RemoteException e) {
+            // won't ever happen
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Sets one userdata key for an account.  Intended by use for the
+     * authenticator to stash state for itself, not directly by applications.
+     * The meaning of the keys and values is up to the authenticator.
+     *
+     * <p>It is safe to call this method from the main thread.
+     *
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#AUTHENTICATE_ACCOUNTS}
+     * and to have the same UID as the account's authenticator.
+     *
+     * @param account The account to set the userdata for
+     * @param key The userdata key to set.  Must not be null
+     * @param value The value to set, null to clear this userdata key
+     */
+    public void setUserData(final Account account, final String key, final String value) {
+        if (account == null) {
+            Log.e(TAG, "the account must not be null");
+            return;
+        }
+        if (key == null) {
+            Log.e(TAG, "the key must not be null");
+            return;
+        }
+        try {
+            mService.setUserData(account, key, value);
+        } catch (RemoteException e) {
+            // won't ever happen
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Adds an auth token to the AccountManager cache for an account.
+     * If the account does not exist then this call has no effect.
+     * Replaces any previous auth token for this account and auth token type.
+     * Intended for use by the authenticator, not directly by applications.
+     *
+     * <p>It is safe to call this method from the main thread.
+     *
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#AUTHENTICATE_ACCOUNTS}
+     * and to have the same UID as the account's authenticator.
+     *
+     * @param account The account to set an auth token for
+     * @param authTokenType The type of the auth token, see {#getAuthToken}
+     * @param authToken The auth token to add to the cache
+     */
+    public void setAuthToken(Account account, final String authTokenType, final String authToken) {
+        try {
+            mService.setAuthToken(account, authTokenType, authToken);
+        } catch (RemoteException e) {
+            // won't ever happen
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * This convenience helper synchronously gets an auth token with
+     * {@link #getAuthToken(Account, String, boolean, AccountManagerCallback, Handler)}.
+     *
+     * <p>This method may block while a network request completes, and must
+     * never be made from the main thread.
+     *
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#USE_CREDENTIALS}.
+     *
+     * @param account The account to fetch an auth token for
+     * @param authTokenType The auth token type, see {#link getAuthToken}
+     * @param notifyAuthFailure If true, display a notification and return null
+     *     if authentication fails; if false, prompt and wait for the user to
+     *     re-enter correct credentials before returning
+     * @return An auth token of the specified type for this account, or null
+     *     if authentication fails or none can be fetched.
+     * @throws AuthenticatorException if the authenticator failed to respond
+     * @throws OperationCanceledException if the request was canceled for any
+     *     reason, including the user canceling a credential request
+     * @throws java.io.IOException if the authenticator experienced an I/O problem
+     *     creating a new auth token, usually because of network trouble
+     */
+    public String blockingGetAuthToken(Account account, String authTokenType,
+            boolean notifyAuthFailure)
+            throws OperationCanceledException, IOException, AuthenticatorException {
+        Bundle bundle = getAuthToken(account, authTokenType, notifyAuthFailure, null /* callback */,
+                null /* handler */).getResult();
+        return bundle.getString(KEY_AUTHTOKEN);
+    }
+
+    /**
+     * Gets an auth token of the specified type for a particular account,
+     * prompting the user for credentials if necessary.  This method is
+     * intended for applications running in the foreground where it makes
+     * sense to ask the user directly for a password.
+     *
+     * <p>If a previously generated auth token is cached for this account and
+     * type, then it will be returned.  Otherwise, if we have a saved password
+     * the server accepts, it will be used to generate a new auth token.
+     * Otherwise, the user will be asked for a password, which will be sent to
+     * the server to generate a new auth token.
+     *
+     * <p>The value of the auth token type depends on the authenticator.
+     * Some services use different tokens to access different functionality --
+     * for example, Google uses different auth tokens to access Gmail and
+     * Google Calendar for the same account.
+     *
+     * <p>This method may be called from any thread, but the returned
+     * {@link AccountManagerFuture} must not be used on the main thread.
+     *
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#USE_CREDENTIALS}.
+     *
+     * @param account The account to fetch an auth token for
+     * @param authTokenType The auth token type, an authenticator-dependent
+     *     string token, must not be null
+     * @param options Authenticator-specific options for the request,
+     *     may be null or empty
+     * @param activity The {@link Activity} context to use for launching a new
+     *     authenticator-defined sub-Activity to prompt the user for a password
+     *     if necessary; used only to call startActivity(); must not be null.
+     * @param callback Callback to invoke when the request completes,
+     *     null for no callback
+     * @param handler {@link Handler} identifying the callback thread,
+     *     null for the main thread
+     * @return An {@link AccountManagerFuture} which resolves to a Bundle with
+     *     at least the following fields:
      * <ul>
-     * <li> {@link #KEY_INTENT}, which is to be used to prompt the user for the credentials
-     * <li> {@link #KEY_ACCOUNT_NAME} and {@link #KEY_ACCOUNT_TYPE} if the user enters the correct
-     * credentials
+     * <li> {@link #KEY_ACCOUNT_NAME} - the name of the account you supplied
+     * <li> {@link #KEY_ACCOUNT_TYPE} - the type of the account
+     * <li> {@link #KEY_AUTHTOKEN} - the auth token you wanted
      * </ul>
-     * If the user presses "back" then the request will be canceled.
+     *
+     * (Other authenticator-specific values may be returned.)  If an auth token
+     * could not be fetched, {@link AccountManagerFuture#getResult()} throws:
+     * <ul>
+     * <li> {@link AuthenticatorException} if the authenticator failed to respond
+     * <li> {@link OperationCanceledException} if the operation is canceled for
+     *      any reason, incluidng the user canceling a credential request
+     * <li> {@link IOException} if the authenticator experienced an I/O problem
+     *      creating a new auth token, usually because of network trouble
+     * </ul>
+     */
+    public AccountManagerFuture<Bundle> getAuthToken(
+            final Account account, final String authTokenType, final Bundle options,
+            final Activity activity, AccountManagerCallback<Bundle> callback, Handler handler) {
+        if (activity == null) throw new IllegalArgumentException("activity is null");
+        if (authTokenType == null) throw new IllegalArgumentException("authTokenType is null");
+        return new AmsTask(activity, handler, callback) {
+            public void doWork() throws RemoteException {
+                mService.getAuthToken(mResponse, account, authTokenType,
+                        false /* notifyOnAuthFailure */, true /* expectActivityLaunch */,
+                        options);
+            }
+        }.start();
+    }
+
+    /**
+     * Gets an auth token of the specified type for a particular account,
+     * optionally raising a notification if the user must enter credentials.
+     * This method is intended for background tasks and services where the
+     * user should not be immediately interrupted with a password prompt.
+     *
+     * <p>If a previously generated auth token is cached for this account and
+     * type, then it will be returned.  Otherwise, if we have saved credentials
+     * the server accepts, it will be used to generate a new auth token.
+     * Otherwise, an Intent will be returned which, when started, will prompt
+     * the user for a password.  If the notifyAuthFailure parameter is set,
+     * the same Intent will be associated with a status bar notification,
+     * alerting the user that they need to enter a password at some point.
+     *
+     * <p>If the intent is left in a notification, you will need to wait until
+     * the user gets around to entering a password before trying again,
+     * which could be hours or days or never.  When it does happen, the
+     * account manager will broadcast the {@link #LOGIN_ACCOUNTS_CHANGED_ACTION}
+     * {@link Intent}, which applications can use to trigger another attempt
+     * to fetch an auth token.
+     *
+     * <p>If notifications are not enabled, it is the application's
+     * responsibility to launch the returned intent at some point to let
+     * the user enter credentials.  In either case, the result from this
+     * call will not wait for user action.
+     *
+     * <p>The value of the auth token type depends on the authenticator.
+     * Some services use different tokens to access different functionality --
+     * for example, Google uses different auth tokens to access Gmail and
+     * Google Calendar for the same account.
+     *
+     * <p>This method may be called from any thread, but the returned
+     * {@link AccountManagerFuture} must not be used on the main thread.
+     *
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#USE_CREDENTIALS}.
+     *
+     * @param account The account to fetch an auth token for
+     * @param authTokenType The auth token type, an authenticator-dependent
+     *     string token, must not be null
+     * @param options Authenticator-specific options for the request,
+     *     may be null or empty
+     * @param notifyAuthFailure True to add a notification to prompt the
+     *     user for a password if necessary, false to leave that to the caller
+     * @param callback Callback to invoke when the request completes,
+     *     null for no callback
+     * @param handler {@link Handler} identifying the callback thread,
+     *     null for the main thread
+     * @return An {@link AccountManagerFuture} which resolves to a Bundle with
+     *     at least the following fields on success:
+     * <ul>
+     * <li> {@link #KEY_ACCOUNT_NAME} - the name of the account you supplied
+     * <li> {@link #KEY_ACCOUNT_TYPE} - the type of the account
+     * <li> {@link #KEY_AUTHTOKEN} - the auth token you wanted
+     * </ul>
+     *
+     * (Other authenticator-specific values may be returned.)  If the user
+     * must enter credentials, the returned Bundle contains only
+     * {@link #KEY_INTENT} with the {@link Intent} needed to launch a prompt.
+     *
+     * <p>If an error occurred, {@link AccountManagerFuture#getResult()} throws:
+     * <ul>
+     * <li> {@link AuthenticatorException} if the authenticator failed to respond
+     * <li> {@link OperationCanceledException} if the operation is canceled for
+     *      any reason, incluidng the user canceling a credential request
+     * <li> {@link IOException} if the authenticator experienced an I/O problem
+     *      creating a new auth token, usually because of network trouble
+     * </ul>
+     */
+    public AccountManagerFuture<Bundle> getAuthToken(
+            final Account account, final String authTokenType, final boolean notifyAuthFailure,
+            AccountManagerCallback<Bundle> callback, Handler handler) {
+        if (account == null) throw new IllegalArgumentException("account is null");
+        if (authTokenType == null) throw new IllegalArgumentException("authTokenType is null");
+        return new AmsTask(null, handler, callback) {
+            public void doWork() throws RemoteException {
+                mService.getAuthToken(mResponse, account, authTokenType,
+                        notifyAuthFailure, false /* expectActivityLaunch */, null /* options */);
+            }
+        }.start();
+    }
+
+    /**
+     * Asks the user to add an account of a specified type.  The authenticator
+     * for this account type processes this request with the appropriate user
+     * interface.  If the user does elect to create a new account, the account
+     * name is returned.
+     *
+     * <p>This method may be called from any thread, but the returned
+     * {@link AccountManagerFuture} must not be used on the main thread.
+     *
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#MANAGE_ACCOUNTS}.
+     *
+     * @param accountType The type of account to add; must not be null
+     * @param authTokenType The type of auth token (see {@link #getAuthToken})
+     *     this account will need to be able to generate, null for none
+     * @param requiredFeatures The features (see {@link #hasFeatures}) this
+     *     account must have, null for none
+     * @param addAccountOptions Authenticator-specific options for the request,
+     *     may be null or empty
+     * @param activity The {@link Activity} context to use for launching a new
+     *     authenticator-defined sub-Activity to prompt the user to create an
+     *     account; used only to call startActivity(); if null, the prompt
+     *     will not be launched directly, but the necessary {@link Intent}
+     *     will be returned to the caller instead
+     * @param callback Callback to invoke when the request completes,
+     *     null for no callback
+     * @param handler {@link Handler} identifying the callback thread,
+     *     null for the main thread
+     * @return An {@link AccountManagerFeature} which resolves to a Bundle with
+     *     these fields if activity was specified and an account was created:
+     * <ul>
+     * <li> {@link #KEY_ACCOUNT_NAME} - the name of the account created
+     * <li> {@link #KEY_ACCOUNT_TYPE} - the type of the account
+     * </ul>
+     *
+     * If no activity was specified, the returned Bundle contains only
+     * {@link #KEY_INTENT} with the {@link Intent} needed to launch the
+     * actual account creation process.
+     *
+     * <p>If an error occurred, {@link AccountManagerFuture#getResult()} throws:
+     * <ul>
+     * <li> {@link AuthenticatorException} if no authenticator was registered for
+     *      this account type or the authenticator failed to respond
+     * <li> {@link OperationCanceledException} if the operation was canceled for
+     *      any reason, including the user canceling the creation process
+     * <li> {@link IOException} if the authenticator experienced an I/O problem
+     *      creating a new account, usually because of network trouble
+     * </ul>
+     */
+    public AccountManagerFuture<Bundle> addAccount(final String accountType,
+            final String authTokenType, final String[] requiredFeatures,
+            final Bundle addAccountOptions,
+            final Activity activity, AccountManagerCallback<Bundle> callback, Handler handler) {
+        return new AmsTask(activity, handler, callback) {
+            public void doWork() throws RemoteException {
+                if (accountType == null) {
+                    Log.e(TAG, "the account must not be null");
+                    // to unblock caller waiting on Future.get()
+                    set(new Bundle());
+                    return;
+                }
+                mService.addAcount(mResponse, accountType, authTokenType,
+                        requiredFeatures, activity != null, addAccountOptions);
+            }
+        }.start();
+    }
+
+    /**
+     * Confirms that the user knows the password for an account to make extra
+     * sure they are the owner of the account.  The user-entered password can
+     * be supplied directly, otherwise the authenticator for this account type
+     * prompts the user with the appropriate interface.  This method is
+     * intended for applications which want extra assurance; for example, the
+     * phone lock screen uses this to let the user unlock the phone with an
+     * account password if they forget the lock pattern.
+     *
+     * <p>If the user-entered password matches a saved password for this
+     * account, the request is considered valid; otherwise the authenticator
+     * verifies the password (usually by contacting the server).
+     *
+     * <p>This method may be called from any thread, but the returned
+     * {@link AccountManagerFuture} must not be used on the main thread.
+     *
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#MANAGE_ACCOUNTS}.
+     *
+     * @param account The account to confirm password knowledge for
+     * @param options Authenticator-specific options for the request;
+     *     if the {@link #KEY_PASSWORD} string field is present, the
+     *     authenticator may use it directly rather than prompting the user;
+     *     may be null or empty
+     * @param activity The {@link Activity} context to use for launching a new
+     *     authenticator-defined sub-Activity to prompt the user to enter a
+     *     password; used only to call startActivity(); if null, the prompt
+     *     will not be launched directly, but the necessary {@link Intent}
+     *     will be returned to the caller instead
+     * @param callback Callback to invoke when the request completes,
+     *     null for no callback
+     * @param handler {@link Handler} identifying the callback thread,
+     *     null for the main thread
+     * @return An {@link AccountManagerFuture} which resolves to a Bundle
+     *     with these fields if activity or password was supplied and
+     *     the account was successfully verified:
+     * <ul>
+     * <li> {@link #KEY_ACCOUNT_NAME} - the name of the account created
+     * <li> {@link #KEY_ACCOUNT_TYPE} - the type of the account
+     * <li> {@link #KEY_BOOLEAN_RESULT} - true to indicate success
+     * </ul>
+     *
+     * If no activity or password was specified, the returned Bundle contains
+     * only {@link #KEY_INTENT} with the {@link Intent} needed to launch the
+     * password prompt.
+     *
+     * <p>If an error occurred, {@link AccountManagerFuture#getResult()} throws:
+     * <ul>
+     * <li> {@link AuthenticatorException} if the authenticator failed to respond
+     * <li> {@link OperationCanceledException} if the operation was canceled for
+     *      any reason, including the user canceling the password prompt
+     * <li> {@link IOException} if the authenticator experienced an I/O problem
+     *      verifying the password, usually because of network trouble
+     * </ul>
      */
     public AccountManagerFuture<Bundle> confirmCredentials(final Account account,
             final Bundle options,
@@ -914,59 +990,52 @@ public class AccountManager {
     }
 
     /**
-     * Requests that the authenticator update the the credentials for a user. This is typically
-     * done by returning an intent to an activity that will prompt the user to update the stored
-     * credentials for the account. This request
-     * is processed by the authenticator for the account. If no matching authenticator is
-     * registered in the system then {@link AuthenticatorException} is thrown.
-     * <p>
-     * This call returns immediately but runs asynchronously and the result is accessed via the
-     * {@link AccountManagerFuture} that is returned. This future is also passed as the sole
-     * parameter to the {@link AccountManagerCallback}. If the caller wished to use this
-     * method asynchronously then they will generally pass in a callback object that will get
-     * invoked with the {@link AccountManagerFuture}. If they wish to use it synchronously then
-     * they will generally pass null for the callback and instead call
-     * {@link android.accounts.AccountManagerFuture#getResult()} on this method's return value,
-     * which will then block until the request completes.
-     * <p>
-     * Do not block the main thread waiting this method's result.
-     * <p>
-     * Not allowed from main thread (but allowed from other threads):
-     * <pre>
-     * Bundle result = updateCredentials(
-     *   account, authTokenType, options, activity, callback, handler).getResult();
-     * </pre>
-     * Allowed from main thread:
-     * <pre>
-     * updateCredentials(account, authTokenType, options, activity, new AccountManagerCallback<Bundle>() {
-     *    public void run(AccountManagerFuture<Bundle> future) {
-     *        Bundle result = future.getResult();
-     *        // use result
-     *    }
-     * }, handler);
-     * </pre>
-     * <p>
-     * Requires that the caller has permission {@link android.Manifest.permission#MANAGE_ACCOUNTS}.
+     * Asks the user to enter a new password for an account, updating the
+     * saved credentials for the account.  Normally this happens automatically
+     * when the server rejects credentials during an auth token fetch, but this
+     * can be invoked directly to ensure we have the correct credentials stored.
      *
-     * @param account The account whose credentials are to be updated.
-     * @param authTokenType the auth token to retrieve as part of updating the credentials.
-     * May be null.
-     * @param options authenticator specific options for the request
-     * @param activity If the authenticator returns a {@link #KEY_INTENT} in the result then
-     * the intent will be started with this activity. If activity is null then the result will
-     * be returned as-is.
-     * @param callback A callback to invoke when the request completes. If null then
-     * no callback is invoked.
-     * @param handler The {@link Handler} to use to invoke the callback. If null then the
-     * main thread's {@link Handler} is used.
-     * @return an {@link AccountManagerFuture} that represents the future result of the call.
-     * The future result is a {@link Bundle} that contains either:
+     * <p>This method may be called from any thread, but the returned
+     * {@link AccountManagerFuture} must not be used on the main thread.
+     *
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#MANAGE_ACCOUNTS}.
+     *
+     * @param account The account to update credentials for
+     * @param authTokenType The credentials entered must allow an auth token
+     *     of this type to be created (but no actual auth token is returned);
+     *     may be null
+     * @param options Authenticator-specific options for the request;
+     *     may be null or empty
+     * @param activity The {@link Activity} context to use for launching a new
+     *     authenticator-defined sub-Activity to prompt the user to enter a
+     *     password; used only to call startActivity(); if null, the prompt
+     *     will not be launched directly, but the necessary {@link Intent}
+     *     will be returned to the caller instead
+     * @param callback Callback to invoke when the request completes,
+     *     null for no callback
+     * @param handler {@link Handler} identifying the callback thread,
+     *     null for the main thread
+     * @return An {@link AccountManagerFuture} which resolves to a Bundle
+     *     with these fields if an activity was supplied and the account
+     *     credentials were successfully updated:
      * <ul>
-     * <li> {@link #KEY_INTENT}, which is to be used to prompt the user for the credentials
-     * <li> {@link #KEY_ACCOUNT_NAME} and {@link #KEY_ACCOUNT_TYPE} if the user enters the correct
-     * credentials.
+     * <li> {@link #KEY_ACCOUNT_NAME} - the name of the account created
+     * <li> {@link #KEY_ACCOUNT_TYPE} - the type of the account
      * </ul>
-     * If the user presses "back" then the request will be canceled.
+     *
+     * If no activity was specified, the returned Bundle contains only
+     * {@link #KEY_INTENT} with the {@link Intent} needed to launch the
+     * password prompt.
+     *
+     * <p>If an error occurred, {@link AccountManagerFuture#getResult()} throws:
+     * <ul>
+     * <li> {@link AuthenticatorException} if the authenticator failed to respond
+     * <li> {@link OperationCanceledException} if the operation was canceled for
+     *      any reason, including the user canceling the password prompt
+     * <li> {@link IOException} if the authenticator experienced an I/O problem
+     *      verifying the password, usually because of network trouble
+     * </ul>
      */
     public AccountManagerFuture<Bundle> updateCredentials(final Account account,
             final String authTokenType,
@@ -982,53 +1051,41 @@ public class AccountManager {
     }
 
     /**
-     * Request that the properties for an authenticator be updated. This is typically done by
-     * returning an intent to an activity that will allow the user to make changes. This request
-     * is processed by the authenticator for the account. If no matching authenticator is
-     * registered in the system then {@link AuthenticatorException} is thrown.
-     * <p>
-     * This call returns immediately but runs asynchronously and the result is accessed via the
-     * {@link AccountManagerFuture} that is returned. This future is also passed as the sole
-     * parameter to the {@link AccountManagerCallback}. If the caller wished to use this
-     * method asynchronously then they will generally pass in a callback object that will get
-     * invoked with the {@link AccountManagerFuture}. If they wish to use it synchronously then
-     * they will generally pass null for the callback and instead call
-     * {@link android.accounts.AccountManagerFuture#getResult()} on this method's return value,
-     * which will then block until the request completes.
-     * <p>
-     * Do not block the main thread waiting this method's result.
-     * <p>
-     * Not allowed from main thread (but allowed from other threads):
-     * <pre>
-     * Bundle result = editProperties(accountType, activity, callback, handler).getResult();
-     * </pre>
-     * Allowed from main thread:
-     * <pre>
-     * editProperties(accountType, activity, new AccountManagerCallback<Bundle>() {
-     *    public void run(AccountManagerFuture<Bundle> future) {
-     *        Bundle result = future.getResult();
-     *        // use result
-     *    }
-     * }, handler);
-     * </pre>
-     * <p>
-     * Requires that the caller has permission {@link android.Manifest.permission#MANAGE_ACCOUNTS}.
+     * Offers the user an opportunity to change an authenticator's settings.
+     * These properties are for the authenticator in general, not a particular
+     * account.  Not all authenticators support this method.
      *
-     * @param accountType The account type of the authenticator whose properties are to be edited.
-     * @param activity If the authenticator returns a {@link #KEY_INTENT} in the result then
-     * the intent will be started with this activity. If activity is null then the result will
-     * be returned as-is.
-     * @param callback A callback to invoke when the request completes. If null then
-     * no callback is invoked.
-     * @param handler The {@link Handler} to use to invoke the callback. If null then the
-     * main thread's {@link Handler} is used.
-     * @return an {@link AccountManagerFuture} that represents the future result of the call.
-     * The future result is a {@link Bundle} that contains either:
+     * <p>This method may be called from any thread, but the returned
+     * {@link AccountManagerFuture} must not be used on the main thread.
+     *
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#MANAGE_ACCOUNTS}.
+     *
+     * @param accountType The account type associated with the authenticator
+     *     to adjust
+     * @param activity The {@link Activity} context to use for launching a new
+     *     authenticator-defined sub-Activity to adjust authenticator settings;
+     *     used only to call startActivity(); if null, the settings dialog will
+     *     not be launched directly, but the necessary {@link Intent} will be
+     *     returned to the caller instead
+     * @param callback Callback to invoke when the request completes,
+     *     null for no callback
+     * @param handler {@link Handler} identifying the callback thread,
+     *     null for the main thread
+     * @return An {@link AccountManagerFuture} which resolves to a Bundle
+     *     which is empty if properties were edited successfully, or
+     *     if no activity was specified, contains only {@link #KEY_INTENT}
+     *     needed to launch the authenticator's settings dialog.
+     *
+     * <p>If an error occurred, {@link AccountManagerFuture#getResult()} throws:
      * <ul>
-     * <li> {@link #KEY_INTENT}, which is to be used to prompt the user for the credentials
-     * <li> nothing, returned if the edit completes successfully
+     * <li> {@link AuthenticatorException} if no authenticator was registered for
+     *      this account type or the authenticator failed to respond
+     * <li> {@link OperationCanceledException} if the operation was canceled for
+     *      any reason, including the user canceling the settings dialog
+     * <li> {@link IOException} if the authenticator experienced an I/O problem
+     *      updating settings, usually because of network trouble
      * </ul>
-     * If the user presses "back" then the request will be canceled.
      */
     public AccountManagerFuture<Bundle> editProperties(final String accountType,
             final Activity activity, final AccountManagerCallback<Bundle> callback,
@@ -1475,57 +1532,68 @@ public class AccountManager {
     }
 
     /**
-     * Convenience method that combines the functionality of {@link #getAccountsByTypeAndFeatures},
-     * {@link #getAuthToken(Account, String, Bundle, Activity, AccountManagerCallback, Handler)},
-     * and {@link #addAccount}. It first gets the list of accounts that match accountType and the
-     * feature set. If there are none then {@link #addAccount} is invoked with the authTokenType
-     * feature set, and addAccountOptions. If there is exactly one then
-     * {@link #getAuthToken(Account, String, Bundle, Activity, AccountManagerCallback, Handler)} is
-     * called with that account. If there are more than one then a chooser activity is launched
-     * to prompt the user to select one of them and then the authtoken is retrieved for it,
-     * <p>
-     * This call returns immediately but runs asynchronously and the result is accessed via the
-     * {@link AccountManagerFuture} that is returned. This future is also passed as the sole
-     * parameter to the {@link AccountManagerCallback}. If the caller wished to use this
-     * method asynchronously then they will generally pass in a callback object that will get
-     * invoked with the {@link AccountManagerFuture}. If they wish to use it synchronously then
-     * they will generally pass null for the callback and instead call
-     * {@link android.accounts.AccountManagerFuture#getResult()} on this method's return value,
-     * which will then block until the request completes.
-     * <p>
-     * Requires that the caller has permission {@link android.Manifest.permission#MANAGE_ACCOUNTS}.
+     * This convenience helper combines the functionality of
+     * {@link #getAccountsByTypeAndFeatures}, {@link #getAuthToken}, and
+     * {@link #addAccount}.
      *
-     * @param accountType the accountType to query; this must be non-null
-     * @param authTokenType the type of authtoken to retrieve; this must be non-null
-     * @param features a filter for the accounts. See {@link #getAccountsByTypeAndFeatures}.
-     * @param activityForPrompting The activity used to start any account management
-     * activities that are required to fulfill this request. This may be null.
-     * @param addAccountOptions authenticator-specific options used if an account needs to be added
-     * @param getAuthTokenOptions authenticator-specific options passed to getAuthToken
-     * @param callback A callback to invoke when the request completes. If null then
-     * no callback is invoked.
-     * @param handler The {@link Handler} to use to invoke the callback. If null then the
-     * main thread's {@link Handler} is used.
-     * @return an {@link AccountManagerFuture} that represents the future result of the call.
-     * The future result is a {@link Bundle} that contains either:
+     * <p>This method gets a list of the accounts matching the
+     * specified type and feature set; if there is exactly one, it is
+     * used; if there are more than one, the user is prompted to pick one;
+     * if there are none, the user is prompted to add one.  Finally,
+     * an auth token is acquired for the chosen account.
+     *
+     * <p>This method may be called from any thread, but the returned
+     * {@link AccountManagerFuture} must not be used on the main thread.
+     *
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#MANAGE_ACCOUNTS}.
+     *
+     * @param accountType The account type required
+     *     (see {@link getAccountsByType}), must not be null
+     * @param authTokenType The desired auth token type
+     *     (see {@link #getAuthToken}), must not be null
+     * @param features Required features for the account
+     *     (see {@link #getAccountsByTypeAndFeatures}), may be null or empty
+     * @param activity The {@link Activity} context to use for launching new
+     *     sub-Activities to prompt to add an account, select an account,
+     *     and/or enter a password, as necessary; used only to call
+     *     startActivity(); should not be null
+     * @param addAccountOptions Authenticator-specific options to use for
+     *     adding new accounts; may be null or empty
+     * @param getAuthTokenOptions Authenticator-specific options to use for
+     *     getting auth tokens; may be null or empty
+     * @param callback Callback to invoke when the request completes,
+     *     null for no callback
+     * @param handler {@link Handler} identifying the callback thread,
+     *     null for the main thread
+     * @return An {@link AccountManagerFuture} which resolves to a Bundle with
+     *     at least the following fields:
      * <ul>
-     * <li> {@link #KEY_INTENT}, if no activity is supplied yet an activity needs to launched to
-     * fulfill the request.
-     * <li> {@link #KEY_ACCOUNT_NAME}, {@link #KEY_ACCOUNT_TYPE} and {@link #KEY_AUTHTOKEN} if the
-     * request completes successfully.
+     * <li> {@link #KEY_ACCOUNT_NAME} - the name of the account
+     * <li> {@link #KEY_ACCOUNT_TYPE} - the type of the account
+     * <li> {@link #KEY_AUTHTOKEN} - the auth token you wanted
      * </ul>
-     * If the user presses "back" then the request will be canceled.
+     *
+     * <p>If an error occurred, {@link AccountManagerFuture#getResult()} throws:
+     * <ul>
+     * <li> {@link AuthenticatorException} if no authenticator was registered for
+     *      this account type or the authenticator failed to respond
+     * <li> {@link OperationCanceledException} if the operation was canceled for
+     *      any reason, including the user canceling any operation
+     * <li> {@link IOException} if the authenticator experienced an I/O problem
+     *      updating settings, usually because of network trouble
+     * </ul>
      */
     public AccountManagerFuture<Bundle> getAuthTokenByFeatures(
             final String accountType, final String authTokenType, final String[] features,
-            final Activity activityForPrompting, final Bundle addAccountOptions,
+            final Activity activity, final Bundle addAccountOptions,
             final Bundle getAuthTokenOptions,
             final AccountManagerCallback<Bundle> callback, final Handler handler) {
         if (accountType == null) throw new IllegalArgumentException("account type is null");
         if (authTokenType == null) throw new IllegalArgumentException("authTokenType is null");
         final GetAuthTokenByTypeAndFeaturesTask task =
                 new GetAuthTokenByTypeAndFeaturesTask(accountType, authTokenType, features,
-                activityForPrompting, addAccountOptions, getAuthTokenOptions, callback, handler);
+                activity, addAccountOptions, getAuthTokenOptions, callback, handler);
         task.start();
         return task;
     }
@@ -1552,18 +1620,26 @@ public class AccountManager {
     };
 
     /**
-     * Add a {@link OnAccountsUpdateListener} to this instance of the {@link AccountManager}.
-     * The listener is guaranteed to be invoked on the thread of the Handler that is passed
-     * in or the main thread's Handler if handler is null.
-     * <p>
-     * You must remove this listener before the context that was used to retrieve this
-     * {@link AccountManager} instance goes away. This generally means when the Activity
-     * or Service you are running is stopped.
-     * @param listener the listener to add
-     * @param handler the Handler whose thread will be used to invoke the listener. If null
-     * the AccountManager context's main thread will be used.
-     * @param updateImmediately if true then the listener will be invoked as a result of this
-     * call.
+     * Adds an {@link OnAccountsUpdateListener} to this instance of the
+     * {@link AccountManager}.  This listener will be notified whenever the
+     * list of accounts on the device changes.
+     *
+     * <p>As long as this listener is present, the AccountManager instance
+     * will not be garbage-collected, and neither will the {@link Context}
+     * used to retrieve it, which may be a large Activity instance.  To avoid
+     * memory leaks, you must remove this listener before then.  Normally
+     * listeners are added in an Activity or Service's {@link Activity#onCreate}
+     * and removed in {@link Activity#onDestroy}.
+     *
+     * <p>It is safe to call this method from the main thread.
+     *
+     * <p>No permission is required to call this method.
+     *
+     * @param listener The listener to send notifications to
+     * @param handler {@link Handler} identifying the thread to use
+     *     for notifications, null for the main thread
+     * @param updateImmediately If true, the listener will be invoked
+     *     (on the handler thread) right away with the current account list
      * @throws IllegalArgumentException if listener is null
      * @throws IllegalStateException if listener was already added
      */
@@ -1596,9 +1672,15 @@ public class AccountManager {
     }
 
     /**
-     * Remove an {@link OnAccountsUpdateListener} that was previously registered with
-     * {@link #addOnAccountsUpdatedListener}.
-     * @param listener the listener to remove
+     * Removes an {@link OnAccountsUpdateListener} previously registered with
+     * {@link #addOnAccountsUpdatedListener}.  The listener will no longer
+     * receive notifications of account changes.
+     *
+     * <p>It is safe to call this method from the main thread.
+     *
+     * <p>No permission is required to call this method.
+     *
+     * @param listener The previously added listener to remove
      * @throws IllegalArgumentException if listener is null
      * @throws IllegalStateException if listener was not already added
      */
