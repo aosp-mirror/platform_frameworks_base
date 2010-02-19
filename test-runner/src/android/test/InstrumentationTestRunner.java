@@ -19,6 +19,7 @@ package android.test;
 import static android.test.suitebuilder.TestPredicates.REJECT_PERFORMANCE;
 
 import com.android.internal.util.Predicate;
+import com.android.internal.util.Predicates;
 
 import android.app.Activity;
 import android.app.Instrumentation;
@@ -31,11 +32,13 @@ import android.os.PerformanceCollector.PerformanceResultsWriter;
 import android.test.suitebuilder.TestMethod;
 import android.test.suitebuilder.TestPredicates;
 import android.test.suitebuilder.TestSuiteBuilder;
+import android.test.suitebuilder.annotation.HasAnnotation;
 import android.util.Log;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.PrintStream;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -91,6 +94,18 @@ import junit.textui.ResultPrinter;
  * <p/>
  * <b>Running all large tests:</b> adb shell am instrument -w
  * -e size large
+ * com.android.foo/android.test.InstrumentationTestRunner
+ * <p/>
+ * <b>Filter test run to tests with given annotation:</b> adb shell am instrument -w
+ * -e annotation com.android.foo.MyAnnotation
+ * com.android.foo/android.test.InstrumentationTestRunner
+ * <p/>
+ * If used with other options, the resulting test run will contain the union of the two options.
+ * e.g. "-e size large -e annotation com.android.foo.MyAnnotation" will run only tests with both
+ * the {@link LargeTest} and "com.android.foo.MyAnnotation" annotations.
+ * <p/>
+ * <b>Filter test run to tests <i>without</i> given annotation:</b> adb shell am instrument -w
+ * -e notAnnotation com.android.foo.MyAnnotation
  * com.android.foo/android.test.InstrumentationTestRunner
  * <p/>
  * <b>Running a single testcase:</b> adb shell am instrument -w
@@ -161,6 +176,10 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
     private static final String LARGE_SUITE = "large";
 
     private static final String ARGUMENT_LOG_ONLY = "log";
+    /** @hide */
+    static final String ARGUMENT_ANNOTATION = "annotation";
+    /** @hide */
+    static final String ARGUMENT_NOT_ANNOTATION = "notAnnotation";
 
     /**
      * This constant defines the maximum allowed runtime (in ms) for a test included in the "small"
@@ -274,6 +293,8 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
         ClassPathPackageInfoSource.setApkPaths(apkPaths);
 
         Predicate<TestMethod> testSizePredicate = null;
+        Predicate<TestMethod> testAnnotationPredicate = null;
+        Predicate<TestMethod> testNotAnnotationPredicate = null;
         boolean includePerformance = false;
         String testClassesArg = null;
         boolean logOnly = false;
@@ -287,6 +308,11 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
             mPackageOfTests = arguments.getString(ARGUMENT_TEST_PACKAGE);
             testSizePredicate = getSizePredicateFromArg(
                     arguments.getString(ARGUMENT_TEST_SIZE_PREDICATE));
+            testAnnotationPredicate = getAnnotationPredicate(
+                    arguments.getString(ARGUMENT_ANNOTATION));
+            testNotAnnotationPredicate = getNotAnnotationPredicate(
+                    arguments.getString(ARGUMENT_NOT_ANNOTATION));
+
             includePerformance = getBooleanArgument(arguments, ARGUMENT_INCLUDE_PERF);
             logOnly = getBooleanArgument(arguments, ARGUMENT_LOG_ONLY);
             mCoverage = getBooleanArgument(arguments, "coverage");
@@ -305,6 +331,12 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
 
         if (testSizePredicate != null) {
             testSuiteBuilder.addRequirements(testSizePredicate);
+        }
+        if (testAnnotationPredicate != null) {
+            testSuiteBuilder.addRequirements(testAnnotationPredicate);
+        }
+        if (testNotAnnotationPredicate != null) {
+            testSuiteBuilder.addRequirements(testNotAnnotationPredicate);
         }
         if (!includePerformance) {
             testSuiteBuilder.addRequirements(REJECT_PERFORMANCE);
@@ -406,6 +438,59 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
         }
     }
 
+   /**
+    * Returns the test predicate object, corresponding to the annotation class value provided via
+    * the {@link ARGUMENT_ANNOTATION} argument.
+    *
+    * @return the predicate or <code>null</code>
+    */
+    private Predicate<TestMethod> getAnnotationPredicate(String annotationClassName) {
+        Class<? extends Annotation> annotationClass = getAnnotationClass(annotationClassName);
+        if (annotationClass != null) {
+            return new HasAnnotation(annotationClass);
+        }
+        return null;
+    }
+
+    /**
+     * Returns the negative test predicate object, corresponding to the annotation class value
+     * provided via the {@link ARGUMENT_NOT_ANNOTATION} argument.
+     *
+     * @return the predicate or <code>null</code>
+     */
+     private Predicate<TestMethod> getNotAnnotationPredicate(String annotationClassName) {
+         Class<? extends Annotation> annotationClass = getAnnotationClass(annotationClassName);
+         if (annotationClass != null) {
+             return Predicates.not(new HasAnnotation(annotationClass));
+         }
+         return null;
+     }
+
+    /**
+     * Helper method to return the annotation class with specified name
+     *
+     * @param annotationClassName the fully qualified name of the class
+     * @return the annotation class or <code>null</code>
+     */
+    private Class<? extends Annotation> getAnnotationClass(String annotationClassName) {
+        if (annotationClassName == null) {
+            return null;
+        }
+        try {
+           Class<?> annotationClass = Class.forName(annotationClassName);
+           if (annotationClass.isAnnotation()) {
+               return (Class<? extends Annotation>)annotationClass;
+           } else {
+               Log.e(LOG_TAG, String.format("Provided annotation value %s is not an Annotation",
+                       annotationClassName));
+           }
+        } catch (ClassNotFoundException e) {
+            Log.e(LOG_TAG, String.format("Could not find class for specified annotation %s",
+                    annotationClassName));
+        }
+        return null;
+    }
+
     @Override
     public void onStart() {
         Looper.prepare();
@@ -471,7 +556,7 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
         String coverageFilePath = getCoverageFilePath();
         java.io.File coverageFile = new java.io.File(coverageFilePath);
         try {
-            Class emmaRTClass = Class.forName("com.vladium.emma.rt.RT");
+            Class<?> emmaRTClass = Class.forName("com.vladium.emma.rt.RT");
             Method dumpCoverageMethod = emmaRTClass.getMethod("dumpCoverageData",
                     coverageFile.getClass(), boolean.class, boolean.class);
 

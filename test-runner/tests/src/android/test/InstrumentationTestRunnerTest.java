@@ -109,6 +109,33 @@ public class InstrumentationTestRunnerTest extends TestCase {
         assertTrue(mStubAndroidTestRunner.isRun());
     }
 
+    /**
+     * Test that the -e {@link InstrumentationTestRunner.ARGUMENT_ANNOTATION} parameter properly
+     * selects tests.
+     */
+    public void testAnnotationParameter() throws Exception {
+        String expectedTestClassName = AnnotationTest.class.getName();
+        Bundle args = new Bundle();
+        args.putString(InstrumentationTestRunner.ARGUMENT_TEST_CLASS, expectedTestClassName);
+        args.putString(InstrumentationTestRunner.ARGUMENT_ANNOTATION, FlakyTest.class.getName());
+        mInstrumentationTestRunner.onCreate(args);
+        assertTestRunnerCalledWithExpectedParameters(expectedTestClassName, "testAnnotated");
+    }
+    
+    /**
+     * Test that the -e {@link InstrumentationTestRunner.ARGUMENT_NOT_ANNOTATION} parameter
+     * properly excludes tests.
+     */
+    public void testNotAnnotationParameter() throws Exception {
+        String expectedTestClassName = AnnotationTest.class.getName();
+        Bundle args = new Bundle();
+        args.putString(InstrumentationTestRunner.ARGUMENT_TEST_CLASS, expectedTestClassName);
+        args.putString(InstrumentationTestRunner.ARGUMENT_NOT_ANNOTATION,
+                FlakyTest.class.getName());
+        mInstrumentationTestRunner.onCreate(args);
+        assertTestRunnerCalledWithExpectedParameters(expectedTestClassName, "testNotAnnotated");
+    }
+
     private void assertContentsInOrder(List<TestDescriptor> actual, TestDescriptor... source) {
         TestDescriptor[] clonedSource = source.clone();
         assertEquals("Unexpected number of items.", clonedSource.length, actual.size());
@@ -267,6 +294,19 @@ public class InstrumentationTestRunnerTest extends TestCase {
 
         public void testPlaceHolder2() throws Exception {
 
+        }
+    }
+
+    /**
+     * Annotated test used for validation.
+     */
+    public static class AnnotationTest extends TestCase {
+
+        public void testNotAnnotated() throws Exception {
+        }
+
+        @FlakyTest
+        public void testAnnotated() throws Exception {
         }
     }
 }
