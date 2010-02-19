@@ -296,8 +296,7 @@ public abstract class AbstractAccountAuthenticator {
      * <ul>
      * <li> {@link AccountManager#KEY_INTENT}, or
      * <li> {@link AccountManager#KEY_ACCOUNT_NAME} and {@link AccountManager#KEY_ACCOUNT_TYPE} of
-     * the account that was added, plus {@link AccountManager#KEY_AUTHTOKEN} if an authTokenType
-     * was supplied, or
+     * the account that was added, or
      * <li> {@link AccountManager#KEY_ERROR_CODE} and {@link AccountManager#KEY_ERROR_MESSAGE} to
      * indicate an error
      * </ul>
@@ -368,8 +367,7 @@ public abstract class AbstractAccountAuthenticator {
      * <ul>
      * <li> {@link AccountManager#KEY_INTENT}, or
      * <li> {@link AccountManager#KEY_ACCOUNT_NAME} and {@link AccountManager#KEY_ACCOUNT_TYPE} of
-     * the account that was added, plus {@link AccountManager#KEY_AUTHTOKEN} if an authTokenType
-     * was supplied, or
+     * the account that was added, or
      * <li> {@link AccountManager#KEY_ERROR_CODE} and {@link AccountManager#KEY_ERROR_MESSAGE} to
      * indicate an error
      * </ul>
@@ -378,7 +376,7 @@ public abstract class AbstractAccountAuthenticator {
      */
     public abstract Bundle updateCredentials(AccountAuthenticatorResponse response,
             Account account, String authTokenType, Bundle options) throws NetworkErrorException;
-    
+
     /**
      * Checks if the account supports all the specified authenticator specific features.
      * @param response to send the result back to the AccountManager, will never be null
