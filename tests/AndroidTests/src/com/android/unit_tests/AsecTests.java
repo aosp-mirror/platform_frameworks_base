@@ -78,6 +78,60 @@ public class AsecTests extends AndroidTestCase {
         }
     }
 
+    private boolean containerExists(String localId) throws RemoteException {
+        IMountService ms = getMs();
+        String[] containers = ms.getSecureContainerList();
+        String fullId = "com.android.unittests.AsecTests." + localId;
+
+        for (int i = 0; i < containers.length; i++) {
+            if (containers[i].equals(fullId)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private int createContainer(String localId, int size, String key) throws RemoteException {
+        Assert.assertTrue(isMediaMounted());
+        String fullId = "com.android.unittests.AsecTests." + localId;
+
+        IMountService ms = getMs();
+        return ms.createSecureContainer(fullId, size, "fat", key, android.os.Process.myUid());
+    }
+
+    private int mountContainer(String localId, String key) throws RemoteException {
+        Assert.assertTrue(isMediaMounted());
+        String fullId = "com.android.unittests.AsecTests." + localId;
+
+        IMountService ms = getMs();
+        return ms.mountSecureContainer(fullId, key, android.os.Process.myUid());
+    }
+
+    private int renameContainer(String localId1, String localId2) throws RemoteException {
+        Assert.assertTrue(isMediaMounted());
+        String fullId1 = "com.android.unittests.AsecTests." + localId1;
+        String fullId2 = "com.android.unittests.AsecTests." + localId2;
+
+        IMountService ms = getMs();
+        return ms.renameSecureContainer(fullId1, fullId2);
+    }
+
+    private int unmountContainer(String localId, boolean force) throws RemoteException {
+        Assert.assertTrue(isMediaMounted());
+        String fullId = "com.android.unittests.AsecTests." + localId;
+
+        IMountService ms = getMs();
+        return ms.unmountSecureContainer(fullId, force);
+    }
+
+    private int destroyContainer(String localId, boolean force) throws RemoteException {
+        Assert.assertTrue(isMediaMounted());
+        String fullId = "com.android.unittests.AsecTests." + localId;
+
+        IMountService ms = getMs();
+        return ms.destroySecureContainer(fullId, force);
+    }
+
     private IMountService getMs() {
         IBinder service = ServiceManager.getService("mount");
         if (service != null) {
@@ -100,143 +154,174 @@ public class AsecTests extends AndroidTestCase {
     }
 
     public void testCreateContainer() {
-        Assert.assertTrue(isMediaMounted());
-        IMountService ms = getMs();
         try {
-            int rc = ms.createSecureContainer("com.android.unittests.AsecTests.testCreateContainer",
-                    4, "fat", "none", android.os.Process.myUid());
-            Assert.assertEquals(StorageResultCode.OperationSucceeded, rc);
-        } catch (Exception e) {
-            failStr(e);
-        }
-    }
-
-    public void testCreateZeroSizeContainer() {
-        Assert.assertTrue(isMediaMounted());
-        IMountService ms = getMs();
-        try {
-            int rc = ms.createSecureContainer("com.android.unittests.AsecTests.testCreateZeroSizeContainer",
-                    0, "fat", "none", android.os.Process.myUid());
-            Assert.assertEquals(StorageResultCode.OperationFailedInternalError, rc);
+            Assert.assertEquals(StorageResultCode.OperationSucceeded,
+                    createContainer("testCreateContainer", 4, "none"));
+            Assert.assertEquals(true, containerExists("testCreateContainer"));
         } catch (Exception e) {
             failStr(e);
         }
     }
 
     public void testCreateMinSizeContainer() {
-        Assert.assertTrue(isMediaMounted());
-        IMountService ms = getMs();
         try {
-            int rc = ms.createSecureContainer("com.android.unittests.AsecTests.testCreateMinSizeContainer",
-                    1, "fat", "none", android.os.Process.myUid());
-            Assert.assertEquals(StorageResultCode.OperationSucceeded, rc);
+            Assert.assertEquals(StorageResultCode.OperationSucceeded,
+                    createContainer("testCreateContainer", 1, "none"));
+            Assert.assertEquals(true, containerExists("testCreateContainer"));
+        } catch (Exception e) {
+            failStr(e);
+        }
+    }
+
+    public void testCreateZeroSizeContainer() {
+        try {
+            Assert.assertEquals(StorageResultCode.OperationFailedInternalError,
+                    createContainer("testCreateZeroContainer", 0, "none"));
+        } catch (Exception e) {
+            failStr(e);
+        }
+    }
+
+    public void testCreateDuplicateContainer() {
+        try {
+            Assert.assertEquals(StorageResultCode.OperationSucceeded,
+                    createContainer("testCreateDupContainer", 4, "none"));
+
+            Assert.assertEquals(StorageResultCode.OperationFailedInternalError,
+                    createContainer("testCreateDupContainer", 4, "none"));
         } catch (Exception e) {
             failStr(e);
         }
     }
 
     public void testDestroyContainer() {
-        Assert.assertTrue(isMediaMounted());
-        IMountService ms = getMs();
         try {
-            int rc = ms.createSecureContainer("com.android.unittests.AsecTests.testDestroyContainer",
-                    4, "fat", "none", android.os.Process.myUid());
-            Assert.assertEquals(StorageResultCode.OperationSucceeded, rc);
-            rc = ms.destroySecureContainer("com.android.unittests.AsecTests.testDestroyContainer", true);
-            Assert.assertEquals(StorageResultCode.OperationSucceeded, rc);
+            Assert.assertEquals(StorageResultCode.OperationSucceeded,
+                    createContainer("testDestroyContainer", 4, "none"));
+            Assert.assertEquals(StorageResultCode.OperationSucceeded,
+                    destroyContainer("testDestroyContainer", false));
         } catch (Exception e) {
             failStr(e);
         }
     }
 
     public void testMountContainer() {
-        Assert.assertTrue(isMediaMounted());
-        IMountService ms = getMs();
         try {
-            int rc = ms.createSecureContainer(
-                    "com.android.unittests.AsecTests.testMountContainer",
-                            4, "fat", "none", android.os.Process.myUid());
-            Assert.assertEquals(StorageResultCode.OperationSucceeded, rc);
+            Assert.assertEquals(StorageResultCode.OperationSucceeded,
+                    createContainer("testMountContainer", 4, "none"));
 
-            rc = ms.unmountSecureContainer("com.android.unittests.AsecTests.testMountContainer", false);
-            Assert.assertEquals(StorageResultCode.OperationSucceeded, rc);
+            Assert.assertEquals(StorageResultCode.OperationSucceeded,
+                    unmountContainer("testMountContainer", false));
 
-            rc = ms.mountSecureContainer("com.android.unittests.AsecTests.testMountContainer", "none",
-                    android.os.Process.myUid());
-            Assert.assertEquals(StorageResultCode.OperationSucceeded, rc);
+            Assert.assertEquals(StorageResultCode.OperationSucceeded,
+                    mountContainer("testMountContainer", "none"));
         } catch (Exception e) {
             failStr(e);
         }
     }
 
     public void testMountBadKey() {
-        Assert.assertTrue(isMediaMounted());
-        IMountService ms = getMs();
         try {
-            int rc = ms.createSecureContainer(
-                    "com.android.unittests.AsecTests.testMountBadKey", 4, "fat",
-                            "00000000000000000000000000000000", android.os.Process.myUid());
-            Assert.assertEquals(StorageResultCode.OperationSucceeded, rc);
+            Assert.assertEquals(StorageResultCode.OperationSucceeded,
+                    createContainer("testMountBadKey", 4, "00000000000000000000000000000000"));
 
-            rc = ms.unmountSecureContainer("com.android.unittests.AsecTests.testMountBadKey", false);
-            Assert.assertEquals(StorageResultCode.OperationSucceeded, rc);
+            Assert.assertEquals(StorageResultCode.OperationSucceeded,
+                    unmountContainer("testMountBadKey", false));
 
-            rc = ms.mountSecureContainer(
-                    "com.android.unittests.AsecTests.testMountBadKey",
-                            "00000000000000000000000000000001", 1001);
-            Assert.assertEquals(StorageResultCode.OperationFailedInternalError, rc);
+            Assert.assertEquals(StorageResultCode.OperationFailedInternalError,
+                    mountContainer("testMountContainer", "000000000000000000000000000000001"));
 
-            rc = ms.mountSecureContainer(
-                    "com.android.unittests.AsecTests.testMountBadKey", "none", 1001);
-            Assert.assertEquals(StorageResultCode.OperationFailedInternalError, rc);
+            Assert.assertEquals(StorageResultCode.OperationFailedInternalError,
+                    mountContainer("testMountContainer", "none"));
         } catch (Exception e) {
             failStr(e);
         }
     }
 
     public void testUnmountBusyContainer() {
-        Assert.assertTrue(isMediaMounted());
         IMountService ms = getMs();
         try {
-            int rc = ms.createSecureContainer("com.android.unittests.AsecTests.testUnmountBusyContainer",
-                    4, "fat", "none", android.os.Process.myUid());
-            Assert.assertEquals(StorageResultCode.OperationSucceeded, rc);
+            Assert.assertEquals(StorageResultCode.OperationSucceeded,
+                    createContainer("testUnmountBusyContainer", 4, "none"));
 
             String path = ms.getSecureContainerPath("com.android.unittests.AsecTests.testUnmountBusyContainer");
-            Context con = super.getContext();
 
             File f = new File(path, "reference");
             FileOutputStream fos = new FileOutputStream(f);
-            rc = ms.unmountSecureContainer("com.android.unittests.AsecTests.testUnmountBusyContainer", false);
-            Assert.assertEquals(StorageResultCode.OperationFailedStorageBusy, rc);
-            fos.close();
 
-            rc = ms.unmountSecureContainer("com.android.unittests.AsecTests.testUnmountBusyContainer", false);
-            Assert.assertEquals(StorageResultCode.OperationSucceeded, rc);
+            Assert.assertEquals(StorageResultCode.OperationFailedStorageBusy,
+                    unmountContainer("testUnmountBusyContainer", false));
+
+            fos.close();
+            Assert.assertEquals(StorageResultCode.OperationSucceeded,
+                    unmountContainer("testUnmountBusyContainer", false));
         } catch (Exception e) {
             failStr(e);
         }
     }
 
     public void testDestroyBusyContainer() {
-        Assert.assertTrue(isMediaMounted());
         IMountService ms = getMs();
         try {
-            int rc = ms.createSecureContainer("com.android.unittests.AsecTests.testUnmountBusyContainer",
-                    4, "fat", "none", android.os.Process.myUid());
-            Assert.assertEquals(StorageResultCode.OperationSucceeded, rc);
+            Assert.assertEquals(StorageResultCode.OperationSucceeded,
+                    createContainer("testDestroyBusyContainer", 4, "none"));
 
-            String path = ms.getSecureContainerPath("com.android.unittests.AsecTests.testUnmountBusyContainer");
-            Context con = super.getContext();
+            String path = ms.getSecureContainerPath("com.android.unittests.AsecTests.testDestroyBusyContainer");
 
             File f = new File(path, "reference");
             FileOutputStream fos = new FileOutputStream(f);
-            rc = ms.destroySecureContainer("com.android.unittests.AsecTests.testUnmountBusyContainer", false);
-            Assert.assertEquals(StorageResultCode.OperationFailedStorageBusy, rc);
-            fos.close();
 
-            rc = ms.destroySecureContainer("com.android.unittests.AsecTests.testUnmountBusyContainer", false);
-            Assert.assertEquals(StorageResultCode.OperationSucceeded, rc);
+            Assert.assertEquals(StorageResultCode.OperationFailedStorageBusy,
+                    destroyContainer("testDestroyBusyContainer", false));
+
+            fos.close();
+            Assert.assertEquals(StorageResultCode.OperationSucceeded,
+                    destroyContainer("testDestroyBusyContainer", false));
+        } catch (Exception e) {
+            failStr(e);
+        }
+    }
+
+    public void testRenameContainer() {
+        try {
+            Assert.assertEquals(StorageResultCode.OperationSucceeded,
+                    createContainer("testRenameContainer.1", 4, "none"));
+
+            Assert.assertEquals(StorageResultCode.OperationSucceeded,
+                    unmountContainer("testRenameContainer.1", false));
+
+            Assert.assertEquals(StorageResultCode.OperationSucceeded,
+                    renameContainer("testRenameContainer.1", "testRenameContainer.2"));
+
+            Assert.assertEquals(false, containerExists("testRenameContainer.1"));
+            Assert.assertEquals(true, containerExists("testRenameContainer.2"));
+        } catch (Exception e) {
+            failStr(e);
+        }
+    }
+
+    public void testRenameMountedContainer() {
+        try {
+            Assert.assertEquals(StorageResultCode.OperationSucceeded,
+                    createContainer("testRenameContainer.1", 4, "none"));
+
+            Assert.assertEquals(StorageResultCode.OperationFailedStorageMounted,
+                    renameContainer("testRenameContainer.1", "testRenameContainer.2"));
+        } catch (Exception e) {
+            failStr(e);
+        }
+    }
+
+    public void testRenameToExistingContainer() {
+        try {
+            Assert.assertEquals(StorageResultCode.OperationSucceeded,
+                    createContainer("testRenameContainer.1", 4, "none"));
+
+            Assert.assertEquals(StorageResultCode.OperationSucceeded,
+                    createContainer("testRenameContainer.2", 4, "none"));
+
+            Assert.assertEquals(StorageResultCode.OperationFailedStorageMounted,
+                    renameContainer("testRenameContainer.1", "testRenameContainer.2"));
         } catch (Exception e) {
             failStr(e);
         }
