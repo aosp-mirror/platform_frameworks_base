@@ -19,6 +19,7 @@ package android.view;
 import com.android.internal.R;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -719,6 +720,19 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void dispatchConfigurationChanged(Configuration newConfig) {
+        super.dispatchConfigurationChanged(newConfig);
+        final int count = mChildrenCount;
+        final View[] children = mChildren;
+        for (int i = 0; i < count; i++) {
+            children[i].dispatchConfigurationChanged(newConfig);
+        }
+    }
+    
     /**
      * {@inheritDoc}
      */

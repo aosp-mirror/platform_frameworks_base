@@ -93,7 +93,7 @@ public class PackageHelper {
 
    public static boolean unMountSdDir(String cid) {
     try {
-        int rc = getMountService().unmountSecureContainer(cid);
+        int rc = getMountService().unmountSecureContainer(cid, false);
         if (rc != StorageResultCode.OperationSucceeded) {
             Log.e(TAG, "Failed to unmount " + cid + " with rc " + rc);
             return false;
@@ -148,7 +148,7 @@ public class PackageHelper {
 
     public static boolean destroySdDir(String cid) {
         try {
-            int rc = getMountService().destroySecureContainer(cid);
+            int rc = getMountService().destroySecureContainer(cid, false);
             if (rc != StorageResultCode.OperationSucceeded) {
                 Log.i(TAG, "Failed to destroy container " + cid);
                 return false;

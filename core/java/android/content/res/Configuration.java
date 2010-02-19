@@ -193,6 +193,11 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     public int uiMode;
 
     /**
+     * @hide Internal book-keeping.
+     */
+    public int seq;
+    
+    /**
      * Construct an invalid Configuration.  You must call {@link #setToDefaults}
      * for this object to be valid.  {@more}
      */
@@ -220,6 +225,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         orientation = o.orientation;
         screenLayout = o.screenLayout;
         uiMode = o.uiMode;
+        seq = o.seq;
     }
 
     public String toString() {
@@ -250,6 +256,10 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         sb.append(screenLayout);
         sb.append(" uiMode=");
         sb.append(uiMode);
+        if (seq != 0) {
+            sb.append(" seq=");
+            sb.append(seq);
+        }
         sb.append('}');
         return sb.toString();
     }
@@ -260,7 +270,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     public void setToDefaults() {
         fontScale = 1;
         mcc = mnc = 0;
-        locale = Locale.getDefault();
+        locale = null;
         userSetLocale = false;
         touchscreen = TOUCHSCREEN_UNDEFINED;
         keyboard = KEYBOARD_UNDEFINED;
@@ -271,6 +281,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         orientation = ORIENTATION_UNDEFINED;
         screenLayout = SCREENLAYOUT_SIZE_UNDEFINED;
         uiMode = UI_MODE_TYPE_NORMAL;
+        seq = 0;
     }
 
     /** {@hide} */
@@ -355,6 +366,10 @@ public final class Configuration implements Parcelable, Comparable<Configuration
                 && uiMode != delta.uiMode) {
             changed |= ActivityInfo.CONFIG_UI_MODE;
             uiMode = delta.uiMode;
+        }
+        
+        if (delta.seq != 0) {
+            seq = delta.seq;
         }
         
         return changed;
@@ -456,6 +471,35 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     }
     
     /**
+     * @hide Return true if the sequence of 'other' is better than this.  Assumes
+     * that 'this' is your current sequence and 'other' is a new one you have
+     * received some how and want to compare with what you have.
+     */
+    public boolean isOtherSeqNewer(Configuration other) {
+        if (other == null) {
+            // Sanity check.
+            return false;
+        }
+        if (other.seq == 0) {
+            // If the other sequence is not specified, then we must assume
+            // it is newer since we don't know any better.
+            return true;
+        }
+        if (seq == 0) {
+            // If this sequence is not specified, then we also consider the
+            // other is better.  Yes we have a preference for other.  Sue us.
+            return true;
+        }
+        int diff = other.seq - seq;
+        if (diff > 0x10000) {
+            // If there has been a sufficiently large jump, assume the
+            // sequence has wrapped around.
+            return false;
+        }
+        return diff > 0;
+    }
+    
+    /**
      * Parcelable methods
      */
     public int describeContents() {
@@ -488,6 +532,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         dest.writeInt(orientation);
         dest.writeInt(screenLayout);
         dest.writeInt(uiMode);
+        dest.writeInt(seq);
     }
 
     public static final Parcelable.Creator<Configuration> CREATOR
@@ -522,6 +567,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         orientation = source.readInt();
         screenLayout = source.readInt();
         uiMode = source.readInt();
+        seq = source.readInt();
     }
 
     public int compareTo(Configuration that) {

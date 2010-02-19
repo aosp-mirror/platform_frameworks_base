@@ -382,7 +382,7 @@ static status_t compileAttribute(const sp<AaptFile>& in,
         }
         attr.createIfNeeded(outTable);
         if (!attr.hasErrors) {
-            char buf[10];
+            char buf[11];
             sprintf(buf, "%d", l10n_required);
             err = outTable->addBag(attr.sourcePos, myPackage, attr16, attr.ident,
                     String16(""), String16("^l10n"), String16(buf), NULL, NULL);

@@ -39,6 +39,7 @@ import android.view.Display;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.ref.WeakReference;
+import java.util.Locale;
 
 /**
  * Class for accessing an application's resources.  This sits on top of the
@@ -1258,6 +1259,9 @@ public class Resources {
             int configChanges = 0xfffffff;
             if (config != null) {
                 configChanges = mConfiguration.updateFrom(config);
+            }
+            if (mConfiguration.locale == null) {
+                mConfiguration.locale = Locale.getDefault();
             }
             if (metrics != null) {
                 mMetrics.setTo(metrics);

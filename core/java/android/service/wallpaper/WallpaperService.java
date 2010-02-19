@@ -28,6 +28,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -226,7 +227,7 @@ public abstract class WallpaperService extends Service {
             
             @Override
             public void resized(int w, int h, Rect coveredInsets,
-                    Rect visibleInsets, boolean reportDraw) {
+                    Rect visibleInsets, boolean reportDraw, Configuration newConfig) {
                 Message msg = mCaller.obtainMessageI(MSG_WINDOW_RESIZED,
                         reportDraw ? 1 : 0);
                 mCaller.sendMessage(msg);

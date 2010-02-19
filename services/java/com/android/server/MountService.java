@@ -97,7 +97,7 @@ class MountService extends IMountService.Stub
         public static final int OpFailedMediaBlank             = 402;
         public static final int OpFailedMediaCorrupt           = 403;
         public static final int OpFailedVolNotMounted          = 404;
-        public static final int OpFailedVolBusy                = 405;
+        public static final int OpFailedStorageBusy            = 405;
 
         /*
          * 600 series - Unsolicited broadcasts.
@@ -142,6 +142,14 @@ class MountService extends IMountService.Stub
             if (action.equals(Intent.ACTION_BOOT_COMPLETED)) {
                 mBooted = true;
 
+                /*
+                 * In the simulator, we need to broadcast a volume mounted event
+                 * to make the media scanner run.
+                 */
+                if ("simulator".equals(SystemProperties.get("ro.product.device"))) {
+                    notifyVolumeStateChange(null, "/sdcard", VolumeState.NoMedia, VolumeState.Mounted);
+                    return;
+                }
                 String path = Environment.getExternalStorageDirectory().getPath();
                 if (getVolumeState(path).equals(Environment.MEDIA_UNMOUNTED)) {
                     int rc = doMountVolume(path);
@@ -184,7 +192,7 @@ class MountService extends IMountService.Stub
         String vs = getVolumeState(path);
         if (enable && vs.equals(Environment.MEDIA_MOUNTED)) {
             mUmsEnabling = enable; // Override for isUsbMassStorageEnabled()
-            int rc = doUnmountVolume(path);
+            int rc = doUnmountVolume(path, false);
             mUmsEnabling = false; // Clear override
             if (rc != StorageResultCode.OperationSucceeded) {
                 Log.e(TAG, String.format("Failed to unmount before enabling UMS (%d)", rc));
@@ -527,7 +535,7 @@ class MountService extends IMountService.Stub
         return rc;
     }
 
-    private int doUnmountVolume(String path) {
+    private int doUnmountVolume(String path, boolean force) {
         if (!getVolumeState(path).equals(Environment.MEDIA_MOUNTED)) {
             return VoldResponseCode.OpFailedVolNotMounted;
         }
@@ -537,7 +545,8 @@ class MountService extends IMountService.Stub
         // notified that the applications installed on the media will be killed.
         mPms.updateExternalMediaStatus(false);
         try {
-            mConnector.doCommand(String.format("volume unmount %s", path));
+            mConnector.doCommand(String.format(
+                    "volume unmount %s%s", path, (force ? " force" : "")));
             return StorageResultCode.OperationSucceeded;
         } catch (NativeDaemonConnectorException e) {
             // Don't worry about mismatch in PackageManager since the
@@ -545,6 +554,8 @@ class MountService extends IMountService.Stub
             int code = e.getCode();
             if (code == VoldResponseCode.OpFailedVolNotMounted) {
                 return StorageResultCode.OperationFailedStorageNotMounted;
+            } else if (code == VoldResponseCode.OpFailedStorageBusy) {
+                return StorageResultCode.OperationFailedStorageBusy;
             } else {
                 return StorageResultCode.OperationFailedInternalError;
             }
@@ -639,15 +650,6 @@ class MountService extends IMountService.Stub
     public MountService(Context context) {
         mContext = context;
 
-        /*
-         * Vold does not run in the simulator, so fake out a mounted
-         * event to trigger MediaScanner
-         */
-        if ("simulator".equals(SystemProperties.get("ro.product.device"))) {
-            updatePublicVolumeState("/sdcard", Environment.MEDIA_MOUNTED);
-            return;
-        }
-
         // XXX: This will go away soon in favor of IMountServiceObserver
         mPms = (PackageManagerService) ServiceManager.getService("package");
 
@@ -655,6 +657,16 @@ class MountService extends IMountService.Stub
                 new IntentFilter(Intent.ACTION_BOOT_COMPLETED), null, null);
 
         mListeners = new ArrayList<MountServiceBinderListener>();
+
+        /*
+         * Vold does not run in the simulator, so pretend the connector thread
+         * ran and did its thing.
+         */
+        if ("simulator".equals(SystemProperties.get("ro.product.device"))) {
+            mReady = true;
+            mUmsEnabling = true;
+            return;
+        }
 
         mConnector = new NativeDaemonConnector(this, "vold", 10, "VoldConnector");
         mReady = false;
@@ -733,7 +745,7 @@ class MountService extends IMountService.Stub
             /*
              * If the media is mounted, then gracefully unmount it.
              */
-            if (doUnmountVolume(path) != StorageResultCode.OperationSucceeded) {
+            if (doUnmountVolume(path, true) != StorageResultCode.OperationSucceeded) {
                 Log.e(TAG, "Failed to unmount media for shutdown");
             }
         }
@@ -782,11 +794,11 @@ class MountService extends IMountService.Stub
         return doMountVolume(path);
     }
 
-    public int unmountVolume(String path) {
+    public int unmountVolume(String path, boolean force) {
         validatePermission(android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS);
         waitForReady();
 
-        return doUnmountVolume(path);
+        return doUnmountVolume(path, force);
     }
 
     public int formatVolume(String path) {
@@ -878,16 +890,21 @@ class MountService extends IMountService.Stub
         return rc;
     }
 
-    public int destroySecureContainer(String id) {
+    public int destroySecureContainer(String id, boolean force) {
         validatePermission(android.Manifest.permission.ASEC_DESTROY);
         waitForReady();
         warnOnNotMounted();
 
         int rc = StorageResultCode.OperationSucceeded;
         try {
-            mConnector.doCommand(String.format("asec destroy %s", id));
+            mConnector.doCommand(String.format("asec destroy %s%s", id, (force ? " force" : "")));
         } catch (NativeDaemonConnectorException e) {
-            rc = StorageResultCode.OperationFailedInternalError;
+            int code = e.getCode();
+            if (code == VoldResponseCode.OpFailedStorageBusy) {
+                rc = StorageResultCode.OperationFailedStorageBusy;
+            } else {
+                rc = StorageResultCode.OperationFailedInternalError;
+            }
         }
 
         if (rc == StorageResultCode.OperationSucceeded) {
@@ -928,7 +945,7 @@ class MountService extends IMountService.Stub
         return rc;
     }
 
-    public int unmountSecureContainer(String id) {
+    public int unmountSecureContainer(String id, boolean force) {
         validatePermission(android.Manifest.permission.ASEC_MOUNT_UNMOUNT);
         waitForReady();
         warnOnNotMounted();
@@ -940,11 +957,16 @@ class MountService extends IMountService.Stub
          }
 
         int rc = StorageResultCode.OperationSucceeded;
-        String cmd = String.format("asec unmount %s", id);
+        String cmd = String.format("asec unmount %s%s", id, (force ? " force" : ""));
         try {
             mConnector.doCommand(cmd);
         } catch (NativeDaemonConnectorException e) {
-            rc = StorageResultCode.OperationFailedInternalError;
+            int code = e.getCode();
+            if (code == VoldResponseCode.OpFailedStorageBusy) {
+                rc = StorageResultCode.OperationFailedStorageBusy;
+            } else {
+                rc = StorageResultCode.OperationFailedInternalError;
+            }
         }
 
         if (rc == StorageResultCode.OperationSucceeded) {

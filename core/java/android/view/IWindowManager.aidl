@@ -64,8 +64,6 @@ interface IWindowManager
     void addAppToken(int addPos, IApplicationToken token,
             int groupId, int requestedOrientation, boolean fullscreen);
     void setAppGroupId(IBinder token, int groupId);
-    Configuration updateOrientationFromAppTokens(in Configuration currentConfig,
-            IBinder freezeThisOneIfNeeded);
     void setAppOrientation(IApplicationToken token, int requestedOrientation);
     int getAppOrientation(IApplicationToken token);
     void setFocusedApp(IBinder token, boolean moveFocusNow);
@@ -85,6 +83,13 @@ interface IWindowManager
     void moveAppTokensToTop(in List<IBinder> tokens);
     void moveAppTokensToBottom(in List<IBinder> tokens);
 
+    // Re-evaluate the current orientation from the caller's state.
+    // If there is a change, the new Configuration is returned and the
+    // caller must call setNewConfiguration() sometime later.
+    Configuration updateOrientationFromAppTokens(in Configuration currentConfig,
+            IBinder freezeThisOneIfNeeded);
+    void setNewConfiguration(in Configuration config);
+    
     // these require DISABLE_KEYGUARD permission
     void disableKeyguard(IBinder token, String tag);
     void reenableKeyguard(IBinder token);

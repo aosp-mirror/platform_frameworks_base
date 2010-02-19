@@ -41,7 +41,9 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Scroller;
 import android.content.pm.PackageManager;
 import android.content.res.CompatibilityInfo;
+import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.content.ComponentCallbacks;
 import android.content.Context;
 import android.app.ActivityManagerNative;
 import android.Manifest;
@@ -100,6 +102,9 @@ public final class ViewRoot extends Handler implements ViewParent,
 
     static final ArrayList<Runnable> sFirstDrawHandlers = new ArrayList<Runnable>();
     static boolean sFirstDrawComplete = false;
+    
+    static final ArrayList<ComponentCallbacks> sConfigCallbacks
+            = new ArrayList<ComponentCallbacks>();
     
     private static int sDrawTime;
 
@@ -171,6 +176,12 @@ public final class ViewRoot extends Handler implements ViewParent,
     final ViewTreeObserver.InternalInsetsInfo mLastGivenInsets
             = new ViewTreeObserver.InternalInsetsInfo();
 
+    class ResizedInfo {
+        Rect coveredInsets;
+        Rect visibleInsets;
+        Configuration newConfig;
+    }
+    
     boolean mScrollMayChange;
     int mSoftInputMode;
     View mLastScrolledFocus;
@@ -262,6 +273,12 @@ public final class ViewRoot extends Handler implements ViewParent,
             if (!sFirstDrawComplete) {
                 sFirstDrawHandlers.add(callback);
             }
+        }
+    }
+    
+    public static void addConfigCallback(ComponentCallbacks callback) {
+        synchronized (sConfigCallbacks) {
+            sConfigCallbacks.add(callback);
         }
     }
     
@@ -1782,23 +1799,33 @@ public final class ViewRoot extends Handler implements ViewParent,
             handleGetNewSurface();
             break;
         case RESIZED:
-            Rect coveredInsets = ((Rect[])msg.obj)[0];
-            Rect visibleInsets = ((Rect[])msg.obj)[1];
+            ResizedInfo ri = (ResizedInfo)msg.obj;
 
             if (mWinFrame.width() == msg.arg1 && mWinFrame.height() == msg.arg2
-                    && mPendingContentInsets.equals(coveredInsets)
-                    && mPendingVisibleInsets.equals(visibleInsets)) {
+                    && mPendingContentInsets.equals(ri.coveredInsets)
+                    && mPendingVisibleInsets.equals(ri.visibleInsets)) {
                 break;
             }
             // fall through...
         case RESIZED_REPORT:
             if (mAdded) {
+                Configuration config = ((ResizedInfo)msg.obj).newConfig;
+                if (config != null) {
+                    synchronized (sConfigCallbacks) {
+                        for (int i=sConfigCallbacks.size()-1; i>=0; i--) {
+                            sConfigCallbacks.get(i).onConfigurationChanged(config);
+                        }
+                    }
+                    if (mView != null) {
+                        mView.dispatchConfigurationChanged(config);
+                    }
+                }
                 mWinFrame.left = 0;
                 mWinFrame.right = msg.arg1;
                 mWinFrame.top = 0;
                 mWinFrame.bottom = msg.arg2;
-                mPendingContentInsets.set(((Rect[])msg.obj)[0]);
-                mPendingVisibleInsets.set(((Rect[])msg.obj)[1]);
+                mPendingContentInsets.set(((ResizedInfo)msg.obj).coveredInsets);
+                mPendingVisibleInsets.set(((ResizedInfo)msg.obj).visibleInsets);
                 if (msg.what == RESIZED_REPORT) {
                     mReportNextDraw = true;
                 }
@@ -2587,7 +2614,7 @@ public final class ViewRoot extends Handler implements ViewParent,
     }
 
     public void dispatchResized(int w, int h, Rect coveredInsets,
-            Rect visibleInsets, boolean reportDraw) {
+            Rect visibleInsets, boolean reportDraw, Configuration newConfig) {
         if (DEBUG_LAYOUT) Log.v(TAG, "Resizing " + this + ": w=" + w
                 + " h=" + h + " coveredInsets=" + coveredInsets.toShortString()
                 + " visibleInsets=" + visibleInsets.toShortString()
@@ -2601,7 +2628,11 @@ public final class ViewRoot extends Handler implements ViewParent,
         }
         msg.arg1 = w;
         msg.arg2 = h;
-        msg.obj = new Rect[] { new Rect(coveredInsets), new Rect(visibleInsets) };
+        ResizedInfo ri = new ResizedInfo();
+        ri.coveredInsets = new Rect(coveredInsets);
+        ri.visibleInsets = new Rect(visibleInsets);
+        ri.newConfig = newConfig;
+        msg.obj = ri;
         sendMessage(msg);
     }
 
@@ -2802,11 +2833,11 @@ public final class ViewRoot extends Handler implements ViewParent,
         }
 
         public void resized(int w, int h, Rect coveredInsets,
-                Rect visibleInsets, boolean reportDraw) {
+                Rect visibleInsets, boolean reportDraw, Configuration newConfig) {
             final ViewRoot viewRoot = mViewRoot.get();
             if (viewRoot != null) {
                 viewRoot.dispatchResized(w, h, coveredInsets,
-                        visibleInsets, reportDraw);
+                        visibleInsets, reportDraw, newConfig);
             }
         }
 

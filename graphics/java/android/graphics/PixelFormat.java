@@ -18,8 +18,7 @@ package android.graphics;
 
 public class PixelFormat
 {
-    /* these constants need to match those
-       in ui/PixelFormat.h & pixelflinger/format.h */
+    /* these constants need to match those in hardware/hardware.h */
     
     public static final int UNKNOWN     = 0;
 
@@ -46,30 +45,34 @@ public class PixelFormat
     public static final int L_8         = 9;
     public static final int LA_88       = 0xA;
     public static final int RGB_332     = 0xB;
-    
+
+
     /**
-     * YCbCr formats, used for video. These are not necessarily supported
-     * by the hardware.
+     * @deprecated use {@link android.graphics.ImageFormat#NV16 
+     * ImageFormat.NV16} instead.
      */
+    @Deprecated
     public static final int YCbCr_422_SP= 0x10;
 
-    /** YCbCr format used for images, which uses the NV21 encoding format.   
-     *  This is the default format for camera preview images, when not
-     *  otherwise set with 
-     *  {@link android.hardware.Camera.Parameters#setPreviewFormat(int)}.
+    /**
+     * @deprecated use {@link android.graphics.ImageFormat#NV21 
+     * ImageFormat.NV21} instead.
      */
+    @Deprecated
     public static final int YCbCr_420_SP= 0x11;
 
-    /** YCbCr format used for images, which uses YUYV (YUY2) encoding format.
-     *  This is an alternative format for camera preview images. Whether this
-     *  format is supported by the camera hardware can be determined by
-     *  {@link android.hardware.Camera.Parameters#getSupportedPreviewFormats()}.
+    /**
+     * @deprecated use {@link android.graphics.ImageFormat#YUY2 
+     * ImageFormat.YUY2} instead.
      */
+    @Deprecated
     public static final int YCbCr_422_I = 0x14;
 
     /**
-     * Encoded formats.  These are not necessarily supported by the hardware.
+     * @deprecated use {@link android.graphics.ImageFormat#JPEG 
+     * ImageFormat.JPEG} instead.
      */
+    @Deprecated
     public static final int JPEG        = 0x100;
 
     /*

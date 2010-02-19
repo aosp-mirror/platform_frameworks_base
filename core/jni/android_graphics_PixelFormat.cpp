@@ -48,11 +48,35 @@ static void android_graphics_getPixelFormatInfo(
         JNIEnv* env, jobject clazz, jint format, jobject pixelFormatObject)
 {
     PixelFormatInfo info;
-    status_t err = getPixelFormatInfo(format, &info);
+    status_t err;
+
+    // we need this for backward compatibility with PixelFormat's
+    // deprecated constants
+    switch (format) {
+    case HAL_PIXEL_FORMAT_YCbCr_422_SP:
+        // defined as the bytes per pixel of the Y plane
+        info.bytesPerPixel = 1;
+        info.bitsPerPixel = 16;
+        goto done;
+    case HAL_PIXEL_FORMAT_YCrCb_420_SP:
+        // defined as the bytes per pixel of the Y plane
+        info.bytesPerPixel = 1;
+        info.bitsPerPixel = 12;
+        goto done;
+    case HAL_PIXEL_FORMAT_YCbCr_422_I:
+        // defined as the bytes per pixel of the Y plane
+        info.bytesPerPixel = 1;
+        info.bitsPerPixel = 16;
+        goto done;
+    }
+
+    err = getPixelFormatInfo(format, &info);
     if (err < 0) {
         doThrow(env, "java/lang/IllegalArgumentException");
         return;
     }
+
+done:
     env->SetIntField(pixelFormatObject, offsets.bytesPerPixel, info.bytesPerPixel);
     env->SetIntField(pixelFormatObject, offsets.bitsPerPixel,  info.bitsPerPixel);
 }

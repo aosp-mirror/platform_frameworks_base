@@ -916,9 +916,12 @@ public class WebSettings {
     }
 
     /**
-     * Tell the WebView to block network image. This is only checked when
-     * getLoadsImagesAutomatically() is true.
-     * @param flag True if the WebView should block network image
+     * Tell the WebView to block network images. This is only checked when
+     * {@link #getLoadsImagesAutomatically} is true. If you set the value to
+     * false, images will automatically be loaded. Use this api to reduce
+     * bandwidth only. Use {@link #setBlockNetworkLoads} if possible.
+     * @param flag True if the WebView should block network images.
+     * @see #setBlockNetworkLoads
      */
     public synchronized void setBlockNetworkImage(boolean flag) {
         if (mBlockNetworkImage != flag) {
@@ -928,17 +931,21 @@ public class WebSettings {
     }
 
     /**
-     * Return true if the WebView will block network image. The default is false.
-     * @return True if the WebView blocks network image.
+     * Return true if the WebView will block network images. The default is
+     * false.
+     * @return True if the WebView blocks network images.
      */
     public synchronized boolean getBlockNetworkImage() {
         return mBlockNetworkImage;
     }
 
     /**
-     * @hide
-     * Tell the WebView to block all network load requests.
-     * @param flag True if the WebView should block all network loads
+     * Tell the WebView to block all network load requests. If you set the
+     * value to false, you must call {@link android.webkit.WebView#reload} to
+     * fetch remote resources. This flag supercedes the value passed to
+     * {@link #setBlockNetworkImage}.
+     * @param flag True if the WebView should block all network loads.
+     * @see android.webkit.WebView#reload
      */
     public synchronized void setBlockNetworkLoads(boolean flag) {
         if (mBlockNetworkLoads != flag) {
@@ -948,9 +955,8 @@ public class WebSettings {
     }
 
     /**
-     * @hide
-     * Return true if the WebView will block all network loads.
-     * The default is false.
+     * Return true if the WebView will block all network loads. The default is
+     * false.
      * @return True if the WebView blocks all network loads.
      */
     public synchronized boolean getBlockNetworkLoads() {

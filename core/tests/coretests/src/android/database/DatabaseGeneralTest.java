@@ -944,6 +944,7 @@ public class DatabaseGeneralTest extends AndroidTestCase implements PerformanceT
         Assert.assertNull(cur.getString(3));
         Assert.assertEquals(1234, cur.getLong(4));
         Assert.assertNull(cur.getString(5));
+        cur.close();
 
         cv = new ContentValues();
         cv.put("s", "two");
@@ -956,6 +957,7 @@ public class DatabaseGeneralTest extends AndroidTestCase implements PerformanceT
         Assert.assertNull(cur.getString(3));
         Assert.assertEquals(1234, cur.getLong(4));
         Assert.assertNull(cur.getString(5));
+        cur.close();
 
         cv = new ContentValues();
         cv.put("t", "goodbye world");
@@ -975,6 +977,7 @@ public class DatabaseGeneralTest extends AndroidTestCase implements PerformanceT
         Assert.assertEquals(2345, cur.getLong(3));
         Assert.assertEquals(3456, cur.getLong(4));
         Assert.assertEquals("tricky", cur.getString(5));
+        cur.close();
 
         cv = new ContentValues();
         cv.put("s", "three");
@@ -987,6 +990,7 @@ public class DatabaseGeneralTest extends AndroidTestCase implements PerformanceT
         Assert.assertEquals("three", cur.getString(1));
         Assert.assertEquals("hello world", cur.getString(2));
         Assert.assertEquals(6789, cur.getLong(3));
+        cur.close();
 
         ih.close();
     }

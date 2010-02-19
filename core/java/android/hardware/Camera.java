@@ -26,7 +26,7 @@ import java.io.IOException;
 import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
-import android.graphics.PixelFormat;
+import android.graphics.ImageFormat;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -192,7 +192,7 @@ public class Camera {
          * The callback that delivers the preview frames.
          *
          * @param data The contents of the preview frame in the format defined
-         *  by {@link android.graphics.PixelFormat}, which can be queried
+         *  by {@link android.graphics.ImageFormat}, which can be queried
          *  with {@link android.hardware.Camera.Parameters#getPreviewFormat()}.
          *  If {@link android.hardware.Camera.Parameters#setPreviewFormat(int)}
          *             is never called, the default will be the YCbCr_420_SP
@@ -276,7 +276,7 @@ public class Camera {
      * Adds a pre-allocated buffer to the callback buffer queue.
      * Preview width and height can be determined from getPreviewSize, and bitsPerPixel can be
      * found from from  {@link android.hardware.Camera.Parameters#getPreviewFormat()} and
-     * {@link android.graphics.PixelFormat#getPixelFormatInfo(int, PixelFormat)}
+     * {@link android.graphics.ImageFormat#getBitsPerPixel(int)}
      *
      * Alternatively, a buffer from a previous callback may be passed in or used
      * to determine the size of new preview frame buffers.
@@ -1086,15 +1086,15 @@ public class Camera {
         /**
          * Sets the image format for preview pictures.
          * <p>If this is never called, the default format will be
-         * {@link android.graphics.PixelFormat#YCbCr_420_SP}, which
+         * {@link android.graphics.ImageFormat#NV21}, which
          * uses the NV21 encoding format.</p>
          *
          * @param pixel_format the desired preview picture format, defined
-         *   by one of the {@link android.graphics.PixelFormat} constants.
-         *   (E.g., <var>PixelFormat.YCbCr_420_SP</var> (default),
-         *                      <var>PixelFormat.RGB_565</var>, or
-         *                      <var>PixelFormat.JPEG</var>)
-         * @see android.graphics.PixelFormat
+         *   by one of the {@link android.graphics.ImageFormat} constants.
+         *   (E.g., <var>ImageFormat.NV21</var> (default),
+         *                      <var>ImageFormat.RGB_565</var>, or
+         *                      <var>ImageFormat.JPEG</var>)
+         * @see android.graphics.ImageFormat
          */
         public void setPreviewFormat(int pixel_format) {
             String s = cameraFormatForPixelFormat(pixel_format);
@@ -1110,7 +1110,7 @@ public class Camera {
          * Returns the image format for preview pictures got from
          * {@link PreviewCallback}.
          *
-         * @return the {@link android.graphics.PixelFormat} int representing
+         * @return the {@link android.graphics.ImageFormat} int representing
          *         the preview picture format.
          */
         public int getPreviewFormat() {
@@ -1128,7 +1128,7 @@ public class Camera {
             ArrayList<Integer> formats = new ArrayList<Integer>();
             for (String s : split(str)) {
                 int f = pixelFormatForCameraFormat(s);
-                if (f == PixelFormat.UNKNOWN) continue;
+                if (f == ImageFormat.UNKNOWN) continue;
                 formats.add(f);
             }
             return formats;
@@ -1171,10 +1171,10 @@ public class Camera {
          * Sets the image format for pictures.
          *
          * @param pixel_format the desired picture format
-         *                     (<var>PixelFormat.YCbCr_420_SP (NV21)</var>,
-         *                      <var>PixelFormat.RGB_565</var>, or
-         *                      <var>PixelFormat.JPEG</var>)
-         * @see android.graphics.PixelFormat
+         *                     (<var>ImageFormat.NV21</var>,
+         *                      <var>ImageFormat.RGB_565</var>, or
+         *                      <var>ImageFormat.JPEG</var>)
+         * @see android.graphics.ImageFormat
          */
         public void setPictureFormat(int pixel_format) {
             String s = cameraFormatForPixelFormat(pixel_format);
@@ -1189,7 +1189,7 @@ public class Camera {
         /**
          * Returns the image format for pictures.
          *
-         * @return the PixelFormat int representing the picture format
+         * @return the ImageFormat int representing the picture format
          */
         public int getPictureFormat() {
             return pixelFormatForCameraFormat(get(KEY_PICTURE_FORMAT));
@@ -1198,7 +1198,7 @@ public class Camera {
         /**
          * Gets the supported picture formats.
          *
-         * @return a List of Integer objects (values are PixelFormat.XXX). This
+         * @return a List of Integer objects (values are ImageFormat.XXX). This
          *         method will always return a list with at least one element.
          */
         public List<Integer> getSupportedPictureFormats() {
@@ -1206,7 +1206,7 @@ public class Camera {
             ArrayList<Integer> formats = new ArrayList<Integer>();
             for (String s : split(str)) {
                 int f = pixelFormatForCameraFormat(s);
-                if (f == PixelFormat.UNKNOWN) continue;
+                if (f == ImageFormat.UNKNOWN) continue;
                 formats.add(f);
             }
             return formats;
@@ -1214,35 +1214,35 @@ public class Camera {
 
         private String cameraFormatForPixelFormat(int pixel_format) {
             switch(pixel_format) {
-            case PixelFormat.YCbCr_422_SP: return PIXEL_FORMAT_YUV422SP;
-            case PixelFormat.YCbCr_420_SP: return PIXEL_FORMAT_YUV420SP;
-            case PixelFormat.YCbCr_422_I:  return PIXEL_FORMAT_YUV422I;
-            case PixelFormat.RGB_565:      return PIXEL_FORMAT_RGB565;
-            case PixelFormat.JPEG:         return PIXEL_FORMAT_JPEG;
-            default:                       return null;
+            case ImageFormat.NV16:      return PIXEL_FORMAT_YUV422SP;
+            case ImageFormat.NV21:      return PIXEL_FORMAT_YUV420SP;
+            case ImageFormat.YUY2:      return PIXEL_FORMAT_YUV422I;
+            case ImageFormat.RGB_565:   return PIXEL_FORMAT_RGB565;
+            case ImageFormat.JPEG:      return PIXEL_FORMAT_JPEG;
+            default:                    return null;
             }
         }
 
         private int pixelFormatForCameraFormat(String format) {
             if (format == null)
-                return PixelFormat.UNKNOWN;
+                return ImageFormat.UNKNOWN;
 
             if (format.equals(PIXEL_FORMAT_YUV422SP))
-                return PixelFormat.YCbCr_422_SP;
+                return ImageFormat.NV16;
 
             if (format.equals(PIXEL_FORMAT_YUV420SP))
-                return PixelFormat.YCbCr_420_SP;
+                return ImageFormat.NV21;
 
             if (format.equals(PIXEL_FORMAT_YUV422I))
-                return PixelFormat.YCbCr_422_I;
+                return ImageFormat.YUY2;
 
             if (format.equals(PIXEL_FORMAT_RGB565))
-                return PixelFormat.RGB_565;
+                return ImageFormat.RGB_565;
 
             if (format.equals(PIXEL_FORMAT_JPEG))
-                return PixelFormat.JPEG;
+                return ImageFormat.JPEG;
 
-            return PixelFormat.UNKNOWN;
+            return ImageFormat.UNKNOWN;
         }
 
         /**

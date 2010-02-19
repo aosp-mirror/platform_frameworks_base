@@ -19,6 +19,7 @@ package android.view;
 import com.android.internal.view.BaseIWindow;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.CompatibilityInfo.Translator;
 import android.graphics.Canvas;
@@ -504,7 +505,7 @@ public class SurfaceView extends View {
         }
 
         public void resized(int w, int h, Rect coveredInsets,
-                Rect visibleInsets, boolean reportDraw) {
+                Rect visibleInsets, boolean reportDraw, Configuration newConfig) {
             SurfaceView surfaceView = mSurfaceView.get();
             if (surfaceView != null) {
                 if (localLOGV) Log.v(
