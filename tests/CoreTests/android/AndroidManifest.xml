@@ -34,6 +34,19 @@
     
     <application>
         <uses-library android:name="android.test.runner" />
+        <activity android:name="StubTestBrowserActivity" android:label="Stubbed Test Browser">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.FOR_TESTS_ONLY"/>
+            </intent-filter>
+        </activity>
+
+        <activity android:name="android.test.TestBrowserTests" android:label="Test Browser Tests">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.UNIT_TEST"/>
+            </intent-filter>
+        </activity>
     </application>
 
     <instrumentation
