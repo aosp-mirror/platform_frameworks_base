@@ -16,9 +16,17 @@
 
 package android.speech;
 
+import java.util.ArrayList;
+
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.os.Bundle;
 
 /**
  * Constants for supporting speech recognition through starting an {@link Intent}
@@ -208,4 +216,92 @@ public class RecognizerIntent {
      * an activity result. In a PendingIntent, the lack of this extra indicates failure.
      */
     public static final String EXTRA_RESULTS = "android.speech.extra.RESULTS";
+    
+    /**
+     * Returns the broadcast intent to fire with
+     * {@link Context#sendOrderedBroadcast(Intent, String, BroadcastReceiver, android.os.Handler, int, String, Bundle)}
+     * to receive details from the package that implements voice search.
+     * <p>
+     * This is based on the value specified by the voice search {@link Activity} in
+     * {@link #DETAILS_META_DATA}, and if this is not specified, will return null. Also if there
+     * is no chosen default to resolve for {@link #ACTION_WEB_SEARCH}, this will return null.
+     * <p>
+     * If an intent is returned and is fired, a {@link Bundle} of extras will be returned to the
+     * provided result receiver, and should ideally contain values for
+     * {@link #EXTRA_LANGUAGE_PREFERENCE} and {@link #EXTRA_SUPPORTED_LANGUAGES}.
+     * <p>
+     * (Whether these are actually provided is up to the particular implementation. It is
+     * recommended that {@link Activity}s implementing {@link #ACTION_WEB_SEARCH} provide this
+     * information, but it is not required.)
+     * 
+     * @param context a context object
+     * @return the broadcast intent to fire or null if not available
+     */
+    public static final Intent getVoiceDetailsIntent(Context context) {
+        Intent voiceSearchIntent = new Intent(ACTION_WEB_SEARCH);
+        ResolveInfo ri = context.getPackageManager().resolveActivity(
+                voiceSearchIntent, PackageManager.GET_META_DATA);
+        if (ri == null || ri.activityInfo == null || ri.activityInfo.metaData == null) return null;
+        
+        String className = ri.activityInfo.metaData.getString(DETAILS_META_DATA);
+        if (className == null) return null;
+        
+        Intent detailsIntent = new Intent(ACTION_GET_LANGUAGE_DETAILS);
+        detailsIntent.setComponent(new ComponentName(ri.activityInfo.packageName, className));
+        return detailsIntent;
+    }
+    
+    /**
+     * Meta-data name under which an {@link Activity} implementing {@link #ACTION_WEB_SEARCH} can
+     * use to expose the class name of a {@link BroadcastReceiver} which can respond to request for
+     * more information, from any of the broadcast intents specified in this class.
+     * <p>
+     * Broadcast intents can be directed to the class name specified in the meta-data by creating
+     * an {@link Intent}, setting the component with
+     * {@link Intent#setComponent(android.content.ComponentName)}, and using
+     * {@link Context#sendOrderedBroadcast(Intent, String, BroadcastReceiver, android.os.Handler, int, String, android.os.Bundle)}
+     * with another {@link BroadcastReceiver} which can receive the results.
+     * <p>
+     * The {@link #getVoiceDetailsIntent(Context)} method is provided as a convenience to create
+     * a broadcast intent based on the value of this meta-data, if available.
+     * <p>
+     * This is optional and not all {@link Activity}s which implement {@link #ACTION_WEB_SEARCH}
+     * are required to implement this. Thus retrieving this meta-data may be null.
+     */
+    public static final String DETAILS_META_DATA = "android.speech.DETAILS";
+    
+    /**
+     * A broadcast intent which can be fired to the {@link BroadcastReceiver} component specified
+     * in the meta-data defined in the {@link #DETAILS_META_DATA} meta-data of an
+     * {@link Activity} satisfying {@link #ACTION_WEB_SEARCH}.
+     * <p>
+     * When fired with
+     * {@link Context#sendOrderedBroadcast(Intent, String, BroadcastReceiver, android.os.Handler, int, String, android.os.Bundle)},
+     * a {@link Bundle} of extras will be returned to the provided result receiver, and should
+     * ideally contain values for {@link #EXTRA_LANGUAGE_PREFERENCE} and
+     * {@link #EXTRA_SUPPORTED_LANGUAGES}.
+     * <p>
+     * (Whether these are actually provided is up to the particular implementation. It is
+     * recommended that {@link Activity}s implementing {@link #ACTION_WEB_SEARCH} provide this
+     * information, but it is not required.)
+     */
+    public static final String ACTION_GET_LANGUAGE_DETAILS =
+            "android.speech.action.GET_LANGUAGE_DETAILS";
+    
+    /**
+     * The key to the extra in the {@link Bundle} returned by {@link #ACTION_GET_LANGUAGE_DETAILS}
+     * which is a {@link String} that represents the current language preference this user has
+     * specified - a locale string like "en-US".
+     */
+    public static final String EXTRA_LANGUAGE_PREFERENCE =
+            "android.speech.extra.LANGUAGE_PREFERENCE";
+    
+    /**
+     * The key to the extra in the {@link Bundle} returned by {@link #ACTION_GET_LANGUAGE_DETAILS}
+     * which is an {@link ArrayList} of {@link String}s that represents the languages supported by
+     * this implementation of voice recognition - a list of strings like "en-US", "cmn-Hans-CN",
+     * etc.
+     */
+    public static final String EXTRA_SUPPORTED_LANGUAGES =
+            "android.speech.extra.SUPPORTED_LANGUAGES";
 }
