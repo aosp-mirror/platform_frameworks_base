@@ -1153,7 +1153,9 @@ public abstract class PackageManager {
      *
      * @return Returns a ResolveInfo containing the final activity intent that
      *         was determined to be the best action.  Returns null if no
-     *         matching activity was found.
+     *         matching activity was found. If multiple matching activities are
+     *         found and there is no default set, returns a ResolveInfo
+     *         containing something else, such as the activity resolver.
      *
      * @see #MATCH_DEFAULT_ONLY
      * @see #GET_INTENT_FILTERS
