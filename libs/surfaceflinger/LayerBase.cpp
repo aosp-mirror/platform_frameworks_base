@@ -52,6 +52,7 @@ LayerBase::LayerBase(SurfaceFlinger* flinger, DisplayID display)
       mTransformed(false),
       mUseLinearFiltering(false),
       mOrientation(0),
+      mLeft(0), mTop(0),
       mTransactionFlags(0),
       mPremultipliedAlpha(true),
       mInvalidate(0)
