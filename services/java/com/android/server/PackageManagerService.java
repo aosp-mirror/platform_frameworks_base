@@ -28,7 +28,9 @@ import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
 import android.app.ActivityManagerNative;
+import android.app.DevicePolicyManager;
 import android.app.IActivityManager;
+import android.app.IDevicePolicyManager;
 import android.backup.IBackupManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -5594,6 +5596,16 @@ class PackageManagerService extends IPackageManager.Stub {
         PackageRemovedInfo info = new PackageRemovedInfo();
         boolean res;
 
+        IDevicePolicyManager dpm = IDevicePolicyManager.Stub.asInterface(
+                ServiceManager.getService(Context.DEVICE_POLICY_SERVICE));
+        try {
+            if (dpm != null && dpm.packageHasActiveAdmins(packageName)) {
+                Log.w(TAG, "Not removing package " + packageName + ": has active device admin");
+                return false;
+            }
+        } catch (RemoteException e) {
+        }
+        
         synchronized (mInstallLock) {
             res = deletePackageLI(packageName, deleteCodeAndResources, flags, info);
         }

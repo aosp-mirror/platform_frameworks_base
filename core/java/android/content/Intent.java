@@ -1316,6 +1316,21 @@ public class Intent implements Parcelable, Cloneable {
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_PACKAGE_CHANGED = "android.intent.action.PACKAGE_CHANGED";
     /**
+     * @hide
+     * Broadcast Action: Ask system services if there is any reason to
+     * restart the given package.  The data contains the name of the
+     * package.
+     * <ul>
+     * <li> {@link #EXTRA_UID} containing the integer uid assigned to the package.
+     * <li> {@link #EXTRA_PACKAGES} String array of all packages to check.
+     * </ul>
+     *
+     * <p class="note">This is a protected intent that can only be sent
+     * by the system.
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_QUERY_PACKAGE_RESTART = "android.intent.action.QUERY_PACKAGE_RESTART";
+    /**
      * Broadcast Action: The user has restarted a package, and all of its
      * processes have been killed.  All runtime state
      * associated with it (processes, alarms, notifications, etc) should
@@ -2098,6 +2113,7 @@ public class Intent implements Parcelable, Cloneable {
      * number to call in a {@link android.content.Intent#ACTION_CALL}.
      */
     public static final String EXTRA_PHONE_NUMBER = "android.intent.extra.PHONE_NUMBER";
+    
     /**
      * Used as an int extra field in {@link android.content.Intent#ACTION_UID_REMOVED}
      * intents to supply the uid the package had been assigned.  Also an optional
@@ -2106,6 +2122,11 @@ public class Intent implements Parcelable, Cloneable {
      * purpose.
      */
     public static final String EXTRA_UID = "android.intent.extra.UID";
+
+    /**
+     * @hide String array of package names.
+     */
+    public static final String EXTRA_PACKAGES = "android.intent.extra.PACKAGES";
 
     /**
      * Used as a boolean extra field in {@link android.content.Intent#ACTION_PACKAGE_REMOVED}

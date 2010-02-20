@@ -618,18 +618,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
        if (upgradeVersion == 48) {
            /*
-            * Adding a new setting for which voice recognition service to use.
+            * Default recognition service no longer initialized here,
+            * moved to RecognitionManagerService.
             */
-           db.beginTransaction();
-           try {
-               SQLiteStatement stmt = db.compileStatement("INSERT OR IGNORE INTO secure(name,value)"
-                       + " VALUES(?,?);");
-               loadVoiceRecognitionServiceSetting(stmt);
-               stmt.close();
-               db.setTransactionSuccessful();
-           } finally {
-               db.endTransaction();
-           }
            upgradeVersion = 49;
        }
 
@@ -1028,8 +1019,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         loadBooleanSetting(stmt, Settings.Secure.MOUNT_UMS_NOTIFY_ENABLED,
                 R.bool.def_mount_ums_notify_enabled);
 
-        loadVoiceRecognitionServiceSetting(stmt);
-
         stmt.close();
     }
 
@@ -1039,32 +1028,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         loadStringSetting(stmt, Settings.Secure.BACKUP_TRANSPORT,
                 R.string.def_backup_transport);
-    }
-
-    /**
-     * Introduced in database version 49.
-     */
-    private void loadVoiceRecognitionServiceSetting(SQLiteStatement stmt) {
-        String selectedService = null;
-        List<ResolveInfo> availableRecognitionServices =
-                mContext.getPackageManager().queryIntentServices(
-                        new Intent(RecognitionService.SERVICE_INTERFACE), 0);
-        int numAvailable = availableRecognitionServices.size();
-
-        if (numAvailable == 0) {
-            Log.w(TAG, "no available voice recognition services found");
-        } else {
-            if (numAvailable > 1) {
-                Log.w(TAG, "more than one voice recognition service found, picking first");
-            }
-
-            ServiceInfo serviceInfo = availableRecognitionServices.get(0).serviceInfo;
-            selectedService =
-                    new ComponentName(serviceInfo.packageName, serviceInfo.name).flattenToString();
-        }
-
-        loadSetting(stmt, Settings.Secure.VOICE_RECOGNITION_SERVICE,
-                selectedService == null ? "" : selectedService);
     }
 
     private void loadSetting(SQLiteStatement stmt, String key, Object value) {

@@ -126,7 +126,7 @@ public final class ComponentName implements Parcelable, Cloneable, Comparable<Co
     }
     
     /**
-     * The samee as {@link #flattenToString()}, but abbreviates the class
+     * The same as {@link #flattenToString()}, but abbreviates the class
      * name if it is a suffix of the package.  The result can still be used
      * with {@link #unflattenFromString(String)}.
      * 

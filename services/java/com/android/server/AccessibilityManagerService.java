@@ -16,6 +16,7 @@
 
 package com.android.server;
 
+import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.HandlerCaller;
 import com.android.internal.os.HandlerCaller.SomeArgs;
 
@@ -56,6 +57,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -145,13 +147,58 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     private void registerPackageChangeAndBootCompletedBroadcastReceiver() {
         Context context = mContext;
 
-        BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        PackageMonitor monitor = new PackageMonitor() {
             @Override
-            public void onReceive(Context context, Intent intent) {
+            public void onSomePackagesChanged() {
                 synchronized (mLock) {
                     populateAccessibilityServiceListLocked();
+                    manageServicesLocked();
+                }
+            }
+            
+            @Override
+            public boolean onHandleForceStop(Intent intent, String[] packages,
+                    int uid, boolean doit) {
+                synchronized (mLock) {
+                    boolean changed = false;
+                    Iterator<ComponentName> it = mEnabledServices.iterator();
+                    while (it.hasNext()) {
+                        ComponentName comp = it.next();
+                        String compPkg = comp.getPackageName();
+                        for (String pkg : packages) {
+                            if (compPkg.equals(pkg)) {
+                                if (!doit) {
+                                    return true;
+                                }
+                                it.remove();
+                                changed = true;
+                            }
+                        }
+                    }
+                    if (changed) {
+                        it = mEnabledServices.iterator();
+                        StringBuilder str = new StringBuilder();
+                        while (it.hasNext()) {
+                            if (str.length() > 0) {
+                                str.append(':');
+                            }
+                            str.append(it.next().flattenToShortString());
+                        }
+                        Settings.Secure.putString(mContext.getContentResolver(),
+                                Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
+                                str.toString());
+                        manageServicesLocked();
+                    }
+                    return false;
+                }
+            }
+            
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (intent.getAction() == Intent.ACTION_BOOT_COMPLETED) {
+                    synchronized (mLock) {
+                        populateAccessibilityServiceListLocked();
 
-                    if (intent.getAction() == Intent.ACTION_BOOT_COMPLETED) {
                         // get the accessibility enabled setting on boot
                         mIsEnabled = Settings.Secure.getInt(mContext.getContentResolver(),
                                 Settings.Secure.ACCESSIBILITY_ENABLED, 0) == 1;
@@ -160,29 +207,23 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                         if (mIsEnabled) {
                             updateClientsLocked();
                         }
-                    }
 
-                    manageServicesLocked();
+                        manageServicesLocked();
+                    }
+                    
+                    return;
                 }
+                
+                super.onReceive(context, intent);
             }
         };
 
         // package changes
-        IntentFilter packageFilter = new IntentFilter();
-        packageFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
-        packageFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
-        packageFilter.addAction(Intent.ACTION_PACKAGE_RESTARTED);
-        packageFilter.addDataScheme("package");
-        context.registerReceiver(broadcastReceiver, packageFilter);
-        // Register for events related to sdcard installation.
-        IntentFilter sdFilter = new IntentFilter();
-        sdFilter.addAction(Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE);
-        sdFilter.addAction(Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE);
-        mContext.registerReceiver(broadcastReceiver, sdFilter);
+        monitor.register(context, true);
 
         // boot completed
         IntentFilter bootFiler = new IntentFilter(Intent.ACTION_BOOT_COMPLETED);
-        mContext.registerReceiver(broadcastReceiver, bootFiler);
+        mContext.registerReceiver(monitor, bootFiler);
     }
 
     /**
@@ -529,8 +570,14 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             TextUtils.SimpleStringSplitter splitter = mStringColonSplitter;
             splitter.setString(servicesValue);
             while (splitter.hasNext()) {
-                ComponentName enabledService = ComponentName.unflattenFromString(splitter.next());
-                enabledServices.add(enabledService);
+                String str = splitter.next();
+                if (str == null || str.length() <= 0) {
+                    continue;
+                }
+                ComponentName enabledService = ComponentName.unflattenFromString(str);
+                if (enabledService != null) {
+                    enabledServices.add(enabledService);
+                }
             }
         }
     }

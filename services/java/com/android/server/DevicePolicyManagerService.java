@@ -17,6 +17,8 @@
 package com.android.server;
 
 import com.android.common.FastXmlSerializer;
+import com.android.common.XmlUtils;
+import com.android.internal.content.PackageMonitor;
 import com.android.internal.widget.LockPatternUtils;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -34,6 +36,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.IPowerManager;
@@ -58,9 +61,10 @@ import java.util.List;
  * Implementation of the device policy APIs.
  */
 public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
-    private static final String TAG = "DevicePolicyManagerService";
+    static final String TAG = "DevicePolicyManagerService";
     
-    private final Context mContext;
+    final Context mContext;
+    final MyPackageMonitor mMonitor;
 
     IPowerManager mIPowerManager;
     
@@ -89,6 +93,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         
         void writeToXml(XmlSerializer out)
                 throws IllegalArgumentException, IllegalStateException, IOException {
+            out.startTag(null, "policies");
+            info.writePoliciesToXml(out);
+            out.endTag(null, "policies");
             if (passwordQuality != DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED) {
                 out.startTag(null, "password-quality");
                 out.attribute(null, "value", Integer.toString(passwordQuality));
@@ -121,7 +128,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     continue;
                 }
                 String tag = parser.getName();
-                if ("password-quality".equals(tag)) {
+                if ("policies".equals(tag)) {
+                    info.readPoliciesFromXml(parser);
+                } else if ("password-quality".equals(tag)) {
                     passwordQuality = Integer.parseInt(
                             parser.getAttributeValue(null, "value"));
                 } else if ("min-password-length".equals(tag)) {
@@ -133,6 +142,35 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 } else if ("max-failed-password-wipe".equals(tag)) {
                     maximumFailedPasswordsForWipe = Integer.parseInt(
                             parser.getAttributeValue(null, "value"));
+                } else {
+                    Log.w(TAG, "Unknown admin tag: " + tag);
+                }
+                XmlUtils.skipCurrentTag(parser);
+            }
+        }
+    }
+    
+    class MyPackageMonitor extends PackageMonitor {
+        public void onSomePackagesChanged() {
+            synchronized (DevicePolicyManagerService.this) {
+                for (int i=mAdminList.size()-1; i>=0; i--) {
+                    ActiveAdmin aa = mAdminList.get(i);
+                    int change = isPackageDisappearing(aa.info.getPackageName()); 
+                    if (change == PACKAGE_PERMANENT_CHANGE
+                            || change == PACKAGE_TEMPORARY_CHANGE) {
+                        Log.w(TAG, "Admin unexpectedly uninstalled: "
+                                + aa.info.getComponent());
+                        mAdminList.remove(i);
+                    } else if (isPackageModified(aa.info.getPackageName())) {
+                        try {
+                            mContext.getPackageManager().getReceiverInfo(
+                                    aa.info.getComponent(), 0);
+                        } catch (NameNotFoundException e) {
+                            Log.w(TAG, "Admin package change removed component: "
+                                    + aa.info.getComponent());
+                            mAdminList.remove(i);
+                        }
+                    }
                 }
             }
         }
@@ -143,6 +181,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      */
     public DevicePolicyManagerService(Context context) {
         mContext = context;
+        mMonitor = new MyPackageMonitor();
+        mMonitor.register(context, true);
     }
 
     private IPowerManager getIPowerManager() {
@@ -336,6 +376,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 } else if ("failed-password-attempts".equals(tag)) {
                     mFailedPasswordAttempts = Integer.parseInt(
                             parser.getAttributeValue(null, "value"));
+                    XmlUtils.skipCurrentTag(parser);
+                } else {
+                    Log.w(TAG, "Unknown tag: " + tag);
+                    XmlUtils.skipCurrentTag(parser);
                 }
             }
         } catch (NullPointerException e) {
@@ -417,6 +461,18 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 res.add(mAdminList.get(i).info.getComponent());
             }
             return res;
+        }
+    }
+    
+    public boolean packageHasActiveAdmins(String packageName) {
+        synchronized (this) {
+            final int N = mAdminList.size();
+            for (int i=0; i<N; i++) {
+                if (mAdminList.get(i).info.getPackageName().equals(packageName)) {
+                    return true;
+                }
+            }
+            return false;
         }
     }
     

@@ -1146,7 +1146,7 @@ class ContextImpl extends Context {
     private DevicePolicyManager getDevicePolicyManager() {
         synchronized (mSync) {
             if (mDevicePolicyManager == null) {
-                mDevicePolicyManager = new DevicePolicyManager(this,
+                mDevicePolicyManager = DevicePolicyManager.create(this,
                         mMainThread.getHandler());
             }
         }

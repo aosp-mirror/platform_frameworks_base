@@ -49,6 +49,7 @@ interface IDevicePolicyManager {
     void setActiveAdmin(in ComponentName policyReceiver);
     boolean isAdminActive(in ComponentName policyReceiver);
     List<ComponentName> getActiveAdmins();
+    boolean packageHasActiveAdmins(String packageName);
     void getRemoveWarning(in ComponentName policyReceiver, in RemoteCallback result);
     void removeActiveAdmin(in ComponentName policyReceiver);
     
