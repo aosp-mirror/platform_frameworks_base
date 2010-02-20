@@ -41,6 +41,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.location.LocationProvider;
 import android.os.Binder;
+import android.media.AudioManager;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -379,7 +380,10 @@ class DockObserver extends UEventObserver {
                                     final Uri soundUri = Uri.parse("file://" + soundPath);
                                     if (soundUri != null) {
                                         final Ringtone sfx = RingtoneManager.getRingtone(mContext, soundUri);
-                                        if (sfx != null) sfx.play();
+                                        if (sfx != null) {
+                                            sfx.setStreamType(AudioManager.STREAM_SYSTEM);
+                                            sfx.play();
+                                        }
                                     }
                                 }
                             }
