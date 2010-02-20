@@ -29,6 +29,7 @@ import org.xmlpull.v1.XmlSerializer;
 
 import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
+import android.backup.IBackupManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -123,6 +124,7 @@ class PackageManagerService extends IPackageManager.Stub {
     private static final boolean DEBUG_SETTINGS = false;
     private static final boolean DEBUG_PREFERRED = false;
     private static final boolean DEBUG_UPGRADE = false;
+    private static final boolean DEBUG_INSTALL = false;
 
     private static final boolean MULTIPLE_APPLICATION_UIDS = true;
     private static final int RADIO_UID = Process.PHONE_UID;
@@ -310,6 +312,7 @@ class PackageManagerService extends IPackageManager.Stub {
     static final int MCS_UNBIND = 6;
     static final int START_CLEANING_PACKAGE = 7;
     static final int FIND_INSTALL_LOC = 8;
+    static final int POST_INSTALL = 9;
     // Delay time in millisecs
     static final int BROADCAST_DELAY = 10 * 1000;
     private ServiceConnection mDefContainerConn = new ServiceConnection() {
@@ -323,6 +326,20 @@ class PackageManagerService extends IPackageManager.Stub {
         public void onServiceDisconnected(ComponentName name) {
         }
     };
+
+    // Recordkeeping of restore-after-install operations that are currently in flight
+    // between the Package Manager and the Backup Manager
+    class PostInstallData {
+        public InstallArgs args;
+        public PackageInstalledInfo res;
+
+        PostInstallData(InstallArgs _a, PackageInstalledInfo _r) {
+            args = _a;
+            res = _r;
+        }
+    };
+    final SparseArray<PostInstallData> mRunningInstalls = new SparseArray<PostInstallData>();
+    int mNextInstallToken = 1;  // nonzero; will be wrapped back to 1 when ++ overflows
 
     class PackageHandler extends Handler {
         final ArrayList<HandlerParams> mPendingInstalls =
@@ -421,6 +438,51 @@ class PackageManagerService extends IPackageManager.Stub {
                         }
                     }
                     startCleaningPackages();
+                } break;
+                case POST_INSTALL: {
+                    if (DEBUG_INSTALL) Log.v(TAG, "Handling post-install for " + msg.arg1);
+                    PostInstallData data = mRunningInstalls.get(msg.arg1);
+                    mRunningInstalls.delete(msg.arg1);
+
+                    if (data != null) {
+                        InstallArgs args = data.args;
+                        PackageInstalledInfo res = data.res;
+
+                        if (res.returnCode == PackageManager.INSTALL_SUCCEEDED) {
+                            res.removedInfo.sendBroadcast(false, true);
+                            Bundle extras = new Bundle(1);
+                            extras.putInt(Intent.EXTRA_UID, res.uid);
+                            final boolean update = res.removedInfo.removedPackage != null;
+                            if (update) {
+                                extras.putBoolean(Intent.EXTRA_REPLACING, true);
+                            }
+                            sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED,
+                                    res.pkg.applicationInfo.packageName,
+                                    extras);
+                            if (update) {
+                                sendPackageBroadcast(Intent.ACTION_PACKAGE_REPLACED,
+                                        res.pkg.applicationInfo.packageName,
+                                        extras);
+                            }
+                            if (res.removedInfo.args != null) {
+                                // Remove the replaced package's older resources safely now
+                                synchronized (mInstallLock) {
+                                    res.removedInfo.args.doPostDeleteLI(true);
+                                }
+                            }
+                        }
+                        Runtime.getRuntime().gc();
+
+                        if (args.observer != null) {
+                            try {
+                                args.observer.packageInstalled(res.name, res.returnCode);
+                            } catch (RemoteException e) {
+                                Log.i(TAG, "Observer no longer exists.");
+                            }
+                        }
+                    } else {
+                        Log.e(TAG, "Bogus post-install token " + msg.arg1);
+                    }
                 } break;
             }
         }
@@ -4253,6 +4315,12 @@ class PackageManagerService extends IPackageManager.Stub {
         mHandler.sendMessage(msg);
     }
 
+    public void finishPackageInstall(int token) {
+        if (DEBUG_INSTALL) Log.v(TAG, "BM finishing package install for " + token);
+        Message msg = mHandler.obtainMessage(POST_INSTALL, token, 0);
+        mHandler.sendMessage(msg);
+    }
+
     private void processPendingInstall(final InstallArgs args, final int currentStatus) {
         // Queue up an async operation since the package installation may take a little while.
         mHandler.post(new Runnable() {
@@ -4271,38 +4339,54 @@ class PackageManagerService extends IPackageManager.Stub {
                     }
                     args.doPostInstall(res.returnCode);
                 }
-                // There appears to be a subtle deadlock condition if the sendPackageBroadcast
-                // call appears in the synchronized block above.
-                if (res.returnCode == PackageManager.INSTALL_SUCCEEDED) {
-                    res.removedInfo.sendBroadcast(false, true);
-                    Bundle extras = new Bundle(1);
-                    extras.putInt(Intent.EXTRA_UID, res.uid);
-                    final boolean update = res.removedInfo.removedPackage != null;
-                    if (update) {
-                        extras.putBoolean(Intent.EXTRA_REPLACING, true);
-                    }
-                    sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED,
-                                         res.pkg.applicationInfo.packageName,
-                                         extras);
-                    if (update) {
-                        sendPackageBroadcast(Intent.ACTION_PACKAGE_REPLACED,
-                                res.pkg.applicationInfo.packageName,
-                                extras);
-                    }
-                    if (res.removedInfo.args != null) {
-                        // Remove the replaced package's older resources safely now
-                        synchronized (mInstallLock) {
-                            res.removedInfo.args.doPostDeleteLI(true);
+
+                // A restore should be performed at this point if (a) the install
+                // succeeded, (b) the operation is not an update, and (c) the new
+                // package has a backupAgent defined.
+                final boolean update = res.removedInfo.removedPackage != null;
+                boolean doRestore = (!update && res.pkg.applicationInfo.backupAgentName != null);
+
+                // Set up the post-install work request bookkeeping.  This will be used
+                // and cleaned up by the post-install event handling regardless of whether
+                // there's a restore pass performed.  Token values are >= 1.
+                int token;
+                if (mNextInstallToken < 0) mNextInstallToken = 1;
+                token = mNextInstallToken++;
+
+                PostInstallData data = new PostInstallData(args, res);
+                mRunningInstalls.put(token, data);
+                if (DEBUG_INSTALL) Log.v(TAG, "+ starting restore round-trip " + token);
+
+                if (res.returnCode == PackageManager.INSTALL_SUCCEEDED && doRestore) {
+                    // Pass responsibility to the Backup Manager.  It will perform a
+                    // restore if appropriate, then pass responsibility back to the
+                    // Package Manager to run the post-install observer callbacks
+                    // and broadcasts.
+                    IBackupManager bm = IBackupManager.Stub.asInterface(
+                            ServiceManager.getService(Context.BACKUP_SERVICE));
+                    if (bm != null) {
+                        if (DEBUG_INSTALL) Log.v(TAG, "token " + token
+                                + " to BM for possible restore");
+                        try {
+                            bm.restoreAtInstall(res.pkg.applicationInfo.packageName, token);
+                        } catch (RemoteException e) {
+                            // can't happen; the backup manager is local
+                        } catch (Exception e) {
+                            Log.e(TAG, "Exception trying to enqueue restore", e);
+                            doRestore = false;
                         }
+                    } else {
+                        Log.e(TAG, "Backup Manager not found!");
+                        doRestore = false;
                     }
                 }
-                Runtime.getRuntime().gc();
-                if (args.observer != null) {
-                    try {
-                        args.observer.packageInstalled(res.name, res.returnCode);
-                    } catch (RemoteException e) {
-                        Log.i(TAG, "Observer no longer exists.");
-                    }
+
+                if (!doRestore) {
+                    // No restore possible, or the Backup Manager was mysteriously not
+                    // available -- just fire the post-install work request directly.
+                    if (DEBUG_INSTALL) Log.v(TAG, "No restore - queue post-install for " + token);
+                    Message msg = mHandler.obtainMessage(POST_INSTALL, token, 0);
+                    mHandler.sendMessage(msg);
                 }
             }
         });

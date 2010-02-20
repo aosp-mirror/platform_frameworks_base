@@ -154,6 +154,8 @@ interface IPackageManager {
     void installPackage(in Uri packageURI, IPackageInstallObserver observer, int flags,
             in String installerPackageName);
 
+    void finishPackageInstall(int token);
+
     /**
      * Delete a package.
      *
