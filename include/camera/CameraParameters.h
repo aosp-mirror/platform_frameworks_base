@@ -187,16 +187,23 @@ public:
     // Vertical angle of view in degrees.
     // Example value: "42.5". Read only.
     static const char KEY_VERTICAL_VIEW_ANGLE[];
-    // Exposure compensation. The value is multiplied by 100. -100 means -1 EV.
-    // 130 means +1.3 EV.
-    // Example value: "0" or "133". Read/write.
+    // Exposure compensation index. 0 means exposure is not adjusted.
+    // Example value: "0" or "5". Read/write.
     static const char KEY_EXPOSURE_COMPENSATION[];
-    // Supported exposure compensation.
-    // Example value: "-100,-66,-33,0,33,66,100". Read only.
-    static const char KEY_SUPPORTED_EXPOSURE_COMPENSATION[];
+    // The maximum exposure compensation index (>=0).
+    // Example value: "6". Read only.
+    static const char KEY_MAX_EXPOSURE_COMPENSATION[];
+    // The minimum exposure compensation index (<=0).
+    // Example value: "-6". Read only.
+    static const char KEY_MIN_EXPOSURE_COMPENSATION[];
+    // The exposure compensation step. Exposure compensation index multiply by
+    // step eqals to EV. Ex: if exposure compensation index is 6 and step is
+    // 0.3333, EV is -2.
+    // Example value: "0.333333333" or "0.5". Read only.
+    static const char KEY_EXPOSURE_COMPENSATION_STEP[];
 
 
-        // Values for white balance settings.
+    // Values for white balance settings.
     static const char WHITE_BALANCE_AUTO[];
     static const char WHITE_BALANCE_INCANDESCENT[];
     static const char WHITE_BALANCE_FLUORESCENT[];
