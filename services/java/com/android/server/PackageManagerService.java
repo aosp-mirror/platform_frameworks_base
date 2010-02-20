@@ -4344,7 +4344,9 @@ class PackageManagerService extends IPackageManager.Stub {
                 // succeeded, (b) the operation is not an update, and (c) the new
                 // package has a backupAgent defined.
                 final boolean update = res.removedInfo.removedPackage != null;
-                boolean doRestore = (!update && res.pkg.applicationInfo.backupAgentName != null);
+                boolean doRestore = (!update
+                        && res.pkg != null
+                        && res.pkg.applicationInfo.backupAgentName != null);
 
                 // Set up the post-install work request bookkeeping.  This will be used
                 // and cleaned up by the post-install event handling regardless of whether
