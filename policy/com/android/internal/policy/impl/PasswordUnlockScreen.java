@@ -53,7 +53,6 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
     private LockPatternUtils mLockPatternUtils;
     private PasswordEntryKeyboardView mKeyboardView;
     private PasswordEntryKeyboardHelper mKeyboardHelper;
-    private boolean mIsInPortrait;
 
     // To avoid accidental lockout due to events while the device in in the pocket, ignore
     // any passwords with length less than or equal to this length.
@@ -88,6 +87,9 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
 
         mKeyboardView.setVisibility(mCreatedWithKeyboardOpen ? View.INVISIBLE : View.VISIBLE);
         mPasswordEntry.requestFocus();
+
+        mKeyboardHelper.setVibratePattern(mLockPatternUtils.isTactileFeedbackEnabled() ?
+                com.android.internal.R.array.config_virtualKeyVibePattern : 0);
     }
 
     @Override
