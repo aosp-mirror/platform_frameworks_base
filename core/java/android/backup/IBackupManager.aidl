@@ -62,6 +62,12 @@ interface IBackupManager {
     void agentDisconnected(String packageName);
 
     /**
+     * Notify the Backup Manager Service that an application being installed will
+     * need a data-restore pass.  This method is only invoked by the Package Manager.
+     */
+    void restoreAtInstall(String packageName, int token);
+
+    /**
      * Enable/disable the backup service entirely.  When disabled, no backup
      * or restore operations will take place.  Data-changed notifications will
      * still be observed and collected, however, so that changes made while the
