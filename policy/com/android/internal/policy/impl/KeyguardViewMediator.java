@@ -28,6 +28,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.media.AudioManager;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -932,8 +933,12 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
                 final Uri soundUri = Uri.parse("file://" + soundPath);
                 if (soundUri != null) {
                     final Ringtone sfx = RingtoneManager.getRingtone(mContext, soundUri);
-                    if (sfx != null) sfx.play();
-                    else Log.d(TAG, "playSounds: failed to load ringtone from uri: " + soundUri);
+                    if (sfx != null) {
+                        sfx.setStreamType(AudioManager.STREAM_SYSTEM);
+                        sfx.play();
+                    } else {
+                        Log.d(TAG, "playSounds: failed to load ringtone from uri: " + soundUri);
+                    }
                 } else {
                     Log.d(TAG, "playSounds: could not parse Uri: " + soundPath);
                 }
