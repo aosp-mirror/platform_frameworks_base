@@ -49,13 +49,18 @@ public class DevicePolicyManager {
     
     private final Handler mHandler;
 
-    /*package*/ DevicePolicyManager(Context context, Handler handler) {
+    private DevicePolicyManager(Context context, Handler handler) {
         mContext = context;
         mHandler = handler;
         mService = IDevicePolicyManager.Stub.asInterface(
                 ServiceManager.getService(Context.DEVICE_POLICY_SERVICE));
     }
 
+    /*package*/ static DevicePolicyManager create(Context context, Handler handler) {
+        DevicePolicyManager me = new DevicePolicyManager(context, handler);
+        return me.mService != null ? me : null;
+    }
+    
     /**
      * Activity action: ask the user to add a new device administrator to the system.
      * The desired policy is the ComponentName of the policy in the
@@ -130,6 +135,20 @@ public class DevicePolicyManager {
             }
         }
         return null;
+    }
+    
+    /**
+     * @hide
+     */
+    public boolean packageHasActiveAdmins(String packageName) {
+        if (mService != null) {
+            try {
+                return mService.packageHasActiveAdmins(packageName);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+        return false;
     }
     
     /**

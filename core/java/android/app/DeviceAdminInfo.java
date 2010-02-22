@@ -18,6 +18,7 @@ package android.app;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -329,6 +330,19 @@ public final class DeviceAdminInfo implements Parcelable {
             }
         }
         return res;
+    }
+    
+    /** @hide */
+    public void writePoliciesToXml(XmlSerializer out)
+            throws IllegalArgumentException, IllegalStateException, IOException {
+        out.attribute(null, "flags", Integer.toString(mUsesPolicies));
+    }
+    
+    /** @hide */
+    public void readPoliciesFromXml(XmlPullParser parser)
+            throws XmlPullParserException, IOException {
+        mUsesPolicies = Integer.parseInt(
+                parser.getAttributeValue(null, "flags"));
     }
     
     public void dump(Printer pw, String prefix) {

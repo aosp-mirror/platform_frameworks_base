@@ -47,6 +47,7 @@ import android.app.ResultInfo;
 import android.app.Service;
 import android.backup.IBackupManager;
 import android.content.ActivityNotFoundException;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -93,7 +94,6 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.provider.Settings;
-import android.text.TextUtils;
 import android.util.Config;
 import android.util.EventLog;
 import android.util.Log;
@@ -107,7 +107,6 @@ import android.view.WindowManagerPolicy;
 
 import java.io.File;
 import java.io.FileDescriptor;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -296,12 +295,6 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     // Memory pages are 4K.
     static final int PAGE_SIZE = 4*1024;
     
-    // System property defining error report receiver for system apps
-    static final String SYSTEM_APPS_ERROR_RECEIVER_PROPERTY = "ro.error.receiver.system.apps";
-
-    // System property defining default error report receiver
-    static final String DEFAULT_ERROR_RECEIVER_PROPERTY = "ro.error.receiver.default";
-
     // Corresponding memory levels for above adjustments.
     static final int EMPTY_APP_MEM;
     static final int HIDDEN_APP_MEM;
@@ -1193,7 +1186,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     int uid = msg.arg1;
                     boolean restart = (msg.arg2 == 1);
                     String pkg = (String) msg.obj;
-                    forceStopPackageLocked(pkg, uid, restart, false);
+                    forceStopPackageLocked(pkg, uid, restart, false, true);
                 }
             } break;
             }
@@ -1396,7 +1389,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         GL_ES_VERSION = SystemProperties.getInt("ro.opengles.version",
             ConfigurationInfo.GL_ES_VERSION_UNDEFINED);
 
-        mConfiguration.makeDefault();
+        mConfiguration.setToDefaults();
+        mConfiguration.locale = Locale.getDefault();
         mProcessStats.init();
         
         // Add ourself to the Watchdog monitors.
@@ -4846,7 +4840,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     return;
                 }
                 killPackageProcessesLocked(packageName, pkgUid,
-                        SECONDARY_SERVER_ADJ, false);
+                        SECONDARY_SERVER_ADJ, false, true);
             }
         } finally {
             Binder.restoreCallingIdentity(callingId);
@@ -4988,7 +4982,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     }
 
     private void forceStopPackageLocked(final String packageName, int uid) {
-        forceStopPackageLocked(packageName, uid, false, false);
+        forceStopPackageLocked(packageName, uid, false, false, true);
         Intent intent = new Intent(Intent.ACTION_PACKAGE_RESTARTED,
                 Uri.fromParts("package", packageName, null));
         intent.putExtra(Intent.EXTRA_UID, uid);
@@ -4997,8 +4991,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 false, false, MY_PID, Process.SYSTEM_UID);
     }
     
-    private final void killPackageProcessesLocked(String packageName, int uid,
-            int minOomAdj, boolean callerWillRestart) {
+    private final boolean killPackageProcessesLocked(String packageName, int uid,
+            int minOomAdj, boolean callerWillRestart, boolean doit) {
         ArrayList<ProcessRecord> procs = new ArrayList<ProcessRecord>();
 
         // Remove all processes this package may have touched: all with the
@@ -5010,11 +5004,16 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             for (int ia=0; ia<NA; ia++) {
                 ProcessRecord app = apps.valueAt(ia);
                 if (app.removed) {
-                    procs.add(app);
+                    if (doit) {
+                        procs.add(app);
+                    }
                 } else if ((uid > 0 && uid != Process.SYSTEM_UID && app.info.uid == uid)
                         || app.processName.equals(packageName)
                         || app.processName.startsWith(procNamePrefix)) {
                     if (app.setAdj >= minOomAdj) {
+                        if (!doit) {
+                            return true;
+                        }
                         app.removed = true;
                         procs.add(app);
                     }
@@ -5026,10 +5025,11 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         for (int i=0; i<N; i++) {
             removeProcessLocked(procs.get(i), callerWillRestart);
         }
+        return N > 0;
     }
 
-    private final void forceStopPackageLocked(String name, int uid,
-            boolean callerWillRestart, boolean purgeCache) {
+    private final boolean forceStopPackageLocked(String name, int uid,
+            boolean callerWillRestart, boolean purgeCache, boolean doit) {
         int i, N;
 
         if (uid < 0) {
@@ -5039,21 +5039,28 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             }
         }
 
-        Log.i(TAG, "Force stopping package " + name + " uid=" + uid);
+        if (doit) {
+            Log.i(TAG, "Force stopping package " + name + " uid=" + uid);
 
-        Iterator<SparseArray<Long>> badApps = mProcessCrashTimes.getMap().values().iterator();
-        while (badApps.hasNext()) {
-            SparseArray<Long> ba = badApps.next();
-            if (ba.get(uid) != null) {
-                badApps.remove();
+            Iterator<SparseArray<Long>> badApps = mProcessCrashTimes.getMap().values().iterator();
+            while (badApps.hasNext()) {
+                SparseArray<Long> ba = badApps.next();
+                if (ba.get(uid) != null) {
+                    badApps.remove();
+                }
             }
         }
-
-        killPackageProcessesLocked(name, uid, -100, callerWillRestart);
+        
+        boolean didSomething = killPackageProcessesLocked(name, uid, -100,
+                callerWillRestart, doit);
         
         for (i=mHistory.size()-1; i>=0; i--) {
             HistoryRecord r = (HistoryRecord)mHistory.get(i);
             if (r.packageName.equals(name)) {
+                if (!doit) {
+                    return true;
+                }
+                didSomething = true;
                 Log.i(TAG, "  Force finishing activity " + r);
                 if (r.app != null) {
                     r.app.removed = true;
@@ -5066,6 +5073,10 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         ArrayList<ServiceRecord> services = new ArrayList<ServiceRecord>();
         for (ServiceRecord service : mServices.values()) {
             if (service.packageName.equals(name)) {
+                if (!doit) {
+                    return true;
+                }
+                didSomething = true;
                 Log.i(TAG, "  Force stopping service " + service);
                 if (service.app != null) {
                     service.app.removed = true;
@@ -5080,13 +5091,17 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             bringDownServiceLocked(services.get(i), true);
         }
         
-        resumeTopActivityLocked(null);
-        if (purgeCache) {
-            AttributeCache ac = AttributeCache.instance();
-            if (ac != null) {
-                ac.removePackage(name);
+        if (doit) {
+            if (purgeCache) {
+                AttributeCache ac = AttributeCache.instance();
+                if (ac != null) {
+                    ac.removePackage(name);
+                }
             }
+            resumeTopActivityLocked(null);
         }
+        
+        return didSomething;
     }
 
     private final boolean removeProcessLocked(ProcessRecord app, boolean callerWillRestart) {
@@ -5583,19 +5598,38 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     }
 
     final void finishBooting() {
-        // Ensure that any processes we had put on hold are now started
-        // up.
-        final int NP = mProcessesOnHold.size();
-        if (NP > 0) {
-            ArrayList<ProcessRecord> procs =
-                new ArrayList<ProcessRecord>(mProcessesOnHold);
-            for (int ip=0; ip<NP; ip++) {
-                this.startProcessLocked(procs.get(ip), "on-hold", null);
+        IntentFilter pkgFilter = new IntentFilter();
+        pkgFilter.addAction(Intent.ACTION_QUERY_PACKAGE_RESTART);
+        pkgFilter.addDataScheme("package");
+        mContext.registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String[] pkgs = intent.getStringArrayExtra(Intent.EXTRA_PACKAGES);
+                if (pkgs != null) {
+                    for (String pkg : pkgs) {
+                        if (forceStopPackageLocked(pkg, -1, false, false, false)) {
+                            setResultCode(Activity.RESULT_OK);
+                            return;
+                        }
+                    }
+                }
             }
-        }
-        if (mFactoryTest != SystemServer.FACTORY_TEST_LOW_LEVEL) {
-            // Tell anyone interested that we are done booting!
-            synchronized (this) {
+        }, pkgFilter);
+        
+        synchronized (this) {
+            // Ensure that any processes we had put on hold are now started
+            // up.
+            final int NP = mProcessesOnHold.size();
+            if (NP > 0) {
+                ArrayList<ProcessRecord> procs =
+                    new ArrayList<ProcessRecord>(mProcessesOnHold);
+                for (int ip=0; ip<NP; ip++) {
+                    this.startProcessLocked(procs.get(ip), "on-hold", null);
+                }
+            }
+            
+            if (mFactoryTest != SystemServer.FACTORY_TEST_LOW_LEVEL) {
+                // Tell anyone interested that we are done booting!
                 broadcastIntentLocked(null, null,
                         new Intent(Intent.ACTION_BOOT_COMPLETED, null),
                         null, null, 0, null, null,
@@ -8050,7 +8084,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             mDebugTransient = !persistent;
             if (packageName != null) {
                 final long origId = Binder.clearCallingIdentity();
-                forceStopPackageLocked(packageName, -1, false, false);
+                forceStopPackageLocked(packageName, -1, false, false, true);
                 Binder.restoreCallingIdentity(origId);
             }
         }
@@ -8339,7 +8373,6 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             mAlwaysFinishActivities = alwaysFinishActivities;
             // This happens before any activities are started, so we can
             // change mConfiguration in-place.
-            mConfiguration.locale = Locale.getDefault();
             mConfiguration.updateFrom(configuration);
             mConfigurationSeq = mConfiguration.seq = 1;
             if (DEBUG_CONFIGURATION) Log.v(TAG, "Initial config: " + mConfiguration);
@@ -8537,73 +8570,6 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         return handleAppCrashLocked(app);
     }
 
-    private ComponentName getErrorReportReceiver(ProcessRecord app) {
-        // check if error reporting is enabled in secure settings
-        int enabled = Settings.Secure.getInt(mContext.getContentResolver(),
-                Settings.Secure.SEND_ACTION_APP_ERROR, 0);
-        if (enabled == 0) {
-            return null;
-        }
-
-        IPackageManager pm = ActivityThread.getPackageManager();
-
-        try {
-            // look for receiver in the installer package
-            String candidate = pm.getInstallerPackageName(app.info.packageName);
-            ComponentName result = getErrorReportReceiver(pm, app.info.packageName, candidate);
-            if (result != null) {
-                return result;
-            }
-
-            // if the error app is on the system image, look for system apps
-            // error receiver
-            if ((app.info.flags&ApplicationInfo.FLAG_SYSTEM) != 0) {
-                candidate = SystemProperties.get(SYSTEM_APPS_ERROR_RECEIVER_PROPERTY);
-                result = getErrorReportReceiver(pm, app.info.packageName, candidate);
-                if (result != null) {
-                    return result;
-                }
-            }
-
-            // if there is a default receiver, try that
-            candidate = SystemProperties.get(DEFAULT_ERROR_RECEIVER_PROPERTY);
-            return getErrorReportReceiver(pm, app.info.packageName, candidate);
-        } catch (RemoteException e) {
-            // should not happen
-            Log.e(TAG, "error talking to PackageManager", e);
-            return null;
-        }
-    }
-
-    /**
-     * Return activity in receiverPackage that handles ACTION_APP_ERROR.
-     *
-     * @param pm PackageManager isntance
-     * @param errorPackage package which caused the error
-     * @param receiverPackage candidate package to receive the error
-     * @return activity component within receiverPackage which handles
-     * ACTION_APP_ERROR, or null if not found
-     */
-    private ComponentName getErrorReportReceiver(IPackageManager pm, String errorPackage,
-            String receiverPackage) throws RemoteException {
-        if (receiverPackage == null || receiverPackage.length() == 0) {
-            return null;
-        }
-
-        // break the loop if it's the error report receiver package that crashed
-        if (receiverPackage.equals(errorPackage)) {
-            return null;
-        }
-
-        Intent intent = new Intent(Intent.ACTION_APP_ERROR);
-        intent.setPackage(receiverPackage);
-        ResolveInfo info = pm.resolveIntent(intent, null, 0);
-        if (info == null || info.activityInfo == null) {
-            return null;
-        }
-        return new ComponentName(receiverPackage, info.activityInfo.name);
-    }
-
     private void makeAppNotRespondingLocked(ProcessRecord app,
             String activity, String shortMsg, String longMsg) {
         app.notResponding = true;
@@ -8717,7 +8683,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     }
 
     void startAppProblemLocked(ProcessRecord app) {
-        app.errorReportReceiver = getErrorReportReceiver(app);
+        app.errorReportReceiver = ApplicationErrorReport.getErrorReportReceiver(
+                mContext, app.info.packageName, app.info.flags);
         skipCurrentReceiverLocked(app);
     }
 
@@ -11951,7 +11918,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                         String list[] = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
                         if (list != null && (list.length > 0)) {
                             for (String pkg : list) {
-                                forceStopPackageLocked(pkg, -1, false, true);
+                                forceStopPackageLocked(pkg, -1, false, true, true);
                             }
                         }
                     } else {
@@ -11960,7 +11927,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                         if (data != null && (ssp=data.getSchemeSpecificPart()) != null) {
                             if (!intent.getBooleanExtra(Intent.EXTRA_DONT_KILL_APP, false)) {
                                 forceStopPackageLocked(ssp,
-                                        intent.getIntExtra(Intent.EXTRA_UID, -1), false, true);
+                                        intent.getIntExtra(Intent.EXTRA_UID, -1), false, true, true);
                             }
                         }
                     }
@@ -12931,7 +12898,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             }
 
             final long origId = Binder.clearCallingIdentity();
-            forceStopPackageLocked(ii.targetPackage, -1, true, false);
+            forceStopPackageLocked(ii.targetPackage, -1, true, false, true);
             ProcessRecord app = addAppLocked(ai);
             app.instrumentationClass = className;
             app.instrumentationInfo = ai;
@@ -12986,7 +12953,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         app.instrumentationProfileFile = null;
         app.instrumentationArguments = null;
 
-        forceStopPackageLocked(app.processName, -1, false, false);
+        forceStopPackageLocked(app.processName, -1, false, false, true);
     }
 
     public void finishInstrumentation(IApplicationThread target,

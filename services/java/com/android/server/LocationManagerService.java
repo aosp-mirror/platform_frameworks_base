@@ -27,6 +27,7 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.Set;
 
+import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -506,6 +507,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         // Register for Package Manager updates
         intentFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
         intentFilter.addAction(Intent.ACTION_PACKAGE_RESTARTED);
+        intentFilter.addAction(Intent.ACTION_QUERY_PACKAGE_RESTART);
         mContext.registerReceiver(mBroadcastReceiver, intentFilter);
         IntentFilter sdFilter = new IntentFilter(Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE);
         mContext.registerReceiver(mBroadcastReceiver, sdFilter);
@@ -1539,8 +1541,9 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-
-            if (action.equals(Intent.ACTION_PACKAGE_REMOVED)
+            boolean queryRestart = action.equals(Intent.ACTION_QUERY_PACKAGE_RESTART);
+            if (queryRestart
+                    || action.equals(Intent.ACTION_PACKAGE_REMOVED)
                     || action.equals(Intent.ACTION_PACKAGE_RESTARTED)
                     || action.equals(Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE)) {
                 synchronized (mLock) {
@@ -1560,6 +1563,10 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
                                 for (int j=i.size()-1; j>=0; j--) {
                                     UpdateRecord ur = i.get(j);
                                     if (ur.mReceiver.isPendingIntent() && ur.mUid == uid) {
+                                        if (queryRestart) {
+                                            setResultCode(Activity.RESULT_OK);
+                                            return;
+                                        }
                                         if (removedRecs == null) {
                                             removedRecs = new ArrayList<Receiver>();
                                         }
@@ -1572,6 +1579,10 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
                             ArrayList<ProximityAlert> removedAlerts = null;
                             for (ProximityAlert i : mProximityAlerts.values()) {
                                 if (i.mUid == uid) {
+                                    if (queryRestart) {
+                                        setResultCode(Activity.RESULT_OK);
+                                        return;
+                                    }
                                     if (removedAlerts == null) {
                                         removedAlerts = new ArrayList<ProximityAlert>();
                                     }
