@@ -41,6 +41,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.regex.Pattern;
 
 /**
  * Exposes methods to manage a SQLite database.
@@ -199,6 +200,10 @@ public class SQLiteDatabase extends SQLiteClosable {
 
     private static final int SLEEP_AFTER_YIELD_QUANTUM = 1000;
 
+    // The pattern we remove from database filenames before
+    // potentially logging them.
+    private static final Pattern EMAIL_IN_DB_PATTERN = Pattern.compile("[\\w\\.\\-]+@[\\w\\.\\-]+");
+
     private long mLastLockMessageTime = 0L;
 
     // Things related to query logging/sampling for debugging
@@ -221,6 +226,9 @@ public class SQLiteDatabase extends SQLiteClosable {
 
     /** The path for the database file */
     private String mPath;
+
+    /** The anonymized path for the database file for logging purposes */
+    private String mPathForLogs = null;  // lazily populated
 
     /** The flags passed to open/create */
     private int mFlags;
@@ -1833,7 +1841,32 @@ public class SQLiteDatabase extends SQLiteClosable {
         if (blockingPackage == null) blockingPackage = "";
 
         EventLog.writeEvent(
-            EVENT_DB_OPERATION, mPath, sql, durationMillis, blockingPackage, samplePercent);
+            EVENT_DB_OPERATION,
+            getPathForLogs(),
+            sql,
+            durationMillis,
+            blockingPackage,
+            samplePercent);
+    }
+
+    /**
+     * Removes email addresses from database filenames before they're
+     * logged to the EventLog where otherwise apps could potentially
+     * read them.
+     */
+    private String getPathForLogs() {
+        if (mPathForLogs != null) {
+            return mPathForLogs;
+        }
+        if (mPath == null) {
+            return null;
+        }
+        if (mPath.indexOf('@') == -1) {
+            mPathForLogs = mPath;
+        } else {
+            mPathForLogs = EMAIL_IN_DB_PATTERN.matcher(mPath).replaceAll("XX@YY");
+        }
+        return mPathForLogs;
     }
 
     /**
