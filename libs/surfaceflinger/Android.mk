@@ -35,7 +35,6 @@ LOCAL_SHARED_LIBRARIES := \
 	libpixelflinger \
 	libhardware \
 	libutils \
-	libskia \
 	libEGL \
 	libGLESv1_CM \
 	libbinder \
