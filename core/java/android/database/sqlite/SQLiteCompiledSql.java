@@ -95,12 +95,16 @@ import android.util.Log;
         }
     }
 
-    /* package */ synchronized boolean isInUse() {
-        return mInUse;
-    }
-
-    /* package */ synchronized void acquire() {
+    /**
+     * returns true if acquire() succeeds. false otherwise.
+     */
+    /* package */ synchronized boolean acquire() {
+        if (mInUse) {
+            // someone already has acquired it.
+            return false;
+        }
         mInUse = true;
+        return true;
     }
 
     /* package */ synchronized void release() {
