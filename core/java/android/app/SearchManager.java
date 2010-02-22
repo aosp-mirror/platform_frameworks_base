@@ -1639,6 +1639,7 @@ public class SearchManager
             return;
         }
         Intent intent = new Intent(INTENT_ACTION_GLOBAL_SEARCH);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.setComponent(globalSearchActivity);
         // TODO: Always pass name of calling package as an extra?
         if (appSearchData != null) {
