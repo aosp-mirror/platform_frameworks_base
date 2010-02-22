@@ -209,6 +209,7 @@ class ServerThread extends Thread {
         AppWidgetService appWidget = null;
         NotificationManagerService notification = null;
         WallpaperManagerService wallpaper = null;
+        LocationManagerService location = null;
 
         if (factoryTest != SystemServer.FACTORY_TEST_LOW_LEVEL) {
             try {
@@ -303,8 +304,8 @@ class ServerThread extends Thread {
 
             try {
                 Log.i(TAG, "Location Manager");
-                ServiceManager.addService(Context.LOCATION_SERVICE,
-                        new LocationManagerService(context));
+                location = new LocationManagerService(context);
+                ServiceManager.addService(Context.LOCATION_SERVICE, location);
             } catch (Throwable e) {
                 Log.e(TAG, "Failure starting Location Manager", e);
             }
@@ -444,6 +445,7 @@ class ServerThread extends Thread {
         final WallpaperManagerService wallpaperF = wallpaper;
         final InputMethodManagerService immF = imm;
         final RecognitionManagerService recognitionF = recognition;
+        final LocationManagerService locationF = location;
 
         // We now tell the activity manager it is okay to run third party
         // code.  It will call back into us once it has gotten to the state
@@ -467,6 +469,7 @@ class ServerThread extends Thread {
                 if (appWidgetF != null) appWidgetF.systemReady(safeMode);
                 if (wallpaperF != null) wallpaperF.systemReady();
                 if (immF != null) immF.systemReady();
+                if (locationF != null) locationF.systemReady();
             }
         });
 

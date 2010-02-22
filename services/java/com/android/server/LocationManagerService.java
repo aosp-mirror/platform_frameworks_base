@@ -485,12 +485,15 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         super();
         mContext = context;
 
-        Thread thread = new Thread(null, this, "LocationManagerService");
-        thread.start();
-
         if (LOCAL_LOGV) {
             Log.v(TAG, "Constructed LocationManager Service");
         }
+    }
+
+    void systemReady() {
+        // we defer starting up the service until the system is ready 
+        Thread thread = new Thread(null, this, "LocationManagerService");
+        thread.start();
     }
 
     private void initialize() {
