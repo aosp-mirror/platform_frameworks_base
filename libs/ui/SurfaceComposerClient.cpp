@@ -56,7 +56,7 @@ namespace android {
 // Must not be holding SurfaceComposerClient::mLock when acquiring gLock here.
 static Mutex                                                gLock;
 static sp<ISurfaceComposer>                                 gSurfaceManager;
-static DefaultKeyedVector< sp<IBinder>, sp<SurfaceComposerClient> > gActiveConnections;
+static DefaultKeyedVector< sp<IBinder>, wp<SurfaceComposerClient> > gActiveConnections;
 static SortedVector<sp<SurfaceComposerClient> >             gOpenTransactions;
 static sp<IMemoryHeap>                                      gServerCblkMemory;
 static volatile surface_flinger_cblk_t*                     gServerCblk;
@@ -193,7 +193,7 @@ SurfaceComposerClient::clientForConnection(const sp<IBinder>& conn)
 
     { // scope for lock
         Mutex::Autolock _l(gLock);
-        client = gActiveConnections.valueFor(conn);
+        client = gActiveConnections.valueFor(conn).promote();
     }
 
     if (client == 0) {
@@ -361,8 +361,8 @@ void SurfaceComposerClient::openGlobalTransaction()
     const size_t N = gActiveConnections.size();
     VERBOSE("openGlobalTransaction (%ld clients)", N);
     for (size_t i=0; i<N; i++) {
-        sp<SurfaceComposerClient> client(gActiveConnections.valueAt(i));
-        if (gOpenTransactions.indexOf(client) < 0) {
+        sp<SurfaceComposerClient> client(gActiveConnections.valueAt(i).promote());
+        if (client != 0 && gOpenTransactions.indexOf(client) < 0) {
             if (client->openTransaction() == NO_ERROR) {
                 if (gOpenTransactions.add(client) < 0) {
                     // Ooops!
