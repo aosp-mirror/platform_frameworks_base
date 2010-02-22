@@ -62,6 +62,8 @@ public class VideoView extends SurfaceView implements MediaPlayerControl {
     private static final int STATE_PLAYING            = 3;
     private static final int STATE_PAUSED             = 4;
     private static final int STATE_PLAYBACK_COMPLETED = 5;
+    private static final int STATE_SUSPEND            = 6;
+    private static final int STATE_RESUME             = 7;
 
     // mCurrentState is a VideoView object's current state.
     // mTargetState is the state that a method caller intends to reach.
@@ -87,6 +89,7 @@ public class VideoView extends SurfaceView implements MediaPlayerControl {
     private boolean     mCanPause;
     private boolean     mCanSeekBack;
     private boolean     mCanSeekForward;
+    private int         mStateWhenSuspended;  //state before calling suspend()
 
     public VideoView(Context context) {
         super(context);
@@ -466,7 +469,14 @@ public class VideoView extends SurfaceView implements MediaPlayerControl {
         public void surfaceCreated(SurfaceHolder holder)
         {
             mSurfaceHolder = holder;
-            openVideo();
+            //resume() was called before surfaceCreated()
+            if (mMediaPlayer != null && mCurrentState == STATE_SUSPEND
+                   && mTargetState == STATE_RESUME) {
+                mMediaPlayer.setDisplay(mSurfaceHolder);
+                resume();
+            } else {
+                openVideo();
+            }
         }
 
         public void surfaceDestroyed(SurfaceHolder holder)
@@ -474,7 +484,6 @@ public class VideoView extends SurfaceView implements MediaPlayerControl {
             // after we return from this we can't use the surface any more
             mSurfaceHolder = null;
             if (mMediaController != null) mMediaController.hide();
-            release(true);
         }
     };
 
@@ -567,7 +576,36 @@ public class VideoView extends SurfaceView implements MediaPlayerControl {
         mTargetState = STATE_PAUSED;
     }
 
-    // cache duration as mDuration for faster access
+    public void suspend() {
+        if (isInPlaybackState()) {
+            if (mMediaPlayer.suspend()) {
+                mStateWhenSuspended = mCurrentState;
+                mCurrentState = STATE_SUSPEND;
+                mTargetState = STATE_SUSPEND;
+            } else {
+                Log.w(TAG, "Unable to suspend video");
+                mErrorListener.onError(mMediaPlayer, MediaPlayer.MEDIA_ERROR_UNKNOWN, 0);
+            }
+        }
+    }
+
+    public void resume() {
+        if (mSurfaceHolder == null && mCurrentState == STATE_SUSPEND){
+            mTargetState = STATE_RESUME;
+            return;
+        }
+        if (mMediaPlayer != null && mCurrentState == STATE_SUSPEND) {
+            if (mMediaPlayer.resume()) {
+                mCurrentState = mStateWhenSuspended;
+                mTargetState = mStateWhenSuspended;
+            } else {
+                Log.w(TAG, "Unable to resume video");
+                mErrorListener.onError(mMediaPlayer, MediaPlayer.MEDIA_ERROR_UNKNOWN, 0);
+            }
+        }
+    }
+
+   // cache duration as mDuration for faster access
     public int getDuration() {
         if (isInPlaybackState()) {
             if (mDuration > 0) {
