@@ -25,6 +25,7 @@ commonSources:= \
 	CallStack.cpp \
 	Debug.cpp \
 	FileMap.cpp \
+	Flattenable.cpp \
 	RefBase.cpp \
 	ResourceTypes.cpp \
 	SharedBuffer.cpp \

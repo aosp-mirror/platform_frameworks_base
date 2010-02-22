@@ -23,6 +23,7 @@
 #include <ui/android_native_buffer.h>
 #include <ui/PixelFormat.h>
 #include <ui/Rect.h>
+#include <utils/Flattenable.h>
 #include <pixelflinger/pixelflinger.h>
 
 struct android_native_buffer_t;
@@ -30,7 +31,6 @@ struct android_native_buffer_t;
 namespace android {
 
 class GraphicBufferMapper;
-class Parcel;
 
 // ===========================================================================
 // GraphicBuffer
@@ -40,7 +40,7 @@ class GraphicBuffer
     : public EGLNativeBase<
         android_native_buffer_t, 
         GraphicBuffer, 
-        LightRefBase<GraphicBuffer> >
+        LightRefBase<GraphicBuffer> >, public Flattenable
 {
 public:
 
@@ -97,7 +97,6 @@ public:
     uint32_t getVerticalStride() const;
 
 protected:
-    GraphicBuffer(const Parcel& reply);
     virtual ~GraphicBuffer();
 
     enum {
@@ -122,8 +121,16 @@ private:
     status_t initSize(uint32_t w, uint32_t h, PixelFormat format, 
             uint32_t usage);
 
-    static status_t writeToParcel(Parcel* reply, 
-            android_native_buffer_t const* buffer);
+    void free_handle();
+
+    // Flattenable interface
+    size_t getFlattenedSize() const;
+    size_t getFdCount() const;
+    status_t flatten(void* buffer, size_t size,
+            int fds[], size_t count) const;
+    status_t unflatten(void const* buffer, size_t size,
+            int fds[], size_t count);
+
 
     GraphicBufferMapper& mBufferMapper;
     ssize_t mInitCheck;

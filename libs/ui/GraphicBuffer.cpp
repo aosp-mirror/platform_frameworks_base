@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+#define LOG_TAG "GraphicBuffer"
+
 #include <stdlib.h>
 #include <stdint.h>
 #include <sys/types.h>
-
-#include <binder/Parcel.h>
 
 #include <utils/Errors.h>
 #include <utils/Log.h>
@@ -77,34 +77,21 @@ GraphicBuffer::GraphicBuffer(uint32_t w, uint32_t h,
     handle = inHandle;
 }
 
-GraphicBuffer::GraphicBuffer(const Parcel& data) 
-    : BASE(), mOwner(ownHandle), mBufferMapper(GraphicBufferMapper::get()),
-      mInitCheck(NO_ERROR),  mVStride(0), mIndex(-1)
-{
-    // we own the handle in this case
-    width  = data.readInt32();
-    if (width < 0) {
-        width = height = stride = format = usage = 0;
-        handle = 0;
-    } else {
-        height = data.readInt32();
-        stride = data.readInt32();
-        format = data.readInt32();
-        usage  = data.readInt32();
-        handle = data.readNativeHandle();
-    }
-}
-
 GraphicBuffer::~GraphicBuffer()
 {
     if (handle) {
-        if (mOwner == ownHandle) {
-            native_handle_close(handle);
-            native_handle_delete(const_cast<native_handle*>(handle));
-        } else if (mOwner == ownData) {
-            GraphicBufferAllocator& allocator(GraphicBufferAllocator::get());
-            allocator.free(handle);
-        }
+        free_handle();
+    }
+}
+
+void GraphicBuffer::free_handle()
+{
+    if (mOwner == ownHandle) {
+        native_handle_close(handle);
+        native_handle_delete(const_cast<native_handle*>(handle));
+    } else if (mOwner == ownData) {
+        GraphicBufferAllocator& allocator(GraphicBufferAllocator::get());
+        allocator.free(handle);
     }
 }
 
@@ -192,29 +179,83 @@ status_t GraphicBuffer::lock(GGLSurface* sur, uint32_t usage)
     return res;
 }
 
+size_t GraphicBuffer::getFlattenedSize() const {
+    return (8 + (handle ? handle->numInts : 0))*sizeof(int);
+}
 
-status_t GraphicBuffer::writeToParcel(Parcel* reply, 
-        android_native_buffer_t const* buffer)
+size_t GraphicBuffer::getFdCount() const {
+    return handle ? handle->numFds : 0;
+}
+
+status_t GraphicBuffer::flatten(void* buffer, size_t size,
+        int fds[], size_t count) const
 {
-    if (buffer == NULL)
-        return BAD_VALUE;
+    size_t sizeNeeded = GraphicBuffer::getFlattenedSize();
+    if (size < sizeNeeded) return NO_MEMORY;
 
-    if (buffer->width < 0 || buffer->height < 0)
-        return BAD_VALUE;
+    size_t fdCountNeeded = GraphicBuffer::getFdCount();
+    if (count < fdCountNeeded) return NO_MEMORY;
 
-    status_t err = NO_ERROR;
-    if (buffer->handle == NULL) {
-        // this buffer doesn't have a handle
-        reply->writeInt32(NO_MEMORY);
-    } else {
-        reply->writeInt32(buffer->width);
-        reply->writeInt32(buffer->height);
-        reply->writeInt32(buffer->stride);
-        reply->writeInt32(buffer->format);
-        reply->writeInt32(buffer->usage);
-        err = reply->writeNativeHandle(buffer->handle);
+    int* buf = static_cast<int*>(buffer);
+    buf[0] = 'GBFR';
+    buf[1] = width;
+    buf[2] = height;
+    buf[3] = stride;
+    buf[4] = format;
+    buf[5] = usage;
+    buf[6] = 0;
+    buf[7] = 0;
+
+    if (handle) {
+        buf[6] = handle->numFds;
+        buf[7] = handle->numInts;
+        native_handle_t const* const h = handle;
+        memcpy(fds,     h->data,             h->numFds*sizeof(int));
+        memcpy(&buf[8], h->data + h->numFds, h->numInts*sizeof(int));
     }
-    return err;
+
+    return NO_ERROR;
+}
+
+status_t GraphicBuffer::unflatten(void const* buffer, size_t size,
+        int fds[], size_t count)
+{
+    if (size < 8*sizeof(int)) return NO_MEMORY;
+
+    int const* buf = static_cast<int const*>(buffer);
+    if (buf[0] != 'GBFR') return BAD_TYPE;
+
+    const size_t numFds  = buf[6];
+    const size_t numInts = buf[7];
+
+    const size_t sizeNeeded = (8 + numInts) * sizeof(int);
+    if (size < sizeNeeded) return NO_MEMORY;
+
+    size_t fdCountNeeded = 0;
+    if (count < fdCountNeeded) return NO_MEMORY;
+
+    if (handle) {
+        // free previous handle if any
+        free_handle();
+    }
+
+    if (numFds || numInts) {
+        width  = buf[1];
+        height = buf[2];
+        stride = buf[3];
+        format = buf[4];
+        usage  = buf[5];
+        native_handle* h = native_handle_create(numFds, numInts);
+        memcpy(h->data,          fds,     numFds*sizeof(int));
+        memcpy(h->data + numFds, &buf[8], numInts*sizeof(int));
+        handle = h;
+    } else {
+        width = height = stride = format = usage = 0;
+        handle = NULL;
+    }
+
+    mOwner = ownHandle;
+    return NO_ERROR;
 }
 
 
