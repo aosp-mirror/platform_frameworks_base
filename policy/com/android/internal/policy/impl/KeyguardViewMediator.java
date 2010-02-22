@@ -225,6 +225,9 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
 
     private boolean mScreenOn = false;
 
+    // last known state of the cellular connection
+    private String mPhoneState = TelephonyManager.EXTRA_STATE_IDLE;
+
     /**
      * we send this intent when the keyguard is dismissed.
      */
@@ -683,19 +686,21 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
                 if (mDelayedShowingSequence == sequence) {
                     doKeyguard();
                 }
-            } else if (TelephonyManager.ACTION_PHONE_STATE_CHANGED.equals(action)
-                    && TelephonyManager.EXTRA_STATE_IDLE.equals(intent.getStringExtra(
-                            TelephonyManager.EXTRA_STATE))  // call ending
-                    && !mScreenOn                           // screen off
-                    && mExternallyEnabled) {                // not disabled by any app
+            } else if (TelephonyManager.ACTION_PHONE_STATE_CHANGED.equals(action)) {
+                mPhoneState = intent.getStringExtra(TelephonyManager.EXTRA_STATE);
 
-                // note: this is a way to gracefully reenable the keyguard when the call
-                // ends and the screen is off without always reenabling the keyguard
-                // each time the screen turns off while in call (and having an occasional ugly
-                // flicker while turning back on the screen and disabling the keyguard again).
-                if (DEBUG) Log.d(TAG, "screen is off and call ended, let's make sure the "
-                        + "keyguard is showing");
-                doKeyguard();
+                if (TelephonyManager.EXTRA_STATE_IDLE.equals(mPhoneState)  // call ending
+                        && !mScreenOn                           // screen off
+                        && mExternallyEnabled) {                // not disabled by any app
+
+                    // note: this is a way to gracefully reenable the keyguard when the call
+                    // ends and the screen is off without always reenabling the keyguard
+                    // each time the screen turns off while in call (and having an occasional ugly
+                    // flicker while turning back on the screen and disabling the keyguard again).
+                    if (DEBUG) Log.d(TAG, "screen is off and call ended, let's make sure the "
+                            + "keyguard is showing");
+                    doKeyguard();
+                }
             }
         }
     };
@@ -977,7 +982,11 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
                 return;
             }
 
-            playSounds(false);
+            // only play "unlock" noises if not on a call (since the incall UI
+            // disables the keyguard)
+            if (TelephonyManager.EXTRA_STATE_IDLE.equals(mPhoneState)) {
+                playSounds(false);
+            }
 
             mKeyguardViewManager.hide();
             mShowing = false;
