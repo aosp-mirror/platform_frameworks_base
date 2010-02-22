@@ -16,45 +16,47 @@
 
 package com.android.dumprendertree;
 
-import java.util.HashSet;
-import java.util.Hashtable;
+import java.util.Vector;
 import android.util.*;
 
 public class FileFilter {
 
+    private static final String LOGTAG = "FileFilter";
+
     public static boolean ignoreTest(String file) {
-      // treat files like directories for the time being.
-      for (int i = 0; i < ignoreTestList.length; i ++) {
-          if (file.endsWith(ignoreTestList[i])) {
-             Log.e("FileFilter", "File path in IgnoreTest: " + file); 
-             return true;
-          }
-      }
-      for (int i = 0; i < ignoreTestDirs.length; i++) {
-          if (file.endsWith(ignoreTestDirs[i])) {
-              Log.e("FileFilter", "File path in ignore list: " + file);
-              return true;
-          }
-      }
-      
-      return false;
-    }
- 
-    public static boolean ignoreResults(String file) {
-        int index = file.indexOf("fast");
-        if (index != -1) {
-            String sub = file.substring(index);
-            if (ignoreResultList.contains(sub))
+        // treat files like directories for the time being.
+        for (int i = 0; i < ignoreTestList.length; i ++) {
+            if (file.endsWith(ignoreTestList[i])) {
+                Log.v(LOGTAG, "File path in list of ignored tests: " + file);
                 return true;
+            }
+        }
+        for (int i = 0; i < ignoreTestDirs.length; i++) {
+            if (file.endsWith(ignoreTestDirs[i])) {
+                Log.v(LOGTAG, "File path in list of ignored directories: " + file);
+                return true;
+            }
+        }
+        // We should run tests for which the expected result is wrong, as there is
+        // value in checking that they don't cause crashes.
+        // TODO: Run these tests but ignore the result.
+        return ignoreResults(file);
+    }
+
+    public static boolean ignoreResults(String file) {
+        for (int i = 0; i < ignoreResultList.size(); i++) {
+            if (file.endsWith(ignoreResultList.get(i))) {
+                Log.v(LOGTAG, "File path in list of ignored results: " + file);
+                return true;
+            }
         }
         return false;
+      }
 
-    }
-
-    final static HashSet<String> ignoreResultList = new HashSet<String>();
+    final static Vector<String> ignoreResultList = new Vector<String>();
 
     static {
-        fillIgnoreResultSet();
+        fillIgnoreResultList();
     }
 
     static final String[] ignoreTestDirs = {
@@ -78,7 +80,7 @@ public class FileFilter {
         "storage/private-browsing-readonly.html", // No notion of private browsing.
     };
 
-    static void fillIgnoreResultSet() {
+    static void fillIgnoreResultList() {
         ignoreResultList.add("fast/css/case-transform.html"); // will not fix #619707
         ignoreResultList.add("fast/dom/Element/offsetLeft-offsetTop-body-quirk.html"); // different screen size result in extra spaces in Apple compared to us
         ignoreResultList.add("fast/dom/Window/Plug-ins.html"); // need test plugin
