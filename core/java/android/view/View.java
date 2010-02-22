@@ -951,6 +951,43 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     static final int PARENT_SAVE_DISABLED_MASK = 0x20000000;
 
     /**
+     * Horizontal direction of this view is from Left to Right.
+     * Use with {@link #setHorizontalDirection}.
+     * {@hide}
+     */
+    public static final int HORIZONTAL_DIRECTION_LTR = 0x00000000;
+
+    /**
+     * Horizontal direction of this view is from Right to Left.
+     * Use with {@link #setHorizontalDirection}.
+     * {@hide}
+     */
+    public static final int HORIZONTAL_DIRECTION_RTL = 0x40000000;
+
+    /**
+     * Horizontal direction of this view is inherited from its parent.
+     * Use with {@link #setHorizontalDirection}.
+     * {@hide}
+     */
+    public static final int HORIZONTAL_DIRECTION_INHERIT = 0x80000000;
+
+    /**
+     * Horizontal direction of this view is from deduced from the default language
+     * script for the locale. Use with {@link #setHorizontalDirection}.
+     * {@hide}
+     */
+    public static final int HORIZONTAL_DIRECTION_LOCALE = 0xC0000000;
+
+    /**
+     * Mask for use with setFlags indicating bits used for horizontalDirection.
+     * {@hide}
+     */
+    static final int HORIZONTAL_DIRECTION_MASK = 0xC0000000;
+
+    private static final int[] HORIZONTAL_DIRECTION_FLAGS = { HORIZONTAL_DIRECTION_LTR,
+            HORIZONTAL_DIRECTION_RTL, HORIZONTAL_DIRECTION_INHERIT, HORIZONTAL_DIRECTION_LOCALE};
+
+    /**
      * View flag indicating whether {@link #addFocusables(ArrayList, int, int)}
      * should add all focusable Views regardless if they are focusable in touch mode.
      */
@@ -2598,6 +2635,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                         viewFlagMasks |= VISIBILITY_MASK;
                     }
                     break;
+                case com.android.internal.R.styleable.View_horizontalDirection:
+                  final int layoutDirection = a.getInt(attr, 0);
+                  if (layoutDirection != 0) {
+                      viewFlagValues |= HORIZONTAL_DIRECTION_FLAGS[layoutDirection];
+                      viewFlagMasks |= HORIZONTAL_DIRECTION_MASK;
+                  }
+                  break;
                 case com.android.internal.R.styleable.View_drawingCacheQuality:
                     final int cacheQuality = a.getInt(attr, 0);
                     if (cacheQuality != 0) {
@@ -3977,6 +4021,41 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     @ViewDebug.ExportedProperty
     public boolean isHapticFeedbackEnabled() {
         return HAPTIC_FEEDBACK_ENABLED == (mViewFlags & HAPTIC_FEEDBACK_ENABLED);
+    }
+
+    /**
+     * Returns the horizontal direction for this view.
+     *
+     * @return One of {@link #HORIZONTAL_DIRECTION_LTR},
+     *   {@link #HORIZONTAL_DIRECTION_RTL},
+     *   {@link #HORIZONTAL_DIRECTION_INHERIT} or
+     *   {@link #HORIZONTAL_DIRECTION_LOCALE}.
+     * @attr ref android.R.styleable#View_horizontalDirection
+     * @hide
+     */
+    @ViewDebug.ExportedProperty(mapping = {
+        @ViewDebug.IntToString(from = HORIZONTAL_DIRECTION_LTR,     to = "LTR"),
+        @ViewDebug.IntToString(from = HORIZONTAL_DIRECTION_RTL,     to = "RTL"),
+        @ViewDebug.IntToString(from = HORIZONTAL_DIRECTION_INHERIT, to = "INHERIT"),
+        @ViewDebug.IntToString(from = HORIZONTAL_DIRECTION_LOCALE,  to = "LOCALE")
+    })
+    public int getHorizontalDirection() {
+        return mViewFlags & HORIZONTAL_DIRECTION_MASK;
+    }
+
+    /**
+     * Set the horizontal direction for this view.
+     *
+     * @param horizontalDirection One of {@link #HORIZONTAL_DIRECTION_LTR},
+     *   {@link #HORIZONTAL_DIRECTION_RTL},
+     *   {@link #HORIZONTAL_DIRECTION_INHERIT} or
+     *   {@link #HORIZONTAL_DIRECTION_LOCALE}.
+     * @attr ref android.R.styleable#View_horizontalDirection
+     * @hide
+     */
+    @RemotableViewMethod
+    public void setHorizontalDirection(int horizontalDirection) {
+        setFlags(horizontalDirection, HORIZONTAL_DIRECTION_MASK);
     }
 
     /**
@@ -5788,6 +5867,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             if (mParent != null && mAttachInfo != null && !mAttachInfo.mRecomputeGlobalAttributes) {
                 mParent.recomputeViewAttributes(this);
             }
+        }
+
+        if ((changed & HORIZONTAL_DIRECTION_MASK) != 0) {
+            requestLayout();
         }
     }
 
