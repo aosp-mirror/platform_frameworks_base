@@ -68,8 +68,6 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * will be null if the application does not specify it in its manifest.
      * 
      * <p>If android:allowBackup is set to false, this attribute is ignored.
-     * 
-     * {@hide}
      */
     public String backupAgentName;
     

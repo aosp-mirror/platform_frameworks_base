@@ -48,7 +48,7 @@ public class MediaNames {
   
     public static final long PAUSE_WAIT_TIME = 3000;
     public static final long WAIT_TIME = 2000;
-    public static final long WAIT_LONG = 4000;
+    public static final long WAIT_SNAPSHOT_TIME = 5000;
   
     //Streaming Video
     public static final String VIDEO_HTTP3GP = "http://pvs.pv.com/jj/lipsync0.3gp";  

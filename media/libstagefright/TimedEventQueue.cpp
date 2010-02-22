@@ -28,6 +28,10 @@
 
 #include <media/stagefright/MediaDebug.h>
 
+#ifdef ANDROID_SIMULATOR
+#include <jni.h>
+#endif
+
 namespace android {
 
 TimedEventQueue::TimedEventQueue()
@@ -183,8 +187,26 @@ int64_t TimedEventQueue::getRealTimeUs() {
 
 // static
 void *TimedEventQueue::ThreadWrapper(void *me) {
+
+#ifdef ANDROID_SIMULATOR
+    // The simulator runs everything as one process, so any
+    // Binder calls happen on this thread instead of a thread
+    // in another process. We therefore need to make sure that
+    // this thread can do calls into interpreted code.
+    // On the device this is not an issue because the remote
+    // thread will already be set up correctly for this.
+    JavaVM *vm;
+    int numvms;
+    JNI_GetCreatedJavaVMs(&vm, 1, &numvms);
+    JNIEnv *env;
+    vm->AttachCurrentThread(&env, NULL);
+#endif
+
     static_cast<TimedEventQueue *>(me)->threadEntry();
 
+#ifdef ANDROID_SIMULATOR
+    vm->DetachCurrentThread();
+#endif
     return NULL;
 }
 

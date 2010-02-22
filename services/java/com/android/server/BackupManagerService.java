@@ -17,6 +17,7 @@
 package com.android.server;
 
 import android.app.ActivityManagerNative;
+import android.app.ActivityThread;
 import android.app.AlarmManager;
 import android.app.IActivityManager;
 import android.app.IApplicationThread;
@@ -34,6 +35,7 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageDataObserver;
+import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
@@ -113,6 +115,7 @@ class BackupManagerService extends IBackupManager.Stub {
 
     private Context mContext;
     private PackageManager mPackageManager;
+    IPackageManager mPackageManagerBinder;
     private IActivityManager mActivityManager;
     private PowerManager mPowerManager;
     private AlarmManager mAlarmManager;
@@ -179,13 +182,15 @@ class BackupManagerService extends IBackupManager.Stub {
         public IRestoreObserver observer;
         public long token;
         public PackageInfo pkgInfo;
+        public int pmToken; // in post-install restore, the PM's token for this transaction
 
         RestoreParams(IBackupTransport _transport, IRestoreObserver _obs,
-                long _token, PackageInfo _pkg) {
+                long _token, PackageInfo _pkg, int _pmToken) {
             transport = _transport;
             observer = _obs;
             token = _token;
             pkgInfo = _pkg;
+            pmToken = _pmToken;
         }
 
         RestoreParams(IBackupTransport _transport, IRestoreObserver _obs, long _token) {
@@ -193,6 +198,7 @@ class BackupManagerService extends IBackupManager.Stub {
             observer = _obs;
             token = _token;
             pkgInfo = null;
+            pmToken = 0;
         }
     }
 
@@ -302,7 +308,7 @@ class BackupManagerService extends IBackupManager.Stub {
                 RestoreParams params = (RestoreParams)msg.obj;
                 Log.d(TAG, "MSG_RUN_RESTORE observer=" + params.observer);
                 (new PerformRestoreTask(params.transport, params.observer,
-                        params.token, params.pkgInfo)).run();
+                        params.token, params.pkgInfo, params.pmToken)).run();
                 break;
             }
 
@@ -349,6 +355,7 @@ class BackupManagerService extends IBackupManager.Stub {
     public BackupManagerService(Context context) {
         mContext = context;
         mPackageManager = context.getPackageManager();
+        mPackageManagerBinder = ActivityThread.getPackageManager();
         mActivityManager = ActivityManagerNative.getDefault();
 
         mAlarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
@@ -1115,6 +1122,18 @@ class BackupManagerService extends IBackupManager.Stub {
         }
     }
 
+    // Get the restore-set token for the best-available restore set for this package:
+    // the active set if possible, else the ancestral one.  Returns zero if none available.
+    long getAvailableRestoreToken(String packageName) {
+        long token = mAncestralToken;
+        synchronized (mQueueLock) {
+            if (mEverStoredApps.contains(packageName)) {
+                token = mCurrentToken;
+            }
+        }
+        return token;
+    }
+
     // -----
     // Utility methods used by the asynchronous-with-timeout backup/restore operations
     boolean waitUntilOperationComplete(int token) {
@@ -1132,12 +1151,14 @@ class BackupManagerService extends IBackupManager.Stub {
             }
         }
         mBackupHandler.removeMessages(MSG_TIMEOUT);
-        if (DEBUG) Log.v(TAG, "operation " + token + " complete: finalState=" + finalState);
+        if (DEBUG) Log.v(TAG, "operation " + Integer.toHexString(token)
+                + " complete: finalState=" + finalState);
         return finalState == OP_ACKNOWLEDGED;
     }
 
     void prepareOperationTimeout(int token, long interval) {
-        if (DEBUG) Log.v(TAG, "starting timeout: token=" + token + " interval=" + interval);
+        if (DEBUG) Log.v(TAG, "starting timeout: token=" + Integer.toHexString(token)
+                + " interval=" + interval);
         mCurrentOperations.put(token, OP_PENDING);
         Message msg = mBackupHandler.obtainMessage(MSG_TIMEOUT, token, 0);
         mBackupHandler.sendMessageDelayed(msg, interval);
@@ -1476,6 +1497,7 @@ class BackupManagerService extends IBackupManager.Stub {
         private long mToken;
         private PackageInfo mTargetPackage;
         private File mStateDir;
+        private int mPmToken;
 
         class RestoreRequest {
             public PackageInfo app;
@@ -1488,11 +1510,12 @@ class BackupManagerService extends IBackupManager.Stub {
         }
 
         PerformRestoreTask(IBackupTransport transport, IRestoreObserver observer,
-                long restoreSetToken, PackageInfo targetPackage) {
+                long restoreSetToken, PackageInfo targetPackage, int pmToken) {
             mTransport = transport;
             mObserver = observer;
             mToken = restoreSetToken;
             mTargetPackage = targetPackage;
+            mPmToken = pmToken;
 
             try {
                 mStateDir = new File(mBaseStateDir, transport.transportDirName());
@@ -1505,25 +1528,7 @@ class BackupManagerService extends IBackupManager.Stub {
             long startRealtime = SystemClock.elapsedRealtime();
             if (DEBUG) Log.v(TAG, "Beginning restore process mTransport=" + mTransport
                     + " mObserver=" + mObserver + " mToken=" + Long.toHexString(mToken)
-                    + " mTargetPackage=" + mTargetPackage);
-            /**
-             * Restore sequence:
-             *
-             * 1. get the restore set description for our identity
-             * 2. for each app in the restore set:
-             *    2.a. if it's restorable on this device, add it to the restore queue
-             * 3. for each app in the restore queue:
-             *    3.a. clear the app data
-             *    3.b. get the restore data for the app from the transport
-             *    3.c. launch the backup agent for the app
-             *    3.d. agent.doRestore() with the data from the server
-             *    3.e. unbind the agent [and kill the app?]
-             * 4. shut down the transport
-             *
-             * On errors, we try our best to recover and move on to the next
-             * application, but if necessary we abort the whole operation --
-             * the user is waiting, after all.
-             */
+                    + " mTargetPackage=" + mTargetPackage + " mPmToken=" + mPmToken);
 
             PackageManagerBackupAgent pmAgent = null;
             int error = -1; // assume error
@@ -1609,6 +1614,7 @@ class BackupManagerService extends IBackupManager.Stub {
                         EventLog.writeEvent(EventLogTags.RESTORE_TRANSPORT_FAILURE);
                         return;
                     } else if (packageName.equals("")) {
+                        if (DEBUG) Log.v(TAG, "No next package, finishing restore");
                         break;
                     }
 
@@ -1731,6 +1737,15 @@ class BackupManagerService extends IBackupManager.Stub {
                     mAncestralPackages = pmAgent.getRestoredPackages();
                     mAncestralToken = mToken;
                     writeRestoreTokens();
+                }
+
+                // We must under all circumstances tell the Package Manager to
+                // proceed with install notifications if it's waiting for us.
+                if (mPmToken > 0) {
+                    if (DEBUG) Log.v(TAG, "finishing PM token " + mPmToken);
+                    try {
+                        mPackageManagerBinder.finishPackageInstall(mPmToken);
+                    } catch (RemoteException e) { /* can't happen */ }
                 }
 
                 // done; we can finally release the wakelock
@@ -2169,7 +2184,7 @@ class BackupManagerService extends IBackupManager.Stub {
     public String getCurrentTransport() {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
                 "getCurrentTransport");
-        Log.v(TAG, "... getCurrentTransport() returning " + mCurrentTransport);
+        if (DEBUG) Log.v(TAG, "... getCurrentTransport() returning " + mCurrentTransport);
         return mCurrentTransport;
     }
 
@@ -2248,6 +2263,45 @@ class BackupManagerService extends IBackupManager.Stub {
         }
     }
 
+    // An application being installed will need a restore pass, then the Package Manager
+    // will need to be told when the restore is finished.
+    public void restoreAtInstall(String packageName, int token) {
+        if (Binder.getCallingUid() != Process.SYSTEM_UID) {
+            Log.w(TAG, "Non-system process uid=" + Binder.getCallingUid()
+                    + " attemping install-time restore");
+            return;
+        }
+
+        long restoreSet = getAvailableRestoreToken(packageName);
+        if (DEBUG) Log.v(TAG, "restoreAtInstall pkg=" + packageName
+                + " token=" + Integer.toHexString(token));
+
+        if (restoreSet != 0) {
+            // okay, we're going to attempt a restore of this package from this restore set.
+            // The eventual message back into the Package Manager to run the post-install
+            // steps for 'token' will be issued from the restore handling code.
+
+            // We can use a synthetic PackageInfo here because:
+            //   1. We know it's valid, since the Package Manager supplied the name
+            //   2. Only the packageName field will be used by the restore code
+            PackageInfo pkg = new PackageInfo();
+            pkg.packageName = packageName;
+
+            mWakelock.acquire();
+            Message msg = mBackupHandler.obtainMessage(MSG_RUN_RESTORE);
+            msg.obj = new RestoreParams(getTransport(mCurrentTransport), null,
+                    restoreSet, pkg, token);
+            mBackupHandler.sendMessage(msg);
+        } else {
+            // No way to attempt a restore; just tell the Package Manager to proceed
+            // with the post-install handling for this package.
+            if (DEBUG) Log.v(TAG, "No restore set -- skipping restore");
+            try {
+                mPackageManagerBinder.finishPackageInstall(token);
+            } catch (RemoteException e) { /* can't happen */ }
+        }
+    }
+
     // Hand off a restore session
     public IRestoreSession beginRestoreSession(String transport) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP, "beginRestoreSession");
@@ -2266,7 +2320,7 @@ class BackupManagerService extends IBackupManager.Stub {
     // completed the given outstanding asynchronous backup/restore operation.
     public void opComplete(int token) {
         synchronized (mCurrentOpLock) {
-            if (DEBUG) Log.v(TAG, "opComplete: " + token);
+            if (DEBUG) Log.v(TAG, "opComplete: " + Integer.toHexString(token));
             mCurrentOperations.put(token, OP_ACKNOWLEDGED);
             mCurrentOpLock.notifyAll();
         }
@@ -2289,6 +2343,7 @@ class BackupManagerService extends IBackupManager.Stub {
             mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
                     "getAvailableRestoreSets");
 
+            long oldId = Binder.clearCallingIdentity();
             try {
                 if (mRestoreTransport == null) {
                     Log.w(TAG, "Null transport getting restore sets");
@@ -2302,6 +2357,8 @@ class BackupManagerService extends IBackupManager.Stub {
             } catch (Exception e) {
                 Log.e(TAG, "Error in getAvailableRestoreSets", e);
                 return null;
+            } finally {
+                Binder.restoreCallingIdentity(oldId);
             }
         }
 
@@ -2360,12 +2417,7 @@ class BackupManagerService extends IBackupManager.Stub {
             // So far so good; we're allowed to try to restore this package.  Now
             // check whether there is data for it in the current dataset, falling back
             // to the ancestral dataset if not.
-            long token = mAncestralToken;
-            synchronized (mQueueLock) {
-                if (mEverStoredApps.contains(packageName)) {
-                    token = mCurrentToken;
-                }
-            }
+            long token = getAvailableRestoreToken(packageName);
 
             // If we didn't come up with a place to look -- no ancestral dataset and
             // the app has never been backed up from this device -- there's nothing
@@ -2378,7 +2430,7 @@ class BackupManagerService extends IBackupManager.Stub {
             long oldId = Binder.clearCallingIdentity();
             mWakelock.acquire();
             Message msg = mBackupHandler.obtainMessage(MSG_RUN_RESTORE);
-            msg.obj = new RestoreParams(mRestoreTransport, observer, token, app);
+            msg.obj = new RestoreParams(mRestoreTransport, observer, token, app, 0);
             mBackupHandler.sendMessage(msg);
             Binder.restoreCallingIdentity(oldId);
             return 0;
@@ -2391,12 +2443,14 @@ class BackupManagerService extends IBackupManager.Stub {
             if (DEBUG) Log.d(TAG, "endRestoreSession");
 
             synchronized (this) {
+                long oldId = Binder.clearCallingIdentity();
                 try {
                     if (mRestoreTransport != null) mRestoreTransport.finishRestore();
                 } catch (Exception e) {
                     Log.e(TAG, "Error in finishRestore", e);
                 } finally {
                     mRestoreTransport = null;
+                    Binder.restoreCallingIdentity(oldId);
                 }
             }
 

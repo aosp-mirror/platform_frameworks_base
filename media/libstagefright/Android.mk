@@ -85,6 +85,8 @@ LOCAL_SHARED_LIBRARIES += \
 
 ifeq ($(TARGET_OS)-$(TARGET_SIMULATOR),linux-true)
         LOCAL_LDLIBS += -lpthread -ldl
+        LOCAL_SHARED_LIBRARIES += libdvm
+        LOCAL_CPPFLAGS += -DANDROID_SIMULATOR
 endif
 
 ifneq ($(TARGET_SIMULATOR),true)

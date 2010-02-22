@@ -21,6 +21,7 @@ import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -45,6 +46,8 @@ public class ContentProviderOperation implements Parcelable {
     private final ContentValues mValuesBackReferences;
     private final Map<Integer, Integer> mSelectionArgsBackReferences;
     private final boolean mYieldAllowed;
+
+    private final static String TAG = "ContentProviderOperation";
 
     /**
      * Creates a {@link ContentProviderOperation} by copying the contents of a
@@ -241,6 +244,7 @@ public class ContentProviderOperation implements Parcelable {
                             final String expectedValue = values.getAsString(projection[i]);
                             if (!TextUtils.equals(cursorValue, expectedValue)) {
                                 // Throw exception when expected values don't match
+                                Log.e(TAG, this.toString());
                                 throw new OperationApplicationException("Found value " + cursorValue
                                         + " when expected " + expectedValue + " for column "
                                         + projection[i]);
@@ -252,10 +256,12 @@ public class ContentProviderOperation implements Parcelable {
                 cursor.close();
             }
         } else {
+            Log.e(TAG, this.toString());
             throw new IllegalStateException("bad type, " + mType);
         }
 
         if (mExpectedCount != null && mExpectedCount != numRows) {
+            Log.e(TAG, this.toString());
             throw new OperationApplicationException("wrong number of rows: " + numRows);
         }
 
@@ -289,6 +295,7 @@ public class ContentProviderOperation implements Parcelable {
             String key = entry.getKey();
             Integer backRefIndex = mValuesBackReferences.getAsInteger(key);
             if (backRefIndex == null) {
+                Log.e(TAG, this.toString());
                 throw new IllegalArgumentException("values backref " + key + " is not an integer");
             }
             values.put(key, backRefToValue(backRefs, numBackRefs, backRefIndex));
@@ -326,6 +333,17 @@ public class ContentProviderOperation implements Parcelable {
         return newArgs;
     }
 
+    @Override
+    public String toString() {
+        return "mType: " + mType + ", mUri: " + mUri +
+                ", mSelection: " + mSelection +
+                ", mExpectedCount: " + mExpectedCount +
+                ", mYieldAllowed: " + mYieldAllowed +
+                ", mValues: " + mValues +
+                ", mValuesBackReferences: " + mValuesBackReferences +
+                ", mSelectionArgsBackReferences: " + mSelectionArgsBackReferences;
+    }
+
     /**
      * Return the string representation of the requested back reference.
      * @param backRefs an array of results
@@ -335,9 +353,10 @@ public class ContentProviderOperation implements Parcelable {
      * the numBackRefs
      * @return the string representation of the requested back reference.
      */
-    private static long backRefToValue(ContentProviderResult[] backRefs, int numBackRefs,
+    private long backRefToValue(ContentProviderResult[] backRefs, int numBackRefs,
             Integer backRefIndex) {
         if (backRefIndex >= numBackRefs) {
+            Log.e(TAG, this.toString());
             throw new ArrayIndexOutOfBoundsException("asked for back ref " + backRefIndex
                     + " but there are only " + numBackRefs + " back refs");
         }
