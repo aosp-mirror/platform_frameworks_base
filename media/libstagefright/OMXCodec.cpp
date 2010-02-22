@@ -298,6 +298,10 @@ uint32_t OMXCodec::getComponentQuirks(const char *componentName) {
         quirks |= kRequiresAllocateBufferOnOutputPorts;
     }
 
+    if (!strcmp(componentName, "OMX.TI.Video.Decoder")) {
+        quirks |= kInputBufferSizesAreBogus;
+    }
+
     return quirks;
 }
 
@@ -561,7 +565,8 @@ void OMXCodec::setMinBufferSize(OMX_U32 portIndex, OMX_U32 size) {
             mNode, OMX_IndexParamPortDefinition, &def, sizeof(def));
     CHECK_EQ(err, OK);
 
-    if (def.nBufferSize < size) {
+    if ((portIndex == kPortIndexInput && (mQuirks & kInputBufferSizesAreBogus))
+        || (def.nBufferSize < size)) {
         def.nBufferSize = size;
     }
 
@@ -574,7 +579,12 @@ void OMXCodec::setMinBufferSize(OMX_U32 portIndex, OMX_U32 size) {
     CHECK_EQ(err, OK);
 
     // Make sure the setting actually stuck.
-    CHECK(def.nBufferSize >= size);
+    if (portIndex == kPortIndexInput
+            && (mQuirks & kInputBufferSizesAreBogus)) {
+        CHECK_EQ(def.nBufferSize, size);
+    } else {
+        CHECK(def.nBufferSize >= size);
+    }
 }
 
 status_t OMXCodec::setVideoPortFormatType(
