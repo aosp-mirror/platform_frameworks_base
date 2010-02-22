@@ -961,7 +961,7 @@ class ContextImpl extends Context {
             return getDropBoxManager();
         } else if (DEVICE_POLICY_SERVICE.equals(name)) {
             return getDevicePolicyManager();
-        } else if (UIMODE_SERVICE.equals(name)) {
+        } else if (UI_MODE_SERVICE.equals(name)) {
             return getUiModeManager();
         }
 
