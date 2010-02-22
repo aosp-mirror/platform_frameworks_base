@@ -206,6 +206,7 @@ public class StatusBarService extends IStatusBar.Stub
     private boolean mTicking;
     
     // Tracking finger for opening/closing.
+    int mEdgeBorder; // corresponds to R.dimen.status_bar_edge_ignore
     boolean mTracking;
     VelocityTracker mVelocityTracker;
     
@@ -298,6 +299,8 @@ public class StatusBarService extends IStatusBar.Stub
         mTrackingView.mService = this;
         mCloseView = (CloseDragHandle)mTrackingView.findViewById(R.id.close);
         mCloseView.mService = this;
+
+        mEdgeBorder = res.getDimensionPixelSize(R.dimen.status_bar_edge_ignore);
 
         // add the more icon for the notifications
         IconData moreData = IconData.makeIcon(null, context.getPackageName(),
@@ -1204,8 +1207,10 @@ public class StatusBarService extends IStatusBar.Stub
     }
     
     boolean interceptTouchEvent(MotionEvent event) {
-        if (SPEW) Log.d(TAG, "Touch: rawY=" + event.getRawY() + " event=" + event + " mDisabled="
+        if (SPEW) {
+            Log.d(TAG, "Touch: rawY=" + event.getRawY() + " event=" + event + " mDisabled="
                 + mDisabled);
+        }
 
         if ((mDisabled & StatusBarManager.DISABLE_EXPAND) != 0) {
             return false;
@@ -1214,7 +1219,7 @@ public class StatusBarService extends IStatusBar.Stub
         final int statusBarSize = mStatusBarView.getHeight();
         final int hitSize = statusBarSize*2;
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
-            int y = (int)event.getRawY();
+            final int y = (int)event.getRawY();
 
             if (!mExpanded) {
                 mViewDelta = statusBarSize - y;
@@ -1224,8 +1229,16 @@ public class StatusBarService extends IStatusBar.Stub
             }
             if ((!mExpanded && y < hitSize) ||
                     (mExpanded && y > (mDisplay.getHeight()-hitSize))) {
-                prepareTracking(y, !mExpanded); // opening if we're not already fully visible
-                mVelocityTracker.addMovement(event);
+
+                // We drop events at the edge of the screen to make the windowshade come
+                // down by accident less, especially when pushing open a device with a keyboard
+                // that rotates (like g1 and droid)
+                int x = (int)event.getRawX();
+                final int edgeBorder = mEdgeBorder;
+                if (x >= edgeBorder && x < mDisplay.getWidth() - edgeBorder) {
+                    prepareTracking(y, !mExpanded);// opening if we're not already fully visible
+                    mVelocityTracker.addMovement(event);
+                }
             }
         } else if (mTracking) {
             mVelocityTracker.addMovement(event);
@@ -1771,10 +1784,15 @@ public class StatusBarService extends IStatusBar.Stub
      * meantime, just update the things that we know change.
      */
     void updateResources() {
+        Resources res = mContext.getResources();
+
         mClearButton.setText(mContext.getText(R.string.status_bar_clear_all_button));
         mOngoingTitle.setText(mContext.getText(R.string.status_bar_ongoing_events_title));
         mLatestTitle.setText(mContext.getText(R.string.status_bar_latest_events_title));
         mNoNotificationsTitle.setText(mContext.getText(R.string.status_bar_no_notifications_title));
+
+        mEdgeBorder = res.getDimensionPixelSize(R.dimen.status_bar_edge_ignore);
+
         if (false) Log.v(TAG, "updateResources");
     }
 
