@@ -8496,6 +8496,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         }
         jumpDrawablesToCurrentState();
 
+        // We are supposing here that the parent directionality will be resolved before its children
+        // View horizontalDirection public attribute resolution to an internal var.
         // Resolving the layout direction. LTR is set initially.
         mPrivateFlags2 &= ~RESOLVED_LAYOUT_RTL;
         switch (getHorizontalDirection()) {
