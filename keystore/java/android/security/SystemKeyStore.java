@@ -17,6 +17,7 @@
 package android.security;
 
 import android.os.Environment;
+import android.os.FileUtils;
 import android.os.Process;
 
 import java.io.File;
@@ -92,6 +93,8 @@ public class SystemKeyStore {
             fos.write(retKey);
             fos.flush();
             fos.close();
+            FileUtils.setPermissions(keyFile.getName(), (FileUtils.S_IRUSR | FileUtils.S_IWUSR),
+                -1, -1);
         } catch (IOException ioe) {
             return null;
         }
