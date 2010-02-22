@@ -1012,12 +1012,12 @@ extends Layout
         int extra;
 
         if (needMultiply) {
-            // XXX: this looks like it is using the +0.5 and the cast to int
-            // to do rounding, but this I expect this isn't doing the intended
-            // thing when spacingmult < 1.  An intended extra of, say, -1.2
-            // will get 'rounded' to -.7 and then truncated to 0.
-            extra = (int) ((below - above) * (spacingmult - 1)
-                           + spacingadd + 0.5);
+            double ex = (below - above) * (spacingmult - 1) + spacingadd;
+            if (ex >= 0) {
+                extra = (int)(ex + 0.5);
+            } else {
+                extra = -(int)(-ex + 0.5);
+            }
         } else {
             extra = 0;
         }
