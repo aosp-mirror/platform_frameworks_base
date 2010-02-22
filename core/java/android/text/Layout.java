@@ -1936,6 +1936,11 @@ public abstract class Layout {
 
     public static final int DIR_LEFT_TO_RIGHT = 1;
     public static final int DIR_RIGHT_TO_LEFT = -1;
+    
+    /* package */ static final int DIR_REQUEST_LTR = 1;
+    /* package */ static final int DIR_REQUEST_RTL = -1;
+    /* package */ static final int DIR_REQUEST_DEFAULT_LTR = 2;
+    /* package */ static final int DIR_REQUEST_DEFAULT_RTL = -2;
 
     public enum Alignment {
         ALIGN_NORMAL,

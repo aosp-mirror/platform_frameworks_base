@@ -234,215 +234,9 @@ extends Layout
             }
 
             if (!easy) {
-                AndroidCharacter.getDirectionalities(chs, chdirs, end - start);
-
-                /*
-                 * Determine primary paragraph direction
-                 */
-
-                for (int j = start; j < end; j++) {
-                    int d = chdirs[j - start];
-
-                    if (d == Character.DIRECTIONALITY_LEFT_TO_RIGHT) {
-                        dir = DIR_LEFT_TO_RIGHT;
-                        break;
-                    }
-                    if (d == Character.DIRECTIONALITY_RIGHT_TO_LEFT) {
-                        dir = DIR_RIGHT_TO_LEFT;
-                        break;
-                    }
-                }
-
-                /*
-                 * XXX Explicit overrides should go here
-                 */
-
-                /*
-                 * Weak type resolution
-                 */
-
-                final byte SOR = dir == DIR_LEFT_TO_RIGHT ?
-                                    Character.DIRECTIONALITY_LEFT_TO_RIGHT :
-                                    Character.DIRECTIONALITY_RIGHT_TO_LEFT;
-
-                // dump(chdirs, n, "initial");
-
-                // W1 non spacing marks
-                for (int j = 0; j < n; j++) {
-                    if (chdirs[j] == Character.NON_SPACING_MARK) {
-                        if (j == 0)
-                            chdirs[j] = SOR;
-                        else
-                            chdirs[j] = chdirs[j - 1];
-                    }
-                }
-
-                // dump(chdirs, n, "W1");
-
-                // W2 european numbers
-                byte cur = SOR;
-                for (int j = 0; j < n; j++) {
-                    byte d = chdirs[j];
-
-                    if (d == Character.DIRECTIONALITY_LEFT_TO_RIGHT ||
-                        d == Character.DIRECTIONALITY_RIGHT_TO_LEFT ||
-                        d == Character.DIRECTIONALITY_RIGHT_TO_LEFT_ARABIC)
-                        cur = d;
-                    else if (d == Character.DIRECTIONALITY_EUROPEAN_NUMBER) {
-                         if (cur ==
-                            Character.DIRECTIONALITY_RIGHT_TO_LEFT_ARABIC)
-                            chdirs[j] = Character.DIRECTIONALITY_ARABIC_NUMBER;
-                    }
-                }
-
-                // dump(chdirs, n, "W2");
-
-                // W3 arabic letters
-                for (int j = 0; j < n; j++) {
-                    if (chdirs[j] == Character.DIRECTIONALITY_RIGHT_TO_LEFT_ARABIC)
-                        chdirs[j] = Character.DIRECTIONALITY_RIGHT_TO_LEFT;
-                }
-
-                // dump(chdirs, n, "W3");
-
-                // W4 single separator between numbers
-                for (int j = 1; j < n - 1; j++) {
-                    byte d = chdirs[j];
-                    byte prev = chdirs[j - 1];
-                    byte next = chdirs[j + 1];
-
-                    if (d == Character.DIRECTIONALITY_EUROPEAN_NUMBER_SEPARATOR) {
-                        if (prev == Character.DIRECTIONALITY_EUROPEAN_NUMBER &&
-                            next == Character.DIRECTIONALITY_EUROPEAN_NUMBER)
-                            chdirs[j] = Character.DIRECTIONALITY_EUROPEAN_NUMBER;
-                    } else if (d == Character.DIRECTIONALITY_COMMON_NUMBER_SEPARATOR) {
-                        if (prev == Character.DIRECTIONALITY_EUROPEAN_NUMBER &&
-                            next == Character.DIRECTIONALITY_EUROPEAN_NUMBER)
-                            chdirs[j] = Character.DIRECTIONALITY_EUROPEAN_NUMBER;
-                        if (prev == Character.DIRECTIONALITY_ARABIC_NUMBER &&
-                            next == Character.DIRECTIONALITY_ARABIC_NUMBER)
-                            chdirs[j] = Character.DIRECTIONALITY_ARABIC_NUMBER;
-                    }
-                }
-
-                // dump(chdirs, n, "W4");
-
-                // W5 european number terminators
-                boolean adjacent = false;
-                for (int j = 0; j < n; j++) {
-                    byte d = chdirs[j];
-
-                    if (d == Character.DIRECTIONALITY_EUROPEAN_NUMBER)
-                        adjacent = true;
-                    else if (d == Character.DIRECTIONALITY_EUROPEAN_NUMBER_TERMINATOR && adjacent)
-                        chdirs[j] = Character.DIRECTIONALITY_EUROPEAN_NUMBER;
-                    else
-                        adjacent = false;
-                }
-
-                //dump(chdirs, n, "W5");
-
-                // W5 european number terminators part 2,
-                // W6 separators and terminators
-                adjacent = false;
-                for (int j = n - 1; j >= 0; j--) {
-                    byte d = chdirs[j];
-
-                    if (d == Character.DIRECTIONALITY_EUROPEAN_NUMBER)
-                        adjacent = true;
-                    else if (d == Character.DIRECTIONALITY_EUROPEAN_NUMBER_TERMINATOR) {
-                        if (adjacent)
-                            chdirs[j] = Character.DIRECTIONALITY_EUROPEAN_NUMBER;
-                        else
-                            chdirs[j] = Character.DIRECTIONALITY_OTHER_NEUTRALS;
-                    }
-                    else {
-                        adjacent = false;
-
-                        if (d == Character.DIRECTIONALITY_EUROPEAN_NUMBER_SEPARATOR ||
-                            d == Character.DIRECTIONALITY_COMMON_NUMBER_SEPARATOR ||
-                            d == Character.DIRECTIONALITY_PARAGRAPH_SEPARATOR ||
-                            d == Character.DIRECTIONALITY_SEGMENT_SEPARATOR)
-                            chdirs[j] = Character.DIRECTIONALITY_OTHER_NEUTRALS;
-                    }
-                }
-
-                // dump(chdirs, n, "W6");
-
-                // W7 strong direction of european numbers
-                cur = SOR;
-                for (int j = 0; j < n; j++) {
-                    byte d = chdirs[j];
-
-                    if (d == SOR ||
-                        d == Character.DIRECTIONALITY_LEFT_TO_RIGHT ||
-                        d == Character.DIRECTIONALITY_RIGHT_TO_LEFT)
-                        cur = d;
-
-                    if (d == Character.DIRECTIONALITY_EUROPEAN_NUMBER)
-                        chdirs[j] = cur;
-                }
-
-                // dump(chdirs, n, "W7");
-
-                // N1, N2 neutrals
-                cur = SOR;
-                for (int j = 0; j < n; j++) {
-                    byte d = chdirs[j];
-
-                    if (d == Character.DIRECTIONALITY_LEFT_TO_RIGHT ||
-                        d == Character.DIRECTIONALITY_RIGHT_TO_LEFT) {
-                        cur = d;
-                    } else if (d == Character.DIRECTIONALITY_EUROPEAN_NUMBER ||
-                               d == Character.DIRECTIONALITY_ARABIC_NUMBER) {
-                        cur = Character.DIRECTIONALITY_RIGHT_TO_LEFT;
-                    } else {
-                        byte dd = SOR;
-                        int k;
-
-                        for (k = j + 1; k < n; k++) {
-                            dd = chdirs[k];
-
-                            if (dd == Character.DIRECTIONALITY_LEFT_TO_RIGHT ||
-                                dd == Character.DIRECTIONALITY_RIGHT_TO_LEFT) {
-                                break;
-                            }
-                            if (dd == Character.DIRECTIONALITY_EUROPEAN_NUMBER ||
-                                dd == Character.DIRECTIONALITY_ARABIC_NUMBER) {
-                                dd = Character.DIRECTIONALITY_RIGHT_TO_LEFT;
-                                break;
-                            }
-                        }
-
-                        for (int y = j; y < k; y++) {
-                            if (dd == cur)
-                                chdirs[y] = cur;
-                            else
-                                chdirs[y] = SOR;
-                        }
-
-                        j = k - 1;
-                    }
-                }
-
-                // dump(chdirs, n, "final");
-
-                // extra: enforce that all tabs and surrogate characters go the
-                // primary direction
-                // TODO: actually do directions right for surrogates
-
-                for (int j = 0; j < n; j++) {
-                    char c = chs[j];
-
-                    if (c == '\t' || (c >= 0xD800 && c <= 0xDFFF)) {
-                        chdirs[j] = SOR;
-                    }
-                }
-
-                // extra: enforce that object replacements go to the
-                // primary direction
-                // and that none of the underlying characters are treated
-                // as viable breakpoints
+                // Ensure that none of the underlying characters are treated
+                // as viable breakpoints, and that the entire run gets the
+                // same bidi direction.
 
                 if (source instanceof Spanned) {
                     Spanned sp = (Spanned) source;
@@ -453,11 +247,13 @@ extends Layout
                         int b = sp.getSpanEnd(spans[y]);
 
                         for (int x = a; x < b; x++) {
-                            chdirs[x - start] = SOR;
                             chs[x - start] = '\uFFFC';
                         }
                     }
                 }
+
+                // XXX put override flags, etc. into chdirs
+                dir = bidi(dir, chs, chdirs, n, false);
 
                 // Do mirroring for right-to-left segments
 
@@ -808,6 +604,239 @@ extends Layout
                     widths, bufstart, 0,
                     where, ellipsizedWidth, 0, paint);
         }
+    }
+
+    /**
+     * Runs the unicode bidi algorithm on the first n chars in chs, returning
+     * the char dirs in chInfo and the base line direction of the first
+     * paragraph.
+     * 
+     * XXX change result from dirs to levels
+     *  
+     * @param dir the direction flag, either DIR_REQUEST_LTR,
+     * DIR_REQUEST_RTL, DIR_REQUEST_DEFAULT_LTR, or DIR_REQUEST_DEFAULT_RTL.
+     * @param chs the text to examine
+     * @param chInfo on input, if hasInfo is true, override and other flags 
+     * representing out-of-band embedding information. On output, the generated 
+     * dirs of the text.
+     * @param n the length of the text/information in chs and chInfo
+     * @param hasInfo true if chInfo has input information, otherwise the
+     * input data in chInfo is ignored.
+     * @return the resolved direction level of the first paragraph, either
+     * DIR_LEFT_TO_RIGHT or DIR_RIGHT_TO_LEFT.
+     */
+    /* package */ static int bidi(int dir, char[] chs, byte[] chInfo, int n, 
+            boolean hasInfo) {
+        
+        AndroidCharacter.getDirectionalities(chs, chInfo, n);
+
+        /*
+         * Determine primary paragraph direction if not specified
+         */
+        if (dir != DIR_REQUEST_LTR && dir != DIR_REQUEST_RTL) {
+            // set up default
+            dir = dir >= 0 ? DIR_LEFT_TO_RIGHT : DIR_RIGHT_TO_LEFT;
+            for (int j = 0; j < n; j++) {
+                int d = chInfo[j];
+
+                if (d == Character.DIRECTIONALITY_LEFT_TO_RIGHT) {
+                    dir = DIR_LEFT_TO_RIGHT;
+                    break;
+                }
+                if (d == Character.DIRECTIONALITY_RIGHT_TO_LEFT) {
+                    dir = DIR_RIGHT_TO_LEFT;
+                    break;
+                }
+            }
+        }
+
+        final byte SOR = dir == DIR_LEFT_TO_RIGHT ?
+                Character.DIRECTIONALITY_LEFT_TO_RIGHT :
+                Character.DIRECTIONALITY_RIGHT_TO_LEFT;
+
+        /*
+         * XXX Explicit overrides should go here
+         */
+
+        /*
+         * Weak type resolution
+         */
+
+        // dump(chdirs, n, "initial");
+
+        // W1 non spacing marks
+        for (int j = 0; j < n; j++) {
+            if (chInfo[j] == Character.NON_SPACING_MARK) {
+                if (j == 0)
+                    chInfo[j] = SOR;
+                else
+                    chInfo[j] = chInfo[j - 1];
+            }
+        }
+
+        // dump(chdirs, n, "W1");
+
+        // W2 european numbers
+        byte cur = SOR;
+        for (int j = 0; j < n; j++) {
+            byte d = chInfo[j];
+
+            if (d == Character.DIRECTIONALITY_LEFT_TO_RIGHT ||
+                d == Character.DIRECTIONALITY_RIGHT_TO_LEFT ||
+                d == Character.DIRECTIONALITY_RIGHT_TO_LEFT_ARABIC)
+                cur = d;
+            else if (d == Character.DIRECTIONALITY_EUROPEAN_NUMBER) {
+                 if (cur ==
+                    Character.DIRECTIONALITY_RIGHT_TO_LEFT_ARABIC)
+                    chInfo[j] = Character.DIRECTIONALITY_ARABIC_NUMBER;
+            }
+        }
+
+        // dump(chdirs, n, "W2");
+
+        // W3 arabic letters
+        for (int j = 0; j < n; j++) {
+            if (chInfo[j] == Character.DIRECTIONALITY_RIGHT_TO_LEFT_ARABIC)
+                chInfo[j] = Character.DIRECTIONALITY_RIGHT_TO_LEFT;
+        }
+
+        // dump(chdirs, n, "W3");
+
+        // W4 single separator between numbers
+        for (int j = 1; j < n - 1; j++) {
+            byte d = chInfo[j];
+            byte prev = chInfo[j - 1];
+            byte next = chInfo[j + 1];
+
+            if (d == Character.DIRECTIONALITY_EUROPEAN_NUMBER_SEPARATOR) {
+                if (prev == Character.DIRECTIONALITY_EUROPEAN_NUMBER &&
+                    next == Character.DIRECTIONALITY_EUROPEAN_NUMBER)
+                    chInfo[j] = Character.DIRECTIONALITY_EUROPEAN_NUMBER;
+            } else if (d == Character.DIRECTIONALITY_COMMON_NUMBER_SEPARATOR) {
+                if (prev == Character.DIRECTIONALITY_EUROPEAN_NUMBER &&
+                    next == Character.DIRECTIONALITY_EUROPEAN_NUMBER)
+                    chInfo[j] = Character.DIRECTIONALITY_EUROPEAN_NUMBER;
+                if (prev == Character.DIRECTIONALITY_ARABIC_NUMBER &&
+                    next == Character.DIRECTIONALITY_ARABIC_NUMBER)
+                    chInfo[j] = Character.DIRECTIONALITY_ARABIC_NUMBER;
+            }
+        }
+
+        // dump(chdirs, n, "W4");
+
+        // W5 european number terminators
+        boolean adjacent = false;
+        for (int j = 0; j < n; j++) {
+            byte d = chInfo[j];
+
+            if (d == Character.DIRECTIONALITY_EUROPEAN_NUMBER)
+                adjacent = true;
+            else if (d == Character.DIRECTIONALITY_EUROPEAN_NUMBER_TERMINATOR && adjacent)
+                chInfo[j] = Character.DIRECTIONALITY_EUROPEAN_NUMBER;
+            else
+                adjacent = false;
+        }
+
+        //dump(chdirs, n, "W5");
+
+        // W5 european number terminators part 2,
+        // W6 separators and terminators
+        adjacent = false;
+        for (int j = n - 1; j >= 0; j--) {
+            byte d = chInfo[j];
+
+            if (d == Character.DIRECTIONALITY_EUROPEAN_NUMBER)
+                adjacent = true;
+            else if (d == Character.DIRECTIONALITY_EUROPEAN_NUMBER_TERMINATOR) {
+                if (adjacent)
+                    chInfo[j] = Character.DIRECTIONALITY_EUROPEAN_NUMBER;
+                else
+                    chInfo[j] = Character.DIRECTIONALITY_OTHER_NEUTRALS;
+            }
+            else {
+                adjacent = false;
+
+                if (d == Character.DIRECTIONALITY_EUROPEAN_NUMBER_SEPARATOR ||
+                    d == Character.DIRECTIONALITY_COMMON_NUMBER_SEPARATOR ||
+                    d == Character.DIRECTIONALITY_PARAGRAPH_SEPARATOR ||
+                    d == Character.DIRECTIONALITY_SEGMENT_SEPARATOR)
+                    chInfo[j] = Character.DIRECTIONALITY_OTHER_NEUTRALS;
+            }
+        }
+
+        // dump(chdirs, n, "W6");
+
+        // W7 strong direction of european numbers
+        cur = SOR;
+        for (int j = 0; j < n; j++) {
+            byte d = chInfo[j];
+
+            if (d == SOR ||
+                d == Character.DIRECTIONALITY_LEFT_TO_RIGHT ||
+                d == Character.DIRECTIONALITY_RIGHT_TO_LEFT)
+                cur = d;
+
+            if (d == Character.DIRECTIONALITY_EUROPEAN_NUMBER)
+                chInfo[j] = cur;
+        }
+
+        // dump(chdirs, n, "W7");
+
+        // N1, N2 neutrals
+        cur = SOR;
+        for (int j = 0; j < n; j++) {
+            byte d = chInfo[j];
+
+            if (d == Character.DIRECTIONALITY_LEFT_TO_RIGHT ||
+                d == Character.DIRECTIONALITY_RIGHT_TO_LEFT) {
+                cur = d;
+            } else if (d == Character.DIRECTIONALITY_EUROPEAN_NUMBER ||
+                       d == Character.DIRECTIONALITY_ARABIC_NUMBER) {
+                cur = Character.DIRECTIONALITY_RIGHT_TO_LEFT;
+            } else {
+                byte dd = SOR;
+                int k;
+
+                for (k = j + 1; k < n; k++) {
+                    dd = chInfo[k];
+
+                    if (dd == Character.DIRECTIONALITY_LEFT_TO_RIGHT ||
+                        dd == Character.DIRECTIONALITY_RIGHT_TO_LEFT) {
+                        break;
+                    }
+                    if (dd == Character.DIRECTIONALITY_EUROPEAN_NUMBER ||
+                        dd == Character.DIRECTIONALITY_ARABIC_NUMBER) {
+                        dd = Character.DIRECTIONALITY_RIGHT_TO_LEFT;
+                        break;
+                    }
+                }
+
+                for (int y = j; y < k; y++) {
+                    if (dd == cur)
+                        chInfo[y] = cur;
+                    else
+                        chInfo[y] = SOR;
+                }
+
+                j = k - 1;
+            }
+        }
+
+        // dump(chdirs, n, "final");
+
+        // extra: enforce that all tabs and surrogate characters go the
+        // primary direction
+        // TODO: actually do directions right for surrogates
+
+        for (int j = 0; j < n; j++) {
+            char c = chs[j];
+
+            if (c == '\t' || (c >= 0xD800 && c <= 0xDFFF)) {
+                chInfo[j] = SOR;
+            }
+        }
+        
+        return dir;
     }
 
     private static final char FIRST_CJK = '\u2E80';
