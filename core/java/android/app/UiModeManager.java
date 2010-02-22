@@ -12,7 +12,7 @@ import android.util.Log;
  *
  * <p>You do not instantiate this class directly; instead, retrieve it through
  * {@link android.content.Context#getSystemService
- * Context.getSystemService(Context.UIMODE_SERVICE)}.
+ * Context.getSystemService(Context.UI_MODE_SERVICE)}.
  */
 public class UiModeManager {
     private static final String TAG = "UiModeManager";
