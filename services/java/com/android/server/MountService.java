@@ -202,7 +202,7 @@ class MountService extends IMountService.Stub
         String vs = getVolumeState(path);
         if (enable && vs.equals(Environment.MEDIA_MOUNTED)) {
             mUmsEnabling = enable; // Override for isUsbMassStorageEnabled()
-            int rc = doUnmountVolume(path, false);
+            int rc = doUnmountVolume(path, true);
             mUmsEnabling = false; // Clear override
             if (rc != StorageResultCode.OperationSucceeded) {
                 Log.e(TAG, String.format("Failed to unmount before enabling UMS (%d)", rc));
