@@ -2495,7 +2495,6 @@ public final class ActivityThread {
                             " did not call through to super.onPostCreate()");
                     }
                 }
-                r.state = null;
             }
             r.paused = true;
 
@@ -2526,6 +2525,7 @@ public final class ActivityThread {
 
         if (a != null) {
             r.createdConfig = new Configuration(mConfiguration);
+            Bundle oldState = r.state;
             handleResumeActivity(r.token, false, r.isForward);
 
             if (!r.activity.mFinished && r.startsNotResumed) {
@@ -2541,6 +2541,9 @@ public final class ActivityThread {
                 try {
                     r.activity.mCalled = false;
                     mInstrumentation.callActivityOnPause(r.activity);
+                    // We need to keep around the original state, in case
+                    // we need to be created again.
+                    r.state = oldState;
                     if (!r.activity.mCalled) {
                         throw new SuperNotCalledException(
                             "Activity " + r.intent.getComponent().toShortString() +

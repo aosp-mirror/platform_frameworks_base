@@ -135,6 +135,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     static final boolean DEBUG_VISBILITY = localLOGV || false;
     static final boolean DEBUG_PROCESSES = localLOGV || false;
     static final boolean DEBUG_PROVIDER = localLOGV || false;
+    static final boolean DEBUG_URI_PERMISSION = localLOGV || false;
     static final boolean DEBUG_USER_LEAVING = localLOGV || false;
     static final boolean DEBUG_RESULTS = localLOGV || false;
     static final boolean DEBUG_BACKUP = localLOGV || false;
@@ -968,6 +969,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     static final int PROC_START_TIMEOUT_MSG = 20;
     static final int DO_PENDING_ACTIVITY_LAUNCHES_MSG = 21;
     static final int KILL_APPLICATION_MSG = 22;
+    static final int FINALIZE_PENDING_INTENT_MSG = 23;
 
     AlertDialog mUidAlert;
 
@@ -1188,6 +1190,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     String pkg = (String) msg.obj;
                     forceStopPackageLocked(pkg, uid, restart, false, true);
                 }
+            } break;
+            case FINALIZE_PENDING_INTENT_MSG: {
+                ((PendingIntentRecord)msg.obj).completeFinalize();
             } break;
             }
         }
@@ -3599,10 +3604,18 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
 
         synchronized(this) {
+            int callingPid;
+            int callingUid;
+            if (caller == null) {
+                callingPid = Binder.getCallingPid();
+                callingUid = Binder.getCallingUid();
+            } else {
+                callingPid = callingUid = -1;
+            }
             final long origId = Binder.clearCallingIdentity();
             int res = startActivityLocked(caller, intent, resolvedType,
                     grantedUriPermissions, grantedMode, aInfo,
-                    resultTo, resultWho, requestCode, -1, -1,
+                    resultTo, resultWho, requestCode, callingPid, callingUid,
                     onlyIfNeeded, componentSpecified);
             Binder.restoreCallingIdentity(origId);
             return res;
@@ -6166,10 +6179,15 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             return;
         }
 
+        if (DEBUG_URI_PERMISSION) Log.v(TAG, 
+                "Requested grant " + targetPkg + " permission to " + uri);
+        
         final IPackageManager pm = ActivityThread.getPackageManager();
 
         // If this is not a content: uri, we can't do anything with it.
         if (!ContentResolver.SCHEME_CONTENT.equals(uri.getScheme())) {
+            if (DEBUG_URI_PERMISSION) Log.v(TAG, 
+                    "Can't grant URI permission for non-content URI: " + uri);
             return;
         }
 
@@ -6195,6 +6213,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         try {
             targetUid = pm.getPackageUid(targetPkg);
             if (targetUid < 0) {
+                if (DEBUG_URI_PERMISSION) Log.v(TAG, 
+                        "Can't grant URI permission no uid for: " + targetPkg);
                 return;
             }
         } catch (RemoteException ex) {
@@ -6204,17 +6224,12 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         // First...  does the target actually need this permission?
         if (checkHoldingPermissionsLocked(pm, pi, targetUid, modeFlags)) {
             // No need to grant the target this permission.
+            if (DEBUG_URI_PERMISSION) Log.v(TAG, 
+                    "Target " + targetPkg + " already has full permission to " + uri);
             return;
         }
 
-        // Second...  maybe someone else has already granted the
-        // permission?
-        if (checkUriPermissionLocked(uri, targetUid, modeFlags)) {
-            // No need to grant the target this permission.
-            return;
-        }
-
-        // Third...  is the provider allowing granting of URI permissions?
+        // Second...  is the provider allowing granting of URI permissions?
         if (!pi.grantUriPermissions) {
             throw new SecurityException("Provider " + pi.packageName
                     + "/" + pi.name
@@ -6239,7 +6254,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             }
         }
 
-        // Fourth...  does the caller itself have permission to access
+        // Third...  does the caller itself have permission to access
         // this uri?
         if (!checkHoldingPermissionsLocked(pm, pi, callingUid, modeFlags)) {
             if (!checkUriPermissionLocked(uri, callingUid, modeFlags)) {
@@ -6252,6 +6267,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         // to the uri, and the target doesn't.  Let's now give this to
         // the target.
 
+        if (DEBUG_URI_PERMISSION) Log.v(TAG, 
+                "Granting " + targetPkg + " permission to " + uri);
+        
         HashMap<Uri, UriPermission> targetUris
                 = mGrantedUriPermissions.get(targetUid);
         if (targetUris == null) {
@@ -6325,6 +6343,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             HashMap<Uri, UriPermission> perms
                     = mGrantedUriPermissions.get(perm.uid);
             if (perms != null) {
+                if (DEBUG_URI_PERMISSION) Log.v(TAG, 
+                        "Removing " + perm.uid + " permission to " + perm.uri);
                 perms.remove(perm.uri);
                 if (perms.size() == 0) {
                     mGrantedUriPermissions.remove(perm.uid);
@@ -6364,6 +6384,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             return;
         }
 
+        if (DEBUG_URI_PERMISSION) Log.v(TAG, 
+                "Revoking all granted permissions to " + uri);
+        
         final IPackageManager pm = ActivityThread.getPackageManager();
 
         final String authority = uri.getAuthority();
@@ -6422,6 +6445,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                             continue toploop;
                         }
                     }
+                    if (DEBUG_URI_PERMISSION) Log.v(TAG, 
+                            "Revoking " + perm.uid + " permission to " + perm.uri);
                     perm.clearModes(modeFlags);
                     if (perm.modeFlags == 0) {
                         it.remove();

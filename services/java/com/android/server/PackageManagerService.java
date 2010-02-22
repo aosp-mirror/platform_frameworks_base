@@ -5704,6 +5704,18 @@ class PackageManagerService extends IPackageManager.Stub {
                 // remove permissions associated with package
                 mSettings.updateSharedUserPermsLP(deletedPs, mGlobalGids);
             }
+            if (deletedPs != null) {
+                // remove from preferred activities.
+                ArrayList<PreferredActivity> removed = new ArrayList<PreferredActivity>();
+                for (PreferredActivity pa : mSettings.mPreferredActivities.filterSet()) {
+                    if (pa.mActivity.getPackageName().equals(deletedPs.name)) {
+                        removed.add(pa);
+                    }
+                }
+                for (PreferredActivity pa : removed) {
+                    mSettings.mPreferredActivities.removeFilter(pa);
+                }
+            }
             // Save settings now
             mSettings.writeLP();
         }
@@ -7461,9 +7473,9 @@ class PackageManagerService extends IPackageManager.Stub {
                         Log.w(TAG, "Trying to update system app code path from " +
                                 p.codePathString + " to " + codePath.toString());
                     } else {
-                        // Let the app continue with previous uid if code path changes.
-                        reportSettingsProblem(Log.WARN,
-                                "Package " + name + " codePath changed from " + p.codePath
+                        // Just a change in the code path is not an issue, but
+                        // let's log a message about it.
+                        Log.i(TAG, "Package " + name + " codePath changed from " + p.codePath
                                 + " to " + codePath + "; Retaining data and using new");
                     }
                 }
