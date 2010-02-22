@@ -192,7 +192,7 @@ public class CameraTest extends ActivityInstrumentationTestCase<MediaFrameworkTe
             }
             mCamera.setPreviewCallback(null);
             mCamera.takePicture(mShutterCallback, mRawPictureCallback, mJpegPictureCallback);
-            Thread.sleep(MediaNames.WAIT_LONG);
+            Thread.sleep(MediaNames.WAIT_SNAPSHOT_TIME);
         } catch (Exception e) {
             Log.v(TAG, e.toString());
         }      
