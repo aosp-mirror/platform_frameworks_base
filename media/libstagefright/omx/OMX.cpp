@@ -401,6 +401,33 @@ void OMX::invalidateNodeID_l(node_id node) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+struct SharedVideoRenderer : public VideoRenderer {
+    SharedVideoRenderer(void *libHandle, VideoRenderer *obj)
+        : mLibHandle(libHandle),
+          mObj(obj) {
+    }
+
+    virtual ~SharedVideoRenderer() {
+        delete mObj;
+        mObj = NULL;
+
+        dlclose(mLibHandle);
+        mLibHandle = NULL;
+    }
+
+    virtual void render(
+            const void *data, size_t size, void *platformPrivate) {
+        return mObj->render(data, size, platformPrivate);
+    }
+
+private:
+    void *mLibHandle;
+    VideoRenderer *mObj;
+
+    SharedVideoRenderer(const SharedVideoRenderer &);
+    SharedVideoRenderer &operator=(const SharedVideoRenderer &);
+};
+
 sp<IOMXRenderer> OMX::createRenderer(
         const sp<ISurface> &surface,
         const char *componentName,
@@ -411,11 +438,7 @@ sp<IOMXRenderer> OMX::createRenderer(
 
     VideoRenderer *impl = NULL;
 
-    static void *libHandle = NULL;
-
-    if (!libHandle) {
-        libHandle = dlopen("libstagefrighthw.so", RTLD_NOW);
-    }
+    void *libHandle = dlopen("libstagefrighthw.so", RTLD_NOW);
 
     if (libHandle) {
         typedef VideoRenderer *(*CreateRendererFunc)(
@@ -434,6 +457,16 @@ sp<IOMXRenderer> OMX::createRenderer(
         if (func) {
             impl = (*func)(surface, componentName, colorFormat,
                     displayWidth, displayHeight, encodedWidth, encodedHeight);
+
+            if (impl) {
+                impl = new SharedVideoRenderer(libHandle, impl);
+                libHandle = NULL;
+            }
+        }
+
+        if (libHandle) {
+            dlclose(libHandle);
+            libHandle = NULL;
         }
     }
 
