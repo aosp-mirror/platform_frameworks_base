@@ -855,12 +855,26 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
     
+    private void finishSession(SessionState sessionState) {
+        if (sessionState != null && sessionState.session != null) {
+            try {
+                sessionState.session.finishSession();
+            } catch (RemoteException e) {
+                Log.w(TAG, "Session failed to close due to remote exception", e);
+            }
+        }
+    }
+
     void clearCurMethodLocked() {
         if (mCurMethod != null) {
             for (ClientState cs : mClients.values()) {
                 cs.sessionRequested = false;
+                finishSession(cs.curSession);
                 cs.curSession = null;
             }
+
+            finishSession(mEnabledSession);
+            mEnabledSession = null;
             mCurMethod = null;
         }
         mStatusBar.setIconVisibility(mInputMethodIcon, false);
