@@ -33,6 +33,7 @@ import android.test.suitebuilder.TestMethod;
 import android.test.suitebuilder.TestPredicates;
 import android.test.suitebuilder.TestSuiteBuilder;
 import android.test.suitebuilder.annotation.HasAnnotation;
+import android.test.suitebuilder.annotation.LargeTest;
 import android.util.Log;
 
 import java.io.ByteArrayOutputStream;
