@@ -64,39 +64,7 @@ public class SearchablesTest extends AndroidTestCase {
      *  findActionKey works
      *  getIcon works
      */
-    
-    /**
-     * The goal of this test is to confirm proper operation of the 
-     * SearchableInfo helper class.
-     * 
-     * TODO:  The metadata source needs to be mocked out because adding
-     * searchability metadata via this test is causing it to leak into the
-     * real system.  So for now I'm just going to test for existence of the
-     * GlobalSearch app (which is searchable).
-     */
-    public void testSearchableGlobalSearch() {
-        // test basic array & hashmap
-        Searchables searchables = new Searchables(mContext);
-        searchables.buildSearchableList();
 
-        // test linkage from another activity
-        // TODO inject this via mocking into the package manager.
-        // TODO for now, just check for searchable GlobalSearch app (this isn't really a unit test)
-        ComponentName thisActivity = new ComponentName(
-                "com.android.globalsearch",
-                "com.android.globalsearch.GlobalSearch");
-
-        SearchableInfo si = searchables.getSearchableInfo(thisActivity);
-        assertNotNull(si);
-        assertEquals(thisActivity, si.getSearchActivity());
-        
-        Context appContext = si.getActivityContext(mContext);
-        assertNotNull(appContext);
-        MoreAsserts.assertNotEqual(appContext, mContext);
-        assertEquals("Quick Search Box", appContext.getString(si.getHintId()));
-        assertEquals("Quick Search Box", appContext.getString(si.getLabelId()));
-    }
-    
     /**
      * Test that non-searchable activities return no searchable info (this would typically
      * trigger the use of the default searchable e.g. contacts)
@@ -113,18 +81,7 @@ public class SearchablesTest extends AndroidTestCase {
         SearchableInfo si = searchables.getSearchableInfo(nonActivity);
         assertNull(si);
     }
-    
-    /**
-     * Test that there is a default searchable (aka global search provider).
-     */
-    public void testDefaultSearchable() {
-        Searchables searchables = new Searchables(mContext);
-        searchables.buildSearchableList();
-        SearchableInfo si = searchables.getDefaultSearchable();
-        checkSearchable(si);
-        assertTrue(searchables.isDefaultSearchable(si));
-    }
-    
+
     /**
      * This is an attempt to run the searchable info list with a mocked context.  Here are some
      * things I'd like to test.
@@ -371,7 +328,8 @@ public class SearchablesTest extends AndroidTestCase {
         public List<ResolveInfo> queryIntentActivities(Intent intent, int flags) {
             assertNotNull(intent);
             assertTrue(intent.getAction().equals(Intent.ACTION_SEARCH)
-                    || intent.getAction().equals(Intent.ACTION_WEB_SEARCH));
+                    || intent.getAction().equals(Intent.ACTION_WEB_SEARCH)
+                    || intent.getAction().equals(SearchManager.INTENT_ACTION_GLOBAL_SEARCH));
             switch (mSearchablesMode) {
             case SEARCHABLES_PASSTHROUGH:
                 return mRealPackageManager.queryIntentActivities(intent, flags);
@@ -471,6 +429,20 @@ public class SearchablesTest extends AndroidTestCase {
             default:
                 throw new UnsupportedOperationException();
             }
+        }
+
+        @Override
+        public int checkPermission(String permName, String pkgName) {
+            assertNotNull(permName);
+            assertNotNull(pkgName);
+            switch (mSearchablesMode) {
+                case SEARCHABLES_PASSTHROUGH:
+                    return mRealPackageManager.checkPermission(permName, pkgName);
+                case SEARCHABLES_MOCK_ZERO:
+                    return PackageManager.PERMISSION_DENIED;
+                default:
+                    throw new UnsupportedOperationException();
+                }
         }
     }
 }

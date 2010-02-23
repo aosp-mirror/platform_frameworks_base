@@ -123,24 +123,15 @@ public class SearchManagerService extends ISearchManager.Stub {
      * Returns the SearchableInfo for a given activity.
      *
      * @param launchActivity The activity from which we're launching this search.
-     * @param globalSearch If false, this will only launch the search that has been specifically
-     * defined by the application (which is usually defined as a local search).  If no default
-     * search is defined in the current application or activity, no search will be launched.
-     * If true, this will always launch a platform-global (e.g. web-based) search instead.
      * @return Returns a SearchableInfo record describing the parameters of the search,
      * or null if no searchable metadata was available.
      */
-    public SearchableInfo getSearchableInfo(final ComponentName launchActivity,
-            final boolean globalSearch) {
-        if (globalSearch) {
-            return getSearchables().getDefaultSearchable();
-        } else {
-            if (launchActivity == null) {
-                Log.e(TAG, "getSearchableInfo(), activity == null");
-                return null;
-            }
-            return getSearchables().getSearchableInfo(launchActivity);
+    public SearchableInfo getSearchableInfo(final ComponentName launchActivity) {
+        if (launchActivity == null) {
+            Log.e(TAG, "getSearchableInfo(), activity == null");
+            return null;
         }
+        return getSearchables().getSearchableInfo(launchActivity);
     }
 
     /**
@@ -151,27 +142,17 @@ public class SearchManagerService extends ISearchManager.Stub {
     }
 
     /**
-     * Returns a list of the searchable activities that handle web searches.
-     * Can be called from any thread.
+     * Gets the name of the global search activity.
      */
-    public List<SearchableInfo> getSearchablesForWebSearch() {
-        return getSearchables().getSearchablesForWebSearchList();
+    public ComponentName getGlobalSearchActivity() {
+        return getSearchables().getGlobalSearchActivity();
     }
 
     /**
-     * Returns the default searchable activity for web searches.
-     * Can be called from any thread.
+     * Gets the name of the web search activity.
      */
-    public SearchableInfo getDefaultSearchableForWebSearch() {
-        return getSearchables().getDefaultSearchableForWebSearch();
+    public ComponentName getWebSearchActivity() {
+        return getSearchables().getWebSearchActivity();
     }
 
-    /**
-     * Sets the default searchable activity for web searches.
-     * Can be called from any thread.
-     */
-    public void setDefaultWebSearch(final ComponentName component) {
-        getSearchables().setDefaultWebSearch(component);
-        broadcastSearchablesChanged();
-    }
 }
