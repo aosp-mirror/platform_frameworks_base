@@ -30,6 +30,7 @@ class IBinder;
 class ProcessState;
 class String8;
 class TextOutput;
+class Flattenable;
 
 struct flat_binder_object;  // defined in support_p/binder_module.h
 
@@ -81,6 +82,7 @@ public:
     status_t            writeString16(const char16_t* str, size_t len);
     status_t            writeStrongBinder(const sp<IBinder>& val);
     status_t            writeWeakBinder(const wp<IBinder>& val);
+    status_t            write(const Flattenable& val);
 
     // Place a native_handle into the parcel (the native_handle's file-
     // descriptors are dup'ed, so it is safe to delete the native_handle
@@ -119,7 +121,7 @@ public:
     const char16_t*     readString16Inplace(size_t* outLen) const;
     sp<IBinder>         readStrongBinder() const;
     wp<IBinder>         readWeakBinder() const;
-
+    status_t            read(Flattenable& val) const;
     
     // Retrieve native_handle from the parcel. This returns a copy of the
     // parcel's native_handle (the caller takes ownership). The caller

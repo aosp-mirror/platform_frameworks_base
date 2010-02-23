@@ -59,6 +59,13 @@ public final class BatteryStatsImpl extends BatteryStats {
     // Current on-disk Parcel version
     private static final int VERSION = 42;
 
+    // The maximum number of names wakelocks we will keep track of
+    // per uid; once the limit is reached, we batch the remaining wakelocks
+    // in to one common name.
+    private static final int MAX_WAKELOCKS_PER_UID = 20;
+    
+    private static final String BATCHED_WAKELOCK_NAME = "*overflow*";
+    
     private static int sNumSpeedSteps;
 
     private final File mFile;
@@ -1757,7 +1764,12 @@ public final class BatteryStatsImpl extends BatteryStats {
                 String wakelockName = in.readString();
                 Uid.Wakelock wakelock = new Wakelock();
                 wakelock.readFromParcelLocked(unpluggables, in);
-                mWakelockStats.put(wakelockName, wakelock);
+                if (mWakelockStats.size() < MAX_WAKELOCKS_PER_UID) {
+                    // We will just drop some random set of wakelocks if
+                    // the previous run of the system was an older version
+                    // that didn't impose a limit.
+                    mWakelockStats.put(wakelockName, wakelock);
+                }
             }
 
             int numSensors = in.readInt();
@@ -2583,8 +2595,14 @@ public final class BatteryStatsImpl extends BatteryStats {
         public StopwatchTimer getWakeTimerLocked(String name, int type) {
             Wakelock wl = mWakelockStats.get(name);
             if (wl == null) {
-                wl = new Wakelock();
-                mWakelockStats.put(name, wl);
+                if (mWakelockStats.size() > MAX_WAKELOCKS_PER_UID) {
+                    name = BATCHED_WAKELOCK_NAME;
+                    wl = mWakelockStats.get(name);
+                }
+                if (wl == null) {
+                    wl = new Wakelock();
+                    mWakelockStats.put(name, wl);
+                }
             }
             StopwatchTimer t = null;
             switch (type) {

@@ -26,6 +26,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Message;
 import android.text.TextUtils;
+import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -48,7 +49,6 @@ import android.widget.ScrollView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.util.AttributeSet;
 
 import com.android.internal.R;
 
@@ -322,24 +322,24 @@ public class AlertController {
     public Button getButton(int whichButton) {
         switch (whichButton) {
             case DialogInterface.BUTTON_POSITIVE:
-                return mButtonPositiveMessage != null ? mButtonPositive : null;
+                return mButtonPositive;
             case DialogInterface.BUTTON_NEGATIVE:
-                return mButtonNegativeMessage != null ? mButtonNegative : null;
+                return mButtonNegative;
             case DialogInterface.BUTTON_NEUTRAL:
-                return mButtonNeutralMessage != null ? mButtonNeutral : null;
+                return mButtonNeutral;
             default:
                 return null;
         }
     }
     
+    @SuppressWarnings({"UnusedDeclaration"})
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (mScrollView != null && mScrollView.executeKeyEvent(event)) return true;
-        return false;
+        return mScrollView != null && mScrollView.executeKeyEvent(event);
     }
 
+    @SuppressWarnings({"UnusedDeclaration"})
     public boolean onKeyUp(int keyCode, KeyEvent event) {
-        if (mScrollView != null && mScrollView.executeKeyEvent(event)) return true;
-        return false;
+        return mScrollView != null && mScrollView.executeKeyEvent(event);
     }
     
     private void setupView() {
@@ -469,7 +469,6 @@ public class AlertController {
     }
 
     private boolean setupButtons() {
-        View defaultButton = null;
         int BIT_BUTTON_POSITIVE = 1;
         int BIT_BUTTON_NEGATIVE = 2;
         int BIT_BUTTON_NEUTRAL = 4;
@@ -482,7 +481,6 @@ public class AlertController {
         } else {
             mButtonPositive.setText(mButtonPositiveText);
             mButtonPositive.setVisibility(View.VISIBLE);
-            defaultButton = mButtonPositive;
             whichButtons = whichButtons | BIT_BUTTON_POSITIVE;
         }
 
@@ -495,9 +493,6 @@ public class AlertController {
             mButtonNegative.setText(mButtonNegativeText);
             mButtonNegative.setVisibility(View.VISIBLE);
 
-            if (defaultButton == null) {
-                defaultButton = mButtonNegative;
-            }
             whichButtons = whichButtons | BIT_BUTTON_NEGATIVE;
         }
 
@@ -510,9 +505,6 @@ public class AlertController {
             mButtonNeutral.setText(mButtonNeutralText);
             mButtonNeutral.setVisibility(View.VISIBLE);
 
-            if (defaultButton == null) {
-                defaultButton = mButtonNeutral;
-            }
             whichButtons = whichButtons | BIT_BUTTON_NEUTRAL;
         }
 
@@ -565,8 +557,6 @@ public class AlertController {
                 R.styleable.AlertDialog_bottomBright, R.drawable.popup_bottom_bright);
         int bottomMedium = a.getResourceId(
                 R.styleable.AlertDialog_bottomMedium, R.drawable.popup_bottom_medium);
-        int centerMedium = a.getResourceId(
-                R.styleable.AlertDialog_centerMedium, R.drawable.popup_center_medium);
         
         /*
          * We now set the background of all of the sections of the alert.
@@ -596,7 +586,7 @@ public class AlertController {
          */
         views[pos] = (contentPanel.getVisibility() == View.GONE) 
                 ? null : contentPanel;
-        light[pos] = mListView == null ? false : true;
+        light[pos] = mListView != null;
         pos++;
         if (customPanel != null) {
             views[pos] = customPanel;

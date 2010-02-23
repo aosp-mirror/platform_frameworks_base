@@ -65,7 +65,10 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
+import com.android.internal.content.PackageMonitor;
 import com.android.internal.service.wallpaper.ImageWallpaper;
+import com.android.server.DevicePolicyManagerService.ActiveAdmin;
+import com.android.server.DevicePolicyManagerService.MyPackageMonitor;
 import com.android.common.FastXmlSerializer;
 
 class WallpaperManagerService extends IWallpaperManager.Stub {
@@ -122,6 +125,7 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
     
     final Context mContext;
     final IWindowManager mIWindowManager;
+    final MyPackageMonitor mMonitor;
 
     int mWidth = -1;
     int mHeight = -1;
@@ -150,6 +154,7 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
     
     WallpaperConnection mWallpaperConnection;
     long mLastDiedTime;
+    boolean mWallpaperUpdating;
     
     class WallpaperConnection extends IWallpaperConnection.Stub
             implements ServiceConnection {
@@ -165,6 +170,7 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
         public void onServiceConnected(ComponentName name, IBinder service) {
             synchronized (mLock) {
                 if (mWallpaperConnection == this) {
+                    mLastDiedTime = SystemClock.uptimeMillis();
                     mService = IWallpaperService.Stub.asInterface(service);
                     attachServiceLocked(this);
                     // XXX should probably do saveSettingsLocked() later
@@ -182,8 +188,8 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
                 mEngine = null;
                 if (mWallpaperConnection == this) {
                     Log.w(TAG, "Wallpaper service gone: " + mWallpaperComponent);
-                    if ((mLastDiedTime+MIN_WALLPAPER_CRASH_TIME)
-                            < SystemClock.uptimeMillis()) {
+                    if (!mWallpaperUpdating && (mLastDiedTime+MIN_WALLPAPER_CRASH_TIME)
+                                > SystemClock.uptimeMillis()) {
                         Log.w(TAG, "Reverting to built-in wallpaper!");
                         bindWallpaperComponentLocked(null);
                     }
@@ -205,11 +211,92 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
         }
     }
     
+    class MyPackageMonitor extends PackageMonitor {
+        @Override
+        public void onPackageUpdateFinished(String packageName, int uid) {
+            synchronized (mLock) {
+                if (mWallpaperComponent != null &&
+                        mWallpaperComponent.getPackageName().equals(packageName)) {
+                    mWallpaperUpdating = false;
+                    ComponentName comp = mWallpaperComponent;
+                    clearWallpaperComponentLocked();
+                    bindWallpaperComponentLocked(comp);
+                }
+            }
+        }
+
+        @Override
+        public void onPackageUpdateStarted(String packageName, int uid) {
+            synchronized (mLock) {
+                if (mWallpaperComponent != null &&
+                        mWallpaperComponent.getPackageName().equals(packageName)) {
+                    mWallpaperUpdating = true;
+                }
+            }
+        }
+
+        @Override
+        public boolean onHandleForceStop(Intent intent, String[] packages, int uid, boolean doit) {
+            return doPackagesChanged(doit);
+        }
+
+        @Override
+        public void onSomePackagesChanged() {
+            doPackagesChanged(true);
+        }
+        
+        boolean doPackagesChanged(boolean doit) {
+            boolean changed = false;
+            synchronized (mLock) {
+                if (mWallpaperComponent != null) {
+                    int change = isPackageDisappearing(mWallpaperComponent.getPackageName());
+                    if (change == PACKAGE_PERMANENT_CHANGE
+                            || change == PACKAGE_TEMPORARY_CHANGE) {
+                        changed = true;
+                        if (doit) {
+                            Log.w(TAG, "Wallpaper uninstalled, removing: " + mWallpaperComponent);
+                            clearWallpaperLocked();
+                        }
+                    }
+                }
+                if (mNextWallpaperComponent != null) {
+                    int change = isPackageDisappearing(mNextWallpaperComponent.getPackageName());
+                    if (change == PACKAGE_PERMANENT_CHANGE
+                            || change == PACKAGE_TEMPORARY_CHANGE) {
+                        mNextWallpaperComponent = null;
+                    }
+                }
+                if (mWallpaperComponent != null
+                        && isPackageModified(mWallpaperComponent.getPackageName())) {
+                    try {
+                        mContext.getPackageManager().getServiceInfo(
+                                mWallpaperComponent, 0);
+                    } catch (NameNotFoundException e) {
+                        Log.w(TAG, "Wallpaper component gone, removing: " + mWallpaperComponent);
+                        clearWallpaperLocked();
+                    }
+                }
+                if (mNextWallpaperComponent != null
+                        && isPackageModified(mNextWallpaperComponent.getPackageName())) {
+                    try {
+                        mContext.getPackageManager().getServiceInfo(
+                                mNextWallpaperComponent, 0);
+                    } catch (NameNotFoundException e) {
+                        mNextWallpaperComponent = null;
+                    }
+                }
+            }
+            return changed;
+        }
+    }
+    
     public WallpaperManagerService(Context context) {
         if (DEBUG) Log.v(TAG, "WallpaperService startup");
         mContext = context;
         mIWindowManager = IWindowManager.Stub.asInterface(
                 ServiceManager.getService(Context.WINDOW_SERVICE));
+        mMonitor = new MyPackageMonitor();
+        mMonitor.register(context, true);
         WALLPAPER_DIR.mkdirs();
         loadSettingsLocked();
         mWallpaperObserver.startWatching();
@@ -241,16 +328,20 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
     public void clearWallpaper() {
         if (DEBUG) Log.v(TAG, "clearWallpaper");
         synchronized (mLock) {
-            File f = WALLPAPER_FILE;
-            if (f.exists()) {
-                f.delete();
-            }
-            final long ident = Binder.clearCallingIdentity();
-            try {
-                bindWallpaperComponentLocked(null);
-            } finally {
-                Binder.restoreCallingIdentity(ident);
-            }
+            clearWallpaperLocked();
+        }
+    }
+
+    public void clearWallpaperLocked() {
+        File f = WALLPAPER_FILE;
+        if (f.exists()) {
+            f.delete();
+        }
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            bindWallpaperComponentLocked(null);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
         }
     }
 
@@ -499,7 +590,9 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
                     mWidth, mHeight);
         } catch (RemoteException e) {
             Log.w(TAG, "Failed attaching wallpaper; clearing", e);
-            bindWallpaperComponentLocked(null);
+            if (!mWallpaperUpdating) {
+                bindWallpaperComponentLocked(null);
+            }
         }
     }
     

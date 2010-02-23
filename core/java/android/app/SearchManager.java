@@ -137,21 +137,11 @@ import java.util.List;
  * setDefaultKeyMode(DEFAULT_KEYS_SEARCH_LOCAL);   // search within your activity
  * setDefaultKeyMode(DEFAULT_KEYS_SEARCH_GLOBAL);  // search using platform global search</pre>
  * 
- * <p><b>How to enable global search with Quick Search Box.</b>  In addition to searching within
+ * <p><b>How to start global search.</b>  In addition to searching within
  * your activity or application, you can also use the Search Manager to invoke a platform-global
- * search, which uses Quick Search Box to search across the device and the web. There are two ways
- * to do this:
- * <ul><li>You can simply define "search" within your application or activity to mean global search.
- * This is described in more detail in the 
- * <a href="#SearchabilityMetadata">Searchability Metadata</a> section.  Briefly, you will
- * add a single meta-data entry to your manifest, declaring that the default search
- * for your application is "*".  This indicates to the system that no application-specific
- * search activity is provided, and that it should launch web-based search instead.</li>
- * <li>Simply do nothing and the default implementation of
- * {@link android.app.Activity#onSearchRequested} will cause global search to be triggered.
- * (You can also always trigger search via a direct call to {@link android.app.Activity#startSearch}.
- * This is most useful if you wish to provide local searchability <i>and</i> access to global
- * search.)</li></ul> 
+ * search, which uses Quick Search Box to search across the device and the web.
+ * Override {@link android.app.Activity#onSearchRequested} and call
+ * {@link android.app.Activity#startSearch} with {@code globalSearch} set to {@code true}.
  * 
  * <p><b>How to disable search from your activity.</b> Search is a system-wide feature and users
  * will expect it to be available in all contexts.  If your UI design absolutely precludes
@@ -871,12 +861,8 @@ import java.util.List;
  * 
  * <p>The simplest way to specify this is to add a <i>search reference</i> element to the
  * application entry in the <a href="{@docRoot}guide/topics/manifest/manifest-intro.html">manifest</a> file.  
- * The value of this reference can be either of:
- * <ul><li>The name of your searchable activity.  
- * It is typically prefixed by '.' to indicate that it's in the same package.</li>
- * <li>A "*" indicates that the system may select a default searchable activity, in which
- * case it will typically select web-based search.</li>
- * </ul>
+ * The value of this reference should be the name of your searchable activity.
+ * It is typically prefixed by '.' to indicate that it's in the same package.
  *
  * <p>Here is a snippet showing the necessary addition to the manifest entry for your 
  * non-searchable activities.
@@ -1639,6 +1625,7 @@ public class SearchManager
             return;
         }
         Intent intent = new Intent(INTENT_ACTION_GLOBAL_SEARCH);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.setComponent(globalSearchActivity);
         // TODO: Always pass name of calling package as an extra?
         if (appSearchData != null) {
@@ -1661,32 +1648,15 @@ public class SearchManager
     /**
      * Gets the name of the global search activity.
      *
-     * This is currently implemented by returning the first activity that handles
-     * the GLOBAL_SEARCH intent and has the GLOBAL_SEARCH permission. If we allow
-     * more than one global search acitivity to be installed, this code must be changed.
-     *
-     * TODO: Doing this every time we start global search is inefficient. Will fix that once
-     * we have settled on the right mechanism for finding the global search activity.
-     *
      * @hide
      */
     public ComponentName getGlobalSearchActivity() {
-        Intent intent = new Intent(INTENT_ACTION_GLOBAL_SEARCH);
-        PackageManager pm = mContext.getPackageManager();
-        List<ResolveInfo> activities =
-                pm.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
-        int count = activities.size();
-        for (int i = 0; i < count; i++) {
-            ActivityInfo ai = activities.get(i).activityInfo;
-            if (pm.checkPermission(Manifest.permission.GLOBAL_SEARCH,
-                    ai.packageName) == PackageManager.PERMISSION_GRANTED) {
-                return new ComponentName(ai.packageName, ai.name);
-            } else {
-                Log.w(TAG, "Package " + ai.packageName + " wants to handle GLOBAL_SEARCH, "
-                        + "but does not have the GLOBAL_SEARCH permission.");
-            }
+        try {
+            return mService.getGlobalSearchActivity();
+        } catch (RemoteException ex) {
+            Log.e(TAG, "getGlobalSearchActivity() failed: " + ex);
+            return null;
         }
-        return null;
     }
 
     /**
@@ -1699,13 +1669,12 @@ public class SearchManager
      * @hide
      */
     public ComponentName getWebSearchActivity() {
-        ComponentName globalSearch = getGlobalSearchActivity();
-        if (globalSearch == null) {
+        try {
+            return mService.getWebSearchActivity();
+        } catch (RemoteException ex) {
+            Log.e(TAG, "getWebSearchActivity() failed: " + ex);
             return null;
         }
-        Intent intent = new Intent(Intent.ACTION_WEB_SEARCH);
-        intent.setPackage(globalSearch.getPackageName());
-        return intent.resolveActivity(mContext.getPackageManager());
     }
 
     /**
@@ -1839,27 +1808,7 @@ public class SearchManager
      */
     public SearchableInfo getSearchableInfo(ComponentName componentName) {
         try {
-            return mService.getSearchableInfo(componentName, false);
-        } catch (RemoteException ex) {
-            Log.e(TAG, "getSearchableInfo() failed: " + ex);
-            return null;
-        }
-    }
-
-    /**
-     * Gets information about a searchable activity.
-     *
-     * @param componentName The activity to get searchable information for.
-     * @param globalSearch If <code>false</code>, return information about the given activity.
-     *        If <code>true</code>, return information about the global search activity. 
-     * @return Searchable information, or <code>null</code> if the activity is not searchable.
-     * 
-     * @hide because SearchableInfo is not part of the API.
-     */
-    public SearchableInfo getSearchableInfo(ComponentName componentName,
-            boolean globalSearch) {
-        try {
-            return mService.getSearchableInfo(componentName, globalSearch);
+            return mService.getSearchableInfo(componentName);
         } catch (RemoteException ex) {
             Log.e(TAG, "getSearchableInfo() failed: " + ex);
             return null;

@@ -16,6 +16,7 @@
 
 package com.android.server;
 
+import android.app.Activity;
 import android.app.ActivityManagerNative;
 import android.app.AlarmManager;
 import android.app.IAlarmManager;
@@ -342,6 +343,22 @@ class AlarmManagerService extends IAlarmManager.Stub {
                 it.remove();
             }
         }
+    }
+    
+    public boolean lookForPackageLocked(String packageName) {
+        return lookForPackageLocked(mRtcWakeupAlarms, packageName)
+                || lookForPackageLocked(mRtcAlarms, packageName)
+                || lookForPackageLocked(mElapsedRealtimeWakeupAlarms, packageName)
+                || lookForPackageLocked(mElapsedRealtimeAlarms, packageName);
+    }
+
+    private boolean lookForPackageLocked(ArrayList<Alarm> alarmList, String packageName) {
+        for (int i=alarmList.size()-1; i>=0; i--) {
+            if (alarmList.get(i).operation.getTargetPackage().equals(packageName)) {
+                return true;
+            }
+        }
+        return false;
     }
     
     private ArrayList<Alarm> getAlarmList(int type) {
@@ -778,6 +795,7 @@ class AlarmManagerService extends IAlarmManager.Stub {
             IntentFilter filter = new IntentFilter();
             filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
             filter.addAction(Intent.ACTION_PACKAGE_RESTARTED);
+            filter.addAction(Intent.ACTION_QUERY_PACKAGE_RESTART);
             filter.addDataScheme("package");
             mContext.registerReceiver(this, filter);
              // Register for events related to sdcard installation.
@@ -791,7 +809,16 @@ class AlarmManagerService extends IAlarmManager.Stub {
             synchronized (mLock) {
                 String action = intent.getAction();
                 String pkgList[] = null;
-                if (Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE.equals(action)) {
+                if (Intent.ACTION_QUERY_PACKAGE_RESTART.equals(action)) {
+                    pkgList = intent.getStringArrayExtra(Intent.EXTRA_PACKAGES);
+                    for (String packageName : pkgList) {
+                        if (lookForPackageLocked(packageName)) {
+                            setResultCode(Activity.RESULT_OK);
+                            return;
+                        }
+                    }
+                    return;
+                } else if (Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE.equals(action)) {
                     pkgList = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
                 } else {
                     Uri data = intent.getData();

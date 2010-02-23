@@ -826,7 +826,10 @@ public class StatusBarPolicy {
                 final Uri soundUri = Uri.parse("file://" + soundPath);
                 if (soundUri != null) {
                     final Ringtone sfx = RingtoneManager.getRingtone(mContext, soundUri);
-                    if (sfx != null) sfx.play();
+                    if (sfx != null) {
+                        sfx.setStreamType(AudioManager.STREAM_SYSTEM);
+                        sfx.play();
+                    }
                 }
             }
         }

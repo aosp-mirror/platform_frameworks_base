@@ -41,6 +41,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.location.LocationProvider;
 import android.os.Binder;
+import android.media.AudioManager;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -379,7 +380,10 @@ class DockObserver extends UEventObserver {
                                     final Uri soundUri = Uri.parse("file://" + soundPath);
                                     if (soundUri != null) {
                                         final Ringtone sfx = RingtoneManager.getRingtone(mContext, soundUri);
-                                        if (sfx != null) sfx.play();
+                                        if (sfx != null) {
+                                            sfx.setStreamType(AudioManager.STREAM_SYSTEM);
+                                            sfx.play();
+                                        }
                                     }
                                 }
                             }
@@ -412,7 +416,7 @@ class DockObserver extends UEventObserver {
                         mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,
                                 LOCATION_UPDATE_MS, LOCATION_UPDATE_DISTANCE_METER, mLocationListener);
                         retrieveLocation();
-                        if (mLocation != null) {
+                        if (mCarModeEnabled && mLocation != null && mNightMode == MODE_NIGHT_AUTO) {
                             try {
                                 DockObserver.this.updateTwilight();
                             } catch (RemoteException e) {
@@ -458,8 +462,8 @@ class DockObserver extends UEventObserver {
             if (location == null) {
                 Time currentTime = new Time();
                 currentTime.set(System.currentTimeMillis());
-                double lngOffset = FACTOR_GMT_OFFSET_LONGITUDE * currentTime.gmtoff
-                        - (currentTime.isDst > 0 ? 3600 : 0);
+                double lngOffset = FACTOR_GMT_OFFSET_LONGITUDE *
+                        (currentTime.gmtoff - (currentTime.isDst > 0 ? 3600 : 0));
                 location = new Location("fake");
                 location.setLongitude(lngOffset);
                 location.setLatitude(59.95);
@@ -583,20 +587,26 @@ class DockObserver extends UEventObserver {
             }
 
             // schedule next update
-            final int mLastTwilightState = tw.mState;
-            // add some extra time to be on the save side.
-            long nextUpdate = DateUtils.MINUTE_IN_MILLIS;
-            if (currentTime > tw.mSunset) {
-                // next update should be on the following day
-                tw.calculateTwilight(currentTime
-                        + DateUtils.DAY_IN_MILLIS, mLocation.getLatitude(),
-                        mLocation.getLongitude());
-            }
-
-            if (mLastTwilightState == TwilightCalculator.NIGHT) {
-                nextUpdate += tw.mSunrise;
+            long nextUpdate = 0;
+            if (tw.mSunrise == -1 || tw.mSunset == -1) {
+                // In the case the day or night never ends the update is scheduled 12 hours later.
+                nextUpdate = currentTime + 12 * DateUtils.HOUR_IN_MILLIS;
             } else {
-                nextUpdate += tw.mSunset;
+                final int mLastTwilightState = tw.mState;
+                // add some extra time to be on the save side.
+                nextUpdate += DateUtils.MINUTE_IN_MILLIS;
+                if (currentTime > tw.mSunset) {
+                    // next update should be on the following day
+                    tw.calculateTwilight(currentTime
+                            + DateUtils.DAY_IN_MILLIS, mLocation.getLatitude(),
+                            mLocation.getLongitude());
+                }
+
+                if (mLastTwilightState == TwilightCalculator.NIGHT) {
+                    nextUpdate += tw.mSunrise;
+                } else {
+                    nextUpdate += tw.mSunset;
+                }
             }
 
             Intent updateIntent = new Intent(ACTION_UPDATE_NIGHT_MODE);
@@ -605,8 +615,11 @@ class DockObserver extends UEventObserver {
             mAlarmManager.cancel(pendingIntent);
             mAlarmManager.set(AlarmManager.RTC_WAKEUP, nextUpdate, pendingIntent);
 
-            // set current mode
-            setMode(Configuration.UI_MODE_TYPE_CAR, nightMode << 4);
+            // Make sure that we really set the new mode only if we're in car mode and
+            // automatic switching is enables.
+            if (mCarModeEnabled && mNightMode == MODE_NIGHT_AUTO) {
+                setMode(Configuration.UI_MODE_TYPE_CAR, nightMode << 4);
+            }
         }
     }
 

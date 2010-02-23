@@ -750,11 +750,8 @@ public abstract class BatteryStats implements Parcelable {
      * Checkin server version of dump to produce more compact, computer-readable log.
      * 
      * NOTE: all times are expressed in 'ms'.
-     * @param fd
-     * @param pw
-     * @param which
      */
-    private final void dumpCheckinLocked(PrintWriter pw, int which) {
+    public final void dumpCheckinLocked(PrintWriter pw, int which, int reqUid) {
         final long rawUptime = SystemClock.uptimeMillis() * 1000;
         final long rawRealtime = SystemClock.elapsedRealtime() * 1000;
         final long batteryUptime = getBatteryUptime(rawUptime);
@@ -856,19 +853,24 @@ public abstract class BatteryStats implements Parcelable {
                     getDischargeCurrentLevel());
         }
         
-        Map<String, ? extends BatteryStats.Timer> kernelWakelocks = getKernelWakelockStats();
-        if (kernelWakelocks.size() > 0) {
-            for (Map.Entry<String, ? extends BatteryStats.Timer> ent : kernelWakelocks.entrySet()) {
-                sb.setLength(0);
-                printWakeLockCheckin(sb, ent.getValue(), batteryRealtime, null, which, "");
-
-                dumpLine(pw, 0 /* uid */, category, KERNEL_WAKELOCK_DATA, ent.getKey(), 
-                        sb.toString());
+        if (reqUid < 0) {
+            Map<String, ? extends BatteryStats.Timer> kernelWakelocks = getKernelWakelockStats();
+            if (kernelWakelocks.size() > 0) {
+                for (Map.Entry<String, ? extends BatteryStats.Timer> ent : kernelWakelocks.entrySet()) {
+                    sb.setLength(0);
+                    printWakeLockCheckin(sb, ent.getValue(), batteryRealtime, null, which, "");
+    
+                    dumpLine(pw, 0 /* uid */, category, KERNEL_WAKELOCK_DATA, ent.getKey(), 
+                            sb.toString());
+                }
             }
         }
         
         for (int iu = 0; iu < NU; iu++) {
             final int uid = uidStats.keyAt(iu);
+            if (reqUid >= 0 && uid != reqUid) {
+                continue;
+            }
             Uid u = uidStats.valueAt(iu);
             // Dump Network stats per uid, if any
             long rx = u.getTcpBytesReceived(which);
@@ -987,7 +989,7 @@ public abstract class BatteryStats implements Parcelable {
     }
 
     @SuppressWarnings("unused")
-    private final void dumpLocked(PrintWriter pw, String prefix, int which) {
+    public final void dumpLocked(PrintWriter pw, String prefix, int which, int reqUid) {
         final long rawUptime = SystemClock.uptimeMillis() * 1000;
         final long rawRealtime = SystemClock.elapsedRealtime() * 1000;
         final long batteryUptime = getBatteryUptime(rawUptime);
@@ -1063,23 +1065,25 @@ public abstract class BatteryStats implements Parcelable {
         long fullWakeLockTimeTotalMicros = 0;
         long partialWakeLockTimeTotalMicros = 0;
         
-        Map<String, ? extends BatteryStats.Timer> kernelWakelocks = getKernelWakelockStats();
-        if (kernelWakelocks.size() > 0) {
-            for (Map.Entry<String, ? extends BatteryStats.Timer> ent : kernelWakelocks.entrySet()) {
-                
-                String linePrefix = ": ";
-                sb.setLength(0);
-                sb.append(prefix);
-                sb.append("  Kernel Wake lock ");
-                sb.append(ent.getKey());
-                linePrefix = printWakeLock(sb, ent.getValue(), batteryRealtime, null, which, 
-                        linePrefix);
-                if (!linePrefix.equals(": ")) {
-                    sb.append(" realtime");
-                } else {
-                    sb.append(": (nothing executed)");
+        if (reqUid < 0) {
+            Map<String, ? extends BatteryStats.Timer> kernelWakelocks = getKernelWakelockStats();
+            if (kernelWakelocks.size() > 0) {
+                for (Map.Entry<String, ? extends BatteryStats.Timer> ent : kernelWakelocks.entrySet()) {
+                    
+                    String linePrefix = ": ";
+                    sb.setLength(0);
+                    sb.append(prefix);
+                    sb.append("  Kernel Wake lock ");
+                    sb.append(ent.getKey());
+                    linePrefix = printWakeLock(sb, ent.getValue(), batteryRealtime, null, which, 
+                            linePrefix);
+                    if (!linePrefix.equals(": ")) {
+                        sb.append(" realtime");
+                    } else {
+                        sb.append(": (nothing executed)");
+                    }
+                    pw.println(sb.toString());
                 }
-                pw.println(sb.toString());
             }
         }
     
@@ -1212,7 +1216,12 @@ public abstract class BatteryStats implements Parcelable {
 
         for (int iu=0; iu<NU; iu++) {
             final int uid = uidStats.keyAt(iu);
+            if (reqUid >= 0 && uid != reqUid) {
+                continue;
+            }
+            
             Uid u = uidStats.valueAt(iu);
+            
             pw.println(prefix + "  #" + uid + ":");
             boolean uidActivity = false;
             
@@ -1421,16 +1430,16 @@ public abstract class BatteryStats implements Parcelable {
         pw.println("Total Statistics (Current and Historic):");
         pw.println("  System starts: " + getStartCount()
                 + ", currently on battery: " + getIsOnBattery());
-        dumpLocked(pw, "", STATS_TOTAL);
+        dumpLocked(pw, "", STATS_TOTAL, -1);
         pw.println("");
         pw.println("Last Run Statistics (Previous run of system):");
-        dumpLocked(pw, "", STATS_LAST);
+        dumpLocked(pw, "", STATS_LAST, -1);
         pw.println("");
         pw.println("Current Battery Statistics (Currently running system):");
-        dumpLocked(pw, "", STATS_CURRENT);
+        dumpLocked(pw, "", STATS_CURRENT, -1);
         pw.println("");
         pw.println("Unplugged Statistics (Since last unplugged from power):");
-        dumpLocked(pw, "", STATS_UNPLUGGED);
+        dumpLocked(pw, "", STATS_UNPLUGGED, -1);
     }
     
     @SuppressWarnings("unused")
@@ -1445,13 +1454,13 @@ public abstract class BatteryStats implements Parcelable {
         }
         
         if (isUnpluggedOnly) {
-            dumpCheckinLocked(pw, STATS_UNPLUGGED);
+            dumpCheckinLocked(pw, STATS_UNPLUGGED, -1);
         }
         else {
-            dumpCheckinLocked(pw, STATS_TOTAL);
-            dumpCheckinLocked(pw, STATS_LAST);
-            dumpCheckinLocked(pw, STATS_UNPLUGGED);
-            dumpCheckinLocked(pw, STATS_CURRENT);
+            dumpCheckinLocked(pw, STATS_TOTAL, -1);
+            dumpCheckinLocked(pw, STATS_LAST, -1);
+            dumpCheckinLocked(pw, STATS_UNPLUGGED, -1);
+            dumpCheckinLocked(pw, STATS_CURRENT, -1);
         }
     }
     

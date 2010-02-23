@@ -16,8 +16,16 @@
 
 package android.app;
 
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.SystemProperties;
+import android.provider.Settings;
 import android.util.Printer;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -38,6 +46,13 @@ import java.io.StringWriter;
  */
 
 public class ApplicationErrorReport implements Parcelable {
+    // System property defining error report receiver for system apps
+    static final String SYSTEM_APPS_ERROR_RECEIVER_PROPERTY = "ro.error.receiver.system.apps";
+
+    // System property defining default error report receiver
+    static final String DEFAULT_ERROR_RECEIVER_PROPERTY = "ro.error.receiver.default";
+
+    
     /**
      * Uninitialized error report.
      */
@@ -54,8 +69,13 @@ public class ApplicationErrorReport implements Parcelable {
     public static final int TYPE_ANR = 2;
 
     /**
+     * An error report about an application that's consuming too much battery.
+     */
+    public static final int TYPE_BATTERY = 3;
+
+    /**
      * Type of this report. Can be one of {@link #TYPE_NONE},
-     * {@link #TYPE_CRASH} or {@link #TYPE_ANR}.
+     * {@link #TYPE_CRASH}, {@link #TYPE_ANR}, or {@link #TYPE_BATTERY}.
      */
     public int type;
 
@@ -99,6 +119,11 @@ public class ApplicationErrorReport implements Parcelable {
     public AnrInfo anrInfo;
 
     /**
+     * Text containing battery usage data.
+     */
+    public String batteryText;
+    
+    /**
      * Create an uninitialized instance of {@link ApplicationErrorReport}.
      */
     public ApplicationErrorReport() {
@@ -110,6 +135,68 @@ public class ApplicationErrorReport implements Parcelable {
      */
     ApplicationErrorReport(Parcel in) {
         readFromParcel(in);
+    }
+
+    public static ComponentName getErrorReportReceiver(Context context,
+            String packageName, int appFlags) {
+        // check if error reporting is enabled in secure settings
+        int enabled = Settings.Secure.getInt(context.getContentResolver(),
+                Settings.Secure.SEND_ACTION_APP_ERROR, 0);
+        if (enabled == 0) {
+            return null;
+        }
+
+        PackageManager pm = context.getPackageManager();
+
+        // look for receiver in the installer package
+        String candidate = pm.getInstallerPackageName(packageName);
+        ComponentName result = getErrorReportReceiver(pm, packageName, candidate);
+        if (result != null) {
+            return result;
+        }
+
+        // if the error app is on the system image, look for system apps
+        // error receiver
+        if ((appFlags&ApplicationInfo.FLAG_SYSTEM) != 0) {
+            candidate = SystemProperties.get(SYSTEM_APPS_ERROR_RECEIVER_PROPERTY);
+            result = getErrorReportReceiver(pm, packageName, candidate);
+            if (result != null) {
+                return result;
+            }
+        }
+
+        // if there is a default receiver, try that
+        candidate = SystemProperties.get(DEFAULT_ERROR_RECEIVER_PROPERTY);
+        return getErrorReportReceiver(pm, packageName, candidate);
+    }
+    
+    /**
+     * Return activity in receiverPackage that handles ACTION_APP_ERROR.
+     *
+     * @param pm PackageManager isntance
+     * @param errorPackage package which caused the error
+     * @param receiverPackage candidate package to receive the error
+     * @return activity component within receiverPackage which handles
+     * ACTION_APP_ERROR, or null if not found
+     */
+    static ComponentName getErrorReportReceiver(PackageManager pm, String errorPackage,
+            String receiverPackage) {
+        if (receiverPackage == null || receiverPackage.length() == 0) {
+            return null;
+        }
+
+        // break the loop if it's the error report receiver package that crashed
+        if (receiverPackage.equals(errorPackage)) {
+            return null;
+        }
+
+        Intent intent = new Intent(Intent.ACTION_APP_ERROR);
+        intent.setPackage(receiverPackage);
+        ResolveInfo info = pm.resolveActivity(intent, 0);
+        if (info == null || info.activityInfo == null) {
+            return null;
+        }
+        return new ComponentName(receiverPackage, info.activityInfo.name);
     }
 
     public void writeToParcel(Parcel dest, int flags) {
@@ -127,6 +214,9 @@ public class ApplicationErrorReport implements Parcelable {
             case TYPE_ANR:
                 anrInfo.writeToParcel(dest, flags);
                 break;
+            case TYPE_BATTERY:
+                dest.writeString(batteryText);
+                break;
         }
     }
 
@@ -142,9 +232,16 @@ public class ApplicationErrorReport implements Parcelable {
             case TYPE_CRASH:
                 crashInfo = new CrashInfo(in);
                 anrInfo = null;
+                batteryText = null;
                 break;
             case TYPE_ANR:
                 anrInfo = new AnrInfo(in);
+                crashInfo = null;
+                batteryText = null;
+                break;
+            case TYPE_BATTERY:
+                batteryText = in.readString();
+                anrInfo = null;
                 crashInfo = null;
                 break;
         }
@@ -346,6 +443,9 @@ public class ApplicationErrorReport implements Parcelable {
                 break;
             case TYPE_ANR:
                 anrInfo.dump(pw, prefix);
+                break;
+            case TYPE_BATTERY:
+                pw.println(batteryText);
                 break;
         }
     }

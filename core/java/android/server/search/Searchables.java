@@ -16,14 +16,12 @@
 
 package android.server.search;
 
-import com.android.internal.app.ResolverActivity;
-
+import android.Manifest;
 import android.app.SearchManager;
 import android.app.SearchableInfo;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -52,9 +50,8 @@ public class Searchables {
     private HashMap<ComponentName, SearchableInfo> mSearchablesMap = null;
     private ArrayList<SearchableInfo> mSearchablesList = null;
     private ArrayList<SearchableInfo> mSearchablesInGlobalSearchList = null;
-    private ArrayList<SearchableInfo> mSearchablesForWebSearchList = null;
-    private SearchableInfo mDefaultSearchable = null;
-    private SearchableInfo mDefaultSearchableForWebSearch = null;
+    private ComponentName mGlobalSearchActivity = null;
+    private ComponentName mWebSearchActivity = null;
 
     public static String GOOGLE_SEARCH_COMPONENT_NAME =
             "com.android.googlesearch/.GoogleSearch";
@@ -131,10 +128,9 @@ public class Searchables {
             // Irrespective of source, if a reference was found, follow it.
             if (refActivityName != null)
             {
-                // An app or activity can declare that we should simply launch
-                // "system default search" if search is invoked.
+                // This value is deprecated, return null
                 if (refActivityName.equals(MD_SEARCHABLE_SYSTEM_SEARCH)) {
-                    return getDefaultSearchable();
+                    return null;
                 }
                 String pkg = activity.getPackageName();
                 ComponentName referredActivity;
@@ -164,20 +160,6 @@ public class Searchables {
     }
 
     /**
-     * Provides the system-default search activity, which you can use
-     * whenever getSearchableInfo() returns null;
-     *
-     * @return Returns the system-default search activity, null if never defined
-     */
-    public synchronized SearchableInfo getDefaultSearchable() {
-        return mDefaultSearchable;
-    }
-
-    public synchronized boolean isDefaultSearchable(SearchableInfo searchable) {
-        return searchable == mDefaultSearchable;
-    }
-
-    /**
      * Builds an entire list (suitable for display) of
      * activities that are searchable, by iterating the entire set of
      * ACTION_SEARCH & ACTION_WEB_SEARCH intents.
@@ -204,8 +186,6 @@ public class Searchables {
         ArrayList<SearchableInfo> newSearchablesList
                                 = new ArrayList<SearchableInfo>();
         ArrayList<SearchableInfo> newSearchablesInGlobalSearchList
-                                = new ArrayList<SearchableInfo>();
-        ArrayList<SearchableInfo> newSearchablesForWebSearchList
                                 = new ArrayList<SearchableInfo>();
 
         final PackageManager pm = mContext.getPackageManager();
@@ -244,127 +224,71 @@ public class Searchables {
             }
         }
 
-        if (webSearchInfoList != null) {
-            for (int i = 0; i < webSearchInfoList.size(); ++i) {
-                ActivityInfo ai = webSearchInfoList.get(i).activityInfo;
-                ComponentName component = new ComponentName(ai.packageName, ai.name);
-                SearchableInfo searchable = newSearchablesMap.get(component);
-                if (searchable == null) {
-                    Log.w(LOG_TAG, "did not find component in searchables: " + component);
-                } else {
-                    newSearchablesForWebSearchList.add(searchable);
-                }
-            }
-        }
+        // Find the global search activity
+        ComponentName newGlobalSearchActivity = findGlobalSearchActivity();
 
-        // Find the global search provider
-        Intent globalSearchIntent = new Intent(SearchManager.INTENT_ACTION_GLOBAL_SEARCH);
-        ComponentName globalSearchActivity = globalSearchIntent.resolveActivity(pm);
-        SearchableInfo newDefaultSearchable = newSearchablesMap.get(globalSearchActivity);
-
-        if (newDefaultSearchable == null) {
-            Log.w(LOG_TAG, "No searchable info found for new default searchable activity "
-                    + globalSearchActivity);
-        }
-
-        // Find the default web search provider.
-        ComponentName webSearchActivity = getPreferredWebSearchActivity(mContext);
-        SearchableInfo newDefaultSearchableForWebSearch = null;
-        if (webSearchActivity != null) {
-            newDefaultSearchableForWebSearch = newSearchablesMap.get(webSearchActivity);
-        }
-        if (newDefaultSearchableForWebSearch == null) {
-            Log.w(LOG_TAG, "No searchable info found for new default web search activity "
-                    + webSearchActivity);
-        }
+        // Find the web search activity
+        ComponentName newWebSearchActivity = findWebSearchActivity(newGlobalSearchActivity);
 
         // Store a consistent set of new values
         synchronized (this) {
             mSearchablesMap = newSearchablesMap;
             mSearchablesList = newSearchablesList;
             mSearchablesInGlobalSearchList = newSearchablesInGlobalSearchList;
-            mSearchablesForWebSearchList = newSearchablesForWebSearchList;
-            mDefaultSearchable = newDefaultSearchable;
-            mDefaultSearchableForWebSearch = newDefaultSearchableForWebSearch;
+            mGlobalSearchActivity = newGlobalSearchActivity;
+            mWebSearchActivity = newWebSearchActivity;
         }
     }
 
     /**
-     * Checks if the given activity component is present in the system and if so makes it the
-     * preferred activity for handling ACTION_WEB_SEARCH.
-     * @param component Name of the component to check and set as preferred.
-     * @param action Intent action for which this activity is to be set as preferred.
-     * @return true if component was detected and set as preferred activity, false if not.
+     * Finds the global search activity.
+     *
+     * This is currently implemented by returning the first activity that handles
+     * the GLOBAL_SEARCH intent and has the GLOBAL_SEARCH permission. If we allow
+     * more than one global search activity to be installed, this code must be changed.
      */
-    private static boolean setPreferredActivity(Context context,
-            ComponentName component, String action) {
-        Log.d(LOG_TAG, "Checking component " + component);
-        PackageManager pm = context.getPackageManager();
-        ActivityInfo ai;
-        try {
-            ai = pm.getActivityInfo(component, 0);
-        } catch (PackageManager.NameNotFoundException e) {
-            return false;
+    private ComponentName findGlobalSearchActivity() {
+        Intent intent = new Intent(SearchManager.INTENT_ACTION_GLOBAL_SEARCH);
+        PackageManager pm = mContext.getPackageManager();
+        List<ResolveInfo> activities =
+                pm.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
+        int count = activities == null ? 0 : activities.size();
+        for (int i = 0; i < count; i++) {
+            ActivityInfo ai = activities.get(i).activityInfo;
+            if (pm.checkPermission(Manifest.permission.GLOBAL_SEARCH,
+                    ai.packageName) == PackageManager.PERMISSION_GRANTED) {
+                return new ComponentName(ai.packageName, ai.name);
+            } else {
+                Log.w(LOG_TAG, "Package " + ai.packageName + " wants to handle GLOBAL_SEARCH, "
+                        + "but does not have the GLOBAL_SEARCH permission.");
+            }
         }
-
-        // The code here to find the value for bestMatch is heavily inspired by the code
-        // in ResolverActivity where the preferred activity is set.
-        Intent intent = new Intent(action);
-        intent.addCategory(Intent.CATEGORY_DEFAULT);
-        List<ResolveInfo> webSearchActivities = pm.queryIntentActivities(intent, 0);
-        ComponentName set[] = new ComponentName[webSearchActivities.size()];
-        int bestMatch = 0;
-        for (int i = 0; i < webSearchActivities.size(); ++i) {
-            ResolveInfo ri = webSearchActivities.get(i);
-            set[i] = new ComponentName(ri.activityInfo.packageName,
-                                       ri.activityInfo.name);
-            if (ri.match > bestMatch) bestMatch = ri.match;
-        }
-
-        Log.d(LOG_TAG, "Setting preferred web search activity to " + component);
-        IntentFilter filter = new IntentFilter(action);
-        filter.addCategory(Intent.CATEGORY_DEFAULT);
-        pm.replacePreferredActivity(filter, bestMatch, set, component);
-        return true;
+        Log.w(LOG_TAG, "No global search activity found");
+        return null;
     }
 
-    private static ComponentName getPreferredWebSearchActivity(Context context) {
-        // Check if we have a preferred web search activity.
-        Intent intent = new Intent(Intent.ACTION_WEB_SEARCH);
-        PackageManager pm = context.getPackageManager();
-        ResolveInfo ri = pm.resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY);
-
-        if (ri == null || ri.activityInfo.name.equals(ResolverActivity.class.getName())) {
-            Log.d(LOG_TAG, "No preferred activity set for action web search.");
-
-            // The components in the providers array are checked in the order of declaration so the
-            // first one has the highest priority. If the component exists in the system it is set
-            // as the preferred activity to handle intent action web search.
-            String[] preferredActivities = context.getResources().getStringArray(
-                    com.android.internal.R.array.default_web_search_providers);
-            for (String componentName : preferredActivities) {
-                ComponentName component = ComponentName.unflattenFromString(componentName);
-                if (setPreferredActivity(context, component, Intent.ACTION_WEB_SEARCH)) {
-                    return component;
-                }
-            }
-        } else {
-            // If the current preferred activity is GoogleSearch, and we detect
-            // EnhancedGoogleSearch installed as well, set the latter as preferred since that
-            // is a superset and provides more functionality.
-            ComponentName cn = new ComponentName(ri.activityInfo.packageName, ri.activityInfo.name);
-            if (cn.flattenToShortString().equals(GOOGLE_SEARCH_COMPONENT_NAME)) {
-                ComponentName enhancedGoogleSearch = ComponentName.unflattenFromString(
-                        ENHANCED_GOOGLE_SEARCH_COMPONENT_NAME);
-                if (setPreferredActivity(context, enhancedGoogleSearch,
-                        Intent.ACTION_WEB_SEARCH)) {
-                    return enhancedGoogleSearch;
-                }
-            }
+    /**
+     * Finds the web search activity.
+     *
+     * Only looks in the package of the global search activity.
+     */
+    private ComponentName findWebSearchActivity(ComponentName globalSearchActivity) {
+        if (globalSearchActivity == null) {
+            return null;
         }
-
-        if (ri == null) return null;
-        return new ComponentName(ri.activityInfo.packageName, ri.activityInfo.name);
+        Intent intent = new Intent(Intent.ACTION_WEB_SEARCH);
+        intent.setPackage(globalSearchActivity.getPackageName());
+        PackageManager pm = mContext.getPackageManager();
+        List<ResolveInfo> activities =
+                pm.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
+        int count = activities == null ? 0 : activities.size();
+        for (int i = 0; i < count; i++) {
+            ActivityInfo ai = activities.get(i).activityInfo;
+            // TODO: do some sanity checks here?
+            return new ComponentName(ai.packageName, ai.name);
+        }
+        Log.w(LOG_TAG, "No web search activity found");
+        return null;
     }
 
     /**
@@ -383,24 +307,16 @@ public class Searchables {
     }
 
     /**
-     * Returns a list of the searchable activities that handle web searches.
+     * Gets the name of the global search activity.
      */
-    public synchronized ArrayList<SearchableInfo> getSearchablesForWebSearchList() {
-        return new ArrayList<SearchableInfo>(mSearchablesForWebSearchList);
+    public synchronized ComponentName getGlobalSearchActivity() {
+        return mGlobalSearchActivity;
     }
 
     /**
-     * Returns the default searchable activity for web searches.
+     * Gets the name of the web search activity.
      */
-    public synchronized SearchableInfo getDefaultSearchableForWebSearch() {
-        return mDefaultSearchableForWebSearch;
-    }
-
-    /**
-     * Sets the default searchable activity for web searches.
-     */
-    public synchronized void setDefaultWebSearch(ComponentName component) {
-        setPreferredActivity(mContext, component, Intent.ACTION_WEB_SEARCH);
-        buildSearchableList();
+    public synchronized ComponentName getWebSearchActivity() {
+        return mWebSearchActivity;
     }
 }

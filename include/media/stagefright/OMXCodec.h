@@ -96,6 +96,7 @@ private:
         kRequiresFlushBeforeShutdown         = 64,
         kDefersOutputBufferAllocation        = 128,
         kDecoderLiesAboutNumberOfChannels    = 256,
+        kInputBufferSizesAreBogus            = 512,
     };
 
     struct BufferInfo {

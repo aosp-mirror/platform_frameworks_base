@@ -97,6 +97,7 @@ class ServerThread extends Thread {
         BluetoothA2dpService bluetoothA2dp = null;
         HeadsetObserver headset = null;
         DockObserver dock = null;
+        RecognitionManagerService recognition = null;
 
         // Critical services...
         try {
@@ -208,6 +209,7 @@ class ServerThread extends Thread {
         AppWidgetService appWidget = null;
         NotificationManagerService notification = null;
         WallpaperManagerService wallpaper = null;
+        LocationManagerService location = null;
 
         if (factoryTest != SystemServer.FACTORY_TEST_LOW_LEVEL) {
             try {
@@ -302,8 +304,8 @@ class ServerThread extends Thread {
 
             try {
                 Log.i(TAG, "Location Manager");
-                ServiceManager.addService(Context.LOCATION_SERVICE,
-                        new LocationManagerService(context));
+                location = new LocationManagerService(context);
+                ServiceManager.addService(Context.LOCATION_SERVICE, location);
             } catch (Throwable e) {
                 Log.e(TAG, "Failure starting Location Manager", e);
             }
@@ -377,6 +379,13 @@ class ServerThread extends Thread {
             }
 
             try {
+                Log.i(TAG, "Recognition Service");
+                recognition = new RecognitionManagerService(context);
+            } catch (Throwable e) {
+                Log.e(TAG, "Failure starting Recognition Service", e);
+            }
+
+            try {
                 com.android.server.status.StatusBarPolicy.installIcons(context, statusBar);
             } catch (Throwable e) {
                 Log.e(TAG, "Failure installing status bar icons", e);
@@ -435,6 +444,8 @@ class ServerThread extends Thread {
         final AppWidgetService appWidgetF = appWidget;
         final WallpaperManagerService wallpaperF = wallpaper;
         final InputMethodManagerService immF = imm;
+        final RecognitionManagerService recognitionF = recognition;
+        final LocationManagerService locationF = location;
 
         // We now tell the activity manager it is okay to run third party
         // code.  It will call back into us once it has gotten to the state
@@ -449,6 +460,7 @@ class ServerThread extends Thread {
                 if (batteryF != null) batteryF.systemReady();
                 if (connectivityF != null) connectivityF.systemReady();
                 if (dockF != null) dockF.systemReady();
+                if (recognitionF != null) recognitionF.systemReady();
                 Watchdog.getInstance().start();
 
                 // It is now okay to let the various system services start their
@@ -457,6 +469,7 @@ class ServerThread extends Thread {
                 if (appWidgetF != null) appWidgetF.systemReady(safeMode);
                 if (wallpaperF != null) wallpaperF.systemReady();
                 if (immF != null) immF.systemReady();
+                if (locationF != null) locationF.systemReady();
             }
         });
 

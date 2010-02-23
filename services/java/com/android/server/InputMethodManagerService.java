@@ -16,6 +16,7 @@
 
 package com.android.server;
 
+import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.HandlerCaller;
 import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethod;
@@ -48,7 +49,6 @@ import android.content.pm.ServiceInfo;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.database.ContentObserver;
-import android.net.Uri;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -332,51 +332,68 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
-    class PackageReceiver extends android.content.BroadcastReceiver {
+    class MyPackageMonitor extends PackageMonitor {
+        
         @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            String pkgList[] = null;
-            if (Intent.ACTION_PACKAGE_ADDED.equals(action) ||
-                    Intent.ACTION_PACKAGE_REMOVED.equals(action)) {
-                Uri uri = intent.getData();
-                String pkg = uri != null ? uri.getSchemeSpecificPart() : null;
-                if (pkg != null) {
-                    pkgList = new String[] { pkg };
-                }
-            } else if (Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE.equals(action) ||
-                    Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE.equals(action)) {
-                pkgList = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
-            }
-            if (pkgList == null || pkgList.length == 0) {
-                return;
-            }
+        public boolean onHandleForceStop(Intent intent, String[] packages, int uid, boolean doit) {
             synchronized (mMethodMap) {
-                buildInputMethodListLocked(mMethodList, mMethodMap);
-
-                InputMethodInfo curIm = null;
-                String curInputMethodId = Settings.Secure.getString(context
+                String curInputMethodId = Settings.Secure.getString(mContext
                         .getContentResolver(), Settings.Secure.DEFAULT_INPUT_METHOD);
                 final int N = mMethodList.size();
                 if (curInputMethodId != null) {
                     for (int i=0; i<N; i++) {
-                        if (mMethodList.get(i).getId().equals(curInputMethodId)) {
-                            curIm = mMethodList.get(i);
+                        InputMethodInfo imi = mMethodList.get(i);
+                        if (imi.getId().equals(curInputMethodId)) {
+                            for (String pkg : packages) {
+                                if (imi.getPackageName().equals(pkg)) {
+                                    if (!doit) {
+                                        return true;
+                                    }
+                                    
+                                    Settings.Secure.putString(mContext.getContentResolver(),
+                                            Settings.Secure.DEFAULT_INPUT_METHOD, "");
+                                    chooseNewDefaultIMELocked();
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
+        @Override
+        public void onSomePackagesChanged() {
+            synchronized (mMethodMap) {
+                InputMethodInfo curIm = null;
+                String curInputMethodId = Settings.Secure.getString(mContext
+                        .getContentResolver(), Settings.Secure.DEFAULT_INPUT_METHOD);
+                final int N = mMethodList.size();
+                if (curInputMethodId != null) {
+                    for (int i=0; i<N; i++) {
+                        InputMethodInfo imi = mMethodList.get(i);
+                        if (imi.getId().equals(curInputMethodId)) {
+                            curIm = imi;
+                        }
+                        int change = isPackageDisappearing(imi.getPackageName());
+                        if (change == PACKAGE_TEMPORARY_CHANGE
+                                || change == PACKAGE_PERMANENT_CHANGE) {
+                            Log.i(TAG, "Input method uninstalled, disabling: "
+                                    + imi.getComponent());
+                            setInputMethodEnabledLocked(imi.getId(), false);
                         }
                     }
                 }
 
+                buildInputMethodListLocked(mMethodList, mMethodMap);
+
                 boolean changed = false;
 
                 if (curIm != null) {
-                    boolean foundPkg = false;
-                    for (String pkg : pkgList) {
-                        if (curIm.getPackageName().equals(pkg)) {
-                            foundPkg = true;
-                            break;
-                        }
-                    }
-                    if (foundPkg) {
+                    int change = isPackageDisappearing(curIm.getPackageName()); 
+                    if (change == PACKAGE_TEMPORARY_CHANGE
+                            || change == PACKAGE_PERMANENT_CHANGE) {
                         ServiceInfo si = null;
                         try {
                             si = mContext.getPackageManager().getServiceInfo(
@@ -387,7 +404,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                             // Uh oh, current input method is no longer around!
                             // Pick another one...
                             Log.i(TAG, "Current input method removed: " + curInputMethodId);
-                            if (!chooseNewDefaultIME()) {
+                            if (!chooseNewDefaultIMELocked()) {
                                 changed = true;
                                 curIm = null;
                                 curInputMethodId = "";
@@ -397,16 +414,17 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                                         curInputMethodId);
                             }
                         }
-
-                    } else if (curIm == null) {
-                        // We currently don't have a default input method... is
-                        // one now available?
-                        changed = chooseNewDefaultIME();
                     }
+                }
+                
+                if (curIm == null) {
+                    // We currently don't have a default input method... is
+                    // one now available?
+                    changed = chooseNewDefaultIMELocked();
+                }
 
-                    if (changed) {
-                        updateFromSettingsLocked();
-                    }
+                if (changed) {
+                    updateFromSettingsLocked();
                 }
             }
         }
@@ -438,19 +456,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
         });
 
-        PackageReceiver mBroadcastReceiver = new PackageReceiver();
-        IntentFilter packageFilt = new IntentFilter();
-        packageFilt.addAction(Intent.ACTION_PACKAGE_ADDED);
-        packageFilt.addAction(Intent.ACTION_PACKAGE_CHANGED);
-        packageFilt.addAction(Intent.ACTION_PACKAGE_REMOVED);
-        packageFilt.addAction(Intent.ACTION_PACKAGE_RESTARTED);
-        packageFilt.addDataScheme("package");
-        mContext.registerReceiver(mBroadcastReceiver, packageFilt);
-        // Register for events related to sdcard installation.
-        IntentFilter sdFilter = new IntentFilter();
-        sdFilter.addAction(Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE);
-        sdFilter.addAction(Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE);
-        mContext.registerReceiver(mBroadcastReceiver, sdFilter);
+        (new MyPackageMonitor()).register(mContext, true);
 
         IntentFilter screenOnOffFilt = new IntentFilter();
         screenOnOffFilt.addAction(Intent.ACTION_SCREEN_ON);
@@ -1385,7 +1391,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 & ApplicationInfo.FLAG_SYSTEM) != 0;
     }
 
-    private boolean chooseNewDefaultIME() {
+    private boolean chooseNewDefaultIMELocked() {
         List<InputMethodInfo> enabled = getEnabledInputMethodListLocked();
         if (enabled != null && enabled.size() > 0) {
             Settings.Secure.putString(mContext.getContentResolver(),
@@ -1446,7 +1452,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         String defaultIme = Settings.Secure.getString(mContext
                 .getContentResolver(), Settings.Secure.DEFAULT_INPUT_METHOD);
         if (!map.containsKey(defaultIme)) {
-            if (chooseNewDefaultIME()) {
+            if (chooseNewDefaultIMELocked()) {
                 updateFromSettingsLocked();
             }
         }
@@ -1557,90 +1563,94 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         "Requires permission "
                         + android.Manifest.permission.WRITE_SECURE_SETTINGS);
             }
-
+            
             long ident = Binder.clearCallingIdentity();
             try {
-                // Make sure this is a valid input method.
-                InputMethodInfo imm = mMethodMap.get(id);
-                if (imm == null) {
-                    if (imm == null) {
-                        throw new IllegalArgumentException("Unknown id: " + mCurMethodId);
-                    }
-                }
-
-                StringBuilder builder = new StringBuilder(256);
-
-                boolean removed = false;
-                String firstId = null;
-
-                // Look through the currently enabled input methods.
-                String enabledStr = Settings.Secure.getString(mContext.getContentResolver(),
-                        Settings.Secure.ENABLED_INPUT_METHODS);
-                if (enabledStr != null) {
-                    final TextUtils.SimpleStringSplitter splitter = mStringColonSplitter;
-                    splitter.setString(enabledStr);
-                    while (splitter.hasNext()) {
-                        String curId = splitter.next();
-                        if (curId.equals(id)) {
-                            if (enabled) {
-                                // We are enabling this input method, but it is
-                                // already enabled.  Nothing to do.  The previous
-                                // state was enabled.
-                                return true;
-                            }
-                            // We are disabling this input method, and it is
-                            // currently enabled.  Skip it to remove from the
-                            // new list.
-                            removed = true;
-                        } else if (!enabled) {
-                            // We are building a new list of input methods that
-                            // doesn't contain the given one.
-                            if (firstId == null) firstId = curId;
-                            if (builder.length() > 0) builder.append(':');
-                            builder.append(curId);
-                        }
-                    }
-                }
-
-                if (!enabled) {
-                    if (!removed) {
-                        // We are disabling the input method but it is already
-                        // disabled.  Nothing to do.  The previous state was
-                        // disabled.
-                        return false;
-                    }
-                    // Update the setting with the new list of input methods.
-                    Settings.Secure.putString(mContext.getContentResolver(),
-                            Settings.Secure.ENABLED_INPUT_METHODS, builder.toString());
-                    // We the disabled input method is currently selected, switch
-                    // to another one.
-                    String selId = Settings.Secure.getString(mContext.getContentResolver(),
-                            Settings.Secure.DEFAULT_INPUT_METHOD);
-                    if (id.equals(selId)) {
-                        Settings.Secure.putString(mContext.getContentResolver(),
-                                Settings.Secure.DEFAULT_INPUT_METHOD,
-                                firstId != null ? firstId : "");
-                    }
-                    // Previous state was enabled.
-                    return true;
-                }
-
-                // Add in the newly enabled input method.
-                if (enabledStr == null || enabledStr.length() == 0) {
-                    enabledStr = id;
-                } else {
-                    enabledStr = enabledStr + ':' + id;
-                }
-
-                Settings.Secure.putString(mContext.getContentResolver(),
-                        Settings.Secure.ENABLED_INPUT_METHODS, enabledStr);
-
-                // Previous state was disabled.
-                return false;
+                return setInputMethodEnabledLocked(id, enabled);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
         }
+    }
+    
+    boolean setInputMethodEnabledLocked(String id, boolean enabled) {
+        // Make sure this is a valid input method.
+        InputMethodInfo imm = mMethodMap.get(id);
+        if (imm == null) {
+            if (imm == null) {
+                throw new IllegalArgumentException("Unknown id: " + mCurMethodId);
+            }
+        }
+
+        StringBuilder builder = new StringBuilder(256);
+
+        boolean removed = false;
+        String firstId = null;
+
+        // Look through the currently enabled input methods.
+        String enabledStr = Settings.Secure.getString(mContext.getContentResolver(),
+                Settings.Secure.ENABLED_INPUT_METHODS);
+        if (enabledStr != null) {
+            final TextUtils.SimpleStringSplitter splitter = mStringColonSplitter;
+            splitter.setString(enabledStr);
+            while (splitter.hasNext()) {
+                String curId = splitter.next();
+                if (curId.equals(id)) {
+                    if (enabled) {
+                        // We are enabling this input method, but it is
+                        // already enabled.  Nothing to do.  The previous
+                        // state was enabled.
+                        return true;
+                    }
+                    // We are disabling this input method, and it is
+                    // currently enabled.  Skip it to remove from the
+                    // new list.
+                    removed = true;
+                } else if (!enabled) {
+                    // We are building a new list of input methods that
+                    // doesn't contain the given one.
+                    if (firstId == null) firstId = curId;
+                    if (builder.length() > 0) builder.append(':');
+                    builder.append(curId);
+                }
+            }
+        }
+
+        if (!enabled) {
+            if (!removed) {
+                // We are disabling the input method but it is already
+                // disabled.  Nothing to do.  The previous state was
+                // disabled.
+                return false;
+            }
+            // Update the setting with the new list of input methods.
+            Settings.Secure.putString(mContext.getContentResolver(),
+                    Settings.Secure.ENABLED_INPUT_METHODS, builder.toString());
+            // We the disabled input method is currently selected, switch
+            // to another one.
+            String selId = Settings.Secure.getString(mContext.getContentResolver(),
+                    Settings.Secure.DEFAULT_INPUT_METHOD);
+            if (id.equals(selId)) {
+                Settings.Secure.putString(mContext.getContentResolver(),
+                        Settings.Secure.DEFAULT_INPUT_METHOD,
+                        firstId != null ? firstId : "");
+            }
+            // Previous state was enabled.
+            return true;
+        }
+
+        // Add in the newly enabled input method.
+        if (enabledStr == null || enabledStr.length() == 0) {
+            enabledStr = id;
+        } else {
+            enabledStr = enabledStr + ':' + id;
+        }
+
+        Settings.Secure.putString(mContext.getContentResolver(),
+                Settings.Secure.ENABLED_INPUT_METHODS, enabledStr);
+
+        // Previous state was disabled.
+        return false;
     }
 
     // ----------------------------------------------------------------------

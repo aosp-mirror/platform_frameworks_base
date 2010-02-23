@@ -24,9 +24,8 @@ import android.os.Bundle;
 
 /** @hide */
 interface ISearchManager {
-   SearchableInfo getSearchableInfo(in ComponentName launchActivity, boolean globalSearch);
+   SearchableInfo getSearchableInfo(in ComponentName launchActivity);
    List<SearchableInfo> getSearchablesInGlobalSearch();
-   List<SearchableInfo> getSearchablesForWebSearch();
-   SearchableInfo getDefaultSearchableForWebSearch();
-   void setDefaultWebSearch(in ComponentName component);
+   ComponentName getGlobalSearchActivity();
+   ComponentName getWebSearchActivity();
 }

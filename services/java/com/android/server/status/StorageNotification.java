@@ -36,6 +36,7 @@ import android.os.ServiceManager;
 import android.os.storage.StorageEventListener;
 import android.os.storage.StorageManager;
 import android.os.storage.StorageResultCode;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -45,6 +46,8 @@ import android.widget.Toast;
 
 public class StorageNotification extends StorageEventListener {
     private static final String TAG = "StorageNotification";
+
+    private static final boolean POP_UMS_ACTIVITY_ON_CONNECT = true;
 
     /**
      * Binder context for this service
@@ -239,12 +242,28 @@ public class StorageNotification extends StorageEventListener {
             Intent intent = new Intent();
             intent.setClass(mContext, com.android.server.status.UsbStorageActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+            final boolean adbOn = 1 == Settings.Secure.getInt(
+                mContext.getContentResolver(),
+                Settings.Secure.ADB_ENABLED,
+                0);
+
             PendingIntent pi = PendingIntent.getActivity(mContext, 0, intent, 0);
             setUsbStorageNotification(
                     com.android.internal.R.string.usb_storage_notification_title,
                     com.android.internal.R.string.usb_storage_notification_message,
                     com.android.internal.R.drawable.stat_sys_data_usb,
                     false, true, pi);
+
+            if (POP_UMS_ACTIVITY_ON_CONNECT && !adbOn) {
+                // We assume that developers don't want to enable UMS every
+                // time they attach a device to a USB host. The average user,
+                // however, is looking to charge the phone (in which case this
+                // is harmless) or transfer files (in which case this coaches
+                // the user about how to complete that task and saves several
+                // steps).
+                mContext.startActivity(intent);
+            }
         } else {
             setUsbStorageNotification(0, 0, 0, false, false, null);
         }

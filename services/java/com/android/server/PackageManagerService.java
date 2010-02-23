@@ -28,7 +28,9 @@ import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
 import android.app.ActivityManagerNative;
+import android.app.DevicePolicyManager;
 import android.app.IActivityManager;
+import android.app.IDevicePolicyManager;
 import android.backup.IBackupManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -5594,6 +5596,16 @@ class PackageManagerService extends IPackageManager.Stub {
         PackageRemovedInfo info = new PackageRemovedInfo();
         boolean res;
 
+        IDevicePolicyManager dpm = IDevicePolicyManager.Stub.asInterface(
+                ServiceManager.getService(Context.DEVICE_POLICY_SERVICE));
+        try {
+            if (dpm != null && dpm.packageHasActiveAdmins(packageName)) {
+                Log.w(TAG, "Not removing package " + packageName + ": has active device admin");
+                return false;
+            }
+        } catch (RemoteException e) {
+        }
+        
         synchronized (mInstallLock) {
             res = deletePackageLI(packageName, deleteCodeAndResources, flags, info);
         }
@@ -5691,6 +5703,18 @@ class PackageManagerService extends IPackageManager.Stub {
             if ( (deletedPs != null) && (deletedPs.sharedUser != null)) {
                 // remove permissions associated with package
                 mSettings.updateSharedUserPermsLP(deletedPs, mGlobalGids);
+            }
+            if (deletedPs != null) {
+                // remove from preferred activities.
+                ArrayList<PreferredActivity> removed = new ArrayList<PreferredActivity>();
+                for (PreferredActivity pa : mSettings.mPreferredActivities.filterSet()) {
+                    if (pa.mActivity.getPackageName().equals(deletedPs.name)) {
+                        removed.add(pa);
+                    }
+                }
+                for (PreferredActivity pa : removed) {
+                    mSettings.mPreferredActivities.removeFilter(pa);
+                }
             }
             // Save settings now
             mSettings.writeLP();
@@ -7449,9 +7473,9 @@ class PackageManagerService extends IPackageManager.Stub {
                         Log.w(TAG, "Trying to update system app code path from " +
                                 p.codePathString + " to " + codePath.toString());
                     } else {
-                        // Let the app continue with previous uid if code path changes.
-                        reportSettingsProblem(Log.WARN,
-                                "Package " + name + " codePath changed from " + p.codePath
+                        // Just a change in the code path is not an issue, but
+                        // let's log a message about it.
+                        Log.i(TAG, "Package " + name + " codePath changed from " + p.codePath
                                 + " to " + codePath + "; Retaining data and using new");
                     }
                 }

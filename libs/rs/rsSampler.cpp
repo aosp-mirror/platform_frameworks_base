@@ -53,7 +53,7 @@ Sampler::~Sampler()
 {
 }
 
-void Sampler::setupGL(const Context *rsc)
+void Sampler::setupGL(const Context *rsc, bool npot)
 {
     GLenum trans[] = {
         GL_NEAREST, //RS_SAMPLER_NEAREST,
@@ -64,10 +64,20 @@ void Sampler::setupGL(const Context *rsc)
 
     };
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, trans[mMinFilter]);
+    bool forceNonMip = false;
+    if (!rsc->ext_OES_texture_npot() && npot) {
+        forceNonMip = true;
+    }
+
+    if ((mMinFilter == RS_SAMPLER_LINEAR_MIP_LINEAR) && forceNonMip) {
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    } else {
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, trans[mMinFilter]);
+    }
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, trans[mMagFilter]);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, trans[mWrapS]);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, trans[mWrapT]);
+
 
     rsc->checkError("ProgramFragment::setupGL2 tex env");
 }

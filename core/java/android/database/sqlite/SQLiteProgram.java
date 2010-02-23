@@ -61,16 +61,13 @@ public abstract class SQLiteProgram extends SQLiteClosable {
             mCompiledSql.acquire();
         } else {
             // it is already in compiled-sql cache.
-            if (mCompiledSql.isInUse()) {
-                // but the CompiledSql in cache is in use by some other SQLiteProgram object.
+            // try to acquire the object.
+            if (!mCompiledSql.acquire()) {
+                // the SQLiteCompiledSql in cache is in use by some other SQLiteProgram object.
                 // we can't have two different SQLiteProgam objects can't share the same
                 // CompiledSql object. create a new one.
                 // finalize it when I am done with it in "this" object.
                 mCompiledSql = new SQLiteCompiledSql(db, sql);
-            } else {
-                // the CompiledSql in cache is NOT in use by any other SQLiteProgram object.
-                // it is safe to give it to this SQLIteProgram Object.
-                mCompiledSql.acquire();
             }
         }
         nStatement = mCompiledSql.nStatement;

@@ -46,10 +46,16 @@ public class TwilightCalculator {
     // Java time on Jan 1, 2000 12:00 UTC.
     private static final long UTC_2000 = 946728000000L;
 
-    /** Time of sunset (civil twilight) in milliseconds. */
+    /**
+     * Time of sunset (civil twilight) in milliseconds or -1 in the case the day
+     * or night never ends.
+     */
     public long mSunset;
 
-    /** Time of sunrise (civil twilight) in milliseconds. */
+    /**
+     * Time of sunrise (civil twilight) in milliseconds or -1 in the case the
+     * day or night never ends.
+     */
     public long mSunrise;
 
     /** Current state */
@@ -85,10 +91,24 @@ public class TwilightCalculator {
         double solarDec = Math.asin(FloatMath.sin(solarLng) * FloatMath.sin(OBLIQUITY));
 
         final double latRad = latiude * DEGREES_TO_RADIANS;
-        float hourAngle = (float) (Math
-                .acos((FloatMath.sin(ALTIDUTE_CORRECTION_CIVIL_TWILIGHT) - Math.sin(latRad)
-                        * Math.sin(solarDec))
-                        / (Math.cos(latRad) * Math.cos(solarDec))) / (2 * Math.PI));
+
+        double cosHourAngle = (FloatMath.sin(ALTIDUTE_CORRECTION_CIVIL_TWILIGHT) - Math.sin(latRad)
+                * Math.sin(solarDec)) / (Math.cos(latRad) * Math.cos(solarDec));
+        // The day or night never ends for the given date and location, if this value is out of
+        // range.
+        if (cosHourAngle >= 1) {
+            mState = NIGHT;
+            mSunset = -1;
+            mSunrise = -1;
+            return;
+        } else if (cosHourAngle <= -1) {
+            mState = DAY;
+            mSunset = -1;
+            mSunrise = -1;
+            return;
+        }
+
+        float hourAngle = (float) (Math.acos(cosHourAngle) / (2 * Math.PI));
 
         mSunset = Math.round((solarTransitJ2000 + hourAngle) * DateUtils.DAY_IN_MILLIS) + UTC_2000;
         mSunrise = Math.round((solarTransitJ2000 - hourAngle) * DateUtils.DAY_IN_MILLIS) + UTC_2000;

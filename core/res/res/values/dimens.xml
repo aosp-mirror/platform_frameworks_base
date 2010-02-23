@@ -38,4 +38,6 @@
     <dimen name="password_keyboard_key_height">56dip</dimen>
     <!-- Default correction for the space key in the password keyboard -->
     <dimen name="password_keyboard_spacebar_vertical_correction">4dip</dimen>
+    <!-- Margin at the edge of the screen to ignore touch events for in the windowshade. -->
+    <dimen name="status_bar_edge_ignore">5dp</dimen>
 </resources>

@@ -307,6 +307,8 @@ class NotificationManagerService extends INotificationManager.Stub
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
 
+            boolean queryRestart = false;
+            
             if (action.equals(Intent.ACTION_BATTERY_CHANGED)) {
                 boolean batteryCharging = (intent.getIntExtra("plugged", 0) != 0);
                 int level = intent.getIntExtra("level", -1);
@@ -330,10 +332,13 @@ class NotificationManagerService extends INotificationManager.Stub
                 updateAdbNotification();
             } else if (action.equals(Intent.ACTION_PACKAGE_REMOVED)
                     || action.equals(Intent.ACTION_PACKAGE_RESTARTED)
+                    || (queryRestart=action.equals(Intent.ACTION_QUERY_PACKAGE_RESTART))
                     || action.equals(Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE)) {
                 String pkgList[] = null;
                 if (action.equals(Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE)) {
                     pkgList = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
+                } else if (queryRestart) {
+                    pkgList = intent.getStringArrayExtra(Intent.EXTRA_PACKAGES);
                 } else {
                     Uri uri = intent.getData();
                     if (uri == null) {
@@ -347,7 +352,7 @@ class NotificationManagerService extends INotificationManager.Stub
                 }
                 if (pkgList != null && (pkgList.length > 0)) {
                     for (String pkgName : pkgList) {
-                        cancelAllNotificationsInt(pkgName, 0, 0);
+                        cancelAllNotificationsInt(pkgName, 0, 0, !queryRestart);
                     }
                 }
             } else if (action.equals(Intent.ACTION_SCREEN_ON)) {
@@ -436,11 +441,15 @@ class NotificationManagerService extends INotificationManager.Stub
         filter.addAction(Intent.ACTION_BATTERY_CHANGED);
         filter.addAction(Intent.ACTION_UMS_CONNECTED);
         filter.addAction(Intent.ACTION_UMS_DISCONNECTED);
-        filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
-        filter.addAction(Intent.ACTION_PACKAGE_RESTARTED);
         filter.addAction(Intent.ACTION_SCREEN_ON);
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         mContext.registerReceiver(mIntentReceiver, filter);
+        IntentFilter pkgFilter = new IntentFilter();
+        pkgFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
+        pkgFilter.addAction(Intent.ACTION_PACKAGE_RESTARTED);
+        pkgFilter.addAction(Intent.ACTION_QUERY_PACKAGE_RESTART);
+        pkgFilter.addDataScheme("package");
+        mContext.registerReceiver(mIntentReceiver, pkgFilter);
         IntentFilter sdFilter = new IntentFilter(Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE);
         mContext.registerReceiver(mIntentReceiver, sdFilter);
 
@@ -920,8 +929,8 @@ class NotificationManagerService extends INotificationManager.Stub
      * Cancels all notifications from a given package that have all of the
      * {@code mustHaveFlags}.
      */
-    void cancelAllNotificationsInt(String pkg, int mustHaveFlags,
-            int mustNotHaveFlags) {
+    boolean cancelAllNotificationsInt(String pkg, int mustHaveFlags,
+            int mustNotHaveFlags, boolean doit) {
         EventLog.writeEvent(EventLogTags.NOTIFICATION_CANCEL_ALL, pkg, mustHaveFlags);
 
         synchronized (mNotificationList) {
@@ -938,13 +947,17 @@ class NotificationManagerService extends INotificationManager.Stub
                 if (!r.pkg.equals(pkg)) {
                     continue;
                 }
+                canceledSomething = true;
+                if (!doit) {
+                    return true;
+                }
                 mNotificationList.remove(i);
                 cancelNotificationLocked(r);
-                canceledSomething = true;
             }
             if (canceledSomething) {
                 updateLightsLocked();
             }
+            return canceledSomething;
         }
     }
 
@@ -966,7 +979,7 @@ class NotificationManagerService extends INotificationManager.Stub
 
         // Calling from user space, don't allow the canceling of actively
         // running foreground services.
-        cancelAllNotificationsInt(pkg, 0, Notification.FLAG_FOREGROUND_SERVICE);
+        cancelAllNotificationsInt(pkg, 0, Notification.FLAG_FOREGROUND_SERVICE, true);
     }
 
     void checkIncomingCall(String pkg) {

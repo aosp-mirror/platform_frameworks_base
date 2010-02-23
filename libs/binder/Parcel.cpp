@@ -28,6 +28,7 @@
 #include <utils/String16.h>
 #include <utils/TextOutput.h>
 #include <utils/misc.h>
+#include <utils/Flattenable.h>
 
 #include <private/binder/binder_module.h>
 
@@ -675,6 +676,42 @@ status_t Parcel::writeDupFileDescriptor(int fd)
     return writeObject(obj, true);
 }
 
+status_t Parcel::write(const Flattenable& val)
+{
+    status_t err;
+
+    // size if needed
+    size_t len = val.getFlattenedSize();
+    size_t fd_count = val.getFdCount();
+
+    err = this->writeInt32(len);
+    if (err) return err;
+
+    err = this->writeInt32(fd_count);
+    if (err) return err;
+
+    // payload
+    void* buf = this->writeInplace(PAD_SIZE(len));
+    if (buf == NULL)
+        return BAD_VALUE;
+
+    int* fds = NULL;
+    if (fd_count) {
+        fds = new int[fd_count];
+    }
+
+    err = val.flatten(buf, len, fds, fd_count);
+    for (size_t i=0 ; i<fd_count && err==NO_ERROR ; i++) {
+        err = this->writeDupFileDescriptor( fds[i] );
+    }
+
+    if (fd_count) {
+        delete [] fds;
+    }
+
+    return err;
+}
+
 status_t Parcel::writeObject(const flat_binder_object& val, bool nullMetaData)
 {
     const bool enoughData = (mDataPos+sizeof(val)) <= mDataCapacity;
@@ -712,7 +749,6 @@ restart_write:
     
     goto restart_write;
 }
-
 
 void Parcel::remove(size_t start, size_t amt)
 {
@@ -940,6 +976,38 @@ int Parcel::readFileDescriptor() const
     return BAD_TYPE;
 }
 
+status_t Parcel::read(Flattenable& val) const
+{
+    // size
+    const size_t len = this->readInt32();
+    const size_t fd_count = this->readInt32();
+
+    // payload
+    void const* buf = this->readInplace(PAD_SIZE(len));
+    if (buf == NULL)
+        return BAD_VALUE;
+
+    int* fds = NULL;
+    if (fd_count) {
+        fds = new int[fd_count];
+    }
+
+    status_t err = NO_ERROR;
+    for (size_t i=0 ; i<fd_count && err==NO_ERROR ; i++) {
+        fds[i] = dup(this->readFileDescriptor());
+        if (fds[i] < 0) err = BAD_VALUE;
+    }
+
+    if (err == NO_ERROR) {
+        err = val.unflatten(buf, len, fds, fd_count);
+    }
+
+    if (fd_count) {
+        delete [] fds;
+    }
+
+    return err;
+}
 const flat_binder_object* Parcel::readObject(bool nullMetaData) const
 {
     const size_t DPOS = mDataPos;

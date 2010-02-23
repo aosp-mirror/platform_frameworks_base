@@ -109,7 +109,7 @@ void ProgramFragment::setupGL(const Context *rsc, ProgramFragmentState *state)
         }
 
         if (mSamplers[ct].get()) {
-            mSamplers[ct]->setupGL(rsc);
+            mSamplers[ct]->setupGL(rsc, mTextures[ct]->getType()->getIsNp2());
         } else {
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -159,7 +159,7 @@ void ProgramFragment::setupGL2(const Context *rsc, ProgramFragmentState *state, 
         glBindTexture(GL_TEXTURE_2D, mTextures[ct]->getTextureID());
         rsc->checkError("ProgramFragment::setupGL2 tex bind");
         if (mSamplers[ct].get()) {
-            mSamplers[ct]->setupGL(rsc);
+            mSamplers[ct]->setupGL(rsc, mTextures[ct]->getType()->getIsNp2());
         } else {
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);

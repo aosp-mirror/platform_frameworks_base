@@ -1308,14 +1308,16 @@ public class Activity extends ContextThemeWrapper
         }
 
         // close any cursors we are managing.
-        int numCursors = mManagedCursors.size();
-        for (int i = 0; i < numCursors; i++) {
-            ManagedCursor c = mManagedCursors.get(i);
-            if (c != null) {
-                c.mCursor.close();
+        synchronized (mManagedCursors) {
+            int numCursors = mManagedCursors.size();
+            for (int i = 0; i < numCursors; i++) {
+                ManagedCursor c = mManagedCursors.get(i);
+                if (c != null) {
+                    c.mCursor.close();
+                }
             }
+            mManagedCursors.clear();
         }
-        mManagedCursors.clear();
     }
 
     /**
@@ -3778,13 +3780,15 @@ public class Activity extends ContextThemeWrapper
     }
     
     final void performRestart() {
-        final int N = mManagedCursors.size();
-        for (int i=0; i<N; i++) {
-            ManagedCursor mc = mManagedCursors.get(i);
-            if (mc.mReleased || mc.mUpdated) {
-                mc.mCursor.requery();
-                mc.mReleased = false;
-                mc.mUpdated = false;
+        synchronized (mManagedCursors) {
+            final int N = mManagedCursors.size();
+            for (int i=0; i<N; i++) {
+                ManagedCursor mc = mManagedCursors.get(i);
+                if (mc.mReleased || mc.mUpdated) {
+                    mc.mCursor.requery();
+                    mc.mReleased = false;
+                    mc.mUpdated = false;
+                }
             }
         }
 
@@ -3850,12 +3854,14 @@ public class Activity extends ContextThemeWrapper
                     " did not call through to super.onStop()");
             }
     
-            final int N = mManagedCursors.size();
-            for (int i=0; i<N; i++) {
-                ManagedCursor mc = mManagedCursors.get(i);
-                if (!mc.mReleased) {
-                    mc.mCursor.deactivate();
-                    mc.mReleased = true;
+            synchronized (mManagedCursors) {
+                final int N = mManagedCursors.size();
+                for (int i=0; i<N; i++) {
+                    ManagedCursor mc = mManagedCursors.get(i);
+                    if (!mc.mReleased) {
+                        mc.mCursor.deactivate();
+                        mc.mReleased = true;
+                    }
                 }
             }
     
