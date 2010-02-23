@@ -295,13 +295,31 @@ void AudioPolicyManagerBase::setPhoneState(int state)
     if (oldState == AudioSystem::MODE_IN_CALL && newDevice == 0) {
         newDevice = hwOutputDesc->device();
     }
+
+    // when changing from ring tone to in call mode, mute the ringing tone
+    // immediately and delay the route change to avoid sending the ring tone
+    // tail into the earpiece or headset.
+    int delayMs = 0;
+    if (state == AudioSystem::MODE_IN_CALL && oldState == AudioSystem::MODE_RINGTONE) {
+        // delay the device change command by twice the output latency to have some margin
+        // and be sure that audio buffers not yet affected by the mute are out when
+        // we actually apply the route change
+        delayMs = hwOutputDesc->mLatency*2;
+        setStreamMute(AudioSystem::RING, true, mHardwareOutput);
+    }
+
     // change routing is necessary
-    setOutputDevice(mHardwareOutput, newDevice, force);
+    setOutputDevice(mHardwareOutput, newDevice, force, delayMs);
 
     // if entering in call state, handle special case of active streams
     // pertaining to sonification strategy see handleIncallSonification()
     if (state == AudioSystem::MODE_IN_CALL) {
         LOGV("setPhoneState() in call state management: new state is %d", state);
+        // unmute the ringing tone after a sufficient delay if it was muted before
+        // setting output device above
+        if (oldState == AudioSystem::MODE_RINGTONE) {
+            setStreamMute(AudioSystem::RING, false, mHardwareOutput, MUTE_TIME_MS);
+        }
         for (int stream = 0; stream < AudioSystem::NUM_STREAM_TYPES; stream++) {
             handleIncallSonification(stream, true, true);
         }
@@ -1207,10 +1225,10 @@ status_t AudioPolicyManagerBase::handleA2dpDisconnection(AudioSystem::audio_devi
         return INVALID_OPERATION;
     }
 
-    // mute media during 2 seconds to avoid outputing sound on hardware output while music stream
+    // mute media strategy to avoid outputting sound on hardware output while music stream
     // is switched from A2DP output and before music is paused by music application
     setStrategyMute(STRATEGY_MEDIA, true, mHardwareOutput);
-    setStrategyMute(STRATEGY_MEDIA, false, mHardwareOutput, 2000);
+    setStrategyMute(STRATEGY_MEDIA, false, mHardwareOutput, MUTE_TIME_MS);
 
     if (!a2dpUsedForSonification()) {
         // unmute music on A2DP output if a notification or ringtone is playing
