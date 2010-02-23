@@ -76,7 +76,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // database gets upgraded properly. At a minimum, please confirm that 'upgradeVersion'
     // is properly propagated through your change.  Not doing so will result in a loss of user
     // settings.
-    private static final int DATABASE_VERSION = 50;
+    private static final int DATABASE_VERSION = 51;
 
     private Context mContext;
 
@@ -640,6 +640,25 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             }
 
            upgradeVersion = 50;
+       }
+
+       if (upgradeVersion == 50) {
+           /*
+            * New settings for set install location UI.
+            */
+           db.beginTransaction();
+           try {
+                SQLiteStatement stmt = db.compileStatement("INSERT INTO system(name,value)"
+                        + " VALUES(?,?);");
+                loadBooleanSetting(stmt, Settings.System.SET_INSTALL_LOCATION,
+                        R.bool.set_install_location);
+                stmt.close();
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+            }
+
+           upgradeVersion = 51;
        }
 
        if (upgradeVersion != currentVersion) {
