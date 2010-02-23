@@ -22,10 +22,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.ServiceManager;
-import android.telephony.PhoneNumberUtils;
-import android.util.Log;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -37,7 +34,7 @@ public abstract class IccPhoneBookInterfaceManager extends IIccPhoneBook.Stub {
 
     protected PhoneBase phone;
     protected AdnRecordCache adnCache;
-    protected Object mLock = new Object();
+    protected final Object mLock = new Object();
     protected int recordSize[];
     protected boolean success;
     protected List<AdnRecord> records;
@@ -80,8 +77,7 @@ public abstract class IccPhoneBookInterfaceManager extends IIccPhoneBook.Stub {
                     ar = (AsyncResult)msg.obj;
                     synchronized (mLock) {
                         if (ar.exception == null) {
-                            records = (List<AdnRecord>)
-                                    ((ArrayList<AdnRecord>) ar.result);
+                            records = (List<AdnRecord>) ar.result;
                         } else {
                             if(DBG) logd("Cannot load ADN records");
                             if (records != null) {

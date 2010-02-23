@@ -25,10 +25,10 @@ import android.util.Log;
 import com.android.internal.telephony.IccConstants;
 import com.android.internal.telephony.IccSmsInterfaceManager;
 import com.android.internal.telephony.IccUtils;
-import com.android.internal.telephony.PhoneProxy;
 import com.android.internal.telephony.SmsRawData;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static android.telephony.SmsManager.STATUS_ON_ICC_FREE;
@@ -65,8 +65,7 @@ public class SimSmsInterfaceManager extends IccSmsInterfaceManager {
                     ar = (AsyncResult)msg.obj;
                     synchronized (mLock) {
                         if (ar.exception == null) {
-                            mSms  = (List<SmsRawData>)
-                                    buildValidRawData((ArrayList<byte[]>) ar.result);
+                            mSms  = buildValidRawData((ArrayList<byte[]>) ar.result);
                         } else {
                             if(DBG) log("Cannot load Sms records");
                             if (mSms != null)
@@ -88,6 +87,11 @@ public class SimSmsInterfaceManager extends IccSmsInterfaceManager {
     }
 
     protected void finalize() {
+        try {
+            super.finalize();
+        } catch (Throwable throwable) {
+            Log.e(LOG_TAG, "Error while finalizing:", throwable);
+        }
         if(DBG) Log.d(LOG_TAG, "SimSmsInterfaceManager finalized");
     }
 
@@ -106,7 +110,7 @@ public class SimSmsInterfaceManager extends IccSmsInterfaceManager {
     updateMessageOnIccEf(int index, int status, byte[] pdu) {
         if (DBG) log("updateMessageOnIccEf: index=" + index +
                 " status=" + status + " ==> " +
-                "("+ pdu + ")");
+                "("+ Arrays.toString(pdu) + ")");
         enforceReceiveAndSend("Updating message on SIM");
         synchronized(mLock) {
             mSuccess = false;
@@ -118,7 +122,7 @@ public class SimSmsInterfaceManager extends IccSmsInterfaceManager {
                 mPhone.mCM.deleteSmsOnSim(index, response);
             } else {
                 byte[] record = makeSmsRecordData(status, pdu);
-                ((SIMFileHandler)mPhone.getIccFileHandler()).updateEFLinearFixed(
+                mPhone.getIccFileHandler().updateEFLinearFixed(
                         IccConstants.EF_SMS,
                         index, record, null, response);
             }
@@ -142,7 +146,8 @@ public class SimSmsInterfaceManager extends IccSmsInterfaceManager {
      */
     public boolean copyMessageToIccEf(int status, byte[] pdu, byte[] smsc) {
         if (DBG) log("copyMessageToIccEf: status=" + status + " ==> " +
-                "pdu=("+ pdu + "), smsm=(" + smsc +")");
+                "pdu=("+ Arrays.toString(pdu) +
+                "), smsm=(" + Arrays.toString(smsc) +")");
         enforceReceiveAndSend("Copying message to SIM");
         synchronized(mLock) {
             mSuccess = false;
@@ -175,8 +180,7 @@ public class SimSmsInterfaceManager extends IccSmsInterfaceManager {
                 "Reading messages from SIM");
         synchronized(mLock) {
             Message response = mHandler.obtainMessage(EVENT_LOAD_DONE);
-            ((SIMFileHandler)mPhone.getIccFileHandler()).loadEFLinearFixedAll(IccConstants.EF_SMS,
-                    response);
+            mPhone.getIccFileHandler().loadEFLinearFixedAll(IccConstants.EF_SMS, response);
 
             try {
                 mLock.wait();
