@@ -16,20 +16,14 @@
 
 package android.server.search;
 
-import android.app.ActivityManagerNative;
-import android.app.IActivityWatcher;
+import com.android.internal.content.PackageMonitor;
+
 import android.app.ISearchManager;
-import android.app.ISearchManagerCallback;
 import android.app.SearchManager;
 import android.app.SearchableInfo;
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.RemoteException;
 import android.util.Log;
 
 import java.util.List;
@@ -42,13 +36,11 @@ public class SearchManagerService extends ISearchManager.Stub {
 
     // general debugging support
     private static final String TAG = "SearchManagerService";
-    private static final boolean DBG = false;
 
     // Context that the service is running in.
     private final Context mContext;
 
-    // This field is initialized in ensureSearchablesCreated(), and then never modified.
-    // Only accessed by ensureSearchablesCreated() and getSearchables()
+    // This field is initialized lazily in getSearchables(), and then never modified.
     private Searchables mSearchables;
 
     /**
@@ -61,58 +53,28 @@ public class SearchManagerService extends ISearchManager.Stub {
         mContext = context;
     }
 
-    private synchronized void ensureSearchablesCreated() {
-        if (mSearchables != null) return;  // already created
-
-        mSearchables = new Searchables(mContext);
-        mSearchables.buildSearchableList();
-
-        IntentFilter packageFilter = new IntentFilter();
-        packageFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
-        packageFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
-        packageFilter.addAction(Intent.ACTION_PACKAGE_CHANGED);
-        packageFilter.addDataScheme("package");
-        mContext.registerReceiver(mPackageChangedReceiver, packageFilter);
-        // Register for events related to sdcard installation.
-        IntentFilter sdFilter = new IntentFilter();
-        sdFilter.addAction(Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE);
-        sdFilter.addAction(Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE);
-        mContext.registerReceiver(mPackageChangedReceiver, sdFilter);
-    }
-
     private synchronized Searchables getSearchables() {
-        ensureSearchablesCreated();
+        if (mSearchables == null) {
+            mSearchables = new Searchables(mContext);
+            mSearchables.buildSearchableList();
+            new MyPackageMonitor().register(mContext, true);
+        }
         return mSearchables;
     }
 
     /**
      * Refreshes the "searchables" list when packages are added/removed.
      */
-    private BroadcastReceiver mPackageChangedReceiver = new BroadcastReceiver() {
+    class MyPackageMonitor extends PackageMonitor {
         @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-
-            if (Intent.ACTION_PACKAGE_ADDED.equals(action) ||
-                    Intent.ACTION_PACKAGE_REMOVED.equals(action) ||
-                    Intent.ACTION_PACKAGE_CHANGED.equals(action) ||
-                    Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE.equals(action) ||
-                    Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE.equals(action)) {
-                if (DBG) Log.d(TAG, "Got " + action);
-                // Update list of searchable activities
-                getSearchables().buildSearchableList();
-                broadcastSearchablesChanged();
-            }
+        public void onSomePackagesChanged() {
+            // Update list of searchable activities
+            getSearchables().buildSearchableList();
+            // Inform all listeners that the list of searchables has been updated.
+            Intent intent = new Intent(SearchManager.INTENT_ACTION_SEARCHABLES_CHANGED);
+            intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
+            mContext.sendBroadcast(intent);
         }
-    };
-
-    /**
-     * Informs all listeners that the list of searchables has been updated.
-     */
-    void broadcastSearchablesChanged() {
-        Intent intent = new Intent(SearchManager.INTENT_ACTION_SEARCHABLES_CHANGED);
-        intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
-        mContext.sendBroadcast(intent);
     }
 
     //
