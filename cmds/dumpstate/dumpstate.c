@@ -96,6 +96,7 @@ static void dumpstate() {
 
     run_command("NETWORK INTERFACES", 10, "netcfg", NULL);
     dump_file("NETWORK ROUTES", "/proc/net/route");
+    dump_file("ARP CACHE", "/proc/net/arp");
 
 #ifdef FWDUMP_bcm4329
     run_command("DUMP WIFI FIRMWARE LOG", 60,
