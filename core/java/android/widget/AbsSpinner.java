@@ -28,8 +28,6 @@ import android.util.AttributeSet;
 import android.util.SparseArray;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Interpolator;
-
 
 /**
  * An abstract base class for spinner widgets. SDK users will probably not
@@ -38,23 +36,20 @@ import android.view.animation.Interpolator;
  * @attr ref android.R.styleable#AbsSpinner_entries
  */
 public abstract class AbsSpinner extends AdapterView<SpinnerAdapter> {
-
     SpinnerAdapter mAdapter;
 
     int mHeightMeasureSpec;
     int mWidthMeasureSpec;
     boolean mBlockLayoutRequests;
+
     int mSelectionLeftPadding = 0;
     int mSelectionTopPadding = 0;
     int mSelectionRightPadding = 0;
     int mSelectionBottomPadding = 0;
-    Rect mSpinnerPadding = new Rect();
-    View mSelectedView = null;
-    Interpolator mInterpolator;
+    final Rect mSpinnerPadding = new Rect();
 
-    RecycleBin mRecycler = new RecycleBin();
+    final RecycleBin mRecycler = new RecycleBin();
     private DataSetObserver mDataSetObserver;
-
 
     /** Temporary frame to hold a child View's frame rectangle */
     private Rect mTouchFrame;
@@ -94,7 +89,6 @@ public abstract class AbsSpinner extends AdapterView<SpinnerAdapter> {
         setFocusable(true);
         setWillNotDraw(false);
     }
-
 
     /**
      * The Adapter is used to provide the data which backs this Spinner.
@@ -190,7 +184,7 @@ public abstract class AbsSpinner extends AdapterView<SpinnerAdapter> {
         boolean needsMeasuring = true;
         
         int selectedPosition = getSelectedItemPosition();
-        if (selectedPosition >= 0 && mAdapter != null) {
+        if (selectedPosition >= 0 && mAdapter != null && selectedPosition < mAdapter.getCount()) {
             // Try looking in the recycler. (Maybe we were measured once already)
             View view = mRecycler.get(selectedPosition);
             if (view == null) {
@@ -237,7 +231,6 @@ public abstract class AbsSpinner extends AdapterView<SpinnerAdapter> {
         mWidthMeasureSpec = widthMeasureSpec;
     }
 
-    
     int getChildHeight(View child) {
         return child.getMeasuredHeight();
     }
@@ -254,26 +247,17 @@ public abstract class AbsSpinner extends AdapterView<SpinnerAdapter> {
     }
     
     void recycleAllViews() {
-        int childCount = getChildCount();
+        final int childCount = getChildCount();
         final AbsSpinner.RecycleBin recycleBin = mRecycler;
+        final int position = mFirstPosition;
 
         // All views go in recycler
-        for (int i=0; i<childCount; i++) {
+        for (int i = 0; i < childCount; i++) {
             View v = getChildAt(i);
-            int index = mFirstPosition + i;
+            int index = position + i;
             recycleBin.put(index, v);
         }  
     }
-    
-    @Override
-    void handleDataChanged() {
-        // FIXME -- this is called from both measure and layout.
-        // This is harmless right now, but we don't want to do redundant work if
-        // this gets more complicated
-       super.handleDataChanged();
-    }
-    
-  
 
     /**
      * Jump directly to a specific item in the adapter data.
@@ -284,7 +268,6 @@ public abstract class AbsSpinner extends AdapterView<SpinnerAdapter> {
                 position <= mFirstPosition + getChildCount() - 1;
         setSelectionInt(position, shouldAnimate);
     }
-    
 
     @Override
     public void setSelection(int position) {
@@ -334,8 +317,6 @@ public abstract class AbsSpinner extends AdapterView<SpinnerAdapter> {
             super.requestLayout();
         }
     }
-
- 
 
     @Override
     public SpinnerAdapter getAdapter() {
@@ -452,7 +433,7 @@ public abstract class AbsSpinner extends AdapterView<SpinnerAdapter> {
     }
 
     class RecycleBin {
-        private SparseArray<View> mScrapHeap = new SparseArray<View>();
+        private final SparseArray<View> mScrapHeap = new SparseArray<View>();
 
         public void put(int position, View v) {
             mScrapHeap.put(position, v);
@@ -469,12 +450,7 @@ public abstract class AbsSpinner extends AdapterView<SpinnerAdapter> {
             }
             return result;
         }
-        
-        View peek(int position) {
-            // System.out.print("Looking for " + position);
-            return mScrapHeap.get(position);
-        }
-        
+
         void clear() {
             final SparseArray<View> scrapHeap = mScrapHeap;
             final int count = scrapHeap.size();
