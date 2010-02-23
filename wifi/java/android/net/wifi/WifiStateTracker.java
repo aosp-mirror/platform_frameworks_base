@@ -943,7 +943,7 @@ public class WifiStateTracker extends NetworkStateTracker {
                         } else {
                             newDetailedState = DetailedState.FAILED;
                         }
-                        handleDisconnectedState(newDetailedState);
+                        handleDisconnectedState(newDetailedState, true);
                         /**
                          * If we were associated with a network (networkId != -1),
                          * assume we reached this state because of a failed attempt
@@ -965,7 +965,7 @@ public class WifiStateTracker extends NetworkStateTracker {
                     } else if (newState == SupplicantState.DISCONNECTED) {
                         mHaveIpAddress = false;
                         if (isDriverStopped() || mDisconnectExpected) {
-                            handleDisconnectedState(DetailedState.DISCONNECTED);
+                            handleDisconnectedState(DetailedState.DISCONNECTED, true);
                         } else {
                             scheduleDisconnect();
                         }
@@ -1072,16 +1072,10 @@ public class WifiStateTracker extends NetworkStateTracker {
                      */
                     if (wasDisconnectPending) {
                         DetailedState saveState = getNetworkInfo().getDetailedState();
-                        handleDisconnectedState(DetailedState.DISCONNECTED);
+                        handleDisconnectedState(DetailedState.DISCONNECTED, false);
                         setDetailedStateInternal(saveState);
-                    } else {
-                        /**
-                         *  stop DHCP to ensure there is a new IP address
-                         *  even if the supplicant transitions without disconnect
-                         *  COMPLETED -> ASSOCIATED -> COMPLETED
-                         */
-                        resetConnections(false);
                     }
+
                     configureInterface();
                     mLastBssid = result.BSSID;
                     mLastSsid = mWifiInfo.getSSID();
@@ -1116,7 +1110,7 @@ public class WifiStateTracker extends NetworkStateTracker {
             
             case EVENT_DEFERRED_DISCONNECT:
                 if (mWifiInfo.getSupplicantState() != SupplicantState.UNINITIALIZED) {
-                    handleDisconnectedState(DetailedState.DISCONNECTED);
+                    handleDisconnectedState(DetailedState.DISCONNECTED, true);
                 }
                 break;
 
@@ -1284,13 +1278,15 @@ public class WifiStateTracker extends NetworkStateTracker {
      * Reset our IP state and send out broadcasts following a disconnect.
      * @param newState the {@code DetailedState} to set. Should be either
      * {@code DISCONNECTED} or {@code FAILED}.
+     * @param disableInterface indicates whether the interface should
+     * be disabled
      */
-    private void handleDisconnectedState(DetailedState newState) {
+    private void handleDisconnectedState(DetailedState newState, boolean disableInterface) {
         if (mDisconnectPending) {
             cancelDisconnect();
         }
         mDisconnectExpected = false;
-        resetConnections(true);
+        resetConnections(disableInterface);
         setDetailedState(newState);
         sendNetworkStateChangeBroadcast(mLastBssid);
         mWifiInfo.setBSSID(null);
