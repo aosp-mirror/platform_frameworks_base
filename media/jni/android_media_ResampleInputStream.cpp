@@ -92,7 +92,7 @@ static void android_media_ResampleInputStream_fir21(JNIEnv *env, jclass clazz,
          jint jNpoints) {
     
     // safety first!
-    if (nFir21 + jNpoints > BUF_SIZE) {
+    if (nFir21 + jNpoints * 2 > BUF_SIZE) {
         throwException(env, "java/lang/IllegalArgumentException",
                 "FIR+data too long %d", nFir21 + jNpoints);
         return;
