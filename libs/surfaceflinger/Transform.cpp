@@ -14,16 +14,13 @@
  * limitations under the License.
  */
 
+#include <math.h>
+
+#include <cutils/compiler.h>
+#include <utils/String8.h>
 #include <ui/Region.h>
 
-#include <private/pixelflinger/ggl_fixed.h>
-
 #include "Transform.h"
-
-// ---------------------------------------------------------------------------
-
-#define LIKELY( exp )       (__builtin_expect( (exp) != 0, true  ))
-#define UNLIKELY( exp )     (__builtin_expect( (exp) != 0, false ))
 
 // ---------------------------------------------------------------------------
 
@@ -31,163 +28,243 @@ namespace android {
 
 // ---------------------------------------------------------------------------
 
-Transform::Transform()
-    : mType(0)
-{
-    mTransform.reset();
+template <typename T> inline T min(T a, T b) {
+    return a<b ? a : b;
+}
+template <typename T> inline T min(T a, T b, T c) {
+    return min(a, min(b, c));
+}
+template <typename T> inline T min(T a, T b, T c, T d) {
+    return min(a, b, min(c, d));
+}
+
+template <typename T> inline T max(T a, T b) {
+    return a>b ? a : b;
+}
+template <typename T> inline T max(T a, T b, T c) {
+    return max(a, max(b, c));
+}
+template <typename T> inline T max(T a, T b, T c, T d) {
+    return max(a, b, max(c, d));
+}
+
+// ---------------------------------------------------------------------------
+
+Transform::Transform() {
+    reset();
 }
 
 Transform::Transform(const Transform&  other)
-    : mTransform(other.mTransform), mType(other.mType)
-{
+    : mMatrix(other.mMatrix), mType(other.mType) {
 }
 
-Transform::Transform(int32_t flags) {
-    mTransform.reset();
-    int sx = (flags & FLIP_H) ? -1 : 1;
-    int sy = (flags & FLIP_V) ? -1 : 1;
-    if (flags & ROT_90) {
-        this->set(0, -sy, sx, 0);
-    } else {
-        this->set(sx, 0, 0, sy);
-    }
+Transform::Transform(uint32_t orientation) {
+    set(orientation, 0, 0);
 }
 
 Transform::~Transform() {
 }
 
+
+bool Transform::absIsOne(float f) {
+    return fabs(f) == 1.0f;
+}
+
+bool Transform::isZero(float f) {
+    return fabs(f) == 0.0f;
+}
+
+bool Transform::absEqual(float a, float b) {
+    return fabs(a) == fabs(b);
+}
+
 Transform Transform::operator * (const Transform& rhs) const
 {
-    if (LIKELY(mType == 0))
+    if (CC_LIKELY(mType == IDENTITY))
         return rhs;
 
     Transform r(*this);
-    r.mTransform.preConcat(rhs.mTransform);
+    if (rhs.mType == IDENTITY)
+        return r;
+
+    // TODO: we could use mType to optimize the matrix multiply
+    const mat33& A(mMatrix);
+    const mat33& B(rhs.mMatrix);
+          mat33& D(r.mMatrix);
+    for (int i=0 ; i<3 ; i++) {
+        const float v0 = A[0][i];
+        const float v1 = A[1][i];
+        const float v2 = A[2][i];
+        D[0][i] = v0*B[0][0] + v1*B[0][1] + v2*B[0][2];
+        D[1][i] = v0*B[1][0] + v1*B[1][1] + v2*B[1][2];
+        D[2][i] = v0*B[2][0] + v1*B[2][1] + v2*B[2][2];
+    }
     r.mType |= rhs.mType;
+
+    // TODO: we could recompute this value from r and rhs
+    r.mType &= 0xFF;
+    r.mType |= UNKNOWN_TYPE;
     return r;
 }
 
-float Transform::operator [] (int i) const
-{
-    float r = 0;
-    switch(i) {
-        case 0: r = SkScalarToFloat( mTransform[SkMatrix::kMScaleX] );  break;
-        case 1: r = SkScalarToFloat( mTransform[SkMatrix::kMSkewX] );   break;
-        case 2: r = SkScalarToFloat( mTransform[SkMatrix::kMSkewY] );   break;
-        case 3: r = SkScalarToFloat( mTransform[SkMatrix::kMScaleY] );  break;
-    }
-    return r;
-}
-
-uint8_t Transform::type() const
-{
-    if (UNLIKELY(mType & 0x80000000)) {
-        mType = mTransform.getType();
-    }
-    return uint8_t(mType & 0xFF);
+float const* Transform::operator [] (int i) const {
+    return mMatrix[i].v;
 }
 
 bool Transform::transformed() const {
-    return type() > SkMatrix::kTranslate_Mask;
+    return type() > TRANSLATE;
 }
 
 int Transform::tx() const {
-    return SkScalarRound( mTransform[SkMatrix::kMTransX] );
+    return floorf(mMatrix[2][0] + 0.5f);
 }
 
 int Transform::ty() const {
-    return SkScalarRound( mTransform[SkMatrix::kMTransY] );
+    return floorf(mMatrix[2][1] + 0.5f);
 }
 
 void Transform::reset() {
-    mTransform.reset();
-    mType = 0;
-}
-
-void Transform::set( float xx, float xy,
-                     float yx, float yy)
-{
-    mTransform.set(SkMatrix::kMScaleX, SkFloatToScalar(xx));
-    mTransform.set(SkMatrix::kMSkewX, SkFloatToScalar(xy));
-    mTransform.set(SkMatrix::kMSkewY, SkFloatToScalar(yx));
-    mTransform.set(SkMatrix::kMScaleY, SkFloatToScalar(yy));
-    mType |= 0x80000000;
-}
-
-void Transform::set(float radian, float x, float y)
-{
-    float r00 = cosf(radian);    float r01 = -sinf(radian);
-    float r10 = sinf(radian);    float r11 =  cosf(radian);
-    mTransform.set(SkMatrix::kMScaleX, SkFloatToScalar(r00));
-    mTransform.set(SkMatrix::kMSkewX, SkFloatToScalar(r01));
-    mTransform.set(SkMatrix::kMSkewY, SkFloatToScalar(r10));
-    mTransform.set(SkMatrix::kMScaleY, SkFloatToScalar(r11));
-    mTransform.set(SkMatrix::kMTransX, SkIntToScalar(x - r00*x - r01*y));
-    mTransform.set(SkMatrix::kMTransY, SkIntToScalar(y - r10*x - r11*y));
-    mType |= 0x80000000 | SkMatrix::kTranslate_Mask;
-}
-
-void Transform::scale(float s, float x, float y)
-{
-    mTransform.postScale(s, s, x, y); 
-    mType |= 0x80000000;
-}
-
-void Transform::set(int tx, int ty)
-{
-    if (tx | ty) {
-        mTransform.set(SkMatrix::kMTransX, SkIntToScalar(tx));
-        mTransform.set(SkMatrix::kMTransY, SkIntToScalar(ty));
-        mType |= SkMatrix::kTranslate_Mask;
-    } else {
-        mTransform.set(SkMatrix::kMTransX, 0);
-        mTransform.set(SkMatrix::kMTransY, 0);
-        mType &= ~SkMatrix::kTranslate_Mask;
+    mType = IDENTITY;
+    for(int i=0 ; i<3 ; i++) {
+        vec3& v(mMatrix[i]);
+        for (int j=0 ; j<3 ; j++)
+            v[j] = ((i==j) ? 1.0f : 0.0f);
     }
 }
 
-void Transform::transform(GLfixed* point, int x, int y) const
+void Transform::set(float tx, float ty)
 {
-    SkPoint s;
-    mTransform.mapXY(SkIntToScalar(x), SkIntToScalar(y), &s);
-    point[0] = SkScalarToFixed(s.fX);
-    point[1] = SkScalarToFixed(s.fY);
+    mMatrix[2][0] = tx;
+    mMatrix[2][1] = ty;
+    mMatrix[2][2] = 1.0f;
+
+    if (isZero(tx) && isZero(ty)) {
+        mType &= ~TRANSLATE;
+    } else {
+        mType |= TRANSLATE;
+    }
+}
+
+void Transform::set(float a, float b, float c, float d)
+{
+    mat33& M(mMatrix);
+    M[0][0] = a;    M[1][0] = b;
+    M[0][1] = c;    M[1][1] = d;
+    M[0][2] = 0;    M[1][2] = 0;
+    mType = UNKNOWN_TYPE;
+}
+
+void Transform::set(uint32_t flags, float w, float h)
+{
+    mType = flags << 8;
+    float sx = (flags & FLIP_H) ? -1 : 1;
+    float sy = (flags & FLIP_V) ? -1 : 1;
+    float a=0, b=0, c=0, d=0, x=0, y=0;
+    int xmask = 0;
+
+    // computation of x,y
+    // x y
+    // 0 0  0
+    // w 0  ROT90
+    // w h  FLIPH|FLIPV
+    // 0 h  FLIPH|FLIPV|ROT90
+
+    if (flags & ROT_90) {
+        mType |= ROTATE;
+        b = -sy;
+        c = sx;
+        xmask = 1;
+    } else {
+        a = sx;
+        d = sy;
+    }
+
+    if (flags & FLIP_H) {
+        mType ^= SCALE;
+        xmask ^= 1;
+    }
+
+    if (flags & FLIP_V) {
+        mType ^= SCALE;
+        y = h;
+    }
+
+    if ((flags & ROT_180) == ROT_180) {
+        mType |= ROTATE;
+    }
+
+    if (xmask) {
+        x = w;
+    }
+
+    if (!isZero(x) || !isZero(y)) {
+        mType |= TRANSLATE;
+    }
+
+    mat33& M(mMatrix);
+    M[0][0] = a;    M[1][0] = b;    M[2][0] = x;
+    M[0][1] = c;    M[1][1] = d;    M[2][1] = y;
+    M[0][2] = 0;    M[1][2] = 0;    M[2][2] = 1;
+}
+
+Transform::vec2 Transform::transform(const vec2& v) const {
+    vec2 r;
+    const mat33& M(mMatrix);
+    r[0] = M[0][0]*v[0] + M[1][0]*v[1] + M[2][0];
+    r[1] = M[0][1]*v[0] + M[1][1]*v[1] + M[2][1];
+    return r;
+}
+
+Transform::vec3 Transform::transform(const vec3& v) const {
+    vec3 r;
+    const mat33& M(mMatrix);
+    r[0] = M[0][0]*v[0] + M[1][0]*v[1] + M[2][0]*v[2];
+    r[1] = M[0][1]*v[0] + M[1][1]*v[1] + M[2][1]*v[2];
+    r[2] = M[0][2]*v[0] + M[1][2]*v[1] + M[2][2]*v[2];
+    return r;
+}
+
+void Transform::transform(fixed1616* point, int x, int y) const
+{
+    const float toFixed = 65536.0f;
+    const mat33& M(mMatrix);
+    vec2 v(x, y);
+    v = transform(v);
+    point[0] = v[0] * toFixed;
+    point[1] = v[1] * toFixed;
 }
 
 Rect Transform::makeBounds(int w, int h) const
 {
-    Rect r;
-    SkRect d, s;
-    s.set(0, 0, SkIntToScalar(w), SkIntToScalar(h));
-    mTransform.mapRect(&d, s);
-    r.left   = SkScalarRound( d.fLeft );
-    r.top    = SkScalarRound( d.fTop );
-    r.right  = SkScalarRound( d.fRight );
-    r.bottom = SkScalarRound( d.fBottom );
-    return r;
+    return transform( Rect(w, h) );
 }
 
 Rect Transform::transform(const Rect& bounds) const
 {
     Rect r;
-    SkRect d, s;
-    s.set(  SkIntToScalar( bounds.left ),
-            SkIntToScalar( bounds.top ),
-            SkIntToScalar( bounds.right ),
-            SkIntToScalar( bounds.bottom ));
-    mTransform.mapRect(&d, s);
-    r.left   = SkScalarRound( d.fLeft );
-    r.top    = SkScalarRound( d.fTop );
-    r.right  = SkScalarRound( d.fRight );
-    r.bottom = SkScalarRound( d.fBottom );
+    vec2 lt( bounds.left,  bounds.top    );
+    vec2 rt( bounds.right, bounds.top    );
+    vec2 lb( bounds.left,  bounds.bottom );
+    vec2 rb( bounds.right, bounds.bottom );
+
+    lt = transform(lt);
+    rt = transform(rt);
+    lb = transform(lb);
+    rb = transform(rb);
+
+    r.left   = floorf(min(lt[0], rt[0], lb[0], rb[0]) + 0.5f);
+    r.top    = floorf(min(lt[1], rt[1], lb[1], rb[1]) + 0.5f);
+    r.right  = floorf(max(lt[0], rt[0], lb[0], rb[0]) + 0.5f);
+    r.bottom = floorf(max(lt[1], rt[1], lb[1], rb[1]) + 0.5f);
+
     return r;
 }
 
 Region Transform::transform(const Region& reg) const
 {
     Region out;
-    if (UNLIKELY(transformed())) {
-        if (LIKELY(preserveRects())) {
+    if (CC_UNLIKELY(transformed())) {
+        if (CC_LIKELY(preserveRects())) {
             Region::const_iterator it = reg.begin();
             Region::const_iterator const end = reg.end();
             while (it != end) {
@@ -202,31 +279,108 @@ Region Transform::transform(const Region& reg) const
     return out;
 }
 
-int32_t Transform::getOrientation() const
+uint32_t Transform::type() const
 {
-    uint32_t flags = 0;
-    if (UNLIKELY(transformed())) {
-        SkScalar a = mTransform[SkMatrix::kMScaleX];
-        SkScalar b = mTransform[SkMatrix::kMSkewX];
-        SkScalar c = mTransform[SkMatrix::kMSkewY];
-        SkScalar d = mTransform[SkMatrix::kMScaleY];
-        if (b==0 && c==0 && a && d) {
-            if (a<0)    flags |= FLIP_H;
-            if (d<0)    flags |= FLIP_V;
-        } else if (b && c && a==0 && d==0) {
-            flags |= ROT_90;
-            if (b>0)    flags |= FLIP_H;
-            if (c<0)    flags |= FLIP_V;
+    if (mType & UNKNOWN_TYPE) {
+        // recompute what this transform is
+
+        const mat33& M(mMatrix);
+        const float a = M[0][0];
+        const float b = M[1][0];
+        const float c = M[0][1];
+        const float d = M[1][1];
+        const float x = M[2][0];
+        const float y = M[2][1];
+
+        bool scale = false;
+        uint32_t flags = ROT_0;
+        if (isZero(b) && isZero(c)) {
+            if (absEqual(a, d)) {
+                if (a<0)    flags |= FLIP_H;
+                if (d<0)    flags |= FLIP_V;
+                if (!absIsOne(a) || !absIsOne(d)) {
+                    scale = true;
+                }
+            } else {
+                flags = ROT_INVALID;
+            }
+        } else if (isZero(a) && isZero(d)) {
+            if (absEqual(b, c)) {
+                flags |= ROT_90;
+                if (b>0)    flags |= FLIP_H;
+                if (c<0)    flags |= FLIP_V;
+                if (!absIsOne(b) || !absIsOne(c)) {
+                    scale = true;
+                }
+            } else {
+                flags = ROT_INVALID;
+            }
         } else {
-            flags = 0x80000000;
+            flags = ROT_INVALID;
         }
+
+        mType = flags << 8;
+        if (flags & ROT_INVALID) {
+            mType |= UNKNOWN;
+        } else {
+            if ((flags & ROT_90) || ((flags & ROT_180) == ROT_180))
+                mType |= ROTATE;
+            if (flags & FLIP_H)
+                mType ^= SCALE;
+            if (flags & FLIP_V)
+                mType ^= SCALE;
+            if (scale)
+                mType |= SCALE;
+        }
+
+        if (!isZero(x) || !isZero(y))
+            mType |= TRANSLATE;
     }
-    return flags;
+    return mType;
+}
+
+uint32_t Transform::getType() const {
+    return type() & 0xFF;
+}
+
+uint32_t Transform::getOrientation() const
+{
+    return (type() >> 8) & 0xFF;
 }
 
 bool Transform::preserveRects() const
 {
-    return mTransform.rectStaysRect();
+    return (type() & ROT_INVALID) ? false : true;
+}
+
+void Transform::dump(const char* name) const
+{
+    type(); // updates the type
+
+    String8 flags, type;
+    const mat33& m(mMatrix);
+    uint32_t orient = mType >> 8;
+
+    if (orient&ROT_INVALID)
+        flags.append("ROT_INVALID ");
+    if (orient&ROT_90)
+        flags.append("ROT_90 ");
+    if (orient&FLIP_V)
+        flags.append("FLIP_V ");
+    if (orient&FLIP_H)
+        flags.append("FLIP_H ");
+
+    if (mType&SCALE)
+        type.append("SCALE ");
+    if (mType&ROTATE)
+        type.append("ROTATE ");
+    if (mType&TRANSLATE)
+        type.append("TRANSLATE ");
+
+    LOGD("%s (%s, %s)", name, flags.string(), type.string());
+    LOGD("%.2f  %.2f  %.2f", m[0][0], m[1][0], m[2][0]);
+    LOGD("%.2f  %.2f  %.2f", m[0][1], m[1][1], m[2][1]);
+    LOGD("%.2f  %.2f  %.2f", m[0][2], m[1][2], m[2][2]);
 }
 
 // ---------------------------------------------------------------------------
