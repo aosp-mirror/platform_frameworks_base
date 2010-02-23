@@ -274,7 +274,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         SearchManager searchManager = (SearchManager)
                 mContext.getSystemService(Context.SEARCH_SERVICE);
         // Try to get the searchable info for the provided component.
-        mSearchable = searchManager.getSearchableInfo(componentName, false);
+        mSearchable = searchManager.getSearchableInfo(componentName);
 
         if (mSearchable == null) {
             return false;
