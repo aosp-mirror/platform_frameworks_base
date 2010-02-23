@@ -39,6 +39,11 @@ public class PhoneSubInfo extends IPhoneSubInfo.Stub {
     }
 
     protected void finalize() {
+        try {
+            super.finalize();
+        } catch (Throwable throwable) {
+            Log.e(LOG_TAG, "Error while finalizing:", throwable);
+        }
         Log.d(LOG_TAG, "PhoneSubInfo finalized");
     }
 

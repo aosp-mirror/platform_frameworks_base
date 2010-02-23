@@ -30,6 +30,7 @@ import com.android.internal.telephony.PhoneProxy;
 import com.android.internal.telephony.SmsRawData;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static android.telephony.SmsManager.STATUS_ON_ICC_FREE;
@@ -89,6 +90,11 @@ public class RuimSmsInterfaceManager extends IccSmsInterfaceManager {
     }
 
     protected void finalize() {
+        try {
+            super.finalize();
+        } catch (Throwable throwable) {
+            Log.e(LOG_TAG, "Error while finalizing:", throwable);
+        }
         if(DBG) Log.d(LOG_TAG, "RuimSmsInterfaceManager finalized");
     }
 
@@ -143,7 +149,7 @@ public class RuimSmsInterfaceManager extends IccSmsInterfaceManager {
     public boolean copyMessageToIccEf(int status, byte[] pdu, byte[] smsc) {
         //NOTE smsc not used in RUIM
         if (DBG) log("copyMessageToIccEf: status=" + status + " ==> " +
-                "pdu=("+ pdu + ")");
+                "pdu=("+ Arrays.toString(pdu) + ")");
         enforceReceiveAndSend("Copying message to RUIM");
         synchronized(mLock) {
             mSuccess = false;
