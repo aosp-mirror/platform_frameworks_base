@@ -68,6 +68,8 @@ private:
     status_t updateAudioTrackInfoFromESDS_MPEG4Audio(
             const void *esds_data, size_t esds_size);
 
+    static status_t verifyTrack(Track *track);
+
     MPEG4Extractor(const MPEG4Extractor &);
     MPEG4Extractor &operator=(const MPEG4Extractor &);
 };
