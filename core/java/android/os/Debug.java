@@ -541,6 +541,14 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
     public static int getGlobalFreedSize() {
         return VMDebug.getAllocCount(VMDebug.KIND_GLOBAL_FREED_BYTES);
     }
+    public static int getGlobalClassInitCount() {
+        /* number of classes that have been successfully initialized */
+        return VMDebug.getAllocCount(VMDebug.KIND_GLOBAL_CLASS_INIT_COUNT);
+    }
+    public static int getGlobalClassInitTime() {
+        /* cumulative elapsed time for class initialization, in usec */
+        return VMDebug.getAllocCount(VMDebug.KIND_GLOBAL_CLASS_INIT_TIME);
+    }
     public static int getGlobalExternalAllocCount() {
         return VMDebug.getAllocCount(VMDebug.KIND_GLOBAL_EXT_ALLOCATED_OBJECTS);
     }
@@ -583,6 +591,12 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
     }
     public static void resetGlobalFreedSize() {
         VMDebug.resetAllocCount(VMDebug.KIND_GLOBAL_FREED_BYTES);
+    }
+    public static void resetGlobalClassInitCount() {
+        VMDebug.resetAllocCount(VMDebug.KIND_GLOBAL_CLASS_INIT_COUNT);
+    }
+    public static void resetGlobalClassInitTime() {
+        VMDebug.resetAllocCount(VMDebug.KIND_GLOBAL_CLASS_INIT_TIME);
     }
     public static void resetGlobalExternalAllocCount() {
         VMDebug.resetAllocCount(VMDebug.KIND_GLOBAL_EXT_ALLOCATED_OBJECTS);
