@@ -805,29 +805,6 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
         if (VERBOSE) Log.v(TAG, "reportLocation lat: " + latitude + " long: " + longitude +
                 " timestamp: " + timestamp);
 
-        mLastFixTime = System.currentTimeMillis();
-        // report time to first fix
-        if (mTTFF == 0 && (flags & LOCATION_HAS_LAT_LONG) == LOCATION_HAS_LAT_LONG) {
-            mTTFF = (int)(mLastFixTime - mFixRequestTime);
-            if (Config.LOGD) Log.d(TAG, "TTFF: " + mTTFF);
-
-            // notify status listeners
-            synchronized(mListeners) {
-                int size = mListeners.size();
-                for (int i = 0; i < size; i++) {
-                    Listener listener = mListeners.get(i);
-                    try {
-                        listener.mListener.onFirstFix(mTTFF); 
-                    } catch (RemoteException e) {
-                        Log.w(TAG, "RemoteException in stopNavigating");
-                        mListeners.remove(listener);
-                        // adjust for size of list changing
-                        size--;
-                    }
-                }
-            }
-        }
-
         synchronized (mLocation) {
             mLocationFlags = flags;
             if ((flags & LOCATION_HAS_LAT_LONG) == LOCATION_HAS_LAT_LONG) {
@@ -860,6 +837,29 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
                 mLocationManager.reportLocation(mLocation);
             } catch (RemoteException e) {
                 Log.e(TAG, "RemoteException calling reportLocation");
+            }
+        }
+
+        mLastFixTime = System.currentTimeMillis();
+        // report time to first fix
+        if (mTTFF == 0 && (flags & LOCATION_HAS_LAT_LONG) == LOCATION_HAS_LAT_LONG) {
+            mTTFF = (int)(mLastFixTime - mFixRequestTime);
+            if (Config.LOGD) Log.d(TAG, "TTFF: " + mTTFF);
+
+            // notify status listeners
+            synchronized(mListeners) {
+                int size = mListeners.size();
+                for (int i = 0; i < size; i++) {
+                    Listener listener = mListeners.get(i);
+                    try {
+                        listener.mListener.onFirstFix(mTTFF);
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "RemoteException in stopNavigating");
+                        mListeners.remove(listener);
+                        // adjust for size of list changing
+                        size--;
+                    }
+                }
             }
         }
 
