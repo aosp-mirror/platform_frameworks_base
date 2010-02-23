@@ -1450,6 +1450,14 @@ status_t MPEG4Source::read(
                 &sampleIndex, SampleTable::kSyncSample_Flag);
 
         if (err != OK) {
+            if (err == ERROR_OUT_OF_RANGE) {
+                // An attempt to seek past the end of the stream would
+                // normally cause this ERROR_OUT_OF_RANGE error. Propagating
+                // this all the way to the MediaPlayer would cause abnormal
+                // termination. Legacy behaviour appears to be to behave as if
+                // we had seeked to the end of stream, ending normally.
+                err = ERROR_END_OF_STREAM;
+            }
             return err;
         }
 

@@ -1933,6 +1933,7 @@ void OMXCodec::drainInputBuffer(BufferInfo *info) {
         CODEC_LOGV("signalling end of input stream.");
         flags |= OMX_BUFFERFLAG_EOS;
 
+        mFinalStatus = err;
         mSignalledEOS = true;
     } else {
         mNoMoreOutputData = false;
@@ -2411,7 +2412,7 @@ status_t OMXCodec::read(
     }
 
     if (mFilledBuffers.empty()) {
-        return ERROR_END_OF_STREAM;
+        return mSignalledEOS ? mFinalStatus : ERROR_END_OF_STREAM;
     }
 
     if (mOutputPortSettingsHaveChanged) {

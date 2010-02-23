@@ -61,7 +61,7 @@ public:
     status_t seekTo(int64_t time_us);
 
     bool isSeeking();
-    bool reachedEOS();
+    bool reachedEOS(status_t *finalStatus);
 
 private:
     sp<MediaSource> mSource;
@@ -81,6 +81,7 @@ private:
 
     bool mSeeking;
     bool mReachedEOS;
+    status_t mFinalStatus;
     int64_t mSeekTimeUs;
 
     bool mStarted;

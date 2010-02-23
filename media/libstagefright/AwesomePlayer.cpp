@@ -434,14 +434,22 @@ void AwesomePlayer::onStreamDone() {
     }
     mStreamDoneEventPending = false;
 
-    if (mFlags & LOOPING) {
+    if (mStreamDoneStatus == ERROR_END_OF_STREAM && (mFlags & LOOPING)) {
         seekTo_l(0);
 
         if (mVideoSource != NULL) {
             postVideoEvent_l();
         }
     } else {
-        notifyListener_l(MEDIA_PLAYBACK_COMPLETE);
+        if (mStreamDoneStatus == ERROR_END_OF_STREAM) {
+            LOGV("MEDIA_PLAYBACK_COMPLETE");
+            notifyListener_l(MEDIA_PLAYBACK_COMPLETE);
+        } else {
+            LOGV("MEDIA_ERROR %d", mStreamDoneStatus);
+
+            notifyListener_l(
+                    MEDIA_ERROR, MEDIA_ERROR_UNKNOWN, mStreamDoneStatus);
+        }
 
         pause_l();
 
@@ -802,7 +810,7 @@ void AwesomePlayer::onVideoEvent() {
                     continue;
                 }
 
-                postStreamDoneEvent_l();
+                postStreamDoneEvent_l(err);
                 return;
             }
 
@@ -904,11 +912,13 @@ void AwesomePlayer::postVideoEvent_l(int64_t delayUs) {
     mQueue.postEventWithDelay(mVideoEvent, delayUs < 0 ? 10000 : delayUs);
 }
 
-void AwesomePlayer::postStreamDoneEvent_l() {
+void AwesomePlayer::postStreamDoneEvent_l(status_t status) {
     if (mStreamDoneEventPending) {
         return;
     }
     mStreamDoneEventPending = true;
+
+    mStreamDoneStatus = status;
     mQueue.postEvent(mStreamDoneEvent);
 }
 
@@ -947,9 +957,10 @@ void AwesomePlayer::onCheckAudioStatus() {
         notifyListener_l(MEDIA_SEEK_COMPLETE);
     }
 
-    if (mWatchForAudioEOS && mAudioPlayer->reachedEOS()) {
+    status_t finalStatus;
+    if (mWatchForAudioEOS && mAudioPlayer->reachedEOS(&finalStatus)) {
         mWatchForAudioEOS = false;
-        postStreamDoneEvent_l();
+        postStreamDoneEvent_l(finalStatus);
     }
 
     postCheckAudioStatusEvent_l();
