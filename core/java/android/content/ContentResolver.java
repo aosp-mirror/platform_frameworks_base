@@ -167,9 +167,9 @@ public abstract class ContentResolver {
     /** @hide */
     public static final int SYNC_OBSERVER_TYPE_ALL = 0x7fffffff;
 
-    // Always log queries which take 100ms+; shorter queries are
+    // Always log queries which take 500ms+; shorter queries are
     // sampled accordingly.
-    private static final int SLOW_THRESHOLD_MILLIS = 100;
+    private static final int SLOW_THRESHOLD_MILLIS = 500;
     private final Random mRandom = new Random();  // guarded by itself
 
     public ContentResolver(Context context) {

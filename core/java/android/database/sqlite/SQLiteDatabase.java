@@ -208,11 +208,11 @@ public class SQLiteDatabase extends SQLiteClosable {
 
     // Things related to query logging/sampling for debugging
     // slow/frequent queries during development.  Always log queries
-    // which take 100ms+; shorter queries are sampled accordingly.
+    // which take 500ms+; shorter queries are sampled accordingly.
     // Commit statements, which are typically slow, are logged
     // together with the most recently executed SQL statement, for
     // disambiguation.
-    private static final int QUERY_LOG_TIME_IN_MILLIS = 100;
+    private static final int QUERY_LOG_TIME_IN_MILLIS = 500;
     private static final int QUERY_LOG_SQL_LENGTH = 64;
     private static final String COMMIT_SQL = "COMMIT;";
     private final Random mRandom = new Random();
