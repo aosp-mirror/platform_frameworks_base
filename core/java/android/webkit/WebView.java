@@ -213,7 +213,6 @@ public class WebView extends AbsoluteLayout
     static private final boolean AUTO_REDRAW_HACK = false;
     // true means redraw the screen all-the-time. Only with AUTO_REDRAW_HACK
     private boolean mAutoRedraw;
-    private int mRootLayer; // C++ pointer to the root layer
 
     static final String LOGTAG = "webview";
 
@@ -617,6 +616,12 @@ public class WebView extends AbsoluteLayout
     private static final int SNAP_X = 2; // may be combined with SNAP_LOCK
     private static final int SNAP_Y = 4; // may be combined with SNAP_LOCK
     private boolean mSnapPositive;
+
+    // keep these in sync with their counterparts in WebView.cpp
+    private static final int DRAW_EXTRAS_NONE = 0;
+    private static final int DRAW_EXTRAS_FIND = 1;
+    private static final int DRAW_EXTRAS_SELECTION = 2;
+    private static final int DRAW_EXTRAS_CURSOR_RING = 3;
 
     // Used to match key downs and key ups
     private boolean mGotKeyDown;
@@ -1306,6 +1311,7 @@ public class WebView extends AbsoluteLayout
                 // onSizeChanged() is called, the rest will be set
                 // correctly
                 mActualScale = scale;
+                mInvActualScale = 1 / scale;
                 mTextWrapScale = b.getFloat("textwrapScale", scale);
                 mInZoomOverview = b.getBoolean("overview");
                 invalidate();
@@ -3116,7 +3122,7 @@ public class WebView extends AbsoluteLayout
         int mScrollY;
         int mWidth;
         int mHeight;
-        float mScale;
+        float mInvScale;
     }
 
     private Metrics getViewMetrics() {
@@ -3125,23 +3131,21 @@ public class WebView extends AbsoluteLayout
         metrics.mScrollY = computeVerticalScrollOffset();
         metrics.mWidth = getWidth();
         metrics.mHeight = getHeight() - getVisibleTitleHeight();
-        metrics.mScale = mActualScale;
+        metrics.mInvScale = mInvActualScale;
         return metrics;
     }
 
-    private void drawLayers(Canvas canvas) {
-        if (mRootLayer != 0) {
-            // Currently for each draw we compute the animation values;
-            // We may in the future decide to do that independently.
-            if (nativeEvaluateLayersAnimations(mRootLayer)) {
-                // If we have unfinished (or unstarted) animations,
-                // we ask for a repaint.
-                invalidate();
-            }
-
-            // We can now draw the layers.
-            nativeDrawLayers(mRootLayer, canvas);
+    private void drawExtras(Canvas canvas, int extras) {
+        if (mNativeClass == 0) return;
+        // Currently for each draw we compute the animation values;
+        // We may in the future decide to do that independently.
+        if (nativeEvaluateLayersAnimations()) {
+            // If we have unfinished (or unstarted) animations,
+            // we ask for a repaint.
+            invalidate();
         }
+
+        nativeDrawExtras(canvas, extras);
     }
 
     private void drawCoreAndCursorRing(Canvas canvas, int color,
@@ -3149,7 +3153,7 @@ public class WebView extends AbsoluteLayout
         if (mDrawHistory) {
             canvas.scale(mActualScale, mActualScale);
             canvas.drawPicture(mHistoryPicture);
-            drawLayers(canvas);
+            drawExtras(canvas, DRAW_EXTRAS_NONE);
             return;
         }
 
@@ -3228,27 +3232,29 @@ public class WebView extends AbsoluteLayout
 
         mWebViewCore.drawContentPicture(canvas, color,
                 (animateZoom || mPreviewZoomOnly), animateScroll);
-        boolean cursorIsInLayer = nativeCursorIsInLayer();
-        if (drawCursorRing && !cursorIsInLayer) {
-            nativeDrawCursorRing(canvas);
-        }
-        // When the FindDialog is up, only draw the matches if we are not in
-        // the process of scrolling them into view.
-        if (mFindIsUp && !animateScroll) {
-            nativeDrawMatches(canvas);
-        }
-        drawLayers(canvas);
-
         if (mNativeClass == 0) return;
-        if (mShiftIsPressed && !(animateZoom || mPreviewZoomOnly)) {
-            if (mTouchSelection || mExtendSelection) {
-                nativeDrawSelectionRegion(canvas);
+        // decide which adornments to draw
+        int extras = DRAW_EXTRAS_NONE;
+        if (mFindIsUp) {
+            // When the FindDialog is up, only draw the matches if we are not in
+            // the process of scrolling them into view.
+            if (!animateScroll) {
+                extras = DRAW_EXTRAS_FIND;
             }
-            if (!mTouchSelection) {
-                nativeDrawSelectionPointer(canvas, mInvActualScale, mSelectX,
-                        mSelectY - getTitleHeight(), mExtendSelection);
+        } else if (mShiftIsPressed) {
+            if (!animateZoom && !mPreviewZoomOnly) {
+                extras = DRAW_EXTRAS_SELECTION;
+                nativeSetSelectionRegion(mTouchSelection || mExtendSelection);
+                nativeSetSelectionPointer(!mTouchSelection, mInvActualScale,
+                        mSelectX, mSelectY - getTitleHeight(),
+                        mExtendSelection);
             }
         } else if (drawCursorRing) {
+            extras = DRAW_EXTRAS_CURSOR_RING;
+        }
+        drawExtras(canvas, extras);
+
+        if (extras == DRAW_EXTRAS_CURSOR_RING) {
             if (mTouchMode == TOUCH_SHORTPRESS_START_MODE) {
                 mTouchMode = TOUCH_SHORTPRESS_MODE;
                 HitTestResult hitTest = getHitTestResult();
@@ -3259,7 +3265,6 @@ public class WebView extends AbsoluteLayout
                             LONG_PRESS_TIMEOUT);
                 }
             }
-            if (cursorIsInLayer) nativeDrawCursorRing(canvas);
         }
         if (mFocusSizeChanged) {
             mFocusSizeChanged = false;
@@ -6001,12 +6006,7 @@ public class WebView extends AbsoluteLayout
                     break;
                 }
                 case SET_ROOT_LAYER_MSG_ID: {
-                    int oldLayer = mRootLayer;
-                    mRootLayer = msg.arg1;
-                    nativeSetRootLayer(mRootLayer);
-                    if (oldLayer > 0) {
-                        nativeDestroyLayer(oldLayer);
-                    }
+                    nativeSetRootLayer(msg.arg1);
                     invalidate();
                     break;
                 }
@@ -6766,7 +6766,6 @@ public class WebView extends AbsoluteLayout
     /* package */ native boolean nativeCursorMatchesFocus();
     private native boolean  nativeCursorIntersects(Rect visibleRect);
     private native boolean  nativeCursorIsAnchor();
-    private native boolean  nativeCursorIsInLayer();
     private native boolean  nativeCursorIsTextInput();
     private native Point    nativeCursorPosition();
     private native String   nativeCursorText();
@@ -6777,14 +6776,8 @@ public class WebView extends AbsoluteLayout
     private native boolean  nativeCursorWantsKeyEvents();
     private native void     nativeDebugDump();
     private native void     nativeDestroy();
-    private native void     nativeDrawCursorRing(Canvas content);
-    private native void     nativeDestroyLayer(int layer);
-    private native boolean  nativeEvaluateLayersAnimations(int layer);
-    private native void     nativeDrawLayers(int layer, Canvas canvas);
-    private native void     nativeDrawMatches(Canvas canvas);
-    private native void     nativeDrawSelectionPointer(Canvas content,
-            float scale, int x, int y, boolean extendSelection);
-    private native void     nativeDrawSelectionRegion(Canvas content);
+    private native boolean  nativeEvaluateLayersAnimations();
+    private native void     nativeDrawExtras(Canvas canvas, int extra);
     private native void     nativeDumpDisplayTree(String urlOrNull);
     private native int      nativeFindAll(String findLower, String findUpper);
     private native void     nativeFindNext(boolean forward);
@@ -6831,6 +6824,9 @@ public class WebView extends AbsoluteLayout
     private native void     nativeSetFollowedLink(boolean followed);
     private native void     nativeSetHeightCanMeasure(boolean measure);
     private native void     nativeSetRootLayer(int layer);
+    private native void     nativeSetSelectionPointer(boolean set,
+            float scale, int x, int y, boolean extendSelection);
+    private native void     nativeSetSelectionRegion(boolean set);
     private native int      nativeTextGeneration();
     // Never call this version except by updateCachedTextfield(String) -
     // we always want to pass in our generation number.
