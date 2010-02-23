@@ -813,8 +813,6 @@ public class AccountManager {
      * @param account The account to fetch an auth token for
      * @param authTokenType The auth token type, an authenticator-dependent
      *     string token, must not be null
-     * @param options Authenticator-specific options for the request,
-     *     may be null or empty
      * @param notifyAuthFailure True to add a notification to prompt the
      *     user for a password if necessary, false to leave that to the caller
      * @param callback Callback to invoke when the request completes,
@@ -883,7 +881,7 @@ public class AccountManager {
      *     null for no callback
      * @param handler {@link Handler} identifying the callback thread,
      *     null for the main thread
-     * @return An {@link AccountManagerFeature} which resolves to a Bundle with
+     * @return An {@link AccountManagerFuture} which resolves to a Bundle with
      *     these fields if activity was specified and an account was created:
      * <ul>
      * <li> {@link #KEY_ACCOUNT_NAME} - the name of the account created
@@ -1549,7 +1547,7 @@ public class AccountManager {
      * {@link android.Manifest.permission#MANAGE_ACCOUNTS}.
      *
      * @param accountType The account type required
-     *     (see {@link getAccountsByType}), must not be null
+     *     (see {@link #getAccountsByType}), must not be null
      * @param authTokenType The desired auth token type
      *     (see {@link #getAuthToken}), must not be null
      * @param features Required features for the account
