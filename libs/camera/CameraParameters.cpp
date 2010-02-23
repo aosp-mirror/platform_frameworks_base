@@ -44,6 +44,7 @@ const char CameraParameters::KEY_GPS_LATITUDE[] = "gps-latitude";
 const char CameraParameters::KEY_GPS_LONGITUDE[] = "gps-longitude";
 const char CameraParameters::KEY_GPS_ALTITUDE[] = "gps-altitude";
 const char CameraParameters::KEY_GPS_TIMESTAMP[] = "gps-timestamp";
+const char CameraParameters::KEY_GPS_PROCESSING_METHOD[] = "gps-processing-method";
 const char CameraParameters::KEY_WHITE_BALANCE[] = "whitebalance";
 const char CameraParameters::KEY_SUPPORTED_WHITE_BALANCE[] = "whitebalance-values";
 const char CameraParameters::KEY_EFFECT[] = "effect";

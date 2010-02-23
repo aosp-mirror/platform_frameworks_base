@@ -717,6 +717,7 @@ public class Camera {
         private static final String KEY_GPS_LONGITUDE = "gps-longitude";
         private static final String KEY_GPS_ALTITUDE = "gps-altitude";
         private static final String KEY_GPS_TIMESTAMP = "gps-timestamp";
+        private static final String KEY_GPS_PROCESSING_METHOD = "gps-processing-method";
         private static final String KEY_WHITE_BALANCE = "whitebalance";
         private static final String KEY_EFFECT = "effect";
         private static final String KEY_ANTIBANDING = "antibanding";
@@ -1327,6 +1328,16 @@ public class Camera {
         }
 
         /**
+         * Sets GPS processing method. It will store up to 100 characters
+         * in JPEG EXIF header.
+         *
+         * @param processing_method The processing method to get this location.
+         */
+        public void setGpsProcessingMethod(String processing_method) {
+            set(KEY_GPS_PROCESSING_METHOD, processing_method);
+        }
+
+        /**
          * Removes GPS latitude, longitude, altitude, and timestamp from the
          * parameters.
          */
@@ -1335,6 +1346,7 @@ public class Camera {
             remove(KEY_GPS_LONGITUDE);
             remove(KEY_GPS_ALTITUDE);
             remove(KEY_GPS_TIMESTAMP);
+            remove(KEY_GPS_PROCESSING_METHOD);
         }
 
         /**
