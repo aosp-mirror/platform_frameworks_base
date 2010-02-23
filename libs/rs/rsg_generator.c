@@ -5,7 +5,7 @@
 void printFileHeader(FILE *f)
 {
     fprintf(f, "/*\n");
-    fprintf(f, " * Copyright (C) 2009 The Android Open Source Project\n");
+    fprintf(f, " * Copyright (C) 2010 The Android Open Source Project\n");
     fprintf(f, " *\n");
     fprintf(f, " * Licensed under the Apache License, Version 2.0 (the \"License\");\n");
     fprintf(f, " * you may not use this file except in compliance with the License.\n");
