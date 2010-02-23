@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package com.google.android.locationtracker;
+package com.android.locationtracker;
 
-import com.google.android.locationtracker.data.DateUtils;
-import com.google.android.locationtracker.data.TrackerDataHelper;
-import com.google.android.locationtracker.data.TrackerListHelper;
+import com.android.locationtracker.data.DateUtils;
+import com.android.locationtracker.data.TrackerDataHelper;
+import com.android.locationtracker.data.TrackerListHelper;
 
 import android.app.AlertDialog;
 import android.app.ListActivity;

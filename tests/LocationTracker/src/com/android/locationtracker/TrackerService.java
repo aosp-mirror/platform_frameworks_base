@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package com.google.android.locationtracker;
+package com.android.locationtracker;
 
-import com.google.android.locationtracker.data.TrackerDataHelper;
+import com.android.locationtracker.data.TrackerDataHelper;
 
 import android.app.Service;
 import android.content.BroadcastReceiver;

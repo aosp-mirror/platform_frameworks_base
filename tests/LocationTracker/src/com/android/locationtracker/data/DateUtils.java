@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.android.locationtracker.data;
+package com.android.locationtracker.data;
 
 import java.util.Calendar;
 import java.util.TimeZone;
