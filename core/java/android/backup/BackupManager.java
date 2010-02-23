@@ -47,9 +47,6 @@ import android.util.Log;
 public class BackupManager {
     private static final String TAG = "BackupManager";
 
-    /** @hide TODO: REMOVE THIS */
-    public static final boolean EVEN_THINK_ABOUT_DOING_RESTORE = true;
-
     private Context mContext;
     private static IBackupManager sService;
 
@@ -78,9 +75,6 @@ public class BackupManager {
      * {@link android.app.BackupAgent} subclass will be scheduled when you call this method.
      */
     public void dataChanged() {
-        if (!EVEN_THINK_ABOUT_DOING_RESTORE) {
-            return;
-        }
         checkServiceBinder();
         if (sService != null) {
             try {
@@ -100,9 +94,6 @@ public class BackupManager {
      * permission if the package named in the argument is not the caller's own.
      */
     public static void dataChanged(String packageName) {
-        if (!EVEN_THINK_ABOUT_DOING_RESTORE) {
-            return;
-        }
         checkServiceBinder();
         if (sService != null) {
             try {
@@ -118,9 +109,6 @@ public class BackupManager {
      * {@link android.backup.RestoreSession} class for documentation on that process.
      */
     public RestoreSession beginRestoreSession() {
-        if (!EVEN_THINK_ABOUT_DOING_RESTORE) {
-            return null;
-        }
         RestoreSession session = null;
         checkServiceBinder();
         if (sService != null) {
