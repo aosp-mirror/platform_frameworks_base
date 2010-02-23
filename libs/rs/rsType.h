@@ -56,6 +56,7 @@ public:
     uint32_t getLODOffset(uint32_t lod, uint32_t x, uint32_t y, uint32_t z) const;
 
     uint32_t getLODCount() const {return mLODCount;}
+    bool getIsNp2() const;
 
 
     void setElement(const Element *e) {mElement.set(e);}
@@ -64,6 +65,7 @@ public:
     void setDimZ(uint32_t v) {mDimZ = v;}
     void setDimFaces(bool v) {mFaces = v;}
     void setDimLOD(bool v) {mDimLOD = v;}
+
 
     void clear();
     void compute();

@@ -283,6 +283,24 @@ void Type::dumpLOGV(const char *prefix) const
     mElement->dumpLOGV(buf);
 }
 
+bool Type::getIsNp2() const
+{
+    uint32_t x = getDimX();
+    uint32_t y = getDimY();
+    uint32_t z = getDimZ();
+
+    if (x && (x & (x-1))) {
+        return true;
+    }
+    if (y && (y & (y-1))) {
+        return true;
+    }
+    if (z && (z & (z-1))) {
+        return true;
+    }
+    return false;
+}
+
 
 //////////////////////////////////////////////////
 //
