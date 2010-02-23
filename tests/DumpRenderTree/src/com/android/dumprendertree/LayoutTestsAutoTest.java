@@ -339,14 +339,7 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
         this.mTestList = new Vector<String>();
 
         // Read settings
-        try {
-            this.mTestPathPrefix =
-                (new File(LAYOUT_TESTS_ROOT + runner.mTestPath)).getCanonicalPath();
-        } catch (IOException e) {
-            Log.e(LOGTAG, "Cannot find test path prefix: " + e.getMessage());
-            return;
-        }
-
+        this.mTestPathPrefix = (new File(LAYOUT_TESTS_ROOT + runner.mTestPath)).getAbsolutePath();
         this.mRebaselineResults = runner.mRebaseline;
 
         int timeout = runner.mTimeoutInMillis;
@@ -395,11 +388,7 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
         if (runner.mTestPath != null) {
             test_path += runner.mTestPath;
         }
-        try {
-            test_path = new File(test_path).getCanonicalPath();
-        } catch (IOException e) {
-            Log.e("LayoutTestsAutoTest", "Cannot get cannonical path " + e.getMessage());
-        }
+        test_path = new File(test_path).getAbsolutePath();
         Log.v("LayoutTestsAutoTest", " Test path : " + test_path);
 
         return test_path;
