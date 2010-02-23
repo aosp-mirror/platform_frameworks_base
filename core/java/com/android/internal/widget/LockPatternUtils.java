@@ -104,14 +104,24 @@ public class LockPatternUtils {
     private static String sLockPatternFilename;
     private static String sLockPasswordFilename;
 
+    DevicePolicyManager getDevicePolicyManager() {
+        if (mDevicePolicyManager == null) {
+            mDevicePolicyManager =
+                (DevicePolicyManager)mContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
+            if (mDevicePolicyManager == null) {
+                Log.e(TAG, "Can't get DevicePolicyManagerService: is it running?",
+                        new IllegalStateException("Stack trace:"));
+            }
+        }
+        return mDevicePolicyManager;
+    }
     /**
      * @param contentResolver Used to look up and save settings.
      */
     public LockPatternUtils(Context context) {
         mContext = context;
         mContentResolver = context.getContentResolver();
-        mDevicePolicyManager =
-                (DevicePolicyManager)context.getSystemService(Context.DEVICE_POLICY_SERVICE);
+        mDevicePolicyManager = getDevicePolicyManager();
         // Initialize the location of gesture lock file
         if (sLockPatternFilename == null) {
             sLockPatternFilename = android.os.Environment.getDataDirectory()
@@ -123,7 +133,7 @@ public class LockPatternUtils {
     }
 
     public int getRequestedMinimumPasswordLength() {
-        return mDevicePolicyManager.getPasswordMinimumLength(null);
+        return getDevicePolicyManager().getPasswordMinimumLength(null);
     }
 
     /**
@@ -133,7 +143,7 @@ public class LockPatternUtils {
      * @return
      */
     public int getRequestedPasswordMode() {
-        int policyMode = mDevicePolicyManager.getPasswordQuality(null);
+        int policyMode = getDevicePolicyManager().getPasswordQuality(null);
         switch (policyMode) {
             case DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC:
                 return MODE_PASSWORD;
@@ -151,11 +161,11 @@ public class LockPatternUtils {
      * @return
      */
     public void reportFailedPasswordAttempt() {
-        mDevicePolicyManager.reportFailedPasswordAttempt();
+        getDevicePolicyManager().reportFailedPasswordAttempt();
     }
 
     public void reportSuccessfulPasswordAttempt() {
-        mDevicePolicyManager.reportSuccessfulPasswordAttempt();
+        getDevicePolicyManager().reportSuccessfulPasswordAttempt();
     }
 
     public void setActivePasswordState(int mode, int length) {
@@ -171,7 +181,7 @@ public class LockPatternUtils {
                 policyMode = DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC;
                 break;
         }
-        mDevicePolicyManager.setActivePasswordState(policyMode, length);
+        getDevicePolicyManager().setActivePasswordState(policyMode, length);
     }
 
     /**
@@ -279,7 +289,7 @@ public class LockPatternUtils {
         saveLockPattern(null);
         setLong(PASSWORD_TYPE_KEY, MODE_PATTERN);
     }
-    
+
     /**
      * Save a lock pattern.
      * @param pattern The new pattern to save.
@@ -334,7 +344,7 @@ public class LockPatternUtils {
                 hasNonDigit = true;
             }
         }
-        
+
         // First check if it is sufficient.
         switch (reqMode) {
             case MODE_PASSWORD: {
@@ -342,19 +352,19 @@ public class LockPatternUtils {
                     return MODE_UNSPECIFIED;
                 }
             } break;
-            
+
             case MODE_PIN:
             case MODE_PATTERN: {
                 // Whatever we have is acceptable; we may need to promote the
                 // mode later.
             } break;
-            
+
             default:
                 // If it isn't a mode we specifically know, then fail fast.
                 Log.w(TAG, "adjustPasswordMode: unknown mode " + reqMode);
                 return MODE_UNSPECIFIED;
         }
-        
+
         // Do we need to promote?
         if (hasNonDigit) {
             if (reqMode < MODE_PASSWORD) {
@@ -366,10 +376,10 @@ public class LockPatternUtils {
                 reqMode = MODE_PIN;
             }
         }
-        
+
         return reqMode;
     }
-    
+
     /**
      * Save a lock password.  Does not ensure that the pattern is as good
      * as the requested mode, but will adjust the mode to be as good as the
