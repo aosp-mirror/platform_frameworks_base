@@ -262,17 +262,26 @@ class PendingIntentRecord extends IIntentSender.Stub {
     }
     
     protected void finalize() throws Throwable {
-        if (!canceled) {
-            synchronized(owner) {
-                WeakReference<PendingIntentRecord> current =
-                        owner.mIntentSenderRecords.get(key);
-                if (current == ref) {
-                    owner.mIntentSenderRecords.remove(key);
-                }
+        try {
+            if (!canceled) {
+                owner.mHandler.sendMessage(owner.mHandler.obtainMessage(
+                        ActivityManagerService.FINALIZE_PENDING_INTENT_MSG, this));
             }
+        } finally {
+            super.finalize();
         }
     }
 
+    public void completeFinalize() {
+        synchronized(owner) {
+            WeakReference<PendingIntentRecord> current =
+                    owner.mIntentSenderRecords.get(key);
+            if (current == ref) {
+                owner.mIntentSenderRecords.remove(key);
+            }
+        }
+    }
+    
     void dump(PrintWriter pw, String prefix) {
         pw.print(prefix); pw.print("uid="); pw.print(uid);
                 pw.print(" packageName="); pw.print(key.packageName);
