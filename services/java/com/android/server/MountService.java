@@ -16,31 +16,28 @@
 
 package com.android.server;
 
+import com.android.server.am.ActivityManagerService;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.content.res.Resources;
 import android.net.Uri;
 import android.os.storage.IMountService;
 import android.os.storage.IMountServiceListener;
 import android.os.storage.StorageResultCode;
+import android.os.Handler;
+import android.os.Message;
 import android.os.RemoteException;
 import android.os.IBinder;
 import android.os.Environment;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
-import android.os.UEventObserver;
-import android.os.Handler;
-import android.text.TextUtils;
 import android.util.Log;
 import java.util.ArrayList;
 import java.util.HashSet;
-
-import java.io.File;
-import java.io.FileReader;
 
 /**
  * MountService implements back-end services for platform storage
@@ -123,6 +120,110 @@ class MountService extends IMountService.Stub
      * Private hash of currently mounted secure containers.
      */
     private HashSet<String> mAsecMountSet = new HashSet<String>();
+
+    private static final int H_UNMOUNT_PM_UPDATE = 1;
+    private static final int H_UNMOUNT_PM_DONE = 2;
+    private static final int H_UNMOUNT_MS = 3;
+    private static final int RETRY_UNMOUNT_DELAY = 30; // in ms
+    private static final int MAX_UNMOUNT_RETRIES = 4;
+
+    private IntentFilter mPmFilter = new IntentFilter(
+            Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE);
+    private BroadcastReceiver mPmReceiver = new BroadcastReceiver() {
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE.equals(action)) {
+                mHandler.sendEmptyMessage(H_UNMOUNT_PM_DONE);
+            }
+        }
+    };
+
+    class UnmountCallBack {
+        String path;
+        int retries;
+        boolean force;
+
+        UnmountCallBack(String path, boolean force) {
+            retries = 0;
+            this.path = path;
+            this.force = force;
+        }
+    }
+
+    final private Handler mHandler = new Handler() {
+        ArrayList<UnmountCallBack> mForceUnmounts = new ArrayList<UnmountCallBack>();
+
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case H_UNMOUNT_PM_UPDATE: {
+                    UnmountCallBack ucb = (UnmountCallBack) msg.obj;
+                    mForceUnmounts.add(ucb);
+                    mContext.registerReceiver(mPmReceiver, mPmFilter);
+                    boolean hasExtPkgs = mPms.updateExternalMediaStatus(false);
+                    if (!hasExtPkgs) {
+                        // Unregister right away
+                        mHandler.sendEmptyMessage(H_UNMOUNT_PM_DONE);
+                    }
+                    break;
+                }
+                case H_UNMOUNT_PM_DONE: {
+                    // Unregister receiver
+                    mContext.unregisterReceiver(mPmReceiver);
+                    UnmountCallBack ucb = mForceUnmounts.get(0);
+                    if (ucb == null || ucb.path == null) {
+                        // Just ignore
+                        return;
+                    }
+                    String path = ucb.path;
+                    boolean done = false;
+                    if (!ucb.force) {
+                        done = true;
+                    } else {
+                        int pids[] = getStorageUsers(path);
+                        if (pids == null || pids.length == 0) {
+                            done = true;
+                        } else {
+                            // Kill processes holding references first
+                            ActivityManagerService ams = (ActivityManagerService)
+                            ServiceManager.getService("activity");
+                            // Eliminate system process here?
+                            boolean ret = ams.killPidsForMemory(pids);
+                            if (ret) {
+                                // Confirm if file references have been freed.
+                                pids = getStorageUsers(path);
+                                if (pids == null || pids.length == 0) {
+                                    done = true;
+                                }
+                            }
+                        }
+                    }
+                    if (done) {
+                        mForceUnmounts.remove(0);
+                        mHandler.sendMessage(mHandler.obtainMessage(H_UNMOUNT_MS,
+                                ucb));
+                    } else {
+                        if (ucb.retries >= MAX_UNMOUNT_RETRIES) {
+                            Log.i(TAG, "Cannot unmount inspite of " +
+                                    MAX_UNMOUNT_RETRIES + " to unmount media");
+                            // Send final broadcast indicating failure to unmount.                      
+                        } else {
+                            mHandler.sendMessageDelayed(
+                                    mHandler.obtainMessage(H_UNMOUNT_PM_DONE,
+                                            ucb.retries++),
+                                    RETRY_UNMOUNT_DELAY);
+                        }
+                    }
+                    break;
+                }
+                case H_UNMOUNT_MS : {
+                    UnmountCallBack ucb = (UnmountCallBack) msg.obj;
+                    String path = ucb.path;
+                    doUnmountVolume(path, true);
+                    break;
+                }
+            }
+        }
+    };
 
     private void waitForReady() {
         while (mReady == false) {
@@ -554,14 +655,28 @@ class MountService extends IMountService.Stub
         return rc;
     }
 
+    /*
+     * If force is not set, we do not unmount if there are
+     * processes holding references to the volume about to be unmounted.
+     * If force is set, all the processes holding references need to be
+     * killed via the ActivityManager before actually unmounting the volume.
+     * This might even take a while and might be retried after timed delays
+     * to make sure we dont end up in an instable state and kill some core
+     * processes.
+     */
     private int doUnmountVolume(String path, boolean force) {
         if (!getVolumeState(path).equals(Environment.MEDIA_MOUNTED)) {
             return VoldResponseCode.OpFailedVolNotMounted;
         }
 
+        // We unmounted the volume. No of the asec containers are available now.
+        synchronized (mAsecMountSet) {
+            mAsecMountSet.clear();
+        }
         // Notify PackageManager of potential media removal and deal with
         // return code later on. The caller of this api should be aware or have been
         // notified that the applications installed on the media will be killed.
+        // Redundant probably. But no harm in updating state again.
         mPms.updateExternalMediaStatus(false);
         try {
             mConnector.doCommand(String.format(
@@ -814,11 +929,12 @@ class MountService extends IMountService.Stub
         return doMountVolume(path);
     }
 
-    public int unmountVolume(String path, boolean force) {
+    public void unmountVolume(String path, boolean force) {
         validatePermission(android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS);
         waitForReady();
 
-        return doUnmountVolume(path, force);
+        UnmountCallBack ucb = new UnmountCallBack(path, force);
+        mHandler.sendMessage(mHandler.obtainMessage(H_UNMOUNT_PM_UPDATE, ucb));
     }
 
     public int formatVolume(String path) {
@@ -1028,6 +1144,13 @@ class MountService extends IMountService.Stub
             mConnector.doCommand(cmd);
         } catch (NativeDaemonConnectorException e) {
             rc = StorageResultCode.OperationFailedInternalError;
+        }
+        if (rc == StorageResultCode.OperationSucceeded) {
+            synchronized (mAsecMountSet) {
+                if (!mAsecMountSet.contains(newId)) {
+                    mAsecMountSet.add(newId);
+                }
+            }
         }
 
         return rc;

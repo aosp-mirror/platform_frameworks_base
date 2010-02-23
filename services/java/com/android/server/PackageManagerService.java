@@ -8877,6 +8877,9 @@ class PackageManagerService extends IPackageManager.Stub {
        return prefix + tmpIdx;
    }
 
+   /*
+    * Return true if PackageManager does have packages to be updated.
+    */
    public boolean updateExternalMediaStatus(final boolean mediaStatus) {
        synchronized (mPackages) {
            if (DEBUG_SD_INSTALL) Log.i(TAG, "updateExternalMediaStatus:: mediaStatus=" +
@@ -8885,16 +8888,24 @@ class PackageManagerService extends IPackageManager.Stub {
                return false;
            }
            mMediaMounted = mediaStatus;
-           final HashMap<SdInstallArgs, String> processCids =
-                   new HashMap<SdInstallArgs, String>();
-           final int[] uidArr = getExternalMediaPackages(mediaStatus, processCids);
-           if (processCids.size() == 0) {
+           boolean ret = false;
+           synchronized (mPackages) {
+               Set<String> appList = mSettings.findPackagesWithFlag(ApplicationInfo.FLAG_ON_SDCARD);
+               ret = appList != null && appList.size() > 0;
+           }
+           if (!ret) {
+               // No packages will be effected by the sdcard update. Just return.
                return false;
            }
             // Queue up an async operation since the package installation may take a little while.
            mHandler.post(new Runnable() {
                public void run() {
                    mHandler.removeCallbacks(this);
+                   // If we are up here that means there are packages to be
+                   // enabled or disabled.
+                   final HashMap<SdInstallArgs, String> processCids =
+                       new HashMap<SdInstallArgs, String>();
+                   final int[] uidArr = getExternalMediaPackages(mediaStatus, processCids);
                    if (mediaStatus) {
                        if (DEBUG_SD_INSTALL) Log.i(TAG, "Loading packages");
                        loadMediaPackages(processCids, uidArr);
@@ -9019,9 +9030,9 @@ class PackageManagerService extends IPackageManager.Stub {
            }
            args.doPostInstall(retCode);
        }
-       // Send broadcasts first
+       // Send a broadcast to let everyone know we are done processing
+       sendResourcesChangedBroadcast(true, pkgList, uidArr);
        if (pkgList.size() > 0) {
-           sendResourcesChangedBroadcast(true, pkgList, uidArr);
            Runtime.getRuntime().gc();
            // If something failed do we clean up here or next install?
        }
@@ -9049,9 +9060,9 @@ class PackageManagerService extends IPackageManager.Stub {
                }
            }
        }
+       sendResourcesChangedBroadcast(false, pkgList, uidArr);
        // Send broadcasts
        if (pkgList.size() > 0) {
-           sendResourcesChangedBroadcast(false, pkgList, uidArr);
            Runtime.getRuntime().gc();
        }
        // Do clean up. Just unmount
