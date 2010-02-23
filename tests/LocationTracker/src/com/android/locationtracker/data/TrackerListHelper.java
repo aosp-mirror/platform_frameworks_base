@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.android.locationtracker.data;
+package com.android.locationtracker.data;
 
 import android.app.ListActivity;
 import android.content.Context;
@@ -22,7 +22,7 @@ import android.view.View;
 import android.widget.ResourceCursorAdapter;
 import android.widget.TextView;
 
-import com.google.android.locationtracker.R;
+import com.android.locationtracker.R;
 
 /**
  * Used to bind Tracker data to a list view UI

@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.google.android.locationtracker">
+    package="com.android.locationtracker">
 
     <!-- Permissions for the Location Service -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
@@ -24,7 +24,7 @@
         <service android:name=".TrackerService" />
         <activity android:label="@string/settings_menu" android:name="SettingsActivity" />
         <provider android:name=".data.TrackerProvider"
-            android:authorities="com.google.android.locationtracker" />
+            android:authorities="com.android.locationtracker" />
     </application>
 
 </manifest>

@@ -14,7 +14,7 @@
  * the License.
  */
 
-package com.google.android.locationtracker.data;
+package com.android.locationtracker.data;
 
 import android.content.ContentValues;
 import android.database.Cursor;

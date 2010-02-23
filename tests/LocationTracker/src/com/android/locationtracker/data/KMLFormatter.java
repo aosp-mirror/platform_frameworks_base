@@ -14,9 +14,9 @@
  * the License.
  */
 
-package com.google.android.locationtracker.data;
+package com.android.locationtracker.data;
 
-import com.google.android.locationtracker.data.TrackerEntry.EntryType;
+import com.android.locationtracker.data.TrackerEntry.EntryType;
 
 import android.location.Location;
 

@@ -14,7 +14,7 @@
  * the License.
  */
 
-package com.google.android.locationtracker.data;
+package com.android.locationtracker.data;
 
 import android.content.ContentProvider;
 import android.content.ContentUris;
@@ -35,7 +35,7 @@ import android.util.Log;
 public class TrackerProvider extends ContentProvider {
 
     public static final Uri CONTENT_URI = Uri
-            .parse("content://com.google.android.locationtracker");
+            .parse("content://com.android.locationtracker");
 
     private static final String DB_NAME = "tracking.db";
     private static final String TABLE_NAME = "tracking";
