@@ -17,13 +17,19 @@
 package android.backup;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
 import java.io.File;
-import java.io.FileDescriptor;
 
 /**
+ * A helper class which can be used in conjunction with
+ * {@link android.backup.BackupHelperAgent} to manage the backup of
+ * {@link android.content.SharedPreferences}. Whenever backup is performed it
+ * will back up all named shared preferences which have changed since the last
+ * backup.
+ * <p>
  * STOPSHIP: document!
  */
 public class SharedPreferencesBackupHelper extends FileBackupHelperBase implements BackupHelper {

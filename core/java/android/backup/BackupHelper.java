@@ -18,16 +18,19 @@ package android.backup;
 
 import android.os.ParcelFileDescriptor;
 
-import java.io.InputStream;
-
 /**
- * STOPSHIP: document!
+ * A convenient interface to be used with the
+ * {@link android.backup.BackupHelperAgent} to implement backup and restore of
+ * arbitrary data types.
+ * <p>
+ * STOPSHOP: document!
  */
 public interface BackupHelper {
     /**
-     * Based on oldState, determine which of the files from the application's data directory
-     * need to be backed up, write them to the data stream, and fill in newState with the
-     * state as it exists now.
+     * Based on <code>oldState</code>, determine which of the files from the
+     * application's data directory need to be backed up, write them to
+     * <code>data</code>, and fill in <code>newState</code> with the state as it
+     * exists now.
      */
     public void performBackup(ParcelFileDescriptor oldState, BackupDataOutput data,
             ParcelFileDescriptor newState);
