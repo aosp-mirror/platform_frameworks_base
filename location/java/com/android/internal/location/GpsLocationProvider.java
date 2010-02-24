@@ -321,7 +321,9 @@ public class GpsLocationProvider implements LocationProviderInterface {
     public GpsLocationProvider(Context context, ILocationManager locationManager) {
         mContext = context;
         mLocationManager = locationManager;
-        mNIHandler= new GpsNetInitiatedHandler(context, this);
+        mNIHandler = new GpsNetInitiatedHandler(context, this);
+
+        mLocation.setExtras(mLocationExtras);
 
         // Create a wake lock
         PowerManager powerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
