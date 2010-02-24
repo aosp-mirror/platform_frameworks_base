@@ -22,10 +22,12 @@ import android.graphics.Rect;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.PasswordEntryKeyboardView;
 
+import android.telephony.TelephonyManager;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -39,7 +41,8 @@ import com.android.internal.widget.PasswordEntryKeyboardHelper;
  * an unlock password
  */
 public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen, View.OnClickListener,
-        KeyguardUpdateMonitor.ConfigurationChangeCallback, OnEditorActionListener {
+        KeyguardUpdateMonitor.ConfigurationChangeCallback, KeyguardUpdateMonitor.InfoCallback,
+        OnEditorActionListener {
 
     private static final int DIGIT_PRESS_WAKE_MILLIS = 5000;
 
@@ -49,7 +52,7 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
     private final boolean mCreatedWithKeyboardOpen;
 
     private EditText mPasswordEntry;
-    private TextView mEmergencyCallButton;
+    private Button mEmergencyCallButton;
     private LockPatternUtils mLockPatternUtils;
     private PasswordEntryKeyboardView mKeyboardView;
     private PasswordEntryKeyboardHelper mKeyboardHelper;
@@ -64,6 +67,7 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
         mUpdateMonitor = updateMonitor;
         mCallback = callback;
         mCreatedWithKeyboardOpen = mUpdateMonitor.isKeyboardOpen();
+        mLockPatternUtils = lockPatternUtils;
 
         LayoutInflater layoutInflater = LayoutInflater.from(context);
         if (mUpdateMonitor.isInPortrait()) {
@@ -76,10 +80,10 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
         mKeyboardView = (PasswordEntryKeyboardView) findViewById(R.id.keyboard);
         mPasswordEntry = (EditText) findViewById(R.id.passwordEntry);
         mPasswordEntry.setOnEditorActionListener(this);
-        mEmergencyCallButton = (TextView) findViewById(R.id.emergencyCall);
+        mEmergencyCallButton = (Button) findViewById(R.id.emergencyCall);
         mEmergencyCallButton.setOnClickListener(this);
+        mLockPatternUtils.updateEmergencyCallButtonState(mEmergencyCallButton);
         mUpdateMonitor.registerConfigurationChangeCallback(this);
-        mLockPatternUtils = lockPatternUtils;
 
         mKeyboardHelper = new PasswordEntryKeyboardHelper(context, mKeyboardView, this);
         mKeyboardHelper.setKeyboardMode(isAlpha ? PasswordEntryKeyboardHelper.KEYBOARD_MODE_ALPHA
@@ -90,6 +94,7 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
 
         mKeyboardHelper.setVibratePattern(mLockPatternUtils.isTactileFeedbackEnabled() ?
                 com.android.internal.R.array.config_virtualKeyVibePattern : 0);
+
     }
 
     @Override
@@ -113,6 +118,7 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
         // start fresh
         mPasswordEntry.setText("");
         mPasswordEntry.requestFocus();
+        mLockPatternUtils.updateEmergencyCallButtonState(mEmergencyCallButton);
     }
 
     /** {@inheritDoc} */
@@ -162,6 +168,26 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
             return true;
         }
         return false;
+    }
+
+    public void onPhoneStateChanged(String newState) {
+        mLockPatternUtils.updateEmergencyCallButtonState(mEmergencyCallButton);
+    }
+
+    public void onRefreshBatteryInfo(boolean showBatteryInfo, boolean pluggedIn, int batteryLevel) {
+
+    }
+
+    public void onRefreshCarrierInfo(CharSequence plmn, CharSequence spn) {
+
+    }
+
+    public void onRingerModeChanged(int state) {
+
+    }
+
+    public void onTimeChanged() {
+
     }
 
 }

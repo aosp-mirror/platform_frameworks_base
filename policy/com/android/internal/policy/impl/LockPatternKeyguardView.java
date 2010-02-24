@@ -37,6 +37,7 @@ import android.graphics.PixelFormat;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.SystemProperties;
+import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -59,6 +60,9 @@ import java.io.IOException;
  */
 public class LockPatternKeyguardView extends KeyguardViewBase
         implements AccountManagerCallback<Account[]> {
+
+    // time after launching EmergencyDialer before the screen goes blank.
+    private static final int EMERGENCY_CALL_TIMEOUT = 10000;
 
     // intent action for launching emergency dialer activity.
     static final String ACTION_EMERGENCY_DIAL = "com.android.phone.EmergencyDialer.DIAL";
@@ -251,10 +255,16 @@ public class LockPatternKeyguardView extends KeyguardViewBase
             }
 
             public void takeEmergencyCallAction() {
-                Intent intent = new Intent(ACTION_EMERGENCY_DIAL);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                        | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-                getContext().startActivity(intent);
+                pokeWakelock(EMERGENCY_CALL_TIMEOUT);
+                if (TelephonyManager.getDefault().getCallState()
+                        == TelephonyManager.CALL_STATE_OFFHOOK) {
+                    mLockPatternUtils.resumeCall();
+                } else {
+                    Intent intent = new Intent(ACTION_EMERGENCY_DIAL);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                            | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+                    getContext().startActivity(intent);
+                }
             }
 
             public void pokeWakelock() {
@@ -556,7 +566,8 @@ public class LockPatternKeyguardView extends KeyguardViewBase
             return new SimUnlockScreen(
                     mContext,
                     mUpdateMonitor,
-                    mKeyguardScreenCallback);
+                    mKeyguardScreenCallback,
+                    mLockPatternUtils);
         } else if (unlockMode == UnlockMode.Account) {
             try {
                 return new AccountUnlockScreen(
@@ -587,32 +598,6 @@ public class LockPatternKeyguardView extends KeyguardViewBase
         } else {
             throw new IllegalArgumentException("unknown unlock mode " + unlockMode);
         }
-    }
-
-    private View getUnlockScreenForCurrentUnlockMode() {
-        final UnlockMode unlockMode = getUnlockMode();
-
-        // if a screen exists for the correct mode, we're done
-        if (unlockMode == mUnlockScreenMode) {
-            return mUnlockScreen;
-        }
-
-        // remember the mode
-        mUnlockScreenMode = unlockMode;
-
-        // unlock mode has changed and we have an existing old unlock screen
-        // to clean up
-        if (mScreenOn && (mUnlockScreen.getVisibility() == View.VISIBLE)) {
-            ((KeyguardScreen) mUnlockScreen).onPause();
-        }
-        ((KeyguardScreen) mUnlockScreen).cleanUp();
-        removeViewInLayout(mUnlockScreen);
-
-        // create the new one
-        mUnlockScreen = createUnlockScreenFor(unlockMode);
-        mUnlockScreen.setVisibility(View.INVISIBLE);
-        addView(mUnlockScreen);
-        return mUnlockScreen;
     }
 
     /**

@@ -25,6 +25,7 @@ import android.view.ViewGroup;
 import android.view.MotionEvent;
 import android.widget.Button;
 import android.widget.TextView;
+import android.telephony.TelephonyManager;
 import android.text.format.DateFormat;
 import android.text.TextUtils;
 import android.util.Log;
@@ -126,6 +127,8 @@ class PatternUnlockScreen extends LinearLayoutWithDefaultTouchRecepient
     };
 
     private Button mForgotPatternButton;
+    private Button mEmergencyAlone;
+    private Button mEmergencyTogether;
 
     enum FooterMode {
         Normal,
@@ -205,16 +208,17 @@ class PatternUnlockScreen extends LinearLayoutWithDefaultTouchRecepient
         // emergency call buttons
         final OnClickListener emergencyClick = new OnClickListener() {
             public void onClick(View v) {
-                mCallback.pokeWakelock();
                 mCallback.takeEmergencyCallAction();
             }
         };
-        Button emergencyAlone = (Button) findViewById(R.id.emergencyCallAlone);
-        emergencyAlone.setFocusable(false); // touch only!
-        emergencyAlone.setOnClickListener(emergencyClick);
-        Button emergencyTogether = (Button) findViewById(R.id.emergencyCallTogether);
-        emergencyTogether.setFocusable(false);
-        emergencyTogether.setOnClickListener(emergencyClick);
+
+        mEmergencyAlone = (Button) findViewById(R.id.emergencyCallAlone);
+        mEmergencyAlone.setFocusable(false); // touch only!
+        mEmergencyAlone.setOnClickListener(emergencyClick);
+        mEmergencyTogether = (Button) findViewById(R.id.emergencyCallTogether);
+        mEmergencyTogether.setFocusable(false);
+        mEmergencyTogether.setOnClickListener(emergencyClick);
+        refreshEmergencyButtonText();
 
         mForgotPatternButton = (Button) findViewById(R.id.forgotPattern);
         mForgotPatternButton.setText(R.string.lockscreen_forgot_pattern_button_text);
@@ -257,6 +261,11 @@ class PatternUnlockScreen extends LinearLayoutWithDefaultTouchRecepient
                 LockScreen.getCarrierString(
                         mUpdateMonitor.getTelephonyPlmn(),
                         mUpdateMonitor.getTelephonySpn()));
+    }
+
+    private void refreshEmergencyButtonText() {
+        mLockPatternUtils.updateEmergencyCallButtonState(mEmergencyAlone);
+        mLockPatternUtils.updateEmergencyCallButtonState(mEmergencyTogether);
     }
 
     public void setEnableFallback(boolean state) {
@@ -447,6 +456,8 @@ class PatternUnlockScreen extends LinearLayoutWithDefaultTouchRecepient
         } else {
             updateFooter(FooterMode.Normal);
         }
+
+        refreshEmergencyButtonText();
     }
 
     /** {@inheritDoc} */
@@ -548,5 +559,9 @@ class PatternUnlockScreen extends LinearLayoutWithDefaultTouchRecepient
                 }
             }
         }.start();
+    }
+
+    public void onPhoneStateChanged(String newState) {
+        refreshEmergencyButtonText();
     }
 }

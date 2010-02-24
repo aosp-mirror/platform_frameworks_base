@@ -18,12 +18,15 @@ package com.android.internal.policy.impl;
 
 import com.android.internal.R;
 import com.android.internal.telephony.IccCard;
+import com.android.internal.telephony.Phone;
+import com.android.internal.telephony.Phone.State;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.SlidingTab;
 
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.ColorStateList;
+import android.telephony.TelephonyManager;
 import android.text.format.DateFormat;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -190,6 +193,7 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
 
         mEmergencyCallButton = (Button) findViewById(R.id.emergencyCallButton);
         mEmergencyCallButton.setText(R.string.lockscreen_emergency_call);
+        mLockPatternUtils.updateEmergencyCallButtonState(mEmergencyCallButton);
         mScreenLocked = (TextView) findViewById(R.id.screenLocked);
         mSelector = (SlidingTab) findViewById(R.id.tab_selector);
         mSelector.setHoldAfterTrigger(true, false);
@@ -248,6 +252,7 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
 
         refreshBatteryStringAndIcon();
         refreshAlarmDisplay();
+        mLockPatternUtils.updateEmergencyCallButtonState(mEmergencyCallButton);
 
         mTimeFormat = DateFormat.getTimeFormat(getContext());
         mDateFormatString = getContext().getString(R.string.full_wday_month_day_no_year);
@@ -610,6 +615,7 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
     /** {@inheritDoc} */
     public void onResume() {
         resetStatusInfo(mUpdateMonitor);
+        mLockPatternUtils.updateEmergencyCallButtonState(mEmergencyCallButton);
     }
 
     /** {@inheritDoc} */
@@ -624,5 +630,9 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
             mSilentMode = silent;
             updateRightTabResources();
         }
+    }
+
+    public void onPhoneStateChanged(String newState) {
+        mLockPatternUtils.updateEmergencyCallButtonState(mEmergencyCallButton);
     }
 }

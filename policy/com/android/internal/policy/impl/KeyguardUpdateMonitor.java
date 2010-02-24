@@ -38,6 +38,8 @@ import static android.provider.Telephony.Intents.SPN_STRINGS_UPDATED_ACTION;
 
 import com.android.internal.telephony.IccCard;
 import com.android.internal.telephony.TelephonyIntents;
+
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import com.android.internal.R;
 import com.google.android.collect.Lists;
@@ -96,6 +98,7 @@ public class KeyguardUpdateMonitor {
     private static final int MSG_CARRIER_INFO_UPDATE = 303;
     private static final int MSG_SIM_STATE_CHANGE = 304;
     private static final int MSG_RINGER_MODE_CHANGED = 305;
+    private static final int MSG_PHONE_STATE_CHANGED = 306;
 
 
     /**
@@ -165,6 +168,9 @@ public class KeyguardUpdateMonitor {
                     case MSG_RINGER_MODE_CHANGED:
                         handleRingerModeChange(msg.arg1);
                         break;
+                    case MSG_PHONE_STATE_CHANGED:
+                        handlePhoneStateChanged((String)msg.obj);
+                        break;
                 }
             }
         };
@@ -221,6 +227,7 @@ public class KeyguardUpdateMonitor {
         filter.addAction(Intent.ACTION_BATTERY_CHANGED);
         filter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
         filter.addAction(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
+        filter.addAction(TelephonyManager.ACTION_PHONE_STATE_CHANGED);
         filter.addAction(SPN_STRINGS_UPDATED_ACTION);
         filter.addAction(AudioManager.RINGER_MODE_CHANGED_ACTION);
         context.registerReceiver(new BroadcastReceiver() {
@@ -255,9 +262,19 @@ public class KeyguardUpdateMonitor {
                 } else if (AudioManager.RINGER_MODE_CHANGED_ACTION.equals(action)) {
                     mHandler.sendMessage(mHandler.obtainMessage(MSG_RINGER_MODE_CHANGED,
                             intent.getIntExtra(AudioManager.EXTRA_RINGER_MODE, -1), 0));
+                } else if (TelephonyManager.ACTION_PHONE_STATE_CHANGED.equals(action)) {
+                    String state = intent.getStringExtra(TelephonyManager.EXTRA_STATE);
+                    mHandler.sendMessage(mHandler.obtainMessage(MSG_PHONE_STATE_CHANGED, state));
                 }
             }
         }, filter);
+    }
+
+    protected void handlePhoneStateChanged(String newState) {
+        if (DEBUG) Log.d(TAG, "handlePhoneStateChanged(" + newState + ")");
+        for (int i = 0; i < mInfoCallbacks.size(); i++) {
+            mInfoCallbacks.get(i).onPhoneStateChanged(newState);
+        }
     }
 
     protected void handleRingerModeChange(int mode) {
@@ -478,6 +495,14 @@ public class KeyguardUpdateMonitor {
          * {@link AudioManager#RINGER_MODE_CHANGED_ACTION}
          */
         void onRingerModeChanged(int state);
+
+        /**
+         * Called when the phone state changes. String will be one of:
+         * {@link TelephonyManager#EXTRA_STATE_IDLE}
+         * {@link TelephonyManager@EXTRA_STATE_RINGING}
+         * {@link TelephonyManager#EXTRA_STATE_OFFHOOK
+         */
+        void onPhoneStateChanged(String newState);
     }
 
     /**
