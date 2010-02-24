@@ -28,11 +28,11 @@ import android.util.AttributeSet;
 public class DecelerateInterpolator implements Interpolator {
     public DecelerateInterpolator() {
     }
-    
+
     /**
      * Constructor
      * 
-     * @param factor Degree to which the animation should be eased. Seting factor to 1.0f produces
+     * @param factor Degree to which the animation should be eased. Setting factor to 1.0f produces
      *        an upside-down y=x^2 parabola. Increasing factor above 1.0f makes exaggerates the
      *        ease-out effect (i.e., it starts even faster and ends evens slower)
      */

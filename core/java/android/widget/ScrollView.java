@@ -1272,7 +1272,7 @@ public class ScrollView extends FrameLayout {
      * Fling the scroll view
      *
      * @param velocityY The initial velocity in the Y direction. Positive
-     *                  numbers mean that the finger/curor is moving down the screen,
+     *                  numbers mean that the finger/cursor is moving down the screen,
      *                  which means we want to scroll towards the top.
      */
     public void fling(int velocityY) {
@@ -1307,6 +1307,7 @@ public class ScrollView extends FrameLayout {
      *
      * <p>This version also clamps the scrolling to the bounds of our child.
      */
+    @Override
     public void scrollTo(int x, int y) {
         // we rely on the fact the View.scrollBy calls scrollTo.
         if (getChildCount() > 0) {

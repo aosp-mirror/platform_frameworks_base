@@ -5728,7 +5728,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * of the thumb within the scrollbar's track.</p>
      *
      * <p>The range is expressed in arbitrary units that must be the same as the
-     * units used by {@link #computeHorizontalScrollRange()} and
+     * units used by {@link #computeVerticalScrollRange()} and
      * {@link #computeVerticalScrollOffset()}.</p>
      *
      * <p>The default extent is the drawing height of this view.</p>
