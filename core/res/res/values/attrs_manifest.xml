@@ -302,7 +302,7 @@
     <!-- Specify whether an activity should be finished when a "close system
          windows" request has been made.  This happens, for example, when
          the home key is pressed, when the device is locked, when a system
-         dialog like recent apps is displayed, etc. -->
+         dialog showing recent applications is displayed, etc. -->
     <attr name="finishOnCloseSystemDialogs" format="boolean" />
     
     <!-- Specify whether an activity's task should be cleared when it
@@ -487,7 +487,7 @@
              the display will rotate based on how the user moves the device. -->
         <enum name="sensor" value="4" />
         <!-- Always ignore orientation determined by orientation sensor:
-             tthe display will not rotate when the user moves the device. -->
+             the display will not rotate when the user moves the device. -->
         <enum name="nosensor" value="5" />
     </attr>
     
@@ -523,7 +523,7 @@
         <flag name="keyboard" value="0x0010" />
         <!-- The keyboard or navigation accessibility has changed, for example
              the user has slid the keyboard out to expose it.  Note that
-             inspite of its name, this applied to any accessibility: keyboard
+             despite its name, this applied to any accessibility: keyboard
              or navigation. -->
         <flag name="keyboardHidden" value="0x0020" />
         <!-- The navigation type has changed.  Should never normally happen. -->
@@ -610,11 +610,11 @@
     <attr name="installLocation">
         <!-- Let the system decide ideal install location -->
         <enum name="auto" value="0" />
-        <!-- Explicitly request to be installed on internal phone storate
+        <!-- Explicitly request to be installed on internal phone storage
              only. -->
         <enum name="internalOnly" value="1" />
-        <!-- Prefer to be installed on sdcard. There is no guarantee that
-             the system will honour this request. The application might end
+        <!-- Prefer to be installed on SD card. There is no guarantee that
+             the system will honor this request. The application might end
              up being installed on internal storage if external media
              is unavailable or too full. -->
         <enum name="preferExternal" value="2" />
@@ -815,7 +815,7 @@
     <!-- The <code>uses-feature</code> tag specifies
          a specific feature used by the application.
          For example an application might specify that it requires
-         specific version of open gl. Multiple such attribute
+         specific version of OpenGL. Multiple such attribute
          values can be specified by the application.
 
          <p>This appears as a child tag of the root
@@ -1361,7 +1361,7 @@
             {@link android.content.Intent#setData Intent.setData()}.
             <p><em>Note: scheme and host name matching in the Android framework is
             case-sensitive, unlike the formal RFC.  As a result,
-            Uris here should always be normalized to use lower case letters
+            URIs here should always be normalized to use lower case letters
             for these elements (as well as other proper Uri normalization).</em></p> -->
         <attr name="data" format="string" />
         <!-- The MIME type name to assign to the Intent, as per
