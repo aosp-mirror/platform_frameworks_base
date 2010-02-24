@@ -516,7 +516,8 @@ public class AccountManager {
      * <p>It is safe to call this method from the main thread.
      *
      * <p>This method requires the caller to hold the permission
-     * {@link android.Manifest.permission#MANAGE_ACCOUNTS}.
+     * {@link android.Manifest.permission#MANAGE_ACCOUNTS} or
+     * {@link android.Manifest.permission#USE_CREDENTIALS}
      *
      * @param accountType The account type of the auth token to invalidate
      * @param authToken The auth token to invalidate

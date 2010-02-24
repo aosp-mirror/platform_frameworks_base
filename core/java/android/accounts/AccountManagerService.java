@@ -565,7 +565,7 @@ public class AccountManagerService
     }
 
     public void invalidateAuthToken(String accountType, String authToken) {
-        checkManageAccountsPermission();
+        checkManageAccountsOrUseCredentialsPermissions();
         long identityToken = clearCallingIdentity();
         try {
             SQLiteDatabase db = mOpenHelper.getWritableDatabase();
@@ -1747,17 +1747,22 @@ public class AccountManagerService
         }
     }
 
-    private void checkBinderPermission(String permission) {
+    /** Succeeds if any of the specified permissions are granted. */
+    private void checkBinderPermission(String... permissions) {
         final int uid = Binder.getCallingUid();
-        if (mContext.checkCallingOrSelfPermission(permission) !=
-                PackageManager.PERMISSION_GRANTED) {
-            String msg = "caller uid " + uid + " lacks " + permission;
-            Log.w(TAG, msg);
-            throw new SecurityException(msg);
+
+        for (String perm : permissions) {
+            if (mContext.checkCallingOrSelfPermission(perm) == PackageManager.PERMISSION_GRANTED) {
+                if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                    Log.v(TAG, "caller uid " + uid + " has " + perm);
+                }
+                return;
+            }
         }
-        if (Log.isLoggable(TAG, Log.VERBOSE)) {
-            Log.v(TAG, "caller uid " + uid + " has " + permission);
-        }
+
+        String msg = "caller uid " + uid + " lacks any of " + TextUtils.join(",", permissions);
+        Log.w(TAG, msg);
+        throw new SecurityException(msg);
     }
 
     private boolean inSystemImage(int callerUid) {
@@ -1846,6 +1851,11 @@ public class AccountManagerService
 
     private void checkManageAccountsPermission() {
         checkBinderPermission(Manifest.permission.MANAGE_ACCOUNTS);
+    }
+
+    private void checkManageAccountsOrUseCredentialsPermissions() {
+        checkBinderPermission(Manifest.permission.MANAGE_ACCOUNTS,
+                Manifest.permission.USE_CREDENTIALS);
     }
 
     /**
