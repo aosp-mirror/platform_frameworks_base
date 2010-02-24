@@ -38,6 +38,7 @@ package android.media;
  */
 public class CamcorderProfile
 {
+    private final int mDuration;  // Recording duration in seconds
 
     /**
      * The Quality class represents the quality level of each CamcorderProfile.
@@ -54,6 +55,14 @@ public class CamcorderProfile
         HIGH,
         LOW
     };
+
+    /**
+     * Returns the recording duration in seconds for LOW quality CamcorderProfile
+     * used by the MMS application.
+     */
+    public static final int getMmsRecordingDurationInSeconds() {
+        return get(Quality.LOW).mDuration;
+    }
 
     /**
      * The quality level of the camcorder profile
@@ -129,7 +138,8 @@ public class CamcorderProfile
     }
 
     // Private constructor called by JNI
-    private CamcorderProfile(int quality,
+    private CamcorderProfile(int duration,
+                             int quality,
                              int fileFormat,
                              int videoCodec,
                              int videoBitRate,
@@ -141,6 +151,7 @@ public class CamcorderProfile
                              int audioSampleRate,
                              int audioChannels) {
 
+        mDuration         = duration;
         mQuality          = Quality.values()[quality];
         mFileFormat       = fileFormat;
         mVideoCodec       = videoCodec;
