@@ -36,7 +36,7 @@ public class PackageHelper {
     public static final int RECOMMEND_INSTALL_EXTERNAL = 2;
     public static final int RECOMMEND_FAILED_INSUFFICIENT_STORAGE = -1;
     public static final int RECOMMEND_FAILED_INVALID_APK = -2;
-    private static final boolean DEBUG_SD_INSTALL = true;
+    private static final boolean localLOGV = true;
     private static final String TAG = "PackageHelper";
 
     public static IMountService getMountService() {
@@ -58,7 +58,7 @@ public class PackageHelper {
         if ((len - (mbLen * 1024 * 1024)) > 0) {
             mbLen++;
         }
-        if (DEBUG_SD_INSTALL) Log.i(TAG, "Size of resource " + mbLen);
+        if (localLOGV) Log.i(TAG, "Size of resource " + mbLen);
 
         try {
             int rc = mountService.createSecureContainer(
@@ -68,7 +68,7 @@ public class PackageHelper {
                 return null;
             }
             String cachePath = mountService.getSecureContainerPath(cid);
-            if (DEBUG_SD_INSTALL) Log.i(TAG, "Created secure container " + cid +
+            if (localLOGV) Log.i(TAG, "Created secure container " + cid +
                     " at " + cachePath);
                 return cachePath;
         } catch (RemoteException e) {
@@ -93,7 +93,7 @@ public class PackageHelper {
 
    public static boolean unMountSdDir(String cid) {
     try {
-        int rc = getMountService().unmountSecureContainer(cid, false);
+        int rc = getMountService().unmountSecureContainer(cid, true);
         if (rc != StorageResultCode.OperationSucceeded) {
             Log.e(TAG, "Failed to unmount " + cid + " with rc " + rc);
             return false;
@@ -148,7 +148,8 @@ public class PackageHelper {
 
     public static boolean destroySdDir(String cid) {
         try {
-            int rc = getMountService().destroySecureContainer(cid, false);
+            if (localLOGV) Log.i(TAG, "Forcibly destroying container " + cid);
+            int rc = getMountService().destroySecureContainer(cid, true);
             if (rc != StorageResultCode.OperationSucceeded) {
                 Log.i(TAG, "Failed to destroy container " + cid);
                 return false;

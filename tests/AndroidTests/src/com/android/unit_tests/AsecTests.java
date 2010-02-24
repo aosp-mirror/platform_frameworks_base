@@ -132,6 +132,14 @@ public class AsecTests extends AndroidTestCase {
         return ms.destroySecureContainer(fullId, force);
     }
 
+    private boolean isContainerMounted(String localId) throws RemoteException {
+        Assert.assertTrue(isMediaMounted());
+        String fullId = "com.android.unittests.AsecTests." + localId;
+
+        IMountService ms = getMs();
+        return ms.isSecureContainerMounted(fullId);
+    }
+
     private IMountService getMs() {
         IBinder service = ServiceManager.getService("mount");
         if (service != null) {
@@ -329,4 +337,25 @@ public class AsecTests extends AndroidTestCase {
             failStr(e);
         }
     }
+
+    public void testIsContainerMountedAfterRename() {
+        try {
+            Assert.assertEquals(StorageResultCode.OperationSucceeded,
+                    createContainer("testRenameContainer.1", 4, "none"));
+
+            Assert.assertEquals(StorageResultCode.OperationSucceeded,
+                    unmountContainer("testRenameContainer.1", false));
+
+            Assert.assertEquals(StorageResultCode.OperationSucceeded,
+                    renameContainer("testRenameContainer.1", "testRenameContainer.2"));
+
+            Assert.assertEquals(false, containerExists("testRenameContainer.1"));
+            Assert.assertEquals(true, containerExists("testRenameContainer.2"));
+            // Check if isContainerMounted returns valid value
+            Assert.assertEquals(true, isContainerMounted("testRenameContainer.2"));
+        } catch (Exception e) {
+            failStr(e);
+        }
+    }
+
 }
