@@ -3650,14 +3650,27 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     }
 
     /**
-     * This is called when a container is going to temporarily detach a child
-     * that currently has focus, with
+     * @hide
+     */
+    public void dispatchStartTemporaryDetach() {
+        onStartTemporaryDetach();
+    }
+
+    /**
+     * This is called when a container is going to temporarily detach a child, with
      * {@link ViewGroup#detachViewFromParent(View) ViewGroup.detachViewFromParent}.
      * It will either be followed by {@link #onFinishTemporaryDetach()} or
-     * {@link #onDetachedFromWindow()} when the container is done.  Generally
-     * this is currently only done ListView for a view with focus.
+     * {@link #onDetachedFromWindow()} when the container is done.
      */
     public void onStartTemporaryDetach() {
+        removeUnsetPressCallback();
+    }
+
+    /**
+     * @hide
+     */
+    public void dispatchFinishTemporaryDetach() {
+        onFinishTemporaryDetach();
     }
 
     /**
@@ -4361,6 +4374,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         }
     }
     
+    /**
+     * Remove the prepress detection timer.
+     */
+    private void removeUnsetPressCallback() {
+        if ((mPrivateFlags & PRESSED) != 0 && mUnsetPressedState != null) {
+            setPressed(false);
+            removeCallbacks(mUnsetPressedState);
+        }
+    }
+
     /**
      * Remove the tap detection timer.
      */
@@ -5886,6 +5909,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @see #onAttachedToWindow()
      */
     protected void onDetachedFromWindow() {
+        removeUnsetPressCallback();
         removeLongPressCallback();
         destroyDrawingCache();
     }
@@ -8731,7 +8755,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             boolean clampedX, boolean clampedY) {
         // Intentionally empty.
     }
-    
+
     /**
      * A MeasureSpec encapsulates the layout requirements passed from parent to child.
      * Each MeasureSpec represents a requirement for either the width or the height.
@@ -9180,12 +9204,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
          * the next time it performs a traversal
          */
         boolean mRecomputeGlobalAttributes;
-
-        /**
-         * Set to true when attributes (like mKeepScreenOn) need to be
-         * recomputed.
-         */
-        boolean mAttributesChanged;
 
         /**
          * Set during a traveral if any views want to keep the screen on.

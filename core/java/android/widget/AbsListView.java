@@ -1314,7 +1314,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                             position, -1);
                 }
             } else {
-                isScrap[0] = true;                
+                isScrap[0] = true;
+                child.dispatchFinishTemporaryDetach();
             }
         } else {
             child = mAdapter.getView(position, null, this);
@@ -4145,8 +4146,10 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             }
 
             if (mViewTypeCount == 1) {
+                scrap.dispatchStartTemporaryDetach();
                 mCurrentScrap.add(scrap);
             } else {
+                scrap.dispatchStartTemporaryDetach();
                 mScrapViews[viewType].add(scrap);
             }
 
@@ -4165,7 +4168,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
             ArrayList<View> scrapViews = mCurrentScrap;
             final int count = activeViews.length;
-            for (int i = 0; i < count; ++i) {
+            for (int i = count - 1; i >= 0; i--) {
                 final View victim = activeViews[i];
                 if (victim != null) {
                     int whichScrap = ((AbsListView.LayoutParams) victim.getLayoutParams()).viewType;
@@ -4181,6 +4184,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     if (multipleScraps) {
                         scrapViews = mScrapViews[whichScrap];
                     }
+                    victim.dispatchStartTemporaryDetach();
                     scrapViews.add(victim);
 
                     if (hasListener) {

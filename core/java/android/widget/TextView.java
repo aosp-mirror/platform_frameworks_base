@@ -198,6 +198,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private boolean mFreezesText;
     private boolean mFrozenWithFocus;
     private boolean mTemporaryDetach;
+    private boolean mDispatchTemporaryDetach;
 
     private boolean mEatTouchRelease = false;
     private boolean mScrolled = false;
@@ -6372,13 +6373,26 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     @Override
+    public void dispatchFinishTemporaryDetach() {
+        mDispatchTemporaryDetach = true;
+        super.dispatchFinishTemporaryDetach();
+        mDispatchTemporaryDetach = false;
+    }
+
+    @Override
     public void onStartTemporaryDetach() {
-        mTemporaryDetach = true;
+        super.onStartTemporaryDetach();
+        // Only track when onStartTemporaryDetach() is called directly,
+        // usually because this instance is an editable field in a list
+        if (!mDispatchTemporaryDetach) mTemporaryDetach = true;
     }
     
     @Override
     public void onFinishTemporaryDetach() {
-        mTemporaryDetach = false;
+        super.onFinishTemporaryDetach();
+        // Only track when onStartTemporaryDetach() is called directly,
+        // usually because this instance is an editable field in a list
+        if (!mDispatchTemporaryDetach) mTemporaryDetach = false;
     }
     
     @Override
