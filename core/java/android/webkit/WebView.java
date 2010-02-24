@@ -3351,23 +3351,31 @@ public class WebView extends AbsoluteLayout
         InputMethodManager imm = (InputMethodManager)
                 getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
 
+        // bring it back to the default scale so that user can enter text
+        boolean zoom = mActualScale < mDefaultScale;
+        if (zoom) {
+            mInZoomOverview = false;
+            mZoomCenterX = mLastTouchX;
+            mZoomCenterY = mLastTouchY;
+            // do not change text wrap scale so that there is no reflow
+            setNewZoomScale(mDefaultScale, false, false);
+        }
         if (isTextView) {
             rebuildWebTextView();
-            if (!inEditingMode()) return;
-            imm.showSoftInput(mWebTextView, 0);
-            // bring it back to the default scale so that user can enter text
-            if (mActualScale < mDefaultScale) {
-                mInZoomOverview = false;
-                mZoomCenterX = mLastTouchX;
-                mZoomCenterY = mLastTouchY;
-                // do not change text wrap scale so that there is no reflow
-                setNewZoomScale(mDefaultScale, false, false);
-                didUpdateTextViewBounds(true);
+            if (inEditingMode()) {
+                imm.showSoftInput(mWebTextView, 0);
+                if (zoom) {
+                    didUpdateTextViewBounds(true);
+                }
+                return;
             }
         }
-        else { // used by plugins
-            imm.showSoftInput(this, 0);
-        }
+        // Used by plugins.
+        // Also used if the navigation cache is out of date, and
+        // does not recognize that a textfield is in focus.  In that
+        // case, use WebView as the targeted view.
+        // see http://b/issue?id=2457459
+        imm.showSoftInput(this, 0);
     }
 
     // Called by WebKit to instruct the UI to hide the keyboard
