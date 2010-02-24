@@ -1003,7 +1003,11 @@ class MountService extends IMountService.Stub
         warnOnNotMounted();
 
         synchronized (mAsecMountSet) {
-            if (mAsecMountSet.contains(oldId)) {
+            /*
+             * Because a mounted container has active internal state which cannot be 
+             * changed while active, we must ensure both ids are not currently mounted.
+             */
+            if (mAsecMountSet.contains(oldId) || mAsecMountSet.contains(newId)) {
                 return StorageResultCode.OperationFailedStorageMounted;
             }
         }
