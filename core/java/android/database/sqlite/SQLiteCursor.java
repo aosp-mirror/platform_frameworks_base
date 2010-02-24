@@ -62,9 +62,8 @@ public class SQLiteCursor extends AbstractWindowedCursor {
     /** A mapping of column names to column indices, to speed up lookups */
     private Map<String, Integer> mColumnNameMap;
 
-    /** Used to find out where a cursor was allocated in case it never got
-     * released. */
-    private StackTraceElement[] mStackTraceElements;
+    /** Used to find out where a cursor was allocated in case it never got released. */
+    private Throwable mStackTrace;
     
     /** 
      *  mMaxRead is the max items that each cursor window reads 
@@ -208,11 +207,7 @@ public class SQLiteCursor extends AbstractWindowedCursor {
             String editTable, SQLiteQuery query) {
         // The AbstractCursor constructor needs to do some setup.
         super();
-
-        if (SQLiteDebug.DEBUG_ACTIVE_CURSOR_FINALIZATION) {
-            mStackTraceElements = new Exception().getStackTrace();
-        }
-
+        mStackTrace = new Exception().fillInStackTrace();
         mDatabase = db;
         mDriver = driver;
         mEditTable = editTable;
@@ -585,15 +580,9 @@ public class SQLiteCursor extends AbstractWindowedCursor {
             // if the cursor hasn't been closed yet, close it first
             if (mWindow != null) {
                 close();
-                Log.e(TAG, "Finalizing cursor that has not been deactivated or closed." 
-                    + " database = " + mDatabase.getPath() + ", table = " + mEditTable
-                    + ", query = " + mQuery.mSql);
-                if (SQLiteDebug.DEBUG_ACTIVE_CURSOR_FINALIZATION) {
-                    Log.d(TAG, "This cursor was created in:");
-                    for (StackTraceElement ste : mStackTraceElements) {
-                        Log.d(TAG, "      " + ste);
-                    }
-                }
+                Log.e(TAG, "Finalizing a Cursor that has not been deactivated or closed. " +
+                        "database = " + mDatabase.getPath() + ", table = " + mEditTable +
+                        ", query = " + mQuery.mSql, mStackTrace);
                 SQLiteDebug.notifyActiveCursorFinalized();
             } else {
                 if (Config.LOGV) {

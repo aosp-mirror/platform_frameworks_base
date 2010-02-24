@@ -271,7 +271,8 @@ public class SQLiteDatabase extends SQLiteClosable {
     private String mTimeOpened = null;
     private String mTimeClosed = null;
 
-    private final RuntimeException mLeakedException;
+    /** Used to find out where this object was created in case it never got closed. */
+    private Throwable mStackTrace = null;
 
     // System property that enables logging of slow queries. Specify the threshold in ms.
     private static final String LOG_SLOW_QUERIES_PROPERTY = "db.log.slow_query_threshold";
@@ -1726,13 +1727,8 @@ public class SQLiteDatabase extends SQLiteClosable {
     @Override
     protected void finalize() {
         if (isOpen()) {
-            if (mPrograms.isEmpty()) {
-                Log.e(TAG, "Leak found", mLeakedException);
-            } else {
-                IllegalStateException leakProgram = new IllegalStateException(
-                        "mPrograms size " + mPrograms.size(), mLeakedException);
-                Log.e(TAG, "Leak found", leakProgram);
-            }
+            Log.e(TAG, "close() was never explicitly called on database '" +
+                    mPath + "' ", mStackTrace);
             closeClosable();
             onAllReferencesReleased();
         }
@@ -1753,9 +1749,7 @@ public class SQLiteDatabase extends SQLiteClosable {
         mFlags = flags;
         mPath = path;
         mSlowQueryThreshold = SystemProperties.getInt(LOG_SLOW_QUERIES_PROPERTY, -1);
-
-        mLeakedException = new IllegalStateException(path +
-            " SQLiteDatabase created and never closed");
+        mStackTrace = new Exception().fillInStackTrace();
         mFactory = factory;
         dbopen(mPath, mFlags);
         if (SQLiteDebug.DEBUG_SQL_CACHE) {
@@ -1908,14 +1902,6 @@ public class SQLiteDatabase extends SQLiteClosable {
             return;
         }
 
-        /* don't cache PRAGMA sql statements.
-         * caching them makes sqlite return incorrect results on pragma sql execution!
-         */
-        String prefixSql = sql.substring(0, 6);
-        if (prefixSql.toLowerCase().startsWith("pragma")) {
-            return;
-        }
-
         SQLiteCompiledSql compiledSql = null;
         synchronized(mCompiledQueries) {
             // don't insert the new mapping if a mapping already exists
@@ -1981,12 +1967,6 @@ public class SQLiteDatabase extends SQLiteClosable {
      * returns null, if not found in the cache.
      */
     /* package */ SQLiteCompiledSql getCompiledStatementForSql(String sql) {
-        // don't look for PRAGMA sql statements in compiled-sql cache
-        String prefixSql = sql.substring(0, 6);
-        if (prefixSql.toLowerCase().startsWith("pragma")) {
-            return null;
-        }
-
         SQLiteCompiledSql compiledStatement = null;
         boolean cacheHit;
         synchronized(mCompiledQueries) {
