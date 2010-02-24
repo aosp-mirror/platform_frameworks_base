@@ -213,13 +213,13 @@ public class StaticLayoutTest extends TestCase {
         }
 
         public int scale(float height) {
-            int altVal = (int)(height * sMult + sAdd + 0.5); // existing impl
+            int altVal = (int)(height * sMult + sAdd + 0.5);
             int rndVal = Math.round(height * sMult + sAdd);
             if (altVal != rndVal) {
                 Log.i("Scale", "expected scale: " + rndVal +
                         " != returned scale: " + altVal);
             }
-            return altVal; // existing implementation
+            return rndVal;
         }
     }
 
