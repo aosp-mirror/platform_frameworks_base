@@ -694,9 +694,7 @@ bool AudioSystem::isBluetoothScoDevice(audio_devices device)
 
 bool AudioSystem::isLowVisibility(stream_type stream)
 {
-    if (stream == AudioSystem::SYSTEM ||
-        stream == AudioSystem::NOTIFICATION ||
-        stream == AudioSystem::RING) {
+    if (stream == AudioSystem::SYSTEM || stream == AudioSystem::NOTIFICATION) {
         return true;
     } else {
         return false;
