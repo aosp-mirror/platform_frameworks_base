@@ -24,6 +24,7 @@ import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.Gravity;
+import android.view.ViewDebug;
 import android.view.accessibility.AccessibilityEvent;
 
 
@@ -73,7 +74,8 @@ public class CheckedTextView extends TextView implements Checkable {
     public void toggle() {
         setChecked(!mChecked);
     }
-    
+
+    @ViewDebug.ExportedProperty
     public boolean isChecked() {
         return mChecked;
     }
