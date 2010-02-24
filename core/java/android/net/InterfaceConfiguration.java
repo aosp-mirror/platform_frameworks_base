@@ -45,10 +45,10 @@ public class InterfaceConfiguration implements Parcelable {
     }
 
     private static void putAddress(StringBuffer buf, int addr) {
-        buf.append(addr  & 0xff).append('.').
-            append((addr >>>= 8) & 0xff).append('.').
-            append((addr >>>= 8) & 0xff).append('.').
-            append((addr >>>= 8) & 0xff);
+        buf.append((addr >> 24) & 0xff).append('.').
+            append((addr >> 16) & 0xff).append('.').
+            append((addr >> 8) & 0xff).append('.').
+            append(addr & 0xff);
     }
 
     /** Implement the Parcelable interface {@hide} */
