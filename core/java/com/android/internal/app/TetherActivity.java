@@ -141,7 +141,7 @@ public class TetherActivity extends AlertActivity implements
                 }
             } else {
                 for (String t : tethered) {
-                    if (!cm.untether("ppp0")) {
+                    if (!cm.untether(t)) {
                         error = true;
                     }
                 }
