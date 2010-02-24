@@ -19,6 +19,19 @@
  */
 class Record {
 
+    /**
+     * The delimiter character we use, {@code :}, conflicts with some other
+     * names. In that case, manually replace the delimiter with something else.
+     */
+    private static final String[] REPLACE_CLASSES = {
+            "com.google.android.apps.maps:FriendService",
+            "com.google.android.apps.maps\\u003AFriendService",
+            "com.google.android.apps.maps:driveabout",
+            "com.google.android.apps.maps\\u003Adriveabout",
+            "com.google.android.apps.maps:LocationFriendService",
+            "com.google.android.apps.maps\\u003ALocationFriendService",
+    };
+
     enum Type {
         /** Start of initialization. */
         START_LOAD,
@@ -74,6 +87,10 @@ class Record {
         }
 
         sourceLineNumber = lineNum;
+
+        for (int i = 0; i < REPLACE_CLASSES.length; i+= 2) {
+            line = line.replace(REPLACE_CLASSES[i], REPLACE_CLASSES[i+1]);
+        }
         
         line = line.substring(1);
         String[] parts = line.split(":");
