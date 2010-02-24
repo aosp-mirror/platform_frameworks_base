@@ -17,6 +17,7 @@
 #include "rsContext.h"
 
 #include <GLES/gl.h>
+#include <GLES2/gl2.h>
 #include <GLES/glext.h>
 
 using namespace android;
@@ -88,12 +89,13 @@ bool Allocation::fixAllocation()
     return false;
 }
 
-void Allocation::deferedUploadToTexture(const Context *rsc, uint32_t lodOffset)
+void Allocation::deferedUploadToTexture(const Context *rsc, bool genMipmap, uint32_t lodOffset)
 {
     rsAssert(lodOffset < mType->getLODCount());
     mIsTexture = true;
     mTextureLOD = lodOffset;
     mUploadDefered = true;
+    mTextureGenMipmap = !mType->getDimLOD() && genMipmap;
 }
 
 void Allocation::uploadToTexture(const Context *rsc)
@@ -138,6 +140,10 @@ void Allocation::uploadToTexture(const Context *rsc)
                      adapt.getDimX(), adapt.getDimY(),
                      0, format, type, ptr);
     }
+    if (mTextureGenMipmap) {
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+
 }
 
 void Allocation::deferedUploadToBufferObject(const Context *rsc)
@@ -316,10 +322,10 @@ RsAllocation rsi_AllocationCreateSized(Context *rsc, RsElement e, size_t count)
     return rsi_AllocationCreateTyped(rsc, type);
 }
 
-void rsi_AllocationUploadToTexture(Context *rsc, RsAllocation va, uint32_t baseMipLevel)
+void rsi_AllocationUploadToTexture(Context *rsc, RsAllocation va, bool genmip, uint32_t baseMipLevel)
 {
     Allocation *alloc = static_cast<Allocation *>(va);
-    alloc->deferedUploadToTexture(rsc, baseMipLevel);
+    alloc->deferedUploadToTexture(rsc, genmip, baseMipLevel);
 }
 
 void rsi_AllocationUploadToBufferObject(Context *rsc, RsAllocation va)

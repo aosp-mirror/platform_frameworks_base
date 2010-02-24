@@ -444,11 +444,11 @@ nAllocationCreateTyped(JNIEnv *_env, jobject _this, jint e)
 }
 
 static void
-nAllocationUploadToTexture(JNIEnv *_env, jobject _this, jint a, jint mip)
+nAllocationUploadToTexture(JNIEnv *_env, jobject _this, jint a, jboolean genMip, jint mip)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nAllocationUploadToTexture, con(%p), a(%p), mip(%i)", con, (RsAllocation)a, mip);
-    rsAllocationUploadToTexture(con, (RsAllocation)a, mip);
+    LOG_API("nAllocationUploadToTexture, con(%p), a(%p), genMip(%i), mip(%i)", con, (RsAllocation)a, genMip, mip);
+    rsAllocationUploadToTexture(con, (RsAllocation)a, genMip, mip);
 }
 
 static void
@@ -1369,7 +1369,7 @@ static JNINativeMethod methods[] = {
 {"nAllocationCreateFromBitmap",    "(IZLandroid/graphics/Bitmap;)I",       (void*)nAllocationCreateFromBitmap },
 {"nAllocationCreateFromBitmapBoxed","(IZLandroid/graphics/Bitmap;)I",      (void*)nAllocationCreateFromBitmapBoxed },
 {"nAllocationCreateFromAssetStream","(IZI)I",                              (void*)nAllocationCreateFromAssetStream },
-{"nAllocationUploadToTexture",     "(II)V",                                (void*)nAllocationUploadToTexture },
+{"nAllocationUploadToTexture",     "(IZI)V",                               (void*)nAllocationUploadToTexture },
 {"nAllocationUploadToBufferObject","(I)V",                                 (void*)nAllocationUploadToBufferObject },
 {"nAllocationSubData1D",           "(III[II)V",                            (void*)nAllocationSubData1D_i },
 {"nAllocationSubData1D",           "(III[SI)V",                            (void*)nAllocationSubData1D_s },
