@@ -36,6 +36,7 @@ import android.graphics.drawable.shapes.Shape;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.View;
+import android.view.ViewDebug;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -335,6 +336,7 @@ public class ProgressBar extends View {
      *
      * @return true if the progress bar is in indeterminate mode
      */
+    @ViewDebug.ExportedProperty
     public synchronized boolean isIndeterminate() {
         return mIndeterminate;
     }
@@ -607,6 +609,7 @@ public class ProgressBar extends View {
      * @see #setMax(int)
      * @see #getMax()
      */
+    @ViewDebug.ExportedProperty
     public synchronized int getProgress() {
         return mIndeterminate ? 0 : mProgress;
     }
@@ -623,6 +626,7 @@ public class ProgressBar extends View {
      * @see #setMax(int)
      * @see #getMax()
      */
+    @ViewDebug.ExportedProperty
     public synchronized int getSecondaryProgress() {
         return mIndeterminate ? 0 : mSecondaryProgress;
     }
@@ -636,6 +640,7 @@ public class ProgressBar extends View {
      * @see #getProgress()
      * @see #getSecondaryProgress()
      */
+    @ViewDebug.ExportedProperty
     public synchronized int getMax() {
         return mMax;
     }
