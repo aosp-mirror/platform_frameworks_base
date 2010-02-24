@@ -59,7 +59,7 @@ final class XmlBlock {
         if (mOpenCount == 0) {
             nativeDestroy(mNative);
             if (mAssets != null) {
-                mAssets.xmlBlockGone();
+                mAssets.xmlBlockGone(hashCode());
             }
         }
     }

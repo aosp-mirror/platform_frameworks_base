@@ -7615,6 +7615,15 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                                     ? cpi.readPermission : cpi.writePermission);
                 }
 
+                if (!mSystemReady && !mDidUpdate && !mWaitingUpdate
+                        && !cpi.processName.equals("system")) {
+                    // If this content provider does not run in the system
+                    // process, and the system is not yet ready to run other
+                    // processes, then fail fast instead of hanging.
+                    throw new IllegalArgumentException(
+                            "Attempt to launch content provider before system ready");
+                }
+                
                 cpr = (ContentProviderRecord)mProvidersByClass.get(cpi.name);
                 final boolean firstClass = cpr == null;
                 if (firstClass) {
@@ -7862,6 +7871,16 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     public static final void installSystemProviders() {
         ProcessRecord app = mSelf.mProcessNames.get("system", Process.SYSTEM_UID);
         List providers = mSelf.generateApplicationProvidersLocked(app);
+        if (providers != null) {
+            for (int i=providers.size()-1; i>=0; i--) {
+                ProviderInfo pi = (ProviderInfo)providers.get(i);
+                if ((pi.applicationInfo.flags&ApplicationInfo.FLAG_SYSTEM) == 0) {
+                    Log.w(TAG, "Not installing system proc provider " + pi.name
+                            + ": not system .apk");
+                    providers.remove(i);
+                }
+            }
+        }
         mSystemThread.installSystemProviders(providers);
     }
 
