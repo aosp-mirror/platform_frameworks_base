@@ -110,6 +110,16 @@ public class MiscRegressionTest extends TestCase {
         Logger.global.finest("This has logging Level.FINEST, should become VERBOSE");
     }
 
+    // Regression test for Issue 5697:
+    // getContextClassLoader returns a non-application classloader
+    // http://code.google.com/p/android/issues/detail?id=5697
+    //
+    @MediumTest
+    public void testJavaContextClassLoader() throws Exception {
+        Assert.assertNotNull("Must hava a Java context ClassLoader",
+                             Thread.currentThread().getContextClassLoader());
+    }
+
     // Regression test for #1045939: Different output for Method.toString()
     @SmallTest
     public void testMethodToString() {

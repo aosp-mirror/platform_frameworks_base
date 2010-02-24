@@ -1496,8 +1496,8 @@ status_t SurfaceFlinger::dump(int fd, const Vector<String16>& args)
                     layer->needsBlending(), layer->needsDithering(),
                     layer->contentDirty,
                     s.alpha, s.flags,
-                    s.transform[0], s.transform[1],
-                    s.transform[2], s.transform[3]);
+                    s.transform[0][0], s.transform[0][1],
+                    s.transform[1][0], s.transform[1][1]);
             result.append(buffer);
             buffer[0] = 0;
             /*** LayerBaseClient ***/
@@ -1833,27 +1833,25 @@ void GraphicPlane::setDisplayHardware(DisplayHardware *hw)
 
 status_t GraphicPlane::orientationToTransfrom(
         int orientation, int w, int h, Transform* tr)
-{    
-    float a, b, c, d, x, y;
+{
+    uint32_t flags = 0;
     switch (orientation) {
     case ISurfaceComposer::eOrientationDefault:
-        // make sure the default orientation is optimal
-        tr->reset();
-        return NO_ERROR;
+        flags = Transform::ROT_0;
+        break;
     case ISurfaceComposer::eOrientation90:
-        a=0; b=-1; c=1; d=0; x=w; y=0;
+        flags = Transform::ROT_90;
         break;
     case ISurfaceComposer::eOrientation180:
-        a=-1; b=0; c=0; d=-1; x=w; y=h;
+        flags = Transform::ROT_180;
         break;
     case ISurfaceComposer::eOrientation270:
-        a=0; b=1; c=-1; d=0; x=0; y=h;
+        flags = Transform::ROT_270;
         break;
     default:
         return BAD_VALUE;
     }
-    tr->set(a, b, c, d);
-    tr->set(x, y);
+    tr->set(flags, w, h);
     return NO_ERROR;
 }
 
@@ -1869,24 +1867,13 @@ status_t GraphicPlane::setOrientation(int orientation)
     mHeight = int(h);
 
     Transform orientationTransform;
-    if (UNLIKELY(orientation == 42)) {
-        float a, b, c, d, x, y;
-        const float r = (3.14159265f / 180.0f) * 42.0f;
-        const float si = sinf(r);
-        const float co = cosf(r);
-        a=co; b=-si; c=si; d=co;
-        x = si*(h*0.5f) + (1-co)*(w*0.5f);
-        y =-si*(w*0.5f) + (1-co)*(h*0.5f);
-        orientationTransform.set(a, b, c, d);
-        orientationTransform.set(x, y);
-    } else {
-        GraphicPlane::orientationToTransfrom(orientation, w, h,
-                &orientationTransform);
-        if (orientation & ISurfaceComposer::eOrientationSwapMask) {
-            mWidth = int(h);
-            mHeight = int(w);
-        }
+    GraphicPlane::orientationToTransfrom(orientation, w, h,
+            &orientationTransform);
+    if (orientation & ISurfaceComposer::eOrientationSwapMask) {
+        mWidth = int(h);
+        mHeight = int(w);
     }
+
     mOrientation = orientation;
     mGlobalTransform = mDisplayTransform * orientationTransform;
     return NO_ERROR;

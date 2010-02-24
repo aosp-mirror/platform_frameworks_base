@@ -145,10 +145,11 @@ private:
     Condition mPreparedCondition;
     bool mIsAsyncPrepare;
     status_t mPrepareResult;
+    status_t mStreamDoneStatus;
 
     void postVideoEvent_l(int64_t delayUs = -1);
     void postBufferingEvent_l();
-    void postStreamDoneEvent_l();
+    void postStreamDoneEvent_l(status_t status);
     void postCheckAudioStatusEvent_l();
     status_t getPosition_l(int64_t *positionUs);
     status_t play_l();

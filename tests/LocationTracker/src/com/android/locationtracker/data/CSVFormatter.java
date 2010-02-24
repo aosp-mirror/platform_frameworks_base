@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package com.google.android.locationtracker.data;
+package com.android.locationtracker.data;
 
-import com.google.android.locationtracker.data.TrackerEntry.EntryType;
+import com.android.locationtracker.data.TrackerEntry.EntryType;
 
 /**
  * Formats tracker data as CSV output

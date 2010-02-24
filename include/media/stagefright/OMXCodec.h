@@ -132,6 +132,7 @@ private:
     PortStatus mPortStatus[2];
     bool mInitialBufferSubmit;
     bool mSignalledEOS;
+    status_t mFinalStatus;
     bool mNoMoreOutputData;
     bool mOutputPortSettingsHaveChanged;
     int64_t mSeekTimeUs;

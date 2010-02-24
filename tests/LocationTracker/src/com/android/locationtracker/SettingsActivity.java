@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.android.locationtracker;
+package com.android.locationtracker;
 
 import android.os.Bundle;
 import android.preference.PreferenceActivity;

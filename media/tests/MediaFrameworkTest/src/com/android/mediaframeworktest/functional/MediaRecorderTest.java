@@ -25,6 +25,9 @@ import android.content.Context;
 import android.hardware.Camera;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
+import android.media.EncoderCapabilities;
+import android.media.EncoderCapabilities.VideoEncoderCap;
+import android.media.EncoderCapabilities.AudioEncoderCap;
 import android.test.ActivityInstrumentationTestCase;
 import android.util.Log;
 import android.view.SurfaceHolder;
@@ -33,6 +36,7 @@ import com.android.mediaframeworktest.MediaProfileReader;
 
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.Suppress;
+import java.util.List;
 
 
 /**
@@ -99,31 +103,29 @@ public class MediaRecorderTest extends ActivityInstrumentationTestCase<MediaFram
         }
     }
     
-    private boolean recordVideoWithPara(String encoder, String audio, String quality){
+    private boolean recordVideoWithPara(VideoEncoderCap videoCap, AudioEncoderCap audioCap, boolean highQuality){
         boolean recordSuccess = false;
-        int videoEncoder = MediaProfileReader.OUTPUT_FORMAT_TABLE.get(encoder);
-        int audioEncoder = MediaProfileReader.OUTPUT_FORMAT_TABLE.get(audio);
-        int videoWidth = MediaProfileReader.OUTPUT_FORMAT_TABLE.get(encoder + ".width_" + quality);
-        int videoHeight =
-                MediaProfileReader.OUTPUT_FORMAT_TABLE.get(encoder + ".height_" + quality);
-        int videoFps = MediaProfileReader.OUTPUT_FORMAT_TABLE.get(encoder + ".fps_" + quality);
-        int videoBitrate = MediaProfileReader.OUTPUT_FORMAT_TABLE.get(encoder + ".bps_" + quality);
-        int audioBitrate = MediaProfileReader.OUTPUT_FORMAT_TABLE.get(audio + ".bps_" + quality);
-        int audioChannels = MediaProfileReader.OUTPUT_FORMAT_TABLE.get(audio + ".ch_" + quality);
-        int audioSamplingRate =
-                MediaProfileReader.OUTPUT_FORMAT_TABLE.get(audio + ".hz_" + quality);
+        int videoEncoder = videoCap.mCodec;
+        int audioEncoder = audioCap.mCodec;
+        int videoWidth = highQuality? videoCap.mMaxFrameWidth: videoCap.mMinFrameWidth;
+        int videoHeight = highQuality? videoCap.mMaxFrameHeight: videoCap.mMinFrameHeight;
+        int videoFps = highQuality? videoCap.mMaxFrameRate: videoCap.mMinFrameRate;
+        int videoBitrate = highQuality? videoCap.mMaxBitRate: videoCap.mMinBitRate;
+        int audioBitrate = highQuality? audioCap.mMaxBitRate: audioCap.mMinBitRate;
+        int audioChannels = highQuality? audioCap.mMaxChannels: audioCap.mMinChannels ;
+        int audioSamplingRate = highQuality? audioCap.mMaxSampleRate: audioCap.mMinSampleRate;
 
         if (videoFps < MIN_VIDEO_FPS) {
             videoFps = MIN_VIDEO_FPS;
         }
         mSurfaceHolder = MediaFrameworkTest.mSurfaceView.getHolder();
-        String filename = ("/sdcard/" + encoder + "_" + audio + "_" + quality + ".3gp");
+        String filename = ("/sdcard/" + videoEncoder + "_" + audioEncoder + "_" + highQuality + ".3gp");
         try {
             Log.v(TAG, "video encoder :" + videoEncoder);
             Log.v(TAG, "audio encoder :" + audioEncoder);
-            Log.v(TAG, "quality : " + quality);
-            Log.v(TAG, "encoder : " + encoder);
-            Log.v(TAG, "audio : " + audio);
+            Log.v(TAG, "quality : " + (highQuality?"high": "low"));
+            Log.v(TAG, "encoder : " + MediaProfileReader.getVideoCodecName(videoEncoder));
+            Log.v(TAG, "audio : " + MediaProfileReader.getAudioCodecName(audioEncoder));
             Log.v(TAG, "videoWidth : " + videoWidth);
             Log.v(TAG, "videoHeight : " + videoHeight);
             Log.v(TAG, "videoFPS : " + videoFps);
@@ -434,35 +436,26 @@ public class MediaRecorderTest extends ActivityInstrumentationTestCase<MediaFram
         boolean recordSuccess = false;
         String deviceType = MediaProfileReader.getDeviceType();
         Log.v(TAG, "deviceType = " + deviceType);
-        // Test cases are device specified
-        MediaProfileReader.createVideoProfileTable();
-        MediaProfileReader.createAudioProfileTable();
-        MediaProfileReader.createEncoderTable();
-        String encoderType = MediaProfileReader.getVideoCodecProperty();
-        String audioType = MediaProfileReader.getAudioCodecProperty();
-        if ((encoderType.length() != 0) || (audioType.length() != 0)) {
-            String audio[] = audioType.split(",");
-            String encoder[] = encoderType.split(",");
-            for (int k = 0; k < 2; k++) {
-                for (int i = 0; i < encoder.length; i++) {
-                    for (int j = 0; j < audio.length; j++) {
-                        if (k == 0) {
-                            recordSuccess = recordVideoWithPara(encoder[i], audio[j], "high");
-                        } else {
-                            recordSuccess = recordVideoWithPara(encoder[i], audio[j], "low");
-                        }
-                        if (!recordSuccess) {
-                            Log.v(TAG, "testDeviceSpecificCodec failed");
-                            Log.v(TAG, "Encoder = " + encoder[i] + "Audio Encoder = " + audio[j]);
-                            noOfFailure++;
-                        }
-                        // assertTrue((encoder[i] + audio[j]), recordSuccess);
+        List<VideoEncoderCap> videoEncoders = MediaProfileReader.getVideoEncoders();
+        List<AudioEncoderCap> audioEncoders = MediaProfileReader.getAudioEncoders();
+        for (int k = 0; k < 2; k++) {
+            for (VideoEncoderCap videoEncoder: videoEncoders) {
+                for (AudioEncoderCap audioEncoder: audioEncoders) {
+                    if (k == 0) {
+                        recordSuccess = recordVideoWithPara(videoEncoder, audioEncoder, true);
+                    } else {
+                        recordSuccess = recordVideoWithPara(videoEncoder, audioEncoder, false);
+                    }
+                    if (!recordSuccess) {
+                        Log.v(TAG, "testDeviceSpecificCodec failed");
+                        Log.v(TAG, "Encoder = " + videoEncoder.mCodec + "Audio Encoder = " + audioEncoder.mCodec);
+                        noOfFailure++;
                     }
                 }
             }
-            if (noOfFailure != 0) {
-                assertTrue("testDeviceSpecificCodec", false);
-            }
+        }
+        if (noOfFailure != 0) {
+            assertTrue("testDeviceSpecificCodec", false);
         }
     }
 }

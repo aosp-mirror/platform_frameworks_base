@@ -23,10 +23,6 @@
 #include <ui/Point.h>
 #include <ui/Rect.h>
 
-#include <GLES/gl.h>
-
-#include <core/SkMatrix.h>
-
 namespace android {
 
 class Region;
@@ -38,9 +34,12 @@ class Transform
 public:
                     Transform();
                     Transform(const Transform&  other);
-                    Transform(int32_t flags);
+           explicit Transform(uint32_t orientation);
                     ~Transform();
 
+            typedef int32_t fixed1616;
+
+            // FIXME: must match OVERLAY_TRANSFORM_*, pull from hardware.h
             enum orientation_flags {
                 ROT_0   = 0x00000000,
                 FLIP_H  = 0x00000001,
@@ -48,48 +47,79 @@ public:
                 ROT_90  = 0x00000004,
                 ROT_180 = FLIP_H|FLIP_V,
                 ROT_270 = ROT_180|ROT_90,
-                ROT_INVALID = 0x80000000
+                ROT_INVALID = 0x80
             };
 
             enum type_mask {
                 IDENTITY            = 0,
                 TRANSLATE           = 0x1,
-                SCALE               = 0x2,
-                AFFINE              = 0x4,
-                PERSPECTIVE         = 0x8
+                ROTATE              = 0x2,
+                SCALE               = 0x4,
+                UNKNOWN             = 0x8
             };
 
-            bool    transformed() const;
-            int32_t getOrientation() const;
-            bool    preserveRects() const;
-            
+            // query the transform
+            bool        transformed() const;
+            bool        preserveRects() const;
+            uint32_t    getType() const;
+            uint32_t    getOrientation() const;
+
+            float const* operator [] (int i) const;  // returns column i
             int     tx() const;
             int     ty() const;
-        
+
+            // modify the transform
             void    reset();
-            void    set(float xx, float xy, float yx, float yy);
-            void    set(int tx, int ty);
-            void    set(float radian, float x, float y);
-            void    scale(float s, float x, float y);
-            
+            void    set(float tx, float ty);
+            void    set(float a, float b, float c, float d);
+            void    set(uint32_t flags, float w, float h);
+
+            // transform data
             Rect    makeBounds(int w, int h) const;
-            void    transform(GLfixed* point, int x, int y) const;
+            void    transform(fixed1616* point, int x, int y) const;
             Region  transform(const Region& reg) const;
-            Rect    transform(const Rect& bounds) const;
-
             Transform operator * (const Transform& rhs) const;
-            float operator [] (int i) const;
-
-    inline uint32_t getType() const { return type(); }
-            
-    inline Transform(bool) : mType(0xFF) { };
 
 private:
-    uint8_t     type() const;
+    struct vec3 {
+        float v[3];
+        inline vec3() { }
+        inline vec3(float a, float b, float c) {
+            v[0] = a; v[1] = b; v[2] = c;
+        }
+        inline float operator [] (int i) const { return v[i]; }
+        inline float& operator [] (int i) { return v[i]; }
+    };
+    struct vec2 {
+        float v[2];
+        inline vec2() { }
+        inline vec2(float a, float b) {
+            v[0] = a; v[1] = b;
+        }
+        inline float operator [] (int i) const { return v[i]; }
+        inline float& operator [] (int i) { return v[i]; }
+    };
+    struct mat33 {
+        vec3 v[3];
+        inline const vec3& operator [] (int i) const { return v[i]; }
+        inline vec3& operator [] (int i) { return v[i]; }
+    };
 
-private:
-            SkMatrix    mTransform;
-    mutable uint32_t    mType;      
+    enum { UNKNOWN_TYPE = 0x80000000 };
+
+    // assumes the last row is < 0 , 0 , 1 >
+    vec2 transform(const vec2& v) const;
+    vec3 transform(const vec3& v) const;
+    Rect transform(const Rect& bounds) const;
+    uint32_t type() const;
+    static bool absIsOne(float f);
+    static bool absEqual(float a, float b);
+    static bool isZero(float f);
+
+    void dump(const char* name) const;
+
+    mat33               mMatrix;
+    mutable uint32_t    mType;
 };
 
 // ---------------------------------------------------------------------------

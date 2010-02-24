@@ -55,6 +55,7 @@ private:
     size_t mIndex;
     bool mStarted;
     bool mReachedEOS;
+    status_t mFinalStatus;
     int64_t mSeekTimeUs;
     int64_t mCacheDurationUs;
     bool mPrefetcherStopped;
@@ -306,7 +307,7 @@ status_t PrefetchedSource::read(
     }
 
     if (mCachedBuffers.empty()) {
-        return ERROR_END_OF_STREAM;
+        return mReachedEOS ? mFinalStatus : ERROR_END_OF_STREAM;
     }
 
     *out = *mCachedBuffers.begin();
@@ -353,6 +354,7 @@ void PrefetchedSource::cacheMore() {
 
     if (err != OK) {
         mReachedEOS = true;
+        mFinalStatus = err;
         mCondition.signal();
 
         return;

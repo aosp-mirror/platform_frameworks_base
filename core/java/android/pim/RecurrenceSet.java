@@ -18,7 +18,6 @@ package android.pim;
 
 import android.content.ContentValues;
 import android.database.Cursor;
-import android.os.Bundle;
 import android.provider.Calendar;
 import android.text.TextUtils;
 import android.text.format.Time;
@@ -26,6 +25,7 @@ import android.util.Config;
 import android.util.Log;
 
 import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * Basic information about a recurrence, following RFC 2445 Section 4.8.5.
@@ -36,6 +36,7 @@ public class RecurrenceSet {
     private final static String TAG = "CalendarProvider";
 
     private final static String RULE_SEPARATOR = "\n";
+    private final static String FOLDING_SEPARATOR = "\n ";
 
     // TODO: make these final?
     public EventRecurrence[] rrules = null;
@@ -309,7 +310,8 @@ public static boolean populateComponent(ContentValues values,
         String rdateStr = values.getAsString(Calendar.Events.RDATE);
         String exruleStr = values.getAsString(Calendar.Events.EXRULE);
         String exdateStr = values.getAsString(Calendar.Events.EXDATE);
-        boolean allDay = values.getAsInteger(Calendar.Events.ALL_DAY) == 1;
+        Integer allDayInteger = values.getAsInteger(Calendar.Events.ALL_DAY);
+        boolean allDay = (null != allDayInteger) ? (allDayInteger == 1) : false;
 
         if ((dtstart == -1) ||
             (TextUtils.isEmpty(duration))||
@@ -361,12 +363,58 @@ public static boolean populateComponent(ContentValues values,
         if (TextUtils.isEmpty(ruleStr)) {
             return;
         }
-        String[] rrules = ruleStr.split(RULE_SEPARATOR);
+        String[] rrules = getRuleStrings(ruleStr);
         for (String rrule : rrules) {
             ICalendar.Property prop = new ICalendar.Property(propertyName);
             prop.setValue(rrule);
             component.addProperty(prop);
         }
+    }
+
+    private static String[] getRuleStrings(String ruleStr) {
+        if (null == ruleStr) {
+            return new String[0];
+        }
+        String unfoldedRuleStr = unfold(ruleStr);
+        String[] split = unfoldedRuleStr.split(RULE_SEPARATOR);
+        int count = split.length;
+        for (int n = 0; n < count; n++) {
+            split[n] = fold(split[n]);
+        }
+        return split;
+    }
+
+
+    private static final Pattern IGNORABLE_ICAL_WHITESPACE_RE =
+            Pattern.compile("(?:\\r\\n?|\\n)[ \t]");
+
+    private static final Pattern FOLD_RE = Pattern.compile(".{75}");
+
+    /**
+    * fold and unfolds ical content lines as per RFC 2445 section 4.1.
+    *
+    * <h3>4.1 Content Lines</h3>
+    *
+    * <p>The iCalendar object is organized into individual lines of text, called
+    * content lines. Content lines are delimited by a line break, which is a CRLF
+    * sequence (US-ASCII decimal 13, followed by US-ASCII decimal 10).
+    *
+    * <p>Lines of text SHOULD NOT be longer than 75 octets, excluding the line
+    * break. Long content lines SHOULD be split into a multiple line
+    * representations using a line "folding" technique. That is, a long line can
+    * be split between any two characters by inserting a CRLF immediately
+    * followed by a single linear white space character (i.e., SPACE, US-ASCII
+    * decimal 32 or HTAB, US-ASCII decimal 9). Any sequence of CRLF followed
+    * immediately by a single linear white space character is ignored (i.e.,
+    * removed) when processing the content type.
+    */
+    public static String fold(String unfoldedIcalContent) {
+        return FOLD_RE.matcher(unfoldedIcalContent).replaceAll("$0\r\n ");
+    }
+
+    public static String unfold(String foldedIcalContent) {
+        return IGNORABLE_ICAL_WHITESPACE_RE.matcher(
+            foldedIcalContent).replaceAll("");
     }
 
     private static void addPropertyForDateStr(ICalendar.Component component,

@@ -38,6 +38,7 @@ AudioPlayer::AudioPlayer(const sp<MediaPlayerBase::AudioSink> &audioSink)
       mPositionTimeRealUs(-1),
       mSeeking(false),
       mReachedEOS(false),
+      mFinalStatus(OK),
       mStarted(false),
       mAudioSink(audioSink) {
 }
@@ -168,6 +169,7 @@ void AudioPlayer::stop() {
     mPositionTimeRealUs = -1;
     mSeeking = false;
     mReachedEOS = false;
+    mFinalStatus = OK;
     mStarted = false;
 }
 
@@ -181,8 +183,11 @@ bool AudioPlayer::isSeeking() {
     return mSeeking;
 }
 
-bool AudioPlayer::reachedEOS() {
+bool AudioPlayer::reachedEOS(status_t *finalStatus) {
+    *finalStatus = OK;
+
     Mutex::Autolock autoLock(mLock);
+    *finalStatus = mFinalStatus;
     return mReachedEOS;
 }
 
@@ -245,6 +250,7 @@ size_t AudioPlayer::fillBuffer(void *data, size_t size) {
 
             if (err != OK) {
                 mReachedEOS = true;
+                mFinalStatus = err;
                 break;
             }
 

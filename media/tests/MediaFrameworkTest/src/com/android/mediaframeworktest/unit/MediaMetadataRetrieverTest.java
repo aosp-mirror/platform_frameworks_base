@@ -39,9 +39,8 @@ public class MediaMetadataRetrieverTest extends AndroidTestCase {
     public static void testAlbumArt() throws Exception {
         Log.v(TAG, "testAlbumArt starts.");
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-        MediaProfileReader reader = new MediaProfileReader();
-        boolean supportWMA = reader.getWMAEnable();
-        boolean supportWMV = reader.getWMVEnable();
+        boolean supportWMA = MediaProfileReader.getWMAEnable();
+        boolean supportWMV = MediaProfileReader.getWMVEnable();
         retriever.setMode(MediaMetadataRetriever.MODE_GET_METADATA_ONLY);
         for (int i = 0, n = MediaNames.ALBUMART_TEST_FILES.length; i < n; ++i) {
             try {
@@ -74,9 +73,8 @@ public class MediaMetadataRetrieverTest extends AndroidTestCase {
     @LargeTest
     public static void testThumbnailCapture() throws Exception {
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-        MediaProfileReader reader = new MediaProfileReader();
-        boolean supportWMA = reader.getWMAEnable();
-        boolean supportWMV = reader.getWMVEnable();
+        boolean supportWMA = MediaProfileReader.getWMAEnable();
+        boolean supportWMV = MediaProfileReader.getWMVEnable();
         Log.v(TAG, "Thumbnail processing starts");
         long startedAt = System.currentTimeMillis();
         for(int i = 0, n = MediaNames.THUMBNAIL_CAPTURE_TEST_FILES.length; i < n; ++i) {
@@ -110,9 +108,8 @@ public class MediaMetadataRetrieverTest extends AndroidTestCase {
     
     @LargeTest
     public static void testMetadataRetrieval() throws Exception {
-        MediaProfileReader reader = new MediaProfileReader();
-        boolean supportWMA = reader.getWMAEnable();
-        boolean supportWMV = reader.getWMVEnable();
+        boolean supportWMA = MediaProfileReader.getWMAEnable();
+        boolean supportWMV = MediaProfileReader.getWMVEnable();
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
         retriever.setMode(MediaMetadataRetriever.MODE_GET_METADATA_ONLY);
         for(int i = 0, n = MediaNames.METADATA_RETRIEVAL_TEST_FILES.length; i < n; ++i) {

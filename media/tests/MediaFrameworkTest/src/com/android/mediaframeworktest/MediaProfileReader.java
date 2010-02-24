@@ -1,28 +1,35 @@
 package com.android.mediaframeworktest;
 
 import android.media.MediaRecorder;
+import android.media.EncoderCapabilities;
+import android.media.EncoderCapabilities.VideoEncoderCap;
+import android.media.EncoderCapabilities.AudioEncoderCap;
+import android.media.DecoderCapabilities;
+import android.media.DecoderCapabilities.VideoDecoder;
+import android.media.DecoderCapabilities.AudioDecoder;
+
 import android.os.SystemProperties;
+import java.util.List;
 import java.util.HashMap;
 
-public class MediaProfileReader {
+public class MediaProfileReader
+{
+    private static final List<VideoDecoder> videoDecoders = DecoderCapabilities.getVideoDecoders();
+    private static final List<AudioDecoder> audioDecoders = DecoderCapabilities.getAudioDecoders();
+    private static final List<VideoEncoderCap> videoEncoders = EncoderCapabilities.getVideoEncoders();
+    private static final List<AudioEncoderCap> audioEncoders = EncoderCapabilities.getAudioEncoders();
+    private static final HashMap<Integer, String> encoderMap = new HashMap<Integer, String>();
 
-    public static final HashMap<String, Integer>
-    OUTPUT_FORMAT_TABLE = new HashMap<String, Integer>();
-    public static String MEDIA_ENC_VID = "ro.media.enc.vid.";
-    public static String MEDIA_AUD_VID = "ro.media.enc.aud.";
-    public static String[] VIDEO_ENCODER_PROPERTY = {".width", ".height", ".bps", ".fps",};
-    public static String[] AUDIO_ENCODER_PROPERTY = {".bps", ".hz", ".ch",};
+    static {
+        initEncoderMap();
+    };
 
-    public static String getVideoCodecProperty() {
-        String s;
-        s = SystemProperties.get("ro.media.enc.vid.codec");
-        return s;
+    public static List<VideoEncoderCap> getVideoEncoders() {
+        return videoEncoders;
     }
 
-    public static String getAudioCodecProperty() {
-        String s;
-        s = SystemProperties.get("ro.media.enc.aud.codec");
-        return s;
+    public static List<AudioEncoderCap> getAudioEncoders() {
+        return audioEncoders;
     }
 
     public static String getDeviceType() {
@@ -33,78 +40,56 @@ public class MediaProfileReader {
     }
 
     public static boolean getWMAEnable() {
-        // push all the property into one big table
-        int wmaEnable = 1;
-        wmaEnable = SystemProperties.getInt("ro.media.dec.aud.wma.enabled",
-                wmaEnable);
-        if (wmaEnable == 1) {
-            return true;
-        } else {
-            return false;
+        for (AudioDecoder decoder: audioDecoders) {
+            if (decoder == AudioDecoder.AUDIO_DECODER_WMA) {
+                return true;
+            }
         }
+        return false;
     }
 
     public static boolean getWMVEnable(){
-        int wmvEnable = 1;
-        wmvEnable = SystemProperties.getInt("ro.media.dec.vid.wmv.enabled",
-                wmvEnable);
-        if (wmvEnable == 1) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    public static void createVideoProfileTable() {
-        // push all the property into one big table
-        String encoderType = getVideoCodecProperty();
-        if (encoderType.length() != 0) {
-            String encoder[] = encoderType.split(",");
-            for (int i = 0; i < encoder.length; i++) {
-                for (int j = 0; j < VIDEO_ENCODER_PROPERTY.length; j++) {
-                    String propertyName = MEDIA_ENC_VID + encoder[i] + VIDEO_ENCODER_PROPERTY[j];
-                    String prop = SystemProperties.get(propertyName);
-                    // push to the table
-                    String propRange[] = prop.split(",");
-                    OUTPUT_FORMAT_TABLE.put((encoder[i] + VIDEO_ENCODER_PROPERTY[j] + "_low"),
-                            Integer.parseInt(propRange[0]));
-                    OUTPUT_FORMAT_TABLE.put((encoder[i] + VIDEO_ENCODER_PROPERTY[j] + "_high"),
-                            Integer.parseInt(propRange[1]));
-                }
-
+        for (VideoDecoder decoder: videoDecoders) {
+            if (decoder == VideoDecoder.VIDEO_DECODER_WMV) {
+                return true;
             }
         }
+        return false;
     }
 
-    public static void createAudioProfileTable() {
-        // push all the property into one big table
-        String audioType = getAudioCodecProperty();
-        String encoder[] = audioType.split(",");
-        if (audioType.length() != 0) {
-            for (int i = 0; i < encoder.length; i++) {
-                for (int j = 0; j < AUDIO_ENCODER_PROPERTY.length; j++) {
-                    String propertyName = MEDIA_AUD_VID + encoder[i] + AUDIO_ENCODER_PROPERTY[j];
-                    String prop = SystemProperties.get(propertyName);
-                    // push to the table
-                    String propRange[] = prop.split(",");
-                    OUTPUT_FORMAT_TABLE.put((encoder[i] + AUDIO_ENCODER_PROPERTY[j] + "_low"),
-                            Integer.parseInt(propRange[0]));
-                    OUTPUT_FORMAT_TABLE.put((encoder[i] + AUDIO_ENCODER_PROPERTY[j] + "_high"),
-                            Integer.parseInt(propRange[1]));
-                }
-            }
+    public static String getVideoCodecName(int videoEncoder) {
+        if (videoEncoder != MediaRecorder.VideoEncoder.H263 &&
+            videoEncoder != MediaRecorder.VideoEncoder.H264 &&
+            videoEncoder != MediaRecorder.VideoEncoder.MPEG_4_SP) {
+            throw new IllegalArgumentException("Unsupported video encoder " + videoEncoder);
         }
+        return encoderMap.get(videoEncoder);
     }
 
-    public static void createEncoderTable(){
-        OUTPUT_FORMAT_TABLE.put("h263", MediaRecorder.VideoEncoder.H263);
-        OUTPUT_FORMAT_TABLE.put("h264", MediaRecorder.VideoEncoder.H264);
-        OUTPUT_FORMAT_TABLE.put("m4v", MediaRecorder.VideoEncoder.MPEG_4_SP);
-        OUTPUT_FORMAT_TABLE.put("amrnb", MediaRecorder.AudioEncoder.AMR_NB);
-        OUTPUT_FORMAT_TABLE.put("amrwb", MediaRecorder.AudioEncoder.AMR_WB);
-        OUTPUT_FORMAT_TABLE.put("aac", MediaRecorder.AudioEncoder.AAC);
-        OUTPUT_FORMAT_TABLE.put("aacplus", MediaRecorder.AudioEncoder.AAC_PLUS);
-        OUTPUT_FORMAT_TABLE.put("eaacplus",
-                MediaRecorder.AudioEncoder.EAAC_PLUS);
+    public static String getAudioCodecName(int audioEncoder) {
+        if (audioEncoder != MediaRecorder.AudioEncoder.AMR_NB &&
+            audioEncoder != MediaRecorder.AudioEncoder.AMR_WB &&
+            audioEncoder != MediaRecorder.AudioEncoder.AAC &&
+            audioEncoder != MediaRecorder.AudioEncoder.AAC_PLUS &&
+            audioEncoder != MediaRecorder.AudioEncoder.EAAC_PLUS) {
+            throw new IllegalArgumentException("Unsupported audio encodeer " + audioEncoder);
+        }
+        return encoderMap.get(audioEncoder);
+    }
+
+    private MediaProfileReader() {} // Don't call me
+
+    private static void initEncoderMap() {
+        // video encoders
+        encoderMap.put(MediaRecorder.VideoEncoder.H263, "h263");
+        encoderMap.put(MediaRecorder.VideoEncoder.H264, "h264");
+        encoderMap.put(MediaRecorder.VideoEncoder.MPEG_4_SP, "m4v");
+
+        // audio encoders
+        encoderMap.put(MediaRecorder.AudioEncoder.AMR_NB, "amrnb");
+        encoderMap.put(MediaRecorder.AudioEncoder.AMR_WB, "amrwb");
+        encoderMap.put(MediaRecorder.AudioEncoder.AAC, "aac");
+        encoderMap.put(MediaRecorder.AudioEncoder.AAC_PLUS, "aacplus");
+        encoderMap.put(MediaRecorder.AudioEncoder.EAAC_PLUS, "eaacplus");
     }
 }
