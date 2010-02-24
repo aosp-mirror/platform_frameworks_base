@@ -16,8 +16,6 @@
 
 package android.test;
 
-import junit.framework.TestCase;
-
 import android.app.Activity;
 import android.app.Instrumentation;
 import android.content.Intent;
@@ -26,9 +24,11 @@ import android.util.Log;
 import android.view.KeyEvent;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.lang.reflect.InvocationTargetException;
+
+import junit.framework.TestCase;
 
 /**
  * A test case that has access to {@link Instrumentation}.
@@ -86,7 +86,6 @@ public class InstrumentationTestCase extends TestCase {
      * @param extras Optional extra stuff to pass to the activity.
      * @return The activity, or null if non launched.
      */
-    @SuppressWarnings("unchecked")
     public final <T extends Activity> T launchActivity(
             String pkg,
             Class<T> activityCls,
@@ -338,6 +337,7 @@ public class InstrumentationTestCase extends TestCase {
      * 
      * @throws Exception
      */
+    @Override
     protected void tearDown() throws Exception {
         Runtime.getRuntime().gc();
         Runtime.getRuntime().runFinalization();

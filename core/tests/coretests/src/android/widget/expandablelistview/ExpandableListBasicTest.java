@@ -16,29 +16,28 @@
 
 package android.widget.expandablelistview;
 
-import android.widget.expandablelistview.ExpandableListSimple;
+import android.app.Instrumentation;
+import android.test.ActivityInstrumentationTestCase2;
+import android.test.suitebuilder.annotation.MediumTest;
 import android.util.ExpandableListScenario;
 import android.util.ListUtil;
 import android.util.ExpandableListScenario.MyGroup;
-
-import java.util.List;
-
-import android.test.ActivityInstrumentationTestCase;
-import android.test.suitebuilder.annotation.MediumTest;
 import android.view.KeyEvent;
+import android.view.View;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
 
-public class ExpandableListBasicTest extends ActivityInstrumentationTestCase<ExpandableListSimple> {
+import java.util.List;
+
+public class ExpandableListBasicTest extends ActivityInstrumentationTestCase2<ExpandableListSimple> {
     private ExpandableListScenario mActivity;
     private ExpandableListView mListView;
     private ExpandableListAdapter mAdapter;
     private ListUtil mListUtil;
     
     public ExpandableListBasicTest() {
-        super("com.android.frameworks.coretests",
-                ExpandableListSimple.class);
+        super(ExpandableListSimple.class);
     }
 
     @Override
@@ -87,7 +86,6 @@ public class ExpandableListBasicTest extends ActivityInstrumentationTestCase<Exp
     
     @MediumTest
     public void testExpandedGroupMovement() {
-
         // Expand the first group
         mListUtil.arrowScrollToSelectedPosition(0);
         sendKeys(KeyEvent.KEYCODE_DPAD_CENTER);
@@ -125,5 +123,55 @@ public class ExpandableListBasicTest extends ActivityInstrumentationTestCase<Exp
         assertFalse("The expanded state was given to the inserted group",
                 mListView.isGroupExpanded(0));
     }
-    
+
+    // Static utility method, shared by different ExpandableListView scenario.
+    static void checkGroupAndChildPositions(ExpandableListView elv,
+            ActivityInstrumentationTestCase2<? extends ExpandableListScenario> activityInstrumentation) {
+        // Add a position tester ContextMenu listener to the ExpandableListView
+        PositionTesterContextMenuListener menuListener = new PositionTesterContextMenuListener();
+        elv.setOnCreateContextMenuListener(menuListener);
+
+        ListUtil listUtil = new ListUtil(elv, activityInstrumentation.getInstrumentation());
+        ExpandableListAdapter adapter = elv.getExpandableListAdapter();
+        Instrumentation instrumentation = activityInstrumentation.getInstrumentation();
+
+        int index = elv.getHeaderViewsCount();
+        int groupCount = adapter.getGroupCount();
+        for (int groupIndex = 0; groupIndex < groupCount; groupIndex++) {
+
+            // Expand group
+            assertFalse("Group is already expanded", elv.isGroupExpanded(groupIndex));
+            listUtil.arrowScrollToSelectedPosition(index);
+            instrumentation.waitForIdleSync();
+            activityInstrumentation.sendKeys(KeyEvent.KEYCODE_DPAD_CENTER);
+            activityInstrumentation.getInstrumentation().waitForIdleSync();
+            assertTrue("Group did not expand " + groupIndex, elv.isGroupExpanded(groupIndex));
+
+            // Check group index in context menu
+            menuListener.expectGroupContextMenu(groupIndex);
+            // Make sure the group is visible so that getChild finds it
+            listUtil.arrowScrollToSelectedPosition(index);
+            View groupChild = elv.getChildAt(index - elv.getFirstVisiblePosition());
+            elv.showContextMenuForChild(groupChild);
+            index++;
+
+            final int childrenCount = adapter.getChildrenCount(groupIndex);
+            for (int childIndex = 0; childIndex < childrenCount; childIndex++) {
+                // Check child index in context menu
+                listUtil.arrowScrollToSelectedPosition(index);
+                menuListener.expectChildContextMenu(groupIndex, childIndex);
+                View child = elv.getChildAt(index - elv.getFirstVisiblePosition());
+                elv.showContextMenuForChild(child);
+                index++;
+            }
+        }
+
+        // Cleanup: remove the listener we added.
+        elv.setOnCreateContextMenuListener(null);
+    }
+
+    @MediumTest
+    public void testGroupChildPositions() {
+        checkGroupAndChildPositions(mListView, this);
+    }
 }
