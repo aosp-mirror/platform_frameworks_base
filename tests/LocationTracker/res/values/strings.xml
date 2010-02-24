@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/*
+* Copyright (C) 2008 The Android Open Source Project
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*      http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
+-->
+
+<resources>
+    <string name="start_service_menu">Start Service</string>
+    <string name="stop_service_menu">Stop Service</string>
+    <string name="settings_menu">Settings</string>
+    <string name="update_preference">Update frequency</string>
+    <string name="title_mintime_preference">Minimum update time</string>
+    <string name="summary_mintime_preference">The suggested minimum time interval for location updates, in seconds</string>
+    <string name="dialog_title_mintime_preference">Minimum update time</string>
+    <string name="title_mindistance_preference">Minimum distance</string>
+    <string name="summary_mindistance_preference">Minimum distance interval for location updates, in meters</string>
+    <string name="dialog_title_mindistance_preference">Minimum distance</string>
+    <string name="provider_preferences">Location providers</string>
+    <string name="title_network_preference">Network location</string>
+    <string name="summary_network_preference">Listen for updates to network location (Wi-Fi/cellid)</string>
+    <string name="title_gps_preference">GPS location</string>
+    <string name="summary_gps_preference">Listen for updates to GPS location</string>
+    <string name="title_signal_preference">Signal strength</string>
+    <string name="summary_signal_preference">Listen for updates to signal strength</string>
+    <string name="advanced_preferences">Advanced</string>
+    <string name="title_advanced_log_preference">Location debug logging</string>
+    <string name="summary_advanced_preference">Logs detailed location data, only relevant for location/test engineers</string>
+    <string name="app_label">Location Tracker</string>
+    <string name="export_sub_menu">Export\u2026</string>
+    <string name="export_kml">Export As KML</string>
+    <string name="export_csv">Export As CSV</string>
+    <string name="clear_data">Clear data</string>
+    <string name="delete_confirm">All current tracking data will be deleted.</string>
+    <string name="confirm_title">Clear data</string>
+</resources>

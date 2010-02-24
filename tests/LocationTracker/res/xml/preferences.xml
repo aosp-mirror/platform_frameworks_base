@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2008 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+
+<!-- The Location preferences UI -->
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory android:title="@string/update_preference">
+        <EditTextPreference android:key="mintime_preference"
+            android:defaultValue="0"
+            android:title="@string/title_mintime_preference"
+            android:summary="@string/summary_mintime_preference"
+            android:dialogTitle="@string/dialog_title_mintime_preference" />
+
+        <EditTextPreference android:key="mindistance_preference"
+            android:defaultValue="0"
+            android:title="@string/title_mindistance_preference"
+            android:summary="@string/summary_mindistance_preference"
+            android:dialogTitle="@string/dialog_title_mindistance_preference" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/provider_preferences">
+
+        <CheckBoxPreference android:key="network_preference"
+            android:defaultValue="true"
+            android:title="@string/title_network_preference"
+            android:summary="@string/summary_network_preference" />
+
+        <CheckBoxPreference android:key="gps_preference"
+            android:defaultValue="true"
+            android:title="@string/title_gps_preference"
+            android:summary="@string/summary_gps_preference" />
+
+        <CheckBoxPreference android:key="signal_preference"
+            android:defaultValue="false"
+            android:title="@string/title_signal_preference"
+            android:summary="@string/summary_signal_preference" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/advanced_preferences">
+
+        <CheckBoxPreference android:key="advanced_log_preference"
+            android:defaultValue="false"
+            android:title="@string/title_advanced_log_preference"
+            android:summary="@string/summary_advanced_preference" />
+    </PreferenceCategory>
+
+</PreferenceScreen>
