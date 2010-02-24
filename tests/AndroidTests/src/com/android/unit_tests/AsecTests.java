@@ -300,7 +300,7 @@ public class AsecTests extends AndroidTestCase {
         }
     }
 
-    public void testRenameMountedContainer() {
+    public void testRenameSrcMountedContainer() {
         try {
             Assert.assertEquals(StorageResultCode.OperationSucceeded,
                     createContainer("testRenameContainer.1", 4, "none"));
@@ -312,10 +312,13 @@ public class AsecTests extends AndroidTestCase {
         }
     }
 
-    public void testRenameToExistingContainer() {
+    public void testRenameDstMountedContainer() {
         try {
             Assert.assertEquals(StorageResultCode.OperationSucceeded,
                     createContainer("testRenameContainer.1", 4, "none"));
+
+            Assert.assertEquals(StorageResultCode.OperationSucceeded,
+                    unmountContainer("testRenameContainer.1", false));
 
             Assert.assertEquals(StorageResultCode.OperationSucceeded,
                     createContainer("testRenameContainer.2", 4, "none"));
