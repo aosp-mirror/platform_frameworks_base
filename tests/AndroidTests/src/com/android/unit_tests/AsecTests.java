@@ -55,6 +55,7 @@ public class AsecTests extends AndroidTestCase {
     void failStr(String errMsg) {
         Log.w(TAG, "errMsg="+errMsg);
     }
+
     void failStr(Exception e) {
         Log.w(TAG, "e.getMessage="+e.getMessage());
         Log.w(TAG, "e="+e);
@@ -63,6 +64,13 @@ public class AsecTests extends AndroidTestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
+        if (localLOGV) Log.i(TAG, "Cleaning out old test containers");
+        cleanupContainers();
+    }
+
+    @Override
+    protected void tearDown() throws Exception {
+        super.tearDown();
         if (localLOGV) Log.i(TAG, "Cleaning out old test containers");
         cleanupContainers();
     }
