@@ -17,6 +17,8 @@ LOCAL_C_INCLUDES:= \
 
 LOCAL_CFLAGS += -Wno-multichar
 
+LOCAL_MODULE_TAGS := debug
+
 LOCAL_MODULE:= stagefright
 
 include $(BUILD_EXECUTABLE)
@@ -39,6 +41,8 @@ LOCAL_C_INCLUDES:= \
 
 LOCAL_CFLAGS += -Wno-multichar
 
+LOCAL_MODULE_TAGS := debug
+
 LOCAL_MODULE:= record
 
 include $(BUILD_EXECUTABLE)
@@ -60,6 +64,8 @@ LOCAL_C_INCLUDES:= \
 	$(TOP)/external/opencore/extern_libs_v2/khronos/openmax/include
 
 LOCAL_CFLAGS += -Wno-multichar
+
+LOCAL_MODULE_TAGS := debug
 
 LOCAL_MODULE:= audioloop
 
