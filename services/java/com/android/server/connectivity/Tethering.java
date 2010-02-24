@@ -265,7 +265,6 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
     }
 
     private void sendTetherStateChangedBroadcast() {
-Log.e("RJGRJG", "sendTetherStateChangedBroadcast");
         IBinder b = ServiceManager.getService(Context.CONNECTIVITY_SERVICE);
         IConnectivityManager service = IConnectivityManager.Stub.asInterface(b);
         try {
@@ -442,7 +441,6 @@ Log.e("RJGRJG", "sendTetherStateChangedBroadcast");
                 }
                 Tethering.this.toggleUsbIfaces(false); // remove them
             } else if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
-Log.e("RJGRJG", "got conn action :"+action);
                 IBinder b = ServiceManager.getService(Context.CONNECTIVITY_SERVICE);
                 IConnectivityManager service = IConnectivityManager.Stub.asInterface(b);
                 try {
@@ -991,10 +989,11 @@ Log.e("RJGRJG", "got conn action :"+action);
                                 if (!Tethering.this.configureUsb(false)) {
                                     transitionTo(mUsbConfigurationErrorState);
                                 } else {
-                                    transitionTo(mUsbConfigurationErrorState);
+                                    transitionTo(mInitialState);
                                 }
+                            } else {
+                                transitionTo(mInitialState);
                             }
-                            transitionTo(mInitialState);
                         } else if (message.what == CMD_INTERFACE_DOWN) {
                             transitionTo(mUnavailableState);
                         }
@@ -1032,7 +1031,7 @@ Log.e("RJGRJG", "got conn action :"+action);
                         sendTetherStateChangedBroadcast();
                         if (mUsb) {
                             if (!Tethering.this.configureUsb(false)) {
-                                transitionTo(mUsbConfigurationError);
+                                transitionTo(mUsbConfigurationErrorState);
                                 break;
                             }
                         }
