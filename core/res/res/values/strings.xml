@@ -779,18 +779,18 @@
         applications can use this to read phone owner data.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_readCalendar">read calendar data</string>
+    <string name="permlab_readCalendar">read calendar events</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_readCalendar">Allows an application to read all
         of the calendar events stored on your phone. Malicious applications
         can use this to send your calendar events to other people.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_writeCalendar">write calendar data</string>
+    <string name="permlab_writeCalendar">add or modify calendar events and send email to guests</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_writeCalendar">Allows an application to modify the
-        calendar events stored on your phone. Malicious
-        applications can use this to erase or modify your calendar data.</string>
+    <string name="permdesc_writeCalendar">Allows an application to add or change the 
+        events on your calendar, which may send email to guests. Malicious applications can use this 
+	to erase or modify your calendar events or to send email to guests.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_accessMockLocation">mock location sources for testing</string>
