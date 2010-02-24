@@ -678,17 +678,19 @@ public class Activity extends ContextThemeWrapper
     private Thread mUiThread;
     private final Handler mHandler = new Handler();
 
+    // Used for debug only
+    /*
     public Activity() {
         ++sInstanceCount;
     }
-
 
     @Override
     protected void finalize() throws Throwable {
         super.finalize();
         --sInstanceCount;
     }
-    
+    */
+
     public static long getInstanceCount() {
         return sInstanceCount;
     }
