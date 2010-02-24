@@ -22,11 +22,14 @@ import android.content.Context;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import com.android.internal.telephony.ITelephony;
+import com.android.internal.widget.LockPatternUtils;
+
 import android.text.Editable;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.android.internal.R;
@@ -35,7 +38,7 @@ import com.android.internal.R;
  * Displays a dialer like interface to unlock the SIM PIN.
  */
 public class SimUnlockScreen extends LinearLayout implements KeyguardScreen, View.OnClickListener,
-        KeyguardUpdateMonitor.ConfigurationChangeCallback {
+        KeyguardUpdateMonitor.ConfigurationChangeCallback, KeyguardUpdateMonitor.InfoCallback {
 
     private static final int DIGIT_PRESS_WAKE_MILLIS = 5000;
 
@@ -48,7 +51,7 @@ public class SimUnlockScreen extends LinearLayout implements KeyguardScreen, Vie
     private TextView mPinText;
 
     private TextView mOkButton;
-    private TextView mEmergencyCallButton;
+    private Button mEmergencyCallButton;
 
     private View mBackSpaceButton;
 
@@ -57,14 +60,17 @@ public class SimUnlockScreen extends LinearLayout implements KeyguardScreen, Vie
 
     private ProgressDialog mSimUnlockProgressDialog = null;
 
+    private LockPatternUtils mLockPatternUtils;
+
     private static final char[] DIGITS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
 
     public SimUnlockScreen(Context context, KeyguardUpdateMonitor updateMonitor,
-            KeyguardScreenCallback callback) {
+            KeyguardScreenCallback callback, LockPatternUtils lockpatternutils) {
         super(context);
         mUpdateMonitor = updateMonitor;
         mCallback = callback;
         mCreatedWithKeyboardOpen = mUpdateMonitor.isKeyboardOpen();
+        mLockPatternUtils = lockpatternutils;
 
         if (mCreatedWithKeyboardOpen) {
             LayoutInflater.from(context).inflate(R.layout.keyguard_screen_sim_pin_landscape, this, true);
@@ -78,7 +84,8 @@ public class SimUnlockScreen extends LinearLayout implements KeyguardScreen, Vie
         mBackSpaceButton = findViewById(R.id.backspace);
         mBackSpaceButton.setOnClickListener(this);
 
-        mEmergencyCallButton = (TextView) findViewById(R.id.emergencyCall);
+        mEmergencyCallButton = (Button) findViewById(R.id.emergencyCall);
+        mLockPatternUtils.updateEmergencyCallButtonState(mEmergencyCallButton);
         mOkButton = (TextView) findViewById(R.id.ok);
 
         mHeaderText.setText(R.string.keyguard_password_enter_pin_code);
@@ -95,7 +102,7 @@ public class SimUnlockScreen extends LinearLayout implements KeyguardScreen, Vie
     public boolean needsInput() {
         return true;
     }
-    
+
     /** {@inheritDoc} */
     public void onPause() {
 
@@ -110,6 +117,8 @@ public class SimUnlockScreen extends LinearLayout implements KeyguardScreen, Vie
         // erase the SIM unlock code, including orientation changes.
         mPinText.setText("");
         mEnteredDigits = 0;
+
+        mLockPatternUtils.updateEmergencyCallButtonState(mEmergencyCallButton);
     }
 
     /** {@inheritDoc} */
@@ -166,7 +175,6 @@ public class SimUnlockScreen extends LinearLayout implements KeyguardScreen, Vie
             }
             mCallback.pokeWakelock();
         } else if (v == mEmergencyCallButton) {
-            mCallback.pokeWakelock();
             mCallback.takeEmergencyCallAction();
         } else if (v == mOkButton) {
             checkPin();
@@ -365,5 +373,25 @@ public class SimUnlockScreen extends LinearLayout implements KeyguardScreen, Vie
             }
             return digit;
         }
+    }
+
+    public void onPhoneStateChanged(String newState) {
+        mLockPatternUtils.updateEmergencyCallButtonState(mEmergencyCallButton);
+    }
+
+    public void onRefreshBatteryInfo(boolean showBatteryInfo, boolean pluggedIn, int batteryLevel) {
+
+    }
+
+    public void onRefreshCarrierInfo(CharSequence plmn, CharSequence spn) {
+
+    }
+
+    public void onRingerModeChanged(int state) {
+
+    }
+
+    public void onTimeChanged() {
+
     }
 }

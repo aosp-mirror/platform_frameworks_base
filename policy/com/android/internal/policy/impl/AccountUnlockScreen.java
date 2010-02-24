@@ -28,6 +28,7 @@ import android.accounts.AccountManagerCallback;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Rect;
+import android.telephony.TelephonyManager;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.LoginFilter;
@@ -51,7 +52,7 @@ import java.io.IOException;
  * account's login/password to unlock the phone (and reset their lock pattern).
  */
 public class AccountUnlockScreen extends RelativeLayout implements KeyguardScreen,
-        View.OnClickListener, TextWatcher {
+        KeyguardUpdateMonitor.InfoCallback,View.OnClickListener, TextWatcher {
     private static final String LOCK_PATTERN_PACKAGE = "com.android.settings";
     private static final String LOCK_PATTERN_CLASS =
             "com.android.settings.ChooseLockPattern";
@@ -108,6 +109,7 @@ public class AccountUnlockScreen extends RelativeLayout implements KeyguardScree
 
         mEmergencyCall = (Button) findViewById(R.id.emergencyCall);
         mEmergencyCall.setOnClickListener(this);
+        mLockPatternUtils.updateEmergencyCallButtonState(mEmergencyCall);
     }
 
     public void afterTextChanged(Editable s) {
@@ -143,6 +145,7 @@ public class AccountUnlockScreen extends RelativeLayout implements KeyguardScree
         mLogin.setText("");
         mPassword.setText("");
         mLogin.requestFocus();
+        mLockPatternUtils.updateEmergencyCallButtonState(mEmergencyCall);
     }
 
     /** {@inheritDoc} */
@@ -313,5 +316,25 @@ public class AccountUnlockScreen extends RelativeLayout implements KeyguardScree
             }
         }
         return mCheckingDialog;
+    }
+
+    public void onPhoneStateChanged(String newState) {
+        mLockPatternUtils.updateEmergencyCallButtonState(mEmergencyCall);
+    }
+
+    public void onRefreshBatteryInfo(boolean showBatteryInfo, boolean pluggedIn, int batteryLevel) {
+
+    }
+
+    public void onRefreshCarrierInfo(CharSequence plmn, CharSequence spn) {
+
+    }
+
+    public void onRingerModeChanged(int state) {
+
+    }
+
+    public void onTimeChanged() {
+
     }
 }
