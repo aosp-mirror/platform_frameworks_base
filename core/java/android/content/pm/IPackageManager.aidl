@@ -309,7 +309,7 @@ interface IPackageManager {
      * MountService uses this to call into the package manager to update
      * status of sdcard.
      */
-    void updateExternalMediaStatus(boolean mounted);
+    boolean updateExternalMediaStatus(boolean mounted);
 
     String nextPackageToClean(String lastPackage);
 
