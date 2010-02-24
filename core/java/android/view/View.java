@@ -7336,6 +7336,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * Sets the background color for this view.
      * @param color the color of the background
      */
+    @RemotableViewMethod
     public void setBackgroundColor(int color) {
         setBackgroundDrawable(new ColorDrawable(color));
     }
@@ -7346,6 +7347,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @param resid The identifier of the resource.
      * @attr ref android.R.styleable#View_background
      */
+    @RemotableViewMethod
     public void setBackgroundResource(int resid) {
         if (resid != 0 && resid == mBackgroundResource) {
             return;
