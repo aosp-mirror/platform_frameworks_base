@@ -19,12 +19,10 @@ package android.backup;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
 import java.io.FileDescriptor;
-import java.util.TreeMap;
+import java.io.IOException;
 import java.util.Map;
+import java.util.TreeMap;
 
 /** @hide */
 public class BackupHelperDispatcher {

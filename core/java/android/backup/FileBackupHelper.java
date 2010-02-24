@@ -21,10 +21,23 @@ import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
 import java.io.File;
-import java.io.FileDescriptor;
 
 /**
- * STOPSHIP: document!  [manages backup of a set of files; restore is totally opaque]
+ * A helper class which can be used in conjunction with
+ * {@link android.backup.BackupHelperAgent} to manage the backup of a set of
+ * files. Whenever backup is performed, all files changed since the last backup
+ * will be saved in their entirety. During the first time the backup happens,
+ * all the files in the list will be backed up. Note that this should only be
+ * used with small configuration files and not with large binary files.
+ * <p>
+ * Any files not present in the list of files during the restore procedure will
+ * be ignored. If files present in a previous version of an application are
+ * removed in subsequent versions, it is the responsibility of the developer to
+ * design a mechanism to remove those files. Otherwise files no longer needed
+ * will linger and consume space on the device.
+ * <p>
+ * STOPSHIP: document! [manages backup of a set of files; restore is totally
+ * opaque]
  */
 public class FileBackupHelper extends FileBackupHelperBase implements BackupHelper {
     private static final String TAG = "FileBackupHelper";
@@ -50,9 +63,16 @@ public class FileBackupHelper extends FileBackupHelperBase implements BackupHelp
     }
 
     /**
-     * Based on oldState, determine which of the files from the application's data directory
-     * need to be backed up, write them to the data stream, and fill in newState with the
-     * state as it exists now.
+     * Based on <code>oldState</code>, determine which of the files from the
+     * application's data directory need to be backed up, write them to the data
+     * stream, and fill in <code>newState</code> with the state as it exists
+     * now. When <code>oldState</code> is <code>null</code>, all the files will
+     * be backed up.
+     * <p>
+     * This should be called from {@link android.backup.BackupHelperAgent}
+     * directly. See
+     * {@link android.app.BackupAgent#onBackup(ParcelFileDescriptor, BackupDataOutput, ParcelFileDescriptor)}
+     * for a description of parameter meanings.
      */
     public void performBackup(ParcelFileDescriptor oldState, BackupDataOutput data,
             ParcelFileDescriptor newState) {

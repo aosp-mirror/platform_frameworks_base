@@ -23,26 +23,36 @@ import android.os.ServiceManager;
 import android.util.Log;
 
 /**
- * BackupManager is the interface to the system's backup service.
- * Applications simply instantiate one, and then use that instance
- * to communicate with the backup infrastructure.
- *
- * <p>When your application has made changes to data it wishes to have
- * backed up, call {@link #dataChanged()} to notify the backup service.
- * The system will then schedule a backup operation to occur in the near
- * future.  Repeated calls to {@link #dataChanged()} have no further effect
- * until the backup operation actually occurs.
- *
- * <p>The backup operation itself begins with the system launching the
- * {@link android.app.BackupAgent} subclass declared in your manifest.  See the
+ * BackupManager is the interface to the system's backup service. Applications
+ * simply instantiate one, and then use that instance to communicate with the
+ * backup infrastructure.
+ * <p>
+ * When an application has made changes to data which should be backed up, a
+ * call to {@link #dataChanged()} will notify the backup service. The system
+ * will then schedule a backup operation to occur in the near future. Repeated
+ * calls to {@link #dataChanged()} have no further effect until the backup
+ * operation actually occurs.
+ * <p>
+ * The backup operation itself begins with the system launching the
+ * {@link android.app.BackupAgent} subclass declared in your manifest. See the
  * documentation for {@link android.app.BackupAgent} for a detailed description
  * of how the backup then proceeds.
- *
- * <p>STOPSHIP more documentation here!  Include the attributes:
- *    android:backupAgent
- *    android:allowBackup
- *    android:restoreNeedsApplication
- *    android:killAfterRestore
+ * <p>
+ * A simple implementation of a BackupAgent useful for backing up Preferences
+ * and files is available by using {@link android.backup.BackupHelperAgent}.
+ * <p>
+ * STOPSHIP: more documentation!
+ * <p>
+ * <b>XML attributes</b>
+ * <p>
+ * See {@link android.R.styleable#AndroidManifestApplication 
+ * AndroidManifest.xml's application attributes}
+ * 
+ * @attr ref android.R.styleable#AndroidManifestApplication_allowBackup
+ * @attr ref android.R.styleable#AndroidManifestApplication_backupAgent
+ * @attr ref
+ *       android.R.styleable#AndroidManifestApplication_restoreNeedsApplication
+ * @attr ref android.R.styleable#AndroidManifestApplication_killAfterRestore
  */
 public class BackupManager {
     private static final String TAG = "BackupManager";

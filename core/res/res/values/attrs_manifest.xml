@@ -592,7 +592,9 @@
          backup and restore of the application's settings to external storage. -->
     <attr name="backupAgent" format="string" />
 
-    <!-- This is not the attribute you are looking for. -->
+    <!-- Whether to allow the application to participate in backup
+         infrastructure.
+         STOPSHIP: more explanation -->
     <attr name="allowBackup" format="boolean" />
 
     <!-- Whether the application in question should be terminated after its

@@ -22,10 +22,12 @@ import android.util.Log;
 
 import java.io.File;
 import java.io.FileDescriptor;
-import java.io.FileOutputStream;
 
+/**
+ * Base class for the {@link android.backup.FileBackupHelper} implementation.
+ */
 class FileBackupHelperBase {
-    private static final String TAG = "RestoreHelperBase";
+    private static final String TAG = "FileBackupHelperBase";
 
     int mPtr;
     Context mContext;
@@ -45,8 +47,8 @@ class FileBackupHelperBase {
     }
 
     /**
-     * Check the parameters so the native code doens't have to throw all the exceptions
-     * since it's easier to do that from java.
+     * Check the parameters so the native code doesn't have to throw all the exceptions
+     * since it's easier to do that from Java.
      */
     static void performBackup_checked(ParcelFileDescriptor oldState, BackupDataOutput data,
             ParcelFileDescriptor newState, String[] files, String[] keys) {
