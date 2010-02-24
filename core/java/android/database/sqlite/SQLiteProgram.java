@@ -57,8 +57,10 @@ public abstract class SQLiteProgram extends SQLiteClosable {
             mCompiledSql = new SQLiteCompiledSql(db, sql);
 
             // add it to the cache of compiled-sqls
-            db.addToCompiledQueries(sql, mCompiledSql);
+            // but before adding it and thus making it available for anyone else to use it,
+            // make sure it is acquired by me.
             mCompiledSql.acquire();
+            db.addToCompiledQueries(sql, mCompiledSql);
         } else {
             // it is already in compiled-sql cache.
             // try to acquire the object.
