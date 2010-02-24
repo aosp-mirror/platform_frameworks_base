@@ -497,6 +497,34 @@ const uint16_t* ResStringPool::stringAt(size_t idx, size_t* outLen) const
     return NULL;
 }
 
+const char* ResStringPool::string8At(size_t idx, size_t* outLen) const
+{
+    if (mError == NO_ERROR && idx < mHeader->stringCount) {
+        const bool isUTF8 = (mHeader->flags&ResStringPool_header::UTF8_FLAG) != 0;
+        const uint32_t off = mEntries[idx]/(isUTF8?sizeof(char):sizeof(char16_t));
+        if (off < (mStringPoolSize-1)) {
+            if (isUTF8) {
+                const uint8_t* strings = (uint8_t*)mStrings;
+                const uint8_t* str = strings+off;
+                DECODE_LENGTH(str, sizeof(uint8_t), *outLen)
+                size_t encLen;
+                DECODE_LENGTH(str, sizeof(uint8_t), encLen)
+                if ((uint32_t)(str+encLen-strings) < mStringPoolSize) {
+                    return (const char*)str;
+                } else {
+                    LOGW("Bad string block: string #%d extends to %d, past end at %d\n",
+                            (int)idx, (int)(str+encLen-strings), (int)mStringPoolSize);
+                }
+            }
+        } else {
+            LOGW("Bad string block: string #%d entry is at %d, past end at %d\n",
+                    (int)idx, (int)(off*sizeof(uint16_t)),
+                    (int)(mStringPoolSize*sizeof(uint16_t)));
+        }
+    }
+    return NULL;
+}
+
 const ResStringPool_span* ResStringPool::styleAt(const ResStringPool_ref& ref) const
 {
     return styleAt(ref.index);
@@ -4018,14 +4046,19 @@ void ResTable::print_value(const Package* pkg, const Res_value& value) const
         printf("(attribute) 0x%08x\n", value.data);
     } else if (value.dataType == Res_value::TYPE_STRING) {
         size_t len;
-        const char16_t* str = pkg->header->values.stringAt(
+        const char* str8 = pkg->header->values.string8At(
                 value.data, &len);
-        if (str == NULL) {
-            printf("(string) null\n");
+        if (str8 != NULL) {
+            printf("(string8) \"%s\"\n", str8);
         } else {
-            printf("(string%d) \"%s\"\n",
-                    pkg->header->values.isUTF8()?8:16,
-                    String8(str, len).string());
+            const char16_t* str16 = pkg->header->values.stringAt(
+                    value.data, &len);
+            if (str16 != NULL) {
+                printf("(string16) \"%s\"\n",
+                    String8(str16, len).string());
+            } else {
+                printf("(string) null\n");
+            }
         } 
     } else if (value.dataType == Res_value::TYPE_FLOAT) {
         printf("(float) %g\n", *(const float*)&value.data);

@@ -447,6 +447,8 @@ public:
     }
     const char16_t* stringAt(size_t idx, size_t* outLen) const;
 
+    const char* string8At(size_t idx, size_t* outLen) const;
+
     const ResStringPool_span* styleAt(const ResStringPool_ref& ref) const;
     const ResStringPool_span* styleAt(size_t idx) const;
 
