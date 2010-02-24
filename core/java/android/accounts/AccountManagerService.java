@@ -691,11 +691,21 @@ public class AccountManagerService
         if (account == null) {
             return;
         }
-        ContentValues values = new ContentValues();
-        values.put(ACCOUNTS_PASSWORD, password);
-        mOpenHelper.getWritableDatabase().update(TABLE_ACCOUNTS, values,
-                ACCOUNTS_NAME + "=? AND " + ACCOUNTS_TYPE+ "=?",
-                new String[]{account.name, account.type});
+        SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+        db.beginTransaction();
+        try {
+            final ContentValues values = new ContentValues();
+            values.put(ACCOUNTS_PASSWORD, password);
+            final long accountId = getAccountId(db, account);
+            if (accountId >= 0) {
+                final String[] argsAccountId = {String.valueOf(accountId)};
+                db.update(TABLE_ACCOUNTS, values, ACCOUNTS_ID + "=?", argsAccountId);
+                db.delete(TABLE_AUTHTOKENS, AUTHTOKENS_ACCOUNTS_ID + "=?", argsAccountId);
+                db.setTransactionSuccessful();
+            }
+        } finally {
+            db.endTransaction();
+        }
         sendAccountsChangedBroadcast();
     }
 
@@ -1134,7 +1144,10 @@ public class AccountManagerService
         long identityToken = clearCallingIdentity();
         try {
             if (features == null || features.length == 0) {
-                getAccountsByType(type);
+                Account[] accounts = getAccountsByType(type);
+                Bundle result = new Bundle();
+                result.putParcelableArray(AccountManager.KEY_ACCOUNTS, accounts);
+                onResult(response, result);
                 return;
             }
             new GetAccountsByTypeAndFeatureSession(response, type, features).bind();
