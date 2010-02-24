@@ -289,6 +289,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
          * the number of different network types is not going
          * to change very often.
          */
+        boolean noMobileData = !getMobileDataEnabled();
         for (int netType : mPriorityList) {
             switch (mNetAttributes[netType].mRadio) {
             case ConnectivityManager.TYPE_WIFI:
@@ -306,6 +307,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 mNetTrackers[netType] = new MobileDataStateTracker(context, mHandler,
                     netType, mNetAttributes[netType].mName);
                 mNetTrackers[netType].startMonitoring();
+                if (noMobileData) {
+                    if (DBG) Log.d(TAG, "tearing down Mobile networks due to setting");
+                    mNetTrackers[netType].teardown();
+                }
                 break;
             default:
                 Log.e(TAG, "Trying to create a DataStateTracker for an unknown radio type " +
@@ -530,6 +535,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         // TODO - move this into the MobileDataStateTracker
         int usedNetworkType = networkType;
         if(networkType == ConnectivityManager.TYPE_MOBILE) {
+            if (!getMobileDataEnabled()) {
+                if (DBG) Log.d(TAG, "requested special network with data disabled - rejected");
+                return Phone.APN_TYPE_NOT_AVAILABLE;
+            }
             if (TextUtils.equals(feature, Phone.FEATURE_ENABLE_MMS)) {
                 usedNetworkType = ConnectivityManager.TYPE_MOBILE_MMS;
             } else if (TextUtils.equals(feature, Phone.FEATURE_ENABLE_SUPL)) {
@@ -765,6 +774,46 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         Intent broadcast = new Intent(
                 ConnectivityManager.ACTION_BACKGROUND_DATA_SETTING_CHANGED);
         mContext.sendBroadcast(broadcast);
+    }
+
+    /**
+     * @see ConnectivityManager#getMobileDataEnabled()
+     */
+    public boolean getMobileDataEnabled() {
+        enforceAccessPermission();
+        boolean retVal = Settings.Secure.getInt(mContext.getContentResolver(),
+                Settings.Secure.MOBILE_DATA, 1) == 1;
+        if (DBG) Log.d(TAG, "getMobileDataEnabled returning " + retVal);
+        return retVal;
+    }
+
+    /**
+     * @see ConnectivityManager#setMobileDataEnabled(boolean)
+     */
+    public synchronized void setMobileDataEnabled(boolean enabled) {
+        enforceChangePermission();
+        if (DBG) Log.d(TAG, "setMobileDataEnabled(" + enabled + ")");
+
+        if (getMobileDataEnabled() == enabled) return;
+
+        Settings.Secure.putInt(mContext.getContentResolver(),
+                Settings.Secure.MOBILE_DATA, enabled ? 1 : 0);
+
+        if (enabled) {
+            if (mNetTrackers[ConnectivityManager.TYPE_MOBILE] != null) {
+                if (DBG) Log.d(TAG, "starting up " + mNetTrackers[ConnectivityManager.TYPE_MOBILE]);
+                mNetTrackers[ConnectivityManager.TYPE_MOBILE].reconnect();
+            }
+        } else {
+            for (NetworkStateTracker nt : mNetTrackers) {
+                if (nt == null) continue;
+                int netType = nt.getNetworkInfo().getType();
+                if (mNetAttributes[netType].mRadio == ConnectivityManager.TYPE_MOBILE) {
+                    if (DBG) Log.d(TAG, "tearing down " + nt);
+                    nt.teardown();
+                }
+            }
+        }
     }
 
     private int getNumConnectedNetworks() {

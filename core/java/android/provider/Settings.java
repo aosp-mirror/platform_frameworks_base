@@ -2466,6 +2466,13 @@ public final class Settings {
         public static final String BACKGROUND_DATA = "background_data";
 
         /**
+         * Whether mobile data connections are allowed by the user.  See
+         * ConnectivityManager for more info.
+         * @hide
+         */
+        public static final String MOBILE_DATA = "mobile_data";
+
+        /**
          * The CDMA roaming mode 0 = Home Networks, CDMA default
          *                       1 = Roaming on Affiliated networks
          *                       2 = Roaming on any networks
