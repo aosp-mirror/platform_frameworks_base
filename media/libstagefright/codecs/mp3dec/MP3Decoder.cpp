@@ -160,14 +160,25 @@ status_t MP3Decoder::read(
     mConfig->outputFrameSize = buffer->size() / sizeof(int16_t);
     mConfig->pOutputBuffer = static_cast<int16_t *>(buffer->data());
 
-    if (pvmp3_framedecoder(mConfig, mDecoderBuf) != NO_DECODING_ERROR) {
-        buffer->release();
-        buffer = NULL;
+    ERROR_CODE decoderErr;
+    if ((decoderErr = pvmp3_framedecoder(mConfig, mDecoderBuf))
+            != NO_DECODING_ERROR) {
+        LOGV("mp3 decoder returned error %d", decoderErr);
 
-        mInputBuffer->release();
-        mInputBuffer = NULL;
+        if (decoderErr != NO_ENOUGH_MAIN_DATA_ERROR) {
+            buffer->release();
+            buffer = NULL;
 
-        return UNKNOWN_ERROR;
+            mInputBuffer->release();
+            mInputBuffer = NULL;
+
+            return UNKNOWN_ERROR;
+        }
+
+        // This is recoverable, just ignore the current frame and
+        // play silence instead.
+        memset(buffer->data(), 0, mConfig->outputFrameSize);
+        mConfig->inputBufferUsedLength = mInputBuffer->range_length();
     }
 
     buffer->set_range(
