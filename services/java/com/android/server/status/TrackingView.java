@@ -23,7 +23,7 @@ public class TrackingView extends LinearLayout {
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
-        mService.updateAvailableHeight();
+        mService.updateExpandedHeight();
     }
 
     @Override
