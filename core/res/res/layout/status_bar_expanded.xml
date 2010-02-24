@@ -20,9 +20,9 @@
 
 <com.android.server.status.ExpandedView xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
-    android:background="@drawable/status_bar_background"
     android:focusable="true"
-    android:descendantFocusability="afterDescendants">
+    android:descendantFocusability="afterDescendants"
+    >
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -79,19 +79,18 @@
     <FrameLayout
         android:layout_width="match_parent" 
         android:layout_height="wrap_content"
+        android:layout_weight="1"
         >
         <ScrollView
             android:id="@+id/scroll"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_height="match_parent"
             android:fadingEdge="none"
             >
             <com.android.server.status.NotificationLinearLayout
                 android:id="@+id/notificationLinearLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:orientation="vertical"
                 >
                 
@@ -136,7 +135,7 @@
 
         <ImageView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:src="@drawable/title_bar_shadow"
             android:scaleType="fitXY"
         />

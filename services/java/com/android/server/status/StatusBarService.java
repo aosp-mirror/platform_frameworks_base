@@ -187,8 +187,9 @@ public class StatusBarService extends IStatusBar.Stub
     TextView mSpnLabel;
     TextView mPlmnLabel;
     TextView mClearButton;
+    View mExpandedContents;
     CloseDragHandle mCloseView;
-    int[] mCloseLocation = new int[2];
+    int[] mPositionTmp = new int[2];
     boolean mExpanded;
     boolean mExpandedVisible;
 
@@ -198,7 +199,7 @@ public class StatusBarService extends IStatusBar.Stub
     // the tracker view
     TrackingView mTrackingView;
     WindowManager.LayoutParams mTrackingParams;
-    int mTrackingPosition;
+    int mTrackingPosition; // the position of the top of the tracking view.
 
     // ticker
     private Ticker mTicker;
@@ -274,6 +275,7 @@ public class StatusBarService extends IStatusBar.Stub
 
         mExpandedDialog = new ExpandedDialog(context);
         mExpandedView = expanded;
+        mExpandedContents = expanded.findViewById(R.id.notificationLinearLayout);
         mOngoingTitle = (TextView)expanded.findViewById(R.id.ongoingTitle);
         mOngoingItems = (LinearLayout)expanded.findViewById(R.id.ongoingItems);
         mLatestTitle = (TextView)expanded.findViewById(R.id.latestTitle);
@@ -1530,20 +1532,11 @@ public class StatusBarService extends IStatusBar.Stub
 
         /// ---------- Expanded View --------------
         pixelFormat = PixelFormat.TRANSLUCENT;
-        bg = mExpandedView.getBackground();
-        if (bg != null) {
-            pixelFormat = bg.getOpacity();
-            if (pixelFormat != PixelFormat.TRANSLUCENT) {
-                // we want good-looking gradients, so we force a 8-bits per
-                // pixel format.
-                pixelFormat = PixelFormat.RGBX_8888;
-            }
-        }
 
         final int disph = mDisplay.getHeight();
         lp = mExpandedDialog.getWindow().getAttributes();
         lp.width = ViewGroup.LayoutParams.MATCH_PARENT;
-        lp.height = ViewGroup.LayoutParams.WRAP_CONTENT;
+        lp.height = getExpandedHeight();
         lp.x = 0;
         mTrackingPosition = lp.y = -disph; // sufficiently large negative
         lp.type = WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL;
@@ -1562,10 +1555,10 @@ public class StatusBarService extends IStatusBar.Stub
         mExpandedDialog.getWindow().requestFeature(Window.FEATURE_NO_TITLE);
         mExpandedDialog.setContentView(mExpandedView,
                 new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                                           ViewGroup.LayoutParams.WRAP_CONTENT));
+                                           ViewGroup.LayoutParams.MATCH_PARENT));
+        mExpandedDialog.getWindow().setBackgroundDrawable(null);
         mExpandedDialog.show();
         FrameLayout hack = (FrameLayout)mExpandedView.getParent();
-        hack.setForeground(null);
     }
 
     void setDateViewVisibility(boolean visible, int anim) {
@@ -1630,11 +1623,15 @@ public class StatusBarService extends IStatusBar.Stub
         mTrackingParams.height = disph-h;
         WindowManagerImpl.getDefault().updateViewLayout(mTrackingView, mTrackingParams);
 
-        mCloseView.getLocationInWindow(mCloseLocation);
-
         if (mExpandedParams != null) {
+            mCloseView.getLocationInWindow(mPositionTmp);
+            final int closePos = mPositionTmp[1];
+
+            mExpandedContents.getLocationInWindow(mPositionTmp);
+            final int contentsBottom = mPositionTmp[1] + mExpandedContents.getHeight();
+
             mExpandedParams.y = pos + mTrackingView.getHeight()
-                    - (mTrackingParams.height-mCloseLocation[1]) - mExpandedView.getHeight();
+                    - (mTrackingParams.height-closePos) - contentsBottom;
             int max = h;
             if (mExpandedParams.y > max) {
                 mExpandedParams.y = max;
@@ -1644,13 +1641,13 @@ public class StatusBarService extends IStatusBar.Stub
                 mExpandedParams.y = min;
             }
 
-            /*
-            Log.d(TAG, "mTrackingPosition=" + mTrackingPosition
-                    + " mTrackingView.height=" + mTrackingView.getHeight()
-                    + " diff=" + (mTrackingPosition + mTrackingView.getHeight())
-                    + " h=" + h);
-            */
-            panelSlightlyVisible((mTrackingPosition + mTrackingView.getHeight()) > h);
+            boolean visible = (mTrackingPosition + mTrackingView.getHeight()) > h;
+            if (!visible) {
+                // if the contents aren't visible, move the expanded view way off screen
+                // because the window itself extends below the content view.
+                mExpandedParams.y = -disph;
+            }
+            panelSlightlyVisible(visible);
             mExpandedDialog.getWindow().setAttributes(mExpandedParams);
         }
 
@@ -1658,16 +1655,19 @@ public class StatusBarService extends IStatusBar.Stub
             Log.d(TAG, "updateExpandedViewPos after  expandedPosition=" + expandedPosition
                     + " mTrackingParams.y=" + mTrackingParams.y
                     + " mTrackingPosition=" + mTrackingPosition
-                    + " mExpandedParams.y=" + mExpandedParams.y);
+                    + " mExpandedParams.y=" + mExpandedParams.y
+                    + " mExpandedParams.height=" + mExpandedParams.height);
         }
     }
 
-    void updateAvailableHeight() {
+    int getExpandedHeight() {
+        return mDisplay.getHeight() - mStatusBarView.getHeight() - mCloseView.getHeight();
+    }
+
+    void updateExpandedHeight() {
         if (mExpandedView != null) {
-            int disph = mDisplay.getHeight();
-            int h = mStatusBarView.getHeight();
-            int max = disph - (mCloseView.getHeight() + h);
-            mExpandedView.setMaxHeight(max);
+            mExpandedParams.height = getExpandedHeight();
+            mExpandedDialog.getWindow().setAttributes(mExpandedParams);
         }
     }
 

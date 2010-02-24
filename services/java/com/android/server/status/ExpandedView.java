@@ -11,17 +11,11 @@ import android.util.Log;
 
 
 public class ExpandedView extends LinearLayout {
-    final Display mDisplay;
     StatusBarService mService;
-    boolean mTracking;
-    int mStartX, mStartY;
-    int mMaxHeight = 0;
     int mPrevHeight = -1;
 
     public ExpandedView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        mDisplay = ((WindowManager)context.getSystemService(
-                Context.WINDOW_SERVICE)).getDefaultDisplay();
     }
 
     @Override
@@ -36,12 +30,6 @@ public class ExpandedView extends LinearLayout {
     }
 
     @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(widthMeasureSpec,
-                MeasureSpec.makeMeasureSpec(mMaxHeight, MeasureSpec.AT_MOST));
-    }
-
-    @Override
      protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
          super.onLayout(changed, left, top, right, bottom);
          int height = bottom - top;
@@ -51,11 +39,4 @@ public class ExpandedView extends LinearLayout {
              mService.updateExpandedViewPos(StatusBarService.EXPANDED_LEAVE_ALONE);
          }
      }
-
-    void setMaxHeight(int h) {
-        if (h != mMaxHeight) {
-            mMaxHeight = h;
-            requestLayout();
-        }
-    }
 }

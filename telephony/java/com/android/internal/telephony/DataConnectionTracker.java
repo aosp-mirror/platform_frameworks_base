@@ -440,10 +440,11 @@ public abstract class DataConnectionTracker extends Handler {
             return Phone.APN_REQUEST_FAILED;
         }
 
-        if(DBG) Log.d(LOG_TAG, "enableApnType("+type+"), isApnTypeActive = "
+        if (DBG) Log.d(LOG_TAG, "enableApnType("+type+"), isApnTypeActive = "
                 + isApnTypeActive(type) + " and state = " + state);
 
         if (!isApnTypeAvailable(type)) {
+            if (DBG) Log.d(LOG_TAG, "type not available");
             return Phone.APN_TYPE_NOT_AVAILABLE;
         }
 
