@@ -26,8 +26,6 @@ import android.database.sqlite.SQLiteException;
 import android.net.Uri;
 import android.os.RemoteException;
 import android.pim.vcard.exception.VCardException;
-import android.provider.CallLog;
-import android.provider.CallLog.Calls;
 import android.provider.ContactsContract.Contacts;
 import android.provider.ContactsContract.Data;
 import android.provider.ContactsContract.RawContacts;
@@ -44,8 +42,6 @@ import android.provider.ContactsContract.CommonDataKinds.Relation;
 import android.provider.ContactsContract.CommonDataKinds.StructuredName;
 import android.provider.ContactsContract.CommonDataKinds.StructuredPostal;
 import android.provider.ContactsContract.CommonDataKinds.Website;
-import android.text.TextUtils;
-import android.text.format.Time;
 import android.util.CharsetUtils;
 import android.util.Log;
 
@@ -60,7 +56,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -124,12 +119,6 @@ public class VCardComposer {
     public static final String NO_ERROR = "No error";
 
     public static final String VCARD_TYPE_STRING_DOCOMO = "docomo";
-
-    // Property for call log entry
-    private static final String VCARD_PROPERTY_X_TIMESTAMP = "X-IRMC-CALL-DATETIME";
-    private static final String VCARD_PROPERTY_CALLTYPE_INCOMING = "INCOMING";
-    private static final String VCARD_PROPERTY_CALLTYPE_OUTGOING = "OUTGOING";
-    private static final String VCARD_PROPERTY_CALLTYPE_MISSED = "MISSED";
 
     private static final String SHIFT_JIS = "SHIFT_JIS";
     private static final String UTF_8 = "UTF-8";
@@ -275,29 +264,13 @@ public class VCardComposer {
 
     private final String mCharsetString;
     private boolean mTerminateIsCalled;
-    final private List<OneEntryHandler> mHandlerList;
+    private final List<OneEntryHandler> mHandlerList;
 
     private String mErrorReason = NO_ERROR;
-
-    private boolean mIsCallLogComposer;
 
     private static final String[] sContactsProjection = new String[] {
         Contacts._ID,
     };
-
-    /** The projection to use when querying the call log table */
-    private static final String[] sCallLogProjection = new String[] {
-            Calls.NUMBER, Calls.DATE, Calls.TYPE, Calls.CACHED_NAME, Calls.CACHED_NUMBER_TYPE,
-            Calls.CACHED_NUMBER_LABEL
-    };
-    private static final int NUMBER_COLUMN_INDEX = 0;
-    private static final int DATE_COLUMN_INDEX = 1;
-    private static final int CALL_TYPE_COLUMN_INDEX = 2;
-    private static final int CALLER_NAME_COLUMN_INDEX = 3;
-    private static final int CALLER_NUMBERTYPE_COLUMN_INDEX = 4;
-    private static final int CALLER_NUMBERLABEL_COLUMN_INDEX = 5;
-
-    private static final String FLAG_TIMEZONE_UTC = "Z";
 
     public VCardComposer(Context context) {
         this(context, VCardConfig.VCARD_TYPE_DEFAULT, true);
@@ -377,6 +350,7 @@ public class VCardComposer {
         if (contentUri == null) {
             return false;
         }
+
         if (mCareHandlerErrors) {
             List<OneEntryHandler> finishedList = new ArrayList<OneEntryHandler>(
                     mHandlerList.size());
@@ -396,10 +370,7 @@ public class VCardComposer {
         }
 
         final String[] projection;
-        if (CallLog.Calls.CONTENT_URI.equals(contentUri)) {
-            projection = sCallLogProjection;
-            mIsCallLogComposer = true;
-        } else if (Contacts.CONTENT_URI.equals(contentUri) ||
+        if (Contacts.CONTENT_URI.equals(contentUri) ||
                 CONTACTS_TEST_CONTENT_URI.equals(contentUri)) {
             projection = sContactsProjection;
         } else {
@@ -426,11 +397,7 @@ public class VCardComposer {
             return false;
         }
 
-        if (mIsCallLogComposer) {
-            mIdColumn = -1;
-        } else {
-            mIdColumn = mCursor.getColumnIndex(Contacts._ID);
-        }
+        mIdColumn = mCursor.getColumnIndex(Contacts._ID);
 
         return true;
     }
@@ -448,19 +415,14 @@ public class VCardComposer {
             mErrorReason = FAILURE_REASON_NOT_INITIALIZED;
             return false;
         }
-        String name = null;
         String vcard;
         try {
-            if (mIsCallLogComposer) {
-                vcard = createOneCallLogEntryInternal();
+            if (mIdColumn >= 0) {
+                vcard = createOneEntryInternal(mCursor.getString(mIdColumn),
+                        getEntityIteratorMethod);
             } else {
-                if (mIdColumn >= 0) {
-                    vcard = createOneEntryInternal(mCursor.getString(mIdColumn),
-                            getEntityIteratorMethod);
-                } else {
-                    Log.e(LOG_TAG, "Incorrect mIdColumn: " + mIdColumn);
-                    return true;
-                }
+                Log.e(LOG_TAG, "Incorrect mIdColumn: " + mIdColumn);
+                return true;
             }
         } catch (VCardException e) {
             Log.e(LOG_TAG, "VCardException has been thrown: " + e.getMessage());
@@ -468,7 +430,7 @@ public class VCardComposer {
         } catch (OutOfMemoryError error) {
             // Maybe some data (e.g. photo) is too big to have in memory. But it
             // should be rare.
-            Log.e(LOG_TAG, "OutOfMemoryError occured. Ignore the entry: " + name);
+            Log.e(LOG_TAG, "OutOfMemoryError occured. Ignore the entry.");
             System.gc();
             // TODO: should tell users what happened?
             return true;
@@ -629,100 +591,5 @@ public class VCardComposer {
      */
     public String getErrorReason() {
         return mErrorReason;
-    }
-
-    /**
-     * This static function is to compose vCard for phone own number
-     */
-    public String composeVCardForPhoneOwnNumber(int phonetype, String phoneName,
-            String phoneNumber, boolean vcardVer21) {
-        final int vcardType = (vcardVer21 ?
-                VCardConfig.VCARD_TYPE_V21_GENERIC_UTF8 :
-                    VCardConfig.VCARD_TYPE_V30_GENERIC_UTF8);
-        final VCardBuilder builder = new VCardBuilder(vcardType);
-        boolean needCharset = false;
-        if (!(VCardUtils.containsOnlyPrintableAscii(phoneName))) {
-            needCharset = true;
-        }
-        builder.appendLine(VCardConstants.PROPERTY_FN, phoneName, needCharset, false);
-        builder.appendLine(VCardConstants.PROPERTY_N, phoneName, needCharset, false);
-
-        if (!TextUtils.isEmpty(phoneNumber)) {
-            String label = Integer.toString(phonetype);
-            builder.appendTelLine(phonetype, label, phoneNumber, false);
-        }
-
-        return builder.toString();
-    }
-
-    /**
-     * Format according to RFC 2445 DATETIME type.
-     * The format is: ("%Y%m%dT%H%M%SZ").
-     */
-    private final String toRfc2455Format(final long millSecs) {
-        Time startDate = new Time();
-        startDate.set(millSecs);
-        String date = startDate.format2445();
-        return date + FLAG_TIMEZONE_UTC;
-    }
-
-    /**
-     * Try to append the property line for a call history time stamp field if possible.
-     * Do nothing if the call log type gotton from the database is invalid.
-     */
-    private void tryAppendCallHistoryTimeStampField(final VCardBuilder builder) {
-        // Extension for call history as defined in
-        // in the Specification for Ic Mobile Communcation - ver 1.1,
-        // Oct 2000. This is used to send the details of the call
-        // history - missed, incoming, outgoing along with date and time
-        // to the requesting device (For example, transferring phone book
-        // when connected over bluetooth)
-        //
-        // e.g. "X-IRMC-CALL-DATETIME;MISSED:20050320T100000Z"
-        final int callLogType = mCursor.getInt(CALL_TYPE_COLUMN_INDEX);
-        final String callLogTypeStr;
-        switch (callLogType) {
-            case Calls.INCOMING_TYPE: {
-                callLogTypeStr = VCARD_PROPERTY_CALLTYPE_INCOMING;
-                break;
-            }
-            case Calls.OUTGOING_TYPE: {
-                callLogTypeStr = VCARD_PROPERTY_CALLTYPE_OUTGOING;
-                break;
-            }
-            case Calls.MISSED_TYPE: {
-                callLogTypeStr = VCARD_PROPERTY_CALLTYPE_MISSED;
-                break;
-            }
-            default: {
-                Log.w(LOG_TAG, "Call log type not correct.");
-                return;
-            }
-        }
-
-        final long dateAsLong = mCursor.getLong(DATE_COLUMN_INDEX);
-        builder.appendLine(VCARD_PROPERTY_X_TIMESTAMP,
-                Arrays.asList(callLogTypeStr), toRfc2455Format(dateAsLong));
-    }
-
-    private String createOneCallLogEntryInternal() {
-        final VCardBuilder builder = new VCardBuilder(VCardConfig.VCARD_TYPE_V21_GENERIC_UTF8);
-        String name = mCursor.getString(CALLER_NAME_COLUMN_INDEX);
-        if (TextUtils.isEmpty(name)) {
-            name = mCursor.getString(NUMBER_COLUMN_INDEX);
-        }
-        final boolean needCharset = !(VCardUtils.containsOnlyPrintableAscii(name));
-        builder.appendLine(VCardConstants.PROPERTY_FN, name, needCharset, false);
-        builder.appendLine(VCardConstants.PROPERTY_N, name, needCharset, false);
-
-        final String number = mCursor.getString(NUMBER_COLUMN_INDEX);
-        final int type = mCursor.getInt(CALLER_NUMBERTYPE_COLUMN_INDEX);
-        String label = mCursor.getString(CALLER_NUMBERLABEL_COLUMN_INDEX);
-        if (TextUtils.isEmpty(label)) {
-            label = Integer.toString(type);
-        }
-        builder.appendTelLine(type, label, number, false);
-        tryAppendCallHistoryTimeStampField(builder);
-        return builder.toString();
     }
 }
