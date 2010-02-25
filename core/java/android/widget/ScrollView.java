@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.FocusFinder;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -51,6 +52,8 @@ import java.util.List;
  * <p>ScrollView only supports vertical scrolling.
  */
 public class ScrollView extends FrameLayout {
+    private static final String TAG = "ScrollView";
+
     static final int ANIMATED_SCROLL_GAP = 250;
 
     static final float MAX_SCROLL_FACTOR = 0.5f;
@@ -360,6 +363,17 @@ public class ScrollView extends FrameLayout {
         return handled;
     }
 
+    private boolean inChild(int x, int y) {
+        if (getChildCount() > 0) {
+            final View child = getChildAt(0);
+            return !(y < child.getTop()
+                    || y >= child.getBottom()
+                    || x < child.getLeft()
+                    || x >= child.getRight());
+        }
+        return false;
+    }
+
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         /*
@@ -399,6 +413,11 @@ public class ScrollView extends FrameLayout {
                 break;
 
             case MotionEvent.ACTION_DOWN:
+                if (!inChild((int)ev.getX(), (int)y)) {
+                    mIsBeingDragged = false;
+                    break;
+                }
+
                 /* Remember location of down touch */
                 mLastMotionY = y;
 
@@ -451,36 +470,45 @@ public class ScrollView extends FrameLayout {
                     mScroller.abortAnimation();
                 }
 
+                if (!inChild((int)ev.getX(), (int)y)) {
+                    mIsBeingDragged = false;
+                    return false;
+                }
+
                 // Remember where the motion event started
                 mLastMotionY = y;
                 break;
             case MotionEvent.ACTION_MOVE:
-                // Scroll to follow the motion event
-                final int deltaY = (int) (mLastMotionY - y);
-                mLastMotionY = y;
+                if (mIsBeingDragged) {
+                    // Scroll to follow the motion event
+                    final int deltaY = (int) (mLastMotionY - y);
+                    mLastMotionY = y;
 
-                overscrollBy(0, deltaY, 0, mScrollY, 0, getScrollRange(),
-                        0, getOverscrollMax());
-                break;
+                    overscrollBy(0, deltaY, 0, mScrollY, 0, getScrollRange(),
+                            0, getOverscrollMax());
+                    break;
+                }
             case MotionEvent.ACTION_UP:
-                final VelocityTracker velocityTracker = mVelocityTracker;
-                velocityTracker.computeCurrentVelocity(1000, mMaximumVelocity);
-                int initialVelocity = (int) velocityTracker.getYVelocity();
+                if (mIsBeingDragged) {
+                    final VelocityTracker velocityTracker = mVelocityTracker;
+                    velocityTracker.computeCurrentVelocity(1000, mMaximumVelocity);
+                    int initialVelocity = (int) velocityTracker.getYVelocity();
 
-                if (getChildCount() > 0) {
-                    if ((Math.abs(initialVelocity) > mMinimumVelocity)) {
-                        fling(-initialVelocity);
-                    } else {
-                        final int bottom = getScrollRange();
-                        if (mScroller.springback(mScrollX, mScrollY, 0, 0, 0, bottom)) {
-                            invalidate();
+                    if (getChildCount() > 0) {
+                        if ((Math.abs(initialVelocity) > mMinimumVelocity)) {
+                            fling(-initialVelocity);
+                        } else {
+                            final int bottom = getScrollRange();
+                            if (mScroller.springback(mScrollX, mScrollY, 0, 0, 0, bottom)) {
+                                invalidate();
+                            }
                         }
                     }
-                }
 
-                if (mVelocityTracker != null) {
-                    mVelocityTracker.recycle();
-                    mVelocityTracker = null;
+                    if (mVelocityTracker != null) {
+                        mVelocityTracker.recycle();
+                        mVelocityTracker = null;
+                    }
                 }
         }
         return true;
