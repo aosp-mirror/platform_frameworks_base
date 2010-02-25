@@ -4931,9 +4931,11 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 Intent intent = new Intent(Intent.ACTION_PACKAGE_DATA_CLEARED,
                         Uri.fromParts("package", packageName, null));
                 intent.putExtra(Intent.EXTRA_UID, pkgUid);
-                broadcastIntentLocked(null, null, intent,
-                        null, null, 0, null, null, null,
-                        false, false, MY_PID, Process.SYSTEM_UID);
+                synchronized (this) {
+                    broadcastIntentLocked(null, null, intent,
+                            null, null, 0, null, null, null,
+                            false, false, MY_PID, Process.SYSTEM_UID);
+                }
             } catch (RemoteException e) {
             }
         } finally {
@@ -5668,7 +5670,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             ArrayList<ProcessRecord> procs =
                 new ArrayList<ProcessRecord>(mProcessesOnHold);
             for (int ip=0; ip<NP; ip++) {
-                this.startProcessLocked(procs.get(ip), "on-hold", null);
+                synchronized (this) {
+                    this.startProcessLocked(procs.get(ip), "on-hold", null);
+                }
             }
         }
         if (mFactoryTest != SystemServer.FACTORY_TEST_LOW_LEVEL) {
@@ -7879,9 +7883,14 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     }
 
     public static final void installSystemProviders() {
-        ProcessRecord app = mSelf.mProcessNames.get("system", Process.SYSTEM_UID);
-        List providers = mSelf.generateApplicationProvidersLocked(app);
-        mSystemThread.installSystemProviders(providers);
+        List providers = null;
+        synchronized (mSelf) {
+            ProcessRecord app = mSelf.mProcessNames.get("system", Process.SYSTEM_UID);
+            providers = mSelf.generateApplicationProvidersLocked(app);
+        }
+        if (providers != null) {
+            mSystemThread.installSystemProviders(providers);
+        }
     }
 
     // =========================================================
@@ -8156,11 +8165,15 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     }
 
     public void registerActivityWatcher(IActivityWatcher watcher) {
-        mWatchers.register(watcher);
+        synchronized (this) {
+            mWatchers.register(watcher);
+        }
     }
 
     public void unregisterActivityWatcher(IActivityWatcher watcher) {
-        mWatchers.unregister(watcher);
+        synchronized (this) {
+            mWatchers.unregister(watcher);
+        }
     }
 
     public final void enterSafeMode() {
