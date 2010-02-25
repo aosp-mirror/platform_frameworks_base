@@ -61,9 +61,12 @@ interface IMountService
 
     /**
      * Safely unmount external storage at given mount point.
-     * Returns an int consistent with MountServiceResultCode
+     * The unmount is an asynchronous operation. Applications
+     * should register StorageEventListener for storage related
+     * status changes.
+     * 
      */
-    int unmountVolume(String mountPoint, boolean force);
+    void unmountVolume(String mountPoint, boolean force);
 
     /**
      * Format external storage given a mount point.

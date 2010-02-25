@@ -403,7 +403,7 @@ public class PackageManagerTests extends AndroidTestCase {
             return ip;
         } finally {
             if (cleanUp) {
-                cleanUpInstall(ip);
+                //cleanUpInstall(ip);
             }
         }
     }
