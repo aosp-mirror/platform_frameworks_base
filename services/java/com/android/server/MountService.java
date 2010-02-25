@@ -115,8 +115,9 @@ class MountService extends IMountService.Stub
     private PackageManagerService                 mPms;
     private boolean                               mUmsEnabling;
     private ArrayList<MountServiceBinderListener> mListeners;
-    private boolean                               mBooted;
-    private boolean                               mReady;
+    private boolean                               mBooted = false;
+    private boolean                               mReady = false;
+    private boolean                               mSendUmsConnectedOnBoot = false;
 
     /**
      * Private hash of currently mounted secure containers.
@@ -161,6 +162,14 @@ class MountService extends IMountService.Stub
                                 if (rc != StorageResultCode.OperationSucceeded) {
                                     Log.e(TAG, String.format("Boot-time mount failed (%d)", rc));
                                 }
+                            }
+                            /*
+                             * If UMS is connected in boot, send the connected event
+                             * now that we're up.
+                             */
+                            if (mSendUmsConnectedOnBoot) {
+                                sendUmsIntent(true);
+                                mSendUmsConnectedOnBoot = false;
                             }
                         } catch (Exception ex) {
                             Log.e(TAG, "Boot-time mount exception", ex);
@@ -636,14 +645,15 @@ class MountService extends IMountService.Stub
         }
 
         if (mBooted == true) {
-            Intent intent;
-            if (avail) {
-                intent = new Intent(Intent.ACTION_UMS_CONNECTED);
-            } else {
-                intent = new Intent(Intent.ACTION_UMS_DISCONNECTED);
-            }
-            mContext.sendBroadcast(intent);
+            sendUmsIntent(avail);
+        } else {
+            mSendUmsConnectedOnBoot = avail;
         }
+    }
+
+    private void sendUmsIntent(boolean c) {
+        mContext.sendBroadcast(
+                new Intent((c ? Intent.ACTION_UMS_CONNECTED : Intent.ACTION_UMS_DISCONNECTED)));
     }
 
     private void validatePermission(String perm) {
