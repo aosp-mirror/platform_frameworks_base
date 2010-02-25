@@ -1647,11 +1647,22 @@ class BackupManagerService extends IBackupManager.Stub {
                     }
 
                     if (metaInfo.versionCode > packageInfo.versionCode) {
-                        String message = "Version " + metaInfo.versionCode
-                                + " > installed version " + packageInfo.versionCode;
-                        Log.w(TAG, "Package " + packageName + ": " + message);
-                        EventLog.writeEvent(EventLogTags.RESTORE_AGENT_FAILURE, packageName, message);
-                        continue;
+                        // Data is from a "newer" version of the app than we have currently
+                        // installed.  If the app has not declared that it is prepared to
+                        // handle this case, we do not attempt the restore.
+                        if ((packageInfo.applicationInfo.flags
+                                & ApplicationInfo.FLAG_RESTORE_ANY_VERSION) == 0) {
+                            String message = "Version " + metaInfo.versionCode
+                                    + " > installed version " + packageInfo.versionCode;
+                            Log.w(TAG, "Package " + packageName + ": " + message);
+                            EventLog.writeEvent(EventLogTags.RESTORE_AGENT_FAILURE,
+                                    packageName, message);
+                            continue;
+                        } else {
+                            if (DEBUG) Log.v(TAG, "Version " + metaInfo.versionCode
+                                    + " > installed " + packageInfo.versionCode
+                                    + " but restoreAnyVersion");
+                        }
                     }
 
                     if (!signaturesMatch(metaInfo.signatures, packageInfo)) {
@@ -1695,8 +1706,10 @@ class BackupManagerService extends IBackupManager.Stub {
                         // The agent was probably running with a stub Application object,
                         // which isn't a valid run mode for the main app logic.  Shut
                         // down the app so that next time it's launched, it gets the
-                        // usual full initialization.
-                        if ((packageInfo.applicationInfo.flags
+                        // usual full initialization.  Note that this is only done for
+                        // full-system restores: when a single app has requested a restore,
+                        // it is explicitly not killed following that operation.
+                        if (mTargetPackage == null && (packageInfo.applicationInfo.flags
                                 & ApplicationInfo.FLAG_KILL_AFTER_RESTORE) != 0) {
                             if (DEBUG) Log.d(TAG, "Restore complete, killing host process of "
                                     + packageInfo.applicationInfo.processName);
