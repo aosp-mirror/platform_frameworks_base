@@ -83,8 +83,16 @@
     </string-array>
 
     <!-- Dhcp range (min, max) to use for tethering purposes -->
-    <string-array name="config_tether_dhcp_range">
+    <string-array translatable="false" name="config_tether_dhcp_range">
     </string-array>
+
+    <!-- Regex array of allowable upstream ifaces for tethering - for example if you want
+         tethering on your a new interface called "foo2" add "foo\\d" here -->
+    <string-array translatable="false" name="config_tether_upstream_regexs">
+    </string-array>
+
+    <!-- Boolean indicating if we require the use of DUN on mobile for tethering -->
+    <bool translatable="false" name="config_tether_dun_required">true</bool>
 
     <!-- Flag indicating whether the keyguard should be bypassed when
          the slider is open.  This can be set or unset depending how easily
