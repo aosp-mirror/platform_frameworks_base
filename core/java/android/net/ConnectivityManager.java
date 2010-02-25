@@ -332,10 +332,10 @@ public class ConnectivityManager
 
     /**
      * Sets the value of the setting for background data usage.
-     * 
+     *
      * @param allowBackgroundData Whether an application should use data while
      *            it is in the background.
-     *            
+     *
      * @attr ref android.Manifest.permission#CHANGE_BACKGROUND_DATA_SETTING
      * @see #getBackgroundDataSetting()
      * @hide
@@ -346,7 +346,35 @@ public class ConnectivityManager
         } catch (RemoteException e) {
         }
     }
-    
+
+    /**
+     * Gets the value of the setting for enabling Mobile data.
+     *
+     * @return Whether mobile data is enabled.
+     * @hide
+     */
+    public boolean getMobileDataEnabled() {
+        try {
+            return mService.getMobileDataEnabled();
+        } catch (RemoteException e) {
+            return true;
+        }
+    }
+
+    /**
+     * Sets the persisted value for enabling/disabling Mobile data.
+     *
+     * @param allowMobileData Whether the mobile data connection should be
+     *            used or not.
+     * @hide
+     */
+    public void setMobileDataEnabled(boolean enabled) {
+        try {
+            mService.setMobileDataEnabled(enabled);
+        } catch (RemoteException e) {
+        }
+    }
+
     /**
      * Don't allow use of default constructor.
      */

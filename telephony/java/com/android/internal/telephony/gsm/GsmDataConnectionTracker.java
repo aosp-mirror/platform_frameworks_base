@@ -27,6 +27,8 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.database.ContentObserver;
 import android.database.Cursor;
+import android.net.ConnectivityManager;
+import android.net.IConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
@@ -243,7 +245,15 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         // This preference tells us 1) initial condition for "dataEnabled",
         // and 2) whether the RIL will setup the baseband to auto-PS attach.
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(phone.getContext());
-        dataEnabled[APN_DEFAULT_ID] = !sp.getBoolean(GSMPhone.DATA_DISABLED_ON_BOOT_KEY, false);
+        boolean dataEnabledSetting = true;
+        try {
+            dataEnabledSetting = IConnectivityManager.Stub.asInterface(ServiceManager.
+                getService(Context.CONNECTIVITY_SERVICE)).getMobileDataEnabled();
+        } catch (Exception e) {
+            // nothing to do - use the old behavior and leave data on
+        }
+        dataEnabled[APN_DEFAULT_ID] = !sp.getBoolean(GSMPhone.DATA_DISABLED_ON_BOOT_KEY, false) &&
+                dataEnabledSetting;
         if (dataEnabled[APN_DEFAULT_ID]) {
             enabledCount++;
         }
