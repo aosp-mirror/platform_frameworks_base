@@ -51,6 +51,10 @@ interface IConnectivityManager
 
     void setBackgroundDataSetting(boolean allowBackgroundData);
 
+    boolean getMobileDataEnabled();
+
+    void setMobileDataEnabled(boolean enabled);
+
     boolean tether(String iface);
 
     boolean untether(String iface);

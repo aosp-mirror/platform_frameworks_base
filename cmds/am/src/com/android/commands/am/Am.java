@@ -88,6 +88,8 @@ public class Am {
 
         if (op.equals("start")) {
             runStart();
+        } else if (op.equals("startservice")) {
+            runStartService();
         } else if (op.equals("instrument")) {
             runInstrument();
         } else if (op.equals("broadcast")) {
@@ -181,6 +183,15 @@ public class Am {
 
         if (!hasIntentInfo) throw new IllegalArgumentException("No intent supplied");
         return intent;
+    }
+
+    private void runStartService() throws Exception {
+        Intent intent = makeIntent();
+        System.out.println("Starting service: " + intent);
+        ComponentName cn = mAm.startService(null, intent, intent.getType());
+        if (cn == null) {
+            System.err.println("Error: Not found; no service started.");
+        }
     }
 
     private void runStart() throws Exception {
@@ -495,6 +506,8 @@ public class Am {
                 "\n" +
                 "    start an Activity: am start [-D] <INTENT>\n" +
                 "        -D: enable debugging\n" +
+                "\n" +
+                "    start a Service: am startservice <INTENT>\n" +
                 "\n" +
                 "    send a broadcast Intent: am broadcast <INTENT>\n" +
                 "\n" +

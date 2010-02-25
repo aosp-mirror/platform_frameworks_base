@@ -166,7 +166,7 @@ class MemoryUsage implements Serializable {
             + ":/system/framework/loadclass.jar";
 
     private static final String[] GET_DIRTY_PAGES = {
-        "adb", "-e", "shell", "dalvikvm", CLASS_PATH, "LoadClass" };
+        "adb", "shell", "dalvikvm", CLASS_PATH, "LoadClass" };
 
     /**
      * Measures memory usage for the given class.
@@ -248,7 +248,7 @@ class MemoryUsage implements Serializable {
                 String line = in.readLine();
                 if (line == null || !line.startsWith("DECAFBAD,")) {
                     System.err.println("Got bad response for " + className
-                            + ": " + line);
+                            + ": " + line + "; command was " + Arrays.toString(commands));
                     errorCount += 1;
                     return NOT_AVAILABLE;
                 }

@@ -55,6 +55,7 @@ public class AsecTests extends AndroidTestCase {
     void failStr(String errMsg) {
         Log.w(TAG, "errMsg="+errMsg);
     }
+
     void failStr(Exception e) {
         Log.w(TAG, "e.getMessage="+e.getMessage());
         Log.w(TAG, "e="+e);
@@ -63,6 +64,13 @@ public class AsecTests extends AndroidTestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
+        if (localLOGV) Log.i(TAG, "Cleaning out old test containers");
+        cleanupContainers();
+    }
+
+    @Override
+    protected void tearDown() throws Exception {
+        super.tearDown();
         if (localLOGV) Log.i(TAG, "Cleaning out old test containers");
         cleanupContainers();
     }
@@ -130,6 +138,14 @@ public class AsecTests extends AndroidTestCase {
 
         IMountService ms = getMs();
         return ms.destroySecureContainer(fullId, force);
+    }
+
+    private boolean isContainerMounted(String localId) throws RemoteException {
+        Assert.assertTrue(isMediaMounted());
+        String fullId = "com.android.unittests.AsecTests." + localId;
+
+        IMountService ms = getMs();
+        return ms.isSecureContainerMounted(fullId);
     }
 
     private IMountService getMs() {
@@ -300,7 +316,7 @@ public class AsecTests extends AndroidTestCase {
         }
     }
 
-    public void testRenameMountedContainer() {
+    public void testRenameSrcMountedContainer() {
         try {
             Assert.assertEquals(StorageResultCode.OperationSucceeded,
                     createContainer("testRenameContainer.1", 4, "none"));
@@ -312,10 +328,13 @@ public class AsecTests extends AndroidTestCase {
         }
     }
 
-    public void testRenameToExistingContainer() {
+    public void testRenameDstMountedContainer() {
         try {
             Assert.assertEquals(StorageResultCode.OperationSucceeded,
                     createContainer("testRenameContainer.1", 4, "none"));
+
+            Assert.assertEquals(StorageResultCode.OperationSucceeded,
+                    unmountContainer("testRenameContainer.1", false));
 
             Assert.assertEquals(StorageResultCode.OperationSucceeded,
                     createContainer("testRenameContainer.2", 4, "none"));
@@ -326,4 +345,25 @@ public class AsecTests extends AndroidTestCase {
             failStr(e);
         }
     }
+
+    public void testIsContainerMountedAfterRename() {
+        try {
+            Assert.assertEquals(StorageResultCode.OperationSucceeded,
+                    createContainer("testRenameContainer.1", 4, "none"));
+
+            Assert.assertEquals(StorageResultCode.OperationSucceeded,
+                    unmountContainer("testRenameContainer.1", false));
+
+            Assert.assertEquals(StorageResultCode.OperationSucceeded,
+                    renameContainer("testRenameContainer.1", "testRenameContainer.2"));
+
+            Assert.assertEquals(false, containerExists("testRenameContainer.1"));
+            Assert.assertEquals(true, containerExists("testRenameContainer.2"));
+            // Check if isContainerMounted returns valid value
+            Assert.assertEquals(true, isContainerMounted("testRenameContainer.2"));
+        } catch (Exception e) {
+            failStr(e);
+        }
+    }
+
 }

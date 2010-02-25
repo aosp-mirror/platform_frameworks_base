@@ -43,9 +43,14 @@ public class Policy {
         "system_server",
         "com.google.process.content",
         "android.process.media",
+        "com.android.bluetooth",
+        "com.android.calendar",
+        "com.android.inputmethod.latin",
         "com.android.phone",
-        "com.google.android.apps.maps.FriendService",
+        "com.google.android.apps.maps.FriendService", // pre froyo
+        "com.google.android.apps.maps:FriendService", // froyo
         "com.google.android.apps.maps.LocationFriendService",
+        "com.google.android.deskclock",
         "com.google.process.gapps",
         "android.tts"
     ));

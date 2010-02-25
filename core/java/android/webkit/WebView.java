@@ -213,7 +213,6 @@ public class WebView extends AbsoluteLayout
     static private final boolean AUTO_REDRAW_HACK = false;
     // true means redraw the screen all-the-time. Only with AUTO_REDRAW_HACK
     private boolean mAutoRedraw;
-    private int mRootLayer; // C++ pointer to the root layer
 
     static final String LOGTAG = "webview";
 
@@ -375,6 +374,7 @@ public class WebView extends AbsoluteLayout
     private static final int PREVENT_DRAG_NO = 0;
     private static final int PREVENT_DRAG_MAYBE_YES = 1;
     private static final int PREVENT_DRAG_YES = 2;
+    private static final int PREVENT_DRAG_CANCEL = 3;
     private int mPreventDrag = PREVENT_DRAG_NO;
 
     // by default mPreventLongPress is false. If it is true, long press event
@@ -616,6 +616,12 @@ public class WebView extends AbsoluteLayout
     private static final int SNAP_X = 2; // may be combined with SNAP_LOCK
     private static final int SNAP_Y = 4; // may be combined with SNAP_LOCK
     private boolean mSnapPositive;
+
+    // keep these in sync with their counterparts in WebView.cpp
+    private static final int DRAW_EXTRAS_NONE = 0;
+    private static final int DRAW_EXTRAS_FIND = 1;
+    private static final int DRAW_EXTRAS_SELECTION = 2;
+    private static final int DRAW_EXTRAS_CURSOR_RING = 3;
 
     // Used to match key downs and key ups
     private boolean mGotKeyDown;
@@ -1305,6 +1311,7 @@ public class WebView extends AbsoluteLayout
                 // onSizeChanged() is called, the rest will be set
                 // correctly
                 mActualScale = scale;
+                mInvActualScale = 1 / scale;
                 mTextWrapScale = b.getFloat("textwrapScale", scale);
                 mInZoomOverview = b.getBoolean("overview");
                 invalidate();
@@ -3115,7 +3122,7 @@ public class WebView extends AbsoluteLayout
         int mScrollY;
         int mWidth;
         int mHeight;
-        float mScale;
+        float mInvScale;
     }
 
     private Metrics getViewMetrics() {
@@ -3124,23 +3131,21 @@ public class WebView extends AbsoluteLayout
         metrics.mScrollY = computeVerticalScrollOffset();
         metrics.mWidth = getWidth();
         metrics.mHeight = getHeight() - getVisibleTitleHeight();
-        metrics.mScale = mActualScale;
+        metrics.mInvScale = mInvActualScale;
         return metrics;
     }
 
-    private void drawLayers(Canvas canvas) {
-        if (mRootLayer != 0) {
-            // Currently for each draw we compute the animation values;
-            // We may in the future decide to do that independently.
-            if (nativeEvaluateLayersAnimations(mRootLayer)) {
-                // If we have unfinished (or unstarted) animations,
-                // we ask for a repaint.
-                invalidate();
-            }
-
-            // We can now draw the layers.
-            nativeDrawLayers(mRootLayer, canvas);
+    private void drawExtras(Canvas canvas, int extras) {
+        if (mNativeClass == 0) return;
+        // Currently for each draw we compute the animation values;
+        // We may in the future decide to do that independently.
+        if (nativeEvaluateLayersAnimations()) {
+            // If we have unfinished (or unstarted) animations,
+            // we ask for a repaint.
+            invalidate();
         }
+
+        nativeDrawExtras(canvas, extras);
     }
 
     private void drawCoreAndCursorRing(Canvas canvas, int color,
@@ -3148,7 +3153,7 @@ public class WebView extends AbsoluteLayout
         if (mDrawHistory) {
             canvas.scale(mActualScale, mActualScale);
             canvas.drawPicture(mHistoryPicture);
-            drawLayers(canvas);
+            drawExtras(canvas, DRAW_EXTRAS_NONE);
             return;
         }
 
@@ -3227,27 +3232,29 @@ public class WebView extends AbsoluteLayout
 
         mWebViewCore.drawContentPicture(canvas, color,
                 (animateZoom || mPreviewZoomOnly), animateScroll);
-        boolean cursorIsInLayer = nativeCursorIsInLayer();
-        if (drawCursorRing && !cursorIsInLayer) {
-            nativeDrawCursorRing(canvas);
-        }
-        // When the FindDialog is up, only draw the matches if we are not in
-        // the process of scrolling them into view.
-        if (mFindIsUp && !animateScroll) {
-            nativeDrawMatches(canvas);
-        }
-        drawLayers(canvas);
-
         if (mNativeClass == 0) return;
-        if (mShiftIsPressed && !(animateZoom || mPreviewZoomOnly)) {
-            if (mTouchSelection || mExtendSelection) {
-                nativeDrawSelectionRegion(canvas);
+        // decide which adornments to draw
+        int extras = DRAW_EXTRAS_NONE;
+        if (mFindIsUp) {
+            // When the FindDialog is up, only draw the matches if we are not in
+            // the process of scrolling them into view.
+            if (!animateScroll) {
+                extras = DRAW_EXTRAS_FIND;
             }
-            if (!mTouchSelection) {
-                nativeDrawSelectionPointer(canvas, mInvActualScale, mSelectX,
-                        mSelectY - getTitleHeight(), mExtendSelection);
+        } else if (mShiftIsPressed) {
+            if (!animateZoom && !mPreviewZoomOnly) {
+                extras = DRAW_EXTRAS_SELECTION;
+                nativeSetSelectionRegion(mTouchSelection || mExtendSelection);
+                nativeSetSelectionPointer(!mTouchSelection, mInvActualScale,
+                        mSelectX, mSelectY - getTitleHeight(),
+                        mExtendSelection);
             }
         } else if (drawCursorRing) {
+            extras = DRAW_EXTRAS_CURSOR_RING;
+        }
+        drawExtras(canvas, extras);
+
+        if (extras == DRAW_EXTRAS_CURSOR_RING) {
             if (mTouchMode == TOUCH_SHORTPRESS_START_MODE) {
                 mTouchMode = TOUCH_SHORTPRESS_MODE;
                 HitTestResult hitTest = getHitTestResult();
@@ -3258,7 +3265,6 @@ public class WebView extends AbsoluteLayout
                             LONG_PRESS_TIMEOUT);
                 }
             }
-            if (cursorIsInLayer) nativeDrawCursorRing(canvas);
         }
         if (mFocusSizeChanged) {
             mFocusSizeChanged = false;
@@ -3351,23 +3357,31 @@ public class WebView extends AbsoluteLayout
         InputMethodManager imm = (InputMethodManager)
                 getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
 
+        // bring it back to the default scale so that user can enter text
+        boolean zoom = mActualScale < mDefaultScale;
+        if (zoom) {
+            mInZoomOverview = false;
+            mZoomCenterX = mLastTouchX;
+            mZoomCenterY = mLastTouchY;
+            // do not change text wrap scale so that there is no reflow
+            setNewZoomScale(mDefaultScale, false, false);
+        }
         if (isTextView) {
             rebuildWebTextView();
-            if (!inEditingMode()) return;
-            imm.showSoftInput(mWebTextView, 0);
-            // bring it back to the default scale so that user can enter text
-            if (mActualScale < mDefaultScale) {
-                mInZoomOverview = false;
-                mZoomCenterX = mLastTouchX;
-                mZoomCenterY = mLastTouchY;
-                // do not change text wrap scale so that there is no reflow
-                setNewZoomScale(mDefaultScale, false, false);
-                didUpdateTextViewBounds(true);
+            if (inEditingMode()) {
+                imm.showSoftInput(mWebTextView, 0);
+                if (zoom) {
+                    didUpdateTextViewBounds(true);
+                }
+                return;
             }
         }
-        else { // used by plugins
-            imm.showSoftInput(this, 0);
-        }
+        // Used by plugins.
+        // Also used if the navigation cache is out of date, and
+        // does not recognize that a textfield is in focus.  In that
+        // case, use WebView as the targeted view.
+        // see http://b/issue?id=2457459
+        imm.showSoftInput(this, 0);
     }
 
     // Called by WebKit to instruct the UI to hide the keyboard
@@ -4429,8 +4443,11 @@ public class WebView extends AbsoluteLayout
         }
 
         // pass the touch events from UI thread to WebCore thread
-        if (mForwardTouchEvents && (action != MotionEvent.ACTION_MOVE
-                || eventTime - mLastSentTouchTime > mCurrentTouchInterval)) {
+        if (mForwardTouchEvents
+                && (action != MotionEvent.ACTION_MOVE || eventTime
+                        - mLastSentTouchTime > mCurrentTouchInterval)
+                && (action == MotionEvent.ACTION_DOWN
+                        || mPreventDrag != PREVENT_DRAG_CANCEL)) {
             WebViewCore.TouchEventData ted = new WebViewCore.TouchEventData();
             ted.mAction = action;
             ted.mX = viewToContentX((int) x + mScrollX);
@@ -5711,12 +5728,17 @@ public class WebView extends AbsoluteLayout
                     break;
                 }
                 case SWITCH_TO_SHORTPRESS: {
-                    // if mPreventDrag is not confirmed, treat it as no so that
-                    // it won't block panning the page.
+                    // if mPreventDrag is not confirmed, cancel it so that it
+                    // won't block panning the page.
                     if (mPreventDrag == PREVENT_DRAG_MAYBE_YES) {
-                        mPreventDrag = PREVENT_DRAG_NO;
+                        mPreventDrag = PREVENT_DRAG_CANCEL;
                         mPreventLongPress = false;
                         mPreventDoubleTap = false;
+                        // remove the pending TOUCH_EVENT and send a cancel
+                        mWebViewCore.removeMessages(EventHub.TOUCH_EVENT);
+                        WebViewCore.TouchEventData ted = new WebViewCore.TouchEventData();
+                        ted.mAction = MotionEvent.ACTION_CANCEL;
+                        mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
                     }
                     if (mTouchMode == TOUCH_INIT_MODE) {
                         mTouchMode = mFullScreenHolder == null
@@ -5743,7 +5765,7 @@ public class WebView extends AbsoluteLayout
                         // don't set it.
                         ted.mMetaState = 0;
                         mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
-                    } else if (mPreventDrag == PREVENT_DRAG_NO) {
+                    } else if (mPreventDrag != PREVENT_DRAG_YES) {
                         mTouchMode = TOUCH_DONE_MODE;
                         if (mFullScreenHolder == null) {
                             performLongClick();
@@ -5754,13 +5776,18 @@ public class WebView extends AbsoluteLayout
                 }
                 case RELEASE_SINGLE_TAP: {
                     if (mPreventDrag == PREVENT_DRAG_MAYBE_YES) {
-                        // if mPreventDrag is not confirmed, treat it as
-                        // no so that it won't block tap.
-                        mPreventDrag = PREVENT_DRAG_NO;
+                        // if mPreventDrag is not confirmed, cancel it so that
+                        // it won't block panning the page.
+                        mPreventDrag = PREVENT_DRAG_CANCEL;
                         mPreventLongPress = false;
                         mPreventDoubleTap = false;
+                        // remove the pending TOUCH_EVENT and send a cancel
+                        mWebViewCore.removeMessages(EventHub.TOUCH_EVENT);
+                        WebViewCore.TouchEventData ted = new WebViewCore.TouchEventData();
+                        ted.mAction = MotionEvent.ACTION_CANCEL;
+                        mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
                     }
-                    if (mPreventDrag == PREVENT_DRAG_NO) {
+                    if (mPreventDrag != PREVENT_DRAG_YES) {
                         mTouchMode = TOUCH_DONE_MODE;
                         doShortPress();
                     }
@@ -5979,12 +6006,7 @@ public class WebView extends AbsoluteLayout
                     break;
                 }
                 case SET_ROOT_LAYER_MSG_ID: {
-                    int oldLayer = mRootLayer;
-                    mRootLayer = msg.arg1;
-                    nativeSetRootLayer(mRootLayer);
-                    if (oldLayer > 0) {
-                        nativeDestroyLayer(oldLayer);
-                    }
+                    nativeSetRootLayer(msg.arg1);
                     invalidate();
                     break;
                 }
@@ -6744,7 +6766,6 @@ public class WebView extends AbsoluteLayout
     /* package */ native boolean nativeCursorMatchesFocus();
     private native boolean  nativeCursorIntersects(Rect visibleRect);
     private native boolean  nativeCursorIsAnchor();
-    private native boolean  nativeCursorIsInLayer();
     private native boolean  nativeCursorIsTextInput();
     private native Point    nativeCursorPosition();
     private native String   nativeCursorText();
@@ -6755,14 +6776,8 @@ public class WebView extends AbsoluteLayout
     private native boolean  nativeCursorWantsKeyEvents();
     private native void     nativeDebugDump();
     private native void     nativeDestroy();
-    private native void     nativeDrawCursorRing(Canvas content);
-    private native void     nativeDestroyLayer(int layer);
-    private native boolean  nativeEvaluateLayersAnimations(int layer);
-    private native void     nativeDrawLayers(int layer, Canvas canvas);
-    private native void     nativeDrawMatches(Canvas canvas);
-    private native void     nativeDrawSelectionPointer(Canvas content,
-            float scale, int x, int y, boolean extendSelection);
-    private native void     nativeDrawSelectionRegion(Canvas content);
+    private native boolean  nativeEvaluateLayersAnimations();
+    private native void     nativeDrawExtras(Canvas canvas, int extra);
     private native void     nativeDumpDisplayTree(String urlOrNull);
     private native int      nativeFindAll(String findLower, String findUpper);
     private native void     nativeFindNext(boolean forward);
@@ -6809,6 +6824,9 @@ public class WebView extends AbsoluteLayout
     private native void     nativeSetFollowedLink(boolean followed);
     private native void     nativeSetHeightCanMeasure(boolean measure);
     private native void     nativeSetRootLayer(int layer);
+    private native void     nativeSetSelectionPointer(boolean set,
+            float scale, int x, int y, boolean extendSelection);
+    private native void     nativeSetSelectionRegion(boolean set);
     private native int      nativeTextGeneration();
     // Never call this version except by updateCachedTextfield(String) -
     // we always want to pass in our generation number.

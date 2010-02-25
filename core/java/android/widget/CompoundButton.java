@@ -26,6 +26,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.view.Gravity;
+import android.view.ViewDebug;
 import android.view.accessibility.AccessibilityEvent;
 
 /**
@@ -98,6 +99,7 @@ public abstract class CompoundButton extends Button implements Checkable {
         return super.performClick();
     }
 
+    @ViewDebug.ExportedProperty
     public boolean isChecked() {
         return mChecked;
     }

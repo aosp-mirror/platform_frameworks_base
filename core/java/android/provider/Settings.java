@@ -374,6 +374,11 @@ public final class Settings {
      * In some cases, a matching Activity may not exist, so ensure you
      * safeguard against this.
      * <p>
+     * The account types available to add via the add account button may be restricted by adding an
+     * {@link #EXTRA_AUTHORITIES} extra to this Intent with one or more syncable content provider's
+     * authorities. Only account types which can sync with that content provider will be offered to
+     * the user.
+     * <p>
      * Input: Nothing.
      * <p>
      * Output: Nothing.
@@ -381,6 +386,24 @@ public final class Settings {
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_SYNC_SETTINGS =
             "android.settings.SYNC_SETTINGS";
+
+    /**
+     * Activity Action: Show add account screen for creating a new account.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * The account types available to add may be restricted by adding an {@link #EXTRA_AUTHORITIES}
+     * extra to the Intent with one or more syncable content provider's authorities.  Only account
+     * types which can sync with that content provider will be offered to the user.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_ADD_ACCOUNT =
+            "android.settings.ADD_ACCOUNT_SETTINGS";
 
     /**
      * Activity Action: Show settings for selecting the network operator.
@@ -467,6 +490,19 @@ public final class Settings {
         "android.settings.DEVICE_INFO_SETTINGS";
 
     // End of Intent actions for Settings
+
+    /**
+     * Activity Extra: Limit available options in launched activity based on the given authority.
+     * <p>
+     * This can be passed as an extra field in an Activity Intent with one or more syncable content
+     * provider's authorities as a String[]. This field is used by some intents to alter the
+     * behavior of the called activity.
+     * <p>
+     * Example: The {@link #ACTION_ADD_ACCOUNT} intent restricts the account types available based
+     * on the authority given.
+     */
+    public static final String EXTRA_AUTHORITIES =
+            "authorities";
 
     private static final String JID_RESOURCE_PREFIX = "android";
 
@@ -2430,6 +2466,13 @@ public final class Settings {
         public static final String BACKGROUND_DATA = "background_data";
 
         /**
+         * Whether mobile data connections are allowed by the user.  See
+         * ConnectivityManager for more info.
+         * @hide
+         */
+        public static final String MOBILE_DATA = "mobile_data";
+
+        /**
          * The CDMA roaming mode 0 = Home Networks, CDMA default
          *                       1 = Roaming on Affiliated networks
          *                       2 = Roaming on any networks
@@ -3033,11 +3076,11 @@ public final class Settings {
          * @hide
          */
         public static final String ANR_SHOW_BACKGROUND = "anr_show_background";
-        
+
         /**
          * The {@link ComponentName} string of the service to be used as the voice recognition
          * service.
-         * 
+         *
          * @hide
          */
         public static final String VOICE_RECOGNITION_SERVICE = "voice_recognition_service";

@@ -664,6 +664,10 @@ public final class BluetoothDevice implements Parcelable {
      * determine which channel to connect to.
      * <p>The remote device will be authenticated and communication on this
      * socket will be encrypted.
+     * <p>Hint: If you are connecting to a Bluetooth serial board then try
+     * using the well-known SPP UUID 00001101-0000-1000-8000-00805F9B34FB.
+     * However if you are connecting to an Android peer then please generate
+     * your own unique UUID.
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
      *
      * @param uuid service record uuid to lookup RFCOMM channel

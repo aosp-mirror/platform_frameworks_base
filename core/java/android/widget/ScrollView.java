@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.FocusFinder;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -51,6 +52,8 @@ import java.util.List;
  * <p>ScrollView only supports vertical scrolling.
  */
 public class ScrollView extends FrameLayout {
+    private static final String TAG = "ScrollView";
+
     static final int ANIMATED_SCROLL_GAP = 250;
 
     static final float MAX_SCROLL_FACTOR = 0.5f;
@@ -112,6 +115,18 @@ public class ScrollView extends FrameLayout {
     private int mTouchSlop;
     private int mMinimumVelocity;
     private int mMaximumVelocity;
+    
+    /**
+     * ID of the active pointer. This is used to retain consistency during
+     * drags/flings if multiple pointers are used.
+     */
+    private int mActivePointerId = INVALID_POINTER;
+    
+    /**
+     * Sentinel value for no current active pointer.
+     * Used by {@link #mActivePointerId}.
+     */
+    private static final int INVALID_POINTER = -1;
 
     public ScrollView(Context context) {
         this(context, null);
@@ -360,6 +375,17 @@ public class ScrollView extends FrameLayout {
         return handled;
     }
 
+    private boolean inChild(int x, int y) {
+        if (getChildCount() > 0) {
+            final View child = getChildAt(0);
+            return !(y < child.getTop()
+                    || y >= child.getBottom()
+                    || x < child.getLeft()
+                    || x >= child.getRight());
+        }
+        return false;
+    }
+
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         /*
@@ -378,10 +404,8 @@ public class ScrollView extends FrameLayout {
             return true;
         }
 
-        final float y = ev.getY();
-
-        switch (action) {
-            case MotionEvent.ACTION_MOVE:
+        switch (action & MotionEvent.ACTION_MASK) {
+            case MotionEvent.ACTION_MOVE: {
                 /*
                  * mIsBeingDragged == false, otherwise the shortcut would have caught it. Check
                  * whether the user has moved far enough from his original down touch.
@@ -391,16 +415,29 @@ public class ScrollView extends FrameLayout {
                 * Locally do absolute value. mLastMotionY is set to the y value
                 * of the down event.
                 */
+                final int pointerIndex = ev.findPointerIndex(mActivePointerId);
+                final float y = ev.getY(pointerIndex);
                 final int yDiff = (int) Math.abs(y - mLastMotionY);
                 if (yDiff > mTouchSlop) {
                     mIsBeingDragged = true;
                     mLastMotionY = y;
                 }
                 break;
+            }
 
-            case MotionEvent.ACTION_DOWN:
-                /* Remember location of down touch */
+            case MotionEvent.ACTION_DOWN: {
+                final float y = ev.getY();
+                if (!inChild((int)ev.getX(), (int)y)) {
+                    mIsBeingDragged = false;
+                    break;
+                }
+
+                /*
+                 * Remember location of down touch.
+                 * ACTION_DOWN always refers to pointer index 0.
+                 */
                 mLastMotionY = y;
+                mActivePointerId = ev.getPointerId(0);
 
                 /*
                 * If being flinged and user touches the screen, initiate drag;
@@ -409,11 +446,16 @@ public class ScrollView extends FrameLayout {
                 */
                 mIsBeingDragged = !mScroller.isFinished();
                 break;
+            }
 
             case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_UP:
                 /* Release the drag */
                 mIsBeingDragged = false;
+                mActivePointerId = INVALID_POINTER;
+                break;
+            case MotionEvent.ACTION_POINTER_UP:
+                onSecondaryPointerUp(ev);
                 break;
         }
 
@@ -439,10 +481,9 @@ public class ScrollView extends FrameLayout {
         mVelocityTracker.addMovement(ev);
 
         final int action = ev.getAction();
-        final float y = ev.getY();
 
-        switch (action) {
-            case MotionEvent.ACTION_DOWN:
+        switch (action & MotionEvent.ACTION_MASK) {
+            case MotionEvent.ACTION_DOWN: {
                 /*
                 * If being flinged and user touches, stop the fling. isFinished
                 * will be false if being flinged.
@@ -451,39 +492,76 @@ public class ScrollView extends FrameLayout {
                     mScroller.abortAnimation();
                 }
 
+                final float y = ev.getY();
+                if (!(mIsBeingDragged = inChild((int)ev.getX(), (int)y))) {
+                    return false;
+                }
+                
                 // Remember where the motion event started
                 mLastMotionY = y;
+                mActivePointerId = ev.getPointerId(0);
                 break;
+            }
             case MotionEvent.ACTION_MOVE:
-                // Scroll to follow the motion event
-                final int deltaY = (int) (mLastMotionY - y);
-                mLastMotionY = y;
+                if (mIsBeingDragged) {
+                    // Scroll to follow the motion event
+                    final int activePointerIndex = ev.findPointerIndex(mActivePointerId);
+                    final float y = ev.getY(activePointerIndex);
+                    final int deltaY = (int) (mLastMotionY - y);
+                    mLastMotionY = y;
 
-                overscrollBy(0, deltaY, 0, mScrollY, 0, getScrollRange(),
-                        0, getOverscrollMax());
+                    overscrollBy(0, deltaY, 0, mScrollY, 0, getScrollRange(),
+                            0, getOverscrollMax());
+                }
                 break;
-            case MotionEvent.ACTION_UP:
-                final VelocityTracker velocityTracker = mVelocityTracker;
-                velocityTracker.computeCurrentVelocity(1000, mMaximumVelocity);
-                int initialVelocity = (int) velocityTracker.getYVelocity();
+            case MotionEvent.ACTION_UP: 
+                if (mIsBeingDragged) {
+                    final VelocityTracker velocityTracker = mVelocityTracker;
+                    velocityTracker.computeCurrentVelocity(1000, mMaximumVelocity);
+                    int initialVelocity = (int) velocityTracker.getYVelocity(mActivePointerId);
 
-                if (getChildCount() > 0) {
-                    if ((Math.abs(initialVelocity) > mMinimumVelocity)) {
-                        fling(-initialVelocity);
-                    } else {
-                        final int bottom = getScrollRange();
-                        if (mScroller.springback(mScrollX, mScrollY, 0, 0, 0, bottom)) {
-                            invalidate();
+                    if (getChildCount() > 0) {
+                        if ((Math.abs(initialVelocity) > mMinimumVelocity)) {
+                            fling(-initialVelocity);
+                        } else {
+                            final int bottom = getScrollRange();
+                            if (mScroller.springback(mScrollX, mScrollY, 0, 0, 0, bottom)) {
+                                invalidate();
+                            }
                         }
                     }
-                }
 
-                if (mVelocityTracker != null) {
-                    mVelocityTracker.recycle();
-                    mVelocityTracker = null;
+                    mActivePointerId = INVALID_POINTER;
+                    mIsBeingDragged = false;
+
+                    if (mVelocityTracker != null) {
+                        mVelocityTracker.recycle();
+                        mVelocityTracker = null;
+                    }
                 }
+                break;
+            case MotionEvent.ACTION_POINTER_UP:
+                onSecondaryPointerUp(ev);
+                break;
         }
         return true;
+    }
+    
+    private void onSecondaryPointerUp(MotionEvent ev) {
+        final int pointerIndex = (ev.getAction() & MotionEvent.ACTION_POINTER_INDEX_MASK) >>
+                MotionEvent.ACTION_POINTER_INDEX_SHIFT;
+        final int pointerId = ev.getPointerId(pointerIndex);
+        if (pointerId == mActivePointerId) {
+            // This was our active pointer going up. Choose a new
+            // active pointer and adjust accordingly.
+            // TODO: Make this decision more intelligent.
+            final int newPointerIndex = pointerIndex == 0 ? 1 : 0;
+            mLastMotionY = ev.getY(newPointerIndex);
+            mActivePointerId = ev.getPointerId(newPointerIndex);
+            if (mVelocityTracker != null) {
+                mVelocityTracker.clear();
+            }
+        }
     }
     
     @Override

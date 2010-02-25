@@ -60,14 +60,14 @@
 
     <!-- user interface sound effects -->
     <integer name="def_power_sounds_enabled">1</integer>
-    <string name="def_low_battery_sound">/system/media/ui/LowBattery.ogg</string>
+    <string name="def_low_battery_sound" translatable="false">/system/media/ui/LowBattery.ogg</string>
     <integer name="def_dock_sounds_enabled">0</integer>
-    <string name="def_desk_dock_sound">/system/media/audio/ui/Dock.ogg</string>
-    <string name="def_desk_undock_sound">/system/media/audio/ui/Undock.ogg</string>
-    <string name="def_car_dock_sound">/system/media/audio/ui/Dock.ogg</string>
-    <string name="def_car_undock_sound">/system/media/audio/ui/Undock.ogg</string>
+    <string name="def_desk_dock_sound" translatable="false">/system/media/audio/ui/Dock.ogg</string>
+    <string name="def_desk_undock_sound" translatable="false">/system/media/audio/ui/Undock.ogg</string>
+    <string name="def_car_dock_sound" translatable="false">/system/media/audio/ui/Dock.ogg</string>
+    <string name="def_car_undock_sound" translatable="false">/system/media/audio/ui/Undock.ogg</string>
     <integer name="def_lockscreen_sounds_enabled">0</integer>
-    <string name="def_lock_sound">/system/media/audio/ui/Lock.ogg</string>
-    <string name="def_unlock_sound">/system/media/audio/ui/Unlock.ogg</string>
+    <string name="def_lock_sound" translatable="false">/system/media/audio/ui/Lock.ogg</string>
+    <string name="def_unlock_sound" translatable="false">/system/media/audio/ui/Unlock.ogg</string>
 
 </resources>

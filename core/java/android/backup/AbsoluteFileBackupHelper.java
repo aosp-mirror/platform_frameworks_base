@@ -21,7 +21,6 @@ import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
 import java.io.File;
-import java.io.FileDescriptor;
 
 /**
  * Like FileBackupHelper, but takes absolute paths for the files instead of

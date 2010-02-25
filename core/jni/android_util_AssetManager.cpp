@@ -1466,19 +1466,25 @@ static jobjectArray android_content_AssetManager_getArrayStringResource(JNIEnv* 
     for (size_t i=0; ((ssize_t)i)<N; i++, bag++) {
         value = bag->map.value;
         jstring str = NULL;
-        
+
         // Take care of resolving the found resource to its final value.
         ssize_t block = res.resolveReference(&value, bag->stringBlock, NULL);
         if (value.dataType == Res_value::TYPE_STRING) {
-            const char16_t* str16 = res.getTableStringBlock(block)->stringAt(value.data, &strLen);
-            str = env->NewString(str16, strLen);
-            if (str == NULL) {
-                doThrow(env, "java/lang/OutOfMemoryError");
-                res.unlockBag(startOfBag);
-                return NULL;
+            const ResStringPool* pool = res.getTableStringBlock(block);
+            const char* str8 = pool->string8At(value.data, &strLen);
+            if (str8 != NULL) {
+                str = env->NewStringUTF(str8);
+            } else {
+                const char16_t* str16 = pool->stringAt(value.data, &strLen);
+                str = env->NewString(str16, strLen);
+                if (str == NULL) {
+                    doThrow(env, "java/lang/OutOfMemoryError");
+                    res.unlockBag(startOfBag);
+                    return NULL;
+                }
             }
         }
-        
+
         env->SetObjectArrayElement(array, i, str);
     }
     res.unlockBag(startOfBag);

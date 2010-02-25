@@ -82,8 +82,8 @@ status_t AudioPolicyManagerBase::setDeviceConnectionState(AudioSystem::audio_dev
                     // keep track of SCO device address
                     mScoDeviceAddress = String8(device_address, MAX_DEVICE_ADDRESS_LEN);
 #ifdef WITH_A2DP
-                    if ((mA2dpDeviceAddress == mScoDeviceAddress) &&
-                        (mPhoneState != AudioSystem::MODE_NORMAL)) {
+                    if (mA2dpOutput != 0 &&
+                        mPhoneState != AudioSystem::MODE_NORMAL) {
                         mpClientInterface->suspendOutput(mA2dpOutput);
                     }
 #endif
@@ -116,8 +116,8 @@ status_t AudioPolicyManagerBase::setDeviceConnectionState(AudioSystem::audio_dev
                 if (AudioSystem::isBluetoothScoDevice(device)) {
                     mScoDeviceAddress = "";
 #ifdef WITH_A2DP
-                    if ((mA2dpDeviceAddress == mScoDeviceAddress) &&
-                        (mPhoneState != AudioSystem::MODE_NORMAL)) {
+                    if (mA2dpOutput != 0 &&
+                        mPhoneState != AudioSystem::MODE_NORMAL) {
                         mpClientInterface->restoreOutput(mA2dpOutput);
                     }
 #endif
@@ -275,10 +275,8 @@ void AudioPolicyManagerBase::setPhoneState(int state)
     newDevice = getNewDevice(mHardwareOutput, false);
 #ifdef WITH_A2DP
     checkOutputForAllStrategies(newDevice);
-    // suspend A2DP output if SCO device address is the same as A2DP device address.
-    // no need to check that a SCO device is actually connected as mScoDeviceAddress == ""
-    // if none is connected and the test below will fail.
-    if (mA2dpDeviceAddress == mScoDeviceAddress) {
+    // suspend A2DP output if a SCO device is present.
+    if (mA2dpOutput != 0 && mScoDeviceAddress != "") {
         if (oldState == AudioSystem::MODE_NORMAL) {
             mpClientInterface->suspendOutput(mA2dpOutput);
         } else if (state == AudioSystem::MODE_NORMAL) {
@@ -1191,7 +1189,7 @@ status_t AudioPolicyManagerBase::handleA2dpConnection(AudioSystem::audio_devices
     }
     AudioOutputDescriptor *hwOutputDesc = mOutputs.valueFor(mHardwareOutput);
 
-    if (mA2dpDeviceAddress == mScoDeviceAddress) {
+    if (mScoDeviceAddress != "") {
         // It is normal to suspend twice if we are both in call,
         // and have the hardware audio output routed to BT SCO
         if (mPhoneState != AudioSystem::MODE_NORMAL) {
@@ -1556,9 +1554,9 @@ void AudioPolicyManagerBase::setOutputDevice(audio_io_handle_t output, uint32_t 
         usleep(outputDesc->mLatency*2*1000);
     }
 #ifdef WITH_A2DP
-    // suspend A2D output if SCO device is selected
+    // suspend A2DP output if SCO device is selected
     if (AudioSystem::isBluetoothScoDevice((AudioSystem::audio_devices)device)) {
-         if (mA2dpOutput && mScoDeviceAddress == mA2dpDeviceAddress) {
+         if (mA2dpOutput != 0) {
              mpClientInterface->suspendOutput(mA2dpOutput);
          }
     }
@@ -1573,7 +1571,7 @@ void AudioPolicyManagerBase::setOutputDevice(audio_io_handle_t output, uint32_t 
 #ifdef WITH_A2DP
     // if disconnecting SCO device, restore A2DP output
     if (AudioSystem::isBluetoothScoDevice((AudioSystem::audio_devices)prevDevice)) {
-         if (mA2dpOutput && mScoDeviceAddress == mA2dpDeviceAddress) {
+         if (mA2dpOutput != 0) {
              LOGV("restore A2DP output");
              mpClientInterface->restoreOutput(mA2dpOutput);
          }

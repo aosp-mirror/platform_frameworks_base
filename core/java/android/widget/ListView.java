@@ -1485,7 +1485,6 @@ public class ListView extends AbsListView {
             }
 
             // Clear out old views
-            //removeAllViewsInLayout();
             detachAllViewsFromParent();
 
             switch (mLayoutMode) {

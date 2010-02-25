@@ -24,6 +24,7 @@ import android.util.TypedValue;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
 
 /**
  * Provides access to an application's raw asset files; see {@link Resources}
@@ -59,6 +60,8 @@ public final class AssetManager {
     private static final String TAG = "AssetManager";
     private static final boolean localLOGV = Config.LOGV || false;
     
+    private static final boolean DEBUG_REFS = false;
+    
     private static final Object sSync = new Object();
     private static AssetManager sSystem = null;
 
@@ -72,6 +75,7 @@ public final class AssetManager {
     
     private int mNumRefs = 1;
     private boolean mOpen = true;
+    private HashMap<Integer, RuntimeException> mRefStacks; 
  
     /**
      * Create a new AssetManager containing only the basic system assets.
@@ -82,6 +86,10 @@ public final class AssetManager {
      */
     public AssetManager() {
         synchronized (this) {
+            if (DEBUG_REFS) {
+                mNumRefs = 0;
+                incRefsLocked(this.hashCode());
+            }
             init();
             if (localLOGV) Log.v(TAG, "New asset manager: " + this);
             ensureSystemAssets();
@@ -99,6 +107,12 @@ public final class AssetManager {
     }
     
     private AssetManager(boolean isSystem) {
+        if (DEBUG_REFS) {
+            synchronized (this) {
+                mNumRefs = 0;
+                incRefsLocked(this.hashCode());
+            }
+        }
         init();
         if (localLOGV) Log.v(TAG, "New asset manager: " + this);
     }
@@ -122,7 +136,7 @@ public final class AssetManager {
             //                   + ", released=" + mReleased);
             if (mOpen) {
                 mOpen = false;
-                decRefsLocked();
+                decRefsLocked(this.hashCode());
             }
         }
     }
@@ -298,8 +312,9 @@ public final class AssetManager {
             }
             int asset = openAsset(fileName, accessMode);
             if (asset != 0) {
-                mNumRefs++;
-                return new AssetInputStream(asset);
+                AssetInputStream res = new AssetInputStream(asset);
+                incRefsLocked(res.hashCode());
+                return res;
             }
         }
         throw new FileNotFoundException("Asset file: " + fileName);
@@ -389,8 +404,9 @@ public final class AssetManager {
             }
             int asset = openNonAssetNative(cookie, fileName, accessMode);
             if (asset != 0) {
-                mNumRefs++;
-                return new AssetInputStream(asset);
+                AssetInputStream res = new AssetInputStream(asset);
+                incRefsLocked(res.hashCode());
+                return res;
             }
         }
         throw new FileNotFoundException("Asset absolute file: " + fileName);
@@ -468,16 +484,17 @@ public final class AssetManager {
             }
             int xmlBlock = openXmlAssetNative(cookie, fileName);
             if (xmlBlock != 0) {
-                mNumRefs++;
-                return new XmlBlock(this, xmlBlock);
+                XmlBlock res = new XmlBlock(this, xmlBlock);
+                incRefsLocked(res.hashCode());
+                return res;
             }
         }
         throw new FileNotFoundException("Asset XML file: " + fileName);
     }
 
-    /*package*/ void xmlBlockGone() {
+    /*package*/ void xmlBlockGone(int id) {
         synchronized (this) {
-            decRefsLocked();
+            decRefsLocked(id);
         }
     }
 
@@ -486,20 +503,34 @@ public final class AssetManager {
             if (!mOpen) {
                 throw new RuntimeException("Assetmanager has been closed");
             }
-            mNumRefs++;
-            return newTheme();
+            int res = newTheme();
+            incRefsLocked(res);
+            return res;
         }
     }
 
     /*package*/ final void releaseTheme(int theme) {
         synchronized (this) {
             deleteTheme(theme);
-            decRefsLocked();
+            decRefsLocked(theme);
         }
     }
 
     protected void finalize() throws Throwable {
-        destroy();
+        try {
+            if (DEBUG_REFS && mNumRefs != 0) {
+                Log.w(TAG, "AssetManager " + this
+                        + " finalized with non-zero refs: " + mNumRefs);
+                if (mRefStacks != null) {
+                    for (RuntimeException e : mRefStacks.values()) {
+                        Log.w(TAG, "Reference from here", e);
+                    }
+                }
+            }
+            destroy();
+        } finally {
+            super.finalize();
+        }
     }
     
     public final class AssetInputStream extends InputStream {
@@ -526,7 +557,7 @@ public final class AssetManager {
                 if (mAsset != 0) {
                     destroyAsset(mAsset);
                     mAsset = 0;
-                    decRefsLocked();
+                    decRefsLocked(hashCode());
                 }
             }
         }
@@ -710,7 +741,22 @@ public final class AssetManager {
     private native final void init();
     private native final void destroy();
 
-    private final void decRefsLocked() {
+    private final void incRefsLocked(int id) {
+        if (DEBUG_REFS) {
+            if (mRefStacks == null) {
+                mRefStacks = new HashMap<Integer, RuntimeException>();
+                RuntimeException ex = new RuntimeException();
+                ex.fillInStackTrace();
+                mRefStacks.put(this.hashCode(), ex);
+            }
+        }
+        mNumRefs++;
+    }
+    
+    private final void decRefsLocked(int id) {
+        if (DEBUG_REFS && mRefStacks != null) {
+            mRefStacks.remove(id);
+        }
         mNumRefs--;
         //System.out.println("Dec streams: mNumRefs=" + mNumRefs
         //                   + " mReleased=" + mReleased);

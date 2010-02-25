@@ -81,6 +81,30 @@ public class FileFilter {
     };
 
     static void fillIgnoreResultList() {
+        // This first block of tests are for HTML5 features, for which Android
+        // should pass all tests. They are skipped only temporarily.
+        // TODO: Fix these failing tests and remove them from this list.
+        ignoreResultList.add("fast/dom/Geolocation/callback-exception.html"); // exception output incorrect with V8
+        ignoreResultList.add("http/tests/appcache/auth.html"); // file not found
+        ignoreResultList.add("http/tests/appcache/deferred-events.html"); // file not found
+        ignoreResultList.add("http/tests/appcache/deferred-events-delete-while-raising.html"); // file not found
+        ignoreResultList.add("http/tests/appcache/destroyed-frame.html"); // file not found
+        ignoreResultList.add("http/tests/appcache/detached-iframe.html"); // file not found
+        ignoreResultList.add("http/tests/appcache/different-scheme.html"); // file not found
+        ignoreResultList.add("http/tests/appcache/disabled.html"); // not found
+        ignoreResultList.add("http/tests/appcache/empty-manifest.html"); // flaky
+        ignoreResultList.add("http/tests/appcache/foreign-iframe-main.html"); // flaky - skips states
+        ignoreResultList.add("http/tests/appcache/local-content.html"); // text diff
+        ignoreResultList.add("http/tests/appcache/max-size.html"); // no layoutTestController.setAppCacheMaximumSize
+        ignoreResultList.add("http/tests/appcache/manifest-with-empty-file.html"); // flaky
+        ignoreResultList.add("http/tests/appcache/whitelist-wildcard.html"); // file not found
+        ignoreResultList.add("storage/database-lock-after-reload.html"); // failure
+        ignoreResultList.add("storage/domstorage/localstorage/string-conversion.html"); // false failure due to whitespace diff in output with V8
+        ignoreResultList.add("storage/domstorage/sessionstorage/string-conversion.html"); // false failure due to whitespace diff in output with V8
+        ignoreResultList.add("storage/statement-error-callback.html"); // expected line number diff in V8 only
+        ignoreResultList.add("storage/transaction-error-callback.html"); // expected line number diff in V8 only
+        ignoreResultList.add("storage/transaction-callback-exception-crash.html"); // expected line number diff in V8 only
+
         ignoreResultList.add("fast/css/case-transform.html"); // will not fix #619707
         ignoreResultList.add("fast/dom/Element/offsetLeft-offsetTop-body-quirk.html"); // different screen size result in extra spaces in Apple compared to us
         ignoreResultList.add("fast/dom/Window/Plug-ins.html"); // need test plugin

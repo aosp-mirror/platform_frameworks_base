@@ -248,6 +248,19 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public static final int FLAG_NATIVE_DEBUGGABLE = 1<<21;
 
     /**
+     * Value for {@link #flags}: Set to true if the application's backup
+     * agent claims to be able to handle restore data even "from the future,"
+     * i.e. from versions of the application with a versionCode greater than
+     * the one currently installed on the device.
+     *
+     * <p>If android:allowBackup is set to false or no android:backupAgent
+     * is specified, this flag will be ignored.
+     *
+     * {@hide}
+     */
+    public static final int FLAG_RESTORE_ANY_VERSION = 1<<22;
+
+    /**
      * Flags associated with the application.  Any combination of
      * {@link #FLAG_SYSTEM}, {@link #FLAG_DEBUGGABLE}, {@link #FLAG_HAS_CODE},
      * {@link #FLAG_PERSISTENT}, {@link #FLAG_FACTORY_TEST}, and

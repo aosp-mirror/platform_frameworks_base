@@ -302,7 +302,7 @@
     <!-- Specify whether an activity should be finished when a "close system
          windows" request has been made.  This happens, for example, when
          the home key is pressed, when the device is locked, when a system
-         dialog like recent apps is displayed, etc. -->
+         dialog showing recent applications is displayed, etc. -->
     <attr name="finishOnCloseSystemDialogs" format="boolean" />
     
     <!-- Specify whether an activity's task should be cleared when it
@@ -487,7 +487,7 @@
              the display will rotate based on how the user moves the device. -->
         <enum name="sensor" value="4" />
         <!-- Always ignore orientation determined by orientation sensor:
-             tthe display will not rotate when the user moves the device. -->
+             the display will not rotate when the user moves the device. -->
         <enum name="nosensor" value="5" />
     </attr>
     
@@ -523,7 +523,7 @@
         <flag name="keyboard" value="0x0010" />
         <!-- The keyboard or navigation accessibility has changed, for example
              the user has slid the keyboard out to expose it.  Note that
-             inspite of its name, this applied to any accessibility: keyboard
+             despite its name, this applied to any accessibility: keyboard
              or navigation. -->
         <flag name="keyboardHidden" value="0x0020" />
         <!-- The navigation type has changed.  Should never normally happen. -->
@@ -592,11 +592,16 @@
          backup and restore of the application's settings to external storage. -->
     <attr name="backupAgent" format="string" />
 
-    <!-- This is not the attribute you are looking for. -->
+    <!-- Whether to allow the application to participate in backup
+         infrastructure.  If this attribute is set to <code>false</code>, no backup
+         of the application will ever be performed, even by a full-system backup that
+         would otherwise cause all application data to be saved via adb.  The
+         default value of this attribute is <code>true</code>. -->
     <attr name="allowBackup" format="boolean" />
 
     <!-- Whether the application in question should be terminated after its
-         settings have been restored.  The default is to do so. -->
+         settings have been restored.  The default is <code>true</code>,
+         which means to do so. -->
     <attr name="killAfterRestore" format="boolean" />
 
     <!-- Whether the application needs to have its own Application subclass
@@ -604,15 +609,25 @@
          Application class to avoid interference with application logic. -->
     <attr name="restoreNeedsApplication" format="boolean" />
 
+    <!-- Indicate that the application is prepared to attempt a restore of any
+         backed-up dataset, even if the backup is apparently from a newer version
+         of the application than is currently installed on the device.  Setting
+         this attribute to <code>true</code> will permit the Backup Manager to
+         attempt restore even when a version mismatch suggests that the data are
+         incompatible.  <em>Use with caution!</em>
+
+         <p>The default value of this attribute is <code>false</code>. -->
+    <attr name="restoreAnyVersion" format="boolean" />
+
     <!-- The default install location defined by an application. -->
     <attr name="installLocation">
         <!-- Let the system decide ideal install location -->
         <enum name="auto" value="0" />
-        <!-- Explicitly request to be installed on internal phone storate
+        <!-- Explicitly request to be installed on internal phone storage
              only. -->
         <enum name="internalOnly" value="1" />
-        <!-- Prefer to be installed on sdcard. There is no guarantee that
-             the system will honour this request. The application might end
+        <!-- Prefer to be installed on SD card. There is no guarantee that
+             the system will honor this request. The application might end
              up being installed on internal storage if external media
              is unavailable or too full. -->
         <enum name="preferExternal" value="2" />
@@ -698,6 +713,7 @@
         <attr name="allowBackup" />
         <attr name="killAfterRestore" />
         <attr name="restoreNeedsApplication" />
+        <attr name="restoreAnyVersion" />
         <attr name="neverEncrypt" />
     </declare-styleable>
     
@@ -813,7 +829,7 @@
     <!-- The <code>uses-feature</code> tag specifies
          a specific feature used by the application.
          For example an application might specify that it requires
-         specific version of open gl. Multiple such attribute
+         specific version of OpenGL. Multiple such attribute
          values can be specified by the application.
 
          <p>This appears as a child tag of the root
@@ -1359,7 +1375,7 @@
             {@link android.content.Intent#setData Intent.setData()}.
             <p><em>Note: scheme and host name matching in the Android framework is
             case-sensitive, unlike the formal RFC.  As a result,
-            Uris here should always be normalized to use lower case letters
+            URIs here should always be normalized to use lower case letters
             for these elements (as well as other proper Uri normalization).</em></p> -->
         <attr name="data" format="string" />
         <!-- The MIME type name to assign to the Intent, as per

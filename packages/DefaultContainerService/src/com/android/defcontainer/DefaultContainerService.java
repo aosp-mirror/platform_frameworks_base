@@ -39,7 +39,7 @@ import android.provider.Settings;
  */
 public class DefaultContainerService extends IntentService {
     private static final String TAG = "DefContainer";
-    private static final boolean localLOGV = false;
+    private static final boolean localLOGV = true;
 
     private IMediaContainerService.Stub mBinder = new IMediaContainerService.Stub() {
         /*
@@ -211,6 +211,8 @@ public class DefaultContainerService extends IntentService {
                 if (PackageHelper.isContainerMounted(newCid)) {
                     if (localLOGV) Log.i(TAG, "Unmounting " + newCid +
                             " at path " + newCachePath + " after " + errMsg);
+                    // Force a gc to avoid being killed.
+                    Runtime.getRuntime().gc();
                     PackageHelper.unMountSdDir(newCid);
                 } else {
                     if (localLOGV) Log.i(TAG, "Container " + newCid + " not mounted");
@@ -328,8 +330,8 @@ public class DefaultContainerService extends IntentService {
         boolean auto = true;
         // To make final copy
         long reqInstallSize = pkgLen;
-        // For dex files
-        long reqInternalSize = 1 * pkgLen;
+        // For dex files. Just ignore and fail when extracting. Max limit of 2Gig for now.
+        long reqInternalSize = 0;
         boolean intThresholdOk = (pctNandFree >= LOW_NAND_FLASH_TRESHOLD);
         boolean intAvailOk = ((reqInstallSize + reqInternalSize) < availInternalFlashSize);
         boolean fitsOnSd = (reqInstallSize < availSDSize) && intThresholdOk &&

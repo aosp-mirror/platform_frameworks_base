@@ -89,6 +89,11 @@ static jstring android_content_StringBlock_nativeGetString(JNIEnv* env, jobject 
     }
 
     size_t len;
+    const char* str8 = osb->string8At(idx, &len);
+    if (str8 != NULL) {
+        return env->NewStringUTF(str8);
+    }
+
     const char16_t* str = osb->stringAt(idx, &len);
     if (str == NULL) {
         doThrow(env, "java/lang/IndexOutOfBoundsException");

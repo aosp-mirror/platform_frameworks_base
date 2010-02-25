@@ -236,11 +236,6 @@ public class Canvas extends _Original_Canvas {
     // OVERRIDEN METHODS
     // --------------------
 
-    @Override
-    public void finalize() throws Throwable {
-        // pass
-    }
-
     /* (non-Javadoc)
      * @see android.graphics.Canvas#setBitmap(android.graphics.Bitmap)
      */

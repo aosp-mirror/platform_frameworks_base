@@ -565,7 +565,7 @@ public class AccountManagerService
     }
 
     public void invalidateAuthToken(String accountType, String authToken) {
-        checkManageAccountsPermission();
+        checkManageAccountsOrUseCredentialsPermissions();
         long identityToken = clearCallingIdentity();
         try {
             SQLiteDatabase db = mOpenHelper.getWritableDatabase();
@@ -691,11 +691,21 @@ public class AccountManagerService
         if (account == null) {
             return;
         }
-        ContentValues values = new ContentValues();
-        values.put(ACCOUNTS_PASSWORD, password);
-        mOpenHelper.getWritableDatabase().update(TABLE_ACCOUNTS, values,
-                ACCOUNTS_NAME + "=? AND " + ACCOUNTS_TYPE+ "=?",
-                new String[]{account.name, account.type});
+        SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+        db.beginTransaction();
+        try {
+            final ContentValues values = new ContentValues();
+            values.put(ACCOUNTS_PASSWORD, password);
+            final long accountId = getAccountId(db, account);
+            if (accountId >= 0) {
+                final String[] argsAccountId = {String.valueOf(accountId)};
+                db.update(TABLE_ACCOUNTS, values, ACCOUNTS_ID + "=?", argsAccountId);
+                db.delete(TABLE_AUTHTOKENS, AUTHTOKENS_ACCOUNTS_ID + "=?", argsAccountId);
+                db.setTransactionSuccessful();
+            }
+        } finally {
+            db.endTransaction();
+        }
         sendAccountsChangedBroadcast();
     }
 
@@ -1134,7 +1144,10 @@ public class AccountManagerService
         long identityToken = clearCallingIdentity();
         try {
             if (features == null || features.length == 0) {
-                getAccountsByType(type);
+                Account[] accounts = getAccountsByType(type);
+                Bundle result = new Bundle();
+                result.putParcelableArray(AccountManager.KEY_ACCOUNTS, accounts);
+                onResult(response, result);
                 return;
             }
             new GetAccountsByTypeAndFeatureSession(response, type, features).bind();
@@ -1734,17 +1747,22 @@ public class AccountManagerService
         }
     }
 
-    private void checkBinderPermission(String permission) {
+    /** Succeeds if any of the specified permissions are granted. */
+    private void checkBinderPermission(String... permissions) {
         final int uid = Binder.getCallingUid();
-        if (mContext.checkCallingOrSelfPermission(permission) !=
-                PackageManager.PERMISSION_GRANTED) {
-            String msg = "caller uid " + uid + " lacks " + permission;
-            Log.w(TAG, msg);
-            throw new SecurityException(msg);
+
+        for (String perm : permissions) {
+            if (mContext.checkCallingOrSelfPermission(perm) == PackageManager.PERMISSION_GRANTED) {
+                if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                    Log.v(TAG, "caller uid " + uid + " has " + perm);
+                }
+                return;
+            }
         }
-        if (Log.isLoggable(TAG, Log.VERBOSE)) {
-            Log.v(TAG, "caller uid " + uid + " has " + permission);
-        }
+
+        String msg = "caller uid " + uid + " lacks any of " + TextUtils.join(",", permissions);
+        Log.w(TAG, msg);
+        throw new SecurityException(msg);
     }
 
     private boolean inSystemImage(int callerUid) {
@@ -1833,6 +1851,11 @@ public class AccountManagerService
 
     private void checkManageAccountsPermission() {
         checkBinderPermission(Manifest.permission.MANAGE_ACCOUNTS);
+    }
+
+    private void checkManageAccountsOrUseCredentialsPermissions() {
+        checkBinderPermission(Manifest.permission.MANAGE_ACCOUNTS,
+                Manifest.permission.USE_CREDENTIALS);
     }
 
     /**

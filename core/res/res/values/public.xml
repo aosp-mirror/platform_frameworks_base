@@ -1231,6 +1231,7 @@
   <public type="attr" name="safeMode" id="0x010102b8" />
   <public type="attr" name="webTextViewStyle" id="0x010102b9" />
   <public type="attr" name="overscrollMode" id="0x010102ba" />
+  <public type="attr" name="restoreAnyVersion" id="0x010102bb" />
 
   <public type="anim" name="cycle_interpolator" id="0x010a000c" />
     

@@ -165,6 +165,7 @@ public class PluginManager {
                     continue;
                 }
 
+/*              temporarily disable signatures checking
                 // check to ensure the plugin is properly signed
                 Signature signatures[] = pkgInfo.signatures;
                 if (signatures == null) {
@@ -184,7 +185,7 @@ public class PluginManager {
                         continue;
                     }
                 }
-
+*/
                 // determine the type of plugin from the manifest
                 if (serviceInfo.metaData == null) {
                     Log.e(LOGTAG, "The plugin '" + serviceInfo.name + "' has no type defined");

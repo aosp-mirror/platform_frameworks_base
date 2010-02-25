@@ -321,7 +321,9 @@ public class GpsLocationProvider implements LocationProviderInterface {
     public GpsLocationProvider(Context context, ILocationManager locationManager) {
         mContext = context;
         mLocationManager = locationManager;
-        mNIHandler= new GpsNetInitiatedHandler(context, this);
+        mNIHandler = new GpsNetInitiatedHandler(context, this);
+
+        mLocation.setExtras(mLocationExtras);
 
         // Create a wake lock
         PowerManager powerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
@@ -759,7 +761,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
                 positionMode = GPS_POSITION_MODE_STANDALONE;
             }
 
-            if (!native_start(positionMode, false, mFixInterval)) {
+            if (!native_start(positionMode, false, 1)) {
                 mStarted = false;
                 Log.e(TAG, "native_start failed in startNavigating()");
                 return;
@@ -870,7 +872,12 @@ public class GpsLocationProvider implements LocationProviderInterface {
         }
 
         if (mStarted && mStatus != LocationProvider.AVAILABLE) {
-            mAlarmManager.cancel(mTimeoutIntent);
+            // we still want to time out if we do not receive MIN_FIX_COUNT
+            // within the time out and we are requesting infrequent fixes
+            if (mFixInterval < NO_FIX_TIMEOUT) {
+                mAlarmManager.cancel(mTimeoutIntent);
+            }
+
             // send an intent to notify that the GPS is receiving fixes.
             Intent intent = new Intent(GPS_FIX_CHANGE_ACTION);
             intent.putExtra(EXTRA_ENABLED, true);

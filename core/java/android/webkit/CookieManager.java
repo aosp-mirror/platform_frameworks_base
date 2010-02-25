@@ -150,8 +150,13 @@ public final class CookieManager {
         }
 
         boolean exactMatch(Cookie in) {
+            // An exact match means that domain, path, and name are equal. If
+            // both values are null, the cookies match. If both values are
+            // non-null, the cookies match. If one value is null and the other
+            // is non-null, the cookies do not match (i.e. "foo=;" and "foo;")
+            boolean valuesMatch = !((value == null) ^ (in.value == null));
             return domain.equals(in.domain) && path.equals(in.path) &&
-                    name.equals(in.name);
+                    name.equals(in.name) && valuesMatch;
         }
 
         boolean domainMatch(String urlHost) {
@@ -206,17 +211,29 @@ public final class CookieManager {
             // As Set is not modified if the two objects are same, we do want to
             // assign different value for each cookie.
             int diff = cookie2.path.length() - cookie1.path.length();
-            if (diff == 0) {
-                diff = cookie2.domain.length() - cookie1.domain.length();
-                if (diff == 0) {
-                    diff = cookie2.name.hashCode() - cookie1.name.hashCode();
-                    if (diff == 0) {
-                        Log.w(LOGTAG, "Found two cookies with the same value." +
-                                "cookie1=" + cookie1 + " , cookie2=" + cookie2);
-                    }
-                }
+            if (diff != 0) return diff;
+
+            diff = cookie2.domain.length() - cookie1.domain.length();
+            if (diff != 0) return diff;
+
+            diff = cookie2.name.hashCode() - cookie1.name.hashCode();
+            if (diff != 0) return diff;
+
+            // If cookie2 has a null value, it should come later in
+            // the list.
+            if (cookie2.value == null) {
+                return -1;
+            } else if (cookie1.value == null) {
+                // Now we know that cookie2 does not have a null value, if
+                // cookie1 has a null value, place it later in the list.
+                return 1;
             }
-            return diff;
+
+            // cookie1 and cookie2 both have non-null values so we emit a
+            // warning and treat them as the same.
+            Log.w(LOGTAG, "Found two cookies with the same value."
+                    + "cookie1=" + cookie1 + " , cookie2=" + cookie2);
+            return 0;
         }
     }
 
@@ -459,8 +476,10 @@ public final class CookieManager {
             }
 
             ret.append(cookie.name);
-            ret.append(EQUAL);
-            ret.append(cookie.value);
+            if (cookie.value != null) {
+                ret.append(EQUAL);
+                ret.append(cookie.value);
+            }
         }
 
         if (ret.length() > 0) {
@@ -634,7 +653,10 @@ public final class CookieManager {
                         byteCount += cookie.domain.length()
                                 + cookie.path.length()
                                 + cookie.name.length()
-                                + cookie.value.length() + 14;
+                                + (cookie.value != null
+                                        ? cookie.value.length()
+                                        : 0)
+                                + 14;
                         count++;
                     }
                 } else {
@@ -779,38 +801,45 @@ public final class CookieManager {
              */
             int semicolonIndex = cookieString.indexOf(SEMICOLON, index);
             int equalIndex = cookieString.indexOf(EQUAL, index);
-            if (equalIndex == -1) {
-                // bad format, force return
-                break;
-            }
-            if (semicolonIndex > -1 && semicolonIndex < equalIndex) {
-                // empty cookie, like "; path=/", return
-                break;
-            }
             cookie = new Cookie(host, path);
-            cookie.name = cookieString.substring(index, equalIndex);
-            if (cookieString.charAt(equalIndex + 1) == QUOTATION) {
-                index = cookieString.indexOf(QUOTATION, equalIndex + 2);
-                if (index == -1) {
-                    // bad format, force return
-                    break;
+
+            // Cookies like "testcookie; path=/;" are valid and used
+            // (lovefilm.se). Check for equal as in the string "testcookie"
+            // Check for equalIndex == -1 as in the string "testcookie;"
+            if (semicolonIndex <= equalIndex || equalIndex == -1) {
+                // Fix up the index in case we have a string like "testcookie"
+                if (semicolonIndex == -1) {
+                    semicolonIndex = length;
                 }
-            }
-            semicolonIndex = cookieString.indexOf(SEMICOLON, index);
-            if (semicolonIndex == -1) {
-                semicolonIndex = length;
-            }
-            if (semicolonIndex - equalIndex > MAX_COOKIE_LENGTH) {
-                // cookie is too big, trim it
-                cookie.value = cookieString.substring(equalIndex + 1,
-                        equalIndex + MAX_COOKIE_LENGTH);
-            } else if (equalIndex + 1 == semicolonIndex
-                    || semicolonIndex < equalIndex) {
-                // these are unusual case like foo=; and foo; path=/
-                cookie.value = "";
+                cookie.name = cookieString.substring(index, semicolonIndex);
+                cookie.value = null;
             } else {
-                cookie.value = cookieString.substring(equalIndex + 1,
-                        semicolonIndex);
+                cookie.name = cookieString.substring(index, equalIndex);
+                if (cookieString.charAt(equalIndex + 1) == QUOTATION) {
+                    index = cookieString.indexOf(QUOTATION, equalIndex + 2);
+                    if (index == -1) {
+                        // bad format, force return
+                        break;
+                    }
+                }
+                // Get the semicolon index again in case it was contained within
+                // the quotations.
+                semicolonIndex = cookieString.indexOf(SEMICOLON, index);
+                if (semicolonIndex == -1) {
+                    semicolonIndex = length;
+                }
+                if (semicolonIndex - equalIndex > MAX_COOKIE_LENGTH) {
+                    // cookie is too big, trim it
+                    cookie.value = cookieString.substring(equalIndex + 1,
+                            equalIndex + 1 + MAX_COOKIE_LENGTH);
+                } else if (equalIndex + 1 == semicolonIndex
+                        || semicolonIndex < equalIndex) {
+                    // this is an unusual case like foo=;
+                    cookie.value = "";
+                } else {
+                    cookie.value = cookieString.substring(equalIndex + 1,
+                            semicolonIndex);
+                }
             }
             // get attributes
             index = semicolonIndex;

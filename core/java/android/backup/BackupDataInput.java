@@ -16,8 +16,6 @@
 
 package android.backup;
 
-import android.content.Context;
-
 import java.io.FileDescriptor;
 import java.io.IOException;
 

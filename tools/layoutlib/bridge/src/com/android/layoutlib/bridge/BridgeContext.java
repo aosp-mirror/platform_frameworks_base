@@ -927,6 +927,7 @@ public final class BridgeContext extends Context {
         return null;
     }
 
+    @Override
     public File getExternalCacheDir() {
         // TODO Auto-generated method stub
         return null;
@@ -964,6 +965,7 @@ public final class BridgeContext extends Context {
         return null;
     }
 
+    @Override
     public File getExternalFilesDir(String type) {
         // TODO Auto-generated method stub
         return null;

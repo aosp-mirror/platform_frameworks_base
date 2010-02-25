@@ -17,24 +17,19 @@
 package android.backup;
 
 import android.app.BackupAgent;
-import android.backup.BackupHelper;
-import android.backup.BackupHelperDispatcher;
-import android.backup.BackupDataInput;
-import android.backup.BackupDataOutput;
 import android.os.ParcelFileDescriptor;
-import android.util.Log;
 
 import java.io.IOException;
 
 /**
- * A convenient BackupAgent wrapper class that automatically manages heterogeneous
- * data sets within the backup data, each identified by a unique key prefix.  An
- * application will typically extend this class in their own backup agent.  Then,
- * within the agent's onBackup() and onRestore() methods, it will call
- * {@link #addHelper(String, BackupHelper)} one or more times to specify the data
- * sets, then invoke super.onBackup() or super.onRestore() to have the BackupHelperAgent
- * implementation process the data.
- *
+ * A convenient BackupAgent wrapper class that automatically manages
+ * heterogeneous data sets within the backup data, each identified by a unique
+ * key prefix. An application will typically extend this class in their own
+ * backup agent. Then, within the agent's onBackup() and onRestore() methods, it
+ * will call {@link #addHelper(String, BackupHelper)} one or more times to
+ * specify the data sets, then invoke super.onBackup() or super.onRestore() to
+ * have the BackupHelperAgent implementation process the data.
+ * <p>
  * STOPSHIP: document!
  */
 public class BackupHelperAgent extends BackupAgent {

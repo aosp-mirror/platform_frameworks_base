@@ -25,8 +25,12 @@ void printStringPool(const ResStringPool* pool)
     const size_t NS = pool->size();
     for (size_t s=0; s<NS; s++) {
         size_t len;
-        printf("String #%ld: %s\n", s,
-                String8(pool->stringAt(s, &len)).string());
+        const char *str = (const char*)pool->string8At(s, &len);
+        if (str == NULL) {
+            str = String8(pool->stringAt(s, &len)).string();
+        }
+
+        printf("String #%ld: %s\n", s, str);
     }
 }
 

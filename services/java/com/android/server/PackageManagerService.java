@@ -4858,42 +4858,67 @@ class PackageManagerService extends IPackageManager.Stub {
                 String oldCodePath) {
             String newCacheId = getNextCodePath(oldCodePath, pkgName, "/" + RES_FILE_NAME);
             String newCachePath = null;
-            final int RENAME_FAILED = 1;
-            final int MOUNT_FAILED = 2;
-            final int PASS = 4;
-            int errCode = RENAME_FAILED;
-            String errMsg = "RENAME_FAILED";
-            boolean mounted = PackageHelper.isContainerMounted(cid);
-            if (mounted) {
-                // Unmount the container
-                if (!PackageHelper.unMountSdDir(cid)) {
-                    Log.i(TAG, "Failed to unmount " + cid + " before renaming");
+            boolean enableRename = false;
+            if (enableRename) {
+                if (PackageHelper.isContainerMounted(cid)) {
+                    // Unmount the container
+                    if (!PackageHelper.unMountSdDir(cid)) {
+                        Log.i(TAG, "Failed to unmount " + cid + " before renaming");
+                        return false;
+                    }
+                }
+                if (!PackageHelper.renameSdDir(cid, newCacheId)) {
+                    Log.e(TAG, "Failed to rename " + cid + " to " + newCacheId);
                     return false;
                 }
-                mounted = false;
-            }
-            if (PackageHelper.renameSdDir(cid, newCacheId)) {
-                errCode = MOUNT_FAILED;
-                errMsg = "MOUNT_FAILED";
-                if ((newCachePath = PackageHelper.mountSdDir(newCacheId,
-                        getEncryptKey(), Process.SYSTEM_UID)) != null) {
-                    errCode = PASS;
-                    errMsg = "PASS";
+                if (!PackageHelper.isContainerMounted(newCacheId)) {
+                    Log.w(TAG, "Mounting container " + newCacheId);
+                    newCachePath = PackageHelper.mountSdDir(newCacheId,
+                            getEncryptKey(), Process.SYSTEM_UID);
+                } else {
+                    newCachePath = PackageHelper.getSdDir(newCacheId);
                 }
-            }
-            if (errCode != PASS) {
-                Log.i(TAG, "Failed to rename " + cid + " to " + newCacheId +
-                        " at path: " + cachePath + " to new path: " + newCachePath +
-                        "err = " + errMsg);
+                if (newCachePath == null) {
+                    Log.w(TAG, "Failed to get cache path for  " + newCacheId);
+                    return false;
+                }
                 // Mount old container?
-                return false;
+                Log.i(TAG, "Succesfully renamed " + cid +
+                        " at path: " + cachePath + " to " + newCacheId +
+                        " at new path: " + newCachePath);
+                cid = newCacheId;
+                cachePath = newCachePath;
+                return true;
             } else {
-                Log.i(TAG, "Succesfully renamed " + cid + " to " + newCacheId +
-                        " at path: " + cachePath + " to new path: " + newCachePath);
+                // STOPSHIP work around for rename
+                Log.i(TAG, "Copying instead of renaming");
+                File srcFile = new File(getCodePath());
+                // Create new container
+                newCachePath = PackageHelper.createSdDir(srcFile, newCacheId,
+                        getEncryptKey(), Process.SYSTEM_UID);
+                Log.i(TAG, "Created rename container " + newCacheId);
+                File destFile = new File(newCachePath + "/" + RES_FILE_NAME);
+                if (!FileUtils.copyFile(srcFile, destFile)) {
+                    Log.e(TAG, "Failed to copy " + srcFile + " to " + destFile);
+                    return false;
+                }
+                Log.i(TAG, "Successfully copied resource to " + newCachePath);
+                if (!PackageHelper.finalizeSdDir(newCacheId)) {
+                    Log.e(TAG, "Failed to finalize " + newCacheId);
+                    PackageHelper.destroySdDir(newCacheId);
+                    return false;
+                }
+                Log.i(TAG, "Finalized " + newCacheId);
+                Runtime.getRuntime().gc();
+                // Unmount first
+                PackageHelper.unMountSdDir(cid);
+                // Delete old container
+                PackageHelper.destroySdDir(cid);
+                // Dont have to mount. Already mounted.
+                cid = newCacheId;
+                cachePath = newCachePath;
+                return true;
             }
-            cid = newCacheId;
-            cachePath = newCachePath;
-            return true;
         }
 
         int doPostInstall(int status) {
@@ -5403,6 +5428,7 @@ class PackageManagerService extends IPackageManager.Stub {
             res.returnCode = PackageManager.INSTALL_FAILED_INVALID_INSTALL_LOCATION;
             return;
         }
+
         if (!args.doRename(res.returnCode, pkgName, oldCodePath)) {
             res.returnCode = PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
             return;
@@ -8809,7 +8835,7 @@ class PackageManagerService extends IPackageManager.Stub {
     }
 
    static String getTempContainerId() {
-       String prefix = "smdl1tmp";
+       String prefix = "smdl2tmp";
        int tmpIdx = 1;
        String list[] = PackageHelper.getSecureContainerList();
        if (list != null) {
@@ -8851,30 +8877,56 @@ class PackageManagerService extends IPackageManager.Stub {
        return prefix + tmpIdx;
    }
 
-   public void updateExternalMediaStatus(final boolean mediaStatus) {
+   /*
+    * Return true if PackageManager does have packages to be updated.
+    */
+   public boolean updateExternalMediaStatus(final boolean mediaStatus) {
        synchronized (mPackages) {
            if (DEBUG_SD_INSTALL) Log.i(TAG, "updateExternalMediaStatus:: mediaStatus=" +
                    mediaStatus+", mMediaMounted=" + mMediaMounted);
            if (mediaStatus == mMediaMounted) {
-               return;
+               return false;
            }
            mMediaMounted = mediaStatus;
+           boolean ret = false;
+           synchronized (mPackages) {
+               Set<String> appList = mSettings.findPackagesWithFlag(ApplicationInfo.FLAG_ON_SDCARD);
+               ret = appList != null && appList.size() > 0;
+           }
+           if (!ret) {
+               // No packages will be effected by the sdcard update. Just return.
+               return false;
+           }
             // Queue up an async operation since the package installation may take a little while.
            mHandler.post(new Runnable() {
                public void run() {
                    mHandler.removeCallbacks(this);
-                   updateExternalMediaStatusInner(mediaStatus);
+                   // If we are up here that means there are packages to be
+                   // enabled or disabled.
+                   final HashMap<SdInstallArgs, String> processCids =
+                       new HashMap<SdInstallArgs, String>();
+                   final int[] uidArr = getExternalMediaPackages(mediaStatus, processCids);
+                   if (mediaStatus) {
+                       if (DEBUG_SD_INSTALL) Log.i(TAG, "Loading packages");
+                       loadMediaPackages(processCids, uidArr);
+                       startCleaningPackages();
+                   } else {
+                       if (DEBUG_SD_INSTALL) Log.i(TAG, "Unloading packages");
+                       unloadMediaPackages(processCids, uidArr);
+                   }
                }
            });
+           return true;
        }
    }
 
-   void updateExternalMediaStatusInner(boolean mediaStatus) {
+    private int[] getExternalMediaPackages(boolean mediaStatus,
+            Map<SdInstallArgs, String> processCids) {
        final String list[] = PackageHelper.getSecureContainerList();
        if (list == null || list.length == 0) {
-           return;
+           return null;
        }
-       HashMap<SdInstallArgs, String> processCids = new HashMap<SdInstallArgs, String>();
+
        int uidList[] = new int[list.length];
        int num = 0;
        synchronized (mPackages) {
@@ -8916,14 +8968,7 @@ class PackageManagerService extends IPackageManager.Stub {
                }
            }
        }
-       if (mediaStatus) {
-           if (DEBUG_SD_INSTALL) Log.i(TAG, "Loading packages");
-           loadMediaPackages(processCids, uidArr);
-           startCleaningPackages();
-       } else {
-           if (DEBUG_SD_INSTALL) Log.i(TAG, "Unloading packages");
-           unloadMediaPackages(processCids, uidArr);
-       }
+       return uidArr;
    }
 
    private void sendResourcesChangedBroadcast(boolean mediaStatus,
@@ -8943,7 +8988,7 @@ class PackageManagerService extends IPackageManager.Stub {
        }
    }
 
-   void loadMediaPackages(HashMap<SdInstallArgs, String> processCids, int uidArr[]) {
+   private void loadMediaPackages(HashMap<SdInstallArgs, String> processCids, int uidArr[]) {
        ArrayList<String> pkgList = new ArrayList<String>();
        Set<SdInstallArgs> keys = processCids.keySet();
        for (SdInstallArgs args : keys) {
@@ -8985,15 +9030,15 @@ class PackageManagerService extends IPackageManager.Stub {
            }
            args.doPostInstall(retCode);
        }
-       // Send broadcasts first
+       // Send a broadcast to let everyone know we are done processing
+       sendResourcesChangedBroadcast(true, pkgList, uidArr);
        if (pkgList.size() > 0) {
-           sendResourcesChangedBroadcast(true, pkgList, uidArr);
            Runtime.getRuntime().gc();
            // If something failed do we clean up here or next install?
        }
    }
 
-   void unloadMediaPackages(HashMap<SdInstallArgs, String> processCids, int uidArr[]) {
+   private void unloadMediaPackages(HashMap<SdInstallArgs, String> processCids, int uidArr[]) {
        if (DEBUG_SD_INSTALL) Log.i(TAG, "unloading media packages");
        ArrayList<String> pkgList = new ArrayList<String>();
        ArrayList<SdInstallArgs> failedList = new ArrayList<SdInstallArgs>();
@@ -9015,9 +9060,9 @@ class PackageManagerService extends IPackageManager.Stub {
                }
            }
        }
+       sendResourcesChangedBroadcast(false, pkgList, uidArr);
        // Send broadcasts
        if (pkgList.size() > 0) {
-           sendResourcesChangedBroadcast(false, pkgList, uidArr);
            Runtime.getRuntime().gc();
        }
        // Do clean up. Just unmount
