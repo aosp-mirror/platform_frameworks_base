@@ -25,7 +25,6 @@ import android.view.ViewGroup;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 
 /*
  * Implementation notes:
@@ -637,7 +636,7 @@ class ExpandableListConnector extends BaseAdapter implements Filterable {
         // Check to see if it's already expanded
         if (posMetadata.groupMetadata != null) return false;
         
-        /* Restrict number of exp groups to mMaxExpGroupCount */
+        /* Restrict number of expanded groups to mMaxExpGroupCount */
         if (mExpGroupMetadataList.size() >= mMaxExpGroupCount) {
             /* Collapse a group */
             // TODO: Collapse something not on the screen instead of the first one?

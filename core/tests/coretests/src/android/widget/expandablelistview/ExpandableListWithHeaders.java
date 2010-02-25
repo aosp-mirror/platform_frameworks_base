@@ -16,13 +16,10 @@
 
 package android.widget.expandablelistview;
 
-import android.util.ExpandableListScenario;
-
 import android.os.Bundle;
+import android.util.ExpandableListScenario;
 import android.widget.Button;
 import android.widget.ExpandableListView;
-import android.widget.ListAdapter;
-import android.widget.ListView;
 
 public class ExpandableListWithHeaders extends ExpandableListScenario {
     private static final int[] sNumChildren = {1, 4, 3, 2, 6};
@@ -46,13 +43,13 @@ public class ExpandableListWithHeaders extends ExpandableListScenario {
 
         for (int i = 0; i < sNumOfHeadersAndFooters; i++) {
             Button header = new Button(this);
-            header.setText("Header View");
+            header.setText("Header View " + i);
             expandableListView.addHeaderView(header);
         }
 
         for (int i = 0; i < sNumOfHeadersAndFooters; i++) {
             Button footer = new Button(this);
-            footer.setText("Footer View");
+            footer.setText("Footer View " + i);
             expandableListView.addFooterView(footer);
         }
         

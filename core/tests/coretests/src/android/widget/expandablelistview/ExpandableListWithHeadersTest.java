@@ -16,22 +16,20 @@
 
 package android.widget.expandablelistview;
 
-import android.test.ActivityInstrumentationTestCase;
+import android.test.ActivityInstrumentationTestCase2;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.MediumTest;
+import android.util.ListUtil;
 import android.view.KeyEvent;
 import android.widget.ExpandableListView;
 
-import android.widget.expandablelistview.ExpandableListWithHeaders;
-import android.util.ListUtil;
-
-public class ExpandableListWithHeadersTest extends ActivityInstrumentationTestCase<ExpandableListWithHeaders> {
+public class ExpandableListWithHeadersTest extends
+        ActivityInstrumentationTestCase2<ExpandableListWithHeaders> {
     private ExpandableListView mExpandableListView;
     private ListUtil mListUtil;
     
     public ExpandableListWithHeadersTest() {
-        super("com.android.frameworks.coretests",
-                ExpandableListWithHeaders.class);
+        super(ExpandableListWithHeaders.class);
     }
 
     @Override
@@ -62,5 +60,10 @@ public class ExpandableListWithHeadersTest extends ActivityInstrumentationTestCa
         sendKeys(KeyEvent.KEYCODE_DPAD_CENTER);
         getInstrumentation().waitForIdleSync();
         assertTrue(mExpandableListView.isGroupExpanded(0));
+    }
+
+    @MediumTest
+    public void testGroupChildPositions() {
+        ExpandableListBasicTest.checkGroupAndChildPositions(mExpandableListView, this);
     }
 }

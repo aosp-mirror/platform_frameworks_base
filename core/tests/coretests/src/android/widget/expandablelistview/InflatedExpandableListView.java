@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.view.widget.expandablelistview;
+package android.widget.expandablelistview;
 
 import com.android.frameworks.coretests.R;
 
