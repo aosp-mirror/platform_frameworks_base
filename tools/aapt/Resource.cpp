@@ -224,9 +224,9 @@ static status_t parsePackage(Bundle* bundle, const sp<AaptAssets>& assets,
                 ssize_t minSdkIndex = block.indexOfAttribute(RESOURCES_ANDROID_NAMESPACE,
                                                              "minSdkVersion");
                 if (minSdkIndex >= 0) {
-                    String8 minSdkString = String8(
-                        block.getAttributeStringValue(minSdkIndex, &len));
-                    bundle->setMinSdkVersion(minSdkString.string());
+                    const uint16_t* minSdk16 = block.getAttributeStringValue(minSdkIndex, &len);
+                    const char* minSdk8 = strdup(String8(minSdk16).string());
+                    bundle->setMinSdkVersion(minSdk8);
                 }
             }
         }
