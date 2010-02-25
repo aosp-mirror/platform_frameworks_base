@@ -525,6 +525,18 @@ public final class Bundle implements Parcelable, Cloneable {
     }
 
     /**
+     * Inserts an ArrayList<CharSequence> value into the mapping of this Bundle, replacing
+     * any existing value for the given key.  Either key or value may be null.
+     *
+     * @param key a String, or null
+     * @param value an ArrayList<CharSequence> object, or null
+     */
+    public void putCharSequenceArrayList(String key, ArrayList<CharSequence> value) {
+        unparcel();
+        mMap.put(key, value);
+    }
+
+    /**
      * Inserts a Serializable value into the mapping of this Bundle, replacing
      * any existing value for the given key.  Either key or value may be null.
      *
@@ -640,6 +652,18 @@ public final class Bundle implements Parcelable, Cloneable {
      * @param value a String array object, or null
      */
     public void putStringArray(String key, String[] value) {
+        unparcel();
+        mMap.put(key, value);
+    }
+
+    /**
+     * Inserts a CharSequence array value into the mapping of this Bundle, replacing
+     * any existing value for the given key.  Either key or value may be null.
+     *
+     * @param key a String, or null
+     * @param value a CharSequence array object, or null
+     */
+    public void putCharSequenceArray(String key, CharSequence[] value) {
         unparcel();
         mMap.put(key, value);
     }
@@ -1186,6 +1210,28 @@ public final class Bundle implements Parcelable, Cloneable {
      * value is explicitly associated with the key.
      *
      * @param key a String, or null
+     * @return an ArrayList<CharSequence> value, or null
+     */
+    public ArrayList<CharSequence> getCharSequenceArrayList(String key) {
+        unparcel();
+        Object o = mMap.get(key);
+        if (o == null) {
+            return null;
+        }
+        try {
+            return (ArrayList<CharSequence>) o;
+        } catch (ClassCastException e) {
+            typeWarning(key, o, "ArrayList<CharSequence>", e);
+            return null;
+        }
+    }
+
+    /**
+     * Returns the value associated with the given key, or null if
+     * no mapping of the desired type exists for the given key or a null
+     * value is explicitly associated with the key.
+     *
+     * @param key a String, or null
      * @return a boolean[] value, or null
      */
     public boolean[] getBooleanArray(String key) {
@@ -1374,6 +1420,28 @@ public final class Bundle implements Parcelable, Cloneable {
             return (String[]) o;
         } catch (ClassCastException e) {
             typeWarning(key, o, "String[]", e);
+            return null;
+        }
+    }
+
+    /**
+     * Returns the value associated with the given key, or null if
+     * no mapping of the desired type exists for the given key or a null
+     * value is explicitly associated with the key.
+     *
+     * @param key a String, or null
+     * @return a CharSequence[] value, or null
+     */
+    public CharSequence[] getCharSequenceArray(String key) {
+        unparcel();
+        Object o = mMap.get(key);
+        if (o == null) {
+            return null;
+        }
+        try {
+            return (CharSequence[]) o;
+        } catch (ClassCastException e) {
+            typeWarning(key, o, "CharSequence[]", e);
             return null;
         }
     }
