@@ -934,9 +934,18 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
             int newType = -1;
             int newPriority = -1;
+            boolean noMobileData = !getMobileDataEnabled();
             for (int checkType=0; checkType <= ConnectivityManager.MAX_NETWORK_TYPE; checkType++) {
                 if (checkType == prevNetType) continue;
                 if (mNetAttributes[checkType] == null) continue;
+                if (mNetAttributes[checkType].mRadio == ConnectivityManager.TYPE_MOBILE &&
+                        noMobileData) {
+                    if (DBG) {
+                        Log.d(TAG, "not failing over to mobile type " + checkType +
+                                " because Mobile Data Disabled");
+                    }
+                    continue;
+                }
                 if (mNetAttributes[checkType].isDefault()) {
                     /* TODO - if we have multiple nets we could use
                      * we may want to put more thought into which we choose
