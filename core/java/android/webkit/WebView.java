@@ -3136,7 +3136,8 @@ public class WebView extends AbsoluteLayout
     }
 
     private void drawExtras(Canvas canvas, int extras) {
-        if (mNativeClass == 0) return;
+        // If mNativeClass is 0, we should not reach here, so we do not
+        // need to check it again.
         // Currently for each draw we compute the animation values;
         // We may in the future decide to do that independently.
         if (nativeEvaluateLayersAnimations()) {
@@ -3153,7 +3154,6 @@ public class WebView extends AbsoluteLayout
         if (mDrawHistory) {
             canvas.scale(mActualScale, mActualScale);
             canvas.drawPicture(mHistoryPicture);
-            drawExtras(canvas, DRAW_EXTRAS_NONE);
             return;
         }
 
