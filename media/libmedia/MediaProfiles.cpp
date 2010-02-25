@@ -293,6 +293,13 @@ MediaProfiles::createCamcorderProfile(const char **atts)
     return profile;
 }
 
+/*static*/ int
+MediaProfiles::getImageEncodingQualityLevel(const char** atts)
+{
+    CHECK(!strcmp("quality", atts[0]));
+    return atoi(atts[1]);
+}
+
 /*static*/ void
 MediaProfiles::startElementHandler(void *userData, const char *name, const char **atts)
 {
@@ -317,6 +324,8 @@ MediaProfiles::startElementHandler(void *userData, const char *name, const char 
         profiles->mEncoderOutputFileFormats.add(createEncoderOutputFileFormat(atts));
     } else if (strcmp("EncoderProfile", name) == 0) {
         profiles->mCamcorderProfiles.add(createCamcorderProfile(atts));
+    } else if (strcmp("ImageEncoding", name) == 0) {
+        profiles->mImageEncodingQualityLevels.add(getImageEncodingQualityLevel(atts));
     }
 }
 
@@ -446,6 +455,14 @@ MediaProfiles::createDefaultAmrNBEncoderCap()
         AUDIO_ENCODER_AMR_NB, 5525, 12200, 8000, 8000, 1, 1);
 }
 
+/*static*/ void
+MediaProfiles::createDefaultImageEncodingQualityLevels(MediaProfiles *profiles)
+{
+    profiles->mImageEncodingQualityLevels.add(70);
+    profiles->mImageEncodingQualityLevels.add(80);
+    profiles->mImageEncodingQualityLevels.add(90);
+}
+
 /*static*/ MediaProfiles*
 MediaProfiles::createDefaultInstance()
 {
@@ -456,6 +473,7 @@ MediaProfiles::createDefaultInstance()
     createDefaultVideoDecoders(profiles);
     createDefaultAudioDecoders(profiles);
     createDefaultEncoderOutputFileFormats(profiles);
+    createDefaultImageEncodingQualityLevels(profiles);
     sIsInitialized = true;
     return profiles;
 }
@@ -627,6 +645,7 @@ int MediaProfiles::getCamcorderProfileParamByName(const char *name, camcorder_qu
         return -1;
     }
 
+    if (!strcmp("duration", name)) return mCamcorderProfiles[index]->mDuration;
     if (!strcmp("file.format", name)) return mCamcorderProfiles[index]->mFileFormat;
     if (!strcmp("vid.codec", name)) return mCamcorderProfiles[index]->mVideoCodec->mCodec;
     if (!strcmp("vid.width", name)) return mCamcorderProfiles[index]->mVideoCodec->mFrameWidth;
@@ -640,6 +659,11 @@ int MediaProfiles::getCamcorderProfileParamByName(const char *name, camcorder_qu
 
     LOGE("The given camcorder profile param name %s is not found", name);
     return -1;
+}
+
+Vector<int> MediaProfiles::getImageEncodingQualityLevels() const
+{
+    return mImageEncodingQualityLevels;  // copy out
 }
 
 MediaProfiles::~MediaProfiles()
