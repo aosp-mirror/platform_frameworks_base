@@ -3176,6 +3176,56 @@ public final class ContactsContract {
     }
 
     /**
+     * Additional columns returned by the {@link Contacts#CONTENT_FILTER_URI} providing the
+     * explanation of why the filter matched the contact.  Specifically, they contain the
+     * data type and element that was used for matching.
+     * <p>
+     * This is temporary API, it will need to change when we move to FTS.
+     *
+     * @hide
+     */
+    public static class SearchSnippetColumns {
+
+        /**
+         * The ID of the data row that was matched by the filter.
+         *
+         * @hide
+         */
+        public static final String SNIPPET_DATA_ID = "snippet_data_id";
+
+        /**
+         * The type of data that was matched by the filter.
+         *
+         * @hide
+         */
+        public static final String SNIPPET_MIMETYPE = "snippet_mimetype";
+
+        /**
+         * The {@link CommonDataKinds.CommonColumns#DATA} field of the data row
+         * that was matched by the filter.
+         *
+         * @hide
+         */
+        public static final String SNIPPET_DATA = "snippet_data";
+
+        /**
+         * The {@link CommonDataKinds.CommonColumns#TYPE} field of the data row
+         * that was matched by the filter.
+         *
+         * @hide
+         */
+        public static final String SNIPPET_TYPE = "snippet_type";
+
+        /**
+         * The {@link CommonDataKinds.CommonColumns#LABEL} field of the data row
+         * that was matched by the filter.
+         *
+         * @hide
+         */
+        public static final String SNIPPET_LABEL = "snippet_label";
+    }
+
+    /**
      * Container for definitions of common data types stored in the {@link ContactsContract.Data}
      * table.
      */
