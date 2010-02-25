@@ -632,6 +632,8 @@ public class LinearLayout extends ViewGroup {
 
         final boolean baselineAligned = mBaselineAligned;
         final boolean useLargestChild = mUseLargestChild;
+        
+        final boolean isExactly = widthMode == MeasureSpec.EXACTLY;
 
         int largestChildWidth = Integer.MIN_VALUE;
 
@@ -658,7 +660,13 @@ public class LinearLayout extends ViewGroup {
                 // Optimization: don't bother measuring children who are going to use
                 // leftover space. These views will get measured again down below if
                 // there is any leftover space.
-                mTotalLength += lp.leftMargin + lp.rightMargin;
+                if (isExactly) {
+                    mTotalLength += lp.leftMargin + lp.rightMargin;
+                } else {
+                    final int totalLength = mTotalLength;
+                    mTotalLength = Math.max(totalLength, totalLength +
+                            lp.leftMargin + lp.rightMargin);
+                }
 
                 // Baseline alignment requires to measure widgets to obtain the
                 // baseline offset (in particular for TextViews). The following
@@ -694,8 +702,14 @@ public class LinearLayout extends ViewGroup {
                 }
 
                 final int childWidth = child.getMeasuredWidth();
-                mTotalLength += childWidth + lp.leftMargin + lp.rightMargin +
-                        getNextLocationOffset(child);
+                if (isExactly) {
+                    mTotalLength += childWidth + lp.leftMargin + lp.rightMargin +
+                            getNextLocationOffset(child);
+                } else {
+                    final int totalLength = mTotalLength;
+                    mTotalLength = Math.max(totalLength, totalLength + childWidth + lp.leftMargin +
+                           lp.rightMargin + getNextLocationOffset(child));
+                }
 
                 if (useLargestChild) {
                     largestChildWidth = Math.max(childWidth, largestChildWidth);
@@ -780,8 +794,14 @@ public class LinearLayout extends ViewGroup {
 
                 final LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams)
                         child.getLayoutParams();
-                mTotalLength += largestChildWidth + lp.leftMargin + lp.rightMargin +
-                        getNextLocationOffset(child);
+                if (isExactly) {
+                    mTotalLength += largestChildWidth + lp.leftMargin + lp.rightMargin +
+                            getNextLocationOffset(child);
+                } else {
+                    final int totalLength = mTotalLength;
+                    mTotalLength = Math.max(totalLength, totalLength + largestChildWidth +
+                            lp.leftMargin + lp.rightMargin + getNextLocationOffset(child));
+                }
             }
         }
 
@@ -851,8 +871,14 @@ public class LinearLayout extends ViewGroup {
                     }
                 }
 
-                mTotalLength += child.getMeasuredWidth() + lp.leftMargin + lp.rightMargin +
-                        getNextLocationOffset(child);
+                if (isExactly) {
+                    mTotalLength += child.getMeasuredWidth() + lp.leftMargin + lp.rightMargin +
+                            getNextLocationOffset(child);
+                } else {
+                    final int totalLength = mTotalLength;
+                    mTotalLength = Math.max(totalLength, totalLength + child.getMeasuredWidth() +
+                            lp.leftMargin + lp.rightMargin + getNextLocationOffset(child));
+                }
 
                 boolean matchHeightLocally = heightMode != MeasureSpec.EXACTLY &&
                         lp.height == LayoutParams.MATCH_PARENT;
