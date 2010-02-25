@@ -1300,6 +1300,14 @@ public class SearchManager
     public final static String EXTRA_SELECT_QUERY = "select_query";
 
     /**
+     * Boolean extra data key for a suggestion provider to return in {@link Cursor#getExtras} to
+     * indicate that the search is not complete yet. This can be used by the search UI
+     * to indicate that a search is in progress. The suggestion provider can return partial results
+     * this way and send a change notification on the cursor when more results are available.
+     */
+    public final static String CURSOR_EXTRA_KEY_IN_PROGRESS = "in_progress";
+
+    /**
      * Intent extra data key: Use this key with Intent.ACTION_SEARCH and
      * {@link android.content.Intent#getStringExtra content.Intent.getStringExtra()}
      * to obtain the action message that was defined for a particular search action key and/or
