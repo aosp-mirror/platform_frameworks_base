@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.common;
+package android.net.http;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -36,7 +36,6 @@ import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
-import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.RequestWrapper;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
@@ -55,7 +54,6 @@ import java.io.OutputStream;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 import java.net.URI;
-import java.security.KeyManagementException;
 
 import android.content.Context;
 import android.content.ContentResolver;

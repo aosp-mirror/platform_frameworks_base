@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.common;
+package com.android.internal.net;
+
 
 import android.util.Config;
 import android.util.Log;
@@ -30,6 +31,7 @@ import java.util.regex.PatternSyntaxException;
 
 import javax.security.auth.x500.X500Principal;
 
+/** @hide */
 public class DomainNameValidator {
     private final static String TAG = "DomainNameValidator";
 

@@ -16,8 +16,6 @@
 
 package android.app;
 
-import com.android.common.Patterns;
-import com.android.common.speech.Recognition;
 
 import static android.app.SuggestionsAdapter.getColumnString;
 
@@ -48,6 +46,7 @@ import android.text.TextWatcher;
 import android.util.AndroidRuntimeException;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.Patterns;
 import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -820,7 +819,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         voiceIntent.putExtra(RecognizerIntent.EXTRA_PROMPT, prompt);
         voiceIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, language);
         voiceIntent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, maxResults);
-        voiceIntent.putExtra(Recognition.EXTRA_CALLING_PACKAGE,
+        voiceIntent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE,
                 searchActivity == null ? null : searchActivity.toShortString());
         
         // Add the values that configure forwarding the results

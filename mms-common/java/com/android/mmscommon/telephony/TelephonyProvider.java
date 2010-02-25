@@ -32,8 +32,8 @@ import android.telephony.SmsMessage;
 import android.text.TextUtils;
 import android.util.Config;
 import android.util.Log;
+import android.util.Patterns;
 
-import com.android.common.Patterns;
 import android.database.sqlite.SqliteWrapper;
 
 /**

@@ -15,7 +15,8 @@
  *  limitations under the License.
  */
 
-package com.android.common;
+package com.android.internal.net;
+
 
 import android.util.Log;
 
@@ -34,6 +35,8 @@ import javax.security.auth.x500.X500Principal;
  *
  * <p>This class is used by {@link DomainNameValidator} only.  However, in order to make this
  * class visible from unit tests, it's made public.
+ * 
+ * @hide
  */
 public final class DNParser {
     private static final String TAG = "DNParser";

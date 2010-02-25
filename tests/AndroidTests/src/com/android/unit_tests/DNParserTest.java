@@ -13,7 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.common;
+package com.android.unit_tests;
+
+import com.android.internal.net.DNParser;
 
 import javax.security.auth.x500.X500Principal;
 

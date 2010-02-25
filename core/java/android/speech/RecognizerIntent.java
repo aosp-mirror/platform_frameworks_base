@@ -32,6 +32,15 @@ import android.os.Bundle;
  * Constants for supporting speech recognition through starting an {@link Intent}
  */
 public class RecognizerIntent {
+    /**
+     * The extra key used in an intent to the speech recognizer for voice search. Not
+     * generally to be used by developers. The system search dialog uses this, for example,
+     * to set a calling package for identification by a voice search API. If this extra
+     * is set by anyone but the system process, it should be overridden by the voice search
+     * implementation.
+     */
+    public final static String EXTRA_CALLING_PACKAGE = "calling_package";
+
     private RecognizerIntent() {
         // Not for instantiating.
     }

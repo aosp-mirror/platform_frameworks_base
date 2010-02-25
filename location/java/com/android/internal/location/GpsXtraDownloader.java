@@ -32,10 +32,10 @@ import java.util.Random;
 
 import android.content.Context;
 import android.net.Proxy;
+import android.net.http.AndroidHttpClient;
 import android.util.Config;
 import android.util.Log;
 
-import com.android.common.AndroidHttpClient;
 
 
 /**

@@ -34,7 +34,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.util.Log;
-import com.android.common.XmlUtils;
+
+import com.android.internal.util.XmlUtils;
 
 import java.io.IOException;
 import java.io.Serializable;

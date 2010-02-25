@@ -308,10 +308,12 @@ android.net.Uri$HierarchicalUri
 android.net.Uri$OpaqueUri
 android.net.Uri$Part
 android.net.WebAddress
+android.net.http.AndroidHttpClient
 android.net.http.AndroidHttpClientConnection
 android.net.http.EventHandler
 android.net.http.Headers
 android.net.http.HttpsConnection
+android.net.http.HttpDateTime
 android.net.http.Request
 android.net.http.RequestQueue
 android.net.http.SslCertificate
@@ -473,6 +475,7 @@ android.util.FloatMath
 android.util.Log
 android.util.LongSparseArray
 android.util.MonthDisplayHelper
+android.util.Patterns
 android.util.SparseArray
 android.util.StateSet
 android.util.TypedValue
@@ -618,13 +621,6 @@ android.widget.ViewSwitcher
 android.widget.ZoomButton
 android.widget.ZoomButtonsController
 android.widget.ZoomControls
-com.android.common.AndroidHttpClient
-com.android.common.DomainNameValidator
-com.android.common.FastXmlSerializer
-com.android.common.HttpDateTime
-com.android.common.Patterns
-com.android.common.Rfc822Validator
-com.android.common.userhappiness.UserHappinessSignals
 com.android.internal.R$styleable
 com.android.internal.app.AlertActivity
 com.android.internal.app.AlertController
@@ -652,6 +648,7 @@ com.android.internal.os.SamplingProfilerIntegration
 com.android.internal.os.ZygoteConnection
 com.android.internal.os.ZygoteConnection$Arguments
 com.android.internal.os.ZygoteInit
+com.android.internal.net.DomainNameValidator
 com.android.internal.policy.PolicyManager
 com.android.internal.policy.impl.PhoneLayoutInflater
 com.android.internal.policy.impl.PhoneWindow
@@ -672,7 +669,9 @@ com.android.internal.telephony.gsm.SmsMessage
 com.android.internal.telephony.gsm.SmsMessage$PduParser
 com.android.internal.util.ArrayUtils
 com.android.internal.util.FastMath
+com.android.internal.util.FastXmlSerializer
 com.android.internal.util.HanziToPinyin
+com.android.internal.util.XmlUtils
 com.android.internal.view.IInputConnectionWrapper
 com.android.internal.view.IInputContext$Stub
 com.android.internal.view.IInputMethodManager$Stub

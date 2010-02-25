@@ -44,8 +44,8 @@ import android.text.TextUtils;
 import android.util.Config;
 import android.util.Log;
 import android.util.Xml;
-import com.android.common.XmlUtils;
 import com.android.internal.telephony.RILConstants;
+import com.android.internal.util.XmlUtils;
 
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockPatternView;

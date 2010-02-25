@@ -18,9 +18,9 @@ package com.android.server;
 
 import com.android.internal.app.IMediaContainerService;
 import com.android.internal.app.ResolverActivity;
-import com.android.common.FastXmlSerializer;
-import com.android.common.XmlUtils;
 import com.android.internal.content.PackageHelper;
+import com.android.internal.util.FastXmlSerializer;
+import com.android.internal.util.XmlUtils;
 import com.android.server.JournaledFile;
 
 import org.xmlpull.v1.XmlPullParser;

@@ -18,6 +18,7 @@ package android.webkit;
 
 import android.content.Context;
 import android.net.http.Headers;
+import android.net.http.HttpDateTime;
 import android.os.FileUtils;
 import android.util.Log;
 import java.io.File;
@@ -30,7 +31,6 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Map;
 
-import com.android.common.HttpDateTime;
 
 import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.digests.SHA1Digest;

@@ -18,8 +18,8 @@ package com.android.internal.telephony.gsm;
 
 import android.os.Message;
 import android.util.Log;
+import android.util.Patterns;
 
-import com.android.common.Patterns;
 import com.android.internal.telephony.DataConnection;
 import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.RILConstants;

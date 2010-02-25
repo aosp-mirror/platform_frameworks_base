@@ -22,10 +22,10 @@ import android.text.style.URLSpan;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.Spanned;
+import android.util.Patterns;
 import android.webkit.WebView;
 import android.widget.TextView;
 
-import com.android.common.Patterns;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;

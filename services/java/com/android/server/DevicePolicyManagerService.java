@@ -16,9 +16,9 @@
 
 package com.android.server;
 
-import com.android.common.FastXmlSerializer;
-import com.android.common.XmlUtils;
 import com.android.internal.content.PackageMonitor;
+import com.android.internal.util.FastXmlSerializer;
+import com.android.internal.util.XmlUtils;
 import com.android.internal.widget.LockPatternUtils;
 
 import org.xmlpull.v1.XmlPullParser;
