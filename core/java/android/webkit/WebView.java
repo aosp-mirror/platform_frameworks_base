@@ -372,6 +372,7 @@ public class WebView extends AbsoluteLayout
     private static final int PREVENT_DRAG_NO = 0;
     private static final int PREVENT_DRAG_MAYBE_YES = 1;
     private static final int PREVENT_DRAG_YES = 2;
+    private static final int PREVENT_DRAG_CANCEL = 3;
     private int mPreventDrag = PREVENT_DRAG_NO;
 
     // by default mPreventLongPress is false. If it is true, long press event
@@ -4138,8 +4139,11 @@ public class WebView extends AbsoluteLayout
         }
 
         // pass the touch events from UI thread to WebCore thread
-        if (mForwardTouchEvents && (action != MotionEvent.ACTION_MOVE
-                || eventTime - mLastSentTouchTime > TOUCH_SENT_INTERVAL)) {
+        if (mForwardTouchEvents
+                && (action != MotionEvent.ACTION_MOVE || eventTime
+                        - mLastSentTouchTime > TOUCH_SENT_INTERVAL)
+                && (action == MotionEvent.ACTION_DOWN
+                        || mPreventDrag != PREVENT_DRAG_CANCEL)) {
             WebViewCore.TouchEventData ted = new WebViewCore.TouchEventData();
             ted.mAction = action;
             ted.mX = viewToContentX((int) x + mScrollX);
@@ -5407,12 +5411,17 @@ public class WebView extends AbsoluteLayout
                     break;
                 }
                 case SWITCH_TO_SHORTPRESS: {
-                    // if mPreventDrag is not confirmed, treat it as no so that
-                    // it won't block panning the page.
+                    // if mPreventDrag is not confirmed, cancel it so that it
+                    // won't block panning the page.
                     if (mPreventDrag == PREVENT_DRAG_MAYBE_YES) {
-                        mPreventDrag = PREVENT_DRAG_NO;
+                        mPreventDrag = PREVENT_DRAG_CANCEL;
                         mPreventLongPress = false;
                         mPreventDoubleTap = false;
+                        // remove the pending TOUCH_EVENT and send a cancel
+                        mWebViewCore.removeMessages(EventHub.TOUCH_EVENT);
+                        WebViewCore.TouchEventData ted = new WebViewCore.TouchEventData();
+                        ted.mAction = MotionEvent.ACTION_CANCEL;
+                        mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
                     }
                     if (mTouchMode == TOUCH_INIT_MODE) {
                         mTouchMode = mFullScreenHolder == null
@@ -5434,7 +5443,7 @@ public class WebView extends AbsoluteLayout
                         ted.mY = viewToContentY((int) mLastTouchY + mScrollY);
                         ted.mEventTime = SystemClock.uptimeMillis();
                         mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
-                    } else if (mPreventDrag == PREVENT_DRAG_NO) {
+                    } else if (mPreventDrag != PREVENT_DRAG_YES) {
                         mTouchMode = TOUCH_DONE_MODE;
                         if (mFullScreenHolder == null) {
                             performLongClick();
@@ -5445,13 +5454,18 @@ public class WebView extends AbsoluteLayout
                 }
                 case RELEASE_SINGLE_TAP: {
                     if (mPreventDrag == PREVENT_DRAG_MAYBE_YES) {
-                        // if mPreventDrag is not confirmed, treat it as
-                        // no so that it won't block tap.
-                        mPreventDrag = PREVENT_DRAG_NO;
+                        // if mPreventDrag is not confirmed, cancel it so that
+                        // it won't block panning the page.
+                        mPreventDrag = PREVENT_DRAG_CANCEL;
                         mPreventLongPress = false;
                         mPreventDoubleTap = false;
+                        // remove the pending TOUCH_EVENT and send a cancel
+                        mWebViewCore.removeMessages(EventHub.TOUCH_EVENT);
+                        WebViewCore.TouchEventData ted = new WebViewCore.TouchEventData();
+                        ted.mAction = MotionEvent.ACTION_CANCEL;
+                        mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
                     }
-                    if (mPreventDrag == PREVENT_DRAG_NO) {
+                    if (mPreventDrag != PREVENT_DRAG_YES) {
                         mTouchMode = TOUCH_DONE_MODE;
                         doShortPress();
                     }
