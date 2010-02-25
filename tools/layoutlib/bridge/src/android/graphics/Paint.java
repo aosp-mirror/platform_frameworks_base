@@ -219,11 +219,6 @@ public class Paint extends _Original_Paint {
     }
 
     @Override
-    public void finalize() throws Throwable {
-        // pass
-    }
-
-    @Override
     public void reset() {
         super.reset();
     }
