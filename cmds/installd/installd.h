@@ -68,7 +68,7 @@
 /* other handy constants */
 
 #define PROTECTED_DIR_PREFIX  "/data/app-private/"
-#define SDCARD_DIR_PREFIX  "/mnt/asec/"
+#define SDCARD_DIR_PREFIX  getenv("ASEC_MOUNTPOINT")
 
 #define DALVIK_CACHE_PREFIX   "/data/dalvik-cache/"
 #define DALVIK_CACHE_POSTFIX  "/classes.dex"
