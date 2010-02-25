@@ -696,8 +696,7 @@ public class ProgressBar extends View {
      * <p>Start the indeterminate progress animation.</p>
      */
     void startAnimation() {
-        int visibility = getVisibility();
-        if (visibility != VISIBLE) {
+        if (getVisibility() != VISIBLE) {
             return;
         }
 
@@ -771,9 +770,23 @@ public class ProgressBar extends View {
                 // let's be nice with the UI thread
                 if (v == GONE || v == INVISIBLE) {
                     stopAnimation();
-                } else if (v == VISIBLE) {
+                } else {
                     startAnimation();
                 }
+            }
+        }
+    }
+
+    @Override
+    protected void onVisibilityChanged(View changedView, int visibility) {
+        super.onVisibilityChanged(changedView, visibility);
+
+        if (mIndeterminate) {
+            // let's be nice with the UI thread
+            if (visibility == GONE || visibility == INVISIBLE) {
+                stopAnimation();
+            } else {
+                startAnimation();
             }
         }
     }
