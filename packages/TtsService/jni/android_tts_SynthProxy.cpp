@@ -45,6 +45,9 @@
 #define USAGEMODE_PLAY_IMMEDIATELY 0
 #define USAGEMODE_WRITE_TO_FILE    1
 
+#define SYNTHPLAYSTATE_IS_STOPPED 0
+#define SYNTHPLAYSTATE_IS_PLAYING 1
+
 using namespace android;
 
 // ----------------------------------------------------------------------------
@@ -154,6 +157,8 @@ class SynthProxyJniStorage {
         TtsEngine*                mNativeSynthInterface;
         void*                     mEngineLibHandle;
         AudioTrack*               mAudioOut;
+        int8_t                    mPlayState;
+        Mutex                     mPlayLock;
         AudioSystem::stream_type  mStreamType;
         uint32_t                  mSampleRate;
         uint32_t                  mAudFormat;
@@ -166,6 +171,7 @@ class SynthProxyJniStorage {
             mNativeSynthInterface = NULL;
             mEngineLibHandle = NULL;
             mAudioOut = NULL;
+            mPlayState =  SYNTHPLAYSTATE_IS_STOPPED;
             mStreamType = DEFAULT_TTS_STREAM_TYPE;
             mSampleRate = DEFAULT_TTS_RATE;
             mAudFormat  = DEFAULT_TTS_FORMAT;
@@ -223,6 +229,7 @@ class SynthProxyJniStorage {
             if (minBufCount < 2) minBufCount = 2;
             int minFrameCount = (afFrameCount * rate * minBufCount)/afSampleRate;
 
+            mPlayLock.lock();
             mAudioOut = new AudioTrack(mStreamType, rate, format,
                     (channel == 2) ? AudioSystem::CHANNEL_OUT_STEREO : AudioSystem::CHANNEL_OUT_MONO,
                     minFrameCount > 4096 ? minFrameCount : 4096,
@@ -237,6 +244,7 @@ class SynthProxyJniStorage {
               mAudioOut->setVolume(1.0f, 1.0f);
               LOGV("AudioTrack ready");
             }
+            mPlayLock.unlock();
         }
 };
 
@@ -288,6 +296,12 @@ static tts_callback_status ttsSynthDoneCB(void *& userdata, uint32_t rate,
         if (bufferSize > 0) {
             prepAudioTrack(pJniData, pForAfter->streamType, rate, (AudioSystem::audio_format)format, channel);
             if (pJniData->mAudioOut) {
+                pJniData->mPlayLock.lock();
+                if(pJniData->mAudioOut->stopped()
+                        && (pJniData->mPlayState == SYNTHPLAYSTATE_IS_PLAYING)) {
+                    pJniData->mAudioOut->start();
+                }
+                pJniData->mPlayLock.unlock();
                 if (bUseFilter) {
                     applyFilter((int16_t*)wav, bufferSize/2);
                 }
@@ -711,9 +725,9 @@ android_tts_SynthProxy_speak(JNIEnv *env, jobject thiz, jint jniData,
 
     SynthProxyJniStorage* pSynthData = (SynthProxyJniStorage*)jniData;
 
-    if (pSynthData->mAudioOut) {
-        pSynthData->mAudioOut->start();
-    }
+    pSynthData->mPlayLock.lock();
+    pSynthData->mPlayState = SYNTHPLAYSTATE_IS_PLAYING;
+    pSynthData->mPlayLock.unlock();
 
     afterSynthData_t* pForAfter = new (afterSynthData_t);
     pForAfter->jniStorage = jniData;
@@ -744,9 +758,13 @@ android_tts_SynthProxy_stop(JNIEnv *env, jobject thiz, jint jniData)
 
     SynthProxyJniStorage* pSynthData = (SynthProxyJniStorage*)jniData;
 
+    pSynthData->mPlayLock.lock();
+    pSynthData->mPlayState = SYNTHPLAYSTATE_IS_STOPPED;
     if (pSynthData->mAudioOut) {
         pSynthData->mAudioOut->stop();
     }
+    pSynthData->mPlayLock.unlock();
+
     if (pSynthData->mNativeSynthInterface) {
         result = pSynthData->mNativeSynthInterface->stop();
     }
