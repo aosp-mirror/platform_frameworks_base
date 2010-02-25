@@ -142,6 +142,7 @@ extern int register_android_net_NetworkUtils(JNIEnv* env);
 extern int register_android_net_wifi_WifiManager(JNIEnv* env);
 extern int register_android_security_Md5MessageDigest(JNIEnv *env);
 extern int register_android_text_AndroidCharacter(JNIEnv *env);
+extern int register_android_text_AndroidBidi(JNIEnv *env);
 extern int register_android_text_KeyCharacterMap(JNIEnv *env);
 extern int register_android_opengl_classes(JNIEnv *env);
 extern int register_android_bluetooth_HeadsetBase(JNIEnv* env);
@@ -1184,6 +1185,7 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_emoji_EmojiFactory),
     REG_JNI(register_android_security_Md5MessageDigest),
     REG_JNI(register_android_text_AndroidCharacter),
+    REG_JNI(register_android_text_AndroidBidi),
     REG_JNI(register_android_text_KeyCharacterMap),
     REG_JNI(register_android_os_Process),
     REG_JNI(register_android_os_Binder),
