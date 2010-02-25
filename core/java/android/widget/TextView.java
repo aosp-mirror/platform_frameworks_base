@@ -6372,6 +6372,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         mBlink.postAtTime(mBlink, mShowCursor + BLINK);
     }
 
+    /**
+     * @hide
+     */
     @Override
     public void dispatchFinishTemporaryDetach() {
         mDispatchTemporaryDetach = true;

@@ -1068,6 +1068,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     
     /**
      * {@inheritDoc}
+     * 
+     * @hide
      */
     @Override
     public void dispatchStartTemporaryDetach() {
@@ -1081,6 +1083,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     
     /**
      * {@inheritDoc}
+     * 
+     * @hide
      */
     @Override
     public void dispatchFinishTemporaryDetach() {
