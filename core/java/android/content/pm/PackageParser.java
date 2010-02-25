@@ -30,6 +30,7 @@ import android.content.res.XmlResourceParser;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.PatternMatcher;
+import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.Config;
 import android.util.DisplayMetrics;
@@ -711,9 +712,10 @@ public class PackageParser {
                     com.android.internal.R.styleable.AndroidManifest_sharedUserLabel, 0);
         }
         sa.recycle();
+
         pkg.installLocation = sa.getInteger(
                 com.android.internal.R.styleable.AndroidManifest_installLocation,
-                PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY);
+                PackageInfo.INSTALL_LOCATION_AUTO);
 
         // Resource boolean are -1, so 1 means we don't know the value.
         int supportsSmallScreens = 1;
