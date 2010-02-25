@@ -50,6 +50,11 @@ public class SyncStateContentProviderHelper {
 
     public static final String PATH = "syncstate";
 
+    private static final String QUERY_COUNT_SYNC_STATE_ROWS =
+            "SELECT count(*)"
+                    + " FROM " + SYNC_STATE_TABLE
+                    + " WHERE " + SyncStateContract.Columns._ID + "=?";
+
     public void createDatabase(SQLiteDatabase db) {
         db.execSQL("DROP TABLE IF EXISTS " + SYNC_STATE_TABLE);
         db.execSQL("CREATE TABLE " + SYNC_STATE_TABLE + " ("
@@ -96,11 +101,17 @@ public class SyncStateContentProviderHelper {
         return db.update(SYNC_STATE_TABLE, values, selection, selectionArgs);
     }
 
-    public void update(SQLiteDatabase db, long rowId, Object data) {
+    public int update(SQLiteDatabase db, long rowId, Object data) {
+        if (DatabaseUtils.longForQuery(db, QUERY_COUNT_SYNC_STATE_ROWS,
+                new String[]{Long.toString(rowId)}) < 1) {
+            return 0;
+        }
         db.execSQL("UPDATE " + SYNC_STATE_TABLE
                 + " SET " + SyncStateContract.Columns.DATA + "=?"
                 + " WHERE " + SyncStateContract.Columns._ID + "=" + rowId,
                 new Object[]{data});
+        // assume a row was modified since we know it exists
+        return 1;
     }
 
     public void onAccountsChanged(SQLiteDatabase db, Account[] accounts) {
