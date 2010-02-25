@@ -52,11 +52,6 @@ public class Matrix extends _Original_Matrix {
         mValues = data;
     }
 
-    @Override
-    public void finalize() throws Throwable {
-        // pass
-    }
-
     //---------- Custom Methods
 
     /**
