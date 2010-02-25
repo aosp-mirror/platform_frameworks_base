@@ -430,6 +430,8 @@ void memStatus(int fd, const Vector<String16>& args)
 
         snprintf(buffer, SIZE, " Allocation count %i\n", count);
         result.append(buffer);
+        snprintf(buffer, SIZE, " Total memory %i\n", totalMemory);
+        result.append(buffer);
 
         AllocEntry * entries = new AllocEntry[count];
 
@@ -478,7 +480,7 @@ void memStatus(int fd, const Vector<String16>& args)
         for (size_t i = 0; i < count; i++) {
             AllocEntry *e = &entries[i];
 
-            snprintf(buffer, SIZE, "size %8i, dup %4i", e->size, e->dups);
+            snprintf(buffer, SIZE, "size %8i, dup %4i, ", e->size, e->dups);
             result.append(buffer);
             for (size_t ct = 0; (ct < backtraceSize) && e->backtrace[ct]; ct++) {
                 if (ct) {
