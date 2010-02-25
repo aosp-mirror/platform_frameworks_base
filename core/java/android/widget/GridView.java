@@ -431,8 +431,6 @@ public class GridView extends AbsListView {
                     }
                 }
             }
-
-            return mFirstPosition + childCount - 1;
         }
         return INVALID_POSITION;
     }
