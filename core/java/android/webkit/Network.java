@@ -16,7 +16,12 @@
 
 package android.webkit;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.http.*;
 import android.os.*;
 import android.util.Log;
@@ -76,6 +81,19 @@ class Network {
      */
     private HttpAuthHandler mHttpAuthHandler;
 
+    private Context mContext;
+
+    /**
+     * True if the currently used network connection is a roaming phone
+     * connection.
+     */
+    private boolean mRoaming;
+
+    /**
+     * Tracks if we are roaming.
+     */
+    private RoamingMonitor mRoamingMonitor;
+
     /**
      * @return The singleton instance of the network.
      */
@@ -107,6 +125,7 @@ class Network {
         if (++sPlatformNotificationEnableRefCount == 1) {
             if (sNetwork != null) {
                 sNetwork.mRequestQueue.enablePlatformNotifications();
+                sNetwork.monitorRoaming();
             } else {
                 sPlatformNotifications = true;
             }
@@ -121,6 +140,7 @@ class Network {
         if (--sPlatformNotificationEnableRefCount == 0) {
             if (sNetwork != null) {
                 sNetwork.mRequestQueue.disablePlatformNotifications();
+                sNetwork.stopMonitoringRoaming();
             } else {
                 sPlatformNotifications = false;
             }
@@ -136,10 +156,37 @@ class Network {
             Assert.assertTrue(Thread.currentThread().
                     getName().equals(WebViewCore.THREAD_NAME));
         }
+        mContext = context;
         mSslErrorHandler = new SslErrorHandler();
         mHttpAuthHandler = new HttpAuthHandler(this);
 
         mRequestQueue = new RequestQueue(context);
+    }
+
+    private class RoamingMonitor extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (!ConnectivityManager.CONNECTIVITY_ACTION.equals(intent.getAction()))
+                return;
+
+            NetworkInfo info = (NetworkInfo)intent.getParcelableExtra(ConnectivityManager.EXTRA_NETWORK_INFO);
+            if (info != null)
+                mRoaming = info.isRoaming();
+        };
+    };
+
+    private void monitorRoaming() {
+        mRoamingMonitor = new RoamingMonitor();
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+        mContext.registerReceiver(sNetwork.mRoamingMonitor, filter);
+    }
+
+    private void stopMonitoringRoaming() {
+        if (mRoamingMonitor != null) {
+            mContext.unregisterReceiver(mRoamingMonitor);
+            mRoamingMonitor = null;
+        }
     }
 
     /**
@@ -167,6 +214,11 @@ class Network {
         // path. This only handles network request.
         if (URLUtil.isAssetUrl(url) || URLUtil.isResourceUrl(url)
                 || URLUtil.isFileUrl(url) || URLUtil.isDataUrl(url)) {
+            return false;
+        }
+
+        // If this is a prefetch, abort it if we're roaming.
+        if (mRoaming && headers.containsKey("X-Moz") && "prefetch".equals(headers.get("X-Moz"))) {
             return false;
         }
 
