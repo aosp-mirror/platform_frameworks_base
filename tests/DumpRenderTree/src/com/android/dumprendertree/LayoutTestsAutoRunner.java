@@ -79,14 +79,17 @@ public class LayoutTestsAutoRunner extends InstrumentationTestRunner {
 
         mSaveImagePath = (String) icicle.get("saveimage");
 
+        mJsEngine = (String) icicle.get("jsengine");
+
         super.onCreate(icicle);
     }
     
-    public String mTestPath = null;
-    public String mSaveImagePath = null;
-    public int mTimeoutInMillis = 0;
-    public int mDelay = 0;
-    public boolean mRebaseline = false;
-    public boolean mLogtime = false;
-    public boolean mGetDrawTime = false;
+    public String mTestPath;
+    public String mSaveImagePath;
+    public int mTimeoutInMillis;
+    public int mDelay;
+    public boolean mRebaseline;
+    public boolean mLogtime;
+    public boolean mGetDrawTime;
+    public String mJsEngine;
 }
