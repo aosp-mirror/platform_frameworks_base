@@ -304,7 +304,7 @@ status_t MediaPlayer::pause()
 {
     LOGV("pause");
     Mutex::Autolock _l(mLock);
-    if (mCurrentState & MEDIA_PLAYER_PAUSED)
+    if (mCurrentState & (MEDIA_PLAYER_PAUSED|MEDIA_PLAYER_PLAYBACK_COMPLETE))
         return NO_ERROR;
     if ((mPlayer != 0) && (mCurrentState & MEDIA_PLAYER_STARTED)) {
         status_t ret = mPlayer->pause();
