@@ -52,10 +52,13 @@ public class Sensor {
      * for more details.
      */
     public static final int TYPE_LIGHT          = 5;
+
     /** A constant describing a pressure sensor type */
     public static final int TYPE_PRESSURE       = 6;
+
     /** A constant describing a temperature sensor type */
     public static final int TYPE_TEMPERATURE    = 7;
+
     /**
      * A constant describing an proximity sensor type.
      * See {@link android.hardware.SensorEvent SensorEvent}

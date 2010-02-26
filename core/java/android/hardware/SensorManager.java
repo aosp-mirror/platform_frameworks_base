@@ -1306,6 +1306,8 @@ public class SensorManager
      * <li>values[1]: <i>pitch</i>, rotation around the X axis.</li>
      * <li>values[2]: <i>roll</i>, rotation around the Y axis.</li>
      * <p>
+     * All three angles above are in <b>radians</b> and <b>positive</b> in the
+     * <b>counter-clockwise</b> direction.
      *
      * @param R rotation matrix see {@link #getRotationMatrix}.
      * @param values an array of 3 floats to hold the result.
