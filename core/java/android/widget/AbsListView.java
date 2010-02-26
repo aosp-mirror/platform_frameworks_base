@@ -4017,6 +4017,10 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
          * View type for this view, as returned by
          * {@link android.widget.Adapter#getItemViewType(int) }
          */
+        @ViewDebug.ExportedProperty(mapping = {
+            @ViewDebug.IntToString(from = ITEM_VIEW_TYPE_IGNORE, to = "ITEM_VIEW_TYPE_IGNORE"),
+            @ViewDebug.IntToString(from = ITEM_VIEW_TYPE_HEADER_OR_FOOTER, to = "ITEM_VIEW_TYPE_HEADER_OR_FOOTER")
+        })
         int viewType;
 
         /**
@@ -4025,6 +4029,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
          * been added to the list view and whether they should be treated as
          * recycled views or not.
          */
+        @ViewDebug.ExportedProperty
         boolean recycledHeaderFooter;
 
         public LayoutParams(Context c, AttributeSet attrs) {
