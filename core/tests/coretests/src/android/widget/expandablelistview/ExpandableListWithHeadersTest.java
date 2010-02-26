@@ -64,6 +64,21 @@ public class ExpandableListWithHeadersTest extends
 
     @MediumTest
     public void testGroupChildPositions() {
-        ExpandableListBasicTest.checkGroupAndChildPositions(mExpandableListView, this);
+        ExpandableListTester tester = new ExpandableListTester(mExpandableListView, this);
+        tester.testGroupAndChildPositions();
+    }
+
+    @MediumTest
+    public void testConvertionBetweenFlatAndPacked() {
+        ExpandableListTester tester = new ExpandableListTester(mExpandableListView, this);
+        tester.testConvertionBetweenFlatAndPackedOnGroups();
+        tester.testConvertionBetweenFlatAndPackedOnChildren();
+    }
+
+    @MediumTest
+    public void testSelectedPosition() {
+        ExpandableListTester tester = new ExpandableListTester(mExpandableListView, this);
+        tester.testSelectedPositionOnGroups();
+        tester.testSelectedPositionOnChildren();
     }
 }
