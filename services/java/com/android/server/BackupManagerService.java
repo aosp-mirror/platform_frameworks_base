@@ -2484,7 +2484,7 @@ class BackupManagerService extends IBackupManager.Stub {
             pw.println("Backup Manager is " + (mEnabled ? "enabled" : "disabled")
                     + " / " + (!mProvisioned ? "not " : "") + "provisioned / "
                     + (this.mPendingInits.size() == 0 ? "not " : "") + "pending init");
-            pw.println("Auto-restore is " + (mAutoRestore : "enabled" : "disabled"));
+            pw.println("Auto-restore is " + (mAutoRestore ? "enabled" : "disabled"));
             pw.println("Last backup pass: " + mLastBackupPass
                     + " (now = " + System.currentTimeMillis() + ')');
             pw.println("  next scheduled: " + mNextBackupPass);
