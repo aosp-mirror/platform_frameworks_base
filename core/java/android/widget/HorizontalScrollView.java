@@ -116,7 +116,19 @@ public class HorizontalScrollView extends FrameLayout {
     private int mTouchSlop;
     private int mMinimumVelocity;
     private int mMaximumVelocity;
-
+    
+    /**
+     * ID of the active pointer. This is used to retain consistency during
+     * drags/flings if multiple pointers are used.
+     */
+    private int mActivePointerId = INVALID_POINTER;
+    
+    /**
+     * Sentinel value for no current active pointer.
+     * Used by {@link #mActivePointerId}.
+     */
+    private static final int INVALID_POINTER = -1;
+    
     public HorizontalScrollView(Context context) {
         this(context, null);
     }
@@ -362,6 +374,17 @@ public class HorizontalScrollView extends FrameLayout {
         return handled;
     }
 
+    private boolean inChild(int x, int y) {
+        if (getChildCount() > 0) {
+            final View child = getChildAt(0);
+            return !(y < child.getTop()
+                    || y >= child.getBottom()
+                    || x < child.getLeft()
+                    || x >= child.getRight());
+        }
+        return false;
+    }
+    
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         /*
@@ -380,10 +403,8 @@ public class HorizontalScrollView extends FrameLayout {
             return true;
         }
 
-        final float x = ev.getX();
-
-        switch (action) {
-            case MotionEvent.ACTION_MOVE:
+        switch (action & MotionEvent.ACTION_MASK) {
+            case MotionEvent.ACTION_MOVE: {
                 /*
                  * mIsBeingDragged == false, otherwise the shortcut would have caught it. Check
                  * whether the user has moved far enough from his original down touch.
@@ -393,16 +414,30 @@ public class HorizontalScrollView extends FrameLayout {
                 * Locally do absolute value. mLastMotionX is set to the x value
                 * of the down event.
                 */
+                final int pointerIndex = ev.findPointerIndex(mActivePointerId);
+                final float x = ev.getX(pointerIndex);
                 final int xDiff = (int) Math.abs(x - mLastMotionX);
                 if (xDiff > mTouchSlop) {
                     mIsBeingDragged = true;
+                    mLastMotionX = x;
                     if (mParent != null) mParent.requestDisallowInterceptTouchEvent(true);
                 }
                 break;
+            }
 
-            case MotionEvent.ACTION_DOWN:
-                /* Remember location of down touch */
+            case MotionEvent.ACTION_DOWN: {
+                final float x = ev.getX();
+                if (!inChild((int) x, (int) ev.getY())) {
+                    mIsBeingDragged = false;
+                    break;
+                }
+                
+                /*
+                 * Remember location of down touch.
+                 * ACTION_DOWN always refers to pointer index 0.
+                 */
                 mLastMotionX = x;
+                mActivePointerId = ev.getPointerId(0);
 
                 /*
                 * If being flinged and user touches the screen, initiate drag;
@@ -411,11 +446,16 @@ public class HorizontalScrollView extends FrameLayout {
                 */
                 mIsBeingDragged = !mScroller.isFinished();
                 break;
+            }
 
             case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_UP:
                 /* Release the drag */
                 mIsBeingDragged = false;
+                mActivePointerId = INVALID_POINTER;
+                break;
+            case MotionEvent.ACTION_POINTER_UP:
+                onSecondaryPointerUp(ev);
                 break;
         }
 
@@ -441,10 +481,9 @@ public class HorizontalScrollView extends FrameLayout {
         mVelocityTracker.addMovement(ev);
 
         final int action = ev.getAction();
-        final float x = ev.getX();
 
-        switch (action) {
-            case MotionEvent.ACTION_DOWN:
+        switch (action & MotionEvent.ACTION_MASK) {
+            case MotionEvent.ACTION_DOWN: {
                 /*
                 * If being flinged and user touches, stop the fling. isFinished
                 * will be false if being flinged.
@@ -452,40 +491,76 @@ public class HorizontalScrollView extends FrameLayout {
                 if (!mScroller.isFinished()) {
                     mScroller.abortAnimation();
                 }
+                
+                final float x = ev.getX();
+                if (!(mIsBeingDragged = inChild((int) x, (int) ev.getY()))) {
+                    return false;
+                }
 
                 // Remember where the motion event started
                 mLastMotionX = x;
                 break;
+            }
             case MotionEvent.ACTION_MOVE:
-                // Scroll to follow the motion event
-                final int deltaX = (int) (mLastMotionX - x);
-                mLastMotionX = x;
+                if (mIsBeingDragged) {
+                    // Scroll to follow the motion event
+                    final int activePointerIndex = ev.findPointerIndex(mActivePointerId);
+                    final float x = ev.getX(activePointerIndex);
+                    final int deltaX = (int) (mLastMotionX - x);
+                    mLastMotionX = x;
 
-                overscrollBy(deltaX, 0, mScrollX, 0, getScrollRange(), 0,
-                        getOverscrollMax(), 0);
+                    overscrollBy(deltaX, 0, mScrollX, 0, getScrollRange(), 0,
+                            getOverscrollMax(), 0);
+                }
                 break;
             case MotionEvent.ACTION_UP:
-                final VelocityTracker velocityTracker = mVelocityTracker;
-                velocityTracker.computeCurrentVelocity(1000, mMaximumVelocity);
-                int initialVelocity = (int) velocityTracker.getXVelocity();
+                if (mIsBeingDragged) {
+                    final VelocityTracker velocityTracker = mVelocityTracker;
+                    velocityTracker.computeCurrentVelocity(1000, mMaximumVelocity);
+                    int initialVelocity = (int) velocityTracker.getXVelocity(mActivePointerId);
 
-                if (getChildCount() > 0) {
-                    if ((Math.abs(initialVelocity) > mMinimumVelocity)) {
-                        fling(-initialVelocity);
-                    } else {
-                        final int right = getScrollRange();
-                        if (mScroller.springback(mScrollX, mScrollY, 0, 0, right, 0)) {
-                            invalidate();
+                    if (getChildCount() > 0) {
+                        if ((Math.abs(initialVelocity) > mMinimumVelocity)) {
+                            fling(-initialVelocity);
+                        } else {
+                            final int right = getScrollRange();
+                            if (mScroller.springback(mScrollX, mScrollY, 0, 0, right, 0)) {
+                                invalidate();
+                            }
                         }
                     }
-                }
+                    
+                    mActivePointerId = INVALID_POINTER;
+                    mIsBeingDragged = false;
 
-                if (mVelocityTracker != null) {
-                    mVelocityTracker.recycle();
-                    mVelocityTracker = null;
+                    if (mVelocityTracker != null) {
+                        mVelocityTracker.recycle();
+                        mVelocityTracker = null;
+                    }
                 }
+                break;
+            case MotionEvent.ACTION_POINTER_UP:
+                onSecondaryPointerUp(ev);
+                break;
         }
         return true;
+    }
+    
+    private void onSecondaryPointerUp(MotionEvent ev) {
+        final int pointerIndex = (ev.getAction() & MotionEvent.ACTION_POINTER_INDEX_MASK) >>
+                MotionEvent.ACTION_POINTER_INDEX_SHIFT;
+        final int pointerId = ev.getPointerId(pointerIndex);
+        if (pointerId == mActivePointerId) {
+            // This was our active pointer going up. Choose a new
+            // active pointer and adjust accordingly.
+            // TODO: Make this decision more intelligent.
+            final int newPointerIndex = pointerIndex == 0 ? 1 : 0;
+            mLastMotionX = ev.getX(newPointerIndex);
+            mActivePointerId = ev.getPointerId(newPointerIndex);
+            if (mVelocityTracker != null) {
+                mVelocityTracker.clear();
+            }
+        }
     }
     
     @Override

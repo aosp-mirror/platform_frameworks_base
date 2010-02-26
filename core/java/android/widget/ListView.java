@@ -1192,7 +1192,6 @@ public class ListView extends AbsListView {
                     return mFirstPosition + i;
                 }
             }
-            return mFirstPosition + childCount - 1;
         }
         return INVALID_POSITION;
     }

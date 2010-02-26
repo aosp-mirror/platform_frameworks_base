@@ -427,7 +427,7 @@ public class ScrollView extends FrameLayout {
 
             case MotionEvent.ACTION_DOWN: {
                 final float y = ev.getY();
-                if (!inChild((int)ev.getX(), (int)y)) {
+                if (!inChild((int) ev.getX(), (int) y)) {
                     mIsBeingDragged = false;
                     break;
                 }
@@ -493,7 +493,7 @@ public class ScrollView extends FrameLayout {
                 }
 
                 final float y = ev.getY();
-                if (!(mIsBeingDragged = inChild((int)ev.getX(), (int)y))) {
+                if (!(mIsBeingDragged = inChild((int) ev.getX(), (int) y))) {
                     return false;
                 }
                 
