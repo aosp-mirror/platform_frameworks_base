@@ -4155,9 +4155,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             final View[] activeViews = mActiveViews;
             for (int i = 0; i < childCount; i++) {
                 View child = getChildAt(i);
-                AbsListView.LayoutParams lp = (AbsListView.LayoutParams)child.getLayoutParams();
+                AbsListView.LayoutParams lp = (AbsListView.LayoutParams) child.getLayoutParams();
                 // Don't put header or footer views into the scrap heap
-                if (lp != null && lp.viewType != AdapterView.ITEM_VIEW_TYPE_HEADER_OR_FOOTER) {
+                if (lp != null && lp.viewType != ITEM_VIEW_TYPE_HEADER_OR_FOOTER) {
                     // Note:  We do place AdapterView.ITEM_VIEW_TYPE_IGNORE in active views.
                     //        However, we will NOT place them into scrap views.
                     activeViews[i] = child;

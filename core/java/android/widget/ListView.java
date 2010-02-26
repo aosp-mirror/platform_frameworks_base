@@ -138,7 +138,7 @@ public class ListView extends AbsListView {
 
     // the single allocated result per list view; kinda cheesey but avoids
     // allocating these thingies too often.
-    private ArrowScrollFocusResult mArrowScrollFocusResult = new ArrowScrollFocusResult();
+    private final ArrowScrollFocusResult mArrowScrollFocusResult = new ArrowScrollFocusResult();
 
     public ListView(Context context) {
         this(context, null);
@@ -1040,7 +1040,8 @@ public class ListView extends AbsListView {
             childWidth = child.getMeasuredWidth();
             childHeight = child.getMeasuredHeight();
 
-            if (recycleOnMeasure()) {
+            if (recycleOnMeasure() && mRecycler.shouldRecycleViewType(
+                    ((LayoutParams) child.getLayoutParams()).viewType)) {
                 mRecycler.addScrapView(child);
             }
         }
@@ -1155,7 +1156,8 @@ public class ListView extends AbsListView {
             }
 
             // Recycle the view before we possibly return from the method
-            if (recyle) {
+            if (recyle && recycleBin.shouldRecycleViewType(
+                    ((LayoutParams) child.getLayoutParams()).viewType)) {
                 recycleBin.addScrapView(child);
             }
 
