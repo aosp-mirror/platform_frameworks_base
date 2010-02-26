@@ -21,6 +21,7 @@ import java.util.Locale;
 import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
 import android.backup.BackupDataInput;
+import android.backup.IBackupManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.IContentService;
@@ -71,8 +72,20 @@ public class SettingsHelper {
         } else if (Settings.Secure.LOCATION_PROVIDERS_ALLOWED.equals(name)) {
             setGpsLocation(value);
             return false;
+        } else if (Settings.Secure.BACKUP_AUTO_RESTORE.equals(name)) {
+            setAutoRestore(Integer.parseInt(value) == 1);
         }
         return true;
+    }
+
+    private void setAutoRestore(boolean enabled) {
+        try {
+            IBackupManager bm = IBackupManager.Stub.asInterface(
+                    ServiceManager.getService(Context.BACKUP_SERVICE));
+            if (bm != null) {
+                bm.setAutoRestore(enabled);
+            }
+        } catch (RemoteException e) {}
     }
 
     private void setGpsLocation(String value) {
