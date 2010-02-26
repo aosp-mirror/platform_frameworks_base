@@ -56,11 +56,11 @@ public class ExpandableListTester {
         mInstrumentation.waitForIdleSync();
         mActivityInstrumentation.sendKeys(KeyEvent.KEYCODE_DPAD_CENTER);
         mActivityInstrumentation.getInstrumentation().waitForIdleSync();
-        Assert.assertTrue("Group did not expand " + groupIndex, mExpandableListView
-                .isGroupExpanded(groupIndex));
+        Assert.assertTrue("Group did not expand " + groupIndex, 
+                mExpandableListView.isGroupExpanded(groupIndex));
     }
 
-    void testGroupAndChildPositions() {
+    void testContextMenus() {
         // Add a position tester ContextMenu listener to the ExpandableListView
         PositionTesterContextMenuListener menuListener = new PositionTesterContextMenuListener();
         mExpandableListView.setOnCreateContextMenuListener(menuListener);
@@ -109,7 +109,7 @@ public class ExpandableListTester {
         // Scrolling on footer elements should trigger an AdapterContextMenu
         for (int i=0; i<mExpandableListView.getFooterViewsCount(); i++) {
             // Check group index in context menu
-            menuListener.expectAdapterContextMenu(i+1);
+            menuListener.expectAdapterContextMenu(index);
             // Make sure the group is visible so that getChild finds it
             mListUtil.arrowScrollToSelectedPosition(index);
             View footerChild = mExpandableListView.getChildAt(index
@@ -136,8 +136,8 @@ public class ExpandableListTester {
 
         for (int i=0; i<headerCount; i++) {
             Assert.assertEquals("Non NULL position for header item",
-                    ExpandableListView.PACKED_POSITION_TYPE_NULL, mExpandableListView
-                    .getExpandableListPosition(i));
+                    ExpandableListView.PACKED_POSITION_VALUE_NULL,
+                    mExpandableListView.getExpandableListPosition(i));
         }
 
         // Test all (non expanded) groups
@@ -156,7 +156,7 @@ public class ExpandableListTester {
 
         for (int i=0; i<mExpandableListView.getFooterViewsCount(); i++) {
             Assert.assertEquals("Non NULL position for header item",
-                    ExpandableListView.PACKED_POSITION_TYPE_NULL,
+                    ExpandableListView.PACKED_POSITION_VALUE_NULL,
                     mExpandableListView.getExpandableListPosition(headerCount + groupCount + i));
         }
     }
@@ -190,7 +190,7 @@ public class ExpandableListTester {
         for (int i=0; i<mExpandableListView.getHeaderViewsCount(); i++) {
             mListUtil.arrowScrollToSelectedPosition(index);
             Assert.assertEquals("Header item is selected",
-                    ExpandableListView.PACKED_POSITION_TYPE_NULL,
+                    ExpandableListView.PACKED_POSITION_VALUE_NULL,
                     mExpandableListView.getSelectedPosition());
             index++;
         }
@@ -209,7 +209,7 @@ public class ExpandableListTester {
         for (int i=0; i<mExpandableListView.getFooterViewsCount(); i++) {
             mListUtil.arrowScrollToSelectedPosition(index);
             Assert.assertEquals("Footer item is selected",
-                    ExpandableListView.PACKED_POSITION_TYPE_NULL,
+                    ExpandableListView.PACKED_POSITION_VALUE_NULL,
                     mExpandableListView.getSelectedPosition());
             index++;
         }

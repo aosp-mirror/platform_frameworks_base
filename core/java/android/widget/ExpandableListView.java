@@ -482,18 +482,21 @@ public class ExpandableListView extends ListView {
         return mAdapter;
     }
     
+    private boolean isHeaderOrFooterPosition(int position) {
+        final int footerViewsStart = mItemCount - getFooterViewsCount();
+        return (position < getHeaderViewsCount() || position >= footerViewsStart);
+    }
+
     @Override
     public boolean performItemClick(View v, int position, long id) {
         // Ignore clicks in header/footers
-        final int headerViewsCount = getHeaderViewsCount();
-        final int footerViewsStart = mItemCount - getFooterViewsCount();
-
-        if (position < headerViewsCount || position >= footerViewsStart) {
+        if (isHeaderOrFooterPosition(position)) {
             // Clicked on a header/footer, so ignore pass it on to super
             return super.performItemClick(v, position, id);
         }
         
         // Internally handle the item click
+        final int headerViewsCount = getHeaderViewsCount();
         return handleItemClick(v, position - headerViewsCount, id);
     }
     
@@ -689,8 +692,8 @@ public class ExpandableListView extends ListView {
     }
     
     /**
-     * Converts a flat list position (the raw position of an item (child or
-     * group) in the list) to an group and/or child position (represented in a
+     * Converts a flat list position (the raw position of an item (child or group)
+     * in the list) to an group and/or child position (represented in a
      * packed position). This is useful in situations where the caller needs to
      * use the underlying {@link ListView}'s methods. Use
      * {@link ExpandableListView#getPackedPositionType} ,
@@ -699,10 +702,16 @@ public class ExpandableListView extends ListView {
      * 
      * @param flatListPosition The flat list position to be converted.
      * @return The group and/or child position for the given flat list position
-     *         in packed position representation.
+     *         in packed position representation. #PACKED_POSITION_VALUE_NULL if
+     *         the position corresponds to a header or a footer item.
      */
     public long getExpandableListPosition(int flatListPosition) {
-        PositionMetadata pm = mConnector.getUnflattenedPos(flatListPosition);
+        if (isHeaderOrFooterPosition(flatListPosition)) {
+            return PACKED_POSITION_VALUE_NULL;
+        }
+
+        final int shiftedPosition = flatListPosition - getHeaderViewsCount();
+        PositionMetadata pm = mConnector.getUnflattenedPos(shiftedPosition);
         long packedPos = pm.position.getPackedPosition();
         pm.recycle();
         return packedPos;
@@ -724,7 +733,7 @@ public class ExpandableListView extends ListView {
                 .obtainPosition(packedPosition));
         int retValue = pm.position.flatListPos;
         pm.recycle();
-        return retValue;
+        return retValue + getHeaderViewsCount();
     }
 
     /**
@@ -732,12 +741,13 @@ public class ExpandableListView extends ListView {
      * its type). Can return {@link #PACKED_POSITION_VALUE_NULL} if no selection.
      * 
      * @return A packed position containing the currently selected group or
-     *         child's position and type. #PACKED_POSITION_VALUE_NULL if no selection.
+     *         child's position and type. #PACKED_POSITION_VALUE_NULL if no selection
+     *         or if selection is on a header or a footer item.
      */
     public long getSelectedPosition() {
         final int selectedPos = getSelectedItemPosition();
-        if (selectedPos == -1) return PACKED_POSITION_VALUE_NULL;
-        
+
+        // The case where there is no selection (selectedPos == -1) is also handled here.
         return getExpandableListPosition(selectedPos);
     }
     
@@ -921,13 +931,12 @@ public class ExpandableListView extends ListView {
 
     @Override
     ContextMenuInfo createContextMenuInfo(View view, int flatListPosition, long id) {
-        // Adjust for and handle for header views
-        final int adjustedPosition = flatListPosition - getHeaderViewsCount();
-        if (adjustedPosition < 0) {
-            // Return normal info for header view context menus
+        if (isHeaderOrFooterPosition(flatListPosition)) {
+            // Return normal info for header/footer view context menus
             return new AdapterContextMenuInfo(view, flatListPosition, id);
         }
 
+        final int adjustedPosition = flatListPosition - getHeaderViewsCount();
         PositionMetadata pm = mConnector.getUnflattenedPos(adjustedPosition);
         ExpandableListPosition pos = pm.position;
         pm.recycle();
