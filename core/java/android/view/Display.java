@@ -100,7 +100,7 @@ public class Display
     }
     
     /**
-     * @deprecated use
+     * @deprecated use {@link #getRotation}
      * @return orientation of this display.
      */
     @Deprecated native public int getOrientation();
