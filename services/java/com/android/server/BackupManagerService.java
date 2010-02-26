@@ -2427,6 +2427,12 @@ class BackupManagerService extends IBackupManager.Stub {
                 throw new SecurityException("No permission to restore other packages");
             }
 
+            // If the package has no backup agent, we obviously cannot proceed
+            if (app.applicationInfo.backupAgentName == null) {
+                Log.w(TAG, "Asked to restore package " + packageName + " with no agent");
+                return -1;
+            }
+
             // So far so good; we're allowed to try to restore this package.  Now
             // check whether there is data for it in the current dataset, falling back
             // to the ancestral dataset if not.
