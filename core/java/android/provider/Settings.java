@@ -1279,6 +1279,17 @@ public final class Settings {
             "notifications_use_ring_volume";
 
         /**
+         * Whether silent mode should allow vibration feedback. This is used
+         * internally in AudioService and the Sound settings activity to
+         * coordinate decoupling of vibrate and silent modes. This setting
+         * will likely be removed in a future release with support for
+         * audio/vibe feedback profiles.
+         *
+         * @hide
+         */
+        public static final String VIBRATE_IN_SILENT = "vibrate_in_silent";
+
+        /**
          * The mapping of stream type (integer) to its setting.
          */
         public static final String[] VOLUME_SETTINGS = {
