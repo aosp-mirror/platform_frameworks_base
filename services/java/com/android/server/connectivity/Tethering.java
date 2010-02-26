@@ -31,6 +31,7 @@ import android.net.InterfaceConfiguration;
 import android.net.IConnectivityManager;
 import android.net.INetworkManagementEventObserver;
 import android.net.NetworkInfo;
+import android.os.BatteryManager;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.INetworkManagementService;
@@ -88,11 +89,6 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
 
     private String mUpstreamIfaceName;
 
-    // turning on/off RNDIS resets the interface generating and extra discon/conn cycle
-    // count how many to ignore..  Self correcting if you plug/unplug a bunch of times.
-    // TODO - brittle - maybe don't need?
-    private int mUsbResetExpected = 0;
-
     HierarchicalStateMachine mTetherMasterSM;
 
     public Tethering(Context context) {
@@ -116,8 +112,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
 
         // TODO - remove this hack after real USB connections are detected.
         IntentFilter filter = new IntentFilter();
-        filter.addAction(Intent.ACTION_UMS_DISCONNECTED);
-        filter.addAction(Intent.ACTION_UMS_CONNECTED);
+        filter.addAction(Intent.ACTION_BATTERY_CHANGED);
         filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
         mStateReceiver = new StateReceiver();
         mContext.registerReceiver(mStateReceiver, filter);
@@ -428,26 +423,10 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
     private class StateReceiver extends BroadcastReceiver {
         public void onReceive(Context content, Intent intent) {
             String action = intent.getAction();
-            if (action.equals(Intent.ACTION_UMS_CONNECTED)) {
-                Log.w(TAG, "got UMS connected");
-                synchronized (Tethering.this) {
-                    if(mUsbResetExpected != 0) {
-                        Log.w(TAG, "mUsbResetExpected == " + mUsbResetExpected + ", ignored");
-                        mUsbResetExpected--;
-                        return;
-                    }
-                }
-                Tethering.this.enableUsbIfaces(true); // add them
-            } else if (action.equals(Intent.ACTION_UMS_DISCONNECTED)) {
-                Log.w(TAG, "got UMS disconneded broadcast");
-                synchronized (Tethering.this) {
-                    if(mUsbResetExpected != 0) {
-                        Log.w(TAG, "mUsbResetExpected == " + mUsbResetExpected + ", ignored");
-                        mUsbResetExpected--;
-                        return;
-                    }
-                }
-                Tethering.this.enableUsbIfaces(false); // remove them
+            if (action.equals(Intent.ACTION_BATTERY_CHANGED)) {
+                boolean usbConnected = (intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1)
+                        == BatteryManager.BATTERY_PLUGGED_USB);
+                Tethering.this.enableUsbIfaces(usbConnected); // add or remove them
             } else if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
                 IBinder b = ServiceManager.getService(Context.CONNECTIVITY_SERVICE);
                 IConnectivityManager service = IConnectivityManager.Stub.asInterface(b);
@@ -497,10 +476,8 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
 
         try {
             if (enabled) {
-                // turning this on will reset USB and generate two bogus events - ignore them
                 synchronized (this) {
                     if (!service.isUsbRNDISStarted()) {
-                        mUsbResetExpected += 2;
                         service.startUsbRNDIS();
                     }
                 }
