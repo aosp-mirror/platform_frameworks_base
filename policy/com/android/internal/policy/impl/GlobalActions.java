@@ -117,7 +117,6 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
      * @return A new dialog.
      */
     private AlertDialog createDialog() {
-
         mSilentModeToggle = new ToggleAction(
                 R.drawable.ic_lock_silent_mode,
                 R.drawable.ic_lock_silent_mode_off,
@@ -125,9 +124,23 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                 R.string.global_action_silent_mode_on_status,
                 R.string.global_action_silent_mode_off_status) {
 
+            void willCreate() {
+                // XXX: FIXME: switch to ic_lock_vibrate_mode when available
+                mEnabledIconResId = (Settings.System.getInt(mContext.getContentResolver(),
+                        Settings.System.VIBRATE_IN_SILENT, 1) == 1)
+                    ? R.drawable.ic_lock_silent_mode
+                    : R.drawable.ic_lock_silent_mode;
+            }
+
             void onToggle(boolean on) {
-                mAudioManager.setRingerMode(on ? AudioManager.RINGER_MODE_SILENT
-                        : AudioManager.RINGER_MODE_NORMAL);
+                if (on) {
+                    mAudioManager.setRingerMode((Settings.System.getInt(mContext.getContentResolver(),
+                        Settings.System.VIBRATE_IN_SILENT, 1) == 1)
+                        ? AudioManager.RINGER_MODE_VIBRATE
+                        : AudioManager.RINGER_MODE_SILENT);
+                } else {
+                    mAudioManager.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
+                }
             }
 
             public boolean showDuringKeyguard() {
@@ -412,11 +425,11 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         protected State mState = State.Off;
 
         // prefs
-        private final int mEnabledIconResId;
-        private final int mDisabledIconResid;
-        private final int mMessageResId;
-        private final int mEnabledStatusMessageResId;
-        private final int mDisabledStatusMessageResId;
+        protected int mEnabledIconResId;
+        protected int mDisabledIconResid;
+        protected int mMessageResId;
+        protected int mEnabledStatusMessageResId;
+        protected int mDisabledStatusMessageResId;
 
         /**
          * @param enabledIconResId The icon for when this action is on.
@@ -437,8 +450,18 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
             mDisabledStatusMessageResId = disabledStatusMessageResId;
         }
 
+        /**
+         * Override to make changes to resource IDs just before creating the
+         * View.
+         */
+        void willCreate() {
+
+        }
+
         public View create(Context context, View convertView, ViewGroup parent,
                 LayoutInflater inflater) {
+            willCreate();
+
             View v = (convertView != null) ?
                     convertView :
                     inflater.inflate(R

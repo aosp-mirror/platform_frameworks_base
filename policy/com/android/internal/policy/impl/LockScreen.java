@@ -37,6 +37,7 @@ import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.media.AudioManager;
 import android.os.SystemProperties;
+import android.provider.Settings;
 
 import java.util.Date;
 import java.io.File;
@@ -229,17 +230,23 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
     }
 
     private boolean isSilentMode() {
-        return mAudioManager.getRingerMode() == AudioManager.RINGER_MODE_SILENT;
+        return mAudioManager.getRingerMode() != AudioManager.RINGER_MODE_NORMAL;
     }
 
     private void updateRightTabResources() {
+        boolean vibe = mSilentMode 
+            && (mAudioManager.getRingerMode() == AudioManager.RINGER_MODE_VIBRATE);
+
         mSelector.setRightTabResources(
-                mSilentMode ? R.drawable.ic_jog_dial_sound_off : R.drawable.ic_jog_dial_sound_on,
-                mSilentMode ? R.drawable.jog_tab_target_yellow : R.drawable.jog_tab_target_gray,
+                mSilentMode ? ( vibe ? R.drawable.ic_jog_dial_vibrate_on
+                                     : R.drawable.ic_jog_dial_sound_off ) 
+                            : R.drawable.ic_jog_dial_sound_on,
+                mSilentMode ? R.drawable.jog_tab_target_yellow 
+                            : R.drawable.jog_tab_target_gray,
                 mSilentMode ? R.drawable.jog_tab_bar_right_sound_on
-                        : R.drawable.jog_tab_bar_right_sound_off,
+                            : R.drawable.jog_tab_bar_right_sound_off,
                 mSilentMode ? R.drawable.jog_tab_right_sound_on
-                        : R.drawable.jog_tab_right_sound_off);
+                            : R.drawable.jog_tab_right_sound_off);
     }
 
     private void resetStatusInfo(KeyguardUpdateMonitor updateMonitor) {
@@ -275,8 +282,17 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
         } else if (whichHandle == SlidingTab.OnTriggerListener.RIGHT_HANDLE) {
             // toggle silent mode
             mSilentMode = !mSilentMode;
-            mAudioManager.setRingerMode(mSilentMode ? AudioManager.RINGER_MODE_SILENT
-                        : AudioManager.RINGER_MODE_NORMAL);
+            if (mSilentMode) {
+                final boolean vibe = (Settings.System.getInt(
+                    getContext().getContentResolver(),
+                    Settings.System.VIBRATE_IN_SILENT, 1) == 1);
+
+                mAudioManager.setRingerMode(vibe
+                    ? AudioManager.RINGER_MODE_VIBRATE 
+                    : AudioManager.RINGER_MODE_SILENT);
+            } else {
+                mAudioManager.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
+            }
 
             updateRightTabResources();
 
@@ -625,7 +641,7 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
 
     /** {@inheritDoc} */
     public void onRingerModeChanged(int state) {
-        boolean silent = AudioManager.RINGER_MODE_SILENT == state;
+        boolean silent = AudioManager.RINGER_MODE_NORMAL != state;
         if (silent != mSilentMode) {
             mSilentMode = silent;
             updateRightTabResources();
