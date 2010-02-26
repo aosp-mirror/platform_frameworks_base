@@ -45,8 +45,10 @@ interface IMountService
 
     /**
      * Enables / disables USB mass storage.
+     * The caller should check actual status of enabling/disabling
+     * USB mass storage via StorageEventListener.
      */
-    int setUsbMassStorageEnabled(boolean enable);
+    void setUsbMassStorageEnabled(boolean enable);
 
     /**
      * Returns true if a USB mass storage host is enabled (media is shared)

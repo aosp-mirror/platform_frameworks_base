@@ -243,30 +243,24 @@ public class StorageManager
 
     /**
      * Enables USB Mass Storage (UMS) on the device.
-     * @return an integer value representing the outcome of the operation.
-     * @see android.os.storage.StorageResultCode
      */
-    public int enableUsbMassStorage() {
+    public void enableUsbMassStorage() {
         try {
-            return mMountService.setUsbMassStorageEnabled(true);
+            mMountService.setUsbMassStorageEnabled(true);
         } catch (Exception ex) {
             Log.e(TAG, "Failed to enable UMS", ex);
         }
-        return StorageResultCode.OperationFailedInternalError;
     }
 
     /**
      * Disables USB Mass Storage (UMS) on the device.
-     * @return an integer value representing the outcome of the operation.
-     * @see android.os.storage.StorageResultCode
      */
-    public int disableUsbMassStorage() {
+    public void disableUsbMassStorage() {
         try {
-            return mMountService.setUsbMassStorageEnabled(false);
+            mMountService.setUsbMassStorageEnabled(false);
         } catch (Exception ex) {
             Log.e(TAG, "Failed to disable UMS", ex);
         }
-        return StorageResultCode.OperationFailedInternalError;
     }
 
     /**
