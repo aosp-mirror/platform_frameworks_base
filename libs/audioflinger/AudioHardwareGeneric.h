@@ -88,6 +88,7 @@ public:
     virtual status_t    standby() { return NO_ERROR; }
     virtual status_t    setParameters(const String8& keyValuePairs);
     virtual String8     getParameters(const String8& keys);
+    virtual unsigned int  getInputFramesLost() const { return 0; }
 
 private:
     AudioHardwareGeneric *mAudioHardware;

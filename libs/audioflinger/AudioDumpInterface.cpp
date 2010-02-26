@@ -509,6 +509,12 @@ String8 AudioStreamInDump::getParameters(const String8& keys)
     return param.toString();
 }
 
+unsigned int AudioStreamInDump::getInputFramesLost() const
+{
+    if (mFinalStream != 0 ) return mFinalStream->getInputFramesLost();
+    return 0;
+}
+
 status_t AudioStreamInDump::dump(int fd, const Vector<String16>& args)
 {
     if (mFinalStream != 0 ) return mFinalStream->dump(fd, args);

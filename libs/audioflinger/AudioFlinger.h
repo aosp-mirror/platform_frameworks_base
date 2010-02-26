@@ -108,6 +108,7 @@ public:
     virtual     void        registerClient(const sp<IAudioFlingerClient>& client);
 
     virtual     size_t      getInputBufferSize(uint32_t sampleRate, int format, int channelCount);
+    virtual     unsigned int  getInputFramesLost(int ioHandle);
 
     virtual int openOutput(uint32_t *pDevices,
                                     uint32_t *pSamplingRate,
@@ -745,6 +746,7 @@ private:
         virtual String8     getParameters(const String8& keys);
         virtual void        audioConfigChanged(int event, int param = 0);
                 void        readInputParameters();
+        virtual unsigned int  getInputFramesLost();
 
     private:
                 RecordThread();

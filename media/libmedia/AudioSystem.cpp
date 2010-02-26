@@ -354,6 +354,16 @@ status_t AudioSystem::getRenderPosition(uint32_t *halFrames, uint32_t *dspFrames
     return af->getRenderPosition(halFrames, dspFrames, getOutput((stream_type)stream));
 }
 
+unsigned int AudioSystem::getInputFramesLost(audio_io_handle_t ioHandle) {
+    const sp<IAudioFlinger>& af = AudioSystem::get_audio_flinger();
+    unsigned int result = 0;
+    if (af == 0) return result;
+    if (ioHandle == NULL) return result;
+
+    result = af->getInputFramesLost(ioHandle);
+    return result;
+}
+
 // ---------------------------------------------------------------------------
 
 void AudioSystem::AudioFlingerClient::binderDied(const wp<IBinder>& who) {
