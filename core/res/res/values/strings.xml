@@ -790,7 +790,7 @@
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_writeCalendar">Allows an application to add or change the 
         events on your calendar, which may send email to guests. Malicious applications can use this 
-	to erase or modify your calendar events or to send email to guests.</string>
+        to erase or modify your calendar events or to send email to guests.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_accessMockLocation">mock location sources for testing</string>
@@ -2046,9 +2046,6 @@
     <string name="perms_hide"><b>Hide</b></string>
     <!-- When installing an application, the less-dangerous permissions are hidden.  This is the text to show those. -->
     <string name="perms_show_all"><b>Show all</b></string>
-
-    <!-- Shown when there is content loading from the internet into a dialog. -->
-    <string name="googlewebcontenthelper_loading">Loading\u2026</string>
 
     <!-- USB storage dialog strings -->
     <!-- This is the title for the activity's window. -->
