@@ -664,7 +664,7 @@ public class SyncStorageEngine extends Handler {
             }
 
             if (mActiveSync != null) {
-                AuthorityInfo ainfo = getAuthority(mActiveSync.authorityId);
+                AuthorityInfo ainfo = getAuthority(mActiveSync.getAuthorityId());
                 if (ainfo != null && ainfo.account.equals(account)
                         && ainfo.authority.equals(authority)) {
                     return true;

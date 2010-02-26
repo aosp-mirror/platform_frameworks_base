@@ -437,7 +437,7 @@ public final class ContentService extends IContentService.Stub {
         long identityToken = clearCallingIdentity();
         try {
             SyncManager syncManager = getSyncManager();
-            if (syncManager != null) {
+            if (syncManager != null && callback != null) {
                 syncManager.getSyncStorageEngine().addStatusChangeListener(mask, callback);
             }
         } finally {
@@ -449,7 +449,7 @@ public final class ContentService extends IContentService.Stub {
         long identityToken = clearCallingIdentity();
         try {
             SyncManager syncManager = getSyncManager();
-            if (syncManager != null) {
+            if (syncManager != null && callback != null) {
                 syncManager.getSyncStorageEngine().removeStatusChangeListener(callback);
             }
         } finally {
