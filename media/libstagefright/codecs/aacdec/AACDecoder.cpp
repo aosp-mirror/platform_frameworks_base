@@ -57,9 +57,9 @@ status_t AACDecoder::start(MetaData *params) {
     mConfig->aacPlusUpsamplingFactor = 0;
     mConfig->aacPlusEnabled = false;
 
-    int32_t numChannels;
-    CHECK(mSource->getFormat()->findInt32(kKeyChannelCount, &numChannels));
-    mConfig->desiredChannels = numChannels;
+    // The software decoder doesn't properly support mono output on
+    // AACplus files. Always output stereo.
+    mConfig->desiredChannels = 2;
 
     UInt32 memRequirements = PVMP4AudioDecoderGetMemRequirements();
     mDecoderBuf = malloc(memRequirements);
@@ -127,14 +127,16 @@ status_t AACDecoder::stop() {
 sp<MetaData> AACDecoder::getFormat() {
     sp<MetaData> srcFormat = mSource->getFormat();
 
-    int32_t numChannels;
     int32_t sampleRate;
-    CHECK(srcFormat->findInt32(kKeyChannelCount, &numChannels));
     CHECK(srcFormat->findInt32(kKeySampleRate, &sampleRate));
 
     sp<MetaData> meta = new MetaData;
     meta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_AUDIO_RAW);
-    meta->setInt32(kKeyChannelCount, numChannels);
+
+    // We'll always output stereo, regardless of how many channels are
+    // present in the input due to decoder limitations.
+    meta->setInt32(kKeyChannelCount, 2);
+
     meta->setInt32(kKeySampleRate, sampleRate);
 
     int64_t durationUs;
