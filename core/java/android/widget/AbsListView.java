@@ -4224,7 +4224,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             // into the scrap heap
             int viewType = lp.viewType;
             if (!shouldRecycleViewType(viewType)) {
-                removeDetachedView(scrap, false);
+                if (viewType != ITEM_VIEW_TYPE_HEADER_OR_FOOTER) {
+                    removeDetachedView(scrap, false);
+                }
                 return;
             }
 
@@ -4258,9 +4260,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
                     activeViews[i] = null;
 
-                    if (whichScrap == AdapterView.ITEM_VIEW_TYPE_IGNORE) {
-                        removeDetachedView(victim, false);
+                    if (!shouldRecycleViewType(whichScrap)) {
                         // Do not move views that should be ignored
+                        if (whichScrap != ITEM_VIEW_TYPE_HEADER_OR_FOOTER) {
+                            removeDetachedView(victim, false);
+                        }
                         continue;
                     }
 
