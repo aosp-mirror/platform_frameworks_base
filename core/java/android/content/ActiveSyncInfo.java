@@ -24,13 +24,9 @@ import android.os.Parcelable.Creator;
  * Information about the sync operation that is currently underway.
  */
 public class ActiveSyncInfo {
-    /** @hide */
     private final int authorityId;
-    /** @hide */
     private final Account account;
-    /** @hide */
     private final String authority;
-    /** @hide */
     private final long startTime;
 
     /**
