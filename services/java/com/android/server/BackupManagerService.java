@@ -374,7 +374,7 @@ class BackupManagerService extends IBackupManager.Stub {
         mProvisioned = Settings.Secure.getInt(context.getContentResolver(),
                 Settings.Secure.BACKUP_PROVISIONED, 0) != 0;
         mAutoRestore = Settings.Secure.getInt(context.getContentResolver(),
-                Settings.Secure.BACKUP_AUTO_RESTORE, 0) != 0;
+                Settings.Secure.BACKUP_AUTO_RESTORE, 1) != 0;
         // If Encrypted file systems is enabled or disabled, this call will return the
         // correct directory.
         mBaseStateDir = new File(Environment.getSecureDataDirectory(), "backup");
