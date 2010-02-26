@@ -1447,8 +1447,9 @@ public class SensorManager
             values[3] = x;
             values[4] = y;
             values[5] = z;
-            // TODO: add support for 180 and 270 orientations
-            if (orientation == Surface.ROTATION_90) {
+
+            if ((orientation & Surface.ROTATION_90) != 0) {
+                // handles 90 and 270 rotation
                 switch (sensor) {
                     case SENSOR_ACCELEROMETER:
                     case SENSOR_MAGNETIC_FIELD:
@@ -1461,6 +1462,26 @@ public class SensorManager
                         values[0] = x + ((x < 270) ? 90 : -270);
                         values[1] = z;
                         values[2] = y;
+                        break;
+                }
+            }
+            if ((orientation & Surface.ROTATION_180) != 0) {
+                x = values[0];
+                y = values[1];
+                z = values[2];
+                // handles 180 (flip) and 270 (flip + 90) rotation
+                switch (sensor) {
+                    case SENSOR_ACCELEROMETER:
+                    case SENSOR_MAGNETIC_FIELD:
+                        values[0] =-x;
+                        values[1] =-y;
+                        values[2] = z;
+                        break;
+                    case SENSOR_ORIENTATION:
+                    case SENSOR_ORIENTATION_RAW:
+                        values[0] = (x >= 180) ? (x - 180) : (x + 180);
+                        values[1] =-y;
+                        values[2] =-z;
                         break;
                 }
             }
