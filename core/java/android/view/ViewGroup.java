@@ -859,6 +859,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                             final float xc = scrolledXFloat - child.mLeft;
                             final float yc = scrolledYFloat - child.mTop;
                             ev.setLocation(xc, yc);
+                            child.mPrivateFlags &= ~CANCEL_NEXT_UP_EVENT;
                             if (child.dispatchTouchEvent(ev))  {
                                 // Event handled, we have a target now.
                                 mMotionTarget = child;
@@ -889,6 +890,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             // We don't have a target, this means we're handling the
             // event as a regular view.
             ev.setLocation(xf, yf);
+            if ((mPrivateFlags & CANCEL_NEXT_UP_EVENT) != 0) {
+                ev.setAction(MotionEvent.ACTION_CANCEL);
+                mPrivateFlags &= ~CANCEL_NEXT_UP_EVENT;
+            }
             return super.dispatchTouchEvent(ev);
         }
 
@@ -897,6 +902,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         if (!disallowIntercept && onInterceptTouchEvent(ev)) {
             final float xc = scrolledXFloat - (float) target.mLeft;
             final float yc = scrolledYFloat - (float) target.mTop;
+            mPrivateFlags &= ~CANCEL_NEXT_UP_EVENT;
             ev.setAction(MotionEvent.ACTION_CANCEL);
             ev.setLocation(xc, yc);
             if (!target.dispatchTouchEvent(ev)) {
@@ -920,6 +926,12 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         final float xc = scrolledXFloat - (float) target.mLeft;
         final float yc = scrolledYFloat - (float) target.mTop;
         ev.setLocation(xc, yc);
+
+        if ((target.mPrivateFlags & CANCEL_NEXT_UP_EVENT) != 0) {
+            ev.setAction(MotionEvent.ACTION_CANCEL);
+            target.mPrivateFlags &= ~CANCEL_NEXT_UP_EVENT;
+            mMotionTarget = null;
+        }
 
         return target.dispatchTouchEvent(ev);
     }
