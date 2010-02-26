@@ -1647,6 +1647,9 @@ public final class Settings {
             TTY_MODE,
             SOUND_EFFECTS_ENABLED,
             HAPTIC_FEEDBACK_ENABLED,
+            POWER_SOUNDS_ENABLED,
+            DOCK_SOUNDS_ENABLED,
+            LOCKSCREEN_SOUNDS_ENABLED,
             SHOW_WEB_SUGGESTIONS,
             NOTIFICATION_LIGHT_PULSE
         };
@@ -3095,6 +3098,7 @@ public final class Settings {
             PARENTAL_CONTROL_REDIRECT_URL,
             USB_MASS_STORAGE_ENABLED,
             ACCESSIBILITY_ENABLED,
+            BACKUP_AUTO_RESTORE,
             ENABLED_ACCESSIBILITY_SERVICES,
             TTS_USE_DEFAULTS,
             TTS_DEFAULT_RATE,
