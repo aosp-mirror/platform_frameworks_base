@@ -1145,6 +1145,10 @@ public class PduPersister {
             }
         }
 
+        // mark "read" and "seen"
+        values.put(Mms.READ, 0);
+        values.put(Mms.SEEN, 0);
+
         Uri res = SqliteWrapper.insert(mContext, mContentResolver, uri, values);
         if (res == null) {
             throw new MmsException("persist() failed: return null.");
