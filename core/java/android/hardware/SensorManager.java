@@ -1179,23 +1179,27 @@ public class SensorManager
      * 
      * <p>When the rotation matrix is used for drawing (for instance with 
      * OpenGL ES), it usually <b>doesn't need</b> to be transformed by this 
-     * function, unless the screen is physically rotated, such as when used
-     * in landscape mode. 
+     * function, unless the screen is physically rotated, in which case you
+     * can use {@link android.view.Display#getRotation() Display.getRotation()}
+     * to retrieve the current rotation of the screen.  Note that because the
+     * user is generally free to rotate their screen, you often should
+     * consider the rotation in deciding the parameters to use here.
      *
      * <p><u>Examples:</u><p>
      *
      * <li>Using the camera (Y axis along the camera's axis) for an augmented 
-     * reality application where the rotation angles are needed :</li><p>
+     * reality application where the rotation angles are needed: </li><p>
      *
      * <code>remapCoordinateSystem(inR, AXIS_X, AXIS_Z, outR);</code><p>
      *
-     * <li>Using the device as a mechanical compass in landscape mode:</li><p>
+     * <li>Using the device as a mechanical compass when rotation is
+     * {@link android.view.Surface#ROTATION_90 Surface.ROTATION_90}:</li><p>
      *
      * <code>remapCoordinateSystem(inR, AXIS_Y, AXIS_MINUS_X, outR);</code><p>
      *
-     * Beware of the above example. This call is needed only if the device is
-     * physically used in landscape mode to calculate the rotation angles (see 
-     * {@link #getOrientation}).
+     * Beware of the above example. This call is needed only to account for
+     * a rotation from its natural orientation when calculating the
+     * rotation angles (see {@link #getOrientation}).
      * If the rotation matrix is also used for rendering, it may not need to 
      * be transformed, for instance if your {@link android.app.Activity
      * Activity} is running in landscape mode.
