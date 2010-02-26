@@ -122,7 +122,12 @@ public class LockPatternKeyguardView extends KeyguardViewBase
         /**
          * Unlock by entering a password or PIN
          */
-        Password
+        Password,
+
+        /**
+         * Unknown (uninitialized) value
+         */
+        Unknown
     }
 
     /**
@@ -152,6 +157,8 @@ public class LockPatternKeyguardView extends KeyguardViewBase
 
     private int mNumAccounts;
     private boolean mIsPortrait;
+
+    private UnlockMode mCurrentUnlockMode = UnlockMode.Unknown;
 
     /**
      * @return Whether we are stuck on the lock screen because the sim is
@@ -421,7 +428,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase
         }
     }
 
-    private void recreateScreens() {
+    private void recreateLockScreen() {
         if (mLockScreen.getVisibility() == View.VISIBLE) {
             ((KeyguardScreen) mLockScreen).onPause();
         }
@@ -431,7 +438,9 @@ public class LockPatternKeyguardView extends KeyguardViewBase
         mLockScreen = createLockScreen();
         mLockScreen.setVisibility(View.INVISIBLE);
         addView(mLockScreen);
+    }
 
+    private void recreateUnlockScreen() {
         if (mUnlockScreen.getVisibility() == View.VISIBLE) {
             ((KeyguardScreen) mUnlockScreen).onPause();
         }
@@ -443,10 +452,13 @@ public class LockPatternKeyguardView extends KeyguardViewBase
         mUnlockScreen.setVisibility(View.INVISIBLE);
         mUnlockScreenMode = unlockMode;
         addView(mUnlockScreen);
-
-        updateScreen(mMode);
     }
 
+    private void recreateScreens() {
+        recreateLockScreen();
+        recreateUnlockScreen();
+        updateScreen(mMode);
+    }
 
     @Override
     public void wakeWhenReadyTq(int keyCode) {
@@ -512,6 +524,12 @@ public class LockPatternKeyguardView extends KeyguardViewBase
 
         mMode = mode;
 
+        // Re-create the unlock screen if necessary. This is primarily required to properly handle
+        // SIM state changes. This typically happens when this method is called by reset()
+        if (mode == Mode.UnlockScreen && mCurrentUnlockMode != getUnlockMode()) {
+            recreateUnlockScreen();
+        }
+
         final View goneScreen = (mode == Mode.LockScreen) ? mUnlockScreen : mLockScreen;
         final View visibleScreen = (mode == Mode.LockScreen) ? mLockScreen : mUnlockScreen;
 
@@ -551,6 +569,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase
         // Capture the orientation this layout was created in.
         mIsPortrait = getResources().getBoolean(R.bool.lockscreen_isPortrait);
 
+        View unlockView = null;
         if (unlockMode == UnlockMode.Pattern) {
             PatternUnlockScreen view = new PatternUnlockScreen(
                     mContext,
@@ -561,16 +580,16 @@ public class LockPatternKeyguardView extends KeyguardViewBase
             if (DEBUG) Log.d(TAG,
                 "createUnlockScreenFor(" + unlockMode + "): mEnableFallback=" + mEnableFallback);
             view.setEnableFallback(mEnableFallback);
-            return view;
+            unlockView = view;
         } else if (unlockMode == UnlockMode.SimPin) {
-            return new SimUnlockScreen(
+            unlockView = new SimUnlockScreen(
                     mContext,
                     mUpdateMonitor,
                     mKeyguardScreenCallback,
                     mLockPatternUtils);
         } else if (unlockMode == UnlockMode.Account) {
             try {
-                return new AccountUnlockScreen(
+                unlockView = new AccountUnlockScreen(
                         mContext,
                         mKeyguardScreenCallback,
                         mLockPatternUtils);
@@ -587,10 +606,10 @@ public class LockPatternKeyguardView extends KeyguardViewBase
                 // regular pattern unlock UI, regardless of the value of
                 // mUnlockScreenMode or whether or not we're in the
                 // "permanently locked" state.)
-                return createUnlockScreenFor(UnlockMode.Pattern);
+                unlockView = createUnlockScreenFor(UnlockMode.Pattern);
             }
         } else if (unlockMode == UnlockMode.Password) {
-            return new PasswordUnlockScreen(
+            unlockView = new PasswordUnlockScreen(
                     mContext,
                     mLockPatternUtils,
                     mUpdateMonitor,
@@ -598,6 +617,34 @@ public class LockPatternKeyguardView extends KeyguardViewBase
         } else {
             throw new IllegalArgumentException("unknown unlock mode " + unlockMode);
         }
+        mCurrentUnlockMode = unlockMode;
+        return unlockView;
+    }
+
+    private View getUnlockScreenForCurrentUnlockMode() {
+        final UnlockMode unlockMode = getUnlockMode();
+
+        // if a screen exists for the correct mode, we're done
+        if (unlockMode == mUnlockScreenMode) {
+            return mUnlockScreen;
+        }
+
+        // remember the mode
+        mUnlockScreenMode = unlockMode;
+
+        // unlock mode has changed and we have an existing old unlock screen
+        // to clean up
+        if (mScreenOn && (mUnlockScreen.getVisibility() == View.VISIBLE)) {
+            ((KeyguardScreen) mUnlockScreen).onPause();
+        }
+        ((KeyguardScreen) mUnlockScreen).cleanUp();
+        removeViewInLayout(mUnlockScreen);
+
+        // create the new one
+        mUnlockScreen = createUnlockScreenFor(unlockMode);
+        mUnlockScreen.setVisibility(View.INVISIBLE);
+        addView(mUnlockScreen);
+        return mUnlockScreen;
     }
 
     /**
