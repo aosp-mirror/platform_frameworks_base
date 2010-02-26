@@ -56,8 +56,6 @@ import android.content.pm.PackageStats;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
-import static android.content.pm.PackageManager.PKG_INSTALL_COMPLETE;
-import static android.content.pm.PackageManager.PKG_INSTALL_INCOMPLETE;
 import android.content.pm.PackageParser;
 import android.content.pm.PermissionInfo;
 import android.content.pm.PermissionGroupInfo;
@@ -150,6 +148,19 @@ class PackageManagerService extends IPackageManager.Stub {
     // Suffix used during package installation when copying/moving
     // package apks to install directory.
     private static final String INSTALL_PACKAGE_SUFFIX = "-";
+
+    /**
+     * Indicates the state of installation. Used by PackageManager to
+     * figure out incomplete installations. Say a package is being installed
+     * (the state is set to PKG_INSTALL_INCOMPLETE) and remains so till
+     * the package installation is successful or unsuccesful lin which case
+     * the PackageManager will no longer maintain state information associated
+     * with the package. If some exception(like device freeze or battery being
+     * pulled out) occurs during installation of a package, the PackageManager
+     * needs this information to clean up the previously failed installation.
+     */
+    private static final int PKG_INSTALL_INCOMPLETE = 0;
+    private static final int PKG_INSTALL_COMPLETE = 1;
 
     static final int SCAN_MONITOR = 1<<0;
     static final int SCAN_NO_DEX = 1<<1;
@@ -4426,8 +4437,11 @@ class PackageManagerService extends IPackageManager.Stub {
         }
 
         public void handleStartCopy(IMediaContainerService imcs) {
-            int ret = PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
-            if (imcs != null) {
+            int ret = PackageManager.INSTALL_SUCCEEDED;
+            // Dont need to invoke getInstallLocation for forward locked apps.
+            if ((flags & PackageManager.INSTALL_FORWARD_LOCK) != 0) {
+                flags &= ~PackageManager.INSTALL_EXTERNAL;
+            } else if (imcs != null) {
                 // Remote call to find out default install location
                 int loc = getInstallLocation(imcs);
                 // Use install location to create InstallArgs and temporary
@@ -4446,16 +4460,6 @@ class PackageManagerService extends IPackageManager.Stub {
                             // media is unset
                             flags &= ~PackageManager.INSTALL_EXTERNAL;
                         }
-                    }
-                    // Disable forward locked apps on sdcard.
-                    if ((flags & PackageManager.INSTALL_FORWARD_LOCK) != 0 &&
-                            (flags & PackageManager.INSTALL_EXTERNAL) != 0) {
-                        // Make sure forward locked apps can only be installed
-                        // on internal storage
-                        Log.w(TAG, "Cannot install protected apps on sdcard");
-                        ret = PackageManager.INSTALL_FAILED_INVALID_INSTALL_LOCATION;
-                    } else {
-                        ret = PackageManager.INSTALL_SUCCEEDED;
                     }
                 }
             }

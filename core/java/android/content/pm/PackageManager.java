@@ -530,19 +530,6 @@ public abstract class PackageManager {
     public static final int INSTALL_FAILED_INTERNAL_ERROR = -110;
 
     /**
-     * Indicates the state of installation. Used by PackageManager to
-     * figure out incomplete installations. Say a package is being installed
-     * (the state is set to PKG_INSTALL_INCOMPLETE) and remains so till
-     * the package installation is successful or unsuccesful lin which case
-     * the PackageManager will no longer maintain state information associated
-     * with the package. If some exception(like device freeze or battery being
-     * pulled out) occurs during installation of a package, the PackageManager
-     * needs this information to clean up the previously failed installation.
-     */
-    public static final int PKG_INSTALL_INCOMPLETE = 0;
-    public static final int PKG_INSTALL_COMPLETE = 1;
-
-    /**
      * Flag parameter for {@link #deletePackage} to indicate that you don't want to delete the
      * package's data directory.
      *
