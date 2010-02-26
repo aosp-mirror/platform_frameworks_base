@@ -173,6 +173,9 @@ public class WebSettings {
     private long            mAppCacheMaxSize = Long.MAX_VALUE;
     private String          mAppCachePath = "";
     private String          mDatabasePath = "";
+    // The WebCore DatabaseTracker only allows the database path to be set
+    // once. Keep track of when the path has been set.
+    private boolean         mDatabasePathHasBeenSet = false;
     private String          mGeolocationDatabasePath = "";
     // Don't need to synchronize the get/set methods as they
     // are basic types, also none of these values are used in
@@ -1006,13 +1009,15 @@ public class WebSettings {
 
     /**
      * Set the path to where database storage API databases should be saved.
+     * Nota that the WebCore Database Tracker only allows the path to be set once.
      * This will update WebCore when the Sync runs in the C++ side.
      * @param databasePath String path to the directory where databases should
      *     be saved. May be the empty string but should never be null.
      */
     public synchronized void setDatabasePath(String databasePath) {
-        if (databasePath != null && !databasePath.equals(mDatabasePath)) {
+        if (databasePath != null && !mDatabasePathHasBeenSet) {
             mDatabasePath = databasePath;
+            mDatabasePathHasBeenSet = true;
             postSync();
         }
     }
