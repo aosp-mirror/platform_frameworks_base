@@ -46,11 +46,23 @@ public abstract class SQLiteProgram extends SQLiteClosable {
 
     /* package */ SQLiteProgram(SQLiteDatabase db, String sql) {
         mDatabase = db;
-        mSql = sql;
+        mSql = sql.trim();
         db.acquireReference();
         db.addSQLiteClosable(this);
         this.nHandle = db.mNativeHandle;
 
+        // shouldn't reuse compiled-plans of PRAGMA sql statements
+        // because sqlite returns OLD values if compiled-pragma-statements are reused
+        //TODO: remove this code when sqlite fixes it (and add tests too)
+        String prefixSql = mSql.substring(0, 6);
+        if (prefixSql.toLowerCase().startsWith("pragma")) {
+            mCompiledSql = new SQLiteCompiledSql(db, sql);
+            nStatement = mCompiledSql.nStatement;
+            // since it is not in the cache, no need to acquire() it.
+            return;
+        }
+
+        // it is not pragma
         mCompiledSql = db.getCompiledStatementForSql(sql);
         if (mCompiledSql == null) {
             // create a new compiled-sql obj
@@ -70,6 +82,8 @@ public abstract class SQLiteProgram extends SQLiteClosable {
                 // CompiledSql object. create a new one.
                 // finalize it when I am done with it in "this" object.
                 mCompiledSql = new SQLiteCompiledSql(db, sql);
+
+                // since it is not in the cache, no need to acquire() it.
             }
         }
         nStatement = mCompiledSql.nStatement;
@@ -95,9 +109,9 @@ public abstract class SQLiteProgram extends SQLiteClosable {
         synchronized(mDatabase.mCompiledQueries) {
             if (!mDatabase.mCompiledQueries.containsValue(mCompiledSql)) {
                 // it is NOT in compiled-sql cache. i.e., responsibility of
-                // release this statement is on me.
+                // releasing this statement is on me.
                 mCompiledSql.releaseSqlStatement();
-                mCompiledSql = null; // so that GC doesn't call finalize() on it
+                mCompiledSql = null;
                 nStatement = 0;
             } else {
                 // it is in compiled-sql cache. reset its CompiledSql#mInUse flag
