@@ -1560,8 +1560,8 @@ public class Camera {
         /**
          * Sets the exposure compensation index.
          *
-         * @param value. The valid value range is from {@link
-         *        #getMinExposureCompensation} (inclusive) to {@link
+         * @param value exposure compensation index. The valid value range is
+         *        from {@link #getMinExposureCompensation} (inclusive) to {@link
          *        #getMaxExposureCompensation} (inclusive). 0 means exposure is
          *        not adjusted. Application should call
          *        getMinExposureCompensation and getMaxExposureCompensation to
