@@ -289,17 +289,66 @@ public final class Bmgr {
                 this.notify();
             }
         }
+
+        public void waitForCompletion() {
+            // The restoreFinished() callback will throw the 'done' flag; we
+            // just sit and wait on that notification.
+            synchronized (this) {
+                while (!this.done) {
+                    try {
+                        this.wait();
+                    } catch (InterruptedException ex) {
+                    }
+                }
+            }
+        }
     }
 
     private void doRestore() {
-        long token;
-        try {
-            token = Long.parseLong(nextArg(), 16);
-        } catch (NumberFormatException e) {
-            showUsage();
-            return;
+        String arg = nextArg();
+        if (arg.indexOf('.') >= 0) {
+            // it's a package name
+            doRestorePackage(arg);
+        } else {
+            try {
+                long token = Long.parseLong(nextArg(), 16);
+                doRestoreAll(token);
+            } catch (NumberFormatException e) {
+                showUsage();
+                return;
+            }
         }
 
+        System.out.println("done");
+    }
+
+    private void doRestorePackage(String pkg) {
+        try {
+            String curTransport = mBmgr.getCurrentTransport();
+            mRestore = mBmgr.beginRestoreSession(curTransport);
+            if (mRestore == null) {
+                System.err.println(BMGR_NOT_RUNNING_ERR);
+                return;
+            }
+
+            RestoreObserver observer = new RestoreObserver();
+            int err = mRestore.restorePackage(pkg, observer);
+            if (err == 0) {
+                // Off and running -- wait for the restore to complete
+                observer.waitForCompletion();
+            } else {
+                System.err.println("Unable to restore package " + pkg);
+            }
+
+            // And finally shut down the session
+            mRestore.endRestoreSession();
+        } catch (RemoteException e) {
+            System.err.println(e.toString());
+            System.err.println(BMGR_NOT_RUNNING_ERR);
+        }
+    }
+
+    private void doRestoreAll(long token) {
         RestoreObserver observer = new RestoreObserver();
 
         try {
@@ -332,14 +381,7 @@ public final class Bmgr {
             // if we kicked off a restore successfully, we have to wait for it
             // to complete before we can shut down the restore session safely
             if (didRestore) {
-                synchronized (observer) {
-                    while (!observer.done) {
-                        try {
-                            observer.wait();
-                        } catch (InterruptedException ex) {
-                        }
-                    }
-                }
+                observer.waitForCompletion();
             }
 
             // once the restore has finished, close down the session and we're done
@@ -348,8 +390,6 @@ public final class Bmgr {
             System.err.println(e.toString());
             System.err.println(BMGR_NOT_RUNNING_ERR);
         }
-
-        System.out.println("done");
     }
 
     private String nextArg() {
@@ -370,6 +410,7 @@ public final class Bmgr {
         System.err.println("       bmgr list sets");
         System.err.println("       bmgr transport WHICH");
         System.err.println("       bmgr restore TOKEN");
+        System.err.println("       bmgr restore PACKAGE");
         System.err.println("       bmgr run");
         System.err.println("       bmgr wipe PACKAGE");
         System.err.println("");
@@ -396,8 +437,14 @@ public final class Bmgr {
         System.err.println("The 'transport' command designates the named transport as the currently");
         System.err.println("active one.  This setting is persistent across reboots.");
         System.err.println("");
-        System.err.println("The 'restore' command initiates a restore operation, using the restore set");
-        System.err.println("from the current transport whose token matches the argument.");
+        System.err.println("The 'restore' command when given a restore token initiates a full-system");
+        System.err.println("restore operation from the currently active transport.  It will deliver");
+        System.err.println("the restore set designated by the TOKEN argument to each application");
+        System.err.println("that had contributed data to that restore set.");
+        System.err.println("");
+        System.err.println("The 'restore' command when given a package name intiates a restore of");
+        System.err.println("just that one package according to the restore set selection algorithm");
+        System.err.println("used by the RestoreSession.restorePackage() method.");
         System.err.println("");
         System.err.println("The 'run' command causes any scheduled backup operation to be initiated");
         System.err.println("immediately, without the usual waiting period for batching together");
