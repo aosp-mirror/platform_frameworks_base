@@ -35,6 +35,7 @@ import android.view.IWindowManager;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.PrintStream;
 import java.net.URISyntaxException;
 import java.util.Iterator;
 import java.util.Set;
@@ -47,6 +48,7 @@ public class Am {
     private String mCurArgData;
 
     private boolean mDebugOption = false;
+    private boolean mWaitOption = false;
 
     // These are magic strings understood by the Eclipse plugin.
     private static final String FATAL_ERROR_CODE = "Error type 1";
@@ -106,6 +108,7 @@ public class Am {
         boolean hasIntentInfo = false;
 
         mDebugOption = false;
+        mWaitOption = false;
         Uri data = null;
         String type = null;
 
@@ -153,6 +156,8 @@ public class Am {
                 intent.setFlags(Integer.decode(str).intValue());
             } else if (opt.equals("-D")) {
                 mDebugOption = true;
+            } else if (opt.equals("-W")) {
+                mWaitOption = true;
             } else {
                 System.err.println("Error: Unknown option: " + opt);
                 showUsage();
@@ -199,57 +204,89 @@ public class Am {
         System.out.println("Starting: " + intent);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         // XXX should do something to determine the MIME type.
-        int res = mAm.startActivity(null, intent, intent.getType(),
-                null, 0, null, null, 0, false, mDebugOption);
+        IActivityManager.WaitResult result = null;
+        int res;
+        if (mWaitOption) {
+            result = mAm.startActivityAndWait(null, intent, intent.getType(),
+                        null, 0, null, null, 0, false, mDebugOption);
+            res = result.result;
+        } else {
+            res = mAm.startActivity(null, intent, intent.getType(),
+                    null, 0, null, null, 0, false, mDebugOption);
+        }
+        PrintStream out = mWaitOption ? System.out : System.err;
+        boolean launched = false;
         switch (res) {
             case IActivityManager.START_SUCCESS:
+                launched = true;
                 break;
             case IActivityManager.START_SWITCHES_CANCELED:
-                System.err.println(
+                launched = true;
+                out.println(
                         "Warning: Activity not started because the "
                         + " current activity is being kept for the user.");
                 break;
             case IActivityManager.START_DELIVERED_TO_TOP:
-                System.err.println(
+                launched = true;
+                out.println(
                         "Warning: Activity not started, intent has "
                         + "been delivered to currently running "
                         + "top-most instance.");
                 break;
             case IActivityManager.START_RETURN_INTENT_TO_CALLER:
-                System.err.println(
+                launched = true;
+                out.println(
                         "Warning: Activity not started because intent "
                         + "should be handled by the caller");
                 break;
             case IActivityManager.START_TASK_TO_FRONT:
-                System.err.println(
+                launched = true;
+                out.println(
                         "Warning: Activity not started, its current "
                         + "task has been brought to the front");
                 break;
             case IActivityManager.START_INTENT_NOT_RESOLVED:
-                System.err.println(
+                out.println(
                         "Error: Activity not started, unable to "
                         + "resolve " + intent.toString());
                 break;
             case IActivityManager.START_CLASS_NOT_FOUND:
-                System.err.println(NO_CLASS_ERROR_CODE);
-                System.err.println("Error: Activity class " +
+                out.println(NO_CLASS_ERROR_CODE);
+                out.println("Error: Activity class " +
                         intent.getComponent().toShortString()
                         + " does not exist.");
                 break;
             case IActivityManager.START_FORWARD_AND_REQUEST_CONFLICT:
-                System.err.println(
+                out.println(
                         "Error: Activity not started, you requested to "
                         + "both forward and receive its result");
                 break;
             case IActivityManager.START_PERMISSION_DENIED:
-                System.err.println(
+                out.println(
                         "Error: Activity not started, you do not "
                         + "have permission to access it.");
                 break;
             default:
-                System.err.println(
+                out.println(
                         "Error: Activity not started, unknown error code " + res);
                 break;
+        }
+        if (mWaitOption && launched) {
+            if (result == null) {
+                result = new IActivityManager.WaitResult();
+                result.who = intent.getComponent();
+            }
+            System.out.println("Status: " + (result.timeout ? "timeout" : "ok"));
+            if (result.who != null) {
+                System.out.println("Activity: " + result.who.flattenToShortString());
+            }
+            if (result.thisTime >= 0) {
+                System.out.println("ThisTime: " + result.thisTime);
+            }
+            if (result.totalTime >= 0) {
+                System.out.println("TotalTime: " + result.totalTime);
+            }
+            System.out.println("Complete");
         }
     }
 
@@ -504,8 +541,9 @@ public class Am {
         System.err.println(
                 "usage: am [subcommand] [options]\n" +
                 "\n" +
-                "    start an Activity: am start [-D] <INTENT>\n" +
+                "    start an Activity: am start [-D] [-W] <INTENT>\n" +
                 "        -D: enable debugging\n" +
+                "        -W: wait for launch to complete\n" +
                 "\n" +
                 "    start a Service: am startservice <INTENT>\n" +
                 "\n" +
