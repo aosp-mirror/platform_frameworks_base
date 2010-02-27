@@ -28,9 +28,9 @@ import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
 import android.app.ActivityManagerNative;
-import android.app.DevicePolicyManager;
 import android.app.IActivityManager;
-import android.app.IDevicePolicyManager;
+import android.app.admin.DevicePolicyManager;
+import android.app.admin.IDevicePolicyManager;
 import android.backup.IBackupManager;
 import android.content.ComponentName;
 import android.content.Context;

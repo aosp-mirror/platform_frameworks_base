@@ -31,7 +31,6 @@ android.app.ExpandableListActivity
 android.app.IActivityManager
 android.app.IActivityManager$ContentProviderHolder
 android.app.IAlarmManager$Stub
-android.app.IDevicePolicyManager$Stub
 android.app.IStatusBar$Stub
 android.app.ITransientNotification$Stub
 android.app.Instrumentation
@@ -51,6 +50,7 @@ android.app.SuggestionsAdapter
 android.app.SuperNotCalledException
 android.app.TabActivity
 android.app.TimePickerDialog
+android.app.admin.IDevicePolicyManager$Stub
 android.appwidget.AppWidgetHost
 android.appwidget.AppWidgetHostView
 android.appwidget.AppWidgetHostView$ParcelableSparseArray

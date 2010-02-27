@@ -1507,7 +1507,7 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService} to retrieve a 
-     * {@link android.app.DevicePolicyManager} for working with global
+     * {@link android.app.admin.DevicePolicyManager} for working with global
      * device policy management.
      *
      * @see #getSystemService

@@ -99,6 +99,7 @@ import android.view.accessibility.AccessibilityManager;
 import android.view.inputmethod.InputMethodManager;
 import android.accounts.AccountManager;
 import android.accounts.IAccountManager;
+import android.app.admin.DevicePolicyManager;
 
 import com.android.internal.os.IDropBoxManagerService;
 

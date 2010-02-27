@@ -15,7 +15,7 @@
 ** limitations under the License.
 */
 
-package android.app;
+package android.app.admin;
 
 import android.content.ComponentName;
 import android.os.RemoteCallback;
@@ -37,7 +37,7 @@ interface IDevicePolicyManager {
     void setMaximumFailedPasswordsForWipe(in ComponentName admin, int num);
     int getMaximumFailedPasswordsForWipe(in ComponentName admin);
     
-    boolean resetPassword(String password);
+    boolean resetPassword(String password, int flags);
     
     void setMaximumTimeToLock(in ComponentName who, long timeMs);
     long getMaximumTimeToLock(in ComponentName who);

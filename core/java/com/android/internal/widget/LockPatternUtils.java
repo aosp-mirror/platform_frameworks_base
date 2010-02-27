@@ -16,7 +16,7 @@
 
 package com.android.internal.widget;
 
-import android.app.DevicePolicyManager;
+import android.app.admin.DevicePolicyManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.os.RemoteException;

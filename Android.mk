@@ -81,7 +81,6 @@ LOCAL_SRC_FILES += \
 	core/java/android/app/IActivityWatcher.aidl \
 	core/java/android/app/IAlarmManager.aidl \
 	core/java/android/app/IBackupAgent.aidl \
-    core/java/android/app/IDevicePolicyManager.aidl \
 	core/java/android/app/IInstrumentationWatcher.aidl \
 	core/java/android/app/INotificationManager.aidl \
 	core/java/android/app/ISearchManager.aidl \
@@ -93,6 +92,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/app/IUiModeManager.aidl \
 	core/java/android/app/IWallpaperManager.aidl \
 	core/java/android/app/IWallpaperManagerCallback.aidl \
+	core/java/android/app/admin/IDevicePolicyManager.aidl \
 	core/java/android/backup/IBackupManager.aidl \
 	core/java/android/backup/IRestoreObserver.aidl \
 	core/java/android/backup/IRestoreSession.aidl \
