@@ -119,9 +119,10 @@ public class ApplicationErrorReport implements Parcelable {
     public AnrInfo anrInfo;
 
     /**
-     * Text containing battery usage data.
+     * If this report is of type {@link #TYPE_BATTERY}, contains an instance
+     * of BatteryInfo; otherwise null.
      */
-    public String batteryText;
+    public BatteryInfo batteryInfo;
     
     /**
      * Create an uninitialized instance of {@link ApplicationErrorReport}.
@@ -215,7 +216,7 @@ public class ApplicationErrorReport implements Parcelable {
                 anrInfo.writeToParcel(dest, flags);
                 break;
             case TYPE_BATTERY:
-                dest.writeString(batteryText);
+                batteryInfo.writeToParcel(dest, flags);
                 break;
         }
     }
@@ -232,15 +233,15 @@ public class ApplicationErrorReport implements Parcelable {
             case TYPE_CRASH:
                 crashInfo = new CrashInfo(in);
                 anrInfo = null;
-                batteryText = null;
+                batteryInfo = null;
                 break;
             case TYPE_ANR:
                 anrInfo = new AnrInfo(in);
                 crashInfo = null;
-                batteryText = null;
+                batteryInfo = null;
                 break;
             case TYPE_BATTERY:
-                batteryText = in.readString();
+                batteryInfo = new BatteryInfo(in);
                 anrInfo = null;
                 crashInfo = null;
                 break;
@@ -411,6 +412,68 @@ public class ApplicationErrorReport implements Parcelable {
         }
     }
 
+    /**
+     * Describes a battery usage report.
+     */
+    public static class BatteryInfo {
+        /**
+         * Percentage of the battery that was used up by the process.
+         */
+        public int usagePercent;
+
+        /**
+         * Duration in microseconds over which the process used the above
+         * percentage of battery.
+         */
+        public long durationMicros;
+
+        /**
+         * Dump of various info impacting battery use.
+         */
+        public String usageDetails;
+
+        /**
+         * Checkin details.
+         */
+        public String checkinDetails;
+
+        /**
+         * Create an uninitialized instance of BatteryInfo.
+         */
+        public BatteryInfo() {
+        }
+
+        /**
+         * Create an instance of BatteryInfo initialized from a Parcel.
+         */
+        public BatteryInfo(Parcel in) {
+            usagePercent = in.readInt();
+            durationMicros = in.readLong();
+            usageDetails = in.readString();
+            checkinDetails = in.readString();
+        }
+
+        /**
+         * Save a BatteryInfo instance to a parcel.
+         */
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(usagePercent);
+            dest.writeLong(durationMicros);
+            dest.writeString(usageDetails);
+            dest.writeString(checkinDetails);
+        }
+
+        /**
+         * Dump a BatteryInfo instance to a Printer.
+         */
+        public void dump(Printer pw, String prefix) {
+            pw.println(prefix + "usagePercent: " + usagePercent);
+            pw.println(prefix + "durationMicros: " + durationMicros);
+            pw.println(prefix + "usageDetails: " + usageDetails);
+            pw.println(prefix + "checkinDetails: " + checkinDetails);
+        }
+    }
+
     public static final Parcelable.Creator<ApplicationErrorReport> CREATOR
             = new Parcelable.Creator<ApplicationErrorReport>() {
         public ApplicationErrorReport createFromParcel(Parcel source) {
@@ -445,7 +508,7 @@ public class ApplicationErrorReport implements Parcelable {
                 anrInfo.dump(pw, prefix);
                 break;
             case TYPE_BATTERY:
-                pw.println(batteryText);
+                batteryInfo.dump(pw, prefix);
                 break;
         }
     }
