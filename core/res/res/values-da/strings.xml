@@ -185,14 +185,12 @@
     <string name="permdesc_setDebugApp" msgid="5584310661711990702">"Tillader, at et program slår fejlretning af andet program til. Ondsindede programmer kan bruge dette til at standse andre programmer."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"skift indstillinger for brugergrænsefladen"</string>
     <string name="permdesc_changeConfiguration" msgid="3465121501528064399">"Tillader, at et program ændrer den nuværende konfiguration, f.eks. den lokale eller overordnede skrifttypestørrelse."</string>
-    <!-- no translation found for permlab_killBackgroundProcesses (8373714752793061963) -->
-    <skip />
-    <!-- no translation found for permdesc_killBackgroundProcesses (2908829602869383753) -->
-    <skip />
-    <!-- no translation found for permlab_forceStopPackages (1447830113260156236) -->
-    <skip />
-    <!-- no translation found for permdesc_forceStopPackages (7263036616161367402) -->
-    <skip />
+    <string name="permlab_enableCarMode" msgid="5684504058192921098">"aktivere biltilstand"</string>
+    <string name="permdesc_enableCarMode" msgid="5673461159384850628">"Tillader et program at aktivere biltilstand."</string>
+    <string name="permlab_killBackgroundProcesses" msgid="8373714752793061963">"standse baggrundsprocesser"</string>
+    <string name="permdesc_killBackgroundProcesses" msgid="2908829602869383753">"Tillader et program at standse andre programmers baggrundsprocesser, selvom der ikke er mangel på hukommelse."</string>
+    <string name="permlab_forceStopPackages" msgid="1447830113260156236">"tvangsstandse andre programmer"</string>
+    <string name="permdesc_forceStopPackages" msgid="7263036616161367402">"Tillader, at et program tvangsstopper andre programmer."</string>
     <string name="permlab_forceBack" msgid="1804196839880393631">"tving programmet til at lukke"</string>
     <string name="permdesc_forceBack" msgid="6534109744159919013">"Tillader, at et program tvinger alle programmer, der er i forgrunden, til at lukke og køre i baggrunden. Bør aldrig være nødvendigt til normale programmer."</string>
     <string name="permlab_dump" msgid="1681799862438954752">"hent intern systemtilstand"</string>
@@ -217,8 +215,6 @@
     <string name="permdesc_batteryStats" msgid="5847319823772230560">"Tillader ændring af indsamlede batteristatistikker. Ikke til brug for normale programmer."</string>
     <string name="permlab_backup" msgid="470013022865453920">"kontroller sikkerhedskopiering af system, og gendan"</string>
     <string name="permdesc_backup" msgid="4837493065154256525">"Tillader, at et program kontrollerer systemets sikkerhedskopierings- og gendannelsesfunktion. Ikke til brug til normale programmer."</string>
-    <string name="permlab_backup_data" msgid="4057625941707926463">"sikkerhedskopier og gendan programmets data"</string>
-    <string name="permdesc_backup_data" msgid="8274426305151227766">"Tillader, at et program deltager i systemets sikkerhedskopierings- og gendannelsesfunktion."</string>
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"vis uautoriserede vinduer"</string>
     <string name="permdesc_internalSystemWindow" msgid="5895082268284998469">"Tillader oprettelse af vinduer, der er beregnet til at blive brugt af den interne systembrugergrænseflade. Ikke til brug for normale programmer."</string>
     <string name="permlab_systemAlertWindow" msgid="3372321942941168324">"vis underretninger på systemniveau"</string>
@@ -235,6 +231,8 @@
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"Tillader, at brugeren forpligter sig til en inputmetodes grænseflade på øverste niveau. Bør aldrig være nødvendig til normale programmer."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"forpligt til et tapet"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"Tillader, at brugeren forpligter sig til et tapets grænseflade på øverste niveau. Bør aldrig være nødvendig til normale programmer."</string>
+    <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"kommunikere med en enhedsadministrator"</string>
+    <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"Tillader brugeren at sende hensigter til en enhedsadministrator. Bør aldrig være nødvendigt for almindelige programmer."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"skift skærmretning"</string>
     <string name="permdesc_setOrientation" msgid="6335814461615851863">"Tillader, at et program ændrer rotationen af skærmen når som helst. Bør aldrig være nødvendigt til normale programmer."</string>
     <string name="permlab_signalPersistentProcesses" msgid="4255467255488653854">"send Linux-signaler til programmer"</string>
@@ -253,6 +251,10 @@
     <string name="permdesc_installPackages" msgid="526669220850066132">"Tillader, at et program installerer nye eller opdaterede Android-pakker. Ondsindede programmer kan bruge dette til at tilføje nye programmer med vilkårlige, effektive tilladelser."</string>
     <string name="permlab_clearAppCache" msgid="4747698311163766540">"slet alle cachedata for programmet"</string>
     <string name="permdesc_clearAppCache" msgid="7740465694193671402">"Tillader, at et program frigør plads på telefonen ved at slette filer i programmets cachemappe. Adgang er normalt meget begrænset til systemprocesser."</string>
+    <!-- no translation found for permlab_movePackage (728454979946503926) -->
+    <skip />
+    <!-- no translation found for permdesc_movePackage (6323049291923925277) -->
+    <skip />
     <string name="permlab_readLogs" msgid="4811921703882532070">"læs systemlogfiler"</string>
     <string name="permdesc_readLogs" msgid="2257937955580475902">"Tillader, at et program læser fra systemets forskellige logfiler. Dermed kan generelle oplysninger om, hvad du laver med telefonen, registreres, men logfilerne bør ikke indeholde personlige eller private oplysninger."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"læs/skriv til ressourcer ejet af diag"</string>
@@ -279,10 +281,13 @@
     <string name="permdesc_writeOwnerData" msgid="2344055317969787124">"Tillader, at et program ændrer rtelefonens ejerdata, der er gemt på din telefon. Ondsindede programmer kan bruge dette til at slette eller ændre ejerdata."</string>
     <string name="permlab_readOwnerData" msgid="6668525984731523563">"læs ejerdata"</string>
     <string name="permdesc_readOwnerData" msgid="3088486383128434507">"Tillader, at et program læser telefonens ejerdata, der er gemt på din telefon. Ondsindede programmer kan bruge dette til at læse ejerdata."</string>
-    <string name="permlab_readCalendar" msgid="3728905909383989370">"læs kalenderdata"</string>
+    <!-- no translation found for permlab_readCalendar (6898987798303840534) -->
+    <skip />
     <string name="permdesc_readCalendar" msgid="5533029139652095734">"Tillader, at et program læser alle kalenderbegivenheder, der er gemt på din telefon. Ondsindede programmer kan bruge dette til at sende dine kalenderbegivenheder til andre mennesker."</string>
-    <string name="permlab_writeCalendar" msgid="377926474603567214">"skriv kalenderdata"</string>
-    <string name="permdesc_writeCalendar" msgid="8674240662630003173">"Tillader, at et program ændrer de kalenderbegivenheder, der er gemt på din telefon. Ondsindede programmer kan bruge dette til at slette eller ændre kalenderdata."</string>
+    <!-- no translation found for permlab_writeCalendar (3894879352594904361) -->
+    <skip />
+    <!-- no translation found for permdesc_writeCalendar (2988871373544154221) -->
+    <skip />
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"imiterede placeringskilder til test"</string>
     <string name="permdesc_accessMockLocation" msgid="7648286063459727252">"Opret imiterede placeringskilder til testning. Ondsindede programmer kan bruge dette til at tilsidesætte den returnerede placering og/eller status fra rigtige placeringskilder som f.eks. GPS eller netværksudbydere."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"få adgang til ekstra kommandoer for placeringsudbyder"</string>
@@ -311,6 +316,16 @@
     <string name="permdesc_mount_unmount_filesystems" msgid="6253263792535859767">"Tillader, at programmet monterer eller demonterer filsystemer til flytbar lagring."</string>
     <string name="permlab_mount_format_filesystems" msgid="5523285143576718981">"formater ekstern lagring"</string>
     <string name="permdesc_mount_format_filesystems" msgid="574060044906047386">"Tillader, at et program formaterer flytbart lager."</string>
+    <string name="permlab_asec_access" msgid="1070364079249834666">"hente oplysninger om sikkert lager"</string>
+    <string name="permdesc_asec_access" msgid="7691616292170590244">"Tillader programmet at få oplysninger om sikkert lager."</string>
+    <string name="permlab_asec_create" msgid="7312078032326928899">"opret sikkert lager"</string>
+    <string name="permdesc_asec_create" msgid="7041802322759014035">"Tillader programmet at oprette sikkert lager."</string>
+    <string name="permlab_asec_destroy" msgid="7787322878955261006">"ødelægge sikkert lager"</string>
+    <string name="permdesc_asec_destroy" msgid="5740754114967893169">"Tillader programmet at ødelægge sikkert lager."</string>
+    <string name="permlab_asec_mount_unmount" msgid="7517449694667828592">"montere/demontere sikkert lager"</string>
+    <string name="permdesc_asec_mount_unmount" msgid="5438078121718738625">"Tillader programmet at montere/demontere sikkert lager."</string>
+    <string name="permlab_asec_rename" msgid="5685344390439934495">"omdøbe sikkert lager"</string>
+    <string name="permdesc_asec_rename" msgid="1387881770708872470">"Tillader programmet at omdøbe sikkert lager."</string>
     <string name="permlab_vibrate" msgid="7768356019980849603">"kontroller vibrator"</string>
     <string name="permdesc_vibrate" msgid="2886677177257789187">"Lader programmet kontrollere vibratoren."</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"kontroller lommelygte"</string>
@@ -345,6 +360,8 @@
     <string name="permdesc_setWallpaperHints" msgid="6019479164008079626">"Tillader, at programmet opsætter størrelsestip for systemets tapet."</string>
     <string name="permlab_masterClear" msgid="2315750423139697397">"nulstil system til fabriksstandarder"</string>
     <string name="permdesc_masterClear" msgid="5033465107545174514">"Tillader, at et program nulstiller systemet fuldstændig til fabriksindstillingerne, sletter alle data, konfigurationer og installerede programmer."</string>
+    <string name="permlab_setTime" msgid="2021614829591775646">"angive tid"</string>
+    <string name="permdesc_setTime" msgid="667294309287080045">"Tillader, at et program ændrer telefonens klokkeslæt."</string>
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"angiv tidszone"</string>
     <string name="permdesc_setTimeZone" msgid="1902540227418179364">"Tillader, at et program ændrer telefonens tidszone."</string>
     <string name="permlab_accountManagerService" msgid="4829262349691386986">"fungerer som kontoadministrationstjeneste"</string>
@@ -364,7 +381,9 @@
     <string name="permlab_writeApnSettings" msgid="7823599210086622545">"skriv indstillinger for adgangspunktnavn"</string>
     <string name="permdesc_writeApnSettings" msgid="7443433457842966680">"Tillader, at et program ændrer APN-indstillingerne, f.eks. enhver APNs Proxy og Port."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"skift netværksforbindelse"</string>
-    <string name="permdesc_changeNetworkState" msgid="6278115726355634395">"Tillader, at et program ændrer netværksforbindelsens tilstand."</string>
+    <string name="permdesc_changeNetworkState" msgid="4199958910396387075">"Tillader, at et program ændrer netværksforbindelsens tilstand."</string>
+    <string name="permlab_changeTetherState" msgid="5952584964373017960">"skifte tethering-forbindelse"</string>
+    <string name="permdesc_changeTetherState" msgid="8905815579146349568">"Tillader, at et program ændrer tilstand for et bundet netværk."</string>
     <string name="permlab_changeBackgroundDataSetting" msgid="1400666012671648741">"skift brugerindstilling for baggrundsdata"</string>
     <string name="permdesc_changeBackgroundDataSetting" msgid="1001482853266638864">"Tillader, at et program ændrer brugerindstillingerne for baggrundsdata."</string>
     <string name="permlab_accessWifiState" msgid="8100926650211034400">"vis Wi-Fi-tilstand"</string>
@@ -395,10 +414,18 @@
     <string name="permdesc_writeDictionary" msgid="2241256206524082880">"Tillader, at et program skriver nye ord i brugerordbogen."</string>
     <string name="permlab_sdcardWrite" msgid="8079403759001777291">"ret/slet indholdet på SD-kortet"</string>
     <string name="permdesc_sdcardWrite" msgid="6643963204976471878">"Tillader, at et program skriver til SD-kortet."</string>
-    <!-- no translation found for permlab_cache_filesystem (5656487264819669824) -->
-    <skip />
-    <!-- no translation found for permdesc_cache_filesystem (1624734528435659906) -->
-    <skip />
+    <string name="permlab_cache_filesystem" msgid="5656487264819669824">"få adgang til cache-filsystemet"</string>
+    <string name="permdesc_cache_filesystem" msgid="1624734528435659906">"Tillader, at et program læser og skriver til cache-filsystemet."</string>
+    <string name="policylab_limitPassword" msgid="4307861496302850201">"Begræns adgangskode"</string>
+    <string name="policydesc_limitPassword" msgid="1719877245692318299">"Begræns de adgangskodetyper, du har tilladelse til at bruge."</string>
+    <string name="policylab_watchLogin" msgid="7374780712664285321">"Vis forsøg på at logge ind"</string>
+    <string name="policydesc_watchLogin" msgid="1961251179624843483">"Overvåg mislykkede forsøg på at logge ind på enheden for at foretage en handling."</string>
+    <string name="policylab_resetPassword" msgid="9084772090797485420">"Nulstil adgangskode"</string>
+    <string name="policydesc_resetPassword" msgid="3332167600331799991">"Tving din adgangskode til en ny værdi. Dette kræver, at administratoren giver den til dig, før du kan kogge ind."</string>
+    <string name="policylab_forceLock" msgid="5760466025247634488">"Tvangslås"</string>
+    <string name="policydesc_forceLock" msgid="2819868664946089740">"Kontrol når enheden låses, så du skal indtaste adgangskoden igen."</string>
+    <string name="policylab_wipeData" msgid="3910545446758639713">"Slet alle data"</string>
+    <string name="policydesc_wipeData" msgid="2314060933796396205">"Foretag en fabriksnulstilling, der sletter alle dine data uden bekræftelse."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Hjem"</item>
     <item msgid="869923650527136615">"Mobil"</item>
@@ -495,6 +522,7 @@
     <string name="contact_status_update_attribution" msgid="5112589886094402795">"via <xliff:g id="SOURCE">%1$s</xliff:g>"</string>
     <string name="contact_status_update_attribution_with_date" msgid="5945386376369979909">"<xliff:g id="DATE">%1$s</xliff:g> via <xliff:g id="SOURCE">%2$s</xliff:g>"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"Indtast PIN-kode"</string>
+    <string name="keyguard_password_enter_password_code" msgid="9138158344813213754">"Indtast adgangskode for at låse op"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"Forkert PIN-kode!"</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"Tryk på Menu og dernæst på 0 for at låse op."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"Nødnummer"</string>
@@ -504,6 +532,8 @@
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"Tryk på Menu for at låse op."</string>
     <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"Tegn oplåsningsmønster"</string>
     <string name="lockscreen_emergency_call" msgid="5347633784401285225">"Nødopkald"</string>
+    <!-- no translation found for lockscreen_return_to_call (5244259785500040021) -->
+    <skip />
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Rigtigt!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4817583279053112312">"Beklager! Prøv igen"</string>
     <string name="lockscreen_plugged_in" msgid="613343852842944435">"Oplader (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
@@ -534,6 +564,9 @@
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"Lås op"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Lyd slået til"</string>
     <string name="lockscreen_sound_off_label" msgid="996822825154319026">"Lyd slået fra"</string>
+    <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
+    <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
+    <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
     <string name="hour_ampm" msgid="4329881288269772723">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_cap_ampm" msgid="1829009197680861107">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Ryd"</string>
@@ -559,6 +592,8 @@
     <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"Tillader, at programmet læser alle de webadresser, browseren har besøgt, og alle browserens bogmærker."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"skriv browserens oversigt og bogmærker"</string>
     <string name="permdesc_writeHistoryBookmarks" msgid="945571990357114950">"Tillader, at et program ændrer browseroversigten eller bogmærker, der er gemt på din telefon. Ondsindede programmer kan bruge dette til at slette eller ændre din browsers data."</string>
+    <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"Skift browsertilladelser for geografisk placering"</string>
+    <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"Giver et program tilladelse til at ændre browserens tilladelser for geografisk placering. Skadelige programmer kan bruge dette til at tillade, at placeringsoplysninger sendes til vilkårlige websteder."</string>
     <string name="save_password_message" msgid="767344687139195790">"Ønsker du, at browseren skal huske denne adgangskode?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Ikke nu"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Husk"</string>
@@ -585,6 +620,11 @@
     <item quantity="one" msgid="9150797944610821849">"For 1 time siden"</item>
     <item quantity="other" msgid="2467273239587587569">"For <xliff:g id="COUNT">%d</xliff:g> timer siden"</item>
   </plurals>
+    <!-- no translation found for last_num_days:other (3069992808164318268) -->
+    <!-- no translation found for last_month (3959346739979055432) -->
+    <skip />
+    <!-- no translation found for older (5211975022815554840) -->
+    <skip />
   <plurals name="num_days_ago">
     <item quantity="one" msgid="861358534398115820">"i går"</item>
     <item quantity="other" msgid="2479586466153314633">"For <xliff:g id="COUNT">%d</xliff:g> dage siden"</item>
@@ -739,21 +779,27 @@
     <string name="no_permissions" msgid="7283357728219338112">"Der kræves ingen tilladelser"</string>
     <string name="perms_hide" msgid="7283915391320676226"><b>"Skjul"</b></string>
     <string name="perms_show_all" msgid="2671791163933091180"><b>"Vis alle"</b></string>
-    <string name="googlewebcontenthelper_loading" msgid="4722128368651947186">"Indlæser ..."</string>
+    <string name="usb_storage_activity_title" msgid="2399289999608900443">"USB-masselagring"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"USB er tilsluttet"</string>
-    <string name="usb_storage_message" msgid="2759542180575016871">"Du har forbundet din telefon til din computer via USB. Vælg \"Monter\", hvis du ønsker at kopiere filer mellem din computer og din telefons SD-kort."</string>
-    <string name="usb_storage_button_mount" msgid="8063426289195405456">"Monter"</string>
-    <string name="usb_storage_button_unmount" msgid="6092146330053864766">"Indsæt ikke"</string>
+    <string name="usb_storage_message" msgid="4796759646167247178">"Du har forbundet din telefon til din computer via USB. Vælg knappen nedenfor, hvis du ønsker at kopiere filer mellem din computer og din Androids SD-kort."</string>
+    <string name="usb_storage_button_mount" msgid="1052259930369508235">"Slå USB-lagringen til"</string>
     <string name="usb_storage_error_message" msgid="2534784751603345363">"Der opstod et problem med at bruge dit SD-kort til USB-lagring."</string>
     <string name="usb_storage_notification_title" msgid="8175892554757216525">"USB er tilsluttet"</string>
     <string name="usb_storage_notification_message" msgid="7380082404288219341">"Vælg for at kopiere filer til/fra din computer."</string>
     <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"Slå USB-lagringen fra"</string>
     <string name="usb_storage_stop_notification_message" msgid="2591813490269841539">"Vælg for at slå USB-lagring fra."</string>
-    <string name="usb_storage_stop_title" msgid="6014127947456185321">"Slå USB-lagring fra"</string>
-    <string name="usb_storage_stop_message" msgid="2390958966725232848">"Inden du slår USB-lagringen fra, skal du sørge for, at USB-værten er demonteret. Vælg \"Slå fra\" for at slå USB-lagringen fra."</string>
-    <string name="usb_storage_stop_button_mount" msgid="1181858854166273345">"Slå fra"</string>
-    <string name="usb_storage_stop_button_unmount" msgid="3774611918660582898">"Annuller"</string>
-    <string name="usb_storage_stop_error_message" msgid="3746037090369246731">"Der opstod et problem med at slå USB-lagringen fra. Sørg for, at du har demonteret USB-værten, og prøv så igen."</string>
+    <string name="usb_storage_stop_title" msgid="660129851708775853">"USB-lager i brug"</string>
+    <string name="usb_storage_stop_message" msgid="3613713396426604104">"Sørg for, at du har demonteret (\"udskubbet\") din Androids SD-kort fra computeren, før du slår USB-lagring fra."</string>
+    <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"Slå USB-lagring fra"</string>
+    <string name="usb_storage_stop_error_message" msgid="143881914840412108">"Der opstod et problem med at slå USB-lagringen fra. Sørg for, at du har demonteret USB-værten, og prøv så igen."</string>
+    <!-- no translation found for dlg_confirm_kill_storage_users_title (203356557714612214) -->
+    <skip />
+    <!-- no translation found for dlg_confirm_kill_storage_users_text (3902998926994232358) -->
+    <skip />
+    <!-- no translation found for dlg_error_title (9179426738781357928) -->
+    <skip />
+    <!-- no translation found for dlg_ok (7376953167039865701) -->
+    <skip />
     <string name="extmedia_format_title" msgid="8663247929551095854">"Formater SD-kort"</string>
     <string name="extmedia_format_message" msgid="3621369962433523619">"Er du sikker på, du ønsker at formatere SD-kortet? Alle data på kortet mistes."</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Formater"</string>
@@ -778,6 +824,8 @@
     <string name="activity_list_empty" msgid="4168820609403385789">"Der blev ikke fundet nogen matchende aktiviteter"</string>
     <string name="permlab_pkgUsageStats" msgid="8787352074326748892">"opdater brugerstatistikker for komponenter"</string>
     <string name="permdesc_pkgUsageStats" msgid="891553695716752835">"Tillader ændring af indsamlede brugerstatistikker for komponenter. Ikke til brug til normale programmer."</string>
+    <string name="permlab_copyProtectedData" msgid="1660908117394854464">"Tillader kald af standardcontainertjeneste for at kopiere indhold. Ikke til brug for almindelige programmer."</string>
+    <string name="permdesc_copyProtectedData" msgid="537780957633976401">"Tillader kald af standardcontainertjeneste for at kopiere indhold. Ikke til brug for almindelige programmer."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"Tryk to gange for zoomkontrol"</string>
     <string name="gadget_host_error_inflating" msgid="2613287218853846830">"Der opstod en fejl under forøgelsen af widgetten"</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Gå"</string>
@@ -790,12 +838,9 @@
     <string name="create_contact_using" msgid="4947405226788104538">"Opret kontakt"\n"ved hjælp af <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="accessibility_compound_button_selected" msgid="5612776946036285686">"kontrolleret"</string>
     <string name="accessibility_compound_button_unselected" msgid="8864512895673924091">"ikke kontrolleret"</string>
-    <!-- no translation found for grant_credentials_permission_message_header (6824538733852821001) -->
-    <skip />
-    <!-- no translation found for grant_credentials_permission_message_footer (3125211343379376561) -->
-    <skip />
-    <!-- no translation found for grant_permissions_header_text (2722567482180797717) -->
-    <skip />
+    <string name="grant_credentials_permission_message_header" msgid="6824538733852821001">"Følgende programmer anmoder om tilladelse til at få adgang til din konto nu og i fremtiden."</string>
+    <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"Vil du tillade denne anmodning?"</string>
+    <string name="grant_permissions_header_text" msgid="2722567482180797717">"Adgangsanmodning"</string>
     <string name="allow" msgid="7225948811296386551">"Tillad"</string>
     <string name="deny" msgid="2081879885755434506">"Afvis"</string>
     <string name="permission_request_notification_title" msgid="5390555465778213840">"Der er anmodet om tilladelse"</string>
@@ -809,10 +854,26 @@
     <string name="l2tp_vpn_description" msgid="3750692169378923304">"Layer 2 Tunneling Protocol"</string>
     <string name="l2tp_ipsec_psk_vpn_description" msgid="3945043564008303239">"L2TP/IPSec VPN baseret på forhåndsdelt nøglekodning"</string>
     <string name="l2tp_ipsec_crt_vpn_description" msgid="5382714073103653577">"Certifikatbaseret L2TP/IPSec VPN"</string>
-    <!-- no translation found for upload_file (2897957172366730416) -->
+    <string name="upload_file" msgid="2897957172366730416">"Vælg fil"</string>
+    <string name="reset" msgid="2448168080964209908">"Nulstil"</string>
+    <string name="submit" msgid="1602335572089911941">"Send"</string>
+    <string name="description_star" msgid="2654319874908576133">"favorit"</string>
+    <string name="tether_title" msgid="6970447107301643248">"USB-binding tilgængelig"</string>
+    <string name="tether_message" msgid="554549994538298101">"Vælg \"Tether\" hvis du vil dele telefonens dataforbindelse med computeren."</string>
+    <string name="tether_button" msgid="7409514810151603641">"Bind"</string>
+    <string name="tether_button_cancel" msgid="6744369928952219677">"Annuller"</string>
+    <string name="tether_error_message" msgid="6672110337349077628">"Der er opstået et problem med tethering."</string>
+    <string name="tether_available_notification_title" msgid="367754042700082080">"USB-binding tilgængelig"</string>
+    <string name="tether_available_notification_message" msgid="8439443306503453793">"Vælg tehtering af computeren og telefonen."</string>
+    <string name="tether_stop_notification_title" msgid="1902246071807668101">"Fjern tethering"</string>
+    <string name="tether_stop_notification_message" msgid="6920086906891516128">"Vælg at fjerne tethering fra computeren."</string>
+    <string name="tether_stop_title" msgid="3118332507220912235">"Afbryd binding"</string>
+    <string name="tether_stop_message" msgid="7741840433788363174">"Du har delt telefonens mobildataforbindelse med computeren. Vælg \"Afbryd\" for at afbryde USB-tethering."</string>
+    <string name="tether_stop_button" msgid="8061941592702063029">"Afbryd"</string>
+    <string name="tether_stop_button_cancel" msgid="3694669546501300230">"Annuller"</string>
+    <string name="tether_stop_error_message" msgid="4244697367270211648">"Der opstod et problem med at slå bindingen fra. Prøv igen."</string>
+    <!-- no translation found for car_mode_disable_notification_title (3164768212003864316) -->
     <skip />
-    <!-- no translation found for reset (2448168080964209908) -->
-    <skip />
-    <!-- no translation found for submit (1602335572089911941) -->
+    <!-- no translation found for car_mode_disable_notification_message (3262812780382240778) -->
     <skip />
 </resources>
