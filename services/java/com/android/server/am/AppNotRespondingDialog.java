@@ -26,7 +26,7 @@ import android.content.res.Resources;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Process;
-import android.util.Log;
+import android.util.Slog;
 
 class AppNotRespondingDialog extends BaseErrorDialog {
     private static final String TAG = "AppNotRespondingDialog";
@@ -130,7 +130,7 @@ class AppNotRespondingDialog extends BaseErrorDialog {
                 try {
                     getContext().startActivity(appErrorIntent);
                 } catch (ActivityNotFoundException e) {
-                    Log.w(TAG, "bug report receiver dissappeared", e);
+                    Slog.w(TAG, "bug report receiver dissappeared", e);
                 }
             }
         }

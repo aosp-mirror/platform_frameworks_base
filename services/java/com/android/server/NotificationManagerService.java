@@ -55,6 +55,7 @@ import android.os.Vibrator;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.EventLog;
+import android.util.Slog;
 import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
@@ -466,10 +467,10 @@ class NotificationManagerService extends INotificationManager.Stub
     // ============================================================================
     public void enqueueToast(String pkg, ITransientNotification callback, int duration)
     {
-        Log.i(TAG, "enqueueToast pkg=" + pkg + " callback=" + callback + " duration=" + duration);
+        Slog.i(TAG, "enqueueToast pkg=" + pkg + " callback=" + callback + " duration=" + duration);
 
         if (pkg == null || callback == null) {
-            Log.e(TAG, "Not doing toast. pkg=" + pkg + " callback=" + callback);
+            Slog.e(TAG, "Not doing toast. pkg=" + pkg + " callback=" + callback);
             return ;
         }
 
@@ -504,10 +505,10 @@ class NotificationManagerService extends INotificationManager.Stub
     }
 
     public void cancelToast(String pkg, ITransientNotification callback) {
-        Log.i(TAG, "cancelToast pkg=" + pkg + " callback=" + callback);
+        Slog.i(TAG, "cancelToast pkg=" + pkg + " callback=" + callback);
 
         if (pkg == null || callback == null) {
-            Log.e(TAG, "Not cancelling notification. pkg=" + pkg + " callback=" + callback);
+            Slog.e(TAG, "Not cancelling notification. pkg=" + pkg + " callback=" + callback);
             return ;
         }
 
@@ -518,7 +519,7 @@ class NotificationManagerService extends INotificationManager.Stub
                 if (index >= 0) {
                     cancelToastLocked(index);
                 } else {
-                    Log.w(TAG, "Toast already cancelled. pkg=" + pkg + " callback=" + callback);
+                    Slog.w(TAG, "Toast already cancelled. pkg=" + pkg + " callback=" + callback);
                 }
             } finally {
                 Binder.restoreCallingIdentity(callingId);
@@ -529,13 +530,13 @@ class NotificationManagerService extends INotificationManager.Stub
     private void showNextToastLocked() {
         ToastRecord record = mToastQueue.get(0);
         while (record != null) {
-            if (DBG) Log.d(TAG, "Show pkg=" + record.pkg + " callback=" + record.callback);
+            if (DBG) Slog.d(TAG, "Show pkg=" + record.pkg + " callback=" + record.callback);
             try {
                 record.callback.show();
                 scheduleTimeoutLocked(record, false);
                 return;
             } catch (RemoteException e) {
-                Log.w(TAG, "Object died trying to show notification " + record.callback
+                Slog.w(TAG, "Object died trying to show notification " + record.callback
                         + " in package " + record.pkg);
                 // remove it from the list and let the process die
                 int index = mToastQueue.indexOf(record);
@@ -557,7 +558,7 @@ class NotificationManagerService extends INotificationManager.Stub
         try {
             record.callback.hide();
         } catch (RemoteException e) {
-            Log.w(TAG, "Object died trying to hide notification " + record.callback
+            Slog.w(TAG, "Object died trying to hide notification " + record.callback
                     + " in package " + record.pkg);
             // don't worry about this, we're about to remove it from
             // the list anyway
@@ -582,7 +583,7 @@ class NotificationManagerService extends INotificationManager.Stub
 
     private void handleTimeout(ToastRecord record)
     {
-        if (DBG) Log.d(TAG, "Timeout pkg=" + record.pkg + " callback=" + record.callback);
+        if (DBG) Slog.d(TAG, "Timeout pkg=" + record.pkg + " callback=" + record.callback);
         synchronized (mToastQueue) {
             int index = indexOfToastLocked(record.pkg, record.callback);
             if (index >= 0) {
@@ -818,7 +819,7 @@ class NotificationManagerService extends INotificationManager.Stub
             if (mLedNotification == old) {
                 mLedNotification = null;
             }
-            //Log.i(TAG, "notification.lights="
+            //Slog.i(TAG, "notification.lights="
             //        + ((old.notification.lights.flags & Notification.FLAG_SHOW_LIGHTS) != 0));
             if ((notification.flags & Notification.FLAG_SHOW_LIGHTS) != 0) {
                 mLights.add(r);
@@ -1013,7 +1014,7 @@ class NotificationManagerService extends INotificationManager.Stub
                         } catch (PendingIntent.CanceledException ex) {
                             // do nothing - there's no relevant way to recover, and
                             //     no reason to let this propagate
-                            Log.w(TAG, "canceled PendingIntent for " + r.pkg, ex);
+                            Slog.w(TAG, "canceled PendingIntent for " + r.pkg, ex);
                         }
                     }
                     mNotificationList.remove(i);

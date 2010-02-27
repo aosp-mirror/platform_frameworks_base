@@ -37,7 +37,7 @@ import android.os.SystemProperties;
 import android.text.TextUtils;
 import android.text.format.Time;
 import android.util.EventLog;
-import android.util.Log;
+import android.util.Slog;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -141,7 +141,7 @@ class AlarmManagerService extends IAlarmManager.Stub {
         if (mDescriptor != -1) {
             mWaitThread.start();
         } else {
-            Log.w(TAG, "Failed to open alarm driver. Falling back to a handler.");
+            Slog.w(TAG, "Failed to open alarm driver. Falling back to a handler.");
         }
     }
     
@@ -160,7 +160,7 @@ class AlarmManagerService extends IAlarmManager.Stub {
     public void setRepeating(int type, long triggerAtTime, long interval, 
             PendingIntent operation) {
         if (operation == null) {
-            Log.w(TAG, "set/setRepeating ignored because there is no intent");
+            Slog.w(TAG, "set/setRepeating ignored because there is no intent");
             return;
         }
         synchronized (mLock) {
@@ -173,7 +173,7 @@ class AlarmManagerService extends IAlarmManager.Stub {
             // Remove this alarm if already scheduled.
             removeLocked(operation);
 
-            if (localLOGV) Log.v(TAG, "set: " + alarm);
+            if (localLOGV) Slog.v(TAG, "set: " + alarm);
 
             int index = addAlarmLocked(alarm);
             if (index == 0) {
@@ -185,7 +185,7 @@ class AlarmManagerService extends IAlarmManager.Stub {
     public void setInexactRepeating(int type, long triggerAtTime, long interval, 
             PendingIntent operation) {
         if (operation == null) {
-            Log.w(TAG, "setInexactRepeating ignored because there is no intent");
+            Slog.w(TAG, "setInexactRepeating ignored because there is no intent");
             return;
         }
 
@@ -237,7 +237,7 @@ class AlarmManagerService extends IAlarmManager.Stub {
 
         // Remember where this bucket started (reducing the amount of later 
         // fixup required) and set the alarm with the new, bucketed start time.
-        if (localLOGV) Log.v(TAG, "setInexactRepeating: interval=" + interval
+        if (localLOGV) Slog.v(TAG, "setInexactRepeating: interval=" + interval
                 + " bucketTime=" + bucketTime);
         mInexactDeliveryTimes[intervalSlot] = bucketTime;
         setRepeating(type, bucketTime, interval, operation);
@@ -264,7 +264,7 @@ class AlarmManagerService extends IAlarmManager.Stub {
         synchronized (this) {
             String current = SystemProperties.get(TIMEZONE_PROPERTY);
             if (current == null || !current.equals(zone.getID())) {
-                if (localLOGV) Log.v(TAG, "timezone changed: " + current + ", new=" + zone.getID());
+                if (localLOGV) Slog.v(TAG, "timezone changed: " + current + ", new=" + zone.getID());
                 timeZoneWasChanged = true; 
                 SystemProperties.set(TIMEZONE_PROPERTY, zone.getID());
             }
@@ -379,18 +379,18 @@ class AlarmManagerService extends IAlarmManager.Stub {
         if (index < 0) {
             index = 0 - index - 1;
         }
-        if (localLOGV) Log.v(TAG, "Adding alarm " + alarm + " at " + index);
+        if (localLOGV) Slog.v(TAG, "Adding alarm " + alarm + " at " + index);
         alarmList.add(index, alarm);
 
         if (localLOGV) {
             // Display the list of alarms for this alarm type
-            Log.v(TAG, "alarms: " + alarmList.size() + " type: " + alarm.type);
+            Slog.v(TAG, "alarms: " + alarmList.size() + " type: " + alarm.type);
             int position = 0;
             for (Alarm a : alarmList) {
                 Time time = new Time();
                 time.set(a.when);
                 String timeStr = time.format("%b %d %I:%M:%S %p");
-                Log.v(TAG, position + ": " + timeStr
+                Slog.v(TAG, position + ": " + timeStr
                         + " " + a.operation.getTargetPackage());
                 position += 1;
             }
@@ -514,7 +514,7 @@ class AlarmManagerService extends IAlarmManager.Stub {
         {
             Alarm alarm = it.next();
 
-            if (localLOGV) Log.v(TAG, "Checking active alarm when=" + alarm.when + " " + alarm);
+            if (localLOGV) Slog.v(TAG, "Checking active alarm when=" + alarm.when + " " + alarm);
 
             if (alarm.when > now) {
                 // don't fire alarms in the future
@@ -526,14 +526,14 @@ class AlarmManagerService extends IAlarmManager.Stub {
             // the Calendar app with a reminder that is in the past. In that
             // case, the reminder alarm will fire immediately.
             if (localLOGV && now - alarm.when > LATE_ALARM_THRESHOLD) {
-                Log.v(TAG, "alarm is late! alarm time: " + alarm.when
+                Slog.v(TAG, "alarm is late! alarm time: " + alarm.when
                         + " now: " + now + " delay (in seconds): "
                         + (now - alarm.when) / 1000);
             }
 
             // Recurring alarms may have passed several alarm intervals while the
             // phone was asleep or off, so pass a trigger count when sending them.
-            if (localLOGV) Log.v(TAG, "Alarm triggering: " + alarm);
+            if (localLOGV) Slog.v(TAG, "Alarm triggering: " + alarm);
             alarm.count = 1;
             if (alarm.repeatInterval > 0) {
                 // this adjustment will be zero if we're late by
@@ -644,7 +644,7 @@ class AlarmManagerService extends IAlarmManager.Stub {
                 synchronized (mLock) {
                     final long nowRTC = System.currentTimeMillis();
                     final long nowELAPSED = SystemClock.elapsedRealtime();
-                    if (localLOGV) Log.v(
+                    if (localLOGV) Slog.v(
                         TAG, "Checking for alarms... rtc=" + nowRTC
                         + ", elapsed=" + nowELAPSED);
 
@@ -665,7 +665,7 @@ class AlarmManagerService extends IAlarmManager.Stub {
                     while (it.hasNext()) {
                         Alarm alarm = it.next();
                         try {
-                            if (localLOGV) Log.v(TAG, "sending alarm " + alarm);
+                            if (localLOGV) Slog.v(TAG, "sending alarm " + alarm);
                             alarm.operation.send(mContext, 0,
                                     mBackgroundIntent.putExtra(
                                             Intent.EXTRA_ALARM_COUNT, alarm.count),
@@ -696,7 +696,7 @@ class AlarmManagerService extends IAlarmManager.Stub {
                                 remove(alarm.operation);
                             }
                         } catch (RuntimeException e) {
-                            Log.w(TAG, "Failure sending alarm.", e);
+                            Slog.w(TAG, "Failure sending alarm.", e);
                         }
                     }
                 }

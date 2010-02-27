@@ -54,7 +54,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.provider.Settings;
-import android.util.Log;
+import android.util.Slog;
 import android.text.TextUtils;
 
 import java.util.ArrayList;
@@ -218,7 +218,7 @@ public class WifiService extends IWifiManager.Stub {
                 }
         );
 
-        Log.i(TAG, "WifiService starting up with Wi-Fi " +
+        Slog.i(TAG, "WifiService starting up with Wi-Fi " +
                 (wifiEnabled ? "enabled" : "disabled"));
 
         mContext.registerReceiver(
@@ -346,13 +346,13 @@ public class WifiService extends IWifiManager.Stub {
         if (enable) {
             synchronized (mWifiStateTracker) {
                 if (!WifiNative.loadDriver()) {
-                    Log.e(TAG, "Failed to load Wi-Fi driver.");
+                    Slog.e(TAG, "Failed to load Wi-Fi driver.");
                     setWifiEnabledState(WIFI_STATE_UNKNOWN, uid);
                     return false;
                 }
                 if (!WifiNative.startSupplicant()) {
                     WifiNative.unloadDriver();
-                    Log.e(TAG, "Failed to start supplicant daemon.");
+                    Slog.e(TAG, "Failed to start supplicant daemon.");
                     setWifiEnabledState(WIFI_STATE_UNKNOWN, uid);
                     return false;
                 }
@@ -368,7 +368,7 @@ public class WifiService extends IWifiManager.Stub {
             boolean failedToStopSupplicantOrUnloadDriver = false;
             synchronized (mWifiStateTracker) {
                 if (!WifiNative.stopSupplicant()) {
-                    Log.e(TAG, "Failed to stop supplicant daemon.");
+                    Slog.e(TAG, "Failed to stop supplicant daemon.");
                     setWifiEnabledState(WIFI_STATE_UNKNOWN, uid);
                     failedToStopSupplicantOrUnloadDriver = true;
                 }
@@ -380,7 +380,7 @@ public class WifiService extends IWifiManager.Stub {
                 mWifiStateTracker.resetConnections(true);
 
                 if (!WifiNative.unloadDriver()) {
-                    Log.e(TAG, "Failed to unload Wi-Fi driver.");
+                    Slog.e(TAG, "Failed to unload Wi-Fi driver.");
                     if (!failedToStopSupplicantOrUnloadDriver) {
                         setWifiEnabledState(WIFI_STATE_UNKNOWN, uid);
                         failedToStopSupplicantOrUnloadDriver = true;
@@ -732,7 +732,7 @@ public class WifiService extends IWifiManager.Stub {
                 netId = WifiNative.addNetworkCommand();
                 if (netId < 0) {
                     if (DBG) {
-                        Log.d(TAG, "Failed to add a network!");
+                        Slog.d(TAG, "Failed to add a network!");
                     }
                     return -1;
                 }
@@ -763,7 +763,7 @@ public class WifiService extends IWifiManager.Stub {
                         WifiConfiguration.ssidVarName,
                         convertToQuotedString(config.SSID))) {
                 if (DBG) {
-                    Log.d(TAG, "failed to set SSID: "+config.SSID);
+                    Slog.d(TAG, "failed to set SSID: "+config.SSID);
                 }
                 break setVariables;
             }
@@ -774,7 +774,7 @@ public class WifiService extends IWifiManager.Stub {
                         WifiConfiguration.bssidVarName,
                         config.BSSID)) {
                 if (DBG) {
-                    Log.d(TAG, "failed to set BSSID: "+config.BSSID);
+                    Slog.d(TAG, "failed to set BSSID: "+config.BSSID);
                 }
                 break setVariables;
             }
@@ -787,7 +787,7 @@ public class WifiService extends IWifiManager.Stub {
                         WifiConfiguration.KeyMgmt.varName,
                         allowedKeyManagementString)) {
                 if (DBG) {
-                    Log.d(TAG, "failed to set key_mgmt: "+
+                    Slog.d(TAG, "failed to set key_mgmt: "+
                             allowedKeyManagementString);
                 }
                 break setVariables;
@@ -801,7 +801,7 @@ public class WifiService extends IWifiManager.Stub {
                         WifiConfiguration.Protocol.varName,
                         allowedProtocolsString)) {
                 if (DBG) {
-                    Log.d(TAG, "failed to set proto: "+
+                    Slog.d(TAG, "failed to set proto: "+
                             allowedProtocolsString);
                 }
                 break setVariables;
@@ -815,7 +815,7 @@ public class WifiService extends IWifiManager.Stub {
                         WifiConfiguration.AuthAlgorithm.varName,
                         allowedAuthAlgorithmsString)) {
                 if (DBG) {
-                    Log.d(TAG, "failed to set auth_alg: "+
+                    Slog.d(TAG, "failed to set auth_alg: "+
                             allowedAuthAlgorithmsString);
                 }
                 break setVariables;
@@ -829,7 +829,7 @@ public class WifiService extends IWifiManager.Stub {
                         WifiConfiguration.PairwiseCipher.varName,
                         allowedPairwiseCiphersString)) {
                 if (DBG) {
-                    Log.d(TAG, "failed to set pairwise: "+
+                    Slog.d(TAG, "failed to set pairwise: "+
                             allowedPairwiseCiphersString);
                 }
                 break setVariables;
@@ -843,7 +843,7 @@ public class WifiService extends IWifiManager.Stub {
                         WifiConfiguration.GroupCipher.varName,
                         allowedGroupCiphersString)) {
                 if (DBG) {
-                    Log.d(TAG, "failed to set group: "+
+                    Slog.d(TAG, "failed to set group: "+
                             allowedGroupCiphersString);
                 }
                 break setVariables;
@@ -857,7 +857,7 @@ public class WifiService extends IWifiManager.Stub {
                         WifiConfiguration.pskVarName,
                         config.preSharedKey)) {
                 if (DBG) {
-                    Log.d(TAG, "failed to set psk: "+config.preSharedKey);
+                    Slog.d(TAG, "failed to set psk: "+config.preSharedKey);
                 }
                 break setVariables;
             }
@@ -873,7 +873,7 @@ public class WifiService extends IWifiManager.Stub {
                                     WifiConfiguration.wepKeyVarNames[i],
                                     config.wepKeys[i])) {
                             if (DBG) {
-                                Log.d(TAG,
+                                Slog.d(TAG,
                                         "failed to set wep_key"+i+": " +
                                         config.wepKeys[i]);
                             }
@@ -890,7 +890,7 @@ public class WifiService extends IWifiManager.Stub {
                             WifiConfiguration.wepTxKeyIdxVarName,
                             Integer.toString(config.wepTxKeyIndex))) {
                     if (DBG) {
-                        Log.d(TAG,
+                        Slog.d(TAG,
                                 "failed to set wep_tx_keyidx: "+
                                 config.wepTxKeyIndex);
                     }
@@ -903,7 +903,7 @@ public class WifiService extends IWifiManager.Stub {
                         WifiConfiguration.priorityVarName,
                         Integer.toString(config.priority))) {
                 if (DBG) {
-                    Log.d(TAG, config.SSID + ": failed to set priority: "
+                    Slog.d(TAG, config.SSID + ": failed to set priority: "
                             +config.priority);
                 }
                 break setVariables;
@@ -914,7 +914,7 @@ public class WifiService extends IWifiManager.Stub {
                         WifiConfiguration.hiddenSSIDVarName,
                         Integer.toString(config.hiddenSSID ? 1 : 0))) {
                 if (DBG) {
-                    Log.d(TAG, config.SSID + ": failed to set hiddenSSID: "+
+                    Slog.d(TAG, config.SSID + ": failed to set hiddenSSID: "+
                             config.hiddenSSID);
                 }
                 break setVariables;
@@ -933,7 +933,7 @@ public class WifiService extends IWifiManager.Stub {
                                 varName,
                                 value)) {
                         if (DBG) {
-                            Log.d(TAG, config.SSID + ": failed to set " + varName +
+                            Slog.d(TAG, config.SSID + ": failed to set " + varName +
                                     ": " + value);
                         }
                         break setVariables;
@@ -952,7 +952,7 @@ public class WifiService extends IWifiManager.Stub {
             if (newNetwork) {
                 removeNetwork(netId);
                 if (DBG) {
-                    Log.d(TAG,
+                    Slog.d(TAG,
                             "Failed to set a network variable, removed network: "
                             + netId);
                 }
@@ -994,7 +994,7 @@ public class WifiService extends IWifiManager.Stub {
             // if we ever get here, we should probably add the
             // value to WifiConfiguration to reflect that it's
             // supported by the WPA supplicant
-            Log.w(TAG, "Failed to look-up a string: " + string);
+            Slog.w(TAG, "Failed to look-up a string: " + string);
         }
 
         return -1;
@@ -1098,7 +1098,7 @@ public class WifiService extends IWifiManager.Stub {
                     if (scanResult != null) {
                         scanList.add(scanResult);
                     } else if (DBG) {
-                        Log.w(TAG, "misformatted scan result for: " + line);
+                        Slog.w(TAG, "misformatted scan result for: " + line);
                     }
                 }
                 lineBeg = lineEnd + 1;
@@ -1185,7 +1185,7 @@ public class WifiService extends IWifiManager.Stub {
                         }
                     }
                 } else {
-                    Log.w(TAG, "Misformatted scan result text with " +
+                    Slog.w(TAG, "Misformatted scan result text with " +
                           result.length + " fields: " + line);
                 }
             }
@@ -1256,7 +1256,7 @@ public class WifiService extends IWifiManager.Stub {
      * {@code numChannels} is outside the valid range.
      */
     public boolean setNumAllowedChannels(int numChannels, boolean persist) {
-        Log.i(TAG, "WifiService trying to setNumAllowed to "+numChannels+
+        Slog.i(TAG, "WifiService trying to setNumAllowed to "+numChannels+
                 " with persist set to "+persist);
         enforceChangePermission();
         /*
@@ -1342,13 +1342,13 @@ public class WifiService extends IWifiManager.Stub {
                 Settings.System.getInt(mContext.getContentResolver(),
                                        Settings.System.STAY_ON_WHILE_PLUGGED_IN, 0);
             if (action.equals(Intent.ACTION_SCREEN_ON)) {
-                Log.d(TAG, "ACTION_SCREEN_ON");
+                Slog.d(TAG, "ACTION_SCREEN_ON");
                 mAlarmManager.cancel(mIdleIntent);
                 mDeviceIdle = false;
                 mScreenOff = false;
                 mWifiStateTracker.enableRssiPolling(true);
             } else if (action.equals(Intent.ACTION_SCREEN_OFF)) {
-                Log.d(TAG, "ACTION_SCREEN_OFF");
+                Slog.d(TAG, "ACTION_SCREEN_OFF");
                 mScreenOff = true;
                 mWifiStateTracker.enableRssiPolling(false);
                 /*
@@ -1365,21 +1365,21 @@ public class WifiService extends IWifiManager.Stub {
                         // as long as we would if connected (below)
                         // TODO - fix the race conditions and switch back to the immediate turn-off
                         long triggerTime = System.currentTimeMillis() + (2*60*1000); // 2 min
-                        Log.d(TAG, "setting ACTION_DEVICE_IDLE timer for 120,000 ms");
+                        Slog.d(TAG, "setting ACTION_DEVICE_IDLE timer for 120,000 ms");
                         mAlarmManager.set(AlarmManager.RTC_WAKEUP, triggerTime, mIdleIntent);
                         //  // do not keep Wifi awake when screen is off if Wifi is not associated
                         //  mDeviceIdle = true;
                         //  updateWifiState();
                     } else {
                         long triggerTime = System.currentTimeMillis() + idleMillis;
-                        Log.d(TAG, "setting ACTION_DEVICE_IDLE timer for " + idleMillis + "ms");
+                        Slog.d(TAG, "setting ACTION_DEVICE_IDLE timer for " + idleMillis + "ms");
                         mAlarmManager.set(AlarmManager.RTC_WAKEUP, triggerTime, mIdleIntent);
                     }
                 }
                 /* we can return now -- there's nothing to do until we get the idle intent back */
                 return;
             } else if (action.equals(ACTION_DEVICE_IDLE)) {
-                Log.d(TAG, "got ACTION_DEVICE_IDLE");
+                Slog.d(TAG, "got ACTION_DEVICE_IDLE");
                 mDeviceIdle = true;
             } else if (action.equals(Intent.ACTION_BATTERY_CHANGED)) {
                 /*
@@ -1390,11 +1390,11 @@ public class WifiService extends IWifiManager.Stub {
                  * the already-set timer.
                  */
                 int pluggedType = intent.getIntExtra("plugged", 0);
-                Log.d(TAG, "ACTION_BATTERY_CHANGED pluggedType: " + pluggedType);
+                Slog.d(TAG, "ACTION_BATTERY_CHANGED pluggedType: " + pluggedType);
                 if (mScreenOff && shouldWifiStayAwake(stayAwakeConditions, mPluggedType) &&
                         !shouldWifiStayAwake(stayAwakeConditions, pluggedType)) {
                     long triggerTime = System.currentTimeMillis() + idleMillis;
-                    Log.d(TAG, "setting ACTION_DEVICE_IDLE timer for " + idleMillis + "ms");
+                    Slog.d(TAG, "setting ACTION_DEVICE_IDLE timer for " + idleMillis + "ms");
                     mAlarmManager.set(AlarmManager.RTC_WAKEUP, triggerTime, mIdleIntent);
                     mPluggedType = pluggedType;
                     return;
@@ -1752,7 +1752,7 @@ public class WifiService extends IWifiManager.Stub {
     }
 
     private boolean acquireWifiLockLocked(WifiLock wifiLock) {
-        Log.d(TAG, "acquireWifiLockLocked: " + wifiLock);
+        Slog.d(TAG, "acquireWifiLockLocked: " + wifiLock);
 
         mLocks.addLock(wifiLock);
 
@@ -1790,7 +1790,7 @@ public class WifiService extends IWifiManager.Stub {
 
         WifiLock wifiLock = mLocks.removeLock(lock);
 
-        Log.d(TAG, "releaseWifiLockLocked: " + wifiLock);
+        Slog.d(TAG, "releaseWifiLockLocked: " + wifiLock);
 
         hadLock = (wifiLock != null);
 
@@ -1847,7 +1847,7 @@ public class WifiService extends IWifiManager.Stub {
         }
 
         public void binderDied() {
-            Log.e(TAG, "Multicaster binderDied");
+            Slog.e(TAG, "Multicaster binderDied");
             synchronized (mMulticasters) {
                 int i = mMulticasters.indexOf(this);
                 if (i != -1) {

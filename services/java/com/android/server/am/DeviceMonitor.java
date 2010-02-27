@@ -16,7 +16,7 @@
 
 package com.android.server.am;
 
-import android.util.Log;
+import android.util.Slog;
 
 import java.io.*;
 import java.util.Arrays;
@@ -65,7 +65,7 @@ class DeviceMonitor {
                 try {
                     dump();
                 } catch (IOException e) {
-                    Log.w(LOG_TAG, "Dump failed.", e);
+                    Slog.w(LOG_TAG, "Dump failed.", e);
                 }
                 pause();
             }
@@ -100,7 +100,7 @@ class DeviceMonitor {
             Arrays.sort(files);
             for (int i = 0; i < count; i++) {
                 if (!files[i].delete()) {
-                    Log.w(LOG_TAG, "Couldn't delete " + files[i] + ".");
+                    Slog.w(LOG_TAG, "Couldn't delete " + files[i] + ".");
                 }
             }
         }
@@ -178,7 +178,7 @@ class DeviceMonitor {
                 closeable.close();
             }
         } catch (IOException e) {
-            Log.w(LOG_TAG, e);
+            Slog.w(LOG_TAG, e);
         }
     }
 

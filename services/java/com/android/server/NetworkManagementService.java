@@ -30,7 +30,7 @@ import android.os.INetworkManagementService;
 import android.os.Handler;
 import android.os.SystemProperties;
 import android.text.TextUtils;
-import android.util.Log;
+import android.util.Slog;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
 import android.provider.Settings;
@@ -99,12 +99,12 @@ class NetworkManagementService extends INetworkManagementService.Stub {
     }
 
     public void registerObserver(INetworkManagementEventObserver obs) {
-        Log.d(TAG, "Registering observer");
+        Slog.d(TAG, "Registering observer");
         mObservers.add(obs);
     }
 
     public void unregisterObserver(INetworkManagementEventObserver obs) {
-        Log.d(TAG, "Unregistering observer");
+        Slog.d(TAG, "Unregistering observer");
         mObservers.remove(mObservers.indexOf(obs));
     }
 
@@ -116,7 +116,7 @@ class NetworkManagementService extends INetworkManagementService.Stub {
             try {
                 obs.interfaceLinkStatusChanged(iface, link);
             } catch (Exception ex) {
-                Log.w(TAG, "Observer notifier failed", ex);
+                Slog.w(TAG, "Observer notifier failed", ex);
             }
         }
     }
@@ -129,7 +129,7 @@ class NetworkManagementService extends INetworkManagementService.Stub {
             try {
                 obs.interfaceAdded(iface);
             } catch (Exception ex) {
-                Log.w(TAG, "Observer notifier failed", ex);
+                Slog.w(TAG, "Observer notifier failed", ex);
             }
         }
     }
@@ -142,7 +142,7 @@ class NetworkManagementService extends INetworkManagementService.Stub {
             try {
                 obs.interfaceRemoved(iface);
             } catch (Exception ex) {
-                Log.w(TAG, "Observer notifier failed", ex);
+                Slog.w(TAG, "Observer notifier failed", ex);
             }
         }
     }
@@ -224,7 +224,7 @@ class NetworkManagementService extends INetworkManagementService.Stub {
 
     public InterfaceConfiguration getInterfaceConfig(String iface) throws IllegalStateException {
         String rsp = mConnector.doCommand("interface getcfg " + iface).get(0);
-        Log.d(TAG, String.format("rsp <%s>", rsp));
+        Slog.d(TAG, String.format("rsp <%s>", rsp));
 
         // Rsp: 213 xx:xx:xx:xx:xx:xx yyy.yyy.yyy.yyy zzz.zzz.zzz.zzz [flag1 flag2 flag3]
         StringTokenizer st = new StringTokenizer(rsp);
@@ -246,18 +246,18 @@ class NetworkManagementService extends INetworkManagementService.Stub {
         try {
             cfg.ipAddr = stringToIpAddr(st.nextToken(" "));
         } catch (UnknownHostException uhe) {
-            Log.e(TAG, "Failed to parse ipaddr", uhe);
+            Slog.e(TAG, "Failed to parse ipaddr", uhe);
             cfg.ipAddr = 0;
         }
 
         try {
             cfg.netmask = stringToIpAddr(st.nextToken(" "));
         } catch (UnknownHostException uhe) {
-            Log.e(TAG, "Failed to parse netmask", uhe);
+            Slog.e(TAG, "Failed to parse netmask", uhe);
             cfg.netmask = 0;
         }
         cfg.interfaceFlags = st.nextToken("]").trim() +"]";
-        Log.d(TAG, String.format("flags <%s>", cfg.interfaceFlags));
+        Slog.d(TAG, String.format("flags <%s>", cfg.interfaceFlags));
         return cfg;
     }
 
@@ -275,7 +275,7 @@ class NetworkManagementService extends INetworkManagementService.Stub {
             throw new SecurityException("Requires SHUTDOWN permission");
         }
 
-        Log.d(TAG, "Shutting down");
+        Slog.d(TAG, "Shutting down");
     }
 
     public boolean getIpForwardingEnabled() throws IllegalStateException{

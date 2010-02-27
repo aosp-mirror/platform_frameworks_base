@@ -41,7 +41,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
 import android.provider.Telephony;
-import android.util.Log;
+import android.util.Slog;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -116,7 +116,7 @@ public class StatusBarService extends IStatusBar.Stub
         IBinder token;
 
         public void binderDied() {
-            Log.i(TAG, "binder died for pkg=" + pkg);
+            Slog.i(TAG, "binder died for pkg=" + pkg);
             disable(0, token, pkg);
             token.unlinkToDeath(this, 0);
         }
@@ -482,7 +482,7 @@ public class StatusBarService extends IStatusBar.Stub
     // lock on mDisableRecords
     void manageDisableListLocked(int what, IBinder token, String pkg) {
         if (SPEW) {
-            Log.d(TAG, "manageDisableList what=0x" + Integer.toHexString(what)
+            Slog.d(TAG, "manageDisableList what=0x" + Integer.toHexString(what)
                     + " pkg=" + pkg);
         }
         // update the list
@@ -661,7 +661,7 @@ public class StatusBarService extends IStatusBar.Stub
     /* private */ void performAddUpdateIcon(IBinder key, IconData data, NotificationData n)
                         throws StatusBarException {
         if (SPEW) {
-            Log.d(TAG, "performAddUpdateIcon icon=" + data + " notification=" + n + " key=" + key);
+            Slog.d(TAG, "performAddUpdateIcon icon=" + data + " notification=" + n + " key=" + key);
         }
         // notification
         if (n != null) {
@@ -725,7 +725,7 @@ public class StatusBarService extends IStatusBar.Stub
                         rightIcons[slotIndex] = icon;
                         mStatusIcons.addView(icon.view, pos);
                     } else {
-                        Log.e(TAG, "duplicate icon in slot " + slotIndex + "/" + data.slot);
+                        Slog.e(TAG, "duplicate icon in slot " + slotIndex + "/" + data.slot);
                         mIconMap.remove(key);
                         mIconList.remove(icon);
                         return ;
@@ -754,7 +754,7 @@ public class StatusBarService extends IStatusBar.Stub
     /* private */ void performSetIconVisibility(IBinder key, boolean visible) {
         synchronized (mIconMap) {
             if (SPEW) {
-                Log.d(TAG, "performSetIconVisibility key=" + key + " visible=" + visible);
+                Slog.d(TAG, "performSetIconVisibility key=" + key + " visible=" + visible);
             }
             StatusBarIcon icon = mIconMap.get(key);
             icon.view.setVisibility(visible ? View.VISIBLE : View.GONE);
@@ -764,7 +764,7 @@ public class StatusBarService extends IStatusBar.Stub
     /* private */ void performRemoveIcon(IBinder key) {
         synchronized (this) {
             if (SPEW) {
-                Log.d(TAG, "performRemoveIcon key=" + key);
+                Slog.d(TAG, "performRemoveIcon key=" + key);
             }
             StatusBarIcon icon = mIconMap.remove(key);
             mIconList.remove(icon);
@@ -851,7 +851,7 @@ public class StatusBarService extends IStatusBar.Stub
             exception = e;
         }
         if (child == null) {
-            Log.e(TAG, "couldn't inflate view for package " + n.pkg, exception);
+            Slog.e(TAG, "couldn't inflate view for package " + n.pkg, exception);
             return null;
         }
         content.addView(child);
@@ -908,7 +908,7 @@ public class StatusBarService extends IStatusBar.Stub
             }
             catch (RuntimeException e) {
                 // It failed to add cleanly.  Log, and remove the view from the panel.
-                Log.w(TAG, "couldn't reapply views for package " + n.contentView.getPackage(), e);
+                Slog.w(TAG, "couldn't reapply views for package " + n.contentView.getPackage(), e);
                 removeNotificationView(notification);
             }
         } else {
@@ -949,7 +949,7 @@ public class StatusBarService extends IStatusBar.Stub
     }
 
     private void makeExpandedVisible() {
-        if (SPEW) Log.d(TAG, "Make expanded visible: expanded visible=" + mExpandedVisible);
+        if (SPEW) Slog.d(TAG, "Make expanded visible: expanded visible=" + mExpandedVisible);
         if (mExpandedVisible) {
             return;
         }
@@ -969,7 +969,7 @@ public class StatusBarService extends IStatusBar.Stub
     }
     
     void animateExpand() {
-        if (SPEW) Log.d(TAG, "Animate expand: expanded=" + mExpanded);
+        if (SPEW) Slog.d(TAG, "Animate expand: expanded=" + mExpanded);
         if ((mDisabled & StatusBarManager.DISABLE_EXPAND) != 0) {
             return ;
         }
@@ -983,7 +983,7 @@ public class StatusBarService extends IStatusBar.Stub
     
     void animateCollapse() {
         if (SPEW) {
-            Log.d(TAG, "animateCollapse(): mExpanded=" + mExpanded
+            Slog.d(TAG, "animateCollapse(): mExpanded=" + mExpanded
                     + " mExpandedVisible=" + mExpandedVisible
                     + " mExpanded=" + mExpanded
                     + " mAnimating=" + mAnimating
@@ -1009,7 +1009,7 @@ public class StatusBarService extends IStatusBar.Stub
     }
     
     void performExpand() {
-        if (SPEW) Log.d(TAG, "performExpand: mExpanded=" + mExpanded);
+        if (SPEW) Slog.d(TAG, "performExpand: mExpanded=" + mExpanded);
         if ((mDisabled & StatusBarManager.DISABLE_EXPAND) != 0) {
             return ;
         }
@@ -1034,7 +1034,7 @@ public class StatusBarService extends IStatusBar.Stub
     }
 
     void performCollapse() {
-        if (SPEW) Log.d(TAG, "performCollapse: mExpanded=" + mExpanded
+        if (SPEW) Slog.d(TAG, "performCollapse: mExpanded=" + mExpanded
                 + " mExpandedVisible=" + mExpandedVisible);
         
         if (!mExpandedVisible) {
@@ -1060,18 +1060,18 @@ public class StatusBarService extends IStatusBar.Stub
 
     void doAnimation() {
         if (mAnimating) {
-            if (SPEW) Log.d(TAG, "doAnimation");
-            if (SPEW) Log.d(TAG, "doAnimation before mAnimY=" + mAnimY);
+            if (SPEW) Slog.d(TAG, "doAnimation");
+            if (SPEW) Slog.d(TAG, "doAnimation before mAnimY=" + mAnimY);
             incrementAnim();
-            if (SPEW) Log.d(TAG, "doAnimation after  mAnimY=" + mAnimY);
+            if (SPEW) Slog.d(TAG, "doAnimation after  mAnimY=" + mAnimY);
             if (mAnimY >= mDisplay.getHeight()-1) {
-                if (SPEW) Log.d(TAG, "Animation completed to expanded state.");
+                if (SPEW) Slog.d(TAG, "Animation completed to expanded state.");
                 mAnimating = false;
                 updateExpandedViewPos(EXPANDED_FULL_OPEN);
                 performExpand();
             }
             else if (mAnimY < mStatusBarView.getHeight()) {
-                if (SPEW) Log.d(TAG, "Animation completed to collapsed state.");
+                if (SPEW) Slog.d(TAG, "Animation completed to collapsed state.");
                 mAnimating = false;
                 updateExpandedViewPos(0);
                 performCollapse();
@@ -1099,7 +1099,7 @@ public class StatusBarService extends IStatusBar.Stub
         mAnimY = y + (v*t) + (0.5f*a*t*t);                          // px
         mAnimVel = v + (a*t);                                       // px/s
         mAnimLastTime = now;                                        // ms
-        //Log.d(TAG, "y=" + y + " v=" + v + " a=" + a + " t=" + t + " mAnimY=" + mAnimY
+        //Slog.d(TAG, "y=" + y + " v=" + v + " a=" + a + " t=" + t + " mAnimY=" + mAnimY
         //        + " mAnimAccel=" + mAnimAccel);
     }
 
@@ -1155,7 +1155,7 @@ public class StatusBarService extends IStatusBar.Stub
         mAnimY = y;
         mAnimVel = vel;
 
-        //Log.d(TAG, "starting with mAnimY=" + mAnimY + " mAnimVel=" + mAnimVel);
+        //Slog.d(TAG, "starting with mAnimY=" + mAnimY + " mAnimVel=" + mAnimVel);
 
         if (mExpanded) {
             if (!always && (
@@ -1195,7 +1195,7 @@ public class StatusBarService extends IStatusBar.Stub
                 }
             }
         }
-        //Log.d(TAG, "mAnimY=" + mAnimY + " mAnimVel=" + mAnimVel
+        //Slog.d(TAG, "mAnimY=" + mAnimY + " mAnimVel=" + mAnimVel
         //        + " mAnimAccel=" + mAnimAccel);
 
         long now = SystemClock.uptimeMillis();
@@ -1210,7 +1210,7 @@ public class StatusBarService extends IStatusBar.Stub
     
     boolean interceptTouchEvent(MotionEvent event) {
         if (SPEW) {
-            Log.d(TAG, "Touch: rawY=" + event.getRawY() + " event=" + event + " mDisabled="
+            Slog.d(TAG, "Touch: rawY=" + event.getRawY() + " event=" + event + " mDisabled="
                 + mDisabled);
         }
 
@@ -1311,7 +1311,7 @@ public class StatusBarService extends IStatusBar.Stub
                 mNotificationCallbacks.onNotificationClick(mPkg, mTag, mId);
             } catch (PendingIntent.CanceledException e) {
                 // the stack trace isn't very helpful here.  Just log the exception message.
-                Log.w(TAG, "Sending contentIntent failed: " + e);
+                Slog.w(TAG, "Sending contentIntent failed: " + e);
             }
             deactivate();
         }
@@ -1475,19 +1475,19 @@ public class StatusBarService extends IStatusBar.Stub
             mHandler.post(new Runnable() {
                     public void run() {
                         mStatusBarView.getLocationOnScreen(mAbsPos);
-                        Log.d(TAG, "mStatusBarView: ----- (" + mAbsPos[0] + "," + mAbsPos[1]
+                        Slog.d(TAG, "mStatusBarView: ----- (" + mAbsPos[0] + "," + mAbsPos[1]
                                 + ") " + mStatusBarView.getWidth() + "x"
                                 + mStatusBarView.getHeight());
                         mStatusBarView.debug();
 
                         mExpandedView.getLocationOnScreen(mAbsPos);
-                        Log.d(TAG, "mExpandedView: ----- (" + mAbsPos[0] + "," + mAbsPos[1]
+                        Slog.d(TAG, "mExpandedView: ----- (" + mAbsPos[0] + "," + mAbsPos[1]
                                 + ") " + mExpandedView.getWidth() + "x"
                                 + mExpandedView.getHeight());
                         mExpandedView.debug();
 
                         mTrackingView.getLocationOnScreen(mAbsPos);
-                        Log.d(TAG, "mTrackingView: ----- (" + mAbsPos[0] + "," + mAbsPos[1]
+                        Slog.d(TAG, "mTrackingView: ----- (" + mAbsPos[0] + "," + mAbsPos[1]
                                 + ") " + mTrackingView.getWidth() + "x"
                                 + mTrackingView.getHeight());
                         mTrackingView.debug();
@@ -1578,7 +1578,7 @@ public class StatusBarService extends IStatusBar.Stub
 
     void updateExpandedViewPos(int expandedPosition) {
         if (SPEW) {
-            Log.d(TAG, "updateExpandedViewPos before expandedPosition=" + expandedPosition
+            Slog.d(TAG, "updateExpandedViewPos before expandedPosition=" + expandedPosition
                     + " mTrackingParams.y=" + mTrackingParams.y
                     + " mTrackingPosition=" + mTrackingPosition);
         }
@@ -1652,7 +1652,7 @@ public class StatusBarService extends IStatusBar.Stub
         }
 
         if (SPEW) {
-            Log.d(TAG, "updateExpandedViewPos after  expandedPosition=" + expandedPosition
+            Slog.d(TAG, "updateExpandedViewPos after  expandedPosition=" + expandedPosition
                     + " mTrackingParams.y=" + mTrackingParams.y
                     + " mTrackingPosition=" + mTrackingPosition
                     + " mExpandedParams.y=" + mExpandedParams.y
@@ -1697,13 +1697,13 @@ public class StatusBarService extends IStatusBar.Stub
         // act accordingly
         if ((diff & StatusBarManager.DISABLE_EXPAND) != 0) {
             if ((net & StatusBarManager.DISABLE_EXPAND) != 0) {
-                Log.d(TAG, "DISABLE_EXPAND: yes");
+                Slog.d(TAG, "DISABLE_EXPAND: yes");
                 animateCollapse();
             }
         }
         if ((diff & StatusBarManager.DISABLE_NOTIFICATION_ICONS) != 0) {
             if ((net & StatusBarManager.DISABLE_NOTIFICATION_ICONS) != 0) {
-                Log.d(TAG, "DISABLE_NOTIFICATION_ICONS: yes");
+                Slog.d(TAG, "DISABLE_NOTIFICATION_ICONS: yes");
                 if (mTicking) {
                     mNotificationIcons.setVisibility(View.INVISIBLE);
                     mTicker.halt();
@@ -1711,7 +1711,7 @@ public class StatusBarService extends IStatusBar.Stub
                     setNotificationIconVisibility(false, com.android.internal.R.anim.fade_out);
                 }
             } else {
-                Log.d(TAG, "DISABLE_NOTIFICATION_ICONS: no");
+                Slog.d(TAG, "DISABLE_NOTIFICATION_ICONS: no");
                 if (!mExpandedVisible) {
                     setNotificationIconVisibility(true, com.android.internal.R.anim.fade_in);
                 }
@@ -1751,7 +1751,7 @@ public class StatusBarService extends IStatusBar.Stub
 
     void updateNetworkName(boolean showSpn, String spn, boolean showPlmn, String plmn) {
         if (false) {
-            Log.d(TAG, "updateNetworkName showSpn=" + showSpn + " spn=" + spn
+            Slog.d(TAG, "updateNetworkName showSpn=" + showSpn + " spn=" + spn
                     + " showPlmn=" + showPlmn + " plmn=" + plmn);
         }
         boolean something = false;
@@ -1793,7 +1793,7 @@ public class StatusBarService extends IStatusBar.Stub
 
         mEdgeBorder = res.getDimensionPixelSize(R.dimen.status_bar_edge_ignore);
 
-        if (false) Log.v(TAG, "updateResources");
+        if (false) Slog.v(TAG, "updateResources");
     }
 
     //
@@ -1814,7 +1814,7 @@ public class StatusBarService extends IStatusBar.Stub
         public void run() {
             vibrate();
             SystemClock.sleep(250);
-            Log.d(TAG, "startTracing");
+            Slog.d(TAG, "startTracing");
             android.os.Debug.startMethodTracing("/data/statusbar-traces/trace");
             mHandler.postDelayed(mStopTracing, 10000);
         }
@@ -1823,7 +1823,7 @@ public class StatusBarService extends IStatusBar.Stub
     Runnable mStopTracing = new Runnable() {
         public void run() {
             android.os.Debug.stopMethodTracing();
-            Log.d(TAG, "stopTracing");
+            Slog.d(TAG, "stopTracing");
             vibrate();
         }
     };

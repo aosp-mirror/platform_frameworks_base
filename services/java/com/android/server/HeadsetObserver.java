@@ -24,7 +24,7 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.os.UEventObserver;
-import android.util.Log;
+import android.util.Slog;
 import android.media.AudioManager;
 
 import java.io.FileReader;
@@ -66,12 +66,12 @@ class HeadsetObserver extends UEventObserver {
 
     @Override
     public void onUEvent(UEventObserver.UEvent event) {
-        if (LOG) Log.v(TAG, "Headset UEVENT: " + event.toString());
+        if (LOG) Slog.v(TAG, "Headset UEVENT: " + event.toString());
 
         try {
             update(event.get("SWITCH_NAME"), Integer.parseInt(event.get("SWITCH_STATE")));
         } catch (NumberFormatException e) {
-            Log.e(TAG, "Could not parse switch state from event " + event);
+            Slog.e(TAG, "Could not parse switch state from event " + event);
         }
     }
 
@@ -91,9 +91,9 @@ class HeadsetObserver extends UEventObserver {
             newName = new String(buffer, 0, len).trim();
 
         } catch (FileNotFoundException e) {
-            Log.w(TAG, "This kernel does not have wired headset support");
+            Slog.w(TAG, "This kernel does not have wired headset support");
         } catch (Exception e) {
-            Log.e(TAG, "" , e);
+            Slog.e(TAG, "" , e);
         }
 
         update(newName, newState);
@@ -167,7 +167,7 @@ class HeadsetObserver extends UEventObserver {
             intent.putExtra("name", headsetName);
             intent.putExtra("microphone", microphone);
 
-            if (LOG) Log.v(TAG, "Intent.ACTION_HEADSET_PLUG: state: "+state+" name: "+headsetName+" mic: "+microphone);
+            if (LOG) Slog.v(TAG, "Intent.ACTION_HEADSET_PLUG: state: "+state+" name: "+headsetName+" mic: "+microphone);
             // TODO: Should we require a permission?
             ActivityManagerNative.broadcastStickyIntent(intent, null);
         }

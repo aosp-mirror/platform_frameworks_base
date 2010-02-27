@@ -51,7 +51,7 @@ import android.text.format.DateFormat;
 import android.text.style.RelativeSizeSpan;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
-import android.util.Log;
+import android.util.Slog;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -650,7 +650,7 @@ public class StatusBarPolicy {
         boolean plugged = intent.getIntExtra("plugged", 0) != 0;
         int level = intent.getIntExtra("level", -1);
         if (false) {
-            Log.d(TAG, "updateBattery level=" + level
+            Slog.d(TAG, "updateBattery level=" + level
                     + " plugged=" + plugged
                     + " mBatteryPlugged=" + mBatteryPlugged
                     + " mBatteryLevel=" + mBatteryLevel
@@ -679,14 +679,14 @@ public class StatusBarPolicy {
         }
         */
         if (false) {
-            Log.d(TAG, "plugged=" + plugged + " oldPlugged=" + oldPlugged + " level=" + level);
+            Slog.d(TAG, "plugged=" + plugged + " oldPlugged=" + oldPlugged + " level=" + level);
         }
     }
 
     private void onBatteryLow(Intent intent) {
         if (SHOW_LOW_BATTERY_WARNING) {
             if (false) {
-                Log.d(TAG, "mPhoneState=" + mPhoneState
+                Slog.d(TAG, "mPhoneState=" + mPhoneState
                       + " mLowBatteryDialog=" + mLowBatteryDialog
                       + " mBatteryShowLowOnEndCall=" + mBatteryShowLowOnEndCall);
             }
@@ -838,7 +838,7 @@ public class StatusBarPolicy {
     private final void updateCallState(int state) {
         mPhoneState = state;
         if (false) {
-            Log.d(TAG, "mPhoneState=" + mPhoneState
+            Slog.d(TAG, "mPhoneState=" + mPhoneState
                     + " mLowBatteryDialog=" + mLowBatteryDialog
                     + " mBatteryShowLowOnEndCall=" + mBatteryShowLowOnEndCall);
         }
@@ -973,7 +973,7 @@ public class StatusBarPolicy {
         int[] iconList;
 
         if (!hasService()) {
-            //Log.d(TAG, "updateSignalStrength: no service");
+            //Slog.d(TAG, "updateSignalStrength: no service");
             if (Settings.System.getInt(mContext.getContentResolver(),
                     Settings.System.AIRPLANE_MODE_ON, 0) == 1) {
                 mPhoneData.iconId = com.android.internal.R.drawable.stat_sys_signal_flightmode;
@@ -1012,7 +1012,7 @@ public class StatusBarPolicy {
             if ((mPhoneState == TelephonyManager.CALL_STATE_IDLE) && isEvdo()){
                 iconLevel = getEvdoLevel();
                 if (false) {
-                    Log.d(TAG, "use Evdo level=" + iconLevel + " to replace Cdma Level=" + getCdmaLevel());
+                    Slog.d(TAG, "use Evdo level=" + iconLevel + " to replace Cdma Level=" + getCdmaLevel());
                 }
             } else {
                 iconLevel = getCdmaLevel();
@@ -1306,16 +1306,16 @@ public class StatusBarPolicy {
         final String action = intent.getAction();
         final boolean enabled = intent.getBooleanExtra(TtyIntent.TTY_ENABLED, false);
 
-        if (false) Log.v(TAG, "updateTTY: enabled: " + enabled);
+        if (false) Slog.v(TAG, "updateTTY: enabled: " + enabled);
 
         if (enabled) {
             // TTY is on
-            if (false) Log.v(TAG, "updateTTY: set TTY on");
+            if (false) Slog.v(TAG, "updateTTY: set TTY on");
             mService.updateIcon(mTTYModeIcon, mTTYModeEnableIconData, null);
             mService.setIconVisibility(mTTYModeIcon, true);
         } else {
             // TTY is off
-            if (false) Log.v(TAG, "updateTTY: set TTY off");
+            if (false) Slog.v(TAG, "updateTTY: set TTY off");
             mService.setIconVisibility(mTTYModeIcon, false);
         }
     }
@@ -1336,17 +1336,17 @@ public class StatusBarPolicy {
         int iconMode = state.getCdmaEriIconMode();
 
         if (iconIndex == -1) {
-            Log.e(TAG, "getCdmaEriIconIndex returned null, skipping ERI icon update");
+            Slog.e(TAG, "getCdmaEriIconIndex returned null, skipping ERI icon update");
             return;
         }
 
         if (iconMode == -1) {
-            Log.e(TAG, "getCdmeEriIconMode returned null, skipping ERI icon update");
+            Slog.e(TAG, "getCdmeEriIconMode returned null, skipping ERI icon update");
             return;
         }
 
         if (iconIndex == EriInfo.ROAMING_INDICATOR_OFF) {
-            if (false) Log.v(TAG, "Cdma ROAMING_INDICATOR_OFF, removing ERI icon");
+            if (false) Slog.v(TAG, "Cdma ROAMING_INDICATOR_OFF, removing ERI icon");
             mService.setIconVisibility(mCdmaRoamingIndicatorIcon, false);
             return;
         }

@@ -9,7 +9,7 @@ import android.text.StaticLayout;
 import android.text.Layout.Alignment;
 import android.text.TextPaint;
 import android.text.TextUtils;
-import android.util.Log;
+import android.util.Slog;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;

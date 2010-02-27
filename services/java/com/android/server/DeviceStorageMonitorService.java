@@ -37,7 +37,7 @@ import android.os.SystemProperties;
 import android.provider.Settings;
 import android.util.Config;
 import android.util.EventLog;
-import android.util.Log;
+import android.util.Slog;
 import android.provider.Settings;
 
 /**
@@ -105,7 +105,7 @@ class DeviceStorageMonitorService extends Binder {
         public void handleMessage(Message msg) {
             //dont handle an invalid message
             if (msg.what != DEVICE_MEMORY_WHAT) {
-                Log.e(TAG, "Will not process invalid message");
+                Slog.e(TAG, "Will not process invalid message");
                 return;
             }
             checkMemory(msg.arg1 == _TRUE);
@@ -116,7 +116,7 @@ class DeviceStorageMonitorService extends Binder {
         public void onRemoveCompleted(String packageName, boolean succeeded) {
             mClearSucceeded = succeeded;
             mClearingCache = false;
-            if(localLOGV) Log.i(TAG, " Clear succeeded:"+mClearSucceeded
+            if(localLOGV) Slog.i(TAG, " Clear succeeded:"+mClearSucceeded
                     +", mClearingCache:"+mClearingCache+" Forcing memory check");
             postCheckMemoryMsg(false, 0);
         }
@@ -182,11 +182,11 @@ class DeviceStorageMonitorService extends Binder {
         }
         mClearingCache = true;
         try {
-            if (localLOGV) Log.i(TAG, "Clearing cache");
+            if (localLOGV) Slog.i(TAG, "Clearing cache");
             IPackageManager.Stub.asInterface(ServiceManager.getService("package")).
                     freeStorageAndNotify(getMemThreshold(), mClearCacheObserver);
         } catch (RemoteException e) {
-            Log.w(TAG, "Failed to get handle for PackageManger Exception: "+e);
+            Slog.w(TAG, "Failed to get handle for PackageManger Exception: "+e);
             mClearingCache = false;
             mClearSucceeded = false;
         }
@@ -198,15 +198,15 @@ class DeviceStorageMonitorService extends Binder {
         // and should be accessed via a lock but even if it does this test will fail now and
         //hopefully the next time this flag will be set to the correct value.
         if(mClearingCache) {
-            if(localLOGV) Log.i(TAG, "Thread already running just skip");
+            if(localLOGV) Slog.i(TAG, "Thread already running just skip");
             //make sure the thread is not hung for too long
             long diffTime = System.currentTimeMillis() - mThreadStartTime;
             if(diffTime > (10*60*1000)) {
-                Log.w(TAG, "Thread that clears cache file seems to run for ever");
+                Slog.w(TAG, "Thread that clears cache file seems to run for ever");
             }
         } else {
             restatDataDir();
-            if (localLOGV)  Log.v(TAG, "freeMemory="+mFreeMem);
+            if (localLOGV)  Slog.v(TAG, "freeMemory="+mFreeMem);
 
             //post intent to NotificationManager to display icon if necessary
             long memThreshold = getMemThreshold();
@@ -220,23 +220,23 @@ class DeviceStorageMonitorService extends Binder {
                         mClearSucceeded = false;
                         clearCache();
                     } else {
-                        Log.i(TAG, "Running low on memory. Sending notification");
+                        Slog.i(TAG, "Running low on memory. Sending notification");
                         sendNotification();
                         mLowMemFlag = true;
                     }
                 } else {
-                    if (localLOGV) Log.v(TAG, "Running low on memory " +
+                    if (localLOGV) Slog.v(TAG, "Running low on memory " +
                             "notification already sent. do nothing");
                 }
             } else {
                 if (mLowMemFlag) {
-                    Log.i(TAG, "Memory available. Cancelling notification");
+                    Slog.i(TAG, "Memory available. Cancelling notification");
                     cancelNotification();
                     mLowMemFlag = false;
                 }
             }
         }
-        if(localLOGV) Log.i(TAG, "Posting Message again");
+        if(localLOGV) Slog.i(TAG, "Posting Message again");
         //keep posting messages to itself periodically
         postCheckMemoryMsg(true, DEFAULT_CHECK_INTERVAL);
     }
@@ -259,7 +259,7 @@ class DeviceStorageMonitorService extends Binder {
                               mContentResolver,
                               Settings.Secure.SYS_STORAGE_THRESHOLD_PERCENTAGE,
                               DEFAULT_THRESHOLD_PERCENTAGE);
-        if(localLOGV) Log.v(TAG, "Threshold Percentage="+value);
+        if(localLOGV) Slog.v(TAG, "Threshold Percentage="+value);
         //evaluate threshold value
         return mTotalMemory*value;
     }
@@ -291,7 +291,7 @@ class DeviceStorageMonitorService extends Binder {
     * application
     */
     private final void sendNotification() {
-        if(localLOGV) Log.i(TAG, "Sending low memory notification");
+        if(localLOGV) Slog.i(TAG, "Sending low memory notification");
         //log the event to event log with the amount of free storage(in bytes) left on the device
         EventLog.writeEvent(EventLogTags.LOW_STORAGE, mFreeMem);
         //  Pack up the values and broadcast them to everyone
@@ -319,7 +319,7 @@ class DeviceStorageMonitorService extends Binder {
      * Cancels low storage notification and sends OK intent.
      */
     private final void cancelNotification() {
-        if(localLOGV) Log.i(TAG, "Canceling low memory notification");
+        if(localLOGV) Slog.i(TAG, "Canceling low memory notification");
         NotificationManager mNotificationMgr =
                 (NotificationManager)mContext.getSystemService(
                         Context.NOTIFICATION_SERVICE);

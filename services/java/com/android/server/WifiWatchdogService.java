@@ -34,7 +34,7 @@ import android.os.Message;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Config;
-import android.util.Log;
+import android.util.Slog;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -281,7 +281,7 @@ public class WifiWatchdogService {
                     // Wait for the handler to be set by the other thread
                     wait();
                 } catch (InterruptedException e) {
-                    Log.e(TAG, "Interrupted while waiting on handler.");
+                    Slog.e(TAG, "Interrupted while waiting on handler.");
                 }
             }
         }
@@ -293,11 +293,11 @@ public class WifiWatchdogService {
      * Logs with the current thread.
      */
     private static void myLogV(String message) {
-        Log.v(TAG, "(" + Thread.currentThread().getName() + ") " + message);
+        Slog.v(TAG, "(" + Thread.currentThread().getName() + ") " + message);
     }
     
     private static void myLogD(String message) {
-        Log.d(TAG, "(" + Thread.currentThread().getName() + ") " + message);
+        Slog.d(TAG, "(" + Thread.currentThread().getName() + ") " + message);
     }
     
     /**
@@ -364,7 +364,7 @@ public class WifiWatchdogService {
             }
             
             if (V) {
-                Log.v(TAG, (dnsAlive ? "  +" : "  Ignored: -"));
+                Slog.v(TAG, (dnsAlive ? "  +" : "  Ignored: -"));
             }
 
             if (shouldCancel()) return false;
@@ -372,7 +372,7 @@ public class WifiWatchdogService {
             try {
                 Thread.sleep(pingDelay);
             } catch (InterruptedException e) {
-                Log.w(TAG, "Interrupted while pausing between pings", e);
+                Slog.w(TAG, "Interrupted while pausing between pings", e);
             }
         }
         
@@ -383,11 +383,11 @@ public class WifiWatchdogService {
             if (DnsPinger.isDnsReachable(dns, getPingTimeoutMs())) {
                 successCounter++;
                 if (V) {
-                    Log.v(TAG, "  +");
+                    Slog.v(TAG, "  +");
                 }
             } else {
                 if (V) {
-                    Log.v(TAG, "  -");
+                    Slog.v(TAG, "  -");
                 }
             }
 
@@ -396,13 +396,13 @@ public class WifiWatchdogService {
             try {
                 Thread.sleep(pingDelay);
             } catch (InterruptedException e) {
-                Log.w(TAG, "Interrupted while pausing between pings", e);
+                Slog.w(TAG, "Interrupted while pausing between pings", e);
             }
         }
         
         int packetLossPercentage = 100 * (numPings - successCounter) / numPings;
         if (D) {
-            Log.d(TAG, packetLossPercentage
+            Slog.d(TAG, packetLossPercentage
                     + "% packet loss (acceptable is " + acceptableLoss + "%)");
         }
         
@@ -544,7 +544,7 @@ public class WifiWatchdogService {
             if (ssid == null) {
                 // It's still null, give up
                 if (V) {
-                    Log.v(TAG, "  Invalid SSID, returning false");
+                    Slog.v(TAG, "  Invalid SSID, returning false");
                 }
                 return false;
             }
@@ -559,7 +559,7 @@ public class WifiWatchdogService {
             if (TextUtils.isEmpty(bssid)) {
                 // It's still null, give up
                 if (V) {
-                    Log.v(TAG, "  Invalid BSSID, returning false");
+                    Slog.v(TAG, "  Invalid BSSID, returning false");
                 }
                 return false;
             }
@@ -567,7 +567,7 @@ public class WifiWatchdogService {
 
         if (!isOnWatchList(ssid)) {
             if (V) {
-                Log.v(TAG, "  SSID not on watch list, returning false");
+                Slog.v(TAG, "  SSID not on watch list, returning false");
             }
             return false;
         }
@@ -667,7 +667,7 @@ public class WifiWatchdogService {
         // Make sure we are not sleeping
         if (mState == WatchdogState.SLEEP) {
             if (V) {
-                Log.v(TAG, "  Sleeping (in " + mSsid + "), so returning");
+                Slog.v(TAG, "  Sleeping (in " + mSsid + "), so returning");
             }
             return;
         }
@@ -681,7 +681,7 @@ public class WifiWatchdogService {
         mNumApsChecked++;
         if (mNumApsChecked > getMaxApChecks()) {
             if (V) {
-                Log.v(TAG, "  Passed the max attempts (" + getMaxApChecks()
+                Slog.v(TAG, "  Passed the max attempts (" + getMaxApChecks()
                         + "), going to sleep for " + mSsid);
             }
             mHandler.sleep(mSsid);
@@ -692,7 +692,7 @@ public class WifiWatchdogService {
         boolean isApAlive = checkDnsConnectivity();
         
         if (V) {
-            Log.v(TAG, "  Is it alive: " + isApAlive);
+            Slog.v(TAG, "  Is it alive: " + isApAlive);
         }
 
         // Take action based on results
@@ -753,7 +753,7 @@ public class WifiWatchdogService {
         
         if (!mWifiStateTracker.addToBlacklist(bssid)) {
             // There's a known bug where this method returns failure on success
-            //Log.e(TAG, "Blacklisting " + bssid + " failed");
+            //Slog.e(TAG, "Blacklisting " + bssid + " failed");
         }
 
         if (D) {
@@ -780,7 +780,7 @@ public class WifiWatchdogService {
         // Make sure we are not sleeping
         if (mState == WatchdogState.SLEEP) {
             if (V) {
-                Log.v(TAG, "  handleBackgroundCheckAp: Sleeping (in " + mSsid + "), so returning");
+                Slog.v(TAG, "  handleBackgroundCheckAp: Sleeping (in " + mSsid + "), so returning");
             }
             return;
         }
@@ -807,7 +807,7 @@ public class WifiWatchdogService {
         boolean isApAlive = backgroundCheckDnsConnectivity();
         
         if (V && !isApAlive) {
-            Log.v(TAG, "  handleBackgroundCheckAp: Is it alive: " + isApAlive);
+            Slog.v(TAG, "  handleBackgroundCheckAp: Is it alive: " + isApAlive);
         }
 
         if (shouldCancel()) {
@@ -851,7 +851,7 @@ public class WifiWatchdogService {
              */
             if (!mWifiStateTracker.clearBlacklist()) {
                 // There's a known bug where this method returns failure on success
-                //Log.e(TAG, "Clearing blacklist failed");
+                //Slog.e(TAG, "Clearing blacklist failed");
             }
             
             if (V) {
@@ -895,7 +895,7 @@ public class WifiWatchdogService {
         
         // If we're sleeping, don't do anything
         if (mState == WatchdogState.SLEEP) {
-            Log.v(TAG, "  Sleeping (in " + mSsid + "), so returning");
+            Slog.v(TAG, "  Sleeping (in " + mSsid + "), so returning");
             return;
         }
         
@@ -903,7 +903,7 @@ public class WifiWatchdogService {
         setIdleState(false);
         
         if (V) {
-            Log.v(TAG, "  Set state to IDLE");
+            Slog.v(TAG, "  Set state to IDLE");
         }
     }
     
@@ -1245,13 +1245,13 @@ public class WifiWatchdogService {
                 
             } catch (SocketException e) {
                 if (V) {
-                    Log.v(TAG, "DnsPinger.isReachable received SocketException", e);
+                    Slog.v(TAG, "DnsPinger.isReachable received SocketException", e);
                 }
                 return false;
                 
             } catch (UnknownHostException e) {
                 if (V) {
-                    Log.v(TAG, "DnsPinger.isReachable is unable to resolve the DNS host", e);
+                    Slog.v(TAG, "DnsPinger.isReachable is unable to resolve the DNS host", e);
                 }
                 return false;
 
@@ -1260,13 +1260,13 @@ public class WifiWatchdogService {
                 
             } catch (IOException e) {
                 if (V) {
-                    Log.v(TAG, "DnsPinger.isReachable got an IOException", e);
+                    Slog.v(TAG, "DnsPinger.isReachable got an IOException", e);
                 }
                 return false;
                 
             } catch (Exception e) {
                 if (V || Config.LOGD) {
-                    Log.d(TAG, "DnsPinger.isReachable got an unknown exception", e);
+                    Slog.d(TAG, "DnsPinger.isReachable got an unknown exception", e);
                 }
                 return false;
             }

@@ -34,7 +34,7 @@ import android.os.SystemProperties;
 import android.provider.Settings;
 import android.util.Config;
 import android.util.EventLog;
-import android.util.Log;
+import android.util.Slog;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -229,7 +229,7 @@ public class Watchdog extends Thread {
                         // During the last pass we collected pss information, so
                         // now it is time to report it.
                         mHaveGlobalPss = false;
-                        if (localLOGV) Log.v(TAG, "Received global pss, logging.");
+                        if (localLOGV) Slog.v(TAG, "Received global pss, logging.");
                         logGlobalMemory();
                     }
                 } break;
@@ -239,7 +239,7 @@ public class Watchdog extends Thread {
                         // During the last pass we collected pss information, so
                         // now it is time to report it.
                         mHavePss = false;
-                        if (localLOGV) Log.v(TAG, "Have pss, checking memory.");
+                        if (localLOGV) Slog.v(TAG, "Have pss, checking memory.");
                         checkMemory();
                     }
 
@@ -247,7 +247,7 @@ public class Watchdog extends Thread {
                         // During the last pass we collected pss information, so
                         // now it is time to report it.
                         mHaveGlobalPss = false;
-                        if (localLOGV) Log.v(TAG, "Have global pss, logging.");
+                        if (localLOGV) Slog.v(TAG, "Have global pss, logging.");
                         logGlobalMemory();
                     }
 
@@ -275,7 +275,7 @@ public class Watchdog extends Thread {
                         // things simple, we will assume that everyone has
                         // reported back by the next MONITOR message.
                         mLastMemCheckTime = now;
-                        if (localLOGV) Log.v(TAG, "Collecting memory usage.");
+                        if (localLOGV) Slog.v(TAG, "Collecting memory usage.");
                         collectMemory();
                         mHavePss = true;
 
@@ -285,7 +285,7 @@ public class Watchdog extends Thread {
                         long realtimeNow = SystemClock.elapsedRealtime();
                         if ((mLastMemCheckRealtime+memCheckRealtimeInterval) < realtimeNow) {
                             mLastMemCheckRealtime = realtimeNow;
-                            if (localLOGV) Log.v(TAG, "Collecting global memory usage.");
+                            if (localLOGV) Slog.v(TAG, "Collecting global memory usage.");
                             collectGlobalMemory();
                             mHaveGlobalPss = true;
                         }
@@ -315,7 +315,7 @@ public class Watchdog extends Thread {
     final class CheckupReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context c, Intent intent) {
-            if (localLOGV) Log.v(TAG, "Alarm went off, checking memory.");
+            if (localLOGV) Slog.v(TAG, "Alarm went off, checking memory.");
             checkMemory();
         }
     }
@@ -323,7 +323,7 @@ public class Watchdog extends Thread {
     final class RebootReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context c, Intent intent) {
-            if (localLOGV) Log.v(TAG, "Alarm went off, checking reboot.");
+            if (localLOGV) Slog.v(TAG, "Alarm went off, checking reboot.");
             checkReboot(true);
         }
     }
@@ -494,7 +494,7 @@ public class Watchdog extends Thread {
                 if (mPhoneMemMonitor.checkLocked(curTime, mPhonePid,
                         mPhonePss)) {
                     // Just kill the phone process and let it restart.
-                    Log.i(TAG, "Watchdog is killing the phone process");
+                    Slog.i(TAG, "Watchdog is killing the phone process");
                     Process.killProcess(mPhonePid);
                 }
             } else {
@@ -511,25 +511,25 @@ public class Watchdog extends Thread {
                 } else if (nextTime >= mMemcheckExecEndTime){
                     // Need to check during next exec time...  so that needs
                     // to be computed.
-                    if (localLOGV) Log.v(TAG, "Computing next time range");
+                    if (localLOGV) Slog.v(TAG, "Computing next time range");
                     computeMemcheckTimesLocked(nextTime);
                     nextTime = mMemcheckExecStartTime;
                 }
 
                 if (localLOGV) {
                     mCalendar.setTimeInMillis(nextTime);
-                    Log.v(TAG, "Next Alarm Time: " + mCalendar);
+                    Slog.v(TAG, "Next Alarm Time: " + mCalendar);
                 }
             }
         }
 
         if (needScheduledCheck) {
-            if (localLOGV) Log.v(TAG, "Scheduling next memcheck alarm for "
+            if (localLOGV) Slog.v(TAG, "Scheduling next memcheck alarm for "
                     + ((nextTime-curTime)/1000/60) + "m from now");
             mAlarm.remove(mCheckupIntent);
             mAlarm.set(AlarmManager.RTC_WAKEUP, nextTime, mCheckupIntent);
         } else {
-            if (localLOGV) Log.v(TAG, "No need to schedule a memcheck alarm!");
+            if (localLOGV) Slog.v(TAG, "No need to schedule a memcheck alarm!");
             mAlarm.remove(mCheckupIntent);
         }
     }
@@ -592,7 +592,7 @@ public class Watchdog extends Thread {
         mRebootInterval = rebootInterval;
         if (rebootInterval <= 0) {
             // No reboot interval requested.
-            if (localLOGV) Log.v(TAG, "No need to schedule a reboot alarm!");
+            if (localLOGV) Slog.v(TAG, "No need to schedule a reboot alarm!");
             mAlarm.remove(mRebootIntent);
             return;
         }
@@ -663,7 +663,7 @@ public class Watchdog extends Thread {
             }
         }
 
-        if (localLOGV) Log.v(TAG, "Scheduling next reboot alarm for "
+        if (localLOGV) Slog.v(TAG, "Scheduling next reboot alarm for "
                 + ((realStartTime-now)/1000/60) + "m from now");
         mAlarm.remove(mRebootIntent);
         mAlarm.set(AlarmManager.RTC_WAKEUP, realStartTime, mRebootIntent);
@@ -673,11 +673,11 @@ public class Watchdog extends Thread {
      * Perform a full reboot of the system.
      */
     void rebootSystem(String reason) {
-        Log.i(TAG, "Rebooting system because: " + reason);
+        Slog.i(TAG, "Rebooting system because: " + reason);
         try {
             android.os.Power.reboot(reason);
         } catch (IOException e) {
-            Log.e(TAG, "Reboot failed!", e);
+            Slog.e(TAG, "Reboot failed!", e);
         }
     }
 
@@ -757,11 +757,11 @@ public class Watchdog extends Thread {
 
         if (localLOGV) {
             mCalendar.setTimeInMillis(curTime);
-            Log.v(TAG, "Current Time: " + mCalendar);
+            Slog.v(TAG, "Current Time: " + mCalendar);
             mCalendar.setTimeInMillis(mMemcheckExecStartTime);
-            Log.v(TAG, "Start Check Time: " + mCalendar);
+            Slog.v(TAG, "Start Check Time: " + mCalendar);
             mCalendar.setTimeInMillis(mMemcheckExecEndTime);
-            Log.v(TAG, "End Check Time: " + mCalendar);
+            Slog.v(TAG, "End Check Time: " + mCalendar);
         }
     }
 
@@ -810,7 +810,7 @@ public class Watchdog extends Thread {
                     } catch (InterruptedException e) {
                         if (SystemProperties.getBoolean("ro.secure", false)) {
                             // If this is a secure build, just log the error.
-                            Log.e("WatchDog", "Woof! Woof! Interrupter!");
+                            Slog.e("WatchDog", "Woof! Woof! Interrupter!");
                         } else {
                             throw new AssertionError("Someone interrupted the watchdog");
                         }
@@ -839,7 +839,7 @@ public class Watchdog extends Thread {
 
             // Only kill the process if the debugger is not attached.
             if (!Debug.isDebuggerConnected()) {
-                Log.i(TAG, "Watchdog is killing the system process");
+                Slog.i(TAG, "Watchdog is killing the system process");
                 Process.killProcess(Process.myPid());
             }
         }

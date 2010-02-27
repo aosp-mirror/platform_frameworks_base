@@ -23,7 +23,7 @@ import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.IBinder;
 import android.util.Config;
-import android.util.Log;
+import android.util.Slog;
 
 import java.util.ArrayList;
 
@@ -74,7 +74,7 @@ class SensorService extends ISensorService.Stub {
         }
 
         public void binderDied() {
-            if (localLOGV) Log.d(TAG, "sensor listener died");
+            if (localLOGV) Slog.d(TAG, "sensor listener died");
             synchronized(mListeners) {
                 mListeners.remove(this);
                 mToken.unlinkToDeath(this, 0);
@@ -86,7 +86,7 @@ class SensorService extends ISensorService.Stub {
                         try {
                             deactivateIfUnusedLocked(sensor);
                         } catch (RemoteException e) {
-                            Log.w(TAG, "RemoteException in binderDied");
+                            Slog.w(TAG, "RemoteException in binderDied");
                         }
                     }
                 }
@@ -101,7 +101,7 @@ class SensorService extends ISensorService.Stub {
 
     @SuppressWarnings("unused")
     public SensorService(Context context) {
-        if (localLOGV) Log.d(TAG, "SensorService startup");
+        if (localLOGV) Slog.d(TAG, "SensorService startup");
         _sensors_control_init();
     }
     
@@ -114,7 +114,7 @@ class SensorService extends ISensorService.Stub {
 
     public boolean enableSensor(IBinder binder, String name, int sensor, int enable)
              throws RemoteException {
-        if (localLOGV) Log.d(TAG, "enableSensor " + name + "(#" + sensor + ") " + enable);
+        if (localLOGV) Slog.d(TAG, "enableSensor " + name + "(#" + sensor + ") " + enable);
         
         // Inform battery statistics service of status change
         int uid = Binder.getCallingUid();
@@ -127,13 +127,13 @@ class SensorService extends ISensorService.Stub {
         Binder.restoreCallingIdentity(identity);
 
         if (binder == null) {
-            Log.w(TAG, "listener is null (sensor=" + name + ", id=" + sensor + ")");
+            Slog.w(TAG, "listener is null (sensor=" + name + ", id=" + sensor + ")");
             return false;
         }
 
         synchronized(mListeners) {
             if (enable!=SENSOR_DISABLE && !_sensors_control_activate(sensor, true)) {
-                Log.w(TAG, "could not enable sensor " + sensor);
+                Slog.w(TAG, "could not enable sensor " + sensor);
                 return false;
             }
                     
@@ -157,7 +157,7 @@ class SensorService extends ISensorService.Stub {
             if (l == null) {
                 // by construction, this means we're disabling a listener we
                 // don't know about...
-                Log.w(TAG, "listener with binder " + binder + 
+                Slog.w(TAG, "listener with binder " + binder + 
                         ", doesn't exist (sensor=" + name + ", id=" + sensor + ")");
                 return false;
             }

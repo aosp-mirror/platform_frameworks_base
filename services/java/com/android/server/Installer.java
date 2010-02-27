@@ -20,7 +20,7 @@ import android.content.pm.PackageStats;
 import android.net.LocalSocketAddress;
 import android.net.LocalSocket;
 import android.util.Config;
-import android.util.Log;
+import android.util.Slog;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -41,7 +41,7 @@ class Installer {
         if (mSocket != null) {
             return true;
         }
-        Log.i(TAG, "connecting...");
+        Slog.i(TAG, "connecting...");
         try {
             mSocket = new LocalSocket();
 
@@ -60,7 +60,7 @@ class Installer {
     }
 
 	private void disconnect() {
-        Log.i(TAG,"disconnecting...");
+        Slog.i(TAG,"disconnecting...");
 		try {
 			if (mSocket != null) mSocket.close();
 		} catch (IOException ex) { }
@@ -82,16 +82,16 @@ class Installer {
 			try {
 				count = mIn.read(buffer, off, len - off);
 				if (count <= 0) {
-                    Log.e(TAG, "read error " + count);
+                    Slog.e(TAG, "read error " + count);
                     break;
                 }
 				off += count;
 			} catch (IOException ex) {
-                Log.e(TAG,"read exception");
+                Slog.e(TAG,"read exception");
 				break;
 			}
 		}
-//        Log.i(TAG, "read "+len+" bytes");
+//        Slog.i(TAG, "read "+len+" bytes");
 		if (off == len) return true;
 		disconnect();
 		return false;
@@ -103,7 +103,7 @@ class Installer {
 		if (!readBytes(buf, 2)) return false;
 		len = (((int) buf[0]) & 0xff) | ((((int) buf[1]) & 0xff) << 8);
 		if ((len < 1) || (len > 1024)) {
-            Log.e(TAG,"invalid reply length ("+len+")");
+            Slog.e(TAG,"invalid reply length ("+len+")");
 			disconnect();
 			return false;
 		}
@@ -122,7 +122,7 @@ class Installer {
 			mOut.write(buf, 0, 2);
 			mOut.write(cmd, 0, len);
 		} catch (IOException ex) {
-            Log.e(TAG,"write error");
+            Slog.e(TAG,"write error");
 			disconnect();
 			return false;
 		}
@@ -131,7 +131,7 @@ class Installer {
 		
 	private synchronized String transaction(String cmd) {
 		if (!connect()) {
-            Log.e(TAG, "connection failed");
+            Slog.e(TAG, "connection failed");
             return "-1";
         }
 
@@ -141,18 +141,18 @@ class Installer {
                  * write (this one).  Try to reconnect and write
                  * the command one more time before giving up.
                  */
-            Log.e(TAG, "write command failed? reconnect!");
+            Slog.e(TAG, "write command failed? reconnect!");
             if (!connect() || !writeCommand(cmd)) {
                 return "-1";
             }
         }
-//        Log.i(TAG,"send: '"+cmd+"'");
+//        Slog.i(TAG,"send: '"+cmd+"'");
 		if (readReply()) {
             String s = new String(buf, 0, buflen);
-//            Log.i(TAG,"recv: '"+s+"'");
+//            Slog.i(TAG,"recv: '"+s+"'");
 			return s;
 		} else {
-//            Log.i(TAG,"fail");
+//            Slog.i(TAG,"fail");
 			return "-1";
 		}
 	}

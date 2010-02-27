@@ -20,12 +20,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.BroadcastReceiver;
 import android.os.SystemService;
-import android.util.Log;
+import android.util.Slog;
 
 public class BrickReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        Log.w("BrickReceiver", "!!! BRICKING DEVICE !!!");
+        Slog.w("BrickReceiver", "!!! BRICKING DEVICE !!!");
         SystemService.start("brick");
     }
 }

@@ -47,7 +47,7 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import android.text.TextUtils.SimpleStringSplitter;
 import android.util.Config;
-import android.util.Log;
+import android.util.Slog;
 import android.util.SparseArray;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.IAccessibilityManager;
@@ -275,7 +275,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 client.setEnabled(mIsEnabled);
                 mClients.add(client);
             } catch (RemoteException re) {
-                Log.w(LOG_TAG, "Dead AccessibilityManagerClient: " + client, re);
+                Slog.w(LOG_TAG, "Dead AccessibilityManagerClient: " + client, re);
             }
         }
     }
@@ -309,13 +309,13 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     service.mServiceInterface.onInterrupt();
                 } catch (RemoteException re) {
                     if (re instanceof DeadObjectException) {
-                        Log.w(LOG_TAG, "Dead " + service.mService + ". Cleaning up.");
+                        Slog.w(LOG_TAG, "Dead " + service.mService + ". Cleaning up.");
                         if (removeDeadServiceLocked(service)) {
                             count--;
                             i--;
                         }
                     } else {
-                        Log.e(LOG_TAG, "Error during sending interrupt request to "
+                        Slog.e(LOG_TAG, "Error during sending interrupt request to "
                                 + service.mService, re);
                     }
                 }
@@ -343,7 +343,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 }
                 return;
             default:
-                Log.w(LOG_TAG, "Unknown message type: " + message.what);
+                Slog.w(LOG_TAG, "Unknown message type: " + message.what);
         }
     }
 
@@ -451,16 +451,16 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         try {
             listener.onAccessibilityEvent(event);
             if (Config.DEBUG) {
-                Log.i(LOG_TAG, "Event " + event + " sent to " + listener);
+                Slog.i(LOG_TAG, "Event " + event + " sent to " + listener);
             }
         } catch (RemoteException re) {
             if (re instanceof DeadObjectException) {
-                Log.w(LOG_TAG, "Dead " + service.mService + ". Cleaning up.");
+                Slog.w(LOG_TAG, "Dead " + service.mService + ". Cleaning up.");
                 synchronized (mLock) {
                     removeDeadServiceLocked(service);
                 }
             } else {
-                Log.e(LOG_TAG, "Error during sending " + event + " to " + service.mService, re);
+                Slog.e(LOG_TAG, "Error during sending " + event + " to " + service.mService, re);
             }
         }
     }
@@ -476,7 +476,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         mHandler.removeMessages(service.mId);
 
         if (Config.DEBUG) {
-            Log.i(LOG_TAG, "Dead service " + service.mService + " removed");
+            Slog.i(LOG_TAG, "Dead service " + service.mService + " removed");
         }
 
         if (mServices.isEmpty()) {
@@ -722,7 +722,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     }
                 }
             } catch (RemoteException re) {
-                Log.w(LOG_TAG, "Error while setting Controller for service: " + service, re);
+                Slog.w(LOG_TAG, "Error while setting Controller for service: " + service, re);
             }
         }
 

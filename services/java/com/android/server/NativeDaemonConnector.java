@@ -21,7 +21,7 @@ import android.net.LocalSocket;
 import android.os.Environment;
 import android.os.SystemClock;
 import android.os.SystemProperties;
-import android.util.Log;
+import android.util.Slog;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -80,7 +80,7 @@ final class NativeDaemonConnector implements Runnable {
             try {
                 listenToSocket();
             } catch (Exception e) {
-                Log.e(TAG, "Error in NativeDaemonConnector", e);
+                Slog.e(TAG, "Error in NativeDaemonConnector", e);
                 SystemClock.sleep(5000);
             }
         }
@@ -110,7 +110,7 @@ final class NativeDaemonConnector implements Runnable {
                 for (int i = 0; i < count; i++) {
                     if (buffer[i] == 0) {
                         String event = new String(buffer, start, i - start);
-                        if (LOCAL_LOGD) Log.d(TAG, String.format("RCV <- {%s}", event));
+                        if (LOCAL_LOGD) Slog.d(TAG, String.format("RCV <- {%s}", event));
 
                         String[] tokens = event.split(" ");
                         try {
@@ -119,29 +119,29 @@ final class NativeDaemonConnector implements Runnable {
                             if (code >= ResponseCode.UnsolicitedInformational) {
                                 try {
                                     if (!mCallbacks.onEvent(code, event, tokens)) {
-                                        Log.w(TAG, String.format(
+                                        Slog.w(TAG, String.format(
                                                 "Unhandled event (%s)", event));
                                     }
                                 } catch (Exception ex) {
-                                    Log.e(TAG, String.format(
+                                    Slog.e(TAG, String.format(
                                             "Error handling '%s'", event), ex);
                                 }
                             } else {
                                 try {
                                     mResponseQueue.put(event);
                                 } catch (InterruptedException ex) {
-                                    Log.e(TAG, "Failed to put response onto queue", ex);
+                                    Slog.e(TAG, "Failed to put response onto queue", ex);
                                 }
                             }
                         } catch (NumberFormatException nfe) {
-                            Log.w(TAG, String.format("Bad msg (%s)", event));
+                            Slog.w(TAG, String.format("Bad msg (%s)", event));
                         }
                         start = i + 1;
                     }
                 }
             }
         } catch (IOException ex) {
-            Log.e(TAG, "Communications error", ex);
+            Slog.e(TAG, "Communications error", ex);
             throw ex;
         } finally {
             synchronized (this) {
@@ -149,7 +149,7 @@ final class NativeDaemonConnector implements Runnable {
                     try {
                         mOutputStream.close();
                     } catch (IOException e) {
-                        Log.w(TAG, "Failed closing output stream", e);
+                        Slog.w(TAG, "Failed closing output stream", e);
                     }
                     mOutputStream = null;
                 }
@@ -160,7 +160,7 @@ final class NativeDaemonConnector implements Runnable {
                     socket.close();
                 }
             } catch (IOException ex) {
-                Log.w(TAG, "Failed closing socket", ex);
+                Slog.w(TAG, "Failed closing socket", ex);
             }
         }
     }
@@ -177,9 +177,9 @@ final class NativeDaemonConnector implements Runnable {
      */
     private void sendCommand(String command, String argument) {
         synchronized (this) {
-            if (LOCAL_LOGD) Log.d(TAG, String.format("SND -> {%s} {%s}", command, argument));
+            if (LOCAL_LOGD) Slog.d(TAG, String.format("SND -> {%s} {%s}", command, argument));
             if (mOutputStream == null) {
-                Log.e(TAG, "No connection to daemon", new IllegalStateException());
+                Slog.e(TAG, "No connection to daemon", new IllegalStateException());
             } else {
                 StringBuilder builder = new StringBuilder(command);
                 if (argument != null) {
@@ -190,7 +190,7 @@ final class NativeDaemonConnector implements Runnable {
                 try {
                     mOutputStream.write(builder.toString().getBytes());
                 } catch (IOException ex) {
-                    Log.e(TAG, "IOException in sendCommand", ex);
+                    Slog.e(TAG, "IOException in sendCommand", ex);
                 }
             }
         }
@@ -210,7 +210,7 @@ final class NativeDaemonConnector implements Runnable {
         while (!complete) {
             try {
                 String line = mResponseQueue.take();
-                if (LOCAL_LOGD) Log.d(TAG, String.format("RSP <- {%s}", line));
+                if (LOCAL_LOGD) Slog.d(TAG, String.format("RSP <- {%s}", line));
                 String[] tokens = line.split(" ");
                 try {
                     code = Integer.parseInt(tokens[0]);
@@ -224,7 +224,7 @@ final class NativeDaemonConnector implements Runnable {
                 }
                 response.add(line);
             } catch (InterruptedException ex) {
-                Log.e(TAG, "Failed to process response", ex);
+                Slog.e(TAG, "Failed to process response", ex);
             }
         }
 
@@ -258,12 +258,12 @@ final class NativeDaemonConnector implements Runnable {
                 if (code == expectedResponseCode) {
                     rdata[idx++] = line.substring(tok[0].length() + 1);
                 } else if (code == NativeDaemonConnector.ResponseCode.CommandOkay) {
-                    if (LOCAL_LOGD) Log.d(TAG, String.format("List terminated with {%s}", line));
+                    if (LOCAL_LOGD) Slog.d(TAG, String.format("List terminated with {%s}", line));
                     int last = rsp.size() -1;
                     if (i != last) {
-                        Log.w(TAG, String.format("Recv'd %d lines after end of list {%s}", (last-i), cmd));
+                        Slog.w(TAG, String.format("Recv'd %d lines after end of list {%s}", (last-i), cmd));
                         for (int j = i; j <= last ; j++) {
-                            Log.w(TAG, String.format("ExtraData <%s>", rsp.get(i)));
+                            Slog.w(TAG, String.format("ExtraData <%s>", rsp.get(i)));
                         }
                     }
                     return rdata;
