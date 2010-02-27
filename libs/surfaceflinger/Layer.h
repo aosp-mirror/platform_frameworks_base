@@ -78,6 +78,8 @@ public:
     inline const sp<FreezeLock>&  getFreezeLock() const { return mFreezeLock; }
     // only for debugging
     inline PixelFormat pixelFormat() const { return mFormat; }
+    // only for debugging
+    inline int getFrontBufferIndex() const { return mFrontBufferIndex; }
 
 private:
     inline sp<GraphicBuffer> getFrontBufferLocked() {
