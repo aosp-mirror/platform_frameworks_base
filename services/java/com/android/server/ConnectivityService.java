@@ -66,6 +66,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
 
     private Tethering mTethering;
+    private boolean mTetheringConfigValid = false;
 
     /**
      * Sometimes we want to refer to the individual network state
@@ -320,6 +321,12 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
 
         mTethering = new Tethering(mContext);
+        mTetheringConfigValid = (((mNetTrackers[ConnectivityManager.TYPE_MOBILE_DUN] != null) ||
+                                  !mTethering.isDunRequired()) &&
+                                 (mTethering.getTetherableUsbRegexs().length != 0 ||
+                                  mTethering.getTetherableWifiRegexs().length != 0) &&
+                                 mTethering.getUpstreamIfaceRegexs().length != 0);
+
     }
 
 
@@ -1498,8 +1505,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     public boolean isTetheringSupported() {
         enforceTetherAccessPermission();
         int defaultVal = (SystemProperties.get("ro.tether.denied").equals("true") ? 0 : 1);
-        return ((Settings.Secure.getInt(mContext.getContentResolver(),
-                Settings.Secure.TETHER_SUPPORTED, defaultVal) != 0) &&
-                (mNetTrackers[ConnectivityManager.TYPE_MOBILE_DUN] != null));
+        boolean tetherEnabledInSettings = (Settings.Secure.getInt(mContext.getContentResolver(),
+                Settings.Secure.TETHER_SUPPORTED, defaultVal) != 0);
+        return tetherEnabledInSettings && mTetheringConfigValid;
     }
 }
