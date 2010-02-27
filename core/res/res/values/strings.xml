@@ -1822,17 +1822,6 @@
     <!-- Appened to express the value is this unit of time. -->
     <string name="years">years</string>
 
-    <!-- Calendar spinner item, to select that an event recurs every weekday. -->
-    <string name="every_weekday">"Every weekday (Mon\u2013Fri)"</string>
-    <!-- Calendar spinner item, to select that an event recurs every day. -->
-    <string name="daily">Daily</string>
-    <!-- Calendar spinner item, to select that an event recurs every week on a particular day of the week. -->
-    <string name="weekly">"Weekly on <xliff:g id="day">%s</xliff:g>"</string>
-    <!-- Calendar spinner item, to select that an event recurs every month. -->
-    <string name="monthly">Monthly</string>
-    <!-- Calendar spinner item, to select that an event recurs every year. -->
-    <string name="yearly">Yearly</string>
-
 
     <!-- Title for error alert when a video cannot be played.  it can be used by any app. -->
     <string name="VideoView_error_title">Cannot play video</string>
