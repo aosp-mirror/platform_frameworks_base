@@ -185,14 +185,12 @@
     <string name="permdesc_setDebugApp" msgid="5584310661711990702">"Umožňuje aplikaci povolit ladění jiné aplikace. Škodlivé aplikace mohou pomocí tohoto nastavení ukončit jiné aplikace."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"změna vašeho nastavení uživatelského rozhraní"</string>
     <string name="permdesc_changeConfiguration" msgid="3465121501528064399">"Umožňuje aplikaci změnit aktuální konfiguraci, např. národní prostředí či obecnou velikost písma."</string>
-    <!-- no translation found for permlab_killBackgroundProcesses (8373714752793061963) -->
-    <skip />
-    <!-- no translation found for permdesc_killBackgroundProcesses (2908829602869383753) -->
-    <skip />
-    <!-- no translation found for permlab_forceStopPackages (1447830113260156236) -->
-    <skip />
-    <!-- no translation found for permdesc_forceStopPackages (7263036616161367402) -->
-    <skip />
+    <string name="permlab_enableCarMode" msgid="5684504058192921098">"aktivovat režim V autě"</string>
+    <string name="permdesc_enableCarMode" msgid="5673461159384850628">"Umožňuje aplikaci aktivovat režim V autě."</string>
+    <string name="permlab_killBackgroundProcesses" msgid="8373714752793061963">"ukončit procesy na pozadí"</string>
+    <string name="permdesc_killBackgroundProcesses" msgid="2908829602869383753">"Umožňuje aplikaci ukončit procesy jiných aplikací běžící na pozadí i v případě, kdy je dostatek paměti."</string>
+    <string name="permlab_forceStopPackages" msgid="1447830113260156236">"vynutit zastavení jiných aplikací"</string>
+    <string name="permdesc_forceStopPackages" msgid="7263036616161367402">"Umožňuje aplikaci vynutit zastavení jiných aplikací."</string>
     <string name="permlab_forceBack" msgid="1804196839880393631">"vynucení zavření aplikace"</string>
     <string name="permdesc_forceBack" msgid="6534109744159919013">"Umožňuje aplikaci vynutit zavření a přesunutí libovolné činnosti v popředí na pozadí. Běžné aplikace by toto nastavení neměly nikdy využívat."</string>
     <string name="permlab_dump" msgid="1681799862438954752">"načtení interního stavu systému"</string>
@@ -217,8 +215,6 @@
     <string name="permdesc_batteryStats" msgid="5847319823772230560">"Umožňuje změnu shromážděných statistických údajů o baterii. Není určeno pro běžné aplikace."</string>
     <string name="permlab_backup" msgid="470013022865453920">"ovládání zálohování a obnovy systému"</string>
     <string name="permdesc_backup" msgid="4837493065154256525">"Umožňuje aplikaci ovládat systémový mechanizmus pro zálohování a obnovu dat. Není určeno pro běžné aplikace."</string>
-    <string name="permlab_backup_data" msgid="4057625941707926463">"zálohování a obnovení dat aplikace"</string>
-    <string name="permdesc_backup_data" msgid="8274426305151227766">"Umožňuje aplikaci podílet se na systémovém mechanizmu zálohování a obnovení."</string>
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"zobrazení nepovolených oken"</string>
     <string name="permdesc_internalSystemWindow" msgid="5895082268284998469">"Umožňuje vytvoření oken, která mají být použita interním systémem uživatelského rozhraní. Běžné aplikace toto nastavení nepoužívají."</string>
     <string name="permlab_systemAlertWindow" msgid="3372321942941168324">"zobrazení upozornění systémové úrovně"</string>
@@ -235,6 +231,8 @@
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"Umožňuje držiteli vázat se na nejvyšší úroveň rozhraní pro zadávání dat. Běžné aplikace by toto nastavení nikdy neměly využívat."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"vazba na tapetu"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"Umožňuje držiteli navázat se na nejvyšší úroveň rozhraní tapety. Běžné aplikace by toto oprávnění nikdy neměly potřebovat."</string>
+    <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"komunikovat se správcem zařízení"</string>
+    <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"Umožňuje držiteli oprávnění odesílat informace správci zařízení. Běžné aplikace by toto oprávnění nikdy neměly požadovat."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"změna orientace obrazovky"</string>
     <string name="permdesc_setOrientation" msgid="6335814461615851863">"Umožňuje aplikaci kdykoli změnit orientaci obrazovky. Běžné aplikace by toto nastavení nikdy neměly využívat."</string>
     <string name="permlab_signalPersistentProcesses" msgid="4255467255488653854">"odeslání signálů Linux aplikacím"</string>
@@ -253,6 +251,10 @@
     <string name="permdesc_installPackages" msgid="526669220850066132">"Umožňuje aplikaci nainstalovat nové či aktualizované balíčky systému Android. Škodlivé aplikace mohou pomocí tohoto nastavení přidat nové aplikace s libovolnými oprávněními."</string>
     <string name="permlab_clearAppCache" msgid="4747698311163766540">"smazání všech dat v mezipaměti aplikace"</string>
     <string name="permdesc_clearAppCache" msgid="7740465694193671402">"Umožňuje aplikaci uvolnit paměť telefonu smazáním souborů v adresáři mezipaměti aplikace. Přístup je velmi omezený, většinou pouze pro systémové procesy."</string>
+    <!-- no translation found for permlab_movePackage (728454979946503926) -->
+    <skip />
+    <!-- no translation found for permdesc_movePackage (6323049291923925277) -->
+    <skip />
     <string name="permlab_readLogs" msgid="4811921703882532070">"čtení systémových souborů protokolu"</string>
     <string name="permdesc_readLogs" msgid="2257937955580475902">"Umožňuje aplikaci číst různé systémové soubory protokolů. Toto nastavení aplikaci umožní získat obecné informace o činnostech s telefonem, ale neměly by obsahovat žádné osobní či soukromé informace."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"čtení nebo zápis do prostředků funkce diag"</string>
@@ -279,10 +281,13 @@
     <string name="permdesc_writeOwnerData" msgid="2344055317969787124">"Umožňuje aplikaci změnit informace o vlastníkovi telefonu uložené v telefonu. Škodlivé aplikace mohou pomocí tohoto nastavení vymazat či pozměnit informace o vlastníkovi."</string>
     <string name="permlab_readOwnerData" msgid="6668525984731523563">"čtení informací o vlastníkovi"</string>
     <string name="permdesc_readOwnerData" msgid="3088486383128434507">"Umožňuje aplikaci číst informace o vlastníkovi telefonu uložená v telefonu. Škodlivé aplikace mohou pomocí tohoto nastavení načíst informace o vlastníkovi."</string>
-    <string name="permlab_readCalendar" msgid="3728905909383989370">"čtení dat kalendáře"</string>
+    <!-- no translation found for permlab_readCalendar (6898987798303840534) -->
+    <skip />
     <string name="permdesc_readCalendar" msgid="5533029139652095734">"Umožňuje aplikaci načíst všechny události kalendáře uložené ve vašem telefonu. Škodlivé aplikace poté mohou dalším lidem odeslat události z vašeho kalendáře."</string>
-    <string name="permlab_writeCalendar" msgid="377926474603567214">"zápis dat kalendáře"</string>
-    <string name="permdesc_writeCalendar" msgid="8674240662630003173">"Umožňuje aplikaci změnit události kalendáře uložené v telefonu. Škodlivé aplikace mohou pomocí tohoto nastavení vymazat či pozměnit vaše data v kalendáři."</string>
+    <!-- no translation found for permlab_writeCalendar (3894879352594904361) -->
+    <skip />
+    <!-- no translation found for permdesc_writeCalendar (2988871373544154221) -->
+    <skip />
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"simulace zdrojů polohy pro účely testování"</string>
     <string name="permdesc_accessMockLocation" msgid="7648286063459727252">"Vytváří simulované zdroje polohy pro účely testování. Škodlivé aplikace mohou pomocí tohoto nastavení změnit polohu či stav vrácený zdroji skutečné polohy, jako je např. jednotka GPS či poskytovatelé sítě."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"přístup k dalším příkazům poskytovatele polohy"</string>
@@ -311,6 +316,16 @@
     <string name="permdesc_mount_unmount_filesystems" msgid="6253263792535859767">"Umožňuje aplikaci připojit či odpojit souborové systémy ve vyměnitelných úložištích."</string>
     <string name="permlab_mount_format_filesystems" msgid="5523285143576718981">"formátovat externí úložiště"</string>
     <string name="permdesc_mount_format_filesystems" msgid="574060044906047386">"Umožňuje aplikaci formátovat vyměnitelná úložiště."</string>
+    <string name="permlab_asec_access" msgid="1070364079249834666">"získat informace o zabezpečeném úložišti"</string>
+    <string name="permdesc_asec_access" msgid="7691616292170590244">"Umožňuje aplikaci získat informace o zabezpečeném úložišti."</string>
+    <string name="permlab_asec_create" msgid="7312078032326928899">"vytvořit zabezpečené úložiště"</string>
+    <string name="permdesc_asec_create" msgid="7041802322759014035">"Umožňuje aplikaci vytvořit zabezpečené úložiště."</string>
+    <string name="permlab_asec_destroy" msgid="7787322878955261006">"zničit zabezpečené úložiště"</string>
+    <string name="permdesc_asec_destroy" msgid="5740754114967893169">"Umožňuje aplikaci zničit zabezpečené úložiště."</string>
+    <string name="permlab_asec_mount_unmount" msgid="7517449694667828592">"připojit nebo odpojit zabezpečené úložiště"</string>
+    <string name="permdesc_asec_mount_unmount" msgid="5438078121718738625">"Umožňuje aplikaci připojit nebo odpojit zabezpečené úložiště."</string>
+    <string name="permlab_asec_rename" msgid="5685344390439934495">"přejmenovat zabezpečené úložiště"</string>
+    <string name="permdesc_asec_rename" msgid="1387881770708872470">"Umožňuje aplikaci přejmenovat zabezpečeného úložiště."</string>
     <string name="permlab_vibrate" msgid="7768356019980849603">"ovládání vibrací"</string>
     <string name="permdesc_vibrate" msgid="2886677177257789187">"Umožňuje aplikaci ovládat vibrace."</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"ovládání kontrolky"</string>
@@ -345,6 +360,8 @@
     <string name="permdesc_setWallpaperHints" msgid="6019479164008079626">"Umožňuje aplikaci nastavit nápovědu pro velikost tapety systému."</string>
     <string name="permlab_masterClear" msgid="2315750423139697397">"obnovení továrního nastavení systému"</string>
     <string name="permdesc_masterClear" msgid="5033465107545174514">"Umožňuje aplikaci kompletně obnovit systém do továrního nastavení a vymazat všechna data, konfiguraci a nainstalované aplikace."</string>
+    <string name="permlab_setTime" msgid="2021614829591775646">"nastavit čas"</string>
+    <string name="permdesc_setTime" msgid="667294309287080045">"Umožňuje aplikaci změnit čas hodin v telefonu."</string>
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"nastavení časového pásma"</string>
     <string name="permdesc_setTimeZone" msgid="1902540227418179364">"Umožňuje aplikaci změnit časové pásmo telefonu."</string>
     <string name="permlab_accountManagerService" msgid="4829262349691386986">"role služby AccountManagerService"</string>
@@ -364,7 +381,9 @@
     <string name="permlab_writeApnSettings" msgid="7823599210086622545">"zápis nastavení názvu přístupového bodu (APN)"</string>
     <string name="permdesc_writeApnSettings" msgid="7443433457842966680">"Umožňuje aplikaci změnit nastavení APN, jako je například proxy či port APN."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"změna připojení k síti"</string>
-    <string name="permdesc_changeNetworkState" msgid="6278115726355634395">"Umožňuje aplikaci změnit stav připojení k síti."</string>
+    <string name="permdesc_changeNetworkState" msgid="4199958910396387075">"Umožňuje aplikaci změnit stav připojení k síti."</string>
+    <string name="permlab_changeTetherState" msgid="5952584964373017960">"změnit sdílené datové připojení"</string>
+    <string name="permdesc_changeTetherState" msgid="8905815579146349568">"Umožňuje aplikaci změnit stav sdíleného datového připojení k síti."</string>
     <string name="permlab_changeBackgroundDataSetting" msgid="1400666012671648741">"změnit nastavení použití dat na pozadí"</string>
     <string name="permdesc_changeBackgroundDataSetting" msgid="1001482853266638864">"Umožňuje aplikaci změnit nastavení použití dat na pozadí."</string>
     <string name="permlab_accessWifiState" msgid="8100926650211034400">"zobrazení stavu WiFi"</string>
@@ -395,10 +414,18 @@
     <string name="permdesc_writeDictionary" msgid="2241256206524082880">"Umožní aplikaci zapisovat nová slova do uživatelského slovníku."</string>
     <string name="permlab_sdcardWrite" msgid="8079403759001777291">"změna/smazání obsahu karty SD"</string>
     <string name="permdesc_sdcardWrite" msgid="6643963204976471878">"Umožní aplikaci zápis na kartu SD."</string>
-    <!-- no translation found for permlab_cache_filesystem (5656487264819669824) -->
-    <skip />
-    <!-- no translation found for permdesc_cache_filesystem (1624734528435659906) -->
-    <skip />
+    <string name="permlab_cache_filesystem" msgid="5656487264819669824">"přistupovat do souborového systému mezipaměti"</string>
+    <string name="permdesc_cache_filesystem" msgid="1624734528435659906">"Umožňuje aplikaci číst a zapisovat do souborového systému mezipaměti."</string>
+    <string name="policylab_limitPassword" msgid="4307861496302850201">"Omezení hesla"</string>
+    <string name="policydesc_limitPassword" msgid="1719877245692318299">"Omezuje typ hesel, která lze použít."</string>
+    <string name="policylab_watchLogin" msgid="7374780712664285321">"Sledování pokusů o přihlášení"</string>
+    <string name="policydesc_watchLogin" msgid="1961251179624843483">"Sleduje nezdařené pokusy o přihlášení do zařízení a umožňuje provedení určité akce."</string>
+    <string name="policylab_resetPassword" msgid="9084772090797485420">"Obnovení hesla"</string>
+    <string name="policydesc_resetPassword" msgid="3332167600331799991">"Vynutí nastavení hesla na novou hodnotu, kterou vám před přihlášením musí sdělit správce."</string>
+    <string name="policylab_forceLock" msgid="5760466025247634488">"Vynucení uzamčení"</string>
+    <string name="policydesc_forceLock" msgid="2819868664946089740">"Určuje, kdy dojde k uzamčení zařízení a bude požadováno opětovné zadání hesla."</string>
+    <string name="policylab_wipeData" msgid="3910545446758639713">"Vymazání všech dat"</string>
+    <string name="policydesc_wipeData" msgid="2314060933796396205">"Bez dalšího potvrzení obnoví výchozí nastavení z výroby a smaže všechna data."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Domů"</item>
     <item msgid="869923650527136615">"Mobil"</item>
@@ -495,6 +522,7 @@
     <string name="contact_status_update_attribution" msgid="5112589886094402795">"pomocí <xliff:g id="SOURCE">%1$s</xliff:g>"</string>
     <string name="contact_status_update_attribution_with_date" msgid="5945386376369979909">"<xliff:g id="DATE">%1$s</xliff:g> pomocí <xliff:g id="SOURCE">%2$s</xliff:g>"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"Zadejte kód PIN"</string>
+    <string name="keyguard_password_enter_password_code" msgid="9138158344813213754">"Zadejte heslo pro odblokování"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"Nesprávný kód PIN"</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"Chcete-li telefon odemknout, stiskněte Menu a poté 0."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"Číslo tísňové linky"</string>
@@ -504,6 +532,8 @@
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"Telefon odemknete stisknutím tlačítka Menu."</string>
     <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"Odblokujte pomocí gesta"</string>
     <string name="lockscreen_emergency_call" msgid="5347633784401285225">"Tísňové volání"</string>
+    <!-- no translation found for lockscreen_return_to_call (5244259785500040021) -->
+    <skip />
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Správně!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4817583279053112312">"Zkuste to prosím znovu"</string>
     <string name="lockscreen_plugged_in" msgid="613343852842944435">"Nabíjení (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
@@ -534,6 +564,9 @@
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"Odemknout"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Zapnout zvuk"</string>
     <string name="lockscreen_sound_off_label" msgid="996822825154319026">"Vypnout zvuk"</string>
+    <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
+    <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
+    <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"Alt"</string>
     <string name="hour_ampm" msgid="4329881288269772723">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_cap_ampm" msgid="1829009197680861107">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Vymazat"</string>
@@ -559,6 +592,8 @@
     <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"Umožňuje aplikaci číst všechny navštívené adresy URL a záložky Prohlížeče."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"zápis do historie a záložek Prohlížeče"</string>
     <string name="permdesc_writeHistoryBookmarks" msgid="945571990357114950">"Umožní aplikaci změnit historii či záložky prohlížeče uložené v telefonu. Škodlivé aplikace mohou pomocí tohoto nastavení vymazat či pozměnit data Prohlížeče."</string>
+    <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"Změnit oprávnění prohlížeče poskytovat informace o zeměpisné poloze"</string>
+    <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"Umožňuje aplikaci změnit oprávnění prohlížeče poskytovat informace o zeměpisné poloze. Škodlivé aplikace mohou toto nastavení použít k odesílání informací o umístění na libovolné webové stránky."</string>
     <string name="save_password_message" msgid="767344687139195790">"Chcete, aby si prohlížeč zapamatoval toto heslo?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Nyní ne"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Zapamatovat"</string>
@@ -585,6 +620,11 @@
     <item quantity="one" msgid="9150797944610821849">"před 1 hodinou"</item>
     <item quantity="other" msgid="2467273239587587569">"před <xliff:g id="COUNT">%d</xliff:g> hod."</item>
   </plurals>
+    <!-- no translation found for last_num_days:other (3069992808164318268) -->
+    <!-- no translation found for last_month (3959346739979055432) -->
+    <skip />
+    <!-- no translation found for older (5211975022815554840) -->
+    <skip />
   <plurals name="num_days_ago">
     <item quantity="one" msgid="861358534398115820">"včera"</item>
     <item quantity="other" msgid="2479586466153314633">"před <xliff:g id="COUNT">%d</xliff:g> dny"</item>
@@ -739,21 +779,27 @@
     <string name="no_permissions" msgid="7283357728219338112">"Nejsou vyžadována žádná oprávnění"</string>
     <string name="perms_hide" msgid="7283915391320676226"><b>"Skrýt"</b></string>
     <string name="perms_show_all" msgid="2671791163933091180"><b>"Zobrazit vše"</b></string>
-    <string name="googlewebcontenthelper_loading" msgid="4722128368651947186">"Načítání..."</string>
+    <string name="usb_storage_activity_title" msgid="2399289999608900443">"Úložiště USB"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"USB připojeno"</string>
-    <string name="usb_storage_message" msgid="2759542180575016871">"Připojili jste svůj telefon k počítači pomocí USB. Vyberte možnost Připojit, chcete-li zkopírovat soubory mezi vaším počítačem a kartou SD v telefonu."</string>
-    <string name="usb_storage_button_mount" msgid="8063426289195405456">"Připojit"</string>
-    <string name="usb_storage_button_unmount" msgid="6092146330053864766">"Nepřipojovat"</string>
+    <string name="usb_storage_message" msgid="4796759646167247178">"Připojili jste svůj telefon k počítači pomocí USB. Chcete-li kopírovat soubory z počítače na kartu SD v zařízení Android či obráceně, vyberte následující tlačítko."</string>
+    <string name="usb_storage_button_mount" msgid="1052259930369508235">"Zapnout úložiště USB"</string>
     <string name="usb_storage_error_message" msgid="2534784751603345363">"Při používání vaší karty SD jako úložiště USB došlo k problému."</string>
     <string name="usb_storage_notification_title" msgid="8175892554757216525">"USB připojeno"</string>
     <string name="usb_storage_notification_message" msgid="7380082404288219341">"Vyberte, chcete-li kopírovat soubory do nebo z počítače."</string>
     <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"Vypnout úložiště USB"</string>
     <string name="usb_storage_stop_notification_message" msgid="2591813490269841539">"Vyberte, chcete-li vypnout úložiště USB."</string>
-    <string name="usb_storage_stop_title" msgid="6014127947456185321">"Vypnout úložiště USB"</string>
-    <string name="usb_storage_stop_message" msgid="2390958966725232848">"Před vypnutím úložiště USB se přesvědčte, zda byl hostitel USB odpojen. Úložiště USB vypnete volbou Vypnout."</string>
-    <string name="usb_storage_stop_button_mount" msgid="1181858854166273345">"Vypnout"</string>
-    <string name="usb_storage_stop_button_unmount" msgid="3774611918660582898">"Zrušit"</string>
-    <string name="usb_storage_stop_error_message" msgid="3746037090369246731">"Při vypínání úložiště USB došlo k problémům. Zkontrolujte, zda byl hostitel USB odpojen, a zkuste to znovu."</string>
+    <string name="usb_storage_stop_title" msgid="660129851708775853">"Úložiště USB je používáno"</string>
+    <string name="usb_storage_stop_message" msgid="3613713396426604104">"Před vypnutím úložiště USB zkontrolujte, zda jste odpojili (vyjmuli) kartu SD zařízení Android z počítače."</string>
+    <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"Vypnout úložiště USB"</string>
+    <string name="usb_storage_stop_error_message" msgid="143881914840412108">"Při vypínání úložiště USB došlo k problémům. Zkontrolujte, zda byl hostitel USB odpojen, a zkuste to znovu."</string>
+    <!-- no translation found for dlg_confirm_kill_storage_users_title (203356557714612214) -->
+    <skip />
+    <!-- no translation found for dlg_confirm_kill_storage_users_text (3902998926994232358) -->
+    <skip />
+    <!-- no translation found for dlg_error_title (9179426738781357928) -->
+    <skip />
+    <!-- no translation found for dlg_ok (7376953167039865701) -->
+    <skip />
     <string name="extmedia_format_title" msgid="8663247929551095854">"Formátovat kartu SD"</string>
     <string name="extmedia_format_message" msgid="3621369962433523619">"Opravdu chcete kartu SD naformátovat? Všechna data na kartě budou ztracena."</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Formátovat"</string>
@@ -778,6 +824,8 @@
     <string name="activity_list_empty" msgid="4168820609403385789">"Nebyly nalezeny žádné odpovídající aktivity."</string>
     <string name="permlab_pkgUsageStats" msgid="8787352074326748892">"aktualizovat statistiku použití součástí"</string>
     <string name="permdesc_pkgUsageStats" msgid="891553695716752835">"Umožňuje změnu shromážděných statistických údajů o použití součástí. Není určeno pro běžné aplikace."</string>
+    <string name="permlab_copyProtectedData" msgid="1660908117394854464">"Umožňuje volat výchozí službu kontejneru ke zkopírování obsahu. Běžné aplikace by toto oprávnění neměly používat."</string>
+    <string name="permdesc_copyProtectedData" msgid="537780957633976401">"Umožňuje volat výchozí službu kontejneru ke zkopírování obsahu. Běžné aplikace by toto oprávnění neměly používat."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"Poklepáním můžete ovládat přiblížení"</string>
     <string name="gadget_host_error_inflating" msgid="2613287218853846830">"Chyba při spouštění widgetu"</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Přejít"</string>
@@ -790,12 +838,9 @@
     <string name="create_contact_using" msgid="4947405226788104538">"Vytvořit kontakt"\n"pro <xliff:g id="NUMBER">%s</xliff:g>."</string>
     <string name="accessibility_compound_button_selected" msgid="5612776946036285686">"Zaškrtnuto"</string>
     <string name="accessibility_compound_button_unselected" msgid="8864512895673924091">"Nezaškrtnuto"</string>
-    <!-- no translation found for grant_credentials_permission_message_header (6824538733852821001) -->
-    <skip />
-    <!-- no translation found for grant_credentials_permission_message_footer (3125211343379376561) -->
-    <skip />
-    <!-- no translation found for grant_permissions_header_text (2722567482180797717) -->
-    <skip />
+    <string name="grant_credentials_permission_message_header" msgid="6824538733852821001">"Následující aplikace požadují oprávnění k přístupu do vašeho účtu (nyní i v budoucnu)."</string>
+    <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"Chcete tento požadavek povolit?"</string>
+    <string name="grant_permissions_header_text" msgid="2722567482180797717">"Požadavek na přístup"</string>
     <string name="allow" msgid="7225948811296386551">"Povolit"</string>
     <string name="deny" msgid="2081879885755434506">"Odepřít"</string>
     <string name="permission_request_notification_title" msgid="5390555465778213840">"Požadováno oprávnění"</string>
@@ -809,10 +854,26 @@
     <string name="l2tp_vpn_description" msgid="3750692169378923304">"Protokol L2TP (Layer 2 Tunneling Protocol)"</string>
     <string name="l2tp_ipsec_psk_vpn_description" msgid="3945043564008303239">"Síť VPN L2TP/IPSec s předsdíleným klíčem"</string>
     <string name="l2tp_ipsec_crt_vpn_description" msgid="5382714073103653577">"Síť VPN L2TP/IPSec s certifikátem"</string>
-    <!-- no translation found for upload_file (2897957172366730416) -->
+    <string name="upload_file" msgid="2897957172366730416">"Zvolit soubor"</string>
+    <string name="reset" msgid="2448168080964209908">"Resetovat"</string>
+    <string name="submit" msgid="1602335572089911941">"Odeslat"</string>
+    <string name="description_star" msgid="2654319874908576133">"oblíbené"</string>
+    <string name="tether_title" msgid="6970447107301643248">"Sdílené datové připojení prostřednictvím portu USB je k dispozici"</string>
+    <string name="tether_message" msgid="554549994538298101">"Chcete-li sdílet datové připojení telefonu s počítačem, vyberte možnost Sdílet datové připojení."</string>
+    <string name="tether_button" msgid="7409514810151603641">"Sdílet datové připojení"</string>
+    <string name="tether_button_cancel" msgid="6744369928952219677">"Zrušit"</string>
+    <string name="tether_error_message" msgid="6672110337349077628">"Při sdílení datového připojení došlo k chybě."</string>
+    <string name="tether_available_notification_title" msgid="367754042700082080">"Sdílené datové připojení prostřednictvím portu USB je k dispozici"</string>
+    <string name="tether_available_notification_message" msgid="8439443306503453793">"Tuto možnost vyberte, chcete-li sdílet datové připojení telefonu s počítačem."</string>
+    <string name="tether_stop_notification_title" msgid="1902246071807668101">"Zrušit sdílení datového připojení"</string>
+    <string name="tether_stop_notification_message" msgid="6920086906891516128">"Výběrem této možnost zrušíte sdílení datového připojení s počítačem."</string>
+    <string name="tether_stop_title" msgid="3118332507220912235">"Odpojit sdílené datové připojení"</string>
+    <string name="tether_stop_message" msgid="7741840433788363174">"Mobilní datové připojení telefonu je sdíleno s počítačem. Chcete-li sdílení prostřednictvím portu  USB zrušit, vyberte možnost Odpojit."</string>
+    <string name="tether_stop_button" msgid="8061941592702063029">"Odpojit"</string>
+    <string name="tether_stop_button_cancel" msgid="3694669546501300230">"Zrušit"</string>
+    <string name="tether_stop_error_message" msgid="4244697367270211648">"Při ukončování sdíleného datového připojení došlo k chybě. Zkuste to prosím znovu."</string>
+    <!-- no translation found for car_mode_disable_notification_title (3164768212003864316) -->
     <skip />
-    <!-- no translation found for reset (2448168080964209908) -->
-    <skip />
-    <!-- no translation found for submit (1602335572089911941) -->
+    <!-- no translation found for car_mode_disable_notification_message (3262812780382240778) -->
     <skip />
 </resources>

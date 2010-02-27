@@ -185,14 +185,12 @@
     <string name="permdesc_setDebugApp" msgid="5584310661711990702">"Bir uygulamanın başka bir uygulama için hata ayıklamayı çalıştırmasına izin verir. Kötü amaçlı uygulamalar bu işlevi başka uygulamaları kapatmak için kullanabilir."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"kullanıcı arayüzü ayarlarınızı değiştirin"</string>
     <string name="permdesc_changeConfiguration" msgid="3465121501528064399">"Uygulamaların güncel yapılandırmayı; örneğin yerel ayarı veya genel yazı tipi boyutunu değiştirmesine izin verir."</string>
-    <!-- no translation found for permlab_killBackgroundProcesses (8373714752793061963) -->
-    <skip />
-    <!-- no translation found for permdesc_killBackgroundProcesses (2908829602869383753) -->
-    <skip />
-    <!-- no translation found for permlab_forceStopPackages (1447830113260156236) -->
-    <skip />
-    <!-- no translation found for permdesc_forceStopPackages (7263036616161367402) -->
-    <skip />
+    <string name="permlab_enableCarMode" msgid="5684504058192921098">"araç modunu etkinleştir"</string>
+    <string name="permdesc_enableCarMode" msgid="5673461159384850628">"Bir uygulamanın araç modunu etkinleştirmesine izin verir."</string>
+    <string name="permlab_killBackgroundProcesses" msgid="8373714752793061963">"arka plan işlemleri son erdir"</string>
+    <string name="permdesc_killBackgroundProcesses" msgid="2908829602869383753">"Bellek düşük olmasa dahi, bir uygulamanın diğer uygulamaların arka plan işlemlerini sona erdirmesine izin verir."</string>
+    <string name="permlab_forceStopPackages" msgid="1447830113260156236">"diğer uygulamaları durmaya zorla"</string>
+    <string name="permdesc_forceStopPackages" msgid="7263036616161367402">"Bir uygulamanın başka uygulamaları zorla durdurmasına izin verir."</string>
     <string name="permlab_forceBack" msgid="1804196839880393631">"uygulamayı kapanmaya zorla"</string>
     <string name="permdesc_forceBack" msgid="6534109744159919013">"Uygulamaların, ön plandaki herhangi bir etkinliği kapanmaya ve arka plana geçmeye zorlamasına izin verir. Normal uygulamalarda hiçbir zaman gerekmemelidir."</string>
     <string name="permlab_dump" msgid="1681799862438954752">"sistemin dahili durumunu al"</string>
@@ -217,8 +215,6 @@
     <string name="permdesc_batteryStats" msgid="5847319823772230560">"Toplanan pil istatistiklerinin değiştirilmesine izin verir. Normal uygulamalarda kullanılmamalıdır."</string>
     <string name="permlab_backup" msgid="470013022865453920">"sistem yedeğini kontrol et ve geri yükle"</string>
     <string name="permdesc_backup" msgid="4837493065154256525">"Uygulamaya sistem yedekleme ve geri yükleme mekanizmasını denetleme izni verir. Normal uygulamalar tarafından kullanım için değildir."</string>
-    <string name="permlab_backup_data" msgid="4057625941707926463">"uygulamanın verilerini yedekle ve geri yükle"</string>
-    <string name="permdesc_backup_data" msgid="8274426305151227766">"Uygulamaya, sistem yedekleme ve geri yükleme mekanizmasına katılma izni verir."</string>
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"yetkisiz pencereleri görüntüle"</string>
     <string name="permdesc_internalSystemWindow" msgid="5895082268284998469">"Dahili sistem kullanıcı arayüzü tarafından kullanılmak üzere tasarlanmış pencerelerin oluşturulmasına izin verir. Normal uygulamalarda kullanılmaz."</string>
     <string name="permlab_systemAlertWindow" msgid="3372321942941168324">"sistem düzeyi uyarıları görüntüle"</string>
@@ -235,6 +231,8 @@
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"Tutucunun bir giriş yönteminin en üst düzey arayüzüne bağlanmasına izin verir. Normal uygulamalarda hiçbir zaman gerek duyulmamalıdır."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"bir duvar kağıdına tabi kıl"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"Hesap sahibine bir duvar kağıdının en üst düzey arayüzüne bağlanma izni verir. Normal uygulamalarda hiçbir zaman gerek duyulmamalıdır."</string>
+    <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"bir cihaz yöneticisi ile etkileşimde bulun"</string>
+    <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"Cihazın sahibinin cihaz yöneticisine amaç göndermesine izin verir. Normal uygulamalarda hiçbir zaman gerek duyulmamalıdır."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"ekran yönünü değiştir"</string>
     <string name="permdesc_setOrientation" msgid="6335814461615851863">"Uygulamaların ekran yönünü istedikleri zaman değiştirmesine izin verir. Normal uygulamalarda hiçbir zaman gerekmemelidir."</string>
     <string name="permlab_signalPersistentProcesses" msgid="4255467255488653854">"uygulamalara Linux sinyalleri gönder"</string>
@@ -253,6 +251,10 @@
     <string name="permdesc_installPackages" msgid="526669220850066132">"Uygulamaların yeni veya güncellenmiş Android paketleri yüklemesine izin verir. Kötü amaçlı uygulamalar bunu, kendilerine verilen izin derecesi keyfi olarak değişen yeni uygulamalar eklemek için kullanabilir."</string>
     <string name="permlab_clearAppCache" msgid="4747698311163766540">"tüm uygulama önbelleği verilerini sil"</string>
     <string name="permdesc_clearAppCache" msgid="7740465694193671402">"Uygulamaların uygulama önbelleği dizinindeki dosyaları silerek telefonda yer açmasına izin verir. Erişim genellikle sistem işlemlerine ve yüksek düzeyde kısıtlı olarak verilir."</string>
+    <!-- no translation found for permlab_movePackage (728454979946503926) -->
+    <skip />
+    <!-- no translation found for permdesc_movePackage (6323049291923925277) -->
+    <skip />
     <string name="permlab_readLogs" msgid="4811921703882532070">"sistem günlük dosyalarını oku"</string>
     <string name="permdesc_readLogs" msgid="2257937955580475902">"Uygulamaların sistemin çeşitli günlük dosyalarından okumalarına izin verir. Bu, uygulamaların telefon ile neler yaptığınız ile ilgili genel bilgi bulmasına izin verir, ancak bunlar kişisel veya özel bir bilgi içermemelidir."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"sahibi tanılama olan kaynakları oku/bunlara yaz"</string>
@@ -279,10 +281,13 @@
     <string name="permdesc_writeOwnerData" msgid="2344055317969787124">"Uygulamaların telefonunuzda depolanan telefon sahibi verilerini değiştirmesine izin verir. Kötü amaçlı uygulamalar bu işlevi kullanıcı verilerini silmek veya değiştirmek için kullanabilir."</string>
     <string name="permlab_readOwnerData" msgid="6668525984731523563">"sahip verilerini oku"</string>
     <string name="permdesc_readOwnerData" msgid="3088486383128434507">"Uygulamaların telefonunuzda depolanan telefon sahibi verilerini okumasına izin verir. Kötü amaçlı uygulamalar bunu telefon sahibi verilerini okumak için kullanabilir."</string>
-    <string name="permlab_readCalendar" msgid="3728905909383989370">"takvim verilerini oku"</string>
+    <!-- no translation found for permlab_readCalendar (6898987798303840534) -->
+    <skip />
     <string name="permdesc_readCalendar" msgid="5533029139652095734">"Uygulamaların telefonunuzda depolanan takvim etkinliklerinin tümünü okumasına izin verir. Kötü amaçlı uygulamalar bunu, takvim etkinliklerinizi başkalarına göndermek için kullanabilir."</string>
-    <string name="permlab_writeCalendar" msgid="377926474603567214">"takvim verilerini yaz"</string>
-    <string name="permdesc_writeCalendar" msgid="8674240662630003173">"Uygulamaların telefonunuzda depolanan takvim etkinliklerini değiştirmesine izin verir. Kötü amaçlı uygulamaları bunu takvim verilerinizi silmek veya değiştirmek için kullanabilir."</string>
+    <!-- no translation found for permlab_writeCalendar (3894879352594904361) -->
+    <skip />
+    <!-- no translation found for permdesc_writeCalendar (2988871373544154221) -->
+    <skip />
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"test için sahte konum kaynakları"</string>
     <string name="permdesc_accessMockLocation" msgid="7648286063459727252">"Test amacıyla sahte konum kaynakları oluşturur. Kötü amaçlı uygulamalar bu işlevi GPS veya Ağ Hizmeti sağlayıcılar gibi gerçek kaynaklardan gelen konum ve/veya durum bilgilerini geçersiz kılmak için kullanabilir."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"ek konum sağlayıcı komutlarına eriş"</string>
@@ -311,6 +316,16 @@
     <string name="permdesc_mount_unmount_filesystems" msgid="6253263792535859767">"Uygulamaların çıkarılabilir depolama birimleri için dosya sistemleri ile bağlantı kurmasına ve bağlantıyı kesmesine izin verir."</string>
     <string name="permlab_mount_format_filesystems" msgid="5523285143576718981">"harici depolama birimini biçimlendir"</string>
     <string name="permdesc_mount_format_filesystems" msgid="574060044906047386">"Uygulamanın çıkarılabilir depolama birimini biçimlendirmesine izin verir."</string>
+    <string name="permlab_asec_access" msgid="1070364079249834666">"güvenli depolama birimi hakkında bilgi al"</string>
+    <string name="permdesc_asec_access" msgid="7691616292170590244">"Uygulamanın güvenli depolama birimi hakkında bilgi almasına izin verir."</string>
+    <string name="permlab_asec_create" msgid="7312078032326928899">"güvenli depolama birimi oluştur"</string>
+    <string name="permdesc_asec_create" msgid="7041802322759014035">"Uygulamanın güvenli depolama birimi oluşturmasına izin verir."</string>
+    <string name="permlab_asec_destroy" msgid="7787322878955261006">"güvenli depolama birimini yok et"</string>
+    <string name="permdesc_asec_destroy" msgid="5740754114967893169">"Uygulamanın güvenli depolama birimini yok etmesine izin verir."</string>
+    <string name="permlab_asec_mount_unmount" msgid="7517449694667828592">"güvenli depolama birimini ekle / kaldır"</string>
+    <string name="permdesc_asec_mount_unmount" msgid="5438078121718738625">"Uygulamanın güvenli depolama birimini yeniden eklemesine / kaldırmasına izin verir."</string>
+    <string name="permlab_asec_rename" msgid="5685344390439934495">"güvenli depolama birimini yeniden adlandır"</string>
+    <string name="permdesc_asec_rename" msgid="1387881770708872470">"Uygulamanın güvenli depolama birimini yeniden adlandırmasına izin verir."</string>
     <string name="permlab_vibrate" msgid="7768356019980849603">"titreşimi denetle"</string>
     <string name="permdesc_vibrate" msgid="2886677177257789187">"Uygulamanın titreşimi denetlemesine izin verir."</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"flaşı denetle"</string>
@@ -345,6 +360,8 @@
     <string name="permdesc_setWallpaperHints" msgid="6019479164008079626">"Uygulamanın sistem duvar kağıdı boyutu ipuçlarını ayarlamasına izin verir."</string>
     <string name="permlab_masterClear" msgid="2315750423139697397">"sistemi fabrika değerlerine sıfırla"</string>
     <string name="permdesc_masterClear" msgid="5033465107545174514">"Uygulamanın, sistemi tamamen fabrika ayarlarına sıfırlamasına; verileri, yapılandırmayı ve yüklü uygulamaları silmesine izin verir."</string>
+    <string name="permlab_setTime" msgid="2021614829591775646">"saati ayarla"</string>
+    <string name="permdesc_setTime" msgid="667294309287080045">"Bu uygulamanın telefonun saatini değiştirmesine izin verir."</string>
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"saat dilimini ayarla"</string>
     <string name="permdesc_setTimeZone" msgid="1902540227418179364">"Uygulamaların telefonun saat dilimini değiştirmesine izin verir."</string>
     <string name="permlab_accountManagerService" msgid="4829262349691386986">"Hesap Yönetici Hizmeti gibi davran"</string>
@@ -364,7 +381,9 @@
     <string name="permlab_writeApnSettings" msgid="7823599210086622545">"Erişim Noktası Adı ayarlarını yaz"</string>
     <string name="permdesc_writeApnSettings" msgid="7443433457842966680">"Uygulamaların herhangi bir APN\'nin Proxy ve Bağlantı Noktası gibi APN ayarlarını değiştirmesine izin verir."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"ağ bağlantısını değiştir"</string>
-    <string name="permdesc_changeNetworkState" msgid="6278115726355634395">"Uygulamaların ağ bağlantı durumunu değiştirmesine izin verir."</string>
+    <string name="permdesc_changeNetworkState" msgid="4199958910396387075">"Bir uygulamanın ağ bağlantı durumunu değiştirmesine izin verir."</string>
+    <string name="permlab_changeTetherState" msgid="5952584964373017960">"kullanılan bağlantıyı değiştir"</string>
+    <string name="permdesc_changeTetherState" msgid="8905815579146349568">"Bir uygulamanın bağlanılan ağ bağlantısı durumunu değiştirmesine izin verir."</string>
     <string name="permlab_changeBackgroundDataSetting" msgid="1400666012671648741">"arka plan veri kullanımı ayarını değiştir"</string>
     <string name="permdesc_changeBackgroundDataSetting" msgid="1001482853266638864">"Uygulamaların arka plan veri kullanımı ayarını değiştirmesine izin verir."</string>
     <string name="permlab_accessWifiState" msgid="8100926650211034400">"Kablosuz durumunu görüntüle"</string>
@@ -395,10 +414,18 @@
     <string name="permdesc_writeDictionary" msgid="2241256206524082880">"Uygulamaların kullanıcı sözlüğüne yeni kelimeler yazmasına izin verir."</string>
     <string name="permlab_sdcardWrite" msgid="8079403759001777291">"SD kart içeriklerini değiştir/sil"</string>
     <string name="permdesc_sdcardWrite" msgid="6643963204976471878">"Bir uygulamaya SD karta yazma izni verir."</string>
-    <!-- no translation found for permlab_cache_filesystem (5656487264819669824) -->
-    <skip />
-    <!-- no translation found for permdesc_cache_filesystem (1624734528435659906) -->
-    <skip />
+    <string name="permlab_cache_filesystem" msgid="5656487264819669824">"önbellek dosya sistemine eriş"</string>
+    <string name="permdesc_cache_filesystem" msgid="1624734528435659906">"Bir uygulamanın önbellek dosya sisteminde okuma yazma yapmasına izin verir."</string>
+    <string name="policylab_limitPassword" msgid="4307861496302850201">"Şifreyi sınırla"</string>
+    <string name="policydesc_limitPassword" msgid="1719877245692318299">"Kullanmanıza izin verilen şifre türlerini sınırlayın."</string>
+    <string name="policylab_watchLogin" msgid="7374780712664285321">"Oturum açma denemelerini izle"</string>
+    <string name="policydesc_watchLogin" msgid="1961251179624843483">"Bir işlem gerçekleştirmek için cihazdaki başarısız oturum açma girişimlerini izleyin."</string>
+    <string name="policylab_resetPassword" msgid="9084772090797485420">"Şifre sıfırlama"</string>
+    <string name="policydesc_resetPassword" msgid="3332167600331799991">"Şifrenizi yeni bir değer alması için zorlayın. Giriş yapabilmeniz için yöneticinin size yeni bir değer sağlamasını gerekecektir."</string>
+    <string name="policylab_forceLock" msgid="5760466025247634488">"Kilitlemeye zorlama"</string>
+    <string name="policydesc_forceLock" msgid="2819868664946089740">"Cihaz kilitlendiğinde, şifresini yeniden girmenizi gerektiren denetim."</string>
+    <string name="policylab_wipeData" msgid="3910545446758639713">"Tüm verileri sil"</string>
+    <string name="policydesc_wipeData" msgid="2314060933796396205">"Tüm verilerinizi onay olmadan silmek için fabrika ayarlarına sıfırlayın."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Ev"</item>
     <item msgid="869923650527136615">"Mobil"</item>
@@ -495,6 +522,7 @@
     <string name="contact_status_update_attribution" msgid="5112589886094402795">"<xliff:g id="SOURCE">%1$s</xliff:g> aracılığıyla"</string>
     <string name="contact_status_update_attribution_with_date" msgid="5945386376369979909">"<xliff:g id="SOURCE">%2$s</xliff:g> ile <xliff:g id="DATE">%1$s</xliff:g> tarihinde"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"PIN kodunu gir"</string>
+    <string name="keyguard_password_enter_password_code" msgid="9138158344813213754">"Kilidi açmak için şifreyi girin"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"Yanlış PIN kodu!"</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"Kilidi açmak için önce Menü\'ye, sonra 0\'a basın."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"Acil durum numarası"</string>
@@ -504,6 +532,8 @@
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"Kilidi açmak için Menü\'ye basın."</string>
     <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"Kilit açmak için deseni çizin"</string>
     <string name="lockscreen_emergency_call" msgid="5347633784401285225">"Acil durum çağrısı"</string>
+    <!-- no translation found for lockscreen_return_to_call (5244259785500040021) -->
+    <skip />
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Doğru!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4817583279053112312">"Üzgünüz, lütfen yeniden deneyin"</string>
     <string name="lockscreen_plugged_in" msgid="613343852842944435">"Şarj oluyor (<xliff:g id="PERCENT">%%</xliff:g><xliff:g id="NUMBER">%d</xliff:g>)"</string>
@@ -534,6 +564,9 @@
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"Kilit Aç"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Sesi aç"</string>
     <string name="lockscreen_sound_off_label" msgid="996822825154319026">"Sesi kapat"</string>
+    <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
+    <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
+    <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
     <string name="hour_ampm" msgid="4329881288269772723">"<xliff:g id="HOUR">%-l</xliff:g> <xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_cap_ampm" msgid="1829009197680861107">"<xliff:g id="HOUR">%-l</xliff:g> <xliff:g id="AMPM">%p</xliff:g>"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Temizle"</string>
@@ -559,6 +592,8 @@
     <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"Uygulamaya Tarayıcının ziyaret etmiş olduğu tüm URL\'leri ve Tarayıcının tüm favorilerini okuma izni verir."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"Tarayıcı geçmişini ve favorileri yaz"</string>
     <string name="permdesc_writeHistoryBookmarks" msgid="945571990357114950">"Uygulamaya telefonunuzda depolanan Tarayıcı geçmişini veya favorileri değiştirme izni verir. Kötü amaçlı uygulamalar bunu Tarayıcı verilerinizi silmek veya değiştirmek için kullanabilir."</string>
+    <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"Tarayıcı\'nın coğrafi konum izinlerini değiştir"</string>
+    <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"Bir uygulamanın, Tarayıcı\'nın coğrafi konum izinlerini değiştirmesine izin verir. Kötü amaçlı uygulamalar, bu özelliği konum bilgilerini rastgele web sitelerine göndermek için kullanabilir."</string>
     <string name="save_password_message" msgid="767344687139195790">"Tarayıcının bu şifreyi anımsamasını istiyor musunuz?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Şimdi değil"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Anımsa"</string>
@@ -585,6 +620,11 @@
     <item quantity="one" msgid="9150797944610821849">"1 saat önce"</item>
     <item quantity="other" msgid="2467273239587587569">"<xliff:g id="COUNT">%d</xliff:g> saat önce"</item>
   </plurals>
+    <!-- no translation found for last_num_days:other (3069992808164318268) -->
+    <!-- no translation found for last_month (3959346739979055432) -->
+    <skip />
+    <!-- no translation found for older (5211975022815554840) -->
+    <skip />
   <plurals name="num_days_ago">
     <item quantity="one" msgid="861358534398115820">"dün"</item>
     <item quantity="other" msgid="2479586466153314633">"<xliff:g id="COUNT">%d</xliff:g> gün önce"</item>
@@ -739,21 +779,27 @@
     <string name="no_permissions" msgid="7283357728219338112">"İzin gerektirmez"</string>
     <string name="perms_hide" msgid="7283915391320676226"><b>"Gizle"</b></string>
     <string name="perms_show_all" msgid="2671791163933091180"><b>"Tümünü göster"</b></string>
-    <string name="googlewebcontenthelper_loading" msgid="4722128368651947186">"Yükleniyor…"</string>
+    <string name="usb_storage_activity_title" msgid="2399289999608900443">"USB Yığın Depolama"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"USB bağlandı"</string>
-    <string name="usb_storage_message" msgid="2759542180575016871">"Telefonunuzu bilgisayarınıza USB ile bağladınız. Bilgisayarınız ve telefonunuzun SD kartı arasında dosya kopyalamak istiyorsanız, \"Bağla\"\'yı seçin."</string>
-    <string name="usb_storage_button_mount" msgid="8063426289195405456">"Bağla"</string>
-    <string name="usb_storage_button_unmount" msgid="6092146330053864766">"Bağlama"</string>
+    <string name="usb_storage_message" msgid="4796759646167247178">"Telefonunuzu USB ile bilgisayarınıza bağladınız. Bilgisayarınız ile Android\'inizin SD kartı arasında dosya kopyalamak istiyorsanız aşağıdaki düğmeyi seçin."</string>
+    <string name="usb_storage_button_mount" msgid="1052259930369508235">"USB depolama birimini aç"</string>
     <string name="usb_storage_error_message" msgid="2534784751603345363">"SD kartınızı USB depolama birimi için kullanmada bir sorun var."</string>
     <string name="usb_storage_notification_title" msgid="8175892554757216525">"USB bağlandı"</string>
     <string name="usb_storage_notification_message" msgid="7380082404288219341">"Bilgisayarınıza/bilgisayarınızdan dosya kopyalamak için seçin."</string>
     <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"USB depolama birimini kapat"</string>
     <string name="usb_storage_stop_notification_message" msgid="2591813490269841539">"USB depolama birimini kapatmak için seçin."</string>
-    <string name="usb_storage_stop_title" msgid="6014127947456185321">"USB depolama birimini kapat"</string>
-    <string name="usb_storage_stop_message" msgid="2390958966725232848">"USB depolama birimini kapatmadan önce USB ana makinesinde bağlantıyı kestiğinizden emin olun. USB depolama birimini kapatmak için \"Kapat\"ı seçin."</string>
-    <string name="usb_storage_stop_button_mount" msgid="1181858854166273345">"Kapat"</string>
-    <string name="usb_storage_stop_button_unmount" msgid="3774611918660582898">"İptal"</string>
-    <string name="usb_storage_stop_error_message" msgid="3746037090369246731">"USB depolama birimini kapatırken bir sorunla karşılaştık. USB ana makinesinin bağlantısını kestiğinizden emin olduktan sonra tekrar deneyin."</string>
+    <string name="usb_storage_stop_title" msgid="660129851708775853">"USB depolama birimi kullanılıyor"</string>
+    <string name="usb_storage_stop_message" msgid="3613713396426604104">"USB depolama birimini kapatmadan önce Android SD kartını bilgisayarınızdan kaldırdığınızdan (\"çıkardığınızdan\") emin olun."</string>
+    <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"USB depolama birimini kapat"</string>
+    <string name="usb_storage_stop_error_message" msgid="143881914840412108">"USB depolama birimini kapatırken bir sorun oluştu. USB ana makinesini kaldırdığınızdan emin olun ve daha sonra tekrar deneyin."</string>
+    <!-- no translation found for dlg_confirm_kill_storage_users_title (203356557714612214) -->
+    <skip />
+    <!-- no translation found for dlg_confirm_kill_storage_users_text (3902998926994232358) -->
+    <skip />
+    <!-- no translation found for dlg_error_title (9179426738781357928) -->
+    <skip />
+    <!-- no translation found for dlg_ok (7376953167039865701) -->
+    <skip />
     <string name="extmedia_format_title" msgid="8663247929551095854">"SD kartı biçimlendir"</string>
     <string name="extmedia_format_message" msgid="3621369962433523619">"SD kartı biçimlendirmek istediğinizden emin misiniz? Kartınızdaki tüm veriler yok olacak."</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Biçimlendir"</string>
@@ -778,6 +824,8 @@
     <string name="activity_list_empty" msgid="4168820609403385789">"Eşleşen hiçbir etkinlik bulunamadı"</string>
     <string name="permlab_pkgUsageStats" msgid="8787352074326748892">"bileşen kullanım istatistiklerini güncelle"</string>
     <string name="permdesc_pkgUsageStats" msgid="891553695716752835">"Toplanmış bileşen istatistiklerinin değiştirilmesine izin verir. Normal uygulamalarda kullanılmamalıdır."</string>
+    <string name="permlab_copyProtectedData" msgid="1660908117394854464">"Varsayılan kapsayıcı hizmetin içeriği kopyalamak için çağrılmasına izin verir. Normal uygulamalar tarafından kullanılmaz."</string>
+    <string name="permdesc_copyProtectedData" msgid="537780957633976401">"Varsayılan kapsayıcı hizmetin içeriği kopyalamak için çağrılmasına izin verir. Normal uygulamalar tarafından kullanılmaz."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"Zum denetimi için iki kez dokun"</string>
     <string name="gadget_host_error_inflating" msgid="2613287218853846830">"Widget\'ı genişletirken hata oluştu"</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Git"</string>
@@ -790,12 +838,9 @@
     <string name="create_contact_using" msgid="4947405226788104538">"<xliff:g id="NUMBER">%s</xliff:g>"\n" ile kişi oluştur"</string>
     <string name="accessibility_compound_button_selected" msgid="5612776946036285686">"seçildi"</string>
     <string name="accessibility_compound_button_unselected" msgid="8864512895673924091">"seçilmedi"</string>
-    <!-- no translation found for grant_credentials_permission_message_header (6824538733852821001) -->
-    <skip />
-    <!-- no translation found for grant_credentials_permission_message_footer (3125211343379376561) -->
-    <skip />
-    <!-- no translation found for grant_permissions_header_text (2722567482180797717) -->
-    <skip />
+    <string name="grant_credentials_permission_message_header" msgid="6824538733852821001">"Aşağıdaki bir veya daha fazla uygulama, şimdi ve ileride hesabınıza erişmek için izin istiyor."</string>
+    <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"Bu isteğe izin vermek istiyor musunuz?"</string>
+    <string name="grant_permissions_header_text" msgid="2722567482180797717">"Erişim İsteği"</string>
     <string name="allow" msgid="7225948811296386551">"İzin Ver"</string>
     <string name="deny" msgid="2081879885755434506">"Reddet"</string>
     <string name="permission_request_notification_title" msgid="5390555465778213840">"İzin İstendi"</string>
@@ -809,10 +854,26 @@
     <string name="l2tp_vpn_description" msgid="3750692169378923304">"Katman 2 Tünel Protokolü"</string>
     <string name="l2tp_ipsec_psk_vpn_description" msgid="3945043564008303239">"L2TP/IPSec VPN temelli önceden paylaşılmış anahtar"</string>
     <string name="l2tp_ipsec_crt_vpn_description" msgid="5382714073103653577">"L2TP/IPSec VPN temelli sertifika"</string>
-    <!-- no translation found for upload_file (2897957172366730416) -->
+    <string name="upload_file" msgid="2897957172366730416">"Dosya seç"</string>
+    <string name="reset" msgid="2448168080964209908">"Sıfırla"</string>
+    <string name="submit" msgid="1602335572089911941">"Gönder"</string>
+    <string name="description_star" msgid="2654319874908576133">"favori"</string>
+    <string name="tether_title" msgid="6970447107301643248">"USB bağlantısı kullanılabilir"</string>
+    <string name="tether_message" msgid="554549994538298101">"Telefonunuzun veri bağlantısını bilgisayarınızla paylaşmak istiyorsanız, \"Bağlan\" seçeneğini belirleyin."</string>
+    <string name="tether_button" msgid="7409514810151603641">"Bağlan"</string>
+    <string name="tether_button_cancel" msgid="6744369928952219677">"İptal"</string>
+    <string name="tether_error_message" msgid="6672110337349077628">"Bağlantıyla ilgili bir sorun var."</string>
+    <string name="tether_available_notification_title" msgid="367754042700082080">"USB bağlantısı kullanılabilir"</string>
+    <string name="tether_available_notification_message" msgid="8439443306503453793">"Bilgisayarınızı telefonunuza bağlamak için seçin."</string>
+    <string name="tether_stop_notification_title" msgid="1902246071807668101">"Bağlantıyı kaldır"</string>
+    <string name="tether_stop_notification_message" msgid="6920086906891516128">"Bilgisayarınızın bağlantısını kesmek için seçin."</string>
+    <string name="tether_stop_title" msgid="3118332507220912235">"Bağlantıyı kes"</string>
+    <string name="tether_stop_message" msgid="7741840433788363174">"Telefonunuzun cep telefonu veri bağlantısını bilgisayarınızla paylaşıyordunuz. USB bağlantısını kesmek için \"Bağlantıyı Kes\" seçeneğini belirleyin."</string>
+    <string name="tether_stop_button" msgid="8061941592702063029">"Bağlantıyı kes"</string>
+    <string name="tether_stop_button_cancel" msgid="3694669546501300230">"İptal"</string>
+    <string name="tether_stop_error_message" msgid="4244697367270211648">"Bağlantı kapatılırken bir sorunla karşılaşıldı. Lütfen tekrar deneyin."</string>
+    <!-- no translation found for car_mode_disable_notification_title (3164768212003864316) -->
     <skip />
-    <!-- no translation found for reset (2448168080964209908) -->
-    <skip />
-    <!-- no translation found for submit (1602335572089911941) -->
+    <!-- no translation found for car_mode_disable_notification_message (3262812780382240778) -->
     <skip />
 </resources>
