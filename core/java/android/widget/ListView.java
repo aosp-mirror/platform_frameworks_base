@@ -140,6 +140,9 @@ public class ListView extends AbsListView {
     // allocating these thingies too often.
     private final ArrowScrollFocusResult mArrowScrollFocusResult = new ArrowScrollFocusResult();
 
+    // Keeps focused children visible through resizes
+    private FocusSelector mFocusSelector;
+    
     public ListView(Context context) {
         this(context, null);
     }
@@ -1015,6 +1018,39 @@ public class ListView extends AbsListView {
         }
 
         return sel;
+    }
+
+    private class FocusSelector implements Runnable {
+        private int mPosition;
+        private int mPositionTop;
+        
+        public FocusSelector setup(int position, int top) {
+            mPosition = position;
+            mPositionTop = top;
+            return this;
+        }
+        
+        public void run() {
+            setSelectionFromTop(mPosition, mPositionTop);
+        }
+    }
+    
+    @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        if (getChildCount() > 0) {
+            View focusedChild = getFocusedChild();
+            if (focusedChild != null) {
+                final int childPosition = mFirstPosition + indexOfChild(focusedChild);
+                final int childBottom = focusedChild.getBottom();
+                final int offset = Math.max(0, childBottom - (h - mPaddingTop));
+                final int top = focusedChild.getTop() - offset;
+                if (mFocusSelector == null) {
+                    mFocusSelector = new FocusSelector();
+                }
+                post(mFocusSelector.setup(childPosition, top));
+            }
+        }
+        super.onSizeChanged(w, h, oldw, oldh);
     }
 
     @Override
