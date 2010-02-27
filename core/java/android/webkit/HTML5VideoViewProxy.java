@@ -131,6 +131,7 @@ class HTML5VideoViewProxy extends Handler
                     mTimer = null;
                     mCurrentProxy.playbackEnded();
                     mCurrentProxy = null;
+                    mVideoView.stopPlayback();
                     mLayout.removeView(mVideoView);
                     mVideoView = null;
                     if (mProgressView != null) {
@@ -218,11 +219,10 @@ class HTML5VideoViewProxy extends Handler
         }
 
         public static void onPrepared() {
-            mTimer.schedule(new TimeupdateTask(mCurrentProxy), TIMEUPDATE_PERIOD, TIMEUPDATE_PERIOD);
-
             if (mProgressView == null || mLayout == null) {
                 return;
             }
+            mTimer.schedule(new TimeupdateTask(mCurrentProxy), TIMEUPDATE_PERIOD, TIMEUPDATE_PERIOD);
             mProgressView.setVisibility(View.GONE);
             mLayout.removeView(mProgressView);
             mProgressView = null;
