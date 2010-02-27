@@ -63,9 +63,9 @@ public class ExpandableListWithHeadersTest extends
     }
 
     @MediumTest
-    public void testGroupChildPositions() {
+    public void testContextMenus() {
         ExpandableListTester tester = new ExpandableListTester(mExpandableListView, this);
-        tester.testGroupAndChildPositions();
+        tester.testContextMenus();
     }
 
     @MediumTest

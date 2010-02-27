@@ -123,9 +123,9 @@ public class ExpandableListBasicTest extends ActivityInstrumentationTestCase2<Ex
     }
 
     @MediumTest
-    public void testGroupChildPositions() {
+    public void testContextMenus() {
         ExpandableListTester tester = new ExpandableListTester(mExpandableListView, this);
-        tester.testGroupAndChildPositions();
+        tester.testContextMenus();
     }
 
     @MediumTest
