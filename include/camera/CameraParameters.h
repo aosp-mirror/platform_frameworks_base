@@ -201,7 +201,29 @@ public:
     // 0.3333, EV is -2.
     // Example value: "0.333333333" or "0.5". Read only.
     static const char KEY_EXPOSURE_COMPENSATION_STEP[];
-
+    // Current zoom value.
+    // Example value: "0" or "6". Read/write.
+    static const char KEY_ZOOM[];
+    // Maximum zoom value.
+    // Example value: "6". Read only.
+    static const char KEY_MAX_ZOOM[];
+    // The zoom ratios of all zoom values. The zoom ratio is in 1/100
+    // increments. Ex: a zoom of 3.2x is returned as 320. The number of list
+    // elements is KEY_MAX_ZOOM + 1. The first element is always 100. The last
+    // element is the zoom ratio of zoom value KEY_MAX_ZOOM.
+    // Example value: "100,150,200,250,300,350,400". Read only.
+    static const char KEY_ZOOM_RATIOS[];
+    // Whether zoom is supported. Zoom is supported if the value is "true". Zoom
+    // is not supported if the value is not "true" or the key does not exist.
+    // Example value: "true". Read only.
+    static const char KEY_ZOOM_SUPPORTED[];
+    // Whether if smooth zoom is supported. Smooth zoom is supported if the
+    // value is "true". It is not supported if the value is not "true" or the
+    // key does not exist.
+    // See CAMERA_CMD_START_SMOOTH_ZOOM, CAMERA_CMD_STOP_SMOOTH_ZOOM, and
+    // CAMERA_MSG_ZOOM in frameworks/base/include/camera/Camera.h.
+    // Example value: "true". Read only.
+    static const char KEY_SMOOTH_ZOOM_SUPPORTED[];
 
     // Values for white balance settings.
     static const char WHITE_BALANCE_AUTO[];
