@@ -98,6 +98,7 @@ import android.provider.Settings;
 import android.util.Config;
 import android.util.EventLog;
 import android.util.Slog;
+import android.util.Log;
 import android.util.PrintWriterPrinter;
 import android.util.SparseArray;
 import android.view.Gravity;
@@ -4695,7 +4696,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 }
             }
         } catch (InterruptedException e) {
-            Slog.wtf(TAG, e);
+            Log.wtf(TAG, e);
         } finally {
             observer.stopWatching();
         }
