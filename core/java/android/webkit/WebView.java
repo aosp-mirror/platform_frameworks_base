@@ -2069,6 +2069,8 @@ public class WebView extends AbsoluteLayout
             boolean force) {
         if (scale < mMinZoomScale) {
             scale = mMinZoomScale;
+            // set mInZoomOverview for non mobile sites
+            if (scale < mDefaultScale) mInZoomOverview = true;
         } else if (scale > mMaxZoomScale) {
             scale = mMaxZoomScale;
         }
@@ -4017,6 +4019,10 @@ public class WebView extends AbsoluteLayout
                 // still want to send the notification over to webkit.
                 mWebView.setNewZoomScale(mWebView.mActualScale,
                         mUpdateTextWrap, true);
+                // update the zoom buttons as the scale can be changed
+                if (mWebView.getSettings().getBuiltInZoomControls()) {
+                    mWebView.updateZoomButtonsEnabled();
+                }
             }
         }
     }
