@@ -1860,11 +1860,16 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 + " app=" + app + " knownToBeDead=" + knownToBeDead
                 + " thread=" + (app != null ? app.thread : null)
                 + " pid=" + (app != null ? app.pid : -1));
-        if (app != null &&
-                (!knownToBeDead || app.thread == null) && app.pid > 0) {
-            return app;
+        if (app != null && app.pid > 0) {
+            if (!knownToBeDead || app.thread == null) {
+                return app;
+            } else {
+                // An application record is attached to a previous process,
+                // clean it up now.
+                handleAppDiedLocked(app, true);
+            }
         }
-        
+
         String hostingNameStr = hostingName != null
                 ? hostingName.flattenToShortString() : null;
         
@@ -4588,7 +4593,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
         mProcDeaths[0]++;
         
-        if (app.thread != null && app.thread.asBinder() == thread.asBinder()) {
+        // Clean up already done if the process has been re-started.
+        if (app.pid == pid && app.thread != null &&
+                app.thread.asBinder() == thread.asBinder()) {
             Log.i(TAG, "Process " + app.processName + " (pid " + pid
                     + ") has died.");
             EventLog.writeEvent(EventLogTags.AM_PROC_DIED, app.pid, app.processName);
@@ -4636,6 +4643,11 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     scheduleAppGcsLocked();
                 }
             }
+        } else if (app.pid != pid) {
+            // A new process has already been started.
+            Log.i(TAG, "Process " + app.processName + " (pid " + pid
+                    + ") has died and restarted (pid " + app.pid + ").");
+            EventLog.writeEvent(EventLogTags.AM_PROC_DIED, app.pid, app.processName);
         } else if (DEBUG_PROCESSES) {
             Log.d(TAG, "Received spurious death notification for thread "
                     + thread.asBinder());
@@ -5479,6 +5491,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 finishReceiverLocked(br.receiver, br.resultCode, br.resultData,
                         br.resultExtras, br.resultAbort, true);
                 scheduleBroadcastsLocked();
+                // We need to reset the state if we fails to start the receiver.
+                br.state = BroadcastRecord.IDLE;
             }
         }
 
