@@ -1557,13 +1557,17 @@ public class TextUtils {
      * @param reqModes The modes to be checked: may be any combination of
      * {@link #CAP_MODE_CHARACTERS}, {@link #CAP_MODE_WORDS}, and
      * {@link #CAP_MODE_SENTENCES}.
-     * 
+     *
      * @return Returns the actual capitalization modes that can be in effect
      * at the current position, which is any combination of
      * {@link #CAP_MODE_CHARACTERS}, {@link #CAP_MODE_WORDS}, and
      * {@link #CAP_MODE_SENTENCES}.
      */
     public static int getCapsMode(CharSequence cs, int off, int reqModes) {
+        if (off < 0) {
+            return 0;
+        }
+
         int i;
         char c;
         int mode = 0;
