@@ -18,6 +18,7 @@
 #define LOG_TAG "AudioPlayer"
 #include <utils/Log.h>
 
+#include <binder/IPCThreadState.h>
 #include <media/AudioTrack.h>
 #include <media/stagefright/AudioPlayer.h>
 #include <media/stagefright/MediaDebug.h>
@@ -163,6 +164,16 @@ void AudioPlayer::stop() {
     }
 
     mSource->stop();
+
+    // The following hack is necessary to ensure that the OMX
+    // component is completely released by the time we may try
+    // to instantiate it again.
+    wp<MediaSource> tmp = mSource;
+    mSource.clear();
+    while (tmp.promote() != NULL) {
+        usleep(1000);
+    }
+    IPCThreadState::self()->flushCommands();
 
     mNumFramesPlayed = 0;
     mPositionTimeMediaUs = -1;
