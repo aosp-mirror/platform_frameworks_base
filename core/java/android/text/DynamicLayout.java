@@ -310,7 +310,6 @@ extends Layout
 
         Directions[] objects = new Directions[1];
 
-
         for (int i = 0; i < n; i++) {
             ints[START] = reflowed.getLineStart(i) |
                           (reflowed.getParagraphDirection(i) << DIR_SHIFT) |

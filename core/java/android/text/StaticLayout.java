@@ -224,7 +224,7 @@ extends Layout
 
             boolean easy = true;
             boolean altered = false;
-            int dir = DEFAULT_DIR; // XXX
+            int dir = DEFAULT_DIR; // XXX pass value in
 
             for (int i = 0; i < n; i++) {
                 if (chs[i] >= FIRST_RIGHT_TO_LEFT) {
@@ -253,7 +253,8 @@ extends Layout
 
             if (!easy) {
                 // XXX put override flags, etc. into chdirs
-                dir = bidi(dir, chs, chdirs, n, false);
+                // XXX supply dir rather than force
+                dir = AndroidBidi.bidi(DIR_REQUEST_DEFAULT_LTR, chs, chdirs, n, false);
 
                 // Do mirroring for right-to-left segments
 
@@ -606,239 +607,6 @@ extends Layout
         }
     }
 
-    /**
-     * Runs the unicode bidi algorithm on the first n chars in chs, returning
-     * the char dirs in chInfo and the base line direction of the first
-     * paragraph.
-     * 
-     * XXX change result from dirs to levels
-     *  
-     * @param dir the direction flag, either DIR_REQUEST_LTR,
-     * DIR_REQUEST_RTL, DIR_REQUEST_DEFAULT_LTR, or DIR_REQUEST_DEFAULT_RTL.
-     * @param chs the text to examine
-     * @param chInfo on input, if hasInfo is true, override and other flags 
-     * representing out-of-band embedding information. On output, the generated 
-     * dirs of the text.
-     * @param n the length of the text/information in chs and chInfo
-     * @param hasInfo true if chInfo has input information, otherwise the
-     * input data in chInfo is ignored.
-     * @return the resolved direction level of the first paragraph, either
-     * DIR_LEFT_TO_RIGHT or DIR_RIGHT_TO_LEFT.
-     */
-    /* package */ static int bidi(int dir, char[] chs, byte[] chInfo, int n, 
-            boolean hasInfo) {
-        
-        AndroidCharacter.getDirectionalities(chs, chInfo, n);
-
-        /*
-         * Determine primary paragraph direction if not specified
-         */
-        if (dir != DIR_REQUEST_LTR && dir != DIR_REQUEST_RTL) {
-            // set up default
-            dir = dir >= 0 ? DIR_LEFT_TO_RIGHT : DIR_RIGHT_TO_LEFT;
-            for (int j = 0; j < n; j++) {
-                int d = chInfo[j];
-
-                if (d == Character.DIRECTIONALITY_LEFT_TO_RIGHT) {
-                    dir = DIR_LEFT_TO_RIGHT;
-                    break;
-                }
-                if (d == Character.DIRECTIONALITY_RIGHT_TO_LEFT) {
-                    dir = DIR_RIGHT_TO_LEFT;
-                    break;
-                }
-            }
-        }
-
-        final byte SOR = dir == DIR_LEFT_TO_RIGHT ?
-                Character.DIRECTIONALITY_LEFT_TO_RIGHT :
-                Character.DIRECTIONALITY_RIGHT_TO_LEFT;
-
-        /*
-         * XXX Explicit overrides should go here
-         */
-
-        /*
-         * Weak type resolution
-         */
-
-        // dump(chdirs, n, "initial");
-
-        // W1 non spacing marks
-        for (int j = 0; j < n; j++) {
-            if (chInfo[j] == Character.NON_SPACING_MARK) {
-                if (j == 0)
-                    chInfo[j] = SOR;
-                else
-                    chInfo[j] = chInfo[j - 1];
-            }
-        }
-
-        // dump(chdirs, n, "W1");
-
-        // W2 european numbers
-        byte cur = SOR;
-        for (int j = 0; j < n; j++) {
-            byte d = chInfo[j];
-
-            if (d == Character.DIRECTIONALITY_LEFT_TO_RIGHT ||
-                d == Character.DIRECTIONALITY_RIGHT_TO_LEFT ||
-                d == Character.DIRECTIONALITY_RIGHT_TO_LEFT_ARABIC)
-                cur = d;
-            else if (d == Character.DIRECTIONALITY_EUROPEAN_NUMBER) {
-                 if (cur ==
-                    Character.DIRECTIONALITY_RIGHT_TO_LEFT_ARABIC)
-                    chInfo[j] = Character.DIRECTIONALITY_ARABIC_NUMBER;
-            }
-        }
-
-        // dump(chdirs, n, "W2");
-
-        // W3 arabic letters
-        for (int j = 0; j < n; j++) {
-            if (chInfo[j] == Character.DIRECTIONALITY_RIGHT_TO_LEFT_ARABIC)
-                chInfo[j] = Character.DIRECTIONALITY_RIGHT_TO_LEFT;
-        }
-
-        // dump(chdirs, n, "W3");
-
-        // W4 single separator between numbers
-        for (int j = 1; j < n - 1; j++) {
-            byte d = chInfo[j];
-            byte prev = chInfo[j - 1];
-            byte next = chInfo[j + 1];
-
-            if (d == Character.DIRECTIONALITY_EUROPEAN_NUMBER_SEPARATOR) {
-                if (prev == Character.DIRECTIONALITY_EUROPEAN_NUMBER &&
-                    next == Character.DIRECTIONALITY_EUROPEAN_NUMBER)
-                    chInfo[j] = Character.DIRECTIONALITY_EUROPEAN_NUMBER;
-            } else if (d == Character.DIRECTIONALITY_COMMON_NUMBER_SEPARATOR) {
-                if (prev == Character.DIRECTIONALITY_EUROPEAN_NUMBER &&
-                    next == Character.DIRECTIONALITY_EUROPEAN_NUMBER)
-                    chInfo[j] = Character.DIRECTIONALITY_EUROPEAN_NUMBER;
-                if (prev == Character.DIRECTIONALITY_ARABIC_NUMBER &&
-                    next == Character.DIRECTIONALITY_ARABIC_NUMBER)
-                    chInfo[j] = Character.DIRECTIONALITY_ARABIC_NUMBER;
-            }
-        }
-
-        // dump(chdirs, n, "W4");
-
-        // W5 european number terminators
-        boolean adjacent = false;
-        for (int j = 0; j < n; j++) {
-            byte d = chInfo[j];
-
-            if (d == Character.DIRECTIONALITY_EUROPEAN_NUMBER)
-                adjacent = true;
-            else if (d == Character.DIRECTIONALITY_EUROPEAN_NUMBER_TERMINATOR && adjacent)
-                chInfo[j] = Character.DIRECTIONALITY_EUROPEAN_NUMBER;
-            else
-                adjacent = false;
-        }
-
-        //dump(chdirs, n, "W5");
-
-        // W5 european number terminators part 2,
-        // W6 separators and terminators
-        adjacent = false;
-        for (int j = n - 1; j >= 0; j--) {
-            byte d = chInfo[j];
-
-            if (d == Character.DIRECTIONALITY_EUROPEAN_NUMBER)
-                adjacent = true;
-            else if (d == Character.DIRECTIONALITY_EUROPEAN_NUMBER_TERMINATOR) {
-                if (adjacent)
-                    chInfo[j] = Character.DIRECTIONALITY_EUROPEAN_NUMBER;
-                else
-                    chInfo[j] = Character.DIRECTIONALITY_OTHER_NEUTRALS;
-            }
-            else {
-                adjacent = false;
-
-                if (d == Character.DIRECTIONALITY_EUROPEAN_NUMBER_SEPARATOR ||
-                    d == Character.DIRECTIONALITY_COMMON_NUMBER_SEPARATOR ||
-                    d == Character.DIRECTIONALITY_PARAGRAPH_SEPARATOR ||
-                    d == Character.DIRECTIONALITY_SEGMENT_SEPARATOR)
-                    chInfo[j] = Character.DIRECTIONALITY_OTHER_NEUTRALS;
-            }
-        }
-
-        // dump(chdirs, n, "W6");
-
-        // W7 strong direction of european numbers
-        cur = SOR;
-        for (int j = 0; j < n; j++) {
-            byte d = chInfo[j];
-
-            if (d == SOR ||
-                d == Character.DIRECTIONALITY_LEFT_TO_RIGHT ||
-                d == Character.DIRECTIONALITY_RIGHT_TO_LEFT)
-                cur = d;
-
-            if (d == Character.DIRECTIONALITY_EUROPEAN_NUMBER)
-                chInfo[j] = cur;
-        }
-
-        // dump(chdirs, n, "W7");
-
-        // N1, N2 neutrals
-        cur = SOR;
-        for (int j = 0; j < n; j++) {
-            byte d = chInfo[j];
-
-            if (d == Character.DIRECTIONALITY_LEFT_TO_RIGHT ||
-                d == Character.DIRECTIONALITY_RIGHT_TO_LEFT) {
-                cur = d;
-            } else if (d == Character.DIRECTIONALITY_EUROPEAN_NUMBER ||
-                       d == Character.DIRECTIONALITY_ARABIC_NUMBER) {
-                cur = Character.DIRECTIONALITY_RIGHT_TO_LEFT;
-            } else {
-                byte dd = SOR;
-                int k;
-
-                for (k = j + 1; k < n; k++) {
-                    dd = chInfo[k];
-
-                    if (dd == Character.DIRECTIONALITY_LEFT_TO_RIGHT ||
-                        dd == Character.DIRECTIONALITY_RIGHT_TO_LEFT) {
-                        break;
-                    }
-                    if (dd == Character.DIRECTIONALITY_EUROPEAN_NUMBER ||
-                        dd == Character.DIRECTIONALITY_ARABIC_NUMBER) {
-                        dd = Character.DIRECTIONALITY_RIGHT_TO_LEFT;
-                        break;
-                    }
-                }
-
-                for (int y = j; y < k; y++) {
-                    if (dd == cur)
-                        chInfo[y] = cur;
-                    else
-                        chInfo[y] = SOR;
-                }
-
-                j = k - 1;
-            }
-        }
-
-        // dump(chdirs, n, "final");
-
-        // extra: enforce that all tabs and surrogate characters go the
-        // primary direction
-        // TODO: actually do directions right for surrogates
-
-        for (int j = 0; j < n; j++) {
-            char c = chs[j];
-
-            if (c == '\t' || (c >= 0xD800 && c <= 0xDFFF)) {
-                chInfo[j] = SOR;
-            }
-        }
-        
-        return dir;
-    }
-
     private static final char FIRST_CJK = '\u2E80';
     /**
      * Returns true if the specified character is one of those specified
@@ -1062,49 +830,123 @@ extends Layout
         if (tab)
             lines[off + TAB] |= TAB_MASK;
 
-        {
-            lines[off + DIR] |= dir << DIR_SHIFT;
-
-            int cur = Character.DIRECTIONALITY_LEFT_TO_RIGHT;
-            int count = 0;
-
-            if (!easy) {
-                for (int k = start; k < end; k++) {
-                    if (chdirs[k - pstart] != cur) {
-                        count++;
-                        cur = chdirs[k - pstart];
-                    }
+        lines[off + DIR] |= dir << DIR_SHIFT;
+        Directions linedirs = DIRS_ALL_LEFT_TO_RIGHT;
+        // easy means all chars < the first RTL, so no emoji, no nothing
+        // XXX a run with no text or all spaces is easy but might be an empty 
+        // RTL paragraph.  Make sure easy is false if this is the case.
+        if (easy) {
+            mLineDirections[j] = linedirs;
+        } else {
+            int startOff = start - pstart;
+            int baseLevel = dir == DIR_LEFT_TO_RIGHT ? 0 : 1;
+            int curLevel = chdirs[startOff];
+            int minLevel = curLevel;
+            int runCount = 1;
+            for (int i = start + 1; i < end; ++i) {
+                int level = chdirs[i - pstart];
+                if (level != curLevel) {
+                    curLevel = level;
+                    ++runCount;
                 }
             }
+            
+            // add final run for trailing counter-directional whitespace
+            int visEnd = end;
+            if ((curLevel & 1) != (baseLevel & 1)) {
+                // look for visible end
+                while (--visEnd >= start) {
+                    char ch = text.charAt(visEnd);
 
-            Directions linedirs;
+                    if (ch == '\n') {
+                        --visEnd;
+                        break;
+                    }
 
-            if (count == 0) {
-                linedirs = DIRS_ALL_LEFT_TO_RIGHT;
+                    if (ch != ' ' && ch != '\t') {
+                        break;
+                    }
+                }
+                ++visEnd;
+                if (visEnd != end) {
+                    ++runCount;
+                }
+            }
+            
+            if (runCount == 1 && minLevel == baseLevel) {
+                if ((minLevel & 1) != 0) {
+                    linedirs = DIRS_ALL_RIGHT_TO_LEFT;
+                }
+                // we're done, only one run on this line
             } else {
-                short[] ld = new short[count + 1];
-
-                cur = Character.DIRECTIONALITY_LEFT_TO_RIGHT;
-                count = 0;
-                int here = start;
-
-                for (int k = start; k < end; k++) {
-                    if (chdirs[k - pstart] != cur) {
-                        // XXX check to make sure we don't
-                        //     overflow short
-                        ld[count++] = (short) (k - here);
-                        cur = chdirs[k - pstart];
-                        here = k;
+                int[] ld = new int[runCount * 2];
+                int maxLevel = minLevel;
+                int levelBits = minLevel << RUN_LEVEL_SHIFT;
+                {
+                    // Start of first pair is always 0, we write
+                    // length then start at each new run, and the
+                    // last run length after we're done.
+                    int n = 1;
+                    int prev = start;
+                    curLevel = minLevel;
+                    for (int i = start; i < visEnd; ++i) {
+                        int level = chdirs[i - pstart];
+                        if (level != curLevel) {
+                            curLevel = level;
+                            if (level > maxLevel) {
+                                maxLevel = level;
+                            } else if (level < minLevel) {
+                                minLevel = level;
+                            }
+                            // XXX ignore run length limit of 2^RUN_LEVEL_SHIFT
+                            ld[n++] = (i - prev) | levelBits;
+                            ld[n++] = i - start;
+                            levelBits = curLevel << RUN_LEVEL_SHIFT;
+                            prev = i;
+                        }
+                    }
+                    ld[n] = (visEnd - prev) | levelBits;
+                    if (visEnd < end) {
+                        ld[++n] = visEnd - start;
+                        ld[++n] = (end - visEnd) | (baseLevel << RUN_LEVEL_SHIFT);
                     }
                 }
 
-                ld[count] = (short) (end - here);
-
-                if (count == 1 && ld[0] == 0) {
-                    linedirs = DIRS_ALL_RIGHT_TO_LEFT;
+                // See if we need to swap any runs.
+                // If the min level run direction doesn't match the base 
+                // direction, we always need to swap (at this point
+                // we have more than one run).
+                // Otherwise, we don't need to swap the lowest level.
+                // Since there are no logically adjacent runs at the same 
+                // level, if the max level is the same as the (new) min
+                // level, we have a series of alternating levels that
+                // is already in order, so there's no more to do.
+                // 
+                boolean swap;
+                if ((minLevel & 1) == baseLevel) {
+                    minLevel += 1;
+                    swap = maxLevel > minLevel;
                 } else {
-                    linedirs = new Directions(ld);
+                    swap = runCount > 1;
                 }
+                if (swap) {
+                    for (int level = maxLevel - 1; level >= minLevel; --level) {
+                        for (int i = 0; i < ld.length; i += 2) {
+                            if (chdirs[startOff + ld[i]] >= level) {
+                                int e = i + 2;
+                                while (e < ld.length && chdirs[startOff + ld[e]] >= level) {
+                                    e += 2;
+                                }
+                                for (int low = i, hi = e - 2; low < hi; low += 2, hi -= 2) {
+                                    int x = ld[low]; ld[low] = ld[hi]; ld[hi] = x;
+                                    x = ld[low+1]; ld[low+1] = ld[hi+1]; ld[hi+1] = x;
+                                }
+                                i = e + 2;
+                            }
+                        }
+                    }
+                }
+                linedirs = new Directions(ld);
             }
 
             mLineDirections[j] = linedirs;
