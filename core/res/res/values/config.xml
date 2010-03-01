@@ -87,7 +87,7 @@
     </string-array>
 
     <!-- Regex array of allowable upstream ifaces for tethering - for example if you want
-         tethering on your a new interface called "foo2" add "foo\\d" here -->
+         tethering on a new interface called "foo2" add <item>"foo\\d"</item> to the array -->
     <string-array translatable="false" name="config_tether_upstream_regexs">
     </string-array>
 
