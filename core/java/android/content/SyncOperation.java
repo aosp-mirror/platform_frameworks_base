@@ -19,7 +19,7 @@ public class SyncOperation implements Comparable {
     public SyncStorageEngine.PendingOperation pendingOperation;
 
     public SyncOperation(Account account, int source, String authority, Bundle extras,
-            long delay) {
+            long delayInMs) {
         this.account = account;
         this.syncSource = source;
         this.authority = authority;
@@ -33,12 +33,12 @@ public class SyncOperation implements Comparable {
         removeFalseExtra(ContentResolver.SYNC_EXTRAS_EXPEDITED);
         removeFalseExtra(ContentResolver.SYNC_EXTRAS_OVERRIDE_TOO_MANY_DELETIONS);
         final long now = SystemClock.elapsedRealtime();
-        if (delay < 0) {
+        if (delayInMs < 0) {
             this.expedited = true;
             this.earliestRunTime = now;
         } else {
             this.expedited = false;
-            this.earliestRunTime = now + delay;
+            this.earliestRunTime = now + delayInMs;
         }
         this.key = toKey();
     }
