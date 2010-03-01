@@ -26,6 +26,7 @@
     --time-out-ms (default is 8000 millis) for each test
     --adb-options="-e" passes option string to adb
     --results-directory=..., (default is ./layout-test-results) directory name under which results are stored.
+    --js-engine the JavaScript engine currently in use, determines which set of Android-specific expected results we should use, should be 'jsc' or 'v8'
 """
 
 import logging
@@ -186,6 +187,16 @@ def main(options, args):
   run_layout_test_cmd_postfix = " -e path \"" + path + "\" -e timeout " + timeout_ms
   if options.rebaseline:
     run_layout_test_cmd_postfix += " -e rebaseline true"
+
+  # If the JS engine is not specified on the command line, try reading the
+  # JS_ENGINE environment  variable, which is used by the build system in
+  # external/webkit/Android.mk.
+  js_engine = options.js_engine
+  if not js_engine:
+    js_engine = os.environ['JS_ENGINE']
+  if js_engine:
+    run_layout_test_cmd_postfix += " -e jsengine " + js_engine
+
   run_layout_test_cmd_postfix += " -w com.android.dumprendertree/.LayoutTestsAutoRunner"
 
   # Call LayoutTestsAutoTest::startLayoutTests.
@@ -297,6 +308,9 @@ if '__main__' == __name__:
                            default=None,
                            dest="ref_directory",
                            help="directory where reference results are stored.")
+  option_parser.add_option("", "--js-engine",
+                           default=None,
+                           help="The JavaScript engine currently in use, which determines which set of Android-specific expected results we should use. Should be 'jsc' or 'v8'.");
 
   options, args = option_parser.parse_args();
   main(options, args)
