@@ -101,7 +101,6 @@ class LoadListener extends Handler implements EventHandler {
     private boolean  mCancelled;  // The request has been cancelled.
     private boolean  mAuthFailed;  // indicates that the prev. auth failed
     private CacheLoader mCacheLoader;
-    private CacheManager.CacheResult mCacheResult;
     private boolean  mFromCache = false;
     private HttpAuthHeader mAuthHeader;
     private int      mErrorID = OK;
@@ -301,6 +300,12 @@ class LoadListener extends Handler implements EventHandler {
      */
     public void headers(Headers headers) {
         if (DebugFlags.LOAD_LISTENER) Log.v(LOGTAG, "LoadListener.headers");
+        // call db (setCookie) in the non-WebCore thread
+        if (mCancelled) return;
+        ArrayList<String> cookies = headers.getSetCookie();
+        for (int i = 0; i < cookies.size(); ++i) {
+            CookieManager.getInstance().setCookie(mUri, cookies.get(i));
+        }
         sendMessageInternal(obtainMessage(MSG_CONTENT_HEADERS, headers));
     }
 
@@ -315,11 +320,6 @@ class LoadListener extends Handler implements EventHandler {
     private void handleHeaders(Headers headers) {
         if (mCancelled) return;
         mHeaders = headers;
-
-        ArrayList<String> cookies = headers.getSetCookie();
-        for (int i = 0; i < cookies.size(); ++i) {
-            CookieManager.getInstance().setCookie(mUri, cookies.get(i));
-        }
 
         long contentLength = headers.getContentLength();
         if (contentLength != Headers.NO_CONTENT_LENGTH) {
@@ -454,12 +454,19 @@ class LoadListener extends Handler implements EventHandler {
             if (!mFromCache && mRequestHandle != null
                     && (!mRequestHandle.getMethod().equals("POST")
                             || mPostIdentifier != 0)) {
-                mCacheResult = CacheManager.createCacheFile(mUrl, mStatusCode,
-                        headers, mMimeType, mPostIdentifier, false);
+                WebViewWorker.CacheCreateData data = new WebViewWorker.CacheCreateData();
+                data.mListener = this;
+                data.mUrl = mUrl;
+                data.mMimeType = mMimeType;
+                data.mStatusCode = mStatusCode;
+                data.mPostId = mPostIdentifier;
+                data.mHeaders = headers;
+                WebViewWorker.getHandler().obtainMessage(
+                        WebViewWorker.MSG_CREATE_CACHE, data).sendToTarget();
             }
-            if (mCacheResult != null) {
-                mCacheResult.encoding = mEncoding;
-            }
+            WebViewWorker.CacheEncoding ce = new WebViewWorker.CacheEncoding();
+            WebViewWorker.getHandler().obtainMessage(
+                    WebViewWorker.MSG_UPDATE_CACHE_ENCODING, ce).sendToTarget();
         }
         commitHeadersCheckRedirect();
     }
@@ -649,7 +656,10 @@ class LoadListener extends Handler implements EventHandler {
                 // ask for it, so make sure we have a valid CacheLoader
                 // before calling it.
                 if (mCacheLoader != null) {
-                    mCacheLoader.load();
+                    // Load the cached file in a separate thread
+                    WebViewWorker.getHandler().obtainMessage(
+                            WebViewWorker.MSG_ADD_STREAMLOADER, mCacheLoader)
+                            .sendToTarget();
                     mFromCache = true;
                     if (DebugFlags.LOAD_LISTENER) {
                         Log.v(LOGTAG, "LoadListener cache load url=" + url());
@@ -708,8 +718,10 @@ class LoadListener extends Handler implements EventHandler {
                     Log.v(LOGTAG, "FrameLoader: HTTP URL in cache " +
                             "and usable: " + url());
                 }
-                // Load the cached file
-                mCacheLoader.load();
+                // Load the cached file in a separate thread
+                WebViewWorker.getHandler().obtainMessage(
+                        WebViewWorker.MSG_ADD_STREAMLOADER, mCacheLoader)
+                        .sendToTarget();
                 mFromCache = true;
                 return true;
             }
@@ -934,12 +946,9 @@ class LoadListener extends Handler implements EventHandler {
      * WebCore.
      */
     void downloadFile() {
-        // Setting the Cache Result to null ensures that this
-        // content is not added to the cache
-        if (mCacheResult != null) {
-            CacheManager.cleanupCacheFile(mCacheResult);
-            mCacheResult = null;
-        }
+        // remove the cache
+        WebViewWorker.getHandler().obtainMessage(
+                WebViewWorker.MSG_REMOVE_CACHE, this).sendToTarget();
 
         // Inform the client that they should download a file
         mBrowserFrame.getCallbackProxy().onDownloadStart(url(), 
@@ -1098,24 +1107,15 @@ class LoadListener extends Handler implements EventHandler {
             if (c == null) break;
 
             if (c.mLength != 0) {
-                if (mCacheResult != null) {
-                    mCacheResult.contentLength += c.mLength;
-                    if (mCacheResult.contentLength > CacheManager.CACHE_MAX_SIZE) {
-                        CacheManager.cleanupCacheFile(mCacheResult);
-                        mCacheResult = null;
-                    } else {
-                        try {
-                            mCacheResult.outStream
-                                    .write(c.mArray, 0, c.mLength);
-                        } catch (IOException e) {
-                            CacheManager.cleanupCacheFile(mCacheResult);
-                            mCacheResult = null;
-                        }
-                    }
-                }
                 nativeAddData(c.mArray, c.mLength);
+                WebViewWorker.CacheData data = new WebViewWorker.CacheData();
+                data.mListener = this;
+                data.mChunk = c;
+                WebViewWorker.getHandler().obtainMessage(
+                        WebViewWorker.MSG_APPEND_CACHE, data).sendToTarget();
+            } else {
+                c.release();
             }
-            c.release();
             checker.responseAlert("res nativeAddData");
         }
     }
@@ -1125,18 +1125,16 @@ class LoadListener extends Handler implements EventHandler {
      * cancellation or errors during the load.
      */
     void tearDown() {
-        if (mCacheResult != null) {
-            if (getErrorID() == OK) {
-                CacheManager.saveCacheFile(mUrl, mPostIdentifier, mCacheResult);
-            } else {
-                CacheManager.cleanupCacheFile(mCacheResult);
-            }
-
-            // we need to reset mCacheResult to be null
-            // resource loader's tearDown will call into WebCore's
-            // nativeFinish, which in turn calls loader.cancel().
-            // If we don't reset mCacheFile, the file will be deleted.
-            mCacheResult = null;
+        if (getErrorID() == OK) {
+            WebViewWorker.CacheSaveData data = new WebViewWorker.CacheSaveData();
+            data.mListener = this;
+            data.mUrl = mUrl;
+            data.mPostId = mPostIdentifier;
+            WebViewWorker.getHandler().obtainMessage(
+                    WebViewWorker.MSG_SAVE_CACHE, data).sendToTarget();
+        } else {
+            WebViewWorker.getHandler().obtainMessage(
+                    WebViewWorker.MSG_REMOVE_CACHE, this).sendToTarget();
         }
         if (mNativeLoader != 0) {
             PerfChecker checker = new PerfChecker();
@@ -1194,10 +1192,8 @@ class LoadListener extends Handler implements EventHandler {
             mRequestHandle = null;
         }
 
-        if (mCacheResult != null) {
-            CacheManager.cleanupCacheFile(mCacheResult);
-            mCacheResult = null;
-        }
+        WebViewWorker.getHandler().obtainMessage(
+                WebViewWorker.MSG_REMOVE_CACHE, this).sendToTarget();
         mCancelled = true;
 
         clearNativeLoader();
@@ -1258,14 +1254,16 @@ class LoadListener extends Handler implements EventHandler {
             }
 
             // Cache the redirect response
-            if (mCacheResult != null) {
-                if (getErrorID() == OK) {
-                    CacheManager.saveCacheFile(mUrl, mPostIdentifier,
-                            mCacheResult);
-                } else {
-                    CacheManager.cleanupCacheFile(mCacheResult);
-                }
-                mCacheResult = null;
+            if (getErrorID() == OK) {
+                WebViewWorker.CacheSaveData data = new WebViewWorker.CacheSaveData();
+                data.mListener = this;
+                data.mUrl = mUrl;
+                data.mPostId = mPostIdentifier;
+                WebViewWorker.getHandler().obtainMessage(
+                        WebViewWorker.MSG_SAVE_CACHE, data).sendToTarget();
+            } else {
+                WebViewWorker.getHandler().obtainMessage(
+                        WebViewWorker.MSG_REMOVE_CACHE, this).sendToTarget();
             }
 
             // This will strip the anchor

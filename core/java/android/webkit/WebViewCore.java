@@ -587,13 +587,6 @@ final class WebViewCore {
         private static final int INITIALIZE = 0;
         private static final int REDUCE_PRIORITY = 1;
         private static final int RESUME_PRIORITY = 2;
-        private static final int CACHE_TICKER = 3;
-        private static final int BLOCK_CACHE_TICKER = 4;
-        private static final int RESUME_CACHE_TICKER = 5;
-
-        private static final int CACHE_TICKER_INTERVAL = 60 * 1000; // 1 minute
-
-        private static boolean mCacheTickersBlocked = true;
 
         public void run() {
             Looper.prepare();
@@ -618,28 +611,6 @@ final class WebViewCore {
                             case RESUME_PRIORITY:
                                 Process.setThreadPriority(
                                         Process.THREAD_PRIORITY_DEFAULT);
-                                break;
-
-                            case CACHE_TICKER:
-                                if (!mCacheTickersBlocked) {
-                                    CacheManager.endCacheTransaction();
-                                    CacheManager.startCacheTransaction();
-                                    sendMessageDelayed(
-                                            obtainMessage(CACHE_TICKER),
-                                            CACHE_TICKER_INTERVAL);
-                                }
-                                break;
-
-                            case BLOCK_CACHE_TICKER:
-                                if (CacheManager.endCacheTransaction()) {
-                                    mCacheTickersBlocked = true;
-                                }
-                                break;
-
-                            case RESUME_CACHE_TICKER:
-                                if (CacheManager.startCacheTransaction()) {
-                                    mCacheTickersBlocked = false;
-                                }
                                 break;
                         }
                     }
@@ -1092,23 +1063,15 @@ final class WebViewCore {
                             Process.setThreadPriority(mTid,
                                     Process.THREAD_PRIORITY_BACKGROUND);
                             pauseTimers();
-                            if (CacheManager.disableTransaction()) {
-                                WebCoreThread.mCacheTickersBlocked = true;
-                                sWebCoreHandler.removeMessages(
-                                        WebCoreThread.CACHE_TICKER);
-                            }
+                            WebViewWorker.getHandler().sendEmptyMessage(
+                                    WebViewWorker.MSG_PAUSE_CACHE_TRANSACTION);
                             break;
 
                         case RESUME_TIMERS:
                             Process.setThreadPriority(mTid, mSavedPriority);
                             resumeTimers();
-                            if (CacheManager.enableTransaction()) {
-                                WebCoreThread.mCacheTickersBlocked = false;
-                                sWebCoreHandler.sendMessageDelayed(
-                                        sWebCoreHandler.obtainMessage(
-                                        WebCoreThread.CACHE_TICKER),
-                                        WebCoreThread.CACHE_TICKER_INTERVAL);
-                            }
+                            WebViewWorker.getHandler().sendEmptyMessage(
+                                    WebViewWorker.MSG_RESUME_CACHE_TRANSACTION);
                             break;
 
                         case ON_PAUSE:
@@ -1851,16 +1814,6 @@ final class WebViewCore {
                 .obtainMessage(WebCoreThread.RESUME_PRIORITY));
     }
 
-    static void startCacheTransaction() {
-        sWebCoreHandler.sendMessage(sWebCoreHandler
-                .obtainMessage(WebCoreThread.RESUME_CACHE_TICKER));
-    }
-
-    static void endCacheTransaction() {
-        sWebCoreHandler.sendMessage(sWebCoreHandler
-                .obtainMessage(WebCoreThread.BLOCK_CACHE_TICKER));
-    }
-
     static void pauseUpdatePicture(WebViewCore core) {
         // Note: there is one possible failure mode. If pauseUpdatePicture() is
         // called from UI thread while WEBKIT_DRAW is just pulled out of the
@@ -1992,9 +1945,10 @@ final class WebViewCore {
         sendUpdateTextEntry();
         // as CacheManager can behave based on database transaction, we need to
         // call tick() to trigger endTransaction
-        sWebCoreHandler.removeMessages(WebCoreThread.CACHE_TICKER);
-        sWebCoreHandler.sendMessage(sWebCoreHandler
-                .obtainMessage(WebCoreThread.CACHE_TICKER));
+        WebViewWorker.getHandler().removeMessages(
+                WebViewWorker.MSG_CACHE_TRANSACTION_TICKER);
+        WebViewWorker.getHandler().sendEmptyMessage(
+                WebViewWorker.MSG_CACHE_TRANSACTION_TICKER);
         contentDraw();
     }
 
