@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.RecoverySystem;
 import android.util.Log;
+import android.util.Slog;
 
 import java.io.IOException;
 
@@ -31,13 +32,13 @@ public class MasterClearReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         if (intent.getAction().equals(Intent.ACTION_REMOTE_INTENT)) {
             if (!"google.com".equals(intent.getStringExtra("from"))) {
-                Log.w(TAG, "Ignoring master clear request -- not from trusted server.");
+                Slog.w(TAG, "Ignoring master clear request -- not from trusted server.");
                 return;
             }
         }
 
         try {
-            Log.w(TAG, "!!! FACTORY RESET !!!");
+            Slog.w(TAG, "!!! FACTORY RESET !!!");
             if (intent.hasExtra("enableEFS")) {
                 RecoverySystem.rebootToggleEFS(context, intent.getBooleanExtra("enableEFS", false));
             } else {
@@ -45,7 +46,7 @@ public class MasterClearReceiver extends BroadcastReceiver {
             }
             Log.wtf(TAG, "Still running after master clear?!");
         } catch (IOException e) {
-            Log.e(TAG, "Can't perform master clear/factory reset", e);
+            Slog.e(TAG, "Can't perform master clear/factory reset", e);
         }
     }
 }

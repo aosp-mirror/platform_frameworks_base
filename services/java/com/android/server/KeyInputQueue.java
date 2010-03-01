@@ -22,7 +22,7 @@ import android.os.Environment;
 import android.os.LatencyTimer;
 import android.os.PowerManager;
 import android.os.SystemClock;
-import android.util.Log;
+import android.util.Slog;
 import android.util.SparseArray;
 import android.util.Xml;
 import android.view.Display;
@@ -177,7 +177,7 @@ public abstract class KeyInputQueue {
                 return;
             }
             
-            if (DEBUG_VIRTUAL_KEYS) Log.v(TAG, "computeHitRect for " + scancode
+            if (DEBUG_VIRTUAL_KEYS) Slog.v(TAG, "computeHitRect for " + scancode
                     + ": dev=" + dev + " absX=" + dev.absX + " absY=" + dev.absY);
             
             lastDevice = dev;
@@ -211,11 +211,11 @@ public abstract class KeyInputQueue {
             String str = br.readLine();
             if (str != null) {
                 String[] it = str.split(":");
-                if (DEBUG_VIRTUAL_KEYS) Log.v(TAG, "***** VIRTUAL KEYS: " + it);
+                if (DEBUG_VIRTUAL_KEYS) Slog.v(TAG, "***** VIRTUAL KEYS: " + it);
                 final int N = it.length-6;
                 for (int i=0; i<=N; i+=6) {
                     if (!"0x01".equals(it[i])) {
-                        Log.w(TAG, "Unknown virtual key type at elem #" + i
+                        Slog.w(TAG, "Unknown virtual key type at elem #" + i
                                 + ": " + it[i]);
                         continue;
                     }
@@ -226,22 +226,22 @@ public abstract class KeyInputQueue {
                         sb.centery = Integer.parseInt(it[i+3]);
                         sb.width = Integer.parseInt(it[i+4]);
                         sb.height = Integer.parseInt(it[i+5]);
-                        if (DEBUG_VIRTUAL_KEYS) Log.v(TAG, "Virtual key "
+                        if (DEBUG_VIRTUAL_KEYS) Slog.v(TAG, "Virtual key "
                                 + sb.scancode + ": center=" + sb.centerx + ","
                                 + sb.centery + " size=" + sb.width + "x"
                                 + sb.height);
                         mVirtualKeys.add(sb);
                     } catch (NumberFormatException e) {
-                        Log.w(TAG, "Bad number at region " + i + " in: "
+                        Slog.w(TAG, "Bad number at region " + i + " in: "
                                 + str, e);
                     }
                 }
             }
             br.close();
         } catch (FileNotFoundException e) {
-            Log.i(TAG, "No virtual keys found");
+            Slog.i(TAG, "No virtual keys found");
         } catch (IOException e) {
-            Log.w(TAG, "Error reading virtual keys", e);
+            Slog.w(TAG, "Error reading virtual keys", e);
         }
     }
 
@@ -264,14 +264,14 @@ public abstract class KeyInputQueue {
                 }
                 String name = parser.getAttributeValue(null, "name");
                 if (name != null) {
-                    if (DEBUG) Log.v(TAG, "addExcludedDevice " + name);
+                    if (DEBUG) Slog.v(TAG, "addExcludedDevice " + name);
                     addExcludedDevice(name);
                 }
             }
         } catch (FileNotFoundException e) {
             // It's ok if the file does not exist.
         } catch (Exception e) {
-            Log.e(TAG, "Exception while parsing '" + confFile.getAbsolutePath() + "'", e);
+            Slog.e(TAG, "Exception while parsing '" + confFile.getAbsolutePath() + "'", e);
         } finally {
             try { if (confreader != null) confreader.close(); } catch (IOException e) { }
         }
@@ -326,21 +326,21 @@ public abstract class KeyInputQueue {
                     if ((d.classes&RawInputEvent.CLASS_TOUCHSCREEN) != 0) {
                         config.touchscreen
                                 = Configuration.TOUCHSCREEN_FINGER;
-                        //Log.i("foo", "***** HAVE TOUCHSCREEN!");
+                        //Slog.i("foo", "***** HAVE TOUCHSCREEN!");
                     }
                     if ((d.classes&RawInputEvent.CLASS_ALPHAKEY) != 0) {
                         config.keyboard
                                 = Configuration.KEYBOARD_QWERTY;
-                        //Log.i("foo", "***** HAVE QWERTY!");
+                        //Slog.i("foo", "***** HAVE QWERTY!");
                     }
                     if ((d.classes&RawInputEvent.CLASS_TRACKBALL) != 0) {
                         config.navigation
                                 = Configuration.NAVIGATION_TRACKBALL;
-                        //Log.i("foo", "***** HAVE TRACKBALL!");
+                        //Slog.i("foo", "***** HAVE TRACKBALL!");
                     } else if ((d.classes&RawInputEvent.CLASS_DPAD) != 0) {
                         config.navigation
                                 = Configuration.NAVIGATION_DPAD;
-                        //Log.i("foo", "***** HAVE DPAD!");
+                        //Slog.i("foo", "***** HAVE DPAD!");
                     }
                 }
             }
@@ -491,7 +491,7 @@ public abstract class KeyInputQueue {
     
     Thread mThread = new Thread("InputDeviceReader") {
         public void run() {
-            if (DEBUG) Log.v(TAG, "InputDeviceReader.run()");
+            if (DEBUG) Slog.v(TAG, "InputDeviceReader.run()");
             android.os.Process.setThreadPriority(
                     android.os.Process.THREAD_PRIORITY_URGENT_DISPLAY);
             
@@ -507,7 +507,7 @@ public abstract class KeyInputQueue {
                     boolean configChanged = false;
                     
                     if (false) {
-                        Log.i(TAG, "Input event: dev=0x"
+                        Slog.i(TAG, "Input event: dev=0x"
                                 + Integer.toHexString(ev.deviceId)
                                 + " type=0x" + Integer.toHexString(ev.type)
                                 + " scancode=" + ev.scancode
@@ -531,7 +531,7 @@ public abstract class KeyInputQueue {
                             } else {
                                 // We won't do anything with this device.
                                 mIgnoredDevices.put(ev.deviceId, di);
-                                Log.i(TAG, "Ignoring non-input device: id=0x"
+                                Slog.i(TAG, "Ignoring non-input device: id=0x"
                                         + Integer.toHexString(di.id)
                                         + ", name=" + di.name);
                             }
@@ -539,7 +539,7 @@ public abstract class KeyInputQueue {
                     } else if (ev.type == RawInputEvent.EV_DEVICE_REMOVED) {
                         synchronized (mFirst) {
                             if (false) {
-                                Log.i(TAG, "Device removed: id=0x"
+                                Slog.i(TAG, "Device removed: id=0x"
                                         + Integer.toHexString(ev.deviceId));
                             }
                             di = mDevices.get(ev.deviceId);
@@ -551,7 +551,7 @@ public abstract class KeyInputQueue {
                             } else if ((di=mIgnoredDevices.get(ev.deviceId)) != null) {
                                 mIgnoredDevices.remove(ev.deviceId);
                             } else {
-                                Log.w(TAG, "Removing bad device id: "
+                                Slog.w(TAG, "Removing bad device id: "
                                         + Integer.toHexString(ev.deviceId));
                                 continue;
                             }
@@ -591,7 +591,7 @@ public abstract class KeyInputQueue {
                         //curTime = gotOne ? ev.when : SystemClock.uptimeMillis();
                         final long curTime = SystemClock.uptimeMillis();
                         final long curTimeNano = System.nanoTime();
-                        //Log.i(TAG, "curTime=" + curTime + ", systemClock=" + SystemClock.uptimeMillis());
+                        //Slog.i(TAG, "curTime=" + curTime + ", systemClock=" + SystemClock.uptimeMillis());
                         
                         final int classes = di.classes;
                         final int type = ev.type;
@@ -646,14 +646,14 @@ public abstract class KeyInputQueue {
                                 di.mAbs.changed = true;
                                 di.mAbs.mNextData[di.mAbs.mAddingPointerOffset
                                     + MotionEvent.SAMPLE_X] = ev.value;
-                                if (DEBUG_POINTERS) Log.v(TAG, "MT @"
+                                if (DEBUG_POINTERS) Slog.v(TAG, "MT @"
                                         + di.mAbs.mAddingPointerOffset
                                         + " X:" + ev.value);
                             } else if (ev.scancode == RawInputEvent.ABS_MT_POSITION_Y) {
                                 di.mAbs.changed = true;
                                 di.mAbs.mNextData[di.mAbs.mAddingPointerOffset
                                     + MotionEvent.SAMPLE_Y] = ev.value;
-                                if (DEBUG_POINTERS) Log.v(TAG, "MT @"
+                                if (DEBUG_POINTERS) Slog.v(TAG, "MT @"
                                         + di.mAbs.mAddingPointerOffset
                                         + " Y:" + ev.value);
                             } else if (ev.scancode == RawInputEvent.ABS_MT_WIDTH_MAJOR) {
@@ -711,7 +711,7 @@ public abstract class KeyInputQueue {
                                                       + MotionEvent.SAMPLE_PRESSURE] != 0) {
                                     final int num = di.mAbs.mNextNumPointers+1;
                                     di.mAbs.mNextNumPointers = num;
-                                    if (DEBUG_POINTERS) Log.v(TAG,
+                                    if (DEBUG_POINTERS) Slog.v(TAG,
                                             "MT_REPORT: now have " + num + " pointers");
                                     final int newOffset = (num <= InputDevice.MAX_POINTERS)
                                             ? (num * MotionEvent.NUM_SAMPLE_DATA)
@@ -721,7 +721,7 @@ public abstract class KeyInputQueue {
                                     di.mAbs.mNextData[newOffset
                                             + MotionEvent.SAMPLE_PRESSURE] = 0;
                                 } else {
-                                    if (DEBUG_POINTERS) Log.v(TAG, "MT_REPORT: no pointer");
+                                    if (DEBUG_POINTERS) Slog.v(TAG, "MT_REPORT: no pointer");
                                 }
                             }
                         
@@ -775,14 +775,14 @@ public abstract class KeyInputQueue {
                                             me = ms.generateAbsMotion(di, curTime,
                                                     curTimeNano, mDisplay,
                                                     mOrientation, mGlobalMetaState);
-                                            if (DEBUG_POINTERS) Log.v(TAG, "Absolute: x="
+                                            if (DEBUG_POINTERS) Slog.v(TAG, "Absolute: x="
                                                     + di.mAbs.mNextData[MotionEvent.SAMPLE_X]
                                                     + " y="
                                                     + di.mAbs.mNextData[MotionEvent.SAMPLE_Y]
                                                     + " ev=" + me);
                                             if (me != null) {
                                                 if (WindowManagerPolicy.WATCH_POINTER) {
-                                                    Log.i(TAG, "Enqueueing: " + me);
+                                                    Slog.i(TAG, "Enqueueing: " + me);
                                                 }
                                                 addLocked(di, curTimeNano, ev.flags,
                                                         RawInputEvent.CLASS_TOUCHSCREEN, me);
@@ -814,7 +814,7 @@ public abstract class KeyInputQueue {
                                     me = ms.generateRelMotion(di, curTime,
                                             curTimeNano,
                                             mOrientation, mGlobalMetaState);
-                                    if (false) Log.v(TAG, "Relative: x="
+                                    if (false) Slog.v(TAG, "Relative: x="
                                             + di.mRel.mNextData[MotionEvent.SAMPLE_X]
                                             + " y="
                                             + di.mRel.mNextData[MotionEvent.SAMPLE_Y]
@@ -831,7 +831,7 @@ public abstract class KeyInputQueue {
                     }
                 
                 } catch (RuntimeException exc) {
-                    Log.e(TAG, "InputReaderThread uncaught exception", exc);
+                    Slog.e(TAG, "InputReaderThread uncaught exception", exc);
                 }
             }
         }
@@ -849,7 +849,7 @@ public abstract class KeyInputQueue {
                 && absm.mNextData[MotionEvent.SAMPLE_X] <= absx.maxValue
                 && absm.mNextData[MotionEvent.SAMPLE_Y] >= absy.minValue
                 && absm.mNextData[MotionEvent.SAMPLE_Y] <= absy.maxValue) {
-            if (DEBUG_VIRTUAL_KEYS) Log.v(TAG, "Input ("
+            if (DEBUG_VIRTUAL_KEYS) Slog.v(TAG, "Input ("
                     + absm.mNextData[MotionEvent.SAMPLE_X]
                     + "," + absm.mNextData[MotionEvent.SAMPLE_Y]
                     + ") inside of display");
@@ -869,7 +869,7 @@ public abstract class KeyInputQueue {
         for (int i=0; i<N; i++) {
             VirtualKey sb = mVirtualKeys.get(i);
             sb.computeHitRect(dev, mDisplayWidth, mDisplayHeight);
-            if (DEBUG_VIRTUAL_KEYS) Log.v(TAG, "Hit test ("
+            if (DEBUG_VIRTUAL_KEYS) Slog.v(TAG, "Hit test ("
                     + absm.mNextData[MotionEvent.SAMPLE_X] + ","
                     + absm.mNextData[MotionEvent.SAMPLE_Y] + ") in code "
                     + sb.scancode + " - (" + sb.hitLeft
@@ -877,7 +877,7 @@ public abstract class KeyInputQueue {
                     + sb.hitBottom + ")");
             if (sb.checkHit(absm.mNextData[MotionEvent.SAMPLE_X],
                     absm.mNextData[MotionEvent.SAMPLE_Y])) {
-                if (DEBUG_VIRTUAL_KEYS) Log.v(TAG, "Hit!");
+                if (DEBUG_VIRTUAL_KEYS) Slog.v(TAG, "Hit!");
                 return sb;
             }
         }
@@ -900,7 +900,7 @@ public abstract class KeyInputQueue {
             vk.lastKeycode = scancodeToKeycode(di.id, vk.scancode);
             ms.mLastNumPointers = ms.mNextNumPointers;
             di.mKeyDownTime = curTime;
-            if (DEBUG_VIRTUAL_KEYS) Log.v(TAG,
+            if (DEBUG_VIRTUAL_KEYS) Slog.v(TAG,
                     "Generate key down for: " + vk.scancode
                     + " (keycode=" + vk.lastKeycode + ")");
             KeyEvent event = newKeyEvent(di, di.mKeyDownTime, curTime, true,
@@ -926,7 +926,7 @@ public abstract class KeyInputQueue {
             final InputDevice.AbsoluteInfo absx = di.absX;
             final InputDevice.AbsoluteInfo absy = di.absY;
             final InputDevice.MotionState absm = di.mAbs;
-            Log.v(TAG, "Rejecting ("
+            Slog.v(TAG, "Rejecting ("
                 + absm.mNextData[MotionEvent.SAMPLE_X] + ","
                 + absm.mNextData[MotionEvent.SAMPLE_Y] + "): outside of ("
                 + absx.minValue + "," + absy.minValue
@@ -947,7 +947,7 @@ public abstract class KeyInputQueue {
         if (ms.mNextNumPointers <= 0) {
             mPressedVirtualKey = null;
             ms.mLastNumPointers = 0;
-            if (DEBUG_VIRTUAL_KEYS) Log.v(TAG, "Generate key up for: " + vk.scancode);
+            if (DEBUG_VIRTUAL_KEYS) Slog.v(TAG, "Generate key up for: " + vk.scancode);
             KeyEvent event = newKeyEvent(di, di.mKeyDownTime, curTime, false,
                     vk.lastKeycode, 0, vk.scancode,
                     KeyEvent.FLAG_VIRTUAL_HARD_KEY);
@@ -962,7 +962,7 @@ public abstract class KeyInputQueue {
             // virtual key and start a pointer
             // motion.
             mPressedVirtualKey = null;
-            if (DEBUG_VIRTUAL_KEYS) Log.v(TAG, "Cancel key up for: " + vk.scancode);
+            if (DEBUG_VIRTUAL_KEYS) Slog.v(TAG, "Cancel key up for: " + vk.scancode);
             KeyEvent event = newKeyEvent(di, di.mKeyDownTime, curTime, false,
                     vk.lastKeycode, 0, vk.scancode,
                     KeyEvent.FLAG_CANCELED | KeyEvent.FLAG_VIRTUAL_HARD_KEY);
@@ -1138,12 +1138,12 @@ public abstract class KeyInputQueue {
     
     void recycleEvent(QueuedEvent ev) {
         synchronized (mFirst) {
-            //Log.i(TAG, "Recycle event: " + ev);
+            //Slog.i(TAG, "Recycle event: " + ev);
             if (ev.event == ev.inputDevice.mAbs.currentMove) {
                 ev.inputDevice.mAbs.currentMove = null;
             }
             if (ev.event == ev.inputDevice.mRel.currentMove) {
-                if (false) Log.i(TAG, "Detach rel " + ev.event);
+                if (false) Slog.i(TAG, "Detach rel " + ev.event);
                 ev.inputDevice.mRel.currentMove = null;
                 ev.inputDevice.mRel.mNextData[MotionEvent.SAMPLE_X] = 0;
                 ev.inputDevice.mRel.mNextData[MotionEvent.SAMPLE_Y] = 0;
@@ -1237,7 +1237,7 @@ public abstract class KeyInputQueue {
         InputDevice.AbsoluteInfo absPressure = null;
         InputDevice.AbsoluteInfo absSize = null;
         if (classes != 0) {
-            Log.i(TAG, "Device added: id=0x" + Integer.toHexString(deviceId)
+            Slog.i(TAG, "Device added: id=0x" + Integer.toHexString(deviceId)
                     + ", name=" + name
                     + ", classes=" + Integer.toHexString(classes));
             if ((classes&RawInputEvent.CLASS_TOUCHSCREEN_MT) != 0) {
@@ -1269,14 +1269,14 @@ public abstract class KeyInputQueue {
         InputDevice.AbsoluteInfo info = new InputDevice.AbsoluteInfo();
         if (getAbsoluteInfo(id, channel, info)
                 && info.minValue != info.maxValue) {
-            Log.i(TAG, "  " + name + ": min=" + info.minValue
+            Slog.i(TAG, "  " + name + ": min=" + info.minValue
                     + " max=" + info.maxValue
                     + " flat=" + info.flat
                     + " fuzz=" + info.fuzz);
             info.range = info.maxValue-info.minValue;
             return info;
         }
-        Log.i(TAG, "  " + name + ": unknown values");
+        Slog.i(TAG, "  " + name + ": unknown values");
         return null;
     }
     private static native boolean readEvent(RawInputEvent outEvent);

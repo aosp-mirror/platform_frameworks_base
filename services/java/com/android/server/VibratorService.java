@@ -29,7 +29,7 @@ import android.os.RemoteException;
 import android.os.IBinder;
 import android.os.Binder;
 import android.os.SystemClock;
-import android.util.Log;
+import android.util.Slog;
 
 import java.util.LinkedList;
 import java.util.ListIterator;
@@ -155,7 +155,7 @@ public class VibratorService extends IVibratorService.Stub {
                 for (int i=0; i<N; i++) {
                     s += " " + pattern[i];
                 }
-                Log.i(TAG, "vibrating with pattern: " + s);
+                Slog.i(TAG, "vibrating with pattern: " + s);
             }
 
             // we're running in the server so we can't fail

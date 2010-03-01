@@ -23,7 +23,7 @@ import android.content.DialogInterface;
 import android.content.res.Resources;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
+import android.util.Slog;
 
 class AppErrorDialog extends BaseErrorDialog {
     private final static String TAG = "AppErrorDialog";

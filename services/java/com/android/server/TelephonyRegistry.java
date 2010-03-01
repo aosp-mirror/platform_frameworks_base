@@ -29,7 +29,7 @@ import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
-import android.util.Log;
+import android.util.Slog;
 
 import java.util.ArrayList;
 import java.io.FileDescriptor;
@@ -124,7 +124,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     public void listen(String pkgForDebug, IPhoneStateListener callback, int events,
             boolean notifyNow) {
-        // Log.d(TAG, "listen pkg=" + pkgForDebug + " events=0x" +
+        // Slog.d(TAG, "listen pkg=" + pkgForDebug + " events=0x" +
         // Integer.toHexString(events));
         if (events != 0) {
             /* Checks permission and throws Security exception */
@@ -575,7 +575,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         }
         String msg = "Modify Phone State Permission Denial: " + method + " from pid="
                 + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid();
-        Log.w(TAG, msg);
+        Slog.w(TAG, msg);
         return false;
     }
 

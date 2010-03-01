@@ -28,7 +28,7 @@ import android.os.Binder;
 import android.provider.Settings;
 import android.speech.RecognitionService;
 import android.text.TextUtils;
-import android.util.Log;
+import android.util.Slog;
 
 import java.util.List;
 
@@ -92,7 +92,7 @@ public class RecognitionManagerService extends Binder {
         int numAvailable = available.size();
     
         if (numAvailable == 0) {
-            Log.w(TAG, "no available voice recognition services found");
+            Slog.w(TAG, "no available voice recognition services found");
             return null;
         } else {
             if (prefPackage != null) {
@@ -104,7 +104,7 @@ public class RecognitionManagerService extends Binder {
                 }
             }
             if (numAvailable > 1) {
-                Log.w(TAG, "more than one voice recognition service found, picking first");
+                Slog.w(TAG, "more than one voice recognition service found, picking first");
             }
     
             ServiceInfo serviceInfo = available.get(0).serviceInfo;

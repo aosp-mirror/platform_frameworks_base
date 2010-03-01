@@ -2,7 +2,7 @@ package com.android.server.status;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.util.Log;
+import android.util.Slog;
 import android.view.MotionEvent;
 import android.widget.FrameLayout;
 

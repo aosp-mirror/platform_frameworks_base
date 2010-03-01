@@ -19,7 +19,7 @@ package com.android.server;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
+import android.util.Slog;
 
 public class LightsService {
     private static final String TAG = "LightsService";

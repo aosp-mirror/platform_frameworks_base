@@ -27,7 +27,7 @@ import android.provider.Contacts;
 import android.provider.Settings;
 import android.provider.MediaStore.Images;
 import android.util.Config;
-import android.util.Log;
+import android.util.Slog;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -62,7 +62,7 @@ public class DemoDataSet
         int count = files.length;
 
         if (count == 0) {
-            Log.i(LOG_TAG, "addDefaultImages: no images found!");
+            Slog.i(LOG_TAG, "addDefaultImages: no images found!");
             return;
         }
 
@@ -74,14 +74,14 @@ public class DemoDataSet
             try {
                 Images.Media.insertImage(mContentResolver, path, name, null);
             } catch (FileNotFoundException e) {
-                Log.e(LOG_TAG, "Failed to import image " + path, e);
+                Slog.e(LOG_TAG, "Failed to import image " + path, e);
             }
         }
     }
     
     private final void addDefaultData()
     {
-        Log.i(LOG_TAG, "Adding default data...");
+        Slog.i(LOG_TAG, "Adding default data...");
 
 //       addImage("Violet", "images/violet.png");
 //       addImage("Corky", "images/corky.png");
@@ -124,7 +124,7 @@ public class DemoDataSet
         }
         catch (Exception e)
         {
-            Log.e(LOG_TAG, "Failed to insert image '" + file + "'", e);
+            Slog.e(LOG_TAG, "Failed to insert image '" + file + "'", e);
             url = null;
         }
 
@@ -133,7 +133,7 @@ public class DemoDataSet
 
     private final Uri addShortcut(String shortcut, Intent intent)
     {
-        if (Config.LOGV) Log.v(LOG_TAG, "addShortcut: shortcut=" + shortcut + ", intent=" + intent);
+        if (Config.LOGV) Slog.v(LOG_TAG, "addShortcut: shortcut=" + shortcut + ", intent=" + intent);
         return Settings.Bookmarks.add(mContentResolver, intent, null, null,
                                       shortcut != null ? shortcut.charAt(0) : 0, 0);
     }

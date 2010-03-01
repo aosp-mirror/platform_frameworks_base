@@ -1,7 +1,7 @@
 package com.android.server.status;
 
 import android.os.IBinder;
-import android.util.Log;
+import android.util.Slog;
 import android.view.View;
 import java.util.ArrayList;
 
@@ -119,8 +119,8 @@ class NotificationViewList {
                 index++;
             }
         }
-        Log.e(StatusBarService.TAG, "Couldn't find notification in NotificationViewList.");
-        Log.e(StatusBarService.TAG, "notification=" + notification);
+        Slog.e(StatusBarService.TAG, "Couldn't find notification in NotificationViewList.");
+        Slog.e(StatusBarService.TAG, "notification=" + notification);
         dump(notification);
         return 0;
     }
@@ -171,7 +171,7 @@ class NotificationViewList {
         list.add(index, notification);
 
         if (StatusBarService.SPEW) {
-            Log.d(StatusBarService.TAG, "NotificationViewList index=" + index);
+            Slog.d(StatusBarService.TAG, "NotificationViewList index=" + index);
             dump(notification);
         }
     }
@@ -190,7 +190,7 @@ class NotificationViewList {
                 }
                 s += " ";
             }
-            Log.d(StatusBarService.TAG, "NotificationViewList ongoing: " + s);
+            Slog.d(StatusBarService.TAG, "NotificationViewList ongoing: " + s);
 
             s = "";
             for (int i=0; i<mLatest.size(); i++) {
@@ -204,7 +204,7 @@ class NotificationViewList {
                 }
                 s += " ";
             }
-            Log.d(StatusBarService.TAG, "NotificationViewList latest:  " + s);
+            Slog.d(StatusBarService.TAG, "NotificationViewList latest:  " + s);
         }
     }
 

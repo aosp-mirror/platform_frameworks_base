@@ -34,7 +34,7 @@ import android.os.SystemClock;
 import android.os.UEventObserver;
 import android.provider.Settings;
 import android.util.EventLog;
-import android.util.Log;
+import android.util.Slog;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -349,7 +349,7 @@ class BatteryService extends Binder {
         intent.putExtra(BatteryManager.EXTRA_TECHNOLOGY, mBatteryTechnology);
 
         if (false) {
-            Log.d(TAG, "updateBattery level:" + mBatteryLevel +
+            Slog.d(TAG, "updateBattery level:" + mBatteryLevel +
                     " scale:" + BATTERY_SCALE + " status:" + mBatteryStatus +
                     " health:" + mBatteryHealth +  " present:" + mBatteryPresent +
                     " voltage: " + mBatteryVoltage +
@@ -381,20 +381,20 @@ class BatteryService extends Binder {
             // add dump file to drop box
             db.addFile("BATTERY_DISCHARGE_INFO", dumpFile, DropBoxManager.IS_TEXT);
         } catch (RemoteException e) {
-            Log.e(TAG, "failed to dump battery service", e);
+            Slog.e(TAG, "failed to dump battery service", e);
         } catch (IOException e) {
-            Log.e(TAG, "failed to write dumpsys file", e);
+            Slog.e(TAG, "failed to write dumpsys file", e);
         } finally {
             // make sure we clean up
             if (dumpStream != null) {
                 try {
                     dumpStream.close();
                 } catch (IOException e) {
-                    Log.e(TAG, "failed to close dumpsys output stream");
+                    Slog.e(TAG, "failed to close dumpsys output stream");
                 }
             }
             if (dumpFile != null && !dumpFile.delete()) {
-                Log.e(TAG, "failed to delete temporary dumpsys file: "
+                Slog.e(TAG, "failed to delete temporary dumpsys file: "
                         + dumpFile.getAbsolutePath());
             }
         }
@@ -416,12 +416,12 @@ class BatteryService extends Binder {
                     // If the discharge cycle is bad enough we want to know about it.
                     logBatteryStats();
                 }
-                if (LOCAL_LOGV) Log.v(TAG, "duration threshold: " + durationThreshold +
+                if (LOCAL_LOGV) Slog.v(TAG, "duration threshold: " + durationThreshold +
                         " discharge threshold: " + dischargeThreshold);
-                if (LOCAL_LOGV) Log.v(TAG, "duration: " + duration + " discharge: " +
+                if (LOCAL_LOGV) Slog.v(TAG, "duration: " + duration + " discharge: " +
                         (mDischargeStartLevel - mBatteryLevel));
             } catch (NumberFormatException e) {
-                Log.e(TAG, "Invalid DischargeThresholds GService string: " +
+                Slog.e(TAG, "Invalid DischargeThresholds GService string: " +
                         durationThresholdString + " or " + dischargeThresholdString);
                 return;
             }

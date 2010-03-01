@@ -27,7 +27,7 @@ import android.os.Parcel;
 import android.os.Process;
 import android.os.ServiceManager;
 import android.os.SystemClock;
-import android.util.Log;
+import android.util.Slog;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
@@ -149,14 +149,14 @@ public final class UsageStatsService extends IUsageStats.Stub {
         PkgUsageStatsExtended(Parcel in) {
             mLaunchCount = in.readInt();
             mUsageTime = in.readLong();
-            if (localLOGV) Log.v(TAG, "Launch count: " + mLaunchCount
+            if (localLOGV) Slog.v(TAG, "Launch count: " + mLaunchCount
                     + ", Usage time:" + mUsageTime);
             
             final int N = in.readInt();
-            if (localLOGV) Log.v(TAG, "Reading comps: " + N);
+            if (localLOGV) Slog.v(TAG, "Reading comps: " + N);
             for (int i=0; i<N; i++) {
                 String comp = in.readString();
-                if (localLOGV) Log.v(TAG, "Component: " + comp);
+                if (localLOGV) Slog.v(TAG, "Component: " + comp);
                 TimeStats times = new TimeStats(in);
                 mLaunchTimes.put(comp, times);
             }
@@ -231,7 +231,7 @@ public final class UsageStatsService extends IUsageStats.Stub {
             while (i > 0) {
                 i--;
                 if (fList[i].startsWith(prefix)) {
-                    Log.i(TAG, "Deleting old usage file: " + fList[i]);
+                    Slog.i(TAG, "Deleting old usage file: " + fList[i]);
                     (new File(parentDir, fList[i])).delete();
                 }
             }
@@ -291,7 +291,7 @@ public final class UsageStatsService extends IUsageStats.Stub {
                     newFile.createNewFile();
                 }
             } catch (IOException e) {
-                Log.w(TAG,"Error : " + e + " reading data from file:" + newFile);
+                Slog.w(TAG,"Error : " + e + " reading data from file:" + newFile);
             }
         }
     }
@@ -300,7 +300,7 @@ public final class UsageStatsService extends IUsageStats.Stub {
         Parcel in = getParcelForFile(file);
         int vers = in.readInt();
         if (vers != VERSION) {
-            Log.w(TAG, "Usage stats version changed; dropping");
+            Slog.w(TAG, "Usage stats version changed; dropping");
             return;
         }
         int N = in.readInt();
@@ -310,7 +310,7 @@ public final class UsageStatsService extends IUsageStats.Stub {
             if (pkgName == null) {
                 break;
             }
-            if (localLOGV) Log.v(TAG, "Reading package #" + N + ": " + pkgName);
+            if (localLOGV) Slog.v(TAG, "Reading package #" + N + ": " + pkgName);
             PkgUsageStatsExtended pus = new PkgUsageStatsExtended(in);
             synchronized (mStatsLock) {
                 mStats.put(pkgName, pus);
@@ -356,7 +356,7 @@ public final class UsageStatsService extends IUsageStats.Stub {
         for (int i = 0; i < count; i++) {
             String fileName = fileList.get(i);
             File file = new File(mDir, fileName);
-            Log.i(TAG, "Deleting usage file : " + fileName);
+            Slog.i(TAG, "Deleting usage file : " + fileName);
             file.delete();
         }
     }
@@ -384,7 +384,7 @@ public final class UsageStatsService extends IUsageStats.Stub {
             if (mFile != null && mFile.exists()) {
                 backupFile = new File(mFile.getPath() + ".bak");
                 if (!mFile.renameTo(backupFile)) {
-                    Log.w(TAG, "Failed to persist new stats");
+                    Slog.w(TAG, "Failed to persist new stats");
                     return;
                 }
             }
@@ -407,7 +407,7 @@ public final class UsageStatsService extends IUsageStats.Stub {
                     backupFile.delete();
                 }
             } catch (IOException e) {
-                Log.w(TAG, "Failed writing stats to file:" + mFile);
+                Slog.w(TAG, "Failed writing stats to file:" + mFile);
                 if (backupFile != null) {
                     mFile.delete();
                     backupFile.renameTo(mFile);
@@ -448,7 +448,7 @@ public final class UsageStatsService extends IUsageStats.Stub {
     }
     
     public void shutdown() {
-        Log.w(TAG, "Writing usage stats before shutdown...");
+        Slog.w(TAG, "Writing usage stats before shutdown...");
         writeStatsToFile(true);
     }
     
@@ -475,7 +475,7 @@ public final class UsageStatsService extends IUsageStats.Stub {
                 if (mLastResumedPkg != null) {
                     // We last resumed some other package...  just pause it now
                     // to recover.
-                    Log.i(TAG, "Unexpected resume of " + pkgName
+                    Slog.i(TAG, "Unexpected resume of " + pkgName
                             + " while already resumed in " + mLastResumedPkg);
                     PkgUsageStatsExtended pus = mStats.get(mLastResumedPkg);
                     if (pus != null) {
@@ -491,7 +491,7 @@ public final class UsageStatsService extends IUsageStats.Stub {
             mLastResumedPkg = pkgName;
             mLastResumedComp = componentName.getClassName();
             
-            if (localLOGV) Log.i(TAG, "started component:" + pkgName);
+            if (localLOGV) Slog.i(TAG, "started component:" + pkgName);
             PkgUsageStatsExtended pus = mStats.get(pkgName);
             if (pus == null) {
                 pus = new PkgUsageStatsExtended();
@@ -514,18 +514,18 @@ public final class UsageStatsService extends IUsageStats.Stub {
                 return;
             }
             if (!mIsResumed) {
-                Log.i(TAG, "Something wrong here, didn't expect "
+                Slog.i(TAG, "Something wrong here, didn't expect "
                         + pkgName + " to be paused");
                 return;
             }
             mIsResumed = false;
             
-            if (localLOGV) Log.i(TAG, "paused component:"+pkgName);
+            if (localLOGV) Slog.i(TAG, "paused component:"+pkgName);
         
             PkgUsageStatsExtended pus = mStats.get(pkgName);
             if (pus == null) {
                 // Weird some error here
-                Log.i(TAG, "No package stats for pkg:"+pkgName);
+                Slog.i(TAG, "No package stats for pkg:"+pkgName);
                 return;
             }
             pus.updatePause();
@@ -642,10 +642,10 @@ public final class UsageStatsService extends IUsageStats.Stub {
                     dFile.delete();
                 }
             } catch (FileNotFoundException e) {
-                Log.w(TAG, "Failed with "+e+" when collecting dump info from file : " + file);
+                Slog.w(TAG, "Failed with "+e+" when collecting dump info from file : " + file);
                 return;
             } catch (IOException e) {
-                Log.w(TAG, "Failed with "+e+" when collecting dump info from file : "+file);
+                Slog.w(TAG, "Failed with "+e+" when collecting dump info from file : "+file);
             }      
         }
     }
@@ -829,7 +829,7 @@ public final class UsageStatsService extends IUsageStats.Stub {
         } else if (isCheckinRequest) {
             // If checkin doesn't specify any packages, then we simply won't
             // show anything.
-            Log.w(TAG, "Checkin without packages");
+            Slog.w(TAG, "Checkin without packages");
             return;
         }
         

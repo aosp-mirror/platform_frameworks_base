@@ -16,7 +16,7 @@
 
 package com.android.server;
 
-import android.util.Log;
+import android.util.Slog;
 
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -129,7 +129,7 @@ class ViewServer implements Runnable {
                 mServer = null;
                 return true;
             } catch (IOException e) {
-                Log.w(LOG_TAG, "Could not close the view server");
+                Slog.w(LOG_TAG, "Could not close the view server");
             }
         }
         return false;
@@ -191,7 +191,7 @@ class ViewServer implements Runnable {
                     }
 
                     if (!result) {
-                        Log.w(LOG_TAG, "An error occured with the command: " + command);
+                        Slog.w(LOG_TAG, "An error occured with the command: " + command);
                     }
                 } finally {
                     if (in != null) {
@@ -199,7 +199,7 @@ class ViewServer implements Runnable {
                     }
                 }
             } catch (Exception e) {
-                Log.w(LOG_TAG, "Connection error: ", e);
+                Slog.w(LOG_TAG, "Connection error: ", e);
             } finally {
                 if (client != null) {
                     try {

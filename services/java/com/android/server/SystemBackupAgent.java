@@ -26,7 +26,7 @@ import android.content.Context;
 import android.os.ParcelFileDescriptor;
 import android.os.ServiceManager;
 import android.os.SystemService;
-import android.util.Log;
+import android.util.Slog;
 
 import java.io.File;
 import java.io.IOException;
@@ -77,7 +77,7 @@ public class SystemBackupAgent extends BackupHelperAgent {
         } catch (IOException ex) {
             // If there was a failure, delete everything for the wallpaper, this is too aggresive,
             // but this is hopefully a rare failure.
-            Log.d(TAG, "restore failed", ex);
+            Slog.d(TAG, "restore failed", ex);
             (new File(WALLPAPER_IMAGE)).delete();
             (new File(WALLPAPER_INFO)).delete();
         }

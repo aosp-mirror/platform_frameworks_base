@@ -29,7 +29,7 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemClock;
-import android.util.Log;
+import android.util.Slog;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -269,7 +269,7 @@ class ServiceRecord extends Binder {
                         inm.enqueueNotification(localPackageName, localForegroundId,
                                 localForegroundNoti, outId);
                     } catch (RuntimeException e) {
-                        Log.w(ActivityManagerService.TAG,
+                        Slog.w(ActivityManagerService.TAG,
                                 "Error showing notification for service", e);
                         // If it gave us a garbage notification, it doesn't
                         // get to be foreground.
@@ -297,7 +297,7 @@ class ServiceRecord extends Binder {
                     try {
                         inm.cancelNotification(localPackageName, localForegroundId);
                     } catch (RuntimeException e) {
-                        Log.w(ActivityManagerService.TAG,
+                        Slog.w(ActivityManagerService.TAG,
                                 "Error canceling notification for service", e);
                     } catch (RemoteException e) {
                     }
