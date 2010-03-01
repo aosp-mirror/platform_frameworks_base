@@ -204,7 +204,7 @@ mTabHost.addTab(TAB_TAG_1, "Hello, world!", "Tab 1");
         // If this is a custom view, then do not draw the bottom strips for
         // the tab indicators.
         if (tabSpec.mIndicatorStrategy instanceof ViewIndicatorStrategy) {
-            mTabWidget.setDrawBottomStrips(false);
+            mTabWidget.setStripEnabled(false);
         }
         mTabWidget.addView(tabIndicator);
         mTabSpecs.add(tabSpec);

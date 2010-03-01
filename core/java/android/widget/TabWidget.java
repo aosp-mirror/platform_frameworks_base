@@ -16,6 +16,7 @@
 
 package android.widget;
 
+import android.R;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -27,8 +28,6 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.View.OnFocusChangeListener;
-
-
 
 /**
  *
@@ -43,15 +42,19 @@ import android.view.View.OnFocusChangeListener;
  * called on the containing TabHost object.
  */
 public class TabWidget extends LinearLayout implements OnFocusChangeListener {
-
-
     private OnTabSelectionChanged mSelectionChangedListener;
+
     private int mSelectedTab = 0;
+
     private Drawable mBottomLeftStrip;
     private Drawable mBottomRightStrip;
-    private boolean mStripMoved;
-    private Drawable mDividerDrawable;
+
     private boolean mDrawBottomStrips = true;
+    private boolean mStripMoved;
+
+    private Drawable mDividerDrawable;
+
+    private final Rect mBounds = new Rect();
 
     public TabWidget(Context context) {
         this(context, null);
@@ -63,13 +66,19 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
 
     public TabWidget(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs);
-        initTabWidget();
 
         TypedArray a =
             context.obtainStyledAttributes(attrs, com.android.internal.R.styleable.TabWidget,
                     defStyle, 0);
 
+        mDrawBottomStrips = a.getBoolean(R.styleable.TabWidget_stripEnabled, true);
+        mDividerDrawable = a.getDrawable(R.styleable.TabWidget_divider);
+        mBottomLeftStrip = a.getDrawable(R.styleable.TabWidget_stripLeft);
+        mBottomRightStrip = a.getDrawable(R.styleable.TabWidget_stripRight);
+
         a.recycle();
+
+        initTabWidget();
     }
 
     @Override
@@ -100,18 +109,25 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
         
         if (context.getApplicationInfo().targetSdkVersion <= Build.VERSION_CODES.DONUT) {
             // Donut apps get old color scheme
-            mBottomLeftStrip = resources.getDrawable(
-                    com.android.internal.R.drawable.tab_bottom_left_v4);
-            mBottomRightStrip = resources.getDrawable(
-                    com.android.internal.R.drawable.tab_bottom_right_v4); 
+            if (mBottomLeftStrip == null) {
+                mBottomLeftStrip = resources.getDrawable(
+                        com.android.internal.R.drawable.tab_bottom_left_v4);
+            }
+            if (mBottomRightStrip == null) {
+                mBottomRightStrip = resources.getDrawable(
+                        com.android.internal.R.drawable.tab_bottom_right_v4);
+            }
         } else {
             // Use modern color scheme for Eclair and beyond
-            mBottomLeftStrip = resources.getDrawable(
-                    com.android.internal.R.drawable.tab_bottom_left);
-            mBottomRightStrip = resources.getDrawable(
-                    com.android.internal.R.drawable.tab_bottom_right); 
+            if (mBottomLeftStrip == null) {
+                mBottomLeftStrip = resources.getDrawable(
+                        com.android.internal.R.drawable.tab_bottom_left);
+            }
+            if (mBottomRightStrip == null) {
+                mBottomRightStrip = resources.getDrawable(
+                        com.android.internal.R.drawable.tab_bottom_right);
+            }
         }
-
 
         // Deal with focus, as we don't want the focus to go by default
         // to a tab other than the current tab
@@ -166,16 +182,62 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
     public void setDividerDrawable(int resId) {
         mDividerDrawable = mContext.getResources().getDrawable(resId);
     }
+    
+    /**
+     * Sets the drawable to use as the left part of the strip below the
+     * tab indicators.
+     * @param drawable the left strip drawable
+     */
+    public void setLeftStripDrawable(Drawable drawable) {
+        mBottomLeftStrip = drawable;
+    }
 
+    /**
+     * Sets the drawable to use as the left part of the strip below the
+     * tab indicators.
+     * @param resId the resource identifier of the drawable to use as the
+     * left strip drawable
+     */
+    public void setLeftStripDrawable(int resId) {
+        mBottomLeftStrip = mContext.getResources().getDrawable(resId);
+    }
+
+    /**
+     * Sets the drawable to use as the left part of the strip below the
+     * tab indicators.
+     * @param drawable the left strip drawable
+     */
+    public void setRightStripDrawable(Drawable drawable) {
+        mBottomLeftStrip = drawable;
+    }
+
+    /**
+     * Sets the drawable to use as the left part of the strip below the
+     * tab indicators.
+     * @param resId the resource identifier of the drawable to use as the
+     * left strip drawable
+     */
+    public void setRightStripDrawable(int resId) {
+        mBottomLeftStrip = mContext.getResources().getDrawable(resId);
+    }
+    
     /**
      * Controls whether the bottom strips on the tab indicators are drawn or
      * not.  The default is to draw them.  If the user specifies a custom
      * view for the tab indicators, then the TabHost class calls this method
      * to disable drawing of the bottom strips.
-     * @param drawBottomStrips true if the bottom strips should be drawn.
+     * @param stripEnabled true if the bottom strips should be drawn.
      */
-    void setDrawBottomStrips(boolean drawBottomStrips) {
-        mDrawBottomStrips = drawBottomStrips;
+    public void setStripEnabled(boolean stripEnabled) {
+        mDrawBottomStrips = stripEnabled;
+    }
+
+    /**
+     * Indicates whether the bottom strips on the tab indicators are drawn
+     * or not.
+     */
+    public boolean isStripEnabled() {
+        return mDrawBottomStrips;
     }
 
     @Override
@@ -201,33 +263,28 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
             return;
         }
 
-        View selectedChild = getChildTabViewAt(mSelectedTab);
+        final View selectedChild = getChildTabViewAt(mSelectedTab);
 
-        mBottomLeftStrip.setState(selectedChild.getDrawableState());
-        mBottomRightStrip.setState(selectedChild.getDrawableState());
+        final Drawable leftStrip = mBottomLeftStrip;
+        final Drawable rightStrip = mBottomRightStrip;
+
+        leftStrip.setState(selectedChild.getDrawableState());
+        rightStrip.setState(selectedChild.getDrawableState());
 
         if (mStripMoved) {
-            Rect selBounds = new Rect(); // Bounds of the selected tab indicator
-            selBounds.left = selectedChild.getLeft();
-            selBounds.right = selectedChild.getRight();
+            final Rect bounds = mBounds;
+            bounds.left = selectedChild.getLeft();
+            bounds.right = selectedChild.getRight();
             final int myHeight = getHeight();
-            mBottomLeftStrip.setBounds(
-                    Math.min(0, selBounds.left
-                                 - mBottomLeftStrip.getIntrinsicWidth()),
-                    myHeight - mBottomLeftStrip.getIntrinsicHeight(),
-                    selBounds.left,
-                    getHeight());
-            mBottomRightStrip.setBounds(
-                    selBounds.right,
-                    myHeight - mBottomRightStrip.getIntrinsicHeight(),
-                    Math.max(getWidth(),
-                            selBounds.right + mBottomRightStrip.getIntrinsicWidth()),
-                    myHeight);
+            leftStrip.setBounds(Math.min(0, bounds.left - leftStrip.getIntrinsicWidth()),
+                    myHeight - leftStrip.getIntrinsicHeight(), bounds.left, myHeight);
+            rightStrip.setBounds(bounds.right, myHeight - rightStrip.getIntrinsicHeight(),
+                    Math.max(getWidth(), bounds.right + rightStrip.getIntrinsicWidth()), myHeight);
             mStripMoved = false;
         }
 
-        mBottomLeftStrip.draw(canvas);
-        mBottomRightStrip.draw(canvas);
+        leftStrip.draw(canvas);
+        rightStrip.draw(canvas);
     }
 
     /**
