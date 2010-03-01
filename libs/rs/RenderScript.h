@@ -200,8 +200,9 @@ enum RsPrimitive {
     RS_PRIMITIVE_TRIANGLE_FAN
 };
 
-
+#ifndef NO_RS_FUNCS
 #include "rsgApiFuncDecl.h"
+#endif
 
 #ifdef __cplusplus
 };
