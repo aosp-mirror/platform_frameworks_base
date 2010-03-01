@@ -98,6 +98,7 @@ public class RenderScript {
 
     native int  nAllocationCreateTyped(int type);
     native int  nAllocationCreateFromBitmap(int dstFmt, boolean genMips, Bitmap bmp);
+    native int  nAllocationCreateBitmapRef(int type, Bitmap bmp);
     native int  nAllocationCreateFromBitmapBoxed(int dstFmt, boolean genMips, Bitmap bmp);
     native int  nAllocationCreateFromAssetStream(int dstFmt, boolean genMips, int assetStream);
 
