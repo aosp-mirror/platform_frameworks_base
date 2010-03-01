@@ -46,7 +46,7 @@ public:
     void * getPtr() const {return mPtr;}
     const Type * getType() const {return mType.get();}
 
-    void deferedUploadToTexture(const Context *rsc, uint32_t lodOffset);
+    void deferedUploadToTexture(const Context *rsc, bool genMipmap, uint32_t lodOffset);
     void uploadToTexture(const Context *rsc);
     uint32_t getTextureID() const {return mTextureID;}
 
@@ -98,6 +98,7 @@ protected:
     // Is this a legal structure to be used as a texture source.
     // Initially this will require 1D or 2D and color data
     bool mIsTexture;
+    bool mTextureGenMipmap;
     uint32_t mTextureLOD;
     uint32_t mTextureID;
 

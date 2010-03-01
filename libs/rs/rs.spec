@@ -113,6 +113,7 @@ AllocationCreateFromBitmapBoxed {
 
 AllocationUploadToTexture {
 	param RsAllocation alloc
+	param bool genMipMaps
 	param uint32_t baseMipLevel
 	}
 

@@ -45,7 +45,12 @@ public class Allocation extends BaseObj {
 
     public void uploadToTexture(int baseMipLevel) {
         mRS.validate();
-        mRS.nAllocationUploadToTexture(mID, baseMipLevel);
+        mRS.nAllocationUploadToTexture(mID, false, baseMipLevel);
+    }
+
+    public void uploadToTexture(boolean genMips, int baseMipLevel) {
+        mRS.validate();
+        mRS.nAllocationUploadToTexture(mID, genMips, baseMipLevel);
     }
 
     public void uploadToBufferObject() {

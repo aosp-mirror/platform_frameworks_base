@@ -975,7 +975,7 @@ static void SC_hsb(float h, float s, float b, float a)
 static void SC_uploadToTexture(RsAllocation va, uint32_t baseMipLevel)
 {
     GET_TLS();
-    rsi_AllocationUploadToTexture(rsc, va, baseMipLevel);
+    rsi_AllocationUploadToTexture(rsc, va, false, baseMipLevel);
 }
 
 static void SC_uploadToBufferObject(RsAllocation va)
