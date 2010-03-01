@@ -24,7 +24,11 @@ import android.os.RemoteException;
 import android.os.IBinder;
 import android.util.Config;
 import android.util.Slog;
+import android.util.PrintWriterPrinter;
+import android.util.Printer;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 
 import com.android.internal.app.IBatteryStats;
@@ -43,6 +47,7 @@ class SensorService extends ISensorService.Stub {
     private static final boolean DEBUG = false;
     private static final boolean localLOGV = DEBUG ? Config.LOGD : Config.LOGV;
     private static final int SENSOR_DISABLE = -1;
+    private int mCurrentDelay = 0;
     
     /**
      * Battery statistics to be updated when sensors are enabled and disabled.
@@ -51,17 +56,19 @@ class SensorService extends ISensorService.Stub {
 
     private final class Listener implements IBinder.DeathRecipient {
         final IBinder mToken;
+        final int mUid;
 
         int mSensors = 0;
         int mDelay = 0x7FFFFFFF;
         
-        Listener(IBinder token) {
+        Listener(IBinder token, int uid) {
             mToken = token;
+            mUid = uid;
         }
         
         void addSensor(int sensor, int delay) {
             mSensors |= (1<<sensor);
-            if (mDelay > delay)
+            if (delay < mDelay)
             	mDelay = delay;
         }
         
@@ -83,16 +90,20 @@ class SensorService extends ISensorService.Stub {
                 for (int sensor=0 ; sensor<32 && mSensors!=0 ; sensor++) {
                     if (hasSensor(sensor)) {
                         removeSensor(sensor);
+                        deactivateIfUnusedLocked(sensor);
                         try {
-                            deactivateIfUnusedLocked(sensor);
+                            mBatteryStats.noteStopSensor(mUid, sensor);
                         } catch (RemoteException e) {
-                            Slog.w(TAG, "RemoteException in binderDied");
+                            // oops. not a big deal.
                         }
                     }
                 }
                 if (mListeners.size() == 0) {
                     _sensors_control_wake();
                     _sensors_control_close();
+                } else {
+                    // TODO: we should recalculate the delay, since removing
+                    // a listener may increase the overall rate.
                 }
                 mListeners.notify();
             }
@@ -113,86 +124,151 @@ class SensorService extends ISensorService.Stub {
     }
 
     public boolean enableSensor(IBinder binder, String name, int sensor, int enable)
-             throws RemoteException {
-        if (localLOGV) Slog.d(TAG, "enableSensor " + name + "(#" + sensor + ") " + enable);
+            throws RemoteException {
         
-        // Inform battery statistics service of status change
-        int uid = Binder.getCallingUid();
-        long identity = Binder.clearCallingIdentity();
-        if (enable == SENSOR_DISABLE) {
-            mBatteryStats.noteStopSensor(uid, sensor);
-        } else {
-            mBatteryStats.noteStartSensor(uid, sensor);
-        }
-        Binder.restoreCallingIdentity(identity);
+        if (localLOGV) Slog.d(TAG, "enableSensor " + name + "(#" + sensor + ") " + enable);
 
         if (binder == null) {
-            Slog.w(TAG, "listener is null (sensor=" + name + ", id=" + sensor + ")");
+            Slog.e(TAG, "listener is null (sensor=" + name + ", id=" + sensor + ")");
             return false;
         }
 
+        if (enable < 0 && (enable != SENSOR_DISABLE)) {
+            Slog.e(TAG, "invalid enable parameter (enable=" + enable +
+                    ", sensor=" + name + ", id=" + sensor + ")");
+            return false;
+        }
+
+        boolean res;
+        int uid = Binder.getCallingUid();
         synchronized(mListeners) {
-            if (enable!=SENSOR_DISABLE && !_sensors_control_activate(sensor, true)) {
+            res = enableSensorInternalLocked(binder, uid, name, sensor, enable);
+            if (res == true) {
+                // Inform battery statistics service of status change
+                long identity = Binder.clearCallingIdentity();
+                if (enable == SENSOR_DISABLE) {
+                    mBatteryStats.noteStopSensor(uid, sensor);
+                } else {
+                    mBatteryStats.noteStartSensor(uid, sensor);
+                }
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+        return res;
+    }
+
+    private boolean enableSensorInternalLocked(IBinder binder, int uid,
+            String name, int sensor, int enable) throws RemoteException {
+
+        // check if we have this listener
+        Listener l = null;
+        for (Listener listener : mListeners) {
+            if (binder == listener.mToken) {
+                l = listener;
+                break;
+            }
+        }
+
+        if (enable != SENSOR_DISABLE) {
+            // Activate the requested sensor
+            if (_sensors_control_activate(sensor, true) == false) {
                 Slog.w(TAG, "could not enable sensor " + sensor);
                 return false;
             }
-                    
-            Listener l = null;
-            int minDelay = enable;
-            for (Listener listener : mListeners) {
-                if (binder == listener.mToken) {
-                    l = listener;
-                }
-                if (minDelay > listener.mDelay)
-                    minDelay = listener.mDelay;
-            }
-            
-            if (l == null && enable!=SENSOR_DISABLE) {
-                l = new Listener(binder);
+
+            if (l == null) {
+                /*
+                 * we don't have a listener for this binder yet, so
+                 * create a new one and add it to the list.
+                 */
+                l = new Listener(binder, uid);
                 binder.linkToDeath(l, 0);
                 mListeners.add(l);
                 mListeners.notify();
             }
-            
+
+            // take note that this sensor is now used by this client
+            l.addSensor(sensor, enable);
+
+        } else {
+
             if (l == null) {
-                // by construction, this means we're disabling a listener we
-                // don't know about...
-                Slog.w(TAG, "listener with binder " + binder + 
-                        ", doesn't exist (sensor=" + name + ", id=" + sensor + ")");
+                /*
+                 *  This client isn't in the list, this usually happens
+                 *  when enabling the sensor failed, but the client
+                 *  didn't handle the error and later tries to shut that
+                 *  sensor off.
+                 */
+                Slog.w(TAG, "listener with binder " + binder +
+                        ", doesn't exist (sensor=" + name +
+                        ", id=" + sensor + ")");
                 return false;
             }
-            
-            if (minDelay >= 0) {
-                _sensors_control_set_delay(minDelay);
-            }
-            
-            if (enable != SENSOR_DISABLE) {
-                l.addSensor(sensor, enable);
-            } else {
-                l.removeSensor(sensor);
-                deactivateIfUnusedLocked(sensor);
-                if (l.mSensors == 0) {
-                    mListeners.remove(l);
-                    binder.unlinkToDeath(l, 0);
-                    mListeners.notify();
+
+            // remove this sensor from this client
+            l.removeSensor(sensor);
+
+            // see if we need to deactivate this sensors=
+            deactivateIfUnusedLocked(sensor);
+
+            // if the listener doesn't have any more sensors active
+            // we can get rid of it
+            if (l.mSensors == 0) {
+                // we won't need this death notification anymore
+                binder.unlinkToDeath(l, 0);
+                // remove the listener from the list
+                mListeners.remove(l);
+                // and if the list is empty, turn off the whole sensor h/w
+                if (mListeners.size() == 0) {
+                    _sensors_control_wake();
+                    _sensors_control_close();
                 }
+                mListeners.notify();
             }
-            
-            if (mListeners.size() == 0) {
-                _sensors_control_wake();
-                _sensors_control_close();
-            }
-        }        
+        }
+
+        // calculate and set the new delay
+        int minDelay = 0x7FFFFFFF;
+        for (Listener listener : mListeners) {
+            if (listener.mDelay < minDelay)
+                minDelay = listener.mDelay;
+        }
+        if (minDelay != 0x7FFFFFFF) {
+            mCurrentDelay = minDelay;
+            _sensors_control_set_delay(minDelay);
+        }
+
         return true;
     }
 
-    private void deactivateIfUnusedLocked(int sensor) throws RemoteException {
+    private void deactivateIfUnusedLocked(int sensor) {
         int size = mListeners.size();
         for (int i=0 ; i<size ; i++) {
-            if (mListeners.get(i).hasSensor(sensor))
+            if (mListeners.get(i).hasSensor(sensor)) {
+                // this sensor is still in use, don't turn it off
                 return;
+            }
         }
-        _sensors_control_activate(sensor, false);
+        if (_sensors_control_activate(sensor, false) == false) {
+            Slog.w(TAG, "could not disable sensor " + sensor);
+        }
+    }
+
+    @Override
+    protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        synchronized (mListeners) {
+            Printer pr = new PrintWriterPrinter(pw);
+            int c = 0;
+            pr.println(mListeners.size() + " listener(s), delay=" + mCurrentDelay + " ms");
+            for (Listener l : mListeners) {
+                pr.println("listener[" + c + "] " +
+                        "sensors=0x" + Integer.toString(l.mSensors, 16) +
+                        ", uid=" + l.mUid +
+                        ", delay=" +
+                        l.mDelay + " ms");
+                c++;
+            }
+        }
     }
 
     private ArrayList<Listener> mListeners = new ArrayList<Listener>();
