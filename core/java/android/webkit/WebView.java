@@ -4746,6 +4746,14 @@ public class WebView extends AbsoluteLayout
                             if (mFullScreenHolder == null
                                     && (computeHorizontalScrollExtent() < computeHorizontalScrollRange()
                                     || computeVerticalScrollExtent() < computeVerticalScrollRange())) {
+                                // remove the pending TOUCH_EVENT and send a
+                                // cancel
+                                mWebViewCore
+                                        .removeMessages(EventHub.TOUCH_EVENT);
+                                WebViewCore.TouchEventData ted = new WebViewCore.TouchEventData();
+                                ted.mAction = MotionEvent.ACTION_CANCEL;
+                                mWebViewCore.sendMessage(EventHub.TOUCH_EVENT,
+                                        ted);
                                 // we will not rewrite drag code here, but we
                                 // will try fling if it applies.
                                 WebViewCore.reducePriority();
