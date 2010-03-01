@@ -34,7 +34,6 @@ package android.media;
  * <li> Audio sample rate
  * <li> Number of audio channels for recording.
  * </ul>
- * {@hide}
  */
 public class CamcorderProfile
 {
