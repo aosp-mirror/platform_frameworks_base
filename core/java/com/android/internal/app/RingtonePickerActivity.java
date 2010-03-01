@@ -276,6 +276,7 @@ public final class RingtonePickerActivity extends AlertActivity implements
     public void run() {
         
         if (mSampleRingtonePos == mSilentPos) {
+            mRingtoneManager.stopPreviousRingtone();
             return;
         }
         
