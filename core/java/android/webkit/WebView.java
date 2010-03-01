@@ -6807,7 +6807,7 @@ public class WebView extends AbsoluteLayout
     private native void     nativeHideCursor();
     private native String   nativeImageURI(int x, int y);
     private native void     nativeInstrumentReport();
-    /* package */ native void nativeMoveCursorToNextTextInput();
+    /* package */ native boolean nativeMoveCursorToNextTextInput();
     // return true if the page has been scrolled
     private native boolean  nativeMotionUp(int x, int y, int slop);
     // returns false if it handled the key
