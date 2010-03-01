@@ -75,11 +75,11 @@ static void registerLoggingFunc() {
     }
 
     LOGV("Registering sqlite logging func \n");
-    int err = sqlite3_config(SQLITE_CONFIG_LOG, &sqlLogger, 0);
-    if (err != SQLITE_OK) {
-        LOGE("sqlite_config failed error_code = %d. THIS SHOULD NEVER occur.\n", err);
-        return;
-    }
+    //int err = sqlite3_config(SQLITE_CONFIG_LOG, &sqlLogger, 0);
+    //if (err != SQLITE_OK) {
+        //LOGE("sqlite_config failed error_code = %d. THIS SHOULD NEVER occur.\n", err);
+        //#return;
+    //}
     loggingFuncSet = true;
 }
 
