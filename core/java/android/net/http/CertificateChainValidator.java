@@ -16,7 +16,8 @@
 
 package android.net.http;
 
-import com.android.common.DomainNameValidator;
+
+import com.android.internal.net.DomainNameValidator;
 
 import org.apache.harmony.xnet.provider.jsse.SSLParameters;
 

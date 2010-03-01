@@ -230,7 +230,8 @@ public final class ViewRoot extends Handler implements ViewParent,
             lt = new LatencyTimer(100, 1000);
         }
 
-        ++sInstanceCount;
+        // For debug only
+        //++sInstanceCount;
 
         // Initialize the statics when this class is first instantiated. This is
         // done here instead of in the static block because Zygote does not
@@ -258,11 +259,14 @@ public final class ViewRoot extends Handler implements ViewParent,
         mDensity = context.getResources().getDisplayMetrics().densityDpi;
     }
 
+    // For debug only
+    /*
     @Override
     protected void finalize() throws Throwable {
         super.finalize();
         --sInstanceCount;
     }
+    */
 
     public static long getInstanceCount() {
         return sInstanceCount;

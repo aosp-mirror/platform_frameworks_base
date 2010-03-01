@@ -18,9 +18,9 @@ package android.webkit;
 
 import android.net.ParseException;
 import android.net.WebAddress;
+import android.net.http.HttpDateTime;
 import android.util.Log;
 
-import com.android.common.HttpDateTime;
 
 import java.util.ArrayList;
 import java.util.Arrays;

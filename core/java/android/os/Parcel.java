@@ -212,6 +212,7 @@ public final class Parcel {
     private static final int VAL_SERIALIZABLE = 21;
     private static final int VAL_SPARSEBOOLEANARRAY = 22;
     private static final int VAL_BOOLEANARRAY = 23;
+    private static final int VAL_CHARSEQUENCEARRAY = 24;
 
     private static final int EX_SECURITY = -1;
     private static final int EX_BAD_PARCELABLE = -2;
@@ -409,6 +410,15 @@ public final class Parcel {
      * growing dataCapacity() if needed.
      */
     public final native void writeString(String val);
+
+    /**
+     * Write a CharSequence value into the parcel at the current dataPosition(),
+     * growing dataCapacity() if needed.
+     * @hide
+     */
+    public final void writeCharSequence(CharSequence val) {
+        TextUtils.writeToParcel(val, this, 0);
+    }
 
     /**
      * Write an object into the parcel at the current dataPosition(),
@@ -827,6 +837,21 @@ public final class Parcel {
         }
     }
 
+    /**
+     * @hide
+     */
+    public final void writeCharSequenceArray(CharSequence[] val) {
+        if (val != null) {
+            int N = val.length;
+            writeInt(N);
+            for (int i=0; i<N; i++) {
+                writeCharSequence(val[i]);
+            }
+        } else {
+            writeInt(-1);
+        }
+    }
+
     public final IBinder[] createBinderArray() {
         int N = readInt();
         if (N >= 0) {
@@ -1045,7 +1070,7 @@ public final class Parcel {
         } else if (v instanceof CharSequence) {
             // Must be after String
             writeInt(VAL_CHARSEQUENCE);
-            TextUtils.writeToParcel((CharSequence) v, this, 0);
+            writeCharSequence((CharSequence) v);
         } else if (v instanceof List) {
             writeInt(VAL_LIST);
             writeList((List) v);
@@ -1061,6 +1086,10 @@ public final class Parcel {
         } else if (v instanceof String[]) {
             writeInt(VAL_STRINGARRAY);
             writeStringArray((String[]) v);
+        } else if (v instanceof CharSequence[]) {
+            // Must be after String[] and before Object[]
+            writeInt(VAL_CHARSEQUENCEARRAY);
+            writeCharSequenceArray((CharSequence[]) v);
         } else if (v instanceof IBinder) {
             writeInt(VAL_IBINDER);
             writeStrongBinder((IBinder) v);
@@ -1257,6 +1286,14 @@ public final class Parcel {
     public final native String readString();
 
     /**
+     * Read a CharSequence value from the parcel at the current dataPosition().
+     * @hide
+     */
+    public final CharSequence readCharSequence() {
+        return TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(this);
+    }
+
+    /**
      * Read an object from the parcel at the current dataPosition().
      */
     public final native IBinder readStrongBinder();
@@ -1382,6 +1419,27 @@ public final class Parcel {
             for (int i = 0 ; i < length ; i++)
             {
                 array[i] = readString();
+            }
+        }
+
+        return array;
+    }
+
+    /**
+     * Read and return a CharSequence[] object from the parcel.
+     * {@hide}
+     */
+    public final CharSequence[] readCharSequenceArray() {
+        CharSequence[] array = null;
+
+        int length = readInt();
+        if (length >= 0)
+        {
+            array = new CharSequence[length];
+
+            for (int i = 0 ; i < length ; i++)
+            {
+                array[i] = readCharSequence();
             }
         }
 
@@ -1728,7 +1786,7 @@ public final class Parcel {
             return readInt() == 1;
 
         case VAL_CHARSEQUENCE:
-            return TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(this);
+            return readCharSequence();
 
         case VAL_LIST:
             return readArrayList(loader);
@@ -1741,6 +1799,9 @@ public final class Parcel {
 
         case VAL_STRINGARRAY:
             return readStringArray();
+
+        case VAL_CHARSEQUENCEARRAY:
+            return readCharSequenceArray();
 
         case VAL_IBINDER:
             return readStrongBinder();

@@ -790,7 +790,7 @@
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_writeCalendar">Allows an application to add or change the 
         events on your calendar, which may send email to guests. Malicious applications can use this 
-	to erase or modify your calendar events or to send email to guests.</string>
+        to erase or modify your calendar events or to send email to guests.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_accessMockLocation">mock location sources for testing</string>
@@ -1441,6 +1441,8 @@
     <string name="lockscreen_pattern_instructions">Draw pattern to unlock</string>
     <!-- Button at the bottom of the unlock screen to make an emergency call. -->
     <string name="lockscreen_emergency_call">Emergency call</string>
+    <!-- Button at the bottom of the unlock screen that lets the user return to a call -->
+    <string name="lockscreen_return_to_call">Return to call</string>
     <!-- Shown to confirm that the user entered their lock pattern correctly. -->
     <string name="lockscreen_pattern_correct">Correct!</string>
     <!-- On the unlock pattern screen, shown when the user enters the wrong lock pattern and must try again. -->
@@ -1820,17 +1822,6 @@
     <!-- Appened to express the value is this unit of time. -->
     <string name="years">years</string>
 
-    <!-- Calendar spinner item, to select that an event recurs every weekday. -->
-    <string name="every_weekday">"Every weekday (Mon\u2013Fri)"</string>
-    <!-- Calendar spinner item, to select that an event recurs every day. -->
-    <string name="daily">Daily</string>
-    <!-- Calendar spinner item, to select that an event recurs every week on a particular day of the week. -->
-    <string name="weekly">"Weekly on <xliff:g id="day">%s</xliff:g>"</string>
-    <!-- Calendar spinner item, to select that an event recurs every month. -->
-    <string name="monthly">Monthly</string>
-    <!-- Calendar spinner item, to select that an event recurs every year. -->
-    <string name="yearly">Yearly</string>
-
 
     <!-- Title for error alert when a video cannot be played.  it can be used by any app. -->
     <string name="VideoView_error_title">Cannot play video</string>
@@ -2045,9 +2036,6 @@
     <!-- When installing an application, the less-dangerous permissions are hidden.  This is the text to show those. -->
     <string name="perms_show_all"><b>Show all</b></string>
 
-    <!-- Shown when there is content loading from the internet into a dialog. -->
-    <string name="googlewebcontenthelper_loading">Loading\u2026</string>
-
     <!-- USB storage dialog strings -->
     <!-- This is the title for the activity's window. -->
     <string name="usb_storage_activity_title">USB Mass Storage</string>
@@ -2065,7 +2053,6 @@
     <!-- See USB_STORAGE. This is the message. -->
     <string name="usb_storage_notification_message">Select to copy files to/from your computer.</string>
 
-
     <!-- USB_STORAGE_STOP: While USB storage is enabled, we show a notification dialog asking if he wants to stop. This is the title -->
     <string name="usb_storage_stop_notification_title">Turn off USB storage</string>
     <!-- See USB_STORAGE. This is the message. -->
@@ -2081,6 +2068,15 @@
     <string name="usb_storage_stop_button_mount">Turn off USB storage</string>
     <!-- See USB_STORAGE_STOP_DIALOG.  If there was an error stopping, this is the text. -->
     <string name="usb_storage_stop_error_message">There was a problem turning off USB storage. Check to make sure you have unmounted the USB host, then try again.</string>
+
+    <!-- USB_STORAGE_KILL_STORAGE_USERS dialog  -->
+    <string name="dlg_confirm_kill_storage_users_title">Enable Mass Storage</string>
+    <!-- USB_STORAGE_KILL_STORAGE_USERS dialog message text -->
+    <string name="dlg_confirm_kill_storage_users_text">Some processes accessing data on sdcard will be killed. Do you want to continue?</string>
+    <!-- USB_STORAGE_ERROR dialog  dialog-->
+    <string name="dlg_error_title">UMS operation failed</string>
+    <!-- USB_STORAGE_ERROR dialog  ok button-->
+    <string name="dlg_ok">OK</string>
 
     <!-- External media format dialog strings -->
     <!-- This is the label for the activity, and should never be visible to the user. -->

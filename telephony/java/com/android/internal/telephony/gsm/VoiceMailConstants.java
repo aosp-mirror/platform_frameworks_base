@@ -28,7 +28,8 @@ import java.io.IOException;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import com.android.common.XmlUtils;
+
+import com.android.internal.util.XmlUtils;
 
 /**
  * {@hide}

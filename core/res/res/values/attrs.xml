@@ -3501,6 +3501,21 @@
     <!-- =============================== -->
     <eat-comment />
     
+    <!-- Use <code>device-admin</code> as the root tag of the XML resource that
+         describes a
+         {@link android.app.admin.DeviceAdminReceiver}, which is
+         referenced from its
+         {@link android.app.admin.DeviceAdminReceiver#DEVICE_ADMIN_META_DATA}
+         meta-data entry.  Described here are the attributes that can be
+         included in that tag. -->
+    <declare-styleable name="DeviceAdmin">
+        <!-- Control whether the admin is visible to the user, even when it
+             is not enabled.  This is true by default.  You may want to make
+             it false if your admin does not make sense to be turned on
+             unless some explicit action happens in your app. -->
+        <attr name="visible" />
+    </declare-styleable>
+
     <!-- Use <code>wallpaper</code> as the root tag of the XML resource that
          describes an
          {@link android.service.wallpaper.WallpaperService}, which is

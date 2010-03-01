@@ -28,6 +28,7 @@ import android.os.Handler;
 import android.os.SystemClock;
 import android.util.TypedValue;
 import android.view.MotionEvent;
+import android.widget.AbsListView.OnScrollListener;
 
 /**
  * Helper class for AbsListView to draw and control the Fast Scroll thumb
@@ -430,6 +431,7 @@ class FastScroller {
                 }
                 if (mList != null) {
                     mList.requestDisallowInterceptTouchEvent(true);
+                    mList.reportScrollStateChange(OnScrollListener.SCROLL_STATE_TOUCH_SCROLL);
                 }
 
                 cancelFling();
@@ -442,6 +444,7 @@ class FastScroller {
                     // be other classes that don't properly reset on touch-up,
                     // so do this explicitly just in case.
                     mList.requestDisallowInterceptTouchEvent(false);
+                    mList.reportScrollStateChange(OnScrollListener.SCROLL_STATE_IDLE);
                 }
                 setState(STATE_VISIBLE);
                 final Handler handler = mHandler;

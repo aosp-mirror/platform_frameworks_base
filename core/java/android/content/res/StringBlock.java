@@ -24,7 +24,8 @@ import android.util.SparseArray;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Typeface;
-import com.android.common.XmlUtils;
+
+import com.android.internal.util.XmlUtils;
 
 /**
  * Conveniences for retrieving data out of a compiled string resource.

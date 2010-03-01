@@ -3201,28 +3201,33 @@ public final class ContactsContract {
         public static final String SNIPPET_MIMETYPE = "snippet_mimetype";
 
         /**
-         * The {@link CommonDataKinds.CommonColumns#DATA} field of the data row
-         * that was matched by the filter.
+         * The {@link Data#DATA1} field of the data row that was matched by the filter.
          *
          * @hide
          */
-        public static final String SNIPPET_DATA = "snippet_data";
+        public static final String SNIPPET_DATA1 = "snippet_data1";
 
         /**
-         * The {@link CommonDataKinds.CommonColumns#TYPE} field of the data row
-         * that was matched by the filter.
+         * The {@link Data#DATA2} field of the data row that was matched by the filter.
          *
          * @hide
          */
-        public static final String SNIPPET_TYPE = "snippet_type";
+        public static final String SNIPPET_DATA2 = "snippet_data2";
 
         /**
-         * The {@link CommonDataKinds.CommonColumns#LABEL} field of the data row
-         * that was matched by the filter.
+         * The {@link Data#DATA3} field of the data row that was matched by the filter.
          *
          * @hide
          */
-        public static final String SNIPPET_LABEL = "snippet_label";
+        public static final String SNIPPET_DATA3 = "snippet_data3";
+
+        /**
+         * The {@link Data#DATA4} field of the data row that was matched by the filter.
+         *
+         * @hide
+         */
+        public static final String SNIPPET_DATA4 = "snippet_data4";
+
     }
 
     /**

@@ -356,25 +356,19 @@ for loop syntax will be exactly equivalent to explicit iterator usage.</p>
 
 <p>There are several alternatives for iterating through an array:</p>
 
-<pre>public class Foo {
-    int mSplat;
-}
-public class ArrayBenchmark {
-    Foo[] mArray = new Foo[27];
-    {
-        for (int i = 0; i &lt; mArray.length; ++i) {
-            mArray[i] = new Foo();
-        }
+<pre>    static class Foo {
+        int mSplat;
     }
+    Foo[] mArray = ...
 
-    public static void zero() {
+    public void zero() {
         int sum = 0;
         for (int i = 0; i &lt; mArray.length; ++i) {
             sum += mArray[i].mSplat;
         }
     }
 
-    public static void one() {
+    public void one() {
         int sum = 0;
         Foo[] localArray = mArray;
         int len = localArray.length;
@@ -384,13 +378,13 @@ public class ArrayBenchmark {
         }
     }
 
-    public static void two() {
+    public void two() {
         int sum = 0;
         for (Foo a : mArray) {
             sum += a.mSplat;
         }
     }
-}</pre>
+</pre>
 
 <p><strong>zero()</strong> is slowest, because the JIT can't yet optimize away
 the cost of getting the array length once for every iteration through the

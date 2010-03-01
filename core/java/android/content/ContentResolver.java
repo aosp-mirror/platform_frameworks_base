@@ -156,11 +156,8 @@ public abstract class ContentResolver {
     /** @hide */
     public static final int SYNC_ERROR_INTERNAL = 8;
 
-    /** @hide */
     public static final int SYNC_OBSERVER_TYPE_SETTINGS = 1<<0;
-    /** @hide */
     public static final int SYNC_OBSERVER_TYPE_PENDING = 1<<1;
-    /** @hide */
     public static final int SYNC_OBSERVER_TYPE_ACTIVE = 1<<2;
     /** @hide */
     public static final int SYNC_OBSERVER_TYPE_STATUS = 1<<3;
@@ -1183,7 +1180,6 @@ public abstract class ContentResolver {
     /**
      * If a sync is active returns the information about it, otherwise returns false.
      * @return the ActiveSyncInfo for the currently active sync or null if one is not active.
-     * @hide
      */
     public static ActiveSyncInfo getActiveSync() {
         try {
@@ -1222,7 +1218,24 @@ public abstract class ContentResolver {
         }
     }
 
+    /**
+     * Request notifications when the different aspects of the SyncManager change. The
+     * different items that can be requested are:
+     * <ul>
+     * <li> {@link #SYNC_OBSERVER_TYPE_PENDING}
+     * <li> {@link #SYNC_OBSERVER_TYPE_ACTIVE}
+     * <li> {@link #SYNC_OBSERVER_TYPE_SETTINGS}
+     * </ul>
+     * The caller can set one or more of the status types in the mask for any
+     * given listener registration.
+     * @param mask the status change types that will cause the callback to be invoked
+     * @param callback observer to be invoked when the status changes
+     * @return a handle that can be used to remove the listener at a later time
+     */
     public static Object addStatusChangeListener(int mask, final SyncStatusObserver callback) {
+        if (callback == null) {
+            throw new IllegalArgumentException("you passed in a null callback");
+        }
         try {
             ISyncStatusObserver.Stub observer = new ISyncStatusObserver.Stub() {
                 public void onStatusChanged(int which) throws RemoteException {
@@ -1236,7 +1249,14 @@ public abstract class ContentResolver {
         }
     }
 
+    /**
+     * Remove a previously registered status change listener.
+     * @param handle the handle that was returned by {@link #addStatusChangeListener}
+     */
     public static void removeStatusChangeListener(Object handle) {
+        if (handle == null) {
+            throw new IllegalArgumentException("you passed in a null handle");
+        }
         try {
             getContentService().removeStatusChangeListener((ISyncStatusObserver.Stub) handle);
         } catch (RemoteException e) {

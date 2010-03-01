@@ -16,16 +16,21 @@
 
 package com.android.internal.widget;
 
-import android.app.DevicePolicyManager;
-import android.content.ComponentName;
+import android.app.admin.DevicePolicyManager;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.provider.Settings;
 import android.security.MessageDigest;
+import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
+import android.widget.Button;
 
+import com.android.internal.R;
+import com.android.internal.telephony.ITelephony;
 import com.google.android.collect.Lists;
 
 import java.io.FileNotFoundException;
@@ -674,5 +679,44 @@ public class LockPatternUtils {
         boolean secure = mode == MODE_PATTERN && isLockPatternEnabled() && savedPatternExists()
             || (mode == MODE_PIN || mode == MODE_PASSWORD) && savedPasswordExists();
         return secure;
+    }
+
+    /**
+     * Sets the text on the emergency button to indicate what action will be taken.
+     * If there's currently a call in progress, the button will take them to the call
+     * @param button the button to update
+     */
+    public void updateEmergencyCallButtonState(Button button) {
+        int newState = TelephonyManager.getDefault().getCallState();
+        int textId;
+        if (newState == TelephonyManager.CALL_STATE_OFFHOOK) {
+            // show "return to call" text and show phone icon
+            textId = R.string.lockscreen_return_to_call;
+            int phoneCallIcon = R.drawable.stat_sys_phone_call;
+            button.setCompoundDrawablesWithIntrinsicBounds(phoneCallIcon, 0, 0, 0);
+        } else {
+            textId = R.string.lockscreen_emergency_call;
+            int emergencyIcon = R.drawable.ic_emergency;
+            button.setCompoundDrawablesWithIntrinsicBounds(emergencyIcon, 0, 0, 0);
+        }
+        button.setText(textId);
+    }
+
+    /**
+     * Resumes a call in progress. Typically launched from the EmergencyCall button
+     * on various lockscreens.
+     *
+     * @return true if we were able to tell InCallScreen to show.
+     */
+    public boolean resumeCall() {
+        ITelephony phone = ITelephony.Stub.asInterface(ServiceManager.checkService("phone"));
+        try {
+            if (phone != null && phone.showCallScreen()) {
+                return true;
+            }
+        } catch (RemoteException e) {
+            // What can we do?
+        }
+        return false;
     }
 }

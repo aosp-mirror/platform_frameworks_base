@@ -18,6 +18,7 @@ package android.provider;
 
 /**
  * Columns for tables that are synced to a server.
+ * @deprecated
  * @hide
  */
 public interface SyncConstValue
@@ -69,7 +70,7 @@ public interface SyncConstValue
      * <P>Type: INTEGER (long)</P>
      */
     public static final String _SYNC_DIRTY = "_sync_dirty";
-    
+
     /**
      * Used to indicate that this account is not synced
      */

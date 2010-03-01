@@ -133,7 +133,7 @@
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Audio non attivo"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"Audio attivo"</string>
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Modalità aereo"</string>
-    <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Disattiva modalità aereo"</string>
+    <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Modalità aereo attiva"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Disattiva modalità aeereo"</string>
     <string name="safeMode" msgid="2788228061547930246">"Modalità provvisoria"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Sistema Android"</string>
@@ -185,14 +185,12 @@
     <string name="permdesc_setDebugApp" msgid="5584310661711990702">"Consente a un\'applicazione di attivare il debug per un\'altra applicazione. Le applicazioni dannose possono sfruttare questa possibilità per interrompere altre applicazioni."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"modifica impostazioni UI"</string>
     <string name="permdesc_changeConfiguration" msgid="3465121501528064399">"Consente a un\'applicazione di modificare la configurazione corrente, come le dimensioni dei caratteri locali o complessive."</string>
-    <!-- no translation found for permlab_killBackgroundProcesses (8373714752793061963) -->
-    <skip />
-    <!-- no translation found for permdesc_killBackgroundProcesses (2908829602869383753) -->
-    <skip />
-    <!-- no translation found for permlab_forceStopPackages (1447830113260156236) -->
-    <skip />
-    <!-- no translation found for permdesc_forceStopPackages (7263036616161367402) -->
-    <skip />
+    <string name="permlab_enableCarMode" msgid="5684504058192921098">"abilitazione modalità auto"</string>
+    <string name="permdesc_enableCarMode" msgid="5673461159384850628">"Consente a un\'applicazione di abilitare la modalità auto."</string>
+    <string name="permlab_killBackgroundProcesses" msgid="8373714752793061963">"interruzione processi in background"</string>
+    <string name="permdesc_killBackgroundProcesses" msgid="2908829602869383753">"Consente a un\'applicazione di terminare i processi in background di altre applicazioni, anche se la memoria non è insufficiente."</string>
+    <string name="permlab_forceStopPackages" msgid="1447830113260156236">"interruzione forzata di altre applicazioni"</string>
+    <string name="permdesc_forceStopPackages" msgid="7263036616161367402">"Consente a un\'applicazione di interrompere forzatamente altre applicazioni."</string>
     <string name="permlab_forceBack" msgid="1804196839880393631">"chiusura forzata dell\'applicazione"</string>
     <string name="permdesc_forceBack" msgid="6534109744159919013">"Consente a un\'applicazione di forzare la chiusura di attività in primo piano. Non dovrebbe essere mai necessario per le normali applicazioni."</string>
     <string name="permlab_dump" msgid="1681799862438954752">"recupero stato interno del sistema"</string>
@@ -217,8 +215,6 @@
     <string name="permdesc_batteryStats" msgid="5847319823772230560">"Consente la modifica delle statistiche sulla batteria raccolte. Da non usare per normali applicazioni."</string>
     <string name="permlab_backup" msgid="470013022865453920">"controllo del backup di sistema e ripristino"</string>
     <string name="permdesc_backup" msgid="4837493065154256525">"Consente all\'applicazione di controllare il meccanismo di backup e ripristino del sistema. Da non usare per normali applicazioni."</string>
-    <string name="permlab_backup_data" msgid="4057625941707926463">"effettuare il backup e il ripristino dei dati dell\'applicazione"</string>
-    <string name="permdesc_backup_data" msgid="8274426305151227766">"Consente all\'applicazione di partecipare al meccanismo di backup e ripristino del sistema."</string>
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"visualizzazione finestre non autorizzate"</string>
     <string name="permdesc_internalSystemWindow" msgid="5895082268284998469">"Consente la creazione di finestre destinate all\'uso nell\'interfaccia utente di sistema interna. Da non usare per normali applicazioni."</string>
     <string name="permlab_systemAlertWindow" msgid="3372321942941168324">"visualizzazione avvisi di sistema"</string>
@@ -235,6 +231,8 @@
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"Consente l\'associazione all\'interfaccia principale di un metodo di inserimento. Non dovrebbe essere mai necessario per le normali applicazioni."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"associazione a sfondo"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"Consente l\'associazione di uno sfondo all\'interfaccia principale. Non dovrebbe mai essere necessario per le normali applicazioni."</string>
+    <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"interazione con un amministratore dispositivo"</string>
+    <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"Consente l\'invio di intent a un amministratore del dispositivo. L\'autorizzazione non deve mai essere necessaria per le normali applicazioni."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"modifica orientamento dello schermo"</string>
     <string name="permdesc_setOrientation" msgid="6335814461615851863">"Consente a un\'applicazione di cambiare la rotazione dello schermo in qualsiasi momento. Non dovrebbe essere mai necessario per le normali applicazioni."</string>
     <string name="permlab_signalPersistentProcesses" msgid="4255467255488653854">"invio segnali Linuz alle applicazioni"</string>
@@ -253,6 +251,10 @@
     <string name="permdesc_installPackages" msgid="526669220850066132">"Consente a un\'applicazione di installare nuovi pacchetti Android o aggiornamenti. Le applicazioni dannose possono sfruttare questa possibilità per aggiungere nuove applicazioni con potenti autorizzazioni arbitrarie."</string>
     <string name="permlab_clearAppCache" msgid="4747698311163766540">"eliminazione dati della cache applicazioni"</string>
     <string name="permdesc_clearAppCache" msgid="7740465694193671402">"Consente a un\'applicazione di liberare spazio sul telefono eliminando file nella directory della cache dell\'applicazione. L\'accesso è generalmente limitato a processi di sistema."</string>
+    <!-- no translation found for permlab_movePackage (728454979946503926) -->
+    <skip />
+    <!-- no translation found for permdesc_movePackage (6323049291923925277) -->
+    <skip />
     <string name="permlab_readLogs" msgid="4811921703882532070">"lettura file di registro sistema"</string>
     <string name="permdesc_readLogs" msgid="2257937955580475902">"Consente a un\'applicazione di leggere vari file di registro del sistema per trovare informazioni generali sulle operazioni effettuate con il telefono. Tali file non dovrebbero contenere informazioni personali o riservate."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"lettura/scrittura risorse di proprietà di diag"</string>
@@ -279,10 +281,13 @@
     <string name="permdesc_writeOwnerData" msgid="2344055317969787124">"Consente a un\'applicazione di modificare i dati del proprietario del telefono memorizzati sul telefono. Le applicazioni dannose possono sfruttare questa possibilità per cancellare o modificare tali dati."</string>
     <string name="permlab_readOwnerData" msgid="6668525984731523563">"lettura dati proprietario"</string>
     <string name="permdesc_readOwnerData" msgid="3088486383128434507">"Consente a un\'applicazione di leggere i dati del proprietario del telefono memorizzati sul telefono. Le applicazioni dannose possono sfruttare questa possibilità per leggere tali dati."</string>
-    <string name="permlab_readCalendar" msgid="3728905909383989370">"lettura dati di calendario"</string>
+    <!-- no translation found for permlab_readCalendar (6898987798303840534) -->
+    <skip />
     <string name="permdesc_readCalendar" msgid="5533029139652095734">"Consente la lettura da parte di un\'applicazione di tutti gli eventi di calendario memorizzati sul telefono. Le applicazioni dannose possono sfruttare questa possibilità per inviare i tuoi eventi di calendario ad altre persone."</string>
-    <string name="permlab_writeCalendar" msgid="377926474603567214">"scrittura dati di calendario"</string>
-    <string name="permdesc_writeCalendar" msgid="8674240662630003173">"Consente a un\'applicazione di modificare gli eventi di calendario memorizzati sul telefono. Le applicazioni dannose possono sfruttare questa possibilità per cancellare o modificare i dati del calendario."</string>
+    <!-- no translation found for permlab_writeCalendar (3894879352594904361) -->
+    <skip />
+    <!-- no translation found for permdesc_writeCalendar (2988871373544154221) -->
+    <skip />
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"fonti di localizzazione fittizie per test"</string>
     <string name="permdesc_accessMockLocation" msgid="7648286063459727252">"Creare fonti di localizzazione fittizie per test. Le applicazioni dannose possono sfruttare questa possibilità per sostituire la posizione e/o lo stato restituito da reali fonti di localizzazione come GPS o provider di rete."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"accesso a comandi aggiuntivi del provider di localizz."</string>
@@ -311,6 +316,16 @@
     <string name="permdesc_mount_unmount_filesystems" msgid="6253263792535859767">"Consente montaggio e smontaggio da parte dell\'applicazione dei filesystem degli archivi rimovibili."</string>
     <string name="permlab_mount_format_filesystems" msgid="5523285143576718981">"formattazione archivio esterno"</string>
     <string name="permdesc_mount_format_filesystems" msgid="574060044906047386">"Consente all\'applicazione di formattare l\'archivio rimovibile."</string>
+    <string name="permlab_asec_access" msgid="1070364079249834666">"recupero di informazioni sull\'archiviazione protetta"</string>
+    <string name="permdesc_asec_access" msgid="7691616292170590244">"Consente all\'applicazione di ottenere informazioni sull\'archiviazione protetta."</string>
+    <string name="permlab_asec_create" msgid="7312078032326928899">"creazione archiviazione protetta"</string>
+    <string name="permdesc_asec_create" msgid="7041802322759014035">"Consente all\'applicazione di creare un\'archiviazione protetta."</string>
+    <string name="permlab_asec_destroy" msgid="7787322878955261006">"eliminazione archiviazione protetta"</string>
+    <string name="permdesc_asec_destroy" msgid="5740754114967893169">"Consente all\'applicazione di eliminare l\'archiviazione protetta."</string>
+    <string name="permlab_asec_mount_unmount" msgid="7517449694667828592">"montaggio/smontaggio archiviazione protetta"</string>
+    <string name="permdesc_asec_mount_unmount" msgid="5438078121718738625">"Consente all\'applicazione di montare/smontare l\'archiviazione protetta."</string>
+    <string name="permlab_asec_rename" msgid="5685344390439934495">"rinominazione archiviazione protetta"</string>
+    <string name="permdesc_asec_rename" msgid="1387881770708872470">"Consente all\'applicazione di rinominare l\'archiviazione protetta."</string>
     <string name="permlab_vibrate" msgid="7768356019980849603">"controllo vibrazione"</string>
     <string name="permdesc_vibrate" msgid="2886677177257789187">"Consente all\'applicazione di controllare la vibrazione."</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"controllo flash"</string>
@@ -345,6 +360,8 @@
     <string name="permdesc_setWallpaperHints" msgid="6019479164008079626">"Consente all\'applicazione di impostare i suggerimenti per le dimensioni dello sfondo del sistema."</string>
     <string name="permlab_masterClear" msgid="2315750423139697397">"ripristino impostazioni predef. di fabbrica"</string>
     <string name="permdesc_masterClear" msgid="5033465107545174514">"Consente a un\'applicazione di ripristinare le impostazioni di fabbrica del sistema, eliminando tutti i dati, le configurazioni e le applicazioni installate."</string>
+    <string name="permlab_setTime" msgid="2021614829591775646">"impostazione ora"</string>
+    <string name="permdesc_setTime" msgid="667294309287080045">"Consente a un\'applicazione di modificare l\'ora dell\'orologio del telefono."</string>
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"impostazione fuso orario"</string>
     <string name="permdesc_setTimeZone" msgid="1902540227418179364">"Consente a un\'applicazione di modificare il fuso orario del telefono."</string>
     <string name="permlab_accountManagerService" msgid="4829262349691386986">"agire da AccountManagerService"</string>
@@ -364,7 +381,9 @@
     <string name="permlab_writeApnSettings" msgid="7823599210086622545">"scrittura impostazioni APN"</string>
     <string name="permdesc_writeApnSettings" msgid="7443433457842966680">"Consente a un\'applicazione di modificare le impostazioni APN, come proxy e porta di qualsiasi APN."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"modifica connettività di rete"</string>
-    <string name="permdesc_changeNetworkState" msgid="6278115726355634395">"Consente a un\'applicazione di modificare lo stato di connettività di rete."</string>
+    <string name="permdesc_changeNetworkState" msgid="4199958910396387075">"Consente a un\'applicazione di modificare lo stato di connettività di rete."</string>
+    <string name="permlab_changeTetherState" msgid="5952584964373017960">"modifica della connettività tethering"</string>
+    <string name="permdesc_changeTetherState" msgid="8905815579146349568">"Consente a un\'applicazione di modificare lo stato di connettività di rete tethering."</string>
     <string name="permlab_changeBackgroundDataSetting" msgid="1400666012671648741">"cambiare l\'impostazione di utilizzo dei dati in background"</string>
     <string name="permdesc_changeBackgroundDataSetting" msgid="1001482853266638864">"Consente a un\'applicazione di cambiare l\'impostazione di utilizzo dei dati in background."</string>
     <string name="permlab_accessWifiState" msgid="8100926650211034400">"visualizzazione stato Wi-Fi"</string>
@@ -395,10 +414,18 @@
     <string name="permdesc_writeDictionary" msgid="2241256206524082880">"Consente a un\'applicazione di scrivere nuove parole nel dizionario utente."</string>
     <string name="permlab_sdcardWrite" msgid="8079403759001777291">"modificare/eliminare i contenuti della scheda SD"</string>
     <string name="permdesc_sdcardWrite" msgid="6643963204976471878">"Consente a un\'applicazione di scrivere sulla scheda SD."</string>
-    <!-- no translation found for permlab_cache_filesystem (5656487264819669824) -->
-    <skip />
-    <!-- no translation found for permdesc_cache_filesystem (1624734528435659906) -->
-    <skip />
+    <string name="permlab_cache_filesystem" msgid="5656487264819669824">"accesso al filesystem nella cache"</string>
+    <string name="permdesc_cache_filesystem" msgid="1624734528435659906">"Consente a un\'applicazione di leggere e scrivere il filesystem nella cache."</string>
+    <string name="policylab_limitPassword" msgid="4307861496302850201">"Limita password"</string>
+    <string name="policydesc_limitPassword" msgid="1719877245692318299">"Limita i tipi di password che sei autorizzato a utilizzare."</string>
+    <string name="policylab_watchLogin" msgid="7374780712664285321">"Controlla i tentativi di accesso"</string>
+    <string name="policydesc_watchLogin" msgid="1961251179624843483">"Monitora i tentativi non riusciti di accedere al dispositivo per eseguire un\'azione."</string>
+    <string name="policylab_resetPassword" msgid="9084772090797485420">"Reimposta password"</string>
+    <string name="policydesc_resetPassword" msgid="3332167600331799991">"Forza un nuovo valore per la password, chiedendo all\'amministratore di concedertelo prima di poter eseguire l\'accesso."</string>
+    <string name="policylab_forceLock" msgid="5760466025247634488">"Forza blocco"</string>
+    <string name="policydesc_forceLock" msgid="2819868664946089740">"Controlla quando il dispositivo si blocca, chiedendoti di reinserire la password."</string>
+    <string name="policylab_wipeData" msgid="3910545446758639713">"Cancella tutti i dati"</string>
+    <string name="policydesc_wipeData" msgid="2314060933796396205">"Esegui un ripristino di fabbrica, eliminando tutti i tuoi dati senza conferma."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Casa"</item>
     <item msgid="869923650527136615">"Cellulare"</item>
@@ -495,6 +522,7 @@
     <string name="contact_status_update_attribution" msgid="5112589886094402795">"tramite <xliff:g id="SOURCE">%1$s</xliff:g>"</string>
     <string name="contact_status_update_attribution_with_date" msgid="5945386376369979909">"<xliff:g id="DATE">%1$s</xliff:g> tramite <xliff:g id="SOURCE">%2$s</xliff:g>"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"Inserisci il PIN"</string>
+    <string name="keyguard_password_enter_password_code" msgid="9138158344813213754">"Inserisci password per sbloccare"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"Codice PIN errato."</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"Per sbloccare, premi Menu, poi 0."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"Numero di emergenza"</string>
@@ -504,6 +532,8 @@
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"Premi Menu per sbloccare."</string>
     <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"Traccia la sequenza di sblocco"</string>
     <string name="lockscreen_emergency_call" msgid="5347633784401285225">"Chiamata di emergenza"</string>
+    <!-- no translation found for lockscreen_return_to_call (5244259785500040021) -->
+    <skip />
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Corretta."</string>
     <string name="lockscreen_pattern_wrong" msgid="4817583279053112312">"Riprova"</string>
     <string name="lockscreen_plugged_in" msgid="613343852842944435">"In carica (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
@@ -534,6 +564,9 @@
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"Sblocca"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Audio attivato"</string>
     <string name="lockscreen_sound_off_label" msgid="996822825154319026">"Audio disattivato"</string>
+    <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
+    <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
+    <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
     <string name="hour_ampm" msgid="4329881288269772723">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_cap_ampm" msgid="1829009197680861107">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Cancella"</string>
@@ -559,6 +592,8 @@
     <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"Consente all\'applicazione di leggere tutti gli URL visitati e tutti i segnalibri del browser."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"creazione cronologia e segnalibri del browser"</string>
     <string name="permdesc_writeHistoryBookmarks" msgid="945571990357114950">"Consente a un\'applicazione di modificare la cronologia o i segnalibri del browser memorizzati sul telefono. Le applicazioni dannose possono sfruttare questa possibilità per cancellare o modificare i dati del browser."</string>
+    <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"Modifica le autorizzazioni di localizzazione geografica del browser"</string>
+    <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"Consente a un\'applicazione di modificare le autorizzazioni di localizzazione geografica del browser. Le applicazioni dannose possono utilizzare questa autorizzazione per consentire l\'invio di informazioni sulla posizione a siti web arbitrari."</string>
     <string name="save_password_message" msgid="767344687139195790">"Memorizzare la password nel browser?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Non ora"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Memorizza"</string>
@@ -585,6 +620,11 @@
     <item quantity="one" msgid="9150797944610821849">"1 ora fa"</item>
     <item quantity="other" msgid="2467273239587587569">"<xliff:g id="COUNT">%d</xliff:g> ore fa"</item>
   </plurals>
+    <!-- no translation found for last_num_days:other (3069992808164318268) -->
+    <!-- no translation found for last_month (3959346739979055432) -->
+    <skip />
+    <!-- no translation found for older (5211975022815554840) -->
+    <skip />
   <plurals name="num_days_ago">
     <item quantity="one" msgid="861358534398115820">"ieri"</item>
     <item quantity="other" msgid="2479586466153314633">"<xliff:g id="COUNT">%d</xliff:g> giorni fa"</item>
@@ -739,21 +779,27 @@
     <string name="no_permissions" msgid="7283357728219338112">"Nessuna autorizzazione richiesta"</string>
     <string name="perms_hide" msgid="7283915391320676226"><b>"Nascondi"</b></string>
     <string name="perms_show_all" msgid="2671791163933091180"><b>"Mostra tutto"</b></string>
-    <string name="googlewebcontenthelper_loading" msgid="4722128368651947186">"Caricamento..."</string>
+    <string name="usb_storage_activity_title" msgid="2399289999608900443">"Archiviazione di massa USB"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"USB collegata"</string>
-    <string name="usb_storage_message" msgid="2759542180575016871">"Il telefono è stato collegato al computer tramite USB. Seleziona \"Collega\" se desideri copiare file tra il computer e la scheda SD del telefono."</string>
-    <string name="usb_storage_button_mount" msgid="8063426289195405456">"Collega"</string>
-    <string name="usb_storage_button_unmount" msgid="6092146330053864766">"Non collegare"</string>
+    <string name="usb_storage_message" msgid="4796759646167247178">"Il telefono è stato collegato al computer tramite USB. Seleziona il pulsante sottostante se desideri copiare file tra il computer e la scheda SD di Android."</string>
+    <string name="usb_storage_button_mount" msgid="1052259930369508235">"Attiva archivio USB"</string>
     <string name="usb_storage_error_message" msgid="2534784751603345363">"Problema di utilizzo della scheda SD per l\'archiviazione USB."</string>
     <string name="usb_storage_notification_title" msgid="8175892554757216525">"USB collegata"</string>
     <string name="usb_storage_notification_message" msgid="7380082404288219341">"Seleziona per copiare file sul/dal tuo computer."</string>
     <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"Disattiva archivio USB"</string>
     <string name="usb_storage_stop_notification_message" msgid="2591813490269841539">"Seleziona per disattivare archivio USB."</string>
-    <string name="usb_storage_stop_title" msgid="6014127947456185321">"Disattiva archivio USB"</string>
-    <string name="usb_storage_stop_message" msgid="2390958966725232848">"Prima di disattivare l\'archivio USB, verifica di aver smontato l\'host USB. A tale scopo, seleziona \"Disattiva\"."</string>
-    <string name="usb_storage_stop_button_mount" msgid="1181858854166273345">"Disattiva"</string>
-    <string name="usb_storage_stop_button_unmount" msgid="3774611918660582898">"Annulla"</string>
-    <string name="usb_storage_stop_error_message" msgid="3746037090369246731">"Abbiamo riscontrato un problema durante la disattivazione dell\'archivio USB. Verifica di aver smontato l\'host USB e riprova."</string>
+    <string name="usb_storage_stop_title" msgid="660129851708775853">"Archiviazione USB in uso"</string>
+    <string name="usb_storage_stop_message" msgid="3613713396426604104">"Prima di disattivare l\'archiviazione USB, assicurati di avere smontato (\"espulso\") la scheda SD di Android dal computer."</string>
+    <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"Disattiva archiviazione USB"</string>
+    <string name="usb_storage_stop_error_message" msgid="143881914840412108">"Si è verificato un problema durante la disattivazione dell\'archiviazione USB. Verifica di avere smontato l\'host USB e riprova."</string>
+    <!-- no translation found for dlg_confirm_kill_storage_users_title (203356557714612214) -->
+    <skip />
+    <!-- no translation found for dlg_confirm_kill_storage_users_text (3902998926994232358) -->
+    <skip />
+    <!-- no translation found for dlg_error_title (9179426738781357928) -->
+    <skip />
+    <!-- no translation found for dlg_ok (7376953167039865701) -->
+    <skip />
     <string name="extmedia_format_title" msgid="8663247929551095854">"Formatta scheda SD"</string>
     <string name="extmedia_format_message" msgid="3621369962433523619">"Formattare la scheda SD? Tutti i dati sulla scheda verranno persi."</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Formatta"</string>
@@ -778,6 +824,8 @@
     <string name="activity_list_empty" msgid="4168820609403385789">"Nessuna attività corrispondente trovata"</string>
     <string name="permlab_pkgUsageStats" msgid="8787352074326748892">"aggiornare le statistiche di utilizzo dei componenti"</string>
     <string name="permdesc_pkgUsageStats" msgid="891553695716752835">"Consente la modifica delle statistiche di utilizzo dei componenti raccolte. Da non usare per normali applicazioni."</string>
+    <string name="permlab_copyProtectedData" msgid="1660908117394854464">"Consente di invocare il servizio contenitore predefinito per la copia di contenuti. Da non usare per normali applicazioni."</string>
+    <string name="permdesc_copyProtectedData" msgid="537780957633976401">"Consente di invocare il servizio contenitore predefinito per la copia di contenuti. Da non usare per normali applicazioni."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"Tocca due volte per il comando dello zoom"</string>
     <string name="gadget_host_error_inflating" msgid="2613287218853846830">"Errore durante l\'ampliamento del widget"</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Vai"</string>
@@ -790,12 +838,9 @@
     <string name="create_contact_using" msgid="4947405226788104538">"Crea contatto"\n"utilizzando <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="accessibility_compound_button_selected" msgid="5612776946036285686">"selezionato"</string>
     <string name="accessibility_compound_button_unselected" msgid="8864512895673924091">"non selezionato"</string>
-    <!-- no translation found for grant_credentials_permission_message_header (6824538733852821001) -->
-    <skip />
-    <!-- no translation found for grant_credentials_permission_message_footer (3125211343379376561) -->
-    <skip />
-    <!-- no translation found for grant_permissions_header_text (2722567482180797717) -->
-    <skip />
+    <string name="grant_credentials_permission_message_header" msgid="6824538733852821001">"Le seguenti applicazioni richiedono l\'autorizzazione per accedere al tuo account, adesso e in futuro."</string>
+    <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"Accettare la richiesta?"</string>
+    <string name="grant_permissions_header_text" msgid="2722567482180797717">"Richiesta di accesso"</string>
     <string name="allow" msgid="7225948811296386551">"Consenti"</string>
     <string name="deny" msgid="2081879885755434506">"Nega"</string>
     <string name="permission_request_notification_title" msgid="5390555465778213840">"Autorizzazione richiesta"</string>
@@ -809,10 +854,26 @@
     <string name="l2tp_vpn_description" msgid="3750692169378923304">"Protocollo di tunneling livello 2"</string>
     <string name="l2tp_ipsec_psk_vpn_description" msgid="3945043564008303239">"VPN L2TP/IPSec basata su chiave precondivisa"</string>
     <string name="l2tp_ipsec_crt_vpn_description" msgid="5382714073103653577">"VPN L2TP/IPSec basata su certificato"</string>
-    <!-- no translation found for upload_file (2897957172366730416) -->
+    <string name="upload_file" msgid="2897957172366730416">"Scegli file"</string>
+    <string name="reset" msgid="2448168080964209908">"Reimposta"</string>
+    <string name="submit" msgid="1602335572089911941">"Invia"</string>
+    <string name="description_star" msgid="2654319874908576133">"preferiti"</string>
+    <string name="tether_title" msgid="6970447107301643248">"Tethering USB disponibile"</string>
+    <string name="tether_message" msgid="554549994538298101">"Seleziona \"Tethering\" per condividere la connessione dati del telefono con il computer."</string>
+    <string name="tether_button" msgid="7409514810151603641">"Tethering"</string>
+    <string name="tether_button_cancel" msgid="6744369928952219677">"Annulla"</string>
+    <string name="tether_error_message" msgid="6672110337349077628">"Si è verificato un problema con il tethering."</string>
+    <string name="tether_available_notification_title" msgid="367754042700082080">"Tethering USB disponibile"</string>
+    <string name="tether_available_notification_message" msgid="8439443306503453793">"Seleziona per impostare il tethering del computer con il telefono."</string>
+    <string name="tether_stop_notification_title" msgid="1902246071807668101">"Interrompi tethering"</string>
+    <string name="tether_stop_notification_message" msgid="6920086906891516128">"Seleziona per interrompere il tethering del computer."</string>
+    <string name="tether_stop_title" msgid="3118332507220912235">"Disconnetti tethering"</string>
+    <string name="tether_stop_message" msgid="7741840433788363174">"Stai condividendo la connessione dati del telefono con il computer. Seleziona \"Disconnetti\" per disconnettere il tethering USB."</string>
+    <string name="tether_stop_button" msgid="8061941592702063029">"Disconnetti"</string>
+    <string name="tether_stop_button_cancel" msgid="3694669546501300230">"Annulla"</string>
+    <string name="tether_stop_error_message" msgid="4244697367270211648">"Si è verificato un problema durante la disattivazione del tethering. Riprova."</string>
+    <!-- no translation found for car_mode_disable_notification_title (3164768212003864316) -->
     <skip />
-    <!-- no translation found for reset (2448168080964209908) -->
-    <skip />
-    <!-- no translation found for submit (1602335572089911941) -->
+    <!-- no translation found for car_mode_disable_notification_message (3262812780382240778) -->
     <skip />
 </resources>

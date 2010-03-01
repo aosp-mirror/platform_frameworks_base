@@ -16,7 +16,6 @@
 
 package android.pim;
 
-import android.content.res.Resources;
 import android.text.TextUtils;
 import android.text.format.Time;
 
@@ -325,55 +324,6 @@ public class EventRecurrence
         return s.toString();
     }
     
-    public String getRepeatString() {
-        Resources r = Resources.getSystem();
-        
-        // TODO Implement "Until" portion of string, as well as custom settings
-        switch (this.freq) {
-            case DAILY:
-                return r.getString(com.android.internal.R.string.daily);
-            case WEEKLY: {
-                if (repeatsOnEveryWeekDay()) {
-                    return r.getString(com.android.internal.R.string.every_weekday);
-                } else {
-                    String format = r.getString(com.android.internal.R.string.weekly);
-                    StringBuilder days = new StringBuilder();
-                
-                    // Do one less iteration in the loop so the last element is added out of the
-                    // loop. This is done so the comma is not placed after the last item.
-                    int count = this.bydayCount - 1;
-                    if (count >= 0) {
-                        for (int i = 0 ; i < count ; i++) {
-                            days.append(dayToString(r, this.byday[i]));
-                            days.append(",");
-                        }
-                        days.append(dayToString(r, this.byday[count]));
-                    
-                        return String.format(format, days.toString());
-                    }
-                    
-                    // There is no "BYDAY" specifier, so use the day of the
-                    // first event.  For this to work, the setStartDate()
-                    // method must have been used by the caller to set the
-                    // date of the first event in the recurrence.
-                    if (startDate == null) {
-                        return null;
-                    }
-                    
-                    int day = timeDay2Day(startDate.weekDay);
-                    return String.format(format, dayToString(r, day));
-                }
-            }
-            case MONTHLY: {
-                return r.getString(com.android.internal.R.string.monthly);
-            }
-            case YEARLY:
-                return r.getString(com.android.internal.R.string.yearly);
-        }
-
-        return null;
-    }
-    
     public boolean repeatsOnEveryWeekDay() {
         if (this.freq != WEEKLY) {
             return false; 
@@ -404,18 +354,5 @@ public class EventRecurrence
         }
         
         return true;
-    }
-    
-    private String dayToString(Resources r, int day) {
-        switch (day) {
-        case SU: return r.getString(com.android.internal.R.string.day_of_week_long_sunday);
-        case MO: return r.getString(com.android.internal.R.string.day_of_week_long_monday);
-        case TU: return r.getString(com.android.internal.R.string.day_of_week_long_tuesday);
-        case WE: return r.getString(com.android.internal.R.string.day_of_week_long_wednesday);
-        case TH: return r.getString(com.android.internal.R.string.day_of_week_long_thursday);
-        case FR: return r.getString(com.android.internal.R.string.day_of_week_long_friday);
-        case SA: return r.getString(com.android.internal.R.string.day_of_week_long_saturday);
-        default: throw new IllegalArgumentException("bad day argument: " + day);
-        }
     }
 }

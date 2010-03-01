@@ -20,6 +20,7 @@ LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 LOCAL_MODULE := mms-common
 LOCAL_SRC_FILES := $(call all-java-files-under, java)
+LOCAL_STATIC_JAVA_LIBRARIES += android-common
 include $(BUILD_STATIC_JAVA_LIBRARY)
 
 # Include this library in the build server's output directory

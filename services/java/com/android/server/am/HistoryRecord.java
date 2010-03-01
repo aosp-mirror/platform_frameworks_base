@@ -387,12 +387,14 @@ class HistoryRecord extends IApplicationToken.Stub {
                     sb.append(" ms)");
                     Log.i(ActivityManagerService.TAG, sb.toString());
                 }
+                service.reportActivityLaunchedLocked(false, this, thisTime, totalTime);
                 if (totalTime > 0) {
                     service.mUsageStatsService.noteLaunchTime(realActivity, (int)totalTime);
                 }
                 startTime = 0;
                 service.mInitialStartTime = 0;
             }
+            service.reportActivityVisibleLocked(this);
             if (ActivityManagerService.DEBUG_SWITCH) Log.v(
                     ActivityManagerService.TAG, "windowsVisible(): " + this);
             if (!nowVisible) {

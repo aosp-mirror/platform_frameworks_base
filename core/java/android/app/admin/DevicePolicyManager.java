@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-package android.app;
+package android.app.admin;
 
 import org.xmlpull.v1.XmlPullParserException;
 
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.app.admin.IDevicePolicyManager.Stub;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
@@ -56,7 +57,8 @@ public class DevicePolicyManager {
                 ServiceManager.getService(Context.DEVICE_POLICY_SERVICE));
     }
 
-    /*package*/ static DevicePolicyManager create(Context context, Handler handler) {
+    /** @hide */
+    public static DevicePolicyManager create(Context context, Handler handler) {
         DevicePolicyManager me = new DevicePolicyManager(context, handler);
         return me.mService != null ? me : null;
     }
@@ -394,6 +396,12 @@ public class DevicePolicyManager {
     }
     
     /**
+     * Flag for {@link #resetPassword}: don't allow other admins to change
+     * the password again until the user has entered it.
+     */
+    public static final int RESET_PASSWORD_REQUIRE_ENTRY = 0x0001;
+    
+    /**
      * Force a new device unlock password (the password needed to access the
      * entire device, not for individual accounts) on the user.  This takes
      * effect immediately.
@@ -411,13 +419,14 @@ public class DevicePolicyManager {
      * this method; if it has not, a security exception will be thrown.
      * 
      * @param password The new password for the user.
+     * @param flags May be 0 or {@link #RESET_PASSWORD_REQUIRE_ENTRY}.
      * @return Returns true if the password was applied, or false if it is
      * not acceptable for the current constraints.
      */
-    public boolean resetPassword(String password) {
+    public boolean resetPassword(String password, int flags) {
         if (mService != null) {
             try {
-                return mService.resetPassword(password);
+                return mService.resetPassword(password, flags);
             } catch (RemoteException e) {
                 Log.w(TAG, "Failed talking with device policy service", e);
             }

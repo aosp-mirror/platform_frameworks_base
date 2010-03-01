@@ -57,8 +57,12 @@ public abstract class WindowOrientationListener {
      * {@link android.hardware.SensorManager SensorManager}). Use the default
      * value of {@link android.hardware.SensorManager#SENSOR_DELAY_NORMAL 
      * SENSOR_DELAY_NORMAL} for simple screen orientation change detection.
+     *
+     * This constructor is private since no one uses it and making it public would complicate
+     * things, since the lowpass filtering code depends on the actual sampling period, and there's
+     * no way to get the period from SensorManager based on the rate constant.
      */
-    public WindowOrientationListener(Context context, int rate) {
+    private WindowOrientationListener(Context context, int rate) {
         mSensorManager = (SensorManager)context.getSystemService(Context.SENSOR_SERVICE);
         mRate = rate;
         mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
@@ -107,94 +111,179 @@ public abstract class WindowOrientationListener {
     }
     
     class SensorEventListenerImpl implements SensorEventListener {
+        // We work with all angles in degrees in this class.
+        private static final float RADIANS_TO_DEGREES = (float) (180 / Math.PI);
+
+        // Indices into SensorEvent.values
         private static final int _DATA_X = 0;
         private static final int _DATA_Y = 1;
         private static final int _DATA_Z = 2;
-        // Angle around x-asis that's considered almost too vertical. Beyond
-        // this angle will not result in any orientation changes. f phone faces uses,
-        // the device is leaning backward.
-        private static final int PIVOT_UPPER = 65;
-        // Angle about x-axis that's considered negative vertical. Beyond this
-        // angle will not result in any orientation changes. If phone faces uses,
-        // the device is leaning forward.
-        private static final int PIVOT_LOWER = -10;
-        static final int ROTATION_0 = 0;
-        static final int ROTATION_90 = 1;
-        static final int ROTATION_180 = 2;
-        static final int ROTATION_270 = 3;
-        int mRotation = ROTATION_0;
 
-        // Threshold values defined for device rotation positions
-        // follow order ROTATION_0 .. ROTATION_270
-        final int THRESHOLDS[][][] = new int[][][] {
-            {{60, 135}, {135, 225}, {225, 300}},
-                {{0, 45}, {45, 135}, {135, 210}, {330, 360}},
-                {{0, 45}, {45, 120}, {240, 315}, {315, 360}},
-                {{0, 30}, {150, 225}, {225, 315}, {315, 360}}
+        // Internal aliases for the four orientation states.  ROTATION_0 = default portrait mode,
+        // ROTATION_90 = left side of device facing the sky, etc.
+        private static final int ROTATION_0 = 0;
+        private static final int ROTATION_90 = 1;
+        private static final int ROTATION_180 = 2;
+        private static final int ROTATION_270 = 3;
+
+        // Current orientation state
+        private int mRotation = ROTATION_0;
+
+        // Mapping our internal aliases into actual Surface rotation values
+        private final int[] SURFACE_ROTATIONS = new int[] {Surface.ROTATION_0, Surface.ROTATION_90,
+                Surface.ROTATION_180, Surface.ROTATION_270};
+
+        // Threshold ranges of orientation angle to transition into other orientation states.
+        // The first list is for transitions from ROTATION_0, the next for ROTATION_90, etc.
+        // ROTATE_TO defines the orientation each threshold range transitions to, and must be kept
+        // in sync with this.
+        // The thresholds are nearly regular -- we generally transition about the halfway point
+        // between two states with a swing of 30 degreees for hysteresis.  For ROTATION_180,
+        // however, we enforce stricter thresholds, pushing the thresholds 15 degrees closer to 180.
+        private final int[][][] THRESHOLDS = new int[][][] {
+                {{60, 165}, {165, 195}, {195, 300}},
+                {{0, 45}, {45, 165}, {165, 195}, {330, 360}},
+                {{0, 45}, {45, 135}, {225, 315}, {315, 360}},
+                {{0, 30}, {165, 195}, {195, 315}, {315, 360}}
         };
 
-        // Transform rotation ranges based on THRESHOLDS. This
-        // has to be in step with THESHOLDS
-        final int ROTATE_TO[][] = new int[][] {
-            {ROTATION_270, ROTATION_180, ROTATION_90},
-            {ROTATION_0, ROTATION_270, ROTATION_180, ROTATION_0},
-            {ROTATION_0, ROTATION_270, ROTATION_90, ROTATION_0},
-            {ROTATION_0, ROTATION_180, ROTATION_90, ROTATION_0}
+        // See THRESHOLDS
+        private final int[][] ROTATE_TO = new int[][] {
+                {ROTATION_270, ROTATION_180, ROTATION_90},
+                {ROTATION_0, ROTATION_270, ROTATION_180, ROTATION_0},
+                {ROTATION_0, ROTATION_270, ROTATION_90, ROTATION_0},
+                {ROTATION_0, ROTATION_180, ROTATION_90, ROTATION_0}
         };
 
-        // Mapping into actual Surface rotation values
-        final int TRANSFORM_ROTATIONS[] = new int[]{Surface.ROTATION_0,
-                Surface.ROTATION_90, Surface.ROTATION_180, Surface.ROTATION_270};
+        // Maximum absolute tilt angle at which to consider orientation changes.  Beyond this (i.e.
+        // when screen is facing the sky or ground), we refuse to make any orientation changes.
+        private static final int MAX_TILT = 65;
+
+        // Additional limits on tilt angle to transition to each new orientation.  We ignore all
+        // vectors with tilt beyond MAX_TILT, but we can set stricter limits on transition to a
+        // particular orientation here.
+        private final int[] MAX_TRANSITION_TILT = new int[] {MAX_TILT, MAX_TILT, 40, MAX_TILT};
+
+        // Between this tilt angle and MAX_TILT, we'll allow orientation changes, but we'll filter
+        // with a higher time constant, making us less sensitive to change.  This primarily helps
+        // prevent momentary orientation changes when placing a device on a table from the side (or
+        // picking one up).
+        private static final int PARTIAL_TILT = 45;
+
+        // Maximum allowable deviation of the magnitude of the sensor vector from that of gravity,
+        // in m/s^2.  Beyond this, we assume the phone is under external forces and we can't trust
+        // the sensor data.  However, under constantly vibrating conditions (think car mount), we
+        // still want to pick up changes, so rather than ignore the data, we filter it with a very
+        // high time constant.
+        private static final int MAX_DEVIATION_FROM_GRAVITY = 1;
+
+        // Actual sampling period corresponding to SensorManager.SENSOR_DELAY_NORMAL.  There's no
+        // way to get this information from SensorManager.
+        // Note the actual period is generally 3-30ms larger than this depending on the device, but
+        // that's not enough to significantly skew our results.
+        private static final int SAMPLING_PERIOD_MS = 200;
+
+        // The following time constants are all used in low-pass filtering the accelerometer output.
+        // See http://en.wikipedia.org/wiki/Low-pass_filter#Discrete-time_realization for
+        // background.
+
+        // When device is near-vertical (screen approximately facing the horizon)
+        private static final int DEFAULT_TIME_CONSTANT_MS = 200;
+        // When device is partially tilted towards the sky or ground
+        private static final int TILTED_TIME_CONSTANT_MS = 600;
+        // When device is under external acceleration, i.e. not just gravity.  We heavily distrust
+        // such readings.
+        private static final int ACCELERATING_TIME_CONSTANT_MS = 5000;
+
+        private static final float DEFAULT_LOWPASS_ALPHA =
+            (float) SAMPLING_PERIOD_MS / (DEFAULT_TIME_CONSTANT_MS + SAMPLING_PERIOD_MS);
+        private static final float TILTED_LOWPASS_ALPHA =
+            (float) SAMPLING_PERIOD_MS / (TILTED_TIME_CONSTANT_MS + SAMPLING_PERIOD_MS);
+        private static final float ACCELERATING_LOWPASS_ALPHA =
+            (float) SAMPLING_PERIOD_MS / (ACCELERATING_TIME_CONSTANT_MS + SAMPLING_PERIOD_MS);
+
+        // The low-pass filtered accelerometer data
+        private float[] mFilteredVector = new float[] {0, 0, 0};
 
         int getCurrentRotation() {
-            return TRANSFORM_ROTATIONS[mRotation];
+            return SURFACE_ROTATIONS[mRotation];
         }
-        
-        private void calculateNewRotation(int orientation, int zyangle) {
-            if (localLOGV) Log.i(TAG, orientation + ", " + zyangle + ", " + mRotation);
-            int rangeArr[][] = THRESHOLDS[mRotation];
+
+        private void calculateNewRotation(int orientation, int tiltAngle) {
+            if (localLOGV) Log.i(TAG, orientation + ", " + tiltAngle + ", " + mRotation);
+            int thresholdRanges[][] = THRESHOLDS[mRotation];
             int row = -1;
-            for (int i = 0; i < rangeArr.length; i++) {
-                if ((orientation >= rangeArr[i][0]) && (orientation < rangeArr[i][1])) {
+            for (int i = 0; i < thresholdRanges.length; i++) {
+                if (orientation >= thresholdRanges[i][0] && orientation < thresholdRanges[i][1]) {
                     row = i;
                     break;
                 }
             }
-            if (row != -1) {
-                // Find new rotation based on current rotation value.
-                // This also takes care of irregular rotations as well.
-                int rotation = ROTATE_TO[mRotation][row];
-                if (localLOGV) Log.i(TAG, " new rotation = " + rotation);
-                if (rotation != mRotation) {
-                    mRotation = rotation;
-                    // Trigger orientation change
-                    onOrientationChanged(TRANSFORM_ROTATIONS[rotation]);
-                }
+            if (row == -1) return; // no matching transition
+
+            int rotation = ROTATE_TO[mRotation][row];
+            if (tiltAngle > MAX_TRANSITION_TILT[rotation]) {
+                // tilted too far flat to go to this rotation
+                return;
             }
+
+            if (localLOGV) Log.i(TAG, " new rotation = " + rotation);
+            mRotation = rotation;
+            onOrientationChanged(SURFACE_ROTATIONS[rotation]);
+        }
+
+        private float lowpassFilter(float newValue, float oldValue, float alpha) {
+            return alpha * newValue + (1 - alpha) * oldValue;
+        }
+
+        private float vectorMagnitude(float x, float y, float z) {
+            return (float) Math.sqrt(x*x + y*y + z*z);
+        }
+
+        /**
+         * Absolute angle between upVector and the x-y plane (the plane of the screen), in [0, 90].
+         * 90 degrees = screen facing the sky or ground.
+         */
+        private float tiltAngle(float z, float magnitude) {
+            return Math.abs((float) Math.asin(z / magnitude) * RADIANS_TO_DEGREES);
         }
 
         public void onSensorChanged(SensorEvent event) {
-            float[] values = event.values;
-            float X = values[_DATA_X];
-            float Y = values[_DATA_Y];
-            float Z = values[_DATA_Z];
-            float OneEightyOverPi = 57.29577957855f;
-            float gravity = (float) Math.sqrt(X*X+Y*Y+Z*Z);
-            float zyangle = (float)Math.asin(Z/gravity)*OneEightyOverPi;
-            if ((zyangle <= PIVOT_UPPER) && (zyangle >= PIVOT_LOWER)) {
-                // Check orientation only if the phone is flat enough
-                // Don't trust the angle if the magnitude is small compared to the y value
-                float angle = (float)Math.atan2(Y, -X) * OneEightyOverPi;
-                int orientation = 90 - Math.round(angle);
-                // normalize to 0 - 359 range
-                while (orientation >= 360) {
-                    orientation -= 360;
-                }
-                while (orientation < 0) {
-                    orientation += 360;
-                }
-                calculateNewRotation(orientation, Math.round(zyangle));
+            // the vector given in the SensorEvent points straight up (towards the sky) under ideal
+            // conditions (the phone is not accelerating).  i'll call this upVector elsewhere.
+            float x = event.values[_DATA_X];
+            float y = event.values[_DATA_Y];
+            float z = event.values[_DATA_Z];
+            float magnitude = vectorMagnitude(x, y, z);
+            float deviation = Math.abs(magnitude - SensorManager.STANDARD_GRAVITY);
+            float tiltAngle = tiltAngle(z, magnitude);
+
+            float alpha = DEFAULT_LOWPASS_ALPHA;
+            if (tiltAngle > MAX_TILT) {
+                return;
+            } else if (deviation > MAX_DEVIATION_FROM_GRAVITY) {
+                alpha = ACCELERATING_LOWPASS_ALPHA;
+            } else if (tiltAngle > PARTIAL_TILT) {
+                alpha = TILTED_LOWPASS_ALPHA;
             }
+
+            x = mFilteredVector[0] = lowpassFilter(x, mFilteredVector[0], alpha);
+            y = mFilteredVector[1] = lowpassFilter(y, mFilteredVector[1], alpha);
+            z = mFilteredVector[2] = lowpassFilter(z, mFilteredVector[2], alpha);
+            magnitude = vectorMagnitude(x, y, z);
+            tiltAngle = tiltAngle(z, magnitude);
+
+            // Angle between the x-y projection of upVector and the +y-axis, increasing
+            // counter-clockwise.
+            // 0 degrees = speaker end towards the sky
+            // 90 degrees = left edge of device towards the sky
+            float orientationAngle = (float) Math.atan2(-x, y) * RADIANS_TO_DEGREES;
+            int orientation = Math.round(orientationAngle);
+            // atan2 returns (-180, 180]; normalize to [0, 360)
+            if (orientation < 0) {
+                orientation += 360;
+            }
+            calculateNewRotation(orientation, Math.round(tiltAngle));
         }
 
         public void onAccuracyChanged(Sensor sensor, int accuracy) {
@@ -208,13 +297,12 @@ public abstract class WindowOrientationListener {
     public boolean canDetectOrientation() {
         return mSensor != null;
     }
-    
+
     /**
      * Called when the rotation view of the device has changed.
-     * Can be either Surface.ROTATION_90 or Surface.ROTATION_0.
-     * @param rotation The new orientation of the device.
      *
-     *  @see #ORIENTATION_UNKNOWN
+     * @param rotation The new orientation of the device, one of the Surface.ROTATION_* constants.
+     * @see Surface
      */
     abstract public void onOrientationChanged(int rotation);
 }

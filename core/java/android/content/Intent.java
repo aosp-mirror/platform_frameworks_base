@@ -34,7 +34,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.util.Log;
-import com.android.common.XmlUtils;
+
+import com.android.internal.util.XmlUtils;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -3480,6 +3481,20 @@ public class Intent implements Parcelable, Cloneable {
      * @param name The name of the desired item.
      *
      * @return the value of an item that previously added with putExtra()
+     * or null if no ArrayList<CharSequence> value was found.
+     *
+     * @see #putCharSequenceArrayListExtra(String, ArrayList)
+     */
+    public ArrayList<CharSequence> getCharSequenceArrayListExtra(String name) {
+        return mExtras == null ? null : mExtras.getCharSequenceArrayList(name);
+    }
+
+    /**
+     * Retrieve extended data from the intent.
+     *
+     * @param name The name of the desired item.
+     *
+     * @return the value of an item that previously added with putExtra()
      * or null if no boolean array value was found.
      *
      * @see #putExtra(String, boolean[])
@@ -3598,6 +3613,20 @@ public class Intent implements Parcelable, Cloneable {
      */
     public String[] getStringArrayExtra(String name) {
         return mExtras == null ? null : mExtras.getStringArray(name);
+    }
+
+    /**
+     * Retrieve extended data from the intent.
+     *
+     * @param name The name of the desired item.
+     *
+     * @return the value of an item that previously added with putExtra()
+     * or null if no CharSequence array value was found.
+     *
+     * @see #putExtra(String, CharSequence[])
+     */
+    public CharSequence[] getCharSequenceArrayExtra(String name) {
+        return mExtras == null ? null : mExtras.getCharSequenceArray(name);
     }
 
     /**
@@ -4308,6 +4337,29 @@ public class Intent implements Parcelable, Cloneable {
      * like "com.android.contacts.ShowAll".
      *
      * @param name The name of the extra data, with package prefix.
+     * @param value The ArrayList<CharSequence> data value.
+     *
+     * @return Returns the same Intent object, for chaining multiple calls
+     * into a single statement.
+     *
+     * @see #putExtras
+     * @see #removeExtra
+     * @see #getCharSequenceArrayListExtra(String)
+     */
+    public Intent putCharSequenceArrayListExtra(String name, ArrayList<CharSequence> value) {
+        if (mExtras == null) {
+            mExtras = new Bundle();
+        }
+        mExtras.putCharSequenceArrayList(name, value);
+        return this;
+    }
+
+    /**
+     * Add extended data to the intent.  The name must include a package
+     * prefix, for example the app com.android.contacts would use names
+     * like "com.android.contacts.ShowAll".
+     *
+     * @param name The name of the extra data, with package prefix.
      * @param value The Serializable data value.
      *
      * @return Returns the same Intent object, for chaining multiple calls
@@ -4529,6 +4581,29 @@ public class Intent implements Parcelable, Cloneable {
             mExtras = new Bundle();
         }
         mExtras.putStringArray(name, value);
+        return this;
+    }
+
+    /**
+     * Add extended data to the intent.  The name must include a package
+     * prefix, for example the app com.android.contacts would use names
+     * like "com.android.contacts.ShowAll".
+     *
+     * @param name The name of the extra data, with package prefix.
+     * @param value The CharSequence array data value.
+     *
+     * @return Returns the same Intent object, for chaining multiple calls
+     * into a single statement.
+     *
+     * @see #putExtras
+     * @see #removeExtra
+     * @see #getCharSequenceArrayExtra(String)
+     */
+    public Intent putExtra(String name, CharSequence[] value) {
+        if (mExtras == null) {
+            mExtras = new Bundle();
+        }
+        mExtras.putCharSequenceArray(name, value);
         return this;
     }
 

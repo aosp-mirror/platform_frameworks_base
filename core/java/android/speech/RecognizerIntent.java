@@ -32,6 +32,15 @@ import android.os.Bundle;
  * Constants for supporting speech recognition through starting an {@link Intent}
  */
 public class RecognizerIntent {
+    /**
+     * The extra key used in an intent to the speech recognizer for voice search. Not
+     * generally to be used by developers. The system search dialog uses this, for example,
+     * to set a calling package for identification by a voice search API. If this extra
+     * is set by anyone but the system process, it should be overridden by the voice search
+     * implementation.
+     */
+    public final static String EXTRA_CALLING_PACKAGE = "calling_package";
+
     private RecognizerIntent() {
         // Not for instantiating.
     }
@@ -287,6 +296,15 @@ public class RecognizerIntent {
      */
     public static final String ACTION_GET_LANGUAGE_DETAILS =
             "android.speech.action.GET_LANGUAGE_DETAILS";
+    
+    /**
+     * Specify this boolean extra in a broadcast of {@link #ACTION_GET_LANGUAGE_DETAILS} to
+     * indicate that only the current language preference is needed in the response. This
+     * avoids any additional computation if all you need is {@link #EXTRA_LANGUAGE_PREFERENCE}
+     * in the response.
+     */
+    public static final String EXTRA_ONLY_RETURN_LANGUAGE_PREFERENCE =
+            "android.speech.extra.ONLY_RETURN_LANGUAGE_PREFERENCE";
     
     /**
      * The key to the extra in the {@link Bundle} returned by {@link #ACTION_GET_LANGUAGE_DETAILS}

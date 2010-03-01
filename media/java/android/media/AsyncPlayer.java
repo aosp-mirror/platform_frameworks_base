@@ -72,10 +72,8 @@ public class AsyncPlayer {
                 Log.w(mTag, "Notification sound delayed by " + delay + "msecs");
             }
         }
-        catch (IOException e) {
+        catch (Exception e) {
             Log.w(mTag, "error loading sound for " + cmd.uri, e);
-        } catch (IllegalStateException e) {
-            Log.w(mTag, "IllegalStateException (content provider died?) " + cmd.uri, e);
         }
     }
 

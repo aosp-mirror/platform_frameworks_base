@@ -374,7 +374,7 @@ class BackupManagerService extends IBackupManager.Stub {
         mProvisioned = Settings.Secure.getInt(context.getContentResolver(),
                 Settings.Secure.BACKUP_PROVISIONED, 0) != 0;
         mAutoRestore = Settings.Secure.getInt(context.getContentResolver(),
-                Settings.Secure.BACKUP_AUTO_RESTORE, 0) != 0;
+                Settings.Secure.BACKUP_AUTO_RESTORE, 1) != 0;
         // If Encrypted file systems is enabled or disabled, this call will return the
         // correct directory.
         mBaseStateDir = new File(Environment.getSecureDataDirectory(), "backup");
@@ -2289,7 +2289,7 @@ class BackupManagerService extends IBackupManager.Stub {
         if (DEBUG) Log.v(TAG, "restoreAtInstall pkg=" + packageName
                 + " token=" + Integer.toHexString(token));
 
-        if (restoreSet != 0) {
+        if (mAutoRestore && mProvisioned && restoreSet != 0) {
             // okay, we're going to attempt a restore of this package from this restore set.
             // The eventual message back into the Package Manager to run the post-install
             // steps for 'token' will be issued from the restore handling code.
@@ -2306,8 +2306,8 @@ class BackupManagerService extends IBackupManager.Stub {
                     restoreSet, pkg, token);
             mBackupHandler.sendMessage(msg);
         } else {
-            // No way to attempt a restore; just tell the Package Manager to proceed
-            // with the post-install handling for this package.
+            // Auto-restore disabled or no way to attempt a restore; just tell the Package
+            // Manager to proceed with the post-install handling for this package.
             if (DEBUG) Log.v(TAG, "No restore set -- skipping restore");
             try {
                 mPackageManagerBinder.finishPackageInstall(token);
@@ -2427,6 +2427,12 @@ class BackupManagerService extends IBackupManager.Stub {
                 throw new SecurityException("No permission to restore other packages");
             }
 
+            // If the package has no backup agent, we obviously cannot proceed
+            if (app.applicationInfo.backupAgentName == null) {
+                Log.w(TAG, "Asked to restore package " + packageName + " with no agent");
+                return -1;
+            }
+
             // So far so good; we're allowed to try to restore this package.  Now
             // check whether there is data for it in the current dataset, falling back
             // to the ancestral dataset if not.
@@ -2484,6 +2490,7 @@ class BackupManagerService extends IBackupManager.Stub {
             pw.println("Backup Manager is " + (mEnabled ? "enabled" : "disabled")
                     + " / " + (!mProvisioned ? "not " : "") + "provisioned / "
                     + (this.mPendingInits.size() == 0 ? "not " : "") + "pending init");
+            pw.println("Auto-restore is " + (mAutoRestore ? "enabled" : "disabled"));
             pw.println("Last backup pass: " + mLastBackupPass
                     + " (now = " + System.currentTimeMillis() + ')');
             pw.println("  next scheduled: " + mNextBackupPass);

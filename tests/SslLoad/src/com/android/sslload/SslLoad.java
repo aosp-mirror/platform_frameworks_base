@@ -35,7 +35,7 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
 import android.util.Log;
-import com.android.common.AndroidHttpClient;
+import android.net.http.AndroidHttpClient;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpGet;

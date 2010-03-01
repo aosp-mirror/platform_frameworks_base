@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.common;
+package com.android.internal.util;
 
 import org.xmlpull.v1.XmlSerializer;
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.app;
+package android.app.admin;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -150,6 +150,11 @@ public final class DeviceAdminInfo implements Parcelable {
     final ResolveInfo mReceiver;
     
     /**
+     * Whether this should be visible to the user.
+     */
+    boolean mVisible;
+    
+    /**
      * The policies this administrator needs access to.
      */
     int mUsesPolicies;
@@ -190,8 +195,11 @@ public final class DeviceAdminInfo implements Parcelable {
             }
             
             TypedArray sa = context.getResources().obtainAttributes(attrs,
-                    com.android.internal.R.styleable.Wallpaper);
+                    com.android.internal.R.styleable.DeviceAdmin);
 
+            mVisible = sa.getBoolean(
+                    com.android.internal.R.styleable.DeviceAdmin_visible, true);
+            
             sa.recycle();
             
             int outerDepth = parser.getDepth();
@@ -298,6 +306,14 @@ public final class DeviceAdminInfo implements Parcelable {
      */
     public Drawable loadIcon(PackageManager pm) {
         return mReceiver.loadIcon(pm);
+    }
+    
+    /**
+     * Returns whether this device admin would like to be visible to the
+     * user, even when it is not enabled.
+     */
+    public boolean isVisible() {
+        return mVisible;
     }
     
     /**

@@ -83,8 +83,16 @@
     </string-array>
 
     <!-- Dhcp range (min, max) to use for tethering purposes -->
-    <string-array name="config_tether_dhcp_range">
+    <string-array translatable="false" name="config_tether_dhcp_range">
     </string-array>
+
+    <!-- Regex array of allowable upstream ifaces for tethering - for example if you want
+         tethering on your a new interface called "foo2" add "foo\\d" here -->
+    <string-array translatable="false" name="config_tether_upstream_regexs">
+    </string-array>
+
+    <!-- Boolean indicating if we require the use of DUN on mobile for tethering -->
+    <bool translatable="false" name="config_tether_dun_required">true</bool>
 
     <!-- Flag indicating whether the keyguard should be bypassed when
          the slider is open.  This can be set or unset depending how easily
@@ -137,6 +145,9 @@
          when the lid is open, 2 means it is accessible when the lid is
          closed.  The default is 0. -->
     <integer name="config_lidNavigationAccessibility">0</integer>
+
+    <!-- Indicate whether the SD card is accessible without removing the battery. -->
+    <bool name="config_batterySdCardAccessibility">false</bool>
 
     <!-- Vibrator pattern for feedback about a long screen/key press -->
     <integer-array name="config_longPressVibePattern">

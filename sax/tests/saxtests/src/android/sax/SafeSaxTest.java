@@ -29,7 +29,7 @@ import android.test.suitebuilder.annotation.SmallTest;
 import android.text.format.Time;
 import android.util.Log;
 import android.util.Xml;
-import com.android.common.XmlUtils;
+import com.android.internal.util.XmlUtils;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;

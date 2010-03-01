@@ -35,6 +35,7 @@ import android.app.AlertDialog;
 import android.app.ApplicationErrorReport;
 import android.app.Dialog;
 import android.app.IActivityController;
+import android.app.IActivityManager;
 import android.app.IActivityWatcher;
 import android.app.IApplicationThread;
 import android.app.IInstrumentationWatcher;
@@ -386,6 +387,18 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     
     final ArrayList<PendingActivityLaunch> mPendingActivityLaunches
             = new ArrayList<PendingActivityLaunch>();
+    
+    /**
+     * List of people waiting to find out about the next launched activity.
+     */
+    final ArrayList<IActivityManager.WaitResult> mWaitingActivityLaunched
+            = new ArrayList<IActivityManager.WaitResult>();
+    
+    /**
+     * List of people waiting to find out about the next visible activity.
+     */
+    final ArrayList<IActivityManager.WaitResult> mWaitingActivityVisible
+            = new ArrayList<IActivityManager.WaitResult>();
     
     /**
      * List of all active broadcasts that are to be executed immediately
@@ -3559,11 +3572,38 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         return START_SUCCESS;
     }
 
-    public final int startActivity(IApplicationThread caller,
+    void reportActivityLaunchedLocked(boolean timeout, HistoryRecord r,
+            long thisTime, long totalTime) {
+        for (int i=mWaitingActivityLaunched.size()-1; i>=0; i--) {
+            WaitResult w = mWaitingActivityLaunched.get(i);
+            w.timeout = timeout;
+            if (r != null) {
+                w.who = new ComponentName(r.info.packageName, r.info.name);
+            }
+            w.thisTime = thisTime;
+            w.totalTime = totalTime;
+        }
+        notify();
+    }
+    
+    void reportActivityVisibleLocked(HistoryRecord r) {
+        for (int i=mWaitingActivityVisible.size()-1; i>=0; i--) {
+            WaitResult w = mWaitingActivityVisible.get(i);
+            w.timeout = false;
+            if (r != null) {
+                w.who = new ComponentName(r.info.packageName, r.info.name);
+            }
+            w.totalTime = SystemClock.uptimeMillis() - w.thisTime;
+            w.thisTime = w.totalTime;
+        }
+        notify();
+    }
+    
+    private final int startActivityMayWait(IApplicationThread caller,
             Intent intent, String resolvedType, Uri[] grantedUriPermissions,
             int grantedMode, IBinder resultTo,
             String resultWho, int requestCode, boolean onlyIfNeeded,
-            boolean debug) {
+            boolean debug, WaitResult outResult) {
         // Refuse possible leaked file descriptors
         if (intent != null && intent.hasFileDescriptors()) {
             throw new IllegalArgumentException("File descriptors passed in Intent");
@@ -3603,7 +3643,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             }
         }
 
-        synchronized(this) {
+        synchronized (this) {
             int callingPid;
             int callingUid;
             if (caller == null) {
@@ -3618,11 +3658,62 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     resultTo, resultWho, requestCode, callingPid, callingUid,
                     onlyIfNeeded, componentSpecified);
             Binder.restoreCallingIdentity(origId);
+            
+            if (outResult != null) {
+                outResult.result = res;
+                if (res == IActivityManager.START_SUCCESS) {
+                    mWaitingActivityLaunched.add(outResult);
+                    do {
+                        try {
+                            wait();
+                        } catch (InterruptedException e) {
+                        }
+                    } while (!outResult.timeout && outResult.who == null);
+                } else if (res == IActivityManager.START_TASK_TO_FRONT) {
+                    HistoryRecord r = this.topRunningActivityLocked(null);
+                    if (r.nowVisible) {
+                        outResult.timeout = false;
+                        outResult.who = new ComponentName(r.info.packageName, r.info.name);
+                        outResult.totalTime = 0;
+                        outResult.thisTime = 0;
+                    } else {
+                        outResult.thisTime = SystemClock.uptimeMillis();
+                        mWaitingActivityVisible.add(outResult);
+                        do {
+                            try {
+                                wait();
+                            } catch (InterruptedException e) {
+                            }
+                        } while (!outResult.timeout && outResult.who == null);
+                    }
+                }
+            }
+            
             return res;
         }
     }
 
-    public int startActivityIntentSender(IApplicationThread caller,
+    public final int startActivity(IApplicationThread caller,
+            Intent intent, String resolvedType, Uri[] grantedUriPermissions,
+            int grantedMode, IBinder resultTo,
+            String resultWho, int requestCode, boolean onlyIfNeeded,
+            boolean debug) {
+        return startActivityMayWait(caller, intent, resolvedType, grantedUriPermissions,
+                grantedMode, resultTo, resultWho, requestCode, onlyIfNeeded, debug, null);
+    }
+
+    public final WaitResult startActivityAndWait(IApplicationThread caller,
+            Intent intent, String resolvedType, Uri[] grantedUriPermissions,
+            int grantedMode, IBinder resultTo,
+            String resultWho, int requestCode, boolean onlyIfNeeded,
+            boolean debug) {
+        WaitResult res = new WaitResult();
+        startActivityMayWait(caller, intent, resolvedType, grantedUriPermissions,
+                grantedMode, resultTo, resultWho, requestCode, onlyIfNeeded, debug, res);
+        return res;
+    }
+    
+     public int startActivityIntentSender(IApplicationThread caller,
             IntentSender intent, Intent fillInIntent, String resolvedType,
             IBinder resultTo, String resultWho, int requestCode,
             int flagsMask, int flagsValues) {
@@ -5505,6 +5596,10 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             if (index >= 0) {
                 HistoryRecord r = (HistoryRecord)mHistory.get(index);
 
+                if (fromTimeout) {
+                    reportActivityLaunchedLocked(fromTimeout, r, -1, -1);
+                }
+                
                 // This is a hack to semi-deal with a race condition
                 // in the client where it can be constructed with a
                 // newer configuration from when we asked it to launch.
@@ -5539,6 +5634,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     mBooted = true;
                     enableScreen = true;
                 }
+                
+            } else if (fromTimeout) {
+                reportActivityLaunchedLocked(fromTimeout, null, -1, -1);
             }
 
             // Atomically retrieve all of the other things to do.

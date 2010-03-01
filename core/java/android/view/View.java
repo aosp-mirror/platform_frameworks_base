@@ -1507,6 +1507,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     private static final int PREPRESSED             = 0x02000000;
     
     /**
+     * Indicates whether the view is temporarily detached.
+     *
+     * @hide
+     */
+    static final int CANCEL_NEXT_UP_EVENT = 0x04000000;
+    
+    /**
      * Always allow a user to overscroll this view, provided it is a
      * view that can scroll.
      */
@@ -1819,7 +1826,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         mContext = context;
         mResources = context != null ? context.getResources() : null;
         mViewFlags = SOUND_EFFECTS_ENABLED | HAPTIC_FEEDBACK_ENABLED;
-        ++sInstanceCount;
+        // Used for debug only
+        //++sInstanceCount;
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
     }
 
@@ -2133,11 +2141,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     View() {
     }
 
+    // Used for debug only
+    /*
     @Override
     protected void finalize() throws Throwable {
         super.finalize();
         --sInstanceCount;
     }
+    */
 
     /**
      * <p>
@@ -3664,6 +3675,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      */
     public void onStartTemporaryDetach() {
         removeUnsetPressCallback();
+        mPrivateFlags |= CANCEL_NEXT_UP_EVENT;
     }
 
     /**
@@ -5909,6 +5921,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @see #onAttachedToWindow()
      */
     protected void onDetachedFromWindow() {
+        mPrivateFlags &= ~CANCEL_NEXT_UP_EVENT;
         removeUnsetPressCallback();
         removeLongPressCallback();
         destroyDrawingCache();

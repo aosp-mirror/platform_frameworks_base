@@ -19,18 +19,42 @@ package com.android.common.speech;
 /**
  * Utilities for voice recognition implementations.
  *
- * @see android.app.RecognitionService
+ * @see android.speech.RecognitionService
+ * @see android.speech.RecognizerIntent
  */
 public class Recognition {
-
+    
     /**
-     * The extra key used in an intent to the speech recognizer for voice search. Not
-     * generally to be used by developers. The system search dialog uses this, for example,
-     * to set a calling package for identification by a voice search API. If this extra
-     * is set by anyone but the system process, it should be overridden by the voice search
-     * implementation.
+     * The key to the extra in the Bundle returned by
+     * android.speech.RecognizerIntent#ACTION_GET_LANGUAGE_DETAILS
+     * which is an ArrayList of CharSequences which are hints that can be shown to
+     * the user for voice actions currently supported by voice search for the user's current
+     * language preference for voice search (i.e., the one defined in the extra
+     * android.speech.RecognizerIntent#EXTRA_LANGUAGE_PREFERENCE).
+     *
+     * If this is paired with EXTRA_HINT_CONTEXT, should return a set of hints that are
+     * appropriate for the provided context.
+     *
+     * The CharSequences are SpannedStrings and will contain segments wrapped in
+     * <annotation action="true"></annotation>. This is to indicate the section of the text
+     * which represents the voice action, to be highlighted in the UI if so desired.
      */
-    public final static String EXTRA_CALLING_PACKAGE = "calling_package";
+    public static final String EXTRA_HINT_STRINGS = "android.speech.extra.HINT_STRINGS";
+    
+    /**
+     * The key to an extra to be included in the request intent for
+     * android.speech.RecognizerIntent#ACTION_GET_LANGUAGE_DETAILS.
+     * Should be an int of one of the values defined below. If an
+     * unknown int value is provided, it should be ignored.
+     */
+    public static final String EXTRA_HINT_CONTEXT = "android.speech.extra.HINT_CONTEXT";
+    
+    /**
+     * A set of values for EXTRA_HINT_CONTEXT.
+     */
+    public static final int HINT_CONTEXT_UNKNOWN = 0;
+    public static final int HINT_CONTEXT_VOICE_SEARCH_HELP = 1;
+    public static final int HINT_CONTEXT_CAR_HOME = 2;
 
     private Recognition() { }   // don't instantiate
 }

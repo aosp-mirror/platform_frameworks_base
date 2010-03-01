@@ -19,15 +19,15 @@ package android.provider;
 import android.accounts.Account;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
+import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.Intent;
-import android.content.EntityIterator;
 import android.content.CursorEntityIterator;
 import android.content.Entity;
-import android.content.ContentProviderClient;
+import android.content.EntityIterator;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.net.Uri;
@@ -408,6 +408,12 @@ public final class Calendar {
         public static final String SELF_ATTENDEE_STATUS = "selfAttendeeStatus";
 
         /**
+         * This column is available for use by sync adapters
+         * <P>Type: TEXT</P>
+         */
+        public static final String SYNC_ADAPTER_DATA = "syncAdapterData";
+
+        /**
          * The comments feed uri.
          * <P>Type: TEXT</P>
          */
@@ -644,6 +650,7 @@ public final class Calendar {
                 mProvider = provider;
             }
 
+            @Override
             public Entity getEntityAndIncrementCursor(Cursor cursor) throws RemoteException {
                 // we expect the cursor is already at the row we need to read from
                 final long eventId = cursor.getLong(cursor.getColumnIndexOrThrow(Events._ID));

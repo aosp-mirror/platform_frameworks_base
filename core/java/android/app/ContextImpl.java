@@ -17,7 +17,7 @@
 package android.app;
 
 import com.android.internal.policy.PolicyManager;
-import com.android.common.XmlUtils;
+import com.android.internal.util.XmlUtils;
 import com.google.android.collect.Maps;
 
 import org.xmlpull.v1.XmlPullParserException;
@@ -99,6 +99,7 @@ import android.view.accessibility.AccessibilityManager;
 import android.view.inputmethod.InputMethodManager;
 import android.accounts.AccountManager;
 import android.accounts.IAccountManager;
+import android.app.admin.DevicePolicyManager;
 
 import com.android.internal.os.IDropBoxManagerService;
 
@@ -209,11 +210,14 @@ class ContextImpl extends Context {
 
     private static final String[] EMPTY_FILE_LIST = {};
 
+    // For debug only
+    /*
     @Override
     protected void finalize() throws Throwable {
         super.finalize();
         --sInstanceCount;
     }
+    */
 
     public static long getInstanceCount() {
         return sInstanceCount;
@@ -1446,7 +1450,8 @@ class ContextImpl extends Context {
     }
 
     ContextImpl() {
-        ++sInstanceCount;
+        // For debug only
+        //++sInstanceCount;
         mOuterContext = this;
     }
 

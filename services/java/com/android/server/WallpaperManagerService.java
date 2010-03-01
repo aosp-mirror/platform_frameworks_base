@@ -67,9 +67,9 @@ import org.xmlpull.v1.XmlSerializer;
 
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.service.wallpaper.ImageWallpaper;
+import com.android.internal.util.FastXmlSerializer;
 import com.android.server.DevicePolicyManagerService.ActiveAdmin;
 import com.android.server.DevicePolicyManagerService.MyPackageMonitor;
-import com.android.common.FastXmlSerializer;
 
 class WallpaperManagerService extends IWallpaperManager.Stub {
     static final String TAG = "WallpaperService";

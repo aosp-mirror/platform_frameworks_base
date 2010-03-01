@@ -48,6 +48,7 @@ public class MobileDataStateTracker extends NetworkStateTracker {
     private ITelephony mPhoneService;
 
     private String mApnType;
+    private String mApnTypeToWatchFor;
     private String mApnName;
     private boolean mEnabled;
     private BroadcastReceiver mStateReceiver;
@@ -65,6 +66,12 @@ public class MobileDataStateTracker extends NetworkStateTracker {
                 TelephonyManager.getDefault().getNetworkType(), tag,
                 TelephonyManager.getDefault().getNetworkTypeName());
         mApnType = networkTypeToApnType(netType);
+        if (TextUtils.equals(mApnType, Phone.APN_TYPE_HIPRI)) {
+            mApnTypeToWatchFor = Phone.APN_TYPE_DEFAULT;
+        } else {
+            mApnTypeToWatchFor = mApnType;
+        }
+
         mPhoneService = null;
         if(netType == ConnectivityManager.TYPE_MOBILE) {
             mEnabled = true;
@@ -122,7 +129,7 @@ public class MobileDataStateTracker extends NetworkStateTracker {
 
         String[] list = typeList.split(",");
         for(int i=0; i< list.length; i++) {
-            if (TextUtils.equals(list[i], mApnType) ||
+            if (TextUtils.equals(list[i], mApnTypeToWatchFor) ||
                 TextUtils.equals(list[i], Phone.APN_TYPE_ALL)) {
                 return true;
             }

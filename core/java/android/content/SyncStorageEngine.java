@@ -18,7 +18,7 @@ package android.content;
 
 import com.android.internal.os.AtomicFile;
 import com.android.internal.util.ArrayUtils;
-import com.android.common.FastXmlSerializer;
+import com.android.internal.util.FastXmlSerializer;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -664,7 +664,7 @@ public class SyncStorageEngine extends Handler {
             }
 
             if (mActiveSync != null) {
-                AuthorityInfo ainfo = getAuthority(mActiveSync.authorityId);
+                AuthorityInfo ainfo = getAuthority(mActiveSync.getAuthorityId());
                 if (ainfo != null && ainfo.account.equals(account)
                         && ainfo.authority.equals(authority)) {
                     return true;

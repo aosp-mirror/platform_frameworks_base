@@ -66,6 +66,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
 
     private Tethering mTethering;
+    private boolean mTetheringConfigValid = false;
 
     /**
      * Sometimes we want to refer to the individual network state
@@ -320,6 +321,12 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
 
         mTethering = new Tethering(mContext);
+        mTetheringConfigValid = (((mNetTrackers[ConnectivityManager.TYPE_MOBILE_DUN] != null) ||
+                                  !mTethering.isDunRequired()) &&
+                                 (mTethering.getTetherableUsbRegexs().length != 0 ||
+                                  mTethering.getTetherableWifiRegexs().length != 0) &&
+                                 mTethering.getUpstreamIfaceRegexs().length != 0);
+
     }
 
 
@@ -934,9 +941,18 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
             int newType = -1;
             int newPriority = -1;
+            boolean noMobileData = !getMobileDataEnabled();
             for (int checkType=0; checkType <= ConnectivityManager.MAX_NETWORK_TYPE; checkType++) {
                 if (checkType == prevNetType) continue;
                 if (mNetAttributes[checkType] == null) continue;
+                if (mNetAttributes[checkType].mRadio == ConnectivityManager.TYPE_MOBILE &&
+                        noMobileData) {
+                    if (DBG) {
+                        Log.d(TAG, "not failing over to mobile type " + checkType +
+                                " because Mobile Data Disabled");
+                    }
+                    continue;
+                }
                 if (mNetAttributes[checkType].isDefault()) {
                     /* TODO - if we have multiple nets we could use
                      * we may want to put more thought into which we choose
@@ -1489,8 +1505,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     public boolean isTetheringSupported() {
         enforceTetherAccessPermission();
         int defaultVal = (SystemProperties.get("ro.tether.denied").equals("true") ? 0 : 1);
-        return ((Settings.Secure.getInt(mContext.getContentResolver(),
-                Settings.Secure.TETHER_SUPPORTED, defaultVal) != 0) &&
-                (mNetTrackers[ConnectivityManager.TYPE_MOBILE_DUN] != null));
+        boolean tetherEnabledInSettings = (Settings.Secure.getInt(mContext.getContentResolver(),
+                Settings.Secure.TETHER_SUPPORTED, defaultVal) != 0);
+        return tetherEnabledInSettings && mTetheringConfigValid;
     }
 }

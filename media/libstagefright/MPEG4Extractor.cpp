@@ -439,14 +439,16 @@ status_t MPEG4Extractor::parseChunk(off_t *offset, int depth) {
     printf("%sfound chunk '%s' of size %lld\n", indent, chunk, chunk_size);
 
     char buffer[256];
-    if (chunk_size <= sizeof(buffer)) {
-        if (mDataSource->readAt(*offset, buffer, chunk_size)
-                < (ssize_t)chunk_size) {
-            return ERROR_IO;
-        }
-
-        hexdump(buffer, chunk_size);
+    size_t n = chunk_size;
+    if (n > sizeof(buffer)) {
+        n = sizeof(buffer);
     }
+    if (mDataSource->readAt(*offset, buffer, n)
+            < (ssize_t)n) {
+        return ERROR_IO;
+    }
+
+    hexdump(buffer, n);
 #endif
 
     PathAdder autoAdder(&mPath, chunk_type);
@@ -981,7 +983,13 @@ status_t MPEG4Extractor::parseChunk(off_t *offset, int depth) {
 
             if (U32_AT(buffer) != 0) {
                 // Should be version 0, flags 0.
-                return ERROR_MALFORMED;
+
+                // If it's not, let's assume this is one of those
+                // apparently malformed chunks that don't have flags
+                // and completely different semantics than what's
+                // in the MPEG4 specs and skip it.
+                *offset += chunk_size;
+                return OK;
             }
 
             off_t stop_offset = *offset + chunk_size;
@@ -1626,7 +1634,8 @@ bool SniffMPEG4(
 
     if (!memcmp(header, "ftyp3gp", 7) || !memcmp(header, "ftypmp42", 8)
         || !memcmp(header, "ftypisom", 8) || !memcmp(header, "ftypM4V ", 8)
-        || !memcmp(header, "ftypM4A ", 8) || !memcmp(header, "ftypf4v ", 8)) {
+        || !memcmp(header, "ftypM4A ", 8) || !memcmp(header, "ftypf4v ", 8)
+        || !memcmp(header, "ftypkddi", 8)) {
         *mimeType = MEDIA_MIMETYPE_CONTAINER_MPEG4;
         *confidence = 0.1;
 

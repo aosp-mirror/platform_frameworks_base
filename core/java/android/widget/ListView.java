@@ -138,8 +138,11 @@ public class ListView extends AbsListView {
 
     // the single allocated result per list view; kinda cheesey but avoids
     // allocating these thingies too often.
-    private ArrowScrollFocusResult mArrowScrollFocusResult = new ArrowScrollFocusResult();
+    private final ArrowScrollFocusResult mArrowScrollFocusResult = new ArrowScrollFocusResult();
 
+    // Keeps focused children visible through resizes
+    private FocusSelector mFocusSelector;
+    
     public ListView(Context context) {
         this(context, null);
     }
@@ -1017,6 +1020,39 @@ public class ListView extends AbsListView {
         return sel;
     }
 
+    private class FocusSelector implements Runnable {
+        private int mPosition;
+        private int mPositionTop;
+        
+        public FocusSelector setup(int position, int top) {
+            mPosition = position;
+            mPositionTop = top;
+            return this;
+        }
+        
+        public void run() {
+            setSelectionFromTop(mPosition, mPositionTop);
+        }
+    }
+    
+    @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        if (getChildCount() > 0) {
+            View focusedChild = getFocusedChild();
+            if (focusedChild != null) {
+                final int childPosition = mFirstPosition + indexOfChild(focusedChild);
+                final int childBottom = focusedChild.getBottom();
+                final int offset = Math.max(0, childBottom - (h - mPaddingTop));
+                final int top = focusedChild.getTop() - offset;
+                if (mFocusSelector == null) {
+                    mFocusSelector = new FocusSelector();
+                }
+                post(mFocusSelector.setup(childPosition, top));
+            }
+        }
+        super.onSizeChanged(w, h, oldw, oldh);
+    }
+
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         // Sets up mListPadding
@@ -1040,7 +1076,8 @@ public class ListView extends AbsListView {
             childWidth = child.getMeasuredWidth();
             childHeight = child.getMeasuredHeight();
 
-            if (recycleOnMeasure()) {
+            if (recycleOnMeasure() && mRecycler.shouldRecycleViewType(
+                    ((LayoutParams) child.getLayoutParams()).viewType)) {
                 mRecycler.addScrapView(child);
             }
         }
@@ -1155,7 +1192,8 @@ public class ListView extends AbsListView {
             }
 
             // Recycle the view before we possibly return from the method
-            if (recyle) {
+            if (recyle && recycleBin.shouldRecycleViewType(
+                    ((LayoutParams) child.getLayoutParams()).viewType)) {
                 recycleBin.addScrapView(child);
             }
 
@@ -1192,7 +1230,6 @@ public class ListView extends AbsListView {
                     return mFirstPosition + i;
                 }
             }
-            return mFirstPosition + childCount - 1;
         }
         return INVALID_POSITION;
     }

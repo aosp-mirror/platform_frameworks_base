@@ -105,6 +105,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
     private static final String[] mSupportedApnTypes = {
             Phone.APN_TYPE_DEFAULT,
             Phone.APN_TYPE_MMS,
+            Phone.APN_TYPE_DUN,
             Phone.APN_TYPE_HIPRI };
 
     // Possibly promoate to base class, the only difference is

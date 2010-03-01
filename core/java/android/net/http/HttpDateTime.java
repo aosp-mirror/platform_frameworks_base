@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.common;
+package android.net.http;
 
 import android.text.format.Time;
 
@@ -22,8 +22,9 @@ import java.util.Calendar;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-
-/** {@hide} */
+/**
+ * Helper for parsing an HTTP date.
+ */
 public final class HttpDateTime {
 
     /*

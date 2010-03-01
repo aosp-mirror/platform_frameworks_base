@@ -18,7 +18,6 @@ package android.database.sqlite;
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
-import android.util.Log;
 
 /**
  * A cursor driver that uses the given query directly.
@@ -26,7 +25,6 @@ import android.util.Log;
  * @hide
  */
 public class SQLiteDirectCursorDriver implements SQLiteCursorDriver {
-    private static String TAG = "SQLiteDirectCursorDriver";
     private String mEditTable; 
     private SQLiteDatabase mDatabase;
     private Cursor mCursor;
@@ -36,11 +34,6 @@ public class SQLiteDirectCursorDriver implements SQLiteCursorDriver {
     public SQLiteDirectCursorDriver(SQLiteDatabase db, String sql, String editTable) {
         mDatabase = db;
         mEditTable = editTable;
-        //TODO remove all callers that end in ; and remove this check
-        if (sql.charAt(sql.length() - 1) == ';') {
-            Log.w(TAG, "Found SQL string that ends in ; -- " + sql);
-            sql = sql.substring(0, sql.length() - 1);
-        }
         mSql = sql;
     }
 

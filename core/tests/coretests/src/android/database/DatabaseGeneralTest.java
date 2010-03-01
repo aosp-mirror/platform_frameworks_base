@@ -1009,4 +1009,24 @@ public class DatabaseGeneralTest extends AndroidTestCase implements PerformanceT
          * mDatabase.close() in tearDown() should release it.
          */
     }
+
+    @MediumTest
+    public void testSemicolonsInStatements() throws Exception {
+        mDatabase.execSQL("CREATE TABLE pragma_test (" +
+                "i INTEGER DEFAULT 1234, " +
+                "j INTEGER, " +
+                "s TEXT DEFAULT 'hello', " +
+                "t TEXT, " +
+                "'select' TEXT DEFAULT \"hello\")");
+        try {
+            // ending the sql statement with  semicolons shouldn't be a problem.
+            Cursor cur = mDatabase.rawQuery("PRAGMA database_list;", null);
+            cur.close();
+            // two semicolons in the statement shouldn't be a problem.
+            cur = mDatabase.rawQuery("PRAGMA database_list;;", null);
+            cur.close();
+        } catch (Throwable t) {
+            fail("unexpected, of course");
+        }
+    }
 }

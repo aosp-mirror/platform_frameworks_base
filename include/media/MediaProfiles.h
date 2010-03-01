@@ -52,6 +52,7 @@ public:
      * or -1 if error.
      *
      * Supported param name are:
+     * duration - the recording duration.
      * file.format - output file format. see mediarecorder.h for details
      * vid.codec - video encoder. see mediarecorder.h for details.
      * aud.codec - audio encoder. see mediarecorder.h for details.
@@ -119,6 +120,16 @@ public:
       * Returns the audio decoders supported.
       */
     Vector<audio_decoder> getAudioDecoders() const;
+
+    /**
+     * Returns the number of image encoding quality levels supported.
+     */
+    Vector<int> getImageEncodingQualityLevels() const;
+
+    /**
+     * Returns the maximum amount of memory in bytes we can use for decoding a JPEG file.
+     */
+    int getImageDecodingMaxMemory() const;
 
 private:
     MediaProfiles& operator=(const MediaProfiles&);  // Don't call me
@@ -257,6 +268,8 @@ private:
     static VideoEncoderCap* createVideoEncoderCap(const char **atts);
     static AudioEncoderCap* createAudioEncoderCap(const char **atts);
     static CamcorderProfile* createCamcorderProfile(const char **atts);
+    static int getImageEncodingQualityLevel(const char **atts);
+    static int getImageDecodingMaxMemory(const char **atts);
 
     // Customized element tag handler for parsing the xml configuration file.
     static void startElementHandler(void *userData, const char *name, const char **atts);
@@ -271,6 +284,8 @@ private:
     static void createDefaultVideoDecoders(MediaProfiles *profiles);
     static void createDefaultAudioDecoders(MediaProfiles *profiles);
     static void createDefaultEncoderOutputFileFormats(MediaProfiles *profiles);
+    static void createDefaultImageEncodingQualityLevels(MediaProfiles *profiles);
+    static void createDefaultImageDecodingMaxMemory(MediaProfiles *profiles);
     static VideoEncoderCap* createDefaultH263VideoEncoderCap();
     static VideoEncoderCap* createDefaultM4vVideoEncoderCap();
     static AudioEncoderCap* createDefaultAmrNBEncoderCap();
@@ -295,6 +310,8 @@ private:
     Vector<AudioDecoderCap*>  mAudioDecoders;
     Vector<VideoDecoderCap*>  mVideoDecoders;
     Vector<output_format>     mEncoderOutputFileFormats;
+    Vector<int>               mImageEncodingQualityLevels;
+    int                       mImageDecodingMaxMemory;
 };
 
 }; // namespace android

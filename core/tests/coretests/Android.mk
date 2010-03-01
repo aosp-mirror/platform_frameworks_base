@@ -9,6 +9,8 @@ LOCAL_SRC_FILES := \
 	$(call all-java-files-under, src) \
 	src/android/os/IAidlTest.aidl
 
+LOCAL_STATIC_JAVA_LIBRARIES += android-common
+
 LOCAL_JAVA_LIBRARIES := android.test.runner
 LOCAL_PACKAGE_NAME := FrameworksCoreTests
 

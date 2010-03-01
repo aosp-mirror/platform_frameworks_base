@@ -2823,9 +2823,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * Null means to use the normal empty text. The hint does not currently
      * participate in determining the size of the view.
      *
-     * This method is deprecated. Use {link #setHint(int, String)} or
-     * {link #setHint(CharSequence, String)} instead.
-     *
      * @attr ref android.R.styleable#TextView_hint
      */
     @android.view.RemotableViewMethod
@@ -2844,9 +2841,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     /**
      * Sets the text to be displayed when the text of the TextView is empty,
      * from a resource.
-     *
-     * This method is deprecated. Use {link #setHint(int, String)} or
-     * {link #setHint(CharSequence, String)} instead.
      *
      * @attr ref android.R.styleable#TextView_hint
      */

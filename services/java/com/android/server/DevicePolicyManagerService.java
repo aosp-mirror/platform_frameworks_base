@@ -16,9 +16,9 @@
 
 package com.android.server;
 
-import com.android.common.FastXmlSerializer;
-import com.android.common.XmlUtils;
 import com.android.internal.content.PackageMonitor;
+import com.android.internal.util.FastXmlSerializer;
+import com.android.internal.util.XmlUtils;
 import com.android.internal.widget.LockPatternUtils;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -26,10 +26,10 @@ import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
 import android.app.Activity;
-import android.app.DeviceAdminReceiver;
-import android.app.DeviceAdminInfo;
-import android.app.DevicePolicyManager;
-import android.app.IDevicePolicyManager;
+import android.app.admin.DeviceAdminInfo;
+import android.app.admin.DeviceAdminReceiver;
+import android.app.admin.DevicePolicyManager;
+import android.app.admin.IDevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -46,13 +46,17 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.util.Log;
+import android.util.PrintWriterPrinter;
+import android.util.Printer;
 import android.util.Xml;
 import android.view.WindowManagerPolicy;
 
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -71,6 +75,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     int mActivePasswordQuality = DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
     int mActivePasswordLength = 0;
     int mFailedPasswordAttempts = 0;
+    
+    int mPasswordOwner = -1;
     
     final HashMap<ComponentName, ActiveAdmin> mAdminMap
             = new HashMap<ComponentName, ActiveAdmin>();
@@ -148,11 +154,31 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 XmlUtils.skipCurrentTag(parser);
             }
         }
+        
+        void dump(String prefix, PrintWriter pw) {
+            pw.print(prefix); pw.print("uid="); pw.println(getUid());
+            pw.print(prefix); pw.println("policies:");
+            ArrayList<DeviceAdminInfo.PolicyInfo> pols = info.getUsedPolicies();
+            if (pols != null) {
+                for (int i=0; i<pols.size(); i++) {
+                    pw.print(prefix); pw.print("  "); pw.println(pols.get(i).tag);
+                }
+            }
+            pw.print(prefix); pw.print("passwordQuality=");
+                    pw.print(passwordQuality);
+                    pw.print(" minimumPasswordLength=");
+                    pw.println(minimumPasswordLength);
+            pw.print(prefix); pw.print("maximumTimeToUnlock=");
+                    pw.println(maximumTimeToUnlock);
+            pw.print(prefix); pw.print("maximumFailedPasswordsForWipe=");
+                    pw.println(maximumFailedPasswordsForWipe);
+        }
     }
     
     class MyPackageMonitor extends PackageMonitor {
         public void onSomePackagesChanged() {
             synchronized (DevicePolicyManagerService.this) {
+                boolean removed = false;
                 for (int i=mAdminList.size()-1; i>=0; i--) {
                     ActiveAdmin aa = mAdminList.get(i);
                     int change = isPackageDisappearing(aa.info.getPackageName()); 
@@ -160,6 +186,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                             || change == PACKAGE_TEMPORARY_CHANGE) {
                         Log.w(TAG, "Admin unexpectedly uninstalled: "
                                 + aa.info.getComponent());
+                        removed = true;
                         mAdminList.remove(i);
                     } else if (isPackageModified(aa.info.getPackageName())) {
                         try {
@@ -168,9 +195,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         } catch (NameNotFoundException e) {
                             Log.w(TAG, "Admin package change removed component: "
                                     + aa.info.getComponent());
+                            removed = true;
                             mAdminList.remove(i);
                         }
                     }
+                }
+                if (removed) {
+                    validatePasswordOwnerLocked();
                 }
             }
         }
@@ -260,6 +291,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             // XXX need to wait for it to complete.
             mAdminList.remove(admin);
             mAdminMap.remove(adminReceiver);
+            validatePasswordOwnerLocked();
         }
     }
     
@@ -312,6 +344,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             
             out.endTag(null, "policies");
 
+            if (mPasswordOwner >= 0) {
+                out.startTag(null, "password-owner");
+                out.attribute(null, "value", Integer.toString(mPasswordOwner));
+                out.endTag(null, "password-owner");
+            }
+            
             if (mFailedPasswordAttempts != 0) {
                 out.startTag(null, "failed-password-attempts");
                 out.attribute(null, "value", Integer.toString(mFailedPasswordAttempts));
@@ -377,6 +415,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     mFailedPasswordAttempts = Integer.parseInt(
                             parser.getAttributeValue(null, "value"));
                     XmlUtils.skipCurrentTag(parser);
+                } else if ("password-owner".equals(tag)) {
+                    mPasswordOwner = Integer.parseInt(
+                            parser.getAttributeValue(null, "value"));
+                    XmlUtils.skipCurrentTag(parser);
                 } else {
                     Log.w(TAG, "Unknown tag: " + tag);
                     XmlUtils.skipCurrentTag(parser);
@@ -401,6 +443,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             // Ignore
         }
 
+        validatePasswordOwnerLocked();
+        
         long timeMs = getMaximumTimeToLock(null);
         if (timeMs <= 0) {
             timeMs = Integer.MAX_VALUE;
@@ -412,6 +456,23 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
+    void validatePasswordOwnerLocked() {
+        if (mPasswordOwner >= 0) {
+            boolean haveOwner = false;
+            for (int i=mAdminList.size()-1; i>=0; i--) {
+                if (mAdminList.get(i).getUid() == mPasswordOwner) {
+                    haveOwner = true;
+                    break;
+                }
+            }
+            if (!haveOwner) {
+                Log.w(TAG, "Previous password owner " + mPasswordOwner
+                        + " no longer active; disabling");
+                mPasswordOwner = -1;
+            }
+        }
+    }
+    
     public void systemReady() {
         synchronized (this) {
             loadSettingsLocked();
@@ -622,7 +683,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
     
-    public boolean resetPassword(String password) {
+    public boolean resetPassword(String password, int flags) {
         int quality;
         synchronized (this) {
             // This API can only be called by an active device admin,
@@ -645,12 +706,24 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
         }
         
+        int callingUid = Binder.getCallingUid();
+        if (mPasswordOwner >= 0 && mPasswordOwner != callingUid) {
+            Log.w(TAG, "resetPassword: already set by another uid and not entered by user");
+            return false;
+        }
+        
         // Don't do this with the lock held, because it is going to call
         // back in to the service.
         long ident = Binder.clearCallingIdentity();
         try {
             LockPatternUtils utils = new LockPatternUtils(mContext);
             utils.saveLockPassword(password, quality);
+            int newOwner = (flags&DevicePolicyManager.RESET_PASSWORD_REQUIRE_ENTRY)
+                    != 0 ? callingUid : -1;
+            if (mPasswordOwner != newOwner) {
+                mPasswordOwner = newOwner;
+                saveSettingsLocked();
+            }
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
@@ -829,10 +902,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 android.Manifest.permission.BIND_DEVICE_ADMIN, null);
         
         synchronized (this) {
-            if (mFailedPasswordAttempts != 0) {
+            if (mFailedPasswordAttempts != 0 || mPasswordOwner >= 0) {
                 long ident = Binder.clearCallingIdentity();
                 try {
                     mFailedPasswordAttempts = 0;
+                    mPasswordOwner = -1;
                     saveSettingsLocked();
                     sendAdminCommandLocked(DeviceAdminReceiver.ACTION_PASSWORD_SUCCEEDED,
                             DeviceAdminInfo.USES_POLICY_WATCH_LOGIN);
@@ -840,6 +914,41 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     Binder.restoreCallingIdentity(ident);
                 }
             }
+        }
+    }
+    
+    @Override
+    protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            pw.println("Permission Denial: can't dump DevicePolicyManagerService from from pid="
+                    + Binder.getCallingPid()
+                    + ", uid=" + Binder.getCallingUid());
+            return;
+        }
+        
+        final Printer p = new PrintWriterPrinter(pw);
+        
+        synchronized (this) {
+            p.println("Current Device Policy Manager state:");
+            
+            p.println("  Enabled Device Admins:");
+            final int N = mAdminList.size();
+            for (int i=0; i<N; i++) {
+                ActiveAdmin ap = mAdminList.get(i);
+                if (ap != null) {
+                    pw.print("  "); pw.print(ap.info.getComponent().flattenToShortString());
+                            pw.println(":");
+                    ap.dump("    ", pw);
+                }
+            }
+            
+            pw.println(" ");
+            pw.print("  mActivePasswordQuality="); pw.println(mActivePasswordQuality);
+            pw.print("  mActivePasswordLength="); pw.println(mActivePasswordLength);
+            pw.print("  mFailedPasswordAttempts="); pw.println(mFailedPasswordAttempts);
+            pw.print("  mPasswordOwner="); pw.println(mPasswordOwner);
         }
     }
 }

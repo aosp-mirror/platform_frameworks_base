@@ -84,6 +84,10 @@ public interface IActivityManager extends IInterface {
             Intent intent, String resolvedType, Uri[] grantedUriPermissions,
             int grantedMode, IBinder resultTo, String resultWho, int requestCode,
             boolean onlyIfNeeded, boolean debug) throws RemoteException;
+    public WaitResult startActivityAndWait(IApplicationThread caller,
+            Intent intent, String resolvedType, Uri[] grantedUriPermissions,
+            int grantedMode, IBinder resultTo, String resultWho, int requestCode,
+            boolean onlyIfNeeded, boolean debug) throws RemoteException;
     public int startActivityIntentSender(IApplicationThread caller,
             IntentSender intent, Intent fillInIntent, String resolvedType,
             IBinder resultTo, String resultWho, int requestCode,
@@ -348,6 +352,49 @@ public interface IActivityManager extends IInterface {
         }
     };
 
+    /** Information returned after waiting for an activity start. */
+    public static class WaitResult implements Parcelable {
+        public int result;
+        public boolean timeout;
+        public ComponentName who;
+        public long thisTime;
+        public long totalTime;
+
+        public WaitResult() {
+        }
+
+        public int describeContents() {
+            return 0;
+        }
+
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(result);
+            dest.writeInt(timeout ? 1 : 0);
+            ComponentName.writeToParcel(who, dest);
+            dest.writeLong(thisTime);
+            dest.writeLong(totalTime);
+        }
+
+        public static final Parcelable.Creator<WaitResult> CREATOR
+                = new Parcelable.Creator<WaitResult>() {
+            public WaitResult createFromParcel(Parcel source) {
+                return new WaitResult(source);
+            }
+
+            public WaitResult[] newArray(int size) {
+                return new WaitResult[size];
+            }
+        };
+
+        private WaitResult(Parcel source) {
+            result = source.readInt();
+            timeout = source.readInt() != 0;
+            who = ComponentName.readFromParcel(source);
+            thisTime = source.readLong();
+            totalTime = source.readLong();
+        }
+    };
+
     String descriptor = "android.app.IActivityManager";
 
     // Please keep these transaction codes the same -- they are also
@@ -453,4 +500,5 @@ public interface IActivityManager extends IInterface {
     int HANDLE_APPLICATION_WTF_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+101;
     int KILL_BACKGROUND_PROCESSES_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+102;
     int IS_USER_A_MONKEY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+103;
+    int START_ACTIVITY_AND_WAIT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+104;
 }

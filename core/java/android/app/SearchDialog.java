@@ -16,8 +16,6 @@
 
 package android.app;
 
-import com.android.common.Patterns;
-import com.android.common.speech.Recognition;
 
 import static android.app.SuggestionsAdapter.getColumnString;
 
@@ -48,6 +46,7 @@ import android.text.TextWatcher;
 import android.util.AndroidRuntimeException;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.Patterns;
 import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -313,7 +312,6 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         mLaunchComponent = null;
         mAppSearchData = null;
         mSearchable = null;
-        mActivityContext = null;
         mUserQuery = null;
     }
 
@@ -411,7 +409,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
             updateSearchAppIcon();
             updateSearchBadge();
             updateQueryHint();
-            updateVoiceButton();
+            updateVoiceButton(TextUtils.isEmpty(mUserQuery));
             
             // In order to properly configure the input method (if one is being used), we
             // need to let it know if we'll be providing suggestions.  Although it would be
@@ -560,10 +558,13 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
     /**
      * Update the visibility of the voice button.  There are actually two voice search modes, 
      * either of which will activate the button.
+     * @param empty whether the search query text field is empty. If it is, then the other
+     * criteria apply to make the voice button visible. Otherwise the voice button will not
+     * be visible - i.e., if the user has typed a query, remove the voice button.
      */
-    private void updateVoiceButton() {
+    private void updateVoiceButton(boolean empty) {
         int visibility = View.GONE;
-        if (mSearchable.getVoiceSearchEnabled()) {
+        if (mSearchable.getVoiceSearchEnabled() && empty) {
             Intent testIntent = null;
             if (mSearchable.getVoiceSearchLaunchWebSearch()) {
                 testIntent = mVoiceWebSearchIntent;
@@ -666,6 +667,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
                 // The user changed the query, remember it.
                 mUserQuery = s == null ? "" : s.toString();
             }
+            updateVoiceButton(TextUtils.isEmpty(s));
         }
 
         public void afterTextChanged(Editable s) {
@@ -746,9 +748,6 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
                 return;
             }
             SearchableInfo searchable = mSearchable;
-            // First stop the existing search before starting voice search, or else we'll end
-            // up showing the search dialog again once we return to the app.
-            cancel();
             try {
                 if (searchable.getVoiceSearchLaunchWebSearch()) {
                     getContext().startActivity(mVoiceWebSearchIntent);
@@ -762,6 +761,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
                 // voice search before showing the button. But just in case...
                 Log.w(LOG_TAG, "Could not find voice search activity");
             }
+            dismiss();
          }
     };
     
@@ -819,7 +819,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         voiceIntent.putExtra(RecognizerIntent.EXTRA_PROMPT, prompt);
         voiceIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, language);
         voiceIntent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, maxResults);
-        voiceIntent.putExtra(Recognition.EXTRA_CALLING_PACKAGE,
+        voiceIntent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE,
                 searchActivity == null ? null : searchActivity.toShortString());
         
         // Add the values that configure forwarding the results

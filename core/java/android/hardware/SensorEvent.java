@@ -68,27 +68,30 @@ public class SensorEvent {
      *  All values are angles in degrees.
      * 
      * <p>values[0]: Azimuth, angle between the magnetic north direction and
-     * the Y axis, around the Z axis (0 to 359). 
+     * the Y axis, around the Z axis (0 to 359).
      * 0=North, 90=East, 180=South, 270=West
-     * 
+     *
      * <p>values[1]: Pitch, rotation around X axis (-180 to 180), 
      * with positive values when the z-axis moves <b>toward</b> the y-axis.
      *
      * <p>values[2]: Roll, rotation around Y axis (-90 to 90), with 
-     * positive values  when the x-axis moves <b>away</b> from the z-axis.
+     * positive values  when the x-axis moves <b>toward</b> the z-axis.
      * 
+     * <p><b>Important note:</b> For historical reasons the roll angle is
+     * positive in the clockwise direction (mathematically speaking, it
+     * should be positive in the counter-clockwise direction).
+     *
      * <p><b>Note:</b> This definition is different from <b>yaw, pitch and 
      * roll</b> used in aviation where the X axis is along the long side of
      * the plane (tail to nose).
-     * 
-     * <p><b>Note:</b> It is preferable to use 
+     *
+     * <p><b>Note:</b> This sensor type exists for legacy reasons, please use
      * {@link android.hardware.SensorManager#getRotationMatrix 
      *      getRotationMatrix()} in conjunction with
      * {@link android.hardware.SensorManager#remapCoordinateSystem 
      *      remapCoordinateSystem()} and
      * {@link android.hardware.SensorManager#getOrientation getOrientation()}
-     * to compute these values; while it may be more expensive, it is usually 
-     * more accurate.
+     * to compute these values instead.
      *
      * <p>{@link android.hardware.Sensor#TYPE_ACCELEROMETER Sensor.TYPE_ACCELEROMETER}:<p>
      *  All values are in SI units (m/s^2) and measure the acceleration applied

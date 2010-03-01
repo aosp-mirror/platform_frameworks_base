@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.common;
+package com.android.unit_tests;
 
-import com.android.common.tests.R;
+import com.android.internal.net.DomainNameValidator;
 
 import android.test.AndroidTestCase;
 

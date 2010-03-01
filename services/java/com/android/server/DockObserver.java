@@ -305,6 +305,14 @@ class DockObserver extends UEventObserver {
                     (KeyguardManager)mContext.getSystemService(Context.KEYGUARD_SERVICE);
             mKeyguardLock = keyguardManager.newKeyguardLock(TAG);
 
+            final boolean enableCarMode = mDockState == Intent.EXTRA_DOCK_STATE_CAR;
+            if (enableCarMode) {
+                try {
+                    setCarMode(enableCarMode);
+                } catch (RemoteException e) {
+                    Log.w(TAG, "Unable to change car mode.", e);
+                }
+            }
             // don't bother broadcasting undocked here
             if (mDockState != Intent.EXTRA_DOCK_STATE_UNDOCKED) {
                 update();

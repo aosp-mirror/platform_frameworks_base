@@ -724,6 +724,9 @@ public class Camera {
         private static final String KEY_HORIZONTAL_VIEW_ANGLE = "horizontal-view-angle";
         private static final String KEY_VERTICAL_VIEW_ANGLE = "vertical-view-angle";
         private static final String KEY_EXPOSURE_COMPENSATION = "exposure-compensation";
+        private static final String KEY_MAX_EXPOSURE_COMPENSATION = "max-exposure-compensation";
+        private static final String KEY_MIN_EXPOSURE_COMPENSATION = "min-exposure-compensation";
+        private static final String KEY_EXPOSURE_COMPENSATION_STEP = "exposure-compensation-step";
         // Parameter key suffix for supported values.
         private static final String SUPPORTED_VALUES_SUFFIX = "-values";
 
@@ -1543,38 +1546,63 @@ public class Camera {
         }
 
         /**
-         * Gets the current exposure compensation setting.
+         * Gets the current exposure compensation index.
          *
-         * @return the current exposure compensation value multiplied by 100.
-         *         null if exposure compensation is not supported. Ex: -100
-         *         means -1 EV. 130 means +1.3 EV.
-         * @hide
+         * @return current exposure compensation index. The range is {@link
+         *         #getMinExposureCompensation} to {@link
+         *         #getMaxExposureCompensation}. 0 means exposure is not
+         *         adjusted.
          */
         public int getExposureCompensation() {
-            return getInt(KEY_EXPOSURE_COMPENSATION);
+            return getInt(KEY_EXPOSURE_COMPENSATION, 0);
         }
 
         /**
-         * Sets the exposure compensation.
+         * Sets the exposure compensation index.
          *
-         * @param value exposure compensation multiplied by 100. Ex: -100 means
-         *        -1 EV. 130 means +1.3 EV.
-         * @hide
+         * @param value exposure compensation index. The valid value range is
+         *        from {@link #getMinExposureCompensation} (inclusive) to {@link
+         *        #getMaxExposureCompensation} (inclusive). 0 means exposure is
+         *        not adjusted. Application should call
+         *        getMinExposureCompensation and getMaxExposureCompensation to
+         *        know if exposure compensation is supported.
          */
         public void setExposureCompensation(int value) {
             set(KEY_EXPOSURE_COMPENSATION, value);
         }
 
         /**
-         * Gets the supported exposure compensation.
+         * Gets the maximum exposure compensation index.
          *
-         * @return a List of Integer constants. null if exposure compensation is
-         *         not supported. The list is sorted from small to large. Ex:
-         *         -100, -66, -33, 0, 33, 66, 100.
-         * @hide
+         * @return maximum exposure compensation index (>=0). If both this
+         *         method and {@link #getMinExposureCompensation} return 0,
+         *         exposure compensation is not supported.
          */
-        public List<Integer> getSupportedExposureCompensation() {
-            return splitInt(get(KEY_EXPOSURE_COMPENSATION + SUPPORTED_VALUES_SUFFIX));
+        public int getMaxExposureCompensation() {
+            return getInt(KEY_MAX_EXPOSURE_COMPENSATION, 0);
+        }
+
+        /**
+         * Gets the minimum exposure compensation index.
+         *
+         * @return minimum exposure compensation index (<=0). If both this
+         *         method and {@link #getMaxExposureCompensation} return 0,
+         *         exposure compensation is not supported.
+         */
+        public int getMinExposureCompensation() {
+            return getInt(KEY_MIN_EXPOSURE_COMPENSATION, 0);
+        }
+
+        /**
+         * Gets the exposure compensation step.
+         *
+         * @return exposure compensation step. Applications can get EV by
+         *         multiplying the exposure compensation index and step. Ex: if
+         *         exposure compensation index is -6 and step is 0.333333333, EV
+         *         is -2.
+         */
+        public float getExposureCompensationStep() {
+            return getFloat(KEY_EXPOSURE_COMPENSATION_STEP, 0);
         }
 
         /**
@@ -1678,6 +1706,24 @@ public class Camera {
             }
             if (substrings.size() == 0) return null;
             return substrings;
+        }
+
+        // Returns the value of a float parameter.
+        private float getFloat(String key, float defaultValue) {
+            try {
+                return Float.parseFloat(mMap.get(key));
+            } catch (NumberFormatException ex) {
+                return defaultValue;
+            }
+        }
+
+        // Returns the value of a integer parameter.
+        private int getInt(String key, int defaultValue) {
+            try {
+                return Integer.parseInt(mMap.get(key));
+            } catch (NumberFormatException ex) {
+                return defaultValue;
+            }
         }
 
         // Splits a comma delimited string to an ArrayList of Size.

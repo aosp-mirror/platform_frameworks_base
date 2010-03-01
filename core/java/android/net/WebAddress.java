@@ -16,7 +16,7 @@
 
 package android.net;
 
-import static com.android.common.Patterns.GOOD_IRI_CHAR;
+import static android.util.Patterns.GOOD_IRI_CHAR;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

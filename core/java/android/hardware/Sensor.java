@@ -41,7 +41,10 @@ public class Sensor {
      * A constant describing an orientation sensor type.
      * See {@link android.hardware.SensorEvent SensorEvent}
      * for more details.
+     * @deprecated use {@link android.hardware.SensorManager#getOrientation
+     *  SensorManager.getOrientation()} instead.
      */
+    @Deprecated
     public static final int TYPE_ORIENTATION    = 3;
 
     /** A constant describing a gyroscope sensor type */
@@ -52,10 +55,13 @@ public class Sensor {
      * for more details.
      */
     public static final int TYPE_LIGHT          = 5;
+
     /** A constant describing a pressure sensor type */
     public static final int TYPE_PRESSURE       = 6;
+
     /** A constant describing a temperature sensor type */
     public static final int TYPE_TEMPERATURE    = 7;
+
     /**
      * A constant describing an proximity sensor type.
      * See {@link android.hardware.SensorEvent SensorEvent}

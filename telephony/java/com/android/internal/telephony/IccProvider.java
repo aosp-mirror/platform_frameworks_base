@@ -19,8 +19,9 @@ package com.android.internal.telephony;
 import android.content.ContentProvider;
 import android.content.UriMatcher;
 import android.content.ContentValues;
-import com.android.common.ArrayListCursor;
+import android.database.AbstractCursor;
 import android.database.Cursor;
+import android.database.CursorWindow;
 import android.net.Uri;
 import android.os.SystemProperties;
 import android.os.RemoteException;
@@ -34,6 +35,149 @@ import java.util.List;
 import com.android.internal.telephony.IccConstants;
 import com.android.internal.telephony.AdnRecord;
 import com.android.internal.telephony.IIccPhoneBook;
+
+/**
+ * XXX old code -- should be replaced with MatrixCursor.
+ * @deprecated This is has been replaced by MatrixCursor.
+*/
+class ArrayListCursor extends AbstractCursor {
+    private String[] mColumnNames;
+    private ArrayList<Object>[] mRows;
+
+    @SuppressWarnings({"unchecked"})
+    public ArrayListCursor(String[] columnNames, ArrayList<ArrayList> rows) {
+        int colCount = columnNames.length;
+        boolean foundID = false;
+        // Add an _id column if not in columnNames
+        for (int i = 0; i < colCount; ++i) {
+            if (columnNames[i].compareToIgnoreCase("_id") == 0) {
+                mColumnNames = columnNames;
+                foundID = true;
+                break;
+            }
+        }
+
+        if (!foundID) {
+            mColumnNames = new String[colCount + 1];
+            System.arraycopy(columnNames, 0, mColumnNames, 0, columnNames.length);
+            mColumnNames[colCount] = "_id";
+        }
+
+        int rowCount = rows.size();
+        mRows = new ArrayList[rowCount];
+
+        for (int i = 0; i < rowCount; ++i) {
+            mRows[i] = rows.get(i);
+            if (!foundID) {
+                mRows[i].add(i);
+            }
+        }
+    }
+
+    @Override
+    public void fillWindow(int position, CursorWindow window) {
+        if (position < 0 || position > getCount()) {
+            return;
+        }
+
+        window.acquireReference();
+        try {
+            int oldpos = mPos;
+            mPos = position - 1;
+            window.clear();
+            window.setStartPosition(position);
+            int columnNum = getColumnCount();
+            window.setNumColumns(columnNum);
+            while (moveToNext() && window.allocRow()) {
+                for (int i = 0; i < columnNum; i++) {
+                    final Object data = mRows[mPos].get(i);
+                    if (data != null) {
+                        if (data instanceof byte[]) {
+                            byte[] field = (byte[]) data;
+                            if (!window.putBlob(field, mPos, i)) {
+                                window.freeLastRow();
+                                break;
+                            }
+                        } else {
+                            String field = data.toString();
+                            if (!window.putString(field, mPos, i)) {
+                                window.freeLastRow();
+                                break;
+                            }
+                        }
+                    } else {
+                        if (!window.putNull(mPos, i)) {
+                            window.freeLastRow();
+                            break;
+                        }
+                    }
+                }
+            }
+
+            mPos = oldpos;
+        } catch (IllegalStateException e){
+            // simply ignore it
+        } finally {
+            window.releaseReference();
+        }
+    }
+
+    @Override
+    public int getCount() {
+        return mRows.length;
+    }
+
+    @Override
+    public String[] getColumnNames() {
+        return mColumnNames;
+    }
+
+    @Override
+    public byte[] getBlob(int columnIndex) {
+        return (byte[]) mRows[mPos].get(columnIndex);
+    }
+
+    @Override
+    public String getString(int columnIndex) {
+        Object cell = mRows[mPos].get(columnIndex);
+        return (cell == null) ? null : cell.toString();
+    }
+
+    @Override
+    public short getShort(int columnIndex) {
+        Number num = (Number) mRows[mPos].get(columnIndex);
+        return num.shortValue();
+    }
+
+    @Override
+    public int getInt(int columnIndex) {
+        Number num = (Number) mRows[mPos].get(columnIndex);
+        return num.intValue();
+    }
+
+    @Override
+    public long getLong(int columnIndex) {
+        Number num = (Number) mRows[mPos].get(columnIndex);
+        return num.longValue();
+    }
+
+    @Override
+    public float getFloat(int columnIndex) {
+        Number num = (Number) mRows[mPos].get(columnIndex);
+        return num.floatValue();
+    }
+
+    @Override
+    public double getDouble(int columnIndex) {
+        Number num = (Number) mRows[mPos].get(columnIndex);
+        return num.doubleValue();
+    }
+
+    @Override
+    public boolean isNull(int columnIndex) {
+        return mRows[mPos].get(columnIndex) == null;
+    }
+}
 
 
 /**
