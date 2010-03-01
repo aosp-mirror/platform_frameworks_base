@@ -690,6 +690,7 @@ public final class Calendar {
                 DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv, GUESTS_CAN_SEE_GUESTS);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, ORGANIZER);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, _SYNC_ID);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, _SYNC_LOCAL_ID);
                 DatabaseUtils.cursorLongToContentValuesIfPresent(cursor, cv, _SYNC_DIRTY);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, _SYNC_VERSION);
                 DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv, DELETED);
