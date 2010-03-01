@@ -51,37 +51,6 @@ public final class TelephonyProvider {
     private static final boolean DEBUG = true;
     private static final boolean LOCAL_LOGV = DEBUG ? Config.LOGD : Config.LOGV;
 
-//    public static final Pattern EMAIL_ADDRESS
-//        = Pattern.compile(
-//            "[a-zA-Z0-9\\+\\.\\_\\%\\-]{1,256}" +
-//            "\\@" +
-//            "[a-zA-Z0-9][a-zA-Z0-9\\-]{0,64}" +
-//            "(" +
-//                "\\." +
-//                "[a-zA-Z0-9][a-zA-Z0-9\\-]{0,25}" +
-//            ")+"
-//        );
-//
-//    /**
-//     * This pattern is intended for searching for things that look like they
-//     * might be phone numbers in arbitrary text, not for validating whether
-//     * something is in fact a phone number.  It will miss many things that
-//     * are legitimate phone numbers.
-//     *
-//     * <p> The pattern matches the following:
-//     * <ul>
-//     * <li>Optionally, a + sign followed immediately by one or more digits. Spaces, dots, or dashes
-//     * may follow.
-//     * <li>Optionally, sets of digits in parentheses, separated by spaces, dots, or dashes.
-//     * <li>A string starting and ending with a digit, containing digits, spaces, dots, and/or dashes.
-//     * </ul>
-//     */
-//    public static final Pattern PHONE
-//        = Pattern.compile(                                  // sdd = space, dot, or dash
-//                "(\\+[0-9]+[\\- \\.]*)?"                    // +<digits><sdd>*
-//                + "(\\([0-9]+\\)[\\- \\.]*)?"               // (<digits>)<sdd>*
-//                + "([0-9][0-9\\- \\.][0-9\\- \\.]+[0-9])"); // <digit><digit|sdd>+<digit>
-
     // Constructor
     public TelephonyProvider() {
     }
@@ -134,6 +103,12 @@ public final class TelephonyProvider {
          * <P>Type: INTEGER (boolean)</P>
          */
         public static final String READ = "read";
+
+        /**
+         * Indicates whether this message has been seen by the user. The "seen" flag will be
+         * used to figure out whether we need to throw up a statusbar notification or not.
+         */
+        public static final String SEEN = "seen";
 
         /**
          * The TP-Status value for the message, or -1 if no status has
@@ -706,6 +681,12 @@ public final class TelephonyProvider {
         public static final String READ = "read";
 
         /**
+         * Indicates whether this message has been seen by the user. The "seen" flag will be
+         * used to figure out whether we need to throw up a statusbar notification or not.
+         */
+        public static final String SEEN = "seen";
+
+        /**
          * The Message-ID of the message.
          * <P>Type: TEXT</P>
          */
@@ -1157,6 +1138,7 @@ public final class TelephonyProvider {
          * <P>Type: INTEGER</P>
          */
         public static final String READ = "read";
+
         /**
          * The snippet of the latest message in the thread.
          * <P>Type: TEXT</P>
@@ -1696,6 +1678,13 @@ public final class TelephonyProvider {
              * The time we last tried to send or download the message.
              */
             public static final String LAST_TRY = "last_try";
+        }
+
+        public static final class WordsTable {
+            public static final String ID = "_id";
+            public static final String SOURCE_ROW_ID = "source_id";
+            public static final String TABLE_ID = "table_to_use";
+            public static final String INDEXED_TEXT = "index_text";
         }
     }
 
