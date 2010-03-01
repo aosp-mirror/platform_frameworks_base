@@ -28,6 +28,8 @@ import android.util.Log;
  */
 /* package */ class SQLiteCompiledSql {
 
+    private static final String TAG = "SQLiteCompiledSql";
+
     /** The database this program is compiled against. */
     /* package */ SQLiteDatabase mDatabase;
 
@@ -44,11 +46,17 @@ import android.util.Log;
      */
     /* package */ int nStatement = 0;
 
+    /** the following are for debugging purposes */
+    private String mSqlStmt = null;
+    private Throwable mStackTrace = null;
+
     /** when in cache and is in use, this member is set */
     private boolean mInUse = false;
 
     /* package */ SQLiteCompiledSql(SQLiteDatabase db, String sql) {
         mDatabase = db;
+        mSqlStmt = sql;
+        mStackTrace = new Exception().fillInStackTrace();
         this.nHandle = db.mNativeHandle;
         compile(sql, true);
     }
@@ -115,8 +123,15 @@ import android.util.Log;
      * Make sure that the native resource is cleaned up.
      */
     @Override
-    protected void finalize() {
-        releaseSqlStatement();
+    protected void finalize() throws Throwable {
+        try {
+            if (nStatement == 0) return;
+            // finalizer should NEVER get called
+            Log.w(TAG, "finalizer should never be called. sql: " + mSqlStmt, mStackTrace);
+            releaseSqlStatement();
+        } finally {
+            super.finalize();
+        }
     }
 
     /**
