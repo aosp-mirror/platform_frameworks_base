@@ -145,14 +145,6 @@ public class Browser {
     }
 
     /**
-     * Stores a String extra in an {@link Intent} representing the title of a
-     * page to share.  When receiving an {@link Intent#ACTION_SEND} from the
-     * Browser, use this to access the title.
-     * @hide
-     */
-    public final static String EXTRA_SHARE_TITLE = "share_title";
-
-    /**
      * Stores a Bitmap extra in an {@link Intent} representing the screenshot of
      * a page to share.  When receiving an {@link Intent#ACTION_SEND} from the
      * Browser, use this to access the screenshot.
