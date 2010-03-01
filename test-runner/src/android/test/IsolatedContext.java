@@ -3,7 +3,11 @@ package android.test;
 import com.google.android.collect.Lists;
 
 import android.accounts.AccountManager;
+import android.accounts.AccountManagerCallback;
+import android.accounts.AccountManagerFuture;
+import android.accounts.AuthenticatorException;
 import android.accounts.OnAccountsUpdateListener;
+import android.accounts.OperationCanceledException;
 import android.accounts.Account;
 import android.content.ContextWrapper;
 import android.content.ContentResolver;
@@ -16,8 +20,13 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Handler;
 
-import java.util.List;
 import java.io.File;
+import java.io.IOException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
+import java.util.List;
+
 
 /**
      * A mock context which prevents its users from talking to the rest of the device while
@@ -105,7 +114,58 @@ public class IsolatedContext extends ContextWrapper {
         public Account[] getAccounts() {
             return new Account[]{};
         }
+
+        public AccountManagerFuture<Account[]> getAccountsByTypeAndFeatures(
+                final String type, final String[] features,
+                AccountManagerCallback<Account[]> callback, Handler handler) {
+            return new MockAccountManagerFuture<Account[]>(new Account[0]);
+        }
+
+        public String blockingGetAuthToken(Account account, String authTokenType,
+                boolean notifyAuthFailure)
+                throws OperationCanceledException, IOException, AuthenticatorException {
+            return null;
+        }
+
+
+        /**
+         * A very simple AccountManagerFuture class
+         * that returns what ever was passed in
+         */
+        private class MockAccountManagerFuture<T>
+                implements AccountManagerFuture<T> {
+
+            T mResult;
+
+            public MockAccountManagerFuture(T result) {
+                mResult = result;
+            }
+
+            public boolean cancel(boolean mayInterruptIfRunning) {
+                return false;
+            }
+
+            public boolean isCancelled() {
+                return false;
+            }
+
+            public boolean isDone() {
+                return true;
+            }
+
+            public T getResult()
+                    throws OperationCanceledException, IOException, AuthenticatorException {
+                return mResult;
+            }
+
+            public T getResult(long timeout, TimeUnit unit)
+                    throws OperationCanceledException, IOException, AuthenticatorException {
+                return getResult();
+            }
+        }
+
     }
+
     @Override
     public File getFilesDir() {
         return new File("/dev/null");
