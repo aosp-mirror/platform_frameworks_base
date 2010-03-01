@@ -320,8 +320,14 @@ public class SurfaceView extends View {
      * <p>Calling this overrides any previous call to {@link #setZOrderMediaOverlay}.
      */
     public void setZOrderOnTop(boolean onTop) {
-        mWindowType = onTop ? WindowManager.LayoutParams.TYPE_APPLICATION_PANEL
-                : WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA;
+        if (onTop) {
+            mWindowType = WindowManager.LayoutParams.TYPE_APPLICATION_PANEL;
+            // ensures the surface is placed below the IME
+            mLayout.flags |= WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
+        } else {
+            mWindowType = WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA;
+            mLayout.flags &= ~WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
+        }
     }
     
     /**
