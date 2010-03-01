@@ -25,6 +25,27 @@ using namespace android::renderscript;
 
 Allocation::Allocation(Context *rsc, const Type *type) : ObjectBase(rsc)
 {
+    init(rsc, type);
+
+    mPtr = malloc(mType->getSizeBytes());
+    if (!mPtr) {
+        LOGE("Allocation::Allocation, alloc failure");
+    }
+}
+
+Allocation::Allocation(Context *rsc, const Type *type, void *bmp,
+                       void *callbackData, RsBitmapCallback_t callback)
+: ObjectBase(rsc)
+{
+    init(rsc, type);
+
+    mPtr = bmp;
+    mUserBitmapCallback = callback;
+    mUserBitmapCallbackData = callbackData;
+}
+
+void Allocation::init(Context *rsc, const Type *type)
+{
     mAllocFile = __FILE__;
     mAllocLine = __LINE__;
     mPtr = NULL;
@@ -43,17 +64,22 @@ Allocation::Allocation(Context *rsc, const Type *type) : ObjectBase(rsc)
     mBufferID = 0;
     mUploadDefered = false;
 
+    mUserBitmapCallback = NULL;
+    mUserBitmapCallbackData = NULL;
+
     mType.set(type);
     rsAssert(type);
-    mPtr = malloc(mType->getSizeBytes());
-    if (!mPtr) {
-        LOGE("Allocation::Allocation, alloc failure");
-    }
+
+    mPtr = NULL;
 }
 
 Allocation::~Allocation()
 {
-    free(mPtr);
+    if (mUserBitmapCallback != NULL) {
+        mUserBitmapCallback(mUserBitmapCallbackData);
+    } else {
+        free(mPtr);
+    }
     mPtr = NULL;
 
     if (mBufferID) {
@@ -486,6 +512,14 @@ static ElementConverter_t pickConverter(const Element *dst, const Element *src)
     return 0;
 }
 
+RsAllocation rsi_AllocationCreateBitmapRef(Context *rsc, RsType vtype,
+                                           void *bmp, void *callbackData, RsBitmapCallback_t callback)
+{
+    const Type * type = static_cast<const Type *>(vtype);
+    Allocation * alloc = new Allocation(rsc, type, bmp, callbackData, callback);
+    alloc->incUserRef();
+    return alloc;
+}
 
 RsAllocation rsi_AllocationCreateFromBitmap(Context *rsc, uint32_t w, uint32_t h, RsElement _dst, RsElement _src,  bool genMips, const void *data)
 {

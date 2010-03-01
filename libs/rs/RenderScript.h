@@ -46,6 +46,8 @@ typedef void * RsProgramFragment;
 typedef void * RsProgramFragmentStore;
 typedef void * RsProgramRaster;
 
+typedef void (* RsBitmapCallback_t)(void *);
+
 enum RsDeviceParam {
     RS_DEVICE_PARAM_FORCE_SOFTWARE_GL,
     RS_DEVICE_PARAM_COUNT

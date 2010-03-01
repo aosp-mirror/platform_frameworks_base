@@ -501,6 +501,26 @@ nAllocationCreateFromBitmap(JNIEnv *_env, jobject _this, jint dstFmt, jboolean g
     return 0;
 }
 
+static void ReleaseBitmapCallback(void *bmp)
+{
+    SkBitmap const * nativeBitmap = (SkBitmap const *)bmp;
+    nativeBitmap->unlockPixels();
+}
+
+static int
+nAllocationCreateBitmapRef(JNIEnv *_env, jobject _this, jint type, jobject jbitmap)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    SkBitmap * nativeBitmap =
+            (SkBitmap *)_env->GetIntField(jbitmap, gNativeBitmapID);
+
+
+    nativeBitmap->lockPixels();
+    void* ptr = nativeBitmap->getPixels();
+    jint id = (jint)rsAllocationCreateBitmapRef(con, (RsType)type, ptr, nativeBitmap, ReleaseBitmapCallback);
+    return id;
+}
+
 static int
 nAllocationCreateFromAssetStream(JNIEnv *_env, jobject _this, jint dstFmt, jboolean genMips, jint native_asset)
 {
@@ -1367,6 +1387,7 @@ static JNINativeMethod methods[] = {
 
 {"nAllocationCreateTyped",         "(I)I",                                 (void*)nAllocationCreateTyped },
 {"nAllocationCreateFromBitmap",    "(IZLandroid/graphics/Bitmap;)I",       (void*)nAllocationCreateFromBitmap },
+{"nAllocationCreateBitmapRef",     "(ILandroid/graphics/Bitmap;)I",        (void*)nAllocationCreateBitmapRef },
 {"nAllocationCreateFromBitmapBoxed","(IZLandroid/graphics/Bitmap;)I",      (void*)nAllocationCreateFromBitmapBoxed },
 {"nAllocationCreateFromAssetStream","(IZI)I",                              (void*)nAllocationCreateFromAssetStream },
 {"nAllocationUploadToTexture",     "(IZI)V",                               (void*)nAllocationUploadToTexture },

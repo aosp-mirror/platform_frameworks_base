@@ -90,6 +90,14 @@ AllocationCreateSized {
 	ret RsAllocation
 	}
 
+AllocationCreateBitmapRef {
+	param RsType type
+	param void * bmpPtr
+	param void * callbackData
+	param RsBitmapCallback_t callback
+	ret RsAllocation
+	}
+
 AllocationCreateFromBitmap {
 	param uint32_t width
 	param uint32_t height
