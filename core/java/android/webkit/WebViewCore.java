@@ -2346,6 +2346,9 @@ final class WebViewCore {
         // ensures the view system knows the view can redraw itself
         pluginView.setWillNotDraw(false);
 
+        if(pluginView instanceof SurfaceView)
+            ((SurfaceView)pluginView).setZOrderOnTop(true);
+
         ViewManager.ChildView view = mWebView.mViewManager.createView();
         view.mView = pluginView;
         view.attachView(x, y, width, height);
