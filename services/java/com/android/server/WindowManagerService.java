@@ -7292,6 +7292,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 try {
                     mSurface = new Surface(
                             mSession.mSurfaceSession, mSession.mPid,
+                            mAttrs.getTitle().toString(),
                             0, w, h, mAttrs.format, flags);
                     if (SHOW_TRANSACTIONS) Slog.i(TAG, "  CREATE SURFACE "
                             + mSurface + " IN SESSION "
@@ -10248,6 +10249,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         if (mBackgroundFillerSurface == null) {
                             try {
                                 mBackgroundFillerSurface = new Surface(mFxSession, 0,
+                                        "BackGroundFiller",
                                         0, dw, dh,
                                         PixelFormat.OPAQUE,
                                         Surface.FX_SURFACE_NORMAL);
@@ -10294,6 +10296,7 @@ public class WindowManagerService extends IWindowManager.Stub
                                             + mBlurSurface + ": CREATE");
                                     try {
                                         mBlurSurface = new Surface(mFxSession, 0,
+                                                "BlurSurface",
                                                 -1, 16, 16,
                                                 PixelFormat.OPAQUE,
                                                 Surface.FX_SURFACE_BLUR);
@@ -11073,7 +11076,9 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (SHOW_TRANSACTIONS) Slog.i(TAG, "  DIM "
                         + mDimSurface + ": CREATE");
                 try {
-                    mDimSurface = new Surface(session, 0, -1, 16, 16, PixelFormat.OPAQUE,
+                    mDimSurface = new Surface(session, 0,
+                            "DimSurface",
+                            -1, 16, 16, PixelFormat.OPAQUE,
                             Surface.FX_SURFACE_DIM);
                 } catch (Exception e) {
                     Slog.e(TAG, "Exception creating Dim surface", e);

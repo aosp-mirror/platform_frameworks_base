@@ -320,6 +320,8 @@ public:
             const sp<Client>& client, int32_t i);
     virtual ~LayerBaseClient();
     virtual void onFirstRef();
+    void setName(const String8& name);
+    String8 getName() const;
 
     const wp<Client>    client;
 
@@ -332,6 +334,7 @@ public:
     virtual sp<Surface> createSurface() const;
     
     virtual void onRemoved();
+
 
     class Surface : public BnSurface 
     {
@@ -371,6 +374,7 @@ private:
     mutable     Mutex           mLock;
     mutable     wp<Surface>     mClientSurface;
     // only read
+                String8         mName;
     const       uint32_t        mIdentity;
     static      int32_t         sIdentity;
 };

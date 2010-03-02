@@ -61,6 +61,7 @@ public:
 
     virtual sp<ISurface> createSurface( surface_data_t* data,
                                         int pid, 
+                                        const String8& name,
                                         DisplayID display,
                                         uint32_t w,
                                         uint32_t h,

@@ -319,10 +319,30 @@ sp<SurfaceControl> SurfaceComposerClient::createSurface(
         PixelFormat format,
         uint32_t flags)
 {
+    String8 name;
+    const size_t SIZE = 128;
+    char buffer[SIZE];
+    snprintf(buffer, SIZE, "<pid_%d>", getpid());
+    name.append(buffer);
+
+    return SurfaceComposerClient::createSurface(pid, name, display,
+            w, h, format, flags);
+
+}
+
+sp<SurfaceControl> SurfaceComposerClient::createSurface(
+        int pid,
+        const String8& name,
+        DisplayID display,
+        uint32_t w,
+        uint32_t h,
+        PixelFormat format,
+        uint32_t flags)
+{
     sp<SurfaceControl> result;
     if (mStatus == NO_ERROR) {
         ISurfaceFlingerClient::surface_data_t data;
-        sp<ISurface> surface = mClient->createSurface(&data, pid,
+        sp<ISurface> surface = mClient->createSurface(&data, pid, name,
                 display, w, h, format, flags);
         if (surface != 0) {
             if (uint32_t(data.token) < NUM_LAYERS_MAX) {
