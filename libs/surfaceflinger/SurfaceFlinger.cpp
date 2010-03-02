@@ -625,12 +625,13 @@ void SurfaceFlinger::handleTransactionLocked(
 
             mVisibleRegionsDirty = true;
             mDirtyRegion.set(hw.bounds());
-            mFreezeDisplayTime = 0;
         }
 
         if (mCurrentState.freezeDisplay != mDrawingState.freezeDisplay) {
             // freezing or unfreezing the display -> trigger animation if needed
             mFreezeDisplay = mCurrentState.freezeDisplay;
+            if (mFreezeDisplay)
+                 mFreezeDisplayTime = 0;
         }
 
         if (currentLayers.size() > mDrawingState.layersSortedByZ.size()) {
