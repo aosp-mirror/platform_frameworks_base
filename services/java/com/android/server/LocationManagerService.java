@@ -825,6 +825,8 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             }
         } catch (SecurityException se) {
             throw se;
+        } catch (IllegalArgumentException iae) {
+            throw iae;
         } catch (Exception e) {
             Slog.e(TAG, "requestUpdates got exception:", e);
         }
@@ -838,6 +840,8 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             }
         } catch (SecurityException se) {
             throw se;
+        } catch (IllegalArgumentException iae) {
+            throw iae;
         } catch (Exception e) {
             Slog.e(TAG, "requestUpdates got exception:", e);
         }
@@ -892,6 +896,8 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             }
         } catch (SecurityException se) {
             throw se;
+        } catch (IllegalArgumentException iae) {
+            throw iae;
         } catch (Exception e) {
             Slog.e(TAG, "removeUpdates got exception:", e);
         }
@@ -904,6 +910,8 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             }
         } catch (SecurityException se) {
             throw se;
+        } catch (IllegalArgumentException iae) {
+            throw iae;
         } catch (Exception e) {
             Slog.e(TAG, "removeUpdates got exception:", e);
         }
@@ -1241,6 +1249,8 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             }
         } catch (SecurityException se) {
             throw se;
+        } catch (IllegalArgumentException iae) {
+            throw iae;
         } catch (Exception e) {
             Slog.e(TAG, "addProximityAlert got exception:", e);
         }
@@ -1286,6 +1296,8 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             }
         } catch (SecurityException se) {
             throw se;
+        } catch (IllegalArgumentException iae) {
+            throw iae;
         } catch (Exception e) {
             Slog.e(TAG, "removeProximityAlert got exception:", e);
         }
@@ -1316,6 +1328,8 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             }
         } catch (SecurityException se) {
             throw se;
+        } catch (IllegalArgumentException iae) {
+            throw iae;
         } catch (Exception e) {
             Slog.e(TAG, "_getProviderInfo got exception:", e);
             return null;
@@ -1351,6 +1365,8 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             }
         } catch (SecurityException se) {
             throw se;
+        } catch (IllegalArgumentException iae) {
+            throw iae;
         } catch (Exception e) {
             Slog.e(TAG, "isProviderEnabled got exception:", e);
             return false;
@@ -1386,6 +1402,8 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             }
         } catch (SecurityException se) {
             throw se;
+        } catch (IllegalArgumentException iae) {
+            throw iae;
         } catch (Exception e) {
             Slog.e(TAG, "getLastKnownLocation got exception:", e);
             return null;
