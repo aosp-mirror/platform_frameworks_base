@@ -1109,6 +1109,7 @@ public class ListView extends AbsListView {
             child.setLayoutParams(p);
         }
         p.viewType = mAdapter.getItemViewType(position);
+        p.forceAdd = true;
 
         int childWidthSpec = ViewGroup.getChildMeasureSpec(widthMeasureSpec,
                 mListPadding.left + mListPadding.right, p.width);
@@ -1743,10 +1744,11 @@ public class ListView extends AbsListView {
         }
         p.viewType = mAdapter.getItemViewType(position);
 
-        if (recycled || (p.recycledHeaderFooter &&
+        if ((recycled && !p.forceAdd) || (p.recycledHeaderFooter &&
                 p.viewType == AdapterView.ITEM_VIEW_TYPE_HEADER_OR_FOOTER)) {
             attachViewToParent(child, flowDown ? -1 : 0, p);
         } else {
+            p.forceAdd = false;
             if (p.viewType == AdapterView.ITEM_VIEW_TYPE_HEADER_OR_FOOTER) {
                 p.recycledHeaderFooter = true;
             }

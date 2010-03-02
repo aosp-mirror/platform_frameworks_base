@@ -4032,6 +4032,17 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         @ViewDebug.ExportedProperty
         boolean recycledHeaderFooter;
 
+        /**
+         * When an AbsListView is measured with an AT_MOST measure spec, it needs
+         * to obtain children views to measure itself. When doing so, the children
+         * are not attached to the window, but put in the recycler which assumes
+         * they've been attached before. Setting this flag will force the reused
+         * view to be attached to the window rather than just attached to the
+         * parent.
+         */
+        @ViewDebug.ExportedProperty
+        boolean forceAdd;
+
         public LayoutParams(Context c, AttributeSet attrs) {
             super(c, attrs);
         }
