@@ -27,7 +27,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Config;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextThemeWrapper;
@@ -72,8 +71,6 @@ import java.lang.ref.WeakReference;
  */
 public class Dialog implements DialogInterface, Window.Callback,
         KeyEvent.Callback, OnCreateContextMenuListener {
-    private static final String LOG_TAG = "Dialog";
-
     private Activity mOwnerActivity;
     
     final Context mContext;
@@ -103,6 +100,12 @@ public class Dialog implements DialogInterface, Window.Callback,
 
     private final Thread mUiThread;
     private final Handler mHandler = new Handler();
+
+    private static final int DISMISS = 0x43;
+    private static final int CANCEL = 0x44;
+    private static final int SHOW = 0x45;
+
+    private Handler mListenersHandler;
 
     private final Runnable mDismissAction = new Runnable() {
         public void run() {
@@ -213,8 +216,6 @@ public class Dialog implements DialogInterface, Window.Callback,
      */
     public void show() {
         if (mShowing) {
-            if (Config.LOGV) Log.v(LOG_TAG,
-                    "[Dialog] start: already showing, ignore");
             if (mDecor != null) {
                 mDecor.setVisibility(View.VISIBLE);
             }
@@ -266,14 +267,7 @@ public class Dialog implements DialogInterface, Window.Callback,
     }
 
     private void dismissDialog() {
-        if (mDecor == null) {
-            if (Config.LOGV) Log.v(LOG_TAG,
-                    "[Dialog] dismiss: already dismissed, ignore");
-            return;
-        }
-        if (!mShowing) {
-            if (Config.LOGV) Log.v(LOG_TAG,
-                    "[Dialog] dismiss: not showing, ignore");
+        if (mDecor == null || !mShowing || mDecor.getWindowToken() == null) {
             return;
         }
 
@@ -1033,12 +1027,6 @@ public class Dialog implements DialogInterface, Window.Callback,
     public void setOnKeyListener(final OnKeyListener onKeyListener) {
         mOnKeyListener = onKeyListener;
     }
-
-    private static final int DISMISS = 0x43;
-    private static final int CANCEL = 0x44;
-    private static final int SHOW = 0x45;
-
-    private Handler mListenersHandler;
 
     private static final class ListenersHandler extends Handler {
         private WeakReference<DialogInterface> mDialog;
