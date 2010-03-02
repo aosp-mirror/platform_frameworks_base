@@ -197,6 +197,13 @@ public class ServerRequestHandler {
     }
 
     /**
+     * Called when a ABORT request is received.
+     */
+    public int onAbort(HeaderSet request, HeaderSet reply) {
+        return ResponseCodes.OBEX_HTTP_NOT_IMPLEMENTED;
+    }
+
+    /**
      * Called when a PUT request is received.
      * <P>
      * If this method is not implemented by the class that extends this class,
