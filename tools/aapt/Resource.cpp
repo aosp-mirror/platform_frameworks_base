@@ -1888,8 +1888,26 @@ writeProguardForAndroidManifest(ProguardKeepSet* keep, const sp<AaptAssets>& ass
     return NO_ERROR;
 }
 
+void
+addProguardKeepRule(ProguardKeepSet* keep, const String8& className,
+        const String8& srcName, int line)
+{
+    String8 rule("-keep class ");
+    rule += className;
+    rule += " { <init>(...); }";
+
+    String8 location("view ");
+    location += srcName;
+    char lineno[20];
+    sprintf(lineno, ":%d", line);
+    location += lineno;
+
+    keep->add(rule, location);
+}
+
 status_t
-writeProguardForLayout(ProguardKeepSet* keep, const sp<AaptFile>& layoutFile)
+writeProguardForXml(ProguardKeepSet* keep, const sp<AaptFile>& layoutFile,
+        const char* startTag, const char* altTag)
 {
     status_t err;
     ResXMLTree tree;
@@ -1903,6 +1921,23 @@ writeProguardForLayout(ProguardKeepSet* keep, const sp<AaptFile>& layoutFile)
 
     tree.restart();
 
+    if (startTag != NULL) {
+        bool haveStart = false;
+        while ((code=tree.next()) != ResXMLTree::END_DOCUMENT && code != ResXMLTree::BAD_DOCUMENT) {
+            if (code != ResXMLTree::START_TAG) {
+                continue;
+            }
+            String8 tag(tree.getElementName(&len));
+            if (tag == startTag) {
+                haveStart = true;
+            }
+            break;
+        }
+        if (!haveStart) {
+            return NO_ERROR;
+        }
+    }
+    
     while ((code=tree.next()) != ResXMLTree::END_DOCUMENT && code != ResXMLTree::BAD_DOCUMENT) {
         if (code != ResXMLTree::START_TAG) {
             continue;
@@ -1911,17 +1946,19 @@ writeProguardForLayout(ProguardKeepSet* keep, const sp<AaptFile>& layoutFile)
 
         // If there is no '.', we'll assume that it's one of the built in names.
         if (strchr(tag.string(), '.')) {
-            String8 rule("-keep class ");
-            rule += tag;
-            rule += " { <init>(...); }";
-
-            String8 location("view ");
-            location += layoutFile->getSourceFile();
-            char lineno[20];
-            sprintf(lineno, ":%d", tree.getLineNumber());
-            location += lineno;
-
-            keep->add(rule, location);
+            addProguardKeepRule(keep, tag,
+                    layoutFile->getPrintableSource(), tree.getLineNumber());
+        } else if (altTag != NULL && tag == altTag) {
+            ssize_t classIndex = tree.indexOfAttribute(NULL, "class");
+            if (classIndex < 0) {
+                fprintf(stderr, "%s:%d: <view> does not have class attribute.\n",
+                        layoutFile->getPrintableSource().string(), tree.getLineNumber());
+            } else {
+                size_t len;
+                addProguardKeepRule(keep,
+                        String8(tree.getAttributeStringValue(classIndex, &len)),
+                        layoutFile->getPrintableSource(), tree.getLineNumber());
+            }
         }
     }
 
@@ -1937,10 +1974,16 @@ writeProguardForLayouts(ProguardKeepSet* keep, const sp<AaptAssets>& assets)
     for (size_t k=0; k<K; k++) {
         const sp<AaptDir>& d = dirs.itemAt(k);
         const String8& dirName = d->getLeaf();
-        if ((dirName != String8("layout")) && (strncmp(dirName.string(), "layout-", 7) != 0)) {
+        const char* startTag = NULL;
+        const char* altTag = NULL;
+        if ((dirName == String8("layout")) || (strncmp(dirName.string(), "layout-", 7) == 0)) {
+            altTag = "view";
+        } else if ((dirName == String8("xml")) || (strncmp(dirName.string(), "xml-", 4) == 0)) {
+            startTag = "PreferenceScreen";
+        } else {
             continue;
         }
-
+        
         const KeyedVector<String8,sp<AaptGroup> > groups = d->getFiles();
         const size_t N = groups.size();
         for (size_t i=0; i<N; i++) {
@@ -1948,7 +1991,7 @@ writeProguardForLayouts(ProguardKeepSet* keep, const sp<AaptAssets>& assets)
             const DefaultKeyedVector<AaptGroupEntry, sp<AaptFile> >& files = group->getFiles();
             const size_t M = files.size();
             for (size_t j=0; j<M; j++) {
-                err = writeProguardForLayout(keep, files.valueAt(j));
+                err = writeProguardForXml(keep, files.valueAt(j), startTag, altTag);
                 if (err < 0) {
                     return err;
                 }
