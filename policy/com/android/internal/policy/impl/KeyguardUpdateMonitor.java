@@ -385,14 +385,8 @@ public class KeyguardUpdateMonitor {
         }
 
         if (!pluggedIn) {
-            // not plugged in and going below threshold
-            if (batteryLevel < LOW_BATTERY_THRESHOLD
-                    && mBatteryLevel >= LOW_BATTERY_THRESHOLD) {
-                return true;
-            }
-            // not plugged in and going above threshold (sounds impossible, but, meh...)
-            if (mBatteryLevel < LOW_BATTERY_THRESHOLD
-                    && batteryLevel >= LOW_BATTERY_THRESHOLD) {
+            // not plugged in and below threshold
+            if (batteryLevel < LOW_BATTERY_THRESHOLD && batteryLevel != mBatteryLevel) {
                 return true;
             }
         }
