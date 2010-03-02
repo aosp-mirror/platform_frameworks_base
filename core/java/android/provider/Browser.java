@@ -211,6 +211,57 @@ public class Browser {
                 new String[] { BookmarkColumns.URL }, null, null, null);
     }
 
+    private static final void addOrUrlEquals(StringBuilder sb) {
+        sb.append(" OR " + BookmarkColumns.URL + " = ");
+    }
+
+    /**
+     *  Return a Cursor with all history/bookmarks that are similar to url,
+     *  where similar means 'http(s)://' and 'www.' are optional, but the rest
+     *  of the url is the same.
+     *  @param cr   The ContentResolver used to access the database.
+     *  @param url  The url to compare to.
+     *  @hide
+     */
+    public static final Cursor getVisitedLike(ContentResolver cr, String url) {
+        boolean secure = false;
+        String compareString = url;
+        if (compareString.startsWith("http://")) {
+            compareString = compareString.substring(7);
+        } else if (compareString.startsWith("https://")) {
+            compareString = compareString.substring(8);
+            secure = true;
+        }
+        if (compareString.startsWith("www.")) {
+            compareString = compareString.substring(4);
+        }
+        StringBuilder whereClause = null;
+        if (secure) {
+            whereClause = new StringBuilder(BookmarkColumns.URL + " = ");
+            DatabaseUtils.appendEscapedSQLString(whereClause,
+                    "https://" + compareString);
+            addOrUrlEquals(whereClause);
+            DatabaseUtils.appendEscapedSQLString(whereClause,
+                    "https://www." + compareString);
+        } else {
+            whereClause = new StringBuilder(BookmarkColumns.URL + " = ");
+            DatabaseUtils.appendEscapedSQLString(whereClause,
+                    compareString);
+            addOrUrlEquals(whereClause);
+            String wwwString = "www." + compareString;
+            DatabaseUtils.appendEscapedSQLString(whereClause,
+                    wwwString);
+            addOrUrlEquals(whereClause);
+            DatabaseUtils.appendEscapedSQLString(whereClause,
+                    "http://" + compareString);
+            addOrUrlEquals(whereClause);
+            DatabaseUtils.appendEscapedSQLString(whereClause,
+                    "http://" + wwwString);
+        }
+        return cr.query(BOOKMARKS_URI, HISTORY_PROJECTION,
+                whereClause.toString(), null, null);
+    }
+
     /**
      *  Update the visited history to acknowledge that a site has been
      *  visited.
@@ -225,14 +276,7 @@ public class Browser {
                                                   String url, boolean real) {
         long now = new Date().getTime();
         try {
-            StringBuilder sb = new StringBuilder(BookmarkColumns.URL + " = ");
-            DatabaseUtils.appendEscapedSQLString(sb, url);
-            Cursor c = cr.query(
-                    BOOKMARKS_URI,
-                    HISTORY_PROJECTION,
-                    sb.toString(),
-                    null,
-                    null);
+            Cursor c = getVisitedLike(cr, url);
             /* We should only get one answer that is exactly the same. */
             if (c.moveToFirst()) {
                 ContentValues map = new ContentValues();
