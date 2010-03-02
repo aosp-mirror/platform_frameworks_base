@@ -2283,7 +2283,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             scrollabilityCache.scrollBar = new ScrollBarDrawable();
         }
         
-        final boolean fadeScrollbars = a.getBoolean(R.styleable.View_fadeScrollbars, false);
+        final boolean fadeScrollbars = a.getBoolean(R.styleable.View_fadeScrollbars, true);
 
         if (!fadeScrollbars) {
             scrollabilityCache.state = ScrollabilityCache.ON;
