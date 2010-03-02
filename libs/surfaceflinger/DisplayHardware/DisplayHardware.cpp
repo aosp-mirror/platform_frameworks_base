@@ -246,10 +246,15 @@ void DisplayHardware::init(uint32_t dpy)
     LOGI("version   : %s", glGetString(GL_VERSION));
     LOGI("extensions: %s", gl_extensions);
 
-    if (strstr(gl_renderer, "Adreno")) {
+#if 0
+    // for drivers that don't have proper support for flushing cached buffers
+    // on gralloc unlock, uncomment this block and test for the specific
+    // renderer substring
+    if (strstr(gl_renderer, "<some vendor string>")) {
         LOGD("Assuming uncached graphics buffers.");
         mFlags &= ~CACHED_BUFFERS;
     }
+#endif
 
     if (strstr(gl_extensions, "GL_ARB_texture_non_power_of_two")) {
         mFlags |= NPOT_EXTENSION;
