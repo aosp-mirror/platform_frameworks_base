@@ -94,6 +94,7 @@ public:
     virtual status_t    standby();
     virtual status_t    setParameters(const String8& keyValuePairs);
     virtual String8     getParameters(const String8& keys);
+    virtual unsigned int  getInputFramesLost() const;
     virtual status_t    dump(int fd, const Vector<String16>& args);
     void                Close(void);
     AudioStreamIn*     finalStream() { return mFinalStream; }
