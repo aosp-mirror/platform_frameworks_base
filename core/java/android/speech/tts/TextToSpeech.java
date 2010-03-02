@@ -410,17 +410,17 @@ public class TextToSpeech {
         mCachedParams[Engine.PARAM_POSITION_UTTERANCE_ID] = Engine.KEY_PARAM_UTTERANCE_ID;
         mCachedParams[Engine.PARAM_POSITION_ENGINE] = Engine.KEY_PARAM_ENGINE;
 
-        mCachedParams[Engine.PARAM_POSITION_RATE + 1] =
-                String.valueOf(Engine.DEFAULT_RATE);
-        // initialize the language cached parameters with the current Locale
-        Locale defaultLoc = Locale.getDefault();
-        mCachedParams[Engine.PARAM_POSITION_LANGUAGE + 1] = defaultLoc.getISO3Language();
-        mCachedParams[Engine.PARAM_POSITION_COUNTRY + 1] = defaultLoc.getISO3Country();
-        mCachedParams[Engine.PARAM_POSITION_VARIANT + 1] = defaultLoc.getVariant();
+        // Leave all defaults that are shown in Settings uninitialized so that
+        // the values set in Settings will take effect if the application does
+        // not try to change these settings itself.
+        mCachedParams[Engine.PARAM_POSITION_RATE + 1] = "";
+        mCachedParams[Engine.PARAM_POSITION_LANGUAGE + 1] = "";
+        mCachedParams[Engine.PARAM_POSITION_COUNTRY + 1] = "";
+        mCachedParams[Engine.PARAM_POSITION_VARIANT + 1] = "";
         mCachedParams[Engine.PARAM_POSITION_STREAM + 1] =
                 String.valueOf(Engine.DEFAULT_STREAM);
         mCachedParams[Engine.PARAM_POSITION_UTTERANCE_ID + 1] = "";
-        mCachedParams[Engine.PARAM_POSITION_ENGINE + 1] = Engine.DEFAULT_SYNTH;
+        mCachedParams[Engine.PARAM_POSITION_ENGINE + 1] = "";
 
         initTts();
     }
