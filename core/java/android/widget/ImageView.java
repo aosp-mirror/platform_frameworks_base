@@ -183,6 +183,7 @@ public class ImageView extends View {
             int scale = alpha + (alpha >> 7);
             if (mViewAlphaScale != scale) {
                 mViewAlphaScale = scale;
+                mColorMod = true;
                 applyColorMod();
             }
             return true;

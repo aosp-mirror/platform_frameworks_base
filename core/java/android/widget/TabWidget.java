@@ -177,6 +177,8 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
      */
     public void setDividerDrawable(Drawable drawable) {
         mDividerDrawable = drawable;
+        requestLayout();
+        invalidate();
     }
 
     /**
@@ -186,6 +188,8 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
      */
     public void setDividerDrawable(int resId) {
         mDividerDrawable = mContext.getResources().getDrawable(resId);
+        requestLayout();
+        invalidate();
     }
     
     /**
@@ -195,6 +199,8 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
      */
     public void setLeftStripDrawable(Drawable drawable) {
         mBottomLeftStrip = drawable;
+        requestLayout();
+        invalidate();
     }
 
     /**
@@ -205,6 +211,8 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
      */
     public void setLeftStripDrawable(int resId) {
         mBottomLeftStrip = mContext.getResources().getDrawable(resId);
+        requestLayout();
+        invalidate();
     }
 
     /**
@@ -214,7 +222,8 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
      */
     public void setRightStripDrawable(Drawable drawable) {
         mBottomLeftStrip = drawable;
-    }
+        requestLayout();
+        invalidate();    }
 
     /**
      * Sets the drawable to use as the left part of the strip below the
@@ -224,6 +233,8 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
      */
     public void setRightStripDrawable(int resId) {
         mBottomLeftStrip = mContext.getResources().getDrawable(resId);
+        requestLayout();
+        invalidate();
     }
     
     /**
@@ -235,6 +246,7 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
      */
     public void setStripEnabled(boolean stripEnabled) {
         mDrawBottomStrips = stripEnabled;
+        invalidate();
     }
 
     /**
