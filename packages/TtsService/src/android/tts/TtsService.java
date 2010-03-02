@@ -206,6 +206,9 @@ public class TtsService extends Service implements OnCompletionListener {
 
     private int setEngine(String enginePackageName) {
         String soFilename = "";
+        if (isDefaultEnforced()) {
+            enginePackageName = getDefaultEngine();
+        }
         // The SVOX TTS is an exception to how the TTS packaging scheme works
         // because it is part of the system and not a 3rd party add-on; thus
         // its binary is actually located under /system/lib/
@@ -779,12 +782,19 @@ public class TtsService extends Service implements OnCompletionListener {
                     if (mKillList.get(speechItem) == null) {
                         if (engine.length() > 0) {
                             setEngine(engine);
+                        } else {
+                            setEngine(getDefaultEngine());
                         }
                         if (language.length() > 0){
                             setLanguage("", language, country, variant);
+                        } else {
+                            setLanguage("", getDefaultLanguage(), getDefaultCountry(),
+                                    getDefaultLocVariant());
                         }
                         if (speechRate.length() > 0){
                             setSpeechRate("", Integer.parseInt(speechRate));
+                        } else {
+                            setSpeechRate("", getDefaultRate());
                         }
                         try {
                             sNativeSynth.speak(speechItem.mText, streamType);
@@ -864,12 +874,19 @@ public class TtsService extends Service implements OnCompletionListener {
                     if (mKillList.get(speechItem) == null){
                         if (engine.length() > 0) {
                             setEngine(engine);
+                        } else {
+                            setEngine(getDefaultEngine());
                         }
                         if (language.length() > 0){
                             setLanguage("", language, country, variant);
+                        } else {
+                            setLanguage("", getDefaultLanguage(), getDefaultCountry(),
+                                    getDefaultLocVariant());
                         }
                         if (speechRate.length() > 0){
                             setSpeechRate("", Integer.parseInt(speechRate));
+                        } else {
+                            setSpeechRate("", getDefaultRate());
                         }
                         try {
                             sNativeSynth.synthesizeToFile(speechItem.mText, speechItem.mFilename);
