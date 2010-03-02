@@ -1768,7 +1768,7 @@ ssize_t MediaPlayerService::AudioCache::write(const void* buffer, size_t size)
 status_t MediaPlayerService::AudioCache::wait()
 {
     Mutex::Autolock lock(mLock);
-    if (!mCommandComplete) {
+    while (!mCommandComplete) {
         mSignal.wait(mLock);
     }
     mCommandComplete = false;
@@ -1805,6 +1805,7 @@ void MediaPlayerService::AudioCache::notify(void* cookie, int msg, int ext1, int
     }
 
     // wake up thread
+    Mutex::Autolock lock(mLock);
     p->mCommandComplete = true;
     p->mSignal.signal();
 }
