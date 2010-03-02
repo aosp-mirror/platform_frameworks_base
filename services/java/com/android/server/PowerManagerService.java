@@ -349,10 +349,14 @@ class PowerManagerService extends IPowerManager.Stub
                     // treat plugging and unplugging the devices as a user activity.
                     // users find it disconcerting when they unplug the device
                     // and it shuts off right away.
+                    // to avoid turning on the screen when unplugging, we only trigger
+                    // user activity when screen was already on.
                     // temporarily set mUserActivityAllowed to true so this will work
                     // even when the keyguard is on.
                     synchronized (mLocks) {
-                        forceUserActivityLocked();
+                        if (!wasPowered || (mPowerState & SCREEN_ON_BIT) != 0) {
+                            forceUserActivityLocked();
+                        }
                     }
                 }
             }
