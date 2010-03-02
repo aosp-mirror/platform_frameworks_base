@@ -10,7 +10,6 @@ LOCAL_SRC_FILES := \
 	../core/java/android/pim/ICalendar.java \
 	../core/java/android/pim/RecurrenceSet.java \
 	../core/java/android/pim/ContactsAsyncHelper.java \
-	../core/java/android/pim/DateException.java
 
 include $(BUILD_STATIC_JAVA_LIBRARY)
 
