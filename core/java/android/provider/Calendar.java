@@ -168,10 +168,13 @@ public final class Calendar {
         public static final String _SYNC_VERSION = "_sync_version";
 
         /**
-         * Used in temporary provider while syncing, always NULL for rows in persistent providers.
+         * For use by sync adapter at its discretion; not modified by CalendarProvider
+         * Note that this column was formerly named _SYNC_LOCAL_ID.  We are using it to avoid a
+         * schema change.
+         * TODO Replace this with something more general in the future.
          * <P>Type: INTEGER (long)</P>
          */
-        public static final String _SYNC_LOCAL_ID = "_sync_local_id";
+        public static final String _SYNC_DATA = "_sync_local_id";
 
         /**
          * Used only in persistent providers, and only during merging.
@@ -690,7 +693,7 @@ public final class Calendar {
                 DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv, GUESTS_CAN_SEE_GUESTS);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, ORGANIZER);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, _SYNC_ID);
-                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, _SYNC_LOCAL_ID);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, _SYNC_DATA);
                 DatabaseUtils.cursorLongToContentValuesIfPresent(cursor, cv, _SYNC_DIRTY);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, _SYNC_VERSION);
                 DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv, DELETED);
