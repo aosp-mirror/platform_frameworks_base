@@ -173,7 +173,7 @@ public class SslCertificate {
      * @return Not-after date from the certificate validity period in
      * ISO 8601 format or "" if none has been set
      *
-     * {@link #getValidNotAfterDate()}
+     * @deprecated Use {@link #getValidNotAfterDate()}
      */
     public String getValidNotAfter() {
         return formatDate(mValidNotAfter);
