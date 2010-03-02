@@ -45,9 +45,10 @@ import android.os.SystemProperties;
 import android.os.Vibrator;
 import android.provider.Settings;
 
-import com.android.common.ui.PointerLocationView;
 import com.android.internal.policy.PolicyManager;
 import com.android.internal.telephony.ITelephony;
+import com.android.internal.widget.PointerLocationView;
+
 import android.util.Config;
 import android.util.EventLog;
 import android.util.Log;
