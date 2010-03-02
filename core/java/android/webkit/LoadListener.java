@@ -1021,6 +1021,13 @@ class LoadListener extends Handler implements EventHandler {
             return;
         }
 
+        // If the response is an authentication and we've resent the
+        // request with some credentials then don't commit the headers
+        // of this response; wait for the response to the request with the
+        // credentials.
+        if (mAuthHeader != null)
+            return;
+
         // Commit the headers to WebCore
         int nativeResponse = createNativeResponse();
         // The native code deletes the native response object.
