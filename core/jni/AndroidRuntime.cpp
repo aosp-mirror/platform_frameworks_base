@@ -1036,7 +1036,7 @@ static int javaAttachThread(const char* threadName, JNIEnv** pEnv)
 
     result = vm->AttachCurrentThread(pEnv, (void*) &args);
     if (result != JNI_OK)
-        LOGE("ERROR: thread attach failed\n");
+        LOGI("NOTE: attach of thread '%s' failed\n", threadName);
 
     return result;
 }
