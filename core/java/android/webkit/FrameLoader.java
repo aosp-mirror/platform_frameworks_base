@@ -110,8 +110,12 @@ class FrameLoader {
                 return false;
             }
             mNetwork = Network.getInstance(mListener.getContext());
-            WebViewWorker.getHandler().obtainMessage(
-                    WebViewWorker.MSG_ADD_HTTPLOADER, this).sendToTarget();
+            if (mListener.isSynchronous()) {
+                handleHTTPLoad();
+            } else {
+                WebViewWorker.getHandler().obtainMessage(
+                        WebViewWorker.MSG_ADD_HTTPLOADER, this).sendToTarget();
+            }
             return true;
         } else if (handleLocalFile(url, mListener, mSettings)) {
             return true;
