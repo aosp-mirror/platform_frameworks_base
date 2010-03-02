@@ -45,10 +45,10 @@ class BaseErrorDialog extends AlertDialog {
 
     public boolean dispatchKeyEvent(KeyEvent event) {
         if (mConsuming) {
-            //Log.i(TAG, "Consuming: " + event);
+            //Slog.i(TAG, "Consuming: " + event);
             return true;
         }
-        //Log.i(TAG, "Dispatching: " + event);
+        //Slog.i(TAG, "Dispatching: " + event);
         return super.dispatchKeyEvent(event);
     }
 

@@ -57,6 +57,7 @@ import android.server.BluetoothService;
 import android.text.format.DateUtils;
 import android.text.format.Time;
 import android.util.Log;
+import android.util.Slog;
 
 import com.android.internal.R;
 import com.android.internal.app.DisableCarModeActivity;
@@ -147,7 +148,7 @@ class DockObserver extends UEventObserver {
                 try {
                     mContext.startActivity(intent);
                 } catch (ActivityNotFoundException e) {
-                    Log.w(TAG, e.getCause());
+                    Slog.w(TAG, e.getCause());
                 }
             }
         }
@@ -249,7 +250,7 @@ class DockObserver extends UEventObserver {
     @Override
     public void onUEvent(UEventObserver.UEvent event) {
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
-            Log.v(TAG, "Dock UEVENT: " + event.toString());
+            Slog.v(TAG, "Dock UEVENT: " + event.toString());
         }
 
         synchronized (this) {
@@ -263,7 +264,7 @@ class DockObserver extends UEventObserver {
                         try {
                             setCarMode(carModeEnabled);
                         } catch (RemoteException e1) {
-                            Log.w(TAG, "Unable to change car mode.", e1);
+                            Slog.w(TAG, "Unable to change car mode.", e1);
                         }
                     }
                     if (mSystemReady) {
@@ -279,7 +280,7 @@ class DockObserver extends UEventObserver {
                     }
                 }
             } catch (NumberFormatException e) {
-                Log.e(TAG, "Could not parse switch state from event " + event);
+                Slog.e(TAG, "Could not parse switch state from event " + event);
             }
         }
     }
@@ -293,9 +294,9 @@ class DockObserver extends UEventObserver {
             mPreviousDockState = mDockState = Integer.valueOf((new String(buffer, 0, len)).trim());
 
         } catch (FileNotFoundException e) {
-            Log.w(TAG, "This kernel does not have dock station support");
+            Slog.w(TAG, "This kernel does not have dock station support");
         } catch (Exception e) {
-            Log.e(TAG, "" , e);
+            Slog.e(TAG, "" , e);
         }
     }
 
@@ -310,7 +311,7 @@ class DockObserver extends UEventObserver {
                 try {
                     setCarMode(enableCarMode);
                 } catch (RemoteException e) {
-                    Log.w(TAG, "Unable to change car mode.", e);
+                    Slog.w(TAG, "Unable to change car mode.", e);
                 }
             }
             // don't bother broadcasting undocked here
@@ -332,13 +333,13 @@ class DockObserver extends UEventObserver {
             switch (msg.what) {
                 case MSG_DOCK_STATE:
                     synchronized (this) {
-                        Log.i(TAG, "Dock state changed: " + mDockState);
+                        Slog.i(TAG, "Dock state changed: " + mDockState);
 
                         final ContentResolver cr = mContext.getContentResolver();
 
                         if (Settings.Secure.getInt(cr,
                                 Settings.Secure.DEVICE_PROVISIONED, 0) == 0) {
-                            Log.i(TAG, "Device not provisioned, skipping dock broadcast");
+                            Slog.i(TAG, "Device not provisioned, skipping dock broadcast");
                             return;
                         }
                         // Pack up the values and broadcast them to everyone
@@ -414,7 +415,7 @@ class DockObserver extends UEventObserver {
                             try {
                                 DockObserver.this.updateTwilight();
                             } catch (RemoteException e) {
-                                Log.w(TAG, "Unable to change night mode.", e);
+                                Slog.w(TAG, "Unable to change night mode.", e);
                             }
                         }
                     }
@@ -428,7 +429,7 @@ class DockObserver extends UEventObserver {
                             try {
                                 DockObserver.this.updateTwilight();
                             } catch (RemoteException e) {
-                                Log.w(TAG, "Unable to change night mode.", e);
+                                Slog.w(TAG, "Unable to change night mode.", e);
                             }
                         }
                     } else {

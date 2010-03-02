@@ -36,14 +36,15 @@ public class ChooseAccountActivity extends ListActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (savedInstanceState == null) {
-            mAccounts = getIntent().getParcelableArrayExtra(AccountManager.KEY_ACCOUNTS);
-            mAccountManagerResponse =
-                    getIntent().getParcelableExtra(AccountManager.KEY_ACCOUNT_MANAGER_RESPONSE);
-        } else {
-            mAccounts = savedInstanceState.getParcelableArray(AccountManager.KEY_ACCOUNTS);
-            mAccountManagerResponse =
-                    savedInstanceState.getParcelable(AccountManager.KEY_ACCOUNT_MANAGER_RESPONSE);
+        mAccounts = getIntent().getParcelableArrayExtra(AccountManager.KEY_ACCOUNTS);
+        mAccountManagerResponse =
+                getIntent().getParcelableExtra(AccountManager.KEY_ACCOUNT_MANAGER_RESPONSE);
+
+        // KEY_ACCOUNTS is a required parameter
+        if (mAccounts == null) {
+            setResult(RESULT_CANCELED);
+            finish();
+            return;
         }
 
         String[] mAccountNames = new String[mAccounts.length];

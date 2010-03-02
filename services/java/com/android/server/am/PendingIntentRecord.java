@@ -24,7 +24,7 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.util.Log;
+import android.util.Slog;
 
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
@@ -81,7 +81,7 @@ class PendingIntentRecord extends IIntentSender.Stub {
             hash = (ODD_PRIME_NUMBER*hash) + _p.hashCode();
             hash = (ODD_PRIME_NUMBER*hash) + _t;
             hashCode = hash;
-            //Log.i(ActivityManagerService.TAG, this + " hashCode=0x"
+            //Slog.i(ActivityManagerService.TAG, this + " hashCode=0x"
             //        + Integer.toHexString(hashCode));
         }
         
@@ -213,7 +213,7 @@ class PendingIntentRecord extends IIntentSender.Stub {
                                     finalIntent, resolvedType,
                                     resultTo, resultWho, requestCode, false);
                         } catch (RuntimeException e) {
-                            Log.w(ActivityManagerService.TAG,
+                            Slog.w(ActivityManagerService.TAG,
                                     "Unable to send startActivity intent", e);
                         }
                         break;
@@ -231,7 +231,7 @@ class PendingIntentRecord extends IIntentSender.Stub {
                                     (finishedReceiver != null), false);
                             sendFinish = false;
                         } catch (RuntimeException e) {
-                            Log.w(ActivityManagerService.TAG,
+                            Slog.w(ActivityManagerService.TAG,
                                     "Unable to send startActivity intent", e);
                         }
                         break;
@@ -240,7 +240,7 @@ class PendingIntentRecord extends IIntentSender.Stub {
                             owner.startServiceInPackage(uid,
                                     finalIntent, resolvedType);
                         } catch (RuntimeException e) {
-                            Log.w(ActivityManagerService.TAG,
+                            Slog.w(ActivityManagerService.TAG,
                                     "Unable to send startService intent", e);
                         }
                         break;

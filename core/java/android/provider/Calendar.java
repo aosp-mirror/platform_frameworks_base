@@ -168,10 +168,13 @@ public final class Calendar {
         public static final String _SYNC_VERSION = "_sync_version";
 
         /**
-         * Used in temporary provider while syncing, always NULL for rows in persistent providers.
+         * For use by sync adapter at its discretion; not modified by CalendarProvider
+         * Note that this column was formerly named _SYNC_LOCAL_ID.  We are using it to avoid a
+         * schema change.
+         * TODO Replace this with something more general in the future.
          * <P>Type: INTEGER (long)</P>
          */
-        public static final String _SYNC_LOCAL_ID = "_sync_local_id";
+        public static final String _SYNC_DATA = "_sync_local_id";
 
         /**
          * Used only in persistent providers, and only during merging.
@@ -690,7 +693,7 @@ public final class Calendar {
                 DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv, GUESTS_CAN_SEE_GUESTS);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, ORGANIZER);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, _SYNC_ID);
-                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, _SYNC_LOCAL_ID);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, _SYNC_DATA);
                 DatabaseUtils.cursorLongToContentValuesIfPresent(cursor, cv, _SYNC_DIRTY);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, _SYNC_VERSION);
                 DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv, DELETED);
@@ -801,123 +804,6 @@ public final class Calendar {
                 return property.getValue();
             }
             return null;
-        }
-
-        public static final Uri insertVEvent(ContentResolver cr,
-            ICalendar.Component event, long calendarId, int status,
-            ContentValues values) {
-
-            // TODO: define VEVENT component names as constants in some
-            // appropriate class (ICalendar.Component?).
-
-            values.clear();
-
-            // title
-            String title = extractValue(event, "SUMMARY");
-            if (TextUtils.isEmpty(title)) {
-                if (Config.LOGD) {
-                    Log.d(TAG, "No SUMMARY provided for event.  "
-                            + "Cannot import.");
-                }
-                return null;
-            }
-            values.put(TITLE, title);
-
-            // status
-            values.put(STATUS, status);
-
-            // description
-            String description = extractValue(event, "DESCRIPTION");
-            if (!TextUtils.isEmpty(description)) {
-                values.put(DESCRIPTION, description);
-            }
-
-            // where
-            String where = extractValue(event, "LOCATION");
-            if (!TextUtils.isEmpty(where)) {
-                values.put(EVENT_LOCATION, where);
-            }
-
-            // Calendar ID
-            values.put(CALENDAR_ID, calendarId);
-
-            boolean timesSet = false;
-
-            // TODO: deal with VALARMs
-
-            // dtstart & dtend
-            Time time = new Time(Time.TIMEZONE_UTC);
-            String dtstart = null;
-            String dtend = null;
-            String duration = null;
-            ICalendar.Property dtstartProp = event.getFirstProperty("DTSTART");
-            // TODO: handle "floating" timezone (no timezone specified).
-            if (dtstartProp != null) {
-                dtstart = dtstartProp.getValue();
-                if (!TextUtils.isEmpty(dtstart)) {
-                    ICalendar.Parameter tzidParam =
-                            dtstartProp.getFirstParameter("TZID");
-                    if (tzidParam != null && tzidParam.value != null) {
-                        time.clear(tzidParam.value);
-                    }
-                    try {
-                        time.parse(dtstart);
-                    } catch (Exception e) {
-                        if (Config.LOGD) {
-                            Log.d(TAG, "Cannot parse dtstart " + dtstart, e);
-                        }
-                        return null;
-                    }
-                    if (time.allDay) {
-                        values.put(ALL_DAY, 1);
-                    }
-                    values.put(DTSTART, time.toMillis(false /* use isDst */));
-                    values.put(EVENT_TIMEZONE, time.timezone);
-                }
-
-                ICalendar.Property dtendProp = event.getFirstProperty("DTEND");
-                if (dtendProp != null) {
-                    dtend = dtendProp.getValue();
-                    if (!TextUtils.isEmpty(dtend)) {
-                        // TODO: make sure the timezones are the same for
-                        // start, end.
-                        try {
-                            time.parse(dtend);
-                        } catch (Exception e) {
-                            if (Config.LOGD) {
-                                Log.d(TAG, "Cannot parse dtend " + dtend, e);
-                            }
-                            return null;
-                        }
-                        values.put(DTEND, time.toMillis(false /* use isDst */));
-                    }
-                } else {
-                    // look for a duration
-                    ICalendar.Property durationProp =
-                            event.getFirstProperty("DURATION");
-                    if (durationProp != null) {
-                        duration = durationProp.getValue();
-                        if (!TextUtils.isEmpty(duration)) {
-                            // TODO: check that it is valid?
-                            values.put(DURATION, duration);
-                        }
-                    }
-                }
-            }
-            if (TextUtils.isEmpty(dtstart) ||
-                    (TextUtils.isEmpty(dtend) && TextUtils.isEmpty(duration))) {
-                if (Config.LOGD) {
-                    Log.d(TAG, "No DTSTART or DTEND/DURATION defined.");
-                }
-                return null;
-            }
-
-            // rrule
-            if (!RecurrenceSet.populateContentValues(event, values)) {
-                return null;
-            }
-
-            return cr.insert(CONTENT_URI, values);
         }
 
         /**

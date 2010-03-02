@@ -185,7 +185,8 @@ static void setSurface(JNIEnv* env, jobject clazz, const sp<Surface>& surface)
 
 static void Surface_init(
         JNIEnv* env, jobject clazz, 
-        jobject session, jint pid, jint dpy, jint w, jint h, jint format, jint flags)
+        jobject session,
+        jint pid, jstring jname, jint dpy, jint w, jint h, jint format, jint flags)
 {
     if (session == NULL) {
         doThrow(env, "java/lang/NullPointerException");
@@ -195,7 +196,16 @@ static void Surface_init(
     SurfaceComposerClient* client =
             (SurfaceComposerClient*)env->GetIntField(session, sso.client);
 
-    sp<SurfaceControl> surface(client->createSurface(pid, dpy, w, h, format, flags));
+    sp<SurfaceControl> surface;
+    if (jname == NULL) {
+        surface = client->createSurface(pid, dpy, w, h, format, flags);
+    } else {
+        const jchar* str = env->GetStringCritical(jname, 0);
+        const String8 name(str, env->GetStringLength(jname));
+        env->ReleaseStringCritical(jname, str);
+        surface = client->createSurface(pid, name, dpy, w, h, format, flags);
+    }
+
     if (surface == 0) {
         doThrow(env, OutOfResourcesException);
         return;
@@ -620,7 +630,7 @@ static JNINativeMethod gSurfaceSessionMethods[] = {
 
 static JNINativeMethod gSurfaceMethods[] = {
     {"nativeClassInit",     "()V",  (void*)nativeClassInit },
-    {"init",                "(Landroid/view/SurfaceSession;IIIIII)V",  (void*)Surface_init },
+    {"init",                "(Landroid/view/SurfaceSession;ILjava/lang/String;IIIII)V",  (void*)Surface_init },
     {"init",                "(Landroid/os/Parcel;)V",  (void*)Surface_initParcel },
     {"destroy",             "()V",  (void*)Surface_destroy },
     {"release",             "()V",  (void*)Surface_release },

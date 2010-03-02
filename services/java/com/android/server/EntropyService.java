@@ -27,7 +27,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemProperties;
-import android.util.Log;
+import android.util.Slog;
 
 /**
  * A service designed to load and periodically save &quot;randomness&quot;
@@ -63,7 +63,7 @@ public class EntropyService extends Binder {
         @Override
         public void handleMessage(Message msg) {
             if (msg.what != ENTROPY_WHAT) {
-                Log.e(TAG, "Will not process invalid message");
+                Slog.e(TAG, "Will not process invalid message");
                 return;
             }
             writeEntropy();
@@ -87,7 +87,7 @@ public class EntropyService extends Binder {
         try {
             RandomBlock.fromFile(ENTROPY_FILENAME).toFile(RANDOM_DEV);
         } catch (IOException e) {
-            Log.w(TAG, "unable to load initial entropy (first boot?)", e);
+            Slog.w(TAG, "unable to load initial entropy (first boot?)", e);
         }
     }
 
@@ -95,7 +95,7 @@ public class EntropyService extends Binder {
         try {
             RandomBlock.fromFile(RANDOM_DEV).toFile(ENTROPY_FILENAME);
         } catch (IOException e) {
-            Log.w(TAG, "unable to write entropy", e);
+            Slog.w(TAG, "unable to write entropy", e);
         }
     }
 
@@ -131,7 +131,7 @@ public class EntropyService extends Binder {
             out.println(System.currentTimeMillis());
             out.println(System.nanoTime());
         } catch (IOException e) {
-            Log.w(TAG, "Unable to add device specific data to the entropy pool", e);
+            Slog.w(TAG, "Unable to add device specific data to the entropy pool", e);
         } finally {
             if (out != null) {
                 out.close();

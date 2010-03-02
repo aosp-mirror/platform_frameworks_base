@@ -46,6 +46,8 @@ typedef void * RsProgramFragment;
 typedef void * RsProgramFragmentStore;
 typedef void * RsProgramRaster;
 
+typedef void (* RsBitmapCallback_t)(void *);
+
 enum RsDeviceParam {
     RS_DEVICE_PARAM_FORCE_SOFTWARE_GL,
     RS_DEVICE_PARAM_COUNT
@@ -200,8 +202,9 @@ enum RsPrimitive {
     RS_PRIMITIVE_TRIANGLE_FAN
 };
 
-
+#ifndef NO_RS_FUNCS
 #include "rsgApiFuncDecl.h"
+#endif
 
 #ifdef __cplusplus
 };

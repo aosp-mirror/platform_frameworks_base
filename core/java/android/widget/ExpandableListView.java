@@ -547,9 +547,10 @@ public class ExpandableListView extends ListView {
                 
                 final int groupPos = posMetadata.position.groupPos;
                 final int groupFlatPos = posMetadata.position.flatListPos;
-                
-                smoothScrollToPosition(groupFlatPos + mAdapter.getChildrenCount(groupPos),
-                        groupFlatPos);
+
+                final int shiftedGroupPosition = groupFlatPos + getHeaderViewsCount(); 
+                smoothScrollToPosition(shiftedGroupPosition + mAdapter.getChildrenCount(groupPos),
+                        shiftedGroupPosition);
             }
 
             returnValue = true;

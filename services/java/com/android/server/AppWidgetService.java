@@ -38,7 +38,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.AttributeSet;
-import android.util.Log;
+import android.util.Slog;
 import android.util.TypedValue;
 import android.util.Xml;
 import android.widget.RemoteViews;
@@ -428,7 +428,7 @@ class AppWidgetService extends IAppWidgetService.Stub
         synchronized (mAppWidgetIds) {
             Provider p = lookupProviderLocked(provider);
             if (p == null) {
-                Log.w(TAG, "updateAppWidgetProvider: provider doesn't exist: " + provider);
+                Slog.w(TAG, "updateAppWidgetProvider: provider doesn't exist: " + provider);
                 return;
             }
             ArrayList<AppWidgetId> instances = p.instances;
@@ -683,7 +683,7 @@ class AppWidgetService extends IAppWidgetService.Stub
             parser = activityInfo.loadXmlMetaData(mPackageManager,
                     AppWidgetManager.META_DATA_APPWIDGET_PROVIDER);
             if (parser == null) {
-                Log.w(TAG, "No " + AppWidgetManager.META_DATA_APPWIDGET_PROVIDER + " meta-data for "
+                Slog.w(TAG, "No " + AppWidgetManager.META_DATA_APPWIDGET_PROVIDER + " meta-data for "
                         + "AppWidget provider '" + component + '\'');
                 return null;
             }
@@ -698,7 +698,7 @@ class AppWidgetService extends IAppWidgetService.Stub
             
             String nodeName = parser.getName();
             if (!"appwidget-provider".equals(nodeName)) {
-                Log.w(TAG, "Meta-data does not start with appwidget-provider tag for"
+                Slog.w(TAG, "Meta-data does not start with appwidget-provider tag for"
                         + " AppWidget provider '" + component + '\'');
                 return null;
             }
@@ -737,7 +737,7 @@ class AppWidgetService extends IAppWidgetService.Stub
             // Ok to catch Exception here, because anything going wrong because
             // of what a client process passes to us should not be fatal for the
             // system process.
-            Log.w(TAG, "XML parsing failed for AppWidget provider '" + component + '\'', e);
+            Slog.w(TAG, "XML parsing failed for AppWidget provider '" + component + '\'', e);
             return null;
         } finally {
             if (parser != null) parser.close();
@@ -829,7 +829,7 @@ class AppWidgetService extends IAppWidgetService.Stub
         }
 
         if (!writeStateToFileLocked(temp)) {
-            Log.w(TAG, "Failed to persist new settings");
+            Slog.w(TAG, "Failed to persist new settings");
             return;
         }
 
@@ -980,7 +980,7 @@ class AppWidgetService extends IAppWidgetService.Stub
                             int pIndex = Integer.parseInt(providerString, 16);
                             id.provider = loadedProviders.get(pIndex);
                             if (false) {
-                                Log.d(TAG, "bound appWidgetId=" + id.appWidgetId + " to provider "
+                                Slog.d(TAG, "bound appWidgetId=" + id.appWidgetId + " to provider "
                                         + pIndex + " which is " + id.provider);
                             }
                             if (id.provider == null) {
@@ -1007,15 +1007,15 @@ class AppWidgetService extends IAppWidgetService.Stub
             } while (type != XmlPullParser.END_DOCUMENT);
             success = true;
         } catch (NullPointerException e) {
-            Log.w(TAG, "failed parsing " + file, e);
+            Slog.w(TAG, "failed parsing " + file, e);
         } catch (NumberFormatException e) {
-            Log.w(TAG, "failed parsing " + file, e);
+            Slog.w(TAG, "failed parsing " + file, e);
         } catch (XmlPullParserException e) {
-            Log.w(TAG, "failed parsing " + file, e);
+            Slog.w(TAG, "failed parsing " + file, e);
         } catch (IOException e) {
-            Log.w(TAG, "failed parsing " + file, e);
+            Slog.w(TAG, "failed parsing " + file, e);
         } catch (IndexOutOfBoundsException e) {
-            Log.w(TAG, "failed parsing " + file, e);
+            Slog.w(TAG, "failed parsing " + file, e);
         }
         try {
             if (stream != null) {
@@ -1055,7 +1055,7 @@ class AppWidgetService extends IAppWidgetService.Stub
     BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            //Log.d(TAG, "received " + action);
+            //Slog.d(TAG, "received " + action);
             if (Intent.ACTION_BOOT_COMPLETED.equals(action)) {
                 sendInitialBroadcasts();
             } else if (Intent.ACTION_CONFIGURATION_CHANGED.equals(action)) {

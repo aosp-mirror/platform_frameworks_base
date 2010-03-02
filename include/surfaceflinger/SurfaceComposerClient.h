@@ -65,12 +65,23 @@ public:
     //! Create a surface
     sp<SurfaceControl> createSurface(
             int pid,            // pid of the process the surface is for
+            const String8& name,// name of the surface
             DisplayID display,  // Display to create this surface on
             uint32_t w,         // width in pixel
             uint32_t h,         // height in pixel
             PixelFormat format, // pixel-format desired
             uint32_t flags = 0  // usage flags
     );
+
+    sp<SurfaceControl> createSurface(
+            int pid,            // pid of the process the surface is for
+            DisplayID display,  // Display to create this surface on
+            uint32_t w,         // width in pixel
+            uint32_t h,         // height in pixel
+            PixelFormat format, // pixel-format desired
+            uint32_t flags = 0  // usage flags
+    );
+
 
     // ------------------------------------------------------------------------
     // Composer parameters

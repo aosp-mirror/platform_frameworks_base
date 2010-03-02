@@ -38,7 +38,8 @@ public:
           mUpdate(false), mExtending(false),
           mRequireLocalization(false), mPseudolocalize(false),
           mUTF8(false), mEncodingSpecified(false), mValues(false),
-          mCompressionMethod(0), mOutputAPKFile(NULL), mManifestPackageNameOverride(NULL),
+          mCompressionMethod(0), mOutputAPKFile(NULL),
+          mManifestPackageNameOverride(NULL), mInstrumentationPackageNameOverride(NULL),
           mAutoAddOverlay(false), mAssetSourceDir(NULL), mProguardFile(NULL),
           mAndroidManifestFile(NULL), mPublicOutputFile(NULL),
           mRClassDir(NULL), mResourceIntermediatesDir(NULL),
@@ -90,6 +91,8 @@ public:
     void setOutputAPKFile(const char* val) { mOutputAPKFile = val; }
     const char* getManifestPackageNameOverride() const { return mManifestPackageNameOverride; }
     void setManifestPackageNameOverride(const char * val) { mManifestPackageNameOverride = val; }
+    const char* getInstrumentationPackageNameOverride() const { return mInstrumentationPackageNameOverride; }
+    void setInstrumentationPackageNameOverride(const char * val) { mInstrumentationPackageNameOverride = val; }
     bool getAutoAddOverlay() { return mAutoAddOverlay; }
     void setAutoAddOverlay(bool val) { mAutoAddOverlay = val; }
 
@@ -183,6 +186,7 @@ private:
     bool        mJunkPath;
     const char* mOutputAPKFile;
     const char* mManifestPackageNameOverride;
+    const char* mInstrumentationPackageNameOverride;
     bool        mAutoAddOverlay;
     const char* mAssetSourceDir;
     const char* mProguardFile;

@@ -24,7 +24,7 @@ import android.os.Parcel;
 import android.os.Process;
 import android.os.ServiceManager;
 import android.telephony.SignalStrength;
-import android.util.Log;
+import android.util.Slog;
 
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.os.BatteryStatsImpl;
@@ -57,7 +57,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
     }
     
     public void shutdown() {
-        Log.w("BatteryStats", "Writing battery stats before shutdown...");
+        Slog.w("BatteryStats", "Writing battery stats before shutdown...");
         synchronized (mStats) {
             mStats.writeLocked();
         }
@@ -84,8 +84,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
     public byte[] getStatistics() {
         mContext.enforceCallingPermission(
                 android.Manifest.permission.BATTERY_STATS, null);
-        //Log.i("foo", "SENDING BATTERY INFO:");
-        //mStats.dumpLocked(new LogPrinter(Log.INFO, "foo"));
+        //Slog.i("foo", "SENDING BATTERY INFO:");
+        //mStats.dumpLocked(new LogPrinter(Log.INFO, "foo", Log.LOG_ID_SYSTEM));
         Parcel out = Parcel.obtain();
         mStats.writeToParcel(out, 0);
         byte[] data = out.marshall();

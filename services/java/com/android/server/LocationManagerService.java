@@ -65,6 +65,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.provider.Settings;
 import android.util.Log;
+import android.util.Slog;
 import android.util.PrintWriterPrinter;
 
 import com.android.internal.location.GeocoderProxy;
@@ -353,7 +354,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
 
         public void binderDied() {
             if (LOCAL_LOGV) {
-                Log.v(TAG, "Location listener died");
+                Slog.v(TAG, "Location listener died");
             }
             synchronized (mLock) {
                 removeUpdatesLocked(this);
@@ -439,7 +440,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         try {
             _loadProvidersLocked();
         } catch (Exception e) {
-            Log.e(TAG, "Exception loading providers:", e);
+            Slog.e(TAG, "Exception loading providers:", e);
         }
     }
 
@@ -486,7 +487,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         mContext = context;
 
         if (LOCAL_LOGV) {
-            Log.v(TAG, "Constructed LocationManager Service");
+            Slog.v(TAG, "Constructed LocationManager Service");
         }
     }
 
@@ -591,14 +592,14 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         } catch (SecurityException se) {
             throw se;
         } catch (Exception e) {
-            Log.e(TAG, "getAllProviders got exception:", e);
+            Slog.e(TAG, "getAllProviders got exception:", e);
             return null;
         }
     }
 
     private List<String> _getAllProvidersLocked() {
         if (LOCAL_LOGV) {
-            Log.v(TAG, "getAllProviders");
+            Slog.v(TAG, "getAllProviders");
         }
         ArrayList<String> out = new ArrayList<String>(mProviders.size());
         for (int i = mProviders.size() - 1; i >= 0; i--) {
@@ -616,14 +617,14 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         } catch (SecurityException se) {
             throw se;
         } catch (Exception e) {
-            Log.e(TAG, "getProviders got exception:", e);
+            Slog.e(TAG, "getProviders got exception:", e);
             return null;
         }
     }
 
     private List<String> _getProvidersLocked(boolean enabledOnly) {
         if (LOCAL_LOGV) {
-            Log.v(TAG, "getProviders");
+            Slog.v(TAG, "getProviders");
         }
         ArrayList<String> out = new ArrayList<String>(mProviders.size());
         for (int i = mProviders.size() - 1; i >= 0; i--) {
@@ -781,7 +782,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
                     receiver.getListener().asBinder().linkToDeath(receiver, 0);
                 }
             } catch (RemoteException e) {
-                Log.e(TAG, "linkToDeath failed:", e);
+                Slog.e(TAG, "linkToDeath failed:", e);
                 return null;
             }
         }
@@ -825,7 +826,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         } catch (SecurityException se) {
             throw se;
         } catch (Exception e) {
-            Log.e(TAG, "requestUpdates got exception:", e);
+            Slog.e(TAG, "requestUpdates got exception:", e);
         }
     }
 
@@ -838,14 +839,14 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         } catch (SecurityException se) {
             throw se;
         } catch (Exception e) {
-            Log.e(TAG, "requestUpdates got exception:", e);
+            Slog.e(TAG, "requestUpdates got exception:", e);
         }
     }
 
     private void requestLocationUpdatesLocked(String provider,
             long minTime, float minDistance, Receiver receiver) {
         if (LOCAL_LOGV) {
-            Log.v(TAG, "_requestLocationUpdates: listener = " + receiver);
+            Slog.v(TAG, "_requestLocationUpdates: listener = " + receiver);
         }
 
         LocationProviderInterface p = mProvidersByName.get(provider);
@@ -892,7 +893,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         } catch (SecurityException se) {
             throw se;
         } catch (Exception e) {
-            Log.e(TAG, "removeUpdates got exception:", e);
+            Slog.e(TAG, "removeUpdates got exception:", e);
         }
     }
 
@@ -904,13 +905,13 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         } catch (SecurityException se) {
             throw se;
         } catch (Exception e) {
-            Log.e(TAG, "removeUpdates got exception:", e);
+            Slog.e(TAG, "removeUpdates got exception:", e);
         }
     }
 
     private void removeUpdatesLocked(Receiver receiver) {
         if (LOCAL_LOGV) {
-            Log.v(TAG, "_removeUpdates: listener = " + receiver);
+            Slog.v(TAG, "_removeUpdates: listener = " + receiver);
         }
 
         // so wakelock calls will succeed
@@ -986,7 +987,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         try {
             mGpsStatusProvider.addGpsStatusListener(listener);
         } catch (RemoteException e) {
-            Log.e(TAG, "mGpsStatusProvider.addGpsStatusListener failed", e);
+            Slog.e(TAG, "mGpsStatusProvider.addGpsStatusListener failed", e);
             return false;
         }
         return true;
@@ -997,7 +998,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             try {
                 mGpsStatusProvider.removeGpsStatusListener(listener);
             } catch (Exception e) {
-                Log.e(TAG, "mGpsStatusProvider.removeGpsStatusListener failed", e);
+                Slog.e(TAG, "mGpsStatusProvider.removeGpsStatusListener failed", e);
             }
         }
     }
@@ -1037,7 +1038,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         }
         catch (RemoteException e)
         {
-            Log.e(TAG, "RemoteException in LocationManagerService.sendNiResponse");
+            Slog.e(TAG, "RemoteException in LocationManagerService.sendNiResponse");
             return false;
         }
     }
@@ -1132,7 +1133,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
                         alert.isInProximity(latitude, longitude, accuracy);
                     if (!entered && inProximity) {
                         if (LOCAL_LOGV) {
-                            Log.v(TAG, "Entered alert");
+                            Slog.v(TAG, "Entered alert");
                         }
                         mProximitiesEntered.add(alert);
                         Intent enteredIntent = new Intent();
@@ -1148,7 +1149,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
                             }
                         } catch (PendingIntent.CanceledException e) {
                             if (LOCAL_LOGV) {
-                                Log.v(TAG, "Canceled proximity alert: " + alert, e);
+                                Slog.v(TAG, "Canceled proximity alert: " + alert, e);
                             }
                             if (intentsToRemove == null) {
                                 intentsToRemove = new ArrayList<PendingIntent>();
@@ -1157,7 +1158,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
                         }
                     } else if (entered && !inProximity) {
                         if (LOCAL_LOGV) {
-                            Log.v(TAG, "Exited alert");
+                            Slog.v(TAG, "Exited alert");
                         }
                         mProximitiesEntered.remove(alert);
                         Intent exitedIntent = new Intent();
@@ -1173,7 +1174,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
                             }
                         } catch (PendingIntent.CanceledException e) {
                             if (LOCAL_LOGV) {
-                                Log.v(TAG, "Canceled proximity alert: " + alert, e);
+                                Slog.v(TAG, "Canceled proximity alert: " + alert, e);
                             }
                             if (intentsToRemove == null) {
                                 intentsToRemove = new ArrayList<PendingIntent>();
@@ -1184,7 +1185,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
                 } else {
                     // Mark alert for expiration
                     if (LOCAL_LOGV) {
-                        Log.v(TAG, "Expiring proximity alert: " + alert);
+                        Slog.v(TAG, "Expiring proximity alert: " + alert);
                     }
                     if (intentsToRemove == null) {
                         intentsToRemove = new ArrayList<PendingIntent>();
@@ -1241,14 +1242,14 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         } catch (SecurityException se) {
             throw se;
         } catch (Exception e) {
-            Log.e(TAG, "addProximityAlert got exception:", e);
+            Slog.e(TAG, "addProximityAlert got exception:", e);
         }
     }
 
     private void addProximityAlertLocked(double latitude, double longitude,
         float radius, long expiration, PendingIntent intent) {
         if (LOCAL_LOGV) {
-            Log.v(TAG, "addProximityAlert: latitude = " + latitude +
+            Slog.v(TAG, "addProximityAlert: latitude = " + latitude +
                     ", longitude = " + longitude +
                     ", expiration = " + expiration +
                     ", intent = " + intent);
@@ -1286,13 +1287,13 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         } catch (SecurityException se) {
             throw se;
         } catch (Exception e) {
-            Log.e(TAG, "removeProximityAlert got exception:", e);
+            Slog.e(TAG, "removeProximityAlert got exception:", e);
         }
     }
 
     private void removeProximityAlertLocked(PendingIntent intent) {
         if (LOCAL_LOGV) {
-            Log.v(TAG, "removeProximityAlert: intent = " + intent);
+            Slog.v(TAG, "removeProximityAlert: intent = " + intent);
         }
 
         mProximityAlerts.remove(intent);
@@ -1316,7 +1317,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         } catch (SecurityException se) {
             throw se;
         } catch (Exception e) {
-            Log.e(TAG, "_getProviderInfo got exception:", e);
+            Slog.e(TAG, "_getProviderInfo got exception:", e);
             return null;
         }
     }
@@ -1351,7 +1352,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         } catch (SecurityException se) {
             throw se;
         } catch (Exception e) {
-            Log.e(TAG, "isProviderEnabled got exception:", e);
+            Slog.e(TAG, "isProviderEnabled got exception:", e);
             return false;
         }
     }
@@ -1386,7 +1387,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         } catch (SecurityException se) {
             throw se;
         } catch (Exception e) {
-            Log.e(TAG, "getLastKnownLocation got exception:", e);
+            Slog.e(TAG, "getLastKnownLocation got exception:", e);
             return null;
         }
     }
@@ -1473,7 +1474,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
                     lastLoc.set(location);
                 }
                 if (!receiver.callLocationChangedLocked(location)) {
-                    Log.w(TAG, "RemoteException calling onLocationChanged on " + receiver);
+                    Slog.w(TAG, "RemoteException calling onLocationChanged on " + receiver);
                     if (deadReceivers == null) {
                         deadReceivers = new ArrayList<Receiver>();
                     }
@@ -1487,7 +1488,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
 
                 r.mLastStatusBroadcast = newStatusUpdateTime;
                 if (!receiver.callStatusChangedLocked(provider, status, extras)) {
-                    Log.w(TAG, "RemoteException calling onStatusChanged on " + receiver);
+                    Slog.w(TAG, "RemoteException calling onStatusChanged on " + receiver);
                     if (deadReceivers == null) {
                         deadReceivers = new ArrayList<Receiver>();
                     }
@@ -1535,7 +1536,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
                 }
             } catch (Exception e) {
                 // Log, don't crash!
-                Log.e(TAG, "Exception in LocationWorkerHandler.handleMessage:", e);
+                Slog.e(TAG, "Exception in LocationWorkerHandler.handleMessage:", e);
             }
         }
     }
@@ -1642,7 +1643,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
                 } catch (Exception e) {
                     // This is to catch a runtime exception thrown when we try to release an
                     // already released lock.
-                    Log.e(TAG, "exception in acquireWakeLock()", e);
+                    Slog.e(TAG, "exception in acquireWakeLock()", e);
                 }
             }
         }
@@ -1662,7 +1663,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
                 } catch (Exception e) {
                     // This is to catch a runtime exception thrown when we try to release an
                     // already released lock.
-                    Log.e(TAG, "exception in releaseWakeLock()", e);
+                    Slog.e(TAG, "exception in releaseWakeLock()", e);
                 }
             }
         }
@@ -1853,7 +1854,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
 
     private void log(String log) {
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
-            Log.d(TAG, log);
+            Slog.d(TAG, log);
         }
     }
     

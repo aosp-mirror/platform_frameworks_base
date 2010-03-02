@@ -6,7 +6,7 @@ import android.content.res.Resources;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
-import android.util.Log;
+import android.util.Slog;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -140,7 +140,7 @@ class StatusBarIcon {
             try {
                 r = context.getPackageManager().getResourcesForApplication(data.iconPackage);
             } catch (PackageManager.NameNotFoundException ex) {
-                Log.e(StatusBarService.TAG, "Icon package not found: " + data.iconPackage, ex);
+                Slog.e(StatusBarService.TAG, "Icon package not found: " + data.iconPackage, ex);
                 return null;
             }
         } else {
@@ -148,14 +148,14 @@ class StatusBarIcon {
         }
 
         if (data.iconId == 0) {
-            Log.w(StatusBarService.TAG, "No icon ID for slot " + data.slot);
+            Slog.w(StatusBarService.TAG, "No icon ID for slot " + data.slot);
             return null;
         }
         
         try {
             return r.getDrawable(data.iconId);
         } catch (RuntimeException e) {
-            Log.w(StatusBarService.TAG, "Icon not found in "
+            Slog.w(StatusBarService.TAG, "Icon not found in "
                   + (data.iconPackage != null ? data.iconId : "<system>")
                   + ": " + Integer.toHexString(data.iconId));
         }

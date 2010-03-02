@@ -2069,6 +2069,8 @@ public class WebView extends AbsoluteLayout
             boolean force) {
         if (scale < mMinZoomScale) {
             scale = mMinZoomScale;
+            // set mInZoomOverview for non mobile sites
+            if (scale < mDefaultScale) mInZoomOverview = true;
         } else if (scale > mMaxZoomScale) {
             scale = mMaxZoomScale;
         }
@@ -4017,6 +4019,10 @@ public class WebView extends AbsoluteLayout
                 // still want to send the notification over to webkit.
                 mWebView.setNewZoomScale(mWebView.mActualScale,
                         mUpdateTextWrap, true);
+                // update the zoom buttons as the scale can be changed
+                if (mWebView.getSettings().getBuiltInZoomControls()) {
+                    mWebView.updateZoomButtonsEnabled();
+                }
             }
         }
     }
@@ -4740,6 +4746,14 @@ public class WebView extends AbsoluteLayout
                             if (mFullScreenHolder == null
                                     && (computeHorizontalScrollExtent() < computeHorizontalScrollRange()
                                     || computeVerticalScrollExtent() < computeVerticalScrollRange())) {
+                                // remove the pending TOUCH_EVENT and send a
+                                // cancel
+                                mWebViewCore
+                                        .removeMessages(EventHub.TOUCH_EVENT);
+                                WebViewCore.TouchEventData ted = new WebViewCore.TouchEventData();
+                                ted.mAction = MotionEvent.ACTION_CANCEL;
+                                mWebViewCore.sendMessage(EventHub.TOUCH_EVENT,
+                                        ted);
                                 // we will not rewrite drag code here, but we
                                 // will try fling if it applies.
                                 WebViewCore.reducePriority();
@@ -6807,7 +6821,7 @@ public class WebView extends AbsoluteLayout
     private native void     nativeHideCursor();
     private native String   nativeImageURI(int x, int y);
     private native void     nativeInstrumentReport();
-    /* package */ native void nativeMoveCursorToNextTextInput();
+    /* package */ native boolean nativeMoveCursorToNextTextInput();
     // return true if the page has been scrolled
     private native boolean  nativeMotionUp(int x, int y, int slop);
     // returns false if it handled the key

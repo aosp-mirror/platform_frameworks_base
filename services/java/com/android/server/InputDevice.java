@@ -16,7 +16,7 @@
 
 package com.android.server;
 
-import android.util.Log;
+import android.util.Slog;
 import android.view.Display;
 import android.view.MotionEvent;
 import android.view.Surface;
@@ -142,7 +142,7 @@ public class InputDevice {
                 final int ioff = i * MotionEvent.NUM_SAMPLE_DATA;
                 //final int x = mNextData[ioff + MotionEvent.SAMPLE_X];
                 final int y = mNextData[ioff + MotionEvent.SAMPLE_Y];
-                if (DEBUG_HACKS) Log.v("InputDevice", "Looking at next point #" + i + ": y=" + y);
+                if (DEBUG_HACKS) Slog.v("InputDevice", "Looking at next point #" + i + ": y=" + y);
                 boolean dropped = false;
                 if (!mDroppedBadPoint[i] && mLastNumPointers > 0) {
                     dropped = true;
@@ -156,7 +156,7 @@ public class InputDevice {
                         int dy = y - mLastData[joff + MotionEvent.SAMPLE_Y];
                         //if (dx < 0) dx = -dx;
                         if (dy < 0) dy = -dy;
-                        if (DEBUG_HACKS) Log.v("InputDevice", "Comparing with last point #" + j
+                        if (DEBUG_HACKS) Slog.v("InputDevice", "Comparing with last point #" + j
                                 + ": y=" + mLastData[joff] + " dy=" + dy);
                         if (dy < maxDy) {
                             dropped = false;
@@ -168,7 +168,7 @@ public class InputDevice {
                     }
                     if (dropped) {
                         dropped = true;
-                        Log.i("InputDevice", "Dropping bad point #" + i
+                        Slog.i("InputDevice", "Dropping bad point #" + i
                                 + ": newY=" + y + " closestDy=" + closestDy
                                 + " maxDy=" + maxDy);
                         mNextData[ioff + MotionEvent.SAMPLE_Y] = closestY;
@@ -188,7 +188,7 @@ public class InputDevice {
                 int nextNumPointers) {
             final int numPointers = mLastNumPointers;
             final int[] rawData = mLastData;
-            if (DEBUG_HACKS) Log.v("InputDevice", "lastNumPointers=" + lastNumPointers
+            if (DEBUG_HACKS) Slog.v("InputDevice", "lastNumPointers=" + lastNumPointers
                     + " nextNumPointers=" + nextNumPointers
                     + " numPointers=" + numPointers);
             for (int i=0; i<numPointers; i++) {
@@ -202,7 +202,7 @@ public class InputDevice {
                     if (lastNumPointers < nextNumPointers) {
                         // This pointer is going down.  Clear its history
                         // and start fresh.
-                        if (DEBUG_HACKS) Log.v("InputDevice", "Pointer down @ index "
+                        if (DEBUG_HACKS) Slog.v("InputDevice", "Pointer down @ index "
                                 + upOrDownPointer + " id " + mPointerIds[i]);
                         mHistoryDataStart[i] = 0;
                         mHistoryDataEnd[i] = 0;
@@ -215,7 +215,7 @@ public class InputDevice {
                         // The pointer is going up.  Just fall through to
                         // recompute the last averaged point (and don't add
                         // it as a new point to include in the average).
-                        if (DEBUG_HACKS) Log.v("InputDevice", "Pointer up @ index "
+                        if (DEBUG_HACKS) Slog.v("InputDevice", "Pointer up @ index "
                                 + upOrDownPointer + " id " + mPointerIds[i]);
                     }
                 } else {
@@ -228,7 +228,7 @@ public class InputDevice {
                     int dx = newX-oldX;
                     int dy = newY-oldY;
                     int delta = dx*dx + dy*dy;
-                    if (DEBUG_HACKS) Log.v("InputDevice", "Delta from last: " + delta);
+                    if (DEBUG_HACKS) Slog.v("InputDevice", "Delta from last: " + delta);
                     if (delta >= (75*75)) {
                         // Magic number, if moving farther than this, turn
                         // off filtering to avoid lag in response.
@@ -284,7 +284,7 @@ public class InputDevice {
                 totalPressure += pressure;
                 x /= totalPressure;
                 y /= totalPressure;
-                if (DEBUG_HACKS) Log.v("InputDevice", "Averaging " + totalPressure
+                if (DEBUG_HACKS) Slog.v("InputDevice", "Averaging " + totalPressure
                         + " weight: (" + x + "," + y + ")");
                 mAveragedData[ioff + MotionEvent.SAMPLE_X] = x;
                 mAveragedData[ioff + MotionEvent.SAMPLE_Y] = y;
@@ -305,7 +305,7 @@ public class InputDevice {
             final int[] nextData = mNextData;
             final int id = nextIndex * MotionEvent.NUM_SAMPLE_DATA;
             
-            if (DEBUG_POINTERS) Log.v("InputDevice", "assignPointer: nextIndex="
+            if (DEBUG_POINTERS) Slog.v("InputDevice", "assignPointer: nextIndex="
                     + nextIndex + " dataOff=" + id);
             final int x1 = nextData[id + MotionEvent.SAMPLE_X];
             final int y1 = nextData[id + MotionEvent.SAMPLE_Y];
@@ -329,7 +329,7 @@ public class InputDevice {
                 }
             }
             
-            if (DEBUG_POINTERS) Log.v("InputDevice", "New index " + nextIndex
+            if (DEBUG_POINTERS) Slog.v("InputDevice", "New index " + nextIndex
                     + " best old index=" + bestIndex + " (distance="
                     + bestDistance + ")");
             next2Last[nextIndex] = bestIndex;
@@ -344,7 +344,7 @@ public class InputDevice {
                 return false;
             }
             
-            if (DEBUG_POINTERS) Log.v("InputDevice", "Old index " + bestIndex
+            if (DEBUG_POINTERS) Slog.v("InputDevice", "Old index " + bestIndex
                     + " has multiple best new pointers!");
             
             last2Next[bestIndex] = -2;
@@ -369,7 +369,7 @@ public class InputDevice {
                 last2Next[i] = -1;
             }
             
-            if (DEBUG_POINTERS) Log.v("InputDevice",
+            if (DEBUG_POINTERS) Slog.v("InputDevice",
                     "Update pointers: lastNumPointers=" + lastNumPointers
                     + " nextNumPointers=" + nextNumPointers);
             
@@ -385,7 +385,7 @@ public class InputDevice {
             // new pointer locations find their best previous location is
             // the same.
             if (conflicts) {
-                if (DEBUG_POINTERS) Log.v("InputDevice", "Resolving conflicts");
+                if (DEBUG_POINTERS) Slog.v("InputDevice", "Resolving conflicts");
                 
                 for (int i=0; i<lastNumPointers; i++) {
                     if (last2Next[i] != -2) {
@@ -396,7 +396,7 @@ public class InputDevice {
                     // we should do something like the one described at
                     // http://portal.acm.org/citation.cfm?id=997856
                     
-                    if (DEBUG_POINTERS) Log.v("InputDevice",
+                    if (DEBUG_POINTERS) Slog.v("InputDevice",
                             "Resolving last index #" + i);
                     
                     int numFound;
@@ -416,7 +416,7 @@ public class InputDevice {
                         }
                         
                         if (worstJ >= 0) {
-                            if (DEBUG_POINTERS) Log.v("InputDevice",
+                            if (DEBUG_POINTERS) Slog.v("InputDevice",
                                     "Worst new pointer: " + worstJ
                                     + " (distance=" + worstDistance + ")");
                             if (assignPointer(worstJ, false)) {
@@ -434,13 +434,13 @@ public class InputDevice {
             if (lastNumPointers < nextNumPointers) {
                 // We have one or more new pointers that are down.  Create a
                 // new pointer identifier for one of them.
-                if (DEBUG_POINTERS) Log.v("InputDevice", "Adding new pointer");
+                if (DEBUG_POINTERS) Slog.v("InputDevice", "Adding new pointer");
                 int nextId = 0;
                 int i=0;
                 while (i < lastNumPointers) {
                     if (mPointerIds[i] > nextId) {
                         // Found a hole, insert the pointer here.
-                        if (DEBUG_POINTERS) Log.v("InputDevice",
+                        if (DEBUG_POINTERS) Slog.v("InputDevice",
                                 "Inserting new pointer at hole " + i);
                         System.arraycopy(mPointerIds, i, mPointerIds,
                                 i+1, lastNumPointers-i);
@@ -453,7 +453,7 @@ public class InputDevice {
                     nextId++;
                 }
                 
-                if (DEBUG_POINTERS) Log.v("InputDevice",
+                if (DEBUG_POINTERS) Slog.v("InputDevice",
                         "New pointer id " + nextId + " at index " + i);
                 
                 mLastNumPointers++;
@@ -463,7 +463,7 @@ public class InputDevice {
                 // And assign this identifier to the first new pointer.
                 for (int j=0; j<nextNumPointers; j++) {
                     if (next2Last[j] < 0) {
-                        if (DEBUG_POINTERS) Log.v("InputDevice",
+                        if (DEBUG_POINTERS) Slog.v("InputDevice",
                                 "Assigning new id to new pointer index " + j);
                         next2Last[j] = i;
                         break;
@@ -477,7 +477,7 @@ public class InputDevice {
             for (int i=0; i<nextNumPointers; i++) {
                 int lastIndex = next2Last[i];
                 if (lastIndex >= 0) {
-                    if (DEBUG_POINTERS) Log.v("InputDevice",
+                    if (DEBUG_POINTERS) Slog.v("InputDevice",
                             "Copying next pointer index " + i
                             + " to last index " + lastIndex);
                     System.arraycopy(nextData, i*MotionEvent.NUM_SAMPLE_DATA,
@@ -489,10 +489,10 @@ public class InputDevice {
             if (lastNumPointers > nextNumPointers) {
                 // One or more pointers has gone up.  Find the first one,
                 // and adjust accordingly.
-                if (DEBUG_POINTERS) Log.v("InputDevice", "Removing old pointer");
+                if (DEBUG_POINTERS) Slog.v("InputDevice", "Removing old pointer");
                 for (int i=0; i<lastNumPointers; i++) {
                     if (last2Next[i] == -1) {
-                        if (DEBUG_POINTERS) Log.v("InputDevice",
+                        if (DEBUG_POINTERS) Slog.v("InputDevice",
                                 "Removing old pointer at index " + i);
                         retIndex = i;
                         break;
@@ -531,7 +531,7 @@ public class InputDevice {
             final int lastNumPointers = mLastNumPointers;
             final int nextNumPointers = mNextNumPointers;
             if (mNextNumPointers > MAX_POINTERS) {
-                Log.w("InputDevice", "Number of pointers " + mNextNumPointers
+                Slog.w("InputDevice", "Number of pointers " + mNextNumPointers
                         + " exceeded maximum of " + MAX_POINTERS);
                 mNextNumPointers = MAX_POINTERS;
             }
@@ -549,7 +549,7 @@ public class InputDevice {
             
             final int numPointers = mLastNumPointers;
             
-            if (DEBUG_POINTERS) Log.v("InputDevice", "Processing "
+            if (DEBUG_POINTERS) Slog.v("InputDevice", "Processing "
                     + numPointers + " pointers (going from " + lastNumPointers
                     + " to " + nextNumPointers + ")");
             
@@ -661,13 +661,13 @@ public class InputDevice {
             }
             
             if (currentMove != null) {
-                if (false) Log.i("InputDevice", "Adding batch x="
+                if (false) Slog.i("InputDevice", "Adding batch x="
                         + reportData[MotionEvent.SAMPLE_X]
                         + " y=" + reportData[MotionEvent.SAMPLE_Y]
                         + " to " + currentMove);
                 currentMove.addBatch(curTime, reportData, metaState);
                 if (WindowManagerPolicy.WATCH_POINTER) {
-                    Log.i("KeyInputQueue", "Updating: " + currentMove);
+                    Slog.i("KeyInputQueue", "Updating: " + currentMove);
                 }
                 return null;
             }
@@ -748,13 +748,13 @@ public class InputDevice {
             }
             
             if (currentMove != null) {
-                if (false) Log.i("InputDevice", "Adding batch x="
+                if (false) Slog.i("InputDevice", "Adding batch x="
                         + scaled[MotionEvent.SAMPLE_X]
                         + " y=" + scaled[MotionEvent.SAMPLE_Y]
                         + " to " + currentMove);
                 currentMove.addBatch(curTime, scaled, metaState);
                 if (WindowManagerPolicy.WATCH_POINTER) {
-                    Log.i("KeyInputQueue", "Updating: " + currentMove);
+                    Slog.i("KeyInputQueue", "Updating: " + currentMove);
                 }
                 return null;
             }

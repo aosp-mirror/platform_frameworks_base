@@ -54,6 +54,7 @@ import android.provider.Settings.SettingNotFoundException;
 import android.provider.Settings;
 import android.util.EventLog;
 import android.util.Log;
+import android.util.Slog;
 import android.view.WindowManagerPolicy;
 import static android.provider.Settings.System.DIM_SCREEN;
 import static android.provider.Settings.System.SCREEN_BRIGHTNESS;
@@ -254,25 +255,25 @@ class PowerManagerService extends IPowerManager.Stub
             mLog = new PrintStream("/data/power.log");
         }
         catch (FileNotFoundException e) {
-            android.util.Log.e(TAG, "Life is hard", e);
+            android.util.Slog.e(TAG, "Life is hard", e);
         }
     }
     static class Log {
         static void d(String tag, String s) {
             mLog.println(s);
-            android.util.Log.d(tag, s);
+            android.util.Slog.d(tag, s);
         }
         static void i(String tag, String s) {
             mLog.println(s);
-            android.util.Log.i(tag, s);
+            android.util.Slog.i(tag, s);
         }
         static void w(String tag, String s) {
             mLog.println(s);
-            android.util.Log.w(tag, s);
+            android.util.Slog.w(tag, s);
         }
         static void e(String tag, String s) {
             mLog.println(s);
-            android.util.Log.e(tag, s);
+            android.util.Slog.e(tag, s);
         }
     }
     */
@@ -348,10 +349,14 @@ class PowerManagerService extends IPowerManager.Stub
                     // treat plugging and unplugging the devices as a user activity.
                     // users find it disconcerting when they unplug the device
                     // and it shuts off right away.
+                    // to avoid turning on the screen when unplugging, we only trigger
+                    // user activity when screen was already on.
                     // temporarily set mUserActivityAllowed to true so this will work
                     // even when the keyguard is on.
                     synchronized (mLocks) {
-                        forceUserActivityLocked();
+                        if (!wasPowered || (mPowerState & SCREEN_ON_BIT) != 0) {
+                            forceUserActivityLocked();
+                        }
                     }
                 }
             }
@@ -643,7 +648,7 @@ class PowerManagerService extends IPowerManager.Stub
         int acquireType = -1;
 
         if (mSpew) {
-            Log.d(TAG, "acquireWakeLock flags=0x" + Integer.toHexString(flags) + " tag=" + tag);
+            Slog.d(TAG, "acquireWakeLock flags=0x" + Integer.toHexString(flags) + " tag=" + tag);
         }
 
         int index = mLocks.getIndex(lock);
@@ -672,7 +677,7 @@ class PowerManagerService extends IPowerManager.Stub
                 default:
                     // just log and bail.  we're in the server, so don't
                     // throw an exception.
-                    Log.e(TAG, "bad wakelock type for lock '" + tag + "' "
+                    Slog.e(TAG, "bad wakelock type for lock '" + tag + "' "
                             + " flags=" + flags);
                     return;
             }
@@ -691,14 +696,14 @@ class PowerManagerService extends IPowerManager.Stub
                 int oldWakeLockState = mWakeLockState;
                 mWakeLockState = mLocks.reactivateScreenLocksLocked();
                 if (mSpew) {
-                    Log.d(TAG, "wakeup here mUserState=0x" + Integer.toHexString(mUserState)
+                    Slog.d(TAG, "wakeup here mUserState=0x" + Integer.toHexString(mUserState)
                             + " mWakeLockState=0x"
                             + Integer.toHexString(mWakeLockState)
                             + " previous wakeLockState=0x" + Integer.toHexString(oldWakeLockState));
                 }
             } else {
                 if (mSpew) {
-                    Log.d(TAG, "here mUserState=0x" + Integer.toHexString(mUserState)
+                    Slog.d(TAG, "here mUserState=0x" + Integer.toHexString(mUserState)
                             + " mLocks.gatherState()=0x"
                             + Integer.toHexString(mLocks.gatherState())
                             + " mWakeLockState=0x" + Integer.toHexString(mWakeLockState));
@@ -758,7 +763,7 @@ class PowerManagerService extends IPowerManager.Stub
         }
 
         if (mSpew) {
-            Log.d(TAG, "releaseWakeLock flags=0x"
+            Slog.d(TAG, "releaseWakeLock flags=0x"
                     + Integer.toHexString(wl.flags) + " tag=" + wl.tag);
         }
 
@@ -783,7 +788,7 @@ class PowerManagerService extends IPowerManager.Stub
                         ((flags & PowerManager.WAIT_FOR_PROXIMITY_NEGATIVE) != 0)) {
                     // wait for proximity sensor to go negative before disabling sensor
                     if (mDebugProximitySensor) {
-                        Log.d(TAG, "waiting for proximity sensor to go negative");
+                        Slog.d(TAG, "waiting for proximity sensor to go negative");
                     }
                 } else {
                     disableProximityLockLocked();
@@ -833,7 +838,7 @@ class PowerManagerService extends IPowerManager.Stub
     public void setPokeLock(int pokey, IBinder token, String tag) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER, null);
         if (token == null) {
-            Log.e(TAG, "setPokeLock got null token for tag='" + tag + "'");
+            Slog.e(TAG, "setPokeLock got null token for tag='" + tag + "'");
             return;
         }
 
@@ -1038,7 +1043,7 @@ class PowerManagerService extends IPowerManager.Stub
                         when += mDimDelay;
                         break;
                     } else {
-                        Log.w(TAG, "mDimDelay=" + mDimDelay + " while trying to dim");
+                        Slog.w(TAG, "mDimDelay=" + mDimDelay + " while trying to dim");
                     }
                 case SCREEN_OFF:
                     synchronized (mLocks) {
@@ -1047,7 +1052,7 @@ class PowerManagerService extends IPowerManager.Stub
                     break;
             }
             if (mSpew) {
-                Log.d(TAG, "setTimeoutLocked now=" + now + " nextState=" + nextState
+                Slog.d(TAG, "setTimeoutLocked now=" + now + " nextState=" + nextState
                         + " when=" + when);
             }
             mHandler.postAtTime(mTimeoutTask, when);
@@ -1068,7 +1073,7 @@ class PowerManagerService extends IPowerManager.Stub
         {
             synchronized (mLocks) {
                 if (mSpew) {
-                    Log.d(TAG, "user activity timeout timed out nextState=" + this.nextState);
+                    Slog.d(TAG, "user activity timeout timed out nextState=" + this.nextState);
                 }
 
                 if (nextState == -1) {
@@ -1177,7 +1182,7 @@ class PowerManagerService extends IPowerManager.Stub
                     }
 
                     if (mSpew) {
-                        Log.d(TAG, "mBroadcastWakeLock=" + mBroadcastWakeLock);
+                        Slog.d(TAG, "mBroadcastWakeLock=" + mBroadcastWakeLock);
                     }
                     if (mContext != null && ActivityManagerNative.isSystemReady()) {
                         mContext.sendOrderedBroadcast(mScreenOnIntent, null,
@@ -1321,12 +1326,12 @@ class PowerManagerService extends IPowerManager.Stub
                 // a prior preventScreenOn(true) call.)
                 if (!mProximitySensorActive && (mPowerState & SCREEN_ON_BIT) != 0) {
                     if (mSpew) {
-                        Log.d(TAG,
+                        Slog.d(TAG,
                               "preventScreenOn: turning on after a prior preventScreenOn(true)!");
                     }
                     int err = setScreenStateLocked(true);
                     if (err != 0) {
-                        Log.w(TAG, "preventScreenOn: error from setScreenStateLocked(): " + err);
+                        Slog.w(TAG, "preventScreenOn: error from setScreenStateLocked(): " + err);
                     }
                 }
 
@@ -1369,7 +1374,7 @@ class PowerManagerService extends IPowerManager.Stub
         // we should have already removed any existing
         // mForceReenableScreenTask messages...
         if (!mPreventScreenOn) {
-            Log.w(TAG, "forceReenableScreen: mPreventScreenOn is false, nothing to do");
+            Slog.w(TAG, "forceReenableScreen: mPreventScreenOn is false, nothing to do");
             return;
         }
 
@@ -1381,7 +1386,7 @@ class PowerManagerService extends IPowerManager.Stub
         // crashed before doing so.)
 
         // Log a warning, and forcibly turn the screen back on.
-        Log.w(TAG, "App called preventScreenOn(true) but didn't promptly reenable the screen! "
+        Slog.w(TAG, "App called preventScreenOn(true) but didn't promptly reenable the screen! "
               + "Forcing the screen back on...");
         preventScreenOn(false);
     }
@@ -1424,7 +1429,7 @@ class PowerManagerService extends IPowerManager.Stub
             int err;
 
             if (mSpew) {
-                Log.d(TAG, "setPowerState: mPowerState=0x" + Integer.toHexString(mPowerState)
+                Slog.d(TAG, "setPowerState: mPowerState=0x" + Integer.toHexString(mPowerState)
                         + " newState=0x" + Integer.toHexString(newState)
                         + " noChangeLights=" + noChangeLights
                         + " reason=" + reason);
@@ -1455,17 +1460,17 @@ class PowerManagerService extends IPowerManager.Stub
             boolean newScreenOn = (newState & SCREEN_ON_BIT) != 0;
 
             if (mSpew) {
-                Log.d(TAG, "setPowerState: mPowerState=" + mPowerState
+                Slog.d(TAG, "setPowerState: mPowerState=" + mPowerState
                         + " newState=" + newState + " noChangeLights=" + noChangeLights);
-                Log.d(TAG, "  oldKeyboardBright=" + ((mPowerState & KEYBOARD_BRIGHT_BIT) != 0)
+                Slog.d(TAG, "  oldKeyboardBright=" + ((mPowerState & KEYBOARD_BRIGHT_BIT) != 0)
                          + " newKeyboardBright=" + ((newState & KEYBOARD_BRIGHT_BIT) != 0));
-                Log.d(TAG, "  oldScreenBright=" + ((mPowerState & SCREEN_BRIGHT_BIT) != 0)
+                Slog.d(TAG, "  oldScreenBright=" + ((mPowerState & SCREEN_BRIGHT_BIT) != 0)
                          + " newScreenBright=" + ((newState & SCREEN_BRIGHT_BIT) != 0));
-                Log.d(TAG, "  oldButtonBright=" + ((mPowerState & BUTTON_BRIGHT_BIT) != 0)
+                Slog.d(TAG, "  oldButtonBright=" + ((mPowerState & BUTTON_BRIGHT_BIT) != 0)
                          + " newButtonBright=" + ((newState & BUTTON_BRIGHT_BIT) != 0));
-                Log.d(TAG, "  oldScreenOn=" + oldScreenOn
+                Slog.d(TAG, "  oldScreenOn=" + oldScreenOn
                          + " newScreenOn=" + newScreenOn);
-                Log.d(TAG, "  oldBatteryLow=" + ((mPowerState & BATTERY_LOW_BIT) != 0)
+                Slog.d(TAG, "  oldBatteryLow=" + ((mPowerState & BATTERY_LOW_BIT) != 0)
                          + " newBatteryLow=" + ((newState & BATTERY_LOW_BIT) != 0));
             }
 
@@ -1491,13 +1496,13 @@ class PowerManagerService extends IPowerManager.Stub
                     // screen forever; see forceReenableScreen().)
                     boolean reallyTurnScreenOn = true;
                     if (mSpew) {
-                        Log.d(TAG, "- turning screen on...  mPreventScreenOn = "
+                        Slog.d(TAG, "- turning screen on...  mPreventScreenOn = "
                               + mPreventScreenOn);
                     }
 
                     if (mPreventScreenOn) {
                         if (mSpew) {
-                            Log.d(TAG, "- PREVENTING screen from really turning on!");
+                            Slog.d(TAG, "- PREVENTING screen from really turning on!");
                         }
                         reallyTurnScreenOn = false;
                     }
@@ -1508,7 +1513,7 @@ class PowerManagerService extends IPowerManager.Stub
                             mBatteryStats.noteScreenBrightness(getPreferredBrightness());
                             mBatteryStats.noteScreenOn();
                         } catch (RemoteException e) {
-                            Log.w(TAG, "RemoteException calling noteScreenOn on BatteryStatsService", e);
+                            Slog.w(TAG, "RemoteException calling noteScreenOn on BatteryStatsService", e);
                         } finally {
                             Binder.restoreCallingIdentity(identity);
                         }
@@ -1535,7 +1540,7 @@ class PowerManagerService extends IPowerManager.Stub
                     try {
                         mBatteryStats.noteScreenOff();
                     } catch (RemoteException e) {
-                        Log.w(TAG, "RemoteException calling noteScreenOff on BatteryStatsService", e);
+                        Slog.w(TAG, "RemoteException calling noteScreenOff on BatteryStatsService", e);
                     } finally {
                         Binder.restoreCallingIdentity(identity);
                     }
@@ -1721,14 +1726,14 @@ class PowerManagerService extends IPowerManager.Stub
 
         if (startAnimation) {
             if (mSpew) {
-                Log.i(TAG, "Scheduling light animator!");
+                Slog.i(TAG, "Scheduling light animator!");
             }
             mHandler.removeCallbacks(mLightAnimator);
             mHandler.post(mLightAnimator);
         }
 
         if (offMask != 0) {
-            //Log.i(TAG, "Setting brightess off: " + offMask);
+            //Slog.i(TAG, "Setting brightess off: " + offMask);
             setLightBrightness(offMask, Power.BRIGHTNESS_OFF);
         }
         if (dimMask != 0) {
@@ -1737,7 +1742,7 @@ class PowerManagerService extends IPowerManager.Stub
                     brightness > Power.BRIGHTNESS_LOW_BATTERY) {
                 brightness = Power.BRIGHTNESS_LOW_BATTERY;
             }
-            //Log.i(TAG, "Setting brightess dim " + brightness + ": " + offMask);
+            //Slog.i(TAG, "Setting brightess dim " + brightness + ": " + offMask);
             setLightBrightness(dimMask, brightness);
         }
         if (onMask != 0) {
@@ -1746,7 +1751,7 @@ class PowerManagerService extends IPowerManager.Stub
                     brightness > Power.BRIGHTNESS_LOW_BATTERY) {
                 brightness = Power.BRIGHTNESS_LOW_BATTERY;
             }
-            //Log.i(TAG, "Setting brightess on " + brightness + ": " + onMask);
+            //Slog.i(TAG, "Setting brightess on " + brightness + ": " + onMask);
             setLightBrightness(onMask, brightness);
         }
     }
@@ -1800,7 +1805,7 @@ class PowerManagerService extends IPowerManager.Stub
                     / stepsToTarget;
             if (mSpew) {
                 String noticeMe = nominalCurrentValue == curValue ? "" : "  ******************";
-                Log.i(TAG, "Setting target " + mask + ": cur=" + curValue
+                Slog.i(TAG, "Setting target " + mask + ": cur=" + curValue
                         + " target=" + targetValue + " delta=" + delta
                         + " nominalCurrentValue=" + nominalCurrentValue
                         + noticeMe);
@@ -1812,7 +1817,7 @@ class PowerManagerService extends IPowerManager.Stub
         boolean stepLocked() {
             if (!animating) return false;
             if (false && mSpew) {
-                Log.i(TAG, "Step target " + mask + ": cur=" + curValue
+                Slog.i(TAG, "Step target " + mask + ": cur=" + curValue
                         + " target=" + targetValue + " delta=" + delta);
             }
             curValue += delta;
@@ -1832,7 +1837,7 @@ class PowerManagerService extends IPowerManager.Stub
                     more = false;
                 }
             }
-            //Log.i(TAG, "Animating brightess " + curIntValue + ": " + mask);
+            //Slog.i(TAG, "Animating brightess " + curIntValue + ": " + mask);
             setLightBrightness(mask, curIntValue);
             animating = more;
             if (!more) {
@@ -1959,7 +1964,7 @@ class PowerManagerService extends IPowerManager.Stub
         if (((mPokey & POKE_LOCK_IGNORE_CHEEK_EVENTS) != 0)
                 && (eventType == CHEEK_EVENT || eventType == TOUCH_EVENT)) {
             if (false) {
-                Log.d(TAG, "dropping cheek or short event mPokey=0x" + Integer.toHexString(mPokey));
+                Slog.d(TAG, "dropping cheek or short event mPokey=0x" + Integer.toHexString(mPokey));
             }
             return;
         }
@@ -1968,22 +1973,22 @@ class PowerManagerService extends IPowerManager.Stub
                 && (eventType == TOUCH_EVENT || eventType == TOUCH_UP_EVENT
                     || eventType == LONG_TOUCH_EVENT || eventType == CHEEK_EVENT)) {
             if (false) {
-                Log.d(TAG, "dropping touch mPokey=0x" + Integer.toHexString(mPokey));
+                Slog.d(TAG, "dropping touch mPokey=0x" + Integer.toHexString(mPokey));
             }
             return;
         }
 
         if (false) {
             if (((mPokey & POKE_LOCK_IGNORE_CHEEK_EVENTS) != 0)) {
-                Log.d(TAG, "userActivity !!!");//, new RuntimeException());
+                Slog.d(TAG, "userActivity !!!");//, new RuntimeException());
             } else {
-                Log.d(TAG, "mPokey=0x" + Integer.toHexString(mPokey));
+                Slog.d(TAG, "mPokey=0x" + Integer.toHexString(mPokey));
             }
         }
 
         synchronized (mLocks) {
             if (mSpew) {
-                Log.d(TAG, "userActivity mLastEventTime=" + mLastEventTime + " time=" + time
+                Slog.d(TAG, "userActivity mLastEventTime=" + mLastEventTime + " time=" + time
                         + " mUserActivityAllowed=" + mUserActivityAllowed
                         + " mUserState=0x" + Integer.toHexString(mUserState)
                         + " mWakeLockState=0x" + Integer.toHexString(mWakeLockState)
@@ -1992,7 +1997,7 @@ class PowerManagerService extends IPowerManager.Stub
             }
             // ignore user activity if we are in the process of turning off the screen
             if (isScreenTurningOffLocked()) {
-                Log.d(TAG, "ignoring user activity while turning off screen");
+                Slog.d(TAG, "ignoring user activity while turning off screen");
                 return;
             }
             // Disable proximity sensor if if user presses power key while we are in the
@@ -2046,7 +2051,7 @@ class PowerManagerService extends IPowerManager.Stub
             return values[i];
         } catch (Exception e) {
             // guard against null pointer or index out of bounds errors
-            Log.e(TAG, "getAutoBrightnessValue", e);
+            Slog.e(TAG, "getAutoBrightnessValue", e);
             return 255;
         }
     }
@@ -2094,7 +2099,7 @@ class PowerManagerService extends IPowerManager.Stub
 
     private void lightSensorChangedLocked(int value) {
         if (mDebugLightSensor) {
-            Log.d(TAG, "lightSensorChangedLocked " + value);
+            Slog.d(TAG, "lightSensorChangedLocked " + value);
         }
 
         // do not allow light sensor value to decrease
@@ -2123,9 +2128,9 @@ class PowerManagerService extends IPowerManager.Stub
                 mLightSensorKeyboardBrightness = keyboardValue;
 
                 if (mDebugLightSensor) {
-                    Log.d(TAG, "lcdValue " + lcdValue);
-                    Log.d(TAG, "buttonValue " + buttonValue);
-                    Log.d(TAG, "keyboardValue " + keyboardValue);
+                    Slog.d(TAG, "lcdValue " + lcdValue);
+                    Slog.d(TAG, "buttonValue " + buttonValue);
+                    Slog.d(TAG, "keyboardValue " + keyboardValue);
                 }
 
                 boolean startAnimation = false;
@@ -2167,7 +2172,7 @@ class PowerManagerService extends IPowerManager.Stub
                 }
                 if (startAnimation) {
                     if (mDebugLightSensor) {
-                        Log.i(TAG, "lightSensorChangedLocked scheduling light animator");
+                        Slog.i(TAG, "lightSensorChangedLocked scheduling light animator");
                     }
                     mHandler.removeCallbacks(mLightAnimator);
                     mHandler.post(mLightAnimator);
@@ -2216,16 +2221,16 @@ class PowerManagerService extends IPowerManager.Stub
             try {
                 mSvc.shutdown();
             } catch (Exception e) {
-                Log.e(TAG, "MountService shutdown failed", e);
+                Slog.e(TAG, "MountService shutdown failed", e);
             }
         } else {
-            Log.w(TAG, "MountService unavailable for shutdown");
+            Slog.w(TAG, "MountService unavailable for shutdown");
         }
 
         try {
             Power.reboot(reason);
         } catch (IOException e) {
-            Log.e(TAG, "reboot failed", e);
+            Slog.e(TAG, "reboot failed", e);
         }
     }
 
@@ -2282,7 +2287,7 @@ class PowerManagerService extends IPowerManager.Stub
     public void setKeyboardVisibility(boolean visible) {
         synchronized (mLocks) {
             if (mSpew) {
-                Log.d(TAG, "setKeyboardVisibility: " + visible);
+                Slog.d(TAG, "setKeyboardVisibility: " + visible);
             }
             if (mKeyboardVisible != visible) {
                 mKeyboardVisible = visible;
@@ -2311,7 +2316,7 @@ class PowerManagerService extends IPowerManager.Stub
      */
     public void enableUserActivity(boolean enabled) {
         if (mSpew) {
-            Log.d(TAG, "enableUserActivity " + enabled);
+            Slog.d(TAG, "enableUserActivity " + enabled);
         }
         synchronized (mLocks) {
             mUserActivityAllowed = enabled;
@@ -2375,7 +2380,7 @@ class PowerManagerService extends IPowerManager.Stub
             }
         }
         if (mSpew) {
-            Log.d(TAG, "setScreenOffTimeouts mKeylightDelay=" + mKeylightDelay
+            Slog.d(TAG, "setScreenOffTimeouts mKeylightDelay=" + mKeylightDelay
                     + " mDimDelay=" + mDimDelay + " mScreenOffDelay=" + mScreenOffDelay
                     + " mDimScreen=" + mDimScreen);
         }
@@ -2390,7 +2395,7 @@ class PowerManagerService extends IPowerManager.Stub
                 mContext.getContentResolver(),
                 Settings.Secure.SHORT_KEYLIGHT_DELAY_MS,
                 SHORT_KEYLIGHT_DELAY_DEFAULT);
-        // Log.i(TAG, "updateSettingsValues(): mShortKeylightDelay now " + mShortKeylightDelay);
+        // Slog.i(TAG, "updateSettingsValues(): mShortKeylightDelay now " + mShortKeylightDelay);
     }
 
     private class LockList extends ArrayList<WakeLock>
@@ -2482,7 +2487,7 @@ class PowerManagerService extends IPowerManager.Stub
         }
 
         synchronized (mLocks) {
-            Log.d(TAG, "system ready!");
+            Slog.d(TAG, "system ready!");
             mDoneBooting = true;
             long identity = Binder.clearCallingIdentity();
             try {
@@ -2497,7 +2502,7 @@ class PowerManagerService extends IPowerManager.Stub
     }
 
     void bootCompleted() {
-        Log.d(TAG, "bootCompleted");
+        Slog.d(TAG, "bootCompleted");
         synchronized (mLocks) {
             mBootCompleted = true;
             userActivity(SystemClock.uptimeMillis(), false, BUTTON_EVENT, true);
@@ -2533,7 +2538,7 @@ class PowerManagerService extends IPowerManager.Stub
         try {
             mBatteryStats.noteScreenBrightness(brightness);
         } catch (RemoteException e) {
-            Log.w(TAG, "RemoteException calling noteScreenBrightness on BatteryStatsService", e);
+            Slog.w(TAG, "RemoteException calling noteScreenBrightness on BatteryStatsService", e);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
@@ -2563,7 +2568,7 @@ class PowerManagerService extends IPowerManager.Stub
 
     private void enableProximityLockLocked() {
         if (mDebugProximitySensor) {
-            Log.d(TAG, "enableProximityLockLocked");
+            Slog.d(TAG, "enableProximityLockLocked");
         }
         if (!mProximitySensorEnabled) {
             // clear calling identity so sensor manager battery stats are accurate
@@ -2580,7 +2585,7 @@ class PowerManagerService extends IPowerManager.Stub
 
     private void disableProximityLockLocked() {
         if (mDebugProximitySensor) {
-            Log.d(TAG, "disableProximityLockLocked");
+            Slog.d(TAG, "disableProximityLockLocked");
         }
         if (mProximitySensorEnabled) {
             // clear calling identity so sensor manager battery stats are accurate
@@ -2604,10 +2609,10 @@ class PowerManagerService extends IPowerManager.Stub
 
     private void proximityChangedLocked(boolean active) {
         if (mDebugProximitySensor) {
-            Log.d(TAG, "proximityChangedLocked, active: " + active);
+            Slog.d(TAG, "proximityChangedLocked, active: " + active);
         }
         if (!mProximitySensorEnabled) {
-            Log.d(TAG, "Ignoring proximity change after sensor is disabled");
+            Slog.d(TAG, "Ignoring proximity change after sensor is disabled");
             return;
         }
         if (active) {
@@ -2630,7 +2635,7 @@ class PowerManagerService extends IPowerManager.Stub
 
     private void enableLightSensor(boolean enable) {
         if (mDebugLightSensor) {
-            Log.d(TAG, "enableLightSensor " + enable);
+            Slog.d(TAG, "enableLightSensor " + enable);
         }
         if (mSensorManager != null && mLightSensorEnabled != enable) {
             mLightSensorEnabled = enable;
@@ -2665,7 +2670,7 @@ class PowerManagerService extends IPowerManager.Stub
                         distance < mProximitySensor.getMaximumRange());
 
                 if (mDebugProximitySensor) {
-                    Log.d(TAG, "mProximityListener.onSensorChanged active: " + active);
+                    Slog.d(TAG, "mProximityListener.onSensorChanged active: " + active);
                 }
                 if (timeSinceLastEvent < PROXIMITY_SENSOR_DELAY) {
                     // enforce delaying atleast PROXIMITY_SENSOR_DELAY before processing
@@ -2705,7 +2710,7 @@ class PowerManagerService extends IPowerManager.Stub
                 int value = (int)event.values[0];
                 long milliseconds = SystemClock.elapsedRealtime();
                 if (mDebugLightSensor) {
-                    Log.d(TAG, "onSensorChanged: light value: " + value);
+                    Slog.d(TAG, "onSensorChanged: light value: " + value);
                 }
                 mHandler.removeCallbacks(mAutoBrightnessTask);
                 if (mLightSensorValue != value) {

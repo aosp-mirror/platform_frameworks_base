@@ -525,6 +525,8 @@ int doDump(Bundle* bundle)
             bool actWallpaperService = false;
             bool specCameraFeature = false;
             bool hasCameraPermission = false;
+            bool specGpsFeature = false;
+            bool hasGpsPermission = false;
             int targetSdk = 0;
             int smallScreen = 1;
             int normalScreen = 1;
@@ -719,6 +721,8 @@ int doDump(Bundle* bundle)
                                     REQUIRED_ATTR, NULL, 1);
                             if (name == "android.hardware.camera") {
                                 specCameraFeature = true;
+                            } else if (name == "android.hardware.location.gps") {
+                                specGpsFeature = true;
                             }
                             printf("uses-feature%s:'%s'\n",
                                     req ? "" : "-not-required", name.string());
@@ -734,6 +738,8 @@ int doDump(Bundle* bundle)
                         if (name != "" && error == "") {
                             if (name == "android.permission.CAMERA") {
                                 hasCameraPermission = true;
+                            } else if (name == "android.permission.ACCESS_FINE_LOCATION") {
+                                hasGpsPermission = true;
                             }
                             printf("uses-permission:'%s'\n", name.string());
                         } else {
@@ -857,6 +863,14 @@ int doDump(Bundle* bundle)
                 // of requiring the equivalent to original android devices.
                 printf("uses-feature:'android.hardware.camera'\n");
                 printf("uses-feature:'android.hardware.camera.autofocus'\n");
+            }
+
+            if (!specGpsFeature && hasGpsPermission) {
+                // For applications that have not explicitly stated their
+                // GPS feature requirements, but have requested the "fine" (GPS)
+                // permission, we are going to give them compatibility treatment
+                // of requiring the equivalent to original android devices.
+                printf("uses-feature:'android.hardware.location.gps'\n");
             }
 
             if (hasMainActivity) {

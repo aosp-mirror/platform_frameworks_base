@@ -63,6 +63,11 @@ const char CameraParameters::KEY_EXPOSURE_COMPENSATION[] = "exposure-compensatio
 const char CameraParameters::KEY_MAX_EXPOSURE_COMPENSATION[] = "max-exposure-compensation";
 const char CameraParameters::KEY_MIN_EXPOSURE_COMPENSATION[] = "min-exposure-compensation";
 const char CameraParameters::KEY_EXPOSURE_COMPENSATION_STEP[] = "exposure-compensation-step";
+const char CameraParameters::KEY_ZOOM[] = "zoom";
+const char CameraParameters::KEY_MAX_ZOOM[] = "max-zoom";
+const char CameraParameters::KEY_ZOOM_RATIOS[] = "zoom-ratios";
+const char CameraParameters::KEY_ZOOM_SUPPORTED[] = "zoom-supported";
+const char CameraParameters::KEY_SMOOTH_ZOOM_SUPPORTED[] = "smooth-zoom-supported";
 
 // Values for white balance settings.
 const char CameraParameters::WHITE_BALANCE_AUTO[] = "auto";

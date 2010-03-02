@@ -21,7 +21,7 @@ import android.content.BroadcastReceiver;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
+import android.util.Slog;
 import com.android.internal.app.ShutdownThread;
 
 public class ShutdownActivity extends Activity {
@@ -34,7 +34,7 @@ public class ShutdownActivity extends Activity {
         super.onCreate(savedInstanceState);
 
         mConfirm = getIntent().getBooleanExtra(Intent.EXTRA_KEY_CONFIRM, false);
-        Log.i(TAG, "onCreate(): confirm=" + mConfirm);
+        Slog.i(TAG, "onCreate(): confirm=" + mConfirm);
 
         Handler h = new Handler();
         h.post(new Runnable() {

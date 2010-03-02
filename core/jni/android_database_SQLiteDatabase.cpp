@@ -63,6 +63,26 @@ enum {
 
 static jfieldID offset_db_handle;
 
+static void sqlLogger(void *databaseName, int iErrCode, const char *zMsg) {
+    LOGI("sqlite returned: error code = %d, msg = %s\n", iErrCode, zMsg);
+}
+
+// register the logging func on sqlite. needs to be done BEFORE any sqlite3 func is called.
+static void registerLoggingFunc() {
+    static bool loggingFuncSet = false;
+    if (loggingFuncSet) {
+        return;
+    }
+
+    LOGV("Registering sqlite logging func \n");
+    //int err = sqlite3_config(SQLITE_CONFIG_LOG, &sqlLogger, 0);
+    //if (err != SQLITE_OK) {
+        //LOGE("sqlite_config failed error_code = %d. THIS SHOULD NEVER occur.\n", err);
+        //#return;
+    //}
+    loggingFuncSet = true;
+}
+
 /* public native void dbopen(String path, int flags, String locale); */
 static void dbopen(JNIEnv* env, jobject object, jstring pathString, jint flags)
 {
@@ -71,6 +91,9 @@ static void dbopen(JNIEnv* env, jobject object, jstring pathString, jint flags)
     sqlite3_stmt * statement = NULL;
     char const * path8 = env->GetStringUTFChars(pathString, NULL);
     int sqliteFlags;
+
+    // register the logging func on sqlite. needs to be done BEFORE any sqlite3 func is called.
+    registerLoggingFunc();
 
     // convert our flags into the sqlite flags
     if (flags & CREATE_IF_NECESSARY) {
@@ -143,7 +166,21 @@ done:
     if (handle != NULL) sqlite3_close(handle);
 }
 
-void sqlTrace(void *databaseName, const char *sql) {
+static char *getDatabaseName(JNIEnv* env, sqlite3 * handle, jstring databaseName) {
+    char const *path = env->GetStringUTFChars(databaseName, NULL);
+    if (path == NULL) {
+        LOGE("Failure in getDatabaseName(). VM ran out of memory?\n");
+        return NULL; // VM would have thrown OutOfMemoryError
+    }
+    int len = strlen(path);
+    char *dbNameStr = (char *)malloc(len + 1);
+    strncpy(dbNameStr, path, len);
+    dbNameStr[len-1] = NULL;
+    env->ReleaseStringUTFChars(databaseName, path);
+    return dbNameStr;
+}
+
+static void sqlTrace(void *databaseName, const char *sql) {
     LOGI("sql_statement|%s|%s\n", (char *)databaseName, sql);
 }
 
@@ -151,21 +188,10 @@ void sqlTrace(void *databaseName, const char *sql) {
 static void enableSqlTracing(JNIEnv* env, jobject object, jstring databaseName)
 {
     sqlite3 * handle = (sqlite3 *)env->GetIntField(object, offset_db_handle);
-    char const *path = env->GetStringUTFChars(databaseName, NULL);
-    if (path == NULL) {
-        LOGE("Failure in enableSqlTracing(). VM ran out of memory?\n");
-        return; // VM would have thrown OutOfMemoryError
-    }
-    int len = strlen(path);
-    char *traceFuncArg = (char *)malloc(len + 1);
-    strncpy(traceFuncArg, path, len);
-    traceFuncArg[len-1] = NULL;
-    env->ReleaseStringUTFChars(databaseName, path);
-    sqlite3_trace(handle, &sqlTrace, (void *)traceFuncArg);
-    LOGI("will be printing all sql statements executed on database = %s\n", traceFuncArg);
+    sqlite3_trace(handle, &sqlTrace, (void *)getDatabaseName(env, handle, databaseName));
 }
 
-void sqlProfile(void *databaseName, const char *sql, sqlite3_uint64 tm) {
+static void sqlProfile(void *databaseName, const char *sql, sqlite3_uint64 tm) {
     double d = tm/1000000.0;
     LOGI("elapsedTime4Sql|%s|%.3f ms|%s\n", (char *)databaseName, d, sql);
 }
@@ -174,20 +200,9 @@ void sqlProfile(void *databaseName, const char *sql, sqlite3_uint64 tm) {
 static void enableSqlProfiling(JNIEnv* env, jobject object, jstring databaseName)
 {
     sqlite3 * handle = (sqlite3 *)env->GetIntField(object, offset_db_handle);
-    char const *path = env->GetStringUTFChars(databaseName, NULL);
-    if (path == NULL) {
-        LOGE("Failure in enableSqlProfiling(). VM ran out of memory?\n");
-        return; // VM would have thrown OutOfMemoryError
-    }
-    int len = strlen(path);
-    char *traceFuncArg = (char *)malloc(len + 1);
-    strncpy(traceFuncArg, path, len);
-    traceFuncArg[len-1] = NULL;
-    env->ReleaseStringUTFChars(databaseName, path);
-    sqlite3_profile(handle, &sqlProfile, (void *)traceFuncArg);
-    LOGI("will be printing execution time of all sql statements executed on database = %s\n",
-            traceFuncArg);
+    sqlite3_profile(handle, &sqlProfile, (void *)getDatabaseName(env, handle, databaseName));
 }
+
 
 /* public native void close(); */
 static void dbclose(JNIEnv* env, jobject object)

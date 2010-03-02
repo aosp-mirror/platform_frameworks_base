@@ -84,7 +84,6 @@ public class FileFilter {
         // This first block of tests are for HTML5 features, for which Android
         // should pass all tests. They are skipped only temporarily.
         // TODO: Fix these failing tests and remove them from this list.
-        ignoreResultList.add("fast/dom/Geolocation/callback-exception.html"); // exception output incorrect with V8
         ignoreResultList.add("http/tests/appcache/auth.html"); // file not found
         ignoreResultList.add("http/tests/appcache/deferred-events.html"); // file not found
         ignoreResultList.add("http/tests/appcache/deferred-events-delete-while-raising.html"); // file not found

@@ -25,10 +25,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 
@@ -200,9 +201,9 @@ public final class CacheManager {
             // the cache database. The directory could be recreated
             // because the system flushed all the data/cache directories
             // to free up disk space.
-            WebViewCore.endCacheTransaction();
-            mDataBase.clearCache();
-            WebViewCore.startCacheTransaction();
+            // delete rows in the cache database
+            WebViewWorker.getHandler().sendEmptyMessage(
+                    WebViewWorker.MSG_CLEAR_CACHE);
             return true;
         }
         return false;
@@ -223,7 +224,6 @@ public final class CacheManager {
      * 
      * @param disabled true to disable the cache
      */
-    // only called from WebCore thread
     static void setCacheDisabled(boolean disabled) {
         if (disabled == mDisabled) {
             return;
@@ -243,7 +243,7 @@ public final class CacheManager {
         return mDisabled;
     }
 
-    // only called from WebCore thread
+    // only called from WebViewWorkerThread
     // make sure to call enableTransaction/disableTransaction in pair
     static boolean enableTransaction() {
         if (++mRefCount == 1) {
@@ -253,12 +253,9 @@ public final class CacheManager {
         return false;
     }
 
-    // only called from WebCore thread
+    // only called from WebViewWorkerThread
     // make sure to call enableTransaction/disableTransaction in pair
     static boolean disableTransaction() {
-        if (mRefCount == 0) {
-            Log.e(LOGTAG, "disableTransaction is out of sync");
-        }
         if (--mRefCount == 0) {
             mDataBase.endCacheTransaction();
             return true;
@@ -266,21 +263,41 @@ public final class CacheManager {
         return false;
     }
 
-    // only called from WebCore thread
-    // make sure to call startCacheTransaction/endCacheTransaction in pair
-    public static boolean startCacheTransaction() {
+    // only called from WebViewWorkerThread
+    // make sure to call startTransaction/endTransaction in pair
+    static boolean startTransaction() {
         return mDataBase.startCacheTransaction();
     }
 
-    // only called from WebCore thread
-    // make sure to call startCacheTransaction/endCacheTransaction in pair
-    public static boolean endCacheTransaction() {
+    // only called from WebViewWorkerThread
+    // make sure to call startTransaction/endTransaction in pair
+    static boolean endTransaction() {
         boolean ret = mDataBase.endCacheTransaction();
         if (++mTrimCacheCount >= TRIM_CACHE_INTERVAL) {
             mTrimCacheCount = 0;
             trimCacheIfNeeded();
         }
         return ret;
+    }
+
+    // only called from WebCore Thread
+    // make sure to call startCacheTransaction/endCacheTransaction in pair
+    /**
+     * @deprecated
+     */
+    @Deprecated
+    public static boolean startCacheTransaction() {
+        return false;
+    }
+
+    // only called from WebCore Thread
+    // make sure to call startCacheTransaction/endCacheTransaction in pair
+    /**
+     * @deprecated
+     */
+    @Deprecated
+    public static boolean endCacheTransaction() {
+        return false;
     }
 
     /**
@@ -291,13 +308,11 @@ public final class CacheManager {
      * 
      * @return the CacheResult for a given url
      */
-    // only called from WebCore thread
     public static CacheResult getCacheFile(String url,
             Map<String, String> headers) {
         return getCacheFile(url, 0, headers);
     }
 
-    // only called from WebCore thread
     static CacheResult getCacheFile(String url, long postIdentifier,
             Map<String, String> headers) {
         if (mDisabled) {
@@ -368,14 +383,12 @@ public final class CacheManager {
      * @hide - hide createCacheFile since it has a parameter of type headers, which is
      * in a hidden package.
      */
-    // only called from WebCore thread
     public static CacheResult createCacheFile(String url, int statusCode,
             Headers headers, String mimeType, boolean forceCache) {
         return createCacheFile(url, statusCode, headers, mimeType, 0,
                 forceCache);
     }
 
-    // only called from WebCore thread
     static CacheResult createCacheFile(String url, int statusCode,
             Headers headers, String mimeType, long postIdentifier,
             boolean forceCache) {
@@ -435,12 +448,10 @@ public final class CacheManager {
      * Save the info of a cache file for a given url to the CacheMap so that it
      * can be reused later
      */
-    // only called from WebCore thread
     public static void saveCacheFile(String url, CacheResult cacheRet) {
         saveCacheFile(url, 0, cacheRet);
     }
 
-    // only called from WebCore thread
     static void saveCacheFile(String url, long postIdentifier,
             CacheResult cacheRet) {
         try {
@@ -489,7 +500,6 @@ public final class CacheManager {
      * 
      * @return true if it succeeds
      */
-    // only called from WebCore thread
     static boolean removeAllCacheFiles() {
         // Note, this is called before init() when the database is
         // created or upgraded.
@@ -499,7 +509,10 @@ public final class CacheManager {
             mClearCacheOnInit = true;
             return true;
         }
-        // delete cache in a separate thread to not block UI.
+        // delete rows in the cache database
+        WebViewWorker.getHandler().sendEmptyMessage(
+                WebViewWorker.MSG_CLEAR_CACHE);
+        // delete cache files in a separate thread to not block UI.
         final Runnable clearCache = new Runnable() {
             public void run() {
                 // delete all cache files
@@ -517,8 +530,6 @@ public final class CacheManager {
                 } catch (SecurityException e) {
                     // Ignore SecurityExceptions.
                 }
-                // delete database
-                mDataBase.clearCache();
             }
         };
         new Thread(clearCache).start();
@@ -528,15 +539,13 @@ public final class CacheManager {
     /**
      * Return true if the cache is empty.
      */
-    // only called from WebCore thread
     static boolean cacheEmpty() {
         return mDataBase.hasCache();
     }
 
-    // only called from WebCore thread
     static void trimCacheIfNeeded() {
         if (mDataBase.getCacheTotalSize() > CACHE_THRESHOLD) {
-            ArrayList<String> pathList = mDataBase.trimCache(CACHE_TRIM_AMOUNT);
+            List<String> pathList = mDataBase.trimCache(CACHE_TRIM_AMOUNT);
             int size = pathList.size();
             for (int i = 0; i < size; i++) {
                 File f = new File(mBaseDir, pathList.get(i));
@@ -544,7 +553,32 @@ public final class CacheManager {
                     Log.e(LOGTAG, f.getPath() + " delete failed.");
                 }
             }
+            // remove the unreferenced files in the cache directory
+            final List<String> fileList = mDataBase.getAllCacheFileNames();
+            if (fileList == null) return;
+            String[] toDelete = mBaseDir.list(new FilenameFilter() {
+                public boolean accept(File dir, String filename) {
+                    if (fileList.contains(filename)) {
+                        return false;
+                    } else {
+                        return true;
+                    }
+                }
+            });
+            if (toDelete == null) return;
+            size = toDelete.length;
+            for (int i = 0; i < size; i++) {
+                File f = new File(mBaseDir, toDelete[i]);
+                if (!f.delete()) {
+                    Log.e(LOGTAG, f.getPath() + " delete failed.");
+                }
+            }
         }
+    }
+
+    static void clearCache() {
+        // delete database
+        mDataBase.clearCache();
     }
 
     private static boolean checkCacheRedirect(int statusCode) {

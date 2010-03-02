@@ -1867,6 +1867,14 @@
         <attr name="layout_span" format="integer" />
     </declare-styleable>
     <declare-styleable name="TabWidget">
+        <!-- Drawable used to draw the divider between tabs. -->
+        <attr name="divider" />
+        <!-- Determines whether the strip under the tab indicators is drawn or not. -->
+        <attr name="stripEnabled" format="boolean" />
+        <!-- Drawable used to draw the left part of the strip underneath the tabs. -->
+        <attr name="stripLeft" format="reference" />
+        <!-- Drawable used to draw the right part of the strip underneath the tabs. -->
+        <attr name="stripRight" format="reference" />
     </declare-styleable>
     <declare-styleable name="TextAppearance">
         <!-- Text color. -->

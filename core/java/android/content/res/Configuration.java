@@ -162,20 +162,14 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      */
     public int orientation;
 
-    /** @hide (UIMODE) Pending API council approval */
     public static final int UI_MODE_TYPE_MASK = 0x0f;
-    /** @hide (UIMODE) Pending API council approval */
-    public static final int UI_MODE_TYPE_NORMAL = 0x00;
-    /** @hide (UIMODE) Pending API council approval */
-    public static final int UI_MODE_TYPE_CAR = 0x01;
+    public static final int UI_MODE_TYPE_UNDEFINED = 0x00;
+    public static final int UI_MODE_TYPE_NORMAL = 0x01;
+    public static final int UI_MODE_TYPE_CAR = 0x02;
 
-    /** @hide (UIMODE) Pending API council approval */
     public static final int UI_MODE_NIGHT_MASK = 0x30;
-    /** @hide (UIMODE) Pending API council approval */
     public static final int UI_MODE_NIGHT_UNDEFINED = 0x00;
-    /** @hide (UIMODE) Pending API council approval */
     public static final int UI_MODE_NIGHT_NO = 0x10;
-    /** @hide (UIMODE) Pending API council approval */
     public static final int UI_MODE_NIGHT_YES = 0x20;
 
     /**
@@ -187,8 +181,6 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      * <p>The {@link #UI_MODE_NIGHT_MASK} defines whether the screen
      * is in a special mode. They may be one of
      * {@link #UI_MODE_NIGHT_NO} or {@link #UI_MODE_NIGHT_YES}.
-     *
-     * @hide (UIMODE) Pending API council approval
      */
     public int uiMode;
 

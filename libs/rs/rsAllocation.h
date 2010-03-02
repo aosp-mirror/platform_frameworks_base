@@ -29,11 +29,12 @@ class Allocation : public ObjectBase
 {
     // The graphics equilivent of malloc.  The allocation contains a structure of elements.
 
-
 public:
     // By policy this allocation will hold a pointer to the type
     // but will not destroy it on destruction.
     Allocation(Context *rsc, const Type *);
+    Allocation(Context *rsc, const Type *, void *bmp, void *callbackData, RsBitmapCallback_t callback);
+
     virtual ~Allocation();
 
     void setCpuWritable(bool);
@@ -46,7 +47,7 @@ public:
     void * getPtr() const {return mPtr;}
     const Type * getType() const {return mType.get();}
 
-    void deferedUploadToTexture(const Context *rsc, uint32_t lodOffset);
+    void deferedUploadToTexture(const Context *rsc, bool genMipmap, uint32_t lodOffset);
     void uploadToTexture(const Context *rsc);
     uint32_t getTextureID() const {return mTextureID;}
 
@@ -82,6 +83,11 @@ protected:
 
     Vector<const Program *> mToDirtyList;
 
+    // Is we have a non-null user bitmap callback we do not own the bits and
+    // instead call this function to free the memort when its time.
+    RsBitmapCallback_t mUserBitmapCallback;
+    void *mUserBitmapCallbackData;
+
     // Usage restrictions
     bool mCpuWrite;
     bool mCpuRead;
@@ -98,6 +104,7 @@ protected:
     // Is this a legal structure to be used as a texture source.
     // Initially this will require 1D or 2D and color data
     bool mIsTexture;
+    bool mTextureGenMipmap;
     uint32_t mTextureLOD;
     uint32_t mTextureID;
 
@@ -108,6 +115,10 @@ protected:
     uint32_t mBufferID;
 
     bool mUploadDefered;
+
+private:
+    void init(Context *rsc, const Type *);
+
 };
 
 }

@@ -625,12 +625,13 @@ void SurfaceFlinger::handleTransactionLocked(
 
             mVisibleRegionsDirty = true;
             mDirtyRegion.set(hw.bounds());
-            mFreezeDisplayTime = 0;
         }
 
         if (mCurrentState.freezeDisplay != mDrawingState.freezeDisplay) {
             // freezing or unfreezing the display -> trigger animation if needed
             mFreezeDisplay = mCurrentState.freezeDisplay;
+            if (mFreezeDisplay)
+                 mFreezeDisplayTime = 0;
         }
 
         if (currentLayers.size() > mDrawingState.layersSortedByZ.size()) {
@@ -1186,7 +1187,7 @@ int SurfaceFlinger::setOrientation(DisplayID dpy,
 }
 
 sp<ISurface> SurfaceFlinger::createSurface(ClientID clientId, int pid,
-        ISurfaceFlingerClient::surface_data_t* params,
+        const String8& name, ISurfaceFlingerClient::surface_data_t* params,
         DisplayID d, uint32_t w, uint32_t h, PixelFormat format,
         uint32_t flags)
 {
@@ -1232,6 +1233,7 @@ sp<ISurface> SurfaceFlinger::createSurface(ClientID clientId, int pid,
     }
 
     if (layer != 0) {
+        layer->setName(name);
         setTransactionFlags(eTransactionNeeded);
         surfaceHandle = layer->getSurface();
         if (surfaceHandle != 0) { 
@@ -1506,8 +1508,10 @@ status_t SurfaceFlinger::dump(int fd, const Vector<String16>& args)
             if (lbc != 0) {
                 sp<Client> client(lbc->client.promote());
                 snprintf(buffer, SIZE,
-                        "      "
-                        "id=0x%08x, client=0x%08x, identity=%u\n",
+                        "      name=%s\n", lbc->getName().string());
+                result.append(buffer);
+                snprintf(buffer, SIZE,
+                        "      id=0x%08x, client=0x%08x, identity=%u\n",
                         lbc->clientIndex(), client.get() ? client->cid : 0,
                         lbc->getIdentity());
 
@@ -1760,10 +1764,12 @@ sp<IMemoryHeap> BClient::getControlBlock() const {
 
 sp<ISurface> BClient::createSurface(
         ISurfaceFlingerClient::surface_data_t* params, int pid,
+        const String8& name,
         DisplayID display, uint32_t w, uint32_t h, PixelFormat format,
         uint32_t flags)
 {
-    return mFlinger->createSurface(mId, pid, params, display, w, h, format, flags);
+    return mFlinger->createSurface(mId, pid, name, params, display, w, h,
+            format, flags);
 }
 
 status_t BClient::destroySurface(SurfaceID sid)

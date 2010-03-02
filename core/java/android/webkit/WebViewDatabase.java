@@ -19,6 +19,7 @@ package android.webkit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.Map.Entry;
 
@@ -234,6 +235,13 @@ public class WebViewDatabase {
             }
 
             if (mCacheDatabase != null) {
+                // use read_uncommitted to speed up READ
+                mCacheDatabase.execSQL("PRAGMA read_uncommitted = true;");
+                // as only READ can be called in the non-WebViewWorkerThread,
+                // and read_uncommitted is used, we can turn off database lock
+                // to use transaction.
+                mCacheDatabase.setLockingEnabled(false);
+
                 // use InsertHelper for faster insertion
                 mCacheInserter = new DatabaseUtils.InsertHelper(mCacheDatabase,
                         "cache");
@@ -548,19 +556,33 @@ public class WebViewDatabase {
     }
 
     //
-    // cache functions, can only be called from WebCoreThread
+    // cache functions
     //
 
+    // only called from WebViewWorkerThread
     boolean startCacheTransaction() {
         if (++mCacheTransactionRefcount == 1) {
+            if (!Thread.currentThread().equals(
+                    WebViewWorker.getHandler().getLooper().getThread())) {
+                Log.w(LOGTAG, "startCacheTransaction should be called from "
+                        + "WebViewWorkerThread instead of from "
+                        + Thread.currentThread().getName());
+            }
             mCacheDatabase.beginTransaction();
             return true;
         }
         return false;
     }
 
+    // only called from WebViewWorkerThread
     boolean endCacheTransaction() {
         if (--mCacheTransactionRefcount == 0) {
+            if (!Thread.currentThread().equals(
+                    WebViewWorker.getHandler().getLooper().getThread())) {
+                Log.w(LOGTAG, "endCacheTransaction should be called from "
+                        + "WebViewWorkerThread instead of from "
+                        + Thread.currentThread().getName());
+            }
             try {
                 mCacheDatabase.setTransactionSuccessful();
             } finally {
@@ -684,7 +706,7 @@ public class WebViewDatabase {
         return size;
     }
 
-    ArrayList<String> trimCache(long amount) {
+    List<String> trimCache(long amount) {
         ArrayList<String> pathList = new ArrayList<String>(100);
         Cursor cursor = mCacheDatabase.rawQuery(
                 "SELECT contentlength, filepath FROM cache ORDER BY expires ASC",
@@ -722,6 +744,20 @@ public class WebViewDatabase {
                 statement.execute();
             }
             statement.close();
+        }
+        cursor.close();
+        return pathList;
+    }
+
+    List<String> getAllCacheFileNames() {
+        ArrayList<String> pathList = null;
+        Cursor cursor = mCacheDatabase.rawQuery("SELECT filepath FROM cache",
+                null);
+        if (cursor != null && cursor.moveToFirst()) {
+            pathList = new ArrayList<String>(cursor.getCount());
+            do {
+                pathList.add(cursor.getString(0));
+            } while (cursor.moveToNext());
         }
         cursor.close();
         return pathList;

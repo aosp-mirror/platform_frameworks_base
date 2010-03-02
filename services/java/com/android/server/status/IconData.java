@@ -1,6 +1,6 @@
 package com.android.server.status;
 
-import android.util.Log;
+import android.util.Slog;
 
 public class IconData {
     /**

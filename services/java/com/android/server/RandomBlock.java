@@ -16,7 +16,7 @@
 
 package com.android.server;
 
-import android.util.Log;
+import android.util.Slog;
 
 import java.io.Closeable;
 import java.io.DataOutput;
@@ -39,7 +39,7 @@ class RandomBlock {
     private RandomBlock() { }
 
     static RandomBlock fromFile(String filename) throws IOException {
-        if (DEBUG) Log.v(TAG, "reading from file " + filename);
+        if (DEBUG) Slog.v(TAG, "reading from file " + filename);
         InputStream stream = null;
         try {
             stream = new FileInputStream(filename);
@@ -63,7 +63,7 @@ class RandomBlock {
     }
 
     void toFile(String filename) throws IOException {
-        if (DEBUG) Log.v(TAG, "writing to file " + filename);
+        if (DEBUG) Slog.v(TAG, "writing to file " + filename);
         RandomAccessFile out = null;
         try {
             out = new RandomAccessFile(filename, "rws");
@@ -95,7 +95,7 @@ class RandomBlock {
             }
             c.close();
         } catch (IOException e) {
-            Log.w(TAG, "IOException thrown while closing Closeable", e);
+            Slog.w(TAG, "IOException thrown while closing Closeable", e);
         }
     }
 }

@@ -444,11 +444,11 @@ nAllocationCreateTyped(JNIEnv *_env, jobject _this, jint e)
 }
 
 static void
-nAllocationUploadToTexture(JNIEnv *_env, jobject _this, jint a, jint mip)
+nAllocationUploadToTexture(JNIEnv *_env, jobject _this, jint a, jboolean genMip, jint mip)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nAllocationUploadToTexture, con(%p), a(%p), mip(%i)", con, (RsAllocation)a, mip);
-    rsAllocationUploadToTexture(con, (RsAllocation)a, mip);
+    LOG_API("nAllocationUploadToTexture, con(%p), a(%p), genMip(%i), mip(%i)", con, (RsAllocation)a, genMip, mip);
+    rsAllocationUploadToTexture(con, (RsAllocation)a, genMip, mip);
 }
 
 static void
@@ -499,6 +499,26 @@ nAllocationCreateFromBitmap(JNIEnv *_env, jobject _this, jint dstFmt, jboolean g
         return id;
     }
     return 0;
+}
+
+static void ReleaseBitmapCallback(void *bmp)
+{
+    SkBitmap const * nativeBitmap = (SkBitmap const *)bmp;
+    nativeBitmap->unlockPixels();
+}
+
+static int
+nAllocationCreateBitmapRef(JNIEnv *_env, jobject _this, jint type, jobject jbitmap)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    SkBitmap * nativeBitmap =
+            (SkBitmap *)_env->GetIntField(jbitmap, gNativeBitmapID);
+
+
+    nativeBitmap->lockPixels();
+    void* ptr = nativeBitmap->getPixels();
+    jint id = (jint)rsAllocationCreateBitmapRef(con, (RsType)type, ptr, nativeBitmap, ReleaseBitmapCallback);
+    return id;
 }
 
 static int
@@ -1367,9 +1387,10 @@ static JNINativeMethod methods[] = {
 
 {"nAllocationCreateTyped",         "(I)I",                                 (void*)nAllocationCreateTyped },
 {"nAllocationCreateFromBitmap",    "(IZLandroid/graphics/Bitmap;)I",       (void*)nAllocationCreateFromBitmap },
+{"nAllocationCreateBitmapRef",     "(ILandroid/graphics/Bitmap;)I",        (void*)nAllocationCreateBitmapRef },
 {"nAllocationCreateFromBitmapBoxed","(IZLandroid/graphics/Bitmap;)I",      (void*)nAllocationCreateFromBitmapBoxed },
 {"nAllocationCreateFromAssetStream","(IZI)I",                              (void*)nAllocationCreateFromAssetStream },
-{"nAllocationUploadToTexture",     "(II)V",                                (void*)nAllocationUploadToTexture },
+{"nAllocationUploadToTexture",     "(IZI)V",                               (void*)nAllocationUploadToTexture },
 {"nAllocationUploadToBufferObject","(I)V",                                 (void*)nAllocationUploadToBufferObject },
 {"nAllocationSubData1D",           "(III[II)V",                            (void*)nAllocationSubData1D_i },
 {"nAllocationSubData1D",           "(III[SI)V",                            (void*)nAllocationSubData1D_s },

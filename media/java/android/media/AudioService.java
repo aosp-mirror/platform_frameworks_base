@@ -901,18 +901,20 @@ public class AudioService extends IAudioService.Stub {
         boolean adjustVolumeIndex = true;
         int newRingerMode = mRingerMode;
 
-        if (mRingerMode == AudioManager.RINGER_MODE_NORMAL && (oldIndex + 5) / 10 == 1
-                && direction == AudioManager.ADJUST_LOWER) {
-            newRingerMode = AudioManager.RINGER_MODE_VIBRATE;
-        } else if (mRingerMode == AudioManager.RINGER_MODE_VIBRATE) {
-            if (direction == AudioManager.ADJUST_RAISE) {
-                newRingerMode = AudioManager.RINGER_MODE_NORMAL;
-            } else if (direction == AudioManager.ADJUST_LOWER) {
-                newRingerMode = AudioManager.RINGER_MODE_SILENT;
+        if (mRingerMode == AudioManager.RINGER_MODE_NORMAL) {
+            // audible mode, at the bottom of the scale
+            if (direction == AudioManager.ADJUST_LOWER
+                    && (oldIndex + 5) / 10 == 1) {
+                // "silent mode", but which one?
+                newRingerMode = System.getInt(mContentResolver, System.VIBRATE_IN_SILENT, 1) == 1
+                    ? AudioManager.RINGER_MODE_VIBRATE
+                    : AudioManager.RINGER_MODE_SILENT;
             }
-        } else if (direction == AudioManager.ADJUST_RAISE
-                && mRingerMode == AudioManager.RINGER_MODE_SILENT) {
-            newRingerMode = AudioManager.RINGER_MODE_VIBRATE;
+        } else {
+            if (direction == AudioManager.ADJUST_RAISE) {
+                // exiting silent mode
+                newRingerMode = AudioManager.RINGER_MODE_NORMAL;
+            }
         }
 
         if (newRingerMode != mRingerMode) {

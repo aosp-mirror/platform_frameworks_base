@@ -304,15 +304,16 @@ import java.util.ArrayList;
     public void onEditorAction(int actionCode) {
         switch (actionCode) {
         case EditorInfo.IME_ACTION_NEXT:
-            // Since the cursor will no longer be in the same place as the
-            // focus, set the focus controller back to inactive
-            mWebView.setFocusControllerInactive();
-            mWebView.nativeMoveCursorToNextTextInput();
-            // Preemptively rebuild the WebTextView, so that the action will
-            // be set properly.
-            mWebView.rebuildWebTextView();
-            setDefaultSelection();
-            mWebView.invalidate();
+            if (mWebView.nativeMoveCursorToNextTextInput()) {
+                // Since the cursor will no longer be in the same place as the
+                // focus, set the focus controller back to inactive
+                mWebView.setFocusControllerInactive();
+                // Preemptively rebuild the WebTextView, so that the action will
+                // be set properly.
+                mWebView.rebuildWebTextView();
+                setDefaultSelection();
+                mWebView.invalidate();
+            }
             break;
         case EditorInfo.IME_ACTION_DONE:
             super.onEditorAction(actionCode);

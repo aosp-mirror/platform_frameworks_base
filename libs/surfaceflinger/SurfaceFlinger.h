@@ -189,7 +189,7 @@ private:
     friend class LayerBlur;
     friend class LayerDim;
 
-    sp<ISurface> createSurface(ClientID client, int pid, 
+    sp<ISurface> createSurface(ClientID client, int pid, const String8& name,
             ISurfaceFlingerClient::surface_data_t* params,
             DisplayID display, uint32_t w, uint32_t h, PixelFormat format,
             uint32_t flags);
@@ -401,7 +401,7 @@ public:
     virtual sp<IMemoryHeap> getControlBlock() const;
 
     virtual sp<ISurface> createSurface(
-            surface_data_t* params, int pid,
+            surface_data_t* params, int pid, const String8& name,
             DisplayID display, uint32_t w, uint32_t h,PixelFormat format,
             uint32_t flags);
 

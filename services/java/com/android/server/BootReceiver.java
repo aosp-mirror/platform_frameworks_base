@@ -28,7 +28,7 @@ import android.os.FileUtils;
 import android.os.RecoverySystem;
 import android.os.SystemProperties;
 import android.provider.Settings;
-import android.util.Log;
+import android.util.Slog;
 
 import java.io.File;
 import java.io.IOException;
@@ -53,13 +53,13 @@ public class BootReceiver extends BroadcastReceiver {
         try {
             logBootEvents(context);
         } catch (Exception e) {
-            Log.e(TAG, "Can't log boot events", e);
+            Slog.e(TAG, "Can't log boot events", e);
         }
 
         try {
             RecoverySystem.handleAftermath();
         } catch (Exception e) {
-            Log.e(TAG, "Can't handle recovery aftermath", e);
+            Slog.e(TAG, "Can't handle recovery aftermath", e);
         }
 
         try {
@@ -70,7 +70,7 @@ public class BootReceiver extends BroadcastReceiver {
                 context.startService(loadavg);
             }
         } catch (Exception e) {
-            Log.e(TAG, "Can't start load average service", e);
+            Slog.e(TAG, "Can't start load average service", e);
         }
     }
 
@@ -122,7 +122,7 @@ public class BootReceiver extends BroadcastReceiver {
                     String filename = new File(TOMBSTONE_DIR, path).getPath();
                     addFileToDropBox(db, prefs, props, filename, LOG_SIZE, "SYSTEM_TOMBSTONE");
                 } catch (IOException e) {
-                    Log.e(TAG, "Can't log tombstone", e);
+                    Slog.e(TAG, "Can't log tombstone", e);
                 }
             }
         };
@@ -133,7 +133,7 @@ public class BootReceiver extends BroadcastReceiver {
     private static void addFileToDropBox(
             DropBoxManager db, SharedPreferences prefs,
             String headers, String filename, int maxSize, String tag) throws IOException {
-        if (!db.isTagEnabled(tag)) return;  // Logging disabled
+        if (!db.isTagEnabled(tag)) return;  // Slog.ing disabled
 
         File file = new File(filename);
         long fileTime = file.lastModified();
@@ -146,6 +146,6 @@ public class BootReceiver extends BroadcastReceiver {
         StringBuilder report = new StringBuilder(headers).append("\n");
         report.append(FileUtils.readTextFile(file, maxSize, "[[TRUNCATED]]\n"));
         db.addText(tag, report.toString());
-        Log.i(TAG, "Logging " + filename + " to DropBox (" + tag + ")");
+        Slog.i(TAG, "Slog.ing " + filename + " to DropBox (" + tag + ")");
     }
 }

@@ -21,7 +21,6 @@ import com.android.internal.R;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.pim.DateException;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -814,35 +813,6 @@ public class DateUtils
                 && (thenMonth == time.month) 
                 && (thenMonthDay == time.monthDay);
     }
-    
-    /**
-     * @hide
-     * @deprecated use {@link android.text.format.Time}
-     */
-    private static final int ctoi(String str, int index)
-                                                throws DateException
-    {
-        char c = str.charAt(index);
-        if (c >= '0' && c <= '9') {
-            return (int)(c - '0');
-        }
-        throw new DateException("Expected numeric character.  Got '" +
-                                            c + "'");
-    }
-
-    /**
-     * @hide
-     * @deprecated use {@link android.text.format.Time}
-     */
-    private static final int check(int lowerBound, int upperBound, int value)
-                                                throws DateException
-    {
-        if (value >= lowerBound && value <= upperBound) {
-            return value;
-        }
-        throw new DateException("field out of bounds.  max=" + upperBound
-                                        + " value=" + value);
-    }
 
     /**
      * @hide
@@ -860,81 +830,6 @@ public class DateUtils
         }
         return false;
     }
-
-
-    // note that month in Calendar is 0 based and in all other human
-    // representations, it's 1 based.
-    // Returns if the Z was present, meaning that the time is in UTC
-    /**
-     * @hide
-     * @deprecated use {@link android.text.format.Time}
-     */
-    public static boolean parseDateTime(String str, Calendar cal)
-                                                throws DateException
-    {
-        int len = str.length();
-        boolean dateTime = (len == 15 || len == 16) && str.charAt(8) == 'T';
-        boolean justDate = len == 8;
-        if (dateTime || justDate) {
-            cal.clear();
-            cal.set(Calendar.YEAR, 
-                            ctoi(str, 0)*1000 + ctoi(str, 1)*100
-                            + ctoi(str, 2)*10 + ctoi(str, 3));
-            cal.set(Calendar.MONTH,
-                            check(0, 11, ctoi(str, 4)*10 + ctoi(str, 5) - 1));
-            cal.set(Calendar.DAY_OF_MONTH,
-                            check(1, 31, ctoi(str, 6)*10 + ctoi(str, 7)));
-            if (dateTime) {
-                cal.set(Calendar.HOUR_OF_DAY,
-                            check(0, 23, ctoi(str, 9)*10 + ctoi(str, 10)));
-                cal.set(Calendar.MINUTE,
-                            check(0, 59, ctoi(str, 11)*10 + ctoi(str, 12)));
-                cal.set(Calendar.SECOND,
-                            check(0, 59, ctoi(str, 13)*10 + ctoi(str, 14)));
-            }
-            if (justDate) {
-                cal.set(Calendar.HOUR_OF_DAY, 0);
-                cal.set(Calendar.MINUTE, 0);
-                cal.set(Calendar.SECOND, 0);
-                return true;
-            }
-            if (len == 15) {
-                return false;
-            }
-            if (str.charAt(15) == 'Z') {
-                return true;
-            }
-        }
-        throw new DateException("Invalid time (expected "
-                                + "YYYYMMDDThhmmssZ? got '" + str + "').");
-    }
-
-    /**
-     * Given a timezone string which can be null, and a dateTime string,
-     * set that time into a calendar.
-     * @hide
-     * @deprecated use {@link android.text.format.Time}
-     */
-    public static void parseDateTime(String tz, String dateTime, Calendar out)
-                                                throws DateException
-    {
-        TimeZone timezone;
-        if (DateUtils.isUTC(dateTime)) {
-            timezone = TimeZone.getTimeZone("UTC");
-        }
-        else if (tz == null) {
-            timezone = TimeZone.getDefault();
-        }
-        else {
-            timezone = TimeZone.getTimeZone(tz);
-        }
-
-        Calendar local = new GregorianCalendar(timezone);
-        DateUtils.parseDateTime(dateTime, local);
-
-        out.setTimeInMillis(local.getTimeInMillis());
-    }
-
 
     /**
      * Return a string containing the date and time in RFC2445 format.

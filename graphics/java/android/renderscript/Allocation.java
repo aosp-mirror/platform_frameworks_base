@@ -32,6 +32,7 @@ import android.util.TypedValue;
  **/
 public class Allocation extends BaseObj {
     Type mType;
+    Bitmap mBitmap;
 
     Allocation(int id, RenderScript rs, Type t) {
         super(rs);
@@ -45,7 +46,12 @@ public class Allocation extends BaseObj {
 
     public void uploadToTexture(int baseMipLevel) {
         mRS.validate();
-        mRS.nAllocationUploadToTexture(mID, baseMipLevel);
+        mRS.nAllocationUploadToTexture(mID, false, baseMipLevel);
+    }
+
+    public void uploadToTexture(boolean genMips, int baseMipLevel) {
+        mRS.validate();
+        mRS.nAllocationUploadToTexture(mID, genMips, baseMipLevel);
     }
 
     public void uploadToBufferObject() {
@@ -257,15 +263,58 @@ public class Allocation extends BaseObj {
         return new Allocation(id, rs, t);
     }
 
+    static private Element elementFromBitmap(RenderScript rs, Bitmap b) {
+        final Bitmap.Config bc = b.getConfig();
+        if (bc == Bitmap.Config.ALPHA_8) {
+            return Element.A_8(rs);
+        }
+        if (bc == Bitmap.Config.ARGB_4444) {
+            return Element.RGBA_4444(rs);
+        }
+        if (bc == Bitmap.Config.ARGB_8888) {
+            return Element.RGBA_8888(rs);
+        }
+        if (bc == Bitmap.Config.RGB_565) {
+            return Element.RGB_565(rs);
+        }
+        throw new IllegalStateException("Bad bitmap type.");
+    }
+
+    static private Type typeFromBitmap(RenderScript rs, Bitmap b) {
+        Element e = elementFromBitmap(rs, b);
+        Type.Builder tb = new Type.Builder(rs, e);
+        tb.add(Dimension.X, b.getWidth());
+        tb.add(Dimension.Y, b.getHeight());
+        return tb.create();
+    }
+
     static public Allocation createFromBitmap(RenderScript rs, Bitmap b, Element dstFmt, boolean genMips)
         throws IllegalArgumentException {
 
         rs.validate();
+        Type t = typeFromBitmap(rs, b);
+
         int id = rs.nAllocationCreateFromBitmap(dstFmt.mID, genMips, b);
         if(id == 0) {
             throw new IllegalStateException("Load failed.");
         }
-        return new Allocation(id, rs, null);
+        return new Allocation(id, rs, t);
+    }
+
+    static public Allocation createBitmapRef(RenderScript rs, Bitmap b)
+        throws IllegalArgumentException {
+
+        rs.validate();
+        Type t = typeFromBitmap(rs, b);
+
+        int id = rs.nAllocationCreateBitmapRef(t.getID(), b);
+        if(id == 0) {
+            throw new IllegalStateException("Load failed.");
+        }
+
+        Allocation a = new Allocation(id, rs, t);
+        a.mBitmap = b;
+        return a;
     }
 
     static Allocation createFromBitmapBoxed(RenderScript rs, Bitmap b, Element dstFmt, boolean genMips)

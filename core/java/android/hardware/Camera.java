@@ -524,21 +524,24 @@ public class Camera {
 
     /**
      * Zooms to the requested value smoothly. Driver will generate {@link
-     * #ZoomCallback} for the current zoom value and whether zoom is stopped.
-     * The applications can call {@link #stopSmoothZoom} to stop the zoom
-     * earlier. The applications should not call startSmoothZoom again or {@link
-     * android.hardware.Camera.Parameters#setZoom(int)} before the zoom stops.
+     * ZoomCallback} for the zoom value and whether zoom is stopped at the
+     * time. For example, suppose the current zoom is 0 and startSmoothZoom is
+     * called with value 3. Three ZoomCallback will be generated with zoom value
+     * 1, 2, and 3. The applications can call {@link #stopSmoothZoom} to stop
+     * the zoom earlier. The applications should not call startSmoothZoom again
+     * or change the zoom value before zoom stops. This method is supported if
+     * {@link android.hardware.Camera.Parameters#isSmoothZoomSupported} is true.
      *
      * @param value zoom value. The valid range is 0 to {@link
      *              android.hardware.Camera.Parameters#getMaxZoom}.
-     * @hide
      */
     public native final void startSmoothZoom(int value);
 
     /**
      * Stops the smooth zoom. The applications should wait for the {@link
-     * #ZoomCallback} to know when the zoom is actually stopped.
-     * @hide
+     * ZoomCallback} to know when the zoom is actually stopped. This method is
+     * supported if {@link
+     * android.hardware.Camera.Parameters#isSmoothZoomSupported} is true.
      */
     public native final void stopSmoothZoom();
 
@@ -560,7 +563,6 @@ public class Camera {
     /**
      * Handles the zoom callback.
      *
-     * @hide
      */
     public interface ZoomCallback
     {
@@ -573,7 +575,7 @@ public class Camera {
          *                this is the last zoom update for the application.
          *
          * @param camera  the Camera service object
-         * @see android.hardware.Camera.Parameters#startSmoothZoom
+         * @see #startSmoothZoom(int)
          */
         void onZoomUpdate(int zoomValue, boolean stopped, Camera camera);
     };
@@ -581,8 +583,9 @@ public class Camera {
     /**
      * Registers a callback to be invoked when the zoom value is updated by the
      * camera driver during smooth zoom.
+     *
      * @param cb the callback to run
-     * @hide
+     * @see #startSmoothZoom(int)
      */
     public final void setZoomCallback(ZoomCallback cb)
     {
@@ -727,8 +730,15 @@ public class Camera {
         private static final String KEY_MAX_EXPOSURE_COMPENSATION = "max-exposure-compensation";
         private static final String KEY_MIN_EXPOSURE_COMPENSATION = "min-exposure-compensation";
         private static final String KEY_EXPOSURE_COMPENSATION_STEP = "exposure-compensation-step";
+        private static final String KEY_ZOOM = "zoom";
+        private static final String KEY_MAX_ZOOM = "max-zoom";
+        private static final String KEY_ZOOM_RATIOS = "zoom-ratios";
+        private static final String KEY_ZOOM_SUPPORTED = "zoom-supported";
+        private static final String KEY_SMOOTH_ZOOM_SUPPORTED = "smooth-zoom-supported";
         // Parameter key suffix for supported values.
         private static final String SUPPORTED_VALUES_SUFFIX = "-values";
+
+        private static final String TRUE = "true";
 
         // Values for white balance settings.
         public static final String WHITE_BALANCE_AUTO = "auto";
@@ -1607,26 +1617,28 @@ public class Camera {
 
         /**
          * Gets current zoom value. This also works when smooth zoom is in
-         * progress.
+         * progress. Applications should check {@link #isZoomSupported} before
+         * using this method.
          *
          * @return the current zoom value. The range is 0 to {@link
-         *          #getMaxZoom}.
-         * @hide
+         *         #getMaxZoom}. 0 means the camera is not zoomed.
          */
         public int getZoom() {
-            return getInt("zoom");
+            return getInt(KEY_ZOOM, 0);
         }
 
         /**
-         * Sets current zoom value. If {@link #startSmoothZoom(int)} has been
-         * called and zoom is not stopped yet, applications should not call this
-         * method.
+         * Sets current zoom value. If the camera is zoomed (value > 0), the
+         * actual picture size may be smaller than picture size setting.
+         * Applications can check the actual picture size after picture is
+         * returned from {@link PictureCallback}. The preview size remains the
+         * same in zoom. Applications should check {@link #isZoomSupported}
+         * before using this method.
          *
          * @param value zoom value. The valid range is 0 to {@link #getMaxZoom}.
-         * @hide
          */
         public void setZoom(int value) {
-            set("zoom", value);
+            set(KEY_ZOOM, value);
         }
 
         /**
@@ -1634,37 +1646,37 @@ public class Camera {
          * before using other zoom methods.
          *
          * @return true if zoom is supported.
-         * @hide
          */
         public boolean isZoomSupported() {
-            String str = get("zoom-supported");
-            return "true".equals(str);
+            String str = get(KEY_ZOOM_SUPPORTED);
+            return TRUE.equals(str);
         }
 
         /**
          * Gets the maximum zoom value allowed for snapshot. This is the maximum
          * value that applications can set to {@link #setZoom(int)}.
+         * Applications should call {@link #isZoomSupported} before using this
+         * method. This value may change in different preview size. Applications
+         * should call this again after setting preview size.
          *
          * @return the maximum zoom value supported by the camera.
-         * @hide
          */
         public int getMaxZoom() {
-            return getInt("max-zoom");
+            return getInt(KEY_MAX_ZOOM, 0);
         }
 
         /**
-         * Gets the zoom factors of all zoom values.
+         * Gets the zoom ratios of all zoom values. Applications should check
+         * {@link #isZoomSupported} before using this method.
          *
-         * @return the zoom factors in 1/100 increments. Ex: a zoom of 3.2x is
-         *         returned as 320. Accuracy of the value is dependent on the
-         *         hardware implementation. The first element of the list is the
-         *         zoom factor of first zoom value. If the first zoom value is
-         *         0, the zoom factor should be 100. The last element is the
-         *         zoom factor of zoom value {@link #getMaxZoom}.
-         * @hide
+         * @return the zoom ratios in 1/100 increments. Ex: a zoom of 3.2x is
+         *         returned as 320. The number of elements is {@link
+         *         #getMaxZoom} + 1. The list is sorted from small to large. The
+         *         first element is always 100. The last element is the zoom
+         *         ratio of the maximum zoom value.
          */
-        public List<Integer> getZoomFactors() {
-            return splitInt(get("zoom-factors"));
+        public List<Integer> getZoomRatios() {
+            return splitInt(get(KEY_ZOOM_RATIOS));
         }
 
         /**
@@ -1672,11 +1684,10 @@ public class Camera {
          * this before using other smooth zoom methods.
          *
          * @return true if smooth zoom is supported.
-         * @hide
          */
         public boolean isSmoothZoomSupported() {
-            String str = get("smooth-zoom-supported");
-            return "true".equals(str);
+            String str = get(KEY_SMOOTH_ZOOM_SUPPORTED);
+            return TRUE.equals(str);
         }
 
         // Splits a comma delimited string to an ArrayList of String.

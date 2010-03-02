@@ -26,7 +26,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.Signature;
 import android.os.Build;
 import android.os.ParcelFileDescriptor;
-import android.util.Log;
+import android.util.Slog;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -95,7 +95,7 @@ public class PackageManagerBackupAgent extends BackupAgent {
 
     public Metadata getRestoredMetadata(String packageName) {
         if (mRestoredSignatures == null) {
-            Log.w(TAG, "getRestoredMetadata() before metadata read!");
+            Slog.w(TAG, "getRestoredMetadata() before metadata read!");
             return null;
         }
 
@@ -104,7 +104,7 @@ public class PackageManagerBackupAgent extends BackupAgent {
 
     public Set<String> getRestoredPackages() {
         if (mRestoredSignatures == null) {
-            Log.w(TAG, "getRestoredPackages() before metadata read!");
+            Slog.w(TAG, "getRestoredPackages() before metadata read!");
             return null;
         }
 
@@ -120,7 +120,7 @@ public class PackageManagerBackupAgent extends BackupAgent {
     // the package name.
     public void onBackup(ParcelFileDescriptor oldState, BackupDataOutput data,
             ParcelFileDescriptor newState) {
-        if (DEBUG) Log.v(TAG, "onBackup()");
+        if (DEBUG) Slog.v(TAG, "onBackup()");
 
         ByteArrayOutputStream bufStream = new ByteArrayOutputStream();  // we'll reuse these
         DataOutputStream outWriter = new DataOutputStream(bufStream);
@@ -131,7 +131,7 @@ public class PackageManagerBackupAgent extends BackupAgent {
         // "already backed up" map built by parseStateFile().
         if (mStoredIncrementalVersion == null
                 || !mStoredIncrementalVersion.equals(Build.VERSION.INCREMENTAL)) {
-            Log.i(TAG, "Previous metadata " + mStoredIncrementalVersion + " mismatch vs "
+            Slog.i(TAG, "Previous metadata " + mStoredIncrementalVersion + " mismatch vs "
                     + Build.VERSION.INCREMENTAL + " - rewriting");
             mExisting.clear();
         }
@@ -147,14 +147,14 @@ public class PackageManagerBackupAgent extends BackupAgent {
              *                       the backup set.
              */
             if (!mExisting.contains(GLOBAL_METADATA_KEY)) {
-                if (DEBUG) Log.v(TAG, "Storing global metadata key");
+                if (DEBUG) Slog.v(TAG, "Storing global metadata key");
                 outWriter.writeInt(Build.VERSION.SDK_INT);
                 outWriter.writeUTF(Build.VERSION.INCREMENTAL);
                 byte[] metadata = bufStream.toByteArray();
                 data.writeEntityHeader(GLOBAL_METADATA_KEY, metadata.length);
                 data.writeEntityData(metadata, metadata.length);
             } else {
-                if (DEBUG) Log.v(TAG, "Global metadata key already stored");
+                if (DEBUG) Slog.v(TAG, "Global metadata key already stored");
                 // don't consider it to have been skipped/deleted
                 mExisting.remove(GLOBAL_METADATA_KEY);
             }
@@ -211,7 +211,7 @@ public class PackageManagerBackupAgent extends BackupAgent {
                         byte[] sigs = flattenSignatureArray(info.signatures);
 
                         if (DEBUG) {
-                            Log.v(TAG, "+ metadata for " + packName
+                            Slog.v(TAG, "+ metadata for " + packName
                                     + " version=" + info.versionCode
                                     + " versionLen=" + versionBuf.length
                                     + " sigsLen=" + sigs.length);
@@ -228,17 +228,17 @@ public class PackageManagerBackupAgent extends BackupAgent {
             // mentioned in the saved state file, but appear to no longer be present
             // on the device.  Write a deletion entity for them.
             for (String app : mExisting) {
-                if (DEBUG) Log.v(TAG, "- removing metadata for deleted pkg " + app);
+                if (DEBUG) Slog.v(TAG, "- removing metadata for deleted pkg " + app);
                 try {
                     data.writeEntityHeader(app, -1);
                 } catch (IOException e) {
-                    Log.e(TAG, "Unable to write package deletions!");
+                    Slog.e(TAG, "Unable to write package deletions!");
                     return;
                 }
             }
         } catch (IOException e) {
             // Real error writing data
-            Log.e(TAG, "Unable to write package backup data file!");
+            Slog.e(TAG, "Unable to write package backup data file!");
             return;
         }
 
@@ -253,14 +253,14 @@ public class PackageManagerBackupAgent extends BackupAgent {
             throws IOException {
         List<ApplicationInfo> restoredApps = new ArrayList<ApplicationInfo>();
         HashMap<String, Metadata> sigMap = new HashMap<String, Metadata>();
-        if (DEBUG) Log.v(TAG, "onRestore()");
+        if (DEBUG) Slog.v(TAG, "onRestore()");
         int storedSystemVersion = -1;
 
         while (data.readNextHeader()) {
             String key = data.getKey();
             int dataSize = data.getDataSize();
 
-            if (DEBUG) Log.v(TAG, "   got key=" + key + " dataSize=" + dataSize);
+            if (DEBUG) Slog.v(TAG, "   got key=" + key + " dataSize=" + dataSize);
 
             // generic setup to parse any entity data
             byte[] dataBuf = new byte[dataSize];
@@ -270,17 +270,17 @@ public class PackageManagerBackupAgent extends BackupAgent {
 
             if (key.equals(GLOBAL_METADATA_KEY)) {
                 int storedSdkVersion = in.readInt();
-                if (DEBUG) Log.v(TAG, "   storedSystemVersion = " + storedSystemVersion);
+                if (DEBUG) Slog.v(TAG, "   storedSystemVersion = " + storedSystemVersion);
                 if (storedSystemVersion > Build.VERSION.SDK_INT) {
                     // returning before setting the sig map means we rejected the restore set
-                    Log.w(TAG, "Restore set was from a later version of Android; not restoring");
+                    Slog.w(TAG, "Restore set was from a later version of Android; not restoring");
                     return;
                 }
                 mStoredSdkVersion = storedSdkVersion;
                 mStoredIncrementalVersion = in.readUTF();
                 mHasMetadata = true;
                 if (DEBUG) {
-                    Log.i(TAG, "Restore set version " + storedSystemVersion
+                    Slog.i(TAG, "Restore set version " + storedSystemVersion
                             + " is compatible with OS version " + Build.VERSION.SDK_INT
                             + " (" + mStoredIncrementalVersion + " vs "
                             + Build.VERSION.INCREMENTAL + ")");
@@ -290,7 +290,7 @@ public class PackageManagerBackupAgent extends BackupAgent {
                 int versionCode = in.readInt();
                 Signature[] sigs = unflattenSignatureArray(in);
                 if (DEBUG) {
-                    Log.i(TAG, "   restored metadata for " + key
+                    Slog.i(TAG, "   restored metadata for " + key
                             + " dataSize=" + dataSize
                             + " versionCode=" + versionCode + " sigs=" + sigs);
                 }
@@ -337,11 +337,11 @@ public class PackageManagerBackupAgent extends BackupAgent {
 
         try {
             int num = in.readInt();
-            if (DEBUG) Log.v(TAG, " ... unflatten read " + num);
+            if (DEBUG) Slog.v(TAG, " ... unflatten read " + num);
 
             // Sensical?
             if (num > 20) {
-                Log.e(TAG, "Suspiciously large sig count in restore data; aborting");
+                Slog.e(TAG, "Suspiciously large sig count in restore data; aborting");
                 throw new IllegalStateException("Bad restore state");
             }
 
@@ -355,10 +355,10 @@ public class PackageManagerBackupAgent extends BackupAgent {
         } catch (EOFException e) {
             // clean termination
             if (sigs == null) {
-                Log.w(TAG, "Empty signature block found");
+                Slog.w(TAG, "Empty signature block found");
             }
         } catch (IOException e) {
-            Log.e(TAG, "Unable to unflatten sigs");
+            Slog.e(TAG, "Unable to unflatten sigs");
             return null;
         }
 
@@ -388,7 +388,7 @@ public class PackageManagerBackupAgent extends BackupAgent {
                 mStoredIncrementalVersion = in.readUTF();
                 mExisting.add(GLOBAL_METADATA_KEY);
             } else {
-                Log.e(TAG, "No global metadata in state file!");
+                Slog.e(TAG, "No global metadata in state file!");
                 return;
             }
 
@@ -403,7 +403,7 @@ public class PackageManagerBackupAgent extends BackupAgent {
             // safe; we're done
         } catch (IOException e) {
             // whoops, bad state file.  abort.
-            Log.e(TAG, "Unable to read Package Manager state file: " + e);
+            Slog.e(TAG, "Unable to read Package Manager state file: " + e);
         }
     }
 
@@ -424,7 +424,7 @@ public class PackageManagerBackupAgent extends BackupAgent {
                 out.writeInt(pkg.versionCode);
             }
         } catch (IOException e) {
-            Log.e(TAG, "Unable to write package manager state file!");
+            Slog.e(TAG, "Unable to write package manager state file!");
             return;
         }
     }

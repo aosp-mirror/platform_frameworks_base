@@ -819,7 +819,7 @@ public class SyncManager implements OnAccountsUpdateListener {
             }
             scheduleSyncOperation(new SyncOperation(operation.account, operation.syncSource,
                     operation.authority, operation.extras,
-                    DELAY_RETRY_SYNC_IN_PROGRESS_IN_SECONDS));
+                    DELAY_RETRY_SYNC_IN_PROGRESS_IN_SECONDS * 1000));
         } else if (syncResult.hasSoftError()) {
             if (isLoggable) {
                 Log.d(TAG, "retrying sync operation because it encountered a soft error: "

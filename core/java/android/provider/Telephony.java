@@ -101,6 +101,12 @@ public final class Telephony {
         public static final String READ = "read";
 
         /**
+         * Indicates whether this message has been seen by the user. The "seen" flag will be
+         * used to figure out whether we need to throw up a statusbar notification or not.
+         */
+        public static final String SEEN = "seen";
+
+        /**
          * The TP-Status value for the message, or -1 if no status has
          * been received
          */
@@ -646,6 +652,12 @@ public final class Telephony {
         public static final String READ = "read";
 
         /**
+         * Indicates whether this message has been seen by the user. The "seen" flag will be
+         * used to figure out whether we need to throw up a statusbar notification or not.
+         */
+        public static final String SEEN = "seen";
+
+        /**
          * The Message-ID of the message.
          * <P>Type: TEXT</P>
          */
@@ -1097,6 +1109,7 @@ public final class Telephony {
          * <P>Type: INTEGER</P>
          */
         public static final String READ = "read";
+
         /**
          * The snippet of the latest message in the thread.
          * <P>Type: TEXT</P>

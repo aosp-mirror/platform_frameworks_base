@@ -562,9 +562,10 @@ void addTagAttribute(const sp<XMLNode>& node, const char* ns8,
     node->addAttribute(ns, attr, String16(value));
 }
 
-static void fullyQualifyClassName(String8& package, sp<XMLNode> node) {
+static void fullyQualifyClassName(const String8& package, sp<XMLNode> node,
+        const String16& attrName) {
     XMLNode::attribute_entry* attr = node->editAttribute(
-            String16("http://schemas.android.com/apk/res/android"), String16("name"));
+            String16("http://schemas.android.com/apk/res/android"), attrName);
     if (attr != NULL) {
         String8 name(attr->string);
 
@@ -635,19 +636,40 @@ status_t massageManifest(Bundle* bundle, sp<XMLNode> root)
         // Make class names fully qualified
         sp<XMLNode> application = root->getChildElement(String16(), String16("application"));
         if (application != NULL) {
-            fullyQualifyClassName(origPackage, application);
+            fullyQualifyClassName(origPackage, application, String16("name"));
 
             Vector<sp<XMLNode> >& children = const_cast<Vector<sp<XMLNode> >&>(application->getChildren());
             for (size_t i = 0; i < children.size(); i++) {
                 sp<XMLNode> child = children.editItemAt(i);
                 String8 tag(child->getElementName());
                 if (tag == "activity" || tag == "service" || tag == "receiver" || tag == "provider") {
-                    fullyQualifyClassName(origPackage, child);
+                    fullyQualifyClassName(origPackage, child, String16("name"));
+                } else if (tag == "activity-alias") {
+                    fullyQualifyClassName(origPackage, child, String16("name"));
+                    fullyQualifyClassName(origPackage, child, String16("targetActivity"));
                 }
             }
         }
     }
 
+    // Deal with manifest package name overrides
+    const char* instrumentationPackageNameOverride = bundle->getInstrumentationPackageNameOverride();
+    if (instrumentationPackageNameOverride != NULL) {
+        // Fix up instrumentation targets.
+        Vector<sp<XMLNode> >& children = const_cast<Vector<sp<XMLNode> >&>(root->getChildren());
+        for (size_t i = 0; i < children.size(); i++) {
+            sp<XMLNode> child = children.editItemAt(i);
+            String8 tag(child->getElementName());
+            if (tag == "instrumentation") {
+                XMLNode::attribute_entry* attr = child->editAttribute(
+                        String16("http://schemas.android.com/apk/res/android"), String16("targetPackage"));
+                if (attr != NULL) {
+                    attr->string.setTo(String16(instrumentationPackageNameOverride));
+                }
+            }
+        }
+    }
+    
     return NO_ERROR;
 }
 

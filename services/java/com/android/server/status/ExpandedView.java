@@ -7,7 +7,7 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
-import android.util.Log;
+import android.util.Slog;
 
 
 public class ExpandedView extends LinearLayout {
@@ -34,7 +34,7 @@ public class ExpandedView extends LinearLayout {
          super.onLayout(changed, left, top, right, bottom);
          int height = bottom - top;
          if (height != mPrevHeight) {
-             //Log.d(StatusBarService.TAG, "height changed old=" + mPrevHeight + " new=" + height);
+             //Slog.d(StatusBarService.TAG, "height changed old=" + mPrevHeight + " new=" + height);
              mPrevHeight = height;
              mService.updateExpandedViewPos(StatusBarService.EXPANDED_LEAVE_ALONE);
          }

@@ -1133,6 +1133,26 @@ ResTable_config AaptGroupEntry::toParams() const
     getNavigationName(navigation.string(), &params);
     getScreenSizeName(screenSize.string(), &params);
     getVersionName(version.string(), &params);
+    
+    // Fix up version number based on specified parameters.
+    int minSdk = 0;
+    if ((params.uiMode&ResTable_config::MASK_UI_MODE_TYPE)
+                != ResTable_config::UI_MODE_TYPE_ANY
+            ||  (params.uiMode&ResTable_config::MASK_UI_MODE_NIGHT)
+                != ResTable_config::UI_MODE_NIGHT_ANY) {
+        minSdk = SDK_FROYO;
+    } else if ((params.screenLayout&ResTable_config::MASK_SCREENSIZE)
+                != ResTable_config::SCREENSIZE_ANY
+            ||  (params.screenLayout&ResTable_config::MASK_SCREENLONG)
+                != ResTable_config::SCREENLONG_ANY
+            || params.density != ResTable_config::DENSITY_DEFAULT) {
+        minSdk = SDK_DONUT;
+    }
+    
+    if (minSdk > params.sdkVersion) {
+        params.sdkVersion = minSdk;
+    }
+    
     return params;
 }
 

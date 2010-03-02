@@ -21,7 +21,7 @@ import static android.os.Process.*;
 import android.os.Process;
 import android.os.SystemClock;
 import android.util.Config;
-import android.util.Log;
+import android.util.Slog;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -289,11 +289,11 @@ public class ProcessStats {
             mRelIdleTime = (int)(idletime - mBaseIdleTime);
 
             if (false) {
-                Log.i("Load", "Total U:" + sysCpu[0] + " N:" + sysCpu[1]
+                Slog.i("Load", "Total U:" + sysCpu[0] + " N:" + sysCpu[1]
                       + " S:" + sysCpu[2] + " I:" + sysCpu[3]
                       + " W:" + sysCpu[4] + " Q:" + sysCpu[5]
                       + " O:" + sysCpu[6]);
-                Log.i("Load", "Rel U:" + mRelUserTime + " S:" + mRelSystemTime
+                Slog.i("Load", "Rel U:" + mRelUserTime + " S:" + mRelSystemTime
                       + " I:" + mRelIdleTime + " Q:" + mRelIrqTime);
             }
 
@@ -331,7 +331,7 @@ public class ProcessStats {
                 // Update an existing process...
                 st.added = false;
                 curStatsIndex++;
-                if (localLOGV) Log.v(TAG, "Existing pid " + pid + ": " + st);
+                if (localLOGV) Slog.v(TAG, "Existing pid " + pid + ": " + st);
 
                 final long[] procStats = mProcessStatsData;
                 if (!Process.readProcFile(st.statFile.toString(),
@@ -376,7 +376,7 @@ public class ProcessStats {
                 st.rel_majfaults = (int)(majfaults - st.base_majfaults);
                 st.base_minfaults = minfaults;
                 st.base_majfaults = majfaults;
-                //Log.i("Load", "Stats changed " + name + " pid=" + st.pid
+                //Slog.i("Load", "Stats changed " + name + " pid=" + st.pid
                 //      + " name=" + st.name + " utime=" + utime
                 //      + " stime=" + stime);
                 workingProcs.add(st);
@@ -389,7 +389,7 @@ public class ProcessStats {
                 allProcs.add(curStatsIndex, st);
                 curStatsIndex++;
                 NS++;
-                if (localLOGV) Log.v(TAG, "New pid " + pid + ": " + st);
+                if (localLOGV) Slog.v(TAG, "New pid " + pid + ": " + st);
 
                 final String[] procStatsString = mProcessFullStatsStringData;
                 final long[] procStats = mProcessFullStatsData;
@@ -419,7 +419,7 @@ public class ProcessStats {
                     }
                 }
                 
-                //Log.i("Load", "New process: " + st.pid + " " + st.name);
+                //Slog.i("Load", "New process: " + st.pid + " " + st.name);
                 st.rel_utime = 0;
                 st.rel_stime = 0;
                 st.rel_minfaults = 0;
@@ -440,7 +440,7 @@ public class ProcessStats {
             workingProcs.add(st);
             allProcs.remove(curStatsIndex);
             NS--;
-            if (localLOGV) Log.v(TAG, "Removed pid " + st.pid + ": " + st);
+            if (localLOGV) Slog.v(TAG, "Removed pid " + st.pid + ": " + st);
             // Decrement the loop counter so that we process the current pid
             // again the next time through the loop.
             i--;
@@ -458,7 +458,7 @@ public class ProcessStats {
             workingProcs.add(st);
             allProcs.remove(curStatsIndex);
             NS--;
-            if (localLOGV) Log.v(TAG, "Removed pid " + st.pid + ": " + st);
+            if (localLOGV) Slog.v(TAG, "Removed pid " + st.pid + ": " + st);
         }
         
         return pids;
@@ -523,11 +523,11 @@ public class ProcessStats {
                     speed++;
                     if (speed == MAX_SPEEDS) break; // No more
                     if (localLOGV && out == null) {
-                        Log.v(TAG, "First time : Speed/Time = " + tempSpeeds[speed - 1]
+                        Slog.v(TAG, "First time : Speed/Time = " + tempSpeeds[speed - 1]
                               + "\t" + tempTimes[speed - 1]);
                     }
                 } catch (NumberFormatException nfe) {
-                    Log.i(TAG, "Unable to parse time_in_state");
+                    Slog.i(TAG, "Unable to parse time_in_state");
                 }
             }
         }

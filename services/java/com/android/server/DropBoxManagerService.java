@@ -32,7 +32,7 @@ import android.os.StatFs;
 import android.os.SystemClock;
 import android.provider.Settings;
 import android.text.format.Time;
-import android.util.Log;
+import android.util.Slog;
 
 import com.android.internal.os.IDropBoxManagerService;
 
@@ -103,7 +103,7 @@ public final class DropBoxManagerService extends IDropBoxManagerService.Stub {
                 init();
                 trimToFit();
             } catch (IOException e) {
-                Log.e(TAG, "Can't init", e);
+                Slog.e(TAG, "Can't init", e);
             }
         }
     };
@@ -195,7 +195,7 @@ public final class DropBoxManagerService extends IDropBoxManagerService.Stub {
 
                 long len = temp.length();
                 if (len > max) {
-                    Log.w(TAG, "Dropping: " + tag + " (" + temp.length() + " > " + max + " bytes)");
+                    Slog.w(TAG, "Dropping: " + tag + " (" + temp.length() + " > " + max + " bytes)");
                     temp.delete();
                     temp = null;  // Pass temp = null to createEntry() to leave a tombstone
                     break;
@@ -205,7 +205,7 @@ public final class DropBoxManagerService extends IDropBoxManagerService.Stub {
             createEntry(temp, tag, flags);
             temp = null;
         } catch (IOException e) {
-            Log.e(TAG, "Can't write: " + tag, e);
+            Slog.e(TAG, "Can't write: " + tag, e);
         } finally {
             try { if (output != null) output.close(); } catch (IOException e) {}
             entry.close();
@@ -227,7 +227,7 @@ public final class DropBoxManagerService extends IDropBoxManagerService.Stub {
         try {
             init();
         } catch (IOException e) {
-            Log.e(TAG, "Can't init", e);
+            Slog.e(TAG, "Can't init", e);
             return null;
         }
 
@@ -243,7 +243,7 @@ public final class DropBoxManagerService extends IDropBoxManagerService.Stub {
                 return new DropBoxManager.Entry(
                         entry.tag, entry.timestampMillis, entry.file, entry.flags);
             } catch (IOException e) {
-                Log.e(TAG, "Can't read: " + entry.file, e);
+                Slog.e(TAG, "Can't read: " + entry.file, e);
                 // Continue to next file
             }
         }
@@ -262,7 +262,7 @@ public final class DropBoxManagerService extends IDropBoxManagerService.Stub {
             init();
         } catch (IOException e) {
             pw.println("Can't initialize: " + e);
-            Log.e(TAG, "Can't init", e);
+            Slog.e(TAG, "Can't init", e);
             return;
         }
 
@@ -357,7 +357,7 @@ public final class DropBoxManagerService extends IDropBoxManagerService.Stub {
                     }
                 } catch (IOException e) {
                     out.append("*** ").append(e.toString()).append("\n");
-                    Log.e(TAG, "Can't read: " + entry.file, e);
+                    Slog.e(TAG, "Can't read: " + entry.file, e);
                 } finally {
                     if (dbe != null) dbe.close();
                 }
@@ -541,17 +541,17 @@ public final class DropBoxManagerService extends IDropBoxManagerService.Stub {
             // Scan pre-existing files.
             for (File file : files) {
                 if (file.getName().endsWith(".tmp")) {
-                    Log.i(TAG, "Cleaning temp file: " + file);
+                    Slog.i(TAG, "Cleaning temp file: " + file);
                     file.delete();
                     continue;
                 }
 
                 EntryFile entry = new EntryFile(file, mBlockSize);
                 if (entry.tag == null) {
-                    Log.w(TAG, "Unrecognized file: " + file);
+                    Slog.w(TAG, "Unrecognized file: " + file);
                     continue;
                 } else if (entry.timestampMillis == 0) {
-                    Log.w(TAG, "Invalid filename: " + file);
+                    Slog.w(TAG, "Invalid filename: " + file);
                     file.delete();
                     continue;
                 }
@@ -677,7 +677,7 @@ public final class DropBoxManagerService extends IDropBoxManagerService.Stub {
         // was lost.  Tombstones are expunged by age (see above).
 
         if (mAllFiles.blocks > mCachedQuotaBlocks) {
-            Log.i(TAG, "Usage (" + mAllFiles.blocks + ") > Quota (" + mCachedQuotaBlocks + ")");
+            Slog.i(TAG, "Usage (" + mAllFiles.blocks + ") > Quota (" + mCachedQuotaBlocks + ")");
 
             // Find a fair share amount of space to limit each tag
             int unsqueezed = mAllFiles.blocks, squeezed = 0;
@@ -703,7 +703,7 @@ public final class DropBoxManagerService extends IDropBoxManagerService.Stub {
                         if (entry.file != null) entry.file.delete();
                         enrollEntry(new EntryFile(mDropBoxDir, entry.tag, entry.timestampMillis));
                     } catch (IOException e) {
-                        Log.e(TAG, "Can't write tombstone file", e);
+                        Slog.e(TAG, "Can't write tombstone file", e);
                     }
                 }
             }

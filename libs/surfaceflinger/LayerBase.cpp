@@ -728,6 +728,14 @@ LayerBaseClient::~LayerBaseClient()
     delete lcblk;
 }
 
+void LayerBaseClient::setName(const String8& name) {
+    mName = name;
+}
+
+String8 LayerBaseClient::getName() const {
+    return mName;
+}
+
 int32_t LayerBaseClient::serverIndex() const 
 {
     sp<Client> client(this->client.promote());
