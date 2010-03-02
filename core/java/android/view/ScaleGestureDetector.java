@@ -154,9 +154,8 @@ public class ScaleGestureDetector {
         boolean handled = true;
 
         if (!mGestureInProgress) {
-            if ((action == MotionEvent.ACTION_POINTER_1_DOWN ||
-                    action == MotionEvent.ACTION_POINTER_2_DOWN) &&
-                    event.getPointerCount() >= 2) {
+            switch (action & MotionEvent.ACTION_MASK) {
+            case MotionEvent.ACTION_POINTER_DOWN: {
                 // We have a new multi-finger gesture
 
                 // as orientation can change, query the metrics in touch down
@@ -189,7 +188,7 @@ public class ScaleGestureDetector {
                 boolean p1sloppy = x1 < edgeSlop || y1 < edgeSlop
                         || x1 > rightSlop || y1 > bottomSlop;
 
-                if(p0sloppy && p1sloppy) {
+                if (p0sloppy && p1sloppy) {
                     mFocusX = -1;
                     mFocusY = -1;
                     mSloppyGesture = true;
@@ -204,54 +203,61 @@ public class ScaleGestureDetector {
                 } else {
                     mGestureInProgress = mListener.onScaleBegin(this);
                 }
-            } else if (action == MotionEvent.ACTION_MOVE && mSloppyGesture) {
-                // Initiate sloppy gestures if we've moved outside of the slop area.
-                final float edgeSlop = mEdgeSlop;
-                final float rightSlop = mRightSlopEdge;
-                final float bottomSlop = mBottomSlopEdge;
-                final float x0 = event.getRawX();
-                final float y0 = event.getRawY();
-                final float x1 = getRawX(event, 1);
-                final float y1 = getRawY(event, 1);
+            }
+            break;
+            
+            case MotionEvent.ACTION_MOVE:
+                if (mSloppyGesture) {
+                    // Initiate sloppy gestures if we've moved outside of the slop area.
+                    final float edgeSlop = mEdgeSlop;
+                    final float rightSlop = mRightSlopEdge;
+                    final float bottomSlop = mBottomSlopEdge;
+                    final float x0 = event.getRawX();
+                    final float y0 = event.getRawY();
+                    final float x1 = getRawX(event, 1);
+                    final float y1 = getRawY(event, 1);
 
-                boolean p0sloppy = x0 < edgeSlop || y0 < edgeSlop
-                        || x0 > rightSlop || y0 > bottomSlop;
-                boolean p1sloppy = x1 < edgeSlop || y1 < edgeSlop
-                        || x1 > rightSlop || y1 > bottomSlop;
+                    boolean p0sloppy = x0 < edgeSlop || y0 < edgeSlop
+                    || x0 > rightSlop || y0 > bottomSlop;
+                    boolean p1sloppy = x1 < edgeSlop || y1 < edgeSlop
+                    || x1 > rightSlop || y1 > bottomSlop;
 
-                if(p0sloppy && p1sloppy) {
-                    mFocusX = -1;
-                    mFocusY = -1;
-                } else if (p0sloppy) {
-                    mFocusX = event.getX(1);
-                    mFocusY = event.getY(1);
-                } else if (p1sloppy) {
-                    mFocusX = event.getX(0);
-                    mFocusY = event.getY(0);
-                } else {
-                    mSloppyGesture = false;
-                    mGestureInProgress = mListener.onScaleBegin(this);
+                    if(p0sloppy && p1sloppy) {
+                        mFocusX = -1;
+                        mFocusY = -1;
+                    } else if (p0sloppy) {
+                        mFocusX = event.getX(1);
+                        mFocusY = event.getY(1);
+                    } else if (p1sloppy) {
+                        mFocusX = event.getX(0);
+                        mFocusY = event.getY(0);
+                    } else {
+                        mSloppyGesture = false;
+                        mGestureInProgress = mListener.onScaleBegin(this);
+                    }
                 }
-            } else if ((action == MotionEvent.ACTION_POINTER_1_UP
-                    || action == MotionEvent.ACTION_POINTER_2_UP)
-                    && mSloppyGesture) {
-                // Set focus point to the remaining finger
-                int id = (((action & MotionEvent.ACTION_POINTER_ID_MASK)
-                        >> MotionEvent.ACTION_POINTER_ID_SHIFT) == 0) ? 1 : 0;
-                mFocusX = event.getX(id);
-                mFocusY = event.getY(id);
+                break;
+                
+            case MotionEvent.ACTION_POINTER_UP:
+                if (mSloppyGesture) {
+                    // Set focus point to the remaining finger
+                    int id = (((action & MotionEvent.ACTION_POINTER_INDEX_MASK)
+                            >> MotionEvent.ACTION_POINTER_INDEX_SHIFT) == 0) ? 1 : 0;
+                    mFocusX = event.getX(id);
+                    mFocusY = event.getY(id);
+                }
+                break;
             }
         } else {
             // Transform gesture in progress - attempt to handle it
-            switch (action) {
-                case MotionEvent.ACTION_POINTER_1_UP:
-                case MotionEvent.ACTION_POINTER_2_UP:
+            switch (action & MotionEvent.ACTION_MASK) {
+                case MotionEvent.ACTION_POINTER_UP:
                     // Gesture ended
                     setContext(event);
 
                     // Set focus point to the remaining finger
-                    int id = (((action & MotionEvent.ACTION_POINTER_ID_MASK)
-                            >> MotionEvent.ACTION_POINTER_ID_SHIFT) == 0) ? 1 : 0;
+                    int id = (((action & MotionEvent.ACTION_POINTER_INDEX_MASK)
+                            >> MotionEvent.ACTION_POINTER_INDEX_SHIFT) == 0) ? 1 : 0;
                     mFocusX = event.getX(id);
                     mFocusY = event.getY(id);
 
