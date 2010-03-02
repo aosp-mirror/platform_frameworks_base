@@ -34,6 +34,8 @@ public class HeaderViewListAdapter implements WrapperListAdapter, Filterable {
 
     private ListAdapter mAdapter;
 
+    // These two ArrayList are assumed to NOT be null.
+    // They are indeed created when declared in ListView and then shared. 
     ArrayList<ListView.FixedViewInfo> mHeaderViewInfos;
     ArrayList<ListView.FixedViewInfo> mFooterViewInfos;
     boolean mAreAllFixedViewsSelectable;
@@ -55,11 +57,11 @@ public class HeaderViewListAdapter implements WrapperListAdapter, Filterable {
     }
 
     public int getHeadersCount() {
-        return mHeaderViewInfos == null ? 0 : mHeaderViewInfos.size();
+        return mHeaderViewInfos.size();
     }
 
     public int getFootersCount() {
-        return mFooterViewInfos == null ? 0 : mFooterViewInfos.size();
+        return mFooterViewInfos.size();
     }
 
     public boolean isEmpty() {
@@ -132,12 +134,12 @@ public class HeaderViewListAdapter implements WrapperListAdapter, Filterable {
         if (mAdapter != null && position >= numHeaders) {
             int adjPosition = position - numHeaders;
             int adapterCount = mAdapter.getCount();
-            if (adjPosition >= adapterCount && mFooterViewInfos != null) {
+            if (adjPosition >= adapterCount) {
                 return mFooterViewInfos.get(adjPosition - adapterCount).isSelectable;
             } else {
                 return mAdapter.isEnabled(adjPosition);
             }
-        } else if (position < numHeaders && mHeaderViewInfos != null) {
+        } else if (position < numHeaders) {
             return mHeaderViewInfos.get(position).isSelectable;
         }
         return true;
@@ -148,12 +150,12 @@ public class HeaderViewListAdapter implements WrapperListAdapter, Filterable {
         if (mAdapter != null && position >= numHeaders) {
             int adjPosition = position - numHeaders;
             int adapterCount = mAdapter.getCount();
-            if (adjPosition >= adapterCount && mFooterViewInfos != null) {
+            if (adjPosition >= adapterCount) {
                 return mFooterViewInfos.get(adjPosition - adapterCount).data;
             } else {
                 return mAdapter.getItem(adjPosition);
             }
-        } else if (position < numHeaders && mHeaderViewInfos != null) {
+        } else if (position < numHeaders) {
             return mHeaderViewInfos.get(position).data;
         }
         return null;
@@ -184,9 +186,7 @@ public class HeaderViewListAdapter implements WrapperListAdapter, Filterable {
             int adjPosition = position - numHeaders;
             int adapterCount = mAdapter.getCount();
             if (adjPosition >= adapterCount) {
-                if (mFooterViewInfos != null) {
-                    return mFooterViewInfos.get(adjPosition - adapterCount).view;
-                }
+                return mFooterViewInfos.get(adjPosition - adapterCount).view;
             } else {
                 return mAdapter.getView(adjPosition, convertView, parent);
             }
