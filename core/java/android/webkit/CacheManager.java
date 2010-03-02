@@ -24,10 +24,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.bouncycastle.crypto.Digest;
@@ -537,6 +539,26 @@ public final class CacheManager {
             int size = pathList.size();
             for (int i = 0; i < size; i++) {
                 File f = new File(mBaseDir, pathList.get(i));
+                if (!f.delete()) {
+                    Log.e(LOGTAG, f.getPath() + " delete failed.");
+                }
+            }
+            // remove the unreferenced files in the cache directory
+            final List<String> fileList = mDataBase.getAllCacheFileNames();
+            if (fileList == null) return;
+            String[] toDelete = mBaseDir.list(new FilenameFilter() {
+                public boolean accept(File dir, String filename) {
+                    if (fileList.contains(filename)) {
+                        return false;
+                    } else {
+                        return true;
+                    }
+                }
+            });
+            if (toDelete == null) return;
+            size = toDelete.length;
+            for (int i = 0; i < size; i++) {
+                File f = new File(mBaseDir, toDelete[i]);
                 if (!f.delete()) {
                     Log.e(LOGTAG, f.getPath() + " delete failed.");
                 }

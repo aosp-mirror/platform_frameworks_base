@@ -19,6 +19,7 @@ package android.webkit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.Map.Entry;
 
@@ -722,6 +723,20 @@ public class WebViewDatabase {
                 statement.execute();
             }
             statement.close();
+        }
+        cursor.close();
+        return pathList;
+    }
+
+    List<String> getAllCacheFileNames() {
+        ArrayList<String> pathList = null;
+        Cursor cursor = mCacheDatabase.rawQuery("SELECT filepath FROM cache",
+                null);
+        if (cursor != null && cursor.moveToFirst()) {
+            pathList = new ArrayList<String>(cursor.getCount());
+            do {
+                pathList.add(cursor.getString(0));
+            } while (cursor.moveToNext());
         }
         cursor.close();
         return pathList;
