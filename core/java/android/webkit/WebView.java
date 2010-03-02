@@ -2860,6 +2860,25 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
+     * Set the back/forward list client. This is an implementation of
+     * WebBackForwardListClient for handling new items and changes in the
+     * history index.
+     * @param client An implementation of WebBackForwardListClient.
+     * {@hide}
+     */
+    public void setWebBackForwardListClient(WebBackForwardListClient client) {
+        mCallbackProxy.setWebBackForwardListClient(client);
+    }
+
+    /**
+     * Gets the WebBackForwardListClient.
+     * {@hide}
+     */
+    public WebBackForwardListClient getWebBackForwardListClient() {
+        return mCallbackProxy.getWebBackForwardListClient();
+    }
+
+    /**
      * Set the Picture listener. This is an interface used to receive
      * notifications of a new Picture.
      * @param listener An implementation of WebView.PictureListener.

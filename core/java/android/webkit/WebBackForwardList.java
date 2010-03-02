@@ -31,13 +31,16 @@ public class WebBackForwardList implements Cloneable, Serializable {
     private ArrayList<WebHistoryItem> mArray;
     // Flag to indicate that the list is invalid
     private boolean mClearPending;
+    // CallbackProxy to issue client callbacks.
+    private final CallbackProxy mCallbackProxy;
 
     /**
      * Construct a back/forward list used by clients of WebView.
      */
-    /*package*/ WebBackForwardList() {
+    /*package*/ WebBackForwardList(CallbackProxy proxy) {
         mCurrentIndex = -1;
         mArray = new ArrayList<WebHistoryItem>();
+        mCallbackProxy = proxy;
     }
 
     /**
@@ -116,6 +119,9 @@ public class WebBackForwardList implements Cloneable, Serializable {
         }
         // Add the item to the list.
         mArray.add(item);
+        if (mCallbackProxy != null) {
+            mCallbackProxy.onNewHistoryItem(item);
+        }
     }
 
     /**
@@ -152,7 +158,7 @@ public class WebBackForwardList implements Cloneable, Serializable {
      * webkit package classes.
      */
     protected synchronized WebBackForwardList clone() {
-        WebBackForwardList l = new WebBackForwardList();
+        WebBackForwardList l = new WebBackForwardList(null);
         if (mClearPending) {
             // If a clear is pending, return a copy with only the current item.
             l.addHistoryItem(getCurrentItem());
@@ -174,6 +180,9 @@ public class WebBackForwardList implements Cloneable, Serializable {
      */
     /*package*/ synchronized void setCurrentIndex(int newIndex) {
         mCurrentIndex = newIndex;
+        if (mCallbackProxy != null) {
+            mCallbackProxy.onIndexChanged(getItemAtIndex(newIndex), newIndex);
+        }
     }
 
     /**
