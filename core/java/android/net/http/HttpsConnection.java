@@ -59,7 +59,7 @@ public class HttpsConnection extends Connection {
     private static SSLSocketFactory mSslSocketFactory = null;
 
     static {
-        // This intiialization happens in the zygote. It triggers some
+        // This initialization happens in the zygote. It triggers some
         // lazy initialization that can will benefit later invocations of
         // initializeEngine().
         initializeEngine(null);
