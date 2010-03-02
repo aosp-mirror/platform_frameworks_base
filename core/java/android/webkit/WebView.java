@@ -4494,12 +4494,12 @@ public class WebView extends AbsoluteLayout
             y = getViewHeightWithTitle() - 1;
         }
 
-        // pass the touch events from UI thread to WebCore thread
-        if (mForwardTouchEvents
-                && (action != MotionEvent.ACTION_MOVE || eventTime
-                        - mLastSentTouchTime > mCurrentTouchInterval)
-                && (action == MotionEvent.ACTION_DOWN
-                        || mPreventDrag != PREVENT_DRAG_CANCEL)) {
+        // pass the touch events, except ACTION_MOVE which will be handled
+        // later, from UI thread to WebCore thread
+        if (mFullScreenHolder != null || (mForwardTouchEvents
+                && action != MotionEvent.ACTION_MOVE
+                && (action == MotionEvent.ACTION_DOWN || mPreventDrag
+                        != PREVENT_DRAG_CANCEL))) {
             WebViewCore.TouchEventData ted = new WebViewCore.TouchEventData();
             ted.mAction = action;
             ted.mX = viewToContentX((int) x + mScrollX);
@@ -4590,6 +4590,21 @@ public class WebView extends AbsoluteLayout
                     if ((deltaX * deltaX + deltaY * deltaY) < mTouchSlopSquare) {
                         break;
                     }
+
+                    // pass the first ACTION_MOVE from UI thread to WebCore
+                    // thread after the distance is confirmed that it is a drag
+                    if (mFullScreenHolder == null && mForwardTouchEvents
+                            && mPreventDrag != PREVENT_DRAG_CANCEL) {
+                        WebViewCore.TouchEventData ted = new WebViewCore.TouchEventData();
+                        ted.mAction = action;
+                        ted.mX = viewToContentX((int) x + mScrollX);
+                        ted.mY = viewToContentY((int) y + mScrollY);
+                        ted.mEventTime = eventTime;
+                        ted.mMetaState = ev.getMetaState();
+                        mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
+                        mLastSentTouchTime = eventTime;
+                    }
+
                     if (mPreventDrag == PREVENT_DRAG_MAYBE_YES) {
                         // track mLastTouchTime as we may need to do fling at
                         // ACTION_UP
@@ -4645,6 +4660,20 @@ public class WebView extends AbsoluteLayout
                                     com.android.internal.R.string.double_tap_toast,
                                     Toast.LENGTH_LONG).show();
                         }
+                    }
+                } else {
+                    // pass the touch events from UI thread to WebCore thread
+                    if (mFullScreenHolder == null && mForwardTouchEvents
+                            && eventTime - mLastSentTouchTime > mCurrentTouchInterval
+                            && mPreventDrag != PREVENT_DRAG_CANCEL) {
+                        WebViewCore.TouchEventData ted = new WebViewCore.TouchEventData();
+                        ted.mAction = action;
+                        ted.mX = viewToContentX((int) x + mScrollX);
+                        ted.mY = viewToContentY((int) y + mScrollY);
+                        ted.mEventTime = eventTime;
+                        ted.mMetaState = ev.getMetaState();
+                        mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
+                        mLastSentTouchTime = eventTime;
                     }
                 }
 
