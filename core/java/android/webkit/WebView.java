@@ -3133,6 +3133,9 @@ public class WebView extends AbsoluteLayout
         metrics.mScrollY = computeVerticalScrollOffset();
         metrics.mWidth = getWidth();
         metrics.mHeight = getHeight() - getVisibleTitleHeight();
+        if (mFindIsUp) {
+            metrics.mHeight -= mFindHeight;
+        }
         metrics.mInvScale = mInvActualScale;
         return metrics;
     }
