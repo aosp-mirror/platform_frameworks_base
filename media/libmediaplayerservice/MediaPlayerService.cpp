@@ -1805,7 +1805,7 @@ void MediaPlayerService::AudioCache::notify(void* cookie, int msg, int ext1, int
     }
 
     // wake up thread
-    Mutex::Autolock lock(mLock);
+    Mutex::Autolock lock(p->mLock);
     p->mCommandComplete = true;
     p->mSignal.signal();
 }
