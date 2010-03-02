@@ -58,9 +58,10 @@ void usage(void)
         " %s p[ackage] [-d][-f][-m][-u][-v][-x][-z][-M AndroidManifest.xml] \\\n"
         "        [-0 extension [-0 extension ...]] [-g tolerance] [-j jarfile] \\\n"
         "        [--min-sdk-version VAL] [--target-sdk-version VAL] \\\n"
-        "        [--max-sdk-version VAL] [--app-version VAL] \\\n"
-        "        [--app-version-name TEXT] [--custom-package VAL] [--utf16] \\\n"
-        "        [--auto-add-overlay] \\\n"
+        "        [--app-version VAL] [--app-version-name TEXT] [--custom-package VAL] \\\n"
+        "        [--rename-manifest-package PACKAGE] \\\n"
+        "        [--rename-instrumentation-target-package PACKAGE] \\\n"
+        "        [--utf16] [--auto-add-overlay] \\\n"
         "        [-I base-package [-I base-package ...]] \\\n"
         "        [-A asset-source-dir]  [-G class-list-file] [-P public-definitions-file] \\\n"
         "        [-S resource-sources [-S resource-sources ...]] "
@@ -127,8 +128,6 @@ void usage(void)
         "       higher, the default encoding for resources will be in UTF-8.\n"
         "   --target-sdk-version\n"
         "       inserts android:targetSdkVersion in to manifest.\n"
-        "   --max-sdk-version\n"
-        "       inserts android:maxSdkVersion in to manifest.\n"
         "   --values\n"
         "       when used with \"dump resources\" also includes resource values.\n"
         "   --version-code\n"
@@ -139,6 +138,16 @@ void usage(void)
         "       generates R.java into a different package.\n"
         "   --auto-add-overlay\n"
         "       Automatically add resources that are only in overlays.\n"
+        "   --rename-manifest-package\n"
+        "       Rewrite the manifest so that its package name is the package name\n"
+        "       given here.  Relative class names (for example .Foo) will be\n"
+        "       changed to absolute names with the old package so that the code\n"
+        "       does not need to change.\n"
+        "   --rename-instrumentation-target-package\n"
+        "       Rewrite the manifest so that all of its instrumentation\n"
+        "       components target the given package.  Useful when used in\n"
+        "       conjunction with --rename-manifest-package to fix tests against\n"
+        "       a package that has been renamed.\n"
         "   --utf16\n"
         "       changes default encoding for resources to UTF-16.  Only useful when API\n"
         "       level is set to 7 or higher where the default encoding is UTF-8.\n");
@@ -448,6 +457,15 @@ int main(int argc, char* const argv[])
                         goto bail;
                     }
                     bundle.setManifestPackageNameOverride(argv[0]);
+                } else if (strcmp(cp, "-rename-instrumentation-target-package") == 0) {
+                    argc--;
+                    argv++;
+                    if (!argc) {
+                        fprintf(stderr, "ERROR: No argument supplied for '--rename-instrumentation-target-package' option\n");
+                        wantUsage = true;
+                        goto bail;
+                    }
+                    bundle.setInstrumentationPackageNameOverride(argv[0]);
                 } else if (strcmp(cp, "-auto-add-overlay") == 0) {
                     bundle.setAutoAddOverlay(true);
                 } else {

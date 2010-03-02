@@ -944,8 +944,9 @@ struct ResTable_config
     enum {
         // uiMode bits for the mode type.
         MASK_UI_MODE_TYPE = 0x0f,
-        UI_MODE_TYPE_NORMAL = 0x00,
-        UI_MODE_TYPE_CAR = 0x01,
+        UI_MODE_TYPE_ANY = 0x00,
+        UI_MODE_TYPE_NORMAL = 0x01,
+        UI_MODE_TYPE_CAR = 0x02,
 
         // uiMode bits for the night switch.
         MASK_UI_MODE_NIGHT = 0x30,
@@ -1086,7 +1087,7 @@ struct ResTable_config
             }
         }
 
-        if (screenConfig || o.screenConfig) {
+        if (screenLayout || o.screenLayout) {
             if (((screenLayout^o.screenLayout) & MASK_SCREENSIZE) != 0) {
                 if (!(screenLayout & MASK_SCREENSIZE)) return false;
                 if (!(o.screenLayout & MASK_SCREENSIZE)) return true;
@@ -1102,7 +1103,7 @@ struct ResTable_config
             if (!o.orientation) return true;
         }
 
-        if (screenConfig || o.screenConfig) {
+        if (uiMode || o.uiMode) {
             if (((uiMode^o.uiMode) & MASK_UI_MODE_TYPE) != 0) {
                 if (!(uiMode & MASK_UI_MODE_TYPE)) return false;
                 if (!(o.uiMode & MASK_UI_MODE_TYPE)) return true;
@@ -1203,7 +1204,7 @@ struct ResTable_config
                 }
             }
 
-            if (screenConfig || o.screenConfig) {
+            if (screenLayout || o.screenLayout) {
                 if (((screenLayout^o.screenLayout) & MASK_SCREENSIZE) != 0
                         && (requested->screenLayout & MASK_SCREENSIZE)) {
                     return (screenLayout & MASK_SCREENSIZE);
@@ -1218,7 +1219,7 @@ struct ResTable_config
                 return (orientation);
             }
 
-            if (screenConfig || o.screenConfig) {
+            if (uiMode || o.uiMode) {
                 if (((uiMode^o.uiMode) & MASK_UI_MODE_TYPE) != 0
                         && (requested->uiMode & MASK_UI_MODE_TYPE)) {
                     return (uiMode & MASK_UI_MODE_TYPE);

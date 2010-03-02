@@ -253,7 +253,6 @@ public class ActivityInfo extends ComponentInfo
      * Bit in {@link #configChanges} that indicates that the activity
      * can itself handle the ui mode. Set from the
      * {@link android.R.attr#configChanges} attribute.
-     * @hide (UIMODE) Pending API council approval
      */
     public static final int CONFIG_UI_MODE = 0x0200;
     /**

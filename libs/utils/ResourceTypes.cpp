@@ -4149,22 +4149,165 @@ void ResTable::print(bool inclValues) const
                     } else {
                         sprintf(density, "%d", (int)dval);
                     }
-                    printf("      config %d lang=%c%c cnt=%c%c orien=%d touch=%d density=%s key=%d infl=%d nav=%d w=%d h=%d sz=%d lng=%d\n",
-                           (int)configIndex,
-                           type->config.language[0] ? type->config.language[0] : '-',
-                           type->config.language[1] ? type->config.language[1] : '-',
-                           type->config.country[0] ? type->config.country[0] : '-',
-                           type->config.country[1] ? type->config.country[1] : '-',
-                           type->config.orientation,
-                           type->config.touchscreen,
-                           density,
-                           type->config.keyboard,
-                           type->config.inputFlags,
-                           type->config.navigation,
-                           dtohs(type->config.screenWidth),
-                           dtohs(type->config.screenHeight),
-                           type->config.screenLayout&ResTable_config::MASK_SCREENSIZE,
-                           type->config.screenLayout&ResTable_config::MASK_SCREENLONG);
+                    printf("      config %d", (int)configIndex);
+                    if (type->config.mcc != 0) {
+                        printf(" mcc=%d", dtohs(type->config.mcc));
+                    }
+                    if (type->config.mnc != 0) {
+                        printf(" mnc=%d", dtohs(type->config.mnc));
+                    }
+                    if (type->config.locale != 0) {
+                        printf(" lang=%c%c cnt=%c%c",
+                               type->config.language[0] ? type->config.language[0] : '-',
+                               type->config.language[1] ? type->config.language[1] : '-',
+                               type->config.country[0] ? type->config.country[0] : '-',
+                               type->config.country[1] ? type->config.country[1] : '-');
+                    }
+                    if (type->config.screenLayout != 0) {
+                        printf(" sz=%d",
+                                type->config.screenLayout&ResTable_config::MASK_SCREENSIZE);
+                        switch (type->config.screenLayout&ResTable_config::MASK_SCREENSIZE) {
+                            case ResTable_config::SCREENSIZE_SMALL:
+                                printf(" (small)");
+                                break;
+                            case ResTable_config::SCREENSIZE_NORMAL:
+                                printf(" (normal)");
+                                break;
+                            case ResTable_config::SCREENSIZE_LARGE:
+                                printf(" (large)");
+                                break;
+                        }
+                        printf(" lng=%d",
+                                type->config.screenLayout&ResTable_config::MASK_SCREENLONG);
+                        switch (type->config.screenLayout&ResTable_config::MASK_SCREENLONG) {
+                            case ResTable_config::SCREENLONG_NO:
+                                printf(" (notlong)");
+                                break;
+                            case ResTable_config::SCREENLONG_YES:
+                                printf(" (long)");
+                                break;
+                        }
+                    }
+                    if (type->config.orientation != 0) {
+                        printf(" orient=%d", type->config.orientation);
+                        switch (type->config.orientation) {
+                            case ResTable_config::ORIENTATION_PORT:
+                                printf(" (port)");
+                                break;
+                            case ResTable_config::ORIENTATION_LAND:
+                                printf(" (land)");
+                                break;
+                            case ResTable_config::ORIENTATION_SQUARE:
+                                printf(" (square)");
+                                break;
+                        }
+                    }
+                    if (type->config.uiMode != 0) {
+                        printf(" type=%d",
+                                type->config.uiMode&ResTable_config::MASK_UI_MODE_TYPE);
+                        switch (type->config.uiMode&ResTable_config::MASK_UI_MODE_TYPE) {
+                            case ResTable_config::UI_MODE_TYPE_NORMAL:
+                                printf(" (normal)");
+                                break;
+                            case ResTable_config::UI_MODE_TYPE_CAR:
+                                printf(" (car)");
+                                break;
+                        }
+                        printf(" night=%d",
+                                type->config.uiMode&ResTable_config::MASK_UI_MODE_NIGHT);
+                        switch (type->config.uiMode&ResTable_config::MASK_UI_MODE_NIGHT) {
+                            case ResTable_config::UI_MODE_NIGHT_NO:
+                                printf(" (no)");
+                                break;
+                            case ResTable_config::UI_MODE_NIGHT_YES:
+                                printf(" (yes)");
+                                break;
+                        }
+                    }
+                    if (dval != 0) {
+                        printf(" density=%s", density);
+                    }
+                    if (type->config.touchscreen != 0) {
+                        printf(" touch=%d", type->config.touchscreen);
+                        switch (type->config.touchscreen) {
+                            case ResTable_config::TOUCHSCREEN_NOTOUCH:
+                                printf(" (notouch)");
+                                break;
+                            case ResTable_config::TOUCHSCREEN_STYLUS:
+                                printf(" (stylus)");
+                                break;
+                            case ResTable_config::TOUCHSCREEN_FINGER:
+                                printf(" (finger)");
+                                break;
+                        }
+                    }
+                    if (type->config.inputFlags != 0) {
+                        printf(" keyhid=%d", type->config.inputFlags&ResTable_config::MASK_KEYSHIDDEN);
+                        switch (type->config.inputFlags&ResTable_config::MASK_KEYSHIDDEN) {
+                            case ResTable_config::KEYSHIDDEN_NO:
+                                printf(" (no)");
+                                break;
+                            case ResTable_config::KEYSHIDDEN_YES:
+                                printf(" (yes)");
+                                break;
+                            case ResTable_config::KEYSHIDDEN_SOFT:
+                                printf(" (soft)");
+                                break;
+                        }
+                        printf(" navhid=%d", type->config.inputFlags&ResTable_config::MASK_NAVHIDDEN);
+                        switch (type->config.inputFlags&ResTable_config::MASK_NAVHIDDEN) {
+                            case ResTable_config::NAVHIDDEN_NO:
+                                printf(" (no)");
+                                break;
+                            case ResTable_config::NAVHIDDEN_YES:
+                                printf(" (yes)");
+                                break;
+                        }
+                    }
+                    if (type->config.keyboard != 0) {
+                        printf(" kbd=%d", type->config.keyboard);
+                        switch (type->config.keyboard) {
+                            case ResTable_config::KEYBOARD_NOKEYS:
+                                printf(" (nokeys)");
+                                break;
+                            case ResTable_config::KEYBOARD_QWERTY:
+                                printf(" (qwerty)");
+                                break;
+                            case ResTable_config::KEYBOARD_12KEY:
+                                printf(" (12key)");
+                                break;
+                        }
+                    }
+                    if (type->config.navigation != 0) {
+                        printf(" nav=%d", type->config.navigation);
+                        switch (type->config.navigation) {
+                            case ResTable_config::NAVIGATION_NONAV:
+                                printf(" (nonav)");
+                                break;
+                            case ResTable_config::NAVIGATION_DPAD:
+                                printf(" (dpad)");
+                                break;
+                            case ResTable_config::NAVIGATION_TRACKBALL:
+                                printf(" (trackball)");
+                                break;
+                            case ResTable_config::NAVIGATION_WHEEL:
+                                printf(" (wheel)");
+                                break;
+                        }
+                    }
+                    if (type->config.screenWidth != 0) {
+                        printf(" w=%d", dtohs(type->config.screenWidth));
+                    }
+                    if (type->config.screenHeight != 0) {
+                        printf(" h=%d", dtohs(type->config.screenHeight));
+                    }
+                    if (type->config.sdkVersion != 0) {
+                        printf(" sdk=%d", dtohs(type->config.sdkVersion));
+                    }
+                    if (type->config.minorVersion != 0) {
+                        printf(" mver=%d", dtohs(type->config.minorVersion));
+                    }
+                    printf("\n");
                     size_t entryCount = dtohl(type->entryCount);
                     uint32_t entriesStart = dtohl(type->entriesStart);
                     if ((entriesStart&0x3) != 0) {

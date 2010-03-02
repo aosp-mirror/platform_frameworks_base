@@ -45,6 +45,15 @@ enum {
     AXIS_VERSION
 };
 
+enum {
+    SDK_CUPCAKE = 3,
+    SDK_DONUT = 4,
+    SDK_ECLAIR = 5,
+    SDK_ECLAIR_0_1 = 6,
+    SDK_MR1 = 7,
+    SDK_FROYO = 8,
+};
+
 /**
  * This structure contains a specific variation of a single file out
  * of all the variations it can have that we can have.
