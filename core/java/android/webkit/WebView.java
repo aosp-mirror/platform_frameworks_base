@@ -2487,7 +2487,7 @@ public class WebView extends AbsoluteLayout
         return result;
     }
 
-    /*
+    /**
      * @hide
      */
     public void setFindIsUp(boolean isUp) {
