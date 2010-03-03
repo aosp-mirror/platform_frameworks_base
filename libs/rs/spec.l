@@ -148,6 +148,9 @@ ID       [a-zA-Z_][a-zA-Z0-9_]*
     BEGIN(api_entry2);
     }
 
+<api_entry2>"*" {
+    currType->ptrLevel ++;
+    }
 
 <api_entry2>"}" {
     apiCount++;

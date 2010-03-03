@@ -178,6 +178,11 @@ uint32_t Context::runRootScript()
     uint32_t ret = runScript(mRootScript.get(), 0);
 
     checkError("runRootScript");
+    if (mError != RS_ERROR_NONE) {
+        // If we have an error condition we stop rendering until
+        // somthing changes that might fix it.
+        ret = 0;
+    }
     return ret;
 }
 
@@ -240,10 +245,13 @@ void Context::timerPrint()
     }
 }
 
-void Context::setupCheck()
+bool Context::setupCheck()
 {
     if (checkVersion2_0()) {
-        mShaderCache.lookup(this, mVertex.get(), mFragment.get());
+        if (!mShaderCache.lookup(this, mVertex.get(), mFragment.get())) {
+            LOGE("Context::setupCheck() 1 fail");
+            return false;
+        }
 
         mFragmentStore->setupGL2(this, &mStateFragmentStore);
         mFragment->setupGL2(this, &mStateFragment, &mShaderCache);
@@ -256,6 +264,7 @@ void Context::setupCheck()
         mRaster->setupGL(this, &mStateRaster);
         mVertex->setupGL(this, &mStateVertex);
     }
+    return true;
 }
 
 static bool getProp(const char *str)
@@ -389,6 +398,9 @@ Context::Context(Device *dev, bool isGraphics, bool useDepth)
     mUseDepth = useDepth;
     mPaused = false;
     mObjHead = NULL;
+    mError = RS_ERROR_NONE;
+    mErrorMsg = NULL;
+
     memset(&mEGL, 0, sizeof(mEGL));
     memset(&mGL, 0, sizeof(mGL));
     mIsGraphicsContext = isGraphics;
@@ -764,6 +776,23 @@ void Context::deinitToClient()
     mIO.mToClient.shutdown();
 }
 
+const char * Context::getError(RsError *err)
+{
+    *err = mError;
+    mError = RS_ERROR_NONE;
+    if (*err != RS_ERROR_NONE) {
+        return mErrorMsg;
+    }
+    return NULL;
+}
+
+void Context::setError(RsError e, const char *msg)
+{
+    mError = e;
+    mErrorMsg = msg;
+}
+
+
 void Context::dumpDebug() const
 {
     LOGE("RS Context debug %p", this);
@@ -872,6 +901,15 @@ void rsi_ContextSetPriority(Context *rsc, int32_t p)
 void rsi_ContextDump(Context *rsc, int32_t bits)
 {
     ObjectBase::dumpAll(rsc);
+}
+
+const char * rsi_ContextGetError(Context *rsc, RsError *e)
+{
+    const char *msg = rsc->getError(e);
+    if (*e != RS_ERROR_NONE) {
+        LOGE("RS Error %i %s", *e, msg);
+    }
+    return msg;
 }
 
 }
