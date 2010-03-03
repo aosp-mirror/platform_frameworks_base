@@ -128,8 +128,8 @@ public class SslCertificate {
             String issuedTo, String issuedBy, Date validNotBefore, Date validNotAfter) {
         mIssuedTo = new DName(issuedTo);
         mIssuedBy = new DName(issuedBy);
-        mValidNotBefore = validNotBefore;
-        mValidNotAfter = validNotAfter;
+        mValidNotBefore = cloneDate(validNotBefore);
+        mValidNotAfter  = cloneDate(validNotAfter);
     }
 
     /**
@@ -148,7 +148,7 @@ public class SslCertificate {
      * "" if none has been set
      */
     public Date getValidNotBeforeDate() {
-        return mValidNotBefore;
+        return cloneDate(mValidNotBefore);
     }
 
     /**
@@ -166,7 +166,7 @@ public class SslCertificate {
      * "" if none has been set
      */
     public Date getValidNotAfterDate() {
-        return mValidNotAfter;
+        return cloneDate(mValidNotAfter);
     }
 
     /**
@@ -221,6 +221,16 @@ public class SslCertificate {
             return "";
         }
         return new SimpleDateFormat(ISO_8601_DATE_FORMAT).format(date);
+    }
+
+    /**
+     * Clone a possibly null Date
+     */
+    private static Date cloneDate(Date date) {
+        if (date == null) {
+            return null;
+        }
+        return (Date) date.clone();
     }
 
     /**
