@@ -67,7 +67,7 @@ class ExpandableListConnector extends BaseAdapter implements Filterable {
     private int mMaxExpGroupCount = Integer.MAX_VALUE;
 
     /** Change observer used to have ExpandableListAdapter changes pushed to us */
-    private DataSetObserver mDataSetObserver = new MyDataSetObserver();
+    private final DataSetObserver mDataSetObserver = new MyDataSetObserver();
 
     /**
      * Constructs the connector
@@ -849,7 +849,7 @@ class ExpandableListConnector extends BaseAdapter implements Filterable {
      * position to either a) group position for groups, or b) child position for
      * children
      */
-    static class GroupMetadata implements Parcelable, Comparable {
+    static class GroupMetadata implements Parcelable, Comparable<GroupMetadata> {
         final static int REFRESH = -1;
         
         /** This group's flat list position */
@@ -885,12 +885,12 @@ class ExpandableListConnector extends BaseAdapter implements Filterable {
             return gm;
         }
         
-        public int compareTo(Object another) {
-            if (another == null || !(another instanceof GroupMetadata)) {
-                throw new ClassCastException();
+        public int compareTo(GroupMetadata another) {
+            if (another == null) {
+                throw new IllegalArgumentException();
             }
             
-            return gPos - ((GroupMetadata) another).gPos;
+            return gPos - another.gPos;
         }
 
         public int describeContents() {
