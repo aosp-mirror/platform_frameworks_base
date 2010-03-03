@@ -1475,13 +1475,22 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
         final List<InputMethodInfo> immis = getEnabledInputMethodList();
 
-        int N = (immis == null ? 0 : immis.size());
+        if (immis == null) {
+            return;
+        }
+        
+        int N = immis.size();
 
         mItems = new CharSequence[N];
         mIms = new InputMethodInfo[N];
 
         for (int i = 0; i < N; ++i) {
             InputMethodInfo property = immis.get(i);
+            if (property == null) {
+                i--;
+                N--;
+                continue;
+            }
             mItems[i] = property.loadLabel(pm);
             mIms[i] = property;
         }
