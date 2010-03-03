@@ -1244,6 +1244,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                             // activity; otherwise we will allow the normal short
                             // press action to be performed.
                             dispatcher.performedLongPress(event);
+                            return true;
                         } catch (ActivityNotFoundException e) {
                             // Ignore
                         }
