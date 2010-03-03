@@ -246,7 +246,7 @@ public class ListView extends AbsListView {
      * added. Views added using this call can take focus if they want.
      * <p>
      * NOTE: Call this before calling setAdapter. This is so ListView can wrap
-     * the supplied cursor with one that that will also account for header
+     * the supplied cursor with one that will also account for header and footer
      * views.
      *
      * @param v The view to add.
@@ -273,7 +273,7 @@ public class ListView extends AbsListView {
      * added. Views added using this call can take focus if they want.
      * <p>
      * NOTE: Call this before calling setAdapter. This is so ListView can wrap
-     * the supplied cursor with one that that will also account for header
+     * the supplied cursor with one that will also account for header and footer
      * views.
      *
      * @param v The view to add.
@@ -324,7 +324,7 @@ public class ListView extends AbsListView {
      * added. Views added using this call can take focus if they want.
      * <p>
      * NOTE: Call this before calling setAdapter. This is so ListView can wrap
-     * the supplied cursor with one that that will also account for header
+     * the supplied cursor with one that will also account for header and footer
      * views.
      *
      * @param v The view to add.
@@ -350,7 +350,7 @@ public class ListView extends AbsListView {
      * than once, the views will appear in the order they were added. Views added using
      * this call can take focus if they want.
      * <p>NOTE: Call this before calling setAdapter. This is so ListView can wrap the supplied
-     * cursor with one that that will also account for header views.
+     * cursor with one that will also account for header and footer views.
      *
      *
      * @param v The view to add.
@@ -1109,6 +1109,7 @@ public class ListView extends AbsListView {
             child.setLayoutParams(p);
         }
         p.viewType = mAdapter.getItemViewType(position);
+        p.forceAdd = true;
 
         int childWidthSpec = ViewGroup.getChildMeasureSpec(widthMeasureSpec,
                 mListPadding.left + mListPadding.right, p.width);
@@ -1743,10 +1744,11 @@ public class ListView extends AbsListView {
         }
         p.viewType = mAdapter.getItemViewType(position);
 
-        if (recycled || (p.recycledHeaderFooter &&
+        if ((recycled && !p.forceAdd) || (p.recycledHeaderFooter &&
                 p.viewType == AdapterView.ITEM_VIEW_TYPE_HEADER_OR_FOOTER)) {
             attachViewToParent(child, flowDown ? -1 : 0, p);
         } else {
+            p.forceAdd = false;
             if (p.viewType == AdapterView.ITEM_VIEW_TYPE_HEADER_OR_FOOTER) {
                 p.recycledHeaderFooter = true;
             }

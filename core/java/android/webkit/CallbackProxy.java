@@ -69,6 +69,8 @@ class CallbackProxy extends Handler {
     private volatile int mLatestProgress = 100;
     // Back/Forward list
     private final WebBackForwardList mBackForwardList;
+    // Back/Forward list client
+    private volatile WebBackForwardListClient mWebBackForwardListClient;
     // Used to call startActivity during url override.
     private final Context mContext;
 
@@ -107,6 +109,8 @@ class CallbackProxy extends Handler {
     private static final int RECEIVED_TOUCH_ICON_URL             = 132;
     private static final int GET_VISITED_HISTORY                 = 133;
     private static final int OPEN_FILE_CHOOSER                   = 134;
+    private static final int ADD_HISTORY_ITEM                    = 135;
+    private static final int HISTORY_INDEX_CHANGED               = 136;
 
     // Message triggered by the client to resume execution
     private static final int NOTIFY                              = 200;
@@ -137,7 +141,7 @@ class CallbackProxy extends Handler {
         // Used to start a default activity.
         mContext = context;
         mWebView = w;
-        mBackForwardList = new WebBackForwardList();
+        mBackForwardList = new WebBackForwardList(this);
     }
 
     /**
@@ -188,6 +192,14 @@ class CallbackProxy extends Handler {
      */
     public WebBackForwardList getBackForwardList() {
         return mBackForwardList;
+    }
+
+    void setWebBackForwardListClient(WebBackForwardListClient client) {
+        mWebBackForwardListClient = client;
+    }
+
+    WebBackForwardListClient getWebBackForwardListClient() {
+        return mWebBackForwardListClient;
     }
 
     /**
@@ -698,6 +710,20 @@ class CallbackProxy extends Handler {
             case OPEN_FILE_CHOOSER:
                 if (mWebChromeClient != null) {
                     mWebChromeClient.openFileChooser((UploadFile) msg.obj);
+                }
+                break;
+
+            case ADD_HISTORY_ITEM:
+                if (mWebBackForwardListClient != null) {
+                    mWebBackForwardListClient.onNewHistoryItem(
+                            (WebHistoryItem) msg.obj);
+                }
+                break;
+
+            case HISTORY_INDEX_CHANGED:
+                if (mWebBackForwardListClient != null) {
+                    mWebBackForwardListClient.onIndexChanged(
+                            (WebHistoryItem) msg.obj, msg.arg1);
                 }
                 break;
         }
@@ -1399,5 +1425,21 @@ class CallbackProxy extends Handler {
             }
         }
         return uploadFile.getResult();
+    }
+
+    void onNewHistoryItem(WebHistoryItem item) {
+        if (mWebBackForwardListClient == null) {
+            return;
+        }
+        Message msg = obtainMessage(ADD_HISTORY_ITEM, item);
+        sendMessage(msg);
+    }
+
+    void onIndexChanged(WebHistoryItem item, int index) {
+        if (mWebBackForwardListClient == null) {
+            return;
+        }
+        Message msg = obtainMessage(HISTORY_INDEX_CHANGED, index, 0, item);
+        sendMessage(msg);
     }
 }

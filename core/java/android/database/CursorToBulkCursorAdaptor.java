@@ -143,8 +143,7 @@ public final class CursorToBulkCursorAdaptor extends BulkCursorNative
 
     public void close() {
         maybeUnregisterObserverProxy();
-        mCursor.deactivate();       
-        
+        mCursor.close();
     }
 
     public int requery(IContentObserver observer, CursorWindow window) {

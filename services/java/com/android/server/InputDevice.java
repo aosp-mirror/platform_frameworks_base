@@ -22,6 +22,8 @@ import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.WindowManagerPolicy;
 
+import java.io.PrintWriter;
+
 public class InputDevice {
     static final boolean DEBUG_POINTERS = false;
     static final boolean DEBUG_HACKS = false;
@@ -58,6 +60,7 @@ public class InputDevice {
         float yMoveScale;
         MotionEvent currentMove = null;
         boolean changed = false;
+        boolean everChanged = false;
         long mDownTime = 0;
         
         // The currently assigned pointer IDs, corresponding to the last data.
@@ -102,6 +105,56 @@ public class InputDevice {
         // This is not used here, but can be used by callers for state tracking.
         int mAddingPointerOffset = 0;
         final boolean[] mDown = new boolean[MAX_POINTERS];
+        
+        void dumpIntArray(PrintWriter pw, int[] array) {
+            pw.print("[");
+            for (int i=0; i<array.length; i++) {
+                if (i > 0) pw.print(", ");
+                pw.print(array[i]);
+            }
+            pw.print("]");
+        }
+        
+        void dumpBooleanArray(PrintWriter pw, boolean[] array) {
+            pw.print("[");
+            for (int i=0; i<array.length; i++) {
+                if (i > 0) pw.print(", ");
+                pw.print(array[i] ? "true" : "false");
+            }
+            pw.print("]");
+        }
+        
+        void dump(PrintWriter pw, String prefix) {
+            pw.print(prefix); pw.print("xPrecision="); pw.print(xPrecision);
+                    pw.print(" yPrecision="); pw.println(yPrecision);
+            pw.print(prefix); pw.print("xMoveScale="); pw.print(xMoveScale);
+                    pw.print(" yMoveScale="); pw.println(yMoveScale);
+            if (currentMove != null) {
+                pw.print(prefix); pw.print("currentMove="); pw.println(currentMove);
+            }
+            if (changed || mDownTime != 0) {
+                pw.print(prefix); pw.print("changed="); pw.print(changed);
+                        pw.print(" mDownTime="); pw.println(mDownTime);
+            }
+            pw.print(prefix); pw.print("mPointerIds="); dumpIntArray(pw, mPointerIds);
+                    pw.println("");
+            if (mSkipLastPointers || mLastNumPointers != 0) {
+                pw.print(prefix); pw.print("mSkipLastPointers="); pw.print(mSkipLastPointers);
+                        pw.print(" mLastNumPointers="); pw.println(mLastNumPointers);
+                pw.print(prefix); pw.print("mLastData="); dumpIntArray(pw, mLastData);
+                        pw.println("");
+            }
+            if (mNextNumPointers != 0) {
+                pw.print(prefix); pw.print("mNextNumPointers="); pw.println(mNextNumPointers);
+                pw.print(prefix); pw.print("mNextData="); dumpIntArray(pw, mNextData);
+                        pw.println("");
+            }
+            pw.print(prefix); pw.print("mDroppedBadPoint=");
+                    dumpBooleanArray(pw, mDroppedBadPoint); pw.println("");
+            pw.print(prefix); pw.print("mAddingPointerOffset="); pw.println(mAddingPointerOffset);
+            pw.print(prefix); pw.print("mDown=");
+                    dumpBooleanArray(pw, mDown); pw.println("");
+        }
         
         MotionState(int mx, int my) {
             xPrecision = mx;
@@ -775,6 +828,14 @@ public class InputDevice {
         int range;
         int flat;
         int fuzz;
+        
+        final void dump(PrintWriter pw) {
+            pw.print("minValue="); pw.print(minValue);
+            pw.print(" maxValue="); pw.print(maxValue);
+            pw.print(" range="); pw.print(range);
+            pw.print(" flat="); pw.print(flat);
+            pw.print(" fuzz="); pw.print(fuzz);
+        }
     };
     
     InputDevice(int _id, int _classes, String _name,

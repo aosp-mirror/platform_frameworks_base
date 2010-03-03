@@ -394,4 +394,56 @@ public class OverScroller {
     public float getCurrVelocity() {
         return mCurrScroller.getCurrVelocity();
     }
+    
+    /**
+     * Extend the scroll animation. This allows a running animation to scroll
+     * further and longer, when used with {@link #setFinalX(int)} or {@link #setFinalY(int)}.
+     *
+     * @param extend Additional time to scroll in milliseconds.
+     * @see #setFinalX(int)
+     * @see #setFinalY(int)
+     */
+    public void extendDuration(int extend) {
+        if (mScrollMode == MODE_DEFAULT) {
+            mDefaultScroller.extendDuration(extend);
+        }
+    }
+    
+    /**
+     * Sets the final position (X) for this scroller.
+     *
+     * @param newX The new X offset as an absolute distance from the origin.
+     * @see #extendDuration(int)
+     * @see #setFinalY(int)
+     */
+    public void setFinalX(int newX) {
+        if (mScrollMode == MODE_DEFAULT) {
+            if (newX < mMinimumX) {
+                mMinimumX = newX;
+            }
+            if (newX > mMaximumX) {
+                mMaximumX = newX;
+            }
+            mDefaultScroller.setFinalX(newX);
+        }
+    }
+    
+    /**
+     * Sets the final position (Y) for this scroller.
+     *
+     * @param newY The new Y offset as an absolute distance from the origin.
+     * @see #extendDuration(int)
+     * @see #setFinalX(int)
+     */
+    public void setFinalY(int newY) {
+        if (mScrollMode == MODE_DEFAULT) {
+            if (newY < mMinimumY) {
+                mMinimumY = newY;
+            }
+            if (newY > mMaximumY) {
+                mMaximumY = newY;
+            }
+            mDefaultScroller.setFinalY(newY);
+        }
+    }
 }

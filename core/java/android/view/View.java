@@ -2283,7 +2283,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             scrollabilityCache.scrollBar = new ScrollBarDrawable();
         }
         
-        final boolean fadeScrollbars = a.getBoolean(R.styleable.View_fadeScrollbars, false);
+        final boolean fadeScrollbars = a.getBoolean(R.styleable.View_fadeScrollbars, true);
 
         if (!fadeScrollbars) {
             scrollabilityCache.state = ScrollabilityCache.ON;
@@ -6493,7 +6493,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * Create a snapshot of the view into a bitmap.  We should probably make
      * some form of this public, but should think about the API.
      */
-    Bitmap createSnapshot(Bitmap.Config quality, int backgroundColor) {
+    Bitmap createSnapshot(Bitmap.Config quality, int backgroundColor, boolean skipChildren) {
         int width = mRight - mLeft;
         int height = mBottom - mTop;
 

@@ -16,6 +16,8 @@
 
 package android.app;
 
+import com.android.internal.R;
+
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -23,16 +25,20 @@ import android.content.ContentResolver.OpenResourceIdResult;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.StateListDrawable;
 import android.net.Uri;
-import android.text.Html;
+import android.text.Spannable;
+import android.text.SpannableString;
 import android.text.TextUtils;
+import android.text.style.TextAppearanceSpan;
 import android.util.Log;
 import android.util.SparseArray;
+import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Filter;
@@ -64,10 +70,13 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
     private SparseArray<Drawable.ConstantState> mBackgroundsCache;
     private boolean mClosed = false;
 
+    // URL color
+    private ColorStateList mUrlColor;
+
     // Cached column indexes, updated when the cursor changes.
-    private int mFormatCol;
     private int mText1Col;
     private int mText2Col;
+    private int mText2UrlCol;
     private int mIconName1Col;
     private int mIconName2Col;
     private int mBackgroundColorCol;
@@ -188,9 +197,9 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
             super.changeCursor(c);
 
             if (c != null) {
-                mFormatCol = c.getColumnIndex(SearchManager.SUGGEST_COLUMN_FORMAT);
                 mText1Col = c.getColumnIndex(SearchManager.SUGGEST_COLUMN_TEXT_1);
                 mText2Col = c.getColumnIndex(SearchManager.SUGGEST_COLUMN_TEXT_2);
+                mText2UrlCol = c.getColumnIndex(SearchManager.SUGGEST_COLUMN_TEXT_2_URL);
                 mIconName1Col = c.getColumnIndex(SearchManager.SUGGEST_COLUMN_ICON_1);
                 mIconName2Col = c.getColumnIndex(SearchManager.SUGGEST_COLUMN_ICON_2);
                 mBackgroundColorCol = c.getColumnIndex(SearchManager.SUGGEST_COLUMN_BACKGROUND_COLOR);
@@ -239,9 +248,20 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
         Drawable background = getItemBackground(backgroundColor);
         view.setBackgroundDrawable(background);
 
-        final boolean isHtml = mFormatCol > 0 && "html".equals(cursor.getString(mFormatCol));
-        setViewText(cursor, views.mText1, mText1Col, isHtml);
-        setViewText(cursor, views.mText2, mText2Col, isHtml);
+        if (views.mText1 != null) {
+            String text1 = getStringOrNull(cursor, mText1Col);
+            setViewText(views.mText1, text1);
+        }
+        if (views.mText2 != null) {
+            // First check TEXT_2_URL
+            CharSequence text2 = getStringOrNull(cursor, mText2UrlCol);
+            if (text2 != null) {
+                text2 = formatUrl(text2);
+            } else {
+                text2 = getStringOrNull(cursor, mText2Col);
+            }
+            setViewText(views.mText2, text2);
+        }
 
         if (views.mIcon1 != null) {
             setViewDrawable(views.mIcon1, getIcon1(cursor));
@@ -249,6 +269,21 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
         if (views.mIcon2 != null) {
             setViewDrawable(views.mIcon2, getIcon2(cursor));
         }
+    }
+
+    private CharSequence formatUrl(CharSequence url) {
+        if (mUrlColor == null) {
+            // Lazily get the URL color from the current theme.
+            TypedValue colorValue = new TypedValue();
+            mContext.getTheme().resolveAttribute(R.attr.textColorSearchUrl, colorValue, true);
+            mUrlColor = mContext.getResources().getColorStateList(colorValue.resourceId);
+        }
+
+        SpannableString text = new SpannableString(url);
+        text.setSpan(new TextAppearanceSpan(null, 0, 0, mUrlColor, null),
+                0, url.length(),
+                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        return text;
     }
 
     /**
@@ -278,19 +313,7 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
         }
     }
 
-    private void setViewText(Cursor cursor, TextView v, int textCol, boolean isHtml) {
-        if (v == null) {
-            return;
-        }
-        CharSequence text = null;
-        if (textCol >= 0) {
-            String str = cursor.getString(textCol);
-            if (isHtml && looksLikeHtml(str)) {
-                text = Html.fromHtml(str);
-            } else {
-                text = str;
-            }
-        }
+    private void setViewText(TextView v, CharSequence text) {
         // Set the text even if it's null, since we need to clear any previous text.
         v.setText(text);
 
@@ -299,15 +322,6 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
         } else {
             v.setVisibility(View.VISIBLE);
         }
-    }
-
-    private static boolean looksLikeHtml(String str) {
-        if (TextUtils.isEmpty(str)) return false;
-        for (int i = str.length() - 1; i >= 0; i--) {
-            char c = str.charAt(i);
-            if (c == '<' || c == '&') return true;
-        }
-        return false;
     }
 
     private Drawable getIcon1(Cursor cursor) {
@@ -617,6 +631,10 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
      */
     public static String getColumnString(Cursor cursor, String columnName) {
         int col = cursor.getColumnIndex(columnName);
+        return getStringOrNull(cursor, col);
+    }
+
+    private static String getStringOrNull(Cursor cursor, int col) {
         if (col == NONE) {
             return null;
         }
@@ -629,5 +647,4 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
             return null;
         }
     }
-
 }

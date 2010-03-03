@@ -18,6 +18,9 @@ include $(CLEAR_VARS)
 copy_from :=                \
     DroidSans.ttf           \
     DroidSans-Bold.ttf      \
+    DroidSansArabic.ttf     \
+    DroidSansHebrew.ttf     \
+    DroidSansThai.ttf       \
     DroidSerif-Regular.ttf  \
     DroidSerif-Bold.ttf     \
     DroidSerif-Italic.ttf   \

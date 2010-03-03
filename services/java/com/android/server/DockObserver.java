@@ -421,9 +421,19 @@ class DockObserver extends UEventObserver {
                     }
                     break;
                 case MSG_ENABLE_LOCATION_UPDATES:
-                    if (mLocationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+                    boolean networkLocationEnabled;
+                    try {
+                        networkLocationEnabled =
+                            mLocationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+                    } catch (Exception e) {
+                        // we may get IllegalArgumentException if network location provider
+                        // does not exist or is not yet installed.
+                        networkLocationEnabled = false;
+                    }
+                    if (networkLocationEnabled) {
                         mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,
-                                LOCATION_UPDATE_MS, LOCATION_UPDATE_DISTANCE_METER, mLocationListener);
+                                LOCATION_UPDATE_MS, LOCATION_UPDATE_DISTANCE_METER, 
+                                mLocationListener);
                         retrieveLocation();
                         if (mCarModeEnabled && mLocation != null && mNightMode == MODE_NIGHT_AUTO) {
                             try {

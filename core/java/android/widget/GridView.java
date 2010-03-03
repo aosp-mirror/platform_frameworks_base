@@ -938,6 +938,7 @@ public class GridView extends AbsListView {
                 child.setLayoutParams(p);
             }
             p.viewType = mAdapter.getItemViewType(0);
+            p.forceAdd = true;
 
             int childHeightSpec = getChildMeasureSpec(
                     MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED), 0, p.height);
@@ -1257,9 +1258,10 @@ public class GridView extends AbsListView {
         }
         p.viewType = mAdapter.getItemViewType(position);
 
-        if (recycled) {
+        if (recycled && !p.forceAdd) {
             attachViewToParent(child, where, p);
         } else {
+            p.forceAdd = false;
             addViewInLayout(child, where, p, true);
         }
 

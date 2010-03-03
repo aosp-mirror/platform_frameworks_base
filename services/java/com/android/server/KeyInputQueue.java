@@ -22,6 +22,7 @@ import android.os.Environment;
 import android.os.LatencyTimer;
 import android.os.PowerManager;
 import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.Xml;
@@ -43,6 +44,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 
 public abstract class KeyInputQueue {
@@ -738,6 +740,7 @@ public abstract class KeyInputQueue {
                                 
                                 InputDevice.MotionState ms = di.mAbs;
                                 if (ms.changed) {
+                                    ms.everChanged = true;
                                     ms.changed = false;
                                     
                                     if ((classes&(RawInputEvent.CLASS_TOUCHSCREEN
@@ -809,6 +812,7 @@ public abstract class KeyInputQueue {
                                 
                                 ms = di.mRel;
                                 if (ms.changed) {
+                                    ms.everChanged = true;
                                     ms.changed = false;
                                     
                                     me = ms.generateRelMotion(di, curTime,
@@ -1280,4 +1284,91 @@ public abstract class KeyInputQueue {
         return null;
     }
     private static native boolean readEvent(RawInputEvent outEvent);
+    
+    void dump(PrintWriter pw, String prefix) {
+        synchronized (mFirst) {
+            for (int i=0; i<mDevices.size(); i++) {
+                InputDevice dev = mDevices.valueAt(i);
+                pw.print(prefix); pw.print("Device #");
+                        pw.print(mDevices.keyAt(i)); pw.print(" ");
+                        pw.print(dev.name); pw.print(" (classes=0x");
+                        pw.print(Integer.toHexString(dev.classes));
+                        pw.println("):");
+                pw.print(prefix); pw.print("  mKeyDownTime=");
+                        pw.print(dev.mKeyDownTime); pw.print(" mMetaKeysState=");
+                        pw.println(dev.mMetaKeysState);
+                if (dev.absX != null) {
+                    pw.print(prefix); pw.print("  absX: "); dev.absX.dump(pw);
+                            pw.println("");
+                }
+                if (dev.absY != null) {
+                    pw.print(prefix); pw.print("  absY: "); dev.absY.dump(pw);
+                            pw.println("");
+                }
+                if (dev.absPressure != null) {
+                    pw.print(prefix); pw.print("  absPressure: ");
+                            dev.absPressure.dump(pw); pw.println("");
+                }
+                if (dev.absSize != null) {
+                    pw.print(prefix); pw.print("  absSize: ");
+                            dev.absSize.dump(pw); pw.println("");
+                }
+                if (dev.mAbs.everChanged) {
+                    pw.print(prefix); pw.println("  mAbs:");
+                    dev.mAbs.dump(pw, prefix + "    ");
+                }
+                if (dev.mRel.everChanged) {
+                    pw.print(prefix); pw.println("  mRel:");
+                    dev.mRel.dump(pw, prefix + "    ");
+                }
+            }
+            pw.println(" ");
+            for (int i=0; i<mIgnoredDevices.size(); i++) {
+                InputDevice dev = mIgnoredDevices.valueAt(i);
+                pw.print(prefix); pw.print("Ignored Device #");
+                        pw.print(mIgnoredDevices.keyAt(i)); pw.print(" ");
+                        pw.print(dev.name); pw.print(" (classes=0x");
+                        pw.print(Integer.toHexString(dev.classes));
+                        pw.println(")");
+            }
+            pw.println(" ");
+            for (int i=0; i<mVirtualKeys.size(); i++) {
+                VirtualKey vk = mVirtualKeys.get(i);
+                pw.print(prefix); pw.print("Virtual Key #");
+                        pw.print(i); pw.println(":");
+                pw.print(prefix); pw.print("  scancode="); pw.println(vk.scancode);
+                pw.print(prefix); pw.print("  centerx="); pw.print(vk.centerx);
+                        pw.print(" centery="); pw.print(vk.centery);
+                        pw.print(" width="); pw.print(vk.width);
+                        pw.print(" height="); pw.println(vk.height);
+                pw.print(prefix); pw.print("  hitLeft="); pw.print(vk.hitLeft);
+                        pw.print(" hitTop="); pw.print(vk.hitTop);
+                        pw.print(" hitRight="); pw.print(vk.hitRight);
+                        pw.print(" hitBottom="); pw.println(vk.hitBottom);
+                if (vk.lastDevice != null) {
+                    pw.print(prefix); pw.print("  lastDevice=#");
+                            pw.println(vk.lastDevice.id);
+                }
+                if (vk.lastKeycode != 0) {
+                    pw.print(prefix); pw.print("  lastKeycode=");
+                            pw.println(vk.lastKeycode);
+                }
+            }
+            pw.println(" ");
+            pw.print(prefix); pw.print("  Default keyboard: ");
+                    pw.println(SystemProperties.get("hw.keyboards.0.devname"));
+            pw.print(prefix); pw.print("  mGlobalMetaState=");
+                    pw.print(mGlobalMetaState); pw.print(" mHaveGlobalMetaState=");
+                    pw.println(mHaveGlobalMetaState);
+            pw.print(prefix); pw.print("  mDisplayWidth=");
+                    pw.print(mDisplayWidth); pw.print(" mDisplayHeight=");
+                    pw.println(mDisplayHeight);
+            pw.print(prefix); pw.print("  mOrientation=");
+                    pw.println(mOrientation);
+            if (mPressedVirtualKey != null) {
+                pw.print(prefix); pw.print("  mPressedVirtualKey.scancode=");
+                        pw.println(mPressedVirtualKey.scancode);
+            }
+        }
+    }
 }

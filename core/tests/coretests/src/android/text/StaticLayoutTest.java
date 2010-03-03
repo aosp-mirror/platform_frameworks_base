@@ -26,6 +26,11 @@ import junit.framework.TestCase;
 
 /**
  * Tests StaticLayout vertical metrics behavior.
+ * 
+ * Requires disabling access checks in the vm since this calls package-private
+ * APIs.
+ * 
+ * @Suppress
  */
 public class StaticLayoutTest extends TestCase {
 
@@ -33,7 +38,7 @@ public class StaticLayoutTest extends TestCase {
      * Basic test showing expected behavior and relationship between font
      * metrics and line metrics.
      */
-    @SmallTest
+    //@SmallTest
     public void testGetters1() {
         LayoutBuilder b = builder();
         FontMetricsInt fmi = b.paint.getFontMetricsInt();
@@ -59,7 +64,7 @@ public class StaticLayoutTest extends TestCase {
      * Basic test showing effect of includePad = true with 1 line.
      * Top and bottom padding are affected, as is the line descent and height.
      */
-    @SmallTest
+    //@SmallTest
     public void testGetters2() {
         LayoutBuilder b = builder()
             .setIncludePad(true);
@@ -74,7 +79,7 @@ public class StaticLayoutTest extends TestCase {
      * Basic test showing effect of includePad = true wrapping to 2 lines.
      * Ascent of top line and descent of bottom line are affected.
      */
-    @SmallTest
+    //@SmallTest
     public void testGetters3() {
         LayoutBuilder b = builder()
             .setIncludePad(true)
@@ -91,7 +96,7 @@ public class StaticLayoutTest extends TestCase {
      * Basic test showing effect of includePad = true wrapping to 3 lines.
      * First line ascent is top, bottom line descent is bottom.
      */
-    @SmallTest
+    //@SmallTest
     public void testGetters4() {
         LayoutBuilder b = builder()
             .setText("This is a longer test")
@@ -111,7 +116,7 @@ public class StaticLayoutTest extends TestCase {
      * large text. See effect of leading. Currently, we don't expect there to
      * even be non-zero leading.
      */
-    @SmallTest
+    //@SmallTest
     public void testGetters5() {
         LayoutBuilder b = builder()
             .setText("This is a longer test")
@@ -138,7 +143,7 @@ public class StaticLayoutTest extends TestCase {
      * Basic test showing effect of includePad = true, spacingAdd = 2, wrapping
      * to 3 lines.
      */
-    @SmallTest
+    //@SmallTest
     public void testGetters6() {
         int spacingAdd = 2; // int so expressions return int
         LayoutBuilder b = builder()
@@ -159,7 +164,7 @@ public class StaticLayoutTest extends TestCase {
      * Basic test showing effect of includePad = true, spacingAdd = 2,
      * spacingMult = 1.5, wrapping to 3 lines.
      */
-    @SmallTest
+    //@SmallTest
     public void testGetters7() {
         LayoutBuilder b = builder()
             .setText("This is a longer test")
@@ -181,7 +186,7 @@ public class StaticLayoutTest extends TestCase {
      * Basic test showing effect of includePad = true, spacingAdd = 0,
      * spacingMult = 0.8 when wrapping to 3 lines.
      */
-    @SmallTest
+    //@SmallTest
     public void testGetters8() {
         LayoutBuilder b = builder()
             .setText("This is a longer test")

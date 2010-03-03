@@ -380,6 +380,9 @@ public class WindowManagerService extends IWindowManager.Stub
 
     int mLayoutSeq = 0;
     
+    // State while inside of layoutAndPlaceSurfacesLocked().
+    boolean mFocusMayChange;
+    
     Configuration mCurConfiguration = new Configuration();
     
     // This is held as long as we have the screen frozen, to give us time to
@@ -2370,6 +2373,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 if (displayed && (win.mAttrs.flags
                         & WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON) != 0) {
+                    if (DEBUG_VISIBILITY) Slog.v(TAG,
+                            "Relayout window turning screen on: " + win);
                     win.mTurnOnScreen = true;
                 }
                 if ((attrChanges&WindowManager.LayoutParams.FORMAT_CHANGED) != 0) {
@@ -3218,7 +3223,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (DEBUG_APP_TRANSITIONS) Slog.v(
                     TAG, "Prepare app transition: transit=" + transit
                     + " mNextAppTransition=" + mNextAppTransition);
-            if (!mDisplayFrozen) {
+            if (!mDisplayFrozen && mPolicy.isScreenOn()) {
                 if (mNextAppTransition == WindowManagerPolicy.TRANSIT_UNSET
                         || mNextAppTransition == WindowManagerPolicy.TRANSIT_NONE) {
                     mNextAppTransition = transit;
@@ -3574,7 +3579,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
             // If we are preparing an app transition, then delay changing
             // the visibility of this token until we execute that transition.
-            if (!mDisplayFrozen && mNextAppTransition != WindowManagerPolicy.TRANSIT_UNSET) {
+            if (!mDisplayFrozen && mPolicy.isScreenOn()
+                    && mNextAppTransition != WindowManagerPolicy.TRANSIT_UNSET) {
                 // Already in requested state, don't do anything more.
                 if (wtoken.hiddenRequested != visible) {
                     return;
@@ -3697,7 +3703,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         synchronized(mWindowMap) {
-            if (configChanges == 0 && !mDisplayFrozen) {
+            if (configChanges == 0 && !mDisplayFrozen && mPolicy.isScreenOn()) {
                 if (DEBUG_ORIENTATION) Slog.v(TAG, "Skipping set freeze of " + token);
                 return;
             }
@@ -7597,12 +7603,21 @@ public class WindowManagerService extends IWindowManager.Stub
                     + " anim layer: " + mAnimLayer);
             mHasTransformation = false;
             mHasLocalTransformation = false;
-            mPolicyVisibility = mPolicyVisibilityAfterAnim;
-            if (!mPolicyVisibility) {
-                // Window is no longer visible -- make sure if we were waiting
-                // for it to be displayed before enabling the display, that
-                // we allow the display to be enabled now.
-                enableScreenIfNeededLocked();
+            if (mPolicyVisibility != mPolicyVisibilityAfterAnim) {
+                if (DEBUG_VISIBILITY) {
+                    Slog.v(TAG, "Policy visibility changing after anim in " + this + ": "
+                            + mPolicyVisibilityAfterAnim);
+                }
+                mPolicyVisibility = mPolicyVisibilityAfterAnim;
+                if (!mPolicyVisibility) {
+                    if (mCurrentFocus == this) {
+                        mFocusMayChange = true;
+                    }
+                    // Window is no longer visible -- make sure if we were waiting
+                    // for it to be displayed before enabling the display, that
+                    // we allow the display to be enabled now.
+                    enableScreenIfNeededLocked();
+                }
             }
             mTransformation.clear();
             if (mHasDrawn
@@ -8029,6 +8044,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (mPolicyVisibility && mPolicyVisibilityAfterAnim) {
                 return false;
             }
+            if (DEBUG_VISIBILITY) Slog.v(TAG, "Policy visibility true: " + this);
             mPolicyVisibility = true;
             mPolicyVisibilityAfterAnim = true;
             if (doAnimation) {
@@ -8059,6 +8075,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (doAnimation) {
                 mPolicyVisibilityAfterAnim = false;
             } else {
+                if (DEBUG_VISIBILITY) Slog.v(TAG, "Policy visibility false: " + this);
                 mPolicyVisibilityAfterAnim = false;
                 mPolicyVisibility = false;
                 // Window is no longer visible -- make sure if we were waiting
@@ -9401,6 +9418,11 @@ public class WindowManagerService extends IWindowManager.Stub
 
         int i;
 
+        if (mFocusMayChange) {
+            mFocusMayChange = false;
+            updateFocusedWindowLocked(UPDATE_FOCUS_WILL_PLACE_SURFACES);
+        }
+        
         // FIRST LOOP: Perform a layout, if needed.
         performLayoutLockedInner();
 
@@ -9462,7 +9484,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
                 boolean tokenMayBeDrawn = false;
                 boolean wallpaperMayChange = false;
-                boolean focusMayChange = false;
 
                 mPolicy.beginAnimationLw(dw, dh);
 
@@ -9496,7 +9517,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         if (mPolicy.doesForceHide(w, attrs)) {
                             if (!wasAnimating && animating) {
                                 wallpaperForceHidingChanged = true;
-                                focusMayChange = true;
+                                mFocusMayChange = true;
                             } else if (w.isReadyForDisplay() && w.mAnimation == null) {
                                 forceHiding = true;
                             }
@@ -9516,6 +9537,7 @@ public class WindowManagerService extends IWindowManager.Stub
                                     if (a != null) {
                                         w.setAnimation(a);
                                     }
+                                    mFocusMayChange = true;
                                 }
                             }
                             if (changed && (attrs.flags
@@ -9825,7 +9847,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         }
                         performLayoutLockedInner();
                         updateFocusedWindowLocked(UPDATE_FOCUS_PLACING_SURFACES);
-                        focusMayChange = false;
+                        mFocusMayChange = false;
 
                         restart = true;
                     }
@@ -9850,7 +9872,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     // Since the window list has been rebuilt, focus might
                     // have to be recomputed since the actual order of windows
                     // might have changed again.
-                    focusMayChange = true;
+                    mFocusMayChange = true;
                 }
 
                 int adjResult = 0;
@@ -9927,7 +9949,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     mLayoutNeeded = true;
                 }
 
-                if (focusMayChange) {
+                if (mFocusMayChange) {
+                    mFocusMayChange = false;
                     if (updateFocusedWindowLocked(UPDATE_FOCUS_PLACING_SURFACES)) {
                         restart = true;
                         adjResult = 0;
@@ -10500,6 +10523,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         if (mTurnOnScreen) {
+            if (DEBUG_VISIBILITY) Slog.v(TAG, "Turning screen on after layout!");
             mPowerManager.userActivity(SystemClock.uptimeMillis(), false,
                     LocalPowerManager.BUTTON_EVENT, true);
             mTurnOnScreen = false;
@@ -10530,6 +10554,8 @@ public class WindowManagerService extends IWindowManager.Stub
             if (win.mSurface != null) {
                 win.mSurface.show();
                 if (win.mTurnOnScreen) {
+                    if (DEBUG_VISIBILITY) Slog.v(TAG,
+                            "Show surface turning screen on: " + win);
                     win.mTurnOnScreen = false;
                     mTurnOnScreen = true;
                 }
@@ -10825,6 +10851,10 @@ public class WindowManagerService extends IWindowManager.Stub
             return;
         }
 
+        pw.println("Input State:");
+        mQueue.dump(pw, "  ");
+        pw.println(" ");
+        
         synchronized(mWindowMap) {
             pw.println("Current Window Manager state:");
             for (int i=mWindows.size()-1; i>=0; i--) {
@@ -10988,7 +11018,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (mDimAnimator != null) {
                 mDimAnimator.printTo(pw);
             } else {
-                pw.print( "  no DimAnimator ");
+                pw.println( "  no DimAnimator ");
             }
             pw.print("  mInputMethodAnimLayerAdjustment=");
                     pw.print(mInputMethodAnimLayerAdjustment);

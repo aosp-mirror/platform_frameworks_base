@@ -18,7 +18,9 @@ package android.net.http;
 
 import android.os.Bundle;
 
-import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Vector;
 
 import java.security.cert.X509Certificate;
@@ -30,6 +32,11 @@ import org.bouncycastle.asn1.x509.X509Name;
  * SSL certificate info (certificate details) class
  */
 public class SslCertificate {
+
+    /**
+     * SimpleDateFormat pattern for an ISO 8601 date
+     */
+    private static String ISO_8601_DATE_FORMAT = "yyyy-MM-dd HH:mm:ssZ";
 
     /**
      * Name of the entity this certificate is issued to
@@ -44,12 +51,12 @@ public class SslCertificate {
     /**
      * Not-before date from the validity period
      */
-    private String mValidNotBefore;
+    private Date mValidNotBefore;
 
     /**
      * Not-after date from the validity period
      */
-    private String mValidNotAfter;
+    private Date mValidNotAfter;
 
      /**
      * Bundle key names
@@ -101,16 +108,28 @@ public class SslCertificate {
      * Creates a new SSL certificate object
      * @param issuedTo The entity this certificate is issued to
      * @param issuedBy The entity that issued this certificate
+     * @param validNotBefore The not-before date from the certificate validity period in ISO 8601 format
+     * @param validNotAfter The not-after date from the certificate validity period in ISO 8601 format
+     * @deprecated Use {@link #SslCertificate(String, String, Date, Date)}
+     */
+    public SslCertificate(
+            String issuedTo, String issuedBy, String validNotBefore, String validNotAfter) {
+        this(issuedTo, issuedBy, parseDate(validNotBefore), parseDate(validNotAfter));
+    }
+
+    /**
+     * Creates a new SSL certificate object
+     * @param issuedTo The entity this certificate is issued to
+     * @param issuedBy The entity that issued this certificate
      * @param validNotBefore The not-before date from the certificate validity period
      * @param validNotAfter The not-after date from the certificate validity period
      */
     public SslCertificate(
-        String issuedTo, String issuedBy, String validNotBefore, String validNotAfter) {
+            String issuedTo, String issuedBy, Date validNotBefore, Date validNotAfter) {
         mIssuedTo = new DName(issuedTo);
         mIssuedBy = new DName(issuedBy);
-
-        mValidNotBefore = validNotBefore;
-        mValidNotAfter = validNotAfter;
+        mValidNotBefore = cloneDate(validNotBefore);
+        mValidNotAfter  = cloneDate(validNotAfter);
     }
 
     /**
@@ -120,24 +139,44 @@ public class SslCertificate {
     public SslCertificate(X509Certificate certificate) {
         this(certificate.getSubjectDN().getName(),
              certificate.getIssuerDN().getName(),
-             DateFormat.getInstance().format(certificate.getNotBefore()),
-             DateFormat.getInstance().format(certificate.getNotAfter()));
+             certificate.getNotBefore(),
+             certificate.getNotAfter());
     }
 
     /**
      * @return Not-before date from the certificate validity period or
      * "" if none has been set
      */
+    public Date getValidNotBeforeDate() {
+        return cloneDate(mValidNotBefore);
+    }
+
+    /**
+     * @return Not-before date from the certificate validity period in
+     * ISO 8601 format or "" if none has been set
+     *
+     * @deprecated Use {@link #getValidNotBeforeDate()}
+     */
     public String getValidNotBefore() {
-        return mValidNotBefore != null ? mValidNotBefore : "";
+        return formatDate(mValidNotBefore);
     }
 
     /**
      * @return Not-after date from the certificate validity period or
      * "" if none has been set
      */
+    public Date getValidNotAfterDate() {
+        return cloneDate(mValidNotAfter);
+    }
+
+    /**
+     * @return Not-after date from the certificate validity period in
+     * ISO 8601 format or "" if none has been set
+     *
+     * @deprecated Use {@link #getValidNotAfterDate()}
+     */
     public String getValidNotAfter() {
-        return mValidNotAfter != null ? mValidNotAfter : "";
+        return formatDate(mValidNotAfter);
     }
 
     /**
@@ -161,6 +200,37 @@ public class SslCertificate {
         return
             "Issued to: " + mIssuedTo.getDName() + ";\n" +
             "Issued by: " + mIssuedBy.getDName() + ";\n";
+    }
+
+    /**
+     * Parse an ISO 8601 date converting ParseExceptions to a null result;
+     */
+    private static Date parseDate(String string) {
+        try {
+            return new SimpleDateFormat(ISO_8601_DATE_FORMAT).parse(string);
+        } catch (ParseException e) {
+            return null;
+        }
+    }
+
+    /**
+     * Format a date as an ISO 8601 string, return "" for a null date
+     */
+    private static String formatDate(Date date) {
+        if (date == null) {
+            return "";
+        }
+        return new SimpleDateFormat(ISO_8601_DATE_FORMAT).format(date);
+    }
+
+    /**
+     * Clone a possibly null Date
+     */
+    private static Date cloneDate(Date date) {
+        if (date == null) {
+            return null;
+        }
+        return (Date) date.clone();
     }
 
     /**

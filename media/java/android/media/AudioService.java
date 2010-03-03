@@ -26,7 +26,6 @@ import android.bluetooth.BluetoothA2dp;
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHeadset;
-
 import android.content.pm.PackageManager;
 import android.database.ContentObserver;
 import android.media.MediaPlayer.OnCompletionListener;
@@ -47,12 +46,15 @@ import android.os.SystemProperties;
 
 import com.android.internal.telephony.ITelephony;
 
+import java.io.FileDescriptor;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.Stack;
 
 /**
  * The implementation of the volume manager service.
@@ -75,6 +77,7 @@ public class AudioService extends IAudioService.Stub {
 
     private Context mContext;
     private ContentResolver mContentResolver;
+
 
     /** The UI */
     private VolumePanel mVolumePanel;
@@ -888,6 +891,7 @@ public class AudioService extends IAudioService.Stub {
         }
     }
 
+
     ///////////////////////////////////////////////////////////////////////////
     // Internal methods
     ///////////////////////////////////////////////////////////////////////////
@@ -1600,4 +1604,223 @@ public class AudioService extends IAudioService.Stub {
             }
         }
     }
+
+    //==========================================================================================
+    // AudioFocus
+    //==========================================================================================
+    private static class FocusStackEntry {
+        public int mStreamType = -1;// no stream type
+        public boolean mIsTransportControlReceiver = false;
+        public IAudioFocusDispatcher mFocusDispatcher = null;
+        public IBinder mSourceRef = null;
+        public String mClientId;
+        public int mDurationHint;
+
+        public FocusStackEntry() {
+        }
+
+        public FocusStackEntry(int streamType, int duration, boolean isTransportControlReceiver,
+                IAudioFocusDispatcher afl, IBinder source, String id) {
+            mStreamType = streamType;
+            mIsTransportControlReceiver = isTransportControlReceiver;
+            mFocusDispatcher = afl;
+            mSourceRef = source;
+            mClientId = id;
+            mDurationHint = duration;
+        }
+    }
+
+    private Stack<FocusStackEntry> mFocusStack = new Stack<FocusStackEntry>();
+
+    /**
+     * Helper function:
+     * Display in the log the current entries in the audio focus stack
+     */
+    private void dumpFocusStack(PrintWriter pw) {
+        pw.println("Audio Focus stack entries:");
+        synchronized(mFocusStack) {
+            Iterator<FocusStackEntry> stackIterator = mFocusStack.iterator();
+            while(stackIterator.hasNext()) {
+                FocusStackEntry fse = stackIterator.next();
+                pw.println("     source:" + fse.mSourceRef + " -- client: " + fse.mClientId
+                        + " -- duration: " +fse.mDurationHint);
+            }
+        }
+    }
+
+    /**
+     * Helper function:
+     * Remove a focus listener from the focus stack.
+     * @param focusListenerToRemove the focus listener
+     * @param signal if true and the listener was at the top of the focus stack, i.e. it was holding
+     *   focus, notify the next item in the stack it gained focus.
+     */
+    private void removeFocusStackEntry(String clientToRemove, boolean signal) {
+        // is the current top of the focus stack abandoning focus? (because of death or request)
+        if (!mFocusStack.empty() && mFocusStack.peek().mClientId.equals(clientToRemove))
+        {
+            //Log.i(TAG, "   removeFocusStackEntry() removing top of stack");
+            mFocusStack.pop();
+            if (signal) {
+                // notify the new top of the stack it gained focus
+                if (!mFocusStack.empty() && (mFocusStack.peek().mFocusDispatcher != null)
+                        && canReassignFocus()) {
+                    try {
+                        mFocusStack.peek().mFocusDispatcher.dispatchAudioFocusChange(
+                                AudioManager.AUDIOFOCUS_GAIN, mFocusStack.peek().mClientId);
+                    } catch (RemoteException e) {
+                        Log.e(TAG, " Failure to signal gain of focus due to "+ e);
+                        e.printStackTrace();
+                    }
+                }
+            }
+        } else {
+            // focus is abandoned by a client that's not at the top of the stack,
+            // no need to update focus.
+            Iterator<FocusStackEntry> stackIterator = mFocusStack.iterator();
+            while(stackIterator.hasNext()) {
+                FocusStackEntry fse = (FocusStackEntry)stackIterator.next();
+                if(fse.mClientId.equals(clientToRemove)) {
+                    Log.i(TAG, " AudioFocus  abandonAudioFocus(): removing entry for "
+                            + fse.mClientId);
+                    mFocusStack.remove(fse);
+                }
+            }
+        }
+    }
+
+    /**
+     * Helper function:
+     * Remove focus listeners from the focus stack for a particular client.
+     */
+    private void removeFocusStackEntryForClient(IBinder cb) {
+        // focus is abandoned by a client that's not at the top of the stack,
+        // no need to update focus.
+        Iterator<FocusStackEntry> stackIterator = mFocusStack.iterator();
+        while(stackIterator.hasNext()) {
+            FocusStackEntry fse = (FocusStackEntry)stackIterator.next();
+            if(fse.mSourceRef.equals(cb)) {
+                Log.i(TAG, " AudioFocus  abandonAudioFocus(): removing entry for "
+                        + fse.mClientId);
+                mFocusStack.remove(fse);
+            }
+        }
+    }
+
+    /**
+     * Helper function:
+     * Returns true if the system is in a state where the focus can be reevaluated, false otherwise.
+     */
+    private boolean canReassignFocus() {
+        // focus requests are rejected during a phone call
+        if (getMode() == AudioSystem.MODE_IN_CALL) {
+            Log.i(TAG, " AudioFocus  can't be reassigned during a call, exiting");
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Inner class to monitor audio focus client deaths, and remove them from the audio focus
+     * stack if necessary.
+     */
+    private class AudioFocusDeathHandler implements IBinder.DeathRecipient {
+        private IBinder mCb; // To be notified of client's death
+
+        AudioFocusDeathHandler(IBinder cb) {
+            mCb = cb;
+        }
+
+        public void binderDied() {
+            synchronized(mFocusStack) {
+                Log.w(TAG, "  AudioFocus   audio focus client died");
+                removeFocusStackEntryForClient(mCb);
+            }
+        }
+
+        public IBinder getBinder() {
+            return mCb;
+        }
+    }
+
+
+    /** @see AudioManager#requestAudioFocus(int, int, IBinder, IAudioFocusDispatcher, String) */
+    public int requestAudioFocus(int mainStreamType, int durationHint, IBinder cb,
+            IAudioFocusDispatcher fd, String clientId) {
+        Log.i(TAG, " AudioFocus  requestAudioFocus() from " + clientId);
+        // the main stream type for the audio focus request is currently not used. It may
+        // potentially be used to handle multiple stream type-dependent audio focuses.
+
+        if ((cb == null) || !cb.pingBinder()) {
+            Log.i(TAG, " AudioFocus  DOA client for requestAudioFocus(), exiting");
+            return AudioManager.AUDIOFOCUS_REQUEST_FAILED;
+        }
+
+        if (!canReassignFocus()) {
+            return AudioManager.AUDIOFOCUS_REQUEST_FAILED;
+        }
+
+        synchronized(mFocusStack) {
+            if (!mFocusStack.empty() && mFocusStack.peek().mClientId.equals(clientId)) {
+                mFocusStack.peek().mDurationHint = durationHint;
+                // if focus is already owned by this client, don't do anything
+                return AudioManager.AUDIOFOCUS_REQUEST_GRANTED;
+            }
+
+            // notify current top of stack it is losing focus
+            if (!mFocusStack.empty() && (mFocusStack.peek().mFocusDispatcher != null)) {
+                try {
+                    mFocusStack.peek().mFocusDispatcher.dispatchAudioFocusChange(
+                            (durationHint == AudioManager.AUDIOFOCUS_GAIN) ?
+                                    AudioManager.AUDIOFOCUS_LOSS :
+                                        AudioManager.AUDIOFOCUS_LOSS_TRANSIENT,
+                            mFocusStack.peek().mClientId);
+                } catch (RemoteException e) {
+                    Log.e(TAG, " Failure to signal loss of focus due to "+ e);
+                    e.printStackTrace();
+                }
+            }
+
+            // push focus requester at the top of the audio focus stack
+            mFocusStack.push(new FocusStackEntry(mainStreamType, durationHint, false, fd, cb,
+                    clientId));
+        }//synchronized(mFocusStack)
+
+        // handle the potential premature death of the new holder of the focus
+        // (premature death == death before abandoning focus)
+        // Register for client death notification
+        AudioFocusDeathHandler afdh = new AudioFocusDeathHandler(cb);
+        try {
+            cb.linkToDeath(afdh, 0);
+        } catch (RemoteException e) {
+            // client has already died!
+            Log.w(TAG, " AudioFocus  requestAudioFocus() could not link to "+cb+" binder death");
+        }
+
+        return AudioManager.AUDIOFOCUS_REQUEST_GRANTED;
+    }
+
+    /** @see AudioManager#abandonAudioFocus(IBinder, IAudioFocusDispatcher, String) */
+    public int abandonAudioFocus(IAudioFocusDispatcher fl, String clientId) {
+        Log.i(TAG, " AudioFocus  abandonAudioFocus() from " + clientId);
+
+        // this will take care of notifying the new focus owner if needed
+        removeFocusStackEntry(clientId, true);
+
+        return AudioManager.AUDIOFOCUS_REQUEST_GRANTED;
+    }
+
+
+    public void unregisterFocusClient(String clientId) {
+        removeFocusStackEntry(clientId, false);
+    }
+
+
+    @Override
+    protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        // TODO probably a lot more to do here than just the audio focus stack
+        dumpFocusStack(pw);
+    }
+
+
 }

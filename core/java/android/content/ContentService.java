@@ -32,7 +32,6 @@ import android.Manifest;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -104,7 +103,7 @@ public final class ContentService extends IContentService.Stub {
             throw new IllegalArgumentException("You must pass a valid uri and observer");
         }
         synchronized (mRootNode) {
-            mRootNode.addObserver(uri, observer, notifyForDescendents);
+            mRootNode.addObserverLocked(uri, observer, notifyForDescendents, mRootNode);
             if (Config.LOGV) Log.v(TAG, "Registered observer " + observer + " at " + uri +
                     " with notifyForDescendents " + notifyForDescendents);
         }
@@ -115,7 +114,7 @@ public final class ContentService extends IContentService.Stub {
             throw new IllegalArgumentException("You must pass a valid observer");
         }
         synchronized (mRootNode) {
-            mRootNode.removeObserver(observer);
+            mRootNode.removeObserverLocked(observer);
             if (Config.LOGV) Log.v(TAG, "Unregistered observer " + observer);
         }
     }
@@ -132,7 +131,7 @@ public final class ContentService extends IContentService.Stub {
         try {
             ArrayList<ObserverCall> calls = new ArrayList<ObserverCall>();
             synchronized (mRootNode) {
-                mRootNode.collectObservers(uri, 0, observer, observerWantsSelfNotifications,
+                mRootNode.collectObserversLocked(uri, 0, observer, observerWantsSelfNotifications,
                         calls);
             }
             final int numCalls = calls.size();
@@ -470,10 +469,12 @@ public final class ContentService extends IContentService.Stub {
      */
     public static final class ObserverNode {
         private class ObserverEntry implements IBinder.DeathRecipient {
-            public IContentObserver observer;
-            public boolean notifyForDescendents;
+            public final IContentObserver observer;
+            public final boolean notifyForDescendents;
+            private final Object observersLock;
 
-            public ObserverEntry(IContentObserver o, boolean n) {
+            public ObserverEntry(IContentObserver o, boolean n, Object observersLock) {
+                this.observersLock = observersLock;
                 observer = o;
                 notifyForDescendents = n;
                 try {
@@ -484,7 +485,9 @@ public final class ContentService extends IContentService.Stub {
             }
 
             public void binderDied() {
-                removeObserver(observer);
+                synchronized (observersLock) {
+                    removeObserverLocked(observer);
+                }
             }
         }
 
@@ -519,16 +522,16 @@ public final class ContentService extends IContentService.Stub {
             return uri.getPathSegments().size() + 1;
         }
 
-        public void addObserver(Uri uri, IContentObserver observer, boolean notifyForDescendents) {
-            addObserver(uri, 0, observer, notifyForDescendents);
+        public void addObserverLocked(Uri uri, IContentObserver observer,
+                boolean notifyForDescendents, Object observersLock) {
+            addObserverLocked(uri, 0, observer, notifyForDescendents, observersLock);
         }
 
-        private void addObserver(Uri uri, int index, IContentObserver observer,
-                boolean notifyForDescendents) {
-
+        private void addObserverLocked(Uri uri, int index, IContentObserver observer,
+                boolean notifyForDescendents, Object observersLock) {
             // If this is the leaf node add the observer
             if (index == countUriSegments(uri)) {
-                mObservers.add(new ObserverEntry(observer, notifyForDescendents));
+                mObservers.add(new ObserverEntry(observer, notifyForDescendents, observersLock));
                 return;
             }
 
@@ -538,7 +541,7 @@ public final class ContentService extends IContentService.Stub {
             for (int i = 0; i < N; i++) {
                 ObserverNode node = mChildren.get(i);
                 if (node.mName.equals(segment)) {
-                    node.addObserver(uri, index + 1, observer, notifyForDescendents);
+                    node.addObserverLocked(uri, index + 1, observer, notifyForDescendents, observersLock);
                     return;
                 }
             }
@@ -546,13 +549,13 @@ public final class ContentService extends IContentService.Stub {
             // No child found, create one
             ObserverNode node = new ObserverNode(segment);
             mChildren.add(node);
-            node.addObserver(uri, index + 1, observer, notifyForDescendents);
+            node.addObserverLocked(uri, index + 1, observer, notifyForDescendents, observersLock);
         }
 
-        public boolean removeObserver(IContentObserver observer) {
+        public boolean removeObserverLocked(IContentObserver observer) {
             int size = mChildren.size();
             for (int i = 0; i < size; i++) {
-                boolean empty = mChildren.get(i).removeObserver(observer);
+                boolean empty = mChildren.get(i).removeObserverLocked(observer);
                 if (empty) {
                     mChildren.remove(i);
                     i--;
@@ -578,10 +581,8 @@ public final class ContentService extends IContentService.Stub {
             return false;
         }
 
-        private void collectMyObservers(Uri uri,
-                boolean leaf, IContentObserver observer, boolean selfNotify,
-                ArrayList<ObserverCall> calls)
-        {
+        private void collectMyObserversLocked(boolean leaf, IContentObserver observer,
+                boolean selfNotify, ArrayList<ObserverCall> calls) {
             int N = mObservers.size();
             IBinder observerBinder = observer == null ? null : observer.asBinder();
             for (int i = 0; i < N; i++) {
@@ -600,17 +601,17 @@ public final class ContentService extends IContentService.Stub {
             }
         }
 
-        public void collectObservers(Uri uri, int index, IContentObserver observer,
+        public void collectObserversLocked(Uri uri, int index, IContentObserver observer,
                 boolean selfNotify, ArrayList<ObserverCall> calls) {
             String segment = null;
             int segmentCount = countUriSegments(uri);
             if (index >= segmentCount) {
                 // This is the leaf node, notify all observers
-                collectMyObservers(uri, true, observer, selfNotify, calls);
+                collectMyObserversLocked(true, observer, selfNotify, calls);
             } else if (index < segmentCount){
                 segment = getUriSegment(uri, index);
                 // Notify any observers at this level who are interested in descendents
-                collectMyObservers(uri, false, observer, selfNotify, calls);
+                collectMyObserversLocked(false, observer, selfNotify, calls);
             }
 
             int N = mChildren.size();
@@ -618,7 +619,7 @@ public final class ContentService extends IContentService.Stub {
                 ObserverNode node = mChildren.get(i);
                 if (segment == null || node.mName.equals(segment)) {
                     // We found the child,
-                    node.collectObservers(uri, index + 1, observer, selfNotify, calls);
+                    node.collectObserversLocked(uri, index + 1, observer, selfNotify, calls);
                     if (segment != null) {
                         break;
                     }

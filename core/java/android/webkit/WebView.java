@@ -2860,6 +2860,25 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
+     * Set the back/forward list client. This is an implementation of
+     * WebBackForwardListClient for handling new items and changes in the
+     * history index.
+     * @param client An implementation of WebBackForwardListClient.
+     * {@hide}
+     */
+    public void setWebBackForwardListClient(WebBackForwardListClient client) {
+        mCallbackProxy.setWebBackForwardListClient(client);
+    }
+
+    /**
+     * Gets the WebBackForwardListClient.
+     * {@hide}
+     */
+    public WebBackForwardListClient getWebBackForwardListClient() {
+        return mCallbackProxy.getWebBackForwardListClient();
+    }
+
+    /**
      * Set the Picture listener. This is an interface used to receive
      * notifications of a new Picture.
      * @param listener An implementation of WebView.PictureListener.
@@ -3133,6 +3152,9 @@ public class WebView extends AbsoluteLayout
         metrics.mScrollY = computeVerticalScrollOffset();
         metrics.mWidth = getWidth();
         metrics.mHeight = getHeight() - getVisibleTitleHeight();
+        if (mFindIsUp) {
+            metrics.mHeight -= mFindHeight;
+        }
         metrics.mInvScale = mInvActualScale;
         return metrics;
     }
@@ -4078,8 +4100,13 @@ public class WebView extends AbsoluteLayout
     protected void onScrollChanged(int l, int t, int oldl, int oldt) {
         super.onScrollChanged(l, t, oldl, oldt);
         sendOurVisibleRect();
+        // update WebKit if visible title bar height changed. The logic is same
+        // as getVisibleTitleHeight.
+        int titleHeight = getTitleHeight();
+        if (Math.max(titleHeight - t, 0) != Math.max(titleHeight - oldt, 0)) {
+            sendViewSizeZoom();
+        }
     }
-
 
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {

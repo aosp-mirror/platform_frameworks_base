@@ -24,50 +24,49 @@ import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Handler;
 import android.test.AndroidTestCase;
-import android.util.Log;
 
-public class ObserverNodeTest extends AndroidTestCase {   
+public class ObserverNodeTest extends AndroidTestCase {
     static class TestObserver  extends ContentObserver {
         public TestObserver() {
             super(new Handler());
         }
     }
-    
+
     public void testUri() {
         ObserverNode root = new ObserverNode("");
         Uri[] uris = new Uri[] {
             Uri.parse("content://c/a/"),
             Uri.parse("content://c/"),
-            Uri.parse("content://x/"), 
+            Uri.parse("content://x/"),
             Uri.parse("content://c/b/"),
             Uri.parse("content://c/a/a1/1/"),
             Uri.parse("content://c/a/a1/2/"),
             Uri.parse("content://c/b/1/"),
             Uri.parse("content://c/b/2/"),
         };
-        
+
         int[] nums = new int[] {4, 7, 1, 4, 2, 2, 3, 3};
-        
+
         // special case
-        root.addObserver(uris[0], new TestObserver().getContentObserver(), false);
+        root.addObserverLocked(uris[0], new TestObserver().getContentObserver(), false, root);
         for(int i = 1; i < uris.length; i++) {
-            root.addObserver(uris[i], new TestObserver().getContentObserver(), true);
+            root.addObserverLocked(uris[i], new TestObserver().getContentObserver(), true, root);
         }
-        
+
         ArrayList<ObserverCall> calls = new ArrayList<ObserverCall>();
-        
+
         for (int i = nums.length - 1; i >=0; --i) {
-            root.collectObservers(uris[i], 0, null, false, calls);
+            root.collectObserversLocked(uris[i], 0, null, false, calls);
             assertEquals(nums[i], calls.size());
             calls.clear();
         }
     }
-    
+
     public void testUriNotNotify() {
         ObserverNode root = new ObserverNode("");
         Uri[] uris = new Uri[] {
             Uri.parse("content://c/"),
-            Uri.parse("content://x/"), 
+            Uri.parse("content://x/"),
             Uri.parse("content://c/a/"),
             Uri.parse("content://c/b/"),
             Uri.parse("content://c/a/1/"),
@@ -76,15 +75,15 @@ public class ObserverNodeTest extends AndroidTestCase {
             Uri.parse("content://c/b/2/"),
         };
         int[] nums = new int[] {7, 1, 3, 3, 1, 1, 1, 1};
-        
+
         for(int i = 0; i < uris.length; i++) {
-            root.addObserver(uris[i], new TestObserver().getContentObserver(), false);
+            root.addObserverLocked(uris[i], new TestObserver().getContentObserver(), false, root);
         }
-        
+
         ArrayList<ObserverCall> calls = new ArrayList<ObserverCall>();
-        
+
         for (int i = uris.length - 1; i >=0; --i) {
-            root.collectObservers(uris[i], 0, null, false, calls);        
+            root.collectObserversLocked(uris[i], 0, null, false, calls);
             assertEquals(nums[i], calls.size());
             calls.clear();
         }

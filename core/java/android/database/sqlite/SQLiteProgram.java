@@ -21,7 +21,10 @@ package android.database.sqlite;
  */
 public abstract class SQLiteProgram extends SQLiteClosable {
 
-    /** The database this program is compiled against. */
+    /** The database this program is compiled against.
+     * @deprecated do not use this
+     */
+    @Deprecated
     protected SQLiteDatabase mDatabase;
 
     /** The SQL used to create this query */
@@ -30,7 +33,9 @@ public abstract class SQLiteProgram extends SQLiteClosable {
     /**
      * Native linkage, do not modify. This comes from the database and should not be modified
      * in here or in the native code.
+     * @deprecated do not use this
      */
+    @Deprecated
     protected int nHandle = 0;
 
     /**
@@ -41,7 +46,9 @@ public abstract class SQLiteProgram extends SQLiteClosable {
     /**
      * SQLiteCompiledSql statement id is populated with the corresponding object from the above
      * member. This member is used by the native_bind_* methods
+     * @deprecated do not use this
      */
+    @Deprecated
     protected int nStatement = 0;
 
     /* package */ SQLiteProgram(SQLiteDatabase db, String sql) {

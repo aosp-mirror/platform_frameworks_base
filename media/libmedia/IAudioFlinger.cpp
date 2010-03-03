@@ -61,7 +61,8 @@ enum {
     CLOSE_INPUT,
     SET_STREAM_OUTPUT,
     SET_VOICE_VOLUME,
-    GET_RENDER_POSITION
+    GET_RENDER_POSITION,
+    GET_INPUT_FRAMES_LOST
 };
 
 class BpAudioFlinger : public BpInterface<IAudioFlinger>
@@ -487,6 +488,15 @@ public:
         }
         return status;
     }
+
+    virtual unsigned int getInputFramesLost(int ioHandle)
+    {
+        Parcel data, reply;
+        data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
+        data.writeInt32(ioHandle);
+        remote()->transact(GET_INPUT_FRAMES_LOST, data, &reply);
+        return reply.readInt32();
+    }
 };
 
 IMPLEMENT_META_INTERFACE(AudioFlinger, "android.media.IAudioFlinger");
@@ -752,6 +762,13 @@ status_t BnAudioFlinger::onTransact(
             }
             return NO_ERROR;
         }
+        case GET_INPUT_FRAMES_LOST: {
+            CHECK_INTERFACE(IAudioFlinger, data, reply);
+            int ioHandle = data.readInt32();
+            reply->writeInt32(getInputFramesLost(ioHandle));
+            return NO_ERROR;
+        } break;
+
         default:
             return BBinder::onTransact(code, data, reply, flags);
     }

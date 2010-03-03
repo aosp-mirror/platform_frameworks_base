@@ -41,6 +41,8 @@ public class WebHistoryItem implements Cloneable {
     private byte[] mFlattenedData;
     // The apple-touch-icon url for use when adding the site to the home screen
     private String mTouchIconUrl;
+    // Custom client data that is not flattened or read by native code.
+    private Object mCustomData;
 
     /**
      * Basic constructor that assigns a unique id to the item. Called by JNI
@@ -134,6 +136,28 @@ public class WebHistoryItem implements Cloneable {
      */
     public String getTouchIconUrl() {
         return mTouchIconUrl;
+    }
+
+    /**
+     * Return the custom data provided by the client.
+     * @hide
+     */
+    public Object getCustomData() {
+        return mCustomData;
+    }
+
+    /**
+     * Set the custom data field.
+     * @param data An Object containing any data the client wishes to associate
+     *             with the item.
+     * @hide
+     */
+    public void setCustomData(Object data) {
+        // NOTE: WebHistoryItems are used in multiple threads. However, the
+        // public facing apis are all getters with the exception of this one
+        // api. Since this api is exclusive to clients, we don't make any
+        // promises about thread safety.
+        mCustomData = data;
     }
 
     /**

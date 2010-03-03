@@ -618,6 +618,21 @@ size_t AudioFlinger::getInputBufferSize(uint32_t sampleRate, int format, int cha
     return mAudioHardware->getInputBufferSize(sampleRate, format, channelCount);
 }
 
+unsigned int AudioFlinger::getInputFramesLost(int ioHandle)
+{
+    if (ioHandle == 0) {
+        return 0;
+    }
+
+    Mutex::Autolock _l(mLock);
+
+    RecordThread *recordThread = checkRecordThread_l(ioHandle);
+    if (recordThread != NULL) {
+        return recordThread->getInputFramesLost();
+    }
+    return 0;
+}
+
 status_t AudioFlinger::setVoiceVolume(float value)
 {
     // check calling permissions
@@ -3573,6 +3588,11 @@ void AudioFlinger::RecordThread::readInputParameters()
 
     }
     mRsmpInIndex = mFrameCount;
+}
+
+unsigned int AudioFlinger::RecordThread::getInputFramesLost()
+{
+    return mInput->getInputFramesLost();
 }
 
 // ----------------------------------------------------------------------------

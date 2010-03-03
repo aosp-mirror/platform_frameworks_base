@@ -199,6 +199,7 @@ status_t AudioRecord::set(
     mUpdatePeriod = 0;
     mInputSource = (uint8_t)inputSource;
     mFlags = flags;
+    mInput = input;
 
     return NO_ERROR;
 }
@@ -384,6 +385,13 @@ status_t AudioRecord::getPosition(uint32_t *position)
     return NO_ERROR;
 }
 
+unsigned int AudioRecord::getInputFramesLost()
+{
+    if (mActive)
+        return AudioSystem::getInputFramesLost(mInput);
+    else
+        return 0;
+}
 
 // -------------------------------------------------------------------------
 
@@ -517,10 +525,11 @@ void AudioRecord::releaseBuffer(Buffer* audioBuffer)
 
 audio_io_handle_t AudioRecord::getInput()
 {
-   return AudioSystem::getInput(mInputSource,
+    mInput = AudioSystem::getInput(mInputSource,
                                 mCblk->sampleRate,
                                 mFormat, mChannels,
                                 (AudioSystem::audio_in_acoustics)mFlags);
+    return mInput;
 }
 
 // -------------------------------------------------------------------------

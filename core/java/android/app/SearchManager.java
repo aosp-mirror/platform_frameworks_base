@@ -1355,6 +1355,16 @@ public class SearchManager
      *  a much smaller appearance.
      */
     public final static String SUGGEST_COLUMN_TEXT_2 = "suggest_text_2";
+
+    /**
+     * Column name for suggestions cursor.  <i>Optional.</i> This is a URL that will be shown
+     * as the second line of text instead of {@link #SUGGEST_COLUMN_TEXT_2}. This is a separate
+     * column so that the search UI knows to display the text as a URL, e.g. by using a different
+     * color. If this column is absent, or has the value {@code null},
+     * {@link #SUGGEST_COLUMN_TEXT_2} will be used instead.
+     */
+    public final static String SUGGEST_COLUMN_TEXT_2_URL = "suggest_text_2_url";
+
     /**
      * Column name for suggestions cursor.  <i>Optional.</i>  If your cursor includes this column,
      *  then all suggestions will be provided in a format that includes space for two small icons,
