@@ -10851,6 +10851,10 @@ public class WindowManagerService extends IWindowManager.Stub
             return;
         }
 
+        pw.println("Input State:");
+        mQueue.dump(pw, "  ");
+        pw.println(" ");
+        
         synchronized(mWindowMap) {
             pw.println("Current Window Manager state:");
             for (int i=mWindows.size()-1; i>=0; i--) {
@@ -11014,7 +11018,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (mDimAnimator != null) {
                 mDimAnimator.printTo(pw);
             } else {
-                pw.print( "  no DimAnimator ");
+                pw.println( "  no DimAnimator ");
             }
             pw.print("  mInputMethodAnimLayerAdjustment=");
                     pw.print(mInputMethodAnimLayerAdjustment);

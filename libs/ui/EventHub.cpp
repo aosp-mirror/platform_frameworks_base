@@ -604,8 +604,11 @@ int EventHub::open_device(const char *deviceName)
 
     // figure out the kinds of events the device reports
     
-    // See if this is a keyboard, and classify it.
-    uint8_t key_bitmask[(KEY_MAX+1)/8];
+    // See if this is a keyboard, and classify it.  Note that we only
+    // consider up through the function keys; we don't want to include
+    // ones after that (play cd etc) so we don't mistakenly consider a
+    // controller to be a keyboard.
+    uint8_t key_bitmask[(KEY_PLAYCD+1)/8];
     memset(key_bitmask, 0, sizeof(key_bitmask));
     LOGV("Getting keys...");
     if (ioctl(fd, EVIOCGBIT(EV_KEY, sizeof(key_bitmask)), key_bitmask) >= 0) {
@@ -702,22 +705,20 @@ int EventHub::open_device(const char *deviceName)
         device->layoutMap->load(keylayoutFilename);
 
         // tell the world about the devname (the descriptive name)
-        int32_t publicID;
-        if (!mHaveFirstKeyboard && !defaultKeymap) {
-            publicID = 0;
+        if (!mHaveFirstKeyboard && !defaultKeymap && strstr(name, "-keypad")) {
             // the built-in keyboard has a well-known device ID of 0,
             // this device better not go away.
             mHaveFirstKeyboard = true;
             mFirstKeyboardId = device->id;
+            property_set("hw.keyboards.0.devname", name);
         } else {
-            publicID = device->id;
             // ensure mFirstKeyboardId is set to -something-.
             if (mFirstKeyboardId == 0) {
                 mFirstKeyboardId = device->id;
             }
         }
         char propName[100];
-        sprintf(propName, "hw.keyboards.%u.devname", publicID);
+        sprintf(propName, "hw.keyboards.%u.devname", device->id);
         property_set(propName, name);
 
         // 'Q' key support = cheap test of whether this is an alpha-capable kbd
@@ -734,8 +735,8 @@ int EventHub::open_device(const char *deviceName)
             device->classes |= CLASS_DPAD;
         }
         
-        LOGI("New keyboard: publicID=%d device->id=0x%x devname='%s' propName='%s' keylayout='%s'\n",
-                publicID, device->id, name, propName, keylayoutFilename);
+        LOGI("New keyboard: device->id=0x%x devname='%s' propName='%s' keylayout='%s'\n",
+                device->id, name, propName, keylayoutFilename);
     }
 
     LOGI("New device: path=%s name=%s id=0x%x (of 0x%x) index=%d fd=%d classes=0x%x\n",
@@ -808,18 +809,15 @@ int EventHub::close_device(const char *deviceName)
             device->next = mClosingDevices;
             mClosingDevices = device;
 
-            uint32_t publicID;
             if (device->id == mFirstKeyboardId) {
                 LOGW("built-in keyboard device %s (id=%d) is closing! the apps will not like this",
                         device->path.string(), mFirstKeyboardId);
                 mFirstKeyboardId = 0;
-                publicID = 0;
-            } else {
-                publicID = device->id;
+                property_set("hw.keyboards.0.devname", NULL);
             }
             // clear the property
             char propName[100];
-            sprintf(propName, "hw.keyboards.%u.devname", publicID);
+            sprintf(propName, "hw.keyboards.%u.devname", device->id);
             property_set(propName, NULL);
             return 0;
         }
