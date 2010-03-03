@@ -1749,7 +1749,7 @@ public class SQLiteDatabase extends SQLiteClosable {
         mFlags = flags;
         mPath = path;
         mSlowQueryThreshold = SystemProperties.getInt(LOG_SLOW_QUERIES_PROPERTY, -1);
-        mStackTrace = new Exception().fillInStackTrace();
+        mStackTrace = new DatabaseObjectNotClosedException().fillInStackTrace();
         mFactory = factory;
         dbopen(mPath, mFlags);
         if (SQLiteDebug.DEBUG_SQL_CACHE) {

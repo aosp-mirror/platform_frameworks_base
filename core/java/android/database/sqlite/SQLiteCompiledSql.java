@@ -56,7 +56,7 @@ import android.util.Log;
     /* package */ SQLiteCompiledSql(SQLiteDatabase db, String sql) {
         mDatabase = db;
         mSqlStmt = sql;
-        mStackTrace = new Exception().fillInStackTrace();
+        mStackTrace = new DatabaseObjectNotClosedException().fillInStackTrace();
         this.nHandle = db.mNativeHandle;
         compile(sql, true);
     }
