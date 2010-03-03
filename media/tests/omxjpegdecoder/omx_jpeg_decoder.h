@@ -42,8 +42,7 @@ public:
     }
 
 protected:
-    virtual bool onDecode(SkStream* stream, SkBitmap* bm,
-            SkBitmap::Config pref, Mode mode);
+    virtual bool onDecode(SkStream* stream, SkBitmap* bm, Mode mode);
 
 private:
     JPEGSource* prepareMediaSource(SkStream* stream);

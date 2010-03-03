@@ -32,8 +32,7 @@ public:
     }
 
 protected:
-    virtual bool onDecode(SkStream* stream, SkBitmap* bm,
-                          SkBitmap::Config pref, Mode);
+    virtual bool onDecode(SkStream* stream, SkBitmap* bm, Mode);
 };
 
 int nullObjectReturn(const char msg[]) {
