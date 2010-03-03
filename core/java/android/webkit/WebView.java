@@ -2480,20 +2480,30 @@ public class WebView extends AbsoluteLayout
      */
     public int findAll(String find) {
         if (0 == mNativeClass) return 0; // client isn't initialized
-        if (mFindIsUp == false) {
-            recordNewContentSize(mContentWidth, mContentHeight + mFindHeight,
-                    false);
-            mFindIsUp = true;
-        }
-        int result = nativeFindAll(find.toLowerCase(), find.toUpperCase());
+        int result = find != null ? nativeFindAll(find.toLowerCase(),
+                find.toUpperCase()) : 0;
         invalidate();
         mLastFind = find;
         return result;
     }
 
+    /*
+     * @hide
+     */
+    public void setFindIsUp(boolean isUp) {
+        mFindIsUp = isUp;
+        if (isUp) {
+            recordNewContentSize(mContentWidth, mContentHeight + mFindHeight,
+                    false);
+        }
+        if (0 == mNativeClass) return; // client isn't initialized
+        nativeSetFindIsUp(isUp);
+    }
+
     // Used to know whether the find dialog is open.  Affects whether
     // or not we draw the highlights for matches.
     private boolean mFindIsUp;
+
     private int mFindHeight;
     // Keep track of the last string sent, so we can search again after an
     // orientation change or the dismissal of the soft keyboard.
@@ -2553,14 +2563,21 @@ public class WebView extends AbsoluteLayout
      * Clear the highlighting surrounding text matches created by findAll.
      */
     public void clearMatches() {
+        mLastFind = "";
         if (mNativeClass == 0)
             return;
-        if (mFindIsUp) {
-            recordNewContentSize(mContentWidth, mContentHeight - mFindHeight,
-                    false);
-            mFindIsUp = false;
-        }
-        nativeSetFindIsUp();
+        nativeSetFindIsEmpty();
+        invalidate();
+    }
+
+    /**
+     * @hide
+     */
+    public void notifyFindDialogDismissed() {
+        clearMatches();
+        setFindIsUp(false);
+        recordNewContentSize(mContentWidth, mContentHeight - mFindHeight,
+                false);
         // Now that the dialog has been removed, ensure that we scroll to a
         // location that is not beyond the end of the page.
         pinScrollTo(mScrollX, mScrollY, false, 0);
@@ -6863,7 +6880,8 @@ public class WebView extends AbsoluteLayout
     private native void     nativeRecordButtons(boolean focused,
             boolean pressed, boolean invalidate);
     private native void     nativeSelectBestAt(Rect rect);
-    private native void     nativeSetFindIsUp();
+    private native void     nativeSetFindIsEmpty();
+    private native void     nativeSetFindIsUp(boolean isUp);
     private native void     nativeSetFollowedLink(boolean followed);
     private native void     nativeSetHeightCanMeasure(boolean measure);
     private native void     nativeSetRootLayer(int layer);
