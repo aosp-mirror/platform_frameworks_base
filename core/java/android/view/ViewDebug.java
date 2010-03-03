@@ -23,9 +23,12 @@ import android.content.res.Resources;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Rect;
 import android.os.Environment;
 import android.os.Debug;
+import android.os.RemoteException;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -345,6 +348,7 @@ public class ViewDebug {
     private static final String REMOTE_COMMAND_INVALIDATE = "INVALIDATE";
     private static final String REMOTE_COMMAND_REQUEST_LAYOUT = "REQUEST_LAYOUT";
     private static final String REMOTE_PROFILE = "PROFILE";
+    private static final String REMOTE_COMMAND_CAPTURE_LAYERS = "CAPTURE_LAYERS";
 
     private static HashMap<Class<?>, Field[]> sFieldsForClasses;
     private static HashMap<Class<?>, Method[]> sMethodsForClasses;
@@ -846,6 +850,8 @@ public class ViewDebug {
 
         if (REMOTE_COMMAND_DUMP.equalsIgnoreCase(command)) {
             dump(view, clientStream);
+        } else if (REMOTE_COMMAND_CAPTURE_LAYERS.equalsIgnoreCase(command)) {
+            captureLayers(view, new DataOutputStream(clientStream));
         } else {
             final String[] params = parameters.split(" ");
             if (REMOTE_COMMAND_CAPTURE.equalsIgnoreCase(command)) {
@@ -1017,24 +1023,109 @@ public class ViewDebug {
         return duration[0];
     }
 
+    private static void captureLayers(View root, final DataOutputStream clientStream)
+            throws IOException {
+
+        try {
+            Rect outRect = new Rect();
+            try {
+                root.mAttachInfo.mSession.getDisplayFrame(root.mAttachInfo.mWindow, outRect);
+            } catch (RemoteException e) {
+                // Ignore
+            }
+    
+            clientStream.writeInt(outRect.width());
+            clientStream.writeInt(outRect.height());
+    
+            captureViewLayer(root, clientStream);
+            
+            clientStream.write(2);
+        } finally {
+            clientStream.close();
+        }
+    }
+
+    private static void captureViewLayer(View view, DataOutputStream clientStream)
+            throws IOException {
+
+        if ((view.mPrivateFlags & View.SKIP_DRAW) != View.SKIP_DRAW) {
+            final int id = view.getId();
+            String name = view.getClass().getSimpleName();
+            if (id != View.NO_ID) {
+                name = resolveId(view.getContext(), id).toString();
+            }
+    
+            clientStream.write(1);
+            clientStream.writeUTF(name);
+            clientStream.writeByte(view.getVisibility() == View.VISIBLE ? 1 : 0);
+    
+            int[] position = new int[2];
+            // XXX: Should happen on the UI thread
+            view.getLocationInWindow(position);
+    
+            clientStream.writeInt(position[0]);
+            clientStream.writeInt(position[1]);
+            clientStream.flush();
+    
+            Bitmap b = performViewCapture(view, true);
+            if (b != null) {
+                ByteArrayOutputStream arrayOut = new ByteArrayOutputStream(b.getWidth() *
+                        b.getHeight() * 2);
+                b.compress(Bitmap.CompressFormat.PNG, 100, arrayOut);
+                clientStream.writeInt(arrayOut.size());
+                arrayOut.writeTo(clientStream);
+            }
+            clientStream.flush();
+        }
+
+        if (view instanceof ViewGroup) {
+            ViewGroup group = (ViewGroup) view;
+            int count = group.getChildCount();
+
+            for (int i = 0; i < count; i++) {
+                captureViewLayer(group.getChildAt(i), clientStream);
+            }
+        }
+    }
+
     private static void capture(View root, final OutputStream clientStream, String parameter)
             throws IOException {
 
         final View captureView = findView(root, parameter);
+        Bitmap b = performViewCapture(captureView, false);
+       
+        if (b != null) {
+            BufferedOutputStream out = null;
+            try {
+                out = new BufferedOutputStream(clientStream, 32 * 1024);
+                b.compress(Bitmap.CompressFormat.PNG, 100, out);
+                out.flush();
+            } finally {
+                if (out != null) {
+                    out.close();
+                }
+                b.recycle();
+            }
+        } else {
+            Log.w("View", "Failed to create capture bitmap!");
+            clientStream.close();
+        }
+    }
 
+    private static Bitmap performViewCapture(final View captureView, final boolean skpiChildren) {
         if (captureView != null) {
             final CountDownLatch latch = new CountDownLatch(1);
             final Bitmap[] cache = new Bitmap[1];
 
-            root.post(new Runnable() {
+            captureView.post(new Runnable() {
                 public void run() {
                     try {
                         cache[0] = captureView.createSnapshot(
-                                Bitmap.Config.ARGB_8888, 0);
+                                Bitmap.Config.ARGB_8888, 0, skpiChildren);
                     } catch (OutOfMemoryError e) {
                         try {
                             cache[0] = captureView.createSnapshot(
-                                    Bitmap.Config.ARGB_4444, 0);
+                                    Bitmap.Config.ARGB_4444, 0, skpiChildren);
                         } catch (OutOfMemoryError e2) {
                             Log.w("View", "Out of memory for bitmap");
                         }
@@ -1046,28 +1137,14 @@ public class ViewDebug {
 
             try {
                 latch.await(CAPTURE_TIMEOUT, TimeUnit.MILLISECONDS);
-
-                if (cache[0] != null) {
-                    BufferedOutputStream out = null;
-                    try {
-                        out = new BufferedOutputStream(clientStream, 32 * 1024);
-                        cache[0].compress(Bitmap.CompressFormat.PNG, 100, out);
-                        out.flush();
-                    } finally {
-                        if (out != null) {
-                            out.close();
-                        }
-                        cache[0].recycle();
-                    }
-                } else {
-                    Log.w("View", "Failed to create capture bitmap!");
-                    clientStream.close();
-                }
+                return cache[0];
             } catch (InterruptedException e) {
                 Log.w("View", "Could not complete the capture of the view " + captureView);
                 Thread.currentThread().interrupt();
             }
         }
+        
+        return null;
     }
 
     private static void dump(View root, OutputStream clientStream) throws IOException {
