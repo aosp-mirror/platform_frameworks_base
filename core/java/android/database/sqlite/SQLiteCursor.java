@@ -207,7 +207,7 @@ public class SQLiteCursor extends AbstractWindowedCursor {
             String editTable, SQLiteQuery query) {
         // The AbstractCursor constructor needs to do some setup.
         super();
-        mStackTrace = new Exception().fillInStackTrace();
+        mStackTrace = new DatabaseObjectNotClosedException().fillInStackTrace();
         mDatabase = db;
         mDriver = driver;
         mEditTable = editTable;
