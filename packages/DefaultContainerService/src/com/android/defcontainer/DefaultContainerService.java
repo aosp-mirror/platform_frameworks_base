@@ -166,61 +166,40 @@ public class DefaultContainerService extends IntentService {
         String codePath = packageURI.getPath();
         File codeFile = new File(codePath);
         String newCachePath = null;
-        final int CREATE_FAILED = 1;
-        final int COPY_FAILED = 2;
-        final int FINALIZE_FAILED = 3;
-        final int PASS = 4;
-        int errCode = CREATE_FAILED;
         // Create new container
         if ((newCachePath = PackageHelper.createSdDir(codeFile,
-                newCid, key, Process.myUid())) != null) {
-            if (localLOGV) Log.i(TAG, "Created container for " + newCid
-                    + " at path : " + newCachePath);
-            File resFile = new File(newCachePath, resFileName);
-            errCode = COPY_FAILED;
-            // Copy file from codePath
-            if (FileUtils.copyFile(new File(codePath), resFile)) {
-                if (localLOGV) Log.i(TAG, "Copied " + codePath + " to " + resFile);
-                errCode = FINALIZE_FAILED;
-                if (PackageHelper.finalizeSdDir(newCid)) {
-                    if (localLOGV) Log.i(TAG, "Finalized container " + newCid);
-                    errCode = PASS;
-                }
-            }
-        }
-        // Print error based on errCode
-        String errMsg = "";
-        switch (errCode) {
-            case CREATE_FAILED:
-                errMsg = "CREATE_FAILED";
-                break;
-            case COPY_FAILED:
-                errMsg = "COPY_FAILED";
-                if (localLOGV) Log.i(TAG, "Destroying " + newCid +
-                        " at path " + newCachePath + " after " + errMsg);
-                PackageHelper.destroySdDir(newCid);
-                break;
-            case FINALIZE_FAILED:
-                errMsg = "FINALIZE_FAILED";
-                if (localLOGV) Log.i(TAG, "Destroying " + newCid +
-                        " at path " + newCachePath + " after " + errMsg);
-                PackageHelper.destroySdDir(newCid);
-                break;
-            default:
-                errMsg = "PASS";
-                if (PackageHelper.isContainerMounted(newCid)) {
-                    if (localLOGV) Log.i(TAG, "Unmounting " + newCid +
-                            " at path " + newCachePath + " after " + errMsg);
-                    // Force a gc to avoid being killed.
-                    Runtime.getRuntime().gc();
-                    PackageHelper.unMountSdDir(newCid);
-                } else {
-                    if (localLOGV) Log.i(TAG, "Container " + newCid + " not mounted");
-                }
-                break;
-        }
-        if (errCode != PASS) {
+                newCid, key, Process.myUid())) == null) {
+            Log.e(TAG, "Failed creating container " + newCid);
             return null;
+        }
+        if (localLOGV) Log.i(TAG, "Created container for " + newCid
+                + " at path : " + newCachePath);
+        File resFile = new File(newCachePath, resFileName);
+        // Copy file from codePath
+        if (!FileUtils.copyFile(new File(codePath), resFile)) {
+            Log.e(TAG, "Failed to copy " + codePath + " to " + resFile);
+            // Clean up created container
+            PackageHelper.destroySdDir(newCid);
+            return null;
+        }
+        if (localLOGV) Log.i(TAG, "Copied " + codePath + " to " + resFile);
+        // Finalize container now
+        if (!PackageHelper.finalizeSdDir(newCid)) {
+            Log.e(TAG, "Failed to finalize " + newCid + " at cache path " + newCachePath);
+            // Clean up created container
+            PackageHelper.destroySdDir(newCid);
+            return null;
+        }
+        if (localLOGV) Log.i(TAG, "Finalized container " + newCid);
+        // Force a gc to avoid being killed.
+        Runtime.getRuntime().gc();
+        // Unmount container
+        if (PackageHelper.isContainerMounted(newCid)) {
+            if (localLOGV) Log.i(TAG, "Unmounting " + newCid +
+                    " at path " + newCachePath);
+            PackageHelper.unMountSdDir(newCid);
+        } else {
+            if (localLOGV) Log.i(TAG, "Container " + newCid + " not mounted");
         }
         return newCachePath;
     }

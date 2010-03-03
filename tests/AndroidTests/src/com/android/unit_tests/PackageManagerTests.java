@@ -263,6 +263,9 @@ public class PackageManagerTests extends AndroidTestCase {
         if (expInstallLocation == PackageInfo.INSTALL_LOCATION_PREFER_EXTERNAL) {
             return true;
         }
+        if (expInstallLocation == PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY) {
+            return false;
+        }
         // TODO Out of memory checks here.
         boolean checkSd = false;
         int setLoc = 0;
@@ -403,7 +406,7 @@ public class PackageManagerTests extends AndroidTestCase {
             return ip;
         } finally {
             if (cleanUp) {
-                //cleanUpInstall(ip);
+                cleanUpInstall(ip);
             }
         }
     }
@@ -931,9 +934,9 @@ public class PackageManagerTests extends AndroidTestCase {
 
     public void testManifestInstallLocationFwdLockedSdcard() {
         installFromRawResource("install.apk", R.raw.install_loc_sdcard,
-                PackageManager.INSTALL_FORWARD_LOCK, true, true,
-                PackageManager.INSTALL_FAILED_INVALID_INSTALL_LOCATION,
-                PackageInfo.INSTALL_LOCATION_AUTO);
+                PackageManager.INSTALL_FORWARD_LOCK, true, false,
+                -1,
+                PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY);
     }
 
     public void xxxtestClearAllSecureContainers() {
@@ -1050,6 +1053,21 @@ public class PackageManagerTests extends AndroidTestCase {
         }
     }
 
+    private int getInstallLoc() {
+        boolean userSetting = false;
+        int origDefaultLoc = PackageInfo.INSTALL_LOCATION_AUTO;
+        try {
+            userSetting = Settings.System.getInt(mContext.getContentResolver(), Settings.System.SET_INSTALL_LOCATION) != 0;
+            origDefaultLoc = Settings.System.getInt(mContext.getContentResolver(), Settings.System.DEFAULT_INSTALL_LOCATION);
+        } catch (SettingNotFoundException e1) {
+        }
+        return origDefaultLoc;
+    }
+
+    private void setInstallLoc(int loc) {
+        Settings.System.putInt(mContext.getContentResolver(),
+                Settings.System.DEFAULT_INSTALL_LOCATION, loc);
+    }
     /*
      * Utility function that reads a apk bundled as a raw resource
      * copies it into own data directory and invokes
@@ -1058,6 +1076,8 @@ public class PackageManagerTests extends AndroidTestCase {
      */
     public void moveFromRawResource(int installFlags, int moveFlags,
             int expRetCode) {
+        int origDefaultLoc = getInstallLoc();
+        setInstallLoc(PackageInfo.INSTALL_LOCATION_AUTO);
         // Install first
         InstallParams ip = sampleInstallFromRawResource(installFlags, false);
         ApplicationInfo oldAppInfo = null;
@@ -1091,6 +1111,8 @@ public class PackageManagerTests extends AndroidTestCase {
             failStr("Failed with exception : " + e);
         } finally {
             cleanUpInstall(ip);
+            // Restore default install location
+            setInstallLoc(origDefaultLoc);
         }
     }
 

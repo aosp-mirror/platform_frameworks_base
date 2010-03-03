@@ -1176,13 +1176,6 @@ class MountService extends IMountService.Stub
         } catch (NativeDaemonConnectorException e) {
             rc = StorageResultCode.OperationFailedInternalError;
         }
-        if (rc == StorageResultCode.OperationSucceeded) {
-            synchronized (mAsecMountSet) {
-                if (!mAsecMountSet.contains(newId)) {
-                    mAsecMountSet.add(newId);
-                }
-            }
-        }
 
         return rc;
     }
