@@ -368,7 +368,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
      * @param reason reason for the clean up.
      */
     private void cleanUpConnection(boolean tearDown, String reason) {
-        if (DBG) log("Clean up connection due to " + reason);
+        if (DBG) log("cleanUpConnection: reason: " + reason);
 
         // Clear the reconnect alarm, if set.
         if (mReconnectIntent != null) {
@@ -380,25 +380,25 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
 
         setState(State.DISCONNECTING);
 
-        for (DataConnection connBase : dataConnectionList) {
-            CdmaDataConnection conn = (CdmaDataConnection) connBase;
-
+        boolean notificationDeferred = false;
+        for (DataConnection conn : dataConnectionList) {
             if(conn != null) {
                 if (tearDown) {
-                    Message msg = obtainMessage(EVENT_DISCONNECT_DONE, reason);
-                    conn.disconnect(msg);
+                    if (DBG) log("cleanUpConnection: teardown, call conn.disconnect");
+                    conn.disconnect(obtainMessage(EVENT_DISCONNECT_DONE, reason));
                 } else {
-                    conn.reset();
+                    if (DBG) log("cleanUpConnection: !tearDown, call conn.reset");
+                    conn.reset(obtainMessage(EVENT_RESET_DONE, reason));
                 }
+                notificationDeferred = true;
             }
         }
 
         stopNetStatPoll();
 
-        if (!tearDown) {
-            setState(State.IDLE);
-            phone.notifyDataConnection(reason);
-            mIsApnActive = false;
+        if (!notificationDeferred) {
+            if (DBG) log("cleanupConnection: !tearDown && !resettingConn");
+            gotoIdleAndNotifyDataConnection(reason);
         }
     }
 
@@ -622,6 +622,13 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
         setState(State.FAILED);
     }
 
+    private void gotoIdleAndNotifyDataConnection(String reason) {
+        if (DBG) log("gotoIdleAndNotifyDataConnection: reason=" + reason);
+        setState(State.IDLE);
+        phone.notifyDataConnection(reason);
+        mIsApnActive = false;
+    }
+
     protected void onRecordsLoaded() {
         if (state == State.FAILED) {
             cleanUpConnection(false, null);
@@ -731,7 +738,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
     }
 
     /**
-     * @override com.android.internal.telephony.DataConnectionTracker
+     * Called when EVENT_DISCONNECT_DONE is received.
      */
     protected void onDisconnectDone(AsyncResult ar) {
         if(DBG) log("EVENT_DISCONNECT_DONE");
@@ -759,6 +766,20 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
         if (retryAfterDisconnected(reason)) {
           trySetupData(reason);
       }
+    }
+
+    /**
+     * Called when EVENT_RESET_DONE is received so goto
+     * IDLE state and send notifications to those interested.
+     */
+    @Override
+    protected void onResetDone(AsyncResult ar) {
+      if (DBG) log("EVENT_RESET_DONE");
+      String reason = null;
+      if (ar.userObj instanceof String) {
+          reason = (String) ar.userObj;
+      }
+      gotoIdleAndNotifyDataConnection(reason);
     }
 
     /**

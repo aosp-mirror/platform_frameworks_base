@@ -502,20 +502,22 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
 
         setState(State.DISCONNECTING);
 
+        boolean notificationDeferred = false;
         for (DataConnection conn : pdpList) {
             if (tearDown) {
-                Message msg = obtainMessage(EVENT_DISCONNECT_DONE, reason);
-                conn.disconnect(msg);
+                if (DBG) log("cleanUpConnection: teardown, call conn.disconnect");
+                conn.disconnect(obtainMessage(EVENT_DISCONNECT_DONE, reason));
             } else {
-                conn.reset();
+                if (DBG) log("cleanUpConnection: !tearDown, call conn.reset");
+                conn.reset(obtainMessage(EVENT_RESET_DONE, reason));
             }
+            notificationDeferred = true;
         }
         stopNetStatPoll();
 
-        if (!tearDown) {
-            setState(State.IDLE);
-            phone.notifyDataConnection(reason);
-            mActiveApn = null;
+        if (!notificationDeferred) {
+            if (DBG) log("cleanupConnection: !tearDown && !resettingConn");
+            gotoIdleAndNotifyDataConnection(reason);
         }
     }
 
@@ -747,6 +749,13 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         // reset reconnect timer
         mRetryMgr.resetRetryCount();
         mReregisterOnReconnectFailure = false;
+    }
+
+    private void gotoIdleAndNotifyDataConnection(String reason) {
+        if (DBG) log("gotoIdleAndNotifyDataConnection: reason=" + reason);
+        setState(State.IDLE);
+        phone.notifyDataConnection(reason);
+        mActiveApn = null;
     }
 
     /**
@@ -1172,6 +1181,9 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         }
     }
 
+    /**
+     * Called when EVENT_DISCONNECT_DONE is received.
+     */
     protected void onDisconnectDone(AsyncResult ar) {
         String reason = null;
         if(DBG) log("EVENT_DISCONNECT_DONE");
@@ -1184,6 +1196,19 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         if (retryAfterDisconnected(reason)) {
             trySetupData(reason);
         }
+    }
+
+    /**
+     * Called when EVENT_RESET_DONE is received.
+     */
+    @Override
+    protected void onResetDone(AsyncResult ar) {
+        if (DBG) log("EVENT_RESET_DONE");
+        String reason = null;
+        if (ar.userObj instanceof String) {
+            reason = (String) ar.userObj;
+        }
+        gotoIdleAndNotifyDataConnection(reason);
     }
 
     protected void onPollPdp() {
@@ -1487,5 +1512,4 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
     protected void log(String s) {
         Log.d(LOG_TAG, "[GsmDataConnectionTracker] " + s);
     }
-
 }
