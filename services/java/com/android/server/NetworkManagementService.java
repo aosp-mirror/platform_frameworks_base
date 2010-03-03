@@ -447,7 +447,7 @@ class NetworkManagementService extends INetworkManagementService.Stub {
             String []tok = line.split(" ");
             int code = Integer.parseInt(tok[0]);
             if (code == NetdResponseCode.UsbRNDISStatusResult) {
-                if (tok[2].equals("started"))
+                if (tok[3].equals("started"))
                     return true;
                 return false;
             } else {
