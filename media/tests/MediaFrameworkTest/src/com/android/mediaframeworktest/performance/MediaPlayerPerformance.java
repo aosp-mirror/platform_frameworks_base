@@ -20,8 +20,11 @@ import com.android.mediaframeworktest.MediaFrameworkTest;
 import com.android.mediaframeworktest.MediaNames;
 
 import android.database.sqlite.SQLiteDatabase;
+import android.hardware.Camera;
+import android.hardware.Camera.PreviewCallback;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
+import android.os.Looper;
 import android.os.SystemClock;
 import android.test.ActivityInstrumentationTestCase;
 import android.test.suitebuilder.annotation.LargeTest;
@@ -42,6 +45,8 @@ import java.io.BufferedWriter;
 import android.media.MediaMetadataRetriever;
 import com.android.mediaframeworktest.MediaProfileReader;
 
+import android.hardware.Camera.PreviewCallback;
+
 /**
  * Junit / Instrumentation - performance measurement for media player and 
  * recorder
@@ -58,14 +63,24 @@ public class MediaPlayerPerformance extends ActivityInstrumentationTestCase<Medi
     private static final String MEDIA_MEMORY_OUTPUT =
         "/sdcard/mediaMemOutput.txt";
 
-    //the tolerant memory leak
-    private static final int MAX_ACCEPTED_MEMORY_LEAK_KB = 150;
-
     private static int mStartMemory = 0;
     private static int mEndMemory = 0;
     private static int mStartPid = 0;
     private static int mEndPid = 0;
 
+    private boolean mInitialized = false;
+    private Looper mLooper = null;
+    private RawPreviewCallback mRawPreviewCallback = new RawPreviewCallback();
+    private final Object lock = new Object();
+    private final Object previewDone = new Object();
+    private static int WAIT_FOR_COMMAND_TO_COMPLETE = 10000;  // Milliseconds.
+
+    //the tolerant memory leak
+    private static int ENCODER_LIMIT = 150;
+    private static int DECODER_LIMIT = 150;
+    private static int CAMERA_LIMIT = 80;
+
+    Camera mCamera;
 
     public MediaPlayerPerformance() {
         super("com.android.mediaframeworktest", MediaFrameworkTest.class);
@@ -178,6 +193,66 @@ public class MediaPlayerPerformance extends ActivityInstrumentationTestCase<Medi
         Log.v(TAG, "Average duration = " + sum / testFile.length);
     }
 
+    private void initializeMessageLooper() {
+        new Thread() {
+            @Override
+            public void run() {
+                Looper.prepare();
+                Log.v(TAG, "start loopRun");
+                mLooper = Looper.myLooper();
+                mCamera = Camera.open();
+                synchronized (lock) {
+                    mInitialized = true;
+                    lock.notify();
+                }
+                Looper.loop();
+                Log.v(TAG, "initializeMessageLooper: quit.");
+            }
+        }.start();
+    }
+
+    private void terminateMessageLooper() {
+        mLooper.quit();
+        mCamera.release();
+    }
+
+    private final class RawPreviewCallback implements PreviewCallback {
+        public void onPreviewFrame(byte[] rawData, Camera camera) {
+            synchronized (previewDone) {
+                previewDone.notify();
+            }
+        }
+    }
+
+    public void stressCameraPreview() {
+        try {
+            synchronized (lock) {
+                initializeMessageLooper();
+                try {
+                    lock.wait(WAIT_FOR_COMMAND_TO_COMPLETE);
+                } catch (Exception e) {
+                    Log.v(TAG, "runTestOnMethod: wait was interrupted.");
+                }
+            }
+            mCamera.setPreviewCallback(mRawPreviewCallback);
+            mSurfaceHolder = MediaFrameworkTest.mSurfaceView.getHolder();
+            mCamera.setPreviewDisplay(mSurfaceHolder);
+            mCamera.startPreview();
+            synchronized (previewDone) {
+                try {
+                    previewDone.wait(WAIT_FOR_COMMAND_TO_COMPLETE);
+                    Log.v(TAG, "Preview Done");
+                } catch (Exception e) {
+                    Log.v(TAG, "wait was interrupted.");
+                }
+            }
+            Thread.sleep(1000);
+            mCamera.stopPreview();
+            terminateMessageLooper();
+        } catch (Exception e) {
+            Log.v(TAG, e.toString());
+        }
+    }
 
     // Note: This test is to assume the mediaserver's pid is 34
     public void mediaStressPlayback(String testFilePath) {
@@ -314,8 +389,9 @@ public class MediaPlayerPerformance extends ActivityInstrumentationTestCase<Medi
         return vsizevalue;
     }
 
-    public boolean validateMemoryResult (int startPid, int startMemory, Writer output) throws Exception {
-        //Wait for 10 seconds to make sure the memory settle.
+    public boolean validateMemoryResult(int startPid, int startMemory, Writer output, int limit)
+            throws Exception {
+        // Wait for 10 seconds to make sure the memory settle.
         Thread.sleep(10000);
         mEndPid = getMediaserverPid();
         int memDiff = mEndMemory - startMemory;
@@ -329,9 +405,8 @@ public class MediaPlayerPerformance extends ActivityInstrumentationTestCase<Medi
             output.write("mediaserver died. Test failed\n");
             return false;
         }
-        //memory leak greter than the tolerant
-        if (memDiff > MAX_ACCEPTED_MEMORY_LEAK_KB )
-            return false;
+        // memory leak greter than the tolerant
+        if (memDiff > limit) return false;
         return true;
     }
 
@@ -356,7 +431,7 @@ public class MediaPlayerPerformance extends ActivityInstrumentationTestCase<Medi
             getMemoryWriteToLog(output, i);
         }
         output.write("\n");
-        memoryResult = validateMemoryResult(mStartPid, mStartMemory, output);
+        memoryResult = validateMemoryResult(mStartPid, mStartMemory, output, DECODER_LIMIT);
         output.close();
         assertTrue("H263 playback memory test", memoryResult);
     }
@@ -375,7 +450,7 @@ public class MediaPlayerPerformance extends ActivityInstrumentationTestCase<Medi
             getMemoryWriteToLog(output, i);
         }
         output.write("\n");
-        memoryResult = validateMemoryResult(mStartPid, mStartMemory, output);
+        memoryResult = validateMemoryResult(mStartPid, mStartMemory, output, DECODER_LIMIT);
         output.close();
         assertTrue("H264 playback memory test", memoryResult);
     }
@@ -394,7 +469,7 @@ public class MediaPlayerPerformance extends ActivityInstrumentationTestCase<Medi
                 getMemoryWriteToLog(output, i);
             }
             output.write("\n");
-            memoryResult = validateMemoryResult(mStartPid, mStartMemory, output);
+            memoryResult = validateMemoryResult(mStartPid, mStartMemory, output, DECODER_LIMIT);
             output.close();
             assertTrue("wmv playback memory test", memoryResult);
         }
@@ -415,7 +490,7 @@ public class MediaPlayerPerformance extends ActivityInstrumentationTestCase<Medi
             getMemoryWriteToLog(output, i);
         }
         output.write("\n");
-        memoryResult = validateMemoryResult(mStartPid, mStartMemory, output);
+        memoryResult = validateMemoryResult(mStartPid, mStartMemory, output, ENCODER_LIMIT);
         output.close();
         assertTrue("H263 record only memory test", memoryResult);
     }
@@ -435,7 +510,7 @@ public class MediaPlayerPerformance extends ActivityInstrumentationTestCase<Medi
             getMemoryWriteToLog(output, i);
         }
         output.write("\n");
-        memoryResult = validateMemoryResult(mStartPid, mStartMemory, output);
+        memoryResult = validateMemoryResult(mStartPid, mStartMemory, output, ENCODER_LIMIT);
         output.close();
         assertTrue("mpeg4 record only memory test", memoryResult);
     }
@@ -456,7 +531,7 @@ public class MediaPlayerPerformance extends ActivityInstrumentationTestCase<Medi
             getMemoryWriteToLog(output, i);
         }
         output.write("\n");
-        memoryResult = validateMemoryResult(mStartPid, mStartMemory, output);
+        memoryResult = validateMemoryResult(mStartPid, mStartMemory, output, ENCODER_LIMIT);
         output.close();
         assertTrue("H263 audio video record memory test", memoryResult);
     }
@@ -475,8 +550,27 @@ public class MediaPlayerPerformance extends ActivityInstrumentationTestCase<Medi
             getMemoryWriteToLog(output, i);
         }
         output.write("\n");
-        memoryResult = validateMemoryResult(mStartPid, mStartMemory, output);
+        memoryResult = validateMemoryResult(mStartPid, mStartMemory, output, ENCODER_LIMIT);
         output.close();
         assertTrue("audio record only memory test", memoryResult);
+    }
+
+    // Test case 8: Capture the memory usage after every 20 camera preview
+    @LargeTest
+    public void testCameraPreviewMemoryUsage() throws Exception {
+        boolean memoryResult = false;
+        mStartPid = getMediaserverPid();
+
+        File cameraPreviewMemoryOut = new File(MEDIA_MEMORY_OUTPUT);
+        Writer output = new BufferedWriter(new FileWriter(cameraPreviewMemoryOut, true));
+        output.write("Camera Preview Only\n");
+        for (int i = 0; i < NUM_STRESS_LOOP; i++) {
+            stressCameraPreview();
+            getMemoryWriteToLog(output, i);
+        }
+        output.write("\n");
+        memoryResult = validateMemoryResult(mStartPid, mStartMemory, output, CAMERA_LIMIT);
+        output.close();
+        assertTrue("camera preview memory test", memoryResult);
     }
 }
