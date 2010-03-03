@@ -56,6 +56,7 @@ protected:
         int32_t mFragAttribSlots[Program::MAX_ATTRIBS];
         int32_t mFragUniformSlots[Program::MAX_UNIFORMS];
         bool mUserVertexProgram;
+        bool mIsValid;
     } entry_t;
     entry_t *mEntries;
     entry_t *mCurrent;

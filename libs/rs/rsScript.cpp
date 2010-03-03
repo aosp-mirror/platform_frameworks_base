@@ -96,6 +96,10 @@ void rsi_ScriptSetInvoke(Context *rsc, const char *name, uint32_t slot)
 void rsi_ScriptInvoke(Context *rsc, RsScript vs, uint32_t slot)
 {
     Script *s = static_cast<Script *>(vs);
+    if (s->mEnviroment.mInvokables[slot] == NULL) {
+        rsc->setError(RS_ERROR_BAD_SCRIPT, "Calling invoke on bad script");
+        return;
+    }
     s->setupScript();
     s->mEnviroment.mInvokables[slot]();
 }

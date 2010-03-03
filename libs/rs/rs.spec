@@ -36,6 +36,11 @@ ContextDump {
 	param int32_t bits
 }
 
+ContextGetError {
+	param RsError *err
+	ret const char *
+	}
+
 ContextSetPriority {
 	param int32_t priority
 	}

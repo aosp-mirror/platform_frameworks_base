@@ -39,6 +39,7 @@ Program::Program(Context *rsc) : ObjectBase(rsc)
     mInputCount = 0;
     mOutputCount = 0;
     mConstantCount = 0;
+    mIsValid = false;
 }
 
 Program::Program(Context *rsc, const char * shaderText, uint32_t shaderLength,
@@ -216,6 +217,7 @@ bool Program::loadShader(Context *rsc, uint32_t type)
                 }
                 glDeleteShader(mShaderID);
                 mShaderID = 0;
+                rsc->setError(RS_ERROR_BAD_SHADER, "Error returned from GL driver loading shader text,");
                 return false;
             }
         }
@@ -224,6 +226,7 @@ bool Program::loadShader(Context *rsc, uint32_t type)
     if (rsc->props.mLogShaders) {
         LOGV("--Shader load result %x ", glGetError());
     }
+    mIsValid = true;
     return true;
 }
 
