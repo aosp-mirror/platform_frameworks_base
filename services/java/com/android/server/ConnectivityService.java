@@ -1457,15 +1457,36 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     }
 
     // javadoc from interface
-    public boolean tether(String iface) {
+    public int tether(String iface) {
         enforceTetherChangePermission();
-        return isTetheringSupported() && mTethering.tether(iface);
+
+        if (isTetheringSupported()) {
+            return mTethering.tether(iface);
+        } else {
+            return ConnectivityManager.TETHER_ERROR_UNSUPPORTED;
+        }
     }
 
     // javadoc from interface
-    public boolean untether(String iface) {
+    public int untether(String iface) {
         enforceTetherChangePermission();
-        return isTetheringSupported() && mTethering.untether(iface);
+
+        if (isTetheringSupported()) {
+            return mTethering.untether(iface);
+        } else {
+            return ConnectivityManager.TETHER_ERROR_UNSUPPORTED;
+        }
+    }
+
+    // javadoc from interface
+    public int getLastTetherError(String iface) {
+        enforceTetherAccessPermission();
+
+        if (isTetheringSupported()) {
+            return mTethering.getLastTetherError(iface);
+        } else {
+            return ConnectivityManager.TETHER_ERROR_UNSUPPORTED;
+        }
     }
 
     // TODO - proper iface API for selection by property, inspection, etc
@@ -1497,6 +1518,11 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     public String[] getTetheredIfaces() {
         enforceTetherAccessPermission();
         return mTethering.getTetheredIfaces();
+    }
+
+    public String[] getTetheringErroredIfaces() {
+        enforceTetherAccessPermission();
+        return mTethering.getErroredIfaces();
     }
 
     // if ro.tether.denied = true we default to no tethering

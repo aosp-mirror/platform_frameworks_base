@@ -62,6 +62,7 @@ public class TetherActivity extends AlertActivity implements
         // determine if we advertise tethering or untethering
         ConnectivityManager cm =
                 (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
+
         mTethered = cm.getTetheredIfaces().length;
         int tetherable = cm.getTetherableIfaces().length;
         if ((mTethered == 0) && (tetherable == 0)) {
@@ -116,7 +117,7 @@ public class TetherActivity extends AlertActivity implements
      * {@inheritDoc}
      */
     public void onClick(DialogInterface dialog, int which) {
-        boolean error =  false;
+        int error = ConnectivityManager.TETHER_ERROR_NO_ERROR;
 
         if (which == POSITIVE_BUTTON) {
             ConnectivityManager cm =
@@ -130,24 +131,17 @@ public class TetherActivity extends AlertActivity implements
                 for (String t : tetherable) {
                     for (String r : usbRegexs) {
                         if (t.matches(r)) {
-                            if (!cm.tether(t))
-                                error = true;
+                            error = cm.tether(t);
                             break;
                         }
                     }
                 }
-                if (error) {
-                    showTetheringError();
-                }
+                showTetheringError(error);
             } else {
                 for (String t : tethered) {
-                    if (!cm.untether(t)) {
-                        error = true;
-                    }
+                    error = cm.untether(t);
                 }
-                if (error) {
-                    showUnTetheringError();
-                }
+                showUnTetheringError(error);
             }
         }
         // No matter what, finish the activity
@@ -163,14 +157,23 @@ public class TetherActivity extends AlertActivity implements
         }
     }
 
-    private void showTetheringError() {
-        Toast.makeText(this, com.android.internal.R.string.tether_error_message,
-                Toast.LENGTH_LONG).show();
+    private void showTetheringError(int error) {
+        switch(error) {
+        case ConnectivityManager.TETHER_ERROR_NO_ERROR:
+            return;
+        default:
+            Toast.makeText(this, com.android.internal.R.string.tether_error_message,
+                    Toast.LENGTH_LONG).show();
+        }
     }
 
-    private void showUnTetheringError() {
-        Toast.makeText(this, com.android.internal.R.string.tether_stop_error_message,
-                Toast.LENGTH_LONG).show();
+    private void showUnTetheringError(int error) {
+        switch(error) {
+        case ConnectivityManager.TETHER_ERROR_NO_ERROR:
+            return;
+        default:
+            Toast.makeText(this, com.android.internal.R.string.tether_stop_error_message,
+                    Toast.LENGTH_LONG).show();
+        }
     }
-
 }

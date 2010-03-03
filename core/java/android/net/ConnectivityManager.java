@@ -364,7 +364,7 @@ public class ConnectivityManager
     /**
      * Sets the persisted value for enabling/disabling Mobile data.
      *
-     * @param allowMobileData Whether the mobile data connection should be
+     * @param enabled Whether the mobile data connection should be
      *            used or not.
      * @hide
      */
@@ -418,22 +418,35 @@ public class ConnectivityManager
     /**
      * {@hide}
      */
-    public boolean tether(String iface) {
+    public String[] getTetheringErroredIfaces() {
         try {
-            return mService.tether(iface);
+            return mService.getTetheringErroredIfaces();
         } catch (RemoteException e) {
-            return false;
+            return new String[0];
         }
     }
 
     /**
+     * @return error A TETHER_ERROR value indicating success or failure type
      * {@hide}
      */
-    public boolean untether(String iface) {
+    public int tether(String iface) {
+        try {
+            return mService.tether(iface);
+        } catch (RemoteException e) {
+            return TETHER_ERROR_SERVICE_UNAVAIL;
+        }
+    }
+
+    /**
+     * @return error A TETHER_ERROR value indicating success or failure type
+     * {@hide}
+     */
+    public int untether(String iface) {
         try {
             return mService.untether(iface);
         } catch (RemoteException e) {
-            return false;
+            return TETHER_ERROR_SERVICE_UNAVAIL;
         }
     }
 
@@ -469,4 +482,41 @@ public class ConnectivityManager
             return new String[0];
         }
     }
+
+    /** {@hide} */
+    public static final int TETHER_ERROR_NO_ERROR           = 0;
+    /** {@hide} */
+    public static final int TETHER_ERROR_UNKNOWN_IFACE      = 1;
+    /** {@hide} */
+    public static final int TETHER_ERROR_SERVICE_UNAVAIL    = 2;
+    /** {@hide} */
+    public static final int TETHER_ERROR_UNSUPPORTED        = 3;
+    /** {@hide} */
+    public static final int TETHER_ERROR_UNAVAIL_IFACE      = 4;
+    /** {@hide} */
+    public static final int TETHER_ERROR_MASTER_ERROR       = 5;
+    /** {@hide} */
+    public static final int TETHER_ERROR_TETHER_IFACE_ERROR = 6;
+    /** {@hide} */
+    public static final int TETHER_ERROR_UNTETHER_IFACE_ERROR = 7;
+    /** {@hide} */
+    public static final int TETHER_ERROR_ENABLE_NAT_ERROR     = 8;
+    /** {@hide} */
+    public static final int TETHER_ERROR_DISABLE_NAT_ERROR    = 9;
+    /** {@hide} */
+    public static final int TETHER_ERROR_IFACE_CFG_ERROR      = 10;
+
+    /**
+     * @param iface The name of the interface we're interested in
+     * @return error The error code of the last error tethering or untethering the named
+     *               interface
+     * {@hide}
+     */
+    public int getLastTetherError(String iface) {
+        try {
+            return mService.getLastTetherError(iface);
+        } catch (RemoteException e) {
+            return TETHER_ERROR_SERVICE_UNAVAIL;
+        }
+   }
 }
