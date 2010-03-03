@@ -23,6 +23,8 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.PasswordEntryKeyboardView;
 
 import android.telephony.TelephonyManager;
+import android.text.method.DigitsKeyListener;
+import android.text.method.TextKeyListener;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -91,6 +93,14 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
 
         mKeyboardView.setVisibility(mCreatedWithKeyboardOpen ? View.INVISIBLE : View.VISIBLE);
         mPasswordEntry.requestFocus();
+
+        // This allows keyboards with overlapping qwerty/numeric keys to choose just the
+        // numeric keys.
+        if (isAlpha) {
+            mPasswordEntry.setKeyListener(TextKeyListener.getInstance());
+        } else {
+            mPasswordEntry.setKeyListener(DigitsKeyListener.getInstance());
+        }
 
         mKeyboardHelper.setVibratePattern(mLockPatternUtils.isTactileFeedbackEnabled() ?
                 com.android.internal.R.array.config_virtualKeyVibePattern : 0);
