@@ -523,6 +523,11 @@ class MountService extends IMountService.Stub
 
         Intent in = null;
 
+        if (oldState == VolumeState.Shared && newState != oldState) {
+            mContext.sendBroadcast(new Intent(Intent.ACTION_MEDIA_UNSHARED,
+                                                Uri.parse("file://" + path)));
+        }
+
         if (newState == VolumeState.Init) {
         } else if (newState == VolumeState.NoMedia) {
             // NoMedia is handled via Disk Remove events
