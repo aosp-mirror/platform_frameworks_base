@@ -225,46 +225,6 @@ public class MediaRecorder
         public static final int MPEG_4_SP = 3;
     }
 
-
-    /**
-     * @hide Defines the audio sampling rate. This must be set before
-     * setAudioEncoder() or it will be ignored.
-     * This parameter is used with
-     * {@link MediaRecorder#setParameters(String)}.
-     */
-    public final class AudioParamSamplingRate {
-      /* Do not change these values without updating their counterparts
-       * in include/media/mediarecorder.h!
-       */
-        private AudioParamSamplingRate() {}
-        public static final String AUDIO_PARAM_SAMPLING_RATE_KEY = "audio-param-sampling-rate=";
-    }
-
-     /**
-     * @hide Defines the audio number of channels. This must be set before
-     * setAudioEncoder() or it will be ignored.
-     * This parameter is used with
-     * {@link MediaRecorder#setParameters(String)}.
-     */
-    public final class AudioParamChannels {
-      /* Do not change these values without updating their counterparts
-       * in include/media/mediarecorder.h!
-       */
-        private AudioParamChannels() {}
-        public static final String AUDIO_PARAM_NUMBER_OF_CHANNELS = "audio-param-number-of-channels=";
-    }
-
-     /**
-     * @hide Defines the audio encoding bitrate. This must be set before
-     * setAudioEncoder() or it will be ignored.
-     * This parameter is used with
-     * {@link MediaRecorder#setParameters(String)}.
-     */
-    public final class AudioParamEncodingBitrate{
-        private AudioParamEncodingBitrate() {}
-        public static final String AUDIO_PARAM_ENCODING_BITRATE = "audio-param-encoding-bitrate=";
-    }
-
     /**
      * Sets the audio source to be used for recording. If this method is not
      * called, the output file will not contain an audio track. The source needs
@@ -399,14 +359,69 @@ public class MediaRecorder
             throws IllegalStateException;
 
     /**
-     * @hide Sets a parameter in the author engine.
+     * Sets the audio sampling rate for recording. Call this method before prepare().
+     * Prepare() may perform additional checks on the parameter to make sure whether
+     * the specified audio sampling rate is applicable. The sampling rate really depends
+     * on the format for the audio recording, as well as the capabilities of the platform.
+     * For instance, the sampling rate supported by AAC audio coding standard ranges
+     * from 8 to 96 kHz. Please consult with the related audio coding standard for the
+     * supported audio sampling rate.
      *
-     * @param params the parameter to set.
-     * @see android.media.MediaRecorder.AudioParamSamplingRate
-     * @see android.media.MediaRecorder.AudioParamChannels
-     * @see android.media.MediaRecorder.AudioParamEncodingBitrate
+     * @param samplingRate the sampling rate for audio in samples per second.
      */
-    public native void setParameters(String params);
+    public void setAudioSamplingRate(int samplingRate) {
+        if (samplingRate <= 0) {
+            throw new IllegalArgumentException("Audio sampling rate is not positive");
+        }
+        setParameter(String.format("audio-param-sampling-rate=%d", samplingRate));
+    }
+
+    /**
+     * Sets the number of audio channels for recording. Call this method before prepare().
+     * Prepare() may perform additional checks on the parameter to make sure whether the
+     * specified number of audio channels are applicable.
+     *
+     * @param numChannels the number of audio channels. Usually it is either 1 (mono) or 2
+     * (stereo).
+     */
+    public void setAudioChannels(int numChannels) {
+        if (numChannels <= 0) {
+            throw new IllegalArgumentException("Number of channels is not positive");
+        }
+        setParameter(String.format("audio-param-number-of-channels=%d", numChannels));
+    }
+
+    /**
+     * Sets the audio encoding bit rate for recording. Call this method before prepare().
+     * Prepare() may perform additional checks on the parameter to make sure whether the
+     * specified bit rate is applicable, and sometimes the passed bitRate will be clipped
+     * internally to ensure the audio recording can proceed smoothly based on the
+     * capabilities of the platform.
+     *
+     * @param bitRate the audio encoding bit rate in bits per second.
+     */
+    public void setAudioEncodingBitRate(int bitRate) {
+        if (bitRate <= 0) {
+            throw new IllegalArgumentException("Audio encoding bit rate is not positive");
+        }
+        setParameter(String.format("audio-param-encoding-bitrate=%d", bitRate));
+    }
+
+    /**
+     * Sets the video encoding bit rate for recording. Call this method before prepare().
+     * Prepare() may perform additional checks on the parameter to make sure whether the
+     * specified bit rate is applicable, and sometimes the passed bitRate will be
+     * clipped internally to ensure the video recording can proceed smoothly based on
+     * the capabilities of the platform.
+     *
+     * @param bitRate the video encoding bit rate in bits per second.
+     */
+    public void setVideoEncodingBitRate(int bitRate) {
+        if (bitRate <= 0) {
+            throw new IllegalArgumentException("Video encoding bit rate is not positive");
+        }
+        setParameter(String.format("video-param-encoding-bitrate=%d", bitRate));
+    }
 
     /**
      * Pass in the file descriptor of the file to be written. Call this after
@@ -669,6 +684,8 @@ public class MediaRecorder
     private native final void native_setup(Object mediarecorder_this) throws IllegalStateException;
 
     private native final void native_finalize();
+
+    private native void setParameter(String nameValuePair);
 
     @Override
     protected void finalize() { native_finalize(); }
