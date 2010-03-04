@@ -401,7 +401,7 @@ public class PhoneNumberUtilsTest extends TestCase {
                      PhoneNumberUtils.convertKeypadLettersToDigits("(800) ABC-DEFG"));
     }
 
-    @SmallTest
+    // To run this test, the device has to be registered with network
     public void testCheckAndProcessPlusCode() {
         assertEquals("0118475797000",
                 PhoneNumberUtils.cdmaCheckAndProcessPlusCode("+8475797000"));
