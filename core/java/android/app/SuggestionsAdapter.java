@@ -189,6 +189,8 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
         if (DBG) Log.d(LOG_TAG, "notifyDataSetChanged");
         super.notifyDataSetChanged();
 
+        mSearchDialog.onDataSetChanged();
+
         updateSpinnerState(getCursor());
     }
 
