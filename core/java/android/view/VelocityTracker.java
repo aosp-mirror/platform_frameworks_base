@@ -100,6 +100,7 @@ public final class VelocityTracker implements Poolable<VelocityTracker> {
     }
 
     private VelocityTracker() {
+        clear();
     }
     
     /**
@@ -109,7 +110,7 @@ public final class VelocityTracker implements Poolable<VelocityTracker> {
         final long[][] pastTime = mPastTime;
         for (int p = 0; p < MotionEvent.BASE_AVAIL_POINTERS; p++) {
             for (int i = 0; i < NUM_PAST; i++) {
-                pastTime[p][i] = 0;
+                pastTime[p][i] = Long.MIN_VALUE;
             }
         }
     }
@@ -129,7 +130,7 @@ public final class VelocityTracker implements Poolable<VelocityTracker> {
         int touchIndex = (mLastTouch + 1) % NUM_PAST;
         for (int i=0; i<N; i++) {
             for (int id = 0; id < MotionEvent.BASE_AVAIL_POINTERS; id++) {
-                mPastTime[id][touchIndex] = 0;
+                mPastTime[id][touchIndex] = Long.MIN_VALUE;
             }
             for (int p = 0; p < pointerCount; p++) {
                 int id = ev.getPointerId(p);
@@ -141,10 +142,10 @@ public final class VelocityTracker implements Poolable<VelocityTracker> {
             touchIndex = (touchIndex + 1) % NUM_PAST;
         }
 
-        // During calculation any pointer values with a time of 0 are treated
-        // as a break in input. Initialize all to 0 for each new touch index.
+        // During calculation any pointer values with a time of MIN_VALUE are treated
+        // as a break in input. Initialize all to MIN_VALUE for each new touch index.
         for (int id = 0; id < MotionEvent.BASE_AVAIL_POINTERS; id++) {
-            mPastTime[id][touchIndex] = 0;
+            mPastTime[id][touchIndex] = Long.MIN_VALUE;
         }
         final long time = ev.getEventTime();
         for (int p = 0; p < pointerCount; p++) {
@@ -189,7 +190,7 @@ public final class VelocityTracker implements Poolable<VelocityTracker> {
         
             // find oldest acceptable time
             int oldestTouch = lastTouch;
-            if (pastTime[lastTouch] > 0) { // cleared ?
+            if (pastTime[lastTouch] != Long.MIN_VALUE) { // cleared ?
                 final float acceptableTime = pastTime[lastTouch] - LONGEST_PAST_TIME;
                 int nextOldestTouch = (NUM_PAST + oldestTouch - 1) % NUM_PAST;
                 while (pastTime[nextOldestTouch] >= acceptableTime &&
