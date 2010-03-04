@@ -185,18 +185,12 @@
     <string name="permdesc_setDebugApp" msgid="5584310661711990702">"允許應用程式為其他程式開啟偵錯功能。請注意：惡意程式可利用此功能終止其他應用程式。"</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"變更介面設定"</string>
     <string name="permdesc_changeConfiguration" msgid="3465121501528064399">"允許應用程式變更目前設定，例如：地區設定或字型大小。"</string>
-    <!-- no translation found for permlab_enableCarMode (5684504058192921098) -->
-    <skip />
-    <!-- no translation found for permdesc_enableCarMode (5673461159384850628) -->
-    <skip />
-    <!-- no translation found for permlab_killBackgroundProcesses (8373714752793061963) -->
-    <skip />
-    <!-- no translation found for permdesc_killBackgroundProcesses (2908829602869383753) -->
-    <skip />
-    <!-- no translation found for permlab_forceStopPackages (1447830113260156236) -->
-    <skip />
-    <!-- no translation found for permdesc_forceStopPackages (7263036616161367402) -->
-    <skip />
+    <string name="permlab_enableCarMode" msgid="5684504058192921098">"啟用行車模式"</string>
+    <string name="permdesc_enableCarMode" msgid="5673461159384850628">"允許應用程式啟用行車模式。"</string>
+    <string name="permlab_killBackgroundProcesses" msgid="8373714752793061963">"關閉背景程序"</string>
+    <string name="permdesc_killBackgroundProcesses" msgid="2908829602869383753">"允許應用程式關閉其他應用程式背景程序 (即使記憶體足夠)。"</string>
+    <string name="permlab_forceStopPackages" msgid="1447830113260156236">"強制停止應用程式"</string>
+    <string name="permdesc_forceStopPackages" msgid="7263036616161367402">"允許應用程式強制停止其他應用程式。"</string>
     <string name="permlab_forceBack" msgid="1804196839880393631">"強制關閉應用程式"</string>
     <string name="permdesc_forceBack" msgid="6534109744159919013">"允許應用程式強制關閉在前端運作的活動並返回。一般應用程式不需要此功能。"</string>
     <string name="permlab_dump" msgid="1681799862438954752">"接收系統內部狀態"</string>
@@ -237,10 +231,8 @@
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"允許擁有人連結至輸入法的最頂層介面。一般應用程式不需使用此選項。"</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"連結至桌布"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"允許擁有人連結至桌布的最頂層介面，一般應用程式不需使用此選項。"</string>
-    <!-- no translation found for permlab_bindDeviceAdmin (8704986163711455010) -->
-    <skip />
-    <!-- no translation found for permdesc_bindDeviceAdmin (8714424333082216979) -->
-    <skip />
+    <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"與裝置管理員互動"</string>
+    <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"允許應用程式將調用請求 (intent) 傳送至裝置管理員；一般應用程式不需使用此選項。"</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"變更螢幕顯示方向"</string>
     <string name="permdesc_setOrientation" msgid="6335814461615851863">"允許應用程式隨時變更螢幕顯示方向。一般應用程式不需要此功能。"</string>
     <string name="permlab_signalPersistentProcesses" msgid="4255467255488653854">"傳送 Linux 訊號到應用程式"</string>
@@ -324,26 +316,16 @@
     <string name="permdesc_mount_unmount_filesystems" msgid="6253263792535859767">"允許應用程式掛載/卸載抽取式儲存設備的檔案系統。"</string>
     <string name="permlab_mount_format_filesystems" msgid="5523285143576718981">"將外接式儲存裝置格式化"</string>
     <string name="permdesc_mount_format_filesystems" msgid="574060044906047386">"允許應用程式將可移除式儲存裝置格式化。"</string>
-    <!-- no translation found for permlab_asec_access (1070364079249834666) -->
-    <skip />
-    <!-- no translation found for permdesc_asec_access (7691616292170590244) -->
-    <skip />
-    <!-- no translation found for permlab_asec_create (7312078032326928899) -->
-    <skip />
-    <!-- no translation found for permdesc_asec_create (7041802322759014035) -->
-    <skip />
-    <!-- no translation found for permlab_asec_destroy (7787322878955261006) -->
-    <skip />
-    <!-- no translation found for permdesc_asec_destroy (5740754114967893169) -->
-    <skip />
-    <!-- no translation found for permlab_asec_mount_unmount (7517449694667828592) -->
-    <skip />
-    <!-- no translation found for permdesc_asec_mount_unmount (5438078121718738625) -->
-    <skip />
-    <!-- no translation found for permlab_asec_rename (5685344390439934495) -->
-    <skip />
-    <!-- no translation found for permdesc_asec_rename (1387881770708872470) -->
-    <skip />
+    <string name="permlab_asec_access" msgid="1070364079249834666">"取得安全儲存空間的資訊"</string>
+    <string name="permdesc_asec_access" msgid="7691616292170590244">"允許應用程式取得安全儲存空間的資訊。"</string>
+    <string name="permlab_asec_create" msgid="7312078032326928899">"建立安全儲存空間"</string>
+    <string name="permdesc_asec_create" msgid="7041802322759014035">"允許應用程式建立安全儲存空間。"</string>
+    <string name="permlab_asec_destroy" msgid="7787322878955261006">"銷毀安全儲存空間"</string>
+    <string name="permdesc_asec_destroy" msgid="5740754114967893169">"允許應用程式銷毀安全儲存空間。"</string>
+    <string name="permlab_asec_mount_unmount" msgid="7517449694667828592">"掛載/卸載安全儲存空間"</string>
+    <string name="permdesc_asec_mount_unmount" msgid="5438078121718738625">"允許應用程式掛載/卸載安全儲存空間。"</string>
+    <string name="permlab_asec_rename" msgid="5685344390439934495">"重新命名安全儲存空間"</string>
+    <string name="permdesc_asec_rename" msgid="1387881770708872470">"允許應用程式重新命名安全儲存空間。"</string>
     <string name="permlab_vibrate" msgid="7768356019980849603">"控制震動"</string>
     <string name="permdesc_vibrate" msgid="2886677177257789187">"允許應用程式控制震動。"</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"控制閃光燈"</string>
@@ -378,10 +360,8 @@
     <string name="permdesc_setWallpaperHints" msgid="6019479164008079626">"允許應用程式設定系統桌布大小提示。"</string>
     <string name="permlab_masterClear" msgid="2315750423139697397">"將系統還原至出廠預設值"</string>
     <string name="permdesc_masterClear" msgid="5033465107545174514">"允許應用程式將手機完全重設至出廠設定，清除所有資料、設定與已安裝程式。"</string>
-    <!-- no translation found for permlab_setTime (2021614829591775646) -->
-    <skip />
-    <!-- no translation found for permdesc_setTime (667294309287080045) -->
-    <skip />
+    <string name="permlab_setTime" msgid="2021614829591775646">"設定時間"</string>
+    <string name="permdesc_setTime" msgid="667294309287080045">"允許應用程式變更手機時鐘時間。"</string>
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"設定時區"</string>
     <string name="permdesc_setTimeZone" msgid="1902540227418179364">"允許應用程式變更時區。"</string>
     <string name="permlab_accountManagerService" msgid="4829262349691386986">"作為 AccountManagerService"</string>
@@ -401,12 +381,9 @@
     <string name="permlab_writeApnSettings" msgid="7823599210086622545">"輸入存取點名稱設定"</string>
     <string name="permdesc_writeApnSettings" msgid="7443433457842966680">"允許應用程式修改 APN 設定，例如：Proxy 及 APN 的連接埠。"</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"變更網路連線"</string>
-    <!-- no translation found for permdesc_changeNetworkState (4199958910396387075) -->
-    <skip />
-    <!-- no translation found for permlab_changeTetherState (5952584964373017960) -->
-    <skip />
-    <!-- no translation found for permdesc_changeTetherState (8905815579146349568) -->
-    <skip />
+    <string name="permdesc_changeNetworkState" msgid="4199958910396387075">"允許應用程式變更網路連線狀態。"</string>
+    <string name="permlab_changeTetherState" msgid="5952584964373017960">"變更數據連線"</string>
+    <string name="permdesc_changeTetherState" msgid="8905815579146349568">"允許應用程式變更數據網路連線狀態。"</string>
     <string name="permlab_changeBackgroundDataSetting" msgid="1400666012671648741">"變更背景資料使用設定"</string>
     <string name="permdesc_changeBackgroundDataSetting" msgid="1001482853266638864">"允許應用程式變更背景資料使用設定。"</string>
     <string name="permlab_accessWifiState" msgid="8100926650211034400">"檢視 Wi-Fi 狀態"</string>
@@ -437,30 +414,18 @@
     <string name="permdesc_writeDictionary" msgid="2241256206524082880">"允許應用程式將新字詞寫入使用者的字典。"</string>
     <string name="permlab_sdcardWrite" msgid="8079403759001777291">"修改/刪除 SD 卡的內容"</string>
     <string name="permdesc_sdcardWrite" msgid="6643963204976471878">"允許應用程式寫入 SD 卡。"</string>
-    <!-- no translation found for permlab_cache_filesystem (5656487264819669824) -->
-    <skip />
-    <!-- no translation found for permdesc_cache_filesystem (1624734528435659906) -->
-    <skip />
-    <!-- no translation found for policylab_limitPassword (4307861496302850201) -->
-    <skip />
-    <!-- no translation found for policydesc_limitPassword (1719877245692318299) -->
-    <skip />
-    <!-- no translation found for policylab_watchLogin (7374780712664285321) -->
-    <skip />
-    <!-- no translation found for policydesc_watchLogin (1961251179624843483) -->
-    <skip />
-    <!-- no translation found for policylab_resetPassword (9084772090797485420) -->
-    <skip />
-    <!-- no translation found for policydesc_resetPassword (3332167600331799991) -->
-    <skip />
-    <!-- no translation found for policylab_forceLock (5760466025247634488) -->
-    <skip />
-    <!-- no translation found for policydesc_forceLock (2819868664946089740) -->
-    <skip />
-    <!-- no translation found for policylab_wipeData (3910545446758639713) -->
-    <skip />
-    <!-- no translation found for policydesc_wipeData (2314060933796396205) -->
-    <skip />
+    <string name="permlab_cache_filesystem" msgid="5656487264819669824">"存取快取檔案系統"</string>
+    <string name="permdesc_cache_filesystem" msgid="1624734528435659906">"允許應用程式讀取及寫入快取檔案系統。"</string>
+    <string name="policylab_limitPassword" msgid="4307861496302850201">"限制密碼設定規則"</string>
+    <string name="policydesc_limitPassword" msgid="1719877245692318299">"限制允許使用的密碼類型。"</string>
+    <string name="policylab_watchLogin" msgid="7374780712664285321">"查看登入嘗試記錄"</string>
+    <string name="policydesc_watchLogin" msgid="1961251179624843483">"監視者無法登入裝置執行部分動作。"</string>
+    <string name="policylab_resetPassword" msgid="9084772090797485420">"重設密碼"</string>
+    <string name="policydesc_resetPassword" msgid="3332167600331799991">"強制重新設定密碼。您必須取得以管理員提供的新密碼，才能登入。"</string>
+    <string name="policylab_forceLock" msgid="5760466025247634488">"強制鎖定"</string>
+    <string name="policydesc_forceLock" msgid="2819868664946089740">"裝置鎖定時可取得控制，但必須重新輸入密碼。"</string>
+    <string name="policylab_wipeData" msgid="3910545446758639713">"清除所有資料"</string>
+    <string name="policydesc_wipeData" msgid="2314060933796396205">"重設為原廠設定 (系統會刪除所有資料，且不會向您進行確認)。"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"住家電話"</item>
     <item msgid="869923650527136615">"行動電話"</item>
@@ -557,8 +522,7 @@
     <string name="contact_status_update_attribution" msgid="5112589886094402795">"透過 <xliff:g id="SOURCE">%1$s</xliff:g>"</string>
     <string name="contact_status_update_attribution_with_date" msgid="5945386376369979909">"<xliff:g id="DATE">%1$s</xliff:g>透過「<xliff:g id="SOURCE">%2$s</xliff:g>」"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"輸入 PIN 碼"</string>
-    <!-- no translation found for keyguard_password_enter_password_code (9138158344813213754) -->
-    <skip />
+    <string name="keyguard_password_enter_password_code" msgid="9138158344813213754">"輸入密碼即可解鎖"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"PIN 碼錯誤！"</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"如要解鎖，請按 Menu 鍵，然後按 0。"</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"緊急電話號碼"</string>
@@ -579,7 +543,7 @@
     <string name="lockscreen_missing_sim_message_short" msgid="7381499217732227295">"沒有 SIM  卡。"</string>
     <string name="lockscreen_missing_sim_message" msgid="2186920585695169078">"手機未插入 SIM 卡。"</string>
     <string name="lockscreen_missing_sim_instructions" msgid="8874620818937719067">"請插入 SIM 卡。"</string>
-    <string name="emergency_calls_only" msgid="6733978304386365407">"只能撥打緊急電話"</string>
+    <string name="emergency_calls_only" msgid="6733978304386365407">"僅可撥打緊急電話"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"網路已鎖定"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"SIM 的 PUK 已鎖定。"</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="635967534992394321">"請參閱《使用者指南》或聯絡客戶服務中心。"</string>
@@ -600,12 +564,9 @@
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"解除封鎖"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"開啟音效"</string>
     <string name="lockscreen_sound_off_label" msgid="996822825154319026">"關閉音效"</string>
-    <!-- no translation found for password_keyboard_label_symbol_key (992280756256536042) -->
-    <skip />
-    <!-- no translation found for password_keyboard_label_alpha_key (8001096175167485649) -->
-    <skip />
-    <!-- no translation found for password_keyboard_label_alt_key (1284820942620288678) -->
-    <skip />
+    <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
+    <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
+    <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
     <string name="hour_ampm" msgid="4329881288269772723">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_cap_ampm" msgid="1829009197680861107">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"清除"</string>
@@ -631,10 +592,8 @@
     <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"允許應用程式讀取瀏覽器曾經造訪過的所有網址，以及瀏覽器的所有書籤。"</string>
     <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"寫入瀏覽器的記錄與書籤"</string>
     <string name="permdesc_writeHistoryBookmarks" msgid="945571990357114950">"允許應用程式修改儲存在電話上的瀏覽記錄或書籤。請注意：惡意應用程式可能會使用此選項來清除或修改您瀏覽器的資料。"</string>
-    <!-- no translation found for permlab_writeGeolocationPermissions (4715212655598275532) -->
-    <skip />
-    <!-- no translation found for permdesc_writeGeolocationPermissions (4011908282980861679) -->
-    <skip />
+    <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"修改瀏覽器地理資訊的權限"</string>
+    <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"允許應用程式修改瀏覽器的地理位置權限，惡意應用程式可能會透過此方式允許將您的位置資訊任意傳送給某些網站。"</string>
     <string name="save_password_message" msgid="767344687139195790">"是否記憶此密碼？"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"現在不要"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"記住"</string>
@@ -733,11 +692,6 @@
     <string name="weeks" msgid="6509623834583944518">"週"</string>
     <string name="year" msgid="4001118221013892076">"年"</string>
     <string name="years" msgid="6881577717993213522">"年"</string>
-    <string name="every_weekday" msgid="8777593878457748503">"每天 (週一至週五)"</string>
-    <string name="daily" msgid="5738949095624133403">"每天"</string>
-    <string name="weekly" msgid="983428358394268344">"每週<xliff:g id="DAY">%s</xliff:g>"</string>
-    <string name="monthly" msgid="2667202947170988834">"每月"</string>
-    <string name="yearly" msgid="1519577999407493836">"每年"</string>
     <string name="VideoView_error_title" msgid="3359437293118172396">"無法播放影片"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="897920883624437033">"很抱歉，影片格式無效，裝置無法進行串流處理。"</string>
     <string name="VideoView_error_text_unknown" msgid="710301040038083944">"很抱歉，此影片無法播放。"</string>
@@ -820,26 +774,19 @@
     <string name="no_permissions" msgid="7283357728219338112">"無須許可"</string>
     <string name="perms_hide" msgid="7283915391320676226"><b>" 隱藏"</b></string>
     <string name="perms_show_all" msgid="2671791163933091180"><b>"顯示全部"</b></string>
-    <!-- no translation found for usb_storage_activity_title (2399289999608900443) -->
-    <skip />
+    <string name="usb_storage_activity_title" msgid="2399289999608900443">"USB 大量儲存裝置"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"USB 已連接"</string>
-    <!-- no translation found for usb_storage_message (4796759646167247178) -->
-    <skip />
-    <!-- no translation found for usb_storage_button_mount (1052259930369508235) -->
-    <skip />
+    <string name="usb_storage_message" msgid="4796759646167247178">"已透過 USB 連接手機與電腦。如要從電腦或 Android 系統的 SD 卡複製檔案，請選取下方按鈕。"</string>
+    <string name="usb_storage_button_mount" msgid="1052259930369508235">"開啟 USB 儲存裝置"</string>
     <string name="usb_storage_error_message" msgid="2534784751603345363">"把 SD 卡當成 USB 儲存裝置時發生問題。"</string>
     <string name="usb_storage_notification_title" msgid="8175892554757216525">"USB 已連接"</string>
     <string name="usb_storage_notification_message" msgid="7380082404288219341">"選取此項將檔案複製到電腦，或從電腦複製。"</string>
     <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"關閉 USB 儲存裝置"</string>
     <string name="usb_storage_stop_notification_message" msgid="2591813490269841539">"選取此處關閉 USB 儲存裝置。"</string>
-    <!-- no translation found for usb_storage_stop_title (660129851708775853) -->
-    <skip />
-    <!-- no translation found for usb_storage_stop_message (3613713396426604104) -->
-    <skip />
-    <!-- no translation found for usb_storage_stop_button_mount (7060218034900696029) -->
-    <skip />
-    <!-- no translation found for usb_storage_stop_error_message (143881914840412108) -->
-    <skip />
+    <string name="usb_storage_stop_title" msgid="660129851708775853">"USB 儲存空間使用中"</string>
+    <string name="usb_storage_stop_message" msgid="3613713396426604104">"關閉 USB 儲存裝置前，請務必先將 Android 系統的 SD 卡從電腦上卸下 (退出)。"</string>
+    <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"關閉 USB 儲存裝置"</string>
+    <string name="usb_storage_stop_error_message" msgid="143881914840412108">"關閉 USB 儲存裝置時發生問題。請檢查您是否已卸載 USB Host，然後再試一次。"</string>
     <!-- no translation found for dlg_confirm_kill_storage_users_title (203356557714612214) -->
     <skip />
     <!-- no translation found for dlg_confirm_kill_storage_users_text (3902998926994232358) -->
@@ -872,10 +819,8 @@
     <string name="activity_list_empty" msgid="4168820609403385789">"找不到符合的活動"</string>
     <string name="permlab_pkgUsageStats" msgid="8787352074326748892">"更新元件使用統計資料"</string>
     <string name="permdesc_pkgUsageStats" msgid="891553695716752835">"允許修改收集到的元件使用統計資料。一般應用程式不會使用此功能。"</string>
-    <!-- no translation found for permlab_copyProtectedData (1660908117394854464) -->
-    <skip />
-    <!-- no translation found for permdesc_copyProtectedData (537780957633976401) -->
-    <skip />
+    <string name="permlab_copyProtectedData" msgid="1660908117394854464">"允許觸發預設容器服務，以便複製內容 (不建議一般應用程式使用)。"</string>
+    <string name="permdesc_copyProtectedData" msgid="537780957633976401">"允許觸發預設容器服務，以便複製內容 (不建議一般應用程式使用)。"</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"點兩下以進行縮放控制"</string>
     <string name="gadget_host_error_inflating" msgid="2613287218853846830">"擴大小工具時發生錯誤"</string>
     <string name="ime_action_go" msgid="8320845651737369027">"開始"</string>
@@ -888,12 +833,9 @@
     <string name="create_contact_using" msgid="4947405226788104538">"建立手機號碼為 <xliff:g id="NUMBER">%s</xliff:g>"\n"的聯絡人"</string>
     <string name="accessibility_compound_button_selected" msgid="5612776946036285686">"已勾選"</string>
     <string name="accessibility_compound_button_unselected" msgid="8864512895673924091">"未勾選"</string>
-    <!-- no translation found for grant_credentials_permission_message_header (6824538733852821001) -->
-    <skip />
-    <!-- no translation found for grant_credentials_permission_message_footer (3125211343379376561) -->
-    <skip />
-    <!-- no translation found for grant_permissions_header_text (2722567482180797717) -->
-    <skip />
+    <string name="grant_credentials_permission_message_header" msgid="6824538733852821001">"下列一或多個應用程式要求現在及將來的帳戶存取權限。"</string>
+    <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"您確定要允許這個要求嗎？"</string>
+    <string name="grant_permissions_header_text" msgid="2722567482180797717">"存取要求"</string>
     <string name="allow" msgid="7225948811296386551">"允許"</string>
     <string name="deny" msgid="2081879885755434506">"拒絕"</string>
     <string name="permission_request_notification_title" msgid="5390555465778213840">"已要求權限"</string>
@@ -907,44 +849,27 @@
     <string name="l2tp_vpn_description" msgid="3750692169378923304">"第二層通道通訊協定"</string>
     <string name="l2tp_ipsec_psk_vpn_description" msgid="3945043564008303239">"採用預先共用金鑰的 L2TP/IPSec VPN"</string>
     <string name="l2tp_ipsec_crt_vpn_description" msgid="5382714073103653577">"採用憑證的 L2TP/IPSec VPN"</string>
-    <!-- no translation found for upload_file (2897957172366730416) -->
+    <string name="upload_file" msgid="2897957172366730416">"選擇檔案"</string>
+    <string name="reset" msgid="2448168080964209908">"重設"</string>
+    <string name="submit" msgid="1602335572089911941">"提交"</string>
+    <string name="description_star" msgid="2654319874908576133">"我的最愛"</string>
+    <string name="tether_title" msgid="6970447107301643248">"USB 數據連線運作中"</string>
+    <string name="tether_message" msgid="554549994538298101">"如要與電腦分享手機的資料連線，請選取 [數據連線]。"</string>
+    <string name="tether_button" msgid="7409514810151603641">"數據連線"</string>
+    <string name="tether_button_cancel" msgid="6744369928952219677">"取消"</string>
+    <!-- no translation found for tether_error_message (950843122853838817) -->
     <skip />
-    <!-- no translation found for reset (2448168080964209908) -->
-    <skip />
-    <!-- no translation found for submit (1602335572089911941) -->
-    <skip />
-    <!-- no translation found for description_star (2654319874908576133) -->
-    <skip />
-    <!-- no translation found for tether_title (6970447107301643248) -->
-    <skip />
-    <!-- no translation found for tether_message (554549994538298101) -->
-    <skip />
-    <!-- no translation found for tether_button (7409514810151603641) -->
-    <skip />
-    <!-- no translation found for tether_button_cancel (6744369928952219677) -->
-    <skip />
-    <!-- no translation found for tether_error_message (6672110337349077628) -->
-    <skip />
-    <!-- no translation found for tether_available_notification_title (367754042700082080) -->
-    <skip />
-    <!-- no translation found for tether_available_notification_message (8439443306503453793) -->
-    <skip />
-    <!-- no translation found for tether_stop_notification_title (1902246071807668101) -->
-    <skip />
-    <!-- no translation found for tether_stop_notification_message (6920086906891516128) -->
-    <skip />
-    <!-- no translation found for tether_stop_title (3118332507220912235) -->
-    <skip />
-    <!-- no translation found for tether_stop_message (7741840433788363174) -->
-    <skip />
-    <!-- no translation found for tether_stop_button (8061941592702063029) -->
-    <skip />
-    <!-- no translation found for tether_stop_button_cancel (3694669546501300230) -->
-    <skip />
-    <!-- no translation found for tether_stop_error_message (4244697367270211648) -->
-    <skip />
+    <string name="tether_available_notification_title" msgid="367754042700082080">"USB 數據連線運作中"</string>
+    <string name="tether_available_notification_message" msgid="8439443306503453793">"選取此選項可讓您的電腦與手機進行數據連線。"</string>
+    <string name="tether_stop_notification_title" msgid="1902246071807668101">"中斷數據連線"</string>
+    <string name="tether_stop_notification_message" msgid="6920086906891516128">"選取即可中斷與電腦的數據連線。"</string>
+    <string name="tether_stop_title" msgid="3118332507220912235">"中斷數據連線"</string>
+    <string name="tether_stop_message" msgid="7741840433788363174">"您已與電腦分享手機的行動資料連線，如要中斷 USB 數據連線，請選取 [中斷連線]。"</string>
+    <string name="tether_stop_button" msgid="8061941592702063029">"中斷連線"</string>
+    <string name="tether_stop_button_cancel" msgid="3694669546501300230">"取消"</string>
+    <string name="tether_stop_error_message" msgid="4244697367270211648">"關閉數據連線時發生問題，請再試一次。"</string>
     <!-- no translation found for car_mode_disable_notification_title (3164768212003864316) -->
     <skip />
-    <!-- no translation found for car_mode_disable_notification_message (3262812780382240778) -->
+    <!-- no translation found for car_mode_disable_notification_message (668663626721675614) -->
     <skip />
 </resources>
