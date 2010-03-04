@@ -1202,8 +1202,9 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             // Remove expired alerts
             if (intentsToRemove != null) {
                 for (PendingIntent i : intentsToRemove) {
-                    ProximityAlert alert = mProximityAlerts.remove(i);
+                    ProximityAlert alert = mProximityAlerts.get(i);
                     mProximitiesEntered.remove(alert);
+                    removeProximityAlertLocked(i);
                 }
             }
         }
