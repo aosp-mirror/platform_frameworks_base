@@ -101,6 +101,7 @@ public abstract class DataConnectionTracker extends Handler {
     protected static final int EVENT_CDMA_OTA_PROVISION = 35;
     protected static final int EVENT_RESTART_RADIO = 36;
     protected static final int EVENT_SET_MASTER_DATA_ENABLE = 37;
+    protected static final int EVENT_RESET_DONE = 38;
 
     /***** Constants *****/
 
@@ -265,6 +266,7 @@ public abstract class DataConnectionTracker extends Handler {
     protected abstract void onRadioOffOrNotAvailable();
     protected abstract void onDataSetupComplete(AsyncResult ar);
     protected abstract void onDisconnectDone(AsyncResult ar);
+    protected abstract void onResetDone(AsyncResult ar);
     protected abstract void onVoiceCallStarted();
     protected abstract void onVoiceCallEnded();
     protected abstract void onCleanUpConnection(boolean tearDown, String reason);
@@ -329,6 +331,10 @@ public abstract class DataConnectionTracker extends Handler {
             case EVENT_SET_MASTER_DATA_ENABLE:
                 boolean enabled = (msg.arg1 == ENABLED) ? true : false;
                 onSetDataEnabled(enabled);
+                break;
+
+            case EVENT_RESET_DONE:
+                onResetDone((AsyncResult) msg.obj);
                 break;
 
             default:

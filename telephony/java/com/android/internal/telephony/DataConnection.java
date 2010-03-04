@@ -51,7 +51,7 @@ import android.util.EventLog;
  *
  * DataConnection {
  *   + mDefaultState {
- *        EVENT_RESET { clearSettings, >mInactiveState }.
+ *        EVENT_RESET { clearSettings, notifiyDisconnectCompleted, >mInactiveState }.
  *        EVENT_CONNECT {  notifyConnectCompleted(FailCause.UNKNOWN) }.
  *        EVENT_DISCONNECT { notifyDisconnectCompleted }.
  *
@@ -60,8 +60,10 @@ import android.util.EventLog;
  *        EVENT_GET_LAST_FAIL_DONE,
  *        EVENT_DEACTIVATE_DONE.
  *     }
- *   ++ # mInactiveState {
- *            EVENT_RESET.
+ *   ++ # mInactiveState 
+ *        e(doNotifications)
+ *        x(clearNotifications) {
+ *            EVENT_RESET { notifiyDisconnectCompleted }.
  *            EVENT_CONNECT {startConnecting, >mActivatingState }.
  *        }
  *   ++   mActivatingState {
@@ -338,6 +340,8 @@ public abstract class DataConnection extends HierarchicalStateMachine {
         if (DBG) log("NotifyDisconnectCompleted");
 
         Message msg = dp.onCompletedMsg;
+        log(String.format("msg.what=%d msg.obj=%s",
+                msg.what, ((msg.obj instanceof String) ? (String) msg.obj : "<no-reason>")));
         AsyncResult.forMessage(msg);
         msg.sendToTarget();
 
@@ -437,6 +441,9 @@ public abstract class DataConnection extends HierarchicalStateMachine {
                 case EVENT_RESET:
                     if (DBG) log("DcDefaultState: msg.what=EVENT_RESET");
                     clearSettings();
+                    if (msg.obj != null) {
+                        notifyDisconnectCompleted((DisconnectParams) msg.obj);
+                    }
                     transitionTo(mInactiveState);
                     break;
 
@@ -467,9 +474,48 @@ public abstract class DataConnection extends HierarchicalStateMachine {
      * The state machine is inactive and expects a EVENT_CONNECT.
      */
     private class DcInactiveState extends HierarchicalState {
+        private ConnectionParams mConnectionParams = null;
+        private FailCause mFailCause = null;
+        private DisconnectParams mDisconnectParams = null;
+
+        public void setEnterNotificationParams(ConnectionParams cp, FailCause cause) {
+            log("DcInactiveState: setEnterNoticationParams cp,cause");
+            mConnectionParams = cp;
+            mFailCause = cause;
+        }
+
+        public void setEnterNotificationParams(DisconnectParams dp) {
+          log("DcInactiveState: setEnterNoticationParams dp");
+            mDisconnectParams = dp;
+        }
+
         @Override protected void enter() {
             mTag += 1;
+
+            /**
+             * Now that we've transitioned to Inactive state we
+             * can send notifications. Previously we sent the
+             * notifications in the processMessage handler but
+             * that caused a race condition because the synchronous
+             * call to isInactive.
+             */
+            if ((mConnectionParams != null) && (mFailCause != null)) {
+                log("DcInactiveState: enter notifyConnectCompleted");
+                notifyConnectCompleted(mConnectionParams, mFailCause);
+            }
+            if (mDisconnectParams != null) {
+              log("DcInactiveState: enter notifyDisconnectCompleted");
+                notifyDisconnectCompleted(mDisconnectParams);
+            }
         }
+
+        @Override protected void exit() {
+            // clear notifications
+            mConnectionParams = null;
+            mFailCause = null;
+            mDisconnectParams = null;
+        }
+
         @Override protected boolean processMessage(Message msg) {
             boolean retVal;
 
@@ -477,6 +523,9 @@ public abstract class DataConnection extends HierarchicalStateMachine {
                 case EVENT_RESET:
                     if (DBG) {
                         log("DcInactiveState: msg.what=EVENT_RESET, ignore we're already reset");
+                    }
+                    if (msg.obj != null) {
+                        notifyDisconnectCompleted((DisconnectParams) msg.obj);
                     }
                     retVal = true;
                     break;
@@ -526,12 +575,14 @@ public abstract class DataConnection extends HierarchicalStateMachine {
                     switch (result) {
                         case SUCCESS:
                             // All is well
-                            notifyConnectCompleted(cp, FailCause.NONE);
+                            mActiveState.setEnterNotificationParams(cp, FailCause.NONE);
                             transitionTo(mActiveState);
                             break;
                         case ERR_BadCommand:
                             // Vendor ril rejected the command and didn't connect.
-                            notifyConnectCompleted(cp, result.mFailCause);
+                            // Transition to inactive but send notifications after
+                            // we've entered the mInactive state.
+                            mInactiveState.setEnterNotificationParams(cp, result.mFailCause);
                             transitionTo(mInactiveState);
                             break;
                         case ERR_BadDns:
@@ -565,7 +616,9 @@ public abstract class DataConnection extends HierarchicalStateMachine {
                             int rilFailCause = ((int[]) (ar.result))[0];
                             cause = getFailCauseFromRequest(rilFailCause);
                         }
-                         notifyConnectCompleted(cp, cause);
+                        // Transition to inactive but send notifications after
+                        // we've entered the mInactive state.
+                         mInactiveState.setEnterNotificationParams(cp, cause);
                          transitionTo(mInactiveState);
                     } else {
                         if (DBG) {
@@ -591,6 +644,35 @@ public abstract class DataConnection extends HierarchicalStateMachine {
      * The state machine is connected, expecting an EVENT_DISCONNECT.
      */
     private class DcActiveState extends HierarchicalState {
+        private ConnectionParams mConnectionParams = null;
+        private FailCause mFailCause = null;
+
+        public void setEnterNotificationParams(ConnectionParams cp, FailCause cause) {
+            log("DcInactiveState: setEnterNoticationParams cp,cause");
+            mConnectionParams = cp;
+            mFailCause = cause;
+        }
+
+        @Override public void enter() {
+            /**
+             * Now that we've transitioned to Active state we
+             * can send notifications. Previously we sent the
+             * notifications in the processMessage handler but
+             * that caused a race condition because the synchronous
+             * call to isActive.
+             */
+            if ((mConnectionParams != null) && (mFailCause != null)) {
+                log("DcActiveState: enter notifyConnectCompleted");
+                notifyConnectCompleted(mConnectionParams, mFailCause);
+            }
+        }
+
+        @Override protected void exit() {
+            // clear notifications
+            mConnectionParams = null;
+            mFailCause = null;
+        }
+
         @Override protected boolean processMessage(Message msg) {
             boolean retVal;
 
@@ -627,7 +709,9 @@ public abstract class DataConnection extends HierarchicalStateMachine {
                     AsyncResult ar = (AsyncResult) msg.obj;
                     DisconnectParams dp = (DisconnectParams) ar.userObj;
                     if (dp.tag == mTag) {
-                        notifyDisconnectCompleted((DisconnectParams) ar.userObj);
+                        // Transition to inactive but send notifications after
+                        // we've entered the mInactive state.
+                        mInactiveState.setEnterNotificationParams((DisconnectParams) ar.userObj);
                         transitionTo(mInactiveState);
                     } else {
                         if (DBG) log("DcDisconnectState EVENT_DEACTIVATE_DONE stale dp.tag="
@@ -660,7 +744,9 @@ public abstract class DataConnection extends HierarchicalStateMachine {
                     ConnectionParams cp = (ConnectionParams) ar.userObj;
                     if (cp.tag == mTag) {
                         if (DBG) log("DcDisconnectingBadDnsState msg.what=EVENT_DEACTIVATE_DONE");
-                        notifyConnectCompleted(cp, FailCause.UNKNOWN);
+                        // Transition to inactive but send notifications after
+                        // we've entered the mInactive state.
+                        mInactiveState.setEnterNotificationParams(cp, FailCause.UNKNOWN);
                         transitionTo(mInactiveState);
                     } else {
                         if (DBG) log("DcDisconnectingBadDnsState EVENT_DEACTIVE_DONE stale dp.tag="
@@ -683,9 +769,12 @@ public abstract class DataConnection extends HierarchicalStateMachine {
 
     /**
      * Disconnect from the network.
+     *
+     * @param onCompletedMsg is sent with its msg.obj as an AsyncResult object.
+     *        With AsyncResult.userObj set to the original msg.obj.
      */
-    public void reset() {
-        sendMessage(obtainMessage(EVENT_RESET));
+    public void reset(Message onCompletedMsg) {
+        sendMessage(obtainMessage(EVENT_RESET, new DisconnectParams(onCompletedMsg)));
     }
 
     /**
@@ -726,6 +815,9 @@ public abstract class DataConnection extends HierarchicalStateMachine {
     // ****** The following are used for debugging.
 
     /**
+     * TODO: This should be an asynchronous call and we wouldn't
+     * have to use handle the notification in the DcInactiveState.enter.
+     *
      * @return true if the state machine is in the inactive state.
      */
     public boolean isInactive() {
@@ -734,7 +826,10 @@ public abstract class DataConnection extends HierarchicalStateMachine {
     }
 
     /**
-     * @return true if the state machine is in the inactive state.
+     * TODO: This should be an asynchronous call and we wouldn't
+     * have to use handle the notification in the DcActiveState.enter.
+     *
+     * @return true if the state machine is in the active state.
      */
     public boolean isActive() {
         boolean retVal = getCurrentState() == mActiveState;
