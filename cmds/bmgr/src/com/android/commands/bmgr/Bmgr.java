@@ -311,7 +311,7 @@ public final class Bmgr {
             doRestorePackage(arg);
         } else {
             try {
-                long token = Long.parseLong(nextArg(), 16);
+                long token = Long.parseLong(arg, 16);
                 doRestoreAll(token);
             } catch (NumberFormatException e) {
                 showUsage();
