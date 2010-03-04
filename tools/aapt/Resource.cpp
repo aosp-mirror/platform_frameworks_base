@@ -447,7 +447,7 @@ static void checkForIds(const String8& path, ResXMLParser& parser)
 
 static bool applyFileOverlay(Bundle *bundle,
                              const sp<AaptAssets>& assets,
-                             const sp<ResourceTypeSet>& baseSet,
+                             sp<ResourceTypeSet> *baseSet,
                              const char *resType)
 {
     if (bundle->getVerbose()) {
@@ -475,13 +475,16 @@ static bool applyFileOverlay(Bundle *bundle,
                 if (bundle->getVerbose()) {
                     printf("trying overlaySet Key=%s\n",overlaySet->keyAt(overlayIndex).string());
                 }
-                size_t baseIndex = baseSet->indexOfKey(overlaySet->keyAt(overlayIndex));
+                size_t baseIndex = UNKNOWN_ERROR;
+                if (baseSet->get() != NULL) {
+                    baseIndex = (*baseSet)->indexOfKey(overlaySet->keyAt(overlayIndex));
+                }
                 if (baseIndex < UNKNOWN_ERROR) {
                     // look for same flavor.  For a given file (strings.xml, for example)
                     // there may be a locale specific or other flavors - we want to match
                     // the same flavor.
                     sp<AaptGroup> overlayGroup = overlaySet->valueAt(overlayIndex);
-                    sp<AaptGroup> baseGroup = baseSet->valueAt(baseIndex);
+                    sp<AaptGroup> baseGroup = (*baseSet)->valueAt(baseIndex);
 
                     DefaultKeyedVector<AaptGroupEntry, sp<AaptFile> > overlayFiles =
                             overlayGroup->getFiles();
@@ -520,8 +523,12 @@ static bool applyFileOverlay(Bundle *bundle,
                         assets->addGroupEntry(overlayFiles.keyAt(overlayGroupIndex));
                     }
                 } else {
+                    if (baseSet->get() == NULL) {
+                        *baseSet = new ResourceTypeSet();
+                        assets->getResources()->add(String8(resType), *baseSet);
+                    }
                     // this group doesn't exist (a file that's only in the overlay)
-                    baseSet->add(overlaySet->keyAt(overlayIndex),
+                    (*baseSet)->add(overlaySet->keyAt(overlayIndex),
                             overlaySet->valueAt(overlayIndex));
                     // make sure all flavors are defined in the resources.
                     sp<AaptGroup> overlayGroup = overlaySet->valueAt(overlayIndex);
@@ -751,13 +758,13 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets)
         current = current->getOverlay();
     }
     // apply the overlay files to the base set
-    if (!applyFileOverlay(bundle, assets, drawables, "drawable") ||
-            !applyFileOverlay(bundle, assets, layouts, "layout") ||
-            !applyFileOverlay(bundle, assets, anims, "anim") ||
-            !applyFileOverlay(bundle, assets, xmls, "xml") ||
-            !applyFileOverlay(bundle, assets, raws, "raw") ||
-            !applyFileOverlay(bundle, assets, colors, "color") ||
-            !applyFileOverlay(bundle, assets, menus, "menu")) {
+    if (!applyFileOverlay(bundle, assets, &drawables, "drawable") ||
+            !applyFileOverlay(bundle, assets, &layouts, "layout") ||
+            !applyFileOverlay(bundle, assets, &anims, "anim") ||
+            !applyFileOverlay(bundle, assets, &xmls, "xml") ||
+            !applyFileOverlay(bundle, assets, &raws, "raw") ||
+            !applyFileOverlay(bundle, assets, &colors, "color") ||
+            !applyFileOverlay(bundle, assets, &menus, "menu")) {
         return UNKNOWN_ERROR;
     }
 
