@@ -576,7 +576,14 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         }
         mVoiceButton.setVisibility(visibility);
     }
-    
+
+    /** Called by SuggestionsAdapter when the cursor contents changed. */
+    void onDataSetChanged() {
+        if (mSearchAutoComplete != null && mSuggestionsAdapter != null) {
+            mSearchAutoComplete.onFilterComplete(mSuggestionsAdapter.getCount());
+        }
+    }
+
     /**
      * Hack to determine whether this is the browser, so we can adjust the UI.
      */
