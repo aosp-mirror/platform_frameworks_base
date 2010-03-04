@@ -2372,10 +2372,10 @@ class PackageManagerService extends IPackageManager.Stub {
         synchronized (mPackages) {
             // Look to see if we already know about this package.
             String oldName = mSettings.mRenamedPackages.get(pkg.packageName);
-            if (oldName != null && oldName.equals(pkg.mOriginalPackage)) {
+            if (pkg.mOriginalPackages != null && pkg.mOriginalPackages.contains(oldName)) {
                 // This package has been renamed to its original name.  Let's
                 // use that.
-                ps = mSettings.peekPackageLP(pkg.mOriginalPackage);
+                ps = mSettings.peekPackageLP(oldName);
             }
             // If there was no original package, see one for the real package name.
             if (ps == null) {
@@ -2645,7 +2645,7 @@ class PackageManagerService extends IPackageManager.Stub {
 
         if ((pkg.applicationInfo.flags&ApplicationInfo.FLAG_SYSTEM) == 0) {
             // Only system apps can use these features.
-            pkg.mOriginalPackage = null;
+            pkg.mOriginalPackages = null;
             pkg.mRealPackage = null;
             pkg.mAdoptPermissions = null;
         }
@@ -2727,22 +2727,22 @@ class PackageManagerService extends IPackageManager.Stub {
             }
 
             if (false) {
-                if (pkg.mOriginalPackage != null) {
+                if (pkg.mOriginalPackages != null) {
                     Log.w(TAG, "WAITING FOR DEBUGGER");
                     Debug.waitForDebugger();
-                    Log.i(TAG, "Package " + pkg.packageName + " from original package"
-                            + pkg.mOriginalPackage);
+                    Log.i(TAG, "Package " + pkg.packageName + " from original packages"
+                            + pkg.mOriginalPackages);
                 }
             }
             
             // Check if we are renaming from an original package name.
             PackageSetting origPackage = null;
             String realName = null;
-            if (pkg.mOriginalPackage != null) {
+            if (pkg.mOriginalPackages != null) {
                 // This package may need to be renamed to a previously
                 // installed name.  Let's check on that...
                 String renamed = mSettings.mRenamedPackages.get(pkg.mRealPackage);
-                if (pkg.mOriginalPackage.equals(renamed)) {
+                if (pkg.mOriginalPackages.contains(renamed)) {
                     // This package had originally been installed as the
                     // original name, and we have already taken care of
                     // transitioning to the new one.  Just update the new
@@ -2755,25 +2755,32 @@ class PackageManagerService extends IPackageManager.Stub {
                         pkg.setPackageName(renamed);
                     }
                     
-                } else if ((origPackage
-                        = mSettings.peekPackageLP(pkg.mOriginalPackage)) != null) {
-                    // We do have the package already installed under its
-                    // original name...  should we use it?
-                    if (!verifyPackageUpdate(origPackage, pkg)) {
-                        // New package is not compatible with original.
-                        origPackage = null;
-                    } else if (origPackage.sharedUser != null) {
-                        // Make sure uid is compatible between packages.
-                        if (!origPackage.sharedUser.name.equals(pkg.mSharedUserId)) {
-                            Log.w(TAG, "Unable to migrate data from " + origPackage.name
-                                    + " to " + pkg.packageName + ": old uid "
-                                    + origPackage.sharedUser.name
-                                    + " differs from " + pkg.mSharedUserId);
-                            origPackage = null;
+                } else {
+                    for (int i=pkg.mOriginalPackages.size()-1; i>=0; i--) {
+                        if ((origPackage=mSettings.peekPackageLP(
+                                pkg.mOriginalPackages.get(i))) != null) {
+                            // We do have the package already installed under its
+                            // original name...  should we use it?
+                            if (!verifyPackageUpdate(origPackage, pkg)) {
+                                // New package is not compatible with original.
+                                origPackage = null;
+                                continue;
+                            } else if (origPackage.sharedUser != null) {
+                                // Make sure uid is compatible between packages.
+                                if (!origPackage.sharedUser.name.equals(pkg.mSharedUserId)) {
+                                    Log.w(TAG, "Unable to migrate data from " + origPackage.name
+                                            + " to " + pkg.packageName + ": old uid "
+                                            + origPackage.sharedUser.name
+                                            + " differs from " + pkg.mSharedUserId);
+                                    origPackage = null;
+                                    continue;
+                                }
+                            } else {
+                                if (DEBUG_UPGRADE) Log.v(TAG, "Renaming new package "
+                                        + pkg.packageName + " to old name " + origPackage.name);
+                            }
+                            break;
                         }
-                    } else {
-                        if (DEBUG_UPGRADE) Log.v(TAG, "Renaming new package "
-                                + pkg.packageName + " to old name " + origPackage.name);
                     }
                 }
             }
@@ -5479,13 +5486,14 @@ class PackageManagerService extends IPackageManager.Stub {
             // Check if installing already existing package
             if ((pFlags&PackageManager.INSTALL_REPLACE_EXISTING) != 0) {
                 String oldName = mSettings.mRenamedPackages.get(pkgName);
-                if (oldName != null && oldName.equals(pkg.mOriginalPackage)
+                if (pkg.mOriginalPackages != null
+                        && pkg.mOriginalPackages.contains(oldName)
                         && mPackages.containsKey(oldName)) {
                     // This package is derived from an original package,
                     // and this device has been updating from that original
                     // name.  We must continue using the original name, so
                     // rename the new package here.
-                    pkg.setPackageName(pkg.mOriginalPackage);
+                    pkg.setPackageName(oldName);
                     pkgName = pkg.packageName;
                     replace = true;
                 } else if (mPackages.containsKey(pkgName)) {

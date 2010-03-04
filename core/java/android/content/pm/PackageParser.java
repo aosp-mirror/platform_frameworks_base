@@ -967,8 +967,11 @@ public class PackageParser {
                 String orig =sa.getNonResourceString(
                         com.android.internal.R.styleable.AndroidManifestOriginalPackage_name);
                 if (!pkg.packageName.equals(orig)) {
-                    pkg.mOriginalPackage = orig;
-                    pkg.mRealPackage = pkg.packageName;
+                    if (pkg.mOriginalPackages == null) {
+                        pkg.mOriginalPackages = new ArrayList<String>();
+                        pkg.mRealPackage = pkg.packageName;
+                    }
+                    pkg.mOriginalPackages.add(orig);
                 }
 
                 sa.recycle();
@@ -2579,7 +2582,7 @@ public class PackageParser {
         public ArrayList<String> usesOptionalLibraries = null;
         public String[] usesLibraryFiles = null;
 
-        public String mOriginalPackage = null;
+        public ArrayList<String> mOriginalPackages = null;
         public String mRealPackage = null;
         public ArrayList<String> mAdoptPermissions = null;
         
