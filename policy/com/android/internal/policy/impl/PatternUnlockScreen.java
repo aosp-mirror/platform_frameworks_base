@@ -62,11 +62,6 @@ class PatternUnlockScreen extends LinearLayoutWithDefaultTouchRecepient
     // how many cells the user has to cross before we poke the wakelock
     private static final int MIN_PATTERN_BEFORE_POKE_WAKELOCK = 2;
 
-    // This dictates how long a pattern should be before we count it as an attempt.
-    // This should be long enough to avoid false triggers while the device is in a pocket,
-    // as this can lead to a wiped device if a {@link DeviceAdmin} is active and has it enabled.
-    private static final int MIN_PATTERN_BEFORE_REPORT = 3;
-
     private int mFailedPatternAttemptsSinceLastTimeout = 0;
     private int mTotalFailedPatternAttempts = 0;
     private CountDownTimer mCountdownTimer = null;
@@ -511,6 +506,7 @@ class PatternUnlockScreen extends LinearLayoutWithDefaultTouchRecepient
                 if (pattern.size() >= LockPatternUtils.MIN_PATTERN_REGISTER_FAIL) {
                     mTotalFailedPatternAttempts++;
                     mFailedPatternAttemptsSinceLastTimeout++;
+                    mCallback.reportFailedUnlockAttempt();
                 }
                 if (mFailedPatternAttemptsSinceLastTimeout >= LockPatternUtils.FAILED_ATTEMPTS_BEFORE_TIMEOUT) {
                     long deadline = mLockPatternUtils.setLockoutAttemptDeadline();
@@ -522,9 +518,6 @@ class PatternUnlockScreen extends LinearLayoutWithDefaultTouchRecepient
                     mLockPatternView.postDelayed(
                             mCancelPatternRunnable,
                             PATTERN_CLEAR_TIMEOUT_MS);
-                }
-                if (pattern.size() > MIN_PATTERN_BEFORE_REPORT) {
-                    mCallback.reportFailedUnlockAttempt();
                 }
             }
         }

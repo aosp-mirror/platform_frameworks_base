@@ -290,7 +290,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase
                 // irrelevant to keyguard screen, they shouldn't be calling this
             }
 
-            public void reportFailedPatternAttempt() {
+            public void reportFailedUnlockAttempt() {
                 mUpdateMonitor.reportFailedAttempt();
                 final int failedAttempts = mUpdateMonitor.getFailedAttempts();
                 if (DEBUG) Log.d(TAG,
@@ -308,14 +308,11 @@ public class LockPatternKeyguardView extends KeyguardViewBase
                         == 0) {
                     showTimeoutDialog();
                 }
+                mLockPatternUtils.reportFailedPasswordAttempt();
             }
 
             public boolean doesFallbackUnlockScreenExist() {
                 return mEnableFallback;
-            }
-
-            public void reportFailedUnlockAttempt() {
-                mLockPatternUtils.reportFailedPasswordAttempt();
             }
 
             public void reportSuccessfulUnlockAttempt() {
@@ -329,13 +326,6 @@ public class LockPatternKeyguardView extends KeyguardViewBase
          */
         setFocusableInTouchMode(true);
         setDescendantFocusability(FOCUS_AFTER_DESCENDANTS);
-
-        // wall paper background
-        if (false) {
-            final BitmapDrawable drawable = (BitmapDrawable) context.getWallpaper();
-            setBackgroundDrawable(
-                    new FastBitmapDrawable(drawable.getBitmap()));
-        }
 
         // create both the lock and unlock screen so they are quickly available
         // when the screen turns on
@@ -680,7 +670,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase
                     break;
                 case LockPatternUtils.MODE_PATTERN:
                     // "forgot pattern" button is only available in the pattern mode...
-                    if (mForgotPattern && mLockPatternUtils.isPermanentlyLocked()) {
+                    if (mForgotPattern || mLockPatternUtils.isPermanentlyLocked()) {
                         currentMode = UnlockMode.Account;
                     } else {
                         currentMode = UnlockMode.Pattern;
