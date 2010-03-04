@@ -3410,7 +3410,6 @@ public class WebView extends AbsoluteLayout
         if (isTextView) {
             rebuildWebTextView();
             if (inEditingMode()) {
-                mWebTextView.setDefaultSelection();
                 imm.showSoftInput(mWebTextView, 0);
                 if (zoom) {
                     didUpdateTextViewBounds(true);
