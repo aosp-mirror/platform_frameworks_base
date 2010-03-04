@@ -2387,6 +2387,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 mVelocityTracker.clear();
             }
         }
+        awakenScrollBars();
     }
     
     private int getOverscrollMax() {
