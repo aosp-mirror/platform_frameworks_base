@@ -3858,6 +3858,10 @@ public class WebView extends AbsoluteLayout
         nativeHideCursor();
     }
 
+    /**
+     * Use this method to put the WebView into text selection mode.
+     * Do not rely on this functionality; it will be deprecated in the future.
+     */
     public void emulateShiftHeld() {
         if (0 == mNativeClass) return; // client isn't initialized
         setUpSelectXY();
