@@ -18,6 +18,7 @@
 #define LOG_TAG "asset"
 
 #define DEBUG_STYLES(x) //x
+#define THROW_ON_BAD_ID 0
 
 #include <android_runtime/android_util_AssetManager.h>
 
@@ -719,9 +720,21 @@ static jint android_content_AssetManager_loadResourceValue(JNIEnv* env, jobject 
     ResTable_config config;
     uint32_t typeSpecFlags;
     ssize_t block = res.getResource(ident, &value, false, &typeSpecFlags, &config);
+#if THROW_ON_BAD_ID
+    if (block == BAD_INDEX) {
+        jniThrowException(env, "java/lang/IllegalStateException", "Bad resource!");
+        return 0;
+    }
+#endif
     uint32_t ref = ident;
     if (resolve) {
         block = res.resolveReference(&value, block, &ref);
+#if THROW_ON_BAD_ID
+        if (block == BAD_INDEX) {
+            jniThrowException(env, "java/lang/IllegalStateException", "Bad resource!");
+            return 0;
+        }
+#endif
     }
     return block >= 0 ? copyValue(env, outValue, &res, value, ref, block, typeSpecFlags, &config) : block;
 }
@@ -763,6 +776,12 @@ static jint android_content_AssetManager_loadResourceBagValue(JNIEnv* env, jobje
     uint32_t ref = ident;
     if (resolve) {
         block = res.resolveReference(&value, block, &ref, &typeSpecFlags);
+#if THROW_ON_BAD_ID
+        if (block == BAD_INDEX) {
+            jniThrowException(env, "java/lang/IllegalStateException", "Bad resource!");
+            return 0;
+        }
+#endif
     }
     return block >= 0 ? copyValue(env, outValue, &res, value, ref, block, typeSpecFlags) : block;
 }
@@ -852,6 +871,12 @@ static jint android_content_AssetManager_loadThemeAttributeValue(
     uint32_t ref = 0;
     if (resolve) {
         block = res.resolveReference(&value, block, &ref, &typeSpecFlags);
+#if THROW_ON_BAD_ID
+        if (block == BAD_INDEX) {
+            jniThrowException(env, "java/lang/IllegalStateException", "Bad resource!");
+            return 0;
+        }
+#endif
     }
     return block >= 0 ? copyValue(env, outValue, &res, value, ref, block, typeSpecFlags) : block;
 }
@@ -1071,6 +1096,12 @@ static jboolean android_content_AssetManager_applyStyle(JNIEnv* env, jobject cla
                         value.dataType, value.data));
                 newBlock = res.resolveReference(&value, block, &resid,
                         &typeSetFlags, &config);
+#if THROW_ON_BAD_ID
+                if (newBlock == BAD_INDEX) {
+                    jniThrowException(env, "java/lang/IllegalStateException", "Bad resource!");
+                    return JNI_FALSE;
+                }
+#endif
                 if (newBlock >= 0) block = newBlock;
                 DEBUG_STYLES(LOGI("-> Resolved theme: type=0x%x, data=0x%08x",
                         value.dataType, value.data));
@@ -1207,6 +1238,12 @@ static jboolean android_content_AssetManager_retrieveAttributes(JNIEnv* env, job
             //printf("Resolving attribute reference\n");
             ssize_t newBlock = res.resolveReference(&value, block, &resid,
                     &typeSetFlags, &config);
+#if THROW_ON_BAD_ID
+            if (newBlock == BAD_INDEX) {
+                jniThrowException(env, "java/lang/IllegalStateException", "Bad resource!");
+                return JNI_FALSE;
+            }
+#endif
             if (newBlock >= 0) block = newBlock;
         }
         
@@ -1314,6 +1351,12 @@ static jint android_content_AssetManager_retrieveArray(JNIEnv* env, jobject claz
             //printf("Resolving attribute reference\n");
             ssize_t newBlock = res.resolveReference(&value, block, &resid,
                     &typeSetFlags, &config);
+#if THROW_ON_BAD_ID
+            if (newBlock == BAD_INDEX) {
+                jniThrowException(env, "java/lang/IllegalStateException", "Bad resource!");
+                return JNI_FALSE;
+            }
+#endif
             if (newBlock >= 0) block = newBlock;
         }
 
@@ -1421,6 +1464,13 @@ static jintArray android_content_AssetManager_getArrayStringInfo(JNIEnv* env, jo
             stringIndex = value.data;
         }
         
+#if THROW_ON_BAD_ID
+        if (stringBlock == BAD_INDEX) {
+            jniThrowException(env, "java/lang/IllegalStateException", "Bad resource!");
+            return array;
+        }
+#endif
+    
         //todo: It might be faster to allocate a C array to contain
         //      the blocknums and indices, put them in there and then
         //      do just one SetIntArrayRegion()
@@ -1469,6 +1519,12 @@ static jobjectArray android_content_AssetManager_getArrayStringResource(JNIEnv* 
 
         // Take care of resolving the found resource to its final value.
         ssize_t block = res.resolveReference(&value, bag->stringBlock, NULL);
+#if THROW_ON_BAD_ID
+        if (block == BAD_INDEX) {
+            jniThrowException(env, "java/lang/IllegalStateException", "Bad resource!");
+            return array;
+        }
+#endif
         if (value.dataType == Res_value::TYPE_STRING) {
             const ResStringPool* pool = res.getTableStringBlock(block);
             const char* str8 = pool->string8At(value.data, &strLen);
@@ -1520,6 +1576,12 @@ static jintArray android_content_AssetManager_getArrayIntResource(JNIEnv* env, j
         
         // Take care of resolving the found resource to its final value.
         ssize_t block = res.resolveReference(&value, bag->stringBlock, NULL);
+#if THROW_ON_BAD_ID
+        if (block == BAD_INDEX) {
+            jniThrowException(env, "java/lang/IllegalStateException", "Bad resource!");
+            return array;
+        }
+#endif
         if (value.dataType >= Res_value::TYPE_FIRST_INT
                 && value.dataType <= Res_value::TYPE_LAST_INT) {
             int intVal = value.data;

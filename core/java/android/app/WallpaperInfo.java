@@ -25,7 +25,9 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources.NotFoundException;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.graphics.drawable.Drawable;
@@ -96,6 +98,8 @@ public final class WallpaperInfo implements Parcelable {
                         + WallpaperService.SERVICE_META_DATA + " meta-data");
             }
         
+            Resources res = pm.getResourcesForApplication(si.applicationInfo);
+            
             AttributeSet attrs = Xml.asAttributeSet(parser);
             
             int type;
@@ -109,7 +113,7 @@ public final class WallpaperInfo implements Parcelable {
                         "Meta-data does not start with wallpaper tag");
             }
             
-            TypedArray sa = context.getResources().obtainAttributes(attrs,
+            TypedArray sa = res.obtainAttributes(attrs,
                     com.android.internal.R.styleable.Wallpaper);
             settingsActivityComponent = sa.getString(
                     com.android.internal.R.styleable.Wallpaper_settingsActivity);
@@ -125,6 +129,9 @@ public final class WallpaperInfo implements Parcelable {
                     -1);
 
             sa.recycle();
+        } catch (NameNotFoundException e) {
+            throw new XmlPullParserException(
+                    "Unable to create context for: " + si.packageName);
         } finally {
             if (parser != null) parser.close();
         }

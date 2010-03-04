@@ -1863,6 +1863,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 + " pid=" + (app != null ? app.pid : -1));
         if (app != null && app.pid > 0) {
             if (!knownToBeDead || app.thread == null) {
+                // We already have the app running, or are waiting for it to
+                // come up (we have a pid but not yet its thread), so keep it.
                 return app;
             } else {
                 // An application record is attached to a previous process,

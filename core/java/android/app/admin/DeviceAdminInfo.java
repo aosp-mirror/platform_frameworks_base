@@ -26,6 +26,8 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.content.res.Resources.NotFoundException;
@@ -181,6 +183,8 @@ public final class DeviceAdminInfo implements Parcelable {
                         + DeviceAdminReceiver.DEVICE_ADMIN_META_DATA + " meta-data");
             }
         
+            Resources res = pm.getResourcesForApplication(ai.applicationInfo);
+            
             AttributeSet attrs = Xml.asAttributeSet(parser);
             
             int type;
@@ -194,7 +198,7 @@ public final class DeviceAdminInfo implements Parcelable {
                         "Meta-data does not start with device-admin tag");
             }
             
-            TypedArray sa = context.getResources().obtainAttributes(attrs,
+            TypedArray sa = res.obtainAttributes(attrs,
                     com.android.internal.R.styleable.DeviceAdmin);
 
             mVisible = sa.getBoolean(
@@ -227,6 +231,9 @@ public final class DeviceAdminInfo implements Parcelable {
                     }
                 }
             }
+        } catch (NameNotFoundException e) {
+            throw new XmlPullParserException(
+                    "Unable to create context for: " + ai.packageName);
         } finally {
             if (parser != null) parser.close();
         }

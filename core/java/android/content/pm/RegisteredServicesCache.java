@@ -21,6 +21,8 @@ import android.content.BroadcastReceiver;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ComponentName;
+import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.os.Environment;
 import android.os.Handler;
@@ -402,7 +404,8 @@ public abstract class RegisteredServicesCache<V> {
                         "Meta-data does not start with " + mAttributesName +  " tag");
             }
 
-            V v = parseServiceAttributes(si.packageName, attrs);
+            V v = parseServiceAttributes(pm.getResourcesForApplication(si.applicationInfo),
+                    si.packageName, attrs);
             if (v == null) {
                 return null;
             }
@@ -410,6 +413,9 @@ public abstract class RegisteredServicesCache<V> {
             final ApplicationInfo applicationInfo = serviceInfo.applicationInfo;
             final int uid = applicationInfo.uid;
             return new ServiceInfo<V>(v, componentName, uid);
+        } catch (NameNotFoundException e) {
+            throw new XmlPullParserException(
+                    "Unable to load resources for pacakge " + si.packageName);
         } finally {
             if (parser != null) parser.close();
         }
@@ -499,5 +505,6 @@ public abstract class RegisteredServicesCache<V> {
         }
     }
 
-    public abstract V parseServiceAttributes(String packageName, AttributeSet attrs);
+    public abstract V parseServiceAttributes(Resources res,
+            String packageName, AttributeSet attrs);
 }
