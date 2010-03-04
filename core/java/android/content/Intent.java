@@ -1423,7 +1423,7 @@ public class Intent implements Parcelable, Cloneable {
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE =
-        "android.intent.action.EXTERNAL_APPLICATIONS_UNAVAILABILE";
+        "android.intent.action.EXTERNAL_APPLICATIONS_UNAVAILABLE";
 
     /**
      * Broadcast Action:  The current system wallpaper has changed.  See
