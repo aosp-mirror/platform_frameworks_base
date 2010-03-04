@@ -1311,7 +1311,12 @@ public class PhoneNumberUtils
         number = extractNetworkPortionAlt(number);
 
         // retrieve the list of emergency numbers
-        String numbers = SystemProperties.get("ro.ril.ecclist");
+        // check read-write ecclist property first
+        String numbers = SystemProperties.get("ril.ecclist");
+        if (TextUtils.isEmpty(numbers)) {
+            // then read-only ecclist property since old RIL only uses this
+            numbers = SystemProperties.get("ro.ril.ecclist");
+        }
 
         if (!TextUtils.isEmpty(numbers)) {
             // searches through the comma-separated list for a match,
