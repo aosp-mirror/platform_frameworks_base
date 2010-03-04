@@ -9516,6 +9516,9 @@ public class WindowManagerService extends IWindowManager.Stub
 
                         if (mPolicy.doesForceHide(w, attrs)) {
                             if (!wasAnimating && animating) {
+                                if (DEBUG_VISIBILITY) Slog.v(TAG,
+                                        "Animation done that could impact force hide: "
+                                        + w);
                                 wallpaperForceHidingChanged = true;
                                 mFocusMayChange = true;
                             } else if (w.isReadyForDisplay() && w.mAnimation == null) {
@@ -9525,19 +9528,31 @@ public class WindowManagerService extends IWindowManager.Stub
                             boolean changed;
                             if (forceHiding) {
                                 changed = w.hideLw(false, false);
+                                if (DEBUG_VISIBILITY && changed) Slog.v(TAG,
+                                        "Now policy hidden: " + w);
                             } else {
                                 changed = w.showLw(false, false);
-                                if (changed && wallpaperForceHidingChanged
-                                        && w.isReadyForDisplay()) {
-                                    // Assume we will need to animate.  If
-                                    // we don't (because the wallpaper will
-                                    // stay with the lock screen), then we will
-                                    // clean up later.
-                                    Animation a = mPolicy.createForceHideEnterAnimation();
-                                    if (a != null) {
-                                        w.setAnimation(a);
+                                if (DEBUG_VISIBILITY && changed) Slog.v(TAG,
+                                        "Now policy shown: " + w);
+                                if (changed) {
+                                    if (wallpaperForceHidingChanged
+                                            && w.isReadyForDisplay()) {
+                                        // Assume we will need to animate.  If
+                                        // we don't (because the wallpaper will
+                                        // stay with the lock screen), then we will
+                                        // clean up later.
+                                        Animation a = mPolicy.createForceHideEnterAnimation();
+                                        if (a != null) {
+                                            w.setAnimation(a);
+                                        }
                                     }
-                                    mFocusMayChange = true;
+                                    if (mCurrentFocus == null ||
+                                            mCurrentFocus.mLayer < w.mLayer) {
+                                        // We are showing on to of the current
+                                        // focus, so re-evaluate focus to make
+                                        // sure it is correct.
+                                        mFocusMayChange = true;
+                                    }
                                 }
                             }
                             if (changed && (attrs.flags

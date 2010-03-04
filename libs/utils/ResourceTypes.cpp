@@ -1850,7 +1850,7 @@ bool ResTable::getResourceName(uint32_t resID, resource_name* outName) const
         if (Res_GETPACKAGE(resID)+1 == 0) {
             LOGW("No package identifier when getting name for resource number 0x%08x", resID);
         } else {
-            LOGV("Resources don't contain package for resource number 0x%08x", resID);
+            LOGW("No known package when getting name for resource number 0x%08x", resID);
         }
         return false;
     }
@@ -1898,9 +1898,9 @@ ssize_t ResTable::getResource(uint32_t resID, Res_value* outValue, bool mayBeBag
 
     if (p < 0) {
         if (Res_GETPACKAGE(resID)+1 == 0) {
-            LOGW("No package identifier when getting name for resource number 0x%08x", resID);
+            LOGW("No package identifier when getting value for resource number 0x%08x", resID);
         } else {
-            LOGV("Resources don't contain package for resource number 0x%08x", resID);
+            LOGW("No known package when getting value for resource number 0x%08x", resID);
         }
         return BAD_INDEX;
     }
@@ -1921,7 +1921,7 @@ ssize_t ResTable::getResource(uint32_t resID, Res_value* outValue, bool mayBeBag
     const PackageGroup* const grp = mPackageGroups[p];
     if (grp == NULL) {
         LOGW("Bad identifier when getting value for resource number 0x%08x", resID);
-        return false;
+        return BAD_INDEX;
     }
     size_t ip = grp->packages.size();
     while (ip > 0) {
@@ -2003,7 +2003,7 @@ ssize_t ResTable::getResource(uint32_t resID, Res_value* outValue, bool mayBeBag
         return bestPackage->header->index;
     }
 
-    return BAD_INDEX;
+    return BAD_VALUE;
 }
 
 ssize_t ResTable::resolveReference(Res_value* value, ssize_t blockIndex,
@@ -2018,6 +2018,9 @@ ssize_t ResTable::resolveReference(Res_value* value, ssize_t blockIndex,
         uint32_t newFlags = 0;
         const ssize_t newIndex = getResource(value->data, value, true, &newFlags,
                 outConfig);
+        if (newIndex == BAD_INDEX) {
+            return BAD_INDEX;
+        }
         TABLE_THEME(LOGI("Resolving reference %p: newIndex=%d, type=0x%x, data=%p\n",
              (void*)lastRef, (int)newIndex, (int)value->dataType, (void*)value->data));
         //printf("Getting reference 0x%08x: newIndex=%d\n", value->data, newIndex);

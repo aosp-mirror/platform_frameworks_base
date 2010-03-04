@@ -1526,13 +1526,15 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         mDialogBuilder.setSingleChoiceItems(mItems, checkedItem,
                 new AlertDialog.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-                        if (mIms == null) {
-                            return;
-                        }
                         synchronized (mMethodMap) {
+                            if (mIms == null || mIms.length <= which) {
+                                return;
+                            }
                             InputMethodInfo im = mIms[which];
                             hideInputMethodMenu();
-                            setInputMethodLocked(im.getId());
+                            if (im != null) {
+                                setInputMethodLocked(im.getId());
+                            }
                         }
                     }
                 });

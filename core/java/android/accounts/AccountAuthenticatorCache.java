@@ -19,6 +19,7 @@ package android.accounts;
 import android.content.pm.PackageManager;
 import android.content.pm.RegisteredServicesCache;
 import android.content.pm.XmlSerializerAndParser;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.Context;
 import android.util.AttributeSet;
@@ -47,8 +48,9 @@ import java.io.IOException;
                 AccountManager.AUTHENTICATOR_ATTRIBUTES_NAME, sSerializer);
     }
 
-    public AuthenticatorDescription parseServiceAttributes(String packageName, AttributeSet attrs) {
-        TypedArray sa = mContext.getResources().obtainAttributes(attrs,
+    public AuthenticatorDescription parseServiceAttributes(Resources res,
+            String packageName, AttributeSet attrs) {
+        TypedArray sa = res.obtainAttributes(attrs,
                 com.android.internal.R.styleable.AccountAuthenticator);
         try {
             final String accountType =

@@ -25,6 +25,8 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
+import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.graphics.drawable.Drawable;
@@ -92,6 +94,8 @@ public final class InputMethodInfo implements Parcelable {
                         + InputMethod.SERVICE_META_DATA + " meta-data");
             }
         
+            Resources res = pm.getResourcesForApplication(si.applicationInfo);
+            
             AttributeSet attrs = Xml.asAttributeSet(parser);
             
             int type;
@@ -105,13 +109,16 @@ public final class InputMethodInfo implements Parcelable {
                         "Meta-data does not start with input-method tag");
             }
             
-            TypedArray sa = context.getResources().obtainAttributes(attrs,
+            TypedArray sa = res.obtainAttributes(attrs,
                     com.android.internal.R.styleable.InputMethod);
             settingsActivityComponent = sa.getString(
                     com.android.internal.R.styleable.InputMethod_settingsActivity);
             isDefaultResId = sa.getResourceId(
                     com.android.internal.R.styleable.InputMethod_isDefault, 0);
             sa.recycle();
+        } catch (NameNotFoundException e) {
+            throw new XmlPullParserException(
+                    "Unable to create context for: " + si.packageName);
         } finally {
             if (parser != null) parser.close();
         }
