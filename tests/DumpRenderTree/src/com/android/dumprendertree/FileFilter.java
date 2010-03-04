@@ -72,10 +72,10 @@ public class FileFilter {
     };
 
     static final String[] ignoreTestList = {
+        "editing/selection/move-left-right.html", // Causes DumpRenderTree to hang
         "fast/js/regexp-charclass-crash.html", // RegExp is too large, causing OOM
         "fast/regex/test1.html", // Causes DumpRenderTree to hang with V8
-        "fast/regex/slow.html", // Causes DumpRenderTree to hang with V8
-        "editing/selection/move-left-right.html" // Causes DumpRenderTree to hang
+        "fast/regex/slow.html" // Causes DumpRenderTree to hang with V8
     };
 
     static void fillIgnoreResultList() {
@@ -98,6 +98,7 @@ public class FileFilter {
         ignoreResultList.add("storage/database-lock-after-reload.html"); // failure
 
         // Will always fail
+        ignoreResultList.add("dom/svg/level3/xpath"); // XPath not supported
         ignoreResultList.add("fast/workers/shared-worker-constructor.html"); // shared workers not supported
         ignoreResultList.add("fast/workers/shared-worker-context-gc.html"); // shared workers not supported
         ignoreResultList.add("fast/workers/shared-worker-event-listener.html"); // shared workers not supported
@@ -114,6 +115,7 @@ public class FileFilter {
         ignoreResultList.add("fast/workers/shared-worker-script-error.html"); // shared workers not supported
         ignoreResultList.add("fast/workers/shared-worker-shared.html"); // shared workers not supported
         ignoreResultList.add("fast/workers/shared-worker-simple.html"); // shared workers not supported
+        ignoreResultList.add("fast/xpath"); // XPath not supported
 
         // TODO: These need to be triaged
         ignoreResultList.add("fast/css/case-transform.html"); // will not fix #619707
