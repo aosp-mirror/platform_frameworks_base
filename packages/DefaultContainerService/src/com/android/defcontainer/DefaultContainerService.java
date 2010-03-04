@@ -93,11 +93,16 @@ public class DefaultContainerService extends IntentService {
          *  PackageHelper.RECOMMEND_FAILED_INVALID_APK for parse errors.
          */
         public int getRecommendedInstallLocation(final Uri fileUri) {
-            if (!fileUri.getScheme().equals("file")) {
+            if (fileUri == null) {
+                Log.i(TAG, "Invalid package uri " + fileUri);
+                return PackageHelper.RECOMMEND_FAILED_INVALID_APK;
+            }
+            String scheme = fileUri.getScheme();
+            if (scheme != null && !scheme.equals("file")) {
                 Log.w(TAG, "Falling back to installing on internal storage only");
                 return PackageHelper.RECOMMEND_INSTALL_INTERNAL;
             }
-            final String archiveFilePath = fileUri.getPath();
+            String archiveFilePath = fileUri.getPath();
             PackageParser packageParser = new PackageParser(archiveFilePath);
             File sourceFile = new File(archiveFilePath);
             DisplayMetrics metrics = new DisplayMetrics();
@@ -166,40 +171,61 @@ public class DefaultContainerService extends IntentService {
         String codePath = packageURI.getPath();
         File codeFile = new File(codePath);
         String newCachePath = null;
+        final int CREATE_FAILED = 1;
+        final int COPY_FAILED = 2;
+        final int FINALIZE_FAILED = 3;
+        final int PASS = 4;
+        int errCode = CREATE_FAILED;
         // Create new container
         if ((newCachePath = PackageHelper.createSdDir(codeFile,
-                newCid, key, Process.myUid())) == null) {
-            Log.e(TAG, "Failed creating container " + newCid);
-            return null;
+                newCid, key, Process.myUid())) != null) {
+            if (localLOGV) Log.i(TAG, "Created container for " + newCid
+                    + " at path : " + newCachePath);
+            File resFile = new File(newCachePath, resFileName);
+            errCode = COPY_FAILED;
+            // Copy file from codePath
+            if (FileUtils.copyFile(new File(codePath), resFile)) {
+                if (localLOGV) Log.i(TAG, "Copied " + codePath + " to " + resFile);
+                errCode = FINALIZE_FAILED;
+                if (PackageHelper.finalizeSdDir(newCid)) {
+                    if (localLOGV) Log.i(TAG, "Finalized container " + newCid);
+                    errCode = PASS;
+                }
+            }
         }
-        if (localLOGV) Log.i(TAG, "Created container for " + newCid
-                + " at path : " + newCachePath);
-        File resFile = new File(newCachePath, resFileName);
-        // Copy file from codePath
-        if (!FileUtils.copyFile(new File(codePath), resFile)) {
-            Log.e(TAG, "Failed to copy " + codePath + " to " + resFile);
-            // Clean up created container
-            PackageHelper.destroySdDir(newCid);
-            return null;
+        // Print error based on errCode
+        String errMsg = "";
+        switch (errCode) {
+            case CREATE_FAILED:
+                errMsg = "CREATE_FAILED";
+                break;
+            case COPY_FAILED:
+                errMsg = "COPY_FAILED";
+                if (localLOGV) Log.i(TAG, "Destroying " + newCid +
+                        " at path " + newCachePath + " after " + errMsg);
+                PackageHelper.destroySdDir(newCid);
+                break;
+            case FINALIZE_FAILED:
+                errMsg = "FINALIZE_FAILED";
+                if (localLOGV) Log.i(TAG, "Destroying " + newCid +
+                        " at path " + newCachePath + " after " + errMsg);
+                PackageHelper.destroySdDir(newCid);
+                break;
+            default:
+                errMsg = "PASS";
+                if (PackageHelper.isContainerMounted(newCid)) {
+                    if (localLOGV) Log.i(TAG, "Unmounting " + newCid +
+                            " at path " + newCachePath + " after " + errMsg);
+                    // Force a gc to avoid being killed.
+                    Runtime.getRuntime().gc();
+                    PackageHelper.unMountSdDir(newCid);
+                } else {
+                    if (localLOGV) Log.i(TAG, "Container " + newCid + " not mounted");
+                }
+                break;
         }
-        if (localLOGV) Log.i(TAG, "Copied " + codePath + " to " + resFile);
-        // Finalize container now
-        if (!PackageHelper.finalizeSdDir(newCid)) {
-            Log.e(TAG, "Failed to finalize " + newCid + " at cache path " + newCachePath);
-            // Clean up created container
-            PackageHelper.destroySdDir(newCid);
+        if (errCode != PASS) {
             return null;
-        }
-        if (localLOGV) Log.i(TAG, "Finalized container " + newCid);
-        // Force a gc to avoid being killed.
-        Runtime.getRuntime().gc();
-        // Unmount container
-        if (PackageHelper.isContainerMounted(newCid)) {
-            if (localLOGV) Log.i(TAG, "Unmounting " + newCid +
-                    " at path " + newCachePath);
-            PackageHelper.unMountSdDir(newCid);
-        } else {
-            if (localLOGV) Log.i(TAG, "Container " + newCid + " not mounted");
         }
         return newCachePath;
     }
@@ -231,7 +257,8 @@ public class DefaultContainerService extends IntentService {
     }
 
     private  boolean copyFile(Uri pPackageURI, FileOutputStream outStream) {
-        if (pPackageURI.getScheme().equals("file")) {
+        String scheme = pPackageURI.getScheme();
+        if (scheme == null || scheme.equals("file")) {
             final File srcPackageFile = new File(pPackageURI.getPath());
             // We copy the source package file to a temp file and then rename it to the
             // destination file in order to eliminate a window where the package directory
@@ -240,7 +267,7 @@ public class DefaultContainerService extends IntentService {
                 Log.e(TAG, "Couldn't copy file: " + srcPackageFile);
                 return false;
             }
-        } else if (pPackageURI.getScheme().equals("content")) {
+        } else if (scheme.equals("content")) {
             ParcelFileDescriptor fd = null;
             try {
                 fd = getContentResolver().openFileDescriptor(pPackageURI, "r");
