@@ -330,7 +330,7 @@ public class VCardConfig {
         (VCARD_TYPE_V21_JAPANESE_MOBILE | FLAG_DOCOMO);
 
     /* package */ static final String VCARD_TYPE_DOCOMO_STR = "docomo";
-    
+
     public static int VCARD_TYPE_DEFAULT = VCARD_TYPE_V21_GENERIC_UTF8;
 
     private static final Map<String, Integer> sVCardTypeMap;
@@ -363,6 +363,8 @@ public class VCardConfig {
         final String loweredKey = vcardTypeString.toLowerCase();
         if (sVCardTypeMap.containsKey(loweredKey)) {
             return sVCardTypeMap.get(loweredKey);
+        } else if ("default".equalsIgnoreCase(vcardTypeString)) {
+            return VCARD_TYPE_DEFAULT;
         } else {
             Log.e(LOG_TAG, "Unknown vCard type String: \"" + vcardTypeString + "\"");
             return VCARD_TYPE_DEFAULT;
