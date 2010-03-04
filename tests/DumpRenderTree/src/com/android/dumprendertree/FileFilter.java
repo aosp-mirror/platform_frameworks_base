@@ -98,11 +98,6 @@ public class FileFilter {
         ignoreResultList.add("http/tests/appcache/manifest-with-empty-file.html"); // flaky
         ignoreResultList.add("http/tests/appcache/whitelist-wildcard.html"); // file not found
         ignoreResultList.add("storage/database-lock-after-reload.html"); // failure
-        ignoreResultList.add("storage/domstorage/localstorage/string-conversion.html"); // false failure due to whitespace diff in output with V8
-        ignoreResultList.add("storage/domstorage/sessionstorage/string-conversion.html"); // false failure due to whitespace diff in output with V8
-        ignoreResultList.add("storage/statement-error-callback.html"); // expected line number diff in V8 only
-        ignoreResultList.add("storage/transaction-error-callback.html"); // expected line number diff in V8 only
-        ignoreResultList.add("storage/transaction-callback-exception-crash.html"); // expected line number diff in V8 only
 
         ignoreResultList.add("fast/css/case-transform.html"); // will not fix #619707
         ignoreResultList.add("fast/dom/Element/offsetLeft-offsetTop-body-quirk.html"); // different screen size result in extra spaces in Apple compared to us
