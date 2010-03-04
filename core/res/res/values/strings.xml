@@ -131,9 +131,17 @@
     <!-- Displayed to tell the user that emergency service is blocked by access control. -->
     <string name="RestrictedOnEmergency">Emergency service is blocked.</string>
     <!-- Displayed to tell the user that normal service is blocked by access control. -->
-    <string name="RestrictedOnNormal">Voice/SMS service is blocked.</string>
-    <!-- Displayed to tell the user that all voice service is blocked by access control. -->
-    <string name="RestrictedOnAll">All voice/SMS services are blocked.</string>
+    <string name="RestrictedOnNormal">Voice service is blocked.</string>
+    <!-- Displayed to tell the user that all emergency and normal voice services are blocked by access control. -->
+    <string name="RestrictedOnAllVoice">All Voice services are blocked.</string>
+    <!-- Displayed to tell the user that sms service is blocked by access control. -->
+    <string name="RestrictedOnSms">SMS service is blocked.</string>
+    <!-- Displayed to tell the user that voice/data service is blocked by access control. -->
+    <string name="RestrictedOnVoiceData">Voice/Data services are blocked.</string>
+    <!-- Displayed to tell the user that voice and sms service are blocked by access control. -->
+    <string name="RestrictedOnVoiceSms">Voice/SMS services are blocked.</string>
+    <!-- Displayed to tell the user that all service is blocked by access control. -->
+    <string name="RestrictedOnAll">All Voice/Data/SMS services are blocked.</string>
 
     <!-- Mappings between TS 27.007 +CFCC/+CLCK "service classes" and human-readable strings--> <skip />
     <!-- Example: Service was enabled for: Voice, Data -->

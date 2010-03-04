@@ -1630,7 +1630,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
             notificationId = PS_NOTIFICATION;
             break;
         case CS_ENABLED:
-            details = context.getText(com.android.internal.R.string.RestrictedOnAll);;
+            details = context.getText(com.android.internal.R.string.RestrictedOnAllVoice);;
             break;
         case CS_NORMAL_ENABLED:
             details = context.getText(com.android.internal.R.string.RestrictedOnNormal);;
