@@ -36,9 +36,9 @@ public class InputDevice {
     
     /**
      * Slop distance for jumpy pointer detection.
-     * This is in touchscreen coordinates, not pixels or dips.
+     * The vertical range of the screen divided by this is our epsilon value.
      */
-    private static final int JUMPY_EPSILON = 30;
+    private static final int JUMPY_EPSILON_DIVISOR = 212;
     
     /** Number of jumpy points to drop for touchscreens that need it. */
     private static final int JUMPY_TRANSITION_DROPS = 3;
@@ -246,11 +246,17 @@ public class InputDevice {
         }
         
         void dropJumpyPoint(InputDevice dev) {
+            // We should always have absY, but let's be paranoid.
+            if (dev.absY == null) {
+                return;
+            }
+            final int jumpyEpsilon = dev.absY.range / JUMPY_EPSILON_DIVISOR;
+            
             final int nextNumPointers = mNextNumPointers;
             final int lastNumPointers = mLastNumPointers;
             final int[] nextData = mNextData;
             final int[] lastData = mLastData;
-
+            
             if (nextNumPointers != mLastNumPointers) {
                 if (DEBUG_HACKS) {
                     Slog.d("InputDevice", "Different pointer count " + lastNumPointers + 
@@ -330,8 +336,8 @@ public class InputDevice {
                         final int xOther = nextData[joff + MotionEvent.SAMPLE_X];
                         final int yOther = nextData[joff + MotionEvent.SAMPLE_Y];
 
-                        dropx = Math.abs(x - xOther) <= JUMPY_EPSILON;
-                        dropy = Math.abs(y - yOther) <= JUMPY_EPSILON;
+                        dropx = Math.abs(x - xOther) <= jumpyEpsilon;
+                        dropy = Math.abs(y - yOther) <= jumpyEpsilon;
                     }
                     
                     if (dropx) {
