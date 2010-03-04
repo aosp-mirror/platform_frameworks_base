@@ -1542,7 +1542,6 @@ public class SQLiteDatabase extends SQLiteClosable {
                 }
             }
             statement.execute();
-            statement.close();
             return lastChangeCount();
         } catch (SQLiteDatabaseCorruptException e) {
             onCorruption();
@@ -1638,7 +1637,6 @@ public class SQLiteDatabase extends SQLiteClosable {
 
             // Run the program and then cleanup
             statement.execute();
-            statement.close();
             int numChangedRows = lastChangeCount();
             if (Config.LOGD && Log.isLoggable(TAG, Log.VERBOSE)) {
                 Log.v(TAG, "Updated " + numChangedRows + " using " + values + " and " + sql);
