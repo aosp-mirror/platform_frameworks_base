@@ -61,7 +61,7 @@ public class VCardEntry {
     private final static int DEFAULT_ORGANIZATION_TYPE = Organization.TYPE_WORK;
 
     private static final String ACCOUNT_TYPE_GOOGLE = "com.google";
-    private static final String GOOGLE_MY_CONTACTS_GROUP = "System Group: My Contacts";
+    private static final String GOOGLE_MY_CONTACTS_GROUP = "My Contacts";
 
     private static final Map<String, Integer> sImMap = new HashMap<String, Integer>();
 
