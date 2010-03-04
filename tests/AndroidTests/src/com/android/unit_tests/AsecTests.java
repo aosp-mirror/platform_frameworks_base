@@ -346,21 +346,20 @@ public class AsecTests extends AndroidTestCase {
         }
     }
 
-    public void testIsContainerMountedAfterRename() {
+    public void testContainerSize() {
+        IMountService ms = getMs();
         try {
             Assert.assertEquals(StorageResultCode.OperationSucceeded,
-                    createContainer("testRenameContainer.1", 4, "none"));
+                    createContainer("testContainerSize", 1, "none"));
+            String path = ms.getSecureContainerPath("com.android.unittests.AsecTests.testUnmountBusyContainer");
 
-            Assert.assertEquals(StorageResultCode.OperationSucceeded,
-                    unmountContainer("testRenameContainer.1", false));
-
-            Assert.assertEquals(StorageResultCode.OperationSucceeded,
-                    renameContainer("testRenameContainer.1", "testRenameContainer.2"));
-
-            Assert.assertEquals(false, containerExists("testRenameContainer.1"));
-            Assert.assertEquals(true, containerExists("testRenameContainer.2"));
-            // Check if isContainerMounted returns valid value
-            Assert.assertEquals(true, isContainerMounted("testRenameContainer.2"));
+            byte[] buf = new byte[4096];
+            File f = new File(path, "reference");
+            FileOutputStream fos = new FileOutputStream(f);
+            for (int i = 0; i < (1024 * 1024); i+= buf.length) {
+                fos.write(buf);
+            }
+            fos.close();
         } catch (Exception e) {
             failStr(e);
         }
