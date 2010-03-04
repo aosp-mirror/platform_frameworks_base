@@ -33,7 +33,7 @@ public class MccTableTest extends AndroidTestCase {
         assertEquals(MccTable.defaultTimeZoneForMcc(655), "Africa/Johannesburg");
         assertEquals(MccTable.defaultTimeZoneForMcc(440), "Asia/Tokyo");
         assertEquals(MccTable.defaultTimeZoneForMcc(441), "Asia/Tokyo");
-        assertEquals(MccTable.defaultTimeZoneForMcc(525), "Singapore");
+        assertEquals(MccTable.defaultTimeZoneForMcc(525), "Asia/Singapore");
         assertEquals(MccTable.defaultTimeZoneForMcc(240), null);  // tz not defined, hence default
         assertEquals(MccTable.defaultTimeZoneForMcc(0), null);    // mcc not defined, hence default
         assertEquals(MccTable.defaultTimeZoneForMcc(2000), null); // mcc not defined, hence default
