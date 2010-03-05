@@ -34,8 +34,10 @@ import android.os.SystemProperties;
 import android.provider.Settings;
 import android.util.Config;
 import android.util.EventLog;
+import android.util.Log;
 import android.util.Slog;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -804,19 +806,14 @@ public class Watchdog extends Thread {
                 // to timeout on is asleep as well and won't have a chance to run. Causing a false
                 // positive on when to kill things.
                 long start = SystemClock.uptimeMillis();
-                do {
+                while (timeout > 0 && !mForceKillSystem) {
                     try {
-                        wait(timeout);
+                        wait(timeout);  // notifyAll() is called when mForceKillSystem is set
                     } catch (InterruptedException e) {
-                        if (SystemProperties.getBoolean("ro.secure", false)) {
-                            // If this is a secure build, just log the error.
-                            Slog.e("WatchDog", "Woof! Woof! Interrupter!");
-                        } else {
-                            throw new AssertionError("Someone interrupted the watchdog");
-                        }
+                        Log.wtf(TAG, e);
                     }
                     timeout = TIME_TO_WAIT - (SystemClock.uptimeMillis() - start);
-                } while (timeout > 0 && !mForceKillSystem);
+                }
 
                 if (mCompleted && !mForceKillSystem) {
                     // The monitors have returned.
@@ -825,22 +822,24 @@ public class Watchdog extends Thread {
             }
 
             // If we got here, that means that the system is most likely hung.
-            // First send a SIGQUIT so that we can see where it was hung. Then
-            // kill this process so that the system will restart.
+            // First collect stack traces from all threads of the system process.
+            // Then kill this process so that the system will restart.
+
             String name = (mCurrentMonitor != null) ? mCurrentMonitor.getClass().getName() : "null";
             EventLog.writeEvent(EventLogTags.WATCHDOG, name);
-            Process.sendSignal(Process.myPid(), Process.SIGNAL_QUIT);
 
-            // Wait a bit longer before killing so we can make sure that the stacks are captured.
-            try {
-                Thread.sleep(10*1000);
-            } catch (InterruptedException e) {
-            }
+            ArrayList pids = new ArrayList();
+            pids.add(Process.myPid());
+            File stack = ActivityManagerService.dumpStackTraces(pids);
+            mActivity.addErrorToDropBox("watchdog", null, null, null, name, null, stack, null);
 
             // Only kill the process if the debugger is not attached.
             if (!Debug.isDebuggerConnected()) {
-                Slog.i(TAG, "Watchdog is killing the system process");
+                Slog.w(TAG, "*** WATCHDOG KILLING SYSTEM PROCESS: " + name);
                 Process.killProcess(Process.myPid());
+                System.exit(10);
+            } else {
+                Slog.w(TAG, "Debugger connected: Watchdog is *not* killing the system process");
             }
         }
     }
