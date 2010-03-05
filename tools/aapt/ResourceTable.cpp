@@ -2369,7 +2369,7 @@ ResourceTable::validateLocalizations(void)
                         if (configSet.find(region) == configSet.end()) {
                             if (configSet.count(defaultLocale) == 0) {
                                 fprintf(stdout, "aapt: warning: "
-                                        "*** string '%s' has no default or required localization "
+                                        "**** string '%s' has no default or required localization "
                                         "for '%s' in %s\n",
                                         String8(nameIter->first).string(),
                                         config.string(),
