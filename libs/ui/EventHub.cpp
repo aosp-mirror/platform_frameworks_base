@@ -176,7 +176,7 @@ int EventHub::getSwitchState(int32_t deviceId, int sw) const
     if (device == NULL) return -1;
     
     if (sw >= 0 && sw <= SW_MAX) {
-        uint8_t sw_bitmask[(SW_MAX+1)/8];
+        uint8_t sw_bitmask[(SW_MAX+7)/8];
         memset(sw_bitmask, 0, sizeof(sw_bitmask));
         if (ioctl(mFDs[id_to_index(device->id)].fd,
                    EVIOCGSW(sizeof(sw_bitmask)), sw_bitmask) >= 0) {
@@ -200,7 +200,7 @@ int EventHub::getScancodeState(int32_t deviceId, int code) const
     if (device == NULL) return -1;
     
     if (code >= 0 && code <= KEY_MAX) {
-        uint8_t key_bitmask[(KEY_MAX+1)/8];
+        uint8_t key_bitmask[(KEY_MAX+7)/8];
         memset(key_bitmask, 0, sizeof(key_bitmask));
         if (ioctl(mFDs[id_to_index(device->id)].fd,
                    EVIOCGKEY(sizeof(key_bitmask)), key_bitmask) >= 0) {
@@ -225,7 +225,7 @@ int EventHub::getKeycodeState(int32_t deviceId, int code) const
     Vector<int32_t> scanCodes;
     device->layoutMap->findScancodes(code, &scanCodes);
     
-    uint8_t key_bitmask[(KEY_MAX+1)/8];
+    uint8_t key_bitmask[(KEY_MAX+7)/8];
     memset(key_bitmask, 0, sizeof(key_bitmask));
     if (ioctl(mFDs[id_to_index(device->id)].fd,
                EVIOCGKEY(sizeof(key_bitmask)), key_bitmask) >= 0) {
@@ -608,12 +608,12 @@ int EventHub::open_device(const char *deviceName)
     // consider up through the function keys; we don't want to include
     // ones after that (play cd etc) so we don't mistakenly consider a
     // controller to be a keyboard.
-    uint8_t key_bitmask[(KEY_MAX+1)/8];
+    uint8_t key_bitmask[(KEY_MAX+7)/8];
     memset(key_bitmask, 0, sizeof(key_bitmask));
     LOGV("Getting keys...");
     if (ioctl(fd, EVIOCGBIT(EV_KEY, sizeof(key_bitmask)), key_bitmask) >= 0) {
         //LOGI("MAP\n");
-        //for (int i=0; i<((KEY_MAX+1)/8); i++) {
+        //for (int i=0; i<((KEY_MAX+7)/8); i++) {
         //    LOGI("%d: 0x%02x\n", i, key_bitmask[i]);
         //}
         for (int i=0; i<((BTN_MISC+7)/8); i++) {
@@ -636,7 +636,7 @@ int EventHub::open_device(const char *deviceName)
     
     // See if this is a trackball.
     if (test_bit(BTN_MOUSE, key_bitmask)) {
-        uint8_t rel_bitmask[(REL_MAX+1)/8];
+        uint8_t rel_bitmask[(REL_MAX+7)/8];
         memset(rel_bitmask, 0, sizeof(rel_bitmask));
         LOGV("Getting relative controllers...");
         if (ioctl(fd, EVIOCGBIT(EV_REL, sizeof(rel_bitmask)), rel_bitmask) >= 0)
@@ -647,7 +647,7 @@ int EventHub::open_device(const char *deviceName)
         }
     }
     
-    uint8_t abs_bitmask[(ABS_MAX+1)/8];
+    uint8_t abs_bitmask[(ABS_MAX+7)/8];
     memset(abs_bitmask, 0, sizeof(abs_bitmask));
     LOGV("Getting absolute controllers...");
     ioctl(fd, EVIOCGBIT(EV_ABS, sizeof(abs_bitmask)), abs_bitmask);
@@ -666,7 +666,7 @@ int EventHub::open_device(const char *deviceName)
 
 #ifdef EV_SW
     // figure out the switches this device reports
-    uint8_t sw_bitmask[(SW_MAX+1)/8];
+    uint8_t sw_bitmask[(SW_MAX+7)/8];
     memset(sw_bitmask, 0, sizeof(sw_bitmask));
     if (ioctl(fd, EVIOCGBIT(EV_SW, sizeof(sw_bitmask)), sw_bitmask) >= 0) {
         for (int i=0; i<EV_SW; i++) {
