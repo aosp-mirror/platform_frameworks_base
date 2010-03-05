@@ -36,8 +36,10 @@
 namespace android {
 
 // Everything must match except for
-// protection, bitrate, padding, private bits and mode extension.
-static const uint32_t kMask = 0xfffe0ccf;
+// protection, bitrate, padding, private bits, mode extension,
+// copyright bit, original bit and emphasis.
+// Yes ... there are things that must indeed match...
+static const uint32_t kMask = 0xfffe0cc0;
 
 static bool get_mp3_frame_size(
         uint32_t header, size_t *frame_size,
@@ -669,7 +671,7 @@ status_t MP3Source::read(
         }
 
         // Lost sync.
-        LOGV("lost sync!\n");
+        LOGV("lost sync! header = 0x%08x, old header = 0x%08x\n", header, mFixedHeader);
 
         off_t pos = mCurrentPos;
         if (!Resync(mDataSource, mFixedHeader, &pos, NULL)) {
