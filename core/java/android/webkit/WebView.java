@@ -3213,27 +3213,6 @@ public class WebView extends AbsoluteLayout
         }
     }
 
-    private static class Metrics {
-        int mScrollX;
-        int mScrollY;
-        int mWidth;
-        int mHeight;
-        float mInvScale;
-    }
-
-    private Metrics getViewMetrics() {
-        Metrics metrics = new Metrics();
-        metrics.mScrollX = mScrollX;
-        metrics.mScrollY = computeVerticalScrollOffset();
-        metrics.mWidth = getWidth();
-        metrics.mHeight = getHeight() - getVisibleTitleHeight();
-        if (mFindIsUp) {
-            metrics.mHeight -= mFindHeight;
-        }
-        metrics.mInvScale = mInvActualScale;
-        return metrics;
-    }
-
     private void drawExtras(Canvas canvas, int extras) {
         // If mNativeClass is 0, we should not reach here, so we do not
         // need to check it again.
