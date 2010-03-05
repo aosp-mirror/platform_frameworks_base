@@ -40,7 +40,6 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.provider.Settings;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.android.internal.telephony.Phone;
 import com.android.internal.util.HierarchicalState;
@@ -66,7 +65,6 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
     private Context mContext;
     private final String TAG = "Tethering";
 
-    private boolean mPlaySounds = false;
     private boolean mBooted = false;
     //used to remember if we got connected before boot finished
     private boolean mDeferedUsbConnection = false;
@@ -77,8 +75,6 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
     private String[] mUpstreamIfaceRegexs;
 
     private HashMap<String, TetherInterfaceSM> mIfaces;
-
-    private ArrayList<String> mActiveTtys;
 
     private BroadcastReceiver mStateReceiver;
 
@@ -112,7 +108,6 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
         }
 
         mIfaces = new HashMap<String, TetherInterfaceSM>();
-        mActiveTtys = new ArrayList<String>();
 
         mTetherMasterSM = new TetherMasterSM("TetherMaster");
         mTetherMasterSM.start();
@@ -323,142 +318,6 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
         mContext.sendStickyBroadcast(broadcast);
         Log.d(TAG, "sendTetherStateChangedBroadcast " + availableList.size() + ", " +
                 activeList.size() + ", " + erroredList.size());
-        // check if we need to send a USB notification
-        // Check if the user wants to be bothered
-        boolean tellUser = (Settings.Secure.getInt(mContext.getContentResolver(),
-                Settings.Secure.TETHER_NOTIFY, 0) == 1);
-        for (Object o : activeList) {
-            String s = (String)o;
-            for (Object regexObject : mTetherableUsbRegexs) {
-                if (s.matches((String)regexObject)) {
-                    showTetheredNotification();
-                    return;
-                }
-            }
-        }
-        if (tellUser) {
-            for (Object o : availableList) {
-                String s = (String)o;
-                for (String match : mTetherableUsbRegexs) {
-                    if (s.matches(match)) {
-                        showTetherAvailableNotification();
-                        return;
-                    }
-                }
-            }
-        }
-        clearNotification();
-    }
-
-    private void showTetherAvailableNotification() {
-        NotificationManager notificationManager = (NotificationManager)mContext.
-                getSystemService(Context.NOTIFICATION_SERVICE);
-        if (notificationManager == null) {
-            return;
-        }
-        Intent intent = new Intent();
-        intent.setClass(mContext, com.android.internal.app.TetherActivity.class);
-
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        PendingIntent pi = PendingIntent.getActivity(mContext, 0, intent, 0);
-
-        Resources r = Resources.getSystem();
-        CharSequence title = r.getText(com.android.internal.R.string.
-                tether_available_notification_title);
-        CharSequence message = r.getText(com.android.internal.R.string.
-                tether_available_notification_message);
-
-        if(mTetheringNotification == null) {
-            mTetheringNotification = new Notification();
-            mTetheringNotification.when = 0;
-        }
-        mTetheringNotification.icon = com.android.internal.R.drawable.stat_sys_tether_usb;
-
-        boolean playSounds = false;
-        //playSounds = SystemProperties.get("persist.service.mount.playsnd", "1").equals("1");
-        if (playSounds) {
-            mTetheringNotification.defaults |= Notification.DEFAULT_SOUND;
-        } else {
-            mTetheringNotification.defaults &= ~Notification.DEFAULT_SOUND;
-        }
-
-        mTetheringNotification.flags = Notification.FLAG_ONGOING_EVENT;
-        mTetheringNotification.tickerText = title;
-        mTetheringNotification.setLatestEventInfo(mContext, title, message, pi);
-
-        notificationManager.notify(mTetheringNotification.icon, mTetheringNotification);
-
-    }
-
-    private void showTetheredNotification() {
-        NotificationManager notificationManager = (NotificationManager)mContext.
-                getSystemService(Context.NOTIFICATION_SERVICE);
-        if (notificationManager == null) {
-            return;
-        }
-
-        Intent intent = new Intent();
-        intent.setClass(mContext, com.android.internal.app.TetherActivity.class);
-
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        PendingIntent pi = PendingIntent.getActivity(mContext, 0, intent, 0);
-
-        Resources r = Resources.getSystem();
-        CharSequence title = r.getText(com.android.internal.R.string.
-                tether_stop_notification_title);
-        CharSequence message = r.getText(com.android.internal.R.string.
-                tether_stop_notification_message);
-
-        if(mTetheringNotification == null) {
-            mTetheringNotification = new Notification();
-            mTetheringNotification.when = 0;
-        }
-        mTetheringNotification.icon = com.android.internal.R.drawable.stat_sys_tether_usb;
-
-        boolean playSounds = false;
-        //playSounds = SystemProperties.get("persist.service.mount.playsnd", "1").equals("1");
-        if (playSounds) {
-            mTetheringNotification.defaults |= Notification.DEFAULT_SOUND;
-        } else {
-            mTetheringNotification.defaults &= ~Notification.DEFAULT_SOUND;
-        }
-
-        mTetheringNotification.flags = Notification.FLAG_ONGOING_EVENT;
-        mTetheringNotification.tickerText = title;
-        mTetheringNotification.setLatestEventInfo(mContext, title, message, pi);
-
-        notificationManager.notify(mTetheringNotification.icon, mTetheringNotification);
-    }
-
-    private void clearNotification() {
-        NotificationManager notificationManager = (NotificationManager)mContext.
-                getSystemService(Context.NOTIFICATION_SERVICE);
-        if (notificationManager != null && mTetheringNotification != null) {
-            notificationManager.cancel(mTetheringNotification.icon);
-            mTetheringNotification = null;
-        }
-    }
-
-    private void showErrorToast(int error) {
-        int num;
-        switch(error) {
-        case ConnectivityManager.TETHER_ERROR_TETHER_IFACE_ERROR:
-        case ConnectivityManager.TETHER_ERROR_ENABLE_NAT_ERROR:
-        case ConnectivityManager.TETHER_ERROR_IFACE_CFG_ERROR:
-        case ConnectivityManager.TETHER_ERROR_MASTER_ERROR:
-            num = com.android.internal.R.string.tether_error_message;
-            break;
-        case ConnectivityManager.TETHER_ERROR_UNTETHER_IFACE_ERROR:
-        case ConnectivityManager.TETHER_ERROR_DISABLE_NAT_ERROR:
-            num = com.android.internal.R.string.tether_stop_error_message;
-            break;
-        default:
-            // do nothing
-            return;
-        }
-        String text = mContext.getResources().getString(num) + " - EC" + error;
-        Log.e(TAG, text);
-        Toast.makeText(mContext, text, Toast.LENGTH_LONG).show();
     }
 
     private class StateReceiver extends BroadcastReceiver {
@@ -748,7 +607,6 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                     // further error..
                     Tethering.this.configureUsbIface(false);
                 }
-                Tethering.this.showErrorToast(error);
             }
         }
 
