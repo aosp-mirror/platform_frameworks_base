@@ -1254,20 +1254,19 @@ public class WebView extends AbsoluteLayout
             final FileOutputStream out = new FileOutputStream(dest);
             p.writeToStream(out);
             out.close();
-        } catch (FileNotFoundException e){
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (RuntimeException e) {
-            e.printStackTrace();
-        }
-        if (dest.length() > 0) {
+            // now update the bundle
             b.putInt("scrollX", mScrollX);
             b.putInt("scrollY", mScrollY);
             b.putFloat("scale", mActualScale);
             b.putFloat("textwrapScale", mTextWrapScale);
             b.putBoolean("overview", mInZoomOverview);
             return true;
+        } catch (FileNotFoundException e){
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (RuntimeException e) {
+            e.printStackTrace();
         }
         return false;
     }
