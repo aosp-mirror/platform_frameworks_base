@@ -2149,6 +2149,7 @@ public class WindowManagerService extends IWindowManager.Stub
     private void removeWindowInnerLocked(Session session, WindowState win) {
         mKeyWaiter.finishedKey(session, win.mClient, true,
                 KeyWaiter.RETURN_NOTHING);
+        mKeyWaiter.releaseMotionTarget(win);
         mKeyWaiter.releasePendingPointerLocked(win.mSession);
         mKeyWaiter.releasePendingTrackballLocked(win.mSession);
 
@@ -6117,6 +6118,12 @@ public class WindowManagerService extends IWindowManager.Stub
             if (s.mPendingTrackballMove != null) {
                 mQueue.recycleEvent(s.mPendingTrackballMove);
                 s.mPendingTrackballMove = null;
+            }
+        }
+
+        void releaseMotionTarget(WindowState win) {
+            if (mMotionTarget == win) {
+                mMotionTarget = null;
             }
         }
 
