@@ -1516,19 +1516,28 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     /**
      * Always allow a user to overscroll this view, provided it is a
      * view that can scroll.
+     * 
+     * @see #getOverscrollMode()
+     * @see #setOverscrollMode(int)
      */
-    private static final int OVERSCROLL_ALWAYS = 0;
+    public static final int OVERSCROLL_ALWAYS = 0;
     
     /**
      * Allow a user to overscroll this view only if the content is large
      * enough to meaningfully scroll, provided it is a view that can scroll.
+     * 
+     * @see #getOverscrollMode()
+     * @see #setOverscrollMode(int)
      */
-    private static final int OVERSCROLL_IF_CONTENT_SCROLLS = 1;
+    public static final int OVERSCROLL_IF_CONTENT_SCROLLS = 1;
     
     /**
      * Never allow a user to overscroll this view.
+     * 
+     * @see #getOverscrollMode()
+     * @see #setOverscrollMode(int)
      */
-    private static final int OVERSCROLL_NEVER = 2;
+    public static final int OVERSCROLL_NEVER = 2;
     
     /**
      * Controls the overscroll mode for this view.
@@ -8769,6 +8778,38 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     protected void onOverscrolled(int scrollX, int scrollY,
             boolean clampedX, boolean clampedY) {
         // Intentionally empty.
+    }
+    
+    /**
+     * Returns the overscroll mode for this view. The result will be
+     * one of {@link #OVERSCROLL_ALWAYS} (default), {@link #OVERSCROLL_IF_CONTENT_SCROLLS}
+     * (allow overscrolling only if the view content is larger than the container),
+     * or {@link #OVERSCROLL_NEVER}.
+     * 
+     * @return This view's overscroll mode.
+     */
+    public int getOverscrollMode() {
+        return mOverscrollMode;
+    }
+    
+    /**
+     * Set the overscroll mode for this view. Valid overscroll modes are
+     * {@link #OVERSCROLL_ALWAYS} (default), {@link #OVERSCROLL_IF_CONTENT_SCROLLS}
+     * (allow overscrolling only if the view content is larger than the container),
+     * or {@link #OVERSCROLL_NEVER}.
+     * 
+     * Setting the overscroll mode of a view will have an effect only if the
+     * view is capable of scrolling.
+     * 
+     * @param overscrollMode The new overscroll mode for this view.
+     */
+    public void setOverscrollMode(int overscrollMode) {
+        if (overscrollMode != OVERSCROLL_ALWAYS &&
+                overscrollMode != OVERSCROLL_IF_CONTENT_SCROLLS &&
+                overscrollMode != OVERSCROLL_NEVER) {
+            throw new IllegalArgumentException("Invalid overscroll mode " + overscrollMode);
+        }
+        mOverscrollMode = overscrollMode;
     }
 
     /**
