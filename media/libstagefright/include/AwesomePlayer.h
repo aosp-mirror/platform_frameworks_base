@@ -112,10 +112,12 @@ private:
 
     sp<DataSource> mFileSource;
 
+    sp<MediaSource> mVideoTrack;
     sp<MediaSource> mVideoSource;
     sp<AwesomeRenderer> mVideoRenderer;
     bool mVideoRendererIsPreview;
 
+    sp<MediaSource> mAudioTrack;
     sp<MediaSource> mAudioSource;
     AudioPlayer *mAudioPlayer;
     int64_t mDurationUs;
@@ -199,8 +201,11 @@ private:
 
     void cancelPlayerEvents(bool keepBufferingGoing = false);
 
-    status_t setAudioSource(sp<MediaSource> source);
-    status_t setVideoSource(sp<MediaSource> source);
+    void setAudioSource(sp<MediaSource> source);
+    status_t initAudioDecoder();
+
+    void setVideoSource(sp<MediaSource> source);
+    status_t initVideoDecoder();
 
     void onStreamDone();
 
@@ -210,6 +215,8 @@ private:
     void onBufferingUpdate();
     void onCheckAudioStatus();
     void onPrepareAsyncEvent();
+    void abortPrepare(status_t err);
+
     status_t finishSetDataSource_l();
 
     AwesomePlayer(const AwesomePlayer &);

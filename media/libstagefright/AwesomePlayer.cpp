@@ -297,13 +297,11 @@ status_t AwesomePlayer::setDataSource_l(const sp<MediaExtractor> &extractor) {
         CHECK(meta->findCString(kKeyMIMEType, &mime));
 
         if (!haveVideo && !strncasecmp(mime, "video/", 6)) {
-            if (setVideoSource(extractor->getTrack(i)) == OK) {
-                haveVideo = true;
-            }
+            setVideoSource(extractor->getTrack(i));
+            haveVideo = true;
         } else if (!haveAudio && !strncasecmp(mime, "audio/", 6)) {
-            if (setAudioSource(extractor->getTrack(i)) == OK) {
-                haveAudio = true;
-            }
+            setAudioSource(extractor->getTrack(i));
+            haveAudio = true;
         }
 
         if (haveAudio && haveVideo) {
@@ -330,6 +328,9 @@ void AwesomePlayer::reset_l() {
         CHECK_EQ(mPrefetcher->getStrongCount(), 1);
     }
     mPrefetcher.clear();
+
+    mAudioTrack.clear();
+    mVideoTrack.clear();
 
     // Shutdown audio first, so that the respone to the reset request
     // appears to happen instantaneously as far as the user is concerned
@@ -699,32 +700,34 @@ status_t AwesomePlayer::getVideoDimensions(
     return OK;
 }
 
-status_t AwesomePlayer::setAudioSource(sp<MediaSource> source) {
-    if (source == NULL) {
-        return UNKNOWN_ERROR;
-    }
+void AwesomePlayer::setAudioSource(sp<MediaSource> source) {
+    CHECK(source != NULL);
 
     if (mPrefetcher != NULL) {
         source = mPrefetcher->addSource(source);
     }
 
-    sp<MetaData> meta = source->getFormat();
+    mAudioTrack = source;
+}
+
+status_t AwesomePlayer::initAudioDecoder() {
+    sp<MetaData> meta = mAudioTrack->getFormat();
 
     const char *mime;
     CHECK(meta->findCString(kKeyMIMEType, &mime));
 
     if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_RAW)) {
-        mAudioSource = source;
+        mAudioSource = mAudioTrack;
     } else {
         mAudioSource = OMXCodec::Create(
-                mClient.interface(), source->getFormat(),
+                mClient.interface(), mAudioTrack->getFormat(),
                 false, // createEncoder
-                source);
+                mAudioTrack);
     }
 
     if (mAudioSource != NULL) {
         int64_t durationUs;
-        if (source->getFormat()->findInt64(kKeyDuration, &durationUs)) {
+        if (mAudioTrack->getFormat()->findInt64(kKeyDuration, &durationUs)) {
             if (mDurationUs < 0 || durationUs > mDurationUs) {
                 mDurationUs = durationUs;
             }
@@ -734,30 +737,32 @@ status_t AwesomePlayer::setAudioSource(sp<MediaSource> source) {
     return mAudioSource != NULL ? OK : UNKNOWN_ERROR;
 }
 
-status_t AwesomePlayer::setVideoSource(sp<MediaSource> source) {
-    if (source == NULL) {
-        return UNKNOWN_ERROR;
-    }
+void AwesomePlayer::setVideoSource(sp<MediaSource> source) {
+    CHECK(source != NULL);
 
     if (mPrefetcher != NULL) {
         source = mPrefetcher->addSource(source);
     }
 
+    mVideoTrack = source;
+}
+
+status_t AwesomePlayer::initVideoDecoder() {
     mVideoSource = OMXCodec::Create(
-            mClient.interface(), source->getFormat(),
+            mClient.interface(), mVideoTrack->getFormat(),
             false, // createEncoder
-            source);
+            mVideoTrack);
 
     if (mVideoSource != NULL) {
         int64_t durationUs;
-        if (source->getFormat()->findInt64(kKeyDuration, &durationUs)) {
+        if (mVideoTrack->getFormat()->findInt64(kKeyDuration, &durationUs)) {
             if (mDurationUs < 0 || durationUs > mDurationUs) {
                 mDurationUs = durationUs;
             }
         }
 
-        CHECK(source->getFormat()->findInt32(kKeyWidth, &mVideoWidth));
-        CHECK(source->getFormat()->findInt32(kKeyHeight, &mVideoHeight));
+        CHECK(mVideoTrack->getFormat()->findInt32(kKeyWidth, &mVideoWidth));
+        CHECK(mVideoTrack->getFormat()->findInt32(kKeyHeight, &mVideoHeight));
 
         mVideoSource->start();
     }
@@ -1045,6 +1050,19 @@ status_t AwesomePlayer::finishSetDataSource_l() {
     return setDataSource_l(extractor);
 }
 
+void AwesomePlayer::abortPrepare(status_t err) {
+    CHECK(err != OK);
+
+    if (mIsAsyncPrepare) {
+        notifyListener_l(MEDIA_ERROR, MEDIA_ERROR_UNKNOWN, err);
+    }
+
+    mPrepareResult = err;
+    mFlags &= ~PREPARING;
+    mAsyncPrepareEvent = NULL;
+    mPreparedCondition.broadcast();
+}
+
 void AwesomePlayer::onPrepareAsyncEvent() {
     {
         Mutex::Autolock autoLock(mLock);
@@ -1053,15 +1071,7 @@ void AwesomePlayer::onPrepareAsyncEvent() {
             status_t err = finishSetDataSource_l();
 
             if (err != OK) {
-                if (mIsAsyncPrepare) {
-                    notifyListener_l(MEDIA_ERROR, MEDIA_ERROR_UNKNOWN, err);
-                }
-
-                mPrepareResult = err;
-                mFlags &= ~PREPARING;
-                mAsyncPrepareEvent = NULL;
-                mPreparedCondition.broadcast();
-
+                abortPrepare(err);
                 return;
             }
         }
@@ -1080,6 +1090,24 @@ void AwesomePlayer::onPrepareAsyncEvent() {
     }
 
     Mutex::Autolock autoLock(mLock);
+
+    if (mVideoTrack != NULL && mVideoSource == NULL) {
+        status_t err = initVideoDecoder();
+
+        if (err != OK) {
+            abortPrepare(err);
+            return;
+        }
+    }
+
+    if (mAudioTrack != NULL && mAudioSource == NULL) {
+        status_t err = initAudioDecoder();
+
+        if (err != OK) {
+            abortPrepare(err);
+            return;
+        }
+    }
 
     if (mIsAsyncPrepare) {
         if (mVideoWidth < 0 || mVideoHeight < 0) {
