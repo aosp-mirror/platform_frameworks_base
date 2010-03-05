@@ -128,7 +128,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                 // XXX: FIXME: switch to ic_lock_vibrate_mode when available
                 mEnabledIconResId = (Settings.System.getInt(mContext.getContentResolver(),
                         Settings.System.VIBRATE_IN_SILENT, 1) == 1)
-                    ? R.drawable.ic_lock_silent_mode
+                    ? R.drawable.ic_lock_silent_mode_vibrate
                     : R.drawable.ic_lock_silent_mode;
             }
 
