@@ -32,6 +32,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.StateListDrawable;
 import android.net.Uri;
+import android.os.Bundle;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.TextUtils;
@@ -80,7 +81,7 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
     private int mIconName1Col;
     private int mIconName2Col;
     private int mBackgroundColorCol;
-    
+
     static final int NONE = -1;
 
     private final Runnable mStartSpinnerRunnable;
@@ -121,7 +122,7 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
                 mSearchDialog.setWorking(false);
             }
         };
-        
+
         // delay 500ms when deleting
         getFilter().setDelayer(new Filter.Delayer() {
 
@@ -129,7 +130,7 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
 
             public long getPostingDelay(CharSequence constraint) {
                 if (constraint == null) return 0;
-                
+
                 long delay = constraint.length() < mPreviousLength ? DELETE_KEY_POST_DELAY : 0;
                 mPreviousLength = constraint.length();
                 return delay;
@@ -203,15 +204,16 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
     }
 
     private void updateSpinnerState(Cursor cursor) {
+        Bundle extras = cursor != null ? cursor.getExtras() : null;
         if (DBG) {
             Log.d(LOG_TAG, "updateSpinnerState - extra = "
-                + (cursor != null
-                        ? cursor.getExtras().getBoolean(SearchManager.CURSOR_EXTRA_KEY_IN_PROGRESS)
+                + (extras != null
+                        ? extras.getBoolean(SearchManager.CURSOR_EXTRA_KEY_IN_PROGRESS)
                         : null));
         }
         // Check if the Cursor indicates that the query is not complete and show the spinner
-        if (cursor != null
-                && cursor.getExtras().getBoolean(SearchManager.CURSOR_EXTRA_KEY_IN_PROGRESS)) {
+        if (extras != null
+                && extras.getBoolean(SearchManager.CURSOR_EXTRA_KEY_IN_PROGRESS)) {
             mSearchDialog.getWindow().getDecorView().post(mStartSpinnerRunnable);
             return;
         }
