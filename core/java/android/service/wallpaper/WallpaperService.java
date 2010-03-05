@@ -821,6 +821,7 @@ public abstract class WallpaperService extends Service {
                 case MSG_WINDOW_RESIZED: {
                     final boolean reportDraw = message.arg1 != 0;
                     mEngine.updateSurface(true, false);
+                    mEngine.doOffsetsChanged();
                     if (reportDraw) {
                         try {
                             mEngine.mSession.finishDrawing(mEngine.mWindow);
