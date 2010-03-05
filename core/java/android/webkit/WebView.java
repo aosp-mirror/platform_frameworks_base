@@ -5927,40 +5927,43 @@ public class WebView extends AbsoluteLayout
                     WebViewCore.RestoreState restoreState = draw.mRestoreState;
                     boolean hasRestoreState = restoreState != null;
                     if (hasRestoreState) {
-                        mInZoomOverview = false;
                         updateZoomRange(restoreState, viewSize.x,
                                 draw.mMinPrefWidth, true);
-                        if (mInitialScaleInPercent > 0) {
-                            setNewZoomScale(mInitialScaleInPercent / 100.0f,
+                        if (!mDrawHistory) {
+                            mInZoomOverview = false;
+
+                            if (mInitialScaleInPercent > 0) {
+                                setNewZoomScale(mInitialScaleInPercent / 100.0f,
                                     mInitialScaleInPercent != mTextWrapScale * 100,
                                     false);
-                        } else if (restoreState.mViewScale > 0) {
-                            mTextWrapScale = restoreState.mTextWrapScale;
-                            setNewZoomScale(restoreState.mViewScale, false,
+                            } else if (restoreState.mViewScale > 0) {
+                                mTextWrapScale = restoreState.mTextWrapScale;
+                                setNewZoomScale(restoreState.mViewScale, false,
                                     false);
-                        } else {
-                            mInZoomOverview = useWideViewport
-                                    && settings.getLoadWithOverviewMode();
-                            float scale;
-                            if (mInZoomOverview) {
-                                scale = (float) viewWidth
-                                        / DEFAULT_VIEWPORT_WIDTH;
                             } else {
-                                scale = restoreState.mTextWrapScale;
-                            }
-                            setNewZoomScale(scale, Math.abs(scale
+                                mInZoomOverview = useWideViewport
+                                    && settings.getLoadWithOverviewMode();
+                                float scale;
+                                if (mInZoomOverview) {
+                                    scale = (float) viewWidth
+                                        / DEFAULT_VIEWPORT_WIDTH;
+                                } else {
+                                    scale = restoreState.mTextWrapScale;
+                                }
+                                setNewZoomScale(scale, Math.abs(scale
                                     - mTextWrapScale) >= 0.01f, false);
-                        }
-                        setContentScrollTo(restoreState.mScrollX,
+                            }
+                            setContentScrollTo(restoreState.mScrollX,
                                 restoreState.mScrollY);
-                        // As we are on a new page, remove the WebTextView. This
-                        // is necessary for page loads driven by webkit, and in
-                        // particular when the user was on a password field, so
-                        // the WebTextView was visible.
-                        clearTextEntry(false);
-                        // update the zoom buttons as the scale can be changed
-                        if (getSettings().getBuiltInZoomControls()) {
-                            updateZoomButtonsEnabled();
+                            // As we are on a new page, remove the WebTextView. This
+                            // is necessary for page loads driven by webkit, and in
+                            // particular when the user was on a password field, so
+                            // the WebTextView was visible.
+                            clearTextEntry(false);
+                            // update the zoom buttons as the scale can be changed
+                            if (getSettings().getBuiltInZoomControls()) {
+                                updateZoomButtonsEnabled();
+                            }
                         }
                     }
                     // We update the layout (i.e. request a layout from the
