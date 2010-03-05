@@ -668,7 +668,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
                 // The user changed the query, remember it.
                 mUserQuery = s == null ? "" : s.toString();
             }
-            updateVoiceButton(TextUtils.isEmpty(s));
+            updateVoiceButton(mSearchAutoComplete.isEmpty());
         }
 
         public void afterTextChanged(Editable s) {
@@ -691,13 +691,30 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
     };
 
     /**
-     * Enable/Disable the cancel button based on edit text state (any text?)
+     * Enable/Disable the go button based on edit text state (any text?)
      */
     private void updateWidgetState() {
         // enable the button if we have one or more non-space characters
         boolean enabled = !mSearchAutoComplete.isEmpty();
-        mGoButton.setEnabled(enabled);
-        mGoButton.setFocusable(enabled);
+        if (isBrowserSearch()) {
+            // In the browser, we hide the search button when there is no text
+            if (enabled) {
+                mSearchAutoComplete.setBackgroundResource(
+                        com.android.internal.R.drawable.textfield_search);
+                mGoButton.setVisibility(View.VISIBLE);
+                // Just to be sure
+                mGoButton.setEnabled(true);
+                mGoButton.setFocusable(true);
+            } else {
+                mSearchAutoComplete.setBackgroundResource(
+                        com.android.internal.R.drawable.textfield_search_empty);
+                mGoButton.setVisibility(View.GONE);
+            }
+        } else {
+            // Elsewhere we just disable the button
+            mGoButton.setEnabled(enabled);
+            mGoButton.setFocusable(enabled);
+        }
     }
 
     /**
