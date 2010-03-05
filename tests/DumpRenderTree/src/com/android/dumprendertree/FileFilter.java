@@ -99,6 +99,24 @@ public class FileFilter {
         ignoreResultList.add("http/tests/appcache/whitelist-wildcard.html"); // file not found
         ignoreResultList.add("storage/database-lock-after-reload.html"); // failure
 
+        // Will always fail
+        ignoreResultList.add("fast/workers/shared-worker-constructor.html"); // shared workers not supported
+        ignoreResultList.add("fast/workers/shared-worker-context-gc.html"); // shared workers not supported
+        ignoreResultList.add("fast/workers/shared-worker-event-listener.html"); // shared workers not supported
+        ignoreResultList.add("fast/workers/shared-worker-exception.html"); // shared workers not supported
+        ignoreResultList.add("fast/workers/shared-worker-frame-lifecycle.html"); // shared workers not supported
+        ignoreResultList.add("fast/workers/shared-worker-gc.html"); // shared workers not supported
+        ignoreResultList.add("fast/workers/shared-worker-lifecycle.html"); // shared workers not supported
+        ignoreResultList.add("fast/workers/shared-worker-load-error.html"); // shared workers not supported
+        ignoreResultList.add("fast/workers/shared-worker-location.html"); // shared workers not supported
+        ignoreResultList.add("fast/workers/shared-worker-name.html"); // shared workers not supported
+        ignoreResultList.add("fast/workers/shared-worker-navigator.html"); // shared workers not supported
+        ignoreResultList.add("fast/workers/shared-worker-replace-global-constructor.html"); // shared workers not supported
+        ignoreResultList.add("fast/workers/shared-worker-replace-self.html"); // shared workers not supported
+        ignoreResultList.add("fast/workers/shared-worker-script-error.html"); // shared workers not supported
+        ignoreResultList.add("fast/workers/shared-worker-shared.html"); // shared workers not supported
+        ignoreResultList.add("fast/workers/shared-worker-simple.html"); // shared workers not supported
+
         ignoreResultList.add("fast/css/case-transform.html"); // will not fix #619707
         ignoreResultList.add("fast/dom/Element/offsetLeft-offsetTop-body-quirk.html"); // different screen size result in extra spaces in Apple compared to us
         ignoreResultList.add("fast/dom/Window/Plug-ins.html"); // need test plugin
