@@ -20,6 +20,8 @@ import android.app.Activity;
 import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
 import android.app.IStatusBar;
+import android.app.IUiModeManager;
+import android.app.UiModeManager;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -207,7 +209,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     boolean mLidOpen;
     int mPlugged;
     boolean mRegisteredBatteryReceiver;
-    int mDockState = Intent.EXTRA_DOCK_STATE_UNDOCKED;
+    int mUiMode = Configuration.UI_MODE_TYPE_NORMAL;
     int mLidOpenRotation;
     int mCarDockRotation;
     int mDeskDockRotation;
@@ -345,8 +347,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return true;
         }
         // We're in a dock that has a rotation affinity, an the app is willing to rotate.
-        if ((mCarDockEnablesAccelerometer && mDockState == Intent.EXTRA_DOCK_STATE_CAR)
-                || (mDeskDockEnablesAccelerometer && mDockState == Intent.EXTRA_DOCK_STATE_DESK)) {
+        if ((mCarDockEnablesAccelerometer && mUiMode == Configuration.UI_MODE_TYPE_CAR)
+                || (mDeskDockEnablesAccelerometer && mUiMode == Configuration.UI_MODE_TYPE_DESK)) {
             // Note we override the nosensor flag here.
             if (appOrientation == ActivityInfo.SCREEN_ORIENTATION_USER
                     || appOrientation == ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
@@ -369,8 +371,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             // orientation, then we need to turn the sensor or.
             return true;
         }
-        if ((mCarDockEnablesAccelerometer && mDockState == Intent.EXTRA_DOCK_STATE_CAR) ||
-            (mDeskDockEnablesAccelerometer && mDockState == Intent.EXTRA_DOCK_STATE_DESK)) {
+        if ((mCarDockEnablesAccelerometer && mUiMode == Configuration.UI_MODE_TYPE_CAR) ||
+            (mDeskDockEnablesAccelerometer && mUiMode == Configuration.UI_MODE_TYPE_DESK)) {
             // enable accelerometer if we are docked in a dock that enables accelerometer
             // orientation management,
             return true;
@@ -537,7 +539,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mPlugged = 0;
         updatePlugged(context.registerReceiver(null, mBatteryStatusFilter));
         // register for dock events
-        context.registerReceiver(mDockReceiver, new IntentFilter(Intent.ACTION_DOCK_EVENT));
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(UiModeManager.ACTION_ENTER_CAR_MODE);
+        filter.addAction(UiModeManager.ACTION_EXIT_CAR_MODE);
+        filter.addAction(UiModeManager.ACTION_ENTER_DESK_MODE);
+        filter.addAction(UiModeManager.ACTION_EXIT_DESK_MODE);
+        context.registerReceiver(mDockReceiver, filter);
         mVibrator = new Vibrator();
         mLongPressVibePattern = getLongIntArray(mContext.getResources(),
                 com.android.internal.R.array.config_longPressVibePattern);
@@ -1981,17 +1988,22 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     BroadcastReceiver mDockReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
-            mDockState = intent.getIntExtra(Intent.EXTRA_DOCK_STATE,
-                    Intent.EXTRA_DOCK_STATE_UNDOCKED);
-            boolean watchBattery = mDockState != Intent.EXTRA_DOCK_STATE_UNDOCKED;
-            if (watchBattery != mRegisteredBatteryReceiver) {
-                mRegisteredBatteryReceiver = watchBattery;
-                if (watchBattery) {
-                    updatePlugged(mContext.registerReceiver(mBatteryReceiver,
-                            mBatteryStatusFilter));
-                } else {
-                    mContext.unregisterReceiver(mBatteryReceiver);
+            try {
+                IUiModeManager uiModeService = IUiModeManager.Stub.asInterface(
+                        ServiceManager.getService(Context.UI_MODE_SERVICE));
+                mUiMode = uiModeService.getCurrentModeType();
+                boolean watchBattery = mUiMode != Configuration.UI_MODE_TYPE_UNDEFINED
+                        && mUiMode != Configuration.UI_MODE_TYPE_NORMAL;
+                if (watchBattery != mRegisteredBatteryReceiver) {
+                    mRegisteredBatteryReceiver = watchBattery;
+                    if (watchBattery) {
+                        updatePlugged(mContext.registerReceiver(mBatteryReceiver,
+                                mBatteryStatusFilter));
+                    } else {
+                        mContext.unregisterReceiver(mBatteryReceiver);
+                    }
                 }
+            } catch (RemoteException e) {
             }
             updateRotation(Surface.FLAGS_ORIENTATION_ANIMATION_DISABLE);
             updateDockKeepingScreenOn();
@@ -2121,9 +2133,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             //or case.unspecified
             if (mLidOpen) {
                 return mLidOpenRotation;
-            } else if (mDockState == Intent.EXTRA_DOCK_STATE_CAR && mCarDockRotation >= 0) {
+            } else if (mUiMode == Configuration.UI_MODE_TYPE_CAR && mCarDockRotation >= 0) {
                 return mCarDockRotation;
-            } else if (mDockState == Intent.EXTRA_DOCK_STATE_DESK && mDeskDockRotation >= 0) {
+            } else if (mUiMode == Configuration.UI_MODE_TYPE_DESK && mDeskDockRotation >= 0) {
                 return mDeskDockRotation;
             } else {
                 if (useSensorForOrientationLp(orientation)) {
@@ -2232,17 +2244,17 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     
     void updateDockKeepingScreenOn() {
         if (mPlugged != 0) {
-            if (localLOGV) Log.v(TAG, "Update: mDockState=" + mDockState
+            if (localLOGV) Log.v(TAG, "Update: mUiMode=" + mUiMode
                     + " mPlugged=" + mPlugged
                     + " mCarDockKeepsScreenOn" + mCarDockKeepsScreenOn
                     + " mDeskDockKeepsScreenOn" + mDeskDockKeepsScreenOn);
-            if (mDockState == Intent.EXTRA_DOCK_STATE_CAR
+            if (mUiMode == Configuration.UI_MODE_TYPE_CAR
                     && (mPlugged&mCarDockKeepsScreenOn) != 0) {
                 if (!mDockWakeLock.isHeld()) {
                     mDockWakeLock.acquire();
                 }
                 return;
-            } else if (mDockState == Intent.EXTRA_DOCK_STATE_DESK
+            } else if (mUiMode == Configuration.UI_MODE_TYPE_DESK
                     && (mPlugged&mDeskDockKeepsScreenOn) != 0) {
                 if (!mDockWakeLock.isHeld()) {
                     mDockWakeLock.acquire();
@@ -2261,9 +2273,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         int rotation = Surface.ROTATION_0;
         if (mLidOpen) {
             rotation = mLidOpenRotation;
-        } else if (mDockState == Intent.EXTRA_DOCK_STATE_CAR && mCarDockRotation >= 0) {
+        } else if (mUiMode == Configuration.UI_MODE_TYPE_CAR && mCarDockRotation >= 0) {
             rotation = mCarDockRotation;
-        } else if (mDockState == Intent.EXTRA_DOCK_STATE_DESK && mDeskDockRotation >= 0) {
+        } else if (mUiMode == Configuration.UI_MODE_TYPE_DESK && mDeskDockRotation >= 0) {
             rotation = mDeskDockRotation;
         }
         //if lid is closed orientation will be portrait
@@ -2282,17 +2294,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
      * @return
      */
     Intent createHomeDockIntent() {
-        if (mDockState == Intent.EXTRA_DOCK_STATE_UNDOCKED) {
-            return null;
-        }
-        
         Intent intent;
-        if (mDockState == Intent.EXTRA_DOCK_STATE_CAR) {
+        if (mUiMode == Configuration.UI_MODE_TYPE_CAR) {
             intent = mCarDockIntent;
-        } else if (mDockState == Intent.EXTRA_DOCK_STATE_DESK) {
+        } else if (mUiMode == Configuration.UI_MODE_TYPE_DESK) {
             intent = mDeskDockIntent;
         } else {
-            Log.w(TAG, "Unknown dock state: " + mDockState);
             return null;
         }
         
