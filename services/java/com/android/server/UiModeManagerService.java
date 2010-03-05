@@ -38,10 +38,12 @@ import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.BatteryManager;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.text.format.DateUtils;
@@ -80,6 +82,9 @@ class UiModeManagerService extends IUiModeManager.Stub {
     
     private int mNightMode = UiModeManager.MODE_NIGHT_NO;
     private boolean mCarModeEnabled = false;
+    private boolean mCharging = false;
+    private final boolean mCarModeKeepsScreenOn;
+    private final boolean mDeskModeKeepsScreenOn;
 
     private boolean mComputedNightMode;
     private int mCurUiMode = 0;
@@ -96,6 +101,7 @@ class UiModeManagerService extends IUiModeManager.Stub {
     private Location mLocation;
     private StatusBarManager mStatusBarManager;
     private KeyguardManager.KeyguardLock mKeyguardLock;
+    private final PowerManager.WakeLock mWakeLock;
 
     // The broadcast receiver which receives the result of the ordered broadcast sent when
     // the dock state changes. The original ordered broadcast is sent with an initial result
@@ -147,6 +153,18 @@ class UiModeManagerService extends IUiModeManager.Stub {
             int state = intent.getIntExtra(Intent.EXTRA_DOCK_STATE,
                     Intent.EXTRA_DOCK_STATE_UNDOCKED);
             updateDockState(state);
+        }
+    };
+
+    private final BroadcastReceiver mBatteryReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            mCharging = (intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0) != 0);
+            synchronized (mLock) {
+                if (mSystemReady) {
+                    updateLocked();
+                }
+            }
         }
     };
 
@@ -237,8 +255,18 @@ class UiModeManagerService extends IUiModeManager.Stub {
                 new IntentFilter(ACTION_UPDATE_NIGHT_MODE));
         mContext.registerReceiver(mDockModeReceiver,
                 new IntentFilter(Intent.ACTION_DOCK_EVENT));
+        mContext.registerReceiver(mBatteryReceiver,
+                new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+
+        PowerManager powerManager = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
+        mWakeLock = powerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK, TAG);
 
         mConfiguration.setToDefaults();
+
+        mCarModeKeepsScreenOn = (context.getResources().getInteger(
+                com.android.internal.R.integer.config_carDockKeepsScreenOn) == 1);
+        mDeskModeKeepsScreenOn = (context.getResources().getInteger(
+                com.android.internal.R.integer.config_deskDockKeepsScreenOn) == 1);
     }
 
     public void disableCarMode() {
@@ -339,7 +367,7 @@ class UiModeManagerService extends IUiModeManager.Stub {
             }
         }
     }
-    
+
     final void updateLocked() {
         long ident = Binder.clearCallingIdentity();
         
@@ -420,6 +448,18 @@ class UiModeManagerService extends IUiModeManager.Stub {
                 // placed into a dock.
                 mContext.sendOrderedBroadcast(new Intent(action), null,
                         mResultReceiver, null, Activity.RESULT_OK, null, null);
+            }
+
+            // keep screen on when charging and in car mode
+            boolean keepScreenOn = mCharging &&
+                    ((mCarModeEnabled && mCarModeKeepsScreenOn) ||
+                     (mCurUiMode == Configuration.UI_MODE_TYPE_DESK && mDeskModeKeepsScreenOn));
+            if (keepScreenOn != mWakeLock.isHeld()) {
+                if (keepScreenOn) {
+                    mWakeLock.acquire();
+                } else {
+                    mWakeLock.release();
+                }
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
