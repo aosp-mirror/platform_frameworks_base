@@ -132,6 +132,45 @@ public final class Bundle implements Parcelable, Cloneable {
     }
 
     /**
+     * Make a Bundle for a single key/value pair.
+     *
+     * @hide
+     */
+    public static Bundle forPair(String key, String value) {
+        // TODO: optimize this case.
+        Bundle b = new Bundle(1);
+        b.putString(key, value);
+        return b;
+    }
+
+    /**
+     * TODO: optimize this later (getting just the value part of a Bundle
+     * with a single pair) once Bundle.forPair() above is implemented
+     * with a special single-value Map implementation/serialization.
+     *
+     * Note: value in single-pair Bundle may be null.
+     *
+     * @hide
+     */
+    public String getPairValue() {
+        unparcel();
+        int size = mMap.size();
+        if (size > 1) {
+            Log.w(LOG_TAG, "getPairValue() used on Bundle with multiple pairs.");
+        }
+        if (size == 0) {
+            return null;
+        }
+        Object o = mMap.values().iterator().next();
+        try {
+            return (String) o;
+        } catch (ClassCastException e) {
+            typeWarning("getPairValue()", o, "String", e);
+            return null;
+        }
+    }
+
+    /**
      * Changes the ClassLoader this Bundle uses when instantiating objects.
      *
      * @param loader An explicit ClassLoader to use when instantiating objects

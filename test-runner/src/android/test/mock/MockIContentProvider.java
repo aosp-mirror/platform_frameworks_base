@@ -27,6 +27,7 @@ import android.database.CursorWindow;
 import android.database.IBulkCursor;
 import android.database.IContentObserver;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
@@ -38,7 +39,7 @@ import java.util.ArrayList;
  * {@link java.lang.UnsupportedOperationException}.  Tests can extend this class to
  * implement behavior needed for tests.
  *
- * @hide - @hide because this exposes bulkQuery(), which must also be hidden.
+ * @hide - @hide because this exposes bulkQuery() and call(), which must also be hidden.
  */
 public class MockIContentProvider implements IContentProvider {
     public int bulkInsert(Uri url, ContentValues[] initialValues) {
@@ -89,6 +90,11 @@ public class MockIContentProvider implements IContentProvider {
     }
 
     public int update(Uri url, ContentValues values, String selection, String[] selectionArgs)
+            throws RemoteException {
+        throw new UnsupportedOperationException("unimplemented mock method");
+    }
+
+    public Bundle call(String method, String request, Bundle args)
             throws RemoteException {
         throw new UnsupportedOperationException("unimplemented mock method");
     }
