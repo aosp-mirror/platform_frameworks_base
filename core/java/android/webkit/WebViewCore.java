@@ -2191,7 +2191,14 @@ final class WebViewCore {
                              );
                 }
                 data.mWidth = Math.round(webViewWidth / data.mScale);
-                data.mHeight = mCurrentViewHeight * data.mWidth / viewportWidth;
+                // We may get a call here when mCurrentViewHeight == 0 if webcore completes the
+                // first layout before we sync our webview dimensions to it. In that case, we
+                // request the real height of the webview. This is not a perfect solution as we
+                // are calling a WebView method from the WebCore thread. But this is preferable
+                // to syncing an incorrect height.
+                data.mHeight = mCurrentViewHeight == 0 ?
+                        Math.round(mWebView.getViewHeight() / data.mScale)
+                        : mCurrentViewHeight * data.mWidth / viewportWidth;
                 data.mTextWrapWidth = Math.round(webViewWidth
                         / mRestoreState.mTextWrapScale);
                 data.mIgnoreHeight = false;
