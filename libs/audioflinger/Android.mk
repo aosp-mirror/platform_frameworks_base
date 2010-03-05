@@ -24,7 +24,7 @@ endif
 LOCAL_SHARED_LIBRARIES := \
     libcutils \
     libutils \
-	libbinder \
+    libbinder \
     libmedia \
     libhardware_legacy
 
@@ -85,7 +85,7 @@ LOCAL_SRC_FILES:=               \
 LOCAL_SHARED_LIBRARIES := \
     libcutils \
     libutils \
-	libbinder \
+    libbinder \
     libmedia \
     libhardware_legacy
 
@@ -114,9 +114,19 @@ ifeq ($(AUDIO_POLICY_TEST),true)
 endif
 
 ifeq ($(TARGET_SIMULATOR),true)
-	ifeq ($(HOST_OS),linux)
-		LOCAL_LDLIBS += -lrt -lpthread
-	endif
+    ifeq ($(HOST_OS),linux)
+        LOCAL_LDLIBS += -lrt -lpthread
+    endif
+endif
+
+ifeq ($(LVMX),true)
+  ifeq ($(TARGET_ARCH),arm)
+    LOCAL_CFLAGS += -DLVMX
+    LOCAL_C_INCLUDES += vendor/nxp
+    LOCAL_STATIC_LIBRARIES += liblifevibes
+    LOCAL_SHARED_LIBRARIES += liblvmxservice
+#    LOCAL_SHARED_LIBRARIES += liblvmxipc
+  endif
 endif
 
 include $(BUILD_SHARED_LIBRARY)
