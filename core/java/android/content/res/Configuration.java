@@ -165,7 +165,8 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     public static final int UI_MODE_TYPE_MASK = 0x0f;
     public static final int UI_MODE_TYPE_UNDEFINED = 0x00;
     public static final int UI_MODE_TYPE_NORMAL = 0x01;
-    public static final int UI_MODE_TYPE_CAR = 0x02;
+    public static final int UI_MODE_TYPE_DESK = 0x02;
+    public static final int UI_MODE_TYPE_CAR = 0x03;
 
     public static final int UI_MODE_NIGHT_MASK = 0x30;
     public static final int UI_MODE_NIGHT_UNDEFINED = 0x00;
@@ -175,11 +176,12 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     /**
      * Bit mask of the ui mode.  Currently there are two fields:
      * <p>The {@link #UI_MODE_TYPE_MASK} bits define the overall ui mode of the
-     * device. They may be one of
-     * {@link #UI_MODE_TYPE_NORMAL} or {@link #UI_MODE_TYPE_CAR}.
+     * device. They may be one of {@link #UI_MODE_TYPE_UNDEFINED},
+     * {@link #UI_MODE_TYPE_NORMAL}, {@link #UI_MODE_TYPE_DESK},
+     * or {@link #UI_MODE_TYPE_CAR}.
      *
      * <p>The {@link #UI_MODE_NIGHT_MASK} defines whether the screen
-     * is in a special mode. They may be one of
+     * is in a special mode. They may be one of {@link #UI_MODE_NIGHT_UNDEFINED},
      * {@link #UI_MODE_NIGHT_NO} or {@link #UI_MODE_NIGHT_YES}.
      */
     public int uiMode;
@@ -272,7 +274,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         navigationHidden = NAVIGATIONHIDDEN_UNDEFINED;
         orientation = ORIENTATION_UNDEFINED;
         screenLayout = SCREENLAYOUT_SIZE_UNDEFINED;
-        uiMode = UI_MODE_TYPE_NORMAL;
+        uiMode = UI_MODE_TYPE_UNDEFINED;
         seq = 0;
     }
 
@@ -354,10 +356,17 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             changed |= ActivityInfo.CONFIG_SCREEN_LAYOUT;
             screenLayout = delta.screenLayout;
         }
-        if (delta.uiMode != UI_MODE_TYPE_NORMAL
+        if (delta.uiMode != (UI_MODE_TYPE_UNDEFINED|UI_MODE_NIGHT_UNDEFINED)
                 && uiMode != delta.uiMode) {
             changed |= ActivityInfo.CONFIG_UI_MODE;
-            uiMode = delta.uiMode;
+            if ((delta.uiMode&UI_MODE_TYPE_MASK) != UI_MODE_TYPE_UNDEFINED) {
+                uiMode = (uiMode&~UI_MODE_TYPE_MASK)
+                        | (delta.uiMode&UI_MODE_TYPE_MASK);
+            }
+            if ((delta.uiMode&UI_MODE_NIGHT_MASK) != UI_MODE_NIGHT_UNDEFINED) {
+                uiMode = (uiMode&~UI_MODE_NIGHT_MASK)
+                        | (delta.uiMode&UI_MODE_NIGHT_MASK);
+            }
         }
         
         if (delta.seq != 0) {
@@ -439,7 +448,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
                 && screenLayout != delta.screenLayout) {
             changed |= ActivityInfo.CONFIG_SCREEN_LAYOUT;
         }
-        if (delta.uiMode != UI_MODE_TYPE_NORMAL
+        if (delta.uiMode != (UI_MODE_TYPE_UNDEFINED|UI_MODE_NIGHT_UNDEFINED)
                 && uiMode != delta.uiMode) {
             changed |= ActivityInfo.CONFIG_UI_MODE;
         }

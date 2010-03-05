@@ -97,6 +97,7 @@ class ServerThread extends Thread {
         BluetoothA2dpService bluetoothA2dp = null;
         HeadsetObserver headset = null;
         DockObserver dock = null;
+        UiModeManagerService uiMode = null;
         RecognitionManagerService recognition = null;
 
         // Critical services...
@@ -363,6 +364,14 @@ class ServerThread extends Thread {
             }
 
             try {
+                Slog.i(TAG, "UI Mode Manager Service");
+                // Listen for dock station changes
+                uiMode = new UiModeManagerService(context);
+            } catch (Throwable e) {
+                Slog.e(TAG, "Failure starting UiModeManagerService", e);
+            }
+
+            try {
                 Slog.i(TAG, "Backup Service");
                 ServiceManager.addService(Context.BACKUP_SERVICE,
                         new BackupManagerService(context));
@@ -441,6 +450,7 @@ class ServerThread extends Thread {
         final BatteryService batteryF = battery;
         final ConnectivityService connectivityF = connectivity;
         final DockObserver dockF = dock;
+        final UiModeManagerService uiModeF = uiMode;
         final AppWidgetService appWidgetF = appWidget;
         final WallpaperManagerService wallpaperF = wallpaper;
         final InputMethodManagerService immF = imm;
@@ -460,6 +470,7 @@ class ServerThread extends Thread {
                 if (batteryF != null) batteryF.systemReady();
                 if (connectivityF != null) connectivityF.systemReady();
                 if (dockF != null) dockF.systemReady();
+                if (uiModeF != null) uiModeF.systemReady();
                 if (recognitionF != null) recognitionF.systemReady();
                 Watchdog.getInstance().start();
 

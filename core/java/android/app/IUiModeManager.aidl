@@ -33,6 +33,11 @@ interface IUiModeManager {
     void disableCarMode();
 
     /**
+     * Return the current running mode.
+     */
+    int getCurrentModeType();
+    
+    /**
      * Sets the night mode.
      * The mode can be one of:
      *   1 - notnight mode
