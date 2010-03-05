@@ -3319,7 +3319,7 @@ public class WebView extends AbsoluteLayout
             if (!animateScroll) {
                 extras = DRAW_EXTRAS_FIND;
             }
-        } else if (mShiftIsPressed) {
+        } else if (mShiftIsPressed && !nativeFocusIsPlugin()) {
             if (!animateZoom && !mPreviewZoomOnly) {
                 extras = DRAW_EXTRAS_SELECTION;
                 nativeSetSelectionRegion(mTouchSelection || mExtendSelection);
@@ -3674,6 +3674,7 @@ public class WebView extends AbsoluteLayout
         }
 
         if (mShiftIsPressed == false && nativeCursorWantsKeyEvents() == false
+                && !nativeFocusIsPlugin()
                 && (keyCode == KeyEvent.KEYCODE_SHIFT_LEFT
                 || keyCode == KeyEvent.KEYCODE_SHIFT_RIGHT)) {
             setUpSelectXY();
@@ -3681,8 +3682,11 @@ public class WebView extends AbsoluteLayout
 
         if (keyCode >= KeyEvent.KEYCODE_DPAD_UP
                 && keyCode <= KeyEvent.KEYCODE_DPAD_RIGHT) {
-            // always handle the navigation keys in the UI thread
             switchOutDrawHistory();
+            if (nativeFocusIsPlugin()) {
+                letPluginHandleNavKey(keyCode, event.getEventTime(), true);
+                return true;
+            }
             if (mShiftIsPressed) {
                 int xRate = keyCode == KeyEvent.KEYCODE_DPAD_LEFT
                     ? -1 : keyCode == KeyEvent.KEYCODE_DPAD_RIGHT ? 1 : 0;
@@ -3692,7 +3696,7 @@ public class WebView extends AbsoluteLayout
                 moveSelection(xRate * multiplier, yRate * multiplier);
                 return true;
             }
-            if (navHandledKey(keyCode, 1, false, event.getEventTime(), false)) {
+            if (navHandledKey(keyCode, 1, false, event.getEventTime())) {
                 playSoundEffect(keyCodeToSoundsEffect(keyCode));
                 return true;
             }
@@ -3703,7 +3707,7 @@ public class WebView extends AbsoluteLayout
         if (keyCode == KeyEvent.KEYCODE_DPAD_CENTER) {
             switchOutDrawHistory();
             if (event.getRepeatCount() == 0) {
-                if (mShiftIsPressed) {
+                if (mShiftIsPressed && !nativeFocusIsPlugin()) {
                     return true; // discard press if copy in progress
                 }
                 mGotCenterDown = true;
@@ -3819,6 +3823,10 @@ public class WebView extends AbsoluteLayout
 
         if (keyCode >= KeyEvent.KEYCODE_DPAD_UP
                 && keyCode <= KeyEvent.KEYCODE_DPAD_RIGHT) {
+            if (nativeFocusIsPlugin()) {
+                letPluginHandleNavKey(keyCode, event.getEventTime(), false);
+                return true;
+            }
             // always handle the navigation keys in the UI thread
             // Bubble up the key event as WebView doesn't handle it
             return false;
@@ -3829,7 +3837,7 @@ public class WebView extends AbsoluteLayout
             mPrivateHandler.removeMessages(LONG_PRESS_CENTER);
             mGotCenterDown = false;
 
-            if (mShiftIsPressed) {
+            if (mShiftIsPressed && !nativeFocusIsPlugin()) {
                 if (mExtendSelection) {
                     commitCopy();
                 } else {
@@ -5014,7 +5022,7 @@ public class WebView extends AbsoluteLayout
             return true;
         }
         if (ev.getAction() == MotionEvent.ACTION_DOWN) {
-            if (mShiftIsPressed) {
+            if (mShiftIsPressed && !nativeFocusIsPlugin()) {
                 return true; // discard press if copy in progress
             }
             mTrackballDown = true;
@@ -5039,7 +5047,7 @@ public class WebView extends AbsoluteLayout
             mPrivateHandler.removeMessages(LONG_PRESS_CENTER);
             mTrackballDown = false;
             mTrackballUpTime = time;
-            if (mShiftIsPressed) {
+            if (mShiftIsPressed && !nativeFocusIsPlugin()) {
                 if (mExtendSelection) {
                     commitCopy();
                 } else {
@@ -5177,7 +5185,7 @@ public class WebView extends AbsoluteLayout
         float yRate = mTrackballRemainsY * 1000 / elapsed;
         int viewWidth = getViewWidth();
         int viewHeight = getViewHeight();
-        if (mShiftIsPressed) {
+        if (mShiftIsPressed && !nativeFocusIsPlugin()) {
             moveSelection(scaleTrackballX(xRate, viewWidth),
                     scaleTrackballY(yRate, viewHeight));
             mTrackballRemainsX = mTrackballRemainsY = 0;
@@ -5215,7 +5223,12 @@ public class WebView extends AbsoluteLayout
                         + " mTrackballRemainsX=" + mTrackballRemainsX
                         + " mTrackballRemainsY=" + mTrackballRemainsY);
             }
-            if (navHandledKey(selectKeyCode, count, false, time, false)) {
+            if (nativeFocusIsPlugin()) {
+                for (int i = 0; i < count; i++) {
+                    letPluginHandleNavKey(selectKeyCode, time, true);
+                    letPluginHandleNavKey(selectKeyCode, time, false);
+                }
+            } else if (navHandledKey(selectKeyCode, count, false, time)) {
                 playSoundEffect(keyCodeToSoundsEffect(selectKeyCode));
             }
             mTrackballRemainsX = mTrackballRemainsY = 0;
@@ -5692,7 +5705,7 @@ public class WebView extends AbsoluteLayout
                         return result;
                 }
                 if (mNativeClass != 0 && !nativeHasCursorNode()) {
-                    navHandledKey(fakeKeyDirection, 1, true, 0, true);
+                    navHandledKey(fakeKeyDirection, 1, true, 0);
                 }
             }
         }
@@ -6118,7 +6131,7 @@ public class WebView extends AbsoluteLayout
                     }
                     break;
                 case MOVE_OUT_OF_PLUGIN:
-                    navHandledKey(msg.arg1, 1, false, 0, true);
+                    navHandledKey(msg.arg1, 1, false, 0);
                     break;
                 case UPDATE_TEXT_ENTRY_MSG_ID:
                     // this is sent after finishing resize in WebViewCore. Make
@@ -6785,21 +6798,34 @@ public class WebView extends AbsoluteLayout
         invalidate();
     }
 
-    // return true if the key was handled
-    private boolean navHandledKey(int keyCode, int count, boolean noScroll,
-            long time, boolean ignorePlugin) {
-        if (mNativeClass == 0) {
-            return false;
+    /**
+     * Pass the key to the plugin.  This assumes that nativeFocusIsPlugin()
+     * returned true.
+     */
+    private void letPluginHandleNavKey(int keyCode, long time, boolean down) {
+        int keyEventAction;
+        int eventHubAction;
+        if (down) {
+            keyEventAction = KeyEvent.ACTION_DOWN;
+            eventHubAction = EventHub.KEY_DOWN;
+            playSoundEffect(keyCodeToSoundsEffect(keyCode));
+        } else {
+            keyEventAction = KeyEvent.ACTION_UP;
+            eventHubAction = EventHub.KEY_UP;
         }
-        if (ignorePlugin == false && nativeFocusIsPlugin()) {
-            KeyEvent event = new KeyEvent(time, time, KeyEvent.ACTION_DOWN
-                , keyCode, count, (mShiftIsPressed ? KeyEvent.META_SHIFT_ON : 0)
+        KeyEvent event = new KeyEvent(time, time, keyEventAction, keyCode,
+                1, (mShiftIsPressed ? KeyEvent.META_SHIFT_ON : 0)
                 | (false ? KeyEvent.META_ALT_ON : 0) // FIXME
                 | (false ? KeyEvent.META_SYM_ON : 0) // FIXME
                 , 0, 0, 0);
-            mWebViewCore.sendMessage(EventHub.KEY_DOWN, event);
-            mWebViewCore.sendMessage(EventHub.KEY_UP, event);
-            return true;
+        mWebViewCore.sendMessage(eventHubAction, event);
+    }
+
+    // return true if the key was handled
+    private boolean navHandledKey(int keyCode, int count, boolean noScroll,
+            long time) {
+        if (mNativeClass == 0) {
+            return false;
         }
         mLastCursorTime = time;
         mLastCursorBounds = nativeGetCursorRingBounds();
