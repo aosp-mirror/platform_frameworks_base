@@ -48,6 +48,28 @@ public class LongSparseArray<E> {
         mValues = new Object[initialCapacity];
         mSize = 0;
     }
+    
+    /**
+     * @return A copy of all keys contained in the sparse array.
+     */
+    public long[] getKeys() {
+        int length = mKeys.length;
+        long[] result = new long[length];
+        System.arraycopy(mKeys, 0, result, 0, length);
+        return result;
+    }
+    
+    /**
+     * Sets all supplied keys to the given unique value.
+     * @param keys Keys to set
+     * @param uniqueValue Value to set all supplied keys to
+     */
+    public void setValues(long[] keys, E uniqueValue) {
+        int length = keys.length;
+        for (int i = 0; i < length; i++) {
+            put(keys[i], uniqueValue);
+        }
+    }
 
     /**
      * Gets the Object mapped from the specified key, or <code>null</code>

@@ -30,6 +30,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AttributeSet;
+import android.util.LongSparseArray;
 import android.util.SparseBooleanArray;
 import android.view.FocusFinder;
 import android.view.KeyEvent;
@@ -131,6 +132,7 @@ public class ListView extends AbsListView {
     private int mChoiceMode = CHOICE_MODE_NONE;
 
     private SparseBooleanArray mCheckStates;
+    private LongSparseArray<Boolean> mCheckedIdStates;
 
     // used for temporary calculations.
     private final Rect mTempRect = new Rect();
@@ -462,6 +464,10 @@ public class ListView extends AbsListView {
 
         if (mCheckStates != null) {
             mCheckStates.clear();
+        }
+        
+        if (mCheckedIdStates != null) {
+            mCheckedIdStates.clear();
         }
 
         requestLayout();
@@ -3310,8 +3316,13 @@ public class ListView extends AbsListView {
      */
     public void setChoiceMode(int choiceMode) {
         mChoiceMode = choiceMode;
-        if (mChoiceMode != CHOICE_MODE_NONE && mCheckStates == null) {
-            mCheckStates = new SparseBooleanArray();
+        if (mChoiceMode != CHOICE_MODE_NONE) {
+            if (mCheckStates == null) {
+                mCheckStates = new SparseBooleanArray();
+            }
+            if (mCheckedIdStates == null && mAdapter.hasStableIds()) {
+                mCheckedIdStates = new LongSparseArray<Boolean>();
+            }
         }
     }
 
@@ -3323,14 +3334,25 @@ public class ListView extends AbsListView {
             handled = true;
 
             if (mChoiceMode == CHOICE_MODE_MULTIPLE) {
-                boolean oldValue = mCheckStates.get(position, false);
-                mCheckStates.put(position, !oldValue);
+                boolean newValue = !mCheckStates.get(position, false);
+                mCheckStates.put(position, newValue);
+                if (mCheckedIdStates != null && mAdapter.hasStableIds()) {
+                    if (newValue) {
+                        mCheckedIdStates.put(mAdapter.getItemId(position), Boolean.TRUE);
+                    } else {
+                        mCheckedIdStates.delete(mAdapter.getItemId(position));
+                    }
+                }
             } else {
-                boolean oldValue = mCheckStates.get(position, false);
-                if (!oldValue) {
+                boolean newValue = !mCheckStates.get(position, false);
+                if (newValue) {
                     mCheckStates.clear();
                     mCheckStates.put(position, true);
-                }
+                    if (mCheckedIdStates != null && mAdapter.hasStableIds()) {
+                        mCheckedIdStates.clear();
+                        mCheckedIdStates.put(mAdapter.getItemId(position), Boolean.TRUE);
+                    }
+                } 
             }
 
             mDataChanged = true;
@@ -3358,16 +3380,30 @@ public class ListView extends AbsListView {
 
         if (mChoiceMode == CHOICE_MODE_MULTIPLE) {
             mCheckStates.put(position, value);
+            if (mCheckedIdStates != null && mAdapter.hasStableIds()) {
+                if (value) {
+                    mCheckedIdStates.put(mAdapter.getItemId(position), Boolean.TRUE);
+                } else {
+                    mCheckedIdStates.delete(mAdapter.getItemId(position));
+                }
+            }
         } else {
+            boolean updateIds = mCheckedIdStates != null && mAdapter.hasStableIds();
             // Clear all values if we're checking something, or unchecking the currently
             // selected item
             if (value || isItemChecked(position)) {
                 mCheckStates.clear();
+                if (updateIds) {
+                    mCheckedIdStates.clear();
+                }
             }
             // this may end up selecting the value we just cleared but this way
             // we ensure length of mCheckStates is 1, a fact getCheckedItemPosition relies on
             if (value) {
                 mCheckStates.put(position, true);
+                if (updateIds) {
+                    mCheckedIdStates.put(mAdapter.getItemId(position), Boolean.TRUE);
+                }
             }
         }
 
@@ -3433,38 +3469,39 @@ public class ListView extends AbsListView {
 
     /**
      * Returns the set of checked items ids. The result is only valid if the
-     * choice mode has not been set to {@link #CHOICE_MODE_SINGLE}.
+     * choice mode has not been set to {@link #CHOICE_MODE_NONE}.
+     * 
+     * @return A new array which contains the id of each checked item in the
+     *         list.
+     *         
+     * @deprecated Use {@link #getCheckedItemIds()} instead. 
+     */
+    public long[] getCheckItemIds() {
+        return getCheckedItemIds();
+    }
+    
+    /**
+     * Returns the set of checked items ids. The result is only valid if the
+     * choice mode has not been set to {@link #CHOICE_MODE_NONE} and the adapter
+     * has stable IDs. ({@link ListAdapter#hasStableIds()} == {@code true})
      * 
      * @return A new array which contains the id of each checked item in the
      *         list.
      */
-    public long[] getCheckItemIds() {
-        if (mChoiceMode != CHOICE_MODE_NONE && mCheckStates != null && mAdapter != null) {
-            final SparseBooleanArray states = mCheckStates;
-            final int count = states.size();
-            final long[] ids = new long[count];
-            final ListAdapter adapter = mAdapter;
-
-            int checkedCount = 0;
-            for (int i = 0; i < count; i++) {
-                if (states.valueAt(i)) {
-                    ids[checkedCount++] = adapter.getItemId(states.keyAt(i));
-                }
-            }
-
-            // Trim array if needed. mCheckStates may contain false values
-            // resulting in checkedCount being smaller than count.
-            if (checkedCount == count) {
-                return ids;
-            } else {
-                final long[] result = new long[checkedCount];
-                System.arraycopy(ids, 0, result, 0, checkedCount);
-
-                return result;
-            }
+    public long[] getCheckedItemIds() {
+        if (mChoiceMode == CHOICE_MODE_NONE || mCheckedIdStates == null || mAdapter == null) {
+            return new long[0];
         }
-
-        return new long[0];
+        
+        final LongSparseArray<Boolean> idStates = mCheckedIdStates;
+        final int count = idStates.size();
+        final long[] ids = new long[count];
+        
+        for (int i = 0; i < count; i++) {
+            ids[i] = idStates.keyAt(i);
+        }
+        
+        return ids;
     }
 
     /**
@@ -3474,17 +3511,23 @@ public class ListView extends AbsListView {
         if (mCheckStates != null) {
             mCheckStates.clear();
         }
+        if (mCheckedIdStates != null) {
+            mCheckedIdStates.clear();
+        }
     }
 
     static class SavedState extends BaseSavedState {
         SparseBooleanArray checkState;
+        LongSparseArray<Boolean> checkIdState;
 
         /**
          * Constructor called from {@link ListView#onSaveInstanceState()}
          */
-        SavedState(Parcelable superState, SparseBooleanArray checkState) {
+        SavedState(Parcelable superState, SparseBooleanArray checkState,
+                LongSparseArray<Boolean> checkIdState) {
             super(superState);
             this.checkState = checkState;
+            this.checkIdState = checkIdState;
         }
 
         /**
@@ -3493,12 +3536,19 @@ public class ListView extends AbsListView {
         private SavedState(Parcel in) {
             super(in);
             checkState = in.readSparseBooleanArray();
+            long[] idState = in.createLongArray();
+
+            if (idState.length > 0) {
+                checkIdState = new LongSparseArray<Boolean>();
+                checkIdState.setValues(idState, Boolean.TRUE);
+            }
         }
 
         @Override
         public void writeToParcel(Parcel out, int flags) {
             super.writeToParcel(out, flags);
             out.writeSparseBooleanArray(checkState);
+            out.writeLongArray(checkIdState != null ? checkIdState.getKeys() : new long[0]);
         }
 
         @Override
@@ -3523,7 +3573,7 @@ public class ListView extends AbsListView {
     @Override
     public Parcelable onSaveInstanceState() {
         Parcelable superState = super.onSaveInstanceState();
-        return new SavedState(superState, mCheckStates);
+        return new SavedState(superState, mCheckStates, mCheckedIdStates);
     }
 
     @Override
@@ -3536,5 +3586,8 @@ public class ListView extends AbsListView {
            mCheckStates = ss.checkState;
         }
 
+        if (ss.checkIdState != null) {
+            mCheckedIdStates = ss.checkIdState;
+        }
     }
 }
