@@ -181,8 +181,7 @@ class DockObserver extends UEventObserver {
 
         public void onLocationChanged(Location location) {
             final boolean hasMoved = hasMoved(location);
-            final boolean hasBetterAccuracy = location.getAccuracy() < mLocation.getAccuracy();
-            if (hasMoved || hasBetterAccuracy) {
+            if (hasMoved || hasBetterAccuracy(location)) {
                 synchronized (this) {
                     mLocation = location;
                 }
@@ -199,6 +198,16 @@ class DockObserver extends UEventObserver {
         }
 
         public void onStatusChanged(String provider, int status, Bundle extras) {
+        }
+
+        private boolean hasBetterAccuracy(Location location) {
+            if (location == null) {
+                return false;
+            }
+            if (mLocation == null) {
+                return true;
+            }
+            return location.getAccuracy() < mLocation.getAccuracy();
         }
 
         /*
