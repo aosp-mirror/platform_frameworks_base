@@ -35,7 +35,6 @@ import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
-import android.os.BatteryManager;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.LocalPowerManager;
@@ -202,19 +201,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     boolean mShouldTurnOffOnKeyUp;
     RecentApplicationsDialog mRecentAppsDialog;
     Handler mHandler;
-
-    final IntentFilter mBatteryStatusFilter = new IntentFilter();
     
     boolean mSystemReady;
     boolean mLidOpen;
-    int mPlugged;
-    boolean mRegisteredBatteryReceiver;
     int mUiMode = Configuration.UI_MODE_TYPE_NORMAL;
     int mLidOpenRotation;
     int mCarDockRotation;
     int mDeskDockRotation;
-    int mCarDockKeepsScreenOn;
-    int mDeskDockKeepsScreenOn;
     boolean mCarDockEnablesAccelerometer;
     boolean mDeskDockEnablesAccelerometer;
     int mLidKeyboardAccessibility;
@@ -280,7 +273,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     ShortcutManager mShortcutManager;
     PowerManager.WakeLock mBroadcastWakeLock;
-    PowerManager.WakeLock mDockWakeLock;
 
     class SettingsObserver extends ContentObserver {
         SettingsObserver(Handler handler) {
@@ -512,9 +504,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         PowerManager pm = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
         mBroadcastWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
                 "PhoneWindowManager.mBroadcastWakeLock");
-        mDockWakeLock = pm.newWakeLock(PowerManager.FULL_WAKE_LOCK | PowerManager.ON_AFTER_RELEASE,
-                "PhoneWindowManager.mDockWakeLock");
-        mDockWakeLock.setReferenceCounted(false);
         mEnableShiftMenuBugReports = "1".equals(SystemProperties.get("ro.debuggable"));
         mLidOpenRotation = readRotation(
                 com.android.internal.R.integer.config_lidOpenRotation);
@@ -522,10 +511,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 com.android.internal.R.integer.config_carDockRotation);
         mDeskDockRotation = readRotation(
                 com.android.internal.R.integer.config_deskDockRotation);
-        mCarDockKeepsScreenOn = mContext.getResources().getInteger(
-                com.android.internal.R.integer.config_carDockKeepsScreenOn);
-        mDeskDockKeepsScreenOn = mContext.getResources().getInteger(
-                com.android.internal.R.integer.config_deskDockKeepsScreenOn);
         mCarDockEnablesAccelerometer = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_carDockEnablesAccelerometer);
         mDeskDockEnablesAccelerometer = mContext.getResources().getBoolean(
@@ -534,10 +519,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 com.android.internal.R.integer.config_lidKeyboardAccessibility);
         mLidNavigationAccessibility = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_lidNavigationAccessibility);
-        // register for battery events
-        mBatteryStatusFilter.addAction(Intent.ACTION_BATTERY_CHANGED);
-        mPlugged = 0;
-        updatePlugged(context.registerReceiver(null, mBatteryStatusFilter));
         // register for dock events
         IntentFilter filter = new IntentFilter();
         filter.addAction(UiModeManager.ACTION_ENTER_CAR_MODE);
@@ -626,14 +607,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             WindowManagerImpl wm = (WindowManagerImpl)
                     mContext.getSystemService(Context.WINDOW_SERVICE);
             wm.removeView(removeView);
-        }
-    }
-    
-    void updatePlugged(Intent powerIntent) {
-        if (localLOGV) Log.v(TAG, "New battery status: " + powerIntent.getExtras());
-        if (powerIntent != null) {
-            mPlugged = powerIntent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0);
-            if (localLOGV) Log.v(TAG, "PLUGGED: " + mPlugged);
         }
     }
     
@@ -1979,34 +1952,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     };
 
-    BroadcastReceiver mBatteryReceiver = new BroadcastReceiver() {
-        public void onReceive(Context context, Intent intent) {
-            updatePlugged(intent);
-            updateDockKeepingScreenOn();
-        }
-    };
-
     BroadcastReceiver mDockReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
             try {
                 IUiModeManager uiModeService = IUiModeManager.Stub.asInterface(
                         ServiceManager.getService(Context.UI_MODE_SERVICE));
                 mUiMode = uiModeService.getCurrentModeType();
-                boolean watchBattery = mUiMode != Configuration.UI_MODE_TYPE_UNDEFINED
-                        && mUiMode != Configuration.UI_MODE_TYPE_NORMAL;
-                if (watchBattery != mRegisteredBatteryReceiver) {
-                    mRegisteredBatteryReceiver = watchBattery;
-                    if (watchBattery) {
-                        updatePlugged(mContext.registerReceiver(mBatteryReceiver,
-                                mBatteryStatusFilter));
-                    } else {
-                        mContext.unregisterReceiver(mBatteryReceiver);
-                    }
-                }
             } catch (RemoteException e) {
             }
             updateRotation(Surface.FLAGS_ORIENTATION_ANIMATION_DISABLE);
-            updateDockKeepingScreenOn();
             updateOrientationListenerLp();
         }
     };
@@ -2240,32 +2194,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     public void enableScreenAfterBoot() {
         readLidState();
         updateRotation(Surface.FLAGS_ORIENTATION_ANIMATION_DISABLE);
-    }
-    
-    void updateDockKeepingScreenOn() {
-        if (mPlugged != 0) {
-            if (localLOGV) Log.v(TAG, "Update: mUiMode=" + mUiMode
-                    + " mPlugged=" + mPlugged
-                    + " mCarDockKeepsScreenOn" + mCarDockKeepsScreenOn
-                    + " mDeskDockKeepsScreenOn" + mDeskDockKeepsScreenOn);
-            if (mUiMode == Configuration.UI_MODE_TYPE_CAR
-                    && (mPlugged&mCarDockKeepsScreenOn) != 0) {
-                if (!mDockWakeLock.isHeld()) {
-                    mDockWakeLock.acquire();
-                }
-                return;
-            } else if (mUiMode == Configuration.UI_MODE_TYPE_DESK
-                    && (mPlugged&mDeskDockKeepsScreenOn) != 0) {
-                if (!mDockWakeLock.isHeld()) {
-                    mDockWakeLock.acquire();
-                }
-                return;
-            }
-        }
-        
-        if (mDockWakeLock.isHeld()) {
-            mDockWakeLock.release();
-        }
     }
 
     void updateRotation(int animFlags) {
