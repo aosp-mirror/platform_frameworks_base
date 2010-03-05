@@ -540,6 +540,7 @@ class PackageManagerService extends IPackageManager.Stub {
                     if (DEBUG_INSTALL) Log.v(TAG, "Handling post-install for " + msg.arg1);
                     PostInstallData data = mRunningInstalls.get(msg.arg1);
                     mRunningInstalls.delete(msg.arg1);
+                    boolean deleteOld = false;
 
                     if (data != null) {
                         InstallArgs args = data.args;
@@ -563,13 +564,17 @@ class PackageManagerService extends IPackageManager.Stub {
                             }
                             if (res.removedInfo.args != null) {
                                 // Remove the replaced package's older resources safely now
-                                synchronized (mInstallLock) {
-                                    res.removedInfo.args.doPostDeleteLI(true);
-                                }
+                                deleteOld = true;
                             }
                         }
+                        // Force a gc to clear up things
                         Runtime.getRuntime().gc();
-
+                        // We delete after a gc for applications  on sdcard.
+                        if (deleteOld) {
+                            synchronized (mInstallLock) {
+                                res.removedInfo.args.doPostDeleteLI(true);
+                            }
+                        }
                         if (args.observer != null) {
                             try {
                                 args.observer.packageInstalled(res.name, res.returnCode);
@@ -1350,6 +1355,10 @@ class PackageManagerService extends IPackageManager.Stub {
             if(ps.pkg == null) {
                 ps.pkg = new PackageParser.Package(packageName);
                 ps.pkg.applicationInfo.packageName = packageName;
+                ps.pkg.applicationInfo.flags = ps.pkgFlags;
+                ps.pkg.applicationInfo.publicSourceDir = ps.resourcePathString;
+                ps.pkg.applicationInfo.sourceDir = ps.codePathString;
+                ps.pkg.applicationInfo.dataDir = getDataPathForPackage(ps.pkg).getPath();
             }
             return generatePackageInfo(ps.pkg, flags);
         }
@@ -2567,6 +2576,17 @@ class PackageManagerService extends IPackageManager.Stub {
         }
         return true;
     }
+
+    private File getDataPathForPackage(PackageParser.Package pkg) {
+        boolean useEncryptedFSDir = useEncryptedFilesystemForPackage(pkg);
+        File dataPath;
+        if (useEncryptedFSDir) {
+            dataPath = new File(mSecureAppDataDir, pkg.packageName);
+        } else {
+            dataPath = new File(mAppDataDir, pkg.packageName);
+        }
+        return dataPath;
+    }
     
     private PackageParser.Package scanPackageLI(PackageParser.Package pkg,
             int parseFlags, int scanMode) {
@@ -2932,11 +2952,7 @@ class PackageManagerService extends IPackageManager.Stub {
         } else {
             // This is a normal package, need to make its data directory.
             boolean useEncryptedFSDir = useEncryptedFilesystemForPackage(pkg);
-            if (useEncryptedFSDir) {
-                dataPath = new File(mSecureAppDataDir, pkgName);
-            } else {
-                dataPath = new File(mAppDataDir, pkgName);
-            }
+            dataPath = getDataPathForPackage(pkg);
             
             boolean uidError = false;
             
@@ -5159,14 +5175,9 @@ class PackageManagerService extends IPackageManager.Stub {
             int scanMode,
             String installerPackageName, PackageInstalledInfo res) {
         // Remember this for later, in case we need to rollback this install
-        boolean dataDirExists;
         String pkgName = pkg.packageName;
 
-        if (useEncryptedFilesystemForPackage(pkg)) {
-            dataDirExists = (new File(mSecureAppDataDir, pkgName)).exists();
-        } else {
-            dataDirExists = (new File(mAppDataDir, pkgName)).exists();
-        }
+        boolean dataDirExists = getDataPathForPackage(pkg).exists();
         res.name = pkgName;
         synchronized(mPackages) {
             if (mPackages.containsKey(pkgName) || mAppDirs.containsKey(pkg.mPath)) {
@@ -5741,6 +5752,8 @@ class PackageManagerService extends IPackageManager.Stub {
                 sendPackageBroadcast(Intent.ACTION_PACKAGE_REPLACED, packageName, extras);
             }
         }
+        // Force a gc here.
+        Runtime.getRuntime().gc();
         // Delete the resources here after sending the broadcast to let
         // other processes clean up before deleting resources.
         if (info.args != null) {
@@ -7136,7 +7149,8 @@ class PackageManagerService extends IPackageManager.Stub {
         void setFlags(int pkgFlags) {
             this.pkgFlags = (pkgFlags & ApplicationInfo.FLAG_SYSTEM) |
             (pkgFlags & ApplicationInfo.FLAG_FORWARD_LOCK) |
-            (pkgFlags & ApplicationInfo.FLAG_ON_SDCARD);
+            (pkgFlags & ApplicationInfo.FLAG_ON_SDCARD) |
+            (pkgFlags & ApplicationInfo.FLAG_NEVER_ENCRYPT);
         }
     }
 
