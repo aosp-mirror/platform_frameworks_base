@@ -736,7 +736,7 @@ public abstract class ContentResolver {
      * @hide
      */
     public final IContentProvider acquireProvider(String name) {
-        if(name == null) {
+        if (name == null) {
             return null;
         }
         return acquireProvider(mContext, name);

@@ -29,6 +29,7 @@ import android.database.IContentObserver;
 import android.database.SQLException;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
 
@@ -215,6 +216,13 @@ public abstract class ContentProvider implements ComponentCallbacks {
             if (mode != null && mode.startsWith("rw")) enforceWritePermission(uri);
             else enforceReadPermission(uri);
             return ContentProvider.this.openAssetFile(uri, mode);
+        }
+
+        /**
+         * @hide
+         */
+        public Bundle call(String method, String request, Bundle args) {
+            return ContentProvider.this.call(method, request, args);
         }
 
         private void enforceReadPermission(Uri uri) {
@@ -747,5 +755,19 @@ public abstract class ContentProvider implements ComponentCallbacks {
             results[i] = operations.get(i).apply(this, results, i);
         }
         return results;
+    }
+
+    /**
+     * @hide -- until interface has proven itself
+     *
+     * Call an provider-defined method.  This can be used to implement
+     * interfaces that are cheaper than using a Cursor.
+     *
+     * @param method Method name to call.  Opaque to framework.
+     * @param request Nullable String argument passed to method.
+     * @param args Nullable Bundle argument passed to method.
+     */
+    public Bundle call(String method, String request, Bundle args) {
+        return null;
     }
 }
