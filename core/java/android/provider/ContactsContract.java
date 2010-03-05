@@ -2935,6 +2935,13 @@ public final class ContactsContract {
          */
         public static final Uri CONTENT_FILTER_URI = Uri.withAppendedPath(AUTHORITY_URI,
                 "phone_lookup");
+
+        /**
+         * The MIME type of {@link #CONTENT_FILTER_URI} providing a directory of phone lookup rows.
+         *
+         * @hide
+         */
+        public static final String CONTENT_TYPE = "vnd.android.cursor.dir/phone_lookup";
     }
 
     /**
