@@ -2067,10 +2067,10 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     // Remember where the motion event started
                     v = getChildAt(motionPosition - mFirstPosition);
                     mMotionViewOriginalTop = v.getTop();
-                    mMotionX = x;
-                    mMotionY = y;
-                    mMotionPosition = motionPosition;
                 }
+                mMotionX = x;
+                mMotionY = y;
+                mMotionPosition = motionPosition;
                 mLastY = Integer.MIN_VALUE;
                 break;
             }
