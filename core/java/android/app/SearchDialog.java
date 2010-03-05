@@ -464,15 +464,14 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         }
     }
 
-    /**    
-     * Update the text in the search button.  Note: This is deprecated functionality, for 
-     * 1.0 compatibility only.
-     */  
-    private void updateSearchButton() { 
+    private void updateSearchButton() {
         String textLabel = null;
         Drawable iconLabel = null;
         int textId = mSearchable.getSearchButtonText(); 
-        if (textId != 0) {
+        if (isBrowserSearch()){
+            iconLabel = getContext().getResources()
+                    .getDrawable(com.android.internal.R.drawable.ic_btn_search_play);
+        } else if (textId != 0) {
             textLabel = mActivityContext.getResources().getString(textId);  
         } else {
             iconLabel = getContext().getResources().
@@ -483,10 +482,6 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
     }
     
     private void updateSearchAppIcon() {
-        // In Donut, we special-case the case of the browser to hide the app icon as if it were
-        // global search, for extra space for url entry.
-        //
-        // TODO: Remove this special case once the issue has been reconciled in Eclair. 
         if (isBrowserSearch()) {
             mAppIcon.setImageResource(0);
             mAppIcon.setVisibility(View.GONE);
@@ -581,10 +576,16 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         }
         mVoiceButton.setVisibility(visibility);
     }
-    
+
+    /** Called by SuggestionsAdapter when the cursor contents changed. */
+    void onDataSetChanged() {
+        if (mSearchAutoComplete != null && mSuggestionsAdapter != null) {
+            mSearchAutoComplete.onFilterComplete(mSuggestionsAdapter.getCount());
+        }
+    }
+
     /**
-     * Hack to determine whether this is the browser, so we can remove the browser icon
-     * to the left of the search field.
+     * Hack to determine whether this is the browser, so we can adjust the UI.
      */
     private boolean isBrowserSearch() {
         return mLaunchComponent.flattenToShortString().startsWith("com.android.browser/");

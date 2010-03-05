@@ -141,14 +141,10 @@ public class MediaRecorderTest extends ActivityInstrumentationTestCase<MediaFram
             mMediaRecorder.setOutputFile(filename);
             mMediaRecorder.setVideoFrameRate(videoFps);
             mMediaRecorder.setVideoSize(videoWidth, videoHeight);
-            mMediaRecorder.setParameters(String.format("video-param-encoding-bitrate=%d",
-                    videoBitrate));
-            mMediaRecorder.setParameters(String.format("audio-param-encoding-bitrate=%d",
-                    audioBitrate));
-            mMediaRecorder.setParameters(String.format("audio-param-number-of-channels=%d",
-                    audioChannels));
-            mMediaRecorder.setParameters(String.format("audio-param-sampling-rate=%d",
-                    audioSamplingRate));
+            mMediaRecorder.setVideoEncodingBitRate(videoBitrate);
+            mMediaRecorder.setAudioEncodingBitRate(audioBitrate);
+            mMediaRecorder.setAudioChannels(audioChannels);
+            mMediaRecorder.setAudioSamplingRate(audioSamplingRate);
             mMediaRecorder.setVideoEncoder(videoEncoder);
             mMediaRecorder.setAudioEncoder(audioEncoder);
             mMediaRecorder.setPreviewDisplay(mSurfaceHolder.getSurface());

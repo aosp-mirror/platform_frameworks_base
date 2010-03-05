@@ -389,7 +389,8 @@ public class ExpandableListView extends ListView {
         // Only proceed as possible child if the divider isn't above all items (if it is above
         // all items, then the item below it has to be a group)
         if (flatListPosition >= 0) {
-            PositionMetadata pos = mConnector.getUnflattenedPos(flatListPosition);
+            final int adjustedPosition = getFlatPositionForConnector(flatListPosition);
+            PositionMetadata pos = mConnector.getUnflattenedPos(adjustedPosition);
             // If this item is a child, or it is a non-empty group that is expanded
             if ((pos.position.type == ExpandableListPosition.CHILD) || (pos.isExpanded() &&
                     pos.groupMetadata.lastChildFlPos != pos.groupMetadata.flPos)) {
@@ -482,9 +483,35 @@ public class ExpandableListView extends ListView {
         return mAdapter;
     }
     
+    /**
+     * @param position An absolute (including header and footer) flat list position.
+     * @return true if the position corresponds to a header or a footer item.
+     */
     private boolean isHeaderOrFooterPosition(int position) {
         final int footerViewsStart = mItemCount - getFooterViewsCount();
         return (position < getHeaderViewsCount() || position >= footerViewsStart);
+    }
+
+    /**
+     * Converts an absolute item flat position into a group/child flat position, shifting according
+     * to the number of header items.
+     * 
+     * @param flatListPosition The absolute flat position
+     * @return A group/child flat position as expected by the connector.
+     */
+    private int getFlatPositionForConnector(int flatListPosition) {
+        return flatListPosition - getHeaderViewsCount();
+    }
+
+    /**
+     * Converts a group/child flat position into an absolute flat position, that takes into account
+     * the possible headers.
+     * 
+     * @param flatListPosition The child/group flat position
+     * @return An absolute flat position.
+     */
+    private int getAbsoluteFlatPosition(int flatListPosition) {
+        return flatListPosition + getHeaderViewsCount();
     }
 
     @Override
@@ -496,8 +523,8 @@ public class ExpandableListView extends ListView {
         }
         
         // Internally handle the item click
-        final int headerViewsCount = getHeaderViewsCount();
-        return handleItemClick(v, position - headerViewsCount, id);
+        final int adjustedPosition = getFlatPositionForConnector(position);
+        return handleItemClick(v, adjustedPosition, id);
     }
     
     /**
@@ -711,8 +738,8 @@ public class ExpandableListView extends ListView {
             return PACKED_POSITION_VALUE_NULL;
         }
 
-        final int shiftedPosition = flatListPosition - getHeaderViewsCount();
-        PositionMetadata pm = mConnector.getUnflattenedPos(shiftedPosition);
+        final int adjustedPosition = getFlatPositionForConnector(flatListPosition);
+        PositionMetadata pm = mConnector.getUnflattenedPos(adjustedPosition);
         long packedPos = pm.position.getPackedPosition();
         pm.recycle();
         return packedPos;
@@ -732,9 +759,9 @@ public class ExpandableListView extends ListView {
     public int getFlatListPosition(long packedPosition) {
         PositionMetadata pm = mConnector.getFlattenedPos(ExpandableListPosition
                 .obtainPosition(packedPosition));
-        int retValue = pm.position.flatListPos;
+        final int flatListPosition = pm.position.flatListPos;
         pm.recycle();
-        return retValue + getHeaderViewsCount();
+        return getAbsoluteFlatPosition(flatListPosition);
     }
 
     /**
@@ -783,7 +810,8 @@ public class ExpandableListView extends ListView {
                 .obtainGroupPosition(groupPosition);
         PositionMetadata pm = mConnector.getFlattenedPos(elGroupPos);
         elGroupPos.recycle();
-        super.setSelection(pm.position.flatListPos);
+        final int absoluteFlatPosition = getAbsoluteFlatPosition(pm.position.flatListPos);
+        super.setSelection(absoluteFlatPosition);
         pm.recycle();
     }
     
@@ -819,7 +847,8 @@ public class ExpandableListView extends ListView {
             }
         }
         
-        super.setSelection(flatChildPos.position.flatListPos);
+        int absoluteFlatPosition = getAbsoluteFlatPosition(flatChildPos.position.flatListPos);
+        super.setSelection(absoluteFlatPosition);
         
         elChildPos.recycle();
         flatChildPos.recycle();
@@ -937,7 +966,7 @@ public class ExpandableListView extends ListView {
             return new AdapterContextMenuInfo(view, flatListPosition, id);
         }
 
-        final int adjustedPosition = flatListPosition - getHeaderViewsCount();
+        final int adjustedPosition = getFlatPositionForConnector(flatListPosition);
         PositionMetadata pm = mConnector.getUnflattenedPos(adjustedPosition);
         ExpandableListPosition pos = pm.position;
         pm.recycle();

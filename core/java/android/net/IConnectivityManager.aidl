@@ -55,15 +55,19 @@ interface IConnectivityManager
 
     void setMobileDataEnabled(boolean enabled);
 
-    boolean tether(String iface);
+    int tether(String iface);
 
-    boolean untether(String iface);
+    int untether(String iface);
+
+    int getLastTetherError(String iface);
 
     boolean isTetheringSupported();
 
     String[] getTetherableIfaces();
 
     String[] getTetheredIfaces();
+
+    String[] getTetheringErroredIfaces();
 
     String[] getTetherableUsbRegexs();
 

@@ -90,8 +90,6 @@ class DockObserver extends UEventObserver {
     private static final float LOCATION_UPDATE_DISTANCE_METER = 1000 * 20;
     private static final long LOCATION_UPDATE_ENABLE_INTERVAL_MIN = 5000;
     private static final long LOCATION_UPDATE_ENABLE_INTERVAL_MAX = 5 * DateUtils.MINUTE_IN_MILLIS;
-    // velocity for estimating a potential movement: 150km/h
-    private static final float MAX_VELOCITY_M_MS = 150 / 3600;
     private static final double FACTOR_GMT_OFFSET_LONGITUDE = 1000.0 * 360.0 / DateUtils.DAY_IN_MILLIS;
 
     private static final String ACTION_UPDATE_NIGHT_MODE = "com.android.server.action.UPDATE_NIGHT_MODE";
@@ -163,10 +161,10 @@ class DockObserver extends UEventObserver {
         }
     };
 
-    private final LocationListener mLocationListener = new LocationListener() {
-
+    // A LocationListener to initialize the network location provider. The location updates
+    // are handled through the passive location provider.
+    private final LocationListener mEmptyLocationListener =  new LocationListener() {
         public void onLocationChanged(Location location) {
-            updateLocation(location);
         }
 
         public void onProviderDisabled(String provider) {
@@ -176,25 +174,40 @@ class DockObserver extends UEventObserver {
         }
 
         public void onStatusChanged(String provider, int status, Bundle extras) {
-            // If the network location is no longer available check for a GPS fix
-            // and try to update the location.
-            if (provider == LocationManager.NETWORK_PROVIDER &&
-                    status != LocationProvider.AVAILABLE) {
-                updateLocation(mLocation);
-            }
         }
+    };
 
-        private void updateLocation(Location location) {
-            location = DockObserver.chooseBestLocation(location,
-                    mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER));
-            if (hasMoved(location)) {
+    private final LocationListener mLocationListener = new LocationListener() {
+
+        public void onLocationChanged(Location location) {
+            final boolean hasMoved = hasMoved(location);
+            if (hasMoved || hasBetterAccuracy(location)) {
                 synchronized (this) {
                     mLocation = location;
                 }
-                if (mCarModeEnabled && mNightMode == MODE_NIGHT_AUTO) {
+                if (hasMoved && mCarModeEnabled && mNightMode == MODE_NIGHT_AUTO) {
                     mHandler.sendEmptyMessage(MSG_UPDATE_TWILIGHT);
                 }
             }
+        }
+
+        public void onProviderDisabled(String provider) {
+        }
+
+        public void onProviderEnabled(String provider) {
+        }
+
+        public void onStatusChanged(String provider, int status, Bundle extras) {
+        }
+
+        private boolean hasBetterAccuracy(Location location) {
+            if (location == null) {
+                return false;
+            }
+            if (mLocation == null) {
+                return true;
+            }
+            return location.getAccuracy() < mLocation.getAccuracy();
         }
 
         /*
@@ -225,7 +238,7 @@ class DockObserver extends UEventObserver {
             /* If the distance is greater than the combined accuracy of the two
              * points then they can't overlap and hence the user has moved.
              */
-            return distance > totalAccuracy;
+            return distance >= totalAccuracy;
         }
     };
 
@@ -328,6 +341,10 @@ class DockObserver extends UEventObserver {
     }
 
     private final Handler mHandler = new Handler() {
+
+        boolean mPassiveListenerEnabled;
+        boolean mNetworkListenerEnabled;
+
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
@@ -421,6 +438,24 @@ class DockObserver extends UEventObserver {
                     }
                     break;
                 case MSG_ENABLE_LOCATION_UPDATES:
+                   // enable passive provider to receive updates from location fixes (gps
+                   // and network).
+                   boolean passiveLocationEnabled;
+                    try {
+                        passiveLocationEnabled =
+                            mLocationManager.isProviderEnabled(LocationManager.PASSIVE_PROVIDER);
+                    } catch (Exception e) {
+                        // we may get IllegalArgumentException if passive location provider
+                        // does not exist or is not yet installed.
+                        passiveLocationEnabled = false;
+                    }
+                    if (!mPassiveListenerEnabled && passiveLocationEnabled) {
+                        mPassiveListenerEnabled = true;
+                        mLocationManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER,
+                                0, LOCATION_UPDATE_DISTANCE_METER , mLocationListener);
+                    }
+                    // enable network provider to receive at least location updates for a given
+                    // distance.
                     boolean networkLocationEnabled;
                     try {
                         networkLocationEnabled =
@@ -430,10 +465,11 @@ class DockObserver extends UEventObserver {
                         // does not exist or is not yet installed.
                         networkLocationEnabled = false;
                     }
-                    if (networkLocationEnabled) {
+                    if (!mNetworkListenerEnabled && networkLocationEnabled) {
+                        mNetworkListenerEnabled = true;
                         mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,
-                                LOCATION_UPDATE_MS, LOCATION_UPDATE_DISTANCE_METER, 
-                                mLocationListener);
+                                LOCATION_UPDATE_MS, 0, mEmptyLocationListener);
+
                         retrieveLocation();
                         if (mCarModeEnabled && mLocation != null && mNightMode == MODE_NIGHT_AUTO) {
                             try {
@@ -442,7 +478,8 @@ class DockObserver extends UEventObserver {
                                 Slog.w(TAG, "Unable to change night mode.", e);
                             }
                         }
-                    } else {
+                    }
+                    if (!(mNetworkListenerEnabled && mPassiveListenerEnabled)) {
                         long interval = msg.getData().getLong(KEY_LAST_UPDATE_INTERVAL);
                         interval *= 1.5;
                         if (interval == 0) {
@@ -468,13 +505,9 @@ class DockObserver extends UEventObserver {
             criteria.setSpeedRequired(false);
             criteria.setAltitudeRequired(false);
             criteria.setBearingRequired(false);
+            criteria.setAccuracy(Criteria.ACCURACY_FINE);
             final String bestProvider = mLocationManager.getBestProvider(criteria, true);
-            if (LocationManager.GPS_PROVIDER.equals(bestProvider)) {
-                location = gpsLocation;
-            } else {
-                location = DockObserver.chooseBestLocation(gpsLocation,
-                        mLocationManager.getLastKnownLocation(bestProvider));
-            }
+            location = mLocationManager.getLastKnownLocation(bestProvider);
             // In the case there is no location available (e.g. GPS fix or network location
             // is not available yet), the longitude of the location is estimated using the timezone,
             // latitude and accuracy are set to get a good average.
@@ -485,7 +518,7 @@ class DockObserver extends UEventObserver {
                         (currentTime.gmtoff - (currentTime.isDst > 0 ? 3600 : 0));
                 location = new Location("fake");
                 location.setLongitude(lngOffset);
-                location.setLatitude(59.95);
+                location.setLatitude(0);
                 location.setAccuracy(417000.0f);
                 location.setTime(System.currentTimeMillis());
             }
@@ -639,33 +672,6 @@ class DockObserver extends UEventObserver {
             if (mCarModeEnabled && mNightMode == MODE_NIGHT_AUTO) {
                 setMode(Configuration.UI_MODE_TYPE_CAR, nightMode << 4);
             }
-        }
-    }
-
-    /**
-     * Check which of two locations is better by comparing the distance a device
-     * could have cover since the last timestamp of the location.
-     *
-     * @param location first location
-     * @param otherLocation second location
-     * @return one of the two locations
-     */
-    protected static Location chooseBestLocation(Location location, Location otherLocation) {
-        if (location == null) {
-            return otherLocation;
-        }
-        if (otherLocation == null) {
-            return location;
-        }
-        final long currentTime = System.currentTimeMillis();
-        float gpsPotentialMove = MAX_VELOCITY_M_MS * (currentTime - location.getTime())
-                + location.getAccuracy();
-        float otherPotentialMove = MAX_VELOCITY_M_MS * (currentTime - otherLocation.getTime())
-                + otherLocation.getAccuracy();
-        if (gpsPotentialMove < otherPotentialMove) {
-            return location;
-        } else {
-            return otherLocation;
         }
     }
 

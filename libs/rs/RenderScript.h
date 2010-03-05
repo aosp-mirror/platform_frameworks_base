@@ -202,6 +202,12 @@ enum RsPrimitive {
     RS_PRIMITIVE_TRIANGLE_FAN
 };
 
+enum RsError {
+    RS_ERROR_NONE,
+    RS_ERROR_BAD_SHADER,
+    RS_ERROR_BAD_SCRIPT
+};
+
 #ifndef NO_RS_FUNCS
 #include "rsgApiFuncDecl.h"
 #endif

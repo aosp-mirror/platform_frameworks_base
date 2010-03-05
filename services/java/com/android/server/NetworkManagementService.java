@@ -447,7 +447,7 @@ class NetworkManagementService extends INetworkManagementService.Stub {
             String []tok = line.split(" ");
             int code = Integer.parseInt(tok[0]);
             if (code == NetdResponseCode.UsbRNDISStatusResult) {
-                if (tok[2].equals("started"))
+                if (tok[3].equals("started"))
                     return true;
                 return false;
             } else {
@@ -456,4 +456,23 @@ class NetworkManagementService extends INetworkManagementService.Stub {
         }
         throw new IllegalStateException("Got an empty response");
     }
+
+    public void startAccessPoint()
+             throws IllegalStateException {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.CHANGE_NETWORK_STATE, "NetworkManagementService");
+        mContext.enforceCallingOrSelfPermission(
+            android.Manifest.permission.CHANGE_WIFI_STATE, "NetworkManagementService");
+        mConnector.doCommand(String.format("softap set"));
+        mConnector.doCommand(String.format("softap start"));
+    }
+
+    public void stopAccessPoint() throws IllegalStateException {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.CHANGE_NETWORK_STATE, "NetworkManagementService");
+        mContext.enforceCallingOrSelfPermission(
+            android.Manifest.permission.CHANGE_WIFI_STATE, "NetworkManagementService");
+        mConnector.doCommand("softap stop");
+    }
+
 }

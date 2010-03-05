@@ -450,10 +450,20 @@ public class AudioService extends IAudioService.Stub {
         VolumeStreamState streamState = mStreamStates[streamType];
         if (streamState.setIndex(index, lastAudible) || force) {
             // Post message to set system volume (it in turn will post a message
-            // to persist). Do not change volume if stream is muted.
-            if (streamState.muteCount() == 0) {
+            // to persist).
+            // If stream is muted or we are in silent mode and stream is affected by ringer mode
+            // and the new volume is not 0, just persist the new volume but do not change
+            // current value
+            if (streamState.muteCount() == 0 &&
+                (mRingerMode == AudioManager.RINGER_MODE_NORMAL ||
+                !isStreamAffectedByRingerMode(streamType) ||
+                index == 0)) {
                 sendMsg(mAudioHandler, MSG_SET_SYSTEM_VOLUME, streamType, SENDMSG_NOOP, 0, 0,
                         streamState, 0);
+            } else {
+                // Post a persist volume msg
+                sendMsg(mAudioHandler, MSG_PERSIST_VOLUME, streamType,
+                        SENDMSG_REPLACE, 0, 1, streamState, PERSIST_DELAY);
             }
         }
     }
@@ -512,7 +522,7 @@ public class AudioService extends IAudioService.Stub {
                 if (!isStreamAffectedByRingerMode(streamType)) continue;
                 // Bring back last audible volume
                 setStreamVolumeInt(streamType, mStreamStates[streamType].mLastAudibleIndex,
-                                   false, false);
+                                   true, false);
             }
         } else {
             for (int streamType = numStreamTypes - 1; streamType >= 0; streamType--) {
@@ -524,7 +534,7 @@ public class AudioService extends IAudioService.Stub {
                     // to non affected by ringer mode. Does not arm to do it for streams that
                     // are not affected as well.
                     setStreamVolumeInt(streamType, mStreamStates[streamType].mLastAudibleIndex,
-                            false, false);
+                            true, false);
                 }
             }
         }
@@ -1269,14 +1279,18 @@ public class AudioService extends IAudioService.Stub {
 
             // Post a persist volume msg
             sendMsg(mAudioHandler, MSG_PERSIST_VOLUME, streamState.mStreamType,
-                    SENDMSG_REPLACE, 0, 0, streamState, PERSIST_DELAY);
+                    SENDMSG_REPLACE, 1, 1, streamState, PERSIST_DELAY);
         }
 
-        private void persistVolume(VolumeStreamState streamState) {
-            System.putInt(mContentResolver, streamState.mVolumeIndexSettingName,
-                    (streamState.mIndex + 5)/ 10);
-            System.putInt(mContentResolver, streamState.mLastAudibleVolumeIndexSettingName,
+        private void persistVolume(VolumeStreamState streamState, boolean current, boolean lastAudible) {
+            if (current) {
+                System.putInt(mContentResolver, streamState.mVolumeIndexSettingName,
+                              (streamState.mIndex + 5)/ 10);
+            }
+            if (lastAudible) {
+                System.putInt(mContentResolver, streamState.mLastAudibleVolumeIndexSettingName,
                     (streamState.mLastAudibleIndex + 5) / 10);
+            }
         }
 
         private void persistRingerMode() {
@@ -1361,7 +1375,7 @@ public class AudioService extends IAudioService.Stub {
                     break;
 
                 case MSG_PERSIST_VOLUME:
-                    persistVolume((VolumeStreamState) msg.obj);
+                    persistVolume((VolumeStreamState) msg.obj, (msg.arg1 != 0), (msg.arg2 != 0));
                     break;
 
                 case MSG_PERSIST_RINGER_MODE:
@@ -1469,7 +1483,7 @@ public class AudioService extends IAudioService.Stub {
                         //  and persist with no delay as there might be registered observers of the persisted
                         //  notification volume.
                         sendMsg(mAudioHandler, MSG_PERSIST_VOLUME, AudioSystem.STREAM_NOTIFICATION,
-                                SENDMSG_REPLACE, 0, 0, mStreamStates[AudioSystem.STREAM_NOTIFICATION], 0);
+                                SENDMSG_REPLACE, 1, 1, mStreamStates[AudioSystem.STREAM_NOTIFICATION], 0);
                     }
                 }
             }

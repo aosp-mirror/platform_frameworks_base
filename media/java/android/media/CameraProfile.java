@@ -21,7 +21,6 @@ package android.media;
  * capture (jpeg) quality levels (0-100) used for low, medium, and high
  * quality settings in the Camera application.
  *
- * {@hide}
  */
 public class CameraProfile
 {

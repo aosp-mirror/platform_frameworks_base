@@ -267,6 +267,11 @@
          it will be removed when the lower-level touch driver generates better
          data. -->
     <bool name="config_filterTouchEvents">false</bool>
+
+    <!-- Enables special filtering code in the framework for raw touch events
+         from the touch driver. This code exists for one particular device,
+         and should not be enabled for any others. -->
+    <bool name="config_filterJumpyTouchEvents">false</bool>
     
     <!-- Component name of the default wallpaper. This will be ImageWallpaper if not 
          specified -->

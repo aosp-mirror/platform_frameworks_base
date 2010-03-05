@@ -674,14 +674,19 @@ int create_move_path(char path[PKG_PATH_MAX],
     return 0;
 }
 
-void mkinnerdirs(char* path, int basepos, mode_t mode, int uid, int gid)
+void mkinnerdirs(char* path, int basepos, mode_t mode, int uid, int gid,
+        struct stat* statbuf)
 {
     while (path[basepos] != 0) {
         if (path[basepos] == '/') {
             path[basepos] = 0;
-            LOGI("Making directory: %s\n", path);
-            if (mkdir(path, mode) == 0) {
-                chown(path, uid, gid);
+            if (lstat(path, statbuf) < 0) {
+                LOGI("Making directory: %s\n", path);
+                if (mkdir(path, mode) == 0) {
+                    chown(path, uid, gid);
+                } else {
+                    LOGW("Unable to make directory %s: %s\n", path, strerror(errno));
+                }
             }
             path[basepos] = '/';
             basepos++;
@@ -690,8 +695,8 @@ void mkinnerdirs(char* path, int basepos, mode_t mode, int uid, int gid)
     }
 }
 
-int movefileordir(char* srcpath, char* dstpath, int dstuid, int dstgid,
-        struct stat* statbuf)
+int movefileordir(char* srcpath, char* dstpath, int dstbasepos,
+        int dstuid, int dstgid, struct stat* statbuf)
 {
     DIR *d;
     struct dirent *de;
@@ -706,8 +711,9 @@ int movefileordir(char* srcpath, char* dstpath, int dstuid, int dstgid,
     }
     
     if ((statbuf->st_mode&S_IFDIR) == 0) {
+        mkinnerdirs(dstpath, dstbasepos, S_IRWXU|S_IRWXG|S_IXOTH,
+                dstuid, dstgid, statbuf);
         LOGI("Renaming %s to %s (uid %d)\n", srcpath, dstpath, dstuid);
-        mkinnerdirs(dstpath, dstend-1, S_IRWXU|S_IRWXG|S_IXOTH, dstuid, dstgid);
         if (rename(srcpath, dstpath) >= 0) {
             if (chown(dstpath, dstuid, dstgid) < 0) {
                 LOGE("cannot chown %s: %s\n", dstpath, strerror(errno));
@@ -752,7 +758,7 @@ int movefileordir(char* srcpath, char* dstpath, int dstuid, int dstgid,
         strcpy(srcpath+srcend+1, name);
         strcpy(dstpath+dstend+1, name);
         
-        if (movefileordir(srcpath, dstpath, dstuid, dstgid, statbuf) != 0) {
+        if (movefileordir(srcpath, dstpath, dstbasepos, dstuid, dstgid, statbuf) != 0) {
             res = 1;
         }
         
@@ -834,7 +840,9 @@ int movefiles()
                             LOGV("Move file: %s (from %s to %s)\n", buf+bufp, srcpkg, dstpkg);
                             if (!create_move_path(srcpath, PKG_DIR_PREFIX, srcpkg, buf+bufp) &&
                                     !create_move_path(dstpath, PKG_DIR_PREFIX, dstpkg, buf+bufp)) {
-                                movefileordir(srcpath, dstpath, dstuid, dstgid, &s);
+                                movefileordir(srcpath, dstpath,
+                                        strlen(dstpath)-strlen(buf+bufp),
+                                        dstuid, dstgid, &s);
                             }
                         }
                     } else {

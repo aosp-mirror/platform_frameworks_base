@@ -158,7 +158,7 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
 
     private synchronized SSLSocketFactory getDelegate() {
         // Relax the SSL check if instructed (for this factory, or systemwide)
-        if (!mSecure || ("0".equals(SystemProperties.get("ro.secure")) &&
+        if (!mSecure || ("1".equals(SystemProperties.get("ro.debuggable")) &&
             "yes".equals(SystemProperties.get("socket.relaxsslcheck")))) {
             if (mInsecureFactory == null) {
                 if (mSecure) {

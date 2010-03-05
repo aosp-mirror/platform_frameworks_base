@@ -683,7 +683,9 @@ static void SC_drawLine(float x1, float y1, float z1,
                         float x2, float y2, float z2)
 {
     GET_TLS();
-    rsc->setupCheck();
+    if (!rsc->setupCheck()) {
+        return;
+    }
 
     float vtx[] = { x1, y1, z1, x2, y2, z2 };
     VertexArray va;
@@ -700,7 +702,9 @@ static void SC_drawLine(float x1, float y1, float z1,
 static void SC_drawPoint(float x, float y, float z)
 {
     GET_TLS();
-    rsc->setupCheck();
+    if (!rsc->setupCheck()) {
+        return;
+    }
 
     float vtx[] = { x, y, z };
 
@@ -725,7 +729,9 @@ static void SC_drawQuadTexCoords(float x1, float y1, float z1,
                                  float u4, float v4)
 {
     GET_TLS();
-    rsc->setupCheck();
+    if (!rsc->setupCheck()) {
+        return;
+    }
 
     //LOGE("Quad");
     //LOGE("%4.2f, %4.2f, %4.2f", x1, y1, z1);
@@ -782,7 +788,9 @@ static void SC_drawSpriteScreenspaceCropped(float x, float y, float z, float w, 
         float cx0, float cy0, float cx1, float cy1)
 {
     GET_TLS();
-    rsc->setupCheck();
+    if (!rsc->setupCheck()) {
+        return;
+    }
 
     GLint crop[4] = {cx0, cy0, cx1, cy1};
     glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_CROP_RECT_OES, crop);
@@ -831,7 +839,9 @@ static void SC_drawSimpleMesh(RsSimpleMesh vsm)
 {
     GET_TLS();
     SimpleMesh *sm = static_cast<SimpleMesh *>(vsm);
-    rsc->setupCheck();
+    if (!rsc->setupCheck()) {
+        return;
+    }
     sm->render(rsc);
 }
 
@@ -839,7 +849,9 @@ static void SC_drawSimpleMeshRange(RsSimpleMesh vsm, uint32_t start, uint32_t le
 {
     GET_TLS();
     SimpleMesh *sm = static_cast<SimpleMesh *>(vsm);
-    rsc->setupCheck();
+    if (!rsc->setupCheck()) {
+        return;
+    }
     sm->renderRange(rsc, start, len);
 }
 

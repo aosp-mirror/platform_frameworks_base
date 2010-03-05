@@ -34,6 +34,16 @@ public class InputDevice {
     /** Maximum number of pointers we will track and report. */
     static final int MAX_POINTERS = 10;
     
+    /**
+     * Slop distance for jumpy pointer detection.
+     * The vertical range of the screen divided by this is our epsilon value.
+     */
+    private static final int JUMPY_EPSILON_DIVISOR = 212;
+    
+    /** Number of jumpy points to drop for touchscreens that need it. */
+    private static final int JUMPY_TRANSITION_DROPS = 3;
+    private static final int JUMPY_DROP_LIMIT = 3;
+    
     final int id;
     final int classes;
     final String name;
@@ -84,6 +94,9 @@ public class InputDevice {
         // Used to determine whether we dropped bad data, to avoid doing
         // it repeatedly.
         final boolean[] mDroppedBadPoint = new boolean[MAX_POINTERS];
+
+        // Used to count the number of jumpy points dropped.
+        private int mJumpyPointsDropped = 0;
         
         // Used to perform averaging of reported coordinates, to smooth
         // the data and filter out transients during a release.
@@ -229,6 +242,164 @@ public class InputDevice {
                     }
                 }
                 mDroppedBadPoint[i] = dropped;
+            }
+        }
+        
+        void dropJumpyPoint(InputDevice dev) {
+            // We should always have absY, but let's be paranoid.
+            if (dev.absY == null) {
+                return;
+            }
+            final int jumpyEpsilon = dev.absY.range / JUMPY_EPSILON_DIVISOR;
+            
+            final int nextNumPointers = mNextNumPointers;
+            final int lastNumPointers = mLastNumPointers;
+            final int[] nextData = mNextData;
+            final int[] lastData = mLastData;
+            
+            if (nextNumPointers != mLastNumPointers) {
+                if (DEBUG_HACKS) {
+                    Slog.d("InputDevice", "Different pointer count " + lastNumPointers + 
+                            " -> " + nextNumPointers);
+                    for (int i = 0; i < nextNumPointers; i++) {
+                        int ioff = i * MotionEvent.NUM_SAMPLE_DATA;
+                        Slog.d("InputDevice", "Pointer " + i + " (" + 
+                                mNextData[ioff + MotionEvent.SAMPLE_X] + ", " +
+                                mNextData[ioff + MotionEvent.SAMPLE_Y] + ")");
+                    }
+                }
+                
+                // Just drop the first few events going from 1 to 2 pointers.
+                // They're bad often enough that they're not worth considering.
+                if (lastNumPointers == 1 && nextNumPointers == 2
+                        && mJumpyPointsDropped < JUMPY_TRANSITION_DROPS) {
+                    mNextNumPointers = 1;
+                    mJumpyPointsDropped++;
+                } else if (lastNumPointers == 2 && nextNumPointers == 1
+                        && mJumpyPointsDropped < JUMPY_TRANSITION_DROPS) {
+                    // The event when we go from 2 -> 1 tends to be messed up too
+                    System.arraycopy(lastData, 0, nextData, 0, 
+                            lastNumPointers * MotionEvent.NUM_SAMPLE_DATA);
+                    mNextNumPointers = lastNumPointers;
+                    mJumpyPointsDropped++;
+                    
+                    if (DEBUG_HACKS) {
+                        for (int i = 0; i < mNextNumPointers; i++) {
+                            int ioff = i * MotionEvent.NUM_SAMPLE_DATA;
+                            Slog.d("InputDevice", "Pointer " + i + " replaced (" + 
+                                    mNextData[ioff + MotionEvent.SAMPLE_X] + ", " +
+                                    mNextData[ioff + MotionEvent.SAMPLE_Y] + ")");
+                        }
+                    }
+                } else {
+                    mJumpyPointsDropped = 0;
+                    
+                    if (DEBUG_HACKS) {
+                        Slog.d("InputDevice", "Transition - drop limit reset");
+                    }
+                }
+                return;
+            }
+            
+            // A 'jumpy' point is one where the coordinate value for one axis
+            // has jumped to the other pointer's location. No need to do anything
+            // else if we only have one pointer.
+            if (nextNumPointers < 2) {
+                return;
+            }
+            
+            int badPointerIndex = -1;
+            int badPointerReplaceXWith = 0;
+            int badPointerReplaceYWith = 0;
+            int badPointerDistance = Integer.MIN_VALUE;
+            for (int i = nextNumPointers - 1; i >= 0; i--) {
+                boolean dropx = false;
+                boolean dropy = false;
+                
+                // Limit how many times a jumpy point can get dropped.
+                if (mJumpyPointsDropped < JUMPY_DROP_LIMIT) {
+                    final int ioff = i * MotionEvent.NUM_SAMPLE_DATA;
+                    final int x = nextData[ioff + MotionEvent.SAMPLE_X];
+                    final int y = nextData[ioff + MotionEvent.SAMPLE_Y];
+                    
+                    if (DEBUG_HACKS) {
+                        Slog.d("InputDevice", "Point " + i + " (" + x + ", " + y + ")");
+                    }
+
+                    // Check if a touch point is too close to another's coordinates
+                    for (int j = 0; j < nextNumPointers && !dropx && !dropy; j++) {
+                        if (j == i) {
+                            continue;
+                        }
+
+                        final int joff = j * MotionEvent.NUM_SAMPLE_DATA;
+                        final int xOther = nextData[joff + MotionEvent.SAMPLE_X];
+                        final int yOther = nextData[joff + MotionEvent.SAMPLE_Y];
+
+                        dropx = Math.abs(x - xOther) <= jumpyEpsilon;
+                        dropy = Math.abs(y - yOther) <= jumpyEpsilon;
+                    }
+                    
+                    if (dropx) {
+                        int xreplace = lastData[MotionEvent.SAMPLE_X];
+                        int yreplace = lastData[MotionEvent.SAMPLE_Y];
+                        int distance = Math.abs(yreplace - y);
+                        for (int j = 1; j < lastNumPointers; j++) {
+                            final int joff = j * MotionEvent.NUM_SAMPLE_DATA;
+                            int lasty = lastData[joff + MotionEvent.SAMPLE_Y];   
+                            int currDist = Math.abs(lasty - y);
+                            if (currDist < distance) {
+                                xreplace = lastData[joff + MotionEvent.SAMPLE_X];
+                                yreplace = lasty;
+                                distance = currDist;
+                            }
+                        }
+                        
+                        int badXDelta = Math.abs(xreplace - x);
+                        if (badXDelta > badPointerDistance) {
+                            badPointerDistance = badXDelta;
+                            badPointerIndex = i;
+                            badPointerReplaceXWith = xreplace;
+                            badPointerReplaceYWith = yreplace;
+                        }
+                    } else if (dropy) {
+                        int xreplace = lastData[MotionEvent.SAMPLE_X];
+                        int yreplace = lastData[MotionEvent.SAMPLE_Y];
+                        int distance = Math.abs(xreplace - x);
+                        for (int j = 1; j < lastNumPointers; j++) {
+                            final int joff = j * MotionEvent.NUM_SAMPLE_DATA;
+                            int lastx = lastData[joff + MotionEvent.SAMPLE_X];   
+                            int currDist = Math.abs(lastx - x);
+                            if (currDist < distance) {
+                                xreplace = lastx;
+                                yreplace = lastData[joff + MotionEvent.SAMPLE_Y];
+                                distance = currDist;
+                            }
+                        }
+                        
+                        int badYDelta = Math.abs(yreplace - y);
+                        if (badYDelta > badPointerDistance) {
+                            badPointerDistance = badYDelta;
+                            badPointerIndex = i;
+                            badPointerReplaceXWith = xreplace;
+                            badPointerReplaceYWith = yreplace;
+                        }
+                    }
+                }
+            }
+            if (badPointerIndex >= 0) {
+                if (DEBUG_HACKS) {
+                    Slog.d("InputDevice", "Replacing bad pointer " + badPointerIndex +
+                            " with (" + badPointerReplaceXWith + ", " + badPointerReplaceYWith +
+                            ")");
+                }
+
+                final int offset = badPointerIndex * MotionEvent.NUM_SAMPLE_DATA;
+                nextData[offset + MotionEvent.SAMPLE_X] = badPointerReplaceXWith;
+                nextData[offset + MotionEvent.SAMPLE_Y] = badPointerReplaceYWith;
+                mJumpyPointsDropped++;
+            } else {
+                mJumpyPointsDropped = 0;
             }
         }
         

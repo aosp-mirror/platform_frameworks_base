@@ -162,4 +162,15 @@ interface INetworkManagementService
      * Check the status of USB RNDIS support
      */
     boolean isUsbRNDISStarted();
+
+    /**
+     * Start Wifi Access Point
+     */
+    void startAccessPoint();
+
+    /**
+     * Stop Wifi Access Point
+     */
+    void stopAccessPoint();
+
 }

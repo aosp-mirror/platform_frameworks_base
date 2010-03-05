@@ -1423,7 +1423,7 @@ public class Intent implements Parcelable, Cloneable {
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE =
-        "android.intent.action.EXTERNAL_APPLICATIONS_UNAVAILABILE";
+        "android.intent.action.EXTERNAL_APPLICATIONS_UNAVAILABLE";
 
     /**
      * Broadcast Action:  The current system wallpaper has changed.  See
@@ -1632,10 +1632,18 @@ public class Intent implements Parcelable, Cloneable {
 
     /**
      * Broadcast Action:  External media is unmounted because it is being shared via USB mass storage.
-     * The path to the mount point for the removed media is contained in the Intent.mData field.
+     * The path to the mount point for the shared media is contained in the Intent.mData field.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_MEDIA_SHARED = "android.intent.action.MEDIA_SHARED";
+
+    /**
+     * Broadcast Action:  External media is no longer being shared via USB mass storage.
+     * The path to the mount point for the previously shared media is contained in the Intent.mData field.
+     *
+     * @hide
+     */
+    public static final String ACTION_MEDIA_UNSHARED = "android.intent.action.MEDIA_UNSHARED";
 
     /**
      * Broadcast Action:  External media was removed from SD card slot, but mount point was not unmounted.

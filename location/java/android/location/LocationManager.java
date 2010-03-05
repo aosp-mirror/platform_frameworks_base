@@ -317,7 +317,7 @@ public class LocationManager {
         List<String> providers = getProviders(enabledOnly);
         for (String providerName : providers) {
             LocationProvider provider = getProvider(providerName);
-            if (provider.meetsCriteria(criteria)) {
+            if (provider != null && provider.meetsCriteria(criteria)) {
                 if (goodProviders.isEmpty()) {
                     goodProviders = new ArrayList<String>();
                 }

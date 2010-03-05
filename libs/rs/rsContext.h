@@ -93,7 +93,7 @@ public:
     const ProgramRaster * getRaster() {return mRaster.get();}
     const ProgramVertex * getVertex() {return mVertex.get();}
 
-    void setupCheck();
+    bool setupCheck();
     bool checkDriver() const {return mEGL.mSurface != 0;}
 
     void pause();
@@ -160,6 +160,8 @@ public:
 
     void dumpDebug() const;
     void checkError(const char *) const;
+    const char * getError(RsError *);
+    void setError(RsError e, const char *msg);
 
     mutable const ObjectBase * mObjHead;
 
@@ -211,6 +213,8 @@ protected:
     bool mExit;
     bool mUseDepth;
     bool mPaused;
+    RsError mError;
+    const char *mErrorMsg;
 
     pthread_t mThreadId;
     pid_t mNativeThreadId;

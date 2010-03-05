@@ -608,7 +608,7 @@ int EventHub::open_device(const char *deviceName)
     // consider up through the function keys; we don't want to include
     // ones after that (play cd etc) so we don't mistakenly consider a
     // controller to be a keyboard.
-    uint8_t key_bitmask[(KEY_PLAYCD+1)/8];
+    uint8_t key_bitmask[(KEY_MAX+1)/8];
     memset(key_bitmask, 0, sizeof(key_bitmask));
     LOGV("Getting keys...");
     if (ioctl(fd, EVIOCGBIT(EV_KEY, sizeof(key_bitmask)), key_bitmask) >= 0) {

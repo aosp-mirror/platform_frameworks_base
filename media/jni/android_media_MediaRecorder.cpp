@@ -223,9 +223,9 @@ android_media_MediaRecorder_setAudioEncoder(JNIEnv *env, jobject thiz, jint ae)
 }
 
 static void
-android_media_MediaRecorder_setParameters(JNIEnv *env, jobject thiz, jstring params)
+android_media_MediaRecorder_setParameter(JNIEnv *env, jobject thiz, jstring params)
 {
-    LOGV("setParameters()");
+    LOGV("setParameter()");
     if (params == NULL)
     {
         LOGE("Invalid or empty params string.  This parameter will be ignored.");
@@ -455,7 +455,7 @@ static JNINativeMethod gMethods[] = {
     {"setOutputFormat",      "(I)V",                            (void *)android_media_MediaRecorder_setOutputFormat},
     {"setVideoEncoder",      "(I)V",                            (void *)android_media_MediaRecorder_setVideoEncoder},
     {"setAudioEncoder",      "(I)V",                            (void *)android_media_MediaRecorder_setAudioEncoder},
-    {"setParameters",        "(Ljava/lang/String;)V",           (void *)android_media_MediaRecorder_setParameters},
+    {"setParameter",         "(Ljava/lang/String;)V",           (void *)android_media_MediaRecorder_setParameter},
     {"_setOutputFile",       "(Ljava/io/FileDescriptor;JJ)V",   (void *)android_media_MediaRecorder_setOutputFileFD},
     {"setVideoSize",         "(II)V",                           (void *)android_media_MediaRecorder_setVideoSize},
     {"setVideoFrameRate",    "(I)V",                            (void *)android_media_MediaRecorder_setVideoFrameRate},

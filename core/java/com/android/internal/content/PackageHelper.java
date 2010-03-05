@@ -54,11 +54,13 @@ public class PackageHelper {
         // Create mount point via MountService
         IMountService mountService = getMountService();
         long len = tmpPackageFile.length();
-        int mbLen = (int) (len/(1024*1024));
+        int mbLen = (int) (len >> 20);
         if ((len - (mbLen * 1024 * 1024)) > 0) {
             mbLen++;
         }
-        if (localLOGV) Log.i(TAG, "Size of resource " + mbLen);
+        // Add buffer size
+        mbLen++;
+        if (localLOGV) Log.i(TAG, "Size of container " + mbLen + " MB " + len + " bytes");
 
         try {
             int rc = mountService.createSecureContainer(

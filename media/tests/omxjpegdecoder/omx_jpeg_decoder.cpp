@@ -97,14 +97,14 @@ OmxJpegImageDecoder::~OmxJpegImageDecoder() {
 }
 
 bool OmxJpegImageDecoder::onDecode(SkStream* stream,
-        SkBitmap* bm, SkBitmap::Config pref, Mode mode) {
+        SkBitmap* bm, Mode mode) {
     sp<MediaSource> source = prepareMediaSource(stream);
     sp<MetaData> meta = source->getFormat();
     int width;
     int height;
     meta->findInt32(kKeyWidth, &width);
     meta->findInt32(kKeyHeight, &height);
-    configBitmapSize(bm, pref, width, height);
+    configBitmapSize(bm, getPrefConfig(k32Bit_SrcDepth, false), width, height);
 
     // mode == DecodeBounds
     if (mode == SkImageDecoder::kDecodeBounds_Mode) {

@@ -1254,20 +1254,19 @@ public class WebView extends AbsoluteLayout
             final FileOutputStream out = new FileOutputStream(dest);
             p.writeToStream(out);
             out.close();
-        } catch (FileNotFoundException e){
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (RuntimeException e) {
-            e.printStackTrace();
-        }
-        if (dest.length() > 0) {
+            // now update the bundle
             b.putInt("scrollX", mScrollX);
             b.putInt("scrollY", mScrollY);
             b.putFloat("scale", mActualScale);
             b.putFloat("textwrapScale", mTextWrapScale);
             b.putBoolean("overview", mInZoomOverview);
             return true;
+        } catch (FileNotFoundException e){
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (RuntimeException e) {
+            e.printStackTrace();
         }
         return false;
     }
@@ -2480,20 +2479,30 @@ public class WebView extends AbsoluteLayout
      */
     public int findAll(String find) {
         if (0 == mNativeClass) return 0; // client isn't initialized
-        if (mFindIsUp == false) {
-            recordNewContentSize(mContentWidth, mContentHeight + mFindHeight,
-                    false);
-            mFindIsUp = true;
-        }
-        int result = nativeFindAll(find.toLowerCase(), find.toUpperCase());
+        int result = find != null ? nativeFindAll(find.toLowerCase(),
+                find.toUpperCase()) : 0;
         invalidate();
         mLastFind = find;
         return result;
     }
 
+    /**
+     * @hide
+     */
+    public void setFindIsUp(boolean isUp) {
+        mFindIsUp = isUp;
+        if (isUp) {
+            recordNewContentSize(mContentWidth, mContentHeight + mFindHeight,
+                    false);
+        }
+        if (0 == mNativeClass) return; // client isn't initialized
+        nativeSetFindIsUp(isUp);
+    }
+
     // Used to know whether the find dialog is open.  Affects whether
     // or not we draw the highlights for matches.
     private boolean mFindIsUp;
+
     private int mFindHeight;
     // Keep track of the last string sent, so we can search again after an
     // orientation change or the dismissal of the soft keyboard.
@@ -2553,14 +2562,21 @@ public class WebView extends AbsoluteLayout
      * Clear the highlighting surrounding text matches created by findAll.
      */
     public void clearMatches() {
+        mLastFind = "";
         if (mNativeClass == 0)
             return;
-        if (mFindIsUp) {
-            recordNewContentSize(mContentWidth, mContentHeight - mFindHeight,
-                    false);
-            mFindIsUp = false;
-        }
-        nativeSetFindIsUp();
+        nativeSetFindIsEmpty();
+        invalidate();
+    }
+
+    /**
+     * @hide
+     */
+    public void notifyFindDialogDismissed() {
+        clearMatches();
+        setFindIsUp(false);
+        recordNewContentSize(mContentWidth, mContentHeight - mFindHeight,
+                false);
         // Now that the dialog has been removed, ensure that we scroll to a
         // location that is not beyond the end of the page.
         pinScrollTo(mScrollX, mScrollY, false, 0);
@@ -3393,7 +3409,6 @@ public class WebView extends AbsoluteLayout
         if (isTextView) {
             rebuildWebTextView();
             if (inEditingMode()) {
-                mWebTextView.setDefaultSelection();
                 imm.showSoftInput(mWebTextView, 0);
                 if (zoom) {
                     didUpdateTextViewBounds(true);
@@ -3842,6 +3857,10 @@ public class WebView extends AbsoluteLayout
         nativeHideCursor();
     }
 
+    /**
+     * Use this method to put the WebView into text selection mode.
+     * Do not rely on this functionality; it will be deprecated in the future.
+     */
     public void emulateShiftHeld() {
         if (0 == mNativeClass) return; // client isn't initialized
         setUpSelectXY();
@@ -4477,12 +4496,12 @@ public class WebView extends AbsoluteLayout
             y = getViewHeightWithTitle() - 1;
         }
 
-        // pass the touch events from UI thread to WebCore thread
-        if (mForwardTouchEvents
-                && (action != MotionEvent.ACTION_MOVE || eventTime
-                        - mLastSentTouchTime > mCurrentTouchInterval)
-                && (action == MotionEvent.ACTION_DOWN
-                        || mPreventDrag != PREVENT_DRAG_CANCEL)) {
+        // pass the touch events, except ACTION_MOVE which will be handled
+        // later, from UI thread to WebCore thread
+        if (mFullScreenHolder != null || (mForwardTouchEvents
+                && action != MotionEvent.ACTION_MOVE
+                && (action == MotionEvent.ACTION_DOWN || mPreventDrag
+                        != PREVENT_DRAG_CANCEL))) {
             WebViewCore.TouchEventData ted = new WebViewCore.TouchEventData();
             ted.mAction = action;
             ted.mX = viewToContentX((int) x + mScrollX);
@@ -4573,6 +4592,21 @@ public class WebView extends AbsoluteLayout
                     if ((deltaX * deltaX + deltaY * deltaY) < mTouchSlopSquare) {
                         break;
                     }
+
+                    // pass the first ACTION_MOVE from UI thread to WebCore
+                    // thread after the distance is confirmed that it is a drag
+                    if (mFullScreenHolder == null && mForwardTouchEvents
+                            && mPreventDrag != PREVENT_DRAG_CANCEL) {
+                        WebViewCore.TouchEventData ted = new WebViewCore.TouchEventData();
+                        ted.mAction = action;
+                        ted.mX = viewToContentX((int) x + mScrollX);
+                        ted.mY = viewToContentY((int) y + mScrollY);
+                        ted.mEventTime = eventTime;
+                        ted.mMetaState = ev.getMetaState();
+                        mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
+                        mLastSentTouchTime = eventTime;
+                    }
+
                     if (mPreventDrag == PREVENT_DRAG_MAYBE_YES) {
                         // track mLastTouchTime as we may need to do fling at
                         // ACTION_UP
@@ -4628,6 +4662,20 @@ public class WebView extends AbsoluteLayout
                                     com.android.internal.R.string.double_tap_toast,
                                     Toast.LENGTH_LONG).show();
                         }
+                    }
+                } else {
+                    // pass the touch events from UI thread to WebCore thread
+                    if (mFullScreenHolder == null && mForwardTouchEvents
+                            && eventTime - mLastSentTouchTime > mCurrentTouchInterval
+                            && mPreventDrag != PREVENT_DRAG_CANCEL) {
+                        WebViewCore.TouchEventData ted = new WebViewCore.TouchEventData();
+                        ted.mAction = action;
+                        ted.mX = viewToContentX((int) x + mScrollX);
+                        ted.mY = viewToContentY((int) y + mScrollY);
+                        ted.mEventTime = eventTime;
+                        ted.mMetaState = ev.getMetaState();
+                        mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
+                        mLastSentTouchTime = eventTime;
                     }
                 }
 
@@ -6863,7 +6911,8 @@ public class WebView extends AbsoluteLayout
     private native void     nativeRecordButtons(boolean focused,
             boolean pressed, boolean invalidate);
     private native void     nativeSelectBestAt(Rect rect);
-    private native void     nativeSetFindIsUp();
+    private native void     nativeSetFindIsEmpty();
+    private native void     nativeSetFindIsUp(boolean isUp);
     private native void     nativeSetFollowedLink(boolean followed);
     private native void     nativeSetHeightCanMeasure(boolean measure);
     private native void     nativeSetRootLayer(int layer);

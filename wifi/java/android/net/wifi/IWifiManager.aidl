@@ -29,7 +29,7 @@ import android.net.DhcpInfo;
 interface IWifiManager
 {
     List<WifiConfiguration> getConfiguredNetworks();
-    
+
     int addOrUpdateNetwork(in WifiConfiguration config);
 
     boolean removeNetwork(int netId);
@@ -47,7 +47,7 @@ interface IWifiManager
     boolean disconnect();
 
     boolean reconnect();
-    
+
     boolean reassociate();
 
     WifiInfo getConnectionInfo();
@@ -61,7 +61,7 @@ interface IWifiManager
     boolean setNumAllowedChannels(int numChannels, boolean persist);
 
     int[] getValidChannelCounts();
-    
+
     boolean saveConfiguration();
 
     DhcpInfo getDhcpInfo();
@@ -77,5 +77,9 @@ interface IWifiManager
     void acquireMulticastLock(IBinder binder, String tag);
 
     void releaseMulticastLock();
+
+    boolean setWifiApEnabled(in WifiConfiguration wifiConfig, boolean enable);
+
+    int getWifiApEnabledState();
 }
 

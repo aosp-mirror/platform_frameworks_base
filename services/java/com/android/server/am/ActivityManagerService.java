@@ -1863,6 +1863,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 + " pid=" + (app != null ? app.pid : -1));
         if (app != null && app.pid > 0) {
             if (!knownToBeDead || app.thread == null) {
+                // We already have the app running, or are waiting for it to
+                // come up (we have a pid but not yet its thread), so keep it.
                 return app;
             } else {
                 // An application record is attached to a previous process,
@@ -4660,7 +4662,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
      * @param pids of dalvik VM processes to dump stack traces for
      * @return file containing stack traces, or null if no dump file is configured
      */
-    private static File dumpStackTraces(ArrayList<Integer> pids) {
+    public static File dumpStackTraces(ArrayList<Integer> pids) {
         String tracesPath = SystemProperties.get("dalvik.vm.stack-trace-file", null);
         if (tracesPath == null || tracesPath.length() == 0) {
             return null;
@@ -8956,10 +8958,13 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
      * @param logFile to include in the report, null if none
      * @param crashInfo giving an application stack trace, null if absent
      */
-    private void addErrorToDropBox(String eventType,
+    public void addErrorToDropBox(String eventType,
             ProcessRecord process, HistoryRecord activity, HistoryRecord parent,
             String subject, String report, File logFile,
             ApplicationErrorReport.CrashInfo crashInfo) {
+        // NOTE -- this must never acquire the ActivityManagerService lock,
+        // otherwise the watchdog may be prevented from resetting the system.
+
         String dropboxTag;
         if (process == null || process.pid == MY_PID) {
             dropboxTag = "system_server_" + eventType;

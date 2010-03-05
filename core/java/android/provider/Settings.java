@@ -2386,6 +2386,13 @@ public final class Settings {
         public static final String WIFI_ON = "wifi_on";
 
         /**
+         * Whether the Wi-Fi AP should be on.
+         *
+         * @hide
+         */
+        public static final String WIFI_AP_ON = "wifi_ap_on";
+
+        /**
          * The acceptable packet loss percentage (range 0 - 100) before trying
          * another AP on the same network.
          */
@@ -3076,13 +3083,6 @@ public final class Settings {
          * @hide
          */
         public static final String MOUNT_UMS_NOTIFY_ENABLED = "mount_ums_notify_enabled";
-
-        /**
-         * Whether or not a notification is displayed when a Tetherable interface is detected.
-         * (0 = false, 1 = true)
-         * @hide
-         */
-        public static final String TETHER_NOTIFY = "tether_notify";
 
         /**
          * If nonzero, ANRs in invisible background processes bring up a dialog.

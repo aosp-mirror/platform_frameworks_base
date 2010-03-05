@@ -29,6 +29,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageInfo;
 import android.content.pm.ResolveInfo;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.net.Uri;
@@ -709,7 +710,10 @@ class AppWidgetService extends IAppWidgetService.Stub
             info.provider = component;
             p.uid = activityInfo.applicationInfo.uid;
 
-            TypedArray sa = mContext.getResources().obtainAttributes(attrs,
+            Resources res = mPackageManager.getResourcesForApplication(
+                    activityInfo.applicationInfo);
+            
+            TypedArray sa = res.obtainAttributes(attrs,
                     com.android.internal.R.styleable.AppWidgetProviderInfo);
             
             // These dimensions has to be resolved in the application's context.

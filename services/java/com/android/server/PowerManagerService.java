@@ -557,14 +557,6 @@ class PowerManagerService extends IPowerManager.Stub
             });
         updateSettingsValues();
 
-        if (mUseSoftwareAutoBrightness) {
-            // turn the screen on
-            setPowerState(SCREEN_BRIGHT);
-        } else {
-            // turn everything on
-            setPowerState(ALL_BRIGHT);
-        }
-
         synchronized (mHandlerThread) {
             mInitComplete = true;
             mHandlerThread.notifyAll();
@@ -2486,9 +2478,21 @@ class PowerManagerService extends IPowerManager.Stub
             enableLightSensor(true);
         }
 
+        // wait until sensors are enabled before turning on screen.
+        // some devices will not activate the light sensor properly on boot
+        // unless we do this.
+        if (mUseSoftwareAutoBrightness) {
+            // turn the screen on
+            setPowerState(SCREEN_BRIGHT);
+        } else {
+            // turn everything on
+            setPowerState(ALL_BRIGHT);
+        }
+
         synchronized (mLocks) {
             Slog.d(TAG, "system ready!");
             mDoneBooting = true;
+
             long identity = Binder.clearCallingIdentity();
             try {
                 mBatteryStats.noteScreenBrightness(getPreferredBrightness());

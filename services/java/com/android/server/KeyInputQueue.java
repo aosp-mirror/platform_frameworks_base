@@ -18,6 +18,7 @@ package com.android.server;
 
 import android.content.Context;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.os.Environment;
 import android.os.LatencyTimer;
 import android.os.PowerManager;
@@ -59,6 +60,12 @@ public abstract class KeyInputQueue {
      * certain device whose screen currently is not all that good.
      */
     static boolean BAD_TOUCH_HACK = false;
+    
+    /**
+     * Turn on some hacks to improve touch interaction with another device
+     * where touch coordinate data can get corrupted.
+     */
+    static boolean JUMPY_TOUCH_HACK = false;
     
     private static final String EXCLUDED_DEVICES_PATH = "etc/excluded-input-devices.xml";
 
@@ -284,8 +291,10 @@ public abstract class KeyInputQueue {
             lt = new LatencyTimer(100, 1000);
         }
 
-        BAD_TOUCH_HACK = context.getResources().getBoolean(
-                com.android.internal.R.bool.config_filterTouchEvents);
+        Resources r = context.getResources();
+        BAD_TOUCH_HACK = r.getBoolean(com.android.internal.R.bool.config_filterTouchEvents);
+        
+        JUMPY_TOUCH_HACK = r.getBoolean(com.android.internal.R.bool.config_filterJumpyTouchEvents);
         
         mHapticFeedbackCallback = hapticFeedbackCallback;
         
@@ -757,6 +766,9 @@ public abstract class KeyInputQueue {
                                     
                                     if (BAD_TOUCH_HACK) {
                                         ms.dropBadPoint(di);
+                                    }
+                                    if (JUMPY_TOUCH_HACK) {
+                                        ms.dropJumpyPoint(di);
                                     }
                                     
                                     boolean doMotion = !monitorVirtualKey(di,

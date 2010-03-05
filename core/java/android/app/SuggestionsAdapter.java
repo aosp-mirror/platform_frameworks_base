@@ -159,25 +159,64 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
          * for in app search we show the progress spinner until the cursor is returned with
          * the results.
          */
+        Cursor cursor = null;
         mSearchDialog.getWindow().getDecorView().post(mStartSpinnerRunnable);
         try {
-            final Cursor cursor = mSearchManager.getSuggestions(mSearchable, query, QUERY_LIMIT);
+            cursor = mSearchManager.getSuggestions(mSearchable, query, QUERY_LIMIT);
             // trigger fill window so the spinner stays up until the results are copied over and
             // closer to being ready
-            if (cursor != null) cursor.getCount();
-            return cursor;
+            if (cursor != null) {
+                cursor.getCount();
+                return cursor;
+            }
         } catch (RuntimeException e) {
             Log.w(LOG_TAG, "Search suggestions query threw an exception.", e);
-            return null;
-        } finally {
-            mSearchDialog.getWindow().getDecorView().post(mStopSpinnerRunnable);
         }
+        // If cursor is null or an exception was thrown, stop the spinner and return null.
+        // changeCursor doesn't get called if cursor is null
+        mSearchDialog.getWindow().getDecorView().post(mStopSpinnerRunnable);
+        return null;
     }
 
     public void close() {
         if (DBG) Log.d(LOG_TAG, "close()");
         changeCursor(null);
         mClosed = true;
+    }
+
+    @Override
+    public void notifyDataSetChanged() {
+        if (DBG) Log.d(LOG_TAG, "notifyDataSetChanged");
+        super.notifyDataSetChanged();
+
+        mSearchDialog.onDataSetChanged();
+
+        updateSpinnerState(getCursor());
+    }
+
+    @Override
+    public void notifyDataSetInvalidated() {
+        if (DBG) Log.d(LOG_TAG, "notifyDataSetInvalidated");
+        super.notifyDataSetInvalidated();
+
+        updateSpinnerState(getCursor());
+    }
+
+    private void updateSpinnerState(Cursor cursor) {
+        if (DBG) {
+            Log.d(LOG_TAG, "updateSpinnerState - extra = "
+                + (cursor != null
+                        ? cursor.getExtras().getBoolean(SearchManager.CURSOR_EXTRA_KEY_IN_PROGRESS)
+                        : null));
+        }
+        // Check if the Cursor indicates that the query is not complete and show the spinner
+        if (cursor != null
+                && cursor.getExtras().getBoolean(SearchManager.CURSOR_EXTRA_KEY_IN_PROGRESS)) {
+            mSearchDialog.getWindow().getDecorView().post(mStartSpinnerRunnable);
+            return;
+        }
+        // If cursor is null or is done, stop the spinner
+        mSearchDialog.getWindow().getDecorView().post(mStopSpinnerRunnable);
     }
 
     /**
@@ -202,7 +241,8 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
                 mText2UrlCol = c.getColumnIndex(SearchManager.SUGGEST_COLUMN_TEXT_2_URL);
                 mIconName1Col = c.getColumnIndex(SearchManager.SUGGEST_COLUMN_ICON_1);
                 mIconName2Col = c.getColumnIndex(SearchManager.SUGGEST_COLUMN_ICON_2);
-                mBackgroundColorCol = c.getColumnIndex(SearchManager.SUGGEST_COLUMN_BACKGROUND_COLOR);
+                mBackgroundColorCol =
+                        c.getColumnIndex(SearchManager.SUGGEST_COLUMN_BACKGROUND_COLOR);
             }
         } catch (Exception e) {
             Log.e(LOG_TAG, "error changing cursor and caching columns", e);

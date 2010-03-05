@@ -704,6 +704,15 @@ public class AccountManager {
             throws OperationCanceledException, IOException, AuthenticatorException {
         Bundle bundle = getAuthToken(account, authTokenType, notifyAuthFailure, null /* callback */,
                 null /* handler */).getResult();
+        if (bundle == null) {
+            // This should never happen, but it does, occasionally. If it does return null to
+            // signify that we were not able to get the authtoken.
+            // TODO: remove this when the bug is found that sometimes causes a null bundle to be
+            // returned
+            Log.e(TAG, "blockingGetAuthToken: null was returned from getResult() for "
+                    + account + ", authTokenType " + authTokenType);
+            return null;
+        }
         return bundle.getString(KEY_AUTHTOKEN);
     }
 
@@ -1164,6 +1173,16 @@ public class AccountManager {
                 setException(e);
             }
             return this;
+        }
+
+        protected void set(Bundle bundle) {
+            // TODO: somehow a null is being set as the result of the Future. Log this
+            // case to help debug where this is occurring. When this bug is fixed this
+            // condition statement should be removed.
+            if (bundle == null) {
+                Log.e(TAG, "the bundle must not be null", new Exception());
+            }
+            super.set(bundle);
         }
 
         public abstract void doWork() throws RemoteException;

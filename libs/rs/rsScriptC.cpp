@@ -62,6 +62,11 @@ void ScriptC::setupScript()
 
 uint32_t ScriptC::run(Context *rsc, uint32_t launchIndex)
 {
+    if (mProgram.mScript == NULL) {
+        rsc->setError(RS_ERROR_BAD_SCRIPT, "Attempted to run bad script");
+        return 0;
+    }
+
     Context::ScriptTLSStruct * tls =
     (Context::ScriptTLSStruct *)pthread_getspecific(Context::gThreadTLSKey);
     rsAssert(tls);
@@ -154,7 +159,9 @@ void ScriptCState::runCompiler(Context *rsc, ScriptC *s)
         ACCchar buf[4096];
         ACCsizei len;
         accGetScriptInfoLog(s->mAccScript, sizeof(buf), &len, buf);
-        LOGV(buf);
+        LOGE(buf);
+        rsc->setError(RS_ERROR_BAD_SCRIPT, "Error compiling user script.");
+        return;
     }
 
     if (s->mProgram.mInit) {

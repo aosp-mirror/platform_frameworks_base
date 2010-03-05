@@ -274,9 +274,11 @@ class BluetoothEventLoop {
 
     private void onDeviceRemoved(String deviceObjectPath) {
         String address = mBluetoothService.getAddressFromObjectPath(deviceObjectPath);
-        if (address != null)
+        if (address != null) {
             mBluetoothService.getBondState().setBondState(address.toUpperCase(),
                     BluetoothDevice.BOND_NONE, BluetoothDevice.UNBOND_REASON_REMOVED);
+            mBluetoothService.setRemoteDeviceProperty(address, "UUIDs", null);
+        }
     }
 
     /*package*/ void onPropertyChanged(String[] propValues) {

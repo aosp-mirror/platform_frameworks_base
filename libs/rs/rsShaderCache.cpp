@@ -123,6 +123,8 @@ bool ShaderCache::lookup(Context *rsc, ProgramVertex *vtx, ProgramFragment *frag
                 }
             }
             glDeleteProgram(pgm);
+            rsc->setError(RS_ERROR_BAD_SHADER, "Error linking GL Programs");
+            return false;
         }
         if (vtx->isUserProgram()) {
             for (uint32_t ct=0; ct < vtx->getAttribCount(); ct++) {
@@ -146,6 +148,7 @@ bool ShaderCache::lookup(Context *rsc, ProgramVertex *vtx, ProgramFragment *frag
         }
     }
 
+    e->mIsValid = true;
     //LOGV("SC made program %i", e->program);
     glUseProgram(e->program);
     mEntryCount++;

@@ -131,9 +131,17 @@
     <!-- Displayed to tell the user that emergency service is blocked by access control. -->
     <string name="RestrictedOnEmergency">Emergency service is blocked.</string>
     <!-- Displayed to tell the user that normal service is blocked by access control. -->
-    <string name="RestrictedOnNormal">Voice/SMS service is blocked.</string>
-    <!-- Displayed to tell the user that all voice service is blocked by access control. -->
-    <string name="RestrictedOnAll">All voice/SMS services are blocked.</string>
+    <string name="RestrictedOnNormal">Voice service is blocked.</string>
+    <!-- Displayed to tell the user that all emergency and normal voice services are blocked by access control. -->
+    <string name="RestrictedOnAllVoice">All Voice services are blocked.</string>
+    <!-- Displayed to tell the user that sms service is blocked by access control. -->
+    <string name="RestrictedOnSms">SMS service is blocked.</string>
+    <!-- Displayed to tell the user that voice/data service is blocked by access control. -->
+    <string name="RestrictedOnVoiceData">Voice/Data services are blocked.</string>
+    <!-- Displayed to tell the user that voice and sms service are blocked by access control. -->
+    <string name="RestrictedOnVoiceSms">Voice/SMS services are blocked.</string>
+    <!-- Displayed to tell the user that all service is blocked by access control. -->
+    <string name="RestrictedOnAll">All Voice/Data/SMS services are blocked.</string>
 
     <!-- Mappings between TS 27.007 +CFCC/+CLCK "service classes" and human-readable strings--> <skip />
     <!-- Example: Service was enabled for: Voice, Data -->
@@ -1093,7 +1101,7 @@
       the state of network connectivity.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_changeTetherState">change tethered connectivity</string>
+    <string name="permlab_changeTetherState">Change tethered connectivity</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the applicaiton to do this. -->
     <string name="permdesc_changeTetherState">Allows an application to change
       the state of tethered network connectivity.</string>
@@ -2237,41 +2245,6 @@
          Used by AccessibilityService to announce the purpose of the view.
     -->
     <string name="description_star">favorite</string>
-
-
-    <!-- Strings for Tethering dialogs -->
-    <!-- This is the label for the activity, and should never be visible to the user. -->
-    <!-- See TETHERING.  TETHERING_DIALOG:  After the user selects the notification, a dialog is shown asking if he wants to Tether.  This is the title. -->
-    <string name="tether_title">USB tethering available</string>
-    <!-- See TETHER.    This is the message. -->
-    <string name="tether_message">Select \"Tether\" if you want to share your phone\'s data connection with your computer.</string>
-    <!-- See TETHER.    This is the button text to Tether the computer with the phone. -->
-    <string name="tether_button">Tether</string>
-    <!-- See TETHER.   This is the button text to ignore the plugging in of the phone.. -->
-    <string name="tether_button_cancel">Cancel</string>
-    <!-- See TETHER.  If there was an error mounting, this is the text. -->
-    <string name="tether_error_message">There is a problem tethering.</string>
-    <!-- TETHER: When the user connects the phone to a computer, we show a notification asking if he wants to share his cellular network connection.  This is the title -->
-    <string name="tether_available_notification_title">USB tethering available</string>
-    <!-- See USB_STORAGE. This is the message. -->
-    <string name="tether_available_notification_message">Select to tether your computer to your phone.</string>
-    <!-- TETHER_STOP: While TETHER is enabled, we show a notification dialog asking if he wants to stop. This is the title -->
-    <string name="tether_stop_notification_title">Untether</string>
-    <!-- See TETHER. This is the message. -->
-    <string name="tether_stop_notification_message">Select to untether your computer.</string>
-
-    <!-- TETHER stop dialog strings -->
-    <!-- This is the label for the activity, and should never be visible to the user. -->
-    <!-- See TETHER_STOP.  TETHER_STOP_DIALOG:  After the user selects the notification, a dialog is shown asking if he wants to stop tethering.  This is the title. -->
-    <string name="tether_stop_title">Disconnect tethering</string>
-    <!-- See TETHER_STOP.    This is the message. -->
-    <string name="tether_stop_message">You have been sharing your phone\'s cellular data connection with your computer. Select \"Disconnect\" to disconnect USB tethering.</string>
-    <!-- See TETHER_STOP.    This is the button text to disconnect tethering. -->
-    <string name="tether_stop_button">Disconnect</string>
-    <!-- See TETHER_STOP.   This is the button text to cancel disconnecting the tether. -->
-    <string name="tether_stop_button_cancel">Cancel</string>
-    <!-- See TETHER_STOP_DIALOG.  If there was an error disconnect, this is the text. -->
-    <string name="tether_stop_error_message">We\'ve encountered a problem turning off Tethering. Please try again.</string>
 
     <!-- Strings for car mode notification -->
     <!-- Shown when car mode is enabled -->

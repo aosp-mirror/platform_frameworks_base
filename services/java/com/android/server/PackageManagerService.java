@@ -318,6 +318,11 @@ class PackageManagerService extends IPackageManager.Stub {
     // Set of pending broadcasts for aggregating enable/disable of components.
     final HashMap<String, ArrayList<String>> mPendingBroadcasts
             = new HashMap<String, ArrayList<String>>();
+    // Service Connection to remote media container service to copy
+    // package uri's from external media onto secure containers
+    // or internal storage.
+    private IMediaContainerService mContainerService = null;
+
     static final int SEND_PENDING_BROADCAST = 1;
     static final int MCS_BOUND = 3;
     static final int END_COPY = 4;
@@ -326,17 +331,23 @@ class PackageManagerService extends IPackageManager.Stub {
     static final int START_CLEANING_PACKAGE = 7;
     static final int FIND_INSTALL_LOC = 8;
     static final int POST_INSTALL = 9;
+    static final int MCS_RECONNECT = 10;
+    static final int MCS_GIVE_UP = 11;
+
     // Delay time in millisecs
     static final int BROADCAST_DELAY = 10 * 1000;
-    private ServiceConnection mDefContainerConn = new ServiceConnection() {
+    final private DefaultContainerConnection mDefContainerConn =
+            new DefaultContainerConnection();
+    class DefaultContainerConnection implements ServiceConnection {
         public void onServiceConnected(ComponentName name, IBinder service) {
+            if (DEBUG_SD_INSTALL) Log.i(TAG, "onServiceConnected");
             IMediaContainerService imcs =
                 IMediaContainerService.Stub.asInterface(service);
-            Message msg = mHandler.obtainMessage(MCS_BOUND, imcs);
-            mHandler.sendMessage(msg);
+            mHandler.sendMessage(mHandler.obtainMessage(MCS_BOUND, imcs));
         }
 
         public void onServiceDisconnected(ComponentName name) {
+            if (DEBUG_SD_INSTALL) Log.i(TAG, "onServiceDisconnected");
         }
     };
 
@@ -355,12 +366,27 @@ class PackageManagerService extends IPackageManager.Stub {
     int mNextInstallToken = 1;  // nonzero; will be wrapped back to 1 when ++ overflows
 
     class PackageHandler extends Handler {
+        private boolean mBound = false;
         final ArrayList<HandlerParams> mPendingInstalls =
             new ArrayList<HandlerParams>();
-        // Service Connection to remote media container service to copy
-        // package uri's from external media onto secure containers
-        // or internal storage.
-        private IMediaContainerService mContainerService = null;
+
+        private boolean connectToService() {
+            if (DEBUG_SD_INSTALL) Log.i(TAG, "Trying to bind to" +
+                    " DefaultContainerService");
+            Intent service = new Intent().setComponent(DEFAULT_CONTAINER_COMPONENT);
+            if (mContext.bindService(service, mDefContainerConn,
+                    Context.BIND_AUTO_CREATE)) {
+                mBound = true;
+                return true;
+            }
+            return false;
+        }
+
+        private void disconnectService() {
+            mContainerService = null;
+            mBound = false;
+            mContext.unbindService(mDefContainerConn);
+        }
 
         PackageHandler(Looper looper) {
             super(looper);
@@ -368,41 +394,99 @@ class PackageManagerService extends IPackageManager.Stub {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case INIT_COPY: {
+                    if (DEBUG_SD_INSTALL) Log.i(TAG, "init_copy");
                     HandlerParams params = (HandlerParams) msg.obj;
-                    Intent service = new Intent().setComponent(DEFAULT_CONTAINER_COMPONENT);
-                    if (mContainerService != null) {
-                        // No need to add to pending list. Use remote stub directly
-                        params.handleStartCopy(mContainerService);
-                    } else {
-                        if (mContext.bindService(service, mDefContainerConn,
-                                Context.BIND_AUTO_CREATE)) {
-                            mPendingInstalls.add(params);
-                        } else {
+                    int idx = mPendingInstalls.size();
+                    if (DEBUG_SD_INSTALL) Log.i(TAG, "idx=" + idx);
+                    // If a bind was already initiated we dont really
+                    // need to do anything. The pending install
+                    // will be processed later on.
+                    if (!mBound) {
+                        // If this is the only one pending we might
+                        // have to bind to the service again.
+                        if (!connectToService()) {
                             Log.e(TAG, "Failed to bind to media container service");
-                            // Indicate service bind error
-                            params.handleServiceError();
+                            params.serviceError();
+                            return;
+                        } else {
+                            // Once we bind to the service, the first
+                            // pending request will be processed.
+                            mPendingInstalls.add(idx, params);
+                        }
+                    } else {
+                        mPendingInstalls.add(idx, params);
+                        // Already bound to the service. Just make
+                        // sure we trigger off processing the first request.
+                        if (idx == 0) {
+                            mHandler.sendEmptyMessage(MCS_BOUND);
                         }
                     }
                     break;
                 }
                 case MCS_BOUND: {
-                    // Initialize mContainerService if needed.
+                    if (DEBUG_SD_INSTALL) Log.i(TAG, "mcs_bound");
                     if (msg.obj != null) {
                         mContainerService = (IMediaContainerService) msg.obj;
                     }
-                    if (mPendingInstalls.size() > 0) {
-                        HandlerParams params = mPendingInstalls.remove(0);
+                    if (mContainerService == null) {
+                        // Something seriously wrong. Bail out
+                        Log.e(TAG, "Cannot bind to media container service");
+                        for (HandlerParams params : mPendingInstalls) {
+                            mPendingInstalls.remove(0);
+                            // Indicate service bind error
+                            params.serviceError();
+                        }
+                        mPendingInstalls.clear();
+                    } else if (mPendingInstalls.size() > 0) {
+                        HandlerParams params = mPendingInstalls.get(0);
                         if (params != null) {
-                            params.handleStartCopy(mContainerService);
+                            params.startCopy();
+                        }
+                    } else {
+                        // Should never happen ideally.
+                        Log.w(TAG, "Empty queue");
+                    }
+                    break;
+                }
+                case MCS_RECONNECT : {
+                    if (DEBUG_SD_INSTALL) Log.i(TAG, "mcs_reconnect");
+                    if (mPendingInstalls.size() > 0) {
+                        if (mBound) {
+                            disconnectService();
+                        }
+                        if (!connectToService()) {
+                            Log.e(TAG, "Failed to bind to media container service");
+                            for (HandlerParams params : mPendingInstalls) {
+                                mPendingInstalls.remove(0);
+                                // Indicate service bind error
+                                params.serviceError();
+                            }
+                            mPendingInstalls.clear();
                         }
                     }
                     break;
                 }
                 case MCS_UNBIND : {
-                    if (mPendingInstalls.size() == 0) {
-                        mContext.unbindService(mDefContainerConn);
-                        mContainerService = null;
+                    if (DEBUG_SD_INSTALL) Log.i(TAG, "mcs_unbind");
+                    // Delete pending install
+                    if (mPendingInstalls.size() > 0) {
+                        mPendingInstalls.remove(0);
                     }
+                    if (mPendingInstalls.size() == 0) {
+                        if (mBound) {
+                            disconnectService();
+                        }
+                    } else {
+                        // There are more pending requests in queue.
+                        // Just post MCS_BOUND message to trigger processing
+                        // of next pending install.
+                        mHandler.sendEmptyMessage(MCS_BOUND);
+                    }
+                    break;
+                }
+                case MCS_GIVE_UP: {
+                    if (DEBUG_SD_INSTALL) Log.i(TAG, "mcs_giveup too many retries");
+                    HandlerParams params = mPendingInstalls.remove(0);
                     break;
                 }
                 case SEND_PENDING_BROADCAST : {
@@ -2288,10 +2372,10 @@ class PackageManagerService extends IPackageManager.Stub {
         synchronized (mPackages) {
             // Look to see if we already know about this package.
             String oldName = mSettings.mRenamedPackages.get(pkg.packageName);
-            if (oldName != null && oldName.equals(pkg.mOriginalPackage)) {
+            if (pkg.mOriginalPackages != null && pkg.mOriginalPackages.contains(oldName)) {
                 // This package has been renamed to its original name.  Let's
                 // use that.
-                ps = mSettings.peekPackageLP(pkg.mOriginalPackage);
+                ps = mSettings.peekPackageLP(oldName);
             }
             // If there was no original package, see one for the real package name.
             if (ps == null) {
@@ -2561,7 +2645,7 @@ class PackageManagerService extends IPackageManager.Stub {
 
         if ((pkg.applicationInfo.flags&ApplicationInfo.FLAG_SYSTEM) == 0) {
             // Only system apps can use these features.
-            pkg.mOriginalPackage = null;
+            pkg.mOriginalPackages = null;
             pkg.mRealPackage = null;
             pkg.mAdoptPermissions = null;
         }
@@ -2643,22 +2727,22 @@ class PackageManagerService extends IPackageManager.Stub {
             }
 
             if (false) {
-                if (pkg.mOriginalPackage != null) {
+                if (pkg.mOriginalPackages != null) {
                     Log.w(TAG, "WAITING FOR DEBUGGER");
                     Debug.waitForDebugger();
-                    Log.i(TAG, "Package " + pkg.packageName + " from original package"
-                            + pkg.mOriginalPackage);
+                    Log.i(TAG, "Package " + pkg.packageName + " from original packages"
+                            + pkg.mOriginalPackages);
                 }
             }
             
             // Check if we are renaming from an original package name.
             PackageSetting origPackage = null;
             String realName = null;
-            if (pkg.mOriginalPackage != null) {
+            if (pkg.mOriginalPackages != null) {
                 // This package may need to be renamed to a previously
                 // installed name.  Let's check on that...
                 String renamed = mSettings.mRenamedPackages.get(pkg.mRealPackage);
-                if (pkg.mOriginalPackage.equals(renamed)) {
+                if (pkg.mOriginalPackages.contains(renamed)) {
                     // This package had originally been installed as the
                     // original name, and we have already taken care of
                     // transitioning to the new one.  Just update the new
@@ -2671,25 +2755,32 @@ class PackageManagerService extends IPackageManager.Stub {
                         pkg.setPackageName(renamed);
                     }
                     
-                } else if ((origPackage
-                        = mSettings.peekPackageLP(pkg.mOriginalPackage)) != null) {
-                    // We do have the package already installed under its
-                    // original name...  should we use it?
-                    if (!verifyPackageUpdate(origPackage, pkg)) {
-                        // New package is not compatible with original.
-                        origPackage = null;
-                    } else if (origPackage.sharedUser != null) {
-                        // Make sure uid is compatible between packages.
-                        if (!origPackage.sharedUser.name.equals(pkg.mSharedUserId)) {
-                            Log.w(TAG, "Unable to migrate data from " + origPackage.name
-                                    + " to " + pkg.packageName + ": old uid "
-                                    + origPackage.sharedUser.name
-                                    + " differs from " + pkg.mSharedUserId);
-                            origPackage = null;
+                } else {
+                    for (int i=pkg.mOriginalPackages.size()-1; i>=0; i--) {
+                        if ((origPackage=mSettings.peekPackageLP(
+                                pkg.mOriginalPackages.get(i))) != null) {
+                            // We do have the package already installed under its
+                            // original name...  should we use it?
+                            if (!verifyPackageUpdate(origPackage, pkg)) {
+                                // New package is not compatible with original.
+                                origPackage = null;
+                                continue;
+                            } else if (origPackage.sharedUser != null) {
+                                // Make sure uid is compatible between packages.
+                                if (!origPackage.sharedUser.name.equals(pkg.mSharedUserId)) {
+                                    Log.w(TAG, "Unable to migrate data from " + origPackage.name
+                                            + " to " + pkg.packageName + ": old uid "
+                                            + origPackage.sharedUser.name
+                                            + " differs from " + pkg.mSharedUserId);
+                                    origPackage = null;
+                                    continue;
+                                }
+                            } else {
+                                if (DEBUG_UPGRADE) Log.v(TAG, "Renaming new package "
+                                        + pkg.packageName + " to old name " + origPackage.name);
+                            }
+                            break;
                         }
-                    } else {
-                        if (DEBUG_UPGRADE) Log.v(TAG, "Renaming new package "
-                                + pkg.packageName + " to old name " + origPackage.name);
                     }
                 }
             }
@@ -4407,12 +4498,41 @@ class PackageManagerService extends IPackageManager.Stub {
         });
     }
 
-    interface HandlerParams {
-        void handleStartCopy(IMediaContainerService imcs);
-        void handleServiceError();
+    abstract class HandlerParams {
+        final static int MAX_RETRIES = 4;
+        int retry = 0;
+        final void startCopy() {
+            try {
+                if (DEBUG_SD_INSTALL) Log.i(TAG, "startCopy");
+                retry++;
+                if (retry > MAX_RETRIES) {
+                    Log.w(TAG, "Failed to invoke remote methods on default container service. Giving up");
+                    mHandler.sendEmptyMessage(MCS_GIVE_UP);
+                    handleServiceError();
+                    return;
+                } else {
+                    handleStartCopy();
+                    if (DEBUG_SD_INSTALL) Log.i(TAG, "Posting install MCS_UNBIND");
+                    mHandler.sendEmptyMessage(MCS_UNBIND);
+                }
+            } catch (RemoteException e) {
+                if (DEBUG_SD_INSTALL) Log.i(TAG, "Posting install MCS_RECONNECT");
+                mHandler.sendEmptyMessage(MCS_RECONNECT);
+            }
+            handleReturnCode();
+        }
+
+        final void serviceError() {
+            if (DEBUG_SD_INSTALL) Log.i(TAG, "serviceError");
+            handleServiceError();
+            handleReturnCode();
+        }
+        abstract void handleStartCopy() throws RemoteException;
+        abstract void handleServiceError();
+        abstract void handleReturnCode();
     }
 
-    class InstallParams implements HandlerParams {
+    class InstallParams extends HandlerParams {
         final IPackageInstallObserver observer;
         int flags;
         final Uri packageURI;
@@ -4428,22 +4548,14 @@ class PackageManagerService extends IPackageManager.Stub {
             this.installerPackageName = installerPackageName;
         }
 
-        private int getInstallLocation(IMediaContainerService imcs) {
-            try {
-                return imcs.getRecommendedInstallLocation(packageURI);
-            } catch (RemoteException e) {
-            }
-            return  -1;
-        }
-
-        public void handleStartCopy(IMediaContainerService imcs) {
+        public void handleStartCopy() throws RemoteException {
             int ret = PackageManager.INSTALL_SUCCEEDED;
             // Dont need to invoke getInstallLocation for forward locked apps.
             if ((flags & PackageManager.INSTALL_FORWARD_LOCK) != 0) {
                 flags &= ~PackageManager.INSTALL_EXTERNAL;
-            } else if (imcs != null) {
+            } else {
                 // Remote call to find out default install location
-                int loc = getInstallLocation(imcs);
+                int loc = mContainerService.getRecommendedInstallLocation(packageURI);
                 // Use install location to create InstallArgs and temporary
                 // install location
                 if (loc == PackageHelper.RECOMMEND_FAILED_INSUFFICIENT_STORAGE){
@@ -4468,23 +4580,22 @@ class PackageManagerService extends IPackageManager.Stub {
             if (ret == PackageManager.INSTALL_SUCCEEDED) {
                 // Create copy only if we are not in an erroneous state.
                 // Remote call to initiate copy using temporary file
-                ret = mArgs.copyApk(imcs, true);
+                ret = mArgs.copyApk(mContainerService, true);
             }
             mRet = ret;
-            mHandler.sendEmptyMessage(MCS_UNBIND);
-            handleReturnCode();
         }
 
+        @Override
         void handleReturnCode() {
             processPendingInstall(mArgs, mRet);
         }
 
-        public void handleServiceError() {
+        @Override
+        void handleServiceError() {
             mArgs = createInstallArgs(this);
             mRet = PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
-            handleReturnCode();
         }
-    };
+    }
 
     /*
      * Utility class used in movePackage api.
@@ -4493,7 +4604,7 @@ class PackageManagerService extends IPackageManager.Stub {
      * We probably want to return ErrorPrams for both failed installs
      * and moves.
      */
-    class MoveParams implements HandlerParams {
+    class MoveParams extends HandlerParams {
         final IPackageMoveObserver observer;
         final int flags;
         final String packageName;
@@ -4515,25 +4626,36 @@ class PackageManagerService extends IPackageManager.Stub {
             }
         }
 
-        public void handleStartCopy(IMediaContainerService imcs) {
+        public void handleStartCopy() throws RemoteException {
             // Create the file args now.
-            mRet = targetArgs.copyApk(imcs, false);
+            mRet = targetArgs.copyApk(mContainerService, false);
             targetArgs.doPreInstall(mRet);
-            mHandler.sendEmptyMessage(MCS_UNBIND);
-            handleReturnCode();
+            if (DEBUG_SD_INSTALL) {
+                StringBuilder builder = new StringBuilder();
+                if (srcArgs != null) {
+                    builder.append("src: ");
+                    builder.append(srcArgs.getCodePath());
+                }
+                if (targetArgs != null) {
+                    builder.append(" target : ");
+                    builder.append(targetArgs.getCodePath());
+                }
+                Log.i(TAG, "Posting move MCS_UNBIND for " + builder.toString());
+            }
         }
 
+        @Override
         void handleReturnCode() {
             targetArgs.doPostInstall(mRet);
             // TODO invoke pending move
             processPendingMove(this, mRet);
         }
 
-        public void handleServiceError() {
+        @Override
+        void handleServiceError() {
             mRet = PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
-            handleReturnCode();
         }
-    };
+    }
 
     private InstallArgs createInstallArgs(InstallParams params) {
         if (installOnSd(params.flags)) {
@@ -4577,7 +4699,7 @@ class PackageManagerService extends IPackageManager.Stub {
         }
 
         abstract void createCopyFile();
-        abstract int copyApk(IMediaContainerService imcs, boolean temp);
+        abstract int copyApk(IMediaContainerService imcs, boolean temp) throws RemoteException;
         abstract int doPreInstall(int status);
         abstract boolean doRename(int status, String pkgName, String oldCodePath);
         abstract int doPostInstall(int status);
@@ -4628,7 +4750,7 @@ class PackageManagerService extends IPackageManager.Stub {
             created = true;
         }
 
-        int copyApk(IMediaContainerService imcs, boolean temp) {
+        int copyApk(IMediaContainerService imcs, boolean temp) throws RemoteException {
             if (temp) {
                 // Generate temp file name
                 createCopyFile();
@@ -4662,7 +4784,6 @@ class PackageManagerService extends IPackageManager.Stub {
                 if (imcs.copyResource(packageURI, out)) {
                     ret = PackageManager.INSTALL_SUCCEEDED;
                 }
-            } catch (RemoteException e) {
             } finally {
                 try { if (out != null) out.close(); } catch (IOException e) {}
             }
@@ -4818,16 +4939,13 @@ class PackageManagerService extends IPackageManager.Stub {
             cid = getTempContainerId();
         }
 
-        int copyApk(IMediaContainerService imcs, boolean temp) {
+        int copyApk(IMediaContainerService imcs, boolean temp) throws RemoteException {
             if (temp) {
                 createCopyFile();
             }
-            try {
-                cachePath = imcs.copyResourceToContainer(
-                        packageURI, cid,
-                        getEncryptKey(), RES_FILE_NAME);
-            } catch (RemoteException e) {
-            }
+            cachePath = imcs.copyResourceToContainer(
+                    packageURI, cid,
+                    getEncryptKey(), RES_FILE_NAME);
             return (cachePath == null) ? PackageManager.INSTALL_FAILED_CONTAINER_ERROR :
                 PackageManager.INSTALL_SUCCEEDED;
         }
@@ -4862,67 +4980,34 @@ class PackageManagerService extends IPackageManager.Stub {
                 String oldCodePath) {
             String newCacheId = getNextCodePath(oldCodePath, pkgName, "/" + RES_FILE_NAME);
             String newCachePath = null;
-            boolean enableRename = false;
-            if (enableRename) {
-                if (PackageHelper.isContainerMounted(cid)) {
-                    // Unmount the container
-                    if (!PackageHelper.unMountSdDir(cid)) {
-                        Log.i(TAG, "Failed to unmount " + cid + " before renaming");
-                        return false;
-                    }
-                }
-                if (!PackageHelper.renameSdDir(cid, newCacheId)) {
-                    Log.e(TAG, "Failed to rename " + cid + " to " + newCacheId);
+            if (PackageHelper.isContainerMounted(cid)) {
+                // Unmount the container
+                if (!PackageHelper.unMountSdDir(cid)) {
+                    Log.i(TAG, "Failed to unmount " + cid + " before renaming");
                     return false;
                 }
-                if (!PackageHelper.isContainerMounted(newCacheId)) {
-                    Log.w(TAG, "Mounting container " + newCacheId);
-                    newCachePath = PackageHelper.mountSdDir(newCacheId,
-                            getEncryptKey(), Process.SYSTEM_UID);
-                } else {
-                    newCachePath = PackageHelper.getSdDir(newCacheId);
-                }
-                if (newCachePath == null) {
-                    Log.w(TAG, "Failed to get cache path for  " + newCacheId);
-                    return false;
-                }
-                // Mount old container?
-                Log.i(TAG, "Succesfully renamed " + cid +
-                        " at path: " + cachePath + " to " + newCacheId +
-                        " at new path: " + newCachePath);
-                cid = newCacheId;
-                cachePath = newCachePath;
-                return true;
-            } else {
-                // STOPSHIP work around for rename
-                Log.i(TAG, "Copying instead of renaming");
-                File srcFile = new File(getCodePath());
-                // Create new container
-                newCachePath = PackageHelper.createSdDir(srcFile, newCacheId,
-                        getEncryptKey(), Process.SYSTEM_UID);
-                Log.i(TAG, "Created rename container " + newCacheId);
-                File destFile = new File(newCachePath + "/" + RES_FILE_NAME);
-                if (!FileUtils.copyFile(srcFile, destFile)) {
-                    Log.e(TAG, "Failed to copy " + srcFile + " to " + destFile);
-                    return false;
-                }
-                Log.i(TAG, "Successfully copied resource to " + newCachePath);
-                if (!PackageHelper.finalizeSdDir(newCacheId)) {
-                    Log.e(TAG, "Failed to finalize " + newCacheId);
-                    PackageHelper.destroySdDir(newCacheId);
-                    return false;
-                }
-                Log.i(TAG, "Finalized " + newCacheId);
-                Runtime.getRuntime().gc();
-                // Unmount first
-                PackageHelper.unMountSdDir(cid);
-                // Delete old container
-                PackageHelper.destroySdDir(cid);
-                // Dont have to mount. Already mounted.
-                cid = newCacheId;
-                cachePath = newCachePath;
-                return true;
             }
+            if (!PackageHelper.renameSdDir(cid, newCacheId)) {
+                Log.e(TAG, "Failed to rename " + cid + " to " + newCacheId);
+                return false;
+            }
+            if (!PackageHelper.isContainerMounted(newCacheId)) {
+                Log.w(TAG, "Mounting container " + newCacheId);
+                newCachePath = PackageHelper.mountSdDir(newCacheId,
+                        getEncryptKey(), Process.SYSTEM_UID);
+            } else {
+                newCachePath = PackageHelper.getSdDir(newCacheId);
+            }
+            if (newCachePath == null) {
+                Log.w(TAG, "Failed to get cache path for  " + newCacheId);
+                return false;
+            }
+            Log.i(TAG, "Succesfully renamed " + cid +
+                    " at path: " + cachePath + " to " + newCacheId +
+                    " at new path: " + newCachePath);
+            cid = newCacheId;
+            cachePath = newCachePath;
+            return true;
         }
 
         int doPostInstall(int status) {
@@ -5401,13 +5486,14 @@ class PackageManagerService extends IPackageManager.Stub {
             // Check if installing already existing package
             if ((pFlags&PackageManager.INSTALL_REPLACE_EXISTING) != 0) {
                 String oldName = mSettings.mRenamedPackages.get(pkgName);
-                if (oldName != null && oldName.equals(pkg.mOriginalPackage)
+                if (pkg.mOriginalPackages != null
+                        && pkg.mOriginalPackages.contains(oldName)
                         && mPackages.containsKey(oldName)) {
                     // This package is derived from an original package,
                     // and this device has been updating from that original
                     // name.  We must continue using the original name, so
                     // rename the new package here.
-                    pkg.setPackageName(pkg.mOriginalPackage);
+                    pkg.setPackageName(oldName);
                     pkgName = pkg.packageName;
                     replace = true;
                 } else if (mPackages.containsKey(pkgName)) {
@@ -8885,6 +8971,7 @@ class PackageManagerService extends IPackageManager.Stub {
     * Return true if PackageManager does have packages to be updated.
     */
    public boolean updateExternalMediaStatus(final boolean mediaStatus) {
+       final boolean ret;
        synchronized (mPackages) {
            if (DEBUG_SD_INSTALL) Log.i(TAG, "updateExternalMediaStatus:: mediaStatus=" +
                    mediaStatus+", mMediaMounted=" + mMediaMounted);
@@ -8892,72 +8979,77 @@ class PackageManagerService extends IPackageManager.Stub {
                return false;
            }
            mMediaMounted = mediaStatus;
-           boolean ret = false;
-           synchronized (mPackages) {
-               Set<String> appList = mSettings.findPackagesWithFlag(ApplicationInfo.FLAG_ON_SDCARD);
-               ret = appList != null && appList.size() > 0;
-           }
-           if (!ret) {
-               // No packages will be effected by the sdcard update. Just return.
-               return false;
-           }
-            // Queue up an async operation since the package installation may take a little while.
-           mHandler.post(new Runnable() {
-               public void run() {
-                   mHandler.removeCallbacks(this);
-                   // If we are up here that means there are packages to be
-                   // enabled or disabled.
-                   final HashMap<SdInstallArgs, String> processCids =
-                       new HashMap<SdInstallArgs, String>();
-                   final int[] uidArr = getExternalMediaPackages(mediaStatus, processCids);
-                   if (mediaStatus) {
-                       if (DEBUG_SD_INSTALL) Log.i(TAG, "Loading packages");
-                       loadMediaPackages(processCids, uidArr);
-                       startCleaningPackages();
-                   } else {
-                       if (DEBUG_SD_INSTALL) Log.i(TAG, "Unloading packages");
-                       unloadMediaPackages(processCids, uidArr);
-                   }
-               }
-           });
-           return true;
+           Set<String> appList = mSettings.findPackagesWithFlag(ApplicationInfo.FLAG_ON_SDCARD);
+           ret = appList != null && appList.size() > 0;
        }
+       // Queue up an async operation since the package installation may take a little while.
+       mHandler.post(new Runnable() {
+           public void run() {
+               mHandler.removeCallbacks(this);
+               updateExternalMediaStatusInner(mediaStatus, ret);
+           }
+       });
+       return ret;
    }
 
-    private int[] getExternalMediaPackages(boolean mediaStatus,
-            Map<SdInstallArgs, String> processCids) {
+   private void updateExternalMediaStatusInner(boolean mediaStatus,
+           boolean sendUpdateBroadcast) {
+       // If we are up here that means there are packages to be
+       // enabled or disabled.
        final String list[] = PackageHelper.getSecureContainerList();
        if (list == null || list.length == 0) {
-           return null;
+           return;
        }
 
        int uidList[] = new int[list.length];
        int num = 0;
+       HashSet<String> removeCids = new HashSet<String>();
+       HashMap<SdInstallArgs, String> processCids = new HashMap<SdInstallArgs, String>();
+       /*HashMap<String, String> cidPathMap = new HashMap<String, String>();
+       // Don't hold any locks when getting cache paths
+       for (String cid : list) {
+           String cpath = PackageHelper.getSdDir(cid);
+           if (cpath == null) {
+               removeCids.add(cid);
+           } else {
+               cidPathMap.put(cid, cpath);
+           }
+       }*/
        synchronized (mPackages) {
-           Set<String> appList = mSettings.findPackagesWithFlag(ApplicationInfo.FLAG_ON_SDCARD);
            for (String cid : list) {
                SdInstallArgs args = new SdInstallArgs(cid);
-               String removeEntry = null;
-               for (String app : appList) {
-                   if (args.matchContainer(app)) {
-                       removeEntry = app;
-                       break;
+               if (DEBUG_SD_INSTALL) Log.i(TAG, "Processing container " + cid);
+               boolean failed = true;
+               try {
+                   String pkgName = args.getPackageName();
+                   if (pkgName == null) {
+                       continue;
                    }
-               }
-               if (removeEntry == null) {
-                   // No matching app on device. Skip entry or may be cleanup?
-                   // Ignore default package
-                   continue;
-               }
-               appList.remove(removeEntry);
-               PackageSetting ps = mSettings.mPackages.get(removeEntry);
-               processCids.put(args, ps.codePathString);
-               int uid = ps.userId;
-               if (uid != -1) {
-                   uidList[num++] = uid;
+                   if (DEBUG_SD_INSTALL) Log.i(TAG, "Looking for pkg : " + pkgName);
+                   PackageSetting ps = mSettings.mPackages.get(pkgName);
+                   if (ps != null && ps.codePathString != null &&
+                           (ps.pkgFlags & ApplicationInfo.FLAG_ON_SDCARD) != 0) {
+                       if (DEBUG_SD_INSTALL) Log.i(TAG, "Container : " + cid +
+                               " corresponds to pkg : " + pkgName +
+                               " at code path: " + ps.codePathString);
+                       // We do have a valid package installed on sdcard
+                       processCids.put(args, ps.codePathString);
+                       failed = false;
+                       int uid = ps.userId;
+                       if (uid != -1) {
+                           uidList[num++] = uid;
+                       }
+                   }
+               } finally {
+                   if (failed) {
+                       // Stale container on sdcard. Just delete
+                       if (DEBUG_SD_INSTALL) Log.i(TAG, "Container : " + cid + " stale");
+                       removeCids.add(cid);
+                   }
                }
            }
        }
+       // Organize uids
        int uidArr[] = null;
        if (num > 0) {
            // Sort uid list
@@ -8972,7 +9064,15 @@ class PackageManagerService extends IPackageManager.Stub {
                }
            }
        }
-       return uidArr;
+       // Process packages with valid entries.
+       if (mediaStatus) {
+           if (DEBUG_SD_INSTALL) Log.i(TAG, "Loading packages");
+           loadMediaPackages(processCids, uidArr, sendUpdateBroadcast, removeCids);
+           startCleaningPackages();
+       } else {
+           if (DEBUG_SD_INSTALL) Log.i(TAG, "Unloading packages");
+           unloadMediaPackages(processCids, uidArr, sendUpdateBroadcast);
+       }
    }
 
    private void sendResourcesChangedBroadcast(boolean mediaStatus,
@@ -8992,57 +9092,100 @@ class PackageManagerService extends IPackageManager.Stub {
        }
    }
 
-   private void loadMediaPackages(HashMap<SdInstallArgs, String> processCids, int uidArr[]) {
+   /*
+    * Look at potentially valid container ids from processCids
+    * If package information doesn't match the one on record
+    * or package scanning fails, the cid is added to list of
+    * removeCids and cleaned up. Since cleaning up containers
+    * involves destroying them, we do not want any parse
+    * references to such stale containers. So force gc's
+    * to avoid unnecessary crashes.
+    */
+   private void loadMediaPackages(HashMap<SdInstallArgs, String> processCids,
+           int uidArr[], boolean sendUpdateBroadcast,
+           HashSet<String> removeCids) {
        ArrayList<String> pkgList = new ArrayList<String>();
        Set<SdInstallArgs> keys = processCids.keySet();
+       boolean doGc = false;
        for (SdInstallArgs args : keys) {
            String codePath = processCids.get(args);
-           if (DEBUG_SD_INSTALL) Log.i(TAG, "Trying to install pkg : "
-                   + args.cid + " from " + args.cachePath);
-           if (args.doPreInstall(PackageManager.INSTALL_SUCCEEDED) != PackageManager.INSTALL_SUCCEEDED) {
-               Log.e(TAG, "Failed to install package: " + codePath + " from sdcard");
-               continue;
-           }
-           // Parse package
-           int parseFlags = PackageParser.PARSE_CHATTY |
-           PackageParser.PARSE_ON_SDCARD | mDefParseFlags;
-           PackageParser pp = new PackageParser(codePath);
-           pp.setSeparateProcesses(mSeparateProcesses);
-           final PackageParser.Package pkg = pp.parsePackage(new File(codePath),
-                   codePath, mMetrics, parseFlags);
-           if (pkg == null) {
-               Log.e(TAG, "Trying to install pkg : "
-                       + args.cid + " from " + args.cachePath);
-               continue;
-           }
-           setApplicationInfoPaths(pkg, codePath, codePath);
+           if (DEBUG_SD_INSTALL) Log.i(TAG, "Loading container : "
+                   + args.cid);
            int retCode = PackageManager.INSTALL_FAILED_CONTAINER_ERROR;
-           synchronized (mInstallLock) {
-               // Scan the package
-               if (scanPackageLI(pkg, parseFlags, SCAN_MONITOR) != null) {
-                   synchronized (mPackages) {
-                       // Grant permissions
-                       grantPermissionsLP(pkg, false);
-                       // Persist settings
-                       mSettings.writeLP();
-                       retCode = PackageManager.INSTALL_SUCCEEDED;
-                       pkgList.add(pkg.packageName);
+           try {
+               // Make sure there are no container errors first.
+               if (args.doPreInstall(PackageManager.INSTALL_SUCCEEDED)
+                       != PackageManager.INSTALL_SUCCEEDED) {
+                   Log.e(TAG, "Failed to mount cid : " + args.cid +
+                   " when installing from sdcard");
+                   continue;
+               }
+               // Check code path here.
+               if (codePath == null || !codePath.equals(args.getCodePath())) {
+                   Log.e(TAG, "Container " + args.cid + " cachepath " + args.getCodePath()+
+                           " does not match one in settings " + codePath);
+                   continue;
+               }
+               // Parse package
+               int parseFlags = PackageParser.PARSE_CHATTY |
+               PackageParser.PARSE_ON_SDCARD | mDefParseFlags;
+               PackageParser pp = new PackageParser(codePath);
+               pp.setSeparateProcesses(mSeparateProcesses);
+               final PackageParser.Package pkg = pp.parsePackage(new File(codePath),
+                       codePath, mMetrics, parseFlags);
+               pp = null;
+               doGc = true;
+               // Check for parse errors
+               if (pkg == null) {
+                   Log.e(TAG, "Parse error when installing install pkg : "
+                           + args.cid + " from " + args.cachePath);
+                   continue;
+               }
+               setApplicationInfoPaths(pkg, codePath, codePath);
+               synchronized (mInstallLock) {
+                   // Scan the package
+                   if (scanPackageLI(pkg, parseFlags, SCAN_MONITOR) != null) {
+                       synchronized (mPackages) {
+                           // Grant permissions
+                           grantPermissionsLP(pkg, false);
+                           // Persist settings
+                           mSettings.writeLP();
+                           retCode = PackageManager.INSTALL_SUCCEEDED;
+                           pkgList.add(pkg.packageName);
+                           // Post process args
+                           args.doPostInstall(PackageManager.INSTALL_SUCCEEDED);
+                       }
+                   } else {
+                       Log.i(TAG, "Failed to install pkg: " +
+                               pkg.packageName + " from sdcard");
                    }
-               } else {
-                   Log.i(TAG, "Failed to install package: " + pkg.packageName + " from sdcard");
+               }
+
+           } finally {
+               if (retCode != PackageManager.INSTALL_SUCCEEDED) {
+                   // Don't destroy container here. Wait till gc clears things up.
+                   removeCids.add(args.cid);
                }
            }
-           args.doPostInstall(retCode);
        }
        // Send a broadcast to let everyone know we are done processing
-       sendResourcesChangedBroadcast(true, pkgList, uidArr);
-       if (pkgList.size() > 0) {
+       if (sendUpdateBroadcast) {
+           sendResourcesChangedBroadcast(true, pkgList, uidArr);
+       }
+       if (doGc) {
            Runtime.getRuntime().gc();
-           // If something failed do we clean up here or next install?
+       }
+       // Delete any stale containers if needed.
+       if (removeCids != null) {
+           for (String cid : removeCids) {
+               Log.i(TAG, "Destroying stale container : " + cid);
+               PackageHelper.destroySdDir(cid);
+           }
        }
    }
 
-   private void unloadMediaPackages(HashMap<SdInstallArgs, String> processCids, int uidArr[]) {
+   private void unloadMediaPackages(HashMap<SdInstallArgs, String> processCids,
+           int uidArr[], boolean sendUpdateBroadcast) {
        if (DEBUG_SD_INSTALL) Log.i(TAG, "unloading media packages");
        ArrayList<String> pkgList = new ArrayList<String>();
        ArrayList<SdInstallArgs> failedList = new ArrayList<SdInstallArgs>();
@@ -9064,13 +9207,14 @@ class PackageManagerService extends IPackageManager.Stub {
                }
            }
        }
-       sendResourcesChangedBroadcast(false, pkgList, uidArr);
        // Send broadcasts
-       if (pkgList.size() > 0) {
-           Runtime.getRuntime().gc();
+       if (sendUpdateBroadcast) {
+           sendResourcesChangedBroadcast(false, pkgList, uidArr);
        }
-       // Do clean up. Just unmount
-       for (SdInstallArgs args : failedList) {
+       // Force gc
+       Runtime.getRuntime().gc();
+       // Just unmount all valid containers.
+       for (SdInstallArgs args : keys) {
            synchronized (mInstallLock) {
                args.doPostDeleteLI(false);
            }
@@ -9189,21 +9333,21 @@ class PackageManagerService extends IPackageManager.Stub {
                            }
                        }
                    }
-                   if (moveSucceeded) {
-                       // Delete older code
-                       synchronized (mInstallLock) {
-                           mp.srcArgs.cleanUpResourcesLI();
-                       }
-                       // Send resources available broadcast
-                       sendResourcesChangedBroadcast(true, pkgList, uidArr);
-                       Runtime.getRuntime().gc();
-                   }
+                   // Send resources available broadcast
+                   sendResourcesChangedBroadcast(true, pkgList, uidArr);
                }
                if (!moveSucceeded){
                    // Clean up failed installation
                    if (mp.targetArgs != null) {
                        mp.targetArgs.doPostInstall(
-                               PackageManager.INSTALL_FAILED_INTERNAL_ERROR);
+                               returnCode);
+                   }
+               } else {
+                   // Force a gc to clear things up.
+                   Runtime.getRuntime().gc();
+                   // Delete older code
+                   synchronized (mInstallLock) {
+                       mp.srcArgs.doPostDeleteLI(true);
                    }
                }
                IPackageMoveObserver observer = mp.observer;

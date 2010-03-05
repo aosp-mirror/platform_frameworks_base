@@ -637,6 +637,7 @@ status_t massageManifest(Bundle* bundle, sp<XMLNode> root)
         sp<XMLNode> application = root->getChildElement(String16(), String16("application"));
         if (application != NULL) {
             fullyQualifyClassName(origPackage, application, String16("name"));
+            fullyQualifyClassName(origPackage, application, String16("backupAgent"));
 
             Vector<sp<XMLNode> >& children = const_cast<Vector<sp<XMLNode> >&>(application->getChildren());
             for (size_t i = 0; i < children.size(); i++) {
@@ -1778,6 +1779,40 @@ void ProguardKeepSet::add(const String8& rule, const String8& where)
     rules.editValueAt(index).add(where);
 }
 
+void
+addProguardKeepRule(ProguardKeepSet* keep, const String8& inClassName,
+        const char* pkg, const String8& srcName, int line)
+{
+    String8 className(inClassName);
+    if (pkg != NULL) {
+        // asdf     --> package.asdf
+        // .asdf  .a.b  --> package.asdf package.a.b
+        // asdf.adsf --> asdf.asdf
+        const char* p = className.string();
+        const char* q = strchr(p, '.');
+        if (p == q) {
+            className = pkg;
+            className.append(inClassName);
+        } else if (q == NULL) {
+            className = pkg;
+            className.append(".");
+            className.append(inClassName);
+        }
+    }
+    
+    String8 rule("-keep class ");
+    rule += className;
+    rule += " { <init>(...); }";
+
+    String8 location("view ");
+    location += srcName;
+    char lineno[20];
+    sprintf(lineno, ":%d", line);
+    location += lineno;
+
+    keep->add(rule, location);
+}
+
 status_t
 writeProguardForAndroidManifest(ProguardKeepSet* keep, const sp<AaptAssets>& assets)
 {
@@ -1839,6 +1874,13 @@ writeProguardForAndroidManifest(ProguardKeepSet* keep, const sp<AaptAssets>& ass
             if (tag == "application") {
                 inApplication = true;
                 keepTag = true;
+                
+                String8 agent = getAttribute(tree, "http://schemas.android.com/apk/res/android",
+                        "backupAgent", &error);
+                if (agent.length() > 0) {
+                    addProguardKeepRule(keep, agent, pkg.string(),
+                            assFile->getPrintableSource(), tree.getLineNumber());
+                }
             } else if (tag == "instrumentation") {
                 keepTag = true;
             }
@@ -1856,53 +1898,13 @@ writeProguardForAndroidManifest(ProguardKeepSet* keep, const sp<AaptAssets>& ass
                 return -1;
             }
             if (name.length() > 0) {
-                // asdf     --> package.asdf
-                // .asdf  .a.b  --> package.asdf package.a.b
-                // asdf.adsf --> asdf.asdf
-                String8 rule("-keep class ");
-                const char* p = name.string();
-                const char* q = strchr(p, '.');
-                if (p == q) {
-                    rule += pkg;
-                    rule += name;
-                } else if (q == NULL) {
-                    rule += pkg;
-                    rule += ".";
-                    rule += name;
-                } else {
-                    rule += name;
-                }
-
-                String8 location = tag;
-                location += " ";
-                location += assFile->getSourceFile();
-                char lineno[20];
-                sprintf(lineno, ":%d", tree.getLineNumber());
-                location += lineno;
-
-                keep->add(rule, location);
+                addProguardKeepRule(keep, name, pkg.string(),
+                        assFile->getPrintableSource(), tree.getLineNumber());
             }
         }
     }
 
     return NO_ERROR;
-}
-
-void
-addProguardKeepRule(ProguardKeepSet* keep, const String8& className,
-        const String8& srcName, int line)
-{
-    String8 rule("-keep class ");
-    rule += className;
-    rule += " { <init>(...); }";
-
-    String8 location("view ");
-    location += srcName;
-    char lineno[20];
-    sprintf(lineno, ":%d", line);
-    location += lineno;
-
-    keep->add(rule, location);
 }
 
 status_t
@@ -1946,7 +1948,7 @@ writeProguardForXml(ProguardKeepSet* keep, const sp<AaptFile>& layoutFile,
 
         // If there is no '.', we'll assume that it's one of the built in names.
         if (strchr(tag.string(), '.')) {
-            addProguardKeepRule(keep, tag,
+            addProguardKeepRule(keep, tag, NULL,
                     layoutFile->getPrintableSource(), tree.getLineNumber());
         } else if (altTag != NULL && tag == altTag) {
             ssize_t classIndex = tree.indexOfAttribute(NULL, "class");
@@ -1956,7 +1958,7 @@ writeProguardForXml(ProguardKeepSet* keep, const sp<AaptFile>& layoutFile,
             } else {
                 size_t len;
                 addProguardKeepRule(keep,
-                        String8(tree.getAttributeStringValue(classIndex, &len)),
+                        String8(tree.getAttributeStringValue(classIndex, &len)), NULL,
                         layoutFile->getPrintableSource(), tree.getLineNumber());
             }
         }

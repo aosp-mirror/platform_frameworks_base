@@ -39,42 +39,42 @@ public class StaticLayoutBidiTest extends TestCase {
     public static final String GIMEL = "\u05d2";
     public static final String DALET = "\u05d3";
     
-    @SmallTest
+    //@SmallTest
     public void testAllLtr() {
         expectBidi(REQ_DL, "a test", "000000", L);
     }
     
-    @SmallTest
+    //@SmallTest
     public void testLtrRtl() {
         expectBidi(REQ_DL, "abc " + ALEF + BET + GIMEL, "0000111", L);
     }
     
-    @SmallTest
+    //@SmallTest
     public void testAllRtl() {
         expectBidi(REQ_DL, ALEF + SP + ALEF + BET + GIMEL + DALET, "111111", R);
     }
     
-    @SmallTest
+    //@SmallTest
     public void testRtlLtr() {
         expectBidi(REQ_DL,  ALEF + BET + GIMEL + " abc", "1111000", R);
     }
     
-    @SmallTest
+    //@SmallTest
     public void testRAllLtr() {
         expectBidi(REQ_R, "a test", "000000", R);
     }
     
-    @SmallTest
+    //@SmallTest
     public void testRLtrRtl() {
         expectBidi(REQ_R, "abc " + ALEF + BET + GIMEL, "0001111", R);
     }
     
-    @SmallTest
+    //@SmallTest
     public void testLAllRtl() {
         expectBidi(REQ_L, ALEF + SP + ALEF + BET + GIMEL + DALET, "111111", L);
     }
     
-    @SmallTest
+    //@SmallTest
     public void testLRtlLtr() {
         expectBidi(REQ_L,  ALEF + BET + GIMEL + " abc", "1110000", L);
     }
@@ -104,7 +104,7 @@ public class StaticLayoutBidiTest extends TestCase {
         assertEquals("levels", expectedLevels, resultLevels);
     }
     
-    @SmallTest
+    //@SmallTest
     public void testNativeBidi() {
         // native bidi returns levels, not simply directions
         expectNativeBidi(REQ_DL,  ALEF + BET + GIMEL + " abc", "1111222", R);

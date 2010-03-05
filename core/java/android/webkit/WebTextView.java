@@ -822,8 +822,9 @@ import java.util.ArrayList;
                 break;
             case 1: // TEXT_AREA
                 single = false;
-                inputType |= EditorInfo.TYPE_TEXT_FLAG_MULTI_LINE
+                inputType = EditorInfo.TYPE_TEXT_FLAG_MULTI_LINE
                         | EditorInfo.TYPE_TEXT_FLAG_CAP_SENTENCES
+                        | EditorInfo.TYPE_CLASS_TEXT
                         | EditorInfo.TYPE_TEXT_FLAG_AUTO_CORRECT;
                 imeOptions |= EditorInfo.IME_ACTION_NONE;
                 break;

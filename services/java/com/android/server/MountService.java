@@ -523,6 +523,11 @@ class MountService extends IMountService.Stub
 
         Intent in = null;
 
+        if (oldState == VolumeState.Shared && newState != oldState) {
+            mContext.sendBroadcast(new Intent(Intent.ACTION_MEDIA_UNSHARED,
+                                                Uri.parse("file://" + path)));
+        }
+
         if (newState == VolumeState.Init) {
         } else if (newState == VolumeState.NoMedia) {
             // NoMedia is handled via Disk Remove events
@@ -1170,13 +1175,6 @@ class MountService extends IMountService.Stub
             mConnector.doCommand(cmd);
         } catch (NativeDaemonConnectorException e) {
             rc = StorageResultCode.OperationFailedInternalError;
-        }
-        if (rc == StorageResultCode.OperationSucceeded) {
-            synchronized (mAsecMountSet) {
-                if (!mAsecMountSet.contains(newId)) {
-                    mAsecMountSet.add(newId);
-                }
-            }
         }
 
         return rc;

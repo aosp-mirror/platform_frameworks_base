@@ -59,6 +59,8 @@ public:
     String8 getGLSLOutputString() const;
     String8 getGLSLConstantString() const;
 
+    bool isValid() const {return mIsValid;}
+
 protected:
     // Components not listed in "in" will be passed though
     // unless overwritten by components in out.
@@ -68,6 +70,7 @@ protected:
     uint32_t mInputCount;
     uint32_t mOutputCount;
     uint32_t mConstantCount;
+    bool mIsValid;
 
     ObjectBaseRef<Allocation> mConstants[MAX_UNIFORMS];
 
