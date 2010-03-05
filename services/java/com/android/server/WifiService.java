@@ -79,7 +79,7 @@ import java.io.PrintWriter;
 import java.net.UnknownHostException;
 
 import com.android.internal.app.IBatteryStats;
-import android.backup.IBackupManager;
+import android.app.backup.IBackupManager;
 import com.android.server.am.BatteryStatsService;
 
 /**

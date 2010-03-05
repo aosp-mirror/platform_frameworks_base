@@ -219,16 +219,16 @@ writeHeader_native(JNIEnv* env, jobject clazz, jobject headerObj, jobject fdObj,
 
 static const JNINativeMethod g_methods[] = {
     { "readHeader_native",
-       "(Landroid/backup/BackupHelperDispatcher$Header;Ljava/io/FileDescriptor;)I",
+       "(Landroid/app/backup/BackupHelperDispatcher$Header;Ljava/io/FileDescriptor;)I",
        (void*)readHeader_native },
     { "skipChunk_native",
         "(Ljava/io/FileDescriptor;I)I",
         (void*)skipChunk_native },
     { "allocateHeader_native",
-        "(Landroid/backup/BackupHelperDispatcher$Header;Ljava/io/FileDescriptor;)I",
+        "(Landroid/app/backup/BackupHelperDispatcher$Header;Ljava/io/FileDescriptor;)I",
         (void*)allocateHeader_native },
     { "writeHeader_native",
-       "(Landroid/backup/BackupHelperDispatcher$Header;Ljava/io/FileDescriptor;I)I",
+       "(Landroid/app/backup/BackupHelperDispatcher$Header;Ljava/io/FileDescriptor;I)I",
        (void*)writeHeader_native },
 };
 
@@ -242,17 +242,17 @@ int register_android_backup_BackupHelperDispatcher(JNIEnv* env)
     LOG_FATAL_IF(s_descriptorField == NULL,
             "Unable to find descriptor field in java.io.FileDescriptor");
     
-    clazz = env->FindClass("android/backup/BackupHelperDispatcher$Header");
+    clazz = env->FindClass("android/app/backup/BackupHelperDispatcher$Header");
     LOG_FATAL_IF(clazz == NULL,
-            "Unable to find class android.backup.BackupHelperDispatcher.Header");
+            "Unable to find class android.app.backup.BackupHelperDispatcher.Header");
     s_chunkSizeField = env->GetFieldID(clazz, "chunkSize", "I");
     LOG_FATAL_IF(s_chunkSizeField == NULL,
-            "Unable to find chunkSize field in android.backup.BackupHelperDispatcher.Header");
+            "Unable to find chunkSize field in android.app.backup.BackupHelperDispatcher.Header");
     s_keyPrefixField = env->GetFieldID(clazz, "keyPrefix", "Ljava/lang/String;");
     LOG_FATAL_IF(s_keyPrefixField == NULL,
-            "Unable to find keyPrefix field in android.backup.BackupHelperDispatcher.Header");
+            "Unable to find keyPrefix field in android.app.backup.BackupHelperDispatcher.Header");
     
-    return AndroidRuntime::registerNativeMethods(env, "android/backup/BackupHelperDispatcher",
+    return AndroidRuntime::registerNativeMethods(env, "android/app/backup/BackupHelperDispatcher",
             g_methods, NELEM(g_methods));
 }
 

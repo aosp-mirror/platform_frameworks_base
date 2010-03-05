@@ -16,7 +16,7 @@
 
 package com.android.internal.backup;
 
-import android.backup.RestoreSet;
+import android.app.backup.RestoreSet;
 import android.content.pm.PackageInfo;
 import android.os.ParcelFileDescriptor;
 

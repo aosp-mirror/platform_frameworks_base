@@ -16,9 +16,9 @@
 
 package com.android.server;
 
-import android.app.BackupAgent;
-import android.backup.BackupDataInput;
-import android.backup.BackupDataOutput;
+import android.app.backup.BackupAgent;
+import android.app.backup.BackupDataInput;
+import android.app.backup.BackupDataOutput;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;

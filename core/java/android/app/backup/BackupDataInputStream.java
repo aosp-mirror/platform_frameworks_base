@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.backup;
+package android.app.backup;
 
 import java.io.InputStream;
 import java.io.IOException;

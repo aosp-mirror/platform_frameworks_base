@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-package android.backup;
+package android.app.backup;
 
-import android.backup.IRestoreSession;
+import android.app.backup.IRestoreSession;
 
 /**
  * Direct interface to the Backup Manager Service that applications invoke on.  The only
  * operation currently needed is a simple notification that the app has made changes to
  * data it wishes to back up, so the system should run a backup pass.
  *
- * Apps will use the {@link android.backup.BackupManager} class rather than going through
+ * Apps will use the {@link android.app.backup.BackupManager} class rather than going through
  * this Binder interface directly.
  * 
  * {@hide}

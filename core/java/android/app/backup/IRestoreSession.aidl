@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package android.backup;
+package android.app.backup;
 
-import android.backup.RestoreSet;
-import android.backup.IRestoreObserver;
+import android.app.backup.RestoreSet;
+import android.app.backup.IRestoreObserver;
 
 /**
  * Binder interface used by clients who wish to manage a restore operation.  Every

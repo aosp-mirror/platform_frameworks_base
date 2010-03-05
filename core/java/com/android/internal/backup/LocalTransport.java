@@ -1,8 +1,8 @@
 package com.android.internal.backup;
 
-import android.backup.BackupDataInput;
-import android.backup.BackupDataOutput;
-import android.backup.RestoreSet;
+import android.app.backup.BackupDataInput;
+import android.app.backup.BackupDataOutput;
+import android.app.backup.RestoreSet;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;

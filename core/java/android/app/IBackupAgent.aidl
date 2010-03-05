@@ -16,13 +16,13 @@
 
 package android.app;
 
-import android.backup.IBackupManager;
+import android.app.backup.IBackupManager;
 import android.os.ParcelFileDescriptor;
  
 /**
  * Interface presented by applications being asked to participate in the
- * backup & restore mechanism.  End user code does not typically implement
- * this interface; they subclass BackupAgent instead.
+ * backup & restore mechanism.  End user code will not typically implement
+ * this interface directly; they subclass BackupAgent instead.
  *
  * {@hide}
  */ 

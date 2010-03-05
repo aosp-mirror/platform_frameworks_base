@@ -28,7 +28,7 @@ namespace android
 // java.io.FileDescriptor
 static jfieldID s_descriptorField = 0;
 
-// android.backup.BackupDataInput$EntityHeader
+// android.app.backup.BackupDataInput$EntityHeader
 static jfieldID s_keyField = 0;
 static jfieldID s_dataSizeField = 0;
 
@@ -130,7 +130,7 @@ skipEntityData_native(JNIEnv* env, jobject clazz, int r)
 static const JNINativeMethod g_methods[] = {
     { "ctor", "(Ljava/io/FileDescriptor;)I", (void*)ctor_native },
     { "dtor", "(I)V", (void*)dtor_native },
-    { "readNextHeader_native", "(ILandroid/backup/BackupDataInput$EntityHeader;)I",
+    { "readNextHeader_native", "(ILandroid/app/backup/BackupDataInput$EntityHeader;)I",
             (void*)readNextHeader_native },
     { "readEntityData_native", "(I[BII)I", (void*)readEntityData_native },
     { "skipEntityData_native", "(I)I", (void*)skipEntityData_native },
@@ -148,16 +148,16 @@ int register_android_backup_BackupDataInput(JNIEnv* env)
     LOG_FATAL_IF(s_descriptorField == NULL,
             "Unable to find descriptor field in java.io.FileDescriptor");
 
-    clazz = env->FindClass("android/backup/BackupDataInput$EntityHeader");
-    LOG_FATAL_IF(clazz == NULL, "Unable to find class android.backup.BackupDataInput.EntityHeader");
+    clazz = env->FindClass("android/app/backup/BackupDataInput$EntityHeader");
+    LOG_FATAL_IF(clazz == NULL, "Unable to find class android.app.backup.BackupDataInput.EntityHeader");
     s_keyField = env->GetFieldID(clazz, "key", "Ljava/lang/String;");
     LOG_FATAL_IF(s_keyField == NULL,
-            "Unable to find key field in android.backup.BackupDataInput.EntityHeader");
+            "Unable to find key field in android.app.backup.BackupDataInput.EntityHeader");
     s_dataSizeField = env->GetFieldID(clazz, "dataSize", "I");
     LOG_FATAL_IF(s_dataSizeField == NULL,
-            "Unable to find dataSize field in android.backup.BackupDataInput.EntityHeader");
+            "Unable to find dataSize field in android.app.backup.BackupDataInput.EntityHeader");
 
-    return AndroidRuntime::registerNativeMethods(env, "android/backup/BackupDataInput",
+    return AndroidRuntime::registerNativeMethods(env, "android/app/backup/BackupDataInput",
             g_methods, NELEM(g_methods));
 }
 

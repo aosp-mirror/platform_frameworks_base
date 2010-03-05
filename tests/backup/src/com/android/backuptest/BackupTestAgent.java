@@ -16,9 +16,9 @@
 
 package com.android.backuptest;
 
-import android.backup.BackupHelperAgent;
-import android.backup.FileBackupHelper;
-import android.backup.SharedPreferencesBackupHelper;
+import android.app.backup.BackupHelperAgent;
+import android.app.backup.FileBackupHelper;
+import android.app.backup.SharedPreferencesBackupHelper;
 
 public class BackupTestAgent extends BackupHelperAgent
 {

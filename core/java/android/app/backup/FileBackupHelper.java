@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.backup;
+package android.app.backup;
 
 import android.content.Context;
 import android.os.ParcelFileDescriptor;
@@ -24,7 +24,7 @@ import java.io.File;
 
 /**
  * A helper class which can be used in conjunction with
- * {@link android.backup.BackupHelperAgent} to manage the backup of a set of
+ * {@link android.app.backup.BackupHelperAgent} to manage the backup of a set of
  * files. Whenever backup is performed, all files changed since the last backup
  * will be saved in their entirety. During the first time the backup happens,
  * all the files in the list will be backed up. Note that this should only be
@@ -69,9 +69,9 @@ public class FileBackupHelper extends FileBackupHelperBase implements BackupHelp
      * now. When <code>oldState</code> is <code>null</code>, all the files will
      * be backed up.
      * <p>
-     * This should be called from {@link android.backup.BackupHelperAgent}
+     * This should be called from {@link android.app.backup.BackupHelperAgent}
      * directly. See
-     * {@link android.app.BackupAgent#onBackup(ParcelFileDescriptor, BackupDataOutput, ParcelFileDescriptor)}
+     * {@link android.app.backup.BackupAgent#onBackup(ParcelFileDescriptor, BackupDataOutput, ParcelFileDescriptor)}
      * for a description of parameter meanings.
      */
     public void performBackup(ParcelFileDescriptor oldState, BackupDataOutput data,
