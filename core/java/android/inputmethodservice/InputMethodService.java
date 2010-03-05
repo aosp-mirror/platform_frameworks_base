@@ -2025,7 +2025,10 @@ public class InputMethodService extends AbstractInputMethodService {
             InputConnection ic = getCurrentInputConnection();
             mExtractedText = ic == null? null
                     : ic.getExtractedText(req, InputConnection.GET_EXTRACTED_TEXT_MONITOR);
-            
+            if (mExtractedText == null || ic == null) {
+                Log.e(TAG, "Unexpected null in startExtractingText : mExtractedText = "
+                        + mExtractedText + ", input connection = " + ic);
+            }
             final EditorInfo ei = getCurrentInputEditorInfo();
             
             try {
