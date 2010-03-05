@@ -2884,17 +2884,19 @@ class PackageManagerService extends IPackageManager.Stub {
                 int i;
                 for (i=0; i<N; i++) {
                     PackageParser.Provider p = pkg.providers.get(i);
-                    String names[] = p.info.authority.split(";");
-                    for (int j = 0; j < names.length; j++) {
-                        if (mProviders.containsKey(names[j])) {
-                            PackageParser.Provider other = mProviders.get(names[j]);
-                            Log.w(TAG, "Can't install because provider name " + names[j] +
-                                    " (in package " + pkg.applicationInfo.packageName +
-                                    ") is already used by "
-                                    + ((other != null && other.getComponentName() != null)
-                                            ? other.getComponentName().getPackageName() : "?"));
-                            mLastScanError = PackageManager.INSTALL_FAILED_CONFLICTING_PROVIDER;
-                            return null;
+                    if (p.info.authority != null) {
+                        String names[] = p.info.authority.split(";");
+                        for (int j = 0; j < names.length; j++) {
+                            if (mProviders.containsKey(names[j])) {
+                                PackageParser.Provider other = mProviders.get(names[j]);
+                                Log.w(TAG, "Can't install because provider name " + names[j] +
+                                        " (in package " + pkg.applicationInfo.packageName +
+                                        ") is already used by "
+                                        + ((other != null && other.getComponentName() != null)
+                                                ? other.getComponentName().getPackageName() : "?"));
+                                mLastScanError = PackageManager.INSTALL_FAILED_CONFLICTING_PROVIDER;
+                                return null;
+                            }
                         }
                     }
                 }
@@ -3103,38 +3105,40 @@ class PackageManagerService extends IPackageManager.Stub {
                 mProvidersByComponent.put(new ComponentName(p.info.packageName,
                         p.info.name), p);
                 p.syncable = p.info.isSyncable;
-                String names[] = p.info.authority.split(";");
-                p.info.authority = null;
-                for (int j = 0; j < names.length; j++) {
-                    if (j == 1 && p.syncable) {
-                        // We only want the first authority for a provider to possibly be
-                        // syncable, so if we already added this provider using a different
-                        // authority clear the syncable flag. We copy the provider before
-                        // changing it because the mProviders object contains a reference
-                        // to a provider that we don't want to change.
-                        // Only do this for the second authority since the resulting provider
-                        // object can be the same for all future authorities for this provider.
-                        p = new PackageParser.Provider(p);
-                        p.syncable = false;
-                    }
-                    if (!mProviders.containsKey(names[j])) {
-                        mProviders.put(names[j], p);
-                        if (p.info.authority == null) {
-                            p.info.authority = names[j];
-                        } else {
-                            p.info.authority = p.info.authority + ";" + names[j];
+                if (p.info.authority != null) {
+                    String names[] = p.info.authority.split(";");
+                    p.info.authority = null;
+                    for (int j = 0; j < names.length; j++) {
+                        if (j == 1 && p.syncable) {
+                            // We only want the first authority for a provider to possibly be
+                            // syncable, so if we already added this provider using a different
+                            // authority clear the syncable flag. We copy the provider before
+                            // changing it because the mProviders object contains a reference
+                            // to a provider that we don't want to change.
+                            // Only do this for the second authority since the resulting provider
+                            // object can be the same for all future authorities for this provider.
+                            p = new PackageParser.Provider(p);
+                            p.syncable = false;
                         }
-                        if ((parseFlags&PackageParser.PARSE_CHATTY) != 0 && Config.LOGD)
-                            Log.d(TAG, "Registered content provider: " + names[j] +
-                            ", className = " + p.info.name +
-                            ", isSyncable = " + p.info.isSyncable);
-                    } else {
-                        PackageParser.Provider other = mProviders.get(names[j]);
-                        Log.w(TAG, "Skipping provider name " + names[j] +
-                              " (in package " + pkg.applicationInfo.packageName +
-                              "): name already used by "
-                              + ((other != null && other.getComponentName() != null)
-                                      ? other.getComponentName().getPackageName() : "?"));
+                        if (!mProviders.containsKey(names[j])) {
+                            mProviders.put(names[j], p);
+                            if (p.info.authority == null) {
+                                p.info.authority = names[j];
+                            } else {
+                                p.info.authority = p.info.authority + ";" + names[j];
+                            }
+                            if ((parseFlags&PackageParser.PARSE_CHATTY) != 0 && Config.LOGD)
+                                Log.d(TAG, "Registered content provider: " + names[j] +
+                                        ", className = " + p.info.name +
+                                        ", isSyncable = " + p.info.isSyncable);
+                        } else {
+                            PackageParser.Provider other = mProviders.get(names[j]);
+                            Log.w(TAG, "Skipping provider name " + names[j] +
+                                    " (in package " + pkg.applicationInfo.packageName +
+                                    "): name already used by "
+                                    + ((other != null && other.getComponentName() != null)
+                                            ? other.getComponentName().getPackageName() : "?"));
+                        }
                     }
                 }
                 if ((parseFlags&PackageParser.PARSE_CHATTY) != 0) {
