@@ -20,6 +20,7 @@ import android.app.Activity;
 import android.app.ActivityManagerNative;
 import android.app.AlarmManager;
 import android.app.IActivityManager;
+import android.app.KeyguardManager;
 import android.app.IUiModeManager;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -94,6 +95,7 @@ class UiModeManagerService extends IUiModeManager.Stub {
     private LocationManager mLocationManager;
     private Location mLocation;
     private StatusBarManager mStatusBarManager;
+    private KeyguardManager.KeyguardLock mKeyguardLock;
 
     // The broadcast receiver which receives the result of the ordered broadcast sent when
     // the dock state changes. The original ordered broadcast is sent with an initial result
@@ -242,6 +244,9 @@ class UiModeManagerService extends IUiModeManager.Stub {
     public void disableCarMode() {
         synchronized (mLock) {
             setCarModeLocked(false);
+            if (mSystemReady) {
+                updateLocked();
+            }
         }
     }
 
@@ -251,6 +256,9 @@ class UiModeManagerService extends IUiModeManager.Stub {
                 "Need ENABLE_CAR_MODE permission");
         synchronized (mLock) {
             setCarModeLocked(true);
+            if (mSystemReady) {
+                updateLocked();
+            }
         }
     }
 
@@ -301,7 +309,22 @@ class UiModeManagerService extends IUiModeManager.Stub {
     void setCarModeLocked(boolean enabled) {
         if (mCarModeEnabled != enabled) {
             mCarModeEnabled = enabled;
-            updateLocked();
+
+            // Disable keyguard when in car mode
+            if (mKeyguardLock == null) {
+                KeyguardManager km =
+                        (KeyguardManager)mContext.getSystemService(Context.KEYGUARD_SERVICE);
+                if (km != null) {
+                    mKeyguardLock = km.newKeyguardLock(TAG);
+                }
+            }
+            if (mKeyguardLock != null) {
+                if (enabled) {
+                    mKeyguardLock.disableKeyguard();
+                } else {
+                    mKeyguardLock.reenableKeyguard();
+                }
+            }
         }
     }
 
@@ -309,7 +332,7 @@ class UiModeManagerService extends IUiModeManager.Stub {
         synchronized (mLock) {
             if (newState != mDockState) {
                 mDockState = newState;
-                mCarModeEnabled = mDockState == Intent.EXTRA_DOCK_STATE_CAR;
+                setCarModeLocked(mDockState == Intent.EXTRA_DOCK_STATE_CAR);
                 if (mSystemReady) {
                     updateLocked();
                 }
