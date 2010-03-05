@@ -972,6 +972,19 @@ public final class Bitmap implements Parcelable {
     }
 
     /**
+     *  Given another bitmap, return true if it has the same dimensions, config,
+     *  and pixel data as this bitmap. If any of those differ, return false.
+     *  If other is null, return false.
+     *
+     * @hide (just needed internally right now)
+     */
+    public boolean sameAs(Bitmap other) {
+        return this == other ||
+              (other != null &&
+               nativeSameAs(mNativeBitmap, other.mNativeBitmap));
+    }
+
+    /**
      * Rebuilds any caches associated with the bitmap that are used for
      * drawing it. In the case of purgeable bitmaps, this call will attempt to
      * ensure that the pixels have been decoded.
@@ -1042,6 +1055,7 @@ public final class Bitmap implements Parcelable {
 
     private static native void nativePrepareToDraw(int nativeBitmap);
     private static native void nativeSetHasAlpha(int nBitmap, boolean hasAlpha);
+    private static native boolean nativeSameAs(int nb0, int nb1);
 
     /* package */ final int ni() {
         return mNativeBitmap;
