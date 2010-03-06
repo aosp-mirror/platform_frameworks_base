@@ -16,6 +16,7 @@
 
 package android.webkit;
 
+import android.annotation.Widget;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -207,6 +208,7 @@ import junit.framework.Assert;
  * changes, and then just leave the WebView alone. It'll automatically
  * re-orient itself as appropriate.</p>
  */
+@Widget
 public class WebView extends AbsoluteLayout
         implements ViewTreeObserver.OnGlobalFocusChangeListener,
         ViewGroup.OnHierarchyChangeListener {
