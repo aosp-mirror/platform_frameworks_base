@@ -550,7 +550,7 @@ public class LockPatternUtils {
      * @return Whether the lock pattern is enabled.
      */
     public boolean isLockPatternEnabled() {
-        return getBoolean(Settings.System.LOCK_PATTERN_ENABLED)
+        return getBoolean(Settings.Secure.LOCK_PATTERN_ENABLED)
                 && getLong(PASSWORD_TYPE_KEY, MODE_PATTERN) == MODE_PATTERN;
     }
 
@@ -558,35 +558,35 @@ public class LockPatternUtils {
      * Set whether the lock pattern is enabled.
      */
     public void setLockPatternEnabled(boolean enabled) {
-        setBoolean(Settings.System.LOCK_PATTERN_ENABLED, enabled);
+        setBoolean(Settings.Secure.LOCK_PATTERN_ENABLED, enabled);
     }
 
     /**
      * @return Whether the visible pattern is enabled.
      */
     public boolean isVisiblePatternEnabled() {
-        return getBoolean(Settings.System.LOCK_PATTERN_VISIBLE);
+        return getBoolean(Settings.Secure.LOCK_PATTERN_VISIBLE);
     }
 
     /**
      * Set whether the visible pattern is enabled.
      */
     public void setVisiblePatternEnabled(boolean enabled) {
-        setBoolean(Settings.System.LOCK_PATTERN_VISIBLE, enabled);
+        setBoolean(Settings.Secure.LOCK_PATTERN_VISIBLE, enabled);
     }
 
     /**
      * @return Whether tactile feedback for the pattern is enabled.
      */
     public boolean isTactileFeedbackEnabled() {
-        return getBoolean(Settings.System.LOCK_PATTERN_TACTILE_FEEDBACK_ENABLED);
+        return getBoolean(Settings.Secure.LOCK_PATTERN_TACTILE_FEEDBACK_ENABLED);
     }
 
     /**
      * Set whether tactile feedback for the pattern is enabled.
      */
     public void setTactileFeedbackEnabled(boolean enabled) {
-        setBoolean(Settings.System.LOCK_PATTERN_TACTILE_FEEDBACK_ENABLED, enabled);
+        setBoolean(Settings.Secure.LOCK_PATTERN_TACTILE_FEEDBACK_ENABLED, enabled);
     }
 
     /**
@@ -648,30 +648,22 @@ public class LockPatternUtils {
         return nextAlarm;
     }
 
-    private boolean getBoolean(String systemSettingKey) {
-        // STOPSHIP: these need to be moved to secure settings!
+    private boolean getBoolean(String secureSettingKey) {
         return 1 ==
-                android.provider.Settings.System.getInt(
-                        mContentResolver,
-                        systemSettingKey, 0);
+                android.provider.Settings.Secure.getInt(mContentResolver, secureSettingKey, 0);
     }
 
-    private void setBoolean(String systemSettingKey, boolean enabled) {
-        // STOPSHIP: these need to be moved to secure settings!
-        android.provider.Settings.System.putInt(
-                        mContentResolver,
-                        systemSettingKey,
-                        enabled ? 1 : 0);
+    private void setBoolean(String secureSettingKey, boolean enabled) {
+        android.provider.Settings.Secure.putInt(mContentResolver, secureSettingKey,
+                                                enabled ? 1 : 0);
     }
 
-    private long getLong(String systemSettingKey, long def) {
-        // STOPSHIP: these need to be moved to secure settings!
-        return android.provider.Settings.System.getLong(mContentResolver, systemSettingKey, def);
+    private long getLong(String secureSettingKey, long def) {
+        return android.provider.Settings.Secure.getLong(mContentResolver, secureSettingKey, def);
     }
 
-    private void setLong(String systemSettingKey, long value) {
-        // STOPSHIP: these need to be moved to secure settings!
-        android.provider.Settings.System.putLong(mContentResolver, systemSettingKey, value);
+    private void setLong(String secureSettingKey, long value) {
+        android.provider.Settings.Secure.putLong(mContentResolver, secureSettingKey, value);
     }
 
     public boolean isSecure() {

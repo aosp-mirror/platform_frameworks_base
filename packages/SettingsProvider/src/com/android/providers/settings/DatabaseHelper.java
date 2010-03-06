@@ -38,6 +38,7 @@ import android.net.ConnectivityManager;
 import android.os.Environment;
 import android.os.SystemProperties;
 import android.provider.Settings;
+import android.provider.Settings.Secure;
 import android.speech.RecognitionService;
 import android.speech.RecognizerIntent;
 import android.text.TextUtils;
@@ -76,7 +77,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // database gets upgraded properly. At a minimum, please confirm that 'upgradeVersion'
     // is properly propagated through your change.  Not doing so will result in a loss of user
     // settings.
-    private static final int DATABASE_VERSION = 51;
+    private static final int DATABASE_VERSION = 52;
 
     private Context mContext;
 
@@ -232,18 +233,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
 
         if (upgradeVersion == 27) {
-            // Copy settings values from 'system' to 'secure' and delete them from 'system'
-            SQLiteStatement insertStmt = null;
-            SQLiteStatement deleteStmt = null;
-
-            db.beginTransaction();
-            try {
-                insertStmt =
-                    db.compileStatement("INSERT INTO secure (name,value) SELECT name,value FROM "
-                        + "system WHERE name=?");
-                deleteStmt = db.compileStatement("DELETE FROM system WHERE name=?");
-
-                String[] settingsToMove = {
+            String[] settingsToMove = {
                     Settings.Secure.ADB_ENABLED,
                     Settings.Secure.ANDROID_ID,
                     Settings.Secure.BLUETOOTH_ON,
@@ -276,24 +266,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     Settings.Secure.WIFI_WATCHDOG_PING_DELAY_MS,
                     Settings.Secure.WIFI_WATCHDOG_PING_TIMEOUT_MS,
                 };
-
-                for (String setting : settingsToMove) {
-                    insertStmt.bindString(1, setting);
-                    insertStmt.execute();
-
-                    deleteStmt.bindString(1, setting);
-                    deleteStmt.execute();
-                }
-                db.setTransactionSuccessful();
-            } finally {
-                db.endTransaction();
-                if (insertStmt != null) {
-                    insertStmt.close();
-                }
-                if (deleteStmt != null) {
-                    deleteStmt.close();
-                }
-            }
+            moveFromSystemToSecure(db, settingsToMove);
             upgradeVersion = 28;
         }
 
@@ -661,6 +634,23 @@ public class DatabaseHelper extends SQLiteOpenHelper {
            upgradeVersion = 51;
        }
 
+       if (upgradeVersion == 51) {
+           /* Move the lockscreen related settings to Secure, including some private ones. */
+           String[] settingsToMove = {
+                   Secure.LOCK_PATTERN_ENABLED,
+                   Secure.LOCK_PATTERN_VISIBLE,
+                   Secure.LOCK_PATTERN_TACTILE_FEEDBACK_ENABLED,
+                   "lockscreen.password_type",
+                   "lockscreen.lockoutattemptdeadline",
+                   "lockscreen.patterneverchosen",
+                   "lock_pattern_autolock",
+                   "lockscreen.lockedoutpermanently",
+                   "lockscreen.password_salt"
+           };
+           moveFromSystemToSecure(db, settingsToMove);
+           upgradeVersion = 52;
+       }
+
        if (upgradeVersion != currentVersion) {
             Log.w(TAG, "Got stuck trying to upgrade from version " + upgradeVersion
                     + ", must wipe the settings provider");
@@ -681,6 +671,38 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             String wipeReason = oldVersion + "/" + upgradeVersion + "/" + currentVersion;
             db.execSQL("INSERT INTO secure(name,value) values('" +
                     "wiped_db_reason" + "','" + wipeReason + "');");
+        }
+    }
+
+    private void moveFromSystemToSecure(SQLiteDatabase db, String [] settingsToMove) {
+        // Copy settings values from 'system' to 'secure' and delete them from 'system'
+        SQLiteStatement insertStmt = null;
+        SQLiteStatement deleteStmt = null;
+
+        db.beginTransaction();
+        try {
+            insertStmt =
+                db.compileStatement("INSERT INTO secure (name,value) SELECT name,value FROM "
+                    + "system WHERE name=?");
+            deleteStmt = db.compileStatement("DELETE FROM system WHERE name=?");
+
+
+            for (String setting : settingsToMove) {
+                insertStmt.bindString(1, setting);
+                insertStmt.execute();
+
+                deleteStmt.bindString(1, setting);
+                deleteStmt.execute();
+            }
+            db.setTransactionSuccessful();
+        } finally {
+            db.endTransaction();
+            if (insertStmt != null) {
+                insertStmt.close();
+            }
+            if (deleteStmt != null) {
+                deleteStmt.close();
+            }
         }
     }
 
