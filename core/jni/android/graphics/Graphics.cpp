@@ -1,3 +1,5 @@
+#define LOG_TAG "GraphicsJNI"
+
 #include "jni.h"
 #include "GraphicsJNI.h"
 #include "NIOBuffer.h"
