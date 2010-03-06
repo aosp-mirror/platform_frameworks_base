@@ -149,6 +149,7 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
     private final static boolean LOG_THREADS = false;
     private final static boolean LOG_SURFACE = false;
     private final static boolean LOG_RENDERER = false;
+    private final static boolean LOG_RENDERER_DRAW_FRAME = false;
     // Work-around for bug 2263168
     private final static boolean DRAW_TWICE_AFTER_SIZE_CHANGED = true;
     /**
@@ -1209,15 +1210,18 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                     }
 
                     if (createEglSurface) {
+                        if (LOG_SURFACE) {
+                            Log.w("GLThread", "egl createSurface");
+                        }
                         gl = (GL10) mEglHelper.createSurface(getHolder());
                         sGLThreadManager.checkGLDriver(gl);
-                        if (LOG_RENDERER) {
-                            Log.w("GLThread", "onSurfaceCreated");
-                        }
                         createEglSurface = false;
                     }
 
                     if (createEglContext) {
+                        if (LOG_RENDERER) {
+                            Log.w("GLThread", "onSurfaceCreated");
+                        }
                         mRenderer.onSurfaceCreated(gl, mEglHelper.mEglConfig);
                         createEglContext = false;
                     }
@@ -1230,7 +1234,7 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                         sizeChanged = false;
                     }
 
-                    if (LOG_RENDERER) {
+                    if (LOG_RENDERER_DRAW_FRAME) {
                         Log.w("GLThread", "onDrawFrame");
                     }
                     mRenderer.onDrawFrame(gl);
@@ -1438,6 +1442,7 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
     }
 
     private static class GLThreadManager {
+        private static String TAG = "GLThreadManager";
 
         public synchronized void threadExiting(GLThread thread) {
             if (LOG_THREADS) {
@@ -1483,7 +1488,7 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
 
         public synchronized boolean shouldReleaseEGLContextWhenPausing() {
             checkGLESVersion();
-            return mMultipleGLESContextsAllowed;
+            return !mMultipleGLESContextsAllowed;
         }
 
         public synchronized void checkGLDriver(GL10 gl) {
@@ -1493,6 +1498,10 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                     String renderer = gl.glGetString(GL10.GL_RENDERER);
                     mMultipleGLESContextsAllowed =
                         ! renderer.startsWith(kMSM7K_RENDERER_PREFIX);
+                    if (LOG_SURFACE) {
+                        Log.w(TAG, "checkGLDriver renderer = \"" + renderer + "\" multipleContextsAllowed = "
+                            + mMultipleGLESContextsAllowed);
+                    }
                     notifyAll();
                 }
                 mGLESDriverCheckComplete = true;
@@ -1506,6 +1515,10 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                         ConfigurationInfo.GL_ES_VERSION_UNDEFINED);
                 if (mGLESVersion >= kGLES_20) {
                     mMultipleGLESContextsAllowed = true;
+                }
+                if (LOG_SURFACE) {
+                    Log.w(TAG, "checkGLESVersion mGLESVersion =" +
+                            " " + mGLESVersion + " mMultipleGLESContextsAllowed = " + mMultipleGLESContextsAllowed);
                 }
                 mGLESVersionCheckComplete = true;
             }
