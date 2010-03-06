@@ -932,11 +932,86 @@ public class PackageManagerTests extends AndroidTestCase {
                 0, true, false, -1, PackageInfo.INSTALL_LOCATION_AUTO);
     }
 
+    public void testManifestInstallLocationFwdLockedFlagSdcard() {
+        installFromRawResource("install.apk", R.raw.install_loc_unspecified,
+                PackageManager.INSTALL_FORWARD_LOCK |
+                PackageManager.INSTALL_EXTERNAL, true, true,
+                PackageManager.INSTALL_FAILED_INVALID_INSTALL_LOCATION,
+                PackageInfo.INSTALL_LOCATION_AUTO);
+    }
+
     public void testManifestInstallLocationFwdLockedSdcard() {
         installFromRawResource("install.apk", R.raw.install_loc_sdcard,
                 PackageManager.INSTALL_FORWARD_LOCK, true, false,
                 -1,
-                PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY);
+                PackageInfo.INSTALL_LOCATION_PREFER_EXTERNAL);
+    }
+
+    private void replaceManifestLocation(int iFlags, int rFlags) {
+        InstallParams ip = sampleInstallFromRawResource(iFlags, false);
+        GenericReceiver receiver = new ReplaceReceiver(ip.pkg.packageName);
+        int replaceFlags = rFlags | PackageManager.INSTALL_REPLACE_EXISTING;
+        try {
+            assertEquals(invokeInstallPackage(ip.packageURI, replaceFlags,
+                    ip.pkg.packageName, receiver), true);
+            assertInstall(ip.pkg, replaceFlags, ip.pkg.installLocation);
+        } catch (Exception e) {
+            failStr("Failed with exception : " + e);
+        } finally {
+            cleanUpInstall(ip);
+        }
+    }
+
+    public void testReplaceFlagInternalSdcard() {
+        replaceManifestLocation(0, PackageManager.INSTALL_EXTERNAL);
+    }
+
+    public void testReplaceFlagSdcardInternal() {
+        replaceManifestLocation(PackageManager.INSTALL_EXTERNAL, 0);
+    }
+
+    public void testManifestInstallLocationReplaceInternalSdcard() {
+        int iFlags = 0;
+        int iApk = R.raw.install_loc_unspecified;
+        int rFlags = 0;
+        int rApk = R.raw.install_loc_sdcard;
+        InstallParams ip = installFromRawResource("install.apk", iApk,
+                iFlags, false,
+                false, -1, PackageInfo.INSTALL_LOCATION_AUTO);
+        GenericReceiver receiver = new ReplaceReceiver(ip.pkg.packageName);
+        int replaceFlags = rFlags | PackageManager.INSTALL_REPLACE_EXISTING;
+        try {
+            InstallParams rp = installFromRawResource("install.apk", rApk,
+                    rFlags, false,
+                    false, -1, PackageInfo.INSTALL_LOCATION_PREFER_EXTERNAL);
+            assertInstall(rp.pkg, replaceFlags, rp.pkg.installLocation);
+        } catch (Exception e) {
+            failStr("Failed with exception : " + e);
+        } finally {
+            cleanUpInstall(ip);
+        }
+    }
+
+    public void testManifestInstallLocationReplaceSdcardInternal() {
+        int iFlags = 0;
+        int iApk = R.raw.install_loc_sdcard;
+        int rFlags = 0;
+        int rApk = R.raw.install_loc_unspecified;
+        InstallParams ip = installFromRawResource("install.apk", iApk,
+                iFlags, false,
+                false, -1, PackageInfo.INSTALL_LOCATION_PREFER_EXTERNAL);
+        GenericReceiver receiver = new ReplaceReceiver(ip.pkg.packageName);
+        int replaceFlags = rFlags | PackageManager.INSTALL_REPLACE_EXISTING;
+        try {
+            InstallParams rp = installFromRawResource("install.apk", rApk,
+                    rFlags, false,
+                    false, -1, PackageInfo.INSTALL_LOCATION_PREFER_EXTERNAL);
+            assertInstall(rp.pkg, replaceFlags, ip.pkg.installLocation);
+        } catch (Exception e) {
+            failStr("Failed with exception : " + e);
+        } finally {
+            cleanUpInstall(ip);
+        }
     }
 
     public void xxxtestClearAllSecureContainers() {

@@ -136,7 +136,20 @@ public class PackageParser {
             enabledRes = _enabledRes;
         }
     }
-    
+
+    /* Light weight package info.
+     * @hide
+     */
+    public static class PackageLite {
+        public String packageName;
+        public int installLocation;
+        public String mScanPath;
+        public PackageLite(String packageName, int installLocation) {
+            this.packageName = packageName;
+            this.installLocation = installLocation;
+        }
+    }
+
     private ParsePackageItemArgs mParseInstrumentationArgs;
     private ParseComponentArgs mParseActivityArgs;
     private ParseComponentArgs mParseActivityAliasArgs;
@@ -562,7 +575,14 @@ public class PackageParser {
         return true;
     }
 
-    public static String parsePackageName(String packageFilePath, int flags) {
+    /*
+     * Utility method that retrieves just the package name and install
+     * location from the apk location at the given file path.
+     * @param packageFilePath file location of the apk
+     * @param flags Special parse flags
+     * @return PackageLite object with package information.
+     */
+    public static PackageLite parsePackageLite(String packageFilePath, int flags) {
         XmlResourceParser parser = null;
         AssetManager assmgr = null;
         try {
@@ -577,9 +597,9 @@ public class PackageParser {
         }
         AttributeSet attrs = parser;
         String errors[] = new String[1];
-        String packageName = null;
+        PackageLite packageLite = null;
         try {
-            packageName = parsePackageName(parser, attrs, flags, errors);
+            packageLite = parsePackageLite(parser, attrs, flags, errors);
         } catch (IOException e) {
             Log.w(TAG, packageFilePath, e);
         } catch (XmlPullParserException e) {
@@ -588,11 +608,11 @@ public class PackageParser {
             if (parser != null) parser.close();
             if (assmgr != null) assmgr.close();
         }
-        if (packageName == null) {
-            Log.e(TAG, "parsePackageName error: " + errors[0]);
+        if (packageLite == null) {
+            Log.e(TAG, "parsePackageLite error: " + errors[0]);
             return null;
         }
-        return packageName;
+        return packageLite;
     }
 
     private static String validateName(String name, boolean requiresSeparator) {
@@ -654,6 +674,49 @@ public class PackageParser {
         }
 
         return pkgName.intern();
+    }
+
+    private static PackageLite parsePackageLite(XmlPullParser parser,
+            AttributeSet attrs, int flags, String[] outError)
+            throws IOException, XmlPullParserException {
+
+        int type;
+        while ((type=parser.next()) != parser.START_TAG
+                   && type != parser.END_DOCUMENT) {
+            ;
+        }
+
+        if (type != parser.START_TAG) {
+            outError[0] = "No start tag found";
+            return null;
+        }
+        if ((flags&PARSE_CHATTY) != 0 && Config.LOGV) Log.v(
+            TAG, "Root element name: '" + parser.getName() + "'");
+        if (!parser.getName().equals("manifest")) {
+            outError[0] = "No <manifest> tag";
+            return null;
+        }
+        String pkgName = attrs.getAttributeValue(null, "package");
+        if (pkgName == null || pkgName.length() == 0) {
+            outError[0] = "<manifest> does not specify package";
+            return null;
+        }
+        String nameError = validateName(pkgName, true);
+        if (nameError != null && !"android".equals(pkgName)) {
+            outError[0] = "<manifest> specifies bad package name \""
+                + pkgName + "\": " + nameError;
+            return null;
+        }
+        int installLocation = PackageInfo.INSTALL_LOCATION_AUTO;
+        for (int i = 0; i < attrs.getAttributeCount(); i++) {
+            String attr = attrs.getAttributeName(i);
+            if (attr.equals("installLocation")) {
+                installLocation = attrs.getAttributeIntValue(i,
+                        PackageInfo.INSTALL_LOCATION_AUTO);
+                break;
+            }
+        }
+        return new PackageLite(pkgName.intern(), installLocation);
     }
 
     /**
