@@ -602,33 +602,87 @@ public abstract class PackageManager {
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device is capable of communicating with
+     * other devices via Bluetooth.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_BLUETOOTH = "android.hardware.bluetooth";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device has a camera facing away
      * from the screen.
      */
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_CAMERA = "android.hardware.camera";
-    
+
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device's camera supports auto-focus.
      */
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_CAMERA_AUTOFOCUS = "android.hardware.camera.autofocus";
-    
+
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device's camera supports flash.
      */
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_CAMERA_FLASH = "android.hardware.camera.flash";
-    
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device supports one or more methods of
+     * reporting current location.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_LOCATION = "android.hardware.location";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device has a Global Positioning System
+     * receiver and can report precise location.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_LOCATION_GPS = "android.hardware.location.gps";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device can report location with coarse
+     * accuracy using a network-based geolocation system.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_LOCATION_NETWORK = "android.hardware.location.network";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device can record audio via a
+     * microphone.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_MICROPHONE = "android.hardware.microphone";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device includes a magnetometer (compass).
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_SENSOR_COMPASS = "android.hardware.sensor.compass";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device includes an accelerometer.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_SENSOR_ACCELEROMETER = "android.hardware.sensor.accelerometer";
+
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device includes a light sensor.
      */
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_SENSOR_LIGHT = "android.hardware.sensor.light";
-    
+
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device includes a proximity sensor.
@@ -660,17 +714,33 @@ public abstract class PackageManager {
     
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
-     * {@link #hasSystemFeature}: The device's touch screen supports multitouch.
+     * {@link #hasSystemFeature}: The device's touch screen supports
+     * multitouch sufficient for basic two-finger gesture detection.
      */
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_TOUCHSCREEN_MULTITOUCH = "android.hardware.touchscreen.multitouch";
     
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device's touch screen is capable of
+     * tracking two or more fingers fully independently.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_TOUCHSCREEN_MULTITOUCH_DISTINCT = "android.hardware.touchscreen.multitouch.distinct";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device supports live wallpapers.
      */
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_LIVE_WALLPAPER = "android.software.live_wallpaper";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device supports WiFi (802.11) networking.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_WIFI = "android.hardware.wifi";
 
     /**
      * Action to external storage service to clean out removed apps.

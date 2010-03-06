@@ -14,7 +14,7 @@
      limitations under the License.
 -->
 
-<!-- This is the standard set of features for a GSM phone. -->
+<!-- This is the standard set of telephony features for a GSM phone. -->
 <permissions>
     <feature name="android.hardware.telephony" />
     <feature name="android.hardware.telephony.gsm" />
