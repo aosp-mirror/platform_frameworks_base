@@ -58,11 +58,10 @@ public abstract class SQLiteProgram extends SQLiteClosable {
         db.addSQLiteClosable(this);
         this.nHandle = db.mNativeHandle;
 
-        // shouldn't reuse compiled-plans of PRAGMA sql statements
-        // because sqlite returns OLD values if compiled-pragma-statements are reused
-        //TODO: remove this code when sqlite fixes it (and add tests too)
+        // only cache CRUD statements
         String prefixSql = mSql.substring(0, 6);
-        if (prefixSql.toLowerCase().startsWith("pragma")) {
+        if (!prefixSql.equalsIgnoreCase("INSERT") && !prefixSql.equalsIgnoreCase("UPDATE") &&
+                !prefixSql.equalsIgnoreCase("DELETE") && !prefixSql.equalsIgnoreCase("SELECT")) {
             mCompiledSql = new SQLiteCompiledSql(db, sql);
             nStatement = mCompiledSql.nStatement;
             // since it is not in the cache, no need to acquire() it.
