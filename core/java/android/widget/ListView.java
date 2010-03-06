@@ -455,6 +455,12 @@ public class ListView extends AbsListView {
                 checkSelectionChanged();
             }
 
+            if (mChoiceMode != CHOICE_MODE_NONE &&
+                    mAdapter.hasStableIds() &&
+                    mCheckedIdStates == null) {
+                mCheckedIdStates = new LongSparseArray<Boolean>();
+            }
+
         } else {
             mAreAllItemsSelectable = true;
             checkFocus();
@@ -3320,7 +3326,7 @@ public class ListView extends AbsListView {
             if (mCheckStates == null) {
                 mCheckStates = new SparseBooleanArray();
             }
-            if (mCheckedIdStates == null && mAdapter.hasStableIds()) {
+            if (mCheckedIdStates == null && mAdapter != null && mAdapter.hasStableIds()) {
                 mCheckedIdStates = new LongSparseArray<Boolean>();
             }
         }
