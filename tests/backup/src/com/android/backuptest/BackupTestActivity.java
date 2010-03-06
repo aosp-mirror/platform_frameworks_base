@@ -17,11 +17,11 @@
 package com.android.backuptest;
 
 import android.app.ListActivity;
-import android.backup.BackupHelperDispatcher;
-import android.backup.BackupDataInput;
-import android.backup.BackupDataOutput;
-import android.backup.BackupManager;
-import android.backup.FileBackupHelper;
+import android.app.backup.BackupHelperDispatcher;
+import android.app.backup.BackupDataInput;
+import android.app.backup.BackupDataOutput;
+import android.app.backup.BackupManager;
+import android.app.backup.FileBackupHelper;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;

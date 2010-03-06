@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-package android.backup;
+package android.app.backup;
 
-import android.backup.RestoreSession;
+import android.app.backup.RestoreSession;
+import android.app.backup.IBackupManager;
+import android.app.backup.IRestoreSession;
 import android.content.Context;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -34,12 +36,12 @@ import android.util.Log;
  * operation actually occurs.
  * <p>
  * The backup operation itself begins with the system launching the
- * {@link android.app.BackupAgent} subclass declared in your manifest. See the
- * documentation for {@link android.app.BackupAgent} for a detailed description
+ * {@link android.app.backup.BackupAgent} subclass declared in your manifest. See the
+ * documentation for {@link android.app.backup.BackupAgent} for a detailed description
  * of how the backup then proceeds.
  * <p>
  * A simple implementation of a BackupAgent useful for backing up Preferences
- * and files is available by using {@link android.backup.BackupHelperAgent}.
+ * and files is available by using {@link android.app.backup.BackupHelperAgent}.
  * <p>
  * STOPSHIP: more documentation!
  * <p>
@@ -82,7 +84,7 @@ public class BackupManager {
     /**
      * Notifies the Android backup system that your application wishes to back up
      * new changes to its data.  A backup operation using your application's
-     * {@link android.app.BackupAgent} subclass will be scheduled when you call this method.
+     * {@link android.app.backup.BackupAgent} subclass will be scheduled when you call this method.
      */
     public void dataChanged() {
         checkServiceBinder();
@@ -116,7 +118,7 @@ public class BackupManager {
 
     /**
      * Begin the process of restoring data from backup.  See the
-     * {@link android.backup.RestoreSession} class for documentation on that process.
+     * {@link android.app.backup.RestoreSession} class for documentation on that process.
      */
     public RestoreSession beginRestoreSession() {
         RestoreSession session = null;

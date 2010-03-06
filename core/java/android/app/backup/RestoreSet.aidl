@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 
-package android.backup;
+package android.app.backup;
 
 parcelable RestoreSet;

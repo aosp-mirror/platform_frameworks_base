@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.backup;
+package android.app.backup;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
@@ -131,7 +131,7 @@ public class BackupDataInput {
 
     /**
      * Consume the current record's data without actually reading it into a buffer
-     * for further processing.  This allows a {@link android.app.BackupAgent} to
+     * for further processing.  This allows a {@link android.app.backup.BackupAgent} to
      * efficiently discard obsolete or otherwise uninteresting records during the
      * restore operation.
      * 

@@ -93,9 +93,9 @@ LOCAL_SRC_FILES += \
 	core/java/android/app/IWallpaperManager.aidl \
 	core/java/android/app/IWallpaperManagerCallback.aidl \
 	core/java/android/app/admin/IDevicePolicyManager.aidl \
-	core/java/android/backup/IBackupManager.aidl \
-	core/java/android/backup/IRestoreObserver.aidl \
-	core/java/android/backup/IRestoreSession.aidl \
+	core/java/android/app/backup/IBackupManager.aidl \
+	core/java/android/app/backup/IRestoreObserver.aidl \
+	core/java/android/app/backup/IRestoreSession.aidl \
 	core/java/android/bluetooth/IBluetooth.aidl \
 	core/java/android/bluetooth/IBluetoothA2dp.aidl \
 	core/java/android/bluetooth/IBluetoothCallback.aidl \

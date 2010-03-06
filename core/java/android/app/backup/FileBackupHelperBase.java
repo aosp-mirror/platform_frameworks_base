@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.backup;
+package android.app.backup;
 
 import android.content.Context;
 import android.os.ParcelFileDescriptor;
@@ -24,7 +24,7 @@ import java.io.File;
 import java.io.FileDescriptor;
 
 /**
- * Base class for the {@link android.backup.FileBackupHelper} implementation.
+ * Base class for the {@link android.app.backup.FileBackupHelper} implementation.
  */
 class FileBackupHelperBase {
     private static final String TAG = "FileBackupHelperBase";

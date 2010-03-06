@@ -23,10 +23,10 @@ import android.app.IActivityManager;
 import android.app.IApplicationThread;
 import android.app.IBackupAgent;
 import android.app.PendingIntent;
-import android.backup.IBackupManager;
-import android.backup.IRestoreObserver;
-import android.backup.IRestoreSession;
-import android.backup.RestoreSet;
+import android.app.backup.RestoreSet;
+import android.app.backup.IBackupManager;
+import android.app.backup.IRestoreObserver;
+import android.app.backup.IRestoreSession;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -96,9 +96,9 @@ class BackupManagerService extends IBackupManager.Stub {
     // the first backup pass.
     private static final long FIRST_BACKUP_INTERVAL = 12 * AlarmManager.INTERVAL_HOUR;
 
-    private static final String RUN_BACKUP_ACTION = "android.backup.intent.RUN";
-    private static final String RUN_INITIALIZE_ACTION = "android.backup.intent.INIT";
-    private static final String RUN_CLEAR_ACTION = "android.backup.intent.CLEAR";
+    private static final String RUN_BACKUP_ACTION = "android.app.backup.intent.RUN";
+    private static final String RUN_INITIALIZE_ACTION = "android.app.backup.intent.INIT";
+    private static final String RUN_CLEAR_ACTION = "android.app.backup.intent.CLEAR";
     private static final int MSG_RUN_BACKUP = 1;
     private static final int MSG_RUN_FULL_BACKUP = 2;
     private static final int MSG_RUN_RESTORE = 3;

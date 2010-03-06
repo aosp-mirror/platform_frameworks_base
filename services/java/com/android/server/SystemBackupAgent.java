@@ -16,12 +16,12 @@
 
 package com.android.server;
 
-import android.backup.AbsoluteFileBackupHelper;
-import android.backup.BackupDataInput;
-import android.backup.BackupDataInputStream;
-import android.backup.BackupDataOutput;
-import android.backup.BackupHelper;
-import android.backup.BackupHelperAgent;
+import android.app.backup.AbsoluteFileBackupHelper;
+import android.app.backup.BackupDataInput;
+import android.app.backup.BackupDataInputStream;
+import android.app.backup.BackupDataOutput;
+import android.app.backup.BackupHelper;
+import android.app.backup.BackupHelperAgent;
 import android.content.Context;
 import android.os.ParcelFileDescriptor;
 import android.os.ServiceManager;

@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-package android.backup;
+package android.app.backup;
 
-import android.app.BackupAgent;
 import android.os.ParcelFileDescriptor;
 
 import java.io.IOException;

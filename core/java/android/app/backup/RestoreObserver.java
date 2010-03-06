@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.backup;
+package android.app.backup;
 
 /**
  * Callback class for receiving progress reports during a restore operation.  These

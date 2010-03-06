@@ -31,7 +31,7 @@ import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.IDevicePolicyManager;
-import android.backup.IBackupManager;
+import android.app.backup.IBackupManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;

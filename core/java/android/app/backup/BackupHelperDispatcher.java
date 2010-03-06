@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.backup;
+package android.app.backup;
 
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
