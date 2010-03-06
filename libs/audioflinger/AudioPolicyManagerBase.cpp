@@ -1290,7 +1290,7 @@ void AudioPolicyManagerBase::checkOutputForStrategy(routing_strategy strategy, u
                 a2dpOutputDesc->changeRefCount((AudioSystem::stream_type)i,-refCount);
             }
         }
-        // do not change newDevice is it was already set before this call by a previous call to
+        // do not change newDevice if it was already set before this call by a previous call to
         // getNewDevice() or checkOutputForStrategy() for a strategy with higher priority
         if (newDevice == 0 && hwOutputDesc->isUsedByStrategy(strategy)) {
             newDevice = getDeviceForStrategy(strategy, false);
@@ -1466,6 +1466,12 @@ uint32_t AudioPolicyManagerBase::getDeviceForStrategy(routing_strategy strategy,
 
     case STRATEGY_MEDIA: {
         uint32_t device2 = mAvailableOutputDevices & AudioSystem::DEVICE_OUT_AUX_DIGITAL;
+        if (device2 == 0) {
+            device2 = mAvailableOutputDevices & AudioSystem::DEVICE_OUT_WIRED_HEADPHONE;
+        }
+        if (device2 == 0) {
+            device2 = mAvailableOutputDevices & AudioSystem::DEVICE_OUT_WIRED_HEADSET;
+        }
 #ifdef WITH_A2DP
         if (mA2dpOutput != 0) {
             if (strategy == STRATEGY_SONIFICATION && !a2dpUsedForSonification()) {
@@ -1482,12 +1488,6 @@ uint32_t AudioPolicyManagerBase::getDeviceForStrategy(routing_strategy strategy,
             }
         }
 #endif
-        if (device2 == 0) {
-            device2 = mAvailableOutputDevices & AudioSystem::DEVICE_OUT_WIRED_HEADPHONE;
-        }
-        if (device2 == 0) {
-            device2 = mAvailableOutputDevices & AudioSystem::DEVICE_OUT_WIRED_HEADSET;
-        }
         if (device2 == 0) {
             device2 = mAvailableOutputDevices & AudioSystem::DEVICE_OUT_SPEAKER;
         }
