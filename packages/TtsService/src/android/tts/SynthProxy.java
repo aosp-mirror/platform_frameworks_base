@@ -50,7 +50,7 @@ public class SynthProxy {
      */
     public SynthProxy(String nativeSoLib) {
         boolean applyFilter = nativeSoLib.toLowerCase().contains("pico");
-        Log.v(TtsService.SERVICE_TAG, "1000 about to load "+ nativeSoLib + ", applyFilter="+applyFilter);
+        Log.v(TtsService.SERVICE_TAG, "About to load "+ nativeSoLib + ", applyFilter="+applyFilter);
         native_setup(new WeakReference<SynthProxy>(this), nativeSoLib);
         native_setLowShelf(applyFilter, PICO_FILTER_GAIN, PICO_FILTER_LOWSHELF_ATTENUATION,
                 PICO_FILTER_TRANSITION_FREQ, PICO_FILTER_SHELF_SLOPE);
