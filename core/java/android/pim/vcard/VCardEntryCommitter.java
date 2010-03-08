@@ -16,6 +16,7 @@
 package android.pim.vcard;
 
 import android.content.ContentResolver;
+import android.net.Uri;
 import android.util.Log;
 
 /**
@@ -34,6 +35,7 @@ public class VCardEntryCommitter implements VCardEntryHandler {
 
     private final ContentResolver mContentResolver;
     private long mTimeToCommit;
+    private Uri mLastCreatedUri;
 
     public VCardEntryCommitter(ContentResolver resolver) {
         mContentResolver = resolver;
@@ -50,7 +52,11 @@ public class VCardEntryCommitter implements VCardEntryHandler {
 
     public void onEntryCreated(final VCardEntry contactStruct) {
         long start = System.currentTimeMillis();
-        contactStruct.pushIntoContentResolver(mContentResolver);
+        mLastCreatedUri = contactStruct.pushIntoContentResolver(mContentResolver);
         mTimeToCommit += System.currentTimeMillis() - start;
+    }
+
+    public Uri getLastCreatedUri() {
+        return mLastCreatedUri;
     }
 }
