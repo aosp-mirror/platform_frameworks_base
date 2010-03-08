@@ -127,10 +127,11 @@ public class RecognizerResultsIntent {
      * All the values and the keys are {@link String}s. Each key/value pair represents an extra HTTP
      * header. The keys can't be the standard HTTP headers as they are set by the WebView.
      *
-     * A list of size 1 may be provided to apply the same HTTP headers to all html results. A list 
-     * of the same size as {@link #EXTRA_VOICE_SEARCH_RESULT_STRINGS} may be provided to apply 
-     * different HTTP headers to each different html result in the 
-     * {@link #EXTRA_VOICE_SEARCH_RESULT_HTML} list.
+     * A list of size 1 may be provided to apply the same HTTP headers to all web results. A
+     * list of the same size as {@link #EXTRA_VOICE_SEARCH_RESULT_STRINGS} may be provided to
+     * apply different HTTP headers to each different web result in the list. These headers will
+     * only be used in the case that the url for a particular web result (from
+     * {@link #EXTRA_VOICE_SEARCH_RESULT_URLS}) is loaded.
      *
      * @hide not to be exposed immediately as the implementation details may change
      */
