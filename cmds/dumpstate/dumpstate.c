@@ -110,6 +110,9 @@ static void dumpstate() {
     dump_file("KERNEL WAKELOCKS", "/proc/wakelocks");
     dump_file("KERNEL CPUFREQ", "/sys/devices/system/cpu/cpu0/cpufreq/stats/time_in_state");
 
+    run_command("SECURE CONTAINERS", 10, "vdc", "asec", "list", NULL);
+    run_command("MOUNTED FILESYSTEMS", 10, "df", NULL);
+
     run_command("PROCESSES", 10, "ps", "-P", NULL);
     run_command("PROCESSES AND THREADS", 10, "ps", "-t", "-p", "-P", NULL);
     run_command("LIBRANK", 10, "librank", NULL);
@@ -208,7 +211,7 @@ int main(int argc, char *argv[]) {
     }
 
     /* switch to non-root user and group */
-    gid_t groups[] = { AID_LOG, AID_SDCARD_RW };
+    gid_t groups[] = { AID_LOG, AID_SDCARD_RW, AID_MOUNT };
     setgroups(sizeof(groups)/sizeof(groups[0]), groups);
     setuid(AID_SHELL);
 
