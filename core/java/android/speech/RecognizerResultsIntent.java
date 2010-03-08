@@ -16,6 +16,8 @@
 
 package android.speech;
 
+import android.os.Bundle;
+
 import java.util.ArrayList;
 
 /**
@@ -119,7 +121,22 @@ public class RecognizerResultsIntent {
      */
     public static final String EXTRA_VOICE_SEARCH_RESULT_HTML_BASE_URLS =
             "android.speech.extras.VOICE_SEARCH_RESULT_HTML_BASE_URLS";
-    
+
+    /**
+     * The key to an extra {@link ArrayList} of {@link Bundle}s that contains key/value pairs.
+     * All the values and the keys are {@link String}s. Each key/value pair represents an extra HTTP
+     * header. The keys can't be the standard HTTP headers as they are set by the WebView.
+     *
+     * A list of size 1 may be provided to apply the same HTTP headers to all html results. A list 
+     * of the same size as {@link #EXTRA_VOICE_SEARCH_RESULT_STRINGS} may be provided to apply 
+     * different HTTP headers to each different html result in the 
+     * {@link #EXTRA_VOICE_SEARCH_RESULT_HTML} list.
+     *
+     * @hide not to be exposed immediately as the implementation details may change
+     */
+    public static final String EXTRA_VOICE_SEARCH_RESULT_HTTP_HEADERS =
+            "android.speech.extras.EXTRA_VOICE_SEARCH_RESULT_HTTP_HEADERS";
+
     /**
      * The scheme used currently for html content in {@link #EXTRA_VOICE_SEARCH_RESULT_HTML}.
      * 
