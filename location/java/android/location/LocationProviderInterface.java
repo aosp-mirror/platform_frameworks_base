@@ -42,6 +42,7 @@ public interface LocationProviderInterface {
     int getStatus(Bundle extras);
     long getStatusUpdateTime();
     void enableLocationTracking(boolean enable);
+    String getInternalState();
     void setMinTime(long minTime);
     void updateNetworkState(int state, NetworkInfo info);
     void updateLocation(Location location);

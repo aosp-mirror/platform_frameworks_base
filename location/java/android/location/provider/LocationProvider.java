@@ -95,6 +95,10 @@ public abstract class LocationProvider {
             return LocationProvider.this.onGetStatusUpdateTime();
         }
 
+        public String getInternalState() {
+            return LocationProvider.this.onGetInternalState();
+        }
+
         public void enableLocationTracking(boolean enable) {
             LocationProvider.this.onEnableLocationTracking(enable);
         }
@@ -265,6 +269,13 @@ public abstract class LocationProvider {
      * @return time of last status update in millis since last reboot
      */
     public abstract long onGetStatusUpdateTime();
+
+    /**
+     * Returns debugging information about the location provider.
+     *
+     * @return string describing the internal state of the location provider, or null.
+     */
+    public abstract String onGetInternalState();
 
     /**
      * Notifies the location provider that clients are listening for locations.
