@@ -318,11 +318,7 @@ public class HorizontalScrollView extends FrameLayout {
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
         // Let the focused view and/or our descendants get the key first
-        boolean handled = super.dispatchKeyEvent(event);
-        if (handled) {
-            return true;
-        }
-        return executeKeyEvent(event);
+        return super.dispatchKeyEvent(event) || executeKeyEvent(event);
     }
 
     /**
@@ -509,8 +505,11 @@ public class HorizontalScrollView extends FrameLayout {
                     final int deltaX = (int) (mLastMotionX - x);
                     mLastMotionX = x;
 
+                    final int oldX = mScrollX;
+                    final int oldY = mScrollY;                    
                     overscrollBy(deltaX, 0, mScrollX, 0, getScrollRange(), 0,
                             getOverscrollMax(), 0);
+                    onScrollChanged(mScrollX, mScrollY, oldX, oldY);
                 }
                 break;
             case MotionEvent.ACTION_UP:
@@ -524,7 +523,7 @@ public class HorizontalScrollView extends FrameLayout {
                             fling(-initialVelocity);
                         } else {
                             final int right = getScrollRange();
-                            if (mScroller.springback(mScrollX, mScrollY, 0, 0, right, 0)) {
+                            if (mScroller.springback(mScrollX, mScrollY, 0, right, 0, 0)) {
                                 invalidate();
                             }
                         }
