@@ -26,6 +26,7 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.storage.IMountService;
 import android.os.storage.IMountServiceListener;
+import android.os.storage.IMountShutdownObserver;
 import android.os.storage.StorageResultCode;
 import android.os.Handler;
 import android.os.Message;
@@ -172,68 +173,109 @@ class MountService extends IMountService.Stub
         }
     }
 
+    class ShutdownCallBack extends UnmountCallBack {
+        IMountShutdownObserver observer;
+        ShutdownCallBack(String path, IMountShutdownObserver observer) {
+            super(path, true);
+            this.observer = observer;
+        }
+
+        @Override
+        void handleFinished() {
+            int ret = doUnmountVolume(path, true);
+            if (observer != null) {
+                try {
+                    observer.onShutDownComplete(ret);
+                } catch (RemoteException e) {
+                    Log.w(TAG, "RemoteException when shutting down");
+                }
+            }
+        }
+    }
+
     final private Handler mHandler = new Handler() {
         ArrayList<UnmountCallBack> mForceUnmounts = new ArrayList<UnmountCallBack>();
+        boolean mRegistered = false;
+
+        void registerReceiver() {
+            mRegistered = true;
+            mContext.registerReceiver(mPmReceiver, mPmFilter);
+        }
+
+        void unregisterReceiver() {
+            mRegistered = false;
+            mContext.unregisterReceiver(mPmReceiver);
+        }
 
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case H_UNMOUNT_PM_UPDATE: {
                     UnmountCallBack ucb = (UnmountCallBack) msg.obj;
                     mForceUnmounts.add(ucb);
-                    mContext.registerReceiver(mPmReceiver, mPmFilter);
-                    boolean hasExtPkgs = mPms.updateExternalMediaStatus(false);
-                    if (!hasExtPkgs) {
-                        // Unregister right away
-                        mHandler.sendEmptyMessage(H_UNMOUNT_PM_DONE);
+                    // Register only if needed.
+                    if (!mRegistered) {
+                        registerReceiver();
+                        boolean hasExtPkgs = mPms.updateExternalMediaStatus(false);
+                        if (!hasExtPkgs) {
+                            // Unregister right away
+                            mHandler.sendEmptyMessage(H_UNMOUNT_PM_DONE);
+                        }
                     }
                     break;
                 }
                 case H_UNMOUNT_PM_DONE: {
-                    // Unregister receiver
-                    mContext.unregisterReceiver(mPmReceiver);
-                    UnmountCallBack ucb = mForceUnmounts.get(0);
-                    if (ucb == null || ucb.path == null) {
-                        // Just ignore
-                        return;
+                    // Unregister now.
+                    if (mRegistered) {
+                        unregisterReceiver();
                     }
-                    String path = ucb.path;
-                    boolean done = false;
-                    if (!ucb.force) {
-                        done = true;
-                    } else {
-                        int pids[] = getStorageUsers(path);
-                        if (pids == null || pids.length == 0) {
+                    int size = mForceUnmounts.size();
+                    int sizeArr[] = new int[size];
+                    int sizeArrN = 0;
+                    for (int i = 0; i < size; i++) {
+                        UnmountCallBack ucb = mForceUnmounts.get(i);
+                        String path = ucb.path;
+                        boolean done = false;
+                        if (!ucb.force) {
                             done = true;
                         } else {
-                            // Kill processes holding references first
-                            ActivityManagerService ams = (ActivityManagerService)
-                            ServiceManager.getService("activity");
-                            // Eliminate system process here?
-                            boolean ret = ams.killPidsForMemory(pids);
-                            if (ret) {
-                                // Confirm if file references have been freed.
-                                pids = getStorageUsers(path);
-                                if (pids == null || pids.length == 0) {
-                                    done = true;
+                            int pids[] = getStorageUsers(path);
+                            if (pids == null || pids.length == 0) {
+                                done = true;
+                            } else {
+                                // Kill processes holding references first
+                                ActivityManagerService ams = (ActivityManagerService)
+                                ServiceManager.getService("activity");
+                                // Eliminate system process here?
+                                boolean ret = ams.killPidsForMemory(pids);
+                                if (ret) {
+                                    // Confirm if file references have been freed.
+                                    pids = getStorageUsers(path);
+                                    if (pids == null || pids.length == 0) {
+                                        done = true;
+                                    }
                                 }
                             }
                         }
-                    }
-                    if (done) {
-                        mForceUnmounts.remove(0);
-                        mHandler.sendMessage(mHandler.obtainMessage(H_UNMOUNT_MS,
-                                ucb));
-                    } else {
-                        if (ucb.retries >= MAX_UNMOUNT_RETRIES) {
-                            Log.i(TAG, "Cannot unmount inspite of " +
-                                    MAX_UNMOUNT_RETRIES + " to unmount media");
-                            // Send final broadcast indicating failure to unmount.                      
+                        if (done) {
+                            sizeArr[sizeArrN++] = i;
+                            mHandler.sendMessage(mHandler.obtainMessage(H_UNMOUNT_MS,
+                                    ucb));
                         } else {
-                            mHandler.sendMessageDelayed(
-                                    mHandler.obtainMessage(H_UNMOUNT_PM_DONE,
-                                            ucb.retries++),
-                                    RETRY_UNMOUNT_DELAY);
+                            if (ucb.retries >= MAX_UNMOUNT_RETRIES) {
+                                Log.i(TAG, "Cannot unmount inspite of " +
+                                        MAX_UNMOUNT_RETRIES + " to unmount media");
+                                // Send final broadcast indicating failure to unmount.                 
+                            } else {
+                                mHandler.sendMessageDelayed(
+                                        mHandler.obtainMessage(H_UNMOUNT_PM_DONE,
+                                                ucb.retries++),
+                                        RETRY_UNMOUNT_DELAY);
+                            }
                         }
+                    }
+                    // Remove already processed elements from list.
+                    for (int i = (sizeArrN-1); i >= 0; i--) {
+                        mForceUnmounts.remove(sizeArr[i]);
                     }
                     break;
                 }
@@ -826,7 +868,7 @@ class MountService extends IMountService.Stub
         }
     }
 
-    public void shutdown() {
+    public void shutdown(final IMountShutdownObserver observer) {
         validatePermission(android.Manifest.permission.SHUTDOWN);
 
         Log.i(TAG, "Shutting down");
@@ -865,12 +907,9 @@ class MountService extends IMountService.Stub
         }
 
         if (state.equals(Environment.MEDIA_MOUNTED)) {
-            /*
-             * If the media is mounted, then gracefully unmount it.
-             */
-            if (doUnmountVolume(path, true) != StorageResultCode.OperationSucceeded) {
-                Log.e(TAG, "Failed to unmount media for shutdown");
-            }
+            // Post a unmount message.
+            ShutdownCallBack ucb = new ShutdownCallBack(path, observer);
+            mHandler.sendMessage(mHandler.obtainMessage(H_UNMOUNT_PM_UPDATE, ucb));
         }
     }
 

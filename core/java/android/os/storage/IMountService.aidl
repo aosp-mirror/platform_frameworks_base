@@ -18,6 +18,7 @@
 package android.os.storage;
 
 import android.os.storage.IMountServiceListener;
+import android.os.storage.IMountShutdownObserver;
 
 /** WARNING! Update IMountService.h and IMountService.cpp if you change this file.
  * In particular, the ordering of the methods below must match the 
@@ -142,6 +143,7 @@ interface IMountService
 
     /**
      * Shuts down the MountService and gracefully unmounts all external media.
+     * Invokes call back once the shutdown is complete.
      */
-    void shutdown();
+    void shutdown(IMountShutdownObserver observer);
 }

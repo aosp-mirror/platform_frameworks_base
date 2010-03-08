@@ -18,7 +18,6 @@ package android.os;
 
 import java.io.IOException;
 import android.os.ServiceManager;
-import android.os.storage.IMountService;
 
 /**
  * Class that provides access to some of the power management functions.
@@ -101,15 +100,6 @@ public class Power
      */
     public static void reboot(String reason) throws IOException
     {
-        IMountService mSvc = IMountService.Stub.asInterface(
-                ServiceManager.getService("mount"));
-
-        if (mSvc != null) {
-            try {
-                mSvc.shutdown();
-            } catch (Exception e) {
-            }
-        }
         rebootNative(reason);
     }
 
