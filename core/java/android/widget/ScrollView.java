@@ -22,7 +22,6 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.FocusFinder;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -52,8 +51,6 @@ import java.util.List;
  * <p>ScrollView only supports vertical scrolling.
  */
 public class ScrollView extends FrameLayout {
-    private static final String TAG = "ScrollView";
-
     static final int ANIMATED_SCROLL_GAP = 250;
 
     static final float MAX_SCROLL_FACTOR = 0.5f;
@@ -318,11 +315,7 @@ public class ScrollView extends FrameLayout {
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
         // Let the focused view and/or our descendants get the key first
-        boolean handled = super.dispatchKeyEvent(event);
-        if (handled) {
-            return true;
-        }
-        return executeKeyEvent(event);
+        return super.dispatchKeyEvent(event) || executeKeyEvent(event);
     }
 
     /**
@@ -510,8 +503,11 @@ public class ScrollView extends FrameLayout {
                     final int deltaY = (int) (mLastMotionY - y);
                     mLastMotionY = y;
 
+                    final int oldX = mScrollX;
+                    final int oldY = mScrollY;
                     overscrollBy(0, deltaY, 0, mScrollY, 0, getScrollRange(),
                             0, getOverscrollMax());
+                    onScrollChanged(mScrollX, mScrollY, oldX, oldY);
                 }
                 break;
             case MotionEvent.ACTION_UP: 
