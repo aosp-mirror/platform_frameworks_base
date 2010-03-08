@@ -195,6 +195,7 @@ int64_t Prefetcher::getCachedDurationUs(bool *noMoreData) {
 
     int64_t minCacheDurationUs = -1;
     ssize_t minIndex = -1;
+    bool anySourceActive = false;
     for (size_t i = 0; i < mSources.size(); ++i) {
         int64_t cacheDurationUs;
         sp<PrefetchedSource> source = mSources[i].promote();
@@ -202,8 +203,8 @@ int64_t Prefetcher::getCachedDurationUs(bool *noMoreData) {
             continue;
         }
 
-        if (!source->getCacheDurationUs(&cacheDurationUs)) {
-            continue;
+        if (source->getCacheDurationUs(&cacheDurationUs)) {
+            anySourceActive = true;
         }
 
         if (minIndex < 0 || cacheDurationUs < minCacheDurationUs) {
@@ -213,7 +214,7 @@ int64_t Prefetcher::getCachedDurationUs(bool *noMoreData) {
     }
 
     if (noMoreData) {
-        *noMoreData = minCacheDurationUs < 0;
+        *noMoreData = !anySourceActive;
     }
 
     return minCacheDurationUs < 0 ? 0 : minCacheDurationUs;
@@ -226,7 +227,7 @@ status_t Prefetcher::prepare() {
     bool noMoreData;
     do {
         duration = getCachedDurationUs(&noMoreData);
-    } while (!noMoreData && duration < kMaxCacheDurationUs);
+    } while (!noMoreData && duration < 2000000ll);
 
     return OK;
 }
@@ -326,13 +327,11 @@ sp<MetaData> PrefetchedSource::getFormat() {
 bool PrefetchedSource::getCacheDurationUs(int64_t *durationUs) {
     Mutex::Autolock autoLock(mLock);
 
-    if (!mStarted || mReachedEOS) {
-        *durationUs = 0;
+    *durationUs = mCacheDurationUs;
 
+    if (!mStarted || mReachedEOS) {
         return false;
     }
-
-    *durationUs = mCacheDurationUs;
 
     return true;
 }
