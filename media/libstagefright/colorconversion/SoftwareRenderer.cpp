@@ -45,7 +45,9 @@ SoftwareRenderer::SoftwareRenderer(
         LOGI("Creating physical memory heap failed, reverting to regular heap.");
         mMemoryHeap = new MemoryHeapBase(2 * mFrameSize);
     } else {
-        mMemoryHeap = new MemoryHeapPmem(mMemoryHeap);
+        sp<MemoryHeapPmem> pmemHeap = new MemoryHeapPmem(mMemoryHeap);
+        pmemHeap->slap();
+        mMemoryHeap = pmemHeap;
     }
 
     CHECK(mISurface.get() != NULL);
