@@ -19,7 +19,6 @@
 
 #include <stdio.h>
 #include <stdint.h>
-#include <string.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -28,18 +27,21 @@
 
 #define KEYSTORE_MESSAGE_SIZE 65535
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* This function is provided for native components to get values from keystore.
  * Users are required to link against libcutils. The lengths of keys and values
  * are limited to KEYSTORE_MESSAGE_SIZE. This function returns the length of
  * the requested value or -1 if something goes wrong. */
-static int keystore_get(const char *key, char *value)
+static int keystore_get(const char *key, int length, char *value)
 {
-    int length = strlen(key);
     uint8_t bytes[2] = {length >> 8, length};
     uint8_t code = 'g';
     int sock;
 
-    if (length > KEYSTORE_MESSAGE_SIZE) {
+    if (length < 0 || length > KEYSTORE_MESSAGE_SIZE) {
         return -1;
     }
     sock = socket_local_client("keystore", ANDROID_SOCKET_NAMESPACE_RESERVED,
@@ -65,5 +67,9 @@ static int keystore_get(const char *key, char *value)
     close(sock);
     return length;
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
