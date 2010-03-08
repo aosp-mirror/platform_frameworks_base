@@ -156,7 +156,11 @@ void Layer::reloadTexture(const Region& dirty)
     if (mFlags & DisplayHardware::DIRECT_TEXTURE) {
         if (buffer->usage & GraphicBuffer::USAGE_HW_TEXTURE) {
             if (mTextures[index].dirty) {
-                initializeEglImage(buffer, &mTextures[index]);
+                if (initializeEglImage(buffer, &mTextures[index]) != NO_ERROR) {
+                    // not sure what we can do here...
+                    mFlags &= ~DisplayHardware::DIRECT_TEXTURE;
+                    goto slowpath;
+                }
             }
         } else {
             if (mHybridBuffer==0 || (mHybridBuffer->width != buffer->width ||
@@ -166,8 +170,13 @@ void Layer::reloadTexture(const Region& dirty)
                         buffer->width, buffer->height, buffer->format,
                         GraphicBuffer::USAGE_SW_WRITE_OFTEN |
                         GraphicBuffer::USAGE_HW_TEXTURE);
-                initializeEglImage(
-                        mHybridBuffer, &mTextures[0]);
+                if (initializeEglImage(
+                        mHybridBuffer, &mTextures[0]) != NO_ERROR) {
+                    // not sure what we can do here...
+                    mFlags &= ~DisplayHardware::DIRECT_TEXTURE;
+                    mHybridBuffer.clear();
+                    goto slowpath;
+                }
             }
 
             GGLSurface t;
@@ -236,6 +245,7 @@ void Layer::reloadTexture(const Region& dirty)
     } else
 #endif
     {
+slowpath:
         for (size_t i=0 ; i<NUM_BUFFERS ; i++) {
             mTextures[i].image = EGL_NO_IMAGE_KHR;
         }

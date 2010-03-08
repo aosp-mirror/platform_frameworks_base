@@ -99,7 +99,8 @@ private:
 
     class Buffer : public LightRefBase<Buffer> {
     public:
-        Buffer(const ISurface::BufferHeap& buffers, ssize_t offset);
+        Buffer(const ISurface::BufferHeap& buffers,
+                ssize_t offset, size_t bufferSize);
         inline bool supportsCopybit() const {
             return mSupportsCopybit;
         }

@@ -261,7 +261,8 @@ sp<OverlayRef> LayerBuffer::SurfaceLayerBuffer::createOverlay(
 // LayerBuffer::Buffer
 // ============================================================================
 
-LayerBuffer::Buffer::Buffer(const ISurface::BufferHeap& buffers, ssize_t offset)
+LayerBuffer::Buffer::Buffer(const ISurface::BufferHeap& buffers,
+        ssize_t offset, size_t bufferSize)
     : mBufferHeap(buffers), mSupportsCopybit(false)
 {
     NativeBuffer& src(mNativeBuffer);
@@ -280,7 +281,7 @@ LayerBuffer::Buffer::Buffer(const ISurface::BufferHeap& buffers, ssize_t offset)
     if (module && module->perform) {
         int err = module->perform(module,
                 GRALLOC_MODULE_PERFORM_CREATE_HANDLE_FROM_BUFFER,
-                buffers.heap->heapID(), buffers.heap->getSize(),
+                buffers.heap->heapID(), bufferSize,
                 offset, buffers.heap->base(),
                 &src.img.handle);
 
@@ -415,7 +416,7 @@ void LayerBuffer::BufferSource::postBuffer(ssize_t offset)
 
     sp<Buffer> buffer;
     if (buffers.heap != 0) {
-        buffer = new LayerBuffer::Buffer(buffers, offset);
+        buffer = new LayerBuffer::Buffer(buffers, offset, mBufferSize);
         if (buffer->getStatus() != NO_ERROR)
             buffer.clear();
         setBuffer(buffer);
@@ -469,6 +470,11 @@ void LayerBuffer::BufferSource::onDraw(const Region& clip) const
     if (mLayer.mFlags & DisplayHardware::DIRECT_TEXTURE) {
         err = INVALID_OPERATION;
         if (ourBuffer->supportsCopybit()) {
+
+            // there are constraints on buffers used by the GPU and these may not
+            // be honored here. We need to change the API so the buffers
+            // are allocated with gralloc. For now disable this code-path
+#if 0
             // First, try to use the buffer as an EGLImage directly
             if (mUseEGLImageDirectly) {
                 // NOTE: Assume the buffer is allocated with the proper USAGE flags
@@ -483,6 +489,8 @@ void LayerBuffer::BufferSource::onDraw(const Region& clip) const
                     mUseEGLImageDirectly = false;
                 }
             }
+#endif
+
             copybit_device_t* copybit = mLayer.mBlitEngine;
             if (copybit && err != NO_ERROR) {
                 // create our EGLImageKHR the first time
