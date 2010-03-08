@@ -173,22 +173,6 @@ public class LockPatternUtils {
         getDevicePolicyManager().reportSuccessfulPasswordAttempt();
     }
 
-    public void setActivePasswordState(int mode, int length) {
-        int policyMode = DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
-        switch (mode) {
-            case MODE_PATTERN:
-                policyMode = DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
-                break;
-            case MODE_PIN:
-                policyMode = DevicePolicyManager.PASSWORD_QUALITY_NUMERIC;
-                break;
-            case MODE_PASSWORD:
-                policyMode = DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC;
-                break;
-        }
-        getDevicePolicyManager().setActivePasswordState(policyMode, length);
-    }
-
     /**
      * Check to see if a pattern matches the saved pattern.  If no pattern exists,
      * always returns true.
@@ -312,13 +296,15 @@ public class LockPatternUtils {
                 raf.write(hash, 0, hash.length);
             }
             raf.close();
+            DevicePolicyManager dpm = getDevicePolicyManager();
             if (pattern != null) {
                 setBoolean(PATTERN_EVER_CHOSEN_KEY, true);
                 setLong(PASSWORD_TYPE_KEY, MODE_PATTERN);
-                DevicePolicyManager dpm = (DevicePolicyManager)mContext.getSystemService(
-                        Context.DEVICE_POLICY_SERVICE);
                 dpm.setActivePasswordState(
                         DevicePolicyManager.PASSWORD_QUALITY_SOMETHING, pattern.size());
+            } else {
+                dpm.setActivePasswordState(
+                        DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED, 0);
             }
         } catch (FileNotFoundException fnfe) {
             // Cant do much, unless we want to fail over to using the settings provider
@@ -404,15 +390,17 @@ public class LockPatternUtils {
                 raf.write(hash, 0, hash.length);
             }
             raf.close();
+            DevicePolicyManager dpm = getDevicePolicyManager();
             if (password != null) {
                 int finalMode = adjustPasswordMode(password, mode);
                 if (mode < finalMode) {
                     mode = finalMode;
                 }
                 setLong(PASSWORD_TYPE_KEY, mode);
-                DevicePolicyManager dpm = (DevicePolicyManager)mContext.getSystemService(
-                        Context.DEVICE_POLICY_SERVICE);
                 dpm.setActivePasswordState(mode, password.length());
+            } else {
+                dpm.setActivePasswordState(
+                        DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED, 0);
             }
         } catch (FileNotFoundException fnfe) {
             // Cant do much, unless we want to fail over to using the settings provider
