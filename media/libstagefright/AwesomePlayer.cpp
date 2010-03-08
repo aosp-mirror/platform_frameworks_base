@@ -1064,6 +1064,8 @@ void AwesomePlayer::abortPrepare(status_t err) {
 }
 
 void AwesomePlayer::onPrepareAsyncEvent() {
+    sp<Prefetcher> prefetcher;
+
     {
         Mutex::Autolock autoLock(mLock);
 
@@ -1075,12 +1077,25 @@ void AwesomePlayer::onPrepareAsyncEvent() {
                 return;
             }
         }
-    }
 
-    sp<Prefetcher> prefetcher;
+        if (mVideoTrack != NULL && mVideoSource == NULL) {
+            status_t err = initVideoDecoder();
 
-    {
-        Mutex::Autolock autoLock(mLock);
+            if (err != OK) {
+                abortPrepare(err);
+                return;
+            }
+        }
+
+        if (mAudioTrack != NULL && mAudioSource == NULL) {
+            status_t err = initAudioDecoder();
+
+            if (err != OK) {
+                abortPrepare(err);
+                return;
+            }
+        }
+
         prefetcher = mPrefetcher;
     }
 
@@ -1090,24 +1105,6 @@ void AwesomePlayer::onPrepareAsyncEvent() {
     }
 
     Mutex::Autolock autoLock(mLock);
-
-    if (mVideoTrack != NULL && mVideoSource == NULL) {
-        status_t err = initVideoDecoder();
-
-        if (err != OK) {
-            abortPrepare(err);
-            return;
-        }
-    }
-
-    if (mAudioTrack != NULL && mAudioSource == NULL) {
-        status_t err = initAudioDecoder();
-
-        if (err != OK) {
-            abortPrepare(err);
-            return;
-        }
-    }
 
     if (mIsAsyncPrepare) {
         if (mVideoWidth < 0 || mVideoHeight < 0) {
