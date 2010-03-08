@@ -666,22 +666,15 @@ status_t LayerBase::initializeEglImage(
             dpy, EGL_NO_CONTEXT, EGL_NATIVE_BUFFER_ANDROID,
             (EGLClientBuffer)clientBuf, attrs);
 
-    LOGE_IF(texture->image == EGL_NO_IMAGE_KHR,
-            "eglCreateImageKHR() failed. err=0x%4x",
-            eglGetError());
-
     if (texture->image != EGL_NO_IMAGE_KHR) {
         glBindTexture(GL_TEXTURE_2D, texture->name);
         glEGLImageTargetTexture2DOES(GL_TEXTURE_2D,
                 (GLeglImageOES)texture->image);
         GLint error = glGetError();
         if (UNLIKELY(error != GL_NO_ERROR)) {
-            // this failed, for instance, because we don't support NPOT.
-            // FIXME: do something!
             LOGE("layer=%p, glEGLImageTargetTexture2DOES(%p) "
                  "failed err=0x%04x",
                  this, texture->image, error);
-            mFlags &= ~DisplayHardware::DIRECT_TEXTURE;
             err = INVALID_OPERATION;
         } else {
             // Everything went okay!
@@ -691,6 +684,8 @@ status_t LayerBase::initializeEglImage(
             texture->height = clientBuf->height;
         }
     } else {
+        LOGE("layer=%p, eglCreateImageKHR() failed. err=0x%4x",
+                this, eglGetError());
         err = INVALID_OPERATION;
     }
     return err;
