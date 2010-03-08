@@ -220,13 +220,13 @@ int64_t Prefetcher::getCachedDurationUs(bool *noMoreData) {
 }
 
 status_t Prefetcher::prepare() {
-    // Buffer about 2 secs worth of data on prepare.
+    // Fill the cache.
 
     int64_t duration;
     bool noMoreData;
     do {
         duration = getCachedDurationUs(&noMoreData);
-    } while (!noMoreData && duration < 2000000);
+    } while (!noMoreData && duration < kMaxCacheDurationUs);
 
     return OK;
 }
