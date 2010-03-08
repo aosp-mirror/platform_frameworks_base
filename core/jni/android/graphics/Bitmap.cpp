@@ -527,6 +527,53 @@ static void Bitmap_copyPixelsFromBuffer(JNIEnv* env, jobject,
     }
 }
 
+static bool Bitmap_sameAs(JNIEnv* env, jobject, const SkBitmap* bm0,
+                             const SkBitmap* bm1) {
+    if (bm0->width() != bm1->width() ||
+        bm0->height() != bm1->height() ||
+        bm0->config() != bm1->config()) {
+        return false;
+    }
+
+    SkAutoLockPixels alp0(*bm0);
+    SkAutoLockPixels alp1(*bm1);
+
+    // if we can't load the pixels, return false
+    if (NULL == bm0->getPixels() || NULL == bm1->getPixels()) {
+        return false;
+    }
+
+    if (bm0->config() == SkBitmap::kIndex8_Config) {
+        SkColorTable* ct0 = bm0->getColorTable();
+        SkColorTable* ct1 = bm1->getColorTable();
+        if (NULL == ct0 || NULL == ct1) {
+            return false;
+        }
+        if (ct0->count() != ct1->count()) {
+            return false;
+        }
+
+        SkAutoLockColors alc0(ct0);
+        SkAutoLockColors alc1(ct1);
+        const size_t size = ct0->count() * sizeof(SkPMColor);
+        if (memcmp(alc0.colors(), alc1.colors(), size) != 0) {
+            return false;
+        }
+    }
+
+    // now compare each scanline. We can't do the entire buffer at once,
+    // since we don't care about the pixel values that might extend beyond
+    // the width (since the scanline might be larger than the logical width)
+    const int h = bm0->height();
+    const size_t size = bm0->width() * bm0->bytesPerPixel();
+    for (int y = 0; y < h; y++) {
+        if (memcmp(bm0->getAddr(0, y), bm1->getAddr(0, y), size) != 0) {
+            return false;
+        }
+    }
+    return true;
+}
+
 static void Bitmap_prepareToDraw(JNIEnv* env, jobject, SkBitmap* bitmap) {
     bitmap->lockPixels();
     bitmap->unlockPixels();
@@ -567,7 +614,8 @@ static JNINativeMethod gBitmapMethods[] = {
                                             (void*)Bitmap_copyPixelsToBuffer },
     {   "nativeCopyPixelsFromBuffer", "(ILjava/nio/Buffer;)V",
                                             (void*)Bitmap_copyPixelsFromBuffer },
-    {   "nativePrepareToDraw",      "(I)V", (void*)Bitmap_prepareToDraw }
+    {   "nativeSameAs",             "(II)Z", (void*)Bitmap_sameAs },
+    {   "nativePrepareToDraw",      "(I)V", (void*)Bitmap_prepareToDraw },
 };
 
 #define kClassPathName  "android/graphics/Bitmap"
