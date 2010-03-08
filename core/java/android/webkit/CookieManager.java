@@ -216,9 +216,6 @@ public final class CookieManager {
             diff = cookie2.domain.length() - cookie1.domain.length();
             if (diff != 0) return diff;
 
-            diff = cookie2.name.hashCode() - cookie1.name.hashCode();
-            if (diff != 0) return diff;
-
             // If cookie2 has a null value, it should come later in
             // the list.
             if (cookie2.value == null) {
@@ -228,6 +225,9 @@ public final class CookieManager {
                 // cookie1 has a null value, place it later in the list.
                 return 1;
             }
+
+            diff = cookie2.name.hashCode() - cookie1.name.hashCode();
+            if (diff != 0) return diff;
 
             // cookie1 and cookie2 both have non-null values so we emit a
             // warning and treat them as the same.
@@ -804,9 +804,13 @@ public final class CookieManager {
             cookie = new Cookie(host, path);
 
             // Cookies like "testcookie; path=/;" are valid and used
-            // (lovefilm.se). Check for equal as in the string "testcookie"
-            // Check for equalIndex == -1 as in the string "testcookie;"
-            if (semicolonIndex <= equalIndex || equalIndex == -1) {
+            // (lovefilm.se).
+            // Look for 2 cases:
+            // 1. "foo" or "foo;" where equalIndex is -1
+            // 2. "foo; path=..." where the first semicolon is before an equal
+            //    and a semicolon exists.
+            if ((semicolonIndex != -1 && (semicolonIndex < equalIndex)) ||
+                    equalIndex == -1) {
                 // Fix up the index in case we have a string like "testcookie"
                 if (semicolonIndex == -1) {
                     semicolonIndex = length;
@@ -815,7 +819,10 @@ public final class CookieManager {
                 cookie.value = null;
             } else {
                 cookie.name = cookieString.substring(index, equalIndex);
-                if (cookieString.charAt(equalIndex + 1) == QUOTATION) {
+                // Make sure we do not throw an exception if the cookie is like
+                // "foo="
+                if ((equalIndex < length - 1) &&
+                        (cookieString.charAt(equalIndex + 1) == QUOTATION)) {
                     index = cookieString.indexOf(QUOTATION, equalIndex + 2);
                     if (index == -1) {
                         // bad format, force return
@@ -834,7 +841,7 @@ public final class CookieManager {
                             equalIndex + 1 + MAX_COOKIE_LENGTH);
                 } else if (equalIndex + 1 == semicolonIndex
                         || semicolonIndex < equalIndex) {
-                    // this is an unusual case like foo=;
+                    // this is an unusual case like "foo=;" or "foo="
                     cookie.value = "";
                 } else {
                     cookie.value = cookieString.substring(equalIndex + 1,
