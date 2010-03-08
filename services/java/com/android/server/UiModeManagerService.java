@@ -347,11 +347,13 @@ class UiModeManagerService extends IUiModeManager.Stub {
                 }
             }
             if (mKeyguardLock != null) {
+                long ident = Binder.clearCallingIdentity();
                 if (enabled) {
                     mKeyguardLock.disableKeyguard();
                 } else {
                     mKeyguardLock.reenableKeyguard();
                 }
+                Binder.restoreCallingIdentity(ident);
             }
         }
     }
