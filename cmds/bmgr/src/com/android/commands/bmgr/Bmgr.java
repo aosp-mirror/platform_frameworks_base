@@ -16,10 +16,10 @@
 
 package com.android.commands.bmgr;
 
-import android.backup.IBackupManager;
-import android.backup.IRestoreObserver;
-import android.backup.IRestoreSession;
-import android.backup.RestoreSet;
+import android.app.backup.RestoreSet;
+import android.app.backup.IBackupManager;
+import android.app.backup.IRestoreObserver;
+import android.app.backup.IRestoreSession;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 

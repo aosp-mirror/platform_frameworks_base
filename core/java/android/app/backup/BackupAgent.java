@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-package android.app;
+package android.app.backup;
 
 import android.app.IBackupAgent;
-import android.backup.BackupDataInput;
-import android.backup.BackupDataOutput;
-import android.backup.IBackupManager;
+import android.app.backup.IBackupManager;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.os.Binder;
@@ -39,7 +37,7 @@ import java.io.IOException;
  * respectively.
  * <p>
  * A backup agent based on convenient helper classes is available in
- * {@link android.backup.BackupHelperAgent} for less complex implementation
+ * {@link android.app.backup.BackupHelperAgent} for less complex implementation
  * requirements.
  * <p>
  * STOPSHIP write more documentation about the backup process here.
@@ -87,7 +85,7 @@ public abstract class BackupAgent extends ContextWrapper {
      * The application is being restored from backup and should replace any
      * existing data with the contents of the backup. The backup data is
      * provided in the file descriptor pointed to by the
-     * {@link android.backup.BackupDataInput} instance <code>data</code>. Once
+     * {@link android.app.backup.BackupDataInput} instance <code>data</code>. Once
      * the restore is finished, the application should write a representation of
      * the final state to the <code>newState</code> file descriptor.
      * <p>

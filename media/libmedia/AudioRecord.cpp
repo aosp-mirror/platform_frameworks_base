@@ -552,13 +552,17 @@ ssize_t AudioRecord::read(void* buffer, size_t userSize)
 
         audioBuffer.frameCount = userSize/frameSize();
 
-        // Calling obtainBuffer() with a negative wait count causes
-        // an (almost) infinite wait time.
-        status_t err = obtainBuffer(&audioBuffer, -1);
+        // By using a wait count corresponding to twice the timeout period in
+        // obtainBuffer() we give a chance to recover once for a read timeout
+        // (if media_server crashed for instance) before returning a length of
+        // 0 bytes read to the client
+        status_t err = obtainBuffer(&audioBuffer, ((2 * MAX_RUN_TIMEOUT_MS) / WAIT_PERIOD_MS));
         if (err < 0) {
             // out of buffers, return #bytes written
             if (err == status_t(NO_MORE_BUFFERS))
                 break;
+            if (err == status_t(TIMED_OUT))
+                err = 0;
             return ssize_t(err);
         }
 

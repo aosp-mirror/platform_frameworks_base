@@ -39,6 +39,7 @@ interface ILocationProvider {
     void disable();
     int getStatus(out Bundle extras);
     long getStatusUpdateTime();
+    String getInternalState();
     void enableLocationTracking(boolean enable);
     void setMinTime(long minTime);
     void updateNetworkState(int state, in NetworkInfo info);

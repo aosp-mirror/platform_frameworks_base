@@ -106,6 +106,10 @@ public class PassiveProvider implements LocationProviderInterface {
         return -1;
     }
 
+    public String getInternalState() {
+        return null;
+    }
+
     public void enableLocationTracking(boolean enable) {
         mTracking = enable;
     }

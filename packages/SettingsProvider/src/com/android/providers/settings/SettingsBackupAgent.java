@@ -30,9 +30,9 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.zip.CRC32;
 
-import android.backup.BackupDataInput;
-import android.backup.BackupDataOutput;
-import android.backup.BackupHelperAgent;
+import android.app.backup.BackupDataInput;
+import android.app.backup.BackupDataOutput;
+import android.app.backup.BackupHelperAgent;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;

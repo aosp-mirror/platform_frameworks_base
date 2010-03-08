@@ -146,15 +146,15 @@ public class TelephonyUtilsTest extends TestCase {
     }
 
     /**
-     * Test string configuration using all options.
+     * Test string configuration using all options and with quotes.
      */
     @SmallTest
     public void testRetryManageString() throws Exception {
         RetryManager rm = new RetryManager();
         int time;
 
-        assertTrue(rm.configure("max_retries=4,"
-                  + "default_randomization=100,1000, 2000 :200 , 3000"));
+        assertTrue(rm.configure(
+                "\"max_retries=4, default_randomization=100,1000, 2000 :200 , 3000\""));
         assertTrue(rm.isRetryNeeded());
         time = rm.getRetryTimer();
         assertTrue((time >= 1000) && (time < 1100));

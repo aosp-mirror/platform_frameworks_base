@@ -32,6 +32,7 @@ import android.database.CursorWindow;
 import android.database.IBulkCursor;
 import android.database.IContentObserver;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
@@ -111,6 +112,15 @@ public class MockContentProvider extends ContentProvider {
         public int update(Uri url, ContentValues values, String selection, String[] selectionArgs)
                 throws RemoteException {
             return MockContentProvider.this.update(url, values, selection, selectionArgs);
+        }
+
+        /**
+         * @hide
+         */
+        @SuppressWarnings("unused")
+        public Bundle call(String method, String request, Bundle args)
+                throws RemoteException {
+            return MockContentProvider.this.call(method, request, args);
         }
 
         public IBinder asBinder() {
@@ -202,6 +212,14 @@ public class MockContentProvider extends ContentProvider {
     @Override
     public ContentProviderResult[] applyBatch(ArrayList<ContentProviderOperation> operations) {
         throw new UnsupportedOperationException("unimplemented mock method");
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public Bundle call(String method, String request, Bundle args) {
+        throw new UnsupportedOperationException("unimplemented mock method call");
     }
 
     /**

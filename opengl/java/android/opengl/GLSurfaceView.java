@@ -30,6 +30,7 @@ import javax.microedition.khronos.opengles.GL10;
 
 import android.content.Context;
 import android.content.pm.ConfigurationInfo;
+import android.graphics.PixelFormat;
 import android.os.SystemProperties;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -75,15 +76,23 @@ import android.view.SurfaceView;
  * <li>{@link #setGLWrapper(GLWrapper)}
  * </ul>
  * <p>
- * <h4>Choosing an EGL Configuration</h4>
- * A given Android device may support multiple possible types of drawing surfaces.
- * The available surfaces may differ in how may channels of data are present, as
- * well as how many bits are allocated to each channel. Therefore, the first thing
- * GLSurfaceView has to do when starting to render is choose what type of surface to use.
+ * <h4>Specifying the android.view.Surface</h4>
+ * By default GLSurfaceView will create a PixelFormat.RGB_565 format surface. If a translucent
+ * surface is required, call getHolder().setFormat(PixelFormat.TRANSLUCENT).
+ * The exact format of a TRANSLUCENT surface is device dependent, but it will be
+ * a 32-bit-per-pixel surface with 8 bits per component.
  * <p>
- * By default GLSurfaceView chooses an available surface that's closest to a 16-bit R5G6B5 surface
- * with a 16-bit depth buffer and no stencil. If you would prefer a different surface (for example,
- * if you do not need a depth buffer) you can override the default behavior by calling one of the
+ * <h4>Choosing an EGL Configuration</h4>
+ * A given Android device may support multiple EGLConfig rendering configurations.
+ * The available configurations may differ in how may channels of data are present, as
+ * well as how many bits are allocated to each channel. Therefore, the first thing
+ * GLSurfaceView has to do when starting to render is choose what EGLConfig to use.
+ * <p>
+ * By default GLSurfaceView chooses a EGLConfig that has an RGB_656 pixel format,
+ * with at least a 16-bit depth buffer and no stencil.
+ * <p>
+ * If you would prefer a different EGLConfig
+ * you can override the default behavior by calling one of the
  * setEGLConfigChooser methods.
  * <p>
  * <h4>Debug Behavior</h4>
@@ -149,6 +158,7 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
     private final static boolean LOG_THREADS = false;
     private final static boolean LOG_SURFACE = false;
     private final static boolean LOG_RENDERER = false;
+    private final static boolean LOG_RENDERER_DRAW_FRAME = false;
     // Work-around for bug 2263168
     private final static boolean DRAW_TWICE_AFTER_SIZE_CHANGED = true;
     /**
@@ -210,6 +220,7 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
         // underlying surface is created and destroyed
         SurfaceHolder holder = getHolder();
         holder.addCallback(this);
+        holder.setFormat(PixelFormat.RGB_565);
         // setType is not needed for SDK 2.0 or newer. Uncomment this
         // statement if back-porting this code to older SDKs.
         // holder.setType(SurfaceHolder.SURFACE_TYPE_GPU);
@@ -330,8 +341,9 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
      * is called.
      * <p>
      * If no setEGLConfigChooser method is called, then by default the
-     * view will choose a config as close to 16-bit RGB as possible, with
-     * a depth buffer as close to 16 bits as possible.
+     * view will choose an EGLConfig that is compatible with the current
+     * android.view.Surface, with a depth buffer depth of
+     * at least 16 bits.
      * @param configChooser
      */
     public void setEGLConfigChooser(EGLConfigChooser configChooser) {
@@ -347,9 +359,9 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
      * called, it must be called before {@link #setRenderer(Renderer)}
      * is called.
      * <p>
-      * If no setEGLConfigChooser method is called, then by default the
-     * view will choose a config as close to 16-bit RGB as possible, with
-     * a depth buffer as close to 16 bits as possible.
+     * If no setEGLConfigChooser method is called, then by default the
+     * view will choose an RGB_565 surface with a depth buffer depth of
+     * at least 16 bits.
      *
      * @param needDepth
      */
@@ -359,15 +371,15 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
 
     /**
      * Install a config chooser which will choose a config
-     * with at least the specified component sizes, and as close
-     * to the specified component sizes as possible.
+     * with at least the specified depthSize and stencilSize,
+     * and exactly the specified redSize, greenSize, blueSize and alphaSize.
      * <p>If this method is
      * called, it must be called before {@link #setRenderer(Renderer)}
      * is called.
      * <p>
      * If no setEGLConfigChooser method is called, then by default the
-     * view will choose a config as close to 16-bit RGB as possible, with
-     * a depth buffer as close to 16 bits as possible.
+     * view will choose an RGB_565 surface with a depth buffer depth of
+     * at least 16 bits.
      *
      */
     public void setEGLConfigChooser(int redSize, int greenSize, int blueSize,
@@ -774,6 +786,10 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
         }
     }
 
+    /**
+     * Choose a configuration with exactly the specified r,g,b,a sizes,
+     * and at least the specified depth and stencil sizes.
+     */
     private class ComponentSizeChooser extends BaseConfigChooser {
         public ComponentSizeChooser(int redSize, int greenSize, int blueSize,
                 int alphaSize, int depthSize, int stencilSize) {
@@ -797,14 +813,12 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
         @Override
         public EGLConfig chooseConfig(EGL10 egl, EGLDisplay display,
                 EGLConfig[] configs) {
-            EGLConfig closestConfig = null;
-            int closestDistance = 1000;
-            for(EGLConfig config : configs) {
+            for (EGLConfig config : configs) {
                 int d = findConfigAttrib(egl, display, config,
                         EGL10.EGL_DEPTH_SIZE, 0);
                 int s = findConfigAttrib(egl, display, config,
                         EGL10.EGL_STENCIL_SIZE, 0);
-                if (d >= mDepthSize && s>= mStencilSize) {
+                if ((d >= mDepthSize) && (s >= mStencilSize)) {
                     int r = findConfigAttrib(egl, display, config,
                             EGL10.EGL_RED_SIZE, 0);
                     int g = findConfigAttrib(egl, display, config,
@@ -813,17 +827,13 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                               EGL10.EGL_BLUE_SIZE, 0);
                     int a = findConfigAttrib(egl, display, config,
                             EGL10.EGL_ALPHA_SIZE, 0);
-                    int distance = Math.abs(r - mRedSize)
-                                + Math.abs(g - mGreenSize)
-                                + Math.abs(b - mBlueSize)
-                                + Math.abs(a - mAlphaSize);
-                    if (distance < closestDistance) {
-                        closestDistance = distance;
-                        closestConfig = config;
+                    if ((r == mRedSize) && (g == mGreenSize)
+                            && (b == mBlueSize) && (a == mAlphaSize)) {
+                        return config;
                     }
                 }
             }
-            return closestConfig;
+            return null;
         }
 
         private int findConfigAttrib(EGL10 egl, EGLDisplay display,
@@ -846,18 +856,13 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
         }
 
     /**
-     * This class will choose a supported surface as close to
-     * RGB565 as possible, with or without a depth buffer.
+     * This class will choose a RGB_565 surface with
+     * or without a depth buffer.
      *
      */
     private class SimpleEGLConfigChooser extends ComponentSizeChooser {
         public SimpleEGLConfigChooser(boolean withDepthBuffer) {
-            super(4, 4, 4, 0, withDepthBuffer ? 16 : 0, 0);
-            // Adjust target values. This way we'll accept a 4444 or
-            // 555 buffer if there's no 565 buffer available.
-            mRedSize = 5;
-            mGreenSize = 6;
-            mBlueSize = 5;
+            super(5, 6, 5, 0, withDepthBuffer ? 16 : 0, 0);
         }
     }
 
@@ -1209,15 +1214,18 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                     }
 
                     if (createEglSurface) {
+                        if (LOG_SURFACE) {
+                            Log.w("GLThread", "egl createSurface");
+                        }
                         gl = (GL10) mEglHelper.createSurface(getHolder());
                         sGLThreadManager.checkGLDriver(gl);
-                        if (LOG_RENDERER) {
-                            Log.w("GLThread", "onSurfaceCreated");
-                        }
                         createEglSurface = false;
                     }
 
                     if (createEglContext) {
+                        if (LOG_RENDERER) {
+                            Log.w("GLThread", "onSurfaceCreated");
+                        }
                         mRenderer.onSurfaceCreated(gl, mEglHelper.mEglConfig);
                         createEglContext = false;
                     }
@@ -1230,7 +1238,7 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                         sizeChanged = false;
                     }
 
-                    if (LOG_RENDERER) {
+                    if (LOG_RENDERER_DRAW_FRAME) {
                         Log.w("GLThread", "onDrawFrame");
                     }
                     mRenderer.onDrawFrame(gl);
@@ -1438,6 +1446,7 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
     }
 
     private static class GLThreadManager {
+        private static String TAG = "GLThreadManager";
 
         public synchronized void threadExiting(GLThread thread) {
             if (LOG_THREADS) {
@@ -1483,7 +1492,7 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
 
         public synchronized boolean shouldReleaseEGLContextWhenPausing() {
             checkGLESVersion();
-            return mMultipleGLESContextsAllowed;
+            return !mMultipleGLESContextsAllowed;
         }
 
         public synchronized void checkGLDriver(GL10 gl) {
@@ -1493,6 +1502,10 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                     String renderer = gl.glGetString(GL10.GL_RENDERER);
                     mMultipleGLESContextsAllowed =
                         ! renderer.startsWith(kMSM7K_RENDERER_PREFIX);
+                    if (LOG_SURFACE) {
+                        Log.w(TAG, "checkGLDriver renderer = \"" + renderer + "\" multipleContextsAllowed = "
+                            + mMultipleGLESContextsAllowed);
+                    }
                     notifyAll();
                 }
                 mGLESDriverCheckComplete = true;
@@ -1506,6 +1519,10 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                         ConfigurationInfo.GL_ES_VERSION_UNDEFINED);
                 if (mGLESVersion >= kGLES_20) {
                     mMultipleGLESContextsAllowed = true;
+                }
+                if (LOG_SURFACE) {
+                    Log.w(TAG, "checkGLESVersion mGLESVersion =" +
+                            " " + mGLESVersion + " mMultipleGLESContextsAllowed = " + mMultipleGLESContextsAllowed);
                 }
                 mGLESVersionCheckComplete = true;
             }

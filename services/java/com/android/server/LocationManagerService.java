@@ -765,7 +765,9 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             pw.println(prefix + "mMinTime=" + mMinTime + " mMinDistance=" + mMinDistance);
             pw.println(prefix + "mUid=" + mUid);
             pw.println(prefix + "mLastFixBroadcast:");
-            mLastFixBroadcast.dump(new PrintWriterPrinter(pw), prefix + "  ");
+            if (mLastFixBroadcast != null) {
+                mLastFixBroadcast.dump(new PrintWriterPrinter(pw), prefix + "  ");
+            }
             pw.println(prefix + "mLastStatusBroadcast=" + mLastStatusBroadcast);
         }
     }
@@ -1952,6 +1954,13 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
                 pw.println("  Mock Providers:");
                 for (Map.Entry<String, MockProvider> i : mMockProviders.entrySet()) {
                     i.getValue().dump(pw, "      ");
+                }
+            }
+            for (LocationProviderInterface provider: mProviders) {
+                String state = provider.getInternalState();
+                if (state != null) {
+                    pw.println(provider.getName() + " Internal State:");
+                    pw.write(state);
                 }
             }
         }

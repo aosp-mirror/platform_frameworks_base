@@ -26,6 +26,7 @@ import android.database.IBulkCursor;
 import android.database.IContentObserver;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.IBinder;
 import android.os.Parcel;
@@ -220,6 +221,21 @@ abstract public class ContentProviderNative extends Binder implements IContentPr
                     } else {
                         reply.writeInt(0);
                     }
+                    return true;
+                }
+
+                case CALL_TRANSACTION:
+                {
+                    data.enforceInterface(IContentProvider.descriptor);
+
+                    String method = data.readString();
+                    String stringArg = data.readString();
+                    Bundle args = data.readBundle();
+
+                    Bundle responseBundle = call(method, stringArg, args);
+
+                    reply.writeNoException();
+                    reply.writeBundle(responseBundle);
                     return true;
                 }
             }
@@ -485,6 +501,22 @@ final class ContentProviderProxy implements IContentProvider
         return fd;
     }
 
+    public Bundle call(String method, String request, Bundle args)
+            throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+
+        data.writeInterfaceToken(IContentProvider.descriptor);
+
+        data.writeString(method);
+        data.writeString(request);
+        data.writeBundle(args);
+
+        mRemote.transact(IContentProvider.CALL_TRANSACTION, data, reply, 0);
+
+        DatabaseUtils.readExceptionFromParcel(reply);
+        return reply.readBundle();
+    }
+
     private IBinder mRemote;
 }
-

@@ -153,13 +153,17 @@ public class RetryManager {
     }
 
     /**
-     * Configure for using string which allow arbitary
+     * Configure for using string which allow arbitrary
      * sequences of times. See class comments for the
      * string format.
      *
-     * @return true if successfull
+     * @return true if successful
      */
     public boolean configure(String configStr) {
+        // Strip quotes if present.
+        if ((configStr.startsWith("\"") && configStr.endsWith("\""))) {
+            configStr = configStr.substring(1, configStr.length()-1);
+        }
         if (DBG) log("configure: '" + configStr + "'");
 
         if (!TextUtils.isEmpty(configStr)) {

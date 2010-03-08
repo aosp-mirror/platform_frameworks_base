@@ -946,7 +946,8 @@ struct ResTable_config
         MASK_UI_MODE_TYPE = 0x0f,
         UI_MODE_TYPE_ANY = 0x00,
         UI_MODE_TYPE_NORMAL = 0x01,
-        UI_MODE_TYPE_CAR = 0x02,
+        UI_MODE_TYPE_DESK = 0x02,
+        UI_MODE_TYPE_CAR = 0x03,
 
         // uiMode bits for the night switch.
         MASK_UI_MODE_NIGHT = 0x30,

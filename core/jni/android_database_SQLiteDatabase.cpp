@@ -63,19 +63,28 @@ enum {
 
 static jfieldID offset_db_handle;
 
+static char *createStr(const char *path) {
+    int len = strlen(path);
+    char *str = (char *)malloc(len + 1);
+    strncpy(str, path, len);
+    str[len] = NULL;
+    return str;
+}
+
 static void sqlLogger(void *databaseName, int iErrCode, const char *zMsg) {
-    LOGI("sqlite returned: error code = %d, msg = %s\n", iErrCode, zMsg);
+    LOGI("sqlite returned: database = %s, error code = %d, msg = %s\n",
+            (char *)databaseName, iErrCode, zMsg);
 }
 
 // register the logging func on sqlite. needs to be done BEFORE any sqlite3 func is called.
-static void registerLoggingFunc() {
+static void registerLoggingFunc(const char *path) {
     static bool loggingFuncSet = false;
     if (loggingFuncSet) {
         return;
     }
 
     LOGV("Registering sqlite logging func \n");
-    int err = sqlite3_config(SQLITE_CONFIG_LOG, &sqlLogger, 0);
+    int err = sqlite3_config(SQLITE_CONFIG_LOG, &sqlLogger, (void *)createStr(path));
     if (err != SQLITE_OK) {
         LOGE("sqlite_config failed error_code = %d. THIS SHOULD NEVER occur.\n", err);
         return;
@@ -93,7 +102,7 @@ static void dbopen(JNIEnv* env, jobject object, jstring pathString, jint flags)
     int sqliteFlags;
 
     // register the logging func on sqlite. needs to be done BEFORE any sqlite3 func is called.
-    registerLoggingFunc();
+    registerLoggingFunc(path8);
 
     // convert our flags into the sqlite flags
     if (flags & CREATE_IF_NECESSARY) {
@@ -172,10 +181,7 @@ static char *getDatabaseName(JNIEnv* env, sqlite3 * handle, jstring databaseName
         LOGE("Failure in getDatabaseName(). VM ran out of memory?\n");
         return NULL; // VM would have thrown OutOfMemoryError
     }
-    int len = strlen(path);
-    char *dbNameStr = (char *)malloc(len + 1);
-    strncpy(dbNameStr, path, len);
-    dbNameStr[len-1] = NULL;
+    char *dbNameStr = createStr(path);
     env->ReleaseStringUTFChars(databaseName, path);
     return dbNameStr;
 }

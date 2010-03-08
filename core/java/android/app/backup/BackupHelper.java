@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package android.backup;
+package android.app.backup;
 
 import android.os.ParcelFileDescriptor;
 
 /**
  * A convenient interface to be used with the
- * {@link android.backup.BackupHelperAgent} to implement backup and restore of
+ * {@link android.app.backup.BackupHelperAgent} to implement backup and restore of
  * arbitrary data types.
  * <p>
  * STOPSHOP: document!

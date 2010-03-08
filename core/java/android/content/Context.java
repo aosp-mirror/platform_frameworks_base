@@ -1489,7 +1489,7 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService} to retrieve an
-     * {@link android.backup.IBackupManager IBackupManager} for communicating
+     * {@link android.app.backup.IBackupManager IBackupManager} for communicating
      * with the backup mechanism.
      * @hide
      * 

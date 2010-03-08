@@ -129,7 +129,7 @@ int register_android_backup_FileBackupHelperBase(JNIEnv* env)
     LOG_FATAL_IF(s_descriptorField == NULL,
             "Unable to find descriptor field in java.io.FileDescriptor");
     
-    return AndroidRuntime::registerNativeMethods(env, "android/backup/FileBackupHelperBase",
+    return AndroidRuntime::registerNativeMethods(env, "android/app/backup/FileBackupHelperBase",
             g_methods, NELEM(g_methods));
 }
 

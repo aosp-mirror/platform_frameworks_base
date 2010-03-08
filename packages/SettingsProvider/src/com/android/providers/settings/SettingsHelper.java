@@ -20,8 +20,8 @@ import java.util.Locale;
 
 import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
-import android.backup.BackupDataInput;
-import android.backup.IBackupManager;
+import android.app.backup.BackupDataInput;
+import android.app.backup.IBackupManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.IContentService;

@@ -820,7 +820,12 @@ bool AaptGroupEntry::getUiModeTypeName(const char* name,
     if (strcmp(name, kWildcardName) == 0) {
         if (out) out->uiMode =
                 (out->uiMode&~ResTable_config::MASK_UI_MODE_TYPE)
-                | ResTable_config::UI_MODE_TYPE_NORMAL;
+                | ResTable_config::UI_MODE_TYPE_ANY;
+        return true;
+    } else if (strcmp(name, "desk") == 0) {
+      if (out) out->uiMode =
+              (out->uiMode&~ResTable_config::MASK_UI_MODE_TYPE)
+              | ResTable_config::UI_MODE_TYPE_DESK;
         return true;
     } else if (strcmp(name, "car") == 0) {
       if (out) out->uiMode =

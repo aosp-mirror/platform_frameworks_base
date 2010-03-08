@@ -27,6 +27,7 @@ import android.content.ContentQueryMap;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.IContentProvider;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -492,6 +493,16 @@ public final class Settings {
     // End of Intent actions for Settings
 
     /**
+     * @hide - Private call() method on SettingsProvider to read from 'system' table.
+     */
+    public static final String CALL_METHOD_GET_SYSTEM = "GET_system";
+
+    /**
+     * @hide - Private call() method on SettingsProvider to read from 'secure' table.
+     */
+    public static final String CALL_METHOD_GET_SECURE = "GET_secure";
+
+    /**
      * Activity Extra: Limit available options in launched activity based on the given authority.
      * <p>
      * This can be passed as an extra field in an Activity Intent with one or more syncable content
@@ -544,23 +555,36 @@ public final class Settings {
         }
     }
 
+    // Thread-safe.
     private static class NameValueCache {
         private final String mVersionSystemProperty;
         private final Uri mUri;
 
-        // Must synchronize(mValues) to access mValues and mValuesVersion.
+        private static final String[] SELECT_VALUE =
+            new String[] { Settings.NameValueTable.VALUE };
+        private static final String NAME_EQ_PLACEHOLDER = "name=?";
+
+        // Must synchronize on 'this' to access mValues and mValuesVersion.
         private final HashMap<String, String> mValues = new HashMap<String, String>();
         private long mValuesVersion = 0;
 
-        public NameValueCache(String versionSystemProperty, Uri uri) {
+        // Initially null; set lazily and held forever.  Synchronized on 'this'.
+        private IContentProvider mContentProvider = null;
+
+        // The method we'll call (or null, to not use) on the provider
+        // for the fast path of retrieving settings.
+        private final String mCallCommand;
+
+        public NameValueCache(String versionSystemProperty, Uri uri, String callCommand) {
             mVersionSystemProperty = versionSystemProperty;
             mUri = uri;
+            mCallCommand = callCommand;
         }
 
         public String getString(ContentResolver cr, String name) {
             long newValuesVersion = SystemProperties.getLong(mVersionSystemProperty, 0);
 
-            synchronized (mValues) {
+            synchronized (this) {
                 if (mValuesVersion != newValuesVersion) {
                     if (LOCAL_LOGV) {
                         Log.v(TAG, "invalidate [" + mUri.getLastPathSegment() + "]: current " +
@@ -576,17 +600,47 @@ public final class Settings {
                 }
             }
 
+            IContentProvider cp = null;
+            synchronized (this) {
+                cp = mContentProvider;
+                if (cp == null) {
+                    cp = mContentProvider = cr.acquireProvider(mUri.getAuthority());
+                }
+            }
+
+            // Try the fast path first, not using query().  If this
+            // fails (alternate Settings provider that doesn't support
+            // this interface?) then we fall back to the query/table
+            // interface.
+            if (mCallCommand != null) {
+                try {
+                    Bundle b = cp.call(mCallCommand, name, null);
+                    if (b != null) {
+                        String value = b.getPairValue();
+                        synchronized (this) {
+                            mValues.put(name, value);
+                        }
+                        return value;
+                    }
+                    // If the response Bundle is null, we fall through
+                    // to the query interface below.
+                } catch (RemoteException e) {
+                    // Not supported by the remote side?  Fall through
+                    // to query().
+                }
+            }
+
             Cursor c = null;
             try {
-                c = cr.query(mUri, new String[] { Settings.NameValueTable.VALUE },
-                        Settings.NameValueTable.NAME + "=?", new String[]{name}, null);
+                c = cp.query(mUri, SELECT_VALUE, NAME_EQ_PLACEHOLDER,
+                             new String[]{name}, null);
                 if (c == null) {
                     Log.w(TAG, "Can't get key " + name + " from " + mUri);
                     return null;
                 }
 
                 String value = c.moveToNext() ? c.getString(0) : null;
-                synchronized (mValues) {
+                synchronized (this) {
                     mValues.put(name, value);
                 }
                 if (LOCAL_LOGV) {
@@ -594,7 +648,7 @@ public final class Settings {
                             name + " = " + (value == null ? "(null)" : value));
                 }
                 return value;
-            } catch (SQLException e) {
+            } catch (RemoteException e) {
                 Log.w(TAG, "Can't get key " + name + " from " + mUri, e);
                 return null;  // Return null, but don't cache it.
             } finally {
@@ -611,7 +665,8 @@ public final class Settings {
     public static final class System extends NameValueTable {
         public static final String SYS_PROP_SETTING_VERSION = "sys.settings_system_version";
 
-        private static volatile NameValueCache mNameValueCache = null;
+        // Populated lazily, guarded by class object:
+        private static NameValueCache sNameValueCache = null;
 
         private static final HashSet<String> MOVED_TO_SECURE;
         static {
@@ -660,10 +715,11 @@ public final class Settings {
                         + " to android.provider.Settings.Secure, returning read-only value.");
                 return Secure.getString(resolver, name);
             }
-            if (mNameValueCache == null) {
-                mNameValueCache = new NameValueCache(SYS_PROP_SETTING_VERSION, CONTENT_URI);
+            if (sNameValueCache == null) {
+                sNameValueCache = new NameValueCache(SYS_PROP_SETTING_VERSION, CONTENT_URI,
+                                                     CALL_METHOD_GET_SYSTEM);
             }
-            return mNameValueCache.getString(resolver, name);
+            return sNameValueCache.getString(resolver, name);
         }
 
         /**
@@ -1905,7 +1961,8 @@ public final class Settings {
     public static final class Secure extends NameValueTable {
         public static final String SYS_PROP_SETTING_VERSION = "sys.settings_secure_version";
 
-        private static volatile NameValueCache mNameValueCache = null;
+        // Populated lazily, guarded by class object:
+        private static NameValueCache sNameValueCache = null;
 
         /**
          * Look up a name in the database.
@@ -1914,10 +1971,11 @@ public final class Settings {
          * @return the corresponding value, or null if not present
          */
         public synchronized static String getString(ContentResolver resolver, String name) {
-            if (mNameValueCache == null) {
-                mNameValueCache = new NameValueCache(SYS_PROP_SETTING_VERSION, CONTENT_URI);
+            if (sNameValueCache == null) {
+                sNameValueCache = new NameValueCache(SYS_PROP_SETTING_VERSION, CONTENT_URI,
+                                                     CALL_METHOD_GET_SECURE);
             }
-            return mNameValueCache.getString(resolver, name);
+            return sNameValueCache.getString(resolver, name);
         }
 
         /**

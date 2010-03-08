@@ -21,7 +21,7 @@ import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 
-import android.backup.BackupManager;
+import android.app.backup.BackupManager;
 import android.content.ContentProvider;
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -30,9 +30,11 @@ import android.content.pm.PackageManager;
 import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.os.SystemProperties;
 import android.provider.DrmStore;
@@ -47,6 +49,8 @@ public class SettingsProvider extends ContentProvider {
 
     private static final String TABLE_FAVORITES = "favorites";
     private static final String TABLE_OLD_FAVORITES = "old_favorites";
+
+    private static final String[] COLUMN_VALUE = new String[] { "value" };
 
     protected DatabaseHelper mOpenHelper;
     private BackupManager mBackupManager;
@@ -218,6 +222,44 @@ public class SettingsProvider extends ContentProvider {
         } finally {
             c.close();
         }
+    }
+
+    /**
+     * Fast path that avoids the use of chatty remoted Cursors.
+     */
+    @Override
+    public Bundle call(String method, String request, Bundle args) {
+        if (Settings.CALL_METHOD_GET_SYSTEM.equals(method)) {
+            return lookupValue("system", request);
+        }
+
+        if (Settings.CALL_METHOD_GET_SECURE.equals(method)) {
+            return lookupValue("secure", request);
+        }
+        return null;
+    }
+
+    // Looks up value 'key' in 'table' and returns either a single-pair Bundle,
+    // possibly with a null value, or null on failure.
+    private Bundle lookupValue(String table, String key) {
+        // TODO: avoid database lookup and serve from in-process cache.
+        SQLiteDatabase db = mOpenHelper.getReadableDatabase();
+        Cursor cursor = null;
+        try {
+            cursor = db.query(table, COLUMN_VALUE, "name=?", new String[]{key},
+                              null, null, null, null);
+            if (cursor != null && cursor.getCount() == 1) {
+                cursor.moveToFirst();
+                String value = cursor.getString(0);
+                return Bundle.forPair("value", value);
+            }
+        } catch (SQLiteException e) {
+            Log.w(TAG, "settings lookup error", e);
+            return null;
+        } finally {
+            if (cursor != null) cursor.close();
+        }
+        return Bundle.forPair("value", null);
     }
 
     @Override

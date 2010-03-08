@@ -137,8 +137,6 @@ public class Camera {
      * can be connected to another process.
      *
      * @throws IOException if the method fails.
-     *
-     * @hide
      */
     public native final void reconnect() throws IOException;
 

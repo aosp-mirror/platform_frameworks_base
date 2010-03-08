@@ -46,7 +46,7 @@ import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.ResultInfo;
 import android.app.Service;
-import android.backup.IBackupManager;
+import android.app.backup.IBackupManager;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;

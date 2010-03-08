@@ -484,6 +484,9 @@ public class VideoView extends SurfaceView implements MediaPlayerControl {
             // after we return from this we can't use the surface any more
             mSurfaceHolder = null;
             if (mMediaController != null) mMediaController.hide();
+            if (mCurrentState != STATE_SUSPEND) {
+                release(true);
+            }
         }
     };
 

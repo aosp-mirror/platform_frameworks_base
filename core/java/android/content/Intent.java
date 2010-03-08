@@ -1838,21 +1838,17 @@ public class Intent implements Parcelable, Cloneable {
             "android.intent.action.REBOOT";
 
     /**
-     * Broadcast Action:  A sticky broadcast indicating the phone was docked
-     * or undocked.
+     * Broadcast Action:  A sticky broadcast for changes in the physical
+     * docking state of the device.
      *
      * <p>The intent will have the following extra values:
      * <ul>
      *   <li><em>{@link #EXTRA_DOCK_STATE}</em> - the current dock
-     *       state, which depends on the state of the car mode.</li>
-     *   <li><em>{@link #EXTRA_PHYSICAL_DOCK_STATE}</em> - the physical dock
-     *       state.</li>
-     *   <li><em>{@link #EXTRA_CAR_MODE_ENABLED}</em> - a boolean indicating the
-     *       state of the car mode.</li>
+     *       state, indicating which dock the device is physically in.</li>
      * </ul>
-     * <p>This is intended for monitoring the current dock state.
-     * To launch an activity from a dock state change, use {@link #CATEGORY_CAR_DOCK}
-     * or {@link #CATEGORY_DESK_DOCK} instead.
+     * <p>This is intended for monitoring the current physical dock state.
+     * See {@link android.app.UiModeManager} for the normal API dealing with
+     * dock mode changes.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_DOCK_EVENT =
@@ -2014,15 +2010,15 @@ public class Intent implements Parcelable, Cloneable {
             "android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST";
     /**
      * An activity to run when device is inserted into a car dock.
-     * Used with {@link #ACTION_MAIN} to launch an activity.
-     * To monitor dock state, use {@link #ACTION_DOCK_EVENT} instead.
+     * Used with {@link #ACTION_MAIN} to launch an activity.  For more
+     * information, see {@link android.app.UiModeManager}.
      */
     @SdkConstant(SdkConstantType.INTENT_CATEGORY)
     public static final String CATEGORY_CAR_DOCK = "android.intent.category.CAR_DOCK";
     /**
      * An activity to run when device is inserted into a car dock.
-     * Used with {@link #ACTION_MAIN} to launch an activity.
-     * To monitor dock state, use {@link #ACTION_DOCK_EVENT} instead.
+     * Used with {@link #ACTION_MAIN} to launch an activity.  For more
+     * information, see {@link android.app.UiModeManager}.
      */
     @SdkConstant(SdkConstantType.INTENT_CATEGORY)
     public static final String CATEGORY_DESK_DOCK = "android.intent.category.DESK_DOCK";
@@ -2189,22 +2185,6 @@ public class Intent implements Parcelable, Cloneable {
      * to represent that the phone is in a car dock.
      */
     public static final int EXTRA_DOCK_STATE_CAR = 2;
-
-    /**
-     * Used as an int extra field in {@link android.content.Intent#ACTION_DOCK_EVENT}
-     * intents to request the physical dock state. Possible values are
-     * {@link android.content.Intent#EXTRA_DOCK_STATE_UNDOCKED},
-     * {@link android.content.Intent#EXTRA_DOCK_STATE_DESK}, or
-     * {@link android.content.Intent#EXTRA_DOCK_STATE_CAR}.
-     */
-    public static final String EXTRA_PHYSICAL_DOCK_STATE =
-            "android.intent.extra.PHYSICAL_DOCK_STATE";
-
-    /**
-     * Used as an boolean extra field in {@link android.content.Intent#ACTION_DOCK_EVENT}
-     * intents to indicate that the car mode is enabled or not.
-     */
-    public static final String EXTRA_CAR_MODE_ENABLED = "android.intent.extra.CAR_MODE_ENABLED";
 
     /**
      * Boolean that can be supplied as meta-data with a dock activity, to

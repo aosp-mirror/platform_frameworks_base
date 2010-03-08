@@ -22,10 +22,11 @@ import android.database.CursorWindow;
 import android.database.IBulkCursor;
 import android.database.IContentObserver;
 import android.net.Uri;
-import android.os.RemoteException;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.IInterface;
 import android.os.ParcelFileDescriptor;
+import android.os.RemoteException;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
@@ -58,6 +59,17 @@ public interface IContentProvider extends IInterface {
             throws RemoteException, FileNotFoundException;
     public ContentProviderResult[] applyBatch(ArrayList<ContentProviderOperation> operations)
             throws RemoteException, OperationApplicationException;
+    /**
+     * @hide -- until interface has proven itself
+     *
+     * Call an provider-defined method.  This can be used to implement
+     * interfaces that are cheaper than using a Cursor.
+     *
+     * @param method Method name to call.  Opaque to framework.
+     * @param request Nullable String argument passed to method.
+     * @param args Nullable Bundle argument passed to method.
+     */
+    public Bundle call(String method, String request, Bundle args) throws RemoteException;
 
     /* IPC constants */
     static final String descriptor = "android.content.IContentProvider";
@@ -71,4 +83,5 @@ public interface IContentProvider extends IInterface {
     static final int OPEN_FILE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 13;
     static final int OPEN_ASSET_FILE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 14;
     static final int APPLY_BATCH_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 19;
+    static final int CALL_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 20;
 }

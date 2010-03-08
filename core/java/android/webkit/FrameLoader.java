@@ -111,11 +111,10 @@ class FrameLoader {
             }
             mNetwork = Network.getInstance(mListener.getContext());
             if (mListener.isSynchronous()) {
-                handleHTTPLoad();
-            } else {
-                WebViewWorker.getHandler().obtainMessage(
-                        WebViewWorker.MSG_ADD_HTTPLOADER, this).sendToTarget();
+                return handleHTTPLoad();
             }
+            WebViewWorker.getHandler().obtainMessage(
+                    WebViewWorker.MSG_ADD_HTTPLOADER, this).sendToTarget();
             return true;
         } else if (handleLocalFile(url, mListener, mSettings)) {
             return true;
@@ -147,34 +146,53 @@ class FrameLoader {
             return true;
         }
         if (URLUtil.isAssetUrl(url)) {
-            // load asset in a separate thread as it involves IO
-            WebViewWorker.getHandler().obtainMessage(
-                    WebViewWorker.MSG_ADD_STREAMLOADER,
-                    new FileLoader(url, loadListener, FileLoader.TYPE_ASSET,
-                            true)).sendToTarget();
+            if (loadListener.isSynchronous()) {
+                new FileLoader(url, loadListener, FileLoader.TYPE_ASSET,
+                        true).load();
+            } else {
+                // load asset in a separate thread as it involves IO
+                WebViewWorker.getHandler().obtainMessage(
+                        WebViewWorker.MSG_ADD_STREAMLOADER,
+                        new FileLoader(url, loadListener, FileLoader.TYPE_ASSET,
+                                true)).sendToTarget();
+            }
             return true;
         } else if (URLUtil.isResourceUrl(url)) {
-            // load resource in a separate thread as it involves IO
-            WebViewWorker.getHandler().obtainMessage(
-                    WebViewWorker.MSG_ADD_STREAMLOADER,
-                    new FileLoader(url, loadListener, FileLoader.TYPE_RES,
-                            true)).sendToTarget();
+            if (loadListener.isSynchronous()) {
+                new FileLoader(url, loadListener, FileLoader.TYPE_RES,
+                        true).load();
+            } else {
+                // load resource in a separate thread as it involves IO
+                WebViewWorker.getHandler().obtainMessage(
+                        WebViewWorker.MSG_ADD_STREAMLOADER,
+                        new FileLoader(url, loadListener, FileLoader.TYPE_RES,
+                                true)).sendToTarget();
+            }
             return true;
         } else if (URLUtil.isFileUrl(url)) {
-            // load file in a separate thread as it involves IO
-            WebViewWorker.getHandler().obtainMessage(
-                    WebViewWorker.MSG_ADD_STREAMLOADER,
-                    new FileLoader(url, loadListener, FileLoader.TYPE_FILE,
-                            settings.getAllowFileAccess())).sendToTarget();
+            if (loadListener.isSynchronous()) {
+                new FileLoader(url, loadListener, FileLoader.TYPE_FILE,
+                        settings.getAllowFileAccess()).load();
+            } else {
+                // load file in a separate thread as it involves IO
+                WebViewWorker.getHandler().obtainMessage(
+                        WebViewWorker.MSG_ADD_STREAMLOADER,
+                        new FileLoader(url, loadListener, FileLoader.TYPE_FILE,
+                                settings.getAllowFileAccess())).sendToTarget();
+            }
             return true;
         } else if (URLUtil.isContentUrl(url)) {
             // Send the raw url to the ContentLoader because it will do a
             // permission check and the url has to match.
-            // load content in a separate thread as it involves IO
-            WebViewWorker.getHandler().obtainMessage(
-                    WebViewWorker.MSG_ADD_STREAMLOADER,
-                    new ContentLoader(loadListener.url(), loadListener))
-                    .sendToTarget();
+            if (loadListener.isSynchronous()) {
+                new ContentLoader(loadListener.url(), loadListener).load();
+            } else {
+                // load content in a separate thread as it involves IO
+                WebViewWorker.getHandler().obtainMessage(
+                        WebViewWorker.MSG_ADD_STREAMLOADER,
+                        new ContentLoader(loadListener.url(), loadListener))
+                        .sendToTarget();
+            }
             return true;
         } else if (URLUtil.isDataUrl(url)) {
             // load data in the current thread to reduce the latency

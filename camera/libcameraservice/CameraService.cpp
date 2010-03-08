@@ -1291,8 +1291,26 @@ void CameraService::Client::copyFrameAndPostCopiedFrame(const sp<ICameraClient>&
     client->dataCallback(CAMERA_MSG_PREVIEW_FRAME, frame);
 }
 
+static const int kDumpLockRetries = 50;
+static const int kDumpLockSleep = 60000;
+
+static bool tryLock(Mutex& mutex)
+{
+    bool locked = false;
+    for (int i = 0; i < kDumpLockRetries; ++i) {
+        if (mutex.tryLock() == NO_ERROR) {
+            locked = true;
+            break;
+        }
+        usleep(kDumpLockSleep);
+    }
+    return locked;
+}
+
 status_t CameraService::dump(int fd, const Vector<String16>& args)
 {
+    static const char* kDeadlockedString = "CameraService may be deadlocked\n";
+
     const size_t SIZE = 256;
     char buffer[SIZE];
     String8 result;
@@ -1304,7 +1322,13 @@ status_t CameraService::dump(int fd, const Vector<String16>& args)
         result.append(buffer);
         write(fd, result.string(), result.size());
     } else {
-        AutoMutex lock(&mServiceLock);
+        bool locked = tryLock(mServiceLock);
+        // failed to lock - CameraService is probably deadlocked
+        if (!locked) {
+            String8 result(kDeadlockedString);
+            write(fd, result.string(), result.size());
+        }
+
         if (mClient != 0) {
             sp<Client> currentClient = mClient.promote();
             sprintf(buffer, "Client (%p) PID: %d\n",
@@ -1317,6 +1341,8 @@ status_t CameraService::dump(int fd, const Vector<String16>& args)
             result.append("No camera client yet.\n");
             write(fd, result.string(), result.size());
         }
+
+        if (locked) mServiceLock.unlock();
     }
     return NO_ERROR;
 }

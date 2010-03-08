@@ -3247,7 +3247,10 @@ bool AudioFlinger::RecordThread::threadLoop()
                             if (mBytesRead < 0) {
                                 LOGE("Error reading audio input");
                                 if (mActiveTrack->mState == TrackBase::ACTIVE) {
-                                    sleep(1);
+                                    // Force input into standby so that it tries to
+                                    // recover at next read attempt
+                                    mInput->standby();
+                                    usleep(5000);
                                 }
                                 mRsmpInIndex = mFrameCount;
                                 framesOut = 0;
@@ -3429,7 +3432,10 @@ status_t AudioFlinger::RecordThread::getNextBuffer(AudioBufferProvider::Buffer* 
         if (mBytesRead < 0) {
             LOGE("RecordThread::getNextBuffer() Error reading audio input");
             if (mActiveTrack->mState == TrackBase::ACTIVE) {
-                sleep(1);
+                // Force input into standby so that it tries to
+                // recover at next read attempt
+                mInput->standby();
+                usleep(5000);
             }
             buffer->raw = 0;
             buffer->frameCount = 0;

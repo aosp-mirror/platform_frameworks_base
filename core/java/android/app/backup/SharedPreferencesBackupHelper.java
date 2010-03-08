@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.backup;
+package android.app.backup;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -25,7 +25,7 @@ import java.io.File;
 
 /**
  * A helper class which can be used in conjunction with
- * {@link android.backup.BackupHelperAgent} to manage the backup of
+ * {@link android.app.backup.BackupHelperAgent} to manage the backup of
  * {@link android.content.SharedPreferences}. Whenever backup is performed it
  * will back up all named shared preferences which have changed since the last
  * backup.

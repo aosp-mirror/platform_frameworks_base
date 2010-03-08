@@ -266,6 +266,15 @@ public class LocationProviderProxy implements LocationProviderInterface {
         return 0;
      }
 
+    public String getInternalState() {
+        try {
+            return mProvider.getInternalState();
+        } catch (RemoteException e) {
+            Log.e(TAG, "getInternalState failed", e);
+            return null;
+        }
+    }
+
     public boolean isLocationTracking() {
         return mLocationTracking;
     }

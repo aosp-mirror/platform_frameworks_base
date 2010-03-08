@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.app.backup.BackupAgent;
 import android.content.BroadcastReceiver;
 import android.content.ComponentCallbacks;
 import android.content.ComponentName;
