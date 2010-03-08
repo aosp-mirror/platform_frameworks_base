@@ -24,6 +24,10 @@ import android.content.pm.PackageManager;
 import android.content.Context;
 import android.content.Intent;
 import android.Manifest;
+import android.text.TextUtils;
+import android.util.Log;
+
+import java.util.Arrays;
 
 /**
  * Abstract base class for creating AccountAuthenticators.
@@ -103,6 +107,8 @@ import android.Manifest;
  * writing activities to handle these requests.
  */
 public abstract class AbstractAccountAuthenticator {
+    private static final String TAG = "AccountAuthenticator";
+
     private final Context mContext;
 
     public AbstractAccountAuthenticator(Context context) {
@@ -111,19 +117,34 @@ public abstract class AbstractAccountAuthenticator {
 
     private class Transport extends IAccountAuthenticator.Stub {
         public void addAccount(IAccountAuthenticatorResponse response, String accountType,
-                String authTokenType, String[] requiredFeatures, Bundle options)
+                String authTokenType, String[] features, Bundle options)
                 throws RemoteException {
+            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                Log.v(TAG, "addAccount: accountType " + accountType
+                        + ", authTokenType " + authTokenType
+                        + ", features " + (features == null ? "[]" : Arrays.toString(features)));
+            }
             checkBinderPermission();
             try {
                 final Bundle result = AbstractAccountAuthenticator.this.addAccount(
                     new AccountAuthenticatorResponse(response),
-                        accountType, authTokenType, requiredFeatures, options);
+                        accountType, authTokenType, features, options);
+                if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                    result.keySet(); // force it to be unparcelled
+                    Log.v(TAG, "addAccount: result " + AccountManager.sanitizeResult(result));
+                }
                 if (result != null) {
                     response.onResult(result);
                 }
             } catch (NetworkErrorException e) {
+                if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                    Log.v(TAG, "addAccount", e);
+                }
                 response.onError(AccountManager.ERROR_CODE_NETWORK_ERROR, e.getMessage());
             } catch (UnsupportedOperationException e) {
+                if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                    Log.v(TAG, "addAccount", e);
+                }
                 response.onError(AccountManager.ERROR_CODE_UNSUPPORTED_OPERATION,
                         "addAccount not supported");
             }
@@ -131,16 +152,30 @@ public abstract class AbstractAccountAuthenticator {
 
         public void confirmCredentials(IAccountAuthenticatorResponse response,
                 Account account, Bundle options) throws RemoteException {
+            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                Log.v(TAG, "confirmCredentials: " + account);
+            }
             checkBinderPermission();
             try {
                 final Bundle result = AbstractAccountAuthenticator.this.confirmCredentials(
                     new AccountAuthenticatorResponse(response), account, options);
+                if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                    result.keySet(); // force it to be unparcelled
+                    Log.v(TAG, "confirmCredentials: result "
+                            + AccountManager.sanitizeResult(result));
+                }
                 if (result != null) {
                     response.onResult(result);
                 }
             } catch (NetworkErrorException e) {
+                if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                    Log.v(TAG, "confirmCredentials", e);
+                }
                 response.onError(AccountManager.ERROR_CODE_NETWORK_ERROR, e.getMessage());
             } catch (UnsupportedOperationException e) {
+                if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                    Log.v(TAG, "confirmCredentials", e);
+                }
                 response.onError(AccountManager.ERROR_CODE_UNSUPPORTED_OPERATION,
                         "confirmCredentials not supported");
             }
@@ -149,16 +184,32 @@ public abstract class AbstractAccountAuthenticator {
         public void getAuthTokenLabel(IAccountAuthenticatorResponse response,
                 String authTokenType)
                 throws RemoteException {
+            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                Log.v(TAG, "getAuthTokenLabel: authTokenType " + authTokenType);
+            }
             checkBinderPermission();
             try {
                 Bundle result = new Bundle();
                 result.putString(AccountManager.KEY_AUTH_TOKEN_LABEL,
                         AbstractAccountAuthenticator.this.getAuthTokenLabel(authTokenType));
-                response.onResult(result);
+                if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                    result.keySet(); // force it to be unparcelled
+                    Log.v(TAG, "getAuthTokenLabel: result "
+                            + AccountManager.sanitizeResult(result));
+                }
+                if (result != null) {
+                    response.onResult(result);
+                }
             } catch (IllegalArgumentException e) {
+                if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                    Log.v(TAG, "getAuthTokenLabel", e);
+                }
                 response.onError(AccountManager.ERROR_CODE_BAD_ARGUMENTS,
                         "unknown authTokenType");
             } catch (UnsupportedOperationException e) {
+                if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                    Log.v(TAG, "getAuthTokenLabel", e);
+                }
                 response.onError(AccountManager.ERROR_CODE_UNSUPPORTED_OPERATION,
                         "getAuthTokenTypeLabel not supported");
             }
@@ -167,35 +218,64 @@ public abstract class AbstractAccountAuthenticator {
         public void getAuthToken(IAccountAuthenticatorResponse response,
                 Account account, String authTokenType, Bundle loginOptions)
                 throws RemoteException {
+            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                Log.v(TAG, "getAuthToken: " + account
+                        + ", authTokenType " + authTokenType);
+            }
             checkBinderPermission();
             try {
                 final Bundle result = AbstractAccountAuthenticator.this.getAuthToken(
                         new AccountAuthenticatorResponse(response), account,
                         authTokenType, loginOptions);
+                if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                    result.keySet(); // force it to be unparcelled
+                    Log.v(TAG, "getAuthToken: result " + AccountManager.sanitizeResult(result));
+                }
                 if (result != null) {
                     response.onResult(result);
                 }
             } catch (UnsupportedOperationException e) {
+                if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                    Log.v(TAG, "getAuthToken", e);
+                }
                 response.onError(AccountManager.ERROR_CODE_UNSUPPORTED_OPERATION,
                         "getAuthToken not supported");
             } catch (NetworkErrorException e) {
+                if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                    Log.v(TAG, "getAuthToken", e);
+                }
                 response.onError(AccountManager.ERROR_CODE_NETWORK_ERROR, e.getMessage());
             }
         }
 
         public void updateCredentials(IAccountAuthenticatorResponse response, Account account,
                 String authTokenType, Bundle loginOptions) throws RemoteException {
+            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                Log.v(TAG, "updateCredentials: " + account
+                        + ", authTokenType " + authTokenType);
+            }
             checkBinderPermission();
             try {
                 final Bundle result = AbstractAccountAuthenticator.this.updateCredentials(
                     new AccountAuthenticatorResponse(response), account,
                         authTokenType, loginOptions);
+                if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                    result.keySet(); // force it to be unparcelled
+                    Log.v(TAG, "updateCredentials: result "
+                            + AccountManager.sanitizeResult(result));
+                }
                 if (result != null) {
                     response.onResult(result);
                 }
             } catch (NetworkErrorException e) {
+                if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                    Log.v(TAG, "updateCredentials", e);
+                }
                 response.onError(AccountManager.ERROR_CODE_NETWORK_ERROR, e.getMessage());
             } catch (UnsupportedOperationException e) {
+                if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                    Log.v(TAG, "updateCredentials", e);
+                }
                 response.onError(AccountManager.ERROR_CODE_UNSUPPORTED_OPERATION,
                         "updateCredentials not supported");
             }

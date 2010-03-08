@@ -20,11 +20,14 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.os.Parcel;
 import android.os.RemoteException;
+import android.util.Log;
 
 /**
  * Object used to communicate responses back to the AccountManager
  */
 public class AccountAuthenticatorResponse implements Parcelable {
+    private static final String TAG = "AccountAuthenticator";
+
     private IAccountAuthenticatorResponse mAccountAuthenticatorResponse;
 
     /**
@@ -40,6 +43,11 @@ public class AccountAuthenticatorResponse implements Parcelable {
     }
 
     public void onResult(Bundle result) {
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            result.keySet(); // force it to be unparcelled
+            Log.v(TAG, "AccountAuthenticatorResponse.onResult: "
+                    + AccountManager.sanitizeResult(result));
+        }
         try {
             mAccountAuthenticatorResponse.onResult(result);
         } catch (RemoteException e) {
@@ -48,6 +56,9 @@ public class AccountAuthenticatorResponse implements Parcelable {
     }
 
     public void onRequestContinued() {
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            Log.v(TAG, "AccountAuthenticatorResponse.onRequestContinued");
+        }
         try {
             mAccountAuthenticatorResponse.onRequestContinued();
         } catch (RemoteException e) {
@@ -56,6 +67,9 @@ public class AccountAuthenticatorResponse implements Parcelable {
     }
 
     public void onError(int errorCode, String errorMessage) {
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            Log.v(TAG, "AccountAuthenticatorResponse.onError: " + errorCode + ", " + errorMessage);
+        }
         try {
             mAccountAuthenticatorResponse.onError(errorCode, errorMessage);
         } catch (RemoteException e) {
