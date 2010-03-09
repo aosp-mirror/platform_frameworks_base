@@ -23,12 +23,11 @@
 
 #include <stdlib.h>
 
+#include <cutils/properties.h>
 #include <media/stagefright/HTTPDataSource.h>
 #include <media/stagefright/MediaDebug.h>
 
 namespace android {
-
-static const char *kUserAgent = "stagefright-http";
 
 // Given a connected HTTPStream, determine if the given path redirects
 // somewhere else, if so, disconnect the stream, update host path and port
@@ -341,9 +340,16 @@ void HTTPDataSource::initHeaders(
         const KeyedVector<String8, String8> *overrides) {
     mHeaders = String8();
 
-    mHeaders.append("User-Agent: ");
-    mHeaders.append(kUserAgent);
-    mHeaders.append("\r\n");
+    mHeaders.append("User-Agent: stagefright/1.0 (Linux;Android ");
+
+#if (PROPERTY_VALUE_MAX < 8)
+#error "PROPERTY_VALUE_MAX must be at least 8"
+#endif
+
+    char value[PROPERTY_VALUE_MAX];
+    property_get("ro.build.version.release", value, "Unknown");
+    mHeaders.append(value);
+    mHeaders.append(")\r\n");
 
     if (overrides == NULL) {
         return;
