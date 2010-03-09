@@ -592,8 +592,11 @@ public class CdmaConnection extends Connection {
         if (!isIncoming) {
             // outgoing calls only
             processNextPostDialChar();
+        } else {
+            // Only release wake lock for incoming calls, for outgoing calls the wake lock
+            // will be released after any pause-dial is completed
+            releaseWakeLock();
         }
-        releaseWakeLock();
     }
 
     private void
@@ -688,6 +691,7 @@ public class CdmaConnection extends Connection {
         Registrant postDialHandler;
 
         if (postDialState == PostDialState.CANCELLED) {
+            releaseWakeLock();
             //Log.v("CDMA", "##### processNextPostDialChar: postDialState == CANCELLED, bail");
             return;
         }
@@ -695,6 +699,9 @@ public class CdmaConnection extends Connection {
         if (postDialString == null ||
                 postDialString.length() <= nextPostDialChar) {
             setPostDialState(PostDialState.COMPLETE);
+
+            // We were holding a wake lock until pause-dial was complete, so give it up now
+            releaseWakeLock();
 
             // notifyMessage.arg1 is 0 on complete
             c = 0;
@@ -770,19 +777,24 @@ public class CdmaConnection extends Connection {
     }
 
     /**
-     * Set post dial state and acquire wake lock while switching to "started"
-     * state, the wake lock will be released if state switches out of "started"
+     * Set post dial state and acquire wake lock while switching to "started" or "wait"
+     * state, the wake lock will be released if state switches out of "started" or "wait"
      * state or after WAKE_LOCK_TIMEOUT_MILLIS.
      * @param s new PostDialState
      */
     private void setPostDialState(PostDialState s) {
-        if (postDialState != PostDialState.STARTED
-                && s == PostDialState.STARTED) {
-            acquireWakeLock();
-            Message msg = h.obtainMessage(EVENT_WAKE_LOCK_TIMEOUT);
-            h.sendMessageDelayed(msg, WAKE_LOCK_TIMEOUT_MILLIS);
-        } else if (postDialState == PostDialState.STARTED
-                && s != PostDialState.STARTED) {
+        if (s == PostDialState.STARTED ||
+                s == PostDialState.PAUSE) {
+            synchronized (mPartialWakeLock) {
+                if (mPartialWakeLock.isHeld()) {
+                    h.removeMessages(EVENT_WAKE_LOCK_TIMEOUT);
+                } else {
+                    acquireWakeLock();
+                }
+                Message msg = h.obtainMessage(EVENT_WAKE_LOCK_TIMEOUT);
+                h.sendMessageDelayed(msg, WAKE_LOCK_TIMEOUT_MILLIS);
+            }
+        } else {
             h.removeMessages(EVENT_WAKE_LOCK_TIMEOUT);
             releaseWakeLock();
         }
