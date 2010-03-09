@@ -1081,11 +1081,11 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
     }
 
     @Override
-    protected boolean setFrame(int l, int t, int r, int b) {
+    protected boolean setFrame(final int l, int t, final int r, int b) {
         boolean result = super.setFrame(l, t, r, b);
 
         if (mPopup.isShowing()) {
-            mPopup.update(this, r - l, -1);
+            showDropDown();
         }
 
         return result;
