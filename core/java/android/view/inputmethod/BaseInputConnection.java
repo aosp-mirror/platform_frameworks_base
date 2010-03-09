@@ -328,6 +328,11 @@ public class BaseInputConnection implements InputConnection {
             b = tmp;
         }
 
+        // Guard against the case where the cursor has not been positioned yet.
+        if (b < 0) {
+            b = 0;
+        }
+
         if (b + length > content.length()) {
             length = content.length() - b;
         }
