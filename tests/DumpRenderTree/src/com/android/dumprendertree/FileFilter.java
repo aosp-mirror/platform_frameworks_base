@@ -62,7 +62,6 @@ public class FileFilter {
     static final String[] ignoreTestDirs = {
         ".", // ignore hidden directories and files
         "resources", // ignore resource directories
-        "AppleScript", // AppleScript not supported
         ".svn", // don't run anything under .svn folder
         "profiler",  // profiler is not supported
         "svg",  // svg is not supported
@@ -73,8 +72,6 @@ public class FileFilter {
     static final String [] ignoreTestList = {
         "editing/selection/move-left-right.html",
         "fast/js/regexp-charclass-crash.html", // RegExp is too large, causing OOM
-        "fast/regex/test1.html", // RegExp is exponential
-        "fast/regex/slow.html", // RegExp is exponential
         "storage/domstorage/localstorage/private-browsing-affects-storage.html", // No notion of private browsing.
         "storage/domstorage/sessionstorage/private-browsing-affects-storage.html", // No notion of private browsing.
         "storage/private-browsing-readonly.html", // No notion of private browsing.
