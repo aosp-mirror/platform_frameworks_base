@@ -219,7 +219,11 @@ public final class CookieManager {
             // If cookie2 has a null value, it should come later in
             // the list.
             if (cookie2.value == null) {
-                return -1;
+                // If both cookies have null values, fall back to using the name
+                // difference.
+                if (cookie1.value != null) {
+                    return -1;
+                }
             } else if (cookie1.value == null) {
                 // Now we know that cookie2 does not have a null value, if
                 // cookie1 has a null value, place it later in the list.

@@ -28,6 +28,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Handler;
+import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.Power;
 import android.os.ServiceManager;
@@ -56,6 +57,8 @@ public final class ShutdownThread extends Thread {
     private final Object mBroadcastDoneSync = new Object();
     private boolean mBroadcastDone;
     private Context mContext;
+    private PowerManager mPowerManager;
+    private PowerManager.WakeLock mWakeLock;
     private Handler mHandler;
     
     private ShutdownThread() {
@@ -125,6 +128,18 @@ public final class ShutdownThread extends Thread {
 
         // start the thread that initiates shutdown
         sInstance.mContext = context;
+        sInstance.mPowerManager = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
+        sInstance.mWakeLock = null;
+        if (sInstance.mPowerManager.isScreenOn()) {
+            try {
+                sInstance.mWakeLock = sInstance.mPowerManager.newWakeLock(
+                        PowerManager.FULL_WAKE_LOCK, "Shutdown");
+                sInstance.mWakeLock.acquire();
+            } catch (SecurityException e) {
+                Log.w(TAG, "No permission to acquire wake lock", e);
+                sInstance.mWakeLock = null;
+            }
+        }
         sInstance.mHandler = new Handler() {
         };
         sInstance.start();

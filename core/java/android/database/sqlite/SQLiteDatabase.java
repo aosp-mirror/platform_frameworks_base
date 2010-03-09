@@ -261,7 +261,7 @@ public class SQLiteDatabase extends SQLiteClosable {
     public static final int MAX_SQL_CACHE_SIZE = 250;
     private int mMaxSqlCacheSize = MAX_SQL_CACHE_SIZE; // max cache size per Database instance
     private int mCacheFullWarnings;
-    private static final int MAX_WARNINGS_ON_CACHESIZE_CONDITION = 5;
+    private static final int MAX_WARNINGS_ON_CACHESIZE_CONDITION = 1;
 
     /** maintain stats about number of cache hits and misses */
     private int mNumCacheHits;
@@ -1909,43 +1909,28 @@ public class SQLiteDatabase extends SQLiteClosable {
             }
             // add this <sql, compiledStatement> to the cache
             if (mCompiledQueries.size() == mMaxSqlCacheSize) {
-                /* reached max cachesize. before adding new entry, remove an entry from the
-                 * cache. we don't want to wipe out the entire cache because of this:
-                 * GCing {@link SQLiteCompiledSql} requires call to sqlite3_finalize
-                 * JNI method. If entire cache is wiped out, it could cause a big GC activity
-                 * just because a (rogue) process is using the cache incorrectly.
+                /*
+                 * cache size of {@link #mMaxSqlCacheSize} is not enough for this app.
+                 * log a warning MAX_WARNINGS_ON_CACHESIZE_CONDITION times
+                 * chances are it is NOT using ? for bindargs - so caching is useless.
+                 * TODO: either let the callers set max cchesize for their app, or intelligently
+                 * figure out what should be cached for a given app.
                  */
-                Log.w(TAG, "Reached MAX size for compiled-sql statement cache for database " +
-                        getPath() + "; i.e., NO space for this sql statement in cache: " +
-                        sql + ". Please change your sql statements to use '?' for " +
-                        "bindargs, instead of using actual values");
-                
-                /* increment the number of times this warnings has been printed.
-                 * if this warning is printed too many times, clear the whole cache - the app
-                 * is doing something weird or incorrect and printing more warnings will only
-                 * flood the logfile.
-                 */
-                if (++mCacheFullWarnings > MAX_WARNINGS_ON_CACHESIZE_CONDITION) {
-                    mCacheFullWarnings = 0;
-                    // clear the cache
-                    mCompiledQueries.clear();
-                    Log.w(TAG, "Compiled-sql statement cache for database: " +
-                            getPath() + " hit MAX size-limit too many times. " +
-                            "Removing all compiled-sql statements from the cache.");
-                } else {
-                    // clear just a single entry from cache
-                    Set<String> keySet = mCompiledQueries.keySet();
-                    for (String s : keySet) {
-                        mCompiledQueries.remove(s);
-                        break;
-                    }
+                if (++mCacheFullWarnings == MAX_WARNINGS_ON_CACHESIZE_CONDITION) {
+                    Log.w(TAG, "Reached MAX size for compiled-sql statement cache for database " +
+                            getPath() + "; i.e., NO space for this sql statement in cache: " +
+                            sql + ". Please change your sql statements to use '?' for " +
+                            "bindargs, instead of using actual values");
+                }
+                // don't add this entry to cache
+            } else {
+                // cache is NOT full. add this to cache.
+                mCompiledQueries.put(sql, compiledStatement);
+                if (SQLiteDebug.DEBUG_SQL_CACHE) {
+                    Log.v(TAG, "|adding_sql_to_cache|" + getPath() + "|" +
+                            mCompiledQueries.size() + "|" + sql);
                 }
             }
-            mCompiledQueries.put(sql, compiledStatement);
-        }
-        if (SQLiteDebug.DEBUG_SQL_CACHE) {
-            Log.v(TAG, "|adding_sql_to_cache|" + getPath() + "|" + mCompiledQueries.size() + "|" +
-                    sql);
         }
         return;
     }

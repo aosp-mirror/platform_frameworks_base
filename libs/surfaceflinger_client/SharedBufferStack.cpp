@@ -132,10 +132,11 @@ String8 SharedBufferBase::dump(char const* prefix) const
     char buffer[SIZE];
     String8 result;
     SharedBufferStack& stack( *mSharedStack );
+    int tail = (mNumBuffers + stack.head - stack.available + 1) % mNumBuffers;
     snprintf(buffer, SIZE, 
-            "%s[ head=%2d, available=%2d, queued=%2d ] "
+            "%s[ head=%2d, available=%2d, queued=%2d, tail=%2d ] "
             "reallocMask=%08x, inUse=%2d, identity=%d, status=%d\n",
-            prefix, stack.head, stack.available, stack.queued, 
+            prefix, stack.head, stack.available, stack.queued, tail,
             stack.reallocMask, stack.inUse, stack.identity, stack.status);
     result.append(buffer);
     return result;
@@ -269,6 +270,8 @@ int32_t SharedBufferClient::computeTail() const
     newTail = head - avail + 1;
     if (newTail < 0) {
         newTail += mNumBuffers;
+    } else if (newTail >= mNumBuffers) {
+        newTail -= mNumBuffers;
     }
     return newTail;
 }

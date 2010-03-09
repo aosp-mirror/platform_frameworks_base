@@ -23,6 +23,7 @@
 #include <sys/resource.h>
 #include <sys/stat.h>
 #include <sys/time.h>
+#include <sys/wait.h>
 #include <unistd.h>
 
 #include <cutils/properties.h>
@@ -86,7 +87,11 @@ static void dumpstate() {
     struct stat st;
     char anr_traces_path[PATH_MAX];
     property_get("dalvik.vm.stack-trace-file", anr_traces_path, "");
-    if (anr_traces_path[0] && !stat(anr_traces_path, &st) && time(NULL) - st.st_mtime < 15 * 60) {
+    if (!anr_traces_path[0]) {
+        printf("*** NO VM TRACES FILE DEFINED (dalvik.vm.stack-trace-file)\n\n");
+    } else if (stat(anr_traces_path, &st)) {
+        printf("*** NO ANR VM TRACES FILE (%s): %s\n\n", anr_traces_path, strerror(errno));
+    } else {
         dump_file("VM TRACES AT LAST ANR", anr_traces_path);
     }
 
@@ -109,6 +114,9 @@ static void dumpstate() {
 
     dump_file("KERNEL WAKELOCKS", "/proc/wakelocks");
     dump_file("KERNEL CPUFREQ", "/sys/devices/system/cpu/cpu0/cpufreq/stats/time_in_state");
+
+    run_command("SECURE CONTAINERS", 10, "vdc", "asec", "list", NULL);
+    run_command("MOUNTED FILESYSTEMS", 10, "df", NULL);
 
     run_command("PROCESSES", 10, "ps", "-P", NULL);
     run_command("PROCESSES AND THREADS", 10, "ps", "-t", "-p", "-P", NULL);
@@ -208,7 +216,7 @@ int main(int argc, char *argv[]) {
     }
 
     /* switch to non-root user and group */
-    gid_t groups[] = { AID_LOG, AID_SDCARD_RW };
+    gid_t groups[] = { AID_LOG, AID_SDCARD_RW, AID_MOUNT };
     setgroups(sizeof(groups)/sizeof(groups[0]), groups);
     setuid(AID_SHELL);
 

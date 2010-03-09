@@ -1376,15 +1376,18 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 dr.mDrawableLeft.setCallback(null);
             }
             dr.mDrawableLeft = left;
-            if (dr.mDrawableTop != left && dr.mDrawableTop != null) {
+
+            if (dr.mDrawableTop != top && dr.mDrawableTop != null) {
                 dr.mDrawableTop.setCallback(null);
             }
             dr.mDrawableTop = top;
-            if (dr.mDrawableRight != left && dr.mDrawableRight != null) {
+
+            if (dr.mDrawableRight != right && dr.mDrawableRight != null) {
                 dr.mDrawableRight.setCallback(null);
             }
             dr.mDrawableRight = right;
-            if (dr.mDrawableBottom != left && dr.mDrawableBottom != null) {
+
+            if (dr.mDrawableBottom != bottom && dr.mDrawableBottom != null) {
                 dr.mDrawableBottom.setCallback(null);
             }
             dr.mDrawableBottom = bottom;

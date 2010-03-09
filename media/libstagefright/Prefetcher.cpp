@@ -59,6 +59,7 @@ private:
     int64_t mSeekTimeUs;
     int64_t mCacheDurationUs;
     bool mPrefetcherStopped;
+    bool mCurrentlyPrefetching;
 
     List<MediaBuffer *> mCachedBuffers;
 
@@ -194,6 +195,7 @@ int64_t Prefetcher::getCachedDurationUs(bool *noMoreData) {
 
     int64_t minCacheDurationUs = -1;
     ssize_t minIndex = -1;
+    bool anySourceActive = false;
     for (size_t i = 0; i < mSources.size(); ++i) {
         int64_t cacheDurationUs;
         sp<PrefetchedSource> source = mSources[i].promote();
@@ -201,12 +203,8 @@ int64_t Prefetcher::getCachedDurationUs(bool *noMoreData) {
             continue;
         }
 
-        if (!source->getCacheDurationUs(&cacheDurationUs)) {
-            continue;
-        }
-
-        if (cacheDurationUs >= kMaxCacheDurationUs) {
-            continue;
+        if (source->getCacheDurationUs(&cacheDurationUs)) {
+            anySourceActive = true;
         }
 
         if (minIndex < 0 || cacheDurationUs < minCacheDurationUs) {
@@ -216,20 +214,20 @@ int64_t Prefetcher::getCachedDurationUs(bool *noMoreData) {
     }
 
     if (noMoreData) {
-        *noMoreData = minCacheDurationUs < 0;
+        *noMoreData = !anySourceActive;
     }
 
     return minCacheDurationUs < 0 ? 0 : minCacheDurationUs;
 }
 
 status_t Prefetcher::prepare() {
-    // Buffer about 2 secs worth of data on prepare.
+    // Fill the cache.
 
     int64_t duration;
     bool noMoreData;
     do {
         duration = getCachedDurationUs(&noMoreData);
-    } while (!noMoreData && duration < 2000000);
+    } while (!noMoreData && duration < 2000000ll);
 
     return OK;
 }
@@ -245,7 +243,8 @@ PrefetchedSource::PrefetchedSource(
       mReachedEOS(false),
       mSeekTimeUs(0),
       mCacheDurationUs(0),
-      mPrefetcherStopped(false) {
+      mPrefetcherStopped(false),
+      mCurrentlyPrefetching(false) {
 }
 
 PrefetchedSource::~PrefetchedSource() {
@@ -274,6 +273,10 @@ status_t PrefetchedSource::stop() {
     CHECK(mStarted);
 
     Mutex::Autolock autoLock(mLock);
+
+    while (mCurrentlyPrefetching) {
+        mCondition.wait(mLock);
+    }
 
     clearCache_l();
 
@@ -324,13 +327,11 @@ sp<MetaData> PrefetchedSource::getFormat() {
 bool PrefetchedSource::getCacheDurationUs(int64_t *durationUs) {
     Mutex::Autolock autoLock(mLock);
 
-    if (!mStarted || mReachedEOS) {
-        *durationUs = 0;
+    *durationUs = mCacheDurationUs;
 
+    if (!mStarted || mReachedEOS) {
         return false;
     }
-
-    *durationUs = mCacheDurationUs;
 
     return true;
 }
@@ -344,15 +345,24 @@ void PrefetchedSource::cacheMore() {
         return;
     }
 
+    mCurrentlyPrefetching = true;
+
     if (mSeekTimeUs >= 0) {
         options.setSeekTo(mSeekTimeUs);
         mSeekTimeUs = -1;
     }
 
+    // Ensure our object does not go away while we're not holding
+    // the lock.
+    sp<PrefetchedSource> me = this;
+
+    mLock.unlock();
     MediaBuffer *buffer;
     status_t err = mSource->read(&buffer, &options);
+    mLock.lock();
 
     if (err != OK) {
+        mCurrentlyPrefetching = false;
         mReachedEOS = true;
         mFinalStatus = err;
         mCondition.signal();
@@ -380,6 +390,8 @@ void PrefetchedSource::cacheMore() {
 
     mCachedBuffers.push_back(copy);
     updateCacheDuration_l();
+
+    mCurrentlyPrefetching = false;
     mCondition.signal();
 }
 

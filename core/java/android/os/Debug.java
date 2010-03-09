@@ -57,6 +57,8 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
  */
 public final class Debug
 {
+    private static final String TAG = "Debug";
+
     /**
      * Flags for startMethodTracing().  These can be ORed together.
      *
@@ -1111,7 +1113,7 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
                 }
             }
         } else {
-            Log.w("android.os.Debug",
+            Log.wtf(TAG,
                   "setFieldsOn(" + (cl == null ? "null" : cl.getName()) +
                   ") called in non-DEBUG build");
         }
@@ -1126,5 +1128,32 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
     @Target({ ElementType.FIELD })
     @Retention(RetentionPolicy.RUNTIME)
     public @interface DebugProperty {
+    }
+
+    /**
+     * Get a debugging dump of a system service by name.
+     *
+     * <p>Most services require the caller to hold android.permission.DUMP.
+     *
+     * @param name of the service to dump
+     * @param fd to write dump output to (usually an output log file)
+     * @param args to pass to the service's dump method, may be null
+     * @return true if the service was dumped successfully, false if
+     *     the service could not be found or had an error while dumping
+     */
+    public static boolean dumpService(String name, FileDescriptor fd, String[] args) {
+        IBinder service = ServiceManager.getService(name);
+        if (service == null) {
+            Log.e(TAG, "Can't find service to dump: " + name);
+            return false;
+        }
+
+        try {
+            service.dump(fd, args);
+            return true;
+        } catch (RemoteException e) {
+            Log.e(TAG, "Can't dump service: " + name, e);
+            return false;
+        }
     }
 }

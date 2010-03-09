@@ -38,15 +38,15 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Vector;
 
-//TestRecorder creates two files, one for passing tests
-//and another for failing tests and writes the paths to
-//layout tests one line at a time. TestRecorder does not
-//have ability to clear the results.
+// TestRecorder creates three files ...
+// - passing tests
+// - failing tests
+// - tests with no text results available
+// TestRecorder does not have the ability to clear the results.
 class MyTestRecorder {
     private BufferedOutputStream mBufferedOutputPassedStream;
     private BufferedOutputStream mBufferedOutputFailedStream;
-    private BufferedOutputStream mBufferedOutputNoresultStream;
-    private BufferedOutputStream mBufferedOutputTimedoutStream;
+    private BufferedOutputStream mBufferedOutputNoResultStream;
 
     public void passed(String layout_file) {
         try {
@@ -68,22 +68,12 @@ class MyTestRecorder {
         }
     }
 
-    public void noresult(String layout_file) {
+    public void noResult(String layout_file) {
         try {
-            mBufferedOutputNoresultStream.write(layout_file.getBytes());
-            mBufferedOutputNoresultStream.write('\n');
-            mBufferedOutputNoresultStream.flush();
+            mBufferedOutputNoResultStream.write(layout_file.getBytes());
+            mBufferedOutputNoResultStream.write('\n');
+            mBufferedOutputNoResultStream.flush();
         } catch(Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void timedout(String url) {
-        try {
-            mBufferedOutputTimedoutStream.write(url.getBytes());
-            mBufferedOutputTimedoutStream.write('\n');
-            mBufferedOutputTimedoutStream.flush();
-        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -93,16 +83,13 @@ class MyTestRecorder {
             File resultsPassedFile = new File("/sdcard/layout_tests_passed.txt");
             File resultsFailedFile = new File("/sdcard/layout_tests_failed.txt");
             File noExpectedResultFile = new File("/sdcard/layout_tests_nontext.txt");
-            File resultTimedoutFile = new File("/sdcard/layout_tests_timedout.txt");
 
             mBufferedOutputPassedStream =
                 new BufferedOutputStream(new FileOutputStream(resultsPassedFile, resume));
             mBufferedOutputFailedStream =
                 new BufferedOutputStream(new FileOutputStream(resultsFailedFile, resume));
-            mBufferedOutputNoresultStream =
+            mBufferedOutputNoResultStream =
                 new BufferedOutputStream(new FileOutputStream(noExpectedResultFile, resume));
-            mBufferedOutputTimedoutStream =
-                new BufferedOutputStream(new FileOutputStream(resultTimedoutFile, resume));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -112,8 +99,7 @@ class MyTestRecorder {
         try {
             mBufferedOutputPassedStream.close();
             mBufferedOutputFailedStream.close();
-            mBufferedOutputNoresultStream.close();
-            mBufferedOutputTimedoutStream.close();
+            mBufferedOutputNoResultStream.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -250,9 +236,9 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
         mResultRecorder.passed(file);
     }
 
-    private void noresultCase(String file) {
+    private void noResultCase(String file) {
         Log.v("Layout test:", file + " no expected result");
-        mResultRecorder.noresult(file);
+        mResultRecorder.noResult(file);
     }
 
     private void processResult(String testFile, String actualResultFile, String expectedResultFile) {
@@ -276,7 +262,7 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
         }
 
         if (!expected.exists()) {
-            noresultCase(testFile);
+            noResultCase(testFile);
         }
     }
 

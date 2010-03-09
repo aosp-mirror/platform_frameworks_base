@@ -59,7 +59,7 @@ public class SettingsProviderTest extends AndroidTestCase {
 
         assertEquals("content://settings/system/test_setting",
                 Settings.System.getUriFor("test_setting").toString());
-        assertEquals("content://settings/gservices/test_service",
+        assertEquals("content://settings/secure/test_service",
                 Settings.Secure.getUriFor("test_service").toString());
 
         // These tables use the row name (not ID) as their content URI.

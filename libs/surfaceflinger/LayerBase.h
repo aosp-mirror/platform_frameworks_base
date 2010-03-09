@@ -369,6 +369,9 @@ public:
 
     friend class Surface;
 
+protected:
+    mutable     bool            mDebug;
+
 private:
                 int32_t         mIndex;
     mutable     Mutex           mLock;

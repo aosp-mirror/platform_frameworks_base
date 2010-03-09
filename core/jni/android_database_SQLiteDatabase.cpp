@@ -367,7 +367,7 @@ static void native_setLocale(JNIEnv* env, jobject object, jstring localeString, 
     if (err != SQLITE_OK) {
         LOGE("register_localized_collators() failed setting locale\n");
         throw_sqlite3_exception(env, handle);
-        goto done;
+        goto rollback;
     }
 
     err = sqlite3_exec(handle, "DELETE FROM " ANDROID_TABLE, NULL, NULL, NULL);
@@ -415,7 +415,9 @@ static void native_setLocale(JNIEnv* env, jobject object, jstring localeString, 
     }
 
 rollback:
-    sqlite3_exec(handle, "ROLLBACK TRANSACTION", NULL, NULL, NULL);
+    if (err != SQLITE_OK) {
+        sqlite3_exec(handle, "ROLLBACK TRANSACTION", NULL, NULL, NULL);
+    }
 
 done:
     if (locale8 != NULL) env->ReleaseStringUTFChars(localeString, locale8);

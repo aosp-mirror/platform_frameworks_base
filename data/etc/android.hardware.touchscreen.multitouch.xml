@@ -15,7 +15,9 @@
 -->
 
 <!-- This is the standard set of features for a touchscreen that supports
-     multitouch. -->
+     basic multitouch capable of gestures but not fully-indendent finger
+     tracking. -->
 <permissions>
+    <feature name="android.hardware.touchscreen" />
     <feature name="android.hardware.touchscreen.multitouch" />
 </permissions>

@@ -679,6 +679,9 @@ public final class Settings {
             MOVED_TO_SECURE.add(Secure.HTTP_PROXY);
             MOVED_TO_SECURE.add(Secure.INSTALL_NON_MARKET_APPS);
             MOVED_TO_SECURE.add(Secure.LOCATION_PROVIDERS_ALLOWED);
+            MOVED_TO_SECURE.add(Secure.LOCK_PATTERN_ENABLED);
+            MOVED_TO_SECURE.add(Secure.LOCK_PATTERN_VISIBLE);
+            MOVED_TO_SECURE.add(Secure.LOCK_PATTERN_TACTILE_FEEDBACK_ENABLED);
             MOVED_TO_SECURE.add(Secure.LOGGING_ID);
             MOVED_TO_SECURE.add(Secure.PARENTAL_CONTROL_ENABLED);
             MOVED_TO_SECURE.add(Secure.PARENTAL_CONTROL_LAST_UPDATE);
@@ -1160,18 +1163,25 @@ public final class Settings {
             "bluetooth_discoverability_timeout";
 
         /**
-         * Whether autolock is enabled (0 = false, 1 = true)
+         * @deprecated Use {@link android.provider.Settings.Secure#LOCK_PATTERN_ENABLED}
+         * instead
          */
-        public static final String LOCK_PATTERN_ENABLED = "lock_pattern_autolock";
+        @Deprecated
+        public static final String LOCK_PATTERN_ENABLED = Secure.LOCK_PATTERN_ENABLED;
 
         /**
-         * Whether lock pattern is visible as user enters (0 = false, 1 = true)
+         * @deprecated Use {@link android.provider.Settings.Secure#LOCK_PATTERN_VISIBLE}
+         * instead
          */
+        @Deprecated
         public static final String LOCK_PATTERN_VISIBLE = "lock_pattern_visible_pattern";
 
         /**
-         * Whether lock pattern will vibrate as user enters (0 = false, 1 = true)
+         * @deprecated Use 
+         * {@link android.provider.Settings.Secure#LOCK_PATTERN_TACTILE_FEEDBACK_ENABLED}
+         * instead
          */
+        @Deprecated
         public static final String LOCK_PATTERN_TACTILE_FEEDBACK_ENABLED =
             "lock_pattern_tactile_feedback_enabled";
 
@@ -2295,6 +2305,22 @@ public final class Settings {
          * Comma-separated list of location providers that activities may access.
          */
         public static final String LOCATION_PROVIDERS_ALLOWED = "location_providers_allowed";
+
+        /**
+         * Whether autolock is enabled (0 = false, 1 = true)
+         */
+        public static final String LOCK_PATTERN_ENABLED = "lock_pattern_autolock";
+
+        /**
+         * Whether lock pattern is visible as user enters (0 = false, 1 = true)
+         */
+        public static final String LOCK_PATTERN_VISIBLE = "lock_pattern_visible_pattern";
+
+        /**
+         * Whether lock pattern will vibrate as user enters (0 = false, 1 = true)
+         */
+        public static final String LOCK_PATTERN_TACTILE_FEEDBACK_ENABLED =
+            "lock_pattern_tactile_feedback_enabled";
 
         /**
          * Whether assisted GPS should be enabled or not.
