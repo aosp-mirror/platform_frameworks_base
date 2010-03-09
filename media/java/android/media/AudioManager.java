@@ -1132,41 +1132,31 @@ public class AudioManager {
     }
 
     /**
-     * TODO unhide for SDK
      * Used to indicate a loss of audio focus of unknown duration.
      * @see OnAudioFocusChangeListener#onAudioFocusChanged(int)
-     * {@hide}
      */
     public static final int AUDIOFOCUS_LOSS = -1;
     /**
-     * TODO unhide for SDK
      * Used to indicate a transient loss of audio focus.
      * @see OnAudioFocusChangeListener#onAudioFocusChanged(int)
-     * {@hide}
      */
     public static final int AUDIOFOCUS_LOSS_TRANSIENT = -2;
     /**
-     * TODO unhide for SDK
      * Used to indicate a gain of audio focus, or a request of audio focus, of unknown duration.
      * @see OnAudioFocusChangeListener#onAudioFocusChanged(int)
      * @see #requestAudioFocus(OnAudioFocusChangeListener, int, int)
-     * {@hide}
      */
     public static final int AUDIOFOCUS_GAIN = 1;
     /**
-     * TODO unhide for SDK
      * Used to indicate a temporary gain or request of audio focus, anticipated to last a short
      * amount of time. Examples of temporary changes are the playback of driving directions, or an
      * event notification.
      * @see OnAudioFocusChangeListener#onAudioFocusChanged(int)
      * @see #requestAudioFocus(OnAudioFocusChangeListener, int, int)
-     * {@hide}
      */
     public static final int AUDIOFOCUS_GAIN_TRANSIENT = 2;
 
     /**
-     * TODO unhide for SDK
-     * {@hide}
      * Interface definition for a callback to be invoked when the audio focus of the system is
      * updated.
      */
@@ -1267,8 +1257,6 @@ public class AudioManager {
     }
 
     /**
-     * TODO unhide for SDK
-     * {@hide}
      * Register a listener for audio focus updates.
      */
     public void registerAudioFocusListener(OnAudioFocusChangeListener l) {
@@ -1284,9 +1272,7 @@ public class AudioManager {
     }
 
     /**
-     * TODO unhide for SDK
      * TODO document for SDK
-     * {@hide}
      */
     public void unregisterAudioFocusListener(OnAudioFocusChangeListener l) {
         // notify service to remove it from audio focus stack
@@ -1304,22 +1290,16 @@ public class AudioManager {
 
 
     /**
-     * TODO unhide for SDK
      * TODO document for SDK
-     * {@hide}
      */
     public static final int AUDIOFOCUS_REQUEST_FAILED = 0;
     /**
-     * TODO unhide for SDK
      * TODO document for SDK
-     * {@hide}
      */
     public static final int AUDIOFOCUS_REQUEST_GRANTED = 1;
 
 
     /**
-     *  TODO unhide for SDK
-     *  {@hide}
      *  Request audio focus.
      *  Send a request to obtain the audio focus for a specific stream type
      *  @param l the listener to be notified of audio focus changes
@@ -1347,9 +1327,7 @@ public class AudioManager {
 
 
     /**
-     *  TODO unhide for SDK
      *  TODO document for SDK
-     *  {@hide}
      *  Abandon audio focus.
      *  @return {@link #AUDIOFOCUS_REQUEST_FAILED} or {@link #AUDIOFOCUS_REQUEST_GRANTED}
      */
