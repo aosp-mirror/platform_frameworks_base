@@ -79,6 +79,11 @@ public abstract class CellLocation {
     public abstract void fillInNotifierBundle(Bundle bundle);
 
     /**
+     * @hide
+     */
+    public abstract boolean isEmpty();
+
+    /**
      * Return a new CellLocation object representing an unknown
      * location, or null for unknown/none phone radio types.
      *

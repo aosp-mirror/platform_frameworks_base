@@ -119,4 +119,11 @@ public class GsmCellLocation extends CellLocation {
         m.putInt("lac", mLac);
         m.putInt("cid", mCid);
     }
+
+    /**
+     * @hide
+     */
+    public boolean isEmpty() {
+        return (mLac == -1 && mCid == -1);
+    }
 }
