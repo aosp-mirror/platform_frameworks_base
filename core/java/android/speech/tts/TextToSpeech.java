@@ -1211,9 +1211,8 @@ public class TextToSpeech {
                         mCachedParams[Engine.PARAM_POSITION_ENGINE + 1] = extra;
                     }
                 }
-                if (mITts.synthesizeToFile(mPackageName, text, mCachedParams, filename)){
-                    result = SUCCESS;
-                }
+                result = mITts.synthesizeToFile(mPackageName, text, mCachedParams, filename) ?
+                        SUCCESS : ERROR;
             } catch (RemoteException e) {
                 // TTS died; restart it.
                 Log.e("TextToSpeech.java - synthesizeToFile", "RemoteException");
