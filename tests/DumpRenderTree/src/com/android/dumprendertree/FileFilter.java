@@ -23,27 +23,33 @@ public class FileFilter {
 
     private static final String LOGTAG = "FileFilter";
 
+    // Returns whether we should ignore this test and skip running it.
+    // Currently we use this only for tests that crash the browser.
+    // TODO: Once these crashes are fixed, we should probably eliminate this
+    // method, as no test should crash.
     public static boolean ignoreTest(String file) {
-        // treat files like directories for the time being.
-        for (int i = 0; i < ignoreTestList.length; i ++) {
+        for (int i = 0; i < ignoreTestList.length; i++) {
             if (file.endsWith(ignoreTestList[i])) {
                 Log.v(LOGTAG, "File path in list of ignored tests: " + file);
                 return true;
             }
         }
-        for (int i = 0; i < ignoreTestDirs.length; i++) {
-            if (file.endsWith(ignoreTestDirs[i])) {
-                Log.v(LOGTAG, "File path in list of ignored directories: " + file);
+        return false;
+    }
+
+    // Returns whether a directory does not contain layout tests and so can be
+    // ignored.
+    public static boolean isNonTestDir(String file) {
+        for (int i = 0; i < nonTestDirs.length; i++) {
+            if (file.endsWith(nonTestDirs[i])) {
                 return true;
             }
         }
-        // We should run tests for which the expected result is wrong, as there is
-        // value in checking that they don't cause crashes.
-        // TODO: Run these tests but ignore the result.
-        return ignoreResults(file);
+        return false;
     }
 
-    public static boolean ignoreResults(String file) {
+    // Returns whether we should ignore the result of this test.
+    public static boolean ignoreResult(String file) {
         for (int i = 0; i < ignoreResultList.size(); i++) {
             if (file.endsWith(ignoreResultList.get(i))) {
                 Log.v(LOGTAG, "File path in list of ignored results: " + file);
@@ -51,7 +57,7 @@ public class FileFilter {
             }
         }
         return false;
-      }
+    }
 
     final static Vector<String> ignoreResultList = new Vector<String>();
 
@@ -59,21 +65,16 @@ public class FileFilter {
         fillIgnoreResultList();
     }
 
-    static final String[] ignoreTestDirs = {
+    static final String[] nonTestDirs = {
         ".", // ignore hidden directories and files
         "resources", // ignore resource directories
         ".svn", // don't run anything under .svn folder
-        "profiler",  // profiler is not supported
-        "svg",  // svg is not supported
-        "platform",  // platform specific
+        "platform"  // No-Android specific tests
     };
 
-    static final String [] ignoreTestList = {
-        "editing/selection/move-left-right.html",
+    static final String[] ignoreTestList = {
         "fast/js/regexp-charclass-crash.html", // RegExp is too large, causing OOM
-        "storage/domstorage/localstorage/private-browsing-affects-storage.html", // No notion of private browsing.
-        "storage/domstorage/sessionstorage/private-browsing-affects-storage.html", // No notion of private browsing.
-        "storage/private-browsing-readonly.html", // No notion of private browsing.
+        "editing/selection/move-left-right.html" // Causes DumpRenderTree to hang
     };
 
     static void fillIgnoreResultList() {
@@ -113,6 +114,7 @@ public class FileFilter {
         ignoreResultList.add("fast/workers/shared-worker-shared.html"); // shared workers not supported
         ignoreResultList.add("fast/workers/shared-worker-simple.html"); // shared workers not supported
 
+        // TODO: These need to be triaged
         ignoreResultList.add("fast/css/case-transform.html"); // will not fix #619707
         ignoreResultList.add("fast/dom/Element/offsetLeft-offsetTop-body-quirk.html"); // different screen size result in extra spaces in Apple compared to us
         ignoreResultList.add("fast/dom/Window/Plug-ins.html"); // need test plugin
@@ -183,6 +185,12 @@ public class FileFilter {
         ignoreResultList.add("fast/parser/script-tag-with-trailing-slash.html"); // not capturing the console messages
         ignoreResultList.add("fast/replaced/image-map.html"); // requires eventSender.mouseDown(),mouseUp()
         ignoreResultList.add("fast/text/plain-text-line-breaks.html"); // extra spacing because iFrames rendered next to each other on Apple
+        ignoreResultList.add("profiler"); // profiler is not supported
+        ignoreResultList.add("storage/domstorage/localstorage/private-browsing-affects-storage.html"); // No notion of private browsing.
+        ignoreResultList.add("storage/domstorage/sessionstorage/private-browsing-affects-storage.html"); // No notion of private browsing.
+        ignoreResultList.add("storage/private-browsing-readonly.html"); // No notion of private browsing.
+        ignoreResultList.add("svg"); // svg is not supported
+
     }
 
 }

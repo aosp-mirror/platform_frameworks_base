@@ -38,14 +38,16 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Vector;
 
-// TestRecorder creates three files ...
+// TestRecorder creates four files ...
 // - passing tests
 // - failing tests
+// - tests for which results are ignored
 // - tests with no text results available
 // TestRecorder does not have the ability to clear the results.
 class MyTestRecorder {
     private BufferedOutputStream mBufferedOutputPassedStream;
     private BufferedOutputStream mBufferedOutputFailedStream;
+    private BufferedOutputStream mBufferedOutputIgnoreResultStream;
     private BufferedOutputStream mBufferedOutputNoResultStream;
 
     public void passed(String layout_file) {
@@ -68,6 +70,16 @@ class MyTestRecorder {
         }
     }
 
+    public void ignoreResult(String layout_file) {
+        try {
+            mBufferedOutputIgnoreResultStream.write(layout_file.getBytes());
+            mBufferedOutputIgnoreResultStream.write('\n');
+            mBufferedOutputIgnoreResultStream.flush();
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     public void noResult(String layout_file) {
         try {
             mBufferedOutputNoResultStream.write(layout_file.getBytes());
@@ -82,12 +94,15 @@ class MyTestRecorder {
         try {
             File resultsPassedFile = new File("/sdcard/layout_tests_passed.txt");
             File resultsFailedFile = new File("/sdcard/layout_tests_failed.txt");
+            File resultsIgnoreResultFile = new File("/sdcard/layout_tests_ignored.txt");
             File noExpectedResultFile = new File("/sdcard/layout_tests_nontext.txt");
 
             mBufferedOutputPassedStream =
                 new BufferedOutputStream(new FileOutputStream(resultsPassedFile, resume));
             mBufferedOutputFailedStream =
                 new BufferedOutputStream(new FileOutputStream(resultsFailedFile, resume));
+            mBufferedOutputIgnoreResultStream =
+                new BufferedOutputStream(new FileOutputStream(resultsIgnoreResultFile, resume));
             mBufferedOutputNoResultStream =
                 new BufferedOutputStream(new FileOutputStream(noExpectedResultFile, resume));
         } catch (Exception e) {
@@ -99,6 +114,7 @@ class MyTestRecorder {
         try {
             mBufferedOutputPassedStream.close();
             mBufferedOutputFailedStream.close();
+            mBufferedOutputIgnoreResultStream.close();
             mBufferedOutputNoResultStream.close();
         } catch (Exception e) {
             e.printStackTrace();
@@ -132,6 +148,8 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
 
     private MyTestRecorder mResultRecorder;
     private Vector<String> mTestList;
+    // Whether we should ignore the result for the corresponding test. Ordered same as mTestList.
+    private Vector<Boolean> mTestListIgnoreResult;
     private boolean mRebaselineResults;
     // The JavaScript engine currently in use. This determines which set of Android-specific
     // expected test results we use.
@@ -158,8 +176,11 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
             BufferedReader inReader = new BufferedReader(new FileReader(LAYOUT_TESTS_LIST_FILE));
             String line = inReader.readLine();
             while (line != null) {
-                if (line.startsWith(mTestPathPrefix))
-                    mTestList.add(line);
+                if (line.startsWith(mTestPathPrefix)) {
+                    String[] components = line.split(" ");
+                    mTestList.add(components[0]);
+                    mTestListIgnoreResult.add(components.length > 1 && components[1].equals("IGNORE_RESULT"));
+                }
                 line = inReader.readLine();
             }
             inReader.close();
@@ -176,6 +197,7 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
             for (int i = 0; i < mTestList.size(); i++) {
                 if (mTestList.elementAt(i).equals(line)) {
                     mTestList = new Vector<String>(mTestList.subList(i+1, mTestList.size()));
+                    mTestListIgnoreResult = new Vector<Boolean>(mTestListIgnoreResult.subList(i+1, mTestListIgnoreResult.size()));
                     break;
                 }
             }
@@ -236,13 +258,23 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
         mResultRecorder.passed(file);
     }
 
+    private void ignoreResultCase(String file) {
+        Log.v("Layout test:", file + " ignore result");
+        mResultRecorder.ignoreResult(file);
+    }
+
     private void noResultCase(String file) {
         Log.v("Layout test:", file + " no expected result");
         mResultRecorder.noResult(file);
     }
 
-    private void processResult(String testFile, String actualResultFile, String expectedResultFile) {
+    private void processResult(String testFile, String actualResultFile, String expectedResultFile, boolean ignoreResult) {
         Log.v(LOGTAG, "  Processing result: " + testFile);
+
+        if (ignoreResult) {
+            ignoreResultCase(testFile);
+            return;
+        }
 
         File actual = new File(actualResultFile);
         File expected = new File(expectedResultFile);
@@ -266,7 +298,7 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
         }
     }
 
-    private void runTestAndWaitUntilDone(TestShellActivity activity, String test, int timeout) {
+    private void runTestAndWaitUntilDone(TestShellActivity activity, String test, int timeout, boolean ignoreResult) {
         activity.setCallback(new TestShellCallback() {
             public void finished() {
                 synchronized (LayoutTestsAutoTest.this) {
@@ -320,7 +352,7 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
                 expectedResultFile = getAndroidExpectedResultFile(expectedResultFile);
             }
 
-            processResult(test, resultFile, expectedResultFile);
+            processResult(test, resultFile, expectedResultFile, ignoreResult);
         }
     }
 
@@ -336,6 +368,7 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
         }
 
         this.mTestList = new Vector<String>();
+        this.mTestListIgnoreResult = new Vector<Boolean>();
 
         // Read settings
         mTestPathPrefix = (new File(LAYOUT_TESTS_ROOT + runner.mTestPath)).getAbsolutePath();
@@ -372,9 +405,10 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
         }
         for (int i = 0; i < mTestList.size(); i++) {
             String s = mTestList.elementAt(i);
+            boolean ignoreResult = mTestListIgnoreResult.elementAt(i);
             FsUtils.updateTestStatus(TEST_STATUS_FILE, s);
             // Run tests
-            runTestAndWaitUntilDone(activity, s, runner.mTimeoutInMillis);
+            runTestAndWaitUntilDone(activity, s, runner.mTimeoutInMillis, ignoreResult);
         }
 
         FsUtils.updateTestStatus(TEST_STATUS_FILE, "#DONE");
@@ -399,7 +433,7 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
         try {
             File tests_list = new File(LAYOUT_TESTS_LIST_FILE);
             BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(tests_list, false));
-            FsUtils.findLayoutTestsRecursively(bos, getTestPath());
+            FsUtils.findLayoutTestsRecursively(bos, getTestPath(), false); // Don't ignore results
             bos.flush();
             bos.close();
        } catch (Exception e) {

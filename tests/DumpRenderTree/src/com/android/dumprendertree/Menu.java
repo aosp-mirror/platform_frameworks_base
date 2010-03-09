@@ -68,7 +68,7 @@ public class Menu extends FileList {
         try {
             File tests_list = new File(LAYOUT_TESTS_LIST_FILE);
             BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(tests_list, false));
-            FsUtils.findLayoutTestsRecursively(bos, path);
+            FsUtils.findLayoutTestsRecursively(bos, path, false); // Don't ignore results
             bos.flush();
             bos.close();
        } catch (Exception e) {
@@ -77,4 +77,3 @@ public class Menu extends FileList {
     }
 
 }
-
