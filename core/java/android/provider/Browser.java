@@ -608,22 +608,24 @@ public class Browser {
      */
     public static final void requestAllIcons(ContentResolver cr, String where,
             WebIconDatabase.IconListener listener) {
+        Cursor c = null;
         try {
-            final Cursor c = cr.query(
+            c = cr.query(
                     BOOKMARKS_URI,
-                    HISTORY_PROJECTION,
+                    new String[] { BookmarkColumns.URL },
                     where, null, null);
             if (c.moveToFirst()) {
                 final WebIconDatabase db = WebIconDatabase.getInstance();
                 do {
-                    db.requestIconForPageUrl(
-                            c.getString(HISTORY_PROJECTION_URL_INDEX), 
-                            listener);
+                    db.requestIconForPageUrl(c.getString(0), listener);
                 } while (c.moveToNext());
             }
-            c.deactivate();
         } catch (IllegalStateException e) {
             Log.e(LOGTAG, "requestAllIcons", e);
+        } finally {
+            if (c != null) {
+                c.close();
+            }
         }
     }
 
