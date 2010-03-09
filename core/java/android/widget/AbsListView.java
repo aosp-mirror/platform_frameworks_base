@@ -2773,7 +2773,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             final int lastPos = firstPos + getChildCount() - 1;
             
             int viewTravelCount = 0;
-            if (position < firstPos) {
+            if (position <= firstPos) {
                 final int boundPosFromLast = lastPos - boundPosition;
                 if (boundPosFromLast < 1) {
                     // Moving would shift our bound position off the screen. Abort.
@@ -2789,7 +2789,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     viewTravelCount = posTravel;
                     mMode = MOVE_UP_POS;
                 }
-            } else if (position > lastPos) {
+            } else if (position >= lastPos) {
                 final int boundPosFromFirst = boundPosition - firstPos;
                 if (boundPosFromFirst < 1) {
                     // Moving would shift our bound position off the screen. Abort.
