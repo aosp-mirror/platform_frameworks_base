@@ -20,6 +20,8 @@ import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import android.app.backup.BackupManager;
 import android.content.ContentProvider;
@@ -51,6 +53,14 @@ public class SettingsProvider extends ContentProvider {
     private static final String TABLE_OLD_FAVORITES = "old_favorites";
 
     private static final String[] COLUMN_VALUE = new String[] { "value" };
+
+    // Cache for settings, access-ordered for acting as LRU.
+    // Guarded by themselves.
+    private static final int MAX_CACHE_ENTRIES = 50;
+    private static final SettingsCache sSystemCache = new SettingsCache();
+    private static final SettingsCache sSecureCache = new SettingsCache();
+
+    private static final Bundle NULL_SETTING = Bundle.forPair("value", null);
 
     protected DatabaseHelper mOpenHelper;
     private BackupManager mBackupManager;
@@ -193,7 +203,7 @@ public class SettingsProvider extends ContentProvider {
         final Cursor c = query(Settings.Secure.CONTENT_URI,
                 new String[] { Settings.NameValueTable.VALUE },
                 Settings.NameValueTable.NAME + "=?",
-                new String[]{Settings.Secure.ANDROID_ID}, null);
+                new String[] { Settings.Secure.ANDROID_ID }, null);
         try {
             final String value = c.moveToNext() ? c.getString(0) : null;
             if (value == null) {
@@ -230,19 +240,23 @@ public class SettingsProvider extends ContentProvider {
     @Override
     public Bundle call(String method, String request, Bundle args) {
         if (Settings.CALL_METHOD_GET_SYSTEM.equals(method)) {
-            return lookupValue("system", request);
+            return lookupValue("system", sSystemCache, request);
         }
-
         if (Settings.CALL_METHOD_GET_SECURE.equals(method)) {
-            return lookupValue("secure", request);
+            return lookupValue("secure", sSecureCache, request);
         }
         return null;
     }
 
     // Looks up value 'key' in 'table' and returns either a single-pair Bundle,
     // possibly with a null value, or null on failure.
-    private Bundle lookupValue(String table, String key) {
-        // TODO: avoid database lookup and serve from in-process cache.
+    private Bundle lookupValue(String table, SettingsCache cache, String key) {
+        synchronized (cache) {
+            if (cache.containsKey(key)) {
+                return cache.get(key);
+            }
+        }
+
         SQLiteDatabase db = mOpenHelper.getReadableDatabase();
         Cursor cursor = null;
         try {
@@ -251,7 +265,9 @@ public class SettingsProvider extends ContentProvider {
             if (cursor != null && cursor.getCount() == 1) {
                 cursor.moveToFirst();
                 String value = cursor.getString(0);
-                return Bundle.forPair("value", value);
+                Bundle bundle = (value == null) ? NULL_SETTING : Bundle.forPair("value", value);
+                cache.putIfAbsentLocked(key, bundle);
+                return bundle;
             }
         } catch (SQLiteException e) {
             Log.w(TAG, "settings lookup error", e);
@@ -259,7 +275,8 @@ public class SettingsProvider extends ContentProvider {
         } finally {
             if (cursor != null) cursor.close();
         }
-        return Bundle.forPair("value", null);
+        cache.putIfAbsentLocked(key, NULL_SETTING);
+        return NULL_SETTING;
     }
 
     @Override
@@ -313,6 +330,7 @@ public class SettingsProvider extends ContentProvider {
             return 0;
         }
         checkWritePermissions(args);
+        SettingsCache cache = SettingsCache.forTable(args.table);
 
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         db.beginTransaction();
@@ -320,6 +338,7 @@ public class SettingsProvider extends ContentProvider {
             int numValues = values.length;
             for (int i = 0; i < numValues; i++) {
                 if (db.insert(args.table, null, values[i]) < 0) return 0;
+                SettingsCache.populate(cache, values[i]);
                 if (LOCAL_LOGV) Log.v(TAG, args.table + " <- " + values[i]);
             }
             db.setTransactionSuccessful();
@@ -336,6 +355,9 @@ public class SettingsProvider extends ContentProvider {
      * This setting contains a list of the currently enabled location providers.
      * But helper functions in android.providers.Settings can enable or disable
      * a single provider by using a "+" or "-" prefix before the provider name.
+     *
+     * @returns whether the database needs to be updated or not, also modifying
+     *     'initialValues' if needed.
      */
     private boolean parseProviderList(Uri url, ContentValues initialValues) {
         String value = initialValues.getAsString(Settings.Secure.VALUE);
@@ -393,7 +415,7 @@ public class SettingsProvider extends ContentProvider {
                 }
             }
         }
-        
+
         return true;
     }
 
@@ -416,6 +438,9 @@ public class SettingsProvider extends ContentProvider {
         final long rowId = db.insert(args.table, null, initialValues);
         if (rowId <= 0) return null;
 
+        SettingsCache cache = SettingsCache.forTable(args.table);
+        SettingsCache.populate(cache, initialValues);  // before we notify
+
         if (LOCAL_LOGV) Log.v(TAG, args.table + " <- " + initialValues);
         url = getUriFor(url, initialValues, rowId);
         sendNotify(url);
@@ -434,7 +459,10 @@ public class SettingsProvider extends ContentProvider {
 
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         int count = db.delete(args.table, args.where, args.args);
-        if (count > 0) sendNotify(url);
+        if (count > 0) {
+            SettingsCache.wipe(args.table);  // before we notify
+            sendNotify(url);
+        }
         if (LOCAL_LOGV) Log.v(TAG, args.table + ": " + count + " row(s) deleted");
         return count;
     }
@@ -449,7 +477,10 @@ public class SettingsProvider extends ContentProvider {
 
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         int count = db.update(args.table, initialValues, args.where, args.args);
-        if (count > 0) sendNotify(url);
+        if (count > 0) {
+            SettingsCache.wipe(args.table);  // before we notify
+            sendNotify(url);
+        }
         if (LOCAL_LOGV) Log.v(TAG, args.table + ": " + count + " row(s) <- " + initialValues);
         return count;
     }
@@ -553,5 +584,74 @@ public class SettingsProvider extends ContentProvider {
 
         // Note that this will end up calling openFile() above.
         return super.openAssetFile(uri, mode);
+    }
+
+    /**
+     * In-memory LRU Cache of system and secure settings, along with
+     * associated helper functions to keep cache coherent with the
+     * database.
+     */
+    private static final class SettingsCache extends LinkedHashMap<String, Bundle> {
+        public SettingsCache() {
+            super(MAX_CACHE_ENTRIES, 0.75f /* load factor */, true /* access ordered */);
+        }
+
+        @Override
+        protected boolean removeEldestEntry(Map.Entry eldest) {
+            return size() > MAX_CACHE_ENTRIES;
+        }
+
+        public void putIfAbsentLocked(String key, Bundle value) {
+            synchronized (this) {
+                if (containsKey(key)) {
+                    // Lost a race.
+                    return;
+                }
+                put(key, value);
+            }
+        }
+
+        public static SettingsCache forTable(String tableName) {
+            if ("system".equals(tableName)) {
+                return SettingsProvider.sSystemCache;
+            }
+            if ("secure".equals(tableName)) {
+                return SettingsProvider.sSecureCache;
+            }
+            return null;
+        }
+
+        /**
+         * Populates a key in a given (possibly-null) cache.
+         */
+        public static void populate(SettingsCache cache, ContentValues contentValues) {
+            if (cache == null) {
+                return;
+            }
+            String name = contentValues.getAsString(Settings.NameValueTable.NAME);
+            if (name == null) {
+                Log.w(TAG, "null name populating settings cache.");
+                return;
+            }
+            String value = contentValues.getAsString(Settings.NameValueTable.VALUE);
+            synchronized (cache) {
+                cache.put(name, Bundle.forPair(Settings.NameValueTable.VALUE, value));
+            }
+        }
+
+        /**
+         * Used for wiping a whole cache on deletes when we're not
+         * sure what exactly was deleted or changed.
+         */
+        public static void wipe(String tableName) {
+            SettingsCache cache = SettingsCache.forTable(tableName);
+            if (cache == null) {
+                return;
+            }
+            synchronized (cache) {
+                cache.clear();
+            }
+        }
+
     }
 }
