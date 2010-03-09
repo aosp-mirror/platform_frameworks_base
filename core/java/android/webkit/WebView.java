@@ -5226,8 +5226,8 @@ public class WebView extends AbsoluteLayout
             if (nativeFocusIsPlugin()) {
                 for (int i = 0; i < count; i++) {
                     letPluginHandleNavKey(selectKeyCode, time, true);
-                    letPluginHandleNavKey(selectKeyCode, time, false);
                 }
+                letPluginHandleNavKey(selectKeyCode, time, false);
             } else if (navHandledKey(selectKeyCode, count, false, time)) {
                 playSoundEffect(keyCodeToSoundsEffect(selectKeyCode));
             }
