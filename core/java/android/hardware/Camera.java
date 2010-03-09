@@ -270,7 +270,13 @@ public class Camera {
     }
 
     /**
-     * Adds a pre-allocated buffer to the callback buffer queue.
+     * Adds a pre-allocated buffer to the callback buffer queue. Applications
+     * can add one or more buffers to the queue. When a preview frame arrives
+     * and there is still available buffer, buffer will be filled and it is
+     * removed from the queue. Then preview callback is invoked with the buffer.
+     * If a frame arrives and there is no buffer left, the frame is discarded.
+     * Applications should add the buffers back when they finish the processing.
+     *
      * Preview width and height can be determined from getPreviewSize, and bitsPerPixel can be
      * found from {@link android.hardware.Camera.Parameters#getPreviewFormat()}
      * and {@link android.graphics.ImageFormat#getBitsPerPixel(int)}.
