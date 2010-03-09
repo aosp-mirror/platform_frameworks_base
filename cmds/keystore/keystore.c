@@ -46,7 +46,7 @@
  * user-defined password. To keep things simple, buffers are always larger than
  * the maximum space we needed, so boundary checks on buffers are omitted. */
 
-#define KEY_SIZE        120
+#define KEY_SIZE        ((NAME_MAX - 15) / 2)
 #define VALUE_SIZE      32768
 #define PASSWORD_SIZE   VALUE_SIZE
 
@@ -442,10 +442,11 @@ static struct user {
     uid_t euid;
     uint32_t perms;
 } users[] = {
-    {AID_SYSTEM,   0,          ~GET},
+    {AID_SYSTEM,   ~0,         ~GET},
     {AID_VPN,      AID_SYSTEM, GET},
     {AID_WIFI,     AID_SYSTEM, GET},
-    {0,            0,          TEST | GET | INSERT | DELETE | EXIST | SAW},
+    {AID_ROOT,     AID_SYSTEM, GET},
+    {~0,           ~0,         TEST | GET | INSERT | DELETE | EXIST | SAW},
 };
 
 static int8_t process(int8_t code) {
@@ -453,7 +454,7 @@ static int8_t process(int8_t code) {
     struct action *action = actions;
     int i;
 
-    while (user->uid && user->uid != uid) {
+    while (~user->uid && user->uid != uid) {
         ++user;
     }
     while (action->code && action->code != code) {
@@ -468,7 +469,7 @@ static int8_t process(int8_t code) {
     if (action->state && action->state != state) {
         return state;
     }
-    if (user->euid) {
+    if (~user->euid) {
         uid = user->euid;
     }
     for (i = 0; i < MAX_PARAM && action->lengths[i]; ++i) {
