@@ -1,0 +1,91 @@
+page.title=Speech Input
+@jd:body
+
+<p> People love their mobile phones because they can stay in touch wherever they
+are.  That means not just talking, but e-mailing, texting, microblogging, and so
+on. </p>
+
+<p>Speech input adds another dimension to staying in touch.
+Google's Voice Search application, which is pre-installed on many Android devices,
+provides powerful features like "search by voice" and voice shortcuts like "Navigate to." Further
+enhancing the voice experience, Android 2.1 introduces a <a
+href="http://www.youtube.com/watch?v=laOlkD8LmZw">
+voice-enabled keyboard</a>, which makes it even easier
+to stay connected. Now you can dictate your message instead of typing it. Just
+tap the new microphone button on the keyboard, and you can speak in just about
+any context in which you would normally type. </p> 
+
+<p> We believe speech can
+fundamentally change the mobile experience. We would like to invite every
+Android application developer to consider integrating speech input capabilities
+via the Android SDK.  One of our favorite apps in the Market that integrates
+speech input is <a href="http://www.handcent.com/">Handcent SMS</a>, 
+because you can dictate a reply to any SMS with a
+quick tap on the SMS popup window. Here is Speech input integrated into
+Handcent SMS:</p>
+
+<img src="images/speech-input.png"/>
+
+
+<p> The Android SDK makes it easy to integrate speech input directly into your
+own application. Just copy and paste from this <a
+href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/
+VoiceRecognition.html">
+sample application</a> to get
+started. The sample application first verifies that the target device is able
+to recognize speech input:</p> 
+<pre>
+// Check to see if a recognition activity is present
+PackageManager pm = getPackageManager();
+List<ResolveInfo> activities = pm.queryIntentActivities(
+  new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH), 0);
+if (activities.size() != 0) {
+  speakButton.setOnClickListener(this);
+} else {
+  speakButton.setEnabled(false);
+  speakButton.setText("Recognizer not present");
+}
+</pre>
+<p>
+The sample application then uses {@link
+android.app.Activity#startActivityForResult(android.content.Intent, int)
+startActivityForResult()} to broadcast an intent that requests voice
+recognition, including an extra parameter that specifies one of two language
+models. The voice recognition application that handles the intent processes the
+voice input, then passes the recognized string back to your application by
+calling the {@link android.app.Activity#onActivityResult(int, int,
+android.content.Intent) onActivityResult()} callback. </p>
+
+
+<p>Android is an open platform, so your application can potentially make
+use of any speech recognition service on the device that's registered to receive
+a {@link android.speech.RecognizerIntent}. Google's Voice Search application,
+which is pre-installed on
+many Android devices, responds to a <em>RecognizerIntent</em> by displaying the
+"Speak
+now" dialog and streaming audio to Google's servers -- the same servers used
+when a user taps the microphone button on the search widget or the voice-enabled
+keyboard. Voice Search is installed on all the major
+US devices, and it's also available on Market. You can check whether Voice
+Search is installed in 
+<strong>Settings > Applications > Manage applications</strong>. </p>
+
+<p> One important tip: for speech input to be as accurate as possible, it's
+helpful to have an idea of what words are likely to be spoken.  While a message
+like "Mom, I'm writing you this message with my voice!" might be appropriate for
+an email or SMS message, you're probably more likely to say something like
+"weather in Mountain View" if you're using Google Search. You can make sure your
+users have the best experience possible by requesting the appropriate
+<em>language model:</em> {@link
+android.speech.RecognizerIntent#LANGUAGE_MODEL_FREE_FORM free_form} for
+dictation, or {@link android.speech.RecognizerIntent#LANGUAGE_MODEL_WEB_SEARCH
+web_search} for shorter, search-like phrases.  We developed the "free form"
+model to improve dictation accuracy for the voice keyboard,
+while the "web search" model is used when users want to search by voice. </p> 
+
+<p> Google's servers currently support English, Mandarin Chinese, and Japanese. 
+The web search model is available in all three languages, while free-form has
+primarily been optimized for English. As we work hard to support more models in
+more languages, and to improve the accuracy of the speech recognition technology
+we use in our products, Android developers who integrate speech capabilities
+directly into their applications can reap the benefits as well. </p>
