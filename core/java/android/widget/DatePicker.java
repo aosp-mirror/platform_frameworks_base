@@ -94,9 +94,7 @@ public class DatePicker extends FrameLayout {
         mDayPicker.setOnChangeListener(new OnChangedListener() {
             public void onChanged(NumberPicker picker, int oldVal, int newVal) {
                 mDay = newVal;
-                if (mOnDateChangedListener != null) {
-                    mOnDateChangedListener.onDateChanged(DatePicker.this, mYear, mMonth, mDay);
-                }
+                notifyDateChanged();
             }
         });
         mMonthPicker = (NumberPicker) findViewById(R.id.month);
@@ -126,9 +124,7 @@ public class DatePicker extends FrameLayout {
                 mMonth = newVal - 1;
                 // Adjust max day of the month
                 adjustMaxDay();
-                if (mOnDateChangedListener != null) {
-                    mOnDateChangedListener.onDateChanged(DatePicker.this, mYear, mMonth, mDay);
-                }
+                notifyDateChanged();
                 updateDaySpinner();
             }
         });
@@ -139,9 +135,7 @@ public class DatePicker extends FrameLayout {
                 mYear = newVal;
                 // Adjust max day for leap years if needed
                 adjustMaxDay();
-                if (mOnDateChangedListener != null) {
-                    mOnDateChangedListener.onDateChanged(DatePicker.this, mYear, mMonth, mDay);
-                }
+                notifyDateChanged();
                 updateDaySpinner();
             }
         });
@@ -242,11 +236,14 @@ public class DatePicker extends FrameLayout {
     }
 
     public void updateDate(int year, int monthOfYear, int dayOfMonth) {
-        mYear = year;
-        mMonth = monthOfYear;
-        mDay = dayOfMonth;
-        updateSpinners();
-        reorderPickers(new DateFormatSymbols().getShortMonths());
+        if (mYear != year || mMonth != monthOfYear || mDay != dayOfMonth) {
+            mYear = year;
+            mMonth = monthOfYear;
+            mDay = dayOfMonth;
+            updateSpinners();
+            reorderPickers(new DateFormatSymbols().getShortMonths());
+            notifyDateChanged();
+        }
     }
 
     private static class SavedState extends BaseSavedState {
@@ -386,6 +383,12 @@ public class DatePicker extends FrameLayout {
         int max = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
         if (mDay > max) {
             mDay = max;
+        }
+    }
+
+    private void notifyDateChanged() {
+        if (mOnDateChangedListener != null) {
+            mOnDateChangedListener.onDateChanged(DatePicker.this, mYear, mMonth, mDay);
         }
     }
 }
