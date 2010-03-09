@@ -50,10 +50,27 @@
                 android:src="@drawable/ic_aggregated"
             />
 
-            <!-- "Name" field is locale-specific. -->
-            <include layout="@layout/contact_header_name"/>
-
+            <TextView android:id="@+id/name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:ellipsize="end"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textStyle="bold"
+                android:shadowColor="#BB000000"
+                android:shadowRadius="2.75"
+                android:layout_marginBottom="-4dip"
+                />
         </LinearLayout>
+
+        <TextView android:id="@+id/phonetic_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:singleLine="true"
+            android:ellipsize="end"
+            android:layout_marginTop="-2dip"
+        />
 
         <TextView android:id="@+id/status"
             android:layout_width="match_parent"
@@ -61,7 +78,7 @@
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:singleLine="true"
             android:ellipsize="end"
-            android:layout_marginTop="-4dip"
+            android:layout_marginTop="-2dip"
         />
 
         <TextView android:id="@+id/status_date"
