@@ -23,8 +23,8 @@ import android.util.Log;
  * Once a sql statement is compiled, it is cached in {@link SQLiteDatabase}
  * and it is released in one of the 2 following ways
  * 1. when {@link SQLiteDatabase} object is closed.
- * 2. dalvikVM wants to reclaim some memory and releases it from the cache in
- * {@link SQLiteDatabase}.
+ * 2. if this is not cached in {@link SQLiteDatabase}, {@link android.database.Cursor#close()}
+ * releaases this obj.
  */
 /* package */ class SQLiteCompiledSql {
 
@@ -127,7 +127,7 @@ import android.util.Log;
         try {
             if (nStatement == 0) return;
             // finalizer should NEVER get called
-            Log.w(TAG, "finalizer should never be called. sql: " + mSqlStmt, mStackTrace);
+            Log.w(TAG, "finalizer should never be called on sql: " + mSqlStmt, mStackTrace);
             releaseSqlStatement();
         } finally {
             super.finalize();
