@@ -1125,9 +1125,11 @@ public class WebView extends AbsoluteLayout
             mCallbackProxy.setWebViewClient(null);
             mCallbackProxy.setWebChromeClient(null);
             // Tell WebViewCore to destroy itself
-            WebViewCore webViewCore = mWebViewCore;
-            mWebViewCore = null; // prevent using partial webViewCore
-            webViewCore.destroy();
+            synchronized (this) {
+                WebViewCore webViewCore = mWebViewCore;
+                mWebViewCore = null; // prevent using partial webViewCore
+                webViewCore.destroy();
+            }
             // Remove any pending messages that might not be serviced yet.
             mPrivateHandler.removeCallbacksAndMessages(null);
             mCallbackProxy.removeCallbacksAndMessages(null);
@@ -5842,7 +5844,7 @@ public class WebView extends AbsoluteLayout
                 cursorData(), 1000);
     }
 
-    /* package */ WebViewCore getWebViewCore() {
+    /* package */ synchronized WebViewCore getWebViewCore() {
         return mWebViewCore;
     }
 
