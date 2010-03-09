@@ -61,6 +61,7 @@ public abstract class SQLiteProgram extends SQLiteClosable {
         // only cache CRUD statements
         String prefixSql = mSql.substring(0, 6);
         if (!prefixSql.equalsIgnoreCase("INSERT") && !prefixSql.equalsIgnoreCase("UPDATE") &&
+                !prefixSql.equalsIgnoreCase("REPLAC") &&
                 !prefixSql.equalsIgnoreCase("DELETE") && !prefixSql.equalsIgnoreCase("SELECT")) {
             mCompiledSql = new SQLiteCompiledSql(db, sql);
             nStatement = mCompiledSql.nStatement;
