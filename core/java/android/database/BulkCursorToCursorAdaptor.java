@@ -43,25 +43,43 @@ public final class BulkCursorToCursorAdaptor extends AbstractWindowedCursor {
         try {
             mCount = mBulkCursor.count();
             mWantsAllOnMoveCalls = mBulkCursor.getWantsAllOnMoveCalls();
-    
+
             // Search for the rowID column index and set it for our parent
             mColumns = mBulkCursor.getColumnNames();
-            int length = mColumns.length;
-            for (int i = 0; i < length; i++) {
-                if (mColumns[i].equals("_id")) {
-                    mRowIdColumnIndex = i;
-                    break;
-                }
-            }
+            mRowIdColumnIndex = findRowIdColumnIndex(mColumns);
         } catch (RemoteException ex) {
             Log.e(TAG, "Setup failed because the remote process is dead");
         }
     }
 
     /**
+     * Version of set() that does fewer Binder calls if the caller
+     * already knows BulkCursorToCursorAdaptor's properties.
+     */
+    public void set(IBulkCursor bulkCursor, int count, int idIndex) {
+        mBulkCursor = bulkCursor;
+        mColumns = null;  // lazily retrieved
+        mCount = count;
+        mRowIdColumnIndex = idIndex;
+    }
+
+    /**
+     * Returns column index of "_id" column, or -1 if not found.
+     */
+    public static int findRowIdColumnIndex(String[] columnNames) {
+        int length = columnNames.length;
+        for (int i = 0; i < length; i++) {
+            if (columnNames[i].equals("_id")) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    /**
      * Gets a SelfDataChangeOberserver that can be sent to a remote
      * process to receive change notifications over IPC.
-     * 
+     *
      * @return A SelfContentObserver hooked up to this Cursor
      */
     public synchronized IContentObserver getObserver() {
@@ -190,6 +208,14 @@ public final class BulkCursorToCursorAdaptor extends AbstractWindowedCursor {
 
     @Override
     public String[] getColumnNames() {
+        if (mColumns == null) {
+            try {
+                mColumns = mBulkCursor.getColumnNames();
+            } catch (RemoteException ex) {
+                Log.e(TAG, "Unable to fetch column names because the remote process is dead");
+                return null;
+            }
+        }
         return mColumns;
     }
 
@@ -255,4 +281,3 @@ public final class BulkCursorToCursorAdaptor extends AbstractWindowedCursor {
         }
     }
 }
-

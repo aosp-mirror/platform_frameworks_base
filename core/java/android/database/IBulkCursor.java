@@ -27,11 +27,10 @@ import java.util.Map;
  * This interface provides a low-level way to pass bulk cursor data across
  * both process and language boundries. Application code should use the Cursor
  * interface directly.
- * 
+ *
  * {@hide}
  */
-public interface IBulkCursor extends IInterface 
-{
+public interface IBulkCursor extends IInterface  {
     /**
      * Returns a BulkCursorWindow, which either has a reference to a shared
      * memory segment with the rows, or an array of JSON strings.
@@ -60,7 +59,7 @@ public interface IBulkCursor extends IInterface
     public boolean deleteRow(int position) throws RemoteException;
 
     public void deactivate() throws RemoteException;
-    
+
     public void close() throws RemoteException;
 
     public int requery(IContentObserver observer, CursorWindow window) throws RemoteException;
@@ -87,4 +86,3 @@ public interface IBulkCursor extends IInterface
     static final int RESPOND_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 10;
     static final int CLOSE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 11;
 }
-
