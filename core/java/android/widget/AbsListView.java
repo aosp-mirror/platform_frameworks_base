@@ -2849,8 +2849,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 final int lastViewHeight = lastView.getHeight();
                 final int lastViewTop = lastView.getTop();
                 final int lastViewPixelsShowing = listHeight - lastViewTop;
+                final int extraScroll = lastPos < mItemCount - 1 ? mExtraScroll : mListPadding.bottom;
 
-                smoothScrollBy(lastViewHeight - lastViewPixelsShowing + mExtraScroll,
+                smoothScrollBy(lastViewHeight - lastViewPixelsShowing + extraScroll,
                         mScrollDuration);
 
                 mLastSeenPos = lastPos;
@@ -2862,7 +2863,10 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 
             case MOVE_DOWN_BOUND: {
                 final int nextViewIndex = 1;
-                if (firstPos == mBoundPos || getChildCount() <= nextViewIndex) {
+                final int childCount = getChildCount();
+                
+                if (firstPos == mBoundPos || childCount <= nextViewIndex
+                        || firstPos + childCount >= mItemCount) {
                     return;
                 }
                 final int nextPos = firstPos + nextViewIndex;
@@ -2904,8 +2908,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     return;
                 }
                 final int firstViewTop = firstView.getTop();
+                final int extraScroll = firstPos > 0 ? mExtraScroll : mListPadding.top;
 
-                smoothScrollBy(firstViewTop - mExtraScroll, mScrollDuration);
+                smoothScrollBy(firstViewTop - extraScroll, mScrollDuration);
 
                 mLastSeenPos = firstPos;
 
@@ -3075,7 +3080,10 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
         final boolean down = incrementalDeltaY < 0;
 
-        hideSelector();
+        final boolean inTouchMode = isInTouchMode();
+        if (inTouchMode) {
+            hideSelector();
+        }
 
         final int headerViewsCount = getHeaderViewsCount();
         final int footerViewsStart = mItemCount - getFooterViewsCount();
@@ -3138,12 +3146,16 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         if (down) {
             mFirstPosition += count;
         }
-
+        
         invalidate();
 
         final int absIncrementalDeltaY = Math.abs(incrementalDeltaY);
         if (spaceAbove < absIncrementalDeltaY || spaceBelow < absIncrementalDeltaY) {
             fillGap(down);
+        }
+
+        if (!inTouchMode && mSelectedPosition != INVALID_POSITION) {
+            positionSelector(getChildAt(mSelectedPosition - mFirstPosition));
         }
 
         mBlockLayoutRequests = false;
