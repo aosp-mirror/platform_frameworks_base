@@ -5767,10 +5767,15 @@ public class WebView extends AbsoluteLayout
         rect.offset(child.getLeft() - child.getScrollX(),
                 child.getTop() - child.getScrollY());
 
-        int height = getViewHeightWithTitle();
-        int screenTop = mScrollY;
-        int screenBottom = screenTop + height;
-
+        Rect content = new Rect(viewToContentX(mScrollX),
+                viewToContentY(mScrollY),
+                viewToContentX(mScrollX + getWidth()
+                - getVerticalScrollbarWidth()),
+                viewToContentY(mScrollY + getViewHeightWithTitle()));
+        content = nativeSubtractLayers(content);
+        int screenTop = contentToViewY(content.top);
+        int screenBottom = contentToViewY(content.bottom);
+        int height = screenBottom - screenTop;
         int scrollYDelta = 0;
 
         if (rect.bottom > screenBottom) {
@@ -5788,10 +5793,9 @@ public class WebView extends AbsoluteLayout
             scrollYDelta = rect.top - screenTop;
         }
 
-        int width = getWidth() - getVerticalScrollbarWidth();
-        int screenLeft = mScrollX;
-        int screenRight = screenLeft + width;
-
+        int screenLeft = contentToViewX(content.left);
+        int screenRight = contentToViewX(content.right);
+        int width = screenRight - screenLeft;
         int scrollXDelta = 0;
 
         if (rect.right > screenRight && rect.left > screenLeft) {
@@ -6995,6 +6999,7 @@ public class WebView extends AbsoluteLayout
     private native void     nativeSetSelectionPointer(boolean set,
             float scale, int x, int y, boolean extendSelection);
     private native void     nativeSetSelectionRegion(boolean set);
+    private native Rect     nativeSubtractLayers(Rect content);
     private native int      nativeTextGeneration();
     // Never call this version except by updateCachedTextfield(String) -
     // we always want to pass in our generation number.
