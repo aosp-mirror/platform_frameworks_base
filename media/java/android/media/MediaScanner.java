@@ -630,13 +630,9 @@ public class MediaScanner
                 map.put(Video.Media.ARTIST, (mArtist != null && mArtist.length() > 0 ? mArtist : MediaStore.UNKNOWN_STRING));
                 map.put(Video.Media.ALBUM, (mAlbum != null && mAlbum.length() > 0 ? mAlbum : MediaStore.UNKNOWN_STRING));
                 map.put(Video.Media.DURATION, mDuration);
-                map.put(Video.Media.DATE_TAKEN, mLastModified * 1000);
                 // FIXME - add RESOLUTION
             } else if (MediaFile.isImageFileType(mFileType)) {
                 // FIXME - add DESCRIPTION
-                // DATE_TAKEN will be overridden later if this is a JPEG image whose EXIF data
-                // contains date time information.
-                map.put(Images.Media.DATE_TAKEN, mLastModified * 1000);
             } else if (MediaFile.isAudioFileType(mFileType)) {
                 map.put(Audio.Media.ARTIST, (mArtist != null && mArtist.length() > 0 ? mArtist : MediaStore.UNKNOWN_STRING));
                 map.put(Audio.Media.ALBUM, (mAlbum != null && mAlbum.length() > 0 ? mAlbum : MediaStore.UNKNOWN_STRING));
