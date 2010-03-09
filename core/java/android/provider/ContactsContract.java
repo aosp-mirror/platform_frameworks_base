@@ -5244,7 +5244,6 @@ public final class ContactsContract {
      * </tr>
      * </table>
      */
-
     public static final class Settings implements SettingsColumns {
         /**
          * This utility class cannot be instantiated
@@ -5268,6 +5267,83 @@ public final class ContactsContract {
          * The MIME-type of {@link #CONTENT_URI} providing a single setting.
          */
         public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/setting";
+    }
+
+    /**
+     * Private API for inquiring about the general status of the provider.
+     *
+     * @hide
+     */
+    public static final class ProviderStatus {
+
+        /**
+         * Not instantiable.
+         */
+        private ProviderStatus() {
+        }
+
+        /**
+         * The content:// style URI for this table.  Requests to this URI can be
+         * performed on the UI thread because they are always unblocking.
+         *
+         * @hide
+         */
+        public static final Uri CONTENT_URI =
+                Uri.withAppendedPath(AUTHORITY_URI, "provider_status");
+
+        /**
+         * The MIME-type of {@link #CONTENT_URI} providing a directory of
+         * settings.
+         *
+         * @hide
+         */
+        public static final String CONTENT_TYPE = "vnd.android.cursor.dir/provider_status";
+
+        /**
+         * An integer representing the current status of the provider.
+         *
+         * @hide
+         */
+        public static final String STATUS = "status";
+
+        /**
+         * Default status of the provider.
+         *
+         * @hide
+         */
+        public static final int STATUS_NORMAL = 0;
+
+        /**
+         * The status used when the provider is in the process of upgrading.  Contacts
+         * are temporarily unaccessible.
+         *
+         * @hide
+         */
+        public static final int STATUS_UPGRADING = 1;
+
+        /**
+         * The status used if the provider was in the process of upgrading but ran
+         * out of storage. The DATA1 column will contain the estimated amount of
+         * storage required (in bytes). Update status to STATUS_NORMAL to force
+         * the provider to retry the upgrade.
+         *
+         * @hide
+         */
+        public static final int STATUS_UPGRADE_OUT_OF_MEMORY = 2;
+
+        /**
+         * The status used during a locale change.
+         *
+         * @hide
+         */
+        public static final int STATUS_CHANGING_LOCALE = 3;
+
+        /**
+         * Additional data associated with the status.
+         *
+         * @hide
+         */
+        public static final String DATA1 = "data1";
     }
 
     /**
