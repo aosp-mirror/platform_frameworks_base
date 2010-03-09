@@ -126,7 +126,7 @@ public class PopupWindow {
                     WindowManager.LayoutParams p = (WindowManager.LayoutParams)
                             mPopupView.getLayoutParams();
 
-                    mAboveAnchor = findDropDownPosition(anchor, p, mAnchorXoff, mAnchorYoff);
+                    updateAboveAnchor(findDropDownPosition(anchor, p, mAnchorXoff, mAnchorYoff));
                     update(p.x, p.y, -1, -1, true);
                 }
             }
@@ -729,22 +729,8 @@ public class PopupWindow {
 
         WindowManager.LayoutParams p = createPopupLayout(anchor.getWindowToken());
         preparePopup(p);
-        mAboveAnchor = findDropDownPosition(anchor, p, xoff, yoff);
 
-        if (mBackground != null) {
-            // If the background drawable provided was a StateListDrawable with above-anchor
-            // and below-anchor states, use those. Otherwise rely on refreshDrawableState to
-            // do the job.
-            if (mAboveAnchorBackgroundDrawable != null) {
-                if (mAboveAnchor) {
-                    mPopupView.setBackgroundDrawable(mAboveAnchorBackgroundDrawable);
-                } else {
-                    mPopupView.setBackgroundDrawable(mBelowAnchorBackgroundDrawable);
-                }
-            } else {
-                mPopupView.refreshDrawableState();
-            }
-        }
+        updateAboveAnchor(findDropDownPosition(anchor, p, xoff, yoff));
 
         if (mHeightMode < 0) p.height = mLastHeight = mHeightMode;
         if (mWidthMode < 0) p.width = mLastWidth = mWidthMode;
@@ -752,6 +738,27 @@ public class PopupWindow {
         p.windowAnimations = computeAnimationResource();
 
         invokePopup(p);
+    }
+
+    private void updateAboveAnchor(boolean aboveAnchor) {
+        if (aboveAnchor != mAboveAnchor) {
+            mAboveAnchor = aboveAnchor;
+
+            if (mBackground != null) {
+                // If the background drawable provided was a StateListDrawable with above-anchor
+                // and below-anchor states, use those. Otherwise rely on refreshDrawableState to
+                // do the job.
+                if (mAboveAnchorBackgroundDrawable != null) {
+                    if (mAboveAnchor) {
+                        mPopupView.setBackgroundDrawable(mAboveAnchorBackgroundDrawable);
+                    } else {
+                        mPopupView.setBackgroundDrawable(mBelowAnchorBackgroundDrawable);
+                    }
+                } else {
+                    mPopupView.refreshDrawableState();
+                }
+            }
+        }
     }
 
     /**
@@ -915,7 +922,7 @@ public class PopupWindow {
 
         anchor.getLocationInWindow(mDrawingLocation);
         p.x = mDrawingLocation[0] + xoff;
-        p.y = mDrawingLocation[1] + anchor.getMeasuredHeight() + yoff;
+        p.y = mDrawingLocation[1] + anchor.getHeight() + yoff;
         
         boolean onTop = false;
 
@@ -932,26 +939,26 @@ public class PopupWindow {
             // the edit box
             int scrollX = anchor.getScrollX();
             int scrollY = anchor.getScrollY();
-            Rect r = new Rect(scrollX, scrollY,  scrollX + mPopupWidth,
-                    scrollY + mPopupHeight + anchor.getMeasuredHeight());
+            Rect r = new Rect(scrollX, scrollY,  scrollX + mPopupWidth + xoff,
+                    scrollY + mPopupHeight + anchor.getHeight() + yoff);
             anchor.requestRectangleOnScreen(r, true);
-            
+
             // now we re-evaluate the space available, and decide from that
             // whether the pop-up will go above or below the anchor.
             anchor.getLocationInWindow(mDrawingLocation);
             p.x = mDrawingLocation[0] + xoff;
-            p.y = mDrawingLocation[1] + anchor.getMeasuredHeight() + yoff;
+            p.y = mDrawingLocation[1] + anchor.getHeight() + yoff;
             
             // determine whether there is more space above or below the anchor
             anchor.getLocationOnScreen(mScreenLocation);
             
-            onTop = (displayFrame.bottom - mScreenLocation[1] - anchor.getMeasuredHeight() - yoff) <
+            onTop = (displayFrame.bottom - mScreenLocation[1] - anchor.getHeight() - yoff) <
                     (mScreenLocation[1] - yoff - displayFrame.top);
             if (onTop) {
                 p.gravity = Gravity.LEFT | Gravity.BOTTOM;
                 p.y = root.getHeight() - mDrawingLocation[1] + yoff;
             } else {
-                p.y = mDrawingLocation[1] + anchor.getMeasuredHeight() + yoff;
+                p.y = mDrawingLocation[1] + anchor.getHeight() + yoff;
             }
         }
 
@@ -1257,13 +1264,16 @@ public class PopupWindow {
             }
         }
 
-        if (updateLocation) {
-            mAboveAnchor = findDropDownPosition(anchor, p, xoff, yoff);
-        } else {
-            mAboveAnchor = findDropDownPosition(anchor, p, mAnchorXoff, mAnchorYoff);            
-        }
+        int x = p.x;
+        int y = p.y;
 
-        update(p.x, p.y, width, height);
+        if (updateLocation) {
+            updateAboveAnchor(findDropDownPosition(anchor, p, xoff, yoff));
+        } else {
+            updateAboveAnchor(findDropDownPosition(anchor, p, mAnchorXoff, mAnchorYoff));            
+        }
+        
+        update(p.x, p.y, width, height, x != p.x || y != p.y);
     }
 
     /**
