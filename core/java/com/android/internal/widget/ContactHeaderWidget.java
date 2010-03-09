@@ -99,6 +99,7 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
             Contacts.LOOKUP_KEY,
             Contacts.PHOTO_ID,
             Contacts.DISPLAY_NAME,
+            Contacts.PHONETIC_NAME,
             Contacts.STARRED,
             Contacts.CONTACT_PRESENCE,
             Contacts.CONTACT_STATUS,
@@ -110,14 +111,15 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
         int LOOKUP_KEY = 1;
         int PHOTO_ID = 2;
         int DISPLAY_NAME = 3;
+        int PHONETIC_NAME = 4;
         //TODO: We need to figure out how we're going to get the phonetic name.
         //static final int HEADER_PHONETIC_NAME_COLUMN_INDEX
-        int STARRED = 4;
-        int CONTACT_PRESENCE_STATUS = 5;
-        int CONTACT_STATUS = 6;
-        int CONTACT_STATUS_TIMESTAMP = 7;
-        int CONTACT_STATUS_RES_PACKAGE = 8;
-        int CONTACT_STATUS_LABEL = 9;
+        int STARRED = 5;
+        int CONTACT_PRESENCE_STATUS = 6;
+        int CONTACT_STATUS = 7;
+        int CONTACT_STATUS_TIMESTAMP = 8;
+        int CONTACT_STATUS_RES_PACKAGE = 9;
+        int CONTACT_STATUS_LABEL = 10;
     }
 
     private interface PhotoQuery {
@@ -321,7 +323,7 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
     }
 
     /**
-     * Turn on/off showing of the aggregate bage element.
+     * Turn on/off showing of the aggregate badge element.
      */
     public void showAggregateBadge(boolean showBagde) {
         mAggregateBadge.setVisibility(showBagde ? View.VISIBLE : View.GONE);
@@ -380,8 +382,11 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
      */
     public void setDisplayName(CharSequence displayName, CharSequence phoneticName) {
         mDisplayNameView.setText(displayName);
-        if (mPhoneticNameView != null) {
+        if (!TextUtils.isEmpty(phoneticName)) {
             mPhoneticNameView.setText(phoneticName);
+            mPhoneticNameView.setVisibility(View.VISIBLE);
+        } else {
+            mPhoneticNameView.setVisibility(View.GONE);
         }
     }
 
@@ -524,10 +529,9 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
      * Bind the contact details provided by the given {@link Cursor}.
      */
     protected void bindContactInfo(Cursor c) {
-        // TODO: Bring back phonetic name
         final String displayName = c.getString(ContactQuery.DISPLAY_NAME);
-        final String phoneticName = null;
-        this.setDisplayName(displayName, null);
+        final String phoneticName = c.getString(ContactQuery.PHONETIC_NAME);
+        this.setDisplayName(displayName, phoneticName);
 
         final boolean starred = c.getInt(ContactQuery.STARRED) != 0;
         mStarredView.setChecked(starred);
