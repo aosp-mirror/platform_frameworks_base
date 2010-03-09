@@ -1034,6 +1034,24 @@ public final class Settings {
         public static final String END_BUTTON_BEHAVIOR = "end_button_behavior";
 
         /**
+         * END_BUTTON_BEHAVIOR value for "go home".
+         * @hide
+         */
+        public static final int END_BUTTON_BEHAVIOR_HOME = 0x1;
+
+        /**
+         * END_BUTTON_BEHAVIOR value for "go to sleep".
+         * @hide
+         */
+        public static final int END_BUTTON_BEHAVIOR_SLEEP = 0x2;
+
+        /**
+         * END_BUTTON_BEHAVIOR default value.
+         * @hide
+         */
+        public static final int END_BUTTON_BEHAVIOR_DEFAULT = END_BUTTON_BEHAVIOR_SLEEP;
+
+        /**
          * Whether Airplane Mode is on.
          */
         public static final String AIRPLANE_MODE_ON = "airplane_mode_on";
@@ -3189,6 +3207,36 @@ public final class Settings {
          * @hide
          */
         public static final String VOICE_RECOGNITION_SERVICE = "voice_recognition_service";
+
+        /**
+         * What happens when the user presses the Power button while in-call
+         * and the screen is on.<br/>
+         * <b>Values:</b><br/>
+         * 1 - The Power button turns off the screen and locks the device. (Default behavior)<br/>
+         * 2 - The Power button hangs up the current call.<br/>
+         *
+         * @hide
+         */
+        public static final String INCALL_POWER_BUTTON_BEHAVIOR = "incall_power_button_behavior";
+
+        /**
+         * INCALL_POWER_BUTTON_BEHAVIOR value for "turn off screen".
+         * @hide
+         */
+        public static final int INCALL_POWER_BUTTON_BEHAVIOR_SCREEN_OFF = 0x1;
+
+        /**
+         * INCALL_POWER_BUTTON_BEHAVIOR value for "hang up".
+         * @hide
+         */
+        public static final int INCALL_POWER_BUTTON_BEHAVIOR_HANGUP = 0x2;
+
+        /**
+         * INCALL_POWER_BUTTON_BEHAVIOR default value.
+         * @hide
+         */
+        public static final int INCALL_POWER_BUTTON_BEHAVIOR_DEFAULT =
+                INCALL_POWER_BUTTON_BEHAVIOR_SCREEN_OFF;
 
         /**
          * @hide
