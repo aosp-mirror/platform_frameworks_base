@@ -1523,10 +1523,6 @@ status_t SurfaceFlinger::dump(int fd, const Vector<String16>& args)
             if (l != 0) {
                 SharedBufferStack::Statistics stats = l->lcblk->getStats();
                 result.append( l->lcblk->dump("      ") );
-                snprintf(buffer, SIZE,
-                        "      front-index=%u\n", l->getFrontBufferIndex());
-                result.append(buffer);
-
                 sp<const GraphicBuffer> buf0(l->getBuffer(0));
                 sp<const GraphicBuffer> buf1(l->getBuffer(1));
                 uint32_t w0=0, h0=0, s0=0;

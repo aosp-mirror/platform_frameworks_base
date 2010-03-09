@@ -699,7 +699,8 @@ int32_t LayerBaseClient::sIdentity = 0;
 LayerBaseClient::LayerBaseClient(SurfaceFlinger* flinger, DisplayID display,
         const sp<Client>& client, int32_t i)
     : LayerBase(flinger, display), lcblk(NULL), client(client),
-      mIndex(i), mIdentity(uint32_t(android_atomic_inc(&sIdentity)))
+      mDebug(false), mIndex(i),
+      mIdentity(uint32_t(android_atomic_inc(&sIdentity)))
 {
     lcblk = new SharedBufferServer(
             client->ctrlblk, i, NUM_BUFFERS,
