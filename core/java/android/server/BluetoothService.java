@@ -1910,6 +1910,13 @@ public class BluetoothService extends IBluetooth.Stub {
         return path;
     }
 
+    /*package */ void setLinkTimeout(String address, int num_slots) {
+        String path = getObjectPathFromAddress(address);
+        boolean result = setLinkTimeoutNative(path, num_slots);
+
+        if (!result) log("Set Link Timeout to:" + num_slots + " slots failed");
+    }
+
     private static void log(String msg) {
         Log.d(TAG, msg);
     }
@@ -1953,4 +1960,5 @@ public class BluetoothService extends IBluetooth.Stub {
     private native int addRfcommServiceRecordNative(String name, long uuidMsb, long uuidLsb,
             short channel);
     private native boolean removeServiceRecordNative(int handle);
+    private native boolean setLinkTimeoutNative(String path, int num_slots);
 }
