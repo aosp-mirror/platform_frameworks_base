@@ -1544,6 +1544,15 @@ public class SearchManager
     public final static String INTENT_ACTION_NONE = "android.search.action.ZILCH";
 
     /**
+     * This means that context is voice, and therefore the SearchDialog should
+     * continue showing the microphone until the user indicates that he/she does
+     * not want to re-speak (e.g. by typing).
+     *
+     * @hide
+     */
+    public final static String CONTEXT_IS_VOICE = "android.search.CONTEXT_IS_VOICE";
+
+    /**
      * Reference to the shared system search service.
      */
     private static ISearchManager mService;
