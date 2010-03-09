@@ -1641,7 +1641,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 mResurrectToPosition = mSelectedPosition;
             }
         } else {
-            if (mFiltered) {
+            if (mFiltered && !mPopupHidden) {
                 // Show the type filter only if a filter is in effect
                 showPopup();
             }
@@ -3510,7 +3510,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         if (mPopup != null) {
             mPopup.dismiss();
         }
-        mPopupHidden = false;
     }
 
     /**
