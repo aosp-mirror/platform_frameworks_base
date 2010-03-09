@@ -17,6 +17,7 @@ package android.pim.vcard;
 
 import android.accounts.Account;
 import android.content.ContentProviderOperation;
+import android.content.ContentProviderResult;
 import android.content.ContentResolver;
 import android.content.OperationApplicationException;
 import android.database.Cursor;
@@ -90,7 +91,7 @@ public class VCardEntry {
             this.label = label;
             this.isPrimary = isPrimary;
         }
-        
+
         @Override
         public boolean equals(Object obj) {
             if (!(obj instanceof PhoneData)) {
@@ -100,7 +101,7 @@ public class VCardEntry {
             return (type == phoneData.type && data.equals(phoneData.data) &&
                     label.equals(phoneData.label) && isPrimary == phoneData.isPrimary);
         }
-        
+
         @Override
         public String toString() {
             return String.format("type: %d, data: %s, label: %s, isPrimary: %s",
@@ -122,7 +123,7 @@ public class VCardEntry {
             this.label = label;
             this.isPrimary = isPrimary;
         }
-        
+
         @Override
         public boolean equals(Object obj) {
             if (!(obj instanceof EmailData)) {
@@ -132,7 +133,7 @@ public class VCardEntry {
             return (type == emailData.type && data.equals(emailData.data) &&
                     label.equals(emailData.label) && isPrimary == emailData.isPrimary);
         }
-        
+
         @Override
         public String toString() {
             return String.format("type: %d, data: %s, label: %s, isPrimary: %s",
@@ -193,14 +194,14 @@ public class VCardEntry {
             this.label = label;
             this.isPrimary = isPrimary;
         }
-        
+
         @Override
         public boolean equals(Object obj) {
             if (!(obj instanceof PostalData)) {
                 return false;
             }
             final PostalData postalData = (PostalData)obj;
-            return (Arrays.equals(dataArray, postalData.dataArray) && 
+            return (Arrays.equals(dataArray, postalData.dataArray) &&
                     (type == postalData.type &&
                             (type == StructuredPostal.TYPE_CUSTOM ?
                                     (label == postalData.label) : true)) &&
@@ -239,7 +240,7 @@ public class VCardEntry {
 
             return builder.toString().trim();
         }
-        
+
         @Override
         public String toString() {
             return String.format("type: %d, label: %s, isPrimary: %s",
@@ -267,7 +268,7 @@ public class VCardEntry {
             this.titleName = titleName;
             this.isPrimary = isPrimary;
         }
-        
+
         @Override
         public boolean equals(Object obj) {
             if (!(obj instanceof OrganizationData)) {
@@ -311,7 +312,7 @@ public class VCardEntry {
                     type, companyName, departmentName, titleName, isPrimary);
         }
     }
-    
+
     static public class ImData {
         public final int protocol;
         public final String customProtocol;
@@ -348,7 +349,7 @@ public class VCardEntry {
                     type, protocol, customProtocol, data, isPrimary);
         }
     }
-    
+
     public static class PhotoData {
         public static final String FORMAT_FLASH = "SWF";
         public final int type;
@@ -382,7 +383,7 @@ public class VCardEntry {
                     type, formatName, photoBytes.length, isPrimary);
         }
     }
-    
+
     /* package */ static class Property {
         private String mPropertyName;
         private Map<String, Collection<String>> mParameterMap =
@@ -393,7 +394,7 @@ public class VCardEntry {
         public void setPropertyName(final String propertyName) {
             mPropertyName = propertyName;
         }
-        
+
         public void addParameter(final String paramName, final String paramValue) {
             Collection<String> values;
             if (!mParameterMap.containsKey(paramName)) {
@@ -408,11 +409,11 @@ public class VCardEntry {
             }
             values.add(paramValue);
         }
-        
+
         public void addToPropertyValueList(final String propertyValue) {
             mPropertyValueList.add(propertyValue);
         }
-        
+
         public void setPropertyBytes(final byte[] propertyBytes) {
             mPropertyBytes = propertyBytes;
         }
@@ -420,11 +421,11 @@ public class VCardEntry {
         public final Collection<String> getParameters(String type) {
             return mParameterMap.get(type);
         }
-        
+
         public final List<String> getPropertyValueList() {
             return mPropertyValueList;
         }
-        
+
         public void clear() {
             mPropertyName = null;
             mParameterMap.clear();
@@ -432,7 +433,7 @@ public class VCardEntry {
             mPropertyBytes = null;
         }
     }
-    
+
     private String mFamilyName;
     private String mGivenName;
     private String mMiddleName;
@@ -441,19 +442,19 @@ public class VCardEntry {
 
     // Used only when no family nor given name is found.
     private String mFullName;
-    
+
     private String mPhoneticFamilyName;
     private String mPhoneticGivenName;
     private String mPhoneticMiddleName;
-    
+
     private String mPhoneticFullName;
 
     private List<String> mNickNameList;
 
-    private String mDisplayName; 
+    private String mDisplayName;
 
     private String mBirthday;
-    
+
     private List<String> mNoteList;
     private List<PhoneData> mPhoneList;
     private List<EmailData> mEmailList;
@@ -513,21 +514,21 @@ public class VCardEntry {
         }
         mNickNameList.add(nickName);
     }
-    
+
     private void addEmail(int type, String data, String label, boolean isPrimary){
         if (mEmailList == null) {
             mEmailList = new ArrayList<EmailData>();
         }
         mEmailList.add(new EmailData(type, data, label, isPrimary));
     }
-    
+
     private void addPostal(int type, List<String> propValueList, String label, boolean isPrimary){
         if (mPostalList == null) {
             mPostalList = new ArrayList<PostalData>(0);
         }
         mPostalList.add(new PostalData(type, propValueList, label, isPrimary));
     }
-    
+
     /**
      * Should be called via {@link #handleOrgValue(int, List, boolean)} or
      * {@link #handleTitleValue(String)}.
@@ -640,14 +641,14 @@ public class VCardEntry {
         }
         mImList.add(new ImData(protocol, customProtocol, type, propValue, isPrimary));
     }
-    
+
     private void addNote(final String note) {
         if (mNoteList == null) {
             mNoteList = new ArrayList<String>(1);
         }
         mNoteList.add(note);
     }
-    
+
     private void addPhotoBytes(String formatName, byte[] photoBytes, boolean isPrimary) {
         if (mPhotoList == null) {
             mPhotoList = new ArrayList<PhotoData>(1);
@@ -745,12 +746,12 @@ public class VCardEntry {
         final Map<String, Collection<String>> paramMap = property.mParameterMap;
         final List<String> propValueList = property.mPropertyValueList;
         byte[] propBytes = property.mPropertyBytes;
-        
+
         if (propValueList.size() == 0) {
             return;
         }
         final String propValue = listToString(propValueList).trim();
-        
+
         if (propName.equals(VCardConstants.PROPERTY_VERSION)) {
             // vCard version. Ignore this.
         } else if (propName.equals(VCardConstants.PROPERTY_FN)) {
@@ -805,7 +806,7 @@ public class VCardEntry {
                     } else if (typeString.equals(VCardConstants.PARAM_TYPE_HOME)) {
                         type = StructuredPostal.TYPE_HOME;
                         label = "";
-                    } else if (typeString.equals(VCardConstants.PARAM_TYPE_WORK) || 
+                    } else if (typeString.equals(VCardConstants.PARAM_TYPE_WORK) ||
                             typeString.equalsIgnoreCase(VCardConstants.PARAM_EXTRA_TYPE_COMPANY)) {
                         // "COMPANY" seems emitted by Windows Mobile, which is not
                         // specifically supported by vCard 2.1. We assume this is same
@@ -916,7 +917,7 @@ public class VCardEntry {
                 type = Phone.TYPE_CUSTOM;
                 label = typeObject.toString();
             }
-            
+
             final boolean isPrimary;
             if (typeCollection != null && typeCollection.contains(VCardConstants.PARAM_TYPE_PREF)) {
                 isPrimary = true;
@@ -977,7 +978,7 @@ public class VCardEntry {
                 VCardUtils.constructListFromValue(propValue,
                         VCardConfig.isV30(mVCardType));
             handleAndroidCustomProperty(customPropertyList);
-        /*} else if (propName.equals("REV")) {                
+        /*} else if (propName.equals("REV")) {
             // Revision of this VCard entry. I think we can ignore this.
         } else if (propName.equals("UID")) {
         } else if (propName.equals("KEY")) {
@@ -1041,7 +1042,7 @@ public class VCardEntry {
     }
 
     /**
-     * Consolidate several fielsds (like mName) using name candidates, 
+     * Consolidate several fielsds (like mName) using name candidates,
      */
     public void consolidateFields() {
         constructDisplayName();
@@ -1051,9 +1052,9 @@ public class VCardEntry {
         }
     }
 
-    public void pushIntoContentResolver(ContentResolver resolver) {
+    public Uri pushIntoContentResolver(ContentResolver resolver) {
         ArrayList<ContentProviderOperation> operationList =
-            new ArrayList<ContentProviderOperation>();  
+            new ArrayList<ContentProviderOperation>();
         ContentProviderOperation.Builder builder =
             ContentProviderOperation.newInsert(RawContacts.CONTENT_URI);
         String myGroupsId = null;
@@ -1176,7 +1177,7 @@ public class VCardEntry {
                 operationList.add(builder.build());
             }
         }
-        
+
         if (mPostalList != null) {
             for (PostalData postalData : mPostalList) {
                 builder = ContentProviderOperation.newInsert(Data.CONTENT_URI);
@@ -1185,7 +1186,7 @@ public class VCardEntry {
                 operationList.add(builder.build());
             }
         }
-        
+
         if (mImList != null) {
             for (ImData imData : mImList) {
                 builder = ContentProviderOperation.newInsert(Data.CONTENT_URI);
@@ -1201,7 +1202,7 @@ public class VCardEntry {
                 }
             }
         }
-        
+
         if (mNoteList != null) {
             for (String note : mNoteList) {
                 builder = ContentProviderOperation.newInsert(Data.CONTENT_URI);
@@ -1232,7 +1233,7 @@ public class VCardEntry {
                 builder.withValue(Data.MIMETYPE, Website.CONTENT_ITEM_TYPE);
                 builder.withValue(Website.URL, website);
                 // There's no information about the type of URL in vCard.
-                // We use TYPE_HOMEPAGE for safety. 
+                // We use TYPE_HOMEPAGE for safety.
                 builder.withValue(Website.TYPE, Website.TYPE_HOMEPAGE);
                 operationList.add(builder.build());
             }
@@ -1265,7 +1266,7 @@ public class VCardEntry {
                         builder = ContentProviderOperation.newInsert(Data.CONTENT_URI);
                         builder.withValueBackReference(GroupMembership.RAW_CONTACT_ID, 0);
                         builder.withValue(Data.MIMETYPE, mimeType);
-                    } else {  // 1 <= i && i <= MAX_DATA_COLUMNS  
+                    } else {  // 1 <= i && i <= MAX_DATA_COLUMNS
                         if (!TextUtils.isEmpty(customPropertyValue)) {
                             builder.withValue("data" + i, customPropertyValue);
                         }
@@ -1286,11 +1287,17 @@ public class VCardEntry {
         }
 
         try {
-            resolver.applyBatch(ContactsContract.AUTHORITY, operationList);
+            ContentProviderResult[] results = resolver.applyBatch(
+                        ContactsContract.AUTHORITY, operationList);
+            // the first result is always the raw_contact. return it's uri so
+            // that it can be found later
+            return results[0].uri;
         } catch (RemoteException e) {
             Log.e(LOG_TAG, String.format("%s: %s", e.toString(), e.getMessage()));
+            return null;
         } catch (OperationApplicationException e) {
             Log.e(LOG_TAG, String.format("%s: %s", e.toString(), e.getMessage()));
+            return null;
         }
     }
 
@@ -1319,7 +1326,7 @@ public class VCardEntry {
     public boolean isIgnorable() {
         return getDisplayName().length() == 0;
     }
-    
+
     private String listToString(List<String> list){
         final int size = list.size();
         if (size > 1) {
