@@ -2251,4 +2251,8 @@
     <string name="car_mode_disable_notification_title">Car mode enabled</string>
     <string name="car_mode_disable_notification_message">Select to exit car mode.</string>
 
+    <!-- Strings for tethered notification -->
+    <!-- Shown when the device is tethered -->
+    <string name="tethered_notification_title">Tethering active</string>
+    <string name="tethered_notification_message">Touch to configure</string>
 </resources>
