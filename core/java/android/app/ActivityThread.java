@@ -39,6 +39,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDebug;
+import android.database.sqlite.SQLiteDebug.DbStats;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.os.Bundle;
@@ -1441,6 +1442,7 @@ public final class ActivityThread {
         private static final String HEAP_COLUMN = "%17s %8s %8s %8s %8s";
         private static final String ONE_COUNT_COLUMN = "%17s %8d";
         private static final String TWO_COUNT_COLUMNS = "%17s %8d %17s %8d";
+        private static final String DB_INFO_FORMAT = "  %8d %8d %10d  %s";
 
         // Formatting for checkin service - update version if row format changes
         private static final int ACTIVITY_THREAD_CHECKIN_VERSION = 1;
@@ -1760,8 +1762,7 @@ public final class ActivityThread {
             int binderDeathObjectCount = Debug.getBinderDeathObjectCount();
             int openSslSocketCount = OpenSSLSocketImpl.getInstanceCount();
             long sqliteAllocated = SQLiteDebug.getHeapAllocatedSize() / 1024;
-            SQLiteDebug.PagerStats stats = new SQLiteDebug.PagerStats();
-            SQLiteDebug.getPagerStats(stats);
+            SQLiteDebug.PagerStats stats = SQLiteDebug.getDatabaseInfo();
 
             // Check to see if we were called by checkin server. If so, print terse format.
             boolean doCheckinFormat = false;
@@ -1835,10 +1836,15 @@ public final class ActivityThread {
 
                 // SQL
                 pw.print(sqliteAllocated); pw.print(',');
-                pw.print(stats.databaseBytes / 1024); pw.print(',');
-                pw.print(stats.numPagers); pw.print(',');
-                pw.print((stats.totalBytes - stats.referencedBytes) / 1024); pw.print(',');
-                pw.print(stats.referencedBytes / 1024); pw.print('\n');
+                pw.print(stats.memoryUsed / 1024); pw.print(',');
+                pw.print(stats.pageCacheOverflo / 1024); pw.print(',');
+                pw.print(stats.largestMemAlloc / 1024); pw.print(',');
+                for (int i = 0; i < stats.dbStats.size(); i++) {
+                    DbStats dbStats = stats.dbStats.get(i);
+                    printRow(pw, DB_INFO_FORMAT, dbStats.pageSize, dbStats.dbSize,
+                            dbStats.lookaside, dbStats.dbName);
+                    pw.print(',');
+                }
 
                 return;
             }
@@ -1879,11 +1885,21 @@ public final class ActivityThread {
             // SQLite mem info
             pw.println(" ");
             pw.println(" SQL");
-            printRow(pw, TWO_COUNT_COLUMNS, "heap:", sqliteAllocated, "dbFiles:",
-                    stats.databaseBytes / 1024);
-            printRow(pw, TWO_COUNT_COLUMNS, "numPagers:", stats.numPagers, "inactivePageKB:",
-                    (stats.totalBytes - stats.referencedBytes) / 1024);
-            printRow(pw, ONE_COUNT_COLUMN, "activePageKB:", stats.referencedBytes / 1024);
+            printRow(pw, TWO_COUNT_COLUMNS, "heap:", sqliteAllocated, "memoryUsed:",
+                    stats.memoryUsed / 1024);
+            printRow(pw, TWO_COUNT_COLUMNS, "pageCacheOverflo:", stats.pageCacheOverflo / 1024,
+                    "largestMemAlloc:", stats.largestMemAlloc / 1024);
+            pw.println(" ");
+            int N = stats.dbStats.size();
+            if (N > 0) {
+                pw.println(" DATABASES");
+                printRow(pw, "  %8s %8s %10s  %s", "Pagesize", "Dbsize", "Lookaside", "Dbname");
+                for (int i = 0; i < N; i++) {
+                    DbStats dbStats = stats.dbStats.get(i);
+                    printRow(pw, DB_INFO_FORMAT, dbStats.pageSize, dbStats.dbSize,
+                            dbStats.lookaside, dbStats.dbName);
+                }
+            }
 
             // Asset details.
             String assetAlloc = AssetManager.getAssetAllocations();
