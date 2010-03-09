@@ -379,14 +379,64 @@ enum {
     ATTR_LEADING_SPACES = -3,
     ATTR_TRAILING_SPACES = -4
 };
-static int validateAttr(const String8& path, const ResXMLParser& parser,
+static int validateAttr(const String8& path, const ResTable& table,
+        const ResXMLParser& parser,
         const char* ns, const char* attr, const char* validChars, bool required)
 {
     size_t len;
 
     ssize_t index = parser.indexOfAttribute(ns, attr);
     const uint16_t* str;
-    if (index >= 0 && (str=parser.getAttributeStringValue(index, &len)) != NULL) {
+    Res_value value;
+    if (index >= 0 && parser.getAttributeValue(index, &value) >= 0) {
+        const ResStringPool* pool = &parser.getStrings();
+        if (value.dataType == Res_value::TYPE_REFERENCE) {
+            uint32_t specFlags = 0;
+            int strIdx;
+            if ((strIdx=table.resolveReference(&value, 0x10000000, NULL, &specFlags)) < 0) {
+                fprintf(stderr, "%s:%d: Tag <%s> attribute %s references unknown resid 0x%08x.\n",
+                        path.string(), parser.getLineNumber(),
+                        String8(parser.getElementName(&len)).string(), attr,
+                        value.data);
+                return ATTR_NOT_FOUND;
+            }
+            
+            pool = table.getTableStringBlock(strIdx);
+            #if 0
+            if (pool != NULL) {
+                str = pool->stringAt(value.data, &len);
+            }
+            printf("***** RES ATTR: %s specFlags=0x%x strIdx=%d: %s\n", attr,
+                    specFlags, strIdx, str != NULL ? String8(str).string() : "???");
+            #endif
+            if ((specFlags&~ResTable_typeSpec::SPEC_PUBLIC) != 0 && false) {
+                fprintf(stderr, "%s:%d: Tag <%s> attribute %s varies by configurations 0x%x.\n",
+                        path.string(), parser.getLineNumber(),
+                        String8(parser.getElementName(&len)).string(), attr,
+                        specFlags);
+                return ATTR_NOT_FOUND;
+            }
+        }
+        if (value.dataType == Res_value::TYPE_STRING) {
+            if (pool == NULL) {
+                fprintf(stderr, "%s:%d: Tag <%s> attribute %s has no string block.\n",
+                        path.string(), parser.getLineNumber(),
+                        String8(parser.getElementName(&len)).string(), attr);
+                return ATTR_NOT_FOUND;
+            }
+            if ((str=pool->stringAt(value.data, &len)) == NULL) {
+                fprintf(stderr, "%s:%d: Tag <%s> attribute %s has corrupt string value.\n",
+                        path.string(), parser.getLineNumber(),
+                        String8(parser.getElementName(&len)).string(), attr);
+                return ATTR_NOT_FOUND;
+            }
+        } else {
+            fprintf(stderr, "%s:%d: Tag <%s> attribute %s has invalid type %d.\n",
+                    path.string(), parser.getLineNumber(),
+                    String8(parser.getElementName(&len)).string(), attr,
+                    value.dataType);
+            return ATTR_NOT_FOUND;
+        }
         if (validChars) {
             for (size_t i=0; i<len; i++) {
                 uint16_t c = str[i];
@@ -959,21 +1009,102 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets)
         err = NO_ERROR;
     }
 
+    if (table.validateLocalizations()) {
+        hasErrors = true;
+    }
+    
+    if (hasErrors) {
+        return UNKNOWN_ERROR;
+    }
+
     const sp<AaptFile> manifestFile(androidManifestFile->getFiles().valueAt(0));
     String8 manifestPath(manifestFile->getPrintableSource());
 
+    // Generate final compiled manifest file.
+    manifestFile->clearData();
+    sp<XMLNode> manifestTree = XMLNode::parse(manifestFile);
+    if (manifestTree == NULL) {
+        return UNKNOWN_ERROR;
+    }
+    err = massageManifest(bundle, manifestTree);
+    if (err < NO_ERROR) {
+        return err;
+    }
+    err = compileXmlFile(assets, manifestTree, manifestFile, &table);
+    if (err < NO_ERROR) {
+        return err;
+    }
+
+    //block.restart();
+    //printXMLBlock(&block);
+
+    // --------------------------------------------------------------
+    // Generate the final resource table.
+    // Re-flatten because we may have added new resource IDs
+    // --------------------------------------------------------------
+
+    ResTable finalResTable;
+    sp<AaptFile> resFile;
+    
+    if (table.hasResources()) {
+        sp<AaptSymbols> symbols = assets->getSymbolsFor(String8("R"));
+        err = table.addSymbols(symbols);
+        if (err < NO_ERROR) {
+            return err;
+        }
+
+        resFile = getResourceFile(assets);
+        if (resFile == NULL) {
+            fprintf(stderr, "Error: unable to generate entry for resource data\n");
+            return UNKNOWN_ERROR;
+        }
+
+        err = table.flatten(bundle, resFile);
+        if (err < NO_ERROR) {
+            return err;
+        }
+
+        if (bundle->getPublicOutputFile()) {
+            FILE* fp = fopen(bundle->getPublicOutputFile(), "w+");
+            if (fp == NULL) {
+                fprintf(stderr, "ERROR: Unable to open public definitions output file %s: %s\n",
+                        (const char*)bundle->getPublicOutputFile(), strerror(errno));
+                return UNKNOWN_ERROR;
+            }
+            if (bundle->getVerbose()) {
+                printf("  Writing public definitions to %s.\n", bundle->getPublicOutputFile());
+            }
+            table.writePublicDefinitions(String16(assets->getPackage()), fp);
+            fclose(fp);
+        }
+        
+        // Read resources back in,
+        finalResTable.add(resFile->getData(), resFile->getSize(), NULL);
+        
+#if 0
+        NOISY(
+              printf("Generated resources:\n");
+              finalResTable.print();
+        )
+#endif
+    }
+    
     // Perform a basic validation of the manifest file.  This time we
     // parse it with the comments intact, so that we can use them to
     // generate java docs...  so we are not going to write this one
     // back out to the final manifest data.
-    err = compileXmlFile(assets, manifestFile, &table,
+    sp<AaptFile> outManifestFile = new AaptFile(manifestFile->getSourceFile(),
+            manifestFile->getGroupEntry(),
+            manifestFile->getResourceType());
+    err = compileXmlFile(assets, manifestFile,
+            outManifestFile, &table,
             XML_COMPILE_ASSIGN_ATTRIBUTE_IDS
             | XML_COMPILE_STRIP_WHITESPACE | XML_COMPILE_STRIP_RAW_VALUES);
     if (err < NO_ERROR) {
         return err;
     }
     ResXMLTree block;
-    block.setTo(manifestFile->getData(), manifestFile->getSize(), true);
+    block.setTo(outManifestFile->getData(), outManifestFile->getSize(), true);
     String16 manifest16("manifest");
     String16 permission16("permission");
     String16 permission_group16("permission-group");
@@ -1012,16 +1143,20 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets)
                 continue;
             }
             if (strcmp16(block.getElementName(&len), manifest16.string()) == 0) {
-                if (validateAttr(manifestPath, block, NULL, "package",
+                if (validateAttr(manifestPath, finalResTable, block, NULL, "package",
                                  packageIdentChars, true) != ATTR_OKAY) {
+                    hasErrors = true;
+                }
+                if (validateAttr(manifestPath, finalResTable, block, RESOURCES_ANDROID_NAMESPACE,
+                                 "sharedUserId", packageIdentChars, false) != ATTR_OKAY) {
                     hasErrors = true;
                 }
             } else if (strcmp16(block.getElementName(&len), permission16.string()) == 0
                     || strcmp16(block.getElementName(&len), permission_group16.string()) == 0) {
                 const bool isGroup = strcmp16(block.getElementName(&len),
                         permission_group16.string()) == 0;
-                if (validateAttr(manifestPath, block, RESOURCES_ANDROID_NAMESPACE, "name",
-                                 isGroup ? packageIdentCharsWithTheStupid
+                if (validateAttr(manifestPath, finalResTable, block, RESOURCES_ANDROID_NAMESPACE,
+                                 "name", isGroup ? packageIdentCharsWithTheStupid
                                  : packageIdentChars, true) != ATTR_OKAY) {
                     hasErrors = true;
                 }
@@ -1099,56 +1234,56 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets)
                 }
                 syms->makeSymbolPublic(String8(e), srcPos);
             } else if (strcmp16(block.getElementName(&len), uses_permission16.string()) == 0) {
-                if (validateAttr(manifestPath, block, RESOURCES_ANDROID_NAMESPACE, "name",
-                                 packageIdentChars, true) != ATTR_OKAY) {
+                if (validateAttr(manifestPath, finalResTable, block, RESOURCES_ANDROID_NAMESPACE,
+                                 "name", packageIdentChars, true) != ATTR_OKAY) {
                     hasErrors = true;
                 }
             } else if (strcmp16(block.getElementName(&len), instrumentation16.string()) == 0) {
-                if (validateAttr(manifestPath, block, RESOURCES_ANDROID_NAMESPACE, "name",
-                                 classIdentChars, true) != ATTR_OKAY) {
+                if (validateAttr(manifestPath, finalResTable, block, RESOURCES_ANDROID_NAMESPACE,
+                                 "name", classIdentChars, true) != ATTR_OKAY) {
                     hasErrors = true;
                 }
-                if (validateAttr(manifestPath, block,
+                if (validateAttr(manifestPath, finalResTable, block,
                                  RESOURCES_ANDROID_NAMESPACE, "targetPackage",
                                  packageIdentChars, true) != ATTR_OKAY) {
                     hasErrors = true;
                 }
             } else if (strcmp16(block.getElementName(&len), application16.string()) == 0) {
-                if (validateAttr(manifestPath, block, RESOURCES_ANDROID_NAMESPACE, "name",
-                                 classIdentChars, false) != ATTR_OKAY) {
+                if (validateAttr(manifestPath, finalResTable, block, RESOURCES_ANDROID_NAMESPACE,
+                                 "name", classIdentChars, false) != ATTR_OKAY) {
                     hasErrors = true;
                 }
-                if (validateAttr(manifestPath, block,
+                if (validateAttr(manifestPath, finalResTable, block,
                                  RESOURCES_ANDROID_NAMESPACE, "permission",
                                  packageIdentChars, false) != ATTR_OKAY) {
                     hasErrors = true;
                 }
-                if (validateAttr(manifestPath, block,
+                if (validateAttr(manifestPath, finalResTable, block,
                                  RESOURCES_ANDROID_NAMESPACE, "process",
                                  processIdentChars, false) != ATTR_OKAY) {
                     hasErrors = true;
                 }
-                if (validateAttr(manifestPath, block,
+                if (validateAttr(manifestPath, finalResTable, block,
                                  RESOURCES_ANDROID_NAMESPACE, "taskAffinity",
                                  processIdentChars, false) != ATTR_OKAY) {
                     hasErrors = true;
                 }
             } else if (strcmp16(block.getElementName(&len), provider16.string()) == 0) {
-                if (validateAttr(manifestPath, block, RESOURCES_ANDROID_NAMESPACE, "name",
-                                 classIdentChars, true) != ATTR_OKAY) {
+                if (validateAttr(manifestPath, finalResTable, block, RESOURCES_ANDROID_NAMESPACE,
+                                 "name", classIdentChars, true) != ATTR_OKAY) {
                     hasErrors = true;
                 }
-                if (validateAttr(manifestPath, block,
+                if (validateAttr(manifestPath, finalResTable, block,
                                  RESOURCES_ANDROID_NAMESPACE, "authorities",
                                  authoritiesIdentChars, true) != ATTR_OKAY) {
                     hasErrors = true;
                 }
-                if (validateAttr(manifestPath, block,
+                if (validateAttr(manifestPath, finalResTable, block,
                                  RESOURCES_ANDROID_NAMESPACE, "permission",
                                  packageIdentChars, false) != ATTR_OKAY) {
                     hasErrors = true;
                 }
-                if (validateAttr(manifestPath, block,
+                if (validateAttr(manifestPath, finalResTable, block,
                                  RESOURCES_ANDROID_NAMESPACE, "process",
                                  processIdentChars, false) != ATTR_OKAY) {
                     hasErrors = true;
@@ -1156,39 +1291,39 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets)
             } else if (strcmp16(block.getElementName(&len), service16.string()) == 0
                        || strcmp16(block.getElementName(&len), receiver16.string()) == 0
                        || strcmp16(block.getElementName(&len), activity16.string()) == 0) {
-                if (validateAttr(manifestPath, block, RESOURCES_ANDROID_NAMESPACE, "name",
-                                 classIdentChars, true) != ATTR_OKAY) {
+                if (validateAttr(manifestPath, finalResTable, block, RESOURCES_ANDROID_NAMESPACE,
+                                 "name", classIdentChars, true) != ATTR_OKAY) {
                     hasErrors = true;
                 }
-                if (validateAttr(manifestPath, block,
+                if (validateAttr(manifestPath, finalResTable, block,
                                  RESOURCES_ANDROID_NAMESPACE, "permission",
                                  packageIdentChars, false) != ATTR_OKAY) {
                     hasErrors = true;
                 }
-                if (validateAttr(manifestPath, block,
+                if (validateAttr(manifestPath, finalResTable, block,
                                  RESOURCES_ANDROID_NAMESPACE, "process",
                                  processIdentChars, false) != ATTR_OKAY) {
                     hasErrors = true;
                 }
-                if (validateAttr(manifestPath, block,
+                if (validateAttr(manifestPath, finalResTable, block,
                                  RESOURCES_ANDROID_NAMESPACE, "taskAffinity",
                                  processIdentChars, false) != ATTR_OKAY) {
                     hasErrors = true;
                 }
             } else if (strcmp16(block.getElementName(&len), action16.string()) == 0
                        || strcmp16(block.getElementName(&len), category16.string()) == 0) {
-                if (validateAttr(manifestPath, block,
+                if (validateAttr(manifestPath, finalResTable, block,
                                  RESOURCES_ANDROID_NAMESPACE, "name",
                                  packageIdentChars, true) != ATTR_OKAY) {
                     hasErrors = true;
                 }
             } else if (strcmp16(block.getElementName(&len), data16.string()) == 0) {
-                if (validateAttr(manifestPath, block,
+                if (validateAttr(manifestPath, finalResTable, block,
                                  RESOURCES_ANDROID_NAMESPACE, "mimeType",
                                  typeIdentChars, true) != ATTR_OKAY) {
                     hasErrors = true;
                 }
-                if (validateAttr(manifestPath, block,
+                if (validateAttr(manifestPath, finalResTable, block,
                                  RESOURCES_ANDROID_NAMESPACE, "scheme",
                                  schemeIdentChars, true) != ATTR_OKAY) {
                     hasErrors = true;
@@ -1197,76 +1332,7 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets)
         }
     }
 
-    if (table.validateLocalizations()) {
-        hasErrors = true;
-    }
-    
-    if (hasErrors) {
-        return UNKNOWN_ERROR;
-    }
-
-    // Generate final compiled manifest file.
-    manifestFile->clearData();
-    sp<XMLNode> manifestTree = XMLNode::parse(manifestFile);
-    if (manifestTree == NULL) {
-        return UNKNOWN_ERROR;
-    }
-    err = massageManifest(bundle, manifestTree);
-    if (err < NO_ERROR) {
-        return err;
-    }
-    err = compileXmlFile(assets, manifestTree, manifestFile, &table);
-    if (err < NO_ERROR) {
-        return err;
-    }
-
-    //block.restart();
-    //printXMLBlock(&block);
-
-    // --------------------------------------------------------------
-    // Generate the final resource table.
-    // Re-flatten because we may have added new resource IDs
-    // --------------------------------------------------------------
-
-    if (table.hasResources()) {
-        sp<AaptSymbols> symbols = assets->getSymbolsFor(String8("R"));
-        err = table.addSymbols(symbols);
-        if (err < NO_ERROR) {
-            return err;
-        }
-
-        sp<AaptFile> resFile(getResourceFile(assets));
-        if (resFile == NULL) {
-            fprintf(stderr, "Error: unable to generate entry for resource data\n");
-            return UNKNOWN_ERROR;
-        }
-
-        err = table.flatten(bundle, resFile);
-        if (err < NO_ERROR) {
-            return err;
-        }
-
-        if (bundle->getPublicOutputFile()) {
-            FILE* fp = fopen(bundle->getPublicOutputFile(), "w+");
-            if (fp == NULL) {
-                fprintf(stderr, "ERROR: Unable to open public definitions output file %s: %s\n",
-                        (const char*)bundle->getPublicOutputFile(), strerror(errno));
-                return UNKNOWN_ERROR;
-            }
-            if (bundle->getVerbose()) {
-                printf("  Writing public definitions to %s.\n", bundle->getPublicOutputFile());
-            }
-            table.writePublicDefinitions(String16(assets->getPackage()), fp);
-            fclose(fp);
-        }
-#if 0
-        NOISY(
-              ResTable rt;
-              rt.add(resFile->getData(), resFile->getSize(), NULL);
-              printf("Generated resources:\n");
-              rt.print();
-        )
-#endif
+    if (resFile != NULL) {
         // These resources are now considered to be a part of the included
         // resources, for others to reference.
         err = assets->addIncludedResources(resFile);
@@ -1275,6 +1341,7 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets)
             return err;
         }
     }
+    
     return err;
 }
 

@@ -37,6 +37,12 @@ status_t compileXmlFile(const sp<AaptAssets>& assets,
                         int options = XML_COMPILE_STANDARD_RESOURCE);
 
 status_t compileXmlFile(const sp<AaptAssets>& assets,
+                        const sp<AaptFile>& target,
+                        const sp<AaptFile>& outTarget,
+                        ResourceTable* table,
+                        int options = XML_COMPILE_STANDARD_RESOURCE);
+
+status_t compileXmlFile(const sp<AaptAssets>& assets,
                         const sp<XMLNode>& xmlTree,
                         const sp<AaptFile>& target,
                         ResourceTable* table,

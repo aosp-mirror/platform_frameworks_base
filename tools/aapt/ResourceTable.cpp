@@ -28,6 +28,20 @@ status_t compileXmlFile(const sp<AaptAssets>& assets,
 }
 
 status_t compileXmlFile(const sp<AaptAssets>& assets,
+                        const sp<AaptFile>& target,
+                        const sp<AaptFile>& outTarget,
+                        ResourceTable* table,
+                        int options)
+{
+    sp<XMLNode> root = XMLNode::parse(target);
+    if (root == NULL) {
+        return UNKNOWN_ERROR;
+    }
+    
+    return compileXmlFile(assets, root, outTarget, table, options);
+}
+
+status_t compileXmlFile(const sp<AaptAssets>& assets,
                         const sp<XMLNode>& root,
                         const sp<AaptFile>& target,
                         ResourceTable* table,

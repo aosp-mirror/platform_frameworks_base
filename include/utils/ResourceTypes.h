@@ -631,6 +631,8 @@ public:
 
     void restart();
 
+    const ResStringPool& getStrings() const;
+
     event_code_t getEventType() const;
     // Note, unlike XmlPullParser, the first call to next() will return
     // START_TAG of the first element.
@@ -715,8 +717,6 @@ public:
     status_t getError() const;
 
     void uninit();
-
-    const ResStringPool& getStrings() const;
 
 private:
     friend class ResXMLParser;
