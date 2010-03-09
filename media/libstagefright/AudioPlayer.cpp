@@ -55,14 +55,17 @@ void AudioPlayer::setSource(const sp<MediaSource> &source) {
     mSource = source;
 }
 
-status_t AudioPlayer::start() {
+status_t AudioPlayer::start(bool sourceAlreadyStarted) {
     CHECK(!mStarted);
     CHECK(mSource != NULL);
 
-    status_t err = mSource->start();
+    status_t err;
+    if (!sourceAlreadyStarted) {
+        err = mSource->start();
 
-    if (err != OK) {
-        return err;
+        if (err != OK) {
+            return err;
+        }
     }
 
     sp<MetaData> format = mSource->getFormat();
