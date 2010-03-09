@@ -5,6 +5,7 @@ import com.android.internal.content.PackageHelper;
 import android.content.Intent;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageInfoLite;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.Package;
@@ -28,6 +29,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import android.os.FileUtils;
+import android.os.storage.IMountService;
 import android.provider.Settings;
 
 /*
@@ -86,46 +88,51 @@ public class DefaultContainerService extends IntentService {
          * specified by file uri location.
          * @param fileUri the uri of resource to be copied. Should be a
          * file uri
-         * @return Returns
-         *  PackageHelper.RECOMMEND_INSTALL_INTERNAL to install on internal storage
-         *  PackageHelper.RECOMMEND_INSTALL_EXTERNAL to install on external media
-         *  PackageHelper.RECOMMEND_FAILED_INSUFFICIENT_STORAGE for storage errors
-         *  PackageHelper.RECOMMEND_FAILED_INVALID_APK for parse errors.
+         * @return Returns PackageInfoLite object containing
+         * the package info and recommended app location.
          */
-        public int getRecommendedInstallLocation(final Uri fileUri) {
+        public PackageInfoLite getMinimalPackageInfo(final Uri fileUri) {
+            PackageInfoLite ret = new PackageInfoLite();
             if (fileUri == null) {
                 Log.i(TAG, "Invalid package uri " + fileUri);
-                return PackageHelper.RECOMMEND_FAILED_INVALID_APK;
+                ret.recommendedInstallLocation = PackageHelper.RECOMMEND_FAILED_INVALID_APK;
+                return ret;
             }
             String scheme = fileUri.getScheme();
             if (scheme != null && !scheme.equals("file")) {
                 Log.w(TAG, "Falling back to installing on internal storage only");
-                return PackageHelper.RECOMMEND_INSTALL_INTERNAL;
+                ret.recommendedInstallLocation = PackageHelper.RECOMMEND_INSTALL_INTERNAL;
+                return ret;
             }
             String archiveFilePath = fileUri.getPath();
             PackageParser packageParser = new PackageParser(archiveFilePath);
             File sourceFile = new File(archiveFilePath);
             DisplayMetrics metrics = new DisplayMetrics();
             metrics.setToDefaults();
-            PackageParser.Package pkg = packageParser.parsePackage(sourceFile,
-                    archiveFilePath, metrics, 0);
+            PackageParser.PackageLite pkg = packageParser.parsePackageLite(
+                    archiveFilePath, 0);
+            ret.packageName = pkg.packageName;
+            ret.installLocation = pkg.installLocation;
             // Nuke the parser reference right away and force a gc
             Runtime.getRuntime().gc();
             packageParser = null;
             if (pkg == null) {
                 Log.w(TAG, "Failed to parse package");
-                return PackageHelper.RECOMMEND_FAILED_INVALID_APK;
+                ret.recommendedInstallLocation = PackageHelper.RECOMMEND_FAILED_INVALID_APK;
+                return ret;
             }
-            int loc = recommendAppInstallLocation(pkg);
+            ret.packageName = pkg.packageName;
+            int loc = recommendAppInstallLocation(pkg.installLocation, archiveFilePath);
             if (loc == PackageManager.INSTALL_EXTERNAL) {
-                return PackageHelper.RECOMMEND_INSTALL_EXTERNAL;
+                ret.recommendedInstallLocation =  PackageHelper.RECOMMEND_INSTALL_EXTERNAL;
             } else if (loc == ERR_LOC) {
                 Log.i(TAG, "Failed to install insufficient storage");
-                return PackageHelper.RECOMMEND_FAILED_INSUFFICIENT_STORAGE;
+                ret.recommendedInstallLocation =  PackageHelper.RECOMMEND_FAILED_INSUFFICIENT_STORAGE;
             } else {
                 // Implies install on internal storage.
-                return PackageHelper.RECOMMEND_INSTALL_INTERNAL;
+                ret.recommendedInstallLocation =  PackageHelper.RECOMMEND_INSTALL_INTERNAL;
             }
+            return ret;
         }
     };
 
@@ -171,61 +178,36 @@ public class DefaultContainerService extends IntentService {
         String codePath = packageURI.getPath();
         File codeFile = new File(codePath);
         String newCachePath = null;
-        final int CREATE_FAILED = 1;
-        final int COPY_FAILED = 2;
-        final int FINALIZE_FAILED = 3;
-        final int PASS = 4;
-        int errCode = CREATE_FAILED;
         // Create new container
         if ((newCachePath = PackageHelper.createSdDir(codeFile,
-                newCid, key, Process.myUid())) != null) {
-            if (localLOGV) Log.i(TAG, "Created container for " + newCid
-                    + " at path : " + newCachePath);
-            File resFile = new File(newCachePath, resFileName);
-            errCode = COPY_FAILED;
-            // Copy file from codePath
-            if (FileUtils.copyFile(new File(codePath), resFile)) {
-                if (localLOGV) Log.i(TAG, "Copied " + codePath + " to " + resFile);
-                errCode = FINALIZE_FAILED;
-                if (PackageHelper.finalizeSdDir(newCid)) {
-                    if (localLOGV) Log.i(TAG, "Finalized container " + newCid);
-                    errCode = PASS;
-                }
-            }
-        }
-        // Print error based on errCode
-        String errMsg = "";
-        switch (errCode) {
-            case CREATE_FAILED:
-                errMsg = "CREATE_FAILED";
-                break;
-            case COPY_FAILED:
-                errMsg = "COPY_FAILED";
-                if (localLOGV) Log.i(TAG, "Destroying " + newCid +
-                        " at path " + newCachePath + " after " + errMsg);
-                PackageHelper.destroySdDir(newCid);
-                break;
-            case FINALIZE_FAILED:
-                errMsg = "FINALIZE_FAILED";
-                if (localLOGV) Log.i(TAG, "Destroying " + newCid +
-                        " at path " + newCachePath + " after " + errMsg);
-                PackageHelper.destroySdDir(newCid);
-                break;
-            default:
-                errMsg = "PASS";
-                if (PackageHelper.isContainerMounted(newCid)) {
-                    if (localLOGV) Log.i(TAG, "Unmounting " + newCid +
-                            " at path " + newCachePath + " after " + errMsg);
-                    // Force a gc to avoid being killed.
-                    Runtime.getRuntime().gc();
-                    PackageHelper.unMountSdDir(newCid);
-                } else {
-                    if (localLOGV) Log.i(TAG, "Container " + newCid + " not mounted");
-                }
-                break;
-        }
-        if (errCode != PASS) {
+                newCid, key, Process.myUid())) == null) {
+            Log.e(TAG, "Failed to create container " + newCid);
             return null;
+        }
+        if (localLOGV) Log.i(TAG, "Created container for " + newCid
+                + " at path : " + newCachePath);
+        File resFile = new File(newCachePath, resFileName);
+        if (!FileUtils.copyFile(new File(codePath), resFile)) {
+            Log.e(TAG, "Failed to copy " + codePath + " to " + resFile);
+            // Clean up container
+            PackageHelper.destroySdDir(newCid);
+            return null;
+        }
+        if (localLOGV) Log.i(TAG, "Copied " + codePath + " to " + resFile);
+        if (!PackageHelper.finalizeSdDir(newCid)) {
+            Log.e(TAG, "Failed to finalize " + newCid + " at path " + newCachePath);
+            // Clean up container
+            PackageHelper.destroySdDir(newCid);
+        }
+        if (localLOGV) Log.i(TAG, "Finalized container " + newCid);
+        if (PackageHelper.isContainerMounted(newCid)) {
+            if (localLOGV) Log.i(TAG, "Unmounting " + newCid +
+                    " at path " + newCachePath);
+            // Force a gc to avoid being killed.
+            Runtime.getRuntime().gc();
+            PackageHelper.unMountSdDir(newCid);
+        } else {
+            if (localLOGV) Log.i(TAG, "Container " + newCid + " not mounted");
         }
         return newCachePath;
     }
@@ -307,29 +289,28 @@ public class DefaultContainerService extends IntentService {
     private static final long INSTALL_ON_SD_THRESHOLD = (1024 * 1024);
     private static final int ERR_LOC = -1;
 
-    public int recommendAppInstallLocation(Package pkg) {
+    private int recommendAppInstallLocation(int installLocation,
+            String archiveFilePath) {
         // Initial implementation:
         // Package size = code size + cache size + data size
         // If code size > 1 MB, install on SD card.
         // Else install on internal NAND flash, unless space on NAND is less than 10%
-
-        if (pkg == null) {
-            return ERR_LOC;
+        String status = Environment.getExternalStorageState();
+        long availSDSize = -1;
+        if (status.equals(Environment.MEDIA_MOUNTED)) {
+            StatFs sdStats = new StatFs(
+                    Environment.getExternalStorageDirectory().getPath());
+            availSDSize = (long)sdStats.getAvailableBlocks() *
+                    (long)sdStats.getBlockSize();
         }
+        StatFs internalStats = new StatFs(Environment.getDataDirectory().getPath());
+        long totalInternalSize = (long)internalStats.getBlockCount() *
+                (long)internalStats.getBlockSize();
+        long availInternalSize = (long)internalStats.getAvailableBlocks() *
+                (long)internalStats.getBlockSize();
 
-        StatFs internalFlashStats = new StatFs(Environment.getDataDirectory().getPath());
-        StatFs sdcardStats = new StatFs(Environment.getExternalStorageDirectory().getPath());
+        double pctNandFree = (double)availInternalSize / (double)totalInternalSize;
 
-        long totalInternalFlashSize = (long)internalFlashStats.getBlockCount() *
-                (long)internalFlashStats.getBlockSize();
-        long availInternalFlashSize = (long)internalFlashStats.getAvailableBlocks() *
-                (long)internalFlashStats.getBlockSize();
-        long availSDSize = (long)sdcardStats.getAvailableBlocks() *
-                (long)sdcardStats.getBlockSize();
-
-        double pctNandFree = (double)availInternalFlashSize / (double)totalInternalFlashSize;
-
-        final String archiveFilePath = pkg.mScanPath;
         File apkFile = new File(archiveFilePath);
         long pkgLen = apkFile.length();
 
@@ -339,15 +320,15 @@ public class DefaultContainerService extends IntentService {
         // For dex files. Just ignore and fail when extracting. Max limit of 2Gig for now.
         long reqInternalSize = 0;
         boolean intThresholdOk = (pctNandFree >= LOW_NAND_FLASH_TRESHOLD);
-        boolean intAvailOk = ((reqInstallSize + reqInternalSize) < availInternalFlashSize);
+        boolean intAvailOk = ((reqInstallSize + reqInternalSize) < availInternalSize);
         boolean fitsOnSd = (reqInstallSize < availSDSize) && intThresholdOk &&
-                (reqInternalSize < availInternalFlashSize);
+                (reqInternalSize < availInternalSize);
         boolean fitsOnInt = intThresholdOk && intAvailOk;
 
         // Consider application flags preferences as well...
-        boolean installOnlyOnSd = (pkg.installLocation ==
+        boolean installOnlyOnSd = (installLocation ==
                 PackageInfo.INSTALL_LOCATION_PREFER_EXTERNAL);
-        boolean installOnlyInternal = (pkg.installLocation ==
+        boolean installOnlyInternal = (installLocation ==
                 PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY);
         if (installOnlyInternal) {
             // If set explicitly in manifest,

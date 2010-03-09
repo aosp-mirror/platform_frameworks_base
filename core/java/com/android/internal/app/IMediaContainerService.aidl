@@ -18,6 +18,7 @@ package com.android.internal.app;
 
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
+import android.content.pm.PackageInfoLite;
 
 interface IMediaContainerService {
     String copyResourceToContainer(in Uri packageURI,
@@ -25,5 +26,5 @@ interface IMediaContainerService {
                 String key, String resFileName);
     boolean copyResource(in Uri packageURI,
                 in ParcelFileDescriptor outStream);
-    int getRecommendedInstallLocation(in Uri fileUri);
+    PackageInfoLite getMinimalPackageInfo(in Uri fileUri);
 }
