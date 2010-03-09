@@ -515,7 +515,12 @@ final class ContentProviderProxy implements IContentProvider
         mRemote.transact(IContentProvider.CALL_TRANSACTION, data, reply, 0);
 
         DatabaseUtils.readExceptionFromParcel(reply);
-        return reply.readBundle();
+        Bundle bundle = reply.readBundle();
+
+        data.recycle();
+        reply.recycle();
+
+        return bundle;
     }
 
     private IBinder mRemote;
