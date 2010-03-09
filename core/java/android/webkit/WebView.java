@@ -2305,9 +2305,11 @@ public class WebView extends AbsoluteLayout
             boolean clampedY) {
         mInOverScrollMode = false;
         int maxX = computeMaxScrollX();
-        if (Math.abs(mMinZoomScale - mMaxZoomScale) < 0.01f && maxX == 0) {
-            // do not over scroll x if the page can't be zoomed and it just fits
-            // the screen
+        if (maxX == 0 && (Math.abs(mMinZoomScale - mMaxZoomScale) < 0.01f)
+                || !getSettings().supportZoom()
+                || !getSettings().getUseWideViewPort()) {
+            // do not over scroll x if the page just fits the screen and it
+            // can't zoom or the view doesn't use wide viewport
             scrollX = pinLocX(scrollX);
         } else if (scrollX < 0 || scrollX > maxX) {
             mInOverScrollMode = true;
@@ -3112,7 +3114,8 @@ public class WebView extends AbsoluteLayout
         }
 
         int saveCount = canvas.save();
-        if (mInOverScrollMode) {
+        if (mInOverScrollMode
+                && getSettings().getUseSystemOverscrollBackground()) {
             if (mOverScrollBackground == null) {
                 mOverScrollBackground = new Paint();
                 Bitmap bm = BitmapFactory.decodeResource(
