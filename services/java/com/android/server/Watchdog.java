@@ -29,6 +29,7 @@ import android.os.Debug;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Process;
+import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.provider.Settings;
@@ -676,11 +677,8 @@ public class Watchdog extends Thread {
      */
     void rebootSystem(String reason) {
         Slog.i(TAG, "Rebooting system because: " + reason);
-        try {
-            android.os.Power.reboot(reason);
-        } catch (IOException e) {
-            Slog.e(TAG, "Reboot failed!", e);
-        }
+        PowerManagerService pms = (PowerManagerService) ServiceManager.getService("power");
+        pms.reboot(reason);
     }
 
     /**

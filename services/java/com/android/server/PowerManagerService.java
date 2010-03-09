@@ -17,6 +17,7 @@
 package com.android.server;
 
 import com.android.internal.app.IBatteryStats;
+import com.android.internal.app.ShutdownThread;
 import com.android.server.am.BatteryStatsService;
 
 import android.app.ActivityManagerNative;
@@ -41,7 +42,6 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
-import android.os.storage.IMountService;
 import android.os.IPowerManager;
 import android.os.LocalPowerManager;
 import android.os.Power;
@@ -2202,28 +2202,35 @@ class PowerManagerService extends IPowerManager.Stub
     {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.REBOOT, null);
 
-        /*
-         * Manually shutdown the MountService to ensure media is
-         * put into a safe state.
-         */
-        IMountService mSvc = IMountService.Stub.asInterface(
-                ServiceManager.getService("mount"));
-
-        if (mSvc != null) {
-            try {
-                mSvc.shutdown();
-            } catch (Exception e) {
-                Slog.e(TAG, "MountService shutdown failed", e);
+        if (mHandler == null || !ActivityManagerNative.isSystemReady()) {
+            throw new IllegalStateException("Too early to call reboot()");
+        }
+        
+        final String finalReason = reason;
+        Runnable runnable = new Runnable() {
+            public void run() {
+                synchronized (this) {
+                    ShutdownThread.reboot(mContext, finalReason, false);
+                    // if we get here we failed
+                    notify();
+                }
+                
             }
-        } else {
-            Slog.w(TAG, "MountService unavailable for shutdown");
-        }
+        };
 
-        try {
-            Power.reboot(reason);
-        } catch (IOException e) {
-            Slog.e(TAG, "reboot failed", e);
+        mHandler.post(runnable);
+
+        // block until we reboot or fail.
+        // throw an exception if we failed to reboot
+        synchronized (runnable) {
+            try {
+                runnable.wait();
+            } catch (InterruptedException e) {
+            }
         }
+     
+        // if we get here we failed
+        throw new IllegalStateException("unable to reboot!");
     }
 
     /**

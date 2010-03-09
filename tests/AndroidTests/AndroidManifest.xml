@@ -35,6 +35,7 @@
     <uses-permission android:name="android.permission.ASEC_DESTROY" />
     <uses-permission android:name="android.permission.ASEC_MOUNT_UNMOUNT" />
     <uses-permission android:name="android.permission.ASEC_RENAME" />
+    <uses-permission android:name="android.permission.SHUTDOWN" />
     <uses-permission android:name="com.android.unit_tests.permission.TEST_GRANTED" />
     <uses-permission android:name="com.google.android.googleapps.permission.ACCESS_GOOGLE_PASSWORD" />
     <uses-permission android:name="com.google.android.googleapps.permission.GOOGLE_AUTH" />

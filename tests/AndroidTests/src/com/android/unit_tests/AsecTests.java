@@ -16,6 +16,8 @@
 
 package com.android.unit_tests;
 
+import com.android.unit_tests.PackageManagerTests.StorageListener;
+
 import android.os.storage.IMountService.Stub;
 
 import android.net.Uri;
@@ -41,6 +43,9 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.storage.IMountService;
+import android.os.storage.IMountShutdownObserver;
+import android.os.storage.StorageEventListener;
+import android.os.storage.StorageManager;
 import android.os.storage.StorageResultCode;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -362,6 +367,258 @@ public class AsecTests extends AndroidTestCase {
             fos.close();
         } catch (Exception e) {
             failStr(e);
+        }
+    }
+
+    /*------------ Tests for unmounting volume ---*/
+    public final long MAX_WAIT_TIME=120*1000;
+    public final long WAIT_TIME_INCR=20*1000;
+    boolean getMediaState() {
+        try {
+        String mPath = Environment.getExternalStorageDirectory().toString();
+        String state = getMs().getVolumeState(mPath);
+        return Environment.MEDIA_MOUNTED.equals(state);
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    boolean mountMedia() {
+        if (getMediaState()) {
+            return true;
+        }
+        try {
+        String mPath = Environment.getExternalStorageDirectory().toString();
+        int ret = getMs().mountVolume(mPath);
+        return ret == StorageResultCode.OperationSucceeded;
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    class StorageListener extends StorageEventListener {
+        String oldState;
+        String newState;
+        String path;
+        private boolean doneFlag = false;
+
+        public void action() {
+            synchronized (this) {
+                doneFlag = true;
+                notifyAll();
+            }
+        }
+
+        public boolean isDone() {
+            return doneFlag;
+        }
+
+        @Override
+        public void onStorageStateChanged(String path, String oldState, String newState) {
+            if (localLOGV) Log.i(TAG, "Storage state changed from " + oldState + " to " + newState);
+            this.oldState = oldState;
+            this.newState = newState;
+            this.path = path;
+            action();
+        }
+    }
+
+    private boolean unmountMedia() {
+        if (!getMediaState()) {
+            return true;
+        }
+        String path = Environment.getExternalStorageDirectory().toString();
+        StorageListener observer = new StorageListener();
+        StorageManager sm = (StorageManager) mContext.getSystemService(Context.STORAGE_SERVICE);
+        sm.registerListener(observer);
+        try {
+            // Wait on observer
+            synchronized(observer) {
+                getMs().unmountVolume(path, false);
+                long waitTime = 0;
+                while((!observer.isDone()) && (waitTime < MAX_WAIT_TIME) ) {
+                    observer.wait(WAIT_TIME_INCR);
+                    waitTime += WAIT_TIME_INCR;
+                }
+                if(!observer.isDone()) {
+                    throw new Exception("Timed out waiting for packageInstalled callback");
+                }
+                return true;
+            }
+        } catch (Exception e) {
+            return false;
+        } finally {
+            sm.unregisterListener(observer);
+        }
+    }
+    public void testUnmount() {
+        boolean oldStatus = getMediaState();
+        Log.i(TAG, "oldStatus="+oldStatus);
+        try {
+            // Mount media firsts
+            if (!getMediaState()) {
+                mountMedia();
+            }
+            assertTrue(unmountMedia());
+        } finally {
+            // Restore old status
+            boolean currStatus = getMediaState();
+            if (oldStatus != currStatus) {
+                if (oldStatus) {
+                    // Mount media
+                    mountMedia();
+                } else {
+                    unmountMedia();
+                }
+            }
+        }
+    }
+
+    class MultipleStorageLis extends StorageListener {
+        int count = 0;
+        public void onStorageStateChanged(String path, String oldState, String newState) {
+            count++;
+            super.action();
+        }
+    }
+    /*
+     * This test invokes unmount multiple time and expects the call back
+     * to be invoked just once.
+     */
+    public void testUnmountMultiple() {
+        boolean oldStatus = getMediaState();
+        StorageManager sm = (StorageManager) mContext.getSystemService(Context.STORAGE_SERVICE);
+        MultipleStorageLis observer = new MultipleStorageLis();
+        try {
+            // Mount media firsts
+            if (!getMediaState()) {
+                mountMedia();
+            }
+            String path = Environment.getExternalStorageDirectory().toString();
+            sm.registerListener(observer);
+            // Wait on observer
+            synchronized(observer) {
+                for (int i = 0; i < 5; i++) {
+                    getMs().unmountVolume(path, false);
+                }
+                long waitTime = 0;
+                while((!observer.isDone()) && (waitTime < MAX_WAIT_TIME) ) {
+                    observer.wait(WAIT_TIME_INCR);
+                    waitTime += WAIT_TIME_INCR;
+                }
+                if(!observer.isDone()) {
+                    failStr("Timed out waiting for packageInstalled callback");
+                }
+            }
+            assertEquals(observer.count, 1);
+        } catch (Exception e) {
+            failStr(e);
+        } finally {
+            sm.unregisterListener(observer);
+            // Restore old status
+            boolean currStatus = getMediaState();
+            if (oldStatus != currStatus) {
+                if (oldStatus) {
+                    // Mount media
+                    mountMedia();
+                } else {
+                    unmountMedia();
+                }
+            }
+        }
+    }
+    
+    class ShutdownObserver extends  IMountShutdownObserver.Stub{
+        private boolean doneFlag = false;
+        int statusCode;
+
+        public void action() {
+            synchronized (this) {
+                doneFlag = true;
+                notifyAll();
+            }
+        }
+
+        public boolean isDone() {
+            return doneFlag;
+        }
+        public void onShutDownComplete(int statusCode) throws RemoteException {
+            this.statusCode = statusCode;
+            action();
+        }
+        
+    }
+
+    boolean invokeShutdown() {
+        IMountService ms = getMs();
+        ShutdownObserver observer = new ShutdownObserver();
+        synchronized (observer) {
+            try {
+                ms.shutdown(observer);
+                return true;
+            } catch (RemoteException e) {
+                failStr(e);
+            }
+        }
+        return false;
+    }
+
+    public void testShutdown() {
+        boolean oldStatus = getMediaState();
+        try {
+            // Mount media firsts
+            if (!getMediaState()) {
+                mountMedia();
+            }
+            assertTrue(invokeShutdown());
+        } finally {
+            // Restore old status
+            boolean currStatus = getMediaState();
+            if (oldStatus != currStatus) {
+                if (oldStatus) {
+                    // Mount media
+                    mountMedia();
+                } else {
+                    unmountMedia();
+                }
+            }
+        }
+    }
+
+    /*
+     * This test invokes unmount multiple time and expects the call back
+     * to be invoked just once.
+     */
+    public void testShutdownMultiple() {
+        boolean oldStatus = getMediaState();
+        try {
+            // Mount media firsts
+            if (!getMediaState()) {
+                mountMedia();
+            }
+            IMountService ms = getMs();
+            ShutdownObserver observer = new ShutdownObserver();
+            synchronized (observer) {
+                try {
+                    ms.shutdown(observer);
+                    for (int i = 0; i < 4; i++) {
+                        ms.shutdown(null);
+                    }
+                } catch (RemoteException e) {
+                    failStr(e);
+                }
+            }
+        } finally {
+            // Restore old status
+            boolean currStatus = getMediaState();
+            if (oldStatus != currStatus) {
+                if (oldStatus) {
+                    // Mount media
+                    mountMedia();
+                } else {
+                    unmountMedia();
+                }
+            }
         }
     }
 
