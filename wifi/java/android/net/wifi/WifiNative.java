@@ -26,6 +26,9 @@ import android.net.DhcpInfo;
  * <p/>
  * Note that methods whose names are not of the form "xxxCommand()" do
  * not talk to the supplicant daemon.
+ * Also, note that all WifiNative calls should happen in the
+ * WifiStateTracker class except for waitForEvent() call which is
+ * on a separate monitor channel for WifiMonitor
  *
  * {@hide}
  */

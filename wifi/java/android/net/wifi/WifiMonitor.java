@@ -272,10 +272,8 @@ public class WifiMonitor {
             int connectTries = 0;
 
             while (true) {
-                synchronized (mWifiStateTracker) {
-                    if (WifiNative.connectToSupplicant()) {
-                        return true;
-                    }
+                if (mWifiStateTracker.connectToSupplicant()) {
+                    return true;
                 }
                 if (connectTries++ < 3) {
                     nap(5);

@@ -346,9 +346,8 @@ public class WifiService extends IWifiManager.Stub {
      */
     public boolean pingSupplicant() {
         enforceChangePermission();
-        synchronized (mWifiStateTracker) {
-            return WifiNative.pingCommand();
-        }
+
+        return mWifiStateTracker.ping();
     }
 
     /**
@@ -357,20 +356,19 @@ public class WifiService extends IWifiManager.Stub {
      */
     public boolean startScan(boolean forceActive) {
         enforceChangePermission();
-        synchronized (mWifiStateTracker) {
-            switch (mWifiStateTracker.getSupplicantState()) {
-                case DISCONNECTED:
-                case INACTIVE:
-                case SCANNING:
-                case DORMANT:
-                    break;
-                default:
-                    WifiNative.setScanResultHandlingCommand(
-                            WifiStateTracker.SUPPL_SCAN_HANDLING_LIST_ONLY);
-                    break;
-            }
-            return WifiNative.scanCommand(forceActive);
+
+        switch (mWifiStateTracker.getSupplicantState()) {
+            case DISCONNECTED:
+            case INACTIVE:
+            case SCANNING:
+            case DORMANT:
+                break;
+            default:
+                mWifiStateTracker.setScanResultHandling(
+                        WifiStateTracker.SUPPL_SCAN_HANDLING_LIST_ONLY);
+                break;
         }
+        return mWifiStateTracker.scan(forceActive);
     }
 
     /**
@@ -434,19 +432,18 @@ public class WifiService extends IWifiManager.Stub {
         }
 
         if (enable) {
-            synchronized (mWifiStateTracker) {
-                if (!WifiNative.loadDriver()) {
-                    Slog.e(TAG, "Failed to load Wi-Fi driver.");
-                    setWifiEnabledState(WIFI_STATE_UNKNOWN, uid);
-                    return false;
-                }
-                if (!WifiNative.startSupplicant()) {
-                    WifiNative.unloadDriver();
-                    Slog.e(TAG, "Failed to start supplicant daemon.");
-                    setWifiEnabledState(WIFI_STATE_UNKNOWN, uid);
-                    return false;
-                }
+            if (!mWifiStateTracker.loadDriver()) {
+                Slog.e(TAG, "Failed to load Wi-Fi driver.");
+                setWifiEnabledState(WIFI_STATE_UNKNOWN, uid);
+                return false;
             }
+            if (!mWifiStateTracker.startSupplicant()) {
+                mWifiStateTracker.unloadDriver();
+                Slog.e(TAG, "Failed to start supplicant daemon.");
+                setWifiEnabledState(WIFI_STATE_UNKNOWN, uid);
+                return false;
+            }
+
             registerForBroadcasts();
             mWifiStateTracker.startEventLoop();
         } else {
@@ -456,27 +453,27 @@ public class WifiService extends IWifiManager.Stub {
             mWifiStateTracker.setNotificationVisible(false, 0, false, 0);
 
             boolean failedToStopSupplicantOrUnloadDriver = false;
-            synchronized (mWifiStateTracker) {
-                if (!WifiNative.stopSupplicant()) {
-                    Slog.e(TAG, "Failed to stop supplicant daemon.");
+
+            if (!mWifiStateTracker.stopSupplicant()) {
+                Slog.e(TAG, "Failed to stop supplicant daemon.");
+                setWifiEnabledState(WIFI_STATE_UNKNOWN, uid);
+                failedToStopSupplicantOrUnloadDriver = true;
+            }
+
+            /**
+             * Reset connections and disable interface
+             * before we unload the driver
+             */
+            mWifiStateTracker.resetConnections(true);
+
+            if (!mWifiStateTracker.unloadDriver()) {
+                Slog.e(TAG, "Failed to unload Wi-Fi driver.");
+                if (!failedToStopSupplicantOrUnloadDriver) {
                     setWifiEnabledState(WIFI_STATE_UNKNOWN, uid);
                     failedToStopSupplicantOrUnloadDriver = true;
                 }
-
-                /**
-                 * Reset connections and disable interface
-                 * before we unload the driver
-                 */
-                mWifiStateTracker.resetConnections(true);
-
-                if (!WifiNative.unloadDriver()) {
-                    Slog.e(TAG, "Failed to unload Wi-Fi driver.");
-                    if (!failedToStopSupplicantOrUnloadDriver) {
-                        setWifiEnabledState(WIFI_STATE_UNKNOWN, uid);
-                        failedToStopSupplicantOrUnloadDriver = true;
-                    }
-                }
             }
+
             if (failedToStopSupplicantOrUnloadDriver) {
                 return false;
             }
@@ -553,9 +550,8 @@ public class WifiService extends IWifiManager.Stub {
      */
     public boolean disconnect() {
         enforceChangePermission();
-        synchronized (mWifiStateTracker) {
-            return WifiNative.disconnectCommand();
-        }
+
+        return mWifiStateTracker.disconnect();
     }
 
     /**
@@ -564,9 +560,8 @@ public class WifiService extends IWifiManager.Stub {
      */
     public boolean reconnect() {
         enforceChangePermission();
-        synchronized (mWifiStateTracker) {
-            return WifiNative.reconnectCommand();
-        }
+
+        return mWifiStateTracker.reconnectCommand();
     }
 
     /**
@@ -575,9 +570,8 @@ public class WifiService extends IWifiManager.Stub {
      */
     public boolean reassociate() {
         enforceChangePermission();
-        synchronized (mWifiStateTracker) {
-            return WifiNative.reassociateCommand();
-        }
+
+        return mWifiStateTracker.reassociate();
     }
 
     private boolean getPersistedWifiApEnabled() {
@@ -650,12 +644,10 @@ public class WifiService extends IWifiManager.Stub {
         }
 
         if (enable) {
-            synchronized (mWifiStateTracker) {
-                if (!WifiNative.loadDriver()) {
-                    Slog.e(TAG, "Failed to load Wi-Fi driver for AP mode");
-                    setWifiApEnabledState(WIFI_AP_STATE_FAILED, uid);
-                    return false;
-                }
+            if (!mWifiStateTracker.loadDriver()) {
+                Slog.e(TAG, "Failed to load Wi-Fi driver for AP mode");
+                setWifiApEnabledState(WIFI_AP_STATE_FAILED, uid);
+                return false;
             }
 
             try {
@@ -672,12 +664,10 @@ public class WifiService extends IWifiManager.Stub {
                 Slog.e(TAG, "Exception in stopAccessPoint()");
             }
 
-            synchronized (mWifiStateTracker) {
-                if (!WifiNative.unloadDriver()) {
-                    Slog.e(TAG, "Failed to unload Wi-Fi driver for AP mode");
-                    setWifiApEnabledState(WIFI_AP_STATE_FAILED, uid);
-                    return false;
-                }
+            if (!mWifiStateTracker.unloadDriver()) {
+                Slog.e(TAG, "Failed to unload Wi-Fi driver for AP mode");
+                setWifiApEnabledState(WIFI_AP_STATE_FAILED, uid);
+                return false;
             }
         }
 
@@ -735,15 +725,15 @@ public class WifiService extends IWifiManager.Stub {
     public List<WifiConfiguration> getConfiguredNetworks() {
         enforceAccessPermission();
         String listStr;
+
         /*
          * We don't cache the list, because we want to allow
          * for the possibility that the configuration file
          * has been modified through some external means,
          * such as the wpa_cli command line program.
          */
-        synchronized (mWifiStateTracker) {
-            listStr = WifiNative.listNetworksCommand();
-        }
+        listStr = mWifiStateTracker.listNetworks();
+
         List<WifiConfiguration> networks =
             new ArrayList<WifiConfiguration>();
         if (listStr == null)
@@ -767,11 +757,10 @@ public class WifiService extends IWifiManager.Stub {
                    config.status = WifiConfiguration.Status.DISABLED;
                else
                    config.status = WifiConfiguration.Status.ENABLED;
-           } else
+           } else {
                config.status = WifiConfiguration.Status.ENABLED;
-           synchronized (mWifiStateTracker) {
-               readNetworkVariables(config);
            }
+           readNetworkVariables(config);
            networks.add(config);
        }
 
@@ -785,7 +774,7 @@ public class WifiService extends IWifiManager.Stub {
      * The caller must hold the synchronization monitor.
      * @param config the {@link WifiConfiguration} object to be filled in.
      */
-    private static void readNetworkVariables(WifiConfiguration config) {
+    private void readNetworkVariables(WifiConfiguration config) {
 
         int netId = config.networkId;
         if (netId < 0)
@@ -798,21 +787,21 @@ public class WifiService extends IWifiManager.Stub {
          */
         String value;
 
-        value = WifiNative.getNetworkVariableCommand(netId, WifiConfiguration.ssidVarName);
+        value = mWifiStateTracker.getNetworkVariable(netId, WifiConfiguration.ssidVarName);
         if (!TextUtils.isEmpty(value)) {
             config.SSID = removeDoubleQuotes(value);
         } else {
             config.SSID = null;
         }
 
-        value = WifiNative.getNetworkVariableCommand(netId, WifiConfiguration.bssidVarName);
+        value = mWifiStateTracker.getNetworkVariable(netId, WifiConfiguration.bssidVarName);
         if (!TextUtils.isEmpty(value)) {
             config.BSSID = value;
         } else {
             config.BSSID = null;
         }
 
-        value = WifiNative.getNetworkVariableCommand(netId, WifiConfiguration.priorityVarName);
+        value = mWifiStateTracker.getNetworkVariable(netId, WifiConfiguration.priorityVarName);
         config.priority = -1;
         if (!TextUtils.isEmpty(value)) {
             try {
@@ -821,7 +810,7 @@ public class WifiService extends IWifiManager.Stub {
             }
         }
 
-        value = WifiNative.getNetworkVariableCommand(netId, WifiConfiguration.hiddenSSIDVarName);
+        value = mWifiStateTracker.getNetworkVariable(netId, WifiConfiguration.hiddenSSIDVarName);
         config.hiddenSSID = false;
         if (!TextUtils.isEmpty(value)) {
             try {
@@ -830,7 +819,7 @@ public class WifiService extends IWifiManager.Stub {
             }
         }
 
-        value = WifiNative.getNetworkVariableCommand(netId, WifiConfiguration.wepTxKeyIdxVarName);
+        value = mWifiStateTracker.getNetworkVariable(netId, WifiConfiguration.wepTxKeyIdxVarName);
         config.wepTxKeyIndex = -1;
         if (!TextUtils.isEmpty(value)) {
             try {
@@ -844,7 +833,7 @@ public class WifiService extends IWifiManager.Stub {
          * just a "*" if the key is set, or the null string otherwise.
          */
         for (int i = 0; i < 4; i++) {
-            value = WifiNative.getNetworkVariableCommand(netId, WifiConfiguration.wepKeyVarNames[i]);
+            value = mWifiStateTracker.getNetworkVariable(netId, WifiConfiguration.wepKeyVarNames[i]);
             if (!TextUtils.isEmpty(value)) {
                 config.wepKeys[i] = value;
             } else {
@@ -856,14 +845,14 @@ public class WifiService extends IWifiManager.Stub {
          * Get the private shared key. Note that the actual keys are not passed back,
          * just a "*" if the key is set, or the null string otherwise.
          */
-        value = WifiNative.getNetworkVariableCommand(netId, WifiConfiguration.pskVarName);
+        value = mWifiStateTracker.getNetworkVariable(netId, WifiConfiguration.pskVarName);
         if (!TextUtils.isEmpty(value)) {
             config.preSharedKey = value;
         } else {
             config.preSharedKey = null;
         }
 
-        value = WifiNative.getNetworkVariableCommand(config.networkId,
+        value = mWifiStateTracker.getNetworkVariable(config.networkId,
                 WifiConfiguration.Protocol.varName);
         if (!TextUtils.isEmpty(value)) {
             String vals[] = value.split(" ");
@@ -876,7 +865,7 @@ public class WifiService extends IWifiManager.Stub {
             }
         }
 
-        value = WifiNative.getNetworkVariableCommand(config.networkId,
+        value = mWifiStateTracker.getNetworkVariable(config.networkId,
                 WifiConfiguration.KeyMgmt.varName);
         if (!TextUtils.isEmpty(value)) {
             String vals[] = value.split(" ");
@@ -889,7 +878,7 @@ public class WifiService extends IWifiManager.Stub {
             }
         }
 
-        value = WifiNative.getNetworkVariableCommand(config.networkId,
+        value = mWifiStateTracker.getNetworkVariable(config.networkId,
                 WifiConfiguration.AuthAlgorithm.varName);
         if (!TextUtils.isEmpty(value)) {
             String vals[] = value.split(" ");
@@ -902,7 +891,7 @@ public class WifiService extends IWifiManager.Stub {
             }
         }
 
-        value = WifiNative.getNetworkVariableCommand(config.networkId,
+        value = mWifiStateTracker.getNetworkVariable(config.networkId,
                 WifiConfiguration.PairwiseCipher.varName);
         if (!TextUtils.isEmpty(value)) {
             String vals[] = value.split(" ");
@@ -915,7 +904,7 @@ public class WifiService extends IWifiManager.Stub {
             }
         }
 
-        value = WifiNative.getNetworkVariableCommand(config.networkId,
+        value = mWifiStateTracker.getNetworkVariable(config.networkId,
                 WifiConfiguration.GroupCipher.varName);
         if (!TextUtils.isEmpty(value)) {
             String vals[] = value.split(" ");
@@ -930,7 +919,7 @@ public class WifiService extends IWifiManager.Stub {
 
         for (WifiConfiguration.EnterpriseField field :
                 config.enterpriseFields) {
-            value = WifiNative.getNetworkVariableCommand(netId,
+            value = mWifiStateTracker.getNetworkVariable(netId,
                     field.varName());
             if (!TextUtils.isEmpty(value)) {
                 if (field != config.eap) value = removeDoubleQuotes(value);
@@ -955,6 +944,7 @@ public class WifiService extends IWifiManager.Stub {
      */
     public int addOrUpdateNetwork(WifiConfiguration config) {
         enforceChangePermission();
+
         /*
          * If the supplied networkId is -1, we create a new empty
          * network configuration. Otherwise, the networkId should
@@ -967,7 +957,7 @@ public class WifiService extends IWifiManager.Stub {
         // networkId of -1 means we want to create a new network
         synchronized (mWifiStateTracker) {
             if (newNetwork) {
-                netId = WifiNative.addNetworkCommand();
+                netId = mWifiStateTracker.addNetwork();
                 if (netId < 0) {
                     if (DBG) {
                         Slog.d(TAG, "Failed to add a network!");
@@ -976,7 +966,8 @@ public class WifiService extends IWifiManager.Stub {
                 }
                 doReconfig = true;
             } else {
-                String priorityVal = WifiNative.getNetworkVariableCommand(netId, WifiConfiguration.priorityVarName);
+                String priorityVal = mWifiStateTracker.getNetworkVariable(
+                                            netId, WifiConfiguration.priorityVarName);
                 currentPriority = -1;
                 if (!TextUtils.isEmpty(priorityVal)) {
                     try {
@@ -987,16 +978,17 @@ public class WifiService extends IWifiManager.Stub {
                 doReconfig = currentPriority != config.priority;
             }
             mNeedReconfig = mNeedReconfig || doReconfig;
+        }
 
-            setVariables: {
+        setVariables: {
             /*
              * Note that if a networkId for a non-existent network
-             * was supplied, then the first setNetworkVariableCommand()
+             * was supplied, then the first setNetworkVariable()
              * will fail, so we don't bother to make a separate check
              * for the validity of the ID up front.
              */
             if (config.SSID != null &&
-                    !WifiNative.setNetworkVariableCommand(
+                    !mWifiStateTracker.setNetworkVariable(
                         netId,
                         WifiConfiguration.ssidVarName,
                         convertToQuotedString(config.SSID))) {
@@ -1007,7 +999,7 @@ public class WifiService extends IWifiManager.Stub {
             }
 
             if (config.BSSID != null &&
-                    !WifiNative.setNetworkVariableCommand(
+                    !mWifiStateTracker.setNetworkVariable(
                         netId,
                         WifiConfiguration.bssidVarName,
                         config.BSSID)) {
@@ -1020,7 +1012,7 @@ public class WifiService extends IWifiManager.Stub {
             String allowedKeyManagementString =
                 makeString(config.allowedKeyManagement, WifiConfiguration.KeyMgmt.strings);
             if (config.allowedKeyManagement.cardinality() != 0 &&
-                    !WifiNative.setNetworkVariableCommand(
+                    !mWifiStateTracker.setNetworkVariable(
                         netId,
                         WifiConfiguration.KeyMgmt.varName,
                         allowedKeyManagementString)) {
@@ -1034,7 +1026,7 @@ public class WifiService extends IWifiManager.Stub {
             String allowedProtocolsString =
                 makeString(config.allowedProtocols, WifiConfiguration.Protocol.strings);
             if (config.allowedProtocols.cardinality() != 0 &&
-                    !WifiNative.setNetworkVariableCommand(
+                    !mWifiStateTracker.setNetworkVariable(
                         netId,
                         WifiConfiguration.Protocol.varName,
                         allowedProtocolsString)) {
@@ -1048,7 +1040,7 @@ public class WifiService extends IWifiManager.Stub {
             String allowedAuthAlgorithmsString =
                 makeString(config.allowedAuthAlgorithms, WifiConfiguration.AuthAlgorithm.strings);
             if (config.allowedAuthAlgorithms.cardinality() != 0 &&
-                    !WifiNative.setNetworkVariableCommand(
+                    !mWifiStateTracker.setNetworkVariable(
                         netId,
                         WifiConfiguration.AuthAlgorithm.varName,
                         allowedAuthAlgorithmsString)) {
@@ -1062,7 +1054,7 @@ public class WifiService extends IWifiManager.Stub {
             String allowedPairwiseCiphersString =
                 makeString(config.allowedPairwiseCiphers, WifiConfiguration.PairwiseCipher.strings);
             if (config.allowedPairwiseCiphers.cardinality() != 0 &&
-                    !WifiNative.setNetworkVariableCommand(
+                    !mWifiStateTracker.setNetworkVariable(
                         netId,
                         WifiConfiguration.PairwiseCipher.varName,
                         allowedPairwiseCiphersString)) {
@@ -1076,7 +1068,7 @@ public class WifiService extends IWifiManager.Stub {
             String allowedGroupCiphersString =
                 makeString(config.allowedGroupCiphers, WifiConfiguration.GroupCipher.strings);
             if (config.allowedGroupCiphers.cardinality() != 0 &&
-                    !WifiNative.setNetworkVariableCommand(
+                    !mWifiStateTracker.setNetworkVariable(
                         netId,
                         WifiConfiguration.GroupCipher.varName,
                         allowedGroupCiphersString)) {
@@ -1090,7 +1082,7 @@ public class WifiService extends IWifiManager.Stub {
             // Prevent client screw-up by passing in a WifiConfiguration we gave it
             // by preventing "*" as a key.
             if (config.preSharedKey != null && !config.preSharedKey.equals("*") &&
-                    !WifiNative.setNetworkVariableCommand(
+                    !mWifiStateTracker.setNetworkVariable(
                         netId,
                         WifiConfiguration.pskVarName,
                         config.preSharedKey)) {
@@ -1106,7 +1098,7 @@ public class WifiService extends IWifiManager.Stub {
                     // Prevent client screw-up by passing in a WifiConfiguration we gave it
                     // by preventing "*" as a key.
                     if (config.wepKeys[i] != null && !config.wepKeys[i].equals("*")) {
-                        if (!WifiNative.setNetworkVariableCommand(
+                        if (!mWifiStateTracker.setNetworkVariable(
                                     netId,
                                     WifiConfiguration.wepKeyVarNames[i],
                                     config.wepKeys[i])) {
@@ -1123,7 +1115,7 @@ public class WifiService extends IWifiManager.Stub {
             }
 
             if (hasSetKey) {
-                if (!WifiNative.setNetworkVariableCommand(
+                if (!mWifiStateTracker.setNetworkVariable(
                             netId,
                             WifiConfiguration.wepTxKeyIdxVarName,
                             Integer.toString(config.wepTxKeyIndex))) {
@@ -1136,7 +1128,7 @@ public class WifiService extends IWifiManager.Stub {
                 }
             }
 
-            if (!WifiNative.setNetworkVariableCommand(
+            if (!mWifiStateTracker.setNetworkVariable(
                         netId,
                         WifiConfiguration.priorityVarName,
                         Integer.toString(config.priority))) {
@@ -1147,7 +1139,7 @@ public class WifiService extends IWifiManager.Stub {
                 break setVariables;
             }
 
-            if (config.hiddenSSID && !WifiNative.setNetworkVariableCommand(
+            if (config.hiddenSSID && !mWifiStateTracker.setNetworkVariable(
                         netId,
                         WifiConfiguration.hiddenSSIDVarName,
                         Integer.toString(config.hiddenSSID ? 1 : 0))) {
@@ -1166,7 +1158,7 @@ public class WifiService extends IWifiManager.Stub {
                     if (field != config.eap) {
                         value = (value.length() == 0) ? "NULL" : convertToQuotedString(value);
                     }
-                    if (!WifiNative.setNetworkVariableCommand(
+                    if (!mWifiStateTracker.setNetworkVariable(
                                 netId,
                                 varName,
                                 value)) {
@@ -1179,21 +1171,20 @@ public class WifiService extends IWifiManager.Stub {
                 }
             }
             return netId;
-            }
+        }
 
-            /*
-             * For an update, if one of the setNetworkVariable operations fails,
-             * we might want to roll back all the changes already made. But the
-             * chances are that if anything is going to go wrong, it'll happen
-             * the first time we try to set one of the variables.
-             */
-            if (newNetwork) {
-                removeNetwork(netId);
-                if (DBG) {
-                    Slog.d(TAG,
-                            "Failed to set a network variable, removed network: "
-                            + netId);
-                }
+        /*
+         * For an update, if one of the setNetworkVariable operations fails,
+         * we might want to roll back all the changes already made. But the
+         * chances are that if anything is going to go wrong, it'll happen
+         * the first time we try to set one of the variables.
+         */
+        if (newNetwork) {
+            removeNetwork(netId);
+            if (DBG) {
+                Slog.d(TAG,
+                        "Failed to set a network variable, removed network: "
+                        + netId);
             }
         }
         return -1;
@@ -1260,15 +1251,13 @@ public class WifiService extends IWifiManager.Stub {
     public boolean enableNetwork(int netId, boolean disableOthers) {
         enforceChangePermission();
 
-        synchronized (mWifiStateTracker) {
-            String ifname = mWifiStateTracker.getInterfaceName();
-            NetworkUtils.enableInterface(ifname);
-            boolean result = WifiNative.enableNetworkCommand(netId, disableOthers);
-            if (!result) {
-                NetworkUtils.disableInterface(ifname);
-            }
-            return result;
+        String ifname = mWifiStateTracker.getInterfaceName();
+        NetworkUtils.enableInterface(ifname);
+        boolean result = mWifiStateTracker.enableNetwork(netId, disableOthers);
+        if (!result) {
+            NetworkUtils.disableInterface(ifname);
         }
+        return result;
     }
 
     /**
@@ -1280,9 +1269,7 @@ public class WifiService extends IWifiManager.Stub {
     public boolean disableNetwork(int netId) {
         enforceChangePermission();
 
-        synchronized (mWifiStateTracker) {
-            return WifiNative.disableNetworkCommand(netId);
-        }
+        return mWifiStateTracker.disableNetwork(netId);
     }
 
     /**
@@ -1306,9 +1293,8 @@ public class WifiService extends IWifiManager.Stub {
     public List<ScanResult> getScanResults() {
         enforceAccessPermission();
         String reply;
-        synchronized (mWifiStateTracker) {
-            reply = WifiNative.scanResultsCommand();
-        }
+
+        reply = mWifiStateTracker.scanResults();
         if (reply == null) {
             return null;
         }
@@ -1456,11 +1442,12 @@ public class WifiService extends IWifiManager.Stub {
     public boolean saveConfiguration() {
         boolean result;
         enforceChangePermission();
+
         synchronized (mWifiStateTracker) {
-            result = WifiNative.saveConfigCommand();
+            result = mWifiStateTracker.saveConfig();
             if (result && mNeedReconfig) {
                 mNeedReconfig = false;
-                result = WifiNative.reloadConfigCommand();
+                result = mWifiStateTracker.reloadConfig();
 
                 if (result) {
                     Intent intent = new Intent(WifiManager.NETWORK_IDS_CHANGED_ACTION);
@@ -1532,18 +1519,17 @@ public class WifiService extends IWifiManager.Stub {
         int numChannels;
 
         enforceAccessPermission();
-        synchronized (mWifiStateTracker) {
-            /*
-             * If we can't get the value from the driver (e.g., because
-             * Wi-Fi is not currently enabled), get the value from
-             * Settings.
-             */
-            numChannels = WifiNative.getNumAllowedChannelsCommand();
-            if (numChannels < 0) {
-                numChannels = Settings.Secure.getInt(mContext.getContentResolver(),
-                                                     Settings.Secure.WIFI_NUM_ALLOWED_CHANNELS,
-                                                     -1);
-            }
+
+        /*
+         * If we can't get the value from the driver (e.g., because
+         * Wi-Fi is not currently enabled), get the value from
+         * Settings.
+         */
+        numChannels = mWifiStateTracker.getNumAllowedChannels();
+        if (numChannels < 0) {
+            numChannels = Settings.Secure.getInt(mContext.getContentResolver(),
+                    Settings.Secure.WIFI_NUM_ALLOWED_CHANNELS,
+                    -1);
         }
         return numChannels;
     }
@@ -2126,14 +2112,13 @@ public class WifiService extends IWifiManager.Stub {
 
     public void initializeMulticastFiltering() {
         enforceMulticastChangePermission();
+
         synchronized (mMulticasters) {
             // if anybody had requested filters be off, leave off
             if (mMulticasters.size() != 0) {
                 return;
             } else {
-                synchronized (mWifiStateTracker) {
-                    WifiNative.startPacketFiltering();
-                }
+                mWifiStateTracker.startPacketFiltering();
             }
         }
     }
@@ -2148,9 +2133,7 @@ public class WifiService extends IWifiManager.Stub {
             // our new size == 1 (first call), but this function won't
             // be called often and by making the stopPacket call each
             // time we're less fragile and self-healing.
-            synchronized (mWifiStateTracker) {
-                WifiNative.stopPacketFiltering();
-            }
+            mWifiStateTracker.stopPacketFiltering();
         }
 
         int uid = Binder.getCallingUid();
@@ -2182,13 +2165,12 @@ public class WifiService extends IWifiManager.Stub {
     private void removeMulticasterLocked(int i, int uid)
     {
         Multicaster removed = mMulticasters.remove(i);
+
         if (removed != null) {
             removed.unlinkDeathRecipient();
         }
         if (mMulticasters.size() == 0) {
-            synchronized (mWifiStateTracker) {
-                WifiNative.startPacketFiltering();
-            }
+            mWifiStateTracker.startPacketFiltering();
         }
 
         Long ident = Binder.clearCallingIdentity();

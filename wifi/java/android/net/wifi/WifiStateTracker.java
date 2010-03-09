@@ -544,9 +544,7 @@ public class WifiStateTracker extends NetworkStateTracker {
      */
     void notifyScanResultsAvailable() {
         // reset the supplicant's handling of scan results to "normal" mode
-        synchronized (this) {
-            WifiNative.setScanResultHandlingCommand(SUPPL_SCAN_HANDLING_NORMAL);
-        }
+        setScanResultHandling(SUPPL_SCAN_HANDLING_NORMAL);
         sendEmptyMessage(EVENT_SCAN_RESULTS_AVAILABLE);
     }
 
@@ -613,39 +611,6 @@ public class WifiStateTracker extends NetworkStateTracker {
     }
 
     /**
-     * Set the number of allowed radio frequency channels from the system
-     * setting value, if any.
-     * @return {@code true} if the operation succeeds, {@code false} otherwise, e.g.,
-     * the number of channels is invalid.
-     */
-    public synchronized boolean setNumAllowedChannels() {
-        try {
-            return setNumAllowedChannels(
-                    Settings.Secure.getInt(mContext.getContentResolver(),
-                    Settings.Secure.WIFI_NUM_ALLOWED_CHANNELS));
-        } catch (Settings.SettingNotFoundException e) {
-            if (mNumAllowedChannels != 0) {
-                WifiNative.setNumAllowedChannelsCommand(mNumAllowedChannels);
-            }
-            // otherwise, use the driver default
-        }
-        return true;
-    }
-
-    /**
-     * Set the number of radio frequency channels that are allowed to be used
-     * in the current regulatory domain.
-     * @param numChannels the number of allowed channels. Must be greater than 0
-     * and less than or equal to 16.
-     * @return {@code true} if the operation succeeds, {@code false} otherwise, e.g.,
-     * {@code numChannels} is outside the valid range.
-     */
-    public synchronized boolean setNumAllowedChannels(int numChannels) {
-        mNumAllowedChannels = numChannels;
-        return WifiNative.setNumAllowedChannelsCommand(numChannels);
-    }
-
-    /**
      * Set the run state to either "normal" or "scan-only".
      * @param scanOnlyMode true if the new mode should be scan-only.
      */
@@ -655,29 +620,19 @@ public class WifiStateTracker extends NetworkStateTracker {
             int scanType = (scanOnlyMode ?
                     SUPPL_SCAN_HANDLING_LIST_ONLY : SUPPL_SCAN_HANDLING_NORMAL);
             if (LOCAL_LOGD) Log.v(TAG, "Scan-only mode changing to " + scanOnlyMode + " scanType=" + scanType);
-            if (WifiNative.setScanResultHandlingCommand(scanType)) {
+            if (setScanResultHandling(scanType)) {
                 mIsScanOnly = scanOnlyMode;
                 if (!isDriverStopped()) {
                     if (scanOnlyMode) {
-                        WifiNative.disconnectCommand();
+                        disconnect();
                     } else {
-                        WifiNative.reconnectCommand();
+                        reconnectCommand();
                     }
                 }
             }
         }
     }
 
-    /**
-     * Enable or disable Bluetooth coexistence scan mode. When this mode is on,
-     * some of the low-level scan parameters used by the driver are changed to
-     * reduce interference with A2DP streaming.
-     *
-     * @param isBluetoothPlaying whether to enable or disable this mode
-     */
-    public synchronized void setBluetoothScanMode(boolean isBluetoothPlaying) {
-        WifiNative.setBluetoothCoexistenceScanModeCommand(isBluetoothPlaying);
-    }
 
     private void checkIsBluetoothPlaying() {
         boolean isBluetoothPlaying = false;
@@ -765,10 +720,8 @@ public class WifiStateTracker extends NetworkStateTracker {
                  * The MAC address isn't going to change, so just request it
                  * once here.
                  */
-                String macaddr;
-                synchronized (this) {
-                    macaddr = WifiNative.getMacAddressCommand();
-                }
+                String macaddr = getMacAddress();
+
                 if (macaddr != null) {
                     mWifiInfo.setMacAddress(macaddr);
                 }
@@ -831,9 +784,8 @@ public class WifiStateTracker extends NetworkStateTracker {
                 // [ 1- 0] Connected to supplicant (1), disconnected from supplicant (0) ,
                 //         or supplicant died (2)
                 EventLog.writeEvent(EVENTLOG_SUPPLICANT_CONNECTION_STATE_CHANGED, died ? 2 : 0);
-                synchronized (this) {
-                    WifiNative.closeSupplicantConnection();
-                }
+                closeSupplicantConnection();
+
                 if (died) {
                     resetConnections(true);
                 }
@@ -861,9 +813,7 @@ public class WifiStateTracker extends NetworkStateTracker {
                 // Only do this if we haven't gotten a new supplicant status since the timer
                 // started
                 if (mNumSupplicantStateChanges == msg.arg1) {
-                    synchronized (this) {
-                        WifiNative.scanCommand(false); // do a passive scan
-                    }
+                    scan(false); // do a passive scan
                 }
                 break;
 
@@ -954,13 +904,9 @@ public class WifiStateTracker extends NetworkStateTracker {
                         if (mRunState == RUN_STATE_RUNNING && !mIsScanOnly && networkId != -1) {
                             sendMessageDelayed(reconnectMsg, RECONNECT_DELAY_MSECS);
                         } else if (mRunState == RUN_STATE_STOPPING) {
-                            synchronized (this) {
-                                WifiNative.stopDriverCommand();
-                            }
+                            stopDriver();
                         } else if (mRunState == RUN_STATE_STARTING && !mIsScanOnly) {
-                            synchronized (this) {
-                                WifiNative.reconnectCommand();
-                            }
+                            reconnectCommand();
                         }
                     } else if (newState == SupplicantState.DISCONNECTED) {
                         mHaveIpAddress = false;
@@ -1129,9 +1075,7 @@ public class WifiStateTracker extends NetworkStateTracker {
                         }
                         addToBlacklist(BSSID);
                     }
-                    synchronized(this) {
-                        WifiNative.reconnectCommand();
-                    }
+                    reconnectCommand();
                 }
                 break;
 
@@ -1174,9 +1118,7 @@ public class WifiStateTracker extends NetworkStateTracker {
                     mHaveIpAddress = false;
                     mWifiInfo.setIpAddress(0);
                     mObtainingIpAddress = false;
-                    synchronized(this) {
-                        WifiNative.disconnectCommand();
-                    }
+                    disconnect();
                 }
                 break;
 
@@ -1199,11 +1141,11 @@ public class WifiStateTracker extends NetworkStateTracker {
                         if (mRunState == RUN_STATE_STARTING) {
                             mRunState = RUN_STATE_RUNNING;
                             if (!mIsScanOnly) {
-                                WifiNative.reconnectCommand();
+                                reconnectCommand();
                             } else {
                                 // In some situations, supplicant needs to be kickstarted to
                                 // start the background scanning
-                                WifiNative.scanCommand(true);
+                                scan(true);
                             }
                         }
                     }
@@ -1243,12 +1185,6 @@ public class WifiStateTracker extends NetworkStateTracker {
             }
         }
         return disabledNetwork;
-    }
-
-    public synchronized void setScanMode(boolean isScanModeActive) {
-        if (mIsScanModeActive != isScanModeActive) {
-            WifiNative.setScanModeCommand(mIsScanModeActive = isScanModeActive);
-        }
     }
 
     private void configureInterface() {
@@ -1371,10 +1307,7 @@ public class WifiStateTracker extends NetworkStateTracker {
     }
 
     private void requestConnectionStatus(WifiInfo info) {
-        String reply;
-        synchronized (this) {
-            reply = WifiNative.statusCommand();
-        }
+        String reply = status();
         if (reply == null) {
             return;
         }
@@ -1423,7 +1356,7 @@ public class WifiStateTracker extends NetworkStateTracker {
      */
     private synchronized void requestPolledInfo(WifiInfo info, boolean polling)
     {
-        int newRssi = (polling ? WifiNative.getRssiApproxCommand() : WifiNative.getRssiCommand());
+        int newRssi = (polling ? getRssiApprox() : getRssi());
         if (newRssi != -1 && -200 < newRssi && newRssi < 256) { // screen out invalid values
             /* some implementations avoid negative values by adding 256
              * so we need to adjust for that here.
@@ -1451,7 +1384,7 @@ public class WifiStateTracker extends NetworkStateTracker {
         } else {
             info.setRssi(-200);
         }
-        int newLinkSpeed = WifiNative.getLinkSpeedCommand();
+        int newLinkSpeed = getLinkSpeed();
         if (newLinkSpeed != -1) {
             info.setLinkSpeed(newLinkSpeed);
         }
@@ -1521,9 +1454,9 @@ public class WifiStateTracker extends NetworkStateTracker {
 
             mRunState = RUN_STATE_STOPPING;
             if (mWifiInfo.getSupplicantState() == SupplicantState.DORMANT) {
-                return WifiNative.stopDriverCommand();
+                return stopDriver();
             } else {
-                return WifiNative.disconnectCommand();
+                return disconnect();
             }
         } else {
             /*
@@ -1547,15 +1480,211 @@ public class WifiStateTracker extends NetworkStateTracker {
         if (mRunState == RUN_STATE_STOPPED) {
             mRunState = RUN_STATE_STARTING;
             resetConnections(true);
-            return WifiNative.startDriverCommand();
+            return startDriver();
         } else if (mRunState == RUN_STATE_STOPPING) {
             mRunState = RUN_STATE_STARTING;
         }
         return true;
     }
 
+    /**
+     * TODO: add documentation to all the native calls
+     * along with conditional checks to make sure
+     * native calls dont happen when wifi is not enabled
+     */
+
+    public synchronized boolean loadDriver() {
+        return WifiNative.loadDriver();
+    }
+
+    public synchronized boolean unloadDriver() {
+        return WifiNative.unloadDriver();
+    }
+
+    public synchronized boolean startSupplicant() {
+        return WifiNative.startSupplicant();
+    }
+
+    public synchronized boolean stopSupplicant() {
+        return WifiNative.stopSupplicant();
+    }
+
+    public synchronized boolean connectToSupplicant() {
+        return WifiNative.connectToSupplicant();
+    }
+
+    public synchronized void closeSupplicantConnection() {
+        WifiNative.closeSupplicantConnection();
+    }
+
+    public synchronized boolean ping() {
+        return WifiNative.pingCommand();
+    }
+
+    public synchronized boolean scan(boolean forceActive) {
+        return WifiNative.scanCommand(forceActive);
+    }
+
+    public synchronized boolean setScanResultHandling(int mode) {
+        return WifiNative.setScanResultHandlingCommand(mode);
+    }
+
+    public synchronized String scanResults() {
+        return WifiNative.scanResultsCommand();
+    }
+
+    public synchronized void setScanMode(boolean isScanModeActive) {
+        if (mIsScanModeActive != isScanModeActive) {
+            WifiNative.setScanModeCommand(mIsScanModeActive = isScanModeActive);
+        }
+    }
+
+    public synchronized boolean disconnect() {
+        return WifiNative.disconnectCommand();
+    }
+
+    public synchronized boolean reconnectCommand() {
+        return WifiNative.reconnectCommand();
+    }
+
+    public synchronized int addNetwork() {
+        return WifiNative.addNetworkCommand();
+    }
+
     public synchronized boolean removeNetwork(int networkId) {
         return mDisconnectExpected = WifiNative.removeNetworkCommand(networkId);
+    }
+
+    public synchronized boolean enableNetwork(int netId, boolean disableOthers) {
+        return WifiNative.enableNetworkCommand(netId, disableOthers);
+    }
+
+    public synchronized boolean disableNetwork(int netId) {
+        return WifiNative.disableNetworkCommand(netId);
+    }
+
+    public synchronized boolean reassociate() {
+        return WifiNative.reassociateCommand();
+    }
+
+    public synchronized boolean addToBlacklist(String bssid) {
+        return WifiNative.addToBlacklistCommand(bssid);
+    }
+
+    public synchronized boolean clearBlacklist() {
+        return WifiNative.clearBlacklistCommand();
+    }
+
+    public synchronized String listNetworks() {
+        return WifiNative.listNetworksCommand();
+    }
+
+    public synchronized String getNetworkVariable(int netId, String name) {
+        return WifiNative.getNetworkVariableCommand(netId, name);
+    }
+
+    public synchronized boolean setNetworkVariable(int netId, String name, String value) {
+        return WifiNative.setNetworkVariableCommand(netId, name, value);
+    }
+
+    public synchronized String status() {
+        return WifiNative.statusCommand();
+    }
+
+    public synchronized int getRssi() {
+        return WifiNative.getRssiApproxCommand();
+    }
+
+    public synchronized int getRssiApprox() {
+        return WifiNative.getRssiApproxCommand();
+    }
+
+    public synchronized int getLinkSpeed() {
+        return WifiNative.getLinkSpeedCommand();
+    }
+
+    public synchronized String getMacAddress() {
+        return WifiNative.getMacAddressCommand();
+    }
+
+    public synchronized boolean startDriver() {
+        return WifiNative.startDriverCommand();
+    }
+
+    public synchronized boolean stopDriver() {
+        return WifiNative.stopDriverCommand();
+    }
+
+    public synchronized boolean startPacketFiltering() {
+        return WifiNative.startPacketFiltering();
+    }
+
+    public synchronized boolean stopPacketFiltering() {
+        return WifiNative.stopPacketFiltering();
+    }
+
+    public synchronized boolean setPowerMode(int mode) {
+        return WifiNative.setPowerModeCommand(mode);
+    }
+
+    /**
+     * Set the number of allowed radio frequency channels from the system
+     * setting value, if any.
+     * @return {@code true} if the operation succeeds, {@code false} otherwise, e.g.,
+     * the number of channels is invalid.
+     */
+    public synchronized boolean setNumAllowedChannels() {
+        try {
+            return setNumAllowedChannels(
+                    Settings.Secure.getInt(mContext.getContentResolver(),
+                    Settings.Secure.WIFI_NUM_ALLOWED_CHANNELS));
+        } catch (Settings.SettingNotFoundException e) {
+            if (mNumAllowedChannels != 0) {
+                WifiNative.setNumAllowedChannelsCommand(mNumAllowedChannels);
+            }
+            // otherwise, use the driver default
+        }
+        return true;
+    }
+
+    /**
+     * Set the number of radio frequency channels that are allowed to be used
+     * in the current regulatory domain.
+     * @param numChannels the number of allowed channels. Must be greater than 0
+     * and less than or equal to 16.
+     * @return {@code true} if the operation succeeds, {@code false} otherwise, e.g.,
+     * {@code numChannels} is outside the valid range.
+     */
+    public synchronized boolean setNumAllowedChannels(int numChannels) {
+        mNumAllowedChannels = numChannels;
+        return WifiNative.setNumAllowedChannelsCommand(numChannels);
+    }
+
+    public synchronized int getNumAllowedChannels() {
+        return WifiNative.getNumAllowedChannelsCommand();
+    }
+
+    public synchronized boolean setBluetoothCoexistenceMode(int mode) {
+        return WifiNative.setBluetoothCoexistenceModeCommand(mode);
+    }
+
+    /**
+     * Enable or disable Bluetooth coexistence scan mode. When this mode is on,
+     * some of the low-level scan parameters used by the driver are changed to
+     * reduce interference with A2DP streaming.
+     *
+     * @param isBluetoothPlaying whether to enable or disable this mode
+     */
+    public synchronized void setBluetoothScanMode(boolean isBluetoothPlaying) {
+        WifiNative.setBluetoothCoexistenceScanModeCommand(isBluetoothPlaying);
+    }
+
+    public synchronized boolean saveConfig() {
+        return WifiNative.saveConfigCommand();
+    }
+
+    public synchronized boolean reloadConfig() {
+        return WifiNative.reloadConfigCommand();
     }
 
     public boolean setRadio(boolean turnOn) {
@@ -1571,7 +1700,7 @@ public class WifiStateTracker extends NetworkStateTracker {
     public int startUsingNetworkFeature(String feature, int callingPid, int callingUid) {
         return -1;
     }
-    
+
     /**
      * {@inheritDoc}
      * There are currently no Wi-Fi-specific features supported.
@@ -1706,18 +1835,6 @@ public class WifiStateTracker extends NetworkStateTracker {
         mNumScansSinceNetworkStateChange = 0;
     }
     
-    public synchronized boolean reassociate() {
-        return WifiNative.reassociateCommand();
-    }
-
-    public synchronized boolean addToBlacklist(String bssid) {
-        return WifiNative.addToBlacklistCommand(bssid);
-    }
-    
-    public synchronized boolean clearBlacklist() {
-        return WifiNative.clearBlacklistCommand();
-    }
-    
     @Override
     public String toString() {
         StringBuffer sb = new StringBuffer();
@@ -1796,15 +1913,12 @@ public class WifiStateTracker extends NetworkStateTracker {
                         modifiedBluetoothCoexistenceMode = true;
 
                         // Disable the coexistence mode
-                        synchronized (WifiStateTracker.this) {
-                            WifiNative.setBluetoothCoexistenceModeCommand(
-                                    WifiNative.BLUETOOTH_COEXISTENCE_MODE_DISABLED);
-                        }
+                        setBluetoothCoexistenceMode(
+                                WifiNative.BLUETOOTH_COEXISTENCE_MODE_DISABLED);
                     }
-                    
-                    synchronized (WifiStateTracker.this) {
-                        WifiNative.setPowerModeCommand(DRIVER_POWER_MODE_ACTIVE);
-                    }
+
+                    setPowerMode(DRIVER_POWER_MODE_ACTIVE);
+
                     synchronized (this) {
                         // A new request is being made, so assume we will callback
                         mCancelCallback = false;
@@ -1818,18 +1932,15 @@ public class WifiStateTracker extends NetworkStateTracker {
                         Log.i(TAG, "DhcpHandler: DHCP request failed: " +
                             NetworkUtils.getDhcpError());
                     }
-                    synchronized (WifiStateTracker.this) {
-                        WifiNative.setPowerModeCommand(DRIVER_POWER_MODE_AUTO);
-                    }
-                    
+
+                    setPowerMode(DRIVER_POWER_MODE_AUTO);
+
                     if (modifiedBluetoothCoexistenceMode) {
                         // Set the coexistence mode back to its default value
-                        synchronized (WifiStateTracker.this) {
-                            WifiNative.setBluetoothCoexistenceModeCommand(
-                                    WifiNative.BLUETOOTH_COEXISTENCE_MODE_SENSE);
-                        }
+                        setBluetoothCoexistenceMode(
+                                WifiNative.BLUETOOTH_COEXISTENCE_MODE_SENSE);
                     }
-                    
+
                     synchronized (this) {
                         if (!mCancelCallback) {
                             mTarget.sendEmptyMessage(event);
@@ -1838,7 +1949,7 @@ public class WifiStateTracker extends NetworkStateTracker {
                     break;
             }
         }
-        
+
         public synchronized void setCancelCallback(boolean cancelCallback) {
             mCancelCallback = cancelCallback;
         }
