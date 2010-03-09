@@ -3691,11 +3691,13 @@ public class WebView extends AbsoluteLayout
             return false;
         }
 
-        if (mShiftIsPressed == false && nativeCursorWantsKeyEvents() == false
-                && !nativeFocusIsPlugin()
-                && (keyCode == KeyEvent.KEYCODE_SHIFT_LEFT
-                || keyCode == KeyEvent.KEYCODE_SHIFT_RIGHT)) {
-            setUpSelectXY();
+        if (keyCode == KeyEvent.KEYCODE_SHIFT_LEFT
+                || keyCode == KeyEvent.KEYCODE_SHIFT_RIGHT) {
+            if (nativeFocusIsPlugin()) {
+                mShiftIsPressed = true;
+            } else if (!nativeCursorWantsKeyEvents() && !mShiftIsPressed) {
+                setUpSelectXY();
+            }
         }
 
         if (keyCode >= KeyEvent.KEYCODE_DPAD_UP
@@ -3834,7 +3836,10 @@ public class WebView extends AbsoluteLayout
 
         if (keyCode == KeyEvent.KEYCODE_SHIFT_LEFT
                 || keyCode == KeyEvent.KEYCODE_SHIFT_RIGHT) {
-            if (commitCopy()) {
+            if (nativeFocusIsPlugin()) {
+                mShiftIsPressed = false;
+                return true;
+            } else if (commitCopy()) {
                 return true;
             }
         }
@@ -4195,7 +4200,9 @@ public class WebView extends AbsoluteLayout
     public boolean dispatchKeyEvent(KeyEvent event) {
         boolean dispatch = true;
 
-        if (!inEditingMode()) {
+        // Textfields and plugins need to receive the shift up key even if
+        // another key was released while the shift key was held down.
+        if (!inEditingMode() && !nativeFocusIsPlugin()) {
             if (event.getAction() == KeyEvent.ACTION_DOWN) {
                 mGotKeyDown = true;
             } else {
