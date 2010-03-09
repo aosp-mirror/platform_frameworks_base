@@ -291,7 +291,7 @@ public class VideoView extends SurfaceView implements MediaPlayerControl {
                 mCanSeekForward = !data.has(Metadata.SEEK_FORWARD_AVAILABLE)
                         || data.getBoolean(Metadata.SEEK_FORWARD_AVAILABLE);
             } else {
-                mCanPause = mCanSeekForward = mCanSeekForward = true;
+                mCanPause = mCanSeekBack = mCanSeekForward = true;
             }
 
             if (mOnPreparedListener != null) {
