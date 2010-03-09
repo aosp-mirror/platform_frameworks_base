@@ -995,6 +995,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     }
                 } else {
                     newNet.reconnect();
+                    newNet = null; // not officially avail..  try anyway, but
+                                   // report no failover
                 }
             }
         }
