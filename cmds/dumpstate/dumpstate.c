@@ -23,6 +23,7 @@
 #include <sys/resource.h>
 #include <sys/stat.h>
 #include <sys/time.h>
+#include <sys/wait.h>
 #include <unistd.h>
 
 #include <cutils/properties.h>
@@ -86,7 +87,11 @@ static void dumpstate() {
     struct stat st;
     char anr_traces_path[PATH_MAX];
     property_get("dalvik.vm.stack-trace-file", anr_traces_path, "");
-    if (anr_traces_path[0] && !stat(anr_traces_path, &st) && time(NULL) - st.st_mtime < 15 * 60) {
+    if (!anr_traces_path[0]) {
+        printf("*** NO VM TRACES FILE DEFINED (dalvik.vm.stack-trace-file)\n\n");
+    } else if (stat(anr_traces_path, &st)) {
+        printf("*** NO ANR VM TRACES FILE (%s): %s\n\n", anr_traces_path, strerror(errno));
+    } else {
         dump_file("VM TRACES AT LAST ANR", anr_traces_path);
     }
 

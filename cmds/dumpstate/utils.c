@@ -33,6 +33,7 @@
 
 #include <cutils/properties.h>
 #include <cutils/sockets.h>
+#include <private/android_filesystem_config.h>
 
 #include "dumpstate.h"
 
@@ -273,6 +274,20 @@ const char *dump_vm_traces() {
         return NULL;  // Can't rename old traces.txt -- no permission? -- leave it alone instead
     }
 
+    /* make the directory if necessary */
+    char anr_traces_dir[PATH_MAX];
+    strlcpy(anr_traces_dir, traces_path, sizeof(anr_traces_dir));
+    char *slash = strrchr(anr_traces_dir, '/');
+    if (slash != NULL) {
+        *slash = '\0';
+        if (!mkdir(anr_traces_dir, 0775)) {
+            chown(anr_traces_dir, AID_SYSTEM, AID_SYSTEM);
+        } else if (errno != EEXIST) {
+            fprintf(stderr, "mkdir(%s): %s\n", anr_traces_dir, strerror(errno));
+            return NULL;
+        }
+    }
+
     /* create a new, empty traces.txt file to receive stack dumps */
     int fd = open(traces_path, O_CREAT | O_WRONLY | O_TRUNC, 0666);  /* -rw-rw-rw- */
     if (fd < 0) {
@@ -302,6 +317,7 @@ const char *dump_vm_traces() {
     }
 
     struct dirent *d;
+    int dalvik_found = 0;
     while ((d = readdir(proc))) {
         int pid = atoi(d->d_name);
         if (pid <= 0) continue;
@@ -319,6 +335,7 @@ const char *dump_vm_traces() {
         close(fd);
         if (len <= 0 || !memcmp(data, "zygote", 6)) continue;
 
+        ++dalvik_found;
         if (kill(pid, SIGQUIT)) {
             fprintf(stderr, "kill(%d, SIGQUIT): %s\n", pid, strerror(errno));
             continue;
@@ -338,6 +355,9 @@ const char *dump_vm_traces() {
     }
 
     close(ifd);
+    if (dalvik_found == 0) {
+        fprintf(stderr, "Warning: no Dalvik processes found to dump stacks\n");
+    }
 
     static char dump_traces_path[PATH_MAX];
     strlcpy(dump_traces_path, traces_path, sizeof(dump_traces_path));
