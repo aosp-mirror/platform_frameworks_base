@@ -344,6 +344,7 @@ void AudioPolicyManagerBase::setForceUse(AudioSystem::force_use usage, AudioSyst
 {
     LOGV("setForceUse() usage %d, config %d, mPhoneState %d", usage, config, mPhoneState);
 
+    bool forceVolumeReeval = false;
     switch(usage) {
     case AudioSystem::FOR_COMMUNICATION:
         if (config != AudioSystem::FORCE_SPEAKER && config != AudioSystem::FORCE_BT_SCO &&
@@ -374,6 +375,7 @@ void AudioPolicyManagerBase::setForceUse(AudioSystem::force_use usage, AudioSyst
             config != AudioSystem::FORCE_BT_DESK_DOCK && config != AudioSystem::FORCE_WIRED_ACCESSORY) {
             LOGW("setForceUse() invalid config %d for FOR_DOCK", config);
         }
+        forceVolumeReeval = true;
         mForceUse[usage] = config;
         break;
     default:
@@ -388,6 +390,9 @@ void AudioPolicyManagerBase::setForceUse(AudioSystem::force_use usage, AudioSyst
 #endif
     updateDeviceForStrategy();
     setOutputDevice(mHardwareOutput, newDevice);
+    if (forceVolumeReeval) {
+        applyStreamVolumes(mHardwareOutput, newDevice);
+    }
 }
 
 AudioSystem::forced_config AudioPolicyManagerBase::getForceUse(AudioSystem::force_use usage)
