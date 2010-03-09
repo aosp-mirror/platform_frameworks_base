@@ -54,14 +54,12 @@ import java.util.Set;
  * @hide
  *
  * Timeout
- * TODO - review error states - they currently are dead-ends with no recovery possible
  *
  * TODO - look for parent classes and code sharing
  */
 
 public class Tethering extends INetworkManagementEventObserver.Stub {
 
-    private Notification mTetheringNotification;
     private Context mContext;
     private final String TAG = "Tethering";
 
@@ -92,7 +90,9 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
     private boolean mUseHiPri;
     private String mUpstreamIfaceName;
 
-    HierarchicalStateMachine mTetherMasterSM;
+    private HierarchicalStateMachine mTetherMasterSM;
+
+    private Notification mTetheredNotification;
 
     public Tethering(Context context) {
         Log.d(TAG, "Tethering starting");
@@ -152,18 +152,11 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
         Log.d(TAG, "interfaceLinkStatusChanged " + iface + ", " + link);
         boolean found = false;
         boolean usb = false;
-        for (String regex : mTetherableWifiRegexs) {
-            if (iface.matches(regex)) {
-                found = true;
-                break;
-            }
-        }
-        for (String regex: mTetherableUsbRegexs) {
-            if (iface.matches(regex)) {
-                found = true;
-                usb = true;
-                break;
-            }
+        if (isWifi(iface)) {
+            found = true;
+        } else if (isUsb(iface)) {
+            found = true;
+            usb = true;
         }
         if (found == false) return;
 
@@ -184,23 +177,31 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
         }
     }
 
+    private boolean isUsb(String iface) {
+        for (String regex : mTetherableUsbRegexs) {
+            if (iface.matches(regex)) return true;
+        }
+        return false;
+    }
+
+    public boolean isWifi(String iface) {
+        for (String regex : mTetherableWifiRegexs) {
+            if (iface.matches(regex)) return true;
+        }
+        return false;
+    }
+
     public void interfaceAdded(String iface) {
         IBinder b = ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE);
         INetworkManagementService service = INetworkManagementService.Stub.asInterface(b);
         boolean found = false;
         boolean usb = false;
-        for (String regex : mTetherableWifiRegexs) {
-            if (iface.matches(regex)) {
-                found = true;
-                break;
-            }
+        if (isWifi(iface)) {
+            found = true;
         }
-        for (String regex : mTetherableUsbRegexs) {
-            if (iface.matches(regex)) {
-                found = true;
-                usb = true;
-                break;
-            }
+        if (isUsb(iface)) {
+            found = true;
+            usb = true;
         }
         if (found == false) {
             Log.d(TAG, iface + " is not a tetherable iface, ignoring");
@@ -293,6 +294,9 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
         ArrayList<String> activeList = new ArrayList<String>();
         ArrayList<String> erroredList = new ArrayList<String>();
 
+        boolean wifiTethered = false;
+        boolean usbTethered = false;
+
         synchronized (mIfaces) {
             Set ifaces = mIfaces.keySet();
             for (Object iface : ifaces) {
@@ -303,6 +307,11 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                     } else if (sm.isAvailable()) {
                         availableList.add((String)iface);
                     } else if (sm.isTethered()) {
+                        if (isUsb((String)iface)) {
+                            usbTethered = true;
+                        } else if (isWifi((String)iface)) {
+                            wifiTethered = true;
+                        }
                         activeList.add((String)iface);
                     }
                 }
@@ -318,6 +327,58 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
         mContext.sendStickyBroadcast(broadcast);
         Log.d(TAG, "sendTetherStateChangedBroadcast " + availableList.size() + ", " +
                 activeList.size() + ", " + erroredList.size());
+
+        if (usbTethered) {
+            if (wifiTethered) {
+                showTetheredNotification(com.android.internal.R.drawable.stat_sys_tether_general);
+            } else {
+                showTetheredNotification(com.android.internal.R.drawable.stat_sys_tether_usb);
+            }
+        } else if (wifiTethered) {
+            showTetheredNotification(com.android.internal.R.drawable.stat_sys_tether_wifi);
+        } else {
+            clearTetheredNotification();
+        }
+    }
+
+    private void showTetheredNotification(int icon) {
+        NotificationManager notificationManager =
+                (NotificationManager)mContext.getSystemService(Context.NOTIFICATION_SERVICE);
+        if (notificationManager == null) {
+            return;
+        }
+
+        Intent intent = new Intent();
+        intent.setClassName("com.android.settings", "com.android.settings.TetherSettings");
+        intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+
+        PendingIntent pi = PendingIntent.getActivity(mContext, 0, intent, 0);
+
+        Resources r = Resources.getSystem();
+        CharSequence title = r.getText(com.android.internal.R.string.tethered_notification_title);
+        CharSequence message = r.getText(com.android.internal.R.string.
+                tethered_notification_message);
+
+        if(mTetheredNotification == null) {
+            mTetheredNotification = new Notification();
+            mTetheredNotification.when = 0;
+        }
+        mTetheredNotification.icon = icon;
+        mTetheredNotification.defaults &= ~Notification.DEFAULT_SOUND;
+        mTetheredNotification.flags = Notification.FLAG_ONGOING_EVENT;
+        mTetheredNotification.tickerText = title;
+        mTetheredNotification.setLatestEventInfo(mContext, title, message, pi);
+
+        notificationManager.notify(mTetheredNotification.icon, mTetheredNotification);
+    }
+
+    private void clearTetheredNotification() {
+        NotificationManager notificationManager =
+            (NotificationManager)mContext.getSystemService(Context.NOTIFICATION_SERVICE);
+        if (notificationManager != null && mTetheredNotification != null) {
+            notificationManager.cancel(mTetheredNotification.icon);
+            mTetheredNotification = null;
+        }
     }
 
     private class StateReceiver extends BroadcastReceiver {
@@ -367,13 +428,11 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
             return;
         }
         for (String iface : ifaces) {
-            for (String regex : mTetherableUsbRegexs) {
-                if (iface.matches(regex)) {
-                    if (enable) {
-                        interfaceAdded(iface);
-                    } else {
-                        interfaceRemoved(iface);
-                    }
+            if (isUsb(iface)) {
+                if (enable) {
+                    interfaceAdded(iface);
+                } else {
+                    interfaceRemoved(iface);
                 }
             }
         }
@@ -420,27 +479,25 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
             return false;
         }
         for (String iface : ifaces) {
-            for (String regex : mTetherableUsbRegexs) {
-                if (iface.matches(regex)) {
-                    InterfaceConfiguration ifcg = null;
-                    try {
-                        ifcg = service.getInterfaceConfig(iface);
-                        if (ifcg != null) {
-                            ifcg.ipAddr = (169 << 24) + (254 << 16) + (2 << 8) + 1;
-                            ifcg.netmask = (255 << 24) + (255 << 16) + (255 << 8) + 0;
-                            if (enabled) {
-                                ifcg.interfaceFlags = ifcg.interfaceFlags.replace("down", "up");
-                            } else {
-                                ifcg.interfaceFlags = ifcg.interfaceFlags.replace("up", "down");
-                            }
-                            ifcg.interfaceFlags = ifcg.interfaceFlags.replace("running", "");
-                            ifcg.interfaceFlags = ifcg.interfaceFlags.replace("  "," ");
-                            service.setInterfaceConfig(iface, ifcg);
+            if (isUsb(iface)) {
+                InterfaceConfiguration ifcg = null;
+                try {
+                    ifcg = service.getInterfaceConfig(iface);
+                    if (ifcg != null) {
+                        ifcg.ipAddr = (169 << 24) + (254 << 16) + (2 << 8) + 1;
+                        ifcg.netmask = (255 << 24) + (255 << 16) + (255 << 8) + 0;
+                        if (enabled) {
+                            ifcg.interfaceFlags = ifcg.interfaceFlags.replace("down", "up");
+                        } else {
+                            ifcg.interfaceFlags = ifcg.interfaceFlags.replace("up", "down");
                         }
-                    } catch (Exception e) {
-                        Log.e(TAG, "Error configuring interface " + iface + ", :" + e);
-                        return false;
+                        ifcg.interfaceFlags = ifcg.interfaceFlags.replace("running", "");
+                        ifcg.interfaceFlags = ifcg.interfaceFlags.replace("  "," ");
+                        service.setInterfaceConfig(iface, ifcg);
                     }
+                } catch (Exception e) {
+                    Log.e(TAG, "Error configuring interface " + iface + ", :" + e);
+                    return false;
                 }
             }
         }
