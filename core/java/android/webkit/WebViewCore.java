@@ -716,14 +716,7 @@ final class WebViewCore {
         boolean mRemember;
     }
 
-    static class PluginFullScreenData {
-        View mView;
-        int mNpp;
-        int mDocX;
-        int mDocY;
-        int mDocWidth;
-        int mDocHeight;
-    }
+
 
         static final String[] HandlerDebugString = {
             "REQUEST_LABEL", // 97
@@ -2351,22 +2344,15 @@ final class WebViewCore {
 
     // called by JNI. PluginWidget function to launch a full-screen view using a
     // View object provided by the plugin class.
-    private void showFullScreenPlugin(ViewManager.ChildView childView,
-            final int npp, int x, int y, int width, int height) {
-
+    private void showFullScreenPlugin(ViewManager.ChildView childView, int npp) {
         if (mWebView == null) {
             return;
         }
 
-        PluginFullScreenData data = new PluginFullScreenData();
-        data.mView = childView.mView;
-        data.mNpp = npp;
-        data.mDocX = x;
-        data.mDocY = y;
-        data.mDocWidth = width;
-        data.mDocHeight = height;
-        mWebView.mPrivateHandler.obtainMessage(WebView.SHOW_FULLSCREEN, data)
-                .sendToTarget();
+        Message message = mWebView.mPrivateHandler.obtainMessage(WebView.SHOW_FULLSCREEN);
+        message.obj = childView.mView;
+        message.arg1 = npp;
+        message.sendToTarget();
     }
 
     // called by JNI
@@ -2375,22 +2361,6 @@ final class WebViewCore {
             return;
         }
         mWebView.mPrivateHandler.obtainMessage(WebView.HIDE_FULLSCREEN)
-                .sendToTarget();
-    }
-
-    // called by JNI
-    private void updateFullScreenPlugin(int x, int y, int width, int height) {
-        if (mWebView == null) {
-            return;
-        }
-
-        PluginFullScreenData data = new PluginFullScreenData();
-        data.mDocX = x;
-        data.mDocY = y;
-        data.mDocWidth = width;
-        data.mDocHeight = height;
-        // null mView and mNpp to indicate it is an update
-        mWebView.mPrivateHandler.obtainMessage(WebView.SHOW_FULLSCREEN, data)
                 .sendToTarget();
     }
 
