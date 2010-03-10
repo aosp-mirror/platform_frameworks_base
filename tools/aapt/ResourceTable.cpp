@@ -13,6 +13,7 @@
 #include <stdarg.h>
 
 #define NOISY(x) //x
+#define NOISY_REF(x) //x
 
 status_t compileXmlFile(const sp<AaptAssets>& assets,
                         const sp<AaptFile>& target,
@@ -1933,7 +1934,7 @@ bool ResourceTable::stringToValue(Res_value* outValue, StringPool* pool,
         // information we have already processed that string!
         outValue->size = sizeof(Res_value);
         outValue->res0 = 0;
-        outValue->dataType = outValue->TYPE_STRING;
+        outValue->dataType = Res_value::TYPE_STRING;
         outValue->data = 0;
         finalStr = str;
     }
@@ -1942,7 +1943,7 @@ bool ResourceTable::stringToValue(Res_value* outValue, StringPool* pool,
         return false;
     }
 
-    if (outValue->dataType == outValue->TYPE_STRING) {
+    if (outValue->dataType == Res_value::TYPE_STRING) {
         // Should do better merging styles.
         if (pool) {
             if (style != NULL && style->size() > 0) {
@@ -2530,6 +2531,7 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<AaptFile>& dest)
     // Iterate through all data, collecting all values (strings,
     // references, etc).
     StringPool valueStrings = StringPool(false, bundle->getUTF8());
+    ResourceConfigReferences configRefs;
     for (pi=0; pi<N; pi++) {
         sp<Package> p = mOrderedPackages.itemAt(pi);
         if (p->getTypes().size() == 0) {
@@ -2570,12 +2572,83 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<AaptFile>& dest)
                     if (err != NO_ERROR) {
                         return err;
                     }
+                    if (e->getType() == Entry::TYPE_ITEM) {
+                        const Item* item = e->getItem();
+                        if (item != NULL) {
+                            uint32_t poolIndex = item->parsedValue.data;
+                            configRefs.add(poolIndex, config);
+                        }
+                    }
                 }
             }
         }
 
         p->setTypeStrings(typeStrings.createStringBlock());
         p->setKeyStrings(keyStrings.createStringBlock());
+    }
+
+    NOISY_REF(configRefs.dump();)
+
+    // Trim all entries in config tables that are not roots for that string.
+    // i.e., rely on the resource system to grab the string from the more
+    // generic pool during runtime to save space.
+    for (pi=0; pi<N; pi++) {
+        sp<Package> p = mOrderedPackages.itemAt(pi);
+        if (p->getTypes().size() == 0) {
+            // Empty, skip!
+            continue;
+        }
+        const size_t TN = p->getOrderedTypes().size();
+        for (size_t ti=0; ti<TN; ti++) {
+            sp<Type> t = p->getOrderedTypes().itemAt(ti);
+            if (t == NULL) {
+                continue;
+            }
+            size_t CN = t->getOrderedConfigs().size();
+            for (size_t ci=0; ci<CN; ci++) {
+                sp<ConfigList> c = t->getOrderedConfigs().itemAt(ci);
+                if (c == NULL) {
+                    continue;
+                }
+                DefaultKeyedVector<ConfigDescription, sp<Entry> > newEntries;
+                size_t EN = c->getEntries().size();
+                for (size_t ei=0; ei<EN; ++ei) {
+                    ConfigDescription config = c->getEntries().keyAt(ei);
+                    if (!filter.match(config)) {
+                        continue;
+                    }
+                    sp<Entry> e = c->getEntries().valueAt(ei);
+                    if (e == NULL) {
+                        continue;
+                    }
+                    if (e->getType() == Entry::TYPE_ITEM) {
+                        const Item* item = e->getItem();
+                        if (item != NULL) {
+                            uint32_t poolIndex = item->parsedValue.data;
+                            if (!configRefs.isRoot(poolIndex, config)) {
+                                NOISY_REF(
+                                    printf("  ConfigRef %d: removing ", poolIndex);
+                                    DEBUG_LANG(config)
+                                    printf("\n");
+                                )
+                                c->removeEntryAt(ei);
+                                t->removeUniqueConfig(config);
+                                --ei; --EN;
+                            }
+                        }
+                    }
+                }
+                if (EN == 0) {
+                    // We removed all the entries from a config, so remove the
+                    // config itself.
+                    NOISY_REF(
+                        printf("  ConfigRef REMOVED ENTIRE CONFIG\n");
+                    )
+                    t->removeOrderedConfigAt(ci);
+                    --ci; --CN;
+                }
+            }
+        }
     }
 
     ssize_t strAmt = 0;
@@ -3731,4 +3804,96 @@ bool ResourceTable::getItemValue(
         item->evaluating = false;
     }
     return res;
+}
+
+#define DEBUG_LANG(x) printf("lang=%c%c cnt=%c%c ", \
+        (x).language[0] ? (x).language[0] : '-', \
+        (x).language[1] ? (x).language[1] : '-', \
+        (x).country[0] ? (x).country[0] : '-', \
+        (x).country[1] ? (x).country[1] : '-');
+
+status_t ResourceConfigReferences::add(uint32_t id, const ResTable_config& config)
+{
+    ssize_t index = mRoots.indexOfKey(id);
+    if (index < 0) {
+        index = mRoots.add(id, Vector<const ResTable_config*>());
+    }
+    Vector<const ResTable_config*>& configRoots = mRoots.editValueFor(id);
+
+    if (!configRoots.isEmpty()) {
+        ssize_t NR = configRoots.size();
+        for (int ri=0; ri<NR; ++ri) {
+            const ResTable_config* current = configRoots[ri];
+
+            if (config.match(*current)) {
+                // We already have something more generic than our incoming string.
+                NOISY_REF(
+                    printf("  ConfigRef %d: ignoring ", id);
+                    DEBUG_LANG(config)
+                    printf("\n");
+                )
+                return NO_ERROR;
+            } else if (current->match(config)) {
+                // more generic
+                NOISY_REF(
+                    printf("  ConfigRef %d: remove ", id);
+                    DEBUG_LANG(current)
+                    printf("\n");
+                )
+                configRoots.removeItemsAt(ri);
+                --ri; --NR;
+            }
+        }
+    }
+    NOISY_REF(
+        printf("  ConfigRef %d: add ", id);
+        DEBUG_LANG(config)
+        printf("\n");
+    )
+    ResTable_config *configCopy = (ResTable_config*)malloc(sizeof(ResTable_config));
+    memcpy(configCopy, &config, sizeof(ResTable_config));
+    configRoots.add(configCopy);
+
+    return NO_ERROR;
+}
+
+void ResourceConfigReferences::dump()
+{
+    printf("ResourceConfigReferences\n");
+    const ssize_t NR = mRoots.size();
+    for (int ri=0; ri<NR; ++ri) {
+        const Vector<const ResTable_config*>& configRoots = mRoots.valueAt(ri);
+        printf("  String %d\n", mRoots.keyAt(ri));
+        const ssize_t NC = configRoots.size();
+        for (int ci=0; ci<NC; ++ci) {
+            printf("    ");
+            DEBUG_LANG(*configRoots[ci])
+            printf("\n");
+        }
+    }
+}
+
+bool ResourceConfigReferences::isRoot(uint32_t id, const ResTable_config& config)
+{
+    const Vector<const ResTable_config*>& configRoots = mRoots.editValueFor(id);
+    const ssize_t NR = configRoots.size();
+    for (int ri = 0; ri<NR; ++ri) {
+        if (configRoots[ri]->match(config)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+ResourceConfigReferences::~ResourceConfigReferences()
+{
+    const ssize_t NR = mRoots.size();
+    for (int ri=0; ri<NR; ++ri) {
+        Vector<const ResTable_config*> configRoots = mRoots.editValueAt(ri);
+        const ssize_t NC = configRoots.size();
+        for (int ci=0; ci<NC; ++ci) {
+            ResTable_config* config = const_cast<ResTable_config*>(configRoots[ci]);
+            free(config);
+        }
+    }
 }

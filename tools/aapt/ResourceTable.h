@@ -376,6 +376,10 @@ public:
         void addEntry(const ResTable_config& config, const sp<Entry>& entry) {
             mEntries.add(config, entry);
         }
+
+        void removeEntryAt(int32_t index) {
+            mEntries.removeItemsAt(index);
+        }
         
         const DefaultKeyedVector<ConfigDescription, sp<Entry> >& getEntries() const { return mEntries; }
     private:
@@ -447,6 +451,9 @@ public:
         
         const DefaultKeyedVector<String16, sp<ConfigList> >& getConfigs() const { return mConfigs; }
         const Vector<sp<ConfigList> >& getOrderedConfigs() const { return mOrderedConfigs; }
+
+        void removeUniqueConfig(ConfigDescription& config) { mUniqueConfigs.remove(config); }
+        void removeOrderedConfigAt(uint32_t index) { mOrderedConfigs.removeItemsAt(index); }
 
         const SortedVector<String16>& getCanAddEntries() const { return mCanAddEntries; }
         
@@ -558,5 +565,17 @@ private:
     bool mContainsPseudo;
 };
 
+class ResourceConfigReferences
+{
+public:
+    ResourceConfigReferences() : mRoots() {}
+    ~ResourceConfigReferences();
+    status_t add(uint32_t id, const ResTable_config& config);
+    bool isRoot(uint32_t id, const ResTable_config& config);
+    void dump();
+
+private:
+    KeyedVector<uint32_t, Vector<const ResTable_config*> > mRoots;
+};
 
 #endif
