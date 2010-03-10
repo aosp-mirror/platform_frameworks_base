@@ -22,6 +22,7 @@ import android.net.LocalSocket;
 import java.io.InputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 
 /**
@@ -57,12 +58,12 @@ public class KeyStore {
 
     public byte[] get(byte[] key) {
         ArrayList<byte[]> values = execute('g', key);
-        return (values == null || values.size() == 0) ? null : values.get(0);
+        return (values == null || values.isEmpty()) ? null : values.get(0);
     }
 
     public String get(String key) {
-        byte[] value = get(key.getBytes());
-        return (value == null) ? null : new String(value);
+        byte[] value = get(getBytes(key));
+        return (value == null) ? null : toString(value);
     }
 
     public boolean put(byte[] key, byte[] value) {
@@ -71,7 +72,7 @@ public class KeyStore {
     }
 
     public boolean put(String key, String value) {
-        return put(key.getBytes(), value.getBytes());
+        return put(getBytes(key), getBytes(value));
     }
 
     public boolean delete(byte[] key) {
@@ -80,7 +81,7 @@ public class KeyStore {
     }
 
     public boolean delete(String key) {
-        return delete(key.getBytes());
+        return delete(getBytes(key));
     }
 
     public boolean contains(byte[] key) {
@@ -89,7 +90,7 @@ public class KeyStore {
     }
 
     public boolean contains(String key) {
-        return contains(key.getBytes());
+        return contains(getBytes(key));
     }
 
     public byte[][] saw(byte[] prefix) {
@@ -98,13 +99,13 @@ public class KeyStore {
     }
 
     public String[] saw(String prefix) {
-        byte[][] values = saw(prefix.getBytes());
+        byte[][] values = saw(getBytes(prefix));
         if (values == null) {
             return null;
         }
         String[] strings = new String[values.length];
         for (int i = 0; i < values.length; ++i) {
-            strings[i] = new String(values[i]);
+            strings[i] = toString(values[i]);
         }
         return strings;
     }
@@ -120,7 +121,7 @@ public class KeyStore {
     }
 
     public boolean password(String oldPassword, String newPassword) {
-        return password(oldPassword.getBytes(), newPassword.getBytes());
+        return password(getBytes(oldPassword), getBytes(newPassword));
     }
 
     public boolean password(byte[] password) {
@@ -128,7 +129,7 @@ public class KeyStore {
     }
 
     public boolean password(String password) {
-        return password(password.getBytes());
+        return password(getBytes(password));
     }
 
     public boolean lock() {
@@ -142,7 +143,7 @@ public class KeyStore {
     }
 
     public boolean unlock(String password) {
-        return unlock(password.getBytes());
+        return unlock(getBytes(password));
     }
 
     public int getLastError() {
@@ -207,5 +208,23 @@ public class KeyStore {
             } catch (IOException e) {}
         }
         return null;
+    }
+
+    private static byte[] getBytes(String string) {
+        try {
+            return string.getBytes("UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            // will never happen
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static String toString(byte[] bytes) {
+        try {
+            return new String(bytes, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            // will never happen
+            throw new RuntimeException(e);
+        }
     }
 }
