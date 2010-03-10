@@ -159,8 +159,10 @@ status_t MediaPlayer::setDataSource(int fd, int64_t offset, int64_t length)
 status_t MediaPlayer::invoke(const Parcel& request, Parcel *reply)
 {
     Mutex::Autolock _l(mLock);
-    if ((mPlayer != NULL) && ( mCurrentState & MEDIA_PLAYER_INITIALIZED ))
-    {
+    const bool hasBeenInitialized =
+            (mCurrentState != MEDIA_PLAYER_STATE_ERROR) &&
+            ((mCurrentState & MEDIA_PLAYER_IDLE) != MEDIA_PLAYER_STATE_IDLE);
+    if ((mPlayer != NULL) && hasBeenInitialized) {
          LOGV("invoke %d", request.dataSize());
          return  mPlayer->invoke(request, reply);
     }
