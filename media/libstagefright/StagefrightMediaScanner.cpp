@@ -20,7 +20,8 @@
 
 #include <media/stagefright/StagefrightMediaScanner.h>
 
-#include "include/StagefrightMetadataRetriever.h"
+#include <media/mediametadataretriever.h>
+#include <private/media/VideoFrame.h>
 
 // Sonivox includes
 #include <libsonivox/eas.h>
@@ -32,7 +33,7 @@
 namespace android {
 
 StagefrightMediaScanner::StagefrightMediaScanner()
-    : mRetriever(new StagefrightMetadataRetriever) {
+    : mRetriever(new MediaMetadataRetriever) {
 }
 
 StagefrightMediaScanner::~StagefrightMediaScanner() {}
@@ -146,6 +147,8 @@ failure:
 status_t StagefrightMediaScanner::processFile(
         const char *path, const char *mimeType,
         MediaScannerClient &client) {
+    LOGV("processFile '%s'.", path);
+
     client.setLocale(locale());
     client.beginFile();
 
@@ -218,6 +221,8 @@ status_t StagefrightMediaScanner::processFile(
 }
 
 char *StagefrightMediaScanner::extractAlbumArt(int fd) {
+    LOGV("extractAlbumArt %d", fd);
+
     off_t size = lseek(fd, 0, SEEK_END);
     if (size < 0) {
         return NULL;
@@ -227,15 +232,14 @@ char *StagefrightMediaScanner::extractAlbumArt(int fd) {
     if (mRetriever->setDataSource(fd, 0, size) == OK
             && mRetriever->setMode(
                 METADATA_MODE_FRAME_CAPTURE_ONLY) == OK) {
-        MediaAlbumArt *art = mRetriever->extractAlbumArt();
+        sp<IMemory> mem = mRetriever->extractAlbumArt();
 
-        if (art != NULL) {
+        if (mem != NULL) {
+            MediaAlbumArt *art = static_cast<MediaAlbumArt *>(mem->pointer());
+
             char *data = (char *)malloc(art->mSize + 4);
             *(int32_t *)data = art->mSize;
-            memcpy(&data[4], art->mData, art->mSize);
-
-            delete art;
-            art = NULL;
+            memcpy(&data[4], &art[1], art->mSize);
 
             return data;
         }
