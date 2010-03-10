@@ -10,5 +10,10 @@ include $(CLEAR_VARS)
 LOCAL_SHARED_LIBRARIES := liblog
 LOCAL_SRC_FILES := service_manager.c binder.c
 LOCAL_MODULE := servicemanager
+ifeq ($(LVMX),true)
+  ifeq ($(TARGET_ARCH),arm)
+    LOCAL_CFLAGS += -DLVMX
+  endif
+endif
 include $(BUILD_EXECUTABLE)
 endif
