@@ -6408,7 +6408,7 @@ public class WebView extends AbsoluteLayout
                         // embedded mode, we have to remove the
                         // AbsoluteLayout.LayoutParams set by embedded mode to
                         // ViewGroup.LayoutParams before adding it to the dialog
-                        data.mView.setLayoutParams(new ViewGroup.LayoutParams(
+                        data.mView.setLayoutParams(new FrameLayout.LayoutParams(
                                 ViewGroup.LayoutParams.FILL_PARENT,
                                 ViewGroup.LayoutParams.FILL_PARENT));
                         mFullScreenHolder.setContentView(data.mView);
