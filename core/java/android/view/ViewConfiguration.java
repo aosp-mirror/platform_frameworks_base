@@ -102,6 +102,12 @@ public class ViewConfiguration {
     private static final int TOUCH_SLOP = 16;
     
     /**
+     * Distance a touch can wander before we think the user is attempting a paged scroll
+     * (in dips)
+     */
+    private static final int PAGING_TOUCH_SLOP = TOUCH_SLOP * 3;
+    
+    /**
      * Distance between the first touch and second touch to still be considered a double tap
      */
     private static final int DOUBLE_TAP_SLOP = 100;
@@ -140,6 +146,7 @@ public class ViewConfiguration {
     private final int mMaximumFlingVelocity;
     private final int mScrollbarSize;
     private final int mTouchSlop;
+    private final int mPagingTouchSlop;
     private final int mDoubleTapSlop;
     private final int mWindowTouchSlop;
     private final int mMaximumDrawingCacheSize;
@@ -158,6 +165,7 @@ public class ViewConfiguration {
         mMaximumFlingVelocity = MAXIMUM_FLING_VELOCITY;
         mScrollbarSize = SCROLL_BAR_SIZE;
         mTouchSlop = TOUCH_SLOP;
+        mPagingTouchSlop = PAGING_TOUCH_SLOP;
         mDoubleTapSlop = DOUBLE_TAP_SLOP;
         mWindowTouchSlop = WINDOW_TOUCH_SLOP;
         //noinspection deprecation
@@ -184,6 +192,7 @@ public class ViewConfiguration {
         mMaximumFlingVelocity = (int) (density * MAXIMUM_FLING_VELOCITY + 0.5f);
         mScrollbarSize = (int) (density * SCROLL_BAR_SIZE + 0.5f);
         mTouchSlop = (int) (density * TOUCH_SLOP + 0.5f);
+        mPagingTouchSlop = (int) (density * PAGING_TOUCH_SLOP + 0.5f);
         mDoubleTapSlop = (int) (density * DOUBLE_TAP_SLOP + 0.5f);
         mWindowTouchSlop = (int) (density * WINDOW_TOUCH_SLOP + 0.5f);
 
@@ -338,6 +347,14 @@ public class ViewConfiguration {
      */
     public int getScaledTouchSlop() {
         return mTouchSlop;
+    }
+    
+    /**
+     * @return Distance a touch can wander before we think the user is scrolling a full page
+     *         in dips
+     */
+    public int getScaledPagingTouchSlop() {
+        return mPagingTouchSlop;
     }
 
     /**
