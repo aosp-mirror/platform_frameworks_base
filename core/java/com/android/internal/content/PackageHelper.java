@@ -40,6 +40,10 @@ public class PackageHelper {
     public static final int RECOMMEND_FAILED_ALREADY_EXISTS = -4;
     private static final boolean localLOGV = true;
     private static final String TAG = "PackageHelper";
+    // App installation location settings values
+    public static final int APP_INSTALL_AUTO = 0;
+    public static final int APP_INSTALL_INTERNAL = 1;
+    public static final int APP_INSTALL_EXTERNAL = 2;
 
     public static IMountService getMountService() {
         IBinder service = ServiceManager.getService("mount");

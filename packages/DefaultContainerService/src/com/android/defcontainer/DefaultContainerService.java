@@ -349,11 +349,11 @@ public class DefaultContainerService extends IntentService {
                 int installPreference = Settings.System.getInt(getApplicationContext()
                         .getContentResolver(),
                         Settings.System.DEFAULT_INSTALL_LOCATION,
-                        PackageInfo.INSTALL_LOCATION_AUTO);
-                if (installPreference == 1) {
+                        PackageHelper.APP_INSTALL_AUTO);
+                if (installPreference == PackageHelper.APP_INSTALL_INTERNAL) {
                     installOnlyInternal = true;
                     auto = false;
-                } else if (installPreference == 2) {
+                } else if (installPreference == PackageHelper.APP_INSTALL_EXTERNAL) {
                     installOnlyOnSd = true;
                     auto = false;
                 }
