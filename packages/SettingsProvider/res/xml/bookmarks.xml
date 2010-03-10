@@ -32,8 +32,8 @@
         class="com.google.android.gm.ConversationListActivityGmail"
         shortcut="g" />
     <bookmark
-        package="com.android.providers.im"
-        class="com.android.providers.im.LandingPage"
+        package="com.android.im"
+        class="com.android.im.app.LandingPage"
         shortcut="i" />
     <bookmark
         package="com.android.calendar"
@@ -53,8 +53,4 @@
         package="com.android.mms"
         class="com.android.mms.ui.ConversationList"
         shortcut="s" />
-    <bookmark
-        package="com.google.android.youtube"
-        class="com.google.android.youtube.HomeActivity"
-        shortcut="y" />
 </bookmarks>
