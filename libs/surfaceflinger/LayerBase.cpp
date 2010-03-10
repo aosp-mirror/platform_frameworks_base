@@ -54,7 +54,7 @@ LayerBase::LayerBase(SurfaceFlinger* flinger, DisplayID display)
       mOrientation(0),
       mLeft(0), mTop(0),
       mTransactionFlags(0),
-      mPremultipliedAlpha(true),
+      mPremultipliedAlpha(true), mDebug(false),
       mInvalidate(0)
 {
     const DisplayHardware& hw(flinger->graphicPlane(0).displayHardware());
@@ -63,6 +63,14 @@ LayerBase::LayerBase(SurfaceFlinger* flinger, DisplayID display)
 
 LayerBase::~LayerBase()
 {
+}
+
+void LayerBase::setName(const String8& name) {
+    mName = name;
+}
+
+String8 LayerBase::getName() const {
+    return mName;
 }
 
 const GraphicPlane& LayerBase::graphicPlane(int dpy) const
@@ -698,8 +706,7 @@ int32_t LayerBaseClient::sIdentity = 0;
 
 LayerBaseClient::LayerBaseClient(SurfaceFlinger* flinger, DisplayID display,
         const sp<Client>& client, int32_t i)
-    : LayerBase(flinger, display), lcblk(NULL), client(client),
-      mDebug(false), mIndex(i),
+    : LayerBase(flinger, display), lcblk(NULL), client(client), mIndex(i),
       mIdentity(uint32_t(android_atomic_inc(&sIdentity)))
 {
     lcblk = new SharedBufferServer(
@@ -722,14 +729,6 @@ LayerBaseClient::~LayerBaseClient()
         client->free(mIndex);
     }
     delete lcblk;
-}
-
-void LayerBaseClient::setName(const String8& name) {
-    mName = name;
-}
-
-String8 LayerBaseClient::getName() const {
-    return mName;
 }
 
 int32_t LayerBaseClient::serverIndex() const 
