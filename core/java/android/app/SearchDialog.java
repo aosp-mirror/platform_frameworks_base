@@ -668,7 +668,10 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
                 // The user changed the query, remember it.
                 mUserQuery = s == null ? "" : s.toString();
             }
-            updateVoiceButton(mSearchAutoComplete.isEmpty());
+            // Always want to show the microphone if the context is voice.
+            updateVoiceButton(mSearchAutoComplete.isEmpty()
+                    || (mAppSearchData != null && mAppSearchData.getBoolean(
+                    SearchManager.CONTEXT_IS_VOICE)));
         }
 
         public void afterTextChanged(Editable s) {
