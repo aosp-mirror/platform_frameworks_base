@@ -19,14 +19,15 @@ package android.database.sqlite;
 import android.database.CursorWindow;
 
 /**
- * An object create from a SQLiteDatabase that can be closed.
+ * An object created from a SQLiteDatabase that can be closed.
  */
-public abstract class SQLiteClosable {    
+public abstract class SQLiteClosable {
     private int mReferenceCount = 1;
     private Object mLock = new Object();
+
     protected abstract void onAllReferencesReleased();
-    protected void onAllReferencesReleasedFromContainer(){}
-    
+    protected void onAllReferencesReleasedFromContainer() {}
+
     public void acquireReference() {
         synchronized(mLock) {
             if (mReferenceCount <= 0) {
@@ -36,7 +37,7 @@ public abstract class SQLiteClosable {
             mReferenceCount++;
         }
     }
-    
+
     public void releaseReference() {
         synchronized(mLock) {
             mReferenceCount--;
@@ -45,14 +46,14 @@ public abstract class SQLiteClosable {
             }
         }
     }
-    
+
     public void releaseReferenceFromContainer() {
         synchronized(mLock) {
             mReferenceCount--;
             if (mReferenceCount == 0) {
                 onAllReferencesReleasedFromContainer();
             }
-        }        
+        }
     }
 
     private String getObjInfo() {
