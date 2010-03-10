@@ -96,7 +96,6 @@ public class WifiService extends IWifiManager.Stub {
     private final WifiStateTracker mWifiStateTracker;
 
     private Context mContext;
-    private int mWifiState;
     private int mWifiApState;
 
     private AlarmManager mAlarmManager;
@@ -216,7 +215,7 @@ public class WifiService extends IWifiManager.Stub {
         wifiThread.start();
         mWifiHandler = new WifiHandler(wifiThread.getLooper());
 
-        mWifiState = WIFI_STATE_DISABLED;
+        mWifiStateTracker.setWifiState(WIFI_STATE_DISABLED);
         mWifiApState = WIFI_AP_STATE_DISABLED;
         boolean wifiEnabled = getPersistedWifiEnabled();
         boolean wifiAPEnabled = wifiEnabled ? false : getPersistedWifiApEnabled();
@@ -406,8 +405,9 @@ public class WifiService extends IWifiManager.Stub {
      */
     private boolean setWifiEnabledBlocking(boolean enable, boolean persist, int uid) {
         final int eventualWifiState = enable ? WIFI_STATE_ENABLED : WIFI_STATE_DISABLED;
+        final int wifiState = mWifiStateTracker.getWifiState();
 
-        if (mWifiState == eventualWifiState) {
+        if (wifiState == eventualWifiState) {
             return true;
         }
         if (enable && isAirplaneModeOn() && !mAirplaneModeOverwridden) {
@@ -421,7 +421,7 @@ public class WifiService extends IWifiManager.Stub {
          * Avoid doing a disable when the current Wifi state is UNKNOWN
          * TODO: Handle driver load fail and supplicant lost as seperate states
          */
-        if ((mWifiState == WIFI_STATE_UNKNOWN) && !enable) {
+        if ((wifiState == WIFI_STATE_UNKNOWN) && !enable) {
             return false;
         }
 
@@ -489,7 +489,7 @@ public class WifiService extends IWifiManager.Stub {
     }
 
     private void setWifiEnabledState(int wifiState, int uid) {
-        final int previousWifiState = mWifiState;
+        final int previousWifiState = mWifiStateTracker.getWifiState();
 
         long ident = Binder.clearCallingIdentity();
         try {
@@ -504,7 +504,7 @@ public class WifiService extends IWifiManager.Stub {
         }
 
         // Update state
-        mWifiState = wifiState;
+        mWifiStateTracker.setWifiState(wifiState);
 
         // Broadcast
         final Intent intent = new Intent(WifiManager.WIFI_STATE_CHANGED_ACTION);
@@ -541,7 +541,7 @@ public class WifiService extends IWifiManager.Stub {
      */
     public int getWifiEnabledState() {
         enforceAccessPermission();
-        return mWifiState;
+        return mWifiStateTracker.getWifiState();
     }
 
     /**
@@ -639,7 +639,7 @@ public class WifiService extends IWifiManager.Stub {
 
         setWifiApEnabledState(enable ? WIFI_AP_STATE_ENABLING : WIFI_AP_STATE_DISABLING, uid);
 
-        if (enable && (mWifiState == WIFI_STATE_ENABLED)) {
+        if (enable && (mWifiStateTracker.getWifiState() == WIFI_STATE_ENABLED)) {
             setWifiEnabledBlocking(false, true, Process.myUid());
         }
 
@@ -1721,7 +1721,7 @@ public class WifiService extends IWifiManager.Stub {
         }
 
         synchronized (mWifiHandler) {
-            if (mWifiState == WIFI_STATE_ENABLING && !airplaneMode) {
+            if ((mWifiStateTracker.getWifiState() == WIFI_STATE_ENABLING) && !airplaneMode) {
                 return;
             }
             if (wifiShouldBeEnabled) {
@@ -1864,7 +1864,7 @@ public class WifiService extends IWifiManager.Stub {
                     + ", uid=" + Binder.getCallingUid());
             return;
         }
-        pw.println("Wi-Fi is " + stateName(mWifiState));
+        pw.println("Wi-Fi is " + stateName(mWifiStateTracker.getWifiState()));
         pw.println("Stay-awake conditions: " +
                 Settings.System.getInt(mContext.getContentResolver(),
                                        Settings.System.STAY_ON_WHILE_PLUGGED_IN, 0));

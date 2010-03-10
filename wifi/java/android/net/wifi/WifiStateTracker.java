@@ -16,6 +16,12 @@
 
 package android.net.wifi;
 
+import static android.net.wifi.WifiManager.WIFI_STATE_DISABLED;
+import static android.net.wifi.WifiManager.WIFI_STATE_DISABLING;
+import static android.net.wifi.WifiManager.WIFI_STATE_ENABLED;
+import static android.net.wifi.WifiManager.WIFI_STATE_ENABLING;
+import static android.net.wifi.WifiManager.WIFI_STATE_UNKNOWN;
+
 import android.app.ActivityManagerNative;
 import android.net.NetworkInfo;
 import android.net.NetworkStateTracker;
@@ -270,6 +276,14 @@ public class WifiStateTracker extends NetworkStateTracker {
     private boolean mIsScanModeActive;
     private boolean mEnableRssiPolling;
 
+    /**
+     * One of  {@link WifiManager#WIFI_STATE_DISABLED},
+     *         {@link WifiManager#WIFI_STATE_DISABLING},
+     *         {@link WifiManager#WIFI_STATE_ENABLED},
+     *         {@link WifiManager#WIFI_STATE_ENABLING},
+     *         {@link WifiManager#WIFI_STATE_UNKNOWN}
+     */
+    private int mWifiState;
     // Wi-Fi run states:
     private static final int RUN_STATE_STARTING = 1;
     private static final int RUN_STATE_RUNNING  = 2;
@@ -771,9 +785,8 @@ public class WifiStateTracker extends NetworkStateTracker {
             case EVENT_SUPPLICANT_DISCONNECT:
                 mRunState = RUN_STATE_STOPPED;
                 noteRunState();
-                int wifiState = mWM.getWifiState();
-                boolean died = wifiState != WifiManager.WIFI_STATE_DISABLED &&
-                        wifiState != WifiManager.WIFI_STATE_DISABLING;
+                boolean died = mWifiState != WIFI_STATE_DISABLED &&
+                               mWifiState != WIFI_STATE_DISABLING;
                 if (died) {
                     if (LOCAL_LOGD) Log.v(TAG, "Supplicant died unexpectedly");
                 } else {
@@ -1487,143 +1500,436 @@ public class WifiStateTracker extends NetworkStateTracker {
         return true;
     }
 
-    /**
-     * TODO: add documentation to all the native calls
-     * along with conditional checks to make sure
-     * native calls dont happen when wifi is not enabled
+    public synchronized int getWifiState() {
+        return mWifiState;
+    }
+
+    public synchronized void setWifiState(int wifiState) {
+        mWifiState = wifiState;
+    }
+
+   /**
+     * The WifiNative interface functions are listed below.
+     * The only native call that is not synchronized on
+     * WifiStateTracker is waitForEvent() which waits on a
+     * seperate monitor channel.
+     *
+     * All supplicant commands need the wifi to be in an
+     * enabled state. This can be done by checking the
+     * mWifiState to be WIFI_STATE_ENABLED.
+     *
+     * All commands that can cause commands to driver
+     * initiated need the driver state to be started.
+     * This is done by checking isDriverStopped() to
+     * be false.
      */
 
+    /**
+     * Load the driver and firmware
+     *
+     * @return {@code true} if the operation succeeds, {@code false} otherwise
+     */
     public synchronized boolean loadDriver() {
         return WifiNative.loadDriver();
     }
 
+    /**
+     * Unload the driver and firmware
+     *
+     * @return {@code true} if the operation succeeds, {@code false} otherwise
+     */
     public synchronized boolean unloadDriver() {
         return WifiNative.unloadDriver();
     }
 
+    /**
+     * Check the supplicant config and
+     * start the supplicant daemon
+     *
+     * @return {@code true} if the operation succeeds, {@code false} otherwise
+     */
     public synchronized boolean startSupplicant() {
         return WifiNative.startSupplicant();
     }
 
+    /**
+     * Stop the supplicant daemon
+     *
+     * @return {@code true} if the operation succeeds, {@code false} otherwise
+     */
     public synchronized boolean stopSupplicant() {
         return WifiNative.stopSupplicant();
     }
 
+    /**
+     * Establishes two channels - control channel for commands
+     * and monitor channel for notifying WifiMonitor
+     *
+     * @return {@code true} if the operation succeeds, {@code false} otherwise
+     */
     public synchronized boolean connectToSupplicant() {
         return WifiNative.connectToSupplicant();
     }
 
+    /**
+     * Close the control/monitor channels to supplicant
+     */
     public synchronized void closeSupplicantConnection() {
         WifiNative.closeSupplicantConnection();
     }
 
+    /**
+     * Check if the supplicant is alive
+     *
+     * @return {@code true} if the operation succeeds, {@code false} otherwise
+     */
     public synchronized boolean ping() {
+        if (mWifiState != WIFI_STATE_ENABLED) {
+            return false;
+        }
         return WifiNative.pingCommand();
     }
 
+    /**
+     * initiate an active or passive scan
+     *
+     * @param forceActive true if it is a active scan
+     * @return {@code true} if the operation succeeds, {@code false} otherwise
+     */
     public synchronized boolean scan(boolean forceActive) {
+        if (mWifiState != WIFI_STATE_ENABLED && !isDriverStopped()) {
+            return false;
+        }
         return WifiNative.scanCommand(forceActive);
     }
 
+    /**
+     * Specifies whether the supplicant or driver
+     * take care of initiating scan and doing AP selection
+     *
+     * @param mode
+     *    SUPPL_SCAN_HANDLING_NORMAL
+     *    SUPPL_SCAN_HANDLING_LIST_ONLY
+     * @return {@code true} if the operation succeeds, {@code false} otherwise
+     */
     public synchronized boolean setScanResultHandling(int mode) {
+        if (mWifiState != WIFI_STATE_ENABLED && !isDriverStopped()) {
+            return false;
+        }
         return WifiNative.setScanResultHandlingCommand(mode);
     }
 
+    /**
+     * Fetch the scan results from the supplicant
+     *
+     * @return example result string
+     * 00:bb:cc:dd:cc:ee       2427    166     [WPA-EAP-TKIP][WPA2-EAP-CCMP]   Net1
+     * 00:bb:cc:dd:cc:ff       2412    165     [WPA-EAP-TKIP][WPA2-EAP-CCMP]   Net2
+     */
     public synchronized String scanResults() {
+        if (mWifiState != WIFI_STATE_ENABLED && !isDriverStopped()) {
+            return null;
+        }
         return WifiNative.scanResultsCommand();
     }
 
-    public synchronized void setScanMode(boolean isScanModeActive) {
-        if (mIsScanModeActive != isScanModeActive) {
-            WifiNative.setScanModeCommand(mIsScanModeActive = isScanModeActive);
+    /**
+     * Set the scan mode - active or passive
+     *
+     * @return {@code true} if the operation succeeds, {@code false} otherwise
+     */
+    public synchronized boolean setScanMode(boolean isScanModeActive) {
+        if (mWifiState != WIFI_STATE_ENABLED && !isDriverStopped()) {
+            return false;
         }
+        if (mIsScanModeActive != isScanModeActive) {
+            return WifiNative.setScanModeCommand(mIsScanModeActive = isScanModeActive);
+        }
+        return true;
     }
 
+    /**
+     * Disconnect from Access Point
+     *
+     * @return {@code true} if the operation succeeds, {@code false} otherwise
+     */
     public synchronized boolean disconnect() {
+        if (mWifiState != WIFI_STATE_ENABLED && !isDriverStopped()) {
+            return false;
+        }
         return WifiNative.disconnectCommand();
     }
 
+    /**
+     * Initiate a reconnection to AP
+     *
+     * @return {@code true} if the operation succeeds, {@code false} otherwise
+     */
     public synchronized boolean reconnectCommand() {
+        if (mWifiState != WIFI_STATE_ENABLED && !isDriverStopped()) {
+            return false;
+        }
         return WifiNative.reconnectCommand();
     }
 
+    /**
+     * Add a network
+     *
+     * @return network id of the new network
+     */
     public synchronized int addNetwork() {
+        if (mWifiState != WIFI_STATE_ENABLED) {
+            return -1;
+        }
         return WifiNative.addNetworkCommand();
     }
 
+    /**
+     * Delete a network
+     *
+     * @param networkId id of the network to be removed
+     * @return {@code true} if the operation succeeds, {@code false} otherwise
+     */
     public synchronized boolean removeNetwork(int networkId) {
+        if (mWifiState != WIFI_STATE_ENABLED) {
+            return false;
+        }
         return mDisconnectExpected = WifiNative.removeNetworkCommand(networkId);
     }
 
+    /**
+     * Enable a network
+     *
+     * @param netId network id of the network
+     * @param disableOthers true, if all other networks have to be disabled
+     * @return {@code true} if the operation succeeds, {@code false} otherwise
+     */
     public synchronized boolean enableNetwork(int netId, boolean disableOthers) {
+        if (mWifiState != WIFI_STATE_ENABLED) {
+            return false;
+        }
         return WifiNative.enableNetworkCommand(netId, disableOthers);
     }
 
+    /**
+     * Disable a network
+     *
+     * @param netId network id of the network
+     * @return {@code true} if the operation succeeds, {@code false} otherwise
+     */
     public synchronized boolean disableNetwork(int netId) {
+        if (mWifiState != WIFI_STATE_ENABLED) {
+            return false;
+        }
         return WifiNative.disableNetworkCommand(netId);
     }
 
+    /**
+     * Initiate a re-association in supplicant
+     *
+     * @return {@code true} if the operation succeeds, {@code false} otherwise
+     */
     public synchronized boolean reassociate() {
+        if (mWifiState != WIFI_STATE_ENABLED && !isDriverStopped()) {
+            return false;
+        }
         return WifiNative.reassociateCommand();
     }
 
+    /**
+     * Blacklist a BSSID. This will avoid the AP if there are
+     * alternate APs to connect
+     *
+     * @param bssid BSSID of the network
+     * @return {@code true} if the operation succeeds, {@code false} otherwise
+     */
     public synchronized boolean addToBlacklist(String bssid) {
+        if (mWifiState != WIFI_STATE_ENABLED) {
+            return false;
+        }
         return WifiNative.addToBlacklistCommand(bssid);
     }
 
+    /**
+     * Clear the blacklist list
+     *
+     * @return {@code true} if the operation succeeds, {@code false} otherwise
+     */
     public synchronized boolean clearBlacklist() {
+        if (mWifiState != WIFI_STATE_ENABLED) {
+            return false;
+        }
         return WifiNative.clearBlacklistCommand();
     }
 
+    /**
+     * List all configured networks
+     *
+     * @return list of networks or null on failure
+     */
     public synchronized String listNetworks() {
+        if (mWifiState != WIFI_STATE_ENABLED) {
+            return null;
+        }
         return WifiNative.listNetworksCommand();
     }
 
+    /**
+     * Get network setting by name
+     *
+     * @param netId network id of the network
+     * @param name network variable key
+     * @return value corresponding to key
+     */
     public synchronized String getNetworkVariable(int netId, String name) {
+        if (mWifiState != WIFI_STATE_ENABLED) {
+            return null;
+        }
         return WifiNative.getNetworkVariableCommand(netId, name);
     }
 
+    /**
+     * Set network setting by name
+     *
+     * @param netId network id of the network
+     * @param name network variable key
+     * @param value network variable value
+     * @return {@code true} if the operation succeeds, {@code false} otherwise
+     */
     public synchronized boolean setNetworkVariable(int netId, String name, String value) {
+        if (mWifiState != WIFI_STATE_ENABLED) {
+            return false;
+        }
         return WifiNative.setNetworkVariableCommand(netId, name, value);
     }
 
+    /**
+     * Get detailed status of the connection
+     *
+     * @return Example status result
+     *  bssid=aa:bb:cc:dd:ee:ff
+     *  ssid=TestNet
+     *  id=3
+     *  pairwise_cipher=NONE
+     *  group_cipher=NONE
+     *  key_mgmt=NONE
+     *  wpa_state=COMPLETED
+     *  ip_address=X.X.X.X
+     */
     public synchronized String status() {
+        if (mWifiState != WIFI_STATE_ENABLED) {
+            return null;
+        }
         return WifiNative.statusCommand();
     }
 
+    /**
+     * Get RSSI to currently connected network
+     *
+     * @return RSSI value, -1 on failure
+     */
     public synchronized int getRssi() {
+        if (mWifiState != WIFI_STATE_ENABLED && !isDriverStopped()) {
+            return -1;
+        }
         return WifiNative.getRssiApproxCommand();
     }
 
+    /**
+     * Get approx RSSI to currently connected network
+     *
+     * @return RSSI value, -1 on failure
+     */
     public synchronized int getRssiApprox() {
+        if (mWifiState != WIFI_STATE_ENABLED && !isDriverStopped()) {
+            return -1;
+        }
         return WifiNative.getRssiApproxCommand();
     }
 
+    /**
+     * Get link speed to currently connected network
+     *
+     * @return link speed, -1 on failure
+     */
     public synchronized int getLinkSpeed() {
+        if (mWifiState != WIFI_STATE_ENABLED && !isDriverStopped()) {
+            return -1;
+        }
         return WifiNative.getLinkSpeedCommand();
     }
 
+    /**
+     * Get MAC address of radio
+     *
+     * @return MAC address, null on failure
+     */
     public synchronized String getMacAddress() {
+        if (mWifiState != WIFI_STATE_ENABLED && !isDriverStopped()) {
+            return null;
+        }
         return WifiNative.getMacAddressCommand();
     }
 
+    /**
+     * Start driver
+     *
+     * @return {@code true} if the operation succeeds, {@code false} otherwise
+     */
     public synchronized boolean startDriver() {
+        if (mWifiState != WIFI_STATE_ENABLED) {
+            return false;
+        }
         return WifiNative.startDriverCommand();
     }
 
+    /**
+     * Stop driver
+     *
+     * @return {@code true} if the operation succeeds, {@code false} otherwise
+     */
     public synchronized boolean stopDriver() {
+        if (mWifiState != WIFI_STATE_ENABLED) {
+            return false;
+        }
         return WifiNative.stopDriverCommand();
     }
 
+    /**
+     * Start packet filtering
+     *
+     * @return {@code true} if the operation succeeds, {@code false} otherwise
+     */
     public synchronized boolean startPacketFiltering() {
+        if (mWifiState != WIFI_STATE_ENABLED && !isDriverStopped()) {
+            return false;
+        }
         return WifiNative.startPacketFiltering();
     }
 
+    /**
+     * Stop packet filtering
+     *
+     * @return {@code true} if the operation succeeds, {@code false} otherwise
+     */
     public synchronized boolean stopPacketFiltering() {
+        if (mWifiState != WIFI_STATE_ENABLED && !isDriverStopped()) {
+            return false;
+        }
         return WifiNative.stopPacketFiltering();
     }
 
+    /**
+     * Set power mode
+     * @param mode
+     *     DRIVER_POWER_MODE_AUTO
+     *     DRIVER_POWER_MODE_ACTIVE
+     * @return {@code true} if the operation succeeds, {@code false} otherwise
+     */
     public synchronized boolean setPowerMode(int mode) {
+        if (mWifiState != WIFI_STATE_ENABLED && !isDriverStopped()) {
+            return false;
+        }
         return WifiNative.setPowerModeCommand(mode);
     }
 
@@ -1634,6 +1940,9 @@ public class WifiStateTracker extends NetworkStateTracker {
      * the number of channels is invalid.
      */
     public synchronized boolean setNumAllowedChannels() {
+        if (mWifiState != WIFI_STATE_ENABLED && !isDriverStopped()) {
+            return false;
+        }
         try {
             return setNumAllowedChannels(
                     Settings.Secure.getInt(mContext.getContentResolver(),
@@ -1656,15 +1965,38 @@ public class WifiStateTracker extends NetworkStateTracker {
      * {@code numChannels} is outside the valid range.
      */
     public synchronized boolean setNumAllowedChannels(int numChannels) {
+        if (mWifiState != WIFI_STATE_ENABLED && !isDriverStopped()) {
+            return false;
+        }
         mNumAllowedChannels = numChannels;
         return WifiNative.setNumAllowedChannelsCommand(numChannels);
     }
 
+    /**
+     * Get number of allowed channels
+     *
+     * @return channel count, -1 on failure
+     */
     public synchronized int getNumAllowedChannels() {
+        if (mWifiState != WIFI_STATE_ENABLED && !isDriverStopped()) {
+            return -1;
+        }
         return WifiNative.getNumAllowedChannelsCommand();
     }
 
+    /**
+     * Set bluetooth coex mode:
+     *
+     * @param mode
+     *  BLUETOOTH_COEXISTENCE_MODE_ENABLED
+     *  BLUETOOTH_COEXISTENCE_MODE_DISABLED
+     *  BLUETOOTH_COEXISTENCE_MODE_SENSE
+     * @return {@code true} if the operation succeeds, {@code false} otherwise
+     */
     public synchronized boolean setBluetoothCoexistenceMode(int mode) {
+        if (mWifiState != WIFI_STATE_ENABLED && !isDriverStopped()) {
+            return false;
+        }
         return WifiNative.setBluetoothCoexistenceModeCommand(mode);
     }
 
@@ -1676,14 +2008,33 @@ public class WifiStateTracker extends NetworkStateTracker {
      * @param isBluetoothPlaying whether to enable or disable this mode
      */
     public synchronized void setBluetoothScanMode(boolean isBluetoothPlaying) {
+        if (mWifiState != WIFI_STATE_ENABLED && !isDriverStopped()) {
+            return;
+        }
         WifiNative.setBluetoothCoexistenceScanModeCommand(isBluetoothPlaying);
     }
 
+    /**
+     * Save configuration on supplicant
+     *
+     * @return {@code true} if the operation succeeds, {@code false} otherwise
+     */
     public synchronized boolean saveConfig() {
+        if (mWifiState != WIFI_STATE_ENABLED) {
+            return false;
+        }
         return WifiNative.saveConfigCommand();
     }
 
+    /**
+     * Reload the configuration from file
+     *
+     * @return {@code true} if the operation succeeds, {@code false} otherwise
+     */
     public synchronized boolean reloadConfig() {
+        if (mWifiState != WIFI_STATE_ENABLED) {
+            return false;
+        }
         return WifiNative.reloadConfigCommand();
     }
 
@@ -1713,11 +2064,11 @@ public class WifiStateTracker extends NetworkStateTracker {
 
     @Override
     public void interpretScanResultsAvailable() {
-        
+
         // If we shouldn't place a notification on available networks, then
         // don't bother doing any of the following
         if (!mNotificationEnabled) return;
-        
+
         NetworkInfo networkInfo = getNetworkInfo();
 
         State state = networkInfo.getState();
