@@ -6989,6 +6989,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     @Override
     public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
+        if (!isShown()) {
+            return false;
+        }
+
         final boolean isPassword = isPasswordInputType(mInputType);
 
         if (!isPassword) {
