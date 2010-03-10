@@ -49,19 +49,16 @@ bool YuvToJpegEncoder::encode(SkWStream* stream, void* inYuv, int width,
 
 void YuvToJpegEncoder::setJpegCompressStruct(jpeg_compress_struct* cinfo,
         int width, int height, int quality) {
-    jpeg_set_quality(cinfo, quality, TRUE);
-
     cinfo->image_width = width;
     cinfo->image_height = height;
-
     cinfo->input_components = 3;
     cinfo->in_color_space = JCS_YCbCr;
     jpeg_set_defaults(cinfo);
+
+    jpeg_set_quality(cinfo, quality, TRUE);
     jpeg_set_colorspace(cinfo, JCS_YCbCr);
     cinfo->raw_data_in = TRUE;
-
     cinfo->dct_method = JDCT_IFAST;
-
     configSamplingFactors(cinfo);
 }
 
