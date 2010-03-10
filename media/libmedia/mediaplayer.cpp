@@ -104,7 +104,8 @@ status_t MediaPlayer::setDataSource(const sp<IMediaPlayer>& player)
     { // scope for the lock
         Mutex::Autolock _l(mLock);
 
-        if ( !( mCurrentState & ( MEDIA_PLAYER_IDLE | MEDIA_PLAYER_STATE_ERROR ) ) ) {
+        if ( !( (mCurrentState & MEDIA_PLAYER_IDLE) ||
+                (mCurrentState == MEDIA_PLAYER_STATE_ERROR ) ) ) {
             LOGE("setDataSource called in state %d", mCurrentState);
             return INVALID_OPERATION;
         }
