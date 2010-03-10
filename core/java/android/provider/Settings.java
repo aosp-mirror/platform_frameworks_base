@@ -29,6 +29,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.IContentProvider;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
@@ -989,6 +990,11 @@ public final class Settings {
             return Settings.System.putFloat(cr, FONT_SCALE, config.fontScale);
         }
 
+        /** @hide */
+        public static boolean hasInterestingConfigurationChanges(int changes) {
+            return (changes&ActivityInfo.CONFIG_FONT_SCALE) != 0;
+        }
+        
         public static boolean getShowGTalkServiceStatus(ContentResolver cr) {
             return getInt(cr, SHOW_GTALK_SERVICE_STATUS, 0) != 0;
         }
