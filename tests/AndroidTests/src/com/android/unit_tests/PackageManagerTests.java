@@ -315,9 +315,9 @@ public class PackageManagerTests extends AndroidTestCase {
             if (!getInstallLoc(flags, expInstallLocation)) {
                 assertEquals(srcPath, appInstallPath);
                 assertEquals(publicSrcPath, appInstallPath);
-                assertFalse((info.flags & ApplicationInfo.FLAG_ON_SDCARD) != 0);
+                assertFalse((info.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0);
             } else {
-                assertTrue((info.flags & ApplicationInfo.FLAG_ON_SDCARD) != 0);
+                assertTrue((info.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0);
                 assertTrue(srcPath.startsWith(SECURE_CONTAINERS_PREFIX));
                 assertTrue(publicSrcPath.startsWith(SECURE_CONTAINERS_PREFIX));
             }
@@ -1172,9 +1172,9 @@ public class PackageManagerTests extends AndroidTestCase {
                 ApplicationInfo info = getPm().getApplicationInfo(ip.pkg.packageName, 0);
                 assertNotNull(info);
                 if ((moveFlags & PackageManager.MOVE_INTERNAL) != 0) {
-                    assertTrue((info.flags & ApplicationInfo.FLAG_ON_SDCARD) == 0);
+                    assertTrue((info.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) == 0);
                 } else if ((moveFlags & PackageManager.MOVE_EXTERNAL_MEDIA) != 0){
-                    assertTrue((info.flags & ApplicationInfo.FLAG_ON_SDCARD) != 0);
+                    assertTrue((info.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0);
                 }
             } else {
                 assertFalse(retCode);

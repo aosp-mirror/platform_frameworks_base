@@ -237,7 +237,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      *
      * {@hide}
      */
-    public static final int FLAG_ON_SDCARD = 1<<20;
+    public static final int FLAG_EXTERNAL_STORAGE = 1<<20;
 
     /**
      * Value for {@link #flags}: Set to true if the application is

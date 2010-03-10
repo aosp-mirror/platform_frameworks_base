@@ -1503,7 +1503,7 @@ public class PackageParser {
         }
 
         if ((flags & PARSE_ON_SDCARD) != 0) {
-            ai.flags |= ApplicationInfo.FLAG_ON_SDCARD;
+            ai.flags |= ApplicationInfo.FLAG_EXTERNAL_STORAGE;
         }
 
         if (sa.getBoolean(
