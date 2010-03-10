@@ -23,40 +23,29 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
-import android.content.pm.ServiceInfo;
-import android.content.res.Resources;
+import android.content.res.XmlResourceParser;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteDoneException;
-import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
 import android.media.AudioManager;
 import android.media.AudioService;
 import android.net.ConnectivityManager;
-import android.os.Environment;
 import android.os.SystemProperties;
 import android.provider.Settings;
 import android.provider.Settings.Secure;
-import android.speech.RecognitionService;
-import android.speech.RecognizerIntent;
 import android.text.TextUtils;
+import android.util.AttributeSet;
 import android.util.Config;
 import android.util.Log;
 import android.util.Xml;
 import com.android.internal.telephony.RILConstants;
 import com.android.internal.util.XmlUtils;
-
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockPatternView;
-
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
 
@@ -65,11 +54,6 @@ import java.util.List;
  * Mostly just has a bit {@link #onCreate} to initialize the database.
  */
 public class DatabaseHelper extends SQLiteOpenHelper {
-    /**
-     * Path to file containing default bookmarks, relative to ANDROID_ROOT.
-     */
-    private static final String DEFAULT_BOOKMARKS_PATH = "etc/bookmarks.xml";
-
     private static final String TAG = "SettingsProvider";
     private static final String DATABASE_NAME = "settings.db";
 
@@ -158,7 +142,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
              * notification vibrate to on.
              */
             loadVibrateSetting(db, true);
-            if (Config.LOGD) Log.d(TAG, "Reset system vibrate setting");
 
             upgradeVersion = 21;
         }
@@ -735,39 +718,28 @@ public class DatabaseHelper extends SQLiteOpenHelper {
      *
      * @param db The database to write the values into
      * @param startingIndex The zero-based position at which bookmarks in this file should begin
-     * @param subPath The relative path from ANDROID_ROOT to the file to read
-     * @param quiet If true, do no complain if the file is missing
      */
-    private int loadBookmarks(SQLiteDatabase db, int startingIndex, String subPath,
-            boolean quiet) {
-        FileReader bookmarksReader;
-
-        // Environment.getRootDirectory() is a fancy way of saying ANDROID_ROOT or "/system".
-        final File favFile = new File(Environment.getRootDirectory(), subPath);
-        try {
-            bookmarksReader = new FileReader(favFile);
-        } catch (FileNotFoundException e) {
-            if (!quiet) {
-                Log.e(TAG, "Couldn't find or open bookmarks file " + favFile);
-            }
-            return 0;
-        }
-
+    private int loadBookmarks(SQLiteDatabase db, int startingIndex) {
         Intent intent = new Intent(Intent.ACTION_MAIN, null);
         intent.addCategory(Intent.CATEGORY_LAUNCHER);
         ContentValues values = new ContentValues();
 
         PackageManager packageManager = mContext.getPackageManager();
-        ActivityInfo info;
         int i = startingIndex;
-        try {
-            XmlPullParser parser = Xml.newPullParser();
-            parser.setInput(bookmarksReader);
 
+        try {
+            XmlResourceParser parser = mContext.getResources().getXml(R.xml.bookmarks);
             XmlUtils.beginDocument(parser, "bookmarks");
 
-            while (true) {
-                XmlUtils.nextElement(parser);
+            final int depth = parser.getDepth();
+            int type;
+
+            while (((type = parser.next()) != XmlPullParser.END_TAG ||
+                    parser.getDepth() > depth) && type != XmlPullParser.END_DOCUMENT) {
+
+                if (type != XmlPullParser.START_TAG) {
+                    continue;
+                }
 
                 String name = parser.getName();
                 if (!"bookmark".equals(name)) {
@@ -777,23 +749,36 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 String pkg = parser.getAttributeValue(null, "package");
                 String cls = parser.getAttributeValue(null, "class");
                 String shortcutStr = parser.getAttributeValue(null, "shortcut");
+
                 int shortcutValue = (int) shortcutStr.charAt(0);
                 if (TextUtils.isEmpty(shortcutStr)) {
                     Log.w(TAG, "Unable to get shortcut for: " + pkg + "/" + cls);
                 }
+
+                ActivityInfo info = null;                
+                ComponentName cn = new ComponentName(pkg, cls);
                 try {
-                    ComponentName cn = new ComponentName(pkg, cls);
                     info = packageManager.getActivityInfo(cn, 0);
+                } catch (PackageManager.NameNotFoundException e) {
+                    String[] packages = packageManager.canonicalToCurrentPackageNames(
+                            new String[] { pkg });
+                    cn = new ComponentName(packages[0], cls);
+                    try {
+                        info = packageManager.getActivityInfo(cn, 0);
+                    } catch (PackageManager.NameNotFoundException e1) {
+                        Log.w(TAG, "Unable to add bookmark: " + pkg + "/" + cls, e);
+                    }
+                }
+                
+                if (info != null) {
                     intent.setComponent(cn);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    values.put(Settings.Bookmarks.INTENT, intent.toURI());
+                    values.put(Settings.Bookmarks.INTENT, intent.toUri(0));
                     values.put(Settings.Bookmarks.TITLE,
                             info.loadLabel(packageManager).toString());
                     values.put(Settings.Bookmarks.SHORTCUT, shortcutValue);
                     db.insert("bookmarks", null, values);
                     i++;
-                } catch (PackageManager.NameNotFoundException e) {
-                    Log.w(TAG, "Unable to add bookmark: " + pkg + "/" + cls, e);
                 }
             }
         } catch (XmlPullParserException e) {
@@ -811,7 +796,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
      * @param db The database to write the values into
      */
     private void loadBookmarks(SQLiteDatabase db) {
-        loadBookmarks(db, 0, DEFAULT_BOOKMARKS_PATH, false);
+        loadBookmarks(db, 0);
     }
 
     /**
@@ -889,8 +874,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private void loadSystemSettings(SQLiteDatabase db) {
         SQLiteStatement stmt = db.compileStatement("INSERT OR IGNORE INTO system(name,value)"
                 + " VALUES(?,?);");
-
-        Resources r = mContext.getResources();
 
         loadBooleanSetting(stmt, Settings.System.DIM_SCREEN,
                 R.bool.def_dim_screen);
