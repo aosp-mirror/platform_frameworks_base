@@ -124,6 +124,8 @@ public class SyncManager implements OnAccountsUpdateListener {
      */
     private static final long ERROR_NOTIFICATION_DELAY_MS = 1000 * 60 * 10; // 10 minutes
 
+    private static final int INITIALIZATION_UNBIND_DELAY_MS = 5000;
+
     private static final String SYNC_WAKE_LOCK = "SyncManagerSyncWakeLock";
     private static final String HANDLE_SYNC_ALARM_WAKE_LOCK = "SyncManagerHandleSyncAlarmWakeLock";
 
@@ -283,6 +285,7 @@ public class SyncManager implements OnAccountsUpdateListener {
 
     private static final String ACTION_SYNC_ALARM = "android.content.syncmanager.SYNC_ALARM";
     private final SyncHandler mSyncHandler;
+    private final Handler mMainHandler;
 
     private volatile boolean mBootCompleted = false;
 
@@ -309,6 +312,7 @@ public class SyncManager implements OnAccountsUpdateListener {
                 Process.THREAD_PRIORITY_BACKGROUND);
         syncThread.start();
         mSyncHandler = new SyncHandler(syncThread.getLooper());
+        mMainHandler = new Handler(mContext.getMainLooper());
 
         mSyncAdapters = new SyncAdaptersCache(mContext);
         mSyncAdapters.setListener(new RegisteredServicesCacheListener<SyncAdapterType>() {
@@ -423,32 +427,56 @@ public class SyncManager implements OnAccountsUpdateListener {
         Intent intent = new Intent();
         intent.setAction("android.content.SyncAdapter");
         intent.setComponent(syncAdapterInfo.componentName);
-        mContext.bindService(intent, new InitializerServiceConnection(account, authority),
+        mContext.bindService(intent, new InitializerServiceConnection(account, authority, mContext,
+                mMainHandler),
                 Context.BIND_AUTO_CREATE | Context.BIND_NOT_FOREGROUND);
     }
 
-    private class InitializerServiceConnection implements ServiceConnection {
+    private static class InitializerServiceConnection implements ServiceConnection {
         private final Account mAccount;
         private final String mAuthority;
+        private final Handler mHandler;
+        private volatile Context mContext;
+        private volatile boolean mInitialized;
 
-        public InitializerServiceConnection(Account account, String authority) {
+        public InitializerServiceConnection(Account account, String authority, Context context,
+                Handler handler) {
             mAccount = account;
             mAuthority = authority;
+            mContext = context;
+            mHandler = handler;
+            mInitialized = false;
         }
 
         public void onServiceConnected(ComponentName name, IBinder service) {
             try {
-                ISyncAdapter.Stub.asInterface(service).initialize(mAccount, mAuthority);
+                if (!mInitialized) {
+                    mInitialized = true;
+                    ISyncAdapter.Stub.asInterface(service).initialize(mAccount, mAuthority);
+                }
             } catch (RemoteException e) {
                 // doesn't matter, we will retry again later
             } finally {
-                mContext.unbindService(this);
+                // give the sync adapter time to initialize before unbinding from it
+                // TODO: change this API to not rely on this timing, http://b/2500805
+                mHandler.postDelayed(new Runnable() {
+                    public void run() {
+                        if (mContext != null) {
+                            mContext.unbindService(InitializerServiceConnection.this);
+                            mContext = null;
+                        }
+                    }
+                }, INITIALIZATION_UNBIND_DELAY_MS);
             }
         }
 
         public void onServiceDisconnected(ComponentName name) {
-            mContext.unbindService(this);
+            if (mContext != null) {
+                mContext.unbindService(InitializerServiceConnection.this);
+                mContext = null;
+            }
         }
+
     }
 
     /**
@@ -841,6 +869,7 @@ public class SyncManager implements OnAccountsUpdateListener {
         ISyncAdapter mSyncAdapter;
         final long mStartTime;
         long mTimeoutStartTime;
+        boolean mBound;
 
         public ActiveSyncContext(SyncOperation syncOperation,
                 long historyRowId) {
@@ -895,15 +924,23 @@ public class SyncManager implements OnAccountsUpdateListener {
                     com.android.internal.R.string.sync_binding_label);
             intent.putExtra(Intent.EXTRA_CLIENT_INTENT, PendingIntent.getActivity(
                     mContext, 0, new Intent(Settings.ACTION_SYNC_SETTINGS), 0));
-            return mContext.bindService(intent, this,
+            mBound = true;
+            final boolean bindResult = mContext.bindService(intent, this,
                     Context.BIND_AUTO_CREATE | Context.BIND_NOT_FOREGROUND);
+            if (!bindResult) {
+                mBound = false;
+            }
+            return bindResult;
         }
 
-        void unBindFromSyncAdapter() {
+        protected void close() {
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
                 Log.d(TAG, "unBindFromSyncAdapter: connection " + this);
             }
-            mContext.unbindService(this);
+            if (mBound) {
+                mBound = false;
+                mContext.unbindService(this);
+            }
         }
 
         @Override
@@ -1580,6 +1617,7 @@ public class SyncManager implements OnAccountsUpdateListener {
             mSyncStorageEngine.setActiveSync(mActiveSyncContext);
             if (!activeSyncContext.bindToSyncAdapter(syncAdapterInfo)) {
                 Log.e(TAG, "Bind attempt failed to " + syncAdapterInfo);
+                mActiveSyncContext.close();
                 mActiveSyncContext = null;
                 mSyncStorageEngine.setActiveSync(mActiveSyncContext);
                 runStateIdle();
@@ -1669,13 +1707,13 @@ public class SyncManager implements OnAccountsUpdateListener {
                         syncOperation.account, syncOperation.extras);
             } catch (RemoteException remoteExc) {
                 Log.d(TAG, "runStateIdle: caught a RemoteException, rescheduling", remoteExc);
-                mActiveSyncContext.unBindFromSyncAdapter();
+                mActiveSyncContext.close();
                 mActiveSyncContext = null;
                 mSyncStorageEngine.setActiveSync(mActiveSyncContext);
                 increaseBackoffSetting(syncOperation);
                 scheduleSyncOperation(new SyncOperation(syncOperation));
             } catch (RuntimeException exc) {
-                mActiveSyncContext.unBindFromSyncAdapter();
+                mActiveSyncContext.close();
                 mActiveSyncContext = null;
                 mSyncStorageEngine.setActiveSync(mActiveSyncContext);
                 Log.e(TAG, "Caught RuntimeException while starting the sync " + syncOperation, exc);
@@ -1741,7 +1779,7 @@ public class SyncManager implements OnAccountsUpdateListener {
             stopSyncEvent(activeSyncContext.mHistoryRowId, syncOperation, historyMessage,
                     upstreamActivity, downstreamActivity, elapsedTime);
 
-            activeSyncContext.unBindFromSyncAdapter();
+            activeSyncContext.close();
 
             if (syncResult != null && syncResult.tooManyDeletions) {
                 installHandleTooManyDeletesNotification(syncOperation.account,
