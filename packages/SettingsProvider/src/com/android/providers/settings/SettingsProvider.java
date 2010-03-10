@@ -436,11 +436,16 @@ public class SettingsProvider extends ContentProvider {
             if (!parseProviderList(url, initialValues)) return null;
         }
 
+        SettingsCache cache = SettingsCache.forTable(args.table);
+        String value = initialValues.getAsString(Settings.NameValueTable.VALUE);
+        if (SettingsCache.isRedundantSetValue(cache, name, value)) {
+            return Uri.withAppendedPath(url, name);
+        }
+
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         final long rowId = db.insert(args.table, null, initialValues);
         if (rowId <= 0) return null;
 
-        SettingsCache cache = SettingsCache.forTable(args.table);
         SettingsCache.populate(cache, initialValues);  // before we notify
 
         if (LOCAL_LOGV) Log.v(TAG, args.table + " <- " + initialValues);
@@ -669,5 +674,21 @@ public class SettingsProvider extends ContentProvider {
             }
         }
 
+        /**
+         * For suppressing duplicate/redundant settings inserts early,
+         * checking our cache first (but without faulting it in),
+         * before going to sqlite with the mutation.
+         */
+        public static boolean isRedundantSetValue(SettingsCache cache, String name, String value) {
+            if (cache == null) return false;
+            synchronized (cache) {
+                Bundle bundle = cache.get(name);
+                if (bundle == null) return false;
+                String oldValue = bundle.getPairValue();
+                if (oldValue == null && value == null) return true;
+                if ((oldValue == null) != (value == null)) return false;
+                return oldValue.equals(value);
+            }
+        }
     }
 }
