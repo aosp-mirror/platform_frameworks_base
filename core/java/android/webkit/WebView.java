@@ -479,8 +479,6 @@ public class WebView extends AbsoluteLayout
     private boolean mSupportMultiTouch;
     // use the framework's ScaleGestureDetector to handle multi-touch
     private ScaleGestureDetector mScaleDetector;
-    // minimum scale change during multi-touch zoom
-    private static float PREVIEW_SCALE_INCREMENT = 0.01f;
 
     // the anchor point in the document space where VIEW_SIZE_CHANGED should
     // apply to
@@ -618,6 +616,8 @@ public class WebView extends AbsoluteLayout
     // default scale. Depending on the display density.
     static int DEFAULT_SCALE_PERCENT;
     private float mDefaultScale;
+
+    private static float MINIMUM_SCALE_INCREMENT = 0.01f;
 
     // set to true temporarily during ScaleGesture triggered zoom
     private boolean mPreviewZoomOnly = false;
@@ -2306,7 +2306,8 @@ public class WebView extends AbsoluteLayout
             boolean clampedY) {
         mInOverScrollMode = false;
         int maxX = computeMaxScrollX();
-        if (maxX == 0 && (Math.abs(mMinZoomScale - mMaxZoomScale) < 0.01f)
+        if (maxX == 0 && (Math.abs(mMinZoomScale - mMaxZoomScale)
+                < MINIMUM_SCALE_INCREMENT)
                 || !getSettings().supportZoom()
                 || !getSettings().getUseWideViewPort()) {
             // do not over scroll x if the page just fits the screen and it
@@ -4466,7 +4467,8 @@ public class WebView extends AbsoluteLayout
                 mAnchorY = viewToContentY((int) mZoomCenterY + mScrollY);
                 // don't reflow when zoom in; when zoom out, do reflow if the
                 // new scale is almost minimum scale;
-                boolean reflowNow = (mActualScale - mMinZoomScale <= 0.01f)
+                boolean reflowNow = (mActualScale - mMinZoomScale
+                        <= MINIMUM_SCALE_INCREMENT)
                         || ((mActualScale <= 0.8 * mTextWrapScale));
                 // force zoom after mPreviewZoomOnly is set to false so that the
                 // new view size will be passed to the WebKit
@@ -4493,7 +4495,7 @@ public class WebView extends AbsoluteLayout
         public boolean onScale(ScaleGestureDetector detector) {
             float scale = (float) (Math.round(detector.getScaleFactor()
                     * mActualScale * 100) / 100.0);
-            if (Math.abs(scale - mActualScale) >= PREVIEW_SCALE_INCREMENT) {
+            if (Math.abs(scale - mActualScale) >= MINIMUM_SCALE_INCREMENT) {
                 mPreviewZoomOnly = true;
                 // limit the scale change per step
                 if (scale > mActualScale) {
@@ -5430,17 +5432,17 @@ public class WebView extends AbsoluteLayout
         invalidate();
     }
 
-    private boolean zoomWithPreview(float scale) {
+    private boolean zoomWithPreview(float scale, boolean updateTextWrapScale) {
         float oldScale = mActualScale;
         mInitialScrollX = mScrollX;
         mInitialScrollY = mScrollY;
 
         // snap to DEFAULT_SCALE if it is close
-        if (scale > (mDefaultScale - 0.05) && scale < (mDefaultScale + 0.05)) {
+        if (Math.abs(scale - mDefaultScale) < MINIMUM_SCALE_INCREMENT) {
             scale = mDefaultScale;
         }
 
-        setNewZoomScale(scale, true, false);
+        setNewZoomScale(scale, updateTextWrapScale, false);
 
         if (oldScale != mActualScale) {
             // use mZoomPickerScale to see zoom preview first
@@ -5552,7 +5554,7 @@ public class WebView extends AbsoluteLayout
         mZoomCenterY = getViewHeight() * .5f;
         mAnchorX = viewToContentX((int) mZoomCenterX + mScrollX);
         mAnchorY = viewToContentY((int) mZoomCenterY + mScrollY);
-        return zoomWithPreview(mActualScale * 1.25f);
+        return zoomWithPreview(mActualScale * 1.25f, true);
     }
 
     /**
@@ -5567,7 +5569,7 @@ public class WebView extends AbsoluteLayout
         mZoomCenterY = getViewHeight() * .5f;
         mAnchorX = viewToContentX((int) mZoomCenterX + mScrollX);
         mAnchorY = viewToContentY((int) mZoomCenterY + mScrollY);
-        return zoomWithPreview(mActualScale * 0.8f);
+        return zoomWithPreview(mActualScale * 0.8f, true);
     }
 
     private void updateSelection() {
@@ -5692,6 +5694,84 @@ public class WebView extends AbsoluteLayout
         }
     }
 
+    /*
+     * Return true if the view (Plugin) is fully visible and maximized inside
+     * the WebView.
+     */
+    private boolean isPluginFitOnScreen(ViewManager.ChildView view) {
+        int viewWidth = getViewWidth();
+        int viewHeight = getViewHeightWithTitle();
+        float scale = Math.min((float) viewWidth / view.width,
+                (float) viewHeight / view.height);
+        if (scale < mMinZoomScale) {
+            scale = mMinZoomScale;
+        } else if (scale > mMaxZoomScale) {
+            scale = mMaxZoomScale;
+        }
+        if (Math.abs(scale - mActualScale) < MINIMUM_SCALE_INCREMENT) {
+            if (contentToViewX(view.x) >= mScrollX
+                    && contentToViewX(view.x + view.width) <= mScrollX
+                            + viewWidth
+                    && contentToViewY(view.y) >= mScrollY
+                    && contentToViewY(view.y + view.height) <= mScrollY
+                            + viewHeight) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /*
+     * Maximize and center the view inside the WebView. If the zoom doesn't need
+     * to be changed, do an animated scroll to center it. If the zoom needs to
+     * be changed, find the zoom center and do a smooth zoom transition.
+     */
+    private void centerPluginOnScreen(ViewManager.ChildView child) {
+        int viewWidth = getViewWidth();
+        int viewHeight = getViewHeightWithTitle();
+        float scale = Math.min((float) viewWidth / child.width,
+                (float) viewHeight / child.height);
+        if (scale < mMinZoomScale) {
+            scale = mMinZoomScale;
+        } else if (scale > mMaxZoomScale) {
+            scale = mMaxZoomScale;
+        }
+        if (Math.abs(scale - mActualScale) < MINIMUM_SCALE_INCREMENT) {
+            pinScrollTo(
+                    contentToViewX(child.x + child.width / 2) - viewWidth / 2,
+                    contentToViewY(child.y + child.height / 2) - viewHeight / 2,
+                    true, 0);
+        } else {
+            int oldScreenX = contentToViewX(child.x) - mScrollX;
+            int newPluginX = (int) (child.x * scale);
+            int newPluginWidth = (int) (child.width * scale);
+            int newMaxWidth = (int) (mContentWidth * scale);
+            int newScreenX = (viewWidth - newPluginWidth) / 2;
+            // pin the newX to the WebView
+            if (newScreenX > newPluginX) {
+                newScreenX = newPluginX;
+            } else if (newScreenX > (newMaxWidth - newPluginX - newPluginWidth)) {
+                newScreenX = viewWidth - (newMaxWidth - newPluginX);
+            }
+            mZoomCenterX = (oldScreenX * scale - newScreenX * mActualScale)
+                    / (scale - mActualScale);
+            int oldScreenY = contentToViewY(child.y) - mScrollY;
+            int newPluginY = (int) (child.y * scale) + getTitleHeight();
+            int newPluginHeight = (int) (child.height * scale);
+            int newMaxHeight = (int) (mContentHeight * scale) + getTitleHeight();
+            int newScreenY = (viewHeight - newPluginHeight) / 2;
+            // pin the newY to the WebView
+            if (newScreenY > newPluginY) {
+                newScreenY = newPluginY;
+            } else if (newScreenY > (newMaxHeight - newPluginY - newPluginHeight)) {
+                newScreenY = viewHeight - (newMaxHeight - newPluginY);
+            }
+            mZoomCenterY = (oldScreenY * scale - newScreenY * mActualScale)
+                    / (scale - mActualScale);
+            zoomWithPreview(scale, false);
+        }
+    }
+
     // Rule for double tap:
     // 1. if the current scale is not same as the text wrap scale and layout
     //    algorithm is NARROW_COLUMNS, fit to column;
@@ -5720,22 +5800,36 @@ public class WebView extends AbsoluteLayout
             }
         }
         settings.setDoubleTapToastCount(0);
+        ViewManager.ChildView plugin = mViewManager.hitTest(mAnchorX, mAnchorY);
+        if (plugin != null) {
+            if (isPluginFitOnScreen(plugin)) {
+                mInZoomOverview = true;
+                // Force the titlebar fully reveal in overview mode
+                if (mScrollY < getTitleHeight()) mScrollY = 0;
+                zoomWithPreview((float) getViewWidth() / mZoomOverviewWidth,
+                        true);
+            } else {
+                mInZoomOverview = false;
+                centerPluginOnScreen(plugin);
+            }
+            return;
+        }
         boolean zoomToDefault = false;
         if ((settings.getLayoutAlgorithm() == WebSettings.LayoutAlgorithm.NARROW_COLUMNS)
-                && (Math.abs(mActualScale - mTextWrapScale) >= 0.01f)) {
+                && (Math.abs(mActualScale - mTextWrapScale) >= MINIMUM_SCALE_INCREMENT)) {
             setNewZoomScale(mActualScale, true, true);
             float overviewScale = (float) getViewWidth() / mZoomOverviewWidth;
-            if (Math.abs(mActualScale - overviewScale) < 0.01f) {
+            if (Math.abs(mActualScale - overviewScale) < MINIMUM_SCALE_INCREMENT) {
                 mInZoomOverview = true;
             }
         } else if (!mInZoomOverview) {
             float newScale = (float) getViewWidth() / mZoomOverviewWidth;
-            if (Math.abs(mActualScale - newScale) >= 0.01f) {
+            if (Math.abs(mActualScale - newScale) >= MINIMUM_SCALE_INCREMENT) {
                 mInZoomOverview = true;
                 // Force the titlebar fully reveal in overview mode
                 if (mScrollY < getTitleHeight()) mScrollY = 0;
-                zoomWithPreview(newScale);
-            } else if (Math.abs(mActualScale - mDefaultScale) >= 0.01f) {
+                zoomWithPreview(newScale, true);
+            } else if (Math.abs(mActualScale - mDefaultScale) >= MINIMUM_SCALE_INCREMENT) {
                 zoomToDefault = true;
             }
         } else {
@@ -5758,7 +5852,7 @@ public class WebView extends AbsoluteLayout
                     mZoomCenterX = 0;
                 }
             }
-            zoomWithPreview(mDefaultScale);
+            zoomWithPreview(mDefaultScale, true);
         }
     }
 
@@ -6103,7 +6197,8 @@ public class WebView extends AbsoluteLayout
                                     scale = restoreState.mTextWrapScale;
                                 }
                                 setNewZoomScale(scale, Math.abs(scale
-                                    - mTextWrapScale) >= 0.01f, false);
+                                    - mTextWrapScale) >= MINIMUM_SCALE_INCREMENT,
+                                    false);
                             }
                             setContentScrollTo(restoreState.mScrollX,
                                 restoreState.mScrollY);
@@ -6156,7 +6251,8 @@ public class WebView extends AbsoluteLayout
                                 - mZoomOverviewWidth) > 1) {
                             setNewZoomScale((float) viewWidth
                                     / mZoomOverviewWidth, Math.abs(mActualScale
-                                            - mTextWrapScale) < 0.01f, false);
+                                    - mTextWrapScale) < MINIMUM_SCALE_INCREMENT,
+                                    false);
                         }
                     }
                     if (draw.mFocusSizeChanged && inEditingMode()) {
