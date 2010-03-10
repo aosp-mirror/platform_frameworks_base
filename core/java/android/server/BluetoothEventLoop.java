@@ -374,6 +374,11 @@ class BluetoothEventLoop {
             Intent intent = null;
             if (propValues[1].equals("true")) {
                 intent = new Intent(BluetoothDevice.ACTION_ACL_CONNECTED);
+                // Set the link timeout to 8000 slots (5 sec timeout)
+                // for bluetooth docks.
+                if (mBluetoothService.isBluetoothDock(address)) {
+                    mBluetoothService.setLinkTimeout(address, 8000);
+                }
             } else {
                 intent = new Intent(BluetoothDevice.ACTION_ACL_DISCONNECTED);
             }
