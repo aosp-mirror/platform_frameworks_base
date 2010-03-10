@@ -3480,10 +3480,41 @@ public class ListView extends AbsListView {
      * @return A new array which contains the id of each checked item in the
      *         list.
      *         
-     * @deprecated Use {@link #getCheckedItemIds()} instead. 
+     * @deprecated Use {@link #getCheckedItemIds()} instead.
      */
     public long[] getCheckItemIds() {
-        return getCheckedItemIds();
+        // Use new behavior that correctly handles stable ID mapping.
+        if (mAdapter != null && mAdapter.hasStableIds()) {
+            return getCheckedItemIds();
+        }
+
+        // Old behavior was buggy, but would sort of work for adapters without stable IDs.
+        // Fall back to it to support legacy apps.
+        if (mChoiceMode != CHOICE_MODE_NONE && mCheckStates != null && mAdapter != null) {
+            final SparseBooleanArray states = mCheckStates;
+            final int count = states.size();
+            final long[] ids = new long[count];
+            final ListAdapter adapter = mAdapter;
+
+            int checkedCount = 0;
+            for (int i = 0; i < count; i++) {
+                if (states.valueAt(i)) {
+                    ids[checkedCount++] = adapter.getItemId(states.keyAt(i));
+                }
+            }
+
+            // Trim array if needed. mCheckStates may contain false values
+            // resulting in checkedCount being smaller than count.
+            if (checkedCount == count) {
+                return ids;
+            } else {
+                final long[] result = new long[checkedCount];
+                System.arraycopy(ids, 0, result, 0, checkedCount);
+
+                return result;
+            }
+        }
+        return new long[0];
     }
     
     /**

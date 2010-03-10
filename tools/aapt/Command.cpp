@@ -603,7 +603,7 @@ int doDump(Bundle* bundle)
                     } else {
                         printf("versionCode='' ");
                     }
-                    String8 versionName = getAttribute(tree, VERSION_NAME_ATTR, &error);
+                    String8 versionName = getResolvedAttribute(&res, tree, VERSION_NAME_ATTR, &error);
                     if (error != "") {
                         fprintf(stderr, "ERROR getting 'android:versionName' attribute: %s\n", error.string());
                         goto bail;

@@ -166,7 +166,7 @@ status_t AudioStreamOutStub::getRenderPosition(uint32_t *dspFrames)
 // ----------------------------------------------------------------------------
 
 status_t AudioStreamInStub::set(int *pFormat, uint32_t *pChannels, uint32_t *pRate,
-				AudioSystem::audio_in_acoustics acoustics)
+                AudioSystem::audio_in_acoustics acoustics)
 {
     return NO_ERROR;
 }

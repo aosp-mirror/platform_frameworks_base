@@ -261,7 +261,6 @@ public class Camera {
      * setPreviewCallback, or to this method with a null callback parameter.
      *
      * @param cb A callback object that receives a copy of the preview frame.  A null value will clear the queue.
-     * @hide
      */
     public final void setPreviewCallbackWithBuffer(PreviewCallback cb) {
         mPreviewCallback = cb;
@@ -271,16 +270,22 @@ public class Camera {
     }
 
     /**
-     * Adds a pre-allocated buffer to the callback buffer queue.
+     * Adds a pre-allocated buffer to the callback buffer queue. Applications
+     * can add one or more buffers to the queue. When a preview frame arrives
+     * and there is still available buffer, buffer will be filled and it is
+     * removed from the queue. Then preview callback is invoked with the buffer.
+     * If a frame arrives and there is no buffer left, the frame is discarded.
+     * Applications should add the buffers back when they finish the processing.
+     *
      * Preview width and height can be determined from getPreviewSize, and bitsPerPixel can be
-     * found from from  {@link android.hardware.Camera.Parameters#getPreviewFormat()} and
-     * {@link android.graphics.ImageFormat#getBitsPerPixel(int)}
+     * found from {@link android.hardware.Camera.Parameters#getPreviewFormat()}
+     * and {@link android.graphics.ImageFormat#getBitsPerPixel(int)}.
      *
      * Alternatively, a buffer from a previous callback may be passed in or used
      * to determine the size of new preview frame buffers.
      *
      * @param callbackBuffer The buffer to register. Size should be width * height * bitsPerPixel / 8.
-     * @hide
+     * @see #setPreviewCallbackWithBuffer(PreviewCallback)
      */
     public native final void addCallbackBuffer(byte[] callbackBuffer);
 

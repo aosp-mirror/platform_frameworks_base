@@ -148,6 +148,42 @@ public class TypedArray {
     }
     
     /**
+     * @hide
+     * Retrieve the string value for the attribute at <var>index</var> that is
+     * not allowed to change with the given configurations.
+     * 
+     * @param index Index of attribute to retrieve.
+     * @param allowedChangingConfigs Bit mask of configurations from
+     * ActivityInfo that are allowed to change.
+     * 
+     * @return String holding string data.  Any styling information is
+     * removed.  Returns null if the attribute is not defined.
+     */
+    public String getNonConfigurationString(int index, int allowedChangingConfigs) {
+        index *= AssetManager.STYLE_NUM_ENTRIES;
+        final int[] data = mData;
+        final int type = data[index+AssetManager.STYLE_TYPE];
+        if ((data[index+AssetManager.STYLE_CHANGING_CONFIGURATIONS]&~allowedChangingConfigs) != 0) {
+            return null;
+        }
+        if (type == TypedValue.TYPE_NULL) {
+            return null;
+        } else if (type == TypedValue.TYPE_STRING) {
+            return loadStringValueAt(index).toString();
+        }
+
+        TypedValue v = mValue;
+        if (getValueAt(index, v)) {
+            Log.w(Resources.TAG, "Converting to string: " + v);
+            CharSequence cs = v.coerceToString();
+            return cs != null ? cs.toString() : null;
+        }
+        Log.w(Resources.TAG, "getString of bad type: 0x"
+              + Integer.toHexString(type));
+        return null;
+    }
+
+    /**
      * Retrieve the boolean value for the attribute at <var>index</var>.
      * 
      * @param index Index of attribute to retrieve.

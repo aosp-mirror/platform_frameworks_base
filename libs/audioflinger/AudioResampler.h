@@ -76,8 +76,8 @@ protected:
     int32_t mInSampleRate;
     AudioBufferProvider::Buffer mBuffer;
     union {
-    	int16_t mVolume[2];
-    	uint32_t mVolumeRL;
+        int16_t mVolume[2];
+        uint32_t mVolumeRL;
     };
     int16_t mTargetVolume[2];
     format mFormat;

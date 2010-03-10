@@ -28,12 +28,13 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Handler;
+import android.os.Power;
 import android.os.PowerManager;
 import android.os.RemoteException;
-import android.os.Power;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.storage.IMountService;
+import android.os.storage.IMountShutdownObserver;
 
 import com.android.internal.telephony.ITelephony;
 import android.util.Log;
@@ -46,16 +47,20 @@ public final class ShutdownThread extends Thread {
     private static final int PHONE_STATE_POLL_SLEEP_MSEC = 500;
     // maximum time we wait for the shutdown broadcast before going on.
     private static final int MAX_BROADCAST_TIME = 10*1000;
+    private static final int MAX_SHUTDOWN_WAIT_TIME = 20*1000;
     
     // state tracking
     private static Object sIsStartedGuard = new Object();
     private static boolean sIsStarted = false;
     
+    private static boolean mReboot;
+    private static String mRebootReason;
+
     // static instance of this thread
     private static final ShutdownThread sInstance = new ShutdownThread();
     
-    private final Object mBroadcastDoneSync = new Object();
-    private boolean mBroadcastDone;
+    private final Object mActionDoneSync = new Object();
+    private boolean mActionDone;
     private Context mContext;
     private PowerManager mPowerManager;
     private PowerManager.WakeLock mWakeLock;
@@ -64,12 +69,13 @@ public final class ShutdownThread extends Thread {
     private ShutdownThread() {
     }
  
-    /** 
+    /**
      * Request a clean shutdown, waiting for subsystems to clean up their
      * state etc.  Must be called from a Looper thread in which its UI
      * is shown.
-     * 
+     *
      * @param context Context used to display the shutdown progress dialog.
+     * @param confirm true if user confirmation is needed before shutting down.
      */
     public static void shutdown(final Context context, boolean confirm) {
         // ensure that only one thread is trying to power down.
@@ -104,6 +110,21 @@ public final class ShutdownThread extends Thread {
         } else {
             beginShutdownSequence(context);
         }
+    }
+
+    /**
+     * Request a clean shutdown, waiting for subsystems to clean up their
+     * state etc.  Must be called from a Looper thread in which its UI
+     * is shown.
+     *
+     * @param context Context used to display the shutdown progress dialog.
+     * @param reason code to pass to the kernel (e.g. "recovery"), or null.
+     * @param confirm true if user confirmation is needed before shutting down.
+     */
+    public static void reboot(final Context context, String reason, boolean confirm) {
+        mReboot = true;
+        mRebootReason = reason;
+        shutdown(context, confirm);
     }
 
     private static void beginShutdownSequence(Context context) {
@@ -145,13 +166,13 @@ public final class ShutdownThread extends Thread {
         sInstance.start();
     }
 
-    void broadcastDone() {
-        synchronized (mBroadcastDoneSync) {
-            mBroadcastDone = true;
-            mBroadcastDoneSync.notifyAll();
+    void actionDone() {
+        synchronized (mActionDoneSync) {
+            mActionDone = true;
+            mActionDoneSync.notifyAll();
         }
     }
-    
+
     /**
      * Makes sure we handle the shutdown gracefully.
      * Shuts off power regardless of radio and bluetooth state if the alloted time has passed.
@@ -163,27 +184,27 @@ public final class ShutdownThread extends Thread {
         BroadcastReceiver br = new BroadcastReceiver() {
             @Override public void onReceive(Context context, Intent intent) {
                 // We don't allow apps to cancel this, so ignore the result.
-                broadcastDone();
+                actionDone();
             }
         };
         
         Log.i(TAG, "Sending shutdown broadcast...");
         
         // First send the high-level shut down broadcast.
-        mBroadcastDone = false;
+        mActionDone = false;
         mContext.sendOrderedBroadcast(new Intent(Intent.ACTION_SHUTDOWN), null,
                 br, mHandler, 0, null, null);
         
         final long endTime = System.currentTimeMillis() + MAX_BROADCAST_TIME;
-        synchronized (mBroadcastDoneSync) {
-            while (!mBroadcastDone) {
+        synchronized (mActionDoneSync) {
+            while (!mActionDone) {
                 long delay = endTime - System.currentTimeMillis();
                 if (delay <= 0) {
                     Log.w(TAG, "Shutdown broadcast timed out");
                     break;
                 }
                 try {
-                    mBroadcastDoneSync.wait(delay);
+                    mActionDoneSync.wait(delay);
                 } catch (InterruptedException e) {
                 }
             }
@@ -262,17 +283,50 @@ public final class ShutdownThread extends Thread {
         }
 
         // Shutdown MountService to ensure media is in a safe state
-        try {
-            if (mount != null) {
-                mount.shutdown();
-            } else {
-                Log.w(TAG, "MountService unavailable for shutdown");
+        IMountShutdownObserver observer = new IMountShutdownObserver.Stub() {
+            public void onShutDownComplete(int statusCode) throws RemoteException {
+                Log.w(TAG, "Result code " + statusCode + " from MountService.shutdown");
+                actionDone();
             }
-        } catch (Exception e) {
-            Log.e(TAG, "Exception during MountService shutdown", e);
+        };
+
+        Log.i(TAG, "Shutting down MountService");
+        // Set initial variables and time out time.
+        mActionDone = false;
+        final long endShutTime = System.currentTimeMillis() + MAX_SHUTDOWN_WAIT_TIME;
+        synchronized (mActionDoneSync) {
+            try {
+                if (mount != null) {
+                    mount.shutdown(observer);
+                } else {
+                    Log.w(TAG, "MountService unavailable for shutdown");
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Exception during MountService shutdown", e);
+            }
+            while (!mActionDone) {
+                long delay = endShutTime - System.currentTimeMillis();
+                if (delay <= 0) {
+                    Log.w(TAG, "Shutdown wait timed out");
+                    break;
+                }
+                try {
+                    mActionDoneSync.wait(delay);
+                } catch (InterruptedException e) {
+                }
+            }
         }
 
-        //shutdown power
+        if (mReboot) {
+            Log.i(TAG, "Rebooting, reason: " + mRebootReason);
+            try {
+                Power.reboot(mRebootReason);
+            } catch (Exception e) {
+                Log.e(TAG, "Reboot failed, will attempt shutdown instead", e);
+            }
+        }
+
+        // Shutdown power
         Log.i(TAG, "Performing low-level shutdown...");
         Power.shutdown();
     }

@@ -38,6 +38,7 @@ import android.speech.tts.TextToSpeech;
 import android.util.Log;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -1112,7 +1113,7 @@ public class TtsService extends Service implements OnCompletionListener {
      * @param filename
      *            The string that gives the full output filename; it should be
      *            something like "/sdcard/myappsounds/mysound.wav".
-     * @return A boolean that indicates if the synthesis succeeded
+     * @return A boolean that indicates if the synthesis can be started
      */
     private boolean synthesizeToFile(String callingApp, String text, ArrayList<String> params,
             String filename) {
@@ -1123,6 +1124,22 @@ public class TtsService extends Service implements OnCompletionListener {
         // Don't allow anything longer than the max text length; since this
         // is synthing to a file, don't even bother splitting it.
         if (text.length() >= MAX_SPEECH_ITEM_CHAR_LENGTH){
+            return false;
+        }
+        // Check that the output file can be created
+        try {
+            File tempFile = new File(filename);
+            if (tempFile.exists()) {
+                Log.v("TtsService", "File " + filename + " exists, deleting.");
+                tempFile.delete();
+            }
+            if (!tempFile.createNewFile()) {
+                Log.e("TtsService", "Unable to synthesize to file: can't create " + filename);
+                return false;
+            }
+            tempFile.delete();
+        } catch (IOException e) {
+            Log.e("TtsService", "Can't create " + filename + " due to exception " + e);
             return false;
         }
         mSpeechQueue.add(new SpeechItem(callingApp, text, params, SpeechItem.TEXT_TO_FILE, filename));

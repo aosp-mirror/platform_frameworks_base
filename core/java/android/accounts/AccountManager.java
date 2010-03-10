@@ -29,6 +29,7 @@ import android.os.RemoteException;
 import android.os.Parcelable;
 import android.os.Build;
 import android.util.Log;
+import android.text.TextUtils;
 
 import java.io.IOException;
 import java.util.concurrent.Callable;
@@ -220,6 +221,19 @@ public class AccountManager {
         mContext = context;
         mService = service;
         mMainHandler = handler;
+    }
+
+    /**
+     * @hide for internal use only
+     */
+    public static Bundle sanitizeResult(Bundle result) {
+        if (result.containsKey(KEY_AUTHTOKEN)
+                && !TextUtils.isEmpty(result.getString(KEY_AUTHTOKEN))) {
+            final Bundle newResult = new Bundle(result);
+            newResult.putString(KEY_AUTHTOKEN, "<omitted for logging purposes>");
+            return newResult;
+        }
+        return result;
     }
 
     /**
@@ -1447,6 +1461,7 @@ public class AccountManager {
         final Bundle mAddAccountOptions;
         final Bundle mLoginOptions;
         final AccountManagerCallback<Bundle> mMyCallback;
+        private volatile int mNumAccounts = 0;
 
         public void doWork() throws RemoteException {
             getAccountsByTypeAndFeatures(mAccountType, mFeatures,
@@ -1465,6 +1480,8 @@ public class AccountManager {
                                 setException(e);
                                 return;
                             }
+
+                            mNumAccounts = accounts.length;
 
                             if (accounts.length == 0) {
                                 if (mActivity != null) {
@@ -1538,7 +1555,21 @@ public class AccountManager {
 
         public void run(AccountManagerFuture<Bundle> future) {
             try {
-                set(future.getResult());
+                final Bundle result = future.getResult();
+                if (mNumAccounts == 0) {
+                    final String accountName = result.getString(KEY_ACCOUNT_NAME);
+                    final String accountType = result.getString(KEY_ACCOUNT_TYPE);
+                    if (TextUtils.isEmpty(accountName) || TextUtils.isEmpty(accountType)) {
+                        setException(new AuthenticatorException("account not in result"));
+                        return;
+                    }
+                    final Account account = new Account(accountName, accountType);
+                    mNumAccounts = 1;
+                    getAuthToken(account, mAuthTokenType, null /* options */, mActivity,
+                            mMyCallback, mHandler);
+                    return;
+                }
+                set(result);
             } catch (OperationCanceledException e) {
                 cancel(true /* mayInterruptIfRUnning */);
             } catch (IOException e) {

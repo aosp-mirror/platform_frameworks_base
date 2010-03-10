@@ -68,6 +68,7 @@ import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.WebTextView.AutoCompleteAdapter;
 import android.webkit.WebViewCore.EventHub;
+import android.webkit.WebViewCore.TouchEventData;
 import android.widget.AbsoluteLayout;
 import android.widget.Adapter;
 import android.widget.AdapterView;
@@ -375,27 +376,29 @@ public class WebView extends AbsoluteLayout
     // Whether to forward the touch events to WebCore
     private boolean mForwardTouchEvents = false;
 
-    // Whether to prevent drag during touch. The initial value depends on
-    // mForwardTouchEvents. If WebCore wants touch events, we assume it will
-    // take control of touch events unless it says no for touch down event.
-    private static final int PREVENT_DRAG_NO = 0;
-    private static final int PREVENT_DRAG_MAYBE_YES = 1;
-    private static final int PREVENT_DRAG_YES = 2;
-    private static final int PREVENT_DRAG_CANCEL = 3;
-    private int mPreventDrag = PREVENT_DRAG_NO;
+    // Whether to prevent default during touch. The initial value depends on
+    // mForwardTouchEvents. If WebCore wants all the touch events, it says yes
+    // for touch down. Otherwise UI will wait for the answer of the first
+    // confirmed move before taking over the control.
+    private static final int PREVENT_DEFAULT_NO = 0;
+    private static final int PREVENT_DEFAULT_MAYBE_YES = 1;
+    private static final int PREVENT_DEFAULT_NO_FROM_TOUCH_DOWN = 2;
+    private static final int PREVENT_DEFAULT_YES = 3;
+    private static final int PREVENT_DEFAULT_IGNORE = 4;
+    private int mPreventDefault = PREVENT_DEFAULT_IGNORE;
 
-    // by default mPreventLongPress is false. If it is true, long press event
-    // will be handled by WebKit instead of UI.
-    private boolean mPreventLongPress = false;
-    // by default mPreventDoubleTap is false. If it is true, double tap event
-    // will be handled by WebKit instead of UI.
-    private boolean mPreventDoubleTap = false;
+    // true when the touch movement exceeds the slop
+    private boolean mConfirmMove;
 
-    // this needs to be in sync with the logic in WebKit's
-    // EventHandler::handleTouchEvent()
-    private static final int TOUCH_PREVENT_DRAG         = 0x1;
-    private static final int TOUCH_PREVENT_LONGPRESS    = 0x2;
-    private static final int TOUCH_PREVENT_DOUBLETAP    = 0x4;
+    // if true, touch events will be first processed by WebCore, if prevent
+    // default is not set, the UI will continue handle them.
+    private boolean mDeferTouchProcess;
+
+    // to avoid interfering with the current touch events, track them
+    // separately. Currently no snapping or fling in the deferred process mode
+    private int mDeferTouchMode = TOUCH_DONE_MODE;
+    private float mLastDeferTouchX;
+    private float mLastDeferTouchY;
 
     // To keep track of whether the current drag was initiated by a WebTextView,
     // so that we know not to hide the cursor
@@ -484,7 +487,7 @@ public class WebView extends AbsoluteLayout
     private int mAnchorX;
     private int mAnchorY;
 
-    /**
+    /*
      * Private message ids
      */
     private static final int REMEMBER_PASSWORD          = 1;
@@ -496,39 +499,49 @@ public class WebView extends AbsoluteLayout
     private static final int RESUME_WEBCORE_PRIORITY    = 7;
     private static final int DRAG_HELD_MOTIONLESS       = 8;
     private static final int AWAKEN_SCROLL_BARS         = 9;
+    private static final int PREVENT_DEFAULT_TIMEOUT    = 10;
 
+    private static final int FIRST_PRIVATE_MSG_ID = REMEMBER_PASSWORD;
+    private static final int LAST_PRIVATE_MSG_ID = PREVENT_DEFAULT_TIMEOUT;
+
+    /*
+     * Package message ids
+     */
     //! arg1=x, arg2=y
-    static final int SCROLL_TO_MSG_ID                   = 10;
-    static final int SCROLL_BY_MSG_ID                   = 11;
+    static final int SCROLL_TO_MSG_ID                   = 101;
+    static final int SCROLL_BY_MSG_ID                   = 102;
     //! arg1=x, arg2=y
-    static final int SPAWN_SCROLL_TO_MSG_ID             = 12;
+    static final int SPAWN_SCROLL_TO_MSG_ID             = 103;
     //! arg1=x, arg2=y
-    static final int SYNC_SCROLL_TO_MSG_ID              = 13;
-    static final int NEW_PICTURE_MSG_ID                 = 14;
-    static final int UPDATE_TEXT_ENTRY_MSG_ID           = 15;
-    static final int WEBCORE_INITIALIZED_MSG_ID         = 16;
-    static final int UPDATE_TEXTFIELD_TEXT_MSG_ID       = 17;
-    static final int UPDATE_ZOOM_RANGE                  = 18;
-    static final int MOVE_OUT_OF_PLUGIN                 = 19;
-    static final int CLEAR_TEXT_ENTRY                   = 20;
-    static final int UPDATE_TEXT_SELECTION_MSG_ID       = 21;
-    static final int SHOW_RECT_MSG_ID                   = 22;
-    static final int LONG_PRESS_CENTER                  = 23;
-    static final int PREVENT_TOUCH_ID                   = 24;
-    static final int WEBCORE_NEED_TOUCH_EVENTS          = 25;
+    static final int SYNC_SCROLL_TO_MSG_ID              = 104;
+    static final int NEW_PICTURE_MSG_ID                 = 105;
+    static final int UPDATE_TEXT_ENTRY_MSG_ID           = 106;
+    static final int WEBCORE_INITIALIZED_MSG_ID         = 107;
+    static final int UPDATE_TEXTFIELD_TEXT_MSG_ID       = 108;
+    static final int UPDATE_ZOOM_RANGE                  = 109;
+    static final int MOVE_OUT_OF_PLUGIN                 = 110;
+    static final int CLEAR_TEXT_ENTRY                   = 111;
+    static final int UPDATE_TEXT_SELECTION_MSG_ID       = 112;
+    static final int SHOW_RECT_MSG_ID                   = 113;
+    static final int LONG_PRESS_CENTER                  = 114;
+    static final int PREVENT_TOUCH_ID                   = 115;
+    static final int WEBCORE_NEED_TOUCH_EVENTS          = 116;
     // obj=Rect in doc coordinates
-    static final int INVAL_RECT_MSG_ID                  = 26;
-    static final int REQUEST_KEYBOARD                   = 27;
-    static final int DO_MOTION_UP                       = 28;
-    static final int SHOW_FULLSCREEN                    = 29;
-    static final int HIDE_FULLSCREEN                    = 30;
-    static final int DOM_FOCUS_CHANGED                  = 31;
-    static final int IMMEDIATE_REPAINT_MSG_ID           = 32;
-    static final int SET_ROOT_LAYER_MSG_ID              = 33;
-    static final int RETURN_LABEL                       = 34;
-    static final int FIND_AGAIN                         = 35;
+    static final int INVAL_RECT_MSG_ID                  = 117;
+    static final int REQUEST_KEYBOARD                   = 118;
+    static final int DO_MOTION_UP                       = 119;
+    static final int SHOW_FULLSCREEN                    = 120;
+    static final int HIDE_FULLSCREEN                    = 121;
+    static final int DOM_FOCUS_CHANGED                  = 122;
+    static final int IMMEDIATE_REPAINT_MSG_ID           = 123;
+    static final int SET_ROOT_LAYER_MSG_ID              = 124;
+    static final int RETURN_LABEL                       = 125;
+    static final int FIND_AGAIN                         = 126;
 
-    static final String[] HandlerDebugString = {
+    private static final int FIRST_PACKAGE_MSG_ID = SCROLL_TO_MSG_ID;
+    private static final int LAST_PACKAGE_MSG_ID = FIND_AGAIN;
+
+    static final String[] HandlerPrivateDebugString = {
         "REMEMBER_PASSWORD", //              = 1;
         "NEVER_REMEMBER_PASSWORD", //        = 2;
         "SWITCH_TO_SHORTPRESS", //           = 3;
@@ -538,32 +551,36 @@ public class WebView extends AbsoluteLayout
         "RESUME_WEBCORE_PRIORITY", //        = 7;
         "DRAG_HELD_MOTIONLESS", //           = 8;
         "AWAKEN_SCROLL_BARS", //             = 9;
-        "SCROLL_TO_MSG_ID", //               = 10;
-        "SCROLL_BY_MSG_ID", //               = 11;
-        "SPAWN_SCROLL_TO_MSG_ID", //         = 12;
-        "SYNC_SCROLL_TO_MSG_ID", //          = 13;
-        "NEW_PICTURE_MSG_ID", //             = 14;
-        "UPDATE_TEXT_ENTRY_MSG_ID", //       = 15;
-        "WEBCORE_INITIALIZED_MSG_ID", //     = 16;
-        "UPDATE_TEXTFIELD_TEXT_MSG_ID", //   = 17;
-        "UPDATE_ZOOM_RANGE", //              = 18;
-        "MOVE_OUT_OF_PLUGIN", //             = 19;
-        "CLEAR_TEXT_ENTRY", //               = 20;
-        "UPDATE_TEXT_SELECTION_MSG_ID", //   = 21;
-        "SHOW_RECT_MSG_ID", //               = 22;
-        "LONG_PRESS_CENTER", //              = 23;
-        "PREVENT_TOUCH_ID", //               = 24;
-        "WEBCORE_NEED_TOUCH_EVENTS", //      = 25;
-        "INVAL_RECT_MSG_ID", //              = 26;
-        "REQUEST_KEYBOARD", //               = 27;
-        "DO_MOTION_UP", //                   = 28;
-        "SHOW_FULLSCREEN", //                = 29;
-        "HIDE_FULLSCREEN", //                = 30;
-        "DOM_FOCUS_CHANGED", //              = 31;
-        "IMMEDIATE_REPAINT_MSG_ID", //       = 32;
-        "SET_ROOT_LAYER_MSG_ID", //          = 33;
-        "RETURN_LABEL", //                   = 34;
-        "FIND_AGAIN" //                      = 35;
+        "PREVENT_DEFAULT_TIMEOUT" //         = 10;
+    };
+
+    static final String[] HandlerPackageDebugString = {
+        "SCROLL_TO_MSG_ID", //               = 101;
+        "SCROLL_BY_MSG_ID", //               = 102;
+        "SPAWN_SCROLL_TO_MSG_ID", //         = 103;
+        "SYNC_SCROLL_TO_MSG_ID", //          = 104;
+        "NEW_PICTURE_MSG_ID", //             = 105;
+        "UPDATE_TEXT_ENTRY_MSG_ID", //       = 106;
+        "WEBCORE_INITIALIZED_MSG_ID", //     = 107;
+        "UPDATE_TEXTFIELD_TEXT_MSG_ID", //   = 108;
+        "UPDATE_ZOOM_RANGE", //              = 109;
+        "MOVE_OUT_OF_PLUGIN", //             = 110;
+        "CLEAR_TEXT_ENTRY", //               = 111;
+        "UPDATE_TEXT_SELECTION_MSG_ID", //   = 112;
+        "SHOW_RECT_MSG_ID", //               = 113;
+        "LONG_PRESS_CENTER", //              = 114;
+        "PREVENT_TOUCH_ID", //               = 115;
+        "WEBCORE_NEED_TOUCH_EVENTS", //      = 116;
+        "INVAL_RECT_MSG_ID", //              = 117;
+        "REQUEST_KEYBOARD", //               = 118;
+        "DO_MOTION_UP", //                   = 119;
+        "SHOW_FULLSCREEN", //                = 120;
+        "HIDE_FULLSCREEN", //                = 121;
+        "DOM_FOCUS_CHANGED", //              = 122;
+        "IMMEDIATE_REPAINT_MSG_ID", //       = 123;
+        "SET_ROOT_LAYER_MSG_ID", //          = 124;
+        "RETURN_LABEL", //                   = 125;
+        "FIND_AGAIN" //                      = 126;
     };
 
     // If the site doesn't use the viewport meta tag to specify the viewport,
@@ -1125,9 +1142,11 @@ public class WebView extends AbsoluteLayout
             mCallbackProxy.setWebViewClient(null);
             mCallbackProxy.setWebChromeClient(null);
             // Tell WebViewCore to destroy itself
-            WebViewCore webViewCore = mWebViewCore;
-            mWebViewCore = null; // prevent using partial webViewCore
-            webViewCore.destroy();
+            synchronized (this) {
+                WebViewCore webViewCore = mWebViewCore;
+                mWebViewCore = null; // prevent using partial webViewCore
+                webViewCore.destroy();
+            }
             // Remove any pending messages that might not be serviced yet.
             mPrivateHandler.removeCallbacksAndMessages(null);
             mCallbackProxy.removeCallbacksAndMessages(null);
@@ -2286,9 +2305,11 @@ public class WebView extends AbsoluteLayout
             boolean clampedY) {
         mInOverScrollMode = false;
         int maxX = computeMaxScrollX();
-        if (Math.abs(mMinZoomScale - mMaxZoomScale) < 0.01f && maxX == 0) {
-            // do not over scroll x if the page can't be zoomed and it just fits
-            // the screen
+        if (maxX == 0 && (Math.abs(mMinZoomScale - mMaxZoomScale) < 0.01f)
+                || !getSettings().supportZoom()
+                || !getSettings().getUseWideViewPort()) {
+            // do not over scroll x if the page just fits the screen and it
+            // can't zoom or the view doesn't use wide viewport
             scrollX = pinLocX(scrollX);
         } else if (scrollX < 0 || scrollX > maxX) {
             mInOverScrollMode = true;
@@ -3093,7 +3114,8 @@ public class WebView extends AbsoluteLayout
         }
 
         int saveCount = canvas.save();
-        if (mInOverScrollMode) {
+        if (mInOverScrollMode
+                && getSettings().getUseSystemOverscrollBackground()) {
             if (mOverScrollBackground == null) {
                 mOverScrollBackground = new Paint();
                 Bitmap bm = BitmapFactory.decodeResource(
@@ -3236,10 +3258,11 @@ public class WebView extends AbsoluteLayout
         }
 
         boolean animateZoom = mZoomScale != 0;
-        boolean animateScroll = (!mScroller.isFinished()
+        boolean animateScroll = ((!mScroller.isFinished()
                 || mVelocityTracker != null)
                 && (mTouchMode != TOUCH_DRAG_MODE ||
-                mHeldMotionless != MOTIONLESS_TRUE);
+                mHeldMotionless != MOTIONLESS_TRUE))
+                || mDeferTouchMode == TOUCH_DRAG_MODE;
         if (mTouchMode == TOUCH_DRAG_MODE) {
             if (mHeldMotionless == MOTIONLESS_PENDING) {
                 mPrivateHandler.removeMessages(DRAG_HELD_MOTIONLESS);
@@ -3336,11 +3359,9 @@ public class WebView extends AbsoluteLayout
             if (mTouchMode == TOUCH_SHORTPRESS_START_MODE) {
                 mTouchMode = TOUCH_SHORTPRESS_MODE;
                 HitTestResult hitTest = getHitTestResult();
-                if (mPreventLongPress || (hitTest != null &&
-                        hitTest.mType != HitTestResult.UNKNOWN_TYPE)) {
-                    mPrivateHandler.sendMessageDelayed(mPrivateHandler
-                            .obtainMessage(SWITCH_TO_LONGPRESS),
-                            LONG_PRESS_TIMEOUT);
+                if (hitTest == null
+                        || hitTest.mType == HitTestResult.UNKNOWN_TYPE) {
+                    mPrivateHandler.removeMessages(SWITCH_TO_LONGPRESS);
                 }
             }
         }
@@ -3673,11 +3694,13 @@ public class WebView extends AbsoluteLayout
             return false;
         }
 
-        if (mShiftIsPressed == false && nativeCursorWantsKeyEvents() == false
-                && !nativeFocusIsPlugin()
-                && (keyCode == KeyEvent.KEYCODE_SHIFT_LEFT
-                || keyCode == KeyEvent.KEYCODE_SHIFT_RIGHT)) {
-            setUpSelectXY();
+        if (keyCode == KeyEvent.KEYCODE_SHIFT_LEFT
+                || keyCode == KeyEvent.KEYCODE_SHIFT_RIGHT) {
+            if (nativeFocusIsPlugin()) {
+                mShiftIsPressed = true;
+            } else if (!nativeCursorWantsKeyEvents() && !mShiftIsPressed) {
+                setUpSelectXY();
+            }
         }
 
         if (keyCode >= KeyEvent.KEYCODE_DPAD_UP
@@ -3816,7 +3839,10 @@ public class WebView extends AbsoluteLayout
 
         if (keyCode == KeyEvent.KEYCODE_SHIFT_LEFT
                 || keyCode == KeyEvent.KEYCODE_SHIFT_RIGHT) {
-            if (commitCopy()) {
+            if (nativeFocusIsPlugin()) {
+                mShiftIsPressed = false;
+                return true;
+            } else if (commitCopy()) {
                 return true;
             }
         }
@@ -4177,7 +4203,9 @@ public class WebView extends AbsoluteLayout
     public boolean dispatchKeyEvent(KeyEvent event) {
         boolean dispatch = true;
 
-        if (!inEditingMode()) {
+        // Textfields and plugins need to receive the shift up key even if
+        // another key was released while the shift key was held down.
+        if (!inEditingMode() && !nativeFocusIsPlugin()) {
             if (event.getAction() == KeyEvent.ACTION_DOWN) {
                 mGotKeyDown = true;
             } else {
@@ -4456,6 +4484,7 @@ public class WebView extends AbsoluteLayout
             // may trigger the unwanted click, can't use TOUCH_DRAG_MODE as it
             // may trigger the unwanted fling.
             mTouchMode = TOUCH_PINCH_DRAG;
+            mConfirmMove = true;
             startTouch(detector.getFocusX(), detector.getFocusY(),
                     mLastTouchTime);
         }
@@ -4479,6 +4508,22 @@ public class WebView extends AbsoluteLayout
             }
             return false;
         }
+    }
+
+    private boolean hitFocusedPlugin(int contentX, int contentY) {
+        return nativeFocusIsPlugin()
+                && nativePointInNavCache(contentX, contentY, mNavSlop)
+                && nativeCacheHitNodePointer() == nativeFocusNodePointer();
+    }
+
+    private boolean shouldForwardTouchEvent() {
+        return mFullScreenHolder != null || (mForwardTouchEvents
+                && mTouchMode != TOUCH_SELECT_MODE
+                && mPreventDefault != PREVENT_DEFAULT_IGNORE);
+    }
+
+    private boolean inFullScreenMode() {
+        return mFullScreenHolder != null;
     }
 
     @Override
@@ -4542,46 +4587,33 @@ public class WebView extends AbsoluteLayout
             y = getViewHeightWithTitle() - 1;
         }
 
-        // pass the touch events, except ACTION_MOVE which will be handled
-        // later, from UI thread to WebCore thread
-        if (mFullScreenHolder != null || (mForwardTouchEvents
-                && action != MotionEvent.ACTION_MOVE
-                && (action == MotionEvent.ACTION_DOWN || mPreventDrag
-                        != PREVENT_DRAG_CANCEL))) {
-            WebViewCore.TouchEventData ted = new WebViewCore.TouchEventData();
-            ted.mAction = action;
-            ted.mX = viewToContentX((int) x + mScrollX);
-            ted.mY = viewToContentY((int) y + mScrollY);
-            ted.mEventTime = eventTime;
-            ted.mMetaState = ev.getMetaState();
-            mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
-            mLastSentTouchTime = eventTime;
-        }
-
         float fDeltaX = mLastTouchX - x;
         float fDeltaY = mLastTouchY - y;
         int deltaX = (int) fDeltaX;
         int deltaY = (int) fDeltaY;
+        int contentX = viewToContentX((int) x + mScrollX);
+        int contentY = viewToContentY((int) y + mScrollY);
 
         switch (action) {
             case MotionEvent.ACTION_DOWN: {
-                mPreventDrag = PREVENT_DRAG_NO;
+                mPreventDefault = PREVENT_DEFAULT_NO;
+                mConfirmMove = false;
                 if (!mScroller.isFinished()) {
                     // stop the current scroll animation, but if this is
                     // the start of a fling, allow it to add to the current
                     // fling's velocity
                     mScroller.abortAnimation();
                     mTouchMode = TOUCH_DRAG_START_MODE;
+                    mConfirmMove = true;
                     mPrivateHandler.removeMessages(RESUME_WEBCORE_PRIORITY);
-                } else if (mShiftIsPressed) {
+                } else if (!inFullScreenMode() && mShiftIsPressed) {
                     mSelectX = mScrollX + (int) x;
                     mSelectY = mScrollY + (int) y;
                     mTouchMode = TOUCH_SELECT_MODE;
                     if (DebugFlags.WEB_VIEW) {
                         Log.v(LOGTAG, "select=" + mSelectX + "," + mSelectY);
                     }
-                    nativeMoveSelection(viewToContentX(mSelectX),
-                            viewToContentY(mSelectY), false);
+                    nativeMoveSelection(contentX, contentY, false);
                     mTouchSelection = mExtendSelection = true;
                     invalidate(); // draw the i-beam instead of the arrow
                 } else if (mPrivateHandler.hasMessages(RELEASE_SINGLE_TAP)) {
@@ -4591,15 +4623,17 @@ public class WebView extends AbsoluteLayout
                     } else {
                         // commit the short press action for the previous tap
                         doShortPress();
-                        // continue, mTouchMode should be still TOUCH_INIT_MODE
+                        mTouchMode = TOUCH_INIT_MODE;
+                        mDeferTouchProcess = (!inFullScreenMode()
+                                && mForwardTouchEvents) ? hitFocusedPlugin(
+                                contentX, contentY) : false;
                     }
-                } else {
+                } else { // the normal case
                     mPreviewZoomOnly = false;
                     mTouchMode = TOUCH_INIT_MODE;
-                    mPreventDrag = mForwardTouchEvents ? PREVENT_DRAG_MAYBE_YES
-                            : PREVENT_DRAG_NO;
-                    mPreventLongPress = false;
-                    mPreventDoubleTap = false;
+                    mDeferTouchProcess = (!inFullScreenMode()
+                            && mForwardTouchEvents) ? hitFocusedPlugin(
+                            contentX, contentY) : false;
                     mWebViewCore.sendMessage(
                             EventHub.UPDATE_FRAME_CACHE_IF_LOADING);
                     if (mLogEvent && eventTime - mLastTouchUpTime < 1000) {
@@ -4610,19 +4644,87 @@ public class WebView extends AbsoluteLayout
                 // Trigger the link
                 if (mTouchMode == TOUCH_INIT_MODE
                         || mTouchMode == TOUCH_DOUBLE_TAP_MODE) {
-                    mPrivateHandler.sendMessageDelayed(mPrivateHandler
-                            .obtainMessage(SWITCH_TO_SHORTPRESS), TAP_TIMEOUT);
+                    mPrivateHandler.sendEmptyMessageDelayed(
+                            SWITCH_TO_SHORTPRESS, TAP_TIMEOUT);
+                    mPrivateHandler.sendEmptyMessageDelayed(
+                            SWITCH_TO_LONGPRESS, LONG_PRESS_TIMEOUT);
+                    if (inFullScreenMode() || mDeferTouchProcess) {
+                        mPreventDefault = PREVENT_DEFAULT_YES;
+                    } else if (mForwardTouchEvents) {
+                        mPreventDefault = PREVENT_DEFAULT_MAYBE_YES;
+                    } else {
+                        mPreventDefault = PREVENT_DEFAULT_NO;
+                    }
+                    // pass the touch events from UI thread to WebCore thread
+                    if (shouldForwardTouchEvent()) {
+                        TouchEventData ted = new TouchEventData();
+                        ted.mAction = action;
+                        ted.mX = contentX;
+                        ted.mY = contentY;
+                        ted.mMetaState = ev.getMetaState();
+                        ted.mReprocess = mDeferTouchProcess;
+                        mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
+                        if (mDeferTouchProcess) {
+                            // still needs to set them for compute deltaX/Y
+                            mLastTouchX = x;
+                            mLastTouchY = y;
+                            break;
+                        }
+                        if (!inFullScreenMode()) {
+                            mPrivateHandler.sendMessageDelayed(mPrivateHandler
+                                    .obtainMessage(PREVENT_DEFAULT_TIMEOUT,
+                                            action, 0), TAP_TIMEOUT);
+                        }
+                    }
                 }
                 startTouch(x, y, eventTime);
                 break;
             }
             case MotionEvent.ACTION_MOVE: {
-                if (mTouchMode == TOUCH_DONE_MODE) {
-                    // no dragging during scroll zoom animation
+                boolean firstMove = false;
+                if (!mConfirmMove && (deltaX * deltaX + deltaY * deltaY)
+                        >= mTouchSlopSquare) {
+                    mPrivateHandler.removeMessages(SWITCH_TO_SHORTPRESS);
+                    mPrivateHandler.removeMessages(SWITCH_TO_LONGPRESS);
+                    mConfirmMove = true;
+                    firstMove = true;
+                    if (mTouchMode == TOUCH_DOUBLE_TAP_MODE) {
+                        mTouchMode = TOUCH_INIT_MODE;
+                    }
+                }
+                // pass the touch events from UI thread to WebCore thread
+                if (shouldForwardTouchEvent() && mConfirmMove && (firstMove
+                        || eventTime - mLastSentTouchTime > mCurrentTouchInterval)) {
+                    TouchEventData ted = new TouchEventData();
+                    ted.mAction = action;
+                    ted.mX = contentX;
+                    ted.mY = contentY;
+                    ted.mMetaState = ev.getMetaState();
+                    ted.mReprocess = mDeferTouchProcess;
+                    mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
+                    mLastSentTouchTime = eventTime;
+                    if (mDeferTouchProcess) {
+                        break;
+                    }
+                    if (firstMove && !inFullScreenMode()) {
+                        mPrivateHandler.sendMessageDelayed(mPrivateHandler
+                                .obtainMessage(PREVENT_DEFAULT_TIMEOUT,
+                                        action, 0), TAP_TIMEOUT);
+                    }
+                }
+                if (mTouchMode == TOUCH_DONE_MODE
+                        || mPreventDefault == PREVENT_DEFAULT_YES) {
+                    // no dragging during scroll zoom animation, or when prevent
+                    // default is yes
                     break;
                 }
+                if (mVelocityTracker == null) {
+                    Log.e(LOGTAG, "Got null mVelocityTracker when "
+                            + "mPreventDefault = " + mPreventDefault
+                            + " mDeferTouchProcess = " + mDeferTouchProcess
+                            + " mTouchMode = " + mTouchMode);
+                }
                 mVelocityTracker.addMovement(ev);
-
                 if (mTouchMode != TOUCH_DRAG_MODE) {
                     if (mTouchMode == TOUCH_SELECT_MODE) {
                         mSelectX = mScrollX + (int) x;
@@ -4630,48 +4732,20 @@ public class WebView extends AbsoluteLayout
                         if (DebugFlags.WEB_VIEW) {
                             Log.v(LOGTAG, "xtend=" + mSelectX + "," + mSelectY);
                         }
-                        nativeMoveSelection(viewToContentX(mSelectX),
-                               viewToContentY(mSelectY), true);
+                        nativeMoveSelection(contentX, contentY, true);
                         invalidate();
                         break;
                     }
-                    if ((deltaX * deltaX + deltaY * deltaY) < mTouchSlopSquare) {
+                    if (!mConfirmMove) {
                         break;
                     }
-
-                    // pass the first ACTION_MOVE from UI thread to WebCore
-                    // thread after the distance is confirmed that it is a drag
-                    if (mFullScreenHolder == null && mForwardTouchEvents
-                            && mPreventDrag != PREVENT_DRAG_CANCEL) {
-                        WebViewCore.TouchEventData ted = new WebViewCore.TouchEventData();
-                        ted.mAction = action;
-                        ted.mX = viewToContentX((int) x + mScrollX);
-                        ted.mY = viewToContentY((int) y + mScrollY);
-                        ted.mEventTime = eventTime;
-                        ted.mMetaState = ev.getMetaState();
-                        mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
-                        mLastSentTouchTime = eventTime;
-                    }
-
-                    if (mPreventDrag == PREVENT_DRAG_MAYBE_YES) {
+                    if (mPreventDefault == PREVENT_DEFAULT_MAYBE_YES
+                            || mPreventDefault == PREVENT_DEFAULT_NO_FROM_TOUCH_DOWN) {
                         // track mLastTouchTime as we may need to do fling at
                         // ACTION_UP
                         mLastTouchTime = eventTime;
                         break;
                     }
-                    if (mTouchMode == TOUCH_SHORTPRESS_MODE
-                            || mTouchMode == TOUCH_SHORTPRESS_START_MODE) {
-                        mPrivateHandler.removeMessages(SWITCH_TO_LONGPRESS);
-                    } else if (mTouchMode == TOUCH_INIT_MODE
-                            || mTouchMode == TOUCH_DOUBLE_TAP_MODE) {
-                        mPrivateHandler.removeMessages(SWITCH_TO_SHORTPRESS);
-                    }
-                    if (mFullScreenHolder != null) {
-                        // in full screen mode, the WebView can't be panned.
-                        mTouchMode = TOUCH_DONE_MODE;
-                        break;
-                    }
-
                     // if it starts nearly horizontal or vertical, enforce it
                     int ax = Math.abs(deltaX);
                     int ay = Math.abs(deltaY);
@@ -4691,38 +4765,11 @@ public class WebView extends AbsoluteLayout
                     deltaX = 0;
                     deltaY = 0;
 
-                    WebViewCore.reducePriority();
-                    if (!mDragFromTextInput) {
-                        nativeHideCursor();
-                    }
-                    WebSettings settings = getSettings();
-                    if (settings.supportZoom()
-                            && settings.getBuiltInZoomControls()
-                            && !mZoomButtonsController.isVisible()
-                            && mMinZoomScale < mMaxZoomScale) {
-                        mZoomButtonsController.setVisible(true);
-                        int count = settings.getDoubleTapToastCount();
-                        if (mInZoomOverview && count > 0) {
-                            settings.setDoubleTapToastCount(--count);
-                            Toast.makeText(mContext,
-                                    com.android.internal.R.string.double_tap_toast,
-                                    Toast.LENGTH_LONG).show();
-                        }
-                    }
-                } else {
-                    // pass the touch events from UI thread to WebCore thread
-                    if (mFullScreenHolder == null && mForwardTouchEvents
-                            && eventTime - mLastSentTouchTime > mCurrentTouchInterval
-                            && mPreventDrag != PREVENT_DRAG_CANCEL) {
-                        WebViewCore.TouchEventData ted = new WebViewCore.TouchEventData();
-                        ted.mAction = action;
-                        ted.mX = viewToContentX((int) x + mScrollX);
-                        ted.mY = viewToContentY((int) y + mScrollY);
-                        ted.mEventTime = eventTime;
-                        ted.mMetaState = ev.getMetaState();
-                        mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
-                        mLastSentTouchTime = eventTime;
-                    }
+                    startDrag();
+                }
+
+                if (mDragTrackerHandler != null) {
+                    mDragTrackerHandler.dragTo(x, y);
                 }
 
                 // do pan
@@ -4770,9 +4817,6 @@ public class WebView extends AbsoluteLayout
                         }
                     }
                     if ((deltaX | deltaY) != 0) {
-                        overscrollBy(deltaX, deltaY, mScrollX, mScrollY,
-                                computeMaxScrollX(), computeMaxScrollY(),
-                                getViewWidth() / 3, getViewHeight() / 3);
                         if (deltaX != 0) {
                             mLastTouchX = x;
                         }
@@ -4789,22 +4833,7 @@ public class WebView extends AbsoluteLayout
                     mUserScroll = true;
                 }
 
-                if (!getSettings().getBuiltInZoomControls()) {
-                    boolean showPlusMinus = mMinZoomScale < mMaxZoomScale;
-                    if (mZoomControls != null && showPlusMinus) {
-                        if (mZoomControls.getVisibility() == View.VISIBLE) {
-                            mPrivateHandler.removeCallbacks(mZoomControlRunnable);
-                        } else {
-                            mZoomControls.show(showPlusMinus, false);
-                        }
-                        mPrivateHandler.postDelayed(mZoomControlRunnable,
-                                ZOOM_CONTROLS_TIMEOUT);
-                    }
-                }
-
-                if (mDragTrackerHandler != null) {
-                    mDragTrackerHandler.dragTo(x, y);
-                }
+                doDrag(deltaX, deltaY);
 
                 if (keepScrollBarsVisible) {
                     if (mHeldMotionless != MOTIONLESS_TRUE) {
@@ -4821,25 +4850,32 @@ public class WebView extends AbsoluteLayout
                 break;
             }
             case MotionEvent.ACTION_UP: {
-                if (mDragTrackerHandler != null) {
-                    mDragTrackerHandler.stopDrag();
+                // pass the touch events from UI thread to WebCore thread
+                if (shouldForwardTouchEvent()) {
+                    TouchEventData ted = new TouchEventData();
+                    ted.mAction = action;
+                    ted.mX = contentX;
+                    ted.mY = contentY;
+                    ted.mMetaState = ev.getMetaState();
+                    ted.mReprocess = mDeferTouchProcess;
+                    mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
                 }
                 mLastTouchUpTime = eventTime;
                 switch (mTouchMode) {
                     case TOUCH_DOUBLE_TAP_MODE: // double tap
                         mPrivateHandler.removeMessages(SWITCH_TO_SHORTPRESS);
-                        mTouchMode = TOUCH_DONE_MODE;
-                        if (mPreventDoubleTap) {
-                            WebViewCore.TouchEventData ted
-                                    = new WebViewCore.TouchEventData();
+                        mPrivateHandler.removeMessages(SWITCH_TO_LONGPRESS);
+                        if (inFullScreenMode() || mDeferTouchProcess) {
+                            TouchEventData ted = new TouchEventData();
                             ted.mAction = WebViewCore.ACTION_DOUBLETAP;
-                            ted.mX = viewToContentX((int) x + mScrollX);
-                            ted.mY = viewToContentY((int) y + mScrollY);
-                            ted.mEventTime = eventTime;
+                            ted.mX = contentX;
+                            ted.mY = contentY;
                             ted.mMetaState = ev.getMetaState();
+                            ted.mReprocess = mDeferTouchProcess;
                             mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
-                        } else if (mFullScreenHolder == null) {
+                        } else if (mPreventDefault != PREVENT_DEFAULT_YES){
                             doDoubleTap();
+                            mTouchMode = TOUCH_DONE_MODE;
                         }
                         break;
                     case TOUCH_SELECT_MODE:
@@ -4851,20 +4887,15 @@ public class WebView extends AbsoluteLayout
                     case TOUCH_SHORTPRESS_MODE:
                         mPrivateHandler.removeMessages(SWITCH_TO_SHORTPRESS);
                         mPrivateHandler.removeMessages(SWITCH_TO_LONGPRESS);
-                        if ((deltaX * deltaX + deltaY * deltaY) > mTouchSlopSquare) {
+                        if (mConfirmMove) {
                             Log.w(LOGTAG, "Miss a drag as we are waiting for" +
                                     " WebCore's response for touch down.");
-                            if (mFullScreenHolder == null
+                            if (mPreventDefault != PREVENT_DEFAULT_YES
                                     && (computeMaxScrollX() > 0
                                             || computeMaxScrollY() > 0)) {
-                                // remove the pending TOUCH_EVENT and send a
-                                // cancel
-                                mWebViewCore
-                                        .removeMessages(EventHub.TOUCH_EVENT);
-                                WebViewCore.TouchEventData ted = new WebViewCore.TouchEventData();
-                                ted.mAction = MotionEvent.ACTION_CANCEL;
-                                mWebViewCore.sendMessage(EventHub.TOUCH_EVENT,
-                                        ted);
+                                // UI takes control back, cancel WebCore touch
+                                cancelWebCoreTouchEvent(contentX, contentY,
+                                        true);
                                 // we will not rewrite drag code here, but we
                                 // will try fling if it applies.
                                 WebViewCore.reducePriority();
@@ -4873,20 +4904,12 @@ public class WebView extends AbsoluteLayout
                                 break;
                             }
                         } else {
-                            // mPreventDrag can be PREVENT_DRAG_MAYBE_YES in
-                            // TOUCH_INIT_MODE. To give WebCoreThread a little
-                            // more time to send PREVENT_TOUCH_ID, we check
-                            // again in responding RELEASE_SINGLE_TAP.
-                            if (mPreventDrag != PREVENT_DRAG_YES) {
-                                if (mTouchMode == TOUCH_INIT_MODE) {
-                                    mPrivateHandler.sendMessageDelayed(
-                                            mPrivateHandler.obtainMessage(
-                                            RELEASE_SINGLE_TAP),
-                                            ViewConfiguration.getDoubleTapTimeout());
-                                } else {
-                                    mTouchMode = TOUCH_DONE_MODE;
-                                    doShortPress();
-                                }
+                            if (mTouchMode == TOUCH_INIT_MODE) {
+                                mPrivateHandler.sendEmptyMessageDelayed(
+                                        RELEASE_SINGLE_TAP, ViewConfiguration
+                                                .getDoubleTapTimeout());
+                            } else {
+                                doShortPress();
                             }
                             break;
                         }
@@ -4899,6 +4922,13 @@ public class WebView extends AbsoluteLayout
                         // if the user waits a while w/o moving before the
                         // up, we don't want to do a fling
                         if (eventTime - mLastTouchTime <= MIN_FLING_TIME) {
+                            if (mVelocityTracker == null) {
+                                Log.e(LOGTAG, "Got null mVelocityTracker when "
+                                        + "mPreventDefault = "
+                                        + mPreventDefault
+                                        + " mDeferTouchProcess = "
+                                        + mDeferTouchProcess);
+                            }
                             mVelocityTracker.addMovement(ev);
                             doFling();
                             break;
@@ -4912,32 +4942,36 @@ public class WebView extends AbsoluteLayout
                         mLastVelocity = 0;
                         WebViewCore.resumePriority();
                         break;
-                    case TOUCH_DRAG_START_MODE:
-                    case TOUCH_DONE_MODE:
-                        // do nothing
-                        break;
                 }
-                // we also use mVelocityTracker == null to tell us that we are
-                // not "moving around", so we can take the slower/prettier
-                // mode in the drawing code
-                if (mVelocityTracker != null) {
-                    mVelocityTracker.recycle();
-                    mVelocityTracker = null;
-                }
+                stopTouch();
                 break;
             }
             case MotionEvent.ACTION_CANCEL: {
-                cancelTouch();
                 if (mTouchMode == TOUCH_DRAG_MODE) {
-                    if (mScroller.springback(mScrollX, mScrollY, 0,
-                            computeMaxScrollX(), 0, computeMaxScrollY())) {
-                        invalidate();
-                    }
+                    mScroller.springback(mScrollX, mScrollY, 0,
+                            computeMaxScrollX(), 0, computeMaxScrollY());
+                    invalidate();
                 }
+                cancelWebCoreTouchEvent(contentX, contentY, false);
+                cancelTouch();
                 break;
             }
         }
         return true;
+    }
+
+    private void cancelWebCoreTouchEvent(int x, int y, boolean removeEvents) {
+        if (shouldForwardTouchEvent()) {
+            if (removeEvents) {
+                mWebViewCore.removeMessages(EventHub.TOUCH_EVENT);
+            }
+            TouchEventData ted = new TouchEventData();
+            ted.mX = x;
+            ted.mY = y;
+            ted.mAction = MotionEvent.ACTION_CANCEL;
+            mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
+            mPreventDefault = PREVENT_DEFAULT_IGNORE;
+        }
     }
 
     private void startTouch(float x, float y, long eventTime) {
@@ -4949,6 +4983,60 @@ public class WebView extends AbsoluteLayout
         mSnapScrollMode = SNAP_NONE;
         if (mDragTracker != null) {
             mDragTrackerHandler = new DragTrackerHandler(x, y, mDragTracker);
+        }
+    }
+
+    private void startDrag() {
+        WebViewCore.reducePriority();
+        if (!mDragFromTextInput) {
+            nativeHideCursor();
+        }
+        WebSettings settings = getSettings();
+        if (settings.supportZoom()
+                && settings.getBuiltInZoomControls()
+                && !mZoomButtonsController.isVisible()
+                && mMinZoomScale < mMaxZoomScale) {
+            mZoomButtonsController.setVisible(true);
+            int count = settings.getDoubleTapToastCount();
+            if (mInZoomOverview && count > 0) {
+                settings.setDoubleTapToastCount(--count);
+                Toast.makeText(mContext,
+                        com.android.internal.R.string.double_tap_toast,
+                        Toast.LENGTH_LONG).show();
+            }
+        }
+    }
+
+    private void doDrag(int deltaX, int deltaY) {
+        if ((deltaX | deltaY) != 0) {
+            overscrollBy(deltaX, deltaY, mScrollX, mScrollY,
+                    computeMaxScrollX(), computeMaxScrollY(),
+                    getViewWidth() / 3, getViewHeight() / 3);
+        }
+        if (!getSettings().getBuiltInZoomControls()) {
+            boolean showPlusMinus = mMinZoomScale < mMaxZoomScale;
+            if (mZoomControls != null && showPlusMinus) {
+                if (mZoomControls.getVisibility() == View.VISIBLE) {
+                    mPrivateHandler.removeCallbacks(mZoomControlRunnable);
+                } else {
+                    mZoomControls.show(showPlusMinus, false);
+                }
+                mPrivateHandler.postDelayed(mZoomControlRunnable,
+                        ZOOM_CONTROLS_TIMEOUT);
+            }
+        }
+    }
+
+    private void stopTouch() {
+        if (mDragTrackerHandler != null) {
+            mDragTrackerHandler.stopDrag();
+        }
+        // we also use mVelocityTracker == null to tell us that we are
+        // not "moving around", so we can take the slower/prettier
+        // mode in the drawing code
+        if (mVelocityTracker != null) {
+            mVelocityTracker.recycle();
+            mVelocityTracker = null;
         }
     }
 
@@ -5226,8 +5314,8 @@ public class WebView extends AbsoluteLayout
             if (nativeFocusIsPlugin()) {
                 for (int i = 0; i < count; i++) {
                     letPluginHandleNavKey(selectKeyCode, time, true);
-                    letPluginHandleNavKey(selectKeyCode, time, false);
                 }
+                letPluginHandleNavKey(selectKeyCode, time, false);
             } else if (navHandledKey(selectKeyCode, count, false, time)) {
                 playSoundEffect(keyCodeToSoundsEffect(selectKeyCode));
             }
@@ -5571,6 +5659,10 @@ public class WebView extends AbsoluteLayout
         if (mNativeClass == 0) {
             return;
         }
+        if (mPreventDefault == PREVENT_DEFAULT_YES) {
+            return;
+        }
+        mTouchMode = TOUCH_DONE_MODE;
         switchOutDrawHistory();
         // mLastTouchX and mLastTouchY are the point in the current viewport
         int contentX = viewToContentX((int) mLastTouchX + mScrollX);
@@ -5842,7 +5934,7 @@ public class WebView extends AbsoluteLayout
                 cursorData(), 1000);
     }
 
-    /* package */ WebViewCore getWebViewCore() {
+    /* package */ synchronized WebViewCore getWebViewCore() {
         return mWebViewCore;
     }
 
@@ -5859,9 +5951,17 @@ public class WebView extends AbsoluteLayout
         public void handleMessage(Message msg) {
             // exclude INVAL_RECT_MSG_ID since it is frequently output
             if (DebugFlags.WEB_VIEW && msg.what != INVAL_RECT_MSG_ID) {
-                Log.v(LOGTAG, msg.what < REMEMBER_PASSWORD || msg.what
-                        > FIND_AGAIN ? Integer.toString(msg.what)
-                        : HandlerDebugString[msg.what - REMEMBER_PASSWORD]);
+                if (msg.what >= FIRST_PRIVATE_MSG_ID
+                        && msg.what <= LAST_PRIVATE_MSG_ID) {
+                    Log.v(LOGTAG, HandlerPrivateDebugString[msg.what
+                            - FIRST_PRIVATE_MSG_ID]);
+                } else if (msg.what >= FIRST_PACKAGE_MSG_ID
+                        && msg.what <= LAST_PACKAGE_MSG_ID) {
+                    Log.v(LOGTAG, HandlerPackageDebugString[msg.what
+                            - FIRST_PACKAGE_MSG_ID]);
+                } else {
+                    Log.v(LOGTAG, Integer.toString(msg.what));
+                }
             }
             if (mWebViewCore == null) {
                 // after WebView's destroy() is called, skip handling messages.
@@ -5882,70 +5982,57 @@ public class WebView extends AbsoluteLayout
                     ((Message) msg.obj).sendToTarget();
                     break;
                 }
-                case SWITCH_TO_SHORTPRESS: {
-                    // if mPreventDrag is not confirmed, cancel it so that it
-                    // won't block panning the page.
-                    if (mPreventDrag == PREVENT_DRAG_MAYBE_YES) {
-                        mPreventDrag = PREVENT_DRAG_CANCEL;
-                        mPreventLongPress = false;
-                        mPreventDoubleTap = false;
-                        // remove the pending TOUCH_EVENT and send a cancel
-                        mWebViewCore.removeMessages(EventHub.TOUCH_EVENT);
-                        WebViewCore.TouchEventData ted = new WebViewCore.TouchEventData();
-                        ted.mAction = MotionEvent.ACTION_CANCEL;
-                        mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
+                case PREVENT_DEFAULT_TIMEOUT: {
+                    // if timeout happens, cancel it so that it won't block UI
+                    // to continue handling touch events
+                    if ((msg.arg1 == MotionEvent.ACTION_DOWN
+                            && mPreventDefault == PREVENT_DEFAULT_MAYBE_YES)
+                            || (msg.arg1 == MotionEvent.ACTION_MOVE
+                            && mPreventDefault == PREVENT_DEFAULT_NO_FROM_TOUCH_DOWN)) {
+                        cancelWebCoreTouchEvent(
+                                viewToContentX((int) mLastTouchX + mScrollX),
+                                viewToContentY((int) mLastTouchY + mScrollY),
+                                true);
                     }
+                    break;
+                }
+                case SWITCH_TO_SHORTPRESS: {
                     if (mTouchMode == TOUCH_INIT_MODE) {
-                        mTouchMode = mFullScreenHolder == null
-                                ? TOUCH_SHORTPRESS_START_MODE
-                                        : TOUCH_SHORTPRESS_MODE;
-                        updateSelection();
+                        if (mPreventDefault != PREVENT_DEFAULT_YES) {
+                            mTouchMode = TOUCH_SHORTPRESS_START_MODE;
+                            updateSelection();
+                        } else {
+                            // set to TOUCH_SHORTPRESS_MODE so that it won't
+                            // trigger double tap any more
+                            mTouchMode = TOUCH_SHORTPRESS_MODE;
+                        }
                     } else if (mTouchMode == TOUCH_DOUBLE_TAP_MODE) {
                         mTouchMode = TOUCH_DONE_MODE;
                     }
                     break;
                 }
                 case SWITCH_TO_LONGPRESS: {
-                    if (mPreventLongPress) {
-                        mTouchMode = TOUCH_DONE_MODE;
-                        WebViewCore.TouchEventData ted
-                                = new WebViewCore.TouchEventData();
+                    if (inFullScreenMode() || mDeferTouchProcess) {
+                        TouchEventData ted = new TouchEventData();
                         ted.mAction = WebViewCore.ACTION_LONGPRESS;
                         ted.mX = viewToContentX((int) mLastTouchX + mScrollX);
                         ted.mY = viewToContentY((int) mLastTouchY + mScrollY);
-                        ted.mEventTime = SystemClock.uptimeMillis();
-                        // metaState for long press is tricky. Should it be the state
-                        // when the press started or when the press was released? Or
-                        // some intermediary key state? For simplicity for now, we
-                        // don't set it.
+                        // metaState for long press is tricky. Should it be the
+                        // state when the press started or when the press was
+                        // released? Or some intermediary key state? For
+                        // simplicity for now, we don't set it.
                         ted.mMetaState = 0;
+                        ted.mReprocess = mDeferTouchProcess;
                         mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
-                    } else if (mPreventDrag != PREVENT_DRAG_YES) {
+                    } else if (mPreventDefault != PREVENT_DEFAULT_YES) {
                         mTouchMode = TOUCH_DONE_MODE;
-                        if (mFullScreenHolder == null) {
-                            performLongClick();
-                            rebuildWebTextView();
-                        }
+                        performLongClick();
+                        rebuildWebTextView();
                     }
                     break;
                 }
                 case RELEASE_SINGLE_TAP: {
-                    if (mPreventDrag == PREVENT_DRAG_MAYBE_YES) {
-                        // if mPreventDrag is not confirmed, cancel it so that
-                        // it won't block panning the page.
-                        mPreventDrag = PREVENT_DRAG_CANCEL;
-                        mPreventLongPress = false;
-                        mPreventDoubleTap = false;
-                        // remove the pending TOUCH_EVENT and send a cancel
-                        mWebViewCore.removeMessages(EventHub.TOUCH_EVENT);
-                        WebViewCore.TouchEventData ted = new WebViewCore.TouchEventData();
-                        ted.mAction = MotionEvent.ACTION_CANCEL;
-                        mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
-                    }
-                    if (mPreventDrag != PREVENT_DRAG_YES) {
-                        mTouchMode = TOUCH_DONE_MODE;
-                        doShortPress();
-                    }
+                    doShortPress();
                     break;
                 }
                 case SCROLL_BY_MSG_ID:
@@ -6191,23 +6278,81 @@ public class WebView extends AbsoluteLayout
                     break;
 
                 case PREVENT_TOUCH_ID:
-                    if (msg.arg1 == MotionEvent.ACTION_DOWN) {
-                        // dont override if mPreventDrag has been set to no due
-                        // to time out
-                        if (mPreventDrag == PREVENT_DRAG_MAYBE_YES) {
-                            mPreventDrag = (msg.arg2 & TOUCH_PREVENT_DRAG)
-                                    == TOUCH_PREVENT_DRAG ? PREVENT_DRAG_YES
-                                    : PREVENT_DRAG_NO;
-                            if (mPreventDrag == PREVENT_DRAG_YES) {
-                                mTouchMode = TOUCH_DONE_MODE;
-                            } else {
-                                mPreventLongPress =
-                                        (msg.arg2 & TOUCH_PREVENT_LONGPRESS)
-                                        == TOUCH_PREVENT_LONGPRESS;
-                                mPreventDoubleTap =
-                                        (msg.arg2 & TOUCH_PREVENT_DOUBLETAP)
-                                        == TOUCH_PREVENT_DOUBLETAP;
+                    if (inFullScreenMode()) {
+                        break;
+                    }
+                    if (msg.obj == null) {
+                        if (msg.arg1 == MotionEvent.ACTION_DOWN
+                                && mPreventDefault == PREVENT_DEFAULT_MAYBE_YES) {
+                            // if prevent default is called from WebCore, UI
+                            // will not handle the rest of the touch events any
+                            // more.
+                            mPreventDefault = msg.arg2 == 1 ? PREVENT_DEFAULT_YES
+                                    : PREVENT_DEFAULT_NO_FROM_TOUCH_DOWN;
+                        } else if (msg.arg1 == MotionEvent.ACTION_MOVE
+                                && mPreventDefault == PREVENT_DEFAULT_NO_FROM_TOUCH_DOWN) {
+                            // the return for the first ACTION_MOVE will decide
+                            // whether UI will handle touch or not. Currently no
+                            // support for alternating prevent default
+                            mPreventDefault = msg.arg2 == 1 ? PREVENT_DEFAULT_YES
+                                    : PREVENT_DEFAULT_NO;
+                        }
+                    } else if (msg.arg2 == 0) {
+                        // prevent default is not called in WebCore, so the
+                        // message needs to be reprocessed in UI
+                        TouchEventData ted = (TouchEventData) msg.obj;
+                        switch (ted.mAction) {
+                            case MotionEvent.ACTION_DOWN:
+                                mLastDeferTouchX = contentToViewX(ted.mX)
+                                        - mScrollX;
+                                mLastDeferTouchY = contentToViewY(ted.mY)
+                                        - mScrollY;
+                                mDeferTouchMode = TOUCH_INIT_MODE;
+                                break;
+                            case MotionEvent.ACTION_MOVE: {
+                                // no snapping in defer process
+                                int x = contentToViewX(ted.mX) - mScrollX;
+                                int y = contentToViewY(ted.mY) - mScrollY;
+                                if (mDeferTouchMode != TOUCH_DRAG_MODE) {
+                                    mDeferTouchMode = TOUCH_DRAG_MODE;
+                                    mLastDeferTouchX = x;
+                                    mLastDeferTouchY = y;
+                                    startDrag();
+                                }
+                                doDrag((int) (mLastDeferTouchX - x),
+                                        (int) (mLastDeferTouchY - y));
+                                mLastDeferTouchX = x;
+                                mLastDeferTouchY = y;
+                                break;
                             }
+                            case MotionEvent.ACTION_UP:
+                            case MotionEvent.ACTION_CANCEL:
+                                if (mDeferTouchMode == TOUCH_DRAG_MODE) {
+                                    // no fling in defer process
+                                    mScroller.springback(mScrollX, mScrollY, 0,
+                                            computeMaxScrollX(), 0,
+                                            computeMaxScrollY());
+                                    invalidate();
+                                    WebViewCore.resumePriority();
+                                }
+                                mDeferTouchMode = TOUCH_DONE_MODE;
+                                break;
+                            case WebViewCore.ACTION_DOUBLETAP:
+                                // doDoubleTap() needs mLastTouchX/Y as anchor
+                                mLastTouchX = contentToViewX(ted.mX) - mScrollX;
+                                mLastTouchY = contentToViewY(ted.mY) - mScrollY;
+                                doDoubleTap();
+                                mDeferTouchMode = TOUCH_DONE_MODE;
+                                break;
+                            case WebViewCore.ACTION_LONGPRESS:
+                                HitTestResult hitTest = getHitTestResult();
+                                if (hitTest != null && hitTest.mType
+                                        != HitTestResult.UNKNOWN_TYPE) {
+                                    performLongClick();
+                                    rebuildWebTextView();
+                                }
+                                mDeferTouchMode = TOUCH_DONE_MODE;
+                                break;
                         }
                     }
                     break;
@@ -6251,7 +6396,7 @@ public class WebView extends AbsoluteLayout
                     WebViewCore.PluginFullScreenData data
                             = (WebViewCore.PluginFullScreenData) msg.obj;
                     if (data.mNpp != 0 && data.mView != null) {
-                        if (mFullScreenHolder != null) {
+                        if (inFullScreenMode()) {
                             Log.w(LOGTAG,
                                     "Should not have another full screen.");
                             mFullScreenHolder.dismiss();
@@ -6269,7 +6414,7 @@ public class WebView extends AbsoluteLayout
                         mFullScreenHolder.setCancelable(false);
                         mFullScreenHolder.setCanceledOnTouchOutside(false);
                         mFullScreenHolder.show();
-                    } else if (mFullScreenHolder == null) {
+                    } else if (!inFullScreenMode()) {
                         // this may happen if user dismisses the fullscreen and
                         // then the WebCore re-position message finally reached
                         // the UI thread.
@@ -6323,7 +6468,7 @@ public class WebView extends AbsoluteLayout
                     break;
 
                 case HIDE_FULLSCREEN:
-                    if (mFullScreenHolder != null) {
+                    if (inFullScreenMode()) {
                         mFullScreenHolder.dismiss();
                         mFullScreenHolder = null;
                     }

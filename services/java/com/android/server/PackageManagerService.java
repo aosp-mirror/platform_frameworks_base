@@ -51,6 +51,7 @@ import android.content.pm.IPackageMoveObserver;
 import android.content.pm.IPackageStatsObserver;
 import android.content.pm.InstrumentationInfo;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageInfoLite;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageStats;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
@@ -78,12 +79,14 @@ import android.os.Environment;
 import android.os.FileObserver;
 import android.os.FileUtils;
 import android.os.Handler;
+import android.os.StatFs;
 import android.os.storage.StorageResultCode;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.provider.Settings;
 import android.security.SystemKeyStore;
 import android.util.*;
 import android.view.Display;
@@ -4568,21 +4571,79 @@ class PackageManagerService extends IPackageManager.Stub {
             this.installerPackageName = installerPackageName;
         }
 
+        private int installLocationPolicy(PackageInfoLite pkgLite, int flags) {
+            String packageName = pkgLite.packageName;
+            int installLocation = pkgLite.installLocation;
+            boolean onSd = (flags & PackageManager.INSTALL_EXTERNAL) != 0;
+            synchronized (mPackages) {
+                PackageParser.Package pkg = mPackages.get(packageName);
+                if (pkg != null) {
+                    if ((flags & PackageManager.INSTALL_REPLACE_EXISTING) != 0) {
+                        // Check for updated system application.
+                        if ((pkg.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
+                            if (onSd) {
+                                Log.w(TAG, "Cannot install update to system app on sdcard");
+                                return PackageHelper.RECOMMEND_FAILED_INVALID_LOCATION;
+                            }
+                            return PackageHelper.RECOMMEND_INSTALL_INTERNAL;
+                        } else {
+                            // When replacing apps make sure we honour
+                            // the existing app location if not overwritten by other options
+                            boolean prevOnSd = (pkg.applicationInfo.flags & ApplicationInfo.FLAG_ON_SDCARD) != 0;
+                            if (onSd) {
+                                // Install flag overrides everything.
+                                return PackageHelper.RECOMMEND_INSTALL_EXTERNAL;
+                            }
+                            // If current upgrade does not specify install location.
+                            if (installLocation == PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY) {
+                                // Application explicitly specified internal.
+                                return PackageHelper.RECOMMEND_INSTALL_INTERNAL;
+                            } else if (installLocation == PackageInfo.INSTALL_LOCATION_PREFER_EXTERNAL) {
+                                // App explictly prefers external. Let policy decide
+                            } else if (installLocation == PackageInfo.INSTALL_LOCATION_AUTO) {
+                                // Prefer previous location
+                                return prevOnSd ? PackageHelper.RECOMMEND_INSTALL_EXTERNAL:
+                                    PackageHelper.RECOMMEND_INSTALL_INTERNAL;
+                            }
+                        }
+                    } else {
+                        // Invalid install. Return error code
+                        return PackageHelper.RECOMMEND_FAILED_ALREADY_EXISTS;
+                    }
+                }
+            }
+            // All the special cases have been taken care of.
+            // Return result based on recommended install location.
+            if (onSd) {
+                return PackageHelper.RECOMMEND_INSTALL_EXTERNAL;
+            }
+            return pkgLite.recommendedInstallLocation;
+        }
+
         public void handleStartCopy() throws RemoteException {
             int ret = PackageManager.INSTALL_SUCCEEDED;
+            boolean fwdLocked = (flags & PackageManager.INSTALL_FORWARD_LOCK) != 0;
+            boolean onSd = (flags & PackageManager.INSTALL_EXTERNAL) != 0;
             // Dont need to invoke getInstallLocation for forward locked apps.
-            if ((flags & PackageManager.INSTALL_FORWARD_LOCK) != 0) {
-                flags &= ~PackageManager.INSTALL_EXTERNAL;
+            if (fwdLocked && onSd) {
+                Log.w(TAG, "Cannot install fwd locked apps on sdcard");
+                ret = PackageManager.INSTALL_FAILED_INVALID_INSTALL_LOCATION;
             } else {
                 // Remote call to find out default install location
-                int loc = mContainerService.getRecommendedInstallLocation(packageURI);
+                PackageInfoLite pkgLite = mContainerService.getMinimalPackageInfo(packageURI);
+                int loc = installLocationPolicy(pkgLite, flags);
                 // Use install location to create InstallArgs and temporary
                 // install location
-                if (loc == PackageHelper.RECOMMEND_FAILED_INSUFFICIENT_STORAGE){
+                if (loc == PackageHelper.RECOMMEND_FAILED_INVALID_LOCATION){
+                    ret = PackageManager.INSTALL_FAILED_INVALID_INSTALL_LOCATION;
+                } else if (loc == PackageHelper.RECOMMEND_FAILED_ALREADY_EXISTS){
+                    ret = PackageManager.INSTALL_FAILED_ALREADY_EXISTS;
+                } else if (loc == PackageHelper.RECOMMEND_FAILED_INSUFFICIENT_STORAGE){
                     ret = PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
                 } else if (loc == PackageHelper.RECOMMEND_FAILED_INVALID_APK) {
                     ret = PackageManager.INSTALL_FAILED_INVALID_APK;
                 } else {
+                    // Override install location with flags
                     if ((flags & PackageManager.INSTALL_EXTERNAL) == 0){
                         if (loc == PackageHelper.RECOMMEND_INSTALL_EXTERNAL) {
                             // Set the flag to install on external media.

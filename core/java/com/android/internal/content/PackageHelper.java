@@ -36,6 +36,8 @@ public class PackageHelper {
     public static final int RECOMMEND_INSTALL_EXTERNAL = 2;
     public static final int RECOMMEND_FAILED_INSUFFICIENT_STORAGE = -1;
     public static final int RECOMMEND_FAILED_INVALID_APK = -2;
+    public static final int RECOMMEND_FAILED_INVALID_LOCATION = -3;
+    public static final int RECOMMEND_FAILED_ALREADY_EXISTS = -4;
     private static final boolean localLOGV = true;
     private static final String TAG = "PackageHelper";
 

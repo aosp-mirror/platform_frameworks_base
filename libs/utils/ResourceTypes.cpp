@@ -625,6 +625,10 @@ void ResXMLParser::restart()
     mCurNode = NULL;
     mEventCode = mTree.mError == NO_ERROR ? START_DOCUMENT : BAD_DOCUMENT;
 }
+const ResStringPool& ResXMLParser::getStrings() const
+{
+    return mTree.mStrings;
+}
 
 ResXMLParser::event_code_t ResXMLParser::getEventType() const
 {
@@ -1147,11 +1151,6 @@ void ResXMLTree::uninit()
         mOwnedData = NULL;
     }
     restart();
-}
-
-const ResStringPool& ResXMLTree::getStrings() const
-{
-    return mStrings;
 }
 
 status_t ResXMLTree::validateNode(const ResXMLTree_node* node) const

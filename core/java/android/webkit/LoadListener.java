@@ -1057,7 +1057,7 @@ class LoadListener extends Handler implements EventHandler {
                 mCacheLoader != null) ? HTTP_OK : mStatusCode;
         // pass content-type content-length and content-encoding
         final int nativeResponse = nativeCreateResponse(
-                mUrl, statusCode, mStatusText,
+                originalUrl(), statusCode, mStatusText,
                 mMimeType, mContentLength, mEncoding);
         if (mHeaders != null) {
             mHeaders.getHeaders(new Headers.HeaderCallback() {
@@ -1256,9 +1256,6 @@ class LoadListener extends Handler implements EventHandler {
                 return;
             }
 
-            if (mOriginalUrl == null) {
-                mOriginalUrl = mUrl;
-            }
 
             // Cache the redirect response
             if (getErrorID() == OK) {
@@ -1273,6 +1270,8 @@ class LoadListener extends Handler implements EventHandler {
                         WebViewWorker.MSG_REMOVE_CACHE, this).sendToTarget();
             }
 
+            // Saving a copy of the unstripped url for the response
+            mOriginalUrl = redirectTo;
             // This will strip the anchor
             setUrl(redirectTo);
 

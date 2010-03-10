@@ -113,9 +113,6 @@ public class AudioService extends IAudioService.Stub {
     private Object mSettingsLock = new Object();
     private boolean mMediaServerOk;
 
-    /** cached value of the BT dock address to recognize undocking events */
-    private static String sBtDockAddress = "";
-
     private SoundPool mSoundPool;
     private Object mSoundEffectsLock = new Object();
     private static final int NUM_SOUNDPOOL_CHANNELS = 4;
@@ -269,6 +266,7 @@ public class AudioService extends IAudioService.Stub {
                 new IntentFilter(Intent.ACTION_HEADSET_PLUG);
         intentFilter.addAction(BluetoothA2dp.ACTION_SINK_STATE_CHANGED);
         intentFilter.addAction(BluetoothHeadset.ACTION_STATE_CHANGED);
+        intentFilter.addAction(Intent.ACTION_DOCK_EVENT);
         context.registerReceiver(mReceiver, intentFilter);
 
     }
@@ -1498,7 +1496,23 @@ public class AudioService extends IAudioService.Stub {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
 
-            if (action.equals(BluetoothA2dp.ACTION_SINK_STATE_CHANGED)) {
+            if (action.equals(Intent.ACTION_DOCK_EVENT)) {
+                int dockState = intent.getIntExtra(Intent.EXTRA_DOCK_STATE,
+                        Intent.EXTRA_DOCK_STATE_UNDOCKED);
+                int config;
+                switch (dockState) {
+                    case Intent.EXTRA_DOCK_STATE_DESK:
+                        config = AudioSystem.FORCE_BT_DESK_DOCK;
+                        break;
+                    case Intent.EXTRA_DOCK_STATE_CAR:
+                        config = AudioSystem.FORCE_BT_CAR_DOCK;
+                        break;
+                    case Intent.EXTRA_DOCK_STATE_UNDOCKED:
+                    default:
+                        config = AudioSystem.FORCE_NONE;
+                }
+                AudioSystem.setForceUse(AudioSystem.FOR_DOCK, config);
+            } else if (action.equals(BluetoothA2dp.ACTION_SINK_STATE_CHANGED)) {
                 int state = intent.getIntExtra(BluetoothA2dp.EXTRA_SINK_STATE,
                                                BluetoothA2dp.STATE_DISCONNECTED);
                 BluetoothDevice btDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
@@ -1508,10 +1522,6 @@ public class AudioService extends IAudioService.Stub {
 
                 if (isConnected &&
                     state != BluetoothA2dp.STATE_CONNECTED && state != BluetoothA2dp.STATE_PLAYING) {
-                    if (address.equals(sBtDockAddress)) {
-                        Log.v(TAG, "Recognized undocking from BT dock");
-                        AudioSystem.setForceUse(AudioSystem.FOR_DOCK, AudioSystem.FORCE_NONE);
-                    }
                     AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
                             AudioSystem.DEVICE_STATE_UNAVAILABLE,
                             address);
@@ -1519,27 +1529,6 @@ public class AudioService extends IAudioService.Stub {
                 } else if (!isConnected &&
                              (state == BluetoothA2dp.STATE_CONNECTED ||
                               state == BluetoothA2dp.STATE_PLAYING)) {
-                    if (btDevice.isBluetoothDock()) {
-                        Log.v(TAG, "Recognized connection to BT dock");
-                        sBtDockAddress = address;
-                        Intent i = context.registerReceiver(null, new IntentFilter(Intent.ACTION_DOCK_EVENT));
-                        if (i != null) {
-                            int dockState = i.getIntExtra(Intent.EXTRA_DOCK_STATE, Intent.EXTRA_DOCK_STATE_UNDOCKED);
-                            int config;
-                            switch (dockState) {
-                                case Intent.EXTRA_DOCK_STATE_DESK:
-                                    config = AudioSystem.FORCE_BT_DESK_DOCK;
-                                    break;
-                                case Intent.EXTRA_DOCK_STATE_CAR:
-                                    config = AudioSystem.FORCE_BT_CAR_DOCK;
-                                    break;
-                                case Intent.EXTRA_DOCK_STATE_UNDOCKED:
-                                default:
-                                    config = AudioSystem.FORCE_NONE;
-                            }
-                            AudioSystem.setForceUse(AudioSystem.FOR_DOCK, config);
-                        }
-                    }
                     AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
                                                          AudioSystem.DEVICE_STATE_AVAILABLE,
                                                          address);

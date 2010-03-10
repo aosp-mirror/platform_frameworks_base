@@ -377,11 +377,17 @@ import java.util.ArrayList;
             return;
         }
         mPreChange = postChange;
-        // This was simply a delete or a cut, so just delete the selection.
-        if (before > 0 && 0 == count) {
-            mWebView.deleteSelection(start, start + before);
-            // For this and all changes to the text, update our cache
-            updateCachedTextfield();
+        if (0 == count) {
+            if (before > 0) {
+                // This was simply a delete or a cut, so just delete the
+                // selection.
+                mWebView.deleteSelection(start, start + before);
+                // For this and all changes to the text, update our cache
+                updateCachedTextfield();
+            }
+            // before should never be negative, so whether it was a cut
+            // (handled above), or before is 0, in which case nothing has
+            // changed, we should return.
             return;
         }
         // Find the last character being replaced.  If it can be represented by

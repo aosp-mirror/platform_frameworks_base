@@ -10267,9 +10267,10 @@ public class WindowManagerService extends IWindowManager.Stub
                                 && buttonBrightness < 0) {
                             buttonBrightness = w.mAttrs.buttonBrightness;
                         }
-                        if (attrs.type == WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG
-                                || attrs.type == WindowManager.LayoutParams.TYPE_KEYGUARD
-                                || attrs.type == WindowManager.LayoutParams.TYPE_SYSTEM_ERROR) {
+                        if (canBeSeen
+                                && (attrs.type == WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG
+                                 || attrs.type == WindowManager.LayoutParams.TYPE_KEYGUARD
+                                 || attrs.type == WindowManager.LayoutParams.TYPE_SYSTEM_ERROR)) {
                             syswin = true;
                         }
                     }

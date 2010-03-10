@@ -60,6 +60,11 @@ public class SettingsProvider extends ContentProvider {
     private static final SettingsCache sSystemCache = new SettingsCache();
     private static final SettingsCache sSecureCache = new SettingsCache();
 
+    // Over this size we don't reject loading or saving settings but
+    // we do consider them broken/malicious and don't keep them in
+    // memory at least:
+    private static final int MAX_CACHE_ENTRY_SIZE = 500;
+
     private static final Bundle NULL_SETTING = Bundle.forPair("value", null);
 
     protected DatabaseHelper mOpenHelper;
@@ -264,10 +269,7 @@ public class SettingsProvider extends ContentProvider {
                               null, null, null, null);
             if (cursor != null && cursor.getCount() == 1) {
                 cursor.moveToFirst();
-                String value = cursor.getString(0);
-                Bundle bundle = (value == null) ? NULL_SETTING : Bundle.forPair("value", value);
-                cache.putIfAbsentLocked(key, bundle);
-                return bundle;
+                return cache.putIfAbsent(key, cursor.getString(0));
             }
         } catch (SQLiteException e) {
             Log.w(TAG, "settings lookup error", e);
@@ -275,7 +277,7 @@ public class SettingsProvider extends ContentProvider {
         } finally {
             if (cursor != null) cursor.close();
         }
-        cache.putIfAbsentLocked(key, NULL_SETTING);
+        cache.putIfAbsent(key, null);
         return NULL_SETTING;
     }
 
@@ -434,11 +436,16 @@ public class SettingsProvider extends ContentProvider {
             if (!parseProviderList(url, initialValues)) return null;
         }
 
+        SettingsCache cache = SettingsCache.forTable(args.table);
+        String value = initialValues.getAsString(Settings.NameValueTable.VALUE);
+        if (SettingsCache.isRedundantSetValue(cache, name, value)) {
+            return Uri.withAppendedPath(url, name);
+        }
+
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         final long rowId = db.insert(args.table, null, initialValues);
         if (rowId <= 0) return null;
 
-        SettingsCache cache = SettingsCache.forTable(args.table);
         SettingsCache.populate(cache, initialValues);  // before we notify
 
         if (LOCAL_LOGV) Log.v(TAG, args.table + " <- " + initialValues);
@@ -592,6 +599,7 @@ public class SettingsProvider extends ContentProvider {
      * database.
      */
     private static final class SettingsCache extends LinkedHashMap<String, Bundle> {
+
         public SettingsCache() {
             super(MAX_CACHE_ENTRIES, 0.75f /* load factor */, true /* access ordered */);
         }
@@ -601,14 +609,23 @@ public class SettingsProvider extends ContentProvider {
             return size() > MAX_CACHE_ENTRIES;
         }
 
-        public void putIfAbsentLocked(String key, Bundle value) {
-            synchronized (this) {
-                if (containsKey(key)) {
-                    // Lost a race.
-                    return;
+        /**
+         * Atomic cache population, conditional on size of value and if
+         * we lost a race.
+         *
+         * @returns a Bundle to send back to the client from call(), even
+         *     if we lost the race.
+         */
+        public Bundle putIfAbsent(String key, String value) {
+            Bundle bundle = (value == null) ? NULL_SETTING : Bundle.forPair("value", value);
+            if (value == null || value.length() <= MAX_CACHE_ENTRY_SIZE) {
+                synchronized (this) {
+                    if (!containsKey(key)) {
+                        put(key, bundle);
+                    }
                 }
-                put(key, value);
             }
+            return bundle;
         }
 
         public static SettingsCache forTable(String tableName) {
@@ -635,7 +652,11 @@ public class SettingsProvider extends ContentProvider {
             }
             String value = contentValues.getAsString(Settings.NameValueTable.VALUE);
             synchronized (cache) {
-                cache.put(name, Bundle.forPair(Settings.NameValueTable.VALUE, value));
+                if (value == null || value.length() <= MAX_CACHE_ENTRY_SIZE) {
+                    cache.put(name, Bundle.forPair(Settings.NameValueTable.VALUE, value));
+                } else {
+                    cache.remove(name);
+                }
             }
         }
 
@@ -653,5 +674,21 @@ public class SettingsProvider extends ContentProvider {
             }
         }
 
+        /**
+         * For suppressing duplicate/redundant settings inserts early,
+         * checking our cache first (but without faulting it in),
+         * before going to sqlite with the mutation.
+         */
+        public static boolean isRedundantSetValue(SettingsCache cache, String name, String value) {
+            if (cache == null) return false;
+            synchronized (cache) {
+                Bundle bundle = cache.get(name);
+                if (bundle == null) return false;
+                String oldValue = bundle.getPairValue();
+                if (oldValue == null && value == null) return true;
+                if ((oldValue == null) != (value == null)) return false;
+                return oldValue.equals(value);
+            }
+        }
     }
 }

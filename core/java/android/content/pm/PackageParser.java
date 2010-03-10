@@ -136,7 +136,20 @@ public class PackageParser {
             enabledRes = _enabledRes;
         }
     }
-    
+
+    /* Light weight package info.
+     * @hide
+     */
+    public static class PackageLite {
+        public String packageName;
+        public int installLocation;
+        public String mScanPath;
+        public PackageLite(String packageName, int installLocation) {
+            this.packageName = packageName;
+            this.installLocation = installLocation;
+        }
+    }
+
     private ParsePackageItemArgs mParseInstrumentationArgs;
     private ParseComponentArgs mParseActivityArgs;
     private ParseComponentArgs mParseActivityAliasArgs;
@@ -562,7 +575,14 @@ public class PackageParser {
         return true;
     }
 
-    public static String parsePackageName(String packageFilePath, int flags) {
+    /*
+     * Utility method that retrieves just the package name and install
+     * location from the apk location at the given file path.
+     * @param packageFilePath file location of the apk
+     * @param flags Special parse flags
+     * @return PackageLite object with package information.
+     */
+    public static PackageLite parsePackageLite(String packageFilePath, int flags) {
         XmlResourceParser parser = null;
         AssetManager assmgr = null;
         try {
@@ -577,9 +597,9 @@ public class PackageParser {
         }
         AttributeSet attrs = parser;
         String errors[] = new String[1];
-        String packageName = null;
+        PackageLite packageLite = null;
         try {
-            packageName = parsePackageName(parser, attrs, flags, errors);
+            packageLite = parsePackageLite(parser, attrs, flags, errors);
         } catch (IOException e) {
             Log.w(TAG, packageFilePath, e);
         } catch (XmlPullParserException e) {
@@ -588,11 +608,11 @@ public class PackageParser {
             if (parser != null) parser.close();
             if (assmgr != null) assmgr.close();
         }
-        if (packageName == null) {
-            Log.e(TAG, "parsePackageName error: " + errors[0]);
+        if (packageLite == null) {
+            Log.e(TAG, "parsePackageLite error: " + errors[0]);
             return null;
         }
-        return packageName;
+        return packageLite;
     }
 
     private static String validateName(String name, boolean requiresSeparator) {
@@ -656,6 +676,49 @@ public class PackageParser {
         return pkgName.intern();
     }
 
+    private static PackageLite parsePackageLite(XmlPullParser parser,
+            AttributeSet attrs, int flags, String[] outError)
+            throws IOException, XmlPullParserException {
+
+        int type;
+        while ((type=parser.next()) != parser.START_TAG
+                   && type != parser.END_DOCUMENT) {
+            ;
+        }
+
+        if (type != parser.START_TAG) {
+            outError[0] = "No start tag found";
+            return null;
+        }
+        if ((flags&PARSE_CHATTY) != 0 && Config.LOGV) Log.v(
+            TAG, "Root element name: '" + parser.getName() + "'");
+        if (!parser.getName().equals("manifest")) {
+            outError[0] = "No <manifest> tag";
+            return null;
+        }
+        String pkgName = attrs.getAttributeValue(null, "package");
+        if (pkgName == null || pkgName.length() == 0) {
+            outError[0] = "<manifest> does not specify package";
+            return null;
+        }
+        String nameError = validateName(pkgName, true);
+        if (nameError != null && !"android".equals(pkgName)) {
+            outError[0] = "<manifest> specifies bad package name \""
+                + pkgName + "\": " + nameError;
+            return null;
+        }
+        int installLocation = PackageInfo.INSTALL_LOCATION_AUTO;
+        for (int i = 0; i < attrs.getAttributeCount(); i++) {
+            String attr = attrs.getAttributeName(i);
+            if (attr.equals("installLocation")) {
+                installLocation = attrs.getAttributeIntValue(i,
+                        PackageInfo.INSTALL_LOCATION_AUTO);
+                break;
+            }
+        }
+        return new PackageLite(pkgName.intern(), installLocation);
+    }
+
     /**
      * Temporary.
      */
@@ -692,14 +755,14 @@ public class PackageParser {
                 com.android.internal.R.styleable.AndroidManifest);
         pkg.mVersionCode = sa.getInteger(
                 com.android.internal.R.styleable.AndroidManifest_versionCode, 0);
-        pkg.mVersionName = sa.getNonResourceString(
-                com.android.internal.R.styleable.AndroidManifest_versionName);
+        pkg.mVersionName = sa.getNonConfigurationString(
+                com.android.internal.R.styleable.AndroidManifest_versionName, 0);
         if (pkg.mVersionName != null) {
             pkg.mVersionName = pkg.mVersionName.intern();
         }
-        String str = sa.getNonResourceString(
-                com.android.internal.R.styleable.AndroidManifest_sharedUserId);
-        if (str != null) {
+        String str = sa.getNonConfigurationString(
+                com.android.internal.R.styleable.AndroidManifest_sharedUserId, 0);
+        if (str != null && str.length() > 0) {
             String nameError = validateName(str, true);
             if (nameError != null && !"android".equals(pkgName)) {
                 outError[0] = "<manifest> specifies bad sharedUserId name \""
@@ -765,6 +828,8 @@ public class PackageParser {
                 sa = res.obtainAttributes(attrs,
                         com.android.internal.R.styleable.AndroidManifestUsesPermission);
 
+                // Note: don't allow this value to be a reference to a resource
+                // that may change.
                 String name = sa.getNonResourceString(
                         com.android.internal.R.styleable.AndroidManifestUsesPermission_name);
 
@@ -808,6 +873,8 @@ public class PackageParser {
                 FeatureInfo fi = new FeatureInfo();
                 sa = res.obtainAttributes(attrs,
                         com.android.internal.R.styleable.AndroidManifestUsesFeature);
+                // Note: don't allow this value to be a reference to a resource
+                // that may change.
                 fi.name = sa.getNonResourceString(
                         com.android.internal.R.styleable.AndroidManifestUsesFeature_name);
                 if (fi.name == null) {
@@ -939,6 +1006,8 @@ public class PackageParser {
                 sa = res.obtainAttributes(attrs,
                         com.android.internal.R.styleable.AndroidManifestProtectedBroadcast);
 
+                // Note: don't allow this value to be a reference to a resource
+                // that may change.
                 String name = sa.getNonResourceString(
                         com.android.internal.R.styleable.AndroidManifestProtectedBroadcast_name);
 
@@ -964,8 +1033,8 @@ public class PackageParser {
                 sa = res.obtainAttributes(attrs,
                         com.android.internal.R.styleable.AndroidManifestOriginalPackage);
 
-                String orig =sa.getNonResourceString(
-                        com.android.internal.R.styleable.AndroidManifestOriginalPackage_name);
+                String orig =sa.getNonConfigurationString(
+                        com.android.internal.R.styleable.AndroidManifestOriginalPackage_name, 0);
                 if (!pkg.packageName.equals(orig)) {
                     if (pkg.mOriginalPackages == null) {
                         pkg.mOriginalPackages = new ArrayList<String>();
@@ -982,8 +1051,8 @@ public class PackageParser {
                 sa = res.obtainAttributes(attrs,
                         com.android.internal.R.styleable.AndroidManifestOriginalPackage);
 
-                String name = sa.getNonResourceString(
-                        com.android.internal.R.styleable.AndroidManifestOriginalPackage_name);
+                String name = sa.getNonConfigurationString(
+                        com.android.internal.R.styleable.AndroidManifestOriginalPackage_name, 0);
 
                 sa.recycle();
 
@@ -1208,6 +1277,8 @@ public class PackageParser {
             return null;
         }
 
+        // Note: don't allow this value to be a reference to a resource
+        // that may change.
         perm.info.group = sa.getNonResourceString(
                 com.android.internal.R.styleable.AndroidManifestPermission_permissionGroup);
         if (perm.info.group != null) {
@@ -1312,6 +1383,8 @@ public class PackageParser {
         }
 
         String str;
+        // Note: don't allow this value to be a reference to a resource
+        // that may change.
         str = sa.getNonResourceString(
                 com.android.internal.R.styleable.AndroidManifestInstrumentation_targetPackage);
         a.info.targetPackage = str != null ? str.intern() : null;
@@ -1352,8 +1425,8 @@ public class PackageParser {
         TypedArray sa = res.obtainAttributes(attrs,
                 com.android.internal.R.styleable.AndroidManifestApplication);
 
-        String name = sa.getNonResourceString(
-                com.android.internal.R.styleable.AndroidManifestApplication_name);
+        String name = sa.getNonConfigurationString(
+                com.android.internal.R.styleable.AndroidManifestApplication_name, 0);
         if (name != null) {
             ai.className = buildClassName(pkgName, name, outError);
             if (ai.className == null) {
@@ -1363,8 +1436,8 @@ public class PackageParser {
             }
         }
 
-        String manageSpaceActivity = sa.getNonResourceString(
-                com.android.internal.R.styleable.AndroidManifestApplication_manageSpaceActivity);
+        String manageSpaceActivity = sa.getNonConfigurationString(
+                com.android.internal.R.styleable.AndroidManifestApplication_manageSpaceActivity, 0);
         if (manageSpaceActivity != null) {
             ai.manageSpaceActivityName = buildClassName(pkgName, manageSpaceActivity,
                     outError);
@@ -1377,8 +1450,8 @@ public class PackageParser {
 
             // backupAgent, killAfterRestore, restoreNeedsApplication, and restoreAnyVersion
             // are only relevant if backup is possible for the given application.
-            String backupAgent = sa.getNonResourceString(
-                    com.android.internal.R.styleable.AndroidManifestApplication_backupAgent);
+            String backupAgent = sa.getNonConfigurationString(
+                    com.android.internal.R.styleable.AndroidManifestApplication_backupAgent, 0);
             if (backupAgent != null) {
                 ai.backupAgentName = buildClassName(pkgName, backupAgent, outError);
                 if (false) {
@@ -1476,21 +1549,22 @@ public class PackageParser {
         }
 
         String str;
-        str = sa.getNonResourceString(
-                com.android.internal.R.styleable.AndroidManifestApplication_permission);
+        str = sa.getNonConfigurationString(
+                com.android.internal.R.styleable.AndroidManifestApplication_permission, 0);
         ai.permission = (str != null && str.length() > 0) ? str.intern() : null;
 
-        str = sa.getNonResourceString(
-                com.android.internal.R.styleable.AndroidManifestApplication_taskAffinity);
+        str = sa.getNonConfigurationString(
+                com.android.internal.R.styleable.AndroidManifestApplication_taskAffinity, 0);
         ai.taskAffinity = buildTaskAffinityName(ai.packageName, ai.packageName,
                 str, outError);
 
         if (outError[0] == null) {
-            ai.processName = buildProcessName(ai.packageName, null, sa.getNonResourceString(
-                    com.android.internal.R.styleable.AndroidManifestApplication_process),
+            ai.processName = buildProcessName(ai.packageName, null, sa.getNonConfigurationString(
+                    com.android.internal.R.styleable.AndroidManifestApplication_process, 0),
                     flags, mSeparateProcesses, outError);
     
-            ai.enabled = sa.getBoolean(com.android.internal.R.styleable.AndroidManifestApplication_enabled, true);
+            ai.enabled = sa.getBoolean(
+                    com.android.internal.R.styleable.AndroidManifestApplication_enabled, true);
         }
 
         sa.recycle();
@@ -1569,6 +1643,8 @@ public class PackageParser {
                 sa = res.obtainAttributes(attrs,
                         com.android.internal.R.styleable.AndroidManifestUsesLibrary);
 
+                // Note: don't allow this value to be a reference to a resource
+                // that may change.
                 String lname = sa.getNonResourceString(
                         com.android.internal.R.styleable.AndroidManifestUsesLibrary_name);
                 boolean req = sa.getBoolean(
@@ -1618,7 +1694,7 @@ public class PackageParser {
     private boolean parsePackageItemInfo(Package owner, PackageItemInfo outInfo,
             String[] outError, String tag, TypedArray sa,
             int nameRes, int labelRes, int iconRes) {
-        String name = sa.getNonResourceString(nameRes);
+        String name = sa.getNonConfigurationString(nameRes, 0);
         if (name == null) {
             outError[0] = tag + " does not specify android:name";
             return false;
@@ -1684,16 +1760,16 @@ public class PackageParser {
                 com.android.internal.R.styleable.AndroidManifestActivity_theme, 0);
 
         String str;
-        str = sa.getNonResourceString(
-                com.android.internal.R.styleable.AndroidManifestActivity_permission);
+        str = sa.getNonConfigurationString(
+                com.android.internal.R.styleable.AndroidManifestActivity_permission, 0);
         if (str == null) {
             a.info.permission = owner.applicationInfo.permission;
         } else {
             a.info.permission = str.length() > 0 ? str.toString().intern() : null;
         }
 
-        str = sa.getNonResourceString(
-                com.android.internal.R.styleable.AndroidManifestActivity_taskAffinity);
+        str = sa.getNonConfigurationString(
+                com.android.internal.R.styleable.AndroidManifestActivity_taskAffinity, 0);
         a.info.taskAffinity = buildTaskAffinityName(owner.applicationInfo.packageName,
                 owner.applicationInfo.taskAffinity, str, outError);
 
@@ -1839,8 +1915,8 @@ public class PackageParser {
         TypedArray sa = res.obtainAttributes(attrs,
                 com.android.internal.R.styleable.AndroidManifestActivityAlias);
 
-        String targetActivity = sa.getNonResourceString(
-                com.android.internal.R.styleable.AndroidManifestActivityAlias_targetActivity);
+        String targetActivity = sa.getNonConfigurationString(
+                com.android.internal.R.styleable.AndroidManifestActivityAlias_targetActivity, 0);
         if (targetActivity == null) {
             outError[0] = "<activity-alias> does not specify android:targetActivity";
             sa.recycle();
@@ -1917,8 +1993,8 @@ public class PackageParser {
         }
 
         String str;
-        str = sa.getNonResourceString(
-                com.android.internal.R.styleable.AndroidManifestActivityAlias_permission);
+        str = sa.getNonConfigurationString(
+                com.android.internal.R.styleable.AndroidManifestActivityAlias_permission, 0);
         if (str != null) {
             a.info.permission = str.length() > 0 ? str.toString().intern() : null;
         }
@@ -2005,17 +2081,17 @@ public class PackageParser {
         p.info.exported = sa.getBoolean(
                 com.android.internal.R.styleable.AndroidManifestProvider_exported, true);
 
-        String cpname = sa.getNonResourceString(
-                com.android.internal.R.styleable.AndroidManifestProvider_authorities);
+        String cpname = sa.getNonConfigurationString(
+                com.android.internal.R.styleable.AndroidManifestProvider_authorities, 0);
 
         p.info.isSyncable = sa.getBoolean(
                 com.android.internal.R.styleable.AndroidManifestProvider_syncable,
                 false);
 
-        String permission = sa.getNonResourceString(
-                com.android.internal.R.styleable.AndroidManifestProvider_permission);
-        String str = sa.getNonResourceString(
-                com.android.internal.R.styleable.AndroidManifestProvider_readPermission);
+        String permission = sa.getNonConfigurationString(
+                com.android.internal.R.styleable.AndroidManifestProvider_permission, 0);
+        String str = sa.getNonConfigurationString(
+                com.android.internal.R.styleable.AndroidManifestProvider_readPermission, 0);
         if (str == null) {
             str = permission;
         }
@@ -2025,8 +2101,8 @@ public class PackageParser {
             p.info.readPermission =
                 str.length() > 0 ? str.toString().intern() : null;
         }
-        str = sa.getNonResourceString(
-                com.android.internal.R.styleable.AndroidManifestProvider_writePermission);
+        str = sa.getNonConfigurationString(
+                com.android.internal.R.styleable.AndroidManifestProvider_writePermission, 0);
         if (str == null) {
             str = permission;
         }
@@ -2089,20 +2165,20 @@ public class PackageParser {
 
                 PatternMatcher pa = null;
 
-                String str = sa.getNonResourceString(
-                        com.android.internal.R.styleable.AndroidManifestGrantUriPermission_path);
+                String str = sa.getNonConfigurationString(
+                        com.android.internal.R.styleable.AndroidManifestGrantUriPermission_path, 0);
                 if (str != null) {
                     pa = new PatternMatcher(str, PatternMatcher.PATTERN_LITERAL);
                 }
 
-                str = sa.getNonResourceString(
-                        com.android.internal.R.styleable.AndroidManifestGrantUriPermission_pathPrefix);
+                str = sa.getNonConfigurationString(
+                        com.android.internal.R.styleable.AndroidManifestGrantUriPermission_pathPrefix, 0);
                 if (str != null) {
                     pa = new PatternMatcher(str, PatternMatcher.PATTERN_PREFIX);
                 }
 
-                str = sa.getNonResourceString(
-                        com.android.internal.R.styleable.AndroidManifestGrantUriPermission_pathPattern);
+                str = sa.getNonConfigurationString(
+                        com.android.internal.R.styleable.AndroidManifestGrantUriPermission_pathPattern, 0);
                 if (str != null) {
                     pa = new PatternMatcher(str, PatternMatcher.PATTERN_SIMPLE_GLOB);
                 }
@@ -2140,15 +2216,15 @@ public class PackageParser {
 
                 PathPermission pa = null;
 
-                String permission = sa.getNonResourceString(
-                        com.android.internal.R.styleable.AndroidManifestPathPermission_permission);
-                String readPermission = sa.getNonResourceString(
-                        com.android.internal.R.styleable.AndroidManifestPathPermission_readPermission);
+                String permission = sa.getNonConfigurationString(
+                        com.android.internal.R.styleable.AndroidManifestPathPermission_permission, 0);
+                String readPermission = sa.getNonConfigurationString(
+                        com.android.internal.R.styleable.AndroidManifestPathPermission_readPermission, 0);
                 if (readPermission == null) {
                     readPermission = permission;
                 }
-                String writePermission = sa.getNonResourceString(
-                        com.android.internal.R.styleable.AndroidManifestPathPermission_writePermission);
+                String writePermission = sa.getNonConfigurationString(
+                        com.android.internal.R.styleable.AndroidManifestPathPermission_writePermission, 0);
                 if (writePermission == null) {
                     writePermission = permission;
                 }
@@ -2175,22 +2251,22 @@ public class PackageParser {
                     return false;
                 }
                 
-                String path = sa.getNonResourceString(
-                        com.android.internal.R.styleable.AndroidManifestPathPermission_path);
+                String path = sa.getNonConfigurationString(
+                        com.android.internal.R.styleable.AndroidManifestPathPermission_path, 0);
                 if (path != null) {
                     pa = new PathPermission(path,
                             PatternMatcher.PATTERN_LITERAL, readPermission, writePermission);
                 }
 
-                path = sa.getNonResourceString(
-                        com.android.internal.R.styleable.AndroidManifestPathPermission_pathPrefix);
+                path = sa.getNonConfigurationString(
+                        com.android.internal.R.styleable.AndroidManifestPathPermission_pathPrefix, 0);
                 if (path != null) {
                     pa = new PathPermission(path,
                             PatternMatcher.PATTERN_PREFIX, readPermission, writePermission);
                 }
 
-                path = sa.getNonResourceString(
-                        com.android.internal.R.styleable.AndroidManifestPathPermission_pathPattern);
+                path = sa.getNonConfigurationString(
+                        com.android.internal.R.styleable.AndroidManifestPathPermission_pathPattern, 0);
                 if (path != null) {
                     pa = new PathPermission(path,
                             PatternMatcher.PATTERN_SIMPLE_GLOB, readPermission, writePermission);
@@ -2272,8 +2348,8 @@ public class PackageParser {
                     com.android.internal.R.styleable.AndroidManifestService_exported, false);
         }
 
-        String str = sa.getNonResourceString(
-                com.android.internal.R.styleable.AndroidManifestService_permission);
+        String str = sa.getNonConfigurationString(
+                com.android.internal.R.styleable.AndroidManifestService_permission, 0);
         if (str == null) {
             s.info.permission = owner.applicationInfo.permission;
         } else {
@@ -2370,8 +2446,8 @@ public class PackageParser {
             data = new Bundle();
         }
 
-        String name = sa.getNonResourceString(
-                com.android.internal.R.styleable.AndroidManifestMetaData_name);
+        String name = sa.getNonConfigurationString(
+                com.android.internal.R.styleable.AndroidManifestMetaData_name, 0);
         if (name == null) {
             outError[0] = "<meta-data> requires an android:name attribute";
             sa.recycle();
@@ -2489,8 +2565,8 @@ public class PackageParser {
                 sa = res.obtainAttributes(attrs,
                         com.android.internal.R.styleable.AndroidManifestData);
 
-                String str = sa.getNonResourceString(
-                        com.android.internal.R.styleable.AndroidManifestData_mimeType);
+                String str = sa.getNonConfigurationString(
+                        com.android.internal.R.styleable.AndroidManifestData_mimeType, 0);
                 if (str != null) {
                     try {
                         outInfo.addDataType(str);
@@ -2501,34 +2577,34 @@ public class PackageParser {
                     }
                 }
 
-                str = sa.getNonResourceString(
-                        com.android.internal.R.styleable.AndroidManifestData_scheme);
+                str = sa.getNonConfigurationString(
+                        com.android.internal.R.styleable.AndroidManifestData_scheme, 0);
                 if (str != null) {
                     outInfo.addDataScheme(str);
                 }
 
-                String host = sa.getNonResourceString(
-                        com.android.internal.R.styleable.AndroidManifestData_host);
-                String port = sa.getNonResourceString(
-                        com.android.internal.R.styleable.AndroidManifestData_port);
+                String host = sa.getNonConfigurationString(
+                        com.android.internal.R.styleable.AndroidManifestData_host, 0);
+                String port = sa.getNonConfigurationString(
+                        com.android.internal.R.styleable.AndroidManifestData_port, 0);
                 if (host != null) {
                     outInfo.addDataAuthority(host, port);
                 }
 
-                str = sa.getNonResourceString(
-                        com.android.internal.R.styleable.AndroidManifestData_path);
+                str = sa.getNonConfigurationString(
+                        com.android.internal.R.styleable.AndroidManifestData_path, 0);
                 if (str != null) {
                     outInfo.addDataPath(str, PatternMatcher.PATTERN_LITERAL);
                 }
 
-                str = sa.getNonResourceString(
-                        com.android.internal.R.styleable.AndroidManifestData_pathPrefix);
+                str = sa.getNonConfigurationString(
+                        com.android.internal.R.styleable.AndroidManifestData_pathPrefix, 0);
                 if (str != null) {
                     outInfo.addDataPath(str, PatternMatcher.PATTERN_PREFIX);
                 }
 
-                str = sa.getNonResourceString(
-                        com.android.internal.R.styleable.AndroidManifestData_pathPattern);
+                str = sa.getNonConfigurationString(
+                        com.android.internal.R.styleable.AndroidManifestData_pathPattern, 0);
                 if (str != null) {
                     outInfo.addDataPath(str, PatternMatcher.PATTERN_SIMPLE_GLOB);
                 }
@@ -2691,7 +2767,7 @@ public class PackageParser {
         public Component(final ParsePackageItemArgs args, final PackageItemInfo outInfo) {
             owner = args.owner;
             intents = new ArrayList<II>(0);
-            String name = args.sa.getNonResourceString(args.nameRes);
+            String name = args.sa.getNonConfigurationString(args.nameRes, 0);
             if (name == null) {
                 className = null;
                 args.outError[0] = args.tag + " does not specify android:name";
@@ -2730,7 +2806,8 @@ public class PackageParser {
 
             if (args.processRes != 0) {
                 outInfo.processName = buildProcessName(owner.applicationInfo.packageName,
-                        owner.applicationInfo.processName, args.sa.getNonResourceString(args.processRes),
+                        owner.applicationInfo.processName,
+                        args.sa.getNonConfigurationString(args.processRes, 0),
                         args.flags, args.sepProcesses, args.outError);
             }
             

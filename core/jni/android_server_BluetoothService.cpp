@@ -861,6 +861,26 @@ static jboolean removeServiceRecordNative(JNIEnv *env, jobject object, jint hand
     return JNI_FALSE;
 }
 
+static jboolean setLinkTimeoutNative(JNIEnv *env, jobject object, jstring object_path,
+                                     jint num_slots) {
+    LOGV(__FUNCTION__);
+#ifdef HAVE_BLUETOOTH
+    native_data_t *nat = get_native_data(env, object);
+    if (nat) {
+        const char *c_object_path = env->GetStringUTFChars(object_path, NULL);
+        DBusMessage *reply = dbus_func_args(env, nat->conn,
+                           get_adapter_path(env, object),
+                           DBUS_ADAPTER_IFACE, "SetLinkTimeout",
+                           DBUS_TYPE_OBJECT_PATH, &c_object_path,
+                           DBUS_TYPE_UINT32, &num_slots,
+                           DBUS_TYPE_INVALID);
+        env->ReleaseStringUTFChars(object_path, c_object_path);
+        return reply ? JNI_TRUE : JNI_FALSE;
+    }
+#endif
+    return JNI_FALSE;
+}
+
 static JNINativeMethod sMethods[] = {
      /* name, signature, funcPtr */
     {"classInitNative", "()V", (void*)classInitNative},
@@ -905,6 +925,7 @@ static JNINativeMethod sMethods[] = {
     {"discoverServicesNative", "(Ljava/lang/String;Ljava/lang/String;)Z", (void *)discoverServicesNative},
     {"addRfcommServiceRecordNative", "(Ljava/lang/String;JJS)I", (void *)addRfcommServiceRecordNative},
     {"removeServiceRecordNative", "(I)Z", (void *)removeServiceRecordNative},
+    {"setLinkTimeoutNative", "(Ljava/lang/String;I)Z", (void *)setLinkTimeoutNative},
 };
 
 int register_android_server_BluetoothService(JNIEnv *env) {

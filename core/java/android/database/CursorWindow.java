@@ -44,7 +44,7 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
     /**
      * Returns the starting position of this window within the entire
      * Cursor's result set.
-     * 
+     *
      * @return the starting position of this window within the entire
      * Cursor's result set.
      */
