@@ -2199,14 +2199,15 @@ public class WebView extends AbsoluteLayout
     // Sets r to be our visible rectangle in content coordinates
     private void calcOurContentVisibleRect(Rect r) {
         calcOurVisibleRect(r);
-        r.left = viewToContentX(r.left);
+        // since we might overscroll, pin the rect to the bounds of the content
+        r.left = Math.max(viewToContentX(r.left), 0);
         // viewToContentY will remove the total height of the title bar.  Add
         // the visible height back in to account for the fact that if the title
         // bar is partially visible, the part of the visible rect which is
         // displaying our content is displaced by that amount.
-        r.top = viewToContentY(r.top + getVisibleTitleHeight());
-        r.right = viewToContentX(r.right);
-        r.bottom = viewToContentY(r.bottom);
+        r.top = Math.max(viewToContentY(r.top + getVisibleTitleHeight()), 0);
+        r.right = Math.min(viewToContentX(r.right), mContentWidth);
+        r.bottom = Math.min(viewToContentY(r.bottom), mContentHeight);
     }
 
     static class ViewSizeData {
