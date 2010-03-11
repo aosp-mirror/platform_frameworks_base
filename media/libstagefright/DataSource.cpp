@@ -102,7 +102,7 @@ sp<DataSource> DataSource::CreateFromURI(
         source = new FileSource(uri + 7);
     } else if (!strncasecmp("http://", uri, 7)) {
         source = new HTTPDataSource(uri, headers);
-        source = new CachingDataSource(source, 64 * 1024, 10);
+        source = new CachingDataSource(source, 32 * 1024, 20);
     } else {
         // Assume it's a filename.
         source = new FileSource(uri);

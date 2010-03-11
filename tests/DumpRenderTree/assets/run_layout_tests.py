@@ -246,6 +246,7 @@ def main(options, args):
 
   result_files = ["/sdcard/layout_tests_passed.txt",
                   "/sdcard/layout_tests_failed.txt",
+                  "/sdcard/layout_tests_ignored.txt",
                   "/sdcard/layout_tests_nontext.txt"]
   for file in result_files:
     shell_cmd_str = adb_cmd + " pull " + file + " " + results_dir
@@ -263,10 +264,13 @@ def main(options, args):
   logging.info(str(passed_tests) + " passed")
   failed_tests = CountLineNumber(results_dir + "/layout_tests_failed.txt")
   logging.info(str(failed_tests) + " failed")
+  ignored_tests = CountLineNumber(results_dir + "/layout_tests_ignored.txt")
+  logging.info(str(ignored_tests) + " ignored results")
   crashed_tests = CountLineNumber(results_dir + "/layout_tests_crashed.txt")
   logging.info(str(crashed_tests) + " crashed")
   nontext_tests = CountLineNumber(results_dir + "/layout_tests_nontext.txt")
   logging.info(str(nontext_tests) + " no dumpAsText")
+  logging.info(str(passed_tests + failed_tests + ignored_tests + crashed_tests + nontext_tests) + " TOTAL")
 
   logging.info("Results are stored under: " + results_dir + "\n")
 

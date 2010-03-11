@@ -43,38 +43,45 @@ public class FsUtils {
     }
 
     public static void findLayoutTestsRecursively(BufferedOutputStream bos,
-            String dir) throws IOException {
+            String dir, boolean ignoreResultsInDir) throws IOException {
         Log.v(LOGTAG, "Searching tests under " + dir);
 
         File d = new File(dir);
         if (!d.isDirectory()) {
             throw new AssertionError("A directory expected, but got " + dir);
         }
+        ignoreResultsInDir |= FileFilter.ignoreResult(dir);
 
         String[] files = d.list();
         for (int i = 0; i < files.length; i++) {
             String s = dir + "/" + files[i];
-            if (s.endsWith("TEMPLATE.html")) {
-                continue;
-            }
-            if (FileFilter.ignoreTest(s)) {
-                Log.v(LOGTAG, "  Ignoring: " + s);
-                continue;
-            }
-            if (s.toLowerCase().endsWith(".html")
-                    || s.toLowerCase().endsWith(".xml")) {
-                bos.write(s.getBytes());
-                bos.write('\n');
-                continue;
-            }
 
             File f = new File(s);
             if (f.isDirectory()) {
-                findLayoutTestsRecursively(bos, s);
+                // If this is not a test directory, we don't recurse into it.
+                if (!FileFilter.isNonTestDir(s)) {
+                    Log.v(LOGTAG, "Recursing on " + s);
+                    findLayoutTestsRecursively(bos, s, ignoreResultsInDir);
+                }
                 continue;
             }
 
-            Log.v(LOGTAG, "Skipping " + s);
+            // If this test should be ignored, we skip it completely.
+            if (FileFilter.ignoreTest(s)) {
+                Log.v(LOGTAG, "Ignoring: " + s);
+                continue;
+            }
+
+            if ((s.toLowerCase().endsWith(".html") || s.toLowerCase().endsWith(".xml"))
+                    && !s.endsWith("TEMPLATE.html")) {
+                Log.v(LOGTAG, "Recording " + s);
+                bos.write(s.getBytes());
+                // If the result of this test should be ignored, we still run the test.
+                if (ignoreResultsInDir || FileFilter.ignoreResult(s)) {
+                    bos.write((" IGNORE_RESULT").getBytes());
+                }
+                bos.write('\n');
+            }
         }
     }
 
