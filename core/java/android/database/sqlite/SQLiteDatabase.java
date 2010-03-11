@@ -23,6 +23,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.SQLException;
+import android.database.sqlite.SQLiteDebug.DbStats;
 import android.os.Debug;
 import android.os.SystemClock;
 import android.os.SystemProperties;
@@ -30,10 +31,14 @@ import android.text.TextUtils;
 import android.util.Config;
 import android.util.EventLog;
 import android.util.Log;
+import android.util.Pair;
 
 import java.io.File;
+import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
@@ -787,25 +792,27 @@ public class SQLiteDatabase extends SQLiteClosable {
      * @throws SQLiteException if the database cannot be opened
      */
     public static SQLiteDatabase openDatabase(String path, CursorFactory factory, int flags) {
-        SQLiteDatabase db = null;
+        SQLiteDatabase sqliteDatabase = null;
         try {
             // Open the database.
-            SQLiteDatabase sqliteDatabase = new SQLiteDatabase(path, factory, flags);
+            sqliteDatabase = new SQLiteDatabase(path, factory, flags);
             if (SQLiteDebug.DEBUG_SQL_STATEMENTS) {
                 sqliteDatabase.enableSqlTracing(path);
             }
             if (SQLiteDebug.DEBUG_SQL_TIME) {
                 sqliteDatabase.enableSqlProfiling(path);
             }
-            return sqliteDatabase;
         } catch (SQLiteDatabaseCorruptException e) {
             // Try to recover from this, if we can.
             // TODO: should we do this for other open failures?
             Log.e(TAG, "Deleting and re-creating corrupt database " + path, e);
             EventLog.writeEvent(EVENT_DB_CORRUPT, path);
             new File(path).delete();
-            return new SQLiteDatabase(path, factory, flags);
+            sqliteDatabase = new SQLiteDatabase(path, factory, flags);
         }
+        ActiveDatabases.getInstance().mActiveDatabases.add(
+                new WeakReference<SQLiteDatabase>(sqliteDatabase));
+        return sqliteDatabase;
     }
 
     /**
@@ -2040,6 +2047,88 @@ public class SQLiteDatabase extends SQLiteClosable {
         mMaxSqlCacheSize = cacheSize;
     }
 
+    static class ActiveDatabases {
+        private static final ActiveDatabases activeDatabases = new ActiveDatabases();
+        private HashSet<WeakReference<SQLiteDatabase>> mActiveDatabases =
+            new HashSet<WeakReference<SQLiteDatabase>>();
+        private ActiveDatabases() {} // disable instantiation of this class
+        static ActiveDatabases getInstance() {return activeDatabases;}
+    }
+
+    /* package */ static ArrayList<DbStats> getDbStats() {
+        ArrayList<DbStats> dbStatsList = new ArrayList<DbStats>();
+        for (WeakReference<SQLiteDatabase> w : ActiveDatabases.getInstance().mActiveDatabases) {
+            SQLiteDatabase db = w.get();
+            if (db == null || !db.isOpen()) {
+                continue;
+            }
+            // get SQLITE_DBSTATUS_LOOKASIDE_USED for the db
+            int lookasideUsed = db.native_getDbLookaside();
+
+            // get the lastnode of the dbname
+            String path = db.getPath();
+            int indx = path.lastIndexOf("/");
+            String lastnode = path.substring((indx != -1) ? ++indx : 0);
+
+            // get list of attached dbs and for each db, get its size and pagesize
+            ArrayList<Pair<String, String>> attachedDbs = getAttachedDbs(db);
+            for (int i = 0; i < attachedDbs.size(); i++) {
+                Pair<String, String> p = attachedDbs.get(i);
+                long pageCount = getPragmaVal(db, p.first + ".page_count;");
+
+                // first entry in the attached db list is always the main database
+                // don't worry about prefixing the dbname with "main"
+                String dbName;
+                if (i == 0) {
+                    dbName = lastnode;
+                } else {
+                    // lookaside is only relevant for the main db
+                    lookasideUsed = 0;
+                    dbName = "  (attached) " + p.first;
+                    // if the attached db has a path, attach the lastnode from the path to above
+                    if (p.second.trim().length() > 0) {
+                        int idx = p.second.lastIndexOf("/");
+                        dbName += " : " + p.second.substring((idx != -1) ? ++idx : 0);
+                    }
+                }
+                dbStatsList.add(new DbStats(dbName, pageCount, db.getPageSize(), lookasideUsed));
+            }
+        }
+        return dbStatsList;
+    }
+
+    /**
+     * get the specified pragma value from sqlite for the specified database.
+     * only handles pragma's that return int/long.
+     * NO JAVA locks are held in this method.
+     * TODO: use this to do all pragma's in this class
+     */
+    private static long getPragmaVal(SQLiteDatabase db, String pragma) {
+        SQLiteStatement prog = null;
+        try {
+            prog = new SQLiteStatement(db, "PRAGMA " + pragma);
+            long val = prog.simpleQueryForLong();
+            return val;
+        } finally {
+            if (prog != null) prog.close();
+        }
+    }
+
+    /**
+     * returns list of full pathnames of all attached databases
+     * including the main database
+     * TODO: move this to {@link DatabaseUtils}
+     */
+    private static ArrayList<Pair<String, String>> getAttachedDbs(SQLiteDatabase dbObj) {
+        ArrayList<Pair<String, String>> attachedDbs = new ArrayList<Pair<String, String>>();
+        Cursor c = dbObj.rawQuery("pragma database_list;", null);
+        while (c.moveToNext()) {
+             attachedDbs.add(new Pair<String, String>(c.getString(1), c.getString(2)));
+        }
+        c.close();
+        return attachedDbs;
+    }
+
     /**
      * Native call to open the database.
      *
@@ -2093,4 +2182,11 @@ public class SQLiteDatabase extends SQLiteClosable {
      * @return the number of changes made in the last statement executed.
      */
     /* package */ native int lastChangeCount();
+
+    /**
+     * return the SQLITE_DBSTATUS_LOOKASIDE_USED documented here
+     * http://www.sqlite.org/c3ref/c_dbstatus_lookaside_used.html
+     * @return int value of SQLITE_DBSTATUS_LOOKASIDE_USED
+     */
+    private native int native_getDbLookaside();
 }

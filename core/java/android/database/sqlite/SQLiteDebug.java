@@ -16,6 +16,8 @@
 
 package android.database.sqlite;
 
+import java.util.ArrayList;
+
 import android.util.Log;
 
 /**
@@ -68,14 +70,87 @@ public final class SQLiteDebug {
      * @see #getPagerStats(PagerStats)
      */
     public static class PagerStats {
-        /** The total number of bytes in all pagers in the current process */
+        /** The total number of bytes in all pagers in the current process
+         * @deprecated not used any longer
+         */
+        @Deprecated
         public long totalBytes;
-        /** The number of bytes in referenced pages in all pagers in the current process */
+        /** The number of bytes in referenced pages in all pagers in the current process
+         * @deprecated not used any longer
+         * */
+        @Deprecated
         public long referencedBytes;
-        /** The number of bytes in all database files opened in the current process */
+        /** The number of bytes in all database files opened in the current process
+         * @deprecated not used any longer
+         */
+        @Deprecated
         public long databaseBytes;
-        /** The number of pagers opened in the current process */
+        /** The number of pagers opened in the current process
+         * @deprecated not used any longer
+         */
+        @Deprecated
         public int numPagers;
+
+        /** the current amount of memory checked out by sqlite using sqlite3_malloc().
+         * documented at http://www.sqlite.org/c3ref/c_status_malloc_size.html
+         */
+        public int memoryUsed;
+
+        /** the number of bytes of page cache allocation which could not be sattisfied by the
+         * SQLITE_CONFIG_PAGECACHE buffer and where forced to overflow to sqlite3_malloc().
+         * The returned value includes allocations that overflowed because they where too large
+         * (they were larger than the "sz" parameter to SQLITE_CONFIG_PAGECACHE) and allocations
+         * that overflowed because no space was left in the page cache.
+         * documented at http://www.sqlite.org/c3ref/c_status_malloc_size.html
+         */
+        public int pageCacheOverflo;
+
+        /** records the largest memory allocation request handed to sqlite3.
+         * documented at http://www.sqlite.org/c3ref/c_status_malloc_size.html
+         */
+        public int largestMemAlloc;
+
+        /** a list of {@link DbStats} - one for each main database opened by the applications
+         * running on the android device
+         */
+        public ArrayList<DbStats> dbStats;
+    }
+
+    /**
+     * contains statistics about a database
+     * @author vnori@google.com (Your Name Here)
+     *
+     */
+    public static class DbStats {
+        /** name of the database */
+        public String dbName;
+
+        /** the page size for the database */
+        public long pageSize;
+
+        /** the database size */
+        public long dbSize;
+
+        /** documented here http://www.sqlite.org/c3ref/c_dbstatus_lookaside_used.html */
+        public int lookaside;
+
+        public DbStats(String dbName, long pageCount, long pageSize, int lookaside) {
+            this.dbName = dbName;
+            this.pageSize = pageSize;
+            dbSize = (pageCount * pageSize) / 1024;
+            this.lookaside = lookaside;
+        }
+    }
+
+    /**
+     * return all pager and database stats for the current process.
+     * @return {@link PagerStats}
+     */
+    public static PagerStats getDatabaseInfo() {
+        PagerStats stats = new PagerStats();
+        getPagerStats(stats);
+        stats.dbStats = SQLiteDatabase.getDbStats();
+        return stats;
     }
 
     /**

@@ -32,7 +32,7 @@ public abstract class SQLiteClosable {
         synchronized(mLock) {
             if (mReferenceCount <= 0) {
                 throw new IllegalStateException(
-                        "attempt to acquire a reference on an already-closed " + getObjInfo());
+                        "attempt to re-open an already-closed object: " + getObjInfo());
             }
             mReferenceCount++;
         }
@@ -59,7 +59,6 @@ public abstract class SQLiteClosable {
     private String getObjInfo() {
         StringBuilder buff = new StringBuilder();
         buff.append(this.getClass().getName());
-        buff.append(" Obj");
         buff.append(" (");
         if (this instanceof SQLiteDatabase) {
             buff.append("database = ");

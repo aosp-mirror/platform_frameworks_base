@@ -306,6 +306,16 @@ static jint lastChangeCount(JNIEnv* env, jobject object)
     return sqlite3_changes(handle);
 }
 
+/* native int native_getDbLookaside(); */
+static jint native_getDbLookaside(JNIEnv* env, jobject object)
+{
+    sqlite3 * handle = (sqlite3 *)env->GetIntField(object, offset_db_handle);
+    int pCur = -1;
+    int unused;
+    sqlite3_db_status(handle, SQLITE_DBSTATUS_LOOKASIDE_USED, &pCur, &unused, 0);
+    return pCur;
+}
+
 /* set locale in the android_metadata table, install localized collators, and rebuild indexes */
 static void native_setLocale(JNIEnv* env, jobject object, jstring localeString, jint flags)
 {
@@ -442,6 +452,7 @@ static JNINativeMethod sMethods[] =
     {"lastInsertRow", "()J", (void *)lastInsertRow},
     {"lastChangeCount", "()I", (void *)lastChangeCount},
     {"native_setLocale", "(Ljava/lang/String;I)V", (void *)native_setLocale},
+    {"native_getDbLookaside", "()I", (void *)native_getDbLookaside},
     {"releaseMemory", "()I", (void *)native_releaseMemory},
 };
 
