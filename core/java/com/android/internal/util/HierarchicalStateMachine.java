@@ -69,6 +69,10 @@ import java.util.HashMap;
  * and invoke <code>halting</code>. Any message subsequently received by the state
  * machine will cause <code>haltedProcessMessage</code> to be invoked.
  *
+ * If it is desirable to completely stop the state machine call <code>quit</code>. This
+ * will exit the current state and its parent and then exit from the controlling thread
+ * and no further messages will be processed.
+ *
  * In addition to <code>processMessage</code> each <code>HierarchicalState</code> has
  * an <code>enter</code> method and <code>exit</exit> method which may be overridden.
  *
@@ -422,13 +426,13 @@ class Hsm1 extends HierarchicalStateMachine {
  * HSM EBNF:
  *   HSM = HSM_NAME "{" { STATE }+ "}" ;
  *   HSM_NAME = alpha_numeric_name ;
- *   STATE = INTRODUCE_STATE [ ENTER ] "{" [ MESSAGES ] "}" [ EXIT ] ;
+ *   STATE = INTRODUCE_STATE [ ENTER | [ ENTER EXIT ] "{" [ MESSAGES ] "}" [ EXIT ] ;
  *   INTRODUCE_STATE = { STATE_DEPTH }+ [ INITIAL_STATE_INDICATOR ] STATE_NAME ;
  *   STATE_DEPTH = "+" ;
  *   INITIAL_STATE_INDICATOR = "#"
  *   ENTER = "e(" SEND_ACTION | TRANSITION_ACTION | HALT_ACTION ")" ;
  *   MESSAGES = { MSG_LIST MESSAGE_ACTIONS } ;
- *   MSG_LIST = { MSG_NAME { "," MSG_NAME } ;
+ *   MSG_LIST = { MSG_NAME { "," MSG_NAME } };
  *   EXIT = "x(" SEND_ACTION | TRANSITION_ACTION | HALT_ACTION ")" ;
  *   PROCESS_COMPLETION = PROCESS_IN_PARENT_OR_COMPLETE | PROCESS_COMPLETE ;
  *   SEND_ACTION = "$" MSG_NAME ;
@@ -454,10 +458,15 @@ public class HierarchicalStateMachine {
     private static final String TAG = "HierarchicalStateMachine";
     private String mName;
 
+    public static final int HSM_QUIT_CMD = -1;
+
     private static class HsmHandler extends Handler {
 
         /** The debug flag */
         private boolean mDbg = false;
+
+        /** The quit object */
+        private static final Object mQuitObj = new Object();
 
         /** A list of messages that this state machine has processed */
         private ProcessedMessages mProcessedMessages = new ProcessedMessages();
@@ -479,6 +488,9 @@ public class HierarchicalStateMachine {
 
         /** State used when state machine is halted */
         private HaltingState mHaltingState = new HaltingState();
+
+        /** State used when state machine is quitting */
+        private QuittingState mQuittingState = new QuittingState();
 
         /** Reference to the HierarchicalStateMachine */
         private HierarchicalStateMachine mHsm;
@@ -529,6 +541,16 @@ public class HierarchicalStateMachine {
             public boolean processMessage(Message msg) {
                 mHsm.haltedProcessMessage(msg);
                 return true;
+            }
+        }
+
+        /**
+         * State entered when a valid quit message is handled.
+         */
+        private class QuittingState extends HierarchicalState {
+            @Override
+            public boolean processMessage(Message msg) {
+                throw new RuntimeException("QuitingState: processMessage called should not happen");
             }
         }
 
@@ -586,7 +608,13 @@ public class HierarchicalStateMachine {
                  * state. All subsequent messages will be processed in
                  * in the halting state which invokes haltedProcessMessage(msg);
                  */
-                if (mDestState == mHaltingState) {
+                if (mDestState == mQuittingState) {
+                    mHsm.quitting();
+                    if (mHsm.mHsmThread != null) {
+                        // If we made the thread then quit looper
+                        getLooper().quit();
+                    }
+                } else if (mDestState == mHaltingState) {
                     mHsm.halting();
                 }
                 mDestState = null;
@@ -651,6 +679,9 @@ public class HierarchicalStateMachine {
                      * No parents left so it's not handled
                      */
                     mHsm.unhandledMessage(msg);
+                    if (isQuit(msg)) {
+                        transitionTo(mQuittingState);
+                    }
                     break;
                 }
                 if (mDbg) {
@@ -851,6 +882,7 @@ public class HierarchicalStateMachine {
             mHsm = hsm;
 
             addState(mHaltingState, null);
+            addState(mQuittingState, null);
         }
 
         /** @see HierarchicalStateMachine#setInitialState(HierarchicalState) */
@@ -874,6 +906,17 @@ public class HierarchicalStateMachine {
             newMsg.copyFrom(msg);
 
             mDeferredMessages.add(newMsg);
+        }
+
+        /** @see HierarchicalStateMachine#deferMessage(Message) */
+        private final void quit() {
+            if (mDbg) Log.d(TAG, "quit:");
+            sendMessage(obtainMessage(HSM_QUIT_CMD, mQuitObj));
+        }
+
+        /** @see HierarchicalStateMachine#isQuit(Message) */
+        private final boolean isQuit(Message msg) {
+            return (msg.what == HSM_QUIT_CMD) && (msg.obj == mQuitObj);
         }
 
         /** @see HierarchicalStateMachine#isDbg() */
@@ -1040,6 +1083,13 @@ public class HierarchicalStateMachine {
     }
 
     /**
+     * Called after the quitting message was NOT handled and
+     * just before the quit actually occurs.
+     */
+    protected void quitting() {
+    }
+
+    /**
      * @return the name
      */
     public final String getName() {
@@ -1136,6 +1186,25 @@ public class HierarchicalStateMachine {
      */
     protected final void sendMessageAtFrontOfQueue(Message msg) {
         mHsmHandler.sendMessageAtFrontOfQueue(msg);
+    }
+
+    /**
+     * Conditionally quit the looper and stop execution.
+     *
+     * This sends the HSM_QUIT_MSG to the state machine and
+     * if not handled by any state's processMessage then the
+     * state machine will be stopped and no further messages
+     * will be processed.
+     */
+    public final void quit() {
+        mHsmHandler.quit();
+    }
+
+    /**
+     * @return ture if msg is quit
+     */
+    protected final boolean isQuit(Message msg) {
+        return mHsmHandler.isQuit(msg);
     }
 
     /**
