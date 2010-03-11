@@ -250,6 +250,8 @@ int FramebufferNativeWindow::perform(android_native_window_t* window,
 {
     switch (operation) {
         case NATIVE_WINDOW_SET_USAGE:
+        case NATIVE_WINDOW_CONNECT:
+        case NATIVE_WINDOW_DISCONNECT:
             break;
         default:
             return NAME_NOT_FOUND;
