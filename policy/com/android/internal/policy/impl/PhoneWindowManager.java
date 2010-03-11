@@ -1233,12 +1233,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mDockBottom = mContentBottom = mCurBottom = displayHeight;
         mDockLayer = 0x10000000;
 
-        mTopFullscreenOpaqueWindowState = null;
-        mForceStatusBar = false;
-        mHideLockScreen = false;
-        mAllowLockscreenWhenOn = false;
-        mDismissKeyguard = false;
-        
         // decide where the status bar goes ahead of time
         if (mStatusBar != null) {
             final Rect pf = mTmpParentFrame;
@@ -1435,30 +1429,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         
         win.computeFrameLw(pf, df, cf, vf);
         
-        if (mTopFullscreenOpaqueWindowState == null &&
-                win.isVisibleOrBehindKeyguardLw()) {
-            if ((attrs.flags & FLAG_FORCE_NOT_FULLSCREEN) != 0) {
-                mForceStatusBar = true;
-            } 
-            if (attrs.type >= FIRST_APPLICATION_WINDOW
-                    && attrs.type <= LAST_APPLICATION_WINDOW
-                    && win.fillsScreenLw(mW, mH, false, false)) {
-                if (DEBUG_LAYOUT) Log.v(TAG, "Fullscreen window: " + win);
-                mTopFullscreenOpaqueWindowState = win;
-                if ((attrs.flags & FLAG_SHOW_WHEN_LOCKED) != 0) {
-                    if (localLOGV) Log.v(TAG, "Setting mHideLockScreen to true by win " + win);
-                    mHideLockScreen = true;
-                }
-            }
-            if ((attrs.flags & FLAG_DISMISS_KEYGUARD) != 0) {
-                if (localLOGV) Log.v(TAG, "Setting mDismissKeyguard to true by win " + win);
-                mDismissKeyguard = true;
-            }
-            if ((attrs.flags & FLAG_ALLOW_LOCK_WHILE_SCREEN_ON) != 0) {
-                mAllowLockscreenWhenOn = true;
-            }
-        }
-        
         // Dock windows carve out the bottom of the screen, so normal windows
         // can't appear underneath them.
         if (attrs.type == TYPE_INPUT_METHOD && !win.getGivenInsetsPendingLw()) {
@@ -1480,7 +1450,51 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     /** {@inheritDoc} */
     public int finishLayoutLw() {
+        return 0;
+    }
+
+    /** {@inheritDoc} */
+    public void beginAnimationLw(int displayWidth, int displayHeight) {
+        mTopFullscreenOpaqueWindowState = null;
+        mForceStatusBar = false;
+        
+        mHideLockScreen = false;
+        mAllowLockscreenWhenOn = false;
+        mDismissKeyguard = false;
+    }
+
+    /** {@inheritDoc} */
+    public void animatingWindowLw(WindowState win,
+                                WindowManager.LayoutParams attrs) {
+        if (mTopFullscreenOpaqueWindowState == null &&
+                win.isVisibleOrBehindKeyguardLw()) {
+            if ((attrs.flags & FLAG_FORCE_NOT_FULLSCREEN) != 0) {
+                mForceStatusBar = true;
+            } 
+            if (attrs.type >= FIRST_APPLICATION_WINDOW
+                    && attrs.type <= LAST_APPLICATION_WINDOW
+                    && win.fillsScreenLw(mW, mH, false, false)) {
+                if (DEBUG_LAYOUT) Log.v(TAG, "Fullscreen window: " + win);
+                mTopFullscreenOpaqueWindowState = win;
+                if ((attrs.flags & FLAG_SHOW_WHEN_LOCKED) != 0) {
+                    if (localLOGV) Log.v(TAG, "Setting mHideLockScreen to true by win " + win);
+                    mHideLockScreen = true;
+                }
+                if ((attrs.flags & FLAG_DISMISS_KEYGUARD) != 0) {
+                    if (localLOGV) Log.v(TAG, "Setting mDismissKeyguard to true by win " + win);
+                    mDismissKeyguard = true;
+                }
+                if ((attrs.flags & FLAG_ALLOW_LOCK_WHILE_SCREEN_ON) != 0) {
+                    mAllowLockscreenWhenOn = true;
+                }
+            }
+        }
+    }
+
+    /** {@inheritDoc} */
+    public int finishAnimationLw() {
         int changes = 0;
+        
         boolean hiding = false;
         if (mStatusBar != null) {
             if (localLOGV) Log.i(TAG, "force=" + mForceStatusBar
@@ -1506,6 +1520,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
             }
         }
+        
+        if (changes != 0 && hiding) {
+            IStatusBar sbs = IStatusBar.Stub.asInterface(ServiceManager.getService("statusbar"));
+            if (sbs != null) {
+                try {
+                    // Make sure the window shade is hidden.
+                    sbs.deactivate();
+                } catch (RemoteException e) {
+                }
+            }
+        }
+
         // Hide the key guard if a visible window explicitly specifies that it wants to be displayed
         // when the screen is locked
         if (mKeyguard != null) {
@@ -1540,34 +1566,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
         }
         
-        if (changes != 0 && hiding) {
-            IStatusBar sbs = IStatusBar.Stub.asInterface(ServiceManager.getService("statusbar"));
-            if (sbs != null) {
-                try {
-                    // Make sure the window shade is hidden.
-                    sbs.deactivate();
-                } catch (RemoteException e) {
-                }
-            }
-        }
-
         // update since mAllowLockscreenWhenOn might have changed
         updateLockScreenTimeout();
         return changes;
-    }
-
-    /** {@inheritDoc} */
-    public void beginAnimationLw(int displayWidth, int displayHeight) {
-    }
-
-    /** {@inheritDoc} */
-    public void animatingWindowLw(WindowState win,
-                                WindowManager.LayoutParams attrs) {
-    }
-
-    /** {@inheritDoc} */
-    public boolean finishAnimationLw() {
-        return false;
     }
 
     public boolean allowAppAnimationsLw() {
