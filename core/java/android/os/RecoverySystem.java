@@ -117,7 +117,10 @@ public class RecoverySystem {
      * exception.
      *
      * Verification of a package can take significant time, so this
-     * function should not be called from a UI thread.
+     * function should not be called from a UI thread.  Interrupting
+     * the thread while this function is in progress will result in a
+     * SecurityException being thrown (and the thread's interrupt flag
+     * will be cleared).
      *
      * @param packageFile  the package to be verified
      * @param listener     an object to receive periodic progress
@@ -259,7 +262,10 @@ public class RecoverySystem {
             long soFar = 0;
             raf.seek(0);
             byte[] buffer = new byte[4096];
+            boolean interrupted = false;
             while (soFar < toRead) {
+                interrupted = Thread.interrupted();
+                if (interrupted) break;
                 int size = buffer.length;
                 if (soFar + size > toRead) {
                     size = (int)(toRead - soFar);
@@ -281,6 +287,10 @@ public class RecoverySystem {
             }
             if (listener != null) {
                 listener.onProgress(100);
+            }
+
+            if (interrupted) {
+                throw new SignatureException("verification was interrupted");
             }
 
             if (!sig.verify(sigInfo.getEncryptedDigest())) {
