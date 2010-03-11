@@ -1014,8 +1014,12 @@ class LoadListener extends Handler implements EventHandler {
 
         // do not call webcore if it is redirect. According to the code in
         // InspectorController::willSendRequest(), the response is only updated
-        // when it is not redirect.
-        if ((mStatusCode >= 301 && mStatusCode <= 303) || mStatusCode == 307) {
+        // when it is not redirect. If we received a not-modified response from
+        // the server and mCacheLoader is not null, do not send the response to
+        // webkit. This is just a validation response for loading from the
+        // cache.
+        if ((mStatusCode >= 301 && mStatusCode <= 303) || mStatusCode == 307 ||
+                (mStatusCode == 304 && mCacheLoader != null)) {
             return;
         }
 
