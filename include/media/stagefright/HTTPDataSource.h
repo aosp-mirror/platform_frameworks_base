@@ -50,7 +50,7 @@ protected:
 
 private:
     enum {
-        kBufferSize = 64 * 1024
+        kBufferSize = 32 * 1024
     };
 
     String8 mHeaders;
