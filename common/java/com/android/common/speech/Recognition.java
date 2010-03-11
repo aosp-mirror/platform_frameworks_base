@@ -55,6 +55,7 @@ public class Recognition {
     public static final int HINT_CONTEXT_UNKNOWN = 0;
     public static final int HINT_CONTEXT_VOICE_SEARCH_HELP = 1;
     public static final int HINT_CONTEXT_CAR_HOME = 2;
+    public static final int HINT_CONTEXT_LAUNCHER = 3;
 
     private Recognition() { }   // don't instantiate
 }
