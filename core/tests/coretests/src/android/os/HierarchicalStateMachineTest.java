@@ -52,6 +52,106 @@ public class HierarchicalStateMachineTest extends TestCase {
     private static final String TAG = "HierarchicalStateMachineTest";
 
     /**
+     * Tests that we can quit the state machine.
+     */
+    class StateMachineQuitTest extends HierarchicalStateMachine {
+        private int mQuitCount = 0;
+
+        StateMachineQuitTest(String name) {
+            super(name);
+            mThisSm = this;
+            setDbg(DBG);
+
+            // Setup state machine with 1 state
+            addState(mS1);
+
+            // Set the initial state
+            setInitialState(mS1);
+        }
+
+        class S1 extends HierarchicalState {
+            @Override protected boolean processMessage(Message message) {
+                if (isQuit(message)) {
+                    mQuitCount += 1;
+                    if (mQuitCount > 2) {
+                        // Returning false to actually quit
+                        return false;
+                    } else {
+                        // Do NOT quit
+                        return true;
+                    }
+                } else  {
+                    // All other message are handled
+                    return true;
+                }
+            }
+        }
+
+        @Override
+        protected void quitting() {
+            synchronized (mThisSm) {
+                mThisSm.notifyAll();
+            }
+        }
+
+        private StateMachineQuitTest mThisSm;
+        private S1 mS1 = new S1();
+    }
+
+    @SmallTest
+    public void testStateMachineQuitTest() throws Exception {
+        //if (WAIT_FOR_DEBUGGER) Debug.waitForDebugger();
+
+        StateMachineQuitTest smQuitTest = new StateMachineQuitTest("smQuitTest");
+        smQuitTest.start();
+        if (smQuitTest.isDbg()) Log.d(TAG, "testStateMachineQuitTest E");
+
+        synchronized (smQuitTest) {
+            // Send 6 messages
+            for (int i = 1; i <= 6; i++) {
+                smQuitTest.sendMessage(smQuitTest.obtainMessage(i));
+            }
+
+            // First two are ignored
+            smQuitTest.quit();
+            smQuitTest.quit();
+
+            // Now we will quit
+            smQuitTest.quit();
+
+            try {
+                // wait for the messages to be handled
+                smQuitTest.wait();
+            } catch (InterruptedException e) {
+                Log.e(TAG, "testStateMachineQuitTest: exception while waiting " + e.getMessage());
+            }
+        }
+
+        assertTrue(smQuitTest.getProcessedMessagesCount() == 9);
+
+        ProcessedMessages.Info pmi;
+
+        // The first two message didn't quit and were handled by mS1
+        pmi = smQuitTest.getProcessedMessage(6);
+        assertEquals(HierarchicalStateMachine.HSM_QUIT_CMD, pmi.getWhat());
+        assertEquals(smQuitTest.mS1, pmi.getState());
+        assertEquals(smQuitTest.mS1, pmi.getOriginalState());
+
+        pmi = smQuitTest.getProcessedMessage(7);
+        assertEquals(HierarchicalStateMachine.HSM_QUIT_CMD, pmi.getWhat());
+        assertEquals(smQuitTest.mS1, pmi.getState());
+        assertEquals(smQuitTest.mS1, pmi.getOriginalState());
+
+        // The last message was never handled so the states are null
+        pmi = smQuitTest.getProcessedMessage(8);
+        assertEquals(HierarchicalStateMachine.HSM_QUIT_CMD, pmi.getWhat());
+        assertEquals(null, pmi.getState());
+        assertEquals(null, pmi.getOriginalState());
+
+        if (smQuitTest.isDbg()) Log.d(TAG, "testStateMachineQuitTest X");
+    }
+
+    /**
      * Tests that ProcessedMessage works as a circular buffer.
      */
     class StateMachine0 extends HierarchicalStateMachine {
@@ -90,7 +190,7 @@ public class HierarchicalStateMachineTest extends TestCase {
 
     @SmallTest
     public void testStateMachine0() throws Exception {
-        if (WAIT_FOR_DEBUGGER) Debug.waitForDebugger();
+        //if (WAIT_FOR_DEBUGGER) Debug.waitForDebugger();
 
         StateMachine0 sm0 = new StateMachine0("sm0");
         sm0.start();
