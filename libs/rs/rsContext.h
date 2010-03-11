@@ -161,7 +161,7 @@ public:
     void dumpDebug() const;
     void checkError(const char *) const;
     const char * getError(RsError *);
-    void setError(RsError e, const char *msg);
+    void setError(RsError e, const char *msg = NULL);
 
     mutable const ObjectBase * mObjHead;
 
