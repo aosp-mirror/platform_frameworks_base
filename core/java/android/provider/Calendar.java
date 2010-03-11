@@ -52,8 +52,7 @@ public final class Calendar {
     /**
      * Broadcast Action: An event reminder.
      */
-    public static final String
-            EVENT_REMINDER_ACTION = "android.intent.action.EVENT_REMINDER";
+    public static final String EVENT_REMINDER_ACTION = "android.intent.action.EVENT_REMINDER";
 
     /**
      * These are the symbolic names for the keys used in the extra data
@@ -208,6 +207,9 @@ public final class Calendar {
      */
     public static class Calendars implements BaseColumns, CalendarsColumns
     {
+        private static final String WHERE_DELETE_FOR_ACCOUNT = Calendars._SYNC_ACCOUNT + "=?"
+                + " AND " + Calendars._SYNC_ACCOUNT_TYPE + "=?";
+
         public static final Cursor query(ContentResolver cr, String[] projection,
                                        String where, String orderBy)
         {
@@ -237,16 +239,14 @@ public final class Calendar {
         public static int deleteCalendarsForAccount(ContentResolver cr, Account account) {
             // delete all calendars that match this account
             return Calendar.Calendars.delete(cr,
-                    Calendar.Calendars._SYNC_ACCOUNT + "=? AND "
-                            + Calendar.Calendars._SYNC_ACCOUNT_TYPE + "=?",
-                    new String[] {account.name, account.type});
+                    WHERE_DELETE_FOR_ACCOUNT,
+                    new String[] { account.name, account.type });
         }
 
         /**
          * The content:// style URL for this table
          */
-        public static final Uri CONTENT_URI =
-            Uri.parse("content://" + AUTHORITY + "/calendars");
+        public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/calendars");
 
         /**
          * The default sort order for this table
@@ -346,10 +346,8 @@ public final class Calendar {
         public static final int ATTENDEE_STATUS_TENTATIVE = 4;
     }
 
-    public static final class Attendees implements BaseColumns,
-            AttendeesColumns, EventsColumns {
-        public static final Uri CONTENT_URI =
-                Uri.parse("content://" + AUTHORITY + "/attendees");
+    public static final class Attendees implements BaseColumns, AttendeesColumns, EventsColumns {
+        public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/attendees");
 
         // TODO: fill out this class when we actually start utilizing attendees
         // in the calendar application.
@@ -641,6 +639,8 @@ public final class Calendar {
             private static final int COLUMN_NAME = 0;
             private static final int COLUMN_VALUE = 1;
 
+            private static final String WHERE_EVENT_ID = "event_id=?";
+
             public EntityIteratorImpl(Cursor cursor, ContentResolver resolver) {
                 super(cursor);
                 mResolver = resolver;
@@ -703,10 +703,14 @@ public final class Calendar {
                 Cursor subCursor;
                 if (mResolver != null) {
                     subCursor = mResolver.query(Reminders.CONTENT_URI, REMINDERS_PROJECTION,
-                            "event_id=" + eventId, null, null);
+                            WHERE_EVENT_ID,
+                            new String[] { Long.toString(eventId) }  /* selectionArgs */,
+                            null /* sortOrder */);
                 } else {
                     subCursor = mProvider.query(Reminders.CONTENT_URI, REMINDERS_PROJECTION,
-                            "event_id=" + eventId, null, null);
+                            WHERE_EVENT_ID,
+                            new String[] { Long.toString(eventId) }  /* selectionArgs */,
+                            null /* sortOrder */);
                 }
                 try {
                     while (subCursor.moveToNext()) {
@@ -721,10 +725,14 @@ public final class Calendar {
 
                 if (mResolver != null) {
                     subCursor = mResolver.query(Attendees.CONTENT_URI, ATTENDEES_PROJECTION,
-                            "event_id=" + eventId, null /* selectionArgs */, null /* sortOrder */);
+                            WHERE_EVENT_ID,
+                            new String[] { Long.toString(eventId) } /* selectionArgs */,
+                            null /* sortOrder */);
                 } else {
                     subCursor = mProvider.query(Attendees.CONTENT_URI, ATTENDEES_PROJECTION,
-                            "event_id=" + eventId, null /* selectionArgs */, null /* sortOrder */);
+                            WHERE_EVENT_ID,
+                            new String[] { Long.toString(eventId) } /* selectionArgs */,
+                            null /* sortOrder */);
                 }
                 try {
                     while (subCursor.moveToNext()) {
@@ -747,10 +755,14 @@ public final class Calendar {
 
                 if (mResolver != null) {
                     subCursor = mResolver.query(ExtendedProperties.CONTENT_URI, EXTENDED_PROJECTION,
-                            "event_id=" + eventId, null /* selectionArgs */, null /* sortOrder */);
+                            WHERE_EVENT_ID,
+                            new String[] { Long.toString(eventId) } /* selectionArgs */,
+                            null /* sortOrder */);
                 } else {
                     subCursor = mProvider.query(ExtendedProperties.CONTENT_URI, EXTENDED_PROJECTION,
-                            "event_id=" + eventId, null /* selectionArgs */, null /* sortOrder */);
+                            WHERE_EVENT_ID,
+                            new String[] { Long.toString(eventId) } /* selectionArgs */,
+                            null /* sortOrder */);
                 }
                 try {
                     while (subCursor.moveToNext()) {
@@ -827,12 +839,14 @@ public final class Calendar {
      */
     public static final class Instances implements BaseColumns, EventsColumns, CalendarsColumns {
 
+        private static final String WHERE_CALENDARS_SELECTED = Calendars.SELECTED + "=1";
+
         public static final Cursor query(ContentResolver cr, String[] projection,
                                          long begin, long end) {
             Uri.Builder builder = CONTENT_URI.buildUpon();
             ContentUris.appendId(builder, begin);
             ContentUris.appendId(builder, end);
-            return cr.query(builder.build(), projection, Calendars.SELECTED + "=1",
+            return cr.query(builder.build(), projection, WHERE_CALENDARS_SELECTED,
                          null, DEFAULT_SORT_ORDER);
         }
 
@@ -842,9 +856,9 @@ public final class Calendar {
             ContentUris.appendId(builder, begin);
             ContentUris.appendId(builder, end);
             if (TextUtils.isEmpty(where)) {
-                where = Calendars.SELECTED + "=1";
+                where = WHERE_CALENDARS_SELECTED;
             } else {
-                where = "(" + where + ") AND " + Calendars.SELECTED + "=1";
+                where = "(" + where + ") AND " + WHERE_CALENDARS_SELECTED;
             }
             return cr.query(builder.build(), projection, where,
                          null, orderBy == null ? DEFAULT_SORT_ORDER : orderBy);
@@ -976,7 +990,7 @@ public final class Calendar {
                 "/instances/groupbyday");
 
         public static final String[] PROJECTION = { STARTDAY, ENDDAY };
-        public static final String SELECTION = "selected==1";
+        public static final String SELECTION = "selected=1";
 
         /**
          * Retrieves the days with events for the Julian days starting at "startDay"
@@ -1107,9 +1121,22 @@ public final class Calendar {
 
     public static final class CalendarAlerts implements BaseColumns,
             CalendarAlertsColumns, EventsColumns, CalendarsColumns {
+
         public static final String TABLE_NAME = "CalendarAlerts";
         public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY +
                 "/calendar_alerts");
+
+        private static final String WHERE_ALARM_EXISTS = EVENT_ID + "=?"
+                + " AND " + BEGIN + "=?"
+                + " AND " + ALARM_TIME + "=?";
+
+        private static final String WHERE_FINDNEXTALARMTIME = ALARM_TIME + ">=?";
+        private static final String SORT_ORDER_ALARMTIME_ASC = ALARM_TIME + " ASC";
+
+        private static final String WHERE_RESCHEDULE_MISSED_ALARMS = STATE + "=" + SCHEDULED
+                + " AND " + ALARM_TIME + "<?"
+                + " AND " + ALARM_TIME + ">?"
+                + " AND " + END + ">=?";
 
         /**
          * This URI is for grouping the query results by event_id and begin
@@ -1158,7 +1185,12 @@ public final class Calendar {
             // TODO: construct an explicit SQL query so that we can add
             // "LIMIT 1" to the end and get just one result.
             String[] projection = new String[] { ALARM_TIME };
-            Cursor cursor = query(cr, projection, selection, null, ALARM_TIME + " ASC");
+            Cursor cursor = query(cr, projection,
+                    WHERE_FINDNEXTALARMTIME,
+                    new String[] {
+                        Long.toString(millis)
+                    },
+                    SORT_ORDER_ALARMTIME_ASC);
             long alarmTime = -1;
             try {
                 if (cursor != null && cursor.moveToFirst()) {
@@ -1188,17 +1220,21 @@ public final class Calendar {
             // and should have fired by now and are not too old.
             long now = System.currentTimeMillis();
             long ancient = now - DateUtils.DAY_IN_MILLIS;
-            String selection = CalendarAlerts.STATE + "=" + CalendarAlerts.SCHEDULED
-                    + " AND " + CalendarAlerts.ALARM_TIME + "<" + now
-                    + " AND " + CalendarAlerts.ALARM_TIME + ">" + ancient
-                    + " AND " + CalendarAlerts.END + ">=" + now;
             String[] projection = new String[] {
                     ALARM_TIME,
             };
 
             // TODO: construct an explicit SQL query so that we can add
             // "GROUPBY" instead of doing a sort and de-dup
-            Cursor cursor = CalendarAlerts.query(cr, projection, selection, null, "alarmTime ASC");
+            Cursor cursor = CalendarAlerts.query(cr,
+                    projection,
+                    WHERE_RESCHEDULE_MISSED_ALARMS,
+                    new String[] {
+                        Long.toString(now),
+                        Long.toString(ancient),
+                        Long.toString(now)
+                    },
+                    SORT_ORDER_ALARMTIME_ASC);
             if (cursor == null) {
                 return;
             }
@@ -1237,8 +1273,8 @@ public final class Calendar {
                 manager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
             }
 
-            Intent intent = new Intent(android.provider.Calendar.EVENT_REMINDER_ACTION);
-            intent.putExtra(android.provider.Calendar.CalendarAlerts.ALARM_TIME, alarmTime);
+            Intent intent = new Intent(EVENT_REMINDER_ACTION);
+            intent.putExtra(ALARM_TIME, alarmTime);
             PendingIntent pi = PendingIntent.getBroadcast(context, 0, intent,
                     PendingIntent.FLAG_CANCEL_CURRENT);
             manager.set(AlarmManager.RTC_WAKEUP, alarmTime, pi);
@@ -1258,13 +1294,18 @@ public final class Calendar {
          */
         public static final boolean alarmExists(ContentResolver cr, long eventId,
                 long begin, long alarmTime) {
-            String selection = CalendarAlerts.EVENT_ID + "=" + eventId
-                    + " AND " + CalendarAlerts.BEGIN + "=" + begin
-                    + " AND " + CalendarAlerts.ALARM_TIME + "=" + alarmTime;
             // TODO: construct an explicit SQL query so that we can add
             // "LIMIT 1" to the end and get just one result.
-            String[] projection = new String[] { CalendarAlerts.ALARM_TIME };
-            Cursor cursor = query(cr, projection, selection, null, null);
+            String[] projection = new String[] { ALARM_TIME };
+            Cursor cursor = query(cr,
+                    projection,
+                    WHERE_ALARM_EXISTS,
+                    new String[] {
+                        Long.toString(eventId),
+                        Long.toString(begin),
+                        Long.toString(alarmTime)
+                    },
+                    null);
             boolean found = false;
             try {
                 if (cursor != null && cursor.getCount() > 0) {
