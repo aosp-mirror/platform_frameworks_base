@@ -353,6 +353,7 @@ void Surface::init()
     const_cast<uint32_t&>(android_native_window_t::flags) = 0;
     // be default we request a hardware surface
     mUsage = GRALLOC_USAGE_HW_RENDER;
+    mConnected = 0;
     mNeedFullUpdate = false;
 }
 
@@ -579,15 +580,35 @@ int Surface::perform(int operation, va_list args)
 {
     int res = NO_ERROR;
     switch (operation) {
-        case NATIVE_WINDOW_SET_USAGE:
-            setUsage( va_arg(args, int) );
-            break;
-        default:
-            res = NAME_NOT_FOUND;
-            break;
+    case NATIVE_WINDOW_SET_USAGE:
+        dispatch_setUsage( args );
+        break;
+    case NATIVE_WINDOW_CONNECT:
+        res = dispatch_connect( args );
+        break;
+    case NATIVE_WINDOW_DISCONNECT:
+        res = dispatch_disconnect( args );
+        break;
+    default:
+        res = NAME_NOT_FOUND;
+        break;
     }
     return res;
 }
+
+void Surface::dispatch_setUsage(va_list args) {
+    int usage = va_arg(args, int);
+    setUsage( usage );
+}
+int Surface::dispatch_connect(va_list args) {
+    int api = va_arg(args, int);
+    return connect( api );
+}
+int Surface::dispatch_disconnect(va_list args) {
+    int api = va_arg(args, int);
+    return disconnect( api );
+}
+
 
 void Surface::setUsage(uint32_t reqUsage)
 {
@@ -595,11 +616,56 @@ void Surface::setUsage(uint32_t reqUsage)
     mUsage = reqUsage;
 }
 
+int Surface::connect(int api)
+{
+    Mutex::Autolock _l(mSurfaceLock);
+    int err = NO_ERROR;
+    switch (api) {
+        case NATIVE_WINDOW_API_EGL:
+            if (mConnected) {
+                err = -EINVAL;
+            } else {
+                mConnected = api;
+            }
+            break;
+        default:
+            err = -EINVAL;
+            break;
+    }
+    return err;
+}
+
+int Surface::disconnect(int api)
+{
+    Mutex::Autolock _l(mSurfaceLock);
+    int err = NO_ERROR;
+    switch (api) {
+        case NATIVE_WINDOW_API_EGL:
+            if (mConnected == api) {
+                mConnected = 0;
+            } else {
+                err = -EINVAL;
+            }
+            break;
+        default:
+            err = -EINVAL;
+            break;
+    }
+    return err;
+}
+
 uint32_t Surface::getUsage() const
 {
     Mutex::Autolock _l(mSurfaceLock);
     return mUsage;
 }
+
+int Surface::getConnectedApi() const
+{
+    Mutex::Autolock _l(mSurfaceLock);
+    return mConnected;
+}
+
 
 // ----------------------------------------------------------------------------
 
@@ -609,11 +675,20 @@ status_t Surface::lock(SurfaceInfo* info, bool blocking) {
 
 status_t Surface::lock(SurfaceInfo* other, Region* dirtyIn, bool blocking) 
 {
+    if (getConnectedApi()) {
+        LOGE("Surface::lock(%p) failed. Already connected to another API",
+                (android_native_window_t*)this);
+        CallStack stack;
+        stack.update();
+        stack.dump("");
+        return INVALID_OPERATION;
+    }
+
     if (mApiLock.tryLock() != NO_ERROR) {
         LOGE("calling Surface::lock from different threads!");
         CallStack stack;
         stack.update();
-        stack.dump("Surface::lock called from different threads");
+        stack.dump("");
         return WOULD_BLOCK;
     }
 

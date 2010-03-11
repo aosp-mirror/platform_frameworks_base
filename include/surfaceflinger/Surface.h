@@ -210,9 +210,16 @@ private:
 
     status_t dequeueBuffer(sp<GraphicBuffer>* buffer);
 
+    void dispatch_setUsage(va_list args);
+    int  dispatch_connect(va_list args);
+    int  dispatch_disconnect(va_list args);
     
     void setUsage(uint32_t reqUsage);
+    int  connect(int api);
+    int  disconnect(int api);
+
     uint32_t getUsage() const;
+    int      getConnectedApi() const;
     
     // constants
     sp<SurfaceComposerClient>   mClient;
@@ -227,6 +234,7 @@ private:
     // protected by mSurfaceLock
     Rect                        mSwapRectangle;
     uint32_t                    mUsage;
+    int                         mConnected;
     
     // protected by mSurfaceLock. These are also used from lock/unlock
     // but in that case, they must be called form the same thread.
