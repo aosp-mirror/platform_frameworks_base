@@ -550,7 +550,8 @@ public class HierarchicalStateMachine {
         private class QuittingState extends HierarchicalState {
             @Override
             public boolean processMessage(Message msg) {
-                throw new RuntimeException("QuitingState: processMessage called should not happen");
+                // Ignore
+                return false;
             }
         }
 
@@ -960,7 +961,7 @@ public class HierarchicalStateMachine {
      * @param looper for this state machine
      * @param name of the state machine
      */
-    private void initStateMachine(Looper looper, String name) {
+    private void initStateMachine(String name, Looper looper) {
         mName = name;
         mHsmHandler = new HsmHandler(looper, this);
     }
@@ -975,7 +976,7 @@ public class HierarchicalStateMachine {
         mHsmThread.start();
         Looper looper = mHsmThread.getLooper();
 
-        initStateMachine(looper, name);
+        initStateMachine(name, looper);
     }
 
     /**
@@ -983,8 +984,8 @@ public class HierarchicalStateMachine {
      *
      * @param name of the state machine
      */
-    protected HierarchicalStateMachine(Looper looper, String name) {
-        initStateMachine(looper, name);
+    protected HierarchicalStateMachine(String name, Looper looper) {
+        initStateMachine(name, looper);
     }
 
     /**
