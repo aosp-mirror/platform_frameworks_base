@@ -668,6 +668,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         synchronized(this) {
             // check if this process still has an outstanding start request
             if (!mFeatureUsers.contains(u)) {
+                if (DBG) Slog.d(TAG, "ignoring - this process has no outstanding requests");
                 return 1;
             }
             u.unlinkDeathRecipient();
@@ -706,6 +707,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             }
             tracker =  mNetTrackers[usedNetworkType];
             if (tracker == null) {
+                if (DBG) Slog.d(TAG, "ignoring - no known tracker for net type " + usedNetworkType);
                 return -1;
             }
             if (usedNetworkType != networkType) {
@@ -720,7 +722,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 callTeardown = true;
             }
         }
-
+        if (DBG) Slog.d(TAG, "Doing network teardown");
         if (callTeardown) {
             tracker.teardown();
             return 1;
