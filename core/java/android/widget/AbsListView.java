@@ -381,12 +381,12 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     /**
      * Maximum distance to overscroll by
      */
-    private int mOverscrollMax;
+    int mOverscrollMax;
     
     /**
      * Content height divided by this is the overscroll limit.
      */
-    private static final int OVERSCROLL_LIMIT_DIVISOR = 3;
+    static final int OVERSCROLL_LIMIT_DIVISOR = 3;
 
     /**
      * Used to request a layout when we changed touch mode
@@ -2390,7 +2390,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         awakenScrollBars();
     }
     
-    private int getOverscrollMax() {
+    int getOverscrollMax() {
         final int childCount = getChildCount();
         if (childCount > 0) {
             return Math.min(mOverscrollMax,
