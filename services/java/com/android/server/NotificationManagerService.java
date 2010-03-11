@@ -53,6 +53,7 @@ import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.Vibrator;
 import android.provider.Settings;
+import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.EventLog;
 import android.util.Slog;
@@ -106,6 +107,7 @@ class NotificationManagerService extends INotificationManager.Stub
 
     // for enabling and disabling notification pulse behavior
     private boolean mScreenOn = true;
+    private boolean mInCall = false;
     private boolean mNotificationPulseEnabled;
 
     // for adb connected notifications
@@ -362,6 +364,9 @@ class NotificationManagerService extends INotificationManager.Stub
             } else if (action.equals(Intent.ACTION_SCREEN_OFF)) {
                 mScreenOn = false;
                 updateNotificationPulse();
+            } else if (action.equals(TelephonyManager.ACTION_PHONE_STATE_CHANGED)) {
+                mInCall = (intent.getStringExtra(TelephonyManager.EXTRA_STATE).equals(TelephonyManager.EXTRA_STATE_OFFHOOK));
+                updateNotificationPulse();
             }
         }
     };
@@ -444,6 +449,7 @@ class NotificationManagerService extends INotificationManager.Stub
         filter.addAction(Intent.ACTION_UMS_DISCONNECTED);
         filter.addAction(Intent.ACTION_SCREEN_ON);
         filter.addAction(Intent.ACTION_SCREEN_OFF);
+        filter.addAction(TelephonyManager.ACTION_PHONE_STATE_CHANGED);
         mContext.registerReceiver(mIntentReceiver, filter);
         IntentFilter pkgFilter = new IntentFilter();
         pkgFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
@@ -1064,7 +1070,8 @@ class NotificationManagerService extends INotificationManager.Stub
         }
 
         // we only flash if screen is off and persistent pulsing is enabled
-        if (mLedNotification == null || mScreenOn) {
+        // and we are not currently in a call
+        if (mLedNotification == null || mScreenOn || mInCall) {
             mNotificationLight.turnOff();
         } else {
             int ledARGB = mLedNotification.notification.ledARGB;
