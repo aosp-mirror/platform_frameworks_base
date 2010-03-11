@@ -176,4 +176,19 @@ class ViewManager {
             }
         });
     }
+
+    ChildView hitTest(int contentX, int contentY) {
+        if (mHidden) {
+            return null;
+        }
+        for (ChildView v : mChildren) {
+            if (v.mView.getVisibility() == View.VISIBLE) {
+                if (contentX >= v.x && contentX < (v.x + v.width)
+                        && contentY >= v.y && contentY < (v.y + v.height)) {
+                    return v;
+                }
+            }
+        }
+        return null;
+    }
 }
