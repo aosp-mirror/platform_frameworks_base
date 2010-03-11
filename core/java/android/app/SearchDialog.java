@@ -19,23 +19,25 @@ package android.app;
 
 import static android.app.SuggestionsAdapter.getColumnString;
 
+import java.util.WeakHashMap;
+import java.util.concurrent.atomic.AtomicLong;
+
 import android.content.ActivityNotFoundException;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
-import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.IBinder;
-import android.os.RemoteException;
 import android.os.SystemClock;
 import android.provider.Browser;
 import android.speech.RecognizerIntent;
@@ -43,11 +45,8 @@ import android.text.Editable;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.util.AndroidRuntimeException;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.util.Patterns;
-import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -68,10 +67,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemSelectedListener;
-
-import java.util.ArrayList;
-import java.util.WeakHashMap;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Search dialog. This is controlled by the 
@@ -154,6 +149,16 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         mVoiceAppSearchIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         mVoiceAppSearchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         mSearchManager = searchManager;
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
+        context.registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (intent.getAction().equals(Intent.ACTION_CONFIGURATION_CHANGED)) {
+                    onConfigurationChanged();
+                }
+            }
+        }, filter);
     }
 
     /**
@@ -394,10 +399,18 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
             updateSearchAppIcon();
             updateSearchBadge();
             updateQueryHint();
+            if (isLandscapeMode(getContext())) {
+                mSearchAutoComplete.ensureImeVisible(true);
+            }
             mSearchAutoComplete.showDropDownAfterLayout();
-        } 
+        }
     }
-    
+
+    static boolean isLandscapeMode(Context context) {
+        return context.getResources().getConfiguration().orientation
+                == Configuration.ORIENTATION_LANDSCAPE;
+    }
+
     /**
      * Update the UI according to the info in the current value of {@link #mSearchable}.
      */
@@ -983,7 +996,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
                 mSearchAutoComplete.setSelection(selPoint);
                 mSearchAutoComplete.setListSelection(0);
                 mSearchAutoComplete.clearListSelection();
-                mSearchAutoComplete.ensureImeVisible();
+                mSearchAutoComplete.ensureImeVisible(true);
                 
                 return true;
             }
@@ -1362,6 +1375,11 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
                 InputMethodManager inputManager = (InputMethodManager)
                         getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
                 inputManager.showSoftInput(this, 0);
+                // If in landscape mode, then make sure that
+                // the ime is in front of the dropdown.
+                if (isLandscapeMode(getContext())) {
+                    ensureImeVisible(true);
+                }
             }
         }
                 

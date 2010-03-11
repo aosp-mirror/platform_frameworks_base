@@ -17,9 +17,11 @@
 package android.widget;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable.Orientation;
 import android.text.Editable;
 import android.text.Selection;
 import android.text.TextUtils;
@@ -210,10 +212,10 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
      * Private hook into the on click event, dispatched from {@link PassThroughClickListener}
      */
     private void onClickImpl() {
-        // If the dropdown is showing, bring it back in front of the soft
-        // keyboard when the user touches the text field.
-        if (mPopup.isShowing() && isInputMethodNotNeeded()) {
-            ensureImeVisible();
+        // If the dropdown is showing, bring the keyboard to the front
+        // when the user touches the text field.
+        if (mPopup.isShowing()) {
+            ensureImeVisible(true);
         }
     }
 
@@ -1114,11 +1116,13 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
     
     /**
      * Ensures that the drop down is not obscuring the IME.
-     * 
+     * @param visible whether the ime should be in front. If false, the ime is pushed to
+     * the background.
      * @hide internal used only here and SearchDialog
      */
-    public void ensureImeVisible() {
-        mPopup.setInputMethodMode(PopupWindow.INPUT_METHOD_NEEDED);
+    public void ensureImeVisible(boolean visible) {
+        mPopup.setInputMethodMode(visible
+                ? PopupWindow.INPUT_METHOD_NEEDED : PopupWindow.INPUT_METHOD_NOT_NEEDED);
         showDropDown();
     }
 
