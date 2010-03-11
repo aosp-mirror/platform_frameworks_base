@@ -69,7 +69,14 @@ enum {
 
 /* valid operations for the (*perform)() hook */
 enum {
-    NATIVE_WINDOW_SET_USAGE = 0
+    NATIVE_WINDOW_SET_USAGE  = 0,
+    NATIVE_WINDOW_CONNECT    = 1,
+    NATIVE_WINDOW_DISCONNECT = 2
+};
+
+/* parameter for NATIVE_WINDOW_[DIS]CONNECT */
+enum {
+    NATIVE_WINDOW_API_EGL = 1
 };
 
 typedef struct android_native_window_t 
@@ -157,8 +164,13 @@ typedef struct android_native_window_t
      * This hook should not be called directly, instead use the helper functions
      * defined below.
      * 
+     *  (*perform)() returns -ENOENT if the 'what' parameter is not supported
+     *  by the surface's implementation.
+     *
      * The valid operations are:
      *     NATIVE_WINDOW_SET_USAGE
+     *     NATIVE_WINDOW_CONNECT
+     *     NATIVE_WINDOW_DISCONNECT
      *  
      */
     
@@ -183,6 +195,30 @@ static inline int native_window_set_usage(
         android_native_window_t* window, int usage)
 {
     return window->perform(window, NATIVE_WINDOW_SET_USAGE, usage);
+}
+
+/*
+ * native_window_connect(..., NATIVE_WINDOW_API_EGL) must be called
+ * by EGL when the window is made current.
+ * Returns -EINVAL if for some reason the window cannot be connected, which
+ * can happen if it's connected to some other API.
+ */
+static inline int native_window_connect(
+        android_native_window_t* window, int api)
+{
+    return window->perform(window, NATIVE_WINDOW_CONNECT, api);
+}
+
+/*
+ * native_window_disconnect(..., NATIVE_WINDOW_API_EGL) must be called
+ * by EGL when the window is made not current.
+ * An error is returned if for instance the window wasn't connected in the
+ * first place.
+ */
+static inline int native_window_disconnect(
+        android_native_window_t* window, int api)
+{
+    return window->perform(window, NATIVE_WINDOW_DISCONNECT, api);
 }
 
 
