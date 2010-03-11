@@ -1250,10 +1250,19 @@ public class ListView extends AbsListView {
     int findMotionRow(int y) {
         int childCount = getChildCount();
         if (childCount > 0) {
-            for (int i = 0; i < childCount; i++) {
-                View v = getChildAt(i);
-                if (y <= v.getBottom()) {
-                    return mFirstPosition + i;
+            if (!mStackFromBottom) {
+                for (int i = 0; i < childCount; i++) {
+                    View v = getChildAt(i);
+                    if (y <= v.getBottom()) {
+                        return mFirstPosition + i;
+                    }
+                }
+            } else {
+                for (int i = childCount - 1; i >= 0; i--) {
+                    View v = getChildAt(i);
+                    if (y >= v.getTop()) {
+                        return mFirstPosition + i;
+                    }
                 }
             }
         }
@@ -3681,6 +3690,20 @@ public class ListView extends AbsListView {
         if (mCheckedIdStates != null) {
             mCheckedIdStates.clear();
         }
+    }
+    
+    @Override
+    int getOverscrollMax() {
+        if (mStackFromBottom) {
+            final int childCount = getChildCount();
+            if (childCount > 0) {
+                return Math.min(mOverscrollMax,
+                        (getHeight() - getChildAt(0).getTop()) / OVERSCROLL_LIMIT_DIVISOR);
+            } else {
+                return mOverscrollMax;
+            }
+        }
+        return super.getOverscrollMax();
     }
 
     static class SavedState extends BaseSavedState {
