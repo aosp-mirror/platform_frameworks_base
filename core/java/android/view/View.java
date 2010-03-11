@@ -2078,8 +2078,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                                         mHandler = getContext().getClass().getMethod(handlerName,
                                                 View.class);
                                     } catch (NoSuchMethodException e) {
+                                        int id = getId();
+                                        String idText = id == NO_ID ? "" : " with id '"
+                                                + getContext().getResources().getResourceEntryName(
+                                                    id) + "'";
                                         throw new IllegalStateException("Could not find a method " +
-                                                handlerName + "(View) in the activity", e);
+                                                handlerName + "(View) in the activity "
+                                                + getContext().getClass() + " for onClick handler"
+                                                + " on view " + View.this.getClass() + idText, e);
                                     }
                                 }
 
