@@ -648,7 +648,7 @@
          for details. -->
     <permission android:name="android.permission.SET_PREFERRED_APPLICATIONS"
         android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
-        android:protectionLevel="dangerous"
+        android:protectionLevel="signature"
         android:label="@string/permlab_setPreferredApplications"
         android:description="@string/permdesc_setPreferredApplications" />
 

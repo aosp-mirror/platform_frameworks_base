@@ -6321,10 +6321,14 @@ class PackageManagerService extends IPackageManager.Stub {
     }
 
     public void clearPackagePreferredActivities(String packageName) {
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.SET_PREFERRED_APPLICATIONS, null);
-
         synchronized (mPackages) {
+            int uid = Binder.getCallingUid();
+            PackageParser.Package pkg = mPackages.get(packageName);
+            if (pkg.applicationInfo.uid != uid) {
+                mContext.enforceCallingOrSelfPermission(
+                        android.Manifest.permission.SET_PREFERRED_APPLICATIONS, null);
+            }
+
             if (clearPackagePreferredActivitiesLP(packageName)) {
                 mSettings.writeLP();
             }

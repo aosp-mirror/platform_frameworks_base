@@ -1896,6 +1896,10 @@ public abstract class PackageManager {
     public abstract List<PackageInfo> getPreferredPackages(int flags);
 
     /**
+     * @deprecated This is a protected API that should not have been available
+     * to third party applications.  It is the platform's responsibility for
+     * assigning preferred activities and this can not be directly modified.
+     * 
      * Add a new preferred activity mapping to the system.  This will be used
      * to automatically select the given activity component when
      * {@link Context#startActivity(Intent) Context.startActivity()} finds
@@ -1910,10 +1914,15 @@ public abstract class PackageManager {
      * @param activity The component name of the activity that is to be
      * preferred.
      */
+    @Deprecated
     public abstract void addPreferredActivity(IntentFilter filter, int match,
             ComponentName[] set, ComponentName activity);
 
     /**
+     * @deprecated This is a protected API that should not have been available
+     * to third party applications.  It is the platform's responsibility for
+     * assigning preferred activities and this can not be directly modified.
+     * 
      * Replaces an existing preferred activity mapping to the system, and if that were not present
      * adds a new preferred activity.  This will be used
      * to automatically select the given activity component when
@@ -1930,6 +1939,7 @@ public abstract class PackageManager {
      * preferred.
      * @hide
      */
+    @Deprecated
     public abstract void replacePreferredActivity(IntentFilter filter, int match,
             ComponentName[] set, ComponentName activity);
 
@@ -1937,6 +1947,7 @@ public abstract class PackageManager {
      * Remove all preferred activity mappings, previously added with
      * {@link #addPreferredActivity}, from the
      * system whose activities are implemented in the given package name.
+     * An application can only clear its own package(s).
      *
      * @param packageName The name of the package whose preferred activity
      * mappings are to be removed.
