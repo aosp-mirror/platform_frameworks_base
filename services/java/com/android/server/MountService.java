@@ -566,6 +566,7 @@ class MountService extends IMountService.Stub
         Intent in = null;
 
         if (oldState == VolumeState.Shared && newState != oldState) {
+            if (LOCAL_LOGD) Log.d(TAG, "Sending ACTION_MEDIA_UNSHARED intent");
             mContext.sendBroadcast(new Intent(Intent.ACTION_MEDIA_UNSHARED,
                                                 Uri.parse("file://" + path)));
         }
@@ -607,6 +608,7 @@ class MountService extends IMountService.Stub
 
             updatePublicVolumeState(path, Environment.MEDIA_SHARED);
             in = new Intent(Intent.ACTION_MEDIA_SHARED, Uri.parse("file://" + path));
+            if (LOCAL_LOGD) Log.d(TAG, "Sending ACTION_MEDIA_SHARED intent");
         } else if (newState == VolumeState.SharedMnt) {
             Log.e(TAG, "Live shared mounts not supported yet!");
             return;
@@ -797,6 +799,29 @@ class MountService extends IMountService.Stub
             sendUmsIntent(avail);
         } else {
             mSendUmsConnectedOnBoot = avail;
+        }
+
+        final String path = Environment.getExternalStorageDirectory().getPath();
+        if (avail == false && getVolumeState(path).equals(Environment.MEDIA_SHARED)) {
+            /*
+             * USB mass storage disconnected while enabled
+             */
+            new Thread() {
+                public void run() {
+                    try {
+                        int rc;
+                        Log.w(TAG, "Disabling UMS after cable disconnect");
+                        doShareUnshareVolume(path, "ums", false);
+                        if ((rc = doMountVolume(path)) != StorageResultCode.OperationSucceeded) {
+                            Log.e(TAG, String.format(
+                                    "Failed to remount {%s} on UMS enabled-disconnect (%d)",
+                                            path, rc));
+                        }
+                    } catch (Exception ex) {
+                        Log.w(TAG, "Failed to mount media on UMS enabled-disconnect", ex);
+                    }
+                }
+            }.start();
         }
     }
 
