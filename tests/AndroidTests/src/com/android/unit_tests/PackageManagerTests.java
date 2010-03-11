@@ -16,6 +16,8 @@
 
 package com.android.unit_tests;
 
+import com.android.internal.content.PackageHelper;
+
 import android.os.storage.IMountService.Stub;
 
 import android.net.Uri;
@@ -73,9 +75,9 @@ public class PackageManagerTests extends AndroidTestCase {
     public final long MAX_WAIT_TIME=120*1000;
     public final long WAIT_TIME_INCR=20*1000;
     private static final String SECURE_CONTAINERS_PREFIX = "/mnt/asec";
-    private static final int APP_INSTALL_AUTO = 0;
-    private static final int APP_INSTALL_DEVICE = 1;
-    private static final int APP_INSTALL_SDCARD = 2;
+    private static final int APP_INSTALL_AUTO = PackageHelper.APP_INSTALL_AUTO;
+    private static final int APP_INSTALL_DEVICE = PackageHelper.APP_INSTALL_INTERNAL;
+    private static final int APP_INSTALL_SDCARD = PackageHelper.APP_INSTALL_EXTERNAL;
 
     void failStr(String errMsg) {
         Log.w(TAG, "errMsg="+errMsg);
