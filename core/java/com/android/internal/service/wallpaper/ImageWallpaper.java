@@ -16,12 +16,15 @@
 
 package com.android.internal.service.wallpaper;
 
+import com.android.internal.view.WindowManagerPolicyThread;
+
 import android.app.WallpaperManager;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.Region.Op;
 import android.graphics.drawable.Drawable;
 import android.os.HandlerThread;
+import android.os.Looper;
 import android.os.Process;
 import android.service.wallpaper.WallpaperService;
 import android.util.Log;
@@ -43,9 +46,14 @@ public class ImageWallpaper extends WallpaperService {
     public void onCreate() {
         super.onCreate();
         mWallpaperManager = (WallpaperManager) getSystemService(WALLPAPER_SERVICE);
-        mThread = new HandlerThread("Wallpaper", Process.THREAD_PRIORITY_FOREGROUND);
-        mThread.start();
-        setCallbackLooper(mThread.getLooper());
+        Looper looper = WindowManagerPolicyThread.getLooper();
+        if (looper != null) {
+            setCallbackLooper(looper);
+        } else {
+            mThread = new HandlerThread("Wallpaper", Process.THREAD_PRIORITY_FOREGROUND);
+            mThread.start();
+            setCallbackLooper(mThread.getLooper());
+        }
     }
 
     public Engine onCreateEngine() {
@@ -55,7 +63,9 @@ public class ImageWallpaper extends WallpaperService {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mThread.quit();
+        if (mThread != null) {
+            mThread.quit();
+        }
     }
 
     class DrawableEngine extends Engine {

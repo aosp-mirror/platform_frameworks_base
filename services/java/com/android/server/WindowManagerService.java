@@ -47,6 +47,7 @@ import com.android.internal.policy.impl.PhoneWindowManager;
 import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethodClient;
 import com.android.internal.view.IInputMethodManager;
+import com.android.internal.view.WindowManagerPolicyThread;
 import com.android.server.KeyInputQueue.QueuedEvent;
 import com.android.server.am.BatteryStatsService;
 
@@ -135,6 +136,7 @@ public class WindowManagerService extends IWindowManager.Stub
     static final boolean DEBUG_FOCUS = false;
     static final boolean DEBUG_ANIM = false;
     static final boolean DEBUG_LAYOUT = false;
+    static final boolean DEBUG_RESIZE = false;
     static final boolean DEBUG_LAYERS = false;
     static final boolean DEBUG_INPUT = false;
     static final boolean DEBUG_INPUT_METHOD = false;
@@ -558,6 +560,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
         public void run() {
             Looper.prepare();
+            WindowManagerPolicyThread.set(this, Looper.myLooper());
+            
             //Looper.myLooper().setMessageLogging(new LogPrinter(
             //        Log.VERBOSE, "WindowManagerPolicy", Log.LOG_ID_SYSTEM));
             android.os.Process.setThreadPriority(
@@ -6911,6 +6915,12 @@ public class WindowManagerService extends IWindowManager.Stub
         final Rect mLastShownFrame = new Rect();
 
         /**
+         * Set when we have changed the size of the surface, to know that
+         * we must tell them application to resize (and thus redraw itself).
+         */
+        boolean mSurfaceResized;
+        
+        /**
          * Insets that determine the actually visible area
          */
         final Rect mVisibleInsets = new Rect();
@@ -10066,6 +10076,20 @@ public class WindowManagerService extends IWindowManager.Stub
                 final int attrFlags = attrs.flags;
 
                 if (w.mSurface != null) {
+                    // XXX NOTE: The logic here could be improved.  We have
+                    // the decision about whether to resize a window separated
+                    // from whether to hide the surface.  This can cause us to
+                    // resize a surface even if we are going to hide it.  You
+                    // can see this by (1) holding device in landscape mode on
+                    // home screen; (2) tapping browser icon (device will rotate
+                    // to landscape; (3) tap home.  The wallpaper will be resized
+                    // in step 2 but then immediately hidden, causing us to
+                    // have to resize and then redraw it again in step 3.  It
+                    // would be nice to figure out how to avoid this, but it is
+                    // difficult because we do need to resize surfaces in some
+                    // cases while they are hidden such as when first showing a
+                    // window.
+                    
                     w.computeShownFrameLocked();
                     if (localLOGV) Slog.v(
                             TAG, "Placing surface #" + i + " " + w.mSurface
@@ -10112,6 +10136,7 @@ public class WindowManagerService extends IWindowManager.Stub
                                         + w.mShownFrame.top + " SIZE "
                                         + w.mShownFrame.width() + "x"
                                         + w.mShownFrame.height(), null);
+                                w.mSurfaceResized = true;
                                 w.mSurface.setSize(width, height);
                                 w.mSurface.setPosition(w.mShownFrame.left,
                                         w.mShownFrame.top);
@@ -10144,6 +10169,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         if (!w.mLastFrame.equals(w.mFrame)
                                 || w.mContentInsetsChanged
                                 || w.mVisibleInsetsChanged
+                                || w.mSurfaceResized
                                 || configChanged) {
                             w.mLastFrame.set(w.mFrame);
                             w.mLastContentInsets.set(w.mContentInsets);
@@ -10180,7 +10206,7 @@ public class WindowManagerService extends IWindowManager.Stub
                                     w.mAppToken.allDrawn = false;
                                 }
                             }
-                            if (DEBUG_ORIENTATION) Slog.v(TAG,
+                            if (DEBUG_RESIZE || DEBUG_ORIENTATION) Slog.v(TAG,
                                     "Resizing window " + w + " to " + w.mFrame);
                             mResizingWindows.add(w);
                         } else if (w.mOrientationChanging) {
@@ -10479,14 +10505,14 @@ public class WindowManagerService extends IWindowManager.Stub
                 i--;
                 WindowState win = mResizingWindows.get(i);
                 try {
-                    if (DEBUG_ORIENTATION) Slog.v(TAG, "Reporting new frame to "
-                            + win + ": " + win.mFrame);
+                    if (DEBUG_RESIZE || DEBUG_ORIENTATION) Slog.v(TAG,
+                            "Reporting new frame to " + win + ": " + win.mFrame);
                     boolean configChanged =
                         win.mConfiguration != mCurConfiguration
                         && (win.mConfiguration == null
                                 || mCurConfiguration.diff(win.mConfiguration) != 0);
                     win.mConfiguration = mCurConfiguration;
-                    if (DEBUG_ORIENTATION && configChanged) {
+                    if ((DEBUG_RESIZE || DEBUG_ORIENTATION) && configChanged) {
                         Slog.i(TAG, "Sending new config to window " + win + ": "
                                 + win.mFrame.width() + "x" + win.mFrame.height()
                                 + " / " + win.mConfiguration);
@@ -10497,6 +10523,7 @@ public class WindowManagerService extends IWindowManager.Stub
                             configChanged ? win.mConfiguration : null);
                     win.mContentInsetsChanged = false;
                     win.mVisibleInsetsChanged = false;
+                    win.mSurfaceResized = false;
                 } catch (RemoteException e) {
                     win.mOrientationChanging = false;
                 }
