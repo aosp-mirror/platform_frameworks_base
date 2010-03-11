@@ -71,9 +71,9 @@ public class UiModeManager {
     public static String ACTION_ENTER_DESK_MODE = "android.app.action.ENTER_DESK_MODE";
     
     /**
-     * Broadcast sent when the device's UI has switch away from car mode back
-     * to normal mode.  Typically used by a car mode app, to dismiss itself
-     * when the user exits car mode.
+     * Broadcast sent when the device's UI has switched away from desk mode back
+     * to normal mode.  Typically used by a desk mode app, to dismiss itself
+     * when the user exits desk mode.
      */
     public static String ACTION_EXIT_DESK_MODE = "android.app.action.EXIT_DESK_MODE";
     
