@@ -192,7 +192,7 @@ def main(options, args):
   # JS_ENGINE environment  variable, which is used by the build system in
   # external/webkit/Android.mk.
   js_engine = options.js_engine
-  if not js_engine:
+  if not js_engine and os.environ.has_key('JS_ENGINE'):
     js_engine = os.environ['JS_ENGINE']
   if js_engine:
     run_layout_test_cmd_postfix += " -e jsengine " + js_engine
