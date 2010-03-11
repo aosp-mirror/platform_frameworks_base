@@ -819,7 +819,7 @@ public class Activity extends ContextThemeWrapper
     /**
      * This method is called after {@link #onStart} when the activity is
      * being re-initialized from a previously saved state, given here in
-     * <var>state</var>.  Most implementations will simply use {@link #onCreate}
+     * <var>savedInstanceState</var>.  Most implementations will simply use {@link #onCreate}
      * to restore their state, but it is sometimes convenient to do it here
      * after all of the initialization has been done or to allow subclasses to
      * decide whether to use your default implementation.  The default
