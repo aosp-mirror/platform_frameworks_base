@@ -358,7 +358,7 @@ unsigned int AudioSystem::getInputFramesLost(audio_io_handle_t ioHandle) {
     const sp<IAudioFlinger>& af = AudioSystem::get_audio_flinger();
     unsigned int result = 0;
     if (af == 0) return result;
-    if (ioHandle == NULL) return result;
+    if (ioHandle == 0) return result;
 
     result = af->getInputFramesLost(ioHandle);
     return result;
@@ -556,7 +556,18 @@ audio_io_handle_t AudioSystem::getOutput(stream_type stream,
                                     output_flags flags)
 {
     audio_io_handle_t output = 0;
-    if ((flags & AudioSystem::OUTPUT_FLAG_DIRECT) == 0) {
+    // Do not use stream to output map cache if the direct output
+    // flag is set or if we are likely to use a direct output
+    // (e.g voice call stream @ 8kHz could use BT SCO device and be routed to
+    // a direct output on some platforms).
+    // TODO: the output cache and stream to output mapping implementation needs to
+    // be reworked for proper operation with direct outputs. This code is too specific
+    // to the first use case we want to cover (Voice Recognition and Voice Dialer over
+    // Bluetooth SCO
+    if ((flags & AudioSystem::OUTPUT_FLAG_DIRECT) == 0 &&
+        ((stream != AudioSystem::VOICE_CALL && stream != AudioSystem::BLUETOOTH_SCO) ||
+         channels != AudioSystem::CHANNEL_OUT_MONO ||
+         (samplingRate != 8000 && samplingRate != 16000))) {
         Mutex::Autolock _l(gLock);
         output = AudioSystem::gStreamOutputMap.valueFor(stream);
         LOGV_IF((output != 0), "getOutput() read %d from cache for stream %d", output, stream);

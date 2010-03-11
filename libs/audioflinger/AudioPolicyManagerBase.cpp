@@ -458,11 +458,8 @@ audio_io_handle_t AudioPolicyManagerBase::getOutput(AudioSystem::stream_type str
     }
 #endif //AUDIO_POLICY_TEST
 
-    // open a direct output if:
-    // 1 a direct output is explicitely requested
-    // 2 the audio format is compressed
-    if ((flags & AudioSystem::OUTPUT_FLAG_DIRECT) ||
-         (format !=0 && !AudioSystem::isLinearPCM(format))) {
+    // open a direct output if required by specified parameters
+    if (needsDirectOuput(stream, samplingRate, format, channels, flags, device)) {
 
         LOGV("getOutput() opening direct output device %x", device);
         AudioOutputDescriptor *outputDesc = new AudioOutputDescriptor();
@@ -472,7 +469,7 @@ audio_io_handle_t AudioPolicyManagerBase::getOutput(AudioSystem::stream_type str
         outputDesc->mChannels = channels;
         outputDesc->mLatency = 0;
         outputDesc->mFlags = (AudioSystem::output_flags)(flags | AudioSystem::OUTPUT_FLAG_DIRECT);
-        outputDesc->mRefCount[stream] = 1;
+        outputDesc->mRefCount[stream] = 0;
         output = mpClientInterface->openOutput(&outputDesc->mDevice,
                                         &outputDesc->mSamplingRate,
                                         &outputDesc->mFormat,
@@ -609,6 +606,9 @@ status_t AudioPolicyManagerBase::stopOutput(audio_io_handle_t output, AudioSyste
             setStrategyMute(STRATEGY_MEDIA, false, mA2dpOutput, mOutputs.valueFor(mHardwareOutput)->mLatency*2);
         }
 #endif
+        if (output != mHardwareOutput) {
+            setOutputDevice(mHardwareOutput, getNewDevice(mHardwareOutput), true);
+        }
         return NO_ERROR;
     } else {
         LOGW("stopOutput() refcount is already 0 for output %d", output);
@@ -1550,10 +1550,10 @@ void AudioPolicyManagerBase::setOutputDevice(audio_io_handle_t output, uint32_t 
     }
 #ifdef WITH_A2DP
     // filter devices according to output selected
-    if (output == mHardwareOutput) {
-        device &= ~AudioSystem::DEVICE_OUT_ALL_A2DP;
-    } else {
+    if (output == mA2dpOutput) {
         device &= AudioSystem::DEVICE_OUT_ALL_A2DP;
+    } else {
+        device &= ~AudioSystem::DEVICE_OUT_ALL_A2DP;
     }
 #endif
 
@@ -1562,8 +1562,7 @@ void AudioPolicyManagerBase::setOutputDevice(audio_io_handle_t output, uint32_t 
     //  - the requestede device is 0
     //  - the requested device is the same as current device and force is not specified.
     // Doing this check here allows the caller to call setOutputDevice() without conditions
-    if (device == 0 ||
-        (device == prevDevice && !force)) {
+    if ((device == 0 || device == prevDevice) && !force) {
         LOGV("setOutputDevice() setting same device %x or null device for output %d", device, output);
         return;
     }
@@ -1666,7 +1665,7 @@ float AudioPolicyManagerBase::computeVolume(int stream, int index, audio_io_hand
     int volInt = (100 * (index - streamDesc.mIndexMin)) / (streamDesc.mIndexMax - streamDesc.mIndexMin);
     volume = AudioSystem::linearToLog(volInt);
 
-    // if a heaset is connected, apply the following rules to ring tones and notifications
+    // if a headset is connected, apply the following rules to ring tones and notifications
     // to avoid sound level bursts in user's ears:
     // - always attenuate ring tones and notifications volume by 6dB
     // - if music is playing, always limit the volume to current music volume,
@@ -1823,6 +1822,17 @@ void AudioPolicyManagerBase::handleIncallSonification(int stream, bool starting,
             }
         }
     }
+}
+
+bool AudioPolicyManagerBase::needsDirectOuput(AudioSystem::stream_type stream,
+                                    uint32_t samplingRate,
+                                    uint32_t format,
+                                    uint32_t channels,
+                                    AudioSystem::output_flags flags,
+                                    uint32_t device)
+{
+   return ((flags & AudioSystem::OUTPUT_FLAG_DIRECT) ||
+          (format !=0 && !AudioSystem::isLinearPCM(format)));
 }
 
 // --- AudioOutputDescriptor class implementation
