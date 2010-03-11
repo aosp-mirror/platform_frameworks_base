@@ -33,6 +33,7 @@ import android.net.INetworkManagementEventObserver;
 import android.net.NetworkInfo;
 import android.os.BatteryManager;
 import android.os.Binder;
+import android.os.Environment;
 import android.os.IBinder;
 import android.os.INetworkManagementService;
 import android.os.Message;
@@ -72,7 +73,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
     private String[] mTetherableWifiRegexs;
     private String[] mUpstreamIfaceRegexs;
 
-    private HashMap<String, TetherInterfaceSM> mIfaces;
+    private HashMap<String, TetherInterfaceSM> mIfaces; // all tethered/tetherable ifaces
 
     private BroadcastReceiver mStateReceiver;
 
@@ -86,13 +87,19 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
     private static final String DNS_DEFAULT_SERVER1 = "8.8.8.8";
     private static final String DNS_DEFAULT_SERVER2 = "4.2.2.2";
 
-    private boolean mDunRequired;
+    private boolean mDunRequired;  // configuration info - must use DUN apn on 3g
     private boolean mUseHiPri;
+
     private String mUpstreamIfaceName;
 
     private HierarchicalStateMachine mTetherMasterSM;
 
     private Notification mTetheredNotification;
+
+    // whether we can tether is the && of these two - they come in as separate
+    // broadcasts so track them so we can decide what to do when either changes
+    private boolean mUsbMassStorageOff;  // track the status of USB Mass Storage
+    private boolean mUsbConnected;       // track the status of USB connection
 
     public Tethering(Context context) {
         Log.d(TAG, "Tethering starting");
@@ -117,6 +124,10 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
         filter.addAction(Intent.ACTION_BATTERY_CHANGED);
         filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
         filter.addAction(Intent.ACTION_BOOT_COMPLETED);
+        filter.addAction(Intent.ACTION_MEDIA_SHARED);
+        filter.addAction(Intent.ACTION_MEDIA_UNSHARED);
+        mUsbMassStorageOff = !Environment.MEDIA_SHARED.equals(
+                Environment.getExternalStorageState());
         mStateReceiver = new StateReceiver();
         mContext.registerReceiver(mStateReceiver, filter);
 
@@ -381,17 +392,28 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
         }
     }
 
+    private void updateUsbStatus() {
+        boolean enable = mUsbConnected && mUsbMassStorageOff;
+
+        if (mBooted) {
+            enableUsbIfaces(enable);
+        }
+    }
+
     private class StateReceiver extends BroadcastReceiver {
         public void onReceive(Context content, Intent intent) {
             String action = intent.getAction();
             if (action.equals(Intent.ACTION_BATTERY_CHANGED)) {
-                boolean usbConnected = (intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1)
+                mUsbConnected = (intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1)
                         == BatteryManager.BATTERY_PLUGGED_USB);
-                if (mBooted) {
-                    Tethering.this.enableUsbIfaces(usbConnected); // add or remove them
-                } else {
-                    mDeferedUsbConnection = usbConnected;
-                }
+                Tethering.this.updateUsbStatus();
+            } else if (action.equals(Intent.ACTION_MEDIA_SHARED)) {
+                mUsbMassStorageOff = false;
+                updateUsbStatus();
+            }
+            else if (action.equals(Intent.ACTION_MEDIA_UNSHARED)) {
+                mUsbMassStorageOff = true;
+                updateUsbStatus();
             } else if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
                 IBinder b = ServiceManager.getService(Context.CONNECTIVITY_SERVICE);
                 IConnectivityManager service = IConnectivityManager.Stub.asInterface(b);
@@ -409,9 +431,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                 } catch (RemoteException e) {}
             } else if (action.equals(Intent.ACTION_BOOT_COMPLETED)) {
                 mBooted = true;
-                if (mDeferedUsbConnection) {
-                    Tethering.this.enableUsbIfaces(true);
-                }
+                updateUsbStatus();
             }
         }
     }
