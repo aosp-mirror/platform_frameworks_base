@@ -16,10 +16,14 @@
 
 package android.database.sqlite;
 
+import android.util.Log;
+
 /**
  * A base class for compiled SQLite programs.
  */
 public abstract class SQLiteProgram extends SQLiteClosable {
+
+    private static final String TAG = "SQLiteProgram";
 
     /** The database this program is compiled against.
      * @deprecated do not use this
@@ -80,16 +84,26 @@ public abstract class SQLiteProgram extends SQLiteClosable {
             // make sure it is acquired by me.
             mCompiledSql.acquire();
             db.addToCompiledQueries(sql, mCompiledSql);
+            if (SQLiteDebug.DEBUG_ACTIVE_CURSOR_FINALIZATION) {
+                Log.v(TAG, "Created DbObj (id#" + mCompiledSql.nStatement +
+                        ") for sql: " + sql);
+            }
         } else {
             // it is already in compiled-sql cache.
             // try to acquire the object.
             if (!mCompiledSql.acquire()) {
+                int last = mCompiledSql.nStatement;
                 // the SQLiteCompiledSql in cache is in use by some other SQLiteProgram object.
                 // we can't have two different SQLiteProgam objects can't share the same
                 // CompiledSql object. create a new one.
                 // finalize it when I am done with it in "this" object.
                 mCompiledSql = new SQLiteCompiledSql(db, sql);
-
+                if (SQLiteDebug.DEBUG_ACTIVE_CURSOR_FINALIZATION) {
+                    Log.v(TAG, "** possible bug ** Created NEW DbObj (id#" +
+                            mCompiledSql.nStatement +
+                            ") because the previously created DbObj (id#" + last +
+                            ") was not released for sql:" + sql);
+                }
                 // since it is not in the cache, no need to acquire() it.
             }
         }
@@ -124,7 +138,7 @@ public abstract class SQLiteProgram extends SQLiteClosable {
                 // it is in compiled-sql cache. reset its CompiledSql#mInUse flag
                 mCompiledSql.release();
             }
-        }
+        } 
     }
 
     /**
