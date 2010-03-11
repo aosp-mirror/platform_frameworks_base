@@ -1748,9 +1748,9 @@
              The default value is true. -->
         <attr name="footerDividersEnabled" format="boolean" />
         <!-- Drawable to draw above list content. -->
-        <attr name="overscrollHeader" format="reference" />
+        <attr name="overscrollHeader" format="reference|color" />
         <!-- Drawable to draw below list content. -->
-        <attr name="overscrollFooter" format="reference" />
+        <attr name="overscrollFooter" format="reference|color" />
     </declare-styleable>
     <declare-styleable name="MenuView">
         <!-- Default appearance of menu item text. -->
