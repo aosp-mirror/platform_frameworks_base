@@ -70,7 +70,7 @@ public class RecoverySystem {
     private static File LOG_FILE = new File(RECOVERY_DIR, "log");
 
     // Length limits for reading files.
-    private static int LOG_FILE_MAX_LENGTH = 8 * 1024;
+    private static int LOG_FILE_MAX_LENGTH = 64 * 1024;
 
     /**
      * Interface definition for a callback to be invoked regularly as
