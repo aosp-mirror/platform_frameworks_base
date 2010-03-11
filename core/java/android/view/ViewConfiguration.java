@@ -105,7 +105,7 @@ public class ViewConfiguration {
      * Distance a touch can wander before we think the user is attempting a paged scroll
      * (in dips)
      */
-    private static final int PAGING_TOUCH_SLOP = TOUCH_SLOP * 3;
+    private static final int PAGING_TOUCH_SLOP = TOUCH_SLOP * 2;
     
     /**
      * Distance between the first touch and second touch to still be considered a double tap
