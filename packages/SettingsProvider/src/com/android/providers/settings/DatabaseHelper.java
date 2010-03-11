@@ -902,6 +902,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         vibrate = AudioService.getValueForVibrateSetting(vibrate,
                 AudioManager.VIBRATE_TYPE_RINGER, AudioManager.VIBRATE_SETTING_OFF);
         loadSetting(stmt, Settings.System.VIBRATE_ON, vibrate);
+        stmt.close();
     }
 
     private void loadSettings(SQLiteDatabase db) {
