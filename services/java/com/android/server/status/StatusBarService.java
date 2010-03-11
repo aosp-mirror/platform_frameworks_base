@@ -552,15 +552,17 @@ public class StatusBarService extends IStatusBar.Stub
                 doRevealAnimation();
                 return;
             }
+            boolean expand = false;
+            boolean doExpand = false;
+            boolean doDisable = false;
+            int disableWhat = 0;
+
             synchronized (mQueue) {
                 boolean wasExpanded = mExpanded;
 
                 // for each one in the queue, find all of the ones with the same key
                 // and collapse that down into a final op and/or call to setVisibility, etc
-                boolean expand = wasExpanded;
-                boolean doExpand = false;
-                boolean doDisable = false;
-                int disableWhat = 0;
+                expand = wasExpanded;
                 int N = mQueue.size();
                 while (N > 0) {
                     PendingOp op = mQueue.get(0);
@@ -634,17 +636,20 @@ public class StatusBarService extends IStatusBar.Stub
                 if (mQueue.size() != 0) {
                     throw new RuntimeException("Assertion failed: mQueue.size=" + mQueue.size());
                 }
-                if (doExpand) {
-                    // this is last so that we capture all of the pending changes before doing it
-                    if (expand) {
-                        animateExpand();
-                    } else {
-                        animateCollapse();
-                    }
+            }
+            // This must be done outside the synchronized block above to prevent a deadlock where
+            // we call into the NotificationManagerService and it is in turn attempting to post a
+            // message to our queue.
+            if (doExpand) {
+                // this is last so that we capture all of the pending changes before doing it
+                if (expand) {
+                    animateExpand();
+                } else {
+                    animateCollapse();
                 }
-                if (doDisable) {
-                    performDisableActions(disableWhat);
-                }
+            }
+            if (doDisable) {
+                performDisableActions(disableWhat);
             }
         }
     }
