@@ -74,7 +74,7 @@ public class Rfc822Tokenizer implements MultiAutoCompleteTextView.Tokenizer {
 
                 name.setLength(0);
                 address.setLength(0);
-                address.setLength(0);
+                comment.setLength(0);
             } else if (c == '"') {
                 i++;
 
