@@ -1204,8 +1204,8 @@ public class HierarchicalStateMachineTest extends TestCase {
      * complete.
      */
     class StateMachineSharedThread extends HierarchicalStateMachine {
-        StateMachineSharedThread(Looper looper, String name, int maxCount) {
-            super(looper, name);
+        StateMachineSharedThread(String name, Looper looper, int maxCount) {
+            super(name, looper);
             mMaxCount = maxCount;
             setDbg(DBG);
 
@@ -1254,7 +1254,7 @@ public class HierarchicalStateMachineTest extends TestCase {
         // Create the state machines
         StateMachineSharedThread sms[] = new StateMachineSharedThread[10];
         for (int i = 0; i < sms.length; i++) {
-            sms[i] = new StateMachineSharedThread(smThread.getLooper(), "sm", sms.length);
+            sms[i] = new StateMachineSharedThread("sm", smThread.getLooper(), sms.length);
             sms[i].start();
         }
 
