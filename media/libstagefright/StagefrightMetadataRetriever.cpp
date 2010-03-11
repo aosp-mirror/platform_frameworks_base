@@ -20,7 +20,6 @@
 
 #include "include/StagefrightMetadataRetriever.h"
 
-#include <media/stagefright/CachingDataSource.h>
 #include <media/stagefright/ColorConverter.h>
 #include <media/stagefright/DataSource.h>
 #include <media/stagefright/FileSource.h>
