@@ -233,25 +233,25 @@ extends Layout
                 }
             }
 
-            if (!easy) {
-                // Ensure that none of the underlying characters are treated
-                // as viable breakpoints, and that the entire run gets the
-                // same bidi direction.
+            // Ensure that none of the underlying characters are treated
+            // as viable breakpoints, and that the entire run gets the
+            // same bidi direction.
 
-                if (source instanceof Spanned) {
-                    Spanned sp = (Spanned) source;
-                    ReplacementSpan[] spans = sp.getSpans(start, end, ReplacementSpan.class);
+            if (source instanceof Spanned) {
+                Spanned sp = (Spanned) source;
+                ReplacementSpan[] spans = sp.getSpans(start, end, ReplacementSpan.class);
 
-                    for (int y = 0; y < spans.length; y++) {
-                        int a = sp.getSpanStart(spans[y]);
-                        int b = sp.getSpanEnd(spans[y]);
+                for (int y = 0; y < spans.length; y++) {
+                    int a = sp.getSpanStart(spans[y]);
+                    int b = sp.getSpanEnd(spans[y]);
 
-                        for (int x = a; x < b; x++) {
-                            chs[x - start] = '\uFFFC';
-                        }
+                    for (int x = a; x < b; x++) {
+                        chs[x - start] = '\uFFFC';
                     }
                 }
+            }
 
+            if (!easy) {
                 // XXX put override flags, etc. into chdirs
                 dir = bidi(dir, chs, chdirs, n, false);
 

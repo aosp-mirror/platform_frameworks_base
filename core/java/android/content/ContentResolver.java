@@ -689,7 +689,7 @@ public abstract class ContentResolver {
      * @param uri The URI to modify.
      * @param values The new field values. The key is the column name for the field.
                      A null value will remove an existing field value.
-     * @param where A filter to apply to rows before deleting, formatted as an SQL WHERE clause
+     * @param where A filter to apply to rows before updating, formatted as an SQL WHERE clause
                     (excluding the WHERE itself).
      * @return The number of rows updated.
      * @throws NullPointerException if uri or values are null

@@ -56,7 +56,10 @@
     <bool name="def_mount_ums_autostart">false</bool>
     <bool name="def_mount_ums_prompt">true</bool>
     <bool name="def_mount_ums_notify_enabled">true</bool>
+    <!-- Enable User preference for setting install location -->
     <bool name="set_install_location">true</bool>
+    <!-- Default install location if user preference for setting install location is turned on. -->
+    <integer name="def_install_location">2</integer>
 
     <!-- user interface sound effects -->
     <integer name="def_power_sounds_enabled">1</integer>
@@ -70,4 +73,6 @@
     <string name="def_lock_sound" translatable="false">/system/media/audio/ui/Lock.ogg</string>
     <string name="def_unlock_sound" translatable="false">/system/media/audio/ui/Unlock.ogg</string>
 
+    <!-- Default for Settings.System.VIBRATE_IN_SILENT -->
+    <bool name="def_vibrate_in_silent">true</bool>
 </resources>

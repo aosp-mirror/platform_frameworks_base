@@ -259,8 +259,6 @@ public final class VelocityTracker implements Poolable<VelocityTracker> {
      * 
      * @param id Which pointer's velocity to return.
      * @return The previously computed X velocity.
-     * 
-     * @hide Pending API approval
      */
     public float getXVelocity(int id) {
         return mXVelocity[id];
@@ -272,8 +270,6 @@ public final class VelocityTracker implements Poolable<VelocityTracker> {
      * 
      * @param id Which pointer's velocity to return.
      * @return The previously computed Y velocity.
-     * 
-     * @hide Pending API approval
      */
     public float getYVelocity(int id) {
         return mYVelocity[id];

@@ -232,7 +232,7 @@ static void usage(const char *me) {
     fprintf(stderr, "       -m max-number-of-frames-to-decode in each pass\n");
     fprintf(stderr, "       -b bug to reproduce\n");
     fprintf(stderr, "       -p(rofiles) dump decoder profiles supported\n");
-    fprintf(stderr, "       -t(humbnail) extract video thumbnail\n");
+    fprintf(stderr, "       -t(humbnail) extract video thumbnail or album art\n");
     fprintf(stderr, "       -s(oftware) prefer software codec\n");
 }
 
@@ -334,12 +334,24 @@ int main(int argc, char **argv) {
             const char *filename = argv[k];
 
             CHECK_EQ(retriever->setDataSource(filename), OK);
-            CHECK_EQ(retriever->setMode(METADATA_MODE_FRAME_CAPTURE_ONLY), OK);
+            CHECK_EQ(retriever->setMode(
+                        METADATA_MODE_FRAME_CAPTURE_AND_METADATA_RETRIEVAL),
+                     OK);
 
             sp<IMemory> mem = retriever->captureFrame();
 
-            printf("captureFrame(%s) => %s\n",
-                   filename, mem != NULL ? "OK" : "FAILED");
+            if (mem != NULL) {
+                printf("captureFrame(%s) => OK\n", filename);
+            } else {
+                mem = retriever->extractAlbumArt();
+
+                if (mem != NULL) {
+                    printf("extractAlbumArt(%s) => OK\n", filename);
+                } else {
+                    printf("both captureFrame and extractAlbumArt "
+                           "failed on file '%s'.\n", filename);
+                }
+            }
         }
 
         return 0;

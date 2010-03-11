@@ -331,12 +331,14 @@ static SkPixelRef* installPixelRef(SkBitmap* bitmap, SkStream* stream,
 // i.e. dynamically allocated, since its lifetime may exceed the current stack
 // frame.
 static jobject doDecode(JNIEnv* env, SkStream* stream, jobject padding,
-                        jobject options, bool allowPurgeable) {
+                        jobject options, bool allowPurgeable,
+                        bool forcePurgeable = false) {
     int sampleSize = 1;
     SkImageDecoder::Mode mode = SkImageDecoder::kDecodePixels_Mode;
     SkBitmap::Config prefConfig = SkBitmap::kNo_Config;
     bool doDither = true;
-    bool isPurgeable = allowPurgeable && optionsPurgeable(env, options);
+    bool isPurgeable = forcePurgeable ||
+                        (allowPurgeable && optionsPurgeable(env, options));
     bool reportSizeToVM = optionsReportSizeToVM(env, options);
     
     if (NULL != options) {
@@ -568,8 +570,10 @@ static jobject nativeDecodeAsset(JNIEnv* env, jobject clazz,
                                  jobject options) { // BitmapFactory$Options
     SkStream* stream;
     Asset* asset = reinterpret_cast<Asset*>(native_asset);
+    // assets can always be rebuilt, so force this
+    bool forcePurgeable = true;
 
-    if (optionsPurgeable(env, options)) {
+    if (forcePurgeable || optionsPurgeable(env, options)) {
         // if we could "ref/reopen" the asset, we may not need to copy it here
         // and we could assume optionsShareable, since assets are always RO
         stream = copyAssetToStream(asset);
@@ -582,7 +586,7 @@ static jobject nativeDecodeAsset(JNIEnv* env, jobject clazz,
         stream = new AssetStreamAdaptor(asset);
     }
     SkAutoUnref aur(stream);
-    return doDecode(env, stream, padding, options, true);
+    return doDecode(env, stream, padding, options, true, forcePurgeable);
 }
 
 static jobject nativeDecodeByteArray(JNIEnv* env, jobject, jbyteArray byteArray,

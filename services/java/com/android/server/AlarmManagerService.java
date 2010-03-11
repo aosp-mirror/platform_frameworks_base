@@ -821,6 +821,11 @@ class AlarmManagerService extends IAlarmManager.Stub {
                 } else if (Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE.equals(action)) {
                     pkgList = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
                 } else {
+                    if (Intent.ACTION_PACKAGE_REMOVED.equals(action)
+                            && intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
+                        // This package is being updated; don't kill its alarms.
+                        return;
+                    }
                     Uri data = intent.getData();
                     if (data != null) {
                         String pkg = data.getSchemeSpecificPart();

@@ -1747,6 +1747,10 @@
         <!-- When set to false, the ListView will not draw the divider before each footer view.
              The default value is true. -->
         <attr name="footerDividersEnabled" format="boolean" />
+        <!-- Drawable to draw above list content. -->
+        <attr name="overscrollHeader" format="reference" />
+        <!-- Drawable to draw below list content. -->
+        <attr name="overscrollFooter" format="reference" />
     </declare-styleable>
     <declare-styleable name="MenuView">
         <!-- Default appearance of menu item text. -->

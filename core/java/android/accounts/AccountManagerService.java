@@ -1071,8 +1071,20 @@ public class AccountManagerService
                 return;
             }
 
+            final IAccountAuthenticator accountAuthenticator = mAuthenticator;
+            if (accountAuthenticator == null) {
+                // It is possible that the authenticator has died, which is indicated by
+                // mAuthenticator being set to null. If this happens then just abort.
+                // There is no need to send back a result or error in this case since
+                // that already happened when mAuthenticator was cleared.
+                if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                    Log.v(TAG, "checkAccount: aborting session since we are no longer"
+                            + " connected to the authenticator, " + toDebugString());
+                }
+                return;
+            }
             try {
-                mAuthenticator.hasFeatures(this, mAccountsOfType[mCurrentAccount], mFeatures);
+                accountAuthenticator.hasFeatures(this, mAccountsOfType[mCurrentAccount], mFeatures);
             } catch (RemoteException e) {
                 onError(AccountManager.ERROR_CODE_REMOTE_EXCEPTION, "remote exception");
             }

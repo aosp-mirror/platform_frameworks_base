@@ -627,8 +627,9 @@ public interface WindowManagerPolicy {
      * returned, all windows given to layoutWindow() <em>must</em> have had a
      * frame assigned.
      *  
-     * @return Return any bit set of {@link #FINISH_LAYOUT_REDO_LAYOUT}
-     * and {@link #FINISH_LAYOUT_REDO_CONFIG}.
+     * @return Return any bit set of {@link #FINISH_LAYOUT_REDO_LAYOUT},
+     * {@link #FINISH_LAYOUT_REDO_CONFIG}, {@link #FINISH_LAYOUT_REDO_WALLPAPER},
+     * or {@link #FINISH_LAYOUT_REDO_ANIM}.
      */
     public int finishLayoutLw();
 
@@ -638,6 +639,8 @@ public interface WindowManagerPolicy {
     static final int FINISH_LAYOUT_REDO_CONFIG = 0x0002;
     /** Wallpaper may need to move */
     static final int FINISH_LAYOUT_REDO_WALLPAPER = 0x0004;
+    /** Need to recompute animations */
+    static final int FINISH_LAYOUT_REDO_ANIM = 0x0008;
     
     /**
      * Called when animation of the windows is about to start.
@@ -661,10 +664,11 @@ public interface WindowManagerPolicy {
      * something that may have modified the animation state of another window, 
      * be sure to return true in order to perform another animation frame. 
      *  
-     * @return Return true if animation state may have changed (so that another 
-     *         frame of animation will be run).
+     * @return Return any bit set of {@link #FINISH_LAYOUT_REDO_LAYOUT},
+     * {@link #FINISH_LAYOUT_REDO_CONFIG}, {@link #FINISH_LAYOUT_REDO_WALLPAPER},
+     * or {@link #FINISH_LAYOUT_REDO_ANIM}.
      */
-    public boolean finishAnimationLw();
+    public int finishAnimationLw();
 
     /**
      * Return true if it is okay to perform animations for an app transition

@@ -13226,9 +13226,11 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     ac.updateConfiguration(mConfiguration);
                 }
 
-                Message msg = mHandler.obtainMessage(UPDATE_CONFIGURATION_MSG);
-                msg.obj = new Configuration(mConfiguration);
-                mHandler.sendMessage(msg);
+                if (Settings.System.hasInterestingConfigurationChanges(changes)) {
+                    Message msg = mHandler.obtainMessage(UPDATE_CONFIGURATION_MSG);
+                    msg.obj = new Configuration(mConfiguration);
+                    mHandler.sendMessage(msg);
+                }
         
                 for (int i=mLruProcesses.size()-1; i>=0; i--) {
                     ProcessRecord app = mLruProcesses.get(i);

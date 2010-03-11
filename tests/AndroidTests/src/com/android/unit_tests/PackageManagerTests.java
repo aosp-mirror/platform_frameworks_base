@@ -16,6 +16,8 @@
 
 package com.android.unit_tests;
 
+import com.android.internal.content.PackageHelper;
+
 import android.os.storage.IMountService.Stub;
 
 import android.net.Uri;
@@ -73,9 +75,9 @@ public class PackageManagerTests extends AndroidTestCase {
     public final long MAX_WAIT_TIME=120*1000;
     public final long WAIT_TIME_INCR=20*1000;
     private static final String SECURE_CONTAINERS_PREFIX = "/mnt/asec";
-    private static final int APP_INSTALL_AUTO = 0;
-    private static final int APP_INSTALL_DEVICE = 1;
-    private static final int APP_INSTALL_SDCARD = 2;
+    private static final int APP_INSTALL_AUTO = PackageHelper.APP_INSTALL_AUTO;
+    private static final int APP_INSTALL_DEVICE = PackageHelper.APP_INSTALL_INTERNAL;
+    private static final int APP_INSTALL_SDCARD = PackageHelper.APP_INSTALL_EXTERNAL;
 
     void failStr(String errMsg) {
         Log.w(TAG, "errMsg="+errMsg);
@@ -315,9 +317,9 @@ public class PackageManagerTests extends AndroidTestCase {
             if (!getInstallLoc(flags, expInstallLocation)) {
                 assertEquals(srcPath, appInstallPath);
                 assertEquals(publicSrcPath, appInstallPath);
-                assertFalse((info.flags & ApplicationInfo.FLAG_ON_SDCARD) != 0);
+                assertFalse((info.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0);
             } else {
-                assertTrue((info.flags & ApplicationInfo.FLAG_ON_SDCARD) != 0);
+                assertTrue((info.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0);
                 assertTrue(srcPath.startsWith(SECURE_CONTAINERS_PREFIX));
                 assertTrue(publicSrcPath.startsWith(SECURE_CONTAINERS_PREFIX));
             }
@@ -1172,9 +1174,9 @@ public class PackageManagerTests extends AndroidTestCase {
                 ApplicationInfo info = getPm().getApplicationInfo(ip.pkg.packageName, 0);
                 assertNotNull(info);
                 if ((moveFlags & PackageManager.MOVE_INTERNAL) != 0) {
-                    assertTrue((info.flags & ApplicationInfo.FLAG_ON_SDCARD) == 0);
+                    assertTrue((info.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) == 0);
                 } else if ((moveFlags & PackageManager.MOVE_EXTERNAL_MEDIA) != 0){
-                    assertTrue((info.flags & ApplicationInfo.FLAG_ON_SDCARD) != 0);
+                    assertTrue((info.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0);
                 }
             } else {
                 assertFalse(retCode);

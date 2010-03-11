@@ -88,7 +88,9 @@ class UiModeManagerService extends IUiModeManager.Stub {
 
     private boolean mComputedNightMode;
     private int mCurUiMode = 0;
+    private int mSetUiMode = 0;
     
+    private boolean mHoldingConfiguration = false;
     private Configuration mConfiguration = new Configuration();
     
     private boolean mSystemReady;
@@ -114,25 +116,32 @@ class UiModeManagerService extends IUiModeManager.Stub {
                 return;
             }
 
-            // Launch a dock activity
-            String category;
-            if (UiModeManager.ACTION_ENTER_CAR_MODE.equals(intent.getAction())) {
-                // Only launch car home when car mode is enabled.
-                category = Intent.CATEGORY_CAR_DOCK;
-            } else if (UiModeManager.ACTION_ENTER_DESK_MODE.equals(intent.getAction())) {
-                category = Intent.CATEGORY_DESK_DOCK;
-            } else {
-                category = null;
-            }
-            if (category != null) {
-                intent = new Intent(Intent.ACTION_MAIN);
-                intent.addCategory(category);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                        | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
-                try {
-                    mContext.startActivity(intent);
-                } catch (ActivityNotFoundException e) {
-                    Slog.w(TAG, e.getCause());
+            synchronized (mLock) {
+                // Launch a dock activity
+                String category;
+                if (UiModeManager.ACTION_ENTER_CAR_MODE.equals(intent.getAction())) {
+                    // Only launch car home when car mode is enabled.
+                    category = Intent.CATEGORY_CAR_DOCK;
+                } else if (UiModeManager.ACTION_ENTER_DESK_MODE.equals(intent.getAction())) {
+                    category = Intent.CATEGORY_DESK_DOCK;
+                } else {
+                    category = null;
+                }
+                if (category != null) {
+                    intent = new Intent(Intent.ACTION_MAIN);
+                    intent.addCategory(category);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                            | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+                    try {
+                        mContext.startActivity(intent);
+                    } catch (ActivityNotFoundException e) {
+                        Slog.w(TAG, e.getCause());
+                    }
+                }
+                
+                if (mHoldingConfiguration) {
+                    mHoldingConfiguration = false;
+                    updateConfigurationLocked();
                 }
             }
         }
@@ -370,42 +379,46 @@ class UiModeManagerService extends IUiModeManager.Stub {
         }
     }
 
+    final void updateConfigurationLocked() {
+        int uiMode = 0;
+        if (mCarModeEnabled) {
+            uiMode = Configuration.UI_MODE_TYPE_CAR;
+        } else if (mDockState == Intent.EXTRA_DOCK_STATE_DESK) {
+            uiMode = Configuration.UI_MODE_TYPE_DESK;
+        }
+        if (uiMode != 0) {
+            if (mNightMode == UiModeManager.MODE_NIGHT_AUTO) {
+                updateTwilightLocked();
+                uiMode |= mComputedNightMode ? Configuration.UI_MODE_NIGHT_YES
+                        : Configuration.UI_MODE_NIGHT_NO;
+            } else {
+                uiMode |= mNightMode << 4;
+            }
+        } else {
+            // Disabling the car mode clears the night mode.
+            uiMode = Configuration.UI_MODE_TYPE_NORMAL |
+                    Configuration.UI_MODE_NIGHT_NO;
+        }
+        
+        mCurUiMode = uiMode;
+        
+        if (!mHoldingConfiguration && uiMode != mSetUiMode) {
+            mSetUiMode = uiMode;
+            
+            try {
+                final IActivityManager am = ActivityManagerNative.getDefault();
+                mConfiguration.uiMode = uiMode;
+                am.updateConfiguration(mConfiguration);
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Failure communicating with activity manager", e);
+            }
+        }
+    }
+    
     final void updateLocked() {
         long ident = Binder.clearCallingIdentity();
         
         try {
-            int uiMode = 0;
-            if (mCarModeEnabled) {
-                uiMode = Configuration.UI_MODE_TYPE_CAR;
-            } else if (mDockState == Intent.EXTRA_DOCK_STATE_DESK) {
-                uiMode = Configuration.UI_MODE_TYPE_DESK;
-            }
-            if (uiMode != 0) {
-                if (mNightMode == UiModeManager.MODE_NIGHT_AUTO) {
-                    updateTwilightLocked();
-                    uiMode |= mComputedNightMode ? Configuration.UI_MODE_NIGHT_YES
-                            : Configuration.UI_MODE_NIGHT_NO;
-                } else {
-                    uiMode |= mNightMode << 4;
-                }
-            } else {
-                // Disabling the car mode clears the night mode.
-                uiMode = Configuration.UI_MODE_TYPE_NORMAL |
-                        Configuration.UI_MODE_NIGHT_NO;
-            }
-            
-            if (uiMode != mCurUiMode) {
-                mCurUiMode = uiMode;
-                
-                try {
-                    final IActivityManager am = ActivityManagerNative.getDefault();
-                    mConfiguration.uiMode = uiMode;
-                    am.updateConfiguration(mConfiguration);
-                } catch (RemoteException e) {
-                    Slog.w(TAG, "Failure communicating with activity manager", e);
-                }
-            }
-            
             String action = null;
             String oldAction = null;
             if (mLastBroadcastState == Intent.EXTRA_DOCK_STATE_CAR) {
@@ -450,7 +463,13 @@ class UiModeManagerService extends IUiModeManager.Stub {
                 // placed into a dock.
                 mContext.sendOrderedBroadcast(new Intent(action), null,
                         mResultReceiver, null, Activity.RESULT_OK, null, null);
+                // Attempting to make this transition a little more clean, we are going
+                // to hold off on doing a configuration change until we have finished
+                // the broacast and started the home activity.
+                mHoldingConfiguration = true;
             }
+            
+            updateConfigurationLocked();
 
             // keep screen on when charging and in car mode
             boolean keepScreenOn = mCharging &&
@@ -685,6 +704,8 @@ class UiModeManagerService extends IUiModeManager.Stub {
                     pw.print(" mCarModeEnabled="); pw.print(mCarModeEnabled);
                     pw.print(" mComputedNightMode="); pw.println(mComputedNightMode);
             pw.print("  mCurUiMode=0x"); pw.print(Integer.toHexString(mCurUiMode));
+                    pw.print(" mSetUiMode=0x"); pw.println(Integer.toHexString(mSetUiMode));
+            pw.print("  mHoldingConfiguration="); pw.print(mHoldingConfiguration);
                     pw.print(" mSystemReady="); pw.println(mSystemReady);
             if (mLocation != null) {
                 pw.print("  mLocation="); pw.println(mLocation);

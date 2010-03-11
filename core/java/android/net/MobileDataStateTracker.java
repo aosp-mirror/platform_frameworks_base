@@ -346,7 +346,7 @@ public class MobileDataStateTracker extends NetworkStateTracker {
                         ACTION_ANY_DATA_CONNECTION_STATE_CHANGED);
                 intent.putExtra(Phone.STATE_KEY, Phone.DataState.CONNECTED.toString());
                 intent.putExtra(Phone.STATE_CHANGE_REASON_KEY, Phone.REASON_APN_CHANGED);
-                intent.putExtra(Phone.DATA_APN_TYPES_KEY, mApnType);
+                intent.putExtra(Phone.DATA_APN_TYPES_KEY, mApnTypeToWatchFor);
                 intent.putExtra(Phone.DATA_APN_KEY, mApnName);
                 intent.putExtra(Phone.DATA_IFACE_NAME_KEY, mInterfaceName);
                 intent.putExtra(Phone.NETWORK_UNAVAILABLE_KEY, false);

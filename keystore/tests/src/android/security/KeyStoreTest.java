@@ -39,6 +39,9 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
     private static final String TEST_KEYNAME2 = "testkey2";
     private static final String TEST_KEYVALUE = "test value";
 
+    // "Hello, World" in Chinese
+    private static final String TEST_I18N = "\u4F60\u597D, \u4E16\u754C";
+
     private KeyStore mKeyStore = null;
 
     public KeyStoreTest() {
@@ -81,6 +84,14 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
         assertFalse(mKeyStore.contains(TEST_KEYNAME));
         mKeyStore.password(TEST_PASSWD);
         assertTrue(mKeyStore.put(TEST_KEYNAME, TEST_KEYVALUE));
+    }
+
+    public void testI18n() throws Exception {
+        assertFalse(mKeyStore.put(TEST_I18N, TEST_I18N));
+        assertFalse(mKeyStore.contains(TEST_I18N));
+        mKeyStore.password(TEST_I18N);
+        assertTrue(mKeyStore.put(TEST_I18N, TEST_I18N));
+        assertTrue(mKeyStore.contains(TEST_I18N));
     }
 
     public void testDelete() throws Exception {

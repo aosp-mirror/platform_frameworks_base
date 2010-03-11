@@ -404,6 +404,15 @@ int get_size(const char *pkgname, const char *apkpath,
         }
     }
 
+        /* count the source apk as code -- but only if it's not
+         * installed on the sdcard
+         */
+    if (strncmp(apkpath, SDCARD_DIR_PREFIX, 7) != 0) {
+        if (stat(apkpath, &s) == 0) {
+            codesize += stat_size(&s);
+        }
+    }
+
 
         /* count the cached dexfile as code */
     if (!create_cache_path(path, apkpath)) {

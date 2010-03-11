@@ -61,7 +61,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // database gets upgraded properly. At a minimum, please confirm that 'upgradeVersion'
     // is properly propagated through your change.  Not doing so will result in a loss of user
     // settings.
-    private static final int DATABASE_VERSION = 52;
+    private static final int DATABASE_VERSION = 54;
 
     private Context mContext;
 
@@ -634,7 +634,45 @@ public class DatabaseHelper extends SQLiteOpenHelper {
            upgradeVersion = 52;
        }
 
-       if (upgradeVersion != currentVersion) {
+        if (upgradeVersion == 52) {
+            // new vibration/silent mode settings
+            db.beginTransaction();
+            try {
+                SQLiteStatement stmt = db.compileStatement("INSERT INTO system(name,value)"
+                        + " VALUES(?,?);");
+                loadBooleanSetting(stmt, Settings.System.VIBRATE_IN_SILENT,
+                        R.bool.def_vibrate_in_silent);
+                stmt.close();
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+            }
+
+            upgradeVersion = 53;
+        }
+        
+        if (upgradeVersion == 53) {
+            /*
+             * New settings for set install location UI.
+             */
+            db.beginTransaction();
+            try {
+                 SQLiteStatement stmt = db.compileStatement("INSERT INTO system(name,value)"
+                         + " VALUES(?,?);");
+                 loadIntegerSetting(stmt, Settings.System.DEFAULT_INSTALL_LOCATION,
+                         R.integer.def_install_location);
+                 stmt.close();
+                 db.setTransactionSuccessful();
+             } finally {
+                 db.endTransaction();
+             }
+
+            upgradeVersion = 54;
+        }
+
+        // *** Remember to update DATABASE_VERSION above!
+
+        if (upgradeVersion != currentVersion) {
             Log.w(TAG, "Got stuck trying to upgrade from version " + upgradeVersion
                     + ", must wipe the settings provider");
             db.execSQL("DROP TABLE IF EXISTS system");
@@ -924,11 +962,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         loadBooleanSetting(stmt, Settings.System.NOTIFICATION_LIGHT_PULSE,
                 R.bool.def_notification_pulse);
-        loadBooleanSetting(stmt, Settings.System.SET_INSTALL_LOCATION, R.bool.set_install_location);
-        loadSetting(stmt, Settings.System.DEFAULT_INSTALL_LOCATION,
-                PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY);
+        loadBooleanSetting(stmt, Settings.System.SET_INSTALL_LOCATION,
+                R.bool.set_install_location);
+        loadIntegerSetting(stmt, Settings.System.DEFAULT_INSTALL_LOCATION,
+                R.integer.def_install_location);
 
         loadUISoundEffectsSettings(stmt);
+
+        loadBooleanSetting(stmt, Settings.System.VIBRATE_IN_SILENT,
+                R.bool.def_vibrate_in_silent);
 
         stmt.close();
     }

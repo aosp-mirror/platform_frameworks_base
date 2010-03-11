@@ -4589,7 +4589,7 @@ class PackageManagerService extends IPackageManager.Stub {
                         } else {
                             // When replacing apps make sure we honour
                             // the existing app location if not overwritten by other options
-                            boolean prevOnSd = (pkg.applicationInfo.flags & ApplicationInfo.FLAG_ON_SDCARD) != 0;
+                            boolean prevOnSd = (pkg.applicationInfo.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0;
                             if (onSd) {
                                 // Install flag overrides everything.
                                 return PackageHelper.RECOMMEND_INSTALL_EXTERNAL;
@@ -5995,7 +5995,7 @@ class PackageManagerService extends IPackageManager.Stub {
         // Delete application code and resources
         if (deleteCodeAndResources) {
             // TODO can pick up from PackageSettings as well
-            int installFlags = ((p.applicationInfo.flags & ApplicationInfo.FLAG_ON_SDCARD)!=0) ?
+            int installFlags = ((p.applicationInfo.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE)!=0) ?
                     PackageManager.INSTALL_EXTERNAL : 0;
             installFlags |= ((p.applicationInfo.flags & ApplicationInfo.FLAG_FORWARD_LOCK)!=0) ?
                     PackageManager.INSTALL_FORWARD_LOCK : 0;
@@ -6321,10 +6321,14 @@ class PackageManagerService extends IPackageManager.Stub {
     }
 
     public void clearPackagePreferredActivities(String packageName) {
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.SET_PREFERRED_APPLICATIONS, null);
-
         synchronized (mPackages) {
+            int uid = Binder.getCallingUid();
+            PackageParser.Package pkg = mPackages.get(packageName);
+            if (pkg.applicationInfo.uid != uid) {
+                mContext.enforceCallingOrSelfPermission(
+                        android.Manifest.permission.SET_PREFERRED_APPLICATIONS, null);
+            }
+
             if (clearPackagePreferredActivitiesLP(packageName)) {
                 mSettings.writeLP();
             }
@@ -7214,7 +7218,7 @@ class PackageManagerService extends IPackageManager.Stub {
         void setFlags(int pkgFlags) {
             this.pkgFlags = (pkgFlags & ApplicationInfo.FLAG_SYSTEM) |
             (pkgFlags & ApplicationInfo.FLAG_FORWARD_LOCK) |
-            (pkgFlags & ApplicationInfo.FLAG_ON_SDCARD) |
+            (pkgFlags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) |
             (pkgFlags & ApplicationInfo.FLAG_NEVER_ENCRYPT);
         }
     }
@@ -9058,7 +9062,7 @@ class PackageManagerService extends IPackageManager.Stub {
                return false;
            }
            mMediaMounted = mediaStatus;
-           Set<String> appList = mSettings.findPackagesWithFlag(ApplicationInfo.FLAG_ON_SDCARD);
+           Set<String> appList = mSettings.findPackagesWithFlag(ApplicationInfo.FLAG_EXTERNAL_STORAGE);
            ret = appList != null && appList.size() > 0;
        }
        // Queue up an async operation since the package installation may take a little while.
@@ -9107,7 +9111,7 @@ class PackageManagerService extends IPackageManager.Stub {
                    if (DEBUG_SD_INSTALL) Log.i(TAG, "Looking for pkg : " + pkgName);
                    PackageSetting ps = mSettings.mPackages.get(pkgName);
                    if (ps != null && ps.codePathString != null &&
-                           (ps.pkgFlags & ApplicationInfo.FLAG_ON_SDCARD) != 0) {
+                           (ps.pkgFlags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0) {
                        if (DEBUG_SD_INSTALL) Log.i(TAG, "Container : " + cid +
                                " corresponds to pkg : " + pkgName +
                                " at code path: " + ps.codePathString);
@@ -9333,7 +9337,7 @@ class PackageManagerService extends IPackageManager.Stub {
                } else {
                    newFlags = (flags & PackageManager.MOVE_EXTERNAL_MEDIA) != 0 ?
                            PackageManager.INSTALL_EXTERNAL : 0;
-                   currFlags = (pkg.applicationInfo.flags & ApplicationInfo.FLAG_ON_SDCARD) != 0 ?
+                   currFlags = (pkg.applicationInfo.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0 ?
                            PackageManager.INSTALL_EXTERNAL : 0;
                    if (newFlags == currFlags) {
                        Log.w(TAG, "No move required. Trying to move to same location");
@@ -9400,9 +9404,9 @@ class PackageManagerService extends IPackageManager.Stub {
                                ps.resourcePathString = ps.resourcePath.getPath();
                                // Set the application info flag correctly.
                                if ((mp.flags & PackageManager.INSTALL_EXTERNAL) != 0) {
-                                   pkg.applicationInfo.flags |= ApplicationInfo.FLAG_ON_SDCARD;
+                                   pkg.applicationInfo.flags |= ApplicationInfo.FLAG_EXTERNAL_STORAGE;
                                } else {
-                                   pkg.applicationInfo.flags &= ~ApplicationInfo.FLAG_ON_SDCARD;
+                                   pkg.applicationInfo.flags &= ~ApplicationInfo.FLAG_EXTERNAL_STORAGE;
                                }
                                ps.setFlags(pkg.applicationInfo.flags);
                                mAppDirs.remove(oldCodePath);

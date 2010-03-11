@@ -1235,6 +1235,8 @@
   <public type="attr" name="stripLeft" id="0x010102bc" />
   <public type="attr" name="stripRight" id="0x010102bd" />
   <public type="attr" name="stripEnabled" id="0x010102be" />
+  <public type="attr" name="overscrollHeader" id="0x010102bf" />
+  <public type="attr" name="overscrollFooter" id="0x010102c0" />
 
   <public type="anim" name="cycle_interpolator" id="0x010a000c" />
     

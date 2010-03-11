@@ -603,7 +603,9 @@ public final class DropBoxManagerService extends IDropBoxManagerService.Stub {
             for (EntryFile late : future) {
                 mAllFiles.blocks -= late.blocks;
                 FileList tagFiles = mFilesByTag.get(late.tag);
-                if (tagFiles.contents.remove(late)) tagFiles.blocks -= late.blocks;
+                if (tagFiles != null && tagFiles.contents.remove(late)) {
+                    tagFiles.blocks -= late.blocks;
+                }
                 if ((late.flags & DropBoxManager.IS_EMPTY) == 0) {
                     enrollEntry(new EntryFile(
                             late.file, mDropBoxDir, late.tag, t++, late.flags, mBlockSize));

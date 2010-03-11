@@ -70,9 +70,6 @@
     <uses-permission android:name="android.permission.ACCESS_MOCK_LOCATION"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.HARDWARE_TEST" />
-    <uses-permission android:name="android.permission.ACCESSIBILITY_EVENT_VIEW_TYPES" />
-    <uses-permission android:name="android.permission.ACCESSIBILITY_EVENT_TRANSITION_TYPES" />
-    <uses-permission android:name="android.permission.ACCESSIBILITY_EVENT_NOTIFICATION_TYPES" />
 
     <!-- package manager test permissions -->
     <uses-permission android:name="android.permission.INSTALL_PACKAGES" />
@@ -1002,7 +999,7 @@
             </intent-filter>
         </activity>
 
-        <service android:name="android.accessibility.AccessibilityTestService">
+        <service android:name="android.accessibilityservice.AccessibilityTestService">
             <intent-filter>
                 <action android:name="android.accessibilityservice.AccessibilityService" />
             </intent-filter>
