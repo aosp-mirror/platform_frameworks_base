@@ -34,15 +34,14 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.PixelFormat;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.WindowManager;
 
 import java.io.IOException;
@@ -78,7 +77,6 @@ public class LockPatternKeyguardView extends KeyguardViewBase
 
     private boolean mScreenOn = false;
     private boolean mEnableFallback = false; // assume no fallback UI until we know better
-
 
     /**
      * The current {@link KeyguardScreen} will use this to communicate back to us.
@@ -156,9 +154,13 @@ public class LockPatternKeyguardView extends KeyguardViewBase
     private final LockPatternUtils mLockPatternUtils;
 
     private int mNumAccounts;
-    private boolean mIsPortrait;
 
     private UnlockMode mCurrentUnlockMode = UnlockMode.Unknown;
+
+    /**
+     * The current configuration.
+     */
+    private Configuration mConfiguration;
 
     /**
      * @return Whether we are stuck on the lock screen because the sim is
@@ -203,6 +205,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase
             KeyguardWindowController controller) {
         super(context);
 
+        mConfiguration = context.getResources().getConfiguration();
         mEnableFallback = false;
 
         mRequiresSim =
@@ -257,7 +260,8 @@ public class LockPatternKeyguardView extends KeyguardViewBase
                 return mIsVerifyUnlockOnly;
             }
 
-            public void recreateMe() {
+            public void recreateMe(Configuration config) {
+                mConfiguration = config;
                 recreateScreens();
             }
 
@@ -370,23 +374,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase
     // be removed once the race condition is fixed. See bugs 2262578 and 2292713.
     @Override
     protected void dispatchDraw(Canvas canvas) {
-        final int orientation = getResources().getConfiguration().orientation;
-        if (mIsPortrait && Configuration.ORIENTATION_PORTRAIT != orientation
-                || getResources().getBoolean(R.bool.lockscreen_isPortrait) != mIsPortrait) {
-            // Make sure we redraw once things settle down.
-            // Log.v(TAG, "dispatchDraw(): not drawing because state is inconsistent");
-            postInvalidate();
-
-            // In order to minimize flashing, draw the first child's background for now.
-            ViewGroup view = (ViewGroup) (mMode == Mode.LockScreen ? mLockScreen : mUnlockScreen);
-            if (view != null && view.getChildAt(0) != null) {
-                Drawable background = view.getChildAt(0).getBackground();
-                if (background != null) {
-                    background.draw(canvas);
-                }
-            }
-            return;
-        }
+        if (DEBUG) Log.v(TAG, "*** dispatchDraw() time: " + SystemClock.elapsedRealtime());
         super.dispatchDraw(canvas);
     }
 
@@ -550,19 +538,18 @@ public class LockPatternKeyguardView extends KeyguardViewBase
     View createLockScreen() {
         return new LockScreen(
                 mContext,
+                mConfiguration,
                 mLockPatternUtils,
                 mUpdateMonitor,
                 mKeyguardScreenCallback);
     }
 
     View createUnlockScreenFor(UnlockMode unlockMode) {
-        // Capture the orientation this layout was created in.
-        mIsPortrait = getResources().getBoolean(R.bool.lockscreen_isPortrait);
-
         View unlockView = null;
         if (unlockMode == UnlockMode.Pattern) {
             PatternUnlockScreen view = new PatternUnlockScreen(
                     mContext,
+                    mConfiguration,
                     mLockPatternUtils,
                     mUpdateMonitor,
                     mKeyguardScreenCallback,
@@ -574,6 +561,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase
         } else if (unlockMode == UnlockMode.SimPin) {
             unlockView = new SimUnlockScreen(
                     mContext,
+                    mConfiguration,
                     mUpdateMonitor,
                     mKeyguardScreenCallback,
                     mLockPatternUtils);
@@ -581,6 +569,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase
             try {
                 unlockView = new AccountUnlockScreen(
                         mContext,
+                        mConfiguration,
                         mKeyguardScreenCallback,
                         mLockPatternUtils);
             } catch (IllegalStateException e) {
@@ -601,6 +590,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase
         } else if (unlockMode == UnlockMode.Password) {
             unlockView = new PasswordUnlockScreen(
                     mContext,
+                    mConfiguration,
                     mLockPatternUtils,
                     mUpdateMonitor,
                     mKeyguardScreenCallback);
@@ -609,32 +599,6 @@ public class LockPatternKeyguardView extends KeyguardViewBase
         }
         mCurrentUnlockMode = unlockMode;
         return unlockView;
-    }
-
-    private View getUnlockScreenForCurrentUnlockMode() {
-        final UnlockMode unlockMode = getUnlockMode();
-
-        // if a screen exists for the correct mode, we're done
-        if (unlockMode == mUnlockScreenMode) {
-            return mUnlockScreen;
-        }
-
-        // remember the mode
-        mUnlockScreenMode = unlockMode;
-
-        // unlock mode has changed and we have an existing old unlock screen
-        // to clean up
-        if (mScreenOn && (mUnlockScreen.getVisibility() == View.VISIBLE)) {
-            ((KeyguardScreen) mUnlockScreen).onPause();
-        }
-        ((KeyguardScreen) mUnlockScreen).cleanUp();
-        removeViewInLayout(mUnlockScreen);
-
-        // create the new one
-        mUnlockScreen = createUnlockScreenFor(unlockMode);
-        mUnlockScreen.setVisibility(View.INVISIBLE);
-        addView(mUnlockScreen);
-        return mUnlockScreen;
     }
 
     /**

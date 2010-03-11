@@ -19,8 +19,10 @@ package com.android.internal.policy.impl;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+
 import com.android.internal.telephony.ITelephony;
 import com.android.internal.widget.LockPatternUtils;
 
@@ -38,14 +40,12 @@ import com.android.internal.R;
  * Displays a dialer like interface to unlock the SIM PIN.
  */
 public class SimUnlockScreen extends LinearLayout implements KeyguardScreen, View.OnClickListener,
-        KeyguardUpdateMonitor.ConfigurationChangeCallback, KeyguardUpdateMonitor.InfoCallback {
+        KeyguardUpdateMonitor.InfoCallback {
 
     private static final int DIGIT_PRESS_WAKE_MILLIS = 5000;
 
     private final KeyguardUpdateMonitor mUpdateMonitor;
     private final KeyguardScreenCallback mCallback;
-
-    private final boolean mCreatedWithKeyboardOpen;
 
     private TextView mHeaderText;
     private TextView mPinText;
@@ -62,20 +62,28 @@ public class SimUnlockScreen extends LinearLayout implements KeyguardScreen, Vie
 
     private LockPatternUtils mLockPatternUtils;
 
+    private int mCreationOrientation;
+
+    private int mKeyboardHidden;
+
     private static final char[] DIGITS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
 
-    public SimUnlockScreen(Context context, KeyguardUpdateMonitor updateMonitor,
-            KeyguardScreenCallback callback, LockPatternUtils lockpatternutils) {
+    public SimUnlockScreen(Context context, Configuration configuration,
+            KeyguardUpdateMonitor updateMonitor, KeyguardScreenCallback callback,
+            LockPatternUtils lockpatternutils) {
         super(context);
         mUpdateMonitor = updateMonitor;
         mCallback = callback;
-        mCreatedWithKeyboardOpen = mUpdateMonitor.isKeyboardOpen();
+
+        mCreationOrientation = configuration.orientation;
+        mKeyboardHidden = configuration.hardKeyboardHidden;
         mLockPatternUtils = lockpatternutils;
 
-        if (mCreatedWithKeyboardOpen) {
-            LayoutInflater.from(context).inflate(R.layout.keyguard_screen_sim_pin_landscape, this, true);
+        LayoutInflater inflater = LayoutInflater.from(context);
+        if (mKeyboardHidden == Configuration.HARDKEYBOARDHIDDEN_NO) {
+            inflater.inflate(R.layout.keyguard_screen_sim_pin_landscape, this, true);
         } else {
-            LayoutInflater.from(context).inflate(R.layout.keyguard_screen_sim_pin_portrait, this, true);
+            inflater.inflate(R.layout.keyguard_screen_sim_pin_portrait, this, true);
             new TouchInput();
         }
 
@@ -94,7 +102,6 @@ public class SimUnlockScreen extends LinearLayout implements KeyguardScreen, Vie
         mEmergencyCallButton.setOnClickListener(this);
         mOkButton.setOnClickListener(this);
 
-        mUpdateMonitor.registerConfigurationChangeCallback(this);
         setFocusableInTouchMode(true);
     }
 
@@ -272,11 +279,18 @@ public class SimUnlockScreen extends LinearLayout implements KeyguardScreen, Vie
         mEnteredPin[mEnteredDigits++] = digit;
     }
 
-    public void onOrientationChange(boolean inPortrait) {}
-
-    public void onKeyboardChange(boolean isKeyboardOpen) {
-        if (isKeyboardOpen != mCreatedWithKeyboardOpen) {
-            mCallback.recreateMe();
+    /** {@inheritDoc} */
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        if (newConfig.orientation != mCreationOrientation) {
+            mCallback.recreateMe(newConfig);
+        } else if (newConfig.hardKeyboardHidden != mKeyboardHidden) {
+            mKeyboardHidden = newConfig.hardKeyboardHidden;
+            final boolean isKeyboardOpen = mKeyboardHidden == Configuration.HARDKEYBOARDHIDDEN_NO;
+            if (mUpdateMonitor.isKeyguardBypassEnabled() && isKeyboardOpen) {
+                mCallback.goToUnlockScreen();
+            }
         }
     }
 
