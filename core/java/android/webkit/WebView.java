@@ -4215,7 +4215,7 @@ public class WebView extends AbsoluteLayout
 
         // Textfields and plugins need to receive the shift up key even if
         // another key was released while the shift key was held down.
-        if (!inEditingMode() && !nativeFocusIsPlugin()) {
+        if (!inEditingMode() && (mNativeClass == 0 || !nativeFocusIsPlugin())) {
             if (event.getAction() == KeyEvent.ACTION_DOWN) {
                 mGotKeyDown = true;
             } else {
@@ -5120,8 +5120,10 @@ public class WebView extends AbsoluteLayout
             if (ev.getY() < 0) pageUp(true);
             return true;
         }
+        boolean shiftPressed = mShiftIsPressed && (mNativeClass == 0
+                || !nativeFocusIsPlugin());
         if (ev.getAction() == MotionEvent.ACTION_DOWN) {
-            if (mShiftIsPressed && !nativeFocusIsPlugin()) {
+            if (shiftPressed) {
                 return true; // discard press if copy in progress
             }
             mTrackballDown = true;
@@ -5146,7 +5148,7 @@ public class WebView extends AbsoluteLayout
             mPrivateHandler.removeMessages(LONG_PRESS_CENTER);
             mTrackballDown = false;
             mTrackballUpTime = time;
-            if (mShiftIsPressed && !nativeFocusIsPlugin()) {
+            if (shiftPressed) {
                 if (mExtendSelection) {
                     commitCopy();
                 } else {
@@ -5284,7 +5286,7 @@ public class WebView extends AbsoluteLayout
         float yRate = mTrackballRemainsY * 1000 / elapsed;
         int viewWidth = getViewWidth();
         int viewHeight = getViewHeight();
-        if (mShiftIsPressed && !nativeFocusIsPlugin()) {
+        if (mShiftIsPressed && (mNativeClass == 0 || !nativeFocusIsPlugin())) {
             moveSelection(scaleTrackballX(xRate, viewWidth),
                     scaleTrackballY(yRate, viewHeight));
             mTrackballRemainsX = mTrackballRemainsY = 0;
@@ -5322,7 +5324,7 @@ public class WebView extends AbsoluteLayout
                         + " mTrackballRemainsX=" + mTrackballRemainsX
                         + " mTrackballRemainsY=" + mTrackballRemainsY);
             }
-            if (nativeFocusIsPlugin()) {
+            if (mNativeClass != 0 && nativeFocusIsPlugin()) {
                 for (int i = 0; i < count; i++) {
                     letPluginHandleNavKey(selectKeyCode, time, true);
                 }
