@@ -4356,6 +4356,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                         mPendingCheckForTap = new CheckForTap();
                     }
                     mPrivateFlags |= PREPRESSED;
+                    mHasPerformedLongPress = false;
                     postDelayed(mPendingCheckForTap, ViewConfiguration.getTapTimeout());
                     break;
 
