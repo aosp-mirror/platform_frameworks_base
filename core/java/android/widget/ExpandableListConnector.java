@@ -442,8 +442,8 @@ class ExpandableListConnector extends BaseAdapter implements Filterable {
 
         View retValue;
         if (posMetadata.position.type == ExpandableListPosition.GROUP) {
-            retValue = mExpandableListAdapter.getGroupView(posMetadata.position.groupPos, posMetadata
-                    .isExpanded(), convertView, parent);
+            retValue = mExpandableListAdapter.getGroupView(posMetadata.position.groupPos,
+                    posMetadata.isExpanded(), convertView, parent);
         } else if (posMetadata.position.type == ExpandableListPosition.CHILD) {
             final boolean isLastChild = posMetadata.groupMetadata.lastChildFlPos == flatListPos;
             
@@ -464,10 +464,21 @@ class ExpandableListConnector extends BaseAdapter implements Filterable {
         final ExpandableListPosition pos = getUnflattenedPos(flatListPos).position;
 
         int retValue;
-        if (pos.type == ExpandableListPosition.GROUP) {
-            retValue = 0;
+        if (mExpandableListAdapter instanceof HeterogeneousExpandableList) {
+            HeterogeneousExpandableList adapter =
+                    (HeterogeneousExpandableList) mExpandableListAdapter;
+            if (pos.type == ExpandableListPosition.GROUP) {
+                retValue = adapter.getGroupType(pos.groupPos);
+            } else {
+                final int childType = adapter.getChildType(pos.groupPos, pos.childPos);
+                retValue = adapter.getGroupTypeCount() + childType;
+            }
         } else {
-            retValue = 1;
+            if (pos.type == ExpandableListPosition.GROUP) {
+                retValue = 0;
+            } else {
+                retValue = 1;
+            }
         }
         
         pos.recycle();
@@ -477,7 +488,13 @@ class ExpandableListConnector extends BaseAdapter implements Filterable {
 
     @Override
     public int getViewTypeCount() {
-        return 2;
+        if (mExpandableListAdapter instanceof HeterogeneousExpandableList) {
+            HeterogeneousExpandableList adapter =
+                    (HeterogeneousExpandableList) mExpandableListAdapter;
+            return adapter.getGroupTypeCount() + adapter.getChildTypeCount();
+        } else {
+            return 2;
+        }
     }
     
     @Override

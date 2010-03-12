@@ -18,7 +18,6 @@ package android.widget;
 
 import android.database.DataSetObservable;
 import android.database.DataSetObserver;
-import android.view.KeyEvent;
 
 /**
  * Base class for a {@link ExpandableListAdapter} used to provide data and Views
@@ -31,7 +30,8 @@ import android.view.KeyEvent;
  * @see SimpleExpandableListAdapter
  * @see SimpleCursorTreeAdapter
  */
-public abstract class BaseExpandableListAdapter implements ExpandableListAdapter {
+public abstract class BaseExpandableListAdapter implements ExpandableListAdapter, 
+        HeterogeneousExpandableList {
     private final DataSetObservable mDataSetObservable = new DataSetObservable();
     
     public void registerDataSetObserver(DataSetObserver observer) {
@@ -102,5 +102,37 @@ public abstract class BaseExpandableListAdapter implements ExpandableListAdapter
     public boolean isEmpty() {
         return getGroupCount() == 0;
     }
-    
+
+
+    /**
+     * {@inheritDoc}
+     * @return 0 for any group or child position, since only one child type count is declared.
+     */
+    public int getChildType(int groupPosition, int childPosition) {
+        return 0;
+    }
+
+    /**
+     * {@inheritDoc}
+     * @return 1 as a default value in BaseExpandableListAdapter.
+     */
+    public int getChildTypeCount() {
+        return 1;
+    }
+
+    /**
+     * {@inheritDoc}
+     * @return 0 for any groupPosition, since only one group type count is declared.
+     */
+    public int getGroupType(int groupPosition) {
+        return 0;
+    }
+
+    /**
+     * {@inheritDoc}
+     * @return 1 as a default value in BaseExpandableListAdapter.
+     */
+    public int getGroupTypeCount() {
+        return 1;
+    }
 }
