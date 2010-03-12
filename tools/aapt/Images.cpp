@@ -359,7 +359,7 @@ static status_t do_9patch(const char* imageName, image_info* image)
 
     const char* errorMsg = NULL;
     int errorPixel = -1;
-    const char* errorEdge = "";
+    const char* errorEdge = NULL;
 
     int colorIndex = 0;
 
@@ -463,6 +463,14 @@ static status_t do_9patch(const char* imageName, image_info* image)
     if (yDivs[numYDivs - 1] == H) {
         numRows--;
     }
+
+    // Make sure the amount of rows and columns will fit in the number of
+    // colors we can use in the 9-patch format.
+    if (numRows * numCols > 0x7F) {
+        errorMsg = "Too many rows and columns in 9-patch perimeter";
+        goto getout;
+    }
+
     numColors = numRows * numCols;
     image->info9Patch.numColors = numColors;
     image->info9Patch.colors = (uint32_t*)malloc(numColors * sizeof(uint32_t));
@@ -533,12 +541,14 @@ getout:
         fprintf(stderr,
             "ERROR: 9-patch image %s malformed.\n"
             "       %s.\n", imageName, errorMsg);
-        if (errorPixel >= 0) {
-            fprintf(stderr,
-            "       Found at pixel #%d along %s edge.\n", errorPixel, errorEdge);
-        } else {
-            fprintf(stderr,
-            "       Found along %s edge.\n", errorEdge);
+        if (errorEdge != NULL) {
+            if (errorPixel >= 0) {
+                fprintf(stderr,
+                    "       Found at pixel #%d along %s edge.\n", errorPixel, errorEdge);
+            } else {
+                fprintf(stderr,
+                    "       Found along %s edge.\n", errorEdge);
+            }
         }
         return UNKNOWN_ERROR;
     }
@@ -613,7 +623,7 @@ static void dump_image(int w, int h, png_bytepp rows, int color_type)
     } else if (color_type == PNG_COLOR_TYPE_GRAY_ALPHA) {
         bpp = 2;
     } else if (color_type == PNG_COLOR_TYPE_RGB || color_type == PNG_COLOR_TYPE_RGB_ALPHA) {
-	    // We use a padding byte even when there is no alpha
+        // We use a padding byte even when there is no alpha
         bpp = 4;
     } else {
         printf("Unknown color type %d.\n", color_type);
