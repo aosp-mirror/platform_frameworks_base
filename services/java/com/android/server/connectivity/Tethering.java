@@ -36,6 +36,7 @@ import android.os.Binder;
 import android.os.Environment;
 import android.os.IBinder;
 import android.os.INetworkManagementService;
+import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -73,6 +74,8 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
     private String[] mTetherableWifiRegexs;
     private String[] mUpstreamIfaceRegexs;
 
+    private Looper mLooper; // given to us at construction time..
+
     private HashMap<String, TetherInterfaceSM> mIfaces; // all tethered/tetherable ifaces
 
     private BroadcastReceiver mStateReceiver;
@@ -101,9 +104,10 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
     private boolean mUsbMassStorageOff;  // track the status of USB Mass Storage
     private boolean mUsbConnected;       // track the status of USB connection
 
-    public Tethering(Context context) {
+    public Tethering(Context context, Looper looper) {
         Log.d(TAG, "Tethering starting");
         mContext = context;
+        mLooper = looper;
 
         // register for notifications from NetworkManagement Service
         IBinder b = ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE);
@@ -116,7 +120,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
 
         mIfaces = new HashMap<String, TetherInterfaceSM>();
 
-        mTetherMasterSM = new TetherMasterSM("TetherMaster");
+        mTetherMasterSM = new TetherMasterSM("TetherMaster", mLooper);
         mTetherMasterSM.start();
 
         // TODO - remove this hack after real USB connections are detected.
@@ -175,7 +179,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
             TetherInterfaceSM sm = mIfaces.get(iface);
             if (link) {
                 if (sm == null) {
-                    sm = new TetherInterfaceSM(iface, usb);
+                    sm = new TetherInterfaceSM(iface, mLooper, usb);
                     mIfaces.put(iface, sm);
                     sm.start();
                 }
@@ -225,7 +229,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                 Log.e(TAG, "active iface (" + iface + ") reported as added, ignoring");
                 return;
             }
-            sm = new TetherInterfaceSM(iface, usb);
+            sm = new TetherInterfaceSM(iface, mLooper, usb);
             mIfaces.put(iface, sm);
             sm.start();
         }
@@ -639,8 +643,8 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
         String mIfaceName;
         boolean mUsb;
 
-        TetherInterfaceSM(String name, boolean usb) {
-            super(name);
+        TetherInterfaceSM(String name, Looper looper, boolean usb) {
+            super(name, looper);
             mIfaceName = name;
             mUsb = usb;
             setLastError(ConnectivityManager.TETHER_ERROR_NO_ERROR);
@@ -1023,8 +1027,8 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
         private static final int CELL_DISABLE_DUN_TIMEOUT_MS = 3000;
         private static final int CELL_DUN_RENEW_MS           = 40000;
 
-        TetherMasterSM(String name) {
-            super(name);
+        TetherMasterSM(String name, Looper looper) {
+            super(name, looper);
 
             //Add states
             mInitialState = new InitialState();

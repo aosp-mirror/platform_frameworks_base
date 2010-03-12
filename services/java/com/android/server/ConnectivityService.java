@@ -320,7 +320,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             }
         }
 
-        mTethering = new Tethering(mContext);
+        mTethering = new Tethering(mContext, mHandler.getLooper());
         mTetheringConfigValid = (((mNetTrackers[ConnectivityManager.TYPE_MOBILE_DUN] != null) ||
                                   !mTethering.isDunRequired()) &&
                                  (mTethering.getTetherableUsbRegexs().length != 0 ||
