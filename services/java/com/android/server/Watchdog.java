@@ -828,7 +828,13 @@ public class Watchdog extends Thread {
 
             ArrayList pids = new ArrayList();
             pids.add(Process.myPid());
+            if (mPhonePid > 0) pids.add(mPhonePid);
             File stack = ActivityManagerService.dumpStackTraces(pids);
+
+            // Give some extra time to make sure the stack traces get written.
+            // The system's been hanging for a minute, another second or two won't hurt much.
+            SystemClock.sleep(2000);
+
             mActivity.addErrorToDropBox("watchdog", null, null, null, name, null, stack, null);
 
             // Only kill the process if the debugger is not attached.
