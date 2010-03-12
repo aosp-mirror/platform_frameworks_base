@@ -59,6 +59,8 @@ public class ExifInterface {
     public static final String TAG_WHITE_BALANCE = "WhiteBalance";
     /** Type is rational. */
     public static final String TAG_FOCAL_LENGTH = "FocalLength";
+    /** Type is String. Name of GPS processing method used for location finding. */
+    public static final String TAG_GPS_PROCESSING_METHOD = "GPSProcessingMethod";
 
     // Constants used for the Orientation Exif tag.
     public static final int ORIENTATION_UNDEFINED = 0;

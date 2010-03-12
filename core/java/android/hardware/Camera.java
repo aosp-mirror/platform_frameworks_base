@@ -1331,7 +1331,7 @@ public class Camera {
         }
 
         /**
-         * Sets GPS processing method. It will store up to 100 characters
+         * Sets GPS processing method. It will store up to 32 characters
          * in JPEG EXIF header.
          *
          * @param processing_method The processing method to get this location.
