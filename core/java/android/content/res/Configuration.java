@@ -597,12 +597,18 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         if (n != 0) return n;
         n = this.mnc - that.mnc;
         if (n != 0) return n;
-        n = this.locale.getLanguage().compareTo(that.locale.getLanguage());
-        if (n != 0) return n;
-        n = this.locale.getCountry().compareTo(that.locale.getCountry());
-        if (n != 0) return n;
-        n = this.locale.getVariant().compareTo(that.locale.getVariant());
-        if (n != 0) return n;
+        if (this.locale == null) {
+            if (that.locale != null) return 1;
+        } else if (that.locale == null) {
+            return -1;
+        } else {
+            n = this.locale.getLanguage().compareTo(that.locale.getLanguage());
+            if (n != 0) return n;
+            n = this.locale.getCountry().compareTo(that.locale.getCountry());
+            if (n != 0) return n;
+            n = this.locale.getVariant().compareTo(that.locale.getVariant());
+            if (n != 0) return n;
+        }
         n = this.touchscreen - that.touchscreen;
         if (n != 0) return n;
         n = this.keyboard - that.keyboard;
@@ -640,7 +646,8 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     
     public int hashCode() {
         return ((int)this.fontScale) + this.mcc + this.mnc
-                + this.locale.hashCode() + this.touchscreen
+                + (this.locale != null ? this.locale.hashCode() : 0)
+                + this.touchscreen
                 + this.keyboard + this.keyboardHidden + this.hardKeyboardHidden
                 + this.navigation + this.navigationHidden
                 + this.orientation + this.screenLayout + this.uiMode;
