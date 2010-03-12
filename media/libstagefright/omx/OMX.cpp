@@ -19,6 +19,8 @@
 #include <utils/Log.h>
 
 #include <dlfcn.h>
+#include <linux/prctl.h>
+#include <sys/resource.h>
 
 #include "../include/OMX.h"
 #include "OMXRenderer.h"
@@ -29,6 +31,7 @@
 #include <binder/IMemory.h>
 #include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/VideoRenderer.h>
+#include <utils/threads.h>
 
 #include "OMXMaster.h"
 
@@ -91,6 +94,7 @@ OMX::CallbackDispatcher::~CallbackDispatcher() {
 
 void OMX::CallbackDispatcher::post(const omx_message &msg) {
     Mutex::Autolock autoLock(mLock);
+
     mQueue.push_back(msg);
     mQueueChanged.signal();
 }
@@ -112,6 +116,9 @@ void *OMX::CallbackDispatcher::ThreadWrapper(void *me) {
 }
 
 void OMX::CallbackDispatcher::threadEntry() {
+    setpriority(PRIO_PROCESS, 0, ANDROID_PRIORITY_AUDIO);
+    prctl(PR_SET_NAME, (unsigned long)"OMXCallbackDisp", 0, 0, 0);
+
     for (;;) {
         omx_message msg;
 
