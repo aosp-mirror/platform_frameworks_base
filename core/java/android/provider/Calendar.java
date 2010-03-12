@@ -33,11 +33,9 @@ import android.database.DatabaseUtils;
 import android.net.Uri;
 import android.os.RemoteException;
 import android.pim.ICalendar;
-import android.pim.RecurrenceSet;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.text.format.Time;
-import android.util.Config;
 import android.util.Log;
 
 /**
@@ -289,6 +287,13 @@ public final class Calendar {
          * <P>Type: String</P>
          */
         public static final String OWNER_ACCOUNT = "ownerAccount";
+
+        /**
+         * Can the organizer respond to the event?  If no, the status of the
+         * organizer should not be shown by the UI.  Defaults to 1
+         * <P>Type: INTEGER (boolean)</P>
+         */
+        public static final String ORGANIZER_CAN_RESPOND = "organizerCanRespond";
     }
 
     public interface AttendeesColumns {
