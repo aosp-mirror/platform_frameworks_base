@@ -59,6 +59,7 @@ import android.util.Config;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
+import android.util.Slog;
 import android.view.Display;
 import android.view.View;
 import android.view.ViewDebug;
@@ -542,7 +543,7 @@ public final class ActivityThread {
                 }
                 warned = true;
                 Thread.currentThread().setContextClassLoader(getParent());
-                Log.w(TAG, "ClassLoader." + methodName + ": " +
+                Slog.w(TAG, "ClassLoader." + methodName + ": " +
                       "The class loader returned by " +
                       "Thread.getContextClassLoader() may fail for processes " +
                       "that host multiple applications. You should explicitly " +
@@ -677,7 +678,7 @@ public final class ActivityThread {
                             "originally registered here. Are you missing a " +
                             "call to unregisterReceiver()?");
                     leak.setStackTrace(rd.getLocation().getStackTrace());
-                    Log.e(TAG, leak.getMessage(), leak);
+                    Slog.e(TAG, leak.getMessage(), leak);
                     try {
                         ActivityManagerNative.getDefault().unregisterReceiver(
                                 rd.getIIntentReceiver());
@@ -698,7 +699,7 @@ public final class ActivityThread {
                             what + " " + who + " has leaked ServiceConnection "
                             + sd.getServiceConnection() + " that was originally bound here");
                     leak.setStackTrace(sd.getLocation().getStackTrace());
-                    Log.e(TAG, leak.getMessage(), leak);
+                    Slog.e(TAG, leak.getMessage(), leak);
                     try {
                         ActivityManagerNative.getDefault().unbindService(
                                 sd.getIServiceConnection());
@@ -823,7 +824,7 @@ public final class ActivityThread {
                         try {
                             mgr.finishReceiver(this, resultCode, data, extras, false);
                         } catch (RemoteException e) {
-                            Log.w(TAG, "Couldn't finish broadcast to unregistered receiver");
+                            Slog.w(TAG, "Couldn't finish broadcast to unregistered receiver");
                         }
                     }
                 }
@@ -1721,7 +1722,7 @@ public final class ActivityThread {
             try {
                 Process.setProcessGroup(Process.myPid(), group);
             } catch (Exception e) {
-                Log.w(TAG, "Failed setting process group to " + group, e);
+                Slog.w(TAG, "Failed setting process group to " + group, e);
             }
         }
 
@@ -2833,7 +2834,7 @@ public final class ActivityThread {
         String classname = data.appInfo.backupAgentName;
         if (classname == null) {
             if (data.backupMode == IApplicationThread.BACKUP_MODE_INCREMENTAL) {
-                Log.e(TAG, "Attempted incremental backup but no defined agent for "
+                Slog.e(TAG, "Attempted incremental backup but no defined agent for "
                         + packageName);
                 return;
             }
@@ -2860,7 +2861,7 @@ public final class ActivityThread {
             } catch (Exception e) {
                 // If this is during restore, fail silently; otherwise go
                 // ahead and let the user see the crash.
-                Log.e(TAG, "Agent threw during creation: " + e);
+                Slog.e(TAG, "Agent threw during creation: " + e);
                 if (data.backupMode != IApplicationThread.BACKUP_MODE_RESTORE) {
                     throw e;
                 }
@@ -2890,12 +2891,12 @@ public final class ActivityThread {
             try {
                 agent.onDestroy();
             } catch (Exception e) {
-                Log.w(TAG, "Exception thrown in onDestroy by backup agent of " + data.appInfo);
+                Slog.w(TAG, "Exception thrown in onDestroy by backup agent of " + data.appInfo);
                 e.printStackTrace();
             }
             mBackupAgents.remove(packageName);
         } else {
-            Log.w(TAG, "Attempt to destroy unknown backup agent " + data);
+            Slog.w(TAG, "Attempt to destroy unknown backup agent " + data);
         }
     }
 
@@ -3284,7 +3285,7 @@ public final class ActivityThread {
             RuntimeException e = new RuntimeException(
                     "Performing pause of activity that is not resumed: "
                     + r.intent.getComponent().toShortString());
-            Log.e(TAG, e.getMessage(), e);
+            Slog.e(TAG, e.getMessage(), e);
         }
         Bundle state = null;
         if (finished) {
@@ -3353,7 +3354,7 @@ public final class ActivityThread {
                 RuntimeException e = new RuntimeException(
                         "Performing stop of activity that is not resumed: "
                         + r.intent.getComponent().toShortString());
-                Log.e(TAG, e.getMessage(), e);
+                Slog.e(TAG, e.getMessage(), e);
             }
 
             if (info != null) {
@@ -3998,13 +3999,13 @@ public final class ActivityThread {
                 Debug.startMethodTracing(pcd.path, pcd.fd.getFileDescriptor(),
                         8 * 1024 * 1024, 0);
             } catch (RuntimeException e) {
-                Log.w(TAG, "Profiling failed on path " + pcd.path
+                Slog.w(TAG, "Profiling failed on path " + pcd.path
                         + " -- can the process access this path?");
             } finally {
                 try {
                     pcd.fd.close();
                 } catch (IOException e) {
-                    Log.w(TAG, "Failure closing profile fd", e);
+                    Slog.w(TAG, "Failure closing profile fd", e);
                 }
             }
         } else {
@@ -4249,7 +4250,7 @@ public final class ActivityThread {
         } catch (RemoteException ex) {
         }
         if (holder == null) {
-            Log.e(TAG, "Failed to find provider info for " + name);
+            Slog.e(TAG, "Failed to find provider info for " + name);
             return null;
         }
         if (holder.permissionFailure != null) {
@@ -4419,7 +4420,7 @@ public final class ActivityThread {
                 }
             }
             if (c == null) {
-                Log.w(TAG, "Unable to get context for package " +
+                Slog.w(TAG, "Unable to get context for package " +
                       ai.packageName +
                       " while loading content provider " +
                       info.name);
@@ -4431,7 +4432,7 @@ public final class ActivityThread {
                     loadClass(info.name).newInstance();
                 provider = localProvider.getIContentProvider();
                 if (provider == null) {
-                    Log.e(TAG, "Failed to instantiate class " +
+                    Slog.e(TAG, "Failed to instantiate class " +
                           info.name + " from sourceDir " +
                           info.applicationInfo.sourceDir);
                     return null;

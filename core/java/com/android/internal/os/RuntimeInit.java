@@ -18,26 +18,19 @@ package com.android.internal.os;
 
 import android.app.ActivityManagerNative;
 import android.app.ApplicationErrorReport;
-import android.app.IActivityManager;
 import android.os.Build;
 import android.os.Debug;
 import android.os.IBinder;
 import android.os.Process;
-import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.util.Config;
 import android.util.Log;
+import android.util.Slog;
 
 import com.android.internal.logging.AndroidConfig;
 
 import dalvik.system.VMRuntime;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -74,9 +67,9 @@ public class RuntimeInit {
                 mCrashing = true;
 
                 if (mApplicationObject == null) {
-                    Log.e(TAG, "*** FATAL EXCEPTION IN SYSTEM PROCESS: " + t.getName(), e);
+                    Slog.e(TAG, "*** FATAL EXCEPTION IN SYSTEM PROCESS: " + t.getName(), e);
                 } else {
-                    Log.e(TAG, "FATAL EXCEPTION: " + t.getName(), e);
+                    Slog.e(TAG, "FATAL EXCEPTION: " + t.getName(), e);
                 }
 
                 // Bring up crash dialog, wait for it to be dismissed
@@ -84,9 +77,9 @@ public class RuntimeInit {
                         mApplicationObject, new ApplicationErrorReport.CrashInfo(e));
             } catch (Throwable t2) {
                 try {
-                    Log.e(TAG, "Error reporting crash", t2);
+                    Slog.e(TAG, "Error reporting crash", t2);
                 } catch (Throwable t3) {
-                    // Even Log.e() fails!  Oh well.
+                    // Even Slog.e() fails!  Oh well.
                 }
             } finally {
                 // Try everything to make sure this process goes away.
@@ -97,14 +90,14 @@ public class RuntimeInit {
     }
 
     private static final void commonInit() {
-        if (Config.LOGV) Log.d(TAG, "Entered RuntimeInit!");
+        if (Config.LOGV) Slog.d(TAG, "Entered RuntimeInit!");
 
         /* set default handler; this applies to all threads in the VM */
         Thread.setDefaultUncaughtExceptionHandler(new UncaughtHandler());
 
         int hasQwerty = getQwertyKeyboard();
 
-        if (Config.LOGV) Log.d(TAG, ">>>>> qwerty keyboard = " + hasQwerty);
+        if (Config.LOGV) Slog.d(TAG, ">>>>> qwerty keyboard = " + hasQwerty);
         if (hasQwerty == 1) {
             System.setProperty("qwerty", "1");
         }
@@ -144,7 +137,7 @@ public class RuntimeInit {
          */
         String trace = SystemProperties.get("ro.kernel.android.tracing");
         if (trace.equals("1")) {
-            Log.i(TAG, "NOTE: emulator trace profiling enabled");
+            Slog.i(TAG, "NOTE: emulator trace profiling enabled");
             Debug.enableEmulatorTraceOutput();
         }
 
@@ -241,7 +234,7 @@ public class RuntimeInit {
          */
         finishInit();
 
-        if (Config.LOGV) Log.d(TAG, "Leaving RuntimeInit!");
+        if (Config.LOGV) Slog.d(TAG, "Leaving RuntimeInit!");
     }
 
     public static final native void finishInit();
@@ -286,7 +279,7 @@ public class RuntimeInit {
         }
 
         if (curArg == argv.length) {
-            Log.e(TAG, "Missing classname argument to RuntimeInit!");
+            Slog.e(TAG, "Missing classname argument to RuntimeInit!");
             // let the process exit
             return;
         }
@@ -334,7 +327,7 @@ public class RuntimeInit {
                 System.exit(10);
             }
         } catch (Throwable t2) {
-            Log.e(TAG, "Error reporting WTF", t2);
+            Slog.e(TAG, "Error reporting WTF", t2);
         }
     }
 
