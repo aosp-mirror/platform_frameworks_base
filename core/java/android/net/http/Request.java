@@ -82,6 +82,9 @@ class Request {
     /* Used to synchronize waitUntilComplete() requests */
     private final Object mClientResource = new Object();
 
+    /** True if loading should be paused **/
+    private boolean mLoadingPaused = false;
+
     /**
      * Processor used to set content-length and transfer-encoding
      * headers.
@@ -130,6 +133,18 @@ class Request {
            high priority reqs (saving the trouble for images, etc) */
         addHeader(ACCEPT_ENCODING_HEADER, "gzip");
         addHeaders(headers);
+    }
+
+    /**
+     * @param pause True if the load should be paused.
+     */
+    synchronized void setLoadingPaused(boolean pause) {
+        mLoadingPaused = pause;
+
+        // Wake up the paused thread if we're unpausing the load.
+        if (!mLoadingPaused) {
+            notify();
+        }
     }
 
     /**
@@ -271,7 +286,24 @@ class Request {
                 int len = 0;
                 int lowWater = buf.length / 2;
                 while (len != -1) {
+                    synchronized(this) {
+                        while (mLoadingPaused) {
+                            // Put this (network loading) thread to sleep if WebCore
+                            // has asked us to. This can happen with plugins for
+                            // example, if we are streaming data but the plugin has
+                            // filled its internal buffers.
+                            try {
+                                wait();
+                            } catch (InterruptedException e) {
+                                HttpLog.e("Interrupted exception whilst "
+                                    + "network thread paused at WebCore's request."
+                                    + " " + e.getMessage());
+                            }
+                        }
+                    }
+
                     len = nis.read(buf, count, buf.length - count);
+
                     if (len != -1) {
                         count += len;
                     }
@@ -316,10 +348,16 @@ class Request {
      *
      * Called by RequestHandle from non-network thread
      */
-    void cancel() {
+    synchronized void cancel() {
         if (HttpLog.LOGV) {
             HttpLog.v("Request.cancel(): " + getUri());
         }
+
+        // Ensure that the network thread is not blocked by a hanging request from WebCore to
+        // pause the load.
+        mLoadingPaused = false;
+        notify();
+
         mCancelled = true;
         if (mConnection != null) {
             mConnection.cancel();

@@ -101,6 +101,16 @@ public class RequestHandle {
     }
 
     /**
+     * Pauses the loading of this request. For example, called from the WebCore thread
+     * when the plugin can take no more data.
+     */
+    public void pauseRequest(boolean pause) {
+        if (mRequest != null) {
+            mRequest.setLoadingPaused(pause);
+        }
+    }
+
+    /**
      * Handles SSL error(s) on the way down from the user (the user
      * has already provided their feedback).
      */

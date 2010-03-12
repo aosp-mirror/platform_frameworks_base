@@ -1198,6 +1198,16 @@ class LoadListener extends Handler implements EventHandler {
     }
 
     /**
+     * Pause the load. For example, if a plugin is unable to accept more data,
+     * we pause reading from the request. Called directly from the WebCore thread.
+     */
+    void pauseLoad(boolean pause) {
+        if (mRequestHandle != null) {
+            mRequestHandle.pauseRequest(pause);
+        }
+    }
+
+    /**
      * Cancel a request.
      * FIXME: This will only work if the request has yet to be handled. This
      * is in no way guarenteed if requests are served in a separate thread.
