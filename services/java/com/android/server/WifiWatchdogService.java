@@ -89,6 +89,8 @@ public class WifiWatchdogService {
      */
     private WifiWatchdogHandler mHandler;
 
+    private ContentObserver mContentObserver;
+
     /**
      * The current watchdog state. Only written from the main thread!
      */
@@ -132,7 +134,7 @@ public class WifiWatchdogService {
         ContentResolver contentResolver = mContext.getContentResolver();
         contentResolver.registerContentObserver(
                 Settings.Secure.getUriFor(Settings.Secure.WIFI_WATCHDOG_ON), false,
-                new ContentObserver(mHandler) {
+                mContentObserver = new ContentObserver(mHandler) {
             @Override
             public void onChange(boolean selfChange) {
                 if (isWatchdogEnabled()) {
@@ -269,6 +271,16 @@ public class WifiWatchdogService {
         mThread = new WifiWatchdogThread();
         mThread.start();
         waitForHandlerCreation();
+    }
+
+    /**
+     * Unregister broadcasts and quit the watchdog thread
+     */
+    public void quit() {
+        unregisterForWifiBroadcasts();
+        mContext.getContentResolver().unregisterContentObserver(mContentObserver);
+        mHandler.removeAllActions();
+        mHandler.getLooper().quit();
     }
 
     /**

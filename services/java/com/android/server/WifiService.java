@@ -124,6 +124,7 @@ public class WifiService extends IWifiManager.Stub {
 
     private INetworkManagementService nwService;
     ConnectivityManager mCm;
+    private WifiWatchdogService mWifiWatchdogService = null;
     private String[] mWifiRegexs;
 
     /**
@@ -217,8 +218,6 @@ public class WifiService extends IWifiManager.Stub {
 
         mWifiStateTracker.setWifiState(WIFI_STATE_DISABLED);
         mWifiApState = WIFI_AP_STATE_DISABLED;
-        boolean wifiEnabled = getPersistedWifiEnabled();
-        boolean wifiAPEnabled = wifiEnabled ? false : getPersistedWifiApEnabled();
 
         mAlarmManager = (AlarmManager)mContext.getSystemService(Context.ALARM_SERVICE);
         Intent idleIntent = new Intent(ACTION_DEVICE_IDLE, null);
@@ -239,9 +238,6 @@ public class WifiService extends IWifiManager.Stub {
                     }
                 }
         );
-
-        Slog.i(TAG, "WifiService starting up with Wi-Fi " +
-                (wifiEnabled ? "enabled" : "disabled"));
 
         mContext.registerReceiver(
                 new BroadcastReceiver() {
@@ -267,7 +263,17 @@ public class WifiService extends IWifiManager.Stub {
 
                 }
             },new IntentFilter(ConnectivityManager.ACTION_TETHER_STATE_CHANGED));
+    }
 
+    /**
+     * Check if Wi-Fi needs to be enabled and start
+     * if needed
+     */
+    public void startWifi() {
+        boolean wifiEnabled = getPersistedWifiEnabled();
+        boolean wifiAPEnabled = wifiEnabled ? false : getPersistedWifiApEnabled();
+        Slog.i(TAG, "WifiService starting up with Wi-Fi " +
+                (wifiEnabled ? "enabled" : "disabled"));
         setWifiEnabledBlocking(wifiEnabled, false, Process.myUid());
         setWifiApEnabledBlocking(wifiAPEnabled, true, Process.myUid(), null);
     }
@@ -446,6 +452,7 @@ public class WifiService extends IWifiManager.Stub {
 
             registerForBroadcasts();
             mWifiStateTracker.startEventLoop();
+
         } else {
 
             mContext.unregisterReceiver(mReceiver);
@@ -1803,6 +1810,9 @@ public class WifiService extends IWifiManager.Stub {
             switch (msg.what) {
 
                 case MESSAGE_ENABLE_WIFI:
+                    if (mWifiWatchdogService == null) {
+                        mWifiWatchdogService = new WifiWatchdogService(mContext, mWifiStateTracker);
+                    }
                     setWifiEnabledBlocking(true, msg.arg1 == 1, msg.arg2);
                     sWakeLock.release();
                     break;
@@ -1821,6 +1831,10 @@ public class WifiService extends IWifiManager.Stub {
                     // a non-zero msg.arg1 value means the "enabled" setting
                     // should be persisted
                     setWifiEnabledBlocking(false, msg.arg1 == 1, msg.arg2);
+                    if (mWifiWatchdogService != null) {
+                        mWifiWatchdogService.quit();
+                        mWifiWatchdogService = null;
+                    }
                     sWakeLock.release();
                     break;
 
