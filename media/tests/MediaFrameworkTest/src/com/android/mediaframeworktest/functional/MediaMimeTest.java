@@ -49,7 +49,7 @@ public class MediaMimeTest extends ActivityInstrumentationTestCase2<MediaFramewo
     private final String TAG = "MediaMimeTest";
     private Context mContext;
     private final String MP3_FILE = "/sdcard/media_api/music/SHORTMP3.mp3";
-    private final String MEDIA_PLAYBACK_NAME = "com.android.music.MediaPlaybackActivity";
+    private final String MEDIA_PLAYBACK_NAME = "com.android.music.MediaPlaybackActivityStarter";
 
     public MediaMimeTest() {
         super("com.android.mediaframeworktest", MediaFrameworkTest.class);
@@ -77,7 +77,7 @@ public class MediaMimeTest extends ActivityInstrumentationTestCase2<MediaFramewo
         assertMediaPlaybackActivityHandles("audio/mp3");
     }
 
-    @MediumTest
+    @Suppress
     // Checks the MediaPlaybackActivity handles audio/*.
     public void testCheckMediaPlaybackHandlesAudio() throws Exception {
         assertMediaPlaybackActivityHandles("audio/*");
@@ -86,7 +86,7 @@ public class MediaMimeTest extends ActivityInstrumentationTestCase2<MediaFramewo
     // TODO: temporarily remove from medium suite because it hangs whole suite 
     // @MediumTest
     // Checks the MediaPlaybackActivity handles application/itunes. Some servers
-    // set the Content-type header to application/iTunes (with capital T, but
+    // set the Content-type hadb ieader to application/iTunes (with capital T, but
     // the download manager downcasts it) for their MP3 podcasts. This is non
     // standard but we try to support it anyway.
     // See bug 1401491
