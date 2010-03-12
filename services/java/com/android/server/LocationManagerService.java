@@ -1341,7 +1341,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
 
     private Bundle _getProviderInfoLocked(String provider) {
         LocationProviderInterface p = mProvidersByName.get(provider);
-        if (p == null || !p.isEnabled()) {
+        if (p == null) {
             return null;
         }
 
