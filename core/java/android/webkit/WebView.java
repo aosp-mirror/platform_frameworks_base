@@ -2301,15 +2301,18 @@ public class WebView extends AbsoluteLayout
         scrollBar.draw(canvas);
     }
 
+    private boolean canOverscrollHorizontally() {
+        return (Math.abs(mMinZoomScale - mMaxZoomScale) >= MINIMUM_SCALE_INCREMENT)
+                && getSettings().supportZoom()
+                && getSettings().getUseWideViewPort();
+    }
+
     @Override
     protected void onOverscrolled(int scrollX, int scrollY, boolean clampedX,
             boolean clampedY) {
         mInOverScrollMode = false;
         int maxX = computeMaxScrollX();
-        if (maxX == 0 && (Math.abs(mMinZoomScale - mMaxZoomScale)
-                < MINIMUM_SCALE_INCREMENT)
-                || !getSettings().supportZoom()
-                || !getSettings().getUseWideViewPort()) {
+        if (maxX == 0 && !canOverscrollHorizontally()) {
             // do not over scroll x if the page just fits the screen and it
             // can't zoom or the view doesn't use wide viewport
             scrollX = pinLocX(scrollX);
@@ -5391,7 +5394,9 @@ public class WebView extends AbsoluteLayout
                 vx = 0;
             }
         }
-
+        if (maxX == 0 && !canOverscrollHorizontally()) {
+            vx = 0;
+        }
         if (true /* EMG release: make our fling more like Maps' */) {
             // maps cuts their velocity in half
             vx = vx * 3 / 4;
