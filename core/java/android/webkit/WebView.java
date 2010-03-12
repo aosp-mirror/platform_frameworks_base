@@ -3115,6 +3115,14 @@ public class WebView extends AbsoluteLayout
             return;
         }
 
+        // if both mContentWidth and mContentHeight are 0, it means there is no
+        // valid Picture passed to WebView yet. This can happen when WebView
+        // just starts. Draw the background and return.
+        if ((mContentWidth | mContentHeight) == 0 && mHistoryPicture == null) {
+            canvas.drawColor(mBackgroundColor);
+            return;
+        }
+
         int saveCount = canvas.save();
         if (mInOverScrollMode
                 && getSettings().getUseSystemOverscrollBackground()) {
