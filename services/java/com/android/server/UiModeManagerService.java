@@ -52,6 +52,7 @@ import android.util.Slog;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.Iterator;
 
 import com.android.internal.R;
 import com.android.internal.app.DisableCarModeActivity;
@@ -76,10 +77,10 @@ class UiModeManagerService extends IUiModeManager.Stub {
     private final Context mContext;
 
     final Object mLock = new Object();
-    
+
     private int mDockState = Intent.EXTRA_DOCK_STATE_UNDOCKED;
     private int mLastBroadcastState = Intent.EXTRA_DOCK_STATE_UNDOCKED;
-    
+
     private int mNightMode = UiModeManager.MODE_NIGHT_NO;
     private boolean mCarModeEnabled = false;
     private boolean mCharging = false;
@@ -89,10 +90,10 @@ class UiModeManagerService extends IUiModeManager.Stub {
     private boolean mComputedNightMode;
     private int mCurUiMode = 0;
     private int mSetUiMode = 0;
-    
+
     private boolean mHoldingConfiguration = false;
     private Configuration mConfiguration = new Configuration();
-    
+
     private boolean mSystemReady;
 
     private NotificationManager mNotificationManager;
@@ -138,7 +139,7 @@ class UiModeManagerService extends IUiModeManager.Stub {
                         Slog.w(TAG, e.getCause());
                     }
                 }
-                
+
                 if (mHoldingConfiguration) {
                     mHoldingConfiguration = false;
                     updateConfigurationLocked();
@@ -255,7 +256,7 @@ class UiModeManagerService extends IUiModeManager.Stub {
         mContext = context;
 
         ServiceManager.addService(Context.UI_MODE_SERVICE, this);
-        
+
         mAlarmManager =
             (AlarmManager)mContext.getSystemService(Context.ALARM_SERVICE);
         mLocationManager =
@@ -304,7 +305,7 @@ class UiModeManagerService extends IUiModeManager.Stub {
             return mCurUiMode & Configuration.UI_MODE_TYPE_MASK;
         }
     }
-    
+
     public void setNightMode(int mode) throws RemoteException {
         synchronized (mLock) {
             switch (mode) {
@@ -318,18 +319,18 @@ class UiModeManagerService extends IUiModeManager.Stub {
             if (!isDoingNightMode()) {
                 return;
             }
-            
+
             if (mNightMode != mode) {
                 mNightMode = mode;
                 updateLocked();
             }
         }
     }
-    
+
     public int getNightMode() throws RemoteException {
         return mNightMode;
     }
-    
+
     void systemReady() {
         synchronized (mLock) {
             mSystemReady = true;
@@ -342,7 +343,7 @@ class UiModeManagerService extends IUiModeManager.Stub {
     boolean isDoingNightMode() {
         return mCarModeEnabled || mDockState != Intent.EXTRA_DOCK_STATE_UNDOCKED;
     }
-    
+
     void setCarModeLocked(boolean enabled) {
         if (mCarModeEnabled != enabled) {
             mCarModeEnabled = enabled;
@@ -399,12 +400,12 @@ class UiModeManagerService extends IUiModeManager.Stub {
             uiMode = Configuration.UI_MODE_TYPE_NORMAL |
                     Configuration.UI_MODE_NIGHT_NO;
         }
-        
+
         mCurUiMode = uiMode;
-        
+
         if (!mHoldingConfiguration && uiMode != mSetUiMode) {
             mSetUiMode = uiMode;
-            
+
             try {
                 final IActivityManager am = ActivityManagerNative.getDefault();
                 mConfiguration.uiMode = uiMode;
@@ -414,10 +415,10 @@ class UiModeManagerService extends IUiModeManager.Stub {
             }
         }
     }
-    
+
     final void updateLocked() {
         long ident = Binder.clearCallingIdentity();
-        
+
         try {
             String action = null;
             String oldAction = null;
@@ -426,11 +427,11 @@ class UiModeManagerService extends IUiModeManager.Stub {
             } else if (mLastBroadcastState == Intent.EXTRA_DOCK_STATE_DESK) {
                 oldAction = UiModeManager.ACTION_EXIT_DESK_MODE;
             }
-            
+
             if (mCarModeEnabled) {
                 if (mLastBroadcastState != Intent.EXTRA_DOCK_STATE_CAR) {
                     adjustStatusBarCarModeLocked();
-                    
+
                     if (oldAction != null) {
                         mContext.sendBroadcast(new Intent(oldAction));
                     }
@@ -449,11 +450,11 @@ class UiModeManagerService extends IUiModeManager.Stub {
                 if (mLastBroadcastState == Intent.EXTRA_DOCK_STATE_CAR) {
                     adjustStatusBarCarModeLocked();
                 }
-                
+
                 mLastBroadcastState = Intent.EXTRA_DOCK_STATE_UNDOCKED;
                 action = oldAction;
             }
-            
+
             if (action != null) {
                 // Send the ordered broadcast; the result receiver will receive after all
                 // broadcasts have been sent. If any broadcast receiver changes the result
@@ -468,7 +469,7 @@ class UiModeManagerService extends IUiModeManager.Stub {
                 // the broacast and started the home activity.
                 mHoldingConfiguration = true;
             }
-            
+
             updateConfigurationLocked();
 
             // keep screen on when charging and in car mode
@@ -609,14 +610,18 @@ class UiModeManagerService extends IUiModeManager.Stub {
         }
 
         private void retrieveLocation() {
-            Location location;
-            Criteria criteria = new Criteria();
-            criteria.setSpeedRequired(false);
-            criteria.setAltitudeRequired(false);
-            criteria.setBearingRequired(false);
-            criteria.setAccuracy(Criteria.ACCURACY_FINE);
-            final String bestProvider = mLocationManager.getBestProvider(criteria, true);
-            location = mLocationManager.getLastKnownLocation(bestProvider);
+            Location location = null;
+            final Iterator<String> providers =
+                    mLocationManager.getProviders(new Criteria(), true).iterator();
+            while (providers.hasNext()) {
+                final Location lastKnownLocation =
+                        mLocationManager.getLastKnownLocation(providers.next());
+                // pick the most recent location
+                if (location == null || (lastKnownLocation != null &&
+                        location.getTime() < lastKnownLocation.getTime())) {
+                    location = lastKnownLocation;
+                }
+            }
             // In the case there is no location available (e.g. GPS fix or network location
             // is not available yet), the longitude of the location is estimated using the timezone,
             // latitude and accuracy are set to get a good average.
@@ -684,18 +689,18 @@ class UiModeManagerService extends IUiModeManager.Stub {
 
         mComputedNightMode = nightMode;
     }
-    
+
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
                 != PackageManager.PERMISSION_GRANTED) {
-            
+
             pw.println("Permission Denial: can't dump uimode service from from pid="
                     + Binder.getCallingPid()
                     + ", uid=" + Binder.getCallingUid());
             return;
         }
-        
+
         synchronized (mLock) {
             pw.println("Current UI Mode Service state:");
             pw.print("  mDockState="); pw.print(mDockState);
