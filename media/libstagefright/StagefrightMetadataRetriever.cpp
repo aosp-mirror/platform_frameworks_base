@@ -206,6 +206,12 @@ static VideoFrame *extractVideoFrameWithCodecFlags(
 VideoFrame *StagefrightMetadataRetriever::captureFrame() {
     LOGV("captureFrame");
 
+    if (0 == (mMode & METADATA_MODE_FRAME_CAPTURE_ONLY)) {
+        LOGV("captureFrame disabled by mode (0x%08x)", mMode);
+
+        return NULL;
+    }
+
     if (mExtractor.get() == NULL) {
         LOGV("no extractor.");
         return NULL;
@@ -256,6 +262,12 @@ VideoFrame *StagefrightMetadataRetriever::captureFrame() {
 MediaAlbumArt *StagefrightMetadataRetriever::extractAlbumArt() {
     LOGV("extractAlbumArt (extractor: %s)", mExtractor.get() != NULL ? "YES" : "NO");
 
+    if (0 == (mMode & METADATA_MODE_METADATA_RETRIEVAL_ONLY)) {
+        LOGV("extractAlbumArt/metadata retrieval disabled by mode");
+
+        return NULL;
+    }
+
     if (mExtractor == NULL) {
         return NULL;
     }
@@ -274,6 +286,12 @@ MediaAlbumArt *StagefrightMetadataRetriever::extractAlbumArt() {
 }
 
 const char *StagefrightMetadataRetriever::extractMetadata(int keyCode) {
+    if (0 == (mMode & METADATA_MODE_METADATA_RETRIEVAL_ONLY)) {
+        LOGV("extractAlbumArt/metadata retrieval disabled by mode");
+
+        return NULL;
+    }
+
     if (mExtractor == NULL) {
         return NULL;
     }
