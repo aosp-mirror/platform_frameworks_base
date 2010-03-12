@@ -135,15 +135,26 @@ public abstract class DataConnection extends HierarchicalStateMachine {
     }
 
     /**
+     * An instance used for notification of blockingReset.
+     * TODO: Remove when blockingReset is removed.
+     */
+    class ResetSynchronouslyLock {
+    }
+
+    /**
      * Used internally for saving disconnecting parameters.
      */
     protected static class DisconnectParams {
         public DisconnectParams(Message onCompletedMsg) {
             this.onCompletedMsg = onCompletedMsg;
         }
+        public DisconnectParams(ResetSynchronouslyLock lockObj) {
+            this.lockObj = lockObj;
+        }
 
         public int tag;
         public Message onCompletedMsg;
+        public ResetSynchronouslyLock lockObj;
     }
 
     /**
@@ -339,11 +350,18 @@ public abstract class DataConnection extends HierarchicalStateMachine {
     private void notifyDisconnectCompleted(DisconnectParams dp) {
         if (DBG) log("NotifyDisconnectCompleted");
 
-        Message msg = dp.onCompletedMsg;
-        log(String.format("msg.what=%d msg.obj=%s",
-                msg.what, ((msg.obj instanceof String) ? (String) msg.obj : "<no-reason>")));
-        AsyncResult.forMessage(msg);
-        msg.sendToTarget();
+        if (dp.onCompletedMsg != null) {
+            Message msg = dp.onCompletedMsg;
+            log(String.format("msg.what=%d msg.obj=%s",
+                    msg.what, ((msg.obj instanceof String) ? (String) msg.obj : "<no-reason>")));
+            AsyncResult.forMessage(msg);
+            msg.sendToTarget();
+        }
+        if (dp.lockObj != null) {
+            synchronized(dp.lockObj) {
+                dp.lockObj.notify();
+            }
+        }
 
         clearSettings();
     }
@@ -775,6 +793,23 @@ public abstract class DataConnection extends HierarchicalStateMachine {
      */
     public void reset(Message onCompletedMsg) {
         sendMessage(obtainMessage(EVENT_RESET, new DisconnectParams(onCompletedMsg)));
+    }
+
+    /**
+     * Reset the connection and wait for it to complete.
+     * TODO: Remove when all callers only need the asynchronous
+     * reset defined above.
+     */
+    public void resetSynchronously() {
+        ResetSynchronouslyLock lockObj = new ResetSynchronouslyLock();
+        synchronized(lockObj) {
+            sendMessage(obtainMessage(EVENT_RESET, new DisconnectParams(lockObj)));
+            try {
+                lockObj.wait();
+            } catch (InterruptedException e) {
+                log("blockingReset: unexpected interrupted of wait()");
+            }
+        }
     }
 
     /**
