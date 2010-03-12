@@ -2205,32 +2205,28 @@ class PowerManagerService extends IPowerManager.Stub
         if (mHandler == null || !ActivityManagerNative.isSystemReady()) {
             throw new IllegalStateException("Too early to call reboot()");
         }
-        
+
         final String finalReason = reason;
         Runnable runnable = new Runnable() {
             public void run() {
                 synchronized (this) {
                     ShutdownThread.reboot(mContext, finalReason, false);
-                    // if we get here we failed
-                    notify();
                 }
                 
             }
         };
-
+        // ShutdownThread must run on a looper capable of displaying the UI.
         mHandler.post(runnable);
 
-        // block until we reboot or fail.
-        // throw an exception if we failed to reboot
+        // PowerManager.reboot() is documented not to return so just wait for the inevitable.
         synchronized (runnable) {
-            try {
-                runnable.wait();
-            } catch (InterruptedException e) {
+            while (true) {
+                try {
+                    runnable.wait();
+                } catch (InterruptedException e) {
+                }
             }
         }
-     
-        // if we get here we failed
-        throw new IllegalStateException("unable to reboot!");
     }
 
     /**

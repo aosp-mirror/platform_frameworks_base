@@ -4708,7 +4708,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
     final void appNotRespondingLocked(ProcessRecord app, HistoryRecord activity,
             HistoryRecord parent, final String annotation) {
-        if (app.notResponding || app.crashing) {
+        // PowerManager.reboot() can block for a long time, so ignore ANRs while shutting down.
+        if (mShuttingDown || app.notResponding || app.crashing) {
             return;
         }
 
