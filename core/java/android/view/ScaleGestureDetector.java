@@ -18,6 +18,7 @@ package android.view;
 
 import android.content.Context;
 import android.util.DisplayMetrics;
+import android.util.FloatMath;
 
 /**
  * Detects transformation gestures involving more than one pointer ("multitouch")
@@ -96,14 +97,16 @@ public class ScaleGestureDetector {
      * A convenience class to extend when you only want to listen for a subset
      * of scaling-related events. This implements all methods in
      * {@link OnScaleGestureListener} but does nothing.
-     * {@link OnScaleGestureListener#onScale(ScaleGestureDetector)} and
-     * {@link OnScaleGestureListener#onScaleBegin(ScaleGestureDetector)} return
+     * {@link OnScaleGestureListener#onScale(ScaleGestureDetector)} returns
+     * {@code false} so that a subclass can retrieve the accumulated scale
+     * factor in an overridden onScaleEnd.
+     * {@link OnScaleGestureListener#onScaleBegin(ScaleGestureDetector)} returns
      * {@code true}. 
      */
     public static class SimpleOnScaleGestureListener implements OnScaleGestureListener {
 
         public boolean onScale(ScaleGestureDetector detector) {
-            return true;
+            return false;
         }
 
         public boolean onScaleBegin(ScaleGestureDetector detector) {
@@ -115,10 +118,19 @@ public class ScaleGestureDetector {
         }
     }
 
+    /**
+     * This value is the threshold ratio between our previous combined pressure
+     * and the current combined pressure. We will only fire an onScale event if
+     * the computed ratio between the current and previous event pressures is
+     * greater than this value. When pressure decreases rapidly between events
+     * the position values can often be imprecise, as it usually indicates
+     * that the user is in the process of lifting a pointer off of the device.
+     * Its value was tuned experimentally.
+     */
     private static final float PRESSURE_THRESHOLD = 0.67f;
 
-    private Context mContext;
-    private OnScaleGestureListener mListener;
+    private final Context mContext;
+    private final OnScaleGestureListener mListener;
     private boolean mGestureInProgress;
 
     private MotionEvent mPrevEvent;
@@ -137,7 +149,7 @@ public class ScaleGestureDetector {
     private float mPrevPressure;
     private long mTimeDelta;
     
-    private float mEdgeSlop;
+    private final float mEdgeSlop;
     private float mRightSlopEdge;
     private float mBottomSlopEdge;
     private boolean mSloppyGesture;
@@ -410,7 +422,7 @@ public class ScaleGestureDetector {
         if (mCurrLen == -1) {
             final float cvx = mCurrFingerDiffX;
             final float cvy = mCurrFingerDiffY;
-            mCurrLen = (float)Math.sqrt(cvx*cvx + cvy*cvy);
+            mCurrLen = FloatMath.sqrt(cvx*cvx + cvy*cvy);
         }
         return mCurrLen;
     }
@@ -425,7 +437,7 @@ public class ScaleGestureDetector {
         if (mPrevLen == -1) {
             final float pvx = mPrevFingerDiffX;
             final float pvy = mPrevFingerDiffY;
-            mPrevLen = (float)Math.sqrt(pvx*pvx + pvy*pvy);
+            mPrevLen = FloatMath.sqrt(pvx*pvx + pvy*pvy);
         }
         return mPrevLen;
     }
