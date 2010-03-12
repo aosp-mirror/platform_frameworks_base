@@ -568,7 +568,7 @@ public class ThumbnailUtils {
         fullThumbWidth = fullOptions.outWidth / fullOptions.inSampleSize;
 
         // Choose the larger thumbnail as the returning sizedThumbBitmap.
-        if (exifThumbWidth >= fullThumbWidth) {
+        if (thumbData != null && exifThumbWidth >= fullThumbWidth) {
             int width = exifOptions.outWidth;
             int height = exifOptions.outHeight;
             exifOptions.inJustDecodeBounds = false;
