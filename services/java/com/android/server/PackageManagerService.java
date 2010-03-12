@@ -7707,7 +7707,11 @@ class PackageManagerService extends IPackageManager.Stub {
                             resourcePath, vc, pkgFlags);
                     if (DEBUG_UPGRADE) Log.v(TAG, "Package " + name
                             + " is adopting original package " + origPackage.name);
+                    // Note that we will retain the new package's signature so
+                    // that we can keep its data.
+                    PackageSignatures s = p.signatures;
                     p.copyFrom(origPackage);
+                    p.signatures = s;
                     p.sharedUser = origPackage.sharedUser;
                     p.userId = origPackage.userId;
                     p.origPackage = origPackage;
