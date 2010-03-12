@@ -395,10 +395,10 @@ public class MediaPlayerPerformance extends ActivityInstrumentationTestCase<Medi
         Thread.sleep(10000);
         mEndPid = getMediaserverPid();
         int memDiff = mEndMemory - startMemory;
-        if (memDiff < 0)
+        if (memDiff < 0) {
             memDiff = 0;
-        else
-            output.write("The total diff = " + memDiff);
+        }
+        output.write("The total diff = " + memDiff);
         output.write("\n\n");
         // mediaserver crash
         if (startPid != mEndPid) {
