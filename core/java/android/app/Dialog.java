@@ -27,7 +27,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextThemeWrapper;
 import android.view.Gravity;
@@ -271,14 +270,16 @@ public class Dialog implements DialogInterface, Window.Callback,
             return;
         }
 
-        mWindowManager.removeView(mDecor);
-
-        mDecor = null;
-        mWindow.closeAllPanels();
-        onStop();
-        mShowing = false;
-        
-        sendDismissMessage();
+        try {
+            mWindowManager.removeView(mDecor);
+        } finally {
+            mDecor = null;
+            mWindow.closeAllPanels();
+            onStop();
+            mShowing = false;
+            
+            sendDismissMessage();
+        }
     }
 
     private void sendDismissMessage() {
