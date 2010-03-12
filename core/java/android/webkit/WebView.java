@@ -535,9 +535,10 @@ public class WebView extends AbsoluteLayout
     static final int SET_ROOT_LAYER_MSG_ID              = 124;
     static final int RETURN_LABEL                       = 125;
     static final int FIND_AGAIN                         = 126;
+    static final int CENTER_FIT_RECT                    = 127;
 
     private static final int FIRST_PACKAGE_MSG_ID = SCROLL_TO_MSG_ID;
-    private static final int LAST_PACKAGE_MSG_ID = FIND_AGAIN;
+    private static final int LAST_PACKAGE_MSG_ID = CENTER_FIT_RECT;
 
     static final String[] HandlerPrivateDebugString = {
         "REMEMBER_PASSWORD", //              = 1;
@@ -578,7 +579,8 @@ public class WebView extends AbsoluteLayout
         "IMMEDIATE_REPAINT_MSG_ID", //       = 123;
         "SET_ROOT_LAYER_MSG_ID", //          = 124;
         "RETURN_LABEL", //                   = 125;
-        "FIND_AGAIN" //                      = 126;
+        "FIND_AGAIN", //                     = 126;
+        "CENTER_FIT_RECT" //                 = 127;
     };
 
     // If the site doesn't use the viewport meta tag to specify the viewport,
@@ -5737,49 +5739,50 @@ public class WebView extends AbsoluteLayout
     }
 
     /*
-     * Maximize and center the view inside the WebView. If the zoom doesn't need
-     * to be changed, do an animated scroll to center it. If the zoom needs to
-     * be changed, find the zoom center and do a smooth zoom transition.
+     * Maximize and center the rectangle, specified in the document coordinate
+     * space, inside the WebView. If the zoom doesn't need to be changed, do an
+     * animated scroll to center it. If the zoom needs to be changed, find the
+     * zoom center and do a smooth zoom transition.
      */
-    private void centerPluginOnScreen(ViewManager.ChildView child) {
+    private void centerFitRect(int docX, int docY, int docWidth, int docHeight) {
         int viewWidth = getViewWidth();
         int viewHeight = getViewHeightWithTitle();
-        float scale = Math.min((float) viewWidth / child.width,
-                (float) viewHeight / child.height);
+        float scale = Math.min((float) viewWidth / docWidth, (float) viewHeight
+                / docHeight);
         if (scale < mMinZoomScale) {
             scale = mMinZoomScale;
         } else if (scale > mMaxZoomScale) {
             scale = mMaxZoomScale;
         }
         if (Math.abs(scale - mActualScale) < MINIMUM_SCALE_INCREMENT) {
-            pinScrollTo(
-                    contentToViewX(child.x + child.width / 2) - viewWidth / 2,
-                    contentToViewY(child.y + child.height / 2) - viewHeight / 2,
+            pinScrollTo(contentToViewX(docX + docWidth / 2) - viewWidth / 2,
+                    contentToViewY(docY + docHeight / 2) - viewHeight / 2,
                     true, 0);
         } else {
-            int oldScreenX = contentToViewX(child.x) - mScrollX;
-            int newPluginX = (int) (child.x * scale);
-            int newPluginWidth = (int) (child.width * scale);
+            int oldScreenX = contentToViewX(docX) - mScrollX;
+            int rectViewX = (int) (docX * scale);
+            int rectViewWidth = (int) (docWidth * scale);
             int newMaxWidth = (int) (mContentWidth * scale);
-            int newScreenX = (viewWidth - newPluginWidth) / 2;
+            int newScreenX = (viewWidth - rectViewWidth) / 2;
             // pin the newX to the WebView
-            if (newScreenX > newPluginX) {
-                newScreenX = newPluginX;
-            } else if (newScreenX > (newMaxWidth - newPluginX - newPluginWidth)) {
-                newScreenX = viewWidth - (newMaxWidth - newPluginX);
+            if (newScreenX > rectViewX) {
+                newScreenX = rectViewX;
+            } else if (newScreenX > (newMaxWidth - rectViewX - rectViewWidth)) {
+                newScreenX = viewWidth - (newMaxWidth - rectViewX);
             }
             mZoomCenterX = (oldScreenX * scale - newScreenX * mActualScale)
                     / (scale - mActualScale);
-            int oldScreenY = contentToViewY(child.y) - mScrollY;
-            int newPluginY = (int) (child.y * scale) + getTitleHeight();
-            int newPluginHeight = (int) (child.height * scale);
-            int newMaxHeight = (int) (mContentHeight * scale) + getTitleHeight();
-            int newScreenY = (viewHeight - newPluginHeight) / 2;
+            int oldScreenY = contentToViewY(docY) - mScrollY;
+            int rectViewY = (int) (docY * scale) + getTitleHeight();
+            int rectViewHeight = (int) (docHeight * scale);
+            int newMaxHeight = (int) (mContentHeight * scale)
+                    + getTitleHeight();
+            int newScreenY = (viewHeight - rectViewHeight) / 2;
             // pin the newY to the WebView
-            if (newScreenY > newPluginY) {
-                newScreenY = newPluginY;
-            } else if (newScreenY > (newMaxHeight - newPluginY - newPluginHeight)) {
-                newScreenY = viewHeight - (newMaxHeight - newPluginY);
+            if (newScreenY > rectViewY) {
+                newScreenY = rectViewY;
+            } else if (newScreenY > (newMaxHeight - rectViewY - rectViewHeight)) {
+                newScreenY = viewHeight - (newMaxHeight - rectViewY);
             }
             mZoomCenterY = (oldScreenY * scale - newScreenY * mActualScale)
                     / (scale - mActualScale);
@@ -5825,7 +5828,7 @@ public class WebView extends AbsoluteLayout
                         true);
             } else {
                 mInZoomOverview = false;
-                centerPluginOnScreen(plugin);
+                centerFitRect(plugin.x, plugin.y, plugin.width, plugin.height);
             }
             return;
         }
@@ -6640,6 +6643,12 @@ public class WebView extends AbsoluteLayout
                     y = Math.max(0, y - getVisibleTitleHeight());
                     scrollTo(x, y);
                     }
+                    break;
+
+                case CENTER_FIT_RECT:
+                    Rect r = (Rect)msg.obj;
+                    mInZoomOverview = false;
+                    centerFitRect(r.left, r.top, r.width(), r.height());
                     break;
 
                 default:
