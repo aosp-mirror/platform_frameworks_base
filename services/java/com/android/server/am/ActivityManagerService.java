@@ -4268,6 +4268,22 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
     }
 
+    public boolean willActivityBeVisible(IBinder token) {
+        synchronized(this) {
+            int i;
+            for (i=mHistory.size()-1; i>=0; i--) {
+                HistoryRecord r = (HistoryRecord)mHistory.get(i);
+                if (r == token) {
+                    return true;
+                }
+                if (r.fullscreen && !r.finishing) {
+                    return false;
+                }
+            }
+            return true;
+        }
+    }
+    
     public void overridePendingTransition(IBinder token, String packageName,
             int enterAnim, int exitAnim) {
         synchronized(this) {

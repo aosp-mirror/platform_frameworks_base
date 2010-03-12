@@ -3095,9 +3095,6 @@ public final class ActivityThread {
 
                 r.paused = false;
                 r.stopped = false;
-                if (r.activity.mStartedActivity) {
-                    r.hideForNow = true;
-                }
                 r.state = null;
             } catch (Exception e) {
                 if (!mInstrumentation.onException(r.activity, e)) {
@@ -3132,7 +3129,15 @@ public final class ActivityThread {
             // If the window hasn't yet been added to the window manager,
             // and this guy didn't finish itself or start another activity,
             // then go ahead and add the window.
-            if (r.window == null && !a.mFinished && !a.mStartedActivity) {
+            boolean willBeVisible = !a.mStartedActivity;
+            if (!willBeVisible) {
+                try {
+                    willBeVisible = ActivityManagerNative.getDefault().willActivityBeVisible(
+                            a.getActivityToken());
+                } catch (RemoteException e) {
+                }
+            }
+            if (r.window == null && !a.mFinished && willBeVisible) {
                 r.window = r.activity.getWindow();
                 View decor = r.window.getDecorView();
                 decor.setVisibility(View.INVISIBLE);
@@ -3148,8 +3153,8 @@ public final class ActivityThread {
 
             // If the window has already been added, but during resume
             // we started another activity, then don't yet make the
-            // window visisble.
-            } else if (a.mStartedActivity) {
+            // window visible.
+            } else if (!willBeVisible) {
                 if (localLOGV) Log.v(
                     TAG, "Launch " + r + " mStartedActivity set");
                 r.hideForNow = true;
@@ -3157,7 +3162,7 @@ public final class ActivityThread {
 
             // The window is now visible if it has been added, we are not
             // simply finishing, and we are not starting another activity.
-            if (!r.activity.mFinished && !a.mStartedActivity
+            if (!r.activity.mFinished && willBeVisible
                     && r.activity.mDecor != null && !r.hideForNow) {
                 if (r.newConfig != null) {
                     if (DEBUG_CONFIGURATION) Log.v(TAG, "Resuming activity "
