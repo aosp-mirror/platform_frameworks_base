@@ -3155,7 +3155,10 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         }
 
         if (!inTouchMode && mSelectedPosition != INVALID_POSITION) {
-            positionSelector(getChildAt(mSelectedPosition - mFirstPosition));
+            final int childIndex = mSelectedPosition - mFirstPosition;
+            if (childIndex >= 0 && childIndex < getChildCount()) {
+                positionSelector(getChildAt(childIndex));
+            }
         }
 
         mBlockLayoutRequests = false;
