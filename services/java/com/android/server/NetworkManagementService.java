@@ -26,10 +26,13 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.net.InterfaceConfiguration;
 import android.net.INetworkManagementEventObserver;
+import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiConfiguration.KeyMgmt;
 import android.os.INetworkManagementService;
 import android.os.Handler;
 import android.os.SystemProperties;
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.Slog;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
@@ -457,14 +460,38 @@ class NetworkManagementService extends INetworkManagementService.Stub {
         throw new IllegalStateException("Got an empty response");
     }
 
-    public void startAccessPoint()
+    public void startAccessPoint(WifiConfiguration wifiConfig, String intf)
              throws IllegalStateException {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.CHANGE_NETWORK_STATE, "NetworkManagementService");
         mContext.enforceCallingOrSelfPermission(
             android.Manifest.permission.CHANGE_WIFI_STATE, "NetworkManagementService");
-        mConnector.doCommand(String.format("softap set"));
-        mConnector.doCommand(String.format("softap start"));
+        mConnector.doCommand(String.format("softap stop " + intf));
+        mConnector.doCommand(String.format("softap fwreload " + intf + " AP"));
+        mConnector.doCommand(String.format("softap start " + intf));
+        if (wifiConfig == null) {
+            mConnector.doCommand(String.format("softap set " + intf + " wl0.1"));
+        } else {
+            /**
+             * softap set arg1 arg2 arg3 [arg4 arg5 arg6 arg7 arg8]
+             * argv1 - wlan interface
+             * argv2 - softap interface
+             * argv3 - SSID
+             * argv4 - Security
+             * argv5 - Key
+             * argv6 - Channel
+             * argv7 - Preamble
+             * argv8 - Max SCB
+             *
+             * TODO: get a configurable softap interface from driver
+             */
+            String str = String.format("softap set " + intf + " wl0.1 %s %s %s", wifiConfig.SSID,
+                                       wifiConfig.allowedKeyManagement.get(KeyMgmt.WPA_PSK) ?
+                                       "wpa2-psk" : "open",
+                                       wifiConfig.preSharedKey);
+            mConnector.doCommand(str);
+        }
+        mConnector.doCommand(String.format("softap startap"));
     }
 
     public void stopAccessPoint() throws IllegalStateException {
@@ -472,7 +499,7 @@ class NetworkManagementService extends INetworkManagementService.Stub {
                 android.Manifest.permission.CHANGE_NETWORK_STATE, "NetworkManagementService");
         mContext.enforceCallingOrSelfPermission(
             android.Manifest.permission.CHANGE_WIFI_STATE, "NetworkManagementService");
-        mConnector.doCommand("softap stop");
+        mConnector.doCommand("softap stopap");
     }
 
 }

@@ -81,5 +81,7 @@ interface IWifiManager
     boolean setWifiApEnabled(in WifiConfiguration wifiConfig, boolean enable);
 
     int getWifiApEnabledState();
+
+    WifiConfiguration getWifiApConfiguration();
 }
 
