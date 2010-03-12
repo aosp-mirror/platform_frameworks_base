@@ -123,17 +123,21 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
         mTetherMasterSM = new TetherMasterSM("TetherMaster", mLooper);
         mTetherMasterSM.start();
 
-        // TODO - remove this hack after real USB connections are detected.
+        mStateReceiver = new StateReceiver();
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_BATTERY_CHANGED);
         filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
         filter.addAction(Intent.ACTION_BOOT_COMPLETED);
+        mContext.registerReceiver(mStateReceiver, filter);
+
+        filter = new IntentFilter();
         filter.addAction(Intent.ACTION_MEDIA_SHARED);
         filter.addAction(Intent.ACTION_MEDIA_UNSHARED);
+        filter.addDataScheme("file");
+        mContext.registerReceiver(mStateReceiver, filter);
+
         mUsbMassStorageOff = !Environment.MEDIA_SHARED.equals(
                 Environment.getExternalStorageState());
-        mStateReceiver = new StateReceiver();
-        mContext.registerReceiver(mStateReceiver, filter);
 
         mDhcpRange = context.getResources().getStringArray(
                 com.android.internal.R.array.config_tether_dhcp_range);
