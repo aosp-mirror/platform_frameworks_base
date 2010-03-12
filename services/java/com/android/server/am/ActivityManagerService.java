@@ -111,6 +111,7 @@ import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.lang.IllegalStateException;
 import java.lang.ref.WeakReference;
@@ -8960,77 +8961,122 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
      * @param crashInfo giving an application stack trace, null if absent
      */
     public void addErrorToDropBox(String eventType,
-            ProcessRecord process, HistoryRecord activity, HistoryRecord parent,
-            String subject, String report, File logFile,
-            ApplicationErrorReport.CrashInfo crashInfo) {
+            ProcessRecord process, HistoryRecord activity, HistoryRecord parent, String subject,
+            final String report, final File logFile,
+            final ApplicationErrorReport.CrashInfo crashInfo) {
         // NOTE -- this must never acquire the ActivityManagerService lock,
         // otherwise the watchdog may be prevented from resetting the system.
 
-        String dropboxTag;
+        String prefix;
         if (process == null || process.pid == MY_PID) {
-            dropboxTag = "system_server_" + eventType;
+            prefix = "system_server_";
         } else if ((process.info.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
-            dropboxTag = "system_app_" + eventType;
+            prefix = "system_app_";
         } else {
-            dropboxTag = "data_app_" + eventType;
+            prefix = "data_app_";
         }
 
-        DropBoxManager dbox = (DropBoxManager) mContext.getSystemService(Context.DROPBOX_SERVICE);
-        if (dbox != null && dbox.isTagEnabled(dropboxTag)) {
-            StringBuilder sb = new StringBuilder(1024);
-            if (process == null || process.pid == MY_PID) {
-                sb.append("Process: system_server\n");
-            } else {
-                sb.append("Process: ").append(process.processName).append("\n");
-            }
-            if (process != null) {
-                int flags = process.info.flags;
-                IPackageManager pm = ActivityThread.getPackageManager();
-                sb.append("Flags: 0x").append(Integer.toString(flags, 16)).append("\n");
-                for (String pkg : process.pkgList) {
-                    sb.append("Package: ").append(pkg);
-                    try {
-                        PackageInfo pi = pm.getPackageInfo(pkg, 0);
-                        if (pi != null) {
-                            sb.append(" v").append(pi.versionCode);
-                            if (pi.versionName != null) {
-                                sb.append(" (").append(pi.versionName).append(")");
-                            }
-                        }
-                    } catch (RemoteException e) {
-                        Slog.e(TAG, "Error getting package info: " + pkg, e);
-                    }
-                    sb.append("\n");
-                }
-            }
-            if (activity != null) {
-                sb.append("Activity: ").append(activity.shortComponentName).append("\n");
-            }
-            if (parent != null && parent.app != null && parent.app.pid != process.pid) {
-                sb.append("Parent-Process: ").append(parent.app.processName).append("\n");
-            }
-            if (parent != null && parent != activity) {
-                sb.append("Parent-Activity: ").append(parent.shortComponentName).append("\n");
-            }
-            if (subject != null) {
-                sb.append("Subject: ").append(subject).append("\n");
-            }
-            sb.append("Build: ").append(Build.FINGERPRINT).append("\n");
-            sb.append("\n");
-            if (report != null) {
-                sb.append(report);
-            }
-            if (logFile != null) {
+        final String dropboxTag = prefix + eventType;
+        final DropBoxManager dbox = (DropBoxManager)
+                mContext.getSystemService(Context.DROPBOX_SERVICE);
+
+        // Exit early if the dropbox isn't configured to accept this report type.
+        if (dbox == null || !dbox.isTagEnabled(dropboxTag)) return;
+
+        final StringBuilder sb = new StringBuilder(1024);
+        if (process == null || process.pid == MY_PID) {
+            sb.append("Process: system_server\n");
+        } else {
+            sb.append("Process: ").append(process.processName).append("\n");
+        }
+        if (process != null) {
+            int flags = process.info.flags;
+            IPackageManager pm = ActivityThread.getPackageManager();
+            sb.append("Flags: 0x").append(Integer.toString(flags, 16)).append("\n");
+            for (String pkg : process.pkgList) {
+                sb.append("Package: ").append(pkg);
                 try {
-                    sb.append(FileUtils.readTextFile(logFile, 128 * 1024, "\n\n[[TRUNCATED]]"));
-                } catch (IOException e) {
-                    Slog.e(TAG, "Error reading " + logFile, e);
+                    PackageInfo pi = pm.getPackageInfo(pkg, 0);
+                    if (pi != null) {
+                        sb.append(" v").append(pi.versionCode);
+                        if (pi.versionName != null) {
+                            sb.append(" (").append(pi.versionName).append(")");
+                        }
+                    }
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Error getting package info: " + pkg, e);
                 }
+                sb.append("\n");
             }
-            if (crashInfo != null && crashInfo.stackTrace != null) {
-                sb.append(crashInfo.stackTrace);
+        }
+        if (activity != null) {
+            sb.append("Activity: ").append(activity.shortComponentName).append("\n");
+        }
+        if (parent != null && parent.app != null && parent.app.pid != process.pid) {
+            sb.append("Parent-Process: ").append(parent.app.processName).append("\n");
+        }
+        if (parent != null && parent != activity) {
+            sb.append("Parent-Activity: ").append(parent.shortComponentName).append("\n");
+        }
+        if (subject != null) {
+            sb.append("Subject: ").append(subject).append("\n");
+        }
+        sb.append("Build: ").append(Build.FINGERPRINT).append("\n");
+        sb.append("\n");
+
+        // Do the rest in a worker thread to avoid blocking the caller on I/O
+        // (After this point, we shouldn't access AMS internal data structures.)
+        Thread worker = new Thread("Error dump: " + dropboxTag) {
+            @Override
+            public void run() {
+                if (report != null) {
+                    sb.append(report);
+                }
+                if (logFile != null) {
+                    try {
+                        sb.append(FileUtils.readTextFile(logFile, 128 * 1024, "\n\n[[TRUNCATED]]"));
+                    } catch (IOException e) {
+                        Slog.e(TAG, "Error reading " + logFile, e);
+                    }
+                }
+                if (crashInfo != null && crashInfo.stackTrace != null) {
+                    sb.append(crashInfo.stackTrace);
+                }
+
+                String setting = Settings.Secure.ERROR_LOGCAT_PREFIX + dropboxTag;
+                int lines = Settings.Secure.getInt(mContext.getContentResolver(), setting, 0);
+                if (lines > 0) {
+                    sb.append("\n");
+
+                    // Merge several logcat streams, and take the last N lines
+                    InputStreamReader input = null;
+                    try {
+                        java.lang.Process logcat = new ProcessBuilder("/system/bin/logcat",
+                                "-v", "time", "-b", "events", "-b", "system", "-b", "main",
+                                "-t", String.valueOf(lines)).redirectErrorStream(true).start();
+
+                        try { logcat.getOutputStream().close(); } catch (IOException e) {}
+                        try { logcat.getErrorStream().close(); } catch (IOException e) {}
+                        input = new InputStreamReader(logcat.getInputStream());
+
+                        int num;
+                        char[] buf = new char[8192];
+                        while ((num = input.read(buf)) > 0) sb.append(buf, 0, num);
+                    } catch (IOException e) {
+                        Slog.e(TAG, "Error running logcat", e);
+                    } finally {
+                        if (input != null) try { input.close(); } catch (IOException e) {}
+                    }
+                }
+
+                dbox.addText(dropboxTag, sb.toString());
             }
-            dbox.addText(dropboxTag, sb.toString());
+        };
+
+        if (process == null || process.pid == MY_PID) {
+            worker.run();  // We may be about to die -- need to run this synchronously
+        } else {
+            worker.start();
         }
     }
 

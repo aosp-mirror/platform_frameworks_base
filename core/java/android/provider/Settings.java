@@ -2900,6 +2900,15 @@ public final class Settings {
          */
         public static final String DROPBOX_TAG_PREFIX =
                 "dropbox:";
+        /**
+         * Lines of logcat to include with system crash/ANR/etc. reports,
+         * as a prefix of the dropbox tag of the report type.
+         * For example, "logcat_for_system_server_anr" controls the lines
+         * of logcat captured with system server ANR reports.  0 to disable.
+         * @hide
+         */
+        public static final String ERROR_LOGCAT_PREFIX =
+                "logcat_for_";
 
 
         /**
