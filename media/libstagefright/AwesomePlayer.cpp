@@ -26,6 +26,7 @@
 
 #include <binder/IPCThreadState.h>
 #include <media/stagefright/AudioPlayer.h>
+#include <media/stagefright/CachingDataSource.h>
 #include <media/stagefright/DataSource.h>
 #include <media/stagefright/FileSource.h>
 #include <media/stagefright/MediaBuffer.h>
@@ -318,6 +319,14 @@ void AwesomePlayer::reset() {
 }
 
 void AwesomePlayer::reset_l() {
+    if (mFlags & PREPARING) {
+        mFlags |= PREPARE_CANCELLED;
+        if (mConnectingDataSource != NULL) {
+            LOGI("interrupting the connection process");
+            mConnectingDataSource->disconnect();
+        }
+    }
+
     while (mFlags & PREPARING) {
         mPreparedCondition.wait(mLock);
     }
@@ -337,6 +346,12 @@ void AwesomePlayer::reset_l() {
     // If we did this later, audio would continue playing while we
     // shutdown the video-related resources and the player appear to
     // not be as responsive to a reset request.
+    if (mAudioPlayer == NULL && mAudioSource != NULL) {
+        // If we had an audio player, it would have effectively
+        // taken possession of the audio source and stopped it when
+        // _it_ is stopped. Otherwise this is still our responsibility.
+        mAudioSource->stop();
+    }
     mAudioSource.clear();
 
     if (mTimeSource != mAudioPlayer) {
@@ -1039,8 +1054,29 @@ status_t AwesomePlayer::prepareAsync_l() {
 }
 
 status_t AwesomePlayer::finishSetDataSource_l() {
-    sp<DataSource> dataSource =
-        DataSource::CreateFromURI(mUri.string(), &mUriHeaders);
+    sp<DataSource> dataSource;
+
+    if (!strncasecmp("http://", mUri.string(), 7)) {
+        mConnectingDataSource = new HTTPDataSource(mUri, &mUriHeaders);
+
+        mLock.unlock();
+        status_t err = mConnectingDataSource->connect();
+        mLock.lock();
+
+        if (err != OK) {
+            mConnectingDataSource.clear();
+
+            LOGI("mConnectingDataSource->connect() returned %d", err);
+            return err;
+        }
+
+        dataSource = new CachingDataSource(
+                mConnectingDataSource, 32 * 1024, 20);
+
+        mConnectingDataSource.clear();
+    } else {
+        dataSource = DataSource::CreateFromURI(mUri.string(), &mUriHeaders);
+    }
 
     if (dataSource == NULL) {
         return UNKNOWN_ERROR;
@@ -1067,7 +1103,7 @@ void AwesomePlayer::abortPrepare(status_t err) {
     }
 
     mPrepareResult = err;
-    mFlags &= ~PREPARING;
+    mFlags &= ~(PREPARING|PREPARE_CANCELLED);
     mAsyncPrepareEvent = NULL;
     mPreparedCondition.broadcast();
 }
@@ -1077,6 +1113,12 @@ void AwesomePlayer::onPrepareAsyncEvent() {
 
     {
         Mutex::Autolock autoLock(mLock);
+
+        if (mFlags & PREPARE_CANCELLED) {
+            LOGI("prepare was cancelled before doing anything");
+            abortPrepare(UNKNOWN_ERROR);
+            return;
+        }
 
         if (mUri.size() > 0) {
             status_t err = finishSetDataSource_l();
@@ -1109,7 +1151,19 @@ void AwesomePlayer::onPrepareAsyncEvent() {
     }
 
     if (prefetcher != NULL) {
+        {
+            Mutex::Autolock autoLock(mLock);
+            if (mFlags & PREPARE_CANCELLED) {
+                LOGI("prepare was cancelled before preparing the prefetcher");
+                abortPrepare(UNKNOWN_ERROR);
+                return;
+            }
+        }
+
+        LOGI("calling prefetcher->prepare()");
         prefetcher->prepare();
+        LOGV("prefetcher is done preparing");
+
         prefetcher.clear();
     }
 
@@ -1126,18 +1180,26 @@ void AwesomePlayer::onPrepareAsyncEvent() {
     }
 
     mPrepareResult = OK;
-    mFlags &= ~PREPARING;
+    mFlags &= ~(PREPARING|PREPARE_CANCELLED);
     mFlags |= PREPARED;
     mAsyncPrepareEvent = NULL;
     mPreparedCondition.broadcast();
 }
 
 status_t AwesomePlayer::suspend() {
-    LOGI("suspend");
+    LOGV("suspend");
     Mutex::Autolock autoLock(mLock);
 
     if (mSuspensionState != NULL) {
         return INVALID_OPERATION;
+    }
+
+    if (mFlags & PREPARING) {
+        mFlags |= PREPARE_CANCELLED;
+        if (mConnectingDataSource != NULL) {
+            LOGI("interrupting the connection process");
+            mConnectingDataSource->disconnect();
+        }
     }
 
     while (mFlags & PREPARING) {
@@ -1180,7 +1242,7 @@ status_t AwesomePlayer::suspend() {
 }
 
 status_t AwesomePlayer::resume() {
-    LOGI("resume");
+    LOGV("resume");
     Mutex::Autolock autoLock(mLock);
 
     if (mSuspensionState == NULL) {

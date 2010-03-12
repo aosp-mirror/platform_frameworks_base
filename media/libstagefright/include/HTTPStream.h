@@ -24,6 +24,7 @@
 
 #include <media/stagefright/MediaErrors.h>
 #include <utils/KeyedVector.h>
+#include <utils/threads.h>
 
 namespace android {
 
@@ -54,10 +55,12 @@ public:
 private:
     enum State {
         READY,
+        CONNECTING,
         CONNECTED
     };
 
     State mState;
+    Mutex mLock;
     int mSocket;
 
     KeyedVector<string, string> mHeaders;

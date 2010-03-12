@@ -22,6 +22,7 @@
 
 #include <media/MediaPlayerInterface.h>
 #include <media/stagefright/DataSource.h>
+#include <media/stagefright/HTTPDataSource.h>
 #include <media/stagefright/OMXClient.h>
 #include <utils/threads.h>
 
@@ -87,12 +88,13 @@ private:
     friend struct AwesomeEvent;
 
     enum Flags {
-        PLAYING     = 1,
-        LOOPING     = 2,
-        FIRST_FRAME = 4,
-        PREPARING   = 8,
-        PREPARED    = 16,
-        AT_EOS      = 32,
+        PLAYING             = 1,
+        LOOPING             = 2,
+        FIRST_FRAME         = 4,
+        PREPARING           = 8,
+        PREPARED            = 16,
+        AT_EOS              = 32,
+        PREPARE_CANCELLED   = 64,
     };
 
     mutable Mutex mLock;
@@ -160,6 +162,7 @@ private:
     MediaBuffer *mVideoBuffer;
 
     sp<Prefetcher> mPrefetcher;
+    sp<HTTPDataSource> mConnectingDataSource;
 
     struct SuspensionState {
         String8 mUri;

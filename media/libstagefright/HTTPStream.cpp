@@ -44,10 +44,17 @@ HTTPStream::~HTTPStream() {
 }
 
 status_t HTTPStream::connect(const char *server, int port) {
+    Mutex::Autolock autoLock(mLock);
+
     status_t err = OK;
 
     if (mState == CONNECTED) {
         return ERROR_ALREADY_CONNECTED;
+    }
+
+    struct hostent *ent = gethostbyname(server);
+    if (ent == NULL) {
+        return ERROR_UNKNOWN_HOST;
     }
 
     CHECK_EQ(mSocket, -1);
@@ -57,11 +64,11 @@ status_t HTTPStream::connect(const char *server, int port) {
         return UNKNOWN_ERROR;
     }
 
-    struct hostent *ent = gethostbyname(server);
-    if (ent == NULL) {
-        err = ERROR_UNKNOWN_HOST;
-        goto exit1;
-    }
+    mState = CONNECTING;
+
+    int s = mSocket;
+
+    mLock.unlock();
 
     struct sockaddr_in addr;
     addr.sin_family = AF_INET;
@@ -69,24 +76,31 @@ status_t HTTPStream::connect(const char *server, int port) {
     addr.sin_addr.s_addr = *(in_addr_t *)ent->h_addr;
     memset(addr.sin_zero, 0, sizeof(addr.sin_zero));
 
-    if (::connect(mSocket, (const struct sockaddr *)&addr, sizeof(addr)) < 0) {
-        err = ERROR_CANNOT_CONNECT;
-        goto exit1;
+    int res = ::connect(s, (const struct sockaddr *)&addr, sizeof(addr));
+
+    mLock.lock();
+
+    if (mState != CONNECTING) {
+        return UNKNOWN_ERROR;
+    }
+
+    if (res < 0) {
+        close(mSocket);
+        mSocket = -1;
+
+        mState = READY;
+        return UNKNOWN_ERROR;
     }
 
     mState = CONNECTED;
 
     return OK;
-
-exit1:
-    close(mSocket);
-    mSocket = -1;
-
-    return err;
 }
 
 status_t HTTPStream::disconnect() {
-    if (mState != CONNECTED) {
+    Mutex::Autolock autoLock(mLock);
+
+    if (mState != CONNECTED && mState != CONNECTING) {
         return ERROR_NOT_CONNECTED;
     }
 
