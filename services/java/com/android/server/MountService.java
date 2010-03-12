@@ -51,6 +51,8 @@ import java.util.HashSet;
 class MountService extends IMountService.Stub
         implements INativeDaemonConnectorCallbacks {
     private static final boolean LOCAL_LOGD = false;
+    private static final boolean DEBUG_UNMOUNT = false;
+    private static final boolean DEBUG_EVENTS = false;
     
     private static final String TAG = "MountService";
 
@@ -156,6 +158,7 @@ class MountService extends IMountService.Stub
         }
 
         void handleFinished() {
+            if (DEBUG_UNMOUNT) Log.i(TAG, "Unmounting " + path);
             doUnmountVolume(path, true);
         }
     }
@@ -205,22 +208,27 @@ class MountService extends IMountService.Stub
 
         void registerReceiver() {
             mRegistered = true;
+            if (DEBUG_UNMOUNT) Log.i(TAG, "Registering receiver");
             mContext.registerReceiver(mPmReceiver, mPmFilter);
         }
 
         void unregisterReceiver() {
             mRegistered = false;
+            if (DEBUG_UNMOUNT) Log.i(TAG, "Unregistering receiver");
             mContext.unregisterReceiver(mPmReceiver);
         }
 
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case H_UNMOUNT_PM_UPDATE: {
+                    if (DEBUG_UNMOUNT) Log.i(TAG, "H_UNMOUNT_PM_UPDATE");
                     UnmountCallBack ucb = (UnmountCallBack) msg.obj;
                     mForceUnmounts.add(ucb);
+                    if (DEBUG_UNMOUNT) Log.i(TAG, " registered = " + mRegistered);
                     // Register only if needed.
                     if (!mRegistered) {
                         registerReceiver();
+                        if (DEBUG_UNMOUNT) Log.i(TAG, "Updating external media status");
                         boolean hasExtPkgs = mPms.updateExternalMediaStatus(false);
                         if (!hasExtPkgs) {
                             // Unregister right away
@@ -230,6 +238,7 @@ class MountService extends IMountService.Stub
                     break;
                 }
                 case H_UNMOUNT_PM_DONE: {
+                    if (DEBUG_UNMOUNT) Log.i(TAG, "H_UNMOUNT_PM_DONE");
                     // Unregister now.
                     if (mRegistered) {
                         unregisterReceiver();
@@ -286,6 +295,7 @@ class MountService extends IMountService.Stub
                     break;
                 }
                 case H_UNMOUNT_MS : {
+                    if (DEBUG_UNMOUNT) Log.i(TAG, "H_UNMOUNT_MS");
                     UnmountCallBack ucb = (UnmountCallBack) msg.obj;
                     ucb.handleFinished();
                     break;
@@ -393,7 +403,12 @@ class MountService extends IMountService.Stub
             Log.w(TAG, String.format("Duplicate state transition (%s -> %s)", mLegacyState, state));
             return;
         }
-
+        // Update state on PackageManager
+        if (Environment.MEDIA_UNMOUNTED.equals(state)) {
+            mPms.updateExternalMediaStatus(false);
+        } else if (Environment.MEDIA_MOUNTED.equals(state)) {
+            mPms.updateExternalMediaStatus(true);
+        }
         String oldState = mLegacyState;
         mLegacyState = state;
 
@@ -456,6 +471,7 @@ class MountService extends IMountService.Stub
                         }
                     }
                     if (state != null) {
+                        if (DEBUG_EVENTS) Log.i(TAG, "Updating valid state " + state);
                         updatePublicVolumeState(path, state);
                     }
                 } catch (Exception e) {
@@ -484,6 +500,18 @@ class MountService extends IMountService.Stub
     public boolean onEvent(int code, String raw, String[] cooked) {
         Intent in = null;
 
+        if (DEBUG_EVENTS) {
+            StringBuilder builder = new StringBuilder();
+            builder.append("onEvent::");
+            builder.append(" raw= " + raw);
+            if (cooked != null) {
+                builder.append(" cooked = " );
+                for (String str : cooked) {
+                    builder.append(" " + str);
+                }
+            }
+            Log.i(TAG, builder.toString());
+        }
         if (code == VoldResponseCode.VolumeStateChange) {
             /*
              * One of the volumes we're managing has changed state.
@@ -541,18 +569,22 @@ class MountService extends IMountService.Stub
                     return true;
                 }
                 /* Send the media unmounted event first */
+                if (DEBUG_EVENTS) Log.i(TAG, "Sending unmounted event first");
                 updatePublicVolumeState(path, Environment.MEDIA_UNMOUNTED);
                 in = new Intent(Intent.ACTION_MEDIA_UNMOUNTED, Uri.parse("file://" + path));
                 mContext.sendBroadcast(in);
 
+                if (DEBUG_EVENTS) Log.i(TAG, "Sending media removed");
                 updatePublicVolumeState(path, Environment.MEDIA_REMOVED);
                 in = new Intent(Intent.ACTION_MEDIA_REMOVED, Uri.parse("file://" + path));
             } else if (code == VoldResponseCode.VolumeBadRemoval) {
+                if (DEBUG_EVENTS) Log.i(TAG, "Sending unmounted event first");
                 /* Send the media unmounted event first */
                 updatePublicVolumeState(path, Environment.MEDIA_UNMOUNTED);
                 in = new Intent(Intent.ACTION_MEDIA_UNMOUNTED, Uri.parse("file://" + path));
                 mContext.sendBroadcast(in);
 
+                if (DEBUG_EVENTS) Log.i(TAG, "Sending media bad removal");
                 updatePublicVolumeState(path, Environment.MEDIA_BAD_REMOVAL);
                 in = new Intent(Intent.ACTION_MEDIA_BAD_REMOVAL, Uri.parse("file://" + path));
             } else {
@@ -570,6 +602,7 @@ class MountService extends IMountService.Stub
 
     private void notifyVolumeStateChange(String label, String path, int oldState, int newState) {
         String vs = getVolumeState(path);
+        if (DEBUG_EVENTS) Log.i(TAG, "notifyVolumeStateChanged::" + vs);
 
         Intent in = null;
 
@@ -591,29 +624,31 @@ class MountService extends IMountService.Stub
                     Environment.MEDIA_BAD_REMOVAL) && !vs.equals(
                             Environment.MEDIA_NOFS) && !vs.equals(
                                     Environment.MEDIA_UNMOUNTABLE) && !getUmsEnabling()) {
+                if (DEBUG_EVENTS) Log.i(TAG, "updating volume state for media bad removal nofs and unmountable");
                 updatePublicVolumeState(path, Environment.MEDIA_UNMOUNTED);
                 in = new Intent(Intent.ACTION_MEDIA_UNMOUNTED, Uri.parse("file://" + path));
             }
         } else if (newState == VolumeState.Pending) {
         } else if (newState == VolumeState.Checking) {
+            if (DEBUG_EVENTS) Log.i(TAG, "updating volume state checking");
             updatePublicVolumeState(path, Environment.MEDIA_CHECKING);
             in = new Intent(Intent.ACTION_MEDIA_CHECKING, Uri.parse("file://" + path));
         } else if (newState == VolumeState.Mounted) {
+            if (DEBUG_EVENTS) Log.i(TAG, "updating volume state mounted");
             updatePublicVolumeState(path, Environment.MEDIA_MOUNTED);
-            // Update media status on PackageManagerService to mount packages on sdcard
-            mPms.updateExternalMediaStatus(true);
             in = new Intent(Intent.ACTION_MEDIA_MOUNTED, Uri.parse("file://" + path));
             in.putExtra("read-only", false);
         } else if (newState == VolumeState.Unmounting) {
-            mPms.updateExternalMediaStatus(false);
             in = new Intent(Intent.ACTION_MEDIA_EJECT, Uri.parse("file://" + path));
         } else if (newState == VolumeState.Formatting) {
         } else if (newState == VolumeState.Shared) {
+            if (DEBUG_EVENTS) Log.i(TAG, "Updating volume state media mounted");
             /* Send the media unmounted event first */
             updatePublicVolumeState(path, Environment.MEDIA_UNMOUNTED);
             in = new Intent(Intent.ACTION_MEDIA_UNMOUNTED, Uri.parse("file://" + path));
             mContext.sendBroadcast(in);
 
+            if (DEBUG_EVENTS) Log.i(TAG, "Updating media shared");
             updatePublicVolumeState(path, Environment.MEDIA_SHARED);
             in = new Intent(Intent.ACTION_MEDIA_SHARED, Uri.parse("file://" + path));
             if (LOCAL_LOGD) Log.d(TAG, "Sending ACTION_MEDIA_SHARED intent");
@@ -657,6 +692,7 @@ class MountService extends IMountService.Stub
     private int doMountVolume(String path) {
         int rc = StorageResultCode.OperationSucceeded;
 
+        if (DEBUG_EVENTS) Log.i(TAG, "doMountVolume: Mouting " + path);
         try {
             mConnector.doCommand(String.format("volume mount %s", path));
         } catch (NativeDaemonConnectorException e) {
@@ -671,6 +707,7 @@ class MountService extends IMountService.Stub
                  */
                 rc = StorageResultCode.OperationFailedNoMedia;
             } else if (code == VoldResponseCode.OpFailedMediaBlank) {
+                if (DEBUG_EVENTS) Log.i(TAG, " updating volume state :: media nofs");
                 /*
                  * Media is blank or does not contain a supported filesystem
                  */
@@ -678,6 +715,7 @@ class MountService extends IMountService.Stub
                 in = new Intent(Intent.ACTION_MEDIA_NOFS, Uri.parse("file://" + path));
                 rc = StorageResultCode.OperationFailedMediaBlank;
             } else if (code == VoldResponseCode.OpFailedMediaCorrupt) {
+                if (DEBUG_EVENTS) Log.i(TAG, "updating volume state media corrupt");
                 /*
                  * Volume consistency check failed
                  */
@@ -1040,6 +1078,16 @@ class MountService extends IMountService.Stub
         validatePermission(android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS);
         waitForReady();
 
+        String volState = getVolumeState(path);
+        if (DEBUG_UNMOUNT) Log.i(TAG, "Unmounting " + path + " force = " + force);
+        if (Environment.MEDIA_UNMOUNTED.equals(volState) ||
+                Environment.MEDIA_REMOVED.equals(volState) ||
+                Environment.MEDIA_SHARED.equals(volState) ||
+                Environment.MEDIA_UNMOUNTABLE.equals(volState)) {
+            // Media already unmounted or cannot be unmounted.
+            // TODO return valid return code when adding observer call back.
+            return;
+        }
         UnmountCallBack ucb = new UnmountCallBack(path, force);
         mHandler.sendMessage(mHandler.obtainMessage(H_UNMOUNT_PM_UPDATE, ucb));
     }

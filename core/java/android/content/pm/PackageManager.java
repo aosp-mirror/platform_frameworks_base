@@ -439,6 +439,15 @@ public abstract class PackageManager {
     public static final int INSTALL_FAILED_INVALID_INSTALL_LOCATION = -19;
 
     /**
+     * Installation return code: this is passed to the {@link IPackageInstallObserver} by
+     * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)} if
+     * the new package couldn't be installed in the specified install
+     * location because the media is not available.
+     * @hide
+     */
+    public static final int INSTALL_FAILED_MEDIA_UNAVAILABLE = -20;
+
+    /**
      * Installation parse return code: this is passed to the {@link IPackageInstallObserver} by
      * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)}
      * if the parser was given a path that is not a file, or does not end with the expected
@@ -584,6 +593,14 @@ public abstract class PackageManager {
      * @hide
      */
     public static final int MOVE_FAILED_INVALID_LOCATION = -5;
+
+    /**
+     * Error code that is passed to the {@link IPackageMoveObserver} by
+     * {@link #movePackage(android.net.Uri, IPackageMoveObserver)}
+     * if the specified package cannot be moved to the specified location.
+     * @hide
+     */
+    public static final int MOVE_FAILED_INTERNAL_ERROR = -6;
 
     /**
      * Flag parameter for {@link #movePackage} to indicate that

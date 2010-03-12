@@ -27,4 +27,5 @@ interface IMediaContainerService {
     boolean copyResource(in Uri packageURI,
                 in ParcelFileDescriptor outStream);
     PackageInfoLite getMinimalPackageInfo(in Uri fileUri);
+    boolean checkFreeStorage(boolean external, in Uri fileUri);
 }
