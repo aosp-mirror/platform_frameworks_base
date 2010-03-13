@@ -1435,6 +1435,15 @@ uint32_t AudioPolicyManagerBase::getDeviceForStrategy(routing_strategy strategy,
             if (device) break;
             device = mAvailableOutputDevices & AudioSystem::DEVICE_OUT_WIRED_HEADSET;
             if (device) break;
+#ifdef WITH_A2DP
+            // when not in a phone call, phone strategy should route STREAM_VOICE_CALL to A2DP
+            if (mPhoneState != AudioSystem::MODE_IN_CALL) {
+                device = mAvailableOutputDevices & AudioSystem::DEVICE_OUT_BLUETOOTH_A2DP;
+                if (device) break;
+                device = mAvailableOutputDevices & AudioSystem::DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES;
+                if (device) break;
+            }
+#endif
             device = mAvailableOutputDevices & AudioSystem::DEVICE_OUT_EARPIECE;
             if (device == 0) {
                 LOGE("getDeviceForStrategy() earpiece device not found");
@@ -1446,6 +1455,14 @@ uint32_t AudioPolicyManagerBase::getDeviceForStrategy(routing_strategy strategy,
                 device = mAvailableOutputDevices & AudioSystem::DEVICE_OUT_BLUETOOTH_SCO_CARKIT;
                 if (device) break;
             }
+#ifdef WITH_A2DP
+            // when not in a phone call, phone strategy should route STREAM_VOICE_CALL to
+            // A2DP speaker when forcing to speaker output
+            if (mPhoneState != AudioSystem::MODE_IN_CALL) {
+                device = mAvailableOutputDevices & AudioSystem::DEVICE_OUT_BLUETOOTH_A2DP_SPEAKER;
+                if (device) break;
+            }
+#endif
             device = mAvailableOutputDevices & AudioSystem::DEVICE_OUT_SPEAKER;
             if (device == 0) {
                 LOGE("getDeviceForStrategy() speaker device not found");
