@@ -145,6 +145,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
     private Context mContext;
     private AlarmManager mAlarmManager;
     private StatusBarManager mStatusBarManager;
+    private boolean mShowLockIcon = false;
     private IBinder mSecureLockIcon = null;
 
     private boolean mSystemReady;
@@ -279,6 +280,9 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
 
         mUserPresentIntent = new Intent(Intent.ACTION_USER_PRESENT);
         mUserPresentIntent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
+
+        final ContentResolver cr = mContext.getContentResolver();
+        mShowLockIcon = (Settings.System.getInt(cr, "show_status_bar_lock", 0) == 1);
     }
 
     /**
@@ -1019,16 +1023,18 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
         if (mStatusBarManager == null) {
             Log.w(TAG, "Could not get status bar manager");
         } else {
-            // Give feedback to user when secure keyguard is active and engaged
-            if (mShowing && isSecure()) {
-                if (mSecureLockIcon == null) {
-                    mSecureLockIcon = mStatusBarManager.addIcon("secure",
-                        com.android.internal.R.drawable.stat_sys_secure, 0);
-                }
-            } else {
-                if (mSecureLockIcon != null) {
-                    mStatusBarManager.removeIcon(mSecureLockIcon);
-                    mSecureLockIcon = null;
+            if (mShowLockIcon) {
+                // Give feedback to user when secure keyguard is active and engaged
+                if (mShowing && isSecure()) {
+                    if (mSecureLockIcon == null) {
+                        mSecureLockIcon = mStatusBarManager.addIcon("secure",
+                            com.android.internal.R.drawable.stat_sys_secure, 0);
+                    }
+                } else {
+                    if (mSecureLockIcon != null) {
+                        mStatusBarManager.removeIcon(mSecureLockIcon);
+                        mSecureLockIcon = null;
+                    }
                 }
             }
 
