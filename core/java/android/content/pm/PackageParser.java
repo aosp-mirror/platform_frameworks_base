@@ -1448,8 +1448,8 @@ public class PackageParser {
         if (allowBackup) {
             ai.flags |= ApplicationInfo.FLAG_ALLOW_BACKUP;
 
-            // backupAgent, killAfterRestore, restoreNeedsApplication, and restoreAnyVersion
-            // are only relevant if backup is possible for the given application.
+            // backupAgent, killAfterRestore, and restoreAnyVersion are only relevant
+            // if backup is possible for the given application.
             String backupAgent = sa.getNonConfigurationString(
                     com.android.internal.R.styleable.AndroidManifestApplication_backupAgent, 0);
             if (backupAgent != null) {
@@ -1463,11 +1463,6 @@ public class PackageParser {
                         com.android.internal.R.styleable.AndroidManifestApplication_killAfterRestore,
                         true)) {
                     ai.flags |= ApplicationInfo.FLAG_KILL_AFTER_RESTORE;
-                }
-                if (sa.getBoolean(
-                        com.android.internal.R.styleable.AndroidManifestApplication_restoreNeedsApplication,
-                        false)) {
-                    ai.flags |= ApplicationInfo.FLAG_RESTORE_NEEDS_APPLICATION;
                 }
                 if (sa.getBoolean(
                         com.android.internal.R.styleable.AndroidManifestApplication_restoreAnyVersion,

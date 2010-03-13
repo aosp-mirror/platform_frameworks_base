@@ -52,8 +52,6 @@ import android.util.Log;
  * 
  * @attr ref android.R.styleable#AndroidManifestApplication_allowBackup
  * @attr ref android.R.styleable#AndroidManifestApplication_backupAgent
- * @attr ref
- *       android.R.styleable#AndroidManifestApplication_restoreNeedsApplication
  * @attr ref android.R.styleable#AndroidManifestApplication_killAfterRestore
  */
 public class BackupManager {

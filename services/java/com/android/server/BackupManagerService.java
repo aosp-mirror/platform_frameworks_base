@@ -819,8 +819,6 @@ class BackupManagerService extends IBackupManager.Stub {
                         + " uid=" + p.applicationInfo.uid
                         + " killAfterRestore="
                         + (((p.applicationInfo.flags & ApplicationInfo.FLAG_KILL_AFTER_RESTORE) != 0) ? "true" : "false")
-                        + " restoreNeedsApplication="
-                        + (((p.applicationInfo.flags & ApplicationInfo.FLAG_RESTORE_NEEDS_APPLICATION) != 0) ? "true" : "false")
                         );
             }
         }
@@ -1677,17 +1675,10 @@ class BackupManagerService extends IBackupManager.Stub {
                             + "] is compatible with installed version ["
                             + packageInfo.versionCode + "]");
 
-                    // Then set up and bind the agent (with a restricted Application object
-                    // unless the application says otherwise)
-                    boolean useRealApp = (packageInfo.applicationInfo.flags
-                            & ApplicationInfo.FLAG_RESTORE_NEEDS_APPLICATION) != 0;
-                    if (DEBUG && useRealApp) {
-                        Slog.v(TAG, "agent requires real Application subclass for restore");
-                    }
+                    // Then set up and bind the agent
                     IBackupAgent agent = bindToAgentSynchronous(
                             packageInfo.applicationInfo,
-                            (useRealApp ? IApplicationThread.BACKUP_MODE_INCREMENTAL
-                                    : IApplicationThread.BACKUP_MODE_RESTORE));
+                            IApplicationThread.BACKUP_MODE_INCREMENTAL);
                     if (agent == null) {
                         Slog.w(TAG, "Can't find backup agent for " + packageName);
                         EventLog.writeEvent(EventLogTags.RESTORE_AGENT_FAILURE, packageName,
