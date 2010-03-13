@@ -47,6 +47,7 @@ import java.util.List;
 public class LockPatternUtils {
 
     private static final String TAG = "LockPatternUtils";
+    private static final boolean LDEBUG = false;
 
     private static final String LOCK_PATTERN_FILE = "/system/gesture.key";
     private static final String LOCK_PASSWORD_FILE = "/system/password.key";
@@ -126,7 +127,6 @@ public class LockPatternUtils {
     public LockPatternUtils(Context context) {
         mContext = context;
         mContentResolver = context.getContentResolver();
-        mDevicePolicyManager = getDevicePolicyManager();
         // Initialize the location of gesture lock file
         if (sLockPatternFilename == null) {
             sLockPatternFilename = android.os.Environment.getDataDirectory()
