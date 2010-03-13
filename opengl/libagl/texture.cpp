@@ -1488,7 +1488,7 @@ void glCopyTexSubImage2D(
         height = cbSurface.height - y;
 
     int err = copyPixels(c,
-            surface, xoffset, yoffset,
+            txSurface, xoffset, yoffset,
             cbSurface, x, y, width, height);
     if (err) {
         ogles_error(c, err);
