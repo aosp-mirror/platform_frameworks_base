@@ -501,7 +501,10 @@ status_t MPEG4Extractor::parseChunk(off_t *offset, int depth) {
                 }
             }
 
+            bool isTrack = false;
             if (chunk_type == FOURCC('t', 'r', 'a', 'k')) {
+                isTrack = true;
+
                 Track *track = new Track;
                 track->next = NULL;
                 if (mLastTrack) {
@@ -513,6 +516,7 @@ status_t MPEG4Extractor::parseChunk(off_t *offset, int depth) {
 
                 track->meta = new MetaData;
                 track->includes_expensive_metadata = false;
+                track->skipTrack = false;
                 track->timescale = 0;
                 track->sampleTable = new SampleTable(mDataSource);
                 track->meta->setCString(kKeyMIMEType, "application/octet-stream");
@@ -531,7 +535,25 @@ status_t MPEG4Extractor::parseChunk(off_t *offset, int depth) {
                 return ERROR_MALFORMED;
             }
 
-            if (chunk_type == FOURCC('t', 'r', 'a', 'k')) {
+            if (isTrack) {
+                if (mLastTrack->skipTrack) {
+                    Track *cur = mFirstTrack;
+
+                    if (cur == mLastTrack) {
+                        delete cur;
+                        mFirstTrack = mLastTrack = NULL;
+                    } else {
+                        while (cur && cur->next != mLastTrack) {
+                            cur = cur->next;
+                        }
+                        cur->next = NULL;
+                        delete mLastTrack;
+                        mLastTrack = cur;
+                    }
+
+                    return OK;
+                }
+
                 status_t err = verifyTrack(mLastTrack);
 
                 if (err != OK) {
@@ -657,12 +679,14 @@ status_t MPEG4Extractor::parseChunk(off_t *offset, int depth) {
 
         case FOURCC('h', 'd', 'l', 'r'):
         {
-            if (chunk_data_size < 25) {
+            uint8_t buffer[12];
+
+            if (chunk_data_size < (ssize_t)sizeof(buffer)) {
                 return ERROR_MALFORMED;
             }
 
-            uint8_t buffer[24];
-            if (mDataSource->readAt(data_offset, buffer, 24) < 24) {
+            if (mDataSource->readAt(data_offset, buffer, sizeof(buffer))
+                    < (ssize_t)sizeof(buffer)) {
                 return ERROR_IO;
             }
 
@@ -672,8 +696,23 @@ status_t MPEG4Extractor::parseChunk(off_t *offset, int depth) {
             }
 
             if (U32_AT(&buffer[4]) != 0) {
-                // pre_defined should be 0.
-                return ERROR_MALFORMED;
+                // pre_defined should be 0 for an ISO 14496-12 compliant
+                // file, if it's not try some heuristics seen in the field.
+                // This has been added to support some so-called
+                // "enhanced" podcasts.
+
+                if (U32_AT(&buffer[4]) == FOURCC('d', 'h', 'l', 'r')) {
+                    *offset += chunk_size;
+                    break;
+                }
+
+                if (U32_AT(&buffer[4]) != FOURCC('m', 'h', 'l', 'r')) {
+                    return ERROR_MALFORMED;
+                }
+
+                mHandlerType = U32_AT(&buffer[8]);
+                *offset += chunk_size;
+                break;
             }
 
             mHandlerType = U32_AT(&buffer[8]);
@@ -706,7 +745,10 @@ status_t MPEG4Extractor::parseChunk(off_t *offset, int depth) {
 
             if (entry_count > 1) {
                 // For now we only support a single type of media per track.
-                return ERROR_UNSUPPORTED;
+
+                mLastTrack->skipTrack = true;
+                *offset += chunk_size;
+                break;
             }
 
             off_t stop_offset = *offset + chunk_size;

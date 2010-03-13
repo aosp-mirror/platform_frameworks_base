@@ -48,6 +48,7 @@ private:
         uint32_t timescale;
         sp<SampleTable> sampleTable;
         bool includes_expensive_metadata;
+        bool skipTrack;
     };
 
     sp<DataSource> mDataSource;
