@@ -1,21 +1,12 @@
 page.title=Designing for Performance
 @jd:body
 
-<p>An Android application should be <em>efficient</em>. It will run on a mobile
-device with limited computing power and storage, a smaller screen, and
-constrained battery life. Battery life is one reason you might want to
-optimize your app even if it already seems to run "fast enough". Battery life
-is important to users, and Android's battery usage breakdown means users will
-know if your app is responsible draining their battery.</p>
-
-<p>One of the trickiest problems you'll face when optimizing Android apps is
-that it's not generally the case that you can say "device X is a factor F
-faster/slower than device Y".
-This is especially true if one of the devices is the emulator, or one of the
-devices has a JIT. If you want to know how your app performs on a given device,
-you need to test it on that device. Drawing conclusions from the emulator is
-particularly dangerous, as is attempting to compare JIT versus non-JIT
-performance: the performance <em>profiles</em> can differ wildly.</p>
+<p>An Android application will run on a mobile device with limited computing
+power and storage, and constrained battery life. Because of
+this, it should be <em>efficient</em>. Battery life is one reason you might
+want to optimize your app even if it already seems to run "fast enough".
+Battery life is important to users, and Android's battery usage breakdown
+means users will know if your app is responsible draining their battery.</p>
 
 <p>This document covers these topics: </p>
 <ul>
@@ -32,15 +23,18 @@ performance: the performance <em>profiles</em> can differ wildly.</p>
     <li><a href="#avoidfloat">Use Floating-Point Judiciously</a> </li>
     <li><a href="#library">Know And Use The Libraries</a></li>
     <li><a href="#native_methods">Use Native Methods Judiciously</a></li>
-    <li><a href="#samples">Some Sample Performance Numbers</a> </li>
     <li><a href="#closing_notes">Closing Notes</a></li>
 </ul>
+
+<p>Note that although this document primarily covers micro-optimizations,
+these will almost never make or break your software. Choosing the right
+algorithms and data structures should always be your priority, but is
+outside the scope of this document.</p>
 
 <a name="intro" id="intro"></a>
 <h2>Introduction</h2>
 
 <p>There are two basic rules for writing efficient code:</p>
-
 <ul>
     <li>Don't do work that you don't need to do.</li>
     <li>Don't allocate memory if you can avoid it.</li>
@@ -220,6 +214,16 @@ Design</em>, Academic Press, London, 1975.
 ISBN: 0123790506.</p>
 
 </blockquote>
+
+<p>One of the trickiest problems you'll face when micro-optimizing Android
+apps is that the "if you will be running your program on ... multiple hardware
+platforms" clause above is always true. And it's not even generally the case
+that you can say "device X is a factor F faster/slower than device Y".
+This is especially true if one of the devices is the emulator, or one of the
+devices has a JIT. If you want to know how your app performs on a given device,
+you need to test it on that device. Drawing conclusions from the emulator is
+particularly dangerous, as is attempting to compare JIT versus non-JIT
+performance: the performance <em>profiles</em> can differ wildly.</p>
 
 <a name="object_creation"></a>
 <h2>Avoid Creating Objects</h2>
@@ -529,87 +533,21 @@ is about 9x faster than a hand-coded loop on a Nexus One with the JIT.</p>
 <a name="native_methods" id="native_methods"></a>
 <h2>Use Native Methods Judiciously</h2>
 
-<p>Native code isn't necessarily more efficient than Java. There's a cost
-associated with the Java-native transition, it can be significantly more
-difficult to arrange timely collection of your native resources, and you
+<p>Native code isn't necessarily more efficient than Java. For one thing,
+there's a cost associated with the Java-native transition, and the JIT can't
+optimize across these boundaries. If you're allocating native resources (memory
+on the native heap, file descriptors, or whatever), it can be significantly
+more difficult to arrange timely collection of these resources. You also
 need to compile your code for each architecture you wish to run on (rather
-than rely on it having a JIT).</p>
+than rely on it having a JIT). You may even have to compile multiple versions
+for what you consider the same architecture: native code compiled for the ARM
+processor in the G1 can't take full advantage of the ARM in the Nexus One, and
+code compiled for the ARM in the Nexus One won't run on the ARM in the G1.</p>
+
+<p>Native code is primarily useful when you have an existing native codebase
+that you want to port to Android, not for "speeding up" parts of a Java app.</p>
 
 <p>(See also <em>Effective Java</em> item 54.)</p>
-
-<a name="samples" id="samples"></a>
-<h2>Some Sample Performance Numbers</h2>
-
-<p>To illustrate some of our ideas, here is a table listing the approximate
-run times for a few basic actions. Note that these values should NOT be taken
-as absolute numbers: they are a combination of CPU and wall clock time, and
-will change as improvements are made to the system. However, it is worth
-noting how these values apply relative to each other &mdash; for example,
-adding a member variable currently takes about four times as long as adding a
-local variable.</p>
-
-<table>
-    <tr>
-        <th>Action</th>
-        <th>Time</th>
-    </tr>
-    <tr>
-        <td>Add a local variable </td>
-        <td>1</td>
-    </tr>
-    <tr class="alt">
-        <td>Add a member variable </td>
-        <td>4</td>
-    </tr>
-    <tr>
-        <td>Call String.length()</td>
-        <td>5</td>
-    </tr>
-    <tr class="alt">
-        <td>Call empty static native method</td>
-        <td>5</td>
-    </tr>
-    <tr>
-        <td>Call empty static method </td>
-        <td>12</td>
-    </tr>
-    <tr class="alt">
-        <td>Call empty virtual method </td>
-        <td>12.5</td>
-    </tr>
-    <tr>
-        <td>Call empty interface method </td>
-        <td>15</td>
-    </tr>
-    <tr class="alt">
-        <td>Call Iterator:next() on a HashMap </td>
-        <td>165</td>
-    </tr>
-    <tr>
-        <td>Call put() on a HashMap</td>
-        <td>600</td>
-    </tr>
-    <tr class="alt">
-        <td>Inflate 1 View from XML </td>
-        <td>22,000</td>
-    </tr>
-    <tr>
-        <td>Inflate 1 LinearLayout containing 1 TextView </td>
-        <td>25,000</td>
-    </tr>
-    <tr class="alt">
-        <td>Inflate 1 LinearLayout containing 6 View objects </td>
-        <td>100,000</td>
-    </tr>
-    <tr>
-        <td>Inflate 1 LinearLayout containing 6 TextView objects </td>
-        <td>135,000</td>
-    </tr>
-    <tr class="alt">
-        <td>Launch an empty activity </td>
-        <td>3,000,000</td>
-    </tr>
-</table>
 
 <a name="closing_notes" id="closing_notes"></a>
 <h2>Closing Notes</h2>
@@ -617,3 +555,14 @@ local variable.</p>
 <p>One last thing: always measure. Before you start optimizing, make sure you
 have a problem. Make sure you can accurately measure your existing performance,
 or you won't be able to measure the benefit of the alternatives you try.</p>
+
+<p>Every claim made in this document is backed up by a benchmark. The source
+to these benchmarks can be found in the <a href="http://code.google.com/p/dalvik/source/browse/#svn/trunk/benchmarks">code.google.com "dalvik" project</a>.</p>
+
+<p>The benchmarks are built with the
+<a href="http://code.google.com/p/caliper/">Caliper</a> microbenchmarking
+framework for Java. Microbenchmarks are hard to get right, so Caliper goes out
+of its way to do the hard work for you, and even detect some cases where you're
+not measuring what you think you're measuring (because, say, the VM has
+managed to optimize all your code away). We highly recommend you use Caliper
+to run your own microbenchmarks.</p>
