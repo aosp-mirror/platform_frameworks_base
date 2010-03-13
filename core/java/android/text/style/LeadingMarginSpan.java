@@ -68,7 +68,20 @@ extends ParagraphStyle
                                   boolean first, Layout layout);
 
 
+    /**
+     * An extended version of {@link LeadingMarginSpan}, which allows
+     * the implementor to specify the number of lines of text to which
+     * this object is attached that the "first line of paragraph" margin
+     * width will be applied to.
+     */
     public interface LeadingMarginSpan2 extends LeadingMarginSpan, WrapTogetherSpan {
+        /**
+         * Returns the number of lines of text to which this object is
+         * attached that the "first line" margin will apply to.
+         * Note that if this returns N, the first N lines of the region,
+         * not the first N lines of each paragraph, will be given the
+         * special margin width.
+         */
         public int getLeadingMarginLineCount();
     };
 
