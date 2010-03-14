@@ -55,6 +55,8 @@ struct audiorecord_callback_cookie {
     jobject     audioRecord_ref;
  };
 
+Mutex sLock;
+
 // ----------------------------------------------------------------------------
 
 #define AUDIORECORD_SUCCESS                         0
@@ -255,12 +257,21 @@ android_media_AudioRecord_stop(JNIEnv *env, jobject thiz)
 
 
 // ----------------------------------------------------------------------------
-static void android_media_AudioRecord_finalize(JNIEnv *env,  jobject thiz) {
-    
-    // delete the AudioRecord object
+static void android_media_AudioRecord_release(JNIEnv *env,  jobject thiz) {
+
+    // serialize access. Ugly, but functional.
+    Mutex::Autolock lock(&sLock);
     AudioRecord *lpRecorder = 
             (AudioRecord *)env->GetIntField(thiz, javaAudioRecordFields.nativeRecorderInJavaObj);
+    audiorecord_callback_cookie *lpCookie = (audiorecord_callback_cookie *)env->GetIntField(
+        thiz, javaAudioRecordFields.nativeCallbackCookie);
 
+    // reset the native resources in the Java object so any attempt to access
+    // them after a call to release fails.
+    env->SetIntField(thiz, javaAudioRecordFields.nativeRecorderInJavaObj, 0);
+    env->SetIntField(thiz, javaAudioRecordFields.nativeCallbackCookie, 0);
+
+    // delete the AudioRecord object
     if (lpRecorder) {
         LOGV("About to delete lpRecorder: %x\n", (int)lpRecorder);
         lpRecorder->stop();
@@ -268,27 +279,18 @@ static void android_media_AudioRecord_finalize(JNIEnv *env,  jobject thiz) {
     }
     
     // delete the callback information
-    audiorecord_callback_cookie *lpCookie = (audiorecord_callback_cookie *)env->GetIntField(
-        thiz, javaAudioRecordFields.nativeCallbackCookie);
     if (lpCookie) {
         LOGV("deleting lpCookie: %x\n", (int)lpCookie);
         env->DeleteGlobalRef(lpCookie->audioRecord_class);
         env->DeleteGlobalRef(lpCookie->audioRecord_ref);
         delete lpCookie;
     }
-
 }
 
 
 // ----------------------------------------------------------------------------
-static void android_media_AudioRecord_release(JNIEnv *env,  jobject thiz) {
-       
-    // do everything a call to finalize would
-    android_media_AudioRecord_finalize(env, thiz);
-    // + reset the native resources in the Java object so any attempt to access
-    // them after a call to release fails.
-    env->SetIntField(thiz, javaAudioRecordFields.nativeRecorderInJavaObj, 0);
-    env->SetIntField(thiz, javaAudioRecordFields.nativeCallbackCookie, 0);
+static void android_media_AudioRecord_finalize(JNIEnv *env,  jobject thiz) {
+    android_media_AudioRecord_release(env, thiz);
 }
 
 
