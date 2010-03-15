@@ -20,6 +20,7 @@
 
 #include <media/stagefright/DataSource.h>
 #include <utils/String8.h>
+#include <utils/threads.h>
 
 namespace android {
 
@@ -34,6 +35,9 @@ public:
     HTTPDataSource(
             const char *uri,
             const KeyedVector<String8, String8> *headers = NULL);
+
+    status_t connect();
+    void disconnect();
 
     virtual status_t initCheck() const;
 
@@ -53,7 +57,20 @@ private:
         kBufferSize = 32 * 1024
     };
 
+    enum State {
+        DISCONNECTED,
+        CONNECTING,
+        CONNECTED
+    };
+
+    State mState;
+    mutable Mutex mStateLock;
+
     String8 mHeaders;
+
+    String8 mStartingHost;
+    String8 mStartingPath;
+    int mStartingPort;
 
     HTTPStream *mHttp;
     char *mHost;
@@ -67,11 +84,7 @@ private:
     bool mContentLengthValid;
     unsigned long long mContentLength;
 
-    status_t mInitCheck;
-
-    void init(
-            const char *_host, int port, const char *_path,
-            const KeyedVector<String8, String8> *headers);
+    void init(const KeyedVector<String8, String8> *headers);
 
     ssize_t sendRangeRequest(size_t offset);
     void initHeaders(const KeyedVector<String8, String8> *overrides);

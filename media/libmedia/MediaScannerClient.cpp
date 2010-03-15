@@ -64,26 +64,28 @@ void MediaScannerClient::beginFile()
 
 bool MediaScannerClient::addStringTag(const char* name, const char* value)
 {
-    // don't bother caching strings that are all ASCII.
-    // call handleStringTag directly instead.
-    // check to see if value (which should be utf8) has any non-ASCII characters
-    bool nonAscii = false;
-    const char* chp = value;
-    char ch;
-    while ((ch = *chp++)) {
-        if (ch & 0x80) {
-            nonAscii = true;
-            break;
+    if (mLocaleEncoding != kEncodingNone) {
+        // don't bother caching strings that are all ASCII.
+        // call handleStringTag directly instead.
+        // check to see if value (which should be utf8) has any non-ASCII characters
+        bool nonAscii = false;
+        const char* chp = value;
+        char ch;
+        while ((ch = *chp++)) {
+            if (ch & 0x80) {
+                nonAscii = true;
+                break;
+            }
         }
-    }
 
-    if (nonAscii) {
-        // save the strings for later so they can be used for native encoding detection
-        mNames->push_back(name);
-        mValues->push_back(value);
-        return true;
+        if (nonAscii) {
+            // save the strings for later so they can be used for native encoding detection
+            mNames->push_back(name);
+            mValues->push_back(value);
+            return true;
+        }
+        // else fall through
     }
-    // else fall through
 
     // autodetection is not necessary, so no need to cache the values
     // pass directly to the client instead
@@ -196,29 +198,23 @@ void MediaScannerClient::convertValues(uint32_t encoding)
 
 void MediaScannerClient::endFile()
 {
-    int size = mNames->size();
-    uint32_t encoding = kEncodingAll;
+    if (mLocaleEncoding != kEncodingNone) {
+        int size = mNames->size();
+        uint32_t encoding = kEncodingAll;
 
-    // compute a bit mask containing all possible encodings
-    for (int i = 0; i < mNames->size(); i++)
-        encoding &= possibleEncodings(mValues->getEntry(i));
+        // compute a bit mask containing all possible encodings
+        for (int i = 0; i < mNames->size(); i++)
+            encoding &= possibleEncodings(mValues->getEntry(i));
 
-    // If one of the possible encodings matches the locale encoding, use that.
-    // Otherwise, if there is only one possible encoding, use that.
-    if (encoding & mLocaleEncoding)
-        convertValues(mLocaleEncoding);
-    else if ((encoding & (encoding - 1)) == 0)
-        convertValues(encoding);
-    else {
-        // TODO: try harder to disambiguate the encoding, perhaps by looking at
-        // other files by same artist, or even the user's entire collection.
-        // For now, fall through and insert the strings as they are.
-    }
+        // if the locale encoding matches, then assume we have a native encoding.
+        if (encoding & mLocaleEncoding)
+            convertValues(mLocaleEncoding);
 
-    // finally, push all name/value pairs to the client
-    for (int i = 0; i < mNames->size(); i++) {
-        if (!handleStringTag(mNames->getEntry(i), mValues->getEntry(i)))
-            break;
+        // finally, push all name/value pairs to the client
+        for (int i = 0; i < mNames->size(); i++) {
+            if (!handleStringTag(mNames->getEntry(i), mValues->getEntry(i)))
+                break;
+        }
     }
     // else addStringTag() has done all the work so we have nothing to do
 

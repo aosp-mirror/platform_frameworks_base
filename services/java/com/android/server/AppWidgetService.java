@@ -940,6 +940,16 @@ class AppWidgetService extends IAppWidgetService.Stub
                         // as before?
                         String pkg = parser.getAttributeValue(null, "pkg");
                         String cl = parser.getAttributeValue(null, "cl");
+
+                        final PackageManager packageManager = mContext.getPackageManager();
+                        try {
+                            packageManager.getReceiverInfo(new ComponentName(pkg, cl), 0);
+                        } catch (PackageManager.NameNotFoundException e) {
+                            String[] pkgs = packageManager.currentToCanonicalPackageNames(
+                                    new String[] { pkg });
+                            pkg = pkgs[0];
+                        }
+
                         Provider p = lookupProviderLocked(new ComponentName(pkg, cl));
                         if (p == null && mSafeMode) {
                             // if we're in safe mode, make a temporary one

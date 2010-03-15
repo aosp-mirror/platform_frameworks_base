@@ -386,18 +386,19 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
                 if (tearDown) {
                     if (DBG) log("cleanUpConnection: teardown, call conn.disconnect");
                     conn.disconnect(obtainMessage(EVENT_DISCONNECT_DONE, reason));
+                    notificationDeferred = true;
                 } else {
-                    if (DBG) log("cleanUpConnection: !tearDown, call conn.reset");
-                    conn.reset(obtainMessage(EVENT_RESET_DONE, reason));
+                    if (DBG) log("cleanUpConnection: !tearDown, call conn.resetSynchronously");
+                    conn.resetSynchronously();
+                    notificationDeferred = false;
                 }
-                notificationDeferred = true;
             }
         }
 
         stopNetStatPoll();
 
         if (!notificationDeferred) {
-            if (DBG) log("cleanupConnection: !tearDown && !resettingConn");
+            if (DBG) log("cleanupConnection: !notificationDeferred");
             gotoIdleAndNotifyDataConnection(reason);
         }
     }

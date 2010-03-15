@@ -97,6 +97,7 @@ public interface IActivityManager extends IInterface {
     public boolean finishActivity(IBinder token, int code, Intent data)
             throws RemoteException;
     public void finishSubActivity(IBinder token, String resultWho, int requestCode) throws RemoteException;
+    public boolean willActivityBeVisible(IBinder token) throws RemoteException;
     public Intent registerReceiver(IApplicationThread caller,
             IIntentReceiver receiver, IntentFilter filter,
             String requiredPermission) throws RemoteException;
@@ -501,4 +502,5 @@ public interface IActivityManager extends IInterface {
     int KILL_BACKGROUND_PROCESSES_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+102;
     int IS_USER_A_MONKEY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+103;
     int START_ACTIVITY_AND_WAIT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+104;
+    int WILL_ACTIVITY_BE_VISIBLE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+105;
 }

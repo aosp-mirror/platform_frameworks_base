@@ -2462,6 +2462,15 @@ final class WebViewCore {
         }
     }
 
+    // called by JNI
+    private void centerFitRect(int x, int y, int width, int height) {
+        if (mWebView == null) {
+            return;
+        }
+        mWebView.mPrivateHandler.obtainMessage(WebView.CENTER_FIT_RECT,
+                new Rect(x, y, x + width, y + height)).sendToTarget();
+    }
+
     private native void nativePause();
     private native void nativeResume();
     private native void nativeFreeMemory();

@@ -204,6 +204,18 @@ public class CdmaCellLocation extends CellLocation {
         bundleToFill.putInt("networkId", this.mNetworkId);
     }
 
+    /**
+     * @hide
+     */
+    public boolean isEmpty() {
+        return (this.mBaseStationId == -1 &&
+                this.mBaseStationLatitude == INVALID_LAT_LONG &&
+                this.mBaseStationLongitude == INVALID_LAT_LONG &&
+                this.mSystemId == -1 &&
+                this.mNetworkId == -1);
+    }
+
+
 }
 
 

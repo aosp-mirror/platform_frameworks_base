@@ -340,6 +340,12 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
         final long ident = Binder.clearCallingIdentity();
         try {
             bindWallpaperComponentLocked(null);
+        } catch (IllegalArgumentException e) {
+            // This can happen if the default wallpaper component doesn't
+            // exist.  This should be a system configuration problem, but
+            // let's not let it crash the system and just live with no
+            // wallpaper.
+            Slog.e(TAG, "Default wallpaper component not found!", e);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }

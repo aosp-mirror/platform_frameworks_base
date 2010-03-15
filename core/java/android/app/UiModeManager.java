@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2010 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package android.app;
 
 import android.content.Context;
@@ -71,9 +87,9 @@ public class UiModeManager {
     public static String ACTION_ENTER_DESK_MODE = "android.app.action.ENTER_DESK_MODE";
     
     /**
-     * Broadcast sent when the device's UI has switch away from car mode back
-     * to normal mode.  Typically used by a car mode app, to dismiss itself
-     * when the user exits car mode.
+     * Broadcast sent when the device's UI has switched away from desk mode back
+     * to normal mode.  Typically used by a desk mode app, to dismiss itself
+     * when the user exits desk mode.
      */
     public static String ACTION_EXIT_DESK_MODE = "android.app.action.EXIT_DESK_MODE";
     

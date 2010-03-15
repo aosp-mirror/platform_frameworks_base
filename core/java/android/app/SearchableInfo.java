@@ -303,7 +303,7 @@ public final class SearchableInfo implements Parcelable {
                 InputType.TYPE_CLASS_TEXT |
                 InputType.TYPE_TEXT_VARIATION_NORMAL);
         mSearchImeOptions = a.getInt(com.android.internal.R.styleable.Searchable_imeOptions, 
-                EditorInfo.IME_ACTION_SEARCH);
+                EditorInfo.IME_ACTION_GO);
         mIncludeInGlobalSearch = a.getBoolean(
                 com.android.internal.R.styleable.Searchable_includeInGlobalSearch, false);
         mQueryAfterZeroResults = a.getBoolean(
@@ -672,7 +672,7 @@ public final class SearchableInfo implements Parcelable {
     
     /**
      * Return the input method options specified in the searchable attributes.
-     * This will default to EditorInfo.ACTION_SEARCH if not specified (which is
+     * This will default to EditorInfo.ACTION_GO if not specified (which is
      * appropriate for a search box).
      * 
      * @return the input type

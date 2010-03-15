@@ -1775,6 +1775,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
 
     private CheckForLongPress mPendingCheckForLongPress;
     private CheckForTap mPendingCheckForTap = null;
+    private PerformClick mPerformClick;
     
     private UnsetPressedState mUnsetPressedState;
 
@@ -2078,8 +2079,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                                         mHandler = getContext().getClass().getMethod(handlerName,
                                                 View.class);
                                     } catch (NoSuchMethodException e) {
+                                        int id = getId();
+                                        String idText = id == NO_ID ? "" : " with id '"
+                                                + getContext().getResources().getResourceEntryName(
+                                                    id) + "'";
                                         throw new IllegalStateException("Could not find a method " +
-                                                handlerName + "(View) in the activity", e);
+                                                handlerName + "(View) in the activity "
+                                                + getContext().getClass() + " for onClick handler"
+                                                + " on view " + View.this.getClass() + idText, e);
                                     }
                                 }
 
@@ -4324,7 +4331,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
 
                             // Only perform take click actions if we were in the pressed state
                             if (!focusTaken) {
-                                performClick();
+                                // Use a Runnable and post this rather than calling
+                                // performClick directly. This lets other visual state
+                                // of the view update before click actions start.
+                                if (mPerformClick == null) {
+                                    mPerformClick = new PerformClick();
+                                }
+                                if (!post(mPerformClick)) {
+                                    performClick();
+                                }
                             }
                         }
 
@@ -4350,6 +4365,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                         mPendingCheckForTap = new CheckForTap();
                     }
                     mPrivateFlags |= PREPRESSED;
+                    mHasPerformedLongPress = false;
                     postDelayed(mPendingCheckForTap, ViewConfiguration.getTapTimeout());
                     break;
 
@@ -8955,6 +8971,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             if ((mViewFlags & LONG_CLICKABLE) == LONG_CLICKABLE) {
                 postCheckForLongClick(ViewConfiguration.getTapTimeout());
             }
+        }
+    }
+
+    private final class PerformClick implements Runnable {
+        public void run() {
+            performClick();
         }
     }
 

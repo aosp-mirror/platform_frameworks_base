@@ -126,41 +126,71 @@ HTTPDataSource::HTTPDataSource(
         host = string(host, 0, colon - host.c_str());
     }
 
-    init(host.c_str(), port, path.c_str(), headers);
+    mStartingHost = host.c_str();
+    mStartingPath = path.c_str();
+    mStartingPort = port;
+
+    init(headers);
 }
 
 HTTPDataSource::HTTPDataSource(
         const char *_host, int port, const char *_path,
         const KeyedVector<String8, String8> *headers) {
-    init(_host, port, _path, headers);
+    mStartingHost = _host;
+    mStartingPath = _path;
+    mStartingPort = port;
+
+    init(headers);
 }
 
-void HTTPDataSource::init(
-        const char *_host, int port, const char *_path,
-        const KeyedVector<String8, String8> *headers) {
+void HTTPDataSource::init(const KeyedVector<String8, String8> *headers) {
+    mState = DISCONNECTED;
     mHttp = new HTTPStream;
+
     mHost = NULL;
     mPort = 0;
-    mPath = NULL,
-    mBuffer = malloc(kBufferSize);
-    mBufferLength = 0;
-    mBufferOffset = 0;
-    mContentLengthValid = false;
+    mPath = NULL;
 
     initHeaders(headers);
 
-    string host = _host;
-    string path = _path;
+    mBuffer = malloc(kBufferSize);
+    mBufferLength = 0;
+    mBufferOffset = 0;
+}
+
+status_t HTTPDataSource::connect() {
+    {
+        Mutex::Autolock autoLock(mStateLock);
+
+        if (mState != DISCONNECTED) {
+            return ERROR_ALREADY_CONNECTED;
+        }
+
+        mState = CONNECTING;
+    }
+
+    mContentLengthValid = false;
+
+    string host = mStartingHost.string();
+    string path = mStartingPath.string();
+    int port = mStartingPort;
 
     LOGI("Connecting to host '%s', port %d, path '%s'",
          host.c_str(), port, path.c_str());
 
     int numRedirectsRemaining = 5;
     do {
-        mInitCheck = mHttp->connect(host.c_str(), port);
+        status_t err = mHttp->connect(host.c_str(), port);
 
-        if (mInitCheck != OK) {
-            return;
+        if (err != OK) {
+            Mutex::Autolock autoLock(mStateLock);
+
+            if (mState != CONNECTING) {
+                LOGV("connect() cancelled");
+            }
+            mState = DISCONNECTED;
+
+            return err;
         }
     } while (PerformRedirectIfNecessary(mHttp, mHeaders, &host, &path, &port)
              && numRedirectsRemaining-- > 0);
@@ -175,17 +205,44 @@ void HTTPDataSource::init(
     mHost = strdup(host.c_str());
     mPort = port;
     mPath = strdup(path.c_str());
+
+    Mutex::Autolock autoLock(mStateLock);
+
+    if (mState != CONNECTING) {
+        // disconnect was called when we had just successfully connected.
+        LOGV("connect() cancelled (we had just succeeded connecting)");
+
+        mHttp->disconnect();
+        return UNKNOWN_ERROR;
+    }
+
+    mState = CONNECTED;
+    return OK;
+}
+
+void HTTPDataSource::disconnect() {
+    Mutex::Autolock autoLock(mStateLock);
+
+    if (mState == CONNECTING || mState == CONNECTED) {
+        mHttp->disconnect();
+        mState = DISCONNECTED;
+    }
 }
 
 status_t HTTPDataSource::initCheck() const {
-    return mInitCheck;
+    Mutex::Autolock autoLock(mStateLock);
+
+    return (mState == CONNECTED) ? (status_t)OK : ERROR_NOT_CONNECTED;
 }
 
 status_t HTTPDataSource::getSize(off_t *size) {
     *size = 0;
 
-    if (mInitCheck != OK) {
-        return mInitCheck;
+    {
+        Mutex::Autolock autoLock(mStateLock);
+        if (mState != CONNECTED) {
+            return ERROR_NOT_CONNECTED;
+        }
     }
 
     if (!mContentLengthValid) {
@@ -198,7 +255,10 @@ status_t HTTPDataSource::getSize(off_t *size) {
 }
 
 HTTPDataSource::~HTTPDataSource() {
-    mHttp->disconnect();
+    disconnect();
+
+    delete mHttp;
+    mHttp = NULL;
 
     free(mBuffer);
     mBuffer = NULL;
@@ -212,9 +272,6 @@ HTTPDataSource::~HTTPDataSource() {
         free(mHost);
         mHost = NULL;
     }
-
-    delete mHttp;
-    mHttp = NULL;
 }
 
 ssize_t HTTPDataSource::sendRangeRequest(size_t offset) {
@@ -271,6 +328,13 @@ ssize_t HTTPDataSource::sendRangeRequest(size_t offset) {
 ssize_t HTTPDataSource::readAt(off_t offset, void *data, size_t size) {
     LOGV("readAt %ld, size %d", offset, size);
 
+    {
+        Mutex::Autolock autoLock(mStateLock);
+        if (mState != CONNECTED) {
+            return ERROR_NOT_CONNECTED;
+        }
+    }
+
     if (offset >= mBufferOffset
             && offset < (off_t)(mBufferOffset + mBufferLength)) {
         size_t num_bytes_available = mBufferLength - (offset - mBufferOffset);
@@ -304,7 +368,7 @@ ssize_t HTTPDataSource::readAt(off_t offset, void *data, size_t size) {
     mBufferOffset = offset;
 
     if (mContentLengthValid
-            && mBufferOffset + contentLength >= mContentLength) {
+            && mBufferOffset + contentLength >= (off_t)mContentLength) {
         // If we never triggered a range request but know the content length,
         // make sure to not read more data than there could be, otherwise
         // we'd block indefinitely if the server doesn't close the connection.

@@ -2078,11 +2078,11 @@
     <string name="usb_storage_stop_error_message">There was a problem turning off USB storage. Check to make sure you have unmounted the USB host, then try again.</string>
 
     <!-- USB_STORAGE_KILL_STORAGE_USERS dialog  -->
-    <string name="dlg_confirm_kill_storage_users_title">Enable Mass Storage</string>
+    <string name="dlg_confirm_kill_storage_users_title">Turn on USB storage</string>
     <!-- USB_STORAGE_KILL_STORAGE_USERS dialog message text -->
-    <string name="dlg_confirm_kill_storage_users_text">Some processes accessing data on sdcard will be killed. Do you want to continue?</string>
+    <string name="dlg_confirm_kill_storage_users_text">If you turn on USB storage, some applications you are using will stop and may be unavailable until you turn off USB storage.</string>
     <!-- USB_STORAGE_ERROR dialog  dialog-->
-    <string name="dlg_error_title">UMS operation failed</string>
+    <string name="dlg_error_title">USB operation failed</string>
     <!-- USB_STORAGE_ERROR dialog  ok button-->
     <string name="dlg_ok">OK</string>
 

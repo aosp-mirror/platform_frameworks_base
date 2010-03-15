@@ -363,7 +363,7 @@ public class Browser {
                 str[i] = c.getString(0);
                 i++;
             }
-            c.deactivate();
+            c.close();
             return str;
         } catch (IllegalStateException e) {
             return new String[0];
@@ -402,7 +402,7 @@ public class Browser {
                     if (!c.moveToNext()) break;
                 }
             }
-            c.deactivate();
+            c.close();
         } catch (IllegalStateException e) {
             Log.e(LOGTAG, "truncateHistory", e);
             return;
@@ -427,7 +427,7 @@ public class Browser {
                 null
                 );
             boolean ret = c.moveToFirst();
-            c.deactivate();
+            c.close();
             return ret;
         } catch (IllegalStateException e) {
             return false;
@@ -462,7 +462,7 @@ public class Browser {
                 null,
                 null);
             if (!c.moveToFirst()) {
-                c.deactivate();
+                c.close();
                 return;
             }
 
@@ -489,7 +489,7 @@ public class Browser {
                     iconDb.releaseIconForPageUrl(url);
                 }
             } while (c.moveToNext());
-            c.deactivate();
+            c.close();
 
             if (!firstTime) {
                 ContentValues map = new ContentValues();
@@ -576,7 +576,7 @@ public class Browser {
             } else {
                 cr.insert(SEARCHES_URI, map);
             }
-            c.deactivate();
+            c.close();
         } catch (IllegalStateException e) {
             Log.e(LOGTAG, "addSearchUrl", e);
             return;

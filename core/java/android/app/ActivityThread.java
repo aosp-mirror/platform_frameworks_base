@@ -39,6 +39,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDebug;
+import android.database.sqlite.SQLiteDebug.DbStats;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.os.Bundle;
@@ -58,6 +59,7 @@ import android.util.Config;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
+import android.util.Slog;
 import android.view.Display;
 import android.view.View;
 import android.view.ViewDebug;
@@ -541,7 +543,7 @@ public final class ActivityThread {
                 }
                 warned = true;
                 Thread.currentThread().setContextClassLoader(getParent());
-                Log.w(TAG, "ClassLoader." + methodName + ": " +
+                Slog.w(TAG, "ClassLoader." + methodName + ": " +
                       "The class loader returned by " +
                       "Thread.getContextClassLoader() may fail for processes " +
                       "that host multiple applications. You should explicitly " +
@@ -676,7 +678,7 @@ public final class ActivityThread {
                             "originally registered here. Are you missing a " +
                             "call to unregisterReceiver()?");
                     leak.setStackTrace(rd.getLocation().getStackTrace());
-                    Log.e(TAG, leak.getMessage(), leak);
+                    Slog.e(TAG, leak.getMessage(), leak);
                     try {
                         ActivityManagerNative.getDefault().unregisterReceiver(
                                 rd.getIIntentReceiver());
@@ -697,7 +699,7 @@ public final class ActivityThread {
                             what + " " + who + " has leaked ServiceConnection "
                             + sd.getServiceConnection() + " that was originally bound here");
                     leak.setStackTrace(sd.getLocation().getStackTrace());
-                    Log.e(TAG, leak.getMessage(), leak);
+                    Slog.e(TAG, leak.getMessage(), leak);
                     try {
                         ActivityManagerNative.getDefault().unbindService(
                                 sd.getIServiceConnection());
@@ -822,7 +824,7 @@ public final class ActivityThread {
                         try {
                             mgr.finishReceiver(this, resultCode, data, extras, false);
                         } catch (RemoteException e) {
-                            Log.w(TAG, "Couldn't finish broadcast to unregistered receiver");
+                            Slog.w(TAG, "Couldn't finish broadcast to unregistered receiver");
                         }
                     }
                 }
@@ -1441,6 +1443,7 @@ public final class ActivityThread {
         private static final String HEAP_COLUMN = "%17s %8s %8s %8s %8s";
         private static final String ONE_COUNT_COLUMN = "%17s %8d";
         private static final String TWO_COUNT_COLUMNS = "%17s %8d %17s %8d";
+        private static final String DB_INFO_FORMAT = "  %8d %8d %10d  %s";
 
         // Formatting for checkin service - update version if row format changes
         private static final int ACTIVITY_THREAD_CHECKIN_VERSION = 1;
@@ -1719,7 +1722,7 @@ public final class ActivityThread {
             try {
                 Process.setProcessGroup(Process.myPid(), group);
             } catch (Exception e) {
-                Log.w(TAG, "Failed setting process group to " + group, e);
+                Slog.w(TAG, "Failed setting process group to " + group, e);
             }
         }
 
@@ -1760,8 +1763,7 @@ public final class ActivityThread {
             int binderDeathObjectCount = Debug.getBinderDeathObjectCount();
             int openSslSocketCount = OpenSSLSocketImpl.getInstanceCount();
             long sqliteAllocated = SQLiteDebug.getHeapAllocatedSize() / 1024;
-            SQLiteDebug.PagerStats stats = new SQLiteDebug.PagerStats();
-            SQLiteDebug.getPagerStats(stats);
+            SQLiteDebug.PagerStats stats = SQLiteDebug.getDatabaseInfo();
 
             // Check to see if we were called by checkin server. If so, print terse format.
             boolean doCheckinFormat = false;
@@ -1835,10 +1837,15 @@ public final class ActivityThread {
 
                 // SQL
                 pw.print(sqliteAllocated); pw.print(',');
-                pw.print(stats.databaseBytes / 1024); pw.print(',');
-                pw.print(stats.numPagers); pw.print(',');
-                pw.print((stats.totalBytes - stats.referencedBytes) / 1024); pw.print(',');
-                pw.print(stats.referencedBytes / 1024); pw.print('\n');
+                pw.print(stats.memoryUsed / 1024); pw.print(',');
+                pw.print(stats.pageCacheOverflo / 1024); pw.print(',');
+                pw.print(stats.largestMemAlloc / 1024); pw.print(',');
+                for (int i = 0; i < stats.dbStats.size(); i++) {
+                    DbStats dbStats = stats.dbStats.get(i);
+                    printRow(pw, DB_INFO_FORMAT, dbStats.pageSize, dbStats.dbSize,
+                            dbStats.lookaside, dbStats.dbName);
+                    pw.print(',');
+                }
 
                 return;
             }
@@ -1879,11 +1886,21 @@ public final class ActivityThread {
             // SQLite mem info
             pw.println(" ");
             pw.println(" SQL");
-            printRow(pw, TWO_COUNT_COLUMNS, "heap:", sqliteAllocated, "dbFiles:",
-                    stats.databaseBytes / 1024);
-            printRow(pw, TWO_COUNT_COLUMNS, "numPagers:", stats.numPagers, "inactivePageKB:",
-                    (stats.totalBytes - stats.referencedBytes) / 1024);
-            printRow(pw, ONE_COUNT_COLUMN, "activePageKB:", stats.referencedBytes / 1024);
+            printRow(pw, TWO_COUNT_COLUMNS, "heap:", sqliteAllocated, "memoryUsed:",
+                    stats.memoryUsed / 1024);
+            printRow(pw, TWO_COUNT_COLUMNS, "pageCacheOverflo:", stats.pageCacheOverflo / 1024,
+                    "largestMemAlloc:", stats.largestMemAlloc / 1024);
+            pw.println(" ");
+            int N = stats.dbStats.size();
+            if (N > 0) {
+                pw.println(" DATABASES");
+                printRow(pw, "  %8s %8s %10s  %s", "Pagesize", "Dbsize", "Lookaside", "Dbname");
+                for (int i = 0; i < N; i++) {
+                    DbStats dbStats = stats.dbStats.get(i);
+                    printRow(pw, DB_INFO_FORMAT, dbStats.pageSize, dbStats.dbSize,
+                            dbStats.lookaside, dbStats.dbName);
+                }
+            }
 
             // Asset details.
             String assetAlloc = AssetManager.getAssetAllocations();
@@ -2817,7 +2834,7 @@ public final class ActivityThread {
         String classname = data.appInfo.backupAgentName;
         if (classname == null) {
             if (data.backupMode == IApplicationThread.BACKUP_MODE_INCREMENTAL) {
-                Log.e(TAG, "Attempted incremental backup but no defined agent for "
+                Slog.e(TAG, "Attempted incremental backup but no defined agent for "
                         + packageName);
                 return;
             }
@@ -2844,7 +2861,7 @@ public final class ActivityThread {
             } catch (Exception e) {
                 // If this is during restore, fail silently; otherwise go
                 // ahead and let the user see the crash.
-                Log.e(TAG, "Agent threw during creation: " + e);
+                Slog.e(TAG, "Agent threw during creation: " + e);
                 if (data.backupMode != IApplicationThread.BACKUP_MODE_RESTORE) {
                     throw e;
                 }
@@ -2874,12 +2891,12 @@ public final class ActivityThread {
             try {
                 agent.onDestroy();
             } catch (Exception e) {
-                Log.w(TAG, "Exception thrown in onDestroy by backup agent of " + data.appInfo);
+                Slog.w(TAG, "Exception thrown in onDestroy by backup agent of " + data.appInfo);
                 e.printStackTrace();
             }
             mBackupAgents.remove(packageName);
         } else {
-            Log.w(TAG, "Attempt to destroy unknown backup agent " + data);
+            Slog.w(TAG, "Attempt to destroy unknown backup agent " + data);
         }
     }
 
@@ -3078,9 +3095,6 @@ public final class ActivityThread {
 
                 r.paused = false;
                 r.stopped = false;
-                if (r.activity.mStartedActivity) {
-                    r.hideForNow = true;
-                }
                 r.state = null;
             } catch (Exception e) {
                 if (!mInstrumentation.onException(r.activity, e)) {
@@ -3115,7 +3129,15 @@ public final class ActivityThread {
             // If the window hasn't yet been added to the window manager,
             // and this guy didn't finish itself or start another activity,
             // then go ahead and add the window.
-            if (r.window == null && !a.mFinished && !a.mStartedActivity) {
+            boolean willBeVisible = !a.mStartedActivity;
+            if (!willBeVisible) {
+                try {
+                    willBeVisible = ActivityManagerNative.getDefault().willActivityBeVisible(
+                            a.getActivityToken());
+                } catch (RemoteException e) {
+                }
+            }
+            if (r.window == null && !a.mFinished && willBeVisible) {
                 r.window = r.activity.getWindow();
                 View decor = r.window.getDecorView();
                 decor.setVisibility(View.INVISIBLE);
@@ -3131,8 +3153,8 @@ public final class ActivityThread {
 
             // If the window has already been added, but during resume
             // we started another activity, then don't yet make the
-            // window visisble.
-            } else if (a.mStartedActivity) {
+            // window visible.
+            } else if (!willBeVisible) {
                 if (localLOGV) Log.v(
                     TAG, "Launch " + r + " mStartedActivity set");
                 r.hideForNow = true;
@@ -3140,7 +3162,7 @@ public final class ActivityThread {
 
             // The window is now visible if it has been added, we are not
             // simply finishing, and we are not starting another activity.
-            if (!r.activity.mFinished && !a.mStartedActivity
+            if (!r.activity.mFinished && willBeVisible
                     && r.activity.mDecor != null && !r.hideForNow) {
                 if (r.newConfig != null) {
                     if (DEBUG_CONFIGURATION) Log.v(TAG, "Resuming activity "
@@ -3268,7 +3290,7 @@ public final class ActivityThread {
             RuntimeException e = new RuntimeException(
                     "Performing pause of activity that is not resumed: "
                     + r.intent.getComponent().toShortString());
-            Log.e(TAG, e.getMessage(), e);
+            Slog.e(TAG, e.getMessage(), e);
         }
         Bundle state = null;
         if (finished) {
@@ -3337,7 +3359,7 @@ public final class ActivityThread {
                 RuntimeException e = new RuntimeException(
                         "Performing stop of activity that is not resumed: "
                         + r.intent.getComponent().toShortString());
-                Log.e(TAG, e.getMessage(), e);
+                Slog.e(TAG, e.getMessage(), e);
             }
 
             if (info != null) {
@@ -3982,13 +4004,13 @@ public final class ActivityThread {
                 Debug.startMethodTracing(pcd.path, pcd.fd.getFileDescriptor(),
                         8 * 1024 * 1024, 0);
             } catch (RuntimeException e) {
-                Log.w(TAG, "Profiling failed on path " + pcd.path
+                Slog.w(TAG, "Profiling failed on path " + pcd.path
                         + " -- can the process access this path?");
             } finally {
                 try {
                     pcd.fd.close();
                 } catch (IOException e) {
-                    Log.w(TAG, "Failure closing profile fd", e);
+                    Slog.w(TAG, "Failure closing profile fd", e);
                 }
             }
         } else {
@@ -4233,7 +4255,7 @@ public final class ActivityThread {
         } catch (RemoteException ex) {
         }
         if (holder == null) {
-            Log.e(TAG, "Failed to find provider info for " + name);
+            Slog.e(TAG, "Failed to find provider info for " + name);
             return null;
         }
         if (holder.permissionFailure != null) {
@@ -4403,7 +4425,7 @@ public final class ActivityThread {
                 }
             }
             if (c == null) {
-                Log.w(TAG, "Unable to get context for package " +
+                Slog.w(TAG, "Unable to get context for package " +
                       ai.packageName +
                       " while loading content provider " +
                       info.name);
@@ -4415,7 +4437,7 @@ public final class ActivityThread {
                     loadClass(info.name).newInstance();
                 provider = localProvider.getIContentProvider();
                 if (provider == null) {
-                    Log.e(TAG, "Failed to instantiate class " +
+                    Slog.e(TAG, "Failed to instantiate class " +
                           info.name + " from sourceDir " +
                           info.applicationInfo.sourceDir);
                     return null;

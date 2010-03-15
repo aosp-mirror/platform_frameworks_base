@@ -203,7 +203,10 @@ public class TelephonyManager {
     public CellLocation getCellLocation() {
         try {
             Bundle bundle = getITelephony().getCellLocation();
-            return CellLocation.newFromBundle(bundle);
+            CellLocation cl = CellLocation.newFromBundle(bundle);
+            if (cl.isEmpty())
+                return null;
+            return cl;
         } catch (RemoteException ex) {
             return null;
         } catch (NullPointerException ex) {

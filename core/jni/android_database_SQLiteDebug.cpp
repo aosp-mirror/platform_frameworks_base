@@ -29,36 +29,28 @@
 // From mem_mspace.c in libsqlite
 extern "C" mspace sqlite3_get_mspace();
 
-// From sqlite.c, hacked in for Android
-extern "C" void sqlite3_get_pager_stats(sqlite3_int64 * totalBytesOut,
-                                       sqlite3_int64 * referencedBytesOut,
-                                       sqlite3_int64 * dbBytesOut,
-                                       int * numPagersOut);
-
 namespace android {
 
-static jfieldID gTotalBytesField;
-static jfieldID gReferencedBytesField;
-static jfieldID gDbBytesField;
-static jfieldID gNumPagersField;
+static jfieldID gMemoryUsedField;
+static jfieldID gPageCacheOverfloField;
+static jfieldID gLargestMemAllocField;
 
 
 #define USE_MSPACE 0
 
 static void getPagerStats(JNIEnv *env, jobject clazz, jobject statsObj)
 {
-    sqlite3_int64 totalBytes;
-    sqlite3_int64 referencedBytes;
-    sqlite3_int64 dbBytes;
-    int numPagers;
+    int memoryUsed;
+    int pageCacheOverflo;
+    int largestMemAlloc;
+    int unused;
 
-    sqlite3_get_pager_stats(&totalBytes, &referencedBytes, &dbBytes,
-            &numPagers);
-
-    env->SetLongField(statsObj, gTotalBytesField, totalBytes);
-    env->SetLongField(statsObj, gReferencedBytesField, referencedBytes);
-    env->SetLongField(statsObj, gDbBytesField, dbBytes);
-    env->SetIntField(statsObj, gNumPagersField, numPagers);
+    sqlite3_status(SQLITE_STATUS_MEMORY_USED, &memoryUsed, &unused, 0);
+    sqlite3_status(SQLITE_STATUS_MALLOC_SIZE, &unused, &largestMemAlloc, 0);
+    sqlite3_status(SQLITE_STATUS_PAGECACHE_OVERFLOW, &pageCacheOverflo, &unused, 0);
+    env->SetIntField(statsObj, gMemoryUsedField, memoryUsed);
+    env->SetIntField(statsObj, gPageCacheOverfloField, pageCacheOverflo);
+    env->SetIntField(statsObj, gLargestMemAllocField, largestMemAlloc);
 }
 
 static jlong getHeapSize(JNIEnv *env, jobject clazz)
@@ -213,27 +205,21 @@ int register_android_database_SQLiteDebug(JNIEnv *env)
         return -1;
     }
 
-    gTotalBytesField = env->GetFieldID(clazz, "totalBytes", "J");
-    if (gTotalBytesField == NULL) {
-        LOGE("Can't find totalBytes");
+    gMemoryUsedField = env->GetFieldID(clazz, "memoryUsed", "I");
+    if (gMemoryUsedField == NULL) {
+        LOGE("Can't find memoryUsed");
         return -1;
     }
 
-    gReferencedBytesField = env->GetFieldID(clazz, "referencedBytes", "J");
-    if (gReferencedBytesField == NULL) {
-        LOGE("Can't find referencedBytes");
+    gLargestMemAllocField = env->GetFieldID(clazz, "largestMemAlloc", "I");
+    if (gLargestMemAllocField == NULL) {
+        LOGE("Can't find largestMemAlloc");
         return -1;
     }
 
-    gDbBytesField = env->GetFieldID(clazz, "databaseBytes", "J");
-    if (gDbBytesField == NULL) {
-        LOGE("Can't find databaseBytes");
-        return -1;
-    }
-
-    gNumPagersField = env->GetFieldID(clazz, "numPagers", "I");
-    if (gNumPagersField == NULL) {
-        LOGE("Can't find numPagers");
+    gPageCacheOverfloField = env->GetFieldID(clazz, "pageCacheOverflo", "I");
+    if (gPageCacheOverfloField == NULL) {
+        LOGE("Can't find pageCacheOverflo");
         return -1;
     }
 

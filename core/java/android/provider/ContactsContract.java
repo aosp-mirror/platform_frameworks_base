@@ -887,6 +887,25 @@ public final class ContactsContract {
                 "as_vcard");
 
         /**
+         * Base {@link Uri} for referencing multiple {@link Contacts} entry,
+         * created by appending {@link #LOOKUP_KEY} using
+         * {@link Uri#withAppendedPath(Uri, String)}. The lookup keys have to be
+         * encoded and joined with the colon (":") seperator. The resulting string
+         * has to be encoded again. Provides
+         * {@link OpenableColumns} columns when queried, or returns the
+         * referenced contact formatted as a vCard when opened through
+         * {@link ContentResolver#openAssetFileDescriptor(Uri, String)}.
+         *
+         * This is private API because we do not have a well-defined way to
+         * specify several entities yet. The format of this Uri might change in the future
+         * or the Uri might be completely removed.
+         *
+         * @hide
+         */
+        public static final Uri CONTENT_MULTI_VCARD_URI = Uri.withAppendedPath(CONTENT_URI,
+                "as_multi_vcard");
+
+        /**
          * Builds a {@link #CONTENT_LOOKUP_URI} style {@link Uri} describing the
          * requested {@link Contacts} entry.
          *

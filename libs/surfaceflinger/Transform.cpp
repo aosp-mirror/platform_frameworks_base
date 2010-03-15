@@ -65,17 +65,14 @@ Transform::Transform(uint32_t orientation) {
 Transform::~Transform() {
 }
 
-
-bool Transform::absIsOne(float f) {
-    return fabs(f) == 1.0f;
-}
+static const float EPSILON = 0.0f;
 
 bool Transform::isZero(float f) {
-    return fabs(f) == 0.0f;
+    return fabs(f) <= EPSILON;
 }
 
-bool Transform::absEqual(float a, float b) {
-    return fabs(a) == fabs(b);
+bool Transform::absIsOne(float f) {
+    return isZero(fabs(f) - 1.0f);
 }
 
 Transform Transform::operator * (const Transform& rhs) const
@@ -154,8 +151,14 @@ void Transform::set(float a, float b, float c, float d)
     mType = UNKNOWN_TYPE;
 }
 
-void Transform::set(uint32_t flags, float w, float h)
+status_t Transform::set(uint32_t flags, float w, float h)
 {
+    if (flags & ROT_INVALID) {
+        // that's not allowed!
+        reset();
+        return BAD_VALUE;
+    }
+
     mType = flags << 8;
     float sx = (flags & FLIP_H) ? -1 : 1;
     float sy = (flags & FLIP_V) ? -1 : 1;
@@ -205,6 +208,8 @@ void Transform::set(uint32_t flags, float w, float h)
     M[0][0] = a;    M[1][0] = b;    M[2][0] = x;
     M[0][1] = c;    M[1][1] = d;    M[2][1] = y;
     M[0][2] = 0;    M[1][2] = 0;    M[2][2] = 1;
+
+    return NO_ERROR;
 }
 
 Transform::vec2 Transform::transform(const vec2& v) const {
@@ -295,25 +300,17 @@ uint32_t Transform::type() const
         bool scale = false;
         uint32_t flags = ROT_0;
         if (isZero(b) && isZero(c)) {
-            if (absEqual(a, d)) {
-                if (a<0)    flags |= FLIP_H;
-                if (d<0)    flags |= FLIP_V;
-                if (!absIsOne(a) || !absIsOne(d)) {
-                    scale = true;
-                }
-            } else {
-                flags = ROT_INVALID;
+            if (a<0)    flags |= FLIP_H;
+            if (d<0)    flags |= FLIP_V;
+            if (!absIsOne(a) || !absIsOne(d)) {
+                scale = true;
             }
         } else if (isZero(a) && isZero(d)) {
-            if (absEqual(b, c)) {
-                flags |= ROT_90;
-                if (b>0)    flags |= FLIP_H;
-                if (c<0)    flags |= FLIP_V;
-                if (!absIsOne(b) || !absIsOne(c)) {
-                    scale = true;
-                }
-            } else {
-                flags = ROT_INVALID;
+            flags |= ROT_90;
+            if (b>0)    flags |= FLIP_H;
+            if (c<0)    flags |= FLIP_V;
+            if (!absIsOne(b) || !absIsOne(c)) {
+                scale = true;
             }
         } else {
             flags = ROT_INVALID;
@@ -361,15 +358,22 @@ void Transform::dump(const char* name) const
     const mat33& m(mMatrix);
     uint32_t orient = mType >> 8;
 
-    if (orient&ROT_INVALID)
+    if (orient&ROT_INVALID) {
         flags.append("ROT_INVALID ");
-    if (orient&ROT_90)
-        flags.append("ROT_90 ");
-    if (orient&FLIP_V)
-        flags.append("FLIP_V ");
-    if (orient&FLIP_H)
-        flags.append("FLIP_H ");
+    } else {
+        if (orient&ROT_90) {
+            flags.append("ROT_90 ");
+        } else {
+            flags.append("ROT_0 ");
+        }
+        if (orient&FLIP_V)
+            flags.append("FLIP_V ");
+        if (orient&FLIP_H)
+            flags.append("FLIP_H ");
+    }
 
+    if (!(mType&(SCALE|ROTATE|TRANSLATE)))
+        type.append("IDENTITY ");
     if (mType&SCALE)
         type.append("SCALE ");
     if (mType&ROTATE)
@@ -377,10 +381,10 @@ void Transform::dump(const char* name) const
     if (mType&TRANSLATE)
         type.append("TRANSLATE ");
 
-    LOGD("%s (%s, %s)", name, flags.string(), type.string());
-    LOGD("%.2f  %.2f  %.2f", m[0][0], m[1][0], m[2][0]);
-    LOGD("%.2f  %.2f  %.2f", m[0][1], m[1][1], m[2][1]);
-    LOGD("%.2f  %.2f  %.2f", m[0][2], m[1][2], m[2][2]);
+    LOGD("%s 0x%08x (%s, %s)", name, mType, flags.string(), type.string());
+    LOGD("%.4f  %.4f  %.4f", m[0][0], m[1][0], m[2][0]);
+    LOGD("%.4f  %.4f  %.4f", m[0][1], m[1][1], m[2][1]);
+    LOGD("%.4f  %.4f  %.4f", m[0][2], m[1][2], m[2][2]);
 }
 
 // ---------------------------------------------------------------------------

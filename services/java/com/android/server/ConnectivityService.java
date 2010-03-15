@@ -81,8 +81,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
      */
     private List mNetRequestersPids[];
 
-    private WifiWatchdogService mWifiWatchdogService;
-
     // priority order of the nettrackers
     // (excluding dynamically set mNetworkPreference)
     // TODO - move mNetworkTypePreference into this
@@ -298,11 +296,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 WifiStateTracker wst = new WifiStateTracker(context, mHandler);
                 WifiService wifiService = new WifiService(context, wst);
                 ServiceManager.addService(Context.WIFI_SERVICE, wifiService);
+                wifiService.startWifi();
                 mNetTrackers[ConnectivityManager.TYPE_WIFI] = wst;
                 wst.startMonitoring();
 
-                // Constructing this starts it too
-                mWifiWatchdogService = new WifiWatchdogService(context, wst);
                 break;
             case ConnectivityManager.TYPE_MOBILE:
                 mNetTrackers[netType] = new MobileDataStateTracker(context, mHandler,
@@ -320,7 +317,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             }
         }
 
-        mTethering = new Tethering(mContext);
+        mTethering = new Tethering(mContext, mHandler.getLooper());
         mTetheringConfigValid = (((mNetTrackers[ConnectivityManager.TYPE_MOBILE_DUN] != null) ||
                                   !mTethering.isDunRequired()) &&
                                  (mTethering.getTetherableUsbRegexs().length != 0 ||

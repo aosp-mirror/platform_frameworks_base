@@ -19,6 +19,8 @@ import android.content.ContentResolver;
 import android.net.Uri;
 import android.util.Log;
 
+import java.util.ArrayList;
+
 /**
  * <P>
  * {@link VCardEntryHandler} implementation which commits the entry to ContentResolver.
@@ -35,7 +37,7 @@ public class VCardEntryCommitter implements VCardEntryHandler {
 
     private final ContentResolver mContentResolver;
     private long mTimeToCommit;
-    private Uri mLastCreatedUri;
+    private ArrayList<Uri> mCreatedUris = new ArrayList<Uri>();
 
     public VCardEntryCommitter(ContentResolver resolver) {
         mContentResolver = resolver;
@@ -52,11 +54,21 @@ public class VCardEntryCommitter implements VCardEntryHandler {
 
     public void onEntryCreated(final VCardEntry contactStruct) {
         long start = System.currentTimeMillis();
-        mLastCreatedUri = contactStruct.pushIntoContentResolver(mContentResolver);
+        mCreatedUris.add(contactStruct.pushIntoContentResolver(mContentResolver));
         mTimeToCommit += System.currentTimeMillis() - start;
     }
 
+    // TODO: Compatibility function to not break the build. Will be removed shortly
+    @Deprecated
     public Uri getLastCreatedUri() {
-        return mLastCreatedUri;
+        return mCreatedUris.size() == 0 ? null : mCreatedUris.get(mCreatedUris.size() - 1);
+    }
+
+    /**
+     * Returns the list of created Uris. This list should not be modified by the caller as it is
+     * not a clone.
+     */
+   public ArrayList<Uri> getCreatedUris() {
+        return mCreatedUris;
     }
 }

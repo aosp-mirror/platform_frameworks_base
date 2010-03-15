@@ -69,16 +69,19 @@ public:
             int     ty() const;
 
             // modify the transform
-            void    reset();
-            void    set(float tx, float ty);
-            void    set(float a, float b, float c, float d);
-            void    set(uint32_t flags, float w, float h);
+            void        reset();
+            void        set(float tx, float ty);
+            void        set(float a, float b, float c, float d);
+            status_t    set(uint32_t flags, float w, float h);
 
             // transform data
             Rect    makeBounds(int w, int h) const;
             void    transform(fixed1616* point, int x, int y) const;
             Region  transform(const Region& reg) const;
             Transform operator * (const Transform& rhs) const;
+
+            // for debugging
+            void dump(const char* name) const;
 
 private:
     struct vec3 {
@@ -113,10 +116,7 @@ private:
     Rect transform(const Rect& bounds) const;
     uint32_t type() const;
     static bool absIsOne(float f);
-    static bool absEqual(float a, float b);
     static bool isZero(float f);
-
-    void dump(const char* name) const;
 
     mat33               mMatrix;
     mutable uint32_t    mType;

@@ -589,7 +589,7 @@
     <attr name="reqFiveWayNav" format="boolean" />
 
     <!-- The name of the class implementing <code>BackupAgent</code> to manage
-         backup and restore of the application's settings to external storage. -->
+         backup and restore of application data on external storage. -->
     <attr name="backupAgent" format="string" />
 
     <!-- Whether to allow the application to participate in backup
@@ -600,13 +600,18 @@
     <attr name="allowBackup" format="boolean" />
 
     <!-- Whether the application in question should be terminated after its
-         settings have been restored.  The default is <code>true</code>,
-         which means to do so. -->
+         settings have been restored during a full-system restore operation.
+         Single-package restore operations will never cause the application to
+         be shut down.  Full-system restore operations typically only occur once,
+         when the phone is first set up.  Third-party applications will not usually
+         need to use this attribute.
+
+         <p>The default is <code>true</code>, which means that after the application
+         has finished processing its data during a full-system restore, it will be
+         terminated. -->
     <attr name="killAfterRestore" format="boolean" />
 
-    <!-- Whether the application needs to have its own Application subclass
-         active during restore.  The default is to run restore with a minimal
-         Application class to avoid interference with application logic. -->
+    <!-- @deprecated This attribute is not used by the Android operating system. -->
     <attr name="restoreNeedsApplication" format="boolean" />
 
     <!-- Indicate that the application is prepared to attempt a restore of any

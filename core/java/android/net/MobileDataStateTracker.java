@@ -359,7 +359,12 @@ public class MobileDataStateTracker extends NetworkStateTracker {
             case Phone.APN_REQUEST_FAILED:
                 if (mPhoneService == null && mApnType == Phone.APN_TYPE_DEFAULT) {
                     // on startup we may try to talk to the phone before it's ready
-                    // just leave mEnabled as it is for the default apn.
+                    // since the phone will come up enabled, go with that.
+                    // TODO - this also comes up on telephony crash: if we think mobile data is
+                    // off and the telephony stuff crashes and has to restart it will come up
+                    // enabled (making a data connection).  We will then be out of sync.
+                    // A possible solution is a broadcast when telephony restarts.
+                    mEnabled = true;
                     return false;
                 }
                 // else fall through

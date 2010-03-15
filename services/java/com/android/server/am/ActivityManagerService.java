@@ -111,6 +111,7 @@ import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.lang.IllegalStateException;
 import java.lang.ref.WeakReference;
@@ -3515,7 +3516,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             if (DEBUG_TASKS) Slog.v(TAG, "Starting new activity " + r
                     + " in new task " + r.task);
             newTask = true;
-            addRecentTask(r.task);
+            addRecentTaskLocked(r.task);
             
         } else if (sourceRecord != null) {
             if (!addingToTask &&
@@ -3890,7 +3891,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
     }
 
-    private final void addRecentTask(TaskRecord task) {
+    private final void addRecentTaskLocked(TaskRecord task) {
         // Remove any existing entries that are the same kind of task.
         int N = mRecentTasks.size();
         for (int i=0; i<N; i++) {
@@ -4267,6 +4268,22 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
     }
 
+    public boolean willActivityBeVisible(IBinder token) {
+        synchronized(this) {
+            int i;
+            for (i=mHistory.size()-1; i>=0; i--) {
+                HistoryRecord r = (HistoryRecord)mHistory.get(i);
+                if (r == token) {
+                    return true;
+                }
+                if (r.fullscreen && !r.finishing) {
+                    return false;
+                }
+            }
+            return true;
+        }
+    }
+    
     public void overridePendingTransition(IBinder token, String packageName,
             int enterAnim, int exitAnim) {
         synchronized(this) {
@@ -4708,7 +4725,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
     final void appNotRespondingLocked(ProcessRecord app, HistoryRecord activity,
             HistoryRecord parent, final String annotation) {
-        if (app.notResponding || app.crashing) {
+        // PowerManager.reboot() can block for a long time, so ignore ANRs while shutting down.
+        if (mShuttingDown || app.notResponding || app.crashing) {
             return;
         }
 
@@ -4921,9 +4939,11 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 Intent intent = new Intent(Intent.ACTION_PACKAGE_DATA_CLEARED,
                         Uri.fromParts("package", packageName, null));
                 intent.putExtra(Intent.EXTRA_UID, pkgUid);
-                broadcastIntentLocked(null, null, intent,
-                        null, null, 0, null, null, null,
-                        false, false, MY_PID, Process.SYSTEM_UID);
+                synchronized (this) {
+                    broadcastIntentLocked(null, null, intent,
+                            null, null, 0, null, null, null,
+                            false, false, MY_PID, Process.SYSTEM_UID);
+                }
             } catch (RemoteException e) {
             }
         } finally {
@@ -6983,7 +7003,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                             taskTopI = -1;
                         }
                         replyChainEnd = -1;
-                        addRecentTask(target.task);
+                        addRecentTaskLocked(target.task);
                     } else if (forceReset || finishOnTaskLaunch
                             || clearWhenTaskReset) {
                         // If the activity should just be removed -- either
@@ -7205,7 +7225,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 moved.add(0, r);
                 top--;
                 if (first) {
-                    addRecentTask(r.task);
+                    addRecentTaskLocked(r.task);
                     first = false;
                 }
             }
@@ -7230,11 +7250,11 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             mWindowManager.validateAppTokens(mHistory);
         }
 
-        finishTaskMove(task);
+        finishTaskMoveLocked(task);
         EventLog.writeEvent(EventLogTags.AM_TASK_TO_FRONT, task);
     }
 
-    private final void finishTaskMove(int task) {
+    private final void finishTaskMoveLocked(int task) {
         resumeTopActivityLocked(null);
     }
 
@@ -7352,7 +7372,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             mWindowManager.validateAppTokens(mHistory);
         }
 
-        finishTaskMove(task);
+        finishTaskMoveLocked(task);
         return true;
     }
 
@@ -7984,19 +8004,24 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     }
 
     public static final void installSystemProviders() {
-        ProcessRecord app = mSelf.mProcessNames.get("system", Process.SYSTEM_UID);
-        List providers = mSelf.generateApplicationProvidersLocked(app);
-        if (providers != null) {
-            for (int i=providers.size()-1; i>=0; i--) {
-                ProviderInfo pi = (ProviderInfo)providers.get(i);
-                if ((pi.applicationInfo.flags&ApplicationInfo.FLAG_SYSTEM) == 0) {
-                    Slog.w(TAG, "Not installing system proc provider " + pi.name
-                            + ": not system .apk");
-                    providers.remove(i);
+        List providers;
+        synchronized (mSelf) {
+            ProcessRecord app = mSelf.mProcessNames.get("system", Process.SYSTEM_UID);
+            providers = mSelf.generateApplicationProvidersLocked(app);
+            if (providers != null) {
+                for (int i=providers.size()-1; i>=0; i--) {
+                    ProviderInfo pi = (ProviderInfo)providers.get(i);
+                    if ((pi.applicationInfo.flags&ApplicationInfo.FLAG_SYSTEM) == 0) {
+                        Slog.w(TAG, "Not installing system proc provider " + pi.name
+                                + ": not system .apk");
+                        providers.remove(i);
+                    }
                 }
             }
         }
-        mSystemThread.installSystemProviders(providers);
+        if (providers != null) {
+            mSystemThread.installSystemProviders(providers);
+        }
     }
 
     // =========================================================
@@ -8279,11 +8304,15 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     }
     
     public void registerActivityWatcher(IActivityWatcher watcher) {
-        mWatchers.register(watcher);
+        synchronized (this) {
+            mWatchers.register(watcher);
+        }
     }
 
     public void unregisterActivityWatcher(IActivityWatcher watcher) {
-        mWatchers.unregister(watcher);
+        synchronized (this) {
+            mWatchers.unregister(watcher);
+        }
     }
 
     public final void enterSafeMode() {
@@ -8959,77 +8988,122 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
      * @param crashInfo giving an application stack trace, null if absent
      */
     public void addErrorToDropBox(String eventType,
-            ProcessRecord process, HistoryRecord activity, HistoryRecord parent,
-            String subject, String report, File logFile,
-            ApplicationErrorReport.CrashInfo crashInfo) {
+            ProcessRecord process, HistoryRecord activity, HistoryRecord parent, String subject,
+            final String report, final File logFile,
+            final ApplicationErrorReport.CrashInfo crashInfo) {
         // NOTE -- this must never acquire the ActivityManagerService lock,
         // otherwise the watchdog may be prevented from resetting the system.
 
-        String dropboxTag;
+        String prefix;
         if (process == null || process.pid == MY_PID) {
-            dropboxTag = "system_server_" + eventType;
+            prefix = "system_server_";
         } else if ((process.info.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
-            dropboxTag = "system_app_" + eventType;
+            prefix = "system_app_";
         } else {
-            dropboxTag = "data_app_" + eventType;
+            prefix = "data_app_";
         }
 
-        DropBoxManager dbox = (DropBoxManager) mContext.getSystemService(Context.DROPBOX_SERVICE);
-        if (dbox != null && dbox.isTagEnabled(dropboxTag)) {
-            StringBuilder sb = new StringBuilder(1024);
-            if (process == null || process.pid == MY_PID) {
-                sb.append("Process: system_server\n");
-            } else {
-                sb.append("Process: ").append(process.processName).append("\n");
-            }
-            if (process != null) {
-                int flags = process.info.flags;
-                IPackageManager pm = ActivityThread.getPackageManager();
-                sb.append("Flags: 0x").append(Integer.toString(flags, 16)).append("\n");
-                for (String pkg : process.pkgList) {
-                    sb.append("Package: ").append(pkg);
-                    try {
-                        PackageInfo pi = pm.getPackageInfo(pkg, 0);
-                        if (pi != null) {
-                            sb.append(" v").append(pi.versionCode);
-                            if (pi.versionName != null) {
-                                sb.append(" (").append(pi.versionName).append(")");
-                            }
-                        }
-                    } catch (RemoteException e) {
-                        Slog.e(TAG, "Error getting package info: " + pkg, e);
-                    }
-                    sb.append("\n");
-                }
-            }
-            if (activity != null) {
-                sb.append("Activity: ").append(activity.shortComponentName).append("\n");
-            }
-            if (parent != null && parent.app != null && parent.app.pid != process.pid) {
-                sb.append("Parent-Process: ").append(parent.app.processName).append("\n");
-            }
-            if (parent != null && parent != activity) {
-                sb.append("Parent-Activity: ").append(parent.shortComponentName).append("\n");
-            }
-            if (subject != null) {
-                sb.append("Subject: ").append(subject).append("\n");
-            }
-            sb.append("Build: ").append(Build.FINGERPRINT).append("\n");
-            sb.append("\n");
-            if (report != null) {
-                sb.append(report);
-            }
-            if (logFile != null) {
+        final String dropboxTag = prefix + eventType;
+        final DropBoxManager dbox = (DropBoxManager)
+                mContext.getSystemService(Context.DROPBOX_SERVICE);
+
+        // Exit early if the dropbox isn't configured to accept this report type.
+        if (dbox == null || !dbox.isTagEnabled(dropboxTag)) return;
+
+        final StringBuilder sb = new StringBuilder(1024);
+        if (process == null || process.pid == MY_PID) {
+            sb.append("Process: system_server\n");
+        } else {
+            sb.append("Process: ").append(process.processName).append("\n");
+        }
+        if (process != null) {
+            int flags = process.info.flags;
+            IPackageManager pm = ActivityThread.getPackageManager();
+            sb.append("Flags: 0x").append(Integer.toString(flags, 16)).append("\n");
+            for (String pkg : process.pkgList) {
+                sb.append("Package: ").append(pkg);
                 try {
-                    sb.append(FileUtils.readTextFile(logFile, 128 * 1024, "\n\n[[TRUNCATED]]"));
-                } catch (IOException e) {
-                    Slog.e(TAG, "Error reading " + logFile, e);
+                    PackageInfo pi = pm.getPackageInfo(pkg, 0);
+                    if (pi != null) {
+                        sb.append(" v").append(pi.versionCode);
+                        if (pi.versionName != null) {
+                            sb.append(" (").append(pi.versionName).append(")");
+                        }
+                    }
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Error getting package info: " + pkg, e);
                 }
+                sb.append("\n");
             }
-            if (crashInfo != null && crashInfo.stackTrace != null) {
-                sb.append(crashInfo.stackTrace);
+        }
+        if (activity != null) {
+            sb.append("Activity: ").append(activity.shortComponentName).append("\n");
+        }
+        if (parent != null && parent.app != null && parent.app.pid != process.pid) {
+            sb.append("Parent-Process: ").append(parent.app.processName).append("\n");
+        }
+        if (parent != null && parent != activity) {
+            sb.append("Parent-Activity: ").append(parent.shortComponentName).append("\n");
+        }
+        if (subject != null) {
+            sb.append("Subject: ").append(subject).append("\n");
+        }
+        sb.append("Build: ").append(Build.FINGERPRINT).append("\n");
+        sb.append("\n");
+
+        // Do the rest in a worker thread to avoid blocking the caller on I/O
+        // (After this point, we shouldn't access AMS internal data structures.)
+        Thread worker = new Thread("Error dump: " + dropboxTag) {
+            @Override
+            public void run() {
+                if (report != null) {
+                    sb.append(report);
+                }
+                if (logFile != null) {
+                    try {
+                        sb.append(FileUtils.readTextFile(logFile, 128 * 1024, "\n\n[[TRUNCATED]]"));
+                    } catch (IOException e) {
+                        Slog.e(TAG, "Error reading " + logFile, e);
+                    }
+                }
+                if (crashInfo != null && crashInfo.stackTrace != null) {
+                    sb.append(crashInfo.stackTrace);
+                }
+
+                String setting = Settings.Secure.ERROR_LOGCAT_PREFIX + dropboxTag;
+                int lines = Settings.Secure.getInt(mContext.getContentResolver(), setting, 0);
+                if (lines > 0) {
+                    sb.append("\n");
+
+                    // Merge several logcat streams, and take the last N lines
+                    InputStreamReader input = null;
+                    try {
+                        java.lang.Process logcat = new ProcessBuilder("/system/bin/logcat",
+                                "-v", "time", "-b", "events", "-b", "system", "-b", "main",
+                                "-t", String.valueOf(lines)).redirectErrorStream(true).start();
+
+                        try { logcat.getOutputStream().close(); } catch (IOException e) {}
+                        try { logcat.getErrorStream().close(); } catch (IOException e) {}
+                        input = new InputStreamReader(logcat.getInputStream());
+
+                        int num;
+                        char[] buf = new char[8192];
+                        while ((num = input.read(buf)) > 0) sb.append(buf, 0, num);
+                    } catch (IOException e) {
+                        Slog.e(TAG, "Error running logcat", e);
+                    } finally {
+                        if (input != null) try { input.close(); } catch (IOException e) {}
+                    }
+                }
+
+                dbox.addText(dropboxTag, sb.toString());
             }
-            dbox.addText(dropboxTag, sb.toString());
+        };
+
+        if (process == null || process.pid == MY_PID) {
+            worker.run();  // We may be about to die -- need to run this synchronously
+        } else {
+            worker.start();
         }
     }
 
@@ -11874,7 +11948,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     // BROADCASTS
     // =========================================================
 
-    private final List getStickies(String action, IntentFilter filter,
+    private final List getStickiesLocked(String action, IntentFilter filter,
             List cur) {
         final ContentResolver resolver = mContext.getContentResolver();
         final ArrayList<Intent> list = mStickyBroadcasts.get(action);
@@ -11926,10 +12000,10 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             if (actions != null) {
                 while (actions.hasNext()) {
                     String action = (String)actions.next();
-                    allSticky = getStickies(action, filter, allSticky);
+                    allSticky = getStickiesLocked(action, filter, allSticky);
                 }
             } else {
-                allSticky = getStickies(null, filter, allSticky);
+                allSticky = getStickiesLocked(null, filter, allSticky);
             }
 
             // The first sticky in the list is returned directly back to
@@ -13777,7 +13851,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     /**
      * Returns true if things are idle enough to perform GCs.
      */
-    private final boolean canGcNow() {
+    private final boolean canGcNowLocked() {
         return mParallelBroadcasts.size() == 0
                 && mOrderedBroadcasts.size() == 0
                 && (mSleeping || (mResumedActivity != null &&
@@ -13793,7 +13867,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         if (N <= 0) {
             return;
         }
-        if (canGcNow()) {
+        if (canGcNowLocked()) {
             while (mProcessesToGc.size() > 0) {
                 ProcessRecord proc = mProcessesToGc.remove(0);
                 if (proc.curRawAdj > VISIBLE_APP_ADJ || proc.reportLowMemory) {
@@ -13821,7 +13895,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
      * If all looks good, perform GCs on all processes waiting for them.
      */
     final void performAppGcsIfAppropriateLocked() {
-        if (canGcNow()) {
+        if (canGcNowLocked()) {
             performAppGcsLocked();
             return;
         }

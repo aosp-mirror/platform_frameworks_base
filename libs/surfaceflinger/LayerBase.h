@@ -101,6 +101,9 @@ public:
                 Region          transparentRegion;
             };
 
+            void setName(const String8& name);
+            String8 getName() const;
+
             // modify current state
             bool setPosition(int32_t x, int32_t y);
             bool setLayer(uint32_t z);
@@ -121,7 +124,7 @@ public:
             void drawRegion(const Region& reg) const;
 
             void invalidate();
-            
+
     /**
      * draw - performs some global clipping optimizations
      * and calls onDraw().
@@ -287,6 +290,9 @@ protected:
 
                 // don't change, don't need a lock
                 bool            mPremultipliedAlpha;
+                String8         mName;
+    mutable     bool            mDebug;
+
 
                 // atomic
     volatile    int32_t         mInvalidate;
@@ -320,8 +326,6 @@ public:
             const sp<Client>& client, int32_t i);
     virtual ~LayerBaseClient();
     virtual void onFirstRef();
-    void setName(const String8& name);
-    String8 getName() const;
 
     const wp<Client>    client;
 
@@ -369,15 +373,11 @@ public:
 
     friend class Surface;
 
-protected:
-    mutable     bool            mDebug;
-
 private:
                 int32_t         mIndex;
     mutable     Mutex           mLock;
     mutable     wp<Surface>     mClientSurface;
     // only read
-                String8         mName;
     const       uint32_t        mIdentity;
     static      int32_t         sIdentity;
 };

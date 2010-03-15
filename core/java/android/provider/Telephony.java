@@ -164,6 +164,12 @@ public final class Telephony {
          * <P>Type: INTEGER</P>
          */
         public static final String ERROR_CODE = "error_code";
+
+        /**
+         * Meta data used externally.
+         * <P>Type: TEXT</P>
+         */
+        public static final String META_DATA = "meta_data";
 }
 
     /**
@@ -1064,6 +1070,12 @@ public final class Telephony {
          * <P>Type: INTEGER (boolean)</P>
          */
         public static final String LOCKED = "locked";
+
+        /**
+         * Meta data used externally.
+         * <P>Type: TEXT</P>
+         */
+        public static final String META_DATA = "meta_data";
     }
 
     /**

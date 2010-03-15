@@ -49,19 +49,7 @@ public class BootReceiver extends BroadcastReceiver {
     private static FileObserver sTombstoneObserver = null;
 
     @Override
-    public void onReceive(Context context, Intent intent) {
-        try {
-            logBootEvents(context);
-        } catch (Exception e) {
-            Slog.e(TAG, "Can't log boot events", e);
-        }
-
-        try {
-            RecoverySystem.handleAftermath();
-        } catch (Exception e) {
-            Slog.e(TAG, "Can't handle recovery aftermath", e);
-        }
-
+    public void onReceive(final Context context, Intent intent) {
         try {
             // Start the load average overlay, if activated
             ContentResolver res = context.getContentResolver();
@@ -72,44 +60,59 @@ public class BootReceiver extends BroadcastReceiver {
         } catch (Exception e) {
             Slog.e(TAG, "Can't start load average service", e);
         }
+
+        // Log boot events in the background to avoid blocking the main thread with I/O
+        new Thread() {
+            @Override
+            public void run() {
+                try {
+                    logBootEvents(context);
+                } catch (Exception e) {
+                    Slog.e(TAG, "Can't log boot events", e);
+                }
+            }
+        }.start();
     }
 
     private void logBootEvents(Context ctx) throws IOException {
         final DropBoxManager db = (DropBoxManager) ctx.getSystemService(Context.DROPBOX_SERVICE);
         final SharedPreferences prefs = ctx.getSharedPreferences("log_files", Context.MODE_PRIVATE);
-        final String props = new StringBuilder()
+        final String headers = new StringBuilder(512)
             .append("Build: ").append(Build.FINGERPRINT).append("\n")
             .append("Hardware: ").append(Build.BOARD).append("\n")
             .append("Bootloader: ").append(Build.BOOTLOADER).append("\n")
             .append("Radio: ").append(Build.RADIO).append("\n")
             .append("Kernel: ")
             .append(FileUtils.readTextFile(new File("/proc/version"), 1024, "...\n"))
-            .toString();
+            .append("\n").toString();
 
-        if (db == null || prefs == null) return;
+        String recovery = RecoverySystem.handleAftermath();
+        if (recovery != null && db != null) {
+            db.addText("SYSTEM_RECOVERY_LOG", headers + recovery);
+        }
 
         if (SystemProperties.getLong("ro.runtime.firstboot", 0) == 0) {
             String now = Long.toString(System.currentTimeMillis());
             SystemProperties.set("ro.runtime.firstboot", now);
-            db.addText("SYSTEM_BOOT", props);
+            if (db != null) db.addText("SYSTEM_BOOT", headers);
 
             // Negative sizes mean to take the *tail* of the file (see FileUtils.readTextFile())
-            addFileToDropBox(db, prefs, props, "/proc/last_kmsg",
+            addFileToDropBox(db, prefs, headers, "/proc/last_kmsg",
                     -LOG_SIZE, "SYSTEM_LAST_KMSG");
-            addFileToDropBox(db, prefs, props, "/cache/recovery/log",
+            addFileToDropBox(db, prefs, headers, "/cache/recovery/log",
                     -LOG_SIZE, "SYSTEM_RECOVERY_LOG");
-            addFileToDropBox(db, prefs, props, "/data/dontpanic/apanic_console",
+            addFileToDropBox(db, prefs, headers, "/data/dontpanic/apanic_console",
                     -LOG_SIZE, "APANIC_CONSOLE");
-            addFileToDropBox(db, prefs, props, "/data/dontpanic/apanic_threads",
+            addFileToDropBox(db, prefs, headers, "/data/dontpanic/apanic_threads",
                     -LOG_SIZE, "APANIC_THREADS");
         } else {
-            db.addText("SYSTEM_RESTART", props);
+            if (db != null) db.addText("SYSTEM_RESTART", headers);
         }
 
         // Scan existing tombstones (in case any new ones appeared)
         File[] tombstoneFiles = TOMBSTONE_DIR.listFiles();
         for (int i = 0; tombstoneFiles != null && i < tombstoneFiles.length; i++) {
-            addFileToDropBox(db, prefs, props, tombstoneFiles[i].getPath(),
+            addFileToDropBox(db, prefs, headers, tombstoneFiles[i].getPath(),
                     LOG_SIZE, "SYSTEM_TOMBSTONE");
         }
 
@@ -120,7 +123,7 @@ public class BootReceiver extends BroadcastReceiver {
             public void onEvent(int event, String path) {
                 try {
                     String filename = new File(TOMBSTONE_DIR, path).getPath();
-                    addFileToDropBox(db, prefs, props, filename, LOG_SIZE, "SYSTEM_TOMBSTONE");
+                    addFileToDropBox(db, prefs, headers, filename, LOG_SIZE, "SYSTEM_TOMBSTONE");
                 } catch (IOException e) {
                     Slog.e(TAG, "Can't log tombstone", e);
                 }
@@ -133,19 +136,19 @@ public class BootReceiver extends BroadcastReceiver {
     private static void addFileToDropBox(
             DropBoxManager db, SharedPreferences prefs,
             String headers, String filename, int maxSize, String tag) throws IOException {
-        if (!db.isTagEnabled(tag)) return;  // Slog.ing disabled
+        if (db == null || !db.isTagEnabled(tag)) return;  // Logging disabled
 
         File file = new File(filename);
         long fileTime = file.lastModified();
         if (fileTime <= 0) return;  // File does not exist
 
-        long lastTime = prefs.getLong(filename, 0);
-        if (lastTime == fileTime) return;  // Already logged this particular file
-        prefs.edit().putLong(filename, fileTime).commit();
+        if (prefs != null) {
+            long lastTime = prefs.getLong(filename, 0);
+            if (lastTime == fileTime) return;  // Already logged this particular file
+            prefs.edit().putLong(filename, fileTime).commit();
+        }
 
-        StringBuilder report = new StringBuilder(headers).append("\n");
-        report.append(FileUtils.readTextFile(file, maxSize, "[[TRUNCATED]]\n"));
-        db.addText(tag, report.toString());
-        Slog.i(TAG, "Slog.ing " + filename + " to DropBox (" + tag + ")");
+        Slog.i(TAG, "Copying " + filename + " to DropBox (" + tag + ")");
+        db.addText(tag, headers + FileUtils.readTextFile(file, maxSize, "[[TRUNCATED]]\n"));
     }
 }
