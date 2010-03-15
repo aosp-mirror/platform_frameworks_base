@@ -1464,7 +1464,9 @@ public class WebView extends AbsoluteLayout
      * Load the given data into the WebView. This will load the data into
      * WebView using the data: scheme. Content loaded through this mechanism
      * does not have the ability to load content from the network.
-     * @param data A String of data in the given encoding.
+     * @param data A String of data in the given encoding. The date must
+     * be URI-escaped -- '#', '%', '\', '?' should be replaced by %23, %25,
+     * %27, %3f respectively.
      * @param mimeType The MIMEType of the data. i.e. text/html, image/jpeg
      * @param encoding The encoding of the data. i.e. utf-8, base64
      */
