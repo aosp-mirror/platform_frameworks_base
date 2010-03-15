@@ -59,7 +59,6 @@ private:
 
     sp<MetaData> mFileMetaData;
 
-    uint32_t mHandlerType;
     Vector<uint32_t> mPath;
 
     status_t readMetaData();

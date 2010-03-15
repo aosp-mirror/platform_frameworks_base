@@ -677,49 +677,6 @@ status_t MPEG4Extractor::parseChunk(off_t *offset, int depth) {
             break;
         }
 
-        case FOURCC('h', 'd', 'l', 'r'):
-        {
-            uint8_t buffer[12];
-
-            if (chunk_data_size < (ssize_t)sizeof(buffer)) {
-                return ERROR_MALFORMED;
-            }
-
-            if (mDataSource->readAt(data_offset, buffer, sizeof(buffer))
-                    < (ssize_t)sizeof(buffer)) {
-                return ERROR_IO;
-            }
-
-            if (U32_AT(buffer) != 0) {
-                // Should be version 0, flags 0.
-                return ERROR_MALFORMED;
-            }
-
-            if (U32_AT(&buffer[4]) != 0) {
-                // pre_defined should be 0 for an ISO 14496-12 compliant
-                // file, if it's not try some heuristics seen in the field.
-                // This has been added to support some so-called
-                // "enhanced" podcasts.
-
-                if (U32_AT(&buffer[4]) == FOURCC('d', 'h', 'l', 'r')) {
-                    *offset += chunk_size;
-                    break;
-                }
-
-                if (U32_AT(&buffer[4]) != FOURCC('m', 'h', 'l', 'r')) {
-                    return ERROR_MALFORMED;
-                }
-
-                mHandlerType = U32_AT(&buffer[8]);
-                *offset += chunk_size;
-                break;
-            }
-
-            mHandlerType = U32_AT(&buffer[8]);
-            *offset += chunk_size;
-            break;
-        }
-
         case FOURCC('s', 't', 's', 'd'):
         {
             if (chunk_data_size < 8) {
@@ -770,10 +727,6 @@ status_t MPEG4Extractor::parseChunk(off_t *offset, int depth) {
         case FOURCC('s', 'a', 'm', 'r'):
         case FOURCC('s', 'a', 'w', 'b'):
         {
-            if (mHandlerType != FOURCC('s', 'o', 'u', 'n')) {
-                return ERROR_MALFORMED;
-            }
-
             uint8_t buffer[8 + 20];
             if (chunk_data_size < (ssize_t)sizeof(buffer)) {
                 // Basic AudioSampleEntry size.
@@ -826,10 +779,6 @@ status_t MPEG4Extractor::parseChunk(off_t *offset, int depth) {
         case FOURCC('a', 'v', 'c', '1'):
         {
             mHasVideo = true;
-
-            if (mHandlerType != FOURCC('v', 'i', 'd', 'e')) {
-                return ERROR_MALFORMED;
-            }
 
             uint8_t buffer[78];
             if (chunk_data_size < (ssize_t)sizeof(buffer)) {
