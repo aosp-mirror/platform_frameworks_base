@@ -19,7 +19,8 @@
 #include <utils/Log.h>
 
 #include <dlfcn.h>
-#include <linux/prctl.h>
+
+#include <sys/prctl.h>
 #include <sys/resource.h>
 
 #include "../include/OMX.h"
