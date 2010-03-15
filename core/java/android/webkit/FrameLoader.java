@@ -262,9 +262,13 @@ class FrameLoader {
         CacheLoader cacheLoader =
                 new CacheLoader(mListener, result);
         mListener.setCacheLoader(cacheLoader);
-        // Load the cached file in a separate thread
-        WebViewWorker.getHandler().obtainMessage(
-                WebViewWorker.MSG_ADD_STREAMLOADER, cacheLoader).sendToTarget();
+        if (mListener.isSynchronous()) {
+            cacheLoader.load();
+        } else {
+            // Load the cached file in a separate thread
+            WebViewWorker.getHandler().obtainMessage(
+                    WebViewWorker.MSG_ADD_STREAMLOADER, cacheLoader).sendToTarget();
+        }
     }
 
     /*
