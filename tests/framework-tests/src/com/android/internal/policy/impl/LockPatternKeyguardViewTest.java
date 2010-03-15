@@ -18,6 +18,7 @@ package com.android.internal.policy.impl;
 
 import android.content.Context;
 import com.android.internal.telephony.IccCard;
+import android.content.res.Configuration;
 import android.test.AndroidTestCase;
 import android.view.View;
 import android.view.KeyEvent;
@@ -39,8 +40,6 @@ public class LockPatternKeyguardViewTest extends AndroidTestCase {
     private static class MockUpdateMonitor extends KeyguardUpdateMonitor {
 
         public IccCard.State simState = IccCard.State.READY;
-        public boolean inPortrait = false;
-        public boolean keyboardOpen = false;
 
         private MockUpdateMonitor(Context context) {
             super(context);
@@ -49,26 +48,6 @@ public class LockPatternKeyguardViewTest extends AndroidTestCase {
         @Override
         public IccCard.State getSimState() {
             return simState;
-        }
-
-        @Override
-        public boolean isInPortrait() {
-            return inPortrait;
-        }
-
-        @Override
-        public boolean isKeyboardOpen() {
-            return keyboardOpen;
-        }
-
-        @Override
-        boolean queryInPortrait() {
-            return inPortrait;
-        }
-
-        @Override
-        boolean queryKeyboardOpen() {
-            return keyboardOpen;
         }
     }
 
@@ -115,7 +94,7 @@ public class LockPatternKeyguardViewTest extends AndroidTestCase {
         public boolean needsInput() {
             return false;
         }
-        
+
         /** {@inheritDoc} */
         public void onPause() {
             mOnPauseCount++;
@@ -202,7 +181,7 @@ public class LockPatternKeyguardViewTest extends AndroidTestCase {
         }
 
         public void keyguardDoneDrawing() {
-            
+
         }
 
         public int getPokeWakelockCount() {
@@ -293,7 +272,7 @@ public class LockPatternKeyguardViewTest extends AndroidTestCase {
 
         // should have poked the wakelock to turn on the screen
         assertEquals(1, mKeyguardViewCallback.getPokeWakelockCount());
-        
+
         // shouldn't be any additional views created
         assertEquals(1, mLPKV.getInjectedLockScreens().size());
         assertEquals(1, mLPKV.getInjectedUnlockScreens().size());
@@ -317,7 +296,7 @@ public class LockPatternKeyguardViewTest extends AndroidTestCase {
         assertEquals(1, lockScreen.getOnResumeCount());
 
         // simulate screen asking to be recreated
-        mLPKV.mKeyguardScreenCallback.recreateMe();
+        mLPKV.mKeyguardScreenCallback.recreateMe(new Configuration());
 
         // should have been recreated
         assertEquals(2, mLPKV.getInjectedLockScreens().size());
