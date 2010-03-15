@@ -2241,7 +2241,8 @@ public final class ViewRoot extends Handler implements ViewParent,
      *   leaving touch mode alone is considered the event).
      */
     private boolean checkForLeavingTouchModeAndConsume(KeyEvent event) {
-        if (event.getAction() != KeyEvent.ACTION_DOWN) {
+        final int action = event.getAction();
+        if (action != KeyEvent.ACTION_DOWN && action != KeyEvent.ACTION_MULTIPLE) {
             return false;
         }
         if ((event.getFlags()&KeyEvent.FLAG_KEEP_TOUCH_MODE) != 0) {
