@@ -25,8 +25,6 @@
 package android.webkit;
 
 import android.app.Dialog;
-import android.graphics.Rect;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -34,15 +32,9 @@ import android.view.ViewGroup;
 
 class PluginFullScreenHolder extends Dialog {
 
-    private static final String LOGTAG = "FullScreenHolder";
-
     private final WebView mWebView;
     private final int mNpp;
     private View mContentView;
-    private int mX;
-    private int mY;
-    private int mWidth;
-    private int mHeight;
 
     PluginFullScreenHolder(WebView webView, int npp) {
         super(webView.getContext(), android.R.style.Theme_NoTitleBar_Fullscreen);
@@ -50,23 +42,15 @@ class PluginFullScreenHolder extends Dialog {
         mNpp = npp;
     }
 
-    Rect getBound() {
-        return new Rect(mX, mY, mWidth, mHeight);
-    }
-
-    /*
-     * x, y, width, height are in the caller's view coordinate system. (x, y) is
-     * relative to the top left corner of the caller's view.
-     */
-    void updateBound(int x, int y, int width, int height) {
-        mX = x;
-        mY = y;
-        mWidth = width;
-        mHeight = height;
-    }
-
     @Override
     public void setContentView(View contentView) {
+        // as we are sharing the View between full screen and
+        // embedded mode, we have to remove the
+        // AbsoluteLayout.LayoutParams set by embedded mode to
+        // ViewGroup.LayoutParams before adding it to the dialog
+        contentView.setLayoutParams(new ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT));
         super.setContentView(contentView);
         mContentView = contentView;
     }
@@ -99,15 +83,7 @@ class PluginFullScreenHolder extends Dialog {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        final float x = event.getX();
-        final float y = event.getY();
-        // TODO: find a way to know when the dialog size changed so that we can
-        // cache the ratio
-        final View decorView = getWindow().getDecorView();
-        event.setLocation(mX + x * mWidth / decorView.getWidth(),
-                mY + y * mHeight / decorView.getHeight());
-        mWebView.onTouchEvent(event);
-        // always return true as we are the handler
+        // always return true as we don't want the event to propagate any further
         return true;
     }
 
