@@ -1608,13 +1608,6 @@ public class WebView extends AbsoluteLayout
     }
 
     private void goBackOrForward(int steps, boolean ignoreSnapshot) {
-        // every time we go back or forward, we want to reset the
-        // WebView certificate:
-        // if the new site is secure, we will reload it and get a
-        // new certificate set;
-        // if the new site is not secure, the certificate must be
-        // null, and that will be the case
-        mCertificate = null;
         if (steps != 0) {
             clearTextEntry(false);
             mWebViewCore.sendMessage(EventHub.GO_BACK_FORWARD, steps,
