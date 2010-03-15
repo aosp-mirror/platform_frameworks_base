@@ -144,7 +144,7 @@ void SoundPool::quit()
 
 bool SoundPool::startThreads()
 {
-    createThreadEtc(beginThread, this, "SoundPoolThread");
+    createThreadEtc(beginThread, this, "SoundPool");
     if (mDecodeThread == NULL)
         mDecodeThread = new SoundPoolThread(this);
     return mDecodeThread != NULL;
@@ -827,4 +827,3 @@ void SoundEvent::set(const sp<Sample>& sample, int channelID, float leftVolume,
 }
 
 } // end namespace android
-
