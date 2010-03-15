@@ -262,7 +262,7 @@ static void native_setLocale(JNIEnv* env, jobject object, jstring localeString, 
         goto done;
     }
 
-    dbLocale = (rowCount >= 1) ? meta[1 * colCount + 0] : NULL;
+    dbLocale = (rowCount >= 1) ? meta[colCount] : NULL;
 
     if (dbLocale != NULL && !strcmp(dbLocale, locale8)) {
         // database locale is the same as the desired locale; set up the collators and go
@@ -273,7 +273,8 @@ static void native_setLocale(JNIEnv* env, jobject object, jstring localeString, 
 
     if ((flags & OPEN_READONLY)) {
         // read-only database, so we're going to have to put up with whatever we got
-        err = register_localized_collators(handle, dbLocale ? dbLocale : locale8, UTF16_STORAGE);
+        // For registering new index. Not for modifing the read-only database.
+        err = register_localized_collators(handle, locale8, UTF16_STORAGE);
         if (err != SQLITE_OK) throw_sqlite3_exception(env, handle);
         goto done;
     }
@@ -286,7 +287,7 @@ static void native_setLocale(JNIEnv* env, jobject object, jstring localeString, 
         goto done;
     }
 
-    err = register_localized_collators(handle, dbLocale ? dbLocale : locale8, UTF16_STORAGE);
+    err = register_localized_collators(handle, locale8, UTF16_STORAGE);
     if (err != SQLITE_OK) {
         LOGE("register_localized_collators() failed setting locale\n");
         throw_sqlite3_exception(env, handle);
