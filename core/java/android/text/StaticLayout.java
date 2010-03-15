@@ -16,14 +16,15 @@
 
 package android.text;
 
+import com.android.internal.util.ArrayUtils;
+
 import android.graphics.Bitmap;
 import android.graphics.Paint;
-import com.android.internal.util.ArrayUtils;
-import android.util.Log;
 import android.text.style.LeadingMarginSpan;
 import android.text.style.LineHeightSpan;
 import android.text.style.MetricAffectingSpan;
 import android.text.style.ReplacementSpan;
+import android.util.Log;
 
 /**
  * StaticLayout is a Layout for text that will not be edited after it
@@ -31,8 +32,9 @@ import android.text.style.ReplacementSpan;
  * <p>This is used by widgets to control text layout. You should not need
  * to use this class directly unless you are implementing your own widget
  * or custom display object, or would be tempted to call
- * {@link android.graphics.Canvas#drawText(java.lang.CharSequence, int, int, float, float, android.graphics.Paint)
- *  Canvas.drawText()} directly.</p>
+ * {@link android.graphics.Canvas#drawText(java.lang.CharSequence, int, int,
+ * float, float, android.graphics.Paint)
+ * Canvas.drawText()} directly.</p>
  */
 public class
 StaticLayout
@@ -62,7 +64,7 @@ extends Layout
                         boolean includepad,
                         TextUtils.TruncateAt ellipsize, int ellipsizedWidth) {
         super((ellipsize == null)
-                ? source 
+                ? source
                 : (source instanceof Spanned)
                     ? new SpannedEllipsizer(source)
                     : new Ellipsizer(source),
@@ -72,7 +74,7 @@ extends Layout
          * This is annoying, but we can't refer to the layout until
          * superclass construction is finished, and the superclass
          * constructor wants the reference to the display text.
-         * 
+         *
          * This will break if the superclass constructor ever actually
          * cares about the content instead of just holding the reference.
          */
@@ -196,7 +198,7 @@ extends Layout
                             // starts in this layout, before the
                             // current paragraph
 
-                            choosehtv[i] = getLineTop(getLineForOffset(o)); 
+                            choosehtv[i] = getLineTop(getLineForOffset(o));
                         } else {
                             // starts in this paragraph
 
@@ -317,7 +319,7 @@ extends Layout
                     paint.getTextWidths(sub, i, next, widths);
                     System.arraycopy(widths, 0, widths,
                                      end - start + (i - start), next - i);
-                                     
+
                     paint.getFontMetricsInt(fm);
                 } else {
                     mWorkPaint.baselineShift = 0;
@@ -377,7 +379,7 @@ extends Layout
                                     whichPaint = mWorkPaint;
                                 }
 
-                                float wid = (float) bm.getWidth() *
+                                float wid = bm.getWidth() *
                                             -whichPaint.ascent() /
                                             bm.getHeight();
 
@@ -412,7 +414,7 @@ extends Layout
                         /*
                          * From the Unicode Line Breaking Algorithm:
                          * (at least approximately)
-                         *  
+                         *
                          * .,:; are class IS: breakpoints
                          *      except when adjacent to digits
                          * /    is class SY: a breakpoint
@@ -833,7 +835,7 @@ extends Layout
         lines[off + DIR] |= dir << DIR_SHIFT;
         Directions linedirs = DIRS_ALL_LEFT_TO_RIGHT;
         // easy means all chars < the first RTL, so no emoji, no nothing
-        // XXX a run with no text or all spaces is easy but might be an empty 
+        // XXX a run with no text or all spaces is easy but might be an empty
         // RTL paragraph.  Make sure easy is false if this is the case.
         if (easy) {
             mLineDirections[j] = linedirs;
@@ -850,7 +852,7 @@ extends Layout
                     ++runCount;
                 }
             }
-            
+
             // add final run for trailing counter-directional whitespace
             int visEnd = end;
             if ((curLevel & 1) != (baseLevel & 1)) {
@@ -872,7 +874,7 @@ extends Layout
                     ++runCount;
                 }
             }
-            
+
             if (runCount == 1 && minLevel == baseLevel) {
                 if ((minLevel & 1) != 0) {
                     linedirs = DIRS_ALL_RIGHT_TO_LEFT;
@@ -913,15 +915,15 @@ extends Layout
                 }
 
                 // See if we need to swap any runs.
-                // If the min level run direction doesn't match the base 
+                // If the min level run direction doesn't match the base
                 // direction, we always need to swap (at this point
                 // we have more than one run).
                 // Otherwise, we don't need to swap the lowest level.
-                // Since there are no logically adjacent runs at the same 
+                // Since there are no logically adjacent runs at the same
                 // level, if the max level is the same as the (new) min
                 // level, we have a series of alternating levels that
                 // is already in order, so there's no more to do.
-                // 
+                //
                 boolean swap;
                 if ((minLevel & 1) == baseLevel) {
                     minLevel += 1;
@@ -1074,11 +1076,11 @@ extends Layout
     }
 
     public int getLineTop(int line) {
-        return mLines[mColumns * line + TOP];    
+        return mLines[mColumns * line + TOP];
     }
 
     public int getLineDescent(int line) {
-        return mLines[mColumns * line + DESCENT];   
+        return mLines[mColumns * line + DESCENT];
     }
 
     public int getLineStart(int line) {
