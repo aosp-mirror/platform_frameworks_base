@@ -142,7 +142,7 @@ NPError NPP_New(NPMIMEType pluginType, NPP instance, uint16 mode, int16 argc,
     if (browser->version >= 14) {
     instance->pdata = browser->createobject (instance, getPluginClass());
     obj = static_cast<PluginObject*>(instance->pdata);
-    bzero(obj, sizeof(*obj));
+    memset(obj, 0, sizeof(*obj));
     } else {
         return NPERR_GENERIC_ERROR;
     }
