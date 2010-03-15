@@ -58,12 +58,6 @@ public class VCardEntryCommitter implements VCardEntryHandler {
         mTimeToCommit += System.currentTimeMillis() - start;
     }
 
-    // TODO: Compatibility function to not break the build. Will be removed shortly
-    @Deprecated
-    public Uri getLastCreatedUri() {
-        return mCreatedUris.size() == 0 ? null : mCreatedUris.get(mCreatedUris.size() - 1);
-    }
-
     /**
      * Returns the list of created Uris. This list should not be modified by the caller as it is
      * not a clone.
