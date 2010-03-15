@@ -977,15 +977,22 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
          * @return false if the context has been lost.
          */
         public boolean swap() {
-            mEgl.eglSwapBuffers(mEglDisplay, mEglSurface);
+            if (! mEgl.eglSwapBuffers(mEglDisplay, mEglSurface)) {
 
-            /*
-             * Always check for EGL_CONTEXT_LOST, which means the context
-             * and all associated data were lost (For instance because
-             * the device went to sleep). We need to sleep until we
-             * get a new surface.
-             */
-            return mEgl.eglGetError() != EGL11.EGL_CONTEXT_LOST;
+                /*
+                 * Check for EGL_CONTEXT_LOST, which means the context
+                 * and all associated data were lost (For instance because
+                 * the device went to sleep). We need to sleep until we
+                 * get a new surface.
+                 */
+                int error = mEgl.eglGetError();
+                if (error == EGL11.EGL_CONTEXT_LOST) {
+                    return false;
+                } else {
+                    throwEglException("eglSwapBuffers", error);
+                }
+            }
+            return true;
         }
 
         public void destroySurface() {
@@ -1010,7 +1017,11 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
         }
 
         private void throwEglException(String function) {
-            throw new RuntimeException(function + " failed: " + mEgl.eglGetError());
+            throwEglException(function, mEgl.eglGetError());
+        }
+
+        private void throwEglException(String function, int error) {
+            throw new RuntimeException(function + " failed: " + error);
         }
 
         EGL10 mEgl;
