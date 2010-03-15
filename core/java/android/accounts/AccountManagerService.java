@@ -1699,7 +1699,7 @@ public class AccountManagerService
                 }
             }
         } else {
-            Account[] accounts = getAccounts(null /* type */);
+            Account[] accounts = getAccountsByType(null /* type */);
             fout.println("Accounts: " + accounts.length);
             for (Account account : accounts) {
                 fout.println("  " + account);
