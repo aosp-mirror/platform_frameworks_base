@@ -28,6 +28,7 @@ import static android.os.BatteryManager.BATTERY_STATUS_UNKNOWN;
 import android.media.AudioManager;
 import android.os.Handler;
 import android.os.Message;
+import android.os.SystemClock;
 import android.provider.Settings;
 import android.provider.Telephony;
 import static android.provider.Telephony.Intents.EXTRA_PLMN;
@@ -66,8 +67,6 @@ public class KeyguardUpdateMonitor {
     private final Context mContext;
 
     private IccCard.State mSimState = IccCard.State.READY;
-    private boolean mInPortrait;
-    private boolean mKeyboardOpen;
 
     private boolean mKeyguardBypassEnabled;
 
@@ -84,15 +83,11 @@ public class KeyguardUpdateMonitor {
 
     private Handler mHandler;
 
-    private ArrayList<ConfigurationChangeCallback> mConfigurationChangeCallbacks
-            = Lists.newArrayList();
     private ArrayList<InfoCallback> mInfoCallbacks = Lists.newArrayList();
     private ArrayList<SimStateCallback> mSimStateCallbacks = Lists.newArrayList();
     private ContentObserver mContentObserver;
 
-
     // messages for the handler
-    private static final int MSG_CONFIGURATION_CHANGED = 300;
     private static final int MSG_TIME_UPDATE = 301;
     private static final int MSG_BATTERY_UPDATE = 302;
     private static final int MSG_CARRIER_INFO_UPDATE = 303;
@@ -150,9 +145,6 @@ public class KeyguardUpdateMonitor {
             @Override
             public void handleMessage(Message msg) {
                 switch (msg.what) {
-                    case MSG_CONFIGURATION_CHANGED:
-                        handleConfigurationChange();
-                        break;
                     case MSG_TIME_UPDATE:
                         handleTimeUpdate();
                         break;
@@ -209,9 +201,6 @@ public class KeyguardUpdateMonitor {
                 Settings.Secure.DEVICE_PROVISIONED, 0) != 0;
         }
 
-        mInPortrait = queryInPortrait();
-        mKeyboardOpen = queryKeyboardOpen();
-
         // take a guess to start
         mSimState = IccCard.State.READY;
         mDevicePluggedIn = true;
@@ -221,7 +210,6 @@ public class KeyguardUpdateMonitor {
 
         // setup receiver
         final IntentFilter filter = new IntentFilter();
-        filter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
         filter.addAction(Intent.ACTION_TIME_TICK);
         filter.addAction(Intent.ACTION_TIME_CHANGED);
         filter.addAction(Intent.ACTION_BATTERY_CHANGED);
@@ -236,9 +224,7 @@ public class KeyguardUpdateMonitor {
                 final String action = intent.getAction();
                 if (DEBUG) Log.d(TAG, "received broadcast " + action);
 
-                if (Intent.ACTION_CONFIGURATION_CHANGED.equals(action)) {
-                    mHandler.sendMessage(mHandler.obtainMessage(MSG_CONFIGURATION_CHANGED));
-                } else if (Intent.ACTION_TIME_TICK.equals(action)
+                if (Intent.ACTION_TIME_TICK.equals(action)
                         || Intent.ACTION_TIME_CHANGED.equals(action)
                         || Intent.ACTION_TIMEZONE_CHANGED.equals(action)) {
                     mHandler.sendMessage(mHandler.obtainMessage(MSG_TIME_UPDATE));
@@ -281,29 +267,6 @@ public class KeyguardUpdateMonitor {
         if (DEBUG) Log.d(TAG, "handleRingerModeChange(" + mode + ")");
         for (int i = 0; i < mInfoCallbacks.size(); i++) {
             mInfoCallbacks.get(i).onRingerModeChanged(mode);
-        }
-    }
-
-    /**
-     * Handle {@link #MSG_CONFIGURATION_CHANGED}
-     */
-    private void handleConfigurationChange() {
-        if (DEBUG) Log.d(TAG, "handleConfigurationChange");
-
-        final boolean inPortrait = queryInPortrait();
-        if (mInPortrait != inPortrait) {
-            mInPortrait = inPortrait;
-            for (int i = 0; i < mConfigurationChangeCallbacks.size(); i++) {
-                mConfigurationChangeCallbacks.get(i).onOrientationChange(inPortrait);
-            }
-        }
-
-        final boolean keyboardOpen = queryKeyboardOpen();
-        if (mKeyboardOpen != keyboardOpen) {
-            mKeyboardOpen = keyboardOpen;
-            for (int i = 0; i < mConfigurationChangeCallbacks.size(); i++) {
-                mConfigurationChangeCallbacks.get(i).onKeyboardChange(keyboardOpen);
-            }
         }
     }
 
@@ -394,23 +357,6 @@ public class KeyguardUpdateMonitor {
     }
 
     /**
-     * What is the current orientation?
-     */
-    boolean queryInPortrait() {
-        final Configuration configuration = mContext.getResources().getConfiguration();
-        return configuration.orientation == Configuration.ORIENTATION_PORTRAIT;
-    }
-
-    /**
-     * Is the (hard) keyboard currently open?
-     */
-    boolean queryKeyboardOpen() {
-        final Configuration configuration = mContext.getResources().getConfiguration();
-
-        return configuration.hardKeyboardHidden == Configuration.HARDKEYBOARDHIDDEN_NO;
-    }
-
-    /**
      * @param intent The intent with action {@link Telephony.Intents#SPN_STRINGS_UPDATED_ACTION}
      * @return The string to use for the plmn, or null if it should not be shown.
      */
@@ -455,18 +401,8 @@ public class KeyguardUpdateMonitor {
      *   {@link InfoCallback} or {@link SimStateCallback}
      */
     public void removeCallback(Object observer) {
-        mConfigurationChangeCallbacks.remove(observer);
         mInfoCallbacks.remove(observer);
         mSimStateCallbacks.remove(observer);
-    }
-
-    /**
-     * Callback for configuration changes.
-     */
-    interface ConfigurationChangeCallback {
-        void onOrientationChange(boolean inPortrait);
-
-        void onKeyboardChange(boolean isKeyboardOpen);
     }
 
     /**
@@ -507,18 +443,6 @@ public class KeyguardUpdateMonitor {
     }
 
     /**
-     * Register to receive notifications about configuration changes.
-     * @param callback The callback.
-     */
-    public void registerConfigurationChangeCallback(ConfigurationChangeCallback callback) {
-        if (!mConfigurationChangeCallbacks.contains(callback)) {
-            mConfigurationChangeCallbacks.add(callback);
-        } else {
-            Log.e(TAG, "Object tried to add another CONFIG callback", new Exception("Whoops"));
-        }
-    }
-
-    /**
      * Register to receive notifications about general keyguard information
      * (see {@link InfoCallback}.
      * @param callback The callback.
@@ -554,14 +478,6 @@ public class KeyguardUpdateMonitor {
      */
     public void reportSimPinUnlocked() {
         mSimState = IccCard.State.READY;
-    }
-
-    public boolean isInPortrait() {
-        return mInPortrait;
-    }
-
-    public boolean isKeyboardOpen() {
-        return mKeyboardOpen;
     }
 
     public boolean isKeyguardBypassEnabled() {

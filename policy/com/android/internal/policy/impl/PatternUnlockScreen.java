@@ -17,6 +17,7 @@
 package com.android.internal.policy.impl;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.os.CountDownTimer;
 import android.os.SystemClock;
 import android.view.LayoutInflater;
@@ -25,7 +26,6 @@ import android.view.ViewGroup;
 import android.view.MotionEvent;
 import android.widget.Button;
 import android.widget.TextView;
-import android.telephony.TelephonyManager;
 import android.text.format.DateFormat;
 import android.text.TextUtils;
 import android.util.Log;
@@ -44,8 +44,8 @@ import java.util.Date;
  * the user how to unlock their device, or make an emergency call.
  */
 class PatternUnlockScreen extends LinearLayoutWithDefaultTouchRecepient
-        implements KeyguardScreen, KeyguardUpdateMonitor.ConfigurationChangeCallback,
-        KeyguardUpdateMonitor.InfoCallback, KeyguardUpdateMonitor.SimStateCallback {
+        implements KeyguardScreen, KeyguardUpdateMonitor.InfoCallback,
+        KeyguardUpdateMonitor.SimStateCallback {
 
     private static final boolean DEBUG = false;
     private static final String TAG = "UnlockScreen";
@@ -74,8 +74,6 @@ class PatternUnlockScreen extends LinearLayoutWithDefaultTouchRecepient
      * whether there is a fallback option available when the pattern is forgotten.
      */
     private boolean mEnableFallback;
-
-    private boolean mCreatedInPortrait;
 
     private String mDateFormatString;
 
@@ -124,6 +122,7 @@ class PatternUnlockScreen extends LinearLayoutWithDefaultTouchRecepient
     private Button mForgotPatternButton;
     private Button mEmergencyAlone;
     private Button mEmergencyTogether;
+    private int mCreationOrientation;
 
     enum FooterMode {
         Normal,
@@ -150,6 +149,7 @@ class PatternUnlockScreen extends LinearLayoutWithDefaultTouchRecepient
 
     /**
      * @param context The context.
+     * @param configuration
      * @param lockPatternUtils Used to lookup lock pattern settings.
      * @param updateMonitor Used to lookup state affecting keyguard.
      * @param callback Used to notify the manager when we're done, etc.
@@ -159,7 +159,7 @@ class PatternUnlockScreen extends LinearLayoutWithDefaultTouchRecepient
      *        backup option).
      */
     PatternUnlockScreen(Context context,
-                 LockPatternUtils lockPatternUtils,
+                 Configuration configuration, LockPatternUtils lockPatternUtils,
                  KeyguardUpdateMonitor updateMonitor,
                  KeyguardScreenCallback callback,
                  int totalFailedAttempts) {
@@ -168,7 +168,8 @@ class PatternUnlockScreen extends LinearLayoutWithDefaultTouchRecepient
         mUpdateMonitor = updateMonitor;
         mCallback = callback;
         mTotalFailedPatternAttempts = totalFailedAttempts;
-        mFailedPatternAttemptsSinceLastTimeout = totalFailedAttempts % LockPatternUtils.FAILED_ATTEMPTS_BEFORE_TIMEOUT;
+        mFailedPatternAttemptsSinceLastTimeout =
+            totalFailedAttempts % LockPatternUtils.FAILED_ATTEMPTS_BEFORE_TIMEOUT;
 
         if (DEBUG) Log.d(TAG,
             "UnlockScreen() ctor: totalFailedAttempts="
@@ -176,10 +177,13 @@ class PatternUnlockScreen extends LinearLayoutWithDefaultTouchRecepient
                  + mFailedPatternAttemptsSinceLastTimeout
                  );
 
-        if (mUpdateMonitor.isInPortrait()) {
-            LayoutInflater.from(context).inflate(R.layout.keyguard_screen_unlock_portrait, this, true);
+        mCreationOrientation = configuration.orientation;
+
+        LayoutInflater inflater = LayoutInflater.from(context);
+        if (mCreationOrientation != Configuration.ORIENTATION_LANDSCAPE) {
+            inflater.inflate(R.layout.keyguard_screen_unlock_portrait, this, true);
         } else {
-            LayoutInflater.from(context).inflate(R.layout.keyguard_screen_unlock_landscape, this, true);
+            inflater.inflate(R.layout.keyguard_screen_unlock_landscape, this, true);
         }
 
         mCarrier = (TextView) findViewById(R.id.carrier);
@@ -241,10 +245,8 @@ class PatternUnlockScreen extends LinearLayoutWithDefaultTouchRecepient
         // assume normal footer mode for now
         updateFooter(FooterMode.Normal);
 
-        mCreatedInPortrait = updateMonitor.isInPortrait();
         updateMonitor.registerInfoCallback(this);
         updateMonitor.registerSimStateCallback(this);
-        updateMonitor.registerConfigurationChangeCallback(this);
         setFocusableInTouchMode(true);
 
         // Required to get Marquee to work.
@@ -397,12 +399,12 @@ class PatternUnlockScreen extends LinearLayoutWithDefaultTouchRecepient
     }
 
 
-
-
     /** {@inheritDoc} */
-    public void onOrientationChange(boolean inPortrait) {
-        if (inPortrait != mCreatedInPortrait) {
-            mCallback.recreateMe();
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        if (newConfig.orientation != mCreationOrientation) {
+            mCallback.recreateMe(newConfig);
         }
     }
 

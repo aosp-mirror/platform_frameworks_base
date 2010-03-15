@@ -17,6 +17,7 @@
 package com.android.internal.policy.impl;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.Rect;
 
 import com.android.internal.widget.LockPatternUtils;
@@ -42,16 +43,11 @@ import com.android.internal.widget.PasswordEntryKeyboardHelper;
  * Displays a dialer-like interface or alphanumeric (latin-1) key entry for the user to enter
  * an unlock password
  */
-public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen, View.OnClickListener,
-        KeyguardUpdateMonitor.ConfigurationChangeCallback, KeyguardUpdateMonitor.InfoCallback,
-        OnEditorActionListener {
-
-    private static final int DIGIT_PRESS_WAKE_MILLIS = 5000;
+public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen,
+        View.OnClickListener, KeyguardUpdateMonitor.InfoCallback, OnEditorActionListener {
 
     private final KeyguardUpdateMonitor mUpdateMonitor;
     private final KeyguardScreenCallback mCallback;
-
-    private final boolean mCreatedWithKeyboardOpen;
 
     private EditText mPasswordEntry;
     private Button mEmergencyCallButton;
@@ -59,20 +55,26 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
     private PasswordEntryKeyboardView mKeyboardView;
     private PasswordEntryKeyboardHelper mKeyboardHelper;
 
+    private int mCreationOrientation;
+    private int mKeyboardHidden;
+
     // To avoid accidental lockout due to events while the device in in the pocket, ignore
     // any passwords with length less than or equal to this length.
     private static final int MINIMUM_PASSWORD_LENGTH_BEFORE_REPORT = 3;
 
-    public PasswordUnlockScreen(Context context, LockPatternUtils lockPatternUtils,
-            KeyguardUpdateMonitor updateMonitor, KeyguardScreenCallback callback) {
+    public PasswordUnlockScreen(Context context, Configuration configuration,
+            LockPatternUtils lockPatternUtils, KeyguardUpdateMonitor updateMonitor,
+            KeyguardScreenCallback callback) {
         super(context);
+
+        mKeyboardHidden = configuration.hardKeyboardHidden;
+        mCreationOrientation = configuration.orientation;
         mUpdateMonitor = updateMonitor;
         mCallback = callback;
-        mCreatedWithKeyboardOpen = mUpdateMonitor.isKeyboardOpen();
         mLockPatternUtils = lockPatternUtils;
 
         LayoutInflater layoutInflater = LayoutInflater.from(context);
-        if (mUpdateMonitor.isInPortrait()) {
+        if (mCreationOrientation != Configuration.ORIENTATION_LANDSCAPE) {
             layoutInflater.inflate(R.layout.keyguard_screen_password_portrait, this, true);
         } else {
             layoutInflater.inflate(R.layout.keyguard_screen_password_landscape, this, true);
@@ -85,13 +87,13 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
         mEmergencyCallButton = (Button) findViewById(R.id.emergencyCall);
         mEmergencyCallButton.setOnClickListener(this);
         mLockPatternUtils.updateEmergencyCallButtonState(mEmergencyCallButton);
-        mUpdateMonitor.registerConfigurationChangeCallback(this);
 
         mKeyboardHelper = new PasswordEntryKeyboardHelper(context, mKeyboardView, this);
         mKeyboardHelper.setKeyboardMode(isAlpha ? PasswordEntryKeyboardHelper.KEYBOARD_MODE_ALPHA
                 : PasswordEntryKeyboardHelper.KEYBOARD_MODE_NUMERIC);
 
-        mKeyboardView.setVisibility(mCreatedWithKeyboardOpen ? View.INVISIBLE : View.VISIBLE);
+        mKeyboardView.setVisibility(mKeyboardHidden == Configuration.HARDKEYBOARDHIDDEN_NO
+                ? View.INVISIBLE : View.VISIBLE);
         mPasswordEntry.requestFocus();
 
         // This allows keyboards with overlapping qwerty/numeric keys to choose just the
@@ -104,7 +106,6 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
 
         mKeyboardHelper.setVibratePattern(mLockPatternUtils.isTactileFeedbackEnabled() ?
                 com.android.internal.R.array.config_virtualKeyVibePattern : 0);
-
     }
 
     @Override
@@ -162,8 +163,13 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
         return false;
     }
 
-    public void onOrientationChange(boolean inPortrait) {
-        mCallback.recreateMe();
+    /** {@inheritDoc} */
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        if (newConfig.orientation != mCreationOrientation) {
+            mCallback.recreateMe(newConfig);
+        }
     }
 
     public void onKeyboardChange(boolean isKeyboardOpen) {

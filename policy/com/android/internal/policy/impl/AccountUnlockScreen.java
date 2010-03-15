@@ -27,6 +27,7 @@ import android.accounts.AuthenticatorException;
 import android.accounts.AccountManagerCallback;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.telephony.TelephonyManager;
 import android.text.Editable;
@@ -79,10 +80,10 @@ public class AccountUnlockScreen extends RelativeLayout implements KeyguardScree
 
     /**
      * AccountUnlockScreen constructor.
+     * @param configuration
      */
-    public AccountUnlockScreen(Context context,
-                               KeyguardScreenCallback callback,
-                               LockPatternUtils lockPatternUtils) {
+    public AccountUnlockScreen(Context context,Configuration configuration,
+            KeyguardScreenCallback callback, LockPatternUtils lockPatternUtils) {
         super(context);
         mCallback = callback;
         mLockPatternUtils = lockPatternUtils;

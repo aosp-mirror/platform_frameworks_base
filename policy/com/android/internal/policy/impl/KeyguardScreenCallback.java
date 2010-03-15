@@ -16,6 +16,8 @@
 
 package com.android.internal.policy.impl;
 
+import android.content.res.Configuration;
+
 /**
  * Within a keyguard, there may be several screens that need a callback
  * to the host keyguard view.
@@ -55,7 +57,7 @@ public interface KeyguardScreenCallback extends KeyguardViewCallback {
     /**
      * Stay on me, but recreate me (so I can use a different layout).
      */
-    void recreateMe();
+    void recreateMe(Configuration config);
 
     /**
      * Take action to send an emergency call.

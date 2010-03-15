@@ -18,15 +18,13 @@ package com.android.internal.policy.impl;
 
 import com.android.internal.R;
 import com.android.internal.telephony.IccCard;
-import com.android.internal.telephony.Phone;
-import com.android.internal.telephony.Phone.State;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.SlidingTab;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.ColorStateList;
-import android.telephony.TelephonyManager;
 import android.text.format.DateFormat;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -36,6 +34,7 @@ import android.widget.*;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.media.AudioManager;
+import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.provider.Settings;
 
@@ -48,8 +47,7 @@ import java.io.File;
  * past it, as applicable.
  */
 class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateMonitor.InfoCallback,
-        KeyguardUpdateMonitor.SimStateCallback, KeyguardUpdateMonitor.ConfigurationChangeCallback,
-        SlidingTab.OnTriggerListener {
+        KeyguardUpdateMonitor.SimStateCallback, SlidingTab.OnTriggerListener {
 
     private static final boolean DBG = false;
     private static final String TAG = "LockScreen";
@@ -70,6 +68,10 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
     private TextView mScreenLocked;
     private Button mEmergencyCallButton;
 
+    // current configuration state of keyboard and display
+    private int mKeyboardHidden;
+    private int mCreationOrientation;
+
     // are we showing battery information?
     private boolean mShowingBatteryInfo = false;
 
@@ -88,7 +90,6 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
     private AudioManager mAudioManager;
     private String mDateFormatString;
     private java.text.DateFormat mTimeFormat;
-    private boolean mCreatedInPortrait;
     private boolean mEnableMenuKeyInLockScreen;
 
     /**
@@ -159,12 +160,13 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
 
     /**
      * @param context Used to setup the view.
+     * @param configuration The current configuration. Used to use when selecting layout, etc.
      * @param lockPatternUtils Used to know the state of the lock pattern settings.
      * @param updateMonitor Used to register for updates on various keyguard related
      *    state, and query the initial state at setup.
      * @param callback Used to communicate back to the host keyguard view.
      */
-    LockScreen(Context context, LockPatternUtils lockPatternUtils,
+    LockScreen(Context context, Configuration configuration, LockPatternUtils lockPatternUtils,
             KeyguardUpdateMonitor updateMonitor,
             KeyguardScreenCallback callback) {
         super(context);
@@ -174,10 +176,13 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
 
         mEnableMenuKeyInLockScreen = shouldEnableMenuKey();
 
-        mCreatedInPortrait = updateMonitor.isInPortrait();
+        mCreationOrientation = configuration.orientation;
+
+        mKeyboardHidden = configuration.hardKeyboardHidden;
 
         final LayoutInflater inflater = LayoutInflater.from(context);
-        if (mCreatedInPortrait) {
+        if (DBG) Log.v(TAG, "Creation orientation = " + mCreationOrientation);
+        if (mCreationOrientation != Configuration.ORIENTATION_LANDSCAPE) {
             inflater.inflate(R.layout.keyguard_screen_tab_unlock, this, true);
         } else {
             inflater.inflate(R.layout.keyguard_screen_tab_unlock_land, this, true);
@@ -211,7 +216,6 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
 
         updateMonitor.registerInfoCallback(this);
         updateMonitor.registerSimStateCallback(this);
-        updateMonitor.registerConfigurationChangeCallback(this);
 
         mAudioManager = (AudioManager) getContext().getSystemService(Context.AUDIO_SERVICE);
         mSilentMode = isSilentMode();
@@ -234,14 +238,14 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
     }
 
     private void updateRightTabResources() {
-        boolean vibe = mSilentMode 
+        boolean vibe = mSilentMode
             && (mAudioManager.getRingerMode() == AudioManager.RINGER_MODE_VIBRATE);
 
         mSelector.setRightTabResources(
                 mSilentMode ? ( vibe ? R.drawable.ic_jog_dial_vibrate_on
-                                     : R.drawable.ic_jog_dial_sound_off ) 
+                                     : R.drawable.ic_jog_dial_sound_off )
                             : R.drawable.ic_jog_dial_sound_on,
-                mSilentMode ? R.drawable.jog_tab_target_yellow 
+                mSilentMode ? R.drawable.jog_tab_target_yellow
                             : R.drawable.jog_tab_target_gray,
                 mSilentMode ? R.drawable.jog_tab_bar_right_sound_on
                             : R.drawable.jog_tab_bar_right_sound_off,
@@ -288,7 +292,7 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
                     Settings.System.VIBRATE_IN_SILENT, 1) == 1);
 
                 mAudioManager.setRingerMode(vibe
-                    ? AudioManager.RINGER_MODE_VIBRATE 
+                    ? AudioManager.RINGER_MODE_VIBRATE
                     : AudioManager.RINGER_MODE_SILENT);
             } else {
                 mAudioManager.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
@@ -367,7 +371,6 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
     }
     private Runnable mPendingR1;
     private Runnable mPendingR2;
-
 
     private void refreshAlarmDisplay() {
         mNextAlarm = mLockPatternUtils.getNextAlarm();
@@ -455,13 +458,6 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
     public void onRefreshCarrierInfo(CharSequence plmn, CharSequence spn) {
         if (DBG) Log.d(TAG, "onRefreshCarrierInfo(" + plmn + ", " + spn + ")");
         updateLayout(mStatus);
-    }
-
-    private void addRelativeLayoutRule(View view, int rule, int viewId) {
-        final RelativeLayout.LayoutParams layoutParams =
-                (RelativeLayout.LayoutParams) view.getLayoutParams();
-        layoutParams.addRule(rule, viewId);
-        view.setLayoutParams(layoutParams);
     }
 
     /**
@@ -604,19 +600,26 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
         updateStatusLines();
     }
 
-
-    public void onOrientationChange(boolean inPortrait) {
-        if (inPortrait != mCreatedInPortrait) {
-            mCallback.recreateMe();
+    /** {@inheritDoc} */
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        if (DBG) {
+            Log.v(TAG, "onConfigurationChanged() time " + SystemClock.elapsedRealtime());
+            if (getResources().getConfiguration().orientation != newConfig.orientation) {
+                Log.e(TAG, "mismatchConfig: ", new Exception("stack trace:"));
+            }
+        }
+        if (newConfig.orientation != mCreationOrientation) {
+            mCallback.recreateMe(newConfig);
+        } else if (newConfig.hardKeyboardHidden != mKeyboardHidden) {
+            mKeyboardHidden = newConfig.hardKeyboardHidden;
+            final boolean isKeyboardOpen = mKeyboardHidden == Configuration.HARDKEYBOARDHIDDEN_NO;
+            if (mUpdateMonitor.isKeyguardBypassEnabled() && isKeyboardOpen) {
+                mCallback.goToUnlockScreen();
+            }
         }
     }
-
-    public void onKeyboardChange(boolean isKeyboardOpen) {
-        if (mUpdateMonitor.isKeyguardBypassEnabled() && isKeyboardOpen) {
-            mCallback.goToUnlockScreen();
-        }
-    }
-
 
     /** {@inheritDoc} */
     public boolean needsInput() {
