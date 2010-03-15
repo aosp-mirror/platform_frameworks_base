@@ -36,9 +36,9 @@ public class SynthProxy {
     // Such a huge filter gain is justified by how much energy in the low frequencies is "wasted" at
     // the output of the synthesis. The low shelving filter removes it, leaving room for
     // amplification.
-    private final static float PICO_FILTER_GAIN = 4.0f; // linear gain
-    private final static float PICO_FILTER_LOWSHELF_ATTENUATION = -16.0f; // in dB
-    private final static float PICO_FILTER_TRANSITION_FREQ = 1000.0f;     // in Hz
+    private final static float PICO_FILTER_GAIN = 5.0f; // linear gain
+    private final static float PICO_FILTER_LOWSHELF_ATTENUATION = -18.0f; // in dB
+    private final static float PICO_FILTER_TRANSITION_FREQ = 1100.0f;     // in Hz
     private final static float PICO_FILTER_SHELF_SLOPE = 1.0f;            // Q
 
     //
