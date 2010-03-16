@@ -16,6 +16,8 @@
 
 package android.content;
 
+import com.android.internal.os.AtomicFile;
+
 import android.test.AndroidTestCase;
 import android.test.RenamingDelegatingContext;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -26,6 +28,7 @@ import android.os.Bundle;
 
 import java.util.List;
 import java.io.File;
+import java.io.FileOutputStream;
 
 public class SyncStorageEngineTest extends AndroidTestCase {
 
@@ -192,6 +195,109 @@ public class SyncStorageEngineTest extends AndroidTestCase {
         assertEquals(1, engine.getIsSyncable(account2, authority1));
         assertEquals(1, engine.getIsSyncable(account1, authority2));
         assertEquals(0, engine.getIsSyncable(account2, authority2));
+    }
+
+    @SmallTest
+    public void testAuthorityParsing() throws Exception {
+        final Account account = new Account("account1", "type1");
+        final String authority1 = "auth1";
+        final String authority2 = "auth2";
+        final String authority3 = "auth3";
+        final Bundle extras = new Bundle();
+        PeriodicSync sync1 = new PeriodicSync(account, authority1, extras, (long) (60 * 60 * 24));
+        PeriodicSync sync2 = new PeriodicSync(account, authority2, extras, (long) (60 * 60 * 24));
+        PeriodicSync sync3 = new PeriodicSync(account, authority3, extras, (long) (60 * 60 * 24));
+        PeriodicSync sync1s = new PeriodicSync(account, authority1, extras, 1000);
+        PeriodicSync sync2s = new PeriodicSync(account, authority2, extras, 1000);
+        PeriodicSync sync3s = new PeriodicSync(account, authority3, extras, 1000);
+
+        MockContentResolver mockResolver = new MockContentResolver();
+
+        final TestContext testContext = new TestContext(mockResolver, getContext());
+        SyncStorageEngine engine = SyncStorageEngine.newTestInstance(testContext);
+
+        byte[] accountsFileData = ("<?xml version='1.0' encoding='utf-8' standalone='yes' ?>\n"
+                + "<accounts>\n"
+                + "<authority id=\"0\" account=\"account1\" type=\"type1\" authority=\"auth1\" />\n"
+                + "<authority id=\"1\" account=\"account1\" type=\"type1\" authority=\"auth2\" />\n"
+                + "<authority id=\"2\" account=\"account1\" type=\"type1\" authority=\"auth3\" />\n"
+                + "</accounts>\n").getBytes();
+
+        File syncDir = new File(new File(testContext.getFilesDir(), "system"), "sync");
+        syncDir.mkdirs();
+        AtomicFile accountInfoFile = new AtomicFile(new File(syncDir, "accounts.xml"));
+        FileOutputStream fos = accountInfoFile.startWrite();
+        fos.write(accountsFileData);
+        accountInfoFile.finishWrite(fos);
+
+        engine.clearAndReadState();
+
+        List<PeriodicSync> syncs = engine.getPeriodicSyncs(account, authority1);
+        assertEquals(1, syncs.size());
+        assertEquals(sync1, syncs.get(0));
+
+        syncs = engine.getPeriodicSyncs(account, authority2);
+        assertEquals(1, syncs.size());
+        assertEquals(sync2, syncs.get(0));
+
+        syncs = engine.getPeriodicSyncs(account, authority3);
+        assertEquals(1, syncs.size());
+        assertEquals(sync3, syncs.get(0));
+
+        accountsFileData = ("<?xml version='1.0' encoding='utf-8' standalone='yes' ?>\n"
+                + "<accounts version=\"1\">\n"
+                + "<authority id=\"0\" account=\"account1\" type=\"type1\" authority=\"auth1\" />\n"
+                + "<authority id=\"1\" account=\"account1\" type=\"type1\" authority=\"auth2\" />\n"
+                + "<authority id=\"2\" account=\"account1\" type=\"type1\" authority=\"auth3\" />\n"
+                + "</accounts>\n").getBytes();
+
+        accountInfoFile = new AtomicFile(new File(syncDir, "accounts.xml"));
+        fos = accountInfoFile.startWrite();
+        fos.write(accountsFileData);
+        accountInfoFile.finishWrite(fos);
+
+        engine.clearAndReadState();
+
+        syncs = engine.getPeriodicSyncs(account, authority1);
+        assertEquals(0, syncs.size());
+
+        syncs = engine.getPeriodicSyncs(account, authority2);
+        assertEquals(0, syncs.size());
+
+        syncs = engine.getPeriodicSyncs(account, authority3);
+        assertEquals(0, syncs.size());
+
+        accountsFileData = ("<?xml version='1.0' encoding='utf-8' standalone='yes' ?>\n"
+                + "<accounts version=\"1\">\n"
+                + "<authority id=\"0\" account=\"account1\" type=\"type1\" authority=\"auth1\">\n"
+                + "<periodicSync period=\"1000\" />\n"
+                + "</authority>"
+                + "<authority id=\"1\" account=\"account1\" type=\"type1\" authority=\"auth2\">\n"
+                + "<periodicSync period=\"1000\" />\n"
+                + "</authority>"
+                + "<authority id=\"2\" account=\"account1\" type=\"type1\" authority=\"auth3\">\n"
+                + "<periodicSync period=\"1000\" />\n"
+                + "</authority>"
+                + "</accounts>\n").getBytes();
+
+        accountInfoFile = new AtomicFile(new File(syncDir, "accounts.xml"));
+        fos = accountInfoFile.startWrite();
+        fos.write(accountsFileData);
+        accountInfoFile.finishWrite(fos);
+
+        engine.clearAndReadState();
+
+        syncs = engine.getPeriodicSyncs(account, authority1);
+        assertEquals(1, syncs.size());
+        assertEquals(sync1s, syncs.get(0));
+
+        syncs = engine.getPeriodicSyncs(account, authority2);
+        assertEquals(1, syncs.size());
+        assertEquals(sync2s, syncs.get(0));
+
+        syncs = engine.getPeriodicSyncs(account, authority3);
+        assertEquals(1, syncs.size());
+        assertEquals(sync3s, syncs.get(0));
     }
 }
 

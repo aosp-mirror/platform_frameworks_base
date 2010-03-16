@@ -121,6 +121,9 @@ public class SyncStorageEngine extends Handler {
 
     private static final boolean SYNC_ENABLED_DEFAULT = false;
 
+    // the version of the accounts xml file format
+    private static final int ACCOUNTS_VERSION = 1;
+
     public static class PendingOperation {
         final Account account;
         final int syncSource;
@@ -1322,6 +1325,7 @@ public class SyncStorageEngine extends Handler {
      * Read all account information back in to the initial engine state.
      */
     private void readAccountInfoLocked() {
+        boolean writeNeeded = false;
         FileInputStream fis = null;
         try {
             fis = mAccountInfoFile.openRead();
@@ -1336,6 +1340,16 @@ public class SyncStorageEngine extends Handler {
             if ("accounts".equals(tagName)) {
                 String listen = parser.getAttributeValue(
                         null, "listen-for-tickles");
+                String versionString = parser.getAttributeValue(null, "version");
+                int version;
+                try {
+                    version = (versionString == null) ? 0 : Integer.parseInt(versionString);
+                } catch (NumberFormatException e) {
+                    version = 0;
+                }
+                if (version < ACCOUNTS_VERSION) {
+                    writeNeeded = true;
+                }
                 mMasterSyncAutomatically = listen == null
                             || Boolean.parseBoolean(listen);
                 eventType = parser.next();
@@ -1346,7 +1360,7 @@ public class SyncStorageEngine extends Handler {
                         tagName = parser.getName();
                         if (parser.getDepth() == 2) {
                             if ("authority".equals(tagName)) {
-                                authority = parseAuthority(parser);
+                                authority = parseAuthority(parser, version);
                                 periodicSync = null;
                             }
                         } else if (parser.getDepth() == 3) {
@@ -1364,9 +1378,11 @@ public class SyncStorageEngine extends Handler {
             }
         } catch (XmlPullParserException e) {
             Log.w(TAG, "Error reading accounts", e);
+            return;
         } catch (java.io.IOException e) {
             if (fis == null) Log.i(TAG, "No initial accounts");
             else Log.w(TAG, "Error reading accounts", e);
+            return;
         } finally {
             if (fis != null) {
                 try {
@@ -1375,9 +1391,13 @@ public class SyncStorageEngine extends Handler {
                 }
             }
         }
+
+        if (writeNeeded) {
+            writeAccountInfoLocked();
+        }
     }
 
-    private AuthorityInfo parseAuthority(XmlPullParser parser) {
+    private AuthorityInfo parseAuthority(XmlPullParser parser, int version) {
         AuthorityInfo authority = null;
         int id = -1;
         try {
@@ -1406,8 +1426,14 @@ public class SyncStorageEngine extends Handler {
                 if (DEBUG_FILE) Log.v(TAG, "Creating entry");
                 authority = getOrCreateAuthorityLocked(
                         new Account(accountName, accountType), authorityName, id, false);
-                // clear this since we will read these later on
-                authority.periodicSyncs.clear();
+                // If the version is 0 then we are upgrading from a file format that did not
+                // know about periodic syncs. In that case don't clear the list since we
+                // want the default, which is a daily periodioc sync.
+                // Otherwise clear out this default list since we will populate it later with
+                // the periodic sync descriptions that are read from the configuration file.
+                if (version > 0) {
+                    authority.periodicSyncs.clear();
+                }
             }
             if (authority != null) {
                 authority.enabled = enabled == null || Boolean.parseBoolean(enabled);
@@ -1443,6 +1469,7 @@ public class SyncStorageEngine extends Handler {
         }
         final Pair<Bundle, Long> periodicSync = Pair.create(extras, period);
         authority.periodicSyncs.add(periodicSync);
+
         return periodicSync;
     }
 
@@ -1491,6 +1518,7 @@ public class SyncStorageEngine extends Handler {
             out.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
 
             out.startTag(null, "accounts");
+            out.attribute(null, "version", Integer.toString(ACCOUNTS_VERSION));
             if (!mMasterSyncAutomatically) {
                 out.attribute(null, "listen-for-tickles", "false");
             }
@@ -1505,7 +1533,7 @@ public class SyncStorageEngine extends Handler {
                 out.attribute(null, "authority", authority.authority);
                 if (!authority.enabled) {
                     out.attribute(null, "enabled", "false");
-                }
+                }   
                 if (authority.syncable < 0) {
                     out.attribute(null, "syncable", "unknown");
                 } else if (authority.syncable == 0) {
