@@ -29,7 +29,7 @@ class ViewManager {
     private boolean mReadyToDraw;
 
     // Threshold at which a surface is prevented from further increasing in size
-    private static final int MAX_SURFACE_THRESHOLD = 1000000;
+    private final int MAX_SURFACE_THRESHOLD;
 
     class ChildView {
         int x;
@@ -103,6 +103,14 @@ class ViewManager {
 
     ViewManager(WebView w) {
         mWebView = w;
+
+        int pixelArea = w.getResources().getDisplayMetrics().widthPixels *
+                        w.getResources().getDisplayMetrics().heightPixels;
+        /* set the threshold to be 275% larger than the screen size. The
+           percentage is simply an estimation and is not based on anything but
+           basic trial-and-error tests run on multiple devices.
+         */
+        MAX_SURFACE_THRESHOLD = (int)(pixelArea * 2.75);
     }
 
     ChildView createView() {
