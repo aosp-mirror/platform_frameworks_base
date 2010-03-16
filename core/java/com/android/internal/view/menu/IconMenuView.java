@@ -179,6 +179,10 @@ public final class IconMenuView extends ViewGroup implements ItemInvoker, MenuVi
      */
     private void layoutItems(int width) {
         int numItems = getChildCount();
+        if (numItems == 0) {
+            mLayoutNumRows = 0;
+            return;
+        }
         
         // Start with the least possible number of rows
         int curNumRows =
@@ -470,15 +474,18 @@ public final class IconMenuView extends ViewGroup implements ItemInvoker, MenuVi
         
         // Get the desired height of the icon menu view (last row of items does
         // not have a divider below)
+        final int layoutNumRows = mLayoutNumRows;
         final int desiredHeight = (mRowHeight + mHorizontalDividerHeight) *
-                mLayoutNumRows - mHorizontalDividerHeight;
+                layoutNumRows - mHorizontalDividerHeight;
         
         // Maximum possible width and desired height
         setMeasuredDimension(measuredWidth,
                 resolveSize(desiredHeight, heightMeasureSpec));
 
         // Position the children
-        positionChildren(mMeasuredWidth, mMeasuredHeight);
+        if (layoutNumRows > 0) {
+            positionChildren(mMeasuredWidth, mMeasuredHeight);
+        }
     }
 
 
