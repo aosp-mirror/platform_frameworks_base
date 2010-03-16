@@ -959,8 +959,7 @@ public class WifiService extends IWifiManager.Stub {
          */
         int netId = config.networkId;
         boolean newNetwork = netId == -1;
-        boolean doReconfig;
-        int currentPriority;
+        boolean doReconfig = false;
         // networkId of -1 means we want to create a new network
         synchronized (mWifiStateTracker) {
             if (newNetwork) {
@@ -972,17 +971,6 @@ public class WifiService extends IWifiManager.Stub {
                     return -1;
                 }
                 doReconfig = true;
-            } else {
-                String priorityVal = mWifiStateTracker.getNetworkVariable(
-                                            netId, WifiConfiguration.priorityVarName);
-                currentPriority = -1;
-                if (!TextUtils.isEmpty(priorityVal)) {
-                    try {
-                        currentPriority = Integer.parseInt(priorityVal);
-                    } catch (NumberFormatException ignore) {
-                    }
-                }
-                doReconfig = currentPriority != config.priority;
             }
             mNeedReconfig = mNeedReconfig || doReconfig;
         }
