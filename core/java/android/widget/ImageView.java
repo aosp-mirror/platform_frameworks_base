@@ -769,8 +769,8 @@ public class ImageView extends View {
             } else if (ScaleType.CENTER == mScaleType) {
                 // Center bitmap in view, no scaling.
                 mDrawMatrix = mMatrix;
-                mDrawMatrix.setTranslate((vwidth - dwidth) * 0.5f,
-                                         (vheight - dheight) * 0.5f);
+                mDrawMatrix.setTranslate((int) ((vwidth - dwidth) * 0.5f + 0.5f),
+                                         (int) ((vheight - dheight) * 0.5f + 0.5f));
             } else if (ScaleType.CENTER_CROP == mScaleType) {
                 mDrawMatrix = mMatrix;
 
@@ -786,7 +786,7 @@ public class ImageView extends View {
                 }
 
                 mDrawMatrix.setScale(scale, scale);
-                mDrawMatrix.postTranslate(dx, dy);
+                mDrawMatrix.postTranslate((int) (dx + 0.5f), (int) (dy + 0.5f));
             } else if (ScaleType.CENTER_INSIDE == mScaleType) {
                 mDrawMatrix = mMatrix;
                 float scale;
@@ -800,8 +800,8 @@ public class ImageView extends View {
                             (float) vheight / (float) dheight);
                 }
                 
-                dx = (vwidth - dwidth * scale) * 0.5f;
-                dy = (vheight - dheight * scale) * 0.5f;
+                dx = (int) ((vwidth - dwidth * scale) * 0.5f + 0.5f);
+                dy = (int) ((vheight - dheight * scale) * 0.5f + 0.5f);
 
                 mDrawMatrix.setScale(scale, scale);
                 mDrawMatrix.postTranslate(dx, dy);
