@@ -25,6 +25,7 @@
 
 #include <binder/IMemory.h>
 #include <media/stagefright/MediaDebug.h>
+#include <media/stagefright/MediaErrors.h>
 
 namespace android {
 
@@ -105,7 +106,14 @@ OMX::node_id OMXNodeInstance::nodeID() {
 }
 
 static status_t StatusFromOMXError(OMX_ERRORTYPE err) {
-    return (err == OMX_ErrorNone) ? OK : UNKNOWN_ERROR;
+    switch (err) {
+        case OMX_ErrorNone:
+            return OK;
+        case OMX_ErrorUnsupportedSetting:
+            return ERROR_UNSUPPORTED;
+        default:
+            return UNKNOWN_ERROR;
+    }
 }
 
 status_t OMXNodeInstance::freeNode(OMXMaster *master) {

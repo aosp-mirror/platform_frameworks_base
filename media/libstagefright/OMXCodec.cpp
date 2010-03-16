@@ -366,7 +366,6 @@ sp<MediaSource> OMXCodec::Create(
 
     sp<OMXCodecObserver> observer = new OMXCodecObserver;
     IOMX::node_id node = 0;
-    success = false;
 
     const char *componentName;
     for (size_t i = 0; i < matchingCodecs.size(); ++i) {
@@ -389,22 +388,27 @@ sp<MediaSource> OMXCodec::Create(
         if (err == OK) {
             LOGV("Successfully allocated OMX node '%s'", componentName);
 
-            success = true;
-            break;
+            sp<OMXCodec> codec = new OMXCodec(
+                    omx, node, getComponentQuirks(componentName),
+                    createEncoder, mime, componentName,
+                    source);
+
+            observer->setCodec(codec);
+
+            err = codec->configureCodec(meta);
+
+            if (err == OK) {
+                return codec;
+            }
+
+            LOGV("Failed to configure codec '%s'", componentName);
         }
     }
 
-    if (!success) {
-        return NULL;
-    }
+    return NULL;
+}
 
-    sp<OMXCodec> codec = new OMXCodec(
-            omx, node, getComponentQuirks(componentName),
-            createEncoder, mime, componentName,
-            source);
-
-    observer->setCodec(codec);
-
+status_t OMXCodec::configureCodec(const sp<MetaData> &meta) {
     uint32_t type;
     const void *data;
     size_t size;
@@ -417,7 +421,7 @@ sp<MediaSource> OMXCodec::Create(
         esds.getCodecSpecificInfo(
                 &codec_specific_data, &codec_specific_data_size);
 
-        codec->addCodecSpecificData(
+        addCodecSpecificData(
                 codec_specific_data, codec_specific_data_size);
     } else if (meta->findData(kKeyAVCC, &type, &data, &size)) {
         // Parse the AVCDecoderConfigurationRecord
@@ -453,7 +457,7 @@ sp<MediaSource> OMXCodec::Create(
 
             CHECK(size >= length);
 
-            codec->addCodecSpecificData(ptr, length);
+            addCodecSpecificData(ptr, length);
 
             ptr += length;
             size -= length;
@@ -473,7 +477,7 @@ sp<MediaSource> OMXCodec::Create(
 
             CHECK(size >= length);
 
-            codec->addCodecSpecificData(ptr, length);
+            addCodecSpecificData(ptr, length);
 
             ptr += length;
             size -= length;
@@ -482,44 +486,49 @@ sp<MediaSource> OMXCodec::Create(
         LOGV("AVC profile = %d (%s), level = %d",
              (int)profile, AVCProfileToString(profile), (int)level / 10);
 
-        if (!strcmp(componentName, "OMX.TI.Video.Decoder")
+        if (!strcmp(mComponentName, "OMX.TI.Video.Decoder")
             && (profile != kAVCProfileBaseline || level > 39)) {
             // This stream exceeds the decoder's capabilities. The decoder
             // does not handle this gracefully and would clobber the heap
             // and wreak havoc instead...
 
             LOGE("Profile and/or level exceed the decoder's capabilities.");
-            return NULL;
+            return ERROR_UNSUPPORTED;
         }
     }
 
-    if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_AMR_NB, mime)) {
-        codec->setAMRFormat(false /* isWAMR */);
+    if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_AMR_NB, mMIME)) {
+        setAMRFormat(false /* isWAMR */);
     }
-    if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_AMR_WB, mime)) {
-        codec->setAMRFormat(true /* isWAMR */);
+    if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_AMR_WB, mMIME)) {
+        setAMRFormat(true /* isWAMR */);
     }
-    if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_AAC, mime)) {
+    if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_AAC, mMIME)) {
         int32_t numChannels, sampleRate;
         CHECK(meta->findInt32(kKeyChannelCount, &numChannels));
         CHECK(meta->findInt32(kKeySampleRate, &sampleRate));
 
-        codec->setAACFormat(numChannels, sampleRate);
+        setAACFormat(numChannels, sampleRate);
     }
-    if (!strncasecmp(mime, "video/", 6)) {
+    if (!strncasecmp(mMIME, "video/", 6)) {
         int32_t width, height;
         bool success = meta->findInt32(kKeyWidth, &width);
         success = success && meta->findInt32(kKeyHeight, &height);
         CHECK(success);
 
-        if (createEncoder) {
-            codec->setVideoInputFormat(mime, width, height);
+        if (mIsEncoder) {
+            setVideoInputFormat(mMIME, width, height);
         } else {
-            codec->setVideoOutputFormat(mime, width, height);
+            status_t err = setVideoOutputFormat(
+                    mMIME, width, height);
+
+            if (err != OK) {
+                return err;
+            }
         }
     }
-    if (!strcasecmp(mime, MEDIA_MIMETYPE_IMAGE_JPEG)
-        && !strcmp(componentName, "OMX.TI.JPEG.decode")) {
+    if (!strcasecmp(mMIME, MEDIA_MIMETYPE_IMAGE_JPEG)
+        && !strcmp(mComponentName, "OMX.TI.JPEG.decode")) {
         OMX_COLOR_FORMATTYPE format =
             OMX_COLOR_Format32bitARGB8888;
             // OMX_COLOR_FormatYUV420PackedPlanar;
@@ -537,23 +546,23 @@ sp<MediaSource> OMXCodec::Create(
         CHECK(success);
         CHECK(compressedSize > 0);
 
-        codec->setImageOutputFormat(format, width, height);
-        codec->setJPEGInputFormat(width, height, (OMX_U32)compressedSize);
+        setImageOutputFormat(format, width, height);
+        setJPEGInputFormat(width, height, (OMX_U32)compressedSize);
     }
 
     int32_t maxInputSize;
     if (meta->findInt32(kKeyMaxInputSize, &maxInputSize)) {
-        codec->setMinBufferSize(kPortIndexInput, (OMX_U32)maxInputSize);
+        setMinBufferSize(kPortIndexInput, (OMX_U32)maxInputSize);
     }
 
-    if (!strcmp(componentName, "OMX.TI.AMR.encode")
-        || !strcmp(componentName, "OMX.TI.WBAMR.encode")) {
-        codec->setMinBufferSize(kPortIndexOutput, 8192);  // XXX
+    if (!strcmp(mComponentName, "OMX.TI.AMR.encode")
+        || !strcmp(mComponentName, "OMX.TI.WBAMR.encode")) {
+        setMinBufferSize(kPortIndexOutput, 8192);  // XXX
     }
 
-    codec->initOutputFormat(meta);
+    initOutputFormat(meta);
 
-    return codec;
+    return OK;
 }
 
 void OMXCodec::setMinBufferSize(OMX_U32 portIndex, OMX_U32 size) {
@@ -902,7 +911,7 @@ status_t OMXCodec::setupAVCEncoderParameters() {
     return OK;
 }
 
-void OMXCodec::setVideoOutputFormat(
+status_t OMXCodec::setVideoOutputFormat(
         const char *mime, OMX_U32 width, OMX_U32 height) {
     CODEC_LOGV("setVideoOutputFormat width=%ld, height=%ld", width, height);
 
@@ -918,8 +927,12 @@ void OMXCodec::setVideoOutputFormat(
         CHECK(!"Should not be here. Not a supported video mime type.");
     }
 
-    setVideoPortFormatType(
+    status_t err = setVideoPortFormatType(
             kPortIndexInput, compressionFormat, OMX_COLOR_FormatUnused);
+
+    if (err != OK) {
+        return err;
+    }
 
 #if 1
     {
@@ -944,7 +957,10 @@ void OMXCodec::setVideoOutputFormat(
         err = mOMX->setParameter(
                 mNode, OMX_IndexParamVideoPortFormat,
                 &format, sizeof(format));
-        CHECK_EQ(err, OK);
+
+        if (err != OK) {
+            return err;
+        }
     }
 #endif
 
@@ -954,7 +970,7 @@ void OMXCodec::setVideoOutputFormat(
 
     OMX_VIDEO_PORTDEFINITIONTYPE *video_def = &def.format.video;
 
-    status_t err = mOMX->getParameter(
+    err = mOMX->getParameter(
             mNode, OMX_IndexParamPortDefinition, &def, sizeof(def));
 
     CHECK_EQ(err, OK);
@@ -977,7 +993,10 @@ void OMXCodec::setVideoOutputFormat(
 
     err = mOMX->setParameter(
             mNode, OMX_IndexParamPortDefinition, &def, sizeof(def));
-    CHECK_EQ(err, OK);
+
+    if (err != OK) {
+        return err;
+    }
 
     ////////////////////////////////////////////////////////////////////////////
 
@@ -999,7 +1018,8 @@ void OMXCodec::setVideoOutputFormat(
 
     err = mOMX->setParameter(
             mNode, OMX_IndexParamPortDefinition, &def, sizeof(def));
-    CHECK_EQ(err, OK);
+
+    return err;
 }
 
 OMXCodec::OMXCodec(
