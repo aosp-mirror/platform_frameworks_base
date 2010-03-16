@@ -20,7 +20,6 @@ import android.app.Activity;
 import android.app.ActivityManagerNative;
 import android.app.AlarmManager;
 import android.app.IActivityManager;
-import android.app.KeyguardManager;
 import android.app.IUiModeManager;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -103,7 +102,6 @@ class UiModeManagerService extends IUiModeManager.Stub {
     private LocationManager mLocationManager;
     private Location mLocation;
     private StatusBarManager mStatusBarManager;
-    private KeyguardManager.KeyguardLock mKeyguardLock;
     private final PowerManager.WakeLock mWakeLock;
 
     // The broadcast receiver which receives the result of the ordered broadcast sent when
@@ -347,24 +345,6 @@ class UiModeManagerService extends IUiModeManager.Stub {
     void setCarModeLocked(boolean enabled) {
         if (mCarModeEnabled != enabled) {
             mCarModeEnabled = enabled;
-
-            // Disable keyguard when in car mode
-            if (mKeyguardLock == null) {
-                KeyguardManager km =
-                        (KeyguardManager)mContext.getSystemService(Context.KEYGUARD_SERVICE);
-                if (km != null) {
-                    mKeyguardLock = km.newKeyguardLock(TAG);
-                }
-            }
-            if (mKeyguardLock != null) {
-                long ident = Binder.clearCallingIdentity();
-                if (enabled) {
-                    mKeyguardLock.disableKeyguard();
-                } else {
-                    mKeyguardLock.reenableKeyguard();
-                }
-                Binder.restoreCallingIdentity(ident);
-            }
         }
     }
 
