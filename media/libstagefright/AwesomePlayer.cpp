@@ -624,8 +624,6 @@ status_t AwesomePlayer::pause_l() {
 }
 
 bool AwesomePlayer::isPlaying() const {
-    Mutex::Autolock autoLock(mLock);
-
     return mFlags & PLAYING;
 }
 
