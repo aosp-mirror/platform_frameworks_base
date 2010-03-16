@@ -656,10 +656,14 @@ class LoadListener extends Handler implements EventHandler {
                 // ask for it, so make sure we have a valid CacheLoader
                 // before calling it.
                 if (mCacheLoader != null) {
-                    // Load the cached file in a separate thread
-                    WebViewWorker.getHandler().obtainMessage(
-                            WebViewWorker.MSG_ADD_STREAMLOADER, mCacheLoader)
-                            .sendToTarget();
+                    if (isSynchronous()) {
+                        mCacheLoader.load();
+                    } else {
+                        // Load the cached file in a separate thread
+                        WebViewWorker.getHandler().obtainMessage(
+                                WebViewWorker.MSG_ADD_STREAMLOADER, mCacheLoader)
+                                .sendToTarget();
+                    }
                     mFromCache = true;
                     if (DebugFlags.LOAD_LISTENER) {
                         Log.v(LOGTAG, "LoadListener cache load url=" + url());
@@ -718,10 +722,14 @@ class LoadListener extends Handler implements EventHandler {
                     Log.v(LOGTAG, "FrameLoader: HTTP URL in cache " +
                             "and usable: " + url());
                 }
-                // Load the cached file in a separate thread
-                WebViewWorker.getHandler().obtainMessage(
-                        WebViewWorker.MSG_ADD_STREAMLOADER, mCacheLoader)
-                        .sendToTarget();
+                if (isSynchronous()) {
+                    mCacheLoader.load();
+                } else {
+                    // Load the cached file in a separate thread
+                    WebViewWorker.getHandler().obtainMessage(
+                            WebViewWorker.MSG_ADD_STREAMLOADER, mCacheLoader)
+                            .sendToTarget();
+                }
                 mFromCache = true;
                 return true;
             }
