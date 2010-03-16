@@ -214,7 +214,6 @@ uint32_t LayerBase::doTransaction(uint32_t flags)
     if ((front.w != temp.w) || (front.h != temp.h)) {
         // invalidate and recompute the visible regions if needed
         flags |= Layer::eVisibleRegion;
-        this->contentDirty = true;
     }
 
     if (temp.sequence != front.sequence) {

@@ -674,6 +674,8 @@ void SurfaceFlinger::computeVisibleRegions(
 {
     const GraphicPlane& plane(graphicPlane(0));
     const Transform& planeTransform(plane.transform());
+    const DisplayHardware& hw(plane.displayHardware());
+    const Region screenRegion(hw.bounds());
 
     Region aboveOpaqueLayers;
     Region aboveCoveredLayers;
@@ -689,31 +691,56 @@ void SurfaceFlinger::computeVisibleRegions(
         // start with the whole surface at its current location
         const Layer::State& s(layer->drawingState());
 
-        // handle hidden surfaces by setting the visible region to empty
+        /*
+         * opaqueRegion: area of a surface that is fully opaque.
+         */
         Region opaqueRegion;
+
+        /*
+         * visibleRegion: area of a surface that is visible on screen
+         * and not fully transparent. This is essentially the layer's
+         * footprint minus the opaque regions above it.
+         * Areas covered by a translucent surface are considered visible.
+         */
         Region visibleRegion;
+
+        /*
+         * coveredRegion: area of a surface that is covered by all
+         * visible regions above it (which includes the translucent areas).
+         */
         Region coveredRegion;
+
+
+        // handle hidden surfaces by setting the visible region to empty
         if (LIKELY(!(s.flags & ISurfaceComposer::eLayerHidden) && s.alpha)) {
             const bool translucent = layer->needsBlending();
             const Rect bounds(layer->visibleBounds());
             visibleRegion.set(bounds);
-            coveredRegion = visibleRegion;
+            visibleRegion.andSelf(screenRegion);
+            if (!visibleRegion.isEmpty()) {
+                // Remove the transparent area from the visible region
+                if (translucent) {
+                    visibleRegion.subtractSelf(layer->transparentRegionScreen);
+                }
 
-            // Remove the transparent area from the visible region
-            if (translucent) {
-                visibleRegion.subtractSelf(layer->transparentRegionScreen);
-            }
-
-            // compute the opaque region
-            if (s.alpha==255 && !translucent && layer->getOrientation()>=0) {
-                // the opaque region is the visible region
-                opaqueRegion = visibleRegion;
+                // compute the opaque region
+                const int32_t layerOrientation = layer->getOrientation();
+                if (s.alpha==255 && !translucent &&
+                        ((layerOrientation & Transform::ROT_INVALID) == false)) {
+                    // the opaque region is the layer's footprint
+                    opaqueRegion = visibleRegion;
+                }
             }
         }
 
+        // Clip the covered region to the visible region
+        coveredRegion = aboveCoveredLayers.intersect(visibleRegion);
+
+        // Update aboveCoveredLayers for next (lower) layer
+        aboveCoveredLayers.orSelf(visibleRegion);
+
         // subtract the opaque region covered by the layers above us
         visibleRegion.subtractSelf(aboveOpaqueLayers);
-        coveredRegion.andSelf(aboveCoveredLayers);
 
         // compute this layer's dirty region
         if (layer->contentDirty) {
@@ -724,19 +751,30 @@ void SurfaceFlinger::computeVisibleRegions(
             layer->contentDirty = false;
         } else {
             /* compute the exposed region:
-             *    exposed = what's VISIBLE and NOT COVERED now 
-             *    but was COVERED before
+             *   the exposed region consists of two components:
+             *   1) what's VISIBLE now and was COVERED before
+             *   2) what's EXPOSED now less what was EXPOSED before
+             *
+             * note that (1) is conservative, we start with the whole
+             * visible region but only keep what used to be covered by
+             * something -- which mean it may have been exposed.
+             *
+             * (2) handles areas that were not covered by anything but got
+             * exposed because of a resize.
              */
-            dirty = (visibleRegion - coveredRegion) & layer->coveredRegionScreen;
+            const Region newExposed = visibleRegion - coveredRegion;
+            const Region oldVisibleRegion = layer->visibleRegionScreen;
+            const Region oldCoveredRegion = layer->coveredRegionScreen;
+            const Region oldExposed = oldVisibleRegion - oldCoveredRegion;
+            dirty = (visibleRegion&oldCoveredRegion) | (newExposed-oldExposed);
         }
         dirty.subtractSelf(aboveOpaqueLayers);
 
         // accumulate to the screen dirty region
         dirtyRegion.orSelf(dirty);
 
-        // Update aboveOpaqueLayers/aboveCoveredLayers for next (lower) layer
+        // Update aboveOpaqueLayers for next (lower) layer
         aboveOpaqueLayers.orSelf(opaqueRegion);
-        aboveCoveredLayers.orSelf(visibleRegion);
         
         // Store the visible region is screen space
         layer->setVisibleRegion(visibleRegion);
