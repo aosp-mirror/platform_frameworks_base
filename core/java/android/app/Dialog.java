@@ -266,7 +266,7 @@ public class Dialog implements DialogInterface, Window.Callback,
     }
 
     private void dismissDialog() {
-        if (mDecor == null || !mShowing || mDecor.getWindowToken() == null) {
+        if (mDecor == null || !mShowing) {
             return;
         }
 
