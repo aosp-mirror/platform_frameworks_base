@@ -275,6 +275,7 @@ static void convertISO8859ToString8(
     size_t utf8len = 0;
     for (size_t i = 0; i < size; ++i) {
         if (data[i] == '\0') {
+            size = i;
             break;
         } else if (data[i] < 0x80) {
             ++utf8len;
