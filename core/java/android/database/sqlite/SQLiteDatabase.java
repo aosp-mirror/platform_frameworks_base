@@ -852,7 +852,11 @@ public class SQLiteDatabase extends SQLiteClosable {
         lock();
         try {
             closeClosable();
-            releaseReference();
+            // close this database instance - regardless of its reference count value
+            onAllReferencesReleased();
+            // set path to null, to cause bad stuff to happen if this object is reused without
+            // being opened first
+            mPath = null;
         } finally {
             unlock();
         }
