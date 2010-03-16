@@ -17,11 +17,9 @@
 package android.widget;
 
 import android.content.Context;
-import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.GradientDrawable.Orientation;
 import android.text.Editable;
 import android.text.Selection;
 import android.text.TextUtils;
@@ -611,8 +609,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
                 && !mDropDownAlwaysVisible) {
             // special case for the back key, we do not even try to send it
             // to the drop down list but instead, consume it immediately
-            if (event.getAction() == KeyEvent.ACTION_DOWN
-                    && event.getRepeatCount() == 0) {
+            if (event.getAction() == KeyEvent.ACTION_DOWN && event.getRepeatCount() == 0) {
                 getKeyDispatcherState().startTracking(event, this);
                 return true;
             } else if (event.getAction() == KeyEvent.ACTION_UP) {
@@ -660,10 +657,19 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
                                     && keyCode != KeyEvent.KEYCODE_DPAD_CENTER))) {
                 int curIndex = mDropDownList.getSelectedItemPosition();
                 boolean consumed;
+
                 final boolean below = !mPopup.isAboveAnchor();
-                if ((below && keyCode == KeyEvent.KEYCODE_DPAD_UP && curIndex <= 0) ||
-                        (!below && keyCode == KeyEvent.KEYCODE_DPAD_DOWN && curIndex >=
-                        mDropDownList.getAdapter().getCount() - 1)) {
+
+                final ListAdapter adapter = mDropDownList.getAdapter();
+                final boolean allEnabled = adapter.areAllItemsEnabled();
+
+                final int firstItem = allEnabled ? 0 :
+                        mDropDownList.lookForSelectablePosition(0, true);
+                final int lastItem = allEnabled ? adapter.getCount() - 1 :
+                        mDropDownList.lookForSelectablePosition(adapter.getCount() - 1, false);
+
+                if ((below && keyCode == KeyEvent.KEYCODE_DPAD_UP && curIndex <= firstItem) ||
+                        (!below && keyCode == KeyEvent.KEYCODE_DPAD_DOWN && curIndex >= lastItem)) {
                     // When the selection is at the top, we block the key
                     // event to prevent focus from moving.
                     clearListSelection();
@@ -703,11 +709,11 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
                     if (below && keyCode == KeyEvent.KEYCODE_DPAD_DOWN) {
                         // when the selection is at the bottom, we block the
                         // event to avoid going to the next focusable widget
-                        Adapter adapter = mDropDownList.getAdapter();
-                        if (adapter != null && curIndex == adapter.getCount() - 1) {
+                        if (curIndex == lastItem) {
                             return true;
                         }
-                    } else if (!below && keyCode == KeyEvent.KEYCODE_DPAD_UP && curIndex == 0) {
+                    } else if (!below && keyCode == KeyEvent.KEYCODE_DPAD_UP &&
+                            curIndex == firstItem) {
                         return true;
                     }
                 }
