@@ -1464,7 +1464,9 @@ public class WebView extends AbsoluteLayout
      * Load the given data into the WebView. This will load the data into
      * WebView using the data: scheme. Content loaded through this mechanism
      * does not have the ability to load content from the network.
-     * @param data A String of data in the given encoding.
+     * @param data A String of data in the given encoding. The date must
+     * be URI-escaped -- '#', '%', '\', '?' should be replaced by %23, %25,
+     * %27, %3f respectively.
      * @param mimeType The MIMEType of the data. i.e. text/html, image/jpeg
      * @param encoding The encoding of the data. i.e. utf-8, base64
      */
@@ -6508,80 +6510,21 @@ public class WebView extends AbsoluteLayout
                     break;
 
                 case SHOW_FULLSCREEN: {
-                    WebViewCore.PluginFullScreenData data
-                            = (WebViewCore.PluginFullScreenData) msg.obj;
-                    if (data.mNpp != 0 && data.mView != null) {
-                        if (inFullScreenMode()) {
-                            Log.w(LOGTAG,
-                                    "Should not have another full screen.");
-                            mFullScreenHolder.dismiss();
-                        }
-                        mFullScreenHolder = new PluginFullScreenHolder(
-                                WebView.this, data.mNpp);
-                        // as we are sharing the View between full screen and
-                        // embedded mode, we have to remove the
-                        // AbsoluteLayout.LayoutParams set by embedded mode to
-                        // ViewGroup.LayoutParams before adding it to the dialog
-                        data.mView.setLayoutParams(new FrameLayout.LayoutParams(
-                                ViewGroup.LayoutParams.FILL_PARENT,
-                                ViewGroup.LayoutParams.FILL_PARENT));
-                        mFullScreenHolder.setContentView(data.mView);
-                        mFullScreenHolder.setCancelable(false);
-                        mFullScreenHolder.setCanceledOnTouchOutside(false);
-                        mFullScreenHolder.show();
-                    } else if (!inFullScreenMode()) {
-                        // this may happen if user dismisses the fullscreen and
-                        // then the WebCore re-position message finally reached
-                        // the UI thread.
-                        break;
-                    }
-                    // move the matching embedded view fully into the view so
-                    // that touch will be valid instead of rejected due to out
-                    // of the visible bounds
-                    // TODO: do we need to preserve the original position and
-                    // scale so that we can revert it when leaving the full
-                    // screen mode?
-                    int x = contentToViewX(data.mDocX);
-                    int y = contentToViewY(data.mDocY);
-                    int width = contentToViewDimension(data.mDocWidth);
-                    int height = contentToViewDimension(data.mDocHeight);
-                    int viewWidth = getViewWidth();
-                    int viewHeight = getViewHeight();
-                    int newX = mScrollX;
-                    int newY = mScrollY;
-                    if (x < mScrollX) {
-                        newX = x + (width > viewWidth
-                                ? (width - viewWidth) / 2 : 0);
-                    } else if (x + width > mScrollX + viewWidth) {
-                        newX = x + width - viewWidth - (width > viewWidth
-                                ? (width - viewWidth) / 2 : 0);
-                    }
-                    if (y < mScrollY) {
-                        newY = y + (height > viewHeight
-                                ? (height - viewHeight) / 2 : 0);
-                    } else if (y + height > mScrollY + viewHeight) {
-                        newY = y + height - viewHeight - (height > viewHeight
-                                ? (height - viewHeight) / 2 : 0);
-                    }
-                    scrollTo(newX, newY);
-                    if (width > viewWidth || height > viewHeight) {
-                        mZoomCenterX = viewWidth * .5f;
-                        mZoomCenterY = viewHeight * .5f;
-                        // do not change text wrap scale so that there is no
-                        // reflow
-                        setNewZoomScale(mActualScale
-                                / Math.max((float) width / viewWidth,
-                                        (float) height / viewHeight), false,
-                                false);
-                    }
-                    // Now update the bound
-                    mFullScreenHolder.updateBound(contentToViewX(data.mDocX)
-                            - mScrollX, contentToViewY(data.mDocY) - mScrollY,
-                            contentToViewDimension(data.mDocWidth),
-                            contentToViewDimension(data.mDocHeight));
-                    }
-                    break;
+                    View view = (View) msg.obj;
+                    int npp = msg.arg1;
 
+                    if (mFullScreenHolder != null) {
+                        Log.w(LOGTAG, "Should not have another full screen.");
+                        mFullScreenHolder.dismiss();
+                    }
+                    mFullScreenHolder = new PluginFullScreenHolder(WebView.this, npp);
+                    mFullScreenHolder.setContentView(view);
+                    mFullScreenHolder.setCancelable(false);
+                    mFullScreenHolder.setCanceledOnTouchOutside(false);
+                    mFullScreenHolder.show();
+
+                    break;
+                }
                 case HIDE_FULLSCREEN:
                     if (inFullScreenMode()) {
                         mFullScreenHolder.dismiss();

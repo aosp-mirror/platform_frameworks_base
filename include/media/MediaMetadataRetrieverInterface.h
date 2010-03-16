@@ -43,6 +43,10 @@ public:
 class MediaMetadataRetrieverInterface : public MediaMetadataRetrieverBase
 {
 public:
+    MediaMetadataRetrieverInterface()
+        : mMode(0) {
+    }
+
     virtual             ~MediaMetadataRetrieverInterface() {}
 
     // @param mode The intended mode of operations:
@@ -57,6 +61,8 @@ public:
                                 mode > METADATA_MODE_FRAME_CAPTURE_AND_METADATA_RETRIEVAL) {
                                 return BAD_VALUE;
                             }
+
+                            mMode = mode;
                             return NO_ERROR;
                         }
 

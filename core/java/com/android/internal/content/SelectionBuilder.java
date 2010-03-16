@@ -47,7 +47,7 @@ public class SelectionBuilder {
      * Append the given selection clause to the internal state. Each clause is
      * surrounded with parenthesis and combined using {@code AND}.
      */
-    public SelectionBuilder append(String selection, String... selectionArgs) {
+    public SelectionBuilder append(String selection, Object... selectionArgs) {
         if (TextUtils.isEmpty(selection)) {
             if (selectionArgs != null && selectionArgs.length > 0) {
                 throw new IllegalArgumentException(
@@ -63,8 +63,12 @@ public class SelectionBuilder {
         }
 
         mSelection.append("(").append(selection).append(")");
-        for (String arg : selectionArgs) {
-            mSelectionArgs.add(arg);
+        if (selectionArgs != null) {
+            for (Object arg : selectionArgs) {
+                // TODO: switch to storing direct Object instances once
+                // http://b/2464440 is fixed
+                mSelectionArgs.add(String.valueOf(arg));
+            }
         }
 
         return this;

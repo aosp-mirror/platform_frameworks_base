@@ -465,44 +465,61 @@ void Layer::lockPageFlip(bool& recomputeVisibleRegions)
         // for composition later in the loop
         return;
     }
-    
+
+    // ouch, this really should never happen
+    if (uint32_t(buf)>=NUM_BUFFERS) {
+        LOGE("retireAndLock() buffer index (%d) out of range", buf);
+        mPostedDirtyRegion.clear();
+        return;
+    }
+
     // we retired a buffer, which becomes the new front buffer
     mFrontBufferIndex = buf;
 
     // get the dirty region
     sp<GraphicBuffer> newFrontBuffer(getBuffer(buf));
-    const Region dirty(lcblk->getDirtyRegion(buf));
-    mPostedDirtyRegion = dirty.intersect( newFrontBuffer->getBounds() );
+    if (newFrontBuffer != NULL) {
+        // compute the posted region
+        const Region dirty(lcblk->getDirtyRegion(buf));
+        mPostedDirtyRegion = dirty.intersect( newFrontBuffer->getBounds() );
 
-    const Layer::State& front(drawingState());
-    if (newFrontBuffer->getWidth()  == front.requested_w &&
-        newFrontBuffer->getHeight() == front.requested_h)
-    {
-        if ((front.w != front.requested_w) ||
-            (front.h != front.requested_h))
+        // update the layer size and release freeze-lock
+        const Layer::State& front(drawingState());
+        if (newFrontBuffer->getWidth()  == front.requested_w &&
+            newFrontBuffer->getHeight() == front.requested_h)
         {
-            // Here we pretend the transaction happened by updating the
-            // current and drawing states. Drawing state is only accessed
-            // in this thread, no need to have it locked
-            Layer::State& editDraw(mDrawingState);
-            editDraw.w = editDraw.requested_w;
-            editDraw.h = editDraw.requested_h;
+            if ((front.w != front.requested_w) ||
+                (front.h != front.requested_h))
+            {
+                // Here we pretend the transaction happened by updating the
+                // current and drawing states. Drawing state is only accessed
+                // in this thread, no need to have it locked
+                Layer::State& editDraw(mDrawingState);
+                editDraw.w = editDraw.requested_w;
+                editDraw.h = editDraw.requested_h;
 
-            // We also need to update the current state so that we don't
-            // end-up doing too much work during the next transaction.
-            // NOTE: We actually don't need hold the transaction lock here
-            // because State::w and State::h are only accessed from
-            // this thread
-            Layer::State& editTemp(currentState());
-            editTemp.w = editDraw.w;
-            editTemp.h = editDraw.h;
+                // We also need to update the current state so that we don't
+                // end-up doing too much work during the next transaction.
+                // NOTE: We actually don't need hold the transaction lock here
+                // because State::w and State::h are only accessed from
+                // this thread
+                Layer::State& editTemp(currentState());
+                editTemp.w = editDraw.w;
+                editTemp.h = editDraw.h;
 
-            // recompute visible region
-            recomputeVisibleRegions = true;
+                // recompute visible region
+                recomputeVisibleRegions = true;
+            }
+
+            // we now have the correct size, unfreeze the screen
+            mFreezeLock.clear();
         }
-
-        // we now have the correct size, unfreeze the screen
-        mFreezeLock.clear();
+    } else {
+        // this should not happen unless we ran out of memory while
+        // allocating the buffer. we're hoping that things will get back
+        // to normal the next time the app tries to draw into this buffer.
+        // meanwhile, pretend the screen didn't update.
+        mPostedDirtyRegion.clear();
     }
 
     if (lcblk->getQueuedCount()) {

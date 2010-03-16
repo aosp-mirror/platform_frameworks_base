@@ -1980,15 +1980,14 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             if (touchMode == TOUCH_MODE_OVERSCROLL || touchMode == TOUCH_MODE_OVERFLING) {
                 if (mFlingRunnable != null) {
                     mFlingRunnable.endFling();
-                    
-                    if (mScrollY != 0) {
-                        mScrollY = 0;
-                        invalidate();
-                    }
+                }
+
+                if (mScrollY != 0) {
+                    mScrollY = 0;
+                    invalidate();
                 }
             }
         }
-        mLastTouchMode = isInTouchMode ? TOUCH_MODE_ON : TOUCH_MODE_OFF;
     }
 
     @Override

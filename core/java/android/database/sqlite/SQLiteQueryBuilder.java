@@ -40,7 +40,7 @@ public class SQLiteQueryBuilder
 
     private Map<String, String> mProjectionMap = null;
     private String mTables = "";
-    private final StringBuilder mWhereClause = new StringBuilder(64);
+    private StringBuilder mWhereClause = null;  // lazily created
     private boolean mDistinct;
     private SQLiteDatabase.CursorFactory mFactory;
 
@@ -89,6 +89,9 @@ public class SQLiteQueryBuilder
      * @param inWhere the chunk of text to append to the WHERE clause.
      */
     public void appendWhere(CharSequence inWhere) {
+        if (mWhereClause == null) {
+            mWhereClause = new StringBuilder(inWhere.length() + 16);
+        }
         if (mWhereClause.length() == 0) {
             mWhereClause.append('(');
         }
@@ -106,6 +109,9 @@ public class SQLiteQueryBuilder
      * to avoid SQL injection attacks
      */
     public void appendWhereEscapeString(String inWhere) {
+        if (mWhereClause == null) {
+            mWhereClause = new StringBuilder(inWhere.length() + 16);
+        }
         if (mWhereClause.length() == 0) {
             mWhereClause.append('(');
         }
@@ -356,15 +362,16 @@ public class SQLiteQueryBuilder
         String[] projection = computeProjection(projectionIn);
 
         StringBuilder where = new StringBuilder();
+        boolean hasBaseWhereClause = mWhereClause != null && mWhereClause.length() > 0;
 
-        if (mWhereClause.length() > 0) {
+        if (hasBaseWhereClause) {
             where.append(mWhereClause.toString());
             where.append(')');
         }
 
         // Tack on the user's selection, if present.
         if (selection != null && selection.length() > 0) {
-            if (mWhereClause.length() > 0) {
+            if (hasBaseWhereClause) {
                 where.append(" AND ");
             }
 

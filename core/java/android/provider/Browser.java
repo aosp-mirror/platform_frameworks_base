@@ -351,23 +351,27 @@ public class Browser {
      *  @hide pending API council approval
      */
     public static final String[] getVisitedHistory(ContentResolver cr) {
+        Cursor c = null;
+        String[] str = null;
         try {
             String[] projection = new String[] {
                 "url"
             };
-            Cursor c = cr.query(BOOKMARKS_URI, projection, "visits > 0", null,
+            c = cr.query(BOOKMARKS_URI, projection, "visits > 0", null,
                     null);
-            String[] str = new String[c.getCount()];
+            str = new String[c.getCount()];
             int i = 0;
             while (c.moveToNext()) {
                 str[i] = c.getString(0);
                 i++;
             }
-            c.close();
-            return str;
         } catch (IllegalStateException e) {
-            return new String[0];
+            Log.e(LOGTAG, "getVisitedHistory", e);
+            str = new String[0];
+        } finally {
+            if (c != null) c.close();
         }
+        return str;
     }
 
     /**
@@ -382,9 +386,10 @@ public class Browser {
      * @param cr The ContentResolver used to access the database.
      */
     public static final void truncateHistory(ContentResolver cr) {
+        Cursor c = null;
         try {
             // Select non-bookmark history, ordered by date
-            Cursor c = cr.query(
+            c = cr.query(
                     BOOKMARKS_URI,
                     TRUNCATE_HISTORY_PROJECTION,
                     "bookmark = 0",
@@ -396,16 +401,16 @@ public class Browser {
                 for (int i = 0; i < TRUNCATE_N_OLDEST; i++) {
                     // Log.v(LOGTAG, "truncate history " +
                     // c.getInt(TRUNCATE_HISTORY_PROJECTION_ID_INDEX));
-                    deleteHistoryWhere(
-                            cr, "_id = " +
-                            c.getInt(TRUNCATE_HISTORY_PROJECTION_ID_INDEX));
+                    cr.delete(BOOKMARKS_URI, "_id = " +
+                            c.getInt(TRUNCATE_HISTORY_PROJECTION_ID_INDEX),
+                            null);
                     if (!c.moveToNext()) break;
                 }
             }
-            c.close();
         } catch (IllegalStateException e) {
             Log.e(LOGTAG, "truncateHistory", e);
-            return;
+        } finally {
+            if (c != null) c.close();
         }
     }
 
@@ -416,8 +421,10 @@ public class Browser {
      * @return boolean  True if the history can be cleared.
      */
     public static final boolean canClearHistory(ContentResolver cr) {
+        Cursor c = null;
+        boolean ret = false;
         try {
-            Cursor c = cr.query(
+            c = cr.query(
                 BOOKMARKS_URI,
                 new String [] { BookmarkColumns._ID, 
                                 BookmarkColumns.BOOKMARK,
@@ -426,12 +433,13 @@ public class Browser {
                 null,
                 null
                 );
-            boolean ret = c.moveToFirst();
-            c.close();
-            return ret;
+            ret = c.moveToFirst();
         } catch (IllegalStateException e) {
-            return false;
+            Log.e(LOGTAG, "canClearHistory", e);
+        } finally {
+            if (c != null) c.close();
         }
+        return ret;
     }
 
     /**
@@ -455,57 +463,57 @@ public class Browser {
      */
     private static final void deleteHistoryWhere(ContentResolver cr,
             String whereClause) {
+        Cursor c = null;
         try {
-            Cursor c = cr.query(BOOKMARKS_URI,
+            c = cr.query(BOOKMARKS_URI,
                 HISTORY_PROJECTION,
                 whereClause,
                 null,
                 null);
-            if (!c.moveToFirst()) {
-                c.close();
-                return;
-            }
-
-            final WebIconDatabase iconDb = WebIconDatabase.getInstance();
-            /* Delete favicons, and revert bookmarks which have been visited
-             * to simply bookmarks.
-             */
-            StringBuffer sb = new StringBuffer();
-            boolean firstTime = true;
-            do {
-                String url = c.getString(HISTORY_PROJECTION_URL_INDEX);
-                boolean isBookmark = 
-                    c.getInt(HISTORY_PROJECTION_BOOKMARK_INDEX) == 1;
-                if (isBookmark) {
-                    if (firstTime) {
-                        firstTime = false;
+            if (c.moveToFirst()) {
+                final WebIconDatabase iconDb = WebIconDatabase.getInstance();
+                /* Delete favicons, and revert bookmarks which have been visited
+                 * to simply bookmarks.
+                 */
+                StringBuffer sb = new StringBuffer();
+                boolean firstTime = true;
+                do {
+                    String url = c.getString(HISTORY_PROJECTION_URL_INDEX);
+                    boolean isBookmark =
+                        c.getInt(HISTORY_PROJECTION_BOOKMARK_INDEX) == 1;
+                    if (isBookmark) {
+                        if (firstTime) {
+                            firstTime = false;
+                        } else {
+                            sb.append(" OR ");
+                        }
+                        sb.append("( _id = ");
+                        sb.append(c.getInt(0));
+                        sb.append(" )");
                     } else {
-                        sb.append(" OR ");
+                        iconDb.releaseIconForPageUrl(url);
                     }
-                    sb.append("( _id = ");
-                    sb.append(c.getInt(0));
-                    sb.append(" )");
-                } else {
-                    iconDb.releaseIconForPageUrl(url);
+                } while (c.moveToNext());
+
+                if (!firstTime) {
+                    ContentValues map = new ContentValues();
+                    map.put(BookmarkColumns.VISITS, 0);
+                    map.put(BookmarkColumns.DATE, 0);
+                    /* FIXME: Should I also remove the title? */
+                    cr.update(BOOKMARKS_URI, map, sb.toString(), null);
                 }
-            } while (c.moveToNext());
-            c.close();
 
-            if (!firstTime) {
-                ContentValues map = new ContentValues();
-                map.put(BookmarkColumns.VISITS, 0);
-                map.put(BookmarkColumns.DATE, 0);
-                /* FIXME: Should I also remove the title? */
-                cr.update(BOOKMARKS_URI, map, sb.toString(), null);
+                String deleteWhereClause = BookmarkColumns.BOOKMARK + " = 0";
+                if (whereClause != null) {
+                    deleteWhereClause += " AND " + whereClause;
+                }
+                cr.delete(BOOKMARKS_URI, deleteWhereClause, null);
             }
-
-            String deleteWhereClause = BookmarkColumns.BOOKMARK + " = 0";
-            if (whereClause != null) {
-                deleteWhereClause += " AND " + whereClause;
-            }
-            cr.delete(BOOKMARKS_URI, deleteWhereClause, null);
         } catch (IllegalStateException e) {
+            Log.e(LOGTAG, "deleteHistoryWhere", e);
             return;
+        } finally {
+            if (c != null) c.close();
         }
     }
 
@@ -560,8 +568,9 @@ public class Browser {
      */
     public static final void addSearchUrl(ContentResolver cr, String search) {
         long now = new Date().getTime();
+        Cursor c = null;
         try {
-            Cursor c = cr.query(
+            c = cr.query(
                 SEARCHES_URI,
                 SEARCHES_PROJECTION,
                 SEARCHES_WHERE_CLAUSE,
@@ -576,10 +585,10 @@ public class Browser {
             } else {
                 cr.insert(SEARCHES_URI, map);
             }
-            c.close();
         } catch (IllegalStateException e) {
             Log.e(LOGTAG, "addSearchUrl", e);
-            return;
+        } finally {
+            if (c != null) c.close();
         }
     }
     /**

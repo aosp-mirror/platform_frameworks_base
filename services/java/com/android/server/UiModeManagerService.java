@@ -423,6 +423,7 @@ class UiModeManagerService extends IUiModeManager.Stub {
             String action = null;
             String oldAction = null;
             if (mLastBroadcastState == Intent.EXTRA_DOCK_STATE_CAR) {
+                adjustStatusBarCarModeLocked();
                 oldAction = UiModeManager.ACTION_EXIT_CAR_MODE;
             } else if (mLastBroadcastState == Intent.EXTRA_DOCK_STATE_DESK) {
                 oldAction = UiModeManager.ACTION_EXIT_DESK_MODE;
@@ -447,10 +448,6 @@ class UiModeManagerService extends IUiModeManager.Stub {
                     action = UiModeManager.ACTION_ENTER_DESK_MODE;
                 }
             } else {
-                if (mLastBroadcastState == Intent.EXTRA_DOCK_STATE_CAR) {
-                    adjustStatusBarCarModeLocked();
-                }
-
                 mLastBroadcastState = Intent.EXTRA_DOCK_STATE_UNDOCKED;
                 action = oldAction;
             }

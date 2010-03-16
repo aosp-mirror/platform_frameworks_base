@@ -23,6 +23,8 @@ LOCAL_SHARED_LIBRARIES := \
 LOCAL_STATIC_LIBRARIES := \
         libstagefright_id3
 
+LOCAL_MODULE_TAGS := debug
+
 LOCAL_MODULE := testid3
 
 include $(BUILD_EXECUTABLE)

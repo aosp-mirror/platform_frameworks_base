@@ -389,6 +389,8 @@ public class TelephonyManager {
     public static final int NETWORK_TYPE_HSUPA = 9;
     /** Current network is HSPA */
     public static final int NETWORK_TYPE_HSPA = 10;
+    /** Current network is iDen */
+    public static final int NETWORK_TYPE_IDEN = 11;
 
     /**
      * Returns a constant indicating the radio technology (network type)

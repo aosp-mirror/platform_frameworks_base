@@ -67,8 +67,8 @@ enum {
 //   and meta data retrieval.$
 enum {
     METADATA_MODE_NOOP                                 = 0x00,
-    METADATA_MODE_FRAME_CAPTURE_ONLY                   = 0x01,
-    METADATA_MODE_METADATA_RETRIEVAL_ONLY              = 0x02,
+    METADATA_MODE_METADATA_RETRIEVAL_ONLY              = 0x01,
+    METADATA_MODE_FRAME_CAPTURE_ONLY                   = 0x02,
     METADATA_MODE_FRAME_CAPTURE_AND_METADATA_RETRIEVAL = 0x03
 };
 

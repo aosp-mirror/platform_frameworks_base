@@ -62,7 +62,7 @@ SoundPoolThread::SoundPoolThread(SoundPool* soundPool) :
     mSoundPool(soundPool)
 {
     mMsgQueue.setCapacity(maxMessages);
-    if (createThread(beginThread, this)) {
+    if (createThreadEtc(beginThread, this, "SoundPoolThread")) {
         mRunning = true;
     }
 }
