@@ -29,6 +29,8 @@ import android.os.storage.IMountServiceListener;
 import android.os.storage.IMountShutdownObserver;
 import android.os.storage.StorageResultCode;
 import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.IBinder;
@@ -193,9 +195,13 @@ class MountService extends IMountService.Stub
         }
     }
 
-    final private Handler mHandler = new Handler() {
+    class MountServiceHandler extends Handler {
         ArrayList<UnmountCallBack> mForceUnmounts = new ArrayList<UnmountCallBack>();
         boolean mRegistered = false;
+
+        MountServiceHandler(Looper l) {
+            super(l);
+        }
 
         void registerReceiver() {
             mRegistered = true;
@@ -287,6 +293,8 @@ class MountService extends IMountService.Stub
             }
         }
     };
+    final private HandlerThread mHandlerThread;
+    final private Handler mHandler;
 
     private void waitForReady() {
         while (mReady == false) {
@@ -556,8 +564,8 @@ class MountService extends IMountService.Stub
 
         if (in != null) {
             mContext.sendBroadcast(in);
-	}
-       return true;
+        }
+        return true;
     }
 
     private void notifyVolumeStateChange(String label, String path, int oldState, int newState) {
@@ -849,6 +857,10 @@ class MountService extends IMountService.Stub
 
         mContext.registerReceiver(mBroadcastReceiver,
                 new IntentFilter(Intent.ACTION_BOOT_COMPLETED), null, null);
+
+        mHandlerThread = new HandlerThread("MountService");
+        mHandlerThread.start();
+        mHandler = new MountServiceHandler(mHandlerThread.getLooper());
 
         /*
          * Vold does not run in the simulator, so pretend the connector thread
