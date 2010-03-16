@@ -167,7 +167,7 @@ private:
     status_t setupMPEG4EncoderParameters();
     status_t setupAVCEncoderParameters();
 
-    void setVideoOutputFormat(
+    status_t setVideoOutputFormat(
             const char *mime, OMX_U32 width, OMX_U32 height);
 
     void setImageOutputFormat(
@@ -219,6 +219,8 @@ private:
     void initOutputFormat(const sp<MetaData> &inputFormat);
 
     void dumpPortStatus(OMX_U32 portIndex);
+
+    status_t configureCodec(const sp<MetaData> &meta);
 
     static uint32_t getComponentQuirks(const char *componentName);
 
