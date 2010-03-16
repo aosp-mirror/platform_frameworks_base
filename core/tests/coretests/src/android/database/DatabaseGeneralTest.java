@@ -16,15 +16,12 @@
 
 package android.database;
 
+import static android.database.DatabaseUtils.InsertHelper.TABLE_INFO_PRAGMA_COLUMNNAME_INDEX;
+import static android.database.DatabaseUtils.InsertHelper.TABLE_INFO_PRAGMA_DEFAULT_INDEX;
 import android.content.ContentValues;
 import android.content.Context;
-import android.database.ContentObserver;
-import android.database.Cursor;
-import android.database.DatabaseUtils;
-import android.database.CharArrayBuffer;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Parcel;
 import android.test.AndroidTestCase;
@@ -33,18 +30,14 @@ import android.test.suitebuilder.annotation.MediumTest;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Log;
 
-import java.io.File;
-import java.io.UnsupportedEncodingException;
-import java.text.Collator;
-import java.util.Arrays;
-
 import junit.framework.Assert;
-import junit.framework.TestCase;
 
-import static android.database.DatabaseUtils.InsertHelper.TABLE_INFO_PRAGMA_COLUMNNAME_INDEX;
-import static android.database.DatabaseUtils.InsertHelper.TABLE_INFO_PRAGMA_DEFAULT_INDEX;
+import java.io.File;
+import java.util.Arrays;
+import java.util.Locale;
 
 public class DatabaseGeneralTest extends AndroidTestCase implements PerformanceTestCase {
+    private static final String TAG = "DatabaseGeneralTest";
 
     private static final String sString1 = "this is a test";
     private static final String sString2 = "and yet another test";
@@ -1029,4 +1022,91 @@ public class DatabaseGeneralTest extends AndroidTestCase implements PerformanceT
             fail("unexpected, of course");
         }
     }
+
+    /**
+     * This test is available only when the platform has a locale with the language "ja".
+     * It finishes without failure when it is not available.  
+     */
+    @MediumTest
+    public void testCollateLocalizedForJapanese() throws Exception {
+        final String testName = "DatabaseGeneralTest#testCollateLocalizedForJapanese()";
+        final Locale[] localeArray = Locale.getAvailableLocales();
+        final String japanese = Locale.JAPANESE.getLanguage();
+        final String english = Locale.ENGLISH.getLanguage();
+        Locale japaneseLocale = null;
+        Locale englishLocale = null;
+        for (Locale locale : localeArray) {
+            if (locale != null) {
+                final String language = locale.getLanguage();
+                if (language == null) {
+                    continue;
+                } else if (language.equals(japanese)) {
+                    japaneseLocale = locale;
+                } else if (language.equals(english)) {
+                    englishLocale = locale;
+                }
+            }
+            
+            if (japaneseLocale != null && englishLocale != null) {
+                break;
+            }
+        }
+
+        if (japaneseLocale == null || englishLocale == null) {
+            Log.d(TAG, testName + "n is silently skipped since " +
+                    (englishLocale == null ?
+                            (japaneseLocale == null ?
+                                    "Both English and Japanese locales do not exist." :
+                                    "English locale does not exist.") :
+                            (japaneseLocale == null ?
+                                    "Japanese locale does not exist." :
+                                    "...why?")));
+            return;
+        }
+
+        Locale originalLocale = Locale.getDefault();
+        try {
+
+            final String dbName = "collate_localized_test";
+            mDatabase.execSQL("CREATE TABLE " + dbName + " (" +
+                    "_id INTEGER PRIMARY KEY, " +
+                    "s TEXT COLLATE LOCALIZED) ");
+            DatabaseUtils.InsertHelper ih =
+                new DatabaseUtils.InsertHelper(mDatabase, dbName);
+            ContentValues cv = new ContentValues();
+
+            cv = new ContentValues();  //
+            cv.put("s", "\uFF75\uFF77\uFF85\uFF9C");  // O-ki-na-wa in half-width Katakana
+            ih.insert(cv);
+
+            cv = new ContentValues();  //
+            cv.put("s", "\u306B\u307B\u3093");  // Ni-ho-n in Hiragana
+            ih.insert(cv);
+
+            cv = new ContentValues();  //
+            cv.put("s", "\u30A2\u30E1\u30EA\u30AB");  // A-me-ri-ca in hull-width Katakana
+            ih.insert(cv);            
+
+            // Assume setLocale() does REINDEX and an English locale does not consider
+            // Japanese-specific LOCALIZED order.
+            Locale.setDefault(englishLocale);
+            Locale.setDefault(japaneseLocale);
+
+            Cursor cur = mDatabase.rawQuery(
+                    "SELECT * FROM " + dbName + " ORDER BY s", null);
+            assertTrue(cur.moveToFirst());
+            assertEquals("\u30A2\u30E1\u30EA\u30AB", cur.getString(1));
+            assertTrue(cur.moveToNext());
+            assertEquals("\uFF75\uFF77\uFF85\uFF9C", cur.getString(1));
+            assertTrue(cur.moveToNext());
+            assertEquals("\u306B\u307B\u3093", cur.getString(1));
+        } finally {
+            if (originalLocale != null) {
+                try {
+                    Locale.setDefault(originalLocale);
+                } catch (Exception e) {
+                }
+            }
+        }
+    }    
 }
