@@ -149,7 +149,11 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
     private IBinder mSecureLockIcon = null;
 
     private boolean mSystemReady;
-    private boolean mFirstShow = true;
+
+    // Whether the next call to playSounds() should be skipped.  Defaults to
+    // true because the first lock (on boot) should be silent.
+    private boolean mSuppressNextLockSound = true;
+
 
     /** Low level access to the power manager for enableUserActivity.  Having this
      * requires that we run in the system process.  */
@@ -689,6 +693,10 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
                         + sequence + ", mDelayedShowingSequence = " + mDelayedShowingSequence);
 
                 if (mDelayedShowingSequence == sequence) {
+                    // Don't play lockscreen SFX if the screen went off due to
+                    // timeout.
+                    mSuppressNextLockSound = true;
+
                     doKeyguard();
                 }
             } else if (TelephonyManager.ACTION_PHONE_STATE_CHANGED.equals(action)) {
@@ -926,6 +934,12 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
 
     private void playSounds(boolean locked) {
         // User feedback for keyguard.
+
+        if (mSuppressNextLockSound) {
+            mSuppressNextLockSound = false;
+            return;
+        }
+
         final ContentResolver cr = mContext.getContentResolver();
         if (Settings.System.getInt(cr, Settings.System.LOCKSCREEN_SOUNDS_ENABLED, 1) == 1)
         {
@@ -961,11 +975,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
             if (DEBUG) Log.d(TAG, "handleShow");
             if (!mSystemReady) return;
 
-            if (mFirstShow) {
-                mFirstShow = false;
-            } else {
-                playSounds(true);
-            }
+            playSounds(true);
 
             mKeyguardViewManager.show();
             mShowing = true;
