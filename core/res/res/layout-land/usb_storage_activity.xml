@@ -24,7 +24,7 @@
 
         <TextView android:id="@+id/banner"
             android:layout_centerHorizontal="true"
-            android:layout_below="@id/icon"
+            android:layout_alignParentTop="true"
             android:layout_marginTop="10dip"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -45,8 +45,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
-            android:layout_below="@id/message"
-            android:layout_marginTop="20dip"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="20dip"
             >
 
             <Button android:id="@+id/mount_button" 
@@ -63,6 +63,13 @@
                 android:paddingLeft="18dip"
                 android:paddingRight="18dip"
                 android:text="@string/usb_storage_stop_button_mount"
+                />
+            <ProgressBar android:id="@+id/progress"
+                android:visibility="gone"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:indeterminate="true"
+                style="?android:attr/progressBarStyle"
                 />
 
         </RelativeLayout>
