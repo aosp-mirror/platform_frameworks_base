@@ -643,6 +643,12 @@ public class SyncStorageEngine extends Handler {
         }
     }
 
+    public void removeAuthority(Account account, String authority) {
+        synchronized (mAuthorities) {
+            removeAuthorityLocked(account, authority);
+        }
+    }
+
     public AuthorityInfo getAuthority(int authorityId) {
         synchronized (mAuthorities) {
             return mAuthorities.get(authorityId);
@@ -1272,6 +1278,15 @@ public class SyncStorageEngine extends Handler {
         return authority;
     }
 
+    private void removeAuthorityLocked(Account account, String authorityName) {
+        AccountInfo accountInfo = mAccounts.get(account);
+        if (accountInfo != null) {
+            if (accountInfo.authorities.remove(authorityName) != null) {
+                writeAccountInfoLocked();
+            }
+        }
+    }
+
     public SyncStatusInfo getOrCreateSyncStatus(AuthorityInfo authority) {
         synchronized (mAuthorities) {
             return getOrCreateSyncStatusLocked(authority.ident);
@@ -1533,7 +1548,7 @@ public class SyncStorageEngine extends Handler {
                 out.attribute(null, "authority", authority.authority);
                 if (!authority.enabled) {
                     out.attribute(null, "enabled", "false");
-                }   
+                }
                 if (authority.syncable < 0) {
                     out.attribute(null, "syncable", "unknown");
                 } else if (authority.syncable == 0) {

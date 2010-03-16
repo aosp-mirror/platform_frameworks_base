@@ -1610,7 +1610,9 @@ public class SyncManager implements OnAccountsUpdateListener {
             RegisteredServicesCache.ServiceInfo<SyncAdapterType> syncAdapterInfo =
                     mSyncAdapters.getServiceInfo(syncAdapterType);
             if (syncAdapterInfo == null) {
-                Log.d(TAG, "can't find a sync adapter for " + syncAdapterType);
+                Log.d(TAG, "can't find a sync adapter for " + syncAdapterType
+                        + ", removing settings for it");
+                mSyncStorageEngine.removeAuthority(op.account, op.authority);
                 runStateIdle();
                 return;
             }
