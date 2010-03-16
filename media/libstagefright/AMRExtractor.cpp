@@ -222,7 +222,7 @@ status_t AMRSource::read(
     ssize_t n = mDataSource->readAt(mOffset, &header, 1);
 
     if (n < 1) {
-        return ERROR_IO;
+        return ERROR_END_OF_STREAM;
     }
 
     if (header & 0x83) {
