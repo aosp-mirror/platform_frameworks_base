@@ -1654,10 +1654,17 @@ public class SearchManager
         Intent intent = new Intent(INTENT_ACTION_GLOBAL_SEARCH);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.setComponent(globalSearchActivity);
-        // TODO: Always pass name of calling package as an extra?
-        if (appSearchData != null) {
-            intent.putExtra(APP_DATA, appSearchData);
+        // Make sure that we have a Bundle to put source in
+        if (appSearchData == null) {
+            appSearchData = new Bundle();
+        } else {
+            appSearchData = new Bundle(appSearchData);
         }
+        // Set source to package name of app that starts global search, if not set already.
+        if (!appSearchData.containsKey("source")) {
+            appSearchData.putString("source", mContext.getPackageName());
+        }
+        intent.putExtra(APP_DATA, appSearchData);
         if (!TextUtils.isEmpty(initialQuery)) {
             intent.putExtra(QUERY, initialQuery);
         }
