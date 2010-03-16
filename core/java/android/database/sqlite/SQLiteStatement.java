@@ -58,11 +58,10 @@ public class SQLiteStatement extends SQLiteProgram
     }
 
     /**
-     * Execute this SQL statement and return the ID of the most
-     * recently inserted row.  The SQL statement should probably be an
-     * INSERT for this to be a useful call.
+     * Execute this SQL statement and return the ID of the row inserted due to this call.
+     * The SQL statement should be an INSERT for this to be a useful call.
      *
-     * @return the row ID of the last row inserted.
+     * @return the row ID of the last row inserted, if this insert is successful. -1 otherwise.
      *
      * @throws android.database.SQLException If the SQL string is invalid for
      *         some reason
@@ -75,7 +74,7 @@ public class SQLiteStatement extends SQLiteProgram
         try {
             native_execute();
             mDatabase.logTimeStat(mSql, timeStart);
-            return mDatabase.lastInsertRow();
+            return (mDatabase.lastChangeCount() > 0) ? mDatabase.lastInsertRow() : -1;
         } finally {
             releaseReference();
             mDatabase.unlock();
