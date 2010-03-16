@@ -1502,7 +1502,7 @@ public class StatusBarService extends IStatusBar.Stub
         Drawable bg;
 
         /// ---------- Tracking View --------------
-        pixelFormat = PixelFormat.TRANSLUCENT;
+        pixelFormat = PixelFormat.RGBX_8888;
         bg = mTrackingView.getBackground();
         if (bg != null) {
             pixelFormat = bg.getOpacity();
