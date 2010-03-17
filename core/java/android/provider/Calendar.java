@@ -1279,9 +1279,9 @@ public final class Calendar {
             }
 
             Intent intent = new Intent(EVENT_REMINDER_ACTION);
+            intent.setData(ContentUris.withAppendedId(Calendar.CONTENT_URI, alarmTime));
             intent.putExtra(ALARM_TIME, alarmTime);
-            PendingIntent pi = PendingIntent.getBroadcast(context, 0, intent,
-                    PendingIntent.FLAG_CANCEL_CURRENT);
+            PendingIntent pi = PendingIntent.getBroadcast(context, 0, intent, 0);
             manager.set(AlarmManager.RTC_WAKEUP, alarmTime, pi);
         }
 
