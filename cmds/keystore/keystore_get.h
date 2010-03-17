@@ -32,9 +32,11 @@ extern "C" {
 #endif
 
 /* This function is provided for native components to get values from keystore.
- * Users are required to link against libcutils. The lengths of keys and values
- * are limited to KEYSTORE_MESSAGE_SIZE. This function returns the length of
- * the requested value or -1 if something goes wrong. */
+ * Users are required to link against libcutils. Keys are values are 8-bit safe.
+ * The first two arguments are the key and its length. The third argument
+ * specifies the buffer to store the retrieved value, which must be an array of
+ * KEYSTORE_MESSAGE_SIZE bytes. This function returns the length of the value or
+ * -1 if an error happens. */
 static int keystore_get(const char *key, int length, char *value)
 {
     uint8_t bytes[2] = {length >> 8, length};
