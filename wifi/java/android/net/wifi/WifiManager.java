@@ -810,6 +810,20 @@ public class WifiManager {
     }
 
     /**
+     * Gets the Wi-Fi AP Configuration.
+     * @return AP details in WifiConfiguration
+     *
+     * @hide Dont open yet
+     */
+    public WifiConfiguration getWifiApConfiguration() {
+        try {
+            return mService.getWifiApConfiguration();
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
+
+    /**
      * Allows an application to keep the Wi-Fi radio awake.
      * Normally the Wi-Fi radio may turn off when the user has not used the device in a while.
      * Acquiring a WifiLock will keep the radio on until the lock is released.  Multiple 

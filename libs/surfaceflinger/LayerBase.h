@@ -157,11 +157,11 @@ public:
     
     /**
      * setCoveredRegion - called when the covered region changes. The covered
-     * region correspond to any area of the surface that is covered 
+     * region corresponds to any area of the surface that is covered
      * (transparently or not) by another surface.
      */
     virtual void setCoveredRegion(const Region& coveredRegion);
-    
+
     /**
      * validateVisibility - cache a bunch of things
      */

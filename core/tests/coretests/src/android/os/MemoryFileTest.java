@@ -42,7 +42,8 @@ public class MemoryFileTest extends AndroidTestCase {
     /**
      * Keep allocating new files till the system purges them.
      */
-    @LargeTest
+    // Flaky test - temporarily suppress from large suite for now
+    // @LargeTest
     public void testPurge() throws Exception {
         List<MemoryFile> files = new ArrayList<MemoryFile>();
         try {

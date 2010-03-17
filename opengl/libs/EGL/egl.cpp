@@ -650,6 +650,7 @@ EGLBoolean eglInitialize(EGLDisplay dpy, EGLint *major, EGLint *minor)
     if (dp->refs > 0) {
         if (major != NULL) *major = VERSION_MAJOR;
         if (minor != NULL) *minor = VERSION_MINOR;
+        dp->refs++;
         return EGL_TRUE;
     }
     
@@ -755,8 +756,10 @@ EGLBoolean eglTerminate(EGLDisplay dpy)
     }
 
     // this is specific to Android, display termination is ref-counted.
-    if (dp->refs > 1)
+    if (dp->refs > 1) {
+        dp->refs--;
         return EGL_TRUE;
+    }
 
     EGLBoolean res = EGL_FALSE;
     for (int i=0 ; i<IMPL_NUM_IMPLEMENTATIONS ; i++) {

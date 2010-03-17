@@ -1608,13 +1608,6 @@ public class WebView extends AbsoluteLayout
     }
 
     private void goBackOrForward(int steps, boolean ignoreSnapshot) {
-        // every time we go back or forward, we want to reset the
-        // WebView certificate:
-        // if the new site is secure, we will reload it and get a
-        // new certificate set;
-        // if the new site is not secure, the certificate must be
-        // null, and that will be the case
-        mCertificate = null;
         if (steps != 0) {
             clearTextEntry(false);
             mWebViewCore.sendMessage(EventHub.GO_BACK_FORWARD, steps,
@@ -3858,7 +3851,6 @@ public class WebView extends AbsoluteLayout
                 || keyCode == KeyEvent.KEYCODE_SHIFT_RIGHT) {
             if (nativeFocusIsPlugin()) {
                 mShiftIsPressed = false;
-                return true;
             } else if (commitCopy()) {
                 return true;
             }
@@ -5761,11 +5753,11 @@ public class WebView extends AbsoluteLayout
                     contentToViewY(docY + docHeight / 2) - viewHeight / 2,
                     true, 0);
         } else {
-            int oldScreenX = contentToViewX(docX) - mScrollX;
-            int rectViewX = (int) (docX * scale);
-            int rectViewWidth = (int) (docWidth * scale);
-            int newMaxWidth = (int) (mContentWidth * scale);
-            int newScreenX = (viewWidth - rectViewWidth) / 2;
+            float oldScreenX = docX * mActualScale - mScrollX;
+            float rectViewX = docX * scale;
+            float rectViewWidth = docWidth * scale;
+            float newMaxWidth = mContentWidth * scale;
+            float newScreenX = (viewWidth - rectViewWidth) / 2;
             // pin the newX to the WebView
             if (newScreenX > rectViewX) {
                 newScreenX = rectViewX;
@@ -5774,12 +5766,12 @@ public class WebView extends AbsoluteLayout
             }
             mZoomCenterX = (oldScreenX * scale - newScreenX * mActualScale)
                     / (scale - mActualScale);
-            int oldScreenY = contentToViewY(docY) - mScrollY;
-            int rectViewY = (int) (docY * scale) + getTitleHeight();
-            int rectViewHeight = (int) (docHeight * scale);
-            int newMaxHeight = (int) (mContentHeight * scale)
-                    + getTitleHeight();
-            int newScreenY = (viewHeight - rectViewHeight) / 2;
+            float oldScreenY = docY * mActualScale + getTitleHeight()
+                    - mScrollY;
+            float rectViewY = docY * scale + getTitleHeight();
+            float rectViewHeight = docHeight * scale;
+            float newMaxHeight = mContentHeight * scale + getTitleHeight();
+            float newScreenY = (viewHeight - rectViewHeight) / 2;
             // pin the newY to the WebView
             if (newScreenY > rectViewY) {
                 newScreenY = rectViewY;

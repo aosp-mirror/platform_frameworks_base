@@ -46,6 +46,7 @@ import android.net.wifi.WifiStateTracker;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.SupplicantState;
+import android.net.wifi.WifiConfiguration.KeyMgmt;
 import android.net.ConnectivityManager;
 import android.net.InterfaceConfiguration;
 import android.net.NetworkStateTracker;
@@ -81,6 +82,7 @@ import java.net.UnknownHostException;
 import com.android.internal.app.IBatteryStats;
 import android.app.backup.IBackupManager;
 import com.android.server.am.BatteryStatsService;
+import com.android.internal.R;
 
 /**
  * WifiService handles remote WiFi operation requests by implementing
@@ -104,6 +106,8 @@ public class WifiService extends IWifiManager.Stub {
     private boolean mScreenOff;
     private boolean mDeviceIdle;
     private int mPluggedType;
+
+    private enum DriverAction {DRIVER_UNLOAD, NO_DRIVER_UNLOAD};
 
     // true if the user enabled Wifi while in airplane mode
     private boolean mAirplaneModeOverwridden;
@@ -271,11 +275,9 @@ public class WifiService extends IWifiManager.Stub {
      */
     public void startWifi() {
         boolean wifiEnabled = getPersistedWifiEnabled();
-        boolean wifiAPEnabled = wifiEnabled ? false : getPersistedWifiApEnabled();
         Slog.i(TAG, "WifiService starting up with Wi-Fi " +
                 (wifiEnabled ? "enabled" : "disabled"));
         setWifiEnabledBlocking(wifiEnabled, false, Process.myUid());
-        setWifiApEnabledBlocking(wifiAPEnabled, true, Process.myUid(), null);
     }
 
     private void updateTetherState(ArrayList<String> available, ArrayList<String> tethered) {
@@ -297,28 +299,22 @@ public class WifiService extends IWifiManager.Stub {
                     try {
                         ifcg = service.getInterfaceConfig(intf);
                         if (ifcg != null) {
-                            /* IP/netmask: 169.254.2.1/255.255.255.0 */
-                            ifcg.ipAddr = (169 << 24) + (254 << 16) + (2 << 8) + 1;
+                            /* IP/netmask: 169.254.2.2/255.255.255.0 */
+                            ifcg.ipAddr = (169 << 24) + (254 << 16) + (2 << 8) + 2;
                             ifcg.netmask = (255 << 24) + (255 << 16) + (255 << 8) + 0;
                             ifcg.interfaceFlags = "up";
 
                             service.setInterfaceConfig(intf, ifcg);
                         }
                     } catch (Exception e) {
-                        /**
-                         * TODO: Add broadcast to indicate tether failed
-                         */
                         Slog.e(TAG, "Error configuring interface " + intf + ", :" + e);
+                        setWifiApEnabledState(WIFI_AP_STATE_FAILED, 0, DriverAction.DRIVER_UNLOAD);
                         return;
                     }
 
-                    /**
-                     * TODO: Add broadcast to indicate tether failed
-                     */
-                    if(mCm.tether(intf) == ConnectivityManager.TETHER_ERROR_NO_ERROR) {
-                        Slog.d(TAG, "Tethered "+intf);
-                    } else {
+                    if(mCm.tether(intf) != ConnectivityManager.TETHER_ERROR_NO_ERROR) {
                         Slog.e(TAG, "Error tethering "+intf);
+                        setWifiApEnabledState(WIFI_AP_STATE_FAILED, 0, DriverAction.DRIVER_UNLOAD);
                     }
                     break;
                 }
@@ -434,7 +430,7 @@ public class WifiService extends IWifiManager.Stub {
         setWifiEnabledState(enable ? WIFI_STATE_ENABLING : WIFI_STATE_DISABLING, uid);
 
         if ((mWifiApState == WIFI_AP_STATE_ENABLED) && enable) {
-            setWifiApEnabledBlocking(false, true, Process.myUid(), null);
+            setWifiApEnabledBlocking(false, Process.myUid(), null);
         }
 
         if (enable) {
@@ -581,21 +577,6 @@ public class WifiService extends IWifiManager.Stub {
         return mWifiStateTracker.reassociate();
     }
 
-    private boolean getPersistedWifiApEnabled() {
-        final ContentResolver cr = mContext.getContentResolver();
-        try {
-            return Settings.Secure.getInt(cr, Settings.Secure.WIFI_AP_ON) == 1;
-        } catch (Settings.SettingNotFoundException e) {
-            Settings.Secure.putInt(cr, Settings.Secure.WIFI_AP_ON, 0);
-            return false;
-        }
-    }
-
-    private void persistWifiApEnabled(boolean enabled) {
-      final ContentResolver cr = mContext.getContentResolver();
-      Settings.Secure.putInt(cr, Settings.Secure.WIFI_AP_ON, enabled ? 1 : 0);
-    }
-
     /**
      * see {@link android.net.wifi.WifiManager#startAccessPoint(WifiConfiguration)}
      * @param wifiConfig SSID, security and channel details as
@@ -621,46 +602,101 @@ public class WifiService extends IWifiManager.Stub {
         return true;
     }
 
+    public WifiConfiguration getWifiApConfiguration() {
+        final ContentResolver cr = mContext.getContentResolver();
+        WifiConfiguration wifiConfig = new WifiConfiguration();
+        int authType;
+        try {
+            wifiConfig.SSID = Settings.Secure.getString(cr, Settings.Secure.WIFI_AP_SSID);
+            if (wifiConfig.SSID == null)
+                return null;
+            authType = Settings.Secure.getInt(cr, Settings.Secure.WIFI_AP_SECURITY);
+            wifiConfig.allowedKeyManagement.set(authType);
+            wifiConfig.preSharedKey = Settings.Secure.getString(cr, Settings.Secure.WIFI_AP_PASSWD);
+            return wifiConfig;
+        } catch (Settings.SettingNotFoundException e) {
+            Slog.e(TAG,"AP settings not found, returning");
+            return null;
+        }
+    }
+
+    private void persistApConfiguration(WifiConfiguration wifiConfig) {
+        final ContentResolver cr = mContext.getContentResolver();
+        boolean isWpa;
+        if (wifiConfig == null)
+            return;
+        Settings.Secure.putString(cr, Settings.Secure.WIFI_AP_SSID, wifiConfig.SSID);
+        isWpa = wifiConfig.allowedKeyManagement.get(KeyMgmt.WPA_PSK);
+        Settings.Secure.putInt(cr,
+                               Settings.Secure.WIFI_AP_SECURITY,
+                               isWpa ? KeyMgmt.WPA_PSK : KeyMgmt.NONE);
+        if (isWpa)
+            Settings.Secure.putString(cr, Settings.Secure.WIFI_AP_PASSWD, wifiConfig.preSharedKey);
+    }
+
     /**
      * Enables/disables Wi-Fi AP synchronously. The driver is loaded
      * and soft access point configured as a single operation.
      * @param enable {@code true} to turn Wi-Fi on, {@code false} to turn it off.
-     * @param persist {@code true} if the setting should be persisted.
      * @param uid The UID of the process making the request.
-     * @param config The WifiConfiguration for AP
+     * @param wifiConfig The WifiConfiguration for AP
      * @return {@code true} if the operation succeeds (or if the existing state
      *         is the same as the requested state)
      */
-    /**
-     * TODO: persist needs to go away in WifiService
-     * This will affect all persist related functions
-     * for Access Point
-     */
     private boolean setWifiApEnabledBlocking(boolean enable,
-                        boolean persist, int uid, WifiConfiguration wifiConfig) {
+                                int uid, WifiConfiguration wifiConfig) {
         final int eventualWifiApState = enable ? WIFI_AP_STATE_ENABLED : WIFI_AP_STATE_DISABLED;
 
         if (mWifiApState == eventualWifiApState) {
-            return true;
+            /* Configuration changed on a running access point */
+            if(enable && (wifiConfig != null)) {
+                try {
+                    persistApConfiguration(wifiConfig);
+                    nwService.stopAccessPoint();
+                    nwService.startAccessPoint(wifiConfig, mWifiStateTracker.getInterfaceName());
+                    return true;
+                } catch(Exception e) {
+                    Slog.e(TAG, "Exception in nwService during AP restart");
+                    setWifiApEnabledState(WIFI_AP_STATE_FAILED, uid, DriverAction.DRIVER_UNLOAD);
+                    return false;
+                }
+            } else {
+                return true;
+            }
         }
 
-        setWifiApEnabledState(enable ? WIFI_AP_STATE_ENABLING : WIFI_AP_STATE_DISABLING, uid);
-
-        if (enable && (mWifiStateTracker.getWifiState() == WIFI_STATE_ENABLED)) {
-            setWifiEnabledBlocking(false, true, Process.myUid());
-        }
+        setWifiApEnabledState(enable ? WIFI_AP_STATE_ENABLING :
+                                       WIFI_AP_STATE_DISABLING, uid, DriverAction.NO_DRIVER_UNLOAD);
 
         if (enable) {
+
+            /**
+             * Disable client mode for starting AP
+             */
+            if (mWifiStateTracker.getWifiState() == WIFI_STATE_ENABLED) {
+                setWifiEnabledBlocking(false, true, Process.myUid());
+            }
+
+            /* Use default config if there is no existing config */
+            if (wifiConfig == null && ((wifiConfig = getWifiApConfiguration()) == null)) {
+                wifiConfig = new WifiConfiguration();
+                wifiConfig.SSID = mContext.getString(R.string.wifi_tether_configure_ssid_default);
+                wifiConfig.allowedKeyManagement.set(KeyMgmt.NONE);
+            }
+            persistApConfiguration(wifiConfig);
+
             if (!mWifiStateTracker.loadDriver()) {
                 Slog.e(TAG, "Failed to load Wi-Fi driver for AP mode");
-                setWifiApEnabledState(WIFI_AP_STATE_FAILED, uid);
+                setWifiApEnabledState(WIFI_AP_STATE_FAILED, uid, DriverAction.NO_DRIVER_UNLOAD);
                 return false;
             }
 
             try {
-                nwService.startAccessPoint();
+                nwService.startAccessPoint(wifiConfig, mWifiStateTracker.getInterfaceName());
             } catch(Exception e) {
                 Slog.e(TAG, "Exception in startAccessPoint()");
+                setWifiApEnabledState(WIFI_AP_STATE_FAILED, uid, DriverAction.DRIVER_UNLOAD);
+                return false;
             }
 
         } else {
@@ -669,20 +705,18 @@ public class WifiService extends IWifiManager.Stub {
                 nwService.stopAccessPoint();
             } catch(Exception e) {
                 Slog.e(TAG, "Exception in stopAccessPoint()");
+                setWifiApEnabledState(WIFI_AP_STATE_FAILED, uid, DriverAction.DRIVER_UNLOAD);
+                return false;
             }
 
             if (!mWifiStateTracker.unloadDriver()) {
                 Slog.e(TAG, "Failed to unload Wi-Fi driver for AP mode");
-                setWifiApEnabledState(WIFI_AP_STATE_FAILED, uid);
+                setWifiApEnabledState(WIFI_AP_STATE_FAILED, uid, DriverAction.NO_DRIVER_UNLOAD);
                 return false;
             }
         }
 
-        // Success!
-        if (persist) {
-            persistWifiApEnabled(enable);
-        }
-        setWifiApEnabledState(eventualWifiApState, uid);
+        setWifiApEnabledState(eventualWifiApState, uid, DriverAction.NO_DRIVER_UNLOAD);
         return true;
     }
 
@@ -699,8 +733,15 @@ public class WifiService extends IWifiManager.Stub {
         return mWifiApState;
     }
 
-    private void setWifiApEnabledState(int wifiAPState, int uid) {
+    private void setWifiApEnabledState(int wifiAPState, int uid, DriverAction flag) {
         final int previousWifiApState = mWifiApState;
+
+        /**
+         * Unload the driver if going to a failed state
+         */
+        if ((mWifiApState == WIFI_AP_STATE_FAILED) && (flag == DriverAction.DRIVER_UNLOAD)) {
+            mWifiStateTracker.unloadDriver();
+        }
 
         long ident = Binder.clearCallingIdentity();
         try {
@@ -959,8 +1000,7 @@ public class WifiService extends IWifiManager.Stub {
          */
         int netId = config.networkId;
         boolean newNetwork = netId == -1;
-        boolean doReconfig;
-        int currentPriority;
+        boolean doReconfig = false;
         // networkId of -1 means we want to create a new network
         synchronized (mWifiStateTracker) {
             if (newNetwork) {
@@ -972,17 +1012,6 @@ public class WifiService extends IWifiManager.Stub {
                     return -1;
                 }
                 doReconfig = true;
-            } else {
-                String priorityVal = mWifiStateTracker.getNetworkVariable(
-                                            netId, WifiConfiguration.priorityVarName);
-                currentPriority = -1;
-                if (!TextUtils.isEmpty(priorityVal)) {
-                    try {
-                        currentPriority = Integer.parseInt(priorityVal);
-                    } catch (NumberFormatException ignore) {
-                    }
-                }
-                doReconfig = currentPriority != config.priority;
             }
             mNeedReconfig = mNeedReconfig || doReconfig;
         }
@@ -1706,7 +1735,7 @@ public class WifiService extends IWifiManager.Stub {
     private void sendAccessPointMessage(boolean enable, WifiConfiguration wifiConfig, int uid) {
         Message.obtain(mWifiHandler,
                 (enable ? MESSAGE_START_ACCESS_POINT : MESSAGE_STOP_ACCESS_POINT),
-                0, uid, wifiConfig).sendToTarget();
+                uid, 0, wifiConfig).sendToTarget();
     }
 
     private void updateWifiState() {
@@ -1853,15 +1882,13 @@ public class WifiService extends IWifiManager.Stub {
 
                 case MESSAGE_START_ACCESS_POINT:
                     setWifiApEnabledBlocking(true,
-                                             msg.arg1 == 1,
-                                             msg.arg2,
+                                             msg.arg1,
                                              (WifiConfiguration) msg.obj);
                     break;
 
                 case MESSAGE_STOP_ACCESS_POINT:
                     setWifiApEnabledBlocking(false,
-                                             msg.arg1 == 1,
-                                             msg.arg2,
+                                             msg.arg1,
                                              (WifiConfiguration) msg.obj);
                     sWakeLock.release();
                     break;

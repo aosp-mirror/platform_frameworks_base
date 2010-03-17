@@ -115,6 +115,9 @@ public final class ServerSession extends ObexSession implements Runnable {
                     case ObexHelper.OBEX_OPCODE_SETPATH:
                         handleSetPathRequest();
                         break;
+                    case ObexHelper.OBEX_OPCODE_ABORT:
+                        handleAbortRequest();
+                        break;
 
                     case -1:
                         done = true;
@@ -142,6 +145,35 @@ public final class ServerSession extends ObexSession implements Runnable {
             Log.d(TAG, e.toString());
         }
         close();
+    }
+
+    /**
+     * Handles a ABORT request from a client. This method will read the rest of
+     * the request from the client. Assuming the request is valid, it will
+     * create a <code>HeaderSet</code> object to pass to the
+     * <code>ServerRequestHandler</code> object. After the handler processes the
+     * request, this method will create a reply message to send to the server.
+     *
+     * @throws IOException if an error occurred at the transport layer
+     */
+    private void handleAbortRequest() throws IOException {
+        int code = ResponseCodes.OBEX_HTTP_OK;
+        HeaderSet request = new HeaderSet();
+        HeaderSet reply = new HeaderSet();
+
+        int length = mInput.read();
+        length = (length << 8) + mInput.read();
+        if (length > ObexHelper.MAX_PACKET_SIZE_INT) {
+            code = ResponseCodes.OBEX_HTTP_REQ_TOO_LARGE;
+        } else {
+            for (int i = 3; i < length; i++) {
+                mInput.read();
+            }
+            code = mListener.onAbort(request, reply);
+            Log.v(TAG, "onAbort request handler return value- " + code);
+            code = validateResponseCode(code);
+        }
+        sendResponse(code, null);
     }
 
     /**

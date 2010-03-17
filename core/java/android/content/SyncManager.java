@@ -416,6 +416,9 @@ public class SyncManager implements OnAccountsUpdateListener {
     }
 
     private void initializeSyncAdapter(Account account, String authority) {
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            Log.v(TAG, "initializeSyncAdapter: " + account + ", authority " + authority);
+        }
         SyncAdapterType syncAdapterType = SyncAdapterType.newKey(authority, account.type);
         RegisteredServicesCache.ServiceInfo<SyncAdapterType> syncAdapterInfo =
                 mSyncAdapters.getServiceInfo(syncAdapterType);
@@ -427,9 +430,11 @@ public class SyncManager implements OnAccountsUpdateListener {
         Intent intent = new Intent();
         intent.setAction("android.content.SyncAdapter");
         intent.setComponent(syncAdapterInfo.componentName);
-        mContext.bindService(intent, new InitializerServiceConnection(account, authority, mContext,
+        if (!mContext.bindService(intent, new InitializerServiceConnection(account, authority, mContext,
                 mMainHandler),
-                Context.BIND_AUTO_CREATE | Context.BIND_NOT_FOREGROUND);
+                Context.BIND_AUTO_CREATE | Context.BIND_NOT_FOREGROUND)) {
+            Log.w(TAG, "initializeSyncAdapter: failed to bind to " + intent);
+        }
     }
 
     private static class InitializerServiceConnection implements ServiceConnection {
@@ -452,6 +457,9 @@ public class SyncManager implements OnAccountsUpdateListener {
             try {
                 if (!mInitialized) {
                     mInitialized = true;
+                    if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                        Log.v(TAG, "calling initialize: " + mAccount + ", authority " + mAuthority);
+                    }
                     ISyncAdapter.Stub.asInterface(service).initialize(mAccount, mAuthority);
                 }
             } catch (RemoteException e) {
@@ -1307,7 +1315,6 @@ public class SyncManager implements OnAccountsUpdateListener {
         // it if sync is still failing
         private boolean mErrorNotificationInstalled = false;
         private volatile CountDownLatch mReadyToRunLatch = new CountDownLatch(1);
-
         public void onBootCompleted() {
             mBootCompleted = true;
             if (mReadyToRunLatch != null) {
@@ -1603,7 +1610,9 @@ public class SyncManager implements OnAccountsUpdateListener {
             RegisteredServicesCache.ServiceInfo<SyncAdapterType> syncAdapterInfo =
                     mSyncAdapters.getServiceInfo(syncAdapterType);
             if (syncAdapterInfo == null) {
-                Log.d(TAG, "can't find a sync adapter for " + syncAdapterType);
+                Log.d(TAG, "can't find a sync adapter for " + syncAdapterType
+                        + ", removing settings for it");
+                mSyncStorageEngine.removeAuthority(op.account, op.authority);
                 runStateIdle();
                 return;
             }

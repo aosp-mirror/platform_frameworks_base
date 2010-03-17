@@ -4613,6 +4613,12 @@ class PackageManagerService extends IPackageManager.Stub {
             return pkgLite.recommendedInstallLocation;
         }
 
+        /*
+         * Invoke remote method to get package information and install
+         * location values. Override install location based on default
+         * policy if needed and then create install arguments based
+         * on the install location.
+         */
         public void handleStartCopy() throws RemoteException {
             int ret = PackageManager.INSTALL_SUCCEEDED;
             boolean fwdLocked = (flags & PackageManager.INSTALL_FORWARD_LOCK) != 0;
@@ -4624,9 +4630,7 @@ class PackageManagerService extends IPackageManager.Stub {
             } else {
                 // Remote call to find out default install location
                 PackageInfoLite pkgLite = mContainerService.getMinimalPackageInfo(packageURI);
-                int loc = installLocationPolicy(pkgLite, flags);
-                // Use install location to create InstallArgs and temporary
-                // install location
+                int loc = pkgLite.recommendedInstallLocation;
                 if (loc == PackageHelper.RECOMMEND_FAILED_INVALID_LOCATION){
                     ret = PackageManager.INSTALL_FAILED_INVALID_INSTALL_LOCATION;
                 } else if (loc == PackageHelper.RECOMMEND_FAILED_ALREADY_EXISTS){
@@ -4635,7 +4639,11 @@ class PackageManagerService extends IPackageManager.Stub {
                     ret = PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
                 } else if (loc == PackageHelper.RECOMMEND_FAILED_INVALID_APK) {
                     ret = PackageManager.INSTALL_FAILED_INVALID_APK;
+                } else if (loc == PackageHelper.RECOMMEND_MEDIA_UNAVAILABLE) {
+                  ret = PackageManager.INSTALL_FAILED_MEDIA_UNAVAILABLE;
                 } else {
+                    // Override with defaults if needed.
+                    loc = installLocationPolicy(pkgLite, flags);
                     // Override install location with flags
                     if ((flags & PackageManager.INSTALL_EXTERNAL) == 0){
                         if (loc == PackageHelper.RECOMMEND_INSTALL_EXTERNAL) {
@@ -4701,6 +4709,12 @@ class PackageManagerService extends IPackageManager.Stub {
         }
 
         public void handleStartCopy() throws RemoteException {
+            mRet = PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
+            // Check for storage space on target medium
+            if (!targetArgs.checkFreeStorage(mContainerService)) {
+                Log.w(TAG, "Insufficient storage to install");
+                return;
+            }
             // Create the file args now.
             mRet = targetArgs.copyApk(mContainerService, false);
             targetArgs.doPreInstall(mRet);
@@ -4714,15 +4728,20 @@ class PackageManagerService extends IPackageManager.Stub {
                     builder.append(" target : ");
                     builder.append(targetArgs.getCodePath());
                 }
-                Log.i(TAG, "Posting move MCS_UNBIND for " + builder.toString());
+                Log.i(TAG, builder.toString());
             }
         }
 
         @Override
         void handleReturnCode() {
             targetArgs.doPostInstall(mRet);
-            // TODO invoke pending move
-            processPendingMove(this, mRet);
+            int currentStatus = PackageManager.MOVE_FAILED_INTERNAL_ERROR;
+            if (mRet == PackageManager.INSTALL_SUCCEEDED) {
+                currentStatus = PackageManager.MOVE_SUCCEEDED;
+            } else if (mRet == PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE){
+                currentStatus = PackageManager.MOVE_FAILED_INSUFFICIENT_STORAGE;
+            }
+            processPendingMove(this, currentStatus);
         }
 
         @Override
@@ -4782,6 +4801,7 @@ class PackageManagerService extends IPackageManager.Stub {
         // Need installer lock especially for dex file removal.
         abstract void cleanUpResourcesLI();
         abstract boolean doPostDeleteLI(boolean delete);
+        abstract boolean checkFreeStorage(IMediaContainerService imcs) throws RemoteException;
     }
 
     class FileInstallArgs extends InstallArgs {
@@ -4810,6 +4830,10 @@ class PackageManagerService extends IPackageManager.Stub {
             String apkName = getNextCodePath(null, pkgName, ".apk");
             codeFileName = new File(installDir, apkName + ".apk").getPath();
             resourceFileName = getResourcePathFromCodePath();
+        }
+
+        boolean  checkFreeStorage(IMediaContainerService imcs) throws RemoteException {
+            return imcs.checkFreeStorage(false, packageURI);
         }
 
         String getCodePath() {
@@ -5011,6 +5035,10 @@ class PackageManagerService extends IPackageManager.Stub {
 
         void createCopyFile() {
             cid = getTempContainerId();
+        }
+
+        boolean  checkFreeStorage(IMediaContainerService imcs) throws RemoteException {
+            return imcs.checkFreeStorage(true, packageURI);
         }
 
         int copyApk(IMediaContainerService imcs, boolean temp) throws RemoteException {
@@ -9109,6 +9137,9 @@ class PackageManagerService extends IPackageManager.Stub {
    public boolean updateExternalMediaStatus(final boolean mediaStatus) {
        final boolean ret;
        synchronized (mPackages) {
+           Log.i(TAG, "Updating external media status from " +
+                   (mMediaMounted ? "mounted" : "unmounted") + " to " +
+                   (mediaStatus ? "mounted" : "unmounted"));
            if (DEBUG_SD_INSTALL) Log.i(TAG, "updateExternalMediaStatus:: mediaStatus=" +
                    mediaStatus+", mMediaMounted=" + mMediaMounted);
            if (mediaStatus == mMediaMounted) {
@@ -9117,6 +9148,14 @@ class PackageManagerService extends IPackageManager.Stub {
            mMediaMounted = mediaStatus;
            Set<String> appList = mSettings.findPackagesWithFlag(ApplicationInfo.FLAG_EXTERNAL_STORAGE);
            ret = appList != null && appList.size() > 0;
+           if (DEBUG_SD_INSTALL) {
+               if (appList != null) {
+                   for (String app : appList) {
+                       Log.i(TAG, "Should enable " + app + " on sdcard");
+                   }
+               }
+           }
+           if (DEBUG_SD_INSTALL)  Log.i(TAG, "updateExternalMediaStatus returning " + ret);
        }
        // Queue up an async operation since the package installation may take a little while.
        mHandler.post(new Runnable() {
@@ -9134,6 +9173,7 @@ class PackageManagerService extends IPackageManager.Stub {
        // enabled or disabled.
        final String list[] = PackageHelper.getSecureContainerList();
        if (list == null || list.length == 0) {
+           Log.i(TAG, "No secure containers on sdcard");
            return;
        }
 
@@ -9141,16 +9181,6 @@ class PackageManagerService extends IPackageManager.Stub {
        int num = 0;
        HashSet<String> removeCids = new HashSet<String>();
        HashMap<SdInstallArgs, String> processCids = new HashMap<SdInstallArgs, String>();
-       /*HashMap<String, String> cidPathMap = new HashMap<String, String>();
-       // Don't hold any locks when getting cache paths
-       for (String cid : list) {
-           String cpath = PackageHelper.getSdDir(cid);
-           if (cpath == null) {
-               removeCids.add(cid);
-           } else {
-               cidPathMap.put(cid, cpath);
-           }
-       }*/
        synchronized (mPackages) {
            for (String cid : list) {
                SdInstallArgs args = new SdInstallArgs(cid);

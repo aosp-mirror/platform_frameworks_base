@@ -2013,6 +2013,8 @@
         <item quantity="one">Open Wi-Fi network available</item>
         <item quantity="other">Open Wi-Fi networks available</item>
     </plurals>
+    <!-- Do not translate. Default access point SSID used for tethering -->
+    <string name="wifi_tether_configure_ssid_default" translatable="false">AndroidAP</string>
 
     <!-- Name of the dialog that lets the user choose an accented character to insert -->
     <string name="select_character">Insert character</string>

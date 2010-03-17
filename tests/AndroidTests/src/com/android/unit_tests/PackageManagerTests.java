@@ -72,8 +72,8 @@ import android.provider.Settings.SettingNotFoundException;
 public class PackageManagerTests extends AndroidTestCase {
     private static final boolean localLOGV = true;
     public static final String TAG="PackageManagerTests";
-    public final long MAX_WAIT_TIME=120*1000;
-    public final long WAIT_TIME_INCR=20*1000;
+    public final long MAX_WAIT_TIME = 25*1000;
+    public final long WAIT_TIME_INCR = 5*1000;
     private static final String SECURE_CONTAINERS_PREFIX = "/mnt/asec";
     private static final int APP_INSTALL_AUTO = PackageHelper.APP_INSTALL_AUTO;
     private static final int APP_INSTALL_DEVICE = PackageHelper.APP_INSTALL_INTERNAL;
@@ -378,39 +378,50 @@ public class PackageManagerTests extends AndroidTestCase {
     private InstallParams installFromRawResource(String outFileName,
             int rawResId, int flags, boolean cleanUp, boolean fail, int result,
             int expInstallLocation) {
+        PackageManager pm = mContext.getPackageManager();
         File filesDir = mContext.getFilesDir();
         File outFile = new File(filesDir, outFileName);
         Uri packageURI = getInstallablePackage(rawResId, outFile);
         PackageParser.Package pkg = parsePackage(packageURI);
         assertNotNull(pkg);
-        InstallParams ip = null;
-        // Make sure the package doesn't exist
-        getPm().deletePackage(pkg.packageName, null, 0);
-        // Clean up the containers as well
-        clearSecureContainersForPkg(pkg.packageName);
-        try {
+        if ((flags & PackageManager.INSTALL_REPLACE_EXISTING) == 0) {
+            // Make sure the package doesn't exist
             try {
-                if (fail) {
-                    assertTrue(invokeInstallPackageFail(packageURI, flags,
-                            pkg.packageName, result));
-                    assertNotInstalled(pkg.packageName);
-                } else {
-                    InstallReceiver receiver = new InstallReceiver(pkg.packageName);
-                    assertTrue(invokeInstallPackage(packageURI, flags,
-                            pkg.packageName, receiver));
-                    // Verify installed information
-                    assertInstall(pkg, flags, expInstallLocation);
-                    ip = new InstallParams(pkg, outFileName, packageURI);
-                }
+                ApplicationInfo appInfo = pm.getApplicationInfo(pkg.packageName,
+                        PackageManager.GET_UNINSTALLED_PACKAGES);
+                GenericReceiver receiver = new DeleteReceiver(pkg.packageName);
+                invokeDeletePackage(packageURI, 0,
+                        pkg.packageName, receiver);
+            } catch (NameNotFoundException e1) {
             } catch (Exception e) {
-                failStr("Failed with exception : " + e);
+                failStr(e);
+            }
+            // Clean up the containers as well
+            clearSecureContainersForPkg(pkg.packageName);
+        }
+        InstallParams ip = null;
+        try {
+            if (fail) {
+                assertTrue(invokeInstallPackageFail(packageURI, flags,
+                        pkg.packageName, result));
+                assertNotInstalled(pkg.packageName);
+            } else {
+                InstallReceiver receiver = new InstallReceiver(pkg.packageName);
+                assertTrue(invokeInstallPackage(packageURI, flags,
+                        pkg.packageName, receiver));
+                // Verify installed information
+                assertInstall(pkg, flags, expInstallLocation);
+                ip = new InstallParams(pkg, outFileName, packageURI);
             }
             return ip;
+        } catch (Exception e) {
+            failStr("Failed with exception : " + e);
         } finally {
             if (cleanUp) {
                 cleanUpInstall(ip);
             }
         }
+        return ip;
     }
 
     @MediumTest
@@ -820,7 +831,7 @@ public class PackageManagerTests extends AndroidTestCase {
         try {
             // Wait on observer
             synchronized(observer) {
-                getMs().unmountVolume(path, false);
+                getMs().unmountVolume(path, true);
                 long waitTime = 0;
                 while((!observer.isDone()) && (waitTime < MAX_WAIT_TIME) ) {
                     observer.wait(WAIT_TIME_INCR);
@@ -949,14 +960,21 @@ public class PackageManagerTests extends AndroidTestCase {
                 PackageInfo.INSTALL_LOCATION_PREFER_EXTERNAL);
     }
 
-    private void replaceManifestLocation(int iFlags, int rFlags) {
+    /*
+     * Install a package on internal flash via PackageManager install flag. Replace
+     * the package via flag to install on sdcard. Make sure the new flag overrides
+     * the old install location.
+     */
+    public void testReplaceFlagInternalSdcard() {
+        int iFlags = 0;
+        int rFlags = PackageManager.INSTALL_EXTERNAL;
         InstallParams ip = sampleInstallFromRawResource(iFlags, false);
         GenericReceiver receiver = new ReplaceReceiver(ip.pkg.packageName);
         int replaceFlags = rFlags | PackageManager.INSTALL_REPLACE_EXISTING;
         try {
             assertEquals(invokeInstallPackage(ip.packageURI, replaceFlags,
                     ip.pkg.packageName, receiver), true);
-            assertInstall(ip.pkg, replaceFlags, ip.pkg.installLocation);
+            assertInstall(ip.pkg, rFlags, ip.pkg.installLocation);
         } catch (Exception e) {
             failStr("Failed with exception : " + e);
         } finally {
@@ -964,12 +982,26 @@ public class PackageManagerTests extends AndroidTestCase {
         }
     }
 
-    public void testReplaceFlagInternalSdcard() {
-        replaceManifestLocation(0, PackageManager.INSTALL_EXTERNAL);
-    }
-
+    /*
+     * Install a package on sdcard via PackageManager install flag. Replace
+     * the package with no flags or manifest option and make sure the old
+     * install location is retained.
+     */
     public void testReplaceFlagSdcardInternal() {
-        replaceManifestLocation(PackageManager.INSTALL_EXTERNAL, 0);
+        int iFlags = PackageManager.INSTALL_EXTERNAL;
+        int rFlags = 0;
+        InstallParams ip = sampleInstallFromRawResource(iFlags, false);
+        GenericReceiver receiver = new ReplaceReceiver(ip.pkg.packageName);
+        int replaceFlags = rFlags | PackageManager.INSTALL_REPLACE_EXISTING;
+        try {
+            assertEquals(invokeInstallPackage(ip.packageURI, replaceFlags,
+                    ip.pkg.packageName, receiver), true);
+            assertInstall(ip.pkg, iFlags, ip.pkg.installLocation);
+        } catch (Exception e) {
+            failStr("Failed with exception : " + e);
+        } finally {
+            cleanUpInstall(ip);
+        }
     }
 
     public void testManifestInstallLocationReplaceInternalSdcard() {
@@ -984,7 +1016,7 @@ public class PackageManagerTests extends AndroidTestCase {
         int replaceFlags = rFlags | PackageManager.INSTALL_REPLACE_EXISTING;
         try {
             InstallParams rp = installFromRawResource("install.apk", rApk,
-                    rFlags, false,
+                    replaceFlags, false,
                     false, -1, PackageInfo.INSTALL_LOCATION_PREFER_EXTERNAL);
             assertInstall(rp.pkg, replaceFlags, rp.pkg.installLocation);
         } catch (Exception e) {
@@ -1002,11 +1034,10 @@ public class PackageManagerTests extends AndroidTestCase {
         InstallParams ip = installFromRawResource("install.apk", iApk,
                 iFlags, false,
                 false, -1, PackageInfo.INSTALL_LOCATION_PREFER_EXTERNAL);
-        GenericReceiver receiver = new ReplaceReceiver(ip.pkg.packageName);
         int replaceFlags = rFlags | PackageManager.INSTALL_REPLACE_EXISTING;
         try {
             InstallParams rp = installFromRawResource("install.apk", rApk,
-                    rFlags, false,
+                    replaceFlags, false,
                     false, -1, PackageInfo.INSTALL_LOCATION_PREFER_EXTERNAL);
             assertInstall(rp.pkg, replaceFlags, ip.pkg.installLocation);
         } catch (Exception e) {
@@ -1211,6 +1242,56 @@ public class PackageManagerTests extends AndroidTestCase {
         moveFromRawResource(PackageManager.INSTALL_EXTERNAL, PackageManager.MOVE_INTERNAL,
                 PackageManager.MOVE_SUCCEEDED);
     }
+
+    /*
+     * Test that an install error code is returned when media is unmounted
+     * and package installed on sdcard via package manager flag.
+     */
+    public void testInstallSdcardUnmount() {
+        boolean origState = getMediaState();
+        try {
+            // Unmount sdcard
+            assertTrue(unmountMedia());
+            // Try to install and make sure an error code is returned.
+            assertNull(installFromRawResource("install.apk", R.raw.install,
+                    PackageManager.INSTALL_EXTERNAL, false,
+                    true, PackageManager.INSTALL_FAILED_CONTAINER_ERROR,
+                    PackageInfo.INSTALL_LOCATION_AUTO));
+        } finally {
+            // Restore original media state
+            if (origState) {
+                mountMedia();
+            } else {
+                unmountMedia();
+            }
+        }
+    }
+
+    /*
+    * Unmount sdcard. Try installing an app with manifest option to install
+    * on sdcard. Make sure it gets installed on internal flash.
+    */
+   public void testInstallManifestSdcardUnmount() {
+       boolean origState = getMediaState();
+       try {
+           // Unmount sdcard
+           assertTrue(unmountMedia());
+           // Try to install and make sure an error code is returned.
+           assertNotNull(installFromRawResource("install.apk", R.raw.install_loc_sdcard,
+                   0, false,
+                   false, -1,
+                   PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY));
+       } finally {
+           // Restore original media state
+           if (origState) {
+               mountMedia();
+           } else {
+               unmountMedia();
+           }
+       }
+   }
+
+   /*---------- Recommended install location tests ----*/
     /*
      * TODO's
      * check version numbers for upgrades

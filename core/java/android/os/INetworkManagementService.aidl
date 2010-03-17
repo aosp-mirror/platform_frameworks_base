@@ -19,6 +19,7 @@ package android.os;
 
 import android.net.InterfaceConfiguration;
 import android.net.INetworkManagementEventObserver;
+import android.net.wifi.WifiConfiguration;
 
 /**
  * @hide
@@ -166,7 +167,7 @@ interface INetworkManagementService
     /**
      * Start Wifi Access Point
      */
-    void startAccessPoint();
+    void startAccessPoint(in WifiConfiguration wifiConfig, String intf);
 
     /**
      * Stop Wifi Access Point

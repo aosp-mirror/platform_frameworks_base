@@ -252,6 +252,13 @@ class CallbackProxy extends Handler {
         // 32-bit reads and writes.
         switch (msg.what) {
             case PAGE_STARTED:
+                // every time we start a new page, we want to reset the
+                // WebView certificate:
+                // if the new site is secure, we will reload it and get a
+                // new certificate set;
+                // if the new site is not secure, the certificate must be
+                // null, and that will be the case
+                mWebView.setCertificate(null);
                 if (mWebViewClient != null) {
                     mWebViewClient.onPageStarted(mWebView,
                             msg.getData().getString("url"),

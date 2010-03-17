@@ -16,6 +16,7 @@
 
 package android.webkit;
 
+import android.view.SurfaceView;
 import android.view.View;
 import android.widget.AbsoluteLayout;
 
@@ -27,12 +28,20 @@ class ViewManager {
     private boolean mHidden;
     private boolean mReadyToDraw;
 
+    // Threshold at which a surface is prevented from further increasing in size
+    private final int MAX_SURFACE_THRESHOLD;
+
     class ChildView {
         int x;
         int y;
         int width;
         int height;
         View mView; // generic view to show
+
+        /* set to true if the view is a surface and it has exceeded the pixel
+           threshold specified in MAX_SURFACE_THRESHOLD.
+         */
+        boolean isFixedSize = false;
 
         ChildView() {
         }
@@ -49,15 +58,15 @@ class ViewManager {
                 return;
             }
             setBounds(x, y, width, height);
-            final AbsoluteLayout.LayoutParams lp =
-                    new AbsoluteLayout.LayoutParams(ctvD(width), ctvD(height),
-                            ctvX(x), ctvY(y));
+
             mWebView.mPrivateHandler.post(new Runnable() {
                 public void run() {
                     // This method may be called multiple times. If the view is
                     // already attached, just set the new LayoutParams,
                     // otherwise attach the view and add it to the list of
                     // children.
+                    AbsoluteLayout.LayoutParams lp = computeLayout(ChildView.this);
+
                     if (mView.getParent() != null) {
                         mView.setLayoutParams(lp);
                     } else {
@@ -67,7 +76,7 @@ class ViewManager {
             });
         }
 
-        void attachViewOnUIThread(AbsoluteLayout.LayoutParams lp) {
+        private void attachViewOnUIThread(AbsoluteLayout.LayoutParams lp) {
             mWebView.addView(mView, lp);
             mChildren.add(this);
             if (!mReadyToDraw) {
@@ -86,7 +95,7 @@ class ViewManager {
             });
         }
 
-        void removeViewOnUIThread() {
+        private void removeViewOnUIThread() {
             mWebView.removeView(mView);
             mChildren.remove(this);
         }
@@ -94,6 +103,14 @@ class ViewManager {
 
     ViewManager(WebView w) {
         mWebView = w;
+
+        int pixelArea = w.getResources().getDisplayMetrics().widthPixels *
+                        w.getResources().getDisplayMetrics().heightPixels;
+        /* set the threshold to be 275% larger than the screen size. The
+           percentage is simply an estimation and is not based on anything but
+           basic trial-and-error tests run on multiple devices.
+         */
+        MAX_SURFACE_THRESHOLD = (int)(pixelArea * 2.75);
     }
 
     ChildView createView() {
@@ -125,16 +142,37 @@ class ViewManager {
         return mWebView.contentToViewY(val);
     }
 
-    void scaleAll() {
-        for (ChildView v : mChildren) {
-            View view = v.mView;
-            AbsoluteLayout.LayoutParams lp =
-                    (AbsoluteLayout.LayoutParams) view.getLayoutParams();
+    /**
+     * This should only be called from the UI thread.
+     */
+    private AbsoluteLayout.LayoutParams computeLayout(ChildView v) {
+
+        // if the surface has exceed a predefined threshold then fix the size
+        // of the surface.
+        if (!v.isFixedSize && (v.width * v.height) > MAX_SURFACE_THRESHOLD
+                && v.mView instanceof SurfaceView) {
+            ((SurfaceView)v.mView).getHolder().setFixedSize(v.width, v.height);
+            v.isFixedSize = true;
+        }
+
+        AbsoluteLayout.LayoutParams lp =
+            (AbsoluteLayout.LayoutParams) v.mView.getLayoutParams();
+
+        if (lp == null)
+            lp = new AbsoluteLayout.LayoutParams(ctvD(v.width), ctvD(v.height),
+                    ctvX(v.x), ctvY(v.y));
+        else {
             lp.width = ctvD(v.width);
             lp.height = ctvD(v.height);
             lp.x = ctvX(v.x);
             lp.y = ctvY(v.y);
-            view.setLayoutParams(lp);
+        }
+        return lp;
+    }
+
+    void scaleAll() {
+        for (ChildView v : mChildren) {
+            v.mView.setLayoutParams(computeLayout(v));
         }
     }
 

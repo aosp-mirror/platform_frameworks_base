@@ -47,7 +47,7 @@ static int64_t getNowUs() {
     struct timeval tv;
     gettimeofday(&tv, NULL);
 
-    return (int64_t)tv.tv_usec + tv.tv_sec * 1000000;
+    return (int64_t)tv.tv_usec + tv.tv_sec * 1000000ll;
 }
 
 static void playSource(OMXClient *client, const sp<MediaSource> &source) {
@@ -434,7 +434,11 @@ int main(int argc, char **argv) {
         sp<DataSource> dataSource;
         if (!strncasecmp("http://", filename, 7)) {
             dataSource = new HTTPDataSource(filename);
-            dataSource = new CachingDataSource(dataSource, 64 * 1024, 10);
+            if (((HTTPDataSource *)dataSource.get())->connect() != OK) {
+                fprintf(stderr, "failed to connect to HTTP server.\n");
+                return -1;
+            }
+            dataSource = new CachingDataSource(dataSource, 32 * 1024, 20);
         } else {
             dataSource = new FileSource(filename);
         }

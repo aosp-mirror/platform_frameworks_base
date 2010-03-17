@@ -18,6 +18,7 @@ package android.widget;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.database.DataSetObserver;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.text.Editable;
@@ -129,10 +130,11 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
 
     private boolean mBlockCompletion;
 
-    private AutoCompleteTextView.ListSelectorHider mHideSelector;
+    private ListSelectorHider mHideSelector;
     private Runnable mShowDropDownRunnable;
 
-    private AutoCompleteTextView.PassThroughClickListener mPassThroughClickListener;
+    private PassThroughClickListener mPassThroughClickListener;
+    private PopupDataSetObserver mObserver;
 
     public AutoCompleteTextView(Context context) {
         this(context, null);
@@ -215,14 +217,6 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
         if (mPopup.isShowing()) {
             ensureImeVisible(true);
         }
-    }
-
-    /**
-     * Sets this to be single line; a separate method so
-     * MultiAutoCompleteTextView can skip this.
-     */
-    /* package */ void finishInit() {
-        setSingleLine();
     }
 
     /**
@@ -448,7 +442,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
     public boolean isDropDownDismissedOnCompletion() {
         return mDropDownDismissedOnCompletion;
     }
-    
+
     /**
      * Sets whether the drop-down is dismissed when a suggestion is clicked. This is 
      * true by default.
@@ -590,10 +584,16 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
      * @see android.widget.ListAdapter
      */
     public <T extends ListAdapter & Filterable> void setAdapter(T adapter) {
+        if (mObserver == null) {
+            mObserver = new PopupDataSetObserver();
+        } else if (mAdapter != null) {
+            mAdapter.unregisterDataSetObserver(mObserver);
+        }
         mAdapter = adapter;
         if (mAdapter != null) {
             //noinspection unchecked
             mFilter = ((Filterable) mAdapter).getFilter();
+            adapter.registerDataSetObserver(mObserver);
         } else {
             mFilter = null;
         }
@@ -866,16 +866,6 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
         return ListView.INVALID_POSITION;
     }
 
-
-    /**
-     * @hide
-     * @return {@link android.widget.ListView#getChildCount()} of the drop down if it is showing,
-     *         otherwise 0.
-     */
-    protected int getDropDownChildCount() {
-        return mDropDownList == null ? 0 : mDropDownList.getChildCount();
-    }
-
     /**
      * <p>Starts filtering the content of the drop down list. The filtering
      * pattern is the content of the edit box. Subclasses should override this
@@ -976,25 +966,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
             mBlockCompletion = false;
         }
     }
-    
-    /**
-     * Like {@link #setTextKeepState(CharSequence)}, except that it can disable filtering.
-     *
-     * @param filter If <code>false</code>, no filtering will be performed
-     *        as a result of this call.
-     * 
-     * @hide Pending API council approval.
-     */
-    public void setTextKeepState(CharSequence text, boolean filter) {
-        if (filter) {
-            setTextKeepState(text);
-        } else {
-            mBlockCompletion = true;
-            setTextKeepState(text);
-            mBlockCompletion = false;
-        }
-    }
-    
+
     /**
      * <p>Performs the text completion by replacing the current text by the
      * selected item. Subclasses should override this method to avoid replacing
@@ -1523,24 +1495,6 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
             return view;
         }
 
-        /**
-         * <p>Returns the top padding of the currently selected view.</p>
-         *
-         * @return the height of the top padding for the selection
-         */
-        public int getSelectionPaddingTop() {
-            return mSelectionTopPadding;
-        }
-
-        /**
-         * <p>Returns the bottom padding of the currently selected view.</p>
-         *
-         * @return the height of the bottom padding for the selection
-         */
-        public int getSelectionPaddingBottom() {
-            return mSelectionBottomPadding;
-        }
-
         @Override
         public boolean isInTouchMode() {
             // WARNING: Please read the comment where mListSelectionHidden is declared
@@ -1638,5 +1592,23 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
             if (mWrapped != null) mWrapped.onClick(v);
         }
     }
-    
+
+    private class PopupDataSetObserver extends DataSetObserver {
+        @Override
+        public void onChanged() {
+            if (isPopupShowing()) {
+                // This will resize the popup to fit the new adapter's content
+                showDropDown();
+            }
+        }
+
+        @Override
+        public void onInvalidated() {
+            if (!mDropDownAlwaysVisible) {
+                // There's no data to display so make sure we're not showing
+                // the drop down and its list
+                dismissDropDown();
+            }
+        }
+    }
 }

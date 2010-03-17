@@ -56,7 +56,7 @@ need to change dynamically and are not part of a performance-intensive game. For
 draw your graphics into a View when you want to display a static graphic or predefined animation, within 
 an otherwise static application. Read <a href="#draw-to-view">Simple Graphics Inside a View</a>.</li>
 
-<p>Option "b," drawing to a Canvas, is better when you're application needs to regularly re-draw itself.
+<p>Option "b," drawing to a Canvas, is better when your application needs to regularly re-draw itself.
 Basically, any video game should be drawing to the Canvas on its own. However, there's more than 
 one way to do this: </p>
 <ul>
@@ -117,7 +117,7 @@ that takes your Canvas as an argument.</p>
 
 <h3 id="on-view">On a View</h3>
 
-<p>If you're application does not require a significant amount of processing or 
+<p>If your application does not require a significant amount of processing or
 frame-rate speed (perhaps for a chess game, a snake game, 
 or another slowly-animated application), then you should consider creating a custom View component
 and drawing with a Canvas in <code>{@link android.view.View#onDraw(Canvas) View.onDraw()}</code>. 

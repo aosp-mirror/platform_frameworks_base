@@ -24,7 +24,6 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageInfoLite;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
-import android.content.pm.PackageParser.Package;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.IBinder;
@@ -45,7 +44,6 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import android.os.FileUtils;
-import android.os.storage.IMountService;
 import android.provider.Settings;
 
 /*
@@ -130,25 +128,20 @@ public class DefaultContainerService extends IntentService {
             ret.packageName = pkg.packageName;
             ret.installLocation = pkg.installLocation;
             // Nuke the parser reference right away and force a gc
-            Runtime.getRuntime().gc();
             packageParser = null;
+            Runtime.getRuntime().gc();
             if (pkg == null) {
                 Log.w(TAG, "Failed to parse package");
                 ret.recommendedInstallLocation = PackageHelper.RECOMMEND_FAILED_INVALID_APK;
                 return ret;
             }
             ret.packageName = pkg.packageName;
-            int loc = recommendAppInstallLocation(pkg.installLocation, archiveFilePath);
-            if (loc == PackageManager.INSTALL_EXTERNAL) {
-                ret.recommendedInstallLocation =  PackageHelper.RECOMMEND_INSTALL_EXTERNAL;
-            } else if (loc == ERR_LOC) {
-                Log.i(TAG, "Failed to install insufficient storage");
-                ret.recommendedInstallLocation =  PackageHelper.RECOMMEND_FAILED_INSUFFICIENT_STORAGE;
-            } else {
-                // Implies install on internal storage.
-                ret.recommendedInstallLocation =  PackageHelper.RECOMMEND_INSTALL_INTERNAL;
-            }
+            ret.recommendedInstallLocation = recommendAppInstallLocation(pkg.installLocation, archiveFilePath);
             return ret;
+        }
+
+        public boolean checkFreeStorage(boolean external, Uri fileUri) {
+            return checkFreeStorageInner(external, fileUri);
         }
     };
 
@@ -190,6 +183,12 @@ public class DefaultContainerService extends IntentService {
     }
 
     private String copyResourceInner(Uri packageURI, String newCid, String key, String resFileName) {
+        // Make sure the sdcard is mounted.
+        String status = Environment.getExternalStorageState();
+        if (!status.equals(Environment.MEDIA_MOUNTED)) {
+            Log.w(TAG, "Make sure sdcard is mounted.");
+            return null;
+        }
         // Create new container at newCachePath
         String codePath = packageURI.getPath();
         File codeFile = new File(codePath);
@@ -313,11 +312,13 @@ public class DefaultContainerService extends IntentService {
         // Else install on internal NAND flash, unless space on NAND is less than 10%
         String status = Environment.getExternalStorageState();
         long availSDSize = -1;
+        boolean mediaAvailable = false;
         if (status.equals(Environment.MEDIA_MOUNTED)) {
             StatFs sdStats = new StatFs(
                     Environment.getExternalStorageDirectory().getPath());
             availSDSize = (long)sdStats.getAvailableBlocks() *
                     (long)sdStats.getBlockSize();
+            mediaAvailable = true;
         }
         StatFs internalStats = new StatFs(Environment.getDataDirectory().getPath());
         long totalInternalSize = (long)internalStats.getBlockCount() *
@@ -337,7 +338,8 @@ public class DefaultContainerService extends IntentService {
         long reqInternalSize = 0;
         boolean intThresholdOk = (pctNandFree >= LOW_NAND_FLASH_TRESHOLD);
         boolean intAvailOk = ((reqInstallSize + reqInternalSize) < availInternalSize);
-        boolean fitsOnSd = (reqInstallSize < availSDSize) && intThresholdOk &&
+        boolean fitsOnSd = mediaAvailable && (reqInstallSize < availSDSize)
+                 && intThresholdOk &&
                 (reqInternalSize < availInternalSize);
         boolean fitsOnInt = intThresholdOk && intAvailOk;
 
@@ -377,21 +379,58 @@ public class DefaultContainerService extends IntentService {
         }
         if (!auto) {
             if (installOnlyOnSd) {
-                return fitsOnSd ? PackageManager.INSTALL_EXTERNAL : ERR_LOC;
+                if (fitsOnSd) {
+                    return PackageHelper.RECOMMEND_INSTALL_EXTERNAL;
+                }
+                if (!mediaAvailable) {
+                    return PackageHelper.RECOMMEND_MEDIA_UNAVAILABLE;
+                }
+                return PackageHelper.RECOMMEND_FAILED_INSUFFICIENT_STORAGE;
             } else if (installOnlyInternal){
                 // Check on internal flash
-                return fitsOnInt ? 0 : ERR_LOC;
+                return fitsOnInt ?  PackageHelper.RECOMMEND_INSTALL_INTERNAL :
+                    PackageHelper.RECOMMEND_FAILED_INSUFFICIENT_STORAGE;
             }
         }
         // Try to install internally
         if (fitsOnInt) {
-            return 0;
+            return PackageHelper.RECOMMEND_INSTALL_INTERNAL;
         }
         // Try the sdcard now.
         if (fitsOnSd) {
-            return PackageManager.INSTALL_EXTERNAL;
+            return PackageHelper.RECOMMEND_INSTALL_EXTERNAL;
         }
         // Return error code
-        return ERR_LOC;
+        return PackageHelper.RECOMMEND_FAILED_INSUFFICIENT_STORAGE;
+    }
+
+    private boolean checkFreeStorageInner(boolean external, Uri packageURI) {
+        File apkFile = new File(packageURI.getPath());
+        long size = apkFile.length();
+        if (external) {
+            String status = Environment.getExternalStorageState();
+            long availSDSize = -1;
+            if (status.equals(Environment.MEDIA_MOUNTED)) {
+                StatFs sdStats = new StatFs(
+                        Environment.getExternalStorageDirectory().getPath());
+                availSDSize = (long)sdStats.getAvailableBlocks() *
+                (long)sdStats.getBlockSize();
+            }
+            return availSDSize > size;
+        }
+        StatFs internalStats = new StatFs(Environment.getDataDirectory().getPath());
+        long totalInternalSize = (long)internalStats.getBlockCount() *
+        (long)internalStats.getBlockSize();
+        long availInternalSize = (long)internalStats.getAvailableBlocks() *
+        (long)internalStats.getBlockSize();
+
+        double pctNandFree = (double)availInternalSize / (double)totalInternalSize;
+        // To make final copy
+        long reqInstallSize = size;
+        // For dex files. Just ignore and fail when extracting. Max limit of 2Gig for now.
+        long reqInternalSize = 0;
+        boolean intThresholdOk = (pctNandFree >= LOW_NAND_FLASH_TRESHOLD);
+        boolean intAvailOk = ((reqInstallSize + reqInternalSize) < availInternalSize);
+        return intThresholdOk && intAvailOk;
     }
 }

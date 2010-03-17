@@ -62,6 +62,10 @@ class BrowserFrame extends Handler {
     private int mLoadType;
     private boolean mFirstLayoutDone = true;
     private boolean mCommitted = true;
+    // Flag for blocking messages. This is used during destroy() so
+    // that if the UI thread posts any messages after the message
+    // queue has been cleared,they are ignored.
+    private boolean mBlockMessages = false;
 
     // Is this frame the main frame?
     private boolean mIsMainFrame;
@@ -383,6 +387,7 @@ class BrowserFrame extends Handler {
     public void destroy() {
         mOrientationListener.disable();
         nativeDestroyFrame();
+        mBlockMessages = true;
         removeCallbacksAndMessages(null);
     }
 
@@ -392,6 +397,9 @@ class BrowserFrame extends Handler {
      */
     @Override
     public void handleMessage(Message msg) {
+        if (mBlockMessages) {
+            return;
+        }
         switch (msg.what) {
             case FRAME_COMPLETED: {
                 if (mSettings.getSavePassword() && hasPasswordField()) {

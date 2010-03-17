@@ -483,7 +483,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         int textId = mSearchable.getSearchButtonText(); 
         if (isBrowserSearch()){
             iconLabel = getContext().getResources()
-                    .getDrawable(com.android.internal.R.drawable.ic_btn_search_play);
+                    .getDrawable(com.android.internal.R.drawable.ic_btn_search_go);
         } else if (textId != 0) {
             textLabel = mActivityContext.getResources().getString(textId);  
         } else {
