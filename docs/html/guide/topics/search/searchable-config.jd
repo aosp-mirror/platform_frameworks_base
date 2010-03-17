@@ -276,11 +276,16 @@ get the results from the Intent.
 
   <dt id="actionkey-element"><code>&lt;actionkey&gt;</code></dt>
   <dd>Defines a shortcut key for a search action, in order to provide special behaviors at the touch
-of a button, based on the current query or selected suggestion. ​For example, the Contacts
+of a button, based on the current query or focused suggestion. ​For example, the Contacts
 application enables the device call key for suggestions. So, when
 the user focuses on a search suggestion using the directional controls and then presses the call
-key, the application will immediately initiate a phone call to the suggested contact. See the
-{@link android.app.SearchManager} for more information about action keys.
+key, the application will immediately initiate a phone call to the suggested contact.
+    <p>Not all action keys are available on every device, and not
+all keys are allowed to be overriden in this way. For example, the "Home" key cannot be used and
+must always return to the home screen. Also be sure not to define an action
+key for a key that's needed for typing a search query. This essentially limits the
+available and reasonable action keys to the call button and menu button. Also note that action
+keys are not generally discoverable, so you should not provide them as a core user feature.</p>
       <p class="caps">attributes:</p>
       <dl class="atn-list">
       <dt><code>android:keycode</code></dt>
@@ -304,9 +309,9 @@ user is simply entering query text. This will be added to the
         getStringExtra(SearchManager.ACTION_MSG)}.</dd>
       <dt><code>android:suggestActionMsg</code></dt>
         <dd><em>String</em>. An action message to be sent if the action key is pressed while a
-        suggestion is being displayed and is currently selected. This will be added to the
+        suggestion is focused. This will be added to the
         Intent that is passed to your searchable Activity (using the action you've defined for
-        suggestions). To examine the string,
+        the suggestion). To examine the string,
         use {@link android.content.Intent#getStringExtra 
         getStringExtra(SearchManager.ACTION_MSG)}. Note that this should only be used if all your
 suggestions support this action key. If not all suggestions can handle the same action key, then
@@ -314,7 +319,7 @@ you must instead use the following {@code android:suggestActionMsgColumn} attrib
       <dt><code>android:suggestActionMsgColumn</code></dt>
         <dd><em>String</em>. The name of the column in your content provider that defines the
 action message for this action key, which is to be sent if the action key is pressed while a
-        suggestion is being displayed and is currently selected. This attribute lets you control the
+        suggestion is focused. This attribute lets you control the
 action key on a suggestion-by-suggestion basis, because, instead of using the {@code
 android:suggestActionMsg} attribute to define the action message for all suggestions, each entry in
 your content provider provides its own action message. First, you must define a column in your
