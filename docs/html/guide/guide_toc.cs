@@ -143,6 +143,7 @@
           <li><a href="<?cs var:toroot ?>guide/topics/manifest/intent-filter-element.html">&lt;intent-filter&gt;</a></li>
           <li><a href="<?cs var:toroot ?>guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></li>
           <li><a href="<?cs var:toroot ?>guide/topics/manifest/meta-data-element.html">&lt;meta-data&gt;</a></li>
+          <li><a href="<?cs var:toroot ?>guide/topics/manifest/path-permission-element.html">&lt;path-permission&gt;</a></li>
           <li><a href="<?cs var:toroot ?>guide/topics/manifest/permission-element.html">&lt;permission&gt;</a></li>
           <li><a href="<?cs var:toroot ?>guide/topics/manifest/permission-group-element.html">&lt;permission-group&gt;</a></li>
           <li><a href="<?cs var:toroot ?>guide/topics/manifest/permission-tree-element.html">&lt;permission-tree&gt;</a></li>
@@ -198,7 +199,18 @@
           </a></li>
       <li><a href="<?cs var:toroot?>guide/topics/wireless/bluetooth.html">
             <span class="en">Bluetooth</span>
-          </a> <span class="new">new!</span></li>
+          </a></li>
+      <li class="toggle-list">
+        <div><a href="<?cs var:toroot?>guide/topics/search/index.html">
+            <span class="en">Search</span>
+          </a> <span class="new">new!</span></div>
+          <ul>
+            <li><a href="<?cs var:toroot?>guide/topics/search/search-dialog.html">Using the Android Search Dialog</a></li>
+            <li><a href="<?cs var:toroot?>guide/topics/search/adding-recent-query-suggestions.html">Adding Recent Query Suggestions</a></li>
+            <li><a href="<?cs var:toroot?>guide/topics/search/adding-custom-suggestions.html">Adding Custom Suggestions</a></li>
+            <li><a href="<?cs var:toroot?>guide/topics/search/searchable-config.html">Searchable Configuration</a></li>
+          </ul>
+      </li>
     </ul>
   </li>
   
