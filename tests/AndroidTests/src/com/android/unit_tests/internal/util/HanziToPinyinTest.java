@@ -17,6 +17,7 @@
 package com.android.unit_tests.internal.util;
 
 import java.text.Collator;
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Locale;
 
@@ -37,6 +38,9 @@ public class HanziToPinyinTest extends TestCase {
 
     @SmallTest
     public void testGetToken() throws Exception {
+        if (!Arrays.asList(Collator.getAvailableLocales()).contains(Locale.CHINA)) {
+            return;
+        }
         ArrayList<Token> tokens = HanziToPinyin.getInstance().get(ONE_HANZI);
         assertEquals(tokens.size(), 1);
         assertEquals(tokens.get(0).type, Token.PINYIN);
