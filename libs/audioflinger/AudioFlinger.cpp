@@ -72,6 +72,10 @@ static const float MAX_GAIN = 4096.0f;
 // 50 * ~20msecs = 1 second
 static const int8_t kMaxTrackRetries = 50;
 static const int8_t kMaxTrackStartupRetries = 50;
+// allow less retry attempts on direct output thread.
+// direct outputs can be a scarce resource in audio hardware and should
+// be released as quickly as possible.
+static const int8_t kMaxTrackRetriesDirect = 2;
 
 static const int kDumpLockRetries = 50;
 static const int kDumpLockSleep = 20000;
@@ -1794,6 +1798,9 @@ bool AudioFlinger::DirectOutputThread::threadLoop()
     uint32_t activeSleepTime = activeSleepTimeUs();
     uint32_t idleSleepTime = idleSleepTimeUs();
     uint32_t sleepTime = idleSleepTime;
+    // use shorter standby delay as on normal output to release
+    // hardware resources as soon as possible
+    nsecs_t standbyDelay = microseconds(activeSleepTime*2);
 
 
     while (!exitPending())
@@ -1810,6 +1817,7 @@ bool AudioFlinger::DirectOutputThread::threadLoop()
                 mixBufferSize = mFrameCount*mFrameSize;
                 activeSleepTime = activeSleepTimeUs();
                 idleSleepTime = idleSleepTimeUs();
+                standbyDelay = microseconds(activeSleepTime*2);
             }
 
             // put audio hardware into standby after short delay
@@ -1842,7 +1850,7 @@ bool AudioFlinger::DirectOutputThread::threadLoop()
                         }
                     }
 
-                    standbyTime = systemTime() + kStandbyTimeInNsecs;
+                    standbyTime = systemTime() + standbyDelay;
                     sleepTime = idleSleepTime;
                     continue;
                 }
@@ -1896,7 +1904,7 @@ bool AudioFlinger::DirectOutputThread::threadLoop()
                     }
 
                     // reset retry count
-                    track->mRetryCount = kMaxTrackRetries;
+                    track->mRetryCount = kMaxTrackRetriesDirect;
                     activeTrack = t;
                     mixerStatus = MIXER_TRACKS_READY;
                 } else {
@@ -1949,7 +1957,7 @@ bool AudioFlinger::DirectOutputThread::threadLoop()
                 activeTrack->releaseBuffer(&buffer);
             }
             sleepTime = 0;
-            standbyTime = systemTime() + kStandbyTimeInNsecs;
+            standbyTime = systemTime() + standbyDelay;
         } else {
             if (sleepTime == 0) {
                 if (mixerStatus == MIXER_TRACKS_ENABLED) {
