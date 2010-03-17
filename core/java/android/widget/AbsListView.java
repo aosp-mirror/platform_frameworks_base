@@ -1160,6 +1160,14 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         super.onLayout(changed, l, t, r, b);
         mInLayout = true;
+        if (changed) {
+            int childCount = getChildCount();
+            for (int i = 0; i < childCount; i++) {
+                getChildAt(i).forceLayout();
+            }
+            mRecycler.markChildrenDirty();
+        }
+
         layoutChildren();
         mInLayout = false;
         
@@ -4141,6 +4149,25 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             mViewTypeCount = viewTypeCount;
             mCurrentScrap = scrapViews[0];
             mScrapViews = scrapViews;
+        }
+        
+        public void markChildrenDirty() {
+            if (mViewTypeCount == 1) {
+                final ArrayList<View> scrap = mCurrentScrap;
+                final int scrapCount = scrap.size();
+                for (int i = 0; i < scrapCount; i++) {
+                    scrap.get(i).forceLayout();
+                }
+            } else {
+                final int typeCount = mViewTypeCount;
+                for (int i = 0; i < typeCount; i++) {
+                    final ArrayList<View> scrap = mScrapViews[i];
+                    final int scrapCount = scrap.size();
+                    for (int j = 0; j < scrapCount; j++) {
+                        scrap.get(j).forceLayout();
+                    }
+                }
+            }
         }
 
         public boolean shouldRecycleViewType(int viewType) {
