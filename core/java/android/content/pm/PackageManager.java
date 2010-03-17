@@ -261,6 +261,13 @@ public abstract class PackageManager {
     public static final int INSTALL_EXTERNAL = 0x00000008;
 
     /**
+    * Flag parameter for {@link #installPackage} to indicate that this
+    * package has to be installed on the sdcard.
+    * @hide
+    */
+   public static final int INSTALL_INTERNAL = 0x00000010;
+
+    /**
      * Flag parameter for
      * {@link #setComponentEnabledSetting(android.content.ComponentName, int, int)} to indicate
      * that you don't want to kill the app containing the component.  Be careful when you set this
