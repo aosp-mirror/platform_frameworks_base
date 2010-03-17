@@ -1048,16 +1048,18 @@ public class PopupWindow {
         if (isShowing() && mPopupView != null) {
             unregisterForScrollChanged();
 
-            mWindowManager.removeView(mPopupView);
-
-            if (mPopupView != mContentView && mPopupView instanceof ViewGroup) {
-                ((ViewGroup) mPopupView).removeView(mContentView);
-            }
-            mPopupView = null;
-            mIsShowing = false;
-
-            if (mOnDismissListener != null) {
-                mOnDismissListener.onDismiss();
+            try {
+                mWindowManager.removeView(mPopupView);                
+            } finally {
+                if (mPopupView != mContentView && mPopupView instanceof ViewGroup) {
+                    ((ViewGroup) mPopupView).removeView(mContentView);
+                }
+                mPopupView = null;
+                mIsShowing = false;
+    
+                if (mOnDismissListener != null) {
+                    mOnDismissListener.onDismiss();
+                }
             }
         }
     }
