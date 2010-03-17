@@ -40,6 +40,7 @@ public class MediaMetadataRetrieverTest extends AndroidTestCase {
         Log.v(TAG, "testAlbumArt starts.");
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
         boolean supportWMA = MediaProfileReader.getWMAEnable();
+        boolean hasFailed = false;
         boolean supportWMV = MediaProfileReader.getWMVEnable();
         retriever.setMode(MediaMetadataRetriever.MODE_GET_METADATA_ONLY);
         for (int i = 0, n = MediaNames.ALBUMART_TEST_FILES.length; i < n; ++i) {
@@ -58,15 +59,18 @@ public class MediaMetadataRetrieverTest extends AndroidTestCase {
                 // A better test would be to compare the retrieved album art with the
                 // known result.
                 if (albumArt == null) {  // Do we have expect in JUnit?
-                    fail("Fails to extract album art for " + MediaNames.ALBUMART_TEST_FILES[i]);
+                    Log.e(TAG, "Fails to extract album art for " + MediaNames.ALBUMART_TEST_FILES[i]);
+                    hasFailed = true;
                 }
             } catch(Exception e) {
-                throw new Exception("Fails to setDataSource for " + MediaNames.ALBUMART_TEST_FILES[i], e);
+                Log.e(TAG, "Fails to setDataSource for " + MediaNames.ALBUMART_TEST_FILES[i]);
+                hasFailed = true;
             }
             Thread.yield();  // Don't be evil
         }
         retriever.release();
         Log.v(TAG, "testAlbumArt completes.");
+        assertTrue(!hasFailed);
     }
 
     // Test frame capture
@@ -75,6 +79,7 @@ public class MediaMetadataRetrieverTest extends AndroidTestCase {
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
         boolean supportWMA = MediaProfileReader.getWMAEnable();
         boolean supportWMV = MediaProfileReader.getWMVEnable();
+        boolean hasFailed = false;
         Log.v(TAG, "Thumbnail processing starts");
         long startedAt = System.currentTimeMillis();
         for(int i = 0, n = MediaNames.THUMBNAIL_CAPTURE_TEST_FILES.length; i < n; ++i) {
@@ -94,22 +99,26 @@ public class MediaMetadataRetrieverTest extends AndroidTestCase {
                     bitmap.compress(Bitmap.CompressFormat.JPEG, 75, stream);
                     stream.close();
                 } catch (Exception e) {
-                    throw new Exception("Fails to convert the bitmap to a JPEG file for " + MediaNames.THUMBNAIL_CAPTURE_TEST_FILES[i], e);
+                    Log.e(TAG, "Fails to convert the bitmap to a JPEG file for " + MediaNames.THUMBNAIL_CAPTURE_TEST_FILES[i]);
+                    hasFailed = true;
                 }
             } catch(Exception e) {
-                throw new Exception("Fails to setDataSource for file " + MediaNames.THUMBNAIL_CAPTURE_TEST_FILES[i], e);
+                Log.e(TAG, "Fails to setDataSource for file " + MediaNames.THUMBNAIL_CAPTURE_TEST_FILES[i]);
+                hasFailed = true;
             }
             Thread.yield();  // Don't be evil
         }
         long endedAt = System.currentTimeMillis();
-        Log.v(TAG, "Average processing time per thumbnail: " + (endedAt - startedAt)/MediaNames.THUMBNAIL_CAPTURE_TEST_FILES.length + " ms");
         retriever.release();
+        assertTrue(!hasFailed);
+        Log.v(TAG, "Average processing time per thumbnail: " + (endedAt - startedAt)/MediaNames.THUMBNAIL_CAPTURE_TEST_FILES.length + " ms");
     }
     
     @LargeTest
     public static void testMetadataRetrieval() throws Exception {
         boolean supportWMA = MediaProfileReader.getWMAEnable();
         boolean supportWMV = MediaProfileReader.getWMVEnable();
+        boolean hasFailed = false;
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
         retriever.setMode(MediaMetadataRetriever.MODE_GET_METADATA_ONLY);
         for(int i = 0, n = MediaNames.METADATA_RETRIEVAL_TEST_FILES.length; i < n; ++i) {
@@ -124,17 +133,20 @@ public class MediaMetadataRetrieverTest extends AndroidTestCase {
                 retriever.setDataSource(MediaNames.METADATA_RETRIEVAL_TEST_FILES[i]);
                 extractAllSupportedMetadataValues(retriever);
             } catch(Exception e) {
-                throw new Exception("Fails to setDataSource for file " + MediaNames.METADATA_RETRIEVAL_TEST_FILES[i], e);
+                Log.e(TAG, "Fails to setDataSource for file " + MediaNames.METADATA_RETRIEVAL_TEST_FILES[i]);
+                hasFailed = true;
             }
             Thread.yield();  // Don't be evil
         }
         retriever.release();
+        assertTrue(!hasFailed);
     }
 
     // If the specified call order and valid media file is used, no exception
     // should be thrown.
     @MediumTest
     public static void testBasicNormalMethodCallSequence() throws Exception {
+        boolean hasFailed = false;
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
         retriever.setMode(MediaMetadataRetriever.MODE_GET_METADATA_ONLY);
         try {
@@ -153,19 +165,29 @@ public class MediaMetadataRetrieverTest extends AndroidTestCase {
             */
             extractAllSupportedMetadataValues(retriever);
         } catch(Exception e) {
-            throw new Exception("Fails to setDataSource for " + MediaNames.TEST_PATH_1, e);
+            Log.e(TAG, "Fails to setDataSource for " + MediaNames.TEST_PATH_1, e);
+            hasFailed = true;
         }
         retriever.release();
+        assertTrue(!hasFailed);
     }
 
     // If setDataSource() has not been called, both captureFrame() and extractMetadata() must
     // return null.
     @MediumTest
     public static void testBasicAbnormalMethodCallSequence() {
+        boolean hasFailed = false;
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
         retriever.setMode(MediaMetadataRetriever.MODE_GET_METADATA_ONLY);
-        assertTrue(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM) == null);
-        assertTrue(retriever.captureFrame() == null);
+        if (retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM) != null) {
+            Log.e(TAG, "No album metadata expected, but is available");
+            hasFailed = true;
+        }
+        if (retriever.captureFrame() != null) {
+            Log.e(TAG, "No frame expected, but is available");
+            hasFailed = true;
+        }
+        assertTrue(!hasFailed);
     }
 
     // Test setDataSource()
@@ -173,42 +195,60 @@ public class MediaMetadataRetrieverTest extends AndroidTestCase {
     public static void testSetDataSource() {
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
         retriever.setMode(MediaMetadataRetriever.MODE_GET_METADATA_ONLY);
+        boolean hasFailed = false;
 
         // Null pointer argument
         try {
             String path = null;
             retriever.setDataSource(path);
-            fail("IllegalArgumentException must be thrown.");
+            Log.e(TAG, "IllegalArgumentException failed to be thrown.");
+            hasFailed = true;
         } catch(Exception e) {
-            assertTrue(e instanceof IllegalArgumentException);
+            if (!(e instanceof IllegalArgumentException)) {
+                Log.e(TAG, "Expected a IllegalArgumentException, but got a different exception");
+                hasFailed = true;
+            }
         }
 
         // Use mem:// path
         try {
             retriever.setDataSource(MediaNames.TEST_PATH_5);
-            fail("IllegalArgumentException must be thrown.");
+            Log.e(TAG, "IllegalArgumentException failed to be thrown.");
+            hasFailed = true;
         } catch(Exception e) {
-            assertTrue(e instanceof IllegalArgumentException);
+            if (!(e instanceof IllegalArgumentException)) {
+                Log.e(TAG, "Expected a IllegalArgumentException, but got a different exception");
+                hasFailed = true;
+            }
         }
 
         // The pathname does not correspond to any existing file
         try {
             retriever.setDataSource(MediaNames.TEST_PATH_4);
-            fail("Runtime exception must be thrown.");
+            Log.e(TAG, "RuntimeException failed to be thrown.");
+            hasFailed = true;
         } catch(Exception e) {
-            assertTrue(e instanceof RuntimeException);
+            if (!(e instanceof RuntimeException)) {
+                Log.e(TAG, "Expected a RuntimeException, but got a different exception");
+                hasFailed = true;
+            }
         }
 
         // The pathname does correspond to a file, but this file
         // is not a valid media file
         try {
             retriever.setDataSource(MediaNames.TEST_PATH_3);
-            fail("Runtime exception must be thrown.");
+            Log.e(TAG, "RuntimeException failed to be thrown.");
+            hasFailed = true;
         } catch(Exception e) {
-            assertTrue(e instanceof RuntimeException);
+            if (!(e instanceof RuntimeException)) {
+                Log.e(TAG, "Expected a RuntimeException, but got a different exception");
+                hasFailed = true;
+            }
         }
         
         retriever.release();
+        assertTrue(!hasFailed);
     }
 
     // Due to the lack of permission to access hardware decoder, any calls
@@ -218,6 +258,7 @@ public class MediaMetadataRetrieverTest extends AndroidTestCase {
     public static void testIntendedUsage() {
         // By default, capture frame and retrieve metadata
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+        boolean hasFailed = false;
         // retriever.setDataSource(MediaNames.TEST_PATH_1);
         // assertTrue(retriever.captureFrame() != null);
         // assertTrue(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_NUM_TRACKS) != null);
@@ -225,8 +266,14 @@ public class MediaMetadataRetrieverTest extends AndroidTestCase {
         // Do not capture frame or retrieve metadata
         retriever.setMode(MediaMetadataRetriever.MODE_CAPTURE_FRAME_ONLY & MediaMetadataRetriever.MODE_GET_METADATA_ONLY);
         retriever.setDataSource(MediaNames.TEST_PATH_1);
-        assertTrue(retriever.captureFrame() == null);
-        assertTrue(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_NUM_TRACKS) == null);
+        if (retriever.captureFrame() != null) {
+            Log.e(TAG, "No frame expected, but is available");
+            hasFailed = true;
+        }
+        if (retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_NUM_TRACKS) != null) {
+            Log.e(TAG, "No num track metadata expected, but is available");
+            hasFailed = true;
+        }
 
         // Capture frame only
         // retriever.setMode(MediaMetadataRetriever.MODE_CAPTURE_FRAME_ONLY);
@@ -236,7 +283,10 @@ public class MediaMetadataRetrieverTest extends AndroidTestCase {
         // Retriever metadata only
         retriever.setMode(MediaMetadataRetriever.MODE_GET_METADATA_ONLY);
         retriever.setDataSource(MediaNames.TEST_PATH_1);
-        assertTrue(retriever.captureFrame() == null);
+        if (retriever.captureFrame() != null) {
+            Log.e(TAG, "No frame expected, but is available");
+            hasFailed = true;
+        }
 
         // Capture frame and retrieve metadata
         // retriever.setMode(MediaMetadataRetriever.MODE_CAPTURE_FRAME_ONLY | MediaMetadataRetriever.MODE_GET_METADATA_ONLY);
@@ -244,6 +294,7 @@ public class MediaMetadataRetrieverTest extends AndroidTestCase {
         // assertTrue(retriever.captureFrame() != null);
         // assertTrue(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_NUM_TRACKS) != null);
         retriever.release();
+        assertTrue(!hasFailed);
     }
 
     // TODO:
