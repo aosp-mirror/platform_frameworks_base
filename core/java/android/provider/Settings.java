@@ -2458,6 +2458,11 @@ public final class Settings {
         public static final String TTS_DEFAULT_VARIANT = "tts_default_variant";
 
         /**
+         * Space delimited list of plugin packages that are enabled.
+         */
+        public static final String TTS_ENABLED_PLUGINS = "tts_enabled_plugins";
+
+        /**
          * Whether to notify the user of open networks.
          * <p>
          * If not connected and the scan results have an open network, we will
@@ -3286,6 +3291,7 @@ public final class Settings {
             TTS_DEFAULT_SYNTH,
             TTS_DEFAULT_LANG,
             TTS_DEFAULT_COUNTRY,
+            TTS_ENABLED_PLUGINS,
             WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON,
             WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY,
             WIFI_NUM_ALLOWED_CHANNELS,
