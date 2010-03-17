@@ -4521,9 +4521,14 @@ public class WebView extends AbsoluteLayout
     }
 
     private boolean hitFocusedPlugin(int contentX, int contentY) {
+        if (DebugFlags.WEB_VIEW) {
+            Log.v(LOGTAG, "nativeFocusIsPlugin()=" + nativeFocusIsPlugin());
+            Rect r = nativeFocusNodeBounds();
+            Log.v(LOGTAG, "nativeFocusNodeBounds()=(" + r.left + ", " + r.top
+                    + ", " + r.right + ", " + r.bottom + ")");
+        }
         return nativeFocusIsPlugin()
-                && nativePointInNavCache(contentX, contentY, mNavSlop)
-                && nativeCacheHitNodePointer() == nativeFocusNodePointer();
+                && nativeFocusNodeBounds().contains(contentX, contentY);
     }
 
     private boolean shouldForwardTouchEvent() {
@@ -7169,6 +7174,7 @@ public class WebView extends AbsoluteLayout
      */
     private native int      nativeFocusCandidateType();
     private native boolean  nativeFocusIsPlugin();
+    private native Rect     nativeFocusNodeBounds();
     /* package */ native int nativeFocusNodePointer();
     private native Rect     nativeGetCursorRingBounds();
     private native String   nativeGetSelection();
