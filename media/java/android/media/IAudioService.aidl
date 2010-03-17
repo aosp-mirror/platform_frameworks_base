@@ -16,6 +16,7 @@
 
 package android.media;
 
+import android.content.ComponentName;
 import android.media.IAudioFocusDispatcher;
 
 /**
@@ -76,5 +77,9 @@ interface IAudioService {
 
     int abandonAudioFocus(IAudioFocusDispatcher l, String clientId);
     
-    void unregisterFocusClient(String clientId);
+    void unregisterAudioFocusClient(String clientId);
+
+    void registerMediaButtonEventReceiver(in ComponentName eventReceiver);
+
+    void unregisterMediaButtonEventReceiver(in ComponentName eventReceiver);
 }
