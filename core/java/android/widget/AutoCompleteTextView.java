@@ -985,6 +985,11 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
 
     /** {@inheritDoc} */
     public void onFilterComplete(int count) {
+        updateDropDownForFilter(count);
+
+    }
+
+    private void updateDropDownForFilter(int count) {
         // Not attached to window, don't update drop-down
         if (getWindowVisibility() == View.GONE) return;
 
@@ -1214,18 +1219,30 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
         ViewGroup dropDownView;
         int otherHeights = 0;
 
-        if (mAdapter != null) {
+        final ListAdapter adapter = mAdapter;
+        if (adapter != null) {
             InputMethodManager imm = InputMethodManager.peekInstance();
             if (imm != null) {
-                int N = mAdapter.getCount();
-                if (N > 20) N = 20;
-                CompletionInfo[] completions = new CompletionInfo[N];
-                for (int i = 0; i < N; i++) {
-                    Object item = mAdapter.getItem(i);
-                    long id = mAdapter.getItemId(i);
-                    completions[i] = new CompletionInfo(id, i,
-                            convertSelectionToString(item));
+                final int count = Math.min(adapter.getCount(), 20);
+                CompletionInfo[] completions = new CompletionInfo[count];
+                int realCount = 0;
+
+                for (int i = 0; i < count; i++) {
+                    if (adapter.isEnabled(i)) {
+                        realCount++;
+                        Object item = adapter.getItem(i);
+                        long id = adapter.getItemId(i);
+                        completions[i] = new CompletionInfo(id, i,
+                                convertSelectionToString(item));
+                    }
                 }
+                
+                if (realCount != count) {
+                    CompletionInfo[] tmp = new CompletionInfo[realCount];
+                    System.arraycopy(completions, 0, tmp, 0, realCount);
+                    completions = tmp;
+                }
+
                 imm.displayCompletions(this, completions);
             }
         }
@@ -1253,7 +1270,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
 
             mDropDownList = new DropDownListView(context);
             mDropDownList.setSelector(mDropDownListHighlight);
-            mDropDownList.setAdapter(mAdapter);
+            mDropDownList.setAdapter(adapter);
             mDropDownList.setVerticalFadingEdgeEnabled(true);
             mDropDownList.setOnItemClickListener(mDropDownItemClickListener);
             mDropDownList.setFocusable(true);
@@ -1599,6 +1616,16 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
             if (isPopupShowing()) {
                 // This will resize the popup to fit the new adapter's content
                 showDropDown();
+            } else if (mAdapter != null) {
+                // If the popup is not showing already, showing it will cause
+                // the list of data set observers attached to the adapter to
+                // change. We can't do it from here, because we are in the middle
+                // of iterating throught he list of observers.
+                post(new Runnable() {
+                    public void run() {
+                        updateDropDownForFilter(mAdapter.getCount());
+                    }
+                });
             }
         }
 
