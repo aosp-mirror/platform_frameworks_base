@@ -212,8 +212,13 @@ public class MediaPlayerPerformance extends ActivityInstrumentationTestCase<Medi
     }
 
     private void terminateMessageLooper() {
-        mLooper.quit();
-        mCamera.release();
+        try {
+            mLooper.quit();
+            mCamera.release();
+            Thread.sleep(1500);
+        } catch (Exception e) {
+            Log.v(TAG, e.toString());
+        }
     }
 
     private final class RawPreviewCallback implements PreviewCallback {
