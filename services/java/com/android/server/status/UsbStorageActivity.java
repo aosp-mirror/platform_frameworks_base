@@ -28,6 +28,7 @@ import android.content.IntentFilter;
 import android.content.DialogInterface.OnCancelListener;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.storage.IMountService;
 import android.os.storage.StorageManager;
@@ -36,8 +37,10 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.widget.ImageView;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.view.View;
+import android.view.Window;
 import android.util.Log;
 
 /**
@@ -48,8 +51,10 @@ import android.util.Log;
 public class UsbStorageActivity extends Activity
         implements View.OnClickListener, OnCancelListener {
     private static final String TAG = "UsbStorageActivity";
+
     private Button mMountButton;
     private Button mUnmountButton;
+    private ProgressBar mProgressBar;
     private TextView mBanner;
     private TextView mMessage;
     private ImageView mIcon;
@@ -71,11 +76,8 @@ public class UsbStorageActivity extends Activity
     private StorageEventListener mStorageListener = new StorageEventListener() {
         @Override
         public void onStorageStateChanged(String path, String oldState, String newState) {
-            if (newState.equals(Environment.MEDIA_SHARED)) {
-                switchDisplay(true);
-            } else {
-                switchDisplay(false);
-            }
+            final boolean on = newState.equals(Environment.MEDIA_SHARED);
+            switchDisplay(on);
         }
     };
     
@@ -90,6 +92,9 @@ public class UsbStorageActivity extends Activity
             }
         }
 
+        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+        setProgressBarIndeterminateVisibility(true);
+
         setTitle(getString(com.android.internal.R.string.usb_storage_activity_title));
 
         setContentView(com.android.internal.R.layout.usb_storage_activity);
@@ -102,16 +107,19 @@ public class UsbStorageActivity extends Activity
         mMountButton.setOnClickListener(this);
         mUnmountButton = (Button) findViewById(com.android.internal.R.id.unmount_button);
         mUnmountButton.setOnClickListener(this);
+        mProgressBar = (ProgressBar) findViewById(com.android.internal.R.id.progress);
     }
 
     private void switchDisplay(boolean usbStorageInUse) {
         if (usbStorageInUse) {
+            mProgressBar.setVisibility(View.GONE);
             mUnmountButton.setVisibility(View.VISIBLE);
             mMountButton.setVisibility(View.GONE);
             mIcon.setImageResource(com.android.internal.R.drawable.usb_android_connected);
             mBanner.setText(com.android.internal.R.string.usb_storage_stop_title);
             mMessage.setText(com.android.internal.R.string.usb_storage_stop_message);
         } else {
+            mProgressBar.setVisibility(View.GONE);
             mUnmountButton.setVisibility(View.GONE);
             mMountButton.setVisibility(View.VISIBLE);
             mIcon.setImageResource(com.android.internal.R.drawable.usb_android);
@@ -189,6 +197,25 @@ public class UsbStorageActivity extends Activity
         showDialog(id);
     }
 
+    private void switchUsbMassStorageAsync(boolean on) {
+        mUnmountButton.setVisibility(View.GONE);
+        mMountButton.setVisibility(View.GONE);
+
+        mProgressBar.setVisibility(View.VISIBLE);
+        // will be hidden once USB mass storage kicks in (or fails)
+        
+        final boolean _on = on;
+        new Thread() {
+            public void run() {
+                if (_on) {
+                    mStorageManager.enableUsbMassStorage();
+                } else {
+                    mStorageManager.disableUsbMassStorage();
+                }
+            }
+        }.start();
+    }
+
     private void checkStorageUsers() {
         IMountService ims = getMountService();
         if (ims == null) {
@@ -208,18 +235,17 @@ public class UsbStorageActivity extends Activity
             showDialogInner(DLG_CONFIRM_KILL_STORAGE_USERS);
         } else {
             if (localLOGV) Log.i(TAG, "Enabling UMS");
-            mStorageManager.enableUsbMassStorage();
+            switchUsbMassStorageAsync(true);
         }
     }
 
     public void onClick(View v) {
-        Log.i(TAG, "Clicked button");
         if (v == mMountButton) {
            // Check for list of storage users and display dialog if needed.
             checkStorageUsers();
         } else if (v == mUnmountButton) {
             if (localLOGV) Log.i(TAG, "Disabling UMS");
-            mStorageManager.disableUsbMassStorage();
+            switchUsbMassStorageAsync(false);
         }
     }
 
