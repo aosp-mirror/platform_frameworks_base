@@ -18,11 +18,13 @@ and each View is responsible for drawing itself.
    siblings drawn in the order they appear in the tree.
    </p>
 
+<div class="sidebox-wrapper">
 <div class="sidebox">
   <p>The framework will not draw Views that are not in the invalid region, and also 
    will take care of drawing the Views background for you.</p>
    <p>You can force a View to draw, by calling <code>{@link android.view.View#invalidate()}</code>.
    </p>
+</div>
 </div>
 
 <p>
@@ -50,11 +52,13 @@ and each View is responsible for drawing itself.
   as to how much space they each get, the parent will intervene and set the rules on the second pass).
    </p>
    
-   <div class="sidebox"><p>
+<div class="sidebox-wrapper">
+<div class="sidebox"><p>
    To initiate a layout, call <code>{@link android.view.View#requestLayout}</code>. This method is typically
    called by a View on itself when it believes that is can no longer fit within
    its current bounds.</p>
-   </div>
+</div>
+</div>
 
    <p>
    The measure pass uses two classes to communicate dimensions. The

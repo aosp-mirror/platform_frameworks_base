@@ -176,10 +176,13 @@ elements.</li>
 <h3 id="mapsApiKey">7. Register for a Maps API Key, if your application is using
 MapView elements</h3>
 
-<div class="sidebox" style="margin-bottom:.5em;padding:1em;"><p>
+<div class="sidebox-wrapper">
+<div class="sidebox"><p>
 For complete information about getting a Maps API Key, see <a
 href="http://code.google.com/android/add-ons/google-apis/mapkey.html">
-Obtaining a Maps API Key</a>.</p></div>
+Obtaining a Maps API Key</a>.</p>
+</div>
+</div>
 
 <p>If your application uses one or more Mapview elements, you will need to 
 register your application with the Google

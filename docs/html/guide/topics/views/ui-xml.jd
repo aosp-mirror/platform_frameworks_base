@@ -21,11 +21,16 @@ parent.link=index.html
 example, the EditText element has a <code>text</code> attribute that corresponds to
 EditText.setText. </p>
 
-<div class="sidebox"><p>For your convenience, the API reference documentation for UI related classes lists the available XML attributes that correspond to the class methods, including inherited attributes.</p>
+<div class="sidebox-wrapper">
+<div class="sidebox">
+<p>For your convenience, the API reference documentation for UI related classes
+lists the available XML attributes that correspond to the class methods, including inherited
+attributes.</p>
 
 <p>To learn more about the available XML elements and attributes, as well as the format of the XML file, see <a
 href="{@docRoot}reference/available-resources.html#layoutresources">Layout Resources</a>.</p>
- </div>
+</div>
+</div>
 
 <p>Using Android's XML vocabulary, you can quickly design UI layouts and the screen elements they contain, in the same way you create HTML files &mdash; as a series of nested tags. </p>
 

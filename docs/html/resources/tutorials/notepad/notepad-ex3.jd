@@ -189,30 +189,28 @@ and populate the View elements with them.</p>
 
 <h2>Step 7</h2>
 
-    <div class="sidebox" style="border:2px solid #FFFFDD;float:right;
-      background-color:#FFFFEE;margin-right:0px;margin-bottom:.5em;
-      margin-top:1em;padding:0em;width:240px;">
-      <h2 style="border:0;font-size:12px;padding:.5em .5em .5em 1em;margin:0;
-      background-color:#FFFFDD;">Why handling life-cycle events is important</h2>
-      <p style="padding-left:.5em;font-size:12px;margin:0;
-     padding:.0em .5em .5em 1em;">If you are used to always having control in your applications, you
-      might not understand why all this life-cycle work is necessary. The reason
-      is that in Android, you are not in control of your Activity, the
-      operating system is!</p>
-      <p style="padding-left:.5em;font-size:12px;margin:0;
-     padding:.0em .5em .5em 1em;">As we have already seen, the Android model is based around activities
-      calling each other. When one Activity calls another, the current Activity
-      is paused at the very least, and may be killed altogether if the
-      system starts to run low on resources. If this happens, your Activity will
-      have to store enough state to come back up later, preferably in the same
-      state it was in when it was killed.</p>
-      <p style="padding-left:.5em;font-size:12px;margin:0;padding:.0em .5em .5em 1em;">
-      Android has a <a href="{@docRoot}guide/topics/fundamentals.html#lcycles">well-defined life cycle</a>.
-      Lifecycle events can happen even if you are not handing off control to
-      another Activity explicitly. For example, perhaps a call comes in to the
-      handset. If this happens, and your Activity is running, it will be swapped
-      out while the call Activity takes over.</p>
-    </div>
+  <div class="sidebox-wrapper">
+  <div class="sidebox">
+    <h2>Why handling life-cycle events is important</h2>
+    <p>If you are used to always having control in your applications, you
+    might not understand why all this life-cycle work is necessary. The reason
+    is that in Android, you are not in control of your Activity, the
+    operating system is!</p>
+    <p>As we have already seen, the Android model is based around activities
+    calling each other. When one Activity calls another, the current Activity
+    is paused at the very least, and may be killed altogether if the
+    system starts to run low on resources. If this happens, your Activity will
+    have to store enough state to come back up later, preferably in the same
+    state it was in when it was killed.</p>
+    <p>
+    Android has a <a href="{@docRoot}guide/topics/fundamentals.html#lcycles">well-defined life
+cycle</a>.
+    Lifecycle events can happen even if you are not handing off control to
+    another Activity explicitly. For example, perhaps a call comes in to the
+    handset. If this happens, and your Activity is running, it will be swapped
+    out while the call Activity takes over.</p>
+  </div>
+  </div>
 
 <p>Still in the <code>NoteEdit</code> class, we now override the methods
    <code>onSaveInstanceState()</code>, <code>onPause()</code> and

@@ -7,9 +7,8 @@ page.title=Draw 9-patch
 the section on Nine-patch in the 
 <a href="{@docRoot}guide/topics/resources/available-resources.html#ninepatch">Nine-patch Images</a> topic.</p>
 
-<div class="sidebox" style="width:auto"><br/>
-<img src="{@docRoot}images/draw9patch-norm.png" alt="" height="300" width="341" />
-</div>
+<img src="{@docRoot}images/draw9patch-norm.png" style="float:right" alt="" height="300" width="341"
+/>
 
 <p>Here's a quick guide to create a Nine-patch graphic using the Draw 9-patch tool.
 You'll need the PNG image with which you'd like to create a NinePatch.</p>
@@ -39,9 +38,8 @@ You'll need the PNG image with which you'd like to create a NinePatch.</p>
      A previously saved 9-patch file (<code>*.9.png</code>) will be loaded as-is, 
      with no drawing area added, because it already exists.</p>
 
-<div class="sidebox" style="width:auto"><br/>
-<img src="{@docRoot}images/draw9patch-bad.png" alt="" height="300" width="341" />
-</div>
+<img src="{@docRoot}images/draw9patch-bad.png" style="float:right" alt="" height="300" width="341"
+/>
 
 <p>Optional controls include:</p>
 <ul>

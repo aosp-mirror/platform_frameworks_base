@@ -64,22 +64,21 @@ selections. </em></li>
 
   <h2>Step 2</h2>
 
-  <div class="sidebox" style="border:2px solid #FFFFDD;float:right;
-      background-color:#FFFFEE;margin-right:0px;
-      margin-bottom:.5em;margin-top:1em;padding:0em;width:240px;">
-    <h2 style="border:0;font-size:12px;padding:.5em .5em .5em 1em;margin:0;
-      background-color:#FFFFDD;">Accessing and modifying data</h2>
-    <p style="padding-left:.5em;font-size:12px;margin:0; padding:.0em .5em .5em 1em;">For this
+  <div class="sidebox-wrapper">
+  <div class="sidebox">
+    <h2>Accessing and modifying data</h2>
+    <p>For this
     exercise, we are using a SQLite database to store our data. This is useful
     if only <em>your</em> application will need to access or modify the data. If you wish for
     other activities to access or modify the data, you have to expose the data using a 
     {@link android.content.ContentProvider ContentProvider}.</p>
-    <p style="padding-left:.5em;font-size:12px;margin:0; 
-     padding:.0em .5em .5em 1em;">If you are interested, you can find out more about 
-    <a href="{@docRoot}guide/topics/providers/content-providers.html">content providers</a> or the whole 
+    <p>If you are interested, you can find out more about
+    <a href="{@docRoot}guide/topics/providers/content-providers.html">content providers</a> or the
+whole
     subject of <a href="{@docRoot}guide/topics/data/data-storage.html">Data Storage</a>.
     The NotePad sample in the <code>samples/</code> folder of the SDK also has an example of how
     to create a ContentProvider.</p>
+  </div>
   </div>
 
     <p>Take a look at the <code>NotesDbAdapter</code> class &mdash; this class is provided to
@@ -137,17 +136,13 @@ selections. </em></li>
    
 <h2 style="clear:right;">Step 3</h2>
 
-	<div class="sidebox" style="border:2px solid #FFFFDD;float:right;
-      background-color:#FFFFEE;margin-right:0px;
-      margin-bottom:.5em;margin-top:1em;padding:0em;width:240px;">
-    <h2 style="border:0;font-size:12px;padding:.5em .5em .5em 1em;margin:0;
-      background-color:#FFFFDD;">Layouts and activities</h2>
-      <p style="padding-left:.5em;font-size:12px;margin:0; 
-     padding:.0em .5em .5em 1em;">Most Activity classes will have a layout associated with them. The layout
+	<div class="sidebox-wrapper">
+  <div class="sidebox">
+    <h2>Layouts and activities</h2>
+      <p>Most Activity classes will have a layout associated with them. The layout
     will be the "face" of the Activity to the user. In this case our layout will
     take over the whole screen and provide a list of notes.</p>
-    <p style="padding-left:.5em;font-size:12px;margin:0; 
-     padding:.0em .5em .5em 1em;">Full screen layouts are not the only option for an Activity however. You
+    <p>Full screen layouts are not the only option for an Activity however. You
     might also want to use a <a
 href="{@docRoot}resources/faq/commontasks.html#floatingorfull">floating 
     layout</a> (for example, a <a
@@ -155,7 +150,8 @@ href="{@docRoot}resources/faq/commontasks.html#dialogsandalerts">dialog
     or alert</a>), 
     or perhaps you don't need a layout at all (the Activity will be invisible 
     to the user unless you specify some kind of layout for it to use).</p>
-    </div>
+  </div>
+  </div>
     
     <p>Open the <code>notepad_list.xml</code> file in <code>res/layout</code>
 and 
@@ -233,23 +229,22 @@ and
 
   <h2 style="clear:right;">Step 5</h2>
 
-	  <div class="sidebox" style="border:2px solid #FFFFDD;float:right;
-      background-color:#FFFFEE;margin-right:0px;
-      margin-bottom:.5em;margin-top:1em;padding:0em;width:240px;">
-    <h2 style="border:0;font-size:12px;padding:.5em .5em .5em 1em;margin:0;
-      background-color:#FFFFDD;">Resources and the R class</h2>
-    <p style="padding-left:.5em;font-size:12px;margin:0; 
-     padding:.0em .5em .5em 1em;">The folders under res/ in the Eclipse project are for resources. 
-     There is a <a href="{@docRoot}resources/faq/commontasks.html#filelist">specific structure</a> to the
+	<div class="sidebox-wrapper">
+  <div class="sidebox">
+    <h2>Resources and the R class</h2>
+    <p>The folders under res/ in the Eclipse project are for resources.
+     There is a <a href="{@docRoot}resources/faq/commontasks.html#filelist">specific structure</a>
+to the
      folders and files under res/.</p>
-    <p style="padding-left:.5em;font-size:12px;
-margin:0; padding:.0em .5em .5em 1em;">Resources defined in these folders and files will have
+    <p>Resources defined in these folders and files will have
     corresponding entries in the R class allowing them to be easily accessed
     and used from your application. The R class is automatically generated using the contents
     of the res/ folder by the eclipse plugin (or by aapt if you use the command line tools).
     Furthermore, they will be bundled and deployed for you as part of the application.</p>
     </p>
   </div>
+  </div>
+
     <p>To make the list of notes in the ListView, we also need to define a View for each row:</p>
   <ol>
     <li>
@@ -373,19 +368,17 @@ Notepadv1
 
   <h2>Step 9</h2>
 
-      <div class="sidebox" style="border:2px solid #FFFFDD;float:right;
-      background-color:#FFFFEE;margin-right:0px;
-      margin-bottom:.5em;margin-top:1em;padding:0em;width:240px;">
-    <h2 style="border:0;font-size:12px;padding:.5em .5em .5em 1em;margin:0;
-      background-color:#FFFFDD;">More on menus</h2>
-    <p style="padding-left:.5em;font-size:12px;margin:0; 
-     padding:.0em .5em .5em 1em;">The notepad application we are constructing only scratches the 
+  <div class="sidebox-wrapper">
+  <div class="sidebox">
+    <h2>More about menus</h2>
+    <p>The notepad application we are constructing only scratches the
      surface with <a href="{@docRoot}resources/faq/commontasks.html#addmenuitems">menus</a>. </p>
-    <p style="padding-left:.5em;font-size:12px;margin:0; 
-     padding:.0em .5em .5em 1em;">You can also <a href="{@docRoot}resources/faq/commontasks.html#menukeyshortcuts">add
-shortcut keys for menu items</a>, <a href="{@docRoot}resources/faq/commontasks.html#menukeyshortcuts">create
+    <p>You can also <a href="{@docRoot}resources/faq/commontasks.html#menukeyshortcuts">add
+shortcut keys for menu items</a>, <a
+href="{@docRoot}resources/faq/commontasks.html#menukeyshortcuts">create
 submenus</a> and even <a href="{@docRoot}resources/faq/commontasks.html#addingtoothermenus">add
 menu items to other applications!</a>. </p>
+  </div>
   </div>
 
 <p>Fill out the body of the <code>onCreateOptionsMenu()</code> method.</p>
@@ -486,18 +479,16 @@ We will simply
 
 
 <h2>Step 12</h2>
-      <div class="sidebox" style="border:2px solid #FFFFDD;float:right;
-      background-color:#FFFFEE;margin-right:0px;
-      margin-bottom:.5em;margin-top:1em;padding:0em;width:240px;">
-    <h2 style="border:0;font-size:12px;padding:.5em .5em .5em 1em;margin:0;
-      background-color:#FFFFDD;">List adapters</h2>
-    <p style="padding-left:.5em;font-size:12px;margin:0; 
-     padding:.0em .5em .5em 1em;">Our example uses a {@link android.widget.SimpleCursorAdapter 
+  <div class="sidebox-wrapper">
+  <div class="sidebox">
+    <h2>List adapters</h2>
+    <p>Our example uses a {@link android.widget.SimpleCursorAdapter
      SimpleCursorAdapter} to bind a database {@link android.database.Cursor Cursor}
      into a ListView, and this is a common way to use a {@link android.widget.ListAdapter 
      ListAdapter}. Other options exist like {@link android.widget.ArrayAdapter ArrayAdapter} which 
      can be used to take a List or Array of in-memory data and bind it in to
      a list as well.</p>
+  </div>
   </div>
   
   <p>Define the <code>fillData()</code> method:</p>
