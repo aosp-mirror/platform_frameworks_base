@@ -274,6 +274,13 @@ public abstract class Connection {
     public abstract int getNumberPresentation();
 
     /**
+     * Returns the User to User Signaling (UUS) information associated with
+     * incoming and waiting calls
+     * @return UUSInfo containing the UUS userdata.
+     */
+    public abstract UUSInfo getUUSInfo();
+
+    /**
      * Build a human representation of a connection instance, suitable for debugging.
      * Don't log personal stuff unless in debug mode.
      * @return a string representing the internal state of this connection.

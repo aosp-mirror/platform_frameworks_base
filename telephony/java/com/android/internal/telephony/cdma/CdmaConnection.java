@@ -933,4 +933,10 @@ public class CdmaConnection extends Connection {
     public int getNumberPresentation() {
         return numberPresentation;
     }
+
+    @Override
+    public UUSInfo getUUSInfo() {
+        // UUS information not supported in CDMA
+        return null;
+    }
 }
