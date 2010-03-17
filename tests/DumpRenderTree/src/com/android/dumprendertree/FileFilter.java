@@ -95,7 +95,8 @@ public class FileFilter {
         ignoreResultList.add("http/tests/appcache/max-size.html"); // no layoutTestController.setAppCacheMaximumSize
         ignoreResultList.add("http/tests/appcache/manifest-with-empty-file.html"); // flaky
         ignoreResultList.add("http/tests/appcache/whitelist-wildcard.html"); // file not found
-        ignoreResultList.add("storage/database-lock-after-reload.html"); // failure
+        ignoreResultList.add("storage/database-lock-after-reload.html"); // Succeeds but DumpRenderTree does not read result correctly
+        ignoreResultList.add("storage/hash-change-with-xhr.html"); // Succeeds but DumpRenderTree does not read result correctly
 
         // Will always fail
         ignoreResultList.add("dom/svg/level3/xpath"); // XPath not supported
@@ -116,6 +117,9 @@ public class FileFilter {
         ignoreResultList.add("fast/workers/shared-worker-shared.html"); // shared workers not supported
         ignoreResultList.add("fast/workers/shared-worker-simple.html"); // shared workers not supported
         ignoreResultList.add("fast/xpath"); // XPath not supported
+        ignoreResultList.add("storage/domstorage/localstorage/private-browsing-affects-storage.html"); // private browsing not supported
+        ignoreResultList.add("storage/domstorage/sessionstorage/private-browsing-affects-storage.html"); // private browsing not supported
+        ignoreResultList.add("storage/private-browsing-readonly.html"); // private browsing not supported
 
         // TODO: These need to be triaged
         ignoreResultList.add("fast/css/case-transform.html"); // will not fix #619707
@@ -189,9 +193,6 @@ public class FileFilter {
         ignoreResultList.add("fast/replaced/image-map.html"); // requires eventSender.mouseDown(),mouseUp()
         ignoreResultList.add("fast/text/plain-text-line-breaks.html"); // extra spacing because iFrames rendered next to each other on Apple
         ignoreResultList.add("profiler"); // profiler is not supported
-        ignoreResultList.add("storage/domstorage/localstorage/private-browsing-affects-storage.html"); // No notion of private browsing.
-        ignoreResultList.add("storage/domstorage/sessionstorage/private-browsing-affects-storage.html"); // No notion of private browsing.
-        ignoreResultList.add("storage/private-browsing-readonly.html"); // No notion of private browsing.
         ignoreResultList.add("svg"); // svg is not supported
 
     }
