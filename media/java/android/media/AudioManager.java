@@ -1253,7 +1253,7 @@ public class AudioManager {
 
     private String getIdForAudioFocusListener(OnAudioFocusChangeListener l) {
         if (l == null) {
-            return new String();
+            return new String(this.toString());
         } else {
             return new String(this.toString() + l.toString());
         }
@@ -1263,9 +1263,6 @@ public class AudioManager {
      * Register a listener for audio focus updates.
      */
     public void registerAudioFocusListener(OnAudioFocusChangeListener l) {
-        if (l == null) {
-            return;
-        }
         synchronized(mFocusListenerLock) {
             if (mAudioFocusIdListenerMap.containsKey(getIdForAudioFocusListener(l))) {
                 return;
