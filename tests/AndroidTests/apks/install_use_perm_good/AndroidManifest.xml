@@ -1,0 +1,10 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+        package="com.android.unit_tests.install_use_perm_good">
+
+    <uses-permission android:name="com.android.unit_tests.NORMAL" />
+    <uses-permission android:name="com.android.unit_tests.DANGEROUS" />
+    <uses-permission android:name="com.android.unit_tests.SIGNATURE" />
+        
+    <application android:hasCode="false">
+    </application>
+</manifest>

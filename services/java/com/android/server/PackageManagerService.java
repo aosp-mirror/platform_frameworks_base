@@ -29,7 +29,6 @@ import org.xmlpull.v1.XmlSerializer;
 
 import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
-import android.app.admin.DevicePolicyManager;
 import android.app.admin.IDevicePolicyManager;
 import android.app.backup.IBackupManager;
 import android.content.ComponentName;
@@ -79,14 +78,11 @@ import android.os.Environment;
 import android.os.FileObserver;
 import android.os.FileUtils;
 import android.os.Handler;
-import android.os.StatFs;
-import android.os.storage.StorageResultCode;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
-import android.provider.Settings;
 import android.security.SystemKeyStore;
 import android.util.*;
 import android.view.Display;
@@ -122,6 +118,17 @@ import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
+/**
+ * Keep track of all those .apks everywhere.
+ * 
+ * This is very central to the platform's security; please run the unit
+ * tests whenever making modifications here:
+ * 
+mmm frameworks/base/tests/AndroidTests
+adb install -r -f out/target/product/passion/data/app/AndroidTests.apk
+adb shell am instrument -w -e class com.android.unit_tests.PackageManagerTests com.android.unit_tests/android.test.InstrumentationTestRunner
+ *
+ */
 class PackageManagerService extends IPackageManager.Stub {
     private static final String TAG = "PackageManager";
     private static final boolean DEBUG_SETTINGS = false;
@@ -912,7 +919,7 @@ class PackageManagerService extends IPackageManager.Stub {
                     + ((SystemClock.uptimeMillis()-startTime)/1000f)
                     + " seconds");
 
-            updatePermissionsLP();
+            updatePermissionsLP(null, null, true, false);
 
             mSettings.writeLP();
 
@@ -1207,6 +1214,36 @@ class PackageManagerService extends IPackageManager.Stub {
         return cur;
     }
 
+    static int[] removeInt(int[] cur, int val) {
+        if (cur == null) {
+            return null;
+        }
+        final int N = cur.length;
+        for (int i=0; i<N; i++) {
+            if (cur[i] == val) {
+                int[] ret = new int[N-1];
+                if (i > 0) {
+                    System.arraycopy(cur, 0, ret, 0, i);
+                }
+                if (i < (N-1)) {
+                    System.arraycopy(cur, i, ret, i+1, N-i-1);
+                }
+                return ret;
+            }
+        }
+        return cur;
+    }
+
+    static int[] removeInts(int[] cur, int[] rem) {
+        if (rem == null) return cur;
+        if (cur == null) return cur;
+        final int N = rem.length;
+        for (int i=0; i<N; i++) {
+            cur = removeInt(cur, rem[i]);
+        }
+        return cur;
+    }
+
     PackageInfo generatePackageInfo(PackageParser.Package p, int flags) {
         if ((flags & PackageManager.GET_UNINSTALLED_PACKAGES) != 0) {
             // The package has been uninstalled but has retained data and resources.
@@ -1289,11 +1326,24 @@ class PackageManagerService extends IPackageManager.Stub {
         return new int[0];
     }
 
+    static final PermissionInfo generatePermissionInfo(
+            BasePermission bp, int flags) {
+        if (bp.perm != null) {
+            return PackageParser.generatePermissionInfo(bp.perm, flags);
+        }
+        PermissionInfo pi = new PermissionInfo();
+        pi.name = bp.name;
+        pi.packageName = bp.sourcePackage;
+        pi.nonLocalizedLabel = bp.name;
+        pi.protectionLevel = bp.protectionLevel;
+        return pi;
+    }
+    
     public PermissionInfo getPermissionInfo(String name, int flags) {
         synchronized (mPackages) {
             final BasePermission p = mSettings.mPermissions.get(name);
-            if (p != null && p.perm != null) {
-                return PackageParser.generatePermissionInfo(p.perm, flags);
+            if (p != null) {
+                return generatePermissionInfo(p, flags);
             }
             return null;
         }
@@ -1304,11 +1354,11 @@ class PackageManagerService extends IPackageManager.Stub {
             ArrayList<PermissionInfo> out = new ArrayList<PermissionInfo>(10);
             for (BasePermission p : mSettings.mPermissions.values()) {
                 if (group == null) {
-                    if (p.perm.info.group == null) {
-                        out.add(PackageParser.generatePermissionInfo(p.perm, flags));
+                    if (p.perm == null || p.perm.info.group == null) {
+                        out.add(generatePermissionInfo(p, flags));
                     }
                 } else {
-                    if (group.equals(p.perm.info.group)) {
+                    if (p.perm != null && group.equals(p.perm.info.group)) {
                         out.add(PackageParser.generatePermissionInfo(p.perm, flags));
                     }
                 }
@@ -1600,6 +1650,7 @@ class PackageManagerService extends IPackageManager.Stub {
                         "Not allowed to modify non-dynamic permission "
                         + info.name);
             }
+            bp.protectionLevel = info.protectionLevel;
             bp.perm = new PackageParser.Permission(tree.perm.owner,
                     new PermissionInfo(info));
             bp.perm.info.packageName = tree.perm.info.packageName;
@@ -3268,6 +3319,7 @@ class PackageManagerService extends IPackageManager.Stub {
                             BasePermission tree = findPermissionTreeLP(p.info.name);
                             if (tree == null
                                     || tree.sourcePackage.equals(p.info.packageName)) {
+                                bp.packageSetting = pkgSetting;
                                 bp.perm = p;
                                 bp.uid = pkg.applicationInfo.uid;
                                 if ((parseFlags&PackageParser.PARSE_CHATTY) != 0) {
@@ -3297,6 +3349,9 @@ class PackageManagerService extends IPackageManager.Stub {
                         }
                         r.append("DUP:");
                         r.append(p.info.name);
+                    }
+                    if (bp.perm == p) {
+                        bp.protectionLevel = p.info.protectionLevel;
                     }
                 } else {
                     Slog.w(TAG, "Permission " + p.info.name + " from package "
@@ -3723,15 +3778,7 @@ class PackageManagerService extends IPackageManager.Stub {
                     bp = mSettings.mPermissionTrees.get(p.info.name);
                 }
                 if (bp != null && bp.perm == p) {
-                    if (bp.type != BasePermission.TYPE_BUILTIN) {
-                        if (tree) {
-                            mSettings.mPermissionTrees.remove(p.info.name);
-                        } else {
-                            mSettings.mPermissions.remove(p.info.name);
-                        }
-                    } else {
-                        bp.perm = null;
-                    }
+                    bp.perm = null;
                     if (chatty) {
                         if (r == null) {
                             r = new StringBuilder(256);
@@ -3770,16 +3817,38 @@ class PackageManagerService extends IPackageManager.Stub {
         return name != null && name.endsWith(".apk");
     }
 
-    private void updatePermissionsLP() {
+    private static boolean hasPermission(PackageParser.Package pkgInfo, String perm) {
+        for (int i=pkgInfo.permissions.size()-1; i>=0; i--) {
+            if (pkgInfo.permissions.get(i).info.name.equals(perm)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    private void updatePermissionsLP(String changingPkg,
+            PackageParser.Package pkgInfo, boolean grantPermissions, boolean replace) {
         // Make sure there are no dangling permission trees.
         Iterator<BasePermission> it = mSettings.mPermissionTrees
                 .values().iterator();
         while (it.hasNext()) {
             BasePermission bp = it.next();
-            if (bp.perm == null) {
+            if (bp.packageSetting == null) {
+                // We may not yet have parsed the package, so just see if
+                // we still know about its settings.
+                bp.packageSetting = mSettings.mPackages.get(bp.sourcePackage);
+            }
+            if (bp.packageSetting == null) {
                 Slog.w(TAG, "Removing dangling permission tree: " + bp.name
                         + " from package " + bp.sourcePackage);
                 it.remove();
+            } else if (changingPkg != null && changingPkg.equals(bp.sourcePackage)) {
+                if (pkgInfo == null || !hasPermission(pkgInfo, bp.name)) {
+                    Slog.i(TAG, "Removing old permission tree: " + bp.name
+                            + " from package " + bp.sourcePackage);
+                    grantPermissions = true;
+                    it.remove();
+                }
             }
         }
 
@@ -3792,9 +3861,10 @@ class PackageManagerService extends IPackageManager.Stub {
                 if (DEBUG_SETTINGS) Log.v(TAG, "Dynamic permission: name="
                         + bp.name + " pkg=" + bp.sourcePackage
                         + " info=" + bp.pendingInfo);
-                if (bp.perm == null && bp.pendingInfo != null) {
+                if (bp.packageSetting == null && bp.pendingInfo != null) {
                     BasePermission tree = findPermissionTreeLP(bp.name);
                     if (tree != null) {
+                        bp.packageSetting = tree.packageSetting;
                         bp.perm = new PackageParser.Permission(tree.perm.owner,
                                 new PermissionInfo(bp.pendingInfo));
                         bp.perm.info.packageName = tree.perm.info.packageName;
@@ -3803,17 +3873,37 @@ class PackageManagerService extends IPackageManager.Stub {
                     }
                 }
             }
-            if (bp.perm == null) {
+            if (bp.packageSetting == null) {
+                // We may not yet have parsed the package, so just see if
+                // we still know about its settings.
+                bp.packageSetting = mSettings.mPackages.get(bp.sourcePackage);
+            }
+            if (bp.packageSetting == null) {
                 Slog.w(TAG, "Removing dangling permission: " + bp.name
                         + " from package " + bp.sourcePackage);
                 it.remove();
+            } else if (changingPkg != null && changingPkg.equals(bp.sourcePackage)) {
+                if (pkgInfo == null || !hasPermission(pkgInfo, bp.name)) {
+                    Slog.i(TAG, "Removing old permission: " + bp.name
+                            + " from package " + bp.sourcePackage);
+                    grantPermissions = true;
+                    it.remove();
+                }
             }
         }
 
         // Now update the permissions for all packages, in particular
         // replace the granted permissions of the system packages.
-        for (PackageParser.Package pkg : mPackages.values()) {
-            grantPermissionsLP(pkg, false);
+        if (grantPermissions) {
+            for (PackageParser.Package pkg : mPackages.values()) {
+                if (pkg != pkgInfo) {
+                    grantPermissionsLP(pkg, false);
+                }
+            }
+        }
+        
+        if (pkgInfo != null) {
+            grantPermissionsLP(pkgInfo, replace);
         }
     }
 
@@ -3823,7 +3913,7 @@ class PackageManagerService extends IPackageManager.Stub {
             return;
         }
         final GrantedPermissions gp = ps.sharedUser != null ? ps.sharedUser : ps;
-        boolean addedPermission = false;
+        boolean changedPermission = false;
 
         if (replace) {
             ps.permissionsFixed = false;
@@ -3841,26 +3931,26 @@ class PackageManagerService extends IPackageManager.Stub {
         for (int i=0; i<N; i++) {
             String name = pkg.requestedPermissions.get(i);
             BasePermission bp = mSettings.mPermissions.get(name);
-            PackageParser.Permission p = bp != null ? bp.perm : null;
             if (false) {
                 if (gp != ps) {
                     Log.i(TAG, "Package " + pkg.packageName + " checking " + name
-                            + ": " + p);
+                            + ": " + bp);
                 }
             }
-            if (p != null) {
-                final String perm = p.info.name;
+            if (bp != null && bp.packageSetting != null) {
+                final String perm = bp.name;
                 boolean allowed;
-                if (p.info.protectionLevel == PermissionInfo.PROTECTION_NORMAL
-                        || p.info.protectionLevel == PermissionInfo.PROTECTION_DANGEROUS) {
+                boolean allowedSig = false;
+                if (bp.protectionLevel == PermissionInfo.PROTECTION_NORMAL
+                        || bp.protectionLevel == PermissionInfo.PROTECTION_DANGEROUS) {
                     allowed = true;
-                } else if (p.info.protectionLevel == PermissionInfo.PROTECTION_SIGNATURE
-                        || p.info.protectionLevel == PermissionInfo.PROTECTION_SIGNATURE_OR_SYSTEM) {
-                    allowed = (checkSignaturesLP(p.owner.mSignatures, pkg.mSignatures)
+                } else if (bp.protectionLevel == PermissionInfo.PROTECTION_SIGNATURE
+                        || bp.protectionLevel == PermissionInfo.PROTECTION_SIGNATURE_OR_SYSTEM) {
+                    allowed = (checkSignaturesLP(bp.packageSetting.signatures.mSignatures, pkg.mSignatures)
                                     == PackageManager.SIGNATURE_MATCH)
                             || (checkSignaturesLP(mPlatformPackage.mSignatures, pkg.mSignatures)
                                     == PackageManager.SIGNATURE_MATCH);
-                    if (p.info.protectionLevel == PermissionInfo.PROTECTION_SIGNATURE_OR_SYSTEM) {
+                    if (bp.protectionLevel == PermissionInfo.PROTECTION_SIGNATURE_OR_SYSTEM) {
                         if ((pkg.applicationInfo.flags&ApplicationInfo.FLAG_SYSTEM) != 0) {
                             // For updated system applications, the signatureOrSystem permission
                             // is granted only if it had been defined by the original application.
@@ -3877,6 +3967,9 @@ class PackageManagerService extends IPackageManager.Stub {
                             }
                         }
                     }
+                    if (allowed) {
+                        allowedSig = true;
+                    }
                 } else {
                     allowed = false;
                 }
@@ -3890,7 +3983,7 @@ class PackageManagerService extends IPackageManager.Stub {
                             && ps.permissionsFixed) {
                         // If this is an existing, non-system package, then
                         // we can't add any new permissions to it.
-                        if (!gp.loadedPermissions.contains(perm)) {
+                        if (!allowedSig && !gp.loadedPermissions.contains(perm)) {
                             allowed = false;
                             // Except...  if this is a permission that was added
                             // to the platform (note: need to only do this when
@@ -3911,7 +4004,7 @@ class PackageManagerService extends IPackageManager.Stub {
                     }
                     if (allowed) {
                         if (!gp.grantedPermissions.contains(perm)) {
-                            addedPermission = true;
+                            changedPermission = true;
                             gp.grantedPermissions.add(perm);
                             gp.gids = appendInts(gp.gids, bp.gids);
                         }
@@ -3921,11 +4014,21 @@ class PackageManagerService extends IPackageManager.Stub {
                                 + " because it was previously installed without");
                     }
                 } else {
-                    Slog.w(TAG, "Not granting permission " + perm
-                            + " to package " + pkg.packageName
-                            + " (protectionLevel=" + p.info.protectionLevel
-                            + " flags=0x" + Integer.toHexString(pkg.applicationInfo.flags)
-                            + ")");
+                    if (gp.grantedPermissions.remove(perm)) {
+                        changedPermission = true;
+                        gp.gids = removeInts(gp.gids, bp.gids);
+                        Slog.i(TAG, "Un-granting permission " + perm
+                                + " from package " + pkg.packageName
+                                + " (protectionLevel=" + bp.protectionLevel
+                                + " flags=0x" + Integer.toHexString(pkg.applicationInfo.flags)
+                                + ")");
+                    } else {
+                        Slog.w(TAG, "Not granting permission " + perm
+                                + " to package " + pkg.packageName
+                                + " (protectionLevel=" + bp.protectionLevel
+                                + " flags=0x" + Integer.toHexString(pkg.applicationInfo.flags)
+                                + ")");
+                    }
                 }
             } else {
                 Slog.w(TAG, "Unknown permission " + name
@@ -3933,7 +4036,7 @@ class PackageManagerService extends IPackageManager.Stub {
             }
         }
 
-        if ((addedPermission || replace) && !ps.permissionsFixed &&
+        if ((changedPermission || replace) && !ps.permissionsFixed &&
                 ((ps.pkgFlags&ApplicationInfo.FLAG_SYSTEM) == 0) ||
                 ((ps.pkgFlags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0)){
             // This is the first that we have heard about this package, so the
@@ -3943,7 +4046,7 @@ class PackageManagerService extends IPackageManager.Stub {
             gp.loadedPermissions = new HashSet<String>(gp.grantedPermissions);
         }
     }
-
+    
     private final class ActivityIntentResolver
             extends IntentResolver<PackageParser.ActivityIntentInfo, ResolveInfo> {
         public List queryIntent(Intent intent, String resolvedType, boolean defaultOnly) {
@@ -4030,6 +4133,11 @@ class PackageManagerService extends IPackageManager.Stub {
         }
 
         @Override
+        protected String packageForFilter(PackageParser.ActivityIntentInfo info) {
+            return info.activity.owner.packageName;
+        }
+        
+        @Override
         protected ResolveInfo newResult(PackageParser.ActivityIntentInfo info,
                 int match) {
             if (!mSettings.isEnabledLP(info.activity.info, mFlags)) {
@@ -4069,7 +4177,9 @@ class PackageManagerService extends IPackageManager.Stub {
             out.print(prefix); out.print(
                     Integer.toHexString(System.identityHashCode(filter.activity)));
                     out.print(' ');
-                    out.println(filter.activity.getComponentShortName());
+                    out.print(filter.activity.getComponentShortName());
+                    out.print(" filter ");
+                    out.println(Integer.toHexString(System.identityHashCode(filter)));
         }
 
 //        List<ResolveInfo> filterEnabled(List<ResolveInfo> resolveInfoList) {
@@ -4180,6 +4290,11 @@ class PackageManagerService extends IPackageManager.Stub {
         }
 
         @Override
+        protected String packageForFilter(PackageParser.ServiceIntentInfo info) {
+            return info.service.owner.packageName;
+        }
+        
+        @Override
         protected ResolveInfo newResult(PackageParser.ServiceIntentInfo filter,
                 int match) {
             final PackageParser.ServiceIntentInfo info = (PackageParser.ServiceIntentInfo)filter;
@@ -4220,7 +4335,9 @@ class PackageManagerService extends IPackageManager.Stub {
             out.print(prefix); out.print(
                     Integer.toHexString(System.identityHashCode(filter.service)));
                     out.print(' ');
-                    out.println(filter.service.getComponentShortName());
+                    out.print(filter.service.getComponentShortName());
+                    out.print(" filter ");
+                    out.println(Integer.toHexString(System.identityHashCode(filter)));
         }
 
 //        List<ResolveInfo> filterEnabled(List<ResolveInfo> resolveInfoList) {
@@ -4389,7 +4506,8 @@ class PackageManagerService extends IPackageManager.Stub {
                                 SCAN_MONITOR | SCAN_NO_PATHS);
                         if (p != null) {
                             synchronized (mPackages) {
-                                grantPermissionsLP(p, false);
+                                updatePermissionsLP(p.packageName, p,
+                                        p.permissions.size() > 0, false);
                             }
                             addedPackage = p.applicationInfo.packageName;
                             addedUid = p.applicationInfo.uid;
@@ -5410,7 +5528,8 @@ class PackageManagerService extends IPackageManager.Stub {
                 parseFlags |= ~PackageManager.INSTALL_REPLACE_EXISTING;
                 scanPackageLI(restoreFile, parseFlags, scanMode);
                 synchronized (mPackages) {
-                    grantPermissionsLP(deletedPackage, false);
+                    updatePermissionsLP(deletedPackage.packageName, deletedPackage,
+                            true, false);
                     mSettings.writeLP();
                 }
                 if (restoreRes.returnCode != PackageManager.INSTALL_SUCCEEDED) {
@@ -5536,7 +5655,8 @@ class PackageManagerService extends IPackageManager.Stub {
             Log.d(TAG, "New package installed in " + newPackage.mPath);
         }
         synchronized (mPackages) {
-            grantPermissionsLP(newPackage, true);
+            updatePermissionsLP(newPackage.packageName, newPackage,
+                    newPackage.permissions.size() > 0, true);
             res.name = pkgName;
             res.uid = newPackage.applicationInfo.uid;
             res.pkg = newPackage;
@@ -5917,19 +6037,23 @@ class PackageManagerService extends IPackageManager.Stub {
                 File dataDir = new File(pkg.applicationInfo.dataDir);
                 dataDir.delete();
             }
-            schedulePackageCleaning(packageName);
-            synchronized (mPackages) {
-                if (outInfo != null) {
-                    outInfo.removedUid = mSettings.removePackageLP(packageName);
-                }
-            }
         }
         synchronized (mPackages) {
-            if ( (deletedPs != null) && (deletedPs.sharedUser != null)) {
-                // remove permissions associated with package
-                mSettings.updateSharedUserPermsLP(deletedPs, mGlobalGids);
-            }
             if (deletedPs != null) {
+                schedulePackageCleaning(packageName);
+                
+                if ((flags&PackageManager.DONT_DELETE_DATA) == 0) {
+                    if (outInfo != null) {
+                        outInfo.removedUid = mSettings.removePackageLP(packageName);
+                    }
+                    if (deletedPs != null) {
+                        updatePermissionsLP(deletedPs.name, null, false, false);
+                        if (deletedPs.sharedUser != null) {
+                            // remove permissions associated with package
+                            mSettings.updateSharedUserPermsLP(deletedPs, mGlobalGids);
+                        }
+                    }
+                }
                 // remove from preferred activities.
                 ArrayList<PreferredActivity> removed = new ArrayList<PreferredActivity>();
                 for (PreferredActivity pa : mSettings.mPreferredActivities.filterSet()) {
@@ -6003,7 +6127,7 @@ class PackageManagerService extends IPackageManager.Stub {
             return false;
         }
         synchronized (mPackages) {
-            grantPermissionsLP(newPkg, true);
+            updatePermissionsLP(newPkg.packageName, newPkg, true, true);
             mSettings.writeLP();
         }
         return true;
@@ -6659,35 +6783,102 @@ class PackageManagerService extends IPackageManager.Stub {
             return;
         }
 
+        String packageName = null;
+        
+        int opti = 0;
+        while (opti < args.length) {
+            String opt = args[opti];
+            if (opt == null || opt.length() <= 0 || opt.charAt(0) != '-') {
+                break;
+            }
+            opti++;
+            if ("-a".equals(opt)) {
+                // Right now we only know how to print all.
+            } else if ("-h".equals(opt)) {
+                pw.println("Package manager dump options:");
+                pw.println("  [-h] [cmd] ...");
+                pw.println("  cmd may be one of:");
+                pw.println("    [package.name]: info about given package");
+                return;
+            } else {
+                pw.println("Unknown argument: " + opt + "; use -h for help");
+            }
+        }
+        
+        // Is the caller requesting to dump a particular piece of data?
+        if (opti < args.length) {
+            String cmd = args[opti];
+            opti++;
+            // Is this a package name?
+            if ("android".equals(cmd) || cmd.contains(".")) {
+                packageName = cmd;
+            }
+        }
+        
+        boolean printedTitle = false;
+        
         synchronized (mPackages) {
-            pw.println("Activity Resolver Table:");
-            mActivities.dump(pw, "  ");
-            pw.println(" ");
-            pw.println("Receiver Resolver Table:");
-            mReceivers.dump(pw, "  ");
-            pw.println(" ");
-            pw.println("Service Resolver Table:");
-            mServices.dump(pw, "  ");
-            pw.println(" ");
-            pw.println("Preferred Activities:");
-            mSettings.mPreferredActivities.dump(pw, "  ");
-            pw.println(" ");
-            pw.println("Permissions:");
+            if (mActivities.dump(pw, "Activity Resolver Table:", "  ", packageName)) {
+                printedTitle = true;
+            }
+            if (mReceivers.dump(pw, printedTitle
+                    ? "\nReceiver Resolver Table:" : "Receiver Resolver Table:",
+                    "  ", packageName)) {
+                printedTitle = true;
+            }
+            if (mServices.dump(pw, printedTitle
+                    ? "\nService Resolver Table:" : "Service Resolver Table:",
+                    "  ", packageName)) {
+                printedTitle = true;
+            }
+            if (mSettings.mPreferredActivities.dump(pw, printedTitle
+                    ? "\nPreferred Activities:" : "Preferred Activities:",
+                    "  ", packageName)) {
+                printedTitle = true;
+            }
+            boolean printedSomething = false;
             {
                 for (BasePermission p : mSettings.mPermissions.values()) {
+                    if (packageName != null && !packageName.equals(p.sourcePackage)) {
+                        continue;
+                    }
+                    if (!printedSomething) {
+                        if (printedTitle) pw.println(" ");
+                        pw.println("Permissions:");
+                        printedSomething = true;
+                        printedTitle = true;
+                    }
                     pw.print("  Permission ["); pw.print(p.name); pw.print("] (");
                             pw.print(Integer.toHexString(System.identityHashCode(p)));
                             pw.println("):");
                     pw.print("    sourcePackage="); pw.println(p.sourcePackage);
                     pw.print("    uid="); pw.print(p.uid);
                             pw.print(" gids="); pw.print(arrayToString(p.gids));
-                            pw.print(" type="); pw.println(p.type);
+                            pw.print(" type="); pw.print(p.type);
+                            pw.print(" prot="); pw.println(p.protectionLevel);
+                    if (p.packageSetting != null) {
+                        pw.print("    packageSetting="); pw.println(p.packageSetting);
+                    }
+                    if (p.perm != null) {
+                        pw.print("    perm="); pw.println(p.perm);
+                    }
                 }
             }
-            pw.println(" ");
-            pw.println("Packages:");
+            printedSomething = false;
+            SharedUserSetting packageSharedUser = null;
             {
                 for (PackageSetting ps : mSettings.mPackages.values()) {
+                    if (packageName != null && !packageName.equals(ps.realName)
+                            && !packageName.equals(ps.name)) {
+                        continue;
+                    }
+                    if (!printedSomething) {
+                        if (printedTitle) pw.println(" ");
+                        pw.println("Packages:");
+                        printedSomething = true;
+                        printedTitle = true;
+                    }
+                    packageSharedUser = ps.sharedUser;
                     pw.print("  Package [");
                             pw.print(ps.realName != null ? ps.realName : ps.name);
                             pw.print("] (");
@@ -6771,20 +6962,38 @@ class PackageManagerService extends IPackageManager.Stub {
                     }
                 }
             }
+            printedSomething = false;
             if (mSettings.mRenamedPackages.size() > 0) {
-                pw.println(" ");
-                pw.println("Renamed packages:");
                 for (HashMap.Entry<String, String> e
                         : mSettings.mRenamedPackages.entrySet()) {
+                    if (packageName != null && !packageName.equals(e.getKey())
+                            && !packageName.equals(e.getValue())) {
+                        continue;
+                    }
+                    if (!printedSomething) {
+                        if (printedTitle) pw.println(" ");
+                        pw.println("Renamed packages:");
+                        printedSomething = true;
+                        printedTitle = true;
+                    }
                     pw.print("  "); pw.print(e.getKey()); pw.print(" -> ");
                             pw.println(e.getValue());
                 }
             }
+            printedSomething = false;
             if (mSettings.mDisabledSysPackages.size() > 0) {
-                pw.println(" ");
-                pw.println("Hidden system packages:");
                 for (PackageSetting ps : mSettings.mDisabledSysPackages.values()) {
-                    pw.print("  Package [");
+                    if (packageName != null && !packageName.equals(ps.realName)
+                            && !packageName.equals(ps.name)) {
+                        continue;
+                    }
+                    if (!printedSomething) {
+                        if (printedTitle) pw.println(" ");
+                        pw.println("Hidden system packages:");
+                        printedSomething = true;
+                        printedTitle = true;
+                    }
+                   pw.print("  Package [");
                             pw.print(ps.realName != null ? ps.realName : ps.name);
                             pw.print("] (");
                             pw.print(Integer.toHexString(System.identityHashCode(ps)));
@@ -6798,10 +7007,18 @@ class PackageManagerService extends IPackageManager.Stub {
                     pw.print("    resourcePath="); pw.println(ps.resourcePathString);
                 }
             }
-            pw.println(" ");
-            pw.println("Shared Users:");
+            printedSomething = false;
             {
                 for (SharedUserSetting su : mSettings.mSharedUsers.values()) {
+                    if (packageName != null && su != packageSharedUser) {
+                        continue;
+                    }
+                    if (!printedSomething) {
+                        if (printedTitle) pw.println(" ");
+                        pw.println("Shared users:");
+                        printedSomething = true;
+                        printedTitle = true;
+                    }
                     pw.print("  SharedUser ["); pw.print(su.name); pw.print("] (");
                             pw.print(Integer.toHexString(System.identityHashCode(su)));
                             pw.println("):");
@@ -6818,29 +7035,40 @@ class PackageManagerService extends IPackageManager.Stub {
                 }
             }
             
-            pw.println(" ");
-            pw.println("Settings parse messages:");
-            pw.println(mSettings.mReadMessages.toString());
-            
-            pw.println(" ");
-            pw.println("Package warning messages:");
-            File fname = getSettingsProblemFile();
-            FileInputStream in;
-            try {
-                in = new FileInputStream(fname);
-                int avail = in.available();
-                byte[] data = new byte[avail];
-                in.read(data);
-                pw.println(new String(data));
-            } catch (FileNotFoundException e) {
-            } catch (IOException e) {
+            if (packageName == null) {
+                if (printedTitle) pw.println(" ");
+                printedTitle = true;
+                pw.println("Settings parse messages:");
+                pw.println(mSettings.mReadMessages.toString());
+                
+                pw.println(" ");
+                pw.println("Package warning messages:");
+                File fname = getSettingsProblemFile();
+                FileInputStream in;
+                try {
+                    in = new FileInputStream(fname);
+                    int avail = in.available();
+                    byte[] data = new byte[avail];
+                    in.read(data);
+                    pw.println(new String(data));
+                } catch (FileNotFoundException e) {
+                } catch (IOException e) {
+                }
             }
         }
 
         synchronized (mProviders) {
-            pw.println(" ");
-            pw.println("Registered ContentProviders:");
+            boolean printedSomething = false;
             for (PackageParser.Provider p : mProviders.values()) {
+                if (packageName != null && !packageName.equals(p.info.packageName)) {
+                    continue;
+                }
+                if (!printedSomething) {
+                    if (printedTitle) pw.println(" ");
+                    pw.println("Registered ContentProviders:");
+                    printedSomething = true;
+                    printedTitle = true;
+                }
                 pw.print("  ["); pw.print(p.info.authority); pw.print("]: ");
                         pw.println(p.toString());
             }
@@ -6854,7 +7082,9 @@ class PackageManagerService extends IPackageManager.Stub {
 
         final String name;
         String sourcePackage;
+        PackageSettingBase packageSetting;
         final int type;
+        int protectionLevel;
         PackageParser.Permission perm;
         PermissionInfo pendingInfo;
         int uid;
@@ -6864,6 +7094,14 @@ class PackageManagerService extends IPackageManager.Stub {
             name = _name;
             sourcePackage = _sourcePackage;
             type = _type;
+            // Default to most conservative protection level.
+            protectionLevel = PermissionInfo.PROTECTION_SIGNATURE;
+        }
+        
+        public String toString() {
+            return "BasePermission{"
+                + Integer.toHexString(System.identityHashCode(this))
+                + " " + name + "}";
         }
     }
 
@@ -7496,6 +7734,10 @@ class PackageManagerService extends IPackageManager.Stub {
         private final IntentResolver<PreferredActivity, PreferredActivity> mPreferredActivities =
                     new IntentResolver<PreferredActivity, PreferredActivity>() {
             @Override
+            protected String packageForFilter(PreferredActivity filter) {
+                return filter.mActivity.getPackageName();
+            }
+            @Override
             protected void dumpFilter(PrintWriter out, String prefix,
                     PreferredActivity filter) {
                 out.print(prefix); out.print(
@@ -7734,9 +7976,10 @@ class PackageManagerService extends IPackageManager.Stub {
                                 + " from pkg " + bp.sourcePackage
                                 + " to " + newPkg);
                         bp.sourcePackage = newPkg;
+                        bp.packageSetting = null;
                         bp.perm = null;
                         if (bp.pendingInfo != null) {
-                            bp.sourcePackage = newPkg;
+                            bp.pendingInfo.packageName = newPkg;
                         }
                         bp.uid = 0;
                         bp.gids = null;
@@ -8243,7 +8486,7 @@ class PackageManagerService extends IPackageManager.Stub {
                 // be set.
                 for (final String name : pkg.grantedPermissions) {
                     BasePermission bp = mPermissions.get(name);
-                    if ((bp != null) && (bp.perm != null) && (bp.perm.info != null)) {
+                    if (bp != null) {
                         // We only need to write signature or system permissions but this wont
                         // match the semantics of grantedPermissions. So write all permissions.
                         serializer.startTag(null, "item");
@@ -8337,6 +8580,11 @@ class PackageManagerService extends IPackageManager.Stub {
                 serializer.startTag(null, "item");
                 serializer.attribute(null, "name", bp.name);
                 serializer.attribute(null, "package", bp.sourcePackage);
+                if (bp.protectionLevel !=
+                        PermissionInfo.PROTECTION_NORMAL) {
+                    serializer.attribute(null, "protection",
+                            Integer.toString(bp.protectionLevel));
+                }
                 if (DEBUG_SETTINGS) Log.v(TAG,
                         "Writing perm: name=" + bp.name + " type=" + bp.type);
                 if (bp.type == BasePermission.TYPE_DYNAMIC) {
@@ -8351,11 +8599,6 @@ class PackageManagerService extends IPackageManager.Stub {
                         if (pi.nonLocalizedLabel != null) {
                             serializer.attribute(null, "label",
                                     pi.nonLocalizedLabel.toString());
-                        }
-                        if (pi.protectionLevel !=
-                                PermissionInfo.PROTECTION_NORMAL) {
-                            serializer.attribute(null, "protection",
-                                    Integer.toString(pi.protectionLevel));
                         }
                     }
                 }
@@ -8558,6 +8801,8 @@ class PackageManagerService extends IPackageManager.Stub {
                                 dynamic
                                 ? BasePermission.TYPE_DYNAMIC
                                 : BasePermission.TYPE_NORMAL);
+                        bp.protectionLevel = readInt(parser, null, "protection",
+                                PermissionInfo.PROTECTION_NORMAL);
                         if (dynamic) {
                             PermissionInfo pi = new PermissionInfo();
                             pi.packageName = sourcePackage.intern();
@@ -8565,8 +8810,7 @@ class PackageManagerService extends IPackageManager.Stub {
                             pi.icon = readInt(parser, null, "icon", 0);
                             pi.nonLocalizedLabel = parser.getAttributeValue(
                                     null, "label");
-                            pi.protectionLevel = readInt(parser, null, "protection",
-                                    PermissionInfo.PROTECTION_NORMAL);
+                            pi.protectionLevel = bp.protectionLevel;
                             bp.pendingInfo = pi;
                         }
                         out.put(bp.name, bp);
@@ -9322,10 +9566,6 @@ class PackageManagerService extends IPackageManager.Stub {
                    // Scan the package
                    if (scanPackageLI(pkg, parseFlags, SCAN_MONITOR) != null) {
                        synchronized (mPackages) {
-                           // Grant permissions
-                           grantPermissionsLP(pkg, false);
-                           // Persist settings
-                           mSettings.writeLP();
                            retCode = PackageManager.INSTALL_SUCCEEDED;
                            pkgList.add(pkg.packageName);
                            // Post process args
@@ -9343,6 +9583,10 @@ class PackageManagerService extends IPackageManager.Stub {
                    removeCids.add(args.cid);
                }
            }
+       }
+       synchronized (mPackages) {
+           // Persist settings
+           mSettings.writeLP();
        }
        // Send a broadcast to let everyone know we are done processing
        if (sendUpdateBroadcast) {
