@@ -304,8 +304,8 @@ public class FrameLayout extends ViewGroup {
                             childLeft = parentLeft + lp.leftMargin;
                             break;
                         case Gravity.CENTER_HORIZONTAL:
-                            childLeft = parentLeft + (parentRight - parentLeft + lp.leftMargin +
-                                    lp.rightMargin - width) / 2;
+                            childLeft = parentLeft + (parentRight - parentLeft - width) / 2 +
+                                    lp.leftMargin - lp.rightMargin;
                             break;
                         case Gravity.RIGHT:
                             childLeft = parentRight - width - lp.rightMargin;
@@ -319,8 +319,8 @@ public class FrameLayout extends ViewGroup {
                             childTop = parentTop + lp.topMargin;
                             break;
                         case Gravity.CENTER_VERTICAL:
-                            childTop = parentTop + (parentBottom - parentTop + lp.topMargin +
-                                    lp.bottomMargin - height) / 2;
+                            childTop = parentTop + (parentBottom - parentTop - height) / 2 +
+                                    lp.topMargin - lp.bottomMargin;
                             break;
                         case Gravity.BOTTOM:
                             childTop = parentBottom - height - lp.bottomMargin;
