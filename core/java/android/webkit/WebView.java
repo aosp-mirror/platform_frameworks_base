@@ -3851,7 +3851,6 @@ public class WebView extends AbsoluteLayout
                 || keyCode == KeyEvent.KEYCODE_SHIFT_RIGHT) {
             if (nativeFocusIsPlugin()) {
                 mShiftIsPressed = false;
-                return true;
             } else if (commitCopy()) {
                 return true;
             }
