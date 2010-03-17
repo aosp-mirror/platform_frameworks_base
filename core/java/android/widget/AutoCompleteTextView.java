@@ -660,14 +660,20 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
 
                 final boolean below = !mPopup.isAboveAnchor();
 
-                final ListAdapter adapter = mDropDownList.getAdapter();
-                final boolean allEnabled = adapter.areAllItemsEnabled();
+                final ListAdapter adapter = mAdapter;
+                
+                boolean allEnabled;
+                int firstItem = Integer.MAX_VALUE;
+                int lastItem = Integer.MIN_VALUE;
 
-                final int firstItem = allEnabled ? 0 :
-                        mDropDownList.lookForSelectablePosition(0, true);
-                final int lastItem = allEnabled ? adapter.getCount() - 1 :
-                        mDropDownList.lookForSelectablePosition(adapter.getCount() - 1, false);
-
+                if (adapter != null) {
+                    allEnabled = adapter.areAllItemsEnabled();
+                    firstItem = allEnabled ? 0 :
+                            mDropDownList.lookForSelectablePosition(0, true);
+                    lastItem = allEnabled ? adapter.getCount() - 1 :
+                            mDropDownList.lookForSelectablePosition(adapter.getCount() - 1, false);                    
+                }
+                
                 if ((below && keyCode == KeyEvent.KEYCODE_DPAD_UP && curIndex <= firstItem) ||
                         (!below && keyCode == KeyEvent.KEYCODE_DPAD_DOWN && curIndex >= lastItem)) {
                     // When the selection is at the top, we block the key
