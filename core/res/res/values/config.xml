@@ -282,4 +282,8 @@
 
     <!-- Component name of the service providing geocoder API support. -->
     <string name="config_geocodeProvider">@null</string>
+
+    <!-- Boolean indicating if current platform supports bluetooth SCO for off call
+    use cases -->
+    <bool name="config_bluetooth_sco_off_call">true</bool>
 </resources>
