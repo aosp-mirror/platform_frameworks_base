@@ -67,4 +67,5 @@
   <item type="id" name="addToDictionary" />
   <item type="id" name="accountPreferences" />
   <item type="id" name="smallIcon" />
+  <item type="id" name="custom" />
 </resources>

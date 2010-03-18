@@ -35,12 +35,12 @@ import com.android.internal.app.AlertController;
 /**
  * A subclass of Dialog that can display one, two or three buttons. If you only want to
  * display a String in this dialog box, use the setMessage() method.  If you
- * want to display a more complex view, look up the FrameLayout called "body"
+ * want to display a more complex view, look up the FrameLayout called "custom"
  * and add your view to it:
  *
  * <pre>
- * FrameLayout fl = (FrameLayout) findViewById(R.id.body);
- * fl.add(myView, new LayoutParams(MATCH_PARENT, WRAP_CONTENT));
+ * FrameLayout fl = (FrameLayout) findViewById(android.R.id.custom);
+ * fl.addView(myView, new LayoutParams(MATCH_PARENT, WRAP_CONTENT));
  * </pre>
  * 
  * <p>The AlertDialog class takes care of automatically setting
