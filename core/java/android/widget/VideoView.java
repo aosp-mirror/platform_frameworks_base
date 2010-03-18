@@ -64,6 +64,7 @@ public class VideoView extends SurfaceView implements MediaPlayerControl {
     private static final int STATE_PLAYBACK_COMPLETED = 5;
     private static final int STATE_SUSPEND            = 6;
     private static final int STATE_RESUME             = 7;
+    private static final int STATE_SUSPEND_UNSUPPORTED = 8;
 
     // mCurrentState is a VideoView object's current state.
     // mTargetState is the state that a method caller intends to reach.
@@ -586,8 +587,9 @@ public class VideoView extends SurfaceView implements MediaPlayerControl {
                 mCurrentState = STATE_SUSPEND;
                 mTargetState = STATE_SUSPEND;
             } else {
-                Log.w(TAG, "Unable to suspend video");
-                mErrorListener.onError(mMediaPlayer, MediaPlayer.MEDIA_ERROR_UNKNOWN, 0);
+                release(false);
+                mCurrentState = STATE_SUSPEND_UNSUPPORTED;
+                Log.w(TAG, "Unable to suspend video. Release MediaPlayer.");
             }
         }
     }
@@ -603,8 +605,11 @@ public class VideoView extends SurfaceView implements MediaPlayerControl {
                 mTargetState = mStateWhenSuspended;
             } else {
                 Log.w(TAG, "Unable to resume video");
-                mErrorListener.onError(mMediaPlayer, MediaPlayer.MEDIA_ERROR_UNKNOWN, 0);
             }
+            return;
+        }
+        if (mCurrentState == STATE_SUSPEND_UNSUPPORTED) {
+            openVideo();
         }
     }
 
