@@ -45,6 +45,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
 import android.content.pm.PackageStats;
 import android.content.pm.IPackageManager;
+import android.content.pm.PermissionInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.content.res.Resources.NotFoundException;
@@ -372,6 +373,7 @@ public class PackageManagerTests extends AndroidTestCase {
         } 
         return INSTALL_LOC_ERR;
     }
+    
     private void assertInstall(PackageParser.Package pkg, int flags, int expInstallLocation) {
         try {
             String pkgName = pkg.packageName;
@@ -410,6 +412,7 @@ public class PackageManagerTests extends AndroidTestCase {
             failStr("failed with exception : " + e);
         }
     }
+    
     private void assertNotInstalled(String pkgName) {
         try {
             ApplicationInfo info = getPm().getApplicationInfo(pkgName, 0);
@@ -434,6 +437,95 @@ public class PackageManagerTests extends AndroidTestCase {
                 false, -1, PackageInfo.INSTALL_LOCATION_AUTO);
     }
 
+    static final String PERM_PACKAGE = "package";
+    static final String PERM_DEFINED = "defined";
+    static final String PERM_UNDEFINED = "undefined";
+    static final String PERM_USED = "used";
+    static final String PERM_NOTUSED = "notused";
+    
+    private void assertPermissions(String[] cmds) {
+        final PackageManager pm = getPm();
+        String pkg = null;
+        PackageInfo pkgInfo = null;
+        String mode = PERM_DEFINED;
+        int i = 0;
+        while (i < cmds.length) {
+            String cmd = cmds[i++];
+            if (cmd == PERM_PACKAGE) {
+                pkg = cmds[i++];
+                try {
+                    pkgInfo = pm.getPackageInfo(pkg,
+                            PackageManager.GET_PERMISSIONS
+                            | PackageManager.GET_UNINSTALLED_PACKAGES);
+                } catch (NameNotFoundException e) {
+                    pkgInfo = null;
+                }
+            } else if (cmd == PERM_DEFINED || cmd == PERM_UNDEFINED
+                    || cmd == PERM_USED || cmd == PERM_NOTUSED) {
+                mode = cmds[i++];
+            } else {
+                if (mode == PERM_DEFINED) {
+                    try {
+                        PermissionInfo pi = pm.getPermissionInfo(cmd, 0);
+                        assertNotNull(pi);
+                        assertEquals(pi.packageName, pkg);
+                        assertEquals(pi.name, cmd);
+                        assertNotNull(pkgInfo);
+                        boolean found = false;
+                        for (int j=0; j<pkgInfo.permissions.length && !found; j++) {
+                            if (pkgInfo.permissions[j].name.equals(cmd)) {
+                                found = true;
+                            }
+                        }
+                        if (!found) {
+                            fail("Permission not found: " + cmd);
+                        }
+                    } catch (NameNotFoundException e) {
+                        throw new RuntimeException(e);
+                    }
+                } else if (mode == PERM_UNDEFINED) {
+                    try {
+                        pm.getPermissionInfo(cmd, 0);
+                        throw new RuntimeException("Permission exists: " + cmd);
+                    } catch (NameNotFoundException e) {
+                    }
+                    if (pkgInfo != null) {
+                        boolean found = false;
+                        for (int j=0; j<pkgInfo.permissions.length && !found; j++) {
+                            if (pkgInfo.permissions[j].name.equals(cmd)) {
+                                found = true;
+                            }
+                        }
+                        if (found) {
+                            fail("Permission still exists: " + cmd);
+                        }
+                    }
+                } else if (mode == PERM_USED || mode == PERM_NOTUSED) {
+                    boolean found = false;
+                    for (int j=0; j<pkgInfo.requestedPermissions.length && !found; j++) {
+                        if (pkgInfo.requestedPermissions[j].equals(cmd)) {
+                            found = true;
+                        }
+                    }
+                    if (!found) {
+                        fail("Permission not requested: " + cmd);
+                    }
+                    if (mode == PERM_USED) {
+                        if (pm.checkPermission(cmd, pkg)
+                                != PackageManager.PERMISSION_GRANTED) {
+                            fail("Permission not granted: " + cmd);
+                        }
+                    } else {
+                        if (pm.checkPermission(cmd, pkg)
+                                != PackageManager.PERMISSION_DENIED) {
+                            fail("Permission granted: " + cmd);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
     public void clearSecureContainersForPkg(String pkgName) {
         IMountService ms = getMs();
         try {
@@ -1862,6 +1954,179 @@ public class PackageManagerTests extends AndroidTestCase {
        int userSetting = PackageHelper.APP_INSTALL_AUTO;
        setUserX(userSetting);
    }
+   
+    static final String BASE_PERMISSIONS_DEFINED[] = new String[] {
+        PERM_PACKAGE, "com.android.unit_tests.install_decl_perm",
+        PERM_DEFINED,
+        "com.android.unit_tests.NORMAL",
+        "com.android.unit_tests.DANGEROUS",
+        "com.android.unit_tests.SIGNATURE",
+    };
+    
+    static final String BASE_PERMISSIONS_UNDEFINED[] = new String[] {
+        PERM_PACKAGE, "com.android.unit_tests.install_decl_perm",
+        PERM_UNDEFINED,
+        "com.android.unit_tests.NORMAL",
+        "com.android.unit_tests.DANGEROUS",
+        "com.android.unit_tests.SIGNATURE",
+    };
+    
+    static final String BASE_PERMISSIONS_USED[] = new String[] {
+        PERM_PACKAGE, "com.android.unit_tests.install_use_perm_good",
+        PERM_USED,
+        "com.android.unit_tests.NORMAL",
+        "com.android.unit_tests.DANGEROUS",
+        "com.android.unit_tests.SIGNATURE",
+    };
+    
+    static final String BASE_PERMISSIONS_NOTUSED[] = new String[] {
+        PERM_PACKAGE, "com.android.unit_tests.install_use_perm_good",
+        PERM_NOTUSED,
+        "com.android.unit_tests.NORMAL",
+        "com.android.unit_tests.DANGEROUS",
+        "com.android.unit_tests.SIGNATURE",
+    };
+    
+    static final String BASE_PERMISSIONS_SIGUSED[] = new String[] {
+        PERM_PACKAGE, "com.android.unit_tests.install_use_perm_good",
+        PERM_USED,
+        "com.android.unit_tests.SIGNATURE",
+        PERM_NOTUSED,
+        "com.android.unit_tests.NORMAL",
+        "com.android.unit_tests.DANGEROUS",
+    };
+    
+    /*
+     * Ensure that permissions are properly declared.
+     */
+    public void testInstallDeclaresPermissions() {
+        InstallParams ip = null;
+        InstallParams ip2 = null;
+        try {
+            // **: Upon installing a package, are its declared permissions published?
+           
+            int iFlags = PackageManager.INSTALL_INTERNAL;
+            int iApk = R.raw.install_decl_perm;
+            ip = installFromRawResource("install.apk", iApk,
+                    iFlags, false,
+                    false, -1, PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY);
+            assertInstall(ip.pkg, iFlags, ip.pkg.installLocation);
+            assertPermissions(BASE_PERMISSIONS_DEFINED);
+           
+            // **: Upon installing package, are its permissions granted?
+           
+            int i2Flags = PackageManager.INSTALL_INTERNAL;
+            int i2Apk = R.raw.install_use_perm_good;
+            ip2 = installFromRawResource("install2.apk", i2Apk,
+                    i2Flags, false,
+                    false, -1, PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY);
+            assertInstall(ip2.pkg, i2Flags, ip2.pkg.installLocation);
+            assertPermissions(BASE_PERMISSIONS_USED);
+            
+            // **: Upon removing but not deleting, are permissions retained?
+           
+            GenericReceiver receiver = new DeleteReceiver(ip.pkg.packageName);
+           
+            try {
+                invokeDeletePackage(ip.packageURI, PackageManager.DONT_DELETE_DATA,
+                        ip.pkg.packageName, receiver);
+            } catch (Exception e) {
+                failStr(e);
+            }
+            assertPermissions(BASE_PERMISSIONS_DEFINED);
+            assertPermissions(BASE_PERMISSIONS_USED);
+           
+            // **: Upon re-installing, are permissions retained?
+           
+            ip = installFromRawResource("install.apk", iApk,
+                    iFlags | PackageManager.INSTALL_REPLACE_EXISTING, false,
+                    false, -1, PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY);
+            assertInstall(ip.pkg, iFlags, ip.pkg.installLocation);
+            assertPermissions(BASE_PERMISSIONS_DEFINED);
+            assertPermissions(BASE_PERMISSIONS_USED);
+           
+            // **: Upon deleting package, are all permissions removed?
+           
+            try {
+                invokeDeletePackage(ip.packageURI, 0,
+                        ip.pkg.packageName, receiver);
+                ip = null;
+            } catch (Exception e) {
+                failStr(e);
+            }
+            assertPermissions(BASE_PERMISSIONS_UNDEFINED);
+            assertPermissions(BASE_PERMISSIONS_NOTUSED);
+           
+            // **: Delete package using permissions; nothing to check here.
+           
+            GenericReceiver receiver2 = new DeleteReceiver(ip2.pkg.packageName);
+            try {
+                invokeDeletePackage(ip2.packageURI, 0,
+                        ip2.pkg.packageName, receiver);
+                ip2 = null;
+            } catch (Exception e) {
+                failStr(e);
+            }
+            
+            // **: Re-install package using permissions; no permissions can be granted.
+           
+            ip2 = installFromRawResource("install2.apk", i2Apk,
+                    i2Flags, false,
+                    false, -1, PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY);
+            assertInstall(ip2.pkg, i2Flags, ip2.pkg.installLocation);
+            assertPermissions(BASE_PERMISSIONS_NOTUSED);
+           
+            // **: Upon installing declaring package, are sig permissions granted
+            // to other apps (but not other perms)?
+           
+            ip = installFromRawResource("install.apk", iApk,
+                    iFlags, false,
+                    false, -1, PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY);
+            assertInstall(ip.pkg, iFlags, ip.pkg.installLocation);
+            assertPermissions(BASE_PERMISSIONS_DEFINED);
+            assertPermissions(BASE_PERMISSIONS_SIGUSED);
+           
+            // **: Re-install package using permissions; are all permissions granted?
+            
+            ip2 = installFromRawResource("install2.apk", i2Apk,
+                    i2Flags | PackageManager.INSTALL_REPLACE_EXISTING, false,
+                    false, -1, PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY);
+            assertInstall(ip2.pkg, i2Flags, ip2.pkg.installLocation);
+            assertPermissions(BASE_PERMISSIONS_NOTUSED);
+           
+            // **: Upon deleting package, are all permissions removed?
+            
+            try {
+                invokeDeletePackage(ip.packageURI, 0,
+                        ip.pkg.packageName, receiver);
+                ip = null;
+            } catch (Exception e) {
+                failStr(e);
+            }
+            assertPermissions(BASE_PERMISSIONS_UNDEFINED);
+            assertPermissions(BASE_PERMISSIONS_NOTUSED);
+            
+            // **: Delete package using permissions; nothing to check here.
+            
+            try {
+                invokeDeletePackage(ip2.packageURI, 0,
+                        ip2.pkg.packageName, receiver);
+                ip2 = null;
+            } catch (Exception e) {
+                failStr(e);
+            }
+            
+        } finally {
+            if (ip2 != null) {
+                cleanUpInstall(ip2);
+            }
+            if (ip != null) {
+                cleanUpInstall(ip);
+            }
+        }
+    }
+
+    /*---------- Recommended install location tests ----*/
     /*
      * TODO's
      * check version numbers for upgrades

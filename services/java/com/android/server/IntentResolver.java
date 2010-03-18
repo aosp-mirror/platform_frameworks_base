@@ -91,38 +91,64 @@ public class IntentResolver<F extends IntentFilter, R extends Object> {
         }
     }
 
-    void dumpMap(PrintWriter out, String prefix, Map<String, ArrayList<F>> map) {
+    boolean dumpMap(PrintWriter out, String titlePrefix, String title,
+            String prefix, Map<String, ArrayList<F>> map, String packageName) {
         String eprefix = prefix + "  ";
         String fprefix = prefix + "    ";
+        boolean printedSomething = false;
         for (Map.Entry<String, ArrayList<F>> e : map.entrySet()) {
-            out.print(eprefix); out.print(e.getKey()); out.println(":");
             ArrayList<F> a = e.getValue();
             final int N = a.size();
+            boolean printedHeader = false;
             for (int i=0; i<N; i++) {
-                dumpFilter(out, fprefix, a.get(i));
+                F filter = a.get(i);
+                if (packageName != null && !packageName.equals(packageForFilter(filter))) {
+                    continue;
+                }
+                if (title != null) {
+                    out.print(titlePrefix); out.println(title);
+                    title = null;
+                }
+                if (!printedHeader) {
+                    out.print(eprefix); out.print(e.getKey()); out.println(":");
+                    printedHeader = true;
+                }
+                printedSomething = true;
+                dumpFilter(out, fprefix, filter);
             }
         }
+        return printedSomething;
     }
 
-    public void dump(PrintWriter out, String prefix) {
+    public boolean dump(PrintWriter out, String title, String prefix, String packageName) {
         String innerPrefix = prefix + "  ";
-        out.print(prefix); out.println("Full MIME Types:");
-        dumpMap(out, innerPrefix, mTypeToFilter);
-        out.println(" ");
-        out.print(prefix); out.println("Base MIME Types:");
-        dumpMap(out, innerPrefix, mBaseTypeToFilter);
-        out.println(" ");
-        out.print(prefix); out.println("Wild MIME Types:");
-        dumpMap(out, innerPrefix, mWildTypeToFilter);
-        out.println(" ");
-        out.print(prefix); out.println("Schemes:");
-        dumpMap(out, innerPrefix, mSchemeToFilter);
-        out.println(" ");
-        out.print(prefix); out.println("Non-Data Actions:");
-        dumpMap(out, innerPrefix, mActionToFilter);
-        out.println(" ");
-        out.print(prefix); out.println("MIME Typed Actions:");
-        dumpMap(out, innerPrefix, mTypedActionToFilter);
+        String sepPrefix = "\n" + prefix;
+        String curPrefix = title + "\n" + prefix;
+        if (dumpMap(out, curPrefix, "Full MIME Types:", innerPrefix,
+                mTypeToFilter, packageName)) {
+            curPrefix = sepPrefix;
+        }
+        if (dumpMap(out, curPrefix, "Base MIME Types:", innerPrefix,
+                mBaseTypeToFilter, packageName)) {
+            curPrefix = sepPrefix;
+        }
+        if (dumpMap(out, curPrefix, "Wild MIME Types:", innerPrefix,
+                mWildTypeToFilter, packageName)) {
+            curPrefix = sepPrefix;
+        }
+        if (dumpMap(out, curPrefix, "Schemes:", innerPrefix,
+                mSchemeToFilter, packageName)) {
+            curPrefix = sepPrefix;
+        }
+        if (dumpMap(out, curPrefix, "Non-Data Actions:", innerPrefix,
+                mActionToFilter, packageName)) {
+            curPrefix = sepPrefix;
+        }
+        if (dumpMap(out, curPrefix, "MIME Typed Actions:", innerPrefix,
+                mTypedActionToFilter, packageName)) {
+            curPrefix = sepPrefix;
+        }
+        return curPrefix == sepPrefix;
     }
 
     private class IteratorWrapper implements Iterator<F> {
@@ -286,6 +312,10 @@ public class IntentResolver<F extends IntentFilter, R extends Object> {
         return true;
     }
 
+    protected String packageForFilter(F filter) {
+        return null;
+    }
+    
     protected R newResult(F filter, int match) {
         return (R)filter;
     }

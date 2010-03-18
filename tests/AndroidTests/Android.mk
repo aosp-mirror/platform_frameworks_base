@@ -16,4 +16,6 @@ LOCAL_CERTIFICATE := platform
 
 include $(BUILD_PACKAGE)
 
-include $(call all-makefiles-under,$(LOCAL_PATH))
+LOCAL_STORED_PATH:= $(LOCAL_PATH)
+include $(call all-makefiles-under,$(LOCAL_STORED_PATH))
+include $(call all-makefiles-under,$(LOCAL_STORED_PATH)/apks)

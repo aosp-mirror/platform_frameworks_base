@@ -9356,7 +9356,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 dumpAll = true;
             } else if ("-h".equals(opt)) {
                 pw.println("Activity manager dump options:");
-                pw.println("  [-a] [h- [cmd] ...");
+                pw.println("  [-a] [-h] [cmd] ...");
                 pw.println("  cmd may be one of:");
                 pw.println("    activities: activity stack state");
                 pw.println("    broadcasts: broadcast state");
@@ -9756,7 +9756,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     
             pw.println(" ");
             pw.println("Receiver Resolver Table:");
-            mReceiverResolver.dump(pw, "  ");
+            mReceiverResolver.dump(pw, null, "  ", null);
             needSep = true;
         }
         
