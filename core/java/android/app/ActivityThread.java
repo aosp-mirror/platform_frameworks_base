@@ -3908,16 +3908,16 @@ public final class ActivityThread {
         }
     }
 
-    final void applyConfigurationToResourcesLocked(Configuration config) {
+    final boolean applyConfigurationToResourcesLocked(Configuration config) {
         if (mResConfiguration == null) {
             mResConfiguration = new Configuration();
         }
         if (!mResConfiguration.isOtherSeqNewer(config)) {
             if (DEBUG_CONFIGURATION) Log.v(TAG, "Skipping new config: curSeq="
                     + mResConfiguration.seq + ", newSeq=" + config.seq);
-            return;
+            return false;
         }
-        mResConfiguration.updateFrom(config);
+        int changes = mResConfiguration.updateFrom(config);
         DisplayMetrics dm = getDisplayMetricsLocked(true);
 
         // set it for java, this also affects newly created Resources
@@ -3948,6 +3948,8 @@ public final class ActivityThread {
                 it.remove();
             }
         }
+        
+        return changes != 0;
     }
     
     final void handleConfigurationChanged(Configuration config) {
@@ -4522,17 +4524,20 @@ public final class ActivityThread {
         ViewRoot.addConfigCallback(new ComponentCallbacks() {
             public void onConfigurationChanged(Configuration newConfig) {
                 synchronized (mPackages) {
-                    if (mPendingConfiguration == null ||
-                            mPendingConfiguration.isOtherSeqNewer(newConfig)) {
-                        mPendingConfiguration = newConfig;
-                        
-                        // We need to apply this change to the resources
-                        // immediately, because upon returning the view
-                        // hierarchy will be informed about it.
-                        applyConfigurationToResourcesLocked(newConfig);
+                    // We need to apply this change to the resources
+                    // immediately, because upon returning the view
+                    // hierarchy will be informed about it.
+                    if (applyConfigurationToResourcesLocked(newConfig)) {
+                        // This actually changed the resources!  Tell
+                        // everyone about it.
+                        if (mPendingConfiguration == null ||
+                                mPendingConfiguration.isOtherSeqNewer(newConfig)) {
+                            mPendingConfiguration = newConfig;
+                            
+                            queueOrSendMessage(H.CONFIGURATION_CHANGED, newConfig);
+                        }
                     }
                 }
-                queueOrSendMessage(H.CONFIGURATION_CHANGED, newConfig);
             }
             public void onLowMemory() {
             }
