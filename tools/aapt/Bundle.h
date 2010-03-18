@@ -37,12 +37,12 @@ public:
           mForce(false), mGrayscaleTolerance(0), mMakePackageDirs(false),
           mUpdate(false), mExtending(false),
           mRequireLocalization(false), mPseudolocalize(false),
-          mUTF8(false), mEncodingSpecified(false), mValues(false),
+          mWantUTF16(false), mValues(false),
           mCompressionMethod(0), mOutputAPKFile(NULL),
           mManifestPackageNameOverride(NULL), mInstrumentationPackageNameOverride(NULL),
           mAutoAddOverlay(false), mAssetSourceDir(NULL), mProguardFile(NULL),
           mAndroidManifestFile(NULL), mPublicOutputFile(NULL),
-          mRClassDir(NULL), mResourceIntermediatesDir(NULL),
+          mRClassDir(NULL), mResourceIntermediatesDir(NULL), mManifestMinSdkVersion(NULL),
           mMinSdkVersion(NULL), mTargetSdkVersion(NULL), mMaxSdkVersion(NULL),
           mVersionCode(NULL), mVersionName(NULL), mCustomPackage(NULL),
           mArgc(0), mArgv(NULL)
@@ -77,10 +77,8 @@ public:
     void setRequireLocalization(bool val) { mRequireLocalization = val; }
     bool getPseudolocalize(void) const { return mPseudolocalize; }
     void setPseudolocalize(bool val) { mPseudolocalize = val; }
-    bool getUTF8(void) const { return mUTF8; }
-    void setUTF8(bool val) { mUTF8 = val; }
-    bool getEncodingSpecified(void) const { return mEncodingSpecified; }
-    void setEncodingSpecified(bool val) { mEncodingSpecified = val; }
+    bool getWantUTF16(void) const { return mWantUTF16; }
+    void setWantUTF16(bool val) { mWantUTF16 = val; }
     bool getValues(void) const { return mValues; }
     void setValues(bool val) { mValues = val; }
     int getCompressionMethod(void) const { return mCompressionMethod; }
@@ -122,13 +120,10 @@ public:
     const android::Vector<const char*>& getNoCompressExtensions() const { return mNoCompressExtensions; }
     void addNoCompressExtension(const char* ext) { mNoCompressExtensions.add(ext); }
 
+    const char*  getManifestMinSdkVersion() const { return mManifestMinSdkVersion; }
+    void setManifestMinSdkVersion(const char*  val) { mManifestMinSdkVersion = val; }
     const char*  getMinSdkVersion() const { return mMinSdkVersion; }
-    void setMinSdkVersion(const char*  val) {
-        mMinSdkVersion = val;
-        if (!mEncodingSpecified) {
-            setUTF8(isUTF8Available());
-        }
-    }
+    void setMinSdkVersion(const char*  val) { mMinSdkVersion = val; }
     const char*  getTargetSdkVersion() const { return mTargetSdkVersion; }
     void setTargetSdkVersion(const char*  val) { mTargetSdkVersion = val; }
     const char*  getMaxSdkVersion() const { return mMaxSdkVersion; }
@@ -167,6 +162,34 @@ public:
     void setPackageCount(int val) { mPackageCount = val; }
 #endif
 
+    /* UTF-8 is only available on APIs 7 or above or
+     * SDK levels that have code names.
+     */
+    bool isUTF8Available() {
+        /* If the application specifies a minSdkVersion in the manifest
+         * then use that. Otherwise, check what the user specified on
+         * the command line. If neither, it's not available since
+         * the minimum SDK version is assumed to be 1.
+         */
+        const char *minVer;
+        if (mManifestMinSdkVersion != NULL) {
+            minVer = mManifestMinSdkVersion;
+        } else if (mMinSdkVersion != NULL) {
+            minVer = mMinSdkVersion;
+        } else {
+            return false;
+        }
+
+        char *end;
+        int minSdkNum = (int)strtol(minVer, &end, 0);
+        if (*end == '\0') {
+            if (minSdkNum < 7) {
+                return false;
+            }
+        }
+        return true;
+    }
+
 private:
     /* commands & modifiers */
     Command     mCmd;
@@ -179,8 +202,7 @@ private:
     bool        mExtending;
     bool        mRequireLocalization;
     bool        mPseudolocalize;
-    bool        mUTF8;
-    bool        mEncodingSpecified;
+    bool        mWantUTF16;
     bool        mValues;
     int         mCompressionMethod;
     bool        mJunkPath;
@@ -200,6 +222,7 @@ private:
     android::Vector<const char*> mNoCompressExtensions;
     android::Vector<const char*> mResourceSourceDirs;
 
+    const char* mManifestMinSdkVersion;
     const char* mMinSdkVersion;
     const char* mTargetSdkVersion;
     const char* mMaxSdkVersion;
@@ -216,19 +239,6 @@ private:
     int         mPackageCount;
 #endif
 
-    /* UTF-8 is only available on APIs 7 or above or
-     * SDK levels that have code names.
-     */
-    bool isUTF8Available() {
-        char *end;
-        int minSdkNum = (int)strtol(mMinSdkVersion, &end, 0);
-        if (*end == '\0') {
-            if (minSdkNum < 7) {
-                return false;
-            }
-        }
-        return true;
-    }
 };
 
 #endif // __BUNDLE_H

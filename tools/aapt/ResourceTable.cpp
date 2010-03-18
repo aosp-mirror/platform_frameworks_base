@@ -2527,9 +2527,11 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<AaptFile>& dest)
     const size_t N = mOrderedPackages.size();
     size_t pi;
 
+    bool useUTF8 = !bundle->getWantUTF16() && bundle->isUTF8Available();
+
     // Iterate through all data, collecting all values (strings,
     // references, etc).
-    StringPool valueStrings = StringPool(false, bundle->getUTF8());
+    StringPool valueStrings = StringPool(false, useUTF8);
     for (pi=0; pi<N; pi++) {
         sp<Package> p = mOrderedPackages.itemAt(pi);
         if (p->getTypes().size() == 0) {
@@ -2537,8 +2539,8 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<AaptFile>& dest)
             continue;
         }
 
-        StringPool typeStrings = StringPool(false, bundle->getUTF8());
-        StringPool keyStrings = StringPool(false, bundle->getUTF8());
+        StringPool typeStrings = StringPool(false, useUTF8);
+        StringPool keyStrings = StringPool(false, useUTF8);
 
         const size_t N = p->getOrderedTypes().size();
         for (size_t ti=0; ti<N; ti++) {
