@@ -132,6 +132,15 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
     // Last known IME options value for the search edit text.
     private int mSearchAutoCompleteImeOptions;
 
+    private BroadcastReceiver mConfChangeListener = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(Intent.ACTION_CONFIGURATION_CHANGED)) {
+                onConfigurationChanged();
+            }
+        }
+    };
+
     /**
      * Constructor - fires it up and makes it look like the search UI.
      * 
@@ -149,16 +158,6 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         mVoiceAppSearchIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         mVoiceAppSearchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         mSearchManager = searchManager;
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
-        context.registerReceiver(new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                if (intent.getAction().equals(Intent.ACTION_CONFIGURATION_CHANGED)) {
-                    onConfigurationChanged();
-                }
-            }
-        }, filter);
     }
 
     /**
@@ -297,8 +296,18 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
             show();
         }
         updateUI();
-        
+
         return true;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        // Register a listener for configuration change events.
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
+        getContext().registerReceiver(mConfChangeListener, filter);
     }
 
     /**
@@ -310,6 +319,8 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
     @Override
     public void onStop() {
         super.onStop();
+
+        getContext().unregisterReceiver(mConfChangeListener);
 
         closeSuggestionsAdapter();
         
