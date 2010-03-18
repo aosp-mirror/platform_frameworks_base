@@ -122,7 +122,8 @@ public class TtsService extends Service implements OnCompletionListener {
     private static final int MAX_FILENAME_LENGTH = 250;
     // TODO use the TTS stream type when available
     private static final int DEFAULT_STREAM_TYPE = AudioManager.STREAM_MUSIC;
-
+    // TODO use TextToSpeech.DEFAULT_SYNTH once it is unhidden
+    private static final String DEFAULT_SYNTH = "com.svox.pico";
     private static final String ACTION = "android.intent.action.START_TTS_SERVICE";
     private static final String CATEGORY = "android.intent.category.TTS";
     private static final String PKGNAME = "android.tts";
@@ -210,10 +211,29 @@ public class TtsService extends Service implements OnCompletionListener {
         if (isDefaultEnforced()) {
             enginePackageName = getDefaultEngine();
         }
+
+        // Make sure that the engine has been allowed by the user
+        if (!enginePackageName.equals(DEFAULT_SYNTH)) {
+            String[] enabledEngines = android.provider.Settings.Secure.getString(mResolver,
+                    android.provider.Settings.Secure.TTS_ENABLED_PLUGINS).split(" ");
+            boolean isEnabled = false;
+            for (int i=0; i<enabledEngines.length; i++) {
+                if (enabledEngines[i].equals(enginePackageName)) {
+                    isEnabled = true;
+                    break;
+                }
+            }
+            if (!isEnabled) {
+                // Do not use an engine that the user has not enabled; fall back
+                // to using the default synthesizer.
+                enginePackageName = DEFAULT_SYNTH;
+            }
+        }
+
         // The SVOX TTS is an exception to how the TTS packaging scheme works
         // because it is part of the system and not a 3rd party add-on; thus
         // its binary is actually located under /system/lib/
-        if (enginePackageName.equals("com.svox.pico")) {
+        if (enginePackageName.equals(DEFAULT_SYNTH)) {
             soFilename = "/system/lib/libttspico.so";
         } else {
             // Find the package
