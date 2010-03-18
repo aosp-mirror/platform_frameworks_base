@@ -82,4 +82,8 @@ interface IAudioService {
     void registerMediaButtonEventReceiver(in ComponentName eventReceiver);
 
     void unregisterMediaButtonEventReceiver(in ComponentName eventReceiver);
+
+    void startBluetoothSco(IBinder cb);
+
+    void stopBluetoothSco(IBinder cb);
 }
