@@ -109,7 +109,7 @@ public class HierarchicalStateMachineTest extends TestCase {
         synchronized (smQuitTest) {
             // Send 6 messages
             for (int i = 1; i <= 6; i++) {
-                smQuitTest.sendMessage(smQuitTest.obtainMessage(i));
+                smQuitTest.sendMessage(i);
             }
 
             // First two are ignored
@@ -297,8 +297,8 @@ public class HierarchicalStateMachineTest extends TestCase {
 
         synchronized (sm1) {
             // Send two messages
-            sm1.sendMessage(sm1.obtainMessage(TEST_CMD_1));
-            sm1.sendMessage(sm1.obtainMessage(TEST_CMD_2));
+            sm1.sendMessage(TEST_CMD_1);
+            sm1.sendMessage(TEST_CMD_2);
 
             try {
                 // wait for the messages to be handled
@@ -402,8 +402,8 @@ public class HierarchicalStateMachineTest extends TestCase {
 
         synchronized (sm2) {
             // Send two messages
-            sm2.sendMessage(sm2.obtainMessage(TEST_CMD_1));
-            sm2.sendMessage(sm2.obtainMessage(TEST_CMD_2));
+            sm2.sendMessage(TEST_CMD_1);
+            sm2.sendMessage(TEST_CMD_2);
 
             try {
                 // wait for the messages to be handled
@@ -494,8 +494,8 @@ public class HierarchicalStateMachineTest extends TestCase {
 
         synchronized (sm3) {
             // Send two messages
-            sm3.sendMessage(sm3.obtainMessage(TEST_CMD_1));
-            sm3.sendMessage(sm3.obtainMessage(TEST_CMD_2));
+            sm3.sendMessage(TEST_CMD_1);
+            sm3.sendMessage(TEST_CMD_2);
 
             try {
                 // wait for the messages to be handled
@@ -587,8 +587,8 @@ public class HierarchicalStateMachineTest extends TestCase {
 
         synchronized (sm4) {
             // Send two messages
-            sm4.sendMessage(sm4.obtainMessage(TEST_CMD_1));
-            sm4.sendMessage(sm4.obtainMessage(TEST_CMD_2));
+            sm4.sendMessage(TEST_CMD_1);
+            sm4.sendMessage(TEST_CMD_2);
 
             try {
                 // wait for the messages to be handled
@@ -861,12 +861,12 @@ public class HierarchicalStateMachineTest extends TestCase {
 
         synchronized (sm5) {
             // Send 6 messages
-            sm5.sendMessage(sm5.obtainMessage(TEST_CMD_1));
-            sm5.sendMessage(sm5.obtainMessage(TEST_CMD_2));
-            sm5.sendMessage(sm5.obtainMessage(TEST_CMD_3));
-            sm5.sendMessage(sm5.obtainMessage(TEST_CMD_4));
-            sm5.sendMessage(sm5.obtainMessage(TEST_CMD_5));
-            sm5.sendMessage(sm5.obtainMessage(TEST_CMD_6));
+            sm5.sendMessage(TEST_CMD_1);
+            sm5.sendMessage(TEST_CMD_2);
+            sm5.sendMessage(TEST_CMD_3);
+            sm5.sendMessage(TEST_CMD_4);
+            sm5.sendMessage(TEST_CMD_5);
+            sm5.sendMessage(TEST_CMD_6);
 
             try {
                 // wait for the messages to be handled
@@ -950,7 +950,7 @@ public class HierarchicalStateMachineTest extends TestCase {
         class S1 extends HierarchicalState {
 
             @Override protected void enter() {
-                sendMessage(obtainMessage(TEST_CMD_1));
+                sendMessage(TEST_CMD_1);
             }
 
             @Override protected boolean processMessage(Message message) {
@@ -994,7 +994,7 @@ public class HierarchicalStateMachineTest extends TestCase {
         synchronized (sm6) {
             // Send a message
             sentTimeMsg2 = SystemClock.elapsedRealtime();
-            sm6.sendMessageDelayed(sm6.obtainMessage(TEST_CMD_2), DELAY_TIME);
+            sm6.sendMessageDelayed(TEST_CMD_2, DELAY_TIME);
 
             try {
                 // wait for the messages to be handled
@@ -1045,7 +1045,7 @@ public class HierarchicalStateMachineTest extends TestCase {
                 return true;
             }
             @Override protected void exit() {
-                sendMessage(obtainMessage(TEST_CMD_2));
+                sendMessage(TEST_CMD_2);
             }
         }
 
@@ -1053,7 +1053,7 @@ public class HierarchicalStateMachineTest extends TestCase {
 
             @Override protected void enter() {
                 // Send a delayed message as a watch dog
-                sendMessageDelayed(obtainMessage(TEST_CMD_3), SM7_DELAY_TIME);
+                sendMessageDelayed(TEST_CMD_3, SM7_DELAY_TIME);
             }
 
             @Override protected boolean processMessage(Message message) {
@@ -1103,7 +1103,7 @@ public class HierarchicalStateMachineTest extends TestCase {
         synchronized (sm7) {
             // Send a message
             sentTimeMsg2 = SystemClock.elapsedRealtime();
-            sm7.sendMessage(sm7.obtainMessage(TEST_CMD_1));
+            sm7.sendMessage(TEST_CMD_1);
 
             try {
                 // wait for the messages to be handled
@@ -1178,7 +1178,7 @@ public class HierarchicalStateMachineTest extends TestCase {
         synchronized (sm) {
             // Send 2 messages
             for (int i = 1; i <= 2; i++) {
-                sm.sendMessage(sm.obtainMessage(i));
+                sm.sendMessage(i);
             }
 
             try {
@@ -1262,7 +1262,7 @@ public class HierarchicalStateMachineTest extends TestCase {
             // Send messages to each of the state machines
             for (StateMachineSharedThread sm : sms) {
                 for (int i = 1; i <= 4; i++) {
-                    sm.sendMessage(sm.obtainMessage(i));
+                    sm.sendMessage(i);
                 }
             }
 
@@ -1295,8 +1295,8 @@ public class HierarchicalStateMachineTest extends TestCase {
         Hsm1 sm = Hsm1.makeHsm1();
 
         // Send messages
-        sm.sendMessage(sm.obtainMessage(Hsm1.CMD_1));
-        sm.sendMessage(sm.obtainMessage(Hsm1.CMD_2));
+        sm.sendMessage(Hsm1.CMD_1);
+        sm.sendMessage(Hsm1.CMD_2);
 
         synchronized (sm) {
             // Wait for the last state machine to notify its done
@@ -1389,7 +1389,7 @@ class Hsm1 extends HierarchicalStateMachine {
             switch(message.what) {
             case CMD_2:
                 // CMD_2 will arrive in mS2 before CMD_3
-                sendMessage(obtainMessage(CMD_3));
+                sendMessage(CMD_3);
                 deferMessage(message);
                 transitionTo(mS2);
                 retVal = true;
@@ -1435,7 +1435,7 @@ class Hsm1 extends HierarchicalStateMachine {
             Log.d(TAG, "S2.processMessage what=" + message.what);
             switch(message.what) {
             case(CMD_2):
-                sendMessage(obtainMessage(CMD_4));
+                sendMessage(CMD_4);
                 retVal = true;
                 break;
             case(CMD_3):
@@ -1457,7 +1457,7 @@ class Hsm1 extends HierarchicalStateMachine {
     class P2 extends HierarchicalState {
         @Override protected void enter() {
             Log.d(TAG, "P2.enter");
-            sendMessage(obtainMessage(CMD_5));
+            sendMessage(CMD_5);
         }
         @Override protected boolean processMessage(Message message) {
             Log.d(TAG, "P2.processMessage what=" + message.what);
