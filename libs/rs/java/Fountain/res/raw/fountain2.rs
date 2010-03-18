@@ -5,7 +5,7 @@
 #include "rs_math.rsh"
 #include "rs_graphics.rsh"
 
-int newPart = 0;
+static int newPart = 0;
 
 typedef struct Control_s {
     int x, y;
@@ -15,14 +15,14 @@ typedef struct Control_s {
     rs_allocation partBuffer;
     rs_mesh partMesh;
 } Control_t;
-extern Control_t *Control;
+Control_t *Control;
 
 typedef struct Point_s{
     float2 delta;
     float2 position;
     unsigned int color;
 } Point_t;
-extern Point_t *point;
+Point_t *point;
 
 int main(int launchID) {
     int ct;
@@ -69,6 +69,5 @@ int main(int launchID) {
 
     uploadToBufferObject(Control->partBuffer);
     drawSimpleMesh(Control->partMesh);
-
     return 1;
 }
