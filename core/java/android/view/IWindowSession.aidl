@@ -17,6 +17,7 @@
 
 package android.view;
 
+import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Bundle;
@@ -63,6 +64,9 @@ interface IWindowSession {
      * contents to make sure the user can see it.  This is different than
      * <var>outContentInsets</var> in that these insets change transiently,
      * so complex relayout of the window should not happen based on them.
+     * @param outConfiguration New configuration of window, if it is now
+     * becoming visible and the global configuration has changed since it
+     * was last displayed.
      * @param outSurface Object in which is placed the new display surface.
      * 
      * @return int Result flags: {@link WindowManagerImpl#RELAYOUT_SHOW_FOCUS},
@@ -71,7 +75,8 @@ interface IWindowSession {
     int relayout(IWindow window, in WindowManager.LayoutParams attrs,
             int requestedWidth, int requestedHeight, int viewVisibility,
             boolean insetsPending, out Rect outFrame, out Rect outContentInsets,
-            out Rect outVisibleInsets, out Surface outSurface);
+            out Rect outVisibleInsets, out Configuration outConfig,
+            out Surface outSurface);
 
     /**
      * Give the window manager a hint of the part of the window that is

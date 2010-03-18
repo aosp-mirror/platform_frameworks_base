@@ -143,6 +143,7 @@ public class WindowManagerService extends IWindowManager.Stub
     static final boolean DEBUG_VISIBILITY = false;
     static final boolean DEBUG_WINDOW_MOVEMENT = false;
     static final boolean DEBUG_ORIENTATION = false;
+    static final boolean DEBUG_CONFIGURATION = false;
     static final boolean DEBUG_APP_TRANSITIONS = false;
     static final boolean DEBUG_STARTING_WINDOW = false;
     static final boolean DEBUG_REORDER = false;
@@ -2317,7 +2318,7 @@ public class WindowManagerService extends IWindowManager.Stub
             WindowManager.LayoutParams attrs, int requestedWidth,
             int requestedHeight, int viewVisibility, boolean insetsPending,
             Rect outFrame, Rect outContentInsets, Rect outVisibleInsets,
-            Surface outSurface) {
+            Configuration outConfig, Surface outSurface) {
         boolean displayed = false;
         boolean inTouchMode;
         boolean configChanged;
@@ -2390,16 +2391,30 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (oldVisibility == View.GONE) {
                     win.mEnterAnimationPending = true;
                 }
-                if (displayed && win.mSurface != null && !win.mDrawPending
-                        && !win.mCommitDrawPending && !mDisplayFrozen
-                        && mPolicy.isScreenOn()) {
-                    applyEnterAnimationLocked(win);
-                }
-                if (displayed && (win.mAttrs.flags
-                        & WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON) != 0) {
-                    if (DEBUG_VISIBILITY) Slog.v(TAG,
-                            "Relayout window turning screen on: " + win);
-                    win.mTurnOnScreen = true;
+                if (displayed) {
+                    if (win.mSurface != null && !win.mDrawPending
+                            && !win.mCommitDrawPending && !mDisplayFrozen
+                            && mPolicy.isScreenOn()) {
+                        applyEnterAnimationLocked(win);
+                    }
+                    if ((win.mAttrs.flags
+                            & WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON) != 0) {
+                        if (DEBUG_VISIBILITY) Slog.v(TAG,
+                                "Relayout window turning screen on: " + win);
+                        win.mTurnOnScreen = true;
+                    }
+                    int diff = 0;
+                    if (win.mConfiguration != mCurConfiguration
+                            && (win.mConfiguration == null
+                                    || (diff=mCurConfiguration.diff(win.mConfiguration)) != 0)) {
+                        win.mConfiguration = mCurConfiguration;
+                        if (DEBUG_CONFIGURATION) {
+                            Slog.i(TAG, "Window " + win + " visible with new config: "
+                                    + win.mConfiguration + " / 0x"
+                                    + Integer.toHexString(diff));
+                        }
+                        outConfig.setTo(mCurConfiguration);
+                    }
                 }
                 if ((attrChanges&WindowManager.LayoutParams.FORMAT_CHANGED) != 0) {
                     // To change the format, we need to re-build the surface.
@@ -6694,10 +6709,10 @@ public class WindowManagerService extends IWindowManager.Stub
         public int relayout(IWindow window, WindowManager.LayoutParams attrs,
                 int requestedWidth, int requestedHeight, int viewFlags,
                 boolean insetsPending, Rect outFrame, Rect outContentInsets,
-                Rect outVisibleInsets, Surface outSurface) {
+                Rect outVisibleInsets, Configuration outConfig, Surface outSurface) {
             return relayoutWindow(this, window, attrs,
                     requestedWidth, requestedHeight, viewFlags, insetsPending,
-                    outFrame, outContentInsets, outVisibleInsets, outSurface);
+                    outFrame, outContentInsets, outVisibleInsets, outConfig, outSurface);
         }
 
         public void setTransparentRegion(IWindow window, Region region) {
@@ -10163,6 +10178,10 @@ public class WindowManagerService extends IWindowManager.Stub
                             w.mConfiguration != mCurConfiguration
                             && (w.mConfiguration == null
                                     || mCurConfiguration.diff(w.mConfiguration) != 0);
+                        if (DEBUG_CONFIGURATION && configChanged) {
+                            Slog.v(TAG, "Win " + w + " config changed: "
+                                    + mCurConfiguration);
+                        }
                         if (localLOGV) Slog.v(TAG, "Resizing " + w
                                 + ": configChanged=" + configChanged
                                 + " last=" + w.mLastFrame + " frame=" + w.mFrame);
@@ -10507,16 +10526,19 @@ public class WindowManagerService extends IWindowManager.Stub
                 try {
                     if (DEBUG_RESIZE || DEBUG_ORIENTATION) Slog.v(TAG,
                             "Reporting new frame to " + win + ": " + win.mFrame);
+                    int diff = 0;
                     boolean configChanged =
                         win.mConfiguration != mCurConfiguration
                         && (win.mConfiguration == null
-                                || mCurConfiguration.diff(win.mConfiguration) != 0);
-                    win.mConfiguration = mCurConfiguration;
-                    if ((DEBUG_RESIZE || DEBUG_ORIENTATION) && configChanged) {
+                                || (diff=mCurConfiguration.diff(win.mConfiguration)) != 0);
+                    if ((DEBUG_RESIZE || DEBUG_ORIENTATION || DEBUG_CONFIGURATION)
+                            && configChanged) {
                         Slog.i(TAG, "Sending new config to window " + win + ": "
                                 + win.mFrame.width() + "x" + win.mFrame.height()
-                                + " / " + win.mConfiguration);
+                                + " / " + mCurConfiguration + " / 0x"
+                                + Integer.toHexString(diff));
                     }
+                    win.mConfiguration = mCurConfiguration;
                     win.mClient.resized(win.mFrame.width(),
                             win.mFrame.height(), win.mLastContentInsets,
                             win.mLastVisibleInsets, win.mDrawPending,

@@ -39,7 +39,6 @@ import android.util.Log;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.concurrent.locks.ReentrantLock;
-import java.lang.ref.WeakReference;
 
 /**
  * Provides a dedicated drawing surface embedded inside of a view hierarchy.
@@ -102,7 +101,8 @@ public class SurfaceView extends View {
     final Rect mVisibleInsets = new Rect();
     final Rect mWinFrame = new Rect();
     final Rect mContentInsets = new Rect();
-
+    final Configuration mConfiguration = new Configuration();
+    
     static final int KEEP_SCREEN_ON_MSG = 1;
     static final int GET_NEW_SURFACE_MSG = 2;
     
@@ -428,7 +428,7 @@ public class SurfaceView extends View {
                 final int relayoutResult = mSession.relayout(
                     mWindow, mLayout, mWidth, mHeight,
                         visible ? VISIBLE : GONE, false, mWinFrame, mContentInsets,
-                        mVisibleInsets, mSurface);
+                        mVisibleInsets, mConfiguration, mSurface);
 
                 if (localLOGV) Log.i(TAG, "New surface: " + mSurface
                         + ", vis=" + visible + ", frame=" + mWinFrame);

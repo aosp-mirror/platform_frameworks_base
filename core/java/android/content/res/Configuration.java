@@ -219,6 +219,10 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      * Makes a deep copy suitable for modification.
      */
     public Configuration(Configuration o) {
+        setTo(o);
+    }
+
+    public void setTo(Configuration o) {
         fontScale = o.fontScale;
         mcc = o.mcc;
         mnc = o.mnc;
@@ -237,7 +241,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         uiMode = o.uiMode;
         seq = o.seq;
     }
-
+    
     public String toString() {
         StringBuilder sb = new StringBuilder(128);
         sb.append("{ scale=");
@@ -552,21 +556,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         dest.writeInt(seq);
     }
 
-    public static final Parcelable.Creator<Configuration> CREATOR
-            = new Parcelable.Creator<Configuration>() {
-        public Configuration createFromParcel(Parcel source) {
-            return new Configuration(source);
-        }
-
-        public Configuration[] newArray(int size) {
-            return new Configuration[size];
-        }
-    };
-
-    /**
-     * Construct this Configuration object, reading from the Parcel.
-     */
-    private Configuration(Parcel source) {
+    public void readFromParcel(Parcel source) {
         fontScale = source.readFloat();
         mcc = source.readInt();
         mnc = source.readInt();
@@ -585,6 +575,24 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         screenLayout = source.readInt();
         uiMode = source.readInt();
         seq = source.readInt();
+    }
+    
+    public static final Parcelable.Creator<Configuration> CREATOR
+            = new Parcelable.Creator<Configuration>() {
+        public Configuration createFromParcel(Parcel source) {
+            return new Configuration(source);
+        }
+
+        public Configuration[] newArray(int size) {
+            return new Configuration[size];
+        }
+    };
+
+    /**
+     * Construct this Configuration object, reading from the Parcel.
+     */
+    private Configuration(Parcel source) {
+        readFromParcel(source);
     }
 
     public int compareTo(Configuration that) {
