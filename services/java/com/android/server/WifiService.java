@@ -96,6 +96,8 @@ public class WifiService extends IWifiManager.Stub {
     private static final boolean DBG = false;
     private static final Pattern scanResultPattern = Pattern.compile("\t+");
     private final WifiStateTracker mWifiStateTracker;
+    /* TODO: fetch a configurable interface */
+    private static final String SOFTAP_IFACE = "wl0.1";
 
     private Context mContext;
     private int mWifiApState;
@@ -582,9 +584,10 @@ public class WifiService extends IWifiManager.Stub {
     }
 
     /**
-     * see {@link android.net.wifi.WifiManager#startAccessPoint(WifiConfiguration)}
+     * see {@link android.net.wifi.WifiManager#setWifiApEnabled(WifiConfiguration, boolean)}
      * @param wifiConfig SSID, security and channel details as
      *        part of WifiConfiguration
+     * @param enabled, true to enable and false to disable
      * @return {@code true} if the start operation was
      *         started or is already in the queue.
      */
@@ -656,11 +659,16 @@ public class WifiService extends IWifiManager.Stub {
             if(enable && (wifiConfig != null)) {
                 try {
                     persistApConfiguration(wifiConfig);
-                    nwService.stopAccessPoint();
-                    nwService.startAccessPoint(wifiConfig, mWifiStateTracker.getInterfaceName());
+                    nwService.setAccessPoint(wifiConfig, mWifiStateTracker.getInterfaceName(),
+                                             SOFTAP_IFACE);
                     return true;
                 } catch(Exception e) {
                     Slog.e(TAG, "Exception in nwService during AP restart");
+                    try {
+                        nwService.stopAccessPoint();
+                    } catch (Exception ee) {
+                        Slog.e(TAG, "Could not stop AP, :" + ee);
+                    }
                     setWifiApEnabledState(WIFI_AP_STATE_FAILED, uid, DriverAction.DRIVER_UNLOAD);
                     return false;
                 }
@@ -696,7 +704,8 @@ public class WifiService extends IWifiManager.Stub {
             }
 
             try {
-                nwService.startAccessPoint(wifiConfig, mWifiStateTracker.getInterfaceName());
+                nwService.startAccessPoint(wifiConfig, mWifiStateTracker.getInterfaceName(),
+                                           SOFTAP_IFACE);
             } catch(Exception e) {
                 Slog.e(TAG, "Exception in startAccessPoint()");
                 setWifiApEnabledState(WIFI_AP_STATE_FAILED, uid, DriverAction.DRIVER_UNLOAD);
