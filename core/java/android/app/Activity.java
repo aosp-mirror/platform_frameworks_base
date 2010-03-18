@@ -1320,6 +1320,11 @@ public class Activity extends ContextThemeWrapper
             }
             mManagedCursors.clear();
         }
+
+        // Close any open search dialog
+        if (mSearchManager != null) {
+            mSearchManager.stopSearch();
+        }
     }
 
     /**

@@ -80,6 +80,7 @@ public final class ViewRoot extends Handler implements ViewParent,
     private static final boolean DEBUG_ORIENTATION = false || LOCAL_LOGV;
     private static final boolean DEBUG_TRACKBALL = false || LOCAL_LOGV;
     private static final boolean DEBUG_IMF = false || LOCAL_LOGV;
+    private static final boolean DEBUG_CONFIGURATION = false || LOCAL_LOGV;
     private static final boolean WATCH_POINTER = false;
 
     private static final boolean MEASURE_LATENCY = false;
@@ -176,6 +177,9 @@ public final class ViewRoot extends Handler implements ViewParent,
     final ViewTreeObserver.InternalInsetsInfo mLastGivenInsets
             = new ViewTreeObserver.InternalInsetsInfo();
 
+    final Configuration mLastConfiguration = new Configuration();
+    final Configuration mPendingConfiguration = new Configuration();
+    
     class ResizedInfo {
         Rect coveredInsets;
         Rect visibleInsets;
@@ -719,6 +723,7 @@ public final class ViewRoot extends Handler implements ViewParent,
             attachInfo.mRecomputeGlobalAttributes = false;
             attachInfo.mKeepScreenOn = false;
             viewVisibilityChanged = false;
+            mLastConfiguration.setTo(host.getResources().getConfiguration());
             host.dispatchAttachedToWindow(attachInfo, 0);
             //Log.i(TAG, "Screen on initialized: " + attachInfo.mKeepScreenOn);
 
@@ -904,6 +909,13 @@ public final class ViewRoot extends Handler implements ViewParent,
                         + " visible=" + mPendingVisibleInsets.toShortString()
                         + " surface=" + mSurface);
 
+                if (mPendingConfiguration.seq != 0) {
+                    if (DEBUG_CONFIGURATION) Log.v(TAG, "Visible with new config: "
+                            + mPendingConfiguration);
+                    updateConfiguration(mPendingConfiguration, !mFirst);
+                    mPendingConfiguration.seq = 0;
+                }
+                
                 contentInsetsChanged = !mPendingContentInsets.equals(
                         mAttachInfo.mContentInsets);
                 visibleInsetsChanged = !mPendingVisibleInsets.equals(
@@ -1627,6 +1639,30 @@ public final class ViewRoot extends Handler implements ViewParent,
         }
     }
 
+    void updateConfiguration(Configuration config, boolean force) {
+        if (DEBUG_CONFIGURATION) Log.v(TAG,
+                "Applying new config to window "
+                + mWindowAttributes.getTitle()
+                + ": " + config);
+        synchronized (sConfigCallbacks) {
+            for (int i=sConfigCallbacks.size()-1; i>=0; i--) {
+                sConfigCallbacks.get(i).onConfigurationChanged(config);
+            }
+        }
+        if (mView != null) {
+            // At this point the resources have been updated to
+            // have the most recent config, whatever that is.  Use
+            // the on in them which may be newer.
+            if (mView != null) {
+                config = mView.getResources().getConfiguration();
+            }
+            if (force || mLastConfiguration.diff(config) != 0) {
+                mLastConfiguration.setTo(config);
+                mView.dispatchConfigurationChanged(config);
+            }
+        }
+    }
+    
     /**
      * Return true if child is an ancestor of parent, (or equal to the parent).
      */
@@ -1815,14 +1851,7 @@ public final class ViewRoot extends Handler implements ViewParent,
             if (mAdded) {
                 Configuration config = ((ResizedInfo)msg.obj).newConfig;
                 if (config != null) {
-                    synchronized (sConfigCallbacks) {
-                        for (int i=sConfigCallbacks.size()-1; i>=0; i--) {
-                            sConfigCallbacks.get(i).onConfigurationChanged(config);
-                        }
-                    }
-                    if (mView != null) {
-                        mView.dispatchConfigurationChanged(config);
-                    }
+                    updateConfiguration(config, false);
                 }
                 mWinFrame.left = 0;
                 mWinFrame.right = msg.arg1;
@@ -2500,12 +2529,14 @@ public final class ViewRoot extends Handler implements ViewParent,
         if (params != null) {
             if (DBG) Log.d(TAG, "WindowLayout in layoutWindow:" + params);
         }
+        mPendingConfiguration.seq = 0;
         int relayoutResult = sWindowSession.relayout(
                 mWindow, params,
                 (int) (mView.mMeasuredWidth * appScale + 0.5f),
                 (int) (mView.mMeasuredHeight * appScale + 0.5f),
                 viewVisibility, insetsPending, mWinFrame,
-                mPendingContentInsets, mPendingVisibleInsets, mSurface);
+                mPendingContentInsets, mPendingVisibleInsets,
+                mPendingConfiguration, mSurface);
         if (restore) {
             params.restore();
         }

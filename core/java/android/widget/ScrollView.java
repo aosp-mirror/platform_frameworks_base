@@ -506,7 +506,7 @@ public class ScrollView extends FrameLayout {
                     final int oldX = mScrollX;
                     final int oldY = mScrollY;
                     overscrollBy(0, deltaY, 0, mScrollY, 0, getScrollRange(),
-                            0, getOverscrollMax());
+                            0, getOverscrollMax(), true);
                     onScrollChanged(mScrollX, mScrollY, oldX, oldY);
                 }
                 break;
@@ -1044,7 +1044,7 @@ public class ScrollView extends FrameLayout {
 
             if (oldX != x || oldY != y) {
                 overscrollBy(x - oldX, y - oldY, oldX, oldY, 0, getScrollRange(),
-                        0, getOverscrollMax());
+                        0, getOverscrollMax(), false);
                 onScrollChanged(mScrollX, mScrollY, oldX, oldY);
             }
             

@@ -199,7 +199,16 @@ status_t AACDecoder::read(
     mConfig->pOutputBuffer_plus = NULL;
     mConfig->repositionFlag = false;
 
-    CHECK_EQ(PVMP4AudioDecodeFrame(mConfig, mDecoderBuf), MP4AUDEC_SUCCESS);
+    Int decoderErr = PVMP4AudioDecodeFrame(mConfig, mDecoderBuf);
+
+    if (decoderErr != MP4AUDEC_SUCCESS) {
+        LOGE("AAC decoder returned error %d", decoderErr);
+
+        buffer->release();
+        buffer = NULL;
+
+        return ERROR_MALFORMED;
+    }
 
     buffer->set_range(
             0, mConfig->frameLength * sizeof(int16_t) * mConfig->desiredChannels);

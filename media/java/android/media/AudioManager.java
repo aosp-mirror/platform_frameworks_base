@@ -18,6 +18,7 @@ package android.media;
 
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.content.ComponentName;
 import android.content.Context;
 import android.database.ContentObserver;
 import android.os.Binder;
@@ -29,6 +30,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.provider.Settings;
 import android.util.Log;
+import android.view.KeyEvent;
 
 import java.util.Iterator;
 import java.util.HashMap;
@@ -1179,7 +1181,7 @@ public class AudioManager {
      * Map to convert focus event listener IDs, as used in the AudioService audio focus stack,
      * to actual listener objects.
      */
-    private HashMap<String, OnAudioFocusChangeListener> mFocusIdListenerMap =
+    private HashMap<String, OnAudioFocusChangeListener> mAudioFocusIdListenerMap =
             new HashMap<String, OnAudioFocusChangeListener>();
     /**
      * Lock to prevent concurrent changes to the list of focus listeners for this AudioManager
@@ -1188,13 +1190,14 @@ public class AudioManager {
     private final Object mFocusListenerLock = new Object();
 
     private OnAudioFocusChangeListener findFocusListener(String id) {
-        return mFocusIdListenerMap.get(id);
+        return mAudioFocusIdListenerMap.get(id);
     }
 
     /**
      * Handler for audio focus events coming from the audio service.
      */
-    private FocusEventHandlerDelegate mFocusEventHandlerDelegate = new FocusEventHandlerDelegate();
+    private FocusEventHandlerDelegate mAudioFocusEventHandlerDelegate =
+            new FocusEventHandlerDelegate();
     /**
      * Event id denotes a loss of focus
      */
@@ -1239,18 +1242,18 @@ public class AudioManager {
         }
     }
 
-    private IAudioFocusDispatcher mFocusDispatcher = new IAudioFocusDispatcher.Stub() {
+    private IAudioFocusDispatcher mAudioFocusDispatcher = new IAudioFocusDispatcher.Stub() {
 
         public void dispatchAudioFocusChange(int focusChange, String id) {
-            Message m = mFocusEventHandlerDelegate.getHandler().obtainMessage(focusChange, id);
-            mFocusEventHandlerDelegate.getHandler().sendMessage(m);
+            Message m = mAudioFocusEventHandlerDelegate.getHandler().obtainMessage(focusChange, id);
+            mAudioFocusEventHandlerDelegate.getHandler().sendMessage(m);
         }
 
     };
 
-    private String getIdForFocusListener(OnAudioFocusChangeListener l) {
+    private String getIdForAudioFocusListener(OnAudioFocusChangeListener l) {
         if (l == null) {
-            return new String();
+            return new String(this.toString());
         } else {
             return new String(this.toString() + l.toString());
         }
@@ -1260,14 +1263,11 @@ public class AudioManager {
      * Register a listener for audio focus updates.
      */
     public void registerAudioFocusListener(OnAudioFocusChangeListener l) {
-        if (l == null) {
-            return;
-        }
         synchronized(mFocusListenerLock) {
-            if (mFocusIdListenerMap.containsKey(getIdForFocusListener(l))) {
+            if (mAudioFocusIdListenerMap.containsKey(getIdForAudioFocusListener(l))) {
                 return;
             }
-            mFocusIdListenerMap.put(getIdForFocusListener(l), l);
+            mAudioFocusIdListenerMap.put(getIdForAudioFocusListener(l), l);
         }
     }
 
@@ -1278,13 +1278,13 @@ public class AudioManager {
         // notify service to remove it from audio focus stack
         IAudioService service = getService();
         try {
-            service.unregisterFocusClient(getIdForFocusListener(l));
+            service.unregisterAudioFocusClient(getIdForAudioFocusListener(l));
         } catch (RemoteException e) {
             Log.e(TAG, "Can't call unregisterFocusClient() from AudioService due to "+e);
         }
         // remove locally
         synchronized(mFocusListenerLock) {
-            mFocusIdListenerMap.remove(getIdForFocusListener(l));
+            mAudioFocusIdListenerMap.remove(getIdForAudioFocusListener(l));
         }
     }
 
@@ -1318,7 +1318,7 @@ public class AudioManager {
         IAudioService service = getService();
         try {
             status = service.requestAudioFocus(streamType, durationHint, mICallBack,
-                    mFocusDispatcher, getIdForFocusListener(l));
+                    mAudioFocusDispatcher, getIdForAudioFocusListener(l));
         } catch (RemoteException e) {
             Log.e(TAG, "Can't call requestAudioFocus() from AudioService due to "+e);
         }
@@ -1336,13 +1336,71 @@ public class AudioManager {
         registerAudioFocusListener(l);
         IAudioService service = getService();
         try {
-            status = service.abandonAudioFocus(mFocusDispatcher, getIdForFocusListener(l));
+            status = service.abandonAudioFocus(mAudioFocusDispatcher,
+                    getIdForAudioFocusListener(l));
         } catch (RemoteException e) {
             Log.e(TAG, "Can't call abandonAudioFocus() from AudioService due to "+e);
         }
         return status;
     }
 
+
+    //====================================================================
+    // Remote Control
+    /**
+     * @hide
+     * TODO unhide for SDK
+     * TODO document for SDK
+     * @param eventReceiver identifier of a {@link android.content.BroadcastReceiver}
+     *      that will receive the media button intent. This broadcast receiver must be declared
+     *      in the application manifest.
+     */
+    public void registerMediaButtonEventReceiver(ComponentName eventReceiver) {
+        //TODO enforce the rule about the receiver being declared in the manifest
+        IAudioService service = getService();
+        try {
+            service.registerMediaButtonEventReceiver(eventReceiver);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Dead object in registerMediaButtonEventReceiver"+e);
+        }
+    }
+
+    /**
+     * @hide
+     * TODO unhide for SDK
+     * TODO document for SDK
+     * @param eventReceiverClass class of a {@link android.content.BroadcastReceiver} that will
+     *     receive the media button intent. This broadcast receiver must be declared in the
+     *     application manifest.
+     */
+    public void registerMediaButtonEventReceiver(Class<?> eventReceiverClass) {
+        registerMediaButtonEventReceiver(new ComponentName(
+                eventReceiverClass.getPackage().getName(), eventReceiverClass.getName()));
+    }
+
+    /**
+     * @hide
+     * TODO unhide for SDK
+     * TODO document for SDK
+     */
+    public void unregisterMediaButtonEventReceiver(ComponentName eventReceiver) {
+        IAudioService service = getService();
+        try {
+            service.unregisterMediaButtonEventReceiver(eventReceiver);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Dead object in unregisterMediaButtonEventReceiver"+e);
+        }
+    }
+
+    /**
+     * @hide
+     * TODO unhide for SDK
+     * TODO document for SDK
+     */
+    public void unregisterMediaButtonEventReceiver(Class<?> eventReceiverClass) {
+        unregisterMediaButtonEventReceiver(new ComponentName(
+                eventReceiverClass.getPackage().getName(), eventReceiverClass.getName()));
+    }
 
     /**
      *  @hide

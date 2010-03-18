@@ -112,10 +112,6 @@ public final class BluetoothHeadset {
     /** Default priority when not set or when the device is unpaired */
     public static final int PRIORITY_UNDEFINED = -1;
 
-    /** Set this to true to prevent the bluetooth headset from
-     * activating the VoiceDialer. */
-    public static final boolean DISABLE_BT_VOICE_DIALING = false;
-
     /**
      * An interface for notifying BluetoothHeadset IPC clients when they have
      * been connected to the BluetoothHeadset service.
@@ -382,6 +378,16 @@ public final class BluetoothHeadset {
             if (DBG) Log.d(TAG, Log.getStackTraceString(new Throwable()));
         }
         return -1;
+    }
+
+    /**
+     * Indicates if current platform supports voice dialing over bluetooth SCO.
+     * @return true if voice dialing over bluetooth is supported, false otherwise.
+     * @hide
+     */
+    public static boolean isBluetoothVoiceDialingEnabled(Context context) {
+        return context.getResources().getBoolean(
+                com.android.internal.R.bool.config_bluetooth_sco_off_call);
     }
 
     private ServiceConnection mConnection = new ServiceConnection() {

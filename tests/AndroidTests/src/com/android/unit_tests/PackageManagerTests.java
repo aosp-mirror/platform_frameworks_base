@@ -45,6 +45,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
 import android.content.pm.PackageStats;
 import android.content.pm.IPackageManager;
+import android.content.pm.PermissionInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.content.res.Resources.NotFoundException;
@@ -78,6 +79,7 @@ public class PackageManagerTests extends AndroidTestCase {
     private static final int APP_INSTALL_AUTO = PackageHelper.APP_INSTALL_AUTO;
     private static final int APP_INSTALL_DEVICE = PackageHelper.APP_INSTALL_INTERNAL;
     private static final int APP_INSTALL_SDCARD = PackageHelper.APP_INSTALL_EXTERNAL;
+    private boolean mOrigState;
 
     void failStr(String errMsg) {
         Log.w(TAG, "errMsg="+errMsg);
@@ -91,6 +93,21 @@ public class PackageManagerTests extends AndroidTestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
+        mOrigState = getMediaState();
+    }
+
+    @Override
+    protected void tearDown() throws Exception {
+        // Restore media state.
+        boolean newState = getMediaState();
+        if (newState != mOrigState) {
+            if (mOrigState) {
+                getMs().mountVolume(Environment.getExternalStorageDirectory().getPath());
+            } else {
+                getMs().unmountVolume(Environment.getExternalStorageDirectory().getPath(), true);
+            }
+        }
+        super.tearDown();
     }
 
     private class PackageInstallObserver extends IPackageInstallObserver.Stub {
@@ -254,21 +271,70 @@ public class PackageManagerTests extends AndroidTestCase {
         packageParser = null;
         return pkg;
     }
-    private boolean getInstallLoc(int flags, int expInstallLocation) {
+    private boolean checkSd(long pkgLen) {
+        String status = Environment.getExternalStorageState();
+        if (!status.equals(Environment.MEDIA_MOUNTED)) {
+            return false;
+        }
+        long sdSize = -1;
+        StatFs sdStats = new StatFs(
+                Environment.getExternalStorageDirectory().getPath());
+        sdSize = (long)sdStats.getAvailableBlocks() *
+                (long)sdStats.getBlockSize();
+        // TODO check for thesholds here
+        return pkgLen <= sdSize;
+        
+    }
+    private boolean checkInt(long pkgLen) {
+        StatFs intStats = new StatFs(Environment.getDataDirectory().getPath());
+        long intSize = (long)intStats.getBlockCount() *
+                (long)intStats.getBlockSize();
+        long iSize = (long)intStats.getAvailableBlocks() *
+                (long)intStats.getBlockSize();
+        // TODO check for thresholds here?
+        return pkgLen <= iSize;
+    }
+    private static final int INSTALL_LOC_INT = 1;
+    private static final int INSTALL_LOC_SD = 2;
+    private static final int INSTALL_LOC_ERR = -1;
+    private int getInstallLoc(int flags, int expInstallLocation, long pkgLen) {
         // Flags explicitly over ride everything else.
         if ((flags & PackageManager.INSTALL_FORWARD_LOCK) != 0 ) {
-            return false;
+            return INSTALL_LOC_INT;
         } else if ((flags & PackageManager.INSTALL_EXTERNAL) != 0 ) {
-            return true;
+            return INSTALL_LOC_SD;
+        } else if ((flags & PackageManager.INSTALL_INTERNAL) != 0) {
+            return INSTALL_LOC_INT;
         }
         // Manifest option takes precedence next
         if (expInstallLocation == PackageInfo.INSTALL_LOCATION_PREFER_EXTERNAL) {
-            return true;
+            // TODO fitsonSd check
+            if (checkSd(pkgLen)) {
+               return INSTALL_LOC_SD;
+            }
+            if (checkInt(pkgLen)) {
+                return INSTALL_LOC_INT;
+            }
+            return INSTALL_LOC_ERR;
         }
         if (expInstallLocation == PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY) {
-            return false;
+            if (checkInt(pkgLen)) {
+                return INSTALL_LOC_INT;
+            }
+            return INSTALL_LOC_ERR;
         }
-        // TODO Out of memory checks here.
+        if (expInstallLocation == PackageInfo.INSTALL_LOCATION_AUTO) {
+            // Check for free memory internally
+            if (checkInt(pkgLen)) {
+                return INSTALL_LOC_INT;
+            }
+            // Check for free memory externally
+            if (checkSd(pkgLen)) {
+                return INSTALL_LOC_SD;
+            }
+            return INSTALL_LOC_ERR;
+        }
+        // Check for settings preference.
         boolean checkSd = false;
         int setLoc = 0;
         try {
@@ -284,50 +350,69 @@ public class PackageManagerTests extends AndroidTestCase {
                 failStr(e);
             }
             if (userPref == APP_INSTALL_DEVICE) {
-                checkSd = false;
+                if (checkInt(pkgLen)) {
+                    return INSTALL_LOC_INT;
+                }
+                return INSTALL_LOC_ERR;
             } else if (userPref == APP_INSTALL_SDCARD) {
-                checkSd = true;
+                if (checkSd(pkgLen)) {
+                    return INSTALL_LOC_SD;
+                }
+                return INSTALL_LOC_ERR;
             } else if (userPref == APP_INSTALL_AUTO) {
-                // Might be determined dynamically. TODO fix this
-                checkSd = false;
+                if (checkInt(pkgLen)) {
+                    return INSTALL_LOC_INT;
+                }
+                // Check for free memory externally
+                if (checkSd(pkgLen)) {
+                    return INSTALL_LOC_SD;
+                }
+                return INSTALL_LOC_ERR;
+                
             }
-        }
-        return checkSd;
+        } 
+        return INSTALL_LOC_ERR;
     }
+    
     private void assertInstall(PackageParser.Package pkg, int flags, int expInstallLocation) {
         try {
             String pkgName = pkg.packageName;
-        ApplicationInfo info = getPm().getApplicationInfo(pkgName, 0);
-        assertNotNull(info);
-        assertEquals(pkgName, info.packageName);
-        File dataDir = Environment.getDataDirectory();
-        String appInstallPath = new File(dataDir, "app").getPath();
-        String drmInstallPath = new File(dataDir, "app-private").getPath();
-        File srcDir = new File(info.sourceDir);
-        String srcPath = srcDir.getParent();
-        File publicSrcDir = new File(info.publicSourceDir);
-        String publicSrcPath = publicSrcDir.getParent();
+            ApplicationInfo info = getPm().getApplicationInfo(pkgName, 0);
+            assertNotNull(info);
+            assertEquals(pkgName, info.packageName);
+            File dataDir = Environment.getDataDirectory();
+            String appInstallPath = new File(dataDir, "app").getPath();
+            String drmInstallPath = new File(dataDir, "app-private").getPath();
+            File srcDir = new File(info.sourceDir);
+            String srcPath = srcDir.getParent();
+            File publicSrcDir = new File(info.publicSourceDir);
+            String publicSrcPath = publicSrcDir.getParent();
+            long pkgLen = new File(info.sourceDir).length();
 
-        if ((flags & PackageManager.INSTALL_FORWARD_LOCK) != 0) {
-            assertTrue((info.flags & ApplicationInfo.FLAG_FORWARD_LOCK) != 0);
-            assertEquals(srcPath, drmInstallPath);
-            assertEquals(publicSrcPath, appInstallPath);
-        } else {
-            assertFalse((info.flags & ApplicationInfo.FLAG_FORWARD_LOCK) != 0);
-            if (!getInstallLoc(flags, expInstallLocation)) {
-                assertEquals(srcPath, appInstallPath);
+            if ((flags & PackageManager.INSTALL_FORWARD_LOCK) != 0) {
+                assertTrue((info.flags & ApplicationInfo.FLAG_FORWARD_LOCK) != 0);
+                assertEquals(srcPath, drmInstallPath);
                 assertEquals(publicSrcPath, appInstallPath);
-                assertFalse((info.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0);
             } else {
-                assertTrue((info.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0);
-                assertTrue(srcPath.startsWith(SECURE_CONTAINERS_PREFIX));
-                assertTrue(publicSrcPath.startsWith(SECURE_CONTAINERS_PREFIX));
+                assertFalse((info.flags & ApplicationInfo.FLAG_FORWARD_LOCK) != 0);
+                int rLoc = getInstallLoc(flags, expInstallLocation, pkgLen);
+                if (rLoc == INSTALL_LOC_INT) {
+                    assertEquals(srcPath, appInstallPath);
+                    assertEquals(publicSrcPath, appInstallPath);
+                    assertFalse((info.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0);
+                } else if (rLoc == INSTALL_LOC_SD){
+                    assertTrue((info.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0);
+                    assertTrue(srcPath.startsWith(SECURE_CONTAINERS_PREFIX));
+                    assertTrue(publicSrcPath.startsWith(SECURE_CONTAINERS_PREFIX));
+                } else {
+                    // TODO handle error. Install should have failed.
+                }
             }
-        }
         } catch (NameNotFoundException e) {
             failStr("failed with exception : " + e);
         }
     }
+    
     private void assertNotInstalled(String pkgName) {
         try {
             ApplicationInfo info = getPm().getApplicationInfo(pkgName, 0);
@@ -352,6 +437,95 @@ public class PackageManagerTests extends AndroidTestCase {
                 false, -1, PackageInfo.INSTALL_LOCATION_AUTO);
     }
 
+    static final String PERM_PACKAGE = "package";
+    static final String PERM_DEFINED = "defined";
+    static final String PERM_UNDEFINED = "undefined";
+    static final String PERM_USED = "used";
+    static final String PERM_NOTUSED = "notused";
+    
+    private void assertPermissions(String[] cmds) {
+        final PackageManager pm = getPm();
+        String pkg = null;
+        PackageInfo pkgInfo = null;
+        String mode = PERM_DEFINED;
+        int i = 0;
+        while (i < cmds.length) {
+            String cmd = cmds[i++];
+            if (cmd == PERM_PACKAGE) {
+                pkg = cmds[i++];
+                try {
+                    pkgInfo = pm.getPackageInfo(pkg,
+                            PackageManager.GET_PERMISSIONS
+                            | PackageManager.GET_UNINSTALLED_PACKAGES);
+                } catch (NameNotFoundException e) {
+                    pkgInfo = null;
+                }
+            } else if (cmd == PERM_DEFINED || cmd == PERM_UNDEFINED
+                    || cmd == PERM_USED || cmd == PERM_NOTUSED) {
+                mode = cmds[i++];
+            } else {
+                if (mode == PERM_DEFINED) {
+                    try {
+                        PermissionInfo pi = pm.getPermissionInfo(cmd, 0);
+                        assertNotNull(pi);
+                        assertEquals(pi.packageName, pkg);
+                        assertEquals(pi.name, cmd);
+                        assertNotNull(pkgInfo);
+                        boolean found = false;
+                        for (int j=0; j<pkgInfo.permissions.length && !found; j++) {
+                            if (pkgInfo.permissions[j].name.equals(cmd)) {
+                                found = true;
+                            }
+                        }
+                        if (!found) {
+                            fail("Permission not found: " + cmd);
+                        }
+                    } catch (NameNotFoundException e) {
+                        throw new RuntimeException(e);
+                    }
+                } else if (mode == PERM_UNDEFINED) {
+                    try {
+                        pm.getPermissionInfo(cmd, 0);
+                        throw new RuntimeException("Permission exists: " + cmd);
+                    } catch (NameNotFoundException e) {
+                    }
+                    if (pkgInfo != null) {
+                        boolean found = false;
+                        for (int j=0; j<pkgInfo.permissions.length && !found; j++) {
+                            if (pkgInfo.permissions[j].name.equals(cmd)) {
+                                found = true;
+                            }
+                        }
+                        if (found) {
+                            fail("Permission still exists: " + cmd);
+                        }
+                    }
+                } else if (mode == PERM_USED || mode == PERM_NOTUSED) {
+                    boolean found = false;
+                    for (int j=0; j<pkgInfo.requestedPermissions.length && !found; j++) {
+                        if (pkgInfo.requestedPermissions[j].equals(cmd)) {
+                            found = true;
+                        }
+                    }
+                    if (!found) {
+                        fail("Permission not requested: " + cmd);
+                    }
+                    if (mode == PERM_USED) {
+                        if (pm.checkPermission(cmd, pkg)
+                                != PackageManager.PERMISSION_GRANTED) {
+                            fail("Permission not granted: " + cmd);
+                        }
+                    } else {
+                        if (pm.checkPermission(cmd, pkg)
+                                != PackageManager.PERMISSION_DENIED) {
+                            fail("Permission granted: " + cmd);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
     public void clearSecureContainersForPkg(String pkgName) {
         IMountService ms = getMs();
         try {
@@ -396,8 +570,6 @@ public class PackageManagerTests extends AndroidTestCase {
             } catch (Exception e) {
                 failStr(e);
             }
-            // Clean up the containers as well
-            clearSecureContainersForPkg(pkg.packageName);
         }
         InstallParams ip = null;
         try {
@@ -1047,19 +1219,6 @@ public class PackageManagerTests extends AndroidTestCase {
         }
     }
 
-    public void xxxtestClearAllSecureContainers() {
-        IMountService ms = getMs();
-        try {
-            String list[] = ms.getSecureContainerList();
-            if (list != null) {
-                for (String cid : list) {
-                    Log.i(TAG, "Destroying container " + cid);
-                    ms.destroySecureContainer(cid, false);
-                }
-            }
-        } catch (RemoteException e) {}
-    }
-
     class MoveReceiver extends GenericReceiver {
         String pkgName;
         final static int INVALID = -1;
@@ -1185,7 +1344,7 @@ public class PackageManagerTests extends AndroidTestCase {
     public void moveFromRawResource(int installFlags, int moveFlags,
             int expRetCode) {
         int origDefaultLoc = getInstallLoc();
-        setInstallLoc(PackageInfo.INSTALL_LOCATION_AUTO);
+        setInstallLoc(PackageHelper.APP_INSTALL_AUTO);
         // Install first
         InstallParams ip = sampleInstallFromRawResource(installFlags, false);
         ApplicationInfo oldAppInfo = null;
@@ -1255,7 +1414,7 @@ public class PackageManagerTests extends AndroidTestCase {
             // Try to install and make sure an error code is returned.
             assertNull(installFromRawResource("install.apk", R.raw.install,
                     PackageManager.INSTALL_EXTERNAL, false,
-                    true, PackageManager.INSTALL_FAILED_CONTAINER_ERROR,
+                    true, PackageManager.INSTALL_FAILED_MEDIA_UNAVAILABLE,
                     PackageInfo.INSTALL_LOCATION_AUTO));
         } finally {
             // Restore original media state
@@ -1292,6 +1451,682 @@ public class PackageManagerTests extends AndroidTestCase {
    }
 
    /*---------- Recommended install location tests ----*/
+   /* Precedence: FlagManifestExistingUser
+    * PrecedenceSuffixes:
+    * Flag : FlagI, FlagE, FlagF
+    * I - internal, E - external, F - forward locked, Flag suffix absent if not using any option.
+    * Manifest: ManifestI, ManifestE, ManifestA, Manifest suffix absent if not using any option.
+    * Existing: Existing suffix absent if not existing.
+    * User: UserI, UserE, UserA, User suffix absent if not existing. 
+    * 
+    */
+   /*
+    * Install an app on internal flash
+    */
+   public void testFlagI() {
+       sampleInstallFromRawResource(PackageManager.INSTALL_INTERNAL, true);
+   }
+   /*
+    * Install an app on sdcard.
+    */
+   public void testFlagE() {
+       sampleInstallFromRawResource(PackageManager.INSTALL_EXTERNAL, true);
+   }
+
+   /*
+    * Install an app on sdcard.
+    */
+   public void testFlagF() {
+       sampleInstallFromRawResource(PackageManager.INSTALL_FORWARD_LOCK, true);
+   }
+   /*
+    * Install an app with both internal and external flags set. should fail
+    */
+   public void testFlagIE() {
+       installFromRawResource("install.apk", R.raw.install,
+               PackageManager.INSTALL_EXTERNAL | PackageManager.INSTALL_INTERNAL,
+               false,
+               true, PackageManager.INSTALL_FAILED_INVALID_INSTALL_LOCATION,
+               PackageInfo.INSTALL_LOCATION_AUTO);
+   }
+
+   /*
+    * Install an app with both internal and external flags set. should fail
+    */
+   public void testFlagIF() {
+       sampleInstallFromRawResource(PackageManager.INSTALL_FORWARD_LOCK |
+               PackageManager.INSTALL_INTERNAL, true);
+   }
+   /*
+    * Install an app with both internal and external flags set. should fail
+    */
+   public void testFlagEF() {
+       installFromRawResource("install.apk", R.raw.install,
+               PackageManager.INSTALL_FORWARD_LOCK | PackageManager.INSTALL_EXTERNAL,
+               false,
+               true, PackageManager.INSTALL_FAILED_INVALID_INSTALL_LOCATION,
+               PackageInfo.INSTALL_LOCATION_AUTO);
+   }
+   /*
+    * Install an app with both internal and external flags set. should fail
+    */
+   public void testFlagIEF() {
+       installFromRawResource("install.apk", R.raw.install,
+               PackageManager.INSTALL_FORWARD_LOCK | PackageManager.INSTALL_INTERNAL |
+               PackageManager.INSTALL_EXTERNAL,
+               false,
+               true, PackageManager.INSTALL_FAILED_INVALID_INSTALL_LOCATION,
+               PackageInfo.INSTALL_LOCATION_AUTO);
+   }
+   /*
+    * Install an app with both internal and manifest option set.
+    * should install on internal.
+    */
+   public void testFlagIManifestI() {
+       installFromRawResource("install.apk", R.raw.install_loc_internal,
+               PackageManager.INSTALL_INTERNAL,
+               true,
+               false, -1,
+               PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY);
+   }
+   /*
+    * Install an app with both internal and manifest preference for
+    * preferExternal. Should install on internal.
+    */
+   public void testFlagIManifestE() {
+       installFromRawResource("install.apk", R.raw.install_loc_sdcard,
+               PackageManager.INSTALL_INTERNAL,
+               true,
+               false, -1,
+               PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY);
+   }
+   /*
+    * Install an app with both internal and manifest preference for
+    * auto. should install internal.
+    */
+   public void testFlagIManifestA() {
+       installFromRawResource("install.apk", R.raw.install_loc_auto,
+               PackageManager.INSTALL_INTERNAL,
+               true,
+               false, -1,
+               PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY);
+   }
+   /*
+    * Install an app with both external and manifest option set.
+    * should install externally.
+    */
+   public void testFlagEManifestI() {
+       installFromRawResource("install.apk", R.raw.install_loc_internal,
+               PackageManager.INSTALL_EXTERNAL,
+               true,
+               false, -1,
+               PackageInfo.INSTALL_LOCATION_PREFER_EXTERNAL);
+   }
+   /*
+    * Install an app with both external and manifest preference for
+    * preferExternal. Should install externally.
+    */
+   public void testFlagEManifestE() {
+       installFromRawResource("install.apk", R.raw.install_loc_sdcard,
+               PackageManager.INSTALL_EXTERNAL,
+               true,
+               false, -1,
+               PackageInfo.INSTALL_LOCATION_PREFER_EXTERNAL);
+   }
+   /*
+    * Install an app with both external and manifest preference for
+    * auto. should install on external media.
+    */
+   public void testFlagEManifestA() {
+       installFromRawResource("install.apk", R.raw.install_loc_auto,
+               PackageManager.INSTALL_EXTERNAL,
+               true,
+               false, -1,
+               PackageInfo.INSTALL_LOCATION_PREFER_EXTERNAL);
+   }
+   /*
+    * Install an app with fwd locked flag set and install location set to
+    * internal. should install internally.
+    */
+   public void testFlagFManifestI() {
+       installFromRawResource("install.apk", R.raw.install_loc_internal,
+               PackageManager.INSTALL_EXTERNAL,
+               true,
+               false, -1,
+               PackageInfo.INSTALL_LOCATION_PREFER_EXTERNAL);
+   }
+   /*
+    * Install an app with fwd locked flag set and install location set to
+    * preferExternal. should install internally.
+    */
+   public void testFlagFManifestE() {
+       installFromRawResource("install.apk", R.raw.install_loc_sdcard,
+               PackageManager.INSTALL_EXTERNAL,
+               true,
+               false, -1,
+               PackageInfo.INSTALL_LOCATION_PREFER_EXTERNAL);
+   }
+   /*
+    * Install an app with fwd locked flag set and install location set to
+    * auto. should install internally.
+    */
+   public void testFlagFManifestA() {
+       installFromRawResource("install.apk", R.raw.install_loc_auto,
+               PackageManager.INSTALL_EXTERNAL,
+               true,
+               false, -1,
+               PackageInfo.INSTALL_LOCATION_PREFER_EXTERNAL);
+   }
+   /* The following test functions verify install location for existing apps.
+    * ie existing app can be installed internally or externally. If install
+    * flag is explicitly set it should override current location. If manifest location
+    * is set, that should over ride current location too. if not the existing install
+    * location should be honoured.
+    * testFlagI/E/F/ExistingI/E - 
+    */
+   public void testFlagIExistingI() {
+       int iFlags = PackageManager.INSTALL_INTERNAL;
+       int rFlags = PackageManager.INSTALL_INTERNAL | PackageManager.INSTALL_REPLACE_EXISTING;
+       // First install.
+       installFromRawResource("install.apk", R.raw.install,
+               iFlags,
+               false,
+               false, -1,
+               -1);
+       // Replace now
+       installFromRawResource("install.apk", R.raw.install,
+               rFlags,
+               true,
+               false, -1,
+               -1);
+   }
+   public void testFlagIExistingE() {
+       int iFlags = PackageManager.INSTALL_EXTERNAL;
+       int rFlags = PackageManager.INSTALL_INTERNAL | PackageManager.INSTALL_REPLACE_EXISTING;
+       // First install.
+       installFromRawResource("install.apk", R.raw.install,
+               iFlags,
+               false,
+               false, -1,
+               -1);
+       // Replace now
+       installFromRawResource("install.apk", R.raw.install,
+               rFlags,
+               true,
+               false, -1,
+               -1);
+   }
+   public void testFlagEExistingI() {
+       int iFlags = PackageManager.INSTALL_INTERNAL;
+       int rFlags = PackageManager.INSTALL_EXTERNAL | PackageManager.INSTALL_REPLACE_EXISTING;
+       // First install.
+       installFromRawResource("install.apk", R.raw.install,
+               iFlags,
+               false,
+               false, -1,
+               -1);
+       // Replace now
+       installFromRawResource("install.apk", R.raw.install,
+               rFlags,
+               true,
+               false, -1,
+               -1);
+   }
+   public void testFlagEExistingE() {
+       int iFlags = PackageManager.INSTALL_EXTERNAL;
+       int rFlags = PackageManager.INSTALL_EXTERNAL | PackageManager.INSTALL_REPLACE_EXISTING;
+       // First install.
+       installFromRawResource("install.apk", R.raw.install,
+               iFlags,
+               false,
+               false, -1,
+               -1);
+       // Replace now
+       installFromRawResource("install.apk", R.raw.install,
+               rFlags,
+               true,
+               false, -1,
+               -1);
+   }
+   public void testFlagFExistingI() {
+       int iFlags = PackageManager.INSTALL_INTERNAL;
+       int rFlags = PackageManager.INSTALL_FORWARD_LOCK | PackageManager.INSTALL_REPLACE_EXISTING;
+       // First install.
+       installFromRawResource("install.apk", R.raw.install,
+               iFlags,
+               false,
+               false, -1,
+               -1);
+       // Replace now
+       installFromRawResource("install.apk", R.raw.install,
+               rFlags,
+               true,
+               false, -1,
+               -1);
+   }
+   public void testFlagFExistingE() {
+       int iFlags = PackageManager.INSTALL_EXTERNAL;
+       int rFlags = PackageManager.INSTALL_FORWARD_LOCK | PackageManager.INSTALL_REPLACE_EXISTING;
+       // First install.
+       installFromRawResource("install.apk", R.raw.install,
+               iFlags,
+               false,
+               false, -1,
+               -1);
+       // Replace now
+       installFromRawResource("install.apk", R.raw.install,
+               rFlags,
+               true,
+               false, -1,
+               -1);
+   }
+   /*
+    * The following set of tests verify the installation of apps with
+    * install location attribute set to internalOnly, preferExternal and auto.
+    * The manifest option should dictate the install location.
+    * public void testManifestI/E/A
+    * TODO out of memory fall back behaviour.
+    */
+   public void testManifestI() {
+       installFromRawResource("install.apk", R.raw.install_loc_internal,
+               0,
+               true,
+               false, -1,
+               PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY);
+   }
+   public void testManifestE() {
+       installFromRawResource("install.apk", R.raw.install_loc_sdcard,
+               0,
+               true,
+               false, -1,
+               PackageInfo.INSTALL_LOCATION_PREFER_EXTERNAL);
+   }
+   public void testManifestA() {
+       installFromRawResource("install.apk", R.raw.install_loc_auto,
+               0,
+               true,
+               false, -1,
+               PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY);
+   }
+   /*
+    * The following set of tests verify the installation of apps
+    * with install location attribute set to internalOnly, preferExternal and auto
+    * for already existing apps. The manifest option should take precedence.
+    * TODO add out of memory fall back behaviour.
+    * testManifestI/E/AExistingI/E 
+    */
+   public void testManifestIExistingI() {
+       int iFlags = PackageManager.INSTALL_INTERNAL;
+       int rFlags = PackageManager.INSTALL_REPLACE_EXISTING;
+       // First install.
+       installFromRawResource("install.apk", R.raw.install,
+               iFlags,
+               false,
+               false, -1,
+               -1);
+       // Replace now
+       installFromRawResource("install.apk", R.raw.install_loc_internal,
+               rFlags,
+               true,
+               false, -1,
+               PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY);
+   }
+   public void testManifestIExistingE() {
+       int iFlags = PackageManager.INSTALL_EXTERNAL;
+       int rFlags = PackageManager.INSTALL_REPLACE_EXISTING;
+       // First install.
+       installFromRawResource("install.apk", R.raw.install,
+               iFlags,
+               false,
+               false, -1,
+               -1);
+       // Replace now
+       installFromRawResource("install.apk", R.raw.install_loc_internal,
+               rFlags,
+               true,
+               false, -1,
+               PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY);
+   }
+   public void testManifestEExistingI() {
+       int iFlags = PackageManager.INSTALL_INTERNAL;
+       int rFlags = PackageManager.INSTALL_REPLACE_EXISTING;
+       // First install.
+       installFromRawResource("install.apk", R.raw.install,
+               iFlags,
+               false,
+               false, -1,
+               -1);
+       // Replace now
+       installFromRawResource("install.apk", R.raw.install_loc_sdcard,
+               rFlags,
+               true,
+               false, -1,
+               PackageInfo.INSTALL_LOCATION_PREFER_EXTERNAL);
+   }
+   public void testManifestEExistingE() {
+       int iFlags = PackageManager.INSTALL_EXTERNAL;
+       int rFlags = PackageManager.INSTALL_REPLACE_EXISTING;
+       // First install.
+       installFromRawResource("install.apk", R.raw.install,
+               iFlags,
+               false,
+               false, -1,
+               -1);
+       // Replace now
+       installFromRawResource("install.apk", R.raw.install_loc_sdcard,
+               rFlags,
+               true,
+               false, -1,
+               PackageInfo.INSTALL_LOCATION_PREFER_EXTERNAL);
+   }
+   public void testManifestAExistingI() {
+       int iFlags = PackageManager.INSTALL_INTERNAL;
+       int rFlags = PackageManager.INSTALL_REPLACE_EXISTING;
+       // First install.
+       installFromRawResource("install.apk", R.raw.install,
+               iFlags,
+               false,
+               false, -1,
+               -1);
+       // Replace now
+       installFromRawResource("install.apk", R.raw.install_loc_auto,
+               rFlags,
+               true,
+               false, -1,
+               PackageInfo.INSTALL_LOCATION_AUTO);
+   }
+   public void testManifestAExistingE() {
+       int iFlags = PackageManager.INSTALL_EXTERNAL;
+       int rFlags = PackageManager.INSTALL_REPLACE_EXISTING;
+       // First install.
+       installFromRawResource("install.apk", R.raw.install,
+               iFlags,
+               false,
+               false, -1,
+               -1);
+       // Replace now
+       installFromRawResource("install.apk", R.raw.install_loc_auto,
+               rFlags,
+               true,
+               false, -1,
+               PackageInfo.INSTALL_LOCATION_AUTO);
+   }
+   /*
+    * The following set of tests check install location for existing
+    * application based on user setting.
+    */
+   private void setExistingXUserX(int userSetting, int iFlags) {
+       int rFlags = PackageManager.INSTALL_REPLACE_EXISTING;
+       // First install.
+       installFromRawResource("install.apk", R.raw.install,
+               iFlags,
+               false,
+               false, -1,
+               -1);
+       // Watch out for this.
+       int iloc = PackageInfo.INSTALL_LOCATION_AUTO;
+       if ((iFlags & PackageManager.INSTALL_INTERNAL) != 0) {
+           iloc = PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY;
+       } else if ((iFlags & PackageManager.INSTALL_EXTERNAL) != 0) {
+           iloc = PackageInfo.INSTALL_LOCATION_PREFER_EXTERNAL;
+       }
+       int origSetting = getInstallLoc();
+       try {
+           // Set user setting
+           setInstallLoc(userSetting);
+           // Replace now
+           installFromRawResource("install.apk", R.raw.install,
+                   rFlags,
+                   true,
+                   false, -1,
+                   iloc);
+       } finally {
+           setInstallLoc(origSetting);
+       }
+   }
+   public void testExistingIUserI() {
+       int userSetting = PackageHelper.APP_INSTALL_INTERNAL;
+       int iFlags = PackageManager.INSTALL_INTERNAL;
+       setExistingXUserX(userSetting, iFlags);
+   }
+   public void testExistingIUserE() {
+       int userSetting = PackageHelper.APP_INSTALL_EXTERNAL;
+       int iFlags = PackageManager.INSTALL_INTERNAL;
+       setExistingXUserX(userSetting, iFlags);
+   }
+   public void testExistingIUserA() {
+       int userSetting = PackageHelper.APP_INSTALL_AUTO;
+       int iFlags = PackageManager.INSTALL_INTERNAL;
+       setExistingXUserX(userSetting, iFlags);
+   }
+   public void testExistingEUserI() {
+       int userSetting = PackageHelper.APP_INSTALL_INTERNAL;
+       int iFlags = PackageManager.INSTALL_EXTERNAL;
+       setExistingXUserX(userSetting, iFlags);
+   }
+   public void testExistingEUserE() {
+       int userSetting = PackageHelper.APP_INSTALL_EXTERNAL;
+       int iFlags = PackageManager.INSTALL_EXTERNAL;
+       setExistingXUserX(userSetting, iFlags);
+   }
+   public void testExistingEUserA() {
+       int userSetting = PackageHelper.APP_INSTALL_AUTO;
+       int iFlags = PackageManager.INSTALL_EXTERNAL;
+       setExistingXUserX(userSetting, iFlags);
+   }
+   /*
+    * The following set of tests verify that the user setting defines
+    * the install location.
+    * 
+    */
+   private void setUserX(int userSetting) {
+       int origSetting = getInstallLoc();
+       int iloc = PackageInfo.INSTALL_LOCATION_AUTO;
+       if (userSetting == PackageHelper.APP_INSTALL_AUTO) {
+           iloc = PackageInfo.INSTALL_LOCATION_AUTO;
+       } else if (userSetting == PackageHelper.APP_INSTALL_EXTERNAL) {
+           iloc = PackageInfo.INSTALL_LOCATION_PREFER_EXTERNAL;
+       } else if (userSetting == PackageHelper.APP_INSTALL_INTERNAL) {
+           iloc = PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY;
+       }
+       try {
+           // Set user setting
+           setInstallLoc(userSetting);
+           // Replace now
+           installFromRawResource("install.apk", R.raw.install,
+                   0,
+                   true,
+                   false, -1,
+                   iloc);
+       } finally {
+           setInstallLoc(origSetting);
+       }
+   }
+   public void testUserI() {
+       int userSetting = PackageHelper.APP_INSTALL_INTERNAL;
+       setUserX(userSetting);
+   }
+   public void testUserE() {
+       int userSetting = PackageHelper.APP_INSTALL_EXTERNAL;
+       setUserX(userSetting);
+   }
+   public void testUserA() {
+       int userSetting = PackageHelper.APP_INSTALL_AUTO;
+       setUserX(userSetting);
+   }
+   
+    static final String BASE_PERMISSIONS_DEFINED[] = new String[] {
+        PERM_PACKAGE, "com.android.unit_tests.install_decl_perm",
+        PERM_DEFINED,
+        "com.android.unit_tests.NORMAL",
+        "com.android.unit_tests.DANGEROUS",
+        "com.android.unit_tests.SIGNATURE",
+    };
+    
+    static final String BASE_PERMISSIONS_UNDEFINED[] = new String[] {
+        PERM_PACKAGE, "com.android.unit_tests.install_decl_perm",
+        PERM_UNDEFINED,
+        "com.android.unit_tests.NORMAL",
+        "com.android.unit_tests.DANGEROUS",
+        "com.android.unit_tests.SIGNATURE",
+    };
+    
+    static final String BASE_PERMISSIONS_USED[] = new String[] {
+        PERM_PACKAGE, "com.android.unit_tests.install_use_perm_good",
+        PERM_USED,
+        "com.android.unit_tests.NORMAL",
+        "com.android.unit_tests.DANGEROUS",
+        "com.android.unit_tests.SIGNATURE",
+    };
+    
+    static final String BASE_PERMISSIONS_NOTUSED[] = new String[] {
+        PERM_PACKAGE, "com.android.unit_tests.install_use_perm_good",
+        PERM_NOTUSED,
+        "com.android.unit_tests.NORMAL",
+        "com.android.unit_tests.DANGEROUS",
+        "com.android.unit_tests.SIGNATURE",
+    };
+    
+    static final String BASE_PERMISSIONS_SIGUSED[] = new String[] {
+        PERM_PACKAGE, "com.android.unit_tests.install_use_perm_good",
+        PERM_USED,
+        "com.android.unit_tests.SIGNATURE",
+        PERM_NOTUSED,
+        "com.android.unit_tests.NORMAL",
+        "com.android.unit_tests.DANGEROUS",
+    };
+    
+    /*
+     * Ensure that permissions are properly declared.
+     */
+    public void testInstallDeclaresPermissions() {
+        InstallParams ip = null;
+        InstallParams ip2 = null;
+        try {
+            // **: Upon installing a package, are its declared permissions published?
+           
+            int iFlags = PackageManager.INSTALL_INTERNAL;
+            int iApk = R.raw.install_decl_perm;
+            ip = installFromRawResource("install.apk", iApk,
+                    iFlags, false,
+                    false, -1, PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY);
+            assertInstall(ip.pkg, iFlags, ip.pkg.installLocation);
+            assertPermissions(BASE_PERMISSIONS_DEFINED);
+           
+            // **: Upon installing package, are its permissions granted?
+           
+            int i2Flags = PackageManager.INSTALL_INTERNAL;
+            int i2Apk = R.raw.install_use_perm_good;
+            ip2 = installFromRawResource("install2.apk", i2Apk,
+                    i2Flags, false,
+                    false, -1, PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY);
+            assertInstall(ip2.pkg, i2Flags, ip2.pkg.installLocation);
+            assertPermissions(BASE_PERMISSIONS_USED);
+            
+            // **: Upon removing but not deleting, are permissions retained?
+           
+            GenericReceiver receiver = new DeleteReceiver(ip.pkg.packageName);
+           
+            try {
+                invokeDeletePackage(ip.packageURI, PackageManager.DONT_DELETE_DATA,
+                        ip.pkg.packageName, receiver);
+            } catch (Exception e) {
+                failStr(e);
+            }
+            assertPermissions(BASE_PERMISSIONS_DEFINED);
+            assertPermissions(BASE_PERMISSIONS_USED);
+           
+            // **: Upon re-installing, are permissions retained?
+           
+            ip = installFromRawResource("install.apk", iApk,
+                    iFlags | PackageManager.INSTALL_REPLACE_EXISTING, false,
+                    false, -1, PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY);
+            assertInstall(ip.pkg, iFlags, ip.pkg.installLocation);
+            assertPermissions(BASE_PERMISSIONS_DEFINED);
+            assertPermissions(BASE_PERMISSIONS_USED);
+           
+            // **: Upon deleting package, are all permissions removed?
+           
+            try {
+                invokeDeletePackage(ip.packageURI, 0,
+                        ip.pkg.packageName, receiver);
+                ip = null;
+            } catch (Exception e) {
+                failStr(e);
+            }
+            assertPermissions(BASE_PERMISSIONS_UNDEFINED);
+            assertPermissions(BASE_PERMISSIONS_NOTUSED);
+           
+            // **: Delete package using permissions; nothing to check here.
+           
+            GenericReceiver receiver2 = new DeleteReceiver(ip2.pkg.packageName);
+            try {
+                invokeDeletePackage(ip2.packageURI, 0,
+                        ip2.pkg.packageName, receiver);
+                ip2 = null;
+            } catch (Exception e) {
+                failStr(e);
+            }
+            
+            // **: Re-install package using permissions; no permissions can be granted.
+           
+            ip2 = installFromRawResource("install2.apk", i2Apk,
+                    i2Flags, false,
+                    false, -1, PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY);
+            assertInstall(ip2.pkg, i2Flags, ip2.pkg.installLocation);
+            assertPermissions(BASE_PERMISSIONS_NOTUSED);
+           
+            // **: Upon installing declaring package, are sig permissions granted
+            // to other apps (but not other perms)?
+           
+            ip = installFromRawResource("install.apk", iApk,
+                    iFlags, false,
+                    false, -1, PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY);
+            assertInstall(ip.pkg, iFlags, ip.pkg.installLocation);
+            assertPermissions(BASE_PERMISSIONS_DEFINED);
+            assertPermissions(BASE_PERMISSIONS_SIGUSED);
+           
+            // **: Re-install package using permissions; are all permissions granted?
+            
+            ip2 = installFromRawResource("install2.apk", i2Apk,
+                    i2Flags | PackageManager.INSTALL_REPLACE_EXISTING, false,
+                    false, -1, PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY);
+            assertInstall(ip2.pkg, i2Flags, ip2.pkg.installLocation);
+            assertPermissions(BASE_PERMISSIONS_NOTUSED);
+           
+            // **: Upon deleting package, are all permissions removed?
+            
+            try {
+                invokeDeletePackage(ip.packageURI, 0,
+                        ip.pkg.packageName, receiver);
+                ip = null;
+            } catch (Exception e) {
+                failStr(e);
+            }
+            assertPermissions(BASE_PERMISSIONS_UNDEFINED);
+            assertPermissions(BASE_PERMISSIONS_NOTUSED);
+            
+            // **: Delete package using permissions; nothing to check here.
+            
+            try {
+                invokeDeletePackage(ip2.packageURI, 0,
+                        ip2.pkg.packageName, receiver);
+                ip2 = null;
+            } catch (Exception e) {
+                failStr(e);
+            }
+            
+        } finally {
+            if (ip2 != null) {
+                cleanUpInstall(ip2);
+            }
+            if (ip != null) {
+                cleanUpInstall(ip);
+            }
+        }
+    }
+
+    /*---------- Recommended install location tests ----*/
     /*
      * TODO's
      * check version numbers for upgrades

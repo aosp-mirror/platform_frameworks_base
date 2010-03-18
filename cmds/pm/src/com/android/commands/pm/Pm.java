@@ -602,6 +602,9 @@ public final class Pm {
             } else if (opt.equals("-s")) {
                 // Override if -s option is specified.
                 installFlags |= PackageManager.INSTALL_EXTERNAL;
+            } else if (opt.equals("-f")) {
+                // Override if -s option is specified.
+                installFlags |= PackageManager.INSTALL_INTERNAL;
             } else {
                 System.err.println("Error: Unknown option: " + opt);
                 showUsage();
@@ -861,7 +864,7 @@ public final class Pm {
         System.err.println("       pm list instrumentation [-f] [TARGET-PACKAGE]");
         System.err.println("       pm list features");
         System.err.println("       pm path PACKAGE");
-        System.err.println("       pm install [-l] [-r] [-t] [-i INSTALLER_PACKAGE_NAME] [-s] PATH");
+        System.err.println("       pm install [-l] [-r] [-t] [-i INSTALLER_PACKAGE_NAME] [-s] [-f] PATH");
         System.err.println("       pm uninstall [-k] PACKAGE");
         System.err.println("       pm mountsd [-m true/false]");
         System.err.println("       pm enable PACKAGE_OR_COMPONENT");
@@ -895,6 +898,7 @@ public final class Pm {
         System.err.println("  -t: allow test .apks to be installed.");
         System.err.println("  -i: specify the installer package name.");
         System.err.println("  -s: install package on sdcard.");
+        System.err.println("  -f: install package on internal flash.");
         System.err.println("");
         System.err.println("The uninstall command removes a package from the system. Options:");
         System.err.println("  -k: keep the data and cache directories around.");

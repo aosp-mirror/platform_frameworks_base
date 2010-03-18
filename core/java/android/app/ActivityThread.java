@@ -3913,6 +3913,8 @@ public final class ActivityThread {
             mResConfiguration = new Configuration();
         }
         if (!mResConfiguration.isOtherSeqNewer(config)) {
+            if (DEBUG_CONFIGURATION) Log.v(TAG, "Skipping new config: curSeq="
+                    + mResConfiguration.seq + ", newSeq=" + config.seq);
             return;
         }
         mResConfiguration.updateFrom(config);
@@ -3936,6 +3938,8 @@ public final class ActivityThread {
             WeakReference<Resources> v = it.next();
             Resources r = v.get();
             if (r != null) {
+                if (DEBUG_CONFIGURATION) Log.v(TAG, "Changing resources "
+                        + r + " config to: " + config);
                 r.updateConfiguration(config, dm);
                 //Log.i(TAG, "Updated app resources " + v.getKey()
                 //        + " " + r + ": " + r.getConfiguration());

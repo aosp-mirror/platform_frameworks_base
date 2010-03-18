@@ -1167,6 +1167,21 @@ public class HierarchicalStateMachine {
         return Message.obtain(mHsmHandler, what, obj);
     }
 
+
+    /**
+     * Enqueue a message to this state machine.
+     */
+    public final void sendMessage(int what) {
+        mHsmHandler.sendMessage(obtainMessage(what));
+    }
+
+    /**
+     * Enqueue a message to this state machine.
+     */
+    public final void sendMessage(int what, Object obj) {
+        mHsmHandler.sendMessage(obtainMessage(what,obj));
+    }
+
     /**
      * Enqueue a message to this state machine.
      */
@@ -1177,8 +1192,38 @@ public class HierarchicalStateMachine {
     /**
      * Enqueue a message to this state machine after a delay.
      */
+    public final void sendMessageDelayed(int what, long delayMillis) {
+        mHsmHandler.sendMessageDelayed(obtainMessage(what), delayMillis);
+    }
+
+    /**
+     * Enqueue a message to this state machine after a delay.
+     */
+    public final void sendMessageDelayed(int what, Object obj, long delayMillis) {
+        mHsmHandler.sendMessageDelayed(obtainMessage(what, obj), delayMillis);
+    }
+
+    /**
+     * Enqueue a message to this state machine after a delay.
+     */
     public final void sendMessageDelayed(Message msg, long delayMillis) {
         mHsmHandler.sendMessageDelayed(msg, delayMillis);
+    }
+
+    /**
+     * Enqueue a message to the front of the queue for this state machine.
+     * Protected, may only be called by instances of HierarchicalStateMachine.
+     */
+    protected final void sendMessageAtFrontOfQueue(int what, Object obj) {
+        mHsmHandler.sendMessageAtFrontOfQueue(obtainMessage(what, obj));
+    }
+
+    /**
+     * Enqueue a message to the front of the queue for this state machine.
+     * Protected, may only be called by instances of HierarchicalStateMachine.
+     */
+    protected final void sendMessageAtFrontOfQueue(int what) {
+        mHsmHandler.sendMessageAtFrontOfQueue(obtainMessage(what));
     }
 
     /**

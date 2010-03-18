@@ -1160,6 +1160,14 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         super.onLayout(changed, l, t, r, b);
         mInLayout = true;
+        if (changed) {
+            int childCount = getChildCount();
+            for (int i = 0; i < childCount; i++) {
+                getChildAt(i).forceLayout();
+            }
+            mRecycler.markChildrenDirty();
+        }
+
         layoutChildren();
         mInLayout = false;
         
@@ -2125,7 +2133,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                             int overscroll = -incrementalDeltaY - 
                                     (motionViewRealTop - motionViewPrevTop);
                             overscrollBy(0, overscroll, 0, mScrollY, 0, 0,
-                                    0, getOverscrollMax());
+                                    0, getOverscrollMax(), true);
                             mTouchMode = TOUCH_MODE_OVERSCROLL;
                             invalidate();
                         }
@@ -2170,7 +2178,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                         }
                     } else {
                         overscrollBy(0, -incrementalDeltaY, 0, mScrollY, 0, 0,
-                                0, getOverscrollMax());
+                                0, getOverscrollMax(), true);
                         invalidate();
                     }
                     mLastY = y;
@@ -2666,7 +2674,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     if (motionView != null) {
                         // Tweak the scroll for how far we overshot
                         int overshoot = -(delta - (motionView.getTop() - oldTop));
-                        overscrollBy(0, overshoot, 0, mScrollY, 0, 0, 0, getOverscrollMax());
+                        overscrollBy(0, overshoot, 0, mScrollY, 0, 0,
+                                0, getOverscrollMax(), false);
                     }
                     float vel = scroller.getCurrVelocity();
                     if (delta > 0) {
@@ -2698,7 +2707,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 if (scroller.computeScrollOffset()) {
                     final int scrollY = mScrollY;
                     final int deltaY = scroller.getCurrY() - scrollY;
-                    if (overscrollBy(0, deltaY, 0, scrollY, 0, 0, 0, getOverscrollMax())) {
+                    if (overscrollBy(0, deltaY, 0, scrollY, 0, 0,
+                            0, getOverscrollMax(), false)) {
                         startSpringback();
                     } else {
                         invalidate();
@@ -4141,6 +4151,25 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             mViewTypeCount = viewTypeCount;
             mCurrentScrap = scrapViews[0];
             mScrapViews = scrapViews;
+        }
+        
+        public void markChildrenDirty() {
+            if (mViewTypeCount == 1) {
+                final ArrayList<View> scrap = mCurrentScrap;
+                final int scrapCount = scrap.size();
+                for (int i = 0; i < scrapCount; i++) {
+                    scrap.get(i).forceLayout();
+                }
+            } else {
+                final int typeCount = mViewTypeCount;
+                for (int i = 0; i < typeCount; i++) {
+                    final ArrayList<View> scrap = mScrapViews[i];
+                    final int scrapCount = scrap.size();
+                    for (int j = 0; j < scrapCount; j++) {
+                        scrap.get(j).forceLayout();
+                    }
+                }
+            }
         }
 
         public boolean shouldRecycleViewType(int viewType) {

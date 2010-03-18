@@ -18,6 +18,7 @@ package android.media;
 
 import android.app.ActivityManagerNative;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -41,6 +42,7 @@ import android.os.ServiceManager;
 import android.provider.Settings;
 import android.provider.Settings.System;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.VolumePanel;
 import android.os.SystemProperties;
 
@@ -224,6 +226,10 @@ public class AudioService extends IAudioService.Stub {
     // Broadcast receiver for device connections intent broadcasts
     private final BroadcastReceiver mReceiver = new AudioServiceBroadcastReceiver();
 
+    //  Broadcast receiver for media button broadcasts (separate from mReceiver to
+    //  independently change its priority)
+    private final BroadcastReceiver mMediaButtonReceiver = new MediaButtonBroadcastReceiver();
+
     // Devices currently connected
     private HashMap <Integer, String> mConnectedDevices = new HashMap <Integer, String>();
 
@@ -269,6 +275,10 @@ public class AudioService extends IAudioService.Stub {
         intentFilter.addAction(Intent.ACTION_DOCK_EVENT);
         context.registerReceiver(mReceiver, intentFilter);
 
+        // Register for media button intent broadcasts.
+        intentFilter = new IntentFilter(Intent.ACTION_MEDIA_BUTTON);
+        intentFilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
+        context.registerReceiver(mMediaButtonReceiver, intentFilter);
     }
 
     private void createAudioSystemThread() {
@@ -1667,7 +1677,7 @@ public class AudioService extends IAudioService.Stub {
             if (signal) {
                 // notify the new top of the stack it gained focus
                 if (!mFocusStack.empty() && (mFocusStack.peek().mFocusDispatcher != null)
-                        && canReassignFocus()) {
+                        && canReassignAudioFocus()) {
                     try {
                         mFocusStack.peek().mFocusDispatcher.dispatchAudioFocusChange(
                                 AudioManager.AUDIOFOCUS_GAIN, mFocusStack.peek().mClientId);
@@ -1714,7 +1724,7 @@ public class AudioService extends IAudioService.Stub {
      * Helper function:
      * Returns true if the system is in a state where the focus can be reevaluated, false otherwise.
      */
-    private boolean canReassignFocus() {
+    private boolean canReassignAudioFocus() {
         // focus requests are rejected during a phone call
         if (getMode() == AudioSystem.MODE_IN_CALL) {
             Log.i(TAG, " AudioFocus  can't be reassigned during a call, exiting");
@@ -1747,7 +1757,7 @@ public class AudioService extends IAudioService.Stub {
     }
 
 
-    /** @see AudioManager#requestAudioFocus(int, int, IBinder, IAudioFocusDispatcher, String) */
+    /** @see AudioManager#requestAudioFocus(IAudioFocusDispatcher, int, int) */
     public int requestAudioFocus(int mainStreamType, int durationHint, IBinder cb,
             IAudioFocusDispatcher fd, String clientId) {
         Log.i(TAG, " AudioFocus  requestAudioFocus() from " + clientId);
@@ -1759,7 +1769,7 @@ public class AudioService extends IAudioService.Stub {
             return AudioManager.AUDIOFOCUS_REQUEST_FAILED;
         }
 
-        if (!canReassignFocus()) {
+        if (!canReassignAudioFocus()) {
             return AudioManager.AUDIOFOCUS_REQUEST_FAILED;
         }
 
@@ -1803,7 +1813,7 @@ public class AudioService extends IAudioService.Stub {
         return AudioManager.AUDIOFOCUS_REQUEST_GRANTED;
     }
 
-    /** @see AudioManager#abandonAudioFocus(IBinder, IAudioFocusDispatcher, String) */
+    /** @see AudioManager#abandonAudioFocus(IAudioFocusDispatcher) */
     public int abandonAudioFocus(IAudioFocusDispatcher fl, String clientId) {
         Log.i(TAG, " AudioFocus  abandonAudioFocus() from " + clientId);
 
@@ -1814,15 +1824,141 @@ public class AudioService extends IAudioService.Stub {
     }
 
 
-    public void unregisterFocusClient(String clientId) {
+    public void unregisterAudioFocusClient(String clientId) {
         removeFocusStackEntry(clientId, false);
+    }
+
+
+    //==========================================================================================
+    // RemoteControl
+    //==========================================================================================
+    /**
+     * Receiver for media button intents. Handles the dispatching of the media button event
+     * to one of the registered listeners, or if there was none, resumes the intent broadcast
+     * to the rest of the system.
+     */
+    private class MediaButtonBroadcastReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (!Intent.ACTION_MEDIA_BUTTON.equals(action)) {
+                return;
+            }
+            KeyEvent event = (KeyEvent) intent.getParcelableExtra(Intent.EXTRA_KEY_EVENT);
+            if (event != null) {
+                // if in a call or ringing, do not break the current phone app behavior
+                // TODO modify this to let the phone app specifically get the RC focus
+                //      add modify the phone app to take advantage of the new API
+                if ((getMode() == AudioSystem.MODE_IN_CALL) ||
+                        (getMode() == AudioSystem.MODE_RINGTONE)) {
+                    return;
+                }
+                synchronized(mRCStack) {
+                    if (!mRCStack.empty()) {
+                        // create a new intent specifically aimed at the current registered listener
+                        Intent targetedIntent = new Intent(Intent.ACTION_MEDIA_BUTTON);
+                        targetedIntent.putExtras(intent.getExtras());
+                        targetedIntent.setComponent(mRCStack.peek().mReceiverComponent);
+                        // trap the current broadcast
+                        abortBroadcast();
+                        //Log.v(TAG, " Sending intent" + targetedIntent);
+                        context.sendBroadcast(targetedIntent, null);
+                    }
+                }
+            }
+        }
+    }
+
+    private static class RemoteControlStackEntry {
+        public ComponentName mReceiverComponent;// always non null
+        // TODO implement registration expiration?
+        //public int mRegistrationTime;
+
+        public RemoteControlStackEntry() {
+        }
+
+        public RemoteControlStackEntry(ComponentName r) {
+            mReceiverComponent = r;
+        }
+    }
+
+    private Stack<RemoteControlStackEntry> mRCStack = new Stack<RemoteControlStackEntry>();
+
+    /**
+     * Helper function:
+     * Display in the log the current entries in the remote control focus stack
+     */
+    private void dumpRCStack(PrintWriter pw) {
+        pw.println("Remote Control stack entries:");
+        synchronized(mRCStack) {
+            Iterator<RemoteControlStackEntry> stackIterator = mRCStack.iterator();
+            while(stackIterator.hasNext()) {
+                RemoteControlStackEntry fse = stackIterator.next();
+                pw.println("     receiver:" + fse.mReceiverComponent);
+            }
+        }
+    }
+
+    /**
+     * Helper function:
+     * Set the new remote control receiver at the top of the RC focus stack
+     */
+    private void pushMediaButtonReceiver(ComponentName newReceiver) {
+        // already at top of stack?
+        if (!mRCStack.empty() && mRCStack.peek().mReceiverComponent.equals(newReceiver)) {
+            return;
+        }
+        Iterator<RemoteControlStackEntry> stackIterator = mRCStack.iterator();
+        while(stackIterator.hasNext()) {
+            RemoteControlStackEntry rcse = (RemoteControlStackEntry)stackIterator.next();
+            if(rcse.mReceiverComponent.equals(newReceiver)) {
+                mRCStack.remove(rcse);
+                break;
+            }
+        }
+        mRCStack.push(new RemoteControlStackEntry(newReceiver));
+    }
+
+    /**
+     * Helper function:
+     * Remove the remote control receiver from the RC focus stack
+     */
+    private void removeMediaButtonReceiver(ComponentName newReceiver) {
+        Iterator<RemoteControlStackEntry> stackIterator = mRCStack.iterator();
+        while(stackIterator.hasNext()) {
+            RemoteControlStackEntry rcse = (RemoteControlStackEntry)stackIterator.next();
+            if(rcse.mReceiverComponent.equals(newReceiver)) {
+                mRCStack.remove(rcse);
+                break;
+            }
+        }
+    }
+
+
+    /** see AudioManager.registerMediaButtonEventReceiver(ComponentName eventReceiver) */
+    public void registerMediaButtonEventReceiver(ComponentName eventReceiver) {
+        Log.i(TAG, "  Remote Control   registerMediaButtonEventReceiver() for " + eventReceiver);
+
+        synchronized(mRCStack) {
+            pushMediaButtonReceiver(eventReceiver);
+        }
+    }
+
+    /** see AudioManager.unregisterMediaButtonEventReceiver(ComponentName eventReceiver) */
+    public void unregisterMediaButtonEventReceiver(ComponentName eventReceiver) {
+        Log.i(TAG, "  Remote Control   registerMediaButtonEventReceiver() for " + eventReceiver);
+
+        synchronized(mRCStack) {
+            removeMediaButtonReceiver(eventReceiver);
+        }
     }
 
 
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        // TODO probably a lot more to do here than just the audio focus stack
+        // TODO probably a lot more to do here than just the audio focus and remote control stacks
         dumpFocusStack(pw);
+        dumpRCStack(pw);
     }
 
 

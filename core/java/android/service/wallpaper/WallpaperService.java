@@ -141,6 +141,7 @@ public abstract class WallpaperService extends Service {
         final Rect mVisibleInsets = new Rect();
         final Rect mWinFrame = new Rect();
         final Rect mContentInsets = new Rect();
+        final Configuration mConfiguration = new Configuration();
         
         final WindowManager.LayoutParams mLayout
                 = new WindowManager.LayoutParams();
@@ -494,7 +495,7 @@ public abstract class WallpaperService extends Service {
                     final int relayoutResult = mSession.relayout(
                         mWindow, mLayout, mWidth, mHeight,
                             View.VISIBLE, false, mWinFrame, mContentInsets,
-                            mVisibleInsets, mSurfaceHolder.mSurface);
+                            mVisibleInsets, mConfiguration, mSurfaceHolder.mSurface);
 
                     if (DEBUG) Log.v(TAG, "New surface: " + mSurfaceHolder.mSurface
                             + ", frame=" + mWinFrame);

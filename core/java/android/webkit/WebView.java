@@ -2670,7 +2670,7 @@ public class WebView extends AbsoluteLayout
             if (oldX != x || oldY != y) {
                 overscrollBy(x - oldX, y - oldY, oldX, oldY,
                         computeMaxScrollX(), computeMaxScrollY(),
-                        getViewWidth() / 3, getViewHeight() / 3);
+                        getViewWidth() / 3, getViewHeight() / 3, false);
                 onScrollChanged(mScrollX, mScrollY, oldX, oldY);
             }
         } else {
@@ -4521,9 +4521,14 @@ public class WebView extends AbsoluteLayout
     }
 
     private boolean hitFocusedPlugin(int contentX, int contentY) {
+        if (DebugFlags.WEB_VIEW) {
+            Log.v(LOGTAG, "nativeFocusIsPlugin()=" + nativeFocusIsPlugin());
+            Rect r = nativeFocusNodeBounds();
+            Log.v(LOGTAG, "nativeFocusNodeBounds()=(" + r.left + ", " + r.top
+                    + ", " + r.right + ", " + r.bottom + ")");
+        }
         return nativeFocusIsPlugin()
-                && nativePointInNavCache(contentX, contentY, mNavSlop)
-                && nativeCacheHitNodePointer() == nativeFocusNodePointer();
+                && nativeFocusNodeBounds().contains(contentX, contentY);
     }
 
     private boolean shouldForwardTouchEvent() {
@@ -5021,7 +5026,7 @@ public class WebView extends AbsoluteLayout
         if ((deltaX | deltaY) != 0) {
             overscrollBy(deltaX, deltaY, mScrollX, mScrollY,
                     computeMaxScrollX(), computeMaxScrollY(),
-                    getViewWidth() / 3, getViewHeight() / 3);
+                    getViewWidth() / 3, getViewHeight() / 3, true);
         }
         if (!getSettings().getBuiltInZoomControls()) {
             boolean showPlusMinus = mMinZoomScale < mMaxZoomScale;
@@ -7169,6 +7174,7 @@ public class WebView extends AbsoluteLayout
      */
     private native int      nativeFocusCandidateType();
     private native boolean  nativeFocusIsPlugin();
+    private native Rect     nativeFocusNodeBounds();
     /* package */ native int nativeFocusNodePointer();
     private native Rect     nativeGetCursorRingBounds();
     private native String   nativeGetSelection();

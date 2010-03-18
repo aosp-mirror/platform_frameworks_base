@@ -1032,7 +1032,7 @@ public final class Bridge implements ILayoutBridge {
 
         @SuppressWarnings("unused")
         public int relayout(IWindow arg0, LayoutParams arg1, int arg2, int arg3, int arg4,
-                boolean arg4_5, Rect arg5, Rect arg6, Rect arg7, Surface arg8)
+                boolean arg4_5, Rect arg5, Rect arg6, Rect arg7, Configuration arg7b, Surface arg8)
                 throws RemoteException {
             // pass for now.
             return 0;

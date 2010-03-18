@@ -1463,8 +1463,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     void showInputMethodMenu() {
         if (DEBUG) Slog.v(TAG, "Show switching menu");
 
-        hideInputMethodMenu();
-
         final Context context = mContext;
 
         final PackageManager pm = context.getPackageManager();
@@ -1479,67 +1477,69 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             return;
         }
         
-        int N = immis.size();
+        synchronized (mMethodMap) {
+            hideInputMethodMenuLocked();
 
-        mItems = new CharSequence[N];
-        mIms = new InputMethodInfo[N];
-
-        for (int i = 0; i < N; ++i) {
-            InputMethodInfo property = immis.get(i);
-            if (property == null) {
-                i--;
-                N--;
-                continue;
+            int N = immis.size();
+    
+            mItems = new CharSequence[N];
+            mIms = new InputMethodInfo[N];
+    
+            int j = 0;
+            for (int i = 0; i < N; ++i) {
+                InputMethodInfo property = immis.get(i);
+                if (property == null) {
+                    continue;
+                }
+                mItems[j] = property.loadLabel(pm);
+                mIms[j] = property;
+                j++;
             }
-            mItems[i] = property.loadLabel(pm);
-            mIms[i] = property;
-        }
-
-        int checkedItem = 0;
-        for (int i = 0; i < N; ++i) {
-            if (mIms[i].getId().equals(lastInputMethodId)) {
-                checkedItem = i;
-                break;
+    
+            int checkedItem = 0;
+            for (int i = 0; i < N; ++i) {
+                if (mIms[i].getId().equals(lastInputMethodId)) {
+                    checkedItem = i;
+                    break;
+                }
             }
-        }
-
-        AlertDialog.OnClickListener adocl = new AlertDialog.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                hideInputMethodMenu();
-            }
-        };
-
-        TypedArray a = context.obtainStyledAttributes(null,
-                com.android.internal.R.styleable.DialogPreference,
-                com.android.internal.R.attr.alertDialogStyle, 0);
-        mDialogBuilder = new AlertDialog.Builder(context)
-                .setTitle(com.android.internal.R.string.select_input_method)
-                .setOnCancelListener(new OnCancelListener() {
-                    public void onCancel(DialogInterface dialog) {
-                        hideInputMethodMenu();
-                    }
-                })
-                .setIcon(a.getDrawable(
-                        com.android.internal.R.styleable.DialogPreference_dialogTitle));
-        a.recycle();
-
-        mDialogBuilder.setSingleChoiceItems(mItems, checkedItem,
-                new AlertDialog.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        synchronized (mMethodMap) {
-                            if (mIms == null || mIms.length <= which) {
-                                return;
-                            }
-                            InputMethodInfo im = mIms[which];
+    
+            AlertDialog.OnClickListener adocl = new AlertDialog.OnClickListener() {
+                public void onClick(DialogInterface dialog, int which) {
+                    hideInputMethodMenu();
+                }
+            };
+    
+            TypedArray a = context.obtainStyledAttributes(null,
+                    com.android.internal.R.styleable.DialogPreference,
+                    com.android.internal.R.attr.alertDialogStyle, 0);
+            mDialogBuilder = new AlertDialog.Builder(context)
+                    .setTitle(com.android.internal.R.string.select_input_method)
+                    .setOnCancelListener(new OnCancelListener() {
+                        public void onCancel(DialogInterface dialog) {
                             hideInputMethodMenu();
-                            if (im != null) {
-                                setInputMethodLocked(im.getId());
+                        }
+                    })
+                    .setIcon(a.getDrawable(
+                            com.android.internal.R.styleable.DialogPreference_dialogTitle));
+            a.recycle();
+    
+            mDialogBuilder.setSingleChoiceItems(mItems, checkedItem,
+                    new AlertDialog.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            synchronized (mMethodMap) {
+                                if (mIms == null || mIms.length <= which) {
+                                    return;
+                                }
+                                InputMethodInfo im = mIms[which];
+                                hideInputMethodMenu();
+                                if (im != null) {
+                                    setInputMethodLocked(im.getId());
+                                }
                             }
                         }
-                    }
-                });
+                    });
 
-        synchronized (mMethodMap) {
             mSwitchingDialog = mDialogBuilder.create();
             mSwitchingDialog.getWindow().setType(
                     WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG);
