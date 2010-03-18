@@ -24,7 +24,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.view.View;
-import android.view.Window;
 
 /**
  * Shows a hierarchy of {@link Preference} objects as
@@ -81,6 +80,8 @@ public abstract class PreferenceActivity extends ListActivity implements
     
     private PreferenceManager mPreferenceManager;
     
+    private Bundle mSavedInstanceState;
+
     /**
      * The starting request code given out to preference framework.
      */
@@ -137,15 +138,19 @@ public abstract class PreferenceActivity extends ListActivity implements
 
     @Override
     protected void onRestoreInstanceState(Bundle state) {
-        super.onRestoreInstanceState(state);
-
         Bundle container = state.getBundle(PREFERENCES_TAG);
         if (container != null) {
             final PreferenceScreen preferenceScreen = getPreferenceScreen();
             if (preferenceScreen != null) {
                 preferenceScreen.restoreHierarchyState(container);
+                mSavedInstanceState = state;
+                return;
             }
         }
+
+        // Only call this if we didn't save the instance state for later.
+        // If we did save it, it will be restored when we bind the adapter.
+        super.onRestoreInstanceState(state);
     }
 
     @Override
@@ -176,6 +181,10 @@ public abstract class PreferenceActivity extends ListActivity implements
         final PreferenceScreen preferenceScreen = getPreferenceScreen();
         if (preferenceScreen != null) {
             preferenceScreen.bind(getListView());
+            if (mSavedInstanceState != null) {
+                super.onRestoreInstanceState(mSavedInstanceState);
+                mSavedInstanceState = null;
+            }
         }
     }
     
