@@ -72,8 +72,9 @@ static char *createStr(const char *path) {
 }
 
 static void sqlLogger(void *databaseName, int iErrCode, const char *zMsg) {
-    LOGI("sqlite returned: database = %s, error code = %d, msg = %s\n",
-            (char *)databaseName, iErrCode, zMsg);
+    // skip printing this message if it is due to certain types of errors
+    if (iErrCode == SQLITE_CONSTRAINT) return;
+    LOGI("sqlite returned: error code = %d, msg = %s\n", iErrCode, zMsg);
 }
 
 // register the logging func on sqlite. needs to be done BEFORE any sqlite3 func is called.
