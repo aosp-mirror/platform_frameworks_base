@@ -308,13 +308,17 @@ public class WifiService extends IWifiManager.Stub {
                         }
                     } catch (Exception e) {
                         Slog.e(TAG, "Error configuring interface " + intf + ", :" + e);
+                        try {
+                            nwService.stopAccessPoint();
+                        } catch (Exception ee) {
+                            Slog.e(TAG, "Could not stop AP, :" + ee);
+                        }
                         setWifiApEnabledState(WIFI_AP_STATE_FAILED, 0, DriverAction.DRIVER_UNLOAD);
                         return;
                     }
 
                     if(mCm.tether(intf) != ConnectivityManager.TETHER_ERROR_NO_ERROR) {
                         Slog.e(TAG, "Error tethering "+intf);
-                        setWifiApEnabledState(WIFI_AP_STATE_FAILED, 0, DriverAction.DRIVER_UNLOAD);
                     }
                     break;
                 }
