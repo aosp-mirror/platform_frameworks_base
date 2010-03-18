@@ -154,8 +154,8 @@ void HTTPDataSource::init(const KeyedVector<String8, String8> *headers) {
     initHeaders(headers);
 
     mBuffer = malloc(kBufferSize);
-    mBufferLength = 0;
-    mBufferOffset = 0;
+
+    mNumRetriesLeft = kMaxNumRetries;
 }
 
 status_t HTTPDataSource::connect() {
@@ -169,6 +169,8 @@ status_t HTTPDataSource::connect() {
         mState = CONNECTING;
     }
 
+    mBufferLength = 0;
+    mBufferOffset = 0;
     mContentLengthValid = false;
 
     string host = mStartingHost.string();
@@ -328,6 +330,7 @@ ssize_t HTTPDataSource::sendRangeRequest(size_t offset) {
 ssize_t HTTPDataSource::readAt(off_t offset, void *data, size_t size) {
     LOGV("readAt %ld, size %d", offset, size);
 
+rinse_repeat:
     {
         Mutex::Autolock autoLock(mStateLock);
         if (mState != CONNECTED) {
@@ -383,6 +386,15 @@ ssize_t HTTPDataSource::readAt(off_t offset, void *data, size_t size) {
     ssize_t num_bytes_received = mHttp->receive(mBuffer, contentLength);
 
     if (num_bytes_received < 0) {
+        if (mNumRetriesLeft-- > 0) {
+            disconnect();
+            if (connect() == OK) {
+                LOGI("retrying connection succeeded.");
+                goto rinse_repeat;
+            }
+            LOGE("retrying connection failed");
+        }
+
         mBufferLength = 0;
 
         return num_bytes_received;

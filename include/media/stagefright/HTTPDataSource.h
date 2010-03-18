@@ -54,7 +54,11 @@ protected:
 
 private:
     enum {
-        kBufferSize = 32 * 1024
+        kBufferSize = 32 * 1024,
+
+        // If we encounter a socket-read error we'll try reconnecting
+        // and restarting the read for at most this many times.
+        kMaxNumRetries = 3,
     };
 
     enum State {
@@ -83,6 +87,8 @@ private:
 
     bool mContentLengthValid;
     unsigned long long mContentLength;
+
+    int32_t mNumRetriesLeft;
 
     void init(const KeyedVector<String8, String8> *headers);
 

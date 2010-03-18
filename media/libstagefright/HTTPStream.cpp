@@ -289,10 +289,14 @@ ssize_t HTTPStream::receive(void *data, size_t size) {
                 continue;
             }
 
+            LOGE("recv failed, errno = %d (%s)", errno, strerror(errno));
+
             disconnect();
-            return total == 0 ? (ssize_t)ERROR_IO : total;
+            return (ssize_t)ERROR_IO;
         } else if (n == 0) {
             disconnect();
+
+            LOGE("recv failed, server is gone");
 
             return total == 0 ? (ssize_t)ERROR_CONNECTION_LOST : total;
         }
