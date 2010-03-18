@@ -91,7 +91,6 @@ public class FileFilter {
         ignoreResultList.add("http/tests/appcache/disabled.html"); // not found
         ignoreResultList.add("http/tests/appcache/empty-manifest.html"); // flaky
         ignoreResultList.add("http/tests/appcache/foreign-iframe-main.html"); // flaky - skips states
-        ignoreResultList.add("http/tests/appcache/local-content.html"); // text diff
         ignoreResultList.add("http/tests/appcache/max-size.html"); // no layoutTestController.setAppCacheMaximumSize
         ignoreResultList.add("http/tests/appcache/manifest-with-empty-file.html"); // flaky
         ignoreResultList.add("http/tests/appcache/whitelist-wildcard.html"); // file not found
