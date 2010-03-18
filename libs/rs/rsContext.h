@@ -18,6 +18,7 @@
 #define ANDROID_RS_CONTEXT_H
 
 #include "rsUtils.h"
+#include "rsMutex.h"
 
 #include "rsThreadIO.h"
 #include "rsType.h"
@@ -227,7 +228,7 @@ protected:
 
 
     struct ObjDestroyOOB {
-        pthread_mutex_t mMutex;
+        Mutex mMutex;
         Vector<ObjectBase *> mDestroyList;
         bool mNeedToEmpty;
     };

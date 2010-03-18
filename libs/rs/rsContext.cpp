@@ -664,8 +664,7 @@ void Context::appendNameDefines(String8 *str) const
 
 bool Context::objDestroyOOBInit()
 {
-    int status = pthread_mutex_init(&mObjDestroy.mMutex, NULL);
-    if (status) {
+    if (!mObjDestroy.mMutex.init()) {
         LOGE("Context::ObjDestroyOOBInit mutex init failure");
         return false;
     }
@@ -675,9 +674,8 @@ bool Context::objDestroyOOBInit()
 void Context::objDestroyOOBRun()
 {
     if (mObjDestroy.mNeedToEmpty) {
-        int status = pthread_mutex_lock(&mObjDestroy.mMutex);
-        if (status) {
-            LOGE("Context::ObjDestroyOOBRun: error %i locking for OOBRun.", status);
+        if (!mObjDestroy.mMutex.lock()) {
+            LOGE("Context::ObjDestroyOOBRun: error locking for OOBRun.");
             return;
         }
 
@@ -686,35 +684,25 @@ void Context::objDestroyOOBRun()
         }
         mObjDestroy.mDestroyList.clear();
         mObjDestroy.mNeedToEmpty = false;
-
-        status = pthread_mutex_unlock(&mObjDestroy.mMutex);
-        if (status) {
-            LOGE("Context::ObjDestroyOOBRun: error %i unlocking for set condition.", status);
-        }
+        mObjDestroy.mMutex.unlock();
     }
 }
 
 void Context::objDestroyOOBDestroy()
 {
     rsAssert(!mObjDestroy.mNeedToEmpty);
-    pthread_mutex_destroy(&mObjDestroy.mMutex);
 }
 
 void Context::objDestroyAdd(ObjectBase *obj)
 {
-    int status = pthread_mutex_lock(&mObjDestroy.mMutex);
-    if (status) {
-        LOGE("Context::ObjDestroyOOBRun: error %i locking for OOBRun.", status);
+    if (!mObjDestroy.mMutex.lock()) {
+        LOGE("Context::ObjDestroyOOBRun: error locking for OOBRun.");
         return;
     }
 
     mObjDestroy.mNeedToEmpty = true;
     mObjDestroy.mDestroyList.add(obj);
-
-    status = pthread_mutex_unlock(&mObjDestroy.mMutex);
-    if (status) {
-        LOGE("Context::ObjDestroyOOBRun: error %i unlocking for set condition.", status);
-    }
+    mObjDestroy.mMutex.unlock();
 }
 
 uint32_t Context::getMessageToClient(void *data, size_t *receiveLen, size_t bufferLen, bool wait)

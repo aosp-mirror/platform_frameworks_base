@@ -17,7 +17,7 @@
 #include "rsLocklessFifo.h"
 
 using namespace android;
-
+using namespace android::renderscript;
 
 LocklessCommandFifo::LocklessCommandFifo()
 {
@@ -128,15 +128,19 @@ void LocklessCommandFifo::flush()
     //dumpState("flush 2");
 }
 
+void LocklessCommandFifo::wait()
+{
+    while(isEmpty() && !mInShutdown) {
+        mSignalToControl.set();
+        mSignalToWorker.wait();
+    }
+}
+
 const void * LocklessCommandFifo::get(uint32_t *command, uint32_t *bytesData)
 {
     while(1) {
         //dumpState("get");
-        while(isEmpty() && !mInShutdown) {
-            mSignalToControl.set();
-            mSignalToWorker.wait();
-        }
-
+        wait();
         if (mInShutdown) {
             *command = 0;
             *bytesData = 0;
@@ -190,81 +194,5 @@ void LocklessCommandFifo::makeSpace(uint32_t bytes)
 void LocklessCommandFifo::dumpState(const char *s) const
 {
     LOGV("%s  put %p, get %p,  buf %p,  end %p", s, mPut, mGet, mBuffer, mEnd);
-}
-
-LocklessCommandFifo::Signal::Signal()
-{
-    mSet = true;
-}
-
-LocklessCommandFifo::Signal::~Signal()
-{
-    pthread_mutex_destroy(&mMutex);
-    pthread_cond_destroy(&mCondition);
-}
-
-bool LocklessCommandFifo::Signal::init()
-{
-    int status = pthread_mutex_init(&mMutex, NULL);
-    if (status) {
-        LOGE("LocklessFifo mutex init failure");
-        return false;
-    }
-
-    status = pthread_cond_init(&mCondition, NULL);
-    if (status) {
-        LOGE("LocklessFifo condition init failure");
-        pthread_mutex_destroy(&mMutex);
-        return false;
-    }
-
-    return true;
-}
-
-void LocklessCommandFifo::Signal::set()
-{
-    int status;
-
-    status = pthread_mutex_lock(&mMutex);
-    if (status) {
-        LOGE("LocklessCommandFifo: error %i locking for set condition.", status);
-        return;
-    }
-
-    mSet = true;
-
-    status = pthread_cond_signal(&mCondition);
-    if (status) {
-        LOGE("LocklessCommandFifo: error %i on set condition.", status);
-    }
-
-    status = pthread_mutex_unlock(&mMutex);
-    if (status) {
-        LOGE("LocklessCommandFifo: error %i unlocking for set condition.", status);
-    }
-}
-
-void LocklessCommandFifo::Signal::wait()
-{
-    int status;
-
-    status = pthread_mutex_lock(&mMutex);
-    if (status) {
-        LOGE("LocklessCommandFifo: error %i locking for condition.", status);
-        return;
-    }
-
-    if (!mSet) {
-        status = pthread_cond_wait(&mCondition, &mMutex);
-        if (status) {
-            LOGE("LocklessCommandFifo: error %i waiting on condition.", status);
-        }
-    }
-    mSet = false;
-
-    status = pthread_mutex_unlock(&mMutex);
-    if (status) {
-        LOGE("LocklessCommandFifo: error %i unlocking for condition.", status);
-    }
 }
 

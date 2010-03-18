@@ -81,12 +81,13 @@ LOCAL_SRC_FILES:= \
 	rsContext.cpp \
 	rsDevice.cpp \
 	rsElement.cpp \
-        rsFileA3D.cpp \
+    rsFileA3D.cpp \
 	rsLight.cpp \
 	rsLocklessFifo.cpp \
 	rsObjectBase.cpp \
 	rsMatrix.cpp \
-        rsMesh.cpp \
+    rsMesh.cpp \
+    rsMutex.cpp \
 	rsNoise.cpp \
 	rsProgram.cpp \
 	rsProgramFragment.cpp \
@@ -97,7 +98,8 @@ LOCAL_SRC_FILES:= \
 	rsScript.cpp \
 	rsScriptC.cpp \
 	rsScriptC_Lib.cpp \
-        rsShaderCache.cpp \
+    rsShaderCache.cpp \
+	rsSignal.cpp \
 	rsSimpleMesh.cpp \
 	rsThreadIO.cpp \
 	rsType.cpp \

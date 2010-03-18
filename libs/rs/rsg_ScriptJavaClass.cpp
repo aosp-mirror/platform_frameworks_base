@@ -7,8 +7,12 @@
 struct Element;
 
 struct ElementField {
+    // An Element Field is a combination of an Element with a name assigned.
+
     const char *name;
     Element *e;
+
+
     ElementField(const char *n, Element *_e) {
         name = n;
         e = _e;
@@ -20,12 +24,21 @@ struct ElementField {
 };
 
 struct Element {
+    // An Element can take one of two forms.
+    // 1: Basic.  It contains a single basic type and vector size.
+    // 2: Complex.  It contains a list of fields with names.  Each field
+    // will in turn be another element.
+
     ElementField *fields;
-    size_t fieldCount;
+    size_t fieldCount;  // If field count is 0, the element is a Basic type.
     const char *name;
     bool generated;
 
+    // The basic data type from RenderScript.h
     RsDataType compType;
+
+    // The vector size of the data type for float2, float3, ....
+    // Allowed sizes are 2,3,4,8,16
     uint32_t compVectorSize;
 
     Element() {
