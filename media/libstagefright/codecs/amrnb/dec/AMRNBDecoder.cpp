@@ -21,6 +21,7 @@
 #include <media/stagefright/MediaBufferGroup.h>
 #include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/MediaDefs.h>
+#include <media/stagefright/MediaErrors.h>
 #include <media/stagefright/MetaData.h>
 
 namespace android {
@@ -161,7 +162,14 @@ status_t AMRNBDecoder::read(
 
     buffer->set_range(0, kNumSamplesPerFrame * sizeof(int16_t));
 
-    CHECK(numBytesRead <= mInputBuffer->range_length());
+    if (numBytesRead > mInputBuffer->range_length()) {
+        // This is bad, should never have happened, but did. Abort now.
+
+        buffer->release();
+        buffer = NULL;
+
+        return ERROR_MALFORMED;
+    }
 
     mInputBuffer->set_range(
             mInputBuffer->range_offset() + numBytesRead,
