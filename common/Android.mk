@@ -20,11 +20,13 @@ LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 LOCAL_MODULE := android-common
 LOCAL_SDK_VERSION := current
-LOCAL_SRC_FILES := $(call all-java-files-under, java)
+LOCAL_SRC_FILES := \
+     $(call all-java-files-under, java) \
+     $(call all-logtags-files-under, java)
 include $(BUILD_STATIC_JAVA_LIBRARY)
 
 # Include this library in the build server's output directory
 $(call dist-for-goals, droid, $(LOCAL_BUILT_MODULE):android-common.jar)
 
 # Build the test package
-include $(call all-makefiles-under,$(LOCAL_PATH))
+include $(call all-makefiles-under, $(LOCAL_PATH))
