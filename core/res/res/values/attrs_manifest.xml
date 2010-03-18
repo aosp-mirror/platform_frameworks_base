@@ -531,8 +531,8 @@
         <!-- The screen orientation has changed, that is the user has
              rotated the device. -->
         <flag name="orientation" value="0x0080" />
-        <!-- The screen orientation has changed, that is the user has
-             rotated the device. -->
+        <!-- The screen layout has changed.  This might be caused by a
+             different display being activated. -->
         <flag name="screenLayout" value="0x0100" />
         <!-- The font scaling factor has changed, that is the user has
              selected a new global font size. -->
