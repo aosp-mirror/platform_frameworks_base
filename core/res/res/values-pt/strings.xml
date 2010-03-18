@@ -1,18 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Copyright (C) 2009 The Android Open Source Project
+<!-- 
+/* //device/apps/common/assets/res/any/strings.xml
+**
+** Copyright 2006, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+ -->
 
-     Licensed under the Apache License, Version 2.0 (the "License");
-     you may not use this file except in compliance with the License.
-     You may obtain a copy of the License at
-
-          http://www.apache.org/licenses/LICENSE-2.0
-
-     Unless required by applicable law or agreed to in writing, software
-     distributed under the License is distributed on an "AS IS" BASIS,
-     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-     See the License for the specific language governing permissions and
-     limitations under the License.
--->
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="8340973892742019101">"B"</string>
@@ -64,8 +69,12 @@
     <string name="RestrictedChangedTitle" msgid="5592189398956187498">"Acesso restrito alterado"</string>
     <string name="RestrictedOnData" msgid="8653794784690065540">"O serviço de dados está bloqueado."</string>
     <string name="RestrictedOnEmergency" msgid="6581163779072833665">"O serviço de emergência está bloqueado."</string>
-    <string name="RestrictedOnNormal" msgid="2045364908281990708">"O serviço de voz/SMS está bloqueado."</string>
-    <string name="RestrictedOnAll" msgid="4923139582141626159">"Todos os serviços de voz/SMS estão bloqueados."</string>
+    <string name="RestrictedOnNormal" msgid="4953867011389750673">"O serviço de voz está bloqueado."</string>
+    <string name="RestrictedOnAllVoice" msgid="1459318899842232234">"Todos os serviços de voz estão bloqueados."</string>
+    <string name="RestrictedOnSms" msgid="8314352327461638897">"O serviço de SMS está bloqueado."</string>
+    <string name="RestrictedOnVoiceData" msgid="8244438624660371717">"Os serviços de voz/dados estão bloqueados."</string>
+    <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"Os serviços de voz/SMS estão bloqueados."</string>
+    <string name="RestrictedOnAll" msgid="2714924667937117304">"Todos os serviços de voz/dados/SMS estão bloqueados."</string>
     <string name="serviceClassVoice" msgid="1258393812335258019">"Voz"</string>
     <string name="serviceClassData" msgid="872456782077937893">"Dados"</string>
     <string name="serviceClassFAX" msgid="5566624998840486475">"FAX"</string>
@@ -251,10 +260,8 @@
     <string name="permdesc_installPackages" msgid="526669220850066132">"Permite que um aplicativo instale pacotes novos ou atualizados do Android. Aplicativos maliciosos podem usar isso para adicionar novos aplicativos com permissões arbitrariamente avançadas."</string>
     <string name="permlab_clearAppCache" msgid="4747698311163766540">"excluir todos os dados de cache do aplicativo"</string>
     <string name="permdesc_clearAppCache" msgid="7740465694193671402">"Permite que um aplicativo libere o espaço de armazenamento do telefone excluindo arquivos no diretório de cache do aplicativo. O acesso é normalmente muito restrito para o processo do sistema."</string>
-    <!-- no translation found for permlab_movePackage (728454979946503926) -->
-    <skip />
-    <!-- no translation found for permdesc_movePackage (6323049291923925277) -->
-    <skip />
+    <string name="permlab_movePackage" msgid="728454979946503926">"Mover recursos do aplicativo"</string>
+    <string name="permdesc_movePackage" msgid="6323049291923925277">"Permite que um aplicativo mova os recursos do aplicativo da mídia interna para a externa e vice-versa."</string>
     <string name="permlab_readLogs" msgid="4811921703882532070">"ler arquivos de registro do sistema"</string>
     <string name="permdesc_readLogs" msgid="2257937955580475902">"Permite que um aplicativo leia os diversos arquivos de registro do sistema. Isso permite que ele descubra informações gerais sobre o que você está fazendo com o telefone, porém esses arquivos não devem conter informações pessoais ou privadas."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"ler/gravar em recursos pertencentes ao diag"</string>
@@ -281,13 +288,10 @@
     <string name="permdesc_writeOwnerData" msgid="2344055317969787124">"Permite que um aplicativo modifique os dados de proprietário do telefone armazenados no seu telefone. Aplicativos maliciosos podem usar isso para apagar ou modificar dados do proprietário."</string>
     <string name="permlab_readOwnerData" msgid="6668525984731523563">"ler dados do proprietário"</string>
     <string name="permdesc_readOwnerData" msgid="3088486383128434507">"Permite que um aplicativo leia os dados de proprietário do telefone armazenados no seu telefone. Aplicativos maliciosos podem usar isso para ler os dados de proprietário do telefone."</string>
-    <!-- no translation found for permlab_readCalendar (6898987798303840534) -->
-    <skip />
+    <string name="permlab_readCalendar" msgid="6898987798303840534">"ler eventos da agenda"</string>
     <string name="permdesc_readCalendar" msgid="5533029139652095734">"Permite que um aplicativo leia todos os eventos da agenda armazenados no seu telefone. Aplicativos maliciosos podem usar isso para enviar eventos da sua agenda para outras pessoas."</string>
-    <!-- no translation found for permlab_writeCalendar (3894879352594904361) -->
-    <skip />
-    <!-- no translation found for permdesc_writeCalendar (2988871373544154221) -->
-    <skip />
+    <string name="permlab_writeCalendar" msgid="3894879352594904361">"adicionar ou modificar eventos da agenda e enviar e-mail aos convidados"</string>
+    <string name="permdesc_writeCalendar" msgid="2988871373544154221">"Permite que um aplicativo adicione ou altere os eventos na sua agenda, que pode enviar e-mail aos convidados. Aplicativos maliciosos podem usar isso para apagar ou modificar os eventos da sua agenda ou para enviar e-mail aos convidados."</string>
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"fontes de locais fictícios para teste"</string>
     <string name="permdesc_accessMockLocation" msgid="7648286063459727252">"Cria fontes de locais fictícios para teste. Aplicativos maliciosos podem usar isso para substituir o local e/ou o status retornado pelas fontes de locais reais como GPS ou provedores de rede."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"acessar comandos extras do provedor de localização"</string>
@@ -382,7 +386,7 @@
     <string name="permdesc_writeApnSettings" msgid="7443433457842966680">"Permite que um aplicativo modifique as configurações de APN, como Proxy e Porta de qualquer APN."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"alterar conectividade da rede"</string>
     <string name="permdesc_changeNetworkState" msgid="4199958910396387075">"Permite que um aplicativo altere o estado da conectividade de rede."</string>
-    <string name="permlab_changeTetherState" msgid="5952584964373017960">"alterar conectividade vinculada"</string>
+    <string name="permlab_changeTetherState" msgid="2702121155761140799">"Alterar conectividade vinculada"</string>
     <string name="permdesc_changeTetherState" msgid="8905815579146349568">"Permite que um aplicativo altere o estado da conectividade de rede vinculada."</string>
     <string name="permlab_changeBackgroundDataSetting" msgid="1400666012671648741">"alterar configuração de uso dos dados de segundo plano"</string>
     <string name="permdesc_changeBackgroundDataSetting" msgid="1001482853266638864">"Permite que um aplicativo altere a configuração de uso dos dados de segundo plano."</string>
@@ -532,8 +536,7 @@
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"Pressione Menu para desbloquear."</string>
     <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"Desenhe o padrão para desbloquear"</string>
     <string name="lockscreen_emergency_call" msgid="5347633784401285225">"Chamada de emergência"</string>
-    <!-- no translation found for lockscreen_return_to_call (5244259785500040021) -->
-    <skip />
+    <string name="lockscreen_return_to_call" msgid="5244259785500040021">"Retornar à chamada"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Correto!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4817583279053112312">"Tente novamente"</string>
     <string name="lockscreen_plugged_in" msgid="613343852842944435">"Carregando (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
@@ -620,11 +623,11 @@
     <item quantity="one" msgid="9150797944610821849">"1 hora atrás"</item>
     <item quantity="other" msgid="2467273239587587569">"<xliff:g id="COUNT">%d</xliff:g> horas atrás"</item>
   </plurals>
-    <!-- no translation found for last_num_days:other (3069992808164318268) -->
-    <!-- no translation found for last_month (3959346739979055432) -->
-    <skip />
-    <!-- no translation found for older (5211975022815554840) -->
-    <skip />
+  <plurals name="last_num_days">
+    <item quantity="other" msgid="3069992808164318268">"Últimos <xliff:g id="COUNT">%d</xliff:g> dias"</item>
+  </plurals>
+    <string name="last_month" msgid="3959346739979055432">"Mês passado"</string>
+    <string name="older" msgid="5211975022815554840">"Mais antigos"</string>
   <plurals name="num_days_ago">
     <item quantity="one" msgid="861358534398115820">"ontem"</item>
     <item quantity="other" msgid="2479586466153314633">"<xliff:g id="COUNT">%d</xliff:g> dias atrás"</item>
@@ -692,11 +695,6 @@
     <string name="weeks" msgid="6509623834583944518">"semanas"</string>
     <string name="year" msgid="4001118221013892076">"ano"</string>
     <string name="years" msgid="6881577717993213522">"anos"</string>
-    <string name="every_weekday" msgid="8777593878457748503">"De segunda a sexta-feira"</string>
-    <string name="daily" msgid="5738949095624133403">"Diariamente"</string>
-    <string name="weekly" msgid="983428358394268344">"Semanalmente na <xliff:g id="DAY">%s</xliff:g>"</string>
-    <string name="monthly" msgid="2667202947170988834">"Mensalmente"</string>
-    <string name="yearly" msgid="1519577999407493836">"Anualmente"</string>
     <string name="VideoView_error_title" msgid="3359437293118172396">"Não é possível reproduzir o vídeo"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="897920883624437033">"Este vídeo não é válido para transmissão com este dispositivo."</string>
     <string name="VideoView_error_text_unknown" msgid="710301040038083944">"Este vídeo não pode ser reproduzido."</string>
@@ -792,14 +790,13 @@
     <string name="usb_storage_stop_message" msgid="3613713396426604104">"Antes de desativar o armazenamento USB, verifique se desconectou (“ejetou”) o cartão SD do Android do computador."</string>
     <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"Desativar o armazenamento USB"</string>
     <string name="usb_storage_stop_error_message" msgid="143881914840412108">"Houve um problema ao desativar o armazenamento USB. Verifique se desconectou o host USB e tente novamente."</string>
-    <!-- no translation found for dlg_confirm_kill_storage_users_title (203356557714612214) -->
+    <!-- no translation found for dlg_confirm_kill_storage_users_title (963039033470478697) -->
     <skip />
-    <!-- no translation found for dlg_confirm_kill_storage_users_text (3902998926994232358) -->
+    <!-- no translation found for dlg_confirm_kill_storage_users_text (3202838234780505886) -->
     <skip />
-    <!-- no translation found for dlg_error_title (9179426738781357928) -->
+    <!-- no translation found for dlg_error_title (8048999973837339174) -->
     <skip />
-    <!-- no translation found for dlg_ok (7376953167039865701) -->
-    <skip />
+    <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
     <string name="extmedia_format_title" msgid="8663247929551095854">"Formatar cartão SD"</string>
     <string name="extmedia_format_message" msgid="3621369962433523619">"Tem certeza de que deseja formatar o cartão SD? Todos os dados no seu cartão serão perdidos."</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Formatar"</string>
@@ -858,22 +855,8 @@
     <string name="reset" msgid="2448168080964209908">"Redefinir"</string>
     <string name="submit" msgid="1602335572089911941">"Enviar"</string>
     <string name="description_star" msgid="2654319874908576133">"favorito"</string>
-    <string name="tether_title" msgid="6970447107301643248">"Vínculo USB disponível"</string>
-    <string name="tether_message" msgid="554549994538298101">"Selecione \"Vincular\" se quiser compartilhar a conexão de dados do seu telefone com o seu computador."</string>
-    <string name="tether_button" msgid="7409514810151603641">"Vincular"</string>
-    <string name="tether_button_cancel" msgid="6744369928952219677">"Cancelar"</string>
-    <string name="tether_error_message" msgid="6672110337349077628">"Há um problema com o vínculo."</string>
-    <string name="tether_available_notification_title" msgid="367754042700082080">"Vínculo USB disponível"</string>
-    <string name="tether_available_notification_message" msgid="8439443306503453793">"Selecione para vincular o seu computador ao seu telefone."</string>
-    <string name="tether_stop_notification_title" msgid="1902246071807668101">"Desvincular"</string>
-    <string name="tether_stop_notification_message" msgid="6920086906891516128">"Selecione para desvincular o seu computador."</string>
-    <string name="tether_stop_title" msgid="3118332507220912235">"Desconectar vínculo"</string>
-    <string name="tether_stop_message" msgid="7741840433788363174">"Você está compartilhando a conexão de dados de celular do seu telefone com o seu computador. Selecione \"Desconectar\" para desconectar o vínculo USB."</string>
-    <string name="tether_stop_button" msgid="8061941592702063029">"Desconectar"</string>
-    <string name="tether_stop_button_cancel" msgid="3694669546501300230">"Cancelar"</string>
-    <string name="tether_stop_error_message" msgid="4244697367270211648">"Encontramos um problema ao desativar o Vínculo. Tente novamente."</string>
-    <!-- no translation found for car_mode_disable_notification_title (3164768212003864316) -->
-    <skip />
-    <!-- no translation found for car_mode_disable_notification_message (3262812780382240778) -->
-    <skip />
+    <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Modo de carro ativado"</string>
+    <string name="car_mode_disable_notification_message" msgid="668663626721675614">"Selecione para sair do modo de carro."</string>
+    <string name="tethered_notification_title" msgid="8146103971290167718">"Vínculo ativo"</string>
+    <string name="tethered_notification_message" msgid="3067108323903048927">"Toque para configurar"</string>
 </resources>

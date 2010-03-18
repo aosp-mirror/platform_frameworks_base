@@ -1,18 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Copyright (C) 2009 The Android Open Source Project
+<!-- 
+/* //device/apps/common/assets/res/any/strings.xml
+**
+** Copyright 2006, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+ -->
 
-     Licensed under the Apache License, Version 2.0 (the "License");
-     you may not use this file except in compliance with the License.
-     You may obtain a copy of the License at
-
-          http://www.apache.org/licenses/LICENSE-2.0
-
-     Unless required by applicable law or agreed to in writing, software
-     distributed under the License is distributed on an "AS IS" BASIS,
-     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-     See the License for the specific language governing permissions and
-     limitations under the License.
--->
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="8340973892742019101">"B"</string>
@@ -64,8 +69,12 @@
     <string name="RestrictedChangedTitle" msgid="5592189398956187498">"Kısıtlanmış erişim değiştirildi"</string>
     <string name="RestrictedOnData" msgid="8653794784690065540">"Veri hizmeti engellendi."</string>
     <string name="RestrictedOnEmergency" msgid="6581163779072833665">"Acil durum hizmeti engellendi."</string>
-    <string name="RestrictedOnNormal" msgid="2045364908281990708">"Ses/SMS hizmeti engellendi."</string>
-    <string name="RestrictedOnAll" msgid="4923139582141626159">"Tüm ses/SMS hizmetleri engellendi."</string>
+    <string name="RestrictedOnNormal" msgid="4953867011389750673">"Ses hizmeti engellendi."</string>
+    <string name="RestrictedOnAllVoice" msgid="1459318899842232234">"Tüm Ses hizmetleri engellendi."</string>
+    <string name="RestrictedOnSms" msgid="8314352327461638897">"SMS hizmeti engellendi."</string>
+    <string name="RestrictedOnVoiceData" msgid="8244438624660371717">"Ses/Veri hizmetleri engellendi."</string>
+    <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"Ses/SMS hizmetleri engellendi."</string>
+    <string name="RestrictedOnAll" msgid="2714924667937117304">"Tüm Ses/Veri/SMS hizmetleri engellendi."</string>
     <string name="serviceClassVoice" msgid="1258393812335258019">"Ses"</string>
     <string name="serviceClassData" msgid="872456782077937893">"Veri"</string>
     <string name="serviceClassFAX" msgid="5566624998840486475">"FAKS"</string>
@@ -251,10 +260,8 @@
     <string name="permdesc_installPackages" msgid="526669220850066132">"Uygulamaların yeni veya güncellenmiş Android paketleri yüklemesine izin verir. Kötü amaçlı uygulamalar bunu, kendilerine verilen izin derecesi keyfi olarak değişen yeni uygulamalar eklemek için kullanabilir."</string>
     <string name="permlab_clearAppCache" msgid="4747698311163766540">"tüm uygulama önbelleği verilerini sil"</string>
     <string name="permdesc_clearAppCache" msgid="7740465694193671402">"Uygulamaların uygulama önbelleği dizinindeki dosyaları silerek telefonda yer açmasına izin verir. Erişim genellikle sistem işlemlerine ve yüksek düzeyde kısıtlı olarak verilir."</string>
-    <!-- no translation found for permlab_movePackage (728454979946503926) -->
-    <skip />
-    <!-- no translation found for permdesc_movePackage (6323049291923925277) -->
-    <skip />
+    <string name="permlab_movePackage" msgid="728454979946503926">"Uygulama kaynaklarını taşı"</string>
+    <string name="permdesc_movePackage" msgid="6323049291923925277">"Bir uygulamanın, uygulama kaynaklarını dahili ve harici ortamlar arasında taşımasına olanak tanır."</string>
     <string name="permlab_readLogs" msgid="4811921703882532070">"sistem günlük dosyalarını oku"</string>
     <string name="permdesc_readLogs" msgid="2257937955580475902">"Uygulamaların sistemin çeşitli günlük dosyalarından okumalarına izin verir. Bu, uygulamaların telefon ile neler yaptığınız ile ilgili genel bilgi bulmasına izin verir, ancak bunlar kişisel veya özel bir bilgi içermemelidir."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"sahibi tanılama olan kaynakları oku/bunlara yaz"</string>
@@ -281,13 +288,10 @@
     <string name="permdesc_writeOwnerData" msgid="2344055317969787124">"Uygulamaların telefonunuzda depolanan telefon sahibi verilerini değiştirmesine izin verir. Kötü amaçlı uygulamalar bu işlevi kullanıcı verilerini silmek veya değiştirmek için kullanabilir."</string>
     <string name="permlab_readOwnerData" msgid="6668525984731523563">"sahip verilerini oku"</string>
     <string name="permdesc_readOwnerData" msgid="3088486383128434507">"Uygulamaların telefonunuzda depolanan telefon sahibi verilerini okumasına izin verir. Kötü amaçlı uygulamalar bunu telefon sahibi verilerini okumak için kullanabilir."</string>
-    <!-- no translation found for permlab_readCalendar (6898987798303840534) -->
-    <skip />
+    <string name="permlab_readCalendar" msgid="6898987798303840534">"takvim etkinliklerini oku"</string>
     <string name="permdesc_readCalendar" msgid="5533029139652095734">"Uygulamaların telefonunuzda depolanan takvim etkinliklerinin tümünü okumasına izin verir. Kötü amaçlı uygulamalar bunu, takvim etkinliklerinizi başkalarına göndermek için kullanabilir."</string>
-    <!-- no translation found for permlab_writeCalendar (3894879352594904361) -->
-    <skip />
-    <!-- no translation found for permdesc_writeCalendar (2988871373544154221) -->
-    <skip />
+    <string name="permlab_writeCalendar" msgid="3894879352594904361">"takvim etkinlikleri ekle veya değiştir ve konuklara e-posta gönder"</string>
+    <string name="permdesc_writeCalendar" msgid="2988871373544154221">"Bir uygulamanın takviminize etkinlik ekleyebilmesini veya takviminizdeki etkinlikleri değiştirebilmesini sağlar ve konuklara e-posta gönderebilir. Kötü amaçlı uygulamalar, bunu takvim etkinliklerinizi silmek veya değiştirmek veya konuklara e-posta göndermek için kullanabilir."</string>
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"test için sahte konum kaynakları"</string>
     <string name="permdesc_accessMockLocation" msgid="7648286063459727252">"Test amacıyla sahte konum kaynakları oluşturur. Kötü amaçlı uygulamalar bu işlevi GPS veya Ağ Hizmeti sağlayıcılar gibi gerçek kaynaklardan gelen konum ve/veya durum bilgilerini geçersiz kılmak için kullanabilir."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"ek konum sağlayıcı komutlarına eriş"</string>
@@ -382,7 +386,7 @@
     <string name="permdesc_writeApnSettings" msgid="7443433457842966680">"Uygulamaların herhangi bir APN\'nin Proxy ve Bağlantı Noktası gibi APN ayarlarını değiştirmesine izin verir."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"ağ bağlantısını değiştir"</string>
     <string name="permdesc_changeNetworkState" msgid="4199958910396387075">"Bir uygulamanın ağ bağlantı durumunu değiştirmesine izin verir."</string>
-    <string name="permlab_changeTetherState" msgid="5952584964373017960">"kullanılan bağlantıyı değiştir"</string>
+    <string name="permlab_changeTetherState" msgid="2702121155761140799">"Kullanılan bağlantıyı değiştir"</string>
     <string name="permdesc_changeTetherState" msgid="8905815579146349568">"Bir uygulamanın bağlanılan ağ bağlantısı durumunu değiştirmesine izin verir."</string>
     <string name="permlab_changeBackgroundDataSetting" msgid="1400666012671648741">"arka plan veri kullanımı ayarını değiştir"</string>
     <string name="permdesc_changeBackgroundDataSetting" msgid="1001482853266638864">"Uygulamaların arka plan veri kullanımı ayarını değiştirmesine izin verir."</string>
@@ -532,8 +536,7 @@
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"Kilidi açmak için Menü\'ye basın."</string>
     <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"Kilit açmak için deseni çizin"</string>
     <string name="lockscreen_emergency_call" msgid="5347633784401285225">"Acil durum çağrısı"</string>
-    <!-- no translation found for lockscreen_return_to_call (5244259785500040021) -->
-    <skip />
+    <string name="lockscreen_return_to_call" msgid="5244259785500040021">"Çağrıya dön"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Doğru!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4817583279053112312">"Üzgünüz, lütfen yeniden deneyin"</string>
     <string name="lockscreen_plugged_in" msgid="613343852842944435">"Şarj oluyor (<xliff:g id="PERCENT">%%</xliff:g><xliff:g id="NUMBER">%d</xliff:g>)"</string>
@@ -620,11 +623,11 @@
     <item quantity="one" msgid="9150797944610821849">"1 saat önce"</item>
     <item quantity="other" msgid="2467273239587587569">"<xliff:g id="COUNT">%d</xliff:g> saat önce"</item>
   </plurals>
-    <!-- no translation found for last_num_days:other (3069992808164318268) -->
-    <!-- no translation found for last_month (3959346739979055432) -->
-    <skip />
-    <!-- no translation found for older (5211975022815554840) -->
-    <skip />
+  <plurals name="last_num_days">
+    <item quantity="other" msgid="3069992808164318268">"Son <xliff:g id="COUNT">%d</xliff:g> gün"</item>
+  </plurals>
+    <string name="last_month" msgid="3959346739979055432">"Son ay"</string>
+    <string name="older" msgid="5211975022815554840">"Daha eski"</string>
   <plurals name="num_days_ago">
     <item quantity="one" msgid="861358534398115820">"dün"</item>
     <item quantity="other" msgid="2479586466153314633">"<xliff:g id="COUNT">%d</xliff:g> gün önce"</item>
@@ -692,11 +695,6 @@
     <string name="weeks" msgid="6509623834583944518">"hafta"</string>
     <string name="year" msgid="4001118221013892076">"yıl"</string>
     <string name="years" msgid="6881577717993213522">"yıl"</string>
-    <string name="every_weekday" msgid="8777593878457748503">"Hafta içi her gün (Pzt-Cum)"</string>
-    <string name="daily" msgid="5738949095624133403">"Her gün"</string>
-    <string name="weekly" msgid="983428358394268344">"Her hafta <xliff:g id="DAY">%s</xliff:g> günü"</string>
-    <string name="monthly" msgid="2667202947170988834">"Aylık"</string>
-    <string name="yearly" msgid="1519577999407493836">"Yılda bir"</string>
     <string name="VideoView_error_title" msgid="3359437293118172396">"Video oynatılamıyor"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="897920883624437033">"Maalesef, bu video cihaza akışla göndermek için uygun değil."</string>
     <string name="VideoView_error_text_unknown" msgid="710301040038083944">"Maalesef bu video oynatılamıyor."</string>
@@ -792,14 +790,13 @@
     <string name="usb_storage_stop_message" msgid="3613713396426604104">"USB depolama birimini kapatmadan önce Android SD kartını bilgisayarınızdan kaldırdığınızdan (\"çıkardığınızdan\") emin olun."</string>
     <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"USB depolama birimini kapat"</string>
     <string name="usb_storage_stop_error_message" msgid="143881914840412108">"USB depolama birimini kapatırken bir sorun oluştu. USB ana makinesini kaldırdığınızdan emin olun ve daha sonra tekrar deneyin."</string>
-    <!-- no translation found for dlg_confirm_kill_storage_users_title (203356557714612214) -->
+    <!-- no translation found for dlg_confirm_kill_storage_users_title (963039033470478697) -->
     <skip />
-    <!-- no translation found for dlg_confirm_kill_storage_users_text (3902998926994232358) -->
+    <!-- no translation found for dlg_confirm_kill_storage_users_text (3202838234780505886) -->
     <skip />
-    <!-- no translation found for dlg_error_title (9179426738781357928) -->
+    <!-- no translation found for dlg_error_title (8048999973837339174) -->
     <skip />
-    <!-- no translation found for dlg_ok (7376953167039865701) -->
-    <skip />
+    <string name="dlg_ok" msgid="7376953167039865701">"Tamam"</string>
     <string name="extmedia_format_title" msgid="8663247929551095854">"SD kartı biçimlendir"</string>
     <string name="extmedia_format_message" msgid="3621369962433523619">"SD kartı biçimlendirmek istediğinizden emin misiniz? Kartınızdaki tüm veriler yok olacak."</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Biçimlendir"</string>
@@ -858,22 +855,8 @@
     <string name="reset" msgid="2448168080964209908">"Sıfırla"</string>
     <string name="submit" msgid="1602335572089911941">"Gönder"</string>
     <string name="description_star" msgid="2654319874908576133">"favori"</string>
-    <string name="tether_title" msgid="6970447107301643248">"USB bağlantısı kullanılabilir"</string>
-    <string name="tether_message" msgid="554549994538298101">"Telefonunuzun veri bağlantısını bilgisayarınızla paylaşmak istiyorsanız, \"Bağlan\" seçeneğini belirleyin."</string>
-    <string name="tether_button" msgid="7409514810151603641">"Bağlan"</string>
-    <string name="tether_button_cancel" msgid="6744369928952219677">"İptal"</string>
-    <string name="tether_error_message" msgid="6672110337349077628">"Bağlantıyla ilgili bir sorun var."</string>
-    <string name="tether_available_notification_title" msgid="367754042700082080">"USB bağlantısı kullanılabilir"</string>
-    <string name="tether_available_notification_message" msgid="8439443306503453793">"Bilgisayarınızı telefonunuza bağlamak için seçin."</string>
-    <string name="tether_stop_notification_title" msgid="1902246071807668101">"Bağlantıyı kaldır"</string>
-    <string name="tether_stop_notification_message" msgid="6920086906891516128">"Bilgisayarınızın bağlantısını kesmek için seçin."</string>
-    <string name="tether_stop_title" msgid="3118332507220912235">"Bağlantıyı kes"</string>
-    <string name="tether_stop_message" msgid="7741840433788363174">"Telefonunuzun cep telefonu veri bağlantısını bilgisayarınızla paylaşıyordunuz. USB bağlantısını kesmek için \"Bağlantıyı Kes\" seçeneğini belirleyin."</string>
-    <string name="tether_stop_button" msgid="8061941592702063029">"Bağlantıyı kes"</string>
-    <string name="tether_stop_button_cancel" msgid="3694669546501300230">"İptal"</string>
-    <string name="tether_stop_error_message" msgid="4244697367270211648">"Bağlantı kapatılırken bir sorunla karşılaşıldı. Lütfen tekrar deneyin."</string>
-    <!-- no translation found for car_mode_disable_notification_title (3164768212003864316) -->
-    <skip />
-    <!-- no translation found for car_mode_disable_notification_message (3262812780382240778) -->
-    <skip />
+    <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Araba modu etkin"</string>
+    <string name="car_mode_disable_notification_message" msgid="668663626721675614">"Araba modundan çıkmak için seçin."</string>
+    <string name="tethered_notification_title" msgid="8146103971290167718">"Bağlantı etkin"</string>
+    <string name="tethered_notification_message" msgid="3067108323903048927">"Yapılandırmak için dokunun"</string>
 </resources>

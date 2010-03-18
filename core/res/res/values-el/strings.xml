@@ -1,18 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Copyright (C) 2009 The Android Open Source Project
+<!-- 
+/* //device/apps/common/assets/res/any/strings.xml
+**
+** Copyright 2006, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+ -->
 
-     Licensed under the Apache License, Version 2.0 (the "License");
-     you may not use this file except in compliance with the License.
-     You may obtain a copy of the License at
-
-          http://www.apache.org/licenses/LICENSE-2.0
-
-     Unless required by applicable law or agreed to in writing, software
-     distributed under the License is distributed on an "AS IS" BASIS,
-     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-     See the License for the specific language governing permissions and
-     limitations under the License.
--->
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="8340973892742019101">"B"</string>
@@ -64,8 +69,12 @@
     <string name="RestrictedChangedTitle" msgid="5592189398956187498">"Η περιορισμένη πρόσβαση άλλαξε"</string>
     <string name="RestrictedOnData" msgid="8653794784690065540">"Η υπηρεσία δεδομένων είναι αποκλεισμένη."</string>
     <string name="RestrictedOnEmergency" msgid="6581163779072833665">"Η υπηρεσία έκτακτης ανάγκης είναι αποκλεισμένη."</string>
-    <string name="RestrictedOnNormal" msgid="2045364908281990708">"Η φωνητική υπηρεσία/υπηρεσία SMS είναι αποκλεισμένη."</string>
-    <string name="RestrictedOnAll" msgid="4923139582141626159">"Όλες οι φωνητικές υπηρεσίες/υπηρεσίες SMS έχουν αποκλειστεί."</string>
+    <string name="RestrictedOnNormal" msgid="4953867011389750673">"Η υπηρεσία φωνής έχει αποκλειστεί."</string>
+    <string name="RestrictedOnAllVoice" msgid="1459318899842232234">"Όλες οι υπηρεσίες φωνής έχουν αποκλειστεί."</string>
+    <string name="RestrictedOnSms" msgid="8314352327461638897">"Η υπηρεσία SMS έχει αποκλειστεί."</string>
+    <string name="RestrictedOnVoiceData" msgid="8244438624660371717">"Οι υπηρεσίες φωνής/δεδομένων έχουν αποκλειστεί."</string>
+    <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"Όλες οι υπηρεσίες φωνής/SMS έχουν αποκλειστεί."</string>
+    <string name="RestrictedOnAll" msgid="2714924667937117304">"Όλες οι υπηρεσίες φωνής/δεδομένων/SMS έχουν αποκλειστεί."</string>
     <string name="serviceClassVoice" msgid="1258393812335258019">"Φωνή"</string>
     <string name="serviceClassData" msgid="872456782077937893">"Δεδομένα"</string>
     <string name="serviceClassFAX" msgid="5566624998840486475">"ΦΑΞ"</string>
@@ -251,10 +260,8 @@
     <string name="permdesc_installPackages" msgid="526669220850066132">"Επιτρέπει σε μια εφαρμογή την εγκατάσταση νέων ή ενημερωμένων πακέτων Android. Κακόβουλες εφαρμογές μπορούν να το χρησιμοποιήσουν για να προσθέσουν νέες εφαρμογές με πολλές αυθαίρετες άδειες."</string>
     <string name="permlab_clearAppCache" msgid="4747698311163766540">"διαγραφή όλων των δεδομένων προσωρινής μνήμης εφαρμογής"</string>
     <string name="permdesc_clearAppCache" msgid="7740465694193671402">"Επιτρέπει σε μια εφαρμογή να αυξήσει τον ελεύθερο χώρο αποθήκευσης του τηλεφώνου διαγράφοντας αρχεία από τον κατάλογο προσωρινής μνήμης της εφαρμογής. Η πρόσβαση είναι συνήθως πολύ περιορισμένη στη διαδικασία συστήματος."</string>
-    <!-- no translation found for permlab_movePackage (728454979946503926) -->
-    <skip />
-    <!-- no translation found for permdesc_movePackage (6323049291923925277) -->
-    <skip />
+    <string name="permlab_movePackage" msgid="728454979946503926">"Μετακίνηση πόρων εφαρμογής"</string>
+    <string name="permdesc_movePackage" msgid="6323049291923925277">"Επιτρέπει σε μια εφαρμογή τη μετακίνηση πόρων εφαρμογής από ένα εσωτερικό σε ένα εξωτερικό μέσο και αντίστροφα."</string>
     <string name="permlab_readLogs" msgid="4811921703882532070">"ανάγνωση αρχείων καταγραφής συστήματος"</string>
     <string name="permdesc_readLogs" msgid="2257937955580475902">"Επιτρέπει σε μια εφαρμογή να αναγνώσει τα αρχεία καταγραφής του συστήματος. Έτσι μπορεί να ανακαλύψει γενικές πληροφορίες σχετικά με τις δραστηριότητές σας στο τηλέφωνο, όμως δεν θα πρέπει να περιέχουν προσωπικές ή ιδιωτικές πληροφορίες."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"ανάγνωση/εγγραφή σε πόρους που ανήκουν στο διαγνωστικό"</string>
@@ -281,13 +288,10 @@
     <string name="permdesc_writeOwnerData" msgid="2344055317969787124">"Επιτρέπει σε μια εφαρμογή να τροποποιήσει τα δεδομένα κατόχου τηλεφώνου στο τηλέφωνό σας. Κακόβουλες εφαρμογές μπορούν να το χρησιμοποιήσουν για να τροποποιήσουν τα δεδομένα κατόχου."</string>
     <string name="permlab_readOwnerData" msgid="6668525984731523563">"ανάγνωση δεδομένων κατόχου"</string>
     <string name="permdesc_readOwnerData" msgid="3088486383128434507">"Επιτρέπει σε μια εφαρμογή την ανάγνωση των δεδομένων κατόχου τηλεφώνου που είναι αποθηκευμένα στο τηλέφωνό σας. Κακόβουλες εφαρμογές μπορούν να το χρησιμοποιήσουν για την ανάγνωση δεδομένων κατόχου τηλεφώνου."</string>
-    <!-- no translation found for permlab_readCalendar (6898987798303840534) -->
-    <skip />
+    <string name="permlab_readCalendar" msgid="6898987798303840534">"ανάγνωση συμβάντων ημερολογίου"</string>
     <string name="permdesc_readCalendar" msgid="5533029139652095734">"Επιτρέπει σε μια εφαρμογή να αναγνώσει όλα τα συμβάντα ημερολογίου που είναι αποθηκευμένα στο τηλέφωνό σας. Κακόβουλες εφαρμογές μπορούν να το χρησιμοποιήσουν για να αποστείλουν συμβάντα ημερολογίου σε άλλους χρήστες."</string>
-    <!-- no translation found for permlab_writeCalendar (3894879352594904361) -->
-    <skip />
-    <!-- no translation found for permdesc_writeCalendar (2988871373544154221) -->
-    <skip />
+    <string name="permlab_writeCalendar" msgid="3894879352594904361">"προσθήκη ή τροποποίηση συμβάντων του ημερολογίου και αποστολή μηνυμάτων ηλεκτρονικού ταχυδρομείου στους προσκεκλημένους"</string>
+    <string name="permdesc_writeCalendar" msgid="2988871373544154221">"Επιτρέπει σε μια εφαρμογή την προσθήκη ή την αλλαγή συμβάντων στο ημερολόγιο σας, και την ενδεχόμενη αποστολή μηνυμάτων ηλεκτρονικού ταχυδρομείου στους προσκεκλημένους. Οι κακόβουλες εφαρμογές μπορούν να χρησιμοποιήσουν αυτή τη λειτουργία για να διαγράψουν ή να τροποποιήσουν τα συμβάντα του ημερολογίου σας ή για να στείλουν μηνύματα ηλεκτρονικού ταχυδρομείου στους προσκεκλημένους."</string>
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"δημιουργία ψευδών πηγών τοποθεσίας για δοκιμή"</string>
     <string name="permdesc_accessMockLocation" msgid="7648286063459727252">"Δημιουργία εικονικών πηγών τοποθεσίας για δοκιμή. Κακόβουλες εφαρμογές μπορούν να το χρησιμοποιήσουν για να παρακάμψουν την τοποθεσία και/ή την κατάσταση που βρίσκουν πραγματικές πηγές τοποθεσίας, όπως πάροχοι GPS ή πάροχοι δικτύου."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"πρόσβαση σε επιπλέον εντολές παρόχου τοποθεσίας"</string>
@@ -382,7 +386,7 @@
     <string name="permdesc_writeApnSettings" msgid="7443433457842966680">"Επιτρέπει σε μια εφαρμογή να τροποποιήσει τις ρυθμίσεις APN, όπως Διακομιστής μεσολάβησης και Θύρα για ένα APN."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"αλλαγή συνδεσιμότητας δικτύου"</string>
     <string name="permdesc_changeNetworkState" msgid="4199958910396387075">"Επιτρέπει σε μια εφαρμογή την αλλαγή της κατάστασης συνδεσιμότητας δικτύου."</string>
-    <string name="permlab_changeTetherState" msgid="5952584964373017960">"αλλαγή συνδεσιμότητας μέσω σύνδεσης με κινητή συσκευή"</string>
+    <string name="permlab_changeTetherState" msgid="2702121155761140799">"αλλαγή συνδεσιμότητας της σύνδεσης μέσω κινητής συσκευής"</string>
     <string name="permdesc_changeTetherState" msgid="8905815579146349568">"Επιτρέπει σε μια εφαρμογή την αλλαγή της κατάστασης συνδεσιμότητας δικτύου μέσω σύνδεσης με κινητή συσκευή."</string>
     <string name="permlab_changeBackgroundDataSetting" msgid="1400666012671648741">"αλλαγή ρύθμισης της χρήσης δεδομένων στο παρασκήνιο"</string>
     <string name="permdesc_changeBackgroundDataSetting" msgid="1001482853266638864">"Επιτρέπει σε μια εφαρμογή την αλλαγή της ρύθμισης χρήσης δεδομένων φόντου."</string>
@@ -532,8 +536,7 @@
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"Πατήστε \"Μενού\" για ξεκλείδωμα."</string>
     <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"Σχεδιασμός μοτίβου για ξεκλείδωμα"</string>
     <string name="lockscreen_emergency_call" msgid="5347633784401285225">"Κλήση έκτακτης ανάγκης"</string>
-    <!-- no translation found for lockscreen_return_to_call (5244259785500040021) -->
-    <skip />
+    <string name="lockscreen_return_to_call" msgid="5244259785500040021">"Επιστροφή στην κλήση"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Σωστό!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4817583279053112312">"Προσπαθήστε αργότερα"</string>
     <string name="lockscreen_plugged_in" msgid="613343852842944435">"Φόρτιση (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
@@ -620,11 +623,11 @@
     <item quantity="one" msgid="9150797944610821849">"πριν από 1 ώρα"</item>
     <item quantity="other" msgid="2467273239587587569">"πριν από <xliff:g id="COUNT">%d</xliff:g> ώρες"</item>
   </plurals>
-    <!-- no translation found for last_num_days:other (3069992808164318268) -->
-    <!-- no translation found for last_month (3959346739979055432) -->
-    <skip />
-    <!-- no translation found for older (5211975022815554840) -->
-    <skip />
+  <plurals name="last_num_days">
+    <item quantity="other" msgid="3069992808164318268">"Τελευταίες <xliff:g id="COUNT">%d</xliff:g> ημέρες"</item>
+  </plurals>
+    <string name="last_month" msgid="3959346739979055432">"Τελευταίος μήνας"</string>
+    <string name="older" msgid="5211975022815554840">"Παλαιότερα"</string>
   <plurals name="num_days_ago">
     <item quantity="one" msgid="861358534398115820">"χθες"</item>
     <item quantity="other" msgid="2479586466153314633">"πριν από <xliff:g id="COUNT">%d</xliff:g> ημέρες"</item>
@@ -692,11 +695,6 @@
     <string name="weeks" msgid="6509623834583944518">"εβδομάδες"</string>
     <string name="year" msgid="4001118221013892076">"έτος"</string>
     <string name="years" msgid="6881577717993213522">"έτη"</string>
-    <string name="every_weekday" msgid="8777593878457748503">"Καθημερινές (Δευ-Παρ)"</string>
-    <string name="daily" msgid="5738949095624133403">"Καθημερινά"</string>
-    <string name="weekly" msgid="983428358394268344">"Κάθε εβδομάδα στο <xliff:g id="DAY">%s</xliff:g>"</string>
-    <string name="monthly" msgid="2667202947170988834">"Μηνιαία"</string>
-    <string name="yearly" msgid="1519577999407493836">"Ετήσια"</string>
     <string name="VideoView_error_title" msgid="3359437293118172396">"Δεν είναι δυνατή η αναπαραγωγή βίντεο"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="897920883624437033">"Αυτό το βίντεο δεν είναι έγκυρο για ροή σε αυτή τη συσκευή."</string>
     <string name="VideoView_error_text_unknown" msgid="710301040038083944">"Δεν είναι δυνατή η προβολή αυτού του βίντεο."</string>
@@ -792,14 +790,13 @@
     <string name="usb_storage_stop_message" msgid="3613713396426604104">"Προτού απενεργοποιήσετε το χώρο αποθήκευσης USB, βεβαιωθείτε ότι έχετε αποσυνδέσει (“αφαιρέσει”) την κάρτα SD του Android από τον υπολογιστή σας."</string>
     <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"Απενεργοποίηση χώρου αποθήκευσης USB"</string>
     <string name="usb_storage_stop_error_message" msgid="143881914840412108">"Παρουσιάστηκε πρόβλημα κατά την απενεργοποίηση του αποθηκευτικού χώρου USB. Βεβαιωθείτε ότι έχετε αφαιρέσει την υποδοχή USB και προσπαθήστε ξανά."</string>
-    <!-- no translation found for dlg_confirm_kill_storage_users_title (203356557714612214) -->
+    <!-- no translation found for dlg_confirm_kill_storage_users_title (963039033470478697) -->
     <skip />
-    <!-- no translation found for dlg_confirm_kill_storage_users_text (3902998926994232358) -->
+    <!-- no translation found for dlg_confirm_kill_storage_users_text (3202838234780505886) -->
     <skip />
-    <!-- no translation found for dlg_error_title (9179426738781357928) -->
+    <!-- no translation found for dlg_error_title (8048999973837339174) -->
     <skip />
-    <!-- no translation found for dlg_ok (7376953167039865701) -->
-    <skip />
+    <string name="dlg_ok" msgid="7376953167039865701">"ΟΚ"</string>
     <string name="extmedia_format_title" msgid="8663247929551095854">"Διαμόρφωση κάρτας SD"</string>
     <string name="extmedia_format_message" msgid="3621369962433523619">"Είστε βέβαιοι ότι θέλετε να διαμορφώσετε την κάρτα SD; Όλα τα δεδομένα στην κάρτα σας θα χαθούν."</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Διαμόρφωση"</string>
@@ -858,22 +855,8 @@
     <string name="reset" msgid="2448168080964209908">"Επαναφορά"</string>
     <string name="submit" msgid="1602335572089911941">"Υποβολή"</string>
     <string name="description_star" msgid="2654319874908576133">"αγαπημένο"</string>
-    <string name="tether_title" msgid="6970447107301643248">"Διαθέσιμη σύνδεση μέσω κινητής συσκευής με USB"</string>
-    <string name="tether_message" msgid="554549994538298101">"Επιλέξτε \"Σύνδεση μέσω κινητής συσκευής\" αν θέλετε να κάνετε κοινή χρήση της σύνδεσης δεδομένων του τηλεφώνου σας με τον υπολογιστή σας."</string>
-    <string name="tether_button" msgid="7409514810151603641">"Σύνδεση μέσω κινητής συσκευής"</string>
-    <string name="tether_button_cancel" msgid="6744369928952219677">"Ακύρωση"</string>
-    <string name="tether_error_message" msgid="6672110337349077628">"Υπάρχει πρόβλημα σύνδεσης μέσω κινητής συσκευής."</string>
-    <string name="tether_available_notification_title" msgid="367754042700082080">"Διαθέσιμη σύνδεση μέσω κινητής συσκευής με USB"</string>
-    <string name="tether_available_notification_message" msgid="8439443306503453793">"Συνδέστε τον υπολογιστή με το τηλέφωνό σας."</string>
-    <string name="tether_stop_notification_title" msgid="1902246071807668101">"Κατάργηση σύνδεσης μέσω κινητής συσκευής"</string>
-    <string name="tether_stop_notification_message" msgid="6920086906891516128">"Καταργήστε τη σύνδεση μέσω κινητής συσκευής του υπολογιστή σας."</string>
-    <string name="tether_stop_title" msgid="3118332507220912235">"Κατάργηση σύνδεσης μέσω κινητής συσκευής"</string>
-    <string name="tether_stop_message" msgid="7741840433788363174">"Κάνετε κοινή χρήση της σύνδεσης των δεδομένων του κινητού σας τηλεφώνου με τον υπολογιστή σας. Επιλέξτε \"Αποσύνδεση\" για να καταργήσετε τη σύνδεση μέσω κινητής συσκευής με USB."</string>
-    <string name="tether_stop_button" msgid="8061941592702063029">"Αποσύνδεση"</string>
-    <string name="tether_stop_button_cancel" msgid="3694669546501300230">"Ακύρωση"</string>
-    <string name="tether_stop_error_message" msgid="4244697367270211648">"Παρουσιάστηκε ένα πρόβλημα κατά την απενεργοποίηση της σύνδεσης μέσω κινητής συσκευής. Προσπαθήστε ξανά."</string>
-    <!-- no translation found for car_mode_disable_notification_title (3164768212003864316) -->
-    <skip />
-    <!-- no translation found for car_mode_disable_notification_message (3262812780382240778) -->
-    <skip />
+    <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Η λειτουργία αυτοκινήτου είναι ενεργοποιημένη"</string>
+    <string name="car_mode_disable_notification_message" msgid="668663626721675614">"Επιλέξτε για έξοδο από τη λειτουργία αυτοκινήτου."</string>
+    <string name="tethered_notification_title" msgid="8146103971290167718">"Η σύνδεση μέσω κινητής συσκευής είναι ενεργή"</string>
+    <string name="tethered_notification_message" msgid="3067108323903048927">"Αγγίξτε για να γίνει διαμόρφωση"</string>
 </resources>
