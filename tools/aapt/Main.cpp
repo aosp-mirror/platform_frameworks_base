@@ -446,8 +446,7 @@ int main(int argc, char* const argv[])
                     }
                     bundle.setCustomPackage(argv[0]);
                 } else if (strcmp(cp, "-utf16") == 0) {
-                    bundle.setEncodingSpecified(true);
-                    bundle.setUTF8(false);
+                    bundle.setWantUTF16(true);
                 } else if (strcmp(cp, "-rename-manifest-package") == 0) {
                     argc--;
                     argv++;
