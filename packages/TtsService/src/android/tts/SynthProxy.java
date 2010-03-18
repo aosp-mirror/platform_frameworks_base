@@ -48,7 +48,7 @@ public class SynthProxy {
     /**
      * Constructor; pass the location of the native TTS .so to use.
      */
-    public SynthProxy(String nativeSoLib) {
+    public SynthProxy(String nativeSoLib, String engineConfig) {
         boolean applyFilter = nativeSoLib.toLowerCase().contains("pico");
         Log.v(TtsService.SERVICE_TAG, "About to load "+ nativeSoLib + ", applyFilter="+applyFilter);
         native_setup(new WeakReference<SynthProxy>(this), nativeSoLib);
@@ -102,6 +102,13 @@ public class SynthProxy {
      */
     public int isLanguageAvailable(String language, String country, String variant) {
         return native_isLanguageAvailable(mJniData, language, country, variant);
+    }
+
+    /**
+     * Sets the engine configuration.
+     */
+    public int setConfig(String engineConfig) {
+        return android.speech.tts.TextToSpeech.SUCCESS;
     }
 
     /**
