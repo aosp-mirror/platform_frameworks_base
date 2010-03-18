@@ -125,8 +125,8 @@ public interface EventHandler {
     public void endData();
 
     /**
-     * SSL certificate callback called every time a resource is
-     * loaded via a secure connection
+     * SSL certificate callback called before resource request is
+     * made, which will be null for insecure connection.
      */
     public void certificate(SslCertificate certificate);
 

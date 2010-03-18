@@ -222,6 +222,12 @@ abstract class Connection {
                         }
                     }
 
+                    /* we have a connection, let the event handler
+                     * know of any associated certificate,
+                     * potentially none.
+                     */
+                    req.mEventHandler.certificate(mCertificate);
+
                     try {
                         /* FIXME: don't increment failure count if old
                            connection?  There should not be a penalty for

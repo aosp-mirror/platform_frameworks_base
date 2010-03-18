@@ -1088,6 +1088,9 @@ public class WebView extends AbsoluteLayout
      * Sets the SSL certificate for the main top-level page.
      */
     public void setCertificate(SslCertificate certificate) {
+        if (DebugFlags.WEB_VIEW) {
+            Log.v(LOGTAG, "setCertificate=" + certificate);
+        }
         // here, the certificate can be null (if the site is not secure)
         mCertificate = certificate;
     }
