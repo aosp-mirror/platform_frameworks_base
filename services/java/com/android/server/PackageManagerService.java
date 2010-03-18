@@ -595,10 +595,13 @@ class PackageManagerService extends IPackageManager.Stub {
 
     static boolean installOnSd(int flags) {
         if (((flags & PackageManager.INSTALL_FORWARD_LOCK) != 0) ||
-                ((flags & PackageManager.INSTALL_EXTERNAL) == 0)) {
+                ((flags & PackageManager.INSTALL_INTERNAL) != 0)) {
             return false;
         }
-        return true;
+        if ((flags & PackageManager.INSTALL_EXTERNAL) != 0) {
+            return true;
+        }
+        return false;
     }
 
     static boolean isFwdLocked(int flags) {
@@ -4452,8 +4455,8 @@ class PackageManagerService extends IPackageManager.Stub {
                 res.uid = -1;
                 res.pkg = null;
                 res.removedInfo = new PackageRemovedInfo();
-                args.doPreInstall(res.returnCode);
                 if (res.returnCode == PackageManager.INSTALL_SUCCEEDED) {
+                    args.doPreInstall(res.returnCode);
                     synchronized (mInstallLock) {
                         installPackageLI(args, true, res);
                     }
@@ -4623,13 +4626,18 @@ class PackageManagerService extends IPackageManager.Stub {
             int ret = PackageManager.INSTALL_SUCCEEDED;
             boolean fwdLocked = (flags & PackageManager.INSTALL_FORWARD_LOCK) != 0;
             boolean onSd = (flags & PackageManager.INSTALL_EXTERNAL) != 0;
-            // Dont need to invoke getInstallLocation for forward locked apps.
-            if (fwdLocked && onSd) {
+            boolean onInt = (flags & PackageManager.INSTALL_INTERNAL) != 0;
+            if (onInt && onSd) {
+                // Check if both bits are set.
+                Slog.w(TAG, "Conflicting flags specified for installing on both internal and external");
+                ret = PackageManager.INSTALL_FAILED_INVALID_INSTALL_LOCATION;
+            } else if (fwdLocked && onSd) {
+                // Check for forward locked apps
                 Slog.w(TAG, "Cannot install fwd locked apps on sdcard");
                 ret = PackageManager.INSTALL_FAILED_INVALID_INSTALL_LOCATION;
             } else {
                 // Remote call to find out default install location
-                PackageInfoLite pkgLite = mContainerService.getMinimalPackageInfo(packageURI);
+                PackageInfoLite pkgLite = mContainerService.getMinimalPackageInfo(packageURI, flags);
                 int loc = pkgLite.recommendedInstallLocation;
                 if (loc == PackageHelper.RECOMMEND_FAILED_INVALID_LOCATION){
                     ret = PackageManager.INSTALL_FAILED_INVALID_INSTALL_LOCATION;
@@ -4644,14 +4652,16 @@ class PackageManagerService extends IPackageManager.Stub {
                 } else {
                     // Override with defaults if needed.
                     loc = installLocationPolicy(pkgLite, flags);
-                    // Override install location with flags
-                    if ((flags & PackageManager.INSTALL_EXTERNAL) == 0){
+                    if (!onSd && !onInt) {
+                        // Override install location with flags
                         if (loc == PackageHelper.RECOMMEND_INSTALL_EXTERNAL) {
                             // Set the flag to install on external media.
                             flags |= PackageManager.INSTALL_EXTERNAL;
+                            flags &= ~PackageManager.INSTALL_INTERNAL;
                         } else {
                             // Make sure the flag for installing on external
                             // media is unset
+                            flags |= PackageManager.INSTALL_INTERNAL;
                             flags &= ~PackageManager.INSTALL_EXTERNAL;
                         }
                     }
