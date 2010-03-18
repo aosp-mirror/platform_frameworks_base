@@ -153,6 +153,12 @@ public class PackageInfo implements Parcelable {
      * the {@link android.R.attr#installLocation} attribute.
      * @hide
      */
+    public static final int INSTALL_LOCATION_UNSPECIFIED = -1;
+    /**
+     * Constant corresponding to <code>auto</code> in
+     * the {@link android.R.attr#installLocation} attribute.
+     * @hide
+     */
     public static final int INSTALL_LOCATION_AUTO = 0;
     /**
      * Constant corresponding to <code>internalOnly</code> in
