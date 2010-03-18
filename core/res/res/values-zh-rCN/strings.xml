@@ -1,18 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Copyright (C) 2009 The Android Open Source Project
+<!-- 
+/* //device/apps/common/assets/res/any/strings.xml
+**
+** Copyright 2006, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+ -->
 
-     Licensed under the Apache License, Version 2.0 (the "License");
-     you may not use this file except in compliance with the License.
-     You may obtain a copy of the License at
-
-          http://www.apache.org/licenses/LICENSE-2.0
-
-     Unless required by applicable law or agreed to in writing, software
-     distributed under the License is distributed on an "AS IS" BASIS,
-     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-     See the License for the specific language governing permissions and
-     limitations under the License.
--->
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="8340973892742019101">"B"</string>
@@ -64,8 +69,12 @@
     <string name="RestrictedChangedTitle" msgid="5592189398956187498">"访问受限情况已发生变化"</string>
     <string name="RestrictedOnData" msgid="8653794784690065540">"数据服务已禁用。"</string>
     <string name="RestrictedOnEmergency" msgid="6581163779072833665">"紧急服务已禁用。"</string>
-    <string name="RestrictedOnNormal" msgid="2045364908281990708">"语音/短信服务已禁用。"</string>
-    <string name="RestrictedOnAll" msgid="4923139582141626159">"所有语音/短信服务均已禁用。"</string>
+    <string name="RestrictedOnNormal" msgid="4953867011389750673">"已禁用语音服务。"</string>
+    <string name="RestrictedOnAllVoice" msgid="1459318899842232234">"已禁用所有语音服务。"</string>
+    <string name="RestrictedOnSms" msgid="8314352327461638897">"已禁用短信服务。"</string>
+    <string name="RestrictedOnVoiceData" msgid="8244438624660371717">"已禁用语音/数据服务。"</string>
+    <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"已禁用语音/短信服务。"</string>
+    <string name="RestrictedOnAll" msgid="2714924667937117304">"已禁用所有语音/数据/短信服务。"</string>
     <string name="serviceClassVoice" msgid="1258393812335258019">"语音"</string>
     <string name="serviceClassData" msgid="872456782077937893">"数据"</string>
     <string name="serviceClassFAX" msgid="5566624998840486475">"传真"</string>
@@ -251,10 +260,8 @@
     <string name="permdesc_installPackages" msgid="526669220850066132">"允许应用程序安装全新的或更新的 Android 包。恶意应用程序可能会借此添加其具有任意权限的新应用程序。"</string>
     <string name="permlab_clearAppCache" msgid="4747698311163766540">"删除所有应用程序缓存数据"</string>
     <string name="permdesc_clearAppCache" msgid="7740465694193671402">"允许应用程序通过删除应用程序缓存目录中的文件释放手机存储空间。通常此权限只适用于系统进程。"</string>
-    <!-- no translation found for permlab_movePackage (728454979946503926) -->
-    <skip />
-    <!-- no translation found for permdesc_movePackage (6323049291923925277) -->
-    <skip />
+    <string name="permlab_movePackage" msgid="728454979946503926">"移动应用程序资源"</string>
+    <string name="permdesc_movePackage" msgid="6323049291923925277">"允许应用程序在内部介质和外部介质之间移动应用程序资源。"</string>
     <string name="permlab_readLogs" msgid="4811921703882532070">"读取系统日志文件"</string>
     <string name="permdesc_readLogs" msgid="2257937955580475902">"允许应用程序从系统的各日志文件中读取信息。这样应用程序可以发现您的手机使用情况，但这些信息不应包含任何个人信息或保密信息。"</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"读取/写入诊断所拥有的资源"</string>
@@ -281,13 +288,10 @@
     <string name="permdesc_writeOwnerData" msgid="2344055317969787124">"允许应用程序修改您手机上存储的手机所有者数据。恶意应用程序可借此清除或修改所有者数据。"</string>
     <string name="permlab_readOwnerData" msgid="6668525984731523563">"读取所有者数据"</string>
     <string name="permdesc_readOwnerData" msgid="3088486383128434507">"允许应用程序读取您手机上存储的手机所有者数据。恶意应用程序可借此读取手机所有者数据。"</string>
-    <!-- no translation found for permlab_readCalendar (6898987798303840534) -->
-    <skip />
+    <string name="permlab_readCalendar" msgid="6898987798303840534">"读取日历活动"</string>
     <string name="permdesc_readCalendar" msgid="5533029139652095734">"允许应用程序读取您手机上存储的所有日历活动。恶意应用程序可借此将您的日历活动发送给其他人。"</string>
-    <!-- no translation found for permlab_writeCalendar (3894879352594904361) -->
-    <skip />
-    <!-- no translation found for permdesc_writeCalendar (2988871373544154221) -->
-    <skip />
+    <string name="permlab_writeCalendar" msgid="3894879352594904361">"添加或修改日历活动以及向邀请对象发送电子邮件"</string>
+    <string name="permdesc_writeCalendar" msgid="2988871373544154221">"允许应用程序添加或更改日历中的活动，这可能会向邀请对象发送电子邮件。恶意应用程序可能会借此清除或修改您的日历活动，或者向邀请对象发送电子邮件。"</string>
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"使用模拟地点来源进行测试"</string>
     <string name="permdesc_accessMockLocation" msgid="7648286063459727252">"创建模拟地点来源进行测试。恶意应用程序可能利用此选项覆盖由真实地点来源（如 GPS 或网络提供商）传回的地点和/或状态。"</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"访问额外的位置信息提供程序命令"</string>
@@ -382,7 +386,7 @@
     <string name="permdesc_writeApnSettings" msgid="7443433457842966680">"允许应用程序修改 APN 设置，例如任何 APN 的代理和端口。"</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"更改网络连接性"</string>
     <string name="permdesc_changeNetworkState" msgid="4199958910396387075">"允许应用程序更改网络连接的状态。"</string>
-    <string name="permlab_changeTetherState" msgid="5952584964373017960">"更改绑定的连接"</string>
+    <string name="permlab_changeTetherState" msgid="2702121155761140799">"更改绑定的连接"</string>
     <string name="permdesc_changeTetherState" msgid="8905815579146349568">"允许应用程序更改绑定网络连接的状态。"</string>
     <string name="permlab_changeBackgroundDataSetting" msgid="1400666012671648741">"更改背景数据使用设置"</string>
     <string name="permdesc_changeBackgroundDataSetting" msgid="1001482853266638864">"允许应用程序更改背景数据使用设置。"</string>
@@ -532,8 +536,7 @@
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"按 MENU 解锁。"</string>
     <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"绘制解锁图案"</string>
     <string name="lockscreen_emergency_call" msgid="5347633784401285225">"紧急呼救"</string>
-    <!-- no translation found for lockscreen_return_to_call (5244259785500040021) -->
-    <skip />
+    <string name="lockscreen_return_to_call" msgid="5244259785500040021">"返回通话"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"正确！"</string>
     <string name="lockscreen_pattern_wrong" msgid="4817583279053112312">"很抱歉，请重试"</string>
     <string name="lockscreen_plugged_in" msgid="613343852842944435">"正在充电 (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
@@ -620,11 +623,11 @@
     <item quantity="one" msgid="9150797944610821849">"1 小时前"</item>
     <item quantity="other" msgid="2467273239587587569">"<xliff:g id="COUNT">%d</xliff:g> 小时前"</item>
   </plurals>
-    <!-- no translation found for last_num_days:other (3069992808164318268) -->
-    <!-- no translation found for last_month (3959346739979055432) -->
-    <skip />
-    <!-- no translation found for older (5211975022815554840) -->
-    <skip />
+  <plurals name="last_num_days">
+    <item quantity="other" msgid="3069992808164318268">"过去 <xliff:g id="COUNT">%d</xliff:g> 天"</item>
+  </plurals>
+    <string name="last_month" msgid="3959346739979055432">"上月"</string>
+    <string name="older" msgid="5211975022815554840">"往前"</string>
   <plurals name="num_days_ago">
     <item quantity="one" msgid="861358534398115820">"昨天"</item>
     <item quantity="other" msgid="2479586466153314633">"<xliff:g id="COUNT">%d</xliff:g> 天前"</item>
@@ -692,11 +695,6 @@
     <string name="weeks" msgid="6509623834583944518">"周"</string>
     <string name="year" msgid="4001118221013892076">"年"</string>
     <string name="years" msgid="6881577717993213522">"年"</string>
-    <string name="every_weekday" msgid="8777593878457748503">"每个工作日（周一至周五）"</string>
-    <string name="daily" msgid="5738949095624133403">"每天"</string>
-    <string name="weekly" msgid="983428358394268344">"每周的<xliff:g id="DAY">%s</xliff:g>"</string>
-    <string name="monthly" msgid="2667202947170988834">"每月"</string>
-    <string name="yearly" msgid="1519577999407493836">"每年"</string>
     <string name="VideoView_error_title" msgid="3359437293118172396">"无法播放视频"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="897920883624437033">"抱歉，该视频不适合在此设备上播放。"</string>
     <string name="VideoView_error_text_unknown" msgid="710301040038083944">"很抱歉，无法播放此视频。"</string>
@@ -792,14 +790,13 @@
     <string name="usb_storage_stop_message" msgid="3613713396426604104">"在关闭 USB 存储设备前，请确保您已从计算机中卸载（“弹出”）Android 手机的 SD 卡。"</string>
     <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"关闭 USB 存储设备"</string>
     <string name="usb_storage_stop_error_message" msgid="143881914840412108">"关闭 USB 存储设备时遇到问题。请检查并确保已卸载了 USB 主设备，然后重试。"</string>
-    <!-- no translation found for dlg_confirm_kill_storage_users_title (203356557714612214) -->
+    <!-- no translation found for dlg_confirm_kill_storage_users_title (963039033470478697) -->
     <skip />
-    <!-- no translation found for dlg_confirm_kill_storage_users_text (3902998926994232358) -->
+    <!-- no translation found for dlg_confirm_kill_storage_users_text (3202838234780505886) -->
     <skip />
-    <!-- no translation found for dlg_error_title (9179426738781357928) -->
+    <!-- no translation found for dlg_error_title (8048999973837339174) -->
     <skip />
-    <!-- no translation found for dlg_ok (7376953167039865701) -->
-    <skip />
+    <string name="dlg_ok" msgid="7376953167039865701">"确定"</string>
     <string name="extmedia_format_title" msgid="8663247929551095854">"格式化 SD 卡"</string>
     <string name="extmedia_format_message" msgid="3621369962433523619">"确定要将 SD 卡格式化吗？该卡上的所有数据都将丢失。"</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"格式化"</string>
@@ -858,22 +855,8 @@
     <string name="reset" msgid="2448168080964209908">"重置"</string>
     <string name="submit" msgid="1602335572089911941">"提交"</string>
     <string name="description_star" msgid="2654319874908576133">"收藏"</string>
-    <string name="tether_title" msgid="6970447107301643248">"可进行 USB 绑定"</string>
-    <string name="tether_message" msgid="554549994538298101">"如果您希望自己的手机与计算机共享数据连接，请选择“绑定”。"</string>
-    <string name="tether_button" msgid="7409514810151603641">"绑定"</string>
-    <string name="tether_button_cancel" msgid="6744369928952219677">"取消"</string>
-    <string name="tether_error_message" msgid="6672110337349077628">"绑定时出现问题。"</string>
-    <string name="tether_available_notification_title" msgid="367754042700082080">"可进行 USB 绑定"</string>
-    <string name="tether_available_notification_message" msgid="8439443306503453793">"选择将您的计算机与手机进行绑定。"</string>
-    <string name="tether_stop_notification_title" msgid="1902246071807668101">"解除绑定"</string>
-    <string name="tether_stop_notification_message" msgid="6920086906891516128">"选择解除计算机的绑定。"</string>
-    <string name="tether_stop_title" msgid="3118332507220912235">"解除绑定"</string>
-    <string name="tether_stop_message" msgid="7741840433788363174">"您的手机与计算机已共享蜂窝数据连接。选择“断开绑定”可解除 USB 绑定。"</string>
-    <string name="tether_stop_button" msgid="8061941592702063029">"断开绑定"</string>
-    <string name="tether_stop_button_cancel" msgid="3694669546501300230">"取消"</string>
-    <string name="tether_stop_error_message" msgid="4244697367270211648">"在解除绑定时遇到了问题。请重试。"</string>
-    <!-- no translation found for car_mode_disable_notification_title (3164768212003864316) -->
-    <skip />
-    <!-- no translation found for car_mode_disable_notification_message (3262812780382240778) -->
-    <skip />
+    <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"已启用车载模式"</string>
+    <string name="car_mode_disable_notification_message" msgid="668663626721675614">"选择退出车载模式"</string>
+    <string name="tethered_notification_title" msgid="8146103971290167718">"绑定生效"</string>
+    <string name="tethered_notification_message" msgid="3067108323903048927">"触摸可进行配置"</string>
 </resources>

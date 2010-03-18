@@ -1,18 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Copyright (C) 2009 The Android Open Source Project
+<!-- 
+/* //device/apps/common/assets/res/any/strings.xml
+**
+** Copyright 2006, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+ -->
 
-     Licensed under the Apache License, Version 2.0 (the "License");
-     you may not use this file except in compliance with the License.
-     You may obtain a copy of the License at
-
-          http://www.apache.org/licenses/LICENSE-2.0
-
-     Unless required by applicable law or agreed to in writing, software
-     distributed under the License is distributed on an "AS IS" BASIS,
-     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-     See the License for the specific language governing permissions and
-     limitations under the License.
--->
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="8340973892742019101">"B"</string>
@@ -64,8 +69,12 @@
     <string name="RestrictedChangedTitle" msgid="5592189398956187498">"Accesso limitato modificato"</string>
     <string name="RestrictedOnData" msgid="8653794784690065540">"Il servizio dati è bloccato."</string>
     <string name="RestrictedOnEmergency" msgid="6581163779072833665">"Il servizio di emergenza è bloccato."</string>
-    <string name="RestrictedOnNormal" msgid="2045364908281990708">"Il servizio vocale/SMS è bloccato."</string>
-    <string name="RestrictedOnAll" msgid="4923139582141626159">"Tutti i servizi vocali/SMS sono bloccati."</string>
+    <string name="RestrictedOnNormal" msgid="4953867011389750673">"Il servizio vocale è bloccato."</string>
+    <string name="RestrictedOnAllVoice" msgid="1459318899842232234">"Tutti i servizi vocali sono bloccati."</string>
+    <string name="RestrictedOnSms" msgid="8314352327461638897">"Il servizio SMS è bloccato."</string>
+    <string name="RestrictedOnVoiceData" msgid="8244438624660371717">"I servizi vocali/dati sono bloccati."</string>
+    <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"I servizi vocali/SMS sono bloccati."</string>
+    <string name="RestrictedOnAll" msgid="2714924667937117304">"Tutti i servizi vocali/dati/SMS sono bloccati."</string>
     <string name="serviceClassVoice" msgid="1258393812335258019">"Voce"</string>
     <string name="serviceClassData" msgid="872456782077937893">"Dati"</string>
     <string name="serviceClassFAX" msgid="5566624998840486475">"FAX"</string>
@@ -251,10 +260,8 @@
     <string name="permdesc_installPackages" msgid="526669220850066132">"Consente a un\'applicazione di installare nuovi pacchetti Android o aggiornamenti. Le applicazioni dannose possono sfruttare questa possibilità per aggiungere nuove applicazioni con potenti autorizzazioni arbitrarie."</string>
     <string name="permlab_clearAppCache" msgid="4747698311163766540">"eliminazione dati della cache applicazioni"</string>
     <string name="permdesc_clearAppCache" msgid="7740465694193671402">"Consente a un\'applicazione di liberare spazio sul telefono eliminando file nella directory della cache dell\'applicazione. L\'accesso è generalmente limitato a processi di sistema."</string>
-    <!-- no translation found for permlab_movePackage (728454979946503926) -->
-    <skip />
-    <!-- no translation found for permdesc_movePackage (6323049291923925277) -->
-    <skip />
+    <string name="permlab_movePackage" msgid="728454979946503926">"Spostare risorse dell\'applicazione"</string>
+    <string name="permdesc_movePackage" msgid="6323049291923925277">"Consente a un\'applicazione di spostare risorse applicative da supporti interni a esterni e viceversa."</string>
     <string name="permlab_readLogs" msgid="4811921703882532070">"lettura file di registro sistema"</string>
     <string name="permdesc_readLogs" msgid="2257937955580475902">"Consente a un\'applicazione di leggere vari file di registro del sistema per trovare informazioni generali sulle operazioni effettuate con il telefono. Tali file non dovrebbero contenere informazioni personali o riservate."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"lettura/scrittura risorse di proprietà di diag"</string>
@@ -281,13 +288,10 @@
     <string name="permdesc_writeOwnerData" msgid="2344055317969787124">"Consente a un\'applicazione di modificare i dati del proprietario del telefono memorizzati sul telefono. Le applicazioni dannose possono sfruttare questa possibilità per cancellare o modificare tali dati."</string>
     <string name="permlab_readOwnerData" msgid="6668525984731523563">"lettura dati proprietario"</string>
     <string name="permdesc_readOwnerData" msgid="3088486383128434507">"Consente a un\'applicazione di leggere i dati del proprietario del telefono memorizzati sul telefono. Le applicazioni dannose possono sfruttare questa possibilità per leggere tali dati."</string>
-    <!-- no translation found for permlab_readCalendar (6898987798303840534) -->
-    <skip />
+    <string name="permlab_readCalendar" msgid="6898987798303840534">"leggere eventi di calendario"</string>
     <string name="permdesc_readCalendar" msgid="5533029139652095734">"Consente la lettura da parte di un\'applicazione di tutti gli eventi di calendario memorizzati sul telefono. Le applicazioni dannose possono sfruttare questa possibilità per inviare i tuoi eventi di calendario ad altre persone."</string>
-    <!-- no translation found for permlab_writeCalendar (3894879352594904361) -->
-    <skip />
-    <!-- no translation found for permdesc_writeCalendar (2988871373544154221) -->
-    <skip />
+    <string name="permlab_writeCalendar" msgid="3894879352594904361">"aggiungere o modificare eventi di calendario e inviare email agli invitati"</string>
+    <string name="permdesc_writeCalendar" msgid="2988871373544154221">"Consente a un\'applicazione di aggiungere o modificare gli eventi nel tuo calendario, eventualmente inviando email agli invitati. Le applicazioni dannose possono utilizzare questa autorizzazione per cancellare o modificare i tuoi eventi di calendario per inviare email agli invitati."</string>
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"fonti di localizzazione fittizie per test"</string>
     <string name="permdesc_accessMockLocation" msgid="7648286063459727252">"Creare fonti di localizzazione fittizie per test. Le applicazioni dannose possono sfruttare questa possibilità per sostituire la posizione e/o lo stato restituito da reali fonti di localizzazione come GPS o provider di rete."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"accesso a comandi aggiuntivi del provider di localizz."</string>
@@ -382,7 +386,7 @@
     <string name="permdesc_writeApnSettings" msgid="7443433457842966680">"Consente a un\'applicazione di modificare le impostazioni APN, come proxy e porta di qualsiasi APN."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"modifica connettività di rete"</string>
     <string name="permdesc_changeNetworkState" msgid="4199958910396387075">"Consente a un\'applicazione di modificare lo stato di connettività di rete."</string>
-    <string name="permlab_changeTetherState" msgid="5952584964373017960">"modifica della connettività tethering"</string>
+    <string name="permlab_changeTetherState" msgid="2702121155761140799">"modificare la connettività tethering"</string>
     <string name="permdesc_changeTetherState" msgid="8905815579146349568">"Consente a un\'applicazione di modificare lo stato di connettività di rete tethering."</string>
     <string name="permlab_changeBackgroundDataSetting" msgid="1400666012671648741">"cambiare l\'impostazione di utilizzo dei dati in background"</string>
     <string name="permdesc_changeBackgroundDataSetting" msgid="1001482853266638864">"Consente a un\'applicazione di cambiare l\'impostazione di utilizzo dei dati in background."</string>
@@ -532,8 +536,7 @@
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"Premi Menu per sbloccare."</string>
     <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"Traccia la sequenza di sblocco"</string>
     <string name="lockscreen_emergency_call" msgid="5347633784401285225">"Chiamata di emergenza"</string>
-    <!-- no translation found for lockscreen_return_to_call (5244259785500040021) -->
-    <skip />
+    <string name="lockscreen_return_to_call" msgid="5244259785500040021">"Torna a chiamata"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Corretta."</string>
     <string name="lockscreen_pattern_wrong" msgid="4817583279053112312">"Riprova"</string>
     <string name="lockscreen_plugged_in" msgid="613343852842944435">"In carica (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
@@ -620,11 +623,11 @@
     <item quantity="one" msgid="9150797944610821849">"1 ora fa"</item>
     <item quantity="other" msgid="2467273239587587569">"<xliff:g id="COUNT">%d</xliff:g> ore fa"</item>
   </plurals>
-    <!-- no translation found for last_num_days:other (3069992808164318268) -->
-    <!-- no translation found for last_month (3959346739979055432) -->
-    <skip />
-    <!-- no translation found for older (5211975022815554840) -->
-    <skip />
+  <plurals name="last_num_days">
+    <item quantity="other" msgid="3069992808164318268">"Ultimi <xliff:g id="COUNT">%d</xliff:g> giorni"</item>
+  </plurals>
+    <string name="last_month" msgid="3959346739979055432">"Ultimo mese"</string>
+    <string name="older" msgid="5211975022815554840">"Precedente"</string>
   <plurals name="num_days_ago">
     <item quantity="one" msgid="861358534398115820">"ieri"</item>
     <item quantity="other" msgid="2479586466153314633">"<xliff:g id="COUNT">%d</xliff:g> giorni fa"</item>
@@ -692,11 +695,6 @@
     <string name="weeks" msgid="6509623834583944518">"settimane"</string>
     <string name="year" msgid="4001118221013892076">"anno"</string>
     <string name="years" msgid="6881577717993213522">"anni"</string>
-    <string name="every_weekday" msgid="8777593878457748503">"Ogni giorno feriale (lun-ven)"</string>
-    <string name="daily" msgid="5738949095624133403">"Quotidianamente"</string>
-    <string name="weekly" msgid="983428358394268344">"Ogni settimana il <xliff:g id="DAY">%s</xliff:g>"</string>
-    <string name="monthly" msgid="2667202947170988834">"Mensilmente"</string>
-    <string name="yearly" msgid="1519577999407493836">"Annualmente"</string>
     <string name="VideoView_error_title" msgid="3359437293118172396">"Impossibile riprodurre il video"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="897920883624437033">"Spiacenti, questo video non è valido per lo streaming su questo dispositivo."</string>
     <string name="VideoView_error_text_unknown" msgid="710301040038083944">"Spiacenti. Impossibile riprodurre il video."</string>
@@ -792,14 +790,13 @@
     <string name="usb_storage_stop_message" msgid="3613713396426604104">"Prima di disattivare l\'archiviazione USB, assicurati di avere smontato (\"espulso\") la scheda SD di Android dal computer."</string>
     <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"Disattiva archiviazione USB"</string>
     <string name="usb_storage_stop_error_message" msgid="143881914840412108">"Si è verificato un problema durante la disattivazione dell\'archiviazione USB. Verifica di avere smontato l\'host USB e riprova."</string>
-    <!-- no translation found for dlg_confirm_kill_storage_users_title (203356557714612214) -->
+    <!-- no translation found for dlg_confirm_kill_storage_users_title (963039033470478697) -->
     <skip />
-    <!-- no translation found for dlg_confirm_kill_storage_users_text (3902998926994232358) -->
+    <!-- no translation found for dlg_confirm_kill_storage_users_text (3202838234780505886) -->
     <skip />
-    <!-- no translation found for dlg_error_title (9179426738781357928) -->
+    <!-- no translation found for dlg_error_title (8048999973837339174) -->
     <skip />
-    <!-- no translation found for dlg_ok (7376953167039865701) -->
-    <skip />
+    <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
     <string name="extmedia_format_title" msgid="8663247929551095854">"Formatta scheda SD"</string>
     <string name="extmedia_format_message" msgid="3621369962433523619">"Formattare la scheda SD? Tutti i dati sulla scheda verranno persi."</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Formatta"</string>
@@ -858,22 +855,8 @@
     <string name="reset" msgid="2448168080964209908">"Reimposta"</string>
     <string name="submit" msgid="1602335572089911941">"Invia"</string>
     <string name="description_star" msgid="2654319874908576133">"preferiti"</string>
-    <string name="tether_title" msgid="6970447107301643248">"Tethering USB disponibile"</string>
-    <string name="tether_message" msgid="554549994538298101">"Seleziona \"Tethering\" per condividere la connessione dati del telefono con il computer."</string>
-    <string name="tether_button" msgid="7409514810151603641">"Tethering"</string>
-    <string name="tether_button_cancel" msgid="6744369928952219677">"Annulla"</string>
-    <string name="tether_error_message" msgid="6672110337349077628">"Si è verificato un problema con il tethering."</string>
-    <string name="tether_available_notification_title" msgid="367754042700082080">"Tethering USB disponibile"</string>
-    <string name="tether_available_notification_message" msgid="8439443306503453793">"Seleziona per impostare il tethering del computer con il telefono."</string>
-    <string name="tether_stop_notification_title" msgid="1902246071807668101">"Interrompi tethering"</string>
-    <string name="tether_stop_notification_message" msgid="6920086906891516128">"Seleziona per interrompere il tethering del computer."</string>
-    <string name="tether_stop_title" msgid="3118332507220912235">"Disconnetti tethering"</string>
-    <string name="tether_stop_message" msgid="7741840433788363174">"Stai condividendo la connessione dati del telefono con il computer. Seleziona \"Disconnetti\" per disconnettere il tethering USB."</string>
-    <string name="tether_stop_button" msgid="8061941592702063029">"Disconnetti"</string>
-    <string name="tether_stop_button_cancel" msgid="3694669546501300230">"Annulla"</string>
-    <string name="tether_stop_error_message" msgid="4244697367270211648">"Si è verificato un problema durante la disattivazione del tethering. Riprova."</string>
-    <!-- no translation found for car_mode_disable_notification_title (3164768212003864316) -->
-    <skip />
-    <!-- no translation found for car_mode_disable_notification_message (3262812780382240778) -->
-    <skip />
+    <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Modalità automobile attivata"</string>
+    <string name="car_mode_disable_notification_message" msgid="668663626721675614">"Seleziona per uscire dalla modalità automobile."</string>
+    <string name="tethered_notification_title" msgid="8146103971290167718">"Tethering attivo"</string>
+    <string name="tethered_notification_message" msgid="3067108323903048927">"Tocca per configurare"</string>
 </resources>

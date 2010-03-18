@@ -1,18 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Copyright (C) 2009 The Android Open Source Project
+<!-- 
+/* //device/apps/common/assets/res/any/strings.xml
+**
+** Copyright 2006, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+ -->
 
-     Licensed under the Apache License, Version 2.0 (the "License");
-     you may not use this file except in compliance with the License.
-     You may obtain a copy of the License at
-
-          http://www.apache.org/licenses/LICENSE-2.0
-
-     Unless required by applicable law or agreed to in writing, software
-     distributed under the License is distributed on an "AS IS" BASIS,
-     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-     See the License for the specific language governing permissions and
-     limitations under the License.
--->
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="8340973892742019101">"B"</string>
@@ -64,8 +69,12 @@
     <string name="RestrictedChangedTitle" msgid="5592189398956187498">"Omezený přístup byl změněn."</string>
     <string name="RestrictedOnData" msgid="8653794784690065540">"Datová služba je zablokována."</string>
     <string name="RestrictedOnEmergency" msgid="6581163779072833665">"Tísňová linka je zablokována."</string>
-    <string name="RestrictedOnNormal" msgid="2045364908281990708">"Hlasová služba a služba SMS jsou zablokovány."</string>
-    <string name="RestrictedOnAll" msgid="4923139582141626159">"Veškeré hlasové služby a služby SMS jsou zablokovány."</string>
+    <string name="RestrictedOnNormal" msgid="4953867011389750673">"Hlasová služba je zablokována."</string>
+    <string name="RestrictedOnAllVoice" msgid="1459318899842232234">"Veškeré hlasové služby jsou zablokovány."</string>
+    <string name="RestrictedOnSms" msgid="8314352327461638897">"Služby SMS jsou zablokovány."</string>
+    <string name="RestrictedOnVoiceData" msgid="8244438624660371717">"Hlasové a datové služby jsou zablokovány."</string>
+    <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"Hlasové služby a služby SMS jsou zablokovány."</string>
+    <string name="RestrictedOnAll" msgid="2714924667937117304">"Veškeré hlasové a datové služby a služby SMS jsou zablokovány."</string>
     <string name="serviceClassVoice" msgid="1258393812335258019">"Hlas"</string>
     <string name="serviceClassData" msgid="872456782077937893">"Data"</string>
     <string name="serviceClassFAX" msgid="5566624998840486475">"FAX"</string>
@@ -251,10 +260,8 @@
     <string name="permdesc_installPackages" msgid="526669220850066132">"Umožňuje aplikaci nainstalovat nové či aktualizované balíčky systému Android. Škodlivé aplikace mohou pomocí tohoto nastavení přidat nové aplikace s libovolnými oprávněními."</string>
     <string name="permlab_clearAppCache" msgid="4747698311163766540">"smazání všech dat v mezipaměti aplikace"</string>
     <string name="permdesc_clearAppCache" msgid="7740465694193671402">"Umožňuje aplikaci uvolnit paměť telefonu smazáním souborů v adresáři mezipaměti aplikace. Přístup je velmi omezený, většinou pouze pro systémové procesy."</string>
-    <!-- no translation found for permlab_movePackage (728454979946503926) -->
-    <skip />
-    <!-- no translation found for permdesc_movePackage (6323049291923925277) -->
-    <skip />
+    <string name="permlab_movePackage" msgid="728454979946503926">"Přesun zdrojů aplikace"</string>
+    <string name="permdesc_movePackage" msgid="6323049291923925277">"Umožňuje aplikaci přesunout své zdroje z interní paměti na externí médium a opačně."</string>
     <string name="permlab_readLogs" msgid="4811921703882532070">"čtení systémových souborů protokolu"</string>
     <string name="permdesc_readLogs" msgid="2257937955580475902">"Umožňuje aplikaci číst různé systémové soubory protokolů. Toto nastavení aplikaci umožní získat obecné informace o činnostech s telefonem, ale neměly by obsahovat žádné osobní či soukromé informace."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"čtení nebo zápis do prostředků funkce diag"</string>
@@ -281,13 +288,10 @@
     <string name="permdesc_writeOwnerData" msgid="2344055317969787124">"Umožňuje aplikaci změnit informace o vlastníkovi telefonu uložené v telefonu. Škodlivé aplikace mohou pomocí tohoto nastavení vymazat či pozměnit informace o vlastníkovi."</string>
     <string name="permlab_readOwnerData" msgid="6668525984731523563">"čtení informací o vlastníkovi"</string>
     <string name="permdesc_readOwnerData" msgid="3088486383128434507">"Umožňuje aplikaci číst informace o vlastníkovi telefonu uložená v telefonu. Škodlivé aplikace mohou pomocí tohoto nastavení načíst informace o vlastníkovi."</string>
-    <!-- no translation found for permlab_readCalendar (6898987798303840534) -->
-    <skip />
+    <string name="permlab_readCalendar" msgid="6898987798303840534">"Čtení událostí v kalendáři"</string>
     <string name="permdesc_readCalendar" msgid="5533029139652095734">"Umožňuje aplikaci načíst všechny události kalendáře uložené ve vašem telefonu. Škodlivé aplikace poté mohou dalším lidem odeslat události z vašeho kalendáře."</string>
-    <!-- no translation found for permlab_writeCalendar (3894879352594904361) -->
-    <skip />
-    <!-- no translation found for permdesc_writeCalendar (2988871373544154221) -->
-    <skip />
+    <string name="permlab_writeCalendar" msgid="3894879352594904361">"Přidávání nebo úprava událostí v kalendáři a odesílání e-mailů hostům"</string>
+    <string name="permdesc_writeCalendar" msgid="2988871373544154221">"Umožňuje aplikaci přidávat nebo měnit události v kalendáři, které budou odesílat e-maily hostům. Škodlivé aplikace mohou pomocí tohoto oprávnění mazat nebo upravovat události v kalendáři a odesílat e-maily hostům."</string>
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"simulace zdrojů polohy pro účely testování"</string>
     <string name="permdesc_accessMockLocation" msgid="7648286063459727252">"Vytváří simulované zdroje polohy pro účely testování. Škodlivé aplikace mohou pomocí tohoto nastavení změnit polohu či stav vrácený zdroji skutečné polohy, jako je např. jednotka GPS či poskytovatelé sítě."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"přístup k dalším příkazům poskytovatele polohy"</string>
@@ -382,7 +386,7 @@
     <string name="permdesc_writeApnSettings" msgid="7443433457842966680">"Umožňuje aplikaci změnit nastavení APN, jako je například proxy či port APN."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"změna připojení k síti"</string>
     <string name="permdesc_changeNetworkState" msgid="4199958910396387075">"Umožňuje aplikaci změnit stav připojení k síti."</string>
-    <string name="permlab_changeTetherState" msgid="5952584964373017960">"změnit sdílené datové připojení"</string>
+    <string name="permlab_changeTetherState" msgid="2702121155761140799">"Změna sdíleného datového připojení"</string>
     <string name="permdesc_changeTetherState" msgid="8905815579146349568">"Umožňuje aplikaci změnit stav sdíleného datového připojení k síti."</string>
     <string name="permlab_changeBackgroundDataSetting" msgid="1400666012671648741">"změnit nastavení použití dat na pozadí"</string>
     <string name="permdesc_changeBackgroundDataSetting" msgid="1001482853266638864">"Umožňuje aplikaci změnit nastavení použití dat na pozadí."</string>
@@ -532,8 +536,7 @@
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"Telefon odemknete stisknutím tlačítka Menu."</string>
     <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"Odblokujte pomocí gesta"</string>
     <string name="lockscreen_emergency_call" msgid="5347633784401285225">"Tísňové volání"</string>
-    <!-- no translation found for lockscreen_return_to_call (5244259785500040021) -->
-    <skip />
+    <string name="lockscreen_return_to_call" msgid="5244259785500040021">"Zavolat zpět"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Správně!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4817583279053112312">"Zkuste to prosím znovu"</string>
     <string name="lockscreen_plugged_in" msgid="613343852842944435">"Nabíjení (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
@@ -620,11 +623,11 @@
     <item quantity="one" msgid="9150797944610821849">"před 1 hodinou"</item>
     <item quantity="other" msgid="2467273239587587569">"před <xliff:g id="COUNT">%d</xliff:g> hod."</item>
   </plurals>
-    <!-- no translation found for last_num_days:other (3069992808164318268) -->
-    <!-- no translation found for last_month (3959346739979055432) -->
-    <skip />
-    <!-- no translation found for older (5211975022815554840) -->
-    <skip />
+  <plurals name="last_num_days">
+    <item quantity="other" msgid="3069992808164318268">"Posledních <xliff:g id="COUNT">%d</xliff:g> dnů"</item>
+  </plurals>
+    <string name="last_month" msgid="3959346739979055432">"Poslední měsíc"</string>
+    <string name="older" msgid="5211975022815554840">"Starší"</string>
   <plurals name="num_days_ago">
     <item quantity="one" msgid="861358534398115820">"včera"</item>
     <item quantity="other" msgid="2479586466153314633">"před <xliff:g id="COUNT">%d</xliff:g> dny"</item>
@@ -692,11 +695,6 @@
     <string name="weeks" msgid="6509623834583944518">"týd."</string>
     <string name="year" msgid="4001118221013892076">"rokem"</string>
     <string name="years" msgid="6881577717993213522">"lety"</string>
-    <string name="every_weekday" msgid="8777593878457748503">"Každý pracovní den (Po – Pá)"</string>
-    <string name="daily" msgid="5738949095624133403">"Denně"</string>
-    <string name="weekly" msgid="983428358394268344">"Každý týden v <xliff:g id="DAY">%s</xliff:g>"</string>
-    <string name="monthly" msgid="2667202947170988834">"Měsíčně"</string>
-    <string name="yearly" msgid="1519577999407493836">"Ročně"</string>
     <string name="VideoView_error_title" msgid="3359437293118172396">"Video nelze přehrát"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="897920883624437033">"Omlouváme se, ale toto video nelze přenášet datovým proudem do tohoto zařízení."</string>
     <string name="VideoView_error_text_unknown" msgid="710301040038083944">"Toto video bohužel nelze přehrát."</string>
@@ -792,14 +790,13 @@
     <string name="usb_storage_stop_message" msgid="3613713396426604104">"Před vypnutím úložiště USB zkontrolujte, zda jste odpojili (vyjmuli) kartu SD zařízení Android z počítače."</string>
     <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"Vypnout úložiště USB"</string>
     <string name="usb_storage_stop_error_message" msgid="143881914840412108">"Při vypínání úložiště USB došlo k problémům. Zkontrolujte, zda byl hostitel USB odpojen, a zkuste to znovu."</string>
-    <!-- no translation found for dlg_confirm_kill_storage_users_title (203356557714612214) -->
+    <!-- no translation found for dlg_confirm_kill_storage_users_title (963039033470478697) -->
     <skip />
-    <!-- no translation found for dlg_confirm_kill_storage_users_text (3902998926994232358) -->
+    <!-- no translation found for dlg_confirm_kill_storage_users_text (3202838234780505886) -->
     <skip />
-    <!-- no translation found for dlg_error_title (9179426738781357928) -->
+    <!-- no translation found for dlg_error_title (8048999973837339174) -->
     <skip />
-    <!-- no translation found for dlg_ok (7376953167039865701) -->
-    <skip />
+    <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
     <string name="extmedia_format_title" msgid="8663247929551095854">"Formátovat kartu SD"</string>
     <string name="extmedia_format_message" msgid="3621369962433523619">"Opravdu chcete kartu SD naformátovat? Všechna data na kartě budou ztracena."</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Formátovat"</string>
@@ -858,22 +855,8 @@
     <string name="reset" msgid="2448168080964209908">"Resetovat"</string>
     <string name="submit" msgid="1602335572089911941">"Odeslat"</string>
     <string name="description_star" msgid="2654319874908576133">"oblíbené"</string>
-    <string name="tether_title" msgid="6970447107301643248">"Sdílené datové připojení prostřednictvím portu USB je k dispozici"</string>
-    <string name="tether_message" msgid="554549994538298101">"Chcete-li sdílet datové připojení telefonu s počítačem, vyberte možnost Sdílet datové připojení."</string>
-    <string name="tether_button" msgid="7409514810151603641">"Sdílet datové připojení"</string>
-    <string name="tether_button_cancel" msgid="6744369928952219677">"Zrušit"</string>
-    <string name="tether_error_message" msgid="6672110337349077628">"Při sdílení datového připojení došlo k chybě."</string>
-    <string name="tether_available_notification_title" msgid="367754042700082080">"Sdílené datové připojení prostřednictvím portu USB je k dispozici"</string>
-    <string name="tether_available_notification_message" msgid="8439443306503453793">"Tuto možnost vyberte, chcete-li sdílet datové připojení telefonu s počítačem."</string>
-    <string name="tether_stop_notification_title" msgid="1902246071807668101">"Zrušit sdílení datového připojení"</string>
-    <string name="tether_stop_notification_message" msgid="6920086906891516128">"Výběrem této možnost zrušíte sdílení datového připojení s počítačem."</string>
-    <string name="tether_stop_title" msgid="3118332507220912235">"Odpojit sdílené datové připojení"</string>
-    <string name="tether_stop_message" msgid="7741840433788363174">"Mobilní datové připojení telefonu je sdíleno s počítačem. Chcete-li sdílení prostřednictvím portu  USB zrušit, vyberte možnost Odpojit."</string>
-    <string name="tether_stop_button" msgid="8061941592702063029">"Odpojit"</string>
-    <string name="tether_stop_button_cancel" msgid="3694669546501300230">"Zrušit"</string>
-    <string name="tether_stop_error_message" msgid="4244697367270211648">"Při ukončování sdíleného datového připojení došlo k chybě. Zkuste to prosím znovu."</string>
-    <!-- no translation found for car_mode_disable_notification_title (3164768212003864316) -->
-    <skip />
-    <!-- no translation found for car_mode_disable_notification_message (3262812780382240778) -->
-    <skip />
+    <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Aktivován režim V autě"</string>
+    <string name="car_mode_disable_notification_message" msgid="668663626721675614">"Vyberte, chcete-li ukončit režim V autě."</string>
+    <string name="tethered_notification_title" msgid="8146103971290167718">"Sdílení je aktivní"</string>
+    <string name="tethered_notification_message" msgid="3067108323903048927">"Dotykem zahájíte konfiguraci"</string>
 </resources>
