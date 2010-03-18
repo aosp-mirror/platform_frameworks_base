@@ -108,7 +108,7 @@ public class SynthProxy {
      * Updates the engine configuration.
      */
     public int setConfig(String engineConfig) {
-        return native_setConfig(engineConfig);
+        return native_setConfig(mJniData, engineConfig);
     }
 
     /**
@@ -205,7 +205,7 @@ public class SynthProxy {
     private native final int native_loadLanguage(int jniData, String language, String country,
             String variant);
 
-    private native final int native_setConfig(String engineConfig);
+    private native final int native_setConfig(int jniData, String engineConfig);
 
     private native final int native_setSpeechRate(int jniData, int speechRate);
 
