@@ -8686,13 +8686,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      *          along the X axis.
      * @param maxOverscrollY Number of pixels to overscroll by in either direction
      *          along the Y axis.
+     * @param isTouchEvent true if this scroll operation is the result of a touch event.
      * @return true if scrolling was clamped to an overscroll boundary along either
      *          axis, false otherwise.
      */
     protected boolean overscrollBy(int deltaX, int deltaY,
             int scrollX, int scrollY,
             int scrollRangeX, int scrollRangeY,
-            int maxOverscrollX, int maxOverscrollY) {
+            int maxOverscrollX, int maxOverscrollY,
+            boolean isTouchEvent) {
         final int overscrollMode = mOverscrollMode;
         final boolean canScrollHorizontal = 
                 computeHorizontalScrollRange() > computeHorizontalScrollExtent();
@@ -8770,10 +8772,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             clampedY = true;
         }
         
-        // Bump the device with some haptic feedback if we're at the edge
-        // and didn't start there.
-        if ((overscrollHorizontal && clampedX && scrollX != left && scrollX != right) ||
-                (overscrollVertical && clampedY && scrollY != top && scrollY != bottom)) {
+        // Bump the device with some haptic feedback if we're at the edge,
+        // didn't start there, and the scroll is the result of a touch event.
+        if (isTouchEvent &&
+                ((overscrollHorizontal && clampedX && scrollX != left && scrollX != right) ||
+                (overscrollVertical && clampedY && scrollY != top && scrollY != bottom))) {
             performHapticFeedback(HapticFeedbackConstants.SCROLL_BARRIER);
         }
 

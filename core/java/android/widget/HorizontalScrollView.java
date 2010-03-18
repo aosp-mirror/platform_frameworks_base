@@ -508,7 +508,7 @@ public class HorizontalScrollView extends FrameLayout {
                     final int oldX = mScrollX;
                     final int oldY = mScrollY;                    
                     overscrollBy(deltaX, 0, mScrollX, 0, getScrollRange(), 0,
-                            getOverscrollMax(), 0);
+                            getOverscrollMax(), 0, true);
                     onScrollChanged(mScrollX, mScrollY, oldX, oldY);
                 }
                 break;
@@ -1042,7 +1042,7 @@ public class HorizontalScrollView extends FrameLayout {
 
             if (oldX != x || oldY != y) {
                 overscrollBy(x - oldX, y - oldY, oldX, oldY, getScrollRange(), 0,
-                        getOverscrollMax(), 0);
+                        getOverscrollMax(), 0, false);
                 onScrollChanged(mScrollX, mScrollY, oldX, oldY);
             }
 

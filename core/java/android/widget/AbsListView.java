@@ -2133,7 +2133,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                             int overscroll = -incrementalDeltaY - 
                                     (motionViewRealTop - motionViewPrevTop);
                             overscrollBy(0, overscroll, 0, mScrollY, 0, 0,
-                                    0, getOverscrollMax());
+                                    0, getOverscrollMax(), true);
                             mTouchMode = TOUCH_MODE_OVERSCROLL;
                             invalidate();
                         }
@@ -2178,7 +2178,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                         }
                     } else {
                         overscrollBy(0, -incrementalDeltaY, 0, mScrollY, 0, 0,
-                                0, getOverscrollMax());
+                                0, getOverscrollMax(), true);
                         invalidate();
                     }
                     mLastY = y;
@@ -2674,7 +2674,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     if (motionView != null) {
                         // Tweak the scroll for how far we overshot
                         int overshoot = -(delta - (motionView.getTop() - oldTop));
-                        overscrollBy(0, overshoot, 0, mScrollY, 0, 0, 0, getOverscrollMax());
+                        overscrollBy(0, overshoot, 0, mScrollY, 0, 0,
+                                0, getOverscrollMax(), false);
                     }
                     float vel = scroller.getCurrVelocity();
                     if (delta > 0) {
@@ -2706,7 +2707,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 if (scroller.computeScrollOffset()) {
                     final int scrollY = mScrollY;
                     final int deltaY = scroller.getCurrY() - scrollY;
-                    if (overscrollBy(0, deltaY, 0, scrollY, 0, 0, 0, getOverscrollMax())) {
+                    if (overscrollBy(0, deltaY, 0, scrollY, 0, 0,
+                            0, getOverscrollMax(), false)) {
                         startSpringback();
                     } else {
                         invalidate();
