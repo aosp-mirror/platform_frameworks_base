@@ -35,6 +35,7 @@ import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
+import android.os.Bundle;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.telephony.TelephonyManager;
@@ -57,8 +58,7 @@ import java.io.IOException;
  * {@link com.android.internal.policy.impl.KeyguardViewManager}
  * via its {@link com.android.internal.policy.impl.KeyguardViewCallback}, as appropriate.
  */
-public class LockPatternKeyguardView extends KeyguardViewBase
-        implements AccountManagerCallback<Account[]> {
+public class LockPatternKeyguardView extends KeyguardViewBase {
 
     static final boolean DEBUG_CONFIGURATION = false;
             
@@ -155,8 +155,6 @@ public class LockPatternKeyguardView extends KeyguardViewBase
      */
     private final LockPatternUtils mLockPatternUtils;
 
-    private int mNumAccounts;
-
     private UnlockMode mCurrentUnlockMode = UnlockMode.Unknown;
 
     /**
@@ -172,25 +170,6 @@ public class LockPatternKeyguardView extends KeyguardViewBase
         return mRequiresSim
                 && (!mUpdateMonitor.isDeviceProvisioned())
                 && (mUpdateMonitor.getSimState() == IccCard.State.ABSENT);
-    }
-
-    // Called by AccountManager.getAccountByTypeAndFeatures() below...
-    public void run(AccountManagerFuture<Account[]> future) {
-        int samlAccounts = 0;
-        try {
-            samlAccounts = future.getResult().length;
-        } catch (OperationCanceledException e) {
-        } catch (IOException e) {
-        } catch (AuthenticatorException e) {
-        }
-        // At least one of the accounts must be non-SAML to enable the fallback.
-        mEnableFallback = samlAccounts < mNumAccounts;
-
-        if (mUnlockScreen == null) {
-            Log.w(TAG, "no unlock screen when receiving AccountManager information");
-        } else if (mUnlockScreen instanceof PatternUnlockScreen) {
-            ((PatternUnlockScreen)mUnlockScreen).setEnableFallback(mEnableFallback);
-        }
     }
 
     /**
@@ -357,16 +336,40 @@ public class LockPatternKeyguardView extends KeyguardViewBase
         // fallback in case the user forgets his pattern. The response comes
         // back in run() below; don't bother asking until you've called
         // createUnlockScreenFor(), else the information will go unused.
-        mNumAccounts = AccountManager.get(context).getAccounts().length;
-        if (mNumAccounts > 0) {
-            /* If we have a SAML account which requires web login we can not use the
-             fallback screen UI to ask the user for credentials.
-             For now we will disable fallback screen in this case.
-             Ultimately we could consider bringing up a web login from GLS
-             but need to make sure that it will work in the "locked screen" mode. */
-            String[] features = new String[] {"saml"};
-            AccountManager.get(context).getAccountsByTypeAndFeatures(
-                    "com.google", features, this, null);
+        Account[] accounts = AccountManager.get(context).getAccounts();
+        mEnableFallback = false;
+
+        for (Account account : accounts) {
+            // See whether this account can be used to unlock the screen.
+            try {
+                // Passing null for action makes sure the confirmCredentials intent is not actually
+                // executed - we're just checking whether it's supported.
+                AccountManager.get(context)
+                        .confirmCredentials(account, null, null, null, null)
+                        .getResult();
+                mEnableFallback = true;
+                break;
+
+            } catch (OperationCanceledException e) {
+                Log.w(TAG, "couldn't talk to AccountManager", e);
+
+            } catch (AuthenticatorException e) {
+                if (e.getCause() instanceof UnsupportedOperationException) {
+                    // This is expected for accounts that don't support confirmCredentials
+                    continue;
+                } else {
+                    Log.w(TAG, "couldn't talk to AccountManager", e);
+                }
+
+            } catch (IOException e) {
+                Log.w(TAG, "couldn't talk to AccountManager", e);
+            }
+        }
+
+        if (mUnlockScreen == null) {
+            Log.w(TAG, "no unlock screen when trying to enable fallback");
+        } else if (mUnlockScreen instanceof PatternUnlockScreen) {
+            ((PatternUnlockScreen)mUnlockScreen).setEnableFallback(mEnableFallback);
         }
     }
 
