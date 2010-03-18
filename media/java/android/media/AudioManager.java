@@ -690,6 +690,132 @@ public class AudioManager {
         }
      }
 
+    //====================================================================
+    // Bluetooth SCO control
+    /**
+     * @hide
+     * TODO unhide for SDK
+     * Sticky broadcast intent action indicating that the bluetoooth SCO audio
+     * connection state has changed. The intent contains on extra {@link EXTRA_SCO_AUDIO_STATE}
+     * indicating the new state which is either {@link #SCO_AUDIO_STATE_DISCONNECTED}
+     * or {@link #SCO_AUDIO_STATE_CONNECTED}
+     *
+     * @see #startBluetoothSco()
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_SCO_AUDIO_STATE_CHANGED =
+            "android.media.SCO_AUDIO_STATE_CHANGED";
+    /**
+     * @hide
+     * TODO unhide for SDK
+     * Extra for intent {@link #ACTION_SCO_AUDIO_STATE_CHANGED} containing the new
+     * bluetooth SCO connection state.
+     */
+    public static final String EXTRA_SCO_AUDIO_STATE =
+            "android.media.extra.SCO_AUDIO_STATE";
+
+    /**
+     * @hide
+     * TODO unhide for SDK
+     * Value for extra {@link #EXTRA_SCO_AUDIO_STATE} indicating that the
+     * SCO audio channel is not established
+     */
+    public static final int SCO_AUDIO_STATE_DISCONNECTED = 0;
+    /**
+     * @hide
+     * TODO unhide for SDK
+     * Value for extra {@link #EXTRA_SCO_AUDIO_STATE} indicating that the
+     * SCO audio channel is established
+     */
+    public static final int SCO_AUDIO_STATE_CONNECTED = 1;
+    /**
+     * @hide
+     * TODO unhide for SDK
+     * Value for extra {@link #EXTRA_SCO_AUDIO_STATE} indicating that
+     * there was an error trying to obtain the state
+     */
+    public static final int SCO_AUDIO_STATE_ERROR = -1;
+
+
+    /**
+     * @hide
+     * TODO unhide for SDK
+     * Indicates if current platform supports use of SCO for off call use cases.
+     * Application wanted to use bluetooth SCO audio when the phone is not in call
+     * must first call thsi method to make sure that the platform supports this
+     * feature.
+     * @return true if bluetooth SCO can be used for audio when not in call
+     *         false otherwise
+     * @see #startBluetoothSco()
+    */
+    public boolean isBluetoothScoAvailableOffCall() {
+        return mContext.getResources().getBoolean(
+               com.android.internal.R.bool.config_bluetooth_sco_off_call);
+    }
+
+    /**
+     * @hide
+     * TODO unhide for SDK
+     * Start bluetooth SCO audio connection.
+     * <p>Requires Permission:
+     *   {@link android.Manifest.permission#MODIFY_AUDIO_SETTINGS}.
+     * <p>This method can be used by applications wanting to send and received audio
+     * to/from a bluetooth SCO headset while the phone is not in call.
+     * <p>As the SCO connection establishment can take several seconds,
+     * applications should not rely on the connection to be available when the method
+     * returns but instead register to receive the intent {@link #ACTION_SCO_AUDIO_STATE_CHANGED}
+     * and wait for the state to be {@link #SCO_AUDIO_STATE_CONNECTED}.
+     * <p>As the connection is not guaranteed to succeed, applications must wait for this intent with
+     * a timeout.
+     * <p>When finished with the SCO connection or if the establishment times out,
+     * the application must call {@link #stopBluetoothSco()} to clear the request and turn
+     * down the bluetooth connection.
+     * <p>Even if a SCO connection is established, the following restrictions apply on audio
+     * output streams so that they can be routed to SCO headset:
+     * - the stream type must be {@link #STREAM_VOICE_CALL} or {@link #STREAM_BLUETOOTH_SCO}
+     * - the format must be mono
+     * - the sampling must be 16kHz or 8kHz
+     * <p>The following restrictions apply on input streams:
+     * - the format must be mono
+     * - the sampling must be 8kHz
+     *
+     * <p>Note that the phone application always has the priority on the usage of the SCO
+     * connection for telephony. If this method is called while the phone is in call
+     * it will be ignored. Similarly, if a call is received or sent while an application
+     * is using the SCO connection, the connection will be lost for the application and NOT
+     * returned automatically when the call ends.
+     * @see #stopBluetoothSco()
+     * @see #ACTION_SCO_AUDIO_STATE_CHANGED
+     */
+    public void startBluetoothSco(){
+        IAudioService service = getService();
+        try {
+            service.startBluetoothSco(mICallBack);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Dead object in startBluetoothSco", e);
+        }
+    }
+
+    /**
+     * @hide
+     * TODO unhide for SDK
+     * Stop bluetooth SCO audio connection.
+     * <p>Requires Permission:
+     *   {@link android.Manifest.permission#MODIFY_AUDIO_SETTINGS}.
+     * <p>This method must be called by applications having requested the use of
+     * bluetooth SCO audio with {@link #startBluetoothSco()}
+     * when finished with the SCO connection or if the establishment times out.
+     * @see #startBluetoothSco()
+     */
+    public void stopBluetoothSco(){
+        IAudioService service = getService();
+        try {
+            service.stopBluetoothSco(mICallBack);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Dead object in stopBluetoothSco", e);
+        }
+    }
+
     /**
      * Request use of Bluetooth SCO headset for communications.
      * <p>
@@ -1171,7 +1297,7 @@ public class AudioManager {
          * When losing focus, listeners can use the duration hint to decide what
          * behavior to adopt when losing focus. A music player could for instance elect to duck its
          * music stream for transient focus losses, and pause otherwise.
-         * @param focusChange one of {@link AudioManager#AUDIOFOCUS_GAIN}, 
+         * @param focusChange one of {@link AudioManager#AUDIOFOCUS_GAIN},
          *   {@link AudioManager#AUDIOFOCUS_LOSS}, {@link AudioManager#AUDIOFOCUS_LOSS_TRANSIENT}.
          */
         public void onAudioFocusChanged(int focusChange);
