@@ -166,7 +166,7 @@ public class TtsService extends Service implements OnCompletionListener {
 
         String soLibPath = "/system/lib/libttspico.so";
         if (sNativeSynth == null) {
-            sNativeSynth = new SynthProxy(soLibPath);
+            sNativeSynth = new SynthProxy(soLibPath, "");
         }
 
         mSelf = this;
@@ -269,7 +269,7 @@ public class TtsService extends Service implements OnCompletionListener {
             sNativeSynth.shutdown();
             sNativeSynth = null;
         }
-        sNativeSynth = new SynthProxy(soFilename);
+        sNativeSynth = new SynthProxy(soFilename, "");
         currentSpeechEngineSOFile = soFilename;
         return TextToSpeech.SUCCESS;
     }
