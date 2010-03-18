@@ -180,6 +180,12 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
 
         mKeyboardHidden = configuration.hardKeyboardHidden;
 
+        if (LockPatternKeyguardView.DEBUG_CONFIGURATION) {
+            Log.v(TAG, "***** CREATING LOCK SCREEN", new RuntimeException());
+            Log.v(TAG, "Cur orient=" + mCreationOrientation
+                    + " res orient=" + context.getResources().getConfiguration().orientation);
+        }
+        
         final LayoutInflater inflater = LayoutInflater.from(context);
         if (DBG) Log.v(TAG, "Creation orientation = " + mCreationOrientation);
         if (mCreationOrientation != Configuration.ORIENTATION_LANDSCAPE) {
@@ -600,16 +606,8 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
         updateStatusLines();
     }
 
-    /** {@inheritDoc} */
-    @Override
-    protected void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        if (DBG) {
-            Log.v(TAG, "onConfigurationChanged() time " + SystemClock.elapsedRealtime());
-            if (getResources().getConfiguration().orientation != newConfig.orientation) {
-                Log.e(TAG, "mismatchConfig: ", new Exception("stack trace:"));
-            }
-        }
+    void updateConfiguration() {
+        Configuration newConfig = getResources().getConfiguration();
         if (newConfig.orientation != mCreationOrientation) {
             mCallback.recreateMe(newConfig);
         } else if (newConfig.hardKeyboardHidden != mKeyboardHidden) {
@@ -619,6 +617,29 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
                 mCallback.goToUnlockScreen();
             }
         }
+    }
+    
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        if (LockPatternKeyguardView.DEBUG_CONFIGURATION) {
+            Log.v(TAG, "***** LOCK ATTACHED TO WINDOW");
+            Log.v(TAG, "Cur orient=" + mCreationOrientation
+                    + ", new config=" + getResources().getConfiguration());
+        }
+        updateConfiguration();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        if (LockPatternKeyguardView.DEBUG_CONFIGURATION) {
+            Log.w(TAG, "***** LOCK CONFIG CHANGING", new RuntimeException());
+            Log.v(TAG, "Cur orient=" + mCreationOrientation
+                    + ", new config=" + newConfig);
+        }
+        updateConfiguration();
     }
 
     /** {@inheritDoc} */

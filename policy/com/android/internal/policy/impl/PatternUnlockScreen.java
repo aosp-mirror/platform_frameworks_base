@@ -398,11 +398,29 @@ class PatternUnlockScreen extends LinearLayoutWithDefaultTouchRecepient
     public void onSimStateChanged(IccCard.State simState) {
     }
 
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        if (LockPatternKeyguardView.DEBUG_CONFIGURATION) {
+            Log.v(TAG, "***** PATTERN ATTACHED TO WINDOW");
+            Log.v(TAG, "Cur orient=" + mCreationOrientation
+                    + ", new config=" + getResources().getConfiguration());
+        }
+        if (getResources().getConfiguration().orientation != mCreationOrientation) {
+            mCallback.recreateMe(getResources().getConfiguration());
+        }
+    }
+
 
     /** {@inheritDoc} */
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
+        if (LockPatternKeyguardView.DEBUG_CONFIGURATION) {
+            Log.v(TAG, "***** PATTERN CONFIGURATION CHANGED");
+            Log.v(TAG, "Cur orient=" + mCreationOrientation
+                    + ", new config=" + getResources().getConfiguration());
+        }
         if (newConfig.orientation != mCreationOrientation) {
             mCallback.recreateMe(newConfig);
         }

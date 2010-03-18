@@ -60,6 +60,8 @@ import java.io.IOException;
 public class LockPatternKeyguardView extends KeyguardViewBase
         implements AccountManagerCallback<Account[]> {
 
+    static final boolean DEBUG_CONFIGURATION = false;
+            
     // time after launching EmergencyDialer before the screen goes blank.
     private static final int EMERGENCY_CALL_TIMEOUT = 10000;
 
@@ -413,7 +415,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase
             ((KeyguardScreen) mLockScreen).onPause();
         }
         ((KeyguardScreen) mLockScreen).cleanUp();
-        removeViewInLayout(mLockScreen);
+        removeView(mLockScreen);
 
         mLockScreen = createLockScreen();
         mLockScreen.setVisibility(View.INVISIBLE);
@@ -425,7 +427,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase
             ((KeyguardScreen) mUnlockScreen).onPause();
         }
         ((KeyguardScreen) mUnlockScreen).cleanUp();
-        removeViewInLayout(mUnlockScreen);
+        removeView(mUnlockScreen);
 
         final UnlockMode unlockMode = getUnlockMode();
         mUnlockScreen = createUnlockScreenFor(unlockMode);
@@ -502,6 +504,9 @@ public class LockPatternKeyguardView extends KeyguardViewBase
 
     private void updateScreen(final Mode mode) {
 
+        if (DEBUG_CONFIGURATION) Log.v(TAG, "**** UPDATE SCREEN: mode=" + mode
+                + " last mode=" + mMode, new RuntimeException());
+        
         mMode = mode;
 
         // Re-create the unlock screen if necessary. This is primarily required to properly handle
@@ -517,7 +522,11 @@ public class LockPatternKeyguardView extends KeyguardViewBase
         // flag is set
         mWindowController.setNeedsInput(((KeyguardScreen)visibleScreen).needsInput());
 
-
+        if (DEBUG_CONFIGURATION) {
+            Log.v(TAG, "Gone=" + goneScreen);
+            Log.v(TAG, "Visible=" + visibleScreen);
+        }
+        
         if (mScreenOn) {
             if (goneScreen.getVisibility() == View.VISIBLE) {
                 ((KeyguardScreen) goneScreen).onPause();
@@ -529,7 +538,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase
 
         goneScreen.setVisibility(View.GONE);
         visibleScreen.setVisibility(View.VISIBLE);
-
+        requestLayout();
 
         if (!visibleScreen.requestFocus()) {
             throw new IllegalStateException("keyguard screen must be able to take "

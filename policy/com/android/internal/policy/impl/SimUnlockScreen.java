@@ -279,10 +279,8 @@ public class SimUnlockScreen extends LinearLayout implements KeyguardScreen, Vie
         mEnteredPin[mEnteredDigits++] = digit;
     }
 
-    /** {@inheritDoc} */
-    @Override
-    protected void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
+    void updateConfiguration() {
+        Configuration newConfig = getResources().getConfiguration();
         if (newConfig.orientation != mCreationOrientation) {
             mCallback.recreateMe(newConfig);
         } else if (newConfig.hardKeyboardHidden != mKeyboardHidden) {
@@ -292,6 +290,20 @@ public class SimUnlockScreen extends LinearLayout implements KeyguardScreen, Vie
                 mCallback.goToUnlockScreen();
             }
         }
+        
+    }
+    
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        updateConfiguration();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        updateConfiguration();
     }
 
     /**

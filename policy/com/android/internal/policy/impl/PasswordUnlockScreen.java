@@ -206,6 +206,14 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
         return false;
     }
 
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        if (getResources().getConfiguration().orientation != mCreationOrientation) {
+            mCallback.recreateMe(getResources().getConfiguration());
+        }
+    }
+
     /** {@inheritDoc} */
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
