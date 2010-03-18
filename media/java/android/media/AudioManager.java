@@ -693,8 +693,6 @@ public class AudioManager {
     //====================================================================
     // Bluetooth SCO control
     /**
-     * @hide
-     * TODO unhide for SDK
      * Sticky broadcast intent action indicating that the bluetoooth SCO audio
      * connection state has changed. The intent contains on extra {@link EXTRA_SCO_AUDIO_STATE}
      * indicating the new state which is either {@link #SCO_AUDIO_STATE_DISCONNECTED}
@@ -706,8 +704,6 @@ public class AudioManager {
     public static final String ACTION_SCO_AUDIO_STATE_CHANGED =
             "android.media.SCO_AUDIO_STATE_CHANGED";
     /**
-     * @hide
-     * TODO unhide for SDK
      * Extra for intent {@link #ACTION_SCO_AUDIO_STATE_CHANGED} containing the new
      * bluetooth SCO connection state.
      */
@@ -715,22 +711,16 @@ public class AudioManager {
             "android.media.extra.SCO_AUDIO_STATE";
 
     /**
-     * @hide
-     * TODO unhide for SDK
      * Value for extra {@link #EXTRA_SCO_AUDIO_STATE} indicating that the
      * SCO audio channel is not established
      */
     public static final int SCO_AUDIO_STATE_DISCONNECTED = 0;
     /**
-     * @hide
-     * TODO unhide for SDK
      * Value for extra {@link #EXTRA_SCO_AUDIO_STATE} indicating that the
      * SCO audio channel is established
      */
     public static final int SCO_AUDIO_STATE_CONNECTED = 1;
     /**
-     * @hide
-     * TODO unhide for SDK
      * Value for extra {@link #EXTRA_SCO_AUDIO_STATE} indicating that
      * there was an error trying to obtain the state
      */
@@ -738,8 +728,6 @@ public class AudioManager {
 
 
     /**
-     * @hide
-     * TODO unhide for SDK
      * Indicates if current platform supports use of SCO for off call use cases.
      * Application wanted to use bluetooth SCO audio when the phone is not in call
      * must first call thsi method to make sure that the platform supports this
@@ -754,8 +742,6 @@ public class AudioManager {
     }
 
     /**
-     * @hide
-     * TODO unhide for SDK
      * Start bluetooth SCO audio connection.
      * <p>Requires Permission:
      *   {@link android.Manifest.permission#MODIFY_AUDIO_SETTINGS}.
@@ -772,7 +758,7 @@ public class AudioManager {
      * down the bluetooth connection.
      * <p>Even if a SCO connection is established, the following restrictions apply on audio
      * output streams so that they can be routed to SCO headset:
-     * - the stream type must be {@link #STREAM_VOICE_CALL} or {@link #STREAM_BLUETOOTH_SCO}
+     * - the stream type must be {@link #STREAM_VOICE_CALL}
      * - the format must be mono
      * - the sampling must be 16kHz or 8kHz
      * <p>The following restrictions apply on input streams:
@@ -797,8 +783,6 @@ public class AudioManager {
     }
 
     /**
-     * @hide
-     * TODO unhide for SDK
      * Stop bluetooth SCO audio connection.
      * <p>Requires Permission:
      *   {@link android.Manifest.permission#MODIFY_AUDIO_SETTINGS}.
