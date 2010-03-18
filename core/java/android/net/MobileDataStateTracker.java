@@ -369,7 +369,11 @@ public class MobileDataStateTracker extends NetworkStateTracker {
                 }
                 // else fall through
             case Phone.APN_TYPE_NOT_AVAILABLE:
-                mEnabled = false;
+                // Default is always available, but may be off due to
+                // AirplaneMode or E-Call or whatever..
+                if (mApnType != Phone.APN_TYPE_DEFAULT) {
+                    mEnabled = false;
+                }
                 break;
             default:
                 Log.e(TAG, "Error in reconnect - unexpected response.");
