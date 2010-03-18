@@ -595,6 +595,9 @@ status_t Harness::testSeek(
 
     static const int32_t kNumIterations = 5000;
 
+    // We are always going to seek beyond EOS in the first iteration (i == 0)
+    // followed by a linear read for the second iteration (i == 1).
+    // After that it's all random.
     for (int32_t i = 0; i < kNumIterations; ++i) {
         int64_t requestedSeekTimeUs;
         int64_t actualSeekTimeUs;
@@ -602,14 +605,14 @@ status_t Harness::testSeek(
 
         double r = uniform_rand();
 
-        if (i > 0 && r < 0.5) {
+        if ((i == 1) || (i > 0 && r < 0.5)) {
             // 50% chance of just continuing to decode from last position.
 
             requestedSeekTimeUs = -1;
 
             LOGI("requesting linear read");
         } else {
-            if (i > 0 && r < 0.55) {
+            if (i == 0 || r < 0.55) {
                 // 5% chance of seeking beyond end of stream.
 
                 requestedSeekTimeUs = durationUs;
@@ -674,7 +677,15 @@ status_t Harness::testSeek(
                 buffer = NULL;
             }
         } else if (actualSeekTimeUs < 0) {
-            CHECK(err != OK);
+            EXPECT(err != OK,
+                   "We attempted to seek beyond EOS and expected "
+                   "ERROR_END_OF_STREAM to be returned, but instead "
+                   "we got a valid buffer.");
+            EXPECT(err == ERROR_END_OF_STREAM,
+                   "We attempted to seek beyond EOS and expected "
+                   "ERROR_END_OF_STREAM to be returned, but instead "
+                   "we found some other error.");
+            CHECK_EQ(err, ERROR_END_OF_STREAM);
             CHECK_EQ(buffer, NULL);
         } else {
             EXPECT(err == OK,
