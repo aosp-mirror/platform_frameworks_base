@@ -1822,7 +1822,7 @@ public class AudioService extends IAudioService.Stub {
         public IAudioFocusDispatcher mFocusDispatcher = null;
         public IBinder mSourceRef = null;
         public String mClientId;
-        public int mDurationHint;
+        public int mFocusChangeType;
 
         public FocusStackEntry() {
         }
@@ -1834,7 +1834,7 @@ public class AudioService extends IAudioService.Stub {
             mFocusDispatcher = afl;
             mSourceRef = source;
             mClientId = id;
-            mDurationHint = duration;
+            mFocusChangeType = duration;
         }
     }
 
@@ -1851,7 +1851,7 @@ public class AudioService extends IAudioService.Stub {
             while(stackIterator.hasNext()) {
                 FocusStackEntry fse = stackIterator.next();
                 pw.println("     source:" + fse.mSourceRef + " -- client: " + fse.mClientId
-                        + " -- duration: " +fse.mDurationHint);
+                        + " -- duration: " +fse.mFocusChangeType);
             }
         }
     }
@@ -1953,7 +1953,7 @@ public class AudioService extends IAudioService.Stub {
 
 
     /** @see AudioManager#requestAudioFocus(IAudioFocusDispatcher, int, int) */
-    public int requestAudioFocus(int mainStreamType, int durationHint, IBinder cb,
+    public int requestAudioFocus(int mainStreamType, int focusChangeHint, IBinder cb,
             IAudioFocusDispatcher fd, String clientId) {
         Log.i(TAG, " AudioFocus  requestAudioFocus() from " + clientId);
         // the main stream type for the audio focus request is currently not used. It may
@@ -1970,7 +1970,7 @@ public class AudioService extends IAudioService.Stub {
 
         synchronized(mFocusStack) {
             if (!mFocusStack.empty() && mFocusStack.peek().mClientId.equals(clientId)) {
-                mFocusStack.peek().mDurationHint = durationHint;
+                mFocusStack.peek().mFocusChangeType = focusChangeHint;
                 // if focus is already owned by this client, don't do anything
                 return AudioManager.AUDIOFOCUS_REQUEST_GRANTED;
             }
@@ -1979,9 +1979,7 @@ public class AudioService extends IAudioService.Stub {
             if (!mFocusStack.empty() && (mFocusStack.peek().mFocusDispatcher != null)) {
                 try {
                     mFocusStack.peek().mFocusDispatcher.dispatchAudioFocusChange(
-                            (durationHint == AudioManager.AUDIOFOCUS_GAIN) ?
-                                    AudioManager.AUDIOFOCUS_LOSS :
-                                        AudioManager.AUDIOFOCUS_LOSS_TRANSIENT,
+                            -1 * focusChangeHint, // loss and gain codes are inverse of each other
                             mFocusStack.peek().mClientId);
                 } catch (RemoteException e) {
                     Log.e(TAG, " Failure to signal loss of focus due to "+ e);
@@ -1990,7 +1988,7 @@ public class AudioService extends IAudioService.Stub {
             }
 
             // push focus requester at the top of the audio focus stack
-            mFocusStack.push(new FocusStackEntry(mainStreamType, durationHint, false, fd, cb,
+            mFocusStack.push(new FocusStackEntry(mainStreamType, focusChangeHint, false, fd, cb,
                     clientId));
         }//synchronized(mFocusStack)
 
