@@ -300,11 +300,13 @@ public class LockPatternKeyguardView extends KeyguardViewBase
                 if (DEBUG) Log.d(TAG,
                     "reportFailedPatternAttempt: #" + failedAttempts +
                     " (enableFallback=" + mEnableFallback + ")");
-                if (mEnableFallback && failedAttempts ==
+                final boolean usingLockPattern = mLockPatternUtils.getPasswordMode()
+                        == LockPatternUtils.MODE_PATTERN;
+                if (usingLockPattern && mEnableFallback && failedAttempts ==
                         (LockPatternUtils.FAILED_ATTEMPTS_BEFORE_RESET
                                 - LockPatternUtils.FAILED_ATTEMPTS_BEFORE_TIMEOUT)) {
                     showAlmostAtAccountLoginDialog();
-                } else if (mEnableFallback
+                } else if (usingLockPattern && mEnableFallback
                         && failedAttempts >= LockPatternUtils.FAILED_ATTEMPTS_BEFORE_RESET) {
                     mLockPatternUtils.setPermanentlyLocked(true);
                     updateScreen(mMode);

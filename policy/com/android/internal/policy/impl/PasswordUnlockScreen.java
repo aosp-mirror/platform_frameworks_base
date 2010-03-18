@@ -20,9 +20,12 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 
+import com.android.internal.policy.impl.PatternUnlockScreen.FooterMode;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.PasswordEntryKeyboardView;
 
+import android.os.CountDownTimer;
+import android.os.SystemClock;
 import android.telephony.TelephonyManager;
 import android.text.method.DigitsKeyListener;
 import android.text.method.TextKeyListener;
@@ -57,6 +60,8 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
 
     private int mCreationOrientation;
     private int mKeyboardHidden;
+    private CountDownTimer mCountdownTimer;
+    private TextView mTitle;
 
     // To avoid accidental lockout due to events while the device in in the pocket, ignore
     // any passwords with length less than or equal to this length.
@@ -87,6 +92,7 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
         mEmergencyCallButton = (Button) findViewById(R.id.emergencyCall);
         mEmergencyCallButton.setOnClickListener(this);
         mLockPatternUtils.updateEmergencyCallButtonState(mEmergencyCallButton);
+        mTitle = (TextView) findViewById(R.id.enter_password_label);
 
         mKeyboardHelper = new PasswordEntryKeyboardHelper(context, mKeyboardView, this);
         mKeyboardHelper.setKeyboardMode(isAlpha ? PasswordEntryKeyboardHelper.KEYBOARD_MODE_ALPHA
@@ -130,6 +136,12 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
         mPasswordEntry.setText("");
         mPasswordEntry.requestFocus();
         mLockPatternUtils.updateEmergencyCallButtonState(mEmergencyCallButton);
+
+        // if the user is currently locked out, enforce it.
+        long deadline = mLockPatternUtils.getLockoutAttemptDeadline();
+        if (deadline != 0) {
+            handleAttemptLockout(deadline);
+        }
     }
 
     /** {@inheritDoc} */
@@ -153,9 +165,40 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
             // to avoid accidental lockout, only count attempts that are long enough to be a
             // real password. This may require some tweaking.
             mCallback.reportFailedUnlockAttempt();
+            if (0 == (mUpdateMonitor.getFailedAttempts()
+                    % LockPatternUtils.FAILED_ATTEMPTS_BEFORE_TIMEOUT)) {
+                long deadline = mLockPatternUtils.setLockoutAttemptDeadline();
+                handleAttemptLockout(deadline);
+            }
         }
         mPasswordEntry.setText("");
     }
+
+    // Prevent user from using the PIN/Password entry until scheduled deadline.
+    private void handleAttemptLockout(long elapsedRealtimeDeadline) {
+        mPasswordEntry.setEnabled(false);
+        mKeyboardView.setEnabled(false);
+        long elapsedRealtime = SystemClock.elapsedRealtime();
+        mCountdownTimer = new CountDownTimer(elapsedRealtimeDeadline - elapsedRealtime, 1000) {
+
+            @Override
+            public void onTick(long millisUntilFinished) {
+                int secondsRemaining = (int) (millisUntilFinished / 1000);
+                String instructions = getContext().getString(
+                        R.string.lockscreen_too_many_failed_attempts_countdown,
+                        secondsRemaining);
+                mTitle.setText(instructions);
+            }
+
+            @Override
+            public void onFinish() {
+                mPasswordEntry.setEnabled(true);
+                mTitle.setText(R.string.keyguard_password_enter_password_code);
+                mKeyboardView.setEnabled(true);
+            }
+        }.start();
+    }
+
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
