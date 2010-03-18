@@ -851,7 +851,8 @@ class PackageManagerService extends IPackageManager.Stub {
             mFrameworkInstallObserver = new AppDirObserver(
                 mFrameworkDir.getPath(), OBSERVER_EVENTS, true);
             mFrameworkInstallObserver.startWatching();
-            scanDirLI(mFrameworkDir, PackageParser.PARSE_IS_SYSTEM,
+            scanDirLI(mFrameworkDir, PackageParser.PARSE_IS_SYSTEM
+                    | PackageParser.PARSE_IS_SYSTEM_DIR,
                     scanMode | SCAN_NO_DEX);
             
             // Collect all system packages.
@@ -859,7 +860,8 @@ class PackageManagerService extends IPackageManager.Stub {
             mSystemInstallObserver = new AppDirObserver(
                 mSystemAppDir.getPath(), OBSERVER_EVENTS, true);
             mSystemInstallObserver.startWatching();
-            scanDirLI(mSystemAppDir, PackageParser.PARSE_IS_SYSTEM, scanMode);
+            scanDirLI(mSystemAppDir, PackageParser.PARSE_IS_SYSTEM
+                    | PackageParser.PARSE_IS_SYSTEM_DIR, scanMode);
             
             if (mInstaller != null) {
                 if (DEBUG_UPGRADE) Log.v(TAG, "Running installd update commands");
@@ -2711,8 +2713,6 @@ class PackageManagerService extends IPackageManager.Stub {
         SharedUserSetting suid = null;
         PackageSetting pkgSetting = null;
 
-        boolean removeExisting = false;
-
         if ((pkg.applicationInfo.flags&ApplicationInfo.FLAG_SYSTEM) == 0) {
             // Only system apps can use these features.
             pkg.mOriginalPackages = null;
@@ -2903,7 +2903,7 @@ class PackageManagerService extends IPackageManager.Stub {
 
             if (!verifySignaturesLP(pkgSetting, pkg, parseFlags,
                     (scanMode&SCAN_UPDATE_SIGNATURE) != 0)) {
-                if ((parseFlags&PackageParser.PARSE_IS_SYSTEM) == 0) {
+                if ((parseFlags&PackageParser.PARSE_IS_SYSTEM_DIR) == 0) {
                     mLastScanError = PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIBLE;
                     return null;
                 }
@@ -2922,7 +2922,10 @@ class PackageManagerService extends IPackageManager.Stub {
                         return null;
                     }
                 }
-                removeExisting = true;
+                // File a report about this.
+                String msg = "System package " + pkg.packageName
+                        + " signature changed; retaining data.";
+                reportSettingsProblem(Log.WARN, msg);
             }
 
             // Verify that this new package doesn't have any content providers
@@ -2955,23 +2958,6 @@ class PackageManagerService extends IPackageManager.Stub {
 
         final String pkgName = pkg.packageName;
         
-        if (removeExisting) {
-            boolean useEncryptedFSDir = useEncryptedFilesystemForPackage(pkg);
-            if (mInstaller != null) {
-                int ret = mInstaller.remove(pkgName, useEncryptedFSDir);
-                if (ret != 0) {
-                    String msg = "System package " + pkg.packageName
-                            + " could not have data directory erased after signature change.";
-                    reportSettingsProblem(Log.WARN, msg);
-                    mLastScanError = PackageManager.INSTALL_FAILED_REPLACE_COULDNT_DELETE;
-                    return null;
-                }
-            }
-            Slog.w(TAG, "System package " + pkg.packageName
-                    + " signature changed: existing data removed.");
-            mLastScanError = PackageManager.INSTALL_SUCCEEDED;
-        }
-
         if (pkg.mAdoptPermissions != null) {
             // This package wants to adopt ownership of permissions from
             // another package.
@@ -4500,7 +4486,8 @@ class PackageManagerService extends IPackageManager.Stub {
                 if ((event&ADD_EVENTS) != 0) {
                     if (p == null) {
                         p = scanPackageLI(fullPath,
-                                (mIsRom ? PackageParser.PARSE_IS_SYSTEM : 0) |
+                                (mIsRom ? PackageParser.PARSE_IS_SYSTEM
+                                        | PackageParser.PARSE_IS_SYSTEM_DIR: 0) |
                                 PackageParser.PARSE_CHATTY |
                                 PackageParser.PARSE_MUST_BE_APK,
                                 SCAN_MONITOR | SCAN_NO_PATHS);
