@@ -1541,7 +1541,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     
     /**
      * Controls the overscroll mode for this view.
-     * See {@link #overscrollBy(int, int, int, int, int, int, int, int)},
+     * See {@link #overscrollBy(int, int, int, int, int, int, int, int, boolean)},
      * {@link #OVERSCROLL_ALWAYS}, {@link #OVERSCROLL_IF_CONTENT_SCROLLS},
      * and {@link #OVERSCROLL_NEVER}.
      */
@@ -8786,7 +8786,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     }
     
     /**
-     * Called by {@link #overscrollBy(int, int, int, int, int, int, int, int)} to
+     * Called by {@link #overscrollBy(int, int, int, int, int, int, int, int, boolean)} to
      * respond to the results of an overscroll operation.
      * 
      * @param scrollX New X scroll value in pixels
