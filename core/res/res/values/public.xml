@@ -1238,6 +1238,8 @@
   <public type="attr" name="overscrollHeader" id="0x010102bf" />
   <public type="attr" name="overscrollFooter" id="0x010102c0" />
 
-  <public type="anim" name="cycle_interpolator" id="0x010a000c" />
+  <public type="id" name="custom" id="0x0102002b" />
     
+  <public type="anim" name="cycle_interpolator" id="0x010a000c" />
+
 </resources>
