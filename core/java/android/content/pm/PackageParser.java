@@ -96,7 +96,8 @@ public class PackageParser {
     private static final Object mSync = new Object();
     private static WeakReference<byte[]> mReadBuffer;
 
-    private static boolean sCompatibilityModeEnabled = true; 
+    private static boolean sCompatibilityModeEnabled = true;
+    private static final int PARSE_DEFAULT_INSTALL_LOCATION = PackageInfo.INSTALL_LOCATION_UNSPECIFIED;
 
     static class ParsePackageItemArgs {
         final Package owner;
@@ -707,12 +708,12 @@ public class PackageParser {
                 + pkgName + "\": " + nameError;
             return null;
         }
-        int installLocation = PackageInfo.INSTALL_LOCATION_AUTO;
+        int installLocation = PARSE_DEFAULT_INSTALL_LOCATION;
         for (int i = 0; i < attrs.getAttributeCount(); i++) {
             String attr = attrs.getAttributeName(i);
             if (attr.equals("installLocation")) {
                 installLocation = attrs.getAttributeIntValue(i,
-                        PackageInfo.INSTALL_LOCATION_AUTO);
+                        PARSE_DEFAULT_INSTALL_LOCATION);
                 break;
             }
         }
@@ -778,7 +779,7 @@ public class PackageParser {
 
         pkg.installLocation = sa.getInteger(
                 com.android.internal.R.styleable.AndroidManifest_installLocation,
-                PackageInfo.INSTALL_LOCATION_AUTO);
+                PARSE_DEFAULT_INSTALL_LOCATION);
 
         // Resource boolean are -1, so 1 means we don't know the value.
         int supportsSmallScreens = 1;

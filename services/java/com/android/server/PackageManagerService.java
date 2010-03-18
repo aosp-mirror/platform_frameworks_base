@@ -4701,23 +4701,22 @@ class PackageManagerService extends IPackageManager.Stub {
                             }
                             return PackageHelper.RECOMMEND_INSTALL_INTERNAL;
                         } else {
-                            // When replacing apps make sure we honour
-                            // the existing app location if not overwritten by other options
-                            boolean prevOnSd = (pkg.applicationInfo.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0;
                             if (onSd) {
                                 // Install flag overrides everything.
                                 return PackageHelper.RECOMMEND_INSTALL_EXTERNAL;
                             }
-                            // If current upgrade does not specify install location.
+                            // If current upgrade specifies particular preference
                             if (installLocation == PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY) {
                                 // Application explicitly specified internal.
                                 return PackageHelper.RECOMMEND_INSTALL_INTERNAL;
                             } else if (installLocation == PackageInfo.INSTALL_LOCATION_PREFER_EXTERNAL) {
                                 // App explictly prefers external. Let policy decide
-                            } else if (installLocation == PackageInfo.INSTALL_LOCATION_AUTO) {
+                            } else {
                                 // Prefer previous location
-                                return prevOnSd ? PackageHelper.RECOMMEND_INSTALL_EXTERNAL:
-                                    PackageHelper.RECOMMEND_INSTALL_INTERNAL;
+                                if ((pkg.applicationInfo.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0) {
+                                    return PackageHelper.RECOMMEND_INSTALL_EXTERNAL;
+                                }
+                                return PackageHelper.RECOMMEND_INSTALL_INTERNAL;
                             }
                         }
                     } else {

@@ -86,8 +86,7 @@ public class PackageManagerTests extends AndroidTestCase {
         fail(errMsg);
     }
     void failStr(Exception e) {
-        Log.w(TAG, "e.getMessage="+e.getMessage());
-        Log.w(TAG, "e="+e);
+        failStr(e.getMessage());
     }
 
     @Override
@@ -297,6 +296,17 @@ public class PackageManagerTests extends AndroidTestCase {
     private static final int INSTALL_LOC_INT = 1;
     private static final int INSTALL_LOC_SD = 2;
     private static final int INSTALL_LOC_ERR = -1;
+    private int checkDefaultPolicy(long pkgLen) {
+        // Check for free memory internally
+        if (checkInt(pkgLen)) {
+            return INSTALL_LOC_INT;
+        }
+        // Check for free memory externally
+        if (checkSd(pkgLen)) {
+            return INSTALL_LOC_SD;
+        }
+        return INSTALL_LOC_ERR;
+    }
     private int getInstallLoc(int flags, int expInstallLocation, long pkgLen) {
         // Flags explicitly over ride everything else.
         if ((flags & PackageManager.INSTALL_FORWARD_LOCK) != 0 ) {
@@ -324,15 +334,7 @@ public class PackageManagerTests extends AndroidTestCase {
             return INSTALL_LOC_ERR;
         }
         if (expInstallLocation == PackageInfo.INSTALL_LOCATION_AUTO) {
-            // Check for free memory internally
-            if (checkInt(pkgLen)) {
-                return INSTALL_LOC_INT;
-            }
-            // Check for free memory externally
-            if (checkSd(pkgLen)) {
-                return INSTALL_LOC_SD;
-            }
-            return INSTALL_LOC_ERR;
+            return checkDefaultPolicy(pkgLen);
         }
         // Check for settings preference.
         boolean checkSd = false;
@@ -359,19 +361,9 @@ public class PackageManagerTests extends AndroidTestCase {
                     return INSTALL_LOC_SD;
                 }
                 return INSTALL_LOC_ERR;
-            } else if (userPref == APP_INSTALL_AUTO) {
-                if (checkInt(pkgLen)) {
-                    return INSTALL_LOC_INT;
-                }
-                // Check for free memory externally
-                if (checkSd(pkgLen)) {
-                    return INSTALL_LOC_SD;
-                }
-                return INSTALL_LOC_ERR;
-                
             }
-        } 
-        return INSTALL_LOC_ERR;
+        }
+        return checkDefaultPolicy(pkgLen);
     }
     
     private void assertInstall(PackageParser.Package pkg, int flags, int expInstallLocation) {
@@ -434,7 +426,7 @@ public class PackageManagerTests extends AndroidTestCase {
 
     private InstallParams sampleInstallFromRawResource(int flags, boolean cleanUp) {
         return installFromRawResource("install.apk", R.raw.install, flags, cleanUp,
-                false, -1, PackageInfo.INSTALL_LOCATION_AUTO);
+                false, -1, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
     }
 
     static final String PERM_PACKAGE = "package";
@@ -1114,7 +1106,7 @@ public class PackageManagerTests extends AndroidTestCase {
 
     public void testManifestInstallLocationUnspecified() {
         installFromRawResource("install.apk", R.raw.install_loc_unspecified,
-                0, true, false, -1, PackageInfo.INSTALL_LOCATION_AUTO);
+                0, true, false, -1, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
     }
 
     public void testManifestInstallLocationFwdLockedFlagSdcard() {
@@ -1122,7 +1114,7 @@ public class PackageManagerTests extends AndroidTestCase {
                 PackageManager.INSTALL_FORWARD_LOCK |
                 PackageManager.INSTALL_EXTERNAL, true, true,
                 PackageManager.INSTALL_FAILED_INVALID_INSTALL_LOCATION,
-                PackageInfo.INSTALL_LOCATION_AUTO);
+                PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
     }
 
     public void testManifestInstallLocationFwdLockedSdcard() {
@@ -1178,12 +1170,12 @@ public class PackageManagerTests extends AndroidTestCase {
 
     public void testManifestInstallLocationReplaceInternalSdcard() {
         int iFlags = 0;
-        int iApk = R.raw.install_loc_unspecified;
+        int iApk = R.raw.install_loc_internal;
         int rFlags = 0;
         int rApk = R.raw.install_loc_sdcard;
         InstallParams ip = installFromRawResource("install.apk", iApk,
                 iFlags, false,
-                false, -1, PackageInfo.INSTALL_LOCATION_AUTO);
+                false, -1, PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY);
         GenericReceiver receiver = new ReplaceReceiver(ip.pkg.packageName);
         int replaceFlags = rFlags | PackageManager.INSTALL_REPLACE_EXISTING;
         try {
@@ -1855,21 +1847,28 @@ public class PackageManagerTests extends AndroidTestCase {
     * The following set of tests check install location for existing
     * application based on user setting.
     */
-   private void setExistingXUserX(int userSetting, int iFlags) {
+   private int getExpectedInstallLocation(int userSetting) {
+       int iloc = PackageInfo.INSTALL_LOCATION_UNSPECIFIED;
+       boolean enable = getUserSettingSetInstallLocation();
+       if (enable) {
+           if (userSetting == PackageHelper.APP_INSTALL_AUTO) {
+               iloc = PackageInfo.INSTALL_LOCATION_AUTO;
+           } else if (userSetting == PackageHelper.APP_INSTALL_EXTERNAL) {
+               iloc = PackageInfo.INSTALL_LOCATION_PREFER_EXTERNAL;
+           } else if (userSetting == PackageHelper.APP_INSTALL_INTERNAL) {
+               iloc = PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY;
+           }
+       }
+       return iloc;
+   }
+   private void setExistingXUserX(int userSetting, int iFlags, int iloc) {
        int rFlags = PackageManager.INSTALL_REPLACE_EXISTING;
        // First install.
        installFromRawResource("install.apk", R.raw.install,
                iFlags,
                false,
                false, -1,
-               -1);
-       // Watch out for this.
-       int iloc = PackageInfo.INSTALL_LOCATION_AUTO;
-       if ((iFlags & PackageManager.INSTALL_INTERNAL) != 0) {
-           iloc = PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY;
-       } else if ((iFlags & PackageManager.INSTALL_EXTERNAL) != 0) {
-           iloc = PackageInfo.INSTALL_LOCATION_PREFER_EXTERNAL;
-       }
+               PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
        int origSetting = getInstallLoc();
        try {
            // Set user setting
@@ -1887,49 +1886,56 @@ public class PackageManagerTests extends AndroidTestCase {
    public void testExistingIUserI() {
        int userSetting = PackageHelper.APP_INSTALL_INTERNAL;
        int iFlags = PackageManager.INSTALL_INTERNAL;
-       setExistingXUserX(userSetting, iFlags);
+       setExistingXUserX(userSetting, iFlags, PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY);
    }
    public void testExistingIUserE() {
        int userSetting = PackageHelper.APP_INSTALL_EXTERNAL;
        int iFlags = PackageManager.INSTALL_INTERNAL;
-       setExistingXUserX(userSetting, iFlags);
+       setExistingXUserX(userSetting, iFlags, PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY);
    }
    public void testExistingIUserA() {
        int userSetting = PackageHelper.APP_INSTALL_AUTO;
        int iFlags = PackageManager.INSTALL_INTERNAL;
-       setExistingXUserX(userSetting, iFlags);
+       setExistingXUserX(userSetting, iFlags, PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY);
    }
    public void testExistingEUserI() {
        int userSetting = PackageHelper.APP_INSTALL_INTERNAL;
        int iFlags = PackageManager.INSTALL_EXTERNAL;
-       setExistingXUserX(userSetting, iFlags);
+       setExistingXUserX(userSetting, iFlags, PackageInfo.INSTALL_LOCATION_PREFER_EXTERNAL);
    }
    public void testExistingEUserE() {
        int userSetting = PackageHelper.APP_INSTALL_EXTERNAL;
        int iFlags = PackageManager.INSTALL_EXTERNAL;
-       setExistingXUserX(userSetting, iFlags);
+       setExistingXUserX(userSetting, iFlags, PackageInfo.INSTALL_LOCATION_PREFER_EXTERNAL);
    }
    public void testExistingEUserA() {
        int userSetting = PackageHelper.APP_INSTALL_AUTO;
        int iFlags = PackageManager.INSTALL_EXTERNAL;
-       setExistingXUserX(userSetting, iFlags);
+       setExistingXUserX(userSetting, iFlags, PackageInfo.INSTALL_LOCATION_PREFER_EXTERNAL);
    }
    /*
     * The following set of tests verify that the user setting defines
     * the install location.
     * 
     */
-   private void setUserX(int userSetting) {
-       int origSetting = getInstallLoc();
-       int iloc = PackageInfo.INSTALL_LOCATION_AUTO;
-       if (userSetting == PackageHelper.APP_INSTALL_AUTO) {
-           iloc = PackageInfo.INSTALL_LOCATION_AUTO;
-       } else if (userSetting == PackageHelper.APP_INSTALL_EXTERNAL) {
-           iloc = PackageInfo.INSTALL_LOCATION_PREFER_EXTERNAL;
-       } else if (userSetting == PackageHelper.APP_INSTALL_INTERNAL) {
-           iloc = PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY;
-       }
+   private boolean getUserSettingSetInstallLocation() {
        try {
+           return Settings.System.getInt(mContext.getContentResolver(), Settings.System.SET_INSTALL_LOCATION) != 0;
+           
+       } catch (SettingNotFoundException e1) {
+       }
+       return false;
+   }
+
+   private void setUserSettingSetInstallLocation(boolean value) {
+       Settings.System.putInt(mContext.getContentResolver(),
+               Settings.System.SET_INSTALL_LOCATION, value ? 1 : 0);
+   }
+   private void setUserX(boolean enable, int userSetting, int iloc) {
+       boolean origUserSetting = getUserSettingSetInstallLocation();
+       int origSetting = getInstallLoc();
+       try {
+           setUserSettingSetInstallLocation(enable);
            // Set user setting
            setInstallLoc(userSetting);
            // Replace now
@@ -1939,20 +1945,44 @@ public class PackageManagerTests extends AndroidTestCase {
                    false, -1,
                    iloc);
        } finally {
+           // Restore original setting
+           setUserSettingSetInstallLocation(origUserSetting);
            setInstallLoc(origSetting);
        }
    }
    public void testUserI() {
        int userSetting = PackageHelper.APP_INSTALL_INTERNAL;
-       setUserX(userSetting);
+       int iloc = getExpectedInstallLocation(userSetting);
+       setUserX(true, userSetting, iloc);
    }
    public void testUserE() {
        int userSetting = PackageHelper.APP_INSTALL_EXTERNAL;
-       setUserX(userSetting);
+       int iloc = getExpectedInstallLocation(userSetting);
+       setUserX(true, userSetting, iloc);
    }
    public void testUserA() {
        int userSetting = PackageHelper.APP_INSTALL_AUTO;
-       setUserX(userSetting);
+       int iloc = getExpectedInstallLocation(userSetting);
+       setUserX(true, userSetting, iloc);
+   }
+   /*
+    * The following set of tests turn on/off the basic
+    * user setting for turning on install location.
+    */
+   public void testUserPrefOffUserI() {
+       int userSetting = PackageHelper.APP_INSTALL_INTERNAL;
+       int iloc = PackageInfo.INSTALL_LOCATION_UNSPECIFIED;
+       setUserX(false, userSetting, iloc);
+   }
+   public void testUserPrefOffUserE() {
+       int userSetting = PackageHelper.APP_INSTALL_EXTERNAL;
+       int iloc = PackageInfo.INSTALL_LOCATION_UNSPECIFIED;
+       setUserX(false, userSetting, iloc);
+   }
+   public void testUserPrefOffA() {
+       int userSetting = PackageHelper.APP_INSTALL_AUTO;
+       int iloc = PackageInfo.INSTALL_LOCATION_UNSPECIFIED;
+       setUserX(false, userSetting, iloc);
    }
    
     static final String BASE_PERMISSIONS_DEFINED[] = new String[] {
