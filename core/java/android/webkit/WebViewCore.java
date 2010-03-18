@@ -2301,11 +2301,21 @@ final class WebViewCore {
     }
 
     // called by JNI
-    private void requestKeyboard(boolean showKeyboard, boolean isTextView) {
+    private void requestKeyboardWithSelection(int pointer, int selStart,
+            int selEnd, int textGeneration) {
         if (mWebView != null) {
             Message.obtain(mWebView.mPrivateHandler,
-                    WebView.REQUEST_KEYBOARD, showKeyboard ? 1 : 0,
-                    isTextView ? 1 : 0)
+                    WebView.REQUEST_KEYBOARD_WITH_SELECTION_MSG_ID, pointer,
+                    textGeneration, new TextSelectionData(selStart, selEnd))
+                    .sendToTarget();
+        }
+    }
+
+    // called by JNI
+    private void requestKeyboard(boolean showKeyboard) {
+        if (mWebView != null) {
+            Message.obtain(mWebView.mPrivateHandler,
+                    WebView.REQUEST_KEYBOARD, showKeyboard ? 1 : 0, 0)
                     .sendToTarget();
         }
     }

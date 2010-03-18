@@ -536,9 +536,11 @@ public class WebView extends AbsoluteLayout
     static final int RETURN_LABEL                       = 125;
     static final int FIND_AGAIN                         = 126;
     static final int CENTER_FIT_RECT                    = 127;
+    static final int REQUEST_KEYBOARD_WITH_SELECTION_MSG_ID = 128;
 
     private static final int FIRST_PACKAGE_MSG_ID = SCROLL_TO_MSG_ID;
-    private static final int LAST_PACKAGE_MSG_ID = CENTER_FIT_RECT;
+    private static final int LAST_PACKAGE_MSG_ID
+            = REQUEST_KEYBOARD_WITH_SELECTION_MSG_ID;
 
     static final String[] HandlerPrivateDebugString = {
         "REMEMBER_PASSWORD", //              = 1;
@@ -580,7 +582,8 @@ public class WebView extends AbsoluteLayout
         "SET_ROOT_LAYER_MSG_ID", //          = 124;
         "RETURN_LABEL", //                   = 125;
         "FIND_AGAIN", //                     = 126;
-        "CENTER_FIT_RECT" //                 = 127;
+        "CENTER_FIT_RECT", //                = 127;
+        "REQUEST_KEYBOARD_WITH_SELECTION_MSG_ID" // = 128;
     };
 
     // If the site doesn't use the viewport meta tag to specify the viewport,
@@ -6307,19 +6310,18 @@ public class WebView extends AbsoluteLayout
                         }
                     }
                     break;
+                case REQUEST_KEYBOARD_WITH_SELECTION_MSG_ID:
+                    displaySoftKeyboard(true);
+                    updateTextSelectionFromMessage(msg.arg1, msg.arg2,
+                            (WebViewCore.TextSelectionData) msg.obj);
+                    break;
                 case UPDATE_TEXT_SELECTION_MSG_ID:
                     // If no textfield was in focus, and the user touched one,
                     // causing it to send this message, then WebTextView has not
                     // been set up yet.  Rebuild it so it can set its selection.
                     rebuildWebTextView();
-                    if (inEditingMode()
-                            && mWebTextView.isSameTextField(msg.arg1)
-                            && msg.arg2 == mTextGeneration) {
-                        WebViewCore.TextSelectionData tData
-                                = (WebViewCore.TextSelectionData) msg.obj;
-                        mWebTextView.setSelectionFromWebKit(tData.mStart,
-                                tData.mEnd);
-                    }
+                    updateTextSelectionFromMessage(msg.arg1, msg.arg2,
+                            (WebViewCore.TextSelectionData) msg.obj);
                     break;
                 case RETURN_LABEL:
                     if (inEditingMode()
@@ -6475,7 +6477,7 @@ public class WebView extends AbsoluteLayout
                     if (msg.arg1 == 0) {
                         hideSoftKeyboard();
                     } else {
-                        displaySoftKeyboard(1 == msg.arg2);
+                        displaySoftKeyboard(false);
                     }
                     break;
 
@@ -6595,6 +6597,19 @@ public class WebView extends AbsoluteLayout
                     super.handleMessage(msg);
                     break;
             }
+        }
+    }
+
+    /**
+     * Used when receiving messages for REQUEST_KEYBOARD_WITH_SELECTION_MSG_ID
+     * and UPDATE_TEXT_SELECTION_MSG_ID.  Update the selection of WebTextView.
+     */
+    private void updateTextSelectionFromMessage(int nodePointer,
+            int textGeneration, WebViewCore.TextSelectionData data) {
+        if (inEditingMode()
+                && mWebTextView.isSameTextField(nodePointer)
+                && textGeneration == mTextGeneration) {
+            mWebTextView.setSelectionFromWebKit(data.mStart, data.mEnd);
         }
     }
 
