@@ -14,16 +14,16 @@ typedef uint16_t ushort;
 typedef uint32_t uint;
 //typedef uint64_t ulong;
 
-typedef void * rs_element;
-typedef void * rs_type;
-typedef void * rs_allocation;
-typedef void * rs_sampler;
-typedef void * rs_script;
-typedef void * rs_mesh;
-typedef void * rs_program_fragment;
-typedef void * rs_program_vertex;
-typedef void * rs_program_raster;
-typedef void * rs_program_store;
+typedef int rs_element;
+typedef int rs_type;
+typedef int rs_allocation;
+typedef int rs_sampler;
+typedef int rs_script;
+typedef int rs_mesh;
+typedef int rs_program_fragment;
+typedef int rs_program_vertex;
+typedef int rs_program_raster;
+typedef int rs_program_store;
 
 typedef float float2 __attribute__((ext_vector_type(2)));
 typedef float float3 __attribute__((ext_vector_type(3)));
