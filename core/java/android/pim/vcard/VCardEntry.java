@@ -1055,6 +1055,8 @@ public class VCardEntry {
     public Uri pushIntoContentResolver(ContentResolver resolver) {
         ArrayList<ContentProviderOperation> operationList =
             new ArrayList<ContentProviderOperation>();
+        // After applying the batch the first result's Uri is returned so it is important that
+        // the RawContact is the first operation that gets inserted into the list
         ContentProviderOperation.Builder builder =
             ContentProviderOperation.newInsert(RawContacts.CONTENT_URI);
         String myGroupsId = null;
