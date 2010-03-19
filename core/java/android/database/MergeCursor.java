@@ -185,6 +185,7 @@ public class MergeCursor extends AbstractCursor
                 mCursors[i].deactivate();
             }
         }
+        super.deactivate();
     }
 
     @Override
@@ -194,6 +195,7 @@ public class MergeCursor extends AbstractCursor
             if (mCursors[i] == null) continue;
             mCursors[i].close();
         }
+        super.close();
     }
 
     @Override
