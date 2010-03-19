@@ -1302,7 +1302,6 @@ public class AudioManager {
          * music stream for transient focus losses, and pause otherwise.
          * @param focusChange one of {@link AudioManager#AUDIOFOCUS_GAIN},
          *   {@link AudioManager#AUDIOFOCUS_LOSS}, {@link AudioManager#AUDIOFOCUS_LOSS_TRANSIENT}
-         *   and {@link AudioManager#AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK}.
          */
         public void onAudioFocusChanged(int focusChange);
     }
@@ -1430,8 +1429,6 @@ public class AudioManager {
      *  @param durationHint use {@link #AUDIOFOCUS_GAIN_TRANSIENT} to indicate this focus request
      *      is temporary, and focus will be abandonned shortly. Examples of transient requests are
      *      for the playback of driving directions, or notifications sounds.
-     *      Use {@link #AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK} to indicate also that it's ok for
-     *      the previous focus owner to keep playing if it ducks its audio output.
      *      Use {@link #AUDIOFOCUS_GAIN} for a focus request of unknown duration such
      *      as the playback of a song or a video.
      *  @return {@link #AUDIOFOCUS_REQUEST_FAILED} or {@link #AUDIOFOCUS_REQUEST_GRANTED}
