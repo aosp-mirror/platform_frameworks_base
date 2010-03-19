@@ -3566,7 +3566,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             if (DEBUG_TASKS) Log.v(TAG, "Starting new activity " + r
                     + " in new task " + r.task);
             newTask = true;
-            addRecentTask(r.task);
+            addRecentTaskLocked(r.task);
             
         } else if (sourceRecord != null) {
             if (!addingToTask &&
@@ -3855,7 +3855,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
     }
 
-    private final void addRecentTask(TaskRecord task) {
+    private final void addRecentTaskLocked(TaskRecord task) {
         // Remove any existing entries that are the same kind of task.
         int N = mRecentTasks.size();
         for (int i=0; i<N; i++) {
@@ -4931,9 +4931,11 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 Intent intent = new Intent(Intent.ACTION_PACKAGE_DATA_CLEARED,
                         Uri.fromParts("package", packageName, null));
                 intent.putExtra(Intent.EXTRA_UID, pkgUid);
-                broadcastIntentLocked(null, null, intent,
-                        null, null, 0, null, null, null,
-                        false, false, MY_PID, Process.SYSTEM_UID);
+                synchronized (this) {
+                    broadcastIntentLocked(null, null, intent,
+                            null, null, 0, null, null, null,
+                            false, false, MY_PID, Process.SYSTEM_UID);
+                }
             } catch (RemoteException e) {
             }
         } finally {
@@ -5668,7 +5670,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             ArrayList<ProcessRecord> procs =
                 new ArrayList<ProcessRecord>(mProcessesOnHold);
             for (int ip=0; ip<NP; ip++) {
-                this.startProcessLocked(procs.get(ip), "on-hold", null);
+                synchronized (this) {
+                    this.startProcessLocked(procs.get(ip), "on-hold", null);
+                }
             }
         }
         if (mFactoryTest != SystemServer.FACTORY_TEST_LOW_LEVEL) {
@@ -6887,7 +6891,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                             taskTopI = -1;
                         }
                         replyChainEnd = -1;
-                        addRecentTask(target.task);
+                        addRecentTaskLocked(target.task);
                     } else if (forceReset || finishOnTaskLaunch
                             || clearWhenTaskReset) {
                         // If the activity should just be removed -- either
@@ -7109,7 +7113,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 moved.add(0, r);
                 top--;
                 if (first) {
-                    addRecentTask(r.task);
+                    addRecentTaskLocked(r.task);
                     first = false;
                 }
             }
@@ -7134,11 +7138,11 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             mWindowManager.validateAppTokens(mHistory);
         }
 
-        finishTaskMove(task);
+        finishTaskMoveLocked(task);
         EventLog.writeEvent(LOG_TASK_TO_FRONT, task);
     }
 
-    private final void finishTaskMove(int task) {
+    private final void finishTaskMoveLocked(int task) {
         resumeTopActivityLocked(null);
     }
 
@@ -7256,7 +7260,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             mWindowManager.validateAppTokens(mHistory);
         }
 
-        finishTaskMove(task);
+        finishTaskMoveLocked(task);
         return true;
     }
 
@@ -7879,9 +7883,14 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     }
 
     public static final void installSystemProviders() {
-        ProcessRecord app = mSelf.mProcessNames.get("system", Process.SYSTEM_UID);
-        List providers = mSelf.generateApplicationProvidersLocked(app);
-        mSystemThread.installSystemProviders(providers);
+        List providers = null;
+        synchronized (mSelf) {
+            ProcessRecord app = mSelf.mProcessNames.get("system", Process.SYSTEM_UID);
+            providers = mSelf.generateApplicationProvidersLocked(app);
+        }
+        if (providers != null) {
+            mSystemThread.installSystemProviders(providers);
+        }
     }
 
     // =========================================================
@@ -8156,11 +8165,15 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     }
 
     public void registerActivityWatcher(IActivityWatcher watcher) {
-        mWatchers.register(watcher);
+        synchronized (this) {
+            mWatchers.register(watcher);
+        }
     }
 
     public void unregisterActivityWatcher(IActivityWatcher watcher) {
-        mWatchers.unregister(watcher);
+        synchronized (this) {
+            mWatchers.unregister(watcher);
+        }
     }
 
     public final void enterSafeMode() {
@@ -11564,7 +11577,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     // BROADCASTS
     // =========================================================
 
-    private final List getStickies(String action, IntentFilter filter,
+    private final List getStickiesLocked(String action, IntentFilter filter,
             List cur) {
         final ContentResolver resolver = mContext.getContentResolver();
         final ArrayList<Intent> list = mStickyBroadcasts.get(action);
@@ -11616,10 +11629,10 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             if (actions != null) {
                 while (actions.hasNext()) {
                     String action = (String)actions.next();
-                    allSticky = getStickies(action, filter, allSticky);
+                    allSticky = getStickiesLocked(action, filter, allSticky);
                 }
             } else {
-                allSticky = getStickies(null, filter, allSticky);
+                allSticky = getStickiesLocked(null, filter, allSticky);
             }
 
             // The first sticky in the list is returned directly back to
@@ -13357,7 +13370,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     /**
      * Returns true if things are idle enough to perform GCs.
      */
-    private final boolean canGcNow() {
+    private final boolean canGcNowLocked() {
         return mParallelBroadcasts.size() == 0
                 && mOrderedBroadcasts.size() == 0
                 && (mSleeping || (mResumedActivity != null &&
@@ -13373,7 +13386,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         if (N <= 0) {
             return;
         }
-        if (canGcNow()) {
+        if (canGcNowLocked()) {
             while (mProcessesToGc.size() > 0) {
                 ProcessRecord proc = mProcessesToGc.remove(0);
                 if (proc.curRawAdj > VISIBLE_APP_ADJ || proc.reportLowMemory) {
@@ -13401,7 +13414,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
      * If all looks good, perform GCs on all processes waiting for them.
      */
     final void performAppGcsIfAppropriateLocked() {
-        if (canGcNow()) {
+        if (canGcNowLocked()) {
             performAppGcsLocked();
             return;
         }
