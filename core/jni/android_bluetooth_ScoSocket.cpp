@@ -37,6 +37,23 @@
 #ifdef HAVE_BLUETOOTH
 #include <bluetooth/bluetooth.h>
 #include <bluetooth/sco.h>
+#include <bluetooth/hci.h>
+
+#define MAX_LINE 255
+
+/*
+ * Defines the module strings used in the blacklist file.
+ * These are used by consumers of the blacklist file to see if the line is
+ * used by that module.
+ */
+#define SCO_BLACKLIST_MODULE_NAME "scoSocket"
+
+
+/* Define the type strings used in the blacklist file. */
+#define BLACKLIST_BY_NAME "name"
+#define BLACKLIST_BY_PARTIAL_NAME "partial_name"
+#define BLACKLIST_BY_OUI "vendor_oui"
+
 #endif
 
 /* Ideally, blocking I/O on a SCO socket would return when another thread
@@ -67,10 +84,27 @@ static jmethodID method_onClosed;
 
 struct thread_data_t;
 static void *work_thread(void *arg);
-static int connect_work(const char *address);
+static int connect_work(const char *address, uint16_t sco_pkt_type);
 static int accept_work(int signal_sk);
 static void wait_for_close(int sk, int signal_sk);
 static void closeNative(JNIEnv *env, jobject object);
+
+static void parseBlacklist(void);
+static uint16_t getScoType(char *address, const char *name);
+
+#define COMPARE_STRING(key, s) (!strncmp(key, s, strlen(s)))
+
+/* Blacklist data */
+typedef struct scoBlacklist {
+    int fieldType;
+    char *value;
+    uint16_t scoType;
+    struct scoBlacklist *next;
+} scoBlacklist_t;
+
+#define BL_TYPE_NAME 1   // Field type is name string
+
+static scoBlacklist_t *blacklist = NULL;
 
 /* shared native data - protected by mutex */
 typedef struct {
@@ -87,10 +121,143 @@ struct thread_data_t {
     bool is_accept;        // accept (listening) or connect (outgoing) thread
     int signal_sk;         // socket for thread to listen for unblock signal
     char address[BTADDR_SIZE];  // BT addres as string
+    uint16_t sco_pkt_type;   // SCO packet types supported
 };
 
 static inline native_data_t * get_native_data(JNIEnv *env, jobject object) {
     return (native_data_t *)(env->GetIntField(object, field_mNativeData));
+}
+
+static uint16_t str2scoType (char *key) {
+    LOGV("%s: key = %s", __FUNCTION__, key);
+    if (COMPARE_STRING(key, "ESCO_HV1"))
+        return ESCO_HV1;
+    if (COMPARE_STRING(key, "ESCO_HV2"))
+        return ESCO_HV2;
+    if (COMPARE_STRING(key, "ESCO_HV3"))
+        return ESCO_HV3;
+    if (COMPARE_STRING(key, "ESCO_EV3"))
+        return ESCO_EV3;
+    if (COMPARE_STRING(key, "ESCO_EV4"))
+        return ESCO_EV4;
+    if (COMPARE_STRING(key, "ESCO_EV5"))
+        return ESCO_EV5;
+    if (COMPARE_STRING(key, "ESCO_2EV3"))
+        return ESCO_2EV3;
+    if (COMPARE_STRING(key, "ESCO_3EV3"))
+        return ESCO_3EV3;
+    if (COMPARE_STRING(key, "ESCO_2EV5"))
+        return ESCO_2EV5;
+    if (COMPARE_STRING(key, "ESCO_3EV5"))
+        return ESCO_3EV5;
+    if (COMPARE_STRING(key, "SCO_ESCO_MASK"))
+        return SCO_ESCO_MASK;
+    if (COMPARE_STRING(key, "EDR_ESCO_MASK"))
+        return EDR_ESCO_MASK;
+    if (COMPARE_STRING(key, "ALL_ESCO_MASK"))
+        return ALL_ESCO_MASK;
+    LOGE("Unknown SCO Type (%s) skipping",key);
+    return 0;
+}
+
+static void parseBlacklist(void) {
+    const char *filename = "/etc/bluetooth/blacklist.conf";
+    char line[MAX_LINE];
+    scoBlacklist_t *list = NULL;
+    scoBlacklist_t *newelem;
+
+    LOGV(__FUNCTION__);
+
+    /* Open file */
+    FILE *fp = fopen(filename, "r");
+    if(!fp) {
+        LOGE("Error(%s)opening blacklist file", strerror(errno));
+        return;
+    }
+
+    while (fgets(line, MAX_LINE, fp) != NULL) {
+        if ((COMPARE_STRING(line, "//")) || (!strcmp(line, "")))
+            continue;
+        char *module = strtok(line,":");
+        if (COMPARE_STRING(module, SCO_BLACKLIST_MODULE_NAME)) {
+            newelem = (scoBlacklist_t *)calloc(1, sizeof(scoBlacklist_t));
+            if (newelem == NULL) {
+                LOGE("%s: out of memory!", __FUNCTION__);
+                return;
+            }
+            // parse line
+            char *type = strtok(NULL, ",");
+            char *valueList = strtok(NULL, ",");
+            char *paramList = strtok(NULL, ",");
+            if (COMPARE_STRING(type, BLACKLIST_BY_NAME)) {
+                // Extract Name from Value list
+                newelem->fieldType = BL_TYPE_NAME;
+                newelem->value = (char *)calloc(1, strlen(valueList));
+                if (newelem->value == NULL) {
+                    LOGE("%s: out of memory!", __FUNCTION__);
+                    continue;
+                }
+                valueList++;  // Skip open quote
+                strncpy(newelem->value, valueList, strlen(valueList) - 1);
+
+                // Get Sco Settings from Parameters
+                char *param = strtok(paramList, ";");
+                uint16_t scoTypes = 0;
+                while (param != NULL) {
+                    uint16_t sco;
+                    if (param[0] == '-') {
+                        param++;
+                        sco = str2scoType(param);
+                        if (sco != 0)
+                            scoTypes &= ~sco;
+                    } else if (param[0] == '+') {
+                        param++;
+                        sco = str2scoType(param);
+                        if (sco != 0)
+                            scoTypes |= sco;
+                    } else if (param[0] == '=') {
+                        param++;
+                        sco = str2scoType(param);
+                        if (sco != 0)
+                            scoTypes = sco;
+                    } else {
+                        LOGE("Invalid SCO type must be =, + or -");
+                    }
+                    param = strtok(NULL, ";");
+                }
+                newelem->scoType = scoTypes;
+            } else {
+                LOGE("Unknown SCO type entry in Blacklist file");
+                continue;
+            }
+            if (list) {
+                list->next = newelem;
+                list = newelem;
+            } else {
+                blacklist = list = newelem;
+            }
+            LOGI("Entry name = %s ScoTypes = 0x%x", newelem->value,
+                 newelem->scoType);
+        }
+    }
+    fclose(fp);
+    return;
+}
+static uint16_t getScoType(char *address, const char *name) {
+    uint16_t ret = 0;
+    scoBlacklist_t *list = blacklist;
+
+    while (list != NULL) {
+        if (list->fieldType == BL_TYPE_NAME) {
+            if (COMPARE_STRING(name, list->value)) {
+                ret = list->scoType;
+                break;
+            }
+        }
+        list = list->next;
+    }
+    LOGI("%s %s - 0x%x",  __FUNCTION__, name, ret);
+    return ret;
 }
 #endif
 
@@ -104,6 +271,9 @@ static void classInitNative(JNIEnv* env, jclass clazz) {
     method_onAccepted = env->GetMethodID(clazz, "onAccepted", "(I)V");
     method_onConnected = env->GetMethodID(clazz, "onConnected", "(I)V");
     method_onClosed = env->GetMethodID(clazz, "onClosed", "()V");
+
+    /* Read the blacklist file in here */
+    parseBlacklist();
 #endif
 }
 
@@ -192,7 +362,9 @@ static jboolean acceptNative(JNIEnv *env, jobject object) {
     return JNI_FALSE;
 }
 
-static jboolean connectNative(JNIEnv *env, jobject object, jstring address) {
+static jboolean connectNative(JNIEnv *env, jobject object, jstring address,
+        jstring name) {
+
     LOGV(__FUNCTION__);
 #ifdef HAVE_BLUETOOTH
     native_data_t *nat = get_native_data(env, object);
@@ -200,6 +372,7 @@ static jboolean connectNative(JNIEnv *env, jobject object, jstring address) {
     pthread_t thread;
     struct thread_data_t *data;
     const char *c_address;
+    const char *c_name;
 
     pthread_mutex_lock(&nat->mutex);
     if (nat->signal_sk != -1) {
@@ -230,6 +403,11 @@ static jboolean connectNative(JNIEnv *env, jobject object, jstring address) {
     strlcpy(data->address, c_address, BTADDR_SIZE);
     env->ReleaseStringUTFChars(address, c_address);
     data->is_accept = false;
+
+    c_name = env->GetStringUTFChars(name, NULL);
+    /* See if this device is in the black list */
+    data->sco_pkt_type = getScoType(data->address, c_name);
+    env->ReleaseStringUTFChars(name, c_name);
 
     if (pthread_create(&thread, NULL, &work_thread, (void *)data) < 0) {
         LOGE("%s: pthread_create() failed: %s", __FUNCTION__, strerror(errno));
@@ -282,7 +460,7 @@ static void *work_thread(void *arg) {
         sk = accept_work(data->signal_sk);
         LOGV("SCO OBJECT %p END ACCEPT *****", data->nat->object);
     } else {
-        sk = connect_work(data->address);
+        sk = connect_work(data->address, data->sco_pkt_type);
     }
 
     /* callback with connection result */
@@ -426,7 +604,7 @@ error:
     return -1;
 }
 
-static int connect_work(const char *address) {
+static int connect_work(const char *address, uint16_t sco_pkt_type) {
     LOGV(__FUNCTION__);
     struct sockaddr_sco addr;
     int sk = -1;
@@ -449,6 +627,7 @@ static int connect_work(const char *address) {
     memset(&addr, 0, sizeof(addr));
     addr.sco_family = AF_BLUETOOTH;
     get_bdaddr(address, &addr.sco_bdaddr);
+    addr.sco_pkt_type = sco_pkt_type;
     LOGI("Connecting to socket");
     while (connect(sk, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
         if (errno != EINTR) {
@@ -493,7 +672,7 @@ static JNINativeMethod sMethods[] = {
     {"classInitNative", "()V", (void*)classInitNative},
     {"initNative", "()V", (void *)initNative},
     {"destroyNative", "()V", (void *)destroyNative},
-    {"connectNative", "(Ljava/lang/String;)Z", (void *)connectNative},
+    {"connectNative", "(Ljava/lang/String;Ljava/lang/String;)Z", (void *)connectNative},
     {"acceptNative", "()Z", (void *)acceptNative},
     {"closeNative", "()V", (void *)closeNative},
 };
