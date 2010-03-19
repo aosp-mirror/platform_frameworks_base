@@ -146,4 +146,10 @@ interface IMountService
      * Invokes call back once the shutdown is complete.
      */
     void shutdown(IMountShutdownObserver observer);
+
+    /**
+     * Call into MountService by PackageManager to notify that its done
+     * processing the media status update request.
+     */
+    void finishMediaUpdate();
 }

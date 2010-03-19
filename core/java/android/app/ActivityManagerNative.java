@@ -980,10 +980,11 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
-        case KILL_PIDS_FOR_MEMORY_TRANSACTION: {
+        case KILL_PIDS_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             int[] pids = data.createIntArray();
-            boolean res = killPidsForMemory(pids);
+            String reason = data.readString();
+            boolean res = killPids(pids, reason);
             reply.writeNoException();
             reply.writeInt(res ? 1 : 0);
             return true;
@@ -2393,12 +2394,13 @@ class ActivityManagerProxy implements IActivityManager
         mRemote.transact(NOTE_WAKEUP_ALARM_TRANSACTION, data, null, 0);
         data.recycle();
     }
-    public boolean killPidsForMemory(int[] pids) throws RemoteException {
+    public boolean killPids(int[] pids, String reason) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeIntArray(pids);
-        mRemote.transact(KILL_PIDS_FOR_MEMORY_TRANSACTION, data, reply, 0);
+        data.writeString(reason);
+        mRemote.transact(KILL_PIDS_TRANSACTION, data, reply, 0);
         boolean res = reply.readInt() != 0;
         data.recycle();
         reply.recycle();

@@ -343,6 +343,7 @@ class PackageManagerService extends IPackageManager.Stub {
     static final int POST_INSTALL = 9;
     static final int MCS_RECONNECT = 10;
     static final int MCS_GIVE_UP = 11;
+    static final int UPDATED_MEDIA_STATUS = 12;
 
     // Delay time in millisecs
     static final int BROADCAST_DELAY = 10 * 1000;
@@ -594,6 +595,13 @@ class PackageManagerService extends IPackageManager.Stub {
                         }
                     } else {
                         Slog.e(TAG, "Bogus post-install token " + msg.arg1);
+                    }
+                } break;
+                case UPDATED_MEDIA_STATUS: {
+                    try {
+                        PackageHelper.getMountService().finishMediaUpdate();
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "MountService not running?");
                     }
                 } break;
             }
@@ -9373,10 +9381,12 @@ class PackageManagerService extends IPackageManager.Stub {
    }
 
    /*
-    * Return true if PackageManager does have packages to be updated.
+    * Update media status on PackageManager.
     */
-   public boolean updateExternalMediaStatus(final boolean mediaStatus) {
-       final boolean ret;
+   public void updateExternalMediaStatus(final boolean mediaStatus, final boolean reportStatus) {
+       if (Binder.getCallingUid() != Process.SYSTEM_UID) {
+           throw new SecurityException("Media status can only be updated by the system");
+       }
        synchronized (mPackages) {
            Log.i(TAG, "Updating external media status from " +
                    (mMediaMounted ? "mounted" : "unmounted") + " to " +
@@ -9384,32 +9394,29 @@ class PackageManagerService extends IPackageManager.Stub {
            if (DEBUG_SD_INSTALL) Log.i(TAG, "updateExternalMediaStatus:: mediaStatus=" +
                    mediaStatus+", mMediaMounted=" + mMediaMounted);
            if (mediaStatus == mMediaMounted) {
-               return false;
+               if (reportStatus) {
+                   mHandler.sendEmptyMessage(UPDATED_MEDIA_STATUS);
+               }
+               return;
            }
            mMediaMounted = mediaStatus;
-           Set<String> appList = mSettings.findPackagesWithFlag(ApplicationInfo.FLAG_EXTERNAL_STORAGE);
-           ret = appList != null && appList.size() > 0;
-           if (DEBUG_SD_INSTALL) {
-               if (appList != null) {
-                   for (String app : appList) {
-                       Log.i(TAG, "Should enable " + app + " on sdcard");
-                   }
-               }
-           }
-           if (DEBUG_SD_INSTALL)  Log.i(TAG, "updateExternalMediaStatus returning " + ret);
        }
        // Queue up an async operation since the package installation may take a little while.
        mHandler.post(new Runnable() {
            public void run() {
                mHandler.removeCallbacks(this);
-               updateExternalMediaStatusInner(mediaStatus, ret);
+               try {
+                   updateExternalMediaStatusInner(mediaStatus);
+               } finally {
+                   if (reportStatus) {
+                       mHandler.sendEmptyMessage(UPDATED_MEDIA_STATUS);
+                   }
+               }
            }
        });
-       return ret;
    }
 
-   private void updateExternalMediaStatusInner(boolean mediaStatus,
-           boolean sendUpdateBroadcast) {
+   private void updateExternalMediaStatusInner(boolean mediaStatus) {
        // If we are up here that means there are packages to be
        // enabled or disabled.
        final String list[] = PackageHelper.getSecureContainerList();
@@ -9474,11 +9481,11 @@ class PackageManagerService extends IPackageManager.Stub {
        // Process packages with valid entries.
        if (mediaStatus) {
            if (DEBUG_SD_INSTALL) Log.i(TAG, "Loading packages");
-           loadMediaPackages(processCids, uidArr, sendUpdateBroadcast, removeCids);
+           loadMediaPackages(processCids, uidArr, removeCids);
            startCleaningPackages();
        } else {
            if (DEBUG_SD_INSTALL) Log.i(TAG, "Unloading packages");
-           unloadMediaPackages(processCids, uidArr, sendUpdateBroadcast);
+           unloadMediaPackages(processCids, uidArr);
        }
    }
 
@@ -9509,8 +9516,7 @@ class PackageManagerService extends IPackageManager.Stub {
     * to avoid unnecessary crashes.
     */
    private void loadMediaPackages(HashMap<SdInstallArgs, String> processCids,
-           int uidArr[], boolean sendUpdateBroadcast,
-           HashSet<String> removeCids) {
+           int uidArr[], HashSet<String> removeCids) {
        ArrayList<String> pkgList = new ArrayList<String>();
        Set<SdInstallArgs> keys = processCids.keySet();
        boolean doGc = false;
@@ -9578,7 +9584,7 @@ class PackageManagerService extends IPackageManager.Stub {
            mSettings.writeLP();
        }
        // Send a broadcast to let everyone know we are done processing
-       if (sendUpdateBroadcast) {
+       if (pkgList.size() > 0) {
            sendResourcesChangedBroadcast(true, pkgList, uidArr);
        }
        if (doGc) {
@@ -9594,7 +9600,7 @@ class PackageManagerService extends IPackageManager.Stub {
    }
 
    private void unloadMediaPackages(HashMap<SdInstallArgs, String> processCids,
-           int uidArr[], boolean sendUpdateBroadcast) {
+           int uidArr[]) {
        if (DEBUG_SD_INSTALL) Log.i(TAG, "unloading media packages");
        ArrayList<String> pkgList = new ArrayList<String>();
        ArrayList<SdInstallArgs> failedList = new ArrayList<SdInstallArgs>();
@@ -9617,7 +9623,7 @@ class PackageManagerService extends IPackageManager.Stub {
            }
        }
        // Send broadcasts
-       if (sendUpdateBroadcast) {
+       if (pkgList.size() > 0) {
            sendResourcesChangedBroadcast(false, pkgList, uidArr);
        }
        // Force gc

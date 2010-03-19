@@ -93,6 +93,9 @@ public class PackageManagerTests extends AndroidTestCase {
     protected void setUp() throws Exception {
         super.setUp();
         mOrigState = getMediaState();
+        if (!mountMedia()) {
+            Log.i(TAG, "sdcard not mounted? Some of these tests might fail");
+        }
     }
 
     @Override

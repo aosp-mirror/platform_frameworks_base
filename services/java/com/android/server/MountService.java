@@ -135,17 +135,6 @@ class MountService extends IMountService.Stub
     private static final int RETRY_UNMOUNT_DELAY = 30; // in ms
     private static final int MAX_UNMOUNT_RETRIES = 4;
 
-    private IntentFilter mPmFilter = new IntentFilter(
-            Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE);
-    private BroadcastReceiver mPmReceiver = new BroadcastReceiver() {
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE.equals(action)) {
-                mHandler.sendEmptyMessage(H_UNMOUNT_PM_DONE);
-            }
-        }
-    };
-
     class UnmountCallBack {
         String path;
         int retries;
@@ -200,22 +189,10 @@ class MountService extends IMountService.Stub
 
     class MountServiceHandler extends Handler {
         ArrayList<UnmountCallBack> mForceUnmounts = new ArrayList<UnmountCallBack>();
-        boolean mRegistered = false;
+        boolean mUpdatingStatus = false;
 
         MountServiceHandler(Looper l) {
             super(l);
-        }
-
-        void registerReceiver() {
-            mRegistered = true;
-            if (DEBUG_UNMOUNT) Log.i(TAG, "Registering receiver");
-            mContext.registerReceiver(mPmReceiver, mPmFilter);
-        }
-
-        void unregisterReceiver() {
-            mRegistered = false;
-            if (DEBUG_UNMOUNT) Log.i(TAG, "Unregistering receiver");
-            mContext.unregisterReceiver(mPmReceiver);
         }
 
         public void handleMessage(Message msg) {
@@ -224,25 +201,23 @@ class MountService extends IMountService.Stub
                     if (DEBUG_UNMOUNT) Log.i(TAG, "H_UNMOUNT_PM_UPDATE");
                     UnmountCallBack ucb = (UnmountCallBack) msg.obj;
                     mForceUnmounts.add(ucb);
-                    if (DEBUG_UNMOUNT) Log.i(TAG, " registered = " + mRegistered);
+                    if (DEBUG_UNMOUNT) Log.i(TAG, " registered = " + mUpdatingStatus);
                     // Register only if needed.
-                    if (!mRegistered) {
-                        registerReceiver();
-                        if (DEBUG_UNMOUNT) Log.i(TAG, "Updating external media status");
-                        boolean hasExtPkgs = mPms.updateExternalMediaStatus(false);
-                        if (!hasExtPkgs) {
-                            // Unregister right away
-                            mHandler.sendEmptyMessage(H_UNMOUNT_PM_DONE);
-                        }
+                    if (!mUpdatingStatus) {
+                        if (DEBUG_UNMOUNT) Log.i(TAG, "Updating external media status on PackageManager");
+                        mUpdatingStatus = true;
+                        mPms.updateExternalMediaStatus(false, true);
                     }
                     break;
                 }
                 case H_UNMOUNT_PM_DONE: {
                     if (DEBUG_UNMOUNT) Log.i(TAG, "H_UNMOUNT_PM_DONE");
-                    // Unregister now.
-                    if (mRegistered) {
-                        unregisterReceiver();
+                    if (!mUpdatingStatus) {
+                        // Does not correspond to unmount's status update.
+                        return;
                     }
+                    if (DEBUG_UNMOUNT) Log.i(TAG, "Updated status. Processing requests");
+                    mUpdatingStatus = false;
                     int size = mForceUnmounts.size();
                     int sizeArr[] = new int[size];
                     int sizeArrN = 0;
@@ -261,7 +236,7 @@ class MountService extends IMountService.Stub
                                 ActivityManagerService ams = (ActivityManagerService)
                                 ServiceManager.getService("activity");
                                 // Eliminate system process here?
-                                boolean ret = ams.killPidsForMemory(pids);
+                                boolean ret = ams.killPids(pids, "Unmount media");
                                 if (ret) {
                                     // Confirm if file references have been freed.
                                     pids = getStorageUsers(path);
@@ -277,8 +252,8 @@ class MountService extends IMountService.Stub
                                     ucb));
                         } else {
                             if (ucb.retries >= MAX_UNMOUNT_RETRIES) {
-                                Log.i(TAG, "Cannot unmount inspite of " +
-                                        MAX_UNMOUNT_RETRIES + " to unmount media");
+                                Log.i(TAG, "Cannot unmount media inspite of " +
+                                        MAX_UNMOUNT_RETRIES + " retries");
                                 // Send final broadcast indicating failure to unmount.                 
                             } else {
                                 mHandler.sendMessageDelayed(
@@ -412,9 +387,9 @@ class MountService extends IMountService.Stub
         }
         // Update state on PackageManager
         if (Environment.MEDIA_UNMOUNTED.equals(state)) {
-            mPms.updateExternalMediaStatus(false);
+            mPms.updateExternalMediaStatus(false, false);
         } else if (Environment.MEDIA_MOUNTED.equals(state)) {
-            mPms.updateExternalMediaStatus(true);
+            mPms.updateExternalMediaStatus(true, false);
         }
         String oldState = mLegacyState;
         mLegacyState = state;
@@ -757,19 +732,15 @@ class MountService extends IMountService.Stub
         if (!getVolumeState(path).equals(Environment.MEDIA_MOUNTED)) {
             return VoldResponseCode.OpFailedVolNotMounted;
         }
-
-        // We unmounted the volume. No of the asec containers are available now.
-        synchronized (mAsecMountSet) {
-            mAsecMountSet.clear();
-        }
-        // Notify PackageManager of potential media removal and deal with
-        // return code later on. The caller of this api should be aware or have been
-        // notified that the applications installed on the media will be killed.
         // Redundant probably. But no harm in updating state again.
-        mPms.updateExternalMediaStatus(false);
+        mPms.updateExternalMediaStatus(false, false);
         try {
             mConnector.doCommand(String.format(
                     "volume unmount %s%s", path, (force ? " force" : "")));
+            // We unmounted the volume. None of the asec containers are available now.
+            synchronized (mAsecMountSet) {
+                mAsecMountSet.clear();
+            }
             return StorageResultCode.OperationSucceeded;
         } catch (NativeDaemonConnectorException e) {
             // Don't worry about mismatch in PackageManager since the
@@ -1331,6 +1302,10 @@ class MountService extends IMountService.Stub
 
         Log.e(TAG, "Got an empty response");
         return "";
+    }
+
+    public void finishMediaUpdate() {
+        mHandler.sendEmptyMessage(H_UNMOUNT_PM_DONE);
     }
 }
 
