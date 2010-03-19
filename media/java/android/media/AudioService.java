@@ -687,6 +687,7 @@ public class AudioService extends IAudioService.Stub {
             }
             if (mode != mMode) {
                 if (AudioSystem.setPhoneState(mode) == AudioSystem.AUDIO_STATUS_OK) {
+                    checkForUndispatchedAudioFocusChange(mMode, mode);
                     mMode = mode;
 
                     synchronized(mSetModeDeathHandlers) {
@@ -1816,6 +1817,40 @@ public class AudioService extends IAudioService.Stub {
     //==========================================================================================
     // AudioFocus
     //==========================================================================================
+    /**
+     * Flag to indicate that the top of the audio focus stack needs to recover focus
+     * but hasn't been signaled yet.
+     */
+    private boolean mHasUndispatchedAudioFocus = false;
+
+    private void checkForUndispatchedAudioFocusChange(int prevMode, int newMode) {
+        // when exiting a call
+        if ((prevMode == AudioSystem.MODE_IN_CALL) && (newMode != AudioSystem.MODE_IN_CALL)) {
+            // check for undispatched remote control focus gain
+            if (mHasUndispatchedAudioFocus) {
+                notifyTopOfAudioFocusStack();
+            }
+        }
+    }
+
+    private void notifyTopOfAudioFocusStack() {
+        // notify the top of the stack it gained focus
+        if (!mFocusStack.empty() && (mFocusStack.peek().mFocusDispatcher != null)) {
+            if (canReassignAudioFocus()) {
+                try {
+                    mFocusStack.peek().mFocusDispatcher.dispatchAudioFocusChange(
+                            AudioManager.AUDIOFOCUS_GAIN, mFocusStack.peek().mClientId);
+                    mHasUndispatchedAudioFocus = false;
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Failure to signal gain of audio control focus due to "+ e);
+                    e.printStackTrace();
+                }
+            } else {
+                mHasUndispatchedAudioFocus = true;
+            }
+        }
+    }
+
     private static class FocusStackEntry {
         public int mStreamType = -1;// no stream type
         public boolean mIsTransportControlReceiver = false;
@@ -1871,16 +1906,7 @@ public class AudioService extends IAudioService.Stub {
             mFocusStack.pop();
             if (signal) {
                 // notify the new top of the stack it gained focus
-                if (!mFocusStack.empty() && (mFocusStack.peek().mFocusDispatcher != null)
-                        && canReassignAudioFocus()) {
-                    try {
-                        mFocusStack.peek().mFocusDispatcher.dispatchAudioFocusChange(
-                                AudioManager.AUDIOFOCUS_GAIN, mFocusStack.peek().mClientId);
-                    } catch (RemoteException e) {
-                        Log.e(TAG, " Failure to signal gain of focus due to "+ e);
-                        e.printStackTrace();
-                    }
-                }
+                notifyTopOfAudioFocusStack();
             }
         } else {
             // focus is abandoned by a client that's not at the top of the stack,
@@ -1902,8 +1928,9 @@ public class AudioService extends IAudioService.Stub {
      * Remove focus listeners from the focus stack for a particular client.
      */
     private void removeFocusStackEntryForClient(IBinder cb) {
-        // focus is abandoned by a client that's not at the top of the stack,
-        // no need to update focus.
+        // is the owner of the audio focus part of the client to remove?
+        boolean isTopOfStackForClientToRemove = !mFocusStack.isEmpty() &&
+                mFocusStack.peek().mSourceRef.equals(cb);
         Iterator<FocusStackEntry> stackIterator = mFocusStack.iterator();
         while(stackIterator.hasNext()) {
             FocusStackEntry fse = (FocusStackEntry)stackIterator.next();
@@ -1912,6 +1939,11 @@ public class AudioService extends IAudioService.Stub {
                         + fse.mClientId);
                 mFocusStack.remove(fse);
             }
+        }
+        if (isTopOfStackForClientToRemove) {
+            // we removed an entry at the top of the stack:
+            //  notify the new top of the stack it gained focus.
+            notifyTopOfAudioFocusStack();
         }
     }
 
@@ -1970,9 +2002,14 @@ public class AudioService extends IAudioService.Stub {
 
         synchronized(mFocusStack) {
             if (!mFocusStack.empty() && mFocusStack.peek().mClientId.equals(clientId)) {
-                mFocusStack.peek().mFocusChangeType = focusChangeHint;
-                // if focus is already owned by this client, don't do anything
-                return AudioManager.AUDIOFOCUS_REQUEST_GRANTED;
+                // if focus is already owned by this client and the reason for acquiring the focus
+                // hasn't changed, don't do anything
+                if (mFocusStack.peek().mFocusChangeType == focusChangeHint) {
+                    return AudioManager.AUDIOFOCUS_REQUEST_GRANTED;
+                }
+                // the reason for the audio focus request has changed: remove the current top of
+                // stack and respond as if we had a new focus owner
+                mFocusStack.pop();
             }
 
             // notify current top of stack it is losing focus
