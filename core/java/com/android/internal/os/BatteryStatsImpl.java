@@ -46,6 +46,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * All information we are collecting about things that can happen that impact
@@ -230,14 +231,15 @@ public final class BatteryStatsImpl extends BatteryStats {
      * State for keeping track of counting information.
      */
     public static class Counter extends BatteryStats.Counter implements Unpluggable {
-        int mCount;
+        final AtomicInteger mCount = new AtomicInteger();
         int mLoadedCount;
         int mLastCount;
         int mUnpluggedCount;
         int mPluggedCount;
         
         Counter(ArrayList<Unpluggable> unpluggables, Parcel in) {
-            mPluggedCount = mCount = in.readInt();
+            mPluggedCount = in.readInt();
+            mCount.set(mPluggedCount);
             mLoadedCount = in.readInt();
             mLastCount = in.readInt();
             mUnpluggedCount = in.readInt();
@@ -249,18 +251,19 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
         
         public void writeToParcel(Parcel out) {
-            out.writeInt(mCount);
+            out.writeInt(mCount.get());
             out.writeInt(mLoadedCount);
             out.writeInt(mLastCount);
             out.writeInt(mUnpluggedCount);
         }
 
         public void unplug(long batteryUptime, long batteryRealtime) {
-            mUnpluggedCount = mCount = mPluggedCount;
+            mUnpluggedCount = mPluggedCount;
+            mCount.set(mPluggedCount);
         }
 
         public void plug(long batteryUptime, long batteryRealtime) {
-            mPluggedCount = mCount;
+            mPluggedCount = mCount.get();
         }
         
         /**
@@ -285,7 +288,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             if (which == STATS_LAST) {
                 val = mLastCount;
             } else {
-                val = mCount;
+                val = mCount.get();
                 if (which == STATS_UNPLUGGED) {
                     val -= mUnpluggedCount;
                 } else if (which != STATS_TOTAL) {
@@ -297,25 +300,27 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
 
         public void logState(Printer pw, String prefix) {
-            pw.println(prefix + "mCount=" + mCount
+            pw.println(prefix + "mCount=" + mCount.get()
                     + " mLoadedCount=" + mLoadedCount + " mLastCount=" + mLastCount
                     + " mUnpluggedCount=" + mUnpluggedCount
                     + " mPluggedCount=" + mPluggedCount);
         }
         
-        void stepLocked() {
-            mCount++;
+        void stepAtomic() {
+            mCount.incrementAndGet();
         }
 
         void writeSummaryFromParcelLocked(Parcel out) {
-            out.writeInt(mCount);
-            out.writeInt(mCount - mLoadedCount);
+            int count = mCount.get();
+            out.writeInt(count);
+            out.writeInt(count - mLoadedCount);
         }
 
         void readSummaryFromParcelLocked(Parcel in) {
-            mCount = mLoadedCount = in.readInt();
+            mLoadedCount = in.readInt();
+            mCount.set(mLoadedCount);
             mLastCount = in.readInt();
-            mUnpluggedCount = mPluggedCount = mCount;
+            mUnpluggedCount = mPluggedCount = mLoadedCount;
         }
     }
 
@@ -329,8 +334,8 @@ public final class BatteryStatsImpl extends BatteryStats {
             super(unpluggables);
         }
 
-        public void addCountLocked(long count) {
-            mCount += count;
+        public void addCountAtomic(long count) {
+            mCount.addAndGet((int)count);
         }
     }
 
@@ -1124,8 +1129,8 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
     }
     
-    public void noteInputEventLocked() {
-        mInputEventCounter.stepLocked();
+    public void noteInputEventAtomic() {
+        mInputEventCounter.stepAtomic();
     }
     
     public void noteUserActivityLocked(int uid, int event) {
@@ -1680,7 +1685,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             }
             if (type < 0) type = 0;
             else if (type >= NUM_USER_ACTIVITY_TYPES) type = NUM_USER_ACTIVITY_TYPES-1;
-            mUserActivityCounters[type].stepLocked();
+            mUserActivityCounters[type].stepAtomic();
         }
         
         @Override
@@ -2172,7 +2177,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             /* Called by ActivityManagerService when CPU times are updated. */
             public void addSpeedStepTimes(long[] values) {
                 for (int i = 0; i < mSpeedBins.length && i < values.length; i++) {
-                    mSpeedBins[i].addCountLocked(values[i]);
+                    mSpeedBins[i].addCountAtomic(values[i]);
                 }
             }
 
