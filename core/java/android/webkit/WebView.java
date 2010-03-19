@@ -1903,15 +1903,8 @@ public class WebView extends AbsoluteLayout
     // Expects y in view coordinates
     private int pinLocY(int y) {
         if (mInOverScrollMode) return y;
-        int titleH = getTitleHeight();
-        // if the titlebar is still visible, just pin against 0
-        if (y <= titleH) {
-            return Math.max(y, 0);
-        }
-        // convert to 0-based coordinate (subtract the title height)
-        // pin(), and then add the title height back in
-        return pinLoc(y - titleH, getViewHeight(),
-                      computeVerticalScrollRange()) + titleH;
+        return pinLoc(y, getViewHeightWithTitle(),
+                      computeVerticalScrollRange() + getTitleHeight());
     }
 
     /**
@@ -4203,12 +4196,6 @@ public class WebView extends AbsoluteLayout
     protected void onScrollChanged(int l, int t, int oldl, int oldt) {
         super.onScrollChanged(l, t, oldl, oldt);
         sendOurVisibleRect();
-        // update WebKit if visible title bar height changed. The logic is same
-        // as getVisibleTitleHeight.
-        int titleHeight = getTitleHeight();
-        if (Math.max(titleHeight - t, 0) != Math.max(titleHeight - oldt, 0)) {
-            sendViewSizeZoom();
-        }
     }
 
     @Override
@@ -5371,7 +5358,7 @@ public class WebView extends AbsoluteLayout
 
     private int computeMaxScrollY() {
         return Math.max(computeVerticalScrollRange() + getTitleHeight()
-                - getViewHeightWithTitle(), getTitleHeight());
+                - getViewHeightWithTitle(), 0);
     }
 
     public void flingScroll(int vx, int vy) {
