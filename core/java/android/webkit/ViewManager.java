@@ -18,6 +18,7 @@ package android.webkit;
 
 import android.view.SurfaceView;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AbsoluteLayout;
 
 import java.util.ArrayList;
@@ -155,17 +156,18 @@ class ViewManager {
             v.isFixedSize = true;
         }
 
-        AbsoluteLayout.LayoutParams lp =
-            (AbsoluteLayout.LayoutParams) v.mView.getLayoutParams();
+        AbsoluteLayout.LayoutParams lp;
+        ViewGroup.LayoutParams layoutParams = v.mView.getLayoutParams();
 
-        if (lp == null)
-            lp = new AbsoluteLayout.LayoutParams(ctvD(v.width), ctvD(v.height),
-                    ctvX(v.x), ctvY(v.y));
-        else {
+        if (layoutParams instanceof AbsoluteLayout.LayoutParams) {
+            lp = (AbsoluteLayout.LayoutParams) layoutParams;
             lp.width = ctvD(v.width);
             lp.height = ctvD(v.height);
             lp.x = ctvX(v.x);
             lp.y = ctvY(v.y);
+        } else {
+            lp = new AbsoluteLayout.LayoutParams(ctvD(v.width), ctvD(v.height),
+                    ctvX(v.x), ctvY(v.y));
         }
         return lp;
     }
