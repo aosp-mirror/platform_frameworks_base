@@ -3133,7 +3133,7 @@ public class WebView extends AbsoluteLayout
                 mOverScrollBackground = new Paint();
                 Bitmap bm = BitmapFactory.decodeResource(
                         mContext.getResources(),
-                        com.android.internal.R.drawable.pattern_underwear);
+                        com.android.internal.R.drawable.status_bar_background);
                 mOverScrollBackground.setShader(new BitmapShader(bm,
                         Shader.TileMode.REPEAT, Shader.TileMode.REPEAT));
             }
