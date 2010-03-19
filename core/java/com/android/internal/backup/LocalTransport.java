@@ -105,6 +105,9 @@ public class LocalTransport extends IBackupTransport.Stub {
                         + " key64=" + base64Key);
 
                 if (dataSize >= 0) {
+                    if (entityFile.exists()) {
+                        entityFile.delete();
+                    }
                     FileOutputStream entity = new FileOutputStream(entityFile);
 
                     if (dataSize > bufSize) {

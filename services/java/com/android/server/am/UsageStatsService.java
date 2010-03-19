@@ -383,9 +383,13 @@ public final class UsageStatsService extends IUsageStats.Stub {
             File backupFile = null;
             if (mFile != null && mFile.exists()) {
                 backupFile = new File(mFile.getPath() + ".bak");
-                if (!mFile.renameTo(backupFile)) {
-                    Slog.w(TAG, "Failed to persist new stats");
-                    return;
+                if (!backupFile.exists()) {
+                    if (!mFile.renameTo(backupFile)) {
+                        Slog.w(TAG, "Failed to persist new stats");
+                        return;
+                    }
+                } else {
+                    mFile.delete();
                 }
             }
 

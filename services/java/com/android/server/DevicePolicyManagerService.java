@@ -18,6 +18,7 @@ package com.android.server;
 
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.util.FastXmlSerializer;
+import com.android.internal.util.JournaledFile;
 import com.android.internal.util.XmlUtils;
 import com.android.internal.widget.LockPatternUtils;
 

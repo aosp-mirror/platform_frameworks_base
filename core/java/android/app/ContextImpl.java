@@ -2935,9 +2935,14 @@ class ContextImpl extends Context {
         private boolean writeFileLocked() {
             // Rename the current file so it may be used as a backup during the next read
             if (mFile.exists()) {
-                if (!mFile.renameTo(mBackupFile)) {
-                    Log.e(TAG, "Couldn't rename file " + mFile + " to backup file " + mBackupFile);
-                    return false;
+                if (!mBackupFile.exists()) {
+                    if (!mFile.renameTo(mBackupFile)) {
+                        Log.e(TAG, "Couldn't rename file " + mFile
+                                + " to backup file " + mBackupFile);
+                        return false;
+                    }
+                } else {
+                    mFile.delete();
                 }
             }
             
