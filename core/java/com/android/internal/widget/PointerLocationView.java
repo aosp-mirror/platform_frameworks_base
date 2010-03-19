@@ -60,6 +60,7 @@ public class PointerLocationView extends View {
     
     public PointerLocationView(Context c) {
         super(c);
+        setFocusable(true);
         mVC = ViewConfiguration.get(c);
         mTextPaint = new Paint();
         mTextPaint.setAntiAlias(true);
@@ -350,4 +351,11 @@ public class PointerLocationView extends View {
         addTouchEvent(event);
         return true;
     }
+
+    @Override
+    public boolean onTrackballEvent(MotionEvent event) {
+        Log.i("Pointer", "Trackball: " + event);
+        return super.onTrackballEvent(event);
+    }
+    
 }
