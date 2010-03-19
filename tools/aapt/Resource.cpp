@@ -611,7 +611,8 @@ void addTagAttribute(const sp<XMLNode>& node, const char* ns8,
     const String16 attr(attr8);
     
     if (node->getAttribute(ns, attr) != NULL) {
-        fprintf(stderr, "Warning: AndroidManifest.xml already defines %s (in %s)\n",
+        fprintf(stderr, "Warning: AndroidManifest.xml already defines %s (in %s);"
+                        " using existing value in manifest.\n",
                 String8(attr).string(), String8(ns).string());
         return;
     }
