@@ -935,17 +935,27 @@ status_t IPCThreadState::executeCommand(int32_t cmd)
             mCallingPid = tr.sender_pid;
             mCallingUid = tr.sender_euid;
             
-            bool doBackground = !gDisableBackgroundScheduling &&
-                    getpriority(PRIO_PROCESS, mMyThreadId)
-                            >= ANDROID_PRIORITY_BACKGROUND;
-            if (doBackground) {
-                // We have inherited a background priority from the caller.
-                // Ensure this thread is in the background scheduling class,
-                // since the driver won't modify scheduling classes for us.
-                androidSetThreadSchedulingGroup(mMyThreadId,
-                        ANDROID_TGROUP_BG_NONINTERACT);
+            int curPrio = getpriority(PRIO_PROCESS, mMyThreadId);
+            if (gDisableBackgroundScheduling) {
+                if (curPrio > ANDROID_PRIORITY_NORMAL) {
+                    // We have inherited a reduced priority from the caller, but do not
+                    // want to run in that state in this process.  The driver set our
+                    // priority already (though not our scheduling class), so bounce
+                    // it back to the default before invoking the transaction.
+                    setpriority(PRIO_PROCESS, mMyThreadId, ANDROID_PRIORITY_NORMAL);
+                }
+            } else {
+                if (curPrio >= ANDROID_PRIORITY_BACKGROUND) {
+                    // We want to use the inherited priority from the caller.
+                    // Ensure this thread is in the background scheduling class,
+                    // since the driver won't modify scheduling classes for us.
+                    // The scheduling group is reset to default by the caller
+                    // once this method returns after the transaction is complete.
+                    androidSetThreadSchedulingGroup(mMyThreadId,
+                                                    ANDROID_TGROUP_BG_NONINTERACT);
+                }
             }
-            
+
             //LOGI(">>>> TRANSACT from pid %d uid %d\n", mCallingPid, mCallingUid);
             
             Parcel reply;
@@ -982,14 +992,7 @@ status_t IPCThreadState::executeCommand(int32_t cmd)
             
             mCallingPid = origPid;
             mCallingUid = origUid;
-            
-            if (doBackground) {
-                // We moved to the background scheduling group to execute
-                // this transaction, so now that we are done go back in the
-                // foreground.
-                androidSetThreadSchedulingGroup(mMyThreadId, ANDROID_TGROUP_DEFAULT);
-            }
-            
+
             IF_LOG_TRANSACTIONS() {
                 TextOutput::Bundle _b(alog);
                 alog << "BC_REPLY thr " << (void*)pthread_self() << " / obj "
