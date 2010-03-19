@@ -462,10 +462,11 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         mEnabledProviders.add(passiveProvider.getName());
 
         // initialize external network location and geocoder services
+        PackageManager pm = mContext. getPackageManager();
         Resources resources = mContext.getResources();
         String serviceName = resources.getString(
                 com.android.internal.R.string.config_networkLocationProvider);
-        if (serviceName != null) {
+        if (serviceName != null && pm.resolveService(new Intent(serviceName), 0) != null) {
             mNetworkLocationProvider =
                 new LocationProviderProxy(mContext, LocationManager.NETWORK_PROVIDER,
                         serviceName, mLocationHandler);
@@ -473,7 +474,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         }
 
         serviceName = resources.getString(com.android.internal.R.string.config_geocodeProvider);
-        if (serviceName != null) {
+        if (serviceName != null && pm.resolveService(new Intent(serviceName), 0) != null) {
             mGeocodeProvider = new GeocoderProxy(mContext, serviceName);
         }
 
