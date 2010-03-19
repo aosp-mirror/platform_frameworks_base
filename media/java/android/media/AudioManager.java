@@ -694,7 +694,7 @@ public class AudioManager {
     // Bluetooth SCO control
     /**
      * Sticky broadcast intent action indicating that the bluetoooth SCO audio
-     * connection state has changed. The intent contains on extra {@link EXTRA_SCO_AUDIO_STATE}
+     * connection state has changed. The intent contains on extra {@link #EXTRA_SCO_AUDIO_STATE}
      * indicating the new state which is either {@link #SCO_AUDIO_STATE_DISCONNECTED}
      * or {@link #SCO_AUDIO_STATE_CONNECTED}
      *
