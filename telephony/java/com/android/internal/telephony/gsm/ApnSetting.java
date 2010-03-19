@@ -32,12 +32,12 @@ public class ApnSetting {
     String user;
     String password;
     int authType;
-    String[] types;
+    public String[] types;
     int id;
     String numeric;
 
 
-    ApnSetting(int id, String numeric, String carrier, String apn, String proxy, String port,
+    public ApnSetting(int id, String numeric, String carrier, String apn, String proxy, String port,
             String mmsc, String mmsProxy, String mmsPort,
             String user, String password, int authType, String[] types) {
         this.id = id;
@@ -73,7 +73,7 @@ public class ApnSetting {
         return sb.toString();
     }
 
-    boolean canHandleType(String type) {
+    public boolean canHandleType(String type) {
         for (String t : types) {
             // DEFAULT handles all, and HIPRI is handled by DEFAULT
             if (t.equals(type) || t.equals(Phone.APN_TYPE_ALL) ||
