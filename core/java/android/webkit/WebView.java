@@ -3120,8 +3120,8 @@ public class WebView extends AbsoluteLayout
         }
 
         int saveCount = canvas.save();
-        if (mInOverScrollMode
-                && getSettings().getUseSystemOverscrollBackground()) {
+        if (mInOverScrollMode && !getSettings()
+                .getUseWebViewBackgroundForOverscrollBackground()) {
             if (mOverScrollBackground == null) {
                 mOverScrollBackground = new Paint();
                 Bitmap bm = BitmapFactory.decodeResource(
