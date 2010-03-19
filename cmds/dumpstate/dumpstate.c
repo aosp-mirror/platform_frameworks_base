@@ -105,7 +105,7 @@ static void dumpstate() {
 
 #ifdef FWDUMP_bcm4329
     run_command("DUMP WIFI FIRMWARE LOG", 60,
-            "dhdutil", "-i", "eth0", "upload", "/data/local/tmp/wlan_crash.dump", NULL);
+            "su", "root", "dhdutil", "-i", "eth0", "upload", "/data/local/tmp/wlan_crash.dump", NULL);
 #endif
 
     print_properties();
