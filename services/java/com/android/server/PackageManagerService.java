@@ -9552,6 +9552,8 @@ class PackageManagerService extends IPackageManager.Stub {
                    // Scan the package
                    if (scanPackageLI(pkg, parseFlags, SCAN_MONITOR) != null) {
                        synchronized (mPackages) {
+                           updatePermissionsLP(pkg.packageName, pkg,
+                                   pkg.permissions.size() > 0, false);
                            retCode = PackageManager.INSTALL_SUCCEEDED;
                            pkgList.add(pkg.packageName);
                            // Post process args

@@ -2156,6 +2156,33 @@ public class PackageManagerTests extends AndroidTestCase {
         }
     }
 
+    /*
+     * Ensure that permissions are properly declared.
+     */
+    public void testInstallOnSdPermissionsUnmount() {
+        InstallParams ip = null;
+        boolean origMediaState = getMediaState();
+        try {
+            // **: Upon installing a package, are its declared permissions published?
+            int iFlags = PackageManager.INSTALL_INTERNAL;
+            int iApk = R.raw.install_decl_perm;
+            ip = installFromRawResource("install.apk", iApk,
+                    iFlags, false,
+                    false, -1, PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY);
+            assertInstall(ip.pkg, iFlags, ip.pkg.installLocation);
+            assertPermissions(BASE_PERMISSIONS_DEFINED);
+            // Unmount media here
+            assertTrue(unmountMedia());
+            // Mount media again
+            mountMedia();
+            //Check permissions now
+            assertPermissions(BASE_PERMISSIONS_DEFINED);
+        } finally {
+            if (ip != null) {
+                cleanUpInstall(ip);
+            }
+        }
+    }
     /*---------- Recommended install location tests ----*/
     /*
      * TODO's
