@@ -365,6 +365,13 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
             return;
         }
 
+        if (mTetheredNotification != null) {
+            if (mTetheredNotification.icon == icon) {
+                return;
+            }
+            notificationManager.cancel(mTetheredNotification.icon);
+        }
+
         Intent intent = new Intent();
         intent.setClassName("com.android.settings", "com.android.settings.TetherSettings");
         intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
