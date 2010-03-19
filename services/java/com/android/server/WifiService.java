@@ -1897,6 +1897,7 @@ public class WifiService extends IWifiManager.Stub {
                     setWifiApEnabledBlocking(true,
                                              msg.arg1,
                                              (WifiConfiguration) msg.obj);
+                    sWakeLock.release();
                     break;
 
                 case MESSAGE_STOP_ACCESS_POINT:
