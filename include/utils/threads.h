@@ -209,7 +209,7 @@ inline thread_id_t getThreadId() {
 class Mutex {
 public:
     enum {
-        NORMAL = 0,
+        PRIVATE = 0,
         SHARED = 1
     };
     
@@ -305,7 +305,13 @@ typedef Mutex::Autolock AutoMutex;
  */
 class Condition {
 public:
+    enum {
+        PRIVATE = 0,
+        SHARED = 1
+    };
+
     Condition();
+    Condition(int type);
     ~Condition();
     // Wait on the condition variable.  Lock the mutex before calling.
     status_t wait(Mutex& mutex);
@@ -328,6 +334,17 @@ private:
 
 inline Condition::Condition() {
     pthread_cond_init(&mCond, NULL);
+}
+inline Condition::Condition(int type) {
+    if (type == SHARED) {
+        pthread_condattr_t attr;
+        pthread_condattr_init(&attr);
+        pthread_condattr_setpshared(&attr, PTHREAD_PROCESS_SHARED);
+        pthread_cond_init(&mCond, &attr);
+        pthread_condattr_destroy(&attr);
+    } else {
+        pthread_cond_init(&mCond, NULL);
+    }
 }
 inline Condition::~Condition() {
     pthread_cond_destroy(&mCond);
