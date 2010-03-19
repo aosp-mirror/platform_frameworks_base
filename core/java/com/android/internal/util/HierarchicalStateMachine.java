@@ -574,23 +574,41 @@ public class HierarchicalStateMachine {
             }
 
             /**
-             * Process the message abiding by the hierarchical semantics.
+             * Process the message abiding by the hierarchical semantics
+             * and perform any requested transitions.
              */
             processMsg(msg);
+            performTransitions();
 
+            if (mDbg) Log.d(TAG, "handleMessage: X");
+        }
+
+        /**
+         * Do any transitions
+         */
+        private void performTransitions() {
             /**
              * If transitionTo has been called, exit and then enter
-             * the appropriate states.
+             * the appropriate states. We loop on this to allow
+             * enter and exit methods to use transitionTo.
              */
-            if (mDestState != null) {
+            HierarchicalState destState = null;
+            while (mDestState != null) {
                 if (mDbg) Log.d(TAG, "handleMessage: new destination call exit");
+
+                /**
+                 * Save mDestState locally and set to null
+                 * to know if enter/exit use transitionTo.
+                 */
+                destState = mDestState;
+                mDestState = null;
 
                 /**
                  * Determine the states to exit and enter and return the
                  * common ancestor state of the enter/exit states. Then
                  * invoke the exit methods then the enter methods.
                  */
-                StateInfo commonStateInfo = setupTempStateStackWithStatesToEnter(mDestState);
+                StateInfo commonStateInfo = setupTempStateStackWithStatesToEnter(destState);
                 invokeExitMethods(commonStateInfo);
                 int stateStackEnteringIndex = moveTempStateStackToStateStack();
                 invokeEnterMethods(stateStackEnteringIndex);
@@ -603,25 +621,31 @@ public class HierarchicalStateMachine {
                  * message queue.
                  */
                 moveDeferredMessageAtFrontOfQueue();
+            }
 
-                /**
-                 * Call halting() if we've transitioned to the halting
-                 * state. All subsequent messages will be processed in
-                 * in the halting state which invokes haltedProcessMessage(msg);
-                 */
-                if (mDestState == mQuittingState) {
+            /**
+             * After processing all transitions check and
+             * see if the last transition was to quit or halt.
+             */
+            if (destState != null) {
+                if (destState == mQuittingState) {
+                    /**
+                     * We are quitting so ignore all messages.
+                     */
                     mHsm.quitting();
                     if (mHsm.mHsmThread != null) {
                         // If we made the thread then quit looper
                         getLooper().quit();
                     }
-                } else if (mDestState == mHaltingState) {
+                } else if (destState == mHaltingState) {
+                    /**
+                     * Call halting() if we've transitioned to the halting
+                     * state. All subsequent messages will be processed in
+                     * in the halting state which invokes haltedProcessMessage(msg);
+                     */
                     mHsm.halting();
                 }
-                mDestState = null;
             }
-
-            if (mDbg) Log.d(TAG, "handleMessage: X");
         }
 
         /**
@@ -656,6 +680,11 @@ public class HierarchicalStateMachine {
              */
             mIsConstructionCompleted = true;
             invokeEnterMethods(0);
+
+            /**
+             * Perform any transitions requested by the enter methods
+             */
+            performTransitions();
 
             if (mDbg) Log.d(TAG, "completeConstruction: X");
         }
@@ -1166,7 +1195,6 @@ public class HierarchicalStateMachine {
     {
         return Message.obtain(mHsmHandler, what, obj);
     }
-
 
     /**
      * Enqueue a message to this state machine.
