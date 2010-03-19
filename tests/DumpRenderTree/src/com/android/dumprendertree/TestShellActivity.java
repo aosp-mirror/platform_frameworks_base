@@ -61,6 +61,9 @@ public class TestShellActivity extends Activity implements LayoutTestController 
 
     static enum DumpDataType {DUMP_AS_TEXT, EXT_REPR, NO_OP}
 
+    // String constants for use with layoutTestController.overridePreferences
+    private final String WEBKIT_OFFLINE_WEB_APPLICATION_CACHE_ENABLED = "WebKitOfflineWebApplicationCacheEnabled";
+
     public class AsyncHandler extends Handler {
         @Override
         public void handleMessage(Message msg) {
@@ -457,6 +460,16 @@ public class TestShellActivity extends Activity implements LayoutTestController 
     public void setGeolocationPermission(boolean allow) {
         mGeolocationPermissionSet = true;
         mGeolocationPermission = allow;
+    }
+
+    public void overridePreference(String key, boolean value) {
+        // TODO: We should look up the correct WebView for the frame which
+        // called the layoutTestController method. Currently, we just use the
+        // WebView for the main frame. EventSender suffers from the same
+        // problem.
+        if (key.equals(WEBKIT_OFFLINE_WEB_APPLICATION_CACHE_ENABLED)) {
+            mWebView.getSettings().setAppCacheEnabled(value);
+        }
     }
 
     private final WebViewClient mViewClient = new WebViewClient(){

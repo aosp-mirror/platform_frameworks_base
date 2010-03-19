@@ -73,6 +73,7 @@ public class CallbackProxy extends Handler implements EventSender, LayoutTestCon
     private static final int LAYOUT_DUMP_DATABASE_CALLBACKS = 41;
     private static final int LAYOUT_SET_CAN_OPEN_WINDOWS = 42;
     private static final int SET_GEOLOCATION_PERMISSION = 43;
+    private static final int OVERRIDE_PREFERENCE = 44;
     
     CallbackProxy(EventSender eventSender, 
             LayoutTestController layoutTestController) {
@@ -265,6 +266,12 @@ public class CallbackProxy extends Handler implements EventSender, LayoutTestCon
         case SET_GEOLOCATION_PERMISSION:
             mLayoutTestController.setGeolocationPermission(
                     msg.arg1 == 1 ? true : false);
+            break;
+
+        case OVERRIDE_PREFERENCE:
+            String key = msg.getData().getString("key");
+            boolean value = msg.getData().getBoolean("value");
+            mLayoutTestController.overridePreference(key, value);
             break;
         }
     }
@@ -483,5 +490,12 @@ public class CallbackProxy extends Handler implements EventSender, LayoutTestCon
 
     public void setGeolocationPermission(boolean allow) {
         obtainMessage(SET_GEOLOCATION_PERMISSION, allow ? 1 : 0, 0).sendToTarget();
+    }
+
+    public void overridePreference(String key, boolean value) {
+        Message message = obtainMessage(OVERRIDE_PREFERENCE);
+        message.getData().putString("key", key);
+        message.getData().putBoolean("value", value);
+        message.sendToTarget();
     }
 }
