@@ -1258,9 +1258,9 @@ public class AudioManager {
      */
     public static final int AUDIOFOCUS_GAIN_TRANSIENT = 2;
     /**
-     * @hide
      * Used to indicate a temporary request of audio focus, anticipated to last a short
-     * amount of time, and where it is acceptable for other audio applications to duck.
+     * amount of time, and where it is acceptable for other audio applications to keep playing
+     * after having lowered their output level (also referred to as "ducking").
      * Examples of temporary changes are the playback of driving directions where playback of music
      * in the background is acceptable.
      * @see OnAudioFocusChangeListener#onAudioFocusChanged(int)
@@ -1278,10 +1278,9 @@ public class AudioManager {
      */
     public static final int AUDIOFOCUS_LOSS_TRANSIENT = -1 * AUDIOFOCUS_GAIN_TRANSIENT;
     /**
-     * @hide
      * Used to indicate a transient loss of audio focus where the loser of the audio focus can
-     * duck if it wants to continue playing, as the new focus owner doesn't require others
-     * to be silent.
+     * lower its output volume if it wants to continue playing (also referred to as "ducking"), as
+     * the new focus owner doesn't require others to be silent.
      * @see OnAudioFocusChangeListener#onAudioFocusChanged(int)
      */
     public static final int AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK =
@@ -1297,11 +1296,12 @@ public class AudioManager {
          * The focusChange value indicates whether the focus was gained,
          * whether the focus was lost, and whether that loss is transient, or whether the new focus
          * holder will hold it for an unknown amount of time.
-         * When losing focus, listeners can use the duration hint to decide what
-         * behavior to adopt when losing focus. A music player could for instance elect to duck its
-         * music stream for transient focus losses, and pause otherwise.
-         * @param focusChange one of {@link AudioManager#AUDIOFOCUS_GAIN},
+         * When losing focus, listeners can use the focus change information to decide what
+         * behavior to adopt when losing focus. A music player could for instance elect to lower
+         * the volume of its music stream (duck) for transient focus losses, and pause otherwise.
+         * @param focusChange the type of focus change, one of {@link AudioManager#AUDIOFOCUS_GAIN},
          *   {@link AudioManager#AUDIOFOCUS_LOSS}, {@link AudioManager#AUDIOFOCUS_LOSS_TRANSIENT}
+         *   and {@link AudioManager#AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK}.
          */
         public void onAudioFocusChanged(int focusChange);
     }
@@ -1429,6 +1429,8 @@ public class AudioManager {
      *  @param durationHint use {@link #AUDIOFOCUS_GAIN_TRANSIENT} to indicate this focus request
      *      is temporary, and focus will be abandonned shortly. Examples of transient requests are
      *      for the playback of driving directions, or notifications sounds.
+     *      Use {@link #AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK} to indicate also that it's ok for
+     *      the previous focus owner to keep playing if it ducks its audio output.
      *      Use {@link #AUDIOFOCUS_GAIN} for a focus request of unknown duration such
      *      as the playback of a song or a video.
      *  @return {@link #AUDIOFOCUS_REQUEST_FAILED} or {@link #AUDIOFOCUS_REQUEST_GRANTED}
