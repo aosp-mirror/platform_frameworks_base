@@ -1629,7 +1629,10 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
                 // of iterating throught he list of observers.
                 post(new Runnable() {
                     public void run() {
-                        updateDropDownForFilter(mAdapter.getCount());
+                        final ListAdapter adapter = mAdapter;
+                        if (adapter != null) {
+                            updateDropDownForFilter(adapter.getCount());
+                        }
                     }
                 });
             }
