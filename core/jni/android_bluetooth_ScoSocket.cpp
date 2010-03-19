@@ -404,11 +404,15 @@ static jboolean connectNative(JNIEnv *env, jobject object, jstring address,
     env->ReleaseStringUTFChars(address, c_address);
     data->is_accept = false;
 
-    c_name = env->GetStringUTFChars(name, NULL);
-    /* See if this device is in the black list */
-    data->sco_pkt_type = getScoType(data->address, c_name);
-    env->ReleaseStringUTFChars(name, c_name);
-
+    if (name == NULL) {
+        LOGE("%s: Null pointer passed in for device name", __FUNCTION__);
+        data->sco_pkt_type = 0;
+    } else {
+        c_name = env->GetStringUTFChars(name, NULL);
+        /* See if this device is in the black list */
+        data->sco_pkt_type = getScoType(data->address, c_name);
+        env->ReleaseStringUTFChars(name, c_name);
+    }
     if (pthread_create(&thread, NULL, &work_thread, (void *)data) < 0) {
         LOGE("%s: pthread_create() failed: %s", __FUNCTION__, strerror(errno));
         return JNI_FALSE;
