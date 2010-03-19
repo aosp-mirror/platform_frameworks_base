@@ -121,6 +121,10 @@ import junit.textui.ResultPrinter;
  * -e class com.android.foo.FooTest,com.android.foo.TooTest
  * com.android.foo/android.test.InstrumentationTestRunner
  * <p/>
+ * <b>Running all tests in a java package:</b> adb shell am instrument -w
+ * -e package com.android.foo.subpkg
+ *  com.android.foo/android.test.InstrumentationTestRunner
+ * <p/>
  * <b>Including performance tests:</b> adb shell am instrument -w
  * -e perf true
  * com.android.foo/android.test.InstrumentationTestRunner
