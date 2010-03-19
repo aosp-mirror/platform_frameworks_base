@@ -461,6 +461,10 @@ public class CallbackProxy extends Handler implements EventSender, LayoutTestCon
         WebStorage.getInstance().setQuotaForOrigin("file://", quota);
     }
 
+    public void setAppCacheMaximumSize(long size) {
+        WebStorage.getInstance().setAppCacheMaximumSize(size);
+    }
+
     public void setCanOpenWindows() {
         obtainMessage(LAYOUT_SET_CAN_OPEN_WINDOWS).sendToTarget();
     }
