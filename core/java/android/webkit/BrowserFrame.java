@@ -586,7 +586,10 @@ class BrowserFrame extends Handler {
      * @param headers The http headers.
      * @param postData If the method is "POST" postData is sent as the request
      *                 body. Is null when empty.
-     * @param cacheMode The cache mode to use when loading this resource.
+     * @param postDataIdentifier If the post data contained form this is the form identifier, otherwise it is 0.
+     * @param cacheMode The cache mode to use when loading this resource. See WebSettings.setCacheMode
+     * @param mainResource True if the this resource is the main request, not a supporting resource
+     * @param userGesture
      * @param synchronous True if the load is synchronous.
      * @return A newly created LoadListener object.
      */

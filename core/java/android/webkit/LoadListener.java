@@ -121,6 +121,7 @@ class LoadListener extends Handler implements EventHandler {
 
     // Does this loader correspond to the main-frame top-level page?
     private boolean mIsMainPageLoader;
+    // Does this loader correspond to the main content (as opposed to a supporting resource)
     private final boolean mIsMainResourceLoader;
     private final boolean mUserGesture;
 
@@ -520,23 +521,28 @@ class LoadListener extends Handler implements EventHandler {
     }
 
     /**
-     * Implementation of certificate handler for EventHandler.
-     * Called every time a resource is loaded via a secure
-     * connection. In this context, can be called multiple
-     * times if we have redirects
-     * @param certificate The SSL certifcate
-     * IMPORTANT: as this is called from network thread, can't call native
-     * directly
+     * Implementation of certificate handler for EventHandler. Called
+     * before a resource is requested. In this context, can be called
+     * multiple times if we have redirects
+     *
+     * IMPORTANT: as this is called from network thread, can't call
+     * native directly
+     *
+     * @param certificate The SSL certifcate or null if the request
+     * was not secure
      */
     public void certificate(SslCertificate certificate) {
+        if (DebugFlags.LOAD_LISTENER) {
+            Log.v(LOGTAG, "LoadListener.certificate: " + certificate);
+        }
         sendMessageInternal(obtainMessage(MSG_SSL_CERTIFICATE, certificate));
     }
 
     // Handle the certificate on the WebCore thread.
     private void handleCertificate(SslCertificate certificate) {
-        // if this is the top-most main-frame page loader
-        if (mIsMainPageLoader) {
-            // update the browser frame (ie, the main frame)
+        // if this is main resource of the top frame
+        if (mIsMainPageLoader && mIsMainResourceLoader) {
+            // update the browser frame with certificate
             mBrowserFrame.certificate(certificate);
         }
     }
