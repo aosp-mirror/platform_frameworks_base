@@ -3986,8 +3986,7 @@ public class WebView extends AbsoluteLayout
     protected void onDetachedFromWindow() {
         clearTextEntry(false);
         super.onDetachedFromWindow();
-        // Clean up the zoom controller
-        mZoomButtonsController.setVisible(false);
+        dismissZoomControl();
     }
 
     /**
@@ -4185,6 +4184,8 @@ public class WebView extends AbsoluteLayout
                 }
             }
         }
+
+        dismissZoomControl();
 
         // onSizeChanged() is called during WebView layout. And any
         // requestLayout() is blocked during layout. As setNewZoomScale() will
@@ -4447,9 +4448,7 @@ public class WebView extends AbsoluteLayout
         public boolean onScaleBegin(ScaleGestureDetector detector) {
             // cancel the single touch handling
             cancelTouch();
-            if (mZoomButtonsController.isVisible()) {
-                mZoomButtonsController.setVisible(false);
-            }
+            dismissZoomControl();
             // reset the zoom overview mode so that the page won't auto grow
             mInZoomOverview = false;
             // If it is in password mode, turn it off so it does not draw
@@ -5782,6 +5781,22 @@ public class WebView extends AbsoluteLayout
         }
     }
 
+    void dismissZoomControl() {
+        WebSettings settings = getSettings();
+        if (settings.getBuiltInZoomControls()) {
+            if (mZoomButtonsController.isVisible()) {
+                mZoomButtonsController.setVisible(false);
+            }
+        } else {
+            if (mZoomControlRunnable != null) {
+                mPrivateHandler.removeCallbacks(mZoomControlRunnable);
+            }
+            if (mZoomControls != null) {
+                mZoomControls.hide();
+            }
+        }
+    }
+
     // Rule for double tap:
     // 1. if the current scale is not same as the text wrap scale and layout
     //    algorithm is NARROW_COLUMNS, fit to column;
@@ -5796,20 +5811,9 @@ public class WebView extends AbsoluteLayout
         mAnchorX = viewToContentX((int) mZoomCenterX + mScrollX);
         mAnchorY = viewToContentY((int) mZoomCenterY + mScrollY);
         WebSettings settings = getSettings();
-        // remove the zoom control after double tap
-        if (settings.getBuiltInZoomControls()) {
-            if (mZoomButtonsController.isVisible()) {
-                mZoomButtonsController.setVisible(false);
-            }
-        } else {
-            if (mZoomControlRunnable != null) {
-                mPrivateHandler.removeCallbacks(mZoomControlRunnable);
-            }
-            if (mZoomControls != null) {
-                mZoomControls.hide();
-            }
-        }
         settings.setDoubleTapToastCount(0);
+        // remove the zoom control after double tap
+        dismissZoomControl();
         ViewManager.ChildView plugin = mViewManager.hitTest(mAnchorX, mAnchorY);
         if (plugin != null) {
             if (isPluginFitOnScreen(plugin)) {
