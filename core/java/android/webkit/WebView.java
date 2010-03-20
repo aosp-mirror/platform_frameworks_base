@@ -2297,20 +2297,13 @@ public class WebView extends AbsoluteLayout
         scrollBar.draw(canvas);
     }
 
-    private boolean canOverscrollHorizontally() {
-        return (Math.abs(mMinZoomScale - mMaxZoomScale) >= MINIMUM_SCALE_INCREMENT)
-                && getSettings().supportZoom()
-                && getSettings().getUseWideViewPort();
-    }
-
     @Override
     protected void onOverscrolled(int scrollX, int scrollY, boolean clampedX,
             boolean clampedY) {
         mInOverScrollMode = false;
         int maxX = computeMaxScrollX();
-        if (maxX == 0 && !canOverscrollHorizontally()) {
-            // do not over scroll x if the page just fits the screen and it
-            // can't zoom or the view doesn't use wide viewport
+        if (maxX == 0) {
+            // do not over scroll x if the page just fits the screen
             scrollX = pinLocX(scrollX);
         } else if (scrollX < 0 || scrollX > maxX) {
             mInOverScrollMode = true;
@@ -5387,9 +5380,6 @@ public class WebView extends AbsoluteLayout
                 vx = 0;
             }
         }
-        if (maxX == 0 && !canOverscrollHorizontally()) {
-            vx = 0;
-        }
         if (true /* EMG release: make our fling more like Maps' */) {
             // maps cuts their velocity in half
             vx = vx * 3 / 4;
@@ -5428,8 +5418,9 @@ public class WebView extends AbsoluteLayout
         mLastVelY = vy;
         mLastVelocity = (float) Math.hypot(vx, vy);
 
+        // no horizontal overscroll if the content just fits
         mScroller.fling(mScrollX, mScrollY, -vx, -vy, 0, maxX, 0, maxY,
-                getViewWidth() / 3, getViewHeight() / 3);
+                maxX == 0 ? 0 : getViewWidth() / 3, getViewHeight() / 3);
         // TODO: duration is calculated based on velocity, if the range is
         // small, the animation will stop before duration is up. We may
         // want to calculate how long the animation is going to run to precisely
