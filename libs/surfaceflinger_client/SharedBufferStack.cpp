@@ -34,7 +34,7 @@ namespace android {
 // ----------------------------------------------------------------------------
 
 SharedClient::SharedClient()
-    : lock(Mutex::SHARED)
+    : lock(Mutex::SHARED), cv(Condition::SHARED)
 {
 }
 
