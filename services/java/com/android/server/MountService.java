@@ -1203,7 +1203,10 @@ class MountService extends IMountService.Stub
         try {
             mConnector.doCommand(cmd);
         } catch (NativeDaemonConnectorException e) {
-            rc = StorageResultCode.OperationFailedInternalError;
+            int code = e.getCode();
+            if (code != VoldResponseCode.OpFailedStorageBusy) {
+                rc = StorageResultCode.OperationFailedInternalError;
+            }
         }
 
         if (rc == StorageResultCode.OperationSucceeded) {
