@@ -208,6 +208,9 @@ public class AudioService extends IAudioService.Stub {
     /** @see System#MODE_RINGER_STREAMS_AFFECTED */
     private int mRingerModeAffectedStreams;
 
+    // Streams currently muted by ringer mode
+    private int mRingerModeMutedStreams;
+
     /** @see System#MUTE_STREAMS_AFFECTED */
     private int mMuteAffectedStreams;
 
@@ -404,7 +407,7 @@ public class AudioService extends IAudioService.Stub {
 
 
         VolumeStreamState streamState = mStreamStates[STREAM_VOLUME_ALIAS[streamType]];
-        final int oldIndex = streamState.mIndex;
+        final int oldIndex = (streamState.muteCount() != 0) ? streamState.mLastAudibleIndex : streamState.mIndex;
         boolean adjustVolume = true;
 
         // If either the client forces allowing ringer modes for this adjustment,
@@ -416,29 +419,42 @@ public class AudioService extends IAudioService.Stub {
             adjustVolume = checkForRingerModeChange(oldIndex, direction);
         }
 
-        if (adjustVolume && streamState.adjustIndex(direction)) {
-            // Post message to set system volume (it in turn will post a message
-            // to persist). Do not change volume if stream is muted.
-            if (streamState.muteCount() == 0) {
+        // If stream is muted, adjust last audible index only
+        int index;
+        if (streamState.muteCount() != 0) {
+            if (adjustVolume) {
+                streamState.adjustLastAudibleIndex(direction);
+                // Post a persist volume msg
+                sendMsg(mAudioHandler, MSG_PERSIST_VOLUME, streamType,
+                        SENDMSG_REPLACE, 0, 1, streamState, PERSIST_DELAY);
+            }
+            index = streamState.mLastAudibleIndex;
+        } else {
+            if (adjustVolume && streamState.adjustIndex(direction)) {
+                // Post message to set system volume (it in turn will post a message
+                // to persist). Do not change volume if stream is muted.
                 sendMsg(mAudioHandler, MSG_SET_SYSTEM_VOLUME, STREAM_VOLUME_ALIAS[streamType], SENDMSG_NOOP, 0, 0,
                         streamState, 0);
             }
+            index = streamState.mIndex;
         }
-
         // UI
         mVolumePanel.postVolumeChanged(streamType, flags);
         // Broadcast Intent
-        sendVolumeUpdate(streamType, oldIndex, streamState.mIndex);
+        sendVolumeUpdate(streamType, oldIndex, index);
     }
 
     /** @see AudioManager#setStreamVolume(int, int, int) */
     public void setStreamVolume(int streamType, int index, int flags) {
         ensureValidStreamType(streamType);
+        VolumeStreamState streamState = mStreamStates[STREAM_VOLUME_ALIAS[streamType]];
 
-        final int oldIndex = mStreamStates[STREAM_VOLUME_ALIAS[streamType]].mIndex;
+        final int oldIndex = (streamState.muteCount() != 0) ? streamState.mLastAudibleIndex : streamState.mIndex;
 
         index = rescaleIndex(index * 10, streamType, STREAM_VOLUME_ALIAS[streamType]);
         setStreamVolumeInt(STREAM_VOLUME_ALIAS[streamType], index, false, true);
+
+        index = (streamState.muteCount() != 0) ? streamState.mLastAudibleIndex : streamState.mIndex;
 
         // UI, etc.
         mVolumePanel.postVolumeChanged(streamType, flags);
@@ -470,22 +486,30 @@ public class AudioService extends IAudioService.Stub {
      */
     private void setStreamVolumeInt(int streamType, int index, boolean force, boolean lastAudible) {
         VolumeStreamState streamState = mStreamStates[streamType];
-        if (streamState.setIndex(index, lastAudible) || force) {
-            // Post message to set system volume (it in turn will post a message
-            // to persist).
-            // If stream is muted or we are in silent mode and stream is affected by ringer mode
-            // and the new volume is not 0, just persist the new volume but do not change
-            // current value
-            if (streamState.muteCount() == 0 &&
-                (mRingerMode == AudioManager.RINGER_MODE_NORMAL ||
-                !isStreamAffectedByRingerMode(streamType) ||
-                index == 0)) {
-                sendMsg(mAudioHandler, MSG_SET_SYSTEM_VOLUME, streamType, SENDMSG_NOOP, 0, 0,
-                        streamState, 0);
-            } else {
-                // Post a persist volume msg
-                sendMsg(mAudioHandler, MSG_PERSIST_VOLUME, streamType,
-                        SENDMSG_REPLACE, 0, 1, streamState, PERSIST_DELAY);
+
+        // If stream is muted, set last audible index only
+        if (streamState.muteCount() != 0) {
+            streamState.setLastAudibleIndex(index);
+            // Post a persist volume msg
+            sendMsg(mAudioHandler, MSG_PERSIST_VOLUME, streamType,
+                    SENDMSG_REPLACE, 0, 1, streamState, PERSIST_DELAY);
+        } else {
+            if (streamState.setIndex(index, lastAudible) || force) {
+                // Post message to set system volume (it in turn will post a message
+                // to persist).
+                // If we are in silent mode and stream is affected by ringer mode
+                // and the new volume is not 0, just persist the new volume but do not change
+                // current value
+                if (mRingerMode == AudioManager.RINGER_MODE_NORMAL ||
+                    !isStreamAffectedByRingerMode(streamType) ||
+                    index == 0) {
+                    sendMsg(mAudioHandler, MSG_SET_SYSTEM_VOLUME, streamType, SENDMSG_NOOP, 0, 0,
+                            streamState, 0);
+                } else {
+                    // Post a persist volume msg
+                    sendMsg(mAudioHandler, MSG_PERSIST_VOLUME, streamType,
+                            SENDMSG_REPLACE, 0, 1, streamState, PERSIST_DELAY);
+                }
             }
         }
     }
@@ -537,27 +561,24 @@ public class AudioService extends IAudioService.Stub {
     private void setRingerModeInt(int ringerMode, boolean persist) {
         mRingerMode = ringerMode;
 
-        // Adjust volumes via posting message
+        // Mute stream if not previously muted by ringer mode and ringer mode
+        // is not RINGER_MODE_NORMAL and stream is affected by ringer mode.
+        // Unmute stream if previously muted by ringer mode and ringer mode
+        // is RINGER_MODE_NORMAL or stream is not affected by ringer mode.
         int numStreamTypes = AudioSystem.getNumStreamTypes();
-        if (mRingerMode == AudioManager.RINGER_MODE_NORMAL) {
-            for (int streamType = numStreamTypes - 1; streamType >= 0; streamType--) {
-                if (!isStreamAffectedByRingerMode(streamType)) continue;
-                // Bring back last audible volume
-                setStreamVolumeInt(streamType, mStreamStates[streamType].mLastAudibleIndex,
-                                   true, false);
-            }
-        } else {
-            for (int streamType = numStreamTypes - 1; streamType >= 0; streamType--) {
-                if (isStreamAffectedByRingerMode(streamType)) {
-                    // Either silent or vibrate, either way volume is 0
-                    setStreamVolumeInt(streamType, 0, false, false);
-                } else {
-                    // restore stream volume in the case the stream changed from affected
-                    // to non affected by ringer mode. Does not arm to do it for streams that
-                    // are not affected as well.
-                    setStreamVolumeInt(streamType, mStreamStates[streamType].mLastAudibleIndex,
-                            true, false);
+        for (int streamType = numStreamTypes - 1; streamType >= 0; streamType--) {
+            if (isStreamMutedByRingerMode(streamType)) {
+                if (!isStreamAffectedByRingerMode(streamType) ||
+                    mRingerMode == AudioManager.RINGER_MODE_NORMAL) {
+                    mStreamStates[streamType].mute(null, false);
+                    mRingerModeMutedStreams &= ~(1 << streamType);
                 }
+            } else {
+                if (isStreamAffectedByRingerMode(streamType) &&
+                    mRingerMode != AudioManager.RINGER_MODE_NORMAL) {
+                   mStreamStates[streamType].mute(null, true);
+                   mRingerModeMutedStreams |= (1 << streamType);
+               }
             }
         }
 
@@ -728,7 +749,7 @@ public class AudioService extends IAudioService.Stub {
             }
             int streamType = getActiveStreamType(AudioManager.USE_DEFAULT_STREAM_TYPE);
             int index = mStreamStates[STREAM_VOLUME_ALIAS[streamType]].mIndex;
-            setStreamVolumeInt(STREAM_VOLUME_ALIAS[streamType], index, true, true);
+            setStreamVolumeInt(STREAM_VOLUME_ALIAS[streamType], index, true, false);
         }
     }
 
@@ -862,7 +883,7 @@ public class AudioService extends IAudioService.Stub {
             }
             streamState.mLastAudibleIndex = streamState.getValidIndex(index);
 
-            // unmute stream that whas muted but is not affect by mute anymore
+            // unmute stream that was muted but is not affect by mute anymore
             if (streamState.muteCount() != 0 && !isStreamAffectedByMute(streamType)) {
                 int size = streamState.mDeathHandlers.size();
                 for (int i = 0; i < size; i++) {
@@ -1127,6 +1148,10 @@ public class AudioService extends IAudioService.Stub {
         return (mRingerModeAffectedStreams & (1 << streamType)) != 0;
     }
 
+    private boolean isStreamMutedByRingerMode(int streamType) {
+        return (mRingerModeMutedStreams & (1 << streamType)) != 0;
+    }
+
     public boolean isStreamAffectedByMute(int streamType) {
         return (mMuteAffectedStreams & (1 << streamType)) != 0;
     }
@@ -1293,6 +1318,14 @@ public class AudioService extends IAudioService.Stub {
             }
         }
 
+        public void setLastAudibleIndex(int index) {
+            mLastAudibleIndex = getValidIndex(index);
+        }
+
+        public void adjustLastAudibleIndex(int deltaIndex) {
+            setLastAudibleIndex(mLastAudibleIndex + deltaIndex * 10);
+        }
+
         public int getMaxIndex() {
             return mIndexMax;
         }
@@ -1330,7 +1363,10 @@ public class AudioService extends IAudioService.Stub {
                         if (mMuteCount == 0) {
                             // Register for client death notification
                             try {
-                                mICallback.linkToDeath(this, 0);
+                                // mICallback can be 0 if muted by AudioService
+                                if (mICallback != null) {
+                                    mICallback.linkToDeath(this, 0);
+                                }
                                 mDeathHandlers.add(this);
                                 // If the stream is not yet muted by any client, set lvel to 0
                                 if (muteCount() == 0) {
@@ -1356,9 +1392,12 @@ public class AudioService extends IAudioService.Stub {
                             if (mMuteCount == 0) {
                                 // Unregistr from client death notification
                                 mDeathHandlers.remove(this);
-                                mICallback.unlinkToDeath(this, 0);
+                                // mICallback can be 0 if muted by AudioService
+                                if (mICallback != null) {
+                                    mICallback.unlinkToDeath(this, 0);
+                                }
                                 if (muteCount() == 0) {
-                                    // If the stream is not mut any more, restore it's volume if
+                                    // If the stream is not muted any more, restore it's volume if
                                     // ringer mode allows it
                                     if (!isStreamAffectedByRingerMode(mStreamType) || mRingerMode == AudioManager.RINGER_MODE_NORMAL) {
                                         setIndex(mLastAudibleIndex, false);
@@ -1398,7 +1437,7 @@ public class AudioService extends IAudioService.Stub {
                 int size = mDeathHandlers.size();
                 for (int i = 0; i < size; i++) {
                     handler = mDeathHandlers.get(i);
-                    if (cb.equals(handler.mICallback)) {
+                    if (cb == handler.mICallback) {
                         return handler;
                     }
                 }
