@@ -230,14 +230,8 @@ public final class CookieManager {
                 return 1;
             }
 
-            diff = cookie2.name.hashCode() - cookie1.name.hashCode();
-            if (diff != 0) return diff;
-
-            // cookie1 and cookie2 both have non-null values so we emit a
-            // warning and treat them as the same.
-            Log.w(LOGTAG, "Found two cookies with the same value."
-                    + "cookie1=" + cookie1 + " , cookie2=" + cookie2);
-            return 0;
+            // Fallback to comparing the name to ensure consistent order.
+            return cookie1.name.compareTo(cookie2.name);
         }
     }
 
@@ -255,7 +249,7 @@ public final class CookieManager {
      * first.
      * 
      * @return CookieManager
-=     */
+     */
     public static synchronized CookieManager getInstance() {
         if (sRef == null) {
             sRef = new CookieManager();
