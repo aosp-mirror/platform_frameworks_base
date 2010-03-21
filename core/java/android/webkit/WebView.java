@@ -5773,6 +5773,15 @@ public class WebView extends AbsoluteLayout
     }
 
     void dismissZoomControl() {
+        if (mWebViewCore == null) {
+            // maybe called after WebView's destroy(). As we can't get settings,
+            // just hide zoom control for both styles.
+            mZoomButtonsController.setVisible(false);
+            if (mZoomControls != null) {
+                mZoomControls.hide();
+            }
+            return;
+        }
         WebSettings settings = getSettings();
         if (settings.getBuiltInZoomControls()) {
             if (mZoomButtonsController.isVisible()) {
