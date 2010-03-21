@@ -574,5 +574,13 @@ public class UriTest extends TestCase {
             .appendQueryParameter("key", "y z")
             .build();
         assertEquals("y z", uri.getQueryParameter("key"));
+
+        // key is a substring of parameters, but not present
+        uri = Uri.parse("http://test/").buildUpon()
+            .appendQueryParameter("akeyb", "a b")
+            .appendQueryParameter("keya", "c d")
+            .appendQueryParameter("bkey", "e f")
+            .build();
+        assertNull(uri.getQueryParameter("key"));
     }
 }
