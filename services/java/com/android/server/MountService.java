@@ -337,16 +337,23 @@ class MountService extends IMountService.Stub
                     public void run() {
                         try {
                             String path = Environment.getExternalStorageDirectory().getPath();
-                            if (getVolumeState(
-                                    Environment.getExternalStorageDirectory().getPath()).equals(
-                                            Environment.MEDIA_UNMOUNTED)) {
+                            String state = getVolumeState(path);
+
+                            if (state.equals(Environment.MEDIA_UNMOUNTED)) {
                                 int rc = doMountVolume(path);
                                 if (rc != StorageResultCode.OperationSucceeded) {
                                     Log.e(TAG, String.format("Boot-time mount failed (%d)", rc));
                                 }
+                            } else if (state.equals(Environment.MEDIA_SHARED)) {
+                                /*
+                                 * Bootstrap UMS enabled state since vold indicates
+                                 * the volume is shared (runtime restart while ums enabled)
+                                 */
+                                notifyVolumeStateChange(null, path, VolumeState.NoMedia, VolumeState.Shared);
                             }
+
                             /*
-                             * If UMS is connected in boot, send the connected event
+                             * If UMS was connected on boot, send the connected event
                              * now that we're up.
                              */
                             if (mSendUmsConnectedOnBoot) {
