@@ -732,7 +732,7 @@
          @hide  -->
     <permission android:name="android.permission.ASEC_ACCESS"
         android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
-        android:protectionLevel="dangerous"
+        android:protectionLevel="signature"
         android:label="@string/permlab_asec_access"
         android:description="@string/permdesc_asec_access" />
 
@@ -740,7 +740,7 @@
          @hide  -->
     <permission android:name="android.permission.ASEC_CREATE"
         android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
-        android:protectionLevel="dangerous"
+        android:protectionLevel="signature"
         android:label="@string/permlab_asec_create"
         android:description="@string/permdesc_asec_create" />
 
@@ -748,7 +748,7 @@
          @hide  -->
     <permission android:name="android.permission.ASEC_DESTROY"
         android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
-        android:protectionLevel="dangerous"
+        android:protectionLevel="signature"
         android:label="@string/permlab_asec_destroy"
         android:description="@string/permdesc_asec_destroy" />
 
@@ -756,7 +756,7 @@
          @hide  -->
     <permission android:name="android.permission.ASEC_MOUNT_UNMOUNT"
         android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
-        android:protectionLevel="dangerous"
+        android:protectionLevel="signature"
         android:label="@string/permlab_asec_mount_unmount"
         android:description="@string/permdesc_asec_mount_unmount" />
 
@@ -764,7 +764,7 @@
          @hide  -->
     <permission android:name="android.permission.ASEC_RENAME"
         android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
-        android:protectionLevel="dangerous"
+        android:protectionLevel="signature"
         android:label="@string/permlab_asec_rename"
         android:description="@string/permdesc_asec_rename" />
 
