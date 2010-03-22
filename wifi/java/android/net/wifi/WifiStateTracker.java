@@ -54,10 +54,11 @@ import android.content.Context;
 import android.database.ContentObserver;
 import com.android.internal.app.IBatteryStats;
 
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Set;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Track the state of Wifi connectivity. All event handling is done here,
@@ -284,6 +285,13 @@ public class WifiStateTracker extends NetworkStateTracker {
      *         {@link WifiManager#WIFI_STATE_UNKNOWN}
      */
     private int mWifiState;
+
+    /**
+     * For getWifiState(), to make sure it's always fast, even when the
+     * instance lock is held on other slow operations.
+     */
+    private final AtomicInteger mWifiStateAtomic = new AtomicInteger(WIFI_STATE_UNKNOWN);
+
     // Wi-Fi run states:
     private static final int RUN_STATE_STARTING = 1;
     private static final int RUN_STATE_RUNNING  = 2;
@@ -1504,11 +1512,12 @@ public class WifiStateTracker extends NetworkStateTracker {
         return true;
     }
 
-    public synchronized int getWifiState() {
-        return mWifiState;
+    public int getWifiState() {
+        return mWifiStateAtomic.get();
     }
 
     public synchronized void setWifiState(int wifiState) {
+        mWifiStateAtomic.set(wifiState);
         mWifiState = wifiState;
     }
 
