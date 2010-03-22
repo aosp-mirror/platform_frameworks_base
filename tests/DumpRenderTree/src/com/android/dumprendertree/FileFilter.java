@@ -82,18 +82,10 @@ public class FileFilter {
         // This first block of tests are for HTML5 features, for which Android
         // should pass all tests. They are skipped only temporarily.
         // TODO: Fix these failing tests and remove them from this list.
-        ignoreResultList.add("http/tests/appcache/auth.html"); // file not found
-        ignoreResultList.add("http/tests/appcache/deferred-events.html"); // file not found
-        ignoreResultList.add("http/tests/appcache/deferred-events-delete-while-raising.html"); // file not found
-        ignoreResultList.add("http/tests/appcache/destroyed-frame.html"); // file not found
-        ignoreResultList.add("http/tests/appcache/detached-iframe.html"); // file not found
-        ignoreResultList.add("http/tests/appcache/different-scheme.html"); // file not found
-        ignoreResultList.add("http/tests/appcache/disabled.html"); // not found
+        ignoreResultList.add("http/tests/appcache/auth.html"); // DumpRenderTree throws exception when authentication fails
         ignoreResultList.add("http/tests/appcache/empty-manifest.html"); // flaky
         ignoreResultList.add("http/tests/appcache/foreign-iframe-main.html"); // flaky - skips states
-        ignoreResultList.add("http/tests/appcache/max-size.html"); // no layoutTestController.setAppCacheMaximumSize
         ignoreResultList.add("http/tests/appcache/manifest-with-empty-file.html"); // flaky
-        ignoreResultList.add("http/tests/appcache/whitelist-wildcard.html"); // file not found
         ignoreResultList.add("storage/database-lock-after-reload.html"); // Succeeds but DumpRenderTree does not read result correctly
         ignoreResultList.add("storage/hash-change-with-xhr.html"); // Succeeds but DumpRenderTree does not read result correctly
 

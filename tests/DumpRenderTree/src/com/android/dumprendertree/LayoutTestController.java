@@ -65,4 +65,6 @@ public interface LayoutTestController {
 
     // For Geolocation tests
     public void setGeolocationPermission(boolean allow);
+
+    public void overridePreference(String key, boolean value);
 }

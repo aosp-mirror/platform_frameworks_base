@@ -340,6 +340,15 @@ public final class WebStorage {
     }
 
     /**
+     * Sets the maximum size of the ApplicationCache.
+     * This should only ever be called on the WebKit thread.
+     * @hide Pending API council approval
+     */
+    public void setAppCacheMaximumSize(long size) {
+        nativeSetAppCacheMaximumSize(size);
+    }
+
+    /**
      * Utility function to send a message to our handler
      */
     private synchronized void postMessage(Message msg) {
@@ -402,4 +411,5 @@ public final class WebStorage {
     private static native void nativeSetQuotaForOrigin(String origin, long quota);
     private static native void nativeDeleteOrigin(String origin);
     private static native void nativeDeleteAllData();
+    private static native void nativeSetAppCacheMaximumSize(long size);
 }
