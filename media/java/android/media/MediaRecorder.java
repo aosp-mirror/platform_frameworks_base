@@ -52,6 +52,7 @@ import java.lang.ref.WeakReference;
  *
  * <p>See the <a href="{@docRoot}guide/topics/media/index.html">Audio and Video</a>
  * documentation for additional help with using MediaRecorder.
+ * <p>Note: Currently, MediaRecorder does not work on the emulator.
  */
 public class MediaRecorder
 {
