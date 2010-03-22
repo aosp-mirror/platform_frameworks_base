@@ -571,6 +571,7 @@ class PowerManagerService extends IPowerManager.Stub
             binder = b;
             tag = t;
             uid = u == MY_UID ? Process.SYSTEM_UID : u;
+            pid = Binder.getCallingPid();
             if (u != MY_UID || (
                     !"KEEP_SCREEN_ON_FLAG".equals(tag)
                     && !"KeyInputQueue".equals(tag))) {
@@ -595,6 +596,7 @@ class PowerManagerService extends IPowerManager.Stub
         final IBinder binder;
         final String tag;
         final int uid;
+        final int pid;
         final int monitorType;
         boolean activated = true;
         int minState;
@@ -998,7 +1000,8 @@ class PowerManagerService extends IPowerManager.Stub
                    activated = " activated";
                 }
                 pw.println("  " + type + " '" + wl.tag + "'" + acquireCausesWakeup
-                        + activated + " (minState=" + wl.minState + ")");
+                        + activated + " (minState=" + wl.minState + ", uid=" + wl.uid
+                        + ", pid=" + wl.pid + ")");
             }
 
             pw.println();
