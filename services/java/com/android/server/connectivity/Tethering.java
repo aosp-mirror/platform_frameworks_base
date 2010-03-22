@@ -91,7 +91,6 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
     private static final String DNS_DEFAULT_SERVER2 = "4.2.2.2";
 
     private boolean mDunRequired;  // configuration info - must use DUN apn on 3g
-    private boolean mUseHiPri;
 
     private HierarchicalStateMachine mTetherMasterSM;
 
@@ -1052,13 +1051,12 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                 return false;
             }
             protected int turnOnMobileConnection() {
-                Log.d(TAG, "turnonMobileConnection with mUseHiPri="+mUseHiPri);
                 IBinder b = ServiceManager.getService(Context.CONNECTIVITY_SERVICE);
                 IConnectivityManager service = IConnectivityManager.Stub.asInterface(b);
                 int retValue = Phone.APN_REQUEST_FAILED;
                 try {
                     retValue = service.startUsingNetworkFeature(ConnectivityManager.TYPE_MOBILE,
-                            (mUseHiPri ? Phone.FEATURE_ENABLE_HIPRI : Phone.FEATURE_ENABLE_DUN),
+                            (mDunRequired ? Phone.FEATURE_ENABLE_DUN : Phone.FEATURE_ENABLE_HIPRI),
                             new Binder());
                 } catch (Exception e) {
                 }
@@ -1083,8 +1081,8 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                             IConnectivityManager.Stub.asInterface(b);
                     try {
                         service.stopUsingNetworkFeature(ConnectivityManager.TYPE_MOBILE,
-                                (mUseHiPri ? Phone.FEATURE_ENABLE_HIPRI :
-                                             Phone.FEATURE_ENABLE_DUN));
+                                (mDunRequired? Phone.FEATURE_ENABLE_DUN :
+                                             Phone.FEATURE_ENABLE_HIPRI));
                     } catch (Exception e) {
                         return false;
                     }
@@ -1175,57 +1173,51 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                 IBinder b = ServiceManager.getService(Context.CONNECTIVITY_SERVICE);
                 IConnectivityManager cm = IConnectivityManager.Stub.asInterface(b);
                 mConnectionRequested = false;
-                mUseHiPri = false;
                 Log.d(TAG, "chooseUpstreamType(" + tryCell + "),  dunRequired ="
                         + mDunRequired + ", iface=" + iface);
-                if (mDunRequired) {
-                    // check if Dun is on
+                if (iface != null) {
                     try {
-                        NetworkInfo info = cm.getNetworkInfo(ConnectivityManager.TYPE_MOBILE_DUN);
-                        if (info.isConnected()) {
-                            Log.d(TAG, "setting dun ifacename =" + iface);
-                            notifyTetheredOfNewIface(iface);
-                            // even if we're already connected - it may be somebody else's
-                            // refcount, so add our own
-                            turnOnMobileConnection();
-                        }
-                    } catch (RemoteException e) {
-                        Log.e(TAG, "RemoteException calling ConnectivityManager");
-                        notifyTetheredOfNewIface(null);
-                    }
-                    if (tryCell == TRY_TO_SETUP_MOBILE_CONNECTION) {
-                        turnOnMobileConnection();
-                    }
-                } else {
-                    if (iface == null) {
-                        if (tryCell == TRY_TO_SETUP_MOBILE_CONNECTION) {
-                            Log.d(TAG, "turning on hipri");
-                            mUseHiPri = true;
-                            turnOnMobileConnection(); // try to turn on hipri
-                        }
-
-                    } else {
-                        try {
+                        if (mDunRequired) {
+                            // check if Dun is on - we can use that
+                            NetworkInfo info = cm.getNetworkInfo(
+                                    ConnectivityManager.TYPE_MOBILE_DUN);
+                            if (info.isConnected()) {
+                                Log.d(TAG, "setting dun ifacename =" + iface);
+                                // even if we're already connected - it may be somebody else's
+                                // refcount, so add our own
+                                turnOnMobileConnection();
+                            } else {
+                                // verify the iface is not the default mobile - can't use that!
+                                info = cm.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
+                                if (info.isConnected()) {
+                                    iface = null; // can't accept this one
+                                }
+                            }
+                        } else {
                             Log.d(TAG, "checking if hipri brought us this connection");
                             NetworkInfo info = cm.getNetworkInfo(
                                     ConnectivityManager.TYPE_MOBILE_HIPRI);
                             if (info.isConnected()) {
                                 Log.d(TAG, "yes - hipri in use");
-                                mUseHiPri = true;
+                                // even if we're already connected - it may be sombody else's
+                                // refcount, so add our own
                                 turnOnMobileConnection();
                             }
-                        } catch (RemoteException e) {
-                            Log.e(TAG, "RemoteException calling ConnectivityManager");
                         }
-                        // we don't require Dun and have an iface that satisfies, so use it
-                        Log.d(TAG, "setting non-dun iface =" + iface);
-                        notifyTetheredOfNewIface(iface);
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "RemoteException calling ConnectivityManager " + e);
+                        iface = null;
                     }
                 }
-                if (iface == null) {
+                // may have been set to null in the if above
+                if (iface == null ) {
+                    if (tryCell == TRY_TO_SETUP_MOBILE_CONNECTION) {
+                        turnOnMobileConnection();
+                    }
                     // wait for things to settle and retry
                     sendMessageDelayed(CMD_RETRY_UPSTREAM, UPSTREAM_SETTLE_TIME_MS);
                 }
+                notifyTetheredOfNewIface(iface);
             }
             protected void notifyTetheredOfNewIface(String ifaceName) {
                 Log.d(TAG, "notifying tethered with iface =" + ifaceName);
@@ -1240,7 +1232,6 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
         class InitialState extends TetherMasterUtilState {
             @Override
             public void enter() {
-                mUseHiPri = false;
                 mConnectionRequested = false;
             }
             @Override
