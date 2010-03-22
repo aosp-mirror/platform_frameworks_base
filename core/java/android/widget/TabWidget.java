@@ -221,7 +221,7 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
      * @param drawable the right strip drawable
      */
     public void setRightStripDrawable(Drawable drawable) {
-        mBottomLeftStrip = drawable;
+        mBottomRightStrip = drawable;
         requestLayout();
         invalidate();    }
 
@@ -232,7 +232,7 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
      * right strip drawable
      */
     public void setRightStripDrawable(int resId) {
-        mBottomLeftStrip = mContext.getResources().getDrawable(resId);
+        mBottomRightStrip = mContext.getResources().getDrawable(resId);
         requestLayout();
         invalidate();
     }
