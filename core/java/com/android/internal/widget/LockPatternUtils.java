@@ -89,7 +89,7 @@ public class LockPatternUtils {
     public static final int MODE_UNSPECIFIED = DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
     public static final int MODE_PATTERN = DevicePolicyManager.PASSWORD_QUALITY_SOMETHING;
     public static final int MODE_PIN = DevicePolicyManager.PASSWORD_QUALITY_NUMERIC;
-    public static final int MODE_PASSWORD = DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC;
+    public static final int MODE_PASSWORD = DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC;
 
     /**
      * The minimum number of dots the user must include in a wrong pattern
@@ -144,12 +144,11 @@ public class LockPatternUtils {
     /**
      * Gets the device policy password mode. If the mode is non-specific, returns
      * MODE_PATTERN which allows the user to choose anything.
-     *
-     * @return
      */
     public int getRequestedPasswordMode() {
         int policyMode = getDevicePolicyManager().getPasswordQuality(null);
         switch (policyMode) {
+            case DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC:
             case DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC:
                 return MODE_PASSWORD;
             case DevicePolicyManager.PASSWORD_QUALITY_NUMERIC:
@@ -270,9 +269,41 @@ public class LockPatternUtils {
     }
 
     /**
+     * Used by device policy manager to validate the current password
+     * information it has.
+     */
+    public int getActivePasswordQuality() {
+        switch (getPasswordMode()) {
+            case MODE_UNSPECIFIED:
+                return DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
+            case MODE_PATTERN:
+                if (isLockPatternEnabled()) {
+                    return DevicePolicyManager.PASSWORD_QUALITY_SOMETHING;
+                } else {
+                    return DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
+                }
+            case MODE_PIN:
+                if (isLockPasswordEnabled()) {
+                    return DevicePolicyManager.PASSWORD_QUALITY_NUMERIC;
+                } else {
+                    return DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
+                }
+            case MODE_PASSWORD:
+                if (isLockPasswordEnabled()) {
+                    return DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC;
+                } else {
+                    return DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
+                }
+        }
+        return DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
+    }
+    
+    /**
      * Clear any lock pattern or password.
      */
     public void clearLock() {
+        getDevicePolicyManager().setActivePasswordState(
+                DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED, 0);
         saveLockPassword(null, LockPatternUtils.MODE_PATTERN);
         setLockPatternEnabled(false);
         saveLockPattern(null);
@@ -316,15 +347,9 @@ public class LockPatternUtils {
     }
 
     /**
-     * Compare the given password and mode, ensuring that the password meets
-     * the mode and returning the minimum mode needed for the given password.
-     * @param password The password to be used.
-     * @param reqMode The desired password mode.
-     * @return Returns {@link #MODE_UNSPECIFIED} if the password is not
-     * good enough for the given mode.  Otherwise, returns either the original
-     * reqMode or something better if that is needed for the given password.
+     * Compute the password quality from the given password string.
      */
-    static public int adjustPasswordMode(String password, int reqMode) {
+    static public int computePasswordQuality(String password) {
         boolean hasDigit = false;
         boolean hasNonDigit = false;
         final int len = password.length();
@@ -336,39 +361,16 @@ public class LockPatternUtils {
             }
         }
 
-        // First check if it is sufficient.
-        switch (reqMode) {
-            case MODE_PASSWORD: {
-                if (!hasDigit || !hasNonDigit) {
-                    return MODE_UNSPECIFIED;
-                }
-            } break;
-
-            case MODE_PIN:
-            case MODE_PATTERN: {
-                // Whatever we have is acceptable; we may need to promote the
-                // mode later.
-            } break;
-
-            default:
-                // If it isn't a mode we specifically know, then fail fast.
-                Log.w(TAG, "adjustPasswordMode: unknown mode " + reqMode);
-                return MODE_UNSPECIFIED;
+        if (hasNonDigit && hasDigit) {
+            return DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC;
         }
-
-        // Do we need to promote?
         if (hasNonDigit) {
-            if (reqMode < MODE_PASSWORD) {
-                reqMode = MODE_PASSWORD;
-            }
+            return DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC;
         }
         if (hasDigit) {
-            if (reqMode < MODE_PIN) {
-                reqMode = MODE_PIN;
-            }
+            return DevicePolicyManager.PASSWORD_QUALITY_NUMERIC;
         }
-
-        return reqMode;
+        return DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
     }
 
     /**
@@ -392,12 +394,15 @@ public class LockPatternUtils {
             raf.close();
             DevicePolicyManager dpm = getDevicePolicyManager();
             if (password != null) {
-                int finalMode = adjustPasswordMode(password, mode);
-                if (mode < finalMode) {
-                    mode = finalMode;
-                }
                 setLong(PASSWORD_TYPE_KEY, mode);
-                dpm.setActivePasswordState(mode, password.length());
+                int quality = computePasswordQuality(password);
+                if (quality != DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED) {
+                    dpm.setActivePasswordState(quality, password.length());
+                } else {
+                    // The password is not anything.
+                    dpm.setActivePasswordState(
+                            DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED, 0);
+                }
             } else {
                 dpm.setActivePasswordState(
                         DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED, 0);

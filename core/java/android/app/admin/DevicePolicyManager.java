@@ -20,7 +20,6 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
-import android.app.admin.IDevicePolicyManager.Stub;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
@@ -192,11 +191,19 @@ public class DevicePolicyManager {
     
     /**
      * Constant for {@link #setPasswordQuality}: the user must have entered a
+     * password containing at least alphabetic (or other symbol) characters.
+     * Note that quality constants are ordered so that higher values are more
+     * restrictive.
+     */
+    public static final int PASSWORD_QUALITY_ALPHABETIC = 0x40000;
+    
+    /**
+     * Constant for {@link #setPasswordQuality}: the user must have entered a
      * password containing at least <em>both></em> numeric <em>and</em>
-     * alphabeter (or other symbol) characters.  Note that quality constants are
+     * alphabetic (or other symbol) characters.  Note that quality constants are
      * ordered so that higher values are more restrictive.
      */
-    public static final int PASSWORD_QUALITY_ALPHANUMERIC = 0x30000;
+    public static final int PASSWORD_QUALITY_ALPHANUMERIC = 0x50000;
     
     /**
      * Called by an application that is administering the device to set the
@@ -219,7 +226,8 @@ public class DevicePolicyManager {
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param quality The new desired quality.  One of
      * {@link #PASSWORD_QUALITY_UNSPECIFIED}, {@link #PASSWORD_QUALITY_SOMETHING},
-     * {@link #PASSWORD_QUALITY_NUMERIC}, or {@link #PASSWORD_QUALITY_ALPHANUMERIC}.
+     * {@link #PASSWORD_QUALITY_NUMERIC}, {@link #PASSWORD_QUALITY_ALPHABETIC},
+     * or {@link #PASSWORD_QUALITY_ALPHANUMERIC}.
      */
     public void setPasswordQuality(ComponentName admin, int quality) {
         if (mService != null) {
@@ -257,7 +265,8 @@ public class DevicePolicyManager {
      * take place immediately.  To prompt the user for a new password, use
      * {@link #ACTION_SET_NEW_PASSWORD} after setting this value.  This
      * constraint is only imposed if the administrator has also requested either
-     * {@link #PASSWORD_QUALITY_NUMERIC} or {@link #PASSWORD_QUALITY_ALPHANUMERIC}
+     * {@link #PASSWORD_QUALITY_NUMERIC}, {@link #PASSWORD_QUALITY_ALPHABETIC},
+     * or {@link #PASSWORD_QUALITY_ALPHANUMERIC}
      * with {@link #setPasswordQuality}.
      * 
      * <p>The calling device admin must have requested
