@@ -1675,6 +1675,16 @@ public final class ViewRoot extends Handler implements ViewParent,
         return (theParent instanceof ViewGroup) && isViewDescendantOf((View) theParent, parent);
     }
 
+    private static void forceLayout(View view) {
+        view.forceLayout();
+        if (view instanceof ViewGroup) {
+            ViewGroup group = (ViewGroup) view;
+            final int count = group.getChildCount();
+            for (int i = 0; i < count; i++) {
+                forceLayout(group.getChildAt(i));
+            }
+        }
+    }
 
     public final static int DO_TRAVERSAL = 1000;
     public final static int DIE = 1001;
@@ -1861,6 +1871,10 @@ public final class ViewRoot extends Handler implements ViewParent,
                 mPendingVisibleInsets.set(((ResizedInfo)msg.obj).visibleInsets);
                 if (msg.what == RESIZED_REPORT) {
                     mReportNextDraw = true;
+                }
+
+                if (mView != null) {
+                    forceLayout(mView);
                 }
                 requestLayout();
             }

@@ -115,6 +115,9 @@ public class FileUtils
      */
     public static boolean copyToFile(InputStream inputStream, File destFile) {
         try {
+            if (destFile.exists()) {
+                destFile.delete();
+            }
             OutputStream out = new FileOutputStream(destFile);
             try {
                 byte[] buffer = new byte[4096];

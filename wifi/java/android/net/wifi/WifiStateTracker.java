@@ -1074,7 +1074,11 @@ public class WifiStateTracker extends NetworkStateTracker {
                 break;
 
             case EVENT_DEFERRED_RECONNECT:
-                String BSSID = msg.obj.toString();
+                /**
+                 * mLastBssid can be null when there is a reconnect
+                 * request on the first BSSID we connect to
+                 */
+                String BSSID = (msg.obj != null) ? msg.obj.toString() : null;
                 /**
                  * If we've exceeded the maximum number of retries for reconnecting
                  * to a given network, blacklist the BSSID to allow a connection attempt on

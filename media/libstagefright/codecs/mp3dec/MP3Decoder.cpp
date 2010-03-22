@@ -52,7 +52,7 @@ status_t MP3Decoder::start(MetaData *params) {
     mBufferGroup->add_buffer(new MediaBuffer(4608 * 2));
 
     mConfig->equalizerType = flat;
-    mConfig->crcEnabled = true;
+    mConfig->crcEnabled = false;
 
     uint32_t memRequirements = pvmp3_decoderMemRequirements();
     mDecoderBuf = malloc(memRequirements);

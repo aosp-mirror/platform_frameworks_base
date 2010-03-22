@@ -20,8 +20,8 @@ import com.android.internal.app.IMediaContainerService;
 import com.android.internal.app.ResolverActivity;
 import com.android.internal.content.PackageHelper;
 import com.android.internal.util.FastXmlSerializer;
+import com.android.internal.util.JournaledFile;
 import com.android.internal.util.XmlUtils;
-import com.android.server.JournaledFile;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -8280,6 +8280,7 @@ class PackageManagerService extends IPackageManager.Stub {
                         return;
                     }
                 } else {
+                    mSettingsFilename.delete();
                     Slog.w(TAG, "Preserving older settings backup");
                 }
             }

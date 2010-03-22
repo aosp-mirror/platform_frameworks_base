@@ -158,9 +158,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
 
     public void noteInputEvent() {
         enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.noteInputEventLocked();
-        }
+        mStats.noteInputEventAtomic();
     }
     
     public void noteUserActivity(int uid, int event) {

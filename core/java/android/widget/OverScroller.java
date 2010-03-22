@@ -17,8 +17,8 @@
 package android.widget;
 
 import android.content.Context;
-import android.view.animation.AccelerateDecelerateInterpolator;
-import android.view.animation.DecelerateInterpolator;
+import android.view.animation.AnimationUtils;
+import android.view.animation.Interpolator;
 
 /**
  * This class encapsulates scrolling with the ability to overshoot the bounds
@@ -27,110 +27,34 @@ import android.view.animation.DecelerateInterpolator;
  * 
  * @hide Pending API approval
  */
-public class OverScroller {
-    private static final int SPRINGBACK_DURATION = 150;
-    private static final int OVERFLING_DURATION = 150;
-    
-    private static final int MODE_DEFAULT = 0;
-    private static final int MODE_OVERFLING = 1;
-    private static final int MODE_SPRINGBACK = 2;
-    
-    private Scroller mDefaultScroller;
-    private Scroller mDecelScroller;
-    private Scroller mAccelDecelScroller;
-    private Scroller mCurrScroller;
-    
-    private int mScrollMode = MODE_DEFAULT;
-    
-    private int mMinimumX;
-    private int mMinimumY;
-    private int mMaximumX;
-    private int mMaximumY;
-    
-    public OverScroller(Context context) {
-        mDefaultScroller = new Scroller(context);
-        mDecelScroller = new Scroller(context, new DecelerateInterpolator());
-        mAccelDecelScroller = new Scroller(context, new AccelerateDecelerateInterpolator());
-        mCurrScroller = mDefaultScroller;
-    }
-    
+public class OverScroller extends Scroller {
+
+    // Identical to mScrollers, but casted to MagneticOverScroller. 
+    private MagneticOverScroller mOverScrollerX;
+    private MagneticOverScroller mOverScrollerY;
+
     /**
-     * Call this when you want to know the new location.  If it returns true,
-     * the animation is not yet finished.  loc will be altered to provide the
-     * new location.
-     */ 
-    public boolean computeScrollOffset() {
-        boolean inProgress = mCurrScroller.computeScrollOffset();
-        
-        switch (mScrollMode) {
-        case MODE_OVERFLING:
-            if (!inProgress) {
-                // Overfling ended
-                if (springback(mCurrScroller.getCurrX(), mCurrScroller.getCurrY(),
-                        mMinimumX, mMaximumX, mMinimumY, mMaximumY, mAccelDecelScroller)) {
-                    return mCurrScroller.computeScrollOffset();
-                } else {
-                    mCurrScroller = mDefaultScroller;
-                    mScrollMode = MODE_DEFAULT;
-                }
-            }
-            break;
-            
-        case MODE_SPRINGBACK:
-            if (!inProgress) {
-                mCurrScroller = mDefaultScroller;
-                mScrollMode = MODE_DEFAULT;
-            }
-            break;
-            
-        case MODE_DEFAULT:
-            // Fling/autoscroll - did we go off the edge?
-            if (inProgress) {
-                Scroller scroller = mCurrScroller;
-                final int x = scroller.getCurrX();
-                final int y = scroller.getCurrY();
-                final int minX = mMinimumX;
-                final int maxX = mMaximumX;
-                final int minY = mMinimumY;
-                final int maxY = mMaximumY;
-                if (x < minX || x > maxX || y < minY || y > maxY) {
-                    final int startx = scroller.getStartX();
-                    final int starty = scroller.getStartY();
-                    final int time = scroller.timePassed();
-                    final float timeSecs = time / 1000.f;
-                    final float xvel = ((x - startx) / timeSecs);
-                    final float yvel = ((y - starty) / timeSecs);
-                    
-                    if ((x < minX && xvel > 0) || (y < minY && yvel > 0) ||
-                            (x > maxX && xvel < 0) || (y > maxY && yvel < 0)) {
-                        // If our velocity would take us back into valid areas,
-                        // try to springback rather than overfling.
-                        if (springback(x, y, minX, maxX, minY, maxY)) {
-                            return mCurrScroller.computeScrollOffset();
-                        }
-                    } else {
-                        overfling(x, y, xvel, yvel);
-                        return mCurrScroller.computeScrollOffset();
-                    }
-                }
-            }
-            break;
-        }
-        
-        return inProgress;
+     * Creates an OverScroller with a viscous fluid scroll interpolator.
+     * @param context
+     */
+    public OverScroller(Context context) {
+        this(context, null);
     }
-    
-    private void overfling(int startx, int starty, float xvel, float yvel) {
-        Scroller scroller = mDecelScroller;
-        final float durationSecs = (OVERFLING_DURATION / 1000.f);
-        int dx = (int)(xvel * durationSecs) / 8;
-        int dy = (int)(yvel * durationSecs) / 8;
-        mCurrScroller.abortAnimation();
-        scroller.startScroll(startx, starty, dx, dy, OVERFLING_DURATION);
-        mCurrScroller = scroller;
-        mScrollMode = MODE_OVERFLING;
+
+    /**
+     * Creates a Scroller with the specified interpolator. If the interpolator is
+     * null, the default (viscous) interpolator will be used.
+     */
+    public OverScroller(Context context, Interpolator interpolator) {
+        super(context, interpolator);
     }
-    
+
+    @Override
+    void instantiateScrollers() {
+        mScrollerX = mOverScrollerX = new MagneticOverScroller();
+        mScrollerY = mOverScrollerY = new MagneticOverScroller();
+    }
+
     /**
      * Call this when you want to 'spring back' into a valid coordinate range.
      *
@@ -140,310 +64,262 @@ public class OverScroller {
      * @param maxX Maximum valid X value
      * @param minY Minimum valid Y value
      * @param maxY Minimum valid Y value
-     * @return true if a springback was initiated, false if startX/startY was
+     * @return true if a springback was initiated, false if startX and startY were
      *          already within the valid range.
      */
-    public boolean springback(int startX, int startY, int minX, int maxX,
-            int minY, int maxY) {
-        return springback(startX, startY, minX, maxX, minY, maxY, mDecelScroller);
-    }
-    
-    private boolean springback(int startX, int startY, int minX, int maxX,
-            int minY, int maxY, Scroller scroller) {
-        int xoff = 0;
-        int yoff = 0;
-        if (startX < minX) {
-            xoff = minX - startX;
-        } else if (startX > maxX) {
-            xoff = maxX - startX;
-        }
-        if (startY < minY) {
-            yoff = minY - startY;
-        } else if (startY > maxY) {
-            yoff = maxY - startY;
-        }
-        
-        if (xoff != 0 || yoff != 0) {
-            mCurrScroller.abortAnimation();
-            scroller.startScroll(startX, startY, xoff, yoff, SPRINGBACK_DURATION);
-            mCurrScroller = scroller;
-            mScrollMode = MODE_SPRINGBACK;
-            return true;
-        }
-        
-        return false;
+    public boolean springback(int startX, int startY, int minX, int maxX, int minY, int maxY) {
+        mMode = FLING_MODE;
+        return mOverScrollerX.springback(startX, minX, maxX)
+                || mOverScrollerY.springback(startY, minY, maxY);
     }
 
-    /**
-     * 
-     * Returns whether the scroller has finished scrolling.
-     * 
-     * @return True if the scroller has finished scrolling, false otherwise.
-     */
-    public final boolean isFinished() {
-        return mCurrScroller.isFinished();
-    }
-
-    /**
-     * Returns the current X offset in the scroll. 
-     * 
-     * @return The new X offset as an absolute distance from the origin.
-     */
-    public final int getCurrX() {
-        return mCurrScroller.getCurrX();
-    }
-    
-    /**
-     * Returns the current Y offset in the scroll. 
-     * 
-     * @return The new Y offset as an absolute distance from the origin.
-     */
-    public final int getCurrY() {
-        return mCurrScroller.getCurrY();
-    }
-    
-    /**
-     * Stops the animation, resets any springback/overfling and completes
-     * any standard flings/scrolls in progress.
-     */
-    public void abortAnimation() {
-        mCurrScroller.abortAnimation();
-        mCurrScroller = mDefaultScroller;
-        mScrollMode = MODE_DEFAULT;
-        mCurrScroller.abortAnimation();
-    }
-    
-    /**
-     * Start scrolling by providing a starting point and the distance to travel.
-     * The scroll will use the default value of 250 milliseconds for the
-     * duration. This version does not spring back to boundaries.
-     * 
-     * @param startX Starting horizontal scroll offset in pixels. Positive
-     *        numbers will scroll the content to the left.
-     * @param startY Starting vertical scroll offset in pixels. Positive numbers
-     *        will scroll the content up.
-     * @param dx Horizontal distance to travel. Positive numbers will scroll the
-     *        content to the left.
-     * @param dy Vertical distance to travel. Positive numbers will scroll the
-     *        content up.
-     */
-    public void startScroll(int startX, int startY, int dx, int dy) {
-        final int minX = Math.min(startX, startX + dx);
-        final int maxX = Math.max(startX, startX + dx);
-        final int minY = Math.min(startY, startY + dy);
-        final int maxY = Math.max(startY, startY + dy);
-        startScroll(startX, startY, dx, dy, minX, maxX, minY, maxY);
-    }
-    
-    /**
-     * Start scrolling by providing a starting point and the distance to travel.
-     * The scroll will use the default value of 250 milliseconds for the
-     * duration. This version will spring back to the provided boundaries if
-     * the scroll value would take it too far.
-     * 
-     * @param startX Starting horizontal scroll offset in pixels. Positive
-     *        numbers will scroll the content to the left.
-     * @param startY Starting vertical scroll offset in pixels. Positive numbers
-     *        will scroll the content up.
-     * @param dx Horizontal distance to travel. Positive numbers will scroll the
-     *        content to the left.
-     * @param dy Vertical distance to travel. Positive numbers will scroll the
-     *        content up.
-     * @param minX Minimum X value. The scroller will not scroll past this
-     *        point.
-     * @param maxX Maximum X value. The scroller will not scroll past this
-     *        point.
-     * @param minY Minimum Y value. The scroller will not scroll past this
-     *        point.
-     * @param maxY Maximum Y value. The scroller will not scroll past this
-     *        point.
-     */
-    public void startScroll(int startX, int startY, int dx, int dy,
-            int minX, int maxX, int minY, int maxY) {
-        mCurrScroller.abortAnimation();
-        mCurrScroller = mDefaultScroller;
-        mScrollMode = MODE_DEFAULT;
-        mMinimumX = minX;
-        mMaximumX = maxX; 
-        mMinimumY = minY;
-        mMaximumY = maxY;
-        mCurrScroller.startScroll(startX, startY, dx, dy);
-    }
-
-    /**
-     * Start scrolling by providing a starting point and the distance to travel.
-     * 
-     * @param startX Starting horizontal scroll offset in pixels. Positive
-     *        numbers will scroll the content to the left.
-     * @param startY Starting vertical scroll offset in pixels. Positive numbers
-     *        will scroll the content up.
-     * @param dx Horizontal distance to travel. Positive numbers will scroll the
-     *        content to the left.
-     * @param dy Vertical distance to travel. Positive numbers will scroll the
-     *        content up.
-     * @param duration Duration of the scroll in milliseconds.
-     */
-    public void startScroll(int startX, int startY, int dx, int dy, int duration) {
-        mCurrScroller.abortAnimation();
-        mCurrScroller = mDefaultScroller;
-        mScrollMode = MODE_DEFAULT;
-        mMinimumX = Math.min(startX, startX + dx);
-        mMinimumY = Math.min(startY, startY + dy);
-        mMaximumX = Math.max(startX, startX + dx);
-        mMaximumY = Math.max(startY, startY + dy);
-        mCurrScroller.startScroll(startX, startY, dx, dy, duration);
-    }
-    
-    /**
-     * Returns the duration of the active scroll in progress; standard, fling,
-     * springback, or overfling. Does not account for any overflings or springback
-     * that may result.
-     */
-    public int getDuration() {
-        return mCurrScroller.getDuration();
-    }
-
-    /**
-     * Start scrolling based on a fling gesture. The distance travelled will
-     * depend on the initial velocity of the fling.
-     * 
-     * @param startX Starting point of the scroll (X)
-     * @param startY Starting point of the scroll (Y)
-     * @param velocityX Initial velocity of the fling (X) measured in pixels per
-     *        second.
-     * @param velocityY Initial velocity of the fling (Y) measured in pixels per
-     *        second
-     * @param minX Minimum X value. The scroller will not scroll past this
-     *        point.
-     * @param maxX Maximum X value. The scroller will not scroll past this
-     *        point.
-     * @param minY Minimum Y value. The scroller will not scroll past this
-     *        point.
-     * @param maxY Maximum Y value. The scroller will not scroll past this
-     *        point.
-     */
+    @Override
     public void fling(int startX, int startY, int velocityX, int velocityY,
             int minX, int maxX, int minY, int maxY) {
-        this.fling(startX, startY, velocityX, velocityY, minX, maxX, minY, maxY, 0, 0);
+        fling(startX, startY, velocityX, velocityY, minX, maxX, minY, maxY, 0, 0);
     }
 
     /**
-     * Start scrolling based on a fling gesture. The distance travelled will
+     * Start scrolling based on a fling gesture. The distance traveled will
      * depend on the initial velocity of the fling.
      * 
      * @param startX Starting point of the scroll (X)
      * @param startY Starting point of the scroll (Y)
      * @param velocityX Initial velocity of the fling (X) measured in pixels per
-     *        second.
+     *            second.
      * @param velocityY Initial velocity of the fling (Y) measured in pixels per
-     *        second
-     * @param minX Minimum X value. The scroller will not scroll past this
-     *        point unless overX > 0. If overfling is allowed, it will use minX
-     *        as a springback boundary.
-     * @param maxX Maximum X value. The scroller will not scroll past this
-     *        point unless overX > 0. If overfling is allowed, it will use maxX
-     *        as a springback boundary.
-     * @param minY Minimum Y value. The scroller will not scroll past this
-     *        point unless overY > 0. If overfling is allowed, it will use minY
-     *        as a springback boundary.
-     * @param maxY Maximum Y value. The scroller will not scroll past this
-     *        point unless overY > 0. If overfling is allowed, it will use maxY
-     *        as a springback boundary.
+     *            second
+     * @param minX Minimum X value. The scroller will not scroll past this point
+     *            unless overX > 0. If overfling is allowed, it will use minX as
+     *            a springback boundary.
+     * @param maxX Maximum X value. The scroller will not scroll past this point
+     *            unless overX > 0. If overfling is allowed, it will use maxX as
+     *            a springback boundary.
+     * @param minY Minimum Y value. The scroller will not scroll past this point
+     *            unless overY > 0. If overfling is allowed, it will use minY as
+     *            a springback boundary.
+     * @param maxY Maximum Y value. The scroller will not scroll past this point
+     *            unless overY > 0. If overfling is allowed, it will use maxY as
+     *            a springback boundary.
      * @param overX Overfling range. If > 0, horizontal overfling in either
-     *        direction will be possible.
+     *            direction will be possible.
      * @param overY Overfling range. If > 0, vertical overfling in either
-     *        direction will be possible.
+     *            direction will be possible.
      */
     public void fling(int startX, int startY, int velocityX, int velocityY,
             int minX, int maxX, int minY, int maxY, int overX, int overY) {
-        mCurrScroller = mDefaultScroller;
-        mScrollMode = MODE_DEFAULT;
-        mMinimumX = minX;
-        mMaximumX = maxX;
-        mMinimumY = minY;
-        mMaximumY = maxY;
-        mCurrScroller.fling(startX, startY, velocityX, velocityY, 
-                minX - overX, maxX + overX, minY - overY, maxY + overY);
+        mMode = FLING_MODE;
+        mOverScrollerX.fling(startX, velocityX, minX, maxX, overX);
+        mOverScrollerY.fling(startY, velocityY, minY, maxY, overY);
+    }
+
+    void notifyHorizontalBoundaryReached(int startX, int finalX) {
+        mOverScrollerX.springback(startX, finalX, finalX);
+    }
+
+    void notifyVerticalBoundaryReached(int startY, int finalY) {
+        mOverScrollerY.springback(startY, finalY, finalY);
+    }
+
+    void notifyHorizontalEdgeReached(int startX, int finalX, int overX) {
+        mOverScrollerX.notifyEdgeReached(startX, finalX, overX);
+    }
+
+    void notifyVerticalEdgeReached(int startY, int finalY, int overY) {
+        mOverScrollerY.notifyEdgeReached(startY, finalY, overY);
     }
 
     /**
-     * Returns where the scroll will end. Valid only for "fling" scrolls.
+     * Returns whether the current Scroller position is overscrolled or still within the minimum and
+     * maximum bounds provided in the
+     * {@link #fling(int, int, int, int, int, int, int, int, int, int)} method.
      * 
-     * @return The final X offset as an absolute distance from the origin.
-     */
-    public int getFinalX() {
-        return mCurrScroller.getFinalX();
-    }
-    
-    /**
-     * Returns where the scroll will end. Valid only for "fling" scrolls.
+     * One should check this value before calling
+     * {@link startScroll(int, int, int, int)} as the interpolation currently in progress to restore
+     * a valid position will then be stopped. The caller has to take into account the fact that the
+     * started scroll will start from an overscrolled position.
      * 
-     * @return The final Y offset as an absolute distance from the origin.
+     * @return true when the current position is overscrolled.
      */
-    public int getFinalY() {
-        return mCurrScroller.getFinalY();
+    public boolean isOverscrolled() {
+        return ((!mOverScrollerX.mFinished && mOverScrollerX.mState != MagneticOverScroller.TO_EDGE) ||
+                (!mOverScrollerY.mFinished && mOverScrollerY.mState != MagneticOverScroller.TO_EDGE));
     }
-    
-    /**
-     * @hide
-     * Returns the current velocity.
-     *
-     * @return The original velocity less the deceleration. Result may be
-     * negative.
-     */
-    public float getCurrVelocity() {
-        return mCurrScroller.getCurrVelocity();
-    }
-    
-    /**
-     * Extend the scroll animation. This allows a running animation to scroll
-     * further and longer, when used with {@link #setFinalX(int)} or {@link #setFinalY(int)}.
-     *
-     * @param extend Additional time to scroll in milliseconds.
-     * @see #setFinalX(int)
-     * @see #setFinalY(int)
-     */
-    public void extendDuration(int extend) {
-        if (mScrollMode == MODE_DEFAULT) {
-            mDefaultScroller.extendDuration(extend);
+
+    static class MagneticOverScroller extends Scroller.MagneticScroller {
+        private static final int TO_EDGE = 0;
+        private static final int TO_BOUNDARY = 1;
+        private static final int TO_BOUNCE = 2;
+
+        private int mState = TO_EDGE;
+
+        // The allowed overshot distance before boundary is reached.
+        private int mOver;
+
+        // When the scroll goes beyond the edges limits, the deceleration is
+        // multiplied by this coefficient, so that the return to a valid
+        // position is faster.
+        private static final float OVERSCROLL_DECELERATION_COEF = 16.0f;
+
+        // If the velocity is smaller than this value, no bounce is triggered
+        // when the edge limits are reached (would result in a zero pixels
+        // displacement anyway).
+        private static final float MINIMUM_VELOCITY_FOR_BOUNCE = 200.0f;
+
+        // Could be made public for tuning, but applications would no longer
+        // have the same look and feel.
+        private static final float BOUNCE_COEFFICIENT = 0.4f;
+
+        /*
+         * Get a signed deceleration that will reduce the velocity.
+         */
+        @Override
+        float getDeceleration(int velocity) {
+            float decelerationY = super.getDeceleration(velocity);
+            if (mState != TO_EDGE) {
+                decelerationY *= OVERSCROLL_DECELERATION_COEF;
+            }
+            return decelerationY;
         }
-    }
-    
-    /**
-     * Sets the final position (X) for this scroller.
-     *
-     * @param newX The new X offset as an absolute distance from the origin.
-     * @see #extendDuration(int)
-     * @see #setFinalY(int)
-     */
-    public void setFinalX(int newX) {
-        if (mScrollMode == MODE_DEFAULT) {
-            if (newX < mMinimumX) {
-                mMinimumX = newX;
+
+        boolean springback(int start, int min, int max) {
+            mFinished = true;
+
+            mStart = start;
+            mVelocity = 0;
+
+            mStartTime = AnimationUtils.currentAnimationTimeMillis();
+            mDuration = 0;
+
+            if (start < min) {
+                startSpringback(start, min, -1);
+            } else if (start > max) {
+                startSpringback(start, max, 1);
             }
-            if (newX > mMaximumX) {
-                mMaximumX = newX;
-            }
-            mDefaultScroller.setFinalX(newX);
+
+            return !mFinished;
         }
-    }
-    
-    /**
-     * Sets the final position (Y) for this scroller.
-     *
-     * @param newY The new Y offset as an absolute distance from the origin.
-     * @see #extendDuration(int)
-     * @see #setFinalX(int)
-     */
-    public void setFinalY(int newY) {
-        if (mScrollMode == MODE_DEFAULT) {
-            if (newY < mMinimumY) {
-                mMinimumY = newY;
+
+        private void startSpringback(int start, int end, int sign) {
+            mFinished = false;
+            mState = TO_BOUNCE;
+            mDeceleration = getDeceleration(sign);
+            mFinal = end;
+            mDuration = (int) (1000.0f * Math.sqrt(2.0f * (end - start) / mDeceleration));
+        }
+
+        void fling(int start, int velocity, int min, int max, int over) {
+            mState = TO_EDGE;
+            mOver = over;
+
+            super.fling(start, velocity, min, max);
+
+            if (mStart > max) {
+                if (mStart >= max + over) {
+                    springback(max + over, min, max);
+                } else {
+                    // Make sure the deceleration brings us back to edge
+                    mVelocity = velocity > 0 ? velocity : -velocity;
+                    mCurrVelocity = velocity;
+                    notifyEdgeReached(start, max, over);
+                }
+            } else {
+                if (mStart < min) {
+                    if (mStart <= min - over) {
+                        springback(min - over, min, max);
+                    } else {
+                        // Make sure the deceleration brings us back to edge
+                        mVelocity = velocity < 0 ? velocity : -velocity;
+                        mCurrVelocity = velocity;
+                        notifyEdgeReached(start, min, over);
+                    }
+                }
             }
-            if (newY > mMaximumY) {
-                mMaximumY = newY;
+        }
+
+        void notifyEdgeReached(int start, int end, int over) {
+            // Compute post-edge deceleration
+            mState = TO_BOUNDARY;
+            mDeceleration = getDeceleration(mVelocity);
+
+            // Local time, used to compute edge crossing time.
+            float timeCurrent = mCurrVelocity / mDeceleration;
+            final int distance = end - start;
+            float timeEdge = -(float) Math.sqrt((2.0f * distance / mDeceleration)
+                             + (timeCurrent * timeCurrent));
+
+            mVelocity = (int) (mDeceleration * timeEdge);
+
+            // Simulate a symmetric bounce that started from edge
+            mStart = end;
+
+            mOver = over;
+
+            long time = AnimationUtils.currentAnimationTimeMillis();
+            mStartTime = (int) (time - 1000.0f * (timeCurrent - timeEdge));
+
+            onEdgeReached();
+        }
+
+        void onEdgeReached() {
+            // mStart, mVelocity and mStartTime were adjusted to their values when edge was reached.
+            mState = TO_BOUNDARY;
+            mDeceleration = getDeceleration(mVelocity);
+
+            int distance = Math.round((mVelocity * mVelocity) / (2.0f * mDeceleration));
+
+            if (Math.abs(distance) < mOver) {
+                // Deceleration will bring us back to final position
+                mState = TO_BOUNCE;
+                mFinal = mStart;
+                mDuration = (int) (-2000.0f * mVelocity / mDeceleration);
+            } else {
+                // Velocity is too high, we will hit the boundary limit
+                mFinal = mStart + (mVelocity > 0 ? mOver : -mOver);
+                mDuration = computeDuration(mStart, mFinal, mVelocity, mDeceleration);
             }
-            mDefaultScroller.setFinalY(newY);
+        }
+
+        @Override
+        boolean continueWhenFinished() {
+            switch (mState) {
+                case TO_EDGE:
+                    // Duration from start to null velocity
+                    int duration = (int) (-1000.0f * mVelocity / mDeceleration);
+                    if (mDuration < duration) {
+                        // If the animation was clamped, we reached the edge
+                        mStart = mFinal;
+                        // Speed when edge was reached
+                        mVelocity = (int) (mVelocity + mDeceleration * mDuration / 1000.0f);
+                        mStartTime += mDuration;
+                        onEdgeReached();
+                    } else {
+                        // Normal stop, no need to continue
+                        return false;
+                    }
+                    break;
+                case TO_BOUNDARY:
+                    mStartTime += mDuration;
+                    mStart = mFinal;
+                    mFinal = mStart - (mVelocity > 0 ? mOver : -mOver);
+                    mVelocity = 0;
+                    mDuration = (int) (1000.0f * Math.sqrt(Math.abs(2.0f * mOver / mDeceleration)));
+                    mState = TO_BOUNCE;
+                    break;
+                case TO_BOUNCE:
+                    float edgeVelocity = mVelocity + mDeceleration * mDuration / 1000.0f;
+                    mVelocity = (int) (-edgeVelocity * BOUNCE_COEFFICIENT);
+                    if (Math.abs(mVelocity) < MINIMUM_VELOCITY_FOR_BOUNCE) {
+                        return false;
+                    }
+                    mStart = mFinal;
+                    mStartTime += mDuration;
+                    mDuration = (int) (-2000.0f * mVelocity / mDeceleration);
+                    break;
+            }
+
+            update();
+            return true;
         }
     }
 }

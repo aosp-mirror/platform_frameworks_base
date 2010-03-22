@@ -86,14 +86,14 @@ public class ScoSocket {
     /** Connect this SCO socket to the given BT address.
      *  Does not block.
      */
-    public synchronized boolean connect(String address) {
+    public synchronized boolean connect(String address, String name) {
         if (DBG) log("connect() " + this);
         if (mState != STATE_READY) {
             if (DBG) log("connect(): Bad state");
             return false;
         }
         acquireWakeLock();
-        if (connectNative(address)) {
+        if (connectNative(address, name)) {
             mState = STATE_CONNECTING;
             return true;
         } else {
@@ -102,7 +102,7 @@ public class ScoSocket {
             return false;
         }
     }
-    private native boolean connectNative(String address);
+    private native boolean connectNative(String address, String name);
 
     /** Accept incoming SCO connections.
      *  Does not block.

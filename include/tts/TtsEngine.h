@@ -26,6 +26,12 @@
 
 namespace android {
 
+#define ANDROID_TTS_ENGINE_PROPERTY_CONFIG "engineConfig"
+#define ANDROID_TTS_ENGINE_PROPERTY_PITCH  "pitch"
+#define ANDROID_TTS_ENGINE_PROPERTY_RATE   "rate"
+#define ANDROID_TTS_ENGINE_PROPERTY_VOLUME "volume"
+
+
 enum tts_synth_status {
     TTS_SYNTH_DONE              = 0,
     TTS_SYNTH_PENDING           = 1
@@ -85,7 +91,7 @@ public:
     // Initialize the TTS engine and returns whether initialization succeeded.
     // @param synthDoneCBPtr synthesis callback function pointer
     // @return TTS_SUCCESS, or TTS_FAILURE
-    virtual tts_result init(synthDoneCB_t synthDoneCBPtr);
+    virtual tts_result init(synthDoneCB_t synthDoneCBPtr, const char *engineConfig);
 
     // Shut down the TTS engine and releases all associated resources.
     // @return TTS_SUCCESS, or TTS_FAILURE
@@ -122,7 +128,7 @@ public:
     // @param variant pointer to the variant code
     // @return TTS_SUCCESS, or TTS_FAILURE
     virtual tts_result loadLanguage(const char *lang, const char *country, const char *variant);
-    
+
     // Load the resources associated with the specified language, country and Locale variant.
     // The loaded language will only be used once a call to setLanguageFromLocale() with the same
     // language value is issued. Language and country values are coded according to the ISO three
@@ -220,19 +226,6 @@ public:
     virtual tts_result synthesizeText(const char *text, int8_t *buffer,
             size_t bufferSize, void *userdata);
 
-    // Synthesize IPA text.
-    // As the synthesis is performed, the engine invokes the callback to notify
-    // the TTS framework that it has filled the given buffer, and indicates how
-    // many bytes it wrote. The callback is called repeatedly until the engine
-    // has generated all the audio data corresponding to the IPA data.
-    // @param ipa      the IPA data to synthesize
-    // @param userdata  pointer to be returned when the call is invoked
-    // @param buffer    the location where the synthesized data must be written
-    // @param bufferSize the number of bytes that can be written in buffer
-    // @return TTS_FEATURE_UNSUPPORTED if IPA is not supported,
-    //         otherwise TTS_SUCCESS or TTS_FAILURE
-    virtual tts_result synthesizeIpa(const char *ipa, int8_t *buffer,
-            size_t bufferSize, void *userdata);
 };
 
 } // namespace android

@@ -16,6 +16,8 @@
 
 package com.android.internal.os;
 
+import com.android.internal.util.JournaledFile;
+
 import android.bluetooth.BluetoothHeadset;
 import android.net.TrafficStats;
 import android.os.BatteryStats;
@@ -30,6 +32,7 @@ import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.util.PrintWriterPrinter;
 import android.util.Printer;
+import android.util.Slog;
 import android.util.SparseArray;
 
 import java.io.BufferedReader;
@@ -43,6 +46,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * All information we are collecting about things that can happen that impact
@@ -57,7 +61,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS' 
 
     // Current on-disk Parcel version
-    private static final int VERSION = 42;
+    private static final int VERSION = 43;
 
     // The maximum number of names wakelocks we will keep track of
     // per uid; once the limit is reached, we batch the remaining wakelocks
@@ -68,8 +72,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     
     private static int sNumSpeedSteps;
 
-    private final File mFile;
-    private final File mBackupFile;
+    private final JournaledFile mFile;
 
     /**
      * The statistics we have collected organized by uids.
@@ -216,7 +219,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     
     // For debugging
     public BatteryStatsImpl() {
-        mFile = mBackupFile = null;
+        mFile = null;
     }
 
     public static interface Unpluggable {
@@ -228,14 +231,15 @@ public final class BatteryStatsImpl extends BatteryStats {
      * State for keeping track of counting information.
      */
     public static class Counter extends BatteryStats.Counter implements Unpluggable {
-        int mCount;
+        final AtomicInteger mCount = new AtomicInteger();
         int mLoadedCount;
         int mLastCount;
         int mUnpluggedCount;
         int mPluggedCount;
         
         Counter(ArrayList<Unpluggable> unpluggables, Parcel in) {
-            mPluggedCount = mCount = in.readInt();
+            mPluggedCount = in.readInt();
+            mCount.set(mPluggedCount);
             mLoadedCount = in.readInt();
             mLastCount = in.readInt();
             mUnpluggedCount = in.readInt();
@@ -247,18 +251,19 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
         
         public void writeToParcel(Parcel out) {
-            out.writeInt(mCount);
+            out.writeInt(mCount.get());
             out.writeInt(mLoadedCount);
             out.writeInt(mLastCount);
             out.writeInt(mUnpluggedCount);
         }
 
         public void unplug(long batteryUptime, long batteryRealtime) {
-            mUnpluggedCount = mCount = mPluggedCount;
+            mUnpluggedCount = mPluggedCount;
+            mCount.set(mPluggedCount);
         }
 
         public void plug(long batteryUptime, long batteryRealtime) {
-            mPluggedCount = mCount;
+            mPluggedCount = mCount.get();
         }
         
         /**
@@ -283,7 +288,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             if (which == STATS_LAST) {
                 val = mLastCount;
             } else {
-                val = mCount;
+                val = mCount.get();
                 if (which == STATS_UNPLUGGED) {
                     val -= mUnpluggedCount;
                 } else if (which != STATS_TOTAL) {
@@ -295,25 +300,27 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
 
         public void logState(Printer pw, String prefix) {
-            pw.println(prefix + "mCount=" + mCount
+            pw.println(prefix + "mCount=" + mCount.get()
                     + " mLoadedCount=" + mLoadedCount + " mLastCount=" + mLastCount
                     + " mUnpluggedCount=" + mUnpluggedCount
                     + " mPluggedCount=" + mPluggedCount);
         }
         
-        void stepLocked() {
-            mCount++;
+        void stepAtomic() {
+            mCount.incrementAndGet();
         }
 
         void writeSummaryFromParcelLocked(Parcel out) {
-            out.writeInt(mCount);
-            out.writeInt(mCount - mLoadedCount);
+            int count = mCount.get();
+            out.writeInt(count);
+            out.writeInt(count - mLoadedCount);
         }
 
         void readSummaryFromParcelLocked(Parcel in) {
-            mCount = mLoadedCount = in.readInt();
+            mLoadedCount = in.readInt();
+            mCount.set(mLoadedCount);
             mLastCount = in.readInt();
-            mUnpluggedCount = mPluggedCount = mCount;
+            mUnpluggedCount = mPluggedCount = mLoadedCount;
         }
     }
 
@@ -327,8 +334,8 @@ public final class BatteryStatsImpl extends BatteryStats {
             super(unpluggables);
         }
 
-        public void addCountLocked(long count) {
-            mCount += count;
+        public void addCountAtomic(long count) {
+            mCount.addAndGet((int)count);
         }
     }
 
@@ -1122,8 +1129,8 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
     }
     
-    public void noteInputEventLocked() {
-        mInputEventCounter.stepLocked();
+    public void noteInputEventAtomic() {
+        mInputEventCounter.stepAtomic();
     }
     
     public void noteUserActivityLocked(int uid, int event) {
@@ -1678,7 +1685,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             }
             if (type < 0) type = 0;
             else if (type >= NUM_USER_ACTIVITY_TYPES) type = NUM_USER_ACTIVITY_TYPES-1;
-            mUserActivityCounters[type].stepLocked();
+            mUserActivityCounters[type].stepAtomic();
         }
         
         @Override
@@ -2170,7 +2177,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             /* Called by ActivityManagerService when CPU times are updated. */
             public void addSpeedStepTimes(long[] values) {
                 for (int i = 0; i < mSpeedBins.length && i < values.length; i++) {
-                    mSpeedBins[i].addCountLocked(values[i]);
+                    mSpeedBins[i].addCountAtomic(values[i]);
                 }
             }
 
@@ -2704,8 +2711,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     }
 
     public BatteryStatsImpl(String filename) {
-        mFile = new File(filename);
-        mBackupFile = new File(filename + ".bak");
+        mFile = new JournaledFile(new File(filename), new File(filename + ".tmp"));
         mStartCount++;
         mScreenOnTimer = new StopwatchTimer(-1, null, mUnpluggables);
         for (int i=0; i<NUM_SCREEN_BRIGHTNESS_BINS; i++) {
@@ -2736,7 +2742,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     }
 
     public BatteryStatsImpl(Parcel p) {
-        mFile = mBackupFile = null;
+        mFile = null;
         readFromParcel(p);
     }
 
@@ -2799,7 +2805,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         
         if (m == null) {
             // Not crashing might make board bringup easier.
-            Log.w(TAG, "Couldn't get kernel wake lock stats");
+            Slog.w(TAG, "Couldn't get kernel wake lock stats");
             return;
         }
 
@@ -3047,26 +3053,19 @@ public final class BatteryStatsImpl extends BatteryStats {
         return u.getServiceStatsLocked(pkg, name);
     }
 
+    private static JournaledFile makeJournaledFile() {
+        final String base = "/data/system/device_policies.xml";
+        return new JournaledFile(new File(base), new File(base + ".tmp"));
+    }
+
     public void writeLocked() {
-        if ((mFile == null) || (mBackupFile == null)) {
-            Log.w("BatteryStats", "writeLocked: no file associated with this instance");
+        if (mFile == null) {
+            Slog.w("BatteryStats", "writeLocked: no file associated with this instance");
             return;
         }
 
-        // Keep the old file around until we know the new one has
-        // been successfully written.
-        if (mFile.exists()) {
-            if (mBackupFile.exists()) {
-                mBackupFile.delete();
-            }
-            if (!mFile.renameTo(mBackupFile)) {
-                Log.w("BatteryStats", "Failed to back up file before writing new stats");
-                return;
-            }
-        }
-
         try {
-            FileOutputStream stream = new FileOutputStream(mFile);
+            FileOutputStream stream = new FileOutputStream(mFile.chooseForWrite());
             Parcel out = Parcel.obtain();
             writeSummaryToParcel(out);
             stream.write(out.marshall());
@@ -3074,18 +3073,14 @@ public final class BatteryStatsImpl extends BatteryStats {
 
             stream.flush();
             stream.close();
-            mBackupFile.delete();
+            mFile.commit();
 
             mLastWriteTime = SystemClock.elapsedRealtime();
             return;
         } catch (IOException e) {
-            Log.w("BatteryStats", "Error writing battery statistics", e);
+            Slog.w("BatteryStats", "Error writing battery statistics", e);
         }
-        if (mFile.exists()) {
-            if (!mFile.delete()) {
-                Log.w(TAG, "Failed to delete mangled file " + mFile);
-            }
-        }
+        mFile.rollback();
     }
 
     static byte[] readFully(FileInputStream stream) throws java.io.IOException {
@@ -3112,29 +3107,19 @@ public final class BatteryStatsImpl extends BatteryStats {
     }
 
     public void readLocked() {
-        if ((mFile == null) || (mBackupFile == null)) {
-            Log.w("BatteryStats", "readLocked: no file associated with this instance");
+        if (mFile == null) {
+            Slog.w("BatteryStats", "readLocked: no file associated with this instance");
             return;
         }
 
         mUidStats.clear();
 
-        FileInputStream stream = null;
-        if (mBackupFile.exists()) {
-            try {
-                stream = new FileInputStream(mBackupFile);
-            } catch (java.io.IOException e) {
-                // We'll try for the normal settings file.
-            }
-        }
-
         try {
-            if (stream == null) {
-                if (!mFile.exists()) {
-                    return;
-                }
-                stream = new FileInputStream(mFile);
+            File file = mFile.chooseForRead();
+            if (!file.exists()) {
+                return;
             }
+            FileInputStream stream = new FileInputStream(file);
 
             byte[] raw = readFully(stream);
             Parcel in = Parcel.obtain();
@@ -3144,7 +3129,7 @@ public final class BatteryStatsImpl extends BatteryStats {
 
             readSummaryFromParcel(in);
         } catch(java.io.IOException e) {
-            Log.e("BatteryStats", "Error reading battery statistics", e);
+            Slog.e("BatteryStats", "Error reading battery statistics", e);
         }
     }
 
@@ -3155,7 +3140,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     private void readSummaryFromParcel(Parcel in) {
         final int version = in.readInt();
         if (version != VERSION) {
-            Log.w("BatteryStats", "readFromParcel: version got " + version
+            Slog.w("BatteryStats", "readFromParcel: version got " + version
                 + ", expected " + VERSION + "; erasing old stats");
             return;
         }
@@ -3197,6 +3182,10 @@ public final class BatteryStatsImpl extends BatteryStats {
         mBluetoothOnTimer.readSummaryFromParcelLocked(in);
 
         int NKW = in.readInt();
+        if (NKW > 10000) {
+            Slog.w(TAG, "File corrupt: too many kernel wake locks " + NKW);
+            return;
+        }
         for (int ikw = 0; ikw < NKW; ikw++) {
             if (in.readInt() != 0) {
                 String kwltName = in.readString();
@@ -3207,6 +3196,10 @@ public final class BatteryStatsImpl extends BatteryStats {
         sNumSpeedSteps = in.readInt();
 
         final int NU = in.readInt();
+        if (NU > 10000) {
+            Slog.w(TAG, "File corrupt: too many uids " + NU);
+            return;
+        }
         for (int iu = 0; iu < NU; iu++) {
             int uid = in.readInt();
             Uid u = new Uid(uid);
@@ -3235,6 +3228,10 @@ public final class BatteryStatsImpl extends BatteryStats {
             }
             
             int NW = in.readInt();
+            if (NW > 10000) {
+                Slog.w(TAG, "File corrupt: too many wake locks " + NW);
+                return;
+            }
             for (int iw = 0; iw < NW; iw++) {
                 String wlName = in.readString();
                 if (in.readInt() != 0) {
@@ -3249,6 +3246,10 @@ public final class BatteryStatsImpl extends BatteryStats {
             }
 
             int NP = in.readInt();
+            if (NP > 10000) {
+                Slog.w(TAG, "File corrupt: too many sensors " + NP);
+                return;
+            }
             for (int is = 0; is < NP; is++) {
                 int seNumber = in.readInt();
                 if (in.readInt() != 0) {
@@ -3258,6 +3259,10 @@ public final class BatteryStatsImpl extends BatteryStats {
             }
 
             NP = in.readInt();
+            if (NP > 10000) {
+                Slog.w(TAG, "File corrupt: too many processes " + NP);
+                return;
+            }
             for (int ip = 0; ip < NP; ip++) {
                 String procName = in.readString();
                 Uid.Proc p = u.getProcessStatsLocked(procName);
@@ -3270,6 +3275,10 @@ public final class BatteryStatsImpl extends BatteryStats {
             }
 
             NP = in.readInt();
+            if (NP > 10000) {
+                Slog.w(TAG, "File corrupt: too many packages " + NP);
+                return;
+            }
             for (int ip = 0; ip < NP; ip++) {
                 String pkgName = in.readString();
                 Uid.Pkg p = u.getPackageStatsLocked(pkgName);

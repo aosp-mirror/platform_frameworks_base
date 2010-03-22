@@ -192,7 +192,7 @@ public class WebSettings {
     private boolean         mBuiltInZoomControls = false;
     private boolean         mAllowFileAccess = true;
     private boolean         mLoadWithOverviewMode = false;
-    private boolean         mUseSystemOverscrollBackground = false;
+    private boolean         mUseWebViewBackgroundOverscrollBackground = true;
 
     // private WebSettings, not accessible by the host activity
     static private int      mDoubleTapToastCount = 3;
@@ -471,20 +471,20 @@ public class WebSettings {
     }
 
     /**
-     * Set whether the WebView uses system background for over scroll
-     * background. If false, it will use the WebView's background. Default is
-     * false.
+     * Set whether the WebView uses its background for over scroll background.
+     * If true, it will use the WebView's background. If false, it will use an
+     * internal pattern. Default is true.
      */
-    public void setUseSystemOverscrollBackground(boolean system) {
-        mUseSystemOverscrollBackground = system;
+    public void setUseWebViewBackgroundForOverscrollBackground(boolean view) {
+        mUseWebViewBackgroundOverscrollBackground = view;
     }
 
     /**
-     * Returns true if this WebView uses system background instead of WebView
-     * background for over scroll background.
+     * Returns true if this WebView uses WebView's background instead of
+     * internal pattern for over scroll background.
      */
-    public boolean getUseSystemOverscrollBackground() {
-        return mUseSystemOverscrollBackground;
+    public boolean getUseWebViewBackgroundForOverscrollBackground() {
+        return mUseWebViewBackgroundOverscrollBackground;
     }
 
     /**

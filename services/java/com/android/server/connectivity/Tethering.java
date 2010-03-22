@@ -365,6 +365,13 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
             return;
         }
 
+        if (mTetheredNotification != null) {
+            if (mTetheredNotification.icon == icon) {
+                return;
+            }
+            notificationManager.cancel(mTetheredNotification.icon);
+        }
+
         Intent intent = new Intent();
         intent.setClassName("com.android.settings", "com.android.settings.TetherSettings");
         intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
@@ -613,10 +620,8 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
         static final int CMD_STOP_TETHERING_ERROR        = 10;
         // notification from the master SM that it had trouble setting the DNS forwarders
         static final int CMD_SET_DNS_FORWARDERS_ERROR    = 11;
-        // a mechanism to transition self to another state from an enter function
-        static final int CMD_TRANSITION_TO_STATE         = 12;
         // the upstream connection has changed
-        static final int CMD_TETHER_CONNECTION_CHANGED   = 13;
+        static final int CMD_TETHER_CONNECTION_CHANGED   = 12;
 
         private HierarchicalState mDefaultState;
 
@@ -746,13 +751,14 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                                 TetherInterfaceSM.this);
                         setLastError(ConnectivityManager.TETHER_ERROR_IFACE_CFG_ERROR);
 
-                        sendMessageAtFrontOfQueue(CMD_TRANSITION_TO_STATE, mInitialState);
+                        transitionTo(mInitialState);
                         return;
                     }
                 }
                 sendTetherStateChangedBroadcast();
 
-                sendMessageAtFrontOfQueue(CMD_TRANSITION_TO_STATE, mTetheredState);
+                // Skipping StartingState
+                transitionTo(mTetheredState);
             }
             @Override
             public boolean processMessage(Message message) {
@@ -786,10 +792,6 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                                 TetherInterfaceSM.this);
                         transitionTo(mUnavailableState);
                         break;
-                   case CMD_TRANSITION_TO_STATE:
-                       HierarchicalState s = (HierarchicalState)(message.obj);
-                       transitionTo(s);
-                       break;
                     default:
                         retValue = false;
                 }
@@ -808,7 +810,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                 } catch (Exception e) {
                     setLastError(ConnectivityManager.TETHER_ERROR_TETHER_IFACE_ERROR);
 
-                    sendMessageAtFrontOfQueue(CMD_TRANSITION_TO_STATE, mInitialState);
+                    transitionTo(mInitialState);
                     return;
                 }
                 if (mUsb) Tethering.this.enableUsbRndis(true);
@@ -945,10 +947,6 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                         }
                         transitionTo(mInitialState);
                         break;
-                    case CMD_TRANSITION_TO_STATE:
-                        HierarchicalState s = (HierarchicalState)(message.obj);
-                        transitionTo(s);
-                        break;
                     default:
                         retValue = false;
                         break;
@@ -996,10 +994,8 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
         static final int CMD_UPSTREAM_CHANGED        = 3;
         // we received notice that the cellular DUN connection is up
         static final int CMD_CELL_CONNECTION_RENEW   = 4;
-        // need to do delayed transition from enter/exit
-        static final int CMD_TRANSITION_TO_STATE     = 5;
         // we don't have a valid upstream conn, check again after a delay
-        static final int CMD_RETRY_UPSTREAM          = 6;
+        static final int CMD_RETRY_UPSTREAM          = 5;
 
         // This indicates what a timeout event relates to.  A state that
         // sends itself a delayed timeout event and handles incoming timeout events
@@ -1103,21 +1099,19 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                 try {
                     service.setIpForwardingEnabled(true);
                 } catch (Exception e) {
-                    sendMessageAtFrontOfQueue(CMD_TRANSITION_TO_STATE,
-                            mSetIpForwardingEnabledErrorState);
+                    transitionTo(mSetIpForwardingEnabledErrorState);
                     return false;
                 }
                 try {
                     service.startTethering(mDhcpRange[0], mDhcpRange[1]);
                 } catch (Exception e) {
-                    sendMessageAtFrontOfQueue(CMD_TRANSITION_TO_STATE, mStartTetheringErrorState);
+                    transitionTo(mStartTetheringErrorState);
                     return false;
                 }
                 try {
                     service.setDnsForwarders(mDnsServers);
                 } catch (Exception e) {
-                    sendMessageAtFrontOfQueue(CMD_TRANSITION_TO_STATE,
-                            mSetDnsForwardersErrorState);
+                    transitionTo(mSetDnsForwardersErrorState);
                     return false;
                 }
                 return true;
@@ -1327,10 +1321,6 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                    case CMD_RETRY_UPSTREAM:
                        chooseUpstreamType(mTryCell);
                        mTryCell = !mTryCell;
-                       break;
-                   case CMD_TRANSITION_TO_STATE:
-                       HierarchicalState s = (HierarchicalState)(message.obj);
-                       transitionTo(s);
                        break;
                    default:
                        retValue = false;

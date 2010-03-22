@@ -32,6 +32,7 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
 import android.view.KeyEvent;
@@ -2388,6 +2389,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     protected void onOverscrolled(int scrollX, int scrollY,
             boolean clampedX, boolean clampedY) {
         mScrollY = scrollY;
+
         if (clampedY) {
             // Velocity is broken by hitting the limit; don't start a fling off of this.
             if (mVelocityTracker != null) {
@@ -2561,7 +2563,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         /**
          * Tracks the decay of a fling scroll
          */
-        private OverScroller mScroller;
+        private final OverScroller mScroller;
 
         /**
          * Y value reported by mScroller on the previous fling
@@ -2598,6 +2600,21 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
         void startOverfling(int initialVelocity) {
             mScroller.fling(0, mScrollY, 0, initialVelocity, 0, 0, 0, 0, 0, getHeight());
+            edgeReached();
+            mTouchMode = TOUCH_MODE_OVERFLING;
+            invalidate();
+            post(this);
+        }
+
+        void edgeReached() {
+            mScroller.notifyVerticalEdgeReached(mScrollY, 0, Integer.MAX_VALUE);
+            mTouchMode = TOUCH_MODE_OVERFLING;
+            invalidate();
+            post(this);
+        }
+
+        void marginReached() {
+            mScroller.notifyVerticalBoundaryReached(mScrollY, 0);
             mTouchMode = TOUCH_MODE_OVERFLING;
             invalidate();
             post(this);
@@ -2677,11 +2694,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                         overscrollBy(0, overshoot, 0, mScrollY, 0, 0,
                                 0, getOverscrollMax(), false);
                     }
-                    float vel = scroller.getCurrVelocity();
-                    if (delta > 0) {
-                        vel = -vel;
-                    }
-                    startOverfling(Math.round(vel));
+                    edgeReached();
                     break;
                 }
 
@@ -2738,7 +2751,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         private int mBoundPos;
         private int mLastSeenPos;
         private int mScrollDuration;
-        private int mExtraScroll;
+        private final int mExtraScroll;
         
         PositionScroller() {
             mExtraScroll = ViewConfiguration.get(mContext).getScaledFadingEdgeLength();
@@ -3977,7 +3990,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             for (int i = 0; i < count; i++) {
                 if (activeViews[i] != null) {
                     result = false;
-                    android.util.Log.d(ViewDebug.CONSISTENCY_LOG_TAG,
+                    Log.d(ViewDebug.CONSISTENCY_LOG_TAG,
                             "AbsListView " + this + " has a view in its active recycler: " +
                                     activeViews[i]);
                 }
@@ -4005,12 +4018,12 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             final View view = scrap.get(i);
             if (view.getParent() != null) {
                 result = false;
-                android.util.Log.d(ViewDebug.CONSISTENCY_LOG_TAG, "AbsListView " + this +
+                Log.d(ViewDebug.CONSISTENCY_LOG_TAG, "AbsListView " + this +
                         " has a view in its scrap heap still attached to a parent: " + view);
             }
             if (indexOfChild(view) >= 0) {
                 result = false;
-                android.util.Log.d(ViewDebug.CONSISTENCY_LOG_TAG, "AbsListView " + this +
+                Log.d(ViewDebug.CONSISTENCY_LOG_TAG, "AbsListView " + this +
                         " has a view in its scrap heap that is also a direct child: " + view);
             }
         }

@@ -51,7 +51,7 @@ public class SynthProxy {
     public SynthProxy(String nativeSoLib, String engineConfig) {
         boolean applyFilter = nativeSoLib.toLowerCase().contains("pico");
         Log.v(TtsService.SERVICE_TAG, "About to load "+ nativeSoLib + ", applyFilter="+applyFilter);
-        native_setup(new WeakReference<SynthProxy>(this), nativeSoLib);
+        native_setup(new WeakReference<SynthProxy>(this), nativeSoLib, engineConfig);
         native_setLowShelf(applyFilter, PICO_FILTER_GAIN, PICO_FILTER_LOWSHELF_ATTENUATION,
                 PICO_FILTER_TRANSITION_FREQ, PICO_FILTER_SHELF_SLOPE);
     }
@@ -105,10 +105,10 @@ public class SynthProxy {
     }
 
     /**
-     * Sets the engine configuration.
+     * Updates the engine configuration.
      */
     public int setConfig(String engineConfig) {
-        return android.speech.tts.TextToSpeech.SUCCESS;
+        return native_setConfig(mJniData, engineConfig);
     }
 
     /**
@@ -180,7 +180,8 @@ public class SynthProxy {
      */
     private int mJniData = 0;
 
-    private native final int native_setup(Object weak_this, String nativeSoLib);
+    private native final int native_setup(Object weak_this, String nativeSoLib,
+            String engineConfig);
 
     private native final int native_setLowShelf(boolean applyFilter, float filterGain,
             float attenuationInDb, float freqInHz, float slope);
@@ -203,6 +204,8 @@ public class SynthProxy {
 
     private native final int native_loadLanguage(int jniData, String language, String country,
             String variant);
+
+    private native final int native_setConfig(int jniData, String engineConfig);
 
     private native final int native_setSpeechRate(int jniData, int speechRate);
 

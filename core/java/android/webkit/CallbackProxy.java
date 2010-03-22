@@ -397,6 +397,7 @@ class CallbackProxy extends Handler {
                             notify();
                         }
                     }
+                    mWebView.dismissZoomControl();
                 }
                 break;
 

@@ -124,6 +124,13 @@ public class SurfaceView extends View {
         }
     };
     
+    final ViewTreeObserver.OnScrollChangedListener mScrollChangedListener
+            = new ViewTreeObserver.OnScrollChangedListener() {
+                    public void onScrollChanged() {
+                        updateWindow(false);
+                    }
+            };
+            
     boolean mRequestedVisible = false;
     boolean mWindowVisibility = false;
     boolean mViewVisibility = false;
@@ -180,6 +187,7 @@ public class SurfaceView extends View {
         mLayout.token = getWindowToken();
         mLayout.setTitle("SurfaceView");
         mViewVisibility = getVisibility() == VISIBLE;
+        getViewTreeObserver().addOnScrollChangedListener(mScrollChangedListener);
     }
 
     @Override
@@ -200,6 +208,7 @@ public class SurfaceView extends View {
     
     @Override
     protected void onDetachedFromWindow() {
+        getViewTreeObserver().removeOnScrollChangedListener(mScrollChangedListener);
         mRequestedVisible = false;
         updateWindow(false);
         mHaveFrame = false;
@@ -223,12 +232,6 @@ public class SurfaceView extends View {
         setMeasuredDimension(width, height);
     }
     
-    @Override
-    protected void onScrollChanged(int l, int t, int oldl, int oldt) {
-        super.onScrollChanged(l, t, oldl, oldt);
-        updateWindow(false);
-    }
-
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);

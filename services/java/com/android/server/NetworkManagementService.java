@@ -483,8 +483,8 @@ class NetworkManagementService extends INetworkManagementService.Stub {
              * argv7 - Preamble
              * argv8 - Max SCB
              */
-            String str = String.format("softap set " + wlanIface + " " + softapIface + " %s %s %s",
-                                       wifiConfig.SSID,
+            String str = String.format("softap set " + wlanIface + " " + softapIface +
+                                       " \"%s\" %s %s", wifiConfig.SSID,
                                        wifiConfig.allowedKeyManagement.get(KeyMgmt.WPA_PSK) ?
                                        "wpa2-psk" : "open",
                                        wifiConfig.preSharedKey);
@@ -511,7 +511,7 @@ class NetworkManagementService extends INetworkManagementService.Stub {
             mConnector.doCommand(String.format("softap set " + wlanIface + " " + softapIface));
         } else {
             String str = String.format("softap set " + wlanIface + " " + softapIface +
-                                       " %s %s %s", wifiConfig.SSID,
+                                       " \"%s\" %s %s", wifiConfig.SSID,
                                        wifiConfig.allowedKeyManagement.get(KeyMgmt.WPA_PSK) ?
                                        "wpa2-psk" : "open",
                                        wifiConfig.preSharedKey);

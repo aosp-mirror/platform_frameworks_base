@@ -839,8 +839,6 @@ public abstract class KeyInputQueue {
                                         addLocked(di, curTimeNano, ev.flags,
                                                 RawInputEvent.CLASS_TRACKBALL, me);
                                     }
-                                    
-                                    ms.finish();
                                 }
                             }
                         }

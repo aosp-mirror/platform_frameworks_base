@@ -1055,6 +1055,8 @@ public class VCardEntry {
     public Uri pushIntoContentResolver(ContentResolver resolver) {
         ArrayList<ContentProviderOperation> operationList =
             new ArrayList<ContentProviderOperation>();
+        // After applying the batch the first result's Uri is returned so it is important that
+        // the RawContact is the first operation that gets inserted into the list
         ContentProviderOperation.Builder builder =
             ContentProviderOperation.newInsert(RawContacts.CONTENT_URI);
         String myGroupsId = null;
@@ -1290,8 +1292,11 @@ public class VCardEntry {
             ContentProviderResult[] results = resolver.applyBatch(
                         ContactsContract.AUTHORITY, operationList);
             // the first result is always the raw_contact. return it's uri so
-            // that it can be found later
-            return results[0].uri;
+            // that it can be found later. do null checking for badly behaving
+            // ContentResolvers
+            return (results == null || results.length == 0 || results[0] == null)
+                ? null
+                : results[0].uri;
         } catch (RemoteException e) {
             Log.e(LOG_TAG, String.format("%s: %s", e.toString(), e.getMessage()));
             return null;

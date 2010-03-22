@@ -48,7 +48,7 @@ public class HierarchicalStateMachineTest extends TestCase {
     private static final int TEST_CMD_6 = 6;
 
     private static final boolean DBG = true;
-    private static final boolean WAIT_FOR_DEBUGGER = false;
+    private static final boolean WAIT_FOR_DEBUGGER = true;
     private static final String TAG = "HierarchicalStateMachineTest";
 
     /**
@@ -149,6 +149,154 @@ public class HierarchicalStateMachineTest extends TestCase {
         assertEquals(null, pmi.getOriginalState());
 
         if (smQuitTest.isDbg()) Log.d(TAG, "testStateMachineQuitTest X");
+    }
+
+    /**
+     * Test enter/exit can use transitionTo
+     */
+    class StateMachineEnterExitTransitionToTest extends HierarchicalStateMachine {
+        StateMachineEnterExitTransitionToTest(String name) {
+            super(name);
+            mThisSm = this;
+            setDbg(DBG);
+
+            // Setup state machine with 1 state
+            addState(mS1);
+            addState(mS2);
+            addState(mS3);
+            addState(mS4);
+
+            // Set the initial state
+            setInitialState(mS1);
+        }
+
+        class S1 extends HierarchicalState {
+            @Override protected void enter() {
+                // Test that a transition in enter and the initial state works
+                mS1EnterCount += 1;
+                transitionTo(mS2);
+                Log.d(TAG, "S1.enter");
+            }
+            @Override protected void exit() {
+                mS1ExitCount += 1;
+                Log.d(TAG, "S1.exit");
+            }
+        }
+
+        class S2 extends HierarchicalState {
+            @Override protected void enter() {
+                mS2EnterCount += 1;
+                Log.d(TAG, "S2.enter");
+            }
+            @Override protected void exit() {
+                // Test transition in exit work
+                mS2ExitCount += 1;
+                transitionTo(mS4);
+                Log.d(TAG, "S2.exit");
+            }
+            @Override protected boolean processMessage(Message message) {
+                // Start a transition to S3 but it will be
+                // changed to a transition to S4
+                transitionTo(mS3);
+                Log.d(TAG, "S2.processMessage");
+                return true;
+            }
+        }
+
+        class S3 extends HierarchicalState {
+            @Override protected void enter() {
+                // Test that we can do halting in an enter/exit
+                transitionToHaltingState();
+                mS3EnterCount += 1;
+                Log.d(TAG, "S3.enter");
+            }
+            @Override protected void exit() {
+                mS3ExitCount += 1;
+                Log.d(TAG, "S3.exit");
+            }
+        }
+
+
+        class S4 extends HierarchicalState {
+            @Override protected void enter() {
+                // Test that we can do halting in an enter/exit
+                transitionToHaltingState();
+                mS4EnterCount += 1;
+                Log.d(TAG, "S4.enter");
+            }
+            @Override protected void exit() {
+                mS4ExitCount += 1;
+                Log.d(TAG, "S4.exit");
+            }
+        }
+
+        @Override
+        protected void halting() {
+            synchronized (mThisSm) {
+                mThisSm.notifyAll();
+            }
+        }
+
+        private StateMachineEnterExitTransitionToTest mThisSm;
+        private S1 mS1 = new S1();
+        private S2 mS2 = new S2();
+        private S3 mS3 = new S3();
+        private S4 mS4 = new S4();
+        private int mS1EnterCount = 0;
+        private int mS1ExitCount = 0;
+        private int mS2EnterCount = 0;
+        private int mS2ExitCount = 0;
+        private int mS3EnterCount = 0;
+        private int mS3ExitCount = 0;
+        private int mS4EnterCount = 0;
+        private int mS4ExitCount = 0;
+    }
+
+    @SmallTest
+    public void testStateMachineEnterExitTransitionToTest() throws Exception {
+        //if (WAIT_FOR_DEBUGGER) Debug.waitForDebugger();
+
+        StateMachineEnterExitTransitionToTest smEnterExitTranstionToTest =
+            new StateMachineEnterExitTransitionToTest("smEnterExitTranstionToTest");
+        smEnterExitTranstionToTest.start();
+        if (smEnterExitTranstionToTest.isDbg()) {
+            Log.d(TAG, "testStateMachineEnterExitTransitionToTest E");
+        }
+
+        synchronized (smEnterExitTranstionToTest) {
+            smEnterExitTranstionToTest.sendMessage(1);
+
+            try {
+                // wait for the messages to be handled
+                smEnterExitTranstionToTest.wait();
+            } catch (InterruptedException e) {
+                Log.e(TAG, "testStateMachineEnterExitTransitionToTest: exception while waiting "
+                    + e.getMessage());
+            }
+        }
+
+        assertTrue(smEnterExitTranstionToTest.getProcessedMessagesCount() == 1);
+
+        ProcessedMessages.Info pmi;
+
+        // Message should be handled by mS2.
+        pmi = smEnterExitTranstionToTest.getProcessedMessage(0);
+        assertEquals(TEST_CMD_1, pmi.getWhat());
+        assertEquals(smEnterExitTranstionToTest.mS2, pmi.getState());
+        assertEquals(smEnterExitTranstionToTest.mS2, pmi.getOriginalState());
+
+        assertEquals(smEnterExitTranstionToTest.mS1EnterCount, 1);
+        assertEquals(smEnterExitTranstionToTest.mS1ExitCount, 1);
+        assertEquals(smEnterExitTranstionToTest.mS2EnterCount, 1);
+        assertEquals(smEnterExitTranstionToTest.mS2ExitCount, 1);
+        assertEquals(smEnterExitTranstionToTest.mS3EnterCount, 1);
+        assertEquals(smEnterExitTranstionToTest.mS3ExitCount, 1);
+        assertEquals(smEnterExitTranstionToTest.mS3EnterCount, 1);
+        assertEquals(smEnterExitTranstionToTest.mS3ExitCount, 1);
+
+        if (smEnterExitTranstionToTest.isDbg()) {
+            Log.d(TAG, "testStateMachineEnterExitTransitionToTest X");
+        }
     }
 
     /**

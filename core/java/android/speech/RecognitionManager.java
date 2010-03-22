@@ -180,10 +180,11 @@ public class RecognitionManager {
     }
 
     /**
-     * Factory method to create a new {@code RecognitionManager}, please note that
-     * {@link #setRecognitionListener(RecognitionListener)} must be called before dispatching any
-     * command to the created {@code RecognitionManager}.
-     * 
+     * Factory method to create a new {@code RecognitionManager}. Please note that
+     * {@link #setRecognitionListener(RecognitionListener)} should be called before dispatching any
+     * command to the created {@code RecognitionManager}, otherwise no notifications will be
+     * received.
+     *
      * @param context in which to create {@code RecognitionManager}
      * @return a new {@code RecognitionManager}
      */
@@ -192,14 +193,15 @@ public class RecognitionManager {
     }
 
     /**
-     * Factory method to create a new {@code RecognitionManager}, please note that
-     * {@link #setRecognitionListener(RecognitionListener)} must be called before dispatching any
-     * command to the created {@code RecognitionManager}.
-     * 
+     * Factory method to create a new {@code RecognitionManager}. Please note that
+     * {@link #setRecognitionListener(RecognitionListener)} should be called before dispatching any
+     * command to the created {@code RecognitionManager}, otherwise no notifications will be
+     * received.
+     *
      * Use this version of the method to specify a specific service to direct this
      * {@link RecognitionManager} to. Normally you would not use this; use
-     * {@link #createRecognitionManager(Context)} instead to use the system default
-     * recognition service.
+     * {@link #createRecognitionManager(Context)} instead to use the system default recognition
+     * service.
      * 
      * @param context in which to create {@code RecognitionManager}
      * @param serviceComponent the {@link ComponentName} of a specific service to direct this
@@ -230,9 +232,9 @@ public class RecognitionManager {
 
     /**
      * Starts listening for speech. Please note that
-     * {@link #setRecognitionListener(RecognitionListener)} must be called beforehand, otherwise a
-     * {@link RuntimeException} will be thrown.
-     * 
+     * {@link #setRecognitionListener(RecognitionListener)} should be called beforehand, otherwise
+     * no notifications will be received.
+     *
      * @param recognizerIntent contains parameters for the recognition to be performed. The intent
      *        may also contain optional extras, see {@link RecognizerIntent}. If these values are
      *        not set explicitly, default values will be used by the recognizer.
@@ -280,8 +282,8 @@ public class RecognitionManager {
      * determines speech has completed. However, you can manipulate endpointer parameters directly
      * using the intent extras defined in {@link RecognizerIntent}, in which case you may sometimes
      * want to manually call this method to stop listening sooner. Please note that
-     * {@link #setRecognitionListener(RecognitionListener)} must be called beforehand, otherwise a
-     * {@link RuntimeException} will be thrown.
+     * {@link #setRecognitionListener(RecognitionListener)} should be called beforehand, otherwise
+     * no notifications will be received.
      */
     public void stopListening() {
         checkIsCalledFromMainThread();
@@ -290,8 +292,8 @@ public class RecognitionManager {
 
     /**
      * Cancels the speech recognition. Please note that
-     * {@link #setRecognitionListener(RecognitionListener)} must be called beforehand, otherwise a
-     * {@link RuntimeException} will be thrown.
+     * {@link #setRecognitionListener(RecognitionListener)} should be called beforehand, otherwise
+     * no notifications will be received.
      */
     public void cancel() {
         checkIsCalledFromMainThread();
@@ -371,8 +373,7 @@ public class RecognitionManager {
     }
 
     /**
-     * Destroys the {@code RecognitionManager} object. Note that after calling this method all
-     * method calls on this object will fail, triggering {@link RecognitionListener#onError}.
+     * Destroys the {@code RecognitionManager} object.
      */
     public void destroy() {
         if (mConnection != null) {

@@ -308,12 +308,6 @@ public class HttpsConnection extends Connection {
         SslError error = CertificateChainValidator.getInstance().
             doHandshakeAndValidateServerCertificates(this, sslSock, mHost.getHostName());
 
-        EventHandler eventHandler = req.getEventHandler();
-
-        // Update the certificate info (to be consistent, it is better to do it
-        // here, before we start handling SSL errors, if any)
-        eventHandler.certificate(mCertificate);
-
         // Inform the user if there is a problem
         if (error != null) {
             // handleSslErrorRequest may immediately unsuspend if it wants to
@@ -325,7 +319,7 @@ public class HttpsConnection extends Connection {
                 mSuspended = true;
             }
             // don't hold the lock while calling out to the event handler
-            boolean canHandle = eventHandler.handleSslErrorRequest(error);
+            boolean canHandle = req.getEventHandler().handleSslErrorRequest(error);
             if(!canHandle) {
                 throw new IOException("failed to handle "+ error);
             }

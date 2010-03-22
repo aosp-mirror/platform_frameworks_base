@@ -634,8 +634,12 @@ public class MediaScanner
             } else if (MediaFile.isImageFileType(mFileType)) {
                 // FIXME - add DESCRIPTION
             } else if (MediaFile.isAudioFileType(mFileType)) {
-                map.put(Audio.Media.ARTIST, (mArtist != null && mArtist.length() > 0 ? mArtist : MediaStore.UNKNOWN_STRING));
-                map.put(Audio.Media.ALBUM, (mAlbum != null && mAlbum.length() > 0 ? mAlbum : MediaStore.UNKNOWN_STRING));
+                map.put(Audio.Media.ARTIST, (mArtist != null && mArtist.length() > 0) ?
+                        mArtist : MediaStore.UNKNOWN_STRING);
+                map.put(Audio.Media.ALBUM_ARTIST, (mAlbumArtist != null &&
+                        mAlbumArtist.length() > 0) ? mAlbumArtist : null);
+                map.put(Audio.Media.ALBUM, (mAlbum != null && mAlbum.length() > 0) ?
+                        mAlbum : MediaStore.UNKNOWN_STRING);
                 map.put(Audio.Media.COMPOSER, mComposer);
                 if (mYear != 0) {
                     map.put(Audio.Media.YEAR, mYear);

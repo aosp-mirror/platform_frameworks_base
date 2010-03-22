@@ -318,7 +318,7 @@ static int backup_dir(FILE* fh, const char* srcPath)
                 result = 0;
                 goto done;
             }
-        } else {
+        } else if (S_ISREG(statBuffer.st_mode)) {
             printf("Saving file %s...\n", fullPath);
             
             if (write_header(fh, TYPE_FILE, fullPath, &statBuffer) == 0) {

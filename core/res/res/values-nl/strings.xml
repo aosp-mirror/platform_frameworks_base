@@ -1,18 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Copyright (C) 2009 The Android Open Source Project
+<!-- 
+/* //device/apps/common/assets/res/any/strings.xml
+**
+** Copyright 2006, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+ -->
 
-     Licensed under the Apache License, Version 2.0 (the "License");
-     you may not use this file except in compliance with the License.
-     You may obtain a copy of the License at
-
-          http://www.apache.org/licenses/LICENSE-2.0
-
-     Unless required by applicable law or agreed to in writing, software
-     distributed under the License is distributed on an "AS IS" BASIS,
-     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-     See the License for the specific language governing permissions and
-     limitations under the License.
--->
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="8340973892742019101">"B"</string>
@@ -64,8 +69,12 @@
     <string name="RestrictedChangedTitle" msgid="5592189398956187498">"Beperkte toegang gewijzigd"</string>
     <string name="RestrictedOnData" msgid="8653794784690065540">"Gegevensservice is geblokkeerd."</string>
     <string name="RestrictedOnEmergency" msgid="6581163779072833665">"Alarmservice is geblokkeerd."</string>
-    <string name="RestrictedOnNormal" msgid="2045364908281990708">"Spraak-/SMS-service is geblokkeerd."</string>
-    <string name="RestrictedOnAll" msgid="4923139582141626159">"Alle spraak-/SMS-services zijn geblokkeerd."</string>
+    <string name="RestrictedOnNormal" msgid="4953867011389750673">"Spraakservice is geblokkeerd."</string>
+    <string name="RestrictedOnAllVoice" msgid="1459318899842232234">"Alle spraakservices zijn geblokkeerd."</string>
+    <string name="RestrictedOnSms" msgid="8314352327461638897">"SMS-service is geblokkeerd."</string>
+    <string name="RestrictedOnVoiceData" msgid="8244438624660371717">"Spraak-/gegevensservices zijn geblokkeerd."</string>
+    <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"Spraak-/SMS-services zijn geblokkeerd."</string>
+    <string name="RestrictedOnAll" msgid="2714924667937117304">"Alle spraak-/gegevens-/SMS-services zijn geblokkeerd."</string>
     <string name="serviceClassVoice" msgid="1258393812335258019">"Spraak"</string>
     <string name="serviceClassData" msgid="872456782077937893">"Gegevens"</string>
     <string name="serviceClassFAX" msgid="5566624998840486475">"FAX"</string>
@@ -251,10 +260,8 @@
     <string name="permdesc_installPackages" msgid="526669220850066132">"Hiermee kan een toepassing nieuwe of bijgewerkte Android-pakketten installeren. Schadelijke toepassingen kunnen hiervan gebruik maken om nieuwe toepassingen met willekeurig krachtige machtigingen toe te voegen."</string>
     <string name="permlab_clearAppCache" msgid="4747698311163766540">"alle cachegegevens van toepassing verwijderen"</string>
     <string name="permdesc_clearAppCache" msgid="7740465694193671402">"Hiermee kan een toepassing opslagruimte op de telefoon vrij maken door bestanden te verwijderen uit de cachemap van de toepassing. De toegang is doorgaans beperkt tot het systeemproces."</string>
-    <!-- no translation found for permlab_movePackage (728454979946503926) -->
-    <skip />
-    <!-- no translation found for permdesc_movePackage (6323049291923925277) -->
-    <skip />
+    <string name="permlab_movePackage" msgid="728454979946503926">"Toepassingsbronnen verplaatsen"</string>
+    <string name="permdesc_movePackage" msgid="6323049291923925277">"Een toepassing toestaan toepassingsbronnen te verplaatsen van interne naar externe media en omgekeerd."</string>
     <string name="permlab_readLogs" msgid="4811921703882532070">"systeemlogbestanden lezen"</string>
     <string name="permdesc_readLogs" msgid="2257937955580475902">"Hiermee kan een toepassing de verschillende logbestanden van het systeem lezen. De toepassing kan op deze manier algemene informatie achterhalen over uw telefoongebruik. Hierin is geen persoonlijke of privé-informatie opgenomen."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"lezen/schrijven naar bronnen van diag"</string>
@@ -281,13 +288,10 @@
     <string name="permdesc_writeOwnerData" msgid="2344055317969787124">"Hiermee kan een toepassing de op uw telefoon opgeslagen gegevens van de eigenaar wijzigen. Schadelijke toepassingen kunnen hiermee gegevens van de eigenaar verwijderen of wijzigen."</string>
     <string name="permlab_readOwnerData" msgid="6668525984731523563">"gegevens eigenaar lezen"</string>
     <string name="permdesc_readOwnerData" msgid="3088486383128434507">"Hiermee kan een toepassing de op uw telefoon opgeslagen gegevens van de eigenaar lezen. Schadelijke toepassingen kunnen hiermee gegevens van de eigenaar lezen."</string>
-    <!-- no translation found for permlab_readCalendar (6898987798303840534) -->
-    <skip />
+    <string name="permlab_readCalendar" msgid="6898987798303840534">"agendagebeurtenissen lezen"</string>
     <string name="permdesc_readCalendar" msgid="5533029139652095734">"Hiermee kan een toepassing alle agendagebeurtenissen lezen die zijn opgeslagen op uw telefoon. Schadelijke toepassingen kunnen hiervan gebruik maken om uw agendagebeurtenissen te verzenden naar andere personen."</string>
-    <!-- no translation found for permlab_writeCalendar (3894879352594904361) -->
-    <skip />
-    <!-- no translation found for permdesc_writeCalendar (2988871373544154221) -->
-    <skip />
+    <string name="permlab_writeCalendar" msgid="3894879352594904361">"agendagebeurtenissen toevoegen of aanpassen en e-mail verzenden naar gasten"</string>
+    <string name="permdesc_writeCalendar" msgid="2988871373544154221">"Een toepassing toestaan gebeurtenissen aan uw agenda toe te voegen of te wijzigen, wat inhoudt dat er e-mails kunnen worden verzonden naar gasten. Schadelijke toepassingen kunnen dit gebruiken om uw agendagebeurtenissen te wissen of aan te passen of om e-mail naar gasten te verzenden."</string>
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"neplocatiebronnen voor test"</string>
     <string name="permdesc_accessMockLocation" msgid="7648286063459727252">"Neplocatiebronnen voor testdoeleinden maken. Schadelijke toepassingen kunnen dit gebruiken om de locatie en/of status te overschrijven die door de echte locatiebronnen wordt aangegeven, zoals GPS of netwerkaanbieders."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"toegang opdrachten aanbieder extra locaties"</string>
@@ -382,7 +386,7 @@
     <string name="permdesc_writeApnSettings" msgid="7443433457842966680">"Hiermee kan een toepassing de APN-instellingen, zoals proxy en poort, van elke APN wijzigen."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"netwerkverbinding wijzigen"</string>
     <string name="permdesc_changeNetworkState" msgid="4199958910396387075">"Staat een toepassing toe de status van de netwerkverbinding te wijzigen."</string>
-    <string name="permlab_changeTetherState" msgid="5952584964373017960">"getetherde verbinding wijzigen"</string>
+    <string name="permlab_changeTetherState" msgid="2702121155761140799">"Getetherde verbinding wijzigen"</string>
     <string name="permdesc_changeTetherState" msgid="8905815579146349568">"Staat een toepassing toe de status van de getetherde netwerkverbinding te wijzigen."</string>
     <string name="permlab_changeBackgroundDataSetting" msgid="1400666012671648741">"instelling voor gebruik van achtergrondgegevens van gegevens wijzigen"</string>
     <string name="permdesc_changeBackgroundDataSetting" msgid="1001482853266638864">"Hiermee kan een toepassing de instelling voor gebruik van achtergrondgegevens wijzigen."</string>
@@ -532,8 +536,7 @@
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"Druk op \'Menu\' om te ontgrendelen."</string>
     <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"Patroon tekenen om te ontgrendelen"</string>
     <string name="lockscreen_emergency_call" msgid="5347633784401285225">"Noodoproep"</string>
-    <!-- no translation found for lockscreen_return_to_call (5244259785500040021) -->
-    <skip />
+    <string name="lockscreen_return_to_call" msgid="5244259785500040021">"Terug naar gesprek"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Juist!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4817583279053112312">"Probeer het opnieuw"</string>
     <string name="lockscreen_plugged_in" msgid="613343852842944435">"Opladen (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
@@ -620,11 +623,11 @@
     <item quantity="one" msgid="9150797944610821849">"1 uur geleden"</item>
     <item quantity="other" msgid="2467273239587587569">"<xliff:g id="COUNT">%d</xliff:g> uur geleden"</item>
   </plurals>
-    <!-- no translation found for last_num_days:other (3069992808164318268) -->
-    <!-- no translation found for last_month (3959346739979055432) -->
-    <skip />
-    <!-- no translation found for older (5211975022815554840) -->
-    <skip />
+  <plurals name="last_num_days">
+    <item quantity="other" msgid="3069992808164318268">"Afgelopen <xliff:g id="COUNT">%d</xliff:g> dagen"</item>
+  </plurals>
+    <string name="last_month" msgid="3959346739979055432">"Afgelopen maand"</string>
+    <string name="older" msgid="5211975022815554840">"Ouder"</string>
   <plurals name="num_days_ago">
     <item quantity="one" msgid="861358534398115820">"gisteren"</item>
     <item quantity="other" msgid="2479586466153314633">"<xliff:g id="COUNT">%d</xliff:g> dagen geleden"</item>
@@ -692,11 +695,6 @@
     <string name="weeks" msgid="6509623834583944518">"weken"</string>
     <string name="year" msgid="4001118221013892076">"jaar"</string>
     <string name="years" msgid="6881577717993213522">"jaren"</string>
-    <string name="every_weekday" msgid="8777593878457748503">"Elke weekdag (ma-vr)"</string>
-    <string name="daily" msgid="5738949095624133403">"Dagelijks"</string>
-    <string name="weekly" msgid="983428358394268344">"Wekelijks op <xliff:g id="DAY">%s</xliff:g>"</string>
-    <string name="monthly" msgid="2667202947170988834">"Maandelijks"</string>
-    <string name="yearly" msgid="1519577999407493836">"Jaarlijks"</string>
     <string name="VideoView_error_title" msgid="3359437293118172396">"Video kan niet worden afgespeeld"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="897920883624437033">"Deze video kan helaas niet worden gestreamd naar dit apparaat."</string>
     <string name="VideoView_error_text_unknown" msgid="710301040038083944">"Deze video kan niet worden afgespeeld."</string>
@@ -792,14 +790,13 @@
     <string name="usb_storage_stop_message" msgid="3613713396426604104">"Voordat u USB-opslag uitschakelt, moet u de SD-kaart van uw Android hebben ontkoppeld (\'uitgeworpen\') van uw computer."</string>
     <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"USB-opslag uitschakelen"</string>
     <string name="usb_storage_stop_error_message" msgid="143881914840412108">"Er is een probleem opgetreden tijdens het uitschakelen van de USB-opslag. Controleer of u de USB-host heeft losgekoppeld en probeer het opnieuw."</string>
-    <!-- no translation found for dlg_confirm_kill_storage_users_title (203356557714612214) -->
+    <!-- no translation found for dlg_confirm_kill_storage_users_title (963039033470478697) -->
     <skip />
-    <!-- no translation found for dlg_confirm_kill_storage_users_text (3902998926994232358) -->
+    <!-- no translation found for dlg_confirm_kill_storage_users_text (3202838234780505886) -->
     <skip />
-    <!-- no translation found for dlg_error_title (9179426738781357928) -->
+    <!-- no translation found for dlg_error_title (8048999973837339174) -->
     <skip />
-    <!-- no translation found for dlg_ok (7376953167039865701) -->
-    <skip />
+    <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
     <string name="extmedia_format_title" msgid="8663247929551095854">"SD-kaart formatteren"</string>
     <string name="extmedia_format_message" msgid="3621369962433523619">"Weet u zeker dat u de SD-kaart wilt formatteren? Alle gegevens op uw kaart gaan dan verloren."</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Formatteren"</string>
@@ -858,22 +855,8 @@
     <string name="reset" msgid="2448168080964209908">"Opnieuw instellen"</string>
     <string name="submit" msgid="1602335572089911941">"Verzenden"</string>
     <string name="description_star" msgid="2654319874908576133">"favoriet"</string>
-    <string name="tether_title" msgid="6970447107301643248">"USB-tethering beschikbaar"</string>
-    <string name="tether_message" msgid="554549994538298101">"Selecteer \'Tetheren\' als u de gegevensverbinding van uw telefoon wilt delen met uw computer."</string>
-    <string name="tether_button" msgid="7409514810151603641">"Tetheren"</string>
-    <string name="tether_button_cancel" msgid="6744369928952219677">"Annuleren"</string>
-    <string name="tether_error_message" msgid="6672110337349077628">"Er is een probleem opgetreden bij het tetheren."</string>
-    <string name="tether_available_notification_title" msgid="367754042700082080">"USB-tethering beschikbaar"</string>
-    <string name="tether_available_notification_message" msgid="8439443306503453793">"Selecteer dit om uw computer aan uw telefoon te tetheren."</string>
-    <string name="tether_stop_notification_title" msgid="1902246071807668101">"Tethering opheffen"</string>
-    <string name="tether_stop_notification_message" msgid="6920086906891516128">"Selecteer dit om de tethering van uw computer op te heffen."</string>
-    <string name="tether_stop_title" msgid="3118332507220912235">"Getetherde verbinding verbreken"</string>
-    <string name="tether_stop_message" msgid="7741840433788363174">"U deelt de gegevensverbinding van uw telefoon met uw computer. Selecteer \'Verbinding verbreken\' om USB-tethering op te heffen."</string>
-    <string name="tether_stop_button" msgid="8061941592702063029">"Verbinding verbreken"</string>
-    <string name="tether_stop_button_cancel" msgid="3694669546501300230">"Annuleren"</string>
-    <string name="tether_stop_error_message" msgid="4244697367270211648">"Er is een probleem opgetreden bij het uitschakelen van tethering. Probeer het opnieuw."</string>
-    <!-- no translation found for car_mode_disable_notification_title (3164768212003864316) -->
-    <skip />
-    <!-- no translation found for car_mode_disable_notification_message (3262812780382240778) -->
-    <skip />
+    <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Automodus ingeschakeld"</string>
+    <string name="car_mode_disable_notification_message" msgid="668663626721675614">"Selecteer dit om de automodus af te sluiten."</string>
+    <string name="tethered_notification_title" msgid="8146103971290167718">"Tethering actief"</string>
+    <string name="tethered_notification_message" msgid="3067108323903048927">"Aanraken om te configureren"</string>
 </resources>

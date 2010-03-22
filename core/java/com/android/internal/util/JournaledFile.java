@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server;
+package com.android.internal.util;
 
 import java.io.File;
 import java.io.IOException;

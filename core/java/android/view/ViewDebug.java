@@ -546,6 +546,9 @@ public class ViewDebug {
         recyclerDump = new File(Environment.getExternalStorageDirectory(), "view-recycler/");
         recyclerDump = new File(recyclerDump, sRecyclerTracePrefix + ".traces");
         try {
+            if (recyclerDump.exists()) {
+                recyclerDump.delete();
+            }
             final FileOutputStream file = new FileOutputStream(recyclerDump);
             final DataOutputStream out = new DataOutputStream(file);
 

@@ -24,6 +24,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
+import android.database.Cursor;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
@@ -164,11 +165,6 @@ public class TtsService extends Service implements OnCompletionListener {
         currentSpeechEngineSOFile = "";
         setEngine(getDefaultEngine());
 
-        String soLibPath = "/system/lib/libttspico.so";
-        if (sNativeSynth == null) {
-            sNativeSynth = new SynthProxy(soLibPath, "");
-        }
-
         mSelf = this;
         mIsSpeaking = false;
         mSynthBusy = false;
@@ -269,7 +265,25 @@ public class TtsService extends Service implements OnCompletionListener {
             sNativeSynth.shutdown();
             sNativeSynth = null;
         }
-        sNativeSynth = new SynthProxy(soFilename, "");
+
+        // Load the engineConfig from the plugin if it has any special configuration
+        // to be loaded. By convention, if an engine wants the TTS framework to pass
+        // in any configuration, it must put it into its content provider which has the URI:
+        // content://<packageName>.providers.SettingsProvider
+        // That content provider must provide a Cursor which returns the String that
+        // is to be passed back to the native .so file for the plugin when getString(0) is
+        // called on it.
+        // Note that the TTS framework does not care what this String data is: it is something
+        // that comes from the engine plugin and is consumed only by the engine plugin itself.
+        String engineConfig = "";
+        Cursor c = getContentResolver().query(Uri.parse("content://" + enginePackageName
+                + ".providers.SettingsProvider"), null, null, null, null);
+        if (c != null){
+            c.moveToFirst();
+            engineConfig = c.getString(0);
+            c.close();
+        }
+        sNativeSynth = new SynthProxy(soFilename, engineConfig);
         currentSpeechEngineSOFile = soFilename;
         return TextToSpeech.SUCCESS;
     }

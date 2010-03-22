@@ -45,12 +45,13 @@ public class AtomicFile {
     public FileOutputStream startWrite() throws IOException {
         // Rename the current file so it may be used as a backup during the next read
         if (mBaseName.exists()) {
-            if (!mBaseName.renameTo(mBackupName)) {
-                mBackupName.delete();
+            if (!mBackupName.exists()) {
                 if (!mBaseName.renameTo(mBackupName)) {
                     Log.w("AtomicFile", "Couldn't rename file " + mBaseName
                             + " to backup file " + mBackupName);
                 }
+            } else {
+                mBaseName.delete();
             }
         }
         FileOutputStream str = null;

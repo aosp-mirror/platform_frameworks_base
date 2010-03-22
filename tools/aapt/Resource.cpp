@@ -226,7 +226,7 @@ static status_t parsePackage(Bundle* bundle, const sp<AaptAssets>& assets,
                 if (minSdkIndex >= 0) {
                     const uint16_t* minSdk16 = block.getAttributeStringValue(minSdkIndex, &len);
                     const char* minSdk8 = strdup(String8(minSdk16).string());
-                    bundle->setMinSdkVersion(minSdk8);
+                    bundle->setManifestMinSdkVersion(minSdk8);
                 }
             }
         }
@@ -611,7 +611,8 @@ void addTagAttribute(const sp<XMLNode>& node, const char* ns8,
     const String16 attr(attr8);
     
     if (node->getAttribute(ns, attr) != NULL) {
-        fprintf(stderr, "Warning: AndroidManifest.xml already defines %s (in %s)\n",
+        fprintf(stderr, "Warning: AndroidManifest.xml already defines %s (in %s);"
+                        " using existing value in manifest.\n",
                 String8(attr).string(), String8(ns).string());
         return;
     }
@@ -768,7 +769,13 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets)
 
     // Standard flags for compiled XML and optional UTF-8 encoding
     int xmlFlags = XML_COMPILE_STANDARD_RESOURCE;
-    if (bundle->getUTF8()) {
+
+    /* Only enable UTF-8 if the caller of aapt didn't specifically
+     * request UTF-16 encoding and the parameters of this package
+     * allow UTF-8 to be used.
+     */
+    if (!bundle->getWantUTF16()
+            && bundle->isUTF8Available()) {
         xmlFlags |= XML_COMPILE_UTF8;
     }
 

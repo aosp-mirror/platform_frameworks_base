@@ -139,7 +139,10 @@ import android.util.Log;
             if (SQLiteDebug.DEBUG_ACTIVE_CURSOR_FINALIZATION) {
                 Log.v(TAG, "** warning ** Finalized DbObj (id#" + nStatement + ")");
             }
-            Log.w(TAG, "finalizer should never be called on sql: " + mSqlStmt, mStackTrace);
+            int len = mSqlStmt.length();
+            Log.w(TAG, "Releasing statement in a finalizer. Please ensure " +
+                    "that you explicitly call close() on your cursor: " +
+                    mSqlStmt.substring(0, (len > 100) ? 100 : len), mStackTrace);
             releaseSqlStatement();
         } finally {
             super.finalize();

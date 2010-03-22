@@ -733,11 +733,15 @@ public final class CacheManager {
             ret.contentdisposition = contentDisposition;
         }
 
+        // lastModified and etag may be set back to http header. So they can't
+        // be empty string.
         String lastModified = headers.getLastModified();
-        if (lastModified != null) ret.lastModified = lastModified;
+        if (lastModified != null && lastModified.length() > 0) {
+            ret.lastModified = lastModified;
+        }
 
         String etag = headers.getEtag();
-        if (etag != null) ret.etag = etag;
+        if (etag != null && etag.length() > 0) ret.etag = etag;
 
         String cacheControl = headers.getCacheControl();
         if (cacheControl != null) {

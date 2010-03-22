@@ -240,6 +240,15 @@ public class AudioService extends IAudioService.Stub {
     // The last process to have called setMode() is at the top of the list.
     private ArrayList <SetModeDeathHandler> mSetModeDeathHandlers = new ArrayList <SetModeDeathHandler>();
 
+    // List of clients having issued a SCO start request
+    private ArrayList <ScoClient> mScoClients = new ArrayList <ScoClient>();
+
+    // BluetoothHeadset API to control SCO connection
+    private BluetoothHeadset mBluetoothHeadset;
+
+    // Bluetooth headset connection state
+    private boolean mBluetoothHeadsetConnected;
+
     ///////////////////////////////////////////////////////////////////////////
     // Construction
     ///////////////////////////////////////////////////////////////////////////
@@ -267,12 +276,17 @@ public class AudioService extends IAudioService.Stub {
         AudioSystem.setErrorCallback(mAudioSystemCallback);
         loadSoundEffects();
 
+        mBluetoothHeadsetConnected = false;
+        mBluetoothHeadset = new BluetoothHeadset(context,
+                                                 mBluetoothHeadsetServiceListener);
+
         // Register for device connection intent broadcasts.
         IntentFilter intentFilter =
                 new IntentFilter(Intent.ACTION_HEADSET_PLUG);
         intentFilter.addAction(BluetoothA2dp.ACTION_SINK_STATE_CHANGED);
         intentFilter.addAction(BluetoothHeadset.ACTION_STATE_CHANGED);
         intentFilter.addAction(Intent.ACTION_DOCK_EVENT);
+        intentFilter.addAction(BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED);
         context.registerReceiver(mReceiver, intentFilter);
 
         // Register for media button intent broadcasts.
@@ -673,6 +687,7 @@ public class AudioService extends IAudioService.Stub {
             }
             if (mode != mMode) {
                 if (AudioSystem.setPhoneState(mode) == AudioSystem.AUDIO_STATUS_OK) {
+                    checkForUndispatchedAudioFocusChange(mMode, mode);
                     mMode = mode;
 
                     synchronized(mSetModeDeathHandlers) {
@@ -704,6 +719,10 @@ public class AudioService extends IAudioService.Stub {
                         // as required by SetModeDeathHandler.binderDied()
                         mSetModeDeathHandlers.add(0, hdlr);
                         hdlr.setMode(mode);
+                    }
+
+                    if (mode != AudioSystem.MODE_NORMAL) {
+                        clearAllScoClients();
                     }
                 }
             }
@@ -909,6 +928,157 @@ public class AudioService extends IAudioService.Stub {
         }
     }
 
+    /** @see AudioManager#startBluetoothSco() */
+    public void startBluetoothSco(IBinder cb){
+        if (!checkAudioSettingsPermission("startBluetoothSco()")) {
+            return;
+        }
+        ScoClient client = getScoClient(cb);
+        client.incCount();
+    }
+
+    /** @see AudioManager#stopBluetoothSco() */
+    public void stopBluetoothSco(IBinder cb){
+        if (!checkAudioSettingsPermission("stopBluetoothSco()")) {
+            return;
+        }
+        ScoClient client = getScoClient(cb);
+        client.decCount();
+    }
+
+    private class ScoClient implements IBinder.DeathRecipient {
+        private IBinder mCb; // To be notified of client's death
+        private int mStartcount; // number of SCO connections started by this client
+
+        ScoClient(IBinder cb) {
+            mCb = cb;
+            mStartcount = 0;
+        }
+
+        public void binderDied() {
+            synchronized(mScoClients) {
+                Log.w(TAG, "SCO client died");
+                int index = mScoClients.indexOf(this);
+                if (index < 0) {
+                    Log.w(TAG, "unregistered SCO client died");
+                } else {
+                    clearCount(true);
+                    mScoClients.remove(this);
+                }
+            }
+        }
+
+        public void incCount() {
+            synchronized(mScoClients) {
+                requestScoState(BluetoothHeadset.AUDIO_STATE_CONNECTED);
+                if (mStartcount == 0) {
+                    try {
+                        mCb.linkToDeath(this, 0);
+                    } catch (RemoteException e) {
+                        // client has already died!
+                        Log.w(TAG, "ScoClient  incCount() could not link to "+mCb+" binder death");
+                    }
+                }
+                mStartcount++;
+            }
+        }
+
+        public void decCount() {
+            synchronized(mScoClients) {
+                if (mStartcount == 0) {
+                    Log.w(TAG, "ScoClient.decCount() already 0");
+                } else {
+                    mStartcount--;
+                    if (mStartcount == 0) {
+                        mCb.unlinkToDeath(this, 0);
+                    }
+                    requestScoState(BluetoothHeadset.AUDIO_STATE_DISCONNECTED);
+                }
+            }
+        }
+
+        public void clearCount(boolean stopSco) {
+            synchronized(mScoClients) {
+                mStartcount = 0;
+                mCb.unlinkToDeath(this, 0);
+                if (stopSco) {
+                    requestScoState(BluetoothHeadset.AUDIO_STATE_DISCONNECTED);
+                }
+            }
+        }
+
+        public int getCount() {
+            return mStartcount;
+        }
+
+        public IBinder getBinder() {
+            return mCb;
+        }
+
+        public int totalCount() {
+            synchronized(mScoClients) {
+                int count = 0;
+                int size = mScoClients.size();
+                for (int i = 0; i < size; i++) {
+                    count += mScoClients.get(i).getCount();
+                }
+                return count;
+            }
+        }
+
+        private void requestScoState(int state) {
+            if (totalCount() == 0 &&
+                mBluetoothHeadsetConnected &&
+                AudioService.this.mMode == AudioSystem.MODE_NORMAL) {
+                if (state == BluetoothHeadset.AUDIO_STATE_CONNECTED) {
+                    mBluetoothHeadset.startVoiceRecognition();
+                } else {
+                    mBluetoothHeadset.stopVoiceRecognition();
+                }
+            }
+        }
+    }
+
+    public ScoClient getScoClient(IBinder cb) {
+        synchronized(mScoClients) {
+            ScoClient client;
+            int size = mScoClients.size();
+            for (int i = 0; i < size; i++) {
+                client = mScoClients.get(i);
+                if (client.getBinder() == cb)
+                    return client;
+            }
+            client = new ScoClient(cb);
+            mScoClients.add(client);
+            return client;
+        }
+    }
+
+    public void clearAllScoClients() {
+        synchronized(mScoClients) {
+            int size = mScoClients.size();
+            for (int i = 0; i < size; i++) {
+                mScoClients.get(i).clearCount(false);
+            }
+        }
+    }
+
+    private BluetoothHeadset.ServiceListener mBluetoothHeadsetServiceListener =
+        new BluetoothHeadset.ServiceListener() {
+        public void onServiceConnected() {
+            if (mBluetoothHeadset != null &&
+                mBluetoothHeadset.getState() == BluetoothHeadset.STATE_CONNECTED) {
+                mBluetoothHeadsetConnected = true;
+            }
+        }
+        public void onServiceDisconnected() {
+            if (mBluetoothHeadset != null &&
+                mBluetoothHeadset.getState() == BluetoothHeadset.STATE_DISCONNECTED) {
+                mBluetoothHeadsetConnected = false;
+                clearAllScoClients();
+            }
+        }
+    };
 
     ///////////////////////////////////////////////////////////////////////////
     // Internal methods
@@ -1577,11 +1747,14 @@ public class AudioService extends IAudioService.Stub {
                                                          AudioSystem.DEVICE_STATE_UNAVAILABLE,
                                                          address);
                     mConnectedDevices.remove(device);
+                    mBluetoothHeadsetConnected = false;
+                    clearAllScoClients();
                 } else if (!isConnected && state == BluetoothHeadset.STATE_CONNECTED) {
                     AudioSystem.setDeviceConnectionState(device,
                                                          AudioSystem.DEVICE_STATE_AVAILABLE,
                                                          address);
                     mConnectedDevices.put(new Integer(device), address);
+                    mBluetoothHeadsetConnected = true;
                 }
             } else if (action.equals(Intent.ACTION_HEADSET_PLUG)) {
                 int state = intent.getIntExtra("state", 0);
@@ -1614,6 +1787,29 @@ public class AudioService extends IAudioService.Stub {
                         mConnectedDevices.put( new Integer(AudioSystem.DEVICE_OUT_WIRED_HEADPHONE), "");
                     }
                 }
+            } else if (action.equals(BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED)) {
+                int state = intent.getIntExtra(BluetoothHeadset.EXTRA_AUDIO_STATE,
+                                               BluetoothHeadset.STATE_ERROR);
+                synchronized (mScoClients) {
+                    if (!mScoClients.isEmpty()) {
+                        switch (state) {
+                        case BluetoothHeadset.AUDIO_STATE_CONNECTED:
+                            state = AudioManager.SCO_AUDIO_STATE_CONNECTED;
+                            break;
+                        case BluetoothHeadset.AUDIO_STATE_DISCONNECTED:
+                            state = AudioManager.SCO_AUDIO_STATE_DISCONNECTED;
+                            break;
+                        default:
+                            state = AudioManager.SCO_AUDIO_STATE_ERROR;
+                            break;
+                        }
+                        if (state != AudioManager.SCO_AUDIO_STATE_ERROR) {
+                            Intent newIntent = new Intent(AudioManager.ACTION_SCO_AUDIO_STATE_CHANGED);
+                            newIntent.putExtra(AudioManager.EXTRA_SCO_AUDIO_STATE, state);
+                            mContext.sendStickyBroadcast(newIntent);
+                        }
+                    }
+                }
             }
         }
     }
@@ -1621,13 +1817,47 @@ public class AudioService extends IAudioService.Stub {
     //==========================================================================================
     // AudioFocus
     //==========================================================================================
+    /**
+     * Flag to indicate that the top of the audio focus stack needs to recover focus
+     * but hasn't been signaled yet.
+     */
+    private boolean mHasUndispatchedAudioFocus = false;
+
+    private void checkForUndispatchedAudioFocusChange(int prevMode, int newMode) {
+        // when exiting a call
+        if ((prevMode == AudioSystem.MODE_IN_CALL) && (newMode != AudioSystem.MODE_IN_CALL)) {
+            // check for undispatched remote control focus gain
+            if (mHasUndispatchedAudioFocus) {
+                notifyTopOfAudioFocusStack();
+            }
+        }
+    }
+
+    private void notifyTopOfAudioFocusStack() {
+        // notify the top of the stack it gained focus
+        if (!mFocusStack.empty() && (mFocusStack.peek().mFocusDispatcher != null)) {
+            if (canReassignAudioFocus()) {
+                try {
+                    mFocusStack.peek().mFocusDispatcher.dispatchAudioFocusChange(
+                            AudioManager.AUDIOFOCUS_GAIN, mFocusStack.peek().mClientId);
+                    mHasUndispatchedAudioFocus = false;
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Failure to signal gain of audio control focus due to "+ e);
+                    e.printStackTrace();
+                }
+            } else {
+                mHasUndispatchedAudioFocus = true;
+            }
+        }
+    }
+
     private static class FocusStackEntry {
         public int mStreamType = -1;// no stream type
         public boolean mIsTransportControlReceiver = false;
         public IAudioFocusDispatcher mFocusDispatcher = null;
         public IBinder mSourceRef = null;
         public String mClientId;
-        public int mDurationHint;
+        public int mFocusChangeType;
 
         public FocusStackEntry() {
         }
@@ -1639,7 +1869,7 @@ public class AudioService extends IAudioService.Stub {
             mFocusDispatcher = afl;
             mSourceRef = source;
             mClientId = id;
-            mDurationHint = duration;
+            mFocusChangeType = duration;
         }
     }
 
@@ -1656,7 +1886,7 @@ public class AudioService extends IAudioService.Stub {
             while(stackIterator.hasNext()) {
                 FocusStackEntry fse = stackIterator.next();
                 pw.println("     source:" + fse.mSourceRef + " -- client: " + fse.mClientId
-                        + " -- duration: " +fse.mDurationHint);
+                        + " -- duration: " +fse.mFocusChangeType);
             }
         }
     }
@@ -1676,16 +1906,7 @@ public class AudioService extends IAudioService.Stub {
             mFocusStack.pop();
             if (signal) {
                 // notify the new top of the stack it gained focus
-                if (!mFocusStack.empty() && (mFocusStack.peek().mFocusDispatcher != null)
-                        && canReassignAudioFocus()) {
-                    try {
-                        mFocusStack.peek().mFocusDispatcher.dispatchAudioFocusChange(
-                                AudioManager.AUDIOFOCUS_GAIN, mFocusStack.peek().mClientId);
-                    } catch (RemoteException e) {
-                        Log.e(TAG, " Failure to signal gain of focus due to "+ e);
-                        e.printStackTrace();
-                    }
-                }
+                notifyTopOfAudioFocusStack();
             }
         } else {
             // focus is abandoned by a client that's not at the top of the stack,
@@ -1707,8 +1928,9 @@ public class AudioService extends IAudioService.Stub {
      * Remove focus listeners from the focus stack for a particular client.
      */
     private void removeFocusStackEntryForClient(IBinder cb) {
-        // focus is abandoned by a client that's not at the top of the stack,
-        // no need to update focus.
+        // is the owner of the audio focus part of the client to remove?
+        boolean isTopOfStackForClientToRemove = !mFocusStack.isEmpty() &&
+                mFocusStack.peek().mSourceRef.equals(cb);
         Iterator<FocusStackEntry> stackIterator = mFocusStack.iterator();
         while(stackIterator.hasNext()) {
             FocusStackEntry fse = (FocusStackEntry)stackIterator.next();
@@ -1717,6 +1939,11 @@ public class AudioService extends IAudioService.Stub {
                         + fse.mClientId);
                 mFocusStack.remove(fse);
             }
+        }
+        if (isTopOfStackForClientToRemove) {
+            // we removed an entry at the top of the stack:
+            //  notify the new top of the stack it gained focus.
+            notifyTopOfAudioFocusStack();
         }
     }
 
@@ -1758,7 +1985,7 @@ public class AudioService extends IAudioService.Stub {
 
 
     /** @see AudioManager#requestAudioFocus(IAudioFocusDispatcher, int, int) */
-    public int requestAudioFocus(int mainStreamType, int durationHint, IBinder cb,
+    public int requestAudioFocus(int mainStreamType, int focusChangeHint, IBinder cb,
             IAudioFocusDispatcher fd, String clientId) {
         Log.i(TAG, " AudioFocus  requestAudioFocus() from " + clientId);
         // the main stream type for the audio focus request is currently not used. It may
@@ -1775,18 +2002,21 @@ public class AudioService extends IAudioService.Stub {
 
         synchronized(mFocusStack) {
             if (!mFocusStack.empty() && mFocusStack.peek().mClientId.equals(clientId)) {
-                mFocusStack.peek().mDurationHint = durationHint;
-                // if focus is already owned by this client, don't do anything
-                return AudioManager.AUDIOFOCUS_REQUEST_GRANTED;
+                // if focus is already owned by this client and the reason for acquiring the focus
+                // hasn't changed, don't do anything
+                if (mFocusStack.peek().mFocusChangeType == focusChangeHint) {
+                    return AudioManager.AUDIOFOCUS_REQUEST_GRANTED;
+                }
+                // the reason for the audio focus request has changed: remove the current top of
+                // stack and respond as if we had a new focus owner
+                mFocusStack.pop();
             }
 
             // notify current top of stack it is losing focus
             if (!mFocusStack.empty() && (mFocusStack.peek().mFocusDispatcher != null)) {
                 try {
                     mFocusStack.peek().mFocusDispatcher.dispatchAudioFocusChange(
-                            (durationHint == AudioManager.AUDIOFOCUS_GAIN) ?
-                                    AudioManager.AUDIOFOCUS_LOSS :
-                                        AudioManager.AUDIOFOCUS_LOSS_TRANSIENT,
+                            -1 * focusChangeHint, // loss and gain codes are inverse of each other
                             mFocusStack.peek().mClientId);
                 } catch (RemoteException e) {
                     Log.e(TAG, " Failure to signal loss of focus due to "+ e);
@@ -1795,7 +2025,7 @@ public class AudioService extends IAudioService.Stub {
             }
 
             // push focus requester at the top of the audio focus stack
-            mFocusStack.push(new FocusStackEntry(mainStreamType, durationHint, false, fd, cb,
+            mFocusStack.push(new FocusStackEntry(mainStreamType, focusChangeHint, false, fd, cb,
                     clientId));
         }//synchronized(mFocusStack)
 

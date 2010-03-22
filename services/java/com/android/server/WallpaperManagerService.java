@@ -68,6 +68,7 @@ import org.xmlpull.v1.XmlSerializer;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.service.wallpaper.ImageWallpaper;
 import com.android.internal.util.FastXmlSerializer;
+import com.android.internal.util.JournaledFile;
 import com.android.server.DevicePolicyManagerService.ActiveAdmin;
 import com.android.server.DevicePolicyManagerService.MyPackageMonitor;
 
@@ -804,6 +805,9 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
                     }
 
                     res = r.openRawResource(resId);
+                    if (WALLPAPER_FILE.exists()) {
+                        WALLPAPER_FILE.delete();
+                    }
                     fos = new FileOutputStream(WALLPAPER_FILE);
 
                     byte[] buffer = new byte[32768];

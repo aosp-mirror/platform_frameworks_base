@@ -21,10 +21,9 @@ import android.os.Message;
 /**
  * {@hide}
  *
- * The abstract class for implementing states in a
- * HierarchicalStateMachine and HandlerStateMachine.
+ * The class for implementing states in a HierarchicalStateMachine
  */
-public abstract class HierarchicalState {
+public class HierarchicalState {
 
     /**
      * Constructor
@@ -54,7 +53,9 @@ public abstract class HierarchicalState {
      *         if the parent state's processMessage should
      *         be invoked.
      */
-    abstract protected boolean processMessage(Message msg);
+    protected boolean processMessage(Message msg) {
+        return false;
+    }
 
     /**
      * Called when a state is exited.

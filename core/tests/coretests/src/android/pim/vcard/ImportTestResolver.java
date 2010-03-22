@@ -215,7 +215,7 @@ import java.util.Map.Entry;
                 mTestCase.fail("Unexpected Uri has come: " + uri);
             }
         }  // for (int i = 0; i < size; i++) {
-        return null;
+        return fakeResultArray;
     }
 
     public void verify() {

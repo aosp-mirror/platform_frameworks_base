@@ -175,6 +175,7 @@ public class KeyboardView extends View implements View.OnClickListener {
     private boolean mShowTouchPoints = true;
     private int mPopupPreviewX;
     private int mPopupPreviewY;
+    private int mWindowY;
 
     private int mLastX;
     private int mLastY;
@@ -909,20 +910,36 @@ public class KeyboardView extends View implements View.OnClickListener {
             getLocationInWindow(mOffsetInWindow);
             mOffsetInWindow[0] += mMiniKeyboardOffsetX; // Offset may be zero
             mOffsetInWindow[1] += mMiniKeyboardOffsetY; // Offset may be zero
+            int[] mWindowLocation = new int[2];
+            getLocationOnScreen(mWindowLocation);
+            mWindowY = mWindowLocation[1];
         }
         // Set the preview background state
         mPreviewText.getBackground().setState(
                 key.popupResId != 0 ? LONG_PRESSABLE_STATE_SET : EMPTY_STATE_SET);
+        mPopupPreviewX += mOffsetInWindow[0];
+        mPopupPreviewY += mOffsetInWindow[1];
+
+        // If the popup cannot be shown above the key, put it on the side
+        if (mPopupPreviewY + mWindowY < 0) {
+            // If the key you're pressing is on the left side of the keyboard, show the popup on
+            // the right, offset by enough to see at least one key to the left/right.
+            if (key.x + key.width <= getWidth() / 2) {
+                mPopupPreviewX += (int) (key.width * 2.5);
+            } else {
+                mPopupPreviewX -= (int) (key.width * 2.5);
+            }
+            mPopupPreviewY += popupHeight;
+        }
+
         if (previewPopup.isShowing()) {
-            previewPopup.update(mPopupPreviewX + mOffsetInWindow[0],
-                    mPopupPreviewY + mOffsetInWindow[1], 
+            previewPopup.update(mPopupPreviewX, mPopupPreviewY,
                     popupWidth, popupHeight);
         } else {
             previewPopup.setWidth(popupWidth);
             previewPopup.setHeight(popupHeight);
             previewPopup.showAtLocation(mPopupParent, Gravity.NO_GRAVITY, 
-                    mPopupPreviewX + mOffsetInWindow[0], 
-                    mPopupPreviewY + mOffsetInWindow[1]);
+                    mPopupPreviewX, mPopupPreviewY);
         }
         mPreviewText.setVisibility(VISIBLE);
     }
