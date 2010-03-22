@@ -301,18 +301,19 @@ public class DatabaseHelper extends SQLiteOpenHelper {
              * enabled or disabled based on product resources.
              */
             db.beginTransaction();
+            SQLiteStatement stmt = null;
             try {
                 db.execSQL("DELETE FROM system WHERE name='"
                         + Settings.System.WINDOW_ANIMATION_SCALE + "'");
                 db.execSQL("DELETE FROM system WHERE name='"
                         + Settings.System.TRANSITION_ANIMATION_SCALE + "'");
-                SQLiteStatement stmt = db.compileStatement("INSERT INTO system(name,value)"
+                stmt = db.compileStatement("INSERT INTO system(name,value)"
                         + " VALUES(?,?);");
                 loadDefaultAnimationSettings(stmt);
-                stmt.close();
                 db.setTransactionSuccessful();
             } finally {
                 db.endTransaction();
+                if (stmt != null) stmt.close();
             }
             upgradeVersion = 32;
         }
@@ -349,14 +350,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         if (upgradeVersion == 34) {
             db.beginTransaction();
+            SQLiteStatement stmt = null;
             try {
-                SQLiteStatement stmt = db.compileStatement("INSERT OR IGNORE INTO secure(name,value)"
+                stmt = db.compileStatement("INSERT OR IGNORE INTO secure(name,value)"
                         + " VALUES(?,?);");
                 loadSecure35Settings(stmt);
-                stmt.close();
                 db.setTransactionSuccessful();
             } finally {
                 db.endTransaction();
+                if (stmt != null) stmt.close();
             }
             upgradeVersion = 35;
         }
@@ -391,15 +393,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         if (upgradeVersion == 37) {
             db.beginTransaction();
+            SQLiteStatement stmt = null;
             try {
-                SQLiteStatement stmt = db.compileStatement("INSERT OR IGNORE INTO system(name,value)"
+                stmt = db.compileStatement("INSERT OR IGNORE INTO system(name,value)"
                         + " VALUES(?,?);");
                 loadStringSetting(stmt, Settings.System.AIRPLANE_MODE_TOGGLEABLE_RADIOS,
                         R.string.airplane_mode_toggleable_radios);
-                stmt.close();
                 db.setTransactionSuccessful();
             } finally {
                 db.endTransaction();
+                if (stmt != null) stmt.close();
             }
             upgradeVersion = 38;
         }
@@ -440,18 +443,19 @@ public class DatabaseHelper extends SQLiteOpenHelper {
              * All animations are now turned on by default!
              */
             db.beginTransaction();
+            SQLiteStatement stmt = null;
             try {
                 db.execSQL("DELETE FROM system WHERE name='"
                         + Settings.System.WINDOW_ANIMATION_SCALE + "'");
                 db.execSQL("DELETE FROM system WHERE name='"
                         + Settings.System.TRANSITION_ANIMATION_SCALE + "'");
-                SQLiteStatement stmt = db.compileStatement("INSERT INTO system(name,value)"
+                stmt = db.compileStatement("INSERT INTO system(name,value)"
                         + " VALUES(?,?);");
                 loadDefaultAnimationSettings(stmt);
-                stmt.close();
                 db.setTransactionSuccessful();
             } finally {
                 db.endTransaction();
+                if (stmt != null) stmt.close();
             }
             upgradeVersion = 41;
         }
@@ -461,16 +465,17 @@ public class DatabaseHelper extends SQLiteOpenHelper {
              * Initialize newly public haptic feedback setting
              */
             db.beginTransaction();
+            SQLiteStatement stmt = null;
             try {
                 db.execSQL("DELETE FROM system WHERE name='"
                         + Settings.System.HAPTIC_FEEDBACK_ENABLED + "'");
-                SQLiteStatement stmt = db.compileStatement("INSERT INTO system(name,value)"
+                stmt = db.compileStatement("INSERT INTO system(name,value)"
                         + " VALUES(?,?);");
                 loadDefaultHapticSettings(stmt);
-                stmt.close();
                 db.setTransactionSuccessful();
             } finally {
                 db.endTransaction();
+                if (stmt != null) stmt.close();
             }
             upgradeVersion = 42;
         }
@@ -480,15 +485,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
              * Initialize new notification pulse setting
              */
             db.beginTransaction();
+            SQLiteStatement stmt = null;
             try {
-                SQLiteStatement stmt = db.compileStatement("INSERT INTO system(name,value)"
+                stmt = db.compileStatement("INSERT INTO system(name,value)"
                         + " VALUES(?,?);");
                 loadBooleanSetting(stmt, Settings.System.NOTIFICATION_LIGHT_PULSE,
                         R.bool.def_notification_pulse);
-                stmt.close();
                 db.setTransactionSuccessful();
             } finally {
                 db.endTransaction();
+                if (stmt != null) stmt.close();
             }
             upgradeVersion = 43;
         }
@@ -498,15 +504,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
              * This upgrade stores bluetooth volume separately from voice volume
              */
             db.beginTransaction();
+            SQLiteStatement stmt = null;
             try {
-                SQLiteStatement stmt = db.compileStatement("INSERT OR IGNORE INTO system(name,value)"
+                stmt = db.compileStatement("INSERT OR IGNORE INTO system(name,value)"
                         + " VALUES(?,?);");
                 loadSetting(stmt, Settings.System.VOLUME_BLUETOOTH_SCO,
                         AudioManager.DEFAULT_STREAM_VOLUME[AudioManager.STREAM_BLUETOOTH_SCO]);
-                stmt.close();
                 db.setTransactionSuccessful();
             } finally {
                 db.endTransaction();
+                if (stmt != null) stmt.close();
             }
             upgradeVersion = 44;
         }
@@ -585,14 +592,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             * New settings for new user interface noises.
             */
            db.beginTransaction();
+           SQLiteStatement stmt = null;
            try {
-                SQLiteStatement stmt = db.compileStatement("INSERT INTO system(name,value)"
+                stmt = db.compileStatement("INSERT INTO system(name,value)"
                         + " VALUES(?,?);");
                 loadUISoundEffectsSettings(stmt);
-                stmt.close();
                 db.setTransactionSuccessful();
             } finally {
                 db.endTransaction();
+                if (stmt != null) stmt.close();
             }
 
            upgradeVersion = 50;
@@ -603,15 +611,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             * New settings for set install location UI.
             */
            db.beginTransaction();
+           SQLiteStatement stmt = null;
            try {
-                SQLiteStatement stmt = db.compileStatement("INSERT INTO system(name,value)"
+                stmt = db.compileStatement("INSERT INTO system(name,value)"
                         + " VALUES(?,?);");
                 loadBooleanSetting(stmt, Settings.System.SET_INSTALL_LOCATION,
                         R.bool.set_install_location);
-                stmt.close();
                 db.setTransactionSuccessful();
             } finally {
                 db.endTransaction();
+                if (stmt != null) stmt.close();
             }
 
            upgradeVersion = 51;
@@ -637,15 +646,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         if (upgradeVersion == 52) {
             // new vibration/silent mode settings
             db.beginTransaction();
+            SQLiteStatement stmt = null;
             try {
-                SQLiteStatement stmt = db.compileStatement("INSERT INTO system(name,value)"
+                stmt = db.compileStatement("INSERT INTO system(name,value)"
                         + " VALUES(?,?);");
                 loadBooleanSetting(stmt, Settings.System.VIBRATE_IN_SILENT,
                         R.bool.def_vibrate_in_silent);
-                stmt.close();
                 db.setTransactionSuccessful();
             } finally {
                 db.endTransaction();
+                if (stmt != null) stmt.close();
             }
 
             upgradeVersion = 53;
@@ -656,15 +666,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
              * New settings for set install location UI.
              */
             db.beginTransaction();
+            SQLiteStatement stmt = null;
             try {
-                 SQLiteStatement stmt = db.compileStatement("INSERT INTO system(name,value)"
+                 stmt = db.compileStatement("INSERT INTO system(name,value)"
                          + " VALUES(?,?);");
                  loadIntegerSetting(stmt, Settings.System.DEFAULT_INSTALL_LOCATION,
                          R.integer.def_install_location);
-                 stmt.close();
                  db.setTransactionSuccessful();
              } finally {
                  db.endTransaction();
+                 if (stmt != null) stmt.close();
              }
 
             upgradeVersion = 54;
@@ -844,47 +855,50 @@ public class DatabaseHelper extends SQLiteOpenHelper {
      * @param db the database to insert the volume levels into
      */
     private void loadVolumeLevels(SQLiteDatabase db) {
-        SQLiteStatement stmt = db.compileStatement("INSERT OR IGNORE INTO system(name,value)"
-                + " VALUES(?,?);");
-
-        loadSetting(stmt, Settings.System.VOLUME_MUSIC,
-                AudioManager.DEFAULT_STREAM_VOLUME[AudioManager.STREAM_MUSIC]);
-        loadSetting(stmt, Settings.System.VOLUME_RING,
-                AudioManager.DEFAULT_STREAM_VOLUME[AudioManager.STREAM_RING]);
-        loadSetting(stmt, Settings.System.VOLUME_SYSTEM,
-                AudioManager.DEFAULT_STREAM_VOLUME[AudioManager.STREAM_SYSTEM]);
-        loadSetting(
-                stmt,
-                Settings.System.VOLUME_VOICE,
-                AudioManager.DEFAULT_STREAM_VOLUME[AudioManager.STREAM_VOICE_CALL]);
-        loadSetting(stmt, Settings.System.VOLUME_ALARM,
-                AudioManager.DEFAULT_STREAM_VOLUME[AudioManager.STREAM_ALARM]);
-        loadSetting(
-                stmt,
-                Settings.System.VOLUME_NOTIFICATION,
-                AudioManager.DEFAULT_STREAM_VOLUME[AudioManager.STREAM_NOTIFICATION]);
-        loadSetting(
-                stmt,
-                Settings.System.VOLUME_BLUETOOTH_SCO,
-                AudioManager.DEFAULT_STREAM_VOLUME[AudioManager.STREAM_BLUETOOTH_SCO]);
-
-        loadSetting(stmt, Settings.System.MODE_RINGER,
-                AudioManager.RINGER_MODE_NORMAL);
-
-        loadVibrateSetting(db, false);
-
-        // By default, only the ring/notification and system streams are affected
-        loadSetting(stmt, Settings.System.MODE_RINGER_STREAMS_AFFECTED,
-                (1 << AudioManager.STREAM_RING) | (1 << AudioManager.STREAM_NOTIFICATION) |
-                (1 << AudioManager.STREAM_SYSTEM) | (1 << AudioManager.STREAM_SYSTEM_ENFORCED));
-
-        loadSetting(stmt, Settings.System.MUTE_STREAMS_AFFECTED,
-                ((1 << AudioManager.STREAM_MUSIC) |
-                 (1 << AudioManager.STREAM_RING) |
-                 (1 << AudioManager.STREAM_NOTIFICATION) |
-                 (1 << AudioManager.STREAM_SYSTEM)));
-
-        stmt.close();
+        SQLiteStatement stmt = null;
+        try {
+            stmt = db.compileStatement("INSERT OR IGNORE INTO system(name,value)"
+                    + " VALUES(?,?);");
+    
+            loadSetting(stmt, Settings.System.VOLUME_MUSIC,
+                    AudioManager.DEFAULT_STREAM_VOLUME[AudioManager.STREAM_MUSIC]);
+            loadSetting(stmt, Settings.System.VOLUME_RING,
+                    AudioManager.DEFAULT_STREAM_VOLUME[AudioManager.STREAM_RING]);
+            loadSetting(stmt, Settings.System.VOLUME_SYSTEM,
+                    AudioManager.DEFAULT_STREAM_VOLUME[AudioManager.STREAM_SYSTEM]);
+            loadSetting(
+                    stmt,
+                    Settings.System.VOLUME_VOICE,
+                    AudioManager.DEFAULT_STREAM_VOLUME[AudioManager.STREAM_VOICE_CALL]);
+            loadSetting(stmt, Settings.System.VOLUME_ALARM,
+                    AudioManager.DEFAULT_STREAM_VOLUME[AudioManager.STREAM_ALARM]);
+            loadSetting(
+                    stmt,
+                    Settings.System.VOLUME_NOTIFICATION,
+                    AudioManager.DEFAULT_STREAM_VOLUME[AudioManager.STREAM_NOTIFICATION]);
+            loadSetting(
+                    stmt,
+                    Settings.System.VOLUME_BLUETOOTH_SCO,
+                    AudioManager.DEFAULT_STREAM_VOLUME[AudioManager.STREAM_BLUETOOTH_SCO]);
+    
+            loadSetting(stmt, Settings.System.MODE_RINGER,
+                    AudioManager.RINGER_MODE_NORMAL);
+    
+            loadVibrateSetting(db, false);
+    
+            // By default, only the ring/notification and system streams are affected
+            loadSetting(stmt, Settings.System.MODE_RINGER_STREAMS_AFFECTED,
+                    (1 << AudioManager.STREAM_RING) | (1 << AudioManager.STREAM_NOTIFICATION) |
+                    (1 << AudioManager.STREAM_SYSTEM) | (1 << AudioManager.STREAM_SYSTEM_ENFORCED));
+    
+            loadSetting(stmt, Settings.System.MUTE_STREAMS_AFFECTED,
+                    ((1 << AudioManager.STREAM_MUSIC) |
+                     (1 << AudioManager.STREAM_RING) |
+                     (1 << AudioManager.STREAM_NOTIFICATION) |
+                     (1 << AudioManager.STREAM_SYSTEM)));
+        } finally {
+            if (stmt != null) stmt.close();
+        }
     }
 
     private void loadVibrateSetting(SQLiteDatabase db, boolean deleteOld) {
@@ -892,17 +906,21 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             db.execSQL("DELETE FROM system WHERE name='" + Settings.System.VIBRATE_ON + "'");
         }
 
-        SQLiteStatement stmt = db.compileStatement("INSERT OR IGNORE INTO system(name,value)"
-                + " VALUES(?,?);");
-
-        // Vibrate off by default for ringer, on for notification
-        int vibrate = 0;
-        vibrate = AudioService.getValueForVibrateSetting(vibrate,
-                AudioManager.VIBRATE_TYPE_NOTIFICATION, AudioManager.VIBRATE_SETTING_ON);
-        vibrate = AudioService.getValueForVibrateSetting(vibrate,
-                AudioManager.VIBRATE_TYPE_RINGER, AudioManager.VIBRATE_SETTING_OFF);
-        loadSetting(stmt, Settings.System.VIBRATE_ON, vibrate);
-        stmt.close();
+        SQLiteStatement stmt = null;
+        try {
+            stmt = db.compileStatement("INSERT OR IGNORE INTO system(name,value)"
+                    + " VALUES(?,?);");
+    
+            // Vibrate off by default for ringer, on for notification
+            int vibrate = 0;
+            vibrate = AudioService.getValueForVibrateSetting(vibrate,
+                    AudioManager.VIBRATE_TYPE_NOTIFICATION, AudioManager.VIBRATE_SETTING_ON);
+            vibrate = AudioService.getValueForVibrateSetting(vibrate,
+                    AudioManager.VIBRATE_TYPE_RINGER, AudioManager.VIBRATE_SETTING_OFF);
+            loadSetting(stmt, Settings.System.VIBRATE_ON, vibrate);
+        } finally {
+            if (stmt != null) stmt.close();
+        }
     }
 
     private void loadSettings(SQLiteDatabase db) {
@@ -911,69 +929,72 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     private void loadSystemSettings(SQLiteDatabase db) {
-        SQLiteStatement stmt = db.compileStatement("INSERT OR IGNORE INTO system(name,value)"
-                + " VALUES(?,?);");
-
-        loadBooleanSetting(stmt, Settings.System.DIM_SCREEN,
-                R.bool.def_dim_screen);
-        loadSetting(stmt, Settings.System.STAY_ON_WHILE_PLUGGED_IN,
-                "1".equals(SystemProperties.get("ro.kernel.qemu")) ? 1 : 0);
-        loadIntegerSetting(stmt, Settings.System.SCREEN_OFF_TIMEOUT,
-                R.integer.def_screen_off_timeout);
-
-        // Set default cdma emergency tone
-        loadSetting(stmt, Settings.System.EMERGENCY_TONE, 0);
-
-        // Set default cdma call auto retry
-        loadSetting(stmt, Settings.System.CALL_AUTO_RETRY, 0);
-
-        // Set default cdma DTMF type
-        loadSetting(stmt, Settings.System.DTMF_TONE_TYPE_WHEN_DIALING, 0);
-
-        // Set default hearing aid
-        loadSetting(stmt, Settings.System.HEARING_AID, 0);
-
-        // Set default tty mode
-        loadSetting(stmt, Settings.System.TTY_MODE, 0);
-
-        loadBooleanSetting(stmt, Settings.System.AIRPLANE_MODE_ON,
-                R.bool.def_airplane_mode_on);
-
-        loadStringSetting(stmt, Settings.System.AIRPLANE_MODE_RADIOS,
-                R.string.def_airplane_mode_radios);
-
-        loadStringSetting(stmt, Settings.System.AIRPLANE_MODE_TOGGLEABLE_RADIOS,
-                R.string.airplane_mode_toggleable_radios);
-
-        loadBooleanSetting(stmt, Settings.System.AUTO_TIME,
-                R.bool.def_auto_time); // Sync time to NITZ
-
-        loadIntegerSetting(stmt, Settings.System.SCREEN_BRIGHTNESS,
-                R.integer.def_screen_brightness);
-
-        loadBooleanSetting(stmt, Settings.System.SCREEN_BRIGHTNESS_MODE,
-                R.bool.def_screen_brightness_automatic_mode);
-
-        loadDefaultAnimationSettings(stmt);
-
-        loadBooleanSetting(stmt, Settings.System.ACCELEROMETER_ROTATION,
-                R.bool.def_accelerometer_rotation);
-
-        loadDefaultHapticSettings(stmt);
-
-        loadBooleanSetting(stmt, Settings.System.NOTIFICATION_LIGHT_PULSE,
-                R.bool.def_notification_pulse);
-        loadBooleanSetting(stmt, Settings.System.SET_INSTALL_LOCATION,
-                R.bool.set_install_location);
-        loadIntegerSetting(stmt, Settings.System.DEFAULT_INSTALL_LOCATION,
-                R.integer.def_install_location);
-
-        loadUISoundEffectsSettings(stmt);
-
-        loadBooleanSetting(stmt, Settings.System.VIBRATE_IN_SILENT,
-                R.bool.def_vibrate_in_silent);
-
-        stmt.close();
+        SQLiteStatement stmt = null;
+        try {
+            stmt = db.compileStatement("INSERT OR IGNORE INTO system(name,value)"
+                    + " VALUES(?,?);");
+    
+            loadBooleanSetting(stmt, Settings.System.DIM_SCREEN,
+                    R.bool.def_dim_screen);
+            loadSetting(stmt, Settings.System.STAY_ON_WHILE_PLUGGED_IN,
+                    "1".equals(SystemProperties.get("ro.kernel.qemu")) ? 1 : 0);
+            loadIntegerSetting(stmt, Settings.System.SCREEN_OFF_TIMEOUT,
+                    R.integer.def_screen_off_timeout);
+    
+            // Set default cdma emergency tone
+            loadSetting(stmt, Settings.System.EMERGENCY_TONE, 0);
+    
+            // Set default cdma call auto retry
+            loadSetting(stmt, Settings.System.CALL_AUTO_RETRY, 0);
+    
+            // Set default cdma DTMF type
+            loadSetting(stmt, Settings.System.DTMF_TONE_TYPE_WHEN_DIALING, 0);
+    
+            // Set default hearing aid
+            loadSetting(stmt, Settings.System.HEARING_AID, 0);
+    
+            // Set default tty mode
+            loadSetting(stmt, Settings.System.TTY_MODE, 0);
+    
+            loadBooleanSetting(stmt, Settings.System.AIRPLANE_MODE_ON,
+                    R.bool.def_airplane_mode_on);
+    
+            loadStringSetting(stmt, Settings.System.AIRPLANE_MODE_RADIOS,
+                    R.string.def_airplane_mode_radios);
+    
+            loadStringSetting(stmt, Settings.System.AIRPLANE_MODE_TOGGLEABLE_RADIOS,
+                    R.string.airplane_mode_toggleable_radios);
+    
+            loadBooleanSetting(stmt, Settings.System.AUTO_TIME,
+                    R.bool.def_auto_time); // Sync time to NITZ
+    
+            loadIntegerSetting(stmt, Settings.System.SCREEN_BRIGHTNESS,
+                    R.integer.def_screen_brightness);
+    
+            loadBooleanSetting(stmt, Settings.System.SCREEN_BRIGHTNESS_MODE,
+                    R.bool.def_screen_brightness_automatic_mode);
+    
+            loadDefaultAnimationSettings(stmt);
+    
+            loadBooleanSetting(stmt, Settings.System.ACCELEROMETER_ROTATION,
+                    R.bool.def_accelerometer_rotation);
+    
+            loadDefaultHapticSettings(stmt);
+    
+            loadBooleanSetting(stmt, Settings.System.NOTIFICATION_LIGHT_PULSE,
+                    R.bool.def_notification_pulse);
+            loadBooleanSetting(stmt, Settings.System.SET_INSTALL_LOCATION,
+                    R.bool.set_install_location);
+            loadIntegerSetting(stmt, Settings.System.DEFAULT_INSTALL_LOCATION,
+                    R.integer.def_install_location);
+    
+            loadUISoundEffectsSettings(stmt);
+    
+            loadBooleanSetting(stmt, Settings.System.VIBRATE_IN_SILENT,
+                    R.bool.def_vibrate_in_silent);
+        } finally {
+            if (stmt != null) stmt.close();
+        }
     }
 
     private void loadUISoundEffectsSettings(SQLiteStatement stmt) {
@@ -1014,79 +1035,82 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     private void loadSecureSettings(SQLiteDatabase db) {
-        SQLiteStatement stmt = db.compileStatement("INSERT OR IGNORE INTO secure(name,value)"
-                + " VALUES(?,?);");
-
-        loadBooleanSetting(stmt, Settings.Secure.BLUETOOTH_ON,
-                R.bool.def_bluetooth_on);
-
-        // Data roaming default, based on build
-        loadSetting(stmt, Settings.Secure.DATA_ROAMING,
-                "true".equalsIgnoreCase(
-                        SystemProperties.get("ro.com.android.dataroaming",
-                                "false")) ? 1 : 0);
-
-        loadBooleanSetting(stmt, Settings.Secure.INSTALL_NON_MARKET_APPS,
-                R.bool.def_install_non_market_apps);
-
-        loadStringSetting(stmt, Settings.Secure.LOCATION_PROVIDERS_ALLOWED,
-                R.string.def_location_providers_allowed);
-
-        loadBooleanSetting(stmt, Settings.Secure.ASSISTED_GPS_ENABLED,
-                R.bool.assisted_gps_enabled);
-
-        loadIntegerSetting(stmt, Settings.Secure.NETWORK_PREFERENCE,
-                R.integer.def_network_preference);
-
-        loadBooleanSetting(stmt, Settings.Secure.USB_MASS_STORAGE_ENABLED,
-                R.bool.def_usb_mass_storage_enabled);
-
-        loadBooleanSetting(stmt, Settings.Secure.WIFI_ON,
-                R.bool.def_wifi_on);
-        loadBooleanSetting(stmt, Settings.Secure.WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON,
-                R.bool.def_networks_available_notification_on);
-
-        String wifiWatchList = SystemProperties.get("ro.com.android.wifi-watchlist");
-        if (!TextUtils.isEmpty(wifiWatchList)) {
-            loadSetting(stmt, Settings.Secure.WIFI_WATCHDOG_WATCH_LIST, wifiWatchList);
+        SQLiteStatement stmt = null;
+        try {
+            stmt = db.compileStatement("INSERT OR IGNORE INTO secure(name,value)"
+                    + " VALUES(?,?);");
+    
+            loadBooleanSetting(stmt, Settings.Secure.BLUETOOTH_ON,
+                    R.bool.def_bluetooth_on);
+    
+            // Data roaming default, based on build
+            loadSetting(stmt, Settings.Secure.DATA_ROAMING,
+                    "true".equalsIgnoreCase(
+                            SystemProperties.get("ro.com.android.dataroaming",
+                                    "false")) ? 1 : 0);
+    
+            loadBooleanSetting(stmt, Settings.Secure.INSTALL_NON_MARKET_APPS,
+                    R.bool.def_install_non_market_apps);
+    
+            loadStringSetting(stmt, Settings.Secure.LOCATION_PROVIDERS_ALLOWED,
+                    R.string.def_location_providers_allowed);
+    
+            loadBooleanSetting(stmt, Settings.Secure.ASSISTED_GPS_ENABLED,
+                    R.bool.assisted_gps_enabled);
+    
+            loadIntegerSetting(stmt, Settings.Secure.NETWORK_PREFERENCE,
+                    R.integer.def_network_preference);
+    
+            loadBooleanSetting(stmt, Settings.Secure.USB_MASS_STORAGE_ENABLED,
+                    R.bool.def_usb_mass_storage_enabled);
+    
+            loadBooleanSetting(stmt, Settings.Secure.WIFI_ON,
+                    R.bool.def_wifi_on);
+            loadBooleanSetting(stmt, Settings.Secure.WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON,
+                    R.bool.def_networks_available_notification_on);
+    
+            String wifiWatchList = SystemProperties.get("ro.com.android.wifi-watchlist");
+            if (!TextUtils.isEmpty(wifiWatchList)) {
+                loadSetting(stmt, Settings.Secure.WIFI_WATCHDOG_WATCH_LIST, wifiWatchList);
+            }
+    
+            // Set the preferred network mode to 0 = Global, CDMA default
+            int type = SystemProperties.getInt("ro.telephony.default_network",
+                    RILConstants.PREFERRED_NETWORK_MODE);
+            loadSetting(stmt, Settings.Secure.PREFERRED_NETWORK_MODE, type);
+    
+            // Enable or disable Cell Broadcast SMS
+            loadSetting(stmt, Settings.Secure.CDMA_CELL_BROADCAST_SMS,
+                    RILConstants.CDMA_CELL_BROADCAST_SMS_DISABLED);
+    
+            // Set the preferred cdma subscription to 0 = Subscription from RUIM, when available
+            loadSetting(stmt, Settings.Secure.PREFERRED_CDMA_SUBSCRIPTION,
+                    RILConstants.PREFERRED_CDMA_SUBSCRIPTION);
+    
+            // Don't do this.  The SystemServer will initialize ADB_ENABLED from a
+            // persistent system property instead.
+            //loadSetting(stmt, Settings.Secure.ADB_ENABLED, 0);
+    
+            // Allow mock locations default, based on build
+            loadSetting(stmt, Settings.Secure.ALLOW_MOCK_LOCATION,
+                    "1".equals(SystemProperties.get("ro.allow.mock.location")) ? 1 : 0);
+    
+            loadSecure35Settings(stmt);
+    
+            loadBooleanSetting(stmt, Settings.Secure.MOUNT_PLAY_NOTIFICATION_SND,
+                    R.bool.def_mount_play_notification_snd);
+    
+            loadBooleanSetting(stmt, Settings.Secure.MOUNT_UMS_AUTOSTART,
+                    R.bool.def_mount_ums_autostart);
+    
+            loadBooleanSetting(stmt, Settings.Secure.MOUNT_UMS_PROMPT,
+                    R.bool.def_mount_ums_prompt);
+    
+            loadBooleanSetting(stmt, Settings.Secure.MOUNT_UMS_NOTIFY_ENABLED,
+                    R.bool.def_mount_ums_notify_enabled);
+        } finally {
+            if (stmt != null) stmt.close();
         }
-
-        // Set the preferred network mode to 0 = Global, CDMA default
-        int type = SystemProperties.getInt("ro.telephony.default_network",
-                RILConstants.PREFERRED_NETWORK_MODE);
-        loadSetting(stmt, Settings.Secure.PREFERRED_NETWORK_MODE, type);
-
-        // Enable or disable Cell Broadcast SMS
-        loadSetting(stmt, Settings.Secure.CDMA_CELL_BROADCAST_SMS,
-                RILConstants.CDMA_CELL_BROADCAST_SMS_DISABLED);
-
-        // Set the preferred cdma subscription to 0 = Subscription from RUIM, when available
-        loadSetting(stmt, Settings.Secure.PREFERRED_CDMA_SUBSCRIPTION,
-                RILConstants.PREFERRED_CDMA_SUBSCRIPTION);
-
-        // Don't do this.  The SystemServer will initialize ADB_ENABLED from a
-        // persistent system property instead.
-        //loadSetting(stmt, Settings.Secure.ADB_ENABLED, 0);
-
-        // Allow mock locations default, based on build
-        loadSetting(stmt, Settings.Secure.ALLOW_MOCK_LOCATION,
-                "1".equals(SystemProperties.get("ro.allow.mock.location")) ? 1 : 0);
-
-        loadSecure35Settings(stmt);
-
-        loadBooleanSetting(stmt, Settings.Secure.MOUNT_PLAY_NOTIFICATION_SND,
-                R.bool.def_mount_play_notification_snd);
-
-        loadBooleanSetting(stmt, Settings.Secure.MOUNT_UMS_AUTOSTART,
-                R.bool.def_mount_ums_autostart);
-
-        loadBooleanSetting(stmt, Settings.Secure.MOUNT_UMS_PROMPT,
-                R.bool.def_mount_ums_prompt);
-
-        loadBooleanSetting(stmt, Settings.Secure.MOUNT_UMS_NOTIFY_ENABLED,
-                R.bool.def_mount_ums_notify_enabled);
-
-        stmt.close();
     }
 
     private void loadSecure35Settings(SQLiteStatement stmt) {
