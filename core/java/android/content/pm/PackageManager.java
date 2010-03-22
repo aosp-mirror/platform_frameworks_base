@@ -233,7 +233,7 @@ public abstract class PackageManager {
     /**
      * Flag parameter for {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)} to
      * indicate that this package should be installed as forward locked, i.e. only the app itself
-     * should have access to it's code and non-resource assets.
+     * should have access to its code and non-resource assets.
      * @hide
      */
     public static final int INSTALL_FORWARD_LOCK = 0x00000001;

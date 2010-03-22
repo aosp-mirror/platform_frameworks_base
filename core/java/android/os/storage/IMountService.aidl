@@ -84,7 +84,7 @@ interface IMountService
     int[] getStorageUsers(String path);
 
     /**
-     * Gets the state of an volume via it's mountpoint.
+     * Gets the state of a volume via its mountpoint.
      */
     String getVolumeState(String mountPoint);
 
