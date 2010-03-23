@@ -213,21 +213,19 @@ class BrowserFrame extends Handler {
 
     /**
      * Load the content as if it was loaded by the provided base URL. The
-     * failUrl is used as the history entry for the load data. If null or
-     * an empty string is passed for the failUrl, then no history entry is
-     * created.
+     * historyUrl is used as the history entry for the load data.
      * 
      * @param baseUrl Base URL used to resolve relative paths in the content
      * @param data Content to render in the browser
      * @param mimeType Mimetype of the data being passed in
      * @param encoding Character set encoding of the provided data.
-     * @param failUrl URL to use if the content fails to load or null.
+     * @param historyUrl URL to use as the history entry.
      */
     public void loadData(String baseUrl, String data, String mimeType,
-            String encoding, String failUrl) {
+            String encoding, String historyUrl) {
         mLoadInitFromJava = true;
-        if (failUrl == null) {
-            failUrl = "";
+        if (historyUrl == null || historyUrl.length() == 0) {
+            historyUrl = "about:blank";
         }
         if (data == null) {
             data = "";
@@ -241,7 +239,7 @@ class BrowserFrame extends Handler {
         if (mimeType == null || mimeType.length() == 0) {
             mimeType = "text/html";
         }
-        nativeLoadData(baseUrl, data, mimeType, encoding, failUrl);
+        nativeLoadData(baseUrl, data, mimeType, encoding, historyUrl);
         mLoadInitFromJava = false;
     }
 
@@ -916,7 +914,7 @@ class BrowserFrame extends Handler {
     private native void nativePostUrl(String url, byte[] postData);
 
     private native void nativeLoadData(String baseUrl, String data,
-            String mimeType, String encoding, String failUrl);
+            String mimeType, String encoding, String historyUrl);
 
     /**
      * Stop loading the current page.

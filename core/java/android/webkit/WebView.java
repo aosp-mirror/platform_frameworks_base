@@ -1483,10 +1483,8 @@ public class WebView extends AbsoluteLayout
     /**
      * Load the given data into the WebView, use the provided URL as the base
      * URL for the content. The base URL is the URL that represents the page
-     * that is loaded through this interface. As such, it is used for the
-     * history entry and to resolve any relative URLs. The failUrl is used if
-     * browser fails to load the data provided. If it is empty or null, and the
-     * load fails, then no history entry is created.
+     * that is loaded through this interface. As such, it is used to resolve any
+     * relative URLs. The historyUrl is used for the history entry.
      * <p>
      * Note for post 1.0. Due to the change in the WebKit, the access to asset
      * files through "file:///android_asset/" for the sub resources is more
@@ -1501,10 +1499,10 @@ public class WebView extends AbsoluteLayout
      * @param mimeType The MIMEType of the data. i.e. text/html. If null,
      *            defaults to "text/html"
      * @param encoding The encoding of the data. i.e. utf-8, us-ascii
-     * @param failUrl URL to use if the content fails to load or null.
+     * @param historyUrl URL to use as the history entry.  Can be null.
      */
     public void loadDataWithBaseURL(String baseUrl, String data,
-            String mimeType, String encoding, String failUrl) {
+            String mimeType, String encoding, String historyUrl) {
 
         if (baseUrl != null && baseUrl.toLowerCase().startsWith("data:")) {
             loadData(data, mimeType, encoding);
@@ -1516,7 +1514,7 @@ public class WebView extends AbsoluteLayout
         arg.mData = data;
         arg.mMimeType = mimeType;
         arg.mEncoding = encoding;
-        arg.mFailUrl = failUrl;
+        arg.mHistoryUrl = historyUrl;
         mWebViewCore.sendMessage(EventHub.LOAD_DATA, arg);
         clearTextEntry(false);
     }
