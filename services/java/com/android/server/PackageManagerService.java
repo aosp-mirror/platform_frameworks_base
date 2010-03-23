@@ -3977,7 +3977,7 @@ class PackageManagerService extends IPackageManager.Stub {
                             && ps.permissionsFixed) {
                         // If this is an existing, non-system package, then
                         // we can't add any new permissions to it.
-                        if (!allowedSig && !gp.loadedPermissions.contains(perm)) {
+                        if (!allowedSig && !gp.grantedPermissions.contains(perm)) {
                             allowed = false;
                             // Except...  if this is a permission that was added
                             // to the platform (note: need to only do this when
@@ -3989,7 +3989,7 @@ class PackageManagerService extends IPackageManager.Stub {
                                 if (npi.name.equals(perm)
                                         && pkg.applicationInfo.targetSdkVersion < npi.sdkVersion) {
                                     allowed = true;
-                                    Log.i(TAG, "Auto-granting WRITE_EXTERNAL_STORAGE to old pkg "
+                                    Log.i(TAG, "Auto-granting " + perm + " to old pkg "
                                             + pkg.packageName);
                                     break;
                                 }
@@ -4037,7 +4037,6 @@ class PackageManagerService extends IPackageManager.Stub {
             // permissions we have now selected are fixed until explicitly
             // changed.
             ps.permissionsFixed = true;
-            gp.loadedPermissions = new HashSet<String>(gp.grantedPermissions);
         }
     }
     
@@ -6948,12 +6947,6 @@ class PackageManagerService extends IPackageManager.Stub {
                             pw.print("      "); pw.println(s);
                         }
                     }
-                    if (ps.loadedPermissions.size() > 0) {
-                        pw.println("    loadedPermissions:");
-                        for (String s : ps.loadedPermissions) {
-                            pw.print("      "); pw.println(s);
-                        }
-                    }
                 }
             }
             printedSomething = false;
@@ -7020,10 +7013,6 @@ class PackageManagerService extends IPackageManager.Stub {
                             pw.print(" gids="); pw.println(arrayToString(su.gids));
                     pw.println("    grantedPermissions:");
                     for (String s : su.grantedPermissions) {
-                        pw.print("      "); pw.println(s);
-                    }
-                    pw.println("    loadedPermissions:");
-                    for (String s : su.loadedPermissions) {
                         pw.print("      "); pw.println(s);
                     }
                 }
@@ -7528,8 +7517,6 @@ class PackageManagerService extends IPackageManager.Stub {
         HashSet<String> grantedPermissions = new HashSet<String>();
         int[] gids;
 
-        HashSet<String> loadedPermissions = new HashSet<String>();
-
         GrantedPermissions(int pkgFlags) {
             setFlags(pkgFlags);
         }
@@ -7629,7 +7616,6 @@ class PackageManagerService extends IPackageManager.Stub {
         public void copyFrom(PackageSettingBase base) {
             grantedPermissions = base.grantedPermissions;
             gids = base.gids;
-            loadedPermissions = base.loadedPermissions;
 
             timeStamp = base.timeStamp;
             timeStampString = base.timeStampString;
@@ -8063,7 +8049,6 @@ class PackageManagerService extends IPackageManager.Stub {
                             p.userId = dis.userId;
                             // Clone permissions
                             p.grantedPermissions = new HashSet<String>(dis.grantedPermissions);
-                            p.loadedPermissions = new HashSet<String>(dis.loadedPermissions);
                             // Clone component info
                             p.disabledComponents = new HashSet<String>(dis.disabledComponents);
                             p.enabledComponents = new HashSet<String>(dis.enabledComponents);
@@ -8168,7 +8153,7 @@ class PackageManagerService extends IPackageManager.Stub {
                 }
                 for (PackageSetting pkg:sus.packages) {
                     if (pkg.pkg != null &&
-                            !pkg.pkg.packageName.equalsIgnoreCase(deletedPs.pkg.packageName) &&
+                            !pkg.pkg.packageName.equals(deletedPs.pkg.packageName) &&
                             pkg.pkg.requestedPermissions.contains(eachPerm)) {
                         used = true;
                         break;
@@ -8177,7 +8162,6 @@ class PackageManagerService extends IPackageManager.Stub {
                 if (!used) {
                     // can safely delete this permission from list
                     sus.grantedPermissions.remove(eachPerm);
-                    sus.loadedPermissions.remove(eachPerm);
                 }
             }
             // Update gids
@@ -9052,7 +9036,7 @@ class PackageManagerService extends IPackageManager.Stub {
                         packageSetting.signatures.readXml(parser, mPastSignatures);
                     } else if (tagName.equals("perms")) {
                         readGrantedPermissionsLP(parser,
-                                packageSetting.loadedPermissions);
+                                packageSetting.grantedPermissions);
                         packageSetting.permissionsFixed = true;
                     } else {
                         reportSettingsProblem(Log.WARN,
@@ -9181,7 +9165,7 @@ class PackageManagerService extends IPackageManager.Stub {
                     if (tagName.equals("sigs")) {
                         su.signatures.readXml(parser, mPastSignatures);
                     } else if (tagName.equals("perms")) {
-                        readGrantedPermissionsLP(parser, su.loadedPermissions);
+                        readGrantedPermissionsLP(parser, su.grantedPermissions);
                     } else {
                         reportSettingsProblem(Log.WARN,
                                 "Unknown element under <shared-user>: "
@@ -9559,8 +9543,6 @@ class PackageManagerService extends IPackageManager.Stub {
                    // Scan the package
                    if (scanPackageLI(pkg, parseFlags, SCAN_MONITOR) != null) {
                        synchronized (mPackages) {
-                           updatePermissionsLP(pkg.packageName, pkg,
-                                   pkg.permissions.size() > 0, false);
                            retCode = PackageManager.INSTALL_SUCCEEDED;
                            pkgList.add(pkg.packageName);
                            // Post process args
