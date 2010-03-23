@@ -31,15 +31,21 @@ import java.util.ArrayList;
  */
 public class HeaderViewListAdapter implements WrapperListAdapter, Filterable {
 
-    private ListAdapter mAdapter;
+    private final ListAdapter mAdapter;
 
     // These two ArrayList are assumed to NOT be null.
-    // They are indeed created when declared in ListView and then shared. 
+    // They are indeed created when declared in ListView and then shared.
     ArrayList<ListView.FixedViewInfo> mHeaderViewInfos;
     ArrayList<ListView.FixedViewInfo> mFooterViewInfos;
+
+    // Used as a placeholder in case the provided info views are indeed null.
+    // Currently only used by some CTS tests, which may be removed.
+    static final ArrayList<ListView.FixedViewInfo> EMPTY_INFO_LIST =
+        new ArrayList<ListView.FixedViewInfo>();
+
     boolean mAreAllFixedViewsSelectable;
 
-    private boolean mIsFilterable;
+    private final boolean mIsFilterable;
 
     public HeaderViewListAdapter(ArrayList<ListView.FixedViewInfo> headerViewInfos,
                                  ArrayList<ListView.FixedViewInfo> footerViewInfos,
@@ -47,8 +53,17 @@ public class HeaderViewListAdapter implements WrapperListAdapter, Filterable {
         mAdapter = adapter;
         mIsFilterable = adapter instanceof Filterable;
 
-        mHeaderViewInfos = headerViewInfos;
-        mFooterViewInfos = footerViewInfos;
+        if (headerViewInfos == null) {
+            mHeaderViewInfos = EMPTY_INFO_LIST;
+        } else {
+            mHeaderViewInfos = headerViewInfos;
+        }
+
+        if (footerViewInfos == null) {
+            mFooterViewInfos = EMPTY_INFO_LIST;
+        } else {
+            mFooterViewInfos = footerViewInfos;
+        }
 
         mAreAllFixedViewsSelectable =
                 areAllListInfosSelectable(mHeaderViewInfos)
