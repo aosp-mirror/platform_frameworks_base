@@ -422,7 +422,7 @@ public class SurfaceView extends View {
                 if (visibleChanged && (!visible || mNewSurfaceNeeded)) {
                     reportSurfaceDestroyed();
                 }
-                
+
                 mNewSurfaceNeeded = false;
                 
                 mSurfaceLock.lock();
@@ -470,6 +470,8 @@ public class SurfaceView extends View {
                                 c.surfaceChanged(mSurfaceHolder, mFormat, mWidth, mHeight);
                             }
                         }
+                    } else {
+                        mSurface.release();
                     }
                 } finally {
                     mIsCreating = false;
