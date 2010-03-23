@@ -2601,8 +2601,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         }
 
         void startOverfling(int initialVelocity) {
-            mScroller.fling(0, mScrollY, 0, initialVelocity, 0, 0, 0, 0, 0, getHeight());
-            edgeReached();
+            final int min = mScrollY > 0 ? Integer.MIN_VALUE : 0;
+            final int max = mScrollY > 0 ? 0 : Integer.MAX_VALUE;
+            mScroller.fling(0, mScrollY, 0, initialVelocity, 0, 0, min, max, 0, getHeight());
             mTouchMode = TOUCH_MODE_OVERFLING;
             invalidate();
             post(this);

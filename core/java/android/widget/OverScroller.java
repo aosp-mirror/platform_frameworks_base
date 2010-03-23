@@ -42,11 +42,31 @@ public class OverScroller extends Scroller {
     }
 
     /**
-     * Creates a Scroller with the specified interpolator. If the interpolator is
-     * null, the default (viscous) interpolator will be used.
+     * Creates an OverScroller with default edge bounce coefficients.
+     * @param context The context of this application.
+     * @param interpolator The scroll interpolator. If null, a default (viscous) interpolator will
+     * be used.
      */
     public OverScroller(Context context, Interpolator interpolator) {
+        this(context, interpolator, MagneticOverScroller.DEFAULT_BOUNCE_COEFFICIENT,
+                MagneticOverScroller.DEFAULT_BOUNCE_COEFFICIENT);
+    }
+
+    /**
+     * Creates an OverScroller.
+     * @param context The context of this application.
+     * @param interpolator The scroll interpolator. If null, a default (viscous) interpolator will
+     * be used.
+     * @param bounceCoefficientX A value between 0 and 1 that will determine the proportion of the
+     * velocity which is preserved in the bounce when the horizontal edge is reached. A null value
+     * means no bounce.
+     * @param bounceCoefficientY Same as bounceCoefficientX but for the vertical direction.
+     */
+    public OverScroller(Context context, Interpolator interpolator,
+            float bounceCoefficientX, float bounceCoefficientY) {
         super(context, interpolator);
+        mOverScrollerX.setBounceCoefficient(bounceCoefficientX);
+        mOverScrollerY.setBounceCoefficient(bounceCoefficientY);
     }
 
     @Override
@@ -69,8 +89,11 @@ public class OverScroller extends Scroller {
      */
     public boolean springback(int startX, int startY, int minX, int maxX, int minY, int maxY) {
         mMode = FLING_MODE;
-        return mOverScrollerX.springback(startX, minX, maxX)
-                || mOverScrollerY.springback(startY, minY, maxY);
+
+        // Make sure both methods are called.
+        final boolean spingbackX = mOverScrollerX.springback(startX, minX, maxX);
+        final boolean spingbackY = mOverScrollerY.springback(startY, minY, maxY);
+        return spingbackX || spingbackY;
     }
 
     @Override
@@ -130,8 +153,8 @@ public class OverScroller extends Scroller {
     }
 
     /**
-     * Returns whether the current Scroller position is overscrolled or still within the minimum and
-     * maximum bounds provided in the
+     * Returns whether the current Scroller is currently returning to a valid position.
+     * Valid bounds were provided by the
      * {@link #fling(int, int, int, int, int, int, int, int, int, int)} method.
      * 
      * One should check this value before calling
@@ -139,11 +162,13 @@ public class OverScroller extends Scroller {
      * a valid position will then be stopped. The caller has to take into account the fact that the
      * started scroll will start from an overscrolled position.
      * 
-     * @return true when the current position is overscrolled.
+     * @return true when the current position is overscrolled and interpolated back to a valid value.
      */
     public boolean isOverscrolled() {
-        return ((!mOverScrollerX.mFinished && mOverScrollerX.mState != MagneticOverScroller.TO_EDGE) ||
-                (!mOverScrollerY.mFinished && mOverScrollerY.mState != MagneticOverScroller.TO_EDGE));
+        return ((!mOverScrollerX.mFinished &&
+                mOverScrollerX.mState != MagneticOverScroller.TO_EDGE) ||
+                (!mOverScrollerY.mFinished &&
+                        mOverScrollerY.mState != MagneticOverScroller.TO_EDGE));
     }
 
     static class MagneticOverScroller extends Scroller.MagneticScroller {
@@ -156,30 +181,25 @@ public class OverScroller extends Scroller {
         // The allowed overshot distance before boundary is reached.
         private int mOver;
 
-        // When the scroll goes beyond the edges limits, the deceleration is
-        // multiplied by this coefficient, so that the return to a valid
-        // position is faster.
-        private static final float OVERSCROLL_DECELERATION_COEF = 16.0f;
+        // Duration in milliseconds to go back from edge to edge. Springback is half of it.
+        private static final int OVERSCROLL_SPRINGBACK_DURATION = 200;
+
+        // Oscillation period
+        private static final float TIME_COEF =
+            1000.0f * (float) Math.PI / OVERSCROLL_SPRINGBACK_DURATION;
 
         // If the velocity is smaller than this value, no bounce is triggered
         // when the edge limits are reached (would result in a zero pixels
         // displacement anyway).
-        private static final float MINIMUM_VELOCITY_FOR_BOUNCE = 200.0f;
+        private static final float MINIMUM_VELOCITY_FOR_BOUNCE = 140.0f;
 
-        // Could be made public for tuning, but applications would no longer
-        // have the same look and feel.
-        private static final float BOUNCE_COEFFICIENT = 0.4f;
+        // Proportion of the velocity that is preserved when the edge is reached.
+        private static final float DEFAULT_BOUNCE_COEFFICIENT = 0.16f;
 
-        /*
-         * Get a signed deceleration that will reduce the velocity.
-         */
-        @Override
-        float getDeceleration(int velocity) {
-            float decelerationY = super.getDeceleration(velocity);
-            if (mState != TO_EDGE) {
-                decelerationY *= OVERSCROLL_DECELERATION_COEF;
-            }
-            return decelerationY;
+        private float mBounceCoefficient = DEFAULT_BOUNCE_COEFFICIENT;
+
+        void setBounceCoefficient(float coefficient) {
+            mBounceCoefficient = coefficient;
         }
 
         boolean springback(int start, int min, int max) {
@@ -192,20 +212,21 @@ public class OverScroller extends Scroller {
             mDuration = 0;
 
             if (start < min) {
-                startSpringback(start, min, -1);
+                startSpringback(start, min, false);
             } else if (start > max) {
-                startSpringback(start, max, 1);
+                startSpringback(start, max, true);
             }
 
             return !mFinished;
         }
 
-        private void startSpringback(int start, int end, int sign) {
+        private void startSpringback(int start, int end, boolean positive) {
             mFinished = false;
             mState = TO_BOUNCE;
-            mDeceleration = getDeceleration(sign);
-            mFinal = end;
-            mDuration = (int) (1000.0f * Math.sqrt(2.0f * (end - start) / mDeceleration));
+            mStart = mFinal = end;
+            mDuration = OVERSCROLL_SPRINGBACK_DURATION;
+            mStartTime -= OVERSCROLL_SPRINGBACK_DURATION / 2;
+            mVelocity = (int) (Math.abs(end - start) * TIME_COEF * (positive ? 1.0 : -1.0f));
         }
 
         void fling(int start, int velocity, int min, int max, int over) {
@@ -214,39 +235,60 @@ public class OverScroller extends Scroller {
 
             super.fling(start, velocity, min, max);
 
-            if (mStart > max) {
-                if (mStart >= max + over) {
+            if (start > max) {
+                if (start >= max + over) {
                     springback(max + over, min, max);
                 } else {
-                    // Make sure the deceleration brings us back to edge
-                    mVelocity = velocity > 0 ? velocity : -velocity;
-                    mCurrVelocity = velocity;
-                    notifyEdgeReached(start, max, over);
+                    if (velocity <= 0) {
+                        springback(start, min, max);
+                    } else {
+                        long time = AnimationUtils.currentAnimationTimeMillis();
+                        final double durationSinceEdge =
+                            Math.atan((start-max) * TIME_COEF / velocity) / TIME_COEF;
+                        mStartTime = (int) (time - 1000.0f * durationSinceEdge);
+
+                        // Simulate a bounce that started from edge
+                        mStart = max;
+
+                        mVelocity = (int) (velocity / Math.cos(durationSinceEdge * TIME_COEF));
+
+                        onEdgeReached();
+                    }
                 }
             } else {
-                if (mStart < min) {
-                    if (mStart <= min - over) {
+                if (start < min) {
+                    if (start <= min - over) {
                         springback(min - over, min, max);
                     } else {
-                        // Make sure the deceleration brings us back to edge
-                        mVelocity = velocity < 0 ? velocity : -velocity;
-                        mCurrVelocity = velocity;
-                        notifyEdgeReached(start, min, over);
+                        if (velocity >= 0) {
+                            springback(start, min, max);
+                        } else {
+                            long time = AnimationUtils.currentAnimationTimeMillis();
+                            final double durationSinceEdge =
+                                Math.atan((start-min) * TIME_COEF / velocity) / TIME_COEF;
+                            mStartTime = (int) (time - 1000.0f * durationSinceEdge);
+
+                            // Simulate a bounce that started from edge
+                            mStart = min;
+
+                            mVelocity = (int) (velocity / Math.cos(durationSinceEdge * TIME_COEF));
+
+                            onEdgeReached();
+                        }
+
                     }
                 }
             }
         }
 
         void notifyEdgeReached(int start, int end, int over) {
-            // Compute post-edge deceleration
-            mState = TO_BOUNDARY;
             mDeceleration = getDeceleration(mVelocity);
 
             // Local time, used to compute edge crossing time.
             float timeCurrent = mCurrVelocity / mDeceleration;
             final int distance = end - start;
             float timeEdge = -(float) Math.sqrt((2.0f * distance / mDeceleration)
-                             + (timeCurrent * timeCurrent));
+                    + (timeCurrent * timeCurrent));
 
             mVelocity = (int) (mDeceleration * timeEdge);
 
@@ -261,22 +303,21 @@ public class OverScroller extends Scroller {
             onEdgeReached();
         }
 
-        void onEdgeReached() {
+        private void onEdgeReached() {
             // mStart, mVelocity and mStartTime were adjusted to their values when edge was reached.
-            mState = TO_BOUNDARY;
-            mDeceleration = getDeceleration(mVelocity);
-
-            int distance = Math.round((mVelocity * mVelocity) / (2.0f * mDeceleration));
+            final float distance = mVelocity / TIME_COEF;
 
             if (Math.abs(distance) < mOver) {
-                // Deceleration will bring us back to final position
+                // Spring force will bring us back to final position
                 mState = TO_BOUNCE;
                 mFinal = mStart;
-                mDuration = (int) (-2000.0f * mVelocity / mDeceleration);
+                mDuration = OVERSCROLL_SPRINGBACK_DURATION;
             } else {
                 // Velocity is too high, we will hit the boundary limit
-                mFinal = mStart + (mVelocity > 0 ? mOver : -mOver);
-                mDuration = computeDuration(mStart, mFinal, mVelocity, mDeceleration);
+                mState = TO_BOUNDARY;
+                int over = mVelocity > 0 ? mOver : -mOver;
+                mFinal = mStart + over;
+                mDuration = (int) (1000.0f * Math.asin(over / distance) / TIME_COEF);
             }
         }
 
@@ -300,25 +341,48 @@ public class OverScroller extends Scroller {
                     break;
                 case TO_BOUNDARY:
                     mStartTime += mDuration;
-                    mStart = mFinal;
-                    mFinal = mStart - (mVelocity > 0 ? mOver : -mOver);
-                    mVelocity = 0;
-                    mDuration = (int) (1000.0f * Math.sqrt(Math.abs(2.0f * mOver / mDeceleration)));
-                    mState = TO_BOUNCE;
+                    startSpringback(mFinal, mFinal - (mVelocity > 0 ? mOver:-mOver), mVelocity > 0);
                     break;
                 case TO_BOUNCE:
-                    float edgeVelocity = mVelocity + mDeceleration * mDuration / 1000.0f;
-                    mVelocity = (int) (-edgeVelocity * BOUNCE_COEFFICIENT);
+                    //mVelocity = (int) (mVelocity * BOUNCE_COEFFICIENT);
+                    mVelocity = (int) (mVelocity * mBounceCoefficient);
                     if (Math.abs(mVelocity) < MINIMUM_VELOCITY_FOR_BOUNCE) {
                         return false;
                     }
-                    mStart = mFinal;
                     mStartTime += mDuration;
-                    mDuration = (int) (-2000.0f * mVelocity / mDeceleration);
                     break;
             }
 
             update();
+            return true;
+        }
+
+        /*
+         * Update the current position and velocity for current time. Returns
+         * true if update has been done and false if animation duration has been
+         * reached.
+         */
+        @Override
+        boolean update() {
+            final long time = AnimationUtils.currentAnimationTimeMillis();
+            final long duration = time - mStartTime;
+
+            if (duration > mDuration) {
+                return false;
+            }
+
+            double distance;
+            final float t = duration / 1000.0f;
+            if (mState == TO_EDGE) {
+                mCurrVelocity = mVelocity + mDeceleration * t;
+                distance = mVelocity * t + mDeceleration * t * t / 2.0f;
+            } else {
+                final float d = t * TIME_COEF;
+                mCurrVelocity = mVelocity * (float)Math.cos(d);
+                distance = mVelocity / TIME_COEF * Math.sin(d);
+            }
+
+            mCurrentPosition = mStart + (int) distance;
             return true;
         }
     }

@@ -431,7 +431,7 @@ public class Scroller  {
         /*
          * Get a signed deceleration that will reduce the velocity.
          */
-        float getDeceleration(int velocity) {
+        static float getDeceleration(int velocity) {
             return velocity > 0 ? -GRAVITY : GRAVITY;
         }
 
