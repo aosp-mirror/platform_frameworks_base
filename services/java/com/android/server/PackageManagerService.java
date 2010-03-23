@@ -9572,11 +9572,10 @@ class PackageManagerService extends IPackageManager.Stub {
        if (doGc) {
            Runtime.getRuntime().gc();
        }
-       // Delete any stale containers if needed.
+       // List stale containers.
        if (removeCids != null) {
            for (String cid : removeCids) {
-               Log.i(TAG, "Destroying stale container : " + cid);
-               PackageHelper.destroySdDir(cid);
+               Log.w(TAG, "Container " + cid + " is stale");
            }
        }
    }

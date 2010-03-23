@@ -136,9 +136,7 @@ public class AppCacheTest extends AndroidTestCase {
         if(localLOGV || TRACKING) Log.i(TAG, "blks3="+blks3);
         verifyTestFiles1(cacheDir, "testtmpdir", 5);
     }
-    
-    // TODO: flaky test
-    // @LargeTest
+
     public void testFreeApplicationCacheSomeFiles() throws Exception {
         StatFs st = new StatFs("/data");
         long blks1 = getFreeStorageBlks(st);
