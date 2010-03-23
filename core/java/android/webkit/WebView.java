@@ -2618,6 +2618,9 @@ public class WebView extends AbsoluteLayout
      * @hide
      */
     public void notifyFindDialogDismissed() {
+        if (mWebViewCore == null) {
+            return;
+        }
         clearMatches();
         setFindIsUp(false);
         recordNewContentSize(mContentWidth, mContentHeight - mFindHeight,
