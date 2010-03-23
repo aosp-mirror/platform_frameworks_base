@@ -172,6 +172,10 @@ public class SimpleAdapter extends BaseAdapter implements Filterable {
                     if (v instanceof Checkable) {
                         if (data instanceof Boolean) {
                             ((Checkable) v).setChecked((Boolean) data);
+                        } else if (v instanceof TextView) {
+                            // Note: keep the instanceof TextView check at the bottom of these
+                            // ifs since a lot of views are TextViews (e.g. CheckBoxes).
+                            setViewText((TextView) v, text);
                         } else {
                             throw new IllegalStateException(v.getClass().getName() +
                                     " should be bound to a Boolean, not a " +
