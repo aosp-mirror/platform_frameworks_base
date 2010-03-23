@@ -168,6 +168,29 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
+        case START_ACTIVITY_WITH_CONFIG_TRANSACTION:
+        {
+            data.enforceInterface(IActivityManager.descriptor);
+            IBinder b = data.readStrongBinder();
+            IApplicationThread app = ApplicationThreadNative.asInterface(b);
+            Intent intent = Intent.CREATOR.createFromParcel(data);
+            String resolvedType = data.readString();
+            Uri[] grantedUriPermissions = data.createTypedArray(Uri.CREATOR);
+            int grantedMode = data.readInt();
+            IBinder resultTo = data.readStrongBinder();
+            String resultWho = data.readString();    
+            int requestCode = data.readInt();
+            boolean onlyIfNeeded = data.readInt() != 0;
+            boolean debug = data.readInt() != 0;
+            Configuration config = Configuration.CREATOR.createFromParcel(data);
+            int result = startActivityWithConfig(app, intent, resolvedType,
+                    grantedUriPermissions, grantedMode, resultTo, resultWho,
+                    requestCode, onlyIfNeeded, debug, config);
+            reply.writeNoException();
+            reply.writeInt(result);
+            return true;
+        }
+
         case START_ACTIVITY_INTENT_SENDER_TRANSACTION:
         {
             data.enforceInterface(IActivityManager.descriptor);
@@ -1291,6 +1314,32 @@ class ActivityManagerProxy implements IActivityManager
         mRemote.transact(START_ACTIVITY_AND_WAIT_TRANSACTION, data, reply, 0);
         reply.readException();
         WaitResult result = WaitResult.CREATOR.createFromParcel(reply);
+        reply.recycle();
+        data.recycle();
+        return result;
+    }
+    public int startActivityWithConfig(IApplicationThread caller, Intent intent,
+            String resolvedType, Uri[] grantedUriPermissions, int grantedMode,
+            IBinder resultTo, String resultWho,
+            int requestCode, boolean onlyIfNeeded,
+            boolean debug, Configuration config) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeStrongBinder(caller != null ? caller.asBinder() : null);
+        intent.writeToParcel(data, 0);
+        data.writeString(resolvedType);
+        data.writeTypedArray(grantedUriPermissions, 0);
+        data.writeInt(grantedMode);
+        data.writeStrongBinder(resultTo);
+        data.writeString(resultWho);
+        data.writeInt(requestCode);
+        data.writeInt(onlyIfNeeded ? 1 : 0);
+        data.writeInt(debug ? 1 : 0);
+        config.writeToParcel(data, 0);
+        mRemote.transact(START_ACTIVITY_TRANSACTION, data, reply, 0);
+        reply.readException();
+        int result = reply.readInt();
         reply.recycle();
         data.recycle();
         return result;

@@ -3612,7 +3612,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             Intent intent, String resolvedType, Uri[] grantedUriPermissions,
             int grantedMode, IBinder resultTo,
             String resultWho, int requestCode, boolean onlyIfNeeded,
-            boolean debug, WaitResult outResult) {
+            boolean debug, WaitResult outResult, Configuration config) {
         // Refuse possible leaked file descriptors
         if (intent != null && intent.hasFileDescriptors()) {
             throw new IllegalArgumentException("File descriptors passed in Intent");
@@ -3666,6 +3666,15 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     grantedUriPermissions, grantedMode, aInfo,
                     resultTo, resultWho, requestCode, callingPid, callingUid,
                     onlyIfNeeded, componentSpecified);
+            if (config != null) {
+                // If the caller also wants to switch to a new configuration,
+                // do so now.  This allows a clean switch, as we are waiting
+                // for the current activity to pause (so we will not destroy
+                // it), and have not yet started the next activity.
+                enforceCallingPermission(android.Manifest.permission.CHANGE_CONFIGURATION,
+                        "updateConfiguration()");
+                updateConfigurationLocked(config, null);
+            }
             Binder.restoreCallingIdentity(origId);
             
             if (outResult != null) {
@@ -3707,8 +3716,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             int grantedMode, IBinder resultTo,
             String resultWho, int requestCode, boolean onlyIfNeeded,
             boolean debug) {
-        return startActivityMayWait(caller, intent, resolvedType, grantedUriPermissions,
-                grantedMode, resultTo, resultWho, requestCode, onlyIfNeeded, debug, null);
+        return startActivityMayWait(caller, intent, resolvedType,
+                grantedUriPermissions, grantedMode, resultTo, resultWho,
+                requestCode, onlyIfNeeded, debug, null, null);
     }
 
     public final WaitResult startActivityAndWait(IApplicationThread caller,
@@ -3717,11 +3727,22 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             String resultWho, int requestCode, boolean onlyIfNeeded,
             boolean debug) {
         WaitResult res = new WaitResult();
-        startActivityMayWait(caller, intent, resolvedType, grantedUriPermissions,
-                grantedMode, resultTo, resultWho, requestCode, onlyIfNeeded, debug, res);
+        startActivityMayWait(caller, intent, resolvedType,
+                grantedUriPermissions, grantedMode, resultTo, resultWho,
+                requestCode, onlyIfNeeded, debug, res, null);
         return res;
     }
     
+    public final int startActivityWithConfig(IApplicationThread caller,
+            Intent intent, String resolvedType, Uri[] grantedUriPermissions,
+            int grantedMode, IBinder resultTo,
+            String resultWho, int requestCode, boolean onlyIfNeeded,
+            boolean debug, Configuration config) {
+        return startActivityMayWait(caller, intent, resolvedType,
+                grantedUriPermissions, grantedMode, resultTo, resultWho,
+                requestCode, onlyIfNeeded, debug, null, config);
+    }
+
      public int startActivityIntentSender(IApplicationThread caller,
             IntentSender intent, Intent fillInIntent, String resolvedType,
             IBinder resultTo, String resultWho, int requestCode,
