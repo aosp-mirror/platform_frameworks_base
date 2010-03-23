@@ -232,18 +232,6 @@ public class WifiService extends IWifiManager.Stub {
         PowerManager powerManager = (PowerManager)mContext.getSystemService(Context.POWER_SERVICE);
         sWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKELOCK_TAG);
         sDriverStopWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKELOCK_TAG);
-        mWifiStateTracker.setReleaseWakeLockCallback(
-                new Runnable() {
-                    public void run() {
-                        mWifiHandler.removeMessages(MESSAGE_RELEASE_WAKELOCK);
-                        synchronized (sDriverStopWakeLock) {
-                            if (sDriverStopWakeLock.isHeld()) {
-                                sDriverStopWakeLock.release();
-                            }
-                        }
-                    }
-                }
-        );
 
         mContext.registerReceiver(
                 new BroadcastReceiver() {
@@ -1779,20 +1767,16 @@ public class WifiService extends IWifiManager.Stub {
                     sendEnableMessage(true, false, mLastEnableUid);
                     sWakeLock.acquire();
                     sendStartMessage(strongestLockMode == WifiManager.WIFI_MODE_SCAN_ONLY);
-                } else {
+                } else if (!mWifiStateTracker.isDriverStopped()) {
                     int wakeLockTimeout =
                             Settings.Secure.getInt(
                                     mContext.getContentResolver(),
                                     Settings.Secure.WIFI_MOBILE_DATA_TRANSITION_WAKELOCK_TIMEOUT_MS,
                                     DEFAULT_WAKELOCK_TIMEOUT);
                     /*
-                     * The following wakelock is held in order to ensure
-                     * that the connectivity manager has time to fail over
-                     * to the mobile data network. The connectivity manager
-                     * releases it once mobile data connectivity has been
-                     * established. If connectivity cannot be established,
-                     * the wakelock is released after wakeLockTimeout
-                     * milliseconds have elapsed.
+                     * We are assuming that ConnectivityService can make
+                     * a transition to cellular data within wakeLockTimeout time.
+                     * The wakelock is released by the delayed message.
                      */
                     sDriverStopWakeLock.acquire();
                     mWifiHandler.sendEmptyMessage(MESSAGE_STOP_WIFI);
@@ -1886,11 +1870,7 @@ public class WifiService extends IWifiManager.Stub {
                     break;
 
                 case MESSAGE_RELEASE_WAKELOCK:
-                    synchronized (sDriverStopWakeLock) {
-                        if (sDriverStopWakeLock.isHeld()) {
-                            sDriverStopWakeLock.release();
-                        }
-                    }
+                    sDriverStopWakeLock.release();
                     break;
 
                 case MESSAGE_START_ACCESS_POINT:
