@@ -4001,6 +4001,8 @@ class PackageManagerService extends IPackageManager.Stub {
                             changedPermission = true;
                             gp.grantedPermissions.add(perm);
                             gp.gids = appendInts(gp.gids, bp.gids);
+                        } else if (!ps.haveGids) {
+                            gp.gids = appendInts(gp.gids, bp.gids);
                         }
                     } else {
                         Slog.w(TAG, "Not granting permission " + perm
@@ -4038,6 +4040,7 @@ class PackageManagerService extends IPackageManager.Stub {
             // changed.
             ps.permissionsFixed = true;
         }
+        ps.haveGids = true;
     }
     
     private final class ActivityIntentResolver
@@ -6926,7 +6929,8 @@ class PackageManagerService extends IPackageManager.Stub {
                     pw.print("    timeStamp="); pw.println(ps.getTimeStampStr());
                     pw.print("    signatures="); pw.println(ps.signatures);
                     pw.print("    permissionsFixed="); pw.print(ps.permissionsFixed);
-                            pw.print(" pkgFlags=0x"); pw.print(Integer.toHexString(ps.pkgFlags));
+                            pw.print(" haveGids="); pw.println(ps.haveGids);
+                    pw.print("    pkgFlags=0x"); pw.print(Integer.toHexString(ps.pkgFlags));
                             pw.print(" installStatus="); pw.print(ps.installStatus);
                             pw.print(" enabled="); pw.println(ps.enabled);
                     if (ps.disabledComponents.size() > 0) {
@@ -7548,6 +7552,7 @@ class PackageManagerService extends IPackageManager.Stub {
         PackageSignatures signatures = new PackageSignatures();
 
         boolean permissionsFixed;
+        boolean haveGids;
 
         /* Explicitly disabled components */
         HashSet<String> disabledComponents = new HashSet<String>(0);
@@ -7621,6 +7626,7 @@ class PackageManagerService extends IPackageManager.Stub {
             timeStampString = base.timeStampString;
             signatures = base.signatures;
             permissionsFixed = base.permissionsFixed;
+            haveGids = base.haveGids;
             disabledComponents = base.disabledComponents;
             enabledComponents = base.enabledComponents;
             enabled = base.enabled;
@@ -9572,11 +9578,10 @@ class PackageManagerService extends IPackageManager.Stub {
        if (doGc) {
            Runtime.getRuntime().gc();
        }
-       // Delete any stale containers if needed.
+       // List stale containers.
        if (removeCids != null) {
            for (String cid : removeCids) {
-               Log.i(TAG, "Destroying stale container : " + cid);
-               PackageHelper.destroySdDir(cid);
+               Log.w(TAG, "Container " + cid + " is stale");
            }
        }
    }

@@ -3274,6 +3274,14 @@ public final class Settings {
                 INCALL_POWER_BUTTON_BEHAVIOR_SCREEN_OFF;
 
         /**
+         * The current night mode that has been selected by the user.  Owned
+         * and controlled by UiModeManagerService.  Constants are as per
+         * UiModeManager.
+         * @hide
+         */
+        public static final String UI_NIGHT_MODE = "ui_night_mode";
+        
+        /**
          * @hide
          */
         public static final String[] SETTINGS_TO_BACKUP = {
@@ -3299,7 +3307,8 @@ public final class Settings {
             MOUNT_PLAY_NOTIFICATION_SND,
             MOUNT_UMS_AUTOSTART,
             MOUNT_UMS_PROMPT,
-            MOUNT_UMS_NOTIFY_ENABLED
+            MOUNT_UMS_NOTIFY_ENABLED,
+            UI_NIGHT_MODE
         };
 
         /**

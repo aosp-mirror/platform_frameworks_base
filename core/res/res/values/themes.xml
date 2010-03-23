@@ -471,7 +471,6 @@
 
     <!-- Theme for the search input bar. -->
     <style name="Theme.SearchBar" parent="Theme.Panel">
-        <item name="android:backgroundDimEnabled">true</item>
         <item name="windowContentOverlay">@null</item>        
     </style>
     

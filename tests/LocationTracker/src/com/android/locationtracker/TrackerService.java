@@ -193,11 +193,11 @@ public class TrackerService extends Service {
     }
 
     private boolean doDebugLogging() {
-        return getPreferences().getBoolean(DEBUG_PREF, true);
+        return getPreferences().getBoolean(DEBUG_PREF, false);
     }
 
     private boolean trackSignalStrength() {
-        return getPreferences().getBoolean(SIGNAL_PREF, true);
+        return getPreferences().getBoolean(SIGNAL_PREF, false);
     }
 
     private float getLocationMinDistance() {

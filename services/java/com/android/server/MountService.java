@@ -100,6 +100,7 @@ class MountService extends IMountService.Stub
         public static final int OpFailedMediaCorrupt           = 403;
         public static final int OpFailedVolNotMounted          = 404;
         public static final int OpFailedStorageBusy            = 405;
+        public static final int OpFailedStorageNotFound        = 406;
 
         /*
          * 600 series - Unsolicited broadcasts.
@@ -1290,21 +1291,22 @@ class MountService extends IMountService.Stub
         waitForReady();
         warnOnNotMounted();
 
-        ArrayList<String> rsp = mConnector.doCommand("asec path " + id);
-
-        for (String line : rsp) {
-            String []tok = line.split(" ");
+        try {
+            ArrayList<String> rsp = mConnector.doCommand(String.format("asec path %s", id));
+            String []tok = rsp.get(0).split(" ");
             int code = Integer.parseInt(tok[0]);
-            if (code == VoldResponseCode.AsecPathResult) {
-                return tok[1];
+            if (code != VoldResponseCode.AsecPathResult) {
+                throw new IllegalStateException(String.format("Unexpected response code %d", code));
+            }
+            return tok[1];
+        } catch (NativeDaemonConnectorException e) {
+            int code = e.getCode();
+            if (code == VoldResponseCode.OpFailedStorageNotFound) {
+                throw new IllegalArgumentException(String.format("Container '%s' not found", id));
             } else {
-                Log.e(TAG, String.format("Unexpected response code %d", code));
-                return "";
+                throw new IllegalStateException(String.format("Unexpected response code %d", code));
             }
         }
-
-        Log.e(TAG, "Got an empty response");
-        return "";
     }
 
     public void finishMediaUpdate() {
