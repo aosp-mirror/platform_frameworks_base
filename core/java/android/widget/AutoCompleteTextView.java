@@ -92,6 +92,13 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
 
     private static final int HINT_VIEW_ID = 0x17;
 
+    /**
+     * This value controls the length of time that the user
+     * must leave a pointer down without scrolling to expand
+     * the autocomplete dropdown list to cover the IME.
+     */
+    private static final int EXPAND_LIST_TIMEOUT = 250;
+
     private CharSequence mHintText;
     private int mHintResource;
 
@@ -132,6 +139,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
 
     private ListSelectorHider mHideSelector;
     private Runnable mShowDropDownRunnable;
+    private Runnable mResizePopupRunnable = new ResizePopupRunnable();
 
     private PassThroughClickListener mPassThroughClickListener;
     private PopupDataSetObserver mObserver;
@@ -1297,6 +1305,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
                 public void onNothingSelected(AdapterView<?> parent) {
                 }
             });
+            mDropDownList.setOnScrollListener(new PopupScrollListener());
 
             if (mItemSelectedListener != null) {
                 mDropDownList.setOnItemSelectedListener(mItemSelectedListener);
@@ -1437,17 +1446,41 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
         }
     }
 
+    private class ResizePopupRunnable implements Runnable {
+        public void run() {
+            mPopup.setInputMethodMode(PopupWindow.INPUT_METHOD_NOT_NEEDED);
+            showDropDown();
+        }
+    }
+
     private class PopupTouchInterceptor implements OnTouchListener {
         public boolean onTouch(View v, MotionEvent event) {
-            if (event.getAction() == MotionEvent.ACTION_DOWN &&
+            final int action = event.getAction();
+            if (action == MotionEvent.ACTION_DOWN &&
                     mPopup != null && mPopup.isShowing()) {
-                mPopup.setInputMethodMode(PopupWindow.INPUT_METHOD_NOT_NEEDED);
-                showDropDown();
+                postDelayed(mResizePopupRunnable, EXPAND_LIST_TIMEOUT);
+            } else if (action == MotionEvent.ACTION_UP) {
+                removeCallbacks(mResizePopupRunnable);
             }
             return false;
         }
     }
     
+    private class PopupScrollListener implements ListView.OnScrollListener {
+        public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount,
+                int totalItemCount) {
+
+        }
+
+        public void onScrollStateChanged(AbsListView view, int scrollState) {
+            if (scrollState == SCROLL_STATE_TOUCH_SCROLL &&
+                    !isInputMethodNotNeeded() && mPopup.getContentView() != null) {
+                removeCallbacks(mResizePopupRunnable);
+                mResizePopupRunnable.run();
+            }
+        }
+    }
+
     private class DropDownItemClickListener implements AdapterView.OnItemClickListener {
         public void onItemClick(AdapterView parent, View v, int position, long id) {
             performCompletion(v, position, id);
