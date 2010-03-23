@@ -48,6 +48,8 @@ final class NativeDaemonConnector implements Runnable {
     private String                mSocket;
     private INativeDaemonConnectorCallbacks mCallbacks;
 
+    private final int BUFFER_SIZE = 4096;
+
     class ResponseCode {
         public static final int ActionInitiated                = 100;
 
@@ -87,7 +89,7 @@ final class NativeDaemonConnector implements Runnable {
     }
 
     private void listenToSocket() throws IOException {
-       LocalSocket socket = null;
+        LocalSocket socket = null;
 
         try {
             socket = new LocalSocket();
@@ -100,13 +102,13 @@ final class NativeDaemonConnector implements Runnable {
             InputStream inputStream = socket.getInputStream();
             mOutputStream = socket.getOutputStream();
 
-            byte[] buffer = new byte[4096];
+            byte[] buffer = new byte[BUFFER_SIZE];
+            int start = 0;
 
             while (true) {
-                int count = inputStream.read(buffer);
+                int count = inputStream.read(buffer, start, BUFFER_SIZE - start);
                 if (count < 0) break;
 
-                int start = 0;
                 for (int i = 0; i < count; i++) {
                     if (buffer[i] == 0) {
                         String event = new String(buffer, start, i - start);
@@ -138,6 +140,13 @@ final class NativeDaemonConnector implements Runnable {
                         }
                         start = i + 1;
                     }
+                }
+                if (start != count) {
+                    final int remaining = BUFFER_SIZE - start;
+                    System.arraycopy(buffer, start, buffer, 0, remaining);
+                    start = remaining;
+                } else {
+                    start = 0;
                 }
             }
         } catch (IOException ex) {
