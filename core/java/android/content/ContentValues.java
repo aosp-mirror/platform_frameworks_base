@@ -66,7 +66,7 @@ public final class ContentValues implements Parcelable {
      * Creates a set of values copied from the given HashMap. This is used
      * by the Parcel unmarshalling code.
      *
-     * @param from the values to start with
+     * @param values the values to start with
      * {@hide}
      */
     private ContentValues(HashMap<String, Object> values) {
@@ -248,7 +248,7 @@ public final class ContentValues implements Parcelable {
      */
     public String getAsString(String key) {
         Object value = mValues.get(key);
-        return value != null ? mValues.get(key).toString() : null;
+        return value != null ? value.toString() : null;
     }
 
     /**
