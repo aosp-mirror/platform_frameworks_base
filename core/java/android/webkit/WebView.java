@@ -4195,7 +4195,15 @@ public class WebView extends AbsoluteLayout
     @Override
     protected void onScrollChanged(int l, int t, int oldl, int oldt) {
         super.onScrollChanged(l, t, oldl, oldt);
-        sendOurVisibleRect();
+        if (!mInOverScrollMode) {
+            sendOurVisibleRect();
+            // update WebKit if visible title bar height changed. The logic is same
+            // as getVisibleTitleHeight.
+            int titleHeight = getTitleHeight();
+            if (Math.max(titleHeight - t, 0) != Math.max(titleHeight - oldt, 0)) {
+                sendViewSizeZoom();
+            }
+        }
     }
 
     @Override
