@@ -340,15 +340,18 @@ public class SQLiteDatabase extends SQLiteClosable {
     private boolean mLockingEnabled = true;
 
     /* package */ void onCorruption() {
+        Log.e(TAG, "Removing corrupt database: " + mPath);
+        EventLog.writeEvent(EVENT_DB_CORRUPT, mPath);
         try {
             // Close the database (if we can), which will cause subsequent operations to fail.
             close();
         } finally {
-            Log.e(TAG, "Removing corrupt database: " + mPath);
-            EventLog.writeEvent(EVENT_DB_CORRUPT, mPath);
             // Delete the corrupt file.  Don't re-create it now -- that would just confuse people
             // -- but the next time someone tries to open it, they can set it up from scratch.
-            new File(mPath).delete();
+            if (!mPath.equalsIgnoreCase(":memory")) {
+                // delete is only for non-memory database files
+                new File(mPath).delete();
+            }
         }
     }
 
@@ -490,6 +493,9 @@ public class SQLiteDatabase extends SQLiteClosable {
      * {@link #yieldIfContendedSafely}.
      */
     public void beginTransactionWithListener(SQLiteTransactionListener transactionListener) {
+        if (!isOpen()) {
+            throw new IllegalStateException("database not open");
+        }
         lockForced();
         boolean ok = false;
         try {
@@ -535,6 +541,9 @@ public class SQLiteDatabase extends SQLiteClosable {
      * are committed and rolled back.
      */
     public void endTransaction() {
+        if (!isOpen()) {
+            throw new IllegalStateException("database not open");
+        }
         if (!mLock.isHeldByCurrentThread()) {
             throw new IllegalStateException("no transaction pending");
         }
@@ -595,6 +604,9 @@ public class SQLiteDatabase extends SQLiteClosable {
      * transaction is already marked as successful.
      */
     public void setTransactionSuccessful() {
+        if (!isOpen()) {
+            throw new IllegalStateException("database not open");
+        }
         if (!mLock.isHeldByCurrentThread()) {
             throw new IllegalStateException("no transaction pending");
         }
@@ -807,7 +819,10 @@ public class SQLiteDatabase extends SQLiteClosable {
             // TODO: should we do this for other open failures?
             Log.e(TAG, "Deleting and re-creating corrupt database " + path, e);
             EventLog.writeEvent(EVENT_DB_CORRUPT, path);
-            new File(path).delete();
+            if (!path.equalsIgnoreCase(":memory")) {
+                // delete is only for non-memory database files
+                new File(path).delete();
+            }
             sqliteDatabase = new SQLiteDatabase(path, factory, flags);
         }
         ActiveDatabases.getInstance().mActiveDatabases.add(
@@ -849,14 +864,14 @@ public class SQLiteDatabase extends SQLiteClosable {
      * Close the database.
      */
     public void close() {
+        if (!isOpen()) {
+            return; // already closed
+        }
         lock();
         try {
             closeClosable();
             // close this database instance - regardless of its reference count value
             onAllReferencesReleased();
-            // set path to null, to cause bad stuff to happen if this object is reused without
-            // being opened first
-            mPath = null;
         } finally {
             unlock();
         }
@@ -893,6 +908,9 @@ public class SQLiteDatabase extends SQLiteClosable {
      * @return the database version
      */
     public int getVersion() {
+        if (!isOpen()) {
+            throw new IllegalStateException("database not open");
+        }
         SQLiteStatement prog = null;
         lock();
         try {
@@ -911,6 +929,9 @@ public class SQLiteDatabase extends SQLiteClosable {
      * @param version the new database version
      */
     public void setVersion(int version) {
+        if (!isOpen()) {
+            throw new IllegalStateException("database not open");
+        }
         execSQL("PRAGMA user_version = " + version);
     }
 
@@ -920,6 +941,9 @@ public class SQLiteDatabase extends SQLiteClosable {
      * @return the new maximum database size
      */
     public long getMaximumSize() {
+        if (!isOpen()) {
+            throw new IllegalStateException("database not open");
+        }
         SQLiteStatement prog = null;
         lock();
         try {
@@ -941,6 +965,9 @@ public class SQLiteDatabase extends SQLiteClosable {
      * @return the new maximum database size
      */
     public long setMaximumSize(long numBytes) {
+        if (!isOpen()) {
+            throw new IllegalStateException("database not open");
+        }
         SQLiteStatement prog = null;
         lock();
         try {
@@ -966,6 +993,9 @@ public class SQLiteDatabase extends SQLiteClosable {
      * @return the database page size, in bytes
      */
     public long getPageSize() {
+        if (!isOpen()) {
+            throw new IllegalStateException("database not open");
+        }
         SQLiteStatement prog = null;
         lock();
         try {
@@ -987,6 +1017,9 @@ public class SQLiteDatabase extends SQLiteClosable {
      * @param numBytes the database page size, in bytes
      */
     public void setPageSize(long numBytes) {
+        if (!isOpen()) {
+            throw new IllegalStateException("database not open");
+        }
         execSQL("PRAGMA page_size = " + numBytes);
     }
 
@@ -1103,6 +1136,9 @@ public class SQLiteDatabase extends SQLiteClosable {
      * @return a pre-compiled statement object.
      */
     public SQLiteStatement compileStatement(String sql) throws SQLException {
+        if (!isOpen()) {
+            throw new IllegalStateException("database not open");
+        }
         lock();
         try {
             return new SQLiteStatement(this, sql);
@@ -1183,6 +1219,9 @@ public class SQLiteDatabase extends SQLiteClosable {
             boolean distinct, String table, String[] columns,
             String selection, String[] selectionArgs, String groupBy,
             String having, String orderBy, String limit) {
+        if (!isOpen()) {
+            throw new IllegalStateException("database not open");
+        }
         String sql = SQLiteQueryBuilder.buildQueryString(
                 distinct, table, columns, selection, groupBy, having, orderBy, limit);
 
@@ -1289,6 +1328,9 @@ public class SQLiteDatabase extends SQLiteClosable {
     public Cursor rawQueryWithFactory(
             CursorFactory cursorFactory, String sql, String[] selectionArgs,
             String editTable) {
+        if (!isOpen()) {
+            throw new IllegalStateException("database not open");
+        }
         long timeStart = 0;
 
         if (Config.LOGV || mSlowQueryThreshold != -1) {
@@ -1675,6 +1717,9 @@ public class SQLiteDatabase extends SQLiteClosable {
      * @throws SQLException If the SQL string is invalid for some reason
      */
     public void execSQL(String sql) throws SQLException {
+        if (!isOpen()) {
+            throw new IllegalStateException("database not open");
+        }
         long timeStart = SystemClock.uptimeMillis();
         lock();
         try {
@@ -1706,6 +1751,9 @@ public class SQLiteDatabase extends SQLiteClosable {
      * @throws SQLException If the SQL string is invalid for some reason
      */
     public void execSQL(String sql, Object[] bindArgs) throws SQLException {
+        if (!isOpen()) {
+            throw new IllegalStateException("database not open");
+        }
         if (bindArgs == null) {
             throw new IllegalArgumentException("Empty bindArgs");
         }
@@ -2059,6 +2107,10 @@ public class SQLiteDatabase extends SQLiteClosable {
         static ActiveDatabases getInstance() {return activeDatabases;}
     }
 
+    /**
+     * this method is used to collect data about ALL open databases in the current process.
+     * bugreport is a user of this data. 
+     */
     /* package */ static ArrayList<DbStats> getDbStats() {
         ArrayList<DbStats> dbStatsList = new ArrayList<DbStats>();
         for (WeakReference<SQLiteDatabase> w : ActiveDatabases.getInstance().mActiveDatabases) {
@@ -2076,6 +2128,9 @@ public class SQLiteDatabase extends SQLiteClosable {
 
             // get list of attached dbs and for each db, get its size and pagesize
             ArrayList<Pair<String, String>> attachedDbs = getAttachedDbs(db);
+            if (attachedDbs == null) {
+                continue;
+            }
             for (int i = 0; i < attachedDbs.size(); i++) {
                 Pair<String, String> p = attachedDbs.get(i);
                 long pageCount = getPragmaVal(db, p.first + ".page_count;");
@@ -2095,7 +2150,10 @@ public class SQLiteDatabase extends SQLiteClosable {
                         dbName += " : " + p.second.substring((idx != -1) ? ++idx : 0);
                     }
                 }
-                dbStatsList.add(new DbStats(dbName, pageCount, db.getPageSize(), lookasideUsed));
+                if (pageCount > 0) {
+                    dbStatsList.add(new DbStats(dbName, pageCount, db.getPageSize(),
+                            lookasideUsed));
+                }
             }
         }
         return dbStatsList;
@@ -2108,6 +2166,9 @@ public class SQLiteDatabase extends SQLiteClosable {
      * TODO: use this to do all pragma's in this class
      */
     private static long getPragmaVal(SQLiteDatabase db, String pragma) {
+        if (!db.isOpen()) {
+            return 0;
+        }
         SQLiteStatement prog = null;
         try {
             prog = new SQLiteStatement(db, "PRAGMA " + pragma);
@@ -2124,6 +2185,9 @@ public class SQLiteDatabase extends SQLiteClosable {
      * TODO: move this to {@link DatabaseUtils}
      */
     private static ArrayList<Pair<String, String>> getAttachedDbs(SQLiteDatabase dbObj) {
+        if (!dbObj.isOpen()) {
+            return null;
+        }
         ArrayList<Pair<String, String>> attachedDbs = new ArrayList<Pair<String, String>>();
         Cursor c = dbObj.rawQuery("pragma database_list;", null);
         while (c.moveToNext()) {
