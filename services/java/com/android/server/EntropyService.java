@@ -48,13 +48,14 @@ import android.util.Slog;
  * instead of periodically.
  */
 public class EntropyService extends Binder {
-    private static final String ENTROPY_FILENAME = getSystemDir() + "/entropy.dat";
     private static final String TAG = "EntropyService";
     private static final int ENTROPY_WHAT = 1;
     private static final int ENTROPY_WRITE_PERIOD = 3 * 60 * 60 * 1000;  // 3 hrs
-    private static final String RANDOM_DEV = "/dev/urandom";
     private static final long START_TIME = System.currentTimeMillis();
     private static final long START_NANOTIME = System.nanoTime();
+
+    private final String randomDevice;
+    private final String entropyFile;
 
     /**
      * Handler that periodically updates the entropy on disk.
@@ -72,6 +73,16 @@ public class EntropyService extends Binder {
     };
 
     public EntropyService() {
+        this(getSystemDir() + "/entropy.dat", "/dev/urandom");
+    }
+
+    /** Test only interface, not for public use */
+    public EntropyService(String entropyFile, String randomDevice) {
+        if (randomDevice == null) { throw new NullPointerException("randomDevice"); }
+        if (entropyFile == null) { throw new NullPointerException("entropyFile"); }
+
+        this.randomDevice = randomDevice;
+        this.entropyFile = entropyFile;
         loadInitialEntropy();
         addDeviceSpecificEntropy();
         writeEntropy();
@@ -85,7 +96,7 @@ public class EntropyService extends Binder {
 
     private void loadInitialEntropy() {
         try {
-            RandomBlock.fromFile(ENTROPY_FILENAME).toFile(RANDOM_DEV);
+            RandomBlock.fromFile(entropyFile).toFile(randomDevice);
         } catch (IOException e) {
             Slog.w(TAG, "unable to load initial entropy (first boot?)", e);
         }
@@ -93,7 +104,7 @@ public class EntropyService extends Binder {
 
     private void writeEntropy() {
         try {
-            RandomBlock.fromFile(RANDOM_DEV).toFile(ENTROPY_FILENAME);
+            RandomBlock.fromFile(randomDevice).toFile(entropyFile);
         } catch (IOException e) {
             Slog.w(TAG, "unable to write entropy", e);
         }
@@ -116,7 +127,7 @@ public class EntropyService extends Binder {
     private void addDeviceSpecificEntropy() {
         PrintWriter out = null;
         try {
-            out = new PrintWriter(new FileOutputStream(RANDOM_DEV));
+            out = new PrintWriter(new FileOutputStream(randomDevice));
             out.println("Copyright (C) 2009 The Android Open Source Project");
             out.println("All Your Randomness Are Belong To Us");
             out.println(START_TIME);

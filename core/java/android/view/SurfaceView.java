@@ -506,6 +506,17 @@ public class SurfaceView extends View {
         updateWindow(false);
     }
 
+    /**
+     * Check to see if the surface has fixed size dimensions or if the surface's
+     * dimensions are dimensions are dependent on its current layout.
+     *
+     * @return true if the surface has dimensions that are fixed in size
+     * @hide
+     */
+    public boolean isFixedSize() {
+        return (mRequestedWidth != -1 || mRequestedHeight != -1);
+    }
+
     private static class MyWindow extends BaseIWindow {
         private final WeakReference<SurfaceView> mSurfaceView;
 

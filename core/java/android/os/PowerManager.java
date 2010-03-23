@@ -361,6 +361,9 @@ public class PowerManager
      */
     public WakeLock newWakeLock(int flags, String tag)
     {
+        if (tag == null) {
+            throw new NullPointerException("tag is null in PowerManager.newWakeLock");
+        }
         return new WakeLock(flags, tag);
     }
 

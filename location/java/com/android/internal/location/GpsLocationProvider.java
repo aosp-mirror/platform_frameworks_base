@@ -35,8 +35,12 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.SntpClient;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
+import android.os.Message;
 import android.os.PowerManager;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
@@ -65,13 +69,13 @@ import java.util.Map.Entry;
  *
  * {@hide}
  */
-public class GpsLocationProvider implements LocationProviderInterface {
+public class GpsLocationProvider implements LocationProviderInterface, Runnable {
 
     private static final String TAG = "GpsLocationProvider";
 
     private static final boolean DEBUG = false;
     private static final boolean VERBOSE = false;
-    
+
     /**
      * Broadcast intent action indicating that the GPS has either been
      * enabled or disabled. An intent extra provides this state as a boolean,
@@ -155,6 +159,17 @@ public class GpsLocationProvider implements LocationProviderInterface {
     private static final int AGPS_DATA_CONNECTION_OPENING = 1;
     private static final int AGPS_DATA_CONNECTION_OPEN = 2;
 
+    // Handler messages
+    private static final int CHECK_LOCATION = 1;
+    private static final int ENABLE = 2;
+    private static final int ENABLE_TRACKING = 3;
+    private static final int UPDATE_NETWORK_STATE = 4;
+    private static final int INJECT_NTP_TIME = 5;
+    private static final int DOWNLOAD_XTRA_DATA = 6;
+    private static final int UPDATE_LOCATION = 7;
+    private static final int ADD_LISTENER = 8;
+    private static final int REMOVE_LISTENER = 9;
+
     private static final String PROPERTIES_FILE = "/etc/gps.conf";
 
     private int mLocationFlags = LOCATION_INVALID;
@@ -179,6 +194,11 @@ public class GpsLocationProvider implements LocationProviderInterface {
     
     // true if we have network connectivity
     private boolean mNetworkAvailable;
+
+    // flags to trigger NTP or XTRA data download when network becomes available
+    // initialized to true so we do NTP and XTRA when the network comes up after booting
+    private boolean mInjectNtpTimePending = true;
+    private boolean mDownloadXtraDataPending = true;
 
     // true if GPS is navigating
     private boolean mNavigating;
@@ -215,9 +235,9 @@ public class GpsLocationProvider implements LocationProviderInterface {
     private Location mLocation = new Location(LocationManager.GPS_PROVIDER);
     private Bundle mLocationExtras = new Bundle();
     private ArrayList<Listener> mListeners = new ArrayList<Listener>();
-    private GpsEventThread mEventThread;
-    private GpsNetworkThread mNetworkThread;
-    private Object mNetworkThreadLock = new Object();
+
+    private Handler mHandler;
+    private Thread mEventThread;
 
     private String mAGpsApn;
     private int mAGpsDataConnectionState;
@@ -333,11 +353,6 @@ public class GpsLocationProvider implements LocationProviderInterface {
         mWakeupIntent = PendingIntent.getBroadcast(mContext, 0, new Intent(ALARM_WAKEUP), 0);
         mTimeoutIntent = PendingIntent.getBroadcast(mContext, 0, new Intent(ALARM_TIMEOUT), 0);
 
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(ALARM_WAKEUP);
-        intentFilter.addAction(ALARM_TIMEOUT);
-        context.registerReceiver(mBroadcastReciever, intentFilter);
-
         mConnMgr = (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
 
         // Battery statistics service to be notified when GPS turns on or off
@@ -373,6 +388,17 @@ public class GpsLocationProvider implements LocationProviderInterface {
         } catch (IOException e) {
             Log.w(TAG, "Could not open GPS configuration file " + PROPERTIES_FILE);
         }
+
+        Thread thread = new Thread(null, this, "GpsLocationProvider");
+        thread.start();
+    }
+
+    private void initialize() {
+        // register our receiver on our thread rather than the main thread
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(ALARM_WAKEUP);
+        intentFilter.addAction(ALARM_TIMEOUT);
+        mContext.registerReceiver(mBroadcastReciever, intentFilter);
     }
 
     /**
@@ -391,6 +417,14 @@ public class GpsLocationProvider implements LocationProviderInterface {
     }
 
     public void updateNetworkState(int state, NetworkInfo info) {
+        mHandler.removeMessages(UPDATE_NETWORK_STATE);
+        Message m = Message.obtain(mHandler, UPDATE_NETWORK_STATE);
+        m.arg1 = state;
+        m.obj = info;
+        mHandler.sendMessage(m);
+    }
+
+    private void handleUpdateNetworkState(int state, NetworkInfo info) {
         mNetworkAvailable = (state == LocationProvider.AVAILABLE);
 
         if (DEBUG) {
@@ -414,10 +448,84 @@ public class GpsLocationProvider implements LocationProviderInterface {
             }
         }
 
-        if (mNetworkAvailable && mNetworkThread != null && mEnabled) {
-            // signal the network thread when the network becomes available
-            mNetworkThread.signal();
-        } 
+        if (mNetworkAvailable) {
+            if (mInjectNtpTimePending) {
+                mHandler.removeMessages(INJECT_NTP_TIME);
+                mHandler.sendMessage(Message.obtain(mHandler, INJECT_NTP_TIME));
+            }
+            if (mDownloadXtraDataPending) {
+                mHandler.removeMessages(DOWNLOAD_XTRA_DATA);
+                mHandler.sendMessage(Message.obtain(mHandler, DOWNLOAD_XTRA_DATA));
+            }
+        }
+    }
+
+    private void handleInjectNtpTime() {
+        if (!mNetworkAvailable) {
+            // try again when network is up
+            mInjectNtpTimePending = true;
+            return;
+        }
+        mInjectNtpTimePending = false;
+
+        SntpClient client = new SntpClient();
+        long delay;
+
+        if (client.requestTime(mNtpServer, 10000)) {
+            long time = client.getNtpTime();
+            long timeReference = client.getNtpTimeReference();
+            int certainty = (int)(client.getRoundTripTime()/2);
+            long now = System.currentTimeMillis();
+            long systemTimeOffset = time - now;
+
+            Log.d(TAG, "NTP server returned: "
+                    + time + " (" + new Date(time)
+                    + ") reference: " + timeReference
+                    + " certainty: " + certainty
+                    + " system time offset: " + systemTimeOffset);
+
+            // sanity check NTP time and do not use if it is too far from system time
+            if (systemTimeOffset < 0) {
+                systemTimeOffset = -systemTimeOffset;
+            }
+            if (systemTimeOffset < MAX_NTP_SYSTEM_TIME_OFFSET) {
+                native_inject_time(time, timeReference, certainty);
+            } else {
+                Log.e(TAG, "NTP time differs from system time by " + systemTimeOffset
+                        + "ms.  Ignoring.");
+            }
+            delay = NTP_INTERVAL;
+        } else {
+            if (DEBUG) Log.d(TAG, "requestTime failed");
+            delay = RETRY_INTERVAL;
+        }
+
+        // send delayed message for next NTP injection
+        mHandler.removeMessages(INJECT_NTP_TIME);
+        mHandler.sendMessageDelayed(Message.obtain(mHandler, INJECT_NTP_TIME), delay);
+    }
+
+    private void handleDownloadXtraData() {
+        if (!mDownloadXtraDataPending) {
+            // try again when network is up
+            mDownloadXtraDataPending = true;
+            return;
+        }
+        mDownloadXtraDataPending = false;
+
+
+        GpsXtraDownloader xtraDownloader = new GpsXtraDownloader(mContext, mProperties);
+        byte[] data = xtraDownloader.downloadXtraData();
+        if (data != null) {
+            if (DEBUG) {
+                Log.d(TAG, "calling native_inject_xtra_data");
+            }
+            native_inject_xtra_data(data, data.length);
+        } else {
+            // try again later
+            mHandler.removeMessages(DOWNLOAD_XTRA_DATA);
+            mHandler.sendMessageDelayed(Message.obtain(mHandler, DOWNLOAD_XTRA_DATA), RETRY_INTERVAL);
+        }
     }
 
     /**
@@ -425,6 +533,13 @@ public class GpsLocationProvider implements LocationProviderInterface {
      * Someday we might use this for network location injection to aid the GPS
      */
     public void updateLocation(Location location) {
+        mHandler.removeMessages(UPDATE_LOCATION);
+        Message m = Message.obtain(mHandler, UPDATE_LOCATION);
+        m.obj = location;
+        mHandler.sendMessage(m);
+    }
+
+    private void handleUpdateLocation(Location location) {
         if (location.hasAccuracy()) {
             native_inject_location(location.getLatitude(), location.getLongitude(),
                     location.getAccuracy());
@@ -513,8 +628,17 @@ public class GpsLocationProvider implements LocationProviderInterface {
      * must be handled.  Hardware may be started up
      * when the provider is enabled.
      */
-    public synchronized void enable() {
-        if (DEBUG) Log.d(TAG, "enable");
+    public void enable() {
+        synchronized (mHandler) {
+            mHandler.removeMessages(ENABLE);
+            Message m = Message.obtain(mHandler, ENABLE);
+            m.arg1 = 1;
+            mHandler.sendMessage(m);
+        }
+    }
+
+    private void handleEnable() {
+        if (DEBUG) Log.d(TAG, "handleEnable");
         if (mEnabled) return;
         mEnabled = native_init();
 
@@ -529,16 +653,6 @@ public class GpsLocationProvider implements LocationProviderInterface {
             // run event listener thread while we are enabled
             mEventThread = new GpsEventThread();
             mEventThread.start();
-
-            if (requiresNetwork()) {
-                // run network thread for NTP and XTRA support
-                if (mNetworkThread == null) {
-                    mNetworkThread = new GpsNetworkThread();
-                    mNetworkThread.start();
-                } else {
-                    mNetworkThread.signal();
-                }
-            }
         } else {
             Log.w(TAG, "Failed to enable location provider");
         }
@@ -549,8 +663,17 @@ public class GpsLocationProvider implements LocationProviderInterface {
      * need not be handled.  Hardware may be shut
      * down while the provider is disabled.
      */
-    public synchronized void disable() {
-        if (DEBUG) Log.d(TAG, "disable");
+    public void disable() {
+        synchronized (mHandler) {
+            mHandler.removeMessages(ENABLE);
+            Message m = Message.obtain(mHandler, ENABLE);
+            m.arg1 = 0;
+            mHandler.sendMessage(m);
+        }
+    }
+
+    private void handleDisable() {
+        if (DEBUG) Log.d(TAG, "handleEnable");
         if (!mEnabled) return;
 
         mEnabled = false;
@@ -565,11 +688,6 @@ public class GpsLocationProvider implements LocationProviderInterface {
                 Log.w(TAG, "InterruptedException when joining mEventThread");
             }
             mEventThread = null;
-        }
-
-        if (mNetworkThread != null) {
-            mNetworkThread.setDone();
-            mNetworkThread = null;
         }
 
         // do this before releasing wakelock
@@ -610,6 +728,15 @@ public class GpsLocationProvider implements LocationProviderInterface {
     }
 
     public void enableLocationTracking(boolean enable) {
+        synchronized (mHandler) {
+            mHandler.removeMessages(ENABLE_TRACKING);
+            Message m = Message.obtain(mHandler, ENABLE_TRACKING);
+            m.arg1 = (enable ? 1 : 0);
+            mHandler.sendMessage(m);
+        }
+    }
+
+    private void handleEnableLocationTracking(boolean enable) {
         if (enable) {
             mTTFF = 0;
             mLastFixTime = 0;
@@ -659,6 +786,12 @@ public class GpsLocationProvider implements LocationProviderInterface {
     }
 
     public void addListener(int uid) {
+        Message m = Message.obtain(mHandler, ADD_LISTENER);
+        m.arg1 = uid;
+        mHandler.sendMessage(m);
+    }
+
+    private void handleAddListener(int uid) {
         synchronized(mListeners) {
             if (mClientUids.indexOfKey(uid) >= 0) {
                 // Shouldn't be here -- already have this uid.
@@ -677,6 +810,12 @@ public class GpsLocationProvider implements LocationProviderInterface {
     }
 
     public void removeListener(int uid) {
+        Message m = Message.obtain(mHandler, REMOVE_LISTENER);
+        m.arg1 = uid;
+        mHandler.sendMessage(m);
+    }
+
+    private void handleRemoveListener(int uid) {
         synchronized(mListeners) {
             if (mClientUids.indexOfKey(uid) < 0) {
                 // Shouldn't be here -- don't have this uid.
@@ -700,10 +839,12 @@ public class GpsLocationProvider implements LocationProviderInterface {
             return deleteAidingData(extras);
         }
         if ("force_time_injection".equals(command)) {
-            return forceTimeInjection();
+            mHandler.removeMessages(INJECT_NTP_TIME);
+            mHandler.sendMessage(Message.obtain(mHandler, INJECT_NTP_TIME));
+            return true;
         }
         if ("force_xtra_injection".equals(command)) {
-            if (native_supports_xtra() && mNetworkThread != null) {
+            if (native_supports_xtra()) {
                 xtraDownloadRequest();
                 return true;
             }
@@ -744,16 +885,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
         return false;
     }
 
-    private boolean forceTimeInjection() {
-        if (DEBUG) Log.d(TAG, "forceTimeInjection");
-        if (mNetworkThread != null) {
-            mNetworkThread.timeInjectRequest();
-            return true;
-        }
-        return false;
-    }
-
-    public void startNavigating() {
+    private void startNavigating() {
         if (!mStarted) {
             if (DEBUG) Log.d(TAG, "startNavigating");
             mStarted = true;
@@ -784,7 +916,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
         }
     }
 
-    public void stopNavigating() {
+    private void stopNavigating() {
         if (DEBUG) Log.d(TAG, "stopNavigating");
         if (mStarted) {
             mStarted = false;
@@ -1092,11 +1224,13 @@ public class GpsLocationProvider implements LocationProviderInterface {
         }
     }
 
+    /**
+     * called from native code to request XTRA data
+     */
     private void xtraDownloadRequest() {
         if (DEBUG) Log.d(TAG, "xtraDownloadRequest");
-        if (mNetworkThread != null) {
-            mNetworkThread.xtraDownloadRequest();
-        }
+        mHandler.removeMessages(DOWNLOAD_XTRA_DATA);
+        mHandler.sendMessage(Message.obtain(mHandler, DOWNLOAD_XTRA_DATA));
     }
 
     //=============================================================
@@ -1189,6 +1323,10 @@ public class GpsLocationProvider implements LocationProviderInterface {
 		mNIHandler.handleNiNotification(notification);		
 	}
 
+    // this thread is used to receive events from the native code.
+    // native_wait_for_event() will callback to us via reportLocation(), reportStatus(), etc.
+    // this is necessary because native code cannot call Java on a thread that the JVM does
+    // not know about.
     private class GpsEventThread extends Thread {
 
         public GpsEventThread() {
@@ -1207,157 +1345,52 @@ public class GpsLocationProvider implements LocationProviderInterface {
         }
     }
 
-    private class GpsNetworkThread extends Thread {
-
-        private long mNextNtpTime = 0;
-        private long mNextXtraTime = 0;
-        private boolean mTimeInjectRequested = false;
-        private boolean mXtraDownloadRequested = false;
-        private boolean mDone = false;
-
-        public GpsNetworkThread() {
-            super("GpsNetworkThread");
-        }
-
-        public void run() {
-            synchronized (mNetworkThreadLock) {
-                if (!mDone) {
-                    runLocked();
-                }
-            }
-        }
-
-        public void runLocked() {
-            if (DEBUG) Log.d(TAG, "NetworkThread starting");
-            
-            SntpClient client = new SntpClient();
-            GpsXtraDownloader xtraDownloader = null;
-            
-            if (native_supports_xtra()) {
-                xtraDownloader = new GpsXtraDownloader(mContext, mProperties);
-            }
-            
-            // thread exits after disable() is called
-            while (!mDone) {
-                long waitTime = getWaitTime();
-                do {                        
-                    synchronized (this) {
-                        try {
-                            if (!mNetworkAvailable) {
-                                if (DEBUG) Log.d(TAG, "NetworkThread wait for network");
-                                wait();
-                            } else if (waitTime > 0) {
-                                if (DEBUG) {
-                                    Log.d(TAG, "NetworkThread wait for " +
-                                            waitTime + "ms");
-                                }
-                                wait(waitTime);
-                            }
-                        } catch (InterruptedException e) {
-                            if (DEBUG) {
-                                Log.d(TAG, "InterruptedException in GpsNetworkThread");
-                            }
-                        }
+    private final class ProviderHandler extends Handler {
+        @Override
+        public void handleMessage(Message msg)
+        {
+            switch (msg.what) {
+                case ENABLE:
+                    if (msg.arg1 == 1) {
+                        handleEnable();
+                    } else {
+                        handleDisable();
                     }
-                    waitTime = getWaitTime();
-                } while (!mDone && ((!mXtraDownloadRequested &&
-                        !mTimeInjectRequested && waitTime > 0)
-                        || !mNetworkAvailable));
-                if (DEBUG) Log.d(TAG, "NetworkThread out of wake loop"); 
-                if (!mDone) {
-                    if (mNtpServer != null && 
-                            (mTimeInjectRequested || mNextNtpTime <= System.currentTimeMillis())) {
-                        if (DEBUG) {
-                            Log.d(TAG, "Requesting time from NTP server " + mNtpServer);
-                        }
-                        mTimeInjectRequested = false;
-                        if (client.requestTime(mNtpServer, 10000)) {
-                            long time = client.getNtpTime();
-                            long timeReference = client.getNtpTimeReference();
-                            int certainty = (int)(client.getRoundTripTime()/2);
-                            long now = System.currentTimeMillis();
-                            long systemTimeOffset = time - now;
-        
-                            Log.d(TAG, "NTP server returned: "
-                                    + time + " (" + new Date(time)
-                                    + ") reference: " + timeReference
-                                    + " certainty: " + certainty
-                                    + " system time offset: " + systemTimeOffset);
-
-                            // sanity check NTP time and do not use if it is too far from system time
-                            if (systemTimeOffset < 0) {
-                                systemTimeOffset = -systemTimeOffset;
-                            }
-                            if (systemTimeOffset < MAX_NTP_SYSTEM_TIME_OFFSET) {
-                                native_inject_time(time, timeReference, certainty);
-                            } else {
-                                Log.e(TAG, "NTP time differs from system time by " + systemTimeOffset
-                                        + "ms.  Ignoring.");
-                            }
-                            mNextNtpTime = now + NTP_INTERVAL;
-                        } else {
-                            if (DEBUG) Log.d(TAG, "requestTime failed");
-                            mNextNtpTime = System.currentTimeMillis() + RETRY_INTERVAL;
-                        }
+                    break;
+                case ENABLE_TRACKING:
+                    handleEnableLocationTracking(msg.arg1 == 1);
+                    break;
+                case UPDATE_NETWORK_STATE:
+                    handleUpdateNetworkState(msg.arg1, (NetworkInfo)msg.obj);
+                    break;
+                case INJECT_NTP_TIME:
+                    handleInjectNtpTime();
+                    break;
+                case DOWNLOAD_XTRA_DATA:
+                    if (native_supports_xtra()) {
+                        handleDownloadXtraData();
                     }
-
-                    if ((mXtraDownloadRequested || 
-                            (mNextXtraTime > 0 && mNextXtraTime <= System.currentTimeMillis()))
-                            && xtraDownloader != null) {
-                        mXtraDownloadRequested = false;
-                        byte[] data = xtraDownloader.downloadXtraData();
-                        if (data != null) {
-                            if (DEBUG) {
-                                Log.d(TAG, "calling native_inject_xtra_data");
-                            }
-                            native_inject_xtra_data(data, data.length);
-                            mNextXtraTime = 0;
-                        } else {
-                            mNextXtraTime = System.currentTimeMillis() + RETRY_INTERVAL;
-                        }
-                    }
-                }
+                    break;
+                case UPDATE_LOCATION:
+                    handleUpdateLocation((Location)msg.obj);
+                    break;
+                case ADD_LISTENER:
+                    handleAddListener(msg.arg1);
+                    break;
+                case REMOVE_LISTENER:
+                    handleRemoveListener(msg.arg1);
+                    break;
             }
-            if (DEBUG) Log.d(TAG, "NetworkThread exiting");
         }
-        
-        synchronized void xtraDownloadRequest() {
-            mXtraDownloadRequested = true;
-            notify();
-        }
+    };
 
-        synchronized void timeInjectRequest() {
-            mTimeInjectRequested = true;
-            notify();
-        }
-
-        synchronized void signal() {
-            notify();
-        }
-
-        synchronized void setDone() {
-            if (DEBUG) Log.d(TAG, "stopping NetworkThread");
-            mDone = true;
-            notify();
-        }
-
-        private long getWaitTime() {
-            long now = System.currentTimeMillis();
-            long waitTime = Long.MAX_VALUE;
-            if (mNtpServer != null) {
-                waitTime = mNextNtpTime - now;
-            }
-            if (mNextXtraTime != 0) {
-                long xtraWaitTime = mNextXtraTime - now;
-                if (xtraWaitTime < waitTime) {
-                    waitTime = xtraWaitTime;
-                }
-            }
-            if (waitTime < 0) {
-                waitTime = 0;
-            }
-            return waitTime;
-        }
+    public void run()
+    {
+        Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+        initialize();
+        Looper.prepare();
+        mHandler = new ProviderHandler();
+        Looper.loop();
     }
 
     // for GPS SV statistics

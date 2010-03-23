@@ -58,7 +58,7 @@ option java_package com.android.server.am
 # The activity's onResume has been called.
 30022 am_on_resume_called (Component Name|3)
 # Kill a process to reclaim memory.
-30023 am_kill_for_memory (PID|1|5),(Process Name|3),(OomAdj|1|5)
+30023 am_kill (PID|1|5),(Process Name|3),(OomAdj|1|5),(Reason|3)
 # Discard an undelivered serialized broadcast (timeout/ANR/crash)
 30024 am_broadcast_discard_filter (Broadcast|1|5),(Action|3),(Receiver Number|1|1),(BroadcastFilter|1|5)
 30025 am_broadcast_discard_app (Broadcast|1|5),(Action|3),(Receiver Number|1|1),(App|3)

@@ -10755,7 +10755,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         pids[i] = pidCandidates.keyAt(i);
                     }
                     try {
-                        if (mActivityManager.killPidsForMemory(pids)) {
+                        if (mActivityManager.killPids(pids, "Free memory")) {
                             killedApps = true;
                         }
                     } catch (RemoteException e) {

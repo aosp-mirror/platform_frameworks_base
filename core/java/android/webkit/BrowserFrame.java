@@ -527,20 +527,12 @@ class BrowserFrame extends Handler {
      */
     private int getFileSize(String uri) {
         int size = 0;
-        Cursor cursor = mContext.getContentResolver().query(Uri.parse(uri),
-                new String[] { OpenableColumns.SIZE },
-                null,
-                null,
-                null);
-        if (cursor != null) {
-            try {
-                if (cursor.moveToNext()) {
-                    size = cursor.getInt(0);
-                }
-            } finally {
-                cursor.close();
-            }
-        }
+        try {
+            InputStream stream = mContext.getContentResolver()
+                            .openInputStream(Uri.parse(uri));
+            size = stream.available();
+            stream.close();
+        } catch (Exception e) {}
         return size;
     }
 

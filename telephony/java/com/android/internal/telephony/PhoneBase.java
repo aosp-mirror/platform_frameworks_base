@@ -585,7 +585,7 @@ public abstract class PhoneBase extends Handler implements Phone {
 
     /**
      * Utility code to set the system locale if it's not set already
-     * @param langauge Two character language code desired
+     * @param language Two character language code desired
      * @param country Two character country code desired
      *
      *  {@hide}
@@ -694,22 +694,22 @@ public abstract class PhoneBase extends Handler implements Phone {
 
     public void setTTYMode(int ttyMode, Message onComplete) {
         // This function should be overridden by the class CDMAPhone. Not implemented in GSMPhone.
-        Log.e(LOG_TAG, "Error! This function should never be executed, inactive CDMAPhone.");
+        logUnexpectedCdmaMethodCall("setTTYMode");
     }
 
     public void queryTTYMode(Message onComplete) {
         // This function should be overridden by the class CDMAPhone. Not implemented in GSMPhone.
-        Log.e(LOG_TAG, "Error! This function should never be executed, inactive CDMAPhone.");
+        logUnexpectedCdmaMethodCall("queryTTYMode");
     }
 
     public void enableEnhancedVoicePrivacy(boolean enable, Message onComplete) {
         // This function should be overridden by the class CDMAPhone. Not implemented in GSMPhone.
-        Log.e(LOG_TAG, "Error! This function should never be executed, inactive CDMAPhone.");
+        logUnexpectedCdmaMethodCall("enableEnhancedVoicePrivacy");
     }
 
     public void getEnhancedVoicePrivacy(Message onComplete) {
         // This function should be overridden by the class CDMAPhone. Not implemented in GSMPhone.
-        Log.e(LOG_TAG, "Error! This function should never be executed, inactive CDMAPhone.");
+        logUnexpectedCdmaMethodCall("getEnhancedVoicePrivacy");
     }
 
     public void setBandMode(int bandMode, Message response) {
@@ -754,7 +754,7 @@ public abstract class PhoneBase extends Handler implements Phone {
      * Returns the CDMA ERI icon index to display
      */
     public int getCdmaEriIconIndex() {
-        Log.e(LOG_TAG, "Error! getCdmaEriIconIndex should never be executed in GSM mode");
+        logUnexpectedCdmaMethodCall("getCdmaEriIconIndex");
         return -1;
     }
 
@@ -764,7 +764,7 @@ public abstract class PhoneBase extends Handler implements Phone {
      * 1 - FLASHING
      */
     public int getCdmaEriIconMode() {
-        Log.e(LOG_TAG, "Error! getCdmaEriIconMode should never be executed in GSM mode");
+        logUnexpectedCdmaMethodCall("getCdmaEriIconMode");
         return -1;
     }
 
@@ -772,82 +772,82 @@ public abstract class PhoneBase extends Handler implements Phone {
      * Returns the CDMA ERI text,
      */
     public String getCdmaEriText() {
-        Log.e(LOG_TAG, "Error! getCdmaEriText should never be executed in GSM mode");
+        logUnexpectedCdmaMethodCall("getCdmaEriText");
         return "GSM nw, no ERI";
     }
 
     public String getCdmaMin() {
         // This function should be overridden by the class CDMAPhone. Not implemented in GSMPhone.
-        Log.e(LOG_TAG, "Error! This function should never be executed, inactive CDMAPhone.");
+        logUnexpectedCdmaMethodCall("getCdmaMin");
         return null;
     }
 
     public boolean isMinInfoReady() {
         // This function should be overridden by the class CDMAPhone. Not implemented in GSMPhone.
-        Log.e(LOG_TAG, "Error! This function should never be executed, inactive CDMAPhone.");
+        logUnexpectedCdmaMethodCall("isMinInfoReady");
         return false;
     }
 
     public String getCdmaPrlVersion(){
         //  This function should be overridden by the class CDMAPhone. Not implemented in GSMPhone.
-        Log.e(LOG_TAG, "Error! This function should never be executed, inactive CDMAPhone.");
+        logUnexpectedCdmaMethodCall("getCdmaPrlVersion");
         return null;
     }
 
     public void sendBurstDtmf(String dtmfString, int on, int off, Message onComplete) {
         // This function should be overridden by the class CDMAPhone. Not implemented in GSMPhone.
-        Log.e(LOG_TAG, "Error! This function should never be executed, inactive CDMAPhone.");
+        logUnexpectedCdmaMethodCall("sendBurstDtmf");
     }
 
     public void exitEmergencyCallbackMode() {
         // This function should be overridden by the class CDMAPhone. Not implemented in GSMPhone.
-        Log.e(LOG_TAG, "Error! This function should never be executed, inactive CDMAPhone.");
+        logUnexpectedCdmaMethodCall("exitEmergencyCallbackMode");
     }
 
     public void registerForCdmaOtaStatusChange(Handler h, int what, Object obj) {
         // This function should be overridden by the class CDMAPhone. Not implemented in GSMPhone.
-        Log.e(LOG_TAG, "Error! This function should never be executed, inactive CDMAPhone.");
+        logUnexpectedCdmaMethodCall("registerForCdmaOtaStatusChange");
     }
 
     public void unregisterForCdmaOtaStatusChange(Handler h) {
         // This function should be overridden by the class CDMAPhone. Not implemented in GSMPhone.
-        Log.e(LOG_TAG, "Error! This function should never be executed, inactive CDMAPhone.");
+        logUnexpectedCdmaMethodCall("unregisterForCdmaOtaStatusChange");
     }
 
     public void registerForSubscriptionInfoReady(Handler h, int what, Object obj) {
         // This function should be overridden by the class CDMAPhone. Not implemented in GSMPhone.
-        Log.e(LOG_TAG, "Error! This function should never be executed, inactive CDMAPhone.");
+        logUnexpectedCdmaMethodCall("registerForSubscriptionInfoReady");
     }
 
     public void unregisterForSubscriptionInfoReady(Handler h) {
         // This function should be overridden by the class CDMAPhone. Not implemented in GSMPhone.
-        Log.e(LOG_TAG, "Error! This function should never be executed, inactive CDMAPhone.");
+        logUnexpectedCdmaMethodCall("unregisterForSubscriptionInfoReady");
     }
 
     public  boolean isOtaSpNumber(String dialStr) {
         // This function should be overridden by the class CDMAPhone. Not implemented in GSMPhone.
-        Log.e(LOG_TAG, "Error! This function should never be executed, inactive CDMAPhone.");
+        logUnexpectedCdmaMethodCall("isOtaSpNumber");
         return false;
     }
 
     public void registerForCallWaiting(Handler h, int what, Object obj){
         // This function should be overridden by the class CDMAPhone. Not implemented in GSMPhone.
-        Log.e(LOG_TAG, "Error! This function should never be executed, inactive CDMAPhone.");
+        logUnexpectedCdmaMethodCall("registerForCallWaiting");
     }
 
     public void unregisterForCallWaiting(Handler h){
         // This function should be overridden by the class CDMAPhone. Not implemented in GSMPhone.
-        Log.e(LOG_TAG, "Error! This function should never be executed, inactive CDMAPhone.");
+        logUnexpectedCdmaMethodCall("unregisterForCallWaiting");
     }
 
     public void registerForEcmTimerReset(Handler h, int what, Object obj) {
         // This function should be overridden by the class CDMAPhone. Not implemented in GSMPhone.
-        Log.e(LOG_TAG, "Error! This function should never be executed, inactive CDMAPhone.");
+        logUnexpectedCdmaMethodCall("registerForEcmTimerReset");
     }
 
     public void unregisterForEcmTimerReset(Handler h) {
         // This function should be overridden by the class CDMAPhone. Not implemented in GSMPhone.
-        Log.e(LOG_TAG, "Error! This function should never be executed, inactive CDMAPhone.");
+        logUnexpectedCdmaMethodCall("unregisterForEcmTimerReset");
     }
 
     public void registerForSignalInfo(Handler h, int what, Object obj) {
@@ -908,12 +908,12 @@ public abstract class PhoneBase extends Handler implements Phone {
 
      public void setOnEcbModeExitResponse(Handler h, int what, Object obj){
          // This function should be overridden by the class CDMAPhone. Not implemented in GSMPhone.
-         Log.e(LOG_TAG, "Error! This function should never be executed, inactive CDMAPhone.");
+         logUnexpectedCdmaMethodCall("setOnEcbModeExitResponse");
      }
 
      public void unsetOnEcbModeExitResponse(Handler h){
         // This function should be overridden by the class CDMAPhone. Not implemented in GSMPhone.
-         Log.e(LOG_TAG, "Error! This function should never be executed, inactive CDMAPhone.");
+         logUnexpectedCdmaMethodCall("unsetOnEcbModeExitResponse");
      }
 
     public String getInterfaceName(String apnType) {
@@ -984,7 +984,7 @@ public abstract class PhoneBase extends Handler implements Phone {
     }
 
     /**
-     * Notifiy registrants of a new ringing Connection.
+     * Notify registrants of a new ringing Connection.
      * Subclasses of Phone probably want to replace this with a
      * version scoped to their packages
      */
@@ -1016,5 +1016,14 @@ public abstract class PhoneBase extends Handler implements Phone {
                     + " token=" + token
                     + " mCallRingContinueToken=" + mCallRingContinueToken);
         }
+    }
+
+    /**
+     * Common error logger method for unexpected calls to CDMA-only methods.
+     */
+    private void logUnexpectedCdmaMethodCall(String name)
+    {
+        Log.e(LOG_TAG, "Error! " + name + "() in PhoneBase should not be " +
+                "called, CDMAPhone inactive.");
     }
 }

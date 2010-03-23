@@ -46,7 +46,7 @@ import java.util.List;
  * {@link android.content.Context#getSystemService
  * Context.getSystemService(Context.TELEPHONY_SERVICE)}.
  * <p>
- * Note that acess to some telephony information is
+ * Note that access to some telephony information is
  * permission-protected. Your application cannot access the protected
  * information unless it has the appropriate permissions declared in
  * its manifest file. Where permissions apply, they are noted in the
@@ -356,7 +356,7 @@ public class TelephonyManager {
     }
 
     /**
-     * Returns the ISO country code equivilent of the current registered
+     * Returns the ISO country code equivalent of the current registered
      * operator's MCC (Mobile Country Code).
      * <p>
      * Availability: Only when user is registered to a network. Result may be

@@ -1274,13 +1274,27 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
     @Override
     Bitmap createSnapshot(Bitmap.Config quality, int backgroundColor, boolean skipChildren) {
-        int oldCount = mChildrenCount;
+        int count = mChildrenCount;
+        int[] visibilities = null;
+
         if (skipChildren) {
-            mChildrenCount = 0;
+            visibilities = new int[count];
+            for (int i = 0; i < count; i++) {
+                View child = getChildAt(i);
+                visibilities[i] = child.getVisibility();
+                if (visibilities[i] == View.VISIBLE) {
+                    child.setVisibility(INVISIBLE);
+                }
+            }
         }
 
         Bitmap b = super.createSnapshot(quality, backgroundColor, skipChildren);
-        mChildrenCount = oldCount;
+
+        if (skipChildren) {
+            for (int i = 0; i < count; i++) {
+                getChildAt(i).setVisibility(visibilities[i]);
+            }        
+        }
 
         return b;
     }

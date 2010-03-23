@@ -8359,11 +8359,11 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
     }
 
-    public boolean killPidsForMemory(int[] pids) {
+    public boolean killPids(int[] pids, String pReason) {
         if (Binder.getCallingUid() != Process.SYSTEM_UID) {
-            throw new SecurityException("killPidsForMemory only available to the system");
+            throw new SecurityException("killPids only available to the system");
         }
-        
+        String reason = (pReason == null) ? "Unknown" : pReason;
         // XXX Note: don't acquire main activity lock here, because the window
         // manager calls in with its locks held.
         
@@ -8387,7 +8387,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             if (worstType < EMPTY_APP_ADJ && worstType > HIDDEN_APP_MIN_ADJ) {
                 worstType = HIDDEN_APP_MIN_ADJ;
             }
-            Slog.w(TAG, "Killing processes for memory at adjustment " + worstType);
+            Slog.w(TAG, "Killing processes " + reason + " at adjustment " + worstType);
             for (int i=0; i<pids.length; i++) {
                 ProcessRecord proc = mPidsSelfLocked.get(pids[i]);
                 if (proc == null) {
@@ -8395,10 +8395,10 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 }
                 int adj = proc.setAdj;
                 if (adj >= worstType) {
-                    Slog.w(TAG, "Killing for memory: " + proc + " (adj "
+                    Slog.w(TAG, "Killing " + reason + " : " + proc + " (adj "
                             + adj + ")");
-                    EventLog.writeEvent(EventLogTags.AM_KILL_FOR_MEMORY, proc.pid,
-                            proc.processName, adj);
+                    EventLog.writeEvent(EventLogTags.AM_KILL, proc.pid,
+                            proc.processName, adj, reason);
                     killed = true;
                     Process.killProcess(pids[i]);
                 }

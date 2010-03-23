@@ -1472,8 +1472,6 @@ public class AudioManager {
     //====================================================================
     // Remote Control
     /**
-     * @hide
-     * TODO unhide for SDK
      * TODO document for SDK
      * @param eventReceiver identifier of a {@link android.content.BroadcastReceiver}
      *      that will receive the media button intent. This broadcast receiver must be declared
@@ -1490,21 +1488,6 @@ public class AudioManager {
     }
 
     /**
-     * @hide
-     * TODO unhide for SDK
-     * TODO document for SDK
-     * @param eventReceiverClass class of a {@link android.content.BroadcastReceiver} that will
-     *     receive the media button intent. This broadcast receiver must be declared in the
-     *     application manifest.
-     */
-    public void registerMediaButtonEventReceiver(Class<?> eventReceiverClass) {
-        registerMediaButtonEventReceiver(new ComponentName(
-                eventReceiverClass.getPackage().getName(), eventReceiverClass.getName()));
-    }
-
-    /**
-     * @hide
-     * TODO unhide for SDK
      * TODO document for SDK
      */
     public void unregisterMediaButtonEventReceiver(ComponentName eventReceiver) {
@@ -1514,16 +1497,6 @@ public class AudioManager {
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in unregisterMediaButtonEventReceiver"+e);
         }
-    }
-
-    /**
-     * @hide
-     * TODO unhide for SDK
-     * TODO document for SDK
-     */
-    public void unregisterMediaButtonEventReceiver(Class<?> eventReceiverClass) {
-        unregisterMediaButtonEventReceiver(new ComponentName(
-                eventReceiverClass.getPackage().getName(), eventReceiverClass.getName()));
     }
 
     /**

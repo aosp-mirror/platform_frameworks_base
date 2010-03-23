@@ -343,6 +343,7 @@ class PackageManagerService extends IPackageManager.Stub {
     static final int POST_INSTALL = 9;
     static final int MCS_RECONNECT = 10;
     static final int MCS_GIVE_UP = 11;
+    static final int UPDATED_MEDIA_STATUS = 12;
 
     // Delay time in millisecs
     static final int BROADCAST_DELAY = 10 * 1000;
@@ -594,6 +595,13 @@ class PackageManagerService extends IPackageManager.Stub {
                         }
                     } else {
                         Slog.e(TAG, "Bogus post-install token " + msg.arg1);
+                    }
+                } break;
+                case UPDATED_MEDIA_STATUS: {
+                    try {
+                        PackageHelper.getMountService().finishMediaUpdate();
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "MountService not running?");
                     }
                 } break;
             }
@@ -3969,7 +3977,7 @@ class PackageManagerService extends IPackageManager.Stub {
                             && ps.permissionsFixed) {
                         // If this is an existing, non-system package, then
                         // we can't add any new permissions to it.
-                        if (!allowedSig && !gp.loadedPermissions.contains(perm)) {
+                        if (!allowedSig && !gp.grantedPermissions.contains(perm)) {
                             allowed = false;
                             // Except...  if this is a permission that was added
                             // to the platform (note: need to only do this when
@@ -3981,7 +3989,7 @@ class PackageManagerService extends IPackageManager.Stub {
                                 if (npi.name.equals(perm)
                                         && pkg.applicationInfo.targetSdkVersion < npi.sdkVersion) {
                                     allowed = true;
-                                    Log.i(TAG, "Auto-granting WRITE_EXTERNAL_STORAGE to old pkg "
+                                    Log.i(TAG, "Auto-granting " + perm + " to old pkg "
                                             + pkg.packageName);
                                     break;
                                 }
@@ -4029,7 +4037,6 @@ class PackageManagerService extends IPackageManager.Stub {
             // permissions we have now selected are fixed until explicitly
             // changed.
             ps.permissionsFixed = true;
-            gp.loadedPermissions = new HashSet<String>(gp.grantedPermissions);
         }
     }
     
@@ -6940,12 +6947,6 @@ class PackageManagerService extends IPackageManager.Stub {
                             pw.print("      "); pw.println(s);
                         }
                     }
-                    if (ps.loadedPermissions.size() > 0) {
-                        pw.println("    loadedPermissions:");
-                        for (String s : ps.loadedPermissions) {
-                            pw.print("      "); pw.println(s);
-                        }
-                    }
                 }
             }
             printedSomething = false;
@@ -7012,10 +7013,6 @@ class PackageManagerService extends IPackageManager.Stub {
                             pw.print(" gids="); pw.println(arrayToString(su.gids));
                     pw.println("    grantedPermissions:");
                     for (String s : su.grantedPermissions) {
-                        pw.print("      "); pw.println(s);
-                    }
-                    pw.println("    loadedPermissions:");
-                    for (String s : su.loadedPermissions) {
                         pw.print("      "); pw.println(s);
                     }
                 }
@@ -7520,8 +7517,6 @@ class PackageManagerService extends IPackageManager.Stub {
         HashSet<String> grantedPermissions = new HashSet<String>();
         int[] gids;
 
-        HashSet<String> loadedPermissions = new HashSet<String>();
-
         GrantedPermissions(int pkgFlags) {
             setFlags(pkgFlags);
         }
@@ -7621,7 +7616,6 @@ class PackageManagerService extends IPackageManager.Stub {
         public void copyFrom(PackageSettingBase base) {
             grantedPermissions = base.grantedPermissions;
             gids = base.gids;
-            loadedPermissions = base.loadedPermissions;
 
             timeStamp = base.timeStamp;
             timeStampString = base.timeStampString;
@@ -8055,7 +8049,6 @@ class PackageManagerService extends IPackageManager.Stub {
                             p.userId = dis.userId;
                             // Clone permissions
                             p.grantedPermissions = new HashSet<String>(dis.grantedPermissions);
-                            p.loadedPermissions = new HashSet<String>(dis.loadedPermissions);
                             // Clone component info
                             p.disabledComponents = new HashSet<String>(dis.disabledComponents);
                             p.enabledComponents = new HashSet<String>(dis.enabledComponents);
@@ -8160,7 +8153,7 @@ class PackageManagerService extends IPackageManager.Stub {
                 }
                 for (PackageSetting pkg:sus.packages) {
                     if (pkg.pkg != null &&
-                            !pkg.pkg.packageName.equalsIgnoreCase(deletedPs.pkg.packageName) &&
+                            !pkg.pkg.packageName.equals(deletedPs.pkg.packageName) &&
                             pkg.pkg.requestedPermissions.contains(eachPerm)) {
                         used = true;
                         break;
@@ -8169,7 +8162,6 @@ class PackageManagerService extends IPackageManager.Stub {
                 if (!used) {
                     // can safely delete this permission from list
                     sus.grantedPermissions.remove(eachPerm);
-                    sus.loadedPermissions.remove(eachPerm);
                 }
             }
             // Update gids
@@ -9044,7 +9036,7 @@ class PackageManagerService extends IPackageManager.Stub {
                         packageSetting.signatures.readXml(parser, mPastSignatures);
                     } else if (tagName.equals("perms")) {
                         readGrantedPermissionsLP(parser,
-                                packageSetting.loadedPermissions);
+                                packageSetting.grantedPermissions);
                         packageSetting.permissionsFixed = true;
                     } else {
                         reportSettingsProblem(Log.WARN,
@@ -9173,7 +9165,7 @@ class PackageManagerService extends IPackageManager.Stub {
                     if (tagName.equals("sigs")) {
                         su.signatures.readXml(parser, mPastSignatures);
                     } else if (tagName.equals("perms")) {
-                        readGrantedPermissionsLP(parser, su.loadedPermissions);
+                        readGrantedPermissionsLP(parser, su.grantedPermissions);
                     } else {
                         reportSettingsProblem(Log.WARN,
                                 "Unknown element under <shared-user>: "
@@ -9373,10 +9365,12 @@ class PackageManagerService extends IPackageManager.Stub {
    }
 
    /*
-    * Return true if PackageManager does have packages to be updated.
+    * Update media status on PackageManager.
     */
-   public boolean updateExternalMediaStatus(final boolean mediaStatus) {
-       final boolean ret;
+   public void updateExternalMediaStatus(final boolean mediaStatus, final boolean reportStatus) {
+       if (Binder.getCallingUid() != Process.SYSTEM_UID) {
+           throw new SecurityException("Media status can only be updated by the system");
+       }
        synchronized (mPackages) {
            Log.i(TAG, "Updating external media status from " +
                    (mMediaMounted ? "mounted" : "unmounted") + " to " +
@@ -9384,32 +9378,29 @@ class PackageManagerService extends IPackageManager.Stub {
            if (DEBUG_SD_INSTALL) Log.i(TAG, "updateExternalMediaStatus:: mediaStatus=" +
                    mediaStatus+", mMediaMounted=" + mMediaMounted);
            if (mediaStatus == mMediaMounted) {
-               return false;
+               if (reportStatus) {
+                   mHandler.sendEmptyMessage(UPDATED_MEDIA_STATUS);
+               }
+               return;
            }
            mMediaMounted = mediaStatus;
-           Set<String> appList = mSettings.findPackagesWithFlag(ApplicationInfo.FLAG_EXTERNAL_STORAGE);
-           ret = appList != null && appList.size() > 0;
-           if (DEBUG_SD_INSTALL) {
-               if (appList != null) {
-                   for (String app : appList) {
-                       Log.i(TAG, "Should enable " + app + " on sdcard");
-                   }
-               }
-           }
-           if (DEBUG_SD_INSTALL)  Log.i(TAG, "updateExternalMediaStatus returning " + ret);
        }
        // Queue up an async operation since the package installation may take a little while.
        mHandler.post(new Runnable() {
            public void run() {
                mHandler.removeCallbacks(this);
-               updateExternalMediaStatusInner(mediaStatus, ret);
+               try {
+                   updateExternalMediaStatusInner(mediaStatus);
+               } finally {
+                   if (reportStatus) {
+                       mHandler.sendEmptyMessage(UPDATED_MEDIA_STATUS);
+                   }
+               }
            }
        });
-       return ret;
    }
 
-   private void updateExternalMediaStatusInner(boolean mediaStatus,
-           boolean sendUpdateBroadcast) {
+   private void updateExternalMediaStatusInner(boolean mediaStatus) {
        // If we are up here that means there are packages to be
        // enabled or disabled.
        final String list[] = PackageHelper.getSecureContainerList();
@@ -9474,11 +9465,11 @@ class PackageManagerService extends IPackageManager.Stub {
        // Process packages with valid entries.
        if (mediaStatus) {
            if (DEBUG_SD_INSTALL) Log.i(TAG, "Loading packages");
-           loadMediaPackages(processCids, uidArr, sendUpdateBroadcast, removeCids);
+           loadMediaPackages(processCids, uidArr, removeCids);
            startCleaningPackages();
        } else {
            if (DEBUG_SD_INSTALL) Log.i(TAG, "Unloading packages");
-           unloadMediaPackages(processCids, uidArr, sendUpdateBroadcast);
+           unloadMediaPackages(processCids, uidArr);
        }
    }
 
@@ -9509,8 +9500,7 @@ class PackageManagerService extends IPackageManager.Stub {
     * to avoid unnecessary crashes.
     */
    private void loadMediaPackages(HashMap<SdInstallArgs, String> processCids,
-           int uidArr[], boolean sendUpdateBroadcast,
-           HashSet<String> removeCids) {
+           int uidArr[], HashSet<String> removeCids) {
        ArrayList<String> pkgList = new ArrayList<String>();
        Set<SdInstallArgs> keys = processCids.keySet();
        boolean doGc = false;
@@ -9553,8 +9543,6 @@ class PackageManagerService extends IPackageManager.Stub {
                    // Scan the package
                    if (scanPackageLI(pkg, parseFlags, SCAN_MONITOR) != null) {
                        synchronized (mPackages) {
-                           updatePermissionsLP(pkg.packageName, pkg,
-                                   pkg.permissions.size() > 0, false);
                            retCode = PackageManager.INSTALL_SUCCEEDED;
                            pkgList.add(pkg.packageName);
                            // Post process args
@@ -9578,7 +9566,7 @@ class PackageManagerService extends IPackageManager.Stub {
            mSettings.writeLP();
        }
        // Send a broadcast to let everyone know we are done processing
-       if (sendUpdateBroadcast) {
+       if (pkgList.size() > 0) {
            sendResourcesChangedBroadcast(true, pkgList, uidArr);
        }
        if (doGc) {
@@ -9594,7 +9582,7 @@ class PackageManagerService extends IPackageManager.Stub {
    }
 
    private void unloadMediaPackages(HashMap<SdInstallArgs, String> processCids,
-           int uidArr[], boolean sendUpdateBroadcast) {
+           int uidArr[]) {
        if (DEBUG_SD_INSTALL) Log.i(TAG, "unloading media packages");
        ArrayList<String> pkgList = new ArrayList<String>();
        ArrayList<SdInstallArgs> failedList = new ArrayList<SdInstallArgs>();
@@ -9617,7 +9605,7 @@ class PackageManagerService extends IPackageManager.Stub {
            }
        }
        // Send broadcasts
-       if (sendUpdateBroadcast) {
+       if (pkgList.size() > 0) {
            sendResourcesChangedBroadcast(false, pkgList, uidArr);
        }
        // Force gc

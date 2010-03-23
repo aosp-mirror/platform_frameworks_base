@@ -241,7 +241,7 @@ public interface IActivityManager extends IInterface {
     
     public void noteWakeupAlarm(IIntentSender sender) throws RemoteException;
     
-    public boolean killPidsForMemory(int[] pids) throws RemoteException;
+    public boolean killPids(int[] pids, String reason) throws RemoteException;
     
     public void reportPss(IApplicationThread caller, int pss) throws RemoteException;
     
@@ -476,7 +476,7 @@ public interface IActivityManager extends IInterface {
     int GET_PROCESSES_IN_ERROR_STATE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+76;
     int CLEAR_APP_DATA_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+77;
     int FORCE_STOP_PACKAGE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+78;
-    int KILL_PIDS_FOR_MEMORY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+79;
+    int KILL_PIDS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+79;
     int GET_SERVICES_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+80;
     int REPORT_PSS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+81;
     int GET_RUNNING_APP_PROCESSES_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+82;

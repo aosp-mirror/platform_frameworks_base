@@ -1835,9 +1835,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     mSelectedPosition < mAdapter.getCount()) {
 
                 final View view = getChildAt(mSelectedPosition - mFirstPosition);
-                performItemClick(view, mSelectedPosition, mSelectedRowId);
+                if (view != null) {
+                    performItemClick(view, mSelectedPosition, mSelectedRowId);
+                    view.setPressed(false);
+                }
                 setPressed(false);
-                if (view != null) view.setPressed(false);
                 return true;
             }
             break;

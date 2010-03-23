@@ -202,7 +202,7 @@ public abstract class IccCard {
     /**
      * Supply the ICC PIN to the ICC
      *
-     * When the operation is complete, onComplete will be sent to it's
+     * When the operation is complete, onComplete will be sent to its
      * Handler.
      *
      * onComplete.obj will be an AsyncResult

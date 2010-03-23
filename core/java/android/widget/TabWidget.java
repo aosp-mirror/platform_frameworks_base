@@ -216,23 +216,23 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
     }
 
     /**
-     * Sets the drawable to use as the left part of the strip below the
+     * Sets the drawable to use as the right part of the strip below the
      * tab indicators.
-     * @param drawable the left strip drawable
+     * @param drawable the right strip drawable
      */
     public void setRightStripDrawable(Drawable drawable) {
-        mBottomLeftStrip = drawable;
+        mBottomRightStrip = drawable;
         requestLayout();
         invalidate();    }
 
     /**
-     * Sets the drawable to use as the left part of the strip below the
+     * Sets the drawable to use as the right part of the strip below the
      * tab indicators.
      * @param resId the resource identifier of the drawable to use as the
-     * left strip drawable
+     * right strip drawable
      */
     public void setRightStripDrawable(int resId) {
-        mBottomLeftStrip = mContext.getResources().getDrawable(resId);
+        mBottomRightStrip = mContext.getResources().getDrawable(resId);
         requestLayout();
         invalidate();
     }

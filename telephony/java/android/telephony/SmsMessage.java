@@ -237,8 +237,8 @@ public class SmsMessage {
 
     /*
      * TODO(cleanup): It would make some sense if the result of
-     * preprocessing a message to determine the proper encoding (ie
-     * the resulting datastructure from calculateLength) could be
+     * preprocessing a message to determine the proper encoding (i.e.
+     * the resulting data structure from calculateLength) could be
      * passed as an argument to the actual final encoding function.
      * This would better ensure that the logic behind size calculation
      * actually matched the encoding.
@@ -427,7 +427,7 @@ public class SmsMessage {
      * @param destinationAddress the address of the destination for the message
      * @param destinationPort the port to deliver the message to at the
      *        destination
-     * @param data the dat for the message
+     * @param data the data for the message
      * @return a <code>SubmitPdu</code> containing the encoded SC
      *         address, if applicable, and the encoded message.
      *         Returns null on encode error.
