@@ -259,6 +259,17 @@ public class AsecTests extends AndroidTestCase {
         }
     }
 
+    public void testNonExistPath() {
+        IMountService ms = getMs();
+        try {
+            String path = ms.getSecureContainerPath("jparks.broke.it");
+            failStr(path);
+        } catch (IllegalArgumentException e) {
+        } catch (Exception e) {
+            failStr(e);
+        }
+    }
+
     public void testUnmountBusyContainer() {
         IMountService ms = getMs();
         try {
