@@ -469,7 +469,7 @@ public final class Downloads {
     /**
      * Base class with common functionality for the various download classes
      */
-    private static class DownloadBase {
+    public static class DownloadBase {
         /** @hide */
         DownloadBase() {}
 
