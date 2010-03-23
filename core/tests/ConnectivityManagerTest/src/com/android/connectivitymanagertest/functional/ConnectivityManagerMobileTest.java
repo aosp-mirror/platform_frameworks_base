@@ -1,3 +1,21 @@
+/*
+ * Copyright (C) 2010 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+
 package com.android.connectivitymanagertest.functional;
 
 import com.android.connectivitymanagertest.ConnectivityManagerTestActivity;
@@ -86,7 +104,7 @@ public class ConnectivityManagerMobileTest
             Log.v(LOG_TAG, "the state for WIFI is changed");
             Log.v(LOG_TAG, "reason: " +
                     cmActivity.getTransitionFailureReason(ConnectivityManager.TYPE_WIFI));
-            assertTrue(false);
+            assertTrue("state validation fail", false);
         }
         if (!cmActivity.validateNetworkStates(ConnectivityManager.TYPE_MOBILE)) {
             Log.v(LOG_TAG, "the state for MOBILE is changed");
@@ -101,6 +119,7 @@ public class ConnectivityManagerMobileTest
     // Test case 2: test connection to a given AP
     @LargeTest
     public void testConnectToWifi() {
+        assertNotNull("SSID is null", TEST_ACCESS_POINT);
         //Prepare for connectivity verification
         NetworkInfo networkInfo = cmActivity.mCM.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
         cmActivity.setStateTransitionCriteria(ConnectivityManager.TYPE_MOBILE, networkInfo.getState(),
