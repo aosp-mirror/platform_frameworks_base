@@ -4460,6 +4460,9 @@ public class WebView extends AbsoluteLayout
             if (inEditingMode() && nativeFocusCandidateIsPassword()) {
                 mWebTextView.setInPassword(false);
             }
+
+            mViewManager.startZoom();
+
             return true;
         }
 
@@ -4493,6 +4496,8 @@ public class WebView extends AbsoluteLayout
             mConfirmMove = true;
             startTouch(detector.getFocusX(), detector.getFocusY(),
                     mLastTouchTime);
+
+            mViewManager.endZoom();
         }
 
         public boolean onScale(ScaleGestureDetector detector) {
