@@ -45,6 +45,7 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.provider.Settings;
 import android.text.format.DateUtils;
 import android.text.format.Time;
 import android.util.Slog;
@@ -127,20 +128,39 @@ class UiModeManagerService extends IUiModeManager.Stub {
                     category = null;
                 }
                 if (category != null) {
+                    // This is the new activity that will serve as home while
+                    // we are in care mode.
                     intent = new Intent(Intent.ACTION_MAIN);
                     intent.addCategory(category);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                             | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+                    
+                    // Now we are going to be careful about switching the
+                    // configuration and starting the activity -- we need to
+                    // do this in a specific order under control of the
+                    // activity manager, to do it cleanly.  So compute the
+                    // new config, but don't set it yet, and let the
+                    // activity manager take care of both the start and config
+                    // change.
+                    Configuration newConfig = null;
+                    if (mHoldingConfiguration) {
+                        updateConfigurationLocked(false);
+                        newConfig = mConfiguration;
+                    }
                     try {
+                        ActivityManagerNative.getDefault().startActivityWithConfig(
+                                null, intent, null, null, 0, null, null, 0, false, false,
+                                newConfig);
                         mContext.startActivity(intent);
-                    } catch (ActivityNotFoundException e) {
+                        mHoldingConfiguration = false;
+                    } catch (RemoteException e) {
                         Slog.w(TAG, e.getCause());
                     }
                 }
 
                 if (mHoldingConfiguration) {
                     mHoldingConfiguration = false;
-                    updateConfigurationLocked();
+                    updateConfigurationLocked(true);
                 }
             }
         }
@@ -275,6 +295,9 @@ class UiModeManagerService extends IUiModeManager.Stub {
                 com.android.internal.R.integer.config_carDockKeepsScreenOn) == 1);
         mDeskModeKeepsScreenOn = (context.getResources().getInteger(
                 com.android.internal.R.integer.config_deskDockKeepsScreenOn) == 1);
+        
+        mNightMode = Settings.Secure.getInt(mContext.getContentResolver(),
+                Settings.Secure.UI_NIGHT_MODE, UiModeManager.MODE_NIGHT_AUTO);
     }
 
     public void disableCarMode() {
@@ -319,6 +342,10 @@ class UiModeManagerService extends IUiModeManager.Stub {
             }
 
             if (mNightMode != mode) {
+                long ident = Binder.clearCallingIdentity();
+                Settings.Secure.putInt(mContext.getContentResolver(),
+                        Settings.Secure.UI_NIGHT_MODE, mode);
+                Binder.restoreCallingIdentity(ident);
                 mNightMode = mode;
                 updateLocked();
             }
@@ -360,7 +387,7 @@ class UiModeManagerService extends IUiModeManager.Stub {
         }
     }
 
-    final void updateConfigurationLocked() {
+    final void updateConfigurationLocked(boolean sendIt) {
         int uiMode = 0;
         if (mCarModeEnabled) {
             uiMode = Configuration.UI_MODE_TYPE_CAR;
@@ -385,13 +412,14 @@ class UiModeManagerService extends IUiModeManager.Stub {
 
         if (!mHoldingConfiguration && uiMode != mSetUiMode) {
             mSetUiMode = uiMode;
+            mConfiguration.uiMode = uiMode;
 
-            try {
-                final IActivityManager am = ActivityManagerNative.getDefault();
-                mConfiguration.uiMode = uiMode;
-                am.updateConfiguration(mConfiguration);
-            } catch (RemoteException e) {
-                Slog.w(TAG, "Failure communicating with activity manager", e);
+            if (sendIt) {
+                try {
+                    ActivityManagerNative.getDefault().updateConfiguration(mConfiguration);
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Failure communicating with activity manager", e);
+                }
             }
         }
     }
@@ -447,7 +475,7 @@ class UiModeManagerService extends IUiModeManager.Stub {
                 mHoldingConfiguration = true;
             }
 
-            updateConfigurationLocked();
+            updateConfigurationLocked(true);
 
             // keep screen on when charging and in car mode
             boolean keepScreenOn = mCharging &&
