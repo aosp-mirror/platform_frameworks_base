@@ -1668,7 +1668,7 @@ public class WebView extends AbsoluteLayout
         }
         nativeClearCursor(); // start next trackball movement from page edge
         if (bottom) {
-            return pinScrollTo(mScrollX, computeVerticalScrollRange(), true, 0);
+            return pinScrollTo(mScrollX, computeRealVerticalScrollRange(), true, 0);
         }
         // Page down.
         int h = getHeight();
@@ -1907,7 +1907,7 @@ public class WebView extends AbsoluteLayout
     private int pinLocY(int y) {
         if (mInOverScrollMode) return y;
         return pinLoc(y, getViewHeightWithTitle(),
-                      computeVerticalScrollRange() + getTitleHeight());
+                      computeRealVerticalScrollRange() + getTitleHeight());
     }
 
     /**
@@ -2258,8 +2258,7 @@ public class WebView extends AbsoluteLayout
         return false;
     }
 
-    @Override
-    protected int computeHorizontalScrollRange() {
+    private int computeRealHorizontalScrollRange() {
         if (mDrawHistory) {
             return mHistoryWidth;
         } else {
@@ -2269,13 +2268,49 @@ public class WebView extends AbsoluteLayout
     }
 
     @Override
-    protected int computeVerticalScrollRange() {
+    protected int computeHorizontalScrollRange() {
+        int range = computeRealHorizontalScrollRange();
+
+        // Adjust reported range if overscrolled to compress the scroll bars
+        final int scrollX = mScrollX;
+        final int overscrollRight = computeMaxScrollX();
+        if (scrollX < 0) {
+            range -= scrollX;
+        } else if (scrollX > overscrollRight) {
+            range += scrollX - overscrollRight;
+        }
+
+        return range;
+    }
+
+    @Override
+    protected int computeHorizontalScrollOffset() {
+        return Math.max(mScrollX, 0);
+    }
+
+    private int computeRealVerticalScrollRange() {
         if (mDrawHistory) {
             return mHistoryHeight;
         } else {
             // to avoid rounding error caused unnecessary scrollbar, use floor
             return (int) Math.floor(mContentHeight * mActualScale);
         }
+    }
+
+    @Override
+    protected int computeVerticalScrollRange() {
+        int range = computeRealVerticalScrollRange();
+
+        // Adjust reported range if overscrolled to compress the scroll bars
+        final int scrollY = mScrollY;
+        final int overscrollBottom = computeMaxScrollY();
+        if (scrollY < 0) {
+            range -= scrollY;
+        } else if (scrollY > overscrollBottom) {
+            range += scrollY - overscrollBottom;
+        }
+
+        return range;
     }
 
     @Override
@@ -3134,14 +3169,14 @@ public class WebView extends AbsoluteLayout
             canvas.save();
             canvas.translate(mScrollX, mScrollY);
             canvas.clipRect(-mScrollX, top - mScrollY,
-                    computeHorizontalScrollRange() - mScrollX, top
-                            + computeVerticalScrollRange() - mScrollY,
+                    computeRealHorizontalScrollRange() - mScrollX, top
+                            + computeRealVerticalScrollRange() - mScrollY,
                     Region.Op.DIFFERENCE);
             canvas.drawPaint(mOverScrollBackground);
             canvas.restore();
             // next clip the region for the content
-            canvas.clipRect(0, top, computeHorizontalScrollRange(), top
-                    + computeVerticalScrollRange());
+            canvas.clipRect(0, top, computeRealHorizontalScrollRange(), top
+                    + computeRealVerticalScrollRange());
         }
         if (mTitleBar != null) {
             canvas.translate(0, (int) mTitleBar.getHeight());
@@ -4272,7 +4307,7 @@ public class WebView extends AbsoluteLayout
         public DragTrackerHandler(float x, float y, DragTracker proxy) {
             mProxy = proxy;
 
-            int docBottom = computeVerticalScrollRange() + getTitleHeight();
+            int docBottom = computeRealVerticalScrollRange() + getTitleHeight();
             int viewTop = getScrollY();
             int viewBottom = viewTop + getHeight();
 
@@ -5364,11 +5399,11 @@ public class WebView extends AbsoluteLayout
     }
 
     private int computeMaxScrollX() {
-        return Math.max(computeHorizontalScrollRange() - getViewWidth(), 0);
+        return Math.max(computeRealHorizontalScrollRange() - getViewWidth(), 0);
     }
 
     private int computeMaxScrollY() {
-        return Math.max(computeVerticalScrollRange() + getTitleHeight()
+        return Math.max(computeRealVerticalScrollRange() + getTitleHeight()
                 - getViewHeightWithTitle(), 0);
     }
 
