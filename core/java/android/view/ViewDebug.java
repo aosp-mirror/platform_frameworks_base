@@ -1040,7 +1040,7 @@ public class ViewDebug {
             clientStream.writeInt(outRect.width());
             clientStream.writeInt(outRect.height());
     
-            captureViewLayer(root, clientStream);
+            captureViewLayer(root, clientStream, true);
             
             clientStream.write(2);
         } finally {
@@ -1048,8 +1048,10 @@ public class ViewDebug {
         }
     }
 
-    private static void captureViewLayer(View view, DataOutputStream clientStream)
+    private static void captureViewLayer(View view, DataOutputStream clientStream, boolean visible)
             throws IOException {
+
+        final boolean localVisible = view.getVisibility() == View.VISIBLE && visible;
 
         if ((view.mPrivateFlags & View.SKIP_DRAW) != View.SKIP_DRAW) {
             final int id = view.getId();
@@ -1060,7 +1062,7 @@ public class ViewDebug {
     
             clientStream.write(1);
             clientStream.writeUTF(name);
-            clientStream.writeByte(view.getVisibility() == View.VISIBLE ? 1 : 0);
+            clientStream.writeByte(localVisible ? 1 : 0);
     
             int[] position = new int[2];
             // XXX: Should happen on the UI thread
@@ -1086,7 +1088,7 @@ public class ViewDebug {
             int count = group.getChildCount();
 
             for (int i = 0; i < count; i++) {
-                captureViewLayer(group.getChildAt(i), clientStream);
+                captureViewLayer(group.getChildAt(i), clientStream, localVisible);
             }
         }
     }
