@@ -579,10 +579,12 @@ public class SQLiteCursor extends AbstractWindowedCursor {
         try {
             // if the cursor hasn't been closed yet, close it first
             if (mWindow != null) {
-                close();
+                int len = mQuery.mSql.length();
                 Log.e(TAG, "Finalizing a Cursor that has not been deactivated or closed. " +
                         "database = " + mDatabase.getPath() + ", table = " + mEditTable +
-                        ", query = " + mQuery.mSql, mStackTrace);
+                        ", query = " + mQuery.mSql.substring(0, (len > 100) ? 100 : len),
+                        mStackTrace);
+                close();
                 SQLiteDebug.notifyActiveCursorFinalized();
             } else {
                 if (Config.LOGV) {
