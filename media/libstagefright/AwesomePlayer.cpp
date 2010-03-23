@@ -1153,6 +1153,8 @@ void AwesomePlayer::onPrepareAsyncEvent() {
             Mutex::Autolock autoLock(mLock);
             if (mFlags & PREPARE_CANCELLED) {
                 LOGI("prepare was cancelled before preparing the prefetcher");
+
+                prefetcher.clear();
                 abortPrepare(UNKNOWN_ERROR);
                 return;
             }
