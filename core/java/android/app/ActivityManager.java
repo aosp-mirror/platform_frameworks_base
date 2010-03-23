@@ -19,6 +19,7 @@ package android.app;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.ConfigurationInfo;
 import android.content.pm.IPackageDataObserver;
 import android.graphics.Bitmap;
@@ -858,6 +859,22 @@ public class ActivityManager {
         }
     }
     
+    /**
+     * Returns a list of application processes installed on external media
+     * that are running on the device.
+     *
+     * @return Returns a list of ApplicationInfo records, or null if none
+     * This list ordering is not specified.
+     * @hide
+     */
+    public List<ApplicationInfo> getRunningExternalApplications() {
+        try {
+            return ActivityManagerNative.getDefault().getRunningExternalApplications();
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
+
     /**
      * Returns a list of application processes that are running on the device.
      * 
