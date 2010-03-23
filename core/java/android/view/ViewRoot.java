@@ -1500,8 +1500,10 @@ public final class ViewRoot extends Handler implements ViewParent,
                         focus.getFocusedRect(mTempRect);
                         if (DEBUG_INPUT_RESIZE) Log.v(TAG, "Focus " + focus
                                 + ": focusRect=" + mTempRect.toShortString());
-                        ((ViewGroup) mView).offsetDescendantRectToMyCoords(
-                                focus, mTempRect);
+                        if (mView instanceof ViewGroup) {
+                            ((ViewGroup) mView).offsetDescendantRectToMyCoords(
+                                    focus, mTempRect);
+                        }
                         if (DEBUG_INPUT_RESIZE) Log.v(TAG,
                                 "Focus in window: focusRect="
                                 + mTempRect.toShortString()
@@ -2491,8 +2493,12 @@ public final class ViewRoot extends Handler implements ViewParent,
                                 // of previous focused into the coord system of
                                 // newly focused view
                                 focused.getFocusedRect(mTempRect);
-                                ((ViewGroup) mView).offsetDescendantRectToMyCoords(focused, mTempRect);
-                                ((ViewGroup) mView).offsetRectIntoDescendantCoords(v, mTempRect);
+                                if (mView instanceof ViewGroup) {
+                                    ((ViewGroup) mView).offsetDescendantRectToMyCoords(
+                                            focused, mTempRect);
+                                    ((ViewGroup) mView).offsetRectIntoDescendantCoords(
+                                            v, mTempRect);
+                                }
                                 focusPassed = v.requestFocus(direction, mTempRect);
                             }
 
