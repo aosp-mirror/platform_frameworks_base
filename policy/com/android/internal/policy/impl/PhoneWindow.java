@@ -29,6 +29,7 @@ import com.android.internal.view.menu.MenuView;
 import com.android.internal.view.menu.SubMenuBuilder;
 
 import android.app.KeyguardManager;
+import android.app.SearchManager;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
@@ -150,6 +151,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     private long mVolumeKeyUpTime;
 
     private KeyguardManager mKeyguardManager = null;
+    
+    private SearchManager mSearchManager = null;
 
     private TelephonyManager mTelephonyManager = null;
     
@@ -1237,9 +1240,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                         Intent intent = new Intent(Intent.ACTION_SEARCH_LONG_PRESS);
                         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         try {
-                            sendCloseSystemWindows();
-                            getContext().startActivity(intent);
                             mDecor.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+                            sendCloseSystemWindows();
+                            getSearchManager().stopSearch();
+                            getContext().startActivity(intent);
                             // Only clear this if we successfully start the
                             // activity; otherwise we will allow the normal short
                             // press action to be performed.
@@ -1265,6 +1269,16 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             mKeyguardManager = (KeyguardManager) getContext().getSystemService(Context.KEYGUARD_SERVICE);
         }
         return mKeyguardManager;
+    }
+    
+    /**
+     * @return A handle to the search manager.
+     */
+    private SearchManager getSearchManager() {
+        if (mSearchManager == null) {
+            mSearchManager = (SearchManager) getContext().getSystemService(Context.SEARCH_SERVICE);
+        }
+        return mSearchManager;
     }
 
     /**
