@@ -222,6 +222,8 @@ private:
 
     status_t finishSetDataSource_l();
 
+    static bool ContinuePreparation(void *cookie);
+
     AwesomePlayer(const AwesomePlayer &);
     AwesomePlayer &operator=(const AwesomePlayer &);
 };

@@ -36,7 +36,12 @@ struct Prefetcher : public RefBase {
 
     int64_t getCachedDurationUs(bool *noMoreData = NULL);
 
-    status_t prepare();
+    // If provided (non-NULL), "continueFunc" will be called repeatedly
+    // while preparing and preparation will finish early if it returns
+    // false. In this case "-EINTR" is returned as a result.
+    status_t prepare(
+            bool (*continueFunc)(void *cookie) = NULL,
+            void *cookie = NULL);
 
 protected:
     virtual ~Prefetcher();

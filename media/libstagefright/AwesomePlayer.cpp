@@ -1106,6 +1106,13 @@ void AwesomePlayer::abortPrepare(status_t err) {
     mPreparedCondition.broadcast();
 }
 
+// static
+bool AwesomePlayer::ContinuePreparation(void *cookie) {
+    AwesomePlayer *me = static_cast<AwesomePlayer *>(cookie);
+
+    return (me->mFlags & PREPARE_CANCELLED) == 0;
+}
+
 void AwesomePlayer::onPrepareAsyncEvent() {
     sp<Prefetcher> prefetcher;
 
@@ -1161,10 +1168,22 @@ void AwesomePlayer::onPrepareAsyncEvent() {
         }
 
         LOGI("calling prefetcher->prepare()");
-        prefetcher->prepare();
-        LOGV("prefetcher is done preparing");
+        status_t result =
+            prefetcher->prepare(&AwesomePlayer::ContinuePreparation, this);
 
         prefetcher.clear();
+
+        if (result == OK) {
+            LOGV("prefetcher is done preparing");
+        } else {
+            Mutex::Autolock autoLock(mLock);
+
+            CHECK_EQ(result, -EINTR);
+
+            LOGI("prefetcher->prepare() was cancelled early.");
+            abortPrepare(UNKNOWN_ERROR);
+            return;
+        }
     }
 
     Mutex::Autolock autoLock(mLock);
