@@ -372,11 +372,12 @@ public class HorizontalScrollView extends FrameLayout {
 
     private boolean inChild(int x, int y) {
         if (getChildCount() > 0) {
+            final int scrollX = mScrollX;
             final View child = getChildAt(0);
             return !(y < child.getTop()
                     || y >= child.getBottom()
-                    || x < child.getLeft()
-                    || x >= child.getRight());
+                    || x < child.getLeft() - scrollX
+                    || x >= child.getRight() - scrollX);
         }
         return false;
     }
@@ -455,6 +456,9 @@ public class HorizontalScrollView extends FrameLayout {
                 /* Release the drag */
                 mIsBeingDragged = false;
                 mActivePointerId = INVALID_POINTER;
+                if (mScroller.springback(mScrollX, mScrollY, 0, getScrollRange(), 0, 0)) {
+                    invalidate();
+                }
                 break;
             case MotionEvent.ACTION_POINTER_UP:
                 onSecondaryPointerUp(ev);
@@ -486,21 +490,22 @@ public class HorizontalScrollView extends FrameLayout {
 
         switch (action & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_DOWN: {
-                /*
-                * If being flinged and user touches, stop the fling. isFinished
-                * will be false if being flinged.
-                */
-                if (!mScroller.isFinished()) {
-                    mScroller.abortAnimation();
-                }
-                
                 final float x = ev.getX();
                 if (!(mIsBeingDragged = inChild((int) x, (int) ev.getY()))) {
                     return false;
                 }
 
+                /*
+                 * If being flinged and user touches, stop the fling. isFinished
+                 * will be false if being flinged.
+                 */
+                if (!mScroller.isFinished()) {
+                    mScroller.abortAnimation();
+                }
+
                 // Remember where the motion event started
                 mLastMotionX = x;
+                mActivePointerId = ev.getPointerId(0);
                 break;
             }
             case MotionEvent.ACTION_MOVE:
@@ -538,6 +543,19 @@ public class HorizontalScrollView extends FrameLayout {
                     mActivePointerId = INVALID_POINTER;
                     mIsBeingDragged = false;
 
+                    if (mVelocityTracker != null) {
+                        mVelocityTracker.recycle();
+                        mVelocityTracker = null;
+                    }
+                }
+                break;
+            case MotionEvent.ACTION_CANCEL:
+                if (mIsBeingDragged && getChildCount() > 0) {
+                    if (mScroller.springback(mScrollX, mScrollY, 0, getScrollRange(), 0, 0)) {
+                        invalidate();
+                    }
+                    mActivePointerId = INVALID_POINTER;
+                    mIsBeingDragged = false;
                     if (mVelocityTracker != null) {
                         mVelocityTracker.recycle();
                         mVelocityTracker = null;

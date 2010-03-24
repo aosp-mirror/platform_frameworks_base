@@ -370,9 +370,10 @@ public class ScrollView extends FrameLayout {
 
     private boolean inChild(int x, int y) {
         if (getChildCount() > 0) {
+            final int scrollY = mScrollY;
             final View child = getChildAt(0);
-            return !(y < child.getTop()
-                    || y >= child.getBottom()
+            return !(y < child.getTop() - scrollY
+                    || y >= child.getBottom() - scrollY
                     || x < child.getLeft()
                     || x >= child.getRight());
         }
@@ -452,6 +453,9 @@ public class ScrollView extends FrameLayout {
                 /* Release the drag */
                 mIsBeingDragged = false;
                 mActivePointerId = INVALID_POINTER;
+                if (mScroller.springback(mScrollX, mScrollY, 0, 0, 0, getScrollRange())) {
+                    invalidate();
+                }
                 break;
             case MotionEvent.ACTION_POINTER_UP:
                 onSecondaryPointerUp(ev);
@@ -483,19 +487,19 @@ public class ScrollView extends FrameLayout {
 
         switch (action & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_DOWN: {
-                /*
-                * If being flinged and user touches, stop the fling. isFinished
-                * will be false if being flinged.
-                */
-                if (!mScroller.isFinished()) {
-                    mScroller.abortAnimation();
-                }
-
                 final float y = ev.getY();
                 if (!(mIsBeingDragged = inChild((int) ev.getX(), (int) y))) {
                     return false;
                 }
                 
+                /*
+                 * If being flinged and user touches, stop the fling. isFinished
+                 * will be false if being flinged.
+                 */
+                if (!mScroller.isFinished()) {
+                    mScroller.abortAnimation();
+                }
+
                 // Remember where the motion event started
                 mLastMotionY = y;
                 mActivePointerId = ev.getPointerId(0);
@@ -536,6 +540,19 @@ public class ScrollView extends FrameLayout {
                     mActivePointerId = INVALID_POINTER;
                     mIsBeingDragged = false;
 
+                    if (mVelocityTracker != null) {
+                        mVelocityTracker.recycle();
+                        mVelocityTracker = null;
+                    }
+                }
+                break;
+            case MotionEvent.ACTION_CANCEL:
+                if (mIsBeingDragged && getChildCount() > 0) {
+                    if (mScroller.springback(mScrollX, mScrollY, 0, 0, 0, getScrollRange())) {
+                        invalidate();
+                    }
+                    mActivePointerId = INVALID_POINTER;
+                    mIsBeingDragged = false;
                     if (mVelocityTracker != null) {
                         mVelocityTracker.recycle();
                         mVelocityTracker = null;
