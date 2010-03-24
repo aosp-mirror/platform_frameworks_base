@@ -122,7 +122,15 @@ public class SyncStorageEngine extends Handler {
     private static final boolean SYNC_ENABLED_DEFAULT = false;
 
     // the version of the accounts xml file format
-    private static final int ACCOUNTS_VERSION = 1;
+    private static final int ACCOUNTS_VERSION = 2;
+
+    private static HashMap<String, String> sAuthorityRenames;
+
+    static {
+        sAuthorityRenames = new HashMap<String, String>();
+        sAuthorityRenames.put("contacts", "com.android.contacts");
+        sAuthorityRenames.put("calendar", "com.android.calendar");
+    }
 
     public static class PendingOperation {
         final Account account;
@@ -1281,7 +1289,9 @@ public class SyncStorageEngine extends Handler {
     private void removeAuthorityLocked(Account account, String authorityName) {
         AccountInfo accountInfo = mAccounts.get(account);
         if (accountInfo != null) {
-            if (accountInfo.authorities.remove(authorityName) != null) {
+            final AuthorityInfo authorityInfo = accountInfo.authorities.remove(authorityName);
+            if (authorityInfo != null) {
+                mAuthorities.remove(authorityInfo.ident);
                 writeAccountInfoLocked();
             }
         }
@@ -1407,9 +1417,59 @@ public class SyncStorageEngine extends Handler {
             }
         }
 
+        if (maybeMigrateSettingsForRenamedAuthorities()) {
+            writeNeeded = true;
+        }
+
         if (writeNeeded) {
             writeAccountInfoLocked();
         }
+    }
+
+    /**
+     * some authority names have changed. copy over their settings and delete the old ones
+     * @return true if a change was made
+     */
+    private boolean maybeMigrateSettingsForRenamedAuthorities() {
+        boolean writeNeeded = false;
+
+        ArrayList<AuthorityInfo> authoritiesToRemove = new ArrayList<AuthorityInfo>();
+        final int N = mAuthorities.size();
+        for (int i=0; i<N; i++) {
+            AuthorityInfo authority = mAuthorities.valueAt(i);
+            // skip this authority if it isn't one of the renamed ones
+            final String newAuthorityName = sAuthorityRenames.get(authority.authority);
+            if (newAuthorityName == null) {
+                continue;
+            }
+
+            // remember this authority so we can remove it later. we can't remove it
+            // now without messing up this loop iteration
+            authoritiesToRemove.add(authority);
+
+            // this authority isn't enabled, no need to copy it to the new authority name since
+            // the default is "disabled"
+            if (!authority.enabled) {
+                continue;
+            }
+
+            // if we already have a record of this new authority then don't copy over the settings
+            if (getAuthorityLocked(authority.account, newAuthorityName, "cleanup") != null) {
+                continue;
+            }
+
+            AuthorityInfo newAuthority = getOrCreateAuthorityLocked(authority.account,
+                    newAuthorityName, -1 /* ident */, false /* doWrite */);
+            newAuthority.enabled = true;
+            writeNeeded = true;
+        }
+
+        for (AuthorityInfo authorityInfo : authoritiesToRemove) {
+            removeAuthorityLocked(authorityInfo.account, authorityInfo.authority);
+            writeNeeded = true;
+        }
+
+        return writeNeeded;
     }
 
     private AuthorityInfo parseAuthority(XmlPullParser parser, int version) {
@@ -1424,14 +1484,15 @@ public class SyncStorageEngine extends Handler {
             Log.e(TAG, "the id of the authority is null", e);
         }
         if (id >= 0) {
+            String authorityName = parser.getAttributeValue(null, "authority");
+            String enabled = parser.getAttributeValue(null, "enabled");
+            String syncable = parser.getAttributeValue(null, "syncable");
             String accountName = parser.getAttributeValue(null, "account");
             String accountType = parser.getAttributeValue(null, "type");
             if (accountType == null) {
                 accountType = "com.google";
+                syncable = "unknown";
             }
-            String authorityName = parser.getAttributeValue(null, "authority");
-            String enabled = parser.getAttributeValue(null, "enabled");
-            String syncable = parser.getAttributeValue(null, "syncable");
             authority = mAuthorities.get(id);
             if (DEBUG_FILE) Log.v(TAG, "Adding authority: account="
                     + accountName + " auth=" + authorityName
@@ -1456,7 +1517,7 @@ public class SyncStorageEngine extends Handler {
                     authority.syncable = -1;
                 } else {
                     authority.syncable =
-                            (syncable == null || Boolean.parseBoolean(enabled)) ? 1 : 0;
+                            (syncable == null || Boolean.parseBoolean(syncable)) ? 1 : 0;
                 }
             } else {
                 Log.w(TAG, "Failure adding authority: account="
@@ -1546,13 +1607,11 @@ public class SyncStorageEngine extends Handler {
                 out.attribute(null, "account", authority.account.name);
                 out.attribute(null, "type", authority.account.type);
                 out.attribute(null, "authority", authority.authority);
-                if (!authority.enabled) {
-                    out.attribute(null, "enabled", "false");
-                }
+                out.attribute(null, "enabled", Boolean.toString(authority.enabled));
                 if (authority.syncable < 0) {
                     out.attribute(null, "syncable", "unknown");
-                } else if (authority.syncable == 0) {
-                    out.attribute(null, "syncable", "false");
+                } else {
+                    out.attribute(null, "syncable", Boolean.toString(authority.syncable != 0));
                 }
                 for (Pair<Bundle, Long> periodicSync : authority.periodicSyncs) {
                     out.startTag(null, "periodicSync");
