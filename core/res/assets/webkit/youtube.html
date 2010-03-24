@@ -5,18 +5,6 @@
       a:hover   { text-decoration: none; }
       a:link    { color: black; }
       a:visited { color: black; }
-      #bg {
-        position: fixed;
-        margin: 0px;
-        border: 0px;
-        padding: 0px;
-        left: 0px;
-        top: 0px;
-        width: 100%;
-        height: 100%;
-        overflow: hidden;
-        z-index: 0;
-      }
       #main {
         position: absolute;
         left: 0%;
@@ -28,26 +16,81 @@
       }
     </style>
   </head>
-  <body>
-    <div id="bg">
-      <img src="http://img.youtube.com/vi/VIDEO_ID/0.jpg"
-      style="width:100%; height:100%"/>
-    </div>
+  <body id="body">
+  <script type="text/javascript">
+    // Nominal original size. If the embed is smaller than this, the play and logo
+    // images get scaled appropriately. These are actually 3/4 of the sizes suggested
+    // by youtube, so the images don't get too tiny.
+    defHeight = 258;
+    defWidth = 318;
+
+    function setup() {
+        var width = document.body.clientWidth;
+        var height = document.body.clientHeight;
+        var canvas = document.getElementById("canvas");
+        // Resize the canvas to the right size
+        canvas.width = width;
+        canvas.height = height;
+        var ctx = canvas.getContext('2d');
+        var loadcount = 0;
+        function doload() {
+            if (++loadcount == 3) {
+                // All images are loaded, so display them.
+                // (Note that the images are loaded from javascript, so might load
+                // after document.onload fires)
+                ctx.drawImage(background, 0, 0, width, height);
+                playWidth = play.width;
+                playHeight = play.height;
+                logoWidth = logo.width;
+                logoHeight = logo.height;
+                var ratio = 1;
+                // If the page is smaller than it 'should' be in either dimension
+                // we scale the play button and logo according to the dimension that
+                // has been shrunk the most.
+                if (width / height > defWidth / defHeight && height < defHeight) {
+                    ratio = height / defHeight;
+                } else if (width / height < defWidth / defHeight && width < defWidth) {
+                    ratio = width / defWidth;
+                }
+                playWidth *= ratio;
+                playHeight *= ratio;
+                logoWidth *= ratio;
+                logoHeight *= ratio;
+                playLeft = (width - playWidth) / 2;
+                playTop = (height - playHeight) / 2;
+                ctx.drawImage(play, playLeft, playTop, playWidth, playHeight);
+                ctx.globalAlpha = 0.7
+                ctx.drawImage(logo, width - logoWidth, height - logoHeight, logoWidth, logoHeight);
+                // To make it slightly easier to hit, the click target is twice the width/height of the unscaled play button
+                targetLeft = width / 2 - play.width;
+                targetRight = width / 2 + play.width;
+                targetTop = height / 2 - play.height;
+                targetBottom = height / 2 + play.height;
+
+                canvas.addEventListener("click", function(e) {
+                   var posx = e.clientX-canvas.offsetLeft;
+                   var posy = e.clientY-canvas.offsetTop;
+                   if (posx >= targetLeft && posx <= targetRight &&
+                       posy >= targetTop && posy <= targetBottom) {
+                       top.location.href = "vnd.youtube:VIDEO_ID";
+                   }
+               }, false);
+            }
+        }
+        var background = new Image();
+        background.onload = doload;
+        background.src = "http://img.youtube.com/vi/VIDEO_ID/0.jpg";
+        play = new Image();
+        play.onload = doload;
+        play.src = "play.png";
+        logo = new Image();
+        logo.onload = doload;
+        logo.src = "youtube.png";
+    }
+    window.onload = setup;
+  </script>
     <div id="main">
-      <table height="100%" width="100%">
-        <tr>
-          <td align="center" valign="middle" height="100%">
-            <a id="url" href="vnd.youtube:VIDEO_ID" target="_top">
-              <img src="play.png" style="border:0px"/>
-            </a>
-          </td>
-        </tr>
-        <tr>
-          <td valign="bottom" align="right">
-            <img src="youtube.png" style="opacity:.7"/>
-          </td>
-        </tr>
-      </table>
+    <canvas id="canvas"></canvas>
     </div>
   </body>
 </html>
