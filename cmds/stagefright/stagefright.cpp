@@ -370,7 +370,9 @@ int main(int argc, char **argv) {
 
         const char *kMimeTypes[] = {
             MEDIA_MIMETYPE_VIDEO_AVC, MEDIA_MIMETYPE_VIDEO_MPEG4,
-            MEDIA_MIMETYPE_VIDEO_H263
+            MEDIA_MIMETYPE_VIDEO_H263, MEDIA_MIMETYPE_AUDIO_AAC,
+            MEDIA_MIMETYPE_AUDIO_AMR_NB, MEDIA_MIMETYPE_AUDIO_AMR_WB,
+            MEDIA_MIMETYPE_AUDIO_MPEG
         };
 
         for (size_t k = 0; k < sizeof(kMimeTypes) / sizeof(kMimeTypes[0]);
