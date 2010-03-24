@@ -215,7 +215,9 @@ public class SyncManager implements OnAccountsUpdateListener {
         // the accounts are not set yet
         sendCheckAlarmsMessage();
 
-        mSyncStorageEngine.doDatabaseCleanup(accounts);
+        if (mBootCompleted) {
+            mSyncStorageEngine.doDatabaseCleanup(accounts);
+        }
 
         if (accounts.length > 0) {
             // If this is the first time this was called after a bootup then
@@ -1317,6 +1319,7 @@ public class SyncManager implements OnAccountsUpdateListener {
         private volatile CountDownLatch mReadyToRunLatch = new CountDownLatch(1);
         public void onBootCompleted() {
             mBootCompleted = true;
+            mSyncStorageEngine.doDatabaseCleanup(AccountManager.get(mContext).getAccounts());
             if (mReadyToRunLatch != null) {
                 mReadyToRunLatch.countDown();
             }

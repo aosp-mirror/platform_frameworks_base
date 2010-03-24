@@ -214,7 +214,6 @@ public class SyncStorageEngineTest extends AndroidTestCase {
         MockContentResolver mockResolver = new MockContentResolver();
 
         final TestContext testContext = new TestContext(mockResolver, getContext());
-        SyncStorageEngine engine = SyncStorageEngine.newTestInstance(testContext);
 
         byte[] accountsFileData = ("<?xml version='1.0' encoding='utf-8' standalone='yes' ?>\n"
                 + "<accounts>\n"
@@ -230,7 +229,7 @@ public class SyncStorageEngineTest extends AndroidTestCase {
         fos.write(accountsFileData);
         accountInfoFile.finishWrite(fos);
 
-        engine.clearAndReadState();
+        SyncStorageEngine engine = SyncStorageEngine.newTestInstance(testContext);
 
         List<PeriodicSync> syncs = engine.getPeriodicSyncs(account, authority1);
         assertEquals(1, syncs.size());
@@ -245,7 +244,7 @@ public class SyncStorageEngineTest extends AndroidTestCase {
         assertEquals(sync3, syncs.get(0));
 
         accountsFileData = ("<?xml version='1.0' encoding='utf-8' standalone='yes' ?>\n"
-                + "<accounts version=\"1\">\n"
+                + "<accounts version=\"2\">\n"
                 + "<authority id=\"0\" account=\"account1\" type=\"type1\" authority=\"auth1\" />\n"
                 + "<authority id=\"1\" account=\"account1\" type=\"type1\" authority=\"auth2\" />\n"
                 + "<authority id=\"2\" account=\"account1\" type=\"type1\" authority=\"auth3\" />\n"
@@ -268,7 +267,7 @@ public class SyncStorageEngineTest extends AndroidTestCase {
         assertEquals(0, syncs.size());
 
         accountsFileData = ("<?xml version='1.0' encoding='utf-8' standalone='yes' ?>\n"
-                + "<accounts version=\"1\">\n"
+                + "<accounts version=\"2\">\n"
                 + "<authority id=\"0\" account=\"account1\" type=\"type1\" authority=\"auth1\">\n"
                 + "<periodicSync period=\"1000\" />\n"
                 + "</authority>"
@@ -298,6 +297,89 @@ public class SyncStorageEngineTest extends AndroidTestCase {
         syncs = engine.getPeriodicSyncs(account, authority3);
         assertEquals(1, syncs.size());
         assertEquals(sync3s, syncs.get(0));
+    }
+
+    @SmallTest
+    public void testAuthorityRenaming() throws Exception {
+        final Account account1 = new Account("acc1", "type1");
+        final Account account2 = new Account("acc2", "type2");
+        final String authorityContacts = "contacts";
+        final String authorityCalendar = "calendar";
+        final String authorityOther = "other";
+        final String authorityContactsNew = "com.android.contacts";
+        final String authorityCalendarNew = "com.android.calendar";
+
+        MockContentResolver mockResolver = new MockContentResolver();
+
+        final TestContext testContext = new TestContext(mockResolver, getContext());
+
+        byte[] accountsFileData = ("<?xml version='1.0' encoding='utf-8' standalone='yes' ?>\n"
+                + "<accounts>\n"
+                + "<authority id=\"0\" account=\"acc1\" type=\"type1\" authority=\"contacts\" />\n"
+                + "<authority id=\"1\" account=\"acc1\" type=\"type1\" authority=\"calendar\" />\n"
+                + "<authority id=\"2\" account=\"acc1\" type=\"type1\" authority=\"other\" />\n"
+                + "<authority id=\"3\" account=\"acc2\" type=\"type2\" authority=\"contacts\" />\n"
+                + "<authority id=\"4\" account=\"acc2\" type=\"type2\" authority=\"calendar\" />\n"
+                + "<authority id=\"5\" account=\"acc2\" type=\"type2\" authority=\"other\" />\n"
+                + "<authority id=\"6\" account=\"acc2\" type=\"type2\" enabled=\"false\""
+                + " authority=\"com.android.calendar\" />\n"
+                + "<authority id=\"7\" account=\"acc2\" type=\"type2\" enabled=\"false\""
+                + " authority=\"com.android.contacts\" />\n"
+                + "</accounts>\n").getBytes();
+
+        File syncDir = new File(new File(testContext.getFilesDir(), "system"), "sync");
+        syncDir.mkdirs();
+        AtomicFile accountInfoFile = new AtomicFile(new File(syncDir, "accounts.xml"));
+        FileOutputStream fos = accountInfoFile.startWrite();
+        fos.write(accountsFileData);
+        accountInfoFile.finishWrite(fos);
+
+        SyncStorageEngine engine = SyncStorageEngine.newTestInstance(testContext);
+
+        assertEquals(false, engine.getSyncAutomatically(account1, authorityContacts));
+        assertEquals(false, engine.getSyncAutomatically(account1, authorityCalendar));
+        assertEquals(true, engine.getSyncAutomatically(account1, authorityOther));
+        assertEquals(true, engine.getSyncAutomatically(account1, authorityContactsNew));
+        assertEquals(true, engine.getSyncAutomatically(account1, authorityCalendarNew));
+
+        assertEquals(false, engine.getSyncAutomatically(account2, authorityContacts));
+        assertEquals(false, engine.getSyncAutomatically(account2, authorityCalendar));
+        assertEquals(true, engine.getSyncAutomatically(account2, authorityOther));
+        assertEquals(false, engine.getSyncAutomatically(account2, authorityContactsNew));
+        assertEquals(false, engine.getSyncAutomatically(account2, authorityCalendarNew));
+    }
+
+    @SmallTest
+    public void testSyncableMigration() throws Exception {
+        final Account account = new Account("acc", "type");
+
+        MockContentResolver mockResolver = new MockContentResolver();
+
+        final TestContext testContext = new TestContext(mockResolver, getContext());
+
+        byte[] accountsFileData = ("<?xml version='1.0' encoding='utf-8' standalone='yes' ?>\n"
+                + "<accounts>\n"
+                + "<authority id=\"0\" account=\"acc\" authority=\"other1\" />\n"
+                + "<authority id=\"1\" account=\"acc\" type=\"type\" authority=\"other2\" />\n"
+                + "<authority id=\"2\" account=\"acc\" type=\"type\" syncable=\"false\""
+                + " authority=\"other3\" />\n"
+                + "<authority id=\"3\" account=\"acc\" type=\"type\" syncable=\"true\""
+                + " authority=\"other4\" />\n"
+                + "</accounts>\n").getBytes();
+
+        File syncDir = new File(new File(testContext.getFilesDir(), "system"), "sync");
+        syncDir.mkdirs();
+        AtomicFile accountInfoFile = new AtomicFile(new File(syncDir, "accounts.xml"));
+        FileOutputStream fos = accountInfoFile.startWrite();
+        fos.write(accountsFileData);
+        accountInfoFile.finishWrite(fos);
+
+        SyncStorageEngine engine = SyncStorageEngine.newTestInstance(testContext);
+
+        assertEquals(-1, engine.getIsSyncable(account, "other1"));
+        assertEquals(1, engine.getIsSyncable(account, "other2"));
+        assertEquals(0, engine.getIsSyncable(account, "other3"));
+        assertEquals(1, engine.getIsSyncable(account, "other4"));
     }
 }
 
