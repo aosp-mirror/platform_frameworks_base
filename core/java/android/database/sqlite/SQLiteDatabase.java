@@ -1347,18 +1347,18 @@ public class SQLiteDatabase extends SQLiteClosable {
         SQLiteCursorDriver driver = new SQLiteDirectCursorDriver(this, sql, editTable);
 
         Cursor cursor = null;
+        int count = 0;
         try {
             cursor = driver.query(
                     cursorFactory != null ? cursorFactory : mFactory,
                     selectionArgs);
+
+            // Force query execution
+            if (cursor != null) {
+                count = cursor.getCount();
+            }
         } finally {
             if (Config.LOGV || mSlowQueryThreshold != -1) {
-
-                // Force query execution
-                if (cursor != null) {
-                    cursor.moveToFirst();
-                    cursor.moveToPosition(-1);
-                }
 
                 long duration = System.currentTimeMillis() - timeStart;
 
@@ -1367,7 +1367,7 @@ public class SQLiteDatabase extends SQLiteClosable {
                           "query (" + duration + " ms): " + driver.toString() + ", args are "
                                   + (selectionArgs != null
                                   ? TextUtils.join(",", selectionArgs)
-                                  : "<null>"));
+                                  : "<null>") + ", count is " + count);
                 }
             }
         }
