@@ -312,11 +312,17 @@ class NetworkManagementService extends INetworkManagementService.Stub {
         mConnector.doCommand(String.format("ipfwd %sable", (enable ? "en" : "dis")));
     }
 
-    public void startTethering(String dhcpRangeStart, String dhcpRangeEnd)
+    public void startTethering(String[] dhcpRange)
              throws IllegalStateException {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.CHANGE_NETWORK_STATE, "NetworkManagementService");
-        mConnector.doCommand(String.format("tether start %s %s", dhcpRangeStart, dhcpRangeEnd));
+        // cmd is "tether start first_start first_stop second_start second_stop ..."
+        // an odd number of addrs will fail
+        String cmd = "tether start";
+        for (String d : dhcpRange) {
+            cmd += " " + d;
+        }
+        mConnector.doCommand(cmd);
     }
 
     public void stopTethering() throws IllegalStateException {
