@@ -520,24 +520,6 @@ public class PackageManagerTests extends AndroidTestCase {
             }
         }
     }
-    
-    public void clearSecureContainersForPkg(String pkgName) {
-        IMountService ms = getMs();
-        try {
-            String list[] = ms.getSecureContainerList();
-            if (list != null) {
-                for (String cid : list) {
-                    boolean delete = false;
-                    // STOPSHIP issues with rename should be fixed.
-                    if (cid.contains(pkgName) ||
-                            cid.contains("smdltmp")) {
-                        Log.i(TAG, "Destroying container " + cid);
-                        ms.destroySecureContainer(cid, true);
-                    }
-                }
-            }
-        } catch (RemoteException e) {}
-    }
 
     /*
      * Utility function that reads a apk bundled as a raw resource
@@ -792,7 +774,7 @@ public class PackageManagerTests extends AndroidTestCase {
                         waitTime += WAIT_TIME_INCR;
                     }
                     if(!receiver.isDone()) {
-                        throw new Exception("Timed out waiting for PACKAGE_ADDED notification");
+                        throw new Exception("Timed out waiting for PACKAGE_REMOVED notification");
                     }
                     return receiver.received;
                 }
@@ -2184,6 +2166,49 @@ public class PackageManagerTests extends AndroidTestCase {
             if (ip != null) {
                 cleanUpInstall(ip);
             }
+        }
+    }
+
+    /* This test creates a stale container via MountService and then installs
+     * a package and verifies that the stale container is cleaned up and install
+     * is successful.
+     * Please note that this test is very closely tied to the framework's
+     * naming convention for secure containers.
+     */
+    public void testInstallSdcardStaleContainer() {
+        boolean origMediaState = getMediaState();
+        try {
+            String outFileName = "install.apk";
+            int rawResId = R.raw.install;
+            PackageManager pm = mContext.getPackageManager();
+            File filesDir = mContext.getFilesDir();
+            File outFile = new File(filesDir, outFileName);
+            Uri packageURI = getInstallablePackage(rawResId, outFile);
+            PackageParser.Package pkg = parsePackage(packageURI);
+            assertNotNull(pkg);
+            // Install an app on sdcard.
+            installFromRawResource(outFileName, rawResId,
+                    PackageManager.INSTALL_EXTERNAL, false,
+                    false, -1, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
+            // Unmount sdcard
+            unmountMedia();
+            // Delete the app on sdcard to leave a stale container on sdcard.
+            GenericReceiver receiver = new DeleteReceiver(pkg.packageName);
+            assertTrue(invokeDeletePackage(packageURI, 0, pkg.packageName, receiver));
+            mountMedia();
+            // Reinstall the app and make sure it gets installed.
+            installFromRawResource(outFileName, rawResId,
+                    PackageManager.INSTALL_EXTERNAL, true,
+                    false, -1, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
+        } catch (Exception e) { 
+            failStr(e.getMessage());
+        } finally {
+            if (origMediaState) {
+                mountMedia();
+            } else {
+                unmountMedia();
+            }
+
         }
     }
     /*---------- Recommended install location tests ----*/
