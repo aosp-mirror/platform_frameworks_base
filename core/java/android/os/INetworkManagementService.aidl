@@ -78,8 +78,9 @@ interface INetworkManagementService
 
     /**
      * Start tethering services with the specified dhcp server range
+     * arg is a set of start end pairs defining the ranges.
      */
-    void startTethering(String dhcpRangeStart, String dhcpRangeEnd);
+    void startTethering(in String[] dhcpRanges);
 
     /**
      * Stop currently running tethering services

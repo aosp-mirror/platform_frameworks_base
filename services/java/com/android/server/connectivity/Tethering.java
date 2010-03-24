@@ -31,6 +31,7 @@ import android.net.InterfaceConfiguration;
 import android.net.IConnectivityManager;
 import android.net.INetworkManagementEventObserver;
 import android.net.NetworkInfo;
+import android.net.NetworkUtils;
 import android.os.BatteryManager;
 import android.os.Binder;
 import android.os.Environment;
@@ -80,11 +81,16 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
 
     private BroadcastReceiver mStateReceiver;
 
-    private static final String USB_NEAR_IFACE_ADDR      = "169.254.2.1";
+    private static final String USB_NEAR_IFACE_ADDR      = "192.168.42.129";
+    private static final String USB_NETMASK              = "255.255.255.0";
+
+    // FYI - the default wifi is 192.168.43.1 and 255.255.255.0
 
     private String[] mDhcpRange;
-    private static final String DHCP_DEFAULT_RANGE_START = "169.254.2.10";
-    private static final String DHCP_DEFAULT_RANGE_STOP  = "169.254.2.64";
+    private static final String DHCP_DEFAULT_RANGE1_START = "192.168.42.2";
+    private static final String DHCP_DEFAULT_RANGE1_STOP  = "192.168.42.254";
+    private static final String DHCP_DEFAULT_RANGE2_START = "192.168.43.2";
+    private static final String DHCP_DEFAULT_RANGE2_STOP  = "192.168.43.254";
 
     private String[] mDnsServers;
     private static final String DNS_DEFAULT_SERVER1 = "8.8.8.8";
@@ -138,15 +144,12 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
 
         mDhcpRange = context.getResources().getStringArray(
                 com.android.internal.R.array.config_tether_dhcp_range);
-        if (mDhcpRange.length == 0) {
-            mDhcpRange = new String[2];
-            mDhcpRange[0] = DHCP_DEFAULT_RANGE_START;
-            mDhcpRange[1] = DHCP_DEFAULT_RANGE_STOP;
-        } else if(mDhcpRange.length == 1) {
-            String[] tmp = new String[2];
-            tmp[0] = mDhcpRange[0];
-            tmp[1] = new String("");
-            mDhcpRange = tmp;
+        if ((mDhcpRange.length == 0) || (mDhcpRange.length % 2 ==1)) {
+            mDhcpRange = new String[4];
+            mDhcpRange[0] = DHCP_DEFAULT_RANGE1_START;
+            mDhcpRange[1] = DHCP_DEFAULT_RANGE1_STOP;
+            mDhcpRange[2] = DHCP_DEFAULT_RANGE2_START;
+            mDhcpRange[3] = DHCP_DEFAULT_RANGE2_STOP;
         }
         mDunRequired = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_tether_dun_required);
@@ -504,8 +507,16 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                 try {
                     ifcg = service.getInterfaceConfig(iface);
                     if (ifcg != null) {
-                        ifcg.ipAddr = (169 << 24) + (254 << 16) + (2 << 8) + 1;
-                        ifcg.netmask = (255 << 24) + (255 << 16) + (255 << 8) + 0;
+                        String[] addr = USB_NEAR_IFACE_ADDR.split("\\.");
+                        ifcg.ipAddr = (Integer.parseInt(addr[0]) << 24) +
+                                (Integer.parseInt(addr[1]) << 16) +
+                                (Integer.parseInt(addr[2]) << 8) +
+                                (Integer.parseInt(addr[3]));
+                        addr = USB_NETMASK.split("\\.");
+                        ifcg.netmask = (Integer.parseInt(addr[0]) << 24) +
+                                (Integer.parseInt(addr[1]) << 16) +
+                                (Integer.parseInt(addr[2]) << 8) +
+                                (Integer.parseInt(addr[3]));
                         if (enabled) {
                             ifcg.interfaceFlags = ifcg.interfaceFlags.replace("down", "up");
                         } else {
@@ -1101,7 +1112,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                     return false;
                 }
                 try {
-                    service.startTethering(mDhcpRange[0], mDhcpRange[1]);
+                    service.startTethering(mDhcpRange);
                 } catch (Exception e) {
                     transitionTo(mStartTetheringErrorState);
                     return false;
