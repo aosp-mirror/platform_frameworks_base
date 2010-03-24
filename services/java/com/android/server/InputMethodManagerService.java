@@ -1394,9 +1394,18 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private boolean chooseNewDefaultIMELocked() {
         List<InputMethodInfo> enabled = getEnabledInputMethodListLocked();
         if (enabled != null && enabled.size() > 0) {
+            // We'd prefer to fall back on a system IME, since that is safer.
+            int i=enabled.size();
+            while (i > 0) {
+                i--;
+                if ((enabled.get(i).getServiceInfo().applicationInfo.flags
+                        & ApplicationInfo.FLAG_SYSTEM) != 0) {
+                    break;
+                }
+            }
             Settings.Secure.putString(mContext.getContentResolver(),
                     Settings.Secure.DEFAULT_INPUT_METHOD,
-                    enabled.get(0).getId());
+                    enabled.get(i).getId());
             return true;
         }
 
@@ -1435,7 +1444,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
                 // System IMEs are enabled by default
                 if (isSystemIme(p)) {
-                    setInputMethodEnabled(p.getId(), true);
+                    setInputMethodEnabledLocked(p.getId(), true);
                 }
 
                 if (DEBUG) {
