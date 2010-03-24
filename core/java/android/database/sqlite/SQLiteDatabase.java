@@ -213,15 +213,22 @@ public class SQLiteDatabase extends SQLiteClosable {
 
     // Things related to query logging/sampling for debugging
     // slow/frequent queries during development.  Always log queries
-    // which take 500ms+; shorter queries are sampled accordingly.
-    // Commit statements, which are typically slow, are logged
-    // together with the most recently executed SQL statement, for
-    // disambiguation.
-    private static final int QUERY_LOG_TIME_IN_MILLIS = 500;
+    // which take (by default) 500ms+; shorter queries are sampled
+    // accordingly.  Commit statements, which are typically slow, are
+    // logged together with the most recently executed SQL statement,
+    // for disambiguation.  The 500ms value is configurable via a
+    // SystemProperty, but developers actively debugging database I/O
+    // should probably use the regular log tunable,
+    // LOG_SLOW_QUERIES_PROPERTY, defined below.
+    private static int sQueryLogTimeInMillis = 0;  // lazily initialized
     private static final int QUERY_LOG_SQL_LENGTH = 64;
     private static final String COMMIT_SQL = "COMMIT;";
     private final Random mRandom = new Random();
     private String mLastSqlStatement = null;
+
+    // String prefix for slow database query EventLog records that show
+    // lock acquistions of the database.
+    /* package */ static final String GET_LOCK_LOG_PREFIX = "GETLOCK:";
 
     /** Used by native code, do not rename */
     /* package */ int mNativeHandle = 0;
@@ -1722,6 +1729,7 @@ public class SQLiteDatabase extends SQLiteClosable {
         }
         long timeStart = SystemClock.uptimeMillis();
         lock();
+        logTimeStat(mLastSqlStatement, timeStart, GET_LOCK_LOG_PREFIX);
         try {
             native_execSQL(sql);
         } catch (SQLiteDatabaseCorruptException e) {
@@ -1735,9 +1743,9 @@ public class SQLiteDatabase extends SQLiteClosable {
         // SQL statement for disambiguation.  Note that instance
         // equality to COMMIT_SQL is safe here.
         if (sql == COMMIT_SQL) {
-            logTimeStat(sql + mLastSqlStatement, timeStart);
+            logTimeStat(mLastSqlStatement, timeStart, COMMIT_SQL);
         } else {
-            logTimeStat(sql, timeStart);
+            logTimeStat(sql, timeStart, null);
         }
     }
 
@@ -1857,9 +1865,11 @@ public class SQLiteDatabase extends SQLiteClosable {
         return mPath;
     }
 
-
-
     /* package */ void logTimeStat(String sql, long beginMillis) {
+        logTimeStat(sql, beginMillis, null);
+    }
+
+    /* package */ void logTimeStat(String sql, long beginMillis, String prefix) {
         // Keep track of the last statement executed here, as this is
         // the common funnel through which all methods of hitting
         // libsqlite eventually flow.
@@ -1871,11 +1881,25 @@ public class SQLiteDatabase extends SQLiteClosable {
 
         int samplePercent;
         long durationMillis = SystemClock.uptimeMillis() - beginMillis;
-        if (durationMillis >= QUERY_LOG_TIME_IN_MILLIS) {
+        if (durationMillis == 0 && prefix == GET_LOCK_LOG_PREFIX) {
+            // The common case is locks being uncontended.  Don't log those,
+            // even at 1%, which is our default below.
+            return;
+        }
+        if (sQueryLogTimeInMillis == 0) {
+            sQueryLogTimeInMillis = SystemProperties.getInt("db.db_operation.threshold_ms", 500);
+        }
+        if (durationMillis >= sQueryLogTimeInMillis) {
             samplePercent = 100;
-        } else {
-            samplePercent = (int) (100 * durationMillis / QUERY_LOG_TIME_IN_MILLIS) + 1;
+        } else {;
+            samplePercent = (int) (100 * durationMillis / sQueryLogTimeInMillis) + 1;
             if (mRandom.nextInt(100) >= samplePercent) return;
+        }
+
+        // Note: the prefix will be "COMMIT;" or "GETLOCK:" when non-null.  We wait to do
+        // it here so we avoid allocating in the common case.
+        if (prefix != null) {
+            sql = prefix + sql;
         }
 
         if (sql.length() > QUERY_LOG_SQL_LENGTH) sql = sql.substring(0, QUERY_LOG_SQL_LENGTH);
