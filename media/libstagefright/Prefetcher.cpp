@@ -220,12 +220,19 @@ int64_t Prefetcher::getCachedDurationUs(bool *noMoreData) {
     return minCacheDurationUs < 0 ? 0 : minCacheDurationUs;
 }
 
-status_t Prefetcher::prepare() {
+status_t Prefetcher::prepare(
+        bool (*continueFunc)(void *cookie), void *cookie) {
     // Fill the cache.
 
     int64_t duration;
     bool noMoreData;
     do {
+        usleep(100000);
+
+        if (continueFunc && !(*continueFunc)(cookie)) {
+            return -EINTR;
+        }
+
         duration = getCachedDurationUs(&noMoreData);
     } while (!noMoreData && duration < 2000000ll);
 
