@@ -67,5 +67,9 @@ class CacheLoader extends StreamLoader {
         if (!TextUtils.isEmpty(mCacheResult.contentdisposition)) {
             headers.setContentDisposition(mCacheResult.contentdisposition);
         }
+
+        if (!TextUtils.isEmpty(mCacheResult.crossDomain)) {
+            headers.setXPermittedCrossDomainPolicies(mCacheResult.crossDomain);
+        }
     }
 }

@@ -51,9 +51,10 @@ public class WebViewDatabase {
     // 7 -> 8 Move cache to its own db
     // 8 -> 9 Store both scheme and host when storing passwords
     // 9 -> 10 Update httpauth table UNIQUE
-    private static final int CACHE_DATABASE_VERSION = 3;
+    private static final int CACHE_DATABASE_VERSION = 4;
     // 1 -> 2 Add expires String
     // 2 -> 3 Add content-disposition
+    // 3 -> 4 Add crossdomain (For x-permitted-cross-domain-policies header)
 
     private static WebViewDatabase mInstance = null;
 
@@ -126,6 +127,8 @@ public class WebViewDatabase {
 
     private static final String CACHE_CONTENTDISPOSITION_COL = "contentdisposition";
 
+    private static final String CACHE_CROSSDOMAIN_COL = "crossdomain";
+
     // column id strings for "password" table
     private static final String PASSWORD_HOST_COL = "host";
 
@@ -166,6 +169,7 @@ public class WebViewDatabase {
     private static int mCacheLocationColIndex;
     private static int mCacheContentLengthColIndex;
     private static int mCacheContentDispositionColIndex;
+    private static int mCacheCrossDomainColIndex;
 
     private static int mCacheTransactionRefcount;
 
@@ -269,6 +273,8 @@ public class WebViewDatabase {
                         .getColumnIndex(CACHE_CONTENTLENGTH_COL);
                 mCacheContentDispositionColIndex = mCacheInserter
                         .getColumnIndex(CACHE_CONTENTDISPOSITION_COL);
+                mCacheCrossDomainColIndex = mCacheInserter
+                        .getColumnIndex(CACHE_CROSSDOMAIN_COL);
             }
         }
 
@@ -378,6 +384,7 @@ public class WebViewDatabase {
                     + " TEXT," + CACHE_HTTP_STATUS_COL + " INTEGER, "
                     + CACHE_LOCATION_COL + " TEXT, " + CACHE_CONTENTLENGTH_COL
                     + " INTEGER, " + CACHE_CONTENTDISPOSITION_COL + " TEXT, "
+                    + CACHE_CROSSDOMAIN_COL + " TEXT,"
                     + " UNIQUE (" + CACHE_URL_COL + ") ON CONFLICT REPLACE);");
             mCacheDatabase.execSQL("CREATE INDEX cacheUrlIndex ON cache ("
                     + CACHE_URL_COL + ")");
@@ -620,7 +627,7 @@ public class WebViewDatabase {
         Cursor cursor = null;
         final String query = "SELECT filepath, lastmodify, etag, expires, "
                 + "expiresstring, mimetype, encoding, httpstatus, location, contentlength, "
-                + "contentdisposition FROM cache WHERE url = ?";
+                + "contentdisposition, crossdomain FROM cache WHERE url = ?";
         try {
             cursor = mCacheDatabase.rawQuery(query, new String[] { url });
             if (cursor.moveToFirst()) {
@@ -636,6 +643,7 @@ public class WebViewDatabase {
                 ret.location = cursor.getString(8);
                 ret.contentLength = cursor.getLong(9);
                 ret.contentdisposition = cursor.getString(10);
+                ret.crossDomain = cursor.getString(11);
                 return ret;
             }
         } catch (IllegalStateException e) {
@@ -684,6 +692,7 @@ public class WebViewDatabase {
         mCacheInserter.bind(mCacheContentLengthColIndex, c.contentLength);
         mCacheInserter.bind(mCacheContentDispositionColIndex,
                 c.contentdisposition);
+        mCacheInserter.bind(mCacheCrossDomainColIndex, c.crossDomain);
         mCacheInserter.execute();
     }
 

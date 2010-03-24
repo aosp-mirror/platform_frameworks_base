@@ -99,6 +99,7 @@ public final class CacheManager {
         String location;
         String encoding;
         String contentdisposition;
+        String crossDomain;
 
         // these fields are NOT saved to the database
         InputStream inStream;
@@ -731,6 +732,11 @@ public final class CacheManager {
         String contentDisposition = headers.getContentDisposition();
         if (contentDisposition != null) {
             ret.contentdisposition = contentDisposition;
+        }
+
+        String crossDomain = headers.getXPermittedCrossDomainPolicies();
+        if (crossDomain != null) {
+            ret.crossDomain = crossDomain;
         }
 
         // lastModified and etag may be set back to http header. So they can't
