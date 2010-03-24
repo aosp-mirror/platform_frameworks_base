@@ -627,7 +627,7 @@ final class WebViewCore {
         String mData;
         String mMimeType;
         String mEncoding;
-        String mFailUrl;
+        String mHistoryUrl;
     }
 
     static class CursorData {
@@ -981,7 +981,7 @@ final class WebViewCore {
                                     loadParams.mData,
                                     loadParams.mMimeType,
                                     loadParams.mEncoding,
-                                    loadParams.mFailUrl);
+                                    loadParams.mHistoryUrl);
                             break;
 
                         case STOP_LOADING:

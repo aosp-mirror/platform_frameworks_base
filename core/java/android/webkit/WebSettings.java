@@ -120,6 +120,21 @@ public class WebSettings {
         LOW
     }
 
+    /**
+     * The plugin state effects how plugins are treated on a page. ON means
+     * that any object will be loaded even if a plugin does not exist to handle
+     * the content. ON_DEMAND means that if there is a plugin installed that
+     * can handle the content, a placeholder is shown until the user clicks on
+     * the placeholder. Once clicked, the plugin will be enabled on the page.
+     * OFF means that all plugins will be turned off and any fallback content
+     * will be used.
+     */
+    public enum PluginState {
+        ON,
+        ON_DEMAND,
+        OFF
+    }
+
     // WebView associated with this WebSettings.
     private WebView mWebView;
     // BrowserFrame used to access the native frame pointer.
@@ -157,7 +172,7 @@ public class WebSettings {
     private boolean         mBlockNetworkImage = false;
     private boolean         mBlockNetworkLoads;
     private boolean         mJavaScriptEnabled = false;
-    private boolean         mPluginsEnabled = false;
+    private PluginState     mPluginState = PluginState.OFF;
     private boolean         mJavaScriptCanOpenWindowsAutomatically = false;
     private boolean         mUseDoubleTree = false;
     private boolean         mUseWideViewport = false;
@@ -1011,10 +1026,23 @@ public class WebSettings {
     /**
      * Tell the WebView to enable plugins.
      * @param flag True if the WebView should load plugins.
+     * @deprecated This method has been deprecated in favor of
+     *             {@link #setPluginState}
      */
     public synchronized void setPluginsEnabled(boolean flag) {
-        if (mPluginsEnabled != flag) {
-            mPluginsEnabled = flag;
+        setPluginState(PluginState.ON);
+    }
+
+    /**
+     * Tell the WebView to enable, disable, or have plugins on demand. On
+     * demand mode means that if a plugin exists that can handle the embedded
+     * content, a placeholder icon will be shown instead of the plugin. When
+     * the placeholder is clicked, the plugin will be enabled.
+     * @param state One of the PluginState values.
+     */
+    public synchronized void setPluginState(PluginState state) {
+        if (mPluginState != state) {
+            mPluginState = state;
             postSync();
         }
     }
@@ -1176,9 +1204,18 @@ public class WebSettings {
     /**
      * Return true if plugins are enabled.
      * @return True if plugins are enabled.
+     * @deprecated This method has been replaced by {@link #getPluginState}
      */
     public synchronized boolean getPluginsEnabled() {
-        return mPluginsEnabled;
+        return mPluginState == PluginState.ON;
+    }
+
+    /**
+     * Return the current plugin state.
+     * @return A value corresponding to the enum PluginState.
+     */
+    public synchronized PluginState getPluginState() {
+        return mPluginState;
     }
 
     /**

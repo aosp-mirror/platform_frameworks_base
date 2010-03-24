@@ -573,6 +573,7 @@ public class ScrollView extends FrameLayout {
         } else {
             super.scrollTo(scrollX, scrollY);
         }
+        awakenScrollBars();
     }
     
     private int getOverscrollMax() {
@@ -1297,7 +1298,6 @@ public class ScrollView extends FrameLayout {
                 mScrollViewMovedFocus = false;
             }
     
-            awakenScrollBars(mScroller.getDuration());
             invalidate();
         }
     }

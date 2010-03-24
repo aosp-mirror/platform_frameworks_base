@@ -1483,10 +1483,8 @@ public class WebView extends AbsoluteLayout
     /**
      * Load the given data into the WebView, use the provided URL as the base
      * URL for the content. The base URL is the URL that represents the page
-     * that is loaded through this interface. As such, it is used for the
-     * history entry and to resolve any relative URLs. The failUrl is used if
-     * browser fails to load the data provided. If it is empty or null, and the
-     * load fails, then no history entry is created.
+     * that is loaded through this interface. As such, it is used to resolve any
+     * relative URLs. The historyUrl is used for the history entry.
      * <p>
      * Note for post 1.0. Due to the change in the WebKit, the access to asset
      * files through "file:///android_asset/" for the sub resources is more
@@ -1501,10 +1499,10 @@ public class WebView extends AbsoluteLayout
      * @param mimeType The MIMEType of the data. i.e. text/html. If null,
      *            defaults to "text/html"
      * @param encoding The encoding of the data. i.e. utf-8, us-ascii
-     * @param failUrl URL to use if the content fails to load or null.
+     * @param historyUrl URL to use as the history entry.  Can be null.
      */
     public void loadDataWithBaseURL(String baseUrl, String data,
-            String mimeType, String encoding, String failUrl) {
+            String mimeType, String encoding, String historyUrl) {
 
         if (baseUrl != null && baseUrl.toLowerCase().startsWith("data:")) {
             loadData(data, mimeType, encoding);
@@ -1516,7 +1514,7 @@ public class WebView extends AbsoluteLayout
         arg.mData = data;
         arg.mMimeType = mimeType;
         arg.mEncoding = encoding;
-        arg.mFailUrl = failUrl;
+        arg.mHistoryUrl = historyUrl;
         mWebViewCore.sendMessage(EventHub.LOAD_DATA, arg);
         clearTextEntry(false);
     }
@@ -1668,7 +1666,7 @@ public class WebView extends AbsoluteLayout
         }
         nativeClearCursor(); // start next trackball movement from page edge
         if (bottom) {
-            return pinScrollTo(mScrollX, computeVerticalScrollRange(), true, 0);
+            return pinScrollTo(mScrollX, computeRealVerticalScrollRange(), true, 0);
         }
         // Page down.
         int h = getHeight();
@@ -1907,7 +1905,7 @@ public class WebView extends AbsoluteLayout
     private int pinLocY(int y) {
         if (mInOverScrollMode) return y;
         return pinLoc(y, getViewHeightWithTitle(),
-                      computeVerticalScrollRange() + getTitleHeight());
+                      computeRealVerticalScrollRange() + getTitleHeight());
     }
 
     /**
@@ -2258,8 +2256,7 @@ public class WebView extends AbsoluteLayout
         return false;
     }
 
-    @Override
-    protected int computeHorizontalScrollRange() {
+    private int computeRealHorizontalScrollRange() {
         if (mDrawHistory) {
             return mHistoryWidth;
         } else {
@@ -2269,13 +2266,49 @@ public class WebView extends AbsoluteLayout
     }
 
     @Override
-    protected int computeVerticalScrollRange() {
+    protected int computeHorizontalScrollRange() {
+        int range = computeRealHorizontalScrollRange();
+
+        // Adjust reported range if overscrolled to compress the scroll bars
+        final int scrollX = mScrollX;
+        final int overscrollRight = computeMaxScrollX();
+        if (scrollX < 0) {
+            range -= scrollX;
+        } else if (scrollX > overscrollRight) {
+            range += scrollX - overscrollRight;
+        }
+
+        return range;
+    }
+
+    @Override
+    protected int computeHorizontalScrollOffset() {
+        return Math.max(mScrollX, 0);
+    }
+
+    private int computeRealVerticalScrollRange() {
         if (mDrawHistory) {
             return mHistoryHeight;
         } else {
             // to avoid rounding error caused unnecessary scrollbar, use floor
             return (int) Math.floor(mContentHeight * mActualScale);
         }
+    }
+
+    @Override
+    protected int computeVerticalScrollRange() {
+        int range = computeRealVerticalScrollRange();
+
+        // Adjust reported range if overscrolled to compress the scroll bars
+        final int scrollY = mScrollY;
+        final int overscrollBottom = computeMaxScrollY();
+        if (scrollY < 0) {
+            range -= scrollY;
+        } else if (scrollY > overscrollBottom) {
+            range += scrollY - overscrollBottom;
+        }
+
+        return range;
     }
 
     @Override
@@ -3134,14 +3167,14 @@ public class WebView extends AbsoluteLayout
             canvas.save();
             canvas.translate(mScrollX, mScrollY);
             canvas.clipRect(-mScrollX, top - mScrollY,
-                    computeHorizontalScrollRange() - mScrollX, top
-                            + computeVerticalScrollRange() - mScrollY,
+                    computeRealHorizontalScrollRange() - mScrollX, top
+                            + computeRealVerticalScrollRange() - mScrollY,
                     Region.Op.DIFFERENCE);
             canvas.drawPaint(mOverScrollBackground);
             canvas.restore();
             // next clip the region for the content
-            canvas.clipRect(0, top, computeHorizontalScrollRange(), top
-                    + computeVerticalScrollRange());
+            canvas.clipRect(0, top, computeRealHorizontalScrollRange(), top
+                    + computeRealVerticalScrollRange());
         }
         if (mTitleBar != null) {
             canvas.translate(0, (int) mTitleBar.getHeight());
@@ -4272,7 +4305,7 @@ public class WebView extends AbsoluteLayout
         public DragTrackerHandler(float x, float y, DragTracker proxy) {
             mProxy = proxy;
 
-            int docBottom = computeVerticalScrollRange() + getTitleHeight();
+            int docBottom = computeRealVerticalScrollRange() + getTitleHeight();
             int viewTop = getScrollY();
             int viewBottom = viewTop + getHeight();
 
@@ -4460,6 +4493,9 @@ public class WebView extends AbsoluteLayout
             if (inEditingMode() && nativeFocusCandidateIsPassword()) {
                 mWebTextView.setInPassword(false);
             }
+
+            mViewManager.startZoom();
+
             return true;
         }
 
@@ -4493,6 +4529,8 @@ public class WebView extends AbsoluteLayout
             mConfirmMove = true;
             startTouch(detector.getFocusX(), detector.getFocusY(),
                     mLastTouchTime);
+
+            mViewManager.endZoom();
         }
 
         public boolean onScale(ScaleGestureDetector detector) {
@@ -5359,11 +5397,11 @@ public class WebView extends AbsoluteLayout
     }
 
     private int computeMaxScrollX() {
-        return Math.max(computeHorizontalScrollRange() - getViewWidth(), 0);
+        return Math.max(computeRealHorizontalScrollRange() - getViewWidth(), 0);
     }
 
     private int computeMaxScrollY() {
-        return Math.max(computeVerticalScrollRange() + getTitleHeight()
+        return Math.max(computeRealVerticalScrollRange() + getTitleHeight()
                 - getViewHeightWithTitle(), 0);
     }
 

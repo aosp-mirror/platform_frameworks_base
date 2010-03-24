@@ -28,6 +28,7 @@ class ViewManager {
     private final ArrayList<ChildView> mChildren = new ArrayList<ChildView>();
     private boolean mHidden;
     private boolean mReadyToDraw;
+    private boolean mZoomInProgress = false;
 
     // Threshold at which a surface is prevented from further increasing in size
     private final int MAX_SURFACE_THRESHOLD;
@@ -38,11 +39,6 @@ class ViewManager {
         int width;
         int height;
         View mView; // generic view to show
-
-        /* set to true if the view is a surface and it has exceeded the pixel
-           threshold specified in MAX_SURFACE_THRESHOLD.
-         */
-        boolean isFixedSize = false;
 
         ChildView() {
         }
@@ -66,19 +62,17 @@ class ViewManager {
                     // already attached, just set the new LayoutParams,
                     // otherwise attach the view and add it to the list of
                     // children.
-                    AbsoluteLayout.LayoutParams lp = computeLayout(ChildView.this);
+                    requestLayout(ChildView.this);
 
-                    if (mView.getParent() != null) {
-                        mView.setLayoutParams(lp);
-                    } else {
-                        attachViewOnUIThread(lp);
+                    if (mView.getParent() == null) {
+                        attachViewOnUIThread();
                     }
                 }
             });
         }
 
-        private void attachViewOnUIThread(AbsoluteLayout.LayoutParams lp) {
-            mWebView.addView(mView, lp);
+        private void attachViewOnUIThread() {
+            mWebView.addView(mView);
             mChildren.add(this);
             if (!mReadyToDraw) {
                 mView.setVisibility(View.GONE);
@@ -146,35 +140,87 @@ class ViewManager {
     /**
      * This should only be called from the UI thread.
      */
-    private AbsoluteLayout.LayoutParams computeLayout(ChildView v) {
+    private void requestLayout(ChildView v) {
 
-        // if the surface has exceed a predefined threshold then fix the size
-        // of the surface.
-        if (!v.isFixedSize && (v.width * v.height) > MAX_SURFACE_THRESHOLD
-                && v.mView instanceof SurfaceView) {
-            ((SurfaceView)v.mView).getHolder().setFixedSize(v.width, v.height);
-            v.isFixedSize = true;
-        }
+        int width = ctvD(v.width);
+        int height = ctvD(v.height);
+        int x = ctvX(v.x);
+        int y = ctvY(v.y);
 
         AbsoluteLayout.LayoutParams lp;
         ViewGroup.LayoutParams layoutParams = v.mView.getLayoutParams();
 
         if (layoutParams instanceof AbsoluteLayout.LayoutParams) {
             lp = (AbsoluteLayout.LayoutParams) layoutParams;
-            lp.width = ctvD(v.width);
-            lp.height = ctvD(v.height);
-            lp.x = ctvX(v.x);
-            lp.y = ctvY(v.y);
+            lp.width = width;
+            lp.height = height;
+            lp.x = x;
+            lp.y = y;
         } else {
-            lp = new AbsoluteLayout.LayoutParams(ctvD(v.width), ctvD(v.height),
-                    ctvX(v.x), ctvY(v.y));
+            lp = new AbsoluteLayout.LayoutParams(width, height, x, y);
         }
-        return lp;
+
+        // apply the layout to the view
+        v.mView.setLayoutParams(lp);
+
+        if(v.mView instanceof SurfaceView) {
+
+            final SurfaceView sView = (SurfaceView) v.mView;
+            boolean exceedThreshold = (width * height) > MAX_SURFACE_THRESHOLD;
+
+            /* If the surface has exceeded a predefined threshold or the webview
+             * is currently zoom then fix the size of the surface.
+             *
+             * NOTE: plugins (e.g. Flash) must not explicitly fix the size of
+             * their surface. The logic below will result in unexpected behavior
+             * for the plugin if they attempt to fix the size of the surface.
+             */
+            if (!sView.isFixedSize() && (exceedThreshold || mZoomInProgress)) {
+                sView.getHolder().setFixedSize(width, height);
+            }
+            else if (sView.isFixedSize() && !exceedThreshold && !mZoomInProgress) {
+                /* The changing of visibility is a hack to get around a bug in
+                 * the framework that causes the surface to revert to the size
+                 * it was prior to being fixed before it redraws using the
+                 * values currently in its layout.
+                 *
+                 * The surface is destroyed when it is set to invisible and then
+                 * recreated at the new dimensions when it is made visible. The
+                 * same destroy/create step occurs without the change in
+                 * visibility, but then exhibits the behavior described in the
+                 * previous paragraph.
+                 */
+                if (sView.getVisibility() == View.VISIBLE) {
+                    sView.setVisibility(View.INVISIBLE);
+                    sView.getHolder().setSizeFromLayout();
+                    sView.setVisibility(View.VISIBLE);
+                } else {
+                    sView.getHolder().setSizeFromLayout();
+                }
+            }
+            else if (sView.isFixedSize() && exceedThreshold) {
+                sView.requestLayout();
+            }
+        }
+    }
+
+    void startZoom() {
+        mZoomInProgress = true;
+        for (ChildView v : mChildren) {
+            requestLayout(v);
+        }
+    }
+
+    void endZoom() {
+        mZoomInProgress = false;
+        for (ChildView v : mChildren) {
+            requestLayout(v);
+        }
     }
 
     void scaleAll() {
         for (ChildView v : mChildren) {
-            v.mView.setLayoutParams(computeLayout(v));
+            requestLayout(v);
         }
     }
 

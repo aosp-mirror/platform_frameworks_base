@@ -206,7 +206,12 @@ public class DateTimeView extends TextView {
         if (format == null || "".equals(format)) {
             return DateFormat.getDateInstance(DateFormat.SHORT);
         } else {
-            return new SimpleDateFormat(format);
+            try {
+                return new SimpleDateFormat(format);
+            } catch (IllegalArgumentException e) {
+                // If we tried to use a bad format string, fall back to a default.
+                return DateFormat.getDateInstance(DateFormat.SHORT);
+            }
         }
     }
 

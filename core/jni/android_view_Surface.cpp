@@ -35,6 +35,11 @@
 
 namespace android {
 
+enum {
+    // should match Parcelable.java
+    PARCELABLE_WRITE_RETURN_VALUE = 0x0001
+};
+
 // ----------------------------------------------------------------------------
 
 static const char* const OutOfResourcesException =
@@ -612,6 +617,9 @@ static void Surface_writeToParcel(
 
     const sp<SurfaceControl>& control(getSurfaceControl(env, clazz));
     SurfaceControl::writeSurfaceToParcel(control, parcel);
+    if (flags & PARCELABLE_WRITE_RETURN_VALUE) {
+        setSurfaceControl(env, clazz, 0);
+    }
 }
 
 // ----------------------------------------------------------------------------

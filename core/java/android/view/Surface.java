@@ -28,6 +28,7 @@ import android.util.Log;
  */
 public class Surface implements Parcelable {
     private static final String LOG_TAG = "Surface";
+    private static final boolean DEBUG_RELEASE = false;
     
     /* flags used in constructor (keep in sync with ISurfaceComposer.h) */
 
@@ -155,6 +156,9 @@ public class Surface implements Parcelable {
     // non compatibility mode.
     private Matrix mCompatibleMatrix;
 
+    @SuppressWarnings("unused")
+    private Exception mCreationStack;
+
     /**
      * Exception thrown when a surface couldn't be created or resized
      */
@@ -181,6 +185,9 @@ public class Surface implements Parcelable {
     public Surface(SurfaceSession s,
             int pid, int display, int w, int h, int format, int flags)
         throws OutOfResourcesException {
+        if (DEBUG_RELEASE) {
+            mCreationStack = new Exception();
+        }
         mCanvas = new CompatibleCanvas();
         init(s,pid,null,display,w,h,format,flags);
     }
@@ -192,6 +199,9 @@ public class Surface implements Parcelable {
     public Surface(SurfaceSession s,
             int pid, String name, int display, int w, int h, int format, int flags)
         throws OutOfResourcesException {
+        if (DEBUG_RELEASE) {
+            mCreationStack = new Exception();
+        }
         mCanvas = new CompatibleCanvas();
         init(s,pid,name,display,w,h,format,flags);
     }
@@ -202,6 +212,9 @@ public class Surface implements Parcelable {
      * {@hide}
      */
     public Surface() {
+        if (DEBUG_RELEASE) {
+            mCreationStack = new Exception();
+        }
         mCanvas = new CompatibleCanvas();
     }
 
@@ -407,6 +420,15 @@ public class Surface implements Parcelable {
     /* no user serviceable parts here ... */
     @Override
     protected void finalize() throws Throwable {
+        if (mSurface != 0 || mSurfaceControl != 0) {
+            if (DEBUG_RELEASE) {
+                Log.w(LOG_TAG, "Surface.finalize() has work. You should have called release() (" 
+                        + mSurface + ", " + mSurfaceControl + ")", mCreationStack);
+            } else {
+                Log.w(LOG_TAG, "Surface.finalize() has work. You should have called release() (" 
+                        + mSurface + ", " + mSurfaceControl + ")");
+            }
+        }
         release();
     }
     
