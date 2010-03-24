@@ -410,7 +410,13 @@ public class HorizontalScrollView extends FrameLayout {
                 * Locally do absolute value. mLastMotionX is set to the x value
                 * of the down event.
                 */
-                final int pointerIndex = ev.findPointerIndex(mActivePointerId);
+                final int activePointerId = mActivePointerId;
+                if (activePointerId == INVALID_POINTER) {
+                    // If we don't have a valid id, the touch down wasn't on content.
+                    break;
+                }
+
+                final int pointerIndex = ev.findPointerIndex(activePointerId);
                 final float x = ev.getX(pointerIndex);
                 final int xDiff = (int) Math.abs(x - mLastMotionX);
                 if (xDiff > mTouchSlop) {

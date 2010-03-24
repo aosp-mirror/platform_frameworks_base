@@ -408,7 +408,13 @@ public class ScrollView extends FrameLayout {
                 * Locally do absolute value. mLastMotionY is set to the y value
                 * of the down event.
                 */
-                final int pointerIndex = ev.findPointerIndex(mActivePointerId);
+                final int activePointerId = mActivePointerId;
+                if (activePointerId == INVALID_POINTER) {
+                    // If we don't have a valid id, the touch down wasn't on content.
+                    break;
+                }
+
+                final int pointerIndex = ev.findPointerIndex(activePointerId);
                 final float y = ev.getY(pointerIndex);
                 final int yDiff = (int) Math.abs(y - mLastMotionY);
                 if (yDiff > mTouchSlop) {
