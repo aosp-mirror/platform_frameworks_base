@@ -113,7 +113,7 @@ public class ParcelFileDescriptor implements Parcelable {
         }
         
         FileDescriptor fd = Parcel.openFileDescriptor(path, mode);
-        return new ParcelFileDescriptor(fd);
+        return fd != null ? new ParcelFileDescriptor(fd) : null;
     }
 
     /**
@@ -127,7 +127,7 @@ public class ParcelFileDescriptor implements Parcelable {
      */
     public static ParcelFileDescriptor fromSocket(Socket socket) {
         FileDescriptor fd = getFileDescriptorFromSocket(socket);
-        return new ParcelFileDescriptor(fd);
+        return fd != null ? new ParcelFileDescriptor(fd) : null;
     }
 
     // Extracts the file descriptor from the specified socket and returns it untouched
@@ -163,7 +163,10 @@ public class ParcelFileDescriptor implements Parcelable {
      *             If an error occurs attempting to close this ParcelFileDescriptor.
      */
     public void close() throws IOException {
-        mClosed = true;
+        synchronized (this) {
+            if (mClosed) return;
+            mClosed = true;
+        }
         if (mParcelDescriptor != null) {
             // If this is a proxy to another file descriptor, just call through to its
             // close method.
@@ -235,6 +238,9 @@ public class ParcelFileDescriptor implements Parcelable {
     
     /*package */ParcelFileDescriptor(FileDescriptor descriptor) {
         super();
+        if (descriptor == null) {
+            throw new NullPointerException("descriptor must not be null");
+        }
         mFileDescriptor = descriptor;
         mParcelDescriptor = null;
     }
