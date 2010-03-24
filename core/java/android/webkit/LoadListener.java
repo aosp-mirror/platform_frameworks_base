@@ -127,6 +127,9 @@ class LoadListener extends Handler implements EventHandler {
 
     private Headers mHeaders;
 
+    private final String mUsername;
+    private final String mPassword;
+
     // =========================================================================
     // Public functions
     // =========================================================================
@@ -134,11 +137,13 @@ class LoadListener extends Handler implements EventHandler {
     public static LoadListener getLoadListener(Context context,
             BrowserFrame frame, String url, int nativeLoader,
             boolean synchronous, boolean isMainPageLoader,
-            boolean isMainResource, boolean userGesture, long postIdentifier) {
+            boolean isMainResource, boolean userGesture, long postIdentifier,
+            String username, String password) {
 
         sNativeLoaderCount += 1;
         return new LoadListener(context, frame, url, nativeLoader, synchronous,
-                isMainPageLoader, isMainResource, userGesture, postIdentifier);
+                isMainPageLoader, isMainResource, userGesture, postIdentifier,
+                username, password);
     }
 
     public static int getNativeLoaderCount() {
@@ -147,7 +152,8 @@ class LoadListener extends Handler implements EventHandler {
 
     LoadListener(Context context, BrowserFrame frame, String url,
             int nativeLoader, boolean synchronous, boolean isMainPageLoader,
-            boolean isMainResource, boolean userGesture, long postIdentifier) {
+            boolean isMainResource, boolean userGesture, long postIdentifier,
+            String username, String password) {
         if (DebugFlags.LOAD_LISTENER) {
             Log.v(LOGTAG, "LoadListener constructor url=" + url);
         }
@@ -163,6 +169,8 @@ class LoadListener extends Handler implements EventHandler {
         mIsMainResourceLoader = isMainResource;
         mUserGesture = userGesture;
         mPostIdentifier = postIdentifier;
+        mUsername = username;
+        mPassword = password;
     }
 
     /**
@@ -402,7 +410,7 @@ class LoadListener extends Handler implements EventHandler {
 
         // if we tried to authenticate ourselves last time
         if (mAuthHeader != null) {
-            // we failed, if we must to authenticate again now and
+            // we failed, if we must authenticate again now and
             // we have a proxy-ness match
             mAuthFailed = (mustAuthenticate &&
                     isProxyAuthRequest == mAuthHeader.isProxy());
@@ -652,7 +660,13 @@ class LoadListener extends Handler implements EventHandler {
                 if (mAuthHeader != null &&
                         (Network.getInstance(mContext).isValidProxySet() ||
                          !mAuthHeader.isProxy())) {
-                    Network.getInstance(mContext).handleAuthRequest(this);
+                    // If this is the first attempt to authenticate, try again with the username and
+                    // password supplied in the URL, if present.
+                    if (!mAuthFailed && mUsername != null && mPassword != null) {
+                        makeAuthResponse(mUsername, mPassword);
+                    } else {
+                        Network.getInstance(mContext).handleAuthRequest(this);
+                    }
                     return;
                 }
                 break;  // use default
@@ -844,41 +858,41 @@ class LoadListener extends Handler implements EventHandler {
                     + " username: " + username
                     + " password: " + password);
         }
-
-        // create and queue an authentication-response
         if (username != null && password != null) {
-            if (mAuthHeader != null && mRequestHandle != null) {
-                mAuthHeader.setUsername(username);
-                mAuthHeader.setPassword(password);
-
-                int scheme = mAuthHeader.getScheme();
-                if (scheme == HttpAuthHeader.BASIC) {
-                    // create a basic response
-                    boolean isProxy = mAuthHeader.isProxy();
-
-                    mRequestHandle.setupBasicAuthResponse(isProxy,
-                            username, password);
-                } else {
-                    if (scheme == HttpAuthHeader.DIGEST) {
-                        // create a digest response
-                        boolean isProxy = mAuthHeader.isProxy();
-
-                        String realm     = mAuthHeader.getRealm();
-                        String nonce     = mAuthHeader.getNonce();
-                        String qop       = mAuthHeader.getQop();
-                        String algorithm = mAuthHeader.getAlgorithm();
-                        String opaque    = mAuthHeader.getOpaque();
-
-                        mRequestHandle.setupDigestAuthResponse
-                                (isProxy, username, password, realm,
-                                 nonce, qop, algorithm, opaque);
-                    }
-                }
-            }
+            makeAuthResponse(username, password);
         } else {
             // Commit whatever data we have and tear down the loader.
             commitLoad();
             tearDown();
+        }
+    }
+
+    void makeAuthResponse(String username, String password) {
+        if (mAuthHeader == null || mRequestHandle == null) {
+            return;
+        }
+
+        mAuthHeader.setUsername(username);
+        mAuthHeader.setPassword(password);
+
+        int scheme = mAuthHeader.getScheme();
+        if (scheme == HttpAuthHeader.BASIC) {
+            // create a basic response
+            boolean isProxy = mAuthHeader.isProxy();
+
+            mRequestHandle.setupBasicAuthResponse(isProxy, username, password);
+        } else if (scheme == HttpAuthHeader.DIGEST) {
+            // create a digest response
+            boolean isProxy = mAuthHeader.isProxy();
+
+            String realm     = mAuthHeader.getRealm();
+            String nonce     = mAuthHeader.getNonce();
+            String qop       = mAuthHeader.getQop();
+            String algorithm = mAuthHeader.getAlgorithm();
+            String opaque    = mAuthHeader.getOpaque();
+
+            mRequestHandle.setupDigestAuthResponse(isProxy, username, password,
+                    realm, nonce, qop, algorithm, opaque);
         }
     }
 
