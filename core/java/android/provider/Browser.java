@@ -121,15 +121,6 @@ public class Browser {
     private static final int MAX_HISTORY_COUNT = 250;
 
     /**
-     * URI for writing geolocation permissions. This requires the
-     * {@link android.Manifest.permission#WRITE_GEOLOCATION_PERMISSIONS}.
-     */
-    public static final Uri GEOLOCATION_URI =
-            Uri.parse("content://browser/geolocation");
-
-    private static final String GEOLOCATION_WHERE_CLAUSE = GeolocationColumns.ORIGIN + " = ?";
-
-    /**
      *  Open the AddBookmark activity to save a bookmark.  Launch with
      *  and/or url, which can be edited by the user before saving.
      *  @param c        Context used to launch the AddBookmark activity.
@@ -614,42 +605,6 @@ public class Browser {
         }
     }
 
-    /**
-     * Allows geolocation for the specified origin.
-     * This requires the {@link android.Manifest.permission#WRITE_GEOLOCATION_PERMISSIONS}
-     * permission.
-     *
-     * @param origin The origin to allow geolocation for, e.g. "http://www.google.com". The string
-     *        should not include a trailing slash.
-     */
-    public static void allowGeolocation(ContentResolver cr, String origin) {
-        try {
-            ContentValues map = new ContentValues();
-            map.put(GeolocationColumns.ORIGIN, origin);
-            cr.insert(GEOLOCATION_URI, map);
-        } catch (IllegalStateException e) {
-            Log.e(LOGTAG, "allowGeolocation", e);
-            return;
-        }
-    }
-
-    /**
-     * Clears the geolocation permission state for the specified origin.
-     * This requires the {@link android.Manifest.permission#WRITE_GEOLOCATION_PERMISSIONS}
-     * permission.
-     *
-     * @param origin The origin to allow geolocation for, e.g. "http://www.google.com". The string
-     *        should not include a trailing slash.
-     */
-    public static void clearGeolocation(ContentResolver cr, String origin) {
-        try {
-            String[] whereArgs = { origin };
-            cr.delete(GEOLOCATION_URI, GEOLOCATION_WHERE_CLAUSE, whereArgs);
-        } catch (IllegalStateException e) {
-            Log.e(LOGTAG, "clearGeolocation", e);
-        }
-    }
-
     public static class BookmarkColumns implements BaseColumns {
         public static final String URL = "url";
         public static final String VISITS = "visits";
@@ -676,9 +631,5 @@ public class Browser {
         public static final String URL = "url";
         public static final String SEARCH = "search";
         public static final String DATE = "date";
-    }
-
-    public static class GeolocationColumns {
-        public static final String ORIGIN = "origin";
     }
 }

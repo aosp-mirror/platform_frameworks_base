@@ -250,14 +250,6 @@
         android:description="@string/permdesc_writeHistoryBookmarks"
         android:protectionLevel="dangerous" />
 
-    <!-- Allows an application to write to (but not read) the user's
-         geolocation permissions.. -->
-    <permission android:name="com.android.browser.permission.WRITE_GEOLOCATION_PERMISSIONS"
-        android:permissionGroup="android.permission-group.LOCATION"
-        android:label="@string/permlab_writeGeolocationPermissions"
-        android:description="@string/permdesc_writeGeolocationPermissions"
-        android:protectionLevel="signatureOrSystem" />
-
     <!-- ======================================= -->
     <!-- Permissions for accessing location info -->
     <!-- ======================================= -->
