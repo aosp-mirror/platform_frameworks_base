@@ -260,7 +260,8 @@ class ContextImpl extends Context {
     
     @Override
     public Context getApplicationContext() {
-        return mMainThread.getApplication();
+        return (mPackageInfo != null) ?
+                mPackageInfo.getApplication() : mMainThread.getApplication();
     }
     
     @Override

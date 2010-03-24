@@ -278,6 +278,10 @@ public final class ActivityThread {
 
         int mClientCount = 0;
 
+        Application getApplication() {
+            return mApplication;
+        }
+
         public PackageInfo(ActivityThread activityThread, ApplicationInfo aInfo,
                 ActivityThread mainThread, ClassLoader baseLoader,
                 boolean securityViolation, boolean includeCode) {
@@ -648,7 +652,7 @@ public final class ActivityThread {
             }
             mActivityThread.mAllApplications.add(app);
             mApplication = app;
-            
+
             if (instrumentation != null) {
                 try {
                     instrumentation.callApplicationOnCreate(app);
