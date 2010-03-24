@@ -421,11 +421,17 @@ public class WifiService extends IWifiManager.Stub {
             return false;
         }
 
-        setWifiEnabledState(enable ? WIFI_STATE_ENABLING : WIFI_STATE_DISABLING, uid);
-
+        /**
+         * Fail Wifi if AP is enabled
+         * TODO: Deprecate WIFI_STATE_UNKNOWN and rename it
+         * WIFI_STATE_FAILED
+         */
         if ((mWifiApState == WIFI_AP_STATE_ENABLED) && enable) {
-            setWifiApEnabledBlocking(false, Process.myUid(), null);
+            setWifiEnabledState(WIFI_STATE_UNKNOWN, uid);
+            return false;
         }
+
+        setWifiEnabledState(enable ? WIFI_STATE_ENABLING : WIFI_STATE_DISABLING, uid);
 
         if (enable) {
             if (!mWifiStateTracker.loadDriver()) {
@@ -665,17 +671,18 @@ public class WifiService extends IWifiManager.Stub {
             }
         }
 
+        /**
+         * Fail AP if Wifi is enabled
+         */
+        if ((mWifiStateTracker.getWifiState() == WIFI_STATE_ENABLED) && enable) {
+            setWifiApEnabledState(WIFI_AP_STATE_FAILED, uid, DriverAction.NO_DRIVER_UNLOAD);
+            return false;
+        }
+
         setWifiApEnabledState(enable ? WIFI_AP_STATE_ENABLING :
                                        WIFI_AP_STATE_DISABLING, uid, DriverAction.NO_DRIVER_UNLOAD);
 
         if (enable) {
-
-            /**
-             * Disable client mode for starting AP
-             */
-            if (mWifiStateTracker.getWifiState() == WIFI_STATE_ENABLED) {
-                setWifiEnabledBlocking(false, true, Process.myUid());
-            }
 
             /* Use default config if there is no existing config */
             if (wifiConfig == null && ((wifiConfig = getWifiApConfiguration()) == null)) {
