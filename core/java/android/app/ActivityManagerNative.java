@@ -491,6 +491,14 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
+        case GET_RUNNING_EXTERNAL_APPLICATIONS_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            List<ApplicationInfo> list = getRunningExternalApplications();
+            reply.writeNoException();
+            reply.writeTypedList(list);
+            return true;
+        }
+
         case MOVE_TASK_TO_FRONT_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             int task = data.readInt();
@@ -1712,6 +1720,19 @@ class ActivityManagerProxy implements IActivityManager
         reply.readException();
         ArrayList<ActivityManager.RunningAppProcessInfo> list
         = reply.createTypedArrayList(ActivityManager.RunningAppProcessInfo.CREATOR);
+        data.recycle();
+        reply.recycle();
+        return list;
+    }
+    public List<ApplicationInfo> getRunningExternalApplications()
+            throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        mRemote.transact(GET_RUNNING_EXTERNAL_APPLICATIONS_TRANSACTION, data, reply, 0);
+        reply.readException();
+        ArrayList<ApplicationInfo> list
+        = reply.createTypedArrayList(ApplicationInfo.CREATOR);
         data.recycle();
         reply.recycle();
         return list;

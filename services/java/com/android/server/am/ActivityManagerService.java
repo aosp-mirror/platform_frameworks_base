@@ -69,6 +69,7 @@ import android.content.pm.PathPermission;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -122,6 +123,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 public final class ActivityManagerService extends ActivityManagerNative implements Watchdog.Monitor {
     static final String TAG = "ActivityManager";
@@ -9350,6 +9352,32 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             }
         }
         return runList;
+    }
+
+    public List<ApplicationInfo> getRunningExternalApplications() {
+        List<ActivityManager.RunningAppProcessInfo> runningApps = getRunningAppProcesses();
+        List<ApplicationInfo> retList = new ArrayList<ApplicationInfo>();
+        if (runningApps != null && runningApps.size() > 0) {
+            Set<String> extList = new HashSet<String>();
+            for (ActivityManager.RunningAppProcessInfo app : runningApps) {
+                if (app.pkgList != null) {
+                    for (String pkg : app.pkgList) {
+                        extList.add(pkg);
+                    }
+                }
+            }
+            IPackageManager pm = ActivityThread.getPackageManager();
+            for (String pkg : extList) {
+                try {
+                    ApplicationInfo info = pm.getApplicationInfo(pkg, 0);
+                    if ((info.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0) {
+                        retList.add(info);
+                    }
+                } catch (RemoteException e) {
+                }
+            }
+        }
+        return retList;
     }
 
     @Override
