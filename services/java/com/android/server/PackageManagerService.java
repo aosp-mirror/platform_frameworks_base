@@ -9579,6 +9579,9 @@ class PackageManagerService extends IPackageManager.Stub {
            }
        }
        synchronized (mPackages) {
+           // Make sure group IDs have been assigned, and any permission
+           // changes in other apps are accounted for
+           updatePermissionsLP(null, null, true, false);
            // Persist settings
            mSettings.writeLP();
        }
