@@ -36,6 +36,9 @@ public interface ListAdapter extends Adapter {
     /**
      * Returns true if the item at the specified position is not a separator.
      * (A separator is a non-selectable, non-clickable item).
+     * 
+     * The result is unspecified if position is invalid. An {@link ArrayIndexOutOfBoundsException}
+     * should be thrown in that case for fast failure.
      *
      * @param position Index of the item
      * @return True if the item is not a separator
