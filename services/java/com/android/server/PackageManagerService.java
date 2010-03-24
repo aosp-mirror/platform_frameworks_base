@@ -5214,8 +5214,19 @@ class PackageManagerService extends IPackageManager.Stub {
                 }
             }
             if (!PackageHelper.renameSdDir(cid, newCacheId)) {
-                Slog.e(TAG, "Failed to rename " + cid + " to " + newCacheId);
-                return false;
+                Slog.e(TAG, "Failed to rename " + cid + " to " + newCacheId +
+                        " which might be stale. Will try to clean up.");
+                // Clean up the stale container and proceed to recreate.
+                if (!PackageHelper.destroySdDir(newCacheId)) {
+                    Slog.e(TAG, "Very strange. Cannot clean up stale container " + newCacheId);
+                    return false;
+                }
+                // Successfully cleaned up stale container. Try to rename again.
+                if (!PackageHelper.renameSdDir(cid, newCacheId)) {
+                    Slog.e(TAG, "Failed to rename " + cid + " to " + newCacheId
+                            + " inspite of cleaning it up.");
+                    return false;
+                }
             }
             if (!PackageHelper.isContainerMounted(newCacheId)) {
                 Slog.w(TAG, "Mounting container " + newCacheId);
