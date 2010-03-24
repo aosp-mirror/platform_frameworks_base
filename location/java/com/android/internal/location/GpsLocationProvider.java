@@ -63,13 +63,14 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Properties;
 import java.util.Map.Entry;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * A GPS implementation of LocationProvider used by LocationManager.
  *
  * {@hide}
  */
-public class GpsLocationProvider implements LocationProviderInterface, Runnable {
+public class GpsLocationProvider implements LocationProviderInterface {
 
     private static final String TAG = "GpsLocationProvider";
 
@@ -190,7 +191,7 @@ public class GpsLocationProvider implements LocationProviderInterface, Runnable 
     private static final int NO_FIX_TIMEOUT = 60;
 
     // true if we are enabled
-    private boolean mEnabled;
+    private volatile boolean mEnabled;
     
     // true if we have network connectivity
     private boolean mNetworkAvailable;
@@ -236,7 +237,13 @@ public class GpsLocationProvider implements LocationProviderInterface, Runnable 
     private Bundle mLocationExtras = new Bundle();
     private ArrayList<Listener> mListeners = new ArrayList<Listener>();
 
+    // GpsLocationProvider's handler thread
+    private final Thread mThread;
+    // Handler for processing events in mThread.
     private Handler mHandler;
+    // Used to signal when our main thread has initialized everything
+    private final CountDownLatch mInitializedLatch = new CountDownLatch(1);
+    // Thread for receiving events from the native code
     private Thread mEventThread;
 
     private String mAGpsApn;
@@ -389,8 +396,17 @@ public class GpsLocationProvider implements LocationProviderInterface, Runnable 
             Log.w(TAG, "Could not open GPS configuration file " + PROPERTIES_FILE);
         }
 
-        Thread thread = new Thread(null, this, "GpsLocationProvider");
-        thread.start();
+        // wait until we are fully initialized before returning
+        mThread = new GpsLocationProviderThread();
+        mThread.start();
+        while (true) {
+            try {
+                mInitializedLatch.await();
+                break;
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
     }
 
     private void initialize() {
@@ -673,7 +689,7 @@ public class GpsLocationProvider implements LocationProviderInterface, Runnable 
     }
 
     private void handleDisable() {
-        if (DEBUG) Log.d(TAG, "handleEnable");
+        if (DEBUG) Log.d(TAG, "handleDisable");
         if (!mEnabled) return;
 
         mEnabled = false;
@@ -1327,7 +1343,7 @@ public class GpsLocationProvider implements LocationProviderInterface, Runnable 
     // native_wait_for_event() will callback to us via reportLocation(), reportStatus(), etc.
     // this is necessary because native code cannot call Java on a thread that the JVM does
     // not know about.
-    private class GpsEventThread extends Thread {
+    private final class GpsEventThread extends Thread {
 
         public GpsEventThread() {
             super("GpsEventThread");
@@ -1384,13 +1400,21 @@ public class GpsLocationProvider implements LocationProviderInterface, Runnable 
         }
     };
 
-    public void run()
-    {
-        Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-        initialize();
-        Looper.prepare();
-        mHandler = new ProviderHandler();
-        Looper.loop();
+    private final class GpsLocationProviderThread extends Thread {
+
+        public GpsLocationProviderThread() {
+            super("GpsLocationProvider");
+        }
+
+        public void run() {
+            Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+            initialize();
+            Looper.prepare();
+            mHandler = new ProviderHandler();
+            // signal when we are initialized and ready to go
+            mInitializedLatch.countDown();
+            Looper.loop();
+        }
     }
 
     // for GPS SV statistics
