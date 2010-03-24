@@ -1179,6 +1179,12 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                                         Log.i("GLThread", "releasing EGL context because paused tid=" + getId());
                                     }
                                 }
+                                if (sGLThreadManager.shouldTerminateEGLWhenPausing()) {
+                                    mEglHelper.finish();
+                                    if (LOG_SURFACE) {
+                                        Log.i("GLThread", "terminating EGL because paused tid=" + getId());
+                                    }
+                                }
                             }
 
                             // Have we lost the surface view surface?
@@ -1549,6 +1555,13 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
         }
 
         public synchronized boolean shouldReleaseEGLContextWhenPausing() {
+            // Release the EGL context when pausing even if
+            // the hardware supports multiple EGL contexts.
+            // Otherwise the device could run out of EGL contexts.
+            return true;
+        }
+
+        public synchronized boolean shouldTerminateEGLWhenPausing() {
             checkGLESVersion();
             return !mMultipleGLESContextsAllowed;
         }
