@@ -1599,7 +1599,7 @@ class LoadListener extends Handler implements EventHandler {
         // from http thread. Then it is called again from WebViewCore thread 
         // after the load is completed. So make sure the queue is cleared but
         // don't set it to null.
-        for (int size = mMessageQueue.size(); size > 0; size--) {
+        while (!mMessageQueue.isEmpty()) {
             handleMessage(mMessageQueue.remove(0));
         }
     }
