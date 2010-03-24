@@ -2213,6 +2213,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     private void installDecor() {
         if (mDecor == null) {
             mDecor = generateDecor();
+            mDecor.setDescendantFocusability(ViewGroup.FOCUS_AFTER_DESCENDANTS);
             mDecor.setIsRootNamespace(true);
         }
         if (mContentParent == null) {
