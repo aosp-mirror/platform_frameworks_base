@@ -41,6 +41,7 @@ application can create View and ViewGroup objects (and manipulate their properti
 
 <p>The Android framework gives you the flexibility to use either or both of these methods for declaring and managing your application's UI. For example, you could declare your application's default layouts in XML, including the screen elements that will appear in them and their properties. You could then add code in your application that would modify the state of the screen objects, including those declared in XML, at run time. </p>
 
+<div class="sidebox-wrapper">
 <div class="sidebox">
   <ul>
   <li>The <a href="{@docRoot}sdk/eclipse-adt.html">ADT
@@ -53,6 +54,7 @@ application can create View and ViewGroup objects (and manipulate their properti
   you debug on the emulator or device.</li>
   <li>The <a href="{@docRoot}guide/developing/tools/layoutopt.html">layoutopt</a> tool lets
   you quickly analyze your layouts and hierarchies for inefficiencies or other problems.</li>
+</div>
 </div>
 
 <p>The advantage to declaring your UI in XML is that it enables you to better separate the presentation of your application from the code that controls its behavior. Your UI descriptions are external to your application code, which means that you can modify or adapt it without having to modify your source code and recompile. For example, you can create XML layouts for different screen orientations, different device screen sizes, and different languages. Additionally, declaring the layout in XML makes it easier to visualize the structure of your UI, so it's easier to debug problems. As such, this document focuses on teaching you how to declare your layout in XML. If you're
@@ -69,10 +71,15 @@ Layout Objects</a>. There are also a collection of tutorials on building various
 
 <h2 id="write">Write the XML</h2>
 
-<div class="sidebox"><p>For your convenience, the API reference documentation for UI related classes lists the available XML attributes that correspond to the class methods, including inherited attributes.</p>
+<div class="sidebox-wrapper">
+<div class="sidebox">
+<p>For your convenience, the API reference documentation for UI related classes
+lists the available XML attributes that correspond to the class methods, including inherited
+attributes.</p>
 <p>To learn more about the available XML elements and attributes, as well as the format of the XML file, see <a
 href="{@docRoot}guide/topics/resources/available-resources.html#layoutresources">Layout Resources</a>.</p>
- </div>
+</div>
+</div>
 
 <p>Using Android's XML vocabulary, you can quickly design UI layouts and the screen elements they contain, in the same way you create web pages in HTML &mdash; with a series of nested elements. </p>
 

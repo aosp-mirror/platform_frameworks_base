@@ -63,11 +63,12 @@ Tools</strong> &gt; <strong>Fix Project Properties</strong>.</p>
 
 
 <h2>Step 2</h2>
-
+<div class="sidebox-wrapper">
 <div class="sidebox">
 <p>Context menus should always be used when performing actions upon specific elements in the UI.
 When you register a View to a context menu, the context menu is revealed by performing a "long-click"
 on the UI component (press and hold the touchscreen or highlight and hold down the selection key for about two seconds).</p>
+</div>
 </div>
 
 <p>First, let's create the context menu that will allow users to delete individual notes.
@@ -122,26 +123,23 @@ method of our NotesDbAdapter and the note is deleted. That's it for the context 
 can now be deleted.</p>
 
 <h2 style="clear:right;">Step 4</h2>
-<div class="sidebox" style="border:2px solid #FFFFDD;float:right;
-     background-color:#FFFFEE;margin-right:0px;
-     margin-bottom:.5em;margin-top:1em;padding:0em;width:240px;">
-    <h2 style="border:0;font-size:12px;padding:.5em .5em .5em 1em;margin:0;
-      background-color:#FFFFDD;">Starting Other Activities</h2>
-    <p style="padding-left:.5em;font-size:12px;margin:0;
-     padding:.0em .5em .5em 1em;">In this example our Intent uses a class name specifically.
+  <div class="sidebox-wrapper">
+  <div class="sidebox">
+    <h2>Starting Other Activities</h2>
+    <p>In this example our Intent uses a class name specifically.
      As well as
      <a href="{@docRoot}resources/faq/commontasks.html#intentexamples">starting intents</a> in
     classes we already know about, be they in our own application or another
     application, we can also create Intents without knowing exactly which
     application will handle it.</p>
-    <p style="padding-left:.5em;font-size:12px;margin:0;
-     padding:.0em .5em .5em 1em;">For example, we might want to open a page in a
+    <p>For example, we might want to open a page in a
     browser, and for this we still use
     an Intent. But instead of specifying a class to handle it, we use
     a predefined Intent constant, and a content URI that describes what we
     want to do. See {@link android.content.Intent
     android.content.Intent} for more information.</p>
-</div>
+  </div>
+  </div>
 
 	<p>Fill in the body of the <code>createNote()</code> method:
     <p>Create a new <code>Intent</code> to create a note
@@ -292,24 +290,22 @@ case ACTIVITY_EDIT:
 
 <h2>Step 7</h2>
 
-  <div class="sidebox" style="border:2px solid #FFFFDD;float:right;
-      background-color:#FFFFEE;margin-right:0px;
-      margin-bottom:.5em;margin-top:1em;padding:0em;width:240px;">
-    <h2 style="border:0;font-size:12px;padding:.5em .5em .5em 1em;margin:0;
-      background-color:#FFFFDD;">The Art of Layout</h2>
-    <p style="padding-left:.5em;font-size:12px;margin:0; padding:.0em .5em .5em 1em;">The provided
+  <div class="sidebox-wrapper">
+  <div class="sidebox">
+    <h2>The Art of Layout</h2>
+    <p>The provided
     note_edit.xml layout file is the most sophisticated one in the application we will be building,
     but that doesn't mean it is even close to the kind of sophistication you will be likely to want
     in real Android applications.</p>
-    <p style="padding-left:.5em;font-size:12px;margin:0; padding:.0em .5em .5em 1em;">Creating a
+    <p>Creating a
     good UI is part art and part science, and the rest is work. Mastery of <a
     href="{@docRoot}guide/topics/ui/declaring-layout.html">Declaring Layout</a> is an essential part of creating
     a good looking Android application.</p>
-    <p style="padding-left:.5em;font-size:12px;margin:0;
-     padding:.0em .5em .5em 1em;">Take a look at the
+    <p>Take a look at the
     <a href="{@docRoot}resources/tutorials/views/index.html">Hello Views</a>
     for some example layouts and how to use them. The ApiDemos sample project is also a
     great resource from which to learn how to create different layouts.</p>
+  </div>
   </div>
 
 <p>Open the file <code>note_edit.xml</code> that has been provided and take a
@@ -565,20 +561,18 @@ protected void onCreate(Bundle savedInstanceState) {
 
 <h2>Step 11</h2>
 
-<div class="sidebox" style="border:2px solid #FFFFDD;float:right;
-      background-color:#FFFFEE;margin-right:0px;
-      margin-bottom:.5em;margin-top:1em;padding:0em;width:240px;">
-    <h2 style="border:0;font-size:12px;padding:.5em .5em .5em 1em;margin:0;
-      background-color:#FFFFDD;">The All-Important Android Manifest File</h2>
-  <p style="padding-left:.5em;font-size:12px;margin:0;
-     padding:.0em .5em .5em 1em;">The AndroidManifest.xml file is the way in which Android sees your
+  <div class="sidebox-wrapper">
+  <div class="sidebox">
+    <h2>The All-Important Android Manifest File</h2>
+  <p>The AndroidManifest.xml file is the way in which Android sees your
     application. This file defines the category of the application, where
     it shows up (or even if it shows up) in the launcher or settings, what
     activities, services, and content providers it defines, what intents it can
     receive, and more. </p>
-    <p style="padding-left:.5em;font-size:12px;margin:0;
-     padding:.0em .5em .5em 1em;">For more information, see the reference document
-    <a href="{@docRoot}guide/topics/manifest/manifest-intro.html">The AndroidManifest.xml File</a></p>
+    <p>For more information, see the reference document
+    <a href="{@docRoot}guide/topics/manifest/manifest-intro.html">The AndroidManifest.xml
+File</a></p>
+  </div>
   </div>
 
 <p>Finally, the new Activity has to be defined in the manifest file:</p>

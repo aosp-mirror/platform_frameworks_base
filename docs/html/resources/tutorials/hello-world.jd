@@ -357,11 +357,13 @@ short for "resources" and the directory contains all the non-code assets that
 your application requires. In addition to layout files, resources also include assets
 such as images, sounds, and localized strings.</p>
 
+<div class="sidebox-wrapper">
 <div class="sidebox">
   <h2>Landscape layout</h2>
   <p>When you want a different design for landscape, put your layout XML file
   inside /res/layout-land. Android will automatically look here when the layout changes.
   Without this special landscape layout defined, Android will stretch the default layout.</p>
+</div>
 </div>
 
 <p>The Eclipse plugin automatically creates one of these layout files for you: main.xml. 
