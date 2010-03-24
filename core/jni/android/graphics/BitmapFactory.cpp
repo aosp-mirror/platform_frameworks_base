@@ -164,8 +164,11 @@ void AutoDecoderCancel::Validate() {
 using namespace android;
 
 class NinePatchPeeker : public SkImageDecoder::Peeker {
+    SkImageDecoder* fHost;
 public:
-    NinePatchPeeker() {
+    NinePatchPeeker(SkImageDecoder* host) {
+        // the host lives longer than we do, so a raw ptr is safe
+        fHost = host;
         fPatchIsValid = false;
     }
 
@@ -197,6 +200,19 @@ public:
             //       fPatch.sizeLeft, fPatch.sizeTop,
             //       fPatch.sizeRight, fPatch.sizeBottom);
             fPatchIsValid = true;
+
+            // now update our host to force index or 32bit config
+            // 'cause we don't want 565 predithered, since as a 9patch, we know
+            // we will be stretched, and therefore we want to dither afterwards.
+            static const SkBitmap::Config gNo565Pref[] = {
+                SkBitmap::kIndex8_Config,
+                SkBitmap::kIndex8_Config,
+                SkBitmap::kARGB_8888_Config,
+                SkBitmap::kARGB_8888_Config,
+                SkBitmap::kARGB_8888_Config,
+                SkBitmap::kARGB_8888_Config,
+            };
+            fHost->setPrefConfigTable(gNo565Pref);
         } else {
             fPatch = NULL;
         }
@@ -364,7 +380,7 @@ static jobject doDecode(JNIEnv* env, SkStream* stream, jobject padding,
     decoder->setSampleSize(sampleSize);
     decoder->setDitherImage(doDither);
 
-    NinePatchPeeker     peeker;
+    NinePatchPeeker     peeker(decoder);
     JavaPixelAllocator  javaAllocator(env, reportSizeToVM);
     SkBitmap*           bitmap = new SkBitmap;
     Res_png_9patch      dummy9Patch;
