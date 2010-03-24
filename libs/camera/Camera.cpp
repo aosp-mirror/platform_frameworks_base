@@ -117,6 +117,7 @@ void Camera::disconnect()
     LOGV("disconnect");
     if (mCamera != 0) {
         mCamera->disconnect();
+        mCamera->asBinder()->unlinkToDeath(this);
         mCamera = 0;
     }
 }
