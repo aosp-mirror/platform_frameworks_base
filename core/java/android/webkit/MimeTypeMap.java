@@ -484,6 +484,7 @@ public class MimeTypeMap {
             sMimeTypeMap.loadEntry("text/x-tex", "cls");
             sMimeTypeMap.loadEntry("text/x-vcalendar", "vcs");
             sMimeTypeMap.loadEntry("text/x-vcard", "vcf");
+            sMimeTypeMap.loadEntry("video/3gpp", "3gpp");
             sMimeTypeMap.loadEntry("video/3gpp", "3gp");
             sMimeTypeMap.loadEntry("video/3gpp", "3g2");
             sMimeTypeMap.loadEntry("video/dl", "dl");
