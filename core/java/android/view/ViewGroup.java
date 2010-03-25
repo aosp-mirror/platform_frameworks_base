@@ -3457,11 +3457,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * The base LayoutParams class just describes how big the view wants to be
      * for both width and height. For each dimension, it can specify one of:
      * <ul>
-     * <li> an exact number
-     * <li>MATCH_PARENT, which means the view wants to be as big as its parent
-     * (minus padding)
+     * <li>FILL_PARENT (renamed MATCH_PARENT in API Level 8 and higher), which
+     * means that the view wants to be as big as its parent (minus padding)
      * <li> WRAP_CONTENT, which means that the view wants to be just big enough
      * to enclose its content (plus padding)
+     * <li> an exact number
      * </ul>
      * There are subclasses of LayoutParams for different subclasses of
      * ViewGroup. For example, AbsoluteLayout has its own subclass of
@@ -3472,8 +3472,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      */
     public static class LayoutParams {
         /**
-         * This value has the same meaning as {@link #MATCH_PARENT} but has
-         * been deprecated.
+         * Special value for the height or width requested by a View.
+         * FILL_PARENT means that the view wants to be as big as its parent,
+         * minus the parent's padding, if any. This value is deprecated
+         * starting in API Level 8 and replaced by {@link #MATCH_PARENT}.
          */
         @SuppressWarnings({"UnusedDeclaration"})
         @Deprecated
@@ -3482,7 +3484,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         /**
          * Special value for the height or width requested by a View.
          * MATCH_PARENT means that the view wants to be as big as its parent,
-         * minus the parent's padding, if any.
+         * minus the parent's padding, if any. Introduced in API Level 8.
          */
         public static final int MATCH_PARENT = -1;
 
@@ -3494,8 +3496,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         public static final int WRAP_CONTENT = -2;
 
         /**
-         * Information about how wide the view wants to be. Can be an exact
-         * size, or one of the constants MATCH_PARENT or WRAP_CONTENT.
+         * Information about how wide the view wants to be. Can be one of the
+         * constants FILL_PARENT (replaced by MATCH_PARENT ,
+         * in API Level 8) or WRAP_CONTENT. or an exact size.
          */
         @ViewDebug.ExportedProperty(mapping = {
             @ViewDebug.IntToString(from = MATCH_PARENT, to = "MATCH_PARENT"),
@@ -3504,8 +3507,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         public int width;
 
         /**
-         * Information about how tall the view wants to be. Can be an exact
-         * size, or one of the constants MATCH_PARENT or WRAP_CONTENT.
+         * Information about how tall the view wants to be. Can be one of the
+         * constants FILL_PARENT (replaced by MATCH_PARENT ,
+         * in API Level 8) or WRAP_CONTENT. or an exact size.
          */
         @ViewDebug.ExportedProperty(mapping = {
             @ViewDebug.IntToString(from = MATCH_PARENT, to = "MATCH_PARENT"),
@@ -3525,9 +3529,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
          *
          * <ul>
          *   <li><code>layout_width</code>: the width, either an exact value,
-         *   {@link #WRAP_CONTENT} or {@link #MATCH_PARENT}</li>
+         *   {@link #WRAP_CONTENT}, or {@link #FILL_PARENT} (replaced by
+         *   {@link #MATCH_PARENT} in API Level 8)</li>
          *   <li><code>layout_height</code>: the height, either an exact value,
-         *   {@link #WRAP_CONTENT} or {@link #MATCH_PARENT}</li>
+         *   {@link #WRAP_CONTENT}, or {@link #FILL_PARENT} (replaced by
+         *   {@link #MATCH_PARENT} in API Level 8)</li>
          * </ul>
          *
          * @param c the application environment
@@ -3546,10 +3552,12 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
          * Creates a new set of layout parameters with the specified width
          * and height.
          *
-         * @param width the width, either {@link #MATCH_PARENT},
-         *        {@link #WRAP_CONTENT} or a fixed size in pixels
-         * @param height the height, either {@link #MATCH_PARENT},
-         *        {@link #WRAP_CONTENT} or a fixed size in pixels
+         * @param width the width, either {@link #WRAP_CONTENT},
+         *        {@link #FILL_PARENT} (replaced by {@link #MATCH_PARENT} in
+         *        API Level 8), or a fixed size in pixels
+         * @param height the height, either {@link #WRAP_CONTENT},
+         *        {@link #FILL_PARENT} (replaced by {@link #MATCH_PARENT} in
+         *        API Level 8), or a fixed size in pixels
          */
         public LayoutParams(int width, int height) {
             this.width = width;
