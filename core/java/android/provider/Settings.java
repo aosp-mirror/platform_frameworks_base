@@ -2313,6 +2313,14 @@ public final class Settings {
         public static final String ENABLED_INPUT_METHODS = "enabled_input_methods";
 
         /**
+         * List of system input methods that are currently disabled.  This is a string
+         * containing the IDs of all disabled input methods, each ID separated
+         * by ':'.
+         * @hide
+         */
+        public static final String DISABLED_SYSTEM_INPUT_METHODS = "disabled_system_input_methods";
+
+        /**
          * Host name and port for a user-selected proxy.
          */
         public static final String HTTP_PROXY = "http_proxy";
