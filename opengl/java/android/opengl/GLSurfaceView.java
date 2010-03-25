@@ -155,7 +155,7 @@ import android.view.SurfaceView;
  *
  */
 public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
-    private final static boolean LOG_THREADS = true;
+    private final static boolean LOG_THREADS = false;
     private final static boolean LOG_PAUSE_RESUME = true;
     private final static boolean LOG_SURFACE = true;
     private final static boolean LOG_RENDERER = false;
