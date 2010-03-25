@@ -173,6 +173,12 @@ class NotificationViewList {
     }
 
     void add(StatusBarNotification notification) {
+        if (StatusBarService.SPEW) {
+            Slog.d(StatusBarService.TAG, "before add NotificationViewList"
+                    + " notification.data.ongoingEvent=" + notification.data.ongoingEvent);
+            dump(notification);
+        }
+
         ArrayList<StatusBarNotification> list = notification.data.ongoingEvent ? mOngoing : mLatest;
         long when = notification.data.when;
         final int N = list.size();
@@ -187,20 +193,25 @@ class NotificationViewList {
         list.add(index, notification);
 
         if (StatusBarService.SPEW) {
-            Slog.d(StatusBarService.TAG, "NotificationViewList index=" + index);
+            Slog.d(StatusBarService.TAG, "after add NotificationViewList index=" + index);
             dump(notification);
         }
     }
 
     void dump(StatusBarNotification notification) {
         if (StatusBarService.SPEW) {
+            boolean showTime = false;
             String s = "";
             for (int i=0; i<mOngoing.size(); i++) {
                 StatusBarNotification that = mOngoing.get(i);
                 if (that.key == notification.key) {
                     s += "[";
                 }
-                s += that.data.when;
+                if (showTime) {
+                    s += that.data.when;
+                } else {
+                    s += that.data.pkg + "/" + that.data.id + "/" + that.view;
+                }
                 if (that.key == notification.key) {
                     s += "]";
                 }
@@ -214,7 +225,11 @@ class NotificationViewList {
                 if (that.key == notification.key) {
                     s += "[";
                 }
-                s += that.data.when;
+                if (showTime) {
+                    s += that.data.when;
+                } else {
+                    s += that.data.pkg + "/" + that.data.id + "/" + that.view;
+                }
                 if (that.key == notification.key) {
                     s += "]";
                 }
