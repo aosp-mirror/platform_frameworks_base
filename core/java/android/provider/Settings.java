@@ -2630,6 +2630,13 @@ public final class Settings {
         public static final String BACKGROUND_DATA = "background_data";
 
         /**
+         * Origins for which browsers should allow geolocation by default.
+         * The value is a space-separated list of origins.
+         */
+        public static final String ALLOWED_GEOLOCATION_ORIGINS
+                = "allowed_geolocation_origins";
+
+        /**
          * Whether mobile data connections are allowed by the user.  See
          * ConnectivityManager for more info.
          * @hide
@@ -2708,14 +2715,6 @@ public final class Settings {
          * @hide
          */
         public static final String TTY_MODE_ENABLED = "tty_mode_enabled";
-
-        /**
-         * Flag for allowing service provider to use location information to improve products and
-         * services.
-         * Type: int ( 0 = disallow, 1 = allow )
-         * @hide
-         */
-        public static final String USE_LOCATION_FOR_SERVICES = "use_location";
 
         /**
          * Controls whether settings backup is enabled.
