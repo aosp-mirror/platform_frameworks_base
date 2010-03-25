@@ -2527,7 +2527,7 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<AaptFile>& dest)
     const size_t N = mOrderedPackages.size();
     size_t pi;
 
-    bool useUTF8 = !bundle->getWantUTF16() && bundle->isUTF8Available();
+    bool useUTF8 = !bundle->getWantUTF16() && bundle->isMinSdkAtLeast(SDK_FROYO);
 
     // Iterate through all data, collecting all values (strings,
     // references, etc).

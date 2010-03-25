@@ -276,71 +276,47 @@ public class Browser {
     public static final void updateVisitedHistory(ContentResolver cr,
                                                   String url, boolean real) {
         long now = new Date().getTime();
-        new UpdateVisitedHistory(cr, url, real, now).execute();
-    }
-
-    /**
-     * Runnable to perform the update in a separate thread.
-     */
-    private static class UpdateVisitedHistory extends AsyncTask<Void, Void, Void> {
-        private final ContentResolver mContentResolver;
-        private final String mUrl;
-        private final boolean mReal;
-        private final long mNow;
-
-        public UpdateVisitedHistory(ContentResolver cr, String url,
-                boolean real, long now) {
-            mContentResolver = cr;
-            mUrl = url;
-            mReal = real;
-            mNow = now;
-        }
-
-        protected Void doInBackground(Void... unused) {
-            Cursor c = null;
-            try {
-                c = getVisitedLike(mContentResolver, mUrl);
-                /* We should only get one answer that is exactly the same. */
-                if (c.moveToFirst()) {
-                    ContentValues map = new ContentValues();
-                    if (mReal) {
-                        map.put(BookmarkColumns.VISITS, c
-                                .getInt(HISTORY_PROJECTION_VISITS_INDEX) + 1);
-                    } else {
-                        map.put(BookmarkColumns.USER_ENTERED, 1);
-                    }
-                    map.put(BookmarkColumns.DATE, mNow);
-                    String[] projection = new String[]
-                            { Integer.valueOf(c.getInt(0)).toString() };
-                    mContentResolver.update(BOOKMARKS_URI, map, "_id = ?",
-                            projection);
+        Cursor c = null;
+        try {
+            c = getVisitedLike(cr, url);
+            /* We should only get one answer that is exactly the same. */
+            if (c.moveToFirst()) {
+                ContentValues map = new ContentValues();
+                if (real) {
+                    map.put(BookmarkColumns.VISITS, c
+                            .getInt(HISTORY_PROJECTION_VISITS_INDEX) + 1);
                 } else {
-                    truncateHistory(mContentResolver);
-                    ContentValues map = new ContentValues();
-                    int visits;
-                    int user_entered;
-                    if (mReal) {
-                        visits = 1;
-                        user_entered = 0;
-                    } else {
-                        visits = 0;
-                        user_entered = 1;
-                    }
-                    map.put(BookmarkColumns.URL, mUrl);
-                    map.put(BookmarkColumns.VISITS, visits);
-                    map.put(BookmarkColumns.DATE, mNow);
-                    map.put(BookmarkColumns.BOOKMARK, 0);
-                    map.put(BookmarkColumns.TITLE, mUrl);
-                    map.put(BookmarkColumns.CREATED, 0);
-                    map.put(BookmarkColumns.USER_ENTERED, user_entered);
-                    mContentResolver.insert(BOOKMARKS_URI, map);
+                    map.put(BookmarkColumns.USER_ENTERED, 1);
                 }
-            } catch (IllegalStateException e) {
-                Log.e(LOGTAG, "updateVisitedHistory", e);
-            } finally {
-                if (c != null) c.close();
+                map.put(BookmarkColumns.DATE, now);
+                String[] projection = new String[]
+                        { Integer.valueOf(c.getInt(0)).toString() };
+                cr.update(BOOKMARKS_URI, map, "_id = ?", projection);
+            } else {
+                truncateHistory(cr);
+                ContentValues map = new ContentValues();
+                int visits;
+                int user_entered;
+                if (real) {
+                    visits = 1;
+                    user_entered = 0;
+                } else {
+                    visits = 0;
+                    user_entered = 1;
+                }
+                map.put(BookmarkColumns.URL, url);
+                map.put(BookmarkColumns.VISITS, visits);
+                map.put(BookmarkColumns.DATE, now);
+                map.put(BookmarkColumns.BOOKMARK, 0);
+                map.put(BookmarkColumns.TITLE, url);
+                map.put(BookmarkColumns.CREATED, 0);
+                map.put(BookmarkColumns.USER_ENTERED, user_entered);
+                cr.insert(BOOKMARKS_URI, map);
             }
-            return null;
+        } catch (IllegalStateException e) {
+            Log.e(LOGTAG, "updateVisitedHistory", e);
+        } finally {
+            if (c != null) c.close();
         }
     }
 

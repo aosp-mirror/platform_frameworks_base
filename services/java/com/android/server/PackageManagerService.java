@@ -5214,8 +5214,19 @@ class PackageManagerService extends IPackageManager.Stub {
                 }
             }
             if (!PackageHelper.renameSdDir(cid, newCacheId)) {
-                Slog.e(TAG, "Failed to rename " + cid + " to " + newCacheId);
-                return false;
+                Slog.e(TAG, "Failed to rename " + cid + " to " + newCacheId +
+                        " which might be stale. Will try to clean up.");
+                // Clean up the stale container and proceed to recreate.
+                if (!PackageHelper.destroySdDir(newCacheId)) {
+                    Slog.e(TAG, "Very strange. Cannot clean up stale container " + newCacheId);
+                    return false;
+                }
+                // Successfully cleaned up stale container. Try to rename again.
+                if (!PackageHelper.renameSdDir(cid, newCacheId)) {
+                    Slog.e(TAG, "Failed to rename " + cid + " to " + newCacheId
+                            + " inspite of cleaning it up.");
+                    return false;
+                }
             }
             if (!PackageHelper.isContainerMounted(newCacheId)) {
                 Slog.w(TAG, "Mounting container " + newCacheId);
@@ -5258,7 +5269,7 @@ class PackageManagerService extends IPackageManager.Stub {
             String sourceFile = getCodePath();
             // Remove dex file
             if (mInstaller != null) {
-                int retCode = mInstaller.rmdex(sourceFile.toString());
+                int retCode = mInstaller.rmdex(sourceFile);
                 if (retCode < 0) {
                     Slog.w(TAG, "Couldn't remove dex file for package: "
                             + " at location "
@@ -5613,7 +5624,7 @@ class PackageManagerService extends IPackageManager.Stub {
     }
 
     // Utility method used to move dex files during install.
-    private int moveDexFiles(PackageParser.Package newPackage) {
+    private int moveDexFilesLI(PackageParser.Package newPackage) {
         int retCode;
         if ((newPackage.applicationInfo.flags&ApplicationInfo.FLAG_HAS_CODE) != 0) {
             retCode = mInstaller.movedex(newPackage.mScanPath, newPackage.mPath);
@@ -5636,7 +5647,7 @@ class PackageManagerService extends IPackageManager.Stub {
             mSettings.writeLP();
         }
 
-        if ((res.returnCode = moveDexFiles(newPackage))
+        if ((res.returnCode = moveDexFilesLI(newPackage))
                 != PackageManager.INSTALL_SUCCEEDED) {
             // Discontinue if moving dex files failed.
             return;
@@ -9568,6 +9579,9 @@ class PackageManagerService extends IPackageManager.Stub {
            }
        }
        synchronized (mPackages) {
+           // Make sure group IDs have been assigned, and any permission
+           // changes in other apps are accounted for
+           updatePermissionsLP(null, null, true, false);
            // Persist settings
            mSettings.writeLP();
        }
@@ -9697,41 +9711,43 @@ class PackageManagerService extends IPackageManager.Stub {
                    sendResourcesChangedBroadcast(false, pkgList, uidArr);
 
                    // Update package code and resource paths
-                   synchronized (mPackages) {
-                       PackageParser.Package pkg = mPackages.get(mp.packageName);
-                       if (pkg != null) {
-                           String oldCodePath = pkg.mPath;
-                           String newCodePath = mp.targetArgs.getCodePath();
-                           String newResPath = mp.targetArgs.getResourcePath();
-                           pkg.mPath = newCodePath;
-                           // Move dex files around
-                           if (moveDexFiles(pkg)
-                                   != PackageManager.INSTALL_SUCCEEDED) {
-                               // Moving of dex files failed. Set
-                               // error code and abort move.
-                               pkg.mPath = pkg.mScanPath;
-                               returnCode = PackageManager.MOVE_FAILED_INSUFFICIENT_STORAGE;
-                               moveSucceeded = false;
-                           } else {
-                               pkg.mScanPath = newCodePath;
-                               pkg.applicationInfo.sourceDir = newCodePath;
-                               pkg.applicationInfo.publicSourceDir = newResPath;
-                               PackageSetting ps = (PackageSetting) pkg.mExtras;
-                               ps.codePath = new File(pkg.applicationInfo.sourceDir);
-                               ps.codePathString = ps.codePath.getPath();
-                               ps.resourcePath = new File(pkg.applicationInfo.publicSourceDir);
-                               ps.resourcePathString = ps.resourcePath.getPath();
-                               // Set the application info flag correctly.
-                               if ((mp.flags & PackageManager.INSTALL_EXTERNAL) != 0) {
-                                   pkg.applicationInfo.flags |= ApplicationInfo.FLAG_EXTERNAL_STORAGE;
+                   synchronized (mInstallLock) {
+                       synchronized (mPackages) {
+                           PackageParser.Package pkg = mPackages.get(mp.packageName);
+                           if (pkg != null) {
+                               String oldCodePath = pkg.mPath;
+                               String newCodePath = mp.targetArgs.getCodePath();
+                               String newResPath = mp.targetArgs.getResourcePath();
+                               pkg.mPath = newCodePath;
+                               // Move dex files around
+                               if (moveDexFilesLI(pkg)
+                                       != PackageManager.INSTALL_SUCCEEDED) {
+                                   // Moving of dex files failed. Set
+                                   // error code and abort move.
+                                   pkg.mPath = pkg.mScanPath;
+                                   returnCode = PackageManager.MOVE_FAILED_INSUFFICIENT_STORAGE;
+                                   moveSucceeded = false;
                                } else {
-                                   pkg.applicationInfo.flags &= ~ApplicationInfo.FLAG_EXTERNAL_STORAGE;
+                                   pkg.mScanPath = newCodePath;
+                                   pkg.applicationInfo.sourceDir = newCodePath;
+                                   pkg.applicationInfo.publicSourceDir = newResPath;
+                                   PackageSetting ps = (PackageSetting) pkg.mExtras;
+                                   ps.codePath = new File(pkg.applicationInfo.sourceDir);
+                                   ps.codePathString = ps.codePath.getPath();
+                                   ps.resourcePath = new File(pkg.applicationInfo.publicSourceDir);
+                                   ps.resourcePathString = ps.resourcePath.getPath();
+                                   // Set the application info flag correctly.
+                                   if ((mp.flags & PackageManager.INSTALL_EXTERNAL) != 0) {
+                                       pkg.applicationInfo.flags |= ApplicationInfo.FLAG_EXTERNAL_STORAGE;
+                                   } else {
+                                       pkg.applicationInfo.flags &= ~ApplicationInfo.FLAG_EXTERNAL_STORAGE;
+                                   }
+                                   ps.setFlags(pkg.applicationInfo.flags);
+                                   mAppDirs.remove(oldCodePath);
+                                   mAppDirs.put(newCodePath, pkg);
+                                   // Persist settings
+                                   mSettings.writeLP();
                                }
-                               ps.setFlags(pkg.applicationInfo.flags);
-                               mAppDirs.remove(oldCodePath);
-                               mAppDirs.put(newCodePath, pkg);
-                               // Persist settings
-                               mSettings.writeLP();
                            }
                        }
                    }

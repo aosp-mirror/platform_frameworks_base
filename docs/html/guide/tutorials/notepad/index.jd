@@ -20,7 +20,7 @@ Android application and will have learned many of the most important
 concepts in Android development. If you want to add more complex features to
 your application, you can examine the code in an alternative implementation
 of a Note Pad application, in the 
-<a href="{@docRoot}guide/samples/index.html">Sample Code</a> section. </p>
+<a href="{@docRoot}resources/samples/index.html">Sample Code</a> section. </p>
 
 
 <a name="who"></a>
@@ -46,7 +46,7 @@ should read <a href="{@docRoot}guide/topics/fundamentals.html">Application
 Fundamentals</a> before continuing. </p>
 
 <p>This tutorial also builds on the introductory information provided in the 
-<a href="{@docRoot}guide/tutorials/hello-world.html">Hello World</a>
+<a href="{@docRoot}resources/tutorials/hello-world.html">Hello World</a>
 tutorial, which explains how to set up your Eclipse environment
 for building Android applications. We recommend you complete the Hello World
 tutorial before starting this one.</p>
@@ -81,7 +81,7 @@ previous exercises.</p>
 table lists the
 tutorial examples and describes what each covers. ">
     <tr>
-      <th width="120"><a href="{@docRoot}guide/tutorials/notepad/notepad-ex1.html">Exercise
+      <th width="120"><a href="{@docRoot}resources/tutorials/notepad/notepad-ex1.html">Exercise
 1</a></th>
       <td>Start here. Construct a simple notes list that lets the user add new notes but not
 edit them. Demonstrates the basics of <code>ListActivity</code> and creating
@@ -89,7 +89,7 @@ and handling
       menu options. Uses a SQLite database to store the notes.</td>
     </tr>
     <tr>
-      <th><a href="{@docRoot}guide/tutorials/notepad/notepad-ex2.html">Exercise 2</a></th>
+      <th><a href="{@docRoot}resources/tutorials/notepad/notepad-ex2.html">Exercise 2</a></th>
       <td>Add a second Activity to the
 application. Demonstrates constructing a
 new Activity, adding it to the Android manifest, passing data between the
@@ -98,13 +98,13 @@ invoke another Activity to return a result, using
 <code>startActivityForResult()</code>.</td>
     </tr>
     <tr>
-      <th><a href="{@docRoot}guide/tutorials/notepad/notepad-ex3.html">Exercise 3</a></th>
+      <th><a href="{@docRoot}resources/tutorials/notepad/notepad-ex3.html">Exercise 3</a></th>
       <td>Add handling of life-cycle events to
 the application, to let it
 maintain application state across the life cycle. </td>
     </tr>
     <tr>
-    <th><a href="{@docRoot}guide/tutorials/notepad/notepad-extra-credit.html">Extra
+    <th><a href="{@docRoot}resources/tutorials/notepad/notepad-extra-credit.html">Extra
 Credit</a></th>
     <td>Demonstrates how to use the Eclipse
 debugger and how you can use it to
@@ -119,11 +119,11 @@ highly recommended.</td>
 <ul>
 <li>For a lighter but broader introduction to concepts not covered in the
 tutorial,
-take a look at <a href="{@docRoot}guide/appendix/faq/commontasks.html">Common Android Tasks</a>.</li>
+take a look at <a href="{@docRoot}resources/faq/commontasks.html">Common Android Tasks</a>.</li>
 <li>The Android SDK includes a variety of fully functioning sample applications
 that make excellent opportunities for further learning. You can find the sample
 applications in the <code>samples/</code> directory of your downloaded SDK, or browser them
-here, in the <a href="{@docRoot}guide/samples/index.html">Sample Code</a> section.</li>
+here, in the <a href="{@docRoot}resources/samples/index.html">Sample Code</a> section.</li>
 <li>This tutorial draws from the full Notepad application included in the
 <code>samples/</code> directory of the SDK, though it does not match it exactly. 
 When you are done with the tutorial,

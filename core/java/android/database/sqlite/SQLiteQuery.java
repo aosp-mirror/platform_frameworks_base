@@ -51,20 +51,20 @@ public class SQLiteQuery extends SQLiteProgram {
 
     /**
      * Reads rows into a buffer. This method acquires the database lock.
-     * 
+     *
      * @param window The window to fill into
      * @return number of total rows in the query
      */
-    /* package */ int fillWindow(CursorWindow window,  
+    /* package */ int fillWindow(CursorWindow window,
             int maxRead, int lastPos) {
         long timeStart = SystemClock.uptimeMillis();
         mDatabase.lock();
-
+        mDatabase.logTimeStat(mSql, timeStart, SQLiteDatabase.GET_LOCK_LOG_PREFIX);
         try {
             acquireReference();
             try {
                 window.acquireReference();
-                // if the start pos is not equal to 0, then most likely window is 
+                // if the start pos is not equal to 0, then most likely window is
                 // too small for the data set, loading by another thread
                 // is not safe in this situation. the native code will ignore maxRead
                 int numRows = native_fill_window(window, window.getStartPosition(), mOffsetIndex,
@@ -83,7 +83,7 @@ public class SQLiteQuery extends SQLiteProgram {
                 mDatabase.onCorruption();
                 throw e;
             } finally {
-                window.releaseReference();                
+                window.releaseReference();
             }
         } finally {
             releaseReference();

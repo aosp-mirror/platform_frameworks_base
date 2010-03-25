@@ -162,10 +162,11 @@ public:
     void setPackageCount(int val) { mPackageCount = val; }
 #endif
 
-    /* UTF-8 is only available on APIs 7 or above or
-     * SDK levels that have code names.
+    /* Certain features may only be available on a specific SDK level or
+     * above. SDK levels that have a non-numeric identifier are assumed
+     * to be newer than any SDK level that has a number designated.
      */
-    bool isUTF8Available() {
+    bool isMinSdkAtLeast(int desired) {
         /* If the application specifies a minSdkVersion in the manifest
          * then use that. Otherwise, check what the user specified on
          * the command line. If neither, it's not available since
@@ -183,7 +184,7 @@ public:
         char *end;
         int minSdkNum = (int)strtol(minVer, &end, 0);
         if (*end == '\0') {
-            if (minSdkNum < 7) {
+            if (minSdkNum < desired) {
                 return false;
             }
         }

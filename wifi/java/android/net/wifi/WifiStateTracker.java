@@ -313,8 +313,6 @@ public class WifiStateTracker extends NetworkStateTracker {
     private String mInterfaceName;
     private static String LS = System.getProperty("line.separator");
 
-    private Runnable mReleaseWakeLockCallback;
-
     private static String[] sDnsPropNames;
 
     /**
@@ -615,7 +613,15 @@ public class WifiStateTracker extends NetworkStateTracker {
         }
     }
 
-    private synchronized boolean isDriverStopped() {
+    /**
+     * TODO: mRunState is not synchronized in some places
+     * address this as part of re-architect.
+     *
+     * TODO: We are exposing an additional public synchronized call
+     * for a wakelock optimization in WifiService. Remove it
+     * when we handle the wakelock in ConnectivityService.
+     */
+    public synchronized boolean isDriverStopped() {
         return mRunState == RUN_STATE_STOPPED || mRunState == RUN_STATE_STOPPING;
     }
 
@@ -674,15 +680,20 @@ public class WifiStateTracker extends NetworkStateTracker {
         }
     }
 
+    /**
+     * We release the wakelock in WifiService
+     * using a timer.
+     *
+     * TODO:
+     * Releasing wakelock using both timer and
+     * a call from ConnectivityService requires
+     * a rethink. We had problems where WifiService
+     * could keep a wakelock forever if we delete
+     * messages in the asynchronous call
+     * from ConnectivityService
+     */
     @Override
     public void releaseWakeLock() {
-        if (mReleaseWakeLockCallback != null) {
-            mReleaseWakeLockCallback.run();
-        }
-    }
-    
-    public void setReleaseWakeLockCallback(Runnable callback) {
-        mReleaseWakeLockCallback = callback;
     }
 
     /**
@@ -1481,20 +1492,6 @@ public class WifiStateTracker extends NetworkStateTracker {
             } else {
                 return disconnect();
             }
-        } else {
-            /*
-             * The "driver-stop" wake lock normally is released from the
-             * connectivity manager after the mobile data connection has
-             * been established, or after a timeout period, if that never
-             * happens. Because WifiService.updateWifiState() can get called
-             * multiple times, we can end up acquiring the wake lock and calling
-             * disconnectAndStop() even when a disconnect or stop operation
-             * is already in progress. In that case, we want to ignore the
-             * disconnectAndStop request and release the (ref-counted) wake
-             * lock, so that eventually, when the mobile data connection is
-             * established, the ref count will drop to zero.
-             */
-            releaseWakeLock();
         }
         return true;
     }

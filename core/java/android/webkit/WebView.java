@@ -1898,7 +1898,7 @@ public class WebView extends AbsoluteLayout
     // Expects x in view coordinates
     private int pinLocX(int x) {
         if (mInOverScrollMode) return x;
-        return pinLoc(x, getViewWidth(), computeHorizontalScrollRange());
+        return pinLoc(x, getViewWidth(), computeRealHorizontalScrollRange());
     }
 
     // Expects y in view coordinates
@@ -4318,7 +4318,7 @@ public class WebView extends AbsoluteLayout
                       " up/down= " + mMinDY + " " + mMaxDY);
             }
 
-            int docRight = computeHorizontalScrollRange();
+            int docRight = computeRealHorizontalScrollRange();
             int viewLeft = getScrollX();
             int viewRight = viewLeft + getWidth();
             mStartX = x;

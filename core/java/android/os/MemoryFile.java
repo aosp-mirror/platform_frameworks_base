@@ -273,7 +273,8 @@ public class MemoryFile
      * @hide
      */
     public ParcelFileDescriptor getParcelFileDescriptor() throws IOException {
-        return new ParcelFileDescriptor(getFileDescriptor());
+        FileDescriptor fd = getFileDescriptor();
+        return fd != null ? new ParcelFileDescriptor(fd) : null;
     }
 
     /**

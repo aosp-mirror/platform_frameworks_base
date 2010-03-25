@@ -46,6 +46,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.database.ContentObserver;
@@ -60,6 +61,7 @@ import android.os.ResultReceiver;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.provider.Settings;
+import android.provider.Settings.Secure;
 import android.text.TextUtils;
 import android.util.EventLog;
 import android.util.Slog;
@@ -1394,9 +1396,18 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private boolean chooseNewDefaultIMELocked() {
         List<InputMethodInfo> enabled = getEnabledInputMethodListLocked();
         if (enabled != null && enabled.size() > 0) {
+            // We'd prefer to fall back on a system IME, since that is safer.
+            int i=enabled.size();
+            while (i > 0) {
+                i--;
+                if ((enabled.get(i).getServiceInfo().applicationInfo.flags
+                        & ApplicationInfo.FLAG_SYSTEM) != 0) {
+                    break;
+                }
+            }
             Settings.Secure.putString(mContext.getContentResolver(),
                     Settings.Secure.DEFAULT_INPUT_METHOD,
-                    enabled.get(0).getId());
+                    enabled.get(i).getId());
             return true;
         }
 
@@ -1409,6 +1420,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         map.clear();
 
         PackageManager pm = mContext.getPackageManager();
+        final Configuration config = mContext.getResources().getConfiguration();
+        final boolean haveHardKeyboard = config.keyboard == Configuration.KEYBOARD_QWERTY;
+        String disabledSysImes = Settings.Secure.getString(mContext.getContentResolver(),
+                Secure.DISABLED_SYSTEM_INPUT_METHODS);
+        if (disabledSysImes == null) disabledSysImes = "";
 
         List<ResolveInfo> services = pm.queryIntentServices(
                 new Intent(InputMethod.SERVICE_INTERFACE),
@@ -1431,11 +1447,13 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             try {
                 InputMethodInfo p = new InputMethodInfo(mContext, ri);
                 list.add(p);
-                map.put(p.getId(), p);
+                final String id = p.getId();
+                map.put(id, p);
 
-                // System IMEs are enabled by default
-                if (isSystemIme(p)) {
-                    setInputMethodEnabled(p.getId(), true);
+                // System IMEs are enabled by default, unless there's a hard keyboard
+                // and the system IME was explicitly disabled
+                if (isSystemIme(p) && (!haveHardKeyboard || disabledSysImes.indexOf(id) < 0)) {
+                    setInputMethodEnabledLocked(id, true);
                 }
 
                 if (DEBUG) {

@@ -392,7 +392,7 @@ section, later.)
 </p>
 
 <div class="sidebox-wrapper">
-<div class="sidebox-inner">
+<div class="sidebox">
 <h2>Filters and security</h2>
 <p>An intent filter cannot be relied on for security.  While it opens a
 component to receiving only certain kinds of implicit intents, it does 

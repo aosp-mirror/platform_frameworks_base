@@ -17,7 +17,10 @@
 package android.webkit;
 
 import android.app.ActivityManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.AssetManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -31,7 +34,7 @@ import android.provider.OpenableColumns;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Surface;
-import android.view.WindowOrientationListener;
+import android.view.WindowManager;
 
 import junit.framework.Assert;
 
@@ -73,8 +76,10 @@ class BrowserFrame extends Handler {
     // Attached Javascript interfaces
     private Map<String, Object> mJSInterfaceMap;
 
+    // WindowManager to obtain the Display configuration.
+    private WindowManager mWindowManager;
     // Orientation listener
-    private WindowOrientationListener mOrientationListener;
+    private BroadcastReceiver mOrientationListener;
 
     // message ids
     // a message posted when a frame loading is completed
@@ -153,9 +158,15 @@ class BrowserFrame extends Handler {
             Log.v(LOGTAG, "BrowserFrame constructor: this=" + this);
         }
 
-        mOrientationListener = new WindowOrientationListener(context) {
-                @Override
-                public void onOrientationChanged(int orientation) {
+        mWindowManager = (WindowManager) context.getSystemService(
+                Context.WINDOW_SERVICE);
+        mOrientationListener = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (Intent.ACTION_CONFIGURATION_CHANGED.equals(
+                        intent.getAction())) {
+                    int orientation =
+                            mWindowManager.getDefaultDisplay().getOrientation();
                     switch (orientation) {
                         case Surface.ROTATION_90:
                             orientation = 90;
@@ -174,9 +185,12 @@ class BrowserFrame extends Handler {
                     }
                     sendMessage(
                             obtainMessage(ORIENTATION_CHANGED, orientation, 0));
+
                 }
+            }
         };
-        mOrientationListener.enable();
+        context.registerReceiver(mOrientationListener,
+                new IntentFilter(Intent.ACTION_CONFIGURATION_CHANGED));
     }
 
     /**
@@ -383,7 +397,7 @@ class BrowserFrame extends Handler {
      * Destroy all native components of the BrowserFrame.
      */
     public void destroy() {
-        mOrientationListener.disable();
+        mContext.unregisterReceiver(mOrientationListener);
         nativeDestroyFrame();
         mBlockMessages = true;
         removeCallbacksAndMessages(null);
@@ -592,7 +606,9 @@ class BrowserFrame extends Handler {
                                               int cacheMode,
                                               boolean mainResource,
                                               boolean userGesture,
-                                              boolean synchronous) {
+                                              boolean synchronous,
+                                              String username,
+                                              String password) {
         PerfChecker checker = new PerfChecker();
 
         if (mSettings.getCacheMode() != WebSettings.LOAD_DEFAULT) {
@@ -665,7 +681,7 @@ class BrowserFrame extends Handler {
         // Create a LoadListener
         LoadListener loadListener = LoadListener.getLoadListener(mContext,
                 this, url, loaderHandle, synchronous, isMainFramePage,
-                mainResource, userGesture, postDataIdentifier);
+                mainResource, userGesture, postDataIdentifier, username, password);
 
         mCallbackProxy.onLoadResource(url);
 

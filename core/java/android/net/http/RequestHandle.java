@@ -200,7 +200,7 @@ public class RequestHandle {
                 if (mBodyProvider != null) mBodyProvider.reset();
             } catch (java.io.IOException ex) {
                 if (HttpLog.LOGV) {
-                    HttpLog.v("setupAuthResponse() failed to reset body provider");
+                    HttpLog.v("setupRedirect() failed to reset body provider");
                 }
                 return false;
             }
@@ -443,6 +443,16 @@ public class RequestHandle {
      * Creates and queues new request.
      */
     private void createAndQueueNewRequest() {
+        // mConnection is non-null if and only if the requests are synchronous.
+        if (mConnection != null) {
+            RequestHandle newHandle = mRequestQueue.queueSynchronousRequest(
+                    mUrl, mUri, mMethod, mHeaders, mRequest.mEventHandler,
+                    mBodyProvider, mBodyLength);
+            mRequest = newHandle.mRequest;
+            mConnection = newHandle.mConnection;
+            newHandle.processRequest();
+            return;
+        }
         mRequest = mRequestQueue.queueRequest(
                 mUrl, mUri, mMethod, mHeaders, mRequest.mEventHandler,
                 mBodyProvider,

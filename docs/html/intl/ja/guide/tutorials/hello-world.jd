@@ -25,7 +25,7 @@ page.title=Hello, World
 <h2 id="avd">AVD の作成</h2>
 
 <div class="sidebox-wrapper">
-  <div class="sidebox-inner">
+  <div class="sidebox">
     <p>AVD の使用方法と使用可能なオプションについて詳しくは、<a href="{@docRoot}guide/developing/tools/avd.html">Android 仮想デバイス</a> のドキュメントを参照してください。</p>
   </div>
 </div>
@@ -155,7 +155,7 @@ public class HelloAndroid extends Activity {
 </ol>
 
 <div class="sidebox-wrapper">
-  <div class="sidebox-inner">
+  <div class="sidebox">
     <p>Eclipse での起動構成の作成と編集について詳しくは、「<a href="{@docRoot}guide/developing/eclipse-adt.html#RunConfig">ADT を使用した Eclipse での開発</a>」を参照してください。</p>
   </div>
 </div>
@@ -232,10 +232,11 @@ public class HelloAndroid extends Activity {
 
 
 <p>これらの XML レイアウト ファイルは、作成するプロジェクトの <code>res/layout/</code> ディレクトリ内に置かれます。「res」は「resources」の略で、アプリケーションに必要なコード以外のすべてのアセットがこのディレクトリに格納されます。リソースには、レイアウト ファイルの他に、画像、音声、ローカライズされた文字列などのアセットがあります。</p>
-
+<div class="sidebox-wrapper">
 <div class="sidebox">
   <h2>横表示レイアウト</h2>
   <p>横表示の場合に異なるデザインで表示するには、レイアウト XML ファイルを /res/layout-land 内に入れます。Android 端末のレイアウトが横表示に変わると自動的にこのディレクトリが参照されます。このように横表示向けに定義されたレイアウトが存在しない場合、自動的にデフォルトのレイアウトが拡大して使用されます。</p>
+</div>
 </div>
 
 <p>Eclipse プラグインでは、このようなレイアウト ファイルの 1 つである「main.xml」が自動的に作成されます。先ほど「Hello World」アプリケーションを作成した際には、このファイルは無視してプログラマティックにレイアウトを作成しました。この作成方法は Android フレームワークについてより深く理解していただくことを意図したもので、実際にはほとんどの場合レイアウトはコードではなく XML ファイルで定義します。以下の手順では、既存のアプリケーションを変更して XML レイアウトが使用されるようにする方法を説明します。</p>

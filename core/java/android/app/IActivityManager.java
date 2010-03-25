@@ -262,8 +262,12 @@ public interface IActivityManager extends IInterface {
      * SIGUSR1 is delivered. All others are ignored.
      */
     public void signalPersistentProcesses(int signal) throws RemoteException;
-    // Retrieve running application processes in the system
+    // Retrieve info of applications installed on external media that are currently
+    // running.
     public List<ActivityManager.RunningAppProcessInfo> getRunningAppProcesses()
+            throws RemoteException;
+ // Retrieve running application processes in the system
+    public List<ApplicationInfo> getRunningExternalApplications()
             throws RemoteException;
     // Get device configuration
     public ConfigurationInfo getDeviceConfigurationInfo() throws RemoteException;
@@ -508,4 +512,5 @@ public interface IActivityManager extends IInterface {
     int START_ACTIVITY_AND_WAIT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+104;
     int WILL_ACTIVITY_BE_VISIBLE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+105;
     int START_ACTIVITY_WITH_CONFIG_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+106;
+    int GET_RUNNING_EXTERNAL_APPLICATIONS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+107;
 }

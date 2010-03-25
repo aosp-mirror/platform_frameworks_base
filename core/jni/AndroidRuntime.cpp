@@ -704,10 +704,10 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
 
 #if defined(WITH_JIT)
     /* Minimal profile threshold to trigger JIT compilation */
-    char jitThresholdBuf[sizeof("-Xthreshold:") + PROPERTY_VALUE_MAX];
+    char jitThresholdBuf[sizeof("-Xjitthreshold:") + PROPERTY_VALUE_MAX];
     property_get("dalvik.vm.jit.threshold", propBuf, "");
     if (strlen(propBuf) > 0) {
-        strcpy(jitThresholdBuf, "-Xthreshold:");
+        strcpy(jitThresholdBuf, "-Xjitthreshold:");
         strcat(jitThresholdBuf, propBuf);
         opt.optionString = jitThresholdBuf;
         mOptions.add(opt);

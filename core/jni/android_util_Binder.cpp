@@ -21,13 +21,18 @@
 #include "JNIHelp.h"
 
 #include <fcntl.h>
-#include <sys/stat.h>
 #include <stdio.h>
+#include <sys/stat.h>
+#include <sys/syscall.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #include <utils/Atomic.h>
 #include <binder/IInterface.h>
 #include <binder/IPCThreadState.h>
 #include <utils/Log.h>
+#include <utils/SystemClock.h>
+#include <cutils/logger.h>
 #include <binder/Parcel.h>
 #include <binder/ProcessState.h>
 #include <binder/IServiceManager.h>
@@ -590,9 +595,19 @@ static void android_os_Binder_destroy(JNIEnv* env, jobject clazz)
 {
     JavaBBinderHolder* jbh = (JavaBBinderHolder*)
         env->GetIntField(clazz, gBinderOffsets.mObject);
-    env->SetIntField(clazz, gBinderOffsets.mObject, 0);
-    LOGV("Java Binder %p: removing ref on holder %p", clazz, jbh);
-    jbh->decStrong(clazz);
+    if (jbh != NULL) {
+        env->SetIntField(clazz, gBinderOffsets.mObject, 0);
+        LOGV("Java Binder %p: removing ref on holder %p", clazz, jbh);
+        jbh->decStrong(clazz);
+    } else {
+        // Encountering an uninitialized binder is harmless.  All it means is that
+        // the Binder was only partially initialized when its finalizer ran and called
+        // destroy().  The Binder could be partially initialized for several reasons.
+        // For example, a Binder subclass constructor might have thrown an exception before
+        // it could delegate to its superclass's constructor.  Consequently init() would
+        // not have been called and the holder pointer would remain NULL.
+        LOGV("Java Binder %p: ignoring uninitialized binder", clazz);
+    }
 }
 
 // ----------------------------------------------------------------------------
@@ -730,7 +745,7 @@ static jstring android_os_BinderProxy_getInterfaceDescriptor(JNIEnv* env, jobjec
 {
     IBinder* target = (IBinder*) env->GetIntField(obj, gBinderProxyOffsets.mObject);
     if (target != NULL) {
-        String16 desc = target->getInterfaceDescriptor();
+        const String16& desc = target->getInterfaceDescriptor();
         return env->NewString(desc.string(), desc.size());
     }
     jniThrowException(env, "java/lang/RuntimeException",
@@ -747,6 +762,100 @@ static jboolean android_os_BinderProxy_isBinderAlive(JNIEnv* env, jobject obj)
     }
     bool alive = target->isBinderAlive();
     return alive ? JNI_TRUE : JNI_FALSE;
+}
+
+static int getprocname(pid_t pid, char *buf, size_t len) {
+    char filename[20];
+    FILE *f;
+
+    sprintf(filename, "/proc/%d/cmdline", pid);
+    f = fopen(filename, "r");
+    if (!f) { *buf = '\0'; return 1; }
+    if (!fgets(buf, len, f)) { *buf = '\0'; return 2; }
+    fclose(f);
+    return 0;
+}
+
+static bool push_eventlog_string(char** pos, const char* end, const char* str) {
+    jint len = strlen(str);
+    int space_needed = 1 + sizeof(len) + len;
+    if (end - *pos < space_needed) {
+        LOGW("not enough space for string. remain=%d; needed=%d",
+             (end - *pos), space_needed);
+        return false;
+    }
+    **pos = EVENT_TYPE_STRING;
+    (*pos)++;
+    memcpy(*pos, &len, sizeof(len));
+    *pos += sizeof(len);
+    memcpy(*pos, str, len);
+    *pos += len;
+    return true;
+}
+
+static bool push_eventlog_int(char** pos, const char* end, jint val) {
+    int space_needed = 1 + sizeof(val);
+    if (end - *pos < space_needed) {
+        LOGW("not enough space for int.  remain=%d; needed=%d",
+             (end - *pos), space_needed);
+        return false;
+    }
+    **pos = EVENT_TYPE_INT;
+    (*pos)++;
+    memcpy(*pos, &val, sizeof(val));
+    *pos += sizeof(val);
+    return true;
+}
+
+// From frameworks/base/core/java/android/content/EventLogTags.logtags:
+#define LOGTAG_BINDER_OPERATION 52004
+
+static void conditionally_log_binder_call(int64_t start_millis,
+                                          IBinder* target, jint code) {
+    int duration_ms = static_cast<int>(uptimeMillis() - start_millis);
+
+    int sample_percent;
+    if (duration_ms >= 500) {
+        sample_percent = 100;
+    } else {
+        sample_percent = 100 * duration_ms / 500;
+        if (sample_percent == 0) {
+            return;
+        }
+        if (sample_percent < (random() % 100 + 1)) {
+            return;
+        }
+    }
+
+    char process_name[40];
+    getprocname(getpid(), process_name, sizeof(process_name));
+    String8 desc(target->getInterfaceDescriptor());
+
+    char buf[LOGGER_ENTRY_MAX_PAYLOAD];
+    buf[0] = EVENT_TYPE_LIST;
+    buf[1] = 5;
+    char* pos = &buf[2];
+    char* end = &buf[LOGGER_ENTRY_MAX_PAYLOAD - 1];  // leave room for final \n
+    if (!push_eventlog_string(&pos, end, desc.string())) return;
+    if (!push_eventlog_int(&pos, end, code)) return;
+    if (!push_eventlog_int(&pos, end, duration_ms)) return;
+    if (!push_eventlog_string(&pos, end, process_name)) return;
+    if (!push_eventlog_int(&pos, end, sample_percent)) return;
+    *(pos++) = '\n';   // conventional with EVENT_TYPE_LIST apparently.
+    android_bWriteLog(LOGTAG_BINDER_OPERATION, buf, pos - buf);
+}
+
+// We only measure binder call durations to potentially log them if
+// we're on the main thread.  Unfortunately sim-eng doesn't seem to
+// have gettid, so we just ignore this and don't log if we can't
+// get the thread id.
+static bool should_time_binder_calls() {
+#ifdef __NR_gettid
+  return (getpid() == syscall(__NR_gettid));
+#else
+#warning no gettid(), so not logging Binder calls...
+  return false;
+#endif
 }
 
 static jboolean android_os_BinderProxy_transact(JNIEnv* env, jobject obj,
@@ -776,9 +885,22 @@ static jboolean android_os_BinderProxy_transact(JNIEnv* env, jobject obj,
 
     LOGV("Java code calling transact on %p in Java object %p with code %d\n",
             target, obj, code);
+
+    // Only log the binder call duration for things on the Java-level main thread.
+    // But if we don't
+    const bool time_binder_calls = should_time_binder_calls();
+
+    int64_t start_millis;
+    if (time_binder_calls) {
+        start_millis = uptimeMillis();
+    }
     //printf("Transact from Java code to %p sending: ", target); data->print();
     status_t err = target->transact(code, *data, reply, flags);
     //if (reply) printf("Transact from Java code to %p received: ", target); reply->print();
+    if (time_binder_calls) {
+        conditionally_log_binder_call(start_millis, target, code);
+    }
+
     if (err == NO_ERROR) {
         return JNI_TRUE;
     } else if (err == UNKNOWN_TRANSACTION) {

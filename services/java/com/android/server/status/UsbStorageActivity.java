@@ -18,6 +18,7 @@ package com.android.server.status;
 
 import com.android.internal.R;
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.BroadcastReceiver;
@@ -26,6 +27,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.DialogInterface.OnCancelListener;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -42,6 +46,8 @@ import android.widget.TextView;
 import android.view.View;
 import android.view.Window;
 import android.util.Log;
+
+import java.util.List;
 
 /**
  * This activity is shown to the user for him/her to enable USB mass storage
@@ -175,7 +181,7 @@ public class UsbStorageActivity extends Activity
                     .setTitle(R.string.dlg_confirm_kill_storage_users_title)
                     .setPositiveButton(R.string.dlg_ok, new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
-                            mStorageManager.enableUsbMassStorage();
+                            switchUsbMassStorageAsync(true);
                         }})
                     .setNegativeButton(R.string.cancel, null)
                     .setMessage(R.string.dlg_confirm_kill_storage_users_text)
@@ -222,15 +228,25 @@ public class UsbStorageActivity extends Activity
             // Display error dialog
             showDialogInner(DLG_ERROR_SHARING);
         }
-        String path = Environment.getExternalStorageDirectory().getPath();
-        int stUsers[] = null;
+        String extStoragePath = Environment.getExternalStorageDirectory().toString();
+        boolean showDialog = false;
         try {
-            if (localLOGV) Log.i(TAG, "Checking getStorageUsers");
-            stUsers = ims.getStorageUsers(path);
+            int[] stUsers = ims.getStorageUsers(extStoragePath);
+            if (stUsers != null && stUsers.length > 0) {
+                showDialog = true;
+            } else {
+                // List of applications on sdcard.
+                ActivityManager am = (ActivityManager)getSystemService(Context.ACTIVITY_SERVICE);
+                List<ApplicationInfo> infoList = am.getRunningExternalApplications();
+                if (infoList != null && infoList.size() > 0) {
+                    showDialog = true;
+                }
+            }
         } catch (RemoteException e) {
+            // Display error dialog
             showDialogInner(DLG_ERROR_SHARING);
         }
-        if (stUsers != null && stUsers.length > 0) {
+        if (showDialog) {
             // Display dialog to user
             showDialogInner(DLG_CONFIRM_KILL_STORAGE_USERS);
         } else {

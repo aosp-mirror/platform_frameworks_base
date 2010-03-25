@@ -55,6 +55,7 @@ If the third box is then given a weight of 2 (instead of 0), then it is now decl
 "more important" than both the others, so it gets half the total remaining space, while the first two
 share the rest equally.</p>
 
+<div class="sidebox-wrapper">
 <div class="sidebox">
 <p><strong>Tip</strong>: To create a proportionate size
 layout on the screen, create a container view group object with the 
@@ -63,6 +64,7 @@ the children <code>height</code> or <code>width</code> to <code>0</code> (zero);
 <code>weight</code> values
 to each child, depending on what proportion of the screen each should
 have.</p>
+</div>
 </div>
 
 <p>The following two forms represent a {@link android.widget.LinearLayout LinearLayout} with a set of elements: a

@@ -35,7 +35,7 @@ here when you've completed the installation.</p>
 <h2 id="avd">Create an AVD</h2>
 
 <div class="sidebox-wrapper">
-  <div class="sidebox-inner">
+  <div class="sidebox">
     <p>To learn more about how to use AVDs and the options 
        available to you, refer to the 
        <a href="{@docRoot}guide/developing/tools/avd.html">Android 
@@ -243,7 +243,7 @@ to see it running.</p>
 </ol>
 
 <div class="sidebox-wrapper">
-  <div class="sidebox-inner">
+  <div class="sidebox">
     <p>To learn more about creating and editing run configurations in Eclipse, refer to
     <a href="{@docRoot}guide/developing/eclipse-adt.html#RunConfig">Developing In Eclipse, 
     with ADT</a>.</p>
@@ -357,11 +357,13 @@ short for "resources" and the directory contains all the non-code assets that
 your application requires. In addition to layout files, resources also include assets
 such as images, sounds, and localized strings.</p>
 
+<div class="sidebox-wrapper">
 <div class="sidebox">
   <h2>Landscape layout</h2>
   <p>When you want a different design for landscape, put your layout XML file
   inside /res/layout-land. Android will automatically look here when the layout changes.
   Without this special landscape layout defined, Android will stretch the default layout.</p>
+</div>
 </div>
 
 <p>The Eclipse plugin automatically creates one of these layout files for you: main.xml. 
@@ -478,12 +480,12 @@ particularly powerful with the code-completion features of IDEs like Eclipse
 because it lets you quickly and interactively locate the specific reference
 you're looking for.</p>
 
-<p>It's possible yours looks slightly different than this (perhaps the hexadecimal values are different). 
+<p>It's possible yours looks slighly different than this (perhaps the hexadecimal values are different). 
 For now, notice the inner class named "layout", and its
 member field "main". The Eclipse plugin noticed the XML
 layout file named main.xml and generated a class for it here.  As you add other
 resources to your project (such as strings in the <code>res/values/string.xml</code> file or drawables inside
-the <code>res/drawable/</code> directory) you'll see <code>R.java</code> change to keep up.</p>
+the <code>res/drawable/</code> direcory) you'll see <code>R.java</code> change to keep up.</p>
 <p>When not using Eclipse, this class file will be generated for you at build time (with the Ant tool).</p>
 <p><em>You should never edit this file by hand.</em></p>
 </div>
