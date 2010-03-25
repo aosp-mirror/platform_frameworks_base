@@ -267,4 +267,14 @@ public class HttpAuthHandler extends Handler {
             proxy.onReceivedHttpAuthRequest(this, hostname, realm);
         }
     }
+
+    /**
+     * Informs the proxy of a new set of credentials.
+     * @hide Pending API council review
+     */
+    public static void onReceivedCredentials(LoadListener loader,
+            String host, String realm, String username, String password) {
+        CallbackProxy proxy = loader.getFrame().getCallbackProxy();
+        proxy.onReceivedHttpAuthCredentials(host, realm, username, password);
+    }
 }

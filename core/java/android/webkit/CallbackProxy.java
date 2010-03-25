@@ -111,6 +111,7 @@ class CallbackProxy extends Handler {
     private static final int OPEN_FILE_CHOOSER                   = 134;
     private static final int ADD_HISTORY_ITEM                    = 135;
     private static final int HISTORY_INDEX_CHANGED               = 136;
+    private static final int AUTH_CREDENTIALS                    = 137;
 
     // Message triggered by the client to resume execution
     private static final int NOTIFY                              = 200;
@@ -734,6 +735,16 @@ class CallbackProxy extends Handler {
                             (WebHistoryItem) msg.obj, msg.arg1);
                 }
                 break;
+            case AUTH_CREDENTIALS:
+                if (mWebViewClient != null) {
+                    String host = msg.getData().getString("host");
+                    String realm = msg.getData().getString("realm");
+                    username = msg.getData().getString("username");
+                    password = msg.getData().getString("password");
+                    mWebViewClient.onReceivedHttpAuthCredentials(
+                            mWebView, host, realm, username, password);
+                }
+                break;
         }
     }
 
@@ -917,6 +928,20 @@ class CallbackProxy extends Handler {
         msg.getData().putString("realm", realmName);
         sendMessage(msg);
     }
+
+    public void onReceivedHttpAuthCredentials(String host, String realm,
+            String username, String password) {
+        if (mWebViewClient == null) {
+            return;
+        }
+        Message msg = obtainMessage(AUTH_CREDENTIALS);
+        msg.getData().putString("host", host);
+        msg.getData().putString("realm", realm);
+        msg.getData().putString("username", username);
+        msg.getData().putString("password", password);
+        sendMessage(msg);
+    }
+
     /**
      * @hide - hide this because it contains a parameter of type SslError.
      * SslError is located in a hidden package.
