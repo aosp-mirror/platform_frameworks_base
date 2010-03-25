@@ -75,7 +75,7 @@ public:
         return result;
     }
  
-    static void computeBounds(JNIEnv* env, jobject clazz, SkPath* obj, jobject bounds, int boundstype) {
+    static void computeBounds(JNIEnv* env, jobject clazz, SkPath* obj, jobject bounds) {
         const SkRect& bounds_ = obj->getBounds();
         GraphicsJNI::rect_to_jrectf(bounds_, env, bounds);
     }
@@ -267,7 +267,7 @@ static JNINativeMethod methods[] = {
     {"native_setFillType","(II)V", (void*) SkPathGlue::setFillType},
     {"native_isEmpty","(I)Z", (void*) SkPathGlue::isEmpty},
     {"native_isRect","(ILandroid/graphics/RectF;)Z", (void*) SkPathGlue::isRect},
-    {"native_computeBounds","(ILandroid/graphics/RectF;I)V", (void*) SkPathGlue::computeBounds},
+    {"native_computeBounds","(ILandroid/graphics/RectF;)V", (void*) SkPathGlue::computeBounds},
     {"native_incReserve","(II)V", (void*) SkPathGlue::incReserve},
     {"native_moveTo","(IFF)V", (void*) SkPathGlue::moveTo__FF},
     {"native_rMoveTo","(IFF)V", (void*) SkPathGlue::rMoveTo},
