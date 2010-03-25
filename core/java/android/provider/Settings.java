@@ -2508,11 +2508,13 @@ public final class Settings {
         public static final String WIFI_ON = "wifi_on";
 
         /**
-         * Whether the Wi-Fi AP should be on.
+         * Used to save the Wifi_ON state prior to tethering.
+         * This state will be checked to restore Wifi after
+         * the user turns off tethering.
          *
          * @hide
          */
-        public static final String WIFI_AP_ON = "wifi_ap_on";
+        public static final String WIFI_SAVED_STATE = "wifi_saved_state";
 
         /**
          * AP SSID
