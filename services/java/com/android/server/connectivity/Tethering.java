@@ -847,6 +847,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                         if (mMyUpstreamIfaceName != null) {
                             try {
                                 service.disableNat(mIfaceName, mMyUpstreamIfaceName);
+                                mMyUpstreamIfaceName = null;
                             } catch (Exception e) {
                                 try {
                                     service.untetherInterface(mIfaceName);
@@ -887,6 +888,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                         if (mMyUpstreamIfaceName != null) {
                             try {
                                 service.disableNat(mIfaceName, mMyUpstreamIfaceName);
+                                mMyUpstreamIfaceName = null;
                             } catch (Exception e) {
                                 try {
                                     service.untetherInterface(mIfaceName);
@@ -926,6 +928,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                         if (mMyUpstreamIfaceName != null) {
                             try {
                                 service.disableNat(mIfaceName, mMyUpstreamIfaceName);
+                                mMyUpstreamIfaceName = null;
                             } catch (Exception e) {
                                 try {
                                     service.untetherInterface(mIfaceName);
@@ -1025,6 +1028,8 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
         private ArrayList mNotifyList;
 
         private boolean mConnectionRequested = false;
+
+        private String mUpstreamIfaceName = null;
 
         private static final int UPSTREAM_SETTLE_TIME_MS     = 10000;
         private static final int CELL_CONNECTION_RENEW_MS    = 40000;
@@ -1228,10 +1233,11 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                     // wait for things to settle and retry
                     sendMessageDelayed(CMD_RETRY_UPSTREAM, UPSTREAM_SETTLE_TIME_MS);
                 }
-                notifyTetheredOfNewIface(iface);
+                notifyTetheredOfNewUpstreamIface(iface);
             }
-            protected void notifyTetheredOfNewIface(String ifaceName) {
+            protected void notifyTetheredOfNewUpstreamIface(String ifaceName) {
                 Log.d(TAG, "notifying tethered with iface =" + ifaceName);
+                mUpstreamIfaceName = ifaceName;
                 for (Object o : mNotifyList) {
                     TetherInterfaceSM sm = (TetherInterfaceSM)o;
                     sm.sendMessage(TetherInterfaceSM.CMD_TETHER_CONNECTION_CHANGED,
@@ -1284,7 +1290,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
             @Override
             public void exit() {
                 turnOffMobileConnection();
-                notifyTetheredOfNewIface(null);
+                notifyTetheredOfNewUpstreamIface(null);
             }
             @Override
             public boolean processMessage(Message message) {
@@ -1294,7 +1300,8 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                     case CMD_TETHER_MODE_REQUESTED:
                         TetherInterfaceSM who = (TetherInterfaceSM)message.obj;
                         mNotifyList.add(who);
-                        who.sendMessage(TetherInterfaceSM.CMD_TETHER_CONNECTION_CHANGED);
+                        who.sendMessage(TetherInterfaceSM.CMD_TETHER_CONNECTION_CHANGED,
+                                mUpstreamIfaceName);
                         break;
                     case CMD_TETHER_MODE_UNREQUESTED:
                         who = (TetherInterfaceSM)message.obj;
