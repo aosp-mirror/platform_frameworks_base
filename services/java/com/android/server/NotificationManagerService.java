@@ -1136,11 +1136,13 @@ class NotificationManagerService extends INotificationManager.Stub
 
                     if (mAdbNotification == null) {
                         mAdbNotification = new Notification();
-                        mAdbNotification.icon = com.android.internal.R.drawable.stat_sys_warning;
+                        mAdbNotification.icon = com.android.internal.R.drawable.stat_sys_adb;
                         mAdbNotification.when = 0;
                         mAdbNotification.flags = Notification.FLAG_ONGOING_EVENT;
                         mAdbNotification.tickerText = title;
-                        mAdbNotification.defaults |= Notification.DEFAULT_SOUND;
+                        mAdbNotification.defaults = 0; // please be quiet
+                        mAdbNotification.sound = null;
+                        mAdbNotification.vibrate = null;
                     }
 
                     Intent intent = new Intent(
