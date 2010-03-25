@@ -227,11 +227,13 @@ public class AccountManager {
      * @hide for internal use only
      */
     public static Bundle sanitizeResult(Bundle result) {
-        if (result.containsKey(KEY_AUTHTOKEN)
-                && !TextUtils.isEmpty(result.getString(KEY_AUTHTOKEN))) {
-            final Bundle newResult = new Bundle(result);
-            newResult.putString(KEY_AUTHTOKEN, "<omitted for logging purposes>");
-            return newResult;
+        if (result != null) {
+            if (result.containsKey(KEY_AUTHTOKEN)
+                    && !TextUtils.isEmpty(result.getString(KEY_AUTHTOKEN))) {
+                final Bundle newResult = new Bundle(result);
+                newResult.putString(KEY_AUTHTOKEN, "<omitted for logging purposes>");
+                return newResult;
+            }
         }
         return result;
     }
@@ -251,6 +253,7 @@ public class AccountManager {
      * @return An {@link AccountManager} instance
      */
     public static AccountManager get(Context context) {
+        if (context == null) throw new IllegalArgumentException("context is null");
         return (AccountManager) context.getSystemService(Context.ACCOUNT_SERVICE);
     }
 
@@ -269,6 +272,7 @@ public class AccountManager {
      * @return The account's password, null if none or if the account doesn't exist
      */
     public String getPassword(final Account account) {
+        if (account == null) throw new IllegalArgumentException("account is null");
         try {
             return mService.getPassword(account);
         } catch (RemoteException e) {
@@ -293,6 +297,8 @@ public class AccountManager {
      * @return The user data, null if the account or key doesn't exist
      */
     public String getUserData(final Account account, final String key) {
+        if (account == null) throw new IllegalArgumentException("account is null");
+        if (key == null) throw new IllegalArgumentException("key is null");
         try {
             return mService.getUserData(account, key);
         } catch (RemoteException e) {
@@ -393,6 +399,8 @@ public class AccountManager {
     public AccountManagerFuture<Boolean> hasFeatures(final Account account,
             final String[] features,
             AccountManagerCallback<Boolean> callback, Handler handler) {
+        if (account == null) throw new IllegalArgumentException("account is null");
+        if (features == null) throw new IllegalArgumentException("features is null");
         return new Future2Task<Boolean>(handler, callback) {
             public void doWork() throws RemoteException {
                 mService.hasFeatures(mResponse, account, features);
@@ -436,13 +444,9 @@ public class AccountManager {
     public AccountManagerFuture<Account[]> getAccountsByTypeAndFeatures(
             final String type, final String[] features,
             AccountManagerCallback<Account[]> callback, Handler handler) {
+        if (type == null) throw new IllegalArgumentException("type is null");
         return new Future2Task<Account[]>(handler, callback) {
             public void doWork() throws RemoteException {
-                if (type == null) {
-                    Log.e(TAG, "Type is null");
-                    set(new Account[0]);
-                    return;
-                }
                 mService.getAccountsByFeatures(mResponse, type, features);
             }
             public Account[] bundleToResult(Bundle bundle) throws AuthenticatorException {
@@ -476,6 +480,7 @@ public class AccountManager {
      *     already exists, the account is null, or another error occurs.
      */
     public boolean addAccountExplicitly(Account account, String password, Bundle userdata) {
+        if (account == null) throw new IllegalArgumentException("account is null");
         try {
             return mService.addAccount(account, password, userdata);
         } catch (RemoteException e) {
@@ -507,6 +512,7 @@ public class AccountManager {
      */
     public AccountManagerFuture<Boolean> removeAccount(final Account account,
             AccountManagerCallback<Boolean> callback, Handler handler) {
+        if (account == null) throw new IllegalArgumentException("account is null");
         return new Future2Task<Boolean>(handler, callback) {
             public void doWork() throws RemoteException {
                 mService.removeAccount(mResponse, account);
@@ -537,6 +543,8 @@ public class AccountManager {
      * @param authToken The auth token to invalidate
      */
     public void invalidateAuthToken(final String accountType, final String authToken) {
+        if (accountType == null) throw new IllegalArgumentException("accountType is null");
+        if (authToken == null) throw new IllegalArgumentException("authToken is null");
         try {
             mService.invalidateAuthToken(accountType, authToken);
         } catch (RemoteException e) {
@@ -563,13 +571,8 @@ public class AccountManager {
      *     no auth token is cached or the account does not exist.
      */
     public String peekAuthToken(final Account account, final String authTokenType) {
-        if (account == null) {
-            Log.e(TAG, "peekAuthToken: the account must not be null");
-            return null;
-        }
-        if (authTokenType == null) {
-            return null;
-        }
+        if (account == null) throw new IllegalArgumentException("account is null");
+        if (authTokenType == null) throw new IllegalArgumentException("authTokenType is null");
         try {
             return mService.peekAuthToken(account, authTokenType);
         } catch (RemoteException e) {
@@ -594,10 +597,7 @@ public class AccountManager {
      * @param password The password to set, null to clear the password
      */
     public void setPassword(final Account account, final String password) {
-        if (account == null) {
-            Log.e(TAG, "the account must not be null");
-            return;
-        }
+        if (account == null) throw new IllegalArgumentException("account is null");
         try {
             mService.setPassword(account, password);
         } catch (RemoteException e) {
@@ -621,10 +621,7 @@ public class AccountManager {
      * @param account The account whose password to clear
      */
     public void clearPassword(final Account account) {
-        if (account == null) {
-            Log.e(TAG, "the account must not be null");
-            return;
-        }
+        if (account == null) throw new IllegalArgumentException("account is null");
         try {
             mService.clearPassword(account);
         } catch (RemoteException e) {
@@ -649,14 +646,8 @@ public class AccountManager {
      * @param value The value to set, null to clear this userdata key
      */
     public void setUserData(final Account account, final String key, final String value) {
-        if (account == null) {
-            Log.e(TAG, "the account must not be null");
-            return;
-        }
-        if (key == null) {
-            Log.e(TAG, "the key must not be null");
-            return;
-        }
+        if (account == null) throw new IllegalArgumentException("account is null");
+        if (key == null) throw new IllegalArgumentException("key is null");
         try {
             mService.setUserData(account, key, value);
         } catch (RemoteException e) {
@@ -682,6 +673,8 @@ public class AccountManager {
      * @param authToken The auth token to add to the cache
      */
     public void setAuthToken(Account account, final String authTokenType, final String authToken) {
+        if (account == null) throw new IllegalArgumentException("account is null");
+        if (authTokenType == null) throw new IllegalArgumentException("authTokenType is null");
         try {
             mService.setAuthToken(account, authTokenType, authToken);
         } catch (RemoteException e) {
@@ -716,6 +709,8 @@ public class AccountManager {
     public String blockingGetAuthToken(Account account, String authTokenType,
             boolean notifyAuthFailure)
             throws OperationCanceledException, IOException, AuthenticatorException {
+        if (account == null) throw new IllegalArgumentException("account is null");
+        if (authTokenType == null) throw new IllegalArgumentException("authTokenType is null");
         Bundle bundle = getAuthToken(account, authTokenType, notifyAuthFailure, null /* callback */,
                 null /* handler */).getResult();
         if (bundle == null) {
@@ -786,7 +781,7 @@ public class AccountManager {
     public AccountManagerFuture<Bundle> getAuthToken(
             final Account account, final String authTokenType, final Bundle options,
             final Activity activity, AccountManagerCallback<Bundle> callback, Handler handler) {
-        if (activity == null) throw new IllegalArgumentException("activity is null");
+        if (account == null) throw new IllegalArgumentException("account is null");
         if (authTokenType == null) throw new IllegalArgumentException("authTokenType is null");
         return new AmsTask(activity, handler, callback) {
             public void doWork() throws RemoteException {
@@ -930,14 +925,9 @@ public class AccountManager {
             final String authTokenType, final String[] requiredFeatures,
             final Bundle addAccountOptions,
             final Activity activity, AccountManagerCallback<Bundle> callback, Handler handler) {
+        if (accountType == null) throw new IllegalArgumentException("accountType is null");
         return new AmsTask(activity, handler, callback) {
             public void doWork() throws RemoteException {
-                if (accountType == null) {
-                    Log.e(TAG, "the account must not be null");
-                    // to unblock caller waiting on Future.get()
-                    set(new Bundle());
-                    return;
-                }
                 mService.addAcount(mResponse, accountType, authTokenType,
                         requiredFeatures, activity != null, addAccountOptions);
             }
@@ -1004,6 +994,7 @@ public class AccountManager {
             final Activity activity,
             final AccountManagerCallback<Bundle> callback,
             final Handler handler) {
+        if (account == null) throw new IllegalArgumentException("account is null");
         return new AmsTask(activity, handler, callback) {
             public void doWork() throws RemoteException {
                 mService.confirmCredentials(mResponse, account, options, activity != null);
@@ -1064,6 +1055,7 @@ public class AccountManager {
             final Bundle options, final Activity activity,
             final AccountManagerCallback<Bundle> callback,
             final Handler handler) {
+        if (account == null) throw new IllegalArgumentException("account is null");
         return new AmsTask(activity, handler, callback) {
             public void doWork() throws RemoteException {
                 mService.updateCredentials(mResponse, account, authTokenType, activity != null,
@@ -1112,6 +1104,7 @@ public class AccountManager {
     public AccountManagerFuture<Bundle> editProperties(final String accountType,
             final Activity activity, final AccountManagerCallback<Bundle> callback,
             final Handler handler) {
+        if (accountType == null) throw new IllegalArgumentException("accountType is null");
         return new AmsTask(activity, handler, callback) {
             public void doWork() throws RemoteException {
                 mService.editProperties(mResponse, accountType, activity != null);
@@ -1734,10 +1727,7 @@ public class AccountManager {
      * @throws IllegalStateException if listener was not already added
      */
     public void removeOnAccountsUpdatedListener(OnAccountsUpdateListener listener) {
-        if (listener == null) {
-            Log.e(TAG, "Missing listener");
-            return;
-        }
+        if (listener == null) throw new IllegalArgumentException("listener is null");
         synchronized (mAccountsUpdatedListeners) {
             if (!mAccountsUpdatedListeners.containsKey(listener)) {
                 Log.e(TAG, "Listener was not previously added");
