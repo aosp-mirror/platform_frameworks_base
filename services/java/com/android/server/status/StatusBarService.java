@@ -893,6 +893,8 @@ public class StatusBarService extends IStatusBar.Stub
     void updateNotificationView(StatusBarNotification notification, NotificationData oldData) {
         NotificationData n = notification.data;
         if (oldData != null && n != null
+                && n.when == oldData.when
+                && n.ongoingEvent == oldData.ongoingEvent
                 && n.contentView != null && oldData.contentView != null
                 && n.contentView.getPackage() != null
                 && oldData.contentView.getPackage() != null
