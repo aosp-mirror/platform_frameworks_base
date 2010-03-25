@@ -23,7 +23,6 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <sys/stat.h>
-#include <sys/syscall.h>
 #include <sys/types.h>
 #include <unistd.h>
 
@@ -36,6 +35,7 @@
 #include <binder/Parcel.h>
 #include <binder/ProcessState.h>
 #include <binder/IServiceManager.h>
+#include <utils/threads.h>
 
 #include <android_runtime/AndroidRuntime.h>
 
@@ -850,8 +850,8 @@ static void conditionally_log_binder_call(int64_t start_millis,
 // have gettid, so we just ignore this and don't log if we can't
 // get the thread id.
 static bool should_time_binder_calls() {
-#ifdef __NR_gettid
-  return (getpid() == syscall(__NR_gettid));
+#ifdef HAVE_GETTID
+  return (getpid() == androidGetTid());
 #else
 #warning no gettid(), so not logging Binder calls...
   return false;
