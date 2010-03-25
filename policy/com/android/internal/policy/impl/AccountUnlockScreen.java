@@ -223,7 +223,7 @@ public class AccountUnlockScreen extends RelativeLayout implements KeyguardScree
      * find a single best match.
      */
     private Account findIntendedAccount(String username) {
-        Account[] accounts = AccountManager.get(mContext).getAccounts();
+        Account[] accounts = AccountManager.get(mContext).getAccountsByType("com.google");
 
         // Try to figure out which account they meant if they
         // typed only the username (and not the domain), or got

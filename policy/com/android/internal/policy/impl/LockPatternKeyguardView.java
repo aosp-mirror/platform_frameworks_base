@@ -61,7 +61,7 @@ import java.io.IOException;
 public class LockPatternKeyguardView extends KeyguardViewBase {
 
     static final boolean DEBUG_CONFIGURATION = false;
-            
+
     // time after launching EmergencyDialer before the screen goes blank.
     private static final int EMERGENCY_CALL_TIMEOUT = 10000;
 
@@ -331,46 +331,62 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
         updateScreen(mMode);
     }
 
-    private void maybeEnableFallback(Context context) {
-        // Ask the account manager if we have an account that can be used as a
-        // fallback in case the user forgets his pattern. The response comes
-        // back in run() below; don't bother asking until you've called
-        // createUnlockScreenFor(), else the information will go unused.
-        Account[] accounts = AccountManager.get(context).getAccounts();
-        mEnableFallback = false;
+    private class AccountAnalyzer implements AccountManagerCallback<Bundle> {
+        private final AccountManager mAccountManager;
+        private final Account[] mAccounts;
+        private int mAccountIndex;
 
-        for (Account account : accounts) {
-            // See whether this account can be used to unlock the screen.
-            try {
-                // Passing null for action makes sure the confirmCredentials intent is not actually
-                // executed - we're just checking whether it's supported.
-                AccountManager.get(context)
-                        .confirmCredentials(account, null, null, null, null)
-                        .getResult();
-                mEnableFallback = true;
-                break;
+        private AccountAnalyzer(AccountManager accountManager) {
+            mAccountManager = accountManager;
+            mAccounts = accountManager.getAccountsByType("com.google");
+        }
 
-            } catch (OperationCanceledException e) {
-                Log.w(TAG, "couldn't talk to AccountManager", e);
-
-            } catch (AuthenticatorException e) {
-                if (e.getCause() instanceof UnsupportedOperationException) {
-                    // This is expected for accounts that don't support confirmCredentials
-                    continue;
-                } else {
-                    Log.w(TAG, "couldn't talk to AccountManager", e);
+        private void next() {
+            // if we are ready to enable the fallback or if we depleted the list of accounts
+            // then finish and get out
+            if (mEnableFallback || mAccountIndex >= mAccounts.length) {
+                if (mUnlockScreen == null) {
+                    Log.w(TAG, "no unlock screen when trying to enable fallback");
+                } else if (mUnlockScreen instanceof PatternUnlockScreen) {
+                    ((PatternUnlockScreen)mUnlockScreen).setEnableFallback(mEnableFallback);
                 }
+                return;
+            }
 
+            // lookup the confirmCredentials intent for the current account
+            mAccountManager.confirmCredentials(mAccounts[mAccountIndex], null, null, this, null);
+        }
+
+        public void start() {
+            mEnableFallback = false;
+            mAccountIndex = 0;
+            next();
+        }
+
+        public void run(AccountManagerFuture<Bundle> future) {
+            try {
+                Bundle result = future.getResult();
+                if (result.getParcelable(AccountManager.KEY_INTENT) != null) {
+                    mEnableFallback = true;
+                }
+            } catch (OperationCanceledException e) {
+                // just skip the account if we are unable to query it
             } catch (IOException e) {
-                Log.w(TAG, "couldn't talk to AccountManager", e);
+                // just skip the account if we are unable to query it
+            } catch (AuthenticatorException e) {
+                // just skip the account if we are unable to query it
+            } finally {
+                mAccountIndex++;
+                next();
             }
         }
+    }
 
-        if (mUnlockScreen == null) {
-            Log.w(TAG, "no unlock screen when trying to enable fallback");
-        } else if (mUnlockScreen instanceof PatternUnlockScreen) {
-            ((PatternUnlockScreen)mUnlockScreen).setEnableFallback(mEnableFallback);
-        }
+    private void maybeEnableFallback(Context context) {
+        // Ask the account manager if we have an account that can be used as a
+        // fallback in case the user forgets his pattern.
+        AccountAnalyzer accountAnalyzer = new AccountAnalyzer(AccountManager.get(context));
+        accountAnalyzer.start();
     }
 
 
@@ -509,7 +525,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
 
         if (DEBUG_CONFIGURATION) Log.v(TAG, "**** UPDATE SCREEN: mode=" + mode
                 + " last mode=" + mMode, new RuntimeException());
-        
+
         mMode = mode;
 
         // Re-create the unlock screen if necessary. This is primarily required to properly handle
@@ -529,7 +545,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
             Log.v(TAG, "Gone=" + goneScreen);
             Log.v(TAG, "Visible=" + visibleScreen);
         }
-        
+
         if (mScreenOn) {
             if (goneScreen.getVisibility() == View.VISIBLE) {
                 ((KeyguardScreen) goneScreen).onPause();
