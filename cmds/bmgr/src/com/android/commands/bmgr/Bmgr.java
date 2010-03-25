@@ -278,8 +278,8 @@ public final class Bmgr {
             System.out.println("restoreStarting: " + numPackages + " packages");
         }
 
-        public void onUpdate(int nowBeingRestored) {
-            System.out.println("onUpdate: " + nowBeingRestored);
+        public void onUpdate(int nowBeingRestored, String currentPackage) {
+            System.out.println("onUpdate: " + nowBeingRestored + " = " + currentPackage);
         }
 
         public void restoreFinished(int error) {
