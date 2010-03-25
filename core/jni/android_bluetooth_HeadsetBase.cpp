@@ -96,6 +96,13 @@ static int send_line(int fd, const char* line) {
     return 0;
 }
 
+static int is_ascii(char *line) {
+    for (;;line++) {
+        if (*line == 0) return 1;
+        if (*line >> 7) return 0;
+    }
+}
+
 static const char* get_line(int fd, char *buf, int len, int timeout_ms,
                             int *err) {
     char *bufit=buf;
@@ -125,7 +132,7 @@ again:
         return NULL;
     }
 
-    while ((int)(bufit - buf) < len)
+    while ((int)(bufit - buf) < (len - 1))
     {
         errno = 0;
         int rc = read(fd, bufit, 1);
@@ -155,8 +162,18 @@ again:
             bufit++;
     }
 
-    *bufit = '\x0';
-    LOG(LOG_INFO, "Bluetooth AT recv", buf);
+    *bufit = NULL;
+
+    // Simple validation. Must be all ASCII.
+    // (we sometimes send non-ASCII UTF-8 in address book, but should
+    // never receive non-ASCII UTF-8).
+    // This was added because of the BMW 2005 E46 which sends binary junk.
+    if (is_ascii(buf)) {
+        LOG(LOG_INFO, "Bluetooth AT recv", buf);
+    } else {
+        LOGW("Ignoring invalid AT command: %s", buf);
+        buf[0] = NULL;
+    }
 
     return buf;
 }
@@ -501,7 +518,7 @@ static jstring readNative(JNIEnv *env, jobject obj, jint timeout_ms) {
     {
         native_data_t *nat = get_native_data(env, obj);
         if (nat->rfcomm_connected) {
-            char buf[128];
+            char buf[256];
             const char *ret = get_line(nat->rfcomm_sock,
                                        buf, sizeof(buf),
                                        timeout_ms,
