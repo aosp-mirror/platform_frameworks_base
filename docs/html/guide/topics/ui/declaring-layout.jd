@@ -200,15 +200,29 @@ view group defines layout parameters for each child view (including the child vi
 values. Each child element must define LayoutParams that are appropriate for its parent, 
 though it may also define different LayoutParams for its own children. </p>
 
-<p>All view groups include a width and height (<code>layout_width</code> and <code>layout_height</code>), 
-and each view is required to define them. 
-Many LayoutParams also include optional margins and
-borders. You can specify width and height with exact measurements, though you probably won't want
-to do this often. More often, you will tell your view to size itself either to
-the dimensions required by its content, or to become as big as its parent view group
-will allow (with the <var>wrap_content</var> and <var>fill_parent</var> values, respectively).
-The accepted measurement types are defined in the 
-<a href="{@docRoot}guide/topics/resources/available-resources.html#dimension">Available Resources</a> document.</p>
+<p>All view groups include a width and height (<code>layout_width</code> and
+<code>layout_height</code>), and each view is required to define them. Many
+LayoutParams also include optional margins and borders. <p>
+
+<p>You can specify width and height with exact measurements, though you probably
+won't want to do this often. More often, you will use one of these constants to
+set the width or height: </p>
+
+<ul>
+  <li><var>wrap_content</var> tells your view to size itself to the dimensions
+required by its content</li>
+  <li><var>fill_parent</var> (renamed <var>match_parent</var> in API Level 8)
+tells your view to become as big as its parent view group will allow.</li>
+</ul>
+
+<p>In general, specifying a layout width and height using absolute units such as
+pixels is not recommended. Instead, using relative measurements such as
+density-independent pixel units (<var>dp</var>), <var>wrap_content</var>, or
+<var>fill_parent</var>, is a better approach, because it helps ensure that
+your application will display properly across a variety of device screen sizes.
+The accepted measurement types are defined in the
+<a href="{@docRoot}guide/topics/resources/available-resources.html#dimension">
+Available Resources</a> document.</p>
 
 
 <h2 id="Position">Layout Position</h2>

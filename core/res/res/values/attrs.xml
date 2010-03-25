@@ -1396,9 +1396,12 @@
              be a dimension (such as "12dip") for a constant width or one of
              the special constants. -->
         <attr name="layout_width" format="dimension">
-            <!-- <strong>Deprecated.</strong> Use {@code match_parent} instead. -->
+            <!-- The view should be as big as its parent (minus padding).
+                 This constant is deprecated starting from API Level 8 and
+                 is replaced by {@code match_parent}. -->
             <enum name="fill_parent" value="-1" />
-            <!-- The view should be as big as its parent (minus padding). -->
+            <!-- The view should be as big as its parent (minus padding).
+                 Introduced in API Level 8. -->
             <enum name="match_parent" value="-1" />
             <!-- The view should be only big enough to enclose its content (plus padding). -->
             <enum name="wrap_content" value="-2" />
@@ -1409,9 +1412,12 @@
              be a dimension (such as "12dip") for a constant height or one of
              the special constants. -->
         <attr name="layout_height" format="dimension">
-            <!-- <strong>Deprecated.</strong> Use {@code match_parent} instead. -->
+            <!-- The view should be as big as its parent (minus padding).
+                 This constant is deprecated starting from API Level 8 and
+                 is replaced by {@code match_parent}. -->
             <enum name="fill_parent" value="-1" />
-            <!-- The view should be as big as its parent (minus padding). -->
+            <!-- The view should be as big as its parent (minus padding).
+                 Introduced in API Level 8. -->
             <enum name="match_parent" value="-1" />
             <!-- The view should be only big enough to enclose its content (plus padding). -->
             <enum name="wrap_content" value="-2" />
@@ -2128,27 +2134,35 @@
              is used. -->
         <attr name="dropDownAnchor" format="reference" />
         <!-- Specifies the basic width of the dropdown. Its value may
-             be a dimension (such as "12dip") for a constant width, match_parent
-             to match the width of the screen, or wrap_content to match the width
-             of the anchored view. -->
+             be a dimension (such as "12dip") for a constant width,
+             fill_parent or match_parent to match the width of the 
+             screen, or wrap_content to match the width of
+             the anchored view. -->
         <attr name="dropDownWidth" format="dimension">
-            <!-- <strong>Deprecated.</strong> Use {@code match_parent} instead. -->
+            <!-- The dropdown should fill the width of the screen.
+                 This constant is deprecated starting from API Level 8 and
+                 is replaced by {@code match_parent}. -->
             <enum name="fill_parent" value="-1" />
-            <!-- The dropdown should fit the width of the screen. -->
+            <!-- The dropdown should fit the width of the screen.
+                 Introduced in API Level 8. -->
             <enum name="match_parent" value="-1" />
             <!-- The dropdown should fit the width of its anchor. -->
             <enum name="wrap_content" value="-2" />
         </attr>
-        <!-- Specifies the basic width of the dropdown. Its value may
-             be a dimension (such as "12dip") for a constant width, match_parent
-             to fill the width of the screen, or wrap_content to match the height of
+        <!-- Specifies the basic height of the dropdown. Its value may
+             be a dimension (such as "12dip") for a constant height,
+             fill_parent or match_parent to fill the height of the
+             screen, or wrap_content to match the height of
              the content of the drop down. -->
         <attr name="dropDownHeight" format="dimension">
-            <!-- <strong>Deprecated.</strong> Use {@code match_parent} instead. -->
+            <!-- The dropdown should fit the height of the screen.
+                 This constant is deprecated starting from API Level 8 and
+                 is replaced by {@code match_parent}. -->
             <enum name="fill_parent" value="-1" />
-            <!-- The dropdown should fill the width of the screen. -->
+            <!-- The dropdown should fit the height of the screen.
+                 Introduced in API Level 8. -->
             <enum name="match_parent" value="-1" />
-            <!-- The dropdown should fit the width of its anchor. -->
+            <!-- The dropdown should fit the height of the content. -->
             <enum name="wrap_content" value="-2" />
         </attr>
         <attr name="inputType" />
