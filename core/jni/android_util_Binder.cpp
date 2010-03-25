@@ -24,6 +24,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <stdio.h>
+#include <unistd.h>
 
 #include <utils/Atomic.h>
 #include <binder/IInterface.h>
