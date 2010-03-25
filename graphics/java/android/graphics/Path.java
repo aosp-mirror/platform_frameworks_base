@@ -153,16 +153,15 @@ public class Path {
     }
 
     /**
-     * Compute the bounds of the path, and write the answer into bounds. If the
-     * path contains 0 or 1 points, the bounds is set to (0,0,0,0)
+     * Compute the bounds of the control points of the path, and write the
+     * answer into bounds. If the path contains 0 or 1 points, the bounds is
+     * set to (0,0,0,0)
      *
-     * @param bounds Returns the computed bounds of the path
-     * @param exact If true, return the exact (but slower) bounds, else return
-     *              just the bounds of all control points
+     * @param bounds Returns the computed bounds of the path's control points.
+     * @param exact This parameter is no longer used.
      */
     public void computeBounds(RectF bounds, boolean exact) {
-        // 1-exact, 0-fast correspond to the values in SkPath.h
-        native_computeBounds(mNativePath, bounds, exact ? 1 : 0);
+        native_computeBounds(mNativePath, bounds);
     }
 
     /**
@@ -552,8 +551,7 @@ public class Path {
     private static native void native_setFillType(int nPath, int ft);
     private static native boolean native_isEmpty(int nPath);
     private static native boolean native_isRect(int nPath, RectF rect);
-    private static native void native_computeBounds(int nPath, RectF bounds,
-                                                    int btype);
+    private static native void native_computeBounds(int nPath, RectF bounds);
     private static native void native_incReserve(int nPath, int extraPtCount);
     private static native void native_moveTo(int nPath, float x, float y);
     private static native void native_rMoveTo(int nPath, float dx, float dy);
