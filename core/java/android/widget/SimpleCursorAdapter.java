@@ -62,7 +62,8 @@ public class SimpleCursorAdapter extends ResourceCursorAdapter {
     private int mStringConversionColumn = -1;
     private CursorToStringConverter mCursorToStringConverter;
     private ViewBinder mViewBinder;
-    private String[] mOriginalFrom;
+
+    String[] mOriginalFrom;
 
     /**
      * Constructor.
