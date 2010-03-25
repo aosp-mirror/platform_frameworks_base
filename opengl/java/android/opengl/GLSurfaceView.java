@@ -155,11 +155,12 @@ import android.view.SurfaceView;
  *
  */
 public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
-    private final static boolean LOG_THREADS = false;
-    private final static boolean LOG_SURFACE = false;
+    private final static boolean LOG_THREADS = true;
+    private final static boolean LOG_PAUSE_RESUME = true;
+    private final static boolean LOG_SURFACE = true;
     private final static boolean LOG_RENDERER = false;
     private final static boolean LOG_RENDERER_DRAW_FRAME = false;
-    private final static boolean LOG_EGL = false;
+    private final static boolean LOG_EGL = true;
     // Work-around for bug 2263168
     private final static boolean DRAW_TWICE_AFTER_SIZE_CHANGED = true;
     /**
@@ -1381,6 +1382,9 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
 
         public void onPause() {
             synchronized (sGLThreadManager) {
+                if (LOG_PAUSE_RESUME) {
+                    Log.i("GLThread", "onPause tid=" + getId());
+                }
                 mPaused = true;
                 sGLThreadManager.notifyAll();
             }
@@ -1388,6 +1392,9 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
 
         public void onResume() {
             synchronized (sGLThreadManager) {
+                if (LOG_PAUSE_RESUME) {
+                    Log.i("GLThread", "onResume tid=" + getId());
+                }
                 mPaused = false;
                 mRequestRender = true;
                 sGLThreadManager.notifyAll();
