@@ -30,6 +30,7 @@ import android.test.ActivityInstrumentationTestCase;
 import android.util.Log;
 import android.view.SurfaceHolder;
 
+import android.os.ConditionVariable;
 import android.os.Looper;
 
 import android.test.suitebuilder.annotation.LargeTest;
@@ -55,8 +56,8 @@ public class CameraTest extends ActivityInstrumentationTestCase<MediaFrameworkTe
     
     private boolean mInitialized = false;
     private Looper mLooper = null;
-    private final Object lock = new Object();
-    private final Object previewDone = new Object();
+    private final ConditionVariable mPreviewDone = new ConditionVariable();
+    private final ConditionVariable mSnapshotDone = new ConditionVariable();
     
     Camera mCamera;
     Context mContext;
@@ -74,6 +75,7 @@ public class CameraTest extends ActivityInstrumentationTestCase<MediaFrameworkTe
      * receive the callback messages.
      */
     private void initializeMessageLooper() {
+        final ConditionVariable startDone = new ConditionVariable();
         Log.v(TAG, "start looper");
         new Thread() {
             @Override
@@ -83,29 +85,30 @@ public class CameraTest extends ActivityInstrumentationTestCase<MediaFrameworkTe
                 Log.v(TAG, "start loopRun");
                 // Save the looper so that we can terminate this thread 
                 // after we are done with it.
-                mLooper = Looper.myLooper();                
-                mCamera = Camera.open();                                
-                synchronized (lock) {
-                    mInitialized = true;
-                    lock.notify();
-                }
+                mLooper = Looper.myLooper();
+                mCamera = Camera.open();
+                startDone.open();
                 Looper.loop();  // Blocks forever until Looper.quit() is called.
                 Log.v(TAG, "initializeMessageLooper: quit.");
             }
         }.start();
+
+        if (!startDone.block(WAIT_FOR_COMMAND_TO_COMPLETE)) {
+            fail("initializeMessageLooper: start timeout");
+        }
     }
     
     /*
      * Terminates the message looper thread.
      */
-    private void terminateMessageLooper() {
+    private void terminateMessageLooper() throws Exception {
         mLooper.quit();
-        //TODO yslau : take out the sleep until bug#1693519 fix
-        try {
-            Thread.sleep(1000);
-        } catch (Exception e){
-            Log.v(TAG, e.toString());
-        }
+        // Looper.quit() is asynchronous. The looper may still has some
+        // preview callbacks in the queue after quit is called. The preview
+        // callback still uses the camera object (setHasPreviewCallback).
+        // After camera is released, RuntimeException will be thrown from
+        // the method. So we need to join the looper thread here.
+        mLooper.getThread().join();
         mCamera.release();
     }
     
@@ -122,11 +125,7 @@ public class CameraTest extends ActivityInstrumentationTestCase<MediaFrameworkTe
             } else {
                 rawPreviewCallbackResult = false;
             }
-            synchronized (previewDone) {
-                Log.v(TAG, "notify the preview callback");
-                previewDone.notify();
-            }
-            
+            mPreviewDone.open();
             Log.v(TAG, "Preview callback stop");
         }
     };
@@ -142,13 +141,8 @@ public class CameraTest extends ActivityInstrumentationTestCase<MediaFrameworkTe
     //Implement the RawPictureCallback
     private final class RawPictureCallback implements PictureCallback { 
         public void onPictureTaken(byte [] rawData, Camera camera) {
-           // no support for raw data - success if we get the callback
-           rawPictureCallbackResult = true;
-           //if (rawData != null) {
-           //    rawPictureCallbackResult = true;
-           //} else {
-           //    rawPictureCallbackResult = false;
-           //}
+            // no support for raw data - success if we get the callback
+            rawPictureCallbackResult = true;
             Log.v(TAG, "RawPictureCallback callback");
         }
     };
@@ -167,6 +161,7 @@ public class CameraTest extends ActivityInstrumentationTestCase<MediaFrameworkTe
                 } else {
                     jpegPictureCallbackResult = false;
                 }
+                mSnapshotDone.open();
                 Log.v(TAG, "Jpeg Picture callback");
             } catch (Exception e) {
                 Log.v(TAG, e.toString());
@@ -174,7 +169,22 @@ public class CameraTest extends ActivityInstrumentationTestCase<MediaFrameworkTe
         }
     };
    
-    
+    private void waitForPreviewDone() {
+        if (!mPreviewDone.block(WAIT_FOR_COMMAND_TO_COMPLETE)) {
+            Log.v(TAG, "waitForPreviewDone: timeout");
+        }
+        mPreviewDone.close();
+    }
+
+    private void waitForSnapshotDone() {
+        if (!mSnapshotDone.block(MediaNames.WAIT_SNAPSHOT_TIME)) {
+            // timeout could be expected or unexpected. The caller will decide.
+            Log.v(TAG, "waitForSnapshotDone: timeout");
+        }
+        mSnapshotDone.close();
+    }
+
+
     private void checkTakePicture() { 
         SurfaceHolder mSurfaceHolder;
         try {
@@ -182,17 +192,10 @@ public class CameraTest extends ActivityInstrumentationTestCase<MediaFrameworkTe
             mCamera.setPreviewDisplay(mSurfaceHolder);
             Log.v(TAG, "Start preview");
             mCamera.startPreview();
-            synchronized (previewDone) {
-                try {
-                    previewDone.wait(WAIT_FOR_COMMAND_TO_COMPLETE);
-                    Log.v(TAG, "Preview Done");
-                } catch (Exception e) {
-                    Log.v(TAG, "wait was interrupted.");
-                }
-            }
+            waitForPreviewDone();
             mCamera.setPreviewCallback(null);
             mCamera.takePicture(mShutterCallback, mRawPictureCallback, mJpegPictureCallback);
-            Thread.sleep(MediaNames.WAIT_SNAPSHOT_TIME);
+            waitForSnapshotDone();
         } catch (Exception e) {
             Log.v(TAG, e.toString());
         }      
@@ -204,15 +207,8 @@ public class CameraTest extends ActivityInstrumentationTestCase<MediaFrameworkTe
             mSurfaceHolder = MediaFrameworkTest.mSurfaceView.getHolder();
             mCamera.setPreviewDisplay(mSurfaceHolder);
             Log.v(TAG, "start preview");
-            mCamera.startPreview();                      
-            synchronized (previewDone) {
-                try {
-                    previewDone.wait(WAIT_FOR_COMMAND_TO_COMPLETE);
-                    Log.v(TAG, "setPreview done");
-                } catch (Exception e) {
-                    Log.v(TAG, "wait was interrupted.");
-                }
-            }
+            mCamera.startPreview();
+            waitForPreviewDone();
             mCamera.setPreviewCallback(null);
         } catch (Exception e) {
             Log.v(TAG, e.toString());
@@ -228,14 +224,7 @@ public class CameraTest extends ActivityInstrumentationTestCase<MediaFrameworkTe
      */
     @LargeTest
     public void testTakePicture() throws Exception {  
-        synchronized (lock) {
-            initializeMessageLooper();
-            try {
-                lock.wait(WAIT_FOR_COMMAND_TO_COMPLETE);
-            } catch(Exception e) {
-                Log.v(TAG, "runTestOnMethod: wait was interrupted.");
-            }
-        }
+        initializeMessageLooper();
         mCamera.setPreviewCallback(mRawPreviewCallback);
         checkTakePicture();
         terminateMessageLooper();
@@ -250,14 +239,7 @@ public class CameraTest extends ActivityInstrumentationTestCase<MediaFrameworkTe
      */
     @LargeTest
     public void testCheckPreview() throws Exception {  
-        synchronized (lock) {
-            initializeMessageLooper();
-            try {
-                lock.wait(WAIT_FOR_COMMAND_TO_COMPLETE);
-            } catch(Exception e) {
-                Log.v(TAG, "wait was interrupted.");
-            }
-        }
+        initializeMessageLooper();
         mCamera.setPreviewCallback(mRawPreviewCallback);
         checkPreviewCallback();     
         terminateMessageLooper();

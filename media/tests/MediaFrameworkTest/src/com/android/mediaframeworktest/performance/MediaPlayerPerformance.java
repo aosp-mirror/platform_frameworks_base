@@ -24,6 +24,7 @@ import android.hardware.Camera;
 import android.hardware.Camera.PreviewCallback;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
+import android.os.ConditionVariable;
 import android.os.Looper;
 import android.os.SystemClock;
 import android.test.ActivityInstrumentationTestCase;
@@ -68,11 +69,9 @@ public class MediaPlayerPerformance extends ActivityInstrumentationTestCase<Medi
     private static int mStartPid = 0;
     private static int mEndPid = 0;
 
-    private boolean mInitialized = false;
     private Looper mLooper = null;
     private RawPreviewCallback mRawPreviewCallback = new RawPreviewCallback();
-    private final Object lock = new Object();
-    private final Object previewDone = new Object();
+    private final ConditionVariable mPreviewDone = new ConditionVariable();
     private static int WAIT_FOR_COMMAND_TO_COMPLETE = 10000;  // Milliseconds.
 
     //the tolerant memory leak
@@ -194,6 +193,7 @@ public class MediaPlayerPerformance extends ActivityInstrumentationTestCase<Medi
     }
 
     private void initializeMessageLooper() {
+        final ConditionVariable startDone = new ConditionVariable();
         new Thread() {
             @Override
             public void run() {
@@ -201,56 +201,49 @@ public class MediaPlayerPerformance extends ActivityInstrumentationTestCase<Medi
                 Log.v(TAG, "start loopRun");
                 mLooper = Looper.myLooper();
                 mCamera = Camera.open();
-                synchronized (lock) {
-                    mInitialized = true;
-                    lock.notify();
-                }
+                startDone.open();
                 Looper.loop();
                 Log.v(TAG, "initializeMessageLooper: quit.");
             }
         }.start();
+
+        if (!startDone.block(WAIT_FOR_COMMAND_TO_COMPLETE)) {
+            fail("initializeMessageLooper: start timeout");
+        }
     }
 
-    private void terminateMessageLooper() {
-        try {
-            mLooper.quit();
-            mCamera.release();
-            Thread.sleep(1500);
-        } catch (Exception e) {
-            Log.v(TAG, e.toString());
-        }
+    private void terminateMessageLooper() throws Exception {
+        mLooper.quit();
+        // Looper.quit() is asynchronous. The looper may still has some
+        // preview callbacks in the queue after quit is called. The preview
+        // callback still uses the camera object (setHasPreviewCallback).
+        // After camera is released, RuntimeException will be thrown from
+        // the method. So we need to join the looper thread here.
+        mLooper.getThread().join();
+        mCamera.release();
     }
 
     private final class RawPreviewCallback implements PreviewCallback {
         public void onPreviewFrame(byte[] rawData, Camera camera) {
-            synchronized (previewDone) {
-                previewDone.notify();
-            }
+            mPreviewDone.open();
         }
+    }
+
+    private void waitForPreviewDone() {
+        if (!mPreviewDone.block(WAIT_FOR_COMMAND_TO_COMPLETE)) {
+            Log.v(TAG, "waitForPreviewDone: timeout");
+        }
+        mPreviewDone.close();
     }
 
     public void stressCameraPreview() {
         try {
-            synchronized (lock) {
-                initializeMessageLooper();
-                try {
-                    lock.wait(WAIT_FOR_COMMAND_TO_COMPLETE);
-                } catch (Exception e) {
-                    Log.v(TAG, "runTestOnMethod: wait was interrupted.");
-                }
-            }
+            initializeMessageLooper();
             mCamera.setPreviewCallback(mRawPreviewCallback);
             mSurfaceHolder = MediaFrameworkTest.mSurfaceView.getHolder();
             mCamera.setPreviewDisplay(mSurfaceHolder);
             mCamera.startPreview();
-            synchronized (previewDone) {
-                try {
-                    previewDone.wait(WAIT_FOR_COMMAND_TO_COMPLETE);
-                    Log.v(TAG, "Preview Done");
-                } catch (Exception e) {
-                    Log.v(TAG, "wait was interrupted.");
-                }
-            }
+            waitForPreviewDone();
             Thread.sleep(1000);
             mCamera.stopPreview();
             terminateMessageLooper();
