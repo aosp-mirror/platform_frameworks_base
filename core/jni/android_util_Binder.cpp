@@ -21,9 +21,10 @@
 #include "JNIHelp.h"
 
 #include <fcntl.h>
-#include <sys/stat.h>
-#include <sys/types.h>
 #include <stdio.h>
+#include <sys/stat.h>
+#include <sys/syscall.h>
+#include <sys/types.h>
 #include <unistd.h>
 
 #include <utils/Atomic.h>
@@ -844,6 +845,19 @@ static void conditionally_log_binder_call(int64_t start_millis,
     android_bWriteLog(LOGTAG_BINDER_OPERATION, buf, pos - buf);
 }
 
+// We only measure binder call durations to potentially log them if
+// we're on the main thread.  Unfortunately sim-eng doesn't seem to
+// have gettid, so we just ignore this and don't log if we can't
+// get the thread id.
+static bool should_time_binder_calls() {
+#ifdef __NR_gettid
+  return (getpid() == syscall(__NR_gettid));
+#else
+#warning no gettid(), so not logging Binder calls...
+  return false;
+#endif
+}
+
 static jboolean android_os_BinderProxy_transact(JNIEnv* env, jobject obj,
                                                 jint code, jobject dataObj,
                                                 jobject replyObj, jint flags)
@@ -873,15 +887,17 @@ static jboolean android_os_BinderProxy_transact(JNIEnv* env, jobject obj,
             target, obj, code);
 
     // Only log the binder call duration for things on the Java-level main thread.
-    const bool is_main_thread = (getpid() == gettid());
+    // But if we don't
+    const bool time_binder_calls = should_time_binder_calls();
+
     int64_t start_millis;
-    if (is_main_thread) {
+    if (time_binder_calls) {
         start_millis = uptimeMillis();
     }
     //printf("Transact from Java code to %p sending: ", target); data->print();
     status_t err = target->transact(code, *data, reply, flags);
     //if (reply) printf("Transact from Java code to %p received: ", target); reply->print();
-    if (is_main_thread) {
+    if (time_binder_calls) {
         conditionally_log_binder_call(start_millis, target, code);
     }
 
