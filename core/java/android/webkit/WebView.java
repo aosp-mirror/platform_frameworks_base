@@ -468,6 +468,7 @@ public class WebView extends AbsoluteLayout
     private OverScroller mScroller;
     private boolean mInOverScrollMode = false;
     private static Paint mOverScrollBackground;
+    private static Paint mOverScrollBorder;
 
     private boolean mWrapContent;
     private static final int MOTIONLESS_FALSE           = 0;
@@ -3161,20 +3162,26 @@ public class WebView extends AbsoluteLayout
                         com.android.internal.R.drawable.status_bar_background);
                 mOverScrollBackground.setShader(new BitmapShader(bm,
                         Shader.TileMode.REPEAT, Shader.TileMode.REPEAT));
+                mOverScrollBorder = new Paint();
+                mOverScrollBorder.setStyle(Paint.Style.STROKE);
+                mOverScrollBorder.setStrokeWidth(0);
+                mOverScrollBorder.setColor(0xffbbbbbb);
             }
+
             int top = getTitleHeight();
+            int right = computeRealHorizontalScrollRange();
+            int bottom = top + computeRealVerticalScrollRange();
             // first draw the background and anchor to the top of the view
             canvas.save();
             canvas.translate(mScrollX, mScrollY);
-            canvas.clipRect(-mScrollX, top - mScrollY,
-                    computeRealHorizontalScrollRange() - mScrollX, top
-                            + computeRealVerticalScrollRange() - mScrollY,
-                    Region.Op.DIFFERENCE);
+            canvas.clipRect(-mScrollX, top - mScrollY, right - mScrollX, bottom
+                    - mScrollY, Region.Op.DIFFERENCE);
             canvas.drawPaint(mOverScrollBackground);
             canvas.restore();
+            // then draw the border
+            canvas.drawRect(-1, top - 1, right, bottom, mOverScrollBorder);
             // next clip the region for the content
-            canvas.clipRect(0, top, computeRealHorizontalScrollRange(), top
-                    + computeRealVerticalScrollRange());
+            canvas.clipRect(0, top, right, bottom);
         }
         if (mTitleBar != null) {
             canvas.translate(0, (int) mTitleBar.getHeight());
