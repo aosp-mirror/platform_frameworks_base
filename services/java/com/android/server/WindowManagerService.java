@@ -7062,6 +7062,12 @@ public class WindowManagerService extends IWindowManager.Stub
         // Is this window now (or just being) removed?
         boolean mRemoved;
 
+        // For debugging, this is the last information given to the surface flinger.
+        boolean mSurfaceShown;
+        int mSurfaceX, mSurfaceY, mSurfaceW, mSurfaceH;
+        int mSurfaceLayer;
+        float mSurfaceAlpha;
+        
         WindowState(Session s, IWindow c, WindowToken token,
                WindowState attachedWindow, WindowManager.LayoutParams a,
                int viewVisibility) {
@@ -7352,6 +7358,13 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (w <= 0) w = 1;
                 if (h <= 0) h = 1;
 
+                mSurfaceShown = false;
+                mSurfaceLayer = 0;
+                mSurfaceAlpha = 1;
+                mSurfaceX = 0;
+                mSurfaceY = 0;
+                mSurfaceW = w;
+                mSurfaceH = h;
                 try {
                     mSurface = new Surface(
                             mSession.mSurfaceSession, mSession.mPid,
@@ -7387,9 +7400,12 @@ public class WindowManagerService extends IWindowManager.Stub
                 Surface.openTransaction();
                 try {
                     try {
-                        mSurface.setPosition(mFrame.left + mXOffset,
-                                mFrame.top + mYOffset);
+                        mSurfaceX = mFrame.left + mXOffset;
+                        mSurfaceY = mFrame.top = mYOffset;
+                        mSurface.setPosition(mSurfaceX, mSurfaceY);
+                        mSurfaceLayer = mAnimLayer;
                         mSurface.setLayer(mAnimLayer);
+                        mSurfaceShown = false;
                         mSurface.hide();
                         if ((mAttrs.flags&WindowManager.LayoutParams.FLAG_DITHER) != 0) {
                             if (SHOW_TRANSACTIONS) logSurface(this, "DITHER", null);
@@ -7472,6 +7488,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         + ": " + e.toString());
                 }
 
+                mSurfaceShown = false;
                 mSurface = null;
             }
         }
@@ -7731,6 +7748,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 mDestroySurface.add(this);
                 mDestroying = true;
                 if (SHOW_TRANSACTIONS) logSurface(this, "HIDE (finishExit)", null);
+                mSurfaceShown = false;
                 try {
                     mSurface.hide();
                 } catch (RuntimeException e) {
@@ -8196,6 +8214,13 @@ public class WindowManagerService extends IWindowManager.Stub
                     pw.print(" mLastLayer="); pw.println(mLastLayer);
             if (mSurface != null) {
                 pw.print(prefix); pw.print("mSurface="); pw.println(mSurface);
+                pw.print(prefix); pw.print("Surface: shown="); pw.print(mSurfaceShown);
+                        pw.print(" layer="); pw.print(mSurfaceLayer);
+                        pw.print(" alpha="); pw.print(mSurfaceAlpha);
+                        pw.print(" rect=("); pw.print(mSurfaceX);
+                        pw.print(","); pw.print(mSurfaceY);
+                        pw.print(") "); pw.print(mSurfaceW);
+                        pw.print(" x "); pw.println(mSurfaceH);
             }
             pw.print(prefix); pw.print("mToken="); pw.println(mToken);
             pw.print(prefix); pw.print("mRootToken="); pw.println(mRootToken);
@@ -9960,6 +9985,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                 }
 
+                int adjResult = 0;
+
                 if (!animating && mAppTransitionRunning) {
                     // We have finished the animation of an app transition.  To do
                     // this, we have delayed a lot of operations like showing and
@@ -9973,6 +10000,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
                     rebuildAppWindowListLocked();
                     changes |= PhoneWindowManager.FINISH_LAYOUT_REDO_LAYOUT;
+                    adjResult |= ADJUST_WALLPAPER_LAYERS_CHANGED;
                     moveInputMethodWindowsIfNeededLocked(false);
                     wallpaperMayChange = true;
                     // Since the window list has been rebuilt, focus might
@@ -9980,8 +10008,6 @@ public class WindowManagerService extends IWindowManager.Stub
                     // might have changed again.
                     mFocusMayChange = true;
                 }
-
-                int adjResult = 0;
 
                 if (wallpaperForceHidingChanged && changes == 0 && !mAppTransitionReady) {
                     // At this point, there was a window with a wallpaper that
@@ -10007,7 +10033,7 @@ public class WindowManagerService extends IWindowManager.Stub
                             changes |= PhoneWindowManager.FINISH_LAYOUT_REDO_ANIM;
                         }
                     }
-                    adjResult = adjustWallpaperWindowsLocked();
+                    adjResult |= adjustWallpaperWindowsLocked();
                     wallpaperMayChange = false;
                     wallpaperForceHidingChanged = false;
                     if (DEBUG_WALLPAPER) Slog.v(TAG, "****** OLD: " + oldWallpaper
@@ -10039,7 +10065,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (wallpaperMayChange) {
                     if (DEBUG_WALLPAPER) Slog.v(TAG,
                             "Wallpaper may change!  Adjusting");
-                    adjResult = adjustWallpaperWindowsLocked();
+                    adjResult |= adjustWallpaperWindowsLocked();
                 }
 
                 if ((adjResult&ADJUST_WALLPAPER_LAYERS_CHANGED) != 0) {
@@ -10127,6 +10153,8 @@ public class WindowManagerService extends IWindowManager.Stub
                             if (SHOW_TRANSACTIONS) logSurface(w,
                                     "POS " + w.mShownFrame.left
                                     + ", " + w.mShownFrame.top, null);
+                            w.mSurfaceX = w.mShownFrame.left;
+                            w.mSurfaceY = w.mShownFrame.top;
                             w.mSurface.setPosition(w.mShownFrame.left, w.mShownFrame.top);
                         } catch (RuntimeException e) {
                             Slog.w(TAG, "Error positioning surface in " + w, e);
@@ -10152,7 +10180,11 @@ public class WindowManagerService extends IWindowManager.Stub
                                         + w.mShownFrame.width() + "x"
                                         + w.mShownFrame.height(), null);
                                 w.mSurfaceResized = true;
+                                w.mSurfaceW = width;
+                                w.mSurfaceH = height;
                                 w.mSurface.setSize(width, height);
+                                w.mSurfaceX = w.mShownFrame.left;
+                                w.mSurfaceY = w.mShownFrame.top;
                                 w.mSurface.setPosition(w.mShownFrame.left,
                                         w.mShownFrame.top);
                             } catch (RuntimeException e) {
@@ -10245,6 +10277,7 @@ public class WindowManagerService extends IWindowManager.Stub
                             if (SHOW_TRANSACTIONS) logSurface(w,
                                     "HIDE (performLayout)", null);
                             if (w.mSurface != null) {
+                                w.mSurfaceShown = false;
                                 try {
                                     w.mSurface.hide();
                                 } catch (RuntimeException e) {
@@ -10290,7 +10323,9 @@ public class WindowManagerService extends IWindowManager.Stub
                                 + "," + (w.mDtDy*w.mVScale) + "]", null);
                         if (w.mSurface != null) {
                             try {
+                                w.mSurfaceAlpha = w.mShownAlpha;
                                 w.mSurface.setAlpha(w.mShownAlpha);
+                                w.mSurfaceLayer = w.mAnimLayer;
                                 w.mSurface.setLayer(w.mAnimLayer);
                                 w.mSurface.setMatrix(
                                         w.mDsDx*w.mHScale, w.mDtDx*w.mVScale,
@@ -10427,14 +10462,13 @@ public class WindowManagerService extends IWindowManager.Stub
                                     mDimAnimator = new DimAnimator(mFxSession);
                                 }
                                 mDimAnimator.show(dw, dh);
+                                mDimAnimator.updateParameters(w, currentTime);
                             }
-                            mDimAnimator.updateParameters(w, currentTime);
                         }
                         if ((attrFlags&FLAG_BLUR_BEHIND) != 0) {
                             if (!blurring) {
                                 //Slog.i(TAG, "BLUR BEHIND: " + w);
                                 blurring = true;
-                                mBlurShown = true;
                                 if (mBlurSurface == null) {
                                     if (SHOW_TRANSACTIONS) Slog.i(TAG, "  BLUR "
                                             + mBlurSurface + ": CREATE");
@@ -10448,20 +10482,25 @@ public class WindowManagerService extends IWindowManager.Stub
                                         Slog.e(TAG, "Exception creating Blur surface", e);
                                     }
                                 }
-                                if (SHOW_TRANSACTIONS) Slog.i(TAG, "  BLUR "
-                                        + mBlurSurface + ": SHOW pos=(0,0) (" +
-                                        dw + "x" + dh + "), layer=" + (w.mAnimLayer-1));
                                 if (mBlurSurface != null) {
+                                    if (SHOW_TRANSACTIONS) Slog.i(TAG, "  BLUR "
+                                            + mBlurSurface + ": pos=(0,0) (" +
+                                            dw + "x" + dh + "), layer=" + (w.mAnimLayer-1));
                                     mBlurSurface.setPosition(0, 0);
                                     mBlurSurface.setSize(dw, dh);
-                                    try {
-                                        mBlurSurface.show();
-                                    } catch (RuntimeException e) {
-                                        Slog.w(TAG, "Failure showing blur surface", e);
+                                    mBlurSurface.setLayer(w.mAnimLayer-2);
+                                    if (!mBlurShown) {
+                                        try {
+                                            if (SHOW_TRANSACTIONS) Slog.i(TAG, "  BLUR "
+                                                    + mBlurSurface + ": SHOW");
+                                            mBlurSurface.show();
+                                        } catch (RuntimeException e) {
+                                            Slog.w(TAG, "Failure showing blur surface", e);
+                                        }
+                                        mBlurShown = true;
                                     }
                                 }
                             }
-                            mBlurSurface.setLayer(w.mAnimLayer-2);
                         }
                     }
                 }
@@ -10613,6 +10652,7 @@ public class WindowManagerService extends IWindowManager.Stub
             mAppTransitionRunning = false;
             needRelayout = true;
             rebuildAppWindowListLocked();
+            assignLayersLocked();
             // Clear information about apps that were moving.
             mToBottomApps.clear();
         }
@@ -10677,6 +10717,7 @@ public class WindowManagerService extends IWindowManager.Stub
     boolean showSurfaceRobustlyLocked(WindowState win) {
         try {
             if (win.mSurface != null) {
+                win.mSurfaceShown = true;
                 win.mSurface.show();
                 if (win.mTurnOnScreen) {
                     if (DEBUG_VISIBILITY) Slog.v(TAG,
@@ -10723,6 +10764,7 @@ public class WindowManagerService extends IWindowManager.Stub
                                 + " pid=" + ws.mSession.mPid
                                 + " uid=" + ws.mSession.mUid);
                         ws.mSurface.destroy();
+                        ws.mSurfaceShown = false;
                         ws.mSurface = null;
                         mForceRemoves.add(ws);
                         i--;
@@ -10733,6 +10775,7 @@ public class WindowManagerService extends IWindowManager.Stub
                                 + ws + " surface=" + ws.mSurface
                                 + " token=" + win.mAppToken);
                         ws.mSurface.destroy();
+                        ws.mSurfaceShown = false;
                         ws.mSurface = null;
                         leakedSurface = true;
                     }
@@ -10769,6 +10812,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 Slog.w(TAG, "Looks like we have reclaimed some memory, clearing surface for retry.");
                 if (surface != null) {
                     surface.destroy();
+                    win.mSurfaceShown = false;
                     win.mSurface = null;
                 }
 
@@ -11245,15 +11289,17 @@ public class WindowManagerService extends IWindowManager.Stub
          * Show the dim surface.
          */
         void show(int dw, int dh) {
-            if (SHOW_TRANSACTIONS) Slog.i(TAG, "  DIM " + mDimSurface + ": SHOW pos=(0,0) (" +
-                    dw + "x" + dh + ")");
-            mDimShown = true;
-            try {
-                mDimSurface.setPosition(0, 0);
-                mDimSurface.setSize(dw, dh);
-                mDimSurface.show();
-            } catch (RuntimeException e) {
-                Slog.w(TAG, "Failure showing dim surface", e);
+            if (!mDimShown) {
+                if (SHOW_TRANSACTIONS) Slog.i(TAG, "  DIM " + mDimSurface + ": SHOW pos=(0,0) (" +
+                        dw + "x" + dh + ")");
+                mDimShown = true;
+                try {
+                    mDimSurface.setPosition(0, 0);
+                    mDimSurface.setSize(dw, dh);
+                    mDimSurface.show();
+                } catch (RuntimeException e) {
+                    Slog.w(TAG, "Failure showing dim surface", e);
+                }
             }
         }
 
