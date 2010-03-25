@@ -50,7 +50,7 @@ for the T-Mobile G1 and myTouch 3G (and similar devices).</p>
 <h2 id="WinUsbDriver">Installing the USB Driver for Windows</h2>
 
 <div class="sidebox-wrapper">
-<div class="sidebox-inner">
+<div class="sidebox">
   <p>The USB driver for Windows provides support for the following
 Android-powered
 devices:</p>

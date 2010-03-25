@@ -1180,7 +1180,7 @@ to commit data changes and otherwise prepare to stop interacting with the user.
 </p>
 
 <div class="sidebox-wrapper">
-<div class="sidebox-inner">
+<div class="sidebox">
 <h2>Calling into the superclass</h2>
 <p>
 An implementation of any activity lifecycle method should always first 

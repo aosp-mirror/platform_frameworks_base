@@ -93,7 +93,7 @@ Other IDEs</a>, as appropriate for your environment.</p>
 <h2 id="creating">Creating an AVD</h2>
 
 <div class="sidebox-wrapper">
-<div class="sidebox-inner">
+<div class="sidebox">
 <p>The Android SDK does not include any preconfigured AVDs, so
 you need to create an AVD before you can run any application in the emulator
 (even the Hello World application).</p>

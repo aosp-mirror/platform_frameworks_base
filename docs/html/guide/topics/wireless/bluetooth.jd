@@ -466,7 +466,8 @@ android.bluetooth.BluetoothServerSocket},
 the {@link android.bluetooth.BluetoothServerSocket} can (and should) be
 discarded, unless you want to accept more connections.</p>
 
-<div class="sidebox-wrapper"><div class="sidebox-inner">
+<div class="sidebox-wrapper">
+<div class="sidebox">
 <h2>About UUID</h2>
 
 <p>A Universally Unique Identifier (UUID) is a standardized 128-bit format for a string
@@ -476,7 +477,8 @@ used to uniquely identify your application's Bluetooth service. To get a UUID to
 use with your application, you can use one of the many random UUID generators on
 the web, then initialize a {@link java.util.UUID} with {@link
 java.util.UUID#fromString(String)}.</p>
-</div></div>
+</div>
+</div>
 
 <p>Here's the basic procedure to set up a server socket and accept a
 connection:</p>

@@ -113,9 +113,13 @@ href="{@docRoot}guide/publishing/publishing.html#market">Android マーケット
 
 <h3 id="mapsApiKey">7. アプリケーションが MapView 要素を使用している場合は、Maps API キーに登録する</h3>
 
-<div class="sidebox" style="margin-bottom:.5em;padding:1em;"><p>
+<div class="sidebox-wrapper">
+<div class="sidebox"><p>
 Maps API キーを取得する方法は、<a
-href="http://code.google.com/android/add-ons/google-apis/mapkey.html">Maps API キーの取得（英語のみ）</a> をご覧ください。</p></div>
+href="http://code.google.com/android/add-ons/google-apis/mapkey.html">Maps API キーの取得（英語のみ）</a>
+をご覧ください。</p>
+</div>
+</div>
 
 <p>アプリケーションが Mapview 要素を使用する場合、アプリケーションを Google Maps サービスで登録し、Maps API キーを取得する必要があります。その後、MapView で Google Maps からデータを取得できるようになります。この処理を行うため、Maps サービスに署名証明書の MD5 フィンガープリントを提出します。 </p>
 

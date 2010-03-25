@@ -220,7 +220,7 @@ following layout classes:</p>
 <h2 id="AppWidgetProvider">Using the AppWidgetProvider Class</h2>
 
 <div class="sidebox-wrapper">
-  <div class="sidebox-inner">
+<div class="sidebox">
     <p>You must declare your AppWidgetProvider class implementation as a broadcast receiver 
     using the <code>&lt;receiver></code> element in the AndroidManifest (see
     <a href="#Manifest">Declaring an App Widget in the Manifest</a> above).</p>

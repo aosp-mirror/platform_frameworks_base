@@ -107,7 +107,7 @@ complex layout.</p>
 <p>For more on building a UI layout, read <a href="declaring-layout.html">Declaring Layout</a>.
 
 <div class="sidebox-wrapper">
-<div class="sidebox-inner">
+<div class="sidebox">
   <p><b>Tip:</b> You can also draw View and ViewGroups objects in Java code, 
   using the <code>{@link android.view.ViewGroup#addView(View)}</code> methods 
   to dynamically insert new View and ViewGroup objects.</p>

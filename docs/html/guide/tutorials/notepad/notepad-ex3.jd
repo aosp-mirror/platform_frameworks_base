@@ -36,7 +36,7 @@ notes.</p>
 
   <ol>
     <li>Remove the code in <code>NoteEdit</code> that parses the title and body
-    from the extras Bundle. 
+    from the extras Bundle.
     <p>Instead, we are going to use the <code>DBHelper</code> class
     to access the notes from the database directly. All we need passed into the
     NoteEdit Activity is a <code>mRowId</code> (but only if we are editing, if creating we pass
@@ -57,7 +57,7 @@ if (body != null) {
 }</pre>
     </li>
   </ol>
-  
+
 <h2>Step 2</h2>
 
 <p>Create a class field for a <code>NotesDbAdapter</code> at the top of the NoteEdit class:</p>
@@ -67,11 +67,11 @@ if (body != null) {
     <pre>
 &nbsp;&nbsp;&nbsp; mDbHelper = new NotesDbAdapter(this);<br>
 &nbsp;&nbsp;&nbsp; mDbHelper.open();</pre>
-    
+
 <h2>Step 3</h2>
 
 <p>In <code>NoteEdit</code>, we need to check the <var>savedInstanceState</var> for the
-<code>mRowId</code>, in case the note 
+<code>mRowId</code>, in case the note
     editing contains a saved state in the Bundle, which we should recover (this would happen
   if our Activity lost focus and then restarted).</p>
   <ol>
@@ -87,11 +87,11 @@ if (body != null) {
         </pre>
         with this:
         <pre>
-        mRowId = savedInstanceState != null ? savedInstanceState.getLong(NotesDbAdapter.KEY_ROWID) 
-                                            : null;
+        mRowId = (savedInstanceState == null) ? null :
+            (Long) savedInstanceState.getSerializable(NotesDbAdapter.KEY_ROWID);
         if (mRowId == null) {
-            Bundle extras = getIntent().getExtras();            
-            mRowId = extras != null ? extras.getLong(NotesDbAdapter.KEY_ROWID) 
+            Bundle extras = getIntent().getExtras();
+            mRowId = extras != null ? extras.getLong(NotesDbAdapter.KEY_ROWID)
                                     : null;
         }
         </pre>
@@ -100,10 +100,15 @@ if (body != null) {
       Note the null check for <code>savedInstanceState</code>, and we still need to load up
       <code>mRowId</code> from the <code>extras</code> Bundle if it is not
       provided by the <code>savedInstanceState</code>. This is a ternary operator shorthand
-      to safely either use the value or null if it is not present.	
+      to safely either use the value or null if it is not present.
+    </li>
+    <li>
+      Note the use of <code>Bundle.getSerializable()</code> instead of
+      <code>Bundle.getLong()</code>.  The latter encoding returns a <code>long</code> primitive and
+      so can not be used to represent the case when <code>mRowId</code> is <code>null</code>.
     </li>
   </ol>
-  
+
 <h2>Step 4</h2>
 
 <p>Next, we need to populate the fields based on the <code>mRowId</code> if we
@@ -126,38 +131,38 @@ public void onClick(View view) {
 }</pre>
     <p>We will take care of storing the updates or new notes in the database
     ourselves, using the life-cycle methods.</p>
-    
+
     <p>The whole <code>onCreate()</code> method should now look like this:</p>
     <pre>
 super.onCreate(savedInstanceState);
- 
+
 mDbHelper = new NotesDbAdapter(this);
 mDbHelper.open();
- 
+
 setContentView(R.layout.note_edit);
- 
+
 mTitleText = (EditText) findViewById(R.id.title);
 mBodyText = (EditText) findViewById(R.id.body);
- 
+
 Button confirmButton = (Button) findViewById(R.id.confirm);
- 
-mRowId = savedInstanceState != null ? savedInstanceState.getLong(NotesDbAdapter.KEY_ROWID) 
-                                    : null;
+
+mRowId = (savedInstanceState == null) ? null :
+    (Long) savedInstanceState.getSerializable(NotesDbAdapter.KEY_ROWID);
 if (mRowId == null) {
     Bundle extras = getIntent().getExtras();
-    mRowId = extras != null ? extras.getLong(NotesDbAdapter.KEY_ROWID) 
+    mRowId = extras != null ? extras.getLong(NotesDbAdapter.KEY_ROWID)
                             : null;
 }
- 
+
 populateFields();
- 
+
 confirmButton.setOnClickListener(new View.OnClickListener() {
 
     public void onClick(View view) {
         setResult(RESULT_OK);
         finish();
     }
-     
+
 });</pre>
 
 <h2>Step 6</h2>
@@ -180,38 +185,36 @@ is an Android convenience method provided to take care of the Cursor life-cycle.
 and re-create resources as dictated by the Activity life-cycle, so we don't need to worry about
 doing that ourselves. After that, we just look up the title and body values from the Cursor
 and populate the View elements with them.</p>
- 
+
 
 <h2>Step 7</h2>
 
-    <div class="sidebox" style="border:2px solid #FFFFDD;float:right;
-      background-color:#FFFFEE;margin-right:0px;margin-bottom:.5em;
-      margin-top:1em;padding:0em;width:240px;">
-      <h2 style="border:0;font-size:12px;padding:.5em .5em .5em 1em;margin:0;
-      background-color:#FFFFDD;">Why handling life-cycle events is important</h2>
-      <p style="padding-left:.5em;font-size:12px;margin:0; 
-     padding:.0em .5em .5em 1em;">If you are used to always having control in your applications, you
-      might not understand why all this life-cycle work is necessary. The reason
-      is that in Android, you are not in control of your Activity, the 
-      operating system is!</p>
-      <p style="padding-left:.5em;font-size:12px;margin:0; 
-     padding:.0em .5em .5em 1em;">As we have already seen, the Android model is based around activities
-      calling each other. When one Activity calls another, the current Activity
-      is paused at the very least, and may be killed altogether if the
-      system starts to run low on resources. If this happens, your Activity will
-      have to store enough state to come back up later, preferably in the same
-      state it was in when it was killed.</p>
-      <p style="padding-left:.5em;font-size:12px;margin:0;padding:.0em .5em .5em 1em;">
-      Android has a <a href="{@docRoot}guide/topics/fundamentals.html#lcycles">well-defined life cycle</a>.
-      Lifecycle events can happen even if you are not handing off control to
-      another Activity explicitly. For example, perhaps a call comes in to the
-      handset. If this happens, and your Activity is running, it will be swapped
-      out while the call Activity takes over.</p>
-    </div>
+  <div class="sidebox-wrapper">
+  <div class="sidebox">
+    <h2>Why handling life-cycle events is important</h2>
+    <p>If you are used to always having control in your applications, you
+    might not understand why all this life-cycle work is necessary. The reason
+    is that in Android, you are not in control of your Activity, the
+    operating system is!</p>
+    <p>As we have already seen, the Android model is based around activities
+    calling each other. When one Activity calls another, the current Activity
+    is paused at the very least, and may be killed altogether if the
+    system starts to run low on resources. If this happens, your Activity will
+    have to store enough state to come back up later, preferably in the same
+    state it was in when it was killed.</p>
+    <p>
+    Android has a <a href="{@docRoot}guide/topics/fundamentals.html#lcycles">well-defined life
+cycle</a>.
+    Lifecycle events can happen even if you are not handing off control to
+    another Activity explicitly. For example, perhaps a call comes in to the
+    handset. If this happens, and your Activity is running, it will be swapped
+    out while the call Activity takes over.</p>
+  </div>
+  </div>
 
-<p>Still in the <code>NoteEdit</code> class, we now override the methods 
-   <code>onSaveInstanceState()</code>, <code>onPause()</code> and 
-   <code>onResume()</code>. These are our life-cycle methods 
+<p>Still in the <code>NoteEdit</code> class, we now override the methods
+   <code>onSaveInstanceState()</code>, <code>onPause()</code> and
+   <code>onResume()</code>. These are our life-cycle methods
    (along with <code>onCreate()</code> which we already have).</p>
 
 <p><code>onSaveInstanceState()</code> is called by Android if the
@@ -241,8 +244,10 @@ and populate the View elements with them.</p>
     &#64;Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putLong(NotesDbAdapter.KEY_ROWID, mRowId);
+        saveState();
+        outState.putSerializable(NotesDbAdapter.KEY_ROWID, mRowId);
     }</pre>
+    <p>We'll define <code>saveState()</code> next.</p>
     </li>
     <li><code>
       onPause()</code>:
@@ -252,7 +257,6 @@ and populate the View elements with them.</p>
         super.onPause();
         saveState();
     }</pre>
-    <p>We'll define <code>saveState()</code> next.</p>
     </li>
     <li><code>
       onResume()</code>:
@@ -264,6 +268,10 @@ and populate the View elements with them.</p>
     }</pre>
     </li>
   </ol>
+<p>Note that <code>saveState()</code> must be called in both <code>onSaveInstanceState()</code>
+and <code>onPause()</code> to ensure that the data is saved.  This is because there is no
+guarantee that <code>onSaveInstanceState()</code> will be called and because when it <em>is</em>
+called, it is called before <code>onPause()</code>.</p>
 
 
 <h2 style="clear:right;">Step 8</h2>
@@ -301,19 +309,18 @@ database.</p>
     necessary. The resulting method should look like this:</p>
 <pre>
 &#64;Override
-protected void onActivityResult(int requestCode, int resultCode, 
-                                Intent intent) {
+protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
     super.onActivityResult(requestCode, resultCode, intent);
     fillData();
 }</pre>
 
 <p>Because the other class now does the work, all this has to do is refresh
       the data.</p>
- 
+
 <h2>Step 10</h2>
 
 <p>Also remove the lines which set the title and body from the
-    <code>onListItemClick()</code> method (again they are no longer needed, 
+    <code>onListItemClick()</code> method (again they are no longer needed,
     only the <code>mRowId</code> is):</p>
 <pre>
     Cursor c = mNotesCursor;
@@ -344,13 +351,13 @@ so that all that should be left in that method is:
   other occurrences of <code>mNotesCursor</code> in your <code>fillData()</code> method.
 </ol>
 <p>
-Run it! (use <em>Run As -&gt; Android Application</em> on the project right 
+Run it! (use <em>Run As -&gt; Android Application</em> on the project right
 click menu again)</p>
 
 <h2>Solution and Next Steps</h2>
 
 <p>You can see the solution to this exercise in <code>Notepadv3Solution</code>
-from 
+from
 the zip file to compare with your own.</p>
 <p>
 When you are ready, move on to the <a href="notepad-extra-credit.html">Tutorial

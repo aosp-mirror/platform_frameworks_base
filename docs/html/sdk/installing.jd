@@ -130,7 +130,7 @@ debug your application.</p>
 
 <h2 id="components">Add Android Platforms and Other Components</h2>
 
-<div class="sidebox-wrapper" style="margin-right:2.5em;">
+<div class="sidebox-wrapper">
 <div class="sidebox">
 <p>The <strong>Android SDK and AVD Manager</strong> tool is pre-installed in
 your SDK. Using the tool is a key part of performing the initial setup of your

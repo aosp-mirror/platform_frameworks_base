@@ -35,7 +35,7 @@ here when you've completed the installation.</p>
 <h2 id="avd">Create an AVD</h2>
 
 <div class="sidebox-wrapper">
-  <div class="sidebox-inner">
+  <div class="sidebox">
     <p>To learn more about how to use AVDs and the options 
        available to you, refer to the 
        <a href="{@docRoot}guide/developing/tools/avd.html">Android 
@@ -243,7 +243,7 @@ to see it running.</p>
 </ol>
 
 <div class="sidebox-wrapper">
-  <div class="sidebox-inner">
+  <div class="sidebox">
     <p>To learn more about creating and editing run configurations in Eclipse, refer to
     <a href="{@docRoot}guide/developing/eclipse-adt.html#RunConfig">Developing In Eclipse, 
     with ADT</a>.</p>

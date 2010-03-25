@@ -613,7 +613,7 @@ onServiceDisconnected()}</code> メソッドが実装されているため、リ
 </p>
 
 <div class="sidebox-wrapper">
-<div class="sidebox-inner">
+<div class="sidebox">
 <h2>スーパークラスの呼び出し</h2>
 <p>
 どのアクティビティ ライフサイクル メソッドの実装でも、必ず最初にスーパークラス バージョンを呼び出す必要があります。次に例を示します:
