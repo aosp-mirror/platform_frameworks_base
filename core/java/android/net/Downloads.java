@@ -36,7 +36,7 @@ import java.io.InputStream;
 /**
  * The Download Manager
  *
- * @hide
+ *
  */
 public final class Downloads {
 
