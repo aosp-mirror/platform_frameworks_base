@@ -7401,7 +7401,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 try {
                     try {
                         mSurfaceX = mFrame.left + mXOffset;
-                        mSurfaceY = mFrame.top = mYOffset;
+                        mSurfaceY = mFrame.top + mYOffset;
                         mSurface.setPosition(mSurfaceX, mSurfaceY);
                         mSurfaceLayer = mAnimLayer;
                         mSurface.setLayer(mAnimLayer);
