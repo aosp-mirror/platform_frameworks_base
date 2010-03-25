@@ -17,11 +17,10 @@
 package android.webkit;
 
 import android.app.ActivityManager;
-import android.content.BroadcastReceiver;
+import android.content.ComponentCallbacks;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.res.AssetManager;
+import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.ParseException;
@@ -34,12 +33,15 @@ import android.provider.OpenableColumns;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Surface;
+import android.view.ViewRoot;
 import android.view.WindowManager;
 
 import junit.framework.Assert;
 
 import java.io.InputStream;
+import java.lang.ref.WeakReference;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Iterator;
@@ -76,11 +78,6 @@ class BrowserFrame extends Handler {
     // Attached Javascript interfaces
     private Map<String, Object> mJSInterfaceMap;
 
-    // WindowManager to obtain the Display configuration.
-    private WindowManager mWindowManager;
-    // Orientation listener
-    private BroadcastReceiver mOrientationListener;
-
     // message ids
     // a message posted when a frame loading is completed
     static final int FRAME_COMPLETED = 1001;
@@ -109,6 +106,70 @@ class BrowserFrame extends Handler {
     // Static instance of a JWebCoreJavaBridge to handle timer and cookie
     // requests from WebCore.
     static JWebCoreJavaBridge sJavaBridge;
+
+    private static class ConfigCallback implements ComponentCallbacks {
+        private final ArrayList<WeakReference<Handler>> mHandlers =
+                new ArrayList<WeakReference<Handler>>();
+        private final WindowManager mWindowManager;
+
+        ConfigCallback(WindowManager wm) {
+            mWindowManager = wm;
+        }
+
+        public synchronized void addHandler(Handler h) {
+            // No need to ever remove a Handler. If the BrowserFrame is
+            // destroyed, it will be collected and the WeakReference set to
+            // null. If it happens to still be around during a configuration
+            // change, the message will be ignored.
+            mHandlers.add(new WeakReference<Handler>(h));
+        }
+
+        public void onConfigurationChanged(Configuration newConfig) {
+            if (mHandlers.size() == 0) {
+                return;
+            }
+            int orientation =
+                    mWindowManager.getDefaultDisplay().getOrientation();
+            switch (orientation) {
+                case Surface.ROTATION_90:
+                    orientation = 90;
+                    break;
+                case Surface.ROTATION_180:
+                    orientation = 180;
+                    break;
+                case Surface.ROTATION_270:
+                    orientation = -90;
+                    break;
+                case Surface.ROTATION_0:
+                    orientation = 0;
+                    break;
+                default:
+                    break;
+            }
+            synchronized (this) {
+                // Create a list of handlers to remove. Go ahead and make it
+                // the same size to avoid resizing.
+                ArrayList<WeakReference> handlersToRemove =
+                        new ArrayList<WeakReference>(mHandlers.size());
+                for (WeakReference<Handler> wh : mHandlers) {
+                    Handler h = wh.get();
+                    if (h != null) {
+                        h.sendMessage(h.obtainMessage(ORIENTATION_CHANGED,
+                                    orientation, 0));
+                    } else {
+                        handlersToRemove.add(wh);
+                    }
+                }
+                // Now remove all the null references.
+                for (WeakReference weak : handlersToRemove) {
+                    mHandlers.remove(weak);
+                }
+            }
+        }
+
+        public void onLowMemory() {}
+    }
+    static ConfigCallback sConfigCallback;
 
     /**
      * Create a new BrowserFrame to be used in an application.
@@ -143,6 +204,15 @@ class BrowserFrame extends Handler {
             // create PluginManager with current Context
             PluginManager.getInstance(appContext);
         }
+
+        if (sConfigCallback == null) {
+            sConfigCallback = new ConfigCallback(
+                    (WindowManager) context.getSystemService(
+                            Context.WINDOW_SERVICE));
+            ViewRoot.addConfigCallback(sConfigCallback);
+        }
+        sConfigCallback.addHandler(this);
+
         mJSInterfaceMap = javascriptInterfaces;
 
         mSettings = settings;
@@ -157,40 +227,6 @@ class BrowserFrame extends Handler {
         if (DebugFlags.BROWSER_FRAME) {
             Log.v(LOGTAG, "BrowserFrame constructor: this=" + this);
         }
-
-        mWindowManager = (WindowManager) context.getSystemService(
-                Context.WINDOW_SERVICE);
-        mOrientationListener = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                if (Intent.ACTION_CONFIGURATION_CHANGED.equals(
-                        intent.getAction())) {
-                    int orientation =
-                            mWindowManager.getDefaultDisplay().getOrientation();
-                    switch (orientation) {
-                        case Surface.ROTATION_90:
-                            orientation = 90;
-                            break;
-                        case Surface.ROTATION_180:
-                            orientation = 180;
-                            break;
-                        case Surface.ROTATION_270:
-                            orientation = -90;
-                            break;
-                        case Surface.ROTATION_0:
-                            orientation = 0;
-                            break;
-                        default:
-                            break;
-                    }
-                    sendMessage(
-                            obtainMessage(ORIENTATION_CHANGED, orientation, 0));
-
-                }
-            }
-        };
-        context.registerReceiver(mOrientationListener,
-                new IntentFilter(Intent.ACTION_CONFIGURATION_CHANGED));
     }
 
     /**
@@ -397,7 +433,6 @@ class BrowserFrame extends Handler {
      * Destroy all native components of the BrowserFrame.
      */
     public void destroy() {
-        mContext.unregisterReceiver(mOrientationListener);
         nativeDestroyFrame();
         mBlockMessages = true;
         removeCallbacksAndMessages(null);
