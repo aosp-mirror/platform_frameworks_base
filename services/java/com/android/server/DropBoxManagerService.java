@@ -61,10 +61,11 @@ import java.util.zip.GZIPOutputStream;
  */
 public final class DropBoxManagerService extends IDropBoxManagerService.Stub {
     private static final String TAG = "DropBoxManagerService";
-    private static final int DEFAULT_RESERVE_PERCENT = 10;
-    private static final int DEFAULT_QUOTA_PERCENT = 10;
-    private static final int DEFAULT_QUOTA_KB = 5 * 1024;
     private static final int DEFAULT_AGE_SECONDS = 3 * 86400;
+    private static final int DEFAULT_MAX_FILES = 1000;
+    private static final int DEFAULT_QUOTA_KB = 5 * 1024;
+    private static final int DEFAULT_QUOTA_PERCENT = 10;
+    private static final int DEFAULT_RESERVE_PERCENT = 10;
     private static final int QUOTA_RESCAN_MILLIS = 5000;
 
     private static final boolean PROFILE_DUMP = false;
@@ -99,12 +100,20 @@ public final class DropBoxManagerService extends IDropBoxManagerService.Stub {
         @Override
         public void onReceive(Context context, Intent intent) {
             mCachedQuotaUptimeMillis = 0;  // Force a re-check of quota size
-            try {
-                init();
-                trimToFit();
-            } catch (IOException e) {
-                Slog.e(TAG, "Can't init", e);
-            }
+
+            // Run the initialization in the background (not this main thread).
+            // The init() and trimToFit() methods are synchronized, so they still
+            // block other users -- but at least the onReceive() call can finish.
+            new Thread() {
+                public void run() {
+                    try {
+                        init();
+                        trimToFit();
+                    } catch (IOException e) {
+                        Slog.e(TAG, "Can't init", e);
+                    }
+                }
+            }.start();
         }
     };
 
@@ -631,10 +640,12 @@ public final class DropBoxManagerService extends IDropBoxManagerService.Stub {
 
         int ageSeconds = Settings.Secure.getInt(mContentResolver,
                 Settings.Secure.DROPBOX_AGE_SECONDS, DEFAULT_AGE_SECONDS);
+        int maxFiles = Settings.Secure.getInt(mContentResolver,
+                Settings.Secure.DROPBOX_MAX_FILES, DEFAULT_MAX_FILES);
         long cutoffMillis = System.currentTimeMillis() - ageSeconds * 1000;
         while (!mAllFiles.contents.isEmpty()) {
             EntryFile entry = mAllFiles.contents.first();
-            if (entry.timestampMillis > cutoffMillis) break;
+            if (entry.timestampMillis > cutoffMillis && mAllFiles.contents.size() < maxFiles) break;
 
             FileList tag = mFilesByTag.get(entry.tag);
             if (tag != null && tag.contents.remove(entry)) tag.blocks -= entry.blocks;
@@ -673,7 +684,7 @@ public final class DropBoxManagerService extends IDropBoxManagerService.Stub {
         // A single circular buffer (a la logcat) would be simpler, but this
         // way we can handle fat/bursty data (like 1MB+ bugreports, 300KB+
         // kernel crash dumps, and 100KB+ ANR reports) without swamping small,
-        // well-behaved data // streams (event statistics, profile data, etc).
+        // well-behaved data streams (event statistics, profile data, etc).
         //
         // Deleted files are replaced with zero-length tombstones to mark what
         // was lost.  Tombstones are expunged by age (see above).

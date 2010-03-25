@@ -2903,6 +2903,12 @@ public final class Settings {
         public static final String DROPBOX_AGE_SECONDS =
                 "dropbox_age_seconds";
         /**
+         * Maximum number of entry files which {@link android.os.IDropBox} will keep around.
+         * @hide
+         */
+        public static final String DROPBOX_MAX_FILES =
+                "dropbox_max_files";
+        /**
          * Maximum amount of disk space used by {@link android.os.IDropBox} no matter what.
          * @hide
          */

@@ -39,6 +39,7 @@ public class DropBoxTest extends AndroidTestCase {
     public void tearDown() throws Exception {
         ContentResolver cr = getContext().getContentResolver();
         Settings.Secure.putString(cr, Settings.Secure.DROPBOX_AGE_SECONDS, "");
+        Settings.Secure.putString(cr, Settings.Secure.DROPBOX_MAX_FILES, "");
         Settings.Secure.putString(cr, Settings.Secure.DROPBOX_QUOTA_KB, "");
         Settings.Secure.putString(cr, Settings.Secure.DROPBOX_TAG_PREFIX + "DropBoxTest", "");
     }
@@ -455,6 +456,55 @@ public class DropBoxTest extends AndroidTestCase {
         assertTrue(null == dropbox.getNextEntry(null, e0.getTimeMillis()));
         assertEquals("TEST1", e0.getText(80));
         e0.close();
+    }
+
+    public void testFileCountLimits() throws Exception {
+        File dir = getEmptyDir("testFileCountLimits");
+
+        DropBoxManagerService service = new DropBoxManagerService(getContext(), dir);
+        DropBoxManager dropbox = new DropBoxManager(service);
+        dropbox.addText("DropBoxTest", "TEST0");
+        dropbox.addText("DropBoxTest", "TEST1");
+        dropbox.addText("DropBoxTest", "TEST2");
+        dropbox.addText("DropBoxTest", "TEST3");
+        dropbox.addText("DropBoxTest", "TEST4");
+        dropbox.addText("DropBoxTest", "TEST5");
+
+        // Verify 6 files added
+        DropBoxManager.Entry e0 = dropbox.getNextEntry(null, 0);
+        DropBoxManager.Entry e1 = dropbox.getNextEntry(null, e0.getTimeMillis());
+        DropBoxManager.Entry e2 = dropbox.getNextEntry(null, e1.getTimeMillis());
+        DropBoxManager.Entry e3 = dropbox.getNextEntry(null, e2.getTimeMillis());
+        DropBoxManager.Entry e4 = dropbox.getNextEntry(null, e3.getTimeMillis());
+        DropBoxManager.Entry e5 = dropbox.getNextEntry(null, e4.getTimeMillis());
+        assertTrue(null == dropbox.getNextEntry(null, e5.getTimeMillis()));
+        assertEquals("TEST0", e0.getText(80));
+        assertEquals("TEST5", e5.getText(80));
+
+        e0.close();
+        e1.close();
+        e2.close();
+        e3.close();
+        e4.close();
+        e5.close();
+
+        // Limit to 3 files and add one more entry
+        ContentResolver cr = getContext().getContentResolver();
+        Settings.Secure.putString(cr, Settings.Secure.DROPBOX_MAX_FILES, "3");
+        dropbox.addText("DropBoxTest", "TEST6");
+
+        // Verify only 3 files left
+        DropBoxManager.Entry f0 = dropbox.getNextEntry(null, 0);
+        DropBoxManager.Entry f1 = dropbox.getNextEntry(null, f0.getTimeMillis());
+        DropBoxManager.Entry f2 = dropbox.getNextEntry(null, f1.getTimeMillis());
+        assertTrue(null == dropbox.getNextEntry(null, f2.getTimeMillis()));
+        assertEquals("TEST4", f0.getText(80));
+        assertEquals("TEST5", f1.getText(80));
+        assertEquals("TEST6", f2.getText(80));
+
+        f0.close();
+        f1.close();
+        f2.close();
     }
 
     public void testCreateDropBoxManagerWithInvalidDirectory() throws Exception {
