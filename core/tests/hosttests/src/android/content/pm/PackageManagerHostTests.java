@@ -37,14 +37,11 @@ import junit.framework.Test;
 public class PackageManagerHostTests extends DeviceTestCase {
 
     private static final String LOG_TAG = "PackageManagerHostTests";
+    private PackageManagerHostTestUtils mPMHostUtils = null;
 
-    // TODO: get this value from Android Environment instead of hardcoding
-    private static final String APP_PRIVATE_PATH = "/data/app-private/";
-    private static final String DEVICE_APP_PATH = "/data/app/";
-    private static final String SDCARD_APP_PATH = "/mnt/secure/asec/";
-
-    private static final int MAX_WAIT_FOR_DEVICE_TIME = 120 * 1000;
-    private static final int WAIT_FOR_DEVICE_POLL_TIME = 10 * 1000;
+    private String appPrivatePath = null;
+    private String deviceAppPath = null;
+    private String sdcardAppPath = null;
 
     // Various test files and their corresponding package names...
 
@@ -92,6 +89,25 @@ public class PackageManagerHostTests extends DeviceTestCase {
         super.setUp();
         // ensure apk path has been set before test is run
         assertNotNull(getTestAppPath());
+
+        // setup the PackageManager host tests utilities class, and get various paths we'll need...
+        mPMHostUtils = new PackageManagerHostTestUtils(getDevice());
+        appPrivatePath = mPMHostUtils.getAppPrivatePath();
+        deviceAppPath = mPMHostUtils.getDeviceAppPath();
+        sdcardAppPath = mPMHostUtils.getSDCardAppPath();
+    }
+
+    /**
+     * Get the absolute file system location of test app with given filename
+     * @param fileName the file name of the test app apk
+     * @return {@link String} of absolute file path
+     */
+    public String getTestAppFilePath(String fileName) {
+        return String.format("%s%s%s", getTestAppPath(), File.separator, fileName);
+    }
+
+    public static Test suite() {
+        return new DeviceTestSuite(PackageManagerHostTests.class);
     }
 
     /**
@@ -102,266 +118,23 @@ public class PackageManagerHostTests extends DeviceTestCase {
      */
     public void testPushAppPrivate() throws IOException, InterruptedException {
         Log.i(LOG_TAG, "testing pushing an apk to /data/app-private");
-        final String apkAppPrivatePath =  APP_PRIVATE_PATH + SIMPLE_APK;
+        final String apkAppPrivatePath =  appPrivatePath + SIMPLE_APK;
 
         // cleanup test app just in case it was accidently installed
         getDevice().uninstallPackage(SIMPLE_PKG);
-        executeShellCommand("stop");
-        pushFile(getTestAppFilePath(SIMPLE_APK), apkAppPrivatePath);
-        // sanity check to make sure file is there
-        assertTrue(doesRemoteFileExist(apkAppPrivatePath));
-        executeShellCommand("start");
+        mPMHostUtils.executeShellCommand("stop");
+        mPMHostUtils.pushFile(getTestAppFilePath(SIMPLE_APK), apkAppPrivatePath);
 
-        waitForDevice();
+        // sanity check to make sure file is there
+        assertTrue(mPMHostUtils.doesRemoteFileExist(apkAppPrivatePath));
+        mPMHostUtils.executeShellCommand("start");
+
+        mPMHostUtils.waitForDevice();
 
         // grep for package to make sure its not installed
-        assertFalse(doesPackageExist(SIMPLE_PKG));
+        assertFalse(mPMHostUtils.doesPackageExist(SIMPLE_PKG));
         // ensure it has been deleted from app-private
-        assertFalse(doesRemoteFileExist(apkAppPrivatePath));
-    }
-
-    /**
-     * Helper method to push a file to device
-     * @param apkAppPrivatePath
-     * @throws IOException
-     */
-    private void pushFile(final String localFilePath, final String destFilePath)
-            throws IOException {
-        SyncResult result = getDevice().getSyncService().pushFile(
-                localFilePath, destFilePath,
-                new NullSyncProgressMonitor());
-        assertEquals(SyncService.RESULT_OK, result.getCode());
-    }
-
-    /**
-     * Helper method to install a file to device
-     * @param localFilePath the absolute file system path to file on local host to install
-     * @param reinstall set to <code>true</code> if re-install of app should be performed
-     * @throws IOException
-     */
-    private void installFile(final String localFilePath, final boolean replace)
-            throws IOException {
-        String result = getDevice().installPackage(localFilePath, replace);
-        assertEquals(null, result);
-    }
-
-    /**
-     * Helper method to determine if file on device exists.
-     *
-     * @param destPath the absolute path of file on device to check
-     * @return <code>true</code> if file exists, <code>false</code> otherwise.
-     * @throws IOException if adb shell command failed
-     */
-    private boolean doesRemoteFileExist(String destPath) throws IOException {
-        String lsGrep = executeShellCommand(String.format("ls %s",
-                destPath));
-        return !lsGrep.contains("No such file or directory");
-    }
-
-    /**
-     * Helper method to determine if file exists on the device containing a given string.
-     *
-     * @param destPath the
-     * @return <code>true</code> if file exists containing given string,
-     *         <code>false</code> otherwise.
-     * @throws IOException if adb shell command failed
-     */
-    private boolean doesRemoteFileExistContainingString(String destPath, String searchString)
-            throws IOException {
-        String lsResult = executeShellCommand(String.format("ls %s",
-                destPath));
-        return lsResult.contains(searchString);
-    }
-
-    /**
-     * Helper method to determine if package on device exists.
-     *
-     * @param packageName the Android manifest package to check.
-     * @return <code>true</code> if package exists, <code>false</code> otherwise
-     * @throws IOException if adb shell command failed
-     */
-    private boolean doesPackageExist(String packageName) throws IOException {
-        String pkgGrep = executeShellCommand(String.format("pm path %s",
-                packageName));
-        return pkgGrep.contains("package:");
-    }
-
-    /**
-     * Helper method to determine if app was installed on device.
-     *
-     * @param packageName package name to check for
-     * @return <code>true</code> if file exists, <code>false</code> otherwise.
-     * @throws IOException if adb shell command failed
-     */
-    private boolean doesAppExistOnDevice(String packageName) throws IOException {
-        return doesRemoteFileExistContainingString(DEVICE_APP_PATH, packageName);
-    }
-
-    /**
-     * Helper method to determine if app was installed on SD card.
-     *
-     * @param packageName package name to check for
-     * @return <code>true</code> if file exists, <code>false</code> otherwise.
-     * @throws IOException if adb shell command failed
-     */
-    private boolean doesAppExistOnSDCard(String packageName) throws IOException {
-        return doesRemoteFileExistContainingString(SDCARD_APP_PATH, packageName);
-    }
-
-    /**
-     * Waits for device's package manager to respond.
-     *
-     * @throws InterruptedException
-     * @throws IOException
-     */
-    private void waitForDevice() throws InterruptedException, IOException {
-        Log.i(LOG_TAG, "waiting for device");
-        int currentWaitTime = 0;
-        // poll the package manager until it returns something for android
-        while (!doesPackageExist("android")) {
-            Thread.sleep(WAIT_FOR_DEVICE_POLL_TIME);
-            currentWaitTime += WAIT_FOR_DEVICE_POLL_TIME;
-            if (currentWaitTime > MAX_WAIT_FOR_DEVICE_TIME) {
-                Log.e(LOG_TAG, "time out waiting for device");
-                throw new InterruptedException();
-            }
-        }
-    }
-
-    /**
-     * Helper method which executes a adb shell command and returns output as a {@link String}
-     * @return
-     * @throws IOException
-     */
-    private String executeShellCommand(String command) throws IOException {
-        Log.d(LOG_TAG, String.format("adb shell %s", command));
-        CollectingOutputReceiver receiver = new CollectingOutputReceiver();
-        getDevice().executeShellCommand(command, receiver);
-        String output = receiver.getOutput();
-        Log.d(LOG_TAG, String.format("Result: %s", output));
-        return output;
-    }
-
-    /**
-     * Get the absolute file system location of test app with given filename
-     * @param fileName the file name of the test app apk
-     * @return {@link String} of absolute file path
-     */
-    private String getTestAppFilePath(String fileName) {
-        return String.format("%s%s%s", getTestAppPath(), File.separator, fileName);
-    }
-
-    public static Test suite() {
-        return new DeviceTestSuite(PackageManagerHostTests.class);
-    }
-
-    /**
-     * A {@link IShellOutputReceiver} which collects the whole shell output into one {@link String}
-     */
-    private static class CollectingOutputReceiver extends MultiLineReceiver {
-
-        private StringBuffer mOutputBuffer = new StringBuffer();
-
-        public String getOutput() {
-            return mOutputBuffer.toString();
-        }
-
-        @Override
-        public void processNewLines(String[] lines) {
-            for (String line: lines) {
-                mOutputBuffer.append(line);
-                mOutputBuffer.append("\n");
-            }
-        }
-
-        public boolean isCancelled() {
-            return false;
-        }
-    }
-
-    private static class NullSyncProgressMonitor implements ISyncProgressMonitor {
-        public void advance(int work) {
-            // ignore
-        }
-
-        public boolean isCanceled() {
-            // ignore
-            return false;
-        }
-
-        public void start(int totalWork) {
-            // ignore
-
-        }
-
-        public void startSubTask(String name) {
-            // ignore
-        }
-
-        public void stop() {
-            // ignore
-        }
-    }
-
-    /**
-     * Helper method for installing an app to wherever is specified in its manifest, and
-     * then verifying the app was installed onto SD Card.
-     * <p/>
-     * Assumes adb is running as root in device under test.
-     */
-    void installAppAndVerifyExistsOnSDCard(String apkName, String pkgName, boolean overwrite)
-            throws IOException, InterruptedException {
-        // Start with a clean slate if we're not overwriting
-        if (!overwrite) {
-            // cleanup test app just in case it already exists
-            getDevice().uninstallPackage(pkgName);
-            // grep for package to make sure its not installed
-            assertFalse(doesPackageExist(pkgName));
-        }
-
-        installFile(getTestAppFilePath(apkName), overwrite);
-        assertTrue(doesAppExistOnSDCard(pkgName));
-        assertFalse(doesAppExistOnDevice(pkgName));
-        waitForDevice();
-
-        // grep for package to make sure it is installed
-        assertTrue(doesPackageExist(pkgName));
-    }
-
-    /**
-     * Helper method for installing an app to wherever is specified in its manifest, and
-     * then verifying the app was installed onto device.
-     * <p/>
-     * Assumes adb is running as root in device under test.
-     */
-    void installAppAndVerifyExistsOnDevice(String apkName, String pkgName, boolean overwrite)
-            throws IOException, InterruptedException {
-        // Start with a clean slate if we're not overwriting
-        if (!overwrite) {
-            // cleanup test app just in case it already exists
-            getDevice().uninstallPackage(pkgName);
-            // grep for package to make sure its not installed
-            assertFalse(doesPackageExist(pkgName));
-        }
-
-        installFile(getTestAppFilePath(apkName), overwrite);
-        assertFalse(doesAppExistOnSDCard(pkgName));
-        assertTrue(doesAppExistOnDevice(pkgName));
-        waitForDevice();
-
-        // grep for package to make sure it is installed
-        assertTrue(doesPackageExist(pkgName));
-    }
-
-    /**
-     * Helper method for uninstalling an app.
-     * <p/>
-     * Assumes adb is running as root in device under test.
-     */
-    void uninstallApp(String pkgName) throws IOException, InterruptedException {
-        getDevice().uninstallPackage(pkgName);
-        // make sure its not installed anymore
-        assertFalse(doesPackageExist(pkgName));
+        assertFalse(mPMHostUtils.doesRemoteFileExist(apkAppPrivatePath));
     }
 
     /**
@@ -374,11 +147,12 @@ public class PackageManagerHostTests extends DeviceTestCase {
         Log.i(LOG_TAG, "Test an app with installLocation=auto gets installed on device");
 
         try {
-            installAppAndVerifyExistsOnDevice(AUTO_LOC_APK, AUTO_LOC_PKG, false);
+            mPMHostUtils.installAppAndVerifyExistsOnDevice(
+                    getTestAppFilePath(AUTO_LOC_APK), AUTO_LOC_PKG, false);
         }
         // cleanup test app
         finally {
-            uninstallApp(AUTO_LOC_PKG);
+            mPMHostUtils.uninstallApp(AUTO_LOC_PKG);
         }
     }
 
@@ -392,11 +166,12 @@ public class PackageManagerHostTests extends DeviceTestCase {
         Log.i(LOG_TAG, "Test an app with installLocation=internalOnly gets installed on device");
 
         try {
-            installAppAndVerifyExistsOnDevice(INTERNAL_LOC_APK, INTERNAL_LOC_PKG, false);
+            mPMHostUtils.installAppAndVerifyExistsOnDevice(
+                    getTestAppFilePath(INTERNAL_LOC_APK), INTERNAL_LOC_PKG, false);
         }
         // cleanup test app
         finally {
-            uninstallApp(INTERNAL_LOC_PKG);
+            mPMHostUtils.uninstallApp(INTERNAL_LOC_PKG);
         }
     }
 
@@ -410,11 +185,12 @@ public class PackageManagerHostTests extends DeviceTestCase {
         Log.i(LOG_TAG, "Test an app with installLocation=preferExternal gets installed on SD Card");
 
         try {
-            installAppAndVerifyExistsOnSDCard(EXTERNAL_LOC_APK, EXTERNAL_LOC_PKG, false);
+            mPMHostUtils.installAppAndVerifyExistsOnSDCard(
+                    getTestAppFilePath(EXTERNAL_LOC_APK), EXTERNAL_LOC_PKG, false);
         }
         // cleanup test app
         finally {
-            uninstallApp(EXTERNAL_LOC_PKG);
+            mPMHostUtils.uninstallApp(EXTERNAL_LOC_PKG);
         }
     }
 
@@ -432,13 +208,15 @@ public class PackageManagerHostTests extends DeviceTestCase {
         Log.i(LOG_TAG, "Test installing an app first to the device, then to the SD Card");
 
         try {
-            installAppAndVerifyExistsOnDevice(VERSATILE_LOC_INTERNAL_APK, VERSATILE_LOC_PKG, false);
-            uninstallApp(VERSATILE_LOC_PKG);
-            installAppAndVerifyExistsOnSDCard(VERSATILE_LOC_EXTERNAL_APK, VERSATILE_LOC_PKG, false);
+            mPMHostUtils.installAppAndVerifyExistsOnDevice(
+                    getTestAppFilePath(VERSATILE_LOC_INTERNAL_APK), VERSATILE_LOC_PKG, false);
+            mPMHostUtils.uninstallApp(VERSATILE_LOC_PKG);
+            mPMHostUtils.installAppAndVerifyExistsOnSDCard(
+                    getTestAppFilePath(VERSATILE_LOC_EXTERNAL_APK), VERSATILE_LOC_PKG, false);
         }
         // cleanup test app
         finally {
-            uninstallApp(VERSATILE_LOC_PKG);
+            mPMHostUtils.uninstallApp(VERSATILE_LOC_PKG);
         }
     }
 
@@ -457,14 +235,16 @@ public class PackageManagerHostTests extends DeviceTestCase {
 
         try {
             // install the app externally
-            installAppAndVerifyExistsOnSDCard(VERSATILE_LOC_EXTERNAL_APK, VERSATILE_LOC_PKG, false);
-            uninstallApp(VERSATILE_LOC_PKG);
+            mPMHostUtils.installAppAndVerifyExistsOnSDCard(
+                    getTestAppFilePath(VERSATILE_LOC_EXTERNAL_APK), VERSATILE_LOC_PKG, false);
+            mPMHostUtils.uninstallApp(VERSATILE_LOC_PKG);
             // then replace the app with one marked for internalOnly
-            installAppAndVerifyExistsOnDevice(VERSATILE_LOC_INTERNAL_APK, VERSATILE_LOC_PKG, true);
+            mPMHostUtils.installAppAndVerifyExistsOnDevice(
+                    getTestAppFilePath(VERSATILE_LOC_INTERNAL_APK), VERSATILE_LOC_PKG, false);
         }
         // cleanup test app
         finally {
-            uninstallApp(VERSATILE_LOC_PKG);
+          mPMHostUtils.uninstallApp(VERSATILE_LOC_PKG);
         }
     }
 
@@ -480,15 +260,15 @@ public class PackageManagerHostTests extends DeviceTestCase {
 
         try {
             // install the app externally
-            installAppAndVerifyExistsOnSDCard(UPDATE_EXTERNAL_LOC_V1_EXT_APK,
-                    UPDATE_EXTERNAL_LOC_PKG, false);
+            mPMHostUtils.installAppAndVerifyExistsOnSDCard(getTestAppFilePath(
+                    UPDATE_EXTERNAL_LOC_V1_EXT_APK), UPDATE_EXTERNAL_LOC_PKG, false);
             // now replace the app with one where the location is blank (app should stay external)
-            installAppAndVerifyExistsOnSDCard(UPDATE_EXTERNAL_LOC_V2_NONE_APK,
-                    UPDATE_EXTERNAL_LOC_PKG, true);
+            mPMHostUtils.installAppAndVerifyExistsOnSDCard(getTestAppFilePath(
+                    UPDATE_EXTERNAL_LOC_V2_NONE_APK), UPDATE_EXTERNAL_LOC_PKG, true);
         }
         // cleanup test app
         finally {
-            uninstallApp(UPDATE_EXTERNAL_LOC_PKG);
+          mPMHostUtils.uninstallApp(UPDATE_EXTERNAL_LOC_PKG);
         }
     }
 
@@ -504,16 +284,15 @@ public class PackageManagerHostTests extends DeviceTestCase {
 
         try {
             // install the app externally
-            installAppAndVerifyExistsOnSDCard(UPDATE_EXT_TO_INT_LOC_V1_EXT_APK,
-                    UPDATE_EXT_TO_INT_LOC_PKG, false);
+            mPMHostUtils.installAppAndVerifyExistsOnSDCard(getTestAppFilePath(
+                    UPDATE_EXT_TO_INT_LOC_V1_EXT_APK), UPDATE_EXT_TO_INT_LOC_PKG, false);
             // now replace the app with an update marked for internalOnly...
-            installAppAndVerifyExistsOnDevice(UPDATE_EXT_TO_INT_LOC_V2_INT_APK,
-                    UPDATE_EXT_TO_INT_LOC_PKG, true);
+            mPMHostUtils.installAppAndVerifyExistsOnDevice(getTestAppFilePath(
+                    UPDATE_EXT_TO_INT_LOC_V2_INT_APK), UPDATE_EXT_TO_INT_LOC_PKG, true);
         }
         // cleanup test app
         finally {
-            uninstallApp(UPDATE_EXT_TO_INT_LOC_PKG);
+            mPMHostUtils.uninstallApp(UPDATE_EXT_TO_INT_LOC_PKG);
         }
     }
-
 }
