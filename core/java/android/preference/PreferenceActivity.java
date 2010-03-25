@@ -23,7 +23,10 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.text.TextUtils;
 import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
 
 /**
  * Shows a hierarchy of {@link Preference} objects as
@@ -69,30 +72,43 @@ import android.view.View;
  * As a convenience, this activity implements a click listener for any
  * preference in the current hierarchy, see
  * {@link #onPreferenceTreeClick(PreferenceScreen, Preference)}.
- * 
+ *
  * @see Preference
  * @see PreferenceScreen
  */
 public abstract class PreferenceActivity extends ListActivity implements
         PreferenceManager.OnPreferenceTreeClickListener {
-    
+
     private static final String PREFERENCES_TAG = "android:preferences";
-    
+
+    // extras that allow any preference activity to be launched as part of a wizard
+
+    // show Back and Next buttons? takes boolean parameter
+    // Back will then return RESULT_CANCELED and Next RESULT_OK
+    private static final String EXTRA_PREFS_SHOW_BUTTON_BAR = "extra_prefs_show_button_bar";
+
+    // specify custom text for the Back or Next buttons, or cause a button to not appear
+    // at all by setting it to null
+    private static final String EXTRA_PREFS_SET_NEXT_TEXT = "extra_prefs_set_next_text";
+    private static final String EXTRA_PREFS_SET_BACK_TEXT = "extra_prefs_set_back_text";
+
+    private Button mNextButton;
+
     private PreferenceManager mPreferenceManager;
-    
+
     private Bundle mSavedInstanceState;
 
     /**
      * The starting request code given out to preference framework.
      */
     private static final int FIRST_REQUEST_CODE = 100;
-    
+
     private static final int MSG_BIND_PREFERENCES = 0;
     private Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                
+
                 case MSG_BIND_PREFERENCES:
                     bindPreferences();
                     break;
@@ -105,7 +121,49 @@ public abstract class PreferenceActivity extends ListActivity implements
         super.onCreate(savedInstanceState);
 
         setContentView(com.android.internal.R.layout.preference_list_content);
-        
+
+        // see if we should show Back/Next buttons
+        Intent intent = getIntent();
+        if (intent.getBooleanExtra(EXTRA_PREFS_SHOW_BUTTON_BAR, false)) {
+
+            findViewById(com.android.internal.R.id.button_bar).setVisibility(View.VISIBLE);
+
+            Button backButton = (Button)findViewById(com.android.internal.R.id.back_button);
+            backButton.setOnClickListener(new OnClickListener() {
+                public void onClick(View v) {
+                    setResult(RESULT_CANCELED);
+                    finish();
+                }
+            });
+            mNextButton = (Button)findViewById(com.android.internal.R.id.next_button);
+            mNextButton.setOnClickListener(new OnClickListener() {
+                public void onClick(View v) {
+                    setResult(RESULT_OK);
+                    finish();
+                }
+            });
+
+            // set our various button parameters
+            if (intent.hasExtra(EXTRA_PREFS_SET_NEXT_TEXT)) {
+                String buttonText = intent.getStringExtra(EXTRA_PREFS_SET_NEXT_TEXT);
+                if (TextUtils.isEmpty(buttonText)) {
+                    mNextButton.setVisibility(View.GONE);
+                }
+                else {
+                    mNextButton.setText(buttonText);
+                }
+            }
+            if (intent.hasExtra(EXTRA_PREFS_SET_BACK_TEXT)) {
+                String buttonText = intent.getStringExtra(EXTRA_PREFS_SET_BACK_TEXT);
+                if (TextUtils.isEmpty(buttonText)) {
+                    backButton.setVisibility(View.GONE);
+                }
+                else {
+                    backButton.setText(buttonText);
+                }
+            }
+        }
+
         mPreferenceManager = onCreatePreferenceManager();
         getListView().setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
     }
@@ -113,14 +171,13 @@ public abstract class PreferenceActivity extends ListActivity implements
     @Override
     protected void onStop() {
         super.onStop();
-        
+
         mPreferenceManager.dispatchActivityStop();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        
         mPreferenceManager.dispatchActivityDestroy();
     }
 
@@ -156,7 +213,7 @@ public abstract class PreferenceActivity extends ListActivity implements
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        
+
         mPreferenceManager.dispatchActivityResult(requestCode, resultCode, data);
     }
 
@@ -176,7 +233,7 @@ public abstract class PreferenceActivity extends ListActivity implements
         if (mHandler.hasMessages(MSG_BIND_PREFERENCES)) return;
         mHandler.obtainMessage(MSG_BIND_PREFERENCES).sendToTarget();
     }
-    
+
     private void bindPreferences() {
         final PreferenceScreen preferenceScreen = getPreferenceScreen();
         if (preferenceScreen != null) {
@@ -187,10 +244,10 @@ public abstract class PreferenceActivity extends ListActivity implements
             }
         }
     }
-    
+
     /**
      * Creates the {@link PreferenceManager}.
-     * 
+     *
      * @return The {@link PreferenceManager} used by this activity.
      */
     private PreferenceManager onCreatePreferenceManager() {
@@ -198,7 +255,7 @@ public abstract class PreferenceActivity extends ListActivity implements
         preferenceManager.setOnPreferenceTreeClickListener(this);
         return preferenceManager;
     }
-    
+
     /**
      * Returns the {@link PreferenceManager} used by this activity.
      * @return The {@link PreferenceManager}.
@@ -206,7 +263,7 @@ public abstract class PreferenceActivity extends ListActivity implements
     public PreferenceManager getPreferenceManager() {
         return mPreferenceManager;
     }
-    
+
     private void requirePreferenceManager() {
         if (mPreferenceManager == null) {
             throw new RuntimeException("This should be called after super.onCreate.");
@@ -215,7 +272,7 @@ public abstract class PreferenceActivity extends ListActivity implements
 
     /**
      * Sets the root of the preference hierarchy that this activity is showing.
-     * 
+     *
      * @param preferenceScreen The root {@link PreferenceScreen} of the preference hierarchy.
      */
     public void setPreferenceScreen(PreferenceScreen preferenceScreen) {
@@ -228,37 +285,37 @@ public abstract class PreferenceActivity extends ListActivity implements
             }
         }
     }
-    
+
     /**
      * Gets the root of the preference hierarchy that this activity is showing.
-     * 
+     *
      * @return The {@link PreferenceScreen} that is the root of the preference
      *         hierarchy.
      */
     public PreferenceScreen getPreferenceScreen() {
         return mPreferenceManager.getPreferenceScreen();
     }
-    
+
     /**
      * Adds preferences from activities that match the given {@link Intent}.
-     * 
+     *
      * @param intent The {@link Intent} to query activities.
      */
     public void addPreferencesFromIntent(Intent intent) {
         requirePreferenceManager();
-        
+
         setPreferenceScreen(mPreferenceManager.inflateFromIntent(intent, getPreferenceScreen()));
     }
-    
+
     /**
      * Inflates the given XML resource and adds the preference hierarchy to the current
      * preference hierarchy.
-     * 
+     *
      * @param preferencesResId The XML resource ID to inflate.
      */
     public void addPreferencesFromResource(int preferencesResId) {
         requirePreferenceManager();
-        
+
         setPreferenceScreen(mPreferenceManager.inflateFromResource(this, preferencesResId,
                 getPreferenceScreen()));
     }
@@ -269,20 +326,20 @@ public abstract class PreferenceActivity extends ListActivity implements
     public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference preference) {
         return false;
     }
-    
+
     /**
      * Finds a {@link Preference} based on its key.
-     * 
+     *
      * @param key The key of the preference to retrieve.
      * @return The {@link Preference} with the key, or null.
      * @see PreferenceGroup#findPreference(CharSequence)
      */
     public Preference findPreference(CharSequence key) {
-        
+
         if (mPreferenceManager == null) {
             return null;
         }
-        
+
         return mPreferenceManager.findPreference(key);
     }
 
@@ -292,5 +349,14 @@ public abstract class PreferenceActivity extends ListActivity implements
             mPreferenceManager.dispatchNewIntent(intent);
         }
     }
-    
+
+    // give subclasses access to the Next button
+    /** @hide */
+    protected boolean hasNextButton() {
+        return mNextButton != null;
+    }
+    /** @hide */
+    protected Button getNextButton() {
+        return mNextButton;
+    }
 }
