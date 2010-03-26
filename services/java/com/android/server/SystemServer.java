@@ -399,6 +399,13 @@ class ServerThread extends Thread {
             } catch (Throwable e) {
                 Slog.e(TAG, "Failure installing status bar icons", e);
             }
+
+            try {
+                Slog.i(TAG, "DiskStats Service");
+                ServiceManager.addService("diskstats", new DiskStatsService(context));
+            } catch (Throwable e) {
+                Slog.e(TAG, "Failure starting DiskStats Service", e);
+            }
         }
 
         // make sure the ADB_ENABLED setting value matches the secure property value

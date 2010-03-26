@@ -19,11 +19,16 @@ package com.android.server;
 import android.content.Context;
 import android.net.TrafficStats;
 import android.os.INetStatService;
+import android.os.SystemClock;
+
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 
 public class NetStatService extends INetStatService.Stub {
+    private final Context mContext;
 
     public NetStatService(Context context) {
-
+        mContext = context;
     }
 
     public long getMobileTxPackets() {
@@ -56,5 +61,36 @@ public class NetStatService extends INetStatService.Stub {
 
     public long getTotalRxBytes() {
         return TrafficStats.getTotalRxBytes();
+    }
+
+    @Override
+    protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        // This data is accessible to any app -- no permission check needed.
+
+        pw.print("Elapsed: total=");
+        pw.print(SystemClock.elapsedRealtime());
+        pw.print("ms awake=");
+        pw.print(SystemClock.uptimeMillis());
+        pw.println("ms");
+
+        pw.print("Mobile: Tx=");
+        pw.print(getMobileTxBytes());
+        pw.print("B/");
+        pw.print(getMobileTxPackets());
+        pw.print("Pkts Rx=");
+        pw.print(getMobileRxBytes());
+        pw.print("B/");
+        pw.print(getMobileRxPackets());
+        pw.println("Pkts");
+
+        pw.print("Total: Tx=");
+        pw.print(getTotalTxBytes());
+        pw.print("B/");
+        pw.print(getTotalTxPackets());
+        pw.print("Pkts Rx=");
+        pw.print(getTotalRxBytes());
+        pw.print("B/");
+        pw.print(getTotalRxPackets());
+        pw.println("Pkts");
     }
 }
