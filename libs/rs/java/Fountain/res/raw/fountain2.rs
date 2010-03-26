@@ -1,9 +1,9 @@
 // Fountain test script
 #pragma version(1)
 
-#include "rs_types.rsh"
-#include "rs_math.rsh"
-#include "rs_graphics.rsh"
+#include "../../../../scriptc/rs_types.rsh"
+#include "../../../../scriptc/rs_math.rsh"
+#include "../../../../scriptc/rs_graphics.rsh"
 
 static int newPart = 0;
 
@@ -12,15 +12,15 @@ typedef struct Control_s {
     int rate;
     int count;
     float r, g, b;
-    rs_allocation partBuffer;
     rs_mesh partMesh;
+    rs_allocation partBuffer;
 } Control_t;
 Control_t *Control;
 
 typedef struct Point_s{
     float2 delta;
-    float2 position;
-    unsigned int color;
+    rs_position2 pos;
+    rs_color4u color;
 } Point_t;
 Point_t *point;
 
@@ -33,8 +33,6 @@ int main(int launchID) {
 
     if (rate) {
         float rMax = ((float)rate) * 0.005f;
-        int x = Control->x;
-        int y = Control->y;
         int color = ((int)(Control->r * 255.f)) |
                     ((int)(Control->g * 255.f)) << 8 |
                     ((int)(Control->b * 255.f)) << 16 |
@@ -42,9 +40,11 @@ int main(int launchID) {
         Point_t * np = &p[newPart];
 
         while (rate--) {
-            np->delta = vec2Rand(rMax);
-            np->position.x = x;
-            np->position.y = y;
+            np->delta.x = rand(rMax);
+            np->delta.y = rand(rMax);
+            //np->delta = vec2Rand(rMax);
+            np->pos.x = Control->x;
+            np->pos.y = Control->y;
             np->color = color;
             newPart++;
             np++;
@@ -57,13 +57,13 @@ int main(int launchID) {
 
     for (ct=0; ct < count; ct++) {
         float dy = p->delta.y + 0.15f;
-        float posy = p->position.y + dy;
+        float posy = p->pos.y + dy;
         if ((posy > height) && (dy > 0)) {
             dy *= -0.3f;
         }
         p->delta.y = dy;
-        p->position.x += p->delta.x;
-        p->position.y = posy;
+        p->pos.x += p->delta.x;
+        p->pos.y = posy;
         p++;
     }
 

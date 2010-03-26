@@ -42,6 +42,10 @@ public class Script extends BaseObj {
         }
     }
 
+    protected void invoke(int slot) {
+        mRS.nScriptInvoke(mID, slot);
+    }
+
     Script(int id, RenderScript rs) {
         super(rs);
         mID = id;
@@ -145,5 +149,48 @@ public class Script extends BaseObj {
 
     }
 
+
+    public static class FieldBase {
+        protected Element mElement;
+        protected Type mType;
+        protected Allocation mAllocation;
+
+        protected void init(RenderScript rs, int dimx) {
+            mAllocation = Allocation.createSized(rs, mElement, dimx);
+            mType = mAllocation.getType();
+        }
+
+        protected FieldBase() {
+        }
+
+        public Element getElement() {
+            return mElement;
+        }
+
+        public Type getType() {
+            return mType;
+        }
+
+        public Allocation getAllocation() {
+            return mAllocation;
+        }
+
+        //@Override
+        public void updateAllocation() {
+        }
+
+
+        //
+        /*
+        public class ScriptField_UserField
+            extends android.renderscript.Script.FieldBase {
+
+            protected
+
+        }
+
+        */
+
+    }
 }
 
