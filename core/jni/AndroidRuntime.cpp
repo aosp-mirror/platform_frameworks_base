@@ -154,7 +154,6 @@ extern int register_android_server_BluetoothEventLoop(JNIEnv *env);
 extern int register_android_server_BluetoothA2dpService(JNIEnv* env);
 extern int register_android_ddm_DdmHandleNativeHeap(JNIEnv *env);
 extern int register_com_android_internal_os_ZygoteInit(JNIEnv* env);
-extern int register_android_location_GpsLocationProvider(JNIEnv* env);
 extern int register_android_backup_BackupDataInput(JNIEnv *env);
 extern int register_android_backup_BackupDataOutput(JNIEnv *env);
 extern int register_android_backup_FileBackupHelperBase(JNIEnv *env);
@@ -1267,7 +1266,6 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_server_BluetoothA2dpService),
     REG_JNI(register_android_message_digest_sha1),
     REG_JNI(register_android_ddm_DdmHandleNativeHeap),
-    REG_JNI(register_android_location_GpsLocationProvider),
     REG_JNI(register_android_backup_BackupDataInput),
     REG_JNI(register_android_backup_BackupDataOutput),
     REG_JNI(register_android_backup_FileBackupHelperBase),

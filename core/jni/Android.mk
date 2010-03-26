@@ -121,7 +121,6 @@ LOCAL_SRC_FILES:= \
 	android_server_BluetoothA2dpService.cpp \
 	android_message_digest_sha1.cpp \
 	android_ddm_DdmHandleNativeHeap.cpp \
-	android_location_GpsLocationProvider.cpp \
 	com_android_internal_os_ZygoteInit.cpp \
 	com_android_internal_graphics_NativeUtils.cpp \
 	android_backup_BackupDataInput.cpp \

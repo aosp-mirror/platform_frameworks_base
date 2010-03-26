@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.location;
+package com.android.server.location;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -22,7 +22,6 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.location.ILocationProvider;
 import android.location.Location;
-import android.location.LocationProviderInterface;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Handler;
@@ -30,6 +29,8 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.Log;
+
+import com.android.internal.location.DummyLocationProvider;
 
 /**
  * A class for proxying location providers implemented as services.

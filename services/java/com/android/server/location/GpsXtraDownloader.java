@@ -14,7 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.internal.location;
+package com.android.server.location;
+
+import android.content.Context;
+import android.net.Proxy;
+import android.net.http.AndroidHttpClient;
+import android.util.Config;
+import android.util.Log;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
@@ -29,14 +35,6 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.util.Properties;
 import java.util.Random;
-
-import android.content.Context;
-import android.net.Proxy;
-import android.net.http.AndroidHttpClient;
-import android.util.Config;
-import android.util.Log;
-
-
 
 /**
  * A class for downloading GPS XTRA data.

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.location;
+package com.android.server.location;
 
 import android.location.Location;
 import android.net.NetworkInfo;
