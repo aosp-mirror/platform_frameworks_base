@@ -1436,6 +1436,15 @@ public class TtsService extends Service implements OnCompletionListener {
             return mSelf.setEngine(packageName);
         }
 
+        /**
+         * Returns the packagename of the default speech synthesis engine.
+         *
+         * @return Packagename of the TTS engine that the user has chosen as their default.
+         */
+        public String getDefaultEngine() {
+            return mSelf.getDefaultEngine();
+        }
+
     };
 
 }
