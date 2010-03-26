@@ -24,13 +24,13 @@ import android.util.Log;
  * @hide
  *
  **/
-public class Vector3f {
-    public Vector3f() {
+public class Long3 {
+    public Long3() {
     }
 
-    public float x;
-    public float y;
-    public float z;
+    public long x;
+    public long y;
+    public long z;
 }
 
 

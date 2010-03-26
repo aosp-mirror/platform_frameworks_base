@@ -1,5 +1,7 @@
 
 
+extern float rand(float max);
+
 extern float2 vec2Rand(float len);
 
 extern float3 float3Norm(float3);

@@ -24,15 +24,15 @@ import android.util.Log;
  * @hide
  *
  **/
-public class Vector4f {
-    public Vector4f() {
+public class Int3 {
+    public Int3() {
     }
 
-    public float x;
-    public float y;
-    public float z;
-    public float w;
+    public int x;
+    public int y;
+    public int z;
 }
+
 
 
 

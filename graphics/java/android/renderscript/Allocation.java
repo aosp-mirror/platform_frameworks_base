@@ -76,10 +76,30 @@ public class Allocation extends BaseObj {
         subData1D(0, mType.getElementCount(), d);
     }
 
+    public void subData(int off, FieldPacker fp) {
+        int eSize = mType.mElement.getSizeBytes();
+        final byte[] data = fp.getData();
+
+        int count = data.length / eSize;
+        if ((eSize * count) != data.length) {
+            throw new IllegalArgumentException("Field packer length " + data.length +
+                                               " not divisible by element size " + eSize + ".");
+        }
+        data1DChecks(off, count, data.length, data.length);
+        mRS.nAllocationSubData1D(mID, off, count, data, data.length);
+    }
+
     private void data1DChecks(int off, int count, int len, int dataSize) {
         mRS.validate();
-        if((off < 0) || (count < 1) || ((off + count) > mType.getElementCount())) {
-            throw new IllegalArgumentException("Offset or Count out of bounds.");
+        if(off < 0) {
+            throw new IllegalArgumentException("Offset must be >= 0.");
+        }
+        if(count < 1) {
+            throw new IllegalArgumentException("Count must be >= 1.");
+        }
+        if((off + count) > mType.getElementCount()) {
+            throw new IllegalArgumentException("Overflow, Available count " + mType.getElementCount() +
+                                               ", got " + count + " at offset " + off + ".");
         }
         if((len) < dataSize) {
             throw new IllegalArgumentException("Array too small for allocation type.");
