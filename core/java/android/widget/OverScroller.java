@@ -17,21 +17,27 @@
 package android.widget;
 
 import android.content.Context;
+import android.util.FloatMath;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
+import android.widget.Scroller.MagneticScroller;
 
 /**
  * This class encapsulates scrolling with the ability to overshoot the bounds
- * of a scrolling operation. This class attempts to be a drop-in replacement
- * for {@link android.widget.Scroller} in most cases.
- * 
- * @hide Pending API approval
+ * of a scrolling operation. This class is a drop-in replacement for
+ * {@link android.widget.Scroller} in most cases.
  */
-public class OverScroller extends Scroller {
+public class OverScroller {
+    private int mMode;
 
-    // Identical to mScrollers, but casted to MagneticOverScroller. 
-    private MagneticOverScroller mOverScrollerX;
-    private MagneticOverScroller mOverScrollerY;
+    private MagneticOverScroller mScrollerX;
+    private MagneticOverScroller mScrollerY;
+
+    private final Interpolator mInterpolator;
+
+    private static final int DEFAULT_DURATION = 250;
+    private static final int SCROLL_MODE = 0;
+    private static final int FLING_MODE = 1;
 
     /**
      * Creates an OverScroller with a viscous fluid scroll interpolator.
@@ -64,15 +70,259 @@ public class OverScroller extends Scroller {
      */
     public OverScroller(Context context, Interpolator interpolator,
             float bounceCoefficientX, float bounceCoefficientY) {
-        super(context, interpolator);
-        mOverScrollerX.setBounceCoefficient(bounceCoefficientX);
-        mOverScrollerY.setBounceCoefficient(bounceCoefficientY);
+        mInterpolator = interpolator;
+        mScrollerX = new MagneticOverScroller();
+        mScrollerY = new MagneticOverScroller();
+        MagneticScroller.initializeFromContext(context);
+
+        mScrollerX.setBounceCoefficient(bounceCoefficientX);
+        mScrollerY.setBounceCoefficient(bounceCoefficientY);
     }
 
-    @Override
-    void instantiateScrollers() {
-        mScrollerX = mOverScrollerX = new MagneticOverScroller();
-        mScrollerY = mOverScrollerY = new MagneticOverScroller();
+    /**
+     *
+     * Returns whether the scroller has finished scrolling.
+     *
+     * @return True if the scroller has finished scrolling, false otherwise.
+     */
+    public final boolean isFinished() {
+        return mScrollerX.mFinished && mScrollerY.mFinished;
+    }
+
+    /**
+     * Force the finished field to a particular value. Contrary to
+     * {@link #abortAnimation()}, forcing the animation to finished
+     * does NOT cause the scroller to move to the final x and y
+     * position.
+     *
+     * @param finished The new finished value.
+     */
+    public final void forceFinished(boolean finished) {
+        mScrollerX.mFinished = mScrollerY.mFinished = finished;
+    }
+
+    /**
+     * Returns the current X offset in the scroll.
+     *
+     * @return The new X offset as an absolute distance from the origin.
+     */
+    public final int getCurrX() {
+        return mScrollerX.mCurrentPosition;
+    }
+
+    /**
+     * Returns the current Y offset in the scroll.
+     *
+     * @return The new Y offset as an absolute distance from the origin.
+     */
+    public final int getCurrY() {
+        return mScrollerY.mCurrentPosition;
+    }
+
+    /**
+     * @hide
+     * Returns the current velocity.
+     *
+     * @return The original velocity less the deceleration, norm of the X and Y velocity vector.
+     */
+    public float getCurrVelocity() {
+        float squaredNorm = mScrollerX.mCurrVelocity * mScrollerX.mCurrVelocity;
+        squaredNorm += mScrollerY.mCurrVelocity * mScrollerY.mCurrVelocity;
+        return FloatMath.sqrt(squaredNorm);
+    }
+
+    /**
+     * Returns the start X offset in the scroll.
+     *
+     * @return The start X offset as an absolute distance from the origin.
+     */
+    public final int getStartX() {
+        return mScrollerX.mStart;
+    }
+
+    /**
+     * Returns the start Y offset in the scroll.
+     *
+     * @return The start Y offset as an absolute distance from the origin.
+     */
+    public final int getStartY() {
+        return mScrollerY.mStart;
+    }
+
+    /**
+     * Returns where the scroll will end. Valid only for "fling" scrolls.
+     *
+     * @return The final X offset as an absolute distance from the origin.
+     */
+    public final int getFinalX() {
+        return mScrollerX.mFinal;
+    }
+
+    /**
+     * Returns where the scroll will end. Valid only for "fling" scrolls.
+     *
+     * @return The final Y offset as an absolute distance from the origin.
+     */
+    public final int getFinalY() {
+        return mScrollerY.mFinal;
+    }
+
+    /**
+     * Returns how long the scroll event will take, in milliseconds.
+     *
+     * @return The duration of the scroll in milliseconds.
+     *
+     * @hide Pending removal once nothing depends on it
+     * @deprecated OverScrollers don't necessarily have a fixed duration.
+     *             This function will lie to the best of its ability.
+     */
+    public final int getDuration() {
+        return Math.max(mScrollerX.mDuration, mScrollerY.mDuration);
+    }
+
+    /**
+     * Extend the scroll animation. This allows a running animation to scroll
+     * further and longer, when used with {@link #setFinalX(int)} or {@link #setFinalY(int)}.
+     *
+     * @param extend Additional time to scroll in milliseconds.
+     * @see #setFinalX(int)
+     * @see #setFinalY(int)
+     *
+     * @hide Pending removal once nothing depends on it
+     * @deprecated OverScrollers don't necessarily have a fixed duration.
+     *             Instead of setting a new final position and extending
+     *             the duration of an existing scroll, use startScroll
+     *             to begin a new animation.
+     */
+    public void extendDuration(int extend) {
+        mScrollerX.extendDuration(extend);
+        mScrollerY.extendDuration(extend);
+    }
+
+    /**
+     * Sets the final position (X) for this scroller.
+     *
+     * @param newX The new X offset as an absolute distance from the origin.
+     * @see #extendDuration(int)
+     * @see #setFinalY(int)
+     *
+     * @hide Pending removal once nothing depends on it
+     * @deprecated OverScroller's final position may change during an animation.
+     *             Instead of setting a new final position and extending
+     *             the duration of an existing scroll, use startScroll
+     *             to begin a new animation.
+     */
+    public void setFinalX(int newX) {
+        mScrollerX.setFinalPosition(newX);
+    }
+
+    /**
+     * Sets the final position (Y) for this scroller.
+     *
+     * @param newY The new Y offset as an absolute distance from the origin.
+     * @see #extendDuration(int)
+     * @see #setFinalX(int)
+     *
+     * @hide Pending removal once nothing depends on it
+     * @deprecated OverScroller's final position may change during an animation.
+     *             Instead of setting a new final position and extending
+     *             the duration of an existing scroll, use startScroll
+     *             to begin a new animation.
+     */
+    public void setFinalY(int newY) {
+        mScrollerY.setFinalPosition(newY);
+    }
+
+    /**
+     * Call this when you want to know the new location. If it returns true, the
+     * animation is not yet finished.
+     */
+    public boolean computeScrollOffset() {
+        if (isFinished()) {
+            return false;
+        }
+
+        switch (mMode) {
+            case SCROLL_MODE:
+                long time = AnimationUtils.currentAnimationTimeMillis();
+                // Any scroller can be used for time, since they were started
+                // together in scroll mode. We use X here.
+                final long elapsedTime = time - mScrollerX.mStartTime;
+
+                final int duration = mScrollerX.mDuration;
+                if (elapsedTime < duration) {
+                    float q = (float) (elapsedTime) / duration;
+
+                    if (mInterpolator == null)
+                        q = Scroller.viscousFluid(q);
+                    else
+                        q = mInterpolator.getInterpolation(q);
+
+                    mScrollerX.updateScroll(q);
+                    mScrollerY.updateScroll(q);
+                } else {
+                    abortAnimation();
+                }
+                break;
+
+            case FLING_MODE:
+                if (!mScrollerX.mFinished) {
+                    if (!mScrollerX.update()) {
+                        if (!mScrollerX.continueWhenFinished()) {
+                            mScrollerX.finish();
+                        }
+                    }
+                }
+
+                if (!mScrollerY.mFinished) {
+                    if (!mScrollerY.update()) {
+                        if (!mScrollerY.continueWhenFinished()) {
+                            mScrollerY.finish();
+                        }
+                    }
+                }
+
+                break;
+        }
+
+        return true;
+    }
+
+    /**
+     * Start scrolling by providing a starting point and the distance to travel.
+     * The scroll will use the default value of 250 milliseconds for the
+     * duration.
+     *
+     * @param startX Starting horizontal scroll offset in pixels. Positive
+     *        numbers will scroll the content to the left.
+     * @param startY Starting vertical scroll offset in pixels. Positive numbers
+     *        will scroll the content up.
+     * @param dx Horizontal distance to travel. Positive numbers will scroll the
+     *        content to the left.
+     * @param dy Vertical distance to travel. Positive numbers will scroll the
+     *        content up.
+     */
+    public void startScroll(int startX, int startY, int dx, int dy) {
+        startScroll(startX, startY, dx, dy, DEFAULT_DURATION);
+    }
+
+    /**
+     * Start scrolling by providing a starting point and the distance to travel.
+     *
+     * @param startX Starting horizontal scroll offset in pixels. Positive
+     *        numbers will scroll the content to the left.
+     * @param startY Starting vertical scroll offset in pixels. Positive numbers
+     *        will scroll the content up.
+     * @param dx Horizontal distance to travel. Positive numbers will scroll the
+     *        content to the left.
+     * @param dy Vertical distance to travel. Positive numbers will scroll the
+     *        content up.
+     * @param duration Duration of the scroll in milliseconds.
+     */
+    public void startScroll(int startX, int startY, int dx, int dy, int duration) {
+        mMode = SCROLL_MODE;
+        mScrollerX.startScroll(startX, dx, duration);
+        mScrollerY.startScroll(startY, dy, duration);
     }
 
     /**
@@ -91,12 +341,11 @@ public class OverScroller extends Scroller {
         mMode = FLING_MODE;
 
         // Make sure both methods are called.
-        final boolean spingbackX = mOverScrollerX.springback(startX, minX, maxX);
-        final boolean spingbackY = mOverScrollerY.springback(startY, minY, maxY);
+        final boolean spingbackX = mScrollerX.springback(startX, minX, maxX);
+        final boolean spingbackY = mScrollerY.springback(startY, minY, maxY);
         return spingbackX || spingbackY;
     }
 
-    @Override
     public void fling(int startX, int startY, int velocityX, int velocityY,
             int minX, int maxX, int minY, int maxY) {
         fling(startX, startY, velocityX, velocityY, minX, maxX, minY, maxY, 0, 0);
@@ -105,7 +354,7 @@ public class OverScroller extends Scroller {
     /**
      * Start scrolling based on a fling gesture. The distance traveled will
      * depend on the initial velocity of the fling.
-     * 
+     *
      * @param startX Starting point of the scroll (X)
      * @param startY Starting point of the scroll (Y)
      * @param velocityX Initial velocity of the fling (X) measured in pixels per
@@ -132,43 +381,87 @@ public class OverScroller extends Scroller {
     public void fling(int startX, int startY, int velocityX, int velocityY,
             int minX, int maxX, int minY, int maxY, int overX, int overY) {
         mMode = FLING_MODE;
-        mOverScrollerX.fling(startX, velocityX, minX, maxX, overX);
-        mOverScrollerY.fling(startY, velocityY, minY, maxY, overY);
+        mScrollerX.fling(startX, velocityX, minX, maxX, overX);
+        mScrollerY.fling(startY, velocityY, minY, maxY, overY);
     }
 
-    void notifyHorizontalBoundaryReached(int startX, int finalX) {
-        mOverScrollerX.springback(startX, finalX, finalX);
+    /**
+     * Notify the scroller that we've reached a horizontal boundary.
+     * Normally the information to handle this will already be known
+     * when the animation is started, such as in a call to one of the
+     * fling functions. However there are cases where this cannot be known
+     * in advance. This function will transition the current motion and
+     * animate from startX to finalX as appropriate.
+     *
+     * @param startX Starting/current X position
+     * @param finalX Desired final X position
+     * @param overX Magnitude of overscroll allowed. This should be the maximum
+     *              desired distance from finalX. Absolute value - must be positive.
+     */
+    public void notifyHorizontalEdgeReached(int startX, int finalX, int overX) {
+        mScrollerX.notifyEdgeReached(startX, finalX, overX);
     }
 
-    void notifyVerticalBoundaryReached(int startY, int finalY) {
-        mOverScrollerY.springback(startY, finalY, finalY);
-    }
-
-    void notifyHorizontalEdgeReached(int startX, int finalX, int overX) {
-        mOverScrollerX.notifyEdgeReached(startX, finalX, overX);
-    }
-
-    void notifyVerticalEdgeReached(int startY, int finalY, int overY) {
-        mOverScrollerY.notifyEdgeReached(startY, finalY, overY);
+    /**
+     * Notify the scroller that we've reached a vertical boundary.
+     * Normally the information to handle this will already be known
+     * when the animation is started, such as in a call to one of the
+     * fling functions. However there are cases where this cannot be known
+     * in advance. This function will animate a parabolic motion from
+     * startY to finalY.
+     *
+     * @param startY Starting/current Y position
+     * @param finalY Desired final Y position
+     * @param overY Magnitude of overscroll allowed. This should be the maximum
+     *              desired distance from finalY.
+     */
+    public void notifyVerticalEdgeReached(int startY, int finalY, int overY) {
+        mScrollerY.notifyEdgeReached(startY, finalY, overY);
     }
 
     /**
      * Returns whether the current Scroller is currently returning to a valid position.
      * Valid bounds were provided by the
      * {@link #fling(int, int, int, int, int, int, int, int, int, int)} method.
-     * 
+     *
      * One should check this value before calling
-     * {@link startScroll(int, int, int, int)} as the interpolation currently in progress to restore
-     * a valid position will then be stopped. The caller has to take into account the fact that the
-     * started scroll will start from an overscrolled position.
+     * {@link #startScroll(int, int, int, int)} as the interpolation currently in progress
+     * to restore a valid position will then be stopped. The caller has to take into account
+     * the fact that the started scroll will start from an overscrolled position.
      * 
-     * @return true when the current position is overscrolled and interpolated back to a valid value.
+     * @return true when the current position is overscrolled and in the process of
+     *         interpolating back to a valid value.
      */
     public boolean isOverscrolled() {
-        return ((!mOverScrollerX.mFinished &&
-                mOverScrollerX.mState != MagneticOverScroller.TO_EDGE) ||
-                (!mOverScrollerY.mFinished &&
-                        mOverScrollerY.mState != MagneticOverScroller.TO_EDGE));
+        return ((!mScrollerX.mFinished &&
+                mScrollerX.mState != MagneticOverScroller.TO_EDGE) ||
+                (!mScrollerY.mFinished &&
+                        mScrollerY.mState != MagneticOverScroller.TO_EDGE));
+    }
+
+    /**
+     * Stops the animation. Contrary to {@link #forceFinished(boolean)},
+     * aborting the animating causes the scroller to move to the final x and y
+     * positions.
+     *
+     * @see #forceFinished(boolean)
+     */
+    public void abortAnimation() {
+        mScrollerX.finish();
+        mScrollerY.finish();
+    }
+
+    /**
+     * Returns the time elapsed since the beginning of the scrolling.
+     *
+     * @return The elapsed time in milliseconds.
+     * 
+     * @hide
+     */
+    public int timePassed() {
+        final long time = AnimationUtils.currentAnimationTimeMillis();
+        final long startTime = Math.min(mScrollerX.mStartTime, mScrollerY.mStartTime);
+        return (int) (time - startTime);
     }
 
     static class MagneticOverScroller extends Scroller.MagneticScroller {

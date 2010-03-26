@@ -963,7 +963,6 @@ public class ScrollView extends FrameLayout {
             dy = Math.max(0, Math.min(scrollY + dy, maxY)) - scrollY;
 
             mScroller.startScroll(mScrollX, scrollY, 0, dy);
-            awakenScrollBars(mScroller.getDuration());
             invalidate();
         } else {
             if (!mScroller.isFinished()) {

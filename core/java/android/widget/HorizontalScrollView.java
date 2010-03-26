@@ -599,6 +599,7 @@ public class HorizontalScrollView extends FrameLayout {
         } else {
             super.scrollTo(scrollX, scrollY);
         }
+        awakenScrollBars();
     }
     
     private int getOverscrollMax() {
@@ -961,7 +962,6 @@ public class HorizontalScrollView extends FrameLayout {
             dx = Math.max(0, Math.min(scrollX + dx, maxX)) - scrollX;
 
             mScroller.startScroll(scrollX, mScrollY, dx, 0);
-            awakenScrollBars(mScroller.getDuration());
             invalidate();
         } else {
             if (!mScroller.isFinished()) {
@@ -1319,7 +1319,6 @@ public class HorizontalScrollView extends FrameLayout {
                 mScrollViewMovedFocus = false;
             }
     
-            awakenScrollBars(mScroller.getDuration());
             invalidate();
         }
     }
