@@ -2597,6 +2597,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 mTouchMode = TOUCH_MODE_OVERFLING;
                 invalidate();
                 post(this);
+            } else {
+                mTouchMode = TOUCH_MODE_REST;
             }
         }
 
