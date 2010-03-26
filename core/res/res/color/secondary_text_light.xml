@@ -15,7 +15,7 @@
 -->
 
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-﻿    <item android:state_window_focused="false" android:state_enabled="false" android:color="@android:color/dim_foreground_light_disabled"/>
+    <item android:state_window_focused="false" android:state_enabled="false" android:color="@android:color/dim_foreground_light_disabled"/>
     <item android:state_window_focused="false" android:color="@android:color/dim_foreground_light"/>
     <!-- Since there is only one selector (for both light and dark), the light's selected state shouldn't be inversed like the dark's. -->
     <item android:state_pressed="true" android:state_enabled="false" android:color="@android:color/dim_foreground_light_disabled"/>
