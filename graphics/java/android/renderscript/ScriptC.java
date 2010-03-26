@@ -37,6 +37,47 @@ public class ScriptC extends Script {
         super(id, rs);
     }
 
+    protected ScriptC(RenderScript rs, Resources resources, int resourceID, boolean isRoot) {
+        super(0, rs);
+        mID = internalCreate(rs, resources, resourceID, isRoot);
+    }
+
+
+    private static synchronized int internalCreate(RenderScript rs, Resources resources, int resourceID, boolean isRoot) {
+        byte[] pgm;
+        int pgmLength;
+        InputStream is = resources.openRawResource(resourceID);
+        try {
+            try {
+                pgm = new byte[1024];
+                pgmLength = 0;
+                while(true) {
+                    int bytesLeft = pgm.length - pgmLength;
+                    if (bytesLeft == 0) {
+                        byte[] buf2 = new byte[pgm.length * 2];
+                        System.arraycopy(pgm, 0, buf2, 0, pgm.length);
+                        pgm = buf2;
+                        bytesLeft = pgm.length - pgmLength;
+                    }
+                    int bytesRead = is.read(pgm, pgmLength, bytesLeft);
+                    if (bytesRead <= 0) {
+                        break;
+                    }
+                    pgmLength += bytesRead;
+                }
+            } finally {
+                is.close();
+            }
+        } catch(IOException e) {
+            throw new Resources.NotFoundException();
+        }
+
+        rs.nScriptCBegin();
+        rs.nScriptCSetScript(pgm, 0, pgmLength);
+        rs.nScriptSetRoot(isRoot);
+        return rs.nScriptCCreate();
+    }
+
     public static class Builder extends Script.Builder {
         byte[] mProgram;
         int mProgramLength;
