@@ -78,8 +78,6 @@ static inline uint32_t clamp(uint32_t c) {
 status_t GraphicBufferAllocator::alloc(uint32_t w, uint32_t h, PixelFormat format,
         int usage, buffer_handle_t* handle, int32_t* stride)
 {
-    Mutex::Autolock _l(mLock);
-
     // make sure to not allocate a 0 x 0 buffer
     w = clamp(w);
     h = clamp(h);
@@ -118,8 +116,6 @@ status_t GraphicBufferAllocator::alloc(uint32_t w, uint32_t h, PixelFormat forma
 
 status_t GraphicBufferAllocator::free(buffer_handle_t handle)
 {
-    Mutex::Autolock _l(mLock);
-
     status_t err;
     if (sw_gralloc_handle_t::validate(handle) < 0) {
         err = mAllocDev->free(mAllocDev, handle);

@@ -86,7 +86,6 @@ private:
     GraphicBufferAllocator();
     ~GraphicBufferAllocator();
     
-    mutable Mutex mLock;
     alloc_device_t  *mAllocDev;
 };
 
