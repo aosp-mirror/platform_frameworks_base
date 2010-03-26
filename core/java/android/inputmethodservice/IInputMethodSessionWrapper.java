@@ -31,9 +31,10 @@ class IInputMethodSessionWrapper extends IInputMethodSession.Stub
     private static final int DO_UPDATE_CURSOR = 95;
     private static final int DO_APP_PRIVATE_COMMAND = 100;
     private static final int DO_TOGGLE_SOFT_INPUT = 105;
-   
-    final HandlerCaller mCaller;
-    final InputMethodSession mInputMethodSession;
+    private static final int DO_FINISH_SESSION = 110;
+
+    HandlerCaller mCaller;
+    InputMethodSession mInputMethodSession;
     
     // NOTE: we should have a cache of these.
     static class InputMethodEventCallbackWrapper implements InputMethodSession.EventCallback {
@@ -111,6 +112,10 @@ class IInputMethodSessionWrapper extends IInputMethodSession.Stub
                 mInputMethodSession.toggleSoftInput(msg.arg1, msg.arg2);
                 return;
             }
+            case DO_FINISH_SESSION: {
+                mInputMethodSession = null;
+                return;
+            }
         }
         Log.w(TAG, "Unhandled message code: " + msg.what);
     }
@@ -157,5 +162,9 @@ class IInputMethodSessionWrapper extends IInputMethodSession.Stub
     
     public void toggleSoftInput(int showFlags, int hideFlags) {
         mCaller.executeOrSendMessage(mCaller.obtainMessageII(DO_TOGGLE_SOFT_INPUT, showFlags, hideFlags));
+    }
+
+    public void finishSession() {
+        mCaller.executeOrSendMessage(mCaller.obtainMessage(DO_FINISH_SESSION));
     }
 }
